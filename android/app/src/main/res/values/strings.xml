@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Prayer Times</string>
+    <string name="widget_description">Today\'s times in one row, next prayer highlighted</string>
+    <string name="widget_placeholder_day">Open Prayer Times to load times</string>
+    <string name="widget_error">Could not load widget data</string>
+</resources>

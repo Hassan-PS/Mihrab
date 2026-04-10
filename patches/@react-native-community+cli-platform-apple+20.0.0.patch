@@ -1,0 +1,60 @@
+diff --git a/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/createRun.js b/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/createRun.js
+index a217a62..f30c1fc 100644
+--- a/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/createRun.js
++++ b/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/createRun.js
+@@ -151,7 +151,15 @@ const createRun = ({
+       devices.unshift(device);
+     }
+   }
+-  const fallbackSimulator = platformName === 'ios' || platformName === 'tvos' ? (0, _getFallbackSimulator.getFallbackSimulator)(args) : devices[0];
++  // When only --device is passed (physical phone), skip getFallbackSimulator: it
++  // always queries simctl and fails with no simulators / broken CoreSimulator,
++  // before we reach runOnDevice (which never uses fallbackSimulator).
++  const fallbackSimulator =
++    platformName === 'ios' || platformName === 'tvos'
++      ? args.device && !args.simulator && !args.udid
++        ? devices.find(d => d.type === 'simulator') || devices[0]
++        : (0, _getFallbackSimulator.getFallbackSimulator)(args)
++      : devices[0];
+   if (args.listDevices || args.interactive) {
+     if (args.device || args.udid) {
+       _cliTools().logger.warn(`Both ${args.device ? 'device' : 'udid'} and "list-devices" parameters were passed to "run" command. We will list available devices and let you choose from one.`);
+diff --git a/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/matchingDevice.js b/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/matchingDevice.js
+index 4be993e..f41479a 100644
+--- a/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/matchingDevice.js
++++ b/node_modules/@react-native-community/cli-platform-apple/build/commands/runCommand/matchingDevice.js
+@@ -23,6 +23,9 @@ function _chalk() {
+ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+ function matchingDevice(devices, deviceName) {
+   // The condition specifically checks if the value is `true`, not just truthy to allow for `--device` flag without a value
++  if (typeof deviceName === 'string') {
++    deviceName = deviceName.trim();
++  }
+   if (deviceName === true) {
+     const firstIOSDevice = devices.find(d => d.type === 'device');
+     if (firstIOSDevice) {
+@@ -33,7 +36,10 @@ function matchingDevice(devices, deviceName) {
+       return undefined;
+     }
+   }
+-  return devices.find(device => device.name === deviceName || formattedDeviceName(device) === deviceName);
++  return devices.find(device => {
++    const n = typeof device.name === 'string' ? device.name.trim() : device.name;
++    return n === deviceName || formattedDeviceName({...device, name: n}) === deviceName;
++  });
+ }
+ function formattedDeviceName(simulator) {
+   return simulator.version ? `${simulator.name} (${simulator.version})` : simulator.name;
+diff --git a/node_modules/@react-native-community/cli-platform-apple/build/tools/listDevices.js b/node_modules/@react-native-community/cli-platform-apple/build/tools/listDevices.js
+index b194800..29e2e48 100644
+--- a/node_modules/@react-native-community/cli-platform-apple/build/tools/listDevices.js
++++ b/node_modules/@react-native-community/cli-platform-apple/build/tools/listDevices.js
+@@ -19,7 +19,7 @@ const parseXcdeviceList = (text, sdkNames = []) => {
+     var _device$error;
+     return {
+       isAvailable: device.available,
+-      name: device.name,
++      name: typeof device.name === 'string' ? device.name.trim() : device.name,
+       udid: device.identifier,
+       sdk: device.platform,
+       version: device.operatingSystemVersion,

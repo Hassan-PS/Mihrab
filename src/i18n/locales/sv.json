@@ -1,0 +1,170 @@
+{
+  "app": {
+    "name": "Prayer Times",
+    "tagline": "Bönetider med fokus på Sverige — med källor anpassade för svenska städer och flexibla alternativ utanför landet."
+  },
+  "nav": {
+    "home": "Prayer Times",
+    "settings": "Inställningar",
+    "month": "Månad",
+    "compass": "Kibla"
+  },
+  "a11y": {
+    "openSettings": "Öppna inställningar",
+    "openMonth": "Öppna månadsvy",
+    "openCompass": "Öppna kiblakompass",
+    "openTimesSource": "Byt källa för bönetider"
+  },
+  "common": {
+    "change": "Ändra",
+    "tryAgain": "Försök igen",
+    "retry": "Försök igen",
+    "continue": "Fortsätt",
+    "back": "Tillbaka",
+    "loading": "Laddar…",
+    "automatic": "Automatiskt"
+  },
+  "home": {
+    "loadingPrayer": "Laddar bönetider…",
+    "nextPrayer": "Nästa bön",
+    "nextIn": "om {{time}}",
+    "hanafiSuffix": "Hanafi asr"
+  },
+  "errors": {
+    "locationNeededTitle": "Plats krävs",
+    "locationNeededBody": "Bönetider behöver din ungefärliga position. Tillåt platsåtkomst i systeminställningarna och försök igen.",
+    "locationErrorTitle": "Platsfel",
+    "apiErrorTitle": "Kunde inte ladda tider",
+    "coordLat": "Latitud måste vara mellan -90 och 90.",
+    "coordLng": "Longitud måste vara mellan -180 och 180.",
+    "gpsPermission": "Platsbehörighet krävs för att använda enhetens plats.",
+    "gpsRead": "Kunde inte läsa GPS-position.",
+    "gpsRequest": "Kunde inte begära plats."
+  },
+  "month": {
+    "locationNotReadyTitle": "Platsen är inte klar",
+    "locationNotReadyBody": "Öppna Hem och ladda dagens tider en gång så att den här skärmen kan använda din GPS-position.",
+    "thisMonth": "Den här månaden",
+    "loadError": "Kunde inte ladda månaden.",
+    "empty": "Inget att visa."
+  },
+  "settings": {
+    "appearance": "Utseende",
+    "theme": "Tema",
+    "themeSystem": "System",
+    "themeLight": "Ljust",
+    "themeDark": "Mörkt",
+    "themeHelp": "System följer enhetens ljust eller mörkt läge.",
+    "pureBlack": "Helt svart (OLED)",
+    "pureBlackHelp": "Helt svart bakgrund i mörkt läge för OLED-skärmar.",
+    "dataSource": "Datakälla",
+    "provider": "Leverantör av bönetider",
+    "providerAutoLine": "Automatiskt · {{label}}",
+    "providerAutoHelp": "I Sverige används Sverige-källan ( listade städer); utanför Sverige används AlAdhan. Välj en källa nedan för att låsa en leverantör.",
+    "location": "Plats",
+    "gps": "GPS",
+    "manual": "Manuell",
+    "manualSearchHelp": "Tryck på ett sökresultat för att använda det direkt, eller redigera koordinater och tryck Använd nedan.",
+    "coordsLabel": "Koordinater (decimalgrader)",
+    "latPlaceholder": "Latitud",
+    "lngPlaceholder": "Longitud",
+    "applyCoords": "Använd koordinater",
+    "calculation": "Beräkning",
+    "calcHiddenSweden": "Sverige använder bönetider per listad stad. Din position omvänds geografiskt till närmaste stad i listan; endast för Sverige.",
+    "calcHiddenPraytimes": "PrayTimes.dev använder sina publicerade regler (se prayertimes.dev). Endast madhab / asr-skola gäller här; metodlistan döljs.",
+    "method": "Metod",
+    "methodModalTitle": "Beräkningsmetod",
+    "hanafiAsr": "Hanafi asr",
+    "hanafiAsrHelp": "Längre skugga för asr (skola = 1)",
+    "notifications": "Aviseringar",
+    "prayerAlerts": "Bönepåminnelser",
+    "prayerAlertsHelp": "Planeras för de fem dagliga bönerna (Fajr–Isha). Android kan kräva exakt larm för pålitlig tid.",
+    "language": "Språk",
+    "languageHelp": "Engelska, svenska eller arabiska. Arabiska använder höger-till-vänster-layout.",
+    "langEn": "Engelska",
+    "langSv": "Svenska",
+    "langAr": "Arabiska"
+  },
+  "locationSetup": {
+    "headline": "Ange din plats",
+    "sub": "Bönetider beror på var du är. Välj ett av alternativen nedan — du kan ändra det senare i Inställningar.",
+    "useGps": "Använd enhetens plats",
+    "searchCoords": "Sök eller ange koordinater",
+    "manualHeadline": "Manuell plats",
+    "manualSub": "Sök och tryck på ett resultat för att slutföra — eller skriv latitud och longitud nedan och tryck Fortsätt.",
+    "decimalCoords": "Decimala koordinater"
+  },
+  "provider": {
+    "timesSource": "Tidskälla",
+    "automaticByLocation": "Automatiskt efter plats",
+    "modalTitle": "Källa för bönetider",
+    "sectionMainstream": "Stora API:er",
+    "sectionRegional": "Nationella och regionala källor",
+    "autoTitle": "Automatiskt",
+    "autoSub": "Sverige-källa i Sverige; AlAdhan annars.",
+    "footer": "Landspecifika källor använder officiella eller nationella bönetabeller där vi integrerar dem. Fler regioner kan läggas till över tid."
+  },
+  "providers": {
+    "aladhan": {
+      "desc": "api.aladhan.com — stor metodlista, koordinater världen över; mycket använd."
+    },
+    "prayertimes_dev": {
+      "desc": "Oberoende API — UK-vinklar och offset; Hanafi/Shafi; globala koordinater."
+    },
+    "local_adhan": {
+      "desc": "Beräknas på telefonen med Batoul Adhan — ingen nätverks-API för bönetider."
+    },
+    "islamiska_forbundet": {
+      "desc": "Bönetider för listade svenska städer; din plats matchas till närmaste stad i listan."
+    }
+  },
+  "compass": {
+    "needLocationTitle": "Platsen är inte klar",
+    "needLocationBody": "Ange en plats i Inställningar eller öppna Hem en gång med GPS så att vi kan beräkna kiblariktningen.",
+    "bearing": "Kibla-riktning",
+    "fromNorth": "{{deg}}° från norr",
+    "qiblaMarker": "Kibla",
+    "phoneFront": "Telefonframdel",
+    "hint": "Håll telefonen platt och undvik metall. Rikta kiblapilen mot “Telefonframdel” när du vänder dig mot kibla.",
+    "signalStrength": "Kompassignal",
+    "signalHelp": "Bygger på magnetfält och stabilitet. Flytta dig från metall och elektronik om den förblir låg.",
+    "signalChecking": "…",
+    "signalOff": "Av",
+    "unsupportedTitle": "Livekompass otillgänglig",
+    "unsupportedBody": "Enheten har ingen användbar magnetometer (eller åtkomst misslyckades). Livekompassen är avstängd. Använd riktningen nedan med fysisk kompass eller karta.",
+    "checkingCompass": "Startar kompass…",
+    "north": "N",
+    "east": "Ö",
+    "south": "S",
+    "west": "V"
+  },
+  "prayer": {
+    "Fajr": "Fajr",
+    "Sunrise": "Soluppgång",
+    "Dhuhr": "Dhuhr",
+    "Asr": "Asr",
+    "Maghrib": "Maghrib",
+    "Isha": "Isha"
+  },
+  "placeSearch": {
+    "label": "Sök stad eller adress",
+    "placeholder": "t.ex. Stockholm, postnummer…",
+    "hint": "Resultat från OpenStreetMap (Nominatim). Använd ansvarsfullt — inte för massgeokodning.",
+    "appliedTitle": "Plats tillämpad",
+    "searchFailed": "Sökningen misslyckades",
+    "applied": "Tillämpat: {{label}}",
+    "noResults": "Inga resultat",
+    "searching": "Söker…"
+  },
+  "support": {
+    "section": "Stöd utgivaren",
+    "title": "Dricks till utvecklaren",
+    "help": "Valfri engångsdricks. Betalningen hanteras av Apple eller Google och går till appens utgivare. Du kan dricksa igen när som helst.",
+    "thankYou": "Tack för ditt stöd.",
+    "dismiss": "Stäng",
+    "loadingPrice": "Laddar pris…",
+    "unavailable": "Dricks är inte tillgänglig än (kontrollera butikskoppling eller produktinställningar).",
+    "tipWithPrice": "Dricks {{price}}",
+    "tip": "Dricks"
+  }
+}

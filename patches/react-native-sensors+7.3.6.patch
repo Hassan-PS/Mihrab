@@ -1,0 +1,56 @@
+diff --git a/node_modules/react-native-sensors/android/build.gradle b/node_modules/react-native-sensors/android/build.gradle
+index f1526ec..cd06e6e 100644
+--- a/node_modules/react-native-sensors/android/build.gradle
++++ b/node_modules/react-native-sensors/android/build.gradle
+@@ -3,44 +3,26 @@ def safeExtGet(prop, fallback) {
+     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+ }
+ 
+-repositories {
+-  mavenCentral()
+-  google()
+-  jcenter()
+-}
+-
+-buildscript {
+-    repositories {
+-        google()
+-        jcenter()
+-    }
+-
+-    dependencies {
+-        classpath("com.android.tools.build:gradle:3.5.1")
+-    }
+-}
+-
+ apply plugin: 'com.android.library'
+ 
+ android {
+-    compileSdkVersion safeExtGet('compileSdkVersion', 23)
++    namespace 'com.sensors'
++    compileSdkVersion safeExtGet('compileSdkVersion', 36)
+ 
+     defaultConfig {
+-        minSdkVersion 17
+-        targetSdkVersion 29
++        minSdkVersion safeExtGet('minSdkVersion', 24)
++        targetSdkVersion safeExtGet('targetSdkVersion', 36)
+         versionCode 1
+-        versionName "1.0"
++        versionName '1.0'
+         ndk {
+-            abiFilters "armeabi-v7a", "x86"
++            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+         }
+     }
+     lintOptions {
+-       warning 'InvalidPackage'
++        warning 'InvalidPackage'
+     }
+ }
+ 
+-
+-
+ dependencies {
+     implementation 'com.facebook.react:react-native:+'
+     implementation 'androidx.appcompat:appcompat:1.0.2'

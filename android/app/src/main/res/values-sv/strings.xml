@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Prayer Times</string>
+    <string name="widget_description">Dagens tider på en rad, nästa bön markerad</string>
+    <string name="widget_placeholder_day">Öppna Prayer Times för att ladda tider</string>
+    <string name="widget_error">Kunde inte ladda widgetdata</string>
+</resources>

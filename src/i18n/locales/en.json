@@ -1,0 +1,170 @@
+{
+  "app": {
+    "name": "Prayer Times",
+    "tagline": "Prayer times focused on Sweden — with sources tuned for Swedish cities and flexible options elsewhere."
+  },
+  "nav": {
+    "home": "Prayer Times",
+    "settings": "Settings",
+    "month": "Month",
+    "compass": "Qibla"
+  },
+  "a11y": {
+    "openSettings": "Open settings",
+    "openMonth": "Open month view",
+    "openCompass": "Open Qibla compass",
+    "openTimesSource": "Change prayer times source"
+  },
+  "common": {
+    "change": "Change",
+    "tryAgain": "Try again",
+    "retry": "Retry",
+    "continue": "Continue",
+    "back": "Back",
+    "loading": "Loading…",
+    "automatic": "Automatic"
+  },
+  "home": {
+    "loadingPrayer": "Loading prayer times…",
+    "nextPrayer": "Next prayer",
+    "nextIn": "in {{time}}",
+    "hanafiSuffix": "Hanafi Asr"
+  },
+  "errors": {
+    "locationNeededTitle": "Location needed",
+    "locationNeededBody": "Prayer times use your approximate position. Grant location access in system settings, then try again.",
+    "locationErrorTitle": "Location error",
+    "apiErrorTitle": "Could not load times",
+    "coordLat": "Latitude must be between -90 and 90.",
+    "coordLng": "Longitude must be between -180 and 180.",
+    "gpsPermission": "Location permission is required to use device location.",
+    "gpsRead": "Could not read GPS position.",
+    "gpsRequest": "Could not request location."
+  },
+  "month": {
+    "locationNotReadyTitle": "Location not ready",
+    "locationNotReadyBody": "Open Home and load today's times once so this screen can use your GPS position.",
+    "thisMonth": "This month",
+    "loadError": "Could not load month.",
+    "empty": "No rows to show."
+  },
+  "settings": {
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeHelp": "System matches your device light or dark mode.",
+    "pureBlack": "Pure black (OLED)",
+    "pureBlackHelp": "True black background in dark mode for OLED displays.",
+    "dataSource": "Data source",
+    "provider": "Prayer times provider",
+    "providerAutoLine": "Automatic · {{label}}",
+    "providerAutoHelp": "In Sweden, prayer times use the Sweden source (listed cities); outside Sweden, AlAdhan. Pick a source below to lock one provider.",
+    "location": "Location",
+    "gps": "GPS",
+    "manual": "Manual",
+    "manualSearchHelp": "Tap a search result to apply it right away, or edit coordinates and press Apply below.",
+    "coordsLabel": "Coordinates (decimal degrees)",
+    "latPlaceholder": "Latitude",
+    "lngPlaceholder": "Longitude",
+    "applyCoords": "Apply coordinates",
+    "calculation": "Calculation",
+    "calcHiddenSweden": "Sweden uses prayer times per listed city. Your position is reverse-geocoded to match that city; only for Sweden.",
+    "calcHiddenPraytimes": "PrayTimes.dev applies its own published rules (see prayertimes.dev). Only madhab / Asr school applies here; method list is hidden.",
+    "method": "Method",
+    "methodModalTitle": "Calculation method",
+    "hanafiAsr": "Hanafi Asr",
+    "hanafiAsrHelp": "Larger shadow length for Asr (school = 1)",
+    "notifications": "Notifications",
+    "prayerAlerts": "Prayer alerts",
+    "prayerAlertsHelp": "Scheduled for the five daily prayers (Fajr–Isha). Android may require exact-alarm access for reliable timing.",
+    "language": "Language",
+    "languageHelp": "English, Swedish, or Arabic. Arabic uses right-to-left layout.",
+    "langEn": "English",
+    "langSv": "Swedish",
+    "langAr": "Arabic"
+  },
+  "locationSetup": {
+    "headline": "Set your location",
+    "sub": "Prayer times depend on where you are. Choose one of the options below — you can change this later in Settings.",
+    "useGps": "Use device location",
+    "searchCoords": "Search or enter coordinates",
+    "manualHeadline": "Manual location",
+    "manualSub": "Search and tap a result to finish — or type latitude and longitude below and press Continue.",
+    "decimalCoords": "Decimal coordinates"
+  },
+  "provider": {
+    "timesSource": "Times source",
+    "automaticByLocation": "Automatic by location",
+    "modalTitle": "Prayer times source",
+    "sectionMainstream": "Mainstream APIs",
+    "sectionRegional": "National & regional sources",
+    "autoTitle": "Automatic",
+    "autoSub": "Sweden source in Sweden; AlAdhan elsewhere.",
+    "footer": "Country-specific sources use official or national prayer tables where we integrate them. More regions may be added over time."
+  },
+  "providers": {
+    "aladhan": {
+      "desc": "api.aladhan.com — large method list, coordinates worldwide; very widely used."
+    },
+    "prayertimes_dev": {
+      "desc": "Independent API — UK-style angles & offsets; Hanafi/Shafi; global coordinates."
+    },
+    "local_adhan": {
+      "desc": "Calculated on your phone with Batoul Adhan — no network prayer API."
+    },
+    "islamiska_forbundet": {
+      "desc": "Prayer times for listed Swedish cities; your location is matched to the nearest city in the list."
+    }
+  },
+  "compass": {
+    "needLocationTitle": "Location not ready",
+    "needLocationBody": "Set a location in Settings or open Home once with GPS so we can compute the Qibla direction.",
+    "bearing": "Qibla bearing",
+    "fromNorth": "{{deg}}° from north",
+    "qiblaMarker": "Qibla",
+    "phoneFront": "Phone front",
+    "hint": "Hold the phone flat and move away from metal. Align the Qibla arrow with “Phone front” when you face the Qibla.",
+    "signalStrength": "Compass signal",
+    "signalHelp": "Based on magnetic field level and stability. Move away from metal and electronics if it stays low.",
+    "signalChecking": "…",
+    "signalOff": "Off",
+    "unsupportedTitle": "Live compass unavailable",
+    "unsupportedBody": "This device does not provide a usable magnetometer (or access failed). The live compass is turned off. Use the bearing below with a physical compass or map.",
+    "checkingCompass": "Starting compass…",
+    "north": "N",
+    "east": "E",
+    "south": "S",
+    "west": "W"
+  },
+  "prayer": {
+    "Fajr": "Fajr",
+    "Sunrise": "Sunrise",
+    "Dhuhr": "Dhuhr",
+    "Asr": "Asr",
+    "Maghrib": "Maghrib",
+    "Isha": "Isha"
+  },
+  "placeSearch": {
+    "label": "Search city or address",
+    "placeholder": "e.g. Cairo, London, postal code…",
+    "hint": "Results from OpenStreetMap (Nominatim). Use respectfully — not for bulk geocoding.",
+    "appliedTitle": "Location applied",
+    "searchFailed": "Search failed",
+    "applied": "Applied: {{label}}",
+    "noResults": "No results",
+    "searching": "Searching…"
+  },
+  "support": {
+    "section": "Support the publisher",
+    "title": "Tip the developer",
+    "help": "Optional one-time tip. Payment is processed by Apple or Google and goes to the app publisher. You can tip again anytime.",
+    "thankYou": "Thank you for your support.",
+    "dismiss": "Dismiss",
+    "loadingPrice": "Loading price…",
+    "unavailable": "Tip purchases are not available yet (check your store connection or product setup).",
+    "tipWithPrice": "Tip {{price}}",
+    "tip": "Tip"
+  }
+}

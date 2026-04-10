@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Adaptive icon backdrop (dark green); foreground art is zoom-cropped to fill the mask -->
+    <color name="ic_launcher_background">#143628</color>
+</resources>
