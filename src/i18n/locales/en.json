@@ -28,7 +28,8 @@
     "loadingPrayer": "Loading prayer times…",
     "nextPrayer": "Next prayer",
     "nextIn": "in {{time}}",
-    "hanafiSuffix": "Hanafi Asr"
+    "hanafiSuffix": "Hanafi Asr",
+    "monthTimesLink": "Prayer times for the whole month"
   },
   "errors": {
     "locationNeededTitle": "Location needed",

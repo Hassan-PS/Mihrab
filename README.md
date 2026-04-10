@@ -6,7 +6,7 @@ Daily prayer times, Qibla compass, and related tools — built with [**React Nat
 
 ## Releases
 
-Pre-built **APK** files are attached on [GitHub Releases](https://github.com/Hassan-PS/PrayerApp/releases). Play Store builds use a separate AAB upload.
+Pre-built **APK** files are attached on [GitHub Releases](https://github.com/Hassan-PS/PrayerApp/releases). Play Store builds use a separate AAB upload. **What’s new:** see [CHANGELOG.md](CHANGELOG.md).
 
 **Contributors:** never commit signing keys, `.env` files, or other secrets. See [SECURITY.md](SECURITY.md).
 

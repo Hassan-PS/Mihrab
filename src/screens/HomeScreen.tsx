@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
+import { CalendarIcon } from '../components/HeaderToolbarIcons';
 import { LocationSetup } from '../components/LocationSetup';
 import { ProviderSourceHeader } from '../components/ProviderSourceHeader';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -251,18 +251,21 @@ export function HomeScreen() {
         </View>
       )}
 
-      <View style={styles.monthLinkRow}>
-        <HeaderToolbarIcons
-          tintColor={palette.accent}
-          onMonth={() => navigation.navigate('MonthTimes')}
-          onCompass={() => navigation.navigate('Compass')}
-          onSettings={() => navigation.navigate('Settings')}
-          monthA11yLabel={t('a11y.openMonth')}
-          compassA11yLabel={t('a11y.openCompass')}
-          settingsA11yLabel={t('a11y.openSettings')}
-          showSettings={false}
-        />
-      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('home.monthTimesLink')}
+        accessibilityHint={t('a11y.openMonth')}
+        onPress={() => navigation.navigate('MonthTimes')}
+        style={({ pressed }) => [
+          styles.monthShortcut,
+          { borderColor: palette.border, backgroundColor: palette.card },
+          pressed && { opacity: 0.85 },
+        ]}>
+        <CalendarIcon color={palette.accent} size={22} />
+        <Text style={[styles.monthShortcutLabel, { color: palette.accent }]}>
+          {t('home.monthTimesLink')}
+        </Text>
+      </Pressable>
 
       <Text style={[styles.coords, { color: palette.muted }]}>
         {settings.locationMode === 'manual' && settings.manualLocationLabel
@@ -384,9 +387,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 8,
   },
-  monthLinkRow: {
+  monthShortcut: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
-    marginBottom: 8,
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  monthShortcutLabel: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   tagline: {
     fontSize: 14,

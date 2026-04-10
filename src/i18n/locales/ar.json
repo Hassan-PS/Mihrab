@@ -28,7 +28,8 @@
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
     "nextPrayer": "الصلاة التالية",
     "nextIn": "خلال {{time}}",
-    "hanafiSuffix": "عصر حنفي"
+    "hanafiSuffix": "عصر حنفي",
+    "monthTimesLink": "أوقات الصلاة للشهر كاملًا"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",

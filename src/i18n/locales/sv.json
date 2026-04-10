@@ -28,7 +28,8 @@
     "loadingPrayer": "Laddar bönetider…",
     "nextPrayer": "Nästa bön",
     "nextIn": "om {{time}}",
-    "hanafiSuffix": "Hanafi asr"
+    "hanafiSuffix": "Hanafi asr",
+    "monthTimesLink": "Bönetider för hela månaden"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",

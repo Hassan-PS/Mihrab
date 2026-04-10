@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import Svg, { Circle, G, Path, Polygon, Rect } from 'react-native-svg';
+import Svg, { Circle, Path, Polygon, Rect } from 'react-native-svg';
 
 type Props = {
   tintColor: string;
@@ -81,9 +81,9 @@ export function CompassIcon({
   );
 }
 
-const GEAR_TOOTH_ANGLES = [0, 60, 120, 180, 240, 300];
-
-/** Classic 6-tooth gear around a hub ring. */
+/**
+ * Lucide-style settings gear (stroke) — reads clearly as a cog, not a flower.
+ */
 function SettingsIcon({
   color,
   size = ICON,
@@ -98,26 +98,22 @@ function SettingsIcon({
       viewBox="0 0 24 24"
       accessibilityElementsHidden
       importantForAccessibility="no">
-      <Circle
-        cx="12"
-        cy="12"
-        r="3.35"
-        stroke={color}
-        strokeWidth={1.85}
+      <Path
+        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
         fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      {GEAR_TOOTH_ANGLES.map(deg => (
-        <G key={deg} transform={`rotate(${deg} 12 12)`}>
-          <Rect
-            x="10.2"
-            y="1.65"
-            width="3.6"
-            height="5"
-            rx="1"
-            fill={color}
-          />
-        </G>
-      ))}
+      <Path
+        d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }

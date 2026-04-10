@@ -89,8 +89,8 @@ android {
         applicationId "com.prayer_times"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2"
         // react-native-iap publishes `play` and `amazon` flavors; pick Play for Google Play builds.
         missingDimensionStrategy "store", "play"
     }
