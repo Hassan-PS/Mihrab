@@ -10,6 +10,8 @@ Pre-built **APK** files are attached on [GitHub Releases](https://github.com/Has
 
 **Contributors:** never commit signing keys, `.env` files, or other secrets. See [SECURITY.md](SECURITY.md).
 
+**Privacy policy** (for Play Console / App Store): [PRIVACY_POLICY.md](https://github.com/Hassan-PS/PrayerApp/blob/main/PRIVACY_POLICY.md)
+
 ---
 
 This project was bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
