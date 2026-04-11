@@ -1,0 +1,17 @@
+--- a/android/app/build.gradle
++++ b/android/app/build.gradle
+@@ -128,9 +128,11 @@ android {
+             signingConfig signingConfigs.debug
+         }
+         release {
+-            signingConfig keystorePropertiesFile.exists()
+-                ? signingConfigs.release
+-                : signingConfigs.debug
++            if (keystorePropertiesFile.exists()) {
++                signingConfig signingConfigs.release
++            } else {
++                signingConfig signingConfigs.debug
++            }
+             minifyEnabled enableProguardInReleaseBuilds
+             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+         }
