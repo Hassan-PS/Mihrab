@@ -50,12 +50,13 @@ Builds:
       - npm ci --no-audit
     patch:
       - fdroid-release-signing-ifelse.patch
-    prebuild:
-      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=1024m/' gradle.properties
-      - printf '\norg.gradle.daemon.performance.disable-logging=true\n' >> gradle.properties
     gradle:
       - fdroid
+    prebuild:
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
+      - sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=1024m/'
+        gradle.properties
+      - printf '\norg.gradle.daemon.performance.disable-logging=true\n' >> gradle.properties
     scanignore:
       - android/build.gradle
       - node_modules
