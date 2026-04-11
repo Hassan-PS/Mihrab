@@ -5,7 +5,7 @@ import { fetchPrayerTimesUnified } from '../providers/fetchPrayerTimes';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
-import { addDays, computeNextSalah } from '../utils/prayerTimes';
+import { addDays } from '../utils/prayerTimes';
 
 export type PrayerDayState =
   | { phase: 'idle' }
@@ -44,22 +44,19 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           calculationMethod: settings.calculationMethod,
           school: settings.school,
         });
-        const next = computeNextSalah(todayRes.timings, new Date());
         let tomorrow: TimingsMap | undefined;
-        if (!next) {
-          try {
-            const tomorrowRes = await fetchPrayerTimesUnified({
-              provider,
-              latitude,
-              longitude,
-              date: addDays(new Date(), 1),
-              calculationMethod: settings.calculationMethod,
-              school: settings.school,
-            });
-            tomorrow = tomorrowRes.timings;
-          } catch {
-            tomorrow = undefined;
-          }
+        try {
+          const tomorrowRes = await fetchPrayerTimesUnified({
+            provider,
+            latitude,
+            longitude,
+            date: addDays(new Date(), 1),
+            calculationMethod: settings.calculationMethod,
+            school: settings.school,
+          });
+          tomorrow = tomorrowRes.timings;
+        } catch {
+          tomorrow = undefined;
         }
         if (gen !== loadGenerationRef.current) {
           return;
