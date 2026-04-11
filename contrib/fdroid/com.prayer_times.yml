@@ -32,8 +32,13 @@ Builds:
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
       - apt-get update
-      - apt-get install -y curl ca-certificates xz-utils openjdk-21-jdk-headless
-      - update-alternatives --auto java
+      - apt-get install -y curl ca-certificates xz-utils
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+      - echo "0c94cbb54325c40dcf026143eb621562017db5525727f2d9131a11250f72c450  /tmp/jdk17.tar.gz"
+        | sha256sum -c -
+      - tar xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -sfn /usr/local/jdk-17.0.18+8 /usr/local/jdk-17
+      - rm -f /tmp/jdk17.tar.gz
       - curl -Lo node.tar.xz https://nodejs.org/dist/v20.19.0/node-v20.19.0-linux-x64.tar.xz
       - echo "b4e336584d62abefad31baecff7af167268be9bb7dd11f1297112e6eed3ca0d5 node.tar.xz"
         | sha256sum -c -
@@ -43,7 +48,7 @@ Builds:
       - cd ..
       - npm ci --no-audit
     prebuild:
-      - printf '\norg.gradle.java.home=%s\n' "$(dirname $(dirname $(readlink -f $(command -v java))))" >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
@@ -55,9 +60,10 @@ Builds:
 MaintainerNotes: |
   React Native 0.83: Node 20 from upstream tarball (checksum-verified). `npm ci`
   runs from repo root; Gradle runs in `android/` with product flavor `fdroid`
-  (no Play Billing). Debian trixie has no `openjdk-17-jdk-headless`; use
-  `openjdk-21-jdk-headless` (Gradle 9 runs on 17+). `prebuild` sets
-  `org.gradle.java.home` so toolchain resolution sees the JDK on the build VM.
+  (no Play Billing). RN `@react-native/gradle-plugin` uses `jvmToolchain(17)`;
+  JDK 21 does not satisfy that request. Trixie has no OpenJDK 17 apt package, so
+  install Eclipse Temurin 17.0.18+8 (checksum-verified) to `/usr/local/jdk-17` and
+  set `org.gradle.java.home` in `prebuild`.
   Scanner: `scanignore` uses `node_modules` (RN layout
   changes make per-package paths brittle) plus `android/build.gradle` for the
   AsyncStorage `local_repo` maven entry. If policy tightens, consider `scandelete`
