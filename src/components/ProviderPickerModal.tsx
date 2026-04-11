@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type ColorValue,
 } from 'react-native';
 import {
   MAINSTREAM_PRAYER_PROVIDERS,
@@ -19,12 +20,12 @@ import type {
 } from '../settings/types';
 
 type Palette = {
-  card: string;
-  text: string;
-  muted: string;
-  border: string;
-  bg: string;
-  overlay: string;
+  card: ColorValue;
+  text: ColorValue;
+  muted: ColorValue;
+  border: ColorValue;
+  bg: ColorValue;
+  overlay: ColorValue;
 };
 
 type Props = {

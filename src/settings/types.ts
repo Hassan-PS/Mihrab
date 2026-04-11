@@ -13,6 +13,11 @@ export type AppLanguage = 'en' | 'sv' | 'ar';
 export type PrayerAppSettings = {
   /** Follow OS light/dark, or force one mode. */
   appearance: AppearancePreference;
+  /**
+   * When theme is System, use platform semantic colors (iOS system colors,
+   * Android Material / dynamic color). Ignored when appearance is not system.
+   */
+  useSystemDynamicTheme: boolean;
   /** When dark, use #000 background (OLED); ignored in light mode. */
   pureBlackDark: boolean;
   dataProvider: PrayerDataProviderId;
@@ -40,6 +45,7 @@ export type PrayerAppSettings = {
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
   appearance: 'system',
+  useSystemDynamicTheme: false,
   pureBlackDark: false,
   dataProvider: 'aladhan',
   dataProviderAuto: true,

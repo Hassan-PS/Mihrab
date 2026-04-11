@@ -33,4 +33,21 @@ RCT_EXPORT_METHOD(setData
   resolve(nil);
 }
 
+RCT_EXPORT_METHOD(setUiHints:(NSString *)style
+                  oledBackground:(BOOL)oled
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  NSUserDefaults *group =
+      [[NSUserDefaults alloc] initWithSuiteName:@"group.com.prayerapp"];
+  NSUserDefaults *target = group != nil ? group : [NSUserDefaults standardUserDefaults];
+  [target setObject:(style != nil ? style : @"fixed") forKey:@"widget_ui_style"];
+  [target setBool:oled forKey:@"widget_oled"];
+  [target synchronize];
+  if (@available(iOS 14.0, *)) {
+    [[WidgetCenter sharedWidgetCenter] reloadAllTimelines];
+  }
+  resolve(nil);
+}
+
 @end

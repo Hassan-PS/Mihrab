@@ -4,14 +4,17 @@ import { StatusBar, useColorScheme, View } from 'react-native';
 import { usePrayerSettings } from './context/PrayerSettingsContext';
 import { RootNavigator } from './navigation/RootNavigator';
 import {
-  buildAppPalette,
+  resolveAppPalette,
   resolveEffectiveDark,
 } from './theme/appPalette';
 import { buildNavigationTheme } from './theme/navigationTheme';
+import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
 
 export function AppNavigationRoot() {
   const { settings } = usePrayerSettings();
   const systemScheme = useColorScheme();
+
+  useSyncWidgetUiHints(systemScheme);
 
   const isDark = useMemo(
     () => resolveEffectiveDark(settings.appearance, systemScheme),
@@ -19,8 +22,19 @@ export function AppNavigationRoot() {
   );
 
   const palette = useMemo(
-    () => buildAppPalette(isDark, settings.pureBlackDark),
-    [isDark, settings.pureBlackDark],
+    () =>
+      resolveAppPalette({
+        appearance: settings.appearance,
+        useSystemDynamicTheme: settings.useSystemDynamicTheme,
+        systemScheme,
+        pureBlackDark: settings.pureBlackDark,
+      }),
+    [
+      settings.appearance,
+      settings.useSystemDynamicTheme,
+      settings.pureBlackDark,
+      systemScheme,
+    ],
   );
 
   const navTheme = useMemo(

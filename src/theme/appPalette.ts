@@ -1,16 +1,21 @@
-import type { ColorSchemeName } from 'react-native';
+import type { ColorSchemeName, ColorValue } from 'react-native';
+import {
+  DynamicColorIOS,
+  Platform,
+  PlatformColor,
+} from 'react-native';
 import type { AppearancePreference } from '../settings/types';
 
 export type AppPalette = {
-  bg: string;
-  card: string;
-  text: string;
-  muted: string;
-  border: string;
-  accent: string;
-  accentBg: string;
-  danger: string;
-  overlay: string;
+  bg: ColorValue;
+  card: ColorValue;
+  text: ColorValue;
+  muted: ColorValue;
+  border: ColorValue;
+  accent: ColorValue;
+  accentBg: ColorValue;
+  danger: ColorValue;
+  overlay: ColorValue;
 };
 
 export function resolveEffectiveDark(
@@ -25,6 +30,13 @@ export function resolveEffectiveDark(
     return true;
   }
   return systemScheme === 'dark';
+}
+
+export function shouldUseDynamicSystemColors(
+  appearance: AppearancePreference | undefined,
+  useSystemDynamicTheme: boolean | undefined,
+): boolean {
+  return (appearance ?? 'system') === 'system' && !!useSystemDynamicTheme;
 }
 
 /** Standard dark greys (current app look). */
@@ -65,6 +77,57 @@ const LIGHT: AppPalette = {
   overlay: 'rgba(0,0,0,0.4)',
 };
 
+function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette {
+  const oled = pureBlackDark && isDark;
+  return {
+    bg: oled ? '#000000' : PlatformColor('systemBackground'),
+    card: oled ? '#0d0d0d' : PlatformColor('secondarySystemGroupedBackground'),
+    text: PlatformColor('label'),
+    muted: PlatformColor('secondaryLabel'),
+    border: PlatformColor('separator'),
+    accent: PlatformColor('tintColor'),
+    accentBg: PlatformColor('tertiarySystemGroupedBackground'),
+    danger: PlatformColor('systemRed'),
+    overlay: DynamicColorIOS({
+      light: 'rgba(0,0,0,0.4)',
+      dark: 'rgba(0,0,0,0.65)',
+      highContrastLight: 'rgba(0,0,0,0.5)',
+      highContrastDark: 'rgba(0,0,0,0.75)',
+    }),
+  };
+}
+
+function androidDynamicPalette(
+  isDark: boolean,
+  pureBlackDark: boolean,
+): AppPalette {
+  const oled = pureBlackDark && isDark;
+  return {
+    bg: oled ? '#000000' : PlatformColor('?attr/colorSurface'),
+    card: oled ? '#0d0d0d' : PlatformColor('?attr/colorSurfaceContainerHigh'),
+    text: PlatformColor('?attr/colorOnSurface'),
+    muted: PlatformColor('?attr/colorOnSurfaceVariant'),
+    border: PlatformColor('?attr/colorOutline'),
+    accent: PlatformColor('?attr/colorPrimary'),
+    accentBg: PlatformColor('?attr/colorPrimaryContainer'),
+    danger: PlatformColor('?attr/colorError'),
+    overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
+  };
+}
+
+function buildDynamicSystemPalette(
+  isDark: boolean,
+  pureBlackDark: boolean,
+): AppPalette {
+  if (Platform.OS === 'ios') {
+    return iosDynamicPalette(isDark, pureBlackDark);
+  }
+  if (Platform.OS === 'android') {
+    return androidDynamicPalette(isDark, pureBlackDark);
+  }
+  return buildAppPalette(isDark, pureBlackDark);
+}
+
 export function buildAppPalette(
   isDark: boolean,
   pureBlackDark: boolean,
@@ -73,4 +136,17 @@ export function buildAppPalette(
     return LIGHT;
   }
   return pureBlackDark ? DARK_PURE_BLACK : DARK;
+}
+
+export function resolveAppPalette(input: {
+  appearance: AppearancePreference;
+  useSystemDynamicTheme: boolean;
+  systemScheme: ColorSchemeName | null | undefined;
+  pureBlackDark: boolean;
+}): AppPalette {
+  const isDark = resolveEffectiveDark(input.appearance, input.systemScheme);
+  if (shouldUseDynamicSystemColors(input.appearance, input.useSystemDynamicTheme)) {
+    return buildDynamicSystemPalette(isDark, input.pureBlackDark);
+  }
+  return buildAppPalette(isDark, input.pureBlackDark);
 }
