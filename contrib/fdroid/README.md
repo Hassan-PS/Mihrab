@@ -1,39 +1,44 @@
-# Publishing on F-Droid
+# F-Droid submission kit
 
-## Where it lives
+Everything here is **upstream preparation**. The real merge request goes to **[fdroiddata on GitLab](https://gitlab.com/fdroid/fdroiddata)** (separate account/repo).
 
-| Place | Role |
-|--------|------|
-| **This repo** (`contrib/fdroid/com.prayer_times.yml`) | Reference copy only — F-Droid does **not** read it automatically. |
-| **[fdroiddata](https://gitlab.com/fdroid/fdroiddata)** (separate GitLab repo) | **Real** metadata. You add `metadata/com.prayer_times.yml` there and open a **Merge Request**. |
+## Files in this folder
 
-Maintainers review the MR, run builds on their infrastructure, and merge when it passes.
+| File | Purpose |
+|------|---------|
+| [`com.prayer_times.yml`](com.prayer_times.yml) | **Paste into** `metadata/com.prayer_times.yml` in your fdroiddata fork (delete the 2-line comment at the top when committing). |
+| [`MERGE_REQUEST.md`](MERGE_REQUEST.md) | Suggested **MR title, description, branch name** for GitLab. |
 
-## What you do
+## Repo root (optional, for listings)
 
-1. [Create a GitLab account](https://gitlab.com/users/sign_up) if needed.
-2. **Fork** [fdroiddata](https://gitlab.com/fdroid/fdroiddata).
-3. In your fork, add **`metadata/com.prayer_times.yml`** — start from the file in this directory (`com.prayer_times.yml`).
-4. Open a **Merge Request** against `fdroid/fdroiddata` with a short description (link this GitHub repo and the `fdroid` flavor).
-5. Reply to reviewer comments (they often tweak `sudo`, Node version, `ndk`, or `init` for React Native).
+| Path | Purpose |
+|------|---------|
+| [`fastlane/metadata/android/en-US/`](../../fastlane/metadata/android/en-US/) | Title / short / long description. F-Droid (and Play) can reuse these; the YAML above still includes `Description` so the first MR is self-contained. |
 
-Official guides:
+## Steps (you do on GitLab)
 
-- [Submitting to F-Droid: Quick Start](https://f-droid.org/docs/Submitting_to_F_Droid_Quick_Start_Guide/)
-- [Build metadata reference](https://f-droid.org/docs/Build_Metadata_Reference/)
-- [Forum — Inclusion Policy](https://forum.f-droid.org/c/fdroid/InclusionPolicy/6)
+1. Sign in at [gitlab.com](https://gitlab.com) and **fork** [fdroid/fdroiddata](https://gitlab.com/fdroid/fdroiddata).
+2. Create branch e.g. `add-com.prayer_times`.
+3. Add **`metadata/com.prayer_times.yml`** using the contents of **`com.prayer_times.yml`** from this folder.
+4. Open a **Merge Request** to `fdroid/fdroiddata` — copy text from **`MERGE_REQUEST.md`**.
+5. Iterate with reviewers (Node/NDK/`scanignore` tweaks are common for React Native).
 
-## After each new release
+## After a new app release
 
-Bump the **`Builds:`** block in **fdroiddata** (new `versionName`, `versionCode`, `commit` tag) via another MR, or rely on `UpdateCheckMode: Tags` once the app is in the repo (automation still needs metadata updates for some setups — follow F-Droid docs).
+Add a new list item under **`Builds:`** in fdroiddata (or your next MR) with updated `versionName`, `versionCode`, and `commit` (git tag). See [Build metadata reference](https://f-droid.org/docs/Build_Metadata_Reference/).
 
-## Local check
-
-From your machine (optional):
+## Local sanity check
 
 ```sh
-npm ci
+cd /path/to/PrayerApp
+npm ci --no-audit
 cd android && ./gradlew assembleFdroidRelease
 ```
 
 APK: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
+
+## Docs
+
+- [Submitting to F-Droid: Quick Start](https://f-droid.org/docs/Submitting_to_F_Droid_Quick_Start_Guide/)
+- [Adding React Native apps](https://f-droid.org/2020/10/14/adding-react-native-app-to-f-droid.html)
+- [Build metadata reference](https://f-droid.org/docs/Build_Metadata_Reference/)
