@@ -1,5 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import {
   ErrorCode,
   getProducts,
@@ -66,7 +67,13 @@ export function useTipDonation() {
         setError(null);
         return;
       }
-      const items = await getProducts({ skus: [...TIP_PRODUCT_SKUS] });
+      const skus = [...TIP_PRODUCT_SKUS];
+      let items = await getProducts({ skus });
+      // Play Billing sometimes returns an empty list on the first query right after connect.
+      if (Platform.OS === 'android' && items.length === 0) {
+        await new Promise<void>(resolve => setTimeout(resolve, 650));
+        items = await getProducts({ skus });
+      }
       setProduct(items[0] ?? null);
     } catch (e) {
       const raw = e instanceof Error ? e.message : 'Could not load store products.';
