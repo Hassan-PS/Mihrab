@@ -26,6 +26,22 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  @ReactMethod
+  fun setUiHints(style: String, oledBackground: Boolean, promise: Promise) {
+    try {
+      reactContext
+        .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+        .edit()
+        .putString(PrayerWidgetProvider.PREFS_UI_STYLE_KEY, style)
+        .putBoolean(PrayerWidgetProvider.PREFS_UI_OLED, oledBackground)
+        .apply()
+      PrayerWidgetProvider.requestUpdate(reactContext)
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject("E_WIDGET_UI", e.message, e)
+    }
+  }
+
   companion object {
     const val NAME = "PrayerWidget"
   }

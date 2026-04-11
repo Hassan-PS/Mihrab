@@ -12,8 +12,8 @@ const { Jimp } = require('jimp');
 const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'assets', 'app-icon-source.png');
 
-/** >1 zooms in before crop so masks that cut corners still look full. */
-const ZOOM = 1.28;
+/** >1 zooms in before crop so masks that cut corners still look full. 1 = minimal (cover + center crop only). */
+const ZOOM = 1;
 
 const ANDROID_MIPMAPS = [
   ['mipmap-mdpi', 48],

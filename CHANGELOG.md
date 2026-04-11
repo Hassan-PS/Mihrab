@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] — 2026-04-11
+
+### Added
+- Optional **System colors** when the theme is set to System: platform semantic and dynamic colors (including Material You on Android) for the app and the home screen widget, with **Pure black (OLED)** still applied to backgrounds when enabled in dark mode.
+- Widget appearance sync via native `setUiHints` when theme-related settings change (no need to reload prayer data first).
+
+### Changed
+- Android uses **Material 3** `DynamicColors` day/night theme so `PlatformColor` Material attributes resolve correctly.
+- New launcher icon artwork; icon generator uses minimal zoom (1.0) for crop.
+- HTTP `User-Agent` prefix updated to `PrayerTimes/1.3`.
+
+### Release builds
+- Android `versionName` **1.3**, `versionCode` **4** — release **AAB** for Google Play and **APK** for GitHub Releases.
+
+[1.3.0]: https://github.com/Hassan-PS/PrayerApp/compare/v1.2.0...v1.3.0
+
 ## [1.2.0] — 2026-04-10
 
 ### Added

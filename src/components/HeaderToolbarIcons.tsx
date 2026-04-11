@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 import Svg, { Circle, Path, Polygon, Rect } from 'react-native-svg';
 
 type Props = {
@@ -20,7 +20,7 @@ export function CalendarIcon({
   color,
   size = ICON,
 }: {
-  color: string;
+  color: ColorValue;
   size?: number;
 }) {
   return (

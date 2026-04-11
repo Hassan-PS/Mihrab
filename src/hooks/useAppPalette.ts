@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import {
-  buildAppPalette,
+  resolveAppPalette,
   resolveEffectiveDark,
   type AppPalette,
 } from '../theme/appPalette';
@@ -22,8 +22,19 @@ export function useAppPalette(): {
   );
 
   const palette = useMemo(
-    () => buildAppPalette(isDark, settings.pureBlackDark),
-    [isDark, settings.pureBlackDark],
+    () =>
+      resolveAppPalette({
+        appearance: settings.appearance,
+        useSystemDynamicTheme: settings.useSystemDynamicTheme,
+        systemScheme,
+        pureBlackDark: settings.pureBlackDark,
+      }),
+    [
+      settings.appearance,
+      settings.useSystemDynamicTheme,
+      settings.pureBlackDark,
+      systemScheme,
+    ],
   );
 
   return { palette, isDark };

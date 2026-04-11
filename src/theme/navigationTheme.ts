@@ -21,5 +21,5 @@ export function buildNavigationTheme(
       border: palette.border,
       notification: palette.accent,
     },
-  };
+  } as Theme;
 }

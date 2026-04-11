@@ -7,18 +7,19 @@ import {
   Text,
   TextInput,
   View,
+  type ColorValue,
 } from 'react-native';
 import { searchPlaces, type GeocodedPlace } from '../geocoding/nominatim';
 
 type Palette = {
-  bg: string;
-  text: string;
-  muted: string;
-  border: string;
-  accent: string;
-  card: string;
+  bg: ColorValue;
+  text: ColorValue;
+  muted: ColorValue;
+  border: ColorValue;
+  accent: ColorValue;
+  card: ColorValue;
   /** Optional; used for “location applied” banner. */
-  accentBg?: string;
+  accentBg?: ColorValue;
 };
 
 type Props = {

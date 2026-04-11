@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type ColorValue } from 'react-native';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import { getProviderLabel } from '../settings/providersCatalog';
 import type { PrayerAppSettings } from '../settings/types';
 import { ProviderPickerModal } from './ProviderPickerModal';
 
 type Palette = {
-  card: string;
-  text: string;
-  muted: string;
-  border: string;
-  bg: string;
-  overlay: string;
-  accent: string;
+  card: ColorValue;
+  text: ColorValue;
+  muted: ColorValue;
+  border: ColorValue;
+  bg: ColorValue;
+  overlay: ColorValue;
+  accent: ColorValue;
 };
 
 type Props = {

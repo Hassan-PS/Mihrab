@@ -10,20 +10,21 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type ColorValue,
 } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { GeocodedPlace } from '../geocoding/nominatim';
 import { PlaceSearchSection } from './PlaceSearchSection';
 
 type Palette = {
-  bg: string;
-  text: string;
-  muted: string;
-  border: string;
-  accent: string;
-  accentBg: string;
-  card: string;
-  danger: string;
+  bg: ColorValue;
+  text: ColorValue;
+  muted: ColorValue;
+  border: ColorValue;
+  accent: ColorValue;
+  accentBg: ColorValue;
+  card: ColorValue;
+  danger: ColorValue;
 };
 
 type Props = {
