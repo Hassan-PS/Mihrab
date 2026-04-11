@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View, type ColorValue } from 'react-native
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import { getProviderLabel } from '../settings/providersCatalog';
 import type { PrayerAppSettings } from '../settings/types';
+import { cardEdgeStyle } from '../theme/chrome';
 import { ProviderPickerModal } from './ProviderPickerModal';
 
 type Palette = {
@@ -14,6 +15,8 @@ type Palette = {
   bg: ColorValue;
   overlay: ColorValue;
   accent: ColorValue;
+  accentBg: ColorValue;
+  flatChrome: boolean;
 };
 
 type Props = {
@@ -47,7 +50,7 @@ export function ProviderSourceHeader({
           styles.bar,
           {
             backgroundColor: palette.card,
-            borderColor: palette.border,
+            ...cardEdgeStyle(palette),
           },
         ]}>
         <View style={styles.barText}>
@@ -78,6 +81,9 @@ export function ProviderSourceHeader({
           border: palette.border,
           bg: palette.bg,
           overlay: palette.overlay,
+          flatChrome: palette.flatChrome,
+          accent: palette.accent,
+          accentBg: palette.accentBg,
         }}
       />
     </>

@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { GeocodedPlace } from '../geocoding/nominatim';
+import { inputChromeStyle } from '../theme/chrome';
 import { PlaceSearchSection } from './PlaceSearchSection';
 
 type Palette = {
@@ -25,6 +26,7 @@ type Palette = {
   accentBg: ColorValue;
   card: ColorValue;
   danger: ColorValue;
+  flatChrome: boolean;
 };
 
 type Props = {
@@ -127,6 +129,7 @@ export function LocationSetup({ palette }: Props) {
     accent: palette.accent,
     accentBg: palette.accentBg,
     card: palette.card,
+    flatChrome: palette.flatChrome,
   };
 
   if (step === 'choose') {
@@ -162,7 +165,16 @@ export function LocationSetup({ palette }: Props) {
         )}
         <Pressable
           onPress={() => setStep('manual')}
-          style={[styles.secondaryBtn, { borderColor: palette.border }]}>
+          style={[
+            styles.secondaryBtn,
+            palette.flatChrome
+              ? {
+                  borderWidth: 0,
+                  borderColor: 'transparent',
+                  backgroundColor: palette.card,
+                }
+              : { borderColor: palette.border },
+          ]}>
           <Text style={[styles.secondaryLabel, { color: palette.accent }]}>
             {t('locationSetup.searchCoords')}
           </Text>
@@ -202,9 +214,9 @@ export function LocationSetup({ palette }: Props) {
         placeholderTextColor={palette.muted}
         style={[
           styles.input,
+          inputChromeStyle(palette),
           {
             color: palette.text,
-            borderColor: palette.border,
             backgroundColor: palette.bg,
           },
         ]}
@@ -220,9 +232,9 @@ export function LocationSetup({ palette }: Props) {
         placeholderTextColor={palette.muted}
         style={[
           styles.input,
+          inputChromeStyle(palette),
           {
             color: palette.text,
-            borderColor: palette.border,
             backgroundColor: palette.bg,
           },
         ]}

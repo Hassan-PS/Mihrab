@@ -16,6 +16,11 @@ export type AppPalette = {
   accentBg: ColorValue;
   danger: ColorValue;
   overlay: ColorValue;
+  /**
+   * System dynamic theme: stronger layered backgrounds, no box borders;
+   * segments use filled selection instead of accent outlines.
+   */
+  flatChrome: boolean;
 };
 
 export function resolveEffectiveDark(
@@ -50,6 +55,7 @@ const DARK: AppPalette = {
   accentBg: '#1e3a52',
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.65)',
+  flatChrome: false,
 };
 
 /** OLED-style: true black base, slightly lifted surfaces. */
@@ -63,6 +69,7 @@ const DARK_PURE_BLACK: AppPalette = {
   accentBg: '#142536',
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.75)',
+  flatChrome: false,
 };
 
 const LIGHT: AppPalette = {
@@ -75,18 +82,22 @@ const LIGHT: AppPalette = {
   accentBg: '#e8f1fb',
   danger: '#b91c1c',
   overlay: 'rgba(0,0,0,0.4)',
+  flatChrome: false,
 };
 
 function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette {
   const oled = pureBlackDark && isDark;
   return {
-    bg: oled ? '#000000' : PlatformColor('systemBackground'),
+    // Grouped stack reads clearly on Dynamic / tinted wallpapers.
+    bg: oled ? '#000000' : PlatformColor('systemGroupedBackground'),
     card: oled ? '#0d0d0d' : PlatformColor('secondarySystemGroupedBackground'),
     text: PlatformColor('label'),
     muted: PlatformColor('secondaryLabel'),
-    border: PlatformColor('separator'),
+    border: 'transparent',
     accent: PlatformColor('tintColor'),
-    accentBg: PlatformColor('tertiarySystemGroupedBackground'),
+    accentBg: oled
+      ? '#142536'
+      : PlatformColor('tertiarySystemGroupedBackground'),
     danger: PlatformColor('systemRed'),
     overlay: DynamicColorIOS({
       light: 'rgba(0,0,0,0.4)',
@@ -94,6 +105,7 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
       highContrastLight: 'rgba(0,0,0,0.5)',
       highContrastDark: 'rgba(0,0,0,0.75)',
     }),
+    flatChrome: true,
   };
 }
 
@@ -104,14 +116,18 @@ function androidDynamicPalette(
   const oled = pureBlackDark && isDark;
   return {
     bg: oled ? '#000000' : PlatformColor('?attr/colorSurface'),
-    card: oled ? '#0d0d0d' : PlatformColor('?attr/colorSurfaceContainerHigh'),
+    // Strongest container tint so Material You / dynamic color is obvious on cards.
+    card: oled ? '#0d0d0d' : PlatformColor('?attr/colorSurfaceContainerHighest'),
     text: PlatformColor('?attr/colorOnSurface'),
     muted: PlatformColor('?attr/colorOnSurfaceVariant'),
-    border: PlatformColor('?attr/colorOutline'),
+    border: 'transparent',
     accent: PlatformColor('?attr/colorPrimary'),
-    accentBg: PlatformColor('?attr/colorPrimaryContainer'),
+    accentBg: oled
+      ? '#142536'
+      : PlatformColor('?attr/colorPrimaryContainer'),
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
+    flatChrome: true,
   };
 }
 

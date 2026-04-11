@@ -272,9 +272,11 @@ export function CompassScreen() {
           style={[
             styles.dial,
             {
-              borderColor: palette.border,
               backgroundColor: palette.card,
               opacity: mode === 'unsupported' ? 0.5 : 1,
+              ...(palette.flatChrome
+                ? { borderWidth: 0, borderColor: 'transparent' }
+                : { borderColor: palette.border }),
             },
           ]}>
           <View style={styles.phoneFrontMark} pointerEvents="none">

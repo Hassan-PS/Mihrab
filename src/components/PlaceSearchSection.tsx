@@ -10,6 +10,12 @@ import {
   type ColorValue,
 } from 'react-native';
 import { searchPlaces, type GeocodedPlace } from '../geocoding/nominatim';
+import {
+  bannerEdgeStyle,
+  cardEdgeStyle,
+  inputChromeStyle,
+  listRowBottomBorder,
+} from '../theme/chrome';
 
 type Palette = {
   bg: ColorValue;
@@ -17,9 +23,9 @@ type Palette = {
   muted: ColorValue;
   border: ColorValue;
   accent: ColorValue;
+  accentBg: ColorValue;
   card: ColorValue;
-  /** Optional; used for “location applied” banner. */
-  accentBg?: ColorValue;
+  flatChrome: boolean;
 };
 
 type Props = {
@@ -97,9 +103,9 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
         placeholderTextColor={palette.muted}
         style={[
           styles.input,
+          inputChromeStyle(palette),
           {
             color: palette.text,
-            borderColor: palette.border,
             backgroundColor: palette.bg,
           },
         ]}
@@ -111,9 +117,9 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
         <View
           style={[
             styles.appliedBanner,
+            bannerEdgeStyle(palette),
             {
-              borderColor: palette.accent,
-              backgroundColor: palette.accentBg ?? palette.card,
+              backgroundColor: palette.accentBg,
             },
           ]}
           accessible
@@ -144,7 +150,8 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
         <View
           style={[
             styles.listCard,
-            { borderColor: palette.border, backgroundColor: palette.card },
+            cardEdgeStyle(palette),
+            { backgroundColor: palette.card },
           ]}>
           {results.map((item, i) => (
             <Pressable
@@ -152,8 +159,7 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
               onPress={() => handleSelectPlace(item)}
               style={[
                 styles.resultRow,
-                { borderBottomColor: palette.border },
-                i === results.length - 1 && styles.resultRowLast,
+                listRowBottomBorder(palette, i === results.length - 1),
               ]}>
               <Text style={[styles.resultTitle, { color: palette.text }]}>
                 {item.displayName.split(',').slice(0, 2).join(',').trim()}
@@ -228,9 +234,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  resultRowLast: {
-    borderBottomWidth: 0,
   },
   resultTitle: {
     fontSize: 15,

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { AppPalette } from '../theme/appPalette';
+import { cardEdgeStyle } from '../theme/chrome';
 import { useTipDonation } from './useTipDonation';
 
 type Props = {
@@ -30,7 +31,7 @@ export function SupportDeveloperSection({ palette }: Props) {
       <View
         style={[
           styles.card,
-          { backgroundColor: palette.card, borderColor: palette.border },
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
         ]}>
         <Text style={[styles.valueText, { color: palette.text }]}>
           {t('support.title')}

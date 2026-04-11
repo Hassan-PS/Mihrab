@@ -34,6 +34,12 @@ import {
 } from '../settings/providersCatalog';
 import { SupportDeveloperSection } from '../donations/SupportDeveloperSection';
 import type { AppLanguage } from '../settings/types';
+import {
+  cardEdgeStyle,
+  inputChromeStyle,
+  rowDividerStyle,
+  segmentChromeStyle,
+} from '../theme/chrome';
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -109,6 +115,7 @@ export function SettingsScreen() {
     accent: palette.accent,
     accentBg: palette.accentBg,
     card: palette.card,
+    flatChrome: palette.flatChrome,
   };
 
   const onNotificationsToggle = async (value: boolean) => {
@@ -149,7 +156,7 @@ export function SettingsScreen() {
         <View
           style={[
             styles.card,
-            { backgroundColor: palette.card, borderColor: palette.border },
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <Text style={[styles.label, { color: palette.muted }]}>
             {t('settings.theme')}
@@ -167,11 +174,7 @@ export function SettingsScreen() {
                 style={[
                   styles.segment,
                   styles.appearanceSegment,
-                  { borderColor: palette.border },
-                  settings.appearance === opt.id && [
-                    styles.segmentActive,
-                    { borderColor: palette.accent },
-                  ],
+                  segmentChromeStyle(palette, settings.appearance === opt.id),
                 ]}
                 onPress={() => updateSettings({ appearance: opt.id })}>
                 <Text
@@ -225,7 +228,7 @@ export function SettingsScreen() {
         <View
           style={[
             styles.card,
-            { backgroundColor: palette.card, borderColor: palette.border },
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <View style={styles.segmentRow}>
             {(
@@ -240,11 +243,7 @@ export function SettingsScreen() {
                 style={[
                   styles.segment,
                   styles.appearanceSegment,
-                  { borderColor: palette.border },
-                  settings.language === opt.id && [
-                    styles.segmentActive,
-                    { borderColor: palette.accent },
-                  ],
+                  segmentChromeStyle(palette, settings.language === opt.id),
                 ]}
                 onPress={() =>
                   updateSettings({ language: opt.id as AppLanguage })
@@ -272,7 +271,7 @@ export function SettingsScreen() {
             style={[
               styles.card,
               styles.switchRow,
-              { backgroundColor: palette.card, borderColor: palette.border },
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
             ]}>
             <View style={styles.switchCopy}>
               <Text style={[styles.valueText, { color: palette.text }]}>
@@ -296,7 +295,7 @@ export function SettingsScreen() {
           style={[
             styles.card,
             styles.rowPress,
-            { backgroundColor: palette.card, borderColor: palette.border },
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}
           onPress={() => setProviderModal(true)}>
           <View style={styles.providerCopy}>
@@ -327,17 +326,13 @@ export function SettingsScreen() {
         <View
           style={[
             styles.card,
-            { backgroundColor: palette.card, borderColor: palette.border },
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <View style={styles.segmentRow}>
             <Pressable
               style={[
                 styles.segment,
-                settings.locationMode === 'gps' && [
-                  styles.segmentActive,
-                  { borderColor: palette.accent },
-                ],
-                { borderColor: palette.border },
+                segmentChromeStyle(palette, settings.locationMode === 'gps'),
               ]}
               onPress={() => updateSettings({ locationMode: 'gps' })}>
               <Text
@@ -352,11 +347,10 @@ export function SettingsScreen() {
             <Pressable
               style={[
                 styles.segment,
-                settings.locationMode === 'manual' && [
-                  styles.segmentActive,
-                  { borderColor: palette.accent },
-                ],
-                { borderColor: palette.border },
+                segmentChromeStyle(
+                  palette,
+                  settings.locationMode === 'manual',
+                ),
               ]}
               onPress={() => updateSettings({ locationMode: 'manual' })}>
               <Text
@@ -391,9 +385,9 @@ export function SettingsScreen() {
                 placeholderTextColor={palette.muted}
                 style={[
                   styles.input,
+                  inputChromeStyle(palette),
                   {
                     color: palette.text,
-                    borderColor: palette.border,
                     backgroundColor: palette.bg,
                   },
                 ]}
@@ -406,9 +400,9 @@ export function SettingsScreen() {
                 placeholderTextColor={palette.muted}
                 style={[
                   styles.input,
+                  inputChromeStyle(palette),
                   {
                     color: palette.text,
-                    borderColor: palette.border,
                     backgroundColor: palette.bg,
                   },
                 ]}
@@ -434,7 +428,7 @@ export function SettingsScreen() {
           <View
             style={[
               styles.card,
-              { backgroundColor: palette.card, borderColor: palette.border },
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
             ]}>
             <Text style={[styles.help, { color: palette.muted }]}>
               {effectiveProvider === 'islamiska_forbundet'
@@ -447,7 +441,7 @@ export function SettingsScreen() {
             style={[
               styles.card,
               styles.rowPress,
-              { backgroundColor: palette.card, borderColor: palette.border },
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
             ]}
             onPress={() => setMethodModal(true)}>
             <View>
@@ -469,7 +463,7 @@ export function SettingsScreen() {
             style={[
               styles.card,
               styles.switchRow,
-              { backgroundColor: palette.card, borderColor: palette.border },
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
             ]}>
             <View style={styles.switchCopy}>
               <Text style={[styles.valueText, { color: palette.text }]}>
@@ -493,7 +487,7 @@ export function SettingsScreen() {
           style={[
             styles.card,
             styles.switchRow,
-            { backgroundColor: palette.card, borderColor: palette.border },
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <View style={styles.switchCopy}>
             <Text style={[styles.valueText, { color: palette.text }]}>
@@ -524,6 +518,9 @@ export function SettingsScreen() {
           border: palette.border,
           bg: palette.bg,
           overlay: palette.overlay,
+          flatChrome: palette.flatChrome,
+          accent: palette.accent,
+          accentBg: palette.accentBg,
         }}
       />
 
@@ -540,7 +537,7 @@ export function SettingsScreen() {
           <View
             style={[
               styles.modalSheet,
-              { backgroundColor: palette.card, borderColor: palette.border },
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
             ]}>
             <Text style={[styles.modalTitle, { color: palette.text }]}>
               {t('settings.methodModalTitle')}
@@ -552,7 +549,7 @@ export function SettingsScreen() {
                 <Pressable
                   style={[
                     styles.methodRow,
-                    { borderBottomColor: palette.border },
+                    rowDividerStyle(palette),
                     settings.calculationMethod === item.id && {
                       backgroundColor: palette.bg,
                     },
