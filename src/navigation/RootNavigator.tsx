@@ -15,7 +15,7 @@ function HomeHeaderRight({ tintColor }: { tintColor?: string }) {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
-  const color = tintColor ?? '#1e6bb8';
+  const color = tintColor ?? '#6BC98A';
   return (
     <HeaderToolbarIcons
       tintColor={color}

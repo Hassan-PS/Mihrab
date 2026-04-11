@@ -44,6 +44,13 @@ export function shouldUseDynamicSystemColors(
   return (appearance ?? 'system') === 'system' && !!useSystemDynamicTheme;
 }
 
+/**
+ * Brand accent when system dynamic colors are off (matches widget default + launcher green family).
+ */
+const BRAND_ACCENT = '#6BC98A';
+const BRAND_ACCENT_SURFACE_DARK = '#1a3328';
+const BRAND_ACCENT_SURFACE_LIGHT = '#dff3e6';
+
 /** Standard dark greys (current app look). */
 const DARK: AppPalette = {
   bg: '#0f1419',
@@ -51,8 +58,8 @@ const DARK: AppPalette = {
   text: '#e8ecf1',
   muted: '#8b95a5',
   border: '#2a3444',
-  accent: '#5b9fd4',
-  accentBg: '#1e3a52',
+  accent: BRAND_ACCENT,
+  accentBg: BRAND_ACCENT_SURFACE_DARK,
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.65)',
   flatChrome: false,
@@ -65,8 +72,8 @@ const DARK_PURE_BLACK: AppPalette = {
   text: '#e8ecf1',
   muted: '#8b95a5',
   border: '#262626',
-  accent: '#5b9fd4',
-  accentBg: '#142536',
+  accent: BRAND_ACCENT,
+  accentBg: '#143628',
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.75)',
   flatChrome: false,
@@ -78,8 +85,8 @@ const LIGHT: AppPalette = {
   text: '#1a1a1a',
   muted: '#5c6570',
   border: '#e2e5ea',
-  accent: '#1e6bb8',
-  accentBg: '#e8f1fb',
+  accent: BRAND_ACCENT,
+  accentBg: BRAND_ACCENT_SURFACE_LIGHT,
   danger: '#b91c1c',
   overlay: 'rgba(0,0,0,0.4)',
   flatChrome: false,
@@ -96,7 +103,7 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
     border: 'transparent',
     accent: PlatformColor('tintColor'),
     accentBg: oled
-      ? '#142536'
+      ? BRAND_ACCENT_SURFACE_DARK
       : PlatformColor('tertiarySystemGroupedBackground'),
     danger: PlatformColor('systemRed'),
     overlay: DynamicColorIOS({
@@ -123,7 +130,7 @@ function androidDynamicPalette(
     border: 'transparent',
     accent: PlatformColor('?attr/colorPrimary'),
     accentBg: oled
-      ? '#142536'
+      ? BRAND_ACCENT_SURFACE_DARK
       : PlatformColor('?attr/colorPrimaryContainer'),
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',

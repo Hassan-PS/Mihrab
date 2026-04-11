@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useMemo, useState } from 'react';
+import type { ColorValue } from 'react-native';
 import {
   FlatList,
   Modal,
@@ -66,13 +67,16 @@ function widgetHighlightLabelKey(id: AndroidWidgetHighlightId): string {
 function AndroidWidgetPreview({
   opacity,
   highlightId,
+  highlightColorOverride,
 }: {
   opacity: number;
   highlightId: AndroidWidgetHighlightId;
+  /** When system dynamic colors are on, matches widget highlight (primary). */
+  highlightColorOverride?: ColorValue;
 }) {
   const { r, g, b } = ANDROID_WIDGET_BASE_BG;
   const a = Math.min(1, Math.max(0, opacity / 100));
-  const hi = androidWidgetHighlightHex(highlightId);
+  const hi = highlightColorOverride ?? androidWidgetHighlightHex(highlightId);
   const cols = [
     { l: 'Fajr', t: '05:12', h: false },
     { l: 'Dhuhr', t: '12:10', h: true },
@@ -385,6 +389,12 @@ export function SettingsScreen() {
               <AndroidWidgetPreview
                 opacity={settings.androidWidgetBackgroundOpacity}
                 highlightId={settings.androidWidgetHighlight}
+                highlightColorOverride={
+                  settings.appearance === 'system' &&
+                  settings.useSystemDynamicTheme
+                    ? palette.accent
+                    : undefined
+                }
               />
               <Text
                 style={[

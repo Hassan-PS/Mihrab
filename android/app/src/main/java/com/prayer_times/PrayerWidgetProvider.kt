@@ -8,17 +8,27 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.os.Build
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import org.json.JSONObject
 
-private data class WidgetStyle(val bgOpacityPercent: Int, val highlightId: String) {
+private data class WidgetStyle(
+  val bgOpacityPercent: Int,
+  val highlightId: String,
+  val useDynamicHighlight: Boolean,
+) {
   fun backgroundArgb(): Int {
     val a = (bgOpacityPercent.coerceIn(0, 100) * 255 / 100f).toInt().coerceIn(0, 255)
     return Color.argb(a, BASE_BG_R, BASE_BG_G, BASE_BG_B)
   }
 
-  fun highlightColorInt(): Int {
+  fun highlightColorInt(context: Context): Int {
+    if (useDynamicHighlight) {
+      return resolveDynamicHighlightColor(context)
+    }
     val hex =
       when (highlightId.lowercase()) {
         "green" -> "#6BC98A"
@@ -35,12 +45,32 @@ private data class WidgetStyle(val bgOpacityPercent: Int, val highlightId: Strin
   }
 }
 
+private fun resolveDynamicHighlightColor(context: Context): Int {
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    try {
+      return ContextCompat.getColor(context, android.R.color.system_accent1_600)
+    } catch (_: Exception) {
+      /* fall through */
+    }
+  }
+  val wrapped = ContextThemeWrapper(context.applicationContext, R.style.AppTheme)
+  val fallback = Color.parseColor("#6BC98A")
+  val ta = wrapped.obtainStyledAttributes(intArrayOf(android.R.attr.colorPrimary))
+  try {
+    return ta.getColor(0, fallback)
+  } finally {
+    ta.recycle()
+  }
+}
+
 private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
   val opacity = prefs.getInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, 88)
   val hid =
     prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, "green")?.trim()
       ?: "green"
-  return WidgetStyle(opacity.coerceIn(0, 100), hid.ifEmpty { "green" })
+  val dynamic =
+    prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
+  return WidgetStyle(opacity.coerceIn(0, 100), hid.ifEmpty { "green" }, dynamic)
 }
 
 /** Neutral dark surface (#1C1C1E), opacity from settings. */
@@ -86,7 +116,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         )
       } else {
         try {
-          applyJson(views, json, style)
+          applyJson(views, json, style, context)
         } catch (_: Exception) {
           showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
         }
@@ -111,7 +141,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     )
   }
 
-  private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle) {
+  private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context) {
     val o = JSONObject(json)
     views.setViewVisibility(R.id.widget_placeholder, View.GONE)
     views.setViewVisibility(R.id.widget_content, View.VISIBLE)
@@ -129,7 +159,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       }
 
     val normalColor = Color.parseColor(NEUTRAL_TEXT)
-    val highlightColor = style.highlightColorInt()
+    val highlightColor = style.highlightColorInt(context)
 
     views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
@@ -163,6 +193,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_UI_OLED = "widget_oled"
     const val PREFS_WIDGET_BG_OPACITY = "widget_bg_opacity"
     const val PREFS_WIDGET_HIGHLIGHT_ID = "widget_highlight_id"
+    const val PREFS_WIDGET_HIGHLIGHT_DYNAMIC = "widget_highlight_dynamic"
 
     private const val NEUTRAL_TEXT = "#E8EAED"
     private const val NEUTRAL_MUTED = "#9AA0A6"
