@@ -18,6 +18,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { usePrayerDay } from '../hooks/usePrayerDay';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { syncPrayerWidget } from '../widget/syncPrayerWidget';
+import { cardEdgeStyle, rowDividerStyle } from '../theme/chrome';
 import { getMethodLabel } from '../settings/methods';
 import { providerHidesCalculationMethod } from '../settings/providerUi';
 import {
@@ -227,7 +228,10 @@ export function HomeScreen() {
         <View
           style={[
             styles.nextCard,
-            { backgroundColor: palette.accentBg, borderColor: palette.border },
+            {
+              backgroundColor: palette.accentBg,
+              ...cardEdgeStyle(palette),
+            },
           ]}>
           <Text style={[styles.nextLabel, { color: palette.muted }]}>
             {t('home.nextPrayer')}
@@ -258,7 +262,7 @@ export function HomeScreen() {
         onPress={() => navigation.navigate('MonthTimes')}
         style={({ pressed }) => [
           styles.monthShortcut,
-          { borderColor: palette.border, backgroundColor: palette.card },
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           pressed && { opacity: 0.85 },
         ]}>
         <CalendarIcon color={palette.accent} size={22} />
@@ -283,7 +287,7 @@ export function HomeScreen() {
       <View
         style={[
           styles.table,
-          { backgroundColor: palette.card, borderColor: palette.border },
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
         ]}>
         {DISPLAY_ORDER.map(key => {
           const raw = today[key];
@@ -300,7 +304,7 @@ export function HomeScreen() {
               key={key}
               style={[
                 styles.row,
-                { borderBottomColor: palette.border },
+                rowDividerStyle(palette),
                 isNext && { backgroundColor: palette.accentBg },
               ]}>
               <Text style={[styles.rowName, { color: palette.text }]}>

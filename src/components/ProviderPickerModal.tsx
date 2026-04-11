@@ -18,6 +18,7 @@ import type {
   PrayerAppSettings,
   PrayerDataProviderId,
 } from '../settings/types';
+import { cardEdgeStyle, rowDividerStyle } from '../theme/chrome';
 
 type Palette = {
   card: ColorValue;
@@ -26,6 +27,9 @@ type Palette = {
   border: ColorValue;
   bg: ColorValue;
   overlay: ColorValue;
+  flatChrome: boolean;
+  accent: ColorValue;
+  accentBg: ColorValue;
 };
 
 type Props = {
@@ -82,7 +86,7 @@ export function ProviderPickerModal({
         <View
           style={[
             styles.modalSheet,
-            { backgroundColor: palette.card, borderColor: palette.border },
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <Text style={[styles.modalTitle, { color: palette.text }]}>
             {t('provider.modalTitle')}
@@ -105,10 +109,7 @@ export function ProviderPickerModal({
               if (item.kind === 'section') {
                 return (
                   <View
-                    style={[
-                      styles.sectionHeader,
-                      { borderBottomColor: palette.border },
-                    ]}>
+                    style={[styles.sectionHeader, rowDividerStyle(palette)]}>
                     <Text
                       style={[styles.sectionTitle, { color: palette.muted }]}>
                       {item.title}
@@ -131,7 +132,7 @@ export function ProviderPickerModal({
                   <Pressable
                     style={[
                       styles.row,
-                      { borderBottomColor: palette.border },
+                      rowDividerStyle(palette),
                       selected && { backgroundColor: palette.bg },
                     ]}
                     onPress={() => {
@@ -157,7 +158,7 @@ export function ProviderPickerModal({
                 <Pressable
                   style={[
                     styles.row,
-                    { borderBottomColor: palette.border },
+                    rowDividerStyle(palette),
                     selected && { backgroundColor: palette.bg },
                   ]}
                   onPress={() => {

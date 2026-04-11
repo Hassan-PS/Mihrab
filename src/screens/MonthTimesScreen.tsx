@@ -19,6 +19,7 @@ import { providerHidesCalculationMethod } from '../settings/providerUi';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import { getProviderLabel } from '../settings/providersCatalog';
 import { DISPLAY_ORDER } from '../types/prayer';
+import { cardEdgeStyle } from '../theme/chrome';
 import { formatLocalDate } from '../utils/date';
 import { formatDisplayTime } from '../utils/prayerTimes';
 
@@ -170,14 +171,14 @@ export function MonthTimesScreen() {
         <View
           style={[
             styles.row,
-            { backgroundColor: palette.card, borderColor: palette.border },
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <Text style={[styles.rowDay, { color: palette.text }]}>{dayLine}</Text>
           <Text style={[styles.rowTimes, { color: palette.muted }]}>{line}</Text>
         </View>
       );
     },
-    [palette.border, palette.card, palette.muted, palette.text],
+    [palette.border, palette.card, palette.flatChrome, palette.muted, palette.text],
   );
 
   if (!hydrated) {
