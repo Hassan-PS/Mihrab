@@ -1,8 +1,10 @@
 import notifee, {
   AlarmType,
   AndroidImportance,
+  AndroidNotificationSetting,
   TriggerType,
 } from '@notifee/react-native';
+import { Platform } from 'react-native';
 import type { TimingsMap } from '../types/prayer';
 import { buildUpcomingSalahEvents } from '../utils/prayerTimes';
 
@@ -17,6 +19,14 @@ async function ensureChannel() {
   });
 }
 
+async function canUseExactAlarms(): Promise<boolean> {
+  if (Platform.OS !== 'android') {
+    return true;
+  }
+  const settings = await notifee.getNotificationSettings();
+  return settings.android.alarm === AndroidNotificationSetting.ENABLED;
+}
+
 export async function syncPrayerNotifications(params: {
   enabled: boolean;
   today: TimingsMap;
@@ -27,6 +37,7 @@ export async function syncPrayerNotifications(params: {
     return;
   }
   await ensureChannel();
+  const exactAlarms = await canUseExactAlarms();
   const now = new Date();
   const events = buildUpcomingSalahEvents(
     params.today,
@@ -35,6 +46,17 @@ export async function syncPrayerNotifications(params: {
   );
   for (const e of events) {
     const notificationId = `pt-${e.at.getTime()}-${e.name}`;
+    const trigger = {
+      type: TriggerType.TIMESTAMP as const,
+      timestamp: e.at.getTime(),
+    };
+    if (Platform.OS === 'android' && exactAlarms) {
+      Object.assign(trigger, {
+        alarmManager: {
+          type: AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE,
+        },
+      });
+    }
     await notifee.createTriggerNotification(
       {
         id: notificationId,
@@ -45,13 +67,7 @@ export async function syncPrayerNotifications(params: {
           pressAction: { id: 'default' },
         },
       },
-      {
-        type: TriggerType.TIMESTAMP,
-        timestamp: e.at.getTime(),
-        alarmManager: {
-          type: AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE,
-        },
-      },
+      trigger,
     );
   }
 }
