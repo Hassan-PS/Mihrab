@@ -55,7 +55,7 @@
     "themeSystem": "System",
     "themeLight": "Ljust",
     "themeDark": "Mörkt",
-    "themeHelp": "System följer enhetens ljust eller mörkt läge. Slå på Systemfärger för plattformspalett i appen (inkl. Material You på Android). Hemskärmswidgeten på Android har eget utseende under Inställningar.",
+    "themeHelp": "System följer enhetens ljust eller mörkt läge. Slå på Systemfärger för plattformspalett i appen (inkl. Material You på Android). Knappar och accenter följer enhetens primärfärg så appen matchar bakgrunden när dynamisk färg finns.",
     "systemDynamicColors": "Systemfärger",
     "systemDynamicColorsHelp": "Använder enhetens semantiska och dynamiska färger i appen när temat är System. Ren svart (OLED) mörkar fortfarande bakgrunder i mörkt läge.",
     "pureBlack": "Helt svart (OLED)",
@@ -87,17 +87,8 @@
     "langEn": "Engelska",
     "langSv": "Svenska",
     "langAr": "Arabiska",
-    "widgetAndroid": "Hemskärmswidget (Android)",
-    "widgetAndroidHelp": "Neutral bakgrund med en accentfärg för nästa bön. Widgetgalleriets förhandsvisning (Android 12+) visar exempeltider.",
-    "widgetBackgroundOpacity": "Bakgrundens styrka",
-    "widgetBackgroundOpacityHelp": "Högre värde ger mer täckande yta; lägre låter mer av bakgrundsbilden synas genom en mörk neutral ton.",
-    "widgetHighlight": "Accent för nästa bön",
-    "widgetHighlightHelp": "Endast denna färg används för den markerade bönen; övrig text förblir neutral. Med Systemfärger på använder widgeten systemets accent för den raden.",
-    "widgetHighlightGreen": "Grön",
-    "widgetHighlightTeal": "Turkos",
-    "widgetHighlightBlue": "Blå",
-    "widgetHighlightAmber": "Bärnsten",
-    "widgetPreviewLabel": "Förhandsvisning"
+    "homeScreenWidget": "Hemskärmswidget",
+    "widgetConfigureHint": "Tryck länge på bönetider-widgeten på hemskärmen och tryck sedan på inställningsikonen (kugghjul) för att ändra bakgrundens styrka, accentfärg och om accenten ska matcha telefonens färg."
   },
   "locationSetup": {
     "headline": "Ange din plats",
