@@ -14,7 +14,7 @@ export function AppNavigationRoot() {
   const { settings } = usePrayerSettings();
   const systemScheme = useColorScheme();
 
-  useSyncWidgetUiHints(systemScheme);
+  useSyncWidgetUiHints();
 
   const isDark = useMemo(
     () => resolveEffectiveDark(settings.appearance, systemScheme),

@@ -6,16 +6,15 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
-import androidx.appcompat.R as AppCompatR
-import androidx.core.graphics.ColorUtils
-import com.google.android.material.R as MR
-import com.google.android.material.color.MaterialColors
 import org.json.JSONObject
 
+/**
+ * Home screen widget uses a fixed dark green theme (aligned with launcher icon),
+ * not the in-app dynamic / Material palette.
+ */
 class PrayerWidgetProvider : AppWidgetProvider() {
 
   override fun onUpdate(
@@ -25,8 +24,6 @@ class PrayerWidgetProvider : AppWidgetProvider() {
   ) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val json = prefs.getString(PREFS_KEY, null)
-    val useDynamic = prefs.getString(PREFS_UI_STYLE_KEY, "fixed") == "dynamic"
-    val oled = prefs.getBoolean(PREFS_UI_OLED, false)
 
     for (id in appWidgetIds) {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget)
@@ -45,95 +42,38 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       if (json.isNullOrBlank()) {
         showMessageOnly(
           views,
-          context,
-          useDynamic,
-          oled,
           context.getString(R.string.widget_placeholder_day),
           isError = false,
         )
       } else {
         try {
-          applyJson(views, context, json, useDynamic, oled)
+          applyJson(views, json)
         } catch (_: Exception) {
-          showMessageOnly(
-            views,
-            context,
-            useDynamic,
-            oled,
-            context.getString(R.string.widget_error),
-            isError = true,
-          )
+          showMessageOnly(views, context.getString(R.string.widget_error), isError = true)
         }
       }
       appWidgetManager.updateAppWidget(id, views)
     }
   }
 
-  private fun isSystemDark(context: Context): Boolean {
-    val mask = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-    return mask == Configuration.UI_MODE_NIGHT_YES
-  }
-
-  private fun applyDynamicChrome(views: RemoteViews, context: Context, oled: Boolean) {
-    val dark = isSystemDark(context)
-    val base =
-      if (oled && dark) {
-        Color.BLACK
-      } else {
-        MaterialColors.getColor(context, MR.attr.colorSurface, Color.BLACK)
-      }
-    val alpha = (255 * 0.93f).toInt().coerceIn(0, 255)
-    val bg = ColorUtils.setAlphaComponent(base, alpha)
-    views.setInt(R.id.widget_root, "setBackgroundColor", bg)
-    val dayMuted = MaterialColors.getColor(context, MR.attr.colorOnSurfaceVariant, Color.GRAY)
-    views.setTextColor(R.id.widget_day, dayMuted)
-  }
-
-  private fun showMessageOnly(
-    views: RemoteViews,
-    context: Context,
-    useDynamic: Boolean,
-    oled: Boolean,
-    message: String,
-    isError: Boolean,
-  ) {
+  private fun showMessageOnly(views: RemoteViews, message: String, isError: Boolean) {
     views.setViewVisibility(R.id.widget_content, View.GONE)
     views.setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
     views.setTextViewText(R.id.widget_placeholder, message)
-    if (useDynamic && !isError) {
-      if (oled && isSystemDark(context)) {
-        views.setInt(R.id.widget_root, "setBackgroundColor", Color.BLACK)
-      } else {
-        applyDynamicChrome(views, context, oled)
-      }
-      val c = MaterialColors.getColor(context, MR.attr.colorOnSurfaceVariant, Color.GRAY)
-      views.setTextColor(R.id.widget_placeholder, c)
-    } else {
-      views.setInt(R.id.widget_root, "setBackgroundColor", Color.parseColor("#EE1A2230"))
-      views.setTextColor(
-        R.id.widget_placeholder,
-        Color.parseColor(if (isError) "#F87171" else "#8B95A5"),
-      )
-    }
+    views.setInt(R.id.widget_root, "setBackgroundColor", Color.parseColor(WIDGET_BG))
+    views.setTextColor(
+      R.id.widget_placeholder,
+      Color.parseColor(if (isError) "#F87171" else WIDGET_MUTED),
+    )
   }
 
-  private fun applyJson(
-    views: RemoteViews,
-    context: Context,
-    json: String,
-    useDynamic: Boolean,
-    oled: Boolean,
-  ) {
+  private fun applyJson(views: RemoteViews, json: String) {
     val o = JSONObject(json)
     views.setViewVisibility(R.id.widget_placeholder, View.GONE)
     views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
-    if (useDynamic) {
-      applyDynamicChrome(views, context, oled)
-    } else {
-      views.setInt(R.id.widget_root, "setBackgroundColor", Color.parseColor("#EE1A2230"))
-      views.setTextColor(R.id.widget_day, Color.parseColor("#8B95A5"))
-    }
+    views.setInt(R.id.widget_root, "setBackgroundColor", Color.parseColor(WIDGET_BG))
+    views.setTextColor(R.id.widget_day, Color.parseColor(WIDGET_MUTED))
 
     views.setTextViewText(R.id.widget_day, o.getString("dayLabel"))
     val rows = o.getJSONArray("rows")
@@ -144,18 +84,8 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         o.optString("nextKey", "").trim().takeIf { it.isNotEmpty() }
       }
 
-    val normalColor =
-      if (useDynamic) {
-        MaterialColors.getColor(context, MR.attr.colorOnSurface, Color.WHITE)
-      } else {
-        Color.parseColor("#E8ECF1")
-      }
-    val accentColor =
-      if (useDynamic) {
-        MaterialColors.getColor(context, AppCompatR.attr.colorPrimary, Color.BLUE)
-      } else {
-        Color.parseColor("#5B9FD4")
-      }
+    val normalColor = Color.parseColor(WIDGET_TEXT)
+    val highlightColor = Color.parseColor(WIDGET_HIGHLIGHT_GREEN)
 
     views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
@@ -176,7 +106,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(COL_WRAPPERS[i], View.VISIBLE)
       views.setTextViewText(COL_LABELS[i], label)
       views.setTextViewText(COL_TIMES[i], time)
-      val col = if (highlight) accentColor else normalColor
+      val col = if (highlight) highlightColor else normalColor
       views.setTextColor(COL_LABELS[i], col)
       views.setTextColor(COL_TIMES[i], col)
     }
@@ -187,6 +117,14 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_KEY = "payload_v1"
     const val PREFS_UI_STYLE_KEY = "widget_ui_style"
     const val PREFS_UI_OLED = "widget_oled"
+
+    /** @color/ic_launcher_background #143628 with ~93% opacity (ARGB). */
+    private const val WIDGET_BG = "#EE143628"
+
+    private const val WIDGET_TEXT = "#E8ECF1"
+    private const val WIDGET_MUTED = "#8B95A5"
+    /** Softer green on dark, in the same family as the launcher icon. */
+    private const val WIDGET_HIGHLIGHT_GREEN = "#6BC98A"
 
     private val COL_WRAPPERS =
       intArrayOf(
