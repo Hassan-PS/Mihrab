@@ -52,6 +52,8 @@ react {
 
     /* Autolinking */
     autolinkLibrariesWithApp()
+    /* Match native-stack + F-Droid debug variant names */
+    debuggableVariants = ["playDebug", "fdroidDebug"]
 }
 
 /**
@@ -89,10 +91,21 @@ android {
         applicationId "com.prayer_times"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "1.3.6"
-        // react-native-iap publishes `play` and `amazon` flavors; pick Play for Google Play builds.
-        missingDimensionStrategy "store", "play"
+        versionCode 11
+        versionName "1.3.7"
+    }
+    flavorDimensions += "distribution"
+    productFlavors {
+        play {
+            dimension "distribution"
+            buildConfigField "boolean", "IAP_ENABLED", "true"
+            // react-native-iap publishes `play` and `amazon` flavors; pick Play for store builds.
+            missingDimensionStrategy "store", "play"
+        }
+        fdroid {
+            dimension "distribution"
+            buildConfigField "boolean", "IAP_ENABLED", "false"
+        }
     }
     signingConfigs {
         debug {
@@ -128,6 +141,8 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation("com.google.android.material:material:1.12.0")
+    // Linked manually (see react-native.config.js); omitted on `fdroid` for F-Droid.
+    playImplementation project(path: ":react-native-iap")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

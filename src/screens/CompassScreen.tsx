@@ -14,6 +14,7 @@ import {
 } from 'react-native-sensors';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
   normalizeHeadingDeg,
   qiblaBearingFrom,
@@ -87,6 +88,8 @@ export function CompassScreen() {
   const smoothedRef = useRef(0);
   const headingHistoryRef = useRef<number[]>([]);
   const gotSampleRef = useRef(false);
+
+  useAndroidSubScreenBack();
 
   const needsGpsPrime =
     settings.locationMode === 'gps' &&

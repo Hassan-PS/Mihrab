@@ -72,12 +72,15 @@ function main() {
   }
 
   const passthrough = process.argv.slice(2);
+  const hasMode = passthrough.some(
+    a => a === '--mode' || a.startsWith('--mode='),
+  );
   const args = [
     'react-native',
     'run-android',
     '--device',
     serial,
-    ...passthrough,
+    ...(hasMode ? passthrough : ['--mode', 'playDebug', ...passthrough]),
   ];
 
   console.log(`Using physical Android device: ${serial}\n`);

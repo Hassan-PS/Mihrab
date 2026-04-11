@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Modal,
@@ -18,6 +18,7 @@ import { PlaceSearchSection } from '../components/PlaceSearchSection';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
+import type { AppPalette } from '../theme/appPalette';
 import type { GeocodedPlace } from '../geocoding/nominatim';
 import { CALCULATION_METHODS, getMethodLabel } from '../settings/methods';
 import {
@@ -32,14 +33,23 @@ import {
   getProviderLabel,
   PRAYER_DATA_PROVIDERS,
 } from '../settings/providersCatalog';
-import { SupportDeveloperSection } from '../donations/SupportDeveloperSection';
 import type { AppLanguage, WidgetHighlightId } from '../settings/types';
+import { showDonationsUi } from '../distribution';
+import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
   cardEdgeStyle,
   inputChromeStyle,
   rowDividerStyle,
   segmentChromeStyle,
 } from '../theme/chrome';
+
+function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
+  if (!showDonationsUi()) {
+    return null;
+  }
+  const { SupportDeveloperSection } = require('../donations/SupportDeveloperSection');
+  return <SupportDeveloperSection palette={palette} />;
+}
 
 const WIDGET_HIGHLIGHT_SWATCHES: { id: Exclude<WidgetHighlightId, 'custom'>; hex: string }[] =
   [
@@ -61,6 +71,10 @@ export function SettingsScreen() {
   const [widgetHexDraft, setWidgetHexDraft] = useState(
     settings.widgetHighlightCustomHex,
   );
+
+  const deferHardwareBackRef = useRef(false);
+  deferHardwareBackRef.current = methodModal || providerModal;
+  useAndroidSubScreenBack(deferHardwareBackRef);
 
   useEffect(() => {
     setWidgetHexDraft(settings.widgetHighlightCustomHex);
@@ -670,7 +684,7 @@ export function SettingsScreen() {
           />
         </View>
 
-        <SupportDeveloperSection palette={palette} />
+        <MaybeSupportDeveloperSection palette={palette} />
       </ScrollView>
 
       <ProviderPickerModal
