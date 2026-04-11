@@ -27,6 +27,40 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setAndroidWidgetAppearance(
+    opacity: Int,
+    highlightId: String,
+    highlightHex: String?,
+    highlightDynamic: Boolean,
+    promise: Promise,
+  ) {
+    try {
+      val o = opacity.coerceIn(20, 100)
+      val hid = highlightId.trim().ifEmpty { "green" }
+      val hex =
+        highlightHex
+          ?.trim()
+          ?.takeIf { it.isNotEmpty() }
+          ?: ""
+      reactContext
+        .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+        .edit()
+        .putInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, o)
+        .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, hid)
+        .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, hex)
+        .putBoolean(
+          PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC,
+          highlightDynamic,
+        )
+        .apply()
+      PrayerWidgetProvider.requestUpdate(reactContext)
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject("E_WIDGET_APPEARANCE", e.message, e)
+    }
+  }
+
+  @ReactMethod
   fun setUiHints(style: String, oledBackground: Boolean, promise: Promise) {
     try {
       reactContext

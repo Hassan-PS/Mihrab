@@ -88,7 +88,17 @@
     "langSv": "Swedish",
     "langAr": "Arabic",
     "homeScreenWidget": "Home screen widget",
-    "widgetConfigureHint": "Touch and hold the prayer times widget on your home screen, then tap the settings (gear) icon to change background strength, highlight color, and whether the highlight matches your phone accent."
+    "widgetBackgroundOpacity": "Widget background strength (Android)",
+    "widgetHighlight": "Next prayer highlight color",
+    "widgetHighlight_green": "Green",
+    "widgetHighlight_teal": "Teal",
+    "widgetHighlight_blue": "Blue",
+    "widgetHighlight_amber": "Amber",
+    "widgetHighlight_custom": "Custom color",
+    "widgetHighlight_customAbbr": "…",
+    "widgetHighlightHexPlaceholder": "#6BC98A",
+    "widgetHighlightDynamicHelp": "When Theme is System and System colors is on, the widget uses your phone accent for the next prayer. Otherwise it uses the color you pick above.",
+    "widgetConfigureHint": "You can also touch and hold the widget → settings (gear) to adjust the same options on Android."
   },
   "locationSetup": {
     "headline": "Set your location",

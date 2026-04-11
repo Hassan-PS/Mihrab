@@ -88,7 +88,17 @@
     "langSv": "السويدية",
     "langAr": "العربية",
     "homeScreenWidget": "ودجة الشاشة الرئيسية",
-    "widgetConfigureHint": "المس مع الاستمرار ودجة أوقات الصلاة على الشاشة الرئيسية، ثم اضغط أيقونة الإعدادات (ترس) لتغيير قوة الخلفية ولون التمييز وما إذا كان التمييز يطابق لون هاتفك."
+    "widgetBackgroundOpacity": "قوة خلفية الودجة (أندرويد)",
+    "widgetHighlight": "لون تمييز الصلاة التالية",
+    "widgetHighlight_green": "أخضر",
+    "widgetHighlight_teal": "تركواز",
+    "widgetHighlight_blue": "أزرق",
+    "widgetHighlight_amber": "كهرماني",
+    "widgetHighlight_custom": "لون مخصص",
+    "widgetHighlight_customAbbr": "…",
+    "widgetHighlightHexPlaceholder": "#6BC98A",
+    "widgetHighlightDynamicHelp": "عندما يكون المظهر «النظام» وتكون «ألوان النظام» مفعّلة، تستخدم الودجة لون تمييز الهاتف للصلاة التالية. وإلا يُستخدم اللون الذي تختاره أعلاه.",
+    "widgetConfigureHint": "يمكنك أيضًا على أندرويد المس مع الاستمرار على الودجة ← الإعدادات (ترس) لنفس الخيارات."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",

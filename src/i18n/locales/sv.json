@@ -88,7 +88,17 @@
     "langSv": "Svenska",
     "langAr": "Arabiska",
     "homeScreenWidget": "Hemskärmswidget",
-    "widgetConfigureHint": "Tryck länge på bönetider-widgeten på hemskärmen och tryck sedan på inställningsikonen (kugghjul) för att ändra bakgrundens styrka, accentfärg och om accenten ska matcha telefonens färg."
+    "widgetBackgroundOpacity": "Widgetbakgrund (Android)",
+    "widgetHighlight": "Färg för nästa bön",
+    "widgetHighlight_green": "Grön",
+    "widgetHighlight_teal": "Turkos",
+    "widgetHighlight_blue": "Blå",
+    "widgetHighlight_amber": "Bärnsten",
+    "widgetHighlight_custom": "Egen färg",
+    "widgetHighlight_customAbbr": "…",
+    "widgetHighlightHexPlaceholder": "#6BC98A",
+    "widgetHighlightDynamicHelp": "När temat är System och Systemfärger är på använder widgeten telefonens accent för nästa bön. Annars används färgen du väljer ovan.",
+    "widgetConfigureHint": "På Android kan du också trycka länge på widgeten → inställningar (kugghjul) för samma val."
   },
   "locationSetup": {
     "headline": "Ange din plats",
