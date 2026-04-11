@@ -81,6 +81,9 @@ MaintainerNotes: |
   Listing text is also in upstream Fastlane: fastlane/metadata/android/en-US/
   Reproducible builds: not requested for this app yet (RN/Hermes); APK F-Droid-signed.
   Single universal fdroidRelease APK (no ABI splits in this recipe).
+  Location: `patch-package` strips `play-services-location` from
+  `@react-native-community/geolocation` and uses AOSP `LocationManager` only so
+  the scanner does not flag proprietary `com.google.android.gms` classes.
 
 ArchivePolicy: 6
 AutoUpdateMode: Version
