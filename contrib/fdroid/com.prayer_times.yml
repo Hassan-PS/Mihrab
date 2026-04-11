@@ -1,5 +1,5 @@
-# Copy to fdroiddata: metadata/com.prayer_times.yml and
-# metadata/com.prayer_times/en-US/summary.txt (then delete these comment lines).
+# Copy to fdroiddata: metadata/com.prayer_times.yml, metadata/com.prayer_times/*.patch,
+# and metadata/com.prayer_times/en-US/summary.txt (then delete these comment lines).
 
 Categories:
   - Time
@@ -47,6 +47,8 @@ Builds:
     init:
       - cd ..
       - npm ci --no-audit
+    patch:
+      - fdroid-release-signing-ifelse.patch
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
     gradle:
