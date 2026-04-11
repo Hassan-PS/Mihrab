@@ -38,6 +38,9 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     if (!('pureBlackDark' in parsed)) {
       merged.pureBlackDark = false;
     }
+    if (!('useSystemDynamicTheme' in parsed)) {
+      merged.useSystemDynamicTheme = false;
+    }
     return merged;
   } catch {
     return DEFAULT_SETTINGS;
