@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useTheme } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -11,14 +11,14 @@ import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function HomeHeaderRight({ tintColor }: { tintColor?: string }) {
+function HomeHeaderRight() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
-  const color = tintColor ?? '#6BC98A';
+  const theme = useTheme();
   return (
     <HeaderToolbarIcons
-      tintColor={color}
+      tintColor={theme.colors.primary}
       onMonth={() => navigation.navigate('MonthTimes')}
       onCompass={() => navigation.navigate('Compass')}
       onSettings={() => navigation.navigate('Settings')}
@@ -38,7 +38,7 @@ export function RootNavigator() {
         component={HomeScreen}
         options={{
           title: t('nav.home'),
-          headerRight: props => <HomeHeaderRight tintColor={props.tintColor} />,
+          headerRight: () => <HomeHeaderRight />,
         }}
       />
       <Stack.Screen

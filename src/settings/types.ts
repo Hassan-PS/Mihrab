@@ -10,8 +10,6 @@ export type AppearancePreference = 'system' | 'light' | 'dark';
 
 export type AppLanguage = 'en' | 'sv' | 'ar';
 
-export type AndroidWidgetHighlightId = 'green' | 'teal' | 'blue' | 'amber';
-
 export type PrayerAppSettings = {
   /** Follow OS light/dark, or force one mode. */
   appearance: AppearancePreference;
@@ -43,12 +41,6 @@ export type PrayerAppSettings = {
   lastFetchedLatitude?: number;
   lastFetchedLongitude?: number;
   notificationsEnabled: boolean;
-  /**
-   * Android home widget: background opacity 0–100 over a neutral dark base (#1C1C1E).
-   */
-  androidWidgetBackgroundOpacity: number;
-  /** Android home widget: accent for the next prayer column only. */
-  androidWidgetHighlight: AndroidWidgetHighlightId;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -65,6 +57,4 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   locationOnboardingComplete: false,
   language: 'en',
   notificationsEnabled: false,
-  androidWidgetBackgroundOpacity: 88,
-  androidWidgetHighlight: 'green',
 };

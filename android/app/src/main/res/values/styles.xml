@@ -5,4 +5,8 @@
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>
 
+    <style name="WidgetConfigureTheme" parent="Theme.Material3.DynamicColors.DayNight">
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+    </style>
+
 </resources>

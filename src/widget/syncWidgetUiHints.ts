@@ -4,11 +4,6 @@ import { usePrayerSettings } from '../context/PrayerSettingsContext';
 
 type PrayerWidgetNative = {
   setUiHints?: (style: string, oledBackground: boolean) => Promise<void>;
-  setAndroidWidgetAppearance?: (
-    backgroundOpacityPercent: number,
-    highlightId: string,
-    useDynamicHighlight: boolean,
-  ) => Promise<void>;
   setWidgetHighlightDynamic?: (enabled: boolean) => Promise<void>;
 };
 
@@ -21,33 +16,10 @@ function useDynamicHighlightForWidget(settings: {
   );
 }
 
-/**
- * Pushes widget appearance to native: Android uses configurable neutral shell +
- * highlight (system accent for highlight only when dynamic theme is on).
- */
+/** iOS: sync whether the widget uses system accent for the highlighted row. Android widget is configured from the widget’s own settings UI. */
 export function useSyncWidgetUiHints(): void {
   const { hydrated, settings } = usePrayerSettings();
   const dynamicHl = useDynamicHighlightForWidget(settings);
-
-  useEffect(() => {
-    if (!hydrated || Platform.OS !== 'android') {
-      return;
-    }
-    const mod = NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
-    if (!mod?.setAndroidWidgetAppearance) {
-      return;
-    }
-    void mod.setAndroidWidgetAppearance(
-      settings.androidWidgetBackgroundOpacity,
-      settings.androidWidgetHighlight,
-      dynamicHl,
-    );
-  }, [
-    hydrated,
-    dynamicHl,
-    settings.androidWidgetBackgroundOpacity,
-    settings.androidWidgetHighlight,
-  ]);
 
   useEffect(() => {
     if (!hydrated || Platform.OS !== 'ios') {

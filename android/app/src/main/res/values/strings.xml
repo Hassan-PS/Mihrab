@@ -3,4 +3,15 @@
     <string name="widget_description">Today\'s times in one row, next prayer highlighted</string>
     <string name="widget_placeholder_day">Open Prayer Times to load times</string>
     <string name="widget_error">Could not load widget data</string>
+    <string name="widget_configure_title">Prayer widget</string>
+    <string name="widget_configure_background">Background strength</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">Next prayer highlight</string>
+    <string name="widget_configure_highlight_green">Green</string>
+    <string name="widget_configure_highlight_teal">Teal</string>
+    <string name="widget_configure_highlight_blue">Blue</string>
+    <string name="widget_configure_highlight_amber">Amber</string>
+    <string name="widget_configure_system_accent">Match phone accent</string>
+    <string name="widget_configure_system_accent_help">When on, the highlighted prayer uses your wallpaper / Material You accent. When off, the color you pick above is used.</string>
+    <string name="widget_configure_save">Save</string>
 </resources>
