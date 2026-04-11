@@ -1,7 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -60,6 +60,19 @@ export function HomeScreen() {
       tomorrow: state.tomorrow,
     }).catch(() => {});
   }, [hydrated, settings.notificationsEnabled, state]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!hydrated || state.phase !== 'ready') {
+        return;
+      }
+      syncPrayerNotifications({
+        enabled: settings.notificationsEnabled,
+        today: state.today,
+        tomorrow: state.tomorrow,
+      }).catch(() => {});
+    }, [hydrated, settings.notificationsEnabled, state]),
+  );
 
   useEffect(() => {
     if (!hydrated || state.phase !== 'ready') {

@@ -14,6 +14,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import notifee, { AndroidNotificationSetting } from '@notifee/react-native';
 import { PlaceSearchSection } from '../components/PlaceSearchSection';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -148,8 +149,11 @@ export function SettingsScreen() {
   };
 
   const onNotificationsToggle = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ notificationsEnabled: false });
+      return;
+    }
     if (
-      value &&
       Platform.OS === 'android' &&
       typeof Platform.Version === 'number' &&
       Platform.Version >= 33
@@ -161,7 +165,17 @@ export function SettingsScreen() {
         return;
       }
     }
-    updateSettings({ notificationsEnabled: value });
+    if (
+      Platform.OS === 'android' &&
+      typeof Platform.Version === 'number' &&
+      Platform.Version >= 31
+    ) {
+      const nSettings = await notifee.getNotificationSettings();
+      if (nSettings.android.alarm === AndroidNotificationSetting.DISABLED) {
+        await notifee.openAlarmPermissionSettings();
+      }
+    }
+    updateSettings({ notificationsEnabled: true });
   };
 
   const lockedProviderDesc = useMemo(() => {
