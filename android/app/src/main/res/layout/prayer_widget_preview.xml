@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Static preview for the widget picker (API 31+). Next prayer column uses accent only. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E01C1C1E"
@@ -9,31 +9,19 @@
     android:paddingTop="12dp"
     android:paddingBottom="6dp">
 
-    <TextView
-        android:id="@+id/widget_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:textColor="#9AA0A6"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
     <LinearLayout
-        android:id="@+id/widget_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="top|start"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/widget_day"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:includeFontPadding="false"
-            android:paddingTop="0dp"
             android:paddingBottom="4dp"
+            android:text="Wed, Apr 9"
             android:textColor="#9AA0A6"
             android:textSize="8sp"
             android:textStyle="bold"
@@ -41,7 +29,6 @@
             android:ellipsize="end" />
 
         <LinearLayout
-            android:id="@+id/widget_times_row"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -49,7 +36,6 @@
             android:orientation="horizontal">
 
             <LinearLayout
-                android:id="@+id/widget_col_0"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -58,29 +44,28 @@
                 android:paddingHorizontal="2dp">
 
                 <TextView
-                    android:id="@+id/widget_col_0_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
+                    android:text="Fajr"
                     android:textColor="#E8EAED"
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/widget_col_0_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:includeFontPadding="false"
                     android:paddingTop="2dp"
+                    android:text="05:12"
                     android:textColor="#E8EAED"
                     android:textSize="22sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/widget_col_1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -89,29 +74,58 @@
                 android:paddingHorizontal="2dp">
 
                 <TextView
-                    android:id="@+id/widget_col_1_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
-                    android:textColor="#E8EAED"
+                    android:text="Dhuhr"
+                    android:textColor="#6BC98A"
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/widget_col_1_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:includeFontPadding="false"
                     android:paddingTop="2dp"
+                    android:text="12:10"
+                    android:textColor="#6BC98A"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="Asr"
+                    android:textColor="#E8EAED"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:paddingTop="2dp"
+                    android:text="15:20"
                     android:textColor="#E8EAED"
                     android:textSize="22sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/widget_col_2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -120,29 +134,28 @@
                 android:paddingHorizontal="2dp">
 
                 <TextView
-                    android:id="@+id/widget_col_2_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
+                    android:text="Magh"
                     android:textColor="#E8EAED"
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/widget_col_2_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:includeFontPadding="false"
                     android:paddingTop="2dp"
+                    android:text="18:05"
                     android:textColor="#E8EAED"
                     android:textSize="22sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/widget_col_3"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -151,53 +164,22 @@
                 android:paddingHorizontal="2dp">
 
                 <TextView
-                    android:id="@+id/widget_col_3_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
+                    android:text="Isha"
                     android:textColor="#E8EAED"
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/widget_col_3_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:includeFontPadding="false"
                     android:paddingTop="2dp"
-                    android:textColor="#E8EAED"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/widget_col_4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:paddingHorizontal="2dp">
-
-                <TextView
-                    android:id="@+id/widget_col_4_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:textColor="#E8EAED"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/widget_col_4_time"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:includeFontPadding="false"
-                    android:paddingTop="2dp"
+                    android:text="19:30"
                     android:textColor="#E8EAED"
                     android:textSize="22sp"
                     android:textStyle="bold" />

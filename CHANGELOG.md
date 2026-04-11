@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.3] — 2026-04-11
+
+### Changed
+- **Android home screen widget**: neutral dark background (not green-tinted); **only the next prayer** uses an accent color. **Settings** (Android): background strength (opacity) and next-prayer accent (green / teal / blue / amber), with an in-app preview.
+- **Widget picker** (Android 12+): `previewLayout` shows sample prayer times in the widget gallery.
+- **iOS widget**: same neutral shell with accent on the next prayer only (no extra settings yet).
+- App **theme** copy updated so system/dynamic colors are described for the **app**; Android widget styling is separate.
+- HTTP `User-Agent` prefix **PrayerTimes/1.3.3**.
+
+### Release builds
+- Android `versionName` **1.3.3**, `versionCode` **7** — **AAB** for Google Play, **APK** for GitHub Releases.
+
+[1.3.3]: https://github.com/Hassan-PS/PrayerApp/compare/v1.3.2...v1.3.3
+
 ## [1.3.2] — 2026-04-11
 
 ### Changed

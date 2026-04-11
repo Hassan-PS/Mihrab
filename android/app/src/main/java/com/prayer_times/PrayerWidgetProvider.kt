@@ -6,14 +6,51 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONObject
 
+private data class WidgetStyle(val bgOpacityPercent: Int, val highlightId: String) {
+  fun backgroundArgb(): Int {
+    val a = (bgOpacityPercent.coerceIn(0, 100) * 255 / 100f).toInt().coerceIn(0, 255)
+    return Color.argb(a, BASE_BG_R, BASE_BG_G, BASE_BG_B)
+  }
+
+  fun highlightColorInt(): Int {
+    val hex =
+      when (highlightId.lowercase()) {
+        "green" -> "#6BC98A"
+        "teal" -> "#4EC9B0"
+        "blue" -> "#6BA3F5"
+        "amber" -> "#E5C07B"
+        else -> "#6BC98A"
+      }
+    return try {
+      Color.parseColor(hex)
+    } catch (_: Exception) {
+      Color.parseColor("#6BC98A")
+    }
+  }
+}
+
+private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
+  val opacity = prefs.getInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, 88)
+  val hid =
+    prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, "green")?.trim()
+      ?: "green"
+  return WidgetStyle(opacity.coerceIn(0, 100), hid.ifEmpty { "green" })
+}
+
+/** Neutral dark surface (#1C1C1E), opacity from settings. */
+private const val BASE_BG_R = 28
+private const val BASE_BG_G = 28
+private const val BASE_BG_B = 30
+
 /**
- * Home screen widget uses a fixed dark green theme (aligned with launcher icon),
- * not the in-app dynamic / Material palette.
+ * Neutral dark widget: only the next prayer row uses an accent color.
+ * Background opacity and accent are configurable from app settings (Android).
  */
 class PrayerWidgetProvider : AppWidgetProvider() {
 
@@ -24,6 +61,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
   ) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val json = prefs.getString(PREFS_KEY, null)
+    val style = readWidgetStyle(prefs)
 
     for (id in appWidgetIds) {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget)
@@ -44,36 +82,42 @@ class PrayerWidgetProvider : AppWidgetProvider() {
           views,
           context.getString(R.string.widget_placeholder_day),
           isError = false,
+          style,
         )
       } else {
         try {
-          applyJson(views, json)
+          applyJson(views, json, style)
         } catch (_: Exception) {
-          showMessageOnly(views, context.getString(R.string.widget_error), isError = true)
+          showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
         }
       }
       appWidgetManager.updateAppWidget(id, views)
     }
   }
 
-  private fun showMessageOnly(views: RemoteViews, message: String, isError: Boolean) {
+  private fun showMessageOnly(
+    views: RemoteViews,
+    message: String,
+    isError: Boolean,
+    style: WidgetStyle,
+  ) {
     views.setViewVisibility(R.id.widget_content, View.GONE)
     views.setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
     views.setTextViewText(R.id.widget_placeholder, message)
-    views.setInt(R.id.widget_root, "setBackgroundColor", Color.parseColor(WIDGET_BG))
+    views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
     views.setTextColor(
       R.id.widget_placeholder,
-      Color.parseColor(if (isError) "#F87171" else WIDGET_MUTED),
+      Color.parseColor(if (isError) "#F87171" else NEUTRAL_MUTED),
     )
   }
 
-  private fun applyJson(views: RemoteViews, json: String) {
+  private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle) {
     val o = JSONObject(json)
     views.setViewVisibility(R.id.widget_placeholder, View.GONE)
     views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
-    views.setInt(R.id.widget_root, "setBackgroundColor", Color.parseColor(WIDGET_BG))
-    views.setTextColor(R.id.widget_day, Color.parseColor(WIDGET_MUTED))
+    views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
+    views.setTextColor(R.id.widget_day, Color.parseColor(NEUTRAL_MUTED))
 
     views.setTextViewText(R.id.widget_day, o.getString("dayLabel"))
     val rows = o.getJSONArray("rows")
@@ -84,8 +128,8 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         o.optString("nextKey", "").trim().takeIf { it.isNotEmpty() }
       }
 
-    val normalColor = Color.parseColor(WIDGET_TEXT)
-    val highlightColor = Color.parseColor(WIDGET_HIGHLIGHT_GREEN)
+    val normalColor = Color.parseColor(NEUTRAL_TEXT)
+    val highlightColor = style.highlightColorInt()
 
     views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
@@ -117,14 +161,11 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_KEY = "payload_v1"
     const val PREFS_UI_STYLE_KEY = "widget_ui_style"
     const val PREFS_UI_OLED = "widget_oled"
+    const val PREFS_WIDGET_BG_OPACITY = "widget_bg_opacity"
+    const val PREFS_WIDGET_HIGHLIGHT_ID = "widget_highlight_id"
 
-    /** @color/ic_launcher_background #143628 with ~93% opacity (ARGB). */
-    private const val WIDGET_BG = "#EE143628"
-
-    private const val WIDGET_TEXT = "#E8ECF1"
-    private const val WIDGET_MUTED = "#8B95A5"
-    /** Softer green on dark, in the same family as the launcher icon. */
-    private const val WIDGET_HIGHLIGHT_GREEN = "#6BC98A"
+    private const val NEUTRAL_TEXT = "#E8EAED"
+    private const val NEUTRAL_MUTED = "#9AA0A6"
 
     private val COL_WRAPPERS =
       intArrayOf(

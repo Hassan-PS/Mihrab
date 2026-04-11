@@ -33,13 +33,87 @@ import {
   PRAYER_DATA_PROVIDERS,
 } from '../settings/providersCatalog';
 import { SupportDeveloperSection } from '../donations/SupportDeveloperSection';
-import type { AppLanguage } from '../settings/types';
+import type { AndroidWidgetHighlightId, AppLanguage } from '../settings/types';
+import {
+  ANDROID_WIDGET_BASE_BG,
+  ANDROID_WIDGET_HIGHLIGHT_OPTIONS,
+  androidWidgetHighlightHex,
+} from '../widget/androidWidgetStyle';
 import {
   cardEdgeStyle,
   inputChromeStyle,
   rowDividerStyle,
   segmentChromeStyle,
 } from '../theme/chrome';
+
+const WIDGET_OPACITY_PRESETS = [45, 60, 75, 88, 100] as const;
+
+function widgetHighlightLabelKey(id: AndroidWidgetHighlightId): string {
+  switch (id) {
+    case 'green':
+      return 'settings.widgetHighlightGreen';
+    case 'teal':
+      return 'settings.widgetHighlightTeal';
+    case 'blue':
+      return 'settings.widgetHighlightBlue';
+    case 'amber':
+      return 'settings.widgetHighlightAmber';
+    default:
+      return 'settings.widgetHighlightGreen';
+  }
+}
+
+function AndroidWidgetPreview({
+  opacity,
+  highlightId,
+}: {
+  opacity: number;
+  highlightId: AndroidWidgetHighlightId;
+}) {
+  const { r, g, b } = ANDROID_WIDGET_BASE_BG;
+  const a = Math.min(1, Math.max(0, opacity / 100));
+  const hi = androidWidgetHighlightHex(highlightId);
+  const cols = [
+    { l: 'Fajr', t: '05:12', h: false },
+    { l: 'Dhuhr', t: '12:10', h: true },
+    { l: 'Asr', t: '15:20', h: false },
+    { l: 'Magh', t: '18:05', h: false },
+    { l: 'Isha', t: '19:30', h: false },
+  ] as const;
+  return (
+    <View style={styles.widgetPreviewOuter}>
+      <View
+        style={[
+          styles.widgetPreviewInner,
+          { backgroundColor: `rgba(${r},${g},${b},${a})` },
+        ]}>
+        <Text style={styles.widgetPreviewDay}>Wed, Apr 9</Text>
+        <View style={styles.widgetPreviewRow}>
+          {cols.map(c => (
+            <View key={c.l} style={styles.widgetPreviewCol}>
+              <Text
+                style={[
+                  styles.widgetPreviewLabelSmall,
+                  { color: c.h ? hi : '#E8EAED' },
+                ]}
+                numberOfLines={1}>
+                {c.l}
+              </Text>
+              <Text
+                style={[
+                  styles.widgetPreviewTime,
+                  { color: c.h ? hi : '#E8EAED' },
+                ]}
+                numberOfLines={1}>
+                {c.t}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -286,6 +360,109 @@ export function SettingsScreen() {
               onValueChange={v => updateSettings({ pureBlackDark: v })}
             />
           </View>
+        ) : null}
+
+        {Platform.OS === 'android' ? (
+          <>
+            <Text style={[styles.sectionTitle, { color: palette.muted }]}>
+              {t('settings.widgetAndroid')}
+            </Text>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+              ]}>
+              <Text style={[styles.help, { color: palette.muted }]}>
+                {t('settings.widgetAndroidHelp')}
+              </Text>
+              <Text
+                style={[
+                  styles.label,
+                  { color: palette.muted, marginTop: 14 },
+                ]}>
+                {t('settings.widgetPreviewLabel')}
+              </Text>
+              <AndroidWidgetPreview
+                opacity={settings.androidWidgetBackgroundOpacity}
+                highlightId={settings.androidWidgetHighlight}
+              />
+              <Text
+                style={[
+                  styles.label,
+                  { color: palette.muted, marginTop: 14 },
+                ]}>
+                {t('settings.widgetBackgroundOpacity')}
+              </Text>
+              <View style={styles.widgetOpacityRow}>
+                {WIDGET_OPACITY_PRESETS.map(pct => (
+                  <Pressable
+                    key={pct}
+                    style={[
+                      styles.widgetOpacityChip,
+                      segmentChromeStyle(
+                        palette,
+                        settings.androidWidgetBackgroundOpacity === pct,
+                      ),
+                    ]}
+                    onPress={() =>
+                      updateSettings({ androidWidgetBackgroundOpacity: pct })
+                    }>
+                    <Text
+                      style={[
+                        styles.widgetOpacityChipLabel,
+                        { color: palette.text },
+                        settings.androidWidgetBackgroundOpacity === pct && {
+                          color: palette.accent,
+                        },
+                      ]}>
+                      {pct}%
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Text style={[styles.help, { color: palette.muted }]}>
+                {t('settings.widgetBackgroundOpacityHelp')}
+              </Text>
+              <Text
+                style={[
+                  styles.label,
+                  { color: palette.muted, marginTop: 14 },
+                ]}>
+                {t('settings.widgetHighlight')}
+              </Text>
+              <View style={styles.segmentRow}>
+                {ANDROID_WIDGET_HIGHLIGHT_OPTIONS.map(id => (
+                  <Pressable
+                    key={id}
+                    style={[
+                      styles.segment,
+                      styles.appearanceSegment,
+                      segmentChromeStyle(
+                        palette,
+                        settings.androidWidgetHighlight === id,
+                      ),
+                    ]}
+                    onPress={() =>
+                      updateSettings({ androidWidgetHighlight: id })
+                    }>
+                    <Text
+                      style={[
+                        styles.appearanceSegmentLabel,
+                        { color: palette.text },
+                        settings.androidWidgetHighlight === id && {
+                          color: palette.accent,
+                        },
+                      ]}>
+                      {t(widgetHighlightLabelKey(id))}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Text style={[styles.help, { color: palette.muted }]}>
+                {t('settings.widgetHighlightHelp')}
+              </Text>
+            </View>
+          </>
         ) : null}
 
         <Text style={[styles.sectionTitle, { color: palette.muted }]}>
@@ -709,5 +886,53 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
     lineHeight: 18,
+  },
+  widgetPreviewOuter: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginTop: 8,
+  },
+  widgetPreviewInner: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  widgetPreviewDay: {
+    color: '#9AA0A6',
+    fontSize: 8,
+    fontWeight: '600',
+  },
+  widgetPreviewRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  widgetPreviewCol: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 1,
+  },
+  widgetPreviewLabelSmall: {
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  widgetPreviewTime: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  widgetOpacityRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  widgetOpacityChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  widgetOpacityChipLabel: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

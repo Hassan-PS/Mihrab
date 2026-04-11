@@ -42,6 +42,31 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  @ReactMethod
+  fun setAndroidWidgetAppearance(
+    backgroundOpacityPercent: Int,
+    highlightId: String,
+    promise: Promise,
+  ) {
+    try {
+      val op = backgroundOpacityPercent.coerceIn(0, 100)
+      val hid =
+        highlightId.trim().lowercase().ifEmpty {
+          "green"
+        }
+      reactContext
+        .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+        .edit()
+        .putInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, op)
+        .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, hid)
+        .apply()
+      PrayerWidgetProvider.requestUpdate(reactContext)
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject("E_WIDGET_ANDROID_STYLE", e.message, e)
+    }
+  }
+
   companion object {
     const val NAME = "PrayerWidget"
   }

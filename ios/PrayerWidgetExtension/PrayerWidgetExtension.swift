@@ -4,11 +4,11 @@ import WidgetKit
 private let kSuite = "group.com.prayerapp"
 private let kKey = "prayer_widget_payload_v1"
 
-/// Fixed widget palette (green family aligned with launcher); not tied to app dynamic theme.
-private let widgetBg = Color(red: 20 / 255, green: 54 / 255, blue: 40 / 255).opacity(0.94)
-private let widgetText = Color(red: 232 / 255, green: 236 / 255, blue: 241 / 255)
-private let widgetMuted = Color(red: 139 / 255, green: 149 / 255, blue: 165 / 255)
-private let widgetHighlightGreen = Color(red: 107 / 255, green: 201 / 255, blue: 138 / 255)
+/// Neutral dark shell; only the next prayer uses accent (same green as Android default).
+private let widgetBg = Color(red: 28 / 255, green: 28 / 255, blue: 30 / 255).opacity(0.88)
+private let widgetText = Color(red: 232 / 255, green: 234 / 255, blue: 237 / 255)
+private let widgetMuted = Color(red: 154 / 255, green: 160 / 255, blue: 166 / 255)
+private let widgetHighlightAccent = Color(red: 107 / 255, green: 201 / 255, blue: 138 / 255)
 
 struct WidgetPayload: Codable {
   let dayLabel: String
@@ -90,13 +90,13 @@ struct PrayerWidgetEntryView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(highlight ? widgetHighlightGreen : widgetText)
+                .foregroundStyle(highlight ? widgetHighlightAccent : widgetText)
               Text(r.time)
                 .font(.system(size: 22, weight: .semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(highlight ? widgetHighlightGreen : widgetText)
+                .foregroundStyle(highlight ? widgetHighlightAccent : widgetText)
             }
             .frame(maxWidth: .infinity)
           }
