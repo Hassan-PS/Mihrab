@@ -92,7 +92,7 @@
     "widgetBackgroundOpacity": "Bakgrundens styrka",
     "widgetBackgroundOpacityHelp": "Högre värde ger mer täckande yta; lägre låter mer av bakgrundsbilden synas genom en mörk neutral ton.",
     "widgetHighlight": "Accent för nästa bön",
-    "widgetHighlightHelp": "Endast denna färg används för den markerade bönen; övrig text förblir neutral.",
+    "widgetHighlightHelp": "Endast denna färg används för den markerade bönen; övrig text förblir neutral. Med Systemfärger på använder widgeten systemets accent för den raden.",
     "widgetHighlightGreen": "Grön",
     "widgetHighlightTeal": "Turkos",
     "widgetHighlightBlue": "Blå",

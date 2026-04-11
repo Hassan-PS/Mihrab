@@ -7,15 +7,27 @@ type PrayerWidgetNative = {
   setAndroidWidgetAppearance?: (
     backgroundOpacityPercent: number,
     highlightId: string,
+    useDynamicHighlight: boolean,
   ) => Promise<void>;
+  setWidgetHighlightDynamic?: (enabled: boolean) => Promise<void>;
 };
+
+function useDynamicHighlightForWidget(settings: {
+  appearance: string;
+  useSystemDynamicTheme: boolean;
+}): boolean {
+  return (
+    settings.appearance === 'system' && settings.useSystemDynamicTheme
+  );
+}
 
 /**
  * Pushes widget appearance to native: Android uses configurable neutral shell +
- * highlight; iOS reloads timelines once after settings hydrate.
+ * highlight (system accent for highlight only when dynamic theme is on).
  */
 export function useSyncWidgetUiHints(): void {
   const { hydrated, settings } = usePrayerSettings();
+  const dynamicHl = useDynamicHighlightForWidget(settings);
 
   useEffect(() => {
     if (!hydrated || Platform.OS !== 'android') {
@@ -28,9 +40,11 @@ export function useSyncWidgetUiHints(): void {
     void mod.setAndroidWidgetAppearance(
       settings.androidWidgetBackgroundOpacity,
       settings.androidWidgetHighlight,
+      dynamicHl,
     );
   }, [
     hydrated,
+    dynamicHl,
     settings.androidWidgetBackgroundOpacity,
     settings.androidWidgetHighlight,
   ]);
@@ -40,9 +54,10 @@ export function useSyncWidgetUiHints(): void {
       return;
     }
     const mod = NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
-    if (!mod?.setUiHints) {
-      return;
+    if (mod?.setWidgetHighlightDynamic) {
+      void mod.setWidgetHighlightDynamic(dynamicHl);
+    } else if (mod?.setUiHints) {
+      void mod.setUiHints('fixed', false);
     }
-    void mod.setUiHints('fixed', false);
-  }, [hydrated]);
+  }, [hydrated, dynamicHl]);
 }
