@@ -33,7 +33,8 @@ Builds:
       - sysctl fs.inotify.max_user_watches=524288 || true
       - apt-get update
       - apt-get install -y curl ca-certificates xz-utils
-      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
       - echo "0c94cbb54325c40dcf026143eb621562017db5525727f2d9131a11250f72c450  /tmp/jdk17.tar.gz"
         | sha256sum -c -
       - tar xzf /tmp/jdk17.tar.gz -C /usr/local
