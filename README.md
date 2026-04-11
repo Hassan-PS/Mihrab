@@ -33,7 +33,7 @@ npm run android:assembleFdroidRelease
 
 Or: `cd android && ./gradlew assembleFdroidRelease`. Use `assemblePlayRelease` for store builds. To run the F-Droid variant on a device: `npm run android:fdroid`.
 
-**Listing on f-droid.org** is done in the separate **[fdroiddata](https://gitlab.com/fdroid/fdroiddata)** GitLab repo (not in this tree). Copy [`contrib/fdroid/com.prayer_times.yml`](contrib/fdroid/com.prayer_times.yml) to `metadata/` there and open a merge request; see [`contrib/fdroid/README.md`](contrib/fdroid/README.md).
+**Listing on f-droid.org** uses the separate **[fdroiddata](https://gitlab.com/fdroid/fdroiddata)** GitLab repo. This project includes a ready-to-copy recipe and MR template under **[`contrib/fdroid/`](contrib/fdroid/README.md)** (`com.prayer_times.yml`, `MERGE_REQUEST.md`). Optional store-style text lives in [`fastlane/metadata/android/en-US/`](fastlane/metadata/android/en-US/).
 
 ## What you get
 
