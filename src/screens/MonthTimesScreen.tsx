@@ -22,6 +22,7 @@ import { DISPLAY_ORDER } from '../types/prayer';
 import { cardEdgeStyle } from '../theme/chrome';
 import { formatLocalDate } from '../utils/date';
 import { formatDisplayTime } from '../utils/prayerTimes';
+import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 
 export function MonthTimesScreen() {
   const { t, i18n } = useTranslation();
@@ -33,6 +34,8 @@ export function MonthTimesScreen() {
   const [rows, setRows] = useState<MonthDayEntry[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useAndroidSubScreenBack();
 
   const needsGpsPrime =
     settings.locationMode === 'gps' &&

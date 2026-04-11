@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.7] — 2026-04-11
+
+### Added
+- **Android `fdroid` product flavor**: no Google Play Billing; F-Droid–friendly build (`assembleFdroidRelease`). **`play` flavor** unchanged for store/GitHub APK with optional tips.
+- **Apache-2.0** [`LICENSE`](LICENSE) at repo root; `package.json` `license` field set.
+
+### Changed
+- **Donations / IAP**: hidden on **`fdroid`** builds via native `PrayerBuildInfo` + JS gating (`TipIapBootstrap` and settings “support developer” section omitted).
+- **Android**: hardware back from Settings, Compass, and month view returns to the home screen instead of exiting the app.
+- HTTP `User-Agent` prefix **PrayerTimes/1.3.7**.
+
+### Release builds
+- Android `versionName` **1.3.7**, `versionCode` **11** — **`play`** APK + **AAB** (Google Play), **`fdroid`** APK (F-Droid / sideload without billing).
+- iOS `MARKETING_VERSION` **1.3.7**, `CURRENT_PROJECT_VERSION` **11** (build in Xcode for App Store / TestFlight).
+
+[1.3.7]: https://github.com/Hassan-PS/PrayerApp/compare/v1.3.6...v1.3.7
+
 ## [1.3.6] — 2026-04-11
 
 ### Changed

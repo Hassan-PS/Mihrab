@@ -10,8 +10,28 @@ A small **React Native** app for **daily Islamic prayer times**, **Qibla**, and 
 |--------|------|
 | **GitHub Releases** | [Latest APK](https://github.com/Hassan-PS/PrayerApp/releases/latest) (direct install on Android) |
 | **Google Play** | Uploads use the release **AAB** from maintainers; check the store for the listing when published. |
+| **F-Droid** | Build the `fdroid` flavor (see below); listing is added via [fdroiddata](https://gitlab.com/fdroid/fdroiddata) when published. |
 
 Release notes and history: [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+Source code in this repository is licensed under the [Apache License 2.0](LICENSE).
+
+## F-Droid build (third Android variant)
+
+Android uses two **product flavors**:
+
+- **`play`** — Google Play Billing for optional one-time tips; this is the default for `npm run android` (physical device script uses `playDebug`).
+- **`fdroid`** — No Play Billing native code, no in-app donation section (F-Droid policy–friendly).
+
+From the repo root after `npm install`:
+
+```sh
+npm run android:assembleFdroidRelease
+```
+
+Or: `cd android && ./gradlew assembleFdroidRelease`. Use `assemblePlayRelease` for store builds. To run the F-Droid variant on a device: `npm run android:fdroid`.
 
 ## What you get
 
@@ -40,7 +60,7 @@ npm start          # Metro
 npm run android    # or: npm run ios (after CocoaPods: bundle exec pod install in ios/)
 ```
 
-Useful scripts include `npm run generate-icons` (regenerates launcher icons from `assets/app-icon-source.png`). For deeper native work, use **Android Studio** / **Xcode** as usual.
+Useful scripts include `npm run generate-icons` (regenerates launcher icons from `assets/app-icon-source.png`). For deeper native work, use **Android Studio** / **Xcode** as usual. Android release builds must pick a flavor (`play` or `fdroid`); see **F-Droid build** above.
 
 ---
 

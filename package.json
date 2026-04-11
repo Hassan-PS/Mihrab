@@ -2,9 +2,12 @@
   "name": "prayerapp",
   "version": "0.0.1",
   "private": true,
+  "license": "Apache-2.0",
   "scripts": {
     "android": "node scripts/run-android-phone.js",
     "android:rn": "react-native run-android",
+    "android:fdroid": "react-native run-android --mode fdroidDebug",
+    "android:assembleFdroidRelease": "cd android && ./gradlew assembleFdroidRelease",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "postinstall": "patch-package",
