@@ -5,8 +5,12 @@ import notifee, {
   TriggerType,
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
+import i18n from '../i18n';
 import type { TimingsMap } from '../types/prayer';
-import { buildUpcomingSalahEvents } from '../utils/prayerTimes';
+import {
+  buildPrePrayerReminderEvents,
+  buildUpcomingSalahEvents,
+} from '../utils/prayerTimes';
 
 const CHANNEL_ID = 'prayer-times';
 
@@ -27,8 +31,31 @@ async function canUseExactAlarms(): Promise<boolean> {
   return settings.android.alarm === AndroidNotificationSetting.ENABLED;
 }
 
+function buildTimestampTrigger(
+  timestamp: number,
+  exactAlarms: boolean,
+): {
+  type: typeof TriggerType.TIMESTAMP;
+  timestamp: number;
+  alarmManager?: { type: AlarmType };
+} {
+  const trigger = {
+    type: TriggerType.TIMESTAMP as const,
+    timestamp,
+  };
+  if (Platform.OS === 'android' && exactAlarms) {
+    Object.assign(trigger, {
+      alarmManager: {
+        type: AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE,
+      },
+    });
+  }
+  return trigger;
+}
+
 export async function syncPrayerNotifications(params: {
   enabled: boolean;
+  prePrayerReminderMinutes: number;
   today: TimingsMap;
   tomorrow?: TimingsMap;
 }): Promise<void> {
@@ -39,35 +66,48 @@ export async function syncPrayerNotifications(params: {
   await ensureChannel();
   const exactAlarms = await canUseExactAlarms();
   const now = new Date();
-  const events = buildUpcomingSalahEvents(
+  const salahEvents = buildUpcomingSalahEvents(
     params.today,
     params.tomorrow,
     now,
   );
-  for (const e of events) {
+  const reminderMinutes = Math.max(0, Math.floor(params.prePrayerReminderMinutes));
+  const reminderEvents =
+    reminderMinutes > 0
+      ? buildPrePrayerReminderEvents(salahEvents, reminderMinutes, now)
+      : [];
+
+  for (const e of salahEvents) {
     const notificationId = `pt-${e.at.getTime()}-${e.name}`;
-    const trigger = {
-      type: TriggerType.TIMESTAMP as const,
-      timestamp: e.at.getTime(),
-    };
-    if (Platform.OS === 'android' && exactAlarms) {
-      Object.assign(trigger, {
-        alarmManager: {
-          type: AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE,
-        },
-      });
-    }
     await notifee.createTriggerNotification(
       {
         id: notificationId,
         title: e.name,
-        body: 'Prayer time',
+        body: i18n.t('alertCopy.atPrayer'),
         android: {
           channelId: CHANNEL_ID,
           pressAction: { id: 'default' },
         },
       },
-      trigger,
+      buildTimestampTrigger(e.at.getTime(), exactAlarms),
+    );
+  }
+
+  for (const e of reminderEvents) {
+    const notificationId = `pt-pre-${e.at.getTime()}-${e.name}`;
+    await notifee.createTriggerNotification(
+      {
+        id: notificationId,
+        title: e.name,
+        body: i18n.t('alertCopy.prePrayer', {
+          count: reminderMinutes,
+        }),
+        android: {
+          channelId: CHANNEL_ID,
+          pressAction: { id: 'default' },
+        },
+      },
+      buildTimestampTrigger(e.at.getTime(), exactAlarms),
     );
   }
 }

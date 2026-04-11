@@ -1,3 +1,5 @@
+import type { PrePrayerReminderMinutes } from './prePrayerReminder';
+
 export type LocationMode = 'gps' | 'manual';
 
 export type PrayerDataProviderId =
@@ -44,6 +46,11 @@ export type PrayerAppSettings = {
   lastFetchedLatitude?: number;
   lastFetchedLongitude?: number;
   notificationsEnabled: boolean;
+  /**
+   * Extra notification this many minutes before each prayer (0 = off).
+   * Only applies when `notificationsEnabled` is true.
+   */
+  prePrayerReminderMinutes: PrePrayerReminderMinutes;
   /** Android: widget background opacity 20–100. */
   androidWidgetBackgroundOpacity: number;
   /** Highlight style for the widget next-prayer row. */
@@ -66,6 +73,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   locationOnboardingComplete: false,
   language: 'en',
   notificationsEnabled: false,
+  prePrayerReminderMinutes: 0,
   androidWidgetBackgroundOpacity: 88,
   widgetHighlightId: 'green',
   widgetHighlightCustomHex: '#6BC98A',

@@ -122,3 +122,31 @@ export function buildUpcomingSalahEvents(
   const cutoff = now.getTime() + NOTIFICATION_BUFFER_MS;
   return events.filter(e => e.at.getTime() > cutoff);
 }
+
+/**
+ * Advance reminders N minutes before each upcoming prayer.
+ * Skips reminders that would fall in the past or after the prayer time.
+ */
+export function buildPrePrayerReminderEvents(
+  salahEvents: { name: string; at: Date }[],
+  minutesBefore: number,
+  now: Date,
+): { name: string; at: Date }[] {
+  if (minutesBefore <= 0) {
+    return [];
+  }
+  const ms = minutesBefore * 60_000;
+  const cutoff = now.getTime() + NOTIFICATION_BUFFER_MS;
+  const out: { name: string; at: Date }[] = [];
+  for (const e of salahEvents) {
+    const atReminder = new Date(e.at.getTime() - ms);
+    if (atReminder.getTime() <= cutoff) {
+      continue;
+    }
+    if (atReminder.getTime() >= e.at.getTime()) {
+      continue;
+    }
+    out.push({ name: e.name, at: atReminder });
+  }
+  return out;
+}

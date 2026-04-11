@@ -82,6 +82,11 @@
     "notifications": "Notifications",
     "prayerAlerts": "Prayer alerts",
     "prayerAlertsHelp": "Scheduled for the five daily prayers (Fajr–Isha). Android may require exact-alarm access for reliable timing.",
+    "prePrayerReminder": "Advance reminder",
+    "prePrayerReminderHelp": "Optional second notification before each prayer.",
+    "prePrayerReminderModalTitle": "Minutes before prayer",
+    "prePrayerReminderOff": "Off",
+    "prePrayerReminderOption": "{{count}} min before",
     "language": "Language",
     "languageHelp": "English, Swedish, or Arabic. Arabic uses right-to-left layout.",
     "langEn": "English",
@@ -170,6 +175,10 @@
     "applied": "Applied: {{label}}",
     "noResults": "No results",
     "searching": "Searching…"
+  },
+  "alertCopy": {
+    "atPrayer": "Prayer time",
+    "prePrayer": "Starts in {{count}} min"
   },
   "support": {
     "section": "Support the publisher",
