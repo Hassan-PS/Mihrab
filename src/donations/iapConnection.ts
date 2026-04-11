@@ -13,9 +13,17 @@ export function ensureIapReady(): Promise<boolean> {
   }
   singleInit = (async () => {
     try {
-      await initConnection();
+      // iOS resolves with `canMakePayments`; Android resolves true on success or rejects on error.
+      const connected = await initConnection();
+      if (!connected) {
+        singleInit = null;
+        return false;
+      }
       return true;
     } catch {
+      // Transient failures (e.g. billing not ready at cold start) would otherwise lock us out
+      // for the whole session because `singleInit` stayed resolved to false.
+      singleInit = null;
       return false;
     }
   })();

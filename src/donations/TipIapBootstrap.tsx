@@ -1,13 +1,12 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { Platform } from 'react-native';
+import { useEffect, type ReactNode } from 'react';
+import { InteractionManager, Platform } from 'react-native';
 import {
-  endConnection,
   finishTransaction,
   flushFailedPurchasesCachedAsPendingAndroid,
   purchaseUpdatedListener,
 } from 'react-native-iap';
 import type { Purchase } from 'react-native-iap';
-import { ensureIapReady, resetIapInitAfterDisconnect } from './iapConnection';
+import { ensureIapReady } from './iapConnection';
 import { isTipProductId } from './tipProductIds';
 
 async function finishTipPurchase(purchase: Purchase) {
@@ -19,18 +18,19 @@ async function finishTipPurchase(purchase: Purchase) {
  * transactions do not linger across app restarts.
  */
 export function TipIapBootstrap({ children }: { children: ReactNode }) {
-  const connectedRef = useRef(false);
-
   useEffect(() => {
     const connect = async () => {
       const ok = await ensureIapReady();
-      connectedRef.current = ok;
       if (ok && Platform.OS === 'android') {
         await flushFailedPurchasesCachedAsPendingAndroid().catch(() => {});
       }
     };
 
-    void connect();
+    // Defer until after first paint / activity readiness — BillingClient often fails
+    // if init runs synchronously on the first tick (common on Android Play builds).
+    const task = InteractionManager.runAfterInteractions(() => {
+      void connect();
+    });
 
     const sub = purchaseUpdatedListener(
       purchase => {
@@ -51,11 +51,10 @@ export function TipIapBootstrap({ children }: { children: ReactNode }) {
 
     return () => {
       sub.remove();
-      if (connectedRef.current) {
-        void endConnection().catch(() => {});
-      }
-      connectedRef.current = false;
-      resetIapInitAfterDisconnect();
+      task.cancel();
+      // Do not call `endConnection` here: this wrapper stays mounted for the app lifetime.
+      // Tearing down billing on unmount breaks Play Billing under React 18 Strict Mode (dev)
+      // and races with Settings loading products on first open.
     };
   }, []);
 
