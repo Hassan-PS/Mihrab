@@ -82,6 +82,11 @@
     "notifications": "Aviseringar",
     "prayerAlerts": "Bönepåminnelser",
     "prayerAlertsHelp": "Planeras för de fem dagliga bönerna (Fajr–Isha). Android kan kräva exakt larm för pålitlig tid.",
+    "prePrayerReminder": "Förhands-påminnelse",
+    "prePrayerReminderHelp": "Valfri andra avisering innan varje bön.",
+    "prePrayerReminderModalTitle": "Minuter före bön",
+    "prePrayerReminderOff": "Av",
+    "prePrayerReminderOption": "{{count}} min före",
     "language": "Språk",
     "languageHelp": "Engelska, svenska eller arabiska. Arabiska använder höger-till-vänster-layout.",
     "langEn": "Engelska",
@@ -170,6 +175,10 @@
     "applied": "Tillämpat: {{label}}",
     "noResults": "Inga resultat",
     "searching": "Söker…"
+  },
+  "alertCopy": {
+    "atPrayer": "Bönetid",
+    "prePrayer": "Börjar om {{count}} min"
   },
   "support": {
     "section": "Stöd utgivaren",

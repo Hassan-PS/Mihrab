@@ -82,6 +82,11 @@
     "notifications": "الإشعارات",
     "prayerAlerts": "تنبيهات الصلاة",
     "prayerAlertsHelp": "تُجدول لصلوات اليوم الخمس (الفجر–العشاء). قد يتطلب أندرويد إذن المنبه الدقيق للتوقيت الموثوق.",
+    "prePrayerReminder": "تذكير مسبق",
+    "prePrayerReminderHelp": "إشعار إضافي اختياري قبل كل صلاة.",
+    "prePrayerReminderModalTitle": "الدقائق قبل الصلاة",
+    "prePrayerReminderOff": "إيقاف",
+    "prePrayerReminderOption": "{{count}} د قبل الصلاة",
     "language": "اللغة",
     "languageHelp": "الإنجليزية أو السويدية أو العربية. العربية تستخدم تخطيطًا من اليمين لليسار.",
     "langEn": "الإنجليزية",
@@ -170,6 +175,10 @@
     "applied": "تم التطبيق: {{label}}",
     "noResults": "لا نتائج",
     "searching": "جارٍ البحث…"
+  },
+  "alertCopy": {
+    "atPrayer": "وقت الصلاة",
+    "prePrayer": "تبدأ خلال {{count}} د"
   },
   "support": {
     "section": "دعم الناشر",

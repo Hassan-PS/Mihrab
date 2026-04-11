@@ -22,6 +22,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import type { AppPalette } from '../theme/appPalette';
 import type { GeocodedPlace } from '../geocoding/nominatim';
 import { CALCULATION_METHODS, getMethodLabel } from '../settings/methods';
+import { PRE_PRAYER_REMINDER_OPTIONS } from '../settings/prePrayerReminder';
 import {
   providerHidesCalculationMethod,
   providerHidesHanafiAsr,
@@ -65,6 +66,7 @@ export function SettingsScreen() {
   const { settings, updateSettings } = usePrayerSettings();
   const { palette, isDark } = useAppPalette();
   const [methodModal, setMethodModal] = useState(false);
+  const [preReminderModal, setPreReminderModal] = useState(false);
   const [providerModal, setProviderModal] = useState(false);
   const [draftLat, setDraftLat] = useState('');
   const [draftLng, setDraftLng] = useState('');
@@ -74,7 +76,8 @@ export function SettingsScreen() {
   );
 
   const deferHardwareBackRef = useRef(false);
-  deferHardwareBackRef.current = methodModal || providerModal;
+  deferHardwareBackRef.current =
+    methodModal || preReminderModal || providerModal;
   useAndroidSubScreenBack(deferHardwareBackRef);
 
   useEffect(() => {
@@ -698,6 +701,35 @@ export function SettingsScreen() {
           />
         </View>
 
+        {settings.notificationsEnabled && (
+          <Pressable
+            style={[
+              styles.card,
+              styles.rowPress,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}
+            onPress={() => setPreReminderModal(true)}>
+            <View style={styles.switchCopy}>
+              <Text style={[styles.label, { color: palette.muted }]}>
+                {t('settings.prePrayerReminder')}
+              </Text>
+              <Text style={[styles.valueText, { color: palette.text }]}>
+                {settings.prePrayerReminderMinutes === 0
+                  ? t('settings.prePrayerReminderOff')
+                  : t('settings.prePrayerReminderOption', {
+                      count: settings.prePrayerReminderMinutes,
+                    })}
+              </Text>
+              <Text style={[styles.help, { color: palette.muted }]}>
+                {t('settings.prePrayerReminderHelp')}
+              </Text>
+            </View>
+            <Text style={[styles.changeLink, { color: palette.accent }]}>
+              {t('common.change')}
+            </Text>
+          </Pressable>
+        )}
+
         <MaybeSupportDeveloperSection palette={palette} />
       </ScrollView>
 
@@ -718,6 +750,52 @@ export function SettingsScreen() {
           accentBg: palette.accentBg,
         }}
       />
+
+      <Modal
+        visible={preReminderModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setPreReminderModal(false)}>
+        <View style={styles.modalRoot}>
+          <Pressable
+            style={[styles.modalFill, { backgroundColor: palette.overlay }]}
+            onPress={() => setPreReminderModal(false)}
+          />
+          <View
+            style={[
+              styles.modalSheet,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}>
+            <Text style={[styles.modalTitle, { color: palette.text }]}>
+              {t('settings.prePrayerReminderModalTitle')}
+            </Text>
+            <FlatList
+              data={[...PRE_PRAYER_REMINDER_OPTIONS]}
+              keyExtractor={item => String(item)}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={[
+                    styles.methodRow,
+                    rowDividerStyle(palette),
+                    settings.prePrayerReminderMinutes === item && {
+                      backgroundColor: palette.bg,
+                    },
+                  ]}
+                  onPress={() => {
+                    updateSettings({ prePrayerReminderMinutes: item });
+                    setPreReminderModal(false);
+                  }}>
+                  <Text style={[styles.methodName, { color: palette.text }]}>
+                    {item === 0
+                      ? t('settings.prePrayerReminderOff')
+                      : t('settings.prePrayerReminderOption', { count: item })}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={methodModal}

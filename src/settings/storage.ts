@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
 import {
   DEFAULT_SETTINGS,
   type AppLanguage,
@@ -80,6 +81,9 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     merged.widgetHighlightId = coerceWidgetHighlightId(parsed.widgetHighlightId);
     merged.widgetHighlightCustomHex = coerceWidgetHighlightHex(
       parsed.widgetHighlightCustomHex,
+    );
+    merged.prePrayerReminderMinutes = coercePrePrayerReminderMinutes(
+      parsed.prePrayerReminderMinutes,
     );
     return merged;
   } catch {

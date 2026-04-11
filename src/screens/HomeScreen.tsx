@@ -56,10 +56,11 @@ export function HomeScreen() {
     }
     syncPrayerNotifications({
       enabled: settings.notificationsEnabled,
+      prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
       today: state.today,
       tomorrow: state.tomorrow,
     }).catch(() => {});
-  }, [hydrated, settings.notificationsEnabled, state]);
+  }, [hydrated, settings.notificationsEnabled, settings.prePrayerReminderMinutes, state]);
 
   useFocusEffect(
     useCallback(() => {
@@ -68,10 +69,11 @@ export function HomeScreen() {
       }
       syncPrayerNotifications({
         enabled: settings.notificationsEnabled,
+        prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
         today: state.today,
         tomorrow: state.tomorrow,
       }).catch(() => {});
-    }, [hydrated, settings.notificationsEnabled, state]),
+    }, [hydrated, settings.notificationsEnabled, settings.prePrayerReminderMinutes, state]),
   );
 
   useEffect(() => {
