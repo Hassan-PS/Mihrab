@@ -3,17 +3,26 @@
  * Uses uniform scale + center crop so artwork fills the square (and thus
  * circular / squircle / rounded-rect masks) even when edges are clipped.
  *
+ * Sharpening: builds a full-size master square from the source, then downsizes
+ * each output with bicubic interpolation (clearer than a single aggressive scale).
+ *
  * Run: npm run generate-icons
  */
 const fs = require('fs');
 const path = require('path');
-const { Jimp } = require('jimp');
+const { Jimp, ResizeStrategy } = require('jimp');
 
 const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'assets', 'app-icon-source.png');
 
 /** >1 zooms in before crop so masks that cut corners still look full. 1 = minimal (cover + center crop only). */
 const ZOOM = 1;
+
+/**
+ * Downscale all outputs from this square for smoother mipmaps (capped at source size).
+ * Use a 2048×2048+ `app-icon-source.png` for maximum sharpness on device.
+ */
+const MASTER_MAX = 2048;
 
 const ANDROID_MIPMAPS = [
   ['mipmap-mdpi', 48],
@@ -43,7 +52,7 @@ const IOS_SIZES = [
   ['AppIcon-1024.png', 1024],
 ];
 
-async function zoomCropSquare(img, size) {
+async function zoomCropSquareRaw(img, size) {
   const w = img.bitmap.width;
   const h = img.bitmap.height;
   const scale = Math.max(size / w, size / h) * ZOOM;
@@ -54,6 +63,21 @@ async function zoomCropSquare(img, size) {
   const y = Math.max(0, Math.floor((nh - size) / 2));
   resized.crop({ x, y, w: size, h: size });
   return resized;
+}
+
+async function zoomCropSquare(img, size) {
+  const sw = img.bitmap.width;
+  const sh = img.bitmap.height;
+  const masterSide = Math.min(MASTER_MAX, Math.max(sw, sh));
+  const master = await zoomCropSquareRaw(img, masterSide);
+  if (masterSide === size) {
+    return master;
+  }
+  return master.clone().resize({
+    w: size,
+    h: size,
+    mode: ResizeStrategy.BICUBIC,
+  });
 }
 
 async function writePng(img, destPath) {
@@ -84,7 +108,11 @@ async function main() {
     await writePng(out, path.join(IOS_DIR, name));
   }
 
-  console.log('Icons generated (zoom=%s): Android mipmaps + iOS AppIcon.', ZOOM);
+  console.log(
+    'Icons generated (zoom=%s, master≤%s, bicubic downscale): Android mipmaps + iOS AppIcon.',
+    ZOOM,
+    MASTER_MAX,
+  );
 }
 
 main().catch(err => {

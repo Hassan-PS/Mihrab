@@ -3,7 +3,7 @@
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EE1A2230"
+    android:background="#EE143628"
     android:paddingStart="14dp"
     android:paddingEnd="8dp"
     android:paddingTop="12dp"
