@@ -86,8 +86,6 @@ Builds:
     init:
       - cd ..
       - npm ci --no-audit
-    patch:
-      - fdroid-release-signing-ifelse.patch
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
@@ -122,6 +120,9 @@ MaintainerNotes: |
   Location: `patch-package` strips `play-services-location` from
   `@react-native-community/geolocation` and uses AOSP `LocationManager` only so
   the scanner does not flag proprietary `com.google.android.gms` classes.
+  Signing: older builds use `fdroid-release-signing-ifelse.patch` after
+  fdroidserver strips keys; **v1.4.1+** ships that if/else in
+  `android/app/build.gradle` already, so the 1.4.1 recipe has no `patch:`.
 
 ArchivePolicy: 6
 AutoUpdateMode: Version
