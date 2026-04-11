@@ -10,6 +10,9 @@ export type AppearancePreference = 'system' | 'light' | 'dark';
 
 export type AppLanguage = 'en' | 'sv' | 'ar';
 
+/** Next-prayer row color on the home screen widget (preset or custom hex). */
+export type WidgetHighlightId = 'green' | 'teal' | 'blue' | 'amber' | 'custom';
+
 export type PrayerAppSettings = {
   /** Follow OS light/dark, or force one mode. */
   appearance: AppearancePreference;
@@ -41,6 +44,12 @@ export type PrayerAppSettings = {
   lastFetchedLatitude?: number;
   lastFetchedLongitude?: number;
   notificationsEnabled: boolean;
+  /** Android: widget background opacity 20–100. */
+  androidWidgetBackgroundOpacity: number;
+  /** Highlight style for the widget next-prayer row. */
+  widgetHighlightId: WidgetHighlightId;
+  /** When `widgetHighlightId` is `custom`, #RRGGBB (e.g. #6BC98A). */
+  widgetHighlightCustomHex: string;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -57,4 +66,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   locationOnboardingComplete: false,
   language: 'en',
   notificationsEnabled: false,
+  androidWidgetBackgroundOpacity: 88,
+  widgetHighlightId: 'green',
+  widgetHighlightCustomHex: '#6BC98A',
 };

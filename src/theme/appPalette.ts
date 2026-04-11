@@ -44,31 +44,22 @@ export function shouldUseDynamicSystemColors(
   return (appearance ?? 'system') === 'system' && !!useSystemDynamicTheme;
 }
 
-/** Material / tint primary + container — matches wallpaper & dynamic color on Android 12+ and iOS accent. */
-function nativeThemeAccents(): { accent: ColorValue; accentBg: ColorValue } {
-  if (Platform.OS === 'android') {
-    return {
-      accent: PlatformColor('?attr/colorPrimary'),
-      accentBg: PlatformColor('?attr/colorPrimaryContainer'),
-    };
-  }
-  if (Platform.OS === 'ios') {
-    return {
-      accent: PlatformColor('tintColor'),
-      accentBg: PlatformColor('tertiarySystemGroupedBackground'),
-    };
-  }
-  return { accent: '#0a84ff', accentBg: '#e3f2fd' };
-}
-
 type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg'>;
 
-function withNativeAccents(base: PaletteBase): AppPalette {
-  const { accent, accentBg } = nativeThemeAccents();
+/** App brand green when System theme + dynamic colors is off, or when appearance is forced light/dark. */
+function brandAccents(isDark: boolean): { accent: ColorValue; accentBg: ColorValue } {
+  if (isDark) {
+    return { accent: '#4ade80', accentBg: '#14532d' };
+  }
+  return { accent: '#22c55e', accentBg: '#dcfce7' };
+}
+
+function withBrandAccents(base: PaletteBase, isDark: boolean): AppPalette {
+  const { accent, accentBg } = brandAccents(isDark);
   return { ...base, accent, accentBg };
 }
 
-/** Standard dark greys. Accent always follows theme primary (Material You / tint). */
+/** Standard dark greys. Accent uses brand green unless dynamic system palette is active. */
 const DARK_BASE: PaletteBase = {
   bg: '#0f1419',
   card: '#1a2230',
@@ -160,10 +151,11 @@ export function buildAppPalette(
   pureBlackDark: boolean,
 ): AppPalette {
   if (!isDark) {
-    return withNativeAccents(LIGHT_BASE);
+    return withBrandAccents(LIGHT_BASE, false);
   }
-  return withNativeAccents(
+  return withBrandAccents(
     pureBlackDark ? DARK_PURE_BLACK_BASE : DARK_BASE,
+    true,
   );
 }
 

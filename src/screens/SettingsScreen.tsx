@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   Modal,
@@ -33,13 +33,21 @@ import {
   PRAYER_DATA_PROVIDERS,
 } from '../settings/providersCatalog';
 import { SupportDeveloperSection } from '../donations/SupportDeveloperSection';
-import type { AppLanguage } from '../settings/types';
+import type { AppLanguage, WidgetHighlightId } from '../settings/types';
 import {
   cardEdgeStyle,
   inputChromeStyle,
   rowDividerStyle,
   segmentChromeStyle,
 } from '../theme/chrome';
+
+const WIDGET_HIGHLIGHT_SWATCHES: { id: Exclude<WidgetHighlightId, 'custom'>; hex: string }[] =
+  [
+    { id: 'green', hex: '#6BC98A' },
+    { id: 'teal', hex: '#4EC9B0' },
+    { id: 'blue', hex: '#6BA3F5' },
+    { id: 'amber', hex: '#E5C07B' },
+  ];
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -50,6 +58,13 @@ export function SettingsScreen() {
   const [draftLat, setDraftLat] = useState('');
   const [draftLng, setDraftLng] = useState('');
   const [coordError, setCoordError] = useState<string | null>(null);
+  const [widgetHexDraft, setWidgetHexDraft] = useState(
+    settings.widgetHighlightCustomHex,
+  );
+
+  useEffect(() => {
+    setWidgetHexDraft(settings.widgetHighlightCustomHex);
+  }, [settings.widgetHighlightCustomHex]);
 
   useFocusEffect(
     useCallback(() => {
@@ -288,22 +303,157 @@ export function SettingsScreen() {
           </View>
         ) : null}
 
-        {Platform.OS === 'android' ? (
-          <>
-            <Text style={[styles.sectionTitle, { color: palette.muted }]}>
-              {t('settings.homeScreenWidget')}
-            </Text>
-            <View
-              style={[
-                styles.card,
-                { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-              ]}>
-              <Text style={[styles.help, { color: palette.muted }]}>
-                {t('settings.widgetConfigureHint')}
+        <Text style={[styles.sectionTitle, { color: palette.muted }]}>
+          {t('settings.homeScreenWidget')}
+        </Text>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          {Platform.OS === 'android' ? (
+            <>
+              <Text style={[styles.label, { color: palette.muted }]}>
+                {t('settings.widgetBackgroundOpacity')}
               </Text>
-            </View>
-          </>
-        ) : null}
+              <View style={styles.widgetOpacityRow}>
+                <Pressable
+                  style={[
+                    styles.widgetOpacityBtn,
+                    {
+                      borderColor: palette.border,
+                      opacity:
+                        settings.androidWidgetBackgroundOpacity <= 20 ? 0.4 : 1,
+                    },
+                  ]}
+                  disabled={settings.androidWidgetBackgroundOpacity <= 20}
+                  onPress={() =>
+                    updateSettings({
+                      androidWidgetBackgroundOpacity: Math.max(
+                        20,
+                        settings.androidWidgetBackgroundOpacity - 4,
+                      ),
+                    })
+                  }>
+                  <Text style={{ color: palette.text, fontSize: 20 }}>−</Text>
+                </Pressable>
+                <Text style={[styles.widgetOpacityValue, { color: palette.text }]}>
+                  {settings.androidWidgetBackgroundOpacity}%
+                </Text>
+                <Pressable
+                  style={[
+                    styles.widgetOpacityBtn,
+                    {
+                      borderColor: palette.border,
+                      opacity:
+                        settings.androidWidgetBackgroundOpacity >= 100 ? 0.4 : 1,
+                    },
+                  ]}
+                  disabled={settings.androidWidgetBackgroundOpacity >= 100}
+                  onPress={() =>
+                    updateSettings({
+                      androidWidgetBackgroundOpacity: Math.min(
+                        100,
+                        settings.androidWidgetBackgroundOpacity + 4,
+                      ),
+                    })
+                  }>
+                  <Text style={{ color: palette.text, fontSize: 20 }}>+</Text>
+                </Pressable>
+              </View>
+            </>
+          ) : null}
+
+          <Text
+            style={[
+              styles.label,
+              {
+                color: palette.muted,
+                marginTop: Platform.OS === 'android' ? 16 : 0,
+              },
+            ]}>
+            {t('settings.widgetHighlight')}
+          </Text>
+          <View style={styles.widgetSwatchRow}>
+            {WIDGET_HIGHLIGHT_SWATCHES.map(s => {
+              const selected = settings.widgetHighlightId === s.id;
+              return (
+                <Pressable
+                  key={s.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(`settings.widgetHighlight_${s.id}`)}
+                  onPress={() => updateSettings({ widgetHighlightId: s.id })}
+                  style={[
+                    styles.widgetSwatch,
+                    {
+                      backgroundColor: s.hex,
+                      borderColor: selected ? palette.accent : palette.border,
+                      borderWidth: selected ? 3 : 2,
+                    },
+                  ]}
+                />
+              );
+            })}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.widgetHighlight_custom')}
+              onPress={() => updateSettings({ widgetHighlightId: 'custom' })}
+              style={[
+                styles.widgetSwatch,
+                styles.widgetSwatchCustom,
+                {
+                  backgroundColor: palette.card,
+                  borderColor:
+                    settings.widgetHighlightId === 'custom'
+                      ? palette.accent
+                      : palette.border,
+                  borderWidth:
+                    settings.widgetHighlightId === 'custom' ? 3 : 2,
+                },
+              ]}>
+              <Text style={[styles.widgetSwatchCustomLabel, { color: palette.muted }]}>
+                {t('settings.widgetHighlight_customAbbr')}
+              </Text>
+            </Pressable>
+          </View>
+
+          {settings.widgetHighlightId === 'custom' ? (
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  marginTop: 10,
+                  borderColor: palette.border,
+                  color: palette.text,
+                  backgroundColor: palette.bg,
+                },
+              ]}
+              value={widgetHexDraft}
+              onChangeText={setWidgetHexDraft}
+              onBlur={() => {
+                const trimmed = widgetHexDraft.trim();
+                if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+                  updateSettings({ widgetHighlightCustomHex: trimmed });
+                } else {
+                  setWidgetHexDraft(settings.widgetHighlightCustomHex);
+                }
+              }}
+              placeholder={t('settings.widgetHighlightHexPlaceholder')}
+              placeholderTextColor={palette.muted}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+          ) : null}
+
+          <Text style={[styles.help, { color: palette.muted }]}>
+            {t('settings.widgetHighlightDynamicHelp')}
+          </Text>
+          {Platform.OS === 'android' ? (
+            <Text style={[styles.help, { color: palette.muted }]}>
+              {t('settings.widgetConfigureHint')}
+            </Text>
+          ) : null}
+        </View>
 
         <Text style={[styles.sectionTitle, { color: palette.muted }]}>
           {t('settings.dataSource')}
@@ -693,6 +843,48 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
     lineHeight: 18,
+  },
+  widgetOpacityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+    marginTop: 8,
+  },
+  widgetOpacityBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  widgetOpacityValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    minWidth: 52,
+    textAlign: 'center',
+  },
+  widgetSwatchRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  widgetSwatch: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  widgetSwatchCustom: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  widgetSwatchCustomLabel: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   modalRoot: {
     flex: 1,

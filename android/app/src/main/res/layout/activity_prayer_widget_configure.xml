@@ -67,20 +67,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/widget_configure_highlight_amber" />
+
+            <RadioButton
+                android:id="@+id/widget_configure_highlight_custom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_configure_highlight_custom" />
         </RadioGroup>
 
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/widget_configure_dynamic_switch"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/widget_configure_hex_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/widget_configure_system_accent" />
+            android:layout_marginTop="8dp"
+            android:hint="@string/widget_configure_hex_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/widget_configure_hex_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapCharacters"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/widget_configure_system_accent_help"
+            android:layout_marginTop="16dp"
+            android:text="@string/widget_configure_theme_accent_hint"
             android:textAppearance="?attr/textAppearanceBodySmall"
             android:textColor="?android:attr/textColorSecondary" />
 
