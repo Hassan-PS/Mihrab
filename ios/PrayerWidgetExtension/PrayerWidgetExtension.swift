@@ -3,6 +3,7 @@ import WidgetKit
 
 private let kSuite = "group.com.prayerapp"
 private let kKey = "prayer_widget_payload_v1"
+private let kHighlightDynamicKey = "widget_highlight_dynamic"
 
 /// Neutral dark shell; only the next prayer uses accent (same green as Android default).
 private let widgetBg = Color(red: 28 / 255, green: 28 / 255, blue: 30 / 255).opacity(0.88)
@@ -68,6 +69,17 @@ struct Entry: TimelineEntry {
 struct PrayerWidgetEntryView: View {
   var entry: Entry
 
+  private var useDynamicHighlight: Bool {
+    UserDefaults(suiteName: kSuite)?.bool(forKey: kHighlightDynamicKey) ?? false
+  }
+
+  private func rowColor(highlight: Bool) -> Color {
+    if highlight {
+      return useDynamicHighlight ? Color.accentColor : widgetHighlightAccent
+    }
+    return widgetText
+  }
+
   @ViewBuilder
   private var prayerContent: some View {
     if let p = entry.payload {
@@ -90,13 +102,13 @@ struct PrayerWidgetEntryView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(highlight ? widgetHighlightAccent : widgetText)
+                .foregroundStyle(rowColor(highlight: highlight))
               Text(r.time)
                 .font(.system(size: 22, weight: .semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(highlight ? widgetHighlightAccent : widgetText)
+                .foregroundStyle(rowColor(highlight: highlight))
             }
             .frame(maxWidth: .infinity)
           }

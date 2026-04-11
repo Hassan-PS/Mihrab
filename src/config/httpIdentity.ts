@@ -4,7 +4,7 @@
  */
 export const APP_SOURCE_REPO_URL = 'https://github.com/Hassan-PS/PrayerApp';
 
-/** e.g. PrayerTimes/1.3.3 (+https://github.com/...; Nominatim) */
+/** e.g. PrayerTimes/1.3.4 (+https://github.com/...; Nominatim) */
 export function httpUserAgent(suffix: string): string {
-  return `PrayerTimes/1.3.3 (+${APP_SOURCE_REPO_URL}; ${suffix})`;
+  return `PrayerTimes/1.3.4 (+${APP_SOURCE_REPO_URL}; ${suffix})`;
 }

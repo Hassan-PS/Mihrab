@@ -92,7 +92,7 @@
     "widgetBackgroundOpacity": "Background strength",
     "widgetBackgroundOpacityHelp": "Higher values look more solid; lower values show more of your wallpaper through a dark neutral tint.",
     "widgetHighlight": "Next prayer accent",
-    "widgetHighlightHelp": "Only this color is used for the highlighted prayer; other text stays neutral.",
+    "widgetHighlightHelp": "Only this color is used for the highlighted prayer; other text stays neutral. With System colors on, the widget uses your system accent for that row instead.",
     "widgetHighlightGreen": "Green",
     "widgetHighlightTeal": "Teal",
     "widgetHighlightBlue": "Blue",

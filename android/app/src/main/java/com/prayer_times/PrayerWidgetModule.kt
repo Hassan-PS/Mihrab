@@ -46,6 +46,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
   fun setAndroidWidgetAppearance(
     backgroundOpacityPercent: Int,
     highlightId: String,
+    useDynamicHighlight: Boolean,
     promise: Promise,
   ) {
     try {
@@ -59,6 +60,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
         .edit()
         .putInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, op)
         .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, hid)
+        .putBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, useDynamicHighlight)
         .apply()
       PrayerWidgetProvider.requestUpdate(reactContext)
       promise.resolve(null)

@@ -92,7 +92,7 @@
     "widgetBackgroundOpacity": "قوة الخلفية",
     "widgetBackgroundOpacityHelp": "قيم أعلى تبدو أكثر صلابة؛ قيم أقل تُظهر المزيد من خلفية الشاشة عبر لون داكن محايد.",
     "widgetHighlight": "لون الصلاة التالية",
-    "widgetHighlightHelp": "يُستخدم هذا اللون فقط للصلاة المميزة؛ بقية النص يبقى محايدًا.",
+    "widgetHighlightHelp": "يُستخدم هذا اللون فقط للصلاة المميزة؛ بقية النص يبقى محايدًا. عند تفعيل ألوان النظام تستخدم الودجة لون تمييز النظام لتلك الصف فقط.",
     "widgetHighlightGreen": "أخضر",
     "widgetHighlightTeal": "تركواز",
     "widgetHighlightBlue": "أزرق",
