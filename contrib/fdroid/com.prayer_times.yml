@@ -52,6 +52,7 @@ Builds:
       - fdroid-release-signing-ifelse.patch
     gradle:
       - fdroid
+    output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=1024m/'
@@ -69,8 +70,9 @@ MaintainerNotes: |
   JDK 21 does not satisfy that request. Trixie has no OpenJDK 17 apt package, so
   install Eclipse Temurin 17.0.18+8 (checksum-verified) to `/usr/local/jdk-17` and
   set `org.gradle.java.home` in `prebuild`.
-  `remove_signing_keys` yields an unsigned APK; omit `output` so fdroidserver
-  discovers it. `prebuild` adjusts JVM args / daemon logging for CI.
+  `output` points at `app/build/.../fdroid/release/*.apk` (RN app module); the
+  default Gradle discovery path does not include `app/`. `prebuild` adjusts JVM
+  args / daemon logging for CI.
   Scanner: `scanignore` uses `node_modules` (RN layout
   changes make per-package paths brittle) plus `android/build.gradle` for the
   AsyncStorage `local_repo` maven entry. If policy tightens, consider `scandelete`
