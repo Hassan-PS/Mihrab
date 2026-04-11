@@ -8,6 +8,8 @@ Everything here is **upstream preparation**. The real merge request goes to **[f
 |------|---------|
 | [`com.prayer_times.yml`](com.prayer_times.yml) | **Paste into** `metadata/com.prayer_times.yml` in your fdroiddata fork (delete the 2-line comment at the top when committing). |
 | [`MERGE_REQUEST.md`](MERGE_REQUEST.md) | Suggested **MR title, description, branch name** for GitLab. |
+| [`SUGGESTED_ITEMS.md`](SUGGESTED_ITEMS.md) | Honest **Suggested**-section answers (submodules / reproducible / split APKs). |
+| [`PRE_MERGE_CHECKLIST.md`](PRE_MERGE_CHECKLIST.md) | Local build check + syncing YAML to your fdroiddata fork. |
 
 ## Repo root (optional, for listings)
 
