@@ -5,16 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 
 /**
  * Shown when the user adds the widget or opens “Settings” from the widget’s long-press menu.
- * Writes the same SharedPreferences keys the widget reads on update.
+ * Writes the same SharedPreferences keys the app and [PrayerWidgetProvider] use.
  */
 class PrayerWidgetConfigureActivity : AppCompatActivity() {
 
@@ -45,7 +47,10 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
     val highlightRaw =
       prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, "green")?.trim()
     val highlightId = if (highlightRaw.isNullOrEmpty()) "green" else highlightRaw
-    val dynamic =
+    val storedHex =
+      prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, "")?.trim()
+        ?: ""
+    val dynamicStored =
       prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
 
     val seek = findViewById<SeekBar>(R.id.widget_configure_opacity_seek)
@@ -75,17 +80,32 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
     )
 
     val radioGroup = findViewById<RadioGroup>(R.id.widget_configure_highlight_group)
+    val hexLayout = findViewById<TextInputLayout>(R.id.widget_configure_hex_layout)
+    val hexInput = findViewById<TextInputEditText>(R.id.widget_configure_hex_input)
+
     val radioId =
       when (highlightId.lowercase()) {
         "teal" -> R.id.widget_configure_highlight_teal
         "blue" -> R.id.widget_configure_highlight_blue
         "amber" -> R.id.widget_configure_highlight_amber
+        "custom" -> R.id.widget_configure_highlight_custom
         else -> R.id.widget_configure_highlight_green
       }
     radioGroup.check(radioId)
 
-    val dynSwitch = findViewById<MaterialSwitch>(R.id.widget_configure_dynamic_switch)
-    dynSwitch.isChecked = dynamic
+    fun syncHexVisibility() {
+      val custom = radioGroup.checkedRadioButtonId == R.id.widget_configure_highlight_custom
+      hexLayout.visibility = if (custom) View.VISIBLE else View.GONE
+    }
+    hexInput.setText(
+      if (storedHex.matches(Regex("^#([0-9A-Fa-f]{6})$"))) {
+        storedHex
+      } else {
+        "#6BC98A"
+      },
+    )
+    syncHexVisibility()
+    radioGroup.setOnCheckedChangeListener { _, _ -> syncHexVisibility() }
 
     findViewById<MaterialButton>(R.id.widget_configure_save).setOnClickListener {
       val checked = radioGroup.checkedRadioButtonId
@@ -94,13 +114,30 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
           R.id.widget_configure_highlight_teal -> "teal"
           R.id.widget_configure_highlight_blue -> "blue"
           R.id.widget_configure_highlight_amber -> "amber"
+          R.id.widget_configure_highlight_custom -> "custom"
           else -> "green"
         }
+      val hexForStore =
+        if (hid == "custom") {
+          val raw = hexInput.text?.toString()?.trim() ?: ""
+          if (raw.matches(Regex("^#([0-9A-Fa-f]{6})$"))) {
+            raw
+          } else {
+            "#6BC98A"
+          }
+        } else {
+          ""
+        }
+
       prefs
         .edit()
         .putInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, seek.progress + 20)
         .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, hid)
-        .putBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, dynSwitch.isChecked)
+        .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, hexForStore)
+        .putBoolean(
+          PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC,
+          dynamicStored,
+        )
         .apply()
 
       val updateIntent =

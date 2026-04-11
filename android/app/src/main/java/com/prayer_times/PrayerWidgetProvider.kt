@@ -18,6 +18,7 @@ import org.json.JSONObject
 private data class WidgetStyle(
   val bgOpacityPercent: Int,
   val highlightId: String,
+  val highlightHex: String,
   val useDynamicHighlight: Boolean,
 ) {
   fun backgroundArgb(): Int {
@@ -28,6 +29,17 @@ private data class WidgetStyle(
   fun highlightColorInt(context: Context): Int {
     if (useDynamicHighlight) {
       return resolveDynamicHighlightColor(context)
+    }
+    if (highlightId.equals("custom", ignoreCase = true)) {
+      val h = highlightHex.trim()
+      if (h.matches(Regex("^#([0-9A-Fa-f]{6})$"))) {
+        return try {
+          Color.parseColor(h)
+        } catch (_: Exception) {
+          Color.parseColor("#6BC98A")
+        }
+      }
+      return Color.parseColor("#6BC98A")
     }
     val hex =
       when (highlightId.lowercase()) {
@@ -68,9 +80,17 @@ private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
   val hid =
     prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, "green")?.trim()
       ?: "green"
+  val hex =
+    prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, "")?.trim()
+      ?: ""
   val dynamic =
     prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
-  return WidgetStyle(opacity.coerceIn(0, 100), hid.ifEmpty { "green" }, dynamic)
+  return WidgetStyle(
+    opacity.coerceIn(0, 100),
+    hid.ifEmpty { "green" },
+    hex,
+    dynamic,
+  )
 }
 
 /** Neutral dark surface (#1C1C1E), opacity from settings. */
@@ -193,6 +213,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_UI_OLED = "widget_oled"
     const val PREFS_WIDGET_BG_OPACITY = "widget_bg_opacity"
     const val PREFS_WIDGET_HIGHLIGHT_ID = "widget_highlight_id"
+    const val PREFS_WIDGET_HIGHLIGHT_HEX = "widget_highlight_hex"
     const val PREFS_WIDGET_HIGHLIGHT_DYNAMIC = "widget_highlight_dynamic"
 
     private const val NEUTRAL_TEXT = "#E8EAED"

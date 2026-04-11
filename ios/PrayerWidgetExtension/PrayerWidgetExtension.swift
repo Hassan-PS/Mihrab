@@ -4,12 +4,56 @@ import WidgetKit
 private let kSuite = "group.com.prayerapp"
 private let kKey = "prayer_widget_payload_v1"
 private let kHighlightDynamicKey = "widget_highlight_dynamic"
+private let kHighlightIdKey = "widget_highlight_id"
+private let kHighlightHexKey = "widget_highlight_hex"
 
 /// Neutral dark shell; only the next prayer uses accent (same green as Android default).
 private let widgetBg = Color(red: 28 / 255, green: 28 / 255, blue: 30 / 255).opacity(0.88)
 private let widgetText = Color(red: 232 / 255, green: 234 / 255, blue: 237 / 255)
 private let widgetMuted = Color(red: 154 / 255, green: 160 / 255, blue: 166 / 255)
-private let widgetHighlightAccent = Color(red: 107 / 255, green: 201 / 255, blue: 138 / 255)
+private let widgetHighlightDefault = Color(red: 107 / 255, green: 201 / 255, blue: 138 / 255)
+
+private extension Color {
+  init?(hexRGB: String) {
+    var s = hexRGB.trimmingCharacters(in: .whitespaces)
+    guard s.hasPrefix("#") else { return nil }
+    s.removeFirst()
+    guard s.count == 6, let n = UInt32(s, radix: 16) else { return nil }
+    let r = Double((n >> 16) & 0xFF) / 255
+    let g = Double((n >> 8) & 0xFF) / 255
+    let b = Double(n & 0xFF) / 255
+    self.init(red: r, green: g, blue: b)
+  }
+}
+
+private func presetHighlightColor(_ id: String) -> Color {
+  switch id.lowercased() {
+  case "teal":
+    return Color(red: 78 / 255, green: 201 / 255, blue: 176 / 255)
+  case "blue":
+    return Color(red: 107 / 255, green: 163 / 255, blue: 245 / 255)
+  case "amber":
+    return Color(red: 229 / 255, green: 192 / 255, blue: 123 / 255)
+  case "green":
+    return widgetHighlightDefault
+  default:
+    return widgetHighlightDefault
+  }
+}
+
+private func resolvedWidgetHighlightColor() -> Color {
+  let def = UserDefaults(suiteName: kSuite)
+  let dynamic = def?.bool(forKey: kHighlightDynamicKey) ?? false
+  if dynamic {
+    return Color.accentColor
+  }
+  let id = def?.string(forKey: kHighlightIdKey) ?? "green"
+  if id.lowercased() == "custom" {
+    let hex = def?.string(forKey: kHighlightHexKey) ?? "#6BC98A"
+    return Color(hexRGB: hex) ?? widgetHighlightDefault
+  }
+  return presetHighlightColor(id)
+}
 
 struct WidgetPayload: Codable {
   let dayLabel: String
@@ -69,13 +113,9 @@ struct Entry: TimelineEntry {
 struct PrayerWidgetEntryView: View {
   var entry: Entry
 
-  private var useDynamicHighlight: Bool {
-    UserDefaults(suiteName: kSuite)?.bool(forKey: kHighlightDynamicKey) ?? false
-  }
-
   private func rowColor(highlight: Bool) -> Color {
     if highlight {
-      return useDynamicHighlight ? Color.accentColor : widgetHighlightAccent
+      return resolvedWidgetHighlightColor()
     }
     return widgetText
   }
