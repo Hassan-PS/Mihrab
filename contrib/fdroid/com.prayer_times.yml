@@ -1,0 +1,49 @@
+# F-Droid metadata — COPY this file into the fdroiddata repo:
+#   https://gitlab.com/fdroid/fdroiddata → metadata/com.prayer_times.yml
+# Then open a Merge Request. Editors adjust sudo/init/NDK if the build server requires it.
+#
+# Upstream: https://github.com/Hassan-PS/PrayerApp
+
+Categories:
+  - Time
+License: Apache-2.0
+AuthorName: PrayerApp contributors
+WebSite: https://github.com/Hassan-PS/PrayerApp
+SourceCode: https://github.com/Hassan-PS/PrayerApp
+IssueTracker: https://github.com/Hassan-PS/PrayerApp/issues
+Changelog: https://github.com/Hassan-PS/PrayerApp/blob/main/CHANGELOG.md
+
+AutoName: Prayer Times
+Name: Prayer Times
+Summary: Islamic prayer times, Qibla, and home screen widget
+Description: |
+  View daily prayer times with GPS or manual location, browse a full month,
+  use a Qibla compass, get prayer notifications, and use a home screen
+  widget (Android). Supports several calculation sources and locales
+  (e.g. English, Swedish, Arabic with RTL).
+
+  This F-Droid build uses the upstream **fdroid** product flavor: it does not
+  include Google Play in-app billing or the in-app “support developer” purchase
+  flow.
+
+RepoType: git
+Repo: https://github.com/Hassan-PS/PrayerApp
+
+Builds:
+  - versionName: 1.3.7
+    versionCode: 11
+    commit: v1.3.7
+    subdir: android
+    sudo:
+      - apt-get update || apt-get update
+      - apt-get install -y npm nodejs
+    init:
+      - cd ..
+      - npm ci --no-audit
+    ndk: 27.1.12297006
+    gradle:
+      - fdroid
+    output: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags

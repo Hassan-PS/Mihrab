@@ -33,6 +33,8 @@ npm run android:assembleFdroidRelease
 
 Or: `cd android && ./gradlew assembleFdroidRelease`. Use `assemblePlayRelease` for store builds. To run the F-Droid variant on a device: `npm run android:fdroid`.
 
+**Listing on f-droid.org** is done in the separate **[fdroiddata](https://gitlab.com/fdroid/fdroiddata)** GitLab repo (not in this tree). Copy [`contrib/fdroid/com.prayer_times.yml`](contrib/fdroid/com.prayer_times.yml) to `metadata/` there and open a merge request; see [`contrib/fdroid/README.md`](contrib/fdroid/README.md).
+
 ## What you get
 
 - **Today’s times** on the home screen, with optional **alerts** for the five daily prayers.
