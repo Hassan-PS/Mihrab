@@ -55,7 +55,7 @@
     "themeSystem": "System",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "themeHelp": "System matches your device light or dark mode. Turn on System colors to use the platform palette in the app (including Material You on Android). The home screen widget on Android has its own look in Settings.",
+    "themeHelp": "System matches your device light or dark mode. Turn on System colors to use the platform palette in the app (including Material You on Android). Buttons and accents follow your phone’s primary color so the app matches your wallpaper when dynamic color is available.",
     "systemDynamicColors": "System colors",
     "systemDynamicColorsHelp": "Uses your device’s semantic and dynamic colors in the app when theme is System. Pure black (OLED) still darkens backgrounds when dark mode is on.",
     "pureBlack": "Pure black (OLED)",
@@ -87,17 +87,8 @@
     "langEn": "English",
     "langSv": "Swedish",
     "langAr": "Arabic",
-    "widgetAndroid": "Home screen widget (Android)",
-    "widgetAndroidHelp": "Neutral background with one accent color for the next prayer. The widget gallery preview (Android 12+) shows sample times.",
-    "widgetBackgroundOpacity": "Background strength",
-    "widgetBackgroundOpacityHelp": "Higher values look more solid; lower values show more of your wallpaper through a dark neutral tint.",
-    "widgetHighlight": "Next prayer accent",
-    "widgetHighlightHelp": "Only this color is used for the highlighted prayer; other text stays neutral. With System colors on, the widget uses your system accent for that row instead.",
-    "widgetHighlightGreen": "Green",
-    "widgetHighlightTeal": "Teal",
-    "widgetHighlightBlue": "Blue",
-    "widgetHighlightAmber": "Amber",
-    "widgetPreviewLabel": "Preview"
+    "homeScreenWidget": "Home screen widget",
+    "widgetConfigureHint": "Touch and hold the prayer times widget on your home screen, then tap the settings (gear) icon to change background strength, highlight color, and whether the highlight matches your phone accent."
   },
   "locationSetup": {
     "headline": "Set your location",

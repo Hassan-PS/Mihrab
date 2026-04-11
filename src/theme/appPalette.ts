@@ -44,49 +44,59 @@ export function shouldUseDynamicSystemColors(
   return (appearance ?? 'system') === 'system' && !!useSystemDynamicTheme;
 }
 
-/**
- * Brand accent when system dynamic colors are off (matches widget default + launcher green family).
- */
-const BRAND_ACCENT = '#6BC98A';
-const BRAND_ACCENT_SURFACE_DARK = '#1a3328';
-const BRAND_ACCENT_SURFACE_LIGHT = '#dff3e6';
+/** Material / tint primary + container — matches wallpaper & dynamic color on Android 12+ and iOS accent. */
+function nativeThemeAccents(): { accent: ColorValue; accentBg: ColorValue } {
+  if (Platform.OS === 'android') {
+    return {
+      accent: PlatformColor('?attr/colorPrimary'),
+      accentBg: PlatformColor('?attr/colorPrimaryContainer'),
+    };
+  }
+  if (Platform.OS === 'ios') {
+    return {
+      accent: PlatformColor('tintColor'),
+      accentBg: PlatformColor('tertiarySystemGroupedBackground'),
+    };
+  }
+  return { accent: '#0a84ff', accentBg: '#e3f2fd' };
+}
 
-/** Standard dark greys (current app look). */
-const DARK: AppPalette = {
+type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg'>;
+
+function withNativeAccents(base: PaletteBase): AppPalette {
+  const { accent, accentBg } = nativeThemeAccents();
+  return { ...base, accent, accentBg };
+}
+
+/** Standard dark greys. Accent always follows theme primary (Material You / tint). */
+const DARK_BASE: PaletteBase = {
   bg: '#0f1419',
   card: '#1a2230',
   text: '#e8ecf1',
   muted: '#8b95a5',
   border: '#2a3444',
-  accent: BRAND_ACCENT,
-  accentBg: BRAND_ACCENT_SURFACE_DARK,
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.65)',
   flatChrome: false,
 };
 
-/** OLED-style: true black base, slightly lifted surfaces. */
-const DARK_PURE_BLACK: AppPalette = {
+const DARK_PURE_BLACK_BASE: PaletteBase = {
   bg: '#000000',
   card: '#0d0d0d',
   text: '#e8ecf1',
   muted: '#8b95a5',
   border: '#262626',
-  accent: BRAND_ACCENT,
-  accentBg: '#143628',
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.75)',
   flatChrome: false,
 };
 
-const LIGHT: AppPalette = {
+const LIGHT_BASE: PaletteBase = {
   bg: '#f5f6f8',
   card: '#ffffff',
   text: '#1a1a1a',
   muted: '#5c6570',
   border: '#e2e5ea',
-  accent: BRAND_ACCENT,
-  accentBg: BRAND_ACCENT_SURFACE_LIGHT,
   danger: '#b91c1c',
   overlay: 'rgba(0,0,0,0.4)',
   flatChrome: false,
@@ -95,16 +105,13 @@ const LIGHT: AppPalette = {
 function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette {
   const oled = pureBlackDark && isDark;
   return {
-    // Grouped stack reads clearly on Dynamic / tinted wallpapers.
     bg: oled ? '#000000' : PlatformColor('systemGroupedBackground'),
     card: oled ? '#0d0d0d' : PlatformColor('secondarySystemGroupedBackground'),
     text: PlatformColor('label'),
     muted: PlatformColor('secondaryLabel'),
     border: 'transparent',
     accent: PlatformColor('tintColor'),
-    accentBg: oled
-      ? BRAND_ACCENT_SURFACE_DARK
-      : PlatformColor('tertiarySystemGroupedBackground'),
+    accentBg: PlatformColor('tertiarySystemGroupedBackground'),
     danger: PlatformColor('systemRed'),
     overlay: DynamicColorIOS({
       light: 'rgba(0,0,0,0.4)',
@@ -123,15 +130,12 @@ function androidDynamicPalette(
   const oled = pureBlackDark && isDark;
   return {
     bg: oled ? '#000000' : PlatformColor('?attr/colorSurface'),
-    // Strongest container tint so Material You / dynamic color is obvious on cards.
     card: oled ? '#0d0d0d' : PlatformColor('?attr/colorSurfaceContainerHighest'),
     text: PlatformColor('?attr/colorOnSurface'),
     muted: PlatformColor('?attr/colorOnSurfaceVariant'),
     border: 'transparent',
     accent: PlatformColor('?attr/colorPrimary'),
-    accentBg: oled
-      ? BRAND_ACCENT_SURFACE_DARK
-      : PlatformColor('?attr/colorPrimaryContainer'),
+    accentBg: PlatformColor('?attr/colorPrimaryContainer'),
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
     flatChrome: true,
@@ -156,9 +160,11 @@ export function buildAppPalette(
   pureBlackDark: boolean,
 ): AppPalette {
   if (!isDark) {
-    return LIGHT;
+    return withNativeAccents(LIGHT_BASE);
   }
-  return pureBlackDark ? DARK_PURE_BLACK : DARK;
+  return withNativeAccents(
+    pureBlackDark ? DARK_PURE_BLACK_BASE : DARK_BASE,
+  );
 }
 
 export function resolveAppPalette(input: {
