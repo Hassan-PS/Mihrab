@@ -34,7 +34,7 @@ Builds:
       - echo "deb https://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
       - apt-get update
       - apt-get install -y curl ca-certificates xz-utils
-      - apt-get install -y -t trixie openjdk-21-jdk-headless
+      - apt-get install -y -t trixie openjdk-17-jdk-headless
       - update-alternatives --auto java
       - curl -Lo node.tar.xz https://nodejs.org/dist/v20.19.0/node-v20.19.0-linux-x64.tar.xz
       - echo "b4e336584d62abefad31baecff7af167268be9bb7dd11f1297112e6eed3ca0d5 node.tar.xz"
@@ -44,6 +44,8 @@ Builds:
     init:
       - cd ..
       - npm ci --no-audit
+    prebuild:
+      - printf '\norg.gradle.java.home=%s\n' "$(dirname $(dirname $(readlink -f $(command -v java))))" >> gradle.properties
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
@@ -55,8 +57,9 @@ Builds:
 MaintainerNotes: |
   React Native 0.83: Node 20 from upstream tarball (checksum-verified). `npm ci`
   runs from repo root; Gradle runs in `android/` with product flavor `fdroid`
-  (no Play Billing). Gradle 9 needs JDK 17+; install `openjdk-21-jdk-headless`
-  from Debian trixie (same pattern as other RN/Gradle recipes on the buildserver).
+  (no Play Billing). Install `openjdk-17-jdk-headless` from trixie (default apt
+  may lack it); set `org.gradle.java.home` in `prebuild` so Gradle 9 / RN plugins
+  resolve the Java 17 toolchain.
   Scanner: `scanignore` uses `node_modules` (RN layout
   changes make per-package paths brittle) plus `android/build.gradle` for the
   AsyncStorage `local_repo` maven entry. If policy tightens, consider `scandelete`
