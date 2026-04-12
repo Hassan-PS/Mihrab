@@ -164,16 +164,12 @@ struct PrayerWidgetEntryView: View {
   }
 
   var body: some View {
-    Group {
-      if #available(iOSApplicationExtension 17.0, *) {
-        prayerContent
-          .containerBackground(for: .widget) {
-            widgetBg
-          }
-      } else {
-        prayerContent
-      }
+    ZStack(alignment: .topLeading) {
+      widgetBg
+      prayerContent
     }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .clipped()
   }
 }
 
@@ -182,7 +178,7 @@ struct PrayerWidgetExtensionBundle: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "PrayerTimesWidget", provider: Provider()) { entry in
       PrayerWidgetEntryView(entry: entry)
-        .padding(EdgeInsets(top: 12, leading: 14, bottom: 8, trailing: 8))
+        .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
     }
     .configurationDisplayName("Prayer times")
     .description("Today’s five daily prayers (Fajr–Isha). After Isha, shows tomorrow.")

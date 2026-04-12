@@ -21,7 +21,9 @@ type PrayerWidgetNative = {
 
 function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
   return (
-    settings.appearance === 'system' && settings.useSystemDynamicTheme
+    Platform.OS === 'android' &&
+    settings.appearance === 'system' &&
+    settings.useSystemDynamicTheme
   );
 }
 

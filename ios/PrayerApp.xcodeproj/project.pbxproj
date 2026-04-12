@@ -14,6 +14,8 @@
 		82792D28789AD3A9AD8EA294 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
 		F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */; };
+		E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */; };
+		E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,10 @@
 		F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerWidget.m; path = PrayerApp/PrayerWidget.m; sourceTree = "<group>"; };
 		F1A100002294A1A2E3B4C5D7 /* PrayerApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PrayerApp.entitlements; path = PrayerApp/PrayerApp.entitlements; sourceTree = "<group>"; };
 		F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetTimelineReloader.swift; path = PrayerApp/WidgetTimelineReloader.swift; sourceTree = "<group>"; };
+		E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PrayerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerWidgetExtension.swift; sourceTree = "<group>"; };
+		E1D2C3B4A5968778695A4B3C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PrayerWidgetExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,9 +47,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1D2C3B4A5968778695A4B3C8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E1D2C3B4A5968778695A4B3D1 /* PrayerWidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */,
+				E1D2C3B4A5968778695A4B3C3 /* Info.plist */,
+				E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */,
+			);
+			path = PrayerWidgetExtension;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* PrayerApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				13B07FAE1A68108700A75B9A /* PrayerApp */,
+				E1D2C3B4A5968778695A4B3D1 /* PrayerWidgetExtension */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
@@ -93,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* PrayerApp.app */,
+				E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,6 +133,16 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXContainerItemProxy section */
+		E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E1D2C3B4A5968778695A4B3CA;
+			remoteInfo = PrayerWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXNativeTarget section */
 		13B07F861A680F5B00A75B9A /* PrayerApp */ = {
 			isa = PBXNativeTarget;
@@ -117,6 +152,7 @@
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
+				E1D2C3B4A5968778695A4B3CB /* Embed Foundation Extensions */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
@@ -124,11 +160,37 @@
 			buildRules = (
 			);
 			dependencies = (
+				E1D2C3B4A5968778695A4B3CD /* PBXTargetDependency */,
 			);
 			name = PrayerApp;
 			productName = PrayerApp;
 			productReference = 13B07F961A680F5B00A75B9A /* PrayerApp.app */;
 			productType = "com.apple.product-type.application";
+		};
+/* Begin PBXTargetDependency section */
+		E1D2C3B4A5968778695A4B3CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */;
+			targetProxy = E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+		E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1D2C3B4A5968778695A4B3D0 /* Build configuration list for PBXNativeTarget "PrayerWidgetExtension" */;
+			buildPhases = (
+				E1D2C3B4A5968778695A4B3C7 /* Sources */,
+				E1D2C3B4A5968778695A4B3C8 /* Frameworks */,
+				E1D2C3B4A5968778695A4B3C9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PrayerWidgetExtension;
+			productName = PrayerWidgetExtension;
+			productReference = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -140,6 +202,9 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
+					};
+					E1D2C3B4A5968778695A4B3CA = {
+						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
@@ -157,6 +222,7 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* PrayerApp */,
+				E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -172,7 +238,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1D2C3B4A5968778695A4B3C9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E1D2C3B4A5968778695A4B3CB /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
@@ -260,6 +347,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E1D2C3B4A5968778695A4B3C7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -272,7 +367,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
@@ -282,7 +377,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.2;
+				MARKETING_VERSION = 1.4.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -306,7 +401,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PrayerApp;
@@ -315,7 +410,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.2;
+				MARKETING_VERSION = 1.4.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -477,6 +572,67 @@
 			};
 			name = Release;
 		};
+
+		E1D2C3B4A5968778695A4B3CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 15;
+				DEVELOPMENT_TEAM = GAW23HT439;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer times";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.4.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		E1D2C3B4A5968778695A4B3CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
+				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 15;
+				DEVELOPMENT_TEAM = GAW23HT439;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer times";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.4.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -494,6 +650,15 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E1D2C3B4A5968778695A4B3D0 /* Build configuration list for PBXNativeTarget "PrayerWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1D2C3B4A5968778695A4B3CE /* Debug */,
+				E1D2C3B4A5968778695A4B3CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

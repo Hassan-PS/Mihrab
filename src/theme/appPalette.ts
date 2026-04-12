@@ -41,7 +41,12 @@ export function shouldUseDynamicSystemColors(
   appearance: AppearancePreference | undefined,
   useSystemDynamicTheme: boolean | undefined,
 ): boolean {
-  return (appearance ?? 'system') === 'system' && !!useSystemDynamicTheme;
+  /** Material You / dynamic palette — Android only; iOS uses brand accents with System theme. */
+  return (
+    Platform.OS === 'android' &&
+    (appearance ?? 'system') === 'system' &&
+    !!useSystemDynamicTheme
+  );
 }
 
 type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg'>;

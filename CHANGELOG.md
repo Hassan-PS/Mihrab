@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.3] — 2026-04-12
+
+### Added
+- **iOS**: **WidgetKit extension** (`PrayerWidgetExtension`) embedded in the app — home screen widget matches Android (five prayers + next-prayer highlight) via App Group `group.com.prayerapp`.
+
+### Changed
+- **Portrait only**: iPhone/iPad app **portrait** orientation; Android `MainActivity` and widget configure activity use **`screenOrientation="portrait"`**.
+- **System colors (Material You / dynamic palette)**: setting and palette path are **Android-only**. On **iOS**, System theme uses standard surfaces with **brand green** accents (same as Light/Dark accent behavior).
+- HTTP `User-Agent` prefix **PrayerTimes/1.4.3**.
+
+### Release builds
+- Android `versionName` **1.4.3**, `versionCode` **17**.
+- iOS `MARKETING_VERSION` **1.4.3**, `CURRENT_PROJECT_VERSION` **15**.
+
+[1.4.3]: https://github.com/Hassan-PS/PrayerApp/compare/v1.4.2...v1.4.3
+
 ## [1.3.7] — 2026-04-11
 
 ### Added
