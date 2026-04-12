@@ -1,6 +1,6 @@
 #import <React/RCTBridgeModule.h>
 
-@import WidgetKit;
+#import "PrayerApp-Swift.h"
 
 @interface PrayerWidget : NSObject <RCTBridgeModule>
 @end
@@ -27,9 +27,7 @@ RCT_EXPORT_METHOD(setData
     [[NSUserDefaults standardUserDefaults] setObject:json
                                                 forKey:@"prayer_widget_payload_v1"];
   }
-  if (@available(iOS 14.0, *)) {
-    [[WidgetCenter sharedWidgetCenter] reloadAllTimelines];
-  }
+  [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);
 }
 
@@ -44,9 +42,7 @@ RCT_EXPORT_METHOD(setUiHints:(NSString *)style
   [target setObject:(style != nil ? style : @"fixed") forKey:@"widget_ui_style"];
   [target setBool:oled forKey:@"widget_oled"];
   [target synchronize];
-  if (@available(iOS 14.0, *)) {
-    [[WidgetCenter sharedWidgetCenter] reloadAllTimelines];
-  }
+  [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);
 }
 
@@ -59,9 +55,7 @@ RCT_EXPORT_METHOD(setWidgetHighlightDynamic:(BOOL)enabled
   NSUserDefaults *target = group != nil ? group : [NSUserDefaults standardUserDefaults];
   [target setBool:enabled forKey:@"widget_highlight_dynamic"];
   [target synchronize];
-  if (@available(iOS 14.0, *)) {
-    [[WidgetCenter sharedWidgetCenter] reloadAllTimelines];
-  }
+  [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);
 }
 
@@ -84,9 +78,7 @@ RCT_EXPORT_METHOD(setIosWidgetHighlightAppearance:(NSString *)highlightId
   }
   [target setBool:dynamic forKey:@"widget_highlight_dynamic"];
   [target synchronize];
-  if (@available(iOS 14.0, *)) {
-    [[WidgetCenter sharedWidgetCenter] reloadAllTimelines];
-  }
+  [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);
 }
 
