@@ -1,6 +1,3 @@
-# Copy to fdroiddata: metadata/com.prayer_times.yml, metadata/com.prayer_times/*.patch,
-# and metadata/com.prayer_times/en-US/summary.txt (then delete these comment lines).
-
 Categories:
   - Time
 License: Apache-2.0
@@ -25,7 +22,6 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/PrayerApp
 
 Builds:
-
   - versionName: 1.4.1
     versionCode: 15
     commit: v1.4.1
