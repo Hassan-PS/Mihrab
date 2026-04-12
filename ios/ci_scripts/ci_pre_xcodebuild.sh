@@ -23,6 +23,12 @@ fi
 export NODE_BINARY="$(command -v node)"
 echo "ci_pre_xcodebuild: node $($NODE_BINARY --version)"
 
+# Xcode script phases often run with a reduced PATH; pin Node for the RN bundle step on Xcode Cloud.
+if [ -n "${CI_PRIMARY_REPOSITORY_PATH}" ] && [ -n "${NODE_BINARY}" ]; then
+  echo "export NODE_BINARY=${NODE_BINARY}" >"${IOS}/.xcode.env.local"
+  echo "ci_pre_xcodebuild: wrote ${IOS}/.xcode.env.local"
+fi
+
 if [ ! -d node_modules ] || [ ! -f node_modules/react-native/package.json ]; then
   echo "ci_pre_xcodebuild: node_modules missing or incomplete, running npm ci"
   if [ -f package-lock.json ]; then
