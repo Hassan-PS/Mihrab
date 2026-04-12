@@ -4,13 +4,18 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import android.widget.RadioGroup
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import kotlin.math.max
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -34,12 +39,26 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
     }
 
     setResult(RESULT_CANCELED)
+    WindowCompat.setDecorFitsSystemWindows(window, false)
     setContentView(R.layout.activity_prayer_widget_configure)
 
-    supportActionBar?.apply {
-      setTitle(R.string.widget_configure_title)
-      setDisplayHomeAsUpEnabled(true)
+    val root = findViewById<LinearLayout>(R.id.widget_configure_root)
+    ViewCompat.setOnApplyWindowInsetsListener(root) { v, windowInsets ->
+      val bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+      val cutout = windowInsets.getInsets(WindowInsetsCompat.Type.displayCutout())
+      v.setPadding(
+        max(bars.left, cutout.left),
+        max(bars.top, cutout.top),
+        max(bars.right, cutout.right),
+        max(bars.bottom, cutout.bottom),
+      )
+      windowInsets
     }
+    ViewCompat.requestApplyInsets(root)
+
+    val toolbar = findViewById<MaterialToolbar>(R.id.widget_configure_toolbar)
+    setSupportActionBar(toolbar)
+    toolbar.setNavigationOnClickListener { finish() }
 
     val prefs = getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
     val opacityStored =
@@ -155,11 +174,4 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
     }
   }
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    if (item.itemId == android.R.id.home) {
-      finish()
-      return true
-    }
-    return super.onOptionsItemSelected(item)
-  }
 }
