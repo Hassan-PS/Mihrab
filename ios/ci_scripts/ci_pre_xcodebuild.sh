@@ -1,13 +1,19 @@
 #!/bin/sh
 # Last chance before xcodebuild: ensure RN + CocoaPods outputs exist on Xcode Cloud.
-# Logs showed archive failing when Pods-PrayerApp.release.xcconfig was still missing.
 
 set -e
 
-ROOT="${CI_PRIMARY_REPOSITORY_PATH:-$(cd "$(dirname "$0")/.." && pwd)}"
-cd "$ROOT"
+if [ -n "${CI_PRIMARY_REPOSITORY_PATH}" ]; then
+  ROOT="${CI_PRIMARY_REPOSITORY_PATH}"
+  IOS="${ROOT}/ios"
+else
+  IOS="$(cd "$(dirname "$0")/.." && pwd)"
+  ROOT="$(cd "${IOS}/.." && pwd)"
+fi
 
-echo "ci_pre_xcodebuild: REPO=$ROOT"
+cd "${ROOT}"
+
+echo "ci_pre_xcodebuild: ROOT=${ROOT} IOS=${IOS}"
 
 if ! command -v node >/dev/null 2>&1; then
   echo "ci_pre_xcodebuild: installing Node via Homebrew"
@@ -15,7 +21,7 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 
 export NODE_BINARY="$(command -v node)"
-echo "ci_pre_xcodebuild: node $($NODE_BINARY --version) NODE_BINARY=$NODE_BINARY"
+echo "ci_pre_xcodebuild: node $($NODE_BINARY --version)"
 
 if [ ! -d node_modules ] || [ ! -f node_modules/react-native/package.json ]; then
   echo "ci_pre_xcodebuild: node_modules missing or incomplete, running npm ci"
@@ -26,7 +32,7 @@ if [ ! -d node_modules ] || [ ! -f node_modules/react-native/package.json ]; the
   fi
 fi
 
-cd ios
+cd "${IOS}"
 RELEASE_CFG="Pods/Target Support Files/Pods-PrayerApp/Pods-PrayerApp.release.xcconfig"
 if [ ! -f "$RELEASE_CFG" ]; then
   echo "ci_pre_xcodebuild: $RELEASE_CFG missing, running pod install"
