@@ -14,7 +14,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import notifee, { AndroidNotificationSetting } from '@notifee/react-native';
+import notifee, {
+  AndroidNotificationSetting,
+  AuthorizationStatus,
+} from '@notifee/react-native';
 import { PlaceSearchSection } from '../components/PlaceSearchSection';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -156,6 +159,19 @@ export function SettingsScreen() {
       updateSettings({ notificationsEnabled: false });
       return;
     }
+    if (Platform.OS === 'ios') {
+      const perm = await notifee.requestPermission({
+        alert: true,
+        badge: true,
+        sound: true,
+      });
+      const ok =
+        perm.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+        perm.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+      if (!ok) {
+        return;
+      }
+    }
     if (
       Platform.OS === 'android' &&
       typeof Platform.Version === 'number' &&
@@ -236,33 +252,35 @@ export function SettingsScreen() {
               </Pressable>
             ))}
           </View>
-          <View
-            style={[
-              styles.switchRow,
-              {
-                marginTop: 14,
-                opacity: settings.appearance === 'system' ? 1 : 0.45,
-              },
-            ]}
-            pointerEvents={
-              settings.appearance === 'system' ? 'auto' : 'none'
-            }>
-            <View style={styles.switchCopy}>
-              <Text style={[styles.valueText, { color: palette.text }]}>
-                {t('settings.systemDynamicColors')}
-              </Text>
-              <Text style={[styles.help, { color: palette.muted }]}>
-                {t('settings.systemDynamicColorsHelp')}
-              </Text>
+          {Platform.OS === 'android' && (
+            <View
+              style={[
+                styles.switchRow,
+                {
+                  marginTop: 14,
+                  opacity: settings.appearance === 'system' ? 1 : 0.45,
+                },
+              ]}
+              pointerEvents={
+                settings.appearance === 'system' ? 'auto' : 'none'
+              }>
+              <View style={styles.switchCopy}>
+                <Text style={[styles.valueText, { color: palette.text }]}>
+                  {t('settings.systemDynamicColors')}
+                </Text>
+                <Text style={[styles.help, { color: palette.muted }]}>
+                  {t('settings.systemDynamicColorsHelp')}
+                </Text>
+              </View>
+              <Switch
+                value={settings.useSystemDynamicTheme}
+                disabled={settings.appearance !== 'system'}
+                onValueChange={v =>
+                  updateSettings({ useSystemDynamicTheme: v })
+                }
+              />
             </View>
-            <Switch
-              value={settings.useSystemDynamicTheme}
-              disabled={settings.appearance !== 'system'}
-              onValueChange={v =>
-                updateSettings({ useSystemDynamicTheme: v })
-              }
-            />
-          </View>
+          )}
           <Text style={[styles.help, { color: palette.muted }]}>
             {t('settings.themeHelp')}
           </Text>

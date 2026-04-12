@@ -2,6 +2,7 @@ import notifee, {
   AlarmType,
   AndroidImportance,
   AndroidNotificationSetting,
+  AuthorizationStatus,
   TriggerType,
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
@@ -15,12 +16,22 @@ import {
 const CHANNEL_ID = 'prayer-times';
 
 async function ensureChannel() {
+  if (Platform.OS !== 'android') {
+    return;
+  }
   await notifee.createChannel({
     id: CHANNEL_ID,
     name: 'Prayer times',
     importance: AndroidImportance.HIGH,
     vibration: true,
   });
+}
+
+function iosNotificationsAllowed(status: AuthorizationStatus): boolean {
+  return (
+    status === AuthorizationStatus.AUTHORIZED ||
+    status === AuthorizationStatus.PROVISIONAL
+  );
 }
 
 async function canUseExactAlarms(): Promise<boolean> {
@@ -63,6 +74,12 @@ export async function syncPrayerNotifications(params: {
   if (!params.enabled) {
     return;
   }
+  if (Platform.OS === 'ios') {
+    const n = await notifee.getNotificationSettings();
+    if (!iosNotificationsAllowed(n.authorizationStatus)) {
+      return;
+    }
+  }
   await ensureChannel();
   const exactAlarms = await canUseExactAlarms();
   const now = new Date();
@@ -84,6 +101,9 @@ export async function syncPrayerNotifications(params: {
         id: notificationId,
         title: e.name,
         body: i18n.t('alertCopy.atPrayer'),
+        ios: {
+          sound: 'default',
+        },
         android: {
           channelId: CHANNEL_ID,
           pressAction: { id: 'default' },
@@ -102,6 +122,9 @@ export async function syncPrayerNotifications(params: {
         body: i18n.t('alertCopy.prePrayer', {
           count: reminderMinutes,
         }),
+        ios: {
+          sound: 'default',
+        },
         android: {
           channelId: CHANNEL_ID,
           pressAction: { id: 'default' },

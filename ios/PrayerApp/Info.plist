@@ -34,7 +34,7 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Prayer Times uses your approximate location to compute prayer times and Qibla direction for your area. Your coordinates are used with the prayer-time source you select in Settings (for example to request today’s schedule from that service). You can turn off GPS and enter coordinates or search for a place manually instead.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Motion is used to show the Qibla compass direction.</string>
 	<key>RCTNewArchEnabled</key>
@@ -48,8 +48,10 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
