@@ -8,7 +8,7 @@ A small **React Native** app for **daily Islamic prayer times**, **Qibla**, and 
 
 | Channel | Link |
 |--------|------|
-| **GitHub Releases** | [Latest release](https://github.com/Hassan-PS/PrayerApp/releases/latest) — **`app-play-release.apk`** (Play flavor, optional tips), **`app-fdroid-release.apk`** (no billing), **`app-play-release.aab`** (upload to Google Play). |
+| **GitHub Releases** | [Latest release](https://github.com/Hassan-PS/PrayerApp/releases/latest) — **`app-play-release.apk`** (Play flavor, optional tips), **`app-fdroid-release.apk`** (no billing), **`app-play-release.aab`** (upload to Google Play). Pushing a version tag **`v*`** runs [`.github/workflows/release-android.yml`](.github/workflows/release-android.yml) to build and **attach** those three files (GitHub’s source zip/tar are automatic extras). |
 | **Google Play** | Install from the store when available; maintainers ship the **AAB** from the `play` flavor (`bundlePlayRelease`). |
 | **F-Droid** | Recipe in [`contrib/fdroid/`](contrib/fdroid/README.md); [fdroiddata](https://gitlab.com/fdroid/fdroiddata) merge request when the listing is accepted. |
 

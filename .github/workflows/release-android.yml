@@ -1,0 +1,48 @@
+# Attach Play + F-Droid APKs and Play AAB to the GitHub Release for the pushed tag
+# (same filenames as README: app-play-release.apk, app-fdroid-release.apk, app-play-release.aab).
+name: Release Android artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build release APKs and AAB
+        working-directory: android
+        run: ./gradlew assemblePlayRelease assembleFdroidRelease bundlePlayRelease --no-daemon
+        env:
+          GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8'
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            android/app/build/outputs/apk/play/release/app-play-release.apk
+            android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+            android/app/build/outputs/bundle/playRelease/app-play-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
