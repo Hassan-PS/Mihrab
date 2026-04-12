@@ -31,6 +31,52 @@ target 'PrayerApp' do
       # :ccache_enabled => true
     )
 
+    # fmt 11 + Apple Clang: Xcode 16+ still hits __cpp_consteval=1 because upstream only
+    # disables consteval for __apple_build_version__ < 14000029L. Patch before __cpp_consteval.
+    fmt_base = File.join(__dir__, 'Pods', 'fmt', 'include', 'fmt', 'base.h')
+    if File.exist?(fmt_base)
+      contents = File.read(fmt_base)
+      unless contents.include?('PRAYERAPP_APPLE_CONSTEVAL_OFF')
+        insert = <<~'PATCH'.strip
+// PRAYERAPP_APPLE_CONSTEVAL_OFF — ios/Podfile (Apple clang / fmt 11, all Xcode versions).
+#elif defined(__apple_build_version__)
+#  define FMT_USE_CONSTEVAL 0
+PATCH
+        patched = nil
+        cpp_consteval_tail = <<~'T'.strip
+#elif defined(__cpp_consteval)
+#  define FMT_USE_CONSTEVAL 1
+T
+        # fmt 11.0.2+ (React Native): Apple-old, MSVC, then __cpp_consteval.
+        prefix_new = <<~'T'.strip
+#elif defined(__apple_build_version__) && __apple_build_version__ < 14000029L
+#  define FMT_USE_CONSTEVAL 0  // consteval is broken in Apple clang < 14.
+#elif FMT_MSC_VERSION && FMT_MSC_VERSION < 1929
+#  define FMT_USE_CONSTEVAL 0  // consteval is broken in MSVC VS2019 < 16.10.
+T
+        needle_new = prefix_new + cpp_consteval_tail
+        replacement_new = prefix_new + insert + "\n" + cpp_consteval_tail
+        # Older fmt layout (no Apple-<14 branch).
+        prefix_old = <<~'T'.strip
+#elif FMT_MSC_VERSION && FMT_MSC_VERSION < 1929
+#  define FMT_USE_CONSTEVAL 0  // consteval is broken in MSVC VS2019 < 16.10.
+T
+        needle_old = prefix_old + cpp_consteval_tail
+        replacement_old = prefix_old + insert + "\n" + cpp_consteval_tail
+        if contents.include?(needle_new)
+          patched = contents.sub(needle_new, replacement_new)
+        elsif contents.include?(needle_old)
+          patched = contents.sub(needle_old, replacement_old)
+        end
+        if patched
+          File.chmod(0o644, fmt_base)
+          File.write(fmt_base, patched)
+        else
+          Pod::UI.warn 'PrayerApp: fmt base.h patch skipped (unexpected upstream layout).'
+        end
+      end
+    end
+
     # Xcode 16+/26: Clang/Swift "explicit modules" + dependency scanning expects
     # .modulemap under DerivedData before some Pod targets have built — breaks
     # AsyncStorage, RNIap, RCTSwiftUI, etc. (same on device and simulator.)
@@ -42,7 +88,32 @@ target 'PrayerApp' do
       target.build_configurations.each do |cfg|
         cfg.build_settings['CLANG_ENABLE_EXPLICIT_MODULES'] = 'NO'
         cfg.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'NO'
+        # Xcode 15+ / 26: allow non-modular includes in framework modules (React Native Pods).
+        cfg.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        # fmt 11 + Apple Clang (Xcode 16+): consteval format_string fails; base.h overrides -D flags.
+        if target.name == 'fmt'
+          defs = cfg.build_settings['GCC_PREPROCESSOR_DEFINITIONS']
+          defs = [defs] if defs.is_a?(String)
+          defs = defs.is_a?(Array) ? defs : ['$(inherited)']
+          defs << 'FMT_USE_CONSTEVAL=0' unless defs.any? { |d| d.to_s.include?('FMT_USE_CONSTEVAL') }
+          cfg.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
+        end
       end
     end
   end
+end
+
+# Ensure Pods-PrayerApp is built before PrayerApp (fixes Swift __preview.dylib / Previews builds
+# that otherwise compile the app before pod products and module maps exist).
+post_integrate do |installer|
+  scheme_path = File.expand_path('PrayerApp.xcodeproj/xcshareddata/xcschemes/PrayerApp.xcscheme', __dir__)
+  pods_target = installer.pods_project.targets.find { |t| t.name == 'Pods-PrayerApp' }
+  next unless pods_target && File.exist?(scheme_path)
+
+  contents = File.read(scheme_path)
+  updated = contents.sub(
+    /BlueprintIdentifier = "[0-9A-F]{24}"(\s+BuildableName = "libPods-PrayerApp\.a")/,
+    %(BlueprintIdentifier = "#{pods_target.uuid}"\\1)
+  )
+  File.write(scheme_path, updated) if updated != contents
 end
