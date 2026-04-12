@@ -21,17 +21,20 @@ else
 fi
 
 cd ios
-
 export NODE_BINARY="${NODE_BINARY:-$(command -v node)}"
 echo "ci_post_clone: NODE_BINARY=$NODE_BINARY"
 
-if [ -f ../Gemfile ]; then
+# Prefer system CocoaPods (available on Xcode Cloud). Bundler + Gemfile can fail if
+# gems cannot resolve on the CI image, which would skip Pods entirely with set -e.
+if command -v pod >/dev/null 2>&1; then
+  echo "ci_post_clone: running pod install (system pod)"
+  pod install
+else
+  echo "ci_post_clone: pod not on PATH, using bundle exec"
   cd ..
   bundle install
   cd ios
   bundle exec pod install
-else
-  pod install
 fi
 
 echo "ci_post_clone: done"
