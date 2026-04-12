@@ -8,9 +8,9 @@ A small **React Native** app for **daily Islamic prayer times**, **Qibla**, and 
 
 | Channel | Link |
 |--------|------|
-| **GitHub Releases** | [Latest APK](https://github.com/Hassan-PS/PrayerApp/releases/latest) (direct install on Android) |
-| **Google Play** | Uploads use the release **AAB** from maintainers; check the store for the listing when published. |
-| **F-Droid** | Build the `fdroid` flavor (see below); listing is added via [fdroiddata](https://gitlab.com/fdroid/fdroiddata) when published. |
+| **GitHub Releases** | [Latest release](https://github.com/Hassan-PS/PrayerApp/releases/latest) — **`app-play-release.apk`** (Play flavor, optional tips), **`app-fdroid-release.apk`** (no billing), **`app-play-release.aab`** (upload to Google Play). |
+| **Google Play** | Install from the store when available; maintainers ship the **AAB** from the `play` flavor (`bundlePlayRelease`). |
+| **F-Droid** | Recipe in [`contrib/fdroid/`](contrib/fdroid/README.md); [fdroiddata](https://gitlab.com/fdroid/fdroiddata) merge request when the listing is accepted. |
 
 Release notes and history: [CHANGELOG.md](CHANGELOG.md).
 
@@ -40,7 +40,7 @@ Or: `cd android && ./gradlew assembleFdroidRelease`. Use `assemblePlayRelease` f
 - **Today’s times** on the home screen, with optional **alerts** for the five daily prayers.
 - **Whole month** view for planning ahead.
 - **Qibla** direction from the app bar (device sensors).
-- **Home screen widget** (medium / large on iOS; Android widget with next-prayer highlight).
+- **Home screen widget** (medium / large on iOS; Android widget with next-prayer highlight). On Android, **long-press the widget → settings** to adjust background strength and highlight color; that screen uses the system status bar and navigation areas correctly on current Android versions.
 - **Location**: GPS or manual coordinates, with **place search** (Nominatim) where supported.
 - **Sources**: configurable providers (e.g. AlAdhan, Sweden city list, others — see in-app settings).
 - **Look & feel**: English, **Swedish**, and **Arabic** (with RTL layout); **System / Light / Dark** theme; optional **system colors** (including Material You on Android) and **pure black** for OLED; app and widget follow the same choices when system theme is used.
@@ -62,7 +62,16 @@ npm start          # Metro
 npm run android    # or: npm run ios (after CocoaPods: bundle exec pod install in ios/)
 ```
 
-Useful scripts include `npm run generate-icons` (regenerates launcher icons from `assets/app-icon-source.png`). For deeper native work, use **Android Studio** / **Xcode** as usual. Android release builds must pick a flavor (`play` or `fdroid`); see **F-Droid build** above.
+Useful scripts include `npm run generate-icons` (regenerates launcher icons from `assets/app-icon-source.png`). For deeper native work, use **Android Studio** / **Xcode** as usual.
+
+**Android release artifacts** (from repo root after `npm install`):
+
+```sh
+npm run android:releaseAll
+# or: cd android && ./gradlew assemblePlayRelease assembleFdroidRelease bundlePlayRelease
+```
+
+Outputs live under `android/app/build/outputs/` (`apk/play/release`, `apk/fdroid/release`, `bundle/playRelease`). Release builds must pick a flavor (`play` or `fdroid`); see **F-Droid build** above.
 
 ---
 
