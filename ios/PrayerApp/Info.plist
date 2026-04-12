@@ -35,6 +35,8 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Prayer Times uses your approximate location to compute prayer times and Qibla direction for your area. Your coordinates are used with the prayer-time source you select in Settings (for example to request today’s schedule from that service). You can turn off GPS and enter coordinates or search for a place manually instead.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Prayer Times uses your location only to compute prayer times and Qibla—not for advertising. Location is normally used while you use the app; if the system offers broader access for the same features, it is still limited to prayer-time and Qibla functionality. You can use manual location in Settings instead of GPS.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Motion is used to show the Qibla compass direction.</string>
 	<key>RCTNewArchEnabled</key>
