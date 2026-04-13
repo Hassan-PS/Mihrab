@@ -183,7 +183,7 @@
   "support": {
     "section": "Support the publisher",
     "title": "Tip the developer",
-    "help": "Optional one-time tip. Payment is processed by Apple or Google and goes to the app publisher. You can tip again anytime.",
+    "help": "Optional one-time tip. Payment is processed by your app store and goes to the app publisher. You can tip again anytime.",
     "thankYou": "Thank you for your support.",
     "dismiss": "Dismiss",
     "loadingPrice": "Loading price…",

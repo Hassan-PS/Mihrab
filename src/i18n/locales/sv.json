@@ -183,7 +183,7 @@
   "support": {
     "section": "Stöd utgivaren",
     "title": "Dricks till utvecklaren",
-    "help": "Valfri engångsdricks. Betalningen hanteras av Apple eller Google och går till appens utgivare. Du kan dricksa igen när som helst.",
+    "help": "Valfri engångsdricks. Betalningen hanteras av appbutiken på din enhet och går till appens utgivare. Du kan dricksa igen när som helst.",
     "thankYou": "Tack för ditt stöd.",
     "dismiss": "Stäng",
     "loadingPrice": "Laddar pris…",

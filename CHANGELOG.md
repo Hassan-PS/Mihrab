@@ -10,11 +10,12 @@ All notable changes to this project are documented here. The format is inspired 
 ### Changed
 - **Portrait only**: iPhone/iPad app **portrait** orientation; Android `MainActivity` and widget configure activity use **`screenOrientation="portrait"`**.
 - **System colors (Material You / dynamic palette)**: setting and palette path are **Android-only**. On **iOS**, System theme uses standard surfaces with **brand green** accents (same as Light/Dark accent behavior).
+- **iOS**: optional **tip / IAP** UI is **omitted** (tips remain on Android Play builds only). Support copy no longer names other app stores.
 - HTTP `User-Agent` prefix **PrayerTimes/1.4.3**.
 
 ### Release builds
 - Android `versionName` **1.4.3**, `versionCode` **17**.
-- iOS `MARKETING_VERSION` **1.4.3**, `CURRENT_PROJECT_VERSION` **15**.
+- iOS `MARKETING_VERSION` **1.4.3**, `CURRENT_PROJECT_VERSION` **17**.
 
 [1.4.3]: https://github.com/Hassan-PS/PrayerApp/compare/v1.4.2...v1.4.3
 

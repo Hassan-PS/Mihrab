@@ -5,8 +5,7 @@ type PrayerBuildInfoNative = {
 };
 
 /**
- * Google Play / default Android build — includes optional in-app tips (IAP).
- * F-Droid build omits Play Billing and must not show donation UI.
+ * Android: `play` vs `fdroid` (F-Droid omits billing). iOS is not `android`.
  */
 export function getAndroidDistribution(): 'play' | 'fdroid' {
   if (Platform.OS !== 'android') {
@@ -16,6 +15,10 @@ export function getAndroidDistribution(): 'play' | 'fdroid' {
   return m?.distribution === 'fdroid' ? 'fdroid' : 'play';
 }
 
+/**
+ * Optional tips (IAP) — **Android Play flavor only**.
+ * iOS build omits this UI so review does not require IAP products until they are configured in App Store Connect.
+ */
 export function showDonationsUi(): boolean {
-  return getAndroidDistribution() !== 'fdroid';
+  return Platform.OS === 'android' && getAndroidDistribution() !== 'fdroid';
 }
