@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.4] — 2026-04-14
+
+### Changed
+- **Compass (iOS + Android)**: improved diagnostics for weak/very weak signal and unstable movement, with actionable calibration guidance (move away from metal/electronics, remove magnetic accessories, do a slow figure-8, hold steady).
+- **iOS compass permission UX**: clearer startup prompt guidance and explicit denied-permission messaging with direct path to system settings.
+- HTTP `User-Agent` prefix **PrayerTimes/1.4.4**.
+
+### Release builds
+- Android `versionName` **1.4.4**, `versionCode` **18**.
+- iOS `MARKETING_VERSION` **1.4.4**, `CURRENT_PROJECT_VERSION` **18**.
+
+[1.4.4]: https://github.com/Hassan-PS/PrayerApp/compare/v1.4.3...v1.4.4
+
 ## [1.4.3] — 2026-04-12
 
 ### Added
