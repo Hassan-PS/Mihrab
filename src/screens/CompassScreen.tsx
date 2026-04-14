@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   StyleSheet,
   Text,
@@ -22,13 +23,18 @@ import {
 
 const DIAL = 260;
 const SMOOTH = 0.15;
-const SENSOR_TIMEOUT_MS = 2800;
+const SENSOR_TIMEOUT_MS = 10000;
 const HEADING_HISTORY = 12;
 
-type CompassMode = 'checking' | 'live' | 'unsupported';
+type CompassMode =
+  | 'checking'
+  | 'live'
+  | 'unsupported'
+  | 'permission_denied';
 
 /** -1 = checking, -2 = off, 0–100 = live strength */
 type SignalStrength = number;
+type SignalQuality = 'unknown' | 'good' | 'weak' | 'very_weak';
 
 function headingFromMagnetometer(x: number, y: number): number {
   if (Platform.OS === 'ios') {
@@ -84,6 +90,8 @@ export function CompassScreen() {
   const [heading, setHeading] = useState(0);
   const [mode, setMode] = useState<CompassMode>('checking');
   const [signalStrength, setSignalStrength] = useState<SignalStrength>(-1);
+  const [signalQuality, setSignalQuality] = useState<SignalQuality>('unknown');
+  const [stability, setStability] = useState(100);
 
   const smoothedRef = useRef(0);
   const headingHistoryRef = useRef<number[]>([]);
@@ -123,20 +131,20 @@ export function CompassScreen() {
     headingHistoryRef.current = [];
     setMode('checking');
     setSignalStrength(-1);
+    setSignalQuality('unknown');
+    setStability(100);
 
-    const failUnsupported = () => {
+    const setUnsupportedUi = () => {
       if (cancelled) {
         return;
       }
-      subscription?.unsubscribe();
-      subscription = null;
       setMode('unsupported');
       setSignalStrength(-2);
     };
 
     const timeoutId = setTimeout(() => {
       if (!cancelled && !gotSampleRef.current) {
-        failUnsupported();
+        setUnsupportedUi();
       }
     }, SENSOR_TIMEOUT_MS);
 
@@ -164,14 +172,38 @@ export function CompassScreen() {
         headingHistoryRef.current = hist;
         const field = magneticFieldScore(x, y, z ?? 0);
         const stab = stabilityScoreFromHeadings(hist);
-        setSignalStrength(combineSignal(field, stab));
+        setStability(stab);
+        const signal = combineSignal(field, stab);
+        setSignalStrength(signal);
+        if (signal < 20) {
+          setSignalQuality('very_weak');
+        } else if (signal < 45) {
+          setSignalQuality('weak');
+        } else {
+          setSignalQuality('good');
+        }
       },
-      error: () => {
+      error: error => {
         if (cancelled) {
           return;
         }
         clearTimeout(timeoutId);
-        failUnsupported();
+        const msg = String(
+          (error as { message?: string } | null)?.message ?? error ?? '',
+        ).toLowerCase();
+        const looksPermission =
+          msg.includes('permission') ||
+          msg.includes('denied') ||
+          msg.includes('not authorized') ||
+          msg.includes('motion');
+        if (Platform.OS === 'ios' && looksPermission) {
+          setMode('permission_denied');
+          setSignalStrength(-2);
+        } else {
+          setUnsupportedUi();
+        }
+        subscription?.unsubscribe();
+        subscription = null;
       },
     });
 
@@ -181,6 +213,12 @@ export function CompassScreen() {
       subscription?.unsubscribe();
     };
   }, [hydrated, needsGpsPrime]);
+
+  const canShowLiveGuidance = mode === 'live' && signalStrength >= 0;
+  const showStabilityWarning = canShowLiveGuidance && stability < 45;
+  const showWeakSignal =
+    canShowLiveGuidance &&
+    (signalQuality === 'weak' || signalQuality === 'very_weak');
 
   const bearingBlock = (
     <>
@@ -258,6 +296,48 @@ export function CompassScreen() {
       {bearingBlock}
 
       {signalRow}
+
+      {mode === 'permission_denied' && Platform.OS === 'ios' ? (
+        <View style={styles.unsupportedBanner}>
+          <Text style={[styles.unsupportedTitle, { color: palette.text }]}>
+            {t('compass.motionPermissionTitle')}
+          </Text>
+          <Text style={[styles.unsupportedBody, { color: palette.muted }]}>
+            {t('compass.motionPermissionDeniedBody')}
+          </Text>
+          <Text
+            style={[styles.settingsLink, { color: palette.accent }]}
+            onPress={() => {
+              void Linking.openSettings();
+            }}>
+            {t('compass.openSettings')}
+          </Text>
+        </View>
+      ) : null}
+
+      {showWeakSignal ? (
+        <View style={styles.unsupportedBanner}>
+          <Text style={[styles.unsupportedTitle, { color: palette.text }]}>
+            {signalQuality === 'very_weak'
+              ? t('compass.signalVeryWeakTitle')
+              : t('compass.signalWeakTitle')}
+          </Text>
+          <Text style={[styles.unsupportedBody, { color: palette.muted }]}>
+            {t('compass.signalWeakBody')}
+          </Text>
+        </View>
+      ) : null}
+
+      {showStabilityWarning ? (
+        <View style={styles.unsupportedBanner}>
+          <Text style={[styles.unsupportedTitle, { color: palette.text }]}>
+            {t('compass.motionDetectedTitle')}
+          </Text>
+          <Text style={[styles.unsupportedBody, { color: palette.muted }]}>
+            {t('compass.motionDetectedBody')}
+          </Text>
+        </View>
+      ) : null}
 
       {mode === 'unsupported' ? (
         <View style={styles.unsupportedBanner}>
@@ -359,7 +439,9 @@ export function CompassScreen() {
 
       {mode === 'checking' ? (
         <Text style={[styles.checkingHint, { color: palette.muted }]}>
-          {t('compass.checkingCompass')}
+          {Platform.OS === 'ios'
+            ? t('compass.checkingCompassWithPrompt')
+            : t('compass.checkingCompass')}
         </Text>
       ) : null}
 
@@ -460,6 +542,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
+  },
+  settingsLink: {
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '700',
   },
   dialWrap: {
     alignItems: 'center',
