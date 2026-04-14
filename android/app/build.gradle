@@ -80,6 +80,17 @@ def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+def requiredReleaseKeys = ["storeFile", "storePassword", "keyAlias", "keyPassword"]
+def hasReleaseSigningConfig = keystorePropertiesFile.exists() &&
+    requiredReleaseKeys.every { key -> (keystoreProperties[key] ?: "").toString().trim() }
+def requestedTasks = gradle.startParameter.taskNames.collect { it.toLowerCase() }
+def wantsPlayRelease = requestedTasks.any { it.contains("playrelease") }
+if (wantsPlayRelease && !hasReleaseSigningConfig) {
+    throw new GradleException(
+        "Play release builds require android/keystore.properties with storeFile/storePassword/keyAlias/keyPassword. " +
+        "Refusing to fallback to debug signing for playRelease."
+    )
+}
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -115,7 +126,7 @@ android {
             keyPassword 'android'
         }
         release {
-            if (keystorePropertiesFile.exists()) {
+            if (hasReleaseSigningConfig) {
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
                 storeFile file(keystoreProperties['storeFile'])
@@ -128,7 +139,7 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            if (keystorePropertiesFile.exists()) {
+            if (hasReleaseSigningConfig) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug

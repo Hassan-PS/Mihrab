@@ -73,6 +73,19 @@ npm run android:releaseAll
 
 Outputs live under `android/app/build/outputs/` (`apk/play/release`, `apk/fdroid/release`, `bundle/playRelease`). Release builds must pick a flavor (`play` or `fdroid`); see **F-Droid build** above.
 
+### Play signing (required)
+
+Google Play accepts upload bundles signed with your **upload key** only. This project intentionally refuses to build `playRelease` with debug signing.
+
+- Local: create `android/keystore.properties` (from `android/keystore.properties.example`) and place your keystore where `storeFile` points.
+- GitHub Actions (`release-android.yml`) requires these repository secrets:
+  - `ANDROID_UPLOAD_KEYSTORE_BASE64` (base64-encoded keystore file)
+  - `ANDROID_UPLOAD_STORE_PASSWORD`
+  - `ANDROID_UPLOAD_KEY_ALIAS`
+  - `ANDROID_UPLOAD_KEY_PASSWORD`
+
+Without those, Play release builds fail fast instead of producing an invalid `.aab`.
+
 ---
 
 *Stack: React Native, TypeScript, native Android (Kotlin) and iOS (Swift) where needed for widgets and integrations.*
