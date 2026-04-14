@@ -31,6 +31,20 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Configure release keystore for Play builds
+        run: |
+          test -n "${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}" || { echo "Missing secret: ANDROID_UPLOAD_KEYSTORE_BASE64"; exit 1; }
+          test -n "${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}" || { echo "Missing secret: ANDROID_UPLOAD_STORE_PASSWORD"; exit 1; }
+          test -n "${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}" || { echo "Missing secret: ANDROID_UPLOAD_KEY_ALIAS"; exit 1; }
+          test -n "${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}" || { echo "Missing secret: ANDROID_UPLOAD_KEY_PASSWORD"; exit 1; }
+          echo "${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          cat > android/keystore.properties <<'EOF'
+          storePassword=${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          storeFile=release.keystore
+          EOF
+
       - name: Build release APKs and AAB
         working-directory: android
         run: ./gradlew assemblePlayRelease assembleFdroidRelease bundlePlayRelease --no-daemon
