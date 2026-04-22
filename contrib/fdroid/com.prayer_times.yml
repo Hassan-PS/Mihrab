@@ -7,24 +7,13 @@ SourceCode: https://github.com/Hassan-PS/PrayerApp
 IssueTracker: https://github.com/Hassan-PS/PrayerApp/issues
 Changelog: https://github.com/Hassan-PS/PrayerApp/blob/HEAD/CHANGELOG.md
 
-Name: Prayer Times
-AutoName: Prayer Times
-Description: |
-  View daily prayer times with GPS or manual location, browse a full month,
-  use a Qibla compass, get prayer notifications, and use a home screen
-  widget (Android). Several calculation sources and locales (e.g. English,
-  Swedish, Arabic with RTL).
-
-  This build uses the upstream **fdroid** Gradle product flavor: no Google Play
-  in-app billing and no in-app “support developer” purchase UI.
-
 RepoType: git
 Repo: https://github.com/Hassan-PS/PrayerApp
 
 Builds:
-  - versionName: 1.4.1
-    versionCode: 15
-    commit: v1.4.1
+  - versionName: 1.4.4
+    versionCode: 18
+    commit: c3b1eb7
     subdir: android
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
@@ -86,5 +75,5 @@ MaintainerNotes: |
 ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.1
-CurrentVersionCode: 15
+CurrentVersion: 1.4.4
+CurrentVersionCode: 18
