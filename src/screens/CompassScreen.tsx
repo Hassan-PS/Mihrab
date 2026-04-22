@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  AppState,
   Linking,
   Platform,
   StyleSheet,
@@ -25,6 +26,8 @@ const DIAL = 260;
 const SMOOTH = 0.15;
 const SENSOR_TIMEOUT_MS = 10000;
 const HEADING_HISTORY = 12;
+const STALE_SAMPLE_MS = 1800;
+const WATCHDOG_INTERVAL_MS = 600;
 
 type CompassMode =
   | 'checking'
@@ -96,6 +99,7 @@ export function CompassScreen() {
   const smoothedRef = useRef(0);
   const headingHistoryRef = useRef<number[]>([]);
   const gotSampleRef = useRef(false);
+  const modeRef = useRef<CompassMode>('checking');
 
   useAndroidSubScreenBack();
 
@@ -127,89 +131,158 @@ export function CompassScreen() {
 
     let cancelled = false;
     let subscription: { unsubscribe: () => void } | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let watchdogId: ReturnType<typeof setInterval> | null = null;
+    let appStateSub: { remove: () => void } | null = null;
     gotSampleRef.current = false;
     headingHistoryRef.current = [];
+    smoothedRef.current = 0;
     setMode('checking');
+    modeRef.current = 'checking';
     setSignalStrength(-1);
     setSignalQuality('unknown');
     setStability(100);
+    let lastSampleAt = 0;
 
     const setUnsupportedUi = () => {
       if (cancelled) {
         return;
       }
       setMode('unsupported');
+      modeRef.current = 'unsupported';
       setSignalStrength(-2);
     };
 
-    const timeoutId = setTimeout(() => {
-      if (!cancelled && !gotSampleRef.current) {
-        setUnsupportedUi();
-      }
-    }, SENSOR_TIMEOUT_MS);
-
     setUpdateIntervalForType(SensorTypes.magnetometer, 100);
-
-    subscription = magnetometer.subscribe({
-      next: ({ x, y, z }) => {
-        if (cancelled) {
-          return;
-        }
+    const clearStartupTimeout = () => {
+      if (timeoutId != null) {
         clearTimeout(timeoutId);
-        if (!gotSampleRef.current) {
-          gotSampleRef.current = true;
-          setMode('live');
-        }
+        timeoutId = null;
+      }
+    };
 
-        const raw = headingFromMagnetometer(x, y);
-        const prev = smoothedRef.current;
-        const delta = shortestAngleDiff(prev, raw);
-        const nextH = normalizeHeadingDeg(prev + delta * SMOOTH);
-        smoothedRef.current = nextH;
-        setHeading(nextH);
-
-        const hist = [...headingHistoryRef.current.slice(-(HEADING_HISTORY - 1)), raw];
-        headingHistoryRef.current = hist;
-        const field = magneticFieldScore(x, y, z ?? 0);
-        const stab = stabilityScoreFromHeadings(hist);
-        setStability(stab);
-        const signal = combineSignal(field, stab);
-        setSignalStrength(signal);
-        if (signal < 20) {
-          setSignalQuality('very_weak');
-        } else if (signal < 45) {
-          setSignalQuality('weak');
-        } else {
-          setSignalQuality('good');
-        }
-      },
-      error: error => {
-        if (cancelled) {
-          return;
-        }
-        clearTimeout(timeoutId);
-        const msg = String(
-          (error as { message?: string } | null)?.message ?? error ?? '',
-        ).toLowerCase();
-        const looksPermission =
-          msg.includes('permission') ||
-          msg.includes('denied') ||
-          msg.includes('not authorized') ||
-          msg.includes('motion');
-        if (Platform.OS === 'ios' && looksPermission) {
-          setMode('permission_denied');
-          setSignalStrength(-2);
-        } else {
+    const scheduleStartupTimeout = () => {
+      clearStartupTimeout();
+      timeoutId = setTimeout(() => {
+        if (!cancelled && !gotSampleRef.current) {
           setUnsupportedUi();
         }
-        subscription?.unsubscribe();
-        subscription = null;
-      },
+      }, SENSOR_TIMEOUT_MS);
+    };
+
+    const restartSubscription = () => {
+      if (cancelled) {
+        return;
+      }
+      subscription?.unsubscribe();
+      subscription = null;
+      gotSampleRef.current = false;
+      headingHistoryRef.current = [];
+      lastSampleAt = 0;
+      setMode('checking');
+      modeRef.current = 'checking';
+      setSignalStrength(-1);
+      setSignalQuality('unknown');
+      setStability(100);
+      scheduleStartupTimeout();
+      startSubscription();
+    };
+
+    const startSubscription = () => {
+      subscription?.unsubscribe();
+      subscription = magnetometer.subscribe({
+        next: ({ x, y, z }) => {
+          if (cancelled) {
+            return;
+          }
+          clearStartupTimeout();
+          lastSampleAt = Date.now();
+          if (!gotSampleRef.current) {
+            gotSampleRef.current = true;
+            setMode('live');
+            modeRef.current = 'live';
+          }
+
+          const raw = headingFromMagnetometer(x, y);
+          const prev = smoothedRef.current;
+          const delta = shortestAngleDiff(prev, raw);
+          const nextH = normalizeHeadingDeg(prev + delta * SMOOTH);
+          smoothedRef.current = nextH;
+          setHeading(nextH);
+
+          const hist = [...headingHistoryRef.current.slice(-(HEADING_HISTORY - 1)), raw];
+          headingHistoryRef.current = hist;
+          const field = magneticFieldScore(x, y, z ?? 0);
+          const stab = stabilityScoreFromHeadings(hist);
+          setStability(stab);
+          const signal = combineSignal(field, stab);
+          setSignalStrength(signal);
+          if (signal < 20) {
+            setSignalQuality('very_weak');
+          } else if (signal < 45) {
+            setSignalQuality('weak');
+          } else {
+            setSignalQuality('good');
+          }
+        },
+        error: error => {
+          if (cancelled) {
+            return;
+          }
+          clearStartupTimeout();
+          const msg = String(
+            (error as { message?: string } | null)?.message ?? error ?? '',
+          ).toLowerCase();
+          const looksPermission =
+            msg.includes('permission') ||
+            msg.includes('denied') ||
+            msg.includes('not authorized') ||
+            msg.includes('motion');
+          if (Platform.OS === 'ios' && looksPermission) {
+            setMode('permission_denied');
+            modeRef.current = 'permission_denied';
+            setSignalStrength(-2);
+          } else {
+            setUnsupportedUi();
+          }
+          subscription?.unsubscribe();
+          subscription = null;
+        },
+      });
+    };
+
+    scheduleStartupTimeout();
+    startSubscription();
+
+    watchdogId = setInterval(() => {
+      if (
+        cancelled ||
+        modeRef.current === 'permission_denied' ||
+        modeRef.current === 'unsupported'
+      ) {
+        return;
+      }
+      if (!gotSampleRef.current || lastSampleAt === 0) {
+        return;
+      }
+      if (Date.now() - lastSampleAt > STALE_SAMPLE_MS) {
+        restartSubscription();
+      }
+    }, WATCHDOG_INTERVAL_MS);
+
+    appStateSub = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        restartSubscription();
+      }
     });
 
     return () => {
       cancelled = true;
-      clearTimeout(timeoutId);
+      clearStartupTimeout();
+      if (watchdogId != null) {
+        clearInterval(watchdogId);
+      }
+      appStateSub?.remove();
       subscription?.unsubscribe();
     };
   }, [hydrated, needsGpsPrime]);
