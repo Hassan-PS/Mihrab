@@ -1,5 +1,4 @@
-# Attach Play + F-Droid APKs and Play AAB to the GitHub Release for the pushed tag
-# (same filenames as README: app-play-release.apk, app-fdroid-release.apk, app-play-release.aab).
+# Attach only F-Droid APK to the GitHub Release for the pushed tag.
 name: Release Android artifacts
 
 on:
@@ -31,23 +30,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Configure release keystore for Play builds
-        run: |
-          test -n "${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}" || { echo "Missing secret: ANDROID_UPLOAD_KEYSTORE_BASE64"; exit 1; }
-          test -n "${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}" || { echo "Missing secret: ANDROID_UPLOAD_STORE_PASSWORD"; exit 1; }
-          test -n "${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}" || { echo "Missing secret: ANDROID_UPLOAD_KEY_ALIAS"; exit 1; }
-          test -n "${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}" || { echo "Missing secret: ANDROID_UPLOAD_KEY_PASSWORD"; exit 1; }
-          echo "${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
-          cat > android/keystore.properties <<'EOF'
-          storePassword=${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
-          keyPassword=${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
-          storeFile=release.keystore
-          EOF
-
-      - name: Build release APKs and AAB
+      - name: Build F-Droid release APK
         working-directory: android
-        run: ./gradlew assemblePlayRelease assembleFdroidRelease bundlePlayRelease --no-daemon
+        run: ./gradlew assembleFdroidRelease --no-daemon
         env:
           GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8'
 
@@ -55,8 +40,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            android/app/build/outputs/apk/play/release/app-play-release.apk
             android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
-            android/app/build/outputs/bundle/playRelease/app-play-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
