@@ -118,6 +118,7 @@ export async function syncPrayerNotifications(params: {
         },
         android: {
           channelId: sound.androidChannelId,
+          smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
         },
       },
@@ -139,6 +140,7 @@ export async function syncPrayerNotifications(params: {
         },
         android: {
           channelId: sound.androidChannelId,
+          smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
         },
       },
