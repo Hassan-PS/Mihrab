@@ -72,7 +72,7 @@ To make those voice profiles audible in release builds, include matching sound a
 - Android: `android/app/src/main/res/raw/adhan_makkah.mp3`, `adhan_madina.mp3`, `adhan_aqsa.mp3`
 - iOS (app target bundle): `adhan_makkah.caf`, `adhan_madina.caf`, `adhan_aqsa.caf`
 
-If these files are missing, selecting a voice profile may fall back to device/default behavior.
+These files are bundled in this repository and included in app builds.
 
 **Android release artifacts** (from repo root after `npm install`):
 

@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.6] — 2026-04-22
+
+### Added
+- **Notifications (Android + iOS)**: bundled built-in Adhan sound assets are now shipped in the app (`adhan_makkah`, `adhan_madina`, `adhan_aqsa`) so sound options work out of the box on every build.
+
+### Changed
+- **Notification sound picker** copy now confirms voices are built into the app build.
+- HTTP `User-Agent` prefix **PrayerTimes/1.4.6**.
+
+### Release builds
+- Android `versionName` **1.4.6**, `versionCode` **20**.
+- iOS `MARKETING_VERSION` **1.4.6**, `CURRENT_PROJECT_VERSION` **19**.
+
+[1.4.6]: https://github.com/Hassan-PS/PrayerApp/compare/v1.4.5...v1.4.6
+
 ## [1.4.5] — 2026-04-22
 
 ### Added

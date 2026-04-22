@@ -111,7 +111,7 @@
     "notificationSoundMakkah": "أذان - مكة",
     "notificationSoundMadina": "أذان - المدينة",
     "notificationSoundAqsa": "أذان - الأقصى",
-    "notificationSoundVoiceHelp": "يتطلب ملفات صوت مضمّنة بنفس الأسماء داخل التطبيق."
+    "notificationSoundVoiceHelp": "الصوت مضمّن داخل هذا الإصدار من التطبيق."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
