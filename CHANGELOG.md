@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.5] — 2026-04-22
+
+### Added
+- **Notifications**: selectable alert sound profile with default notification sound plus Adhan voice options (Makkah, Madina, Al-Aqsa) in Settings.
+
+### Changed
+- **Android notifications**: prayer alerts now use a dedicated monochrome status-bar icon instead of the generic fallback circle.
+- HTTP `User-Agent` prefix **PrayerTimes/1.4.5**.
+
+### Release builds
+- Android `versionName` **1.4.5**, `versionCode` **19**.
+
+[1.4.5]: https://github.com/Hassan-PS/PrayerApp/compare/v1.4.4...v1.4.5
+
 ## [1.4.4] — 2026-04-14
 
 ### Changed
