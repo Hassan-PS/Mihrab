@@ -7,24 +7,34 @@ import notifee, {
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
 import i18n from '../i18n';
+import {
+  getNotificationSoundOption,
+  NOTIFICATION_SOUND_OPTIONS,
+  type NotificationSoundId,
+} from './notificationSounds';
 import type { TimingsMap } from '../types/prayer';
 import {
   buildPrePrayerReminderEvents,
   buildUpcomingSalahEvents,
 } from '../utils/prayerTimes';
 
-const CHANNEL_ID = 'prayer-times';
-
-async function ensureChannel() {
+async function ensureChannel(selectedSound: NotificationSoundId) {
   if (Platform.OS !== 'android') {
     return;
   }
-  await notifee.createChannel({
-    id: CHANNEL_ID,
-    name: 'Prayer times',
-    importance: AndroidImportance.HIGH,
-    vibration: true,
-  });
+  const selected = getNotificationSoundOption(selectedSound);
+  for (const option of NOTIFICATION_SOUND_OPTIONS) {
+    await notifee.createChannel({
+      id: option.androidChannelId,
+      name:
+        option.id === selected.id
+          ? `Prayer times (${i18n.t(option.labelKey)})`
+          : 'Prayer times',
+      importance: AndroidImportance.HIGH,
+      vibration: true,
+      ...(option.androidSound ? { sound: option.androidSound } : {}),
+    });
+  }
 }
 
 function iosNotificationsAllowed(status: AuthorizationStatus): boolean {
@@ -67,6 +77,7 @@ function buildTimestampTrigger(
 export async function syncPrayerNotifications(params: {
   enabled: boolean;
   prePrayerReminderMinutes: number;
+  notificationSound: NotificationSoundId;
   today: TimingsMap;
   tomorrow?: TimingsMap;
 }): Promise<void> {
@@ -80,7 +91,8 @@ export async function syncPrayerNotifications(params: {
       return;
     }
   }
-  await ensureChannel();
+  await ensureChannel(params.notificationSound);
+  const sound = getNotificationSoundOption(params.notificationSound);
   const exactAlarms = await canUseExactAlarms();
   const now = new Date();
   const salahEvents = buildUpcomingSalahEvents(
@@ -102,10 +114,10 @@ export async function syncPrayerNotifications(params: {
         title: e.name,
         body: i18n.t('alertCopy.atPrayer'),
         ios: {
-          sound: 'default',
+          sound: sound.iosSound,
         },
         android: {
-          channelId: CHANNEL_ID,
+          channelId: sound.androidChannelId,
           pressAction: { id: 'default' },
         },
       },
@@ -123,10 +135,10 @@ export async function syncPrayerNotifications(params: {
           count: reminderMinutes,
         }),
         ios: {
-          sound: 'default',
+          sound: sound.iosSound,
         },
         android: {
-          channelId: CHANNEL_ID,
+          channelId: sound.androidChannelId,
           pressAction: { id: 'default' },
         },
       },

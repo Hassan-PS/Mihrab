@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { coerceNotificationSoundId } from '../notifications/notificationSounds';
 import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
 import {
   DEFAULT_SETTINGS,
@@ -85,6 +86,7 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     merged.prePrayerReminderMinutes = coercePrePrayerReminderMinutes(
       parsed.prePrayerReminderMinutes,
     );
+    merged.notificationSound = coerceNotificationSoundId(parsed.notificationSound);
     return merged;
   } catch {
     return DEFAULT_SETTINGS;

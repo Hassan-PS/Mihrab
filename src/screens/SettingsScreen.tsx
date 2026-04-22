@@ -47,6 +47,10 @@ import {
   rowDividerStyle,
   segmentChromeStyle,
 } from '../theme/chrome';
+import {
+  getNotificationSoundOption,
+  NOTIFICATION_SOUND_OPTIONS,
+} from '../notifications/notificationSounds';
 
 function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
   if (!showDonationsUi()) {
@@ -70,6 +74,7 @@ export function SettingsScreen() {
   const { palette, isDark } = useAppPalette();
   const [methodModal, setMethodModal] = useState(false);
   const [preReminderModal, setPreReminderModal] = useState(false);
+  const [notificationSoundModal, setNotificationSoundModal] = useState(false);
   const [providerModal, setProviderModal] = useState(false);
   const [draftLat, setDraftLat] = useState('');
   const [draftLng, setDraftLng] = useState('');
@@ -80,7 +85,7 @@ export function SettingsScreen() {
 
   const deferHardwareBackRef = useRef(false);
   deferHardwareBackRef.current =
-    methodModal || preReminderModal || providerModal;
+    methodModal || preReminderModal || notificationSoundModal || providerModal;
   useAndroidSubScreenBack(deferHardwareBackRef);
 
   useEffect(() => {
@@ -205,6 +210,10 @@ export function SettingsScreen() {
       defaultValue: opt?.description ?? '',
     });
   }, [settings.dataProvider, t]);
+  const selectedNotificationSound = useMemo(
+    () => getNotificationSoundOption(settings.notificationSound),
+    [settings.notificationSound],
+  );
 
   return (
     <>
@@ -726,6 +735,31 @@ export function SettingsScreen() {
               styles.rowPress,
               { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
             ]}
+            onPress={() => setNotificationSoundModal(true)}>
+            <View style={styles.switchCopy}>
+              <Text style={[styles.label, { color: palette.muted }]}>
+                {t('settings.notificationSound')}
+              </Text>
+              <Text style={[styles.valueText, { color: palette.text }]}>
+                {t(selectedNotificationSound.labelKey)}
+              </Text>
+              <Text style={[styles.help, { color: palette.muted }]}>
+                {t(selectedNotificationSound.helpKey)}
+              </Text>
+            </View>
+            <Text style={[styles.changeLink, { color: palette.accent }]}>
+              {t('common.change')}
+            </Text>
+          </Pressable>
+        )}
+
+        {settings.notificationsEnabled && (
+          <Pressable
+            style={[
+              styles.card,
+              styles.rowPress,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}
             onPress={() => setPreReminderModal(true)}>
             <View style={styles.switchCopy}>
               <Text style={[styles.label, { color: palette.muted }]}>
@@ -807,6 +841,55 @@ export function SettingsScreen() {
                     {item === 0
                       ? t('settings.prePrayerReminderOff')
                       : t('settings.prePrayerReminderOption', { count: item })}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={notificationSoundModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setNotificationSoundModal(false)}>
+        <View style={styles.modalRoot}>
+          <Pressable
+            style={[styles.modalFill, { backgroundColor: palette.overlay }]}
+            onPress={() => setNotificationSoundModal(false)}
+          />
+          <View
+            style={[
+              styles.modalSheet,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}>
+            <Text style={[styles.modalTitle, { color: palette.text }]}>
+              {t('settings.notificationSoundModalTitle')}
+            </Text>
+            <FlatList
+              data={NOTIFICATION_SOUND_OPTIONS}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={[
+                    styles.methodRow,
+                    rowDividerStyle(palette),
+                    settings.notificationSound === item.id && {
+                      backgroundColor: palette.bg,
+                    },
+                  ]}
+                  onPress={() => {
+                    updateSettings({
+                      notificationSound: item.id,
+                    });
+                    setNotificationSoundModal(false);
+                  }}>
+                  <Text style={[styles.methodName, { color: palette.text }]}>
+                    {t(item.labelKey)}
+                  </Text>
+                  <Text style={[styles.providerSub, { color: palette.muted }]}>
+                    {t(item.helpKey)}
                   </Text>
                 </Pressable>
               )}

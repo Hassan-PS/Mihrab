@@ -103,7 +103,15 @@
     "widgetHighlight_customAbbr": "…",
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetHighlightDynamicHelp": "När temat är System och Systemfärger är på använder widgeten telefonens accent för nästa bön. Annars används färgen du väljer ovan.",
-    "widgetConfigureHint": "På Android kan du också trycka länge på widgeten → inställningar (kugghjul) för samma val."
+    "widgetConfigureHint": "På Android kan du också trycka länge på widgeten → inställningar (kugghjul) för samma val.",
+    "notificationSound": "Aviseringsljud",
+    "notificationSoundModalTitle": "Välj aviseringsljud",
+    "notificationSoundDefault": "Standardavisering",
+    "notificationSoundDefaultHelp": "Använder enhetens standardljud för aviseringar.",
+    "notificationSoundMakkah": "Adhan - Makkah",
+    "notificationSoundMadina": "Adhan - Madina",
+    "notificationSoundAqsa": "Adhan - Al-Aqsa",
+    "notificationSoundVoiceHelp": "Kräver att motsvarande ljudfiler är inbyggda i appen."
   },
   "locationSetup": {
     "headline": "Ange din plats",
