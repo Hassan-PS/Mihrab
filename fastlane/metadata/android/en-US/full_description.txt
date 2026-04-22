@@ -1,5 +1,15 @@
-Prayer Times helps you keep track of the five daily prayers with a clear home screen, optional notifications, a full-month planner, and a Qibla compass.
+Prayer Times helps you keep track of the five daily prayers with a clear home screen, optional reminders, a full-month planner, and a Qibla compass.
 
-Features include GPS or manual location, place search where supported, multiple calculation sources, English / Swedish / Arabic (with RTL), light / dark / system theme, and a home screen widget on Android.
+Key features:
+- Prayer times for today with quick, readable layout
+- Optional notifications for the five daily prayers
+- Monthly overview for planning ahead
+- Qibla direction using device sensors
+- GPS location or manual coordinates
+- Place search where supported
+- Multiple calculation sources
+- English, Swedish, and Arabic (RTL)
+- Light, dark, and system theme options
+- Android home-screen widget
 
-The app is open source (Apache-2.0). Builds distributed outside Google Play (for example on F-Droid) use a variant without proprietary in-app billing.
+The app is open source under Apache-2.0.
