@@ -103,7 +103,15 @@
     "widgetHighlight_customAbbr": "…",
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetHighlightDynamicHelp": "عندما يكون المظهر «النظام» وتكون «ألوان النظام» مفعّلة، تستخدم الودجة لون تمييز الهاتف للصلاة التالية. وإلا يُستخدم اللون الذي تختاره أعلاه.",
-    "widgetConfigureHint": "يمكنك أيضًا على أندرويد المس مع الاستمرار على الودجة ← الإعدادات (ترس) لنفس الخيارات."
+    "widgetConfigureHint": "يمكنك أيضًا على أندرويد المس مع الاستمرار على الودجة ← الإعدادات (ترس) لنفس الخيارات.",
+    "notificationSound": "صوت التنبيه",
+    "notificationSoundModalTitle": "اختر صوت التنبيه",
+    "notificationSoundDefault": "تنبيه النظام الافتراضي",
+    "notificationSoundDefaultHelp": "يستخدم صوت الإشعار الافتراضي في جهازك.",
+    "notificationSoundMakkah": "أذان - مكة",
+    "notificationSoundMadina": "أذان - المدينة",
+    "notificationSoundAqsa": "أذان - الأقصى",
+    "notificationSoundVoiceHelp": "يتطلب ملفات صوت مضمّنة بنفس الأسماء داخل التطبيق."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",

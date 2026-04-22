@@ -57,10 +57,17 @@ export function HomeScreen() {
     syncPrayerNotifications({
       enabled: settings.notificationsEnabled,
       prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
+      notificationSound: settings.notificationSound,
       today: state.today,
       tomorrow: state.tomorrow,
     }).catch(() => {});
-  }, [hydrated, settings.notificationsEnabled, settings.prePrayerReminderMinutes, state]);
+  }, [
+    hydrated,
+    settings.notificationsEnabled,
+    settings.prePrayerReminderMinutes,
+    settings.notificationSound,
+    state,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,10 +77,17 @@ export function HomeScreen() {
       syncPrayerNotifications({
         enabled: settings.notificationsEnabled,
         prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
+        notificationSound: settings.notificationSound,
         today: state.today,
         tomorrow: state.tomorrow,
       }).catch(() => {});
-    }, [hydrated, settings.notificationsEnabled, settings.prePrayerReminderMinutes, state]),
+    }, [
+      hydrated,
+      settings.notificationsEnabled,
+      settings.prePrayerReminderMinutes,
+      settings.notificationSound,
+      state,
+    ]),
   );
 
   useEffect(() => {

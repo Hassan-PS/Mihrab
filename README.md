@@ -64,6 +64,16 @@ npm run android    # or: npm run ios (after CocoaPods: bundle exec pod install i
 
 Useful scripts include `npm run generate-icons` (regenerates launcher icons from `assets/app-icon-source.png`). For deeper native work, use **Android Studio** / **Xcode** as usual.
 
+### Optional Adhan notification sounds
+
+Notification settings include voice profiles (`Adhan - Makkah`, `Adhan - Madina`, `Adhan - Al-Aqsa`) in addition to the default system notification sound.
+
+To make those voice profiles audible in release builds, include matching sound assets:
+- Android: `android/app/src/main/res/raw/adhan_makkah.mp3`, `adhan_madina.mp3`, `adhan_aqsa.mp3`
+- iOS (app target bundle): `adhan_makkah.caf`, `adhan_madina.caf`, `adhan_aqsa.caf`
+
+If these files are missing, selecting a voice profile may fall back to device/default behavior.
+
 **Android release artifacts** (from repo root after `npm install`):
 
 ```sh

@@ -1,4 +1,5 @@
 import type { PrePrayerReminderMinutes } from './prePrayerReminder';
+import type { NotificationSoundId } from '../notifications/notificationSounds';
 
 export type LocationMode = 'gps' | 'manual';
 
@@ -51,6 +52,8 @@ export type PrayerAppSettings = {
    * Only applies when `notificationsEnabled` is true.
    */
   prePrayerReminderMinutes: PrePrayerReminderMinutes;
+  /** Notification sound profile for prayer alerts/reminders. */
+  notificationSound: NotificationSoundId;
   /** Android: widget background opacity 20–100. */
   androidWidgetBackgroundOpacity: number;
   /** Highlight style for the widget next-prayer row. */
@@ -74,6 +77,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   language: 'en',
   notificationsEnabled: false,
   prePrayerReminderMinutes: 0,
+  notificationSound: 'default',
   androidWidgetBackgroundOpacity: 88,
   widgetHighlightId: 'green',
   widgetHighlightCustomHex: '#6BC98A',
