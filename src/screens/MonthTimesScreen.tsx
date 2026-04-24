@@ -28,6 +28,8 @@ import { formatDisplayTime } from '../utils/prayerTimes';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
 
+import { ShareMonthScreen } from './ShareMonthScreen';
+
 export function MonthTimesScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -43,6 +45,7 @@ export function MonthTimesScreen() {
   const [cacheStatus, setCacheStatus] = useState<{ monthsStored: number; isExpired: boolean } | null>(null);
   const [refreshingCache, setRefreshingCache] = useState(false);
   const [refreshProgress, setRefreshProgress] = useState<{ current: number; total: number } | null>(null);
+  const [isShareView, setIsShareView] = useState(false);
 
   useAndroidSubScreenBack();
 
@@ -287,11 +290,30 @@ export function MonthTimesScreen() {
             {t('month.thisMonth')}
           </Text>
         </Pressable>
+      </View>
+      <View style={styles.toggleRow}>
         <Pressable
-          onPress={() => navigation.navigate('ShareMonth', { year: viewYear, month: viewMonth })}
-          style={styles.actionBtn}>
-          <Text style={[styles.actionLabel, { color: palette.accent }]}>
-            {t('month.shareMonth')}
+          onPress={() => setIsShareView(false)}
+          style={[
+            styles.toggleBtn,
+            styles.toggleBtnLeft,
+            !isShareView && { backgroundColor: palette.accentBg },
+            { borderColor: palette.border }
+          ]}>
+          <Text style={[styles.toggleLabel, { color: !isShareView ? palette.accent : palette.muted }]}>
+            {t('month.standardView', 'Standard')}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setIsShareView(true)}
+          style={[
+            styles.toggleBtn,
+            styles.toggleBtnRight,
+            isShareView && { backgroundColor: palette.accentBg },
+            { borderColor: palette.border }
+          ]}>
+          <Text style={[styles.toggleLabel, { color: isShareView ? palette.accent : palette.muted }]}>
+            {t('month.shareView', 'Shareable')}
           </Text>
         </Pressable>
       </View>
@@ -332,6 +354,21 @@ export function MonthTimesScreen() {
       )}
     </View>
   );
+
+  if (isShareView) {
+    return (
+      <View style={{ flex: 1, backgroundColor: palette.bg }}>
+        {header}
+        <View style={{ flex: 1 }}>
+          <ShareMonthScreen 
+            route={{ key: 'ShareMonth', name: 'ShareMonth', params: { year: viewYear, month: viewMonth } }} 
+            navigation={navigation as any}
+            embedded={true}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <FlatList
@@ -412,6 +449,32 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     fontSize: 15,
+    fontWeight: '600',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 12,
+    marginHorizontal: 16,
+  },
+  toggleBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  toggleBtnLeft: {
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderRightWidth: 0,
+  },
+  toggleBtnRight: {
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    borderLeftWidth: 0,
+  },
+  toggleLabel: {
+    fontSize: 14,
     fontWeight: '600',
   },
   cacheRow: {

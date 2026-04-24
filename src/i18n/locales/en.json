@@ -47,6 +47,8 @@
     "locationNotReadyTitle": "Location not ready",
     "locationNotReadyBody": "Open Home and load today's times once so this screen can use your GPS position.",
     "thisMonth": "This month",
+    "standardView": "Standard",
+    "shareView": "Shareable",
     "shareMonth": "Share Image",
     "loadError": "Could not load month.",
     "empty": "No rows to show.",

@@ -27,7 +27,7 @@ import { formatDisplayTime } from '../utils/prayerTimes';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ShareMonth'>;
 
-export function ShareMonthScreen({ route }: Props) {
+export function ShareMonthScreen({ route, navigation, embedded }: Props & { navigation?: any, embedded?: boolean }) {
   const { year, month } = route.params;
   const { t, i18n } = useTranslation();
   const { settings, hydrated } = usePrayerSettings();
@@ -40,6 +40,16 @@ export function ShareMonthScreen({ route }: Props) {
   const [sharing, setSharing] = useState(false);
 
   useAndroidSubScreenBack();
+
+  // If embedded, we use the parent's navigation for back handling
+  useEffect(() => {
+    if (embedded && navigation) {
+      const unsubscribe = navigation.addListener('beforeRemove', () => {
+        // Allow default back behavior
+      });
+      return unsubscribe;
+    }
+  }, [embedded, navigation]);
 
   const needsGpsPrime =
     settings.locationMode === 'gps' &&
@@ -219,8 +229,8 @@ export function ShareMonthScreen({ route }: Props) {
               </View>
               <View style={styles.bannerRight}>
                 <Image
-                  source={require('../../assets/app-icon-source.png')}
-                  style={styles.appIcon}
+                  source={require('../../assets/qr-code.png')}
+                  style={styles.qrCode}
                   resizeMode="contain"
                 />
               </View>
@@ -310,7 +320,7 @@ export function ShareMonthScreen({ route }: Props) {
         </ViewShot>
       </ScrollView>
 
-      <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.card }]}>
+      <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.bg }]}>
         <TouchableOpacity
           style={[styles.shareBtn, { backgroundColor: palette.accent }]}
           onPress={handleShare}
@@ -356,11 +366,16 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
+    alignItems: 'center', // Center the A4 container
   },
   shotContainer: {
     backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 12,
+    padding: 32, // More padding for A4 look
+    borderRadius: 0, // A4 isn't rounded
+    // A4 aspect ratio is roughly 1:1.414, but we'll let content dictate height
+    // while ensuring a minimum width/height ratio if needed.
+    width: 794, // A4 width at 96 DPI
+    alignSelf: 'center',
     // Add shadow for preview
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -387,18 +402,18 @@ const styles = StyleSheet.create({
   },
   appName: {
     color: '#ffffff',
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
   },
   githubLink: {
     color: '#9ca3af',
-    fontSize: 12,
+    fontSize: 16,
     marginTop: 4,
   },
-  appIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+  qrCode: {
+    width: 96,
+    height: 96,
+    borderRadius: 8,
   },
   bannerBottom: {
     alignItems: 'center',
@@ -408,18 +423,18 @@ const styles = StyleSheet.create({
   },
   islamicMonth: {
     color: '#ffffff',
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   gregorianMonth: {
     color: '#d1d5db',
-    fontSize: 16,
+    fontSize: 20,
     marginBottom: 4,
   },
   locationText: {
     color: '#9ca3af',
-    fontSize: 14,
+    fontSize: 18,
   },
   table: {
     borderWidth: 1,
@@ -465,12 +480,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   headerText: {
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   cellText: {
-    fontSize: 11,
+    fontSize: 16,
     textAlign: 'center',
   },
   boldText: {
