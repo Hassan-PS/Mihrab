@@ -1,9 +1,10 @@
 export type CalculationMethodOption = {
-  id: number;
+  id: number | 'auto';
   name: string;
 };
 
 export const CALCULATION_METHODS: CalculationMethodOption[] = [
+  { id: 'auto', name: 'Automatic (by location)' },
   { id: 0, name: 'Shia — Ithna Ashari' },
   { id: 1, name: 'University of Islamic Sciences, Karachi' },
   { id: 2, name: 'Islamic Society of North America (ISNA)' },
@@ -21,6 +22,6 @@ export const CALCULATION_METHODS: CalculationMethodOption[] = [
   { id: 15, name: 'Moonsighting Committee Worldwide' },
 ];
 
-export function getMethodLabel(id: number): string {
+export function getMethodLabel(id: number | 'auto'): string {
   return CALCULATION_METHODS.find(m => m.id === id)?.name ?? `Method ${id}`;
 }

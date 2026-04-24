@@ -11,6 +11,6 @@ export type UnifiedFetchParams = {
   latitude: number;
   longitude: number;
   date: Date;
-  calculationMethod: number;
+  calculationMethod: number | 'auto';
   school: number;
 };

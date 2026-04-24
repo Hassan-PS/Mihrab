@@ -20,14 +20,19 @@ export async function fetchAladhanTimes(params: {
   latitude: number;
   longitude: number;
   date: Date;
-  method?: number;
+  method?: number | 'auto';
   school?: number;
 }): Promise<PrayerTimesResult> {
   const dateStr = formatLocalDate(params.date);
   const query = new URLSearchParams();
   query.append('latitude', String(params.latitude));
   query.append('longitude', String(params.longitude));
-  query.append('method', String(params.method ?? 2));
+  if (params.method !== 'auto' && params.method !== undefined) {
+    query.append('method', String(params.method));
+  } else {
+    // If 'auto' or undefined, AlAdhan automatically selects the best method based on location.
+    // We can explicitly pass '99' for auto, or just omit it. Omitting it defaults to auto detection.
+  }
   if (params.school !== undefined) {
     query.append('school', String(params.school));
   }
