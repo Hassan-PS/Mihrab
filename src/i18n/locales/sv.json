@@ -47,6 +47,8 @@
     "locationNotReadyTitle": "Platsen är inte klar",
     "locationNotReadyBody": "Öppna Hem och ladda dagens tider en gång så att den här skärmen kan använda din GPS-position.",
     "thisMonth": "Den här månaden",
+    "standardView": "Standard",
+    "shareView": "Delbar",
     "shareMonth": "Dela bild",
     "loadError": "Kunde inte ladda månaden.",
     "empty": "Inget att visa.",

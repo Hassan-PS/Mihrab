@@ -47,6 +47,8 @@
     "locationNotReadyTitle": "الموقع غير جاهز",
     "locationNotReadyBody": "افتح الرئيسية وحمّل أوقات اليوم مرة واحدة حتى تتمكن هذه الشاشة من استخدام موقع GPS.",
     "thisMonth": "هذا الشهر",
+    "standardView": "قياسي",
+    "shareView": "للمشاركة",
     "shareMonth": "مشاركة الصورة",
     "loadError": "تعذّر تحميل الشهر.",
     "empty": "لا يوجد ما يُعرض.",
