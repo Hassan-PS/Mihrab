@@ -306,12 +306,22 @@ export function SettingsScreen() {
             styles.card,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <View style={styles.segmentRow}>
+          <View style={[styles.segmentRow, { flexWrap: 'wrap' }]}>
             {(
               [
                 { id: 'en' as const, label: t('settings.langEn') },
                 { id: 'sv' as const, label: t('settings.langSv') },
                 { id: 'ar' as const, label: t('settings.langAr') },
+                { id: 'bn' as const, label: 'বাংলা' },
+                { id: 'ur' as const, label: 'اردو' },
+                { id: 'hi' as const, label: 'हिन्दी' },
+                { id: 'fr' as const, label: 'Français' },
+                { id: 'es' as const, label: 'Español' },
+                { id: 'de' as const, label: 'Deutsch' },
+                { id: 'tr' as const, label: 'Türkçe' },
+                { id: 'id' as const, label: 'Bahasa Indonesia' },
+                { id: 'ru' as const, label: 'Русский' },
+                { id: 'zh' as const, label: '中文' },
               ] as const
             ).map(opt => (
               <Pressable
@@ -319,6 +329,7 @@ export function SettingsScreen() {
                 style={[
                   styles.segment,
                   styles.appearanceSegment,
+                  { minWidth: '30%' },
                   segmentChromeStyle(palette, settings.language === opt.id),
                 ]}
                 onPress={() =>

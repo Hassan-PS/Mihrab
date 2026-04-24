@@ -185,7 +185,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
     try {
       // Get the middle of the month to represent the most prominent Hijri month
       const midDate = new Date(year, month, 15);
-      const loc = i18n.language === 'sv' ? 'sv-SE' : i18n.language === 'ar' ? 'ar' : 'en-US';
+      const loc = i18n.language;
       return new Intl.DateTimeFormat(`${loc}-u-ca-islamic`, { month: 'long', year: 'numeric' }).format(midDate);
     } catch {
       return '';
@@ -194,7 +194,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 
   const gregorianMonthName = useMemo(() => {
     const d = new Date(year, month, 1);
-    const loc = i18n.language === 'sv' ? 'sv-SE' : i18n.language === 'ar' ? 'ar' : 'en-US';
+    const loc = i18n.language;
     return d.toLocaleString(loc, { month: 'long', year: 'numeric' });
   }, [year, month, i18n.language]);
 
@@ -316,8 +316,9 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
               const isFriday = row.date.getDay() === 5;
               const rowBg = isFriday ? '#e5e7eb' : index % 2 === 0 ? '#ffffff' : '#f9fafb';
               const gregDateStr = row.date.getDate().toString();
-              const hijriDateStr = new Intl.DateTimeFormat('en-US-u-ca-islamic', { day: 'numeric' }).format(row.date);
-              const dayStr = row.date.toLocaleDateString(i18n.language === 'sv' ? 'sv-SE' : i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'short' });
+              const loc = i18n.language;
+              const hijriDateStr = new Intl.DateTimeFormat(`${loc}-u-ca-islamic`, { day: 'numeric' }).format(row.date);
+              const dayStr = row.date.toLocaleDateString(loc, { weekday: 'short' });
               
               return (
                 <View key={index} style={[styles.tableRow, { backgroundColor: rowBg, flexDirection: 'row' }]}>

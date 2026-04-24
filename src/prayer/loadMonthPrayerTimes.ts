@@ -11,7 +11,7 @@ type BaseParams = {
   provider: PrayerDataProviderId;
   latitude: number;
   longitude: number;
-  calculationMethod: number;
+  calculationMethod: number | 'auto';
   school: number;
 };
 
