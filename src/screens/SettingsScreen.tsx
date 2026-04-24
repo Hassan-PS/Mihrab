@@ -51,6 +51,7 @@ import {
   getNotificationSoundOption,
   NOTIFICATION_SOUND_OPTIONS,
 } from '../notifications/notificationSounds';
+import { getInstalledAppVersionLabel } from '../appVersion';
 
 function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
   if (!showDonationsUi()) {
@@ -214,6 +215,7 @@ export function SettingsScreen() {
     () => getNotificationSoundOption(settings.notificationSound),
     [settings.notificationSound],
   );
+  const versionLabel = useMemo(() => getInstalledAppVersionLabel(), []);
 
   return (
     <>
@@ -783,6 +785,9 @@ export function SettingsScreen() {
         )}
 
         <MaybeSupportDeveloperSection palette={palette} />
+        <Text style={[styles.versionText, { color: palette.muted }]}>
+          {t('settings.versionInstalled', { version: versionLabel })}
+        </Text>
       </ScrollView>
 
       <ProviderPickerModal
@@ -1125,5 +1130,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
     lineHeight: 18,
+  },
+  versionText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 4,
   },
 });

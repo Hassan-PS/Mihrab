@@ -18,6 +18,7 @@ class MainApplication : Application(), ReactApplication {
         PackageList(this).packages.apply {
           add(PrayerWidgetPackage())
           add(PrayerBuildInfoPackage())
+          add(AppVersionPackage())
           if (BuildConfig.IAP_ENABLED) {
             addIapPackageIfPresent(this)
           }
