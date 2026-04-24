@@ -42,6 +42,10 @@
 	<string>Prayer Times uses your location only to compute prayer times and Qibla—not for advertising. Location is normally used while you use the app; if the system offers broader access for the same features, it is still limited to prayer-time and Qibla functionality. You can use manual location in Settings instead of GPS.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Motion is used to show the Qibla compass direction.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Prayer Times needs access to your photo library to save the monthly prayer times image.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Prayer Times needs access to your photo library to save the monthly prayer times image.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
