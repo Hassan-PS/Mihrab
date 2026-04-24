@@ -173,14 +173,25 @@ struct PrayerWidgetEntryView: View {
   }
 }
 
+private struct WidgetBackgroundCompatModifier: ViewModifier {
+  @ViewBuilder
+  func body(content: Content) -> some View {
+    if #available(iOSApplicationExtension 17.0, *) {
+      content.containerBackground(for: .widget) {
+        widgetBg
+      }
+    } else {
+      content.background(widgetBg)
+    }
+  }
+}
+
 @main
 struct PrayerWidgetExtensionBundle: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "PrayerTimesWidget", provider: Provider()) { entry in
       PrayerWidgetEntryView(entry: entry)
-        .containerBackground(for: .widget) {
-          widgetBg
-        }
+        .modifier(WidgetBackgroundCompatModifier())
     }
     .configurationDisplayName("Prayer times")
     .description("Today’s five daily prayers (Fajr–Isha). After Isha, shows tomorrow.")
