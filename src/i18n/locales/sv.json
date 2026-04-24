@@ -111,7 +111,8 @@
     "notificationSoundMakkah": "Adhan - Makkah",
     "notificationSoundMadina": "Adhan - Madina",
     "notificationSoundAqsa": "Adhan - Al-Aqsa",
-    "notificationSoundVoiceHelp": "Inbyggd röst ingår i den här appversionen."
+    "notificationSoundVoiceHelp": "Inbyggd röst ingår i den här appversionen.",
+    "versionInstalled": "Installerad version: {{version}}"
   },
   "locationSetup": {
     "headline": "Ange din plats",

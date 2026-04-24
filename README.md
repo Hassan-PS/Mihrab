@@ -1,101 +1,39 @@
 # Prayer Times
 
-A small **React Native** app for **daily Islamic prayer times**, **Qibla**, and a **home-screen widget** — with GPS or manual location, several calculation sources, and a clear month view.
+Simple React Native app for prayer times, Qibla, month view, and widget.
 
-[![Latest release](https://img.shields.io/github/v/release/Hassan-PS/PrayerApp?label=version&logo=github)](https://github.com/Hassan-PS/PrayerApp/releases)
+## Install
 
-## Get the app
+- **GitHub Releases (default)**: [Latest](https://github.com/Hassan-PS/PrayerApp/releases/latest) → `app-fdroid-release.apk`
+- **Google Play**: upload/use the Play `.aab`
+- **F-Droid**: metadata/recipe in `contrib/fdroid/`
 
-| Channel | Link |
-|--------|------|
-| **GitHub Releases** | [Latest release](https://github.com/Hassan-PS/PrayerApp/releases/latest) — **`app-fdroid-release.apk`** (no billing). Pushing a version tag **`v*`** runs [`.github/workflows/release-android.yml`](.github/workflows/release-android.yml) to build and **attach** the F-Droid APK only (GitHub’s source zip/tar are automatic extras). |
-| **Google Play** | Install from the store when available; maintainers ship the **AAB** from the `play` flavor (`bundlePlayRelease`). |
-| **F-Droid** | Recipe in [`contrib/fdroid/`](contrib/fdroid/README.md); [fdroiddata](https://gitlab.com/fdroid/fdroiddata) merge request when the listing is accepted. |
-
-Release notes and history: [CHANGELOG.md](CHANGELOG.md).
-
-## License
-
-Source code in this repository is licensed under the [Apache License 2.0](LICENSE).
-
-## F-Droid build (third Android variant)
-
-Android uses two **product flavors**:
-
-- **`play`** — Google Play Billing for optional one-time tips; this is the default for `npm run android` (physical device script uses `playDebug`).
-- **`fdroid`** — No Play Billing native code, no in-app donation section (F-Droid policy–friendly).
-
-From the repo root after `npm install`:
-
-```sh
-npm run android:assembleFdroidRelease
-```
-
-Or: `cd android && ./gradlew assembleFdroidRelease`. Use `assemblePlayRelease` for store builds. To run the F-Droid variant on a device: `npm run android:fdroid`.
-
-**Listing on f-droid.org** uses the separate **[fdroiddata](https://gitlab.com/fdroid/fdroiddata)** GitLab repo. This project includes a ready-to-copy recipe and MR template under **[`contrib/fdroid/`](contrib/fdroid/README.md)** (`com.prayer_times.yml`, `MERGE_REQUEST.md`). Optional store-style text lives in [`fastlane/metadata/android/en-US/`](fastlane/metadata/android/en-US/).
-
-## What you get
-
-- **Today’s times** on the home screen, with optional **alerts** for the five daily prayers.
-- **Whole month** view for planning ahead.
-- **Qibla** direction from the app bar (device sensors).
-- **Home screen widget** (medium / large on iOS; Android widget with next-prayer highlight). On Android, **long-press the widget → settings** to adjust background strength and highlight color; that screen uses the system status bar and navigation areas correctly on current Android versions.
-- **Location**: GPS or manual coordinates, with **place search** (Nominatim) where supported.
-- **Sources**: configurable providers (e.g. AlAdhan, Sweden city list, others — see in-app settings).
-- **Look & feel**: English, **Swedish**, and **Arabic** (with RTL layout); **System / Light / Dark** theme; optional **system colors** (including Material You on Android) and **pure black** for OLED; app and widget follow the same choices when system theme is used.
-- **Privacy**: [Privacy policy](PRIVACY_POLICY.md) (EN / SV) for transparency and store listings.
-
-## Repository & contributing
-
-- **Security** (secrets, signing, reporting): [SECURITY.md](SECURITY.md).
-- **Issues & ideas**: [GitHub Issues](https://github.com/Hassan-PS/PrayerApp/issues).
-- **Contributors**: do not commit keystores, `keystore.properties`, API keys, or `.env` files with real values.
-
-## For developers
-
-This repo is the **source tree** for the shipped app (not a minimal template). To run from a clone you need a standard [React Native development environment](https://reactnative.dev/docs/set-up-your-environment).
+## Build
 
 ```sh
 npm install
-npm start          # Metro
-npm run android    # or: npm run ios (after CocoaPods: bundle exec pod install in ios/)
+npm start
 ```
 
-Useful scripts include `npm run generate-icons` (regenerates launcher icons from `assets/app-icon-source.png`). For deeper native work, use **Android Studio** / **Xcode** as usual.
-
-### Optional Adhan notification sounds
-
-Notification settings include voice profiles (`Adhan - Makkah`, `Adhan - Madina`, `Adhan - Al-Aqsa`) in addition to the default system notification sound.
-
-To make those voice profiles audible in release builds, include matching sound assets:
-- Android: `android/app/src/main/res/raw/adhan_makkah.mp3`, `adhan_madina.mp3`, `adhan_aqsa.mp3`
-- iOS (app target bundle): `adhan_makkah.caf`, `adhan_madina.caf`, `adhan_aqsa.caf`
-
-These files are bundled in this repository and included in app builds.
-
-**Android release artifacts** (from repo root after `npm install`):
+### Android
 
 ```sh
-npm run android:releaseAll
-# or: cd android && ./gradlew assemblePlayRelease assembleFdroidRelease bundlePlayRelease
+npm run android:assembleFdroidRelease
+npm run android:bundlePlayRelease
 ```
 
-Outputs live under `android/app/build/outputs/` (`apk/play/release`, `apk/fdroid/release`, `bundle/playRelease`). Release builds must pick a flavor (`play` or `fdroid`); see **F-Droid build** above.
+Outputs:
+- F-Droid APK: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
+- Play AAB: `android/app/build/outputs/bundle/playRelease/app-play-release.aab`
 
-### Play signing (required)
+### iOS
 
-Google Play accepts upload bundles signed with your **upload key** only. This project intentionally refuses to build `playRelease` with debug signing.
+```sh
+npm run ios
+```
 
-- Local: create `android/keystore.properties` (from `android/keystore.properties.example`) and place your keystore where `storeFile` points.
-- GitHub Actions (`release-android.yml`) requires these repository secrets:
-  - `ANDROID_UPLOAD_KEYSTORE_BASE64` (base64-encoded keystore file)
-  - `ANDROID_UPLOAD_STORE_PASSWORD`
-  - `ANDROID_UPLOAD_KEY_ALIAS`
-  - `ANDROID_UPLOAD_KEY_PASSWORD`
+Build and upload via Xcode Organizer for App Store/TestFlight.
 
-Without those, Play release builds fail fast instead of producing an invalid `.aab`.
+## License
 
----
-
-*Stack: React Native, TypeScript, native Android (Kotlin) and iOS (Swift) where needed for widgets and integrations.*
+Apache-2.0 (`LICENSE`).

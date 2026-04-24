@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.8] — 2026-04-22
+
+### Added
+- **Settings (Android + iOS)**: show installed app version/build at the bottom of the Settings screen.
+
+### Changed
+- **Notifications**: Adhan sound options are bundled in-app for Android/iOS; help text updated to reflect built-in sounds.
+- HTTP `User-Agent` prefix **PrayerTimes/1.4.8**.
+
+### Release builds
+- Android `versionName` **1.4.8**, `versionCode` **21**.
+- iOS `MARKETING_VERSION` **1.4.8**, `CURRENT_PROJECT_VERSION` **20**.
+
+[1.4.8]: https://github.com/Hassan-PS/PrayerApp/compare/v1.4.7...v1.4.8
+
 ## [1.4.6] — 2026-04-22
 
 ### Added

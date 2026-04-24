@@ -111,7 +111,8 @@
     "notificationSoundMakkah": "Adhan - Makkah",
     "notificationSoundMadina": "Adhan - Madina",
     "notificationSoundAqsa": "Adhan - Al-Aqsa",
-    "notificationSoundVoiceHelp": "Built-in voice included in this app build."
+    "notificationSoundVoiceHelp": "Built-in voice included in this app build.",
+    "versionInstalled": "Installed version: {{version}}"
   },
   "locationSetup": {
     "headline": "Set your location",
