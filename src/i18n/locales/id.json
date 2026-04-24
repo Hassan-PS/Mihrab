@@ -17,10 +17,10 @@
     "openTimesSource": "Ubah sumber waktu sholat"
   },
   "common": {
-    "change": "Perubahan",
+    "change": "Mengubah",
     "tryAgain": "Coba lagi",
-    "retry": "Coba lagi",
-    "continue": "Lanjutkan",
+    "retry": "Mencoba kembali",
+    "continue": "Melanjutkan",
     "back": "Kembali",
     "loading": "Memuat…",
     "automatic": "Otomatis"
@@ -65,7 +65,7 @@
     "appearance": "Penampilan",
     "theme": "Tema",
     "themeSystem": "Sistem",
-    "themeLight": "Ringan",
+    "themeLight": "Lampu",
     "themeDark": "Gelap",
     "themeHelp": "Sistem mencocokkan mode terang atau gelap perangkat Anda. Aktifkan warna Sistem untuk menggunakan palet platform di aplikasi (termasuk Material You di Android). Tombol dan aksen mengikuti warna utama ponsel Anda sehingga aplikasi cocok dengan wallpaper Anda saat warna dinamis tersedia.",
     "systemDynamicColors": "Warna sistem",
@@ -101,7 +101,7 @@
     "prePrayerReminderOption": "{{count}} menit sebelumnya",
     "language": "Bahasa",
     "languageHelp": "Inggris, Swedia, atau Arab. Bahasa Arab menggunakan tata letak kanan ke kiri.",
-    "langEn": "bahasa Inggris",
+    "langEn": "Bahasa inggris",
     "langSv": "Swedia",
     "langAr": "Arab",
     "homeScreenWidget": "Widget layar beranda",
@@ -110,7 +110,7 @@
     "widgetHighlight_green": "Hijau",
     "widgetHighlight_teal": "teal",
     "widgetHighlight_blue": "Biru",
-    "widgetHighlight_amber": "kuning",
+    "widgetHighlight_amber": "Amber",
     "widgetHighlight_dynamic": "Dinamis (aksen telepon)",
     "widgetHighlight_dynamicAbbr": "Dyn",
     "widgetHighlight_custom": "Warna khusus",
@@ -223,7 +223,7 @@
     "searching": "Mencari…"
   },
   "alertCopy": {
-    "atPrayer": "Waktu sholat",
+    "atPrayer": "Waktunya sholat",
     "prePrayer": "Dimulai dalam {{count}} menit",
     "adhanStopAction": "Hentikan adzan",
     "adhanDisableAction": "Nonaktifkan adzan"
@@ -233,7 +233,7 @@
     "title": "Tip pengembang",
     "help": "Tip satu kali opsional. Pembayaran diproses oleh toko aplikasi Anda dan masuk ke penerbit aplikasi. Anda dapat memberi tip lagi kapan saja.",
     "thankYou": "Terima kasih atas dukungan Anda.",
-    "dismiss": "Singkirkan",
+    "dismiss": "Membubarkan",
     "loadingPrice": "Memuat harga…",
     "unavailable": "Pembelian tip belum tersedia (periksa koneksi toko Anda atau pengaturan produk).",
     "tipWithPrice": "Kiat {{price}}",

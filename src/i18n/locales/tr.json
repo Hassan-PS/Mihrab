@@ -17,10 +17,10 @@
     "openTimesSource": "Namaz vakitleri kaynağını değiştir"
   },
   "common": {
-    "change": "Değiştir",
-    "tryAgain": "Tekrar dene",
+    "change": "Değiştirmek",
+    "tryAgain": "Tekrar deneyin",
     "retry": "Yeniden dene",
-    "continue": "Devam et",
+    "continue": "Devam etmek",
     "back": "Geri",
     "loading": "Yükleniyor…",
     "automatic": "Otomatik"
@@ -62,7 +62,7 @@
     "prayerTimes": "Namaz Vakitleri"
   },
   "settings": {
-    "appearance": "Görünüm",
+    "appearance": "Dış görünüş",
     "theme": "Tema",
     "themeSystem": "Sistem",
     "themeLight": "Işık",
@@ -77,7 +77,7 @@
     "providerAutoLine": "Otomatik · {{label}}",
     "providerAutoHelp": "İsveç'te namaz vakitleri İsveç kaynağını (listelenen şehirler) kullanır; İsveç dışında, AlAdhan. Bir sağlayıcıyı kilitlemek için aşağıdan bir kaynak seçin.",
     "location": "Konum",
-    "gps": "GPS",
+    "gps": "Küresel Konumlama Sistemi",
     "manual": "Manuel",
     "manualSearchHelp": "Hemen uygulamak için bir arama sonucuna dokunun veya koordinatları düzenleyip aşağıda Uygula'ya basın.",
     "coordsLabel": "Koordinatlar (ondalık derece)",
@@ -220,7 +220,7 @@
     "searchFailed": "Arama başarısız oldu",
     "applied": "Uygulanan: {{label}}",
     "noResults": "Sonuç yok",
-    "searching": "Aranıyor…"
+    "searching": "Arama…"
   },
   "alertCopy": {
     "atPrayer": "Namaz vakti",
@@ -233,7 +233,7 @@
     "title": "Geliştiriciye ipucu verin",
     "help": "İsteğe bağlı tek seferlik bahşiş. Ödeme, uygulama mağazanız tarafından işlenir ve uygulama yayıncısına gider. İstediğiniz zaman tekrar bahşiş verebilirsiniz.",
     "thankYou": "Desteğiniz için teşekkür ederiz.",
-    "dismiss": "Reddet",
+    "dismiss": "Azletmek",
     "loadingPrice": "Fiyat yükleniyor…",
     "unavailable": "Bahşiş satın alımları henüz mevcut değil (mağaza bağlantınızı veya ürün kurulumunuzu kontrol edin).",
     "tipWithPrice": "İpucu {{price}}",
