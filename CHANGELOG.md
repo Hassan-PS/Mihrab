@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.9] — 2026-04-24
+
+### Added
+- **Settings**: installed version now includes a tappable GitHub link at the bottom.
+
+### Changed
+- **Android dynamic theme**: use higher-contrast container colors to avoid low-contrast text with Material You palettes.
+- **Android widget**: Android 12+ widget metadata now marks the widget as reconfigurable so launcher settings affordance appears on long-press.
+- **iOS widget**: use native widget container background and internal padding for consistent edge rendering.
+- HTTP `User-Agent` prefix **PrayerTimes/1.4.9**.
+
+### Release builds
+- Android `versionName` **1.4.9**, `versionCode` **22**.
+- iOS `MARKETING_VERSION` **1.4.9**, `CURRENT_PROJECT_VERSION` **21**.
+
+[1.4.9]: https://github.com/Hassan-PS/PrayerApp/compare/v1.4.8...v1.4.9
+
 ## [1.4.8] — 2026-04-22
 
 ### Added

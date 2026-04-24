@@ -5,8 +5,6 @@ Simple React Native app for prayer times, Qibla, month view, and widget.
 ## Install
 
 - **GitHub Releases (default)**: [Latest](https://github.com/Hassan-PS/PrayerApp/releases/latest) → `app-fdroid-release.apk`
-- **Google Play**: upload/use the Play `.aab`
-- **F-Droid**: metadata/recipe in `contrib/fdroid/`
 
 ## Build
 

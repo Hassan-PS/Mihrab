@@ -165,8 +165,8 @@ struct PrayerWidgetEntryView: View {
 
   var body: some View {
     ZStack(alignment: .topLeading) {
-      widgetBg
       prayerContent
+        .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .clipped()
@@ -178,7 +178,9 @@ struct PrayerWidgetExtensionBundle: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "PrayerTimesWidget", provider: Provider()) { entry in
       PrayerWidgetEntryView(entry: entry)
-        .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+        .containerBackground(for: .widget) {
+          widgetBg
+        }
     }
     .configurationDisplayName("Prayer times")
     .description("Today’s five daily prayers (Fajr–Isha). After Isha, shows tomorrow.")
