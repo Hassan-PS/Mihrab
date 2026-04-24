@@ -62,7 +62,7 @@ function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
   return <SupportDeveloperSection palette={palette} />;
 }
 
-const WIDGET_HIGHLIGHT_SWATCHES: { id: Exclude<WidgetHighlightId, 'custom'>; hex: string }[] =
+const WIDGET_HIGHLIGHT_SWATCHES: { id: Exclude<WidgetHighlightId, 'custom' | 'dynamic'>; hex: string }[] =
   [
     { id: 'green', hex: '#6BC98A' },
     { id: 'teal', hex: '#4EC9B0' },
@@ -384,14 +384,14 @@ export function SettingsScreen() {
                     {
                       borderColor: palette.border,
                       opacity:
-                        settings.androidWidgetBackgroundOpacity <= 20 ? 0.4 : 1,
+                        settings.androidWidgetBackgroundOpacity <= 0 ? 0.4 : 1,
                     },
                   ]}
-                  disabled={settings.androidWidgetBackgroundOpacity <= 20}
+                  disabled={settings.androidWidgetBackgroundOpacity <= 0}
                   onPress={() =>
                     updateSettings({
                       androidWidgetBackgroundOpacity: Math.max(
-                        20,
+                        0,
                         settings.androidWidgetBackgroundOpacity - 4,
                       ),
                     })
@@ -436,6 +436,27 @@ export function SettingsScreen() {
             {t('settings.widgetHighlight')}
           </Text>
           <View style={styles.widgetSwatchRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.widgetHighlight_dynamic')}
+              onPress={() => updateSettings({ widgetHighlightId: 'dynamic' })}
+              style={[
+                styles.widgetSwatch,
+                styles.widgetSwatchCustom,
+                {
+                  backgroundColor: palette.card,
+                  borderColor:
+                    settings.widgetHighlightId === 'dynamic'
+                      ? palette.accent
+                      : palette.border,
+                  borderWidth:
+                    settings.widgetHighlightId === 'dynamic' ? 3 : 2,
+                },
+              ]}>
+              <Text style={[styles.widgetSwatchCustomLabel, { color: palette.muted }]}>
+                {t('settings.widgetHighlight_dynamicAbbr')}
+              </Text>
+            </Pressable>
             {WIDGET_HIGHLIGHT_SWATCHES.map(s => {
               const selected = settings.widgetHighlightId === s.id;
               return (

@@ -7,6 +7,7 @@
     "home": "Prayer Times",
     "settings": "Inställningar",
     "month": "Månad",
+    "shareMonth": "Dela månad",
     "compass": "Kibla"
   },
   "a11y": {
@@ -46,8 +47,17 @@
     "locationNotReadyTitle": "Platsen är inte klar",
     "locationNotReadyBody": "Öppna Hem och ladda dagens tider en gång så att den här skärmen kan använda din GPS-position.",
     "thisMonth": "Den här månaden",
+    "shareMonth": "Dela bild",
     "loadError": "Kunde inte ladda månaden.",
-    "empty": "Inget att visa."
+    "empty": "Inget att visa.",
+    "refreshData": "Uppdatera sparad data",
+    "refreshing": "Uppdaterar...",
+    "monthsStored": "{{count}} månader sparade",
+    "dayOfWeek": "Dag",
+    "date": "Datum",
+    "hijri": "Hijri",
+    "gregorian": "Gregoriansk",
+    "prayerTimes": "Bönetider"
   },
   "settings": {
     "appearance": "Utseende",
@@ -99,18 +109,34 @@
     "widgetHighlight_teal": "Turkos",
     "widgetHighlight_blue": "Blå",
     "widgetHighlight_amber": "Bärnsten",
+    "widgetHighlight_dynamic": "Dynamisk (telefonaccent)",
+    "widgetHighlight_dynamicAbbr": "Dyn",
     "widgetHighlight_custom": "Egen färg",
     "widgetHighlight_customAbbr": "…",
     "widgetHighlightHexPlaceholder": "#6BC98A",
-    "widgetHighlightDynamicHelp": "När temat är System och Systemfärger är på använder widgeten telefonens accent för nästa bön. Annars används färgen du väljer ovan.",
+    "widgetHighlightDynamicHelp": "Välj Dynamisk för att följa telefonens accentfärg för nästa bön. På Android 12+ följer den bakgrundens dynamiska färger.",
     "widgetConfigureHint": "På Android kan du också trycka länge på widgeten → inställningar (kugghjul) för samma val.",
     "notificationSound": "Aviseringsljud",
     "notificationSoundModalTitle": "Välj aviseringsljud",
     "notificationSoundDefault": "Standardavisering",
     "notificationSoundDefaultHelp": "Använder enhetens standardljud för aviseringar.",
+    "notificationSoundAbdulBasit": "Adhan - Abdul Basit",
+    "notificationSoundAbdulGhaffar": "Adhan - Abdul Ghaffar",
+    "notificationSoundAbdulHakam": "Adhan - Abdul Hakam",
     "notificationSoundMakkah": "Adhan - Makkah",
     "notificationSoundMadina": "Adhan - Madina",
     "notificationSoundAqsa": "Adhan - Al-Aqsa",
+    "notificationSoundEgypt": "Adhan - Egypten",
+    "notificationSoundHalab": "Adhan - Halab",
+    "notificationSoundAlHussaini": "Adhan - Al-Hussaini",
+    "notificationSoundBakirBash": "Adhan - Bakir Bash",
+    "notificationSoundHafez": "Adhan - Hafez",
+    "notificationSoundHafizMurad": "Adhan - Hafiz Murad",
+    "notificationSoundMinshawi": "Adhan - Minshawi",
+    "notificationSoundNaghshbandi": "Adhan - Naghshbandi",
+    "notificationSoundSaber": "Adhan - Saber",
+    "notificationSoundSharifDoman": "Adhan - Sharif Doman",
+    "notificationSoundYusufIslam": "Adhan - Yusuf Islam",
     "notificationSoundVoiceHelp": "Inbyggd röst ingår i den här appversionen.",
     "versionInstalled": "Installerad version: {{version}}"
   },
@@ -196,7 +222,9 @@
   },
   "alertCopy": {
     "atPrayer": "Bönetid",
-    "prePrayer": "Börjar om {{count}} min"
+    "prePrayer": "Börjar om {{count}} min",
+    "adhanStopAction": "Stoppa adhan",
+    "adhanDisableAction": "Inaktivera adhan"
   },
   "support": {
     "section": "Stöd utgivaren",

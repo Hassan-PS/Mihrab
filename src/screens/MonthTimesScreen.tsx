@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -10,6 +12,7 @@ import {
 } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
+import type { RootStackParamList } from '../navigation/types';
 import {
   loadMonthPrayerTimes,
   type MonthDayEntry,
@@ -23,8 +26,11 @@ import { cardEdgeStyle } from '../theme/chrome';
 import { formatLocalDate } from '../utils/date';
 import { formatDisplayTime } from '../utils/prayerTimes';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
+import { getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
 
 export function MonthTimesScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t, i18n } = useTranslation();
   const { settings, hydrated } = usePrayerSettings();
   const { palette } = useAppPalette();
@@ -34,6 +40,9 @@ export function MonthTimesScreen() {
   const [rows, setRows] = useState<MonthDayEntry[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cacheStatus, setCacheStatus] = useState<{ monthsStored: number; isExpired: boolean } | null>(null);
+  const [refreshingCache, setRefreshingCache] = useState(false);
+  const [refreshProgress, setRefreshProgress] = useState<{ current: number; total: number } | null>(null);
 
   useAndroidSubScreenBack();
 
@@ -102,10 +111,64 @@ export function MonthTimesScreen() {
   }, [viewMonth]);
 
   const goThisMonth = useCallback(() => {
-    const t = new Date();
-    setViewYear(t.getFullYear());
-    setViewMonth(t.getMonth());
+    const now = new Date();
+    setViewYear(now.getFullYear());
+    setViewMonth(now.getMonth());
   }, []);
+
+  const updateCacheStatus = useCallback(() => {
+    if (!hydrated || needsGpsPrime) return;
+    getCacheStatus({
+      provider: effectiveProvider,
+      latitude: lat,
+      longitude: lng,
+      calculationMethod: settings.calculationMethod,
+      school: settings.school,
+    }).then(setCacheStatus).catch(() => {});
+  }, [hydrated, needsGpsPrime, effectiveProvider, lat, lng, settings.calculationMethod, settings.school]);
+
+  useEffect(() => {
+    updateCacheStatus();
+  }, [updateCacheStatus]);
+
+  const handleRefreshCache = useCallback(async () => {
+    if (!hydrated || needsGpsPrime) return;
+    setRefreshingCache(true);
+    setRefreshProgress({ current: 0, total: 1 });
+    try {
+      await refreshPrayerDataCache(
+        {
+          provider: effectiveProvider,
+          latitude: lat,
+          longitude: lng,
+          calculationMethod: settings.calculationMethod,
+          school: settings.school,
+        },
+        12,
+        (current, total) => {
+          setRefreshProgress({ current, total });
+        }
+      );
+      updateCacheStatus();
+      // Reload current month view to reflect new data
+      setRows(null);
+      setLoading(true);
+      const data = await loadMonthPrayerTimes(viewYear, viewMonth, {
+        provider: effectiveProvider,
+        latitude: lat,
+        longitude: lng,
+        calculationMethod: settings.calculationMethod,
+        school: settings.school,
+      });
+      setRows(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('month.loadError'));
+    } finally {
+      setRefreshingCache(false);
+      setRefreshProgress(null);
+      setLoading(false);
+    }
+  }, [hydrated, needsGpsPrime, effectiveProvider, lat, lng, settings.calculationMethod, settings.school, viewYear, viewMonth, updateCacheStatus, t]);
 
   useEffect(() => {
     if (!hydrated || needsGpsPrime) {
@@ -181,7 +244,7 @@ export function MonthTimesScreen() {
         </View>
       );
     },
-    [palette.border, palette.card, palette.flatChrome, palette.muted, palette.text],
+    [palette],
   );
 
   if (!hydrated) {
@@ -218,11 +281,37 @@ export function MonthTimesScreen() {
           <Text style={[styles.navArrow, { color: palette.accent }]}>›</Text>
         </Pressable>
       </View>
-      <Pressable onPress={goThisMonth} style={styles.thisMonthBtn}>
-        <Text style={[styles.thisMonthLabel, { color: palette.accent }]}>
-          {t('month.thisMonth')}
-        </Text>
-      </Pressable>
+      <View style={styles.actionsRow}>
+        <Pressable onPress={goThisMonth} style={styles.actionBtn}>
+          <Text style={[styles.actionLabel, { color: palette.accent }]}>
+            {t('month.thisMonth')}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate('ShareMonth', { year: viewYear, month: viewMonth })}
+          style={styles.actionBtn}>
+          <Text style={[styles.actionLabel, { color: palette.accent }]}>
+            {t('month.shareMonth')}
+          </Text>
+        </Pressable>
+      </View>
+      <View style={styles.cacheRow}>
+        <Pressable
+          onPress={handleRefreshCache}
+          disabled={refreshingCache}
+          style={[styles.actionBtn, refreshingCache && { opacity: 0.5 }]}>
+          <Text style={[styles.actionLabel, { color: palette.accent }]}>
+            {refreshingCache 
+              ? (refreshProgress ? `${t('month.refreshing')} ${Math.round((refreshProgress.current / refreshProgress.total) * 100)}%` : t('month.refreshing')) 
+              : t('month.refreshData')}
+          </Text>
+        </Pressable>
+        {cacheStatus && !refreshingCache && (
+          <Text style={[styles.cacheStatusText, { color: palette.muted }]}>
+            {t('month.monthsStored', { count: cacheStatus.monthsStored })}
+          </Text>
+        )}
+      </View>
       <Text style={[styles.meta, { color: palette.muted }]}>
         {getProviderLabel(effectiveProvider)}
         {!providerHidesCalculationMethod(effectiveProvider)
@@ -311,15 +400,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  thisMonthBtn: {
-    alignSelf: 'center',
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: 8,
+    gap: 16,
+  },
+  actionBtn: {
     paddingVertical: 6,
     paddingHorizontal: 12,
   },
-  thisMonthLabel: {
+  actionLabel: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  cacheRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+    gap: 8,
+  },
+  cacheStatusText: {
+    fontSize: 13,
   },
   meta: {
     fontSize: 12,

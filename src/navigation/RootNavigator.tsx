@@ -7,6 +7,7 @@ import { CompassScreen } from '../screens/CompassScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { MonthTimesScreen } from '../screens/MonthTimesScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -50,6 +51,11 @@ export function RootNavigator() {
         name="MonthTimes"
         component={MonthTimesScreen}
         options={{ title: t('nav.month') }}
+      />
+      <Stack.Screen
+        name="ShareMonth"
+        component={ShareMonthScreen}
+        options={{ title: t('nav.shareMonth') }}
       />
       <Stack.Screen
         name="Compass"

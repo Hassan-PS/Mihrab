@@ -12,6 +12,11 @@ import {
   NOTIFICATION_SOUND_OPTIONS,
   type NotificationSoundId,
 } from './notificationSounds';
+import {
+  ADHAN_ACTION_DISABLE,
+  ADHAN_ACTION_STOP,
+  ADHAN_CONTROLS_CATEGORY_ID,
+} from './adhanSafetyControls';
 import type { TimingsMap } from '../types/prayer';
 import {
   buildPrePrayerReminderEvents,
@@ -92,7 +97,8 @@ export async function syncPrayerNotifications(params: {
     }
   }
   await ensureChannel(params.notificationSound);
-  const sound = getNotificationSoundOption(params.notificationSound);
+  const prayerTimeSound = getNotificationSoundOption(params.notificationSound);
+  const reminderSound = getNotificationSoundOption('default');
   const exactAlarms = await canUseExactAlarms();
   const now = new Date();
   const salahEvents = buildUpcomingSalahEvents(
@@ -108,18 +114,38 @@ export async function syncPrayerNotifications(params: {
 
   for (const e of salahEvents) {
     const notificationId = `pt-${e.at.getTime()}-${e.name}`;
+    const usesAdhan = prayerTimeSound.id !== 'default';
     await notifee.createTriggerNotification(
       {
         id: notificationId,
         title: e.name,
         body: i18n.t('alertCopy.atPrayer'),
+        data: {
+          kind: 'prayer_time',
+          usesAdhan: usesAdhan ? '1' : '0',
+        },
         ios: {
-          sound: sound.iosSound,
+          sound: prayerTimeSound.iosSound,
+          ...(usesAdhan ? { categoryId: ADHAN_CONTROLS_CATEGORY_ID } : {}),
         },
         android: {
-          channelId: sound.androidChannelId,
+          channelId: prayerTimeSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
+          ...(usesAdhan
+            ? {
+                actions: [
+                  {
+                    title: i18n.t('alertCopy.adhanStopAction'),
+                    pressAction: { id: ADHAN_ACTION_STOP },
+                  },
+                  {
+                    title: i18n.t('alertCopy.adhanDisableAction'),
+                    pressAction: { id: ADHAN_ACTION_DISABLE },
+                  },
+                ],
+              }
+            : {}),
         },
       },
       buildTimestampTrigger(e.at.getTime(), exactAlarms),
@@ -136,10 +162,10 @@ export async function syncPrayerNotifications(params: {
           count: reminderMinutes,
         }),
         ios: {
-          sound: sound.iosSound,
+          sound: reminderSound.iosSound,
         },
         android: {
-          channelId: sound.androidChannelId,
+          channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
         },

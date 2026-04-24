@@ -1,7 +1,7 @@
 import Geolocation from '@react-native-community/geolocation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
-import { fetchPrayerTimesUnified } from '../providers/fetchPrayerTimes';
+import { getOrFetchPrayerTimes, getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
@@ -36,7 +36,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       );
       setState({ phase: 'loading' });
       try {
-        const todayRes = await fetchPrayerTimesUnified({
+        const todayTimings = await getOrFetchPrayerTimes({
           provider,
           latitude,
           longitude,
@@ -46,7 +46,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         });
         let tomorrow: TimingsMap | undefined;
         try {
-          const tomorrowRes = await fetchPrayerTimesUnified({
+          tomorrow = await getOrFetchPrayerTimes({
             provider,
             latitude,
             longitude,
@@ -54,7 +54,6 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             calculationMethod: settings.calculationMethod,
             school: settings.school,
           });
-          tomorrow = tomorrowRes.timings;
         } catch {
           tomorrow = undefined;
         }
@@ -65,9 +64,35 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           phase: 'ready',
           latitude,
           longitude,
-          today: todayRes.timings,
+          today: todayTimings,
           tomorrow,
         });
+
+        // Background cache refresh if needed
+        try {
+          const status = await getCacheStatus({
+            provider,
+            latitude,
+            longitude,
+            calculationMethod: settings.calculationMethod,
+            school: settings.school,
+          });
+          if (status.monthsStored < 2 || status.isExpired) {
+            // Refresh up to 12 months ahead in the background
+            refreshPrayerDataCache(
+              {
+                provider,
+                latitude,
+                longitude,
+                calculationMethod: settings.calculationMethod,
+                school: settings.school,
+              },
+              12
+            ).catch(() => {});
+          }
+        } catch {
+          // Ignore cache check errors
+        }
       } catch (e) {
         if (gen !== loadGenerationRef.current) {
           return;

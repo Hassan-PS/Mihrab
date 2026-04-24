@@ -34,7 +34,9 @@
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.24.0",
     "react-native-sensors": "^7.3.6",
-    "react-native-svg": "^15.15.4"
+    "react-native-share": "^12.2.6",
+    "react-native-svg": "^15.15.4",
+    "react-native-view-shot": "^4.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

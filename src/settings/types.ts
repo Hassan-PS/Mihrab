@@ -13,8 +13,14 @@ export type AppearancePreference = 'system' | 'light' | 'dark';
 
 export type AppLanguage = 'en' | 'sv' | 'ar';
 
-/** Next-prayer row color on the home screen widget (preset or custom hex). */
-export type WidgetHighlightId = 'green' | 'teal' | 'blue' | 'amber' | 'custom';
+/** Next-prayer row color on the home screen widget (preset, dynamic, or custom hex). */
+export type WidgetHighlightId =
+  | 'dynamic'
+  | 'green'
+  | 'teal'
+  | 'blue'
+  | 'amber'
+  | 'custom';
 
 export type PrayerAppSettings = {
   /** Follow OS light/dark, or force one mode. */
@@ -54,7 +60,7 @@ export type PrayerAppSettings = {
   prePrayerReminderMinutes: PrePrayerReminderMinutes;
   /** Notification sound profile for prayer alerts/reminders. */
   notificationSound: NotificationSoundId;
-  /** Android: widget background opacity 20–100. */
+  /** Android: widget background opacity 0–100. */
   androidWidgetBackgroundOpacity: number;
   /** Highlight style for the widget next-prayer row. */
   widgetHighlightId: WidgetHighlightId;
