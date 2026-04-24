@@ -3,14 +3,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Animated,
   Image,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 import Share from 'react-native-share';
 import ViewShot from 'react-native-view-shot';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -38,6 +41,29 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+
+  const { width: screenWidth } = useWindowDimensions();
+  const A4_WIDTH = 794;
+  const initialScale = Math.min(1, (screenWidth - 32) / A4_WIDTH);
+
+  const baseScale = useRef(new Animated.Value(initialScale)).current;
+  const pinchScale = useRef(new Animated.Value(1)).current;
+  const scale = Animated.multiply(baseScale, pinchScale);
+  const lastScale = useRef(initialScale);
+
+  const onPinchGestureEvent = Animated.event(
+    [{ nativeEvent: { scale: pinchScale } }],
+    { useNativeDriver: true }
+  );
+
+  const onPinchHandlerStateChange = (event: any) => {
+    if (event.nativeEvent.oldState === State.ACTIVE) {
+      lastScale.current *= event.nativeEvent.scale;
+      lastScale.current = Math.max(initialScale, Math.min(lastScale.current, 3));
+      baseScale.setValue(lastScale.current);
+      pinchScale.setValue(1);
+    }
+  };
 
   useAndroidSubScreenBack();
 
@@ -215,12 +241,20 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   return (
     <View style={[styles.container, { backgroundColor: palette.bg }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ViewShot
-          ref={viewShotRef}
-          options={{ format: 'png', quality: 1.0 }}
-          style={styles.shotContainer}>
-          
-          {/* Banner */}
+        <PinchGestureHandler
+          onGestureEvent={onPinchGestureEvent}
+          onHandlerStateChange={onPinchHandlerStateChange}>
+          <Animated.View
+            style={{
+              transform: [{ scale }],
+              transformOrigin: 'top center',
+            }}>
+            <ViewShot
+              ref={viewShotRef}
+              options={{ format: 'png', quality: 1.0 }}
+              style={styles.shotContainer}>
+              
+              {/* Banner */}
           <View style={styles.banner}>
             <View style={[styles.bannerTop, { flexDirection: 'row' }]}>
               <View style={[styles.bannerLeft, { alignItems: 'flex-start' }]}>
@@ -317,7 +351,9 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
               );
             })}
           </View>
-        </ViewShot>
+            </ViewShot>
+          </Animated.View>
+        </PinchGestureHandler>
       </ScrollView>
 
       <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.bg }]}>
