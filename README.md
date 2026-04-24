@@ -1,10 +1,10 @@
 # Prayer Times
 
 <a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256">
-  <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1713052800" alt="Download on the App Store" height="50">
+  <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1713052800" alt="Download on the App Store" height="40">
 </a>
 <a href="https://github.com/Hassan-PS/PrayerApp/releases/latest">
-  <img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="50">
+  <img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="40">
 </a>
 
 Simple React Native app for prayer times, Qibla, month view, and widget.
