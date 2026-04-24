@@ -100,7 +100,7 @@
     "prePrayerReminderOff": "Off",
     "prePrayerReminderOption": "{{count}} min before",
     "language": "Language",
-    "languageHelp": "English, Swedish, or Arabic. Arabic uses right-to-left layout.",
+    "languageHelp": "Select the app language. Arabic and Urdu use right-to-left layout.",
     "langEn": "English",
     "langSv": "Swedish",
     "langAr": "Arabic",

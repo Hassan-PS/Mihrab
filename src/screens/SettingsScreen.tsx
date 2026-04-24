@@ -78,6 +78,7 @@ export function SettingsScreen() {
   const [preReminderModal, setPreReminderModal] = useState(false);
   const [notificationSoundModal, setNotificationSoundModal] = useState(false);
   const [providerModal, setProviderModal] = useState(false);
+  const [languageModal, setLanguageModal] = useState(false);
   const [draftLat, setDraftLat] = useState('');
   const [draftLng, setDraftLng] = useState('');
   const [coordError, setCoordError] = useState<string | null>(null);
@@ -87,7 +88,7 @@ export function SettingsScreen() {
 
   const deferHardwareBackRef = useRef(false);
   deferHardwareBackRef.current =
-    methodModal || preReminderModal || notificationSoundModal || providerModal;
+    methodModal || preReminderModal || notificationSoundModal || providerModal || languageModal;
   useAndroidSubScreenBack(deferHardwareBackRef);
 
   useEffect(() => {
@@ -301,57 +302,44 @@ export function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: palette.muted }]}>
           {t('settings.language')}
         </Text>
-        <View
+        <Pressable
           style={[
             styles.card,
+            styles.rowPress,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <View style={[styles.segmentRow, { flexWrap: 'wrap' }]}>
-            {(
-              [
-                { id: 'en' as const, label: t('settings.langEn') },
-                { id: 'sv' as const, label: t('settings.langSv') },
-                { id: 'ar' as const, label: t('settings.langAr') },
-                { id: 'bn' as const, label: 'বাংলা' },
-                { id: 'ur' as const, label: 'اردو' },
-                { id: 'hi' as const, label: 'हिन्दी' },
-                { id: 'fr' as const, label: 'Français' },
-                { id: 'es' as const, label: 'Español' },
-                { id: 'de' as const, label: 'Deutsch' },
-                { id: 'tr' as const, label: 'Türkçe' },
-                { id: 'id' as const, label: 'Bahasa Indonesia' },
-                { id: 'ru' as const, label: 'Русский' },
-                { id: 'zh' as const, label: '中文' },
-              ] as const
-            ).map(opt => (
-              <Pressable
-                key={opt.id}
-                style={[
-                  styles.segment,
-                  styles.appearanceSegment,
-                  { minWidth: '30%' },
-                  segmentChromeStyle(palette, settings.language === opt.id),
-                ]}
-                onPress={() =>
-                  updateSettings({ language: opt.id as AppLanguage })
-                }>
-                <Text
-                  style={[
-                    styles.appearanceSegmentLabel,
-                    { color: palette.text },
-                    settings.language === opt.id && {
-                      color: palette.accent,
-                    },
-                  ]}>
-                  {opt.label}
-                </Text>
-              </Pressable>
-            ))}
+          ]}
+          onPress={() => setLanguageModal(true)}>
+          <View style={styles.providerCopy}>
+            <Text style={[styles.label, { color: palette.muted }]}>
+              {t('settings.language')}
+            </Text>
+            <Text style={[styles.valueText, { color: palette.text }]}>
+              {(
+                [
+                  { id: 'en', label: t('settings.langEn') },
+                  { id: 'sv', label: t('settings.langSv') },
+                  { id: 'ar', label: t('settings.langAr') },
+                  { id: 'bn', label: 'বাংলা' },
+                  { id: 'ur', label: 'اردو' },
+                  { id: 'hi', label: 'हिन्दी' },
+                  { id: 'fr', label: 'Français' },
+                  { id: 'es', label: 'Español' },
+                  { id: 'de', label: 'Deutsch' },
+                  { id: 'tr', label: 'Türkçe' },
+                  { id: 'id', label: 'Bahasa Indonesia' },
+                  { id: 'ru', label: 'Русский' },
+                  { id: 'zh', label: '中文' },
+                ].find(l => l.id === settings.language)?.label || 'English'
+              )}
+            </Text>
+            <Text style={[styles.help, { color: palette.muted }]}>
+              {t('settings.languageHelp')}
+            </Text>
           </View>
-          <Text style={[styles.help, { color: palette.muted }]}>
-            {t('settings.languageHelp')}
+          <Text style={[styles.changeLink, { color: palette.accent }]}>
+            {t('common.change')}
           </Text>
-        </View>
+        </Pressable>
 
         {isDark ? (
           <View
@@ -937,6 +925,64 @@ export function SettingsScreen() {
                   </Text>
                   <Text style={[styles.providerSub, { color: palette.muted }]}>
                     {t(item.helpKey)}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={languageModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setLanguageModal(false)}>
+        <View style={styles.modalRoot}>
+          <Pressable
+            style={[styles.modalFill, { backgroundColor: palette.overlay }]}
+            onPress={() => setLanguageModal(false)}
+          />
+          <View
+            style={[
+              styles.modalSheet,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}>
+            <Text style={[styles.modalTitle, { color: palette.text }]}>
+              {t('settings.language')}
+            </Text>
+            <FlatList
+              data={[
+                { id: 'en' as const, label: t('settings.langEn') },
+                { id: 'sv' as const, label: t('settings.langSv') },
+                { id: 'ar' as const, label: t('settings.langAr') },
+                { id: 'bn' as const, label: 'বাংলা' },
+                { id: 'ur' as const, label: 'اردو' },
+                { id: 'hi' as const, label: 'हिन्दी' },
+                { id: 'fr' as const, label: 'Français' },
+                { id: 'es' as const, label: 'Español' },
+                { id: 'de' as const, label: 'Deutsch' },
+                { id: 'tr' as const, label: 'Türkçe' },
+                { id: 'id' as const, label: 'Bahasa Indonesia' },
+                { id: 'ru' as const, label: 'Русский' },
+                { id: 'zh' as const, label: '中文' },
+              ]}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={[
+                    styles.methodRow,
+                    rowDividerStyle(palette),
+                    settings.language === item.id && {
+                      backgroundColor: palette.bg,
+                    },
+                  ]}
+                  onPress={() => {
+                    updateSettings({ language: item.id as AppLanguage });
+                    setLanguageModal(false);
+                  }}>
+                  <Text style={[styles.methodName, { color: palette.text }]}>
+                    {item.label}
                   </Text>
                 </Pressable>
               )}
