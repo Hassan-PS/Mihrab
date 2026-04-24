@@ -11,7 +11,7 @@ export type PrayerDataProviderId =
 
 export type AppearancePreference = 'system' | 'light' | 'dark';
 
-export type AppLanguage = 'en' | 'sv' | 'ar';
+export type AppLanguage = 'en' | 'sv' | 'ar' | 'bn' | 'ur' | 'hi' | 'fr' | 'es' | 'de' | 'tr' | 'id' | 'ru' | 'zh';
 
 /** Next-prayer row color on the home screen widget (preset, dynamic, or custom hex). */
 export type WidgetHighlightId =
@@ -38,7 +38,7 @@ export type PrayerAppSettings = {
    * Choosing a provider from the list sets this to false.
    */
   dataProviderAuto: boolean;
-  calculationMethod: number;
+  calculationMethod: number | 'auto';
   school: number;
   locationMode: LocationMode;
   manualLatitude: number;
@@ -74,7 +74,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   pureBlackDark: false,
   dataProvider: 'aladhan',
   dataProviderAuto: true,
-  calculationMethod: 2,
+  calculationMethod: 'auto',
   school: 0,
   locationMode: 'manual',
   manualLatitude: 51.5074,

@@ -86,12 +86,7 @@ export function MonthTimesScreen() {
 
   const monthTitle = useMemo(() => {
     const d = new Date(viewYear, viewMonth, 1);
-    const loc =
-      i18n.language === 'sv'
-        ? 'sv-SE'
-        : i18n.language === 'ar'
-          ? 'ar'
-          : 'en-US';
+    const loc = i18n.language;
     return d.toLocaleString(loc, { month: 'long', year: 'numeric' });
   }, [viewYear, viewMonth, i18n.language]);
 
@@ -233,7 +228,7 @@ export function MonthTimesScreen() {
         return raw ? formatDisplayTime(raw) : '—';
       }).join('  ');
       const dayLine = `${formatLocalDate(item.date)} · ${item.date.toLocaleDateString(
-        undefined,
+        i18n.language,
         { weekday: 'short' },
       )}`;
       return (
@@ -247,7 +242,7 @@ export function MonthTimesScreen() {
         </View>
       );
     },
-    [palette],
+    [palette, i18n.language],
   );
 
   if (!hydrated) {

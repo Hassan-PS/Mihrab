@@ -8,7 +8,7 @@ export type StoredPrayerData = {
   provider: PrayerDataProviderId;
   latitude: number;
   longitude: number;
-  calculationMethod: number;
+  calculationMethod: number | 'auto';
   school: number;
   months: Record<string, Record<string, TimingsMap>>; // YYYY-MM -> YYYY-MM-DD -> TimingsMap
 };

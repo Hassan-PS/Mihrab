@@ -48,7 +48,7 @@ export function computeLocalAdhanTimes(params: {
   latitude: number;
   longitude: number;
   date: Date;
-  calculationMethod: number;
+  calculationMethod: number | 'auto';
   school: number;
 }): PrayerTimesResult {
   const y = params.date.getFullYear();
@@ -56,7 +56,11 @@ export function computeLocalAdhanTimes(params: {
   const day = params.date.getDate();
   const dayDate = new Date(y, m, day);
   const coords = new Coordinates(params.latitude, params.longitude);
-  const calc = parametersForMethod(params.calculationMethod);
+  
+  // If auto, default to MWL for local calculation (since we can't easily auto-detect)
+  const methodId = params.calculationMethod === 'auto' ? 3 : params.calculationMethod;
+  const calc = parametersForMethod(methodId);
+  
   calc.madhab = params.school === 1 ? Madhab.Hanafi : Madhab.Shafi;
   const pt = new PrayerTimes(coords, dayDate, calc);
   return {
