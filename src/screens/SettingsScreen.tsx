@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
+  Linking,
   Modal,
   PermissionsAndroid,
   Platform,
@@ -785,9 +786,18 @@ export function SettingsScreen() {
         )}
 
         <MaybeSupportDeveloperSection palette={palette} />
-        <Text style={[styles.versionText, { color: palette.muted }]}>
-          {t('settings.versionInstalled', { version: versionLabel })}
-        </Text>
+        <View style={styles.versionBlock}>
+          <Text style={[styles.versionText, { color: palette.muted }]}>
+            {t('settings.versionInstalled', { version: versionLabel })}
+          </Text>
+          <Text
+            style={[styles.versionLink, { color: palette.accent }]}
+            onPress={() => {
+              void Linking.openURL('https://github.com/Hassan-PS/PrayerApp');
+            }}>
+            github.com/Hassan-PS/PrayerApp
+          </Text>
+        </View>
       </ScrollView>
 
       <ProviderPickerModal
@@ -1134,7 +1144,15 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 12,
     textAlign: 'center',
+  },
+  versionBlock: {
     marginTop: 10,
     marginBottom: 4,
+    alignItems: 'center',
+    gap: 3,
+  },
+  versionLink: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

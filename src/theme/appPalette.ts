@@ -131,7 +131,8 @@ function androidDynamicPalette(
     muted: PlatformColor('?attr/colorOnSurfaceVariant'),
     border: 'transparent',
     accent: PlatformColor('?attr/colorPrimary'),
-    accentBg: PlatformColor('?attr/colorPrimaryContainer'),
+    // Use a neutral container to keep text contrast predictable with dynamic palettes.
+    accentBg: PlatformColor('?attr/colorSurfaceContainerHigh'),
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
     flatChrome: true,

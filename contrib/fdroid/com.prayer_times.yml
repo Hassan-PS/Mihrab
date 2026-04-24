@@ -11,9 +11,9 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/PrayerApp
 
 Builds:
-  - versionName: 1.4.8
-    versionCode: 21
-    commit: v1.4.8
+  - versionName: 1.4.9
+    versionCode: 22
+    commit: v1.4.9
     subdir: android
     sudo:
       - sysctl fs.inotify.max_user_watches=524288 || true
@@ -75,5 +75,5 @@ MaintainerNotes: |
 ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.8
-CurrentVersionCode: 21
+CurrentVersion: 1.4.9
+CurrentVersionCode: 22
