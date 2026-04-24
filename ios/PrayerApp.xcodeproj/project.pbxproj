@@ -7,43 +7,95 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08E4CD4EC9CFDE3F2B1D21A7 /* adhan_naghshbandi.caf in Resources */ = {isa = PBXBuildFile; fileRef = 48AAC76E10CD18CD2ADE11BD /* adhan_naghshbandi.caf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-PrayerApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-PrayerApp.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		2A9B8C7D6E5F4A3B2C1D0E9F /* AppVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A9B8C7D6E5F4A3B2C1D0E9E /* AppVersion.m */; };
+		21C5696033EE08B870466B16 /* adhan_al_hussaini.caf in Resources */ = {isa = PBXBuildFile; fileRef = 7BB6BBBA364576409D299287 /* adhan_al_hussaini.caf */; };
+		29B211ACA24869F8CDC46EF4 /* adhan_sharif_doman.caf in Resources */ = {isa = PBXBuildFile; fileRef = 7B489EDC7485CD1BDA638DC8 /* adhan_sharif_doman.caf */; };
 		2A6B7C8D9E0F1A2B3C4D5E60 /* adhan_makkah.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2A6B7C8D9E0F1A2B3C4D5E50 /* adhan_makkah.caf */; };
 		2A6B7C8D9E0F1A2B3C4D5E61 /* adhan_madina.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2A6B7C8D9E0F1A2B3C4D5E51 /* adhan_madina.caf */; };
 		2A6B7C8D9E0F1A2B3C4D5E62 /* adhan_aqsa.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2A6B7C8D9E0F1A2B3C4D5E52 /* adhan_aqsa.caf */; };
+		2A9B8C7D6E5F4A3B2C1D0E9F /* AppVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A9B8C7D6E5F4A3B2C1D0E9E /* AppVersion.m */; };
+		437AD791C98039C8EE2B87EF /* adhan_egypt.caf in Resources */ = {isa = PBXBuildFile; fileRef = C27195F19393889CFB4B2553 /* adhan_egypt.caf */; };
+		443F2CB14D90FCE3B9A43123 /* adhan_bakir_bash.caf in Resources */ = {isa = PBXBuildFile; fileRef = B7714F32B411231108636A8C /* adhan_bakir_bash.caf */; };
+		6F702A22F070F0CB015C3788 /* adhan_abdul_ghaffar.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		82792D28789AD3A9AD8EA294 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
-		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
-		F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */; };
+		8335EB755F07A4493C0BCA72 /* adhan_saber.caf in Resources */ = {isa = PBXBuildFile; fileRef = CE9E49272B22B1425383AC48 /* adhan_saber.caf */; };
+		83D5A0830BF1AEF2D5F9C666 /* adhan_halab.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3677D65A9EE39814B1FF01A4 /* adhan_halab.caf */; };
+		9E69A27015C7ED4DEE6162C9 /* adhan_hafez.caf in Resources */ = {isa = PBXBuildFile; fileRef = CB4D857AA2ED576723B598E1 /* adhan_hafez.caf */; };
+		AA0385239A1984202E9F4870 /* adhan_abdul_hakam.caf in Resources */ = {isa = PBXBuildFile; fileRef = B8EC02874B0A8F91C2E75CCD /* adhan_abdul_hakam.caf */; };
+		AFCC85C860A9E992FFA3E2C9 /* adhan_yusuf_islam.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */; };
+		B5C72EE49F32E58EDF1BC8CA /* adhan_abdul_basit.caf in Resources */ = {isa = PBXBuildFile; fileRef = D5FC0C5A1FDA3B8C9843426D /* adhan_abdul_basit.caf */; };
+		CE1E4BEE25F612B8320B7886 /* adhan_hafiz_murad.caf in Resources */ = {isa = PBXBuildFile; fileRef = 91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */; };
 		E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */; };
 		E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EA6B2A6659A3E2683A2EC666 /* adhan_minshawi.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */; };
+		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
+		F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E1D2C3B4A5968778695A4B3CA;
+			remoteInfo = PrayerWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E1D2C3B4A5968778695A4B3CB /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		13B07F961A680F5B00A75B9A /* PrayerApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrayerApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = PrayerApp/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = PrayerApp/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = PrayerApp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2A6B7C8D9E0F1A2B3C4D5E50 /* adhan_makkah.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_makkah.caf; path = PrayerApp/adhan_makkah.caf; sourceTree = "<group>"; };
+		2A6B7C8D9E0F1A2B3C4D5E51 /* adhan_madina.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_madina.caf; path = PrayerApp/adhan_madina.caf; sourceTree = "<group>"; };
+		2A6B7C8D9E0F1A2B3C4D5E52 /* adhan_aqsa.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_aqsa.caf; path = PrayerApp/adhan_aqsa.caf; sourceTree = "<group>"; };
 		2A9B8C7D6E5F4A3B2C1D0E9E /* AppVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppVersion.m; path = PrayerApp/AppVersion.m; sourceTree = "<group>"; };
-		2A6B7C8D9E0F1A2B3C4D5E50 /* adhan_makkah.caf */ = {isa = PBXFileReference; lastKnownFileType = audio.x-caf; name = adhan_makkah.caf; path = PrayerApp/adhan_makkah.caf; sourceTree = "<group>"; };
-		2A6B7C8D9E0F1A2B3C4D5E51 /* adhan_madina.caf */ = {isa = PBXFileReference; lastKnownFileType = audio.x-caf; name = adhan_madina.caf; path = PrayerApp/adhan_madina.caf; sourceTree = "<group>"; };
-		2A6B7C8D9E0F1A2B3C4D5E52 /* adhan_aqsa.caf */ = {isa = PBXFileReference; lastKnownFileType = audio.x-caf; name = adhan_aqsa.caf; path = PrayerApp/adhan_aqsa.caf; sourceTree = "<group>"; };
+		3677D65A9EE39814B1FF01A4 /* adhan_halab.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_halab.caf; path = PrayerApp/adhan_halab.caf; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-PrayerApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrayerApp.debug.xcconfig"; path = "Target Support Files/Pods-PrayerApp/Pods-PrayerApp.debug.xcconfig"; sourceTree = "<group>"; };
+		4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_yusuf_islam.caf; path = PrayerApp/adhan_yusuf_islam.caf; sourceTree = "<group>"; };
+		48AAC76E10CD18CD2ADE11BD /* adhan_naghshbandi.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_naghshbandi.caf; path = PrayerApp/adhan_naghshbandi.caf; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-PrayerApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrayerApp.release.xcconfig"; path = "Target Support Files/Pods-PrayerApp/Pods-PrayerApp.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-PrayerApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PrayerApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = PrayerApp/AppDelegate.swift; sourceTree = "<group>"; };
+		7B489EDC7485CD1BDA638DC8 /* adhan_sharif_doman.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_sharif_doman.caf; path = PrayerApp/adhan_sharif_doman.caf; sourceTree = "<group>"; };
+		7BB6BBBA364576409D299287 /* adhan_al_hussaini.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_al_hussaini.caf; path = PrayerApp/adhan_al_hussaini.caf; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = PrayerApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerWidget.m; path = PrayerApp/PrayerWidget.m; sourceTree = "<group>"; };
-		F1A100002294A1A2E3B4C5D7 /* PrayerApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PrayerApp.entitlements; path = PrayerApp/PrayerApp.entitlements; sourceTree = "<group>"; };
-		F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetTimelineReloader.swift; path = PrayerApp/WidgetTimelineReloader.swift; sourceTree = "<group>"; };
+		8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_ghaffar.caf; path = PrayerApp/adhan_abdul_ghaffar.caf; sourceTree = "<group>"; };
+		91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_hafiz_murad.caf; path = PrayerApp/adhan_hafiz_murad.caf; sourceTree = "<group>"; };
+		B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_minshawi.caf; path = PrayerApp/adhan_minshawi.caf; sourceTree = "<group>"; };
+		B7714F32B411231108636A8C /* adhan_bakir_bash.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_bakir_bash.caf; path = PrayerApp/adhan_bakir_bash.caf; sourceTree = "<group>"; };
+		B8EC02874B0A8F91C2E75CCD /* adhan_abdul_hakam.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_hakam.caf; path = PrayerApp/adhan_abdul_hakam.caf; sourceTree = "<group>"; };
+		C27195F19393889CFB4B2553 /* adhan_egypt.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_egypt.caf; path = PrayerApp/adhan_egypt.caf; sourceTree = "<group>"; };
+		CB4D857AA2ED576723B598E1 /* adhan_hafez.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_hafez.caf; path = PrayerApp/adhan_hafez.caf; sourceTree = "<group>"; };
+		CE9E49272B22B1425383AC48 /* adhan_saber.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_saber.caf; path = PrayerApp/adhan_saber.caf; sourceTree = "<group>"; };
+		D5FC0C5A1FDA3B8C9843426D /* adhan_abdul_basit.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_basit.caf; path = PrayerApp/adhan_abdul_basit.caf; sourceTree = "<group>"; };
 		E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PrayerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerWidgetExtension.swift; sourceTree = "<group>"; };
 		E1D2C3B4A5968778695A4B3C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PrayerWidgetExtension.entitlements; sourceTree = "<group>"; };
+		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerWidget.m; path = PrayerApp/PrayerWidget.m; sourceTree = "<group>"; };
+		F1A100002294A1A2E3B4C5D7 /* PrayerApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PrayerApp.entitlements; path = PrayerApp/PrayerApp.entitlements; sourceTree = "<group>"; };
+		F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetTimelineReloader.swift; path = PrayerApp/WidgetTimelineReloader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,16 +117,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		E1D2C3B4A5968778695A4B3D1 /* PrayerWidgetExtension */ = {
-			isa = PBXGroup;
-			children = (
-				E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */,
-				E1D2C3B4A5968778695A4B3C3 /* Info.plist */,
-				E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */,
-			);
-			path = PrayerWidgetExtension;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* PrayerApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -83,6 +125,20 @@
 				2A6B7C8D9E0F1A2B3C4D5E50 /* adhan_makkah.caf */,
 				2A6B7C8D9E0F1A2B3C4D5E51 /* adhan_madina.caf */,
 				2A6B7C8D9E0F1A2B3C4D5E52 /* adhan_aqsa.caf */,
+				D5FC0C5A1FDA3B8C9843426D /* adhan_abdul_basit.caf */,
+				8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */,
+				B8EC02874B0A8F91C2E75CCD /* adhan_abdul_hakam.caf */,
+				C27195F19393889CFB4B2553 /* adhan_egypt.caf */,
+				3677D65A9EE39814B1FF01A4 /* adhan_halab.caf */,
+				7BB6BBBA364576409D299287 /* adhan_al_hussaini.caf */,
+				B7714F32B411231108636A8C /* adhan_bakir_bash.caf */,
+				CB4D857AA2ED576723B598E1 /* adhan_hafez.caf */,
+				91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */,
+				B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */,
+				48AAC76E10CD18CD2ADE11BD /* adhan_naghshbandi.caf */,
+				CE9E49272B22B1425383AC48 /* adhan_saber.caf */,
+				7B489EDC7485CD1BDA638DC8 /* adhan_sharif_doman.caf */,
+				4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */,
 				F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */,
@@ -143,17 +199,17 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-/* End PBXGroup section */
-
-/* Begin PBXContainerItemProxy section */
-		E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E1D2C3B4A5968778695A4B3CA;
-			remoteInfo = PrayerWidgetExtension;
+		E1D2C3B4A5968778695A4B3D1 /* PrayerWidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */,
+				E1D2C3B4A5968778695A4B3C3 /* Info.plist */,
+				E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */,
+			);
+			path = PrayerWidgetExtension;
+			sourceTree = "<group>";
 		};
-/* End PBXContainerItemProxy section */
+/* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		13B07F861A680F5B00A75B9A /* PrayerApp */ = {
@@ -179,14 +235,6 @@
 			productReference = 13B07F961A680F5B00A75B9A /* PrayerApp.app */;
 			productType = "com.apple.product-type.application";
 		};
-/* Begin PBXTargetDependency section */
-		E1D2C3B4A5968778695A4B3CD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */;
-			targetProxy = E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 		E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E1D2C3B4A5968778695A4B3D0 /* Build configuration list for PBXNativeTarget "PrayerWidgetExtension" */;
@@ -249,6 +297,20 @@
 				2A6B7C8D9E0F1A2B3C4D5E60 /* adhan_makkah.caf in Resources */,
 				2A6B7C8D9E0F1A2B3C4D5E61 /* adhan_madina.caf in Resources */,
 				2A6B7C8D9E0F1A2B3C4D5E62 /* adhan_aqsa.caf in Resources */,
+				B5C72EE49F32E58EDF1BC8CA /* adhan_abdul_basit.caf in Resources */,
+				6F702A22F070F0CB015C3788 /* adhan_abdul_ghaffar.caf in Resources */,
+				AA0385239A1984202E9F4870 /* adhan_abdul_hakam.caf in Resources */,
+				437AD791C98039C8EE2B87EF /* adhan_egypt.caf in Resources */,
+				83D5A0830BF1AEF2D5F9C666 /* adhan_halab.caf in Resources */,
+				21C5696033EE08B870466B16 /* adhan_al_hussaini.caf in Resources */,
+				443F2CB14D90FCE3B9A43123 /* adhan_bakir_bash.caf in Resources */,
+				9E69A27015C7ED4DEE6162C9 /* adhan_hafez.caf in Resources */,
+				CE1E4BEE25F612B8320B7886 /* adhan_hafiz_murad.caf in Resources */,
+				EA6B2A6659A3E2683A2EC666 /* adhan_minshawi.caf in Resources */,
+				08E4CD4EC9CFDE3F2B1D21A7 /* adhan_naghshbandi.caf in Resources */,
+				8335EB755F07A4493C0BCA72 /* adhan_saber.caf in Resources */,
+				29B211ACA24869F8CDC46EF4 /* adhan_sharif_doman.caf in Resources */,
+				AFCC85C860A9E992FFA3E2C9 /* adhan_yusuf_islam.caf in Resources */,
 				82792D28789AD3A9AD8EA294 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -261,20 +323,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		E1D2C3B4A5968778695A4B3CB /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
@@ -373,6 +421,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E1D2C3B4A5968778695A4B3CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */;
+			targetProxy = E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -383,7 +439,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
@@ -393,7 +449,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.9;
+				MARKETING_VERSION = 1.5.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -417,7 +473,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PrayerApp;
@@ -426,7 +482,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.9;
+				MARKETING_VERSION = 1.5.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -588,7 +644,6 @@
 			};
 			name = Release;
 		};
-
 		E1D2C3B4A5968778695A4B3CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -596,7 +651,7 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -607,14 +662,14 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.9;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -626,7 +681,7 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -637,14 +692,14 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.9;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

@@ -13,6 +13,7 @@ const KEY = 'prayerapp.settings.v1';
 const LANGUAGES: AppLanguage[] = ['en', 'sv', 'ar'];
 
 const WIDGET_HIGHLIGHT_IDS: WidgetHighlightId[] = [
+  'dynamic',
   'green',
   'teal',
   'blue',
@@ -46,7 +47,7 @@ function coerceWidgetHighlightHex(value: unknown): string {
 
 function coerceWidgetOpacity(value: unknown): number {
   if (typeof value === 'number' && Number.isFinite(value)) {
-    return Math.round(Math.min(100, Math.max(20, value)));
+    return Math.round(Math.min(100, Math.max(0, value)));
   }
   return DEFAULT_SETTINGS.androidWidgetBackgroundOpacity;
 }

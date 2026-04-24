@@ -7,6 +7,7 @@
     "home": "Prayer Times",
     "settings": "الإعدادات",
     "month": "الشهر",
+    "shareMonth": "مشاركة الشهر",
     "compass": "القبلة"
   },
   "a11y": {
@@ -46,8 +47,17 @@
     "locationNotReadyTitle": "الموقع غير جاهز",
     "locationNotReadyBody": "افتح الرئيسية وحمّل أوقات اليوم مرة واحدة حتى تتمكن هذه الشاشة من استخدام موقع GPS.",
     "thisMonth": "هذا الشهر",
+    "shareMonth": "مشاركة الصورة",
     "loadError": "تعذّر تحميل الشهر.",
-    "empty": "لا يوجد ما يُعرض."
+    "empty": "لا يوجد ما يُعرض.",
+    "refreshData": "تحديث البيانات المخزنة",
+    "refreshing": "جارٍ التحديث...",
+    "monthsStored": "{{count}} أشهر مخزنة",
+    "dayOfWeek": "اليوم",
+    "date": "التاريخ",
+    "hijri": "هجري",
+    "gregorian": "ميلادي",
+    "prayerTimes": "مواقيت الصلاة"
   },
   "settings": {
     "appearance": "المظهر",
@@ -99,18 +109,34 @@
     "widgetHighlight_teal": "تركواز",
     "widgetHighlight_blue": "أزرق",
     "widgetHighlight_amber": "كهرماني",
+    "widgetHighlight_dynamic": "ديناميكي (لون الهاتف)",
+    "widgetHighlight_dynamicAbbr": "Dyn",
     "widgetHighlight_custom": "لون مخصص",
     "widgetHighlight_customAbbr": "…",
     "widgetHighlightHexPlaceholder": "#6BC98A",
-    "widgetHighlightDynamicHelp": "عندما يكون المظهر «النظام» وتكون «ألوان النظام» مفعّلة، تستخدم الودجة لون تمييز الهاتف للصلاة التالية. وإلا يُستخدم اللون الذي تختاره أعلاه.",
+    "widgetHighlightDynamicHelp": "اختر ديناميكي لاستخدام لون تمييز الهاتف للصلاة التالية. على Android 12+ يتبع هذا ألوان الخلفية الديناميكية.",
     "widgetConfigureHint": "يمكنك أيضًا على أندرويد المس مع الاستمرار على الودجة ← الإعدادات (ترس) لنفس الخيارات.",
     "notificationSound": "صوت التنبيه",
     "notificationSoundModalTitle": "اختر صوت التنبيه",
     "notificationSoundDefault": "تنبيه النظام الافتراضي",
     "notificationSoundDefaultHelp": "يستخدم صوت الإشعار الافتراضي في جهازك.",
+    "notificationSoundAbdulBasit": "أذان - عبد الباسط",
+    "notificationSoundAbdulGhaffar": "أذان - عبد الغفار",
+    "notificationSoundAbdulHakam": "أذان - عبد الحكم",
     "notificationSoundMakkah": "أذان - مكة",
     "notificationSoundMadina": "أذان - المدينة",
     "notificationSoundAqsa": "أذان - الأقصى",
+    "notificationSoundEgypt": "أذان - مصر",
+    "notificationSoundHalab": "أذان - حلب",
+    "notificationSoundAlHussaini": "أذان - الحسيني",
+    "notificationSoundBakirBash": "أذان - باقر باش",
+    "notificationSoundHafez": "أذان - حافظ",
+    "notificationSoundHafizMurad": "أذان - حافظ مراد",
+    "notificationSoundMinshawi": "أذان - المنشاوي",
+    "notificationSoundNaghshbandi": "أذان - نقشبندي",
+    "notificationSoundSaber": "أذان - صابر",
+    "notificationSoundSharifDoman": "أذان - شريف دومان",
+    "notificationSoundYusufIslam": "أذان - يوسف إسلام",
     "notificationSoundVoiceHelp": "الصوت مضمّن داخل هذا الإصدار من التطبيق.",
     "versionInstalled": "الإصدار المثبت: {{version}}"
   },
@@ -196,7 +222,9 @@
   },
   "alertCopy": {
     "atPrayer": "وقت الصلاة",
-    "prePrayer": "تبدأ خلال {{count}} د"
+    "prePrayer": "تبدأ خلال {{count}} د",
+    "adhanStopAction": "إيقاف الأذان",
+    "adhanDisableAction": "تعطيل الأذان"
   },
   "support": {
     "section": "دعم الناشر",

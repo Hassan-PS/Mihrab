@@ -1,4 +1,4 @@
-import { fetchPrayerTimesUnified } from '../providers/fetchPrayerTimes';
+import { getOrFetchPrayerTimes } from './prayerStorage';
 import type { PrayerDataProviderId } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 
@@ -34,7 +34,7 @@ export async function loadMonthPrayerTimes(
     const batch = dates.slice(i, i + concurrency);
     const batchResult = await Promise.all(
       batch.map(async date => {
-        const { timings } = await fetchPrayerTimesUnified({
+        const timings = await getOrFetchPrayerTimes({
           provider: base.provider,
           latitude: base.latitude,
           longitude: base.longitude,

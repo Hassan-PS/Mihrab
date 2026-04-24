@@ -20,11 +20,7 @@ type PrayerWidgetNative = {
 };
 
 function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
-  return (
-    Platform.OS === 'android' &&
-    settings.appearance === 'system' &&
-    settings.useSystemDynamicTheme
-  );
+  return settings.widgetHighlightId === 'dynamic';
 }
 
 function syncNativeWidgetAppearance(
@@ -75,10 +71,6 @@ export function useSyncWidgetUiHints(): void {
   }, [
     hydrated,
     dynamicHl,
-    settings.androidWidgetBackgroundOpacity,
-    settings.widgetHighlightId,
-    settings.widgetHighlightCustomHex,
-    settings.appearance,
-    settings.useSystemDynamicTheme,
+    settings,
   ]);
 }

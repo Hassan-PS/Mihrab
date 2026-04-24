@@ -62,23 +62,29 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
 
     val prefs = getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
     val opacityStored =
-      prefs.getInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, 88).coerceIn(20, 100)
+      prefs.getInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, 88).coerceIn(0, 100)
     val highlightRaw =
       prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, "green")?.trim()
-    val highlightId = if (highlightRaw.isNullOrEmpty()) "green" else highlightRaw
+    val dynamicStored =
+      prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
+    val highlightId =
+      if (dynamicStored) {
+        "dynamic"
+      } else if (highlightRaw.isNullOrEmpty()) {
+        "green"
+      } else {
+        highlightRaw
+      }
     val storedHex =
       prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, "")?.trim()
         ?: ""
-    val dynamicStored =
-      prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
-
     val seek = findViewById<SeekBar>(R.id.widget_configure_opacity_seek)
     val opacityLabel = findViewById<TextView>(R.id.widget_configure_opacity_value)
-    seek.max = 80
-    seek.progress = opacityStored - 20
+    seek.max = 100
+    seek.progress = opacityStored
 
     fun updateOpacityLabel() {
-      val v = seek.progress + 20
+      val v = seek.progress
       opacityLabel.text = getString(R.string.widget_configure_opacity_percent, v)
     }
     updateOpacityLabel()
@@ -104,6 +110,7 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
 
     val radioId =
       when (highlightId.lowercase()) {
+        "dynamic" -> R.id.widget_configure_highlight_dynamic
         "teal" -> R.id.widget_configure_highlight_teal
         "blue" -> R.id.widget_configure_highlight_blue
         "amber" -> R.id.widget_configure_highlight_amber
@@ -130,6 +137,7 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
       val checked = radioGroup.checkedRadioButtonId
       val hid =
         when (checked) {
+          R.id.widget_configure_highlight_dynamic -> "dynamic"
           R.id.widget_configure_highlight_teal -> "teal"
           R.id.widget_configure_highlight_blue -> "blue"
           R.id.widget_configure_highlight_amber -> "amber"
@@ -150,12 +158,12 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
 
       prefs
         .edit()
-        .putInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, seek.progress + 20)
+        .putInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, seek.progress)
         .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, hid)
         .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, hexForStore)
         .putBoolean(
           PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC,
-          dynamicStored,
+          hid == "dynamic",
         )
         .apply()
 

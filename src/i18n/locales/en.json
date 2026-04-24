@@ -7,6 +7,7 @@
     "home": "Prayer Times",
     "settings": "Settings",
     "month": "Month",
+    "shareMonth": "Share Month",
     "compass": "Qibla"
   },
   "a11y": {
@@ -46,8 +47,17 @@
     "locationNotReadyTitle": "Location not ready",
     "locationNotReadyBody": "Open Home and load today's times once so this screen can use your GPS position.",
     "thisMonth": "This month",
+    "shareMonth": "Share Image",
     "loadError": "Could not load month.",
-    "empty": "No rows to show."
+    "empty": "No rows to show.",
+    "refreshData": "Refresh stored data",
+    "refreshing": "Refreshing...",
+    "monthsStored": "{{count}} months stored",
+    "dayOfWeek": "Day",
+    "date": "Date",
+    "hijri": "Hijri",
+    "gregorian": "Gregorian",
+    "prayerTimes": "Prayer Times"
   },
   "settings": {
     "appearance": "Appearance",
@@ -99,18 +109,34 @@
     "widgetHighlight_teal": "Teal",
     "widgetHighlight_blue": "Blue",
     "widgetHighlight_amber": "Amber",
+    "widgetHighlight_dynamic": "Dynamic (phone accent)",
+    "widgetHighlight_dynamicAbbr": "Dyn",
     "widgetHighlight_custom": "Custom color",
     "widgetHighlight_customAbbr": "…",
     "widgetHighlightHexPlaceholder": "#6BC98A",
-    "widgetHighlightDynamicHelp": "When Theme is System and System colors is on, the widget uses your phone accent for the next prayer. Otherwise it uses the color you pick above.",
+    "widgetHighlightDynamicHelp": "Pick Dynamic to follow your phone accent for the next prayer highlight. On Android 12+, this follows wallpaper-based dynamic color.",
     "widgetConfigureHint": "You can also touch and hold the widget → settings (gear) to adjust the same options on Android.",
     "notificationSound": "Alert sound",
     "notificationSoundModalTitle": "Select alert sound",
     "notificationSoundDefault": "Default notification",
     "notificationSoundDefaultHelp": "Uses your device default notification sound.",
+    "notificationSoundAbdulBasit": "Adhan - Abdul Basit",
+    "notificationSoundAbdulGhaffar": "Adhan - Abdul Ghaffar",
+    "notificationSoundAbdulHakam": "Adhan - Abdul Hakam",
     "notificationSoundMakkah": "Adhan - Makkah",
     "notificationSoundMadina": "Adhan - Madina",
     "notificationSoundAqsa": "Adhan - Al-Aqsa",
+    "notificationSoundEgypt": "Adhan - Egypt",
+    "notificationSoundHalab": "Adhan - Halab",
+    "notificationSoundAlHussaini": "Adhan - Al-Hussaini",
+    "notificationSoundBakirBash": "Adhan - Bakir Bash",
+    "notificationSoundHafez": "Adhan - Hafez",
+    "notificationSoundHafizMurad": "Adhan - Hafiz Murad",
+    "notificationSoundMinshawi": "Adhan - Minshawi",
+    "notificationSoundNaghshbandi": "Adhan - Naghshbandi",
+    "notificationSoundSaber": "Adhan - Saber",
+    "notificationSoundSharifDoman": "Adhan - Sharif Doman",
+    "notificationSoundYusufIslam": "Adhan - Yusuf Islam",
     "notificationSoundVoiceHelp": "Built-in voice included in this app build.",
     "versionInstalled": "Installed version: {{version}}"
   },
@@ -196,7 +222,9 @@
   },
   "alertCopy": {
     "atPrayer": "Prayer time",
-    "prePrayer": "Starts in {{count}} min"
+    "prePrayer": "Starts in {{count}} min",
+    "adhanStopAction": "Stop adhan",
+    "adhanDisableAction": "Disable adhan"
   },
   "support": {
     "section": "Support the publisher",

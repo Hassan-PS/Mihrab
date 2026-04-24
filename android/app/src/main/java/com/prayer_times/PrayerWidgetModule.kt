@@ -35,7 +35,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
     promise: Promise,
   ) {
     try {
-      val o = opacity.coerceIn(20, 100)
+      val o = opacity.coerceIn(0, 100)
       val hid = highlightId.trim().ifEmpty { "green" }
       val hex =
         highlightHex
