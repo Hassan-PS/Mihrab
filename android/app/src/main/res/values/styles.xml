@@ -5,4 +5,9 @@
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>
 
+    <!-- NoActionBar: toolbar is in activity_prayer_widget_configure.xml for correct window insets. -->
+    <style name="WidgetConfigureTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+    </style>
+
 </resources>

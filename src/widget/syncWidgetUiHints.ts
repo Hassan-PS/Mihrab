@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { NativeModules, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { NativeModules, Platform, AppState } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { PrayerAppSettings } from '../settings/types';
 
@@ -12,6 +12,12 @@ type PrayerWidgetNative = {
     highlightHex: string | null,
     highlightDynamic: boolean,
   ) => Promise<void>;
+  getAndroidWidgetAppearance?: () => Promise<{
+    opacity: number;
+    highlightId: string;
+    highlightHex: string;
+    highlightDynamic: boolean;
+  } | null>;
   setIosWidgetHighlightAppearance?: (
     highlightId: string,
     highlightHex: string | null,
@@ -60,16 +66,68 @@ function syncNativeWidgetAppearance(
 
 /** Syncs widget highlight / Android opacity with app settings (and Theme → System colors for dynamic accent). */
 export function useSyncWidgetUiHints(): void {
-  const { hydrated, settings } = usePrayerSettings();
+  const { hydrated, settings, updateSettings } = usePrayerSettings();
   const dynamicHl = useDynamicHighlightForWidget(settings);
+  const [nativeSynced, setNativeSynced] = useState(Platform.OS !== 'android');
+
+  // Keep a ref to the latest settings so AppState listener uses fresh values
+  const settingsRef = React.useRef(settings);
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   useEffect(() => {
-    if (!hydrated) {
+    if (!hydrated || Platform.OS !== 'android') return;
+
+    const syncFromNative = () => {
+      const mod = NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
+      if (mod?.getAndroidWidgetAppearance) {
+        mod.getAndroidWidgetAppearance().then(nativeSettings => {
+          if (nativeSettings) {
+            const currentSettings = settingsRef.current;
+            const updates: Partial<PrayerAppSettings> = {};
+            if (nativeSettings.opacity !== currentSettings.androidWidgetBackgroundOpacity) {
+              updates.androidWidgetBackgroundOpacity = nativeSettings.opacity;
+            }
+            const hlId = nativeSettings.highlightDynamic ? 'dynamic' : nativeSettings.highlightId;
+            if (hlId !== currentSettings.widgetHighlightId) {
+              updates.widgetHighlightId = hlId as any;
+            }
+            if (nativeSettings.highlightHex && nativeSettings.highlightHex !== currentSettings.widgetHighlightCustomHex) {
+              updates.widgetHighlightCustomHex = nativeSettings.highlightHex;
+            }
+            if (Object.keys(updates).length > 0) {
+              updateSettings(updates);
+            }
+          }
+        }).catch(e => console.error('Failed to get widget appearance', e))
+        .finally(() => setNativeSynced(true));
+      } else {
+        setNativeSynced(true);
+      }
+    };
+
+    syncFromNative();
+
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (nextAppState === 'active') {
+        syncFromNative();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || !nativeSynced) {
       return;
     }
     syncNativeWidgetAppearance(settings, dynamicHl);
   }, [
     hydrated,
+    nativeSynced,
     dynamicHl,
     settings,
   ]);
