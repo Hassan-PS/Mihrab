@@ -76,7 +76,7 @@ struct Provider: TimelineProvider {
   }
 
   func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
-    completion(Entry(date: Date(), payload: loadPayload()))
+    completion(Entry(date: Date(), payload: loadPayload(), dynamicNextKey: nil, dynamicNextName: nil, dynamicNextTime: nil))
   }
 
   func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
