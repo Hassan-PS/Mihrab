@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
+import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.RemoteViews
@@ -114,35 +115,67 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     val style = readWidgetStyle(prefs)
 
     for (id in appWidgetIds) {
-      val views = RemoteViews(context.packageName, R.layout.prayer_widget)
-      val click = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-      }
-      val pi =
-        PendingIntent.getActivity(
-          context,
-          0,
-          click,
-          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-      views.setOnClickPendingIntent(R.id.widget_root, pi)
-
-      if (json.isNullOrBlank()) {
-        showMessageOnly(
-          views,
-          context.getString(R.string.widget_placeholder_day),
-          isError = false,
-          style,
-        )
-      } else {
-        try {
-          applyJson(views, json, style, context)
-        } catch (_: Exception) {
-          showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
-        }
-      }
-      appWidgetManager.updateAppWidget(id, views)
+      updateAppWidget(context, appWidgetManager, id, prefs, json, style)
     }
+  }
+
+  override fun onAppWidgetOptionsChanged(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetId: Int,
+    newOptions: Bundle
+  ) {
+    super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val json = prefs.getString(PREFS_KEY, null)
+    val style = readWidgetStyle(prefs)
+    updateAppWidget(context, appWidgetManager, appWidgetId, prefs, json, style)
+  }
+
+  private fun updateAppWidget(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetId: Int,
+    prefs: SharedPreferences,
+    json: String?,
+    style: WidgetStyle
+  ) {
+    val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+    val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+    
+    // If minHeight < 100, we assume it's a 1-row or 2-row widget, so use horizontal layout.
+    // Otherwise, use the vertical stack layout.
+    val isHorizontal = minHeight > 0 && minHeight < 100
+    val layoutId = if (isHorizontal) R.layout.prayer_widget_horizontal else R.layout.prayer_widget
+
+    val views = RemoteViews(context.packageName, layoutId)
+    val click = Intent(context, MainActivity::class.java).apply {
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+    val pi =
+      PendingIntent.getActivity(
+        context,
+        0,
+        click,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+    views.setOnClickPendingIntent(R.id.widget_root, pi)
+
+    if (json.isNullOrBlank()) {
+      showMessageOnly(
+        views,
+        context.getString(R.string.widget_placeholder_day),
+        isError = false,
+        style,
+      )
+    } else {
+      try {
+        applyJson(views, json, style, context, isHorizontal)
+      } catch (_: Exception) {
+        showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
+      }
+    }
+    appWidgetManager.updateAppWidget(appWidgetId, views)
   }
 
   private fun showMessageOnly(
@@ -161,7 +194,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     )
   }
 
-  private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context) {
+  private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context, isHorizontal: Boolean) {
     val o = JSONObject(json)
     views.setViewVisibility(R.id.widget_placeholder, View.GONE)
     views.setViewVisibility(R.id.widget_content, View.VISIBLE)
@@ -175,9 +208,23 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         o.optString("nextKey", "").trim().takeIf { it.isNotEmpty() }
       }
 
-    val nextPrayerName = o.optString("nextPrayerName", "")
-    val nextPrayerTime = o.optString("nextPrayerTime", "")
+    var nextPrayerName = o.optString("nextPrayerName", "")
+    var nextPrayerTime = o.optString("nextPrayerTime", "")
     val locationName = o.optString("locationName", "")
+
+    val rows = o.getJSONArray("rows")
+
+    // Fallback for old cached payloads that don't have nextPrayerName/Time
+    if (nextPrayerName.isEmpty() && nextKey != null) {
+      for (i in 0 until rows.length()) {
+        val row = rows.getJSONObject(i)
+        if (row.getString("key") == nextKey) {
+          nextPrayerName = row.optString("abbr", "").trim().ifEmpty { nextKey }
+          nextPrayerTime = row.getString("time")
+          break
+        }
+      }
+    }
 
     val normalColor = Color.parseColor(NEUTRAL_TEXT)
     val highlightColor = style.highlightColorInt(context)
@@ -189,8 +236,6 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     views.setTextColor(R.id.widget_next_name, normalColor)
     views.setTextColor(R.id.widget_next_time, highlightColor)
     views.setTextColor(R.id.widget_location, Color.parseColor(NEUTRAL_MUTED))
-
-    val rows = o.getJSONArray("rows")
 
     views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
@@ -214,6 +259,14 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       val col = if (highlight) highlightColor else normalColor
       views.setTextColor(COL_LABELS[i], col)
       views.setTextColor(COL_TIMES[i], col)
+
+      if (!isHorizontal) {
+        if (highlight) {
+          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", R.drawable.widget_row_highlight)
+        } else {
+          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
+        }
+      }
     }
   }
 
