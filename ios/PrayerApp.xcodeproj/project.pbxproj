@@ -83,7 +83,7 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = PrayerApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_ghaffar.caf; path = PrayerApp/adhan_abdul_ghaffar.caf; sourceTree = "<group>"; };
 		91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_hafiz_murad.caf; path = PrayerApp/adhan_hafiz_murad.caf; sourceTree = "<group>"; };
-		A62E49C8F92272DF77C323AA /* CompassModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CompassModule.swift; sourceTree = "<group>"; };
+		A62E49C8F92272DF77C323AA /* CompassModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CompassModule.swift; path = PrayerApp/CompassModule.swift; sourceTree = "<group>"; };
 		B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_minshawi.caf; path = PrayerApp/adhan_minshawi.caf; sourceTree = "<group>"; };
 		B7714F32B411231108636A8C /* adhan_bakir_bash.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_bakir_bash.caf; path = PrayerApp/adhan_bakir_bash.caf; sourceTree = "<group>"; };
 		B8EC02874B0A8F91C2E75CCD /* adhan_abdul_hakam.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_hakam.caf; path = PrayerApp/adhan_abdul_hakam.caf; sourceTree = "<group>"; };
@@ -99,7 +99,7 @@
 		F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerWidget.m; path = PrayerApp/PrayerWidget.m; sourceTree = "<group>"; };
 		F1A100002294A1A2E3B4C5D7 /* PrayerApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PrayerApp.entitlements; path = PrayerApp/PrayerApp.entitlements; sourceTree = "<group>"; };
 		F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetTimelineReloader.swift; path = PrayerApp/WidgetTimelineReloader.swift; sourceTree = "<group>"; };
-		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CompassModule.m; sourceTree = "<group>"; };
+		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
