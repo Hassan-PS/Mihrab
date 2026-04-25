@@ -9,7 +9,7 @@
     <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" height="40">
   </a>
   &nbsp;&nbsp;
-  <a href="https://github.com/Hassan-PS/PrayerApp/releases/latest">
+  <a href="https://github.com/Hassan-PS/PrayerApp/releases">
     <img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="51">
   </a>
 </div>
