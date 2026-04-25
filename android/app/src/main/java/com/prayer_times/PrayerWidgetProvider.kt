@@ -230,8 +230,24 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     val highlightColor = style.highlightColorInt(context)
 
     views.setTextViewText(R.id.widget_next_name, nextPrayerName)
+    if (nextPrayerName.isEmpty()) {
+      views.setViewVisibility(R.id.widget_next_name, View.GONE)
+    } else {
+      views.setViewVisibility(R.id.widget_next_name, View.VISIBLE)
+    }
+    
     views.setTextViewText(R.id.widget_next_time, nextPrayerTime)
+    if (nextPrayerTime.isEmpty()) {
+      views.setViewVisibility(R.id.widget_next_time, View.GONE)
+    } else {
+      views.setViewVisibility(R.id.widget_next_time, View.VISIBLE)
+    }
     views.setTextViewText(R.id.widget_location, locationName)
+    if (locationName.isEmpty()) {
+      views.setViewVisibility(R.id.widget_location, View.GONE)
+    } else {
+      views.setViewVisibility(R.id.widget_location, View.VISIBLE)
+    }
 
     views.setTextColor(R.id.widget_next_name, normalColor)
     views.setTextColor(R.id.widget_next_time, highlightColor)
