@@ -166,23 +166,40 @@ export async function refreshPrayerDataCache(
   const now = new Date();
   const datesToFetch: Date[] = [];
 
+  const existingData = await getStoredPrayerData();
+  const keepExisting = existingData && isSameParams(existingData, params);
+
+  const newData: StoredPrayerData = keepExisting
+    ? existingData
+    : {
+        provider: params.provider,
+        latitude: params.latitude,
+        longitude: params.longitude,
+        calculationMethod: params.calculationMethod,
+        school: params.school,
+        months: {},
+      };
+
   for (let i = 0; i < monthsAhead; i++) {
     const year = now.getFullYear();
     const month = now.getMonth() + i;
     const dim = new Date(year, month + 1, 0).getDate();
     for (let d = 1; d <= dim; d++) {
-      datesToFetch.push(new Date(year, month, d));
+      const date = new Date(year, month, d);
+      const monthKey = getMonthKey(date);
+      const dayKey = getDayKey(date);
+      
+      // Only fetch if missing
+      if (!newData.months[monthKey] || !newData.months[monthKey][dayKey]) {
+        datesToFetch.push(date);
+      }
     }
   }
 
-  const newData: StoredPrayerData = {
-    provider: params.provider,
-    latitude: params.latitude,
-    longitude: params.longitude,
-    calculationMethod: params.calculationMethod,
-    school: params.school,
-    months: {},
-  };
+  if (datesToFetch.length === 0) {
+    if (onProgress) onProgress(1, 1);
+    return;
+  }
 
   const concurrency = 4;
   let completed = 0;
