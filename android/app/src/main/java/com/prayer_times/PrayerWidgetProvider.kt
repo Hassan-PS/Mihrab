@@ -167,10 +167,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
     views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
-    views.setTextColor(R.id.widget_day, Color.parseColor(NEUTRAL_MUTED))
 
-    views.setTextViewText(R.id.widget_day, o.getString("dayLabel"))
-    val rows = o.getJSONArray("rows")
     val nextKey =
       if (o.isNull("nextKey")) {
         null
@@ -178,8 +175,22 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         o.optString("nextKey", "").trim().takeIf { it.isNotEmpty() }
       }
 
+    val nextPrayerName = o.optString("nextPrayerName", "")
+    val nextPrayerTime = o.optString("nextPrayerTime", "")
+    val locationName = o.optString("locationName", "")
+
     val normalColor = Color.parseColor(NEUTRAL_TEXT)
     val highlightColor = style.highlightColorInt(context)
+
+    views.setTextViewText(R.id.widget_next_name, nextPrayerName)
+    views.setTextViewText(R.id.widget_next_time, nextPrayerTime)
+    views.setTextViewText(R.id.widget_location, locationName)
+
+    views.setTextColor(R.id.widget_next_name, normalColor)
+    views.setTextColor(R.id.widget_next_time, highlightColor)
+    views.setTextColor(R.id.widget_location, Color.parseColor(NEUTRAL_MUTED))
+
+    val rows = o.getJSONArray("rows")
 
     views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
@@ -226,6 +237,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_2,
         R.id.widget_col_3,
         R.id.widget_col_4,
+        R.id.widget_col_5,
       )
     private val COL_LABELS =
       intArrayOf(
@@ -234,6 +246,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_2_label,
         R.id.widget_col_3_label,
         R.id.widget_col_4_label,
+        R.id.widget_col_5_label,
       )
     private val COL_TIMES =
       intArrayOf(
@@ -242,6 +255,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_2_time,
         R.id.widget_col_3_time,
         R.id.widget_col_4_time,
+        R.id.widget_col_5_time,
       )
 
     fun requestUpdate(context: Context) {
