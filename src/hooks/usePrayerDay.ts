@@ -1,6 +1,6 @@
 import Geolocation from '@react-native-community/geolocation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { AppState, PermissionsAndroid, Platform } from 'react-native';
 import { getOrFetchPrayerTimes, getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
@@ -26,7 +26,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
   const loadGenerationRef = useRef(0);
 
   const loadTimes = useCallback(
-    async (latitude: number, longitude: number) => {
+    async (latitude: number, longitude: number, isBackgroundRefresh: boolean = false) => {
       const gen = ++loadGenerationRef.current;
       const coords = { latitude, longitude };
       const provider = getEffectiveDataProvider(
@@ -34,7 +34,9 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         settings.dataProvider,
         coords,
       );
-      setState({ phase: 'loading' });
+      if (!isBackgroundRefresh) {
+        setState({ phase: 'loading' });
+      }
       try {
         const todayTimings = await getOrFetchPrayerTimes({
           provider,
@@ -110,11 +112,13 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     ],
   );
 
-  const requestAndLoad = useCallback(() => {
-    setState({ phase: 'loading' });
+  const requestAndLoad = useCallback((isBackgroundRefresh: boolean = false) => {
+    if (!isBackgroundRefresh) {
+      setState({ phase: 'loading' });
+    }
     const run = async () => {
       if (settings.locationMode === 'manual') {
-        loadTimes(settings.manualLatitude, settings.manualLongitude).catch(
+        loadTimes(settings.manualLatitude, settings.manualLongitude, isBackgroundRefresh).catch(
           () => {},
         );
         return;
@@ -130,13 +134,15 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       }
       Geolocation.getCurrentPosition(
         pos => {
-          loadTimes(pos.coords.latitude, pos.coords.longitude).catch(() => {});
+          loadTimes(pos.coords.latitude, pos.coords.longitude, isBackgroundRefresh).catch(() => {});
         },
         err => {
-          setState({
-            phase: 'location_error',
-            message: err.message || 'Could not get location',
-          });
+          if (!isBackgroundRefresh) {
+            setState({
+              phase: 'location_error',
+              message: err.message || 'Could not get location',
+            });
+          }
         },
         { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 },
       );
@@ -158,6 +164,16 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       return;
     }
     requestAndLoad();
+
+    const sub = AppState.addEventListener('change', nextState => {
+      if (nextState === 'active') {
+        requestAndLoad(true);
+      }
+    });
+
+    return () => {
+      sub.remove();
+    };
   }, [hydrated, settings.locationOnboardingComplete, requestAndLoad]);
 
   return { state, retry: requestAndLoad };
