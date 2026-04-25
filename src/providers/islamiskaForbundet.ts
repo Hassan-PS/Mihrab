@@ -3,7 +3,7 @@ import {
   reverseLocality,
   type ReverseLocality,
 } from '../geocoding/nominatim';
-import { matchIslamiskaForbundetCity } from './islamiskaForbundetCities';
+import { getNearestIslamiskaForbundetCity } from './islamiskaForbundetNearest';
 import { formatLocalDate } from '../utils/date';
 import { fetchWithRetry } from '../utils/fetchWithRetry';
 import type { PrayerTimesResult } from './types';
@@ -55,8 +55,8 @@ export async function fetchIslamiskaForbundetTimes(params: {
     );
   }
 
-  const widgetCity =
-    matchIslamiskaForbundetCity(city) ?? capitalizeForWidget(city);
+  const nearestCity = getNearestIslamiskaForbundetCity(params.latitude, params.longitude);
+  const widgetCity = nearestCity;
 
   const body = new URLSearchParams({
     ifis_bonetider_widget_city: `${widgetCity}, SE`,
