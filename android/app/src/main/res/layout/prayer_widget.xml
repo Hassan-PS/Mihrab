@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E01C1C1E"
-    android:padding="8dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/widget_placeholder"
@@ -13,7 +13,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="#9AA0A6"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:visibility="gone" />
 
     <LinearLayout
@@ -28,17 +28,17 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.2"
+            android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_vertical|start"
-            android:paddingEnd="8dp">
+            android:paddingEnd="16dp">
 
             <TextView
                 android:id="@+id/widget_next_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
-                android:textSize="12sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:ellipsize="end" />
@@ -48,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#E8EAED"
-                android:textSize="28sp"
+                android:textSize="44sp"
                 android:textStyle="bold"
                 android:includeFontPadding="false"
                 android:maxLines="1" />
@@ -58,10 +58,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
-                android:textSize="10sp"
+                android:textSize="14sp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:layout_marginTop="2dp" />
+                android:layout_marginTop="4dp" />
         </LinearLayout>
 
         <!-- Right Side: 6 Prayer Times -->
@@ -69,38 +69,38 @@
             android:id="@+id/widget_times_row"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2.8"
+            android:layout_weight="1.2"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/widget_col_0_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/widget_col_0_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="12sp" android:textStyle="bold" android:includeFontPadding="false" android:layout_marginTop="2dp" />
+            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp">
+                <TextView android:id="@+id/widget_col_0_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="15sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/widget_col_0_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/widget_col_1_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/widget_col_1_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="12sp" android:textStyle="bold" android:includeFontPadding="false" android:layout_marginTop="2dp" />
+            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp">
+                <TextView android:id="@+id/widget_col_1_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="15sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/widget_col_1_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/widget_col_2_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/widget_col_2_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="12sp" android:textStyle="bold" android:includeFontPadding="false" android:layout_marginTop="2dp" />
+            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp">
+                <TextView android:id="@+id/widget_col_2_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="15sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/widget_col_2_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/widget_col_3_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/widget_col_3_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="12sp" android:textStyle="bold" android:includeFontPadding="false" android:layout_marginTop="2dp" />
+            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp">
+                <TextView android:id="@+id/widget_col_3_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="15sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/widget_col_3_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/widget_col_4_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/widget_col_4_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="12sp" android:textStyle="bold" android:includeFontPadding="false" android:layout_marginTop="2dp" />
+            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp">
+                <TextView android:id="@+id/widget_col_4_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="15sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/widget_col_4_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/widget_col_5_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/widget_col_5_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="12sp" android:textStyle="bold" android:includeFontPadding="false" android:layout_marginTop="2dp" />
+            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp">
+                <TextView android:id="@+id/widget_col_5_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="15sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/widget_col_5_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
         </LinearLayout>
