@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/app-icon-source.png" alt="Prayer App Icon" width="150" style="border-radius: 20px;">
+  <img src="assets/app-icon-rounded.png" alt="Prayer App Icon" width="150" style="border-radius: 20px;">
   
   # Prayer Salah Times & Qibla
   
