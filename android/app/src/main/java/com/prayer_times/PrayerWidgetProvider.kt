@@ -260,12 +260,10 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       views.setTextColor(COL_LABELS[i], col)
       views.setTextColor(COL_TIMES[i], col)
 
-      if (!isHorizontal) {
-        if (highlight) {
-          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", R.drawable.widget_row_highlight)
-        } else {
-          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
-        }
+      if (highlight) {
+        views.setInt(COL_WRAPPERS[i], "setBackgroundResource", R.drawable.widget_row_highlight)
+      } else {
+        views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
       }
     }
   }
