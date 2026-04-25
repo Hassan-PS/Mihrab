@@ -1,5 +1,6 @@
 import SwiftUI
 import WidgetKit
+import AppIntents
 
 private let kSuite = "group.com.prayerapp"
 private let kKey = "prayer_widget_payload_v1"
@@ -101,6 +102,9 @@ struct Provider: TimelineProvider {
           }
         }
       }
+      if let first = payload.rows.first {
+        return (first.key, first.abbr ?? first.key, first.time)
+      }
       return nil
     }
 
@@ -156,6 +160,15 @@ struct Entry: TimelineEntry {
   let dynamicNextKey: String?
   let dynamicNextName: String?
   let dynamicNextTime: String?
+}
+
+@available(iOS 16.0, *)
+struct RefreshIntent: AppIntent {
+  static var title: LocalizedStringResource = "Refresh Widget"
+  
+  func perform() async throws -> some IntentResult {
+    return .result()
+  }
 }
 
 struct PrayerWidgetEntryView: View {
@@ -238,6 +251,16 @@ struct PrayerWidgetEntryView: View {
     ZStack(alignment: .topLeading) {
       prayerContent
         .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+        
+      if #available(iOS 17.0, *) {
+        Button(intent: RefreshIntent()) {
+          Image(systemName: "arrow.clockwise")
+            .font(.system(size: 10))
+            .foregroundColor(widgetMuted)
+            .padding(8)
+        }
+        .buttonStyle(.plain)
+      }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .clipped()

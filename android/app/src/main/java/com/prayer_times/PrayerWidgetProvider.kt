@@ -161,6 +161,18 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       )
     views.setOnClickPendingIntent(R.id.widget_root, pi)
 
+    val refreshIntent = Intent(context, PrayerWidgetProvider::class.java).apply {
+        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+    }
+    val refreshPi = PendingIntent.getBroadcast(
+        context,
+        appWidgetId,
+        refreshIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+    views.setOnClickPendingIntent(R.id.widget_refresh_btn, refreshPi)
+
     if (json.isNullOrBlank()) {
       showMessageOnly(
         views,
@@ -239,6 +251,13 @@ class PrayerWidgetProvider : AppWidgetProvider() {
                 break
             }
         }
+    }
+
+    if (dynamicNextKey == null && rows.length() > 0) {
+        val firstRow = rows.getJSONObject(0)
+        dynamicNextKey = firstRow.getString("key")
+        dynamicNextName = firstRow.optString("abbr", "").trim().ifEmpty { dynamicNextKey }
+        dynamicNextTime = firstRow.getString("time")
     }
 
     if (dynamicNextKey != null) {
