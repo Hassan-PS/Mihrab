@@ -59,6 +59,9 @@ struct WidgetPayload: Codable {
   let dayLabel: String
   let rows: [Row]
   let nextKey: String?
+  let nextPrayerName: String?
+  let nextPrayerTime: String?
+  let locationName: String?
   struct Row: Codable {
     let key: String
     let time: String
@@ -96,12 +99,16 @@ struct Provider: TimelineProvider {
     dayLabel: "Wed, Apr 9",
     rows: [
       .init(key: "Fajr", time: "05:12", abbr: "Fajr"),
+      .init(key: "Sunrise", time: "06:30", abbr: "Sunrise"),
       .init(key: "Dhuhr", time: "12:10", abbr: "Dhuhr"),
       .init(key: "Asr", time: "15:20", abbr: "Asr"),
       .init(key: "Maghrib", time: "18:05", abbr: "Magh"),
       .init(key: "Isha", time: "19:30", abbr: "Isha"),
     ],
     nextKey: "Dhuhr",
+    nextPrayerName: "Dhuhr",
+    nextPrayerTime: "12:10",
+    locationName: "London"
   )
 }
 
@@ -123,39 +130,61 @@ struct PrayerWidgetEntryView: View {
   @ViewBuilder
   private var prayerContent: some View {
     if let p = entry.payload {
-      VStack(alignment: .leading, spacing: 0) {
-        Text(p.dayLabel)
-          .font(.system(size: 8, weight: .semibold))
-          .foregroundStyle(widgetMuted)
-          .lineLimit(1)
-          .minimumScaleFactor(0.8)
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .padding(.bottom, 4)
-        Spacer(minLength: 0)
-        HStack(spacing: 0) {
+      HStack(spacing: 0) {
+        // Left Side: Next Prayer
+        VStack(spacing: 2) {
+          if let nextName = p.nextPrayerName ?? p.nextKey, !nextName.isEmpty {
+            Text(nextName)
+              .font(.system(size: 14, weight: .bold))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+          }
+          
+          if let nextTime = p.nextPrayerTime, !nextTime.isEmpty {
+            Text(nextTime)
+              .font(.system(size: 32, weight: .bold))
+              .foregroundStyle(resolvedWidgetHighlightColor())
+              .lineLimit(1)
+              .minimumScaleFactor(0.8)
+          }
+          
+          if let loc = p.locationName, !loc.isEmpty {
+            Text(loc)
+              .font(.system(size: 12))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+          }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        
+        // Right Side: 6 Prayer Times
+        VStack(spacing: 0) {
           ForEach(Array(p.rows.enumerated()), id: \.offset) { _, r in
             let label = r.abbr ?? r.key
             let highlight = p.nextKey == r.key
-            VStack(spacing: 2) {
+            
+            HStack(spacing: 0) {
               Text(label)
-                .font(.system(size: 12))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .multilineTextAlignment(.center)
+                .font(.system(size: 11))
                 .foregroundStyle(rowColor(highlight: highlight))
-              Text(r.time)
-                .font(.system(size: 22, weight: .semibold))
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .lineLimit(1)
-                .minimumScaleFactor(0.65)
-                .multilineTextAlignment(.center)
+              
+              Text(r.time)
+                .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(rowColor(highlight: highlight))
             }
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 8)
+            .frame(maxHeight: .infinity)
+            .background(
+              highlight ? resolvedWidgetHighlightColor().opacity(0.12) : Color.clear
+            )
+            .cornerRadius(8)
           }
         }
-        Spacer(minLength: 0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
-      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     } else {
       Text("Open Prayer Times to load times")
         .font(.caption)
