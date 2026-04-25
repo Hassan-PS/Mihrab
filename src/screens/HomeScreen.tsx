@@ -90,12 +90,22 @@ export function HomeScreen() {
     ]),
   );
 
+  const locationLabel = useMemo(() => {
+    if (settings.locationMode === 'manual' && settings.manualLocationLabel) {
+      return settings.manualLocationLabel;
+    }
+    if (state.phase === 'ready') {
+      return `${state.latitude.toFixed(4)}°, ${state.longitude.toFixed(4)}°`;
+    }
+    return '';
+  }, [settings.locationMode, settings.manualLocationLabel, state]);
+
   useEffect(() => {
     if (!hydrated || state.phase !== 'ready') {
       return;
     }
-    syncPrayerWidget(state.today, state.tomorrow, now).catch(() => {});
-  }, [hydrated, state, now]);
+    syncPrayerWidget(state.today, state.tomorrow, now, locationLabel).catch(() => {});
+  }, [hydrated, state, now, locationLabel]);
 
   const readyLat = state.phase === 'ready' ? state.latitude : undefined;
   const readyLng = state.phase === 'ready' ? state.longitude : undefined;
@@ -301,9 +311,7 @@ export function HomeScreen() {
       </Pressable>
 
       <Text style={[styles.coords, { color: palette.muted }]}>
-        {settings.locationMode === 'manual' && settings.manualLocationLabel
-          ? `${settings.manualLocationLabel} · `
-          : `${latitude.toFixed(4)}°, ${longitude.toFixed(4)}° · `}
+        {locationLabel ? `${locationLabel} · ` : ''}
         {getProviderLabel(effectiveProvider)}
         {!providerHidesCalculationMethod(effectiveProvider)
           ? ` · ${getMethodLabel(settings.calculationMethod)}`

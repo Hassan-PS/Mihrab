@@ -1,4 +1,5 @@
 import type { TimingsMap } from '../types/prayer';
+import i18n from '../i18n';
 import {
   addDays,
   computeNextSalah,
@@ -17,6 +18,7 @@ export type WidgetPrayerRow = {
 /** Five daily salāh times on the widget (Sunrise is omitted to save space). */
 export const WIDGET_ROW_KEYS = [
   'Fajr',
+  'Sunrise',
   'Dhuhr',
   'Asr',
   'Maghrib',
@@ -31,14 +33,12 @@ export type WidgetPrayerPayload = {
   rows: WidgetPrayerRow[];
   /** Row `key` to highlight as the next salāh (matches WIDGET_ROW_KEYS). */
   nextKey: string | null;
-};
-
-const WIDGET_ABBR: Record<WidgetPrayerKey, string> = {
-  Fajr: 'Fajr',
-  Dhuhr: 'Dhuhr',
-  Asr: 'Asr',
-  Maghrib: 'Magh',
-  Isha: 'Isha',
+  /** Name of the next prayer */
+  nextPrayerName?: string;
+  /** Time of the next prayer */
+  nextPrayerTime?: string;
+  /** Location name */
+  locationName?: string;
 };
 
 /**
@@ -49,6 +49,7 @@ export function buildWidgetPayload(
   today: TimingsMap,
   tomorrow: TimingsMap | undefined,
   now: Date,
+  locationName?: string,
 ): WidgetPrayerPayload {
   const stillToday = computeNextSalah(today, now) != null;
   const timings =
@@ -74,7 +75,7 @@ export function buildWidgetPayload(
     return {
       key,
       time: raw ? formatDisplayTime(raw) : '—',
-      abbr: WIDGET_ABBR[key],
+      abbr: i18n.t(`prayer.${key}`),
     };
   });
 
@@ -82,5 +83,8 @@ export function buildWidgetPayload(
     dayLabel,
     rows,
     nextKey,
+    nextPrayerName: next ? i18n.t(`prayer.${next.name}`) : undefined,
+    nextPrayerTime: next ? formatDisplayTime(next.at) : undefined,
+    locationName,
   };
 }

@@ -18,6 +18,7 @@ export async function syncPrayerWidget(
   today: TimingsMap,
   tomorrow: TimingsMap | undefined,
   now: Date = new Date(),
+  locationName?: string,
 ): Promise<void> {
   if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
     return;
@@ -26,7 +27,7 @@ export async function syncPrayerWidget(
   if (!mod) {
     return;
   }
-  const payload = buildWidgetPayload(today, tomorrow, now);
+  const payload = buildWidgetPayload(today, tomorrow, now, locationName);
   try {
     await mod.setData(JSON.stringify(payload));
   } catch {
