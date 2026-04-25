@@ -8,6 +8,8 @@ import {
   StyleSheet,
   Text,
   View,
+  NativeModules,
+  NativeEventEmitter,
 } from 'react-native';
 import {
   magnetometer,
@@ -38,6 +40,9 @@ type CompassMode =
 /** -1 = checking, -2 = off, 0–100 = live strength */
 type SignalStrength = number;
 type SignalQuality = 'unknown' | 'good' | 'weak' | 'very_weak';
+
+const { CompassModule } = NativeModules;
+const compassEmitter = Platform.OS === 'ios' ? new NativeEventEmitter(CompassModule as any) : null;
 
 function headingFromMagnetometer(x: number, y: number): number {
   if (Platform.OS === 'ios') {
@@ -189,12 +194,11 @@ export function CompassScreen() {
     };
 
     const startSubscription = () => {
-      subscription?.unsubscribe();
-      subscription = magnetometer.subscribe({
-        next: ({ x, y, z }) => {
-          if (cancelled) {
-            return;
-          }
+      if (Platform.OS === 'ios' && CompassModule) {
+        subscription?.unsubscribe();
+        CompassModule.startUpdates();
+        const sub = compassEmitter?.addListener('CompassHeading', (data: { heading: number; accuracy: number }) => {
+          if (cancelled) return;
           clearStartupTimeout();
           lastSampleAt = Date.now();
           if (!gotSampleRef.current) {
@@ -202,8 +206,8 @@ export function CompassScreen() {
             setMode('live');
             modeRef.current = 'live';
           }
-
-          const raw = headingFromMagnetometer(x, y);
+          
+          const raw = data.heading;
           const prev = smoothedRef.current;
           const delta = shortestAngleDiff(prev, raw);
           const nextH = normalizeHeadingDeg(prev + delta * SMOOTH);
@@ -212,43 +216,96 @@ export function CompassScreen() {
 
           const hist = [...headingHistoryRef.current.slice(-(HEADING_HISTORY - 1)), raw];
           headingHistoryRef.current = hist;
-          const field = magneticFieldScore(x, y, z ?? 0);
           const stab = stabilityScoreFromHeadings(hist);
           setStability(stab);
-          const signal = combineSignal(field, stab);
-          setSignalStrength(signal);
-          if (signal < 20) {
+          
+          // Accuracy on iOS: positive values indicate accuracy in degrees.
+          // Negative values indicate heading could not be determined.
+          if (data.accuracy < 0) {
+            setSignalStrength(10);
             setSignalQuality('very_weak');
-          } else if (signal < 45) {
-            setSignalQuality('weak');
           } else {
-            setSignalQuality('good');
+            // Map accuracy (e.g. 0 to 45 deg) to a 0-100 score.
+            const field = Math.max(0, 100 - (data.accuracy * 2));
+            const signal = combineSignal(field, stab);
+            setSignalStrength(signal);
+            if (signal < 20) {
+              setSignalQuality('very_weak');
+            } else if (signal < 45) {
+              setSignalQuality('weak');
+            } else {
+              setSignalQuality('good');
+            }
           }
-        },
-        error: error => {
-          if (cancelled) {
-            return;
+        });
+        subscription = {
+          unsubscribe: () => {
+            sub?.remove();
+            CompassModule.stopUpdates();
           }
-          clearStartupTimeout();
-          const msg = String(
-            (error as { message?: string } | null)?.message ?? error ?? '',
-          ).toLowerCase();
-          const looksPermission =
-            msg.includes('permission') ||
-            msg.includes('denied') ||
-            msg.includes('not authorized') ||
-            msg.includes('motion');
-          if (Platform.OS === 'ios' && looksPermission) {
-            setMode('permission_denied');
-            modeRef.current = 'permission_denied';
-            setSignalStrength(-2);
-          } else {
-            setUnsupportedUi();
-          }
-          subscription?.unsubscribe();
-          subscription = null;
-        },
-      });
+        };
+      } else {
+        subscription?.unsubscribe();
+        subscription = magnetometer.subscribe({
+          next: ({ x, y, z }) => {
+            if (cancelled) {
+              return;
+            }
+            clearStartupTimeout();
+            lastSampleAt = Date.now();
+            if (!gotSampleRef.current) {
+              gotSampleRef.current = true;
+              setMode('live');
+              modeRef.current = 'live';
+            }
+
+            const raw = headingFromMagnetometer(x, y);
+            const prev = smoothedRef.current;
+            const delta = shortestAngleDiff(prev, raw);
+            const nextH = normalizeHeadingDeg(prev + delta * SMOOTH);
+            smoothedRef.current = nextH;
+            setHeading(nextH);
+
+            const hist = [...headingHistoryRef.current.slice(-(HEADING_HISTORY - 1)), raw];
+            headingHistoryRef.current = hist;
+            const field = magneticFieldScore(x, y, z ?? 0);
+            const stab = stabilityScoreFromHeadings(hist);
+            setStability(stab);
+            const signal = combineSignal(field, stab);
+            setSignalStrength(signal);
+            if (signal < 20) {
+              setSignalQuality('very_weak');
+            } else if (signal < 45) {
+              setSignalQuality('weak');
+            } else {
+              setSignalQuality('good');
+            }
+          },
+          error: error => {
+            if (cancelled) {
+              return;
+            }
+            clearStartupTimeout();
+            const msg = String(
+              (error as { message?: string } | null)?.message ?? error ?? '',
+            ).toLowerCase();
+            const looksPermission =
+              msg.includes('permission') ||
+              msg.includes('denied') ||
+              msg.includes('not authorized') ||
+              msg.includes('motion');
+            if (Platform.OS === 'ios' && looksPermission) {
+              setMode('permission_denied');
+              modeRef.current = 'permission_denied';
+              setSignalStrength(-2);
+            } else {
+              setUnsupportedUi();
+            }
+            subscription?.unsubscribe();
+            subscription = null;
+          },
+        });
+      }
     };
 
     scheduleStartupTimeout();
