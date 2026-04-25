@@ -71,7 +71,7 @@ struct WidgetPayload: Codable {
 
 struct Provider: TimelineProvider {
   func placeholder(in context: Context) -> Entry {
-    Entry(date: Date(), payload: Self.sample)
+    Entry(date: Date(), payload: Self.sample, dynamicNextKey: nil, dynamicNextName: nil, dynamicNextTime: nil)
   }
 
   func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
@@ -79,10 +79,48 @@ struct Provider: TimelineProvider {
   }
 
   func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
-    let entry = Entry(date: Date(), payload: loadPayload())
-    let refresh = Calendar.current.date(byAdding: .minute, value: 15, to: Date())
-      ?? Date().addingTimeInterval(900)
-    completion(Timeline(entries: [entry], policy: .after(refresh)))
+    guard let payload = loadPayload() else {
+      let entry = Entry(date: Date(), payload: nil, dynamicNextKey: nil, dynamicNextName: nil, dynamicNextTime: nil)
+      let refresh = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
+      completion(Timeline(entries: [entry], policy: .after(refresh)))
+      return
+    }
+
+    var entries: [Entry] = []
+    let now = Date()
+    let cal = Calendar.current
+    
+    func getDynamicNext(after date: Date) -> (key: String, name: String, time: String)? {
+      let currentMinutes = cal.component(.hour, from: date) * 60 + cal.component(.minute, from: date)
+      for row in payload.rows {
+        let parts = row.time.split(separator: ":")
+        if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
+          let rowMinutes = h * 60 + m
+          if rowMinutes > currentMinutes {
+            return (row.key, row.abbr ?? row.key, row.time)
+          }
+        }
+      }
+      return nil
+    }
+
+    let currentNext = getDynamicNext(after: now)
+    entries.append(Entry(date: now, payload: payload, dynamicNextKey: currentNext?.key, dynamicNextName: currentNext?.name, dynamicNextTime: currentNext?.time))
+
+    var lastDate = now
+    for row in payload.rows {
+      let parts = row.time.split(separator: ":")
+      if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
+        if let prayerDate = cal.date(bySettingHour: h, minute: m, second: 0, of: now), prayerDate > now {
+          let next = getDynamicNext(after: prayerDate)
+          entries.append(Entry(date: prayerDate, payload: payload, dynamicNextKey: next?.key, dynamicNextName: next?.name, dynamicNextTime: next?.time))
+          lastDate = prayerDate
+        }
+      }
+    }
+
+    let refresh = Calendar.current.date(byAdding: .minute, value: 15, to: lastDate) ?? lastDate.addingTimeInterval(900)
+    completion(Timeline(entries: entries, policy: .after(refresh)))
   }
 
   private func loadPayload() -> WidgetPayload? {
@@ -115,6 +153,9 @@ struct Provider: TimelineProvider {
 struct Entry: TimelineEntry {
   let date: Date
   let payload: WidgetPayload?
+  let dynamicNextKey: String?
+  let dynamicNextName: String?
+  let dynamicNextTime: String?
 }
 
 struct PrayerWidgetEntryView: View {
@@ -133,14 +174,14 @@ struct PrayerWidgetEntryView: View {
       HStack(spacing: 0) {
         // Left Side: Next Prayer
         VStack(spacing: 2) {
-          if let nextName = p.nextPrayerName ?? p.nextKey, !nextName.isEmpty {
+          if let nextName = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey, !nextName.isEmpty {
             Text(nextName)
               .font(.system(size: 14, weight: .bold))
               .foregroundStyle(widgetMuted)
               .lineLimit(1)
           }
           
-          if let nextTime = p.nextPrayerTime, !nextTime.isEmpty {
+          if let nextTime = entry.dynamicNextTime ?? p.nextPrayerTime, !nextTime.isEmpty {
             Text(nextTime)
               .font(.system(size: 32, weight: .bold))
               .foregroundStyle(resolvedWidgetHighlightColor())
@@ -155,13 +196,14 @@ struct PrayerWidgetEntryView: View {
               .lineLimit(1)
           }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         
         // Right Side: 6 Prayer Times
         VStack(spacing: 0) {
           ForEach(Array(p.rows.enumerated()), id: \.offset) { _, r in
             let label = r.abbr ?? r.key
-            let highlight = p.nextKey == r.key
+            let currentNextKey = entry.dynamicNextKey ?? p.nextKey
+            let highlight = currentNextKey == r.key
             
             HStack(spacing: 0) {
               Text(label)
