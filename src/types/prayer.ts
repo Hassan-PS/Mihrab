@@ -13,6 +13,7 @@ export type DisplayPrayerKey = (typeof DISPLAY_ORDER)[number];
 
 export const NEXT_SALAH_ORDER = [
   'Fajr',
+  'Sunrise',
   'Dhuhr',
   'Asr',
   'Maghrib',
