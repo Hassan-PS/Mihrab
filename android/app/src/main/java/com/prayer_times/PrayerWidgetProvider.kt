@@ -214,17 +214,48 @@ class PrayerWidgetProvider : AppWidgetProvider() {
 
     val rows = o.getJSONArray("rows")
 
-    // Fallback for old cached payloads that don't have nextPrayerName/Time
-    if (nextPrayerName.isEmpty() && nextKey != null) {
-      for (i in 0 until rows.length()) {
+    // Dynamically calculate next prayer based on current time
+    val cal = java.util.Calendar.getInstance()
+    val currentMinutes = cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
+    
+    var dynamicNextKey: String? = null
+    var dynamicNextName = ""
+    var dynamicNextTime = ""
+    var nextUpdateMinutes = -1
+    
+    for (i in 0 until rows.length()) {
         val row = rows.getJSONObject(i)
-        if (row.getString("key") == nextKey) {
-          nextPrayerName = row.optString("abbr", "").trim().ifEmpty { nextKey }
-          nextPrayerTime = row.getString("time")
-          break
+        val timeStr = row.getString("time")
+        val parts = timeStr.split(":")
+        if (parts.size == 2) {
+            val h = parts[0].toIntOrNull() ?: continue
+            val m = parts[1].toIntOrNull() ?: continue
+            val rowMinutes = h * 60 + m
+            if (rowMinutes > currentMinutes) {
+                dynamicNextKey = row.getString("key")
+                dynamicNextName = row.optString("abbr", "").trim().ifEmpty { dynamicNextKey }
+                dynamicNextTime = timeStr
+                nextUpdateMinutes = rowMinutes
+                break
+            }
         }
-      }
     }
+
+    if (dynamicNextKey != null) {
+        nextPrayerName = dynamicNextName
+        nextPrayerTime = dynamicNextTime
+    } else if (nextPrayerName.isEmpty() && nextKey != null) {
+        // Fallback for old cached payloads that don't have nextPrayerName/Time
+        for (i in 0 until rows.length()) {
+            val row = rows.getJSONObject(i)
+            if (row.getString("key") == nextKey) {
+                nextPrayerName = row.optString("abbr", "").trim().ifEmpty { nextKey }
+                nextPrayerTime = row.getString("time")
+                break
+            }
+        }
+    }
+    val effectiveNextKey = dynamicNextKey ?: nextKey
 
     val normalColor = Color.parseColor(NEUTRAL_TEXT)
     val highlightColor = style.highlightColorInt(context)
@@ -267,7 +298,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         row.optString("abbr", "").trim().ifEmpty {
           key
         }
-      val highlight = nextKey != null && nextKey == key
+      val highlight = effectiveNextKey != null && effectiveNextKey == key
 
       views.setViewVisibility(COL_WRAPPERS[i], View.VISIBLE)
       views.setTextViewText(COL_LABELS[i], label)
@@ -281,6 +312,28 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       } else {
         views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
       }
+    }
+
+    // Schedule next update using AlarmManager
+    if (nextUpdateMinutes != -1) {
+        val updateTime = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, nextUpdateMinutes / 60)
+            set(java.util.Calendar.MINUTE, nextUpdateMinutes % 60)
+            set(java.util.Calendar.SECOND, 0)
+        }
+        val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            val mgr = AppWidgetManager.getInstance(context)
+            val cn = ComponentName(context, PrayerWidgetProvider::class.java)
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mgr.getAppWidgetIds(cn))
+        }
+        val pi = PendingIntent.getBroadcast(context, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExact(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
+        } else {
+            alarmManager.set(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
+        }
     }
   }
 
