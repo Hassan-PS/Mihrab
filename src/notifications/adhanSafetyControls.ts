@@ -29,17 +29,20 @@ async function disableAdhanAndClose(notificationId?: string) {
 async function handleAdhanAction(event: Event) {
   const { type, detail } = event;
   const notification = detail.notification;
-  if (type === EventType.DISMISSED && isAdhanPrayerNotification(notification)) {
-    await disableAdhanAndClose();
+  if (!isAdhanPrayerNotification(notification)) {
+    return;
+  }
+  if (type === EventType.DISMISSED) {
+    // Just stop the sound if dismissed, do not disable the preference
+    if (notification?.id) {
+      await notifee.cancelNotification(notification.id);
+    }
     return;
   }
   if (type !== EventType.ACTION_PRESS) {
     return;
   }
   const pressId = detail.pressAction?.id;
-  if (!isAdhanPrayerNotification(notification)) {
-    return;
-  }
   if (pressId === ADHAN_ACTION_STOP) {
     if (notification?.id) {
       await notifee.cancelNotification(notification.id);

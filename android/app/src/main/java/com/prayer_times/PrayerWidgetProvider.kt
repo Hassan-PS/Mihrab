@@ -105,6 +105,23 @@ private const val BASE_BG_B = 30
  */
 class PrayerWidgetProvider : AppWidgetProvider() {
 
+  override fun onReceive(context: Context, intent: Intent) {
+    super.onReceive(context, intent)
+    val action = intent.action
+    if (action == Intent.ACTION_USER_PRESENT || action == Intent.ACTION_SCREEN_ON) {
+      val mgr = AppWidgetManager.getInstance(context)
+      val cn = ComponentName(context, PrayerWidgetProvider::class.java)
+      val ids = mgr.getAppWidgetIds(cn)
+      if (ids.isNotEmpty()) {
+        val updateIntent = Intent(context, PrayerWidgetProvider::class.java).apply {
+          this.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        }
+        context.sendBroadcast(updateIntent)
+      }
+    }
+  }
+
   override fun onUpdate(
     context: Context,
     appWidgetManager: AppWidgetManager,
