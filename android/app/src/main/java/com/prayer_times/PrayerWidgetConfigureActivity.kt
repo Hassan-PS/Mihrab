@@ -167,10 +167,14 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
         )
         .apply()
 
+      val mgr = AppWidgetManager.getInstance(this)
+      val cn = android.content.ComponentName(this, PrayerWidgetProvider::class.java)
+      val allIds = mgr.getAppWidgetIds(cn)
+
       val updateIntent =
         Intent(this, PrayerWidgetProvider::class.java).apply {
           action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allIds)
         }
       sendBroadcast(updateIntent)
 
