@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.25] — 2026-04-27
+
+### Fixed
+- **F-Droid CI**: trailing space on a `sudo` curl line in the v1.5.21 build recipe caused `fdroid rewritemeta` to produce a diff and fail the pipeline; whitespace removed.
+
+### Changed
+- **Month view — layout**: prayer times now displayed in an aligned column grid (day label + 6 prayer columns with abbreviated headers) instead of a single joined string; each column has a fixed-width header; Sunrise column rendered muted italic.
+- **Month view — today highlight**: today's row shows the accent background and a leading accent bar; Friday rows use the card background to distinguish the day of Jumu'ah.
+- **Month view — controls**: month nav, "This Month", refresh, and "Share" toggle are now compact pills in a single row; provider info and cache count shown in one meta line; column headers are fixed below the controls (not part of the scrollable list).
+- **Month view — auto-scroll**: list jumps to today's row on initial load.
+- **Share image — banner**: header background changed to brand dark green (`#14532d`) to match app identity.
+- **Share image — Sunrise column**: Sunrise times rendered muted italic in both the header and data rows of the shareable table.
+- **Share image — GitHub URL**: corrected from `github.com/hassan/PrayerApp` to `github.com/Hassan-PS/PrayerApp`.
+
+### Release builds
+- Android `versionName` **1.5.25**, `versionCode` **48**.
+- iOS `MARKETING_VERSION` **1.5.25**, `CURRENT_PROJECT_VERSION` **48**.
+
+[1.5.25]: https://github.com/Hassan-PS/PrayerApp/compare/v1.5.24...v1.5.25
+
 ## [1.5.24] — 2026-04-27
 
 ### Changed
