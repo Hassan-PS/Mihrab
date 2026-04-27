@@ -1,33 +1,52 @@
 <div align="center">
-  <img src="assets/app-icon-rounded.png" alt="Prayer App Icon" width="150" style="border-radius: 20px;">
-  
+  <img src="assets/app-icon-rounded.png" alt="Prayer App Icon" width="120">
+
   # Prayer Salah Times & Qibla
-  
-  A simple, fast, and privacy-focused React Native app for daily prayer times, Qibla direction, monthly calendar, and home screen widgets.
-  
+
+  A simple, fast, and privacy-focused app for daily prayer times, Qibla direction, monthly calendar, and home screen widgets.
+
+  <br>
+
   <a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256">
-    <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" height="40">
+    <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" height="46">
   </a>
-  &nbsp;&nbsp;
+  &nbsp;
   <a href="https://github.com/Hassan-PS/PrayerApp/releases">
-    <img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="51">
+    <img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="46">
   </a>
+  &nbsp;
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/PrayerApp">
+    <img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Add to Obtainium" height="46">
+  </a>
+
 </div>
+
+---
 
 ## Features
 
-- **No Ads & Full Privacy**: Completely free of advertisements. No tracking, no data collection, and full transparency with open-source code.
-- **Accurate Prayer Times**: Get prayer times for the day, or view the entire month up to a year in advance.
-- **Offline First & Fast**: Uses on-device storage to cache data, reducing network requests so the app loads instantly and works offline.
-- **Home Screen Widgets**: Beautiful, customizable widgets for iOS and Android to see the next prayer at a glance.
-- **Qibla Compass**: Accurate Qibla direction using your device's sensors.
-- **Adhan & Reminders**: Get notified with beautiful Adhan sounds and upcoming prayer reminders.
-- **Customizable UI**: Personalize the interface settings to your liking.
-- **Multi-Language Support**: Available in English, Arabic, Swedish, Bengali, Urdu, Hindi, French, Spanish, German, Turkish, Indonesian, Russian, and Chinese.
+- **No Ads & Full Privacy** — No tracking, no data collection, fully open-source.
+- **Accurate Prayer Times** — Daily times or a full month view, up to a year ahead.
+- **Offline First** — Prayer times are cached on-device so the app loads instantly and works without a connection.
+- **Home Screen Widgets** — Customisable iOS and Android widgets showing the next prayer at a glance.
+- **Qibla Compass** — Accurate direction to the Kaaba using your device's sensors.
+- **Adhan & Reminders** — Notifications with built-in Adhan sounds and pre-prayer alerts.
+- **Multiple Providers** — AlAdhan, PrayerTimes.dev, Islamiska Förbundet (Sweden), or on-device calculation.
+- **Multi-Language** — English, Arabic, Swedish, Bengali, Urdu, Hindi, French, Spanish, German, Turkish, Indonesian, Russian, and Chinese.
+
+---
 
 ## Install
 
-- **GitHub Releases (default)**: [Latest](https://github.com/Hassan-PS/PrayerApp/releases/latest) → `app-fdroid-release.apk`
+| Platform | Link |
+|---|---|
+| **iOS** | [App Store](https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256) |
+| **Android APK** | [GitHub Releases](https://github.com/Hassan-PS/PrayerApp/releases) → `app-fdroid-release.apk` |
+| **Android (Obtainium)** | [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/PrayerApp) — auto-updates directly from GitHub Releases |
+| **Google Play** | Coming soon |
+| **F-Droid** | Coming soon ([MR #36312](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/36312)) |
+
+---
 
 ## Build
 
@@ -39,7 +58,10 @@ npm start
 ### Android
 
 ```sh
+# F-Droid APK (no Play Billing)
 npm run android:assembleFdroidRelease
+
+# Google Play AAB
 npm run android:bundlePlayRelease
 ```
 
@@ -53,8 +75,10 @@ Outputs:
 npm run ios
 ```
 
-Build and upload via Xcode Organizer for App Store/TestFlight.
+Archive and upload via Xcode Organizer for App Store / TestFlight.
+
+---
 
 ## License
 
-Apache-2.0 (`LICENSE`).
+[Apache-2.0](LICENSE)
