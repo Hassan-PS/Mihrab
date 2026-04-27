@@ -170,13 +170,9 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
       val mgr = AppWidgetManager.getInstance(this)
       val cn = android.content.ComponentName(this, PrayerWidgetProvider::class.java)
       val allIds = mgr.getAppWidgetIds(cn)
-
-      val updateIntent =
-        Intent(this, PrayerWidgetProvider::class.java).apply {
-          action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allIds)
-        }
-      sendBroadcast(updateIntent)
+      // Include the widget being configured (may not be in allIds yet on some launchers)
+      val idsToUpdate = (allIds.toSet() + appWidgetId).toIntArray()
+      PrayerWidgetProvider.refreshAll(this, mgr, idsToUpdate)
 
       setResult(
         RESULT_OK,
