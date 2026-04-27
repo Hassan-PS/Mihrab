@@ -171,7 +171,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
       setSharing(true);
       const uri = await viewShotRef.current.capture();
       await Share.open({
-        url: Platform.OS === 'android' ? `file://${uri}` : uri,
+        url: Platform.OS === 'android' && !uri.startsWith('file://') ? `file://${uri}` : uri,
         type: 'image/png',
       });
     } catch (e) {
