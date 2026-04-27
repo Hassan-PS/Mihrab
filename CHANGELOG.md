@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.24] — 2026-04-27
+
+### Changed
+- **Home screen — Next prayer card**: redesigned hero card with prayer name and time side-by-side, a countdown pill, and platform-specific corner radius (iOS 20dp, Android 16dp).
+- **Home screen — Prayer table**: Sunrise row is now rendered in muted italic to distinguish it as a reference time, not a salah. The active prayer row gains a 4dp accent bar on the leading edge.
+- **Home screen — layout**: switched to `gap`-based spacing for consistent vertical rhythm; month shortcut moved below the prayer table and spans full width.
+- **Navigation (iOS)**: large title headers enabled on all screens (`headerLargeTitle`), matching iOS HIG expectations.
+- **Widget (Android)**: left panel uses `sans-serif-light` for the large time (more elegant), prayer name rendered uppercase with letter spacing, subtle vertical divider separates panels, right-side prayer list uses `sans-serif-medium` for clarity.
+- **Widget (iOS — small)**: added "NEXT" micro-label, prayer name shown above the time, location shown uppercase with tracking at top.
+- **Widget (iOS — medium/large)**: left panel restructured with location top, "NEXT" label, uppercase prayer name, and day label at bottom; large time uses `.light` weight. Highlighted row gains a 3dp leading accent bar alongside the background tint. Divider between panels.
+
+### Release builds
+- Android `versionName` **1.5.24**, `versionCode` **47**.
+- iOS `MARKETING_VERSION` **1.5.24**, `CURRENT_PROJECT_VERSION` **47**.
+
+[1.5.24]: https://github.com/Hassan-PS/PrayerApp/compare/v1.5.23...v1.5.24
+
 ## [1.5.23] — 2026-04-27
 
 ### Changed
