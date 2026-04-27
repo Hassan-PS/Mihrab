@@ -7,11 +7,19 @@ type NativePrayerWidget = {
 };
 
 function getNativeModule(): NativePrayerWidget | null {
-  // TurboModuleRegistry is required in New Architecture (RN 0.76+)
-  const turbo = TurboModuleRegistry.get<NativePrayerWidget>('PrayerWidget');
-  if (turbo?.setData) return turbo;
   const legacy = NativeModules.PrayerWidget as NativePrayerWidget | undefined;
-  return legacy?.setData ? legacy : null;
+  if (legacy && legacy.setData) {
+    return legacy;
+  }
+  try {
+    const turbo = TurboModuleRegistry.get<NativePrayerWidget>('PrayerWidget');
+    if (turbo) {
+      return turbo;
+    }
+  } catch (e) {
+    // Ignore
+  }
+  return null;
 }
 
 /**
