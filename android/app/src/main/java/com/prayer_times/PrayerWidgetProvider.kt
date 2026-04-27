@@ -103,7 +103,7 @@ private const val BASE_BG_B = 30
  * Neutral dark widget: only the next prayer row uses an accent color.
  * Background opacity and accent are configurable from app settings (Android).
  */
-class PrayerWidgetProvider : AppWidgetProvider() {
+open class PrayerWidgetProvider : AppWidgetProvider() {
 
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
@@ -191,10 +191,16 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     /** Called from RN native module after writing new payload to SharedPreferences. */
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
-      val cn = ComponentName(context, PrayerWidgetProvider::class.java)
-      val ids = mgr.getAppWidgetIds(cn)
-      if (ids.isEmpty()) return
-      refreshAll(context, mgr, ids)
+      val classes = arrayOf(
+        PrayerWidgetProvider::class.java,
+        PrayerWidgetSmallProvider::class.java,
+        PrayerWidgetLargeProvider::class.java
+      )
+      for (cls in classes) {
+        val cn = ComponentName(context, cls)
+        val ids = mgr.getAppWidgetIds(cn)
+        if (ids.isNotEmpty()) refreshAll(context, mgr, ids)
+      }
     }
 
     private fun buildViews(

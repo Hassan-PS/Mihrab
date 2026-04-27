@@ -35,12 +35,16 @@ function HomeHeaderRight() {
 
 export function RootNavigator() {
   const { t } = useTranslation();
+  const theme = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{
         headerLargeTitle: isIOS,
         headerLargeTitleShadowVisible: false,
         headerShadowVisible: false,
+        headerStyle: { backgroundColor: theme.colors.background },
+        headerTitleStyle: { color: theme.colors.text },
+        headerLargeTitleStyle: { color: theme.colors.text },
       }}>
       <Stack.Screen
         name="Home"
@@ -58,17 +62,17 @@ export function RootNavigator() {
       <Stack.Screen
         name="MonthTimes"
         component={MonthTimesScreen}
-        options={{ title: t('nav.month') }}
+        options={{ title: t('nav.month'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="ShareMonth"
         component={ShareMonthScreen}
-        options={{ title: t('nav.shareMonth') }}
+        options={{ title: t('nav.shareMonth'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Compass"
         component={CompassScreen}
-        options={{ title: t('nav.compass') }}
+        options={{ title: t('nav.compass'), headerLargeTitle: false }}
       />
     </Stack.Navigator>
   );
