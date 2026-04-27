@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.28] — 2026-04-27
+
+### Fixed
+- **Android widget — doesn't load**: `requestUpdate` was using `sendBroadcast` which can be silently dropped by battery optimisation on Android 8+. Replaced with direct `AppWidgetManager.updateAppWidget()` calls throughout. The configure activity now also directly refreshes the new widget on Save (instead of relying on the broadcast reaching the correct ID). Also fixed `setBackgroundResource(0)` → `setBackgroundColor(TRANSPARENT)` which could throw on some ROM variants.
+
 ## [1.5.27] — 2026-04-27
 
 ### Fixed
