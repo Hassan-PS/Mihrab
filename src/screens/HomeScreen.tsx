@@ -106,12 +106,14 @@ export function HomeScreen() {
         today: state.today,
         tomorrow: state.tomorrow,
       }).catch(() => {});
+      syncPrayerWidget(state.today, state.tomorrow, new Date(), locationLabel).catch(() => {});
     }, [
       hydrated,
       settings.notificationsEnabled,
       settings.prePrayerReminderMinutes,
       settings.notificationSound,
       state,
+      locationLabel,
     ]),
   );
 

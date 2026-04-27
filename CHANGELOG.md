@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.26] — 2026-04-27
+
+### Fixed
+- **Widget — fresh install**: widget would show "Open Prayer Times to load times" even after the app had loaded prayer data. The widget data is now also synced every time the Home screen gains focus (e.g. when returning after placing the widget), guaranteeing the widget is populated within seconds of opening the app.
+
 ## [1.5.25] — 2026-04-27
 
 ### Fixed
