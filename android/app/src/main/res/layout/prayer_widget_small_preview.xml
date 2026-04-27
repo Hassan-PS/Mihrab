@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
                 android:textSize="14sp"
-                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
                 android:text="DHUHR"
                 android:maxLines="1" />
 
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="#E8EAED"
                 android:textSize="44sp"
-                android:fontFamily="sans-serif-light"
+                
                 android:includeFontPadding="false"
                 android:text="12:10"
                 android:layout_marginTop="2dp"
