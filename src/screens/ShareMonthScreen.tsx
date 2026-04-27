@@ -235,7 +235,8 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   }
 
   const tableBorderColor = '#d1d5db';
-  const headerBgColor = '#f3f4f6';
+  const headerBgColor = '#dcfce7';   // brand green tint for header row
+  const headerAccent = '#166534';    // dark green text in header
   const textColor = '#1f2937';
 
   return (
@@ -259,7 +260,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
             <View style={[styles.bannerTop, { flexDirection: 'row' }]}>
               <View style={[styles.bannerLeft, { alignItems: 'flex-start' }]}>
                 <Text style={styles.appName}>{t('app.name')}</Text>
-                <Text style={styles.githubLink}>github.com/hassan/PrayerApp</Text>
+                <Text style={styles.githubLink}>github.com/Hassan-PS/PrayerApp</Text>
               </View>
               <View style={styles.bannerRight}>
                 <Image
@@ -279,34 +280,37 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 
           {/* Table */}
           <View style={[styles.table, { borderColor: tableBorderColor }]}>
-            {/* Header Row 1 */}
+            {/* Header Row */}
             <View style={[styles.tableRow, styles.tableHeader, { backgroundColor: headerBgColor, flexDirection: 'row' }]}>
               <View style={[styles.cell, styles.cellDay, { borderColor: tableBorderColor }]}>
-                <Text style={[styles.headerText, { color: textColor }]}>{t('month.dayOfWeek', 'Day')}</Text>
+                <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.dayOfWeek', 'Day')}</Text>
               </View>
               <View style={[styles.cell, styles.cellDateGroup, { borderColor: tableBorderColor, flexDirection: 'column', paddingVertical: 0 }]}>
                 <View style={[styles.cellSubHeader, { borderBottomWidth: 1, borderColor: tableBorderColor }]}>
-                  <Text style={[styles.headerText, { color: textColor }]}>{t('month.date', 'Date')}</Text>
+                  <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.date', 'Date')}</Text>
                 </View>
                 <View style={[styles.cellSubRow, { flexDirection: 'row' }]}>
                   <View style={[styles.cellSubCol, { borderRightWidth: 1, borderColor: tableBorderColor }]}>
-                    <Text style={[styles.headerText, { color: textColor }]}>{t('month.hijri', 'Hijri')}</Text>
+                    <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.hijri', 'Hijri')}</Text>
                   </View>
                   <View style={styles.cellSubCol}>
-                    <Text style={[styles.headerText, { color: textColor }]}>{t('month.gregorian', 'Gregorian')}</Text>
+                    <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.gregorian', 'Greg.')}</Text>
                   </View>
                 </View>
               </View>
               <View style={[styles.cell, styles.cellTimesGroup, { borderColor: tableBorderColor, flexDirection: 'column', paddingVertical: 0, borderRightWidth: 0 }]}>
                 <View style={[styles.cellSubHeader, { borderBottomWidth: 1, borderColor: tableBorderColor }]}>
-                  <Text style={[styles.headerText, { color: textColor }]}>{t('month.prayerTimes', 'Prayer Times')}</Text>
+                  <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.prayerTimes', 'Prayer Times')}</Text>
                 </View>
                 <View style={[styles.cellSubRow, { flexDirection: 'row' }]}>
-                  {DISPLAY_ORDER.map((key, idx) => (
-                    <View key={key} style={[styles.cellSubCol, { borderRightWidth: idx === DISPLAY_ORDER.length - 1 ? 0 : 1, borderColor: tableBorderColor }]}>
-                      <Text style={[styles.headerText, { color: textColor }]}>{t(`prayer.${key}`)}</Text>
-                    </View>
-                  ))}
+                  {DISPLAY_ORDER.map((key, idx) => {
+                    const isSunrise = key === 'Sunrise';
+                    return (
+                      <View key={key} style={[styles.cellSubCol, { borderRightWidth: idx === DISPLAY_ORDER.length - 1 ? 0 : 1, borderColor: tableBorderColor }]}>
+                        <Text style={[styles.headerText, { color: isSunrise ? '#6b7280' : headerAccent }]}>{t(`prayer.${key}`)}</Text>
+                      </View>
+                    );
+                  })}
                 </View>
               </View>
             </View>
@@ -339,9 +343,10 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
                     {DISPLAY_ORDER.map((key, idx) => {
                       const raw = row.timings[key];
                       const timeStr = raw ? formatDisplayTime(raw) : '—';
+                      const isSunrise = key === 'Sunrise';
                       return (
                         <View key={key} style={[styles.cellSubCol, { borderRightWidth: idx === DISPLAY_ORDER.length - 1 ? 0 : 1, borderColor: tableBorderColor, justifyContent: 'center' }]}>
-                          <Text style={[styles.cellText, isFriday && styles.boldText, { color: textColor }]}>
+                          <Text style={[styles.cellText, isFriday && styles.boldText, { color: isSunrise ? '#9ca3af' : textColor, fontStyle: isSunrise ? 'italic' : 'normal' }]}>
                             {timeStr}
                           </Text>
                         </View>
@@ -422,7 +427,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     marginBottom: 16,
-    backgroundColor: '#1f2937',
+    backgroundColor: '#14532d',
     borderRadius: 8,
     padding: 16,
   },
@@ -455,7 +460,7 @@ const styles = StyleSheet.create({
   bannerBottom: {
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#374151',
+    borderTopColor: '#166534',
     paddingTop: 12,
   },
   islamicMonth: {
