@@ -177,17 +177,17 @@ struct PrayerWidgetEntryView: View {
         // Location + date at top
         if let loc = p.locationName, !loc.isEmpty {
           Text(loc.uppercased())
+            .kerning(0.5)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
             .lineLimit(1)
-            .kerning(0.5)
         }
         Spacer()
         // Label
         Text("NEXT")
+          .kerning(1.0)
           .font(.system(size: 9, weight: .semibold))
           .foregroundStyle(widgetMuted)
-          .kerning(1.0)
         // Prayer name
         if let name = entry.dynamicNextName ?? p.nextPrayerName, !name.isEmpty {
           Text(name)
@@ -231,28 +231,28 @@ struct PrayerWidgetEntryView: View {
           // Location at top
           if let loc = p.locationName, !loc.isEmpty {
             Text(loc.uppercased())
+              .kerning(0.5)
               .font(.system(size: 9, weight: .semibold))
               .foregroundStyle(widgetMuted)
               .lineLimit(1)
-              .kerning(0.5)
           }
 
           Spacer()
 
           // "NEXT" micro-label
           Text("NEXT")
+            .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
-            .kerning(1.0)
             .padding(.bottom, 2)
 
           // Prayer name — semibold, prominent
           if let name = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey, !name.isEmpty {
             Text(name.uppercased())
+              .kerning(0.5)
               .font(.system(size: 13, weight: .semibold))
               .foregroundStyle(widgetText)
               .lineLimit(1)
-              .kerning(0.5)
           }
 
           // Time — large, light weight
