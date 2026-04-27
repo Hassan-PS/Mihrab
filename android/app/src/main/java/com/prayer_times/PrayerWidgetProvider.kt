@@ -210,19 +210,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       json: String?,
       style: WidgetStyle,
     ): RemoteViews {
-      val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-      val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-      val isHorizontal = minHeight > 0 && minHeight < 100
-      
       val providerName = appWidgetManager.getAppWidgetInfo(appWidgetId)?.provider?.className
       val isSmall = providerName == PrayerWidgetSmallProvider::class.java.name
+      val isLarge = providerName == PrayerWidgetLargeProvider::class.java.name
       
       val layoutId = if (isSmall) {
         R.layout.prayer_widget_small
-      } else if (isHorizontal) {
-        R.layout.prayer_widget_horizontal
-      } else {
+      } else if (isLarge) {
         R.layout.prayer_widget
+      } else {
+        R.layout.prayer_widget_horizontal
       }
 
       val views = RemoteViews(context.packageName, layoutId)
@@ -251,6 +248,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         showMessageOnly(views, context.getString(R.string.widget_placeholder_day), isError = false, style)
       } else {
         try {
+          val isHorizontal = layoutId == R.layout.prayer_widget_horizontal
           applyJson(views, json, style, context, isHorizontal)
         } catch (_: Exception) {
           showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
