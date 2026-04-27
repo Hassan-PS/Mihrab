@@ -270,12 +270,8 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    if (dynamicNextKey == null && rows.length() > 0) {
-        val firstRow = rows.getJSONObject(0)
-        dynamicNextKey = firstRow.getString("key")
-        dynamicNextName = firstRow.optString("abbr", "").trim().ifEmpty { dynamicNextKey }
-        dynamicNextTime = firstRow.getString("time")
-    }
+    // If all prayers have passed, leave dynamicNextKey null so the left panel
+    // stays blank until the app syncs tomorrow's payload.
 
     if (dynamicNextKey != null) {
         nextPrayerName = dynamicNextName
@@ -335,11 +331,17 @@ class PrayerWidgetProvider : AppWidgetProvider() {
           key
         }
       val highlight = effectiveNextKey != null && effectiveNextKey == key
+      // Sunrise is a reference time, not a salah — render it muted when not highlighted.
+      val isSunrise = key.equals("Sunrise", ignoreCase = true)
+      val col = when {
+        highlight -> highlightColor
+        isSunrise -> Color.parseColor(NEUTRAL_MUTED)
+        else -> normalColor
+      }
 
       views.setViewVisibility(COL_WRAPPERS[i], View.VISIBLE)
       views.setTextViewText(COL_LABELS[i], label)
       views.setTextViewText(COL_TIMES[i], time)
-      val col = if (highlight) highlightColor else normalColor
       views.setTextColor(COL_LABELS[i], col)
       views.setTextColor(COL_TIMES[i], col)
 
