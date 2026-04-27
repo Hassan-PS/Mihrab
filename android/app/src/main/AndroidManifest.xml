@@ -22,7 +22,7 @@
       <receiver
         android:name=".PrayerWidgetProvider"
         android:exported="true"
-        android:label="@string/app_name">
+        android:label="@string/widget_name_medium">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
@@ -31,6 +31,34 @@
         <meta-data
           android:name="android.appwidget.provider"
           android:resource="@xml/prayer_widget_info" />
+      </receiver>
+
+      <receiver
+        android:name=".PrayerWidgetSmallProvider"
+        android:exported="true"
+        android:label="@string/widget_name_small">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.SCREEN_ON" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_small_info" />
+      </receiver>
+
+      <receiver
+        android:name=".PrayerWidgetLargeProvider"
+        android:exported="true"
+        android:label="@string/widget_name_large">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.SCREEN_ON" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_large_info" />
       </receiver>
 
       <activity

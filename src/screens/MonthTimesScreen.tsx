@@ -317,6 +317,7 @@ export function MonthTimesScreen() {
       <FlatList
         style={{ flex: 1 }}
         data={rows ?? []}
+        contentInsetAdjustmentBehavior="automatic"
         keyExtractor={item => formatLocalDate(item.date)}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 32 }}

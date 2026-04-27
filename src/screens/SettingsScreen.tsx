@@ -224,6 +224,7 @@ export function SettingsScreen() {
       <ScrollView
         style={[styles.scroll, { backgroundColor: palette.bg }]}
         contentContainerStyle={styles.scrollContent}
+        contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled">
         <Text style={[styles.sectionTitle, { color: palette.muted }]}>
           {t('settings.appearance')}

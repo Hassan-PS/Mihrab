@@ -278,7 +278,8 @@ export function HomeScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: palette.bg }]}
-      contentContainerStyle={styles.scrollContent}>
+      contentContainerStyle={styles.scrollContent}
+      contentInsetAdjustmentBehavior="automatic">
       <ProviderSourceHeader
         settings={settings}
         updateSettings={updateSettings}
