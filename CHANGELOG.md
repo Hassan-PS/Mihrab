@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.27] — 2026-04-27
+
+### Fixed
+- **iOS widget — build**: `.tracking()` (SwiftUI letter-spacing modifier, iOS 16+ only) replaced with `.kerning()` (iOS 13+) so the Xcode Cloud archive compiles on the app's minimum deployment target.
+
 ## [1.5.26] — 2026-04-27
 
 ### Fixed
