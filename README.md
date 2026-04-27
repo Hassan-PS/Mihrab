@@ -30,6 +30,20 @@
 
 ---
 
+## Screenshots
+
+<div align="center">
+
+<img src="assets/screenshots/01_prayer_times_at_a_glance.jpg" width="49%" alt="Prayer times at a glance">&nbsp;<img src="assets/screenshots/02_share_beautiful_calendars.jpg" width="49%" alt="Share beautiful calendars">
+
+<img src="assets/screenshots/03_full_month_always_ready.jpg" width="49%" alt="Full month always ready">&nbsp;<img src="assets/screenshots/04_qibla_direction_anywhere.jpg" width="49%" alt="Qibla direction anywhere">
+
+<img src="assets/screenshots/05_fully_customisable.jpg" width="49%" alt="Fully customisable">
+
+</div>
+
+---
+
 ## Install
 
 | Platform | Link |
