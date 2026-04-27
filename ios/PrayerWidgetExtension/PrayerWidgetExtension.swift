@@ -180,14 +180,14 @@ struct PrayerWidgetEntryView: View {
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
             .lineLimit(1)
-            .tracking(0.5)
+            .kerning(0.5)
         }
         Spacer()
         // Label
         Text("NEXT")
           .font(.system(size: 9, weight: .semibold))
           .foregroundStyle(widgetMuted)
-          .tracking(1.0)
+          .kerning(1.0)
         // Prayer name
         if let name = entry.dynamicNextName ?? p.nextPrayerName, !name.isEmpty {
           Text(name)
@@ -234,7 +234,7 @@ struct PrayerWidgetEntryView: View {
               .font(.system(size: 9, weight: .semibold))
               .foregroundStyle(widgetMuted)
               .lineLimit(1)
-              .tracking(0.5)
+              .kerning(0.5)
           }
 
           Spacer()
@@ -243,7 +243,7 @@ struct PrayerWidgetEntryView: View {
           Text("NEXT")
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
-            .tracking(1.0)
+            .kerning(1.0)
             .padding(.bottom, 2)
 
           // Prayer name — semibold, prominent
@@ -252,7 +252,7 @@ struct PrayerWidgetEntryView: View {
               .font(.system(size: 13, weight: .semibold))
               .foregroundStyle(widgetText)
               .lineLimit(1)
-              .tracking(0.5)
+              .kerning(0.5)
           }
 
           // Time — large, light weight
