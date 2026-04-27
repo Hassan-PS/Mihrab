@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -35,6 +36,14 @@ import {
   isSameLocalDay,
 } from '../utils/prayerTimes';
 import type { RootStackParamList } from '../navigation/types';
+
+const isIOS = Platform.OS === 'ios';
+
+// Platform-specific design tokens
+const CARD_RADIUS = isIOS ? 20 : 16;
+const CARD_PADDING = isIOS ? 20 : 18;
+const ROW_PADDING_V = isIOS ? 15 : 14;
+const TABLE_RADIUS = isIOS ? 16 : 12;
 
 export function HomeScreen() {
   const navigation =
@@ -262,7 +271,7 @@ export function HomeScreen() {
     );
   }
 
-  const { today, latitude, longitude } = state;
+  const { today } = state;
 
   return (
     <ScrollView
@@ -275,57 +284,54 @@ export function HomeScreen() {
         palette={palette}
       />
 
-      <Text style={[styles.tagline, { color: palette.muted }]}>
-        {t('app.tagline')}
-      </Text>
-
+      {/* Next prayer hero card */}
       {nextInfo && (
         <View
           style={[
             styles.nextCard,
             {
               backgroundColor: palette.accentBg,
+              borderRadius: CARD_RADIUS,
+              padding: CARD_PADDING,
               ...cardEdgeStyle(palette),
             },
           ]}>
           <Text style={[styles.nextLabel, { color: palette.muted }]}>
             {t('home.nextPrayer')}
           </Text>
-          <Text style={[styles.nextName, { color: palette.text }]}>
-            {t(`prayer.${nextInfo.name}`)}
-          </Text>
-          <Text style={[styles.nextTime, { color: palette.accent }]}>
-            {formatLocalTime(nextInfo.at)}
-          </Text>
-          <Text style={[styles.nextCountdown, { color: palette.muted }]}>
-            {t('home.nextIn', {
-              time: formatCountdown(
-                Math.max(
-                  0,
-                  Math.floor((nextInfo.at.getTime() - now.getTime()) / 1000),
-                ),
-              ),
-            })}
-          </Text>
+
+          {/* Name + time row */}
+          <View style={styles.nextRow}>
+            <Text
+              style={[styles.nextName, { color: palette.text }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit>
+              {t(`prayer.${nextInfo.name}`)}
+            </Text>
+            <Text style={[styles.nextTime, { color: palette.accent }]}>
+              {formatLocalTime(nextInfo.at)}
+            </Text>
+          </View>
+
+          {/* Countdown */}
+          <View style={styles.nextCountdownRow}>
+            <View style={[styles.countdownPill, { backgroundColor: palette.card }]}>
+              <Text style={[styles.nextCountdown, { color: palette.muted }]}>
+                {t('home.nextIn', {
+                  time: formatCountdown(
+                    Math.max(
+                      0,
+                      Math.floor((nextInfo.at.getTime() - now.getTime()) / 1000),
+                    ),
+                  ),
+                })}
+              </Text>
+            </View>
+          </View>
         </View>
       )}
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('home.monthTimesLink')}
-        accessibilityHint={t('a11y.openMonth')}
-        onPress={() => navigation.navigate('MonthTimes')}
-        style={({ pressed }) => [
-          styles.monthShortcut,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          pressed && { opacity: 0.85 },
-        ]}>
-        <CalendarIcon color={palette.accent} size={22} />
-        <Text style={[styles.monthShortcutLabel, { color: palette.accent }]}>
-          {t('home.monthTimesLink')}
-        </Text>
-      </Pressable>
-
+      {/* Location + provider info */}
       <Text style={[styles.coords, { color: palette.muted }]}>
         {locationLabel ? `${locationLabel} · ` : ''}
         {getProviderLabel(effectiveProvider)}
@@ -337,12 +343,17 @@ export function HomeScreen() {
           : ''}
       </Text>
 
+      {/* Prayer times table */}
       <View
         style={[
           styles.table,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          {
+            backgroundColor: palette.card,
+            borderRadius: TABLE_RADIUS,
+            ...cardEdgeStyle(palette),
+          },
         ]}>
-        {DISPLAY_ORDER.map(key => {
+        {DISPLAY_ORDER.map((key, index) => {
           const raw = today[key];
           if (!raw) {
             return null;
@@ -352,24 +363,73 @@ export function HomeScreen() {
             nextInfo.name === key &&
             nextInfo.at > now &&
             isSameLocalDay(nextInfo.at, now);
+          const isSunrise = key === 'Sunrise';
+          const isLast = index === DISPLAY_ORDER.length - 1;
+
           return (
             <View
               key={key}
               style={[
                 styles.row,
-                rowDividerStyle(palette),
+                !isLast && rowDividerStyle(palette),
                 isNext && { backgroundColor: palette.accentBg },
               ]}>
-              <Text style={[styles.rowName, { color: palette.text }]}>
+              {/* Active-row accent bar (left edge) */}
+              {isNext && (
+                <View
+                  style={[styles.activeBar, { backgroundColor: palette.accent }]}
+                />
+              )}
+              <Text
+                style={[
+                  styles.rowName,
+                  {
+                    color: isSunrise && !isNext ? palette.muted : palette.text,
+                    fontStyle: isSunrise ? 'italic' : 'normal',
+                    fontWeight: isNext ? '600' : '500',
+                  },
+                ]}>
                 {t(`prayer.${key}`)}
               </Text>
-              <Text style={[styles.rowTime, { color: palette.accent }]}>
+              <Text
+                style={[
+                  styles.rowTime,
+                  {
+                    color: isNext
+                      ? palette.accent
+                      : isSunrise
+                      ? palette.muted
+                      : palette.text,
+                    fontWeight: isNext ? '700' : '500',
+                  },
+                ]}>
                 {formatDisplayTime(raw)}
               </Text>
             </View>
           );
         })}
       </View>
+
+      {/* Month shortcut */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('home.monthTimesLink')}
+        accessibilityHint={t('a11y.openMonth')}
+        onPress={() => navigation.navigate('MonthTimes')}
+        style={({ pressed }) => [
+          styles.monthShortcut,
+          {
+            backgroundColor: palette.card,
+            borderRadius: CARD_RADIUS,
+            ...cardEdgeStyle(palette),
+          },
+          pressed && { opacity: 0.75 },
+        ]}>
+        <CalendarIcon color={palette.accent} size={20} />
+        <Text style={[styles.monthShortcutLabel, { color: palette.accent }]}>
+          {t('home.monthTimesLink')}
+        </Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -381,6 +441,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 32,
+    gap: 12,
   },
   centered: {
     flex: 1,
@@ -420,73 +481,82 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   nextCard: {
-    borderRadius: 14,
-    padding: 18,
-    marginBottom: 16,
-    borderWidth: 1,
+    overflow: 'hidden',
   },
   nextLabel: {
-    fontSize: 13,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginBottom: 4,
-  },
-  nextName: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  nextTime: {
-    fontSize: 22,
+    fontSize: 12,
     fontWeight: '600',
-    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 8,
   },
-  nextCountdown: {
-    fontSize: 15,
-    marginTop: 8,
-  },
-  monthShortcut: {
+  nextRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    marginBottom: 10,
-    borderRadius: 10,
-    borderWidth: 1,
+    justifyContent: 'space-between',
+    gap: 8,
   },
-  monthShortcutLabel: {
-    fontSize: 16,
-    fontWeight: '600',
+  nextName: {
+    fontSize: 32,
+    fontWeight: '700',
+    flex: 1,
   },
-  tagline: {
+  nextTime: {
+    fontSize: 26,
+    fontWeight: '700',
+  },
+  nextCountdownRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+  },
+  countdownPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  nextCountdown: {
     fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 14,
+    fontWeight: '500',
   },
   coords: {
     fontSize: 13,
-    marginBottom: 12,
+    lineHeight: 18,
   },
   table: {
-    borderRadius: 12,
-    borderWidth: 1,
     overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: ROW_PADDING_V,
     paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingLeft: 20,
+    position: 'relative',
+  },
+  activeBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
   },
   rowName: {
     fontSize: 17,
-    fontWeight: '500',
   },
   rowTime: {
     fontSize: 17,
+  },
+  monthShortcut: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+  },
+  monthShortcutLabel: {
+    fontSize: 16,
     fontWeight: '600',
   },
 });
