@@ -58,7 +58,7 @@ yarn-error.log
 
 **/fastlane/report.xml
 **/fastlane/Preview.html
-**/fastlane/screenshots
+# fastlane/screenshots intentionally tracked (App Store / Play Store assets)
 **/fastlane/test_output
 
 # Bundle artifact
