@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.23] — 2026-04-27
+
+### Changed
+- **Notification icon (Android)**: status-bar icon replaced with a mosque silhouette (dome + two minarets) for a more recognisable prayer app icon.
+- **README**: store badge buttons rendered in a fixed horizontal row.
+
+### Release builds
+- Android `versionName` **1.5.23**, `versionCode` **46**.
+- iOS `MARKETING_VERSION` **1.5.23**, `CURRENT_PROJECT_VERSION` **46**.
+
+[1.5.23]: https://github.com/Hassan-PS/PrayerApp/compare/v1.5.22...v1.5.23
+
 ## [1.5.22] — 2026-04-27
 
 ### Fixed
