@@ -241,7 +241,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 
   return (
     <View style={[styles.container, { backgroundColor: palette.bg }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} contentInsetAdjustmentBehavior="automatic">
         <PinchGestureHandler
           onGestureEvent={onPinchGestureEvent}
           onHandlerStateChange={onPinchHandlerStateChange}>
