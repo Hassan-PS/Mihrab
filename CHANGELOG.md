@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.30] — 2026-04-27
+
+### Fixed
+- **iOS widget — build**: `.kerning()` called after `.foregroundStyle()` resolves to the SwiftUI View modifier (iOS 16+) rather than `Text.kerning(_:)` (iOS 13+). Moved all `.kerning()` calls to be the first modifier on each `Text` view so the compiler picks the correct iOS 13+ method.
+
 ## [1.5.29] — 2026-04-27
 
 ### Fixed
