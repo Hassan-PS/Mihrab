@@ -1,7 +1,7 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -44,11 +44,27 @@ export function HomeScreen() {
   const { state, retry } = usePrayerDay(settings, hydrated);
   const { palette } = useAppPalette();
   const [now, setNow] = useState(() => new Date());
+  const loadedDateKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30000);
+    if (state.phase === 'ready') {
+      loadedDateKeyRef.current = new Date().toDateString();
+    }
+  }, [state]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const current = new Date();
+      setNow(current);
+      if (
+        loadedDateKeyRef.current !== null &&
+        current.toDateString() !== loadedDateKeyRef.current
+      ) {
+        retry();
+      }
+    }, 30000);
     return () => clearInterval(id);
-  }, []);
+  }, [retry]);
 
   useEffect(() => {
     if (!hydrated || state.phase !== 'ready') {

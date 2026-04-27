@@ -15,7 +15,7 @@ export type WidgetPrayerRow = {
   abbr: string;
 };
 
-/** Five daily salāh times on the widget (Sunrise is omitted to save space). */
+/** Six times shown on the widget: five daily salāh + Sunrise. */
 export const WIDGET_ROW_KEYS = [
   'Fajr',
   'Sunrise',

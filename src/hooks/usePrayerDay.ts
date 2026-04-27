@@ -90,7 +90,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
                 school: settings.school,
               },
               12
-            ).catch(() => {});
+            ).catch(e => console.error('Background prayer cache refresh failed', e));
           }
         } catch {
           // Ignore cache check errors

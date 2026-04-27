@@ -120,7 +120,7 @@ export async function getOrFetchPrayerTimes(
     newData.months[monthKey][dayKey] = res.timings;
 
     await saveStoredPrayerData(newData);
-  }).catch(() => {});
+  }).catch(e => console.error('Failed to update prayer cache after fetch', e));
 
   return res.timings;
 }

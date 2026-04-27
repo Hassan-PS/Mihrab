@@ -23,7 +23,12 @@ function convertLondonTimeToLocal(timeStr: string, date: Date): string {
   if (isNaN(hours) || isNaN(minutes)) return timeStr;
 
   const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
-  let lYear = 0, lMonth = 0, lDay = 0, lHour = 0, lMinute = 0, lSecond = 0;
+  let lYear: number | undefined,
+    lMonth: number | undefined,
+    lDay: number | undefined,
+    lHour: number | undefined,
+    lMinute: number | undefined,
+    lSecond: number | undefined;
 
   try {
     const parts = new Intl.DateTimeFormat('en-US', {
@@ -46,6 +51,17 @@ function convertLondonTimeToLocal(timeStr: string, date: Date): string {
     }
   } catch {
     // Fallback if Intl is not fully supported
+    return timeStr;
+  }
+
+  if (
+    lYear === undefined || isNaN(lYear) ||
+    lMonth === undefined || isNaN(lMonth) ||
+    lDay === undefined || isNaN(lDay) || lDay < 1 ||
+    lHour === undefined || isNaN(lHour) ||
+    lMinute === undefined || isNaN(lMinute) ||
+    lSecond === undefined || isNaN(lSecond)
+  ) {
     return timeStr;
   }
 

@@ -56,6 +56,28 @@ private func resolvedWidgetHighlightColor() -> Color {
   return presetHighlightColor(id)
 }
 
+// Extracted so both getSnapshot and getTimeline can use it.
+private func computeDynamicNext(
+  after date: Date,
+  rows: [WidgetPayload.Row],
+  calendar: Calendar
+) -> (key: String, name: String, time: String)? {
+  let currentMinutes = calendar.component(.hour, from: date) * 60
+    + calendar.component(.minute, from: date)
+  for row in rows {
+    let parts = row.time.split(separator: ":")
+    if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
+      let rowMinutes = h * 60 + m
+      if rowMinutes > currentMinutes {
+        return (row.key, row.abbr ?? row.key, row.time)
+      }
+    }
+  }
+  // All times have passed — return nil so the left panel stays blank
+  // until the app syncs tomorrow's payload.
+  return nil
+}
+
 struct WidgetPayload: Codable {
   let dayLabel: String
   let rows: [Row]
@@ -72,11 +94,21 @@ struct WidgetPayload: Codable {
 
 struct Provider: TimelineProvider {
   func placeholder(in context: Context) -> Entry {
-    Entry(date: Date(), payload: Self.sample, dynamicNextKey: nil, dynamicNextName: nil, dynamicNextTime: nil)
+    Entry(date: Date(), payload: Self.sample, dynamicNextKey: "Dhuhr", dynamicNextName: "Dhuhr", dynamicNextTime: "12:10")
   }
 
   func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
-    completion(Entry(date: Date(), payload: loadPayload(), dynamicNextKey: nil, dynamicNextName: nil, dynamicNextTime: nil))
+    let payload = loadPayload()
+    var key: String? = nil
+    var name: String? = nil
+    var time: String? = nil
+    if let p = payload {
+      let result = computeDynamicNext(after: Date(), rows: p.rows, calendar: Calendar.current)
+      key = result?.key
+      name = result?.name
+      time = result?.time
+    }
+    completion(Entry(date: Date(), payload: payload ?? Self.sample, dynamicNextKey: key, dynamicNextName: name, dynamicNextTime: time))
   }
 
   func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
@@ -90,25 +122,8 @@ struct Provider: TimelineProvider {
     var entries: [Entry] = []
     let now = Date()
     let cal = Calendar.current
-    
-    func getDynamicNext(after date: Date) -> (key: String, name: String, time: String)? {
-      let currentMinutes = cal.component(.hour, from: date) * 60 + cal.component(.minute, from: date)
-      for row in payload.rows {
-        let parts = row.time.split(separator: ":")
-        if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
-          let rowMinutes = h * 60 + m
-          if rowMinutes > currentMinutes {
-            return (row.key, row.abbr ?? row.key, row.time)
-          }
-        }
-      }
-      if let first = payload.rows.first {
-        return (first.key, first.abbr ?? first.key, first.time)
-      }
-      return nil
-    }
 
-    let currentNext = getDynamicNext(after: now)
+    let currentNext = computeDynamicNext(after: now, rows: payload.rows, calendar: cal)
     entries.append(Entry(date: now, payload: payload, dynamicNextKey: currentNext?.key, dynamicNextName: currentNext?.name, dynamicNextTime: currentNext?.time))
 
     var lastDate = now
@@ -116,7 +131,7 @@ struct Provider: TimelineProvider {
       let parts = row.time.split(separator: ":")
       if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
         if let prayerDate = cal.date(bySettingHour: h, minute: m, second: 0, of: now), prayerDate > now {
-          let next = getDynamicNext(after: prayerDate)
+          let next = computeDynamicNext(after: prayerDate, rows: payload.rows, calendar: cal)
           entries.append(Entry(date: prayerDate, payload: payload, dynamicNextKey: next?.key, dynamicNextName: next?.name, dynamicNextTime: next?.time))
           lastDate = prayerDate
         }
@@ -165,7 +180,7 @@ struct Entry: TimelineEntry {
 @available(iOS 16.0, *)
 struct RefreshIntent: AppIntent {
   static var title: LocalizedStringResource = "Refresh Widget"
-  
+
   func perform() async throws -> some IntentResult {
     return .result()
   }
@@ -173,16 +188,61 @@ struct RefreshIntent: AppIntent {
 
 struct PrayerWidgetEntryView: View {
   var entry: Entry
+  @Environment(\.widgetFamily) var widgetFamily
 
-  private func rowColor(highlight: Bool) -> Color {
-    if highlight {
-      return resolvedWidgetHighlightColor()
-    }
-    return widgetText
+  private func rowColor(highlight: Bool, isSunrise: Bool) -> Color {
+    if highlight { return resolvedWidgetHighlightColor() }
+    // Sunrise is a reference time, not a salah — render it muted when idle.
+    return isSunrise ? widgetMuted : widgetText
   }
 
+  // MARK: - Small widget: focused next-prayer view
+
   @ViewBuilder
-  private var prayerContent: some View {
+  private var smallWidgetContent: some View {
+    if let p = entry.payload {
+      VStack(alignment: .leading, spacing: 0) {
+        if let loc = p.locationName, !loc.isEmpty {
+          Text(loc)
+            .font(.system(size: 11, weight: .medium))
+            .foregroundStyle(widgetMuted)
+            .lineLimit(1)
+        }
+        Spacer()
+        if let name = entry.dynamicNextName ?? p.nextPrayerName, !name.isEmpty {
+          Text(name)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(widgetMuted)
+            .lineLimit(1)
+        }
+        if let time = entry.dynamicNextTime ?? p.nextPrayerTime, !time.isEmpty {
+          Text(time)
+            .font(.system(size: 36, weight: .bold))
+            .foregroundStyle(resolvedWidgetHighlightColor())
+            .minimumScaleFactor(0.6)
+            .lineLimit(1)
+        }
+        Spacer()
+        Text(p.dayLabel)
+          .font(.system(size: 11))
+          .foregroundStyle(widgetMuted)
+          .lineLimit(1)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+      .padding(14)
+    } else {
+      Text("Open Prayer Times")
+        .font(.caption)
+        .foregroundStyle(widgetMuted)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+    }
+  }
+
+  // MARK: - Medium/Large widget: next prayer + full prayer list
+
+  @ViewBuilder
+  private var mediumLargeContent: some View {
     if let p = entry.payload {
       HStack(spacing: 0) {
         // Left Side: Next Prayer
@@ -193,7 +253,7 @@ struct PrayerWidgetEntryView: View {
               .foregroundStyle(widgetMuted)
               .lineLimit(1)
           }
-          
+
           if let nextTime = entry.dynamicNextTime ?? p.nextPrayerTime, !nextTime.isEmpty {
             Text(nextTime)
               .font(.system(size: 32, weight: .bold))
@@ -201,7 +261,7 @@ struct PrayerWidgetEntryView: View {
               .lineLimit(1)
               .minimumScaleFactor(0.8)
           }
-          
+
           if let loc = p.locationName, !loc.isEmpty {
             Text(loc)
               .font(.system(size: 12))
@@ -210,24 +270,26 @@ struct PrayerWidgetEntryView: View {
           }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        
-        // Right Side: 6 Prayer Times
+
+        // Right Side: Prayer Times list
         VStack(spacing: 0) {
           ForEach(Array(p.rows.enumerated()), id: \.offset) { _, r in
+            let isSunrise = r.key == "Sunrise"
             let label = r.abbr ?? r.key
             let currentNextKey = entry.dynamicNextKey ?? p.nextKey
             let highlight = currentNextKey == r.key
-            
+            let color = rowColor(highlight: highlight, isSunrise: isSunrise)
+
             HStack(spacing: 0) {
               Text(label)
                 .font(.system(size: 11))
-                .foregroundStyle(rowColor(highlight: highlight))
+                .foregroundStyle(color)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .lineLimit(1)
-              
+
               Text(r.time)
                 .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(rowColor(highlight: highlight))
+                .foregroundStyle(color)
             }
             .padding(.horizontal, 8)
             .frame(maxHeight: .infinity)
@@ -247,19 +309,25 @@ struct PrayerWidgetEntryView: View {
     }
   }
 
+  // MARK: - Body
+
   var body: some View {
     ZStack(alignment: .topLeading) {
-      prayerContent
-        .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
-        
-      if #available(iOS 17.0, *) {
-        Button(intent: RefreshIntent()) {
-          Image(systemName: "arrow.clockwise")
-            .font(.system(size: 10))
-            .foregroundColor(widgetMuted)
-            .padding(8)
+      if widgetFamily == .systemSmall {
+        smallWidgetContent
+      } else {
+        mediumLargeContent
+          .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+
+        if #available(iOS 17.0, *) {
+          Button(intent: RefreshIntent()) {
+            Image(systemName: "arrow.clockwise")
+              .font(.system(size: 10))
+              .foregroundColor(widgetMuted)
+              .padding(8)
+          }
+          .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -288,7 +356,7 @@ struct PrayerWidgetExtensionBundle: Widget {
         .modifier(WidgetBackgroundCompatModifier())
     }
     .configurationDisplayName("Prayer times")
-    .description("Today’s five daily prayers (Fajr–Isha). After Isha, shows tomorrow.")
-    .supportedFamilies([.systemMedium, .systemLarge])
+    .description("Today's prayer times including Sunrise. After Isha, shows tomorrow.")
+    .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
   }
 }

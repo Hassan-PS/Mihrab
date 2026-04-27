@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { NativeModules, Platform, AppState } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
-import type { PrayerAppSettings } from '../settings/types';
+import type { PrayerAppSettings, WidgetHighlightId } from '../settings/types';
+
+const VALID_WIDGET_HIGHLIGHT_IDS = new Set<string>([
+  'dynamic', 'green', 'teal', 'blue', 'amber', 'custom',
+]);
 
 type PrayerWidgetNative = {
   setUiHints?: (style: string, oledBackground: boolean) => Promise<void>;
@@ -90,8 +94,8 @@ export function useSyncWidgetUiHints(): void {
               updates.androidWidgetBackgroundOpacity = nativeSettings.opacity;
             }
             const hlId = nativeSettings.highlightDynamic ? 'dynamic' : nativeSettings.highlightId;
-            if (hlId !== currentSettings.widgetHighlightId) {
-              updates.widgetHighlightId = hlId as any;
+            if (hlId !== currentSettings.widgetHighlightId && VALID_WIDGET_HIGHLIGHT_IDS.has(hlId)) {
+              updates.widgetHighlightId = hlId as WidgetHighlightId;
             }
             if (nativeSettings.highlightHex && nativeSettings.highlightHex !== currentSettings.widgetHighlightCustomHex) {
               updates.widgetHighlightCustomHex = nativeSettings.highlightHex;
