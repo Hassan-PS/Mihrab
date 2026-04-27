@@ -42,7 +42,9 @@ export function RootNavigator() {
         headerLargeTitle: isIOS,
         headerLargeTitleShadowVisible: false,
         headerShadowVisible: false,
-        headerStyle: { backgroundColor: theme.colors.background },
+        headerBlurEffect: theme.dark ? 'dark' : 'light',
+        headerTransparent: true,
+        headerLargeStyle: { backgroundColor: 'transparent' },
         headerTitleStyle: { color: theme.colors.text },
         headerLargeTitleStyle: { color: theme.colors.text },
       }}>
@@ -62,17 +64,17 @@ export function RootNavigator() {
       <Stack.Screen
         name="MonthTimes"
         component={MonthTimesScreen}
-        options={{ title: t('nav.month'), headerLargeTitle: false }}
+        options={{ title: t('nav.month'), headerLargeTitle: false, headerTransparent: false, headerStyle: { backgroundColor: theme.colors.background } }}
       />
       <Stack.Screen
         name="ShareMonth"
         component={ShareMonthScreen}
-        options={{ title: t('nav.shareMonth'), headerLargeTitle: false }}
+        options={{ title: t('nav.shareMonth'), headerLargeTitle: false, headerTransparent: false, headerStyle: { backgroundColor: theme.colors.background } }}
       />
       <Stack.Screen
         name="Compass"
         component={CompassScreen}
-        options={{ title: t('nav.compass'), headerLargeTitle: false }}
+        options={{ title: t('nav.compass'), headerLargeTitle: false, headerTransparent: false, headerStyle: { backgroundColor: theme.colors.background } }}
       />
     </Stack.Navigator>
   );
