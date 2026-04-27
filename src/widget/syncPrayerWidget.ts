@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { TurboModuleRegistry, NativeModules, Platform } from 'react-native';
 import type { TimingsMap } from '../types/prayer';
 import { buildWidgetPayload } from './buildWidgetPayload';
 
@@ -7,8 +7,11 @@ type NativePrayerWidget = {
 };
 
 function getNativeModule(): NativePrayerWidget | null {
-  const m = NativeModules.PrayerWidget as NativePrayerWidget | undefined;
-  return m?.setData ? m : null;
+  // TurboModuleRegistry is required in New Architecture (RN 0.76+)
+  const turbo = TurboModuleRegistry.get<NativePrayerWidget>('PrayerWidget');
+  if (turbo?.setData) return turbo;
+  const legacy = NativeModules.PrayerWidget as NativePrayerWidget | undefined;
+  return legacy?.setData ? legacy : null;
 }
 
 /**

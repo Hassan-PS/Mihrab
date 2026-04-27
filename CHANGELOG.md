@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.29] — 2026-04-27
+
+### Fixed
+- **Android widget — New Architecture**: `NativeModules.PrayerWidget` is not accessible in React Native New Architecture (bridgeless mode). The widget sync now uses `TurboModuleRegistry.get()` as the primary lookup, falling back to `NativeModules` for older builds. Added `@ReactModule` annotation to `PrayerWidgetModule` for proper TurboModule registry discovery.
+
 ## [1.5.28] — 2026-04-27
 
 ### Fixed
