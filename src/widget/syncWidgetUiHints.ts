@@ -34,9 +34,19 @@ function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
 }
 
 function getWidgetModule(): PrayerWidgetNative | undefined {
-  const turbo = TurboModuleRegistry.get<PrayerWidgetNative>('PrayerWidget');
-  if (turbo) return turbo;
-  return NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
+  const legacy = NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
+  if (legacy) {
+    return legacy;
+  }
+  try {
+    const turbo = TurboModuleRegistry.get<PrayerWidgetNative>('PrayerWidget');
+    if (turbo) {
+      return turbo;
+    }
+  } catch (e) {
+    // Ignore
+  }
+  return undefined;
 }
 
 function syncNativeWidgetAppearance(
