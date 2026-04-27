@@ -1,10 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -22,13 +23,17 @@ import { providerHidesCalculationMethod } from '../settings/providerUi';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import { getProviderLabel } from '../settings/providersCatalog';
 import { DISPLAY_ORDER } from '../types/prayer';
-import { cardEdgeStyle } from '../theme/chrome';
 import { formatLocalDate } from '../utils/date';
 import { formatDisplayTime } from '../utils/prayerTimes';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
-
 import { ShareMonthScreen } from './ShareMonthScreen';
+
+// Column flex weights — day label + 6 prayer columns
+const COL_DAY = 1.4;
+const COL_TIME = 1.0;
+
+const DAYS_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 export function MonthTimesScreen() {
   const navigation =
@@ -37,8 +42,13 @@ export function MonthTimesScreen() {
   const { settings, hydrated } = usePrayerSettings();
   const { palette } = useAppPalette();
 
-  const [viewYear, setViewYear] = useState(() => new Date().getFullYear());
-  const [viewMonth, setViewMonth] = useState(() => new Date().getMonth());
+  const today = useMemo(() => {
+    const d = new Date();
+    return { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+  }, []);
+
+  const [viewYear, setViewYear] = useState(today.year);
+  const [viewMonth, setViewMonth] = useState(today.month);
   const [rows, setRows] = useState<MonthDayEntry[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,83 +61,54 @@ export function MonthTimesScreen() {
 
   const needsGpsPrime =
     settings.locationMode === 'gps' &&
-    (settings.lastFetchedLatitude == null ||
-      settings.lastFetchedLongitude == null);
+    (settings.lastFetchedLatitude == null || settings.lastFetchedLongitude == null);
 
-  const lat =
-    settings.locationMode === 'gps'
-      ? (settings.lastFetchedLatitude ?? 0)
-      : settings.manualLatitude;
-  const lng =
-    settings.locationMode === 'gps'
-      ? (settings.lastFetchedLongitude ?? 0)
-      : settings.manualLongitude;
+  const lat = settings.locationMode === 'gps'
+    ? (settings.lastFetchedLatitude ?? 0) : settings.manualLatitude;
+  const lng = settings.locationMode === 'gps'
+    ? (settings.lastFetchedLongitude ?? 0) : settings.manualLongitude;
 
   const coordsForProvider = useMemo(() => {
-    if (needsGpsPrime) {
-      return null;
-    }
+    if (needsGpsPrime) return null;
     return { latitude: lat, longitude: lng };
   }, [needsGpsPrime, lat, lng]);
 
   const effectiveProvider = useMemo(
-    () =>
-      getEffectiveDataProvider(
-        settings.dataProviderAuto,
-        settings.dataProvider,
-        coordsForProvider,
-      ),
-    [
-      settings.dataProviderAuto,
-      settings.dataProvider,
-      coordsForProvider,
-    ],
+    () => getEffectiveDataProvider(settings.dataProviderAuto, settings.dataProvider, coordsForProvider),
+    [settings.dataProviderAuto, settings.dataProvider, coordsForProvider],
   );
 
   const monthTitle = useMemo(() => {
     const d = new Date(viewYear, viewMonth, 1);
-    const loc = i18n.language;
-    return d.toLocaleString(loc, { month: 'long', year: 'numeric' });
+    return d.toLocaleString(i18n.language, { month: 'long', year: 'numeric' });
   }, [viewYear, viewMonth, i18n.language]);
 
+  const isCurrentMonth = viewYear === today.year && viewMonth === today.month;
+
   const goPrevMonth = useCallback(() => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear(y => y - 1);
-    } else {
-      setViewMonth(m => m - 1);
-    }
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else { setViewMonth(m => m - 1); }
   }, [viewMonth]);
 
   const goNextMonth = useCallback(() => {
-    if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear(y => y + 1);
-    } else {
-      setViewMonth(m => m + 1);
-    }
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else { setViewMonth(m => m + 1); }
   }, [viewMonth]);
 
   const goThisMonth = useCallback(() => {
-    const now = new Date();
-    setViewYear(now.getFullYear());
-    setViewMonth(now.getMonth());
-  }, []);
+    setViewYear(today.year);
+    setViewMonth(today.month);
+  }, [today]);
 
   const updateCacheStatus = useCallback(() => {
     if (!hydrated || needsGpsPrime) return;
     getCacheStatus({
-      provider: effectiveProvider,
-      latitude: lat,
-      longitude: lng,
-      calculationMethod: settings.calculationMethod,
-      school: settings.school,
+      provider: effectiveProvider, latitude: lat, longitude: lng,
+      calculationMethod: settings.calculationMethod, school: settings.school,
     }).then(setCacheStatus).catch(() => {});
   }, [hydrated, needsGpsPrime, effectiveProvider, lat, lng, settings.calculationMethod, settings.school]);
 
-  useEffect(() => {
-    updateCacheStatus();
-  }, [updateCacheStatus]);
+  useEffect(() => { updateCacheStatus(); }, [updateCacheStatus]);
 
   const handleRefreshCache = useCallback(async () => {
     if (!hydrated || needsGpsPrime) return;
@@ -135,28 +116,17 @@ export function MonthTimesScreen() {
     setRefreshProgress({ current: 0, total: 1 });
     try {
       await refreshPrayerDataCache(
-        {
-          provider: effectiveProvider,
-          latitude: lat,
-          longitude: lng,
-          calculationMethod: settings.calculationMethod,
-          school: settings.school,
-        },
+        { provider: effectiveProvider, latitude: lat, longitude: lng,
+          calculationMethod: settings.calculationMethod, school: settings.school },
         12,
-        (current, total) => {
-          setRefreshProgress({ current, total });
-        }
+        (current, total) => setRefreshProgress({ current, total }),
       );
       updateCacheStatus();
-      // Reload current month view to reflect new data
       setRows(null);
       setLoading(true);
       const data = await loadMonthPrayerTimes(viewYear, viewMonth, {
-        provider: effectiveProvider,
-        latitude: lat,
-        longitude: lng,
-        calculationMethod: settings.calculationMethod,
-        school: settings.school,
+        provider: effectiveProvider, latitude: lat, longitude: lng,
+        calculationMethod: settings.calculationMethod, school: settings.school,
       });
       setRows(data);
     } catch (e) {
@@ -170,80 +140,76 @@ export function MonthTimesScreen() {
 
   useEffect(() => {
     if (!hydrated || needsGpsPrime) {
-      setRows(null);
-      setLoading(false);
-      setError(null);
+      setRows(null); setLoading(false); setError(null);
       return;
     }
-
     let cancelled = false;
-    setLoading(true);
-    setError(null);
-
+    setLoading(true); setError(null);
     loadMonthPrayerTimes(viewYear, viewMonth, {
-      provider: effectiveProvider,
-      latitude: lat,
-      longitude: lng,
-      calculationMethod: settings.calculationMethod,
-      school: settings.school,
-    })
-      .then(data => {
-        if (!cancelled) {
-          setRows(data);
-        }
-      })
-      .catch(e => {
-        if (!cancelled) {
-          setError(
-            e instanceof Error ? e.message : t('month.loadError'),
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
+      provider: effectiveProvider, latitude: lat, longitude: lng,
+      calculationMethod: settings.calculationMethod, school: settings.school,
+    }).then(data => { if (!cancelled) setRows(data); })
+      .catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : t('month.loadError')); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [hydrated, needsGpsPrime, viewYear, viewMonth, effectiveProvider,
+      settings.calculationMethod, settings.school, lat, lng, t]);
 
-    return () => {
-      cancelled = true;
-    };
-  },     [
-    hydrated,
-    needsGpsPrime,
-    viewYear,
-    viewMonth,
-    effectiveProvider,
-    settings.calculationMethod,
-    settings.school,
-    lat,
-    lng,
-    t,
-  ]);
-
-  const renderItem = useCallback(
-    ({ item }: { item: MonthDayEntry }) => {
-      const line = DISPLAY_ORDER.map(key => {
-        const raw = item.timings[key];
-        return raw ? formatDisplayTime(raw) : '—';
-      }).join('  ');
-      const dayLine = `${formatLocalDate(item.date)} · ${item.date.toLocaleDateString(
-        i18n.language,
-        { weekday: 'short' },
-      )}`;
-      return (
-        <View
-          style={[
-            styles.row,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <Text style={[styles.rowDay, { color: palette.text }]}>{dayLine}</Text>
-          <Text style={[styles.rowTimes, { color: palette.muted }]}>{line}</Text>
-        </View>
-      );
-    },
-    [palette, i18n.language],
+  // Abbreviated column headers from localized prayer names
+  const colHeaders = useMemo(() =>
+    DISPLAY_ORDER.map(key => t(`prayer.${key}`).slice(0, 3)),
+    [t],
   );
+
+  const renderItem = useCallback(({ item }: { item: MonthDayEntry }) => {
+    const d = item.date;
+    const isToday = isCurrentMonth && d.getDate() === today.day;
+    const isFriday = d.getDay() === 5;
+    const dayLabel = `${DAYS_SHORT[d.getDay()]} ${d.getDate()}`;
+
+    return (
+      <View style={[
+        styles.row,
+        { borderBottomColor: palette.border },
+        isToday && { backgroundColor: palette.accentBg },
+        isFriday && !isToday && { backgroundColor: palette.card },
+      ]}>
+        {/* Active-day accent bar */}
+        {isToday && <View style={[styles.todayBar, { backgroundColor: palette.accent }]} />}
+
+        <Text style={[
+          styles.cellDay,
+          { color: isToday ? palette.accent : isFriday ? palette.text : palette.muted,
+            fontWeight: isFriday || isToday ? '700' : '400' },
+        ]}>
+          {dayLabel}
+        </Text>
+
+        {DISPLAY_ORDER.map((key, idx) => {
+          const raw = item.timings[key];
+          const timeStr = raw ? formatDisplayTime(raw) : '—';
+          const isSunrise = key === 'Sunrise';
+          return (
+            <Text
+              key={key}
+              style={[
+                styles.cellTime,
+                { color: isToday
+                    ? palette.accent
+                    : isSunrise
+                    ? palette.muted
+                    : palette.text,
+                  fontStyle: isSunrise ? 'italic' : 'normal',
+                  fontWeight: isToday ? '600' : '400',
+                },
+              ]}>
+              {timeStr}
+            </Text>
+          );
+        })}
+      </View>
+    );
+  }, [palette, isCurrentMonth, today.day]);
 
   if (!hydrated) {
     return (
@@ -256,269 +222,202 @@ export function MonthTimesScreen() {
   if (needsGpsPrime) {
     return (
       <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg }]}>
-        <Text style={[styles.title, { color: palette.text }]}>
-          {t('month.locationNotReadyTitle')}
-        </Text>
-        <Text style={[styles.body, { color: palette.muted }]}>
-          {t('month.locationNotReadyBody')}
-        </Text>
+        <Text style={[styles.title, { color: palette.text }]}>{t('month.locationNotReadyTitle')}</Text>
+        <Text style={[styles.body, { color: palette.muted }]}>{t('month.locationNotReadyBody')}</Text>
       </View>
     );
   }
 
-  const header = (
-    <View style={styles.headerBlock}>
+  const controlsHeader = (
+    <View style={[styles.controls, { backgroundColor: palette.bg, borderBottomColor: palette.border }]}>
+      {/* Month navigation */}
       <View style={styles.monthNav}>
-        <Pressable onPress={goPrevMonth} hitSlop={12} style={styles.navHit}>
+        <Pressable onPress={goPrevMonth} hitSlop={16} style={styles.navHit}>
           <Text style={[styles.navArrow, { color: palette.accent }]}>‹</Text>
         </Pressable>
-        <Text style={[styles.monthTitle, { color: palette.text }]}>
-          {monthTitle}
-        </Text>
-        <Pressable onPress={goNextMonth} hitSlop={12} style={styles.navHit}>
+        <Text style={[styles.monthTitle, { color: palette.text }]}>{monthTitle}</Text>
+        <Pressable onPress={goNextMonth} hitSlop={16} style={styles.navHit}>
           <Text style={[styles.navArrow, { color: palette.accent }]}>›</Text>
         </Pressable>
       </View>
+
+      {/* Actions row */}
       <View style={styles.actionsRow}>
-        <Pressable onPress={goThisMonth} style={styles.actionBtn}>
-          <Text style={[styles.actionLabel, { color: palette.accent }]}>
-            {t('month.thisMonth')}
-          </Text>
-        </Pressable>
-      </View>
-      <View style={styles.toggleRow}>
-        <Pressable
-          onPress={() => setIsShareView(false)}
-          style={[
-            styles.toggleBtn,
-            styles.toggleBtnLeft,
-            !isShareView && { backgroundColor: palette.accentBg },
-            { borderColor: palette.border }
-          ]}>
-          <Text style={[styles.toggleLabel, { color: !isShareView ? palette.accent : palette.muted }]}>
-            {t('month.standardView', 'Standard')}
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setIsShareView(true)}
-          style={[
-            styles.toggleBtn,
-            styles.toggleBtnRight,
-            isShareView && { backgroundColor: palette.accentBg },
-            { borderColor: palette.border }
-          ]}>
-          <Text style={[styles.toggleLabel, { color: isShareView ? palette.accent : palette.muted }]}>
-            {t('month.shareView', 'Shareable')}
-          </Text>
-        </Pressable>
-      </View>
-      <View style={styles.cacheRow}>
+        {!isCurrentMonth && (
+          <Pressable onPress={goThisMonth} style={[styles.pill, { backgroundColor: palette.card, borderColor: palette.border }]}>
+            <Text style={[styles.pillLabel, { color: palette.accent }]}>{t('month.thisMonth')}</Text>
+          </Pressable>
+        )}
         <Pressable
           onPress={handleRefreshCache}
           disabled={refreshingCache}
-          style={[styles.actionBtn, refreshingCache && { opacity: 0.5 }]}>
-          <Text style={[styles.actionLabel, { color: palette.accent }]}>
-            {refreshingCache 
-              ? (refreshProgress ? `${t('month.refreshing')} ${Math.round((refreshProgress.current / refreshProgress.total) * 100)}%` : t('month.refreshing')) 
+          style={[styles.pill, { backgroundColor: palette.card, borderColor: palette.border, opacity: refreshingCache ? 0.5 : 1 }]}>
+          <Text style={[styles.pillLabel, { color: palette.muted }]}>
+            {refreshingCache
+              ? (refreshProgress ? `${Math.round((refreshProgress.current / refreshProgress.total) * 100)}%` : '…')
               : t('month.refreshData')}
           </Text>
         </Pressable>
-        {cacheStatus && !refreshingCache && (
-          <Text style={[styles.cacheStatusText, { color: palette.muted }]}>
-            {t('month.monthsStored', { count: cacheStatus.monthsStored })}
+        <Pressable
+          onPress={() => setIsShareView(v => !v)}
+          style={[styles.pill, { backgroundColor: isShareView ? palette.accentBg : palette.card, borderColor: isShareView ? palette.accent : palette.border }]}>
+          <Text style={[styles.pillLabel, { color: isShareView ? palette.accent : palette.muted }]}>
+            {t('month.shareView', 'Share')}
           </Text>
-        )}
+        </Pressable>
       </View>
+
+      {/* Meta info */}
       <Text style={[styles.meta, { color: palette.muted }]}>
         {getProviderLabel(effectiveProvider)}
-        {!providerHidesCalculationMethod(effectiveProvider)
-          ? ` · ${getMethodLabel(settings.calculationMethod)}`
-          : ''}
-        {effectiveProvider !== 'islamiska_forbundet' && settings.school === 1
-          ? ` · ${t('home.hanafiSuffix')}`
-          : ''}
+        {!providerHidesCalculationMethod(effectiveProvider) ? ` · ${getMethodLabel(settings.calculationMethod)}` : ''}
+        {effectiveProvider !== 'islamiska_forbundet' && settings.school === 1 ? ` · ${t('home.hanafiSuffix')}` : ''}
+        {cacheStatus && !refreshingCache ? ` · ${cacheStatus.monthsStored}mo cached` : ''}
       </Text>
-      <Text style={[styles.legend, { color: palette.muted }]}>
-        {DISPLAY_ORDER.map(k => t(`prayer.${k}`)).join(' · ')}
-      </Text>
-      {loading && (
-        <ActivityIndicator style={styles.headerSpinner} color={palette.accent} />
-      )}
-      {error && (
-        <Text style={[styles.err, { color: palette.accent }]}>{error}</Text>
-      )}
+
+      {loading && <ActivityIndicator style={{ marginTop: 8 }} color={palette.accent} />}
+      {error && <Text style={[styles.err, { color: palette.danger }]}>{error}</Text>}
+    </View>
+  );
+
+  // Sticky column header row
+  const columnHeader = (
+    <View style={[styles.colHeader, { backgroundColor: palette.card, borderBottomColor: palette.accent }]}>
+      <Text style={[styles.colHeaderDay, { color: palette.muted }]}>{t('month.dayOfWeek', 'Day')}</Text>
+      {DISPLAY_ORDER.map((key, idx) => {
+        const isSunrise = key === 'Sunrise';
+        return (
+          <Text
+            key={key}
+            style={[styles.colHeaderTime, { color: isSunrise ? palette.muted : palette.accent }]}>
+            {colHeaders[idx]}
+          </Text>
+        );
+      })}
     </View>
   );
 
   if (isShareView) {
     return (
       <View style={{ flex: 1, backgroundColor: palette.bg }}>
-        {header}
-        <View style={{ flex: 1 }}>
-          <ShareMonthScreen 
-            route={{ key: 'ShareMonth', name: 'ShareMonth', params: { year: viewYear, month: viewMonth } }} 
-            navigation={navigation as any}
-            embedded={true}
-          />
-        </View>
+        {controlsHeader}
+        <ShareMonthScreen
+          route={{ key: 'ShareMonth', name: 'ShareMonth', params: { year: viewYear, month: viewMonth } }}
+          navigation={navigation as any}
+          embedded={true}
+        />
       </View>
     );
   }
 
   return (
-    <FlatList
-      style={{ backgroundColor: palette.bg }}
-      contentContainerStyle={styles.listContent}
-      data={rows ?? []}
-      keyExtractor={item => formatLocalDate(item.date)}
-      ListHeaderComponent={header}
-      renderItem={renderItem}
-      ListEmptyComponent={
-        !loading && !error ? (
-          <Text style={[styles.empty, { color: palette.muted }]}>
-            {t('month.empty')}
-          </Text>
-        ) : null
-      }
-      keyboardShouldPersistTaps="handled"
-    />
+    <View style={{ flex: 1, backgroundColor: palette.bg }}>
+      {controlsHeader}
+      {columnHeader}
+      <FlatList
+        style={{ flex: 1 }}
+        data={rows ?? []}
+        keyExtractor={item => formatLocalDate(item.date)}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 32 }}
+        ListEmptyComponent={
+          !loading && !error ? (
+            <Text style={[styles.empty, { color: palette.muted }]}>{t('month.empty')}</Text>
+          ) : null
+        }
+        keyboardShouldPersistTaps="handled"
+        initialScrollIndex={isCurrentMonth && rows ? Math.max(0, today.day - 3) : 0}
+        getItemLayout={(_, index) => ({ length: ROW_HEIGHT, offset: ROW_HEIGHT * index, index })}
+        onScrollToIndexFailed={() => {}}
+      />
+    </View>
   );
 }
 
+const ROW_HEIGHT = 40;
+
 const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pad: {
-    padding: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  body: {
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  listContent: {
-    paddingBottom: 32,
-  },
-  headerBlock: {
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  pad: { padding: 24 },
+  title: { fontSize: 20, fontWeight: '600', marginBottom: 8, textAlign: 'center' },
+  body: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  err: { marginTop: 6, fontSize: 13, textAlign: 'center' },
+  empty: { textAlign: 'center', marginTop: 24, paddingHorizontal: 24 },
+
+  controls: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: Platform.OS === 'ios' ? 8 : 12,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   monthNav: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  navHit: {
-    minWidth: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navArrow: {
-    fontSize: 28,
-    fontWeight: '300',
-    lineHeight: 32,
-  },
-  monthTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
+  navHit: { minWidth: 44, alignItems: 'center', justifyContent: 'center' },
+  navArrow: { fontSize: 30, fontWeight: '300', lineHeight: 36 },
+  monthTitle: { fontSize: 20, fontWeight: '700' },
   actionsRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 8,
-    gap: 16,
-  },
-  actionBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  actionLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 12,
-    marginHorizontal: 16,
-  },
-  toggleBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  toggleBtnLeft: {
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
-    borderRightWidth: 0,
-  },
-  toggleBtnRight: {
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
-    borderLeftWidth: 0,
-  },
-  toggleLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  cacheRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
     gap: 8,
-  },
-  cacheStatusText: {
-    fontSize: 13,
-  },
-  meta: {
-    fontSize: 12,
     marginTop: 10,
-    textAlign: 'center',
+    flexWrap: 'wrap',
   },
-  legend: {
-    fontSize: 11,
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  headerSpinner: {
-    marginTop: 12,
-  },
-  err: {
-    marginTop: 8,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  row: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    padding: 12,
-    borderRadius: 10,
+  pill: {
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 20,
     borderWidth: 1,
   },
-  rowDay: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 6,
+  pillLabel: { fontSize: 13, fontWeight: '600' },
+  meta: { fontSize: 11, marginTop: 8, lineHeight: 16 },
+
+  colHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderBottomWidth: 1.5,
   },
-  rowTimes: {
-    fontSize: 13,
-    lineHeight: 18,
+  colHeaderDay: {
+    flex: COL_DAY,
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
-  empty: {
+  colHeaderTime: {
+    flex: COL_TIME,
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
     textAlign: 'center',
-    marginTop: 24,
-    paddingHorizontal: 24,
+  },
+
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: ROW_HEIGHT,
+    paddingHorizontal: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    position: 'relative',
+  },
+  todayBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+  },
+  cellDay: {
+    flex: COL_DAY,
+    fontSize: 13,
+    paddingLeft: 4,
+  },
+  cellTime: {
+    flex: COL_TIME,
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
