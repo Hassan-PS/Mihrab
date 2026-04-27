@@ -213,7 +213,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
       val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
       val isHorizontal = minHeight > 0 && minHeight < 100
-      val layoutId = if (isHorizontal) R.layout.prayer_widget_horizontal else R.layout.prayer_widget
+      
+      val providerName = appWidgetManager.getAppWidgetInfo(appWidgetId)?.provider?.className
+      val isSmall = providerName == PrayerWidgetSmallProvider::class.java.name
+      
+      val layoutId = if (isSmall) {
+        R.layout.prayer_widget_small
+      } else if (isHorizontal) {
+        R.layout.prayer_widget_horizontal
+      } else {
+        R.layout.prayer_widget
+      }
 
       val views = RemoteViews(context.packageName, layoutId)
 
