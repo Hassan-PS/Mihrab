@@ -1,4 +1,4 @@
-# Build F-Droid APK and Google Play AAB, attach both to the GitHub Release.
+# Attach only F-Droid APK to the GitHub Release for the pushed tag.
 name: Release Android artifacts
 
 on:
@@ -61,6 +61,5 @@ jobs:
         with:
           files: |
             android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
-            android/app/build/outputs/bundle/playRelease/app-play-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
