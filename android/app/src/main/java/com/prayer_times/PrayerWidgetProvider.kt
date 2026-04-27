@@ -365,7 +365,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         if (highlight) {
           views.setInt(COL_WRAPPERS[i], "setBackgroundResource", R.drawable.widget_row_highlight)
         } else {
-          views.setInt(COL_WRAPPERS[i], "setBackgroundColor", Color.TRANSPARENT)
+          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
         }
       }
 

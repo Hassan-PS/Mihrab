@@ -30,14 +30,15 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <ImageView
+            <TextView
                 android:id="@+id/widget_refresh_btn"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="top|start"
                 android:padding="4dp"
-                android:src="@android:drawable/ic_popup_sync"
-                android:alpha="0.5"
+                android:text="↻"
+                android:textColor="#80FFFFFF"
+                android:textSize="16sp"
                 android:contentDescription="Refresh" />
 
             <LinearLayout
@@ -88,32 +89,32 @@
             android:gravity="center_vertical"
             android:orientation="vertical">
 
-            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
                 <TextView android:id="@+id/widget_col_0_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 <TextView android:id="@+id/widget_col_0_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
                 <TextView android:id="@+id/widget_col_1_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 <TextView android:id="@+id/widget_col_1_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
                 <TextView android:id="@+id/widget_col_2_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 <TextView android:id="@+id/widget_col_2_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
                 <TextView android:id="@+id/widget_col_3_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 <TextView android:id="@+id/widget_col_3_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
                 <TextView android:id="@+id/widget_col_4_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 <TextView android:id="@+id/widget_col_4_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
                 <TextView android:id="@+id/widget_col_5_label" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 <TextView android:id="@+id/widget_col_5_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:includeFontPadding="false" />
             </LinearLayout>
