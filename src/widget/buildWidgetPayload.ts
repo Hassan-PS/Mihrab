@@ -4,6 +4,7 @@ import {
   addDays,
   computeNextSalah,
   formatDisplayTime,
+  formatLocalTime,
   getNextPrayerDisplay,
   startOfLocalDay,
 } from '../utils/prayerTimes';
@@ -84,7 +85,7 @@ export function buildWidgetPayload(
     rows,
     nextKey,
     nextPrayerName: next ? i18n.t(`prayer.${next.name}`) : undefined,
-    nextPrayerTime: next ? formatDisplayTime(next.at) : undefined,
+    nextPrayerTime: next ? formatLocalTime(next.at) : undefined,
     locationName,
   };
 }
