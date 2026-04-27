@@ -113,11 +113,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
       val cn = ComponentName(context, PrayerWidgetProvider::class.java)
       val ids = mgr.getAppWidgetIds(cn)
       if (ids.isNotEmpty()) {
-        val updateIntent = Intent(context, PrayerWidgetProvider::class.java).apply {
-          this.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-        }
-        context.sendBroadcast(updateIntent)
+        refreshAll(context, mgr, ids)
       }
     }
   }
@@ -127,13 +123,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     appWidgetManager: AppWidgetManager,
     appWidgetIds: IntArray,
   ) {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    val json = prefs.getString(PREFS_KEY, null)
-    val style = readWidgetStyle(prefs)
-
-    for (id in appWidgetIds) {
-      updateAppWidget(context, appWidgetManager, id, prefs, json, style)
-    }
+    refreshAll(context, appWidgetManager, appWidgetIds)
   }
 
   override fun onAppWidgetOptionsChanged(
@@ -143,236 +133,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     newOptions: Bundle
   ) {
     super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    val json = prefs.getString(PREFS_KEY, null)
-    val style = readWidgetStyle(prefs)
-    updateAppWidget(context, appWidgetManager, appWidgetId, prefs, json, style)
-  }
-
-  private fun updateAppWidget(
-    context: Context,
-    appWidgetManager: AppWidgetManager,
-    appWidgetId: Int,
-    prefs: SharedPreferences,
-    json: String?,
-    style: WidgetStyle
-  ) {
-    val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-    val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-    
-    // If minHeight < 100, we assume it's a 1-row or 2-row widget, so use horizontal layout.
-    // Otherwise, use the vertical stack layout.
-    val isHorizontal = minHeight > 0 && minHeight < 100
-    val layoutId = if (isHorizontal) R.layout.prayer_widget_horizontal else R.layout.prayer_widget
-
-    val views = RemoteViews(context.packageName, layoutId)
-    val click = Intent(context, MainActivity::class.java).apply {
-      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-    }
-    val pi =
-      PendingIntent.getActivity(
-        context,
-        0,
-        click,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-      )
-    views.setOnClickPendingIntent(R.id.widget_root, pi)
-
-    val refreshIntent = Intent(context, PrayerWidgetProvider::class.java).apply {
-        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-    }
-    val refreshPi = PendingIntent.getBroadcast(
-        context,
-        appWidgetId,
-        refreshIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-    views.setOnClickPendingIntent(R.id.widget_refresh_btn, refreshPi)
-
-    if (json.isNullOrBlank()) {
-      showMessageOnly(
-        views,
-        context.getString(R.string.widget_placeholder_day),
-        isError = false,
-        style,
-      )
-    } else {
-      try {
-        applyJson(views, json, style, context, isHorizontal)
-      } catch (_: Exception) {
-        showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
-      }
-    }
-    appWidgetManager.updateAppWidget(appWidgetId, views)
-  }
-
-  private fun showMessageOnly(
-    views: RemoteViews,
-    message: String,
-    isError: Boolean,
-    style: WidgetStyle,
-  ) {
-    views.setViewVisibility(R.id.widget_content, View.GONE)
-    views.setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
-    views.setTextViewText(R.id.widget_placeholder, message)
-    views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
-    views.setTextColor(
-      R.id.widget_placeholder,
-      Color.parseColor(if (isError) "#F87171" else NEUTRAL_MUTED),
-    )
-  }
-
-  private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context, isHorizontal: Boolean) {
-    val o = JSONObject(json)
-    views.setViewVisibility(R.id.widget_placeholder, View.GONE)
-    views.setViewVisibility(R.id.widget_content, View.VISIBLE)
-
-    views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
-
-    val nextKey =
-      if (o.isNull("nextKey")) {
-        null
-      } else {
-        o.optString("nextKey", "").trim().takeIf { it.isNotEmpty() }
-      }
-
-    var nextPrayerName = o.optString("nextPrayerName", "")
-    var nextPrayerTime = o.optString("nextPrayerTime", "")
-    val locationName = o.optString("locationName", "")
-
-    val rows = o.getJSONArray("rows")
-
-    // Dynamically calculate next prayer based on current time
-    val cal = java.util.Calendar.getInstance()
-    val currentMinutes = cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
-    
-    var dynamicNextKey: String? = null
-    var dynamicNextName = ""
-    var dynamicNextTime = ""
-    var nextUpdateMinutes = -1
-    
-    for (i in 0 until rows.length()) {
-        val row = rows.getJSONObject(i)
-        val timeStr = row.getString("time")
-        val parts = timeStr.split(":")
-        if (parts.size == 2) {
-            val h = parts[0].toIntOrNull() ?: continue
-            val m = parts[1].toIntOrNull() ?: continue
-            val rowMinutes = h * 60 + m
-            if (rowMinutes > currentMinutes) {
-                dynamicNextKey = row.getString("key")
-                dynamicNextName = row.optString("abbr", "").trim().ifEmpty { dynamicNextKey }
-                dynamicNextTime = timeStr
-                nextUpdateMinutes = rowMinutes
-                break
-            }
-        }
-    }
-
-    // If all prayers have passed, leave dynamicNextKey null so the left panel
-    // stays blank until the app syncs tomorrow's payload.
-
-    if (dynamicNextKey != null) {
-        nextPrayerName = dynamicNextName
-        nextPrayerTime = dynamicNextTime
-    } else if (nextPrayerName.isEmpty() && nextKey != null) {
-        // Fallback for old cached payloads that don't have nextPrayerName/Time
-        for (i in 0 until rows.length()) {
-            val row = rows.getJSONObject(i)
-            if (row.getString("key") == nextKey) {
-                nextPrayerName = row.optString("abbr", "").trim().ifEmpty { nextKey }
-                nextPrayerTime = row.getString("time")
-                break
-            }
-        }
-    }
-    val effectiveNextKey = dynamicNextKey ?: nextKey
-
-    val normalColor = Color.parseColor(NEUTRAL_TEXT)
-    val highlightColor = style.highlightColorInt(context)
-
-    views.setTextViewText(R.id.widget_next_name, nextPrayerName)
-    if (nextPrayerName.isEmpty()) {
-      views.setViewVisibility(R.id.widget_next_name, View.GONE)
-    } else {
-      views.setViewVisibility(R.id.widget_next_name, View.VISIBLE)
-    }
-    
-    views.setTextViewText(R.id.widget_next_time, nextPrayerTime)
-    if (nextPrayerTime.isEmpty()) {
-      views.setViewVisibility(R.id.widget_next_time, View.GONE)
-    } else {
-      views.setViewVisibility(R.id.widget_next_time, View.VISIBLE)
-    }
-    views.setTextViewText(R.id.widget_location, locationName)
-    if (locationName.isEmpty()) {
-      views.setViewVisibility(R.id.widget_location, View.GONE)
-    } else {
-      views.setViewVisibility(R.id.widget_location, View.VISIBLE)
-    }
-
-    views.setTextColor(R.id.widget_next_name, normalColor)
-    views.setTextColor(R.id.widget_next_time, highlightColor)
-    views.setTextColor(R.id.widget_location, Color.parseColor(NEUTRAL_MUTED))
-
-    views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
-
-    for (i in COL_LABELS.indices) {
-      if (i >= rows.length()) {
-        views.setViewVisibility(COL_WRAPPERS[i], View.GONE)
-        continue
-      }
-      val row = rows.getJSONObject(i)
-      val key = row.getString("key")
-      val time = row.getString("time")
-      val label =
-        row.optString("abbr", "").trim().ifEmpty {
-          key
-        }
-      val highlight = effectiveNextKey != null && effectiveNextKey == key
-      // Sunrise is a reference time, not a salah — render it muted when not highlighted.
-      val isSunrise = key.equals("Sunrise", ignoreCase = true)
-      val col = when {
-        highlight -> highlightColor
-        isSunrise -> Color.parseColor(NEUTRAL_MUTED)
-        else -> normalColor
-      }
-
-      views.setViewVisibility(COL_WRAPPERS[i], View.VISIBLE)
-      views.setTextViewText(COL_LABELS[i], label)
-      views.setTextViewText(COL_TIMES[i], time)
-      views.setTextColor(COL_LABELS[i], col)
-      views.setTextColor(COL_TIMES[i], col)
-
-      if (highlight) {
-        views.setInt(COL_WRAPPERS[i], "setBackgroundResource", R.drawable.widget_row_highlight)
-      } else {
-        views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
-      }
-    }
-
-    // Schedule next update using AlarmManager
-    if (nextUpdateMinutes != -1) {
-        val updateTime = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, nextUpdateMinutes / 60)
-            set(java.util.Calendar.MINUTE, nextUpdateMinutes % 60)
-            set(java.util.Calendar.SECOND, 0)
-        }
-        val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
-            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            val mgr = AppWidgetManager.getInstance(context)
-            val cn = ComponentName(context, PrayerWidgetProvider::class.java)
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mgr.getAppWidgetIds(cn))
-        }
-        val pi = PendingIntent.getBroadcast(context, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setExact(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
-        } else {
-            alarmManager.set(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
-        }
-    }
+    refreshAll(context, appWidgetManager, intArrayOf(appWidgetId))
   }
 
   companion object {
@@ -416,19 +177,219 @@ class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_5_time,
       )
 
+    /** Directly push updated RemoteViews to the given widget IDs — no broadcast. */
+    fun refreshAll(context: Context, appWidgetManager: AppWidgetManager, ids: IntArray) {
+      val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+      val json = prefs.getString(PREFS_KEY, null)
+      val style = readWidgetStyle(prefs)
+      for (id in ids) {
+        val views = buildViews(context, appWidgetManager, id, json, style)
+        appWidgetManager.updateAppWidget(id, views)
+      }
+    }
+
+    /** Called from RN native module after writing new payload to SharedPreferences. */
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val cn = ComponentName(context, PrayerWidgetProvider::class.java)
       val ids = mgr.getAppWidgetIds(cn)
-      if (ids.isEmpty()) {
-        return
+      if (ids.isEmpty()) return
+      refreshAll(context, mgr, ids)
+    }
+
+    private fun buildViews(
+      context: Context,
+      appWidgetManager: AppWidgetManager,
+      appWidgetId: Int,
+      json: String?,
+      style: WidgetStyle,
+    ): RemoteViews {
+      val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+      val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+      val isHorizontal = minHeight > 0 && minHeight < 100
+      val layoutId = if (isHorizontal) R.layout.prayer_widget_horizontal else R.layout.prayer_widget
+
+      val views = RemoteViews(context.packageName, layoutId)
+
+      val click = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
       }
-      val intent =
-        Intent(context, PrayerWidgetProvider::class.java).apply {
-          action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+      val pi =
+        PendingIntent.getActivity(
+          context, 0, click,
+          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+      views.setOnClickPendingIntent(R.id.widget_root, pi)
+
+      val refreshIntent = Intent(context, PrayerWidgetProvider::class.java).apply {
+        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+      }
+      val refreshPi = PendingIntent.getBroadcast(
+        context, appWidgetId, refreshIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+      views.setOnClickPendingIntent(R.id.widget_refresh_btn, refreshPi)
+
+      if (json.isNullOrBlank()) {
+        showMessageOnly(views, context.getString(R.string.widget_placeholder_day), isError = false, style)
+      } else {
+        try {
+          applyJson(views, json, style, context, isHorizontal)
+        } catch (_: Exception) {
+          showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
         }
-      context.sendBroadcast(intent)
+      }
+      return views
+    }
+
+    private fun showMessageOnly(
+      views: RemoteViews,
+      message: String,
+      isError: Boolean,
+      style: WidgetStyle,
+    ) {
+      views.setViewVisibility(R.id.widget_content, View.GONE)
+      views.setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
+      views.setTextViewText(R.id.widget_placeholder, message)
+      views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
+      views.setTextColor(
+        R.id.widget_placeholder,
+        Color.parseColor(if (isError) "#F87171" else NEUTRAL_MUTED),
+      )
+    }
+
+    private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context, isHorizontal: Boolean) {
+      val o = JSONObject(json)
+      views.setViewVisibility(R.id.widget_placeholder, View.GONE)
+      views.setViewVisibility(R.id.widget_content, View.VISIBLE)
+
+      views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
+
+      val nextKey =
+        if (o.isNull("nextKey")) {
+          null
+        } else {
+          o.optString("nextKey", "").trim().takeIf { it.isNotEmpty() }
+        }
+
+      var nextPrayerName = o.optString("nextPrayerName", "")
+      var nextPrayerTime = o.optString("nextPrayerTime", "")
+      val locationName = o.optString("locationName", "")
+
+      val rows = o.getJSONArray("rows")
+
+      // Dynamically calculate next prayer based on current time
+      val cal = java.util.Calendar.getInstance()
+      val currentMinutes = cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
+
+      var dynamicNextKey: String? = null
+      var dynamicNextName = ""
+      var dynamicNextTime = ""
+      var nextUpdateMinutes = -1
+
+      for (i in 0 until rows.length()) {
+        val row = rows.getJSONObject(i)
+        val timeStr = row.getString("time")
+        val parts = timeStr.split(":")
+        if (parts.size == 2) {
+          val h = parts[0].toIntOrNull() ?: continue
+          val m = parts[1].toIntOrNull() ?: continue
+          val rowMinutes = h * 60 + m
+          if (rowMinutes > currentMinutes) {
+            dynamicNextKey = row.getString("key")
+            dynamicNextName = row.optString("abbr", "").trim().ifEmpty { dynamicNextKey }
+            dynamicNextTime = timeStr
+            nextUpdateMinutes = rowMinutes
+            break
+          }
+        }
+      }
+
+      if (dynamicNextKey != null) {
+        nextPrayerName = dynamicNextName
+        nextPrayerTime = dynamicNextTime
+      } else if (nextPrayerName.isEmpty() && nextKey != null) {
+        for (i in 0 until rows.length()) {
+          val row = rows.getJSONObject(i)
+          if (row.getString("key") == nextKey) {
+            nextPrayerName = row.optString("abbr", "").trim().ifEmpty { nextKey }
+            nextPrayerTime = row.getString("time")
+            break
+          }
+        }
+      }
+      val effectiveNextKey = dynamicNextKey ?: nextKey
+
+      val normalColor = Color.parseColor(NEUTRAL_TEXT)
+      val highlightColor = style.highlightColorInt(context)
+
+      views.setTextViewText(R.id.widget_next_name, nextPrayerName)
+      views.setViewVisibility(R.id.widget_next_name, if (nextPrayerName.isEmpty()) View.GONE else View.VISIBLE)
+
+      views.setTextViewText(R.id.widget_next_time, nextPrayerTime)
+      views.setViewVisibility(R.id.widget_next_time, if (nextPrayerTime.isEmpty()) View.GONE else View.VISIBLE)
+
+      views.setTextViewText(R.id.widget_location, locationName)
+      views.setViewVisibility(R.id.widget_location, if (locationName.isEmpty()) View.GONE else View.VISIBLE)
+
+      views.setTextColor(R.id.widget_next_name, normalColor)
+      views.setTextColor(R.id.widget_next_time, highlightColor)
+      views.setTextColor(R.id.widget_location, Color.parseColor(NEUTRAL_MUTED))
+
+      views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
+
+      for (i in COL_LABELS.indices) {
+        if (i >= rows.length()) {
+          views.setViewVisibility(COL_WRAPPERS[i], View.GONE)
+          continue
+        }
+        val row = rows.getJSONObject(i)
+        val key = row.getString("key")
+        val time = row.getString("time")
+        val label = row.optString("abbr", "").trim().ifEmpty { key }
+        val highlight = effectiveNextKey != null && effectiveNextKey == key
+        val isSunrise = key.equals("Sunrise", ignoreCase = true)
+        val col = when {
+          highlight -> highlightColor
+          isSunrise -> Color.parseColor(NEUTRAL_MUTED)
+          else -> normalColor
+        }
+
+        views.setViewVisibility(COL_WRAPPERS[i], View.VISIBLE)
+        views.setTextViewText(COL_LABELS[i], label)
+        views.setTextViewText(COL_TIMES[i], time)
+        views.setTextColor(COL_LABELS[i], col)
+        views.setTextColor(COL_TIMES[i], col)
+
+        if (highlight) {
+          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", R.drawable.widget_row_highlight)
+        } else {
+          views.setInt(COL_WRAPPERS[i], "setBackgroundColor", Color.TRANSPARENT)
+        }
+      }
+
+      // Schedule next update using AlarmManager
+      if (nextUpdateMinutes != -1) {
+        val updateTime = java.util.Calendar.getInstance().apply {
+          set(java.util.Calendar.HOUR_OF_DAY, nextUpdateMinutes / 60)
+          set(java.util.Calendar.MINUTE, nextUpdateMinutes % 60)
+          set(java.util.Calendar.SECOND, 0)
+        }
+        val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
+          action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+          val mgr = AppWidgetManager.getInstance(context)
+          val cn = ComponentName(context, PrayerWidgetProvider::class.java)
+          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mgr.getAppWidgetIds(cn))
+        }
+        val pi = PendingIntent.getBroadcast(context, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+          alarmManager.setExact(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
+        } else {
+          alarmManager.set(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
+        }
+      }
     }
   }
 }
