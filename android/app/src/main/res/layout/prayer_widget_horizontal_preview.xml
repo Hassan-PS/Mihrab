@@ -15,29 +15,29 @@
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.8">
+            android:layout_weight="1">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|start"
-                android:padding="2dp"
+                android:padding="4dp"
                 android:text="↻"
                 android:textColor="#80FFFFFF"
-                android:textSize="12sp" />
+                android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:paddingEnd="4dp">
+                android:paddingEnd="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#9AA0A6"
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     android:text="DHUHR"
                     android:maxLines="1" />
@@ -46,7 +46,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#E8EAED"
-                    android:textSize="24sp"
+                    android:textSize="32sp"
                     android:textStyle="bold"
                     android:includeFontPadding="false"
                     android:text="12:10"
@@ -56,49 +56,49 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#9AA0A6"
-                    android:textSize="10sp"
+                    android:textSize="12sp"
                     android:text="Stockholm"
                     android:maxLines="1"
-                    android:layout_marginTop="1dp" />
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Right Side: 6 Prayer Times in ONE ROW -->
+        <!-- Right Side: 6 Prayer Times -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2.2"
+            android:layout_weight="1.2"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:text="Fajr" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="05:12" android:layout_marginTop="2dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:text="Fajr" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="05:12" />
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:text="Sun" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="06:30" android:layout_marginTop="2dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:text="Sun" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="06:30" />
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:background="#266BC98A">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#6BC98A" android:textSize="10sp" android:text="Dhuhr" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#6BC98A" android:textSize="11sp" android:textStyle="bold" android:text="12:10" android:layout_marginTop="2dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp" android:background="#266BC98A">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#6BC98A" android:textSize="11sp" android:text="Dhuhr" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#6BC98A" android:textSize="11sp" android:textStyle="bold" android:text="12:10" />
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:text="Asr" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="15:20" android:layout_marginTop="2dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:text="Asr" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="15:20" />
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:text="Magh" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="18:05" android:layout_marginTop="2dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:text="Magh" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="18:05" />
             </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="10sp" android:text="Isha" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="19:30" android:layout_marginTop="2dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#E8EAED" android:textSize="11sp" android:text="Isha" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="11sp" android:textStyle="bold" android:text="19:30" />
             </LinearLayout>
 
         </LinearLayout>
