@@ -2,7 +2,7 @@ import { useNavigation, useTheme } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
 import { CompassScreen } from '../screens/CompassScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -65,17 +65,17 @@ export function RootNavigator() {
       <Stack.Screen
         name="MonthTimes"
         component={MonthTimesScreen}
-        options={{ title: t('nav.month'), headerLargeTitle: false, headerTransparent: false, headerStyle: { backgroundColor: theme.colors.background } }}
+        options={{ title: t('nav.month'), headerLargeTitle: false, headerTransparent: true, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
       />
       <Stack.Screen
         name="ShareMonth"
         component={ShareMonthScreen}
-        options={{ title: t('nav.shareMonth'), headerLargeTitle: false, headerTransparent: false, headerStyle: { backgroundColor: theme.colors.background } }}
+        options={{ title: t('nav.shareMonth'), headerLargeTitle: false, headerTransparent: true, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
       />
       <Stack.Screen
         name="Compass"
         component={CompassScreen}
-        options={{ title: t('nav.compass'), headerLargeTitle: false, headerTransparent: false, headerStyle: { backgroundColor: theme.colors.background } }}
+        options={{ title: t('nav.compass'), headerLargeTitle: false, headerTransparent: true, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
       />
     </Stack.Navigator>
   );

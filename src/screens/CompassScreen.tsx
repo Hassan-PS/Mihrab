@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHeaderHeight } from '@react-navigation/elements';
 import {
   ActivityIndicator,
   AppState,
@@ -98,6 +99,7 @@ export function CompassScreen() {
   const { t } = useTranslation();
   const { settings, hydrated } = usePrayerSettings();
   const { palette } = useAppPalette();
+  const headerHeight = useHeaderHeight();
   const [heading, setHeading] = useState(0);
   const [mode, setMode] = useState<CompassMode>('checking');
   const [signalStrength, setSignalStrength] = useState<SignalStrength>(-1);
@@ -405,7 +407,7 @@ export function CompassScreen() {
 
   if (!hydrated) {
     return (
-      <View style={[styles.centered, { backgroundColor: palette.bg }]}>
+      <View style={[styles.centered, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
         <Text style={{ color: palette.muted }}>{t('common.loading')}</Text>
       </View>
     );
@@ -413,7 +415,7 @@ export function CompassScreen() {
 
   if (needsGpsPrime) {
     return (
-      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg }]}>
+      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
         <Text style={[styles.title, { color: palette.text }]}>
           {t('compass.needLocationTitle')}
         </Text>
@@ -425,7 +427,7 @@ export function CompassScreen() {
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: palette.bg }]}>
+    <View style={[styles.root, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
       {bearingBlock}
 
       {signalRow}

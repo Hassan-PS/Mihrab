@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import { useHeaderHeight } from '@react-navigation/elements';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +42,7 @@ export function MonthTimesScreen() {
   const { t, i18n } = useTranslation();
   const { settings, hydrated } = usePrayerSettings();
   const { palette } = useAppPalette();
+  const headerHeight = useHeaderHeight();
 
   const today = useMemo(() => {
     const d = new Date();
@@ -213,7 +215,7 @@ export function MonthTimesScreen() {
 
   if (!hydrated) {
     return (
-      <View style={[styles.centered, { backgroundColor: palette.bg }]}>
+      <View style={[styles.centered, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
         <ActivityIndicator size="large" color={palette.accent} />
       </View>
     );
@@ -221,7 +223,7 @@ export function MonthTimesScreen() {
 
   if (needsGpsPrime) {
     return (
-      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg }]}>
+      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
         <Text style={[styles.title, { color: palette.text }]}>{t('month.locationNotReadyTitle')}</Text>
         <Text style={[styles.body, { color: palette.muted }]}>{t('month.locationNotReadyBody')}</Text>
       </View>
@@ -299,7 +301,7 @@ export function MonthTimesScreen() {
 
   if (isShareView) {
     return (
-      <View style={{ flex: 1, backgroundColor: palette.bg }}>
+      <View style={{ flex: 1, backgroundColor: palette.bg, paddingTop: headerHeight }}>
         {controlsHeader}
         <ShareMonthScreen
           route={{ key: 'ShareMonth', name: 'ShareMonth', params: { year: viewYear, month: viewMonth } }}
@@ -311,13 +313,13 @@ export function MonthTimesScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: palette.bg }}>
+    <View style={{ flex: 1, backgroundColor: palette.bg, paddingTop: headerHeight }}>
       {controlsHeader}
       {columnHeader}
       <FlatList
         style={{ flex: 1 }}
         data={rows ?? []}
-        contentInsetAdjustmentBehavior="automatic"
+        contentInsetAdjustmentBehavior="never"
         keyExtractor={item => formatLocalDate(item.date)}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 32 }}
