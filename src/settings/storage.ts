@@ -10,7 +10,7 @@ import {
 
 const KEY = 'prayerapp.settings.v1';
 
-const LANGUAGES: AppLanguage[] = ['en', 'sv', 'ar'];
+const LANGUAGES: AppLanguage[] = ['en', 'sv', 'ar', 'bn', 'ur', 'hi', 'fr', 'es', 'de', 'tr', 'id', 'ru', 'zh'];
 
 const WIDGET_HIGHLIGHT_IDS: WidgetHighlightId[] = [
   'dynamic',

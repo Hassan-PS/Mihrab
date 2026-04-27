@@ -2,6 +2,37 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.22] — 2026-04-27
+
+### Fixed
+- **Compass (iOS)**: native `CompassModule` is now null-checked before constructing `NativeEventEmitter`, preventing a crash on builds where the module is not registered.
+- **Settings persistence**: storage write failures are now logged instead of silently swallowed, making AsyncStorage errors diagnosable.
+- **Prayer cache**: background cache-write and refresh errors are now logged so storage failures don't go undetected.
+- **UK prayer times (PrayerTimes.dev)**: date-part variables initialised to `undefined` instead of `0`, preventing a wrong-epoch timezone offset when `Intl.DateTimeFormat.formatToParts` partially fails.
+- **Sweden prayer times**: times extracted by HTML scraping are validated to be in strict chronological order; an out-of-order result now throws rather than silently storing corrupted data.
+- **Sweden reverse-geocoding cache**: capped at 200 entries (FIFO eviction) to prevent unbounded memory growth.
+- **Widget highlight ID**: native Android widget appearance value is validated against known IDs before being written to settings, removing an unsafe `as any` cast.
+- **Language persistence**: settings storage now recognises all 13 supported languages; previously only `en`, `sv`, and `ar` were accepted and other languages were silently reset to English on restart.
+- **Midnight rollover**: home screen now detects when the calendar date has changed during an active session and re-fetches prayer times automatically.
+- **Widget (iOS + Android)**: after Isha, the "next prayer" left panel no longer falls back to showing today's Fajr time (stale data); it now stays blank until the app syncs tomorrow's payload.
+- **Widget `getSnapshot` (iOS)**: snapshot now computes the real dynamic next prayer instead of passing `nil`, so the widget preview reflects live data.
+- **Widget comment**: corrected stale comment that said "Sunrise is omitted" when Sunrise has been included in the row list.
+- **Widget description (iOS)**: updated App Store widget gallery description to reflect six displayed times including Sunrise.
+
+### Changed
+- **Sunrise row (widget)**: Sunrise is now rendered in muted colour when it is not the current next item, visually distinguishing it as a reference time rather than a daily salah — consistent on both iOS and Android.
+- **Widget (iOS)**: added `systemSmall` family — a compact view showing location, next prayer name, and time.
+- **Widget (iOS)**: `computeDynamicNext` extracted as a module-level function shared by both `getSnapshot` and `getTimeline`, eliminating duplicated logic.
+- **Widget info (Android)**: added `targetCellWidth`/`targetCellHeight` and `maxResizeWidth`/`maxResizeHeight` for correct Android 12+ grid sizing.
+- **CI**: `release-android.yml` now builds both the F-Droid APK (`assembleFdroidRelease`) and the Google Play AAB (`bundlePlayRelease`) and attaches both to the GitHub Release.
+- **HTTP User-Agent**: updated version string from stale `1.4.9` to `1.5.22`.
+
+### Release builds
+- Android `versionName` **1.5.22**, `versionCode` **45**.
+- iOS `MARKETING_VERSION` **1.5.22**, `CURRENT_PROJECT_VERSION` **45**.
+
+[1.5.22]: https://github.com/Hassan-PS/PrayerApp/compare/v1.5.21...v1.5.22
+
 ## [1.4.9] — 2026-04-24
 
 ### Added

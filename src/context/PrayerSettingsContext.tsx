@@ -46,7 +46,7 @@ export function PrayerSettingsProvider({
   const updateSettings = useCallback((patch: Partial<PrayerAppSettings>) => {
     setSettings(prev => {
       const next = { ...prev, ...patch };
-      saveSettings(next).catch(() => {});
+      saveSettings(next).catch(e => console.error('Failed to save settings', e));
       return next;
     });
   }, []);

@@ -42,7 +42,10 @@ type SignalStrength = number;
 type SignalQuality = 'unknown' | 'good' | 'weak' | 'very_weak';
 
 const { CompassModule } = NativeModules;
-const compassEmitter = Platform.OS === 'ios' ? new NativeEventEmitter(CompassModule as any) : null;
+const compassEmitter =
+  Platform.OS === 'ios' && CompassModule
+    ? new NativeEventEmitter(CompassModule)
+    : null;
 
 function headingFromMagnetometer(x: number, y: number): number {
   if (Platform.OS === 'ios') {

@@ -11,6 +11,7 @@ import type { PrayerTimesResult } from './types';
 const WIDGET_URL =
   'https://www.islamiskaforbundet.se/wp-content/plugins/bonetider/Bonetider_Widget.php';
 
+const MAX_REVERSE_CACHE = 200;
 const reverseCache = new Map<string, ReverseLocality>();
 
 function localityCacheKey(lat: number, lng: number): string {
@@ -27,6 +28,12 @@ async function resolveLocality(
     return hit;
   }
   const v = await reverseLocality(latitude, longitude);
+  if (reverseCache.size >= MAX_REVERSE_CACHE) {
+    const firstKey = reverseCache.keys().next().value;
+    if (firstKey !== undefined) {
+      reverseCache.delete(firstKey);
+    }
+  }
   reverseCache.set(k, v);
   return v;
 }
@@ -93,6 +100,17 @@ export async function fetchIslamiskaForbundetTimes(params: {
   }
 
   const [fajr, sunrise, dhuhr, asr, maghrib, isha] = times.slice(0, 6);
+
+  const toMinutes = (t: string) => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  };
+  const [fM, srM, dhM, asM, mgM, isM] = [fajr, sunrise, dhuhr, asr, maghrib, isha].map(toMinutes);
+  if (!(fM < srM && srM < dhM && dhM < asM && asM < mgM && mgM < isM)) {
+    throw new Error(
+      `Prayer times for "${widgetCity}" are out of order — the website layout may have changed.`,
+    );
+  }
 
   return {
     timings: {
