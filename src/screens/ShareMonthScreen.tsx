@@ -1,6 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHeaderHeight } from '@react-navigation/elements';
 import {
   ActivityIndicator,
   Animated,
@@ -35,6 +36,8 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   const { t, i18n } = useTranslation();
   const { settings, hydrated } = usePrayerSettings();
   const { palette } = useAppPalette();
+  const headerHeight = useHeaderHeight();
+  const paddingTop = embedded ? 0 : headerHeight;
   const viewShotRef = useRef<ViewShot>(null);
 
   const [rows, setRows] = useState<MonthDayEntry[] | null>(null);
@@ -207,7 +210,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 
   if (!hydrated || loading) {
     return (
-      <View style={[styles.centered, { backgroundColor: palette.bg }]}>
+      <View style={[styles.centered, { backgroundColor: palette.bg, paddingTop }]}>
         <ActivityIndicator size="large" color={palette.accent} />
       </View>
     );
@@ -215,7 +218,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 
   if (needsGpsPrime) {
     return (
-      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg }]}>
+      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg, paddingTop }]}>
         <Text style={[styles.title, { color: palette.text }]}>
           {t('month.locationNotReadyTitle')}
         </Text>
@@ -228,7 +231,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 
   if (error) {
     return (
-      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg }]}>
+      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg, paddingTop }]}>
         <Text style={[styles.err, { color: palette.accent }]}>{error}</Text>
       </View>
     );
@@ -240,8 +243,8 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   const textColor = '#1f2937';
 
   return (
-    <View style={[styles.container, { backgroundColor: palette.bg }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent} contentInsetAdjustmentBehavior="automatic">
+    <View style={[styles.container, { backgroundColor: palette.bg, paddingTop }]}>
+      <ScrollView contentContainerStyle={styles.scrollContent} contentInsetAdjustmentBehavior="never">
         <PinchGestureHandler
           onGestureEvent={onPinchGestureEvent}
           onHandlerStateChange={onPinchHandlerStateChange}>
