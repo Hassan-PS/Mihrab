@@ -2,6 +2,7 @@ import { useNavigation, useTheme } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import { Platform } from 'react-native';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
 import { CompassScreen } from '../screens/CompassScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -11,6 +12,8 @@ import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const isIOS = Platform.OS === 'ios';
 
 function HomeHeaderRight() {
   const navigation =
@@ -33,7 +36,12 @@ function HomeHeaderRight() {
 export function RootNavigator() {
   const { t } = useTranslation();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerLargeTitle: isIOS,
+        headerLargeTitleShadowVisible: false,
+        headerShadowVisible: false,
+      }}>
       <Stack.Screen
         name="Home"
         component={HomeScreen}

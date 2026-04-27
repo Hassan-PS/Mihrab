@@ -8,7 +8,6 @@ private let kHighlightDynamicKey = "widget_highlight_dynamic"
 private let kHighlightIdKey = "widget_highlight_id"
 private let kHighlightHexKey = "widget_highlight_hex"
 
-/// Neutral dark shell; only the next prayer uses accent (same green as Android default).
 private let widgetBg = Color(red: 28 / 255, green: 28 / 255, blue: 30 / 255).opacity(0.88)
 private let widgetText = Color(red: 232 / 255, green: 234 / 255, blue: 237 / 255)
 private let widgetMuted = Color(red: 154 / 255, green: 160 / 255, blue: 166 / 255)
@@ -29,25 +28,16 @@ private extension Color {
 
 private func presetHighlightColor(_ id: String) -> Color {
   switch id.lowercased() {
-  case "teal":
-    return Color(red: 78 / 255, green: 201 / 255, blue: 176 / 255)
-  case "blue":
-    return Color(red: 107 / 255, green: 163 / 255, blue: 245 / 255)
-  case "amber":
-    return Color(red: 229 / 255, green: 192 / 255, blue: 123 / 255)
-  case "green":
-    return widgetHighlightDefault
-  default:
-    return widgetHighlightDefault
+  case "teal":  return Color(red: 78 / 255, green: 201 / 255, blue: 176 / 255)
+  case "blue":  return Color(red: 107 / 255, green: 163 / 255, blue: 245 / 255)
+  case "amber": return Color(red: 229 / 255, green: 192 / 255, blue: 123 / 255)
+  default:      return widgetHighlightDefault
   }
 }
 
 private func resolvedWidgetHighlightColor() -> Color {
   let def = UserDefaults(suiteName: kSuite)
-  let dynamic = def?.bool(forKey: kHighlightDynamicKey) ?? false
-  if dynamic {
-    return Color.accentColor
-  }
+  if def?.bool(forKey: kHighlightDynamicKey) == true { return Color.accentColor }
   let id = def?.string(forKey: kHighlightIdKey) ?? "green"
   if id.lowercased() == "custom" {
     let hex = def?.string(forKey: kHighlightHexKey) ?? "#6BC98A"
@@ -56,7 +46,6 @@ private func resolvedWidgetHighlightColor() -> Color {
   return presetHighlightColor(id)
 }
 
-// Extracted so both getSnapshot and getTimeline can use it.
 private func computeDynamicNext(
   after date: Date,
   rows: [WidgetPayload.Row],
@@ -67,14 +56,11 @@ private func computeDynamicNext(
   for row in rows {
     let parts = row.time.split(separator: ":")
     if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
-      let rowMinutes = h * 60 + m
-      if rowMinutes > currentMinutes {
+      if h * 60 + m > currentMinutes {
         return (row.key, row.abbr ?? row.key, row.time)
       }
     }
   }
-  // All times have passed — return nil so the left panel stays blank
-  // until the app syncs tomorrow's payload.
   return nil
 }
 
@@ -99,42 +85,36 @@ struct Provider: TimelineProvider {
 
   func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
     let payload = loadPayload()
-    var key: String? = nil
-    var name: String? = nil
-    var time: String? = nil
+    var key: String? = nil; var name: String? = nil; var time: String? = nil
     if let p = payload {
-      let result = computeDynamicNext(after: Date(), rows: p.rows, calendar: Calendar.current)
-      key = result?.key
-      name = result?.name
-      time = result?.time
+      let r = computeDynamicNext(after: Date(), rows: p.rows, calendar: .current)
+      key = r?.key; name = r?.name; time = r?.time
     }
     completion(Entry(date: Date(), payload: payload ?? Self.sample, dynamicNextKey: key, dynamicNextName: name, dynamicNextTime: time))
   }
 
   func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
     guard let payload = loadPayload() else {
-      let entry = Entry(date: Date(), payload: nil, dynamicNextKey: nil, dynamicNextName: nil, dynamicNextTime: nil)
+      let e = Entry(date: Date(), payload: nil, dynamicNextKey: nil, dynamicNextName: nil, dynamicNextTime: nil)
       let refresh = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
-      completion(Timeline(entries: [entry], policy: .after(refresh)))
+      completion(Timeline(entries: [e], policy: .after(refresh)))
       return
     }
 
     var entries: [Entry] = []
-    let now = Date()
-    let cal = Calendar.current
-
+    let now = Date(); let cal = Calendar.current
     let currentNext = computeDynamicNext(after: now, rows: payload.rows, calendar: cal)
     entries.append(Entry(date: now, payload: payload, dynamicNextKey: currentNext?.key, dynamicNextName: currentNext?.name, dynamicNextTime: currentNext?.time))
 
     var lastDate = now
     for row in payload.rows {
       let parts = row.time.split(separator: ":")
-      if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
-        if let prayerDate = cal.date(bySettingHour: h, minute: m, second: 0, of: now), prayerDate > now {
-          let next = computeDynamicNext(after: prayerDate, rows: payload.rows, calendar: cal)
-          entries.append(Entry(date: prayerDate, payload: payload, dynamicNextKey: next?.key, dynamicNextName: next?.name, dynamicNextTime: next?.time))
-          lastDate = prayerDate
-        }
+      if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
+         let prayerDate = cal.date(bySettingHour: h, minute: m, second: 0, of: now),
+         prayerDate > now {
+        let next = computeDynamicNext(after: prayerDate, rows: payload.rows, calendar: cal)
+        entries.append(Entry(date: prayerDate, payload: payload, dynamicNextKey: next?.key, dynamicNextName: next?.name, dynamicNextTime: next?.time))
+        lastDate = prayerDate
       }
     }
 
@@ -146,25 +126,21 @@ struct Provider: TimelineProvider {
     guard let json = UserDefaults(suiteName: kSuite)?.string(forKey: kKey),
           let data = json.data(using: .utf8),
           let p = try? JSONDecoder().decode(WidgetPayload.self, from: data)
-    else {
-      return nil
-    }
+    else { return nil }
     return p
   }
 
   private static let sample = WidgetPayload(
     dayLabel: "Wed, Apr 9",
     rows: [
-      .init(key: "Fajr", time: "05:12", abbr: "Fajr"),
+      .init(key: "Fajr",    time: "05:12", abbr: "Fajr"),
       .init(key: "Sunrise", time: "06:30", abbr: "Sunrise"),
-      .init(key: "Dhuhr", time: "12:10", abbr: "Dhuhr"),
-      .init(key: "Asr", time: "15:20", abbr: "Asr"),
+      .init(key: "Dhuhr",   time: "12:10", abbr: "Dhuhr"),
+      .init(key: "Asr",     time: "15:20", abbr: "Asr"),
       .init(key: "Maghrib", time: "18:05", abbr: "Magh"),
-      .init(key: "Isha", time: "19:30", abbr: "Isha"),
+      .init(key: "Isha",    time: "19:30", abbr: "Isha"),
     ],
-    nextKey: "Dhuhr",
-    nextPrayerName: "Dhuhr",
-    nextPrayerTime: "12:10",
+    nextKey: "Dhuhr", nextPrayerName: "Dhuhr", nextPrayerTime: "12:10",
     locationName: "London"
   )
 }
@@ -180,10 +156,7 @@ struct Entry: TimelineEntry {
 @available(iOS 16.0, *)
 struct RefreshIntent: AppIntent {
   static var title: LocalizedStringResource = "Refresh Widget"
-
-  func perform() async throws -> some IntentResult {
-    return .result()
-  }
+  func perform() async throws -> some IntentResult { .result() }
 }
 
 struct PrayerWidgetEntryView: View {
@@ -192,39 +165,47 @@ struct PrayerWidgetEntryView: View {
 
   private func rowColor(highlight: Bool, isSunrise: Bool) -> Color {
     if highlight { return resolvedWidgetHighlightColor() }
-    // Sunrise is a reference time, not a salah — render it muted when idle.
     return isSunrise ? widgetMuted : widgetText
   }
 
-  // MARK: - Small widget: focused next-prayer view
+  // MARK: - Small widget
 
   @ViewBuilder
   private var smallWidgetContent: some View {
     if let p = entry.payload {
       VStack(alignment: .leading, spacing: 0) {
+        // Location + date at top
         if let loc = p.locationName, !loc.isEmpty {
-          Text(loc)
-            .font(.system(size: 11, weight: .medium))
+          Text(loc.uppercased())
+            .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
             .lineLimit(1)
+            .tracking(0.5)
         }
         Spacer()
+        // Label
+        Text("NEXT")
+          .font(.system(size: 9, weight: .semibold))
+          .foregroundStyle(widgetMuted)
+          .tracking(1.0)
+        // Prayer name
         if let name = entry.dynamicNextName ?? p.nextPrayerName, !name.isEmpty {
           Text(name)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(widgetMuted)
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(widgetText)
             .lineLimit(1)
         }
+        // Time — large, light weight for elegance
         if let time = entry.dynamicNextTime ?? p.nextPrayerTime, !time.isEmpty {
           Text(time)
-            .font(.system(size: 36, weight: .bold))
+            .font(.system(size: 34, weight: .light))
             .foregroundStyle(resolvedWidgetHighlightColor())
             .minimumScaleFactor(0.6)
             .lineLimit(1)
         }
         Spacer()
         Text(p.dayLabel)
-          .font(.system(size: 11))
+          .font(.system(size: 9))
           .foregroundStyle(widgetMuted)
           .lineLimit(1)
       }
@@ -235,94 +216,138 @@ struct PrayerWidgetEntryView: View {
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
     }
   }
 
-  // MARK: - Medium/Large widget: next prayer + full prayer list
+  // MARK: - Medium / Large widget
 
   @ViewBuilder
   private var mediumLargeContent: some View {
     if let p = entry.payload {
       HStack(spacing: 0) {
-        // Left Side: Next Prayer
-        VStack(spacing: 2) {
-          if let nextName = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey, !nextName.isEmpty {
-            Text(nextName)
-              .font(.system(size: 14, weight: .bold))
+
+        // ── Left: next prayer ──
+        VStack(alignment: .leading, spacing: 0) {
+          // Location at top
+          if let loc = p.locationName, !loc.isEmpty {
+            Text(loc.uppercased())
+              .font(.system(size: 9, weight: .semibold))
               .foregroundStyle(widgetMuted)
               .lineLimit(1)
+              .tracking(0.5)
           }
 
-          if let nextTime = entry.dynamicNextTime ?? p.nextPrayerTime, !nextTime.isEmpty {
-            Text(nextTime)
-              .font(.system(size: 32, weight: .bold))
+          Spacer()
+
+          // "NEXT" micro-label
+          Text("NEXT")
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(widgetMuted)
+            .tracking(1.0)
+            .padding(.bottom, 2)
+
+          // Prayer name — semibold, prominent
+          if let name = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey, !name.isEmpty {
+            Text(name.uppercased())
+              .font(.system(size: 13, weight: .semibold))
+              .foregroundStyle(widgetText)
+              .lineLimit(1)
+              .tracking(0.5)
+          }
+
+          // Time — large, light weight
+          if let time = entry.dynamicNextTime ?? p.nextPrayerTime, !time.isEmpty {
+            Text(time)
+              .font(.system(size: 34, weight: .light))
               .foregroundStyle(resolvedWidgetHighlightColor())
               .lineLimit(1)
-              .minimumScaleFactor(0.8)
+              .minimumScaleFactor(0.7)
           }
 
-          if let loc = p.locationName, !loc.isEmpty {
-            Text(loc)
-              .font(.system(size: 12))
-              .foregroundStyle(widgetMuted)
-              .lineLimit(1)
-          }
+          Spacer()
+
+          // Day label at bottom
+          Text(p.dayLabel)
+            .font(.system(size: 9))
+            .foregroundStyle(widgetMuted)
+            .lineLimit(1)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
 
-        // Right Side: Prayer Times list
+        // Divider
+        Rectangle()
+          .fill(Color.white.opacity(0.12))
+          .frame(width: 1)
+          .padding(.vertical, 6)
+          .padding(.horizontal, 8)
+
+        // ── Right: prayer list ──
         VStack(spacing: 0) {
           ForEach(Array(p.rows.enumerated()), id: \.offset) { _, r in
             let isSunrise = r.key == "Sunrise"
             let label = r.abbr ?? r.key
             let currentNextKey = entry.dynamicNextKey ?? p.nextKey
             let highlight = currentNextKey == r.key
-            let color = rowColor(highlight: highlight, isSunrise: isSunrise)
+            let col = rowColor(highlight: highlight, isSunrise: isSunrise)
 
-            HStack(spacing: 0) {
-              Text(label)
-                .font(.system(size: 11))
-                .foregroundStyle(color)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .lineLimit(1)
+            ZStack(alignment: .leading) {
+              // Highlight background
+              if highlight {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                  .fill(resolvedWidgetHighlightColor().opacity(0.15))
+              }
+              // Left accent bar for highlighted row
+              if highlight {
+                Rectangle()
+                  .fill(resolvedWidgetHighlightColor())
+                  .frame(width: 3)
+                  .cornerRadius(1.5)
+              }
 
-              Text(r.time)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(color)
+              HStack(spacing: 0) {
+                Text(label)
+                  .font(.system(size: 11, weight: highlight ? .semibold : .regular))
+                  .foregroundStyle(col)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .lineLimit(1)
+                  .padding(.leading, highlight ? 7 : 4)
+
+                Text(r.time)
+                  .font(.system(size: 11, weight: highlight ? .semibold : .medium))
+                  .foregroundStyle(col)
+                  .padding(.trailing, 4)
+              }
             }
-            .padding(.horizontal, 8)
             .frame(maxHeight: .infinity)
-            .background(
-              highlight ? resolvedWidgetHighlightColor().opacity(0.12) : Color.clear
-            )
-            .cornerRadius(8)
           }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     } else {
-      Text("Open Prayer Times to load times")
-        .font(.caption)
-        .foregroundStyle(widgetMuted)
+      VStack {
+        Text("Open Prayer Times")
+          .font(.caption)
+          .foregroundStyle(widgetMuted)
+      }
     }
   }
 
   // MARK: - Body
 
   var body: some View {
-    ZStack(alignment: .topLeading) {
+    ZStack(alignment: .topTrailing) {
       if widgetFamily == .systemSmall {
         smallWidgetContent
       } else {
         mediumLargeContent
-          .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+          .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 12))
 
+        // iOS 17+ refresh button
         if #available(iOS 17.0, *) {
           Button(intent: RefreshIntent()) {
             Image(systemName: "arrow.clockwise")
-              .font(.system(size: 10))
+              .font(.system(size: 9, weight: .medium))
               .foregroundColor(widgetMuted)
               .padding(8)
           }
@@ -339,9 +364,7 @@ private struct WidgetBackgroundCompatModifier: ViewModifier {
   @ViewBuilder
   func body(content: Content) -> some View {
     if #available(iOSApplicationExtension 17.0, *) {
-      content.containerBackground(for: .widget) {
-        widgetBg
-      }
+      content.containerBackground(for: .widget) { widgetBg }
     } else {
       content.background(widgetBg)
     }
@@ -355,7 +378,7 @@ struct PrayerWidgetExtensionBundle: Widget {
       PrayerWidgetEntryView(entry: entry)
         .modifier(WidgetBackgroundCompatModifier())
     }
-    .configurationDisplayName("Prayer times")
+    .configurationDisplayName("Prayer Times")
     .description("Today's prayer times including Sunrise. After Isha, shows tomorrow.")
     .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
   }
