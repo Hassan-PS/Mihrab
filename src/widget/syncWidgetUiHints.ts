@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NativeModules, Platform, AppState } from 'react-native';
+import { TurboModuleRegistry, NativeModules, Platform, AppState } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { PrayerAppSettings, WidgetHighlightId } from '../settings/types';
 
@@ -33,11 +33,17 @@ function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
   return settings.widgetHighlightId === 'dynamic';
 }
 
+function getWidgetModule(): PrayerWidgetNative | undefined {
+  const turbo = TurboModuleRegistry.get<PrayerWidgetNative>('PrayerWidget');
+  if (turbo) return turbo;
+  return NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
+}
+
 function syncNativeWidgetAppearance(
   settings: PrayerAppSettings,
   dynamicHl: boolean,
 ): void {
-  const mod = NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
+  const mod = getWidgetModule();
   const hex =
     settings.widgetHighlightId === 'custom'
       ? settings.widgetHighlightCustomHex
@@ -84,7 +90,7 @@ export function useSyncWidgetUiHints(): void {
     if (!hydrated || Platform.OS !== 'android') return;
 
     const syncFromNative = () => {
-      const mod = NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
+      const mod = getWidgetModule();
       if (mod?.getAndroidWidgetAppearance) {
         mod.getAndroidWidgetAppearance().then(nativeSettings => {
           if (nativeSettings) {
