@@ -210,7 +210,13 @@
     "Dhuhr": "ظہر",
     "Asr": "عصر",
     "Maghrib": "مغرب",
-    "Isha": "عشاء"
+    "Isha": "عشاء",
+    "Fajr_abbr": "فجر",
+    "Sunrise_abbr": "طلوع",
+    "Dhuhr_abbr": "ظہر",
+    "Asr_abbr": "عصر",
+    "Maghrib_abbr": "مغرب",
+    "Isha_abbr": "عشاء"
   },
   "placeSearch": {
     "label": "شہر یا پتہ تلاش کریں۔",
