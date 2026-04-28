@@ -23,7 +23,8 @@
     "continue": "Fortsätt",
     "back": "Tillbaka",
     "loading": "Laddar…",
-    "automatic": "Automatiskt"
+    "automatic": "Automatiskt",
+    "openSettings": "Öppna inställningar"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "Hanafi asr",
     "monthTimesLink": "Bönetider för hela månaden",
     "localFallbackNotice": "Lokal beräkning — anslut för att uppdatera",
-    "lastGpsCoordsNotice": "Använder senast kända position — GPS inte tillgänglig"
+    "lastGpsCoordsNotice": "Använder senast kända position — GPS inte tillgänglig",
+    "exactAlarmDenied": "Bönetidsaviseringar behöver exakt larmtillstånd för korrekt timing. Tryck för att bevilja.",
+    "notifPermDenied": "Aviseringsbehörighet nekad — bönetidsaviseringar fungerar inte. Tryck för att öppna inställningar."
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",

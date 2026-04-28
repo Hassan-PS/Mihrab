@@ -23,7 +23,8 @@
     "continue": "Devam etmek",
     "back": "Geri",
     "loading": "Yükleniyor…",
-    "automatic": "Otomatik"
+    "automatic": "Otomatik",
+    "openSettings": "Ayarları Aç"
   },
   "home": {
     "loadingPrayer": "Namaz vakitleri yükleniyor…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "Hanefi Asr",
     "monthTimesLink": "Tüm ay boyunca namaz vakitleri",
     "localFallbackNotice": "Yerel hesaplama — güncellemek için bağlanın",
-    "lastGpsCoordsNotice": "Son bilinen konum kullanılıyor — GPS kullanılamıyor"
+    "lastGpsCoordsNotice": "Son bilinen konum kullanılıyor — GPS kullanılamıyor",
+    "exactAlarmDenied": "Namaz uyarıları için kesin alarm izni gerekiyor. İzin vermek için dokunun.",
+    "notifPermDenied": "Bildirim izni reddedildi — namaz uyarıları çalmayacak. Ayarları açmak için dokunun."
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",

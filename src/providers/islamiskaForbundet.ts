@@ -4,6 +4,7 @@ import {
   type ReverseLocality,
 } from '../geocoding/nominatim';
 import { getNearestIslamiskaForbundetCity } from './islamiskaForbundetNearest';
+import { computeLocalAdhanTimes } from './localAdhan';
 import { formatLocalDate } from '../utils/date';
 import { fetchWithRetry } from '../utils/fetchWithRetry';
 import type { PrayerTimesResult } from './types';
@@ -110,6 +111,39 @@ export async function fetchIslamiskaForbundetTimes(params: {
     throw new Error(
       `Prayer times for "${widgetCity}" are out of order — the website layout may have changed.`,
     );
+  }
+
+  // Sanity-check scraped times against the on-device adhan calculation.
+  // If any time differs by more than 6 hours the HTML layout has likely changed.
+  try {
+    const local = computeLocalAdhanTimes({
+      latitude: params.latitude,
+      longitude: params.longitude,
+      date: params.date,
+      calculationMethod: 'auto',
+      school: 0,
+    });
+    const MAX_DIFF_MIN = 6 * 60;
+    const pairs: Array<[number, string]> = [
+      [fM, local.timings.Fajr],
+      [srM, local.timings.Sunrise],
+      [dhM, local.timings.Dhuhr],
+      [asM, local.timings.Asr],
+      [mgM, local.timings.Maghrib],
+      [isM, local.timings.Isha],
+    ];
+    for (const [scraped, localTime] of pairs) {
+      if (Math.abs(scraped - toMinutes(localTime)) > MAX_DIFF_MIN) {
+        throw new Error(
+          `Prayer times for "${widgetCity}" differ from on-device calculation by more than 6 hours — the website layout may have changed.`,
+        );
+      }
+    }
+  } catch (e) {
+    // Re-throw only our own sanity error; ignore failures from the local calc itself.
+    if (e instanceof Error && e.message.includes('differ from on-device')) {
+      throw e;
+    }
   }
 
   return {

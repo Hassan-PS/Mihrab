@@ -23,7 +23,8 @@
     "continue": "继续",
     "back": "后退",
     "loading": "加载中…",
-    "automatic": "自动的"
+    "automatic": "自动的",
+    "openSettings": "打开设置"
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "哈乃斐晡礼",
     "monthTimesLink": "整个月的祈祷时间",
     "localFallbackNotice": "本地计算 — 连接网络以刷新",
-    "lastGpsCoordsNotice": "使用上次已知位置 — GPS 不可用"
+    "lastGpsCoordsNotice": "使用上次已知位置 — GPS 不可用",
+    "exactAlarmDenied": "祈祷提醒需要精确闹钟权限以确保时间准确。点击授权。",
+    "notifPermDenied": "通知权限被拒绝 — 祈祷提醒将无法发出。点击打开设置。"
   },
   "errors": {
     "locationNeededTitle": "需要位置",

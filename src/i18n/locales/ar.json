@@ -23,7 +23,8 @@
     "continue": "متابعة",
     "back": "رجوع",
     "loading": "جارٍ التحميل…",
-    "automatic": "تلقائي"
+    "automatic": "تلقائي",
+    "openSettings": "فتح الإعدادات"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "عصر حنفي",
     "monthTimesLink": "أوقات الصلاة للشهر كاملًا",
     "localFallbackNotice": "حساب محلي — اتصل بالإنترنت للتحديث",
-    "lastGpsCoordsNotice": "استخدام الموقع الأخير — GPS غير متاح"
+    "lastGpsCoordsNotice": "استخدام الموقع الأخير — GPS غير متاح",
+    "exactAlarmDenied": "تنبيهات الصلاة تحتاج إذن التنبيه الدقيق للتوقيت الصحيح. اضغط للمنح.",
+    "notifPermDenied": "إذن الإشعارات مرفوض — لن تعمل تنبيهات الصلاة. اضغط لفتح الإعدادات."
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",

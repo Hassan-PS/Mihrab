@@ -107,7 +107,7 @@ export function MonthTimesScreen() {
     getCacheStatus({
       provider: effectiveProvider, latitude: lat, longitude: lng,
       calculationMethod: settings.calculationMethod, school: settings.school,
-    }).then(setCacheStatus).catch(() => {});
+    }).then(setCacheStatus).catch(e => console.warn('getCacheStatus:', e));
   }, [hydrated, needsGpsPrime, effectiveProvider, lat, lng, settings.calculationMethod, settings.school]);
 
   useEffect(() => { updateCacheStatus(); }, [updateCacheStatus]);
