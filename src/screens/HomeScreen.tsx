@@ -295,6 +295,20 @@ export function HomeScreen() {
         palette={palette}
       />
 
+      {/* Offline-first notice: shown when provider failed and on-device calculation is used */}
+      {state.usingLocalFallback && (
+        <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>
+          <Text style={[styles.localFallbackText, { color: palette.text }]}>
+            {t('home.localFallbackNotice')}
+          </Text>
+          <Pressable onPress={retry} hitSlop={8}>
+            <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
+              {t('common.retry')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
       {/* Next prayer hero card */}
       {nextInfo && (
         <View
@@ -542,15 +556,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: ROW_PADDING_V,
     paddingHorizontal: 16,
-    paddingLeft: 20,
+    paddingStart: 20,
     position: 'relative',
   },
   activeBar: {
     position: 'absolute',
-    left: 0,
+    start: 0,
     top: 0,
     bottom: 0,
     width: 4,
+  },
+  localFallbackBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    gap: 8,
+  },
+  localFallbackText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  localFallbackRetry: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   rowName: {
     fontSize: 17,

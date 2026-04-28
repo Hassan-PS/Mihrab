@@ -30,7 +30,8 @@
     "nextPrayer": "পরবর্তী প্রার্থনা",
     "nextIn": "{{time}} এ",
     "hanafiSuffix": "হানাফী আসর",
-    "monthTimesLink": "পুরো মাসের নামাজের সময়"
+    "monthTimesLink": "পুরো মাসের নামাজের সময়",
+    "localFallbackNotice": "ডিভাইস গণনা — আপডেটের জন্য সংযোগ করুন"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",
@@ -140,7 +141,9 @@
     "notificationSoundSharifDoman": "আযান - শরীফ দোমান",
     "notificationSoundYusufIslam": "আজান- ইউসুফ ইসলাম",
     "notificationSoundVoiceHelp": "এই অ্যাপ বিল্ডে অন্তর্নির্মিত ভয়েস অন্তর্ভুক্ত।",
-    "versionInstalled": "ইনস্টল করা সংস্করণ: {{version}}"
+    "versionInstalled": "ইনস্টল করা সংস্করণ: {{version}}",
+    "adhanPreviewTitle": "আজান পূর্বরূপ",
+    "adhanPreviewBody": ""
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",
@@ -202,7 +205,14 @@
     "north": "এন",
     "east": "ই",
     "south": "এস",
-    "west": "ডব্লিউ"
+    "west": "ডব্লিউ",
+    "a11yDialLive": "Qibla compass. Rotate {{deg}} degrees to face Qibla.",
+    "a11yDialChecking": "Qibla compass. Waiting for sensor data.",
+    "a11yDialUnavailable": "Qibla compass unavailable.",
+    "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
+    "a11ySignal_good": "Compass signal: good.",
+    "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
+    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
   },
   "prayer": {
     "Fajr": "ফজর",

@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bannerRight: {
-    marginLeft: 16,
+    marginStart: 16,
   },
   appName: {
     color: '#ffffff',

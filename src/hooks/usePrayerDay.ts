@@ -2,6 +2,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, PermissionsAndroid, Platform } from 'react-native';
 import { getOrFetchPrayerTimes, getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
+import { computeLocalAdhanTimes } from '../providers/localAdhan';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
@@ -19,6 +20,8 @@ export type PrayerDayState =
       longitude: number;
       today: TimingsMap;
       tomorrow?: TimingsMap;
+      /** True when showing on-device fallback times because the network/provider failed. */
+      usingLocalFallback?: boolean;
     };
 
 export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
@@ -99,9 +102,48 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         if (gen !== loadGenerationRef.current) {
           return;
         }
-        const message =
-          e instanceof Error ? e.message : 'Failed to load prayer times';
-        setState({ phase: 'api_error', message });
+        // Network / provider failed — try on-device calculation as an offline fallback
+        // so the app is usable without a connection on first launch.
+        try {
+          const localToday = computeLocalAdhanTimes({
+            latitude,
+            longitude,
+            date: new Date(),
+            calculationMethod: settings.calculationMethod,
+            school: settings.school,
+          });
+          let localTomorrow: TimingsMap | undefined;
+          try {
+            localTomorrow = computeLocalAdhanTimes({
+              latitude,
+              longitude,
+              date: addDays(new Date(), 1),
+              calculationMethod: settings.calculationMethod,
+              school: settings.school,
+            }).timings;
+          } catch {
+            localTomorrow = undefined;
+          }
+          if (gen !== loadGenerationRef.current) {
+            return;
+          }
+          setState({
+            phase: 'ready',
+            latitude,
+            longitude,
+            today: localToday.timings,
+            tomorrow: localTomorrow,
+            usingLocalFallback: true,
+          });
+        } catch {
+          // Local calculation also failed (invalid coordinates?)
+          if (gen !== loadGenerationRef.current) {
+            return;
+          }
+          const message =
+            e instanceof Error ? e.message : 'Failed to load prayer times';
+          setState({ phase: 'api_error', message });
+        }
       }
     },
     [
