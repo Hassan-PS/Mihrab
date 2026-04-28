@@ -30,7 +30,8 @@
     "nextPrayer": "الصلاة التالية",
     "nextIn": "خلال {{time}}",
     "hanafiSuffix": "عصر حنفي",
-    "monthTimesLink": "أوقات الصلاة للشهر كاملًا"
+    "monthTimesLink": "أوقات الصلاة للشهر كاملًا",
+    "localFallbackNotice": "حساب محلي — اتصل بالإنترنت للتحديث"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",
@@ -140,7 +141,9 @@
     "notificationSoundSharifDoman": "أذان - شريف دومان",
     "notificationSoundYusufIslam": "أذان - يوسف إسلام",
     "notificationSoundVoiceHelp": "الصوت مضمّن داخل هذا الإصدار من التطبيق.",
-    "versionInstalled": "الإصدار المثبت: {{version}}"
+    "versionInstalled": "الإصدار المثبت: {{version}}",
+    "adhanPreviewTitle": "معاينة الأذان",
+    "adhanPreviewBody": ""
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -202,7 +205,14 @@
     "north": "ش",
     "east": "ق",
     "south": "ج",
-    "west": "غ"
+    "west": "غ",
+    "a11yDialLive": "بوصلة القبلة. أدر {{deg}} درجة لمواجهة القبلة.",
+    "a11yDialChecking": "بوصلة القبلة. في انتظار بيانات المستشعر.",
+    "a11yDialUnavailable": "بوصلة القبلة غير متاحة.",
+    "a11yNeedleDeg": "أدر {{deg}} درجة لمواجهة القبلة.",
+    "a11ySignal_good": "إشارة البوصلة: جيدة.",
+    "a11ySignal_weak": "إشارة البوصلة: ضعيفة.",
+    "a11ySignal_very_weak": "إشارة البوصلة: ضعيفة جداً."
   },
   "prayer": {
     "Fajr": "الفجر",

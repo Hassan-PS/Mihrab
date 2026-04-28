@@ -30,7 +30,8 @@
     "nextPrayer": "Nächstes Gebet",
     "nextIn": "im {{time}}",
     "hanafiSuffix": "Hanafi Asr",
-    "monthTimesLink": "Gebetszeiten für den ganzen Monat"
+    "monthTimesLink": "Gebetszeiten für den ganzen Monat",
+    "localFallbackNotice": "Lokale Berechnung — Verbinden zum Aktualisieren"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",
@@ -140,7 +141,9 @@
     "notificationSoundSharifDoman": "Adhan – Sharif Doman",
     "notificationSoundYusufIslam": "Adhan – Yusuf Islam",
     "notificationSoundVoiceHelp": "Integrierte Stimme in diesem App-Build enthalten.",
-    "versionInstalled": "Installierte Version: {{version}}"
+    "versionInstalled": "Installierte Version: {{version}}",
+    "adhanPreviewTitle": "Adhan-Vorschau",
+    "adhanPreviewBody": ""
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -202,7 +205,14 @@
     "north": "N",
     "east": "E",
     "south": "S",
-    "west": "W"
+    "west": "W",
+    "a11yDialLive": "Qibla compass. Rotate {{deg}} degrees to face Qibla.",
+    "a11yDialChecking": "Qibla compass. Waiting for sensor data.",
+    "a11yDialUnavailable": "Qibla compass unavailable.",
+    "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
+    "a11ySignal_good": "Compass signal: good.",
+    "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
+    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
   },
   "prayer": {
     "Fajr": "Fajr",

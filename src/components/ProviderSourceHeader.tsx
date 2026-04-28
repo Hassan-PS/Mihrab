@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   barText: {
     flex: 1,
-    paddingRight: 8,
+    paddingEnd: 8,
   },
   kicker: {
     fontSize: 11,

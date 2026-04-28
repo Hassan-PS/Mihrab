@@ -79,6 +79,51 @@ function buildTimestampTrigger(
   return trigger;
 }
 
+const PREVIEW_NOTIFICATION_ID = 'adhan_preview';
+let _previewCancelTimeout: ReturnType<typeof setTimeout> | null = null;
+
+/** Play a short preview of the given adhan/notification sound. */
+export async function previewAdhanSound(
+  soundId: NotificationSoundId,
+): Promise<void> {
+  // Cancel any in-flight preview
+  if (_previewCancelTimeout !== null) {
+    clearTimeout(_previewCancelTimeout);
+    _previewCancelTimeout = null;
+  }
+  await notifee.cancelNotification(PREVIEW_NOTIFICATION_ID).catch(() => {});
+
+  await ensureChannel(soundId);
+  const option = getNotificationSoundOption(soundId);
+
+  await notifee.displayNotification({
+    id: PREVIEW_NOTIFICATION_ID,
+    title: i18n.t('settings.adhanPreviewTitle'),
+    body: i18n.t('settings.adhanPreviewBody', { defaultValue: '' }),
+    ios: { sound: option.iosSound },
+    android: {
+      channelId: option.androidChannelId,
+      smallIcon: 'ic_stat_prayer',
+      pressAction: { id: 'default' },
+    },
+  });
+
+  // Auto-cancel after 30 s (adhan recordings are ~30–60 s; this clears the banner)
+  _previewCancelTimeout = setTimeout(() => {
+    _previewCancelTimeout = null;
+    notifee.cancelNotification(PREVIEW_NOTIFICATION_ID).catch(() => {});
+  }, 30000);
+}
+
+/** Cancel any in-flight adhan preview notification. */
+export async function stopAdhanPreview(): Promise<void> {
+  if (_previewCancelTimeout !== null) {
+    clearTimeout(_previewCancelTimeout);
+    _previewCancelTimeout = null;
+  }
+  await notifee.cancelNotification(PREVIEW_NOTIFICATION_ID).catch(() => {});
+}
+
 export async function syncPrayerNotifications(params: {
   enabled: boolean;
   prePrayerReminderMinutes: number;

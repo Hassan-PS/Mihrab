@@ -30,7 +30,8 @@
     "nextPrayer": "下一个祷告",
     "nextIn": "在{{time}}",
     "hanafiSuffix": "哈乃斐晡礼",
-    "monthTimesLink": "整个月的祈祷时间"
+    "monthTimesLink": "整个月的祈祷时间",
+    "localFallbackNotice": "本地计算 — 连接网络以刷新"
   },
   "errors": {
     "locationNeededTitle": "需要位置",
@@ -140,7 +141,9 @@
     "notificationSoundSharifDoman": "阿丹 - 谢里夫·多曼",
     "notificationSoundYusufIslam": "宣礼 - 优素福·伊斯兰",
     "notificationSoundVoiceHelp": "此应用程序版本中包含内置语音。",
-    "versionInstalled": "安装版本：{{version}}"
+    "versionInstalled": "安装版本：{{version}}",
+    "adhanPreviewTitle": "宣礼预览",
+    "adhanPreviewBody": ""
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -202,7 +205,14 @@
     "north": "氮",
     "east": "乙",
     "south": "S",
-    "west": "瓦"
+    "west": "瓦",
+    "a11yDialLive": "Qibla compass. Rotate {{deg}} degrees to face Qibla.",
+    "a11yDialChecking": "Qibla compass. Waiting for sensor data.",
+    "a11yDialUnavailable": "Qibla compass unavailable.",
+    "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
+    "a11ySignal_good": "Compass signal: good.",
+    "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
+    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
   },
   "prayer": {
     "Fajr": "晨曦",

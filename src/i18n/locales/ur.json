@@ -30,7 +30,8 @@
     "nextPrayer": "اگلی نماز",
     "nextIn": "{{time}} میں",
     "hanafiSuffix": "حنفی عصر",
-    "monthTimesLink": "پورے مہینے کی نماز کے اوقات"
+    "monthTimesLink": "پورے مہینے کی نماز کے اوقات",
+    "localFallbackNotice": "مقامی حساب — اپ ڈیٹ کے لیے جڑیں"
   },
   "errors": {
     "locationNeededTitle": "مقام درکار ہے۔",
@@ -140,7 +141,9 @@
     "notificationSoundSharifDoman": "اذان - شریف ڈومین",
     "notificationSoundYusufIslam": "اذان - یوسف اسلام",
     "notificationSoundVoiceHelp": "اس ایپ کی تعمیر میں بلٹ ان آواز شامل ہے۔",
-    "versionInstalled": "انسٹال شدہ ورژن: {{version}}"
+    "versionInstalled": "انسٹال شدہ ورژن: {{version}}",
+    "adhanPreviewTitle": "اذان پیش نظارہ",
+    "adhanPreviewBody": ""
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",
@@ -202,7 +205,14 @@
     "north": "ن",
     "east": "ای",
     "south": "ایس",
-    "west": "ڈبلیو"
+    "west": "ڈبلیو",
+    "a11yDialLive": "Qibla compass. Rotate {{deg}} degrees to face Qibla.",
+    "a11yDialChecking": "Qibla compass. Waiting for sensor data.",
+    "a11yDialUnavailable": "Qibla compass unavailable.",
+    "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
+    "a11ySignal_good": "Compass signal: good.",
+    "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
+    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
   },
   "prayer": {
     "Fajr": "فجر",

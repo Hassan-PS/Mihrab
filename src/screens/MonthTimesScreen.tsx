@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   },
   todayBar: {
     position: 'absolute',
-    left: 0,
+    start: 0,
     top: 0,
     bottom: 0,
     width: 3,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   cellDay: {
     flex: COL_DAY,
     fontSize: 13,
-    paddingLeft: 4,
+    paddingStart: 4,
   },
   cellTime: {
     flex: COL_TIME,
