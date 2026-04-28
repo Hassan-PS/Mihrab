@@ -210,7 +210,13 @@
     "Dhuhr": "杜尔",
     "Asr": "晡气",
     "Maghrib": "昏礼",
-    "Isha": "伊莎"
+    "Isha": "伊莎",
+    "Fajr_abbr": "晨曦",
+    "Sunrise_abbr": "日出",
+    "Dhuhr_abbr": "杜尔",
+    "Asr_abbr": "晡气",
+    "Maghrib_abbr": "昏礼",
+    "Isha_abbr": "伊莎"
   },
   "placeSearch": {
     "label": "搜索城市或地址",
