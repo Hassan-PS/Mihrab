@@ -5,15 +5,6 @@
     android:background="#E01C1C1E"
     android:padding="8dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:padding="4dp"
-        android:text="↻"
-        android:textColor="#80FFFFFF"
-        android:textSize="16sp" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -25,6 +16,15 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1.0">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:padding="4dp"
+                android:text="↻"
+                android:textColor="#80FFFFFF"
+                android:textSize="14sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
