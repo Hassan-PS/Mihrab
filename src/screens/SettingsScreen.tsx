@@ -51,7 +51,12 @@ import {
 import {
   getNotificationSoundOption,
   NOTIFICATION_SOUND_OPTIONS,
+  type NotificationSoundId,
 } from '../notifications/notificationSounds';
+import {
+  previewAdhanSound,
+  stopAdhanPreview,
+} from '../notifications/prayerNotifications';
 import { getInstalledAppVersionLabel } from '../appVersion';
 
 function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
@@ -77,6 +82,7 @@ export function SettingsScreen() {
   const [methodModal, setMethodModal] = useState(false);
   const [preReminderModal, setPreReminderModal] = useState(false);
   const [notificationSoundModal, setNotificationSoundModal] = useState(false);
+  const [previewingId, setPreviewingId] = useState<NotificationSoundId | null>(null);
   const [providerModal, setProviderModal] = useState(false);
   const [languageModal, setLanguageModal] = useState(false);
   const [draftLat, setDraftLat] = useState('');
@@ -889,11 +895,19 @@ export function SettingsScreen() {
         visible={notificationSoundModal}
         animationType="slide"
         transparent
-        onRequestClose={() => setNotificationSoundModal(false)}>
+        onRequestClose={() => {
+          stopAdhanPreview().catch(() => {});
+          setPreviewingId(null);
+          setNotificationSoundModal(false);
+        }}>
         <View style={styles.modalRoot}>
           <Pressable
             style={[styles.modalFill, { backgroundColor: palette.overlay }]}
-            onPress={() => setNotificationSoundModal(false)}
+            onPress={() => {
+              stopAdhanPreview().catch(() => {});
+              setPreviewingId(null);
+              setNotificationSoundModal(false);
+            }}
           />
           <View
             style={[
@@ -916,17 +930,42 @@ export function SettingsScreen() {
                     },
                   ]}
                   onPress={() => {
-                    updateSettings({
-                      notificationSound: item.id,
-                    });
+                    stopAdhanPreview().catch(() => {});
+                    setPreviewingId(null);
+                    updateSettings({ notificationSound: item.id });
                     setNotificationSoundModal(false);
                   }}>
-                  <Text style={[styles.methodName, { color: palette.text }]}>
-                    {t(item.labelKey)}
-                  </Text>
-                  <Text style={[styles.providerSub, { color: palette.muted }]}>
-                    {t(item.helpKey)}
-                  </Text>
+                  <View style={styles.soundRowContent}>
+                    <View style={styles.soundRowText}>
+                      <Text style={[styles.methodName, { color: palette.text }]}>
+                        {t(item.labelKey)}
+                      </Text>
+                      <Text style={[styles.providerSub, { color: palette.muted }]}>
+                        {t(item.helpKey)}
+                      </Text>
+                    </View>
+                    {item.id !== 'default' && (
+                      <Pressable
+                        hitSlop={10}
+                        onPress={e => {
+                          e.stopPropagation();
+                          if (previewingId === item.id) {
+                            stopAdhanPreview().catch(() => {});
+                            setPreviewingId(null);
+                          } else {
+                            setPreviewingId(item.id);
+                            previewAdhanSound(item.id).catch(() => {
+                              setPreviewingId(null);
+                            });
+                          }
+                        }}
+                        style={[styles.soundPreviewBtn, { borderColor: palette.border }]}>
+                        <Text style={[styles.soundPreviewIcon, { color: palette.accent }]}>
+                          {previewingId === item.id ? '■' : '▶'}
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
                 </Pressable>
               )}
             />
@@ -1122,7 +1161,7 @@ const styles = StyleSheet.create({
   },
   providerCopy: {
     flex: 1,
-    paddingRight: 12,
+    paddingEnd: 12,
   },
   changeLink: {
     fontSize: 17,
@@ -1138,7 +1177,7 @@ const styles = StyleSheet.create({
   },
   switchCopy: {
     flex: 1,
-    paddingRight: 12,
+    paddingEnd: 12,
   },
   help: {
     fontSize: 13,
@@ -1218,6 +1257,26 @@ const styles = StyleSheet.create({
   providerSub: {
     fontSize: 13,
     marginTop: 4,
+    lineHeight: 18,
+  },
+  soundRowContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  soundRowText: {
+    flex: 1,
+  },
+  soundPreviewBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginStart: 8,
+  },
+  soundPreviewIcon: {
+    fontSize: 14,
     lineHeight: 18,
   },
   versionText: {

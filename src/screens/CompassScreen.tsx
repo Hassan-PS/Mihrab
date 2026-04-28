@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHeaderHeight } from '@react-navigation/elements';
 import {
+  AccessibilityInfo,
   ActivityIndicator,
   AppState,
   Linking,
@@ -110,8 +111,35 @@ export function CompassScreen() {
   const headingHistoryRef = useRef<number[]>([]);
   const gotSampleRef = useRef(false);
   const modeRef = useRef<CompassMode>('checking');
+  // Accessibility: track last announced values to debounce announcements.
+  const lastAnnouncedDegRef = useRef<number | null>(null);
+  const lastAnnouncedQualityRef = useRef<SignalQuality | null>(null);
 
   useAndroidSubScreenBack();
+
+  // Announce Qibla direction to screen readers when heading changes by >5°.
+  const announceHeading = useCallback((deg: number) => {
+    const last = lastAnnouncedDegRef.current;
+    if (last === null || Math.abs(deg - last) >= 5) {
+      lastAnnouncedDegRef.current = deg;
+      const rounded = Math.round(deg);
+      AccessibilityInfo.announceForAccessibility(
+        t('compass.a11yNeedleDeg', { deg: rounded }),
+      );
+    }
+  }, [t]);
+
+  // Announce signal quality transitions.
+  const announceQuality = useCallback((quality: SignalQuality) => {
+    if (quality !== lastAnnouncedQualityRef.current) {
+      lastAnnouncedQualityRef.current = quality;
+      if (quality === 'good' || quality === 'weak' || quality === 'very_weak') {
+        AccessibilityInfo.announceForAccessibility(
+          t(`compass.a11ySignal_${quality}`),
+        );
+      }
+    }
+  }, [t]);
 
   const needsGpsPrime =
     settings.locationMode === 'gps' &&
@@ -349,6 +377,29 @@ export function CompassScreen() {
     };
   }, [hydrated, needsGpsPrime]);
 
+  // Accessibility announcements — only fires when screen reader is active.
+  useEffect(() => {
+    if (mode !== 'live') {
+      return;
+    }
+    AccessibilityInfo.isScreenReaderEnabled().then(enabled => {
+      if (enabled) {
+        announceHeading(needleDeg);
+      }
+    }).catch(() => {});
+  }, [mode, needleDeg, announceHeading]);
+
+  useEffect(() => {
+    if (mode !== 'live') {
+      return;
+    }
+    AccessibilityInfo.isScreenReaderEnabled().then(enabled => {
+      if (enabled) {
+        announceQuality(signalQuality);
+      }
+    }).catch(() => {});
+  }, [mode, signalQuality, announceQuality]);
+
   const canShowLiveGuidance = mode === 'live' && signalStrength >= 0;
   const showStabilityWarning = canShowLiveGuidance && stability < 45;
   const showWeakSignal =
@@ -381,6 +432,19 @@ export function CompassScreen() {
         </Text>
       </View>
       <View
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityLabel={t('compass.signalStrength')}
+        accessibilityValue={{
+          min: 0,
+          max: 100,
+          now: signalStrength >= 0 ? signalStrength : 0,
+          text: signalStrength === -1
+            ? t('compass.signalChecking')
+            : signalStrength === -2
+              ? t('compass.signalOff')
+              : `${signalStrength}%`,
+        }}
         style={[
           styles.signalTrack,
           { backgroundColor: palette.border },
@@ -487,6 +551,15 @@ export function CompassScreen() {
 
       <View style={styles.dialWrap}>
         <View
+          accessible
+          accessibilityRole="image"
+          accessibilityLabel={
+            mode === 'live'
+              ? t('compass.a11yDialLive', { deg: Math.round(needleDeg) })
+              : mode === 'checking'
+                ? t('compass.a11yDialChecking')
+                : t('compass.a11yDialUnavailable')
+          }
           style={[
             styles.dial,
             {
