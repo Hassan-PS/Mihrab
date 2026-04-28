@@ -334,20 +334,6 @@ export function HomeScreen() {
         </View>
       )}
 
-      {/* GPS fallback notice: shown when GPS failed but last cached coordinates are being used */}
-      {state.usingLastGpsCoords && !state.usingLocalFallback && (
-        <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>
-          <Text style={[styles.localFallbackText, { color: palette.text }]}>
-            {t('home.lastGpsCoordsNotice')}
-          </Text>
-          <Pressable onPress={() => retry()} hitSlop={8}>
-            <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
-              {t('common.retry')}
-            </Text>
-          </Pressable>
-        </View>
-      )}
-
       {/* Android: exact-alarm permission denied — notifications may be up to 15 min late */}
       {exactAlarmDenied && (
         <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>

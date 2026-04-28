@@ -61,6 +61,12 @@ private func computeDynamicNext(
       }
     }
   }
+  // All prayer times appear to be in the past for today's wall clock — this
+  // means the JS layer has already rolled the payload over to tomorrow's data
+  // (which it does after Isha). Return the first prayer (Fajr) as the next one.
+  if let first = rows.first {
+    return (first.key, first.abbr ?? first.key, first.time)
+  }
   return nil
 }
 
@@ -106,11 +112,32 @@ struct Provider: TimelineProvider {
     let currentNext = computeDynamicNext(after: now, rows: payload.rows, calendar: cal)
     entries.append(Entry(date: now, payload: payload, dynamicNextKey: currentNext?.key, dynamicNextName: currentNext?.name, dynamicNextTime: currentNext?.time))
 
+    // Detect whether the payload contains tomorrow's data. This happens when
+    // all prayer times in the payload are earlier than the current wall-clock
+    // hour:minute (e.g. payload has Fajr 05:02 but it's currently 21:30 after
+    // Isha). In that case we must schedule the per-prayer entries against
+    // tomorrow's calendar date, otherwise they all resolve to today's past and
+    // no future timeline entries are produced.
+    let allTimesInPast = payload.rows.allSatisfy { row in
+      let parts = row.time.split(separator: ":")
+      guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
+            let d = cal.date(bySettingHour: h, minute: m, second: 0, of: now)
+      else { return true }
+      return d <= now
+    }
+    let baseDate: Date
+    if allTimesInPast {
+      // Use the start of tomorrow as the anchor for scheduling entries.
+      baseDate = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: now)) ?? now
+    } else {
+      baseDate = now
+    }
+
     var lastDate = now
     for row in payload.rows {
       let parts = row.time.split(separator: ":")
       if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
-         let prayerDate = cal.date(bySettingHour: h, minute: m, second: 0, of: now),
+         let prayerDate = cal.date(bySettingHour: h, minute: m, second: 0, of: baseDate),
          prayerDate > now {
         let next = computeDynamicNext(after: prayerDate, rows: payload.rows, calendar: cal)
         entries.append(Entry(date: prayerDate, payload: payload, dynamicNextKey: next?.key, dynamicNextName: next?.name, dynamicNextTime: next?.time))
@@ -118,7 +145,10 @@ struct Provider: TimelineProvider {
       }
     }
 
-    let refresh = Calendar.current.date(byAdding: .minute, value: 15, to: lastDate) ?? lastDate.addingTimeInterval(900)
+    // Ask WidgetKit to refresh 15 min after the last prayer in the timeline.
+    // If we are in the overnight window (all-times-in-past), the app will push
+    // fresh data on next launch; the 15-min policy is a safety net.
+    let refresh = cal.date(byAdding: .minute, value: 15, to: lastDate) ?? lastDate.addingTimeInterval(900)
     completion(Timeline(entries: entries, policy: .after(refresh)))
   }
 
