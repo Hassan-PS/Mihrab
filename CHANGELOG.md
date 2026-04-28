@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.44] — 2026-04-28
+
+### Fixed
+- **Android medium widget — wrong size**: On Android 12+ (API 31) the medium widget placed at 4×3 instead of 4×1 due to the `xml-v31/prayer_widget_info.xml` override pointing to the large widget layout (`prayer_widget`) with `targetCellHeight="3"`. Corrected to use `prayer_widget_horizontal` and `targetCellHeight="1"`.
+
+### Changed
+- **Android medium widget — design**: Redesigned to match the large widget's visual style — `sans-serif-light` time, `sans-serif-medium` all-caps prayer name, a thin vertical divider between the next-prayer panel and the prayer list. Right panel rows made more compact (equal 1:1 weight split, 4dp row padding) to fit the 4×1 height.
+
 ## [1.5.30] — 2026-04-27
 
 ### Fixed
