@@ -1,26 +1,7 @@
-import { TurboModuleRegistry, NativeModules, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import type { TimingsMap } from '../types/prayer';
 import { buildWidgetPayload } from './buildWidgetPayload';
-
-type NativePrayerWidget = {
-  setData: (json: string) => Promise<void>;
-};
-
-function getNativeModule(): NativePrayerWidget | null {
-  const legacy = NativeModules.PrayerWidget as NativePrayerWidget | undefined;
-  if (legacy && legacy.setData) {
-    return legacy;
-  }
-  try {
-    const turbo = TurboModuleRegistry.get<NativePrayerWidget>('PrayerWidget');
-    if (turbo) {
-      return turbo;
-    }
-  } catch (e) {
-    // Ignore
-  }
-  return null;
-}
+import { getPrayerWidgetModule } from '../native/PrayerWidget';
 
 /**
  * Updates home-screen widget data (Android + iOS when native module is linked).
@@ -34,7 +15,7 @@ export async function syncPrayerWidget(
   if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
     return;
   }
-  const mod = getNativeModule();
+  const mod = getPrayerWidgetModule();
   if (!mod) {
     return;
   }

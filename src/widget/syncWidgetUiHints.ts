@@ -1,59 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { TurboModuleRegistry, NativeModules, Platform, AppState } from 'react-native';
+import { Platform, AppState } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { PrayerAppSettings, WidgetHighlightId } from '../settings/types';
+import { getPrayerWidgetModule } from '../native/PrayerWidget';
 
 const VALID_WIDGET_HIGHLIGHT_IDS = new Set<string>([
   'dynamic', 'green', 'teal', 'blue', 'amber', 'custom',
 ]);
 
-type PrayerWidgetNative = {
-  setUiHints?: (style: string, oledBackground: boolean) => Promise<void>;
-  setWidgetHighlightDynamic?: (enabled: boolean) => Promise<void>;
-  setAndroidWidgetAppearance?: (
-    opacity: number,
-    highlightId: string,
-    highlightHex: string | null,
-    highlightDynamic: boolean,
-  ) => Promise<void>;
-  getAndroidWidgetAppearance?: () => Promise<{
-    opacity: number;
-    highlightId: string;
-    highlightHex: string;
-    highlightDynamic: boolean;
-  } | null>;
-  setIosWidgetHighlightAppearance?: (
-    highlightId: string,
-    highlightHex: string | null,
-    highlightDynamic: boolean,
-  ) => Promise<void>;
-};
-
 function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
   return settings.widgetHighlightId === 'dynamic';
-}
-
-function getWidgetModule(): PrayerWidgetNative | undefined {
-  const legacy = NativeModules.PrayerWidget as PrayerWidgetNative | undefined;
-  if (legacy) {
-    return legacy;
-  }
-  try {
-    const turbo = TurboModuleRegistry.get<PrayerWidgetNative>('PrayerWidget');
-    if (turbo) {
-      return turbo;
-    }
-  } catch (e) {
-    // Ignore
-  }
-  return undefined;
 }
 
 function syncNativeWidgetAppearance(
   settings: PrayerAppSettings,
   dynamicHl: boolean,
 ): void {
-  const mod = getWidgetModule();
+  const mod = getPrayerWidgetModule();
   const hex =
     settings.widgetHighlightId === 'custom'
       ? settings.widgetHighlightCustomHex
@@ -100,7 +63,7 @@ export function useSyncWidgetUiHints(): void {
     if (!hydrated || Platform.OS !== 'android') return;
 
     const syncFromNative = () => {
-      const mod = getWidgetModule();
+      const mod = getPrayerWidgetModule();
       if (mod?.getAndroidWidgetAppearance) {
         mod.getAndroidWidgetAppearance().then(nativeSettings => {
           if (nativeSettings) {

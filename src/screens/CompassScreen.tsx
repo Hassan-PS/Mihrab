@@ -10,9 +10,9 @@ import {
   StyleSheet,
   Text,
   View,
-  NativeModules,
   NativeEventEmitter,
 } from 'react-native';
+import { CompassModule } from '../native/CompassModule';
 import {
   magnetometer,
   SensorTypes,
@@ -43,10 +43,13 @@ type CompassMode =
 type SignalStrength = number;
 type SignalQuality = 'unknown' | 'good' | 'weak' | 'very_weak';
 
-const { CompassModule } = NativeModules;
 const compassEmitter =
   Platform.OS === 'ios' && CompassModule
-    ? new NativeEventEmitter(CompassModule)
+    // NativeEventEmitter expects a full NativeModule (with addListener /
+    // removeListeners), which CompassModule satisfies at runtime; cast here
+    // to avoid a compile-time mismatch against the narrower interface.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? new NativeEventEmitter(CompassModule as any)
     : null;
 
 function headingFromMagnetometer(x: number, y: number): number {
@@ -279,7 +282,9 @@ export function CompassScreen() {
             try {
               sub?.remove();
             } finally {
-              CompassModule.stopUpdates();
+              // CompassModule is non-null here: we're inside the
+              // `if (Platform.OS === 'ios' && CompassModule)` branch.
+              CompassModule?.stopUpdates();
             }
           },
         };
