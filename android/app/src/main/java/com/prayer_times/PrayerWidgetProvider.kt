@@ -107,14 +107,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
-    val action = intent.action
-    if (action == Intent.ACTION_USER_PRESENT || action == Intent.ACTION_SCREEN_ON) {
-      val mgr = AppWidgetManager.getInstance(context)
-      val cn = ComponentName(context, PrayerWidgetProvider::class.java)
-      val ids = mgr.getAppWidgetIds(cn)
-      if (ids.isNotEmpty()) {
-        refreshAll(context, mgr, ids)
-      }
+    when (intent.action) {
+      Intent.ACTION_USER_PRESENT,
+      Intent.ACTION_SCREEN_ON,
+      Intent.ACTION_WALLPAPER_CHANGED,
+      Intent.ACTION_BOOT_COMPLETED,
+      ACTION_PRAYER_TIME_ELAPSED -> requestUpdate(context)
     }
   }
 
@@ -145,6 +143,8 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_WIDGET_HIGHLIGHT_ID = "widget_highlight_id"
     const val PREFS_WIDGET_HIGHLIGHT_HEX = "widget_highlight_hex"
     const val PREFS_WIDGET_HIGHLIGHT_DYNAMIC = "widget_highlight_dynamic"
+    /** Internal broadcast fired by AlarmManager at each prayer time transition. */
+    const val ACTION_PRAYER_TIME_ELAPSED = "com.prayer_times.ACTION_PRAYER_TIME_ELAPSED"
 
     private const val NEUTRAL_TEXT = "#E8EAED"
     private const val NEUTRAL_MUTED = "#9AA0A6"
@@ -383,7 +383,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
       }
 
-      // Schedule next update using AlarmManager
+      // Schedule next update using AlarmManager — targets all widget providers.
       if (nextUpdateMinutes != -1) {
         val updateTime = java.util.Calendar.getInstance().apply {
           set(java.util.Calendar.HOUR_OF_DAY, nextUpdateMinutes / 60)
@@ -391,10 +391,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           set(java.util.Calendar.SECOND, 0)
         }
         val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
-          action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-          val mgr = AppWidgetManager.getInstance(context)
-          val cn = ComponentName(context, PrayerWidgetProvider::class.java)
-          putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mgr.getAppWidgetIds(cn))
+          action = ACTION_PRAYER_TIME_ELAPSED
         }
         val pi = PendingIntent.getBroadcast(context, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager

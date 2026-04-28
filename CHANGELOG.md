@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.45] — 2026-04-28
+
+### Fixed
+- **Android widgets — refresh on wallpaper/theme change**: All three widget variants (small, medium, large) now listen for `ACTION_WALLPAPER_CHANGED` and re-render immediately when the system wallpaper or Material You color palette changes. Previously the widget could stay the wrong accent color for up to 30 minutes.
+- **Android widgets — refresh after reboot**: Widgets now listen for `ACTION_BOOT_COMPLETED` and repopulate as soon as the device finishes booting. Previously they stayed stale until the user opened the app or the 30-minute system timer fired.
+- **Android widgets — prayer-time highlight advance**: The AlarmManager alarm that fires at each prayer time now refreshes all three widget variants. Previously it only targeted medium widgets, so small and large widgets kept the wrong prayer row highlighted after a prayer time passed.
+- **Android widgets — screen-on refresh scope**: `ACTION_SCREEN_ON` and `ACTION_USER_PRESENT` now correctly refresh all three widget variants. Previously if only a small or large widget was on the home screen (no medium), the screen-on refresh was a no-op.
+- **Android medium widget — refresh button overlap**: The refresh button (↻) was positioned inside the left panel at `top|start`, overlapping the prayer name on the narrow 4×1 layout. Moved to the top-right corner of the whole widget so it clears the left-side content.
+
 ## [1.5.44] — 2026-04-28
 
 ### Fixed
