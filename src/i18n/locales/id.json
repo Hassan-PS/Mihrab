@@ -31,7 +31,8 @@
     "nextIn": "di {{time}}",
     "hanafiSuffix": "Hanafi Ashar",
     "monthTimesLink": "Waktu sholat sebulan penuh",
-    "localFallbackNotice": "Perhitungan lokal — sambungkan untuk memperbarui"
+    "localFallbackNotice": "Perhitungan lokal — sambungkan untuk memperbarui",
+    "lastGpsCoordsNotice": "Menggunakan lokasi terakhir — GPS tidak tersedia"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",

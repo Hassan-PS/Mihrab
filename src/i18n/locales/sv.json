@@ -31,7 +31,8 @@
     "nextIn": "om {{time}}",
     "hanafiSuffix": "Hanafi asr",
     "monthTimesLink": "Bönetider för hela månaden",
-    "localFallbackNotice": "Lokal beräkning — anslut för att uppdatera"
+    "localFallbackNotice": "Lokal beräkning — anslut för att uppdatera",
+    "lastGpsCoordsNotice": "Använder senast kända position — GPS inte tillgänglig"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",

@@ -31,7 +31,8 @@
     "nextIn": "im {{time}}",
     "hanafiSuffix": "Hanafi Asr",
     "monthTimesLink": "Gebetszeiten für den ganzen Monat",
-    "localFallbackNotice": "Lokale Berechnung — Verbinden zum Aktualisieren"
+    "localFallbackNotice": "Lokale Berechnung — Verbinden zum Aktualisieren",
+    "lastGpsCoordsNotice": "Letzten Standort verwenden — GPS nicht verfügbar"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",

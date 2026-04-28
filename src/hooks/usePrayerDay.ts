@@ -1,7 +1,13 @@
 import Geolocation from '@react-native-community/geolocation';
+import NetInfo from '@react-native-community/netinfo';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, PermissionsAndroid, Platform } from 'react-native';
-import { getOrFetchPrayerTimes, getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
+import {
+  getOrFetchPrayerTimes,
+  getCacheStatus,
+  refreshPrayerDataCache,
+  maybeFullSyncOnWifi,
+} from '../prayer/prayerStorage';
 import { computeLocalAdhanTimes } from '../providers/localAdhan';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
@@ -22,6 +28,8 @@ export type PrayerDayState =
       tomorrow?: TimingsMap;
       /** True when showing on-device fallback times because the network/provider failed. */
       usingLocalFallback?: boolean;
+      /** True when GPS failed and the last cached GPS position is being used. */
+      usingLastGpsCoords?: boolean;
     };
 
 export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
@@ -29,7 +37,12 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
   const loadGenerationRef = useRef(0);
 
   const loadTimes = useCallback(
-    async (latitude: number, longitude: number, isBackgroundRefresh: boolean = false) => {
+    async (
+      latitude: number,
+      longitude: number,
+      isBackgroundRefresh: boolean = false,
+      usingLastGpsCoords: boolean = false,
+    ) => {
       const gen = ++loadGenerationRef.current;
       const coords = { latitude, longitude };
       const provider = getEffectiveDataProvider(
@@ -71,6 +84,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           longitude,
           today: todayTimings,
           tomorrow,
+          usingLastGpsCoords: usingLastGpsCoords || undefined,
         });
 
         // Background cache refresh if needed
@@ -134,6 +148,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             today: localToday.timings,
             tomorrow: localTomorrow,
             usingLocalFallback: true,
+            usingLastGpsCoords: usingLastGpsCoords || undefined,
           });
         } catch {
           // Local calculation also failed (invalid coordinates?)
@@ -180,7 +195,12 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       let watchdogFired = false;
       const watchdog = setTimeout(() => {
         watchdogFired = true;
-        if (!isBackgroundRefresh) {
+        // GPS timed out — silently fall back to last known position if available
+        const cachedLat = settings.lastFetchedLatitude;
+        const cachedLng = settings.lastFetchedLongitude;
+        if (cachedLat != null && cachedLng != null) {
+          loadTimes(cachedLat, cachedLng, isBackgroundRefresh, true).catch(() => {});
+        } else if (!isBackgroundRefresh) {
           setState({
             phase: 'location_error',
             message: 'Location request timed out',
@@ -197,11 +217,18 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         },
         err => {
           clearTimeout(watchdog);
-          if (!watchdogFired && !isBackgroundRefresh) {
-            setState({
-              phase: 'location_error',
-              message: err.message || 'Could not get location',
-            });
+          if (!watchdogFired) {
+            // GPS error — fall back to last known position if available
+            const cachedLat = settings.lastFetchedLatitude;
+            const cachedLng = settings.lastFetchedLongitude;
+            if (cachedLat != null && cachedLng != null) {
+              loadTimes(cachedLat, cachedLng, isBackgroundRefresh, true).catch(() => {});
+            } else if (!isBackgroundRefresh) {
+              setState({
+                phase: 'location_error',
+                message: err.message || 'Could not get location',
+              });
+            }
           }
         },
         { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 },
@@ -213,6 +240,59 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     settings.locationMode,
     settings.manualLatitude,
     settings.manualLongitude,
+    settings.lastFetchedLatitude,
+    settings.lastFetchedLongitude,
+  ]);
+
+  // WiFi-triggered background sync: keep the 12-month cache topped up whenever
+  // the device connects to WiFi, using whatever coords are currently available.
+  useEffect(() => {
+    if (!hydrated || !settings.locationOnboardingComplete) {
+      return;
+    }
+    const unsubscribeNetInfo = NetInfo.addEventListener(netState => {
+      if (!netState.isConnected || netState.type !== 'wifi') {
+        return;
+      }
+      const lat =
+        settings.locationMode === 'gps'
+          ? settings.lastFetchedLatitude
+          : settings.manualLatitude;
+      const lng =
+        settings.locationMode === 'gps'
+          ? settings.lastFetchedLongitude
+          : settings.manualLongitude;
+      if (lat == null || lng == null) {
+        return;
+      }
+      const provider = getEffectiveDataProvider(
+        settings.dataProviderAuto,
+        settings.dataProvider,
+        { latitude: lat, longitude: lng },
+      );
+      maybeFullSyncOnWifi({
+        provider,
+        latitude: lat,
+        longitude: lng,
+        calculationMethod: settings.calculationMethod,
+        school: settings.school,
+      }).catch(e => console.warn('WiFi-triggered sync check failed:', e));
+    });
+    return () => {
+      unsubscribeNetInfo();
+    };
+  }, [
+    hydrated,
+    settings.locationOnboardingComplete,
+    settings.locationMode,
+    settings.lastFetchedLatitude,
+    settings.lastFetchedLongitude,
+    settings.manualLatitude,
+    settings.manualLongitude,
+    settings.dataProvider,
+    settings.dataProviderAuto,
+    settings.calculationMethod,
+    settings.school,
   ]);
 
   useEffect(() => {

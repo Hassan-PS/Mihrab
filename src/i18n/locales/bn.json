@@ -31,7 +31,8 @@
     "nextIn": "{{time}} এ",
     "hanafiSuffix": "হানাফী আসর",
     "monthTimesLink": "পুরো মাসের নামাজের সময়",
-    "localFallbackNotice": "ডিভাইস গণনা — আপডেটের জন্য সংযোগ করুন"
+    "localFallbackNotice": "ডিভাইস গণনা — আপডেটের জন্য সংযোগ করুন",
+    "lastGpsCoordsNotice": "শেষ পরিচিত অবস্থান ব্যবহার করা হচ্ছে — GPS অনুপলব্ধ"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",

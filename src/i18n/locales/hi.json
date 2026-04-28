@@ -31,7 +31,8 @@
     "nextIn": "{{time}} में",
     "hanafiSuffix": "हनफ़ी अस्र",
     "monthTimesLink": "पूरे महीने के लिए प्रार्थना का समय",
-    "localFallbackNotice": "स्थानीय गणना — अपडेट के लिए कनेक्ट करें"
+    "localFallbackNotice": "स्थानीय गणना — अपडेट के लिए कनेक्ट करें",
+    "lastGpsCoordsNotice": "अंतिम ज्ञात स्थान का उपयोग — GPS अनुपलब्ध"
   },
   "errors": {
     "locationNeededTitle": "स्थान की आवश्यकता है",
