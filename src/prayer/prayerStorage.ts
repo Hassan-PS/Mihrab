@@ -15,6 +15,11 @@ export type StoredPrayerData = {
 
 const STORAGE_KEY = 'prayer_times_cache';
 
+// Serialises all cache writes so that concurrent fetches (e.g. month scroll)
+// don't clobber each other.  Each write waits for the previous one to finish
+// before reading-and-updating the cache.
+let _writeMutex: Promise<void> = Promise.resolve();
+
 function getMonthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
@@ -97,30 +102,34 @@ export async function getOrFetchPrayerTimes(
     school: params.school,
   });
 
-  // Save to cache asynchronously
-  getStoredPrayerData().then(async (stored) => {
-    let newData = stored;
-    if (!newData || !isSameParams(newData, params)) {
-      newData = {
-        provider: params.provider,
-        latitude: params.latitude,
-        longitude: params.longitude,
-        calculationMethod: params.calculationMethod,
-        school: params.school,
-        months: {},
-      };
+  // Save to cache via the mutex so concurrent fetches don't clobber each other.
+  _writeMutex = _writeMutex.then(async () => {
+    try {
+      let newData = await getStoredPrayerData();
+      if (!newData || !isSameParams(newData, params)) {
+        newData = {
+          provider: params.provider,
+          latitude: params.latitude,
+          longitude: params.longitude,
+          calculationMethod: params.calculationMethod,
+          school: params.school,
+          months: {},
+        };
+      }
+
+      const monthKey = getMonthKey(params.date);
+      const dayKey = getDayKey(params.date);
+
+      if (!newData.months[monthKey]) {
+        newData.months[monthKey] = {};
+      }
+      newData.months[monthKey][dayKey] = res.timings;
+
+      await saveStoredPrayerData(newData);
+    } catch (e) {
+      console.error('Failed to update prayer cache after fetch', e);
     }
-
-    const monthKey = getMonthKey(params.date);
-    const dayKey = getDayKey(params.date);
-
-    if (!newData.months[monthKey]) {
-      newData.months[monthKey] = {};
-    }
-    newData.months[monthKey][dayKey] = res.timings;
-
-    await saveStoredPrayerData(newData);
-  }).catch(e => console.error('Failed to update prayer cache after fetch', e));
+  });
 
   return res.timings;
 }

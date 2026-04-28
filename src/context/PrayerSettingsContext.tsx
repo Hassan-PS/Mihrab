@@ -45,7 +45,12 @@ export function PrayerSettingsProvider({
 
   const updateSettings = useCallback((patch: Partial<PrayerAppSettings>) => {
     setSettings(prev => {
-      const next = { ...prev, ...patch };
+      let next = { ...prev, ...patch };
+      // When switching location mode, drop the cached GPS coordinates so screens
+      // never briefly display times for the old location.
+      if (patch.locationMode !== undefined && patch.locationMode !== prev.locationMode) {
+        next = { ...next, lastFetchedLatitude: undefined, lastFetchedLongitude: undefined };
+      }
       saveSettings(next).catch(e => console.error('Failed to save settings', e));
       return next;
     });

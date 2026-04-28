@@ -210,7 +210,13 @@
     "Dhuhr": "Öğle yemeği",
     "Asr": "İkindi",
     "Maghrib": "Akşam",
-    "Isha": "Yatsı"
+    "Isha": "Yatsı",
+    "Fajr_abbr": "Sabah",
+    "Sunrise_abbr": "Gün",
+    "Dhuhr_abbr": "Öğle",
+    "Asr_abbr": "İknd",
+    "Maghrib_abbr": "Akşam",
+    "Isha_abbr": "Yatsı"
   },
   "placeSearch": {
     "label": "Şehir veya adres arayın",

@@ -132,12 +132,30 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           return;
         }
       }
+      // Wrap getCurrentPosition in a 25 s watchdog so that unresponsive OS
+      // callbacks (seen on certain Android ROMs) don't leave the screen
+      // frozen in loading state forever.
+      let watchdogFired = false;
+      const watchdog = setTimeout(() => {
+        watchdogFired = true;
+        if (!isBackgroundRefresh) {
+          setState({
+            phase: 'location_error',
+            message: 'Location request timed out',
+          });
+        }
+      }, 25000);
+
       Geolocation.getCurrentPosition(
         pos => {
-          loadTimes(pos.coords.latitude, pos.coords.longitude, isBackgroundRefresh).catch(() => {});
+          clearTimeout(watchdog);
+          if (!watchdogFired) {
+            loadTimes(pos.coords.latitude, pos.coords.longitude, isBackgroundRefresh).catch(() => {});
+          }
         },
         err => {
-          if (!isBackgroundRefresh) {
+          clearTimeout(watchdog);
+          if (!watchdogFired && !isBackgroundRefresh) {
             setState({
               phase: 'location_error',
               message: err.message || 'Could not get location',
