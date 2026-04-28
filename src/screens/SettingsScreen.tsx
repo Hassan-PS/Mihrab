@@ -2,9 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  FlatList,
   Linking,
-  Modal,
   PermissionsAndroid,
   Platform,
   Pressable,
@@ -15,6 +13,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { MethodModal } from './settings/MethodModal';
+import { PreReminderModal } from './settings/PreReminderModal';
+import { SoundPickerModal } from './settings/SoundPickerModal';
+import { LanguageModal } from './settings/LanguageModal';
 import notifee, {
   AndroidNotificationSetting,
   AuthorizationStatus,
@@ -25,8 +27,7 @@ import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import type { AppPalette } from '../theme/appPalette';
 import type { GeocodedPlace } from '../geocoding/nominatim';
-import { CALCULATION_METHODS, getMethodLabel } from '../settings/methods';
-import { PRE_PRAYER_REMINDER_OPTIONS } from '../settings/prePrayerReminder';
+import { getMethodLabel } from '../settings/methods';
 import {
   providerHidesCalculationMethod,
   providerHidesHanafiAsr,
@@ -39,7 +40,7 @@ import {
   getProviderLabel,
   PRAYER_DATA_PROVIDERS,
 } from '../settings/providersCatalog';
-import type { AppLanguage, WidgetHighlightId } from '../settings/types';
+import type { WidgetHighlightId } from '../settings/types';
 import { showDonationsUi } from '../distribution';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
@@ -50,13 +51,8 @@ import {
 } from '../theme/chrome';
 import {
   getNotificationSoundOption,
-  NOTIFICATION_SOUND_OPTIONS,
   type NotificationSoundId,
 } from '../notifications/notificationSounds';
-import {
-  previewAdhanSound,
-  stopAdhanPreview,
-} from '../notifications/prayerNotifications';
 import { getInstalledAppVersionLabel } from '../appVersion';
 
 function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
@@ -845,235 +841,39 @@ export function SettingsScreen() {
         }}
       />
 
-      <Modal
+      <PreReminderModal
         visible={preReminderModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setPreReminderModal(false)}>
-        <View style={styles.modalRoot}>
-          <Pressable
-            style={[styles.modalFill, { backgroundColor: palette.overlay }]}
-            onPress={() => setPreReminderModal(false)}
-          />
-          <View
-            style={[
-              styles.modalSheet,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <Text style={[styles.modalTitle, { color: palette.text }]}>
-              {t('settings.prePrayerReminderModalTitle')}
-            </Text>
-            <FlatList
-              data={[...PRE_PRAYER_REMINDER_OPTIONS]}
-              keyExtractor={item => String(item)}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={[
-                    styles.methodRow,
-                    rowDividerStyle(palette),
-                    settings.prePrayerReminderMinutes === item && {
-                      backgroundColor: palette.bg,
-                    },
-                  ]}
-                  onPress={() => {
-                    updateSettings({ prePrayerReminderMinutes: item });
-                    setPreReminderModal(false);
-                  }}>
-                  <Text style={[styles.methodName, { color: palette.text }]}>
-                    {item === 0
-                      ? t('settings.prePrayerReminderOff')
-                      : t('settings.prePrayerReminderOption', { count: item })}
-                  </Text>
-                </Pressable>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+        current={settings.prePrayerReminderMinutes}
+        palette={palette}
+        onSelect={minutes => updateSettings({ prePrayerReminderMinutes: minutes })}
+        onClose={() => setPreReminderModal(false)}
+      />
 
-      <Modal
+      <SoundPickerModal
         visible={notificationSoundModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => {
-          stopAdhanPreview().catch(() => {});
-          setPreviewingId(null);
-          setNotificationSoundModal(false);
-        }}>
-        <View style={styles.modalRoot}>
-          <Pressable
-            style={[styles.modalFill, { backgroundColor: palette.overlay }]}
-            onPress={() => {
-              stopAdhanPreview().catch(() => {});
-              setPreviewingId(null);
-              setNotificationSoundModal(false);
-            }}
-          />
-          <View
-            style={[
-              styles.modalSheet,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <Text style={[styles.modalTitle, { color: palette.text }]}>
-              {t('settings.notificationSoundModalTitle')}
-            </Text>
-            <FlatList
-              data={NOTIFICATION_SOUND_OPTIONS}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={[
-                    styles.methodRow,
-                    rowDividerStyle(palette),
-                    settings.notificationSound === item.id && {
-                      backgroundColor: palette.bg,
-                    },
-                  ]}
-                  onPress={() => {
-                    stopAdhanPreview().catch(() => {});
-                    setPreviewingId(null);
-                    updateSettings({ notificationSound: item.id });
-                    setNotificationSoundModal(false);
-                  }}>
-                  <View style={styles.soundRowContent}>
-                    <View style={styles.soundRowText}>
-                      <Text style={[styles.methodName, { color: palette.text }]}>
-                        {t(item.labelKey)}
-                      </Text>
-                      <Text style={[styles.providerSub, { color: palette.muted }]}>
-                        {t(item.helpKey)}
-                      </Text>
-                    </View>
-                    {item.id !== 'default' && (
-                      <Pressable
-                        hitSlop={10}
-                        onPress={e => {
-                          e.stopPropagation();
-                          if (previewingId === item.id) {
-                            stopAdhanPreview().catch(() => {});
-                            setPreviewingId(null);
-                          } else {
-                            setPreviewingId(item.id);
-                            previewAdhanSound(item.id).catch(() => {
-                              setPreviewingId(null);
-                            });
-                          }
-                        }}
-                        style={[styles.soundPreviewBtn, { borderColor: palette.border }]}>
-                        <Text style={[styles.soundPreviewIcon, { color: palette.accent }]}>
-                          {previewingId === item.id ? '■' : '▶'}
-                        </Text>
-                      </Pressable>
-                    )}
-                  </View>
-                </Pressable>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+        currentSound={settings.notificationSound}
+        previewingId={previewingId}
+        palette={palette}
+        onSelect={id => updateSettings({ notificationSound: id })}
+        onSetPreviewingId={setPreviewingId}
+        onClose={() => setNotificationSoundModal(false)}
+      />
 
-      <Modal
+      <LanguageModal
         visible={languageModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setLanguageModal(false)}>
-        <View style={styles.modalRoot}>
-          <Pressable
-            style={[styles.modalFill, { backgroundColor: palette.overlay }]}
-            onPress={() => setLanguageModal(false)}
-          />
-          <View
-            style={[
-              styles.modalSheet,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <Text style={[styles.modalTitle, { color: palette.text }]}>
-              {t('settings.language')}
-            </Text>
-            <FlatList
-              data={[
-                { id: 'en' as const, label: t('settings.langEn') },
-                { id: 'sv' as const, label: t('settings.langSv') },
-                { id: 'ar' as const, label: t('settings.langAr') },
-                { id: 'bn' as const, label: 'বাংলা' },
-                { id: 'ur' as const, label: 'اردو' },
-                { id: 'hi' as const, label: 'हिन्दी' },
-                { id: 'fr' as const, label: 'Français' },
-                { id: 'es' as const, label: 'Español' },
-                { id: 'de' as const, label: 'Deutsch' },
-                { id: 'tr' as const, label: 'Türkçe' },
-                { id: 'id' as const, label: 'Bahasa Indonesia' },
-                { id: 'ru' as const, label: 'Русский' },
-                { id: 'zh' as const, label: '中文' },
-              ]}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={[
-                    styles.methodRow,
-                    rowDividerStyle(palette),
-                    settings.language === item.id && {
-                      backgroundColor: palette.bg,
-                    },
-                  ]}
-                  onPress={() => {
-                    updateSettings({ language: item.id as AppLanguage });
-                    setLanguageModal(false);
-                  }}>
-                  <Text style={[styles.methodName, { color: palette.text }]}>
-                    {item.label}
-                  </Text>
-                </Pressable>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+        current={settings.language}
+        palette={palette}
+        onSelect={lang => updateSettings({ language: lang })}
+        onClose={() => setLanguageModal(false)}
+      />
 
-      <Modal
+      <MethodModal
         visible={methodModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setMethodModal(false)}>
-        <View style={styles.modalRoot}>
-          <Pressable
-            style={[styles.modalFill, { backgroundColor: palette.overlay }]}
-            onPress={() => setMethodModal(false)}
-          />
-          <View
-            style={[
-              styles.modalSheet,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <Text style={[styles.modalTitle, { color: palette.text }]}>
-              {t('settings.methodModalTitle')}
-            </Text>
-            <FlatList
-              data={CALCULATION_METHODS}
-              keyExtractor={item => String(item.id)}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={[
-                    styles.methodRow,
-                    rowDividerStyle(palette),
-                    settings.calculationMethod === item.id && {
-                      backgroundColor: palette.bg,
-                    },
-                  ]}
-                  onPress={() => {
-                    updateSettings({ calculationMethod: item.id });
-                    setMethodModal(false);
-                  }}>
-                  <Text style={[styles.methodName, { color: palette.text }]}>
-                    {item.name}
-                  </Text>
-                </Pressable>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+        currentMethod={settings.calculationMethod}
+        palette={palette}
+        onSelect={id => updateSettings({ calculationMethod: id })}
+        onClose={() => setMethodModal(false)}
+      />
     </>
   );
 }
@@ -1225,59 +1025,6 @@ const styles = StyleSheet.create({
   widgetSwatchCustomLabel: {
     fontSize: 12,
     fontWeight: '700',
-  },
-  modalRoot: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalFill: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  modalSheet: {
-    maxHeight: '72%',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingTop: 12,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  methodRow: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  methodName: {
-    fontSize: 16,
-  },
-  providerSub: {
-    fontSize: 13,
-    marginTop: 4,
-    lineHeight: 18,
-  },
-  soundRowContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  soundRowText: {
-    flex: 1,
-  },
-  soundPreviewBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginStart: 8,
-  },
-  soundPreviewIcon: {
-    fontSize: 14,
-    lineHeight: 18,
   },
   versionText: {
     fontSize: 12,

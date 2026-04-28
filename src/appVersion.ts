@@ -1,9 +1,4 @@
-import { NativeModules } from 'react-native';
-
-type AppVersionNative = {
-  versionName?: string;
-  buildNumber?: string;
-};
+import { AppVersionModule } from './native/AppVersion';
 
 export type InstalledAppVersion = {
   versionName: string;
@@ -11,10 +6,9 @@ export type InstalledAppVersion = {
 };
 
 function fromNative(): InstalledAppVersion {
-  const m = NativeModules.AppVersion as AppVersionNative | undefined;
   return {
-    versionName: m?.versionName?.trim() || 'unknown',
-    buildNumber: m?.buildNumber?.trim() || 'unknown',
+    versionName: AppVersionModule?.versionName?.trim() || 'unknown',
+    buildNumber: AppVersionModule?.buildNumber?.trim() || 'unknown',
   };
 }
 
