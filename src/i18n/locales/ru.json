@@ -210,7 +210,13 @@
     "Dhuhr": "Зухр",
     "Asr": "Аср",
     "Maghrib": "Магриб",
-    "Isha": "Иша"
+    "Isha": "Иша",
+    "Fajr_abbr": "Фаджр",
+    "Sunrise_abbr": "Восх",
+    "Dhuhr_abbr": "Зухр",
+    "Asr_abbr": "Аср",
+    "Maghrib_abbr": "Магр",
+    "Isha_abbr": "Иша"
   },
   "placeSearch": {
     "label": "Поиск города или адреса",

@@ -54,10 +54,15 @@ export function HomeScreen() {
   const { palette } = useAppPalette();
   const [now, setNow] = useState(() => new Date());
   const loadedDateKeyRef = useRef<string | null>(null);
+  // Track the UTC offset at the time prayer times were last loaded.
+  // If the device timezone changes (travel), we force a reload so that
+  // notification timestamps are recomputed for the correct local clock.
+  const loadedTzOffsetRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (state.phase === 'ready') {
       loadedDateKeyRef.current = new Date().toDateString();
+      loadedTzOffsetRef.current = new Date().getTimezoneOffset();
     }
   }, [state]);
 
@@ -65,10 +70,13 @@ export function HomeScreen() {
     const id = setInterval(() => {
       const current = new Date();
       setNow(current);
-      if (
+      const dateChanged =
         loadedDateKeyRef.current !== null &&
-        current.toDateString() !== loadedDateKeyRef.current
-      ) {
+        current.toDateString() !== loadedDateKeyRef.current;
+      const tzChanged =
+        loadedTzOffsetRef.current !== null &&
+        current.getTimezoneOffset() !== loadedTzOffsetRef.current;
+      if (dateChanged || tzChanged) {
         retry();
       }
     }, 30000);

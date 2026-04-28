@@ -210,7 +210,13 @@
     "Dhuhr": "ধুহর",
     "Asr": "আসর",
     "Maghrib": "মাগরিব",
-    "Isha": "ইশা"
+    "Isha": "ইশা",
+    "Fajr_abbr": "ফজর",
+    "Sunrise_abbr": "সূর্য",
+    "Dhuhr_abbr": "ধুহর",
+    "Asr_abbr": "আসর",
+    "Maghrib_abbr": "মাগর",
+    "Isha_abbr": "ইশা"
   },
   "placeSearch": {
     "label": "শহর বা ঠিকানা খুঁজুন",

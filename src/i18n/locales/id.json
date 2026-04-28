@@ -210,7 +210,13 @@
     "Dhuhr": "Dhuhur",
     "Asr": "Asar",
     "Maghrib": "Maghrib",
-    "Isha": "Isya"
+    "Isha": "Isya",
+    "Fajr_abbr": "Subuh",
+    "Sunrise_abbr": "Terbt",
+    "Dhuhr_abbr": "Dhuhr",
+    "Asr_abbr": "Asar",
+    "Maghrib_abbr": "Magh",
+    "Isha_abbr": "Isya"
   },
   "placeSearch": {
     "label": "Cari kota atau alamat",

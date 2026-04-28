@@ -292,8 +292,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       val locationName = o.optString("locationName", "")
 
       val rows = o.getJSONArray("rows")
+      // sunriseRow is a separate object (not in `rows`) rendered at display slot 1.
+      val sunriseRowObj = o.optJSONObject("sunriseRow")
 
-      // Dynamically calculate next prayer based on current time
+      // Build the ordered display list: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha
+      val displayRows = mutableListOf<org.json.JSONObject>()
+      if (rows.length() > 0) displayRows.add(rows.getJSONObject(0)) // Fajr at slot 0
+      sunriseRowObj?.let { displayRows.add(it) }                     // Sunrise at slot 1
+      for (i in 1 until rows.length()) displayRows.add(rows.getJSONObject(i)) // rest of salāh
+
+      // Dynamically calculate next event (prayer or sunrise) based on current time
       val cal = java.util.Calendar.getInstance()
       val currentMinutes = cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
 
@@ -302,8 +310,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       var dynamicNextTime = ""
       var nextUpdateMinutes = -1
 
-      for (i in 0 until rows.length()) {
-        val row = rows.getJSONObject(i)
+      for (row in displayRows) {
         val timeStr = row.getString("time")
         val parts = timeStr.split(":")
         if (parts.size == 2) {
@@ -312,7 +319,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           val rowMinutes = h * 60 + m
           if (rowMinutes > currentMinutes) {
             dynamicNextKey = row.getString("key")
-            dynamicNextName = row.optString("abbr", "").trim().ifEmpty { dynamicNextKey }
+            dynamicNextName = row.optString("abbr", "").trim().ifEmpty { dynamicNextKey!! }
             dynamicNextTime = timeStr
             nextUpdateMinutes = rowMinutes
             break
@@ -324,8 +331,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         nextPrayerName = dynamicNextName
         nextPrayerTime = dynamicNextTime
       } else if (nextPrayerName.isEmpty() && nextKey != null) {
-        for (i in 0 until rows.length()) {
-          val row = rows.getJSONObject(i)
+        for (row in displayRows) {
           if (row.getString("key") == nextKey) {
             nextPrayerName = row.optString("abbr", "").trim().ifEmpty { nextKey }
             nextPrayerTime = row.getString("time")
@@ -354,11 +360,11 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
       for (i in COL_LABELS.indices) {
-        if (i >= rows.length()) {
+        if (i >= displayRows.size) {
           views.setViewVisibility(COL_WRAPPERS[i], View.GONE)
           continue
         }
-        val row = rows.getJSONObject(i)
+        val row = displayRows[i]
         val key = row.getString("key")
         val time = row.getString("time")
         val label = row.optString("abbr", "").trim().ifEmpty { key }

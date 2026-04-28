@@ -210,7 +210,13 @@
     "Dhuhr": "धुहर",
     "Asr": "अस्र",
     "Maghrib": "मग़रिब",
-    "Isha": "ईशा"
+    "Isha": "ईशा",
+    "Fajr_abbr": "फज्र",
+    "Sunrise_abbr": "सूर्य",
+    "Dhuhr_abbr": "धुहर",
+    "Asr_abbr": "अस्र",
+    "Maghrib_abbr": "मगरि",
+    "Isha_abbr": "ईशा"
   },
   "placeSearch": {
     "label": "शहर या पता खोजें",

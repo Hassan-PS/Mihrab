@@ -210,7 +210,13 @@
     "Dhuhr": "Dhuhr",
     "Asr": "asr",
     "Maghrib": "Magreb",
-    "Isha": "Isha"
+    "Isha": "Isha",
+    "Fajr_abbr": "Fayr",
+    "Sunrise_abbr": "Aman",
+    "Dhuhr_abbr": "Dhuhr",
+    "Asr_abbr": "Asr",
+    "Maghrib_abbr": "Magr",
+    "Isha_abbr": "Isha"
   },
   "placeSearch": {
     "label": "Buscar ciudad o dirección",

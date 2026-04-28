@@ -66,9 +66,9 @@ export function MonthTimesScreen() {
     (settings.lastFetchedLatitude == null || settings.lastFetchedLongitude == null);
 
   const lat = settings.locationMode === 'gps'
-    ? (settings.lastFetchedLatitude ?? 0) : settings.manualLatitude;
+    ? (settings.lastFetchedLatitude ?? settings.manualLatitude) : settings.manualLatitude;
   const lng = settings.locationMode === 'gps'
-    ? (settings.lastFetchedLongitude ?? 0) : settings.manualLongitude;
+    ? (settings.lastFetchedLongitude ?? settings.manualLongitude) : settings.manualLongitude;
 
   const coordsForProvider = useMemo(() => {
     if (needsGpsPrime) return null;
