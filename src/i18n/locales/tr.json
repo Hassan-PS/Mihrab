@@ -30,7 +30,8 @@
     "nextPrayer": "Sonraki dua",
     "nextIn": "{{time}} yılında",
     "hanafiSuffix": "Hanefi Asr",
-    "monthTimesLink": "Tüm ay boyunca namaz vakitleri"
+    "monthTimesLink": "Tüm ay boyunca namaz vakitleri",
+    "localFallbackNotice": "Yerel hesaplama — güncellemek için bağlanın"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",
@@ -140,7 +141,9 @@
     "notificationSoundSharifDoman": "Ezan - Şerif Doman",
     "notificationSoundYusufIslam": "Ezan - Yusuf İslam",
     "notificationSoundVoiceHelp": "Bu uygulama derlemesine yerleşik ses dahildir.",
-    "versionInstalled": "Yüklü sürüm: {{version}}"
+    "versionInstalled": "Yüklü sürüm: {{version}}",
+    "adhanPreviewTitle": "Ezan önizleme",
+    "adhanPreviewBody": ""
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -202,7 +205,14 @@
     "north": "N",
     "east": "e",
     "south": "S",
-    "west": "K"
+    "west": "K",
+    "a11yDialLive": "Qibla compass. Rotate {{deg}} degrees to face Qibla.",
+    "a11yDialChecking": "Qibla compass. Waiting for sensor data.",
+    "a11yDialUnavailable": "Qibla compass unavailable.",
+    "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
+    "a11ySignal_good": "Compass signal: good.",
+    "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
+    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
   },
   "prayer": {
     "Fajr": "sabah",

@@ -30,7 +30,8 @@
     "nextPrayer": "Nästa bön",
     "nextIn": "om {{time}}",
     "hanafiSuffix": "Hanafi asr",
-    "monthTimesLink": "Bönetider för hela månaden"
+    "monthTimesLink": "Bönetider för hela månaden",
+    "localFallbackNotice": "Lokal beräkning — anslut för att uppdatera"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",
@@ -140,7 +141,9 @@
     "notificationSoundSharifDoman": "Adhan - Sharif Doman",
     "notificationSoundYusufIslam": "Adhan - Yusuf Islam",
     "notificationSoundVoiceHelp": "Inbyggd röst ingår i den här appversionen.",
-    "versionInstalled": "Installerad version: {{version}}"
+    "versionInstalled": "Installerad version: {{version}}",
+    "adhanPreviewTitle": "Förhandsvisning av adhan",
+    "adhanPreviewBody": ""
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -202,7 +205,14 @@
     "north": "N",
     "east": "Ö",
     "south": "S",
-    "west": "V"
+    "west": "V",
+    "a11yDialLive": "Qiblakompass. Vrid {{deg}} grader för att vända mot Qibla.",
+    "a11yDialChecking": "Qiblakompass. Väntar på sensordata.",
+    "a11yDialUnavailable": "Qiblakompass ej tillgänglig.",
+    "a11yNeedleDeg": "Vrid {{deg}} grader för att vända mot Qibla.",
+    "a11ySignal_good": "Kompasssignal: bra.",
+    "a11ySignal_weak": "Kompasssignal: svag.",
+    "a11ySignal_very_weak": "Kompasssignal: mycket svag."
   },
   "prayer": {
     "Fajr": "Fajr",
