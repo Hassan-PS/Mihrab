@@ -23,7 +23,8 @@
     "continue": "جاری رکھیں",
     "back": "پیچھے",
     "loading": "لوڈ ہو رہا ہے…",
-    "automatic": "خودکار"
+    "automatic": "خودکار",
+    "openSettings": "ترتیبات کھولیں"
   },
   "home": {
     "loadingPrayer": "نماز کے اوقات لوڈ ہو رہے ہیں…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "حنفی عصر",
     "monthTimesLink": "پورے مہینے کی نماز کے اوقات",
     "localFallbackNotice": "مقامی حساب — اپ ڈیٹ کے لیے جڑیں",
-    "lastGpsCoordsNotice": "آخری معلوم مقام استعمال ہو رہا ہے — GPS دستیاب نہیں"
+    "lastGpsCoordsNotice": "آخری معلوم مقام استعمال ہو رہا ہے — GPS دستیاب نہیں",
+    "exactAlarmDenied": "درست وقت کے لیے نماز الرٹ کو درست الارم کی اجازت چاہیے۔ دینے کے لیے ٹیپ کریں۔",
+    "notifPermDenied": "اطلاع کی اجازت مسترد — نماز الرٹ نہیں بجیں گے۔ ترتیبات کھولنے کے لیے ٹیپ کریں۔"
   },
   "errors": {
     "locationNeededTitle": "مقام درکار ہے۔",

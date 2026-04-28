@@ -23,7 +23,8 @@
     "continue": "Continue",
     "back": "Back",
     "loading": "Loading…",
-    "automatic": "Automatic"
+    "automatic": "Automatic",
+    "openSettings": "Open Settings"
   },
   "home": {
     "loadingPrayer": "Loading prayer times…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "Hanafi Asr",
     "monthTimesLink": "Prayer times for the whole month",
     "localFallbackNotice": "On-device calculation — connect to refresh from your provider",
-    "lastGpsCoordsNotice": "Using last known location — GPS unavailable"
+    "lastGpsCoordsNotice": "Using last known location — GPS unavailable",
+    "exactAlarmDenied": "Prayer alerts need exact-alarm permission for accurate timing. Tap to grant.",
+    "notifPermDenied": "Notification permission denied — prayer alerts won't fire. Tap to open Settings."
   },
   "errors": {
     "locationNeededTitle": "Location needed",

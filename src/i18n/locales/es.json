@@ -23,7 +23,8 @@
     "continue": "Continuar",
     "back": "Atrás",
     "loading": "Cargando…",
-    "automatic": "Automático"
+    "automatic": "Automático",
+    "openSettings": "Abrir Ajustes"
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "Hanafi Asr",
     "monthTimesLink": "Tiempos de oración para todo el mes.",
     "localFallbackNotice": "Cálculo local — conéctate para actualizar",
-    "lastGpsCoordsNotice": "Usando última ubicación conocida — GPS no disponible"
+    "lastGpsCoordsNotice": "Usando última ubicación conocida — GPS no disponible",
+    "exactAlarmDenied": "Las alertas de oración necesitan permiso de alarma exacta para precisión. Toca para conceder.",
+    "notifPermDenied": "Permiso de notificaciones denegado — las alertas de oración no se activarán. Toca para abrir Ajustes."
   },
   "errors": {
     "locationNeededTitle": "Ubicación necesaria",

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -11,6 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import notifee, { AndroidNotificationSetting, AuthorizationStatus } from '@notifee/react-native';
 import { CalendarIcon } from '../components/HeaderToolbarIcons';
 import { LocationSetup } from '../components/LocationSetup';
 import { ProviderSourceHeader } from '../components/ProviderSourceHeader';
@@ -58,6 +60,9 @@ export function HomeScreen() {
   // If the device timezone changes (travel), we force a reload so that
   // notification timestamps are recomputed for the correct local clock.
   const loadedTzOffsetRef = useRef<number | null>(null);
+  // Notification permission / exact-alarm warning banners
+  const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
+  const [notifPermDenied, setNotifPermDenied] = useState(false);
 
   useEffect(() => {
     if (state.phase === 'ready') {
@@ -93,7 +98,7 @@ export function HomeScreen() {
       notificationSound: settings.notificationSound,
       today: state.today,
       tomorrow: state.tomorrow,
-    }).catch(() => {});
+    }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
   }, [
     hydrated,
     settings.notificationsEnabled,
@@ -113,8 +118,28 @@ export function HomeScreen() {
         notificationSound: settings.notificationSound,
         today: state.today,
         tomorrow: state.tomorrow,
-      }).catch(() => {});
-      syncPrayerWidget(state.today, state.tomorrow, new Date(), locationLabel).catch(() => {});
+      }).catch(e => console.warn('syncPrayerNotifications (focus):', e));
+      syncPrayerWidget(state.today, state.tomorrow, new Date(), locationLabel).catch(e => console.warn('syncPrayerWidget (focus):', e));
+
+      // Re-check notification permissions every time the screen comes into focus
+      // (the user may have just returned from system settings).
+      if (settings.notificationsEnabled) {
+        notifee.getNotificationSettings().then(s => {
+          if (Platform.OS === 'android') {
+            setExactAlarmDenied(
+              s.android.alarm !== AndroidNotificationSetting.ENABLED,
+            );
+          } else if (Platform.OS === 'ios') {
+            setNotifPermDenied(
+              s.authorizationStatus !== AuthorizationStatus.AUTHORIZED &&
+              s.authorizationStatus !== AuthorizationStatus.PROVISIONAL,
+            );
+          }
+        }).catch(e => console.warn('getNotificationSettings:', e));
+      } else {
+        setExactAlarmDenied(false);
+        setNotifPermDenied(false);
+      }
     }, [
       hydrated,
       settings.notificationsEnabled,
@@ -139,7 +164,7 @@ export function HomeScreen() {
     if (!hydrated || state.phase !== 'ready') {
       return;
     }
-    syncPrayerWidget(state.today, state.tomorrow, now, locationLabel).catch(() => {});
+    syncPrayerWidget(state.today, state.tomorrow, now, locationLabel).catch(e => console.warn('syncPrayerWidget (effect):', e));
   }, [hydrated, state, now, locationLabel]);
 
   const readyLat = state.phase === 'ready' ? state.latitude : undefined;
@@ -318,6 +343,38 @@ export function HomeScreen() {
           <Pressable onPress={() => retry()} hitSlop={8}>
             <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
               {t('common.retry')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Android: exact-alarm permission denied — notifications may be up to 15 min late */}
+      {exactAlarmDenied && (
+        <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>
+          <Text style={[styles.localFallbackText, { color: palette.text }]} numberOfLines={2}>
+            {t('home.exactAlarmDenied')}
+          </Text>
+          <Pressable
+            onPress={() => notifee.openAlarmPermissionSettings().catch(() => {})}
+            hitSlop={8}>
+            <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
+              {t('common.openSettings')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* iOS: notification permission denied — alerts won't fire at all */}
+      {notifPermDenied && (
+        <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>
+          <Text style={[styles.localFallbackText, { color: palette.text }]} numberOfLines={2}>
+            {t('home.notifPermDenied')}
+          </Text>
+          <Pressable
+            onPress={() => Linking.openSettings().catch(() => {})}
+            hitSlop={8}>
+            <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
+              {t('common.openSettings')}
             </Text>
           </Pressable>
         </View>

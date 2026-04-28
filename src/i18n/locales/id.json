@@ -23,7 +23,8 @@
     "continue": "Melanjutkan",
     "back": "Kembali",
     "loading": "Memuat…",
-    "automatic": "Otomatis"
+    "automatic": "Otomatis",
+    "openSettings": "Buka Pengaturan"
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "Hanafi Ashar",
     "monthTimesLink": "Waktu sholat sebulan penuh",
     "localFallbackNotice": "Perhitungan lokal — sambungkan untuk memperbarui",
-    "lastGpsCoordsNotice": "Menggunakan lokasi terakhir — GPS tidak tersedia"
+    "lastGpsCoordsNotice": "Menggunakan lokasi terakhir — GPS tidak tersedia",
+    "exactAlarmDenied": "Pengingat shalat membutuhkan izin alarm tepat untuk ketepatan waktu. Ketuk untuk memberikan izin.",
+    "notifPermDenied": "Izin notifikasi ditolak — pengingat shalat tidak akan berbunyi. Ketuk untuk membuka Pengaturan."
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",

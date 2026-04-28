@@ -23,7 +23,8 @@
     "continue": "Continuer",
     "back": "Dos",
     "loading": "Chargement…",
-    "automatic": "Automatique"
+    "automatic": "Automatique",
+    "openSettings": "Ouvrir les réglages"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "Hanafi Asr",
     "monthTimesLink": "Horaires de prière pour tout le mois",
     "localFallbackNotice": "Calcul local — connectez-vous pour actualiser",
-    "lastGpsCoordsNotice": "Utilisation du dernier emplacement connu — GPS indisponible"
+    "lastGpsCoordsNotice": "Utilisation du dernier emplacement connu — GPS indisponible",
+    "exactAlarmDenied": "Les alertes de prière nécessitent la permission d'alarme exacte. Appuyez pour accorder.",
+    "notifPermDenied": "Permission de notification refusée — les alertes de prière ne sonneront pas. Appuyez pour ouvrir les réglages."
   },
   "errors": {
     "locationNeededTitle": "Emplacement nécessaire",

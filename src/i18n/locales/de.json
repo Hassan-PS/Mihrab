@@ -23,7 +23,8 @@
     "continue": "Weitermachen",
     "back": "Zurück",
     "loading": "Laden…",
-    "automatic": "Automatisch"
+    "automatic": "Automatisch",
+    "openSettings": "Einstellungen öffnen"
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",
@@ -32,7 +33,9 @@
     "hanafiSuffix": "Hanafi Asr",
     "monthTimesLink": "Gebetszeiten für den ganzen Monat",
     "localFallbackNotice": "Lokale Berechnung — Verbinden zum Aktualisieren",
-    "lastGpsCoordsNotice": "Letzten Standort verwenden — GPS nicht verfügbar"
+    "lastGpsCoordsNotice": "Letzten Standort verwenden — GPS nicht verfügbar",
+    "exactAlarmDenied": "Gebetsbenachrichtigungen benötigen die Berechtigung für genaue Alarme. Tippen zum Erteilen.",
+    "notifPermDenied": "Benachrichtigungsberechtigung verweigert — Gebetsalarme werden nicht ausgelöst. Tippen zum Öffnen."
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",

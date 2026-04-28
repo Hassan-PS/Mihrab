@@ -168,7 +168,9 @@ export function CompassScreen() {
     }
 
     let cancelled = false;
-    let subscription: { unsubscribe: () => void } | null = null;
+    // Track the active subscription in a ref so the cleanup closure always
+    // reads the most-recent assignment (important after restartSubscription).
+    const subscriptionRef: { current: { unsubscribe: () => void } | null } = { current: null };
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let watchdogId: ReturnType<typeof setInterval> | null = null;
     let appStateSub: { remove: () => void } | null = null;
@@ -212,8 +214,8 @@ export function CompassScreen() {
       if (cancelled) {
         return;
       }
-      subscription?.unsubscribe();
-      subscription = null;
+      subscriptionRef.current?.unsubscribe();
+      subscriptionRef.current = null;
       gotSampleRef.current = false;
       headingHistoryRef.current = [];
       lastSampleAt = 0;
@@ -228,7 +230,7 @@ export function CompassScreen() {
 
     const startSubscription = () => {
       if (Platform.OS === 'ios' && CompassModule) {
-        subscription?.unsubscribe();
+        subscriptionRef.current?.unsubscribe();
         CompassModule.startUpdates();
         const sub = compassEmitter?.addListener('CompassHeading', (data: { heading: number; accuracy: number }) => {
           if (cancelled) return;
@@ -239,7 +241,7 @@ export function CompassScreen() {
             setMode('live');
             modeRef.current = 'live';
           }
-          
+
           const raw = data.heading;
           const prev = smoothedRef.current;
           const delta = shortestAngleDiff(prev, raw);
@@ -251,7 +253,7 @@ export function CompassScreen() {
           headingHistoryRef.current = hist;
           const stab = stabilityScoreFromHeadings(hist);
           setStability(stab);
-          
+
           // Accuracy on iOS: positive values indicate accuracy in degrees.
           // Negative values indicate heading could not be determined.
           if (data.accuracy < 0) {
@@ -271,15 +273,19 @@ export function CompassScreen() {
             }
           }
         });
-        subscription = {
+        // Wrap in try/finally so stopUpdates() always fires even if remove() throws.
+        subscriptionRef.current = {
           unsubscribe: () => {
-            sub?.remove();
-            CompassModule.stopUpdates();
-          }
+            try {
+              sub?.remove();
+            } finally {
+              CompassModule.stopUpdates();
+            }
+          },
         };
       } else {
-        subscription?.unsubscribe();
-        subscription = magnetometer.subscribe({
+        subscriptionRef.current?.unsubscribe();
+        subscriptionRef.current = magnetometer.subscribe({
           next: ({ x, y, z }) => {
             if (cancelled) {
               return;
@@ -334,8 +340,8 @@ export function CompassScreen() {
             } else {
               setUnsupportedUi();
             }
-            subscription?.unsubscribe();
-            subscription = null;
+            subscriptionRef.current?.unsubscribe();
+            subscriptionRef.current = null;
           },
         });
       }
@@ -373,7 +379,12 @@ export function CompassScreen() {
         clearInterval(watchdogId);
       }
       appStateSub?.remove();
-      subscription?.unsubscribe();
+      try {
+        subscriptionRef.current?.unsubscribe();
+      } catch (e) {
+        console.warn('CompassScreen subscription cleanup error:', e);
+      }
+      subscriptionRef.current = null;
     };
   }, [hydrated, needsGpsPrime]);
 
