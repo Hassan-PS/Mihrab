@@ -16,17 +16,6 @@
         android:textSize="12sp"
         android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/widget_refresh_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:padding="4dp"
-        android:text="↻"
-        android:textColor="#80FFFFFF"
-        android:textSize="16sp"
-        android:contentDescription="Refresh" />
-
     <LinearLayout
         android:id="@+id/widget_content"
         android:layout_width="match_parent"
@@ -40,6 +29,17 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1.0">
+
+            <TextView
+                android:id="@+id/widget_refresh_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:padding="4dp"
+                android:text="↻"
+                android:textColor="#80FFFFFF"
+                android:textSize="14sp"
+                android:contentDescription="Refresh" />
 
             <LinearLayout
                 android:layout_width="match_parent"

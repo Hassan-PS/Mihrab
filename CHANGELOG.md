@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.46] — 2026-04-28
+
+### Fixed
+- **Android medium widget — refresh button placement**: The ↻ button now sits in the empty space at the right end of the left panel, vertically centred next to the divider line. Previously it was at the top-right corner of the whole widget, floating above the prayer-times list.
+
 ## [1.5.45] — 2026-04-28
 
 ### Fixed
