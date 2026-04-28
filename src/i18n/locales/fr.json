@@ -31,7 +31,8 @@
     "nextIn": "à {{time}}",
     "hanafiSuffix": "Hanafi Asr",
     "monthTimesLink": "Horaires de prière pour tout le mois",
-    "localFallbackNotice": "Calcul local — connectez-vous pour actualiser"
+    "localFallbackNotice": "Calcul local — connectez-vous pour actualiser",
+    "lastGpsCoordsNotice": "Utilisation du dernier emplacement connu — GPS indisponible"
   },
   "errors": {
     "locationNeededTitle": "Emplacement nécessaire",

@@ -31,7 +31,8 @@
     "nextIn": "在{{time}}",
     "hanafiSuffix": "哈乃斐晡礼",
     "monthTimesLink": "整个月的祈祷时间",
-    "localFallbackNotice": "本地计算 — 连接网络以刷新"
+    "localFallbackNotice": "本地计算 — 连接网络以刷新",
+    "lastGpsCoordsNotice": "使用上次已知位置 — GPS 不可用"
   },
   "errors": {
     "locationNeededTitle": "需要位置",

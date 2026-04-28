@@ -31,7 +31,8 @@
     "nextIn": "خلال {{time}}",
     "hanafiSuffix": "عصر حنفي",
     "monthTimesLink": "أوقات الصلاة للشهر كاملًا",
-    "localFallbackNotice": "حساب محلي — اتصل بالإنترنت للتحديث"
+    "localFallbackNotice": "حساب محلي — اتصل بالإنترنت للتحديث",
+    "lastGpsCoordsNotice": "استخدام الموقع الأخير — GPS غير متاح"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",

@@ -256,3 +256,33 @@ export async function refreshPrayerDataCache(
 
   await saveStoredPrayerData(newData);
 }
+
+/** Minimum gap between automatic full 12-month syncs (1 hour). */
+const FULL_SYNC_COOLDOWN_MS = 60 * 60 * 1000;
+let _lastFullSyncAttemptMs = 0;
+
+/**
+ * Run a full 12-month background sync only if:
+ *  - The cache has fewer than 12 months stored, AND
+ *  - At least FULL_SYNC_COOLDOWN_MS have passed since the last attempt.
+ *
+ * Designed to be called whenever WiFi connectivity is detected.
+ * Returns true if a sync was kicked off.
+ */
+export async function maybeFullSyncOnWifi(
+  params: Omit<StoredPrayerData, 'months'>,
+): Promise<boolean> {
+  const now = Date.now();
+  if (now - _lastFullSyncAttemptMs < FULL_SYNC_COOLDOWN_MS) {
+    return false;
+  }
+  const status = await getCacheStatus(params);
+  if (status.monthsStored >= 12) {
+    return false;
+  }
+  _lastFullSyncAttemptMs = now;
+  refreshPrayerDataCache(params, 12).catch(e =>
+    console.warn('WiFi-triggered 12-month sync failed:', e),
+  );
+  return true;
+}

@@ -31,7 +31,8 @@
     "nextIn": "{{time}} yılında",
     "hanafiSuffix": "Hanefi Asr",
     "monthTimesLink": "Tüm ay boyunca namaz vakitleri",
-    "localFallbackNotice": "Yerel hesaplama — güncellemek için bağlanın"
+    "localFallbackNotice": "Yerel hesaplama — güncellemek için bağlanın",
+    "lastGpsCoordsNotice": "Son bilinen konum kullanılıyor — GPS kullanılamıyor"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",

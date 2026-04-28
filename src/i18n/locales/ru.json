@@ -31,7 +31,8 @@
     "nextIn": "в {{time}}",
     "hanafiSuffix": "Ханафи Аср",
     "monthTimesLink": "Время молитвы на весь месяц",
-    "localFallbackNotice": "Локальный расчёт — подключитесь для обновления"
+    "localFallbackNotice": "Локальный расчёт — подключитесь для обновления",
+    "lastGpsCoordsNotice": "Используется последнее известное местоположение — GPS недоступен"
   },
   "errors": {
     "locationNeededTitle": "Требуется местоположение",
