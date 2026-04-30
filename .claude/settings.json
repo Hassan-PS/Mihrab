@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npx jest*)",
+      "Bash(npx tsc*)",
+      "Bash(./android/gradlew*)",
+      "Bash(find src*)",
+      "Bash(find ios*)",
+      "Bash(find android*)",
+      "Bash(find __tests__*)",
+      "Bash(grep*)",
+      "Bash(ls*)",
+      "Bash(cat*)",
+      "Bash(wc*)",
+      "Bash(sed*)",
+      "Bash(cp*)",
+      "Bash(gh release*)",
+      "Bash(gh pr*)",
+      "Bash(npm ci*)",
+      "Bash(npm run*)"
+    ],
+    "deny": []
+  }
+}
