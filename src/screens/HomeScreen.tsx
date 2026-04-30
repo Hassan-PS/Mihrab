@@ -10,12 +10,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import notifee, { AndroidNotificationSetting, AuthorizationStatus } from '@notifee/react-native';
 import { CalendarIcon } from '../components/HeaderToolbarIcons';
 import { LocationSetup } from '../components/LocationSetup';
-import { ProviderSourceHeader } from '../components/ProviderSourceHeader';
+import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { usePrayerDay } from '../hooks/usePrayerDay';
@@ -30,7 +31,9 @@ import {
 } from '../settings/effectiveProvider';
 import { getProviderLabel } from '../settings/providersCatalog';
 import { DISPLAY_ORDER } from '../types/prayer';
+import type { TimingsMap } from '../types/prayer';
 import {
+  addDays,
   formatCountdown,
   formatDisplayTime,
   formatLocalTime,
@@ -46,23 +49,36 @@ const CARD_RADIUS = isIOS ? 20 : 16;
 const CARD_PADDING = isIOS ? 20 : 18;
 const ROW_PADDING_V = isIOS ? 15 : 14;
 const TABLE_RADIUS = isIOS ? 16 : 12;
+const SCREEN_PADDING = 16;
 
 export function HomeScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { settings, hydrated, updateSettings } = usePrayerSettings();
   const { state, retry } = usePrayerDay(settings, hydrated);
   const { palette } = useAppPalette();
+  const { width: screenWidth } = useWindowDimensions();
+  const cardWidth = screenWidth - SCREEN_PADDING * 2;
+
   const [now, setNow] = useState(() => new Date());
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
+  const [providerPickerOpen, setProviderPickerOpen] = useState(false);
+  const dayScrollRef = useRef<ScrollView>(null);
   const loadedDateKeyRef = useRef<string | null>(null);
-  // Track the UTC offset at the time prayer times were last loaded.
-  // If the device timezone changes (travel), we force a reload so that
-  // notification timestamps are recomputed for the correct local clock.
   const loadedTzOffsetRef = useRef<number | null>(null);
-  // Notification permission / exact-alarm warning banners
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
   const [notifPermDenied, setNotifPermDenied] = useState(false);
+
+  // Reset carousel to today when location/data changes
+  useEffect(() => {
+    if (state.phase === 'ready') {
+      loadedDateKeyRef.current = new Date().toDateString();
+      loadedTzOffsetRef.current = new Date().getTimezoneOffset();
+      setActiveDayIndex(0);
+      dayScrollRef.current?.scrollTo({ x: 0, animated: false });
+    }
+  }, [state.phase === 'ready' ? state.latitude : null, state.phase === 'ready' ? state.longitude : null]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (state.phase === 'ready') {
@@ -119,10 +135,10 @@ export function HomeScreen() {
         today: state.today,
         tomorrow: state.tomorrow,
       }).catch(e => console.warn('syncPrayerNotifications (focus):', e));
-      syncPrayerWidget(state.today, state.tomorrow, new Date(), locationLabel).catch(e => console.warn('syncPrayerWidget (focus):', e));
+      syncPrayerWidget(state.today, state.tomorrow, new Date(), locationLabel).catch(
+        e => console.warn('syncPrayerWidget (focus):', e),
+      );
 
-      // Re-check notification permissions every time the screen comes into focus
-      // (the user may have just returned from system settings).
       if (settings.notificationsEnabled) {
         notifee.getNotificationSettings().then(s => {
           if (Platform.OS === 'android') {
@@ -164,7 +180,9 @@ export function HomeScreen() {
     if (!hydrated || state.phase !== 'ready') {
       return;
     }
-    syncPrayerWidget(state.today, state.tomorrow, now, locationLabel).catch(e => console.warn('syncPrayerWidget (effect):', e));
+    syncPrayerWidget(state.today, state.tomorrow, now, locationLabel).catch(
+      e => console.warn('syncPrayerWidget (effect):', e),
+    );
   }, [hydrated, state, now, locationLabel]);
 
   const readyLat = state.phase === 'ready' ? state.latitude : undefined;
@@ -204,19 +222,53 @@ export function HomeScreen() {
         settings.dataProvider,
         coordsForProviderUi,
       ),
-    [
-      settings.dataProviderAuto,
-      settings.dataProvider,
-      coordsForProviderUi,
-    ],
+    [settings.dataProviderAuto, settings.dataProvider, coordsForProviderUi],
   );
 
   const nextInfo = useMemo(() => {
-    if (state.phase !== 'ready') {
-      return null;
-    }
+    if (state.phase !== 'ready') return null;
     return getNextPrayerDisplay(state.today, state.tomorrow, now);
   }, [state, now]);
+
+  /** Short label shown in the day card header: "Today", "Tomorrow", or weekday name. */
+  const getDayLabel = useCallback(
+    (dayOffset: number): string => {
+      if (dayOffset === 0) return t('home.today');
+      if (dayOffset === 1) return t('home.tomorrow');
+      return addDays(new Date(), dayOffset).toLocaleDateString(i18n.language, {
+        weekday: 'long',
+      });
+    },
+    [t, i18n.language],
+  );
+
+  /** Short date string for the day card sub-header, e.g. "30 Apr". */
+  const getDayDate = useCallback(
+    (dayOffset: number): string =>
+      addDays(new Date(), dayOffset).toLocaleDateString(i18n.language, {
+        day: 'numeric',
+        month: 'short',
+      }),
+    [i18n.language],
+  );
+
+  // ── Palette object for ProviderPickerModal ─────────────────────────────────
+  const pickerPalette = useMemo(
+    () => ({
+      card: palette.card,
+      text: palette.text,
+      muted: palette.muted,
+      border: palette.border,
+      bg: palette.bg,
+      overlay: palette.overlay,
+      flatChrome: palette.flatChrome,
+      accent: palette.accent,
+      accentBg: palette.accentBg,
+    }),
+    [palette],
+  );
+
+  // ── Early-exit phases ──────────────────────────────────────────────────────
 
   if (!hydrated) {
     return (
@@ -306,67 +358,60 @@ export function HomeScreen() {
     );
   }
 
-  const { today } = state;
+  const { week } = state;
 
+  // ── Main ready layout ──────────────────────────────────────────────────────
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={styles.scrollContent}
       contentInsetAdjustmentBehavior="automatic">
-      <ProviderSourceHeader
-        settings={settings}
-        updateSettings={updateSettings}
-        coords={coordsForProviderUi}
-        palette={palette}
-      />
 
-      {/* Offline-first notice: shown when provider failed and on-device calculation is used */}
+      {/* ── Banners ── */}
       {state.usingLocalFallback && (
-        <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>
-          <Text style={[styles.localFallbackText, { color: palette.text }]}>
+        <View style={[styles.banner, { backgroundColor: palette.accentBg }]}>
+          <Text style={[styles.bannerText, { color: palette.text }]}>
             {t('home.localFallbackNotice')}
           </Text>
           <Pressable onPress={retry} hitSlop={8}>
-            <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
+            <Text style={[styles.bannerAction, { color: palette.accent }]}>
               {t('common.retry')}
             </Text>
           </Pressable>
         </View>
       )}
 
-      {/* Android: exact-alarm permission denied — notifications may be up to 15 min late */}
       {exactAlarmDenied && (
-        <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>
-          <Text style={[styles.localFallbackText, { color: palette.text }]} numberOfLines={2}>
+        <View style={[styles.banner, { backgroundColor: palette.accentBg }]}>
+          <Text style={[styles.bannerText, { color: palette.text }]} numberOfLines={2}>
             {t('home.exactAlarmDenied')}
           </Text>
           <Pressable
             onPress={() => notifee.openAlarmPermissionSettings().catch(() => {})}
             hitSlop={8}>
-            <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
+            <Text style={[styles.bannerAction, { color: palette.accent }]}>
               {t('common.openSettings')}
             </Text>
           </Pressable>
         </View>
       )}
 
-      {/* iOS: notification permission denied — alerts won't fire at all */}
       {notifPermDenied && (
-        <View style={[styles.localFallbackBanner, { backgroundColor: palette.accentBg }]}>
-          <Text style={[styles.localFallbackText, { color: palette.text }]} numberOfLines={2}>
+        <View style={[styles.banner, { backgroundColor: palette.accentBg }]}>
+          <Text style={[styles.bannerText, { color: palette.text }]} numberOfLines={2}>
             {t('home.notifPermDenied')}
           </Text>
           <Pressable
             onPress={() => Linking.openSettings().catch(() => {})}
             hitSlop={8}>
-            <Text style={[styles.localFallbackRetry, { color: palette.accent }]}>
+            <Text style={[styles.bannerAction, { color: palette.accent }]}>
               {t('common.openSettings')}
             </Text>
           </Pressable>
         </View>
       )}
 
-      {/* Next prayer hero card */}
+      {/* ── Next prayer hero card ── */}
       {nextInfo && (
         <View
           style={[
@@ -381,8 +426,6 @@ export function HomeScreen() {
           <Text style={[styles.nextLabel, { color: palette.muted }]}>
             {t('home.nextPrayer')}
           </Text>
-
-          {/* Name + time row */}
           <View style={styles.nextRow}>
             <Text
               style={[styles.nextName, { color: palette.text }]}
@@ -394,17 +437,12 @@ export function HomeScreen() {
               {formatLocalTime(nextInfo.at)}
             </Text>
           </View>
-
-          {/* Countdown */}
           <View style={styles.nextCountdownRow}>
             <View style={[styles.countdownPill, { backgroundColor: palette.card }]}>
               <Text style={[styles.nextCountdown, { color: palette.muted }]}>
                 {t('home.nextIn', {
                   time: formatCountdown(
-                    Math.max(
-                      0,
-                      Math.floor((nextInfo.at.getTime() - now.getTime()) / 1000),
-                    ),
+                    Math.max(0, Math.floor((nextInfo.at.getTime() - now.getTime()) / 1000)),
                   ),
                 })}
               </Text>
@@ -413,86 +451,111 @@ export function HomeScreen() {
         </View>
       )}
 
-      {/* Location + provider info */}
-      <Text style={[styles.coords, { color: palette.muted }]}>
-        {locationLabel ? `${locationLabel} · ` : ''}
-        {getProviderLabel(effectiveProvider)}
-        {!providerHidesCalculationMethod(effectiveProvider)
-          ? ` · ${getMethodLabel(settings.calculationMethod)}`
-          : ''}
-        {effectiveProvider !== 'islamiska_forbundet' && settings.school === 1
-          ? ` · ${t('home.hanafiSuffix')}`
-          : ''}
-      </Text>
-
-      {/* Prayer times table */}
-      <View
-        style={[
-          styles.table,
-          {
-            backgroundColor: palette.card,
-            borderRadius: TABLE_RADIUS,
-            ...cardEdgeStyle(palette),
-          },
-        ]}>
-        {DISPLAY_ORDER.map((key, index) => {
-          const raw = today[key];
-          if (!raw) {
-            return null;
-          }
-          const isNext =
-            nextInfo &&
-            nextInfo.name === key &&
-            nextInfo.at > now &&
-            isSameLocalDay(nextInfo.at, now);
-          const isSunrise = key === 'Sunrise';
-          const isLast = index === DISPLAY_ORDER.length - 1;
-
-          return (
-            <View
-              key={key}
-              style={[
-                styles.row,
-                !isLast && rowDividerStyle(palette),
-                isNext && { backgroundColor: palette.accentBg },
-              ]}>
-              {/* Active-row accent bar (left edge) */}
-              {isNext && (
-                <View
-                  style={[styles.activeBar, { backgroundColor: palette.accent }]}
-                />
-              )}
-              <Text
-                style={[
-                  styles.rowName,
-                  {
-                    color: isSunrise && !isNext ? palette.muted : palette.text,
-                    fontStyle: isSunrise ? 'italic' : 'normal',
-                    fontWeight: isNext ? '600' : '500',
-                  },
-                ]}>
-                {t(`prayer.${key}`)}
+      {/* ── Day carousel ── */}
+      <ScrollView
+        ref={dayScrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        decelerationRate="fast"
+        style={styles.carousel}
+        onMomentumScrollEnd={e => {
+          const newIndex = Math.round(e.nativeEvent.contentOffset.x / cardWidth);
+          setActiveDayIndex(Math.max(0, Math.min(newIndex, week.length - 1)));
+        }}>
+        {week.map((timings: TimingsMap, dayIndex: number) => (
+          <View
+            key={dayIndex}
+            style={[
+              styles.dayCard,
+              {
+                width: cardWidth,
+                backgroundColor: palette.card,
+                borderRadius: TABLE_RADIUS,
+                ...cardEdgeStyle(palette),
+              },
+            ]}>
+            {/* Day header */}
+            <View style={[styles.dayCardHeader, { borderBottomColor: palette.border ?? palette.muted }]}>
+              <Text style={[styles.dayCardTitle, { color: palette.text }]}>
+                {getDayLabel(dayIndex)}
               </Text>
-              <Text
-                style={[
-                  styles.rowTime,
-                  {
-                    color: isNext
-                      ? palette.accent
-                      : isSunrise
-                      ? palette.muted
-                      : palette.text,
-                    fontWeight: isNext ? '700' : '500',
-                  },
-                ]}>
-                {formatDisplayTime(raw)}
+              <Text style={[styles.dayCardDate, { color: palette.muted }]}>
+                {getDayDate(dayIndex)}
               </Text>
             </View>
-          );
-        })}
-      </View>
 
-      {/* Month shortcut */}
+            {/* Prayer rows */}
+            {DISPLAY_ORDER.map((key, rowIndex) => {
+              const raw = timings[key];
+              if (!raw) return null;
+              const isNext =
+                dayIndex === 0 &&
+                nextInfo?.name === key &&
+                nextInfo.at > now &&
+                isSameLocalDay(nextInfo.at, now);
+              const isSunrise = key === 'Sunrise';
+              const isLast = rowIndex === DISPLAY_ORDER.length - 1;
+
+              return (
+                <View
+                  key={key}
+                  style={[
+                    styles.row,
+                    !isLast && rowDividerStyle(palette),
+                    isNext && { backgroundColor: palette.accentBg },
+                  ]}>
+                  {isNext && (
+                    <View style={[styles.activeBar, { backgroundColor: palette.accent }]} />
+                  )}
+                  <Text
+                    style={[
+                      styles.rowName,
+                      {
+                        color: isSunrise && !isNext ? palette.muted : palette.text,
+                        fontStyle: isSunrise ? 'italic' : 'normal',
+                        fontWeight: isNext ? '600' : '500',
+                      },
+                    ]}>
+                    {t(`prayer.${key}`)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.rowTime,
+                      {
+                        color: isNext ? palette.accent : isSunrise ? palette.muted : palette.text,
+                        fontWeight: isNext ? '700' : '500',
+                      },
+                    ]}>
+                    {formatDisplayTime(raw)}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* ── Dot indicators (only when there are multiple days) ── */}
+      {week.length > 1 && (
+        <View style={styles.dotRow} accessibilityElementsHidden>
+          {week.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.dot,
+                {
+                  backgroundColor: palette.muted,
+                  opacity: i === activeDayIndex ? 0.9 : 0.25,
+                  width: i === activeDayIndex ? 16 : 6,
+                },
+              ]}
+            />
+          ))}
+        </View>
+      )}
+
+      {/* ── Month shortcut ── */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('home.monthTimesLink')}
@@ -512,17 +575,77 @@ export function HomeScreen() {
           {t('home.monthTimesLink')}
         </Text>
       </Pressable>
+
+      {/* ── Provider / source footer ── */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityHint={t('a11y.openTimesSource')}
+        onPress={() => setProviderPickerOpen(true)}
+        style={({ pressed }) => [
+          styles.providerFooter,
+          {
+            backgroundColor: palette.card,
+            borderRadius: TABLE_RADIUS,
+            ...cardEdgeStyle(palette),
+          },
+          pressed && { opacity: 0.75 },
+        ]}>
+        <View style={styles.providerFooterBody}>
+          <Text style={[styles.providerFooterKicker, { color: palette.muted }]}>
+            {t('provider.timesSource').toUpperCase()}
+          </Text>
+          <Text
+            style={[styles.providerFooterLabel, { color: palette.text }]}
+            numberOfLines={1}>
+            {getProviderLabel(effectiveProvider)}
+            {!providerHidesCalculationMethod(effectiveProvider)
+              ? ` · ${getMethodLabel(settings.calculationMethod)}`
+              : ''}
+            {effectiveProvider !== 'islamiska_forbundet' && settings.school === 1
+              ? ` · ${t('home.hanafiSuffix')}`
+              : ''}
+          </Text>
+          {locationLabel ? (
+            <Text
+              style={[styles.providerFooterSub, { color: palette.muted }]}
+              numberOfLines={1}>
+              {locationLabel}
+              {settings.dataProviderAuto
+                ? ` · ${t('provider.automaticByLocation')}`
+                : ''}
+            </Text>
+          ) : null}
+        </View>
+        <View style={styles.providerFooterRight}>
+          {state.backgroundRefreshing && (
+            <ActivityIndicator
+              size="small"
+              color={palette.muted}
+              accessibilityLabel={t('home.updatingLocation')}
+              style={styles.refreshSpinner}
+            />
+          )}
+          <Text style={[styles.providerChevron, { color: palette.accent }]}>▾</Text>
+        </View>
+      </Pressable>
+
+      {/* Provider picker modal — controlled from footer press */}
+      <ProviderPickerModal
+        visible={providerPickerOpen}
+        onClose={() => setProviderPickerOpen(false)}
+        settings={settings}
+        updateSettings={updateSettings}
+        palette={pickerPalette}
+      />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
+  scroll: { flex: 1 },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: SCREEN_PADDING,
+    paddingBottom: 36,
     gap: 12,
   },
   centered: {
@@ -530,41 +653,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorScreen: {
-    padding: 24,
-  },
-  loadingHint: {
-    marginTop: 12,
-  },
-  bodyCenter: {
-    textAlign: 'center',
-  },
-  muted: {
-    fontSize: 15,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  body: {
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 20,
-  },
-  button: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+  errorScreen: { padding: 24 },
+  loadingHint: { marginTop: 12 },
+  bodyCenter: { textAlign: 'center' },
+  muted: { fontSize: 15 },
+  title: { fontSize: 20, fontWeight: '600', marginBottom: 8 },
+  body: { fontSize: 15, lineHeight: 22, marginBottom: 20 },
+  button: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10 },
+  buttonLabel: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+
+  // ── Banners ──
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    gap: 8,
   },
-  buttonLabel: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  nextCard: {
-    overflow: 'hidden',
-  },
+  bannerText: { flex: 1, fontSize: 13, lineHeight: 18 },
+  bannerAction: { fontSize: 13, fontWeight: '600' },
+
+  // ── Next prayer hero ──
+  nextCard: { overflow: 'hidden' },
   nextLabel: {
     fontSize: 12,
     fontWeight: '600',
@@ -578,34 +690,37 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
   },
-  nextName: {
-    fontSize: 32,
-    fontWeight: '700',
-    flex: 1,
+  nextName: { fontSize: 32, fontWeight: '700', flex: 1 },
+  nextTime: { fontSize: 26, fontWeight: '700' },
+  nextCountdownRow: { marginTop: 10, flexDirection: 'row' },
+  countdownPill: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  nextCountdown: { fontSize: 14, fontWeight: '500' },
+
+  // ── Day carousel ──
+  carousel: {
+    // Overflow visible so card shadow / edge isn't clipped.
+    // The horizontal ScrollView clips itself anyway.
   },
-  nextTime: {
-    fontSize: 26,
-    fontWeight: '700',
-  },
-  nextCountdownRow: {
-    marginTop: 10,
-    flexDirection: 'row',
-  },
-  countdownPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  nextCountdown: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  coords: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  table: {
+  dayCard: {
     overflow: 'hidden',
+  },
+  dayCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+  },
+  dayCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  dayCardDate: {
+    fontSize: 13,
+    fontWeight: '400',
   },
   row: {
     flexDirection: 'row',
@@ -623,31 +738,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: 4,
   },
-  localFallbackBanner: {
+  rowName: { fontSize: 17 },
+  rowTime: { fontSize: 17 },
+
+  // ── Dot indicators ──
+  dotRow: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    gap: 8,
+    gap: 5,
+    marginTop: -4, // pull up slightly to reduce gap with card
   },
-  localFallbackText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
+  dot: {
+    height: 6,
+    borderRadius: 3,
   },
-  localFallbackRetry: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  rowName: {
-    fontSize: 17,
-  },
-  rowTime: {
-    fontSize: 17,
-  },
+
+  // ── Month shortcut ──
   monthShortcut: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -656,8 +763,40 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     paddingHorizontal: 16,
   },
-  monthShortcutLabel: {
-    fontSize: 16,
+  monthShortcutLabel: { fontSize: 16, fontWeight: '600' },
+
+  // ── Provider footer ──
+  providerFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    gap: 8,
+  },
+  providerFooterBody: {
+    flex: 1,
+    gap: 2,
+  },
+  providerFooterKicker: {
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  providerFooterLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  providerFooterSub: {
+    fontSize: 12,
+  },
+  providerFooterRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  refreshSpinner: {},
+  providerChevron: {
+    fontSize: 18,
     fontWeight: '600',
   },
 });

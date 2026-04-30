@@ -106,15 +106,36 @@ export async function fetchIslamiskaForbundetTimes(params: {
     const [h, m] = t.split(':').map(Number);
     return h * 60 + m;
   };
+
+  // Circular diff handles times that straddle midnight (e.g. Isha 23:52 vs 00:45
+  // are only 53 min apart, but naive subtraction gives 1387 min = 23 h).
+  const circularMinuteDiff = (a: number, b: number): number => {
+    const diff = Math.abs(a - b);
+    return Math.min(diff, 1440 - diff);
+  };
+
   const [fM, srM, dhM, asM, mgM, isM] = [fajr, sunrise, dhuhr, asr, maghrib, isha].map(toMinutes);
-  if (!(fM < srM && srM < dhM && dhM < asM && asM < mgM && mgM < isM)) {
+
+  // At high Swedish latitudes in summer, Isha can fall past midnight.
+  // Only normalise if Isha is in the early-morning window (before 06:00) —
+  // that's the only physically plausible "past midnight" zone for Isha.
+  // This prevents a mis-parsed afternoon time from being silently accepted.
+  const EARLY_MORNING_THRESHOLD = 6 * 60; // 06:00
+  const isM_norm = isM < EARLY_MORNING_THRESHOLD ? isM + 1440 : isM;
+  if (!(fM < srM && srM < dhM && dhM < asM && asM < mgM && mgM < isM_norm)) {
     throw new Error(
       `Prayer times for "${widgetCity}" are out of order — the website layout may have changed.`,
     );
   }
 
-  // Sanity-check scraped times against the on-device adhan calculation.
-  // If any time differs by more than 6 hours the HTML layout has likely changed.
+  // Advisory comparison against on-device adhan — logged only, never thrown.
+  //
+  // The Swedish Islamic Society uses a high-latitude method that legitimately
+  // diverges from MWL (the local fallback) near midsummer, so any mismatch
+  // is expected and must not block the scraped result. At extreme latitudes
+  // Fajr/Isha can straddle midnight, so we use circular diff to avoid a
+  // phantom ~24 h gap when one method places Isha at 23:52 and the other
+  // at 00:45 (they are actually only 53 min apart).
   try {
     const local = computeLocalAdhanTimes({
       latitude: params.latitude,
@@ -123,27 +144,26 @@ export async function fetchIslamiskaForbundetTimes(params: {
       calculationMethod: 'auto',
       school: 0,
     });
-    const MAX_DIFF_MIN = 6 * 60;
-    const pairs: Array<[number, string]> = [
-      [fM, local.timings.Fajr],
-      [srM, local.timings.Sunrise],
-      [dhM, local.timings.Dhuhr],
-      [asM, local.timings.Asr],
-      [mgM, local.timings.Maghrib],
-      [isM, local.timings.Isha],
+    const ADVISORY_DIFF_MIN = 6 * 60;
+    const pairs: Array<[number, string, string]> = [
+      [fM,  local.timings.Fajr,    'Fajr'],
+      [srM, local.timings.Sunrise, 'Sunrise'],
+      [dhM, local.timings.Dhuhr,   'Dhuhr'],
+      [asM, local.timings.Asr,     'Asr'],
+      [mgM, local.timings.Maghrib, 'Maghrib'],
+      [isM, local.timings.Isha,    'Isha'],
     ];
-    for (const [scraped, localTime] of pairs) {
-      if (Math.abs(scraped - toMinutes(localTime)) > MAX_DIFF_MIN) {
-        throw new Error(
-          `Prayer times for "${widgetCity}" differ from on-device calculation by more than 6 hours — the website layout may have changed.`,
+    for (const [scraped, localTime, name] of pairs) {
+      const diff = circularMinuteDiff(scraped, toMinutes(localTime));
+      if (diff > ADVISORY_DIFF_MIN) {
+        console.warn(
+          `[islamiskaForbundet] ${name} for "${widgetCity}" differs from ` +
+          `on-device adhan by ${diff} min — returning scraped value anyway.`,
         );
       }
     }
-  } catch (e) {
-    // Re-throw only our own sanity error; ignore failures from the local calc itself.
-    if (e instanceof Error && e.message.includes('differ from on-device')) {
-      throw e;
-    }
+  } catch {
+    // Local adhan calculation failed — irrelevant to the scraped result.
   }
 
   return {

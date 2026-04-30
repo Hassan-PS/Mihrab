@@ -145,16 +145,16 @@ export function CompassScreen() {
   }, [t]);
 
   const needsGpsPrime =
-    settings.locationMode === 'gps' &&
+    settings.locationMode === 'automatic' &&
     (settings.lastFetchedLatitude == null ||
       settings.lastFetchedLongitude == null);
 
   const lat =
-    settings.locationMode === 'gps'
+    settings.locationMode === 'automatic'
       ? (settings.lastFetchedLatitude ?? settings.manualLatitude)
       : settings.manualLatitude;
   const lng =
-    settings.locationMode === 'gps'
+    settings.locationMode === 'automatic'
       ? (settings.lastFetchedLongitude ?? settings.manualLongitude)
       : settings.manualLongitude;
 

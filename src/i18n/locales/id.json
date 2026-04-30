@@ -35,7 +35,10 @@
     "localFallbackNotice": "Perhitungan lokal — sambungkan untuk memperbarui",
     "lastGpsCoordsNotice": "Menggunakan lokasi terakhir — GPS tidak tersedia",
     "exactAlarmDenied": "Pengingat shalat membutuhkan izin alarm tepat untuk ketepatan waktu. Ketuk untuk memberikan izin.",
-    "notifPermDenied": "Izin notifikasi ditolak — pengingat shalat tidak akan berbunyi. Ketuk untuk membuka Pengaturan."
+    "notifPermDenied": "Izin notifikasi ditolak — pengingat shalat tidak akan berbunyi. Ketuk untuk membuka Pengaturan.",
+    "updatingLocation": "Memperbarui lokasi",
+    "today": "Hari ini",
+    "tomorrow": "Besok"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",
@@ -82,7 +85,7 @@
     "providerAutoLine": "Otomatis · {{label}}",
     "providerAutoHelp": "Di Swedia, waktu sholat menggunakan sumber Swedia (kota-kota yang terdaftar); di luar Swedia, AlAdhan. Pilih sumber di bawah untuk mengunci satu penyedia.",
     "location": "Lokasi",
-    "gps": "GPS",
+    "automatic": "Otomatis",
     "manual": "petunjuk",
     "manualSearchHelp": "Ketuk hasil pencarian untuk langsung menerapkannya, atau edit koordinat dan tekan Terapkan di bawah.",
     "coordsLabel": "Koordinat (derajat desimal)",
@@ -152,7 +155,7 @@
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
     "sub": "Waktu sholat tergantung di mana Anda berada. Pilih salah satu opsi di bawah — Anda dapat mengubahnya nanti di Pengaturan.",
-    "useGps": "Gunakan lokasi perangkat",
+    "useAutomatic": "Gunakan lokasi perangkat",
     "searchCoords": "Cari atau masukkan koordinat",
     "manualHeadline": "Lokasi manual",
     "manualSub": "Cari dan ketuk hasil untuk menyelesaikannya — atau ketik lintang dan bujur di bawah dan tekan Lanjutkan.",

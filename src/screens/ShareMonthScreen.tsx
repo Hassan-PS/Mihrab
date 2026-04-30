@@ -81,16 +81,16 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   }, [embedded, navigation]);
 
   const needsGpsPrime =
-    settings.locationMode === 'gps' &&
+    settings.locationMode === 'automatic' &&
     (settings.lastFetchedLatitude == null ||
       settings.lastFetchedLongitude == null);
 
   const lat =
-    settings.locationMode === 'gps'
+    settings.locationMode === 'automatic'
       ? (settings.lastFetchedLatitude ?? 0)
       : settings.manualLatitude;
   const lng =
-    settings.locationMode === 'gps'
+    settings.locationMode === 'automatic'
       ? (settings.lastFetchedLongitude ?? 0)
       : settings.manualLongitude;
 

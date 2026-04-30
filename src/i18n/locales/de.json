@@ -35,7 +35,10 @@
     "localFallbackNotice": "Lokale Berechnung — Verbinden zum Aktualisieren",
     "lastGpsCoordsNotice": "Letzten Standort verwenden — GPS nicht verfügbar",
     "exactAlarmDenied": "Gebetsbenachrichtigungen benötigen die Berechtigung für genaue Alarme. Tippen zum Erteilen.",
-    "notifPermDenied": "Benachrichtigungsberechtigung verweigert — Gebetsalarme werden nicht ausgelöst. Tippen zum Öffnen."
+    "notifPermDenied": "Benachrichtigungsberechtigung verweigert — Gebetsalarme werden nicht ausgelöst. Tippen zum Öffnen.",
+    "updatingLocation": "Standort wird aktualisiert",
+    "today": "Heute",
+    "tomorrow": "Morgen"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",
@@ -82,7 +85,7 @@
     "providerAutoLine": "Automatisch · {{label}}",
     "providerAutoHelp": "In Schweden verwenden die Gebetszeiten die schwedische Quelle (aufgelistete Städte); außerhalb Schwedens, AlAdhan. Wählen Sie unten eine Quelle aus, um einen Anbieter zu sperren.",
     "location": "Standort",
-    "gps": "GPS",
+    "automatic": "Automatisch",
     "manual": "Handbuch",
     "manualSearchHelp": "Tippen Sie auf ein Suchergebnis, um es sofort anzuwenden, oder bearbeiten Sie die Koordinaten und klicken Sie unten auf „Übernehmen“.",
     "coordsLabel": "Koordinaten (Dezimalgrade)",
@@ -152,7 +155,7 @@
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
     "sub": "Die Gebetszeiten hängen davon ab, wo Sie sich befinden. Wählen Sie eine der folgenden Optionen – Sie können dies später in den Einstellungen ändern.",
-    "useGps": "Verwenden Sie den Gerätestandort",
+    "useAutomatic": "Verwenden Sie den Gerätestandort",
     "searchCoords": "Koordinaten suchen oder eingeben",
     "manualHeadline": "Manueller Standort",
     "manualSub": "Suchen Sie und tippen Sie auf ein Ergebnis, um den Vorgang abzuschließen – oder geben Sie unten Breiten- und Längengrad ein und klicken Sie auf „Weiter“.",

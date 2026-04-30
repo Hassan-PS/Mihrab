@@ -4,7 +4,7 @@
     "tagline": "Bönetider med fokus på Sverige — med källor anpassade för svenska städer och flexibla alternativ utanför landet."
   },
   "nav": {
-    "home": "Prayer Times",
+    "home": "Bönetider",
     "settings": "Inställningar",
     "month": "Månad",
     "shareMonth": "Dela månad",
@@ -35,7 +35,10 @@
     "localFallbackNotice": "Lokal beräkning — anslut för att uppdatera",
     "lastGpsCoordsNotice": "Använder senast kända position — GPS inte tillgänglig",
     "exactAlarmDenied": "Bönetidsaviseringar behöver exakt larmtillstånd för korrekt timing. Tryck för att bevilja.",
-    "notifPermDenied": "Aviseringsbehörighet nekad — bönetidsaviseringar fungerar inte. Tryck för att öppna inställningar."
+    "notifPermDenied": "Aviseringsbehörighet nekad — bönetidsaviseringar fungerar inte. Tryck för att öppna inställningar.",
+    "updatingLocation": "Uppdaterar plats",
+    "today": "Idag",
+    "tomorrow": "Imorgon"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",
@@ -82,7 +85,7 @@
     "providerAutoLine": "Automatiskt · {{label}}",
     "providerAutoHelp": "I Sverige används Sverige-källan ( listade städer); utanför Sverige används AlAdhan. Välj en källa nedan för att låsa en leverantör.",
     "location": "Plats",
-    "gps": "GPS",
+    "automatic": "Automatisk",
     "manual": "Manuell",
     "manualSearchHelp": "Tryck på ett sökresultat för att använda det direkt, eller redigera koordinater och tryck Använd nedan.",
     "coordsLabel": "Koordinater (decimalgrader)",
@@ -152,7 +155,7 @@
   "locationSetup": {
     "headline": "Ange din plats",
     "sub": "Bönetider beror på var du är. Välj ett av alternativen nedan — du kan ändra det senare i Inställningar.",
-    "useGps": "Använd enhetens plats",
+    "useAutomatic": "Använd enhetens plats",
     "searchCoords": "Sök eller ange koordinater",
     "manualHeadline": "Manuell plats",
     "manualSub": "Sök och tryck på ett resultat för att slutföra — eller skriv latitud och longitud nedan och tryck Fortsätt.",

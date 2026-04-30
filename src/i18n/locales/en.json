@@ -35,7 +35,10 @@
     "localFallbackNotice": "On-device calculation — connect to refresh from your provider",
     "lastGpsCoordsNotice": "Using last known location — GPS unavailable",
     "exactAlarmDenied": "Prayer alerts need exact-alarm permission for accurate timing. Tap to grant.",
-    "notifPermDenied": "Notification permission denied — prayer alerts won't fire. Tap to open Settings."
+    "notifPermDenied": "Notification permission denied — prayer alerts won't fire. Tap to open Settings.",
+    "updatingLocation": "Updating location",
+    "today": "Today",
+    "tomorrow": "Tomorrow"
   },
   "errors": {
     "locationNeededTitle": "Location needed",
@@ -82,7 +85,7 @@
     "providerAutoLine": "Automatic · {{label}}",
     "providerAutoHelp": "In Sweden, prayer times use the Sweden source (listed cities); outside Sweden, AlAdhan. Pick a source below to lock one provider.",
     "location": "Location",
-    "gps": "GPS",
+    "automatic": "Automatic",
     "manual": "Manual",
     "manualSearchHelp": "Tap a search result to apply it right away, or edit coordinates and press Apply below.",
     "coordsLabel": "Coordinates (decimal degrees)",
@@ -152,7 +155,7 @@
   "locationSetup": {
     "headline": "Set your location",
     "sub": "Prayer times depend on where you are. Choose one of the options below — you can change this later in Settings.",
-    "useGps": "Use device location",
+    "useAutomatic": "Use device location",
     "searchCoords": "Search or enter coordinates",
     "manualHeadline": "Manual location",
     "manualSub": "Search and tap a result to finish — or type latitude and longitude below and press Continue.",

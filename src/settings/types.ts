@@ -1,7 +1,7 @@
 import type { PrePrayerReminderMinutes } from './prePrayerReminder';
 import type { NotificationSoundId } from '../notifications/notificationSounds';
 
-export type LocationMode = 'gps' | 'manual';
+export type LocationMode = 'automatic' | 'manual';
 
 export type PrayerDataProviderId =
   | 'aladhan'
