@@ -35,7 +35,10 @@
     "localFallbackNotice": "Calcul local — connectez-vous pour actualiser",
     "lastGpsCoordsNotice": "Utilisation du dernier emplacement connu — GPS indisponible",
     "exactAlarmDenied": "Les alertes de prière nécessitent la permission d'alarme exacte. Appuyez pour accorder.",
-    "notifPermDenied": "Permission de notification refusée — les alertes de prière ne sonneront pas. Appuyez pour ouvrir les réglages."
+    "notifPermDenied": "Permission de notification refusée — les alertes de prière ne sonneront pas. Appuyez pour ouvrir les réglages.",
+    "updatingLocation": "Mise à jour de la localisation",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain"
   },
   "errors": {
     "locationNeededTitle": "Emplacement nécessaire",
@@ -82,7 +85,7 @@
     "providerAutoLine": "Automatique · {{label}}",
     "providerAutoHelp": "En Suède, les horaires de prière utilisent la source suédoise (villes répertoriées) ; en dehors de la Suède, AlAdhan. Choisissez une source ci-dessous pour verrouiller un fournisseur.",
     "location": "Emplacement",
-    "gps": "GPS",
+    "automatic": "Automatique",
     "manual": "Manuel",
     "manualSearchHelp": "Appuyez sur un résultat de recherche pour l'appliquer immédiatement, ou modifiez les coordonnées et appuyez sur Appliquer ci-dessous.",
     "coordsLabel": "Coordonnées (degrés décimaux)",
@@ -152,7 +155,7 @@
   "locationSetup": {
     "headline": "Définissez votre emplacement",
     "sub": "Les horaires de prière dépendent de l'endroit où vous vous trouvez. Choisissez l’une des options ci-dessous – vous pourrez la modifier ultérieurement dans Paramètres.",
-    "useGps": "Utiliser l'emplacement de l'appareil",
+    "useAutomatic": "Utiliser l'emplacement de l'appareil",
     "searchCoords": "Rechercher ou saisir des coordonnées",
     "manualHeadline": "Localisation manuelle",
     "manualSub": "Recherchez et appuyez sur un résultat pour terminer – ou saisissez la latitude et la longitude ci-dessous et appuyez sur Continuer.",

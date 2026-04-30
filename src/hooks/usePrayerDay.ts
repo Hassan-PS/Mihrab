@@ -14,6 +14,9 @@ import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { addDays } from '../utils/prayerTimes';
 
+/** How many consecutive days (today + N-1 more) to fetch and expose. */
+const WEEK_DAYS = 7;
+
 export type PrayerDayState =
   | { phase: 'idle' }
   | { phase: 'loading' }
@@ -24,10 +27,26 @@ export type PrayerDayState =
       phase: 'ready';
       latitude: number;
       longitude: number;
+      /** Convenience alias for week[0]. */
       today: TimingsMap;
+      /** Convenience alias for week[1] (may be undefined). */
       tomorrow?: TimingsMap;
+      /**
+       * Consecutive days starting from today (index 0 = today, 1 = tomorrow …).
+       * Always has at least one entry. Stops at the first day that could not be
+       * fetched so callers can rely on the array being gapless.
+       */
+      week: TimingsMap[];
       /** True when showing on-device fallback times because the network/provider failed. */
       usingLocalFallback?: boolean;
+      /**
+       * True while a silent background operation is in flight:
+       *  - fetching data for a newly detected location, OR
+       *  - filling gaps in the local cache after showing today's times.
+       * The displayed times are always valid; this flag just drives a subtle
+       * loading indicator so the user knows a refresh is happening.
+       */
+      backgroundRefreshing?: boolean;
     };
 
 /**
@@ -65,43 +84,55 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         settings.dataProvider,
         coords,
       );
+
       if (!isBackgroundRefresh) {
         setState({ phase: 'loading' });
+      } else {
+        // Mark current ready state as actively refreshing so the UI can show
+        // a subtle indicator without blanking the displayed times.
+        setState(prev =>
+          prev.phase === 'ready' ? { ...prev, backgroundRefreshing: true } : prev,
+        );
       }
-      try {
-        const todayTimings = await getOrFetchPrayerTimes({
-          provider,
-          latitude,
-          longitude,
-          date: new Date(),
-          calculationMethod: settings.calculationMethod,
-          school: settings.school,
-        });
-        let tomorrow: TimingsMap | undefined;
-        try {
-          tomorrow = await getOrFetchPrayerTimes({
-            provider,
-            latitude,
-            longitude,
-            date: addDays(new Date(), 1),
-            calculationMethod: settings.calculationMethod,
-            school: settings.school,
-          });
-        } catch {
-          tomorrow = undefined;
-        }
-        if (gen !== loadGenerationRef.current) {
-          return;
-        }
-        setState({
-          phase: 'ready',
-          latitude,
-          longitude,
-          today: todayTimings,
-          tomorrow,
-        });
 
-        // Background cache refresh if needed
+      try {
+        // Fetch WEEK_DAYS consecutive days concurrently so the swipeable day
+        // carousel loads atomically — no staggered re-renders as later days arrive.
+        const now = new Date();
+        const weekResults = await Promise.allSettled(
+          Array.from({ length: WEEK_DAYS }, (_, i) =>
+            getOrFetchPrayerTimes({
+              provider,
+              latitude,
+              longitude,
+              date: addDays(now, i),
+              calculationMethod: settings.calculationMethod,
+              school: settings.school,
+            }),
+          ),
+        );
+
+        if (gen !== loadGenerationRef.current) return;
+
+        // Build a gapless week: stop at the first failure so callers can rely
+        // on week[i] corresponding to today + i days without holes.
+        const weekTimings: TimingsMap[] = [];
+        for (const result of weekResults) {
+          if (result.status === 'fulfilled') {
+            weekTimings.push(result.value);
+          } else {
+            break;
+          }
+        }
+
+        if (weekTimings.length === 0) {
+          throw new Error('No prayer times available');
+        }
+
+        // Check whether the local cache needs a background fill.  We do this
+        // before the final setState so we can include backgroundRefreshing in
+        // the same update — preventing a brief false-idle flash.
+        let needsCacheFill = false;
         try {
           const status = await getCacheStatus({
             provider,
@@ -110,64 +141,89 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             calculationMethod: settings.calculationMethod,
             school: settings.school,
           });
-          if (status.monthsStored < 2 || status.isExpired) {
-            // Refresh up to 12 months ahead in the background
-            refreshPrayerDataCache(
-              {
-                provider,
-                latitude,
-                longitude,
-                calculationMethod: settings.calculationMethod,
-                school: settings.school,
-              },
-              12
-            ).catch(e => console.error('Background prayer cache refresh failed', e));
-          }
+          needsCacheFill = status.monthsStored < 2 || status.isExpired;
         } catch {
-          // Ignore cache check errors
+          // Cache status check failing is non-critical; we just won't fill.
         }
-      } catch (e) {
-        if (gen !== loadGenerationRef.current) {
-          return;
-        }
-        // Network / provider failed — try on-device calculation as an offline fallback
-        // so the app is usable without a connection on first launch.
-        try {
-          const localToday = computeLocalAdhanTimes({
-            latitude,
-            longitude,
-            date: new Date(),
-            calculationMethod: settings.calculationMethod,
-            school: settings.school,
-          });
-          let localTomorrow: TimingsMap | undefined;
-          try {
-            localTomorrow = computeLocalAdhanTimes({
+
+        if (gen !== loadGenerationRef.current) return;
+
+        setState({
+          phase: 'ready',
+          latitude,
+          longitude,
+          today: weekTimings[0],
+          tomorrow: weekTimings[1],
+          week: weekTimings,
+          backgroundRefreshing: needsCacheFill,
+        });
+
+        if (needsCacheFill) {
+          // Fill up to 12 months ahead in the background; clear the indicator
+          // when done regardless of success or failure.
+          refreshPrayerDataCache(
+            {
+              provider,
               latitude,
               longitude,
-              date: addDays(new Date(), 1),
               calculationMethod: settings.calculationMethod,
               school: settings.school,
-            }).timings;
-          } catch {
-            localTomorrow = undefined;
+            },
+            12,
+          )
+            .catch(e => console.error('Background prayer cache refresh failed', e))
+            .finally(() => {
+              if (gen !== loadGenerationRef.current) return;
+              setState(prev =>
+                prev.phase === 'ready'
+                  ? { ...prev, backgroundRefreshing: false }
+                  : prev,
+              );
+            });
+        }
+      } catch (e) {
+        if (gen !== loadGenerationRef.current) return;
+
+        // Network / provider failed — fall back to on-device calculation so
+        // the app remains usable offline.  Generate the full week from local
+        // adhan so the day carousel still works without connectivity.
+        try {
+          const now = new Date();
+          const localWeek: TimingsMap[] = [];
+          for (let i = 0; i < WEEK_DAYS; i++) {
+            try {
+              const local = computeLocalAdhanTimes({
+                latitude,
+                longitude,
+                date: addDays(now, i),
+                calculationMethod: settings.calculationMethod,
+                school: settings.school,
+              });
+              localWeek.push(local.timings);
+            } catch {
+              break;
+            }
           }
-          if (gen !== loadGenerationRef.current) {
-            return;
+
+          if (localWeek.length === 0) {
+            throw new Error('Local adhan calculation failed');
           }
+
+          if (gen !== loadGenerationRef.current) return;
+
           setState({
             phase: 'ready',
             latitude,
             longitude,
-            today: localToday.timings,
-            tomorrow: localTomorrow,
+            today: localWeek[0],
+            tomorrow: localWeek[1],
+            week: localWeek,
             usingLocalFallback: true,
+            backgroundRefreshing: false,
           });
         } catch {
           // Local calculation also failed (invalid coordinates?)
-          if (gen !== loadGenerationRef.current) {
-            return;
-          }
+          if (gen !== loadGenerationRef.current) return;
           const message =
             e instanceof Error ? e.message : 'Failed to load prayer times';
           setState({ phase: 'api_error', message });
@@ -189,21 +245,31 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         if (!isBackgroundRefresh) {
           setState({ phase: 'loading' });
         }
-        loadTimes(settings.manualLatitude, settings.manualLongitude, isBackgroundRefresh).catch(
-          () => {},
-        );
+        loadTimes(
+          settings.manualLatitude,
+          settings.manualLongitude,
+          isBackgroundRefresh,
+        ).catch(() => {});
         return;
       }
 
-      // ── GPS mode: show cached data instantly, refresh coords in background ──
+      // ── Automatic mode ───────────────────────────────────────────────────────
+      // Strategy:
+      //  1. Immediately show last-known data (if any) — zero wait for the user.
+      //  2. Silently resolve the current GPS position in the background.
+      //  3. If position changed significantly (~1 km), fetch new times without
+      //     blanking the screen; swap atomically when both today+week ready.
+      //  4. Whether or not position changed, always check cache staleness and
+      //     fill gaps in the background, signalling via backgroundRefreshing.
+
       const cachedLat = settings.lastFetchedLatitude;
       const cachedLng = settings.lastFetchedLongitude;
       const hasCached = cachedLat != null && cachedLng != null;
 
       if (hasCached) {
-        // Immediately render the last-known prayer data — no loading spinner.
-        // Pass isBackgroundRefresh=true so loadTimes won't reset to 'loading'.
-        loadTimes(cachedLat!, cachedLng!, true).catch(() => {});
+        // Instantly render last-known times while GPS resolves in background.
+        // isBackgroundRefresh=true prevents the 'loading' flash.
+        loadTimes(cachedLat, cachedLng, true).catch(() => {});
       } else if (!isBackgroundRefresh) {
         setState({ phase: 'loading' });
       }
@@ -222,37 +288,43 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         }
       }
 
-      // Get fresh GPS in the background. A 25 s watchdog fires if the OS never
-      // responds (seen on certain Android ROMs and iOS edge cases).
+      // Resolve fresh GPS in the background.  A 25 s watchdog fires if the OS
+      // never responds (seen on certain Android ROMs and iOS edge cases).
       let watchdogFired = false;
       const watchdog = setTimeout(() => {
         watchdogFired = true;
         if (!hasCached && !isBackgroundRefresh) {
           setState({ phase: 'location_error', message: 'Location request timed out' });
         }
-      }, 25000);
+      }, 25_000);
 
       Geolocation.getCurrentPosition(
         pos => {
           clearTimeout(watchdog);
           if (watchdogFired) return;
+
           const { latitude: newLat, longitude: newLng } = pos.coords;
-          // Only re-fetch prayer data when the device has moved significantly
-          // (~1 km). Same neighbourhood → cached data is accurate, skip the
-          // network round-trip.
+
           if (coordsChangedSignificantly(newLat, newLng, cachedLat, cachedLng)) {
+            // New location — fetch fresh data and swap atomically when ready.
+            // The screen already shows the old cached data with backgroundRefreshing.
             loadTimes(newLat, newLng, true).catch(() => {});
           }
+          // If coords haven't changed, loadTimes(cachedLat, cachedLng, true)
+          // already ran above and handles cache-staleness proactively.
         },
         err => {
           clearTimeout(watchdog);
           if (watchdogFired) return;
-          // GPS failed — cached data is already on screen if hasCached.
           if (!hasCached && !isBackgroundRefresh) {
-            setState({ phase: 'location_error', message: err.message || 'Could not get location' });
+            setState({
+              phase: 'location_error',
+              message: err.message || 'Could not get location',
+            });
           }
+          // GPS failed but cached data is already on screen — stay on it.
         },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 },
+        { enableHighAccuracy: true, timeout: 20_000, maximumAge: 60_000 },
       );
     };
     run().catch(() => {});
@@ -265,8 +337,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     settings.lastFetchedLongitude,
   ]);
 
-  // WiFi-triggered background sync: keep the 12-month cache topped up whenever
-  // the device connects to WiFi, using whatever coords are currently available.
+  // WiFi-triggered background sync: silently top up the 12-month cache
+  // whenever the device connects to WiFi.  No backgroundRefreshing indicator
+  // here — this is a maintenance task that may run for a long time and the
+  // user already has correct times on screen.
   useEffect(() => {
     if (!hydrated || !settings.locationOnboardingComplete) {
       return;
@@ -276,11 +350,11 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         return;
       }
       const lat =
-        settings.locationMode === 'gps'
+        settings.locationMode === 'automatic'
           ? settings.lastFetchedLatitude
           : settings.manualLatitude;
       const lng =
-        settings.locationMode === 'gps'
+        settings.locationMode === 'automatic'
           ? settings.lastFetchedLongitude
           : settings.manualLongitude;
       if (lat == null || lng == null) {

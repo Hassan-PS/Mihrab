@@ -88,6 +88,10 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
       parsed.prePrayerReminderMinutes,
     );
     merged.notificationSound = coerceNotificationSoundId(parsed.notificationSound);
+    // Migrate locationMode: 'gps' was renamed to 'automatic' in v1.5.52+
+    if ((merged.locationMode as string) === 'gps') {
+      merged.locationMode = 'automatic';
+    }
     return merged;
   } catch {
     return DEFAULT_SETTINGS;

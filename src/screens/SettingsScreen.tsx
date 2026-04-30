@@ -583,16 +583,16 @@ export function SettingsScreen() {
             <Pressable
               style={[
                 styles.segment,
-                segmentChromeStyle(palette, settings.locationMode === 'gps'),
+                segmentChromeStyle(palette, settings.locationMode === 'automatic'),
               ]}
-              onPress={() => updateSettings({ locationMode: 'gps' })}>
+              onPress={() => updateSettings({ locationMode: 'automatic' })}>
               <Text
                 style={[
                   styles.segmentLabel,
                   { color: palette.text },
-                  settings.locationMode === 'gps' && { color: palette.accent },
+                  settings.locationMode === 'automatic' && { color: palette.accent },
                 ]}>
-                {t('settings.gps')}
+                {t('settings.automatic')}
               </Text>
             </Pressable>
             <Pressable

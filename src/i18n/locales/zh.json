@@ -35,7 +35,10 @@
     "localFallbackNotice": "本地计算 — 连接网络以刷新",
     "lastGpsCoordsNotice": "使用上次已知位置 — GPS 不可用",
     "exactAlarmDenied": "祈祷提醒需要精确闹钟权限以确保时间准确。点击授权。",
-    "notifPermDenied": "通知权限被拒绝 — 祈祷提醒将无法发出。点击打开设置。"
+    "notifPermDenied": "通知权限被拒绝 — 祈祷提醒将无法发出。点击打开设置。",
+    "updatingLocation": "正在更新位置",
+    "today": "今天",
+    "tomorrow": "明天"
   },
   "errors": {
     "locationNeededTitle": "需要位置",
@@ -82,7 +85,7 @@
     "providerAutoLine": "自动·{{label}}",
     "providerAutoHelp": "在瑞典，祈祷时间使用瑞典来源（列出的城市）；瑞典郊外的 AlAdhan。选择下面的来源来锁定一个提供商。",
     "location": "地点",
-    "gps": "全球定位系统",
+    "automatic": "自动",
     "manual": "手动的",
     "manualSearchHelp": "点击搜索结果即可立即应用它，或编辑坐标并按下面的“应用”。",
     "coordsLabel": "坐标（十进制）",
@@ -152,7 +155,7 @@
   "locationSetup": {
     "headline": "设置您的位置",
     "sub": "祈祷时间取决于您所在的位置。选择以下选项之一 - 您可以稍后在“设置”中更改此选项。",
-    "useGps": "使用设备位置",
+    "useAutomatic": "使用设备位置",
     "searchCoords": "搜索或输入坐标",
     "manualHeadline": "手动定位",
     "manualSub": "搜索并点击结果即可完成 - 或在下面输入纬度和经度，然后按继续。",

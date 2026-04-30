@@ -97,7 +97,7 @@ export function LocationSetup({ palette }: Props) {
         Geolocation.getCurrentPosition(
           () => {
             updateSettings({
-              locationMode: 'gps',
+              locationMode: 'automatic',
               locationOnboardingComplete: true,
               manualLocationLabel: undefined,
             });
@@ -156,7 +156,7 @@ export function LocationSetup({ palette }: Props) {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.primaryBtnLabel}>
-              {t('locationSetup.useGps')}
+              {t('locationSetup.useAutomatic')}
             </Text>
           )}
         </Pressable>

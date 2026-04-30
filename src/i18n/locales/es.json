@@ -35,7 +35,10 @@
     "localFallbackNotice": "Cálculo local — conéctate para actualizar",
     "lastGpsCoordsNotice": "Usando última ubicación conocida — GPS no disponible",
     "exactAlarmDenied": "Las alertas de oración necesitan permiso de alarma exacta para precisión. Toca para conceder.",
-    "notifPermDenied": "Permiso de notificaciones denegado — las alertas de oración no se activarán. Toca para abrir Ajustes."
+    "notifPermDenied": "Permiso de notificaciones denegado — las alertas de oración no se activarán. Toca para abrir Ajustes.",
+    "updatingLocation": "Actualizando ubicación",
+    "today": "Hoy",
+    "tomorrow": "Mañana"
   },
   "errors": {
     "locationNeededTitle": "Ubicación necesaria",
@@ -82,7 +85,7 @@
     "providerAutoLine": "Automático · {{label}}",
     "providerAutoHelp": "En Suecia, los tiempos de oración utilizan la fuente Suecia (ciudades enumeradas); fuera de Suecia, AlAdhan. Elija una fuente a continuación para bloquear un proveedor.",
     "location": "Ubicación",
-    "gps": "GPS",
+    "automatic": "Automático",
     "manual": "Manual",
     "manualSearchHelp": "Toque un resultado de búsqueda para aplicarlo de inmediato o edite las coordenadas y presione Aplicar a continuación.",
     "coordsLabel": "Coordenadas (grados decimales)",
@@ -152,7 +155,7 @@
   "locationSetup": {
     "headline": "Establece tu ubicación",
     "sub": "Los tiempos de oración dependen de dónde se encuentre. Elija una de las opciones siguientes; podrá cambiarla más adelante en Configuración.",
-    "useGps": "Usar la ubicación del dispositivo",
+    "useAutomatic": "Usar la ubicación del dispositivo",
     "searchCoords": "Buscar o ingresar coordenadas",
     "manualHeadline": "Ubicación manual",
     "manualSub": "Busque y toque un resultado para finalizar, o escriba latitud y longitud a continuación y presione Continuar.",
