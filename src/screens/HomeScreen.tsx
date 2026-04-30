@@ -162,7 +162,6 @@ export function HomeScreen() {
       settings.prePrayerReminderMinutes,
       settings.notificationSound,
       state,
-      locationLabel,
     ]),
   );
 
@@ -314,7 +313,7 @@ export function HomeScreen() {
           {t('errors.locationNeededBody')}
         </Text>
         <Pressable
-          onPress={retry}
+          onPress={() => retry()}
           style={[styles.button, { backgroundColor: palette.accent }]}>
           <Text style={styles.buttonLabel}>{t('common.tryAgain')}</Text>
         </Pressable>
@@ -332,7 +331,7 @@ export function HomeScreen() {
           {state.message}
         </Text>
         <Pressable
-          onPress={retry}
+          onPress={() => retry()}
           style={[styles.button, { backgroundColor: palette.accent }]}>
           <Text style={styles.buttonLabel}>{t('common.tryAgain')}</Text>
         </Pressable>
@@ -350,7 +349,7 @@ export function HomeScreen() {
           {state.message}
         </Text>
         <Pressable
-          onPress={retry}
+          onPress={() => retry()}
           style={[styles.button, { backgroundColor: palette.accent }]}>
           <Text style={styles.buttonLabel}>{t('common.retry')}</Text>
         </Pressable>
@@ -373,7 +372,7 @@ export function HomeScreen() {
           <Text style={[styles.bannerText, { color: palette.text }]}>
             {t('home.localFallbackNotice')}
           </Text>
-          <Pressable onPress={retry} hitSlop={8}>
+          <Pressable onPress={() => retry()} hitSlop={8}>
             <Text style={[styles.bannerAction, { color: palette.accent }]}>
               {t('common.retry')}
             </Text>
