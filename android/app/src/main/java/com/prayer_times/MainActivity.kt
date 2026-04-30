@@ -1,9 +1,12 @@
 package com.prayer_times
 
+import android.content.res.Configuration
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.DynamicColorsOptions
 
 class MainActivity : ReactActivity() {
 
@@ -19,4 +22,19 @@ class MainActivity : ReactActivity() {
    */
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+
+  /**
+   * Re-apply Material3 DynamicColors when night mode changes.
+   *
+   * android:configChanges="uiMode" prevents Activity recreation on dark/light toggle, which
+   * means the DynamicColorsContextWrapper created at onActivityPreCreated in MainApplication
+   * would otherwise hold stale (light-mode) theme resources after a system dark-mode switch.
+   * Re-calling applyIfAvailable here re-applies the dynamic color overlay against the updated
+   * Configuration so that PlatformColor(?attr/...) attributes resolve correctly on the next
+   * Fabric render pass.
+   */
+  override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+    DynamicColors.applyIfAvailable(this, DynamicColorsOptions.Builder().build())
+  }
 }
