@@ -93,7 +93,7 @@
 		CE9E49272B22B1425383AC48 /* adhan_saber.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_saber.caf; path = PrayerApp/adhan_saber.caf; sourceTree = "<group>"; };
 		D5FC0C5A1FDA3B8C9843426D /* adhan_abdul_basit.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_basit.caf; path = PrayerApp/adhan_abdul_basit.caf; sourceTree = "<group>"; };
 		E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PrayerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = PrayerWidgetExtension/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerWidgetExtension.swift; sourceTree = "<group>"; };
 		E1D2C3B4A5968778695A4B3C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PrayerWidgetExtension.entitlements; sourceTree = "<group>"; };
@@ -451,7 +451,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 78;
+				CURRENT_PROJECT_VERSION = 79;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
@@ -461,7 +461,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.55;
+				MARKETING_VERSION = 1.5.56;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -485,7 +485,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 78;
+				CURRENT_PROJECT_VERSION = 79;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PrayerApp;
@@ -494,7 +494,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.55;
+				MARKETING_VERSION = 1.5.56;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -661,7 +661,7 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 78;
+				CURRENT_PROJECT_VERSION = 79;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -672,7 +672,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.55;
+				MARKETING_VERSION = 1.5.56;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -691,7 +691,7 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 78;
+				CURRENT_PROJECT_VERSION = 79;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -702,7 +702,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.55;
+				MARKETING_VERSION = 1.5.56;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
