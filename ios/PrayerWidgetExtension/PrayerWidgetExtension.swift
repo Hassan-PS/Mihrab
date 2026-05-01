@@ -183,9 +183,10 @@ struct Entry: TimelineEntry {
   let dynamicNextTime: String?
 }
 
-@available(iOS 16.0, *)
+@available(iOS 17.0, *)
 struct RefreshIntent: AppIntent {
   static var title: LocalizedStringResource = "Refresh Widget"
+  static var isDiscoverable: Bool = false
   func perform() async throws -> some IntentResult { .result() }
 }
 
