@@ -6,7 +6,6 @@ import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.google.android.material.color.DynamicColors
-import com.google.android.material.color.DynamicColorsOptions
 
 class MainActivity : ReactActivity() {
 
@@ -35,6 +34,7 @@ class MainActivity : ReactActivity() {
    */
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
-    DynamicColors.applyIfAvailable(this, DynamicColorsOptions.Builder().build())
+    // Use the Precondition overload (always-true) to avoid the deprecated no-arg overload.
+    DynamicColors.applyIfAvailable(this) { _, _ -> true }
   }
 }
