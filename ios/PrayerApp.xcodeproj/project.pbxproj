@@ -451,7 +451,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 78;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
@@ -461,7 +461,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.54;
+				MARKETING_VERSION = 1.5.55;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -485,7 +485,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 78;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PrayerApp;
@@ -494,7 +494,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.54;
+				MARKETING_VERSION = 1.5.55;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -661,18 +661,18 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 78;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Prayer times";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.54;
+				MARKETING_VERSION = 1.5.55;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -691,18 +691,18 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 78;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Prayer times";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.54;
+				MARKETING_VERSION = 1.5.55;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

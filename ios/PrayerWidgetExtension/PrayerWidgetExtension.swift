@@ -183,7 +183,8 @@ struct Entry: TimelineEntry {
   let dynamicNextTime: String?
 }
 
-@available(iOS 17.0, *)
+// AppIntent requires iOS 16+; the widget extension minimum deployment target is 16.0.
+// Button(intent:) requires iOS 17+, so the button itself is still guarded below.
 struct RefreshIntent: AppIntent {
   static var title: LocalizedStringResource = "Refresh Widget"
   static var isDiscoverable: Bool = false

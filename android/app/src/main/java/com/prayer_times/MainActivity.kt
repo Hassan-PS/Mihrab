@@ -34,7 +34,9 @@ class MainActivity : ReactActivity() {
    */
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
-    // Use the Precondition overload (always-true) to avoid the deprecated no-arg overload.
-    DynamicColors.applyIfAvailable(this) { _, _ -> true }
+    // Explicit SAM constructor avoids trailing-lambda overload resolution ambiguity
+    // in older Kotlin toolchains (e.g. F-Droid CI) that do not infer the Precondition
+    // SAM type from the trailing lambda form.
+    DynamicColors.applyIfAvailable(this, DynamicColors.Precondition { _, _ -> true })
   }
 }
