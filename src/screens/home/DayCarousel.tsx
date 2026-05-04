@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { I18nManager, ScrollView, StyleSheet, View } from 'react-native';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { TimingsMap } from '../../types/prayer';
 import { DayCard } from './DayCard';
@@ -36,19 +36,33 @@ function DayCarouselImpl({
   const scrollRef = useRef<ScrollView>(null);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
+  // RTL handling — task #143.
+  //
+  // ScrollView in horizontal mode lays children RIGHT-to-LEFT under RTL,
+  // but `contentOffset.x` is still measured from the LEFT edge of the
+  // content. So `{x: 0}` shows the LEFTMOST visual page, which under RTL
+  // is the LAST logical child (week[week.length - 1]) — that's why the
+  // user saw "10 May / Sunday" instead of today on first load.
+  //
+  // To pin today (week[0]) in the visible viewport we need to scroll all
+  // the way to the right edge under RTL, and we have to invert the
+  // visual→logical index mapping in `onMomentumScrollEnd` too.
+  const isRtl = I18nManager.isRTL;
+  const todayScrollX = isRtl ? Math.max(0, (week.length - 1) * cardWidth) : 0;
+
   useEffect(() => {
     setActiveDayIndex(0);
-    scrollRef.current?.scrollTo({ x: 0, animated: false });
-  }, [resetKey]);
+    scrollRef.current?.scrollTo({ x: todayScrollX, animated: false });
+  }, [resetKey, todayScrollX]);
 
   // Back-to-today handler — passed to every non-today DayCard so the
   // user can jump from any future day back to today's card with a
   // single tap (#129). Animated scroll so the carousel slide makes
   // the transition obvious.
   const onBackToToday = useCallback(() => {
-    scrollRef.current?.scrollTo({ x: 0, animated: true });
+    scrollRef.current?.scrollTo({ x: todayScrollX, animated: true });
     setActiveDayIndex(0);
-  }, []);
+  }, [todayScrollX]);
 
   return (
     <>
@@ -60,8 +74,17 @@ function DayCarouselImpl({
         decelerationRate="fast"
         accessibilityRole="tablist"
         onMomentumScrollEnd={e => {
-          const newIndex = Math.round(e.nativeEvent.contentOffset.x / cardWidth);
-          setActiveDayIndex(Math.max(0, Math.min(newIndex, week.length - 1)));
+          const visualIndex = Math.round(
+            e.nativeEvent.contentOffset.x / cardWidth,
+          );
+          // Map visual→logical index. Under RTL, the leftmost visual page
+          // (visualIndex 0) is the last logical child.
+          const logicalIndex = isRtl
+            ? week.length - 1 - visualIndex
+            : visualIndex;
+          setActiveDayIndex(
+            Math.max(0, Math.min(logicalIndex, week.length - 1)),
+          );
         }}>
         {week.map((timings, dayIndex) => (
           <DayCard
