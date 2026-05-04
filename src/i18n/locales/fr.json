@@ -10,10 +10,10 @@
     "shareMonth": "Partager le mois",
     "compass": "Qibla",
     "tasbih": "Tasbih",
-    "duas": "Duas",
-    "quran": "Quran",
-    "mosques": "Mosques",
-    "journal": "Journal",
+    "duas": "Invocations",
+    "quran": "Coran",
+    "mosques": "Mosquées",
+    "journal": "Journal de prière",
     "backup": "Sauvegarde",
     "fasting": "Jeûne"
   },
@@ -186,7 +186,7 @@
     "accent_amber": "Amber",
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
-    "accentColorHelp": "Utilisé dans l'application et le widget de l'écran d'accueil.",
+    "accentColorHelp": "Utilisé dans toute l’application et dans le widget de l’écran d’accueil.",
     "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {

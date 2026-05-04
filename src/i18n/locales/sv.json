@@ -10,10 +10,10 @@
     "shareMonth": "Dela månad",
     "compass": "Kibla",
     "tasbih": "Tasbih",
-    "duas": "Duas",
-    "quran": "Quran",
-    "mosques": "Mosques",
-    "journal": "Journal",
+    "duas": "Duor",
+    "quran": "Koranen",
+    "mosques": "Moskéer",
+    "journal": "Bönedagbok",
     "backup": "Säkerhetskopiering",
     "fasting": "Fasta"
   },
@@ -186,7 +186,7 @@
     "accent_amber": "Amber",
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
-    "accentColorHelp": "Används i appen och på hemskärmens widget.",
+    "accentColorHelp": "Används i hela appen och i hemskärmens widget.",
     "widgetColorFollowsAccentHelp": "Widgeten använder samma accentfärg som appen. Välj den under Utseende."
   },
   "locationSetup": {

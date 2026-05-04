@@ -75,11 +75,19 @@ function HomeScreenWrapper() {
 export function RootNavigator() {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
-  // RTL-aware title style: iOS native-stack large title doesn't apply
-  // writingDirection automatically based on the active locale, so the
-  // Arabic/Urdu/Hebrew header title would render in visual L-to-R order
-  // (the bug user spotted: "أوقات الصلاة" → "ةلىصلااتاقوأ"). Set the
-  // writingDirection explicitly when the locale is RTL.
+  // RTL-aware title rendering — task #142.
+  //
+  // iOS native-stack `headerLargeTitle` is a UIKit `UINavigationBar` large
+  // title. It does NOT do Unicode bidi reshaping of Arabic/Urdu/Hebrew text
+  // — letters render in visual L-to-R order, producing the bug the user
+  // reported: "أوقات الصلاة" → "ةلصلا تاقوأ" (letters reversed AND not
+  // joined). `writingDirection: 'rtl'` on the style does NOT fix this; the
+  // bug is below the RN style layer.
+  //
+  // The robust fix is to disable `headerLargeTitle` for RTL locales and use
+  // the regular (compact) navigation bar instead. The compact title goes
+  // through a different UIKit code path that DOES shape Arabic correctly,
+  // matching what the user sees on the small header chip in screenshot 3.
   const isRtlLocale = ['ar', 'ur', 'he', 'fa'].includes(
     (i18n.language || '').slice(0, 2),
   );
@@ -87,7 +95,9 @@ export function RootNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerLargeTitle: isIOS,
+        // Large title only on iOS AND only for LTR locales — RTL locales fall
+        // back to the compact title to avoid the Arabic-letters-reversed bug.
+        headerLargeTitle: isIOS && !isRtlLocale,
         headerLargeTitleShadowVisible: false,
         headerShadowVisible: false,
         headerBlurEffect: theme.dark ? 'dark' : 'light',

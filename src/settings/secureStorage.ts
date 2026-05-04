@@ -24,12 +24,29 @@
  *   no Google Play Services, no proprietary code. F-Droid build keeps working.
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { coerceLocationPresets } from './locationPresets';
 import type { LocationPreset } from './types';
 
 /** Single key under which we store the JSON-encoded sensitive settings blob. */
 const SECURE_KEY = 'prayerapp.location.v1';
+
+/**
+ * Fallback key — task #141.
+ *
+ * If the platform Keychain rejects writes (errSecMissingEntitlement -34018,
+ * locked secure enclave, etc.) we MUST NOT lose the user's coordinates and
+ * saved presets. Memory: "user data must never go missing." The fallback is
+ * plaintext AsyncStorage. That is unfortunately PII at rest, but the
+ * alternative is silently dropping the user's home/work coordinates on every
+ * settings save — which is worse and breaks every prayer-time fetch.
+ *
+ * On every successful encrypted save we drain the fallback (delete the
+ * AsyncStorage entry) so PII doesn't linger in plaintext once the keychain
+ * is healthy again.
+ */
+const SECURE_FALLBACK_KEY = 'prayerapp.location.fallback.v1';
 
 export type SecureSettings = {
   /** Manual coordinates entered by the user. */
@@ -56,28 +73,68 @@ export const SECURE_FIELD_NAMES: ReadonlyArray<keyof SecureSettings> = [
   'locationPresets',
 ];
 
-export async function loadSecureSettings(): Promise<SecureSettings> {
+async function readFallback(): Promise<SecureSettings | null> {
   try {
-    const raw = await EncryptedStorage.getItem(SECURE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as Partial<SecureSettings>;
-    return sanitize(parsed);
-  } catch (e) {
-    // Encrypted storage failure is rare but possible if the user's secure
-    // enclave is locked or the keychain item was deleted. Return an empty
-    // object — the caller falls back to defaults rather than leaking a
-    // stale plaintext copy.
-    console.warn('secureStorage.loadSecureSettings failed:', e);
-    return {};
+    const raw = await AsyncStorage.getItem(SECURE_FALLBACK_KEY);
+    if (!raw) return null;
+    return sanitize(JSON.parse(raw) as Partial<SecureSettings>);
+  } catch {
+    return null;
   }
 }
 
-export async function saveSecureSettings(s: SecureSettings): Promise<void> {
+async function writeFallback(s: SecureSettings): Promise<void> {
   try {
-    await EncryptedStorage.setItem(SECURE_KEY, JSON.stringify(sanitize(s)));
+    await AsyncStorage.setItem(SECURE_FALLBACK_KEY, JSON.stringify(sanitize(s)));
   } catch (e) {
-    // Don't silently swallow — caller will surface a "couldn't save" hint.
-    console.error('secureStorage.saveSecureSettings failed:', e);
+    // Even AsyncStorage is failing. Last-resort log; nothing else we can do.
+    console.warn('secureStorage.writeFallback failed:', e);
+  }
+}
+
+async function clearFallback(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(SECURE_FALLBACK_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+export async function loadSecureSettings(): Promise<SecureSettings> {
+  // Try the encrypted store first. If that returns nothing OR throws, fall
+  // back to the plaintext AsyncStorage entry written when a previous save
+  // failed — task #141. Without this fallback, a transient Keychain error
+  // would erase the user's saved coordinates / presets on the next session.
+  try {
+    const raw = await EncryptedStorage.getItem(SECURE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<SecureSettings>;
+      return sanitize(parsed);
+    }
+  } catch (e) {
+    console.warn('secureStorage.loadSecureSettings (encrypted) failed:', e);
+  }
+
+  const fallback = await readFallback();
+  if (fallback) return fallback;
+  return {};
+}
+
+export async function saveSecureSettings(s: SecureSettings): Promise<void> {
+  const sanitized = sanitize(s);
+  try {
+    await EncryptedStorage.setItem(SECURE_KEY, JSON.stringify(sanitized));
+    // Encrypted save succeeded — drain the plaintext fallback so PII doesn't
+    // linger on disk once the keychain is healthy.
+    await clearFallback();
+  } catch (e) {
+    // Memory: user data must never go missing. The encrypted store rejected
+    // the write (e.g., errSecMissingEntitlement -34018 on misconfigured iOS
+    // builds, secure enclave locked, etc.). Persist to plaintext AsyncStorage
+    // so the next session still has the user's coords + presets, and re-throw
+    // so the caller can surface a recoverable warning if it wants to.
+    console.error('secureStorage.saveSecureSettings failed (using fallback):', e);
+    await writeFallback(sanitized);
     throw e;
   }
 }
@@ -88,6 +145,9 @@ export async function clearSecureSettings(): Promise<void> {
   } catch (e) {
     console.warn('secureStorage.clearSecureSettings failed:', e);
   }
+  // Also drop the plaintext fallback (task #141) — `clear` should leave no
+  // trace of secure data in either store.
+  await clearFallback();
 }
 
 /** Drop unrecognised keys and coerce types. */

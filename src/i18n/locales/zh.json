@@ -9,11 +9,11 @@
     "month": "月",
     "shareMonth": "分享月",
     "compass": "朝拜",
-    "tasbih": "Tasbih",
-    "duas": "Duas",
-    "quran": "Quran",
-    "mosques": "Mosques",
-    "journal": "Journal",
+    "tasbih": "念珠",
+    "duas": "祈祷文",
+    "quran": "《古兰经》",
+    "mosques": "清真寺",
+    "journal": "礼拜日记",
     "backup": "备份",
     "fasting": "斋戒"
   },
@@ -186,7 +186,7 @@
     "accent_amber": "Amber",
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
-    "accentColorHelp": "Used across the app and the home-screen widget.",
+    "accentColorHelp": "用于整个应用程序和主屏幕小部件。",
     "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {
