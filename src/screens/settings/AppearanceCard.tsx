@@ -14,9 +14,10 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAppearanceSettings } from '../../context/PrayerSettingsContext';
+import { useAppearanceSettings, usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
+import { saveSettings } from '../../settings/storage';
 import { cardEdgeStyle, segmentChromeStyle } from '../../theme/chrome';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
@@ -29,6 +30,10 @@ import { sharedSettingsStyles as s } from './sharedStyles';
 function AppearanceCardImpl() {
   const { t } = useTranslation();
   const { slice: settings, update: updateSettings } = useAppearanceSettings();
+  // Need the full settings object (not just the appearance slice) so we
+  // can synchronously persist a copy with the toggled value before
+  // restarting the process — task #114.
+  const { settings: fullSettings } = usePrayerSettings();
   const { palette, isDark } = useAppPalette();
 
   return (
@@ -126,50 +131,60 @@ function AppearanceCardImpl() {
                       text: t('settings.themeRestartConfirm', 'Restart'),
                       style: 'destructive',
                       onPress: () => {
-                        // Persist the new value first.
-                        updateSettings({ useSystemDynamicTheme: v });
-                        // Try the native dev-settings reload (works in
-                        // dev + on a prod bridge that has it linked),
-                        // then fall back to BackHandler.exitApp on
-                        // Android. iOS has no programmatic restart;
-                        // surface a follow-up alert telling the user
-                        // to reopen the app manually.
-                        const tryReload = () => {
+                        // Persist the new value DIRECTLY to disk before
+                        // restarting — calling updateSettings() alone
+                        // schedules an async save whose write can be
+                        // killed by the imminent Process.exit, leaving
+                        // the next launch to read the old value (#114).
+                        // saveSettings() awaits the AsyncStorage commit
+                        // first, then the native restart proceeds.
+                        void (async () => {
                           try {
-                            const dev = (NativeModules as { DevSettings?: { reload?: () => void } })
-                              .DevSettings;
-                            if (dev?.reload) {
-                              dev.reload();
-                              return true;
+                            await saveSettings({
+                              ...fullSettings,
+                              useSystemDynamicTheme: v,
+                            });
+                          } catch (e) {
+                            console.warn('Failed to persist toggle before restart:', e);
+                          }
+                          // Update in-memory state too so if anything
+                          // delays the actual restart the UI matches.
+                          updateSettings({ useSystemDynamicTheme: v });
+                          const tryReload = () => {
+                            try {
+                              const dev = (NativeModules as { DevSettings?: { reload?: () => void } })
+                                .DevSettings;
+                              if (dev?.reload) {
+                                dev.reload();
+                                return true;
+                              }
+                            } catch {
+                              // ignore
                             }
-                          } catch {
-                            // ignore
+                            return false;
+                          };
+                          if (Platform.OS === 'android') {
+                            // Native restart launches a fresh Activity
+                            // and kills the process so PlatformColor
+                            // refs re-resolve.
+                            if (nativeRestartApp()) return;
+                            if (!tryReload()) {
+                              BackHandler.exitApp();
+                            }
+                          } else {
+                            // iOS: try reload, otherwise prompt manual.
+                            if (!tryReload()) {
+                              Alert.alert(
+                                t('settings.themeRestartManualTitle', 'Reopen the app'),
+                                t(
+                                  'settings.themeRestartManualBody',
+                                  'iOS does not allow apps to restart themselves. Please force-quit Prayer Times and reopen it for the new theme to take effect.',
+                                ),
+                                [{ text: t('common.ok', 'OK'), style: 'default' }],
+                              );
+                            }
                           }
-                          return false;
-                        };
-                        if (Platform.OS === 'android') {
-                          // Try the proper native restart first — this
-                          // launches a fresh Activity and kills the
-                          // process so PlatformColor refs re-resolve.
-                          // Falls back to the dev reload, then to a
-                          // cold exit if neither is available.
-                          if (nativeRestartApp()) return;
-                          if (!tryReload()) {
-                            BackHandler.exitApp();
-                          }
-                        } else {
-                          // iOS: try reload, otherwise prompt manual.
-                          if (!tryReload()) {
-                            Alert.alert(
-                              t('settings.themeRestartManualTitle', 'Reopen the app'),
-                              t(
-                                'settings.themeRestartManualBody',
-                                'iOS does not allow apps to restart themselves. Please force-quit Prayer Times and reopen it for the new theme to take effect.',
-                              ),
-                              [{ text: t('common.ok', 'OK'), style: 'default' }],
-                            );
-                          }
-                        }
+                        })();
                       },
                     },
                   ],

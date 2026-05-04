@@ -6,7 +6,6 @@ import android.util.TypedValue
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.google.android.material.R as MaterialR
 import kotlin.system.exitProcess
 
 /**
@@ -31,7 +30,7 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun restartApp() {
-    val activity = currentActivity ?: return
+    val activity = getCurrentActivity() ?: return
     val pm = reactContext.packageManager
     val intent = pm.getLaunchIntentForPackage(reactContext.packageName) ?: return
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -43,16 +42,18 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
 
   @ReactMethod(isBlockingSynchronousMethod = true)
   fun resolveAccentHex(): String {
-    val activity = currentActivity ?: return DEFAULT_ACCENT
+    val activity = getCurrentActivity() ?: return DEFAULT_ACCENT
     val typedValue = TypedValue()
     val theme = activity.theme
-    // Try Material 3's colorPrimary first (Material You); fall back to
-    // colorAccent which is broadly supported on AppCompat themes.
+    // Try the Material 3 colorPrimary (resolves the Material You /
+    // dynamic color overlay applied by DynamicColors.applyToActivities)
+    // first, then fall back to the platform colorPrimary, then
+    // colorAccent for AppCompat themes.
+    // android.R.attr.colorPrimary maps to colorPrimary in the active
+    // theme. When DynamicColors.applyToActivities has been called this
+    // is the Material You colorPrimary; otherwise it's the static brand
+    // primary from the AppTheme.
     val resolved = theme.resolveAttribute(
-        MaterialR.attr.colorPrimary,
-        typedValue,
-        true,
-    ) || theme.resolveAttribute(
         android.R.attr.colorPrimary,
         typedValue,
         true,
