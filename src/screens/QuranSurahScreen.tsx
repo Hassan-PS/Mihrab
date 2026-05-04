@@ -455,35 +455,6 @@ function MushafReader({
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  // Tap-to-show fullscreen controls — the floating exit button hides
-  // by default so it doesn't sit on top of the Arabic text. A tap on
-  // the page surfaces it for ~2.5 seconds, after which it fades back
-  // out. (#129)
-  const [controlsVisible, setControlsVisible] = useState(false);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const showControls = () => {
-    setControlsVisible(true);
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => setControlsVisible(false), 2500);
-  };
-  // When fullscreen toggles off, drop the timer + visibility so we
-  // don't leak across re-entries.
-  useEffect(() => {
-    if (!isFullscreen) {
-      setControlsVisible(false);
-      if (hideTimerRef.current) {
-        clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
-      }
-    }
-    return () => {
-      if (hideTimerRef.current) {
-        clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
-      }
-    };
-  }, [isFullscreen]);
-
   // Use the default mushaf colours always — task #122. The page PNGs
   // carry the authentic dark ink + colored ayah markers; we render
   // them on a plain white surface (the mushaf's natural paper colour)
@@ -692,29 +663,18 @@ function MushafReader({
           parchment={parchment}
           ornament={ornament}
           isFullscreen={isFullscreen}
-          onTapInFullscreen={showControls}
         />
       )}
     />
-    {/* Tap layer — only when fullscreen. A bare tap toggles the
-        controls (exit button + auto-hide). Doesn't block scrolling,
-        because horizontal pan gestures bubble up to the FlatList
-        which sits below. (#129) */}
+    {/* Floating exit-fullscreen affordance — always visible while in
+        fullscreen so the user can leave with one tap. Sits on the
+        LEFT (opposite side of the right-aligned "Part X" running
+        head) at the safe-area top. The previous tap-to-show overlay
+        was eating horizontal swipe gestures and blocking the
+        page-flipping carousel; removing it lets the parent FlatList
+        own the swipe gesture cleanly so the user can flip pages
+        like a book. (#134) */}
     {isFullscreen ? (
-      <Pressable
-        onPress={showControls}
-        // pointerEvents='box-only' — only the tap on this view
-        // itself counts; children would normally block, but here
-        // there are no children. Horizontal swipes don't fire
-        // onPress, so the FlatList still gets the gesture.
-        style={StyleSheet.absoluteFillObject}
-      />
-    ) : null}
-    {/* Floating exit-fullscreen affordance — sits at safe-area top
-        (matches where the title bar would be) instead of the very top
-        of the screen, and only shows when the user taps the page.
-        Auto-hides after 2.5s. (#129) */}
-    {isFullscreen && controlsVisible ? (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('quran.exitFullscreen', 'Exit fullscreen')}
@@ -722,11 +682,6 @@ function MushafReader({
         hitSlop={16}
         style={{
           position: 'absolute',
-          // Sit at the safe-area top + a small offset so the button
-          // lines up with where the navigation title bar would be.
-          // Anchored on the LEFT so it sits on the opposite side of
-          // the page's "Part X" running head (which is right-aligned
-          // to mirror the printed Madinah mushaf). (#132 follow-up)
           top: insets.top + 6,
           left: 12,
           backgroundColor: 'rgba(0,0,0,0.32)',
@@ -768,43 +723,38 @@ function MushafPage({
   parchment,
   ornament,
   isFullscreen,
-  onTapInFullscreen,
 }: {
   page: typeof MUSHAF_PAGES[number];
   screenWidth: number;
   parchment: string;
   ornament: string;
   /**
-   * In fullscreen the image is rendered at full width × natural
-   * aspect ratio inside a vertical ScrollView, so the user can read
-   * the page at higher detail and scroll vertically. Outside
-   * fullscreen the image is fit-to-screen (header+footer reserved).
-   * (#133)
+   * Fullscreen drops the page chrome (Part-X header + page-number
+   * footer) so the image gets the full vertical real estate, and
+   * sizes the image to fit the entire viewport with no reserved
+   * room. Page-flipping (horizontal swipe) is handled by the
+   * parent FlatList's pagingEnabled — there is no inner scroll
+   * here so nothing competes with it. (#134)
    */
   isFullscreen: boolean;
-  /** Tap-to-surface fullscreen controls — re-uses the parent's timer. */
-  onTapInFullscreen: () => void;
 }) {
   const [imageReady, setImageReady] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
 
-  // Compute the image rect.
-  //   • Non-fullscreen: fit the largest rect that preserves aspect
-  //     ratio AND leaves room for the header + footer chrome.
-  //   • Fullscreen: pin width to (almost) the screen width and let
-  //     height grow with the natural aspect; the wrapping
-  //     ScrollView handles vertical scrolling.
-  const headerFooterReserve = 80; // px reserved for header + footer
+  // Fit the largest rect that preserves the source aspect ratio.
+  // In fullscreen we get the entire screen; otherwise we reserve
+  // room for the header (Part X) and footer (page number) chrome.
+  const headerFooterReserve = 80;
   const horizontalPadding = 16;
   const maxWidth = screenWidth - horizontalPadding * 2;
+  const maxHeight = isFullscreen
+    ? Dimensions.get('window').height
+    : Dimensions.get('window').height - headerFooterReserve;
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / MUSHAF_IMAGE_ASPECT;
-  if (!isFullscreen) {
-    const maxHeight = Dimensions.get('window').height - headerFooterReserve;
-    if (imageHeight > maxHeight) {
-      imageHeight = maxHeight;
-      imageWidth = imageHeight * MUSHAF_IMAGE_ASPECT;
-    }
+  if (imageHeight > maxHeight) {
+    imageHeight = maxHeight;
+    imageWidth = imageHeight * MUSHAF_IMAGE_ASPECT;
   }
 
   const imageBlock = (
@@ -814,11 +764,6 @@ function MushafPage({
         style={{ width: imageWidth, height: imageHeight }}
         resizeMode="contain"
         accessibilityLabel={`Mushaf page ${page.page}`}
-        // No tintColor — the source pixels (dark ink + colored ayah
-        // markers) render exactly as printed. Default decode path
-        // preserves the original palette PNG quality without the
-        // green-tint regression introduced by the previous WebP
-        // re-encoding (#130).
         onLoad={() => setImageReady(true)}
         onError={() => setImageFailed(true)}
         fadeDuration={0}
@@ -838,63 +783,35 @@ function MushafPage({
     </View>
   );
 
-  const headerBlock = (
-    <View style={mushafPageStyles.header}>
-      <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
-        {`Part ${easternNumerals(page.juz)}`}
-      </Text>
-    </View>
-  );
-
-  const footerBlock = (
-    <View style={mushafPageStyles.footer}>
-      <View
-        style={[mushafPageStyles.pageNumberFrame, { borderColor: ornament }]}>
-        <Text style={[mushafPageStyles.pageNumber, { color: ornament }]}>
-          {easternNumerals(page.page)}
-        </Text>
-      </View>
-    </View>
-  );
-
-  if (isFullscreen) {
-    // Vertical ScrollView so the user can scroll a tall page on a
-    // narrow viewport. The horizontal FlatList parent still owns
-    // page-flipping (its pagingEnabled gesture wins on horizontal
-    // swipe; the ScrollView only claims vertical pans). Tap-to-show
-    // controls handled by the onScrollBeginDrag-equivalent
-    // `onResponderGrant` would over-fire, so the parent's
-    // absoluteFill Pressable continues to be the tap source.
-    return (
-      <ScrollView
-        style={{ width: screenWidth, backgroundColor: parchment }}
-        contentContainerStyle={{
-          // No flex:1 here — the content has to be taller than the
-          // viewport for vertical scrolling to make sense.
-          paddingHorizontal: horizontalPadding,
-          paddingVertical: 12,
-          alignItems: 'center',
-        }}
-        showsVerticalScrollIndicator={false}
-        // Tap-to-show controls; bumping the parent's timer keeps the
-        // exit button visible while the user starts a scroll.
-        onScrollBeginDrag={onTapInFullscreen}>
-        {headerBlock}
-        {imageBlock}
-        {footerBlock}
-      </ScrollView>
-    );
-  }
-
   return (
     <View
       style={[
         mushafPageStyles.page,
         { width: screenWidth, backgroundColor: parchment },
       ]}>
-      {headerBlock}
+      {/* Header + footer hidden in fullscreen so the page image can
+          take the entire viewport — like reading a printed mushaf
+          flipped page-by-page. */}
+      {isFullscreen ? null : (
+        <View style={mushafPageStyles.header}>
+          <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
+            {`Part ${easternNumerals(page.juz)}`}
+          </Text>
+        </View>
+      )}
+
       {imageBlock}
-      {footerBlock}
+
+      {isFullscreen ? null : (
+        <View style={mushafPageStyles.footer}>
+          <View
+            style={[mushafPageStyles.pageNumberFrame, { borderColor: ornament }]}>
+            <Text style={[mushafPageStyles.pageNumber, { color: ornament }]}>
+              {easternNumerals(page.page)}
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
