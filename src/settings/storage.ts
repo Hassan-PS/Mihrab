@@ -235,6 +235,7 @@ export async function resetAppData(): Promise<void> {
     // Mushaf one-time-download flag — task #130. Clearing forces the
     // download prompt to re-appear on first mushaf open after reset.
     'mushaf.assets.v1.complete',
+    'mushaf.assets.v2.complete',
   ];
   try {
     await AsyncStorage.multiRemove(asyncKeys);
