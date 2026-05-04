@@ -318,7 +318,21 @@
       "evening": "Evening",
       "afterPrayer": "After prayer",
       "food": "Food",
-      "distress": "Distress"
+      "distress": "Distress",
+      "sleep": "睡眠",
+      "travel": "旅行",
+      "mosque": "清真寺",
+      "gratitude": "感恩",
+      "forgiveness": "求宽恕",
+      "weather": "天气",
+      "family": "家庭",
+      "sickness": "疾病",
+      "funeral": "葬礼",
+      "eid": "开斋节",
+      "beforeQuran": "诵读古兰经前",
+      "knowledge": "知识",
+      "protection": "保护",
+      "guidance": "指引"
     },
     "repeat": "Recite ×{{count}}"
   },

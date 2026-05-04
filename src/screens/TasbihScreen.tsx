@@ -3,6 +3,7 @@
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { useCallback, useState } from 'react';
 import {
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -10,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
@@ -44,6 +46,13 @@ export function TasbihScreen() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   useAndroidSubScreenBack();
+  // Plain <View> root: on iOS the header is transparent (for the blur
+  // effect), so the screen content starts at y=0 and we manually reserve
+  // the header height as paddingTop. On Android the header is opaque
+  // and the system already insets content below it, so no manual
+  // padding is needed.
+  const headerHeight = useHeaderHeight();
+  const topInset = Platform.OS === 'ios' ? headerHeight : 0;
 
   const [presetId, setPresetId] = useState<TasbihPresetId>(
     TASBIH_PRESETS[0].id,
@@ -84,7 +93,7 @@ export function TasbihScreen() {
   }, []);
 
   return (
-    <View style={[styles.root, { backgroundColor: palette.bg }]}>
+    <View style={[styles.root, { backgroundColor: palette.bg, paddingTop: topInset + 12 }]}>
       <View
         style={[
           styles.dhikrCard,

@@ -163,6 +163,11 @@ android {
             versionNameSuffix "-beta"
             matchingFallbacks = ['release']
             buildConfigField "boolean", "IS_BETA", "true"
+            // The React Native gradle plugin defines usesCleartextTraffic
+            // for the stock debug/release types only. `initWith release`
+            // doesn't propagate manifestPlaceholders, so we set it here
+            // (matching release: cleartext disabled).
+            manifestPlaceholders.usesCleartextTraffic = "false"
             if (hasReleaseSigningConfig) {
                 signingConfig signingConfigs.release
             } else {

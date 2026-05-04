@@ -153,7 +153,18 @@ export function JournalScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: palette.bg }}
-      contentContainerStyle={styles.scroll}>
+      contentContainerStyle={styles.scroll}
+      contentInsetAdjustmentBehavior="automatic">
+      {/* Encouragement copy above the stats — task #95. Adapts to the
+          user's progress: a fresh user sees an inviting first-step
+          nudge, an active user sees Mashallah-style affirmation. */}
+      <Text style={[styles.encouragement, { color: palette.text }]}>
+        {streak >= 7
+          ? t('journal.encourageStreak', 'Mashallah, {{count}}-day on-time streak. Keep going.', { count: streak })
+          : stats.total >= 1
+          ? t('journal.encourageActive', 'Every prayer logged is a step forward.')
+          : t('journal.encourageEmpty', 'Mark today\'s first prayer to begin your journal.')}
+      </Text>
       <View
         style={[
           styles.statsCard,
@@ -348,6 +359,12 @@ function formatDate(d: Date): string {
 
 const styles = StyleSheet.create({
   scroll: { padding: 16, gap: 8 },
+  encouragement: {
+    fontSize: 15,
+    fontWeight: '600',
+    lineHeight: 22,
+    marginBottom: 4,
+  },
   statsCard: {
     flexDirection: 'row',
     padding: 16,
