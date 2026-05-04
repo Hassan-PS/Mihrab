@@ -157,19 +157,43 @@ function Attributions({ palette }: { palette: AppPalette }) {
       </Text>
       <AttributionRow
         palette={palette}
-        label={t('settings.attribQuran')}
+        label="Quran Uthmani text"
         sub="Tanzil.net · CC BY 3.0"
         url="https://tanzil.net/"
       />
       <AttributionRow
         palette={palette}
-        label={t('settings.attribTranslation')}
-        sub="Sahih International · public domain"
+        label="Mushaf page images (604)"
+        sub="archive.org/madinah_mushaf · King Fahd Quran Complex"
+        url="https://archive.org/details/madinah_mushaf"
+      />
+      <AttributionRow
+        palette={palette}
+        label="Translation editions (14)"
+        sub="alquran.cloud · Tanzil-derived · CC BY 3.0"
+        url="https://alquran.cloud/"
+      />
+      <AttributionRow
+        palette={palette}
+        label="Sahih International (English)"
+        sub="public domain · via Tanzil"
         url="https://tanzil.net/trans/"
       />
       <AttributionRow
         palette={palette}
-        label="Amiri"
+        label="Pickthall (English)"
+        sub="public domain"
+        url="https://tanzil.net/trans/"
+      />
+      <AttributionRow
+        palette={palette}
+        label="Mushaf page metadata"
+        sub="alquran.cloud /v1/meta · Tanzil-derived · CC BY 3.0"
+        url="https://alquran.cloud/api"
+      />
+      <AttributionRow
+        palette={palette}
+        label="Amiri & Amiri Quran fonts"
         sub="aliftype/amiri · SIL OFL 1.1"
         url="https://github.com/aliftype/amiri"
       />
@@ -181,7 +205,7 @@ function Attributions({ palette }: { palette: AppPalette }) {
       />
       <AttributionRow
         palette={palette}
-        label={t('settings.attribDuas')}
+        label="Hisnul Muslim duas"
         sub="rn0x/hisn_almuslim_json · MIT"
         url="https://github.com/rn0x/hisn_almuslim_json"
       />
