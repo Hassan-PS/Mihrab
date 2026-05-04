@@ -2,7 +2,7 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo, type ComponentType } from 'react';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -53,11 +53,6 @@ const TOOLS: Tool[] = [
 function QuickActionsGridImpl() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  // React Navigation's theme primary is the same color the title-bar
-  // header icons use. Reading it here keeps the tile icons visually in
-  // sync with the toolbar icons under Material You — the user noticed
-  // the mismatch in #109.
-  const theme = useTheme();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
@@ -78,15 +73,15 @@ function QuickActionsGridImpl() {
               ...cardEdgeStyle(palette),
             },
           ]}>
-          {/* Use the same color React Navigation hands the title-bar
-              icons (theme.colors.primary). On Material You that's the
-              live system primary; on the brand themes it's the brand
-              green. Falls back to palette.accentSolid if the navigation
-              theme is not yet ready. */}
-          <tool.Icon
-            color={String(theme.colors.primary) || palette.accentSolid}
-            size={24}
-          />
+          {/* `palette.accentSolid` is the SystemTheme native module's
+              resolved hex for `?attr/colorPrimary` — the same value the
+              title-bar icons render under Material You. SVG can render
+              this directly. We deliberately do NOT use
+              `theme.colors.primary` here because on Material You it can
+              be a non-string ColorValue whose `String(...)` is
+              "[object Object]" — truthy, so `||` won't fall through,
+              and the SVG fill silently goes blank. */}
+          <tool.Icon color={palette.accentSolid} size={24} />
           <Text style={[styles.label, { color: palette.text }]}>
             {t(tool.labelKey)}
           </Text>
