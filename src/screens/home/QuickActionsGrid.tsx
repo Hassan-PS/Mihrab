@@ -42,7 +42,7 @@ const TOOLS: Tool[] = [
   { id: 'Tasbih', labelKey: 'nav.tasbih', Icon: TasbihIcon },
   { id: 'Duas', labelKey: 'nav.duas', Icon: BookIcon },
   { id: 'Quran', labelKey: 'nav.quran', Icon: BookIcon },
-  { id: 'Journal', labelKey: 'nav.journal', Icon: TasbihIcon },
+  { id: 'Journal', labelKey: 'nav.journal', Icon: BookIcon },
   { id: 'Mosques', labelKey: 'nav.mosques', Icon: MosqueIcon },
   // Fasting tile is universally useful (Mondays/Thursdays + Ayyam al-Bidh
   // outside Ramadan), but the surface gracefully shows the Sunnah tracker
