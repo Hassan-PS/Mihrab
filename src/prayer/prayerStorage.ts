@@ -13,7 +13,43 @@ export type StoredPrayerData = {
   months: Record<string, Record<string, TimingsMap>>; // YYYY-MM -> YYYY-MM-DD -> TimingsMap
 };
 
-const STORAGE_KEY = 'prayer_times_cache';
+/**
+ * Multi-location cache — task #145.
+ *
+ * Until v1.7.0-beta.32 the prayer-times cache held a SINGLE
+ * `StoredPrayerData` object keyed by params. As soon as the user switched to
+ * a different location preset, `isSameParams` returned false and the next
+ * cache write replaced everything. The user'\''s symptom: "switching deletes
+ * stored prayer times".
+ *
+ * v2 keeps every (provider, lat, lng, method, school) combination alive in
+ * its own slot of `caches`. Switching presets just changes which slot we
+ * read/write — the other slots stay intact, so going back to a previous
+ * preset is instant and doesn'\''t re-fetch anything that was already
+ * pre-warmed.
+ *
+ * Migration: a one-time read of the legacy single-cache key
+ * `prayer_times_cache` converts that data into the new `prayer_times_cache.v2`
+ * shape so existing users keep their pre-cached months. The legacy key is
+ * deleted after migration.
+ */
+type CacheEntry = StoredPrayerData & {
+  /** ISO timestamp of the last `getCachedPrayerTimes`/`getOrFetch…` hit on
+   *  this entry. Used as the LRU key when storage hits quota. */
+  lastAccessedAt: string;
+};
+
+type V2Shape = {
+  /**
+   * Keyed by `cacheKey(params)` — see below. Round-tripped through JSON via
+   * AsyncStorage; not encrypted (prayer times are derivable from coordinates,
+   * which is the privacy-sensitive bit and lives in the encrypted store).
+   */
+  caches: Record<string, CacheEntry>;
+};
+
+const STORAGE_KEY_V2 = 'prayer_times_cache.v2';
+const STORAGE_KEY_LEGACY = 'prayer_times_cache';
 
 /** Maximum time to hold the write mutex before forcing release. */
 const MUTEX_TIMEOUT_MS = 10_000;
@@ -30,6 +66,23 @@ function getMonthKey(date: Date): string {
 
 function getDayKey(date: Date): string {
   return formatLocalDate(date);
+}
+
+/**
+ * Stable cache key for a (provider, lat, lng, method, school) tuple.
+ *
+ * Lat/lng are rounded to 2 decimals (~1.1 km at the equator) so a slightly
+ * jittery GPS reading on the same physical location reuses the same slot
+ * instead of creating a new one each fetch.
+ */
+function cacheKey(p: Omit<StoredPrayerData, 'months'>): string {
+  return [
+    p.provider,
+    p.latitude.toFixed(2),
+    p.longitude.toFixed(2),
+    String(p.calculationMethod),
+    String(p.school),
+  ].join('|');
 }
 
 /** Race a promise against a timeout that throws if the promise hangs. */
@@ -78,128 +131,201 @@ export function isQuotaError(e: unknown): boolean {
   );
 }
 
-/**
- * Pick the lexicographically smallest month key. Months are formatted YYYY-MM,
- * so lexicographic order matches chronological order. Returns `null` if no
- * months are cached.
- */
 function pickOldestMonthKey(data: StoredPrayerData): string | null {
   const keys = Object.keys(data.months);
   if (keys.length === 0) return null;
   return keys.reduce((a, b) => (a < b ? a : b));
 }
 
-/**
- * Drop the oldest cached month from `data`. Returns a new object (does not
- * mutate the input) with the month removed, or `null` if there's nothing to
- * evict (cache already empty in `months`).
- */
-function evictOldestMonth(data: StoredPrayerData): StoredPrayerData | null {
-  const oldest = pickOldestMonthKey(data);
+function evictOldestMonth(entry: CacheEntry): CacheEntry | null {
+  const oldest = pickOldestMonthKey(entry);
   if (!oldest) return null;
-  const months = { ...data.months };
+  const months = { ...entry.months };
   delete months[oldest];
-  return { ...data, months };
+  return { ...entry, months };
 }
 
-export async function getStoredPrayerData(): Promise<StoredPrayerData | null> {
+/**
+ * Pick the cache entry to evict first under quota pressure: the one with the
+ * oldest `lastAccessedAt`. Falls back to any non-current key if timestamps
+ * are missing (e.g., freshly migrated entries).
+ */
+function pickStalestCacheKey(v2: V2Shape, exclude: string): string | null {
+  const keys = Object.keys(v2.caches).filter(k => k !== exclude);
+  if (keys.length === 0) return null;
+  return keys.reduce((a, b) => {
+    const ta = Date.parse(v2.caches[a].lastAccessedAt) || 0;
+    const tb = Date.parse(v2.caches[b].lastAccessedAt) || 0;
+    return ta <= tb ? a : b;
+  });
+}
+
+async function loadV2(): Promise<V2Shape> {
+  // Try the v2 shape first.
   try {
-    const data = await AsyncStorage.getItem(STORAGE_KEY);
-    if (!data) return null;
-    return JSON.parse(data) as StoredPrayerData;
+    const raw = await AsyncStorage.getItem(STORAGE_KEY_V2);
+    if (raw) {
+      const parsed = JSON.parse(raw) as V2Shape;
+      if (parsed && typeof parsed === 'object' && parsed.caches) {
+        return parsed;
+      }
+    }
   } catch {
-    return null;
+    // fall through to legacy migration
   }
+
+  // Migration: read the pre-v2 single-cache shape and convert.
+  try {
+    const legacyRaw = await AsyncStorage.getItem(STORAGE_KEY_LEGACY);
+    if (legacyRaw) {
+      const legacy = JSON.parse(legacyRaw) as StoredPrayerData;
+      if (legacy && typeof legacy === 'object' && legacy.months) {
+        const k = cacheKey(legacy);
+        const v2: V2Shape = {
+          caches: {
+            [k]: { ...legacy, lastAccessedAt: new Date().toISOString() },
+          },
+        };
+        // Best-effort: write the new shape and drop the legacy key.
+        try {
+          await AsyncStorage.setItem(STORAGE_KEY_V2, JSON.stringify(v2));
+          await AsyncStorage.removeItem(STORAGE_KEY_LEGACY);
+        } catch {
+          // ignore — next call will retry
+        }
+        return v2;
+      }
+    }
+  } catch {
+    // ignore — start fresh
+  }
+
+  return { caches: {} };
 }
 
-/** Internal save — single attempt, returns categorised result. */
-async function saveOnce(data: StoredPrayerData): Promise<SaveResult> {
+async function saveV2Once(v2: V2Shape): Promise<SaveResult> {
   try {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    await AsyncStorage.setItem(STORAGE_KEY_V2, JSON.stringify(v2));
     return { ok: true };
   } catch (e) {
     return { ok: false, reason: isQuotaError(e) ? 'quota' : 'unknown', error: e };
   }
 }
 
+async function saveV2(v2: V2Shape, activeKey: string): Promise<SaveResult> {
+  let attempt = await saveV2Once(v2);
+  if (attempt.ok) return attempt;
+
+  // Quota pressure — evict oldest month from the active cache first.
+  if (attempt.reason === 'quota') {
+    const active = v2.caches[activeKey];
+    if (active) {
+      const slim = evictOldestMonth(active);
+      if (slim) {
+        const next: V2Shape = {
+          ...v2,
+          caches: { ...v2.caches, [activeKey]: slim },
+        };
+        attempt = await saveV2Once(next);
+        if (attempt.ok) {
+          console.warn(
+            'prayerStorage: quota exceeded, evicted oldest month from active cache',
+          );
+          return attempt;
+        }
+      }
+    }
+
+    // Still over quota — evict the entire stalest non-active cache and retry.
+    const stale = pickStalestCacheKey(v2, activeKey);
+    if (stale) {
+      const trimmed: V2Shape = { caches: { ...v2.caches } };
+      delete trimmed.caches[stale];
+      attempt = await saveV2Once(trimmed);
+      if (attempt.ok) {
+        console.warn(
+          `prayerStorage: quota exceeded, evicted stale cache "${stale}"`,
+        );
+        return attempt;
+      }
+    }
+  }
+
+  console.error('prayerStorage: cache write failed', attempt);
+  return attempt;
+}
+
 /**
- * Save the cache. On quota errors, evicts the oldest cached month and retries
- * once. Returns a `SaveResult` so callers can surface a "couldn't save" toast
- * when persistence ultimately fails — silent swallow is no longer the default.
+ * Backward-compat helper kept for the legacy test harness — task #145.
+ * Writes the given single-cache shape into the v2 multi-cache under that
+ * params'\'' computed cacheKey. Production code paths use
+ * `getOrFetchPrayerTimes` / `refreshPrayerDataCache` instead and never call
+ * this directly.
  */
 export async function saveStoredPrayerData(
   data: StoredPrayerData,
 ): Promise<SaveResult> {
-  const first = await saveOnce(data);
-  if (first.ok) return first;
+  const v2 = await loadV2();
+  const k = cacheKey(data);
+  const next: V2Shape = {
+    caches: {
+      ...v2.caches,
+      [k]: { ...data, lastAccessedAt: new Date().toISOString() },
+    },
+  };
+  return saveV2(next, k);
+}
 
-  if (first.reason === 'quota') {
-    // Evict the oldest month and try again. The user trades older history for
-    // future months, which is what they actually need for prayer times.
-    const slim = evictOldestMonth(data);
-    if (slim) {
-      console.warn(
-        'prayerStorage: storage quota exceeded, evicting oldest month and retrying',
-      );
-      const second = await saveOnce(slim);
-      if (second.ok) return second;
-      // Both attempts failed — surface to caller.
-      console.error('prayerStorage: cache write failed after eviction', second.error);
-      return second;
-    }
-  }
-
-  console.error('prayerStorage: cache write failed', first.error);
-  return first;
+/** Backward-compat helper for callers that want "the single active cache".
+ *  Returns the most-recently-accessed entry, or null if the cache is empty. */
+export async function getStoredPrayerData(): Promise<StoredPrayerData | null> {
+  const v2 = await loadV2();
+  const keys = Object.keys(v2.caches);
+  if (keys.length === 0) return null;
+  const newest = keys.reduce((a, b) => {
+    const ta = Date.parse(v2.caches[a].lastAccessedAt) || 0;
+    const tb = Date.parse(v2.caches[b].lastAccessedAt) || 0;
+    return ta >= tb ? a : b;
+  });
+  // Strip lastAccessedAt to keep the public StoredPrayerData shape stable.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { lastAccessedAt: _ts, ...rest } = v2.caches[newest];
+  return rest;
 }
 
 export async function clearStoredPrayerData(): Promise<void> {
   try {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    await AsyncStorage.removeItem(STORAGE_KEY_V2);
+    // Legacy too, in case migration hadn'\''t run yet.
+    await AsyncStorage.removeItem(STORAGE_KEY_LEGACY);
   } catch (e) {
     console.error('Failed to clear prayer data cache', e);
   }
 }
 
-function isSameParams(a: StoredPrayerData, b: Omit<StoredPrayerData, 'months'>): boolean {
-  return (
-    a.provider === b.provider &&
-    Math.abs(a.latitude - b.latitude) < 0.01 &&
-    Math.abs(a.longitude - b.longitude) < 0.01 &&
-    a.calculationMethod === b.calculationMethod &&
-    a.school === b.school
-  );
-}
-
 export async function getCachedPrayerTimes(
-  params: Omit<StoredPrayerData, 'months'> & { date: Date }
+  params: Omit<StoredPrayerData, 'months'> & { date: Date },
 ): Promise<TimingsMap | null> {
-  const stored = await getStoredPrayerData();
-  if (!stored) return null;
-
-  if (!isSameParams(stored, params)) {
-    return null; // Cache is for different settings
-  }
+  const v2 = await loadV2();
+  const k = cacheKey(params);
+  const entry = v2.caches[k];
+  if (!entry) return null;
 
   const monthKey = getMonthKey(params.date);
   const dayKey = getDayKey(params.date);
 
-  if (stored.months[monthKey] && stored.months[monthKey][dayKey]) {
-    return stored.months[monthKey][dayKey];
+  if (entry.months[monthKey] && entry.months[monthKey][dayKey]) {
+    return entry.months[monthKey][dayKey];
   }
-
   return null;
 }
 
 export async function getOrFetchPrayerTimes(
-  params: Omit<StoredPrayerData, 'months'> & { date: Date }
+  params: Omit<StoredPrayerData, 'months'> & { date: Date },
 ): Promise<TimingsMap> {
   const cached = await getCachedPrayerTimes(params);
-  if (cached) {
-    return cached;
-  }
+  if (cached) return cached;
 
-  // Not in cache, fetch it
   const res = await fetchPrayerTimesUnified({
     provider: params.provider,
     latitude: params.latitude,
@@ -209,35 +335,36 @@ export async function getOrFetchPrayerTimes(
     school: params.school,
   });
 
-  // Save to cache via the mutex so concurrent fetches don't clobber each other.
-  // The mutex'd block is wrapped in a hard timeout — if AsyncStorage hangs
-  // (rooted/jailbroken devices, exotic backends, native bugs), the mutex
-  // releases after MUTEX_TIMEOUT_MS so subsequent writes are not blocked.
+  // Save under the cacheKey, preserving every other location'\''s entry.
+  // The mutex guards against concurrent month-scroll writes; the timeout
+  // releases it if AsyncStorage hangs.
   _writeMutex = _writeMutex.then(async () => {
     try {
       await withTimeout(
         (async () => {
-          let newData = await getStoredPrayerData();
-          if (!newData || !isSameParams(newData, params)) {
-            newData = {
-              provider: params.provider,
-              latitude: params.latitude,
-              longitude: params.longitude,
-              calculationMethod: params.calculationMethod,
-              school: params.school,
-              months: {},
-            };
-          }
-
+          const v2 = await loadV2();
+          const k = cacheKey(params);
+          const existing = v2.caches[k];
           const monthKey = getMonthKey(params.date);
           const dayKey = getDayKey(params.date);
-
-          if (!newData.months[monthKey]) {
-            newData.months[monthKey] = {};
-          }
-          newData.months[monthKey][dayKey] = res.timings;
-
-          await saveStoredPrayerData(newData);
+          const months = { ...(existing?.months ?? {}) };
+          months[monthKey] = { ...(months[monthKey] ?? {}) };
+          months[monthKey][dayKey] = res.timings;
+          const next: V2Shape = {
+            caches: {
+              ...v2.caches,
+              [k]: {
+                provider: params.provider,
+                latitude: params.latitude,
+                longitude: params.longitude,
+                calculationMethod: params.calculationMethod,
+                school: params.school,
+                months,
+                lastAccessedAt: new Date().toISOString(),
+              },
+            },
+          };
+          await saveV2(next, k);
         })(),
         MUTEX_TIMEOUT_MS,
         'cache write',
@@ -251,33 +378,24 @@ export async function getOrFetchPrayerTimes(
 }
 
 /**
- * Returns cache health for the current month and a count of contiguous
+ * Returns cache health for the given params and a count of contiguous
  * fully-stored months from now forward.
- *
- * @returns
- *  - `monthsStored` — count of contiguous fully-stored months starting from
- *    the current month.
- *  - `isExpired` — true if the current month is missing ANY days. Preserved
- *    for backwards compatibility with `usePrayerDay`'s coarse "needs cache
- *    fill" decision.
- *  - `daysMissingThisMonth` — exact count of missing days in the current
- *    calendar month. Lets callers fetch ONLY the missing days instead of
- *    re-fetching the entire month (refresh logic in `refreshPrayerDataCache`
- *    already supports this).
- *  - `totalDaysCached` — diagnostic counter across all stored months.
  */
 export async function getCacheStatus(
   params: Omit<StoredPrayerData, 'months'>,
-  now: Date = new Date()
+  now: Date = new Date(),
 ): Promise<{
   monthsStored: number;
   isExpired: boolean;
   daysMissingThisMonth: number;
   totalDaysCached: number;
 }> {
-  const stored = await getStoredPrayerData();
-  if (!stored || !isSameParams(stored, params)) {
-    const dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const v2 = await loadV2();
+  const k = cacheKey(params);
+  const entry = v2.caches[k];
+
+  const dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  if (!entry) {
     return {
       monthsStored: 0,
       isExpired: true,
@@ -287,24 +405,23 @@ export async function getCacheStatus(
   }
 
   const currentMonthKey = getMonthKey(now);
-  const dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const currentMonthData = stored.months[currentMonthKey] ?? {};
+  const currentMonthData = entry.months[currentMonthKey] ?? {};
   const daysPresentThisMonth = Object.keys(currentMonthData).length;
   const daysMissingThisMonth = Math.max(0, dim - daysPresentThisMonth);
   const isExpired = daysMissingThisMonth > 0;
 
-  let count = 0;
   let totalDaysCached = 0;
-  for (const days of Object.values(stored.months)) {
+  for (const days of Object.values(entry.months)) {
     totalDaysCached += Object.keys(days).length;
   }
 
   // Count consecutive fully-stored months from `now` forward.
-  let d = new Date(now.getFullYear(), now.getMonth(), 1);
+  let count = 0;
+  const d = new Date(now.getFullYear(), now.getMonth(), 1);
   for (let i = 0; i < 12; i++) {
     const mk = getMonthKey(d);
     const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    if (stored.months[mk] && Object.keys(stored.months[mk]).length >= daysInMonth) {
+    if (entry.months[mk] && Object.keys(entry.months[mk]).length >= daysInMonth) {
       count++;
     } else {
       break;
@@ -320,27 +437,34 @@ export async function getCacheStatus(
   };
 }
 
+/**
+ * Pre-fetch (and cache) the next `monthsAhead` calendar months for a given
+ * (provider, lat, lng, method, school) tuple. Existing months are left intact;
+ * only missing days are fetched. Other locations'\'' caches are untouched.
+ *
+ * Used both for the on-demand "fill the active location's cache" path AND
+ * for the "warm a newly-saved location preset" path so switching presets is
+ * instant.
+ */
 export async function refreshPrayerDataCache(
   params: Omit<StoredPrayerData, 'months'>,
   monthsAhead: number = 12,
-  onProgress?: (progress: number, total: number) => void
+  onProgress?: (progress: number, total: number) => void,
 ): Promise<void> {
   const now = new Date();
   const datesToFetch: Date[] = [];
 
-  const existingData = await getStoredPrayerData();
-  const keepExisting = existingData && isSameParams(existingData, params);
-
-  const newData: StoredPrayerData = keepExisting
-    ? existingData
-    : {
-        provider: params.provider,
-        latitude: params.latitude,
-        longitude: params.longitude,
-        calculationMethod: params.calculationMethod,
-        school: params.school,
-        months: {},
-      };
+  const v2 = await loadV2();
+  const k = cacheKey(params);
+  const existing: CacheEntry = v2.caches[k] ?? {
+    provider: params.provider,
+    latitude: params.latitude,
+    longitude: params.longitude,
+    calculationMethod: params.calculationMethod,
+    school: params.school,
+    months: {},
+    lastAccessedAt: new Date().toISOString(),
+  };
 
   for (let i = 0; i < monthsAhead; i++) {
     const year = now.getFullYear();
@@ -350,9 +474,7 @@ export async function refreshPrayerDataCache(
       const date = new Date(year, month, d);
       const monthKey = getMonthKey(date);
       const dayKey = getDayKey(date);
-
-      // Only fetch if missing
-      if (!newData.months[monthKey] || !newData.months[monthKey][dayKey]) {
+      if (!existing.months[monthKey] || !existing.months[monthKey][dayKey]) {
         datesToFetch.push(date);
       }
     }
@@ -365,6 +487,7 @@ export async function refreshPrayerDataCache(
 
   const concurrency = 4;
   let completed = 0;
+  const months = { ...existing.months };
 
   for (let i = 0; i < datesToFetch.length; i += concurrency) {
     const batch = datesToFetch.slice(i, i + concurrency);
@@ -381,66 +504,85 @@ export async function refreshPrayerDataCache(
           });
           return { date, timings: res.timings };
         } catch (e) {
-          // Background 12-month cache fill — failures are best-effort
-          // and recover automatically next time the user opens the
-          // app or hits a fresh batch. Use warn (not error) so dev
-          // builds don't flash a red LogBox banner over the UI for a
+          // Background fill failures are best-effort. warn (not error) so
+          // dev builds don'\''t flash a red LogBox banner over the UI for a
           // recoverable network blip (#137).
           console.warn('Failed to fetch for date', date, e);
           return null;
         }
-      })
+      }),
     );
 
     for (const item of batchResult) {
       if (item) {
         const monthKey = getMonthKey(item.date);
         const dayKey = getDayKey(item.date);
-        if (!newData.months[monthKey]) {
-          newData.months[monthKey] = {};
-        }
-        newData.months[monthKey][dayKey] = item.timings;
+        if (!months[monthKey]) months[monthKey] = {};
+        months[monthKey][dayKey] = item.timings;
       }
     }
 
     completed += batch.length;
-    if (onProgress) {
-      onProgress(completed, datesToFetch.length);
-    }
+    if (onProgress) onProgress(completed, datesToFetch.length);
 
-    // Small delay to avoid hammering APIs
+    // Small delay to avoid hammering APIs.
     await new Promise(resolve => setTimeout(() => resolve(undefined), 100));
   }
 
-  await saveStoredPrayerData(newData);
+  // Single write at the end so concurrent month-scroll writes don'\''t race.
+  const v2After = await loadV2();
+  const next: V2Shape = {
+    caches: {
+      ...v2After.caches,
+      [k]: {
+        provider: params.provider,
+        latitude: params.latitude,
+        longitude: params.longitude,
+        calculationMethod: params.calculationMethod,
+        school: params.school,
+        months,
+        lastAccessedAt: new Date().toISOString(),
+      },
+    },
+  };
+  await saveV2(next, k);
 }
 
 /** Minimum gap between automatic full 12-month syncs (1 hour). */
 const FULL_SYNC_COOLDOWN_MS = 60 * 60 * 1000;
-let _lastFullSyncAttemptMs = 0;
+const _lastFullSyncAttemptByKey = new Map<string, number>();
 
 /**
  * Run a full 12-month background sync only if:
- *  - The cache has fewer than 12 months stored, AND
- *  - At least FULL_SYNC_COOLDOWN_MS have passed since the last attempt.
+ *  - The cache for these params has fewer than 12 months stored, AND
+ *  - At least FULL_SYNC_COOLDOWN_MS have passed since the last attempt
+ *    for the SAME params (other locations are tracked independently so
+ *    switching back triggers a sync if needed).
  *
- * Designed to be called whenever WiFi connectivity is detected.
  * Returns true if a sync was kicked off.
  */
 export async function maybeFullSyncOnWifi(
   params: Omit<StoredPrayerData, 'months'>,
 ): Promise<boolean> {
+  const k = cacheKey(params);
   const now = Date.now();
-  if (now - _lastFullSyncAttemptMs < FULL_SYNC_COOLDOWN_MS) {
-    return false;
-  }
+  const last = _lastFullSyncAttemptByKey.get(k) ?? 0;
+  if (now - last < FULL_SYNC_COOLDOWN_MS) return false;
   const status = await getCacheStatus(params);
-  if (status.monthsStored >= 12) {
-    return false;
-  }
-  _lastFullSyncAttemptMs = now;
+  if (status.monthsStored >= 12) return false;
+  _lastFullSyncAttemptByKey.set(k, now);
   refreshPrayerDataCache(params, 12).catch(e =>
     console.warn('WiFi-triggered 12-month sync failed:', e),
   );
   return true;
+}
+
+/**
+ * Reset the in-memory cooldown so the next call to `maybeFullSyncOnWifi`
+ * fires immediately. Used by tests and by the "I switched location and want
+ * a fresh sync now" path in the settings screen. Process-local — does not
+ * touch persisted state.
+ */
+export function resetFullSyncCooldown(): void {
+  _lastFullSyncAttemptByKey.clear();
 }

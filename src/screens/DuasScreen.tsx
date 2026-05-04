@@ -2,7 +2,9 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo, useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, Vibration, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, Vibration, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -47,6 +49,19 @@ export function DuasScreen() {
     setCounts(prev => ({ ...prev, [id]: 0 }));
   }, []);
 
+  // Safe-area / nav-bar offset — task #145 (iOS).
+  //
+  // The global navigator uses `headerTransparent: true` on iOS so the blur
+  // effect can extend behind content. That means the screen content starts
+  // at y=0 of the window and the category chips ended up rendering BEHIND
+  // the transparent header — invisible to the user. Push the tabs row down
+  // by the navigation header height so the chips appear just below the
+  // title bar like the user expects. Android has an opaque header so
+  // header height == 0 from this hook (the header sits above the content),
+  // and we don't need extra padding.
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
+  const topOffset = Platform.OS === 'ios' ? headerHeight : insets.top;
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
       {/* Tabs are wrapped in a fixed-height row pinned just under the
@@ -54,7 +69,7 @@ export function DuasScreen() {
           duas the chips stay at the top instead of vertically centering
           (#101 follow-up). The dua list ScrollView fills the rest of
           the screen and starts at a predictable y-offset. */}
-      <View style={styles.tabsRow}>
+      <View style={[styles.tabsRow, { paddingTop: topOffset }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
