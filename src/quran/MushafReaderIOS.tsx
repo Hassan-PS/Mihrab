@@ -1,28 +1,27 @@
 /**
- * iOS-only Mushaf reader — task #151.
+ * iOS-only Mushaf reader — task #151, glitch fix in #152.
  *
  * The shared FlatList-based reader (`MushafReader` in QuranSurahScreen.tsx)
- * keeps hitting iOS-specific FlatList edge cases when combined with the
- * Arabic in-app locale and the 604-page mushaf data set:
- *   • `inverted={true}` + `initialScrollIndex` → list mounts but never
- *     scrolls (beta.34 bug).
- *   • Drop `inverted`, keep `initialScrollIndex` → fixed for English UI
- *     but still blank in Arabic (beta.35).
- *   • Pin `writingDirection: 'ltr'` and key by `i18n.language` → still
- *     blank in Arabic (beta.37).
- *   • Replace `initialScrollIndex` with manual `scrollToOffset` on
- *     `onLayout` → still reported blank (beta.38).
+ * keeps hitting iOS-specific edge cases when combined with the Arabic
+ * in-app locale and the 604-page mushaf data set. Beta.39 introduced this
+ * iOS-only file with a 3-slot sliding-window ScrollView; it rendered
+ * correctly but produced a visible glitch on every swipe (the previously-
+ * shown page flashed for one frame before the new page settled). Root
+ * cause: the recenter-after-swipe pattern updated React state and scroll
+ * position in two distinct passes, leaving one render frame where they
+ * disagreed.
  *
- * Rather than chase another FlatList quirk, this iOS reader is built from
- * scratch on plain `<ScrollView pagingEnabled horizontal>` with a manual
- * 3-page sliding window. Only ever 3 page <Image> components are mounted
- * (the active page plus one on each side) so memory stays low even with
- * 604 logical pages. Swipe gestures are handled by the OS via
- * `pagingEnabled`. No FlatList virtualization, no `inverted`, no
- * `initialScrollIndex`, no writing-direction inheritance.
+ * This rewrite uses ABSOLUTE POSITIONING inside a 604-page-wide
+ * ScrollView. Only 3 page <Image> components are mounted at any time,
+ * but each one is positioned at its TRUE x-offset = `(page - 1) *
+ * screenWidth`. The user scrolls naturally through the full 604-page
+ * width; pagingEnabled snaps to whole pages. After the user swipes,
+ * we update `currentPage` from the contentOffset — but the scroll
+ * position itself never needs to be recentered because each page's
+ * x-position is already correct. No frame mismatch, no glitch.
  *
- * Android keeps using the FlatList implementation in QuranSurahScreen.tsx
- * because Android's view hierarchy doesn't reproduce the iOS bug.
+ * Memory: 3 images mounted. Scroll content size: 604 * screenWidth.
+ * Performance: pagingEnabled handles snap/momentum natively.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -76,14 +75,12 @@ export function MushafReaderIOS({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
-  // Initial page is wherever the requested surah begins. Derived once;
-  // changing surah unmounts the screen so we don't need a useEffect.
   const initialPage = useMemo(
     () => findPageForAyah(surahNumber, 1),
     [surahNumber],
   );
 
-  // ── Download gating — same UX contract as MushafReader on Android ──
+  // ── Download gating ──────────────────────────────────────────────────
   const [downloadStatus, setDownloadStatus] = useState<
     'checking' | 'needs_download' | 'downloading' | 'ready'
   >('checking');
@@ -121,16 +118,19 @@ export function MushafReaderIOS({
     });
   };
 
-  // ── Page state ──────────────────────────────────────────────────────
-  // Track the active page (1..604). A 3-page sliding window is rendered
-  // around it: [page-1, page, page+1]. The horizontal ScrollView holds
-  // exactly those three pages and we recenter after each swipe.
+  // ── Page state ───────────────────────────────────────────────────────
+  // Source of truth is the actual page number (1..604). The 3 mounted
+  // images are { current - 1, current, current + 1 } each absolutely
+  // positioned at their (page - 1) * screenWidth x-coordinate inside the
+  // big ScrollView, so the scroll position matches the visible page
+  // exactly without any imperative recentering after a swipe.
   const screenWidth = Dimensions.get('window').width;
   const [currentPage, setCurrentPage] = useState(initialPage);
   const scrollRef = useRef<ScrollView>(null);
+  // Track whether we've already done the initial scroll so we don't keep
+  // jumping back when the user navigates within the reader.
+  const didInitialScrollRef = useRef(false);
 
-  // Notify the parent screen of title changes so the nav header reflects
-  // the surah on the visible page.
   useEffect(() => {
     if (!onTitleChange) return;
     const visiblePage = MUSHAF_PAGES.find(p => p.page === currentPage);
@@ -139,30 +139,26 @@ export function MushafReaderIOS({
     if (surah) onTitleChange(surah.englishName);
   }, [currentPage, onTitleChange]);
 
-  // After every render, recenter the scroll view so the visible page is
-  // in the middle slot. The middle slot always holds `currentPage`. The
-  // left slot holds `currentPage - 1` (clamped to 1), the right slot
-  // holds `currentPage + 1` (clamped to MUSHAF_TOTAL_PAGES).
-  //
-  // This pattern dodges all the FlatList iOS issues: the ScrollView only
-  // ever has three children, the offset arithmetic is straightforward,
-  // and there is no virtualization layer that might silently misbehave
-  // under an RTL ancestor.
-  useEffect(() => {
-    // jumpTo 0 = left page, 1 = middle page, 2 = right page
-    const middleX = screenWidth;
-    // Use scrollTo with animated:false to position without animation.
-    // Defer one frame so the ScrollView's content has laid out.
-    const id = setTimeout(() => {
-      scrollRef.current?.scrollTo({ x: middleX, y: 0, animated: false });
+  // Initial scroll to the surah's starting page once everything has laid
+  // out. After this we never imperatively scroll again — the user drives
+  // it via swipes, and `currentPage` is derived from contentOffset.
+  const onScrollViewLayout = () => {
+    if (didInitialScrollRef.current) return;
+    if (initialPage <= 1) {
+      didInitialScrollRef.current = true;
+      return;
+    }
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({
+        x: (initialPage - 1) * screenWidth,
+        y: 0,
+        animated: false,
+      });
+      didInitialScrollRef.current = true;
     }, 0);
-    return () => clearTimeout(id);
-  }, [currentPage, screenWidth]);
+  };
 
-  const leftPage = Math.max(1, currentPage - 1);
-  const rightPage = Math.min(MUSHAF_TOTAL_PAGES, currentPage + 1);
-
-  // ── Download-prompt screens ─────────────────────────────────────────
+  // ── Download-prompt screens ──────────────────────────────────────────
   if (downloadStatus === 'checking') {
     return (
       <View style={[styles.gate, { backgroundColor: PARCHMENT }]}>
@@ -228,9 +224,8 @@ export function MushafReaderIOS({
     );
   }
 
-  // ── Reader ──────────────────────────────────────────────────────────
-  // Compute the dimensions for each page image once — same aspect-fit
-  // logic as the Android reader.
+  // ── Reader ───────────────────────────────────────────────────────────
+  // Page-image dimensions, computed once.
   const horizontalPadding = 16;
   const headerFooterReserve = 80;
   const maxWidth = screenWidth - horizontalPadding * 2;
@@ -248,11 +243,19 @@ export function MushafReaderIOS({
     MUSHAF_PAGES.find(p => p.page === page) ?? MUSHAF_PAGES[0];
 
   const renderPage = (page: number) => {
+    if (page < 1 || page > MUSHAF_TOTAL_PAGES) return null;
     const meta = pageMeta(page);
     return (
       <View
         key={page}
-        style={{ width: screenWidth, height: '100%', backgroundColor: PARCHMENT }}>
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: (page - 1) * screenWidth,
+          width: screenWidth,
+          height: '100%',
+          backgroundColor: PARCHMENT,
+        }}>
         {!isFullscreen ? (
           <View style={styles.pageHeader}>
             <Text style={styles.pageHeaderText}>
@@ -272,15 +275,20 @@ export function MushafReaderIOS({
         {!isFullscreen ? (
           <View style={styles.pageFooter}>
             <View style={styles.pageNumberFrame}>
-              <Text style={styles.pageNumber}>
-                {easternNumerals(page)}
-              </Text>
+              <Text style={styles.pageNumber}>{easternNumerals(page)}</Text>
             </View>
           </View>
         ) : null}
       </View>
     );
   };
+
+  // The 3 pages we keep mounted: prev, current, next.
+  const mountedPages = [
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+  ].filter(p => p >= 1 && p <= MUSHAF_TOTAL_PAGES);
 
   return (
     <View
@@ -294,27 +302,27 @@ export function MushafReaderIOS({
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        // Disable bounces so the user can't scroll past the edges and
-        // see empty space when on page 1 or 604.
         bounces={false}
-        // Defer the offset update until momentum stops. We don't update
-        // on every scroll event because the user might land between
-        // pages mid-gesture.
+        // Don't react to live scroll events — only commit currentPage
+        // after momentum has stopped. This prevents flicker during the
+        // swipe gesture itself.
         onMomentumScrollEnd={e => {
           const x = e.nativeEvent.contentOffset.x;
-          // Snap the index to which slot was selected (0=left, 1=middle, 2=right).
-          const slot = Math.round(x / screenWidth);
-          if (slot === 0 && currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-          } else if (slot === 2 && currentPage < MUSHAF_TOTAL_PAGES) {
-            setCurrentPage(currentPage + 1);
-          }
-          // slot===1 means user scrolled then snapped back — no-op.
+          const page = Math.round(x / screenWidth) + 1;
+          const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
+          if (clamped !== currentPage) setCurrentPage(clamped);
         }}
-        contentContainerStyle={{ flexGrow: 0 }}>
-        {renderPage(leftPage)}
-        {renderPage(currentPage)}
-        {renderPage(rightPage)}
+        onLayout={onScrollViewLayout}
+        // Native ScrollView allocates contentSize from contentContainerStyle.
+        // 604 * screenWidth gives the user the natural feel of paging
+        // through a real mushaf — content size is computed once and never
+        // changes; only the 3 absolutely-positioned children move with
+        // currentPage.
+        contentContainerStyle={{
+          width: screenWidth * MUSHAF_TOTAL_PAGES,
+          height: '100%',
+        }}>
+        {mountedPages.map(renderPage)}
       </ScrollView>
       {isFullscreen ? (
         <Pressable
@@ -339,8 +347,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     gap: 16,
   },
-  gateTitle: { fontSize: 20, fontWeight: '700', textAlign: 'center', color: '#1c1c1e' },
-  gateBody: { fontSize: 15, lineHeight: 22, textAlign: 'center', color: '#3a3a3c' },
+  gateTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    color: '#1c1c1e',
+  },
+  gateBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    color: '#3a3a3c',
+  },
   cta: {
     marginTop: 8,
     paddingHorizontal: 22,
