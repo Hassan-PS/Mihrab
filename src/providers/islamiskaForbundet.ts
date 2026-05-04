@@ -22,6 +22,17 @@ const WIDGET_URL =
 
 const MAX_REVERSE_CACHE = 200;
 const reverseCache = new Map<string, ReverseLocality>();
+/**
+ * In-flight requests, keyed identically to the result cache. Lets us
+ * deduplicate concurrent reverse-geocode hits for the same coords —
+ * the 12-month cache fill in `prayerStorage.refreshPrayerDataCache`
+ * runs 4 day-fetches in parallel per batch, and before #137 each one
+ * raced its own reverse-geocode call. Nominatim rate-limits at ~1
+ * req/s, so 4 races → 3 failures until the cache populated. With
+ * single-flight, the first pending Promise is shared across all
+ * concurrent callers and the cache is filled atomically.
+ */
+const reverseInFlight = new Map<string, Promise<ReverseLocality>>();
 
 function localityCacheKey(lat: number, lng: number): string {
   return `${lat.toFixed(3)},${lng.toFixed(3)}`;
@@ -36,15 +47,30 @@ async function resolveLocality(
   if (hit) {
     return hit;
   }
-  const v = await reverseLocality(latitude, longitude);
-  if (reverseCache.size >= MAX_REVERSE_CACHE) {
-    const firstKey = reverseCache.keys().next().value;
-    if (firstKey !== undefined) {
-      reverseCache.delete(firstKey);
-    }
+  // Coalesce concurrent callers onto a single network request.
+  const inflight = reverseInFlight.get(k);
+  if (inflight) {
+    return inflight;
   }
-  reverseCache.set(k, v);
-  return v;
+  const promise = reverseLocality(latitude, longitude)
+    .then(v => {
+      if (reverseCache.size >= MAX_REVERSE_CACHE) {
+        const firstKey = reverseCache.keys().next().value;
+        if (firstKey !== undefined) {
+          reverseCache.delete(firstKey);
+        }
+      }
+      reverseCache.set(k, v);
+      return v;
+    })
+    .finally(() => {
+      // Drop the in-flight slot whether we succeeded or failed; on
+      // failure the next caller will retry, on success the cache hit
+      // path takes over.
+      reverseInFlight.delete(k);
+    });
+  reverseInFlight.set(k, promise);
+  return promise;
 }
 
 const TIME_RE = /\b\d{1,2}:\d{2}\b/g;
