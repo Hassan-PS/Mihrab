@@ -1,7 +1,15 @@
 import type { TimingsMap } from '../types/prayer';
 import { formatLocalDate } from '../utils/date';
+import { fetchWithRetry } from '../utils/fetchWithRetry';
+import {
+  ProviderError,
+  isAbortOrTimeoutError,
+  isNetworkError,
+} from './errors';
+import { computeImsak, DEFAULT_IMSAK_OFFSET_MINUTES } from './imsak';
 import type { PrayerTimesResult } from './types';
 
+const PROVIDER = 'prayertimes_dev';
 const BASE = 'https://prayertimes.dev/api/prayer-times';
 
 type PrayTimesDevResponse = {
@@ -77,13 +85,19 @@ function convertLondonTimeToLocal(timeStr: string, date: Date): string {
 }
 
 function normalize(dev: NonNullable<PrayTimesDevResponse['prayer_times']>, date: Date): TimingsMap {
+  const fajr = convertLondonTimeToLocal(dev.fajr, date);
+  // PrayTimes.dev does not return Imsak. Compute the canonical Fajr − 10 fallback
+  // so downstream consumers (widget, fasting tracker, Suhoor countdown) always
+  // have a value. The user-configurable offset (task #21) will override this
+  // once the setting lands.
   return {
-    Fajr: convertLondonTimeToLocal(dev.fajr, date),
+    Fajr: fajr,
     Sunrise: convertLondonTimeToLocal(dev.sunrise, date),
     Dhuhr: convertLondonTimeToLocal(dev.zuhr, date),
     Asr: convertLondonTimeToLocal(dev.asr, date),
     Maghrib: convertLondonTimeToLocal(dev.maghrib, date),
     Isha: convertLondonTimeToLocal(dev.isha, date),
+    Imsak: computeImsak(fajr, DEFAULT_IMSAK_OFFSET_MINUTES),
   };
 }
 
@@ -100,13 +114,56 @@ export async function fetchPrayTimesDev(params: {
   q.append('lng', String(params.longitude));
   q.append('date', dateStr);
   q.append('school', school);
-  const res = await fetch(`${BASE}?${q.toString()}`);
-  if (!res.ok) {
-    throw new Error(`PrayTimes.dev request failed (${res.status})`);
+
+  let res: Response;
+  try {
+    // Migrated from raw fetch() to the unified retry helper (task #6) so this
+    // provider gets the same per-request timeout, jittered backoff, and 5xx
+    // retry policy as the others.
+    res = await fetchWithRetry(`${BASE}?${q.toString()}`, undefined, {
+      maxAttempts: 4,
+      baseDelayMs: 900,
+      timeoutMs: 7000,
+    });
+  } catch (e) {
+    if (isAbortOrTimeoutError(e)) {
+      throw new ProviderError(PROVIDER, 'timeout', 'PrayTimes.dev request timed out', { cause: e });
+    }
+    if (isNetworkError(e)) {
+      throw new ProviderError(PROVIDER, 'network', 'PrayTimes.dev network failure', { cause: e });
+    }
+    throw new ProviderError(PROVIDER, 'unknown', 'PrayTimes.dev request failed', { cause: e });
   }
-  const json = (await res.json()) as PrayTimesDevResponse;
+
+  if (res.status === 401 || res.status === 403) {
+    throw new ProviderError(PROVIDER, 'unauthorized', `PrayTimes.dev returned ${res.status}`, {
+      status: res.status,
+    });
+  }
+  if (res.status >= 500) {
+    throw new ProviderError(PROVIDER, 'server', `PrayTimes.dev server error (${res.status})`, {
+      status: res.status,
+    });
+  }
+  if (!res.ok) {
+    throw new ProviderError(PROVIDER, 'shape', `PrayTimes.dev request failed (${res.status})`, {
+      status: res.status,
+    });
+  }
+
+  let json: PrayTimesDevResponse;
+  try {
+    json = (await res.json()) as PrayTimesDevResponse;
+  } catch (e) {
+    throw new ProviderError(
+      PROVIDER,
+      'shape',
+      'PrayTimes.dev response was not valid JSON',
+      { cause: e },
+    );
+  }
   if (!json.prayer_times) {
-    throw new Error('PrayTimes.dev returned no prayer times');
+    throw new ProviderError(PROVIDER, 'shape', 'PrayTimes.dev returned no prayer times');
   }
   return {
     timings: normalize(json.prayer_times, params.date),

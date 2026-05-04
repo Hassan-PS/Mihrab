@@ -11,8 +11,8 @@ export const modalStyles = StyleSheet.create({
   },
   sheet: {
     maxHeight: '72%',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopStartRadius: 16,
+    borderTopEndRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     paddingTop: 12,
   },

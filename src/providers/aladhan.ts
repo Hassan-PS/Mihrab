@@ -1,8 +1,14 @@
 import type { TimingsMap } from '../types/prayer';
 import { formatLocalDate } from '../utils/date';
 import { fetchWithRetry } from '../utils/fetchWithRetry';
+import {
+  ProviderError,
+  isAbortOrTimeoutError,
+  isNetworkError,
+} from './errors';
 import type { PrayerTimesResult } from './types';
 
+const PROVIDER = 'aladhan';
 const BASE = 'https://api.aladhan.com/v1';
 
 type AladhanTimingsResponse = {
@@ -37,16 +43,61 @@ export async function fetchAladhanTimes(params: {
     query.append('school', String(params.school));
   }
   const url = `${BASE}/timings/${dateStr}?${query.toString()}`;
-  const res = await fetchWithRetry(url, undefined, {
-    maxAttempts: 5,
-    baseDelayMs: 1000,
-  });
-  if (!res.ok) {
-    throw new Error(`AlAdhan request failed (${res.status})`);
+
+  let res: Response;
+  try {
+    res = await fetchWithRetry(url, undefined, {
+      maxAttempts: 4,
+      baseDelayMs: 1000,
+      timeoutMs: 7000,
+    });
+  } catch (e) {
+    if (isAbortOrTimeoutError(e)) {
+      throw new ProviderError(PROVIDER, 'timeout', 'AlAdhan request timed out', { cause: e });
+    }
+    if (isNetworkError(e)) {
+      throw new ProviderError(PROVIDER, 'network', 'AlAdhan network failure', { cause: e });
+    }
+    throw new ProviderError(PROVIDER, 'unknown', 'AlAdhan request failed', { cause: e });
   }
-  const json = (await res.json()) as AladhanTimingsResponse;
+
+  if (res.status === 401 || res.status === 403) {
+    throw new ProviderError(
+      PROVIDER,
+      'unauthorized',
+      `AlAdhan returned ${res.status}`,
+      { status: res.status },
+    );
+  }
+  if (res.status >= 500) {
+    throw new ProviderError(
+      PROVIDER,
+      'server',
+      `AlAdhan server error (${res.status})`,
+      { status: res.status },
+    );
+  }
+  if (!res.ok) {
+    throw new ProviderError(
+      PROVIDER,
+      'shape',
+      `AlAdhan request failed (${res.status})`,
+      { status: res.status },
+    );
+  }
+
+  let json: AladhanTimingsResponse;
+  try {
+    json = (await res.json()) as AladhanTimingsResponse;
+  } catch (e) {
+    throw new ProviderError(PROVIDER, 'shape', 'AlAdhan response was not valid JSON', { cause: e });
+  }
   if (json.code !== 200 || !json.data?.timings) {
-    throw new Error(json.status || 'Unexpected AlAdhan response');
+    throw new ProviderError(
+      PROVIDER,
+      'shape',
+      json.status || 'AlAdhan returned an unexpected payload shape',
+    );
   }
   return {
     timings: json.data.timings,

@@ -15,6 +15,7 @@ import {
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { GeocodedPlace } from '../geocoding/nominatim';
 import { inputChromeStyle } from '../theme/chrome';
+import { RADIUS, SPACING } from '../theme/tokens';
 import { PlaceSearchSection } from './PlaceSearchSection';
 
 type Palette = {
@@ -145,6 +146,9 @@ export function LocationSetup({ palette }: Props) {
           {t('locationSetup.sub')}
         </Text>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('locationSetup.useAutomatic')}
+          accessibilityState={{ busy: gpsBusy, disabled: gpsBusy }}
           disabled={gpsBusy}
           onPress={useDeviceLocation}
           style={[
@@ -164,6 +168,8 @@ export function LocationSetup({ palette }: Props) {
           <Text style={[styles.err, { color: palette.danger }]}>{gpsError}</Text>
         )}
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('locationSetup.searchCoords')}
           onPress={() => setStep('manual')}
           style={[
             styles.secondaryBtn,
@@ -188,7 +194,11 @@ export function LocationSetup({ palette }: Props) {
       style={[styles.fill, { backgroundColor: palette.bg }]}
       contentContainerStyle={styles.manualContent}
       keyboardShouldPersistTaps="handled">
-      <Pressable onPress={() => setStep('choose')} hitSlop={12}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('common.back')}
+        onPress={() => setStep('choose')}
+        hitSlop={12}>
         <Text style={[styles.back, { color: palette.accent }]}>
           ← {t('common.back')}
         </Text>
@@ -243,6 +253,8 @@ export function LocationSetup({ palette }: Props) {
         <Text style={[styles.err, { color: palette.danger }]}>{coordError}</Text>
       )}
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('common.continue')}
         onPress={completeManual}
         style={[styles.primaryBtn, { backgroundColor: palette.accent }]}>
         <Text style={styles.primaryBtnLabel}>{t('common.continue')}</Text>
@@ -256,67 +268,67 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   chooseContent: {
-    padding: 24,
-    paddingTop: 48,
-    gap: 16,
+    padding: SPACING.xl,
+    paddingTop: SPACING.xxxl,
+    gap: SPACING.lg,
   },
   manualContent: {
-    padding: 24,
-    paddingTop: 24,
-    gap: 12,
-    paddingBottom: 40,
+    padding: SPACING.xl,
+    paddingTop: SPACING.xl,
+    gap: SPACING.md,
+    paddingBottom: SPACING.xxl + SPACING.sm, // 40 — between xxl (32) and xxxl (48)
   },
   headline: {
-    fontSize: 24,
+    fontSize: 24, // tokens-ok-line: hero one-off; will move to TYPE.title1 in #36 sweep
     fontWeight: '700',
   },
   sub: {
-    fontSize: 15,
+    fontSize: 15, // tokens-ok-line: TYPE.callout target
     lineHeight: 22,
   },
   primaryBtn: {
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 14, // tokens-ok-line: 44pt min-tap baseline
+    borderRadius: RADIUS.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: SPACING.sm,
   },
   primaryBtnBusy: {
     opacity: 0.7,
   },
   primaryBtnLabel: {
     color: '#fff',
-    fontSize: 17,
+    fontSize: 17, // tokens-ok-line: TYPE.headline target
     fontWeight: '600',
   },
   secondaryBtn: {
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 14, // tokens-ok-line: matches primaryBtn baseline
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     borderWidth: 2,
     backgroundColor: 'transparent',
   },
   secondaryLabel: {
-    fontSize: 17,
+    fontSize: 17, // tokens-ok-line: TYPE.headline target
     fontWeight: '600',
   },
   err: {
-    fontSize: 14,
+    fontSize: 14, // tokens-ok-line: TYPE.footnote target
     textAlign: 'center',
   },
   back: {
-    fontSize: 17,
+    fontSize: 17, // tokens-ok-line: TYPE.headline target
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
   },
   advLabel: {
-    fontSize: 13,
-    marginTop: 8,
+    fontSize: 13, // tokens-ok-line: TYPE.footnote target
+    marginTop: SPACING.sm,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 10, // tokens-ok-line: input min-tap baseline
+    fontSize: 16, // tokens-ok-line: TYPE.body target
   },
 });

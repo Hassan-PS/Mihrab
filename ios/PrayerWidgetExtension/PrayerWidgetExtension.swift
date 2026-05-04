@@ -77,10 +77,19 @@ struct WidgetPayload: Codable {
   let nextPrayerName: String?
   let nextPrayerTime: String?
   let locationName: String?
+  /// Seasonal treatment flags — task #67. Optional because older app
+  /// versions push payloads without this field; absent treats as
+  /// all-false.
+  let seasonal: SeasonalFlags?
   struct Row: Codable {
     let key: String
     let time: String
     let abbr: String?
+  }
+  struct SeasonalFlags: Codable {
+    let jumuah: Bool
+    let ramadan: Bool
+    let eid: String?
   }
 }
 
@@ -171,7 +180,8 @@ struct Provider: TimelineProvider {
       .init(key: "Isha",    time: "19:30", abbr: "Isha"),
     ],
     nextKey: "Dhuhr", nextPrayerName: "Dhuhr", nextPrayerTime: "12:10",
-    locationName: "London"
+    locationName: "London",
+    seasonal: nil
   )
 }
 
@@ -367,24 +377,135 @@ struct PrayerWidgetEntryView: View {
 
   // MARK: - Body
 
+  // MARK: - Lock Screen (Accessory) families — task #23
+  //
+  // Three families, each tuned to its real estate:
+  //   • accessoryInline      — single line of text (status bar style).
+  //   • accessoryCircular    — tiny circular badge (Apple Watch-like).
+  //   • accessoryRectangular — wider lock-screen tile, two-line layout.
+  //
+  // Friday Jumu'ah accent is honored by reading the seasonal-treatment flag
+  // already pushed by the JS layer. The flag is optional — fall back to the
+  // standard accent when absent.
+
+  @ViewBuilder
+  private var inlineWidgetContent: some View {
+    if let p = entry.payload,
+       let name = entry.dynamicNextName ?? p.nextPrayerName,
+       let time = entry.dynamicNextTime ?? p.nextPrayerTime {
+      // Inline family is rendered by the system inside the lock-screen
+      // status row — single line, system styling. Pre-format as
+      // "Fajr · 05:12" so the system can lay it out compactly.
+      Text("\(name) · \(time)")
+    } else {
+      Text("Prayer Times")
+    }
+  }
+
+  @ViewBuilder
+  private var circularWidgetContent: some View {
+    if let p = entry.payload,
+       let time = entry.dynamicNextTime ?? p.nextPrayerTime {
+      // Circular: just the time with a tiny prayer-name ring above.
+      // System tints the whole view in the user's chosen lock-screen color.
+      VStack(spacing: 2) {
+        if let name = entry.dynamicNextName ?? p.nextPrayerName {
+          Text(name.prefix(4).uppercased())
+            .font(.system(size: 9, weight: .semibold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+        }
+        Text(time)
+          .font(.system(size: 14, weight: .semibold))
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+    } else {
+      Image(systemName: "moon.stars")
+    }
+  }
+
+  @ViewBuilder
+  private var rectangularWidgetContent: some View {
+    if let p = entry.payload {
+      VStack(alignment: .leading, spacing: 2) {
+        // Seasonal eyebrow — Friday (Jumu'ah), Ramadan, or Eid. The
+        // system tints lock-screen widgets a single color, so we use
+        // glyphs (◇ for Jumu'ah, ☾ for Ramadan, ✦ for Eid) for visual
+        // distinction within the tint.
+        if let s = p.seasonal {
+          if s.eid != nil {
+            Text("✦ EID")
+              .font(.system(size: 9, weight: .semibold))
+              .lineLimit(1)
+          } else if s.jumuah {
+            Text("◇ JUMU'AH")
+              .font(.system(size: 9, weight: .semibold))
+              .lineLimit(1)
+          } else if s.ramadan {
+            Text("☾ RAMADAN")
+              .font(.system(size: 9, weight: .semibold))
+              .lineLimit(1)
+          } else if let loc = p.locationName, !loc.isEmpty {
+            Text(loc.uppercased())
+              .font(.system(size: 9, weight: .semibold))
+              .lineLimit(1)
+          }
+        } else if let loc = p.locationName, !loc.isEmpty {
+          Text(loc.uppercased())
+            .font(.system(size: 9, weight: .semibold))
+            .lineLimit(1)
+        }
+        if let name = entry.dynamicNextName ?? p.nextPrayerName {
+          Text(name)
+            .font(.system(size: 13, weight: .semibold))
+            .lineLimit(1)
+        }
+        if let time = entry.dynamicNextTime ?? p.nextPrayerTime {
+          Text(time)
+            .font(.system(size: 18, weight: .regular))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        }
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+    } else {
+      Text("Prayer Times")
+    }
+  }
+
   var body: some View {
     ZStack(alignment: .topTrailing) {
-      if widgetFamily == .systemSmall {
+      if #available(iOSApplicationExtension 16.0, *) {
+        switch widgetFamily {
+        case .accessoryInline:
+          inlineWidgetContent
+        case .accessoryCircular:
+          circularWidgetContent
+        case .accessoryRectangular:
+          rectangularWidgetContent
+        case .systemSmall:
+          smallWidgetContent
+        default:
+          mediumLargeContent
+            .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 12))
+          // iOS 17+ refresh button
+          if #available(iOS 17.0, *) {
+            Button(intent: RefreshIntent()) {
+              Image(systemName: "arrow.clockwise")
+                .font(.system(size: 9, weight: .medium))
+                .foregroundColor(widgetMuted)
+                .padding(8)
+            }
+            .buttonStyle(.plain)
+          }
+        }
+      } else if widgetFamily == .systemSmall {
         smallWidgetContent
       } else {
         mediumLargeContent
           .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 12))
-
-        // iOS 17+ refresh button
-        if #available(iOS 17.0, *) {
-          Button(intent: RefreshIntent()) {
-            Image(systemName: "arrow.clockwise")
-              .font(.system(size: 9, weight: .medium))
-              .foregroundColor(widgetMuted)
-              .padding(8)
-          }
-          .buttonStyle(.plain)
-        }
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -412,6 +533,18 @@ struct PrayerWidgetExtensionBundle: Widget {
     }
     .configurationDisplayName("Prayer Times")
     .description("Today's prayer times including Sunrise. After Isha, shows tomorrow.")
-    .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+    .supportedFamilies(supportedFamilies())
+  }
+
+  /// iOS 16+ adds the Lock Screen accessory families. Fall back to the
+  /// home-screen-only set on older deployments.
+  private func supportedFamilies() -> [WidgetFamily] {
+    if #available(iOSApplicationExtension 16.0, *) {
+      return [
+        .systemSmall, .systemMedium, .systemLarge,
+        .accessoryInline, .accessoryCircular, .accessoryRectangular,
+      ]
+    }
+    return [.systemSmall, .systemMedium, .systemLarge]
   }
 }

@@ -1,0 +1,155 @@
+#!/usr/bin/env node
+/**
+ * /quran-import — task #68 importer.
+ *
+ * Consumes Tanzil Quran JSON (Uthmani simple-clean) + Sahih International
+ * translation and emits one JSON file per surah at:
+ *
+ *   src/quran/data/surahs/{NNN}.json
+ *
+ * Plus regenerates the static-import switch in `src/quran/quran.ts` so
+ * Metro can tree-shake on a per-surah basis.
+ *
+ * Usage:
+ *
+ *   1. Drop the source files into `src/quran/data/source/`:
+ *      - quran-uthmani.json  (Tanzil simple-clean Uthmani)
+ *      - en.sahih.json       (Sahih International translation)
+ *      Both files are downloaded from https://tanzil.net/download/
+ *      (Quran text: CC BY 3.0; Sahih International: public domain).
+ *   2. Run: `node scripts/quran-import.js`
+ *   3. The script writes 114 per-surah files + updates the loader.
+ *   4. Run `npx jest --testPathPattern=quranIntegrity` to verify the
+ *      hash check still passes for Surah al-Fatihah.
+ *
+ * Tanzil JSON shape (per-ayah array):
+ *   { "quran": [ { "chapter": 1, "verse": 1, "text": "بِسْمِ..." }, ... ] }
+ *
+ * Sahih International JSON shape: same shape, English text in `text`.
+ *
+ * If the Tanzil download is in a different shape, this script tolerates
+ * either array-of-objects or chapter-keyed-object input.
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..');
+const SRC_DIR = path.join(ROOT, 'src', 'quran', 'data', 'source');
+const OUT_DIR = path.join(ROOT, 'src', 'quran', 'data', 'surahs');
+const QURAN_TS = path.join(ROOT, 'src', 'quran', 'quran.ts');
+
+const ARABIC_FILE = path.join(SRC_DIR, 'quran-uthmani.json');
+const TRANSLATION_FILE = path.join(SRC_DIR, 'en.sahih.json');
+
+function pad3(n) {
+  return String(n).padStart(3, '0');
+}
+
+function readSource(file, label) {
+  if (!fs.existsSync(file)) {
+    console.error(`✗ ${label} not found at ${file}`);
+    console.error(`  Download from https://tanzil.net/download/ and place here.`);
+    process.exit(1);
+  }
+  const raw = fs.readFileSync(file, 'utf-8');
+  const parsed = JSON.parse(raw);
+  // Tolerate both shapes: { quran: [...] } | { 1: { 1: 'text', ... } } | flat array
+  if (Array.isArray(parsed)) return parsed;
+  if (Array.isArray(parsed.quran)) return parsed.quran;
+  if (typeof parsed === 'object' && parsed !== null) {
+    const out = [];
+    for (const [chapter, ayahs] of Object.entries(parsed)) {
+      if (typeof ayahs === 'object' && ayahs !== null) {
+        for (const [verse, text] of Object.entries(ayahs)) {
+          out.push({
+            chapter: Number(chapter),
+            verse: Number(verse),
+            text: String(text),
+          });
+        }
+      }
+    }
+    return out;
+  }
+  console.error(`✗ ${label}: unrecognized JSON shape`);
+  process.exit(1);
+}
+
+function groupBySurah(rows) {
+  const grouped = new Map();
+  for (const row of rows) {
+    const ch = Number(row.chapter ?? row.surah ?? 0);
+    const v = Number(row.verse ?? row.ayah ?? 0);
+    const text = String(row.text ?? '');
+    if (!ch || !v || !text) continue;
+    if (!grouped.has(ch)) grouped.set(ch, []);
+    const arr = grouped.get(ch);
+    arr[v - 1] = text;
+  }
+  return grouped;
+}
+
+function main() {
+  console.log('Quran import — task #68');
+  console.log('');
+
+  const arabicRows = readSource(ARABIC_FILE, 'Arabic (Tanzil Uthmani)');
+  const translationRows = readSource(TRANSLATION_FILE, 'Translation (Sahih International)');
+
+  const arabicBySurah = groupBySurah(arabicRows);
+  const translationBySurah = groupBySurah(translationRows);
+
+  if (!fs.existsSync(OUT_DIR)) {
+    fs.mkdirSync(OUT_DIR, { recursive: true });
+  }
+
+  let written = 0;
+  for (let n = 1; n <= 114; n += 1) {
+    const arabic = arabicBySurah.get(n) ?? [];
+    const translation = translationBySurah.get(n) ?? [];
+    if (arabic.length === 0) {
+      console.warn(`  Surah ${n}: no Arabic text found`);
+      continue;
+    }
+    const out = { number: n, arabic, translation };
+    fs.writeFileSync(
+      path.join(OUT_DIR, `${pad3(n)}.json`),
+      JSON.stringify(out),
+    );
+    written += 1;
+  }
+
+  console.log(`✓ Wrote ${written} per-surah JSON files to ${path.relative(ROOT, OUT_DIR)}`);
+  console.log('');
+  console.log('Patching loadSurahDataFile() in src/quran/quran.ts to enumerate the static requires…');
+
+  // Generate the loader switch. Metro tree-shakes only when the require()
+  // arg is a literal — so we generate one case per surah.
+  const switchCases = [];
+  for (let n = 2; n <= 114; n += 1) {
+    switchCases.push(
+      `    case ${n}: return require('./data/surahs/${pad3(n)}.json');`,
+    );
+  }
+  const newBody = `async function loadSurahDataFile(\n  n: number,\n): Promise<{ arabic: string[]; translation?: string[] } | null> {\n  // Metro requires literal require paths for tree-shaking; we enumerate\n  // 2..114 explicitly. Surah 1 goes through the inline SURAH_TEXT path\n  // in loadSurah() above. Generated by scripts/quran-import.js.\n  switch (n) {\n${switchCases.join('\n')}\n    default: return null;\n  }\n}`;
+
+  let ts = fs.readFileSync(QURAN_TS, 'utf-8');
+  // Replace the existing loadSurahDataFile body with the generated one.
+  // Anchor on the function name + closing brace of the function.
+  const re = /async function loadSurahDataFile\([\s\S]*?\n\}/;
+  if (!re.test(ts)) {
+    console.error('✗ Could not locate loadSurahDataFile() in quran.ts');
+    process.exit(1);
+  }
+  ts = ts.replace(re, newBody);
+  fs.writeFileSync(QURAN_TS, ts);
+  console.log('✓ Patched loadSurahDataFile() with 113 static requires.');
+  console.log('');
+  console.log('Next steps:');
+  console.log('  1. npx tsc --noEmit');
+  console.log('  2. npx jest --testPathPattern=quranIntegrity');
+  console.log('  3. Add data/source/ to .gitignore (raw Tanzil files are reproducible).');
+}
+
+main();

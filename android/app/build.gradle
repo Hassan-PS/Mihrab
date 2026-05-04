@@ -84,11 +84,11 @@ def requiredReleaseKeys = ["storeFile", "storePassword", "keyAlias", "keyPasswor
 def hasReleaseSigningConfig = keystorePropertiesFile.exists() &&
     requiredReleaseKeys.every { key -> (keystoreProperties[key] ?: "").toString().trim() }
 def requestedTasks = gradle.startParameter.taskNames.collect { it.toLowerCase() }
-def wantsPlayRelease = requestedTasks.any { it.contains("playrelease") }
+def wantsPlayRelease = requestedTasks.any { it.contains("playrelease") || it.contains("playbeta") }
 if (wantsPlayRelease && !hasReleaseSigningConfig) {
     throw new GradleException(
-        "Play release builds require android/keystore.properties with storeFile/storePassword/keyAlias/keyPassword. " +
-        "Refusing to fallback to debug signing for playRelease."
+        "Play release/beta builds require android/keystore.properties with storeFile/storePassword/keyAlias/keyPassword. " +
+        "Refusing to fallback to debug signing for playRelease / playBeta."
     )
 }
 
@@ -102,8 +102,8 @@ android {
         applicationId "com.prayer_times"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 79
-        versionName "1.5.56"
+        versionCode 81
+        versionName "1.7.0"
     }
     flavorDimensions += "distribution"
     productFlavors {
@@ -137,6 +137,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            buildConfigField "boolean", "IS_BETA", "false"
         }
         release {
             if (hasReleaseSigningConfig) {
@@ -146,6 +147,27 @@ android {
             }
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            buildConfigField "boolean", "IS_BETA", "false"
+        }
+        // Beta build type — separate test channel (added 2026-05-04).
+        //
+        // Inherits the release config (R8/Proguard, signing) but installs
+        // alongside the stable app via the `.beta` applicationId suffix.
+        // The `beta` source set (android/app/src/beta/) overrides
+        // `app_name` to "Prayer times test" so the launcher icon is
+        // unambiguous. Build with: ./gradlew assembleFdroidBeta or
+        // ./gradlew bundlePlayBeta.
+        beta {
+            initWith release
+            applicationIdSuffix ".beta"
+            versionNameSuffix "-beta"
+            matchingFallbacks = ['release']
+            buildConfigField "boolean", "IS_BETA", "true"
+            if (hasReleaseSigningConfig) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
         }
     }
 

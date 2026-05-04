@@ -6,6 +6,7 @@ import {
 } from 'adhan';
 import type { PrayerTimesResult } from './types';
 import { formatLocalTime } from '../utils/prayerTimes';
+import { computeImsak, DEFAULT_IMSAK_OFFSET_MINUTES } from './imsak';
 
 function parametersForMethod(methodId: number) {
   switch (methodId) {
@@ -50,6 +51,8 @@ export function computeLocalAdhanTimes(params: {
   date: Date;
   calculationMethod: number | 'auto';
   school: number;
+  /** Minutes before Fajr that Imsak fires. Defaults to the canonical 10. */
+  imsakOffsetMinutes?: number;
 }): PrayerTimesResult {
   const y = params.date.getFullYear();
   const m = params.date.getMonth();
@@ -63,14 +66,20 @@ export function computeLocalAdhanTimes(params: {
   
   calc.madhab = params.school === 1 ? Madhab.Hanafi : Madhab.Shafi;
   const pt = new PrayerTimes(coords, dayDate, calc);
+  const fajrStr = formatLocalTime(pt.fajr);
+  // Imsak is computed locally (adhan.js does not expose it). Default offset
+  // is the most-common 10 minutes; will become user-configurable via task #21.
+  const imsakOffset =
+    params.imsakOffsetMinutes ?? DEFAULT_IMSAK_OFFSET_MINUTES;
   return {
     timings: {
-      Fajr: formatLocalTime(pt.fajr),
+      Fajr: fajrStr,
       Sunrise: formatLocalTime(pt.sunrise),
       Dhuhr: formatLocalTime(pt.dhuhr),
       Asr: formatLocalTime(pt.asr),
       Maghrib: formatLocalTime(pt.maghrib),
       Isha: formatLocalTime(pt.isha),
+      Imsak: computeImsak(fajrStr, imsakOffset),
     },
   };
 }

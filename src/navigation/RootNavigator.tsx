@@ -1,14 +1,25 @@
 import { useNavigation, useTheme } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, View } from 'react-native';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
+import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
+import { DuasScreen } from '../screens/DuasScreen';
 import { HomeScreen } from '../screens/HomeScreen';
+import { JournalScreen } from '../screens/JournalScreen';
 import { MonthTimesScreen } from '../screens/MonthTimesScreen';
+import { MosquesScreen } from '../screens/MosquesScreen';
+import { OnboardingScreen } from '../screens/OnboardingScreen';
+import { QuranScreen } from '../screens/QuranScreen';
+import { QuranSurahScreen } from '../screens/QuranSurahScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { ShareMonthScreen } from '../screens/ShareMonthScreen';
+import { TasbihScreen } from '../screens/TasbihScreen';
+import { BackupScreen } from '../screens/BackupScreen';
+import { FastingScreen } from '../screens/FastingScreen';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -33,9 +44,46 @@ function HomeHeaderRight() {
   );
 }
 
+/**
+ * Auto-routes to Onboarding on first run when `onboardingComplete` is
+ * still false — task #60. Uses a one-shot ref so the auto-route fires
+ * exactly once per app launch and doesn't fight the user if they pop back.
+ */
+function useOnboardingAutoRoute() {
+  const { settings, hydrated } = usePrayerSettings();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const firedRef = useRef(false);
+
+  useEffect(() => {
+    if (firedRef.current) return;
+    if (!hydrated) return;
+    if (settings.onboardingComplete) return;
+    firedRef.current = true;
+    navigation.navigate('Onboarding');
+  }, [hydrated, navigation, settings.onboardingComplete]);
+}
+
+function HomeScreenWrapper() {
+  // Wraps HomeScreen so the onboarding auto-route effect lives on the
+  // landing route — it has access to the navigation prop without pulling
+  // a one-shot effect into AppNavigationRoot's tree.
+  useOnboardingAutoRoute();
+  return <HomeScreen />;
+}
+
 export function RootNavigator() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
+  // RTL-aware title style: iOS native-stack large title doesn't apply
+  // writingDirection automatically based on the active locale, so the
+  // Arabic/Urdu/Hebrew header title would render in visual L-to-R order
+  // (the bug user spotted: "أوقات الصلاة" → "ةلىصلااتاقوأ"). Set the
+  // writingDirection explicitly when the locale is RTL.
+  const isRtlLocale = ['ar', 'ur', 'he', 'fa'].includes(
+    (i18n.language || '').slice(0, 2),
+  );
+  const titleWritingDirection: 'rtl' | 'ltr' = isRtlLocale ? 'rtl' : 'ltr';
   return (
     <Stack.Navigator
       screenOptions={{
@@ -46,12 +94,12 @@ export function RootNavigator() {
         headerTransparent: isIOS,
         headerStyle: { backgroundColor: isIOS ? 'transparent' : theme.colors.background },
         headerLargeStyle: { backgroundColor: 'transparent' },
-        headerTitleStyle: { color: theme.colors.text },
-        headerLargeTitleStyle: { color: theme.colors.text },
+        headerTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection },
+        headerLargeTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection },
       }}>
       <Stack.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeScreenWrapper}
         options={{
           title: t('nav.home'),
           headerRight: () => <HomeHeaderRight />,
@@ -65,17 +113,62 @@ export function RootNavigator() {
       <Stack.Screen
         name="MonthTimes"
         component={MonthTimesScreen}
-        options={{ title: t('nav.month'), headerLargeTitle: false, headerTransparent: true, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.month'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
       />
       <Stack.Screen
         name="ShareMonth"
         component={ShareMonthScreen}
-        options={{ title: t('nav.shareMonth'), headerLargeTitle: false, headerTransparent: true, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.shareMonth'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
       />
       <Stack.Screen
         name="Compass"
         component={CompassScreen}
-        options={{ title: t('nav.compass'), headerLargeTitle: false, headerTransparent: true, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.compass'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="Tasbih"
+        component={TasbihScreen}
+        options={{ title: t('nav.tasbih'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="Duas"
+        component={DuasScreen}
+        options={{ title: t('nav.duas'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="Quran"
+        component={QuranScreen}
+        options={{ title: t('nav.quran'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="QuranSurah"
+        component={QuranSurahScreen}
+        options={{ title: '', headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="Mosques"
+        component={MosquesScreen}
+        options={{ title: t('nav.mosques'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="Journal"
+        component={JournalScreen}
+        options={{ title: t('nav.journal'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="Onboarding"
+        component={OnboardingScreen}
+        options={{ title: '', headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined }}
+      />
+      <Stack.Screen
+        name="Backup"
+        component={BackupScreen}
+        options={{ title: t('nav.backup'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+      />
+      <Stack.Screen
+        name="Fasting"
+        component={FastingScreen}
+        options={{ title: t('nav.fasting'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
       />
     </Stack.Navigator>
   );

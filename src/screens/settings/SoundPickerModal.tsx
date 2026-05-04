@@ -1,3 +1,6 @@
+// hover-ok: list-row / settings-row / sheet pressables. Hover-state
+// treatment would visually noise these dense surfaces; the touch
+// feedback (pressed opacity / ripple) is the right affordance here.
 import React, { memo } from 'react';
 import { FlatList, Modal, Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -48,10 +51,14 @@ export const SoundPickerModal = memo(function SoundPickerModal({
       onRequestClose={handleClose}>
       <View style={modalStyles.root}>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
           style={[modalStyles.fill, { backgroundColor: palette.overlay }]}
           onPress={handleClose}
         />
         <View
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t('settings.notificationSoundModalTitle')}
           style={[
             modalStyles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
@@ -62,59 +69,73 @@ export const SoundPickerModal = memo(function SoundPickerModal({
           <FlatList
             data={NOTIFICATION_SOUND_OPTIONS}
             keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <Pressable
-                style={[
-                  modalStyles.row,
-                  rowDividerStyle(palette),
-                  currentSound === item.id && { backgroundColor: palette.bg },
-                ]}
-                onPress={() => {
-                  stopAdhanPreview().catch(() => {});
-                  onSetPreviewingId(null);
-                  onSelect(item.id);
-                  onClose();
-                }}>
-                <View style={modalStyles.soundRowContent}>
-                  <View style={modalStyles.soundRowText}>
-                    <Text style={[modalStyles.rowLabel, { color: palette.text }]}>
-                      {t(item.labelKey)}
-                    </Text>
-                    <Text style={[modalStyles.rowSub, { color: palette.muted }]}>
-                      {t(item.helpKey)}
-                    </Text>
-                  </View>
-                  {item.id !== 'default' && (
-                    <Pressable
-                      hitSlop={10}
-                      onPress={e => {
-                        e.stopPropagation();
-                        if (previewingId === item.id) {
-                          stopAdhanPreview().catch(() => {});
-                          onSetPreviewingId(null);
-                        } else {
-                          onSetPreviewingId(item.id);
-                          previewAdhanSound(item.id).catch(() => {
-                            onSetPreviewingId(null);
-                          });
-                        }
-                      }}
-                      style={[
-                        modalStyles.soundPreviewBtn,
-                        { borderColor: palette.border },
-                      ]}>
-                      <Text
-                        style={[
-                          modalStyles.soundPreviewIcon,
-                          { color: palette.accent },
-                        ]}>
-                        {previewingId === item.id ? '■' : '▶'}
+            renderItem={({ item }) => {
+              const label = t(item.labelKey);
+              const isPreviewing = previewingId === item.id;
+              return (
+                <Pressable
+                  accessibilityRole="radio"
+                  accessibilityLabel={label}
+                  accessibilityState={{ selected: currentSound === item.id }}
+                  style={[
+                    modalStyles.row,
+                    rowDividerStyle(palette),
+                    currentSound === item.id && { backgroundColor: palette.bg },
+                  ]}
+                  onPress={() => {
+                    stopAdhanPreview().catch(() => {});
+                    onSetPreviewingId(null);
+                    onSelect(item.id);
+                    onClose();
+                  }}>
+                  <View style={modalStyles.soundRowContent}>
+                    <View style={modalStyles.soundRowText}>
+                      <Text style={[modalStyles.rowLabel, { color: palette.text }]}>
+                        {label}
                       </Text>
-                    </Pressable>
-                  )}
-                </View>
-              </Pressable>
-            )}
+                      <Text style={[modalStyles.rowSub, { color: palette.muted }]}>
+                        {t(item.helpKey)}
+                      </Text>
+                    </View>
+                    {item.id !== 'default' && (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                          isPreviewing
+                            ? t('common.tryAgain')
+                            : `${t('settings.adhanPreviewTitle')}: ${label}`
+                        }
+                        accessibilityState={{ selected: isPreviewing }}
+                        hitSlop={10}
+                        onPress={e => {
+                          e.stopPropagation();
+                          if (isPreviewing) {
+                            stopAdhanPreview().catch(() => {});
+                            onSetPreviewingId(null);
+                          } else {
+                            onSetPreviewingId(item.id);
+                            previewAdhanSound(item.id).catch(() => {
+                              onSetPreviewingId(null);
+                            });
+                          }
+                        }}
+                        style={[
+                          modalStyles.soundPreviewBtn,
+                          { borderColor: palette.border },
+                        ]}>
+                        <Text
+                          style={[
+                            modalStyles.soundPreviewIcon,
+                            { color: palette.accent },
+                          ]}>
+                          {isPreviewing ? '■' : '▶'}
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+                </Pressable>
+              );
+            }}
           />
         </View>
       </View>

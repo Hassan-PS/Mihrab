@@ -44,6 +44,7 @@ export function ProviderSourceHeader({
     <>
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel={t('provider.timesSource')}
         accessibilityHint={t('a11y.openTimesSource')}
         onPress={() => setPickerOpen(true)}
         style={[

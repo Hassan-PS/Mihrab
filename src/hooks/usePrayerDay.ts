@@ -49,22 +49,27 @@ export type PrayerDayState =
       backgroundRefreshing?: boolean;
     };
 
+// `coordsChangedSignificantly` extracted to `src/utils/coords.ts` (task #17)
+// so it can be unit-tested without dragging in the NetInfo / Geolocation
+// native modules.
+import { coordsChangedSignificantly } from '../utils/coords';
+import { applyOffsets, type PrayerOffsetMinutes } from '../settings/prayerOffsets';
+
 /**
- * Returns true when the two positions differ by more than `thresholdDeg` degrees
- * in either axis (~1 km at the equator with the default 0.01°).
+ * Apply per-prayer offsets uniformly across a week of timings — task #22 +
+ * follow-up #59. Applied at READ time (here, in the hook) rather than at
+ * cache-write time so the cache stays raw: when the user changes an offset,
+ * cached data is re-derived without a re-fetch, and a buggy offset only
+ * affects the VIEW, never poisoning the stored data. No-op when there are
+ * no offsets, so the original references pass through and downstream
+ * memoisation stays cheap.
  */
-function coordsChangedSignificantly(
-  newLat: number,
-  newLng: number,
-  oldLat: number | null | undefined,
-  oldLng: number | null | undefined,
-  thresholdDeg = 0.01,
-): boolean {
-  if (oldLat == null || oldLng == null) return true;
-  return (
-    Math.abs(newLat - oldLat) > thresholdDeg ||
-    Math.abs(newLng - oldLng) > thresholdDeg
-  );
+function applyOffsetsToWeek(
+  week: TimingsMap[],
+  offsets: PrayerOffsetMinutes | undefined,
+): TimingsMap[] {
+  if (!offsets || Object.keys(offsets).length === 0) return week;
+  return week.map(t => applyOffsets(t, offsets));
 }
 
 export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
@@ -129,6 +134,13 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           throw new Error('No prayer times available');
         }
 
+        // Apply per-prayer offsets at READ time so the cache stays raw —
+        // a setting change immediately re-derives without a re-fetch.
+        const offsettedWeek = applyOffsetsToWeek(
+          weekTimings,
+          settings.prayerOffsets,
+        );
+
         // Check whether the local cache needs a background fill.  We do this
         // before the final setState so we can include backgroundRefreshing in
         // the same update — preventing a brief false-idle flash.
@@ -152,9 +164,9 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           phase: 'ready',
           latitude,
           longitude,
-          today: weekTimings[0],
-          tomorrow: weekTimings[1],
-          week: weekTimings,
+          today: offsettedWeek[0],
+          tomorrow: offsettedWeek[1],
+          week: offsettedWeek,
           backgroundRefreshing: needsCacheFill,
         });
 
@@ -211,13 +223,20 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
 
           if (gen !== loadGenerationRef.current) return;
 
+          // Apply per-prayer offsets to the local-adhan fallback too —
+          // the user's adjustment must be honored even when offline.
+          const offsettedLocalWeek = applyOffsetsToWeek(
+            localWeek,
+            settings.prayerOffsets,
+          );
+
           setState({
             phase: 'ready',
             latitude,
             longitude,
-            today: localWeek[0],
-            tomorrow: localWeek[1],
-            week: localWeek,
+            today: offsettedLocalWeek[0],
+            tomorrow: offsettedLocalWeek[1],
+            week: offsettedLocalWeek,
             usingLocalFallback: true,
             backgroundRefreshing: false,
           });

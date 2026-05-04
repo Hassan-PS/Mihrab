@@ -63,8 +63,37 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
+// react-native-encrypted-storage — task #16. Provides the same async API as
+// AsyncStorage with a separate in-memory backing so tests can verify that
+// sensitive fields land HERE and never in the AsyncStorage mock above.
+//
+// `virtual: true` lets Jest mock a module that isn't present in node_modules.
+// This makes the test suite pass before the user runs
+// `npm install react-native-encrypted-storage` for the native build.
+jest.mock(
+  'react-native-encrypted-storage',
+  () => {
+    let secureStore = {};
+    return {
+      __esModule: true,
+      default: {
+        setItem: jest.fn(async (key, value) => { secureStore[key] = value; }),
+        getItem: jest.fn(async key => secureStore[key] ?? null),
+        removeItem: jest.fn(async key => { delete secureStore[key]; }),
+        clear: jest.fn(async () => { secureStore = {}; }),
+      },
+      __reset: () => { secureStore = {}; },
+      __peek: () => secureStore,
+    };
+  },
+  { virtual: true },
+);
+
 jest.mock('adhan', () => {
-  const t = new Date(2026, 3, 9, 5, 0, 0);
+  // Realistic in-order prayer times so validateTimings ordering checks pass
+  // through the local-adhan code path. Times are deliberately well-separated.
+  const Y = 2026, M = 3, D = 9; // April 9, 2026 (local time)
+  const at = (h, m) => new Date(Y, M, D, h, m, 0);
   const mk = () => ({ madhab: 'shafi' });
   const names = [
     'Tehran',
@@ -88,13 +117,15 @@ jest.mock('adhan', () => {
     Coordinates: function Coordinates() {},
     Madhab: { Hanafi: 'hanafi', Shafi: 'shafi' },
     CalculationMethod: CM,
-    PrayerTimes: function PrayerTimes() {
-      this.fajr = t;
-      this.sunrise = t;
-      this.dhuhr = t;
-      this.asr = t;
-      this.maghrib = t;
-      this.isha = t;
+    PrayerTimes: function PrayerTimes(_coords, _date, calc) {
+      this.fajr = at(4, 30);
+      this.sunrise = at(6, 10);
+      this.dhuhr = at(12, 0);
+      // Hanafi madhab pushes Asr later — reflect that so tests that exercise
+      // the school param see different times.
+      this.asr = calc && calc.madhab === 'hanafi' ? at(16, 30) : at(15, 30);
+      this.maghrib = at(18, 0);
+      this.isha = at(20, 0);
     },
   };
 });
@@ -128,18 +159,30 @@ jest.mock('@notifee/react-native', () => ({
   __esModule: true,
   default: {
     cancelTriggerNotifications: jest.fn(() => Promise.resolve()),
+    cancelTriggerNotification: jest.fn(() => Promise.resolve()),
+    cancelNotification: jest.fn(() => Promise.resolve()),
     createChannel: jest.fn(() => Promise.resolve()),
     createTriggerNotification: jest.fn(() => Promise.resolve()),
+    displayNotification: jest.fn(() => Promise.resolve()),
     getNotificationSettings: jest.fn(() =>
       Promise.resolve({
         android: { alarm: 1 },
+        authorizationStatus: 1,
       }),
     ),
+    getTriggerNotifications: jest.fn(() => Promise.resolve([])),
     openAlarmPermissionSettings: jest.fn(() => Promise.resolve()),
   },
   TriggerType: { TIMESTAMP: 0, INTERVAL: 1 },
   AndroidImportance: { DEFAULT: 3, HIGH: 4 },
   AndroidNotificationSetting: { DISABLED: 0, ENABLED: 1, NOT_SUPPORTED: -1 },
+  AuthorizationStatus: {
+    NOT_DETERMINED: -1,
+    DENIED: 0,
+    AUTHORIZED: 1,
+    PROVISIONAL: 2,
+    EPHEMERAL: 3,
+  },
   AlarmType: {
     SET_EXACT_AND_ALLOW_WHILE_IDLE: 3,
   },

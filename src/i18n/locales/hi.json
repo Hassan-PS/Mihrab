@@ -8,7 +8,14 @@
     "settings": "सेटिंग्स",
     "month": "महीना",
     "shareMonth": "माह साझा करें",
-    "compass": "किबला"
+    "compass": "किबला",
+    "tasbih": "Tasbih",
+    "duas": "Duas",
+    "quran": "Quran",
+    "mosques": "Mosques",
+    "journal": "Journal",
+    "backup": "बैकअप",
+    "fasting": "रोज़ा"
   },
   "a11y": {
     "openSettings": "खुली सेटिंग",
@@ -38,7 +45,9 @@
     "notifPermDenied": "अधिसूचना अनुमति अस्वीकृत — नमाज़ अलर्ट काम नहीं करेंगे। सेटिंग्स खोलने के लिए टैप करें।",
     "updatingLocation": "स्थान अपडेट हो रहा है",
     "today": "आज",
-    "tomorrow": "कल"
+    "tomorrow": "कल",
+    "savedLocationLabel": "{{name}}",
+    "switchLocation": "स्थान बदलें"
   },
   "errors": {
     "locationNeededTitle": "स्थान की आवश्यकता है",
@@ -150,7 +159,23 @@
     "notificationSoundVoiceHelp": "इस ऐप बिल्ड में बिल्ट-इन वॉयस शामिल है।",
     "versionInstalled": "स्थापित संस्करण: {{version}}",
     "adhanPreviewTitle": "अज़ान पूर्वावलोकन",
-    "adhanPreviewBody": ""
+    "adhanPreviewBody": "",
+    "prayerOffsets": "प्रति प्रार्थना समायोजन",
+    "prayerOffsetsTitle": "प्रति प्रार्थना समायोजन",
+    "prayerOffsetsHelp": "अपनी स्थानीय मस्जिद से मेल खाने के लिए प्रत्येक प्रार्थना ±{{max}} मिनट बदलें।",
+    "prayerOffsetsNone": "कोई समायोजन नहीं",
+    "prayerOffsetsCount_one": "{{count}} prayer adjusted",
+    "prayerOffsetsCount_other": "{{count}} prayers adjusted",
+    "prayerOffsetsIncrease": "Increase {{prayer}} offset",
+    "prayerOffsetsDecrease": "Decrease {{prayer}} offset",
+    "prayerOffsetsReset": "सभी रीसेट करें",
+    "dataAndPrivacy": "डेटा और गोपनीयता",
+    "replayOnboarding": "ऑनबोर्डिंग फिर देखें",
+    "replayOnboardingHelp": "स्वागत प्रवाह देखें।",
+    "attributions": "श्रेय",
+    "attribQuran": "क़ुरआन का पाठ",
+    "attribTranslation": "अनुवाद",
+    "attribDuas": "दुआएं"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",
@@ -213,13 +238,13 @@
     "east": "ई",
     "south": "एस",
     "west": "डब्ल्यू",
-    "a11yDialLive": "Qibla compass. Rotate {{deg}} degrees to face Qibla.",
-    "a11yDialChecking": "Qibla compass. Waiting for sensor data.",
-    "a11yDialUnavailable": "Qibla compass unavailable.",
-    "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
-    "a11ySignal_good": "Compass signal: good.",
-    "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
-    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
+    "a11yDialLive": "क़िबला कम्पास। क़िबला की ओर मुख करने के लिए {{deg}} डिग्री घुमाएँ।",
+    "a11yDialChecking": "क़िबला कम्पास। सेंसर डेटा की प्रतीक्षा है।",
+    "a11yDialUnavailable": "क़िबला कम्पास उपलब्ध नहीं।",
+    "a11yNeedleDeg": "क़िबला की ओर मुख करने के लिए {{deg}} डिग्री घुमाएँ।",
+    "a11ySignal_good": "कम्पास सिग्नल: अच्छा।",
+    "a11ySignal_weak": "कम्पास सिग्नल: कमज़ोर। खुली जगह में जाने का प्रयास करें।",
+    "a11ySignal_very_weak": "कम्पास सिग्नल: बहुत कमज़ोर। सटीकता सीमित हो सकती है।"
   },
   "prayer": {
     "Fajr": "फज्र",
@@ -261,5 +286,147 @@
     "unavailable": "टिप खरीदारी अभी तक उपलब्ध नहीं है (अपना स्टोर कनेक्शन या उत्पाद सेटअप जांचें)।",
     "tipWithPrice": "टिप {{price}}",
     "tip": "बख्शीश"
+  },
+  "locations": {
+    "title": "Saved locations",
+    "empty": "Save the current location to switch quickly later.",
+    "add": "Save current as…",
+    "addPrompt": "Name this location",
+    "addPlaceholder": "Home, Work, Travel…",
+    "cancel": "Cancel",
+    "save": "Save",
+    "use": "Use",
+    "delete": "Delete",
+    "limitReached": "Maximum {{max}} saved locations reached."
+  },
+  "tasbih": {
+    "subhanallah": "SubhanAllah",
+    "alhamdulillah": "Alhamdulillah",
+    "allahuakbar": "Allahu Akbar",
+    "lailaha": "La ilaha illa Allah",
+    "astaghfirullah": "Astaghfirullah",
+    "open": "Open count",
+    "increment": "Tap to count",
+    "reset": "Reset",
+    "salahonprophet": "नबी ﷺ पर दरूद",
+    "prev": "पिछला",
+    "next": "अगला"
+  },
+  "duas": {
+    "cat": {
+      "morning": "Morning",
+      "evening": "Evening",
+      "afterPrayer": "After prayer",
+      "food": "Food",
+      "distress": "Distress"
+    },
+    "repeat": "Recite ×{{count}}"
+  },
+  "quran": {
+    "meccan": "Meccan",
+    "medinan": "Medinan",
+    "ayahCount": "{{count}} ayahs",
+    "notFound": "Surah not found.",
+    "comingSoon": "Full text for this surah will arrive in a future data update."
+  },
+  "mosques": {
+    "searching": "Looking for nearby mosques…",
+    "noneFound": "No mosques found nearby. Try expanding the search radius.",
+    "unnamedMosque": "Mosque",
+    "needLocation": "Set a location first so we can search nearby.",
+    "error": "Couldn't reach the mosque database. Please try again."
+  },
+  "journal": {
+    "todayLabel": "Today",
+    "streakDays": "Day streak",
+    "onTimeRate": "On-time",
+    "totalLogged": "Total logged",
+    "status": {
+      "on-time": "On time",
+      "late": "Late",
+      "missed": "Missed",
+      "qadha": "Make-up (Qadha)"
+    },
+    "statusShort": {
+      "on-time": "On",
+      "late": "Late",
+      "missed": "Miss",
+      "qadha": "Qad"
+    }
+  },
+  "events": {
+    "islamicNewYear": "Islamic New Year",
+    "ashura": "Day of Ashura",
+    "mawlid": "Mawlid an-Nabi",
+    "isra": "Isra and Mi'raj",
+    "midShaban": "Mid-Sha'ban",
+    "ramadanBegins": "Ramadan begins",
+    "laylatAlQadr": "Laylat al-Qadr (observed)",
+    "eidAlFitr": "Eid al-Fitr",
+    "arafah": "Day of Arafah",
+    "eidAlAdha": "Eid al-Adha"
+  },
+  "ramadan": {
+    "title": "रमज़ान",
+    "suhoor": "सहरी",
+    "iftar": "इफ़्तार",
+    "suhoorIn": "सहरी {{time}} में समाप्त होगी",
+    "iftarIn": "इफ़्तार {{time}} में"
+  },
+  "onboarding": {
+    "skip": "Skip for now",
+    "next": "Next",
+    "done": "Done",
+    "stepLabel": "Step {{current}} of {{total}}",
+    "welcome": {
+      "title": "Welcome",
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+    },
+    "location": {
+      "title": "Your location",
+      "body": "We use your approximate position to calculate accurate prayer times. Coordinates stay encrypted on this device — they never leave it.",
+      "cta": "Use my location"
+    },
+    "notifications": {
+      "title": "Prayer alerts",
+      "body": "We can quietly notify you at each prayer time. You can pick a sound, set a reminder, or turn this off any time.",
+      "cta": "Enable alerts"
+    },
+    "exactAlarms": {
+      "title": "Exact-time alerts",
+      "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
+      "cta": "Allow exact alerts"
+    }
+  },
+  "backup": {
+    "exportSection": "Export",
+    "exportHelp": "Save your settings, saved locations, prayer journal, and fasting log to a JSON file. Open it later to restore.",
+    "exportCta": "Export backup",
+    "shareTitle": "Prayer Times backup",
+    "exportFailedTitle": "Could not export",
+    "restoreSection": "Restore",
+    "restoreHelp": "Paste a backup JSON below and tap Restore to preview it. The app will confirm before applying.",
+    "restorePastePlaceholder": "Paste backup JSON here…",
+    "restoreCta": "Preview restore",
+    "restorePreviewTitle": "Backup found",
+    "restorePreviewBody": "{{settings}} settings, {{presets}} saved locations, {{journal}} journal entries, {{fasting}} fasting days. Apply this on next pass.",
+    "restoreFailedTitle": "Could not parse backup",
+    "notAnEnvelope": "That file does not look like a Prayer Times backup.",
+    "privacyNote": "Backups stay on your device until you share them. Coordinates and journal entries can be encrypted with a password in a future update — keep your backup file private until then."
+  },
+  "fasting": {
+    "todayLabel": "Today",
+    "ramadanDayLabel": "Ramadan · Day {{day}}",
+    "statusKept": "Fast kept — barakAllāhu fīk.",
+    "statusRecommended": "A Sunnah voluntary fast falls on this date.",
+    "statusOptional": "No fast logged today.",
+    "markCta": "Mark today as fasted",
+    "unmarkCta": "Unmark today",
+    "statRamadan": "Ramadan",
+    "statVoluntary": "Voluntary",
+    "statStreak": "Streak",
+    "gridLabel": "This Ramadan",
+    "gridDayA11y": "Day {{day}} {{state}}",
+    "privacyNote": "Fasting history stays encrypted on your device."
   }
 }
