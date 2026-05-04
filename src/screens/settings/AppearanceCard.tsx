@@ -16,6 +16,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppearanceSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { cardEdgeStyle, segmentChromeStyle } from '../../theme/chrome';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
@@ -147,6 +148,12 @@ function AppearanceCardImpl() {
                           return false;
                         };
                         if (Platform.OS === 'android') {
+                          // Try the proper native restart first — this
+                          // launches a fresh Activity and kills the
+                          // process so PlatformColor refs re-resolve.
+                          // Falls back to the dev reload, then to a
+                          // cold exit if neither is available.
+                          if (nativeRestartApp()) return;
                           if (!tryReload()) {
                             BackHandler.exitApp();
                           }
