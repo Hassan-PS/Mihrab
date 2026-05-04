@@ -448,7 +448,7 @@ function MushafReader({
   isFullscreen: boolean;
   onExitFullscreen: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const initialPage = useMemo(() => findPageForAyah(surahNumber, 1), [surahNumber]);
   const flatListRef = useRef<FlatList<typeof MUSHAF_PAGES[number]>>(null);
@@ -617,12 +617,24 @@ function MushafReader({
         // the camera notch / system bar on Android where the status bar
         // often stays visible even in immersive mode (#130).
         paddingTop: isFullscreen ? insets.top : 0,
+        // Pin the container's direction to LTR — task #149. When the
+        // in-app language is Arabic, RN's text-direction inheritance
+        // somehow propagates to the horizontal FlatList and flips its
+        // children layout, leaving every page off-viewport. The mushaf
+        // pages are independent images and don't need RTL flow at the
+        // carousel level — only the Arabic content INSIDE each page is
+        // RTL, and that is baked into the PNG.
+        writingDirection: 'ltr',
       }}>
     {/* Hide the status bar in fullscreen so nothing from the app appears
         next to the system battery / wifi icons. iOS auto-restores when
         the screen unmounts; Android needs the explicit `hidden` prop. */}
     <StatusBar hidden={isFullscreen} animated />
     <FlatList
+      // Force remount on language change — task #149. Without this, the
+      // FlatList carries scroll/layout state from the previous locale
+      // and may render blank if the inherited writing direction shifted.
+      key={i18n.language}
       ref={flatListRef}
       data={[...MUSHAF_PAGES]}
       keyExtractor={p => String(p.page)}
@@ -630,7 +642,7 @@ function MushafReader({
       pagingEnabled
       // We previously used `inverted={true}` to mirror the RTL "turn pages
       // from right to left" feel of a real mushaf. On iOS that combines
-      // badly with `initialScrollIndex` — the FlatList mounts but doesn'\''t
+      // badly with `initialScrollIndex` — the FlatList mounts but doesn't
       // actually scroll to the requested index, so opening any surah
       // other than Al-Fatiha rendered a blank screen (the target page
       // existed but was off-viewport). Verified by user with screenshots
@@ -650,7 +662,7 @@ function MushafReader({
         index: idx,
       })}
       onScrollToIndexFailed={info => {
-        // RN sometimes fires this when the target index hasn'\''t laid out
+        // RN sometimes fires this when the target index hasn't laid out
         // yet (large initial offset like surah 50 at page 528). Retry on
         // the next frame — `getItemLayout` guarantees the offset is
         // computable.
@@ -668,7 +680,10 @@ function MushafReader({
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       showsHorizontalScrollIndicator={false}
-      style={{ flex: 1, backgroundColor: parchment }}
+      // Belt-and-suspenders LTR pin on the FlatList itself so the
+      // horizontal layout direction is independent of whatever the
+      // surrounding tree decides for the active locale (#149).
+      style={{ flex: 1, backgroundColor: parchment, writingDirection: 'ltr' }}
       contentInsetAdjustmentBehavior="automatic"
       // Performance tuning — task #121:
       //   • windowSize=5 keeps the active page + ~2 on each side mounted
