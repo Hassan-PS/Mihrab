@@ -5,7 +5,7 @@ import {
   PlatformColor,
 } from 'react-native';
 import { getResolvedAccentHex } from '../native/SystemTheme';
-import type { AppearancePreference } from '../settings/types';
+import type { AppAccentId, AppearancePreference } from '../settings/types';
 
 export type AppPalette = {
   bg: ColorValue;
@@ -63,16 +63,88 @@ export function shouldUseDynamicSystemColors(
 
 type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg'>;
 
-/** App brand green when System theme + dynamic colors is off, or when appearance is forced light/dark. */
-function brandAccents(isDark: boolean): { accent: ColorValue; accentBg: ColorValue; accentSolid: string } {
-  if (isDark) {
-    return { accent: '#4ade80', accentBg: '#14532d', accentSolid: '#4ade80' };
-  }
-  return { accent: '#22c55e', accentBg: '#dcfce7', accentSolid: '#22c55e' };
+/**
+ * Hex swatches for each selectable app accent — task #127.
+ *
+ * Each id gives a (light, dark, lightBg, darkBg) tuple so the accent
+ * stays readable in both modes (saturated swatch on the light card,
+ * brighter swatch on the dark card; backgrounds are tinted to match).
+ *
+ * 'green' is the historical brand accent; the rest are the same swatches
+ * the widget already exposed so users get visual parity between the app
+ * and widget when they pick a color.
+ */
+const ACCENT_SWATCHES: Record<
+  Exclude<AppAccentId, 'custom'>,
+  { light: string; dark: string; lightBg: string; darkBg: string }
+> = {
+  green: { light: '#22c55e', dark: '#4ade80', lightBg: '#dcfce7', darkBg: '#14532d' },
+  teal: { light: '#0d9488', dark: '#5eead4', lightBg: '#ccfbf1', darkBg: '#134e4a' },
+  blue: { light: '#2563eb', dark: '#7dd3fc', lightBg: '#dbeafe', darkBg: '#0c2a52' },
+  amber: { light: '#b45309', dark: '#fbbf24', lightBg: '#fef3c7', darkBg: '#3f2a05' },
+};
+
+/**
+ * Lighten/darken a #RRGGBB hex by a percentage — used to derive a
+ * tinted background from a custom accent. Positive `amount` lightens
+ * (toward #fff), negative darkens (toward #000). Returns a #RRGGBB.
+ */
+function shiftHex(hex: string, amount: number): string {
+  const m = /^#([0-9a-fA-F]{6})$/.exec(hex.trim());
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  let r = (n >> 16) & 0xff;
+  let g = (n >> 8) & 0xff;
+  let b = n & 0xff;
+  const target = amount > 0 ? 255 : 0;
+  const k = Math.abs(amount);
+  r = Math.round(r + (target - r) * k);
+  g = Math.round(g + (target - g) * k);
+  b = Math.round(b + (target - b) * k);
+  return (
+    '#' +
+    r.toString(16).padStart(2, '0') +
+    g.toString(16).padStart(2, '0') +
+    b.toString(16).padStart(2, '0')
+  );
 }
 
-function withBrandAccents(base: PaletteBase, isDark: boolean): AppPalette {
-  const { accent, accentBg, accentSolid } = brandAccents(isDark);
+/**
+ * Resolve the accent triple for the chosen app-accent id.
+ *
+ * For 'custom', the user-typed hex is the accent; we derive a softly
+ * tinted background by mixing the hex with white (light mode) or black
+ * (dark mode). For the named ids, we use the static swatch table.
+ */
+function brandAccents(
+  isDark: boolean,
+  accentId: AppAccentId,
+  customHex: string,
+): { accent: ColorValue; accentBg: ColorValue; accentSolid: string } {
+  if (accentId === 'custom') {
+    const valid = /^#[0-9a-fA-F]{6}$/.test(customHex.trim());
+    const hex = valid ? customHex.trim() : '#22c55e';
+    const accentBg = isDark ? shiftHex(hex, -0.7) : shiftHex(hex, 0.82);
+    return { accent: hex, accentBg, accentSolid: hex };
+  }
+  const sw = ACCENT_SWATCHES[accentId] ?? ACCENT_SWATCHES.green;
+  if (isDark) {
+    return { accent: sw.dark, accentBg: sw.darkBg, accentSolid: sw.dark };
+  }
+  return { accent: sw.light, accentBg: sw.lightBg, accentSolid: sw.light };
+}
+
+function withBrandAccents(
+  base: PaletteBase,
+  isDark: boolean,
+  accentId: AppAccentId,
+  customHex: string,
+): AppPalette {
+  const { accent, accentBg, accentSolid } = brandAccents(
+    isDark,
+    accentId,
+    customHex,
+  );
   return { ...base, accent, accentBg, accentSolid };
 }
 
@@ -170,19 +242,23 @@ function buildDynamicSystemPalette(
   if (Platform.OS === 'android') {
     return androidDynamicPalette(isDark, pureBlackDark);
   }
-  return buildAppPalette(isDark, pureBlackDark);
+  return buildAppPalette(isDark, pureBlackDark, 'green', '#22c55e');
 }
 
 export function buildAppPalette(
   isDark: boolean,
   pureBlackDark: boolean,
+  accentId: AppAccentId,
+  accentCustomHex: string,
 ): AppPalette {
   if (!isDark) {
-    return withBrandAccents(LIGHT_BASE, false);
+    return withBrandAccents(LIGHT_BASE, false, accentId, accentCustomHex);
   }
   return withBrandAccents(
     pureBlackDark ? DARK_PURE_BLACK_BASE : DARK_BASE,
     true,
+    accentId,
+    accentCustomHex,
   );
 }
 
@@ -191,10 +267,17 @@ export function resolveAppPalette(input: {
   useSystemDynamicTheme: boolean;
   systemScheme: ColorSchemeName | null | undefined;
   pureBlackDark: boolean;
+  appAccentId: AppAccentId;
+  appAccentCustomHex: string;
 }): AppPalette {
   const isDark = resolveEffectiveDark(input.appearance, input.systemScheme);
   if (shouldUseDynamicSystemColors(input.appearance, input.useSystemDynamicTheme)) {
     return buildDynamicSystemPalette(isDark, input.pureBlackDark);
   }
-  return buildAppPalette(isDark, input.pureBlackDark);
+  return buildAppPalette(
+    isDark,
+    input.pureBlackDark,
+    input.appAccentId,
+    input.appAccentCustomHex,
+  );
 }

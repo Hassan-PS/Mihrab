@@ -22,6 +22,14 @@ export type PrayerDayState =
   | { phase: 'loading' }
   | { phase: 'permission_denied' }
   | { phase: 'location_error'; message: string }
+  /**
+   * GPS failed AND we have no previously-saved location to fall back to —
+   * surface a manual-entry CTA so the user can type a city or coordinates.
+   * Added 2026-05-04 (#125): we used to silently fall through to on-device
+   * adhan calculation here, but with no coords there is nothing to calculate
+   * from. The user must provide a location.
+   */
+  | { phase: 'manual_required'; message: string }
   | { phase: 'api_error'; message: string }
   | {
       phase: 'ready';
@@ -301,6 +309,9 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         );
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
           if (!hasCached) {
+            // No previous location AND no permission → ask the user to set
+            // a manual location instead of stranding them on a dead-end
+            // "permission denied" wall (#125).
             setState({ phase: 'permission_denied' });
           }
           return;
@@ -313,7 +324,13 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       const watchdog = setTimeout(() => {
         watchdogFired = true;
         if (!hasCached && !isBackgroundRefresh) {
-          setState({ phase: 'location_error', message: 'Location request timed out' });
+          // No previous coords + GPS hung → prompt for manual entry rather
+          // than computing prayer times against bogus on-device defaults
+          // (#125).
+          setState({
+            phase: 'manual_required',
+            message: 'Location request timed out',
+          });
         }
       }, 25_000);
 
@@ -336,12 +353,19 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           clearTimeout(watchdog);
           if (watchdogFired) return;
           if (!hasCached && !isBackgroundRefresh) {
+            // GPS failed AND we have no previously-saved location. The user
+            // must manually set a city or coordinates — bouncing them to
+            // LocationSetup is friendlier than showing "Could not get
+            // location" with only a "Try again" button (#125).
             setState({
-              phase: 'location_error',
+              phase: 'manual_required',
               message: err.message || 'Could not get location',
             });
           }
           // GPS failed but cached data is already on screen — stay on it.
+          // The user's previous location keeps working; we explicitly do
+          // NOT switch to on-device calculation against fresh GPS-less
+          // coordinates (#125).
         },
         { enableHighAccuracy: true, timeout: 20_000, maximumAge: 60_000 },
       );

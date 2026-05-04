@@ -53,11 +53,15 @@ export function AppNavigationRoot() {
         useSystemDynamicTheme: settings.useSystemDynamicTheme,
         systemScheme,
         pureBlackDark: settings.pureBlackDark,
+        appAccentId: settings.appAccentId,
+        appAccentCustomHex: settings.appAccentCustomHex,
       }),
     [
       settings.appearance,
       settings.useSystemDynamicTheme,
       settings.pureBlackDark,
+      settings.appAccentId,
+      settings.appAccentCustomHex,
       systemScheme,
     ],
   );

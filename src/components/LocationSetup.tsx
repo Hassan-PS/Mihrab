@@ -15,6 +15,7 @@ import {
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { GeocodedPlace } from '../geocoding/nominatim';
 import { inputChromeStyle } from '../theme/chrome';
+import { MapPinIcon, SearchIcon } from '../theme/icons';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { PlaceSearchSection } from './PlaceSearchSection';
 
@@ -96,11 +97,18 @@ export function LocationSetup({ palette }: Props) {
           }
         }
         Geolocation.getCurrentPosition(
-          () => {
+          pos => {
+            // Persist the coords as lastFetched so usePrayerDay's effect
+            // re-fires even when locationMode/onboardingComplete are
+            // already set (e.g., re-entering after a manual_required
+            // bounce — #125). Otherwise pressing "Use automatic" would
+            // be a silent no-op because the settings didn't change.
             updateSettings({
               locationMode: 'automatic',
               locationOnboardingComplete: true,
               manualLocationLabel: undefined,
+              lastFetchedLatitude: pos.coords.latitude,
+              lastFetchedLongitude: pos.coords.longitude,
             });
             setGpsBusy(false);
           },
@@ -159,9 +167,12 @@ export function LocationSetup({ palette }: Props) {
           {gpsBusy ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.primaryBtnLabel}>
-              {t('locationSetup.useAutomatic')}
-            </Text>
+            <View style={styles.btnContent}>
+              <MapPinIcon size={20} color="#fff" />
+              <Text style={styles.primaryBtnLabel}>
+                {t('locationSetup.useAutomatic')}
+              </Text>
+            </View>
           )}
         </Pressable>
         {gpsError && (
@@ -181,9 +192,12 @@ export function LocationSetup({ palette }: Props) {
                 }
               : { borderColor: palette.border },
           ]}>
-          <Text style={[styles.secondaryLabel, { color: palette.accent }]}>
-            {t('locationSetup.searchCoords')}
-          </Text>
+          <View style={styles.btnContent}>
+            <SearchIcon size={20} color={palette.accentSolid} />
+            <Text style={[styles.secondaryLabel, { color: palette.accent }]}>
+              {t('locationSetup.searchCoords')}
+            </Text>
+          </View>
         </Pressable>
       </ScrollView>
     );
@@ -291,6 +305,11 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     alignItems: 'center',
     marginTop: SPACING.sm,
+  },
+  btnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
   },
   primaryBtnBusy: {
     opacity: 0.7,

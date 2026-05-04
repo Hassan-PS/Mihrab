@@ -33,14 +33,15 @@ type Props = {
   onSelectPlace: (place: GeocodedPlace) => void;
 };
 
-const DEBOUNCE_MS = 450;
+const DEBOUNCE_MS = 350;
 
 export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GeocodedPlace[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searched, setSearched] = useState(false);
   const [appliedLabel, setAppliedLabel] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,15 +49,30 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
       setResults([]);
       setError(null);
       setLoading(false);
+      setSearched(false);
       return;
     }
     setLoading(true);
     setError(null);
     const debounceTimer = setTimeout(() => {
-      searchPlaces(query)
-        .then(setResults)
+      // Pass the active i18n locale so Nominatim returns place names in the
+      // user's language ("München" for de, "Munich" for en, etc.) — matches
+      // user expectation when typing in a non-English locale (#125).
+      searchPlaces(query, i18n.language)
+        .then(rows => {
+          setResults(rows);
+          setSearched(true);
+        })
         .catch(e => {
+          // Surface the error so we can tell whether the network is failing
+          // vs. the query truly returning zero matches. Previously a thrown
+          // error showed only a "no results" silence and the user could not
+          // tell that anything was wrong (#125).
+          if (__DEV__) {
+            console.warn('searchPlaces failed:', e);
+          }
           setResults([]);
+          setSearched(true);
           setError(
             e instanceof Error ? e.message : t('placeSearch.searchFailed'),
           );
@@ -64,7 +80,7 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
         .finally(() => setLoading(false));
     }, DEBOUNCE_MS);
     return () => clearTimeout(debounceTimer);
-  }, [query, t]);
+  }, [query, t, i18n.language]);
 
   useEffect(() => {
     if (query.trim().length >= 2) {
@@ -86,6 +102,7 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
     setResults([]);
     setQuery('');
     setError(null);
+    setSearched(false);
     onSelectPlace(item);
   };
 
@@ -146,6 +163,15 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
         />
       )}
       {error && <Text style={styles.errorText}>{error}</Text>}
+      {!loading &&
+        !error &&
+        searched &&
+        results.length === 0 &&
+        query.trim().length >= 2 && (
+          <Text style={[styles.noResults, { color: palette.muted }]}>
+            {t('placeSearch.noResults')}
+          </Text>
+        )}
       {!loading && results.length > 0 && (
         <View
           style={[
@@ -202,6 +228,10 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#b91c1c',
     fontSize: 14,
+  },
+  noResults: {
+    fontSize: 13,
+    fontStyle: 'italic',
   },
   appliedBanner: {
     flexDirection: 'row',

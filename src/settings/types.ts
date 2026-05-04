@@ -24,6 +24,19 @@ export type WidgetHighlightId =
   | 'custom';
 
 /**
+ * App accent color id — task #127.
+ *
+ * Drives the in-app accent (`palette.accent`) AND, when dynamic colors
+ * are OFF, also drives the widget highlight (so the user picks a color
+ * once and both follow). Dynamic colors flips both to OS Material You /
+ * iOS dynamic; the picker is hidden in that mode.
+ *
+ * Note: 'dynamic' is intentionally absent here — the unified
+ * dynamic-color toggle on AppearanceCard handles that case.
+ */
+export type AppAccentId = 'green' | 'teal' | 'blue' | 'amber' | 'custom';
+
+/**
  * A user-saved location preset — task #18.
  *
  * Lets the user keep "Home", "Work", "Trip to Mecca" etc. as named snapshots
@@ -154,6 +167,15 @@ export type PrayerAppSettings = {
    * that opens the journal pre-targeted to today's row for that prayer.
    */
   journalNotificationActionsEnabled: boolean;
+  /**
+   * App accent color id — task #127. Drives the in-app accent and (when
+   * `useSystemDynamicTheme` is off) also the widget highlight via the
+   * sync logic in `syncWidgetUiHints.ts`. When `useSystemDynamicTheme`
+   * is on, this is ignored and both app + widget use Material You.
+   */
+  appAccentId: AppAccentId;
+  /** When `appAccentId` is 'custom', the user-typed #RRGGBB hex. */
+  appAccentCustomHex: string;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -195,4 +217,9 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // the user notices before sleeping.
   fastingReminderHour: 20,
   journalNotificationActionsEnabled: false,
+  // App accent defaults to brand green (matches the historical hardcoded
+  // accent so users on existing installs see no visual diff after the
+  // upgrade).
+  appAccentId: 'green',
+  appAccentCustomHex: '#22c55e',
 };

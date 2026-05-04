@@ -146,6 +146,22 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (!('useSystemDynamicTheme' in parsed)) {
     merged.useSystemDynamicTheme = false;
   }
+  // App accent (#127). Older installs persisted no `appAccentId`; fall
+  // back to the brand green default and a valid 6-char hex so the
+  // palette resolver always has something concrete to work with.
+  const validAccentIds: ReadonlyArray<string> = ['green', 'teal', 'blue', 'amber', 'custom'];
+  if (
+    typeof parsed.appAccentId !== 'string' ||
+    !validAccentIds.includes(parsed.appAccentId)
+  ) {
+    merged.appAccentId = DEFAULT_SETTINGS.appAccentId;
+  }
+  if (
+    typeof parsed.appAccentCustomHex !== 'string' ||
+    !/^#[0-9A-Fa-f]{6}$/.test(parsed.appAccentCustomHex)
+  ) {
+    merged.appAccentCustomHex = DEFAULT_SETTINGS.appAccentCustomHex;
+  }
   merged.androidWidgetBackgroundOpacity = coerceWidgetOpacity(
     parsed.androidWidgetBackgroundOpacity,
   );
