@@ -293,10 +293,17 @@ function MushafReader({
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  // The KFGQPC mushaf PNGs have a transparent background and dark ink.
+  // If we put them over a dark surface the ink merges in and the text
+  // becomes unreadable (#117). Background is therefore:
+  //   • Light mode: warm cream — the authentic paper colour, easy on
+  //     the eyes.
+  //   • Dark mode: pure black, with the image tinted to a warm white
+  //     so the dark ink renders as light ink against the black page.
   const isDark = String(palette.text).toLowerCase() !== '#1a1a1a';
-  const parchment = isDark ? '#1c1815' : '#fbf6e9';
-  const ink = isDark ? '#e8d8b8' : '#3a2e1a';
+  const parchment = isDark ? '#000000' : '#fbf6e9';
   const ornament = isDark ? '#c9a96a' : '#8b6f2a';
+  const inkTint = isDark ? '#f0e6c8' : undefined;
 
   const screenWidth = Dimensions.get('window').width;
 
@@ -343,8 +350,8 @@ function MushafReader({
           page={item}
           screenWidth={screenWidth}
           parchment={parchment}
-          ink={ink}
           ornament={ornament}
+          inkTint={inkTint}
         />
       )}
     />
@@ -378,12 +385,15 @@ function MushafPage({
   screenWidth,
   parchment,
   ornament,
+  inkTint,
 }: {
   page: typeof MUSHAF_PAGES[number];
   screenWidth: number;
   parchment: string;
-  ink: string;
   ornament: string;
+  /** When set, applied as the Image's tintColor so dark-mode renders
+   *  the dark KFGQPC ink as a warm-light color against a black page. */
+  inkTint?: string;
 }) {
   const [imageReady, setImageReady] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
@@ -419,7 +429,14 @@ function MushafPage({
       <View style={mushafPageStyles.imageWrap}>
         <Image
           source={{ uri: mushafPageImageUrl(page.page) }}
-          style={{ width: imageWidth, height: imageHeight }}
+          style={[
+            { width: imageWidth, height: imageHeight },
+            // tintColor flattens the image to a single color while
+            // preserving alpha — gives us readable warm-white ink on
+            // pure black in dark mode. Light mode renders the original
+            // colored ayah markers + dark ink as-is.
+            inkTint ? { tintColor: inkTint } : null,
+          ]}
           resizeMode="contain"
           accessibilityLabel={`Mushaf page ${page.page}`}
           onLoad={() => setImageReady(true)}
