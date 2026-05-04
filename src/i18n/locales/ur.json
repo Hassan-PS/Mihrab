@@ -9,11 +9,11 @@
     "month": "مہینہ",
     "shareMonth": "شیئر مہینہ",
     "compass": "قبلہ",
-    "tasbih": "Tasbih",
-    "duas": "Duas",
-    "quran": "Quran",
-    "mosques": "Mosques",
-    "journal": "Journal",
+    "tasbih": "تسبیح",
+    "duas": "دعائیں",
+    "quran": "قرآن",
+    "mosques": "مساجد",
+    "journal": "نماز ڈائری",
     "backup": "بیک اپ",
     "fasting": "روزہ"
   },
@@ -186,7 +186,7 @@
     "accent_amber": "Amber",
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
-    "accentColorHelp": "Used across the app and the home-screen widget.",
+    "accentColorHelp": "پورے ایپ اور ہوم اسکرین ویجٹ میں استعمال ہوتا ہے۔",
     "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {

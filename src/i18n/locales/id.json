@@ -10,10 +10,10 @@
     "shareMonth": "Bagikan Bulan",
     "compass": "Kiblat",
     "tasbih": "Tasbih",
-    "duas": "Duas",
-    "quran": "Quran",
-    "mosques": "Mosques",
-    "journal": "Journal",
+    "duas": "Doa",
+    "quran": "Al-Qur’an",
+    "mosques": "Masjid",
+    "journal": "Jurnal Salat",
     "backup": "Pencadangan",
     "fasting": "Puasa"
   },
@@ -186,7 +186,7 @@
     "accent_amber": "Amber",
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
-    "accentColorHelp": "Used across the app and the home-screen widget.",
+    "accentColorHelp": "Digunakan di seluruh aplikasi dan widget layar utama.",
     "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {

@@ -11,9 +11,9 @@
     "compass": "Qibla",
     "tasbih": "Tasbih",
     "duas": "Duas",
-    "quran": "Quran",
-    "mosques": "Mosques",
-    "journal": "Journal",
+    "quran": "Koran",
+    "mosques": "Moscheen",
+    "journal": "Gebetstagebuch",
     "backup": "Sicherung",
     "fasting": "Fasten"
   },
@@ -186,7 +186,7 @@
     "accent_amber": "Amber",
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
-    "accentColorHelp": "Wird in der App und im Startbildschirm-Widget verwendet.",
+    "accentColorHelp": "Wird in der gesamten App und im Homescreen-Widget verwendet.",
     "widgetColorFollowsAccentHelp": "Das Widget verwendet die gleiche Akzentfarbe wie die App. Wähle sie unter Darstellung."
   },
   "locationSetup": {

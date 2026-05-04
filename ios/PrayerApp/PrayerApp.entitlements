@@ -6,5 +6,17 @@
 	<array>
 		<string>group.com.prayerapp</string>
 	</array>
+	<!--
+	  Keychain access group — required for react-native-encrypted-storage's
+	  SecItemAdd to succeed. Without this entitlement, every Keychain write
+	  fails with errSecMissingEntitlement (-34018). The $(AppIdentifierPrefix)
+	  expands to the team prefix (e.g. "ABCDE12345.") at build time, so the
+	  group identifier matches the app's bundle ID and is unique per signing
+	  team. Adding this is required for both simulator and device builds.
+	-->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
+	</array>
 </dict>
 </plist>

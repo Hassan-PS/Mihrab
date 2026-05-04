@@ -232,9 +232,20 @@ export async function saveSettings(settings: PrayerAppSettings): Promise<void> {
   const plaintext = stripSecureFields(
     settings as unknown as Record<string, unknown>,
   );
-  // Encrypted save first — if it fails, we don't strip the plaintext, so the
-  // user's coordinates aren't lost. saveSecureSettings throws on failure.
-  await saveSecureSettings(secure);
+  // Persist secure fields first. saveSecureSettings now writes to a plaintext
+  // AsyncStorage fallback if the encrypted store rejects (task #141), so
+  // user coordinates / presets survive a broken Keychain. We still want the
+  // plaintext settings save to proceed regardless — non-secure fields like
+  // theme, language, and method changes shouldn't be blocked by a Keychain
+  // outage. Catch and log; do not re-throw.
+  try {
+    await saveSecureSettings(secure);
+  } catch (e) {
+    console.warn(
+      'saveSettings: secure save failed, fallback engaged. Continuing with plaintext save.',
+      e,
+    );
+  }
   await AsyncStorage.setItem(KEY, JSON.stringify(plaintext));
 }
 
@@ -265,6 +276,14 @@ export async function resetAppData(): Promise<void> {
     'mushaf.assets.v1.complete',
     'mushaf.assets.v2.complete',
     'mushaf.assets.v3.complete',
+    // Plaintext fallback for secure storage — task #141. If the user's
+    // Keychain was rejecting writes, secure data ended up here. Reset
+    // must wipe it too.
+    'prayerapp.location.fallback.v1',
+    // Cached reverse-geocode results from the Sweden/non-Sweden gate —
+    // task #138. Not sensitive but resetting makes the next session
+    // re-fetch fresh.
+    'islamiska_forbundet.reverse.v1',
   ];
   try {
     await AsyncStorage.multiRemove(asyncKeys);
