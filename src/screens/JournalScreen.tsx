@@ -254,7 +254,8 @@ export function JournalScreen() {
           accessibilityLabel={t('journal.notificationToggleA11y', 'Enable journal log action on prayer notifications')}
           value={settings.journalNotificationActionsEnabled}
           onValueChange={v => updateSettings({ journalNotificationActionsEnabled: v })}
-          trackColor={{ true: String(palette.accent), false: String(palette.border) }}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={settings.journalNotificationActionsEnabled ? palette.accentSolid : '#f3f4f6'}
         />
       </View>
 

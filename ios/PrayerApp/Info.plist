@@ -84,6 +84,7 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>Amiri-Regular.ttf</string>
+		<string>AmiriQuran.ttf</string>
 		<string>Amiri-Bold.ttf</string>
 		<string>ScheherazadeNew-Regular.ttf</string>
 	</array>

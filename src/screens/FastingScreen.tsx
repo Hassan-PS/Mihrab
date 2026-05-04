@@ -390,7 +390,8 @@ export function FastingScreen() {
           accessibilityLabel={t('fasting.reminderToggleA11y', 'Enable day-before fasting reminders')}
           value={settings.fastingRemindersEnabled}
           onValueChange={onToggleReminders}
-          trackColor={{ true: String(palette.accent), false: String(palette.border) }}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={settings.fastingRemindersEnabled ? palette.accentSolid : '#f3f4f6'}
         />
       </View>
 
