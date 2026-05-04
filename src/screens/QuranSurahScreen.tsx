@@ -294,17 +294,15 @@ function MushafReader({
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  // The KFGQPC mushaf PNGs have a transparent background and dark ink.
-  // If we put them over a dark surface the ink merges in and the text
-  // becomes unreadable (#117). Background is therefore:
-  //   • Light mode: warm cream — the authentic paper colour, easy on
-  //     the eyes.
-  //   • Dark mode: pure black, with the image tinted to a warm white
-  //     so the dark ink renders as light ink against the black page.
-  const isDark = String(palette.text).toLowerCase() !== '#1a1a1a';
-  const parchment = isDark ? '#000000' : '#fbf6e9';
-  const ornament = isDark ? '#c9a96a' : '#8b6f2a';
-  const inkTint = isDark ? '#f0e6c8' : undefined;
+  // Use the default mushaf colours always — task #122. The page PNGs
+  // carry the authentic dark ink + colored ayah markers; we render
+  // them on a plain white surface (the mushaf's natural paper colour)
+  // and apply no tint, so nothing alters the source pixels regardless
+  // of whether the user is in app light or dark mode. Header / footer
+  // chrome uses a dark gold-on-white tone matching the printed running
+  // heads.
+  const parchment = '#ffffff';
+  const ornament = '#7a5e1f';
 
   const screenWidth = Dimensions.get('window').width;
 
@@ -366,7 +364,6 @@ function MushafReader({
           screenWidth={screenWidth}
           parchment={parchment}
           ornament={ornament}
-          inkTint={inkTint}
         />
       )}
     />
@@ -397,15 +394,11 @@ function MushafPage({
   screenWidth,
   parchment,
   ornament,
-  inkTint,
 }: {
   page: typeof MUSHAF_PAGES[number];
   screenWidth: number;
   parchment: string;
   ornament: string;
-  /** When set, applied as the Image's tintColor so dark-mode renders
-   *  the dark KFGQPC ink as a warm-light color against a black page. */
-  inkTint?: string;
 }) {
   const [imageReady, setImageReady] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
@@ -441,19 +434,11 @@ function MushafPage({
       <View style={mushafPageStyles.imageWrap}>
         <Image
           source={mushafPageAsset(page.page)}
-          style={[
-            { width: imageWidth, height: imageHeight },
-            // tintColor flattens the image to a single color while
-            // preserving alpha — gives us readable warm-white ink on
-            // pure black in dark mode. Light mode renders the original
-            // colored ayah markers + dark ink as-is.
-            inkTint ? { tintColor: inkTint } : null,
-          ]}
+          style={{ width: imageWidth, height: imageHeight }}
           resizeMode="contain"
           accessibilityLabel={`Mushaf page ${page.page}`}
-          // Local asset, but RN still decodes async on the first
-          // mount of each page; show a quick spinner so the swipe
-          // doesn't show a blank cell between pages.
+          // No tintColor — the source pixels (dark ink + colored ayah
+          // markers) render exactly as printed.
           onLoad={() => setImageReady(true)}
           onError={() => setImageFailed(true)}
           fadeDuration={0}
