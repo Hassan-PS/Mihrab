@@ -454,6 +454,14 @@ function MushafReader({
   const flatListRef = useRef<FlatList<typeof MUSHAF_PAGES[number]>>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  // Track whether we've already scrolled to the target page after the
+  // FlatList laid out. We avoid `initialScrollIndex` because it
+  // interacts unreliably on iOS when an ancestor's `direction` is RTL
+  // (the FlatList mounts but never moves to the requested index, so
+  // every page stays off-viewport — that's the "blank in Arabic UI"
+  // symptom). Manual scrollToOffset on first layout works in any
+  // direction context. — task #150.
+  const didInitialScrollRef = useRef(false);
 
   // Use the default mushaf colours always — task #122. The page PNGs
   // carry the authentic dark ink + colored ayah markers; we render
@@ -631,10 +639,11 @@ function MushafReader({
         the screen unmounts; Android needs the explicit `hidden` prop. */}
     <StatusBar hidden={isFullscreen} animated />
     <FlatList
-      // Force remount on language change — task #149. Without this, the
-      // FlatList carries scroll/layout state from the previous locale
-      // and may render blank if the inherited writing direction shifted.
-      key={i18n.language}
+      // Force remount on language change OR surah change — task #150.
+      // Without this, the FlatList carries scroll/layout state from a
+      // previous locale or surah and may render blank if direction or
+      // initial offset shifted underneath it.
+      key={`${i18n.language}-${surahNumber}`}
       ref={flatListRef}
       data={[...MUSHAF_PAGES]}
       keyExtractor={p => String(p.page)}
@@ -655,27 +664,33 @@ function MushafReader({
       // reader apps page through a mushaf even in Arabic UI. The page
       // images themselves still typeset their Arabic content RTL — this
       // change only affects the carousel's gesture direction.
-      initialScrollIndex={initialPage - 1}
+      // No `initialScrollIndex`. We manually scroll to the target page
+      // on first layout (see onLayout below) because RN's
+      // initialScrollIndex interacts unreliably with the iOS layout
+      // engine when an ancestor view has an RTL writing-direction —
+      // the list mounts but never actually scrolls to the requested
+      // index, so every page sits off-viewport ("blank in Arabic UI").
       getItemLayout={(_, idx) => ({
         length: screenWidth,
         offset: screenWidth * idx,
         index: idx,
       })}
-      onScrollToIndexFailed={info => {
-        // RN sometimes fires this when the target index hasn't laid out
-        // yet (large initial offset like surah 50 at page 528). Retry on
-        // the next frame — `getItemLayout` guarantees the offset is
-        // computable.
-        const offset = info.averageItemLength * info.index;
-        flatListRef.current?.scrollToOffset({ offset, animated: false });
-        setTimeout(
-          () =>
-            flatListRef.current?.scrollToIndex({
-              index: info.index,
-              animated: false,
-            }),
-          50,
-        );
+      onLayout={() => {
+        if (didInitialScrollRef.current) return;
+        if (initialPage <= 1) {
+          didInitialScrollRef.current = true;
+          return;
+        }
+        // Defer one frame so the FlatList content has actual layout.
+        // Without the timeout the offset call sometimes silently
+        // no-ops on iOS during the layout pass.
+        setTimeout(() => {
+          flatListRef.current?.scrollToOffset({
+            offset: (initialPage - 1) * screenWidth,
+            animated: false,
+          });
+          didInitialScrollRef.current = true;
+        }, 0);
       }}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
