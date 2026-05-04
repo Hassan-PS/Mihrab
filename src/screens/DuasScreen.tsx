@@ -1,8 +1,8 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { memo, useCallback, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, Vibration, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -13,7 +13,7 @@ import {
   type DuaCategory,
 } from '../duas/duas';
 import { cardEdgeStyle } from '../theme/chrome';
-import { TITLE_BAND_MAX_FONT_SCALE } from '../theme/textScale';
+import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
 
 /**
  * Dua library screen — task #26.
@@ -30,6 +30,22 @@ export function DuasScreen() {
   const { palette } = useAppPalette();
   useAndroidSubScreenBack();
   const [selected, setSelected] = useState<DuaCategory>('morning');
+  // Per-dua tap-to-count state — task #94. Persists for the lifetime of
+  // the screen so the user can navigate away from a dua and come back to
+  // resume their count. Reset by tapping the inline reset affordance.
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  const onIncrement = useCallback((id: string, target: number) => {
+    setCounts(prev => {
+      const cur = prev[id] ?? 0;
+      const next = cur + 1;
+      Vibration.vibrate(target > 0 && next === target ? [0, 60, 80, 60, 80, 60] : 20);
+      return { ...prev, [id]: next };
+    });
+  }, []);
+  const onResetCount = useCallback((id: string) => {
+    setCounts(prev => ({ ...prev, [id]: 0 }));
+  }, []);
 
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
@@ -66,7 +82,9 @@ export function DuasScreen() {
         })}
       </ScrollView>
 
-      <ScrollView contentContainerStyle={styles.list}>
+      <ScrollView
+        contentContainerStyle={styles.list}
+        contentInsetAdjustmentBehavior="automatic">
         {duasByCategory(selected).map(dua => (
           <View
             key={dua.id}
@@ -98,6 +116,55 @@ export function DuasScreen() {
                   `duas.<id>.translation` in that locale's JSON. */}
               {t(`duas.${dua.id}.translation`, { defaultValue: dua.translation })}
             </Text>
+            {dua.repeat ? (
+              // Tap-to-count counter for duas with a recommended
+              // repetition (e.g. ×3, ×100). Mirrors the Tasbih pattern:
+              // big number + target, haptic on each tap, reset
+              // affordance, persists across the screen session.
+              <View style={styles.counterRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('duas.tapToCount', 'Tap to count')}
+                  accessibilityValue={{
+                    now: counts[dua.id] ?? 0,
+                    min: 0,
+                    max: dua.repeat,
+                    text: `${counts[dua.id] ?? 0} / ${dua.repeat}`,
+                  }}
+                  onPress={() => onIncrement(dua.id, dua.repeat ?? 0)}
+                  style={[
+                    styles.counterBtn,
+                    {
+                      backgroundColor:
+                        (counts[dua.id] ?? 0) >= (dua.repeat ?? 0)
+                          ? palette.accentBg
+                          : palette.bg,
+                      borderColor:
+                        (counts[dua.id] ?? 0) >= (dua.repeat ?? 0)
+                          ? palette.accent
+                          : palette.border,
+                    },
+                  ]}>
+                  <Text
+                    style={[styles.counterValue, tabularNumeralStyle, { color: palette.text }]}>
+                    {counts[dua.id] ?? 0}
+                  </Text>
+                  <Text style={[styles.counterTarget, { color: palette.muted }]}>
+                    / {dua.repeat}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('tasbih.reset', 'Reset')}
+                  onPress={() => onResetCount(dua.id)}
+                  hitSlop={8}
+                  style={styles.counterReset}>
+                  <Text style={[styles.counterResetLabel, { color: palette.muted }]}>
+                    {t('tasbih.reset', 'Reset')}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
             <View style={styles.metaRow}>
               {dua.repeat ? (
                 <Text style={[styles.meta, { color: palette.accent }]}>
@@ -120,14 +187,16 @@ export { _DuasScreenMemo as DuasScreenMemo };
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  tabs: { padding: 16, gap: 8 },
+  tabs: { paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center' },
   tab: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 18,
     borderWidth: 1,
+    minHeight: 40,
+    justifyContent: 'center',
   },
-  tabLabel: { fontSize: 14, fontWeight: '600' },
+  tabLabel: { fontSize: 14, fontWeight: '600', lineHeight: 18, includeFontPadding: false },
   list: { padding: 16, paddingTop: 0, gap: 12 },
   card: { borderRadius: 14, padding: 16, gap: 8 },
   title: { fontSize: 14, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
@@ -137,4 +206,28 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   meta: { fontSize: 12 },
   source: { flexShrink: 1, textAlign: 'right' },
+  counterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 4,
+  },
+  counterBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  counterValue: { fontSize: 28, fontWeight: '700' },
+  counterTarget: { fontSize: 16, fontWeight: '500' },
+  counterReset: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  counterResetLabel: { fontSize: 13, fontWeight: '600' },
 });

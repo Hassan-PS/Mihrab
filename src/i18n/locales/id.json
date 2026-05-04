@@ -318,7 +318,21 @@
       "evening": "Evening",
       "afterPrayer": "After prayer",
       "food": "Food",
-      "distress": "Distress"
+      "distress": "Distress",
+      "sleep": "Tidur",
+      "travel": "Perjalanan",
+      "mosque": "Masjid",
+      "gratitude": "Syukur",
+      "forgiveness": "Istigfar",
+      "weather": "Cuaca",
+      "family": "Keluarga",
+      "sickness": "Sakit",
+      "funeral": "Jenazah",
+      "eid": "Idul",
+      "beforeQuran": "Sebelum Al-Qur'an",
+      "knowledge": "Ilmu",
+      "protection": "Perlindungan",
+      "guidance": "Petunjuk"
     },
     "repeat": "Recite ×{{count}}"
   },

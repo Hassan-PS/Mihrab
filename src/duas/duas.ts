@@ -181,6 +181,32 @@ export const DUAS: ReadonlyArray<Dua> = [
       'Allah — there is no deity except Him, the Ever-Living, the Sustainer of all existence. (full ayah continues)',
     source: 'Quran 2:255, Sahih al-Bukhari 2311 (recited at sleep)',
   },
+  {
+    id: 'distress_dua_al_faraj',
+    category: 'distress',
+    titleEn: 'Dua al-Faraj (relief from worry & sorrow)',
+    arabic:
+      'ٱللَّٰهُمَّ إِنِّي عَبْدُكَ، ٱبْنُ عَبْدِكَ، ٱبْنُ أَمَتِكَ، نَاصِيَتِي بِيَدِكَ، مَاضٍ فِيَّ حُكْمُكَ، عَدْلٌ فِيَّ قَضَاؤُكَ، أَسْأَلُكَ بِكُلِّ ٱسْمٍ هُوَ لَكَ، سَمَّيْتَ بِهِ نَفْسَكَ، أَوْ عَلَّمْتَهُ أَحَدًا مِنْ خَلْقِكَ، أَوْ أَنْزَلْتَهُ فِي كِتَابِكَ، أَوِ ٱسْتَأْثَرْتَ بِهِ فِي عِلْمِ ٱلْغَيْبِ عِنْدَكَ، أَنْ تَجْعَلَ ٱلْقُرْآنَ رَبِيعَ قَلْبِي، وَنُورَ صَدْرِي، وَجَلَاءَ حُزْنِي، وَذَهَابَ هَمِّي.',
+    transliteration:
+      'Allāhumma innī ʿabduk, ibnu ʿabdik, ibnu amatik, nāṣiyatī bi-yadik, māḍin fiyya ḥukmuk, ʿadlun fiyya qaḍāʾuk. Asʾaluka bi-kulli-smin huwa lak, sammayta bihi nafsak, aw ʿallamtahu aḥadan min khalqik, aw anzaltahu fī kitābik, aw-staʾtharta bihi fī ʿilmi-l-ghaybi ʿindak, an tajʿalal-qurʾāna rabīʿa qalbī, wa nūra ṣadrī, wa jalāʾa ḥuznī, wa dhahāba hammī.',
+    translation:
+      'O Allah, I am Your servant, son of Your male servant, son of Your female servant. My forelock is in Your hand. Your judgment over me is assured, and Your decree concerning me is just. I ask You by every Name that is Yours — those You named Yourself with, or taught to any of Your creation, or revealed in Your Book, or kept hidden in the knowledge of the unseen with You — that You make the Quran the spring of my heart, the light of my chest, the lifting of my sorrow, and the departing of my grief.',
+    source: 'Musnad Ahmad 3712 — recited by anyone troubled, with sincere certainty.',
+    repeat: 1,
+  },
+  {
+    id: 'distress_dua_al_karb',
+    category: 'distress',
+    titleEn: 'Dua at the time of grief',
+    arabic:
+      'ٱللَّٰهُمَّ إِلَيْكَ أَشْكُو ضَعْفَ قُوَّتِي، وَقِلَّةَ حِيلَتِي، وَهَوَانِي عَلَى ٱلنَّاسِ. يَا أَرْحَمَ ٱلرَّاحِمِينَ، أَنْتَ أَرْحَمُ ٱلرَّاحِمِينَ. إِلَىٰ مَنْ تَكِلُنِي؟ إِلَىٰ عَدُوٍّ يَتَجَهَّمُنِي، أَمْ إِلَىٰ قَرِيبٍ مَلَّكْتَهُ أَمْرِي؟ إِنْ لَمْ تَكُنْ غَضْبَانَ عَلَيَّ فَلَا أُبَالِي، غَيْرَ أَنَّ عَافِيَتَكَ أَوْسَعُ لِي. أَعُوذُ بِنُورِ وَجْهِكَ ٱلَّذِي أَشْرَقَتْ لَهُ ٱلظُّلُمَاتُ، وَصَلَحَ عَلَيْهِ أَمْرُ ٱلدُّنْيَا وَٱلْآخِرَةِ، أَنْ تُنْزِلَ بِي غَضَبَكَ، أَوْ تُحِلَّ عَلَيَّ سَخَطَكَ. لَكَ ٱلْعُتْبَىٰ حَتَّىٰ تَرْضَىٰ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِكَ.',
+    transliteration:
+      'Allāhumma ilayka ashkū ḍaʿfa quwwatī, wa qillata ḥīlatī, wa hawānī ʿalan-nās. Yā arḥama-r-rāḥimīn, anta arḥamu-r-rāḥimīn. Ilā man takilunī? Ilā ʿaduwwin yatajahhamunī, am ilā qarībin mallaktahu amrī? In lam takun ghaḍbāna ʿalayya fa-lā ubālī, ghayra anna ʿāfiyataka awsaʿu lī. Aʿūdhu bi-nūri wajhikalladhī ashraqat lahu-ẓ-ẓulumāt, wa ṣalaḥa ʿalayhi amrud-dunyā wal-ākhira, an tunzila bī ghaḍabak, aw tuḥilla ʿalayya sakhaṭak. Laka-l-ʿutbā ḥattā tarḍā, wa lā ḥawla wa lā quwwata illā bik.',
+    translation:
+      'O Allah, to You I complain of the weakness of my strength, the fewness of my resources, and my insignificance before people. O Most Merciful of those who show mercy, You are the Most Merciful. To whom do You leave me — to an enemy who scowls at me, or to a relative to whom You have entrusted my affair? If You are not angry with me, I do not care, but Your protection is more spacious for me. I seek refuge in the light of Your Face which lit up the darknesses and set right the affairs of this world and the next, lest Your anger descend upon me or Your displeasure befall me. To You belongs the right to reproach until You are pleased, and there is no power and no strength except by You.',
+    source: 'The Prophet ﷺ said this when the people of Taif rejected him (Sirat Ibn Hisham; al-Tabarani al-Kabir).',
+    repeat: 1,
+  },
   // — Sleep —
   {
     id: 'sleep_bismika',
@@ -231,14 +257,15 @@ export const DUAS: ReadonlyArray<Dua> = [
   {
     id: 'travel_journey',
     category: 'travel',
-    titleEn: 'For a journey',
+    titleEn: 'For a journey — full text',
     arabic:
-      'ٱللَّٰهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هَٰذَا ٱلْبِرَّ وَٱلتَّقْوَىٰ، وَمِنَ ٱلْعَمَلِ مَا تَرْضَىٰ',
+      'ٱللَّٰهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هَٰذَا ٱلْبِرَّ وَٱلتَّقْوَىٰ، وَمِنَ ٱلْعَمَلِ مَا تَرْضَىٰ. ٱللَّٰهُمَّ هَوِّنْ عَلَيْنَا سَفَرَنَا هَٰذَا وَٱطْوِ عَنَّا بُعْدَهُ. ٱللَّٰهُمَّ أَنْتَ ٱلصَّاحِبُ فِي ٱلسَّفَرِ، وَٱلْخَلِيفَةُ فِي ٱلْأَهْلِ. ٱللَّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ وَعْثَاءِ ٱلسَّفَرِ، وَكَآبَةِ ٱلْمَنْظَرِ، وَسُوءِ ٱلْمُنْقَلَبِ فِي ٱلْمَالِ وَٱلْأَهْلِ.',
     transliteration:
-      'Allāhumma innā nasʾaluka fī safarinā hādhā-l-birra wat-taqwā, wa minal-ʿamali mā tarḍā',
+      'Allāhumma innā nasʾaluka fī safarinā hādhā-l-birra wat-taqwā, wa minal-ʿamali mā tarḍā. Allāhumma hawwin ʿalaynā safaranā hādhā wa-ṭwi ʿannā buʿdah. Allāhumma anta-ṣ-ṣāḥibu fis-safar, wal-khalīfatu fil-ahl. Allāhumma innī aʿūdhu bika min waʿthāʾis-safar, wa kaʾābatil-manẓar, wa sūʾil-munqalabi fil-māli wal-ahl.',
     translation:
-      'O Allah, we ask You on this journey of ours righteousness, piety, and deeds that You will be pleased with.',
-    source: 'Sahih Muslim 1342',
+      'O Allah, we ask You on this journey of ours for righteousness, piety, and deeds that please You. O Allah, ease this journey for us and shorten its distance. O Allah, You are the Companion on the journey and the Successor over the family. O Allah, I seek refuge in You from the hardships of travel, the bleakness of sights, and any harmful return upon family or wealth.',
+    source: 'Sahih Muslim 1342. Recite when starting a journey, after saying "Allāhu Akbar" three times. On the return, add the next dua "Āyibūn tāʾibūn ʿābidūn li-rabbinā ḥāmidūn".',
+    repeat: 1,
   },
   {
     id: 'travel_returning',
@@ -706,14 +733,15 @@ export const DUAS: ReadonlyArray<Dua> = [
   {
     id: 'guidance_istikharah',
     category: 'guidance',
-    titleEn: 'Salat al-Istikharah (decision-seeking)',
+    titleEn: 'Salat al-Istikharah (decision-seeking) — full text',
     arabic:
-      'ٱللَّٰهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ ٱلْعَظِيمِ',
+      'ٱللَّٰهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ ٱلْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ ٱلْغُيُوبِ. ٱللَّٰهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَٰذَا ٱلْأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي، فَٱقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ. وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَٰذَا ٱلْأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي، فَٱصْرِفْهُ عَنِّي وَٱصْرِفْنِي عَنْهُ وَٱقْدُرْ لِيَ ٱلْخَيْرَ حَيْثُ كَانَ ثُمَّ أَرْضِنِي بِهِ.',
     transliteration:
-      'Allāhumma innī astakhīruka bi-ʿilmik, wa astaqdiruka bi-qudratik, wa asʾaluka min faḍlika-l-ʿaẓīm',
+      'Allāhumma innī astakhīruka bi-ʿilmik, wa astaqdiruka bi-qudratik, wa asʾaluka min faḍlika-l-ʿaẓīm. Fa-innaka taqdiru wa lā aqdir, wa taʿlamu wa lā aʿlam, wa anta ʿallāmu-l-ghuyūb. Allāhumma in kunta taʿlamu anna hādhā-l-amra khayrun lī fī dīnī wa maʿāshī wa ʿāqibati amrī, fa-qdurhu lī wa yassirhu lī thumma bārik lī fīh. Wa in kunta taʿlamu anna hādhā-l-amra sharrun lī fī dīnī wa maʿāshī wa ʿāqibati amrī, fa-ṣrifhu ʿannī wa-ṣrifnī ʿanhu wa-qdur liyal-khayra ḥaythu kāna thumma arḍinī bih.',
     translation:
-      'O Allah, I seek Your guidance through Your knowledge, I seek strength through Your power, and I ask You of Your great bounty. (Recited as part of the full istikhāra prayer after two voluntary rakʿahs — see source for the complete form.)',
-    source: 'Sahih al-Bukhari 1162',
+      'O Allah, I seek Your guidance through Your knowledge, and I seek strength through Your power, and I ask You of Your great bounty — for You are able and I am not, You know and I do not, and You are the Knower of the unseen. O Allah, if You know that this matter (mention it) is good for me in my religion, my livelihood, and the outcome of my affairs, then decree it for me, make it easy for me, and bless me in it. And if You know that this matter is bad for me in my religion, my livelihood, and the outcome of my affairs, then turn it away from me, turn me away from it, and decree for me good wherever it may be — then make me pleased with it.',
+    source: 'Sahih al-Bukhari 1162. Pray two rakʿahs of voluntary prayer, then make this dua and name your specific need in place of "this matter".',
+    repeat: 1,
   },
   {
     id: 'guidance_steadfastness',

@@ -3,7 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, View } from 'react-native';
+import { Platform } from 'react-native';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
@@ -110,65 +110,71 @@ export function RootNavigator() {
         component={SettingsScreen}
         options={{ title: t('nav.settings') }}
       />
+      {/* Subpages: inherit screenOptions defaults (transparent header on
+          iOS for the blur effect, opaque on Android via headerStyle), only
+          override `headerLargeTitle: false` to keep the compact navbar
+          look. The previously-stacked `headerBackground` view + per-screen
+          `headerTransparent: false` was creating a double-offset / extra
+          gap below the title bar (#91). */}
       <Stack.Screen
         name="MonthTimes"
         component={MonthTimesScreen}
-        options={{ title: t('nav.month'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.month'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="ShareMonth"
         component={ShareMonthScreen}
-        options={{ title: t('nav.shareMonth'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.shareMonth'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Compass"
         component={CompassScreen}
-        options={{ title: t('nav.compass'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.compass'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Tasbih"
         component={TasbihScreen}
-        options={{ title: t('nav.tasbih'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.tasbih'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Duas"
         component={DuasScreen}
-        options={{ title: t('nav.duas'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.duas'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Quran"
         component={QuranScreen}
-        options={{ title: t('nav.quran'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.quran'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="QuranSurah"
         component={QuranSurahScreen}
-        options={{ title: '', headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: '', headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Mosques"
         component={MosquesScreen}
-        options={{ title: t('nav.mosques'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.mosques'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Journal"
         component={JournalScreen}
-        options={{ title: t('nav.journal'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.journal'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
-        options={{ title: '', headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined }}
+        options={{ title: '', headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Backup"
         component={BackupScreen}
-        options={{ title: t('nav.backup'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.backup'), headerLargeTitle: false }}
       />
       <Stack.Screen
         name="Fasting"
         component={FastingScreen}
-        options={{ title: t('nav.fasting'), headerLargeTitle: false, headerTransparent: false, headerBlurEffect: undefined, headerBackground: () => <View style={{ flex: 1, backgroundColor: theme.colors.background }} /> }}
+        options={{ title: t('nav.fasting'), headerLargeTitle: false }}
       />
     </Stack.Navigator>
   );

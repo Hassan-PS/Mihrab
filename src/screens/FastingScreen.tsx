@@ -261,6 +261,15 @@ export function FastingScreen() {
         </Pressable>
       </View>
 
+      {/* Encouragement copy above the stats — task #95. Mirrors the
+          Journal pattern and adapts to the user's progress. */}
+      <Text style={[styles.encouragement, { color: palette.text }]}>
+        {stats.currentStreak >= 3
+          ? t('fasting.encourageStreak', 'Mashallah, {{count}}-day streak. Keep it up.', { count: stats.currentStreak })
+          : (stats.ramadanDaysKept + stats.voluntaryDaysKept) >= 1
+          ? t('fasting.encourageActive', 'Every fast counts. May Allah accept it.')
+          : t('fasting.encourageEmpty', 'Log your first fast to start tracking.')}
+      </Text>
       <View style={styles.statsRow}>
         <StatCell
           label={t('fasting.statRamadan')}
@@ -519,6 +528,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+  },
+  encouragement: {
+    fontSize: 15,
+    fontWeight: '600',
+    lineHeight: 22,
+    marginBottom: 4,
   },
   ramadanCountdown: {
     alignItems: 'center',

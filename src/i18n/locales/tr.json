@@ -318,7 +318,21 @@
       "evening": "Evening",
       "afterPrayer": "After prayer",
       "food": "Food",
-      "distress": "Distress"
+      "distress": "Distress",
+      "sleep": "Uyku",
+      "travel": "Seyahat",
+      "mosque": "Cami",
+      "gratitude": "Şükür",
+      "forgiveness": "Bağışlanma",
+      "weather": "Hava",
+      "family": "Aile",
+      "sickness": "Hastalık",
+      "funeral": "Cenaze",
+      "eid": "Bayram",
+      "beforeQuran": "Kur'an öncesi",
+      "knowledge": "İlim",
+      "protection": "Korunma",
+      "guidance": "Hidayet"
     },
     "repeat": "Recite ×{{count}}"
   },

@@ -38,6 +38,7 @@ export function QuranScreen() {
         data={[...SURAHS]}
         keyExtractor={s => String(s.number)}
         contentContainerStyle={styles.list}
+        contentInsetAdjustmentBehavior="automatic"
         renderItem={({ item }) => (
           <Pressable
             accessibilityRole="button"

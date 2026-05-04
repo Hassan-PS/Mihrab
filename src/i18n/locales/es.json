@@ -318,7 +318,21 @@
       "evening": "Evening",
       "afterPrayer": "After prayer",
       "food": "Food",
-      "distress": "Distress"
+      "distress": "Distress",
+      "sleep": "Sueño",
+      "travel": "Viaje",
+      "mosque": "Mezquita",
+      "gratitude": "Gratitud",
+      "forgiveness": "Perdón",
+      "weather": "Clima",
+      "family": "Familia",
+      "sickness": "Enfermedad",
+      "funeral": "Funeral",
+      "eid": "Eid",
+      "beforeQuran": "Antes del Corán",
+      "knowledge": "Conocimiento",
+      "protection": "Protección",
+      "guidance": "Guía"
     },
     "repeat": "Recite ×{{count}}"
   },

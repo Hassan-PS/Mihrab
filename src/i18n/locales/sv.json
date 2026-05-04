@@ -318,7 +318,21 @@
       "evening": "Evening",
       "afterPrayer": "After prayer",
       "food": "Food",
-      "distress": "Distress"
+      "distress": "Distress",
+      "sleep": "Sömn",
+      "travel": "Resa",
+      "mosque": "Moské",
+      "gratitude": "Tacksamhet",
+      "forgiveness": "Förlåtelse",
+      "weather": "Väder",
+      "family": "Familj",
+      "sickness": "Sjukdom",
+      "funeral": "Begravning",
+      "eid": "Eid",
+      "beforeQuran": "Före Koranen",
+      "knowledge": "Kunskap",
+      "protection": "Skydd",
+      "guidance": "Vägledning"
     },
     "repeat": "Recite ×{{count}}"
   },

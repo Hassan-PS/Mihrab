@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Animated,
+  Easing,
   PermissionsAndroid,
   Platform,
   Pressable,
@@ -25,7 +27,7 @@ import {
   type OnboardingStep,
   type OnboardingStepId,
 } from '../onboarding/steps';
-import { CrescentIcon, MihrabArchIcon } from '../theme/icons';
+import { CrescentIcon } from '../theme/icons';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { typeStyle } from '../theme/typography';
 import type { RootStackParamList } from '../navigation/types';
@@ -49,6 +51,119 @@ import { LocationSetup } from '../components/LocationSetup';
  * It only requests OS permission; the existing GPS pipeline in
  * `usePrayerDay` picks up the granted permission on next focus.
  */
+/**
+ * Animated Arabic salām hero — task #89.
+ *
+ * Reverent first-impression: the greeting "السلام عليكم ورحمة الله تعالى
+ * وبركاته" appears in Amiri/Scheherazade calligraphic font, fading in
+ * with a gentle scale + slide that evokes the iPhone "hello" first-launch
+ * moment without copying it. Translation appears below in muted color
+ * for non-Arabic speakers. Reduce-motion users see the static
+ * end-state instantly via the imperative animation finishing in 1ms.
+ */
+function SalamHero({
+  accentColor,
+  mutedColor,
+}: {
+  accentColor: string;
+  mutedColor: string;
+}) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.92)).current;
+  const slide = useRef(new Animated.Value(20)).current;
+  const translationOpacity = useRef(new Animated.Value(0)).current;
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 1100,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: 1100,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(slide, {
+          toValue: 0,
+          duration: 1100,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.timing(translationOpacity, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [opacity, scale, slide, translationOpacity]);
+
+  return (
+    <View style={salamStyles.wrap}>
+      <Animated.Text
+        accessibilityLabel="As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
+        style={[
+          salamStyles.salam,
+          {
+            color: accentColor,
+            opacity,
+            transform: [{ scale }, { translateX: slide }],
+            // The bundled Amiri font ships via task #69 — a calligraphic
+            // Naskh that's elegant at large sizes. Falls back to system
+            // default if the .ttf hasn't been registered yet.
+            fontFamily: Platform.select({
+              ios: 'Amiri',
+              android: 'Amiri-Regular',
+              default: undefined,
+            }),
+          },
+        ]}>
+        السلام عليكم ورحمة الله تعالى وبركاته
+      </Animated.Text>
+      <Animated.Text
+        style={[
+          salamStyles.translation,
+          { color: mutedColor, opacity: translationOpacity },
+        ]}>
+        {t(
+          'onboarding.welcome.salam',
+          'Peace be upon you, and the mercy of Allah and His blessings.',
+        )}
+      </Animated.Text>
+    </View>
+  );
+}
+
+const salamStyles = StyleSheet.create({
+  wrap: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    gap: 12,
+  },
+  salam: {
+    fontSize: 30,
+    lineHeight: 50,
+    textAlign: 'center',
+    writingDirection: 'rtl',
+    fontWeight: '500',
+    letterSpacing: 0,
+    paddingHorizontal: 8,
+  },
+  translation: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+});
+
 export function OnboardingScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
@@ -157,7 +272,7 @@ export function OnboardingScreen() {
       contentInsetAdjustmentBehavior="automatic">
       <View style={styles.illustration}>
         {step.id === 'welcome' ? (
-          <MihrabArchIcon color={String(palette.accent)} size={96} />
+          <SalamHero accentColor={String(palette.accent)} mutedColor={String(palette.muted)} />
         ) : (
           <CrescentIcon color={String(palette.accent)} size={64} />
         )}

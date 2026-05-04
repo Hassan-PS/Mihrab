@@ -74,7 +74,8 @@ export function QuranSurahScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: palette.bg }}
-      contentContainerStyle={styles.scroll}>
+      contentContainerStyle={styles.scroll}
+      contentInsetAdjustmentBehavior="automatic">
       <View
         style={[
           styles.header,
