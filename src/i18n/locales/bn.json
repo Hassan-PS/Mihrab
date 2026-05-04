@@ -31,7 +31,9 @@
     "back": "ব্যাক",
     "loading": "লোড হচ্ছে...",
     "automatic": "স্বয়ংক্রিয়",
-    "openSettings": "সেটিংস খুলুন"
+    "openSettings": "সেটিংস খুলুন",
+    "cancel": "বাতিল",
+    "ok": "ঠিক আছে"
   },
   "home": {
     "loadingPrayer": "নামাজের সময় লোড হচ্ছে...",
@@ -358,7 +360,12 @@
     "viewToggleTranslation": "অনুবাদ",
     "viewToggleMushaf": "মুসহাফ",
     "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen"
+    "exitFullscreen": "Exit fullscreen",
+    "mushafDownloadTitle": "মুসহাফ ডাউনলোড করুন",
+    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
+    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloading": "Downloading mushaf…",
+    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

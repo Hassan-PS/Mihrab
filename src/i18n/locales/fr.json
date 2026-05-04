@@ -31,7 +31,9 @@
     "back": "Dos",
     "loading": "Chargement…",
     "automatic": "Automatique",
-    "openSettings": "Ouvrir les réglages"
+    "openSettings": "Ouvrir les réglages",
+    "cancel": "Annuler",
+    "ok": "OK"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -358,7 +360,12 @@
     "viewToggleTranslation": "Traduction",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Plein écran",
-    "exitFullscreen": "Quitter le plein écran"
+    "exitFullscreen": "Quitter le plein écran",
+    "mushafDownloadTitle": "Télécharger le mushaf",
+    "mushafDownloadBody": "Le mushaf de Médine fait environ 120 Mo. Il n'est pas inclus dans l'application — téléchargez-le une fois et les pages restent en cache sur votre appareil.",
+    "mushafDownloadCta": "Télécharger le mushaf (~120 Mo)",
+    "mushafDownloading": "Téléchargement du mushaf…",
+    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

@@ -31,7 +31,9 @@
     "back": "Tillbaka",
     "loading": "Laddar…",
     "automatic": "Automatiskt",
-    "openSettings": "Öppna inställningar"
+    "openSettings": "Öppna inställningar",
+    "cancel": "Avbryt",
+    "ok": "OK"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -358,7 +360,12 @@
     "viewToggleTranslation": "Översättning",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Helskärm",
-    "exitFullscreen": "Avsluta helskärm"
+    "exitFullscreen": "Avsluta helskärm",
+    "mushafDownloadTitle": "Ladda ner mushafen",
+    "mushafDownloadBody": "Madinah-mushafen är cirka 120 MB. Den ingår inte i appen — ladda ner den en gång så lagras sidorna på din enhet.",
+    "mushafDownloadCta": "Ladda ner mushafen (~120 MB)",
+    "mushafDownloading": "Laddar ner mushafen…",
+    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

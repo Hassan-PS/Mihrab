@@ -31,7 +31,9 @@
     "back": "Atrás",
     "loading": "Cargando…",
     "automatic": "Automático",
-    "openSettings": "Abrir Ajustes"
+    "openSettings": "Abrir Ajustes",
+    "cancel": "Cancelar",
+    "ok": "Aceptar"
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -358,7 +360,12 @@
     "viewToggleTranslation": "Traducción",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Pantalla completa",
-    "exitFullscreen": "Salir de pantalla completa"
+    "exitFullscreen": "Salir de pantalla completa",
+    "mushafDownloadTitle": "Descargar el mushaf",
+    "mushafDownloadBody": "El mushaf de Medina ocupa unos 120 MB. No viene incluido en la aplicación — descárgalo una vez y las páginas permanecerán en tu dispositivo.",
+    "mushafDownloadCta": "Descargar mushaf (~120 MB)",
+    "mushafDownloading": "Descargando mushaf…",
+    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

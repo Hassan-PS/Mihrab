@@ -11,6 +11,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -33,7 +34,13 @@ import {
   MUSHAF_PAGES,
   MUSHAF_SURAHS,
 } from '../quran/pages';
-import { mushafPageAsset } from '../quran/mushafImages';
+import { mushafPageAsset, MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
+import {
+  downloadMushafAssets,
+  isMushafDownloaded,
+  type MushafDownloadHandle,
+  type MushafDownloadProgress,
+} from '../quran/mushafDownload';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
 import { cardEdgeStyle } from '../theme/chrome';
@@ -487,6 +494,50 @@ function MushafReader({
   const parchment = '#ffffff';
   const ornament = '#7a5e1f';
 
+  // ── On-demand download state — task #130 ─────────────────────────
+  // Track whether the user has completed the one-time mushaf download.
+  // The 604 page PNGs live on a GitHub release, not the APK, so the
+  // first time the user opens this view they get a download prompt.
+  // After download, RN's Image cache serves every page locally.
+  const [downloadStatus, setDownloadStatus] = useState<
+    'checking' | 'needs_download' | 'downloading' | 'ready'
+  >('checking');
+  const [progress, setProgress] = useState<MushafDownloadProgress>({
+    done: 0,
+    total: MUSHAF_TOTAL_PAGES,
+    failed: 0,
+  });
+  const downloadHandleRef = useRef<MushafDownloadHandle | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void isMushafDownloaded().then(yes => {
+      if (cancelled) return;
+      setDownloadStatus(yes ? 'ready' : 'needs_download');
+    });
+    return () => {
+      cancelled = true;
+      // Cancel any in-flight download if the user navigates away.
+      downloadHandleRef.current?.cancel();
+    };
+  }, []);
+
+  const startDownload = () => {
+    if (downloadStatus === 'downloading') return;
+    setDownloadStatus('downloading');
+    setProgress({ done: 0, total: MUSHAF_TOTAL_PAGES, failed: 0 });
+    const handle = downloadMushafAssets({
+      concurrency: 8,
+      onProgress: setProgress,
+    });
+    downloadHandleRef.current = handle;
+    void handle.promise.then(completed => {
+      downloadHandleRef.current = null;
+      if (completed) setDownloadStatus('ready');
+      else setDownloadStatus('needs_download');
+    });
+  };
+
   const screenWidth = Dimensions.get('window').width;
 
   // Update the navigation title to reflect the surah on the currently-
@@ -506,8 +557,100 @@ function MushafReader({
     itemVisiblePercentThreshold: 60,
   }).current;
 
+  // ── Download-prompt screens — task #130 ──────────────────────────
+  // Render dedicated states before the page reader: a quiet checking
+  // spinner while we read AsyncStorage, a download prompt the first
+  // time, and a progress bar while pages are streaming in.
+  if (downloadStatus === 'checking') {
+    return (
+      <View style={[mushafGateStyles.gate, { backgroundColor: palette.bg }]}>
+        <ActivityIndicator color={palette.accentSolid} size="large" />
+      </View>
+    );
+  }
+  if (downloadStatus === 'needs_download') {
+    return (
+      <View style={[mushafGateStyles.gate, { backgroundColor: palette.bg }]}>
+        <Text style={[mushafGateStyles.title, { color: palette.text }]}>
+          {t('quran.mushafDownloadTitle', 'Download the mushaf')}
+        </Text>
+        <Text style={[mushafGateStyles.body, { color: palette.muted }]}>
+          {t(
+            'quran.mushafDownloadBody',
+            'The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.',
+          )}
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.mushafDownloadCta', 'Download mushaf (~120 MB)')}
+          onPress={startDownload}
+          style={[mushafGateStyles.cta, { backgroundColor: palette.accent }]}>
+          <Text style={mushafGateStyles.ctaLabel}>
+            {t('quran.mushafDownloadCta', 'Download mushaf (~120 MB)')}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+  if (downloadStatus === 'downloading') {
+    const pct =
+      progress.total > 0
+        ? Math.round((progress.done / progress.total) * 100)
+        : 0;
+    return (
+      <View style={[mushafGateStyles.gate, { backgroundColor: palette.bg }]}>
+        <Text style={[mushafGateStyles.title, { color: palette.text }]}>
+          {t('quran.mushafDownloading', 'Downloading mushaf…')}
+        </Text>
+        <Text style={[mushafGateStyles.progressLabel, { color: palette.muted }]}>
+          {t('quran.mushafDownloadProgress', '{{done}} / {{total}} pages · {{pct}}%', {
+            done: progress.done,
+            total: progress.total,
+            pct,
+          })}
+        </Text>
+        <View
+          style={[
+            mushafGateStyles.progressTrack,
+            { backgroundColor: palette.accentBg },
+          ]}>
+          <View
+            style={[
+              mushafGateStyles.progressFill,
+              { backgroundColor: palette.accent, width: `${pct}%` },
+            ]}
+          />
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.cancel', 'Cancel')}
+          onPress={() => {
+            downloadHandleRef.current?.cancel();
+          }}
+          style={mushafGateStyles.cancelBtn}>
+          <Text style={[mushafGateStyles.cancelLabel, { color: palette.accent }]}>
+            {t('common.cancel', 'Cancel')}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
-    <View style={{ flex: 1, backgroundColor: parchment }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: parchment,
+        // In fullscreen we hide the system status bar entirely below; this
+        // top inset keeps the mushaf page content (Part X header) below
+        // the camera notch / system bar on Android where the status bar
+        // often stays visible even in immersive mode (#130).
+        paddingTop: isFullscreen ? insets.top : 0,
+      }}>
+    {/* Hide the status bar in fullscreen so nothing from the app appears
+        next to the system battery / wifi icons. iOS auto-restores when
+        the screen unmounts; Android needs the explicit `hidden` prop. */}
+    <StatusBar hidden={isFullscreen} animated />
     <FlatList
       ref={flatListRef}
       data={[...MUSHAF_PAGES]}
@@ -661,14 +804,12 @@ function MushafPage({
           source={mushafPageAsset(page.page)}
           style={{ width: imageWidth, height: imageHeight }}
           resizeMode="contain"
-          // Decode-time downsample on Android — produces a much
-          // smoother image than the default "auto" path which can
-          // pick a low-quality scaling for palette PNGs. iOS ignores
-          // this prop. (#129)
-          resizeMethod="resize"
           accessibilityLabel={`Mushaf page ${page.page}`}
           // No tintColor — the source pixels (dark ink + colored ayah
-          // markers) render exactly as printed.
+          // markers) render exactly as printed. Default decode path
+          // preserves the original palette PNG quality without the
+          // green-tint regression introduced by the previous WebP
+          // re-encoding (#130).
           onLoad={() => setImageReady(true)}
           onError={() => setImageFailed(true)}
           fadeDuration={0}
@@ -702,6 +843,48 @@ function MushafPage({
     </View>
   );
 }
+
+const mushafGateStyles = StyleSheet.create({
+  gate: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 16,
+  },
+  title: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
+  body: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  cta: {
+    marginTop: 8,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  ctaLabel: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  progressLabel: {
+    fontSize: 13,
+    fontVariant: ['tabular-nums'],
+  },
+  progressTrack: {
+    width: '100%',
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginTop: 6,
+  },
+  progressFill: {
+    height: '100%',
+  },
+  cancelBtn: {
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  cancelLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+});
 
 const mushafPageStyles = StyleSheet.create({
   page: { flex: 1, paddingHorizontal: 16, paddingVertical: 12 },
