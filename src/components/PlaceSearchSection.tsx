@@ -156,6 +156,8 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
           {results.map((item, i) => (
             <Pressable
               key={`${item.latitude},${item.longitude},${i}`}
+              accessibilityRole="button"
+              accessibilityLabel={item.displayName}
               onPress={() => handleSelectPlace(item)}
               style={[
                 styles.resultRow,

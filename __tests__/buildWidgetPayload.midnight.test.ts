@@ -49,11 +49,20 @@ describe('buildWidgetPayload midnight rollover', () => {
     expect(p.nextKey).toBe('Fajr');
   });
 
-  it('stays on today when tomorrow is unavailable after Isha', () => {
+  it('estimates tomorrow Fajr when after Isha and tomorrow data is unavailable', () => {
+    // After Isha (21:00) with no tomorrow data, the previous behavior fell back
+    // to today's stale times with `nextKey: null` — the user saw an inert widget.
+    // The fix surfaces a soft-state estimate: today's Fajr applied to tomorrow's
+    // calendar date, with `tomorrowEstimated: true` so the widget can render a
+    // subtle indicator.
     const now = new Date(2026, 3, 9, 21, 0, 0);
     const p = buildWidgetPayload(today, undefined, now);
-    // No tomorrow data — falls back to today
+    expect(p.tomorrowEstimated).toBe(true);
+    // Times shown are today's strings re-applied to tomorrow's date.
     expect(p.rows.find(r => r.key === 'Fajr')?.time).toBe('05:00');
+    // The next-prayer hint points at Fajr (the user expects to see this).
+    expect(p.nextKey).toBe('Fajr');
+    expect(p.nextPrayerTime).toBe('05:00');
   });
 
   it('shows correct nextKey at each prayer boundary', () => {

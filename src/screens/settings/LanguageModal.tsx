@@ -1,3 +1,6 @@
+// hover-ok: list-row / settings-row / sheet pressables. Hover-state
+// treatment would visually noise these dense surfaces; the touch
+// feedback (pressed opacity / ripple) is the right affordance here.
 import React, { memo } from 'react';
 import { FlatList, Modal, Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -46,10 +49,14 @@ export const LanguageModal = memo(function LanguageModal({
       onRequestClose={onClose}>
       <View style={modalStyles.root}>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
           style={[modalStyles.fill, { backgroundColor: palette.overlay }]}
           onPress={onClose}
         />
         <View
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t('settings.language')}
           style={[
             modalStyles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
@@ -62,6 +69,10 @@ export const LanguageModal = memo(function LanguageModal({
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
               <Pressable
+                accessibilityRole="radio"
+                accessibilityLabel={item.label}
+                accessibilityLanguage={item.id}
+                accessibilityState={{ selected: current === item.id }}
                 style={[
                   modalStyles.row,
                   rowDividerStyle(palette),

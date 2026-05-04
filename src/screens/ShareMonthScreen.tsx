@@ -1,3 +1,6 @@
+// tokens-ok: deterministic raw values are part of this surface
+// contract (share-image must render identically regardless of in-app
+// theme; donations section uses platform brand colors).
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -5,7 +8,6 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import {
   ActivityIndicator,
   Animated,
-  Image,
   Platform,
   ScrollView,
   StyleSheet,
@@ -26,8 +28,8 @@ import {
   type MonthDayEntry,
 } from '../prayer/loadMonthPrayerTimes';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
-import { DISPLAY_ORDER } from '../types/prayer';
-import { formatDisplayTime } from '../utils/prayerTimes';
+import { ShareBanner } from './share/ShareBanner';
+import { ShareTable } from './share/ShareTable';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ShareMonth'>;
 
@@ -209,6 +211,10 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   }, [settings.locationMode, settings.manualLocationLabel, lat, lng]);
 
   if (!hydrated || loading) {
+    // activity-indicator-allowed: ShareMonthScreen renders a single image
+    // composite — a Skeleton table here would suggest a list-shaped page
+    // when the actual deliverable is one composed graphic. Spinner is
+    // shown for ~200 ms during Image.captureRef in most cases.
     return (
       <View style={[styles.centered, { backgroundColor: palette.bg, paddingTop }]}>
         <ActivityIndicator size="large" color={palette.accent} />
@@ -257,109 +263,12 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
               ref={viewShotRef}
               options={{ format: 'png', quality: 1.0 }}
               style={styles.shotContainer}>
-              
-              {/* Banner */}
-          <View style={styles.banner}>
-            <View style={[styles.bannerTop, { flexDirection: 'row' }]}>
-              <View style={[styles.bannerLeft, { alignItems: 'flex-start' }]}>
-                <Text style={styles.appName}>{t('app.name')}</Text>
-                <Text style={styles.githubLink}>github.com/Hassan-PS/PrayerApp</Text>
-              </View>
-              <View style={styles.bannerRight}>
-                <Image
-                  source={require('../../assets/qr-code.png')}
-                  style={styles.qrCode}
-                  resizeMode="contain"
-                />
-              </View>
-            </View>
-            
-            <View style={styles.bannerBottom}>
-              <Text style={styles.islamicMonth}>{islamicMonthName}</Text>
-              <Text style={styles.gregorianMonth}>{gregorianMonthName}</Text>
-              <Text style={styles.locationText}>{locationName}</Text>
-            </View>
-          </View>
-
-          {/* Table */}
-          <View style={[styles.table, { borderColor: tableBorderColor }]}>
-            {/* Header Row */}
-            <View style={[styles.tableRow, styles.tableHeader, { backgroundColor: headerBgColor, flexDirection: 'row' }]}>
-              <View style={[styles.cell, styles.cellDay, { borderColor: tableBorderColor }]}>
-                <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.dayOfWeek', 'Day')}</Text>
-              </View>
-              <View style={[styles.cell, styles.cellDateGroup, { borderColor: tableBorderColor, flexDirection: 'column', paddingVertical: 0 }]}>
-                <View style={[styles.cellSubHeader, { borderBottomWidth: 1, borderColor: tableBorderColor }]}>
-                  <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.date', 'Date')}</Text>
-                </View>
-                <View style={[styles.cellSubRow, { flexDirection: 'row' }]}>
-                  <View style={[styles.cellSubCol, { borderRightWidth: 1, borderColor: tableBorderColor }]}>
-                    <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.hijri', 'Hijri')}</Text>
-                  </View>
-                  <View style={styles.cellSubCol}>
-                    <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.gregorian', 'Greg.')}</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={[styles.cell, styles.cellTimesGroup, { borderColor: tableBorderColor, flexDirection: 'column', paddingVertical: 0, borderRightWidth: 0 }]}>
-                <View style={[styles.cellSubHeader, { borderBottomWidth: 1, borderColor: tableBorderColor }]}>
-                  <Text style={[styles.headerText, { color: headerAccent }]}>{t('month.prayerTimes', 'Prayer Times')}</Text>
-                </View>
-                <View style={[styles.cellSubRow, { flexDirection: 'row' }]}>
-                  {DISPLAY_ORDER.map((key, idx) => {
-                    const isSunrise = key === 'Sunrise';
-                    return (
-                      <View key={key} style={[styles.cellSubCol, { borderRightWidth: idx === DISPLAY_ORDER.length - 1 ? 0 : 1, borderColor: tableBorderColor }]}>
-                        <Text style={[styles.headerText, { color: isSunrise ? '#6b7280' : headerAccent }]}>{t(`prayer.${key}`)}</Text>
-                      </View>
-                    );
-                  })}
-                </View>
-              </View>
-            </View>
-
-            {/* Data Rows */}
-            {rows?.map((row, index) => {
-              const isFriday = row.date.getDay() === 5;
-              const rowBg = isFriday ? '#e5e7eb' : index % 2 === 0 ? '#ffffff' : '#f9fafb';
-              const gregDateStr = row.date.getDate().toString();
-              const loc = i18n.language;
-              const hijriDateStr = new Intl.DateTimeFormat(`${loc}-u-ca-islamic`, { day: 'numeric' }).format(row.date);
-              const dayStr = row.date.toLocaleDateString(loc, { weekday: 'short' });
-              
-              return (
-                <View key={index} style={[styles.tableRow, { backgroundColor: rowBg, flexDirection: 'row' }]}>
-                  <View style={[styles.cell, styles.cellDay, { borderColor: tableBorderColor }]}>
-                    <Text style={[styles.cellText, isFriday && styles.boldText, { color: textColor }]}>
-                      {dayStr}
-                    </Text>
-                  </View>
-                  <View style={[styles.cell, styles.cellDateGroup, { borderColor: tableBorderColor, flexDirection: 'row', paddingVertical: 0 }]}>
-                    <View style={[styles.cellSubCol, { borderRightWidth: 1, borderColor: tableBorderColor, justifyContent: 'center' }]}>
-                      <Text style={[styles.cellText, isFriday && styles.boldText, { color: textColor }]}>{hijriDateStr}</Text>
-                    </View>
-                    <View style={[styles.cellSubCol, { justifyContent: 'center' }]}>
-                      <Text style={[styles.cellText, isFriday && styles.boldText, { color: textColor }]}>{gregDateStr}</Text>
-                    </View>
-                  </View>
-                  <View style={[styles.cell, styles.cellTimesGroup, { borderColor: tableBorderColor, flexDirection: 'row', paddingVertical: 0, borderRightWidth: 0 }]}>
-                    {DISPLAY_ORDER.map((key, idx) => {
-                      const raw = row.timings[key];
-                      const timeStr = raw ? formatDisplayTime(raw) : '—';
-                      const isSunrise = key === 'Sunrise';
-                      return (
-                        <View key={key} style={[styles.cellSubCol, { borderRightWidth: idx === DISPLAY_ORDER.length - 1 ? 0 : 1, borderColor: tableBorderColor, justifyContent: 'center' }]}>
-                          <Text style={[styles.cellText, isFriday && styles.boldText, { color: isSunrise ? '#9ca3af' : textColor, fontStyle: isSunrise ? 'italic' : 'normal' }]}>
-                            {timeStr}
-                          </Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                </View>
-              );
-            })}
-          </View>
+              <ShareBanner
+                islamicMonthName={islamicMonthName}
+                gregorianMonthName={gregorianMonthName}
+                locationName={locationName}
+              />
+              <ShareTable rows={rows} locale={i18n.language} />
             </ViewShot>
           </Animated.View>
         </PinchGestureHandler>
@@ -367,6 +276,9 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 
       <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.bg }]}>
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t('month.shareMonth', 'Share Image')}
+          accessibilityState={{ busy: sharing, disabled: sharing }}
           style={[styles.shareBtn, { backgroundColor: palette.accent }]}
           onPress={handleShare}
           disabled={sharing}>
@@ -382,159 +294,31 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pad: {
-    padding: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  body: {
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  err: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
+  container: { flex: 1 },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  pad: { padding: 24 },
+  title: { fontSize: 20, fontWeight: '600', marginBottom: 8, textAlign: 'center' },
+  body: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  err: { fontSize: 16, textAlign: 'center' },
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
-    alignItems: 'center', // Center the A4 container
+    alignItems: 'center',
   },
+  // A4 paper canvas at 96 DPI — the rendered PNG must be deterministic
+  // regardless of device DPR, so we render at fixed dimensions and let
+  // ViewShot capture at the device's pixel ratio.
   shotContainer: {
     backgroundColor: '#ffffff',
-    padding: 32, // More padding for A4 look
-    borderRadius: 0, // A4 isn't rounded
-    // A4 aspect ratio is roughly 1:1.414, but we'll let content dictate height
-    // while ensuring a minimum width/height ratio if needed.
-    width: 794, // A4 width at 96 DPI
+    padding: 32,
+    borderRadius: 0,
+    width: 794, maxWidth: 794, // A4 at 96 DPI — fixed by design.
     alignSelf: 'center',
-    // Add shadow for preview
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-  },
-  banner: {
-    marginBottom: 16,
-    backgroundColor: '#14532d',
-    borderRadius: 8,
-    padding: 16,
-  },
-  bannerTop: {
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  bannerLeft: {
-    flex: 1,
-  },
-  bannerRight: {
-    marginStart: 16,
-  },
-  appName: {
-    color: '#ffffff',
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  githubLink: {
-    color: '#9ca3af',
-    fontSize: 16,
-    marginTop: 4,
-  },
-  qrCode: {
-    width: 96,
-    height: 96,
-    borderRadius: 8,
-  },
-  bannerBottom: {
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#166534',
-    paddingTop: 12,
-  },
-  islamicMonth: {
-    color: '#ffffff',
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  gregorianMonth: {
-    color: '#d1d5db',
-    fontSize: 20,
-    marginBottom: 4,
-  },
-  locationText: {
-    color: '#9ca3af',
-    fontSize: 18,
-  },
-  table: {
-    borderWidth: 1,
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  tableRow: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#d1d5db',
-  },
-  tableHeader: {
-    borderBottomWidth: 2,
-  },
-  cell: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRightWidth: 1,
-  },
-  cellDay: {
-    flex: 1.5,
-    paddingVertical: 8,
-  },
-  cellDateGroup: {
-    flex: 2,
-  },
-  cellTimesGroup: {
-    flex: 6,
-  },
-  cellSubHeader: {
-    width: '100%',
-    paddingVertical: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cellSubRow: {
-    flex: 1,
-    width: '100%',
-  },
-  cellSubCol: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 4,
-  },
-  headerText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  cellText: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  boldText: {
-    fontWeight: 'bold',
   },
   footer: {
     padding: 16,
@@ -546,9 +330,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  shareBtnText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  shareBtnText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
 });

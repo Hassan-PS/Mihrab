@@ -8,7 +8,14 @@
     "settings": "Inställningar",
     "month": "Månad",
     "shareMonth": "Dela månad",
-    "compass": "Kibla"
+    "compass": "Kibla",
+    "tasbih": "Tasbih",
+    "duas": "Duas",
+    "quran": "Quran",
+    "mosques": "Mosques",
+    "journal": "Journal",
+    "backup": "Säkerhetskopiering",
+    "fasting": "Fasta"
   },
   "a11y": {
     "openSettings": "Öppna inställningar",
@@ -38,7 +45,9 @@
     "notifPermDenied": "Aviseringsbehörighet nekad — bönetidsaviseringar fungerar inte. Tryck för att öppna inställningar.",
     "updatingLocation": "Uppdaterar plats",
     "today": "Idag",
-    "tomorrow": "Imorgon"
+    "tomorrow": "Imorgon",
+    "savedLocationLabel": "{{name}}",
+    "switchLocation": "Byt plats"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",
@@ -150,7 +159,23 @@
     "notificationSoundVoiceHelp": "Inbyggd röst ingår i den här appversionen.",
     "versionInstalled": "Installerad version: {{version}}",
     "adhanPreviewTitle": "Förhandsvisning av adhan",
-    "adhanPreviewBody": ""
+    "adhanPreviewBody": "",
+    "prayerOffsets": "Justeringar per bön",
+    "prayerOffsetsTitle": "Justeringar per bön",
+    "prayerOffsetsHelp": "Justera varje bön ±{{max}} minuter för att matcha din lokala moské.",
+    "prayerOffsetsNone": "Inga justeringar",
+    "prayerOffsetsCount_one": "{{count}} prayer adjusted",
+    "prayerOffsetsCount_other": "{{count}} prayers adjusted",
+    "prayerOffsetsIncrease": "Increase {{prayer}} offset",
+    "prayerOffsetsDecrease": "Decrease {{prayer}} offset",
+    "prayerOffsetsReset": "Återställ alla",
+    "dataAndPrivacy": "Data & integritet",
+    "replayOnboarding": "Visa introduktion igen",
+    "replayOnboardingHelp": "Gå igenom välkomstflödet.",
+    "attributions": "Erkännanden",
+    "attribQuran": "Koranens text",
+    "attribTranslation": "Översättning",
+    "attribDuas": "Duas"
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -261,5 +286,147 @@
     "unavailable": "Dricks är inte tillgänglig än (kontrollera butikskoppling eller produktinställningar).",
     "tipWithPrice": "Dricks {{price}}",
     "tip": "Dricks"
+  },
+  "locations": {
+    "title": "Sparade platser",
+    "empty": "Spara din nuvarande plats för att snabbt växla senare.",
+    "add": "Spara nuvarande som…",
+    "addPrompt": "Namnge platsen",
+    "addPlaceholder": "Hem, Jobb, Resa…",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "use": "Använd",
+    "delete": "Ta bort",
+    "limitReached": "Max {{max}} sparade platser har nåtts."
+  },
+  "tasbih": {
+    "subhanallah": "SubhanAllah",
+    "alhamdulillah": "Alhamdulillah",
+    "allahuakbar": "Allahu Akbar",
+    "lailaha": "La ilaha illa Allah",
+    "astaghfirullah": "Astaghfirullah",
+    "open": "Open count",
+    "increment": "Tap to count",
+    "reset": "Reset",
+    "salahonprophet": "Salawat över Profeten ﷺ",
+    "prev": "Föregående",
+    "next": "Nästa"
+  },
+  "duas": {
+    "cat": {
+      "morning": "Morning",
+      "evening": "Evening",
+      "afterPrayer": "After prayer",
+      "food": "Food",
+      "distress": "Distress"
+    },
+    "repeat": "Recite ×{{count}}"
+  },
+  "quran": {
+    "meccan": "Meccan",
+    "medinan": "Medinan",
+    "ayahCount": "{{count}} ayahs",
+    "notFound": "Surah not found.",
+    "comingSoon": "Full text for this surah will arrive in a future data update."
+  },
+  "mosques": {
+    "searching": "Looking for nearby mosques…",
+    "noneFound": "No mosques found nearby. Try expanding the search radius.",
+    "unnamedMosque": "Mosque",
+    "needLocation": "Set a location first so we can search nearby.",
+    "error": "Couldn't reach the mosque database. Please try again."
+  },
+  "journal": {
+    "todayLabel": "Today",
+    "streakDays": "Day streak",
+    "onTimeRate": "On-time",
+    "totalLogged": "Total logged",
+    "status": {
+      "on-time": "On time",
+      "late": "Late",
+      "missed": "Missed",
+      "qadha": "Make-up (Qadha)"
+    },
+    "statusShort": {
+      "on-time": "On",
+      "late": "Late",
+      "missed": "Miss",
+      "qadha": "Qad"
+    }
+  },
+  "events": {
+    "islamicNewYear": "Islamic New Year",
+    "ashura": "Day of Ashura",
+    "mawlid": "Mawlid an-Nabi",
+    "isra": "Isra and Mi'raj",
+    "midShaban": "Mid-Sha'ban",
+    "ramadanBegins": "Ramadan begins",
+    "laylatAlQadr": "Laylat al-Qadr (observed)",
+    "eidAlFitr": "Eid al-Fitr",
+    "arafah": "Day of Arafah",
+    "eidAlAdha": "Eid al-Adha"
+  },
+  "ramadan": {
+    "title": "Ramadan",
+    "suhoor": "Suhoor",
+    "iftar": "Iftar",
+    "suhoorIn": "Suhoor slutar om {{time}}",
+    "iftarIn": "Iftar om {{time}}"
+  },
+  "onboarding": {
+    "skip": "Skip for now",
+    "next": "Next",
+    "done": "Done",
+    "stepLabel": "Step {{current}} of {{total}}",
+    "welcome": {
+      "title": "Welcome",
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+    },
+    "location": {
+      "title": "Your location",
+      "body": "We use your approximate position to calculate accurate prayer times. Coordinates stay encrypted on this device — they never leave it.",
+      "cta": "Use my location"
+    },
+    "notifications": {
+      "title": "Prayer alerts",
+      "body": "We can quietly notify you at each prayer time. You can pick a sound, set a reminder, or turn this off any time.",
+      "cta": "Enable alerts"
+    },
+    "exactAlarms": {
+      "title": "Exact-time alerts",
+      "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
+      "cta": "Allow exact alerts"
+    }
+  },
+  "backup": {
+    "exportSection": "Export",
+    "exportHelp": "Save your settings, saved locations, prayer journal, and fasting log to a JSON file. Open it later to restore.",
+    "exportCta": "Export backup",
+    "shareTitle": "Prayer Times backup",
+    "exportFailedTitle": "Could not export",
+    "restoreSection": "Restore",
+    "restoreHelp": "Paste a backup JSON below and tap Restore to preview it. The app will confirm before applying.",
+    "restorePastePlaceholder": "Paste backup JSON here…",
+    "restoreCta": "Preview restore",
+    "restorePreviewTitle": "Backup found",
+    "restorePreviewBody": "{{settings}} settings, {{presets}} saved locations, {{journal}} journal entries, {{fasting}} fasting days. Apply this on next pass.",
+    "restoreFailedTitle": "Could not parse backup",
+    "notAnEnvelope": "That file does not look like a Prayer Times backup.",
+    "privacyNote": "Backups stay on your device until you share them. Coordinates and journal entries can be encrypted with a password in a future update — keep your backup file private until then."
+  },
+  "fasting": {
+    "todayLabel": "Today",
+    "ramadanDayLabel": "Ramadan · Day {{day}}",
+    "statusKept": "Fast kept — barakAllāhu fīk.",
+    "statusRecommended": "A Sunnah voluntary fast falls on this date.",
+    "statusOptional": "No fast logged today.",
+    "markCta": "Mark today as fasted",
+    "unmarkCta": "Unmark today",
+    "statRamadan": "Ramadan",
+    "statVoluntary": "Voluntary",
+    "statStreak": "Streak",
+    "gridLabel": "This Ramadan",
+    "gridDayA11y": "Day {{day}} {{state}}",
+    "privacyNote": "Fasting history stays encrypted on your device."
   }
 }

@@ -16,7 +16,10 @@ Appen utvecklas som öppen källkod. För frågor om denna policy, använd proje
   Om du väljer enhetsplats används GPS/plats från enheten för att berätta bön­tider och relaterade funktioner (t.ex. kompass). Om du i stället anger plats manuellt eller via ortsökning används de koordinater du valt.
 
 - **Inställningar och appdata på enheten**  
-  T.ex. språk, utseende, vald datakälla, beräkningsinställningar, notisinställningar och sparad plats lagras lokalt på enheten (t.ex. via AsyncStorage). De skickas inte till en central server som drivs av appens utvecklare.
+  T.ex. språk, utseende, vald datakälla, beräkningsinställningar och notisinställningar lagras lokalt på enheten i AsyncStorage (i klartext). De skickas inte till en central server som drivs av appens utvecklare.
+
+- **Platsuppgifter på enheten (krypterade vid vila)**  
+  Sparade platskoordinater (manuellt valda och senast hämtade GPS-positioner) samt ortnamn lagras **krypterat** lokalt på enheten via plattformens säkra lagring: **iOS Keychain** respektive **Android EncryptedSharedPreferences** (Android Keystore). Plattextlagring av koordinater i AsyncStorage används inte; befintliga klartext-värden från äldre versioner migreras automatiskt till den krypterade lagringen vid första öppnandet efter uppdateringen och tas sedan bort från klartextlagringen.
 
 - **Nätverksanrop**  
   För att visa bön­tider och ortsökning behöver appen internetanslutning. Vid dessa anrop kan **tekniska uppgifter** som IP‑adress, tidpunkt och begärd URL behandlas av respektive tredjepartstjänst enligt deras egna villkor.
@@ -44,8 +47,9 @@ Donationer/tips hanteras av **Google Play** eller **Apple**. Vi får inte dina f
 
 ## Lagring och säkerhet
 
-- Inställningar och platsval som sparas i appen ligger **på enheten**.  
-- Android: `android:allowBackup` är satt till **false** i manifestet (ingen säkerhetskopiering via Android Backup för appdata i denna konfiguration).  
+- Inställningar och platsval som sparas i appen ligger **på enheten**.
+- **Koordinater krypteras vid vila** via iOS Keychain / Android EncryptedSharedPreferences. På en upplåst enhet är de tillgängliga för appen; på en låst enhet (skärmlås aktivt) skyddas de av plattformens nyckelhantering.
+- Android: `android:allowBackup` är satt till **false** i manifestet (ingen säkerhetskopiering via Android Backup för appdata i denna konfiguration).
 - Använd en uppdaterad enhet och lås skärm för att skydda enhetsdata.
 
 ## Dina rättigheter (EU/EEA)

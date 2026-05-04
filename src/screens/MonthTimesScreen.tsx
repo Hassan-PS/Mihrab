@@ -1,42 +1,36 @@
 import { useNavigation } from '@react-navigation/native';
 import { useHeaderHeight } from '@react-navigation/elements';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Skeleton } from '../components/ui/Skeleton';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useBreakpoint } from '../responsive/breakpoints';
+import { SPACING } from '../theme/tokens';
 import type { RootStackParamList } from '../navigation/types';
 import {
   loadMonthPrayerTimes,
   type MonthDayEntry,
 } from '../prayer/loadMonthPrayerTimes';
-import { getMethodLabel } from '../settings/methods';
-import { providerHidesCalculationMethod } from '../settings/providerUi';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
-import { getProviderLabel } from '../settings/providersCatalog';
 import { DISPLAY_ORDER } from '../types/prayer';
 import { formatLocalDate } from '../utils/date';
-import { formatDisplayTime } from '../utils/prayerTimes';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
 import { ShareMonthScreen } from './ShareMonthScreen';
-
-// Column flex weights — day label + 6 prayer columns
-const COL_DAY = 1.4;
-const COL_TIME = 1.0;
-
-const DAYS_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+import { MonthControls } from './month/MonthControls';
+import {
+  MONTH_ROW_HEIGHT,
+  MonthColumnHeader,
+  MonthRow,
+} from './month/MonthTable';
 
 export function MonthTimesScreen() {
+  // Subscribe to width changes so future master-detail layouts pick up
+  // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
+  useBreakpoint();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t, i18n } = useTranslation();
@@ -158,65 +152,42 @@ export function MonthTimesScreen() {
       settings.calculationMethod, settings.school, lat, lng, t]);
 
   // Abbreviated column headers from localized prayer names
-  const colHeaders = useMemo(() =>
-    DISPLAY_ORDER.map(key => t(`prayer.${key}`).slice(0, 3)),
+  const colHeaders = useMemo(
+    () => DISPLAY_ORDER.map(key => t(`prayer.${key}`).slice(0, 3)),
     [t],
   );
 
-  const renderItem = useCallback(({ item }: { item: MonthDayEntry }) => {
-    const d = item.date;
-    const isToday = isCurrentMonth && d.getDate() === today.day;
-    const isFriday = d.getDay() === 5;
-    const dayLabel = `${DAYS_SHORT[d.getDay()]} ${d.getDate()}`;
-
-    return (
-      <View style={[
-        styles.row,
-        { borderBottomColor: palette.border },
-        isToday && { backgroundColor: palette.accentBg },
-        isFriday && !isToday && { backgroundColor: palette.card },
-      ]}>
-        {/* Active-day accent bar */}
-        {isToday && <View style={[styles.todayBar, { backgroundColor: palette.accent }]} />}
-
-        <Text style={[
-          styles.cellDay,
-          { color: isToday ? palette.accent : isFriday ? palette.text : palette.muted,
-            fontWeight: isFriday || isToday ? '700' : '400' },
-        ]}>
-          {dayLabel}
-        </Text>
-
-        {DISPLAY_ORDER.map((key, idx) => {
-          const raw = item.timings[key];
-          const timeStr = raw ? formatDisplayTime(raw) : '—';
-          const isSunrise = key === 'Sunrise';
-          return (
-            <Text
-              key={key}
-              style={[
-                styles.cellTime,
-                { color: isToday
-                    ? palette.accent
-                    : isSunrise
-                    ? palette.muted
-                    : palette.text,
-                  fontStyle: isSunrise ? 'italic' : 'normal',
-                  fontWeight: isToday ? '600' : '400',
-                },
-              ]}>
-              {timeStr}
-            </Text>
-          );
-        })}
-      </View>
-    );
-  }, [palette, isCurrentMonth, today.day]);
+  const renderItem = useCallback(
+    ({ item }: { item: MonthDayEntry }) => (
+      <MonthRow
+        item={item}
+        palette={palette}
+        isCurrentMonth={isCurrentMonth}
+        todayDay={today.day}
+      />
+    ),
+    [palette, isCurrentMonth, today.day],
+  );
 
   if (!hydrated) {
+    // Layout-stable skeleton — keeps the eye anchored to the table shape
+    // instead of a centered spinner that disappears with a jump.
     return (
-      <View style={[styles.centered, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
-        <ActivityIndicator size="large" color={palette.accent} />
+      <View
+        accessibilityRole="text"
+        accessibilityLabel={t('common.loading')}
+        style={[styles.skeletonScreen, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
+        <Skeleton width="60%" height={28} radius="sm" />
+        <Skeleton width="40%" height={16} radius="sm" />
+        {Array.from({ length: 12 }, (_, i) => (
+          <View key={i} style={styles.skelRow}>
+            <Skeleton width={24} height={20} radius="sm" />
+            <Skeleton width={64} height={16} radius="sm" />
+            <Skeleton width={64} height={16} radius="sm" />
+            <Skeleton width={64} height={16} radius="sm" />
+            <Skeleton width={64} height={16} radius="sm" />
+          </View>
+        ))}
       </View>
     );
   }
@@ -231,72 +202,33 @@ export function MonthTimesScreen() {
   }
 
   const controlsHeader = (
-    <View style={[styles.controls, { backgroundColor: palette.bg, borderBottomColor: palette.border }]}>
-      {/* Month navigation */}
-      <View style={styles.monthNav}>
-        <Pressable onPress={goPrevMonth} hitSlop={16} style={styles.navHit}>
-          <Text style={[styles.navArrow, { color: palette.accent }]}>‹</Text>
-        </Pressable>
-        <Text style={[styles.monthTitle, { color: palette.text }]}>{monthTitle}</Text>
-        <Pressable onPress={goNextMonth} hitSlop={16} style={styles.navHit}>
-          <Text style={[styles.navArrow, { color: palette.accent }]}>›</Text>
-        </Pressable>
-      </View>
-
-      {/* Actions row */}
-      <View style={styles.actionsRow}>
-        {!isCurrentMonth && (
-          <Pressable onPress={goThisMonth} style={[styles.pill, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            <Text style={[styles.pillLabel, { color: palette.accent }]}>{t('month.thisMonth')}</Text>
-          </Pressable>
-        )}
-        <Pressable
-          onPress={handleRefreshCache}
-          disabled={refreshingCache}
-          style={[styles.pill, { backgroundColor: palette.card, borderColor: palette.border, opacity: refreshingCache ? 0.5 : 1 }]}>
-          <Text style={[styles.pillLabel, { color: palette.muted }]}>
-            {refreshingCache
-              ? (refreshProgress ? `${Math.round((refreshProgress.current / refreshProgress.total) * 100)}%` : '…')
-              : t('month.refreshData')}
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setIsShareView(v => !v)}
-          style={[styles.pill, { backgroundColor: isShareView ? palette.accentBg : palette.card, borderColor: isShareView ? palette.accent : palette.border }]}>
-          <Text style={[styles.pillLabel, { color: isShareView ? palette.accent : palette.muted }]}>
-            {t('month.shareView', 'Share')}
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* Meta info */}
-      <Text style={[styles.meta, { color: palette.muted }]}>
-        {getProviderLabel(effectiveProvider)}
-        {!providerHidesCalculationMethod(effectiveProvider) ? ` · ${getMethodLabel(settings.calculationMethod)}` : ''}
-        {effectiveProvider !== 'islamiska_forbundet' && settings.school === 1 ? ` · ${t('home.hanafiSuffix')}` : ''}
-        {cacheStatus && !refreshingCache ? ` · ${cacheStatus.monthsStored}mo cached` : ''}
-      </Text>
-
-      {loading && <ActivityIndicator style={{ marginTop: 8 }} color={palette.accent} />}
-      {error && <Text style={[styles.err, { color: palette.danger }]}>{error}</Text>}
-    </View>
+    <MonthControls
+      palette={palette}
+      monthTitle={monthTitle}
+      isCurrentMonth={isCurrentMonth}
+      isShareView={isShareView}
+      effectiveProvider={effectiveProvider}
+      calculationMethod={settings.calculationMethod}
+      school={settings.school}
+      cacheStatus={cacheStatus}
+      refreshingCache={refreshingCache}
+      refreshProgress={refreshProgress}
+      loading={loading}
+      error={error}
+      onPrev={goPrevMonth}
+      onNext={goNextMonth}
+      onThisMonth={goThisMonth}
+      onRefreshCache={handleRefreshCache}
+      onToggleShareView={() => setIsShareView(v => !v)}
+    />
   );
 
-  // Sticky column header row
   const columnHeader = (
-    <View style={[styles.colHeader, { backgroundColor: palette.card, borderBottomColor: palette.accent }]}>
-      <Text style={[styles.colHeaderDay, { color: palette.muted }]}>{t('month.dayOfWeek', 'Day')}</Text>
-      {DISPLAY_ORDER.map((key, idx) => {
-        const isSunrise = key === 'Sunrise';
-        return (
-          <Text
-            key={key}
-            style={[styles.colHeaderTime, { color: isSunrise ? palette.muted : palette.accent }]}>
-            {colHeaders[idx]}
-          </Text>
-        );
-      })}
-    </View>
+    <MonthColumnHeader
+      palette={palette}
+      colHeaders={colHeaders}
+      dayLabel={t('month.dayOfWeek', 'Day')}
+    />
   );
 
   if (isShareView) {
@@ -330,97 +262,28 @@ export function MonthTimesScreen() {
         }
         keyboardShouldPersistTaps="handled"
         initialScrollIndex={isCurrentMonth && rows ? Math.max(0, today.day - 3) : 0}
-        getItemLayout={(_, index) => ({ length: ROW_HEIGHT, offset: ROW_HEIGHT * index, index })}
+        getItemLayout={(_, index) => ({
+          length: MONTH_ROW_HEIGHT,
+          offset: MONTH_ROW_HEIGHT * index,
+          index,
+        })}
         onScrollToIndexFailed={() => {}}
       />
     </View>
   );
 }
 
-const ROW_HEIGHT = 40;
-
 const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  pad: { padding: 24 },
-  title: { fontSize: 20, fontWeight: '600', marginBottom: 8, textAlign: 'center' },
-  body: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
-  err: { marginTop: 6, fontSize: 13, textAlign: 'center' },
-  empty: { textAlign: 'center', marginTop: 24, paddingHorizontal: 24 },
-
-  controls: {
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 8 : 12,
-    paddingBottom: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  monthNav: {
+  skeletonScreen: { flex: 1, padding: SPACING.lg, gap: SPACING.sm },
+  skelRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: SPACING.xs,
   },
-  navHit: { minWidth: 44, alignItems: 'center', justifyContent: 'center' },
-  navArrow: { fontSize: 30, fontWeight: '300', lineHeight: 36 },
-  monthTitle: { fontSize: 20, fontWeight: '700' },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-    flexWrap: 'wrap',
-  },
-  pill: {
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  pillLabel: { fontSize: 13, fontWeight: '600' },
-  meta: { fontSize: 11, marginTop: 8, lineHeight: 16 },
-
-  colHeader: {
-    flexDirection: 'row',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderBottomWidth: 1.5,
-  },
-  colHeaderDay: {
-    flex: COL_DAY,
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  colHeaderTime: {
-    flex: COL_TIME,
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    textAlign: 'center',
-  },
-
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: ROW_HEIGHT,
-    paddingHorizontal: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    position: 'relative',
-  },
-  todayBar: {
-    position: 'absolute',
-    start: 0,
-    top: 0,
-    bottom: 0,
-    width: 3,
-  },
-  cellDay: {
-    flex: COL_DAY,
-    fontSize: 13,
-    paddingStart: 4,
-  },
-  cellTime: {
-    flex: COL_TIME,
-    fontSize: 12,
-    textAlign: 'center',
-  },
+  pad: { padding: 24 },
+  title: { fontSize: 20, fontWeight: '600', marginBottom: 8, textAlign: 'center' },
+  body: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  empty: { textAlign: 'center', marginTop: 24, paddingHorizontal: 24 },
 });

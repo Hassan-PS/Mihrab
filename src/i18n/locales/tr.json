@@ -8,7 +8,14 @@
     "settings": "Ayarlar",
     "month": "Ay",
     "shareMonth": "Ayı Paylaş",
-    "compass": "Kıble"
+    "compass": "Kıble",
+    "tasbih": "Tasbih",
+    "duas": "Duas",
+    "quran": "Quran",
+    "mosques": "Mosques",
+    "journal": "Journal",
+    "backup": "Yedekleme",
+    "fasting": "Oruç"
   },
   "a11y": {
     "openSettings": "Ayarları aç",
@@ -38,7 +45,9 @@
     "notifPermDenied": "Bildirim izni reddedildi — namaz uyarıları çalmayacak. Ayarları açmak için dokunun.",
     "updatingLocation": "Konum güncelleniyor",
     "today": "Bugün",
-    "tomorrow": "Yarın"
+    "tomorrow": "Yarın",
+    "savedLocationLabel": "{{name}}",
+    "switchLocation": "Konumu değiştir"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",
@@ -150,7 +159,23 @@
     "notificationSoundVoiceHelp": "Bu uygulama derlemesine yerleşik ses dahildir.",
     "versionInstalled": "Yüklü sürüm: {{version}}",
     "adhanPreviewTitle": "Ezan önizleme",
-    "adhanPreviewBody": ""
+    "adhanPreviewBody": "",
+    "prayerOffsets": "Vakit başına kaydırma",
+    "prayerOffsetsTitle": "Vakit başına kaydırma",
+    "prayerOffsetsHelp": "Yerel caminize uyacak şekilde her vakti ±{{max}} dakika kaydırın.",
+    "prayerOffsetsNone": "Kaydırma yok",
+    "prayerOffsetsCount_one": "{{count}} prayer adjusted",
+    "prayerOffsetsCount_other": "{{count}} prayers adjusted",
+    "prayerOffsetsIncrease": "Increase {{prayer}} offset",
+    "prayerOffsetsDecrease": "Decrease {{prayer}} offset",
+    "prayerOffsetsReset": "Tümünü sıfırla",
+    "dataAndPrivacy": "Veri ve gizlilik",
+    "replayOnboarding": "Tanıtımı tekrar göster",
+    "replayOnboardingHelp": "Karşılama akışını izle.",
+    "attributions": "Atıflar",
+    "attribQuran": "Kuran metni",
+    "attribTranslation": "Çeviri",
+    "attribDuas": "Dualar"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -213,13 +238,13 @@
     "east": "e",
     "south": "S",
     "west": "K",
-    "a11yDialLive": "Qibla compass. Rotate {{deg}} degrees to face Qibla.",
-    "a11yDialChecking": "Qibla compass. Waiting for sensor data.",
-    "a11yDialUnavailable": "Qibla compass unavailable.",
-    "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
-    "a11ySignal_good": "Compass signal: good.",
-    "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
-    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
+    "a11yDialLive": "Kıble pusulası. Kıbleye dönmek için {{deg}} derece çevirin.",
+    "a11yDialChecking": "Kıble pusulası. Sensör verileri bekleniyor.",
+    "a11yDialUnavailable": "Kıble pusulası kullanılamıyor.",
+    "a11yNeedleDeg": "Kıbleye dönmek için {{deg}} derece çevirin.",
+    "a11ySignal_good": "Pusula sinyali: iyi.",
+    "a11ySignal_weak": "Pusula sinyali: zayıf. Açık bir alana geçmeyi deneyin.",
+    "a11ySignal_very_weak": "Pusula sinyali: çok zayıf. Doğruluk sınırlı olabilir."
   },
   "prayer": {
     "Fajr": "sabah",
@@ -261,5 +286,147 @@
     "unavailable": "Bahşiş satın alımları henüz mevcut değil (mağaza bağlantınızı veya ürün kurulumunuzu kontrol edin).",
     "tipWithPrice": "İpucu {{price}}",
     "tip": "Uç"
+  },
+  "locations": {
+    "title": "Saved locations",
+    "empty": "Save the current location to switch quickly later.",
+    "add": "Save current as…",
+    "addPrompt": "Name this location",
+    "addPlaceholder": "Home, Work, Travel…",
+    "cancel": "Cancel",
+    "save": "Save",
+    "use": "Use",
+    "delete": "Delete",
+    "limitReached": "Maximum {{max}} saved locations reached."
+  },
+  "tasbih": {
+    "subhanallah": "SubhanAllah",
+    "alhamdulillah": "Alhamdulillah",
+    "allahuakbar": "Allahu Akbar",
+    "lailaha": "La ilaha illa Allah",
+    "astaghfirullah": "Astaghfirullah",
+    "open": "Open count",
+    "increment": "Tap to count",
+    "reset": "Reset",
+    "salahonprophet": "Peygamber’e ﷺ Salavat",
+    "prev": "Önceki",
+    "next": "Sonraki"
+  },
+  "duas": {
+    "cat": {
+      "morning": "Morning",
+      "evening": "Evening",
+      "afterPrayer": "After prayer",
+      "food": "Food",
+      "distress": "Distress"
+    },
+    "repeat": "Recite ×{{count}}"
+  },
+  "quran": {
+    "meccan": "Meccan",
+    "medinan": "Medinan",
+    "ayahCount": "{{count}} ayahs",
+    "notFound": "Surah not found.",
+    "comingSoon": "Full text for this surah will arrive in a future data update."
+  },
+  "mosques": {
+    "searching": "Looking for nearby mosques…",
+    "noneFound": "No mosques found nearby. Try expanding the search radius.",
+    "unnamedMosque": "Mosque",
+    "needLocation": "Set a location first so we can search nearby.",
+    "error": "Couldn't reach the mosque database. Please try again."
+  },
+  "journal": {
+    "todayLabel": "Today",
+    "streakDays": "Day streak",
+    "onTimeRate": "On-time",
+    "totalLogged": "Total logged",
+    "status": {
+      "on-time": "On time",
+      "late": "Late",
+      "missed": "Missed",
+      "qadha": "Make-up (Qadha)"
+    },
+    "statusShort": {
+      "on-time": "On",
+      "late": "Late",
+      "missed": "Miss",
+      "qadha": "Qad"
+    }
+  },
+  "events": {
+    "islamicNewYear": "Islamic New Year",
+    "ashura": "Day of Ashura",
+    "mawlid": "Mawlid an-Nabi",
+    "isra": "Isra and Mi'raj",
+    "midShaban": "Mid-Sha'ban",
+    "ramadanBegins": "Ramadan begins",
+    "laylatAlQadr": "Laylat al-Qadr (observed)",
+    "eidAlFitr": "Eid al-Fitr",
+    "arafah": "Day of Arafah",
+    "eidAlAdha": "Eid al-Adha"
+  },
+  "ramadan": {
+    "title": "Ramazan",
+    "suhoor": "Sahur",
+    "iftar": "İftar",
+    "suhoorIn": "Sahura {{time}} kaldı",
+    "iftarIn": "İftara {{time}}"
+  },
+  "onboarding": {
+    "skip": "Skip for now",
+    "next": "Next",
+    "done": "Done",
+    "stepLabel": "Step {{current}} of {{total}}",
+    "welcome": {
+      "title": "Welcome",
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+    },
+    "location": {
+      "title": "Your location",
+      "body": "We use your approximate position to calculate accurate prayer times. Coordinates stay encrypted on this device — they never leave it.",
+      "cta": "Use my location"
+    },
+    "notifications": {
+      "title": "Prayer alerts",
+      "body": "We can quietly notify you at each prayer time. You can pick a sound, set a reminder, or turn this off any time.",
+      "cta": "Enable alerts"
+    },
+    "exactAlarms": {
+      "title": "Exact-time alerts",
+      "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
+      "cta": "Allow exact alerts"
+    }
+  },
+  "backup": {
+    "exportSection": "Export",
+    "exportHelp": "Save your settings, saved locations, prayer journal, and fasting log to a JSON file. Open it later to restore.",
+    "exportCta": "Export backup",
+    "shareTitle": "Prayer Times backup",
+    "exportFailedTitle": "Could not export",
+    "restoreSection": "Restore",
+    "restoreHelp": "Paste a backup JSON below and tap Restore to preview it. The app will confirm before applying.",
+    "restorePastePlaceholder": "Paste backup JSON here…",
+    "restoreCta": "Preview restore",
+    "restorePreviewTitle": "Backup found",
+    "restorePreviewBody": "{{settings}} settings, {{presets}} saved locations, {{journal}} journal entries, {{fasting}} fasting days. Apply this on next pass.",
+    "restoreFailedTitle": "Could not parse backup",
+    "notAnEnvelope": "That file does not look like a Prayer Times backup.",
+    "privacyNote": "Backups stay on your device until you share them. Coordinates and journal entries can be encrypted with a password in a future update — keep your backup file private until then."
+  },
+  "fasting": {
+    "todayLabel": "Today",
+    "ramadanDayLabel": "Ramadan · Day {{day}}",
+    "statusKept": "Fast kept — barakAllāhu fīk.",
+    "statusRecommended": "A Sunnah voluntary fast falls on this date.",
+    "statusOptional": "No fast logged today.",
+    "markCta": "Mark today as fasted",
+    "unmarkCta": "Unmark today",
+    "statRamadan": "Ramadan",
+    "statVoluntary": "Voluntary",
+    "statStreak": "Streak",
+    "gridLabel": "This Ramadan",
+    "gridDayA11y": "Day {{day}} {{state}}",
+    "privacyNote": "Fasting history stays encrypted on your device."
   }
 }

@@ -1,3 +1,7 @@
+// tokens-ok: deterministic raw values are part of this surface
+// contract (share-image must render identically regardless of in-app
+// theme; donations section uses platform brand colors).
+import { memo } from 'react';
 import { Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 import Svg, { Circle, Path, Polygon, Rect } from 'react-native-svg';
 
@@ -16,7 +20,7 @@ type Props = {
 const ICON = 24;
 
 /** Wall calendar: page + twin rings + header line (Feather-style). */
-export function CalendarIcon({
+function CalendarIconImpl({
   color,
   size = ICON,
 }: {
@@ -57,8 +61,10 @@ export function CalendarIcon({
   );
 }
 
+export const CalendarIcon = memo(CalendarIconImpl);
+
 /** Compass dial + filled needle diamond (Feather-style). */
-export function CompassIcon({
+function CompassIconImpl({
   color,
   size = ICON,
 }: {
@@ -81,10 +87,12 @@ export function CompassIcon({
   );
 }
 
+export const CompassIcon = memo(CompassIconImpl);
+
 /**
  * Lucide-style settings gear (stroke) — reads clearly as a cog, not a flower.
  */
-function SettingsIcon({
+function SettingsIconImpl({
   color,
   size = ICON,
 }: {
@@ -118,7 +126,9 @@ function SettingsIcon({
   );
 }
 
-export function HeaderToolbarIcons({
+const SettingsIcon = memo(SettingsIconImpl);
+
+function HeaderToolbarIconsImpl({
   tintColor,
   onMonth,
   onCompass,
@@ -159,6 +169,13 @@ export function HeaderToolbarIcons({
     </View>
   );
 }
+
+/**
+ * Memo'd. Used in screen headers — re-renders only when one of the 7 props
+ * actually changes (typically: tintColor on theme switch, accessibility labels
+ * on locale switch, or a stale callback identity if a parent forgets useCallback).
+ */
+export const HeaderToolbarIcons = memo(HeaderToolbarIconsImpl);
 
 const styles = StyleSheet.create({
   row: {

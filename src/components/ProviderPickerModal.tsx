@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   FlatList,
@@ -8,6 +8,7 @@ import {
   Text,
   View,
   type ColorValue,
+  type ListRenderItem,
 } from 'react-native';
 import {
   MAINSTREAM_PRAYER_PROVIDERS,
@@ -46,7 +47,14 @@ type ListItem =
   | { kind: 'provider'; id: PrayerDataProviderId }
   | { kind: 'footer'; text: string };
 
-export function ProviderPickerModal({
+function keyExtractor(item: ListItem): string {
+  if (item.kind === 'auto') return 'auto';
+  if (item.kind === 'section') return `section-${item.title}`;
+  if (item.kind === 'footer') return 'footer';
+  return `provider-${item.id}`;
+}
+
+function ProviderPickerModalImpl({
   visible,
   onClose,
   settings,
@@ -72,6 +80,96 @@ export function ProviderPickerModal({
     [t],
   );
 
+  // Memoised renderItem so FlatList doesn't recreate row components on every
+  // settings change. Captures everything via deps; stable as long as none of
+  // them change identity.
+  const renderItem = useCallback<ListRenderItem<ListItem>>(
+    ({ item }) => {
+      if (item.kind === 'section') {
+        return (
+          <View style={[styles.sectionHeader, rowDividerStyle(palette)]}>
+            <Text style={[styles.sectionTitle, { color: palette.muted }]}>
+              {item.title}
+            </Text>
+          </View>
+        );
+      }
+      if (item.kind === 'footer') {
+        return (
+          <View style={styles.footerWrap}>
+            <Text style={[styles.footerText, { color: palette.muted }]}>
+              {item.text}
+            </Text>
+          </View>
+        );
+      }
+      if (item.kind === 'auto') {
+        const selected = settings.dataProviderAuto;
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('provider.autoTitle')}
+            accessibilityState={{ selected }}
+            style={[
+              styles.row,
+              rowDividerStyle(palette),
+              selected && { backgroundColor: palette.bg },
+            ]}
+            onPress={() => {
+              updateSettings({ dataProviderAuto: true });
+              onClose();
+            }}>
+            <Text style={[styles.rowTitle, { color: palette.text }]}>
+              {t('provider.autoTitle')}
+            </Text>
+            <Text style={[styles.rowSub, { color: palette.muted }]}>
+              {t('provider.autoSub')}
+            </Text>
+          </Pressable>
+        );
+      }
+      const opt = PRAYER_DATA_PROVIDERS.find(o => o.id === item.id)!;
+      const selected =
+        !settings.dataProviderAuto && settings.dataProvider === item.id;
+      const desc = t(`providers.${item.id}.desc`, {
+        defaultValue: opt.description,
+      });
+      return (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={opt.name}
+          accessibilityState={{ selected }}
+          style={[
+            styles.row,
+            rowDividerStyle(palette),
+            selected && { backgroundColor: palette.bg },
+          ]}
+          onPress={() => {
+            updateSettings({
+              dataProvider: item.id,
+              dataProviderAuto: false,
+            });
+            onClose();
+          }}>
+          <Text style={[styles.rowTitle, { color: palette.text }]}>
+            {opt.name}
+          </Text>
+          <Text style={[styles.rowSub, { color: palette.muted }]}>
+            {desc}
+          </Text>
+        </Pressable>
+      );
+    },
+    [
+      palette,
+      settings.dataProviderAuto,
+      settings.dataProvider,
+      t,
+      updateSettings,
+      onClose,
+    ],
+  );
+
   return (
     <Modal
       visible={visible}
@@ -80,6 +178,8 @@ export function ProviderPickerModal({
       onRequestClose={onClose}>
       <View style={styles.modalRoot}>
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
           style={[styles.modalFill, { backgroundColor: palette.overlay }]}
           onPress={onClose}
         />
@@ -93,96 +193,17 @@ export function ProviderPickerModal({
           </Text>
           <FlatList
             data={listData}
-            keyExtractor={item => {
-              if (item.kind === 'auto') {
-                return 'auto';
-              }
-              if (item.kind === 'section') {
-                return `section-${item.title}`;
-              }
-              if (item.kind === 'footer') {
-                return 'footer';
-              }
-              return `provider-${item.id}`;
-            }}
-            renderItem={({ item }) => {
-              if (item.kind === 'section') {
-                return (
-                  <View
-                    style={[styles.sectionHeader, rowDividerStyle(palette)]}>
-                    <Text
-                      style={[styles.sectionTitle, { color: palette.muted }]}>
-                      {item.title}
-                    </Text>
-                  </View>
-                );
-              }
-              if (item.kind === 'footer') {
-                return (
-                  <View style={styles.footerWrap}>
-                    <Text style={[styles.footerText, { color: palette.muted }]}>
-                      {item.text}
-                    </Text>
-                  </View>
-                );
-              }
-              if (item.kind === 'auto') {
-                const selected = settings.dataProviderAuto;
-                return (
-                  <Pressable
-                    style={[
-                      styles.row,
-                      rowDividerStyle(palette),
-                      selected && { backgroundColor: palette.bg },
-                    ]}
-                    onPress={() => {
-                      updateSettings({ dataProviderAuto: true });
-                      onClose();
-                    }}>
-                    <Text style={[styles.rowTitle, { color: palette.text }]}>
-                      {t('provider.autoTitle')}
-                    </Text>
-                    <Text style={[styles.rowSub, { color: palette.muted }]}>
-                      {t('provider.autoSub')}
-                    </Text>
-                  </Pressable>
-                );
-              }
-              const opt = PRAYER_DATA_PROVIDERS.find(o => o.id === item.id)!;
-              const selected =
-                !settings.dataProviderAuto && settings.dataProvider === item.id;
-              const desc = t(`providers.${item.id}.desc`, {
-                defaultValue: opt.description,
-              });
-              return (
-                <Pressable
-                  style={[
-                    styles.row,
-                    rowDividerStyle(palette),
-                    selected && { backgroundColor: palette.bg },
-                  ]}
-                  onPress={() => {
-                    updateSettings({
-                      dataProvider: item.id,
-                      dataProviderAuto: false,
-                    });
-                    onClose();
-                  }}>
-                  <Text style={[styles.rowTitle, { color: palette.text }]}>
-                    {opt.name}
-                  </Text>
-                  <Text style={[styles.rowSub, { color: palette.muted }]}>
-                    {desc}
-                  </Text>
-                </Pressable>
-              );
-            }}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
           />
         </View>
       </View>
     </Modal>
   );
 }
+
+/** Memo'd. Modal content tree is rebuilt only when its 5 props change. */
+export const ProviderPickerModal = memo(ProviderPickerModalImpl);
 
 const styles = StyleSheet.create({
   modalRoot: {
@@ -194,8 +215,8 @@ const styles = StyleSheet.create({
   },
   modalSheet: {
     maxHeight: '78%',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopStartRadius: 16,
+    borderTopEndRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     paddingTop: 12,
   },

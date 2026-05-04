@@ -1,3 +1,6 @@
+// tokens-ok: deterministic raw values are part of this surface
+// contract (share-image must render identically regardless of in-app
+// theme; donations section uses platform brand colors).
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { AppPalette } from '../theme/appPalette';
@@ -45,7 +48,11 @@ export function SupportDeveloperSection({ palette }: Props) {
             <Text style={[styles.thankYouText, { color: palette.accent }]}>
               {t('support.thankYou')}
             </Text>
-            <Pressable onPress={dismissThankYou} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('support.dismiss')}
+              onPress={dismissThankYou}
+              hitSlop={8}>
               <Text style={[styles.dismissLink, { color: palette.muted }]}>
                 {t('support.dismiss')}
               </Text>
@@ -71,6 +78,13 @@ export function SupportDeveloperSection({ palette }: Props) {
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            priceLabel
+              ? t('support.tipWithPrice', { price: priceLabel })
+              : t('support.tip')
+          }
+          accessibilityState={{ disabled: !canBuy, busy: purchasing }}
           disabled={!canBuy}
           onPress={() => void purchase()}
           style={[
