@@ -31,7 +31,9 @@
     "back": "Назад",
     "loading": "Загрузка…",
     "automatic": "Автоматический",
-    "openSettings": "Открыть настройки"
+    "openSettings": "Открыть настройки",
+    "cancel": "Отмена",
+    "ok": "OK"
   },
   "home": {
     "loadingPrayer": "Загрузка времени молитв…",
@@ -358,7 +360,12 @@
     "viewToggleTranslation": "Перевод",
     "viewToggleMushaf": "Мусхаф",
     "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen"
+    "exitFullscreen": "Exit fullscreen",
+    "mushafDownloadTitle": "Скачать мусхаф",
+    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
+    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloading": "Downloading mushaf…",
+    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

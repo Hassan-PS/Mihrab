@@ -31,7 +31,9 @@
     "back": "Zurück",
     "loading": "Laden…",
     "automatic": "Automatisch",
-    "openSettings": "Einstellungen öffnen"
+    "openSettings": "Einstellungen öffnen",
+    "cancel": "Abbrechen",
+    "ok": "OK"
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",
@@ -358,7 +360,12 @@
     "viewToggleTranslation": "Übersetzung",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Vollbild",
-    "exitFullscreen": "Vollbild beenden"
+    "exitFullscreen": "Vollbild beenden",
+    "mushafDownloadTitle": "Mushaf herunterladen",
+    "mushafDownloadBody": "Der Madinah-Mushaf ist etwa 120 MB groß. Er ist nicht in der App enthalten — einmal herunterladen, danach bleiben die Seiten auf deinem Gerät gespeichert.",
+    "mushafDownloadCta": "Mushaf herunterladen (~120 MB)",
+    "mushafDownloading": "Mushaf wird heruntergeladen…",
+    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

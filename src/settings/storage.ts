@@ -229,7 +229,13 @@ export async function resetAppData(): Promise<void> {
   // Plaintext: clear EVERYTHING we own. AsyncStorage.clear() is too broad
   // (it would also nuke other libraries' storage), so we enumerate keys
   // we authored.
-  const asyncKeys = ['prayerapp.settings.v1', 'prayerapp.prayer.v1'];
+  const asyncKeys = [
+    'prayerapp.settings.v1',
+    'prayerapp.prayer.v1',
+    // Mushaf one-time-download flag — task #130. Clearing forces the
+    // download prompt to re-appear on first mushaf open after reset.
+    'mushaf.assets.v1.complete',
+  ];
   try {
     await AsyncStorage.multiRemove(asyncKeys);
   } catch (e) {
