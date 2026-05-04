@@ -1,8 +1,11 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { I18nManager, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { TimingsMap } from '../../types/prayer';
 import { DayCard } from './DayCard';
+
+const RTL_LOCALES = ['ar', 'ur', 'he', 'fa'];
 
 /**
  * Horizontal scroll over a week of day cards, with paged snapping and dot
@@ -33,21 +36,29 @@ function DayCarouselImpl({
   getDayDate,
 }: DayCarouselProps) {
   const { palette } = useAppPalette();
+  const { i18n } = useTranslation();
   const scrollRef = useRef<ScrollView>(null);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
   // RTL handling — task #143.
   //
-  // ScrollView in horizontal mode lays children RIGHT-to-LEFT under RTL,
-  // but `contentOffset.x` is still measured from the LEFT edge of the
-  // content. So `{x: 0}` shows the LEFTMOST visual page, which under RTL
-  // is the LAST logical child (week[week.length - 1]) — that's why the
-  // user saw "10 May / Sunday" instead of today on first load.
+  // The user reports the carousel lands on the LAST day instead of today
+  // when the app language is Arabic. Two relevant facts:
   //
-  // To pin today (week[0]) in the visible viewport we need to scroll all
-  // the way to the right edge under RTL, and we have to invert the
-  // visual→logical index mapping in `onMomentumScrollEnd` too.
-  const isRtl = I18nManager.isRTL;
+  // 1. Our app sets its own language via the in-app picker (i18n.language).
+  //    The iOS SYSTEM locale stays English, so I18nManager.isRTL is FALSE
+  //    even when i18n.language === 'ar'. We must drive the RTL flip from
+  //    i18n.language, not from I18nManager.
+  //
+  // 2. Even though the parent layout stays LTR, the DayCard children
+  //    contain Arabic text whose intrinsic writingDirection causes the
+  //    paged ScrollView's snap target to land on the rightmost-but-last
+  //    page on first paint. Forcing the initial scroll to the today edge
+  //    keeps it pinned.
+  //
+  // We treat the locale-driven flag as the source of truth for both the
+  // initial scroll and the visual→logical index inversion.
+  const isRtl = RTL_LOCALES.includes((i18n.language || '').slice(0, 2));
   const todayScrollX = isRtl ? Math.max(0, (week.length - 1) * cardWidth) : 0;
 
   useEffect(() => {
