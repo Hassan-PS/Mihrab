@@ -96,6 +96,12 @@ export function RootNavigator() {
         headerLargeStyle: { backgroundColor: 'transparent' },
         headerTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection },
         headerLargeTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection },
+        // Default portrait everywhere; the Quran mushaf-fullscreen mode
+        // overrides this to 'all' via navigation.setOptions so the user
+        // can rotate the phone for landscape reading. The activity's
+        // android:screenOrientation is now 'unspecified' so this option
+        // takes effect.
+        orientation: 'portrait',
       }}>
       <Stack.Screen
         name="Home"

@@ -109,43 +109,89 @@ export function QuranSurahScreen() {
     });
   };
 
-  // Set the title and a headerRight Mushaf/Translation toggle so the
-  // mode switch lives opposite the title text in the navigation bar
-  // — task #107.
+  // Fullscreen state — only reachable from mushaf mode (#123). Hides
+  // the navigation header + status bar and unlocks orientation so the
+  // user can rotate the phone for landscape reading.
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const toggleFullscreen = () => setIsFullscreen(s => !s);
+
+  // Set the title + headerRight controls. In mushaf mode we render a
+  // text "Translation" label (tap to flip to translation mode) and a
+  // fullscreen icon next to it. In translation mode we render a
+  // "Mushaf" text label. Header is hidden entirely in fullscreen.
+  // — tasks #107, #123.
   useEffect(() => {
     if (!surah) return;
+    if (isFullscreen) {
+      navigation.setOptions({
+        headerShown: false,
+        // Allow the user to rotate while reading; reset to portrait
+        // when fullscreen exits or the screen unmounts.
+        orientation: 'all',
+      });
+      return;
+    }
     navigation.setOptions({
+      headerShown: true,
+      orientation: 'portrait',
       title: surah.romanized,
       headerRight: () => (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            isMushaf
-              ? t('quran.switchToTranslation', 'Switch to translation view')
-              : t('quran.switchToMushaf', 'Switch to mushaf view')
-          }
-          onPress={toggleMushaf}
-          hitSlop={10}
-          style={{ paddingHorizontal: 4 }}>
-          <Text
-            style={{
-              color: String(palette.accent),
-              fontSize: 15,
-              fontWeight: '700',
-            }}>
-            {isMushaf
-              ? t('quran.viewToggleTranslation', 'Aa')
-              : t('quran.viewToggleMushaf', '۝')}
-          </Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              isMushaf
+                ? t('quran.switchToTranslation', 'Switch to translation view')
+                : t('quran.switchToMushaf', 'Switch to mushaf view')
+            }
+            onPress={toggleMushaf}
+            hitSlop={10}
+            style={{ paddingHorizontal: 4 }}>
+            <Text
+              style={{
+                color: String(palette.accent),
+                fontSize: 15,
+                fontWeight: '700',
+              }}>
+              {isMushaf
+                ? t('quran.viewToggleTranslation', 'Translation')
+                : t('quran.viewToggleMushaf', 'Mushaf')}
+            </Text>
+          </Pressable>
+          {isMushaf ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.enterFullscreen', 'Enter fullscreen')}
+              onPress={toggleFullscreen}
+              hitSlop={10}
+              style={{ paddingHorizontal: 4 }}>
+              <Text
+                style={{
+                  color: String(palette.accent),
+                  fontSize: 18,
+                  fontWeight: '700',
+                }}>
+                {/* Box-with-arrow glyph for "expand to fullscreen". */}
+                ⛶
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
       ),
     });
-    // We intentionally re-run when the mode flips so headerRight is
-    // rebuilt with the right label. The toggle handler is referentially
-    // stable enough for our needs — the dep list captures the values
-    // it reads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, surah, isMushaf, palette.accent, t]);
+  }, [navigation, surah, isMushaf, isFullscreen, palette.accent, t]);
+
+  // When the screen unmounts or we leave mushaf mode, ensure header
+  // and orientation are restored.
+  useEffect(() => {
+    return () => {
+      navigation.setOptions({
+        headerShown: true,
+        orientation: 'portrait',
+      });
+    };
+  }, [navigation]);
   const cycleEdition = () => {
     // Open the translation picker via a quick cycle: rotate to the next
     // bundled edition. A full Settings entry exists for granular choice;
@@ -167,7 +213,14 @@ export function QuranSurahScreen() {
   // It pulls its own ayah text per page (since pages can span surahs)
   // so we don't need the per-surah `ayahs` state for this branch.
   if (isMushaf) {
-    return <MushafReader surahNumber={surahNumber} palette={palette} />;
+    return (
+      <MushafReader
+        surahNumber={surahNumber}
+        palette={palette}
+        isFullscreen={isFullscreen}
+        onExitFullscreen={() => setIsFullscreen(false)}
+      />
+    );
   }
 
   return (
@@ -285,9 +338,13 @@ export function QuranSurahScreen() {
 function MushafReader({
   surahNumber,
   palette,
+  isFullscreen,
+  onExitFullscreen,
 }: {
   surahNumber: number;
   palette: ReturnType<typeof useAppPalette>['palette'];
+  isFullscreen: boolean;
+  onExitFullscreen: () => void;
 }) {
   const initialPage = useMemo(() => findPageForAyah(surahNumber, 1), [surahNumber]);
   const flatListRef = useRef<FlatList<typeof MUSHAF_PAGES[number]>>(null);
@@ -324,6 +381,7 @@ function MushafReader({
   }).current;
 
   return (
+    <View style={{ flex: 1, backgroundColor: parchment }}>
     <FlatList
       ref={flatListRef}
       data={[...MUSHAF_PAGES]}
@@ -367,6 +425,31 @@ function MushafReader({
         />
       )}
     />
+    {/* Floating exit-fullscreen affordance — only rendered when in
+        fullscreen, so the user can tap to bring the navigation header
+        back. Sits in the top-end corner with a subtle tap target so
+        it doesn't compete with the page text. (#123) */}
+    {isFullscreen ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Exit fullscreen"
+        onPress={onExitFullscreen}
+        hitSlop={12}
+        style={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          backgroundColor: 'rgba(0,0,0,0.18)',
+          paddingHorizontal: 10,
+          paddingVertical: 6,
+          borderRadius: 16,
+        }}>
+        <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>
+          ✕
+        </Text>
+      </Pressable>
+    ) : null}
+    </View>
   );
 }
 
