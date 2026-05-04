@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { usePrayerSettings } from '../context/PrayerSettingsContext';
+import { rescheduleFastingReminders } from '../notifications/fastingReminders';
 import {
   durableEncryptedGet,
   durableEncryptedSet,
@@ -63,9 +65,26 @@ export function FastingScreen() {
   useBreakpoint();
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const { settings, updateSettings } = usePrayerSettings();
 
   const [entries, setEntries] = useState<FastEntry[]>([]);
   const [hydrated, setHydrated] = useState(false);
+
+  // Re-schedule fasting reminders whenever the toggle or hour changes.
+  // Also fires on first mount so a fresh install picks them up.
+  useEffect(() => {
+    void rescheduleFastingReminders({
+      enabled: settings.fastingRemindersEnabled,
+      hour: settings.fastingReminderHour,
+    });
+  }, [settings.fastingRemindersEnabled, settings.fastingReminderHour]);
+
+  const onToggleReminders = useCallback(
+    (next: boolean) => {
+      updateSettings({ fastingRemindersEnabled: next });
+    },
+    [updateSettings],
+  );
 
   // Hydrate from encrypted storage on mount. coerceFastEntries silently
   // drops malformed entries so a corrupted blob doesn't crash the screen.
@@ -343,6 +362,38 @@ export function FastingScreen() {
         </View>
       ) : null}
 
+      {/* Reminder toggle (#98) — schedules a notification the evening
+          before each Mon/Thu and special fasting day. */}
+      <View
+        style={[
+          styles.reminderCard,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={styles.reminderTextCol}>
+          <Text style={[styles.reminderTitle, { color: palette.text }]}>
+            {t('fasting.reminderToggleTitle', 'Day-before reminder')}
+          </Text>
+          <Text style={[styles.reminderBody, { color: palette.muted }]}>
+            {settings.fastingRemindersEnabled
+              ? t(
+                  'fasting.reminderToggleOn',
+                  'You\'ll get a gentle notification at {{hour}}:00 the evening before each Sunnah fast.',
+                  { hour: settings.fastingReminderHour },
+                )
+              : t(
+                  'fasting.reminderToggleOff',
+                  'Get notified the evening before each Mon/Thu and special fasting day.',
+                )}
+          </Text>
+        </View>
+        <Switch
+          accessibilityLabel={t('fasting.reminderToggleA11y', 'Enable day-before fasting reminders')}
+          value={settings.fastingRemindersEnabled}
+          onValueChange={onToggleReminders}
+          trackColor={{ true: String(palette.accent), false: String(palette.border) }}
+        />
+      </View>
+
       {/* Upcoming high-reward fasting days, each with a "X days away"
           countdown. Surfaces White Days (every Hijri month), Ashura,
           Arafah, 6 of Shawwal, and Ramadan. */}
@@ -535,6 +586,16 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 4,
   },
+  reminderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: SPACING.md,
+    borderRadius: 12,
+  },
+  reminderTextCol: { flex: 1, gap: 4 },
+  reminderTitle: { fontSize: 15, fontWeight: '600' },
+  reminderBody: { fontSize: 12, lineHeight: 18 },
   ramadanCountdown: {
     alignItems: 'center',
     paddingVertical: SPACING.md,
