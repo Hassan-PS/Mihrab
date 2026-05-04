@@ -203,12 +203,24 @@ export type SyncPrayerNotificationsResult =
       reminderMinutes: number;
     };
 
+/**
+ * Stable id for the "Log prayer in journal" notification action — task #99.
+ *
+ * When `journalNotificationActionsEnabled` is true, every prayer-time
+ * notification gets this action attached. Tapping it opens the app
+ * with a deep-link payload identifying the prayer; the journal screen
+ * picks that up and pre-targets the row.
+ */
+export const JOURNAL_LOG_ACTION_ID = 'journal-log-prayer';
+
 export async function syncPrayerNotifications(params: {
   enabled: boolean;
   prePrayerReminderMinutes: number;
   notificationSound: NotificationSoundId;
   today: TimingsMap;
   tomorrow?: TimingsMap;
+  /** When true, the prayer-time alert gets a "Log prayer" action — task #99. */
+  journalLogActionEnabled?: boolean;
 }): Promise<SyncPrayerNotificationsResult> {
   if (!params.enabled) {
     await cancelOwnedPrayerNotifications([]);
@@ -273,20 +285,32 @@ export async function syncPrayerNotifications(params: {
           channelId: prayerTimeSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
-          ...(usesAdhan
-            ? {
-                actions: [
-                  {
-                    title: i18n.t('alertCopy.adhanStopAction'),
-                    pressAction: { id: ADHAN_ACTION_STOP },
-                  },
-                  {
-                    title: i18n.t('alertCopy.adhanDisableAction'),
-                    pressAction: { id: ADHAN_ACTION_DISABLE },
-                  },
-                ],
-              }
-            : {}),
+          actions: (() => {
+            const actions: { title: string; pressAction: { id: string } }[] = [];
+            if (usesAdhan) {
+              actions.push(
+                {
+                  title: i18n.t('alertCopy.adhanStopAction'),
+                  pressAction: { id: ADHAN_ACTION_STOP },
+                },
+                {
+                  title: i18n.t('alertCopy.adhanDisableAction'),
+                  pressAction: { id: ADHAN_ACTION_DISABLE },
+                },
+              );
+            }
+            if (params.journalLogActionEnabled) {
+              actions.push({
+                title: i18n.t('journal.logActionTitle', 'Log prayer'),
+                pressAction: {
+                  // Encode the prayer name in the action id so the
+                  // foreground handler can route to the right row.
+                  id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
+                },
+              });
+            }
+            return actions;
+          })(),
         },
       },
       buildTimestampTrigger(e.at.getTime(), exactAlarms),

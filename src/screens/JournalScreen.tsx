@@ -7,11 +7,15 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import notifee, { EventType } from '@notifee/react-native';
+import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
+import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
@@ -59,12 +63,37 @@ export function JournalScreen() {
   useBreakpoint();
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const { settings, updateSettings } = usePrayerSettings();
   useAndroidSubScreenBack();
 
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  // Action-target prayer set by a tap on the "Log prayer" notification
+  // action — task #99. Highlights that prayer's row briefly so the user
+  // sees where the journal opened to.
+  const [actionTargetPrayer, setActionTargetPrayer] = useState<JournalPrayer | null>(null);
   // Per-prayer note draft text — keyed by prayer name for today's row.
   const [draftNotes, setDraftNotes] = useState<Record<string, string>>({});
+
+  // Foreground notifee event subscription — when the user taps the
+  // "Log prayer" action while the app is open, route to the right row.
+  // Background events are handled in App.tsx's setBackgroundEventHandler
+  // (already running for the adhan stop/disable actions).
+  useEffect(() => {
+    const sub = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type !== EventType.ACTION_PRESS) return;
+      const id = detail.pressAction?.id ?? '';
+      if (!id.startsWith(`${JOURNAL_LOG_ACTION_ID}:`)) return;
+      const name = id.slice(JOURNAL_LOG_ACTION_ID.length + 1) as JournalPrayer;
+      if (PRAYERS.includes(name)) {
+        setActionTargetPrayer(name);
+        // Drop the highlight after a few seconds so the row returns
+        // to its normal styling.
+        setTimeout(() => setActionTargetPrayer(null), 4000);
+      }
+    });
+    return sub;
+  }, []);
 
   useEffect(() => {
     void durableEncryptedGet(JOURNAL_KEY)
@@ -198,6 +227,37 @@ export function JournalScreen() {
         </View>
       </View>
 
+      {/* Reminder toggle (#99) — adds a "Log prayer" action to the
+          existing prayer-time notification. */}
+      <View
+        style={[
+          styles.reminderCard,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={styles.reminderTextCol}>
+          <Text style={[styles.reminderTitle, { color: palette.text }]}>
+            {t('journal.notificationToggleTitle', 'Log from notification')}
+          </Text>
+          <Text style={[styles.reminderBody, { color: palette.muted }]}>
+            {settings.journalNotificationActionsEnabled
+              ? t(
+                  'journal.notificationToggleOn',
+                  'Tap "Log prayer" on the prayer-time alert to jump straight here.',
+                )
+              : t(
+                  'journal.notificationToggleOff',
+                  'Add a "Log prayer" action to each prayer-time alert.',
+                )}
+          </Text>
+        </View>
+        <Switch
+          accessibilityLabel={t('journal.notificationToggleA11y', 'Enable journal log action on prayer notifications')}
+          value={settings.journalNotificationActionsEnabled}
+          onValueChange={v => updateSettings({ journalNotificationActionsEnabled: v })}
+          trackColor={{ true: String(palette.accent), false: String(palette.border) }}
+        />
+      </View>
+
       <Text style={[styles.sectionTitle, { color: palette.muted }]}>
         {t('journal.todayLabel')}
       </Text>
@@ -208,12 +268,17 @@ export function JournalScreen() {
           e => e.date === today && e.prayer === prayer,
         )?.note;
         const draftDirty = (savedNote ?? '') !== draft;
+        const isActionTarget = actionTargetPrayer === prayer;
         return (
           <View
             key={prayer}
             style={[
               styles.prayerCard,
               { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+              isActionTarget && {
+                borderWidth: 2,
+                borderColor: String(palette.accent),
+              },
             ]}>
             <View style={styles.prayerHeaderRow}>
               <Text style={[styles.prayerName, { color: palette.text }]}>
@@ -365,6 +430,16 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 4,
   },
+  reminderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: 12,
+  },
+  reminderTextCol: { flex: 1, gap: 4 },
+  reminderTitle: { fontSize: 15, fontWeight: '600' },
+  reminderBody: { fontSize: 12, lineHeight: 18 },
   statsCard: {
     flexDirection: 'row',
     padding: 16,

@@ -120,6 +120,40 @@ export type PrayerAppSettings = {
    * this gates the wider welcome / notifications / exact-alarms flow.
    */
   onboardingComplete: boolean;
+  /**
+   * Active Quran translation edition — task #96.
+   *
+   * Empty string means "follow app language" (the default). When set,
+   * the QuranSurahScreen reads from `src/quran/data/translations/{id}.json`
+   * regardless of locale. See `src/quran/translations.ts` for the
+   * registry.
+   */
+  quranTranslationEdition: string;
+  /**
+   * Reading mode for the QuranSurahScreen — task #97.
+   *
+   * `withTranslation` (default) shows ayah-by-ayah cards with Arabic +
+   * translation. `mushaf` is a continuous Arabic-only reading view
+   * styled like a printed mushaf page.
+   */
+  quranReadingMode: 'withTranslation' | 'mushaf';
+  /**
+   * Day-before fasting reminder — task #98.
+   *
+   * When true, schedules a notifee notification the evening before
+   * each Monday, Thursday, and curated special day (Ashura, Arafah,
+   * White Days, 6 of Shawwal, 1 Ramadan).
+   */
+  fastingRemindersEnabled: boolean;
+  /** Hour of the day (0-23) the day-before fasting reminder fires. */
+  fastingReminderHour: number;
+  /**
+   * Journal log-from-notification — task #99.
+   *
+   * When true, the prayer-time notification gets a "Log prayer" action
+   * that opens the journal pre-targeted to today's row for that prayer.
+   */
+  journalNotificationActionsEnabled: boolean;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -152,4 +186,13 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   locationPresets: [],
   prayerOffsets: {},
   onboardingComplete: false,
+  // Empty string = follow app language (resolved at read time via
+  // `defaultEditionForLocale`).
+  quranTranslationEdition: '',
+  quranReadingMode: 'withTranslation',
+  fastingRemindersEnabled: false,
+  // 8 PM by default — late enough to land after isha, early enough that
+  // the user notices before sleeping.
+  fastingReminderHour: 20,
+  journalNotificationActionsEnabled: false,
 };

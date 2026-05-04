@@ -131,12 +131,14 @@ export function HomeScreen() {
       notificationSound: settings.notificationSound,
       today: state.today,
       tomorrow: state.tomorrow,
+      journalLogActionEnabled: settings.journalNotificationActionsEnabled,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
   }, [
     hydrated,
     settings.notificationsEnabled,
     settings.prePrayerReminderMinutes,
     settings.notificationSound,
+    settings.journalNotificationActionsEnabled,
     state,
   ]);
 
