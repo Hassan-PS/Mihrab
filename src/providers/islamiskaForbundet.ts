@@ -295,27 +295,14 @@ export async function fetchIslamiskaForbundetTimes(params: {
   longitude: number;
   date: Date;
 }): Promise<PrayerTimesResult> {
-  let locality;
-  try {
-    locality = await resolveLocality(params.latitude, params.longitude);
-  } catch (e) {
-    if (isAbortOrTimeoutError(e)) {
-      throw new ProviderError(PROVIDER, 'timeout', 'Reverse geocoding timed out', { cause: e });
-    }
-    if (isNetworkError(e)) {
-      throw new ProviderError(PROVIDER, 'network', 'Reverse geocoding failed', { cause: e });
-    }
-    throw new ProviderError(PROVIDER, 'unknown', 'Reverse geocoding failed', { cause: e });
-  }
-  const { countryCode } = locality;
-  if (countryCode !== 'SE') {
-    throw new ProviderError(
-      PROVIDER,
-      'shape',
-      'Sweden prayer times are only available for locations in Sweden.',
-    );
-  }
-
+  // We used to reverse-geocode here just to confirm `countryCode === 'SE'`,
+  // but the caller already gates this provider behind `isCoordinateInSweden`
+  // (see `getEffectiveDataProvider`), so the Nominatim round-trip was pure
+  // dead weight — and worse, every day-fetch in the 12-month cache fill
+  // raced 4 concurrent reverse-geocodes through Nominatim's 1-req/s rate
+  // limit, falling back to local_adhan calculations and showing the user
+  // wrong times. The nearest-city lookup below is a pure static-table
+  // operation; no network call needed (#138).
   const nearestCity = getNearestIslamiskaForbundetCity(
     params.latitude,
     params.longitude,
