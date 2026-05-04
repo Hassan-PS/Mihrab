@@ -3,8 +3,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -350,15 +352,31 @@ function MushafReader({
 }
 
 /**
- * One physical page of the mushaf. Renders the ayah range from
- * `page.start` to (page+1).start exclusive across one or more surah
- * data files, joined into a single justified RTL paragraph.
+ * One physical page of the mushaf — task #116.
+ *
+ * Religious-accuracy invariant: rendering the Quran from text + font
+ * leaves any number of ways the rendered output could subtly differ
+ * from the authoritative print (diacritic substitutions, ligature
+ * rendering bugs, font glyph variants). To eliminate that risk this
+ * page is rendered from an authoritative PNG of the official
+ * KFGQPC Madinah Mushaf, hosted on archive.org's `madinah_mushaf`
+ * collection (community mirror of the King Fahd print).
+ *
+ * The image is loaded over the network on first view and cached by
+ * RN's native image loader; subsequent views are instant and offline.
+ * A future task will bundle all 604 pages directly so first-view is
+ * also offline.
+ *
+ * Image base aspect ratio is 1014:1628 (the source resolution).
  */
+const MUSHAF_IMAGE_ASPECT = 1014 / 1628;
+const mushafPageImageUrl = (page: number): string =>
+  `https://archive.org/download/madinah_mushaf/page${page}.png`;
+
 function MushafPage({
   page,
   screenWidth,
   parchment,
-  ink,
   ornament,
 }: {
   page: typeof MUSHAF_PAGES[number];
@@ -367,51 +385,21 @@ function MushafPage({
   ink: string;
   ornament: string;
 }) {
-  // Collect every ayah on this page, walking surahs as needed when
-  // the page spans a surah boundary. Each ayah gets the traditional
-  // ﴿N﴾ ayah-end marker in eastern numerals.
-  const [body, setBody] = useState<string>('');
-  const [headerSurah, setHeaderSurah] = useState<{ name: string; english: string } | null>(null);
-  const [showBismillahPrefix, setShowBismillahPrefix] = useState(false);
+  const [imageReady, setImageReady] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const startSurah = page.start.surah;
-      const endSurah = page.end?.surah ?? page.start.surah;
-      const endAyahExclusive = page.end?.ayah ?? Number.MAX_SAFE_INTEGER;
-      const parts: string[] = [];
-      for (let s = startSurah; s <= endSurah; s++) {
-        const loaded = await loadSurah(s);
-        if (!loaded) continue;
-        const ayahFrom = s === startSurah ? page.start.ayah : 1;
-        const ayahToExclusive =
-          s === endSurah ? endAyahExclusive : loaded.arabic.length + 1;
-        for (let a = ayahFrom; a < ayahToExclusive; a++) {
-          const text = loaded.arabic[a - 1];
-          if (!text) continue;
-          parts.push(`${text} ﴿${easternNumerals(a)}﴾`);
-        }
-      }
-      if (cancelled) return;
-      setBody(parts.join(' '));
-      const surah = MUSHAF_SURAHS.find(s => s.number === page.start.surah);
-      setHeaderSurah(
-        surah
-          ? { name: surah.name, english: surah.englishName }
-          : null,
-      );
-      // Bismillah is pre-rendered only when this page is the very first
-      // page of a new surah (not Fatihah, not Tawbah, and not just a
-      // continuation page within the same surah).
-      const startsNewSurah =
-        page.start.ayah === 1 && page.start.surah !== 1 && page.start.surah !== 9;
-      setShowBismillahPrefix(startsNewSurah);
-    })().catch(e => console.warn('MushafPage load failed', e));
-    return () => {
-      cancelled = true;
-    };
-  }, [page]);
+  // Compute the largest image rect that fits the screen while
+  // preserving the source aspect ratio.
+  const headerFooterReserve = 80; // px reserved for header + footer
+  const horizontalPadding = 16;
+  const maxWidth = screenWidth - horizontalPadding * 2;
+  const maxHeight = Dimensions.get('window').height - headerFooterReserve;
+  let imageWidth = maxWidth;
+  let imageHeight = imageWidth / MUSHAF_IMAGE_ASPECT;
+  if (imageHeight > maxHeight) {
+    imageHeight = maxHeight;
+    imageWidth = imageHeight * MUSHAF_IMAGE_ASPECT;
+  }
 
   return (
     <View
@@ -419,46 +407,37 @@ function MushafPage({
         mushafPageStyles.page,
         { width: screenWidth, backgroundColor: parchment },
       ]}>
-      {/* Header: surah name (left) + Juz number (right) — like the
-          Madinah print's running heads. */}
+      {/* Header: Juz number on the right (matches the Madinah print's
+          running heads). The surah name is visible on the page image
+          itself, so we don't repeat it here. */}
       <View style={mushafPageStyles.header}>
-        <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
-          {headerSurah?.english ?? ''}
-        </Text>
         <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
           {`Part ${easternNumerals(page.juz)}`}
         </Text>
       </View>
 
-      <ScrollView
-        style={mushafPageStyles.bodyScroll}
-        contentContainerStyle={mushafPageStyles.bodyContent}>
-        {showBismillahPrefix ? (
-          <Text style={[mushafPageStyles.bismillah, { color: ink }]}>
-            بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-          </Text>
-        ) : null}
-        <Text
-          style={[
-            mushafPageStyles.body,
-            {
-              color: ink,
-              // Bundled in this build (#115): AmiriQuran.ttf in
-              // android/app/src/main/assets/fonts and registered in
-              // ios Info.plist UIAppFonts. iOS resolves by family
-              // name "Amiri Quran"; Android by file basename.
-              fontFamily: Platform.select({
-                ios: 'Amiri Quran',
-                android: 'AmiriQuran',
-                default: undefined,
-              }),
-            },
-          ]}
+      <View style={mushafPageStyles.imageWrap}>
+        <Image
+          source={{ uri: mushafPageImageUrl(page.page) }}
+          style={{ width: imageWidth, height: imageHeight }}
+          resizeMode="contain"
           accessibilityLabel={`Mushaf page ${page.page}`}
-          selectable>
-          {body}
-        </Text>
-      </ScrollView>
+          onLoad={() => setImageReady(true)}
+          onError={() => setImageFailed(true)}
+        />
+        {!imageReady && !imageFailed ? (
+          <View style={mushafPageStyles.imageOverlay}>
+            <ActivityIndicator color={ornament} />
+          </View>
+        ) : null}
+        {imageFailed ? (
+          <View style={mushafPageStyles.imageOverlay}>
+            <Text style={[mushafPageStyles.errorText, { color: ornament }]}>
+              Mushaf page unavailable offline. Connect to load page {page.page}.
+            </Text>
+          </View>
+        ) : null}
+      </View>
 
       {/* Footer: page number in an ornamental frame. */}
       <View style={mushafPageStyles.footer}>
@@ -477,10 +456,10 @@ function MushafPage({
 }
 
 const mushafPageStyles = StyleSheet.create({
-  page: { flex: 1, paddingHorizontal: 22, paddingVertical: 14 },
+  page: { flex: 1, paddingHorizontal: 16, paddingVertical: 12 },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 8,
     marginBottom: 6,
@@ -491,22 +470,18 @@ const mushafPageStyles = StyleSheet.create({
     fontStyle: 'italic',
     letterSpacing: 0.4,
   },
-  bodyScroll: { flex: 1 },
-  bodyContent: { paddingBottom: 12 },
-  bismillah: {
-    fontSize: 26,
-    lineHeight: 50,
-    textAlign: 'center',
-    writingDirection: 'rtl',
-    marginBottom: 12,
+  imageWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-  body: {
-    fontSize: 24,
-    lineHeight: 56,
-    writingDirection: 'rtl',
-    textAlign: 'justify',
-    letterSpacing: 0,
-  },
+  errorText: { fontSize: 13, textAlign: 'center', lineHeight: 20 },
   footer: { alignItems: 'center', paddingTop: 8 },
   pageNumberFrame: {
     minWidth: 38,
