@@ -691,6 +691,8 @@ function MushafReader({
           screenWidth={screenWidth}
           parchment={parchment}
           ornament={ornament}
+          isFullscreen={isFullscreen}
+          onTapInFullscreen={showControls}
         />
       )}
     />
@@ -765,26 +767,123 @@ function MushafPage({
   screenWidth,
   parchment,
   ornament,
+  isFullscreen,
+  onTapInFullscreen,
 }: {
   page: typeof MUSHAF_PAGES[number];
   screenWidth: number;
   parchment: string;
   ornament: string;
+  /**
+   * In fullscreen the image is rendered at full width × natural
+   * aspect ratio inside a vertical ScrollView, so the user can read
+   * the page at higher detail and scroll vertically. Outside
+   * fullscreen the image is fit-to-screen (header+footer reserved).
+   * (#133)
+   */
+  isFullscreen: boolean;
+  /** Tap-to-surface fullscreen controls — re-uses the parent's timer. */
+  onTapInFullscreen: () => void;
 }) {
   const [imageReady, setImageReady] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
 
-  // Compute the largest image rect that fits the screen while
-  // preserving the source aspect ratio.
+  // Compute the image rect.
+  //   • Non-fullscreen: fit the largest rect that preserves aspect
+  //     ratio AND leaves room for the header + footer chrome.
+  //   • Fullscreen: pin width to (almost) the screen width and let
+  //     height grow with the natural aspect; the wrapping
+  //     ScrollView handles vertical scrolling.
   const headerFooterReserve = 80; // px reserved for header + footer
   const horizontalPadding = 16;
   const maxWidth = screenWidth - horizontalPadding * 2;
-  const maxHeight = Dimensions.get('window').height - headerFooterReserve;
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / MUSHAF_IMAGE_ASPECT;
-  if (imageHeight > maxHeight) {
-    imageHeight = maxHeight;
-    imageWidth = imageHeight * MUSHAF_IMAGE_ASPECT;
+  if (!isFullscreen) {
+    const maxHeight = Dimensions.get('window').height - headerFooterReserve;
+    if (imageHeight > maxHeight) {
+      imageHeight = maxHeight;
+      imageWidth = imageHeight * MUSHAF_IMAGE_ASPECT;
+    }
+  }
+
+  const imageBlock = (
+    <View style={mushafPageStyles.imageWrap}>
+      <Image
+        source={mushafPageAsset(page.page)}
+        style={{ width: imageWidth, height: imageHeight }}
+        resizeMode="contain"
+        accessibilityLabel={`Mushaf page ${page.page}`}
+        // No tintColor — the source pixels (dark ink + colored ayah
+        // markers) render exactly as printed. Default decode path
+        // preserves the original palette PNG quality without the
+        // green-tint regression introduced by the previous WebP
+        // re-encoding (#130).
+        onLoad={() => setImageReady(true)}
+        onError={() => setImageFailed(true)}
+        fadeDuration={0}
+      />
+      {!imageReady && !imageFailed ? (
+        <View style={mushafPageStyles.imageOverlay}>
+          <ActivityIndicator color={ornament} />
+        </View>
+      ) : null}
+      {imageFailed ? (
+        <View style={mushafPageStyles.imageOverlay}>
+          <Text style={[mushafPageStyles.errorText, { color: ornament }]}>
+            Could not load mushaf page {page.page}.
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const headerBlock = (
+    <View style={mushafPageStyles.header}>
+      <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
+        {`Part ${easternNumerals(page.juz)}`}
+      </Text>
+    </View>
+  );
+
+  const footerBlock = (
+    <View style={mushafPageStyles.footer}>
+      <View
+        style={[mushafPageStyles.pageNumberFrame, { borderColor: ornament }]}>
+        <Text style={[mushafPageStyles.pageNumber, { color: ornament }]}>
+          {easternNumerals(page.page)}
+        </Text>
+      </View>
+    </View>
+  );
+
+  if (isFullscreen) {
+    // Vertical ScrollView so the user can scroll a tall page on a
+    // narrow viewport. The horizontal FlatList parent still owns
+    // page-flipping (its pagingEnabled gesture wins on horizontal
+    // swipe; the ScrollView only claims vertical pans). Tap-to-show
+    // controls handled by the onScrollBeginDrag-equivalent
+    // `onResponderGrant` would over-fire, so the parent's
+    // absoluteFill Pressable continues to be the tap source.
+    return (
+      <ScrollView
+        style={{ width: screenWidth, backgroundColor: parchment }}
+        contentContainerStyle={{
+          // No flex:1 here — the content has to be taller than the
+          // viewport for vertical scrolling to make sense.
+          paddingHorizontal: horizontalPadding,
+          paddingVertical: 12,
+          alignItems: 'center',
+        }}
+        showsVerticalScrollIndicator={false}
+        // Tap-to-show controls; bumping the parent's timer keeps the
+        // exit button visible while the user starts a scroll.
+        onScrollBeginDrag={onTapInFullscreen}>
+        {headerBlock}
+        {imageBlock}
+        {footerBlock}
+      </ScrollView>
+    );
   }
 
   return (
@@ -793,56 +892,9 @@ function MushafPage({
         mushafPageStyles.page,
         { width: screenWidth, backgroundColor: parchment },
       ]}>
-      {/* Header: Juz number on the right (matches the Madinah print's
-          running heads). The surah name is visible on the page image
-          itself, so we don't repeat it here. */}
-      <View style={mushafPageStyles.header}>
-        <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
-          {`Part ${easternNumerals(page.juz)}`}
-        </Text>
-      </View>
-
-      <View style={mushafPageStyles.imageWrap}>
-        <Image
-          source={mushafPageAsset(page.page)}
-          style={{ width: imageWidth, height: imageHeight }}
-          resizeMode="contain"
-          accessibilityLabel={`Mushaf page ${page.page}`}
-          // No tintColor — the source pixels (dark ink + colored ayah
-          // markers) render exactly as printed. Default decode path
-          // preserves the original palette PNG quality without the
-          // green-tint regression introduced by the previous WebP
-          // re-encoding (#130).
-          onLoad={() => setImageReady(true)}
-          onError={() => setImageFailed(true)}
-          fadeDuration={0}
-        />
-        {!imageReady && !imageFailed ? (
-          <View style={mushafPageStyles.imageOverlay}>
-            <ActivityIndicator color={ornament} />
-          </View>
-        ) : null}
-        {imageFailed ? (
-          <View style={mushafPageStyles.imageOverlay}>
-            <Text style={[mushafPageStyles.errorText, { color: ornament }]}>
-              Could not load mushaf page {page.page}.
-            </Text>
-          </View>
-        ) : null}
-      </View>
-
-      {/* Footer: page number in an ornamental frame. */}
-      <View style={mushafPageStyles.footer}>
-        <View
-          style={[
-            mushafPageStyles.pageNumberFrame,
-            { borderColor: ornament },
-          ]}>
-          <Text style={[mushafPageStyles.pageNumber, { color: ornament }]}>
-            {easternNumerals(page.page)}
-          </Text>
-        </View>
-      </View>
+      {headerBlock}
+      {imageBlock}
+      {footerBlock}
     </View>
   );
 }
