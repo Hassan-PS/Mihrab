@@ -120,6 +120,53 @@ export function BookIcon({ size = 24, color = '#000' }: IconProps) {
   );
 }
 
+/** Map pin / location marker — used for the "Use device location" CTA on
+ *  the welcome / location-setup screen. */
+export function MapPinIcon({ size = 24, color = '#000' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M12 22s7-7.58 7-13a7 7 0 10-14 0c0 5.42 7 13 7 13z"
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Circle
+        cx={12}
+        cy={9}
+        r={2.5}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+      />
+    </Svg>
+  );
+}
+
+/** Magnifying glass — used for the "Search city or coords" CTA. */
+export function SearchIcon({ size = 24, color = '#000' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle
+        cx={11}
+        cy={11}
+        r={7}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+      />
+      <Path
+        d="M16.5 16.5L21 21"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 /** Mosque silhouette — used for the mosque-finder nav button and as the
  *  empty-state illustration for "no mosques found nearby." */
 export function MosqueIcon({ size = 24, color = '#000' }: IconProps) {

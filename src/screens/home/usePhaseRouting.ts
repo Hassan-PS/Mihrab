@@ -41,14 +41,14 @@ export function useNonReadyPhaseElement(args: {
       hint: t('home.loadingPrayer'),
     });
   }
+  // Permission denied AND no cached coords → drop the user into the
+  // LocationSetup widget so they can either re-prompt the OS or type a
+  // city/coordinates instead of being walled off behind a "Try again"
+  // button that just re-asks for the same denied permission (#125
+  // follow-up: handles the "skipped the whole onboarding" path on
+  // Android too).
   if (state.phase === 'permission_denied') {
-    return createElement(PhaseScreen, {
-      kind: 'error',
-      title: t('errors.locationNeededTitle'),
-      body: t('errors.locationNeededBody'),
-      retryLabel: t('common.tryAgain'),
-      onRetry: retry,
-    });
+    return createElement(LocationSetup, { palette });
   }
   if (state.phase === 'location_error') {
     return createElement(PhaseScreen, {
@@ -59,6 +59,12 @@ export function useNonReadyPhaseElement(args: {
       retryLabel: t('common.tryAgain'),
       onRetry: retry,
     });
+  }
+  // GPS failed AND no previous location → drop the user into LocationSetup
+  // so they can type a city or paste coordinates instead of staring at a
+  // "Could not get location" wall (#125).
+  if (state.phase === 'manual_required') {
+    return createElement(LocationSetup, { palette });
   }
   if (state.phase === 'api_error') {
     return createElement(PhaseScreen, {

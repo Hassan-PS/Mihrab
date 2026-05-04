@@ -62,6 +62,8 @@ export function useAppPalette(): {
         useSystemDynamicTheme: settings.useSystemDynamicTheme,
         systemScheme,
         pureBlackDark: settings.pureBlackDark,
+        appAccentId: settings.appAccentId,
+        appAccentCustomHex: settings.appAccentCustomHex,
       }),
     // `bump` is included so a manual Appearance event re-runs this even
     // when systemScheme appears unchanged from React's perspective.
@@ -70,6 +72,8 @@ export function useAppPalette(): {
       settings.appearance,
       settings.useSystemDynamicTheme,
       settings.pureBlackDark,
+      settings.appAccentId,
+      settings.appAccentCustomHex,
       systemScheme,
       bump,
     ],

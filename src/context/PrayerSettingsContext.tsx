@@ -43,7 +43,12 @@ import {
 
 export type AppearanceSlice = Pick<
   PrayerAppSettings,
-  'appearance' | 'useSystemDynamicTheme' | 'pureBlackDark' | 'language'
+  | 'appearance'
+  | 'useSystemDynamicTheme'
+  | 'pureBlackDark'
+  | 'language'
+  | 'appAccentId'
+  | 'appAccentCustomHex'
 >;
 
 export type LocationSlice = Pick<
@@ -150,12 +155,16 @@ export function PrayerSettingsProvider({
       useSystemDynamicTheme: settings.useSystemDynamicTheme,
       pureBlackDark: settings.pureBlackDark,
       language: settings.language,
+      appAccentId: settings.appAccentId,
+      appAccentCustomHex: settings.appAccentCustomHex,
     }),
     [
       settings.appearance,
       settings.useSystemDynamicTheme,
       settings.pureBlackDark,
       settings.language,
+      settings.appAccentId,
+      settings.appAccentCustomHex,
     ],
   );
 

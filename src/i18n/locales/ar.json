@@ -341,7 +341,8 @@
     "medinan": "Medinan",
     "ayahCount": "{{count}} ayahs",
     "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update."
+    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "pageLabel": "صفحة {{page}}"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

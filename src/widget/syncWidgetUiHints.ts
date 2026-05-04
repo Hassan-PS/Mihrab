@@ -8,8 +8,17 @@ const VALID_WIDGET_HIGHLIGHT_IDS = new Set<string>([
   'dynamic', 'green', 'teal', 'blue', 'amber', 'custom',
 ]);
 
+/**
+ * #127: When the user has the unified dynamic-colors toggle on (Material
+ * You / iOS dynamic), the widget always follows the OS palette regardless
+ * of the legacy `widgetHighlightId === 'dynamic'` flag. When off, the
+ * `widgetHighlightId` is kept in sync with the app accent picker, so the
+ * widget gets the same color the user picked for the app.
+ */
 function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
-  return settings.widgetHighlightId === 'dynamic';
+  return (
+    settings.useSystemDynamicTheme || settings.widgetHighlightId === 'dynamic'
+  );
 }
 
 function syncNativeWidgetAppearance(

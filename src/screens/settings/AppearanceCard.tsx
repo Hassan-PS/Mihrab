@@ -1,7 +1,7 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import {
   Alert,
   BackHandler,
@@ -11,13 +11,15 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAppearanceSettings, usePrayerSettings } from '../../context/PrayerSettingsContext';
+import { useAppearanceSettings, usePrayerSettings, useWidgetSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { saveSettings } from '../../settings/storage';
+import type { AppAccentId } from '../../settings/types';
 import { cardEdgeStyle, segmentChromeStyle } from '../../theme/chrome';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
@@ -27,14 +29,62 @@ import { sharedSettingsStyles as s } from './sharedStyles';
  * dark mode. Subscribes only to the appearance slice (task #11) — toggling a
  * widget color or notifications setting will not re-render this card.
  */
+// App accent swatches — kept in sync with `ACCENT_SWATCHES` in
+// src/theme/appPalette.ts. The chosen color drives palette.accent and
+// (when dynamic colors are off) is mirrored into widgetHighlightId so
+// the home-screen widget picks up the same color (#127).
+const APP_ACCENT_SWATCHES: { id: Exclude<AppAccentId, 'custom'>; hex: string }[] = [
+  { id: 'green', hex: '#22c55e' },
+  { id: 'teal', hex: '#0d9488' },
+  { id: 'blue', hex: '#2563eb' },
+  { id: 'amber', hex: '#b45309' },
+];
+
 function AppearanceCardImpl() {
   const { t } = useTranslation();
   const { slice: settings, update: updateSettings } = useAppearanceSettings();
+  const { update: updateWidget } = useWidgetSettings();
   // Need the full settings object (not just the appearance slice) so we
   // can synchronously persist a copy with the toggled value before
   // restarting the process — task #114.
   const { settings: fullSettings } = usePrayerSettings();
   const { palette, isDark } = useAppPalette();
+  const [accentHexDraft, setAccentHexDraft] = useState(
+    settings.appAccentCustomHex,
+  );
+  useEffect(() => {
+    setAccentHexDraft(settings.appAccentCustomHex);
+  }, [settings.appAccentCustomHex]);
+
+  // Picker is hidden under dynamic colors — both app and widget follow OS.
+  const dynamicColorsActive =
+    settings.appearance === 'system' &&
+    settings.useSystemDynamicTheme &&
+    Platform.OS === 'android';
+
+  /**
+   * Atomic accent change: write app accent + mirror widget highlight.
+   *
+   * Per #127 the picker is unified: switching the app accent should
+   * also retint the widget so the user sees one color across surfaces.
+   * When dynamic colors are on, this sync is skipped (the OS drives
+   * both already).
+   */
+  const setAccent = (id: AppAccentId, customHex?: string) => {
+    updateSettings({
+      appAccentId: id,
+      ...(customHex ? { appAccentCustomHex: customHex } : {}),
+    });
+    if (!dynamicColorsActive) {
+      const widgetPatch: { widgetHighlightId: AppAccentId; widgetHighlightCustomHex?: string } = {
+        widgetHighlightId: id,
+      };
+      if (id === 'custom' && customHex) {
+        widgetPatch.widgetHighlightCustomHex = customHex;
+      }
+      updateWidget(widgetPatch);
+    }
+  };
 
   return (
     <>
@@ -203,6 +253,98 @@ function AppearanceCardImpl() {
         </Text>
       </View>
 
+      {!dynamicColorsActive && (
+        <View
+          style={[
+            s.card,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <Text style={[s.label, { color: palette.muted }]}>
+            {t('settings.accentColor', 'Accent color')}
+          </Text>
+          <View style={styles.swatchRow}>
+            {APP_ACCENT_SWATCHES.map(sw => {
+              const selected = settings.appAccentId === sw.id;
+              return (
+                <Pressable
+                  key={sw.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(
+                    `settings.accent_${sw.id}`,
+                    sw.id,
+                  )}
+                  accessibilityState={{ selected }}
+                  onPress={() => setAccent(sw.id)}
+                  style={[
+                    styles.swatch,
+                    {
+                      backgroundColor: sw.hex,
+                      borderColor: selected ? palette.accent : palette.border,
+                      borderWidth: selected ? 3 : 2,
+                    },
+                  ]}
+                />
+              );
+            })}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.accent_custom', 'Custom')}
+              accessibilityState={{ selected: settings.appAccentId === 'custom' }}
+              onPress={() => setAccent('custom')}
+              style={[
+                styles.swatch,
+                styles.swatchCustom,
+                {
+                  backgroundColor: palette.card,
+                  borderColor:
+                    settings.appAccentId === 'custom'
+                      ? palette.accent
+                      : palette.border,
+                  borderWidth: settings.appAccentId === 'custom' ? 3 : 2,
+                },
+              ]}>
+              <Text
+                style={[styles.swatchCustomLabel, { color: palette.muted }]}>
+                {t('settings.accent_customAbbr', 'Hex')}
+              </Text>
+            </Pressable>
+          </View>
+          {settings.appAccentId === 'custom' ? (
+            <TextInput
+              style={[
+                s.input,
+                {
+                  marginTop: 10,
+                  borderColor: palette.border,
+                  color: palette.text,
+                  backgroundColor: palette.bg,
+                },
+              ]}
+              value={accentHexDraft}
+              onChangeText={setAccentHexDraft}
+              onBlur={() => {
+                const trimmed = accentHexDraft.trim();
+                if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+                  setAccent('custom', trimmed);
+                } else {
+                  setAccentHexDraft(settings.appAccentCustomHex);
+                }
+              }}
+              placeholder="#22c55e"
+              placeholderTextColor={palette.muted}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+          ) : null}
+          <Text style={[s.help, { color: palette.muted, marginTop: 8 }]}>
+            {t(
+              'settings.accentColorHelp',
+              'Used across the app and the home-screen widget.',
+            )}
+          </Text>
+        </View>
+      )}
+
       {isDark ? (
         <View
           style={[
@@ -243,5 +385,26 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  swatchRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  swatch: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  swatchCustom: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  swatchCustomLabel: {
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
