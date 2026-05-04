@@ -19,12 +19,12 @@ import { Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MUSHAF_TOTAL_PAGES, mushafPageUrl } from './mushafImages';
 
-// Bumped from `mushaf.assets.v1.complete` → `.v2.` so beta.19 users
-// who already downloaded the lower-resolution mushaf-assets-v1 get
-// re-prompted to download from the higher-resolution GovarJabbar
-// source switched in #131. The two URL spaces are entirely disjoint;
-// the old cache hits are irrelevant.
-const COMPLETION_KEY = 'mushaf.assets.v2.complete';
+// Bumped to `.v3.` in #132. Each version reflects a distinct URL
+// space; the platform image cache is keyed by URL, so when we
+// switch source releases the old cache entries become irrelevant
+// and the user has to re-download. The reset path wipes all
+// historical keys.
+const COMPLETION_KEY = 'mushaf.assets.v3.complete';
 
 /** Has the user already completed the one-time download? */
 export async function isMushafDownloaded(): Promise<boolean> {
