@@ -1,8 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Dimensions,
+  FlatList,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -14,6 +23,12 @@ import {
   QURAN_TRANSLATIONS,
   type QuranTranslationId,
 } from '../quran/translations';
+import {
+  easternNumerals,
+  findPageForAyah,
+  MUSHAF_PAGES,
+  MUSHAF_SURAHS,
+} from '../quran/pages';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
 import { cardEdgeStyle } from '../theme/chrome';
@@ -145,18 +160,11 @@ export function QuranSurahScreen() {
     );
   }
 
-  // Mushaf mode renders a dedicated full-page view (no scroll cards,
-  // no chrome). Translation mode keeps the scrollable card layout.
-  if (isMushaf && ayahs) {
-    return (
-      <MushafReader
-        surahNumber={surahNumber}
-        surahArabic={surah.arabic}
-        surahRomanized={surah.romanized}
-        arabic={ayahs.arabic}
-        palette={palette}
-      />
-    );
+  // Mushaf mode renders the page-by-page paginated view directly.
+  // It pulls its own ayah text per page (since pages can span surahs)
+  // so we don't need the per-surah `ayahs` state for this branch.
+  if (isMushaf) {
+    return <MushafReader surahNumber={surahNumber} palette={palette} />;
   }
 
   return (
@@ -248,132 +256,242 @@ export function QuranSurahScreen() {
 }
 
 /**
- * Mushaf-style reader — task #108.
+ * Mushaf-style page-by-page reader — task #111.
  *
- * Modeled on the Ayah app's mushaf experience: a parchment-styled
- * full-page surface with a decorative surah heading, the Bismillah
- * pre-rendered for surahs that begin with it, and a continuous
- * justified RTL paragraph carrying ornamental ayah markers (﴿N﴾) in
- * eastern-Arabic numerals. No card chrome, no translation overlay —
- * this is the reading-only mode.
+ * Models the standard 604-page Madinah mushaf:
+ *   • Each item in the horizontal FlatList is one mushaf page.
+ *   • Page header: surah name (left) + Juz/Part number (right),
+ *     in the ornamental gold colour Madinah print uses.
+ *   • Page body: the ayah range that lives on that page,
+ *     justified RTL, with traditional ﴿N﴾ ornamental ayah-end
+ *     markers in eastern numerals. Bismillah pre-rendered when the
+ *     page begins a new surah other than al-Fatihah / at-Tawbah.
+ *   • Page footer: page number inside an ornamental frame.
+ *   • Swipe horizontally to flip pages. The reader opens at the
+ *     page that contains the surah the user navigated from.
  *
- * Surah at-Tawbah (9) is the only surah that does not begin with
- * Bismillah; we suppress the pre-rendered Bismillah for it. Surah
- * al-Fatihah (1) already contains Bismillah as its first ayah, so
- * we suppress the pre-rendered version there too.
+ * Page→ayah mapping is from the bundled `pages.json` asset
+ * (alquran.cloud /v1/meta, Tanzil-derived, CC BY 3.0).
+ *
+ * Bundling a true KFGQPC Madinah mushaf font (one font per page)
+ * would yield pixel-perfect rendering at the cost of ~10 MB of
+ * fonts, which is a follow-on. For now we render with the bundled
+ * Amiri-Quran / Amiri-Regular at a large size on a parchment
+ * surface — visually close to the Madinah look the user noted.
  */
 function MushafReader({
   surahNumber,
-  surahArabic,
-  surahRomanized,
-  arabic,
   palette,
 }: {
   surahNumber: number;
-  surahArabic: string;
-  surahRomanized: string;
-  arabic: ReadonlyArray<string>;
   palette: ReturnType<typeof useAppPalette>['palette'];
 }) {
-  const joined = useMemo(() => {
-    return arabic
-      .map((line, i) => {
-        const num = String(i + 1).replace(/[0-9]/g, d =>
-          String.fromCharCode('٠'.charCodeAt(0) + Number(d)),
-        );
-        // U+FD3E ornate left, U+FD3F ornate right — the traditional
-        // mushaf decorative ayah-end markers used in Madinah print.
-        return `${line} ﴿${num}﴾`;
-      })
-      .join(' ');
-  }, [arabic]);
+  const initialPage = useMemo(() => findPageForAyah(surahNumber, 1), [surahNumber]);
+  const flatListRef = useRef<FlatList<typeof MUSHAF_PAGES[number]>>(null);
 
-  const showBismillahHeader = surahNumber !== 1 && surahNumber !== 9;
-  // Parchment-style background: warm off-white that adapts to dark mode
-  // by going to a deep brown. Falls back to palette.bg if the user has
-  // OLED on so the screen stays calming.
   const isDark = String(palette.text).toLowerCase() !== '#1a1a1a';
   const parchment = isDark ? '#1c1815' : '#fbf6e9';
   const ink = isDark ? '#e8d8b8' : '#3a2e1a';
   const ornament = isDark ? '#c9a96a' : '#8b6f2a';
 
+  const screenWidth = Dimensions.get('window').width;
+
   return (
-    <ScrollView
+    <FlatList
+      ref={flatListRef}
+      data={[...MUSHAF_PAGES]}
+      keyExtractor={p => String(p.page)}
+      horizontal
+      pagingEnabled
+      // RTL layout: pages flow right-to-left like a real mushaf.
+      // FlatList honors the RTL writingDirection when inverted.
+      inverted
+      initialScrollIndex={initialPage - 1}
+      getItemLayout={(_, idx) => ({
+        length: screenWidth,
+        offset: screenWidth * idx,
+        index: idx,
+      })}
+      showsHorizontalScrollIndicator={false}
       style={{ flex: 1, backgroundColor: parchment }}
-      contentContainerStyle={mushafStyles.scroll}
-      contentInsetAdjustmentBehavior="automatic">
-      {/* Decorative surah heading banner */}
-      <View style={[mushafStyles.heading, { borderColor: ornament }]}>
-        <Text style={[mushafStyles.headingArabic, { color: ink }]}>
-          {`سُورَةُ ${surahArabic}`}
-        </Text>
-        <Text style={[mushafStyles.headingRomanized, { color: ornament }]}>
-          {surahRomanized}
-        </Text>
-      </View>
-
-      {showBismillahHeader ? (
-        <Text style={[mushafStyles.bismillah, { color: ink }]}>
-          بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-        </Text>
-      ) : null}
-
-      <Text
-        style={[
-          mushafStyles.body,
-          {
-            color: ink,
-            fontFamily: Platform.select({
-              ios: 'Amiri Quran',
-              android: 'Amiri-Regular',
-              default: undefined,
-            }),
-          },
-        ]}
-        accessibilityLabel="Mushaf page"
-        selectable>
-        {joined}
-      </Text>
-    </ScrollView>
+      contentInsetAdjustmentBehavior="automatic"
+      renderItem={({ item }) => (
+        <MushafPage
+          page={item}
+          screenWidth={screenWidth}
+          parchment={parchment}
+          ink={ink}
+          ornament={ornament}
+        />
+      )}
+    />
   );
 }
 
-const mushafStyles = StyleSheet.create({
-  scroll: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 64 },
-  heading: {
+/**
+ * One physical page of the mushaf. Renders the ayah range from
+ * `page.start` to (page+1).start exclusive across one or more surah
+ * data files, joined into a single justified RTL paragraph.
+ */
+function MushafPage({
+  page,
+  screenWidth,
+  parchment,
+  ink,
+  ornament,
+}: {
+  page: typeof MUSHAF_PAGES[number];
+  screenWidth: number;
+  parchment: string;
+  ink: string;
+  ornament: string;
+}) {
+  // Collect every ayah on this page, walking surahs as needed when
+  // the page spans a surah boundary. Each ayah gets the traditional
+  // ﴿N﴾ ayah-end marker in eastern numerals.
+  const [body, setBody] = useState<string>('');
+  const [headerSurah, setHeaderSurah] = useState<{ name: string; english: string } | null>(null);
+  const [showBismillahPrefix, setShowBismillahPrefix] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const startSurah = page.start.surah;
+      const endSurah = page.end?.surah ?? page.start.surah;
+      const endAyahExclusive = page.end?.ayah ?? Number.MAX_SAFE_INTEGER;
+      const parts: string[] = [];
+      for (let s = startSurah; s <= endSurah; s++) {
+        const loaded = await loadSurah(s);
+        if (!loaded) continue;
+        const ayahFrom = s === startSurah ? page.start.ayah : 1;
+        const ayahToExclusive =
+          s === endSurah ? endAyahExclusive : loaded.arabic.length + 1;
+        for (let a = ayahFrom; a < ayahToExclusive; a++) {
+          const text = loaded.arabic[a - 1];
+          if (!text) continue;
+          parts.push(`${text} ﴿${easternNumerals(a)}﴾`);
+        }
+      }
+      if (cancelled) return;
+      setBody(parts.join(' '));
+      const surah = MUSHAF_SURAHS.find(s => s.number === page.start.surah);
+      setHeaderSurah(
+        surah
+          ? { name: surah.name, english: surah.englishName }
+          : null,
+      );
+      // Bismillah is pre-rendered only when this page is the very first
+      // page of a new surah (not Fatihah, not Tawbah, and not just a
+      // continuation page within the same surah).
+      const startsNewSurah =
+        page.start.ayah === 1 && page.start.surah !== 1 && page.start.surah !== 9;
+      setShowBismillahPrefix(startsNewSurah);
+    })().catch(e => console.warn('MushafPage load failed', e));
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
+
+  return (
+    <View
+      style={[
+        mushafPageStyles.page,
+        { width: screenWidth, backgroundColor: parchment },
+      ]}>
+      {/* Header: surah name (left) + Juz number (right) — like the
+          Madinah print's running heads. */}
+      <View style={mushafPageStyles.header}>
+        <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
+          {headerSurah?.english ?? ''}
+        </Text>
+        <Text style={[mushafPageStyles.headerText, { color: ornament }]}>
+          {`Part ${easternNumerals(page.juz)}`}
+        </Text>
+      </View>
+
+      <ScrollView
+        style={mushafPageStyles.bodyScroll}
+        contentContainerStyle={mushafPageStyles.bodyContent}>
+        {showBismillahPrefix ? (
+          <Text style={[mushafPageStyles.bismillah, { color: ink }]}>
+            بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+          </Text>
+        ) : null}
+        <Text
+          style={[
+            mushafPageStyles.body,
+            {
+              color: ink,
+              fontFamily: Platform.select({
+                ios: 'Amiri Quran',
+                android: 'Amiri-Regular',
+                default: undefined,
+              }),
+            },
+          ]}
+          accessibilityLabel={`Mushaf page ${page.page}`}
+          selectable>
+          {body}
+        </Text>
+      </ScrollView>
+
+      {/* Footer: page number in an ornamental frame. */}
+      <View style={mushafPageStyles.footer}>
+        <View
+          style={[
+            mushafPageStyles.pageNumberFrame,
+            { borderColor: ornament },
+          ]}>
+          <Text style={[mushafPageStyles.pageNumber, { color: ornament }]}>
+            {easternNumerals(page.page)}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const mushafPageStyles = StyleSheet.create({
+  page: { flex: 1, paddingHorizontal: 22, paddingVertical: 14 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 16,
-    marginBottom: 18,
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
+    paddingBottom: 8,
+    marginBottom: 6,
   },
-  headingArabic: {
-    fontSize: 26,
-    lineHeight: 40,
+  headerText: {
+    fontSize: 13,
     fontWeight: '600',
-    writingDirection: 'rtl',
+    fontStyle: 'italic',
+    letterSpacing: 0.4,
   },
-  headingRomanized: {
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    marginTop: 4,
-  },
+  bodyScroll: { flex: 1 },
+  bodyContent: { paddingBottom: 12 },
   bismillah: {
-    fontSize: 30,
-    lineHeight: 56,
+    fontSize: 26,
+    lineHeight: 50,
     textAlign: 'center',
     writingDirection: 'rtl',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   body: {
-    fontSize: 28,
-    lineHeight: 64,
+    fontSize: 24,
+    lineHeight: 56,
     writingDirection: 'rtl',
     textAlign: 'justify',
     letterSpacing: 0,
   },
+  footer: { alignItems: 'center', paddingTop: 8 },
+  pageNumberFrame: {
+    minWidth: 38,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    borderWidth: 1.5,
+    borderRadius: 18,
+    alignItems: 'center',
+  },
+  pageNumber: { fontSize: 13, fontWeight: '700' },
 });
 
 const styles = StyleSheet.create({
