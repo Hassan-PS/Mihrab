@@ -52,40 +52,518 @@ export type Dua = {
 };
 
 export const DUAS: ReadonlyArray<Dua> = [
-  // — Morning adhkar —
+  // — Morning adhkar — order, repeat counts, and content match the
+  //   uploaded أذكار الصباح note exactly (recited between Fajr and
+  //   sunrise; can be made up later if missed).
   {
-    id: 'morning_subhanallah',
+    id: 'morning_01_ayat_kursi',
     category: 'morning',
-    titleEn: 'Glorification on rising',
-    arabic: 'سُبْحَانَ ٱللَّٰهِ وَبِحَمْدِهِ',
-    transliteration: 'Subḥān-Allāhi wa biḥamdihi',
-    translation: 'Glory be to Allah, and praise be to Him.',
-    source: 'Sahih Muslim 2692',
+    titleEn: 'Ayat al-Kursi',
+    arabic:
+      'ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ٱلْحَيُّ ٱلْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي ٱلسَّمَاوَاتِ وَمَا فِي ٱلْأَرْضِ، مَنْ ذَا ٱلَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ ٱلسَّمَاوَاتِ وَٱلْأَرْضَ، وَلَا يَؤُودُهُ حِفْظُهُمَا، وَهُوَ ٱلْعَلِيُّ ٱلْعَظِيمُ',
+    transliteration:
+      'Allāhu lā ilāha illā huwa-l-ḥayyu-l-qayyūm, lā taʾkhudhuhu sinatun wa lā nawm, lahu mā fī-s-samāwāti wa mā fī-l-arḍ, man dhā-lladhī yashfaʿu ʿindahu illā bi-idhnih, yaʿlamu mā bayna aydīhim wa mā khalfahum, wa lā yuḥīṭūna bi-shayʾin min ʿilmihi illā bi-mā shāʾ, wasiʿa kursiyyuhu-s-samāwāti wa-l-arḍ, wa lā yaʾūduhu ḥifẓuhumā, wa huwa-l-ʿaliyyu-l-ʿaẓīm',
+    translation:
+      'Allah — there is no god but He, the Ever-Living, the Self-Sustaining. Neither slumber nor sleep overtakes Him. To Him belongs whatever is in the heavens and whatever is on earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what is behind them, and they encompass nothing of His knowledge except what He wills. His Throne extends over the heavens and the earth, and their preservation tires Him not, and He is the Most High, the Most Great.',
+    source: 'Quran 2:255 — narrated by al-Hakim and Ibn Hibban',
+  },
+  {
+    id: 'morning_02_three_quls',
+    category: 'morning',
+    titleEn: 'Surah al-Ikhlas, al-Falaq, an-Nas',
+    arabic:
+      'قُلْ هُوَ ٱللَّهُ أَحَدٌ · قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ · قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ',
+    transliteration:
+      'Qul huwa-llāhu aḥad · Qul aʿūdhu bi-rabbi-l-falaq · Qul aʿūdhu bi-rabbi-n-nās',
+    translation:
+      'Recite Surah al-Ikhlas, al-Falaq, and an-Nas, three times each.',
+    source: 'Jami at-Tirmidhi',
+    repeat: 3,
+  },
+  {
+    id: 'morning_03_fitra_islam',
+    category: 'morning',
+    titleEn: 'On the natural disposition of Islam',
+    arabic:
+      'أَصْبَحْنَا عَلَىٰ فِطْرَةِ ٱلْإِسْلَامِ، وَكَلِمَةِ ٱلْإِخْلَاصِ، وَدِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَمِلَّةِ أَبِينَا إِبْرَاهِيمَ، حَنِيفًا مُسْلِمًا، وَمَا كَانَ مِنَ ٱلْمُشْرِكِينَ',
+    transliteration:
+      'Aṣbaḥnā ʿalā fiṭrati-l-Islām, wa kalimati-l-ikhlāṣ, wa dīni nabiyyinā Muḥammadin ﷺ, wa millati abīnā Ibrāhīma, ḥanīfan musliman, wa mā kāna mina-l-mushrikīn.',
+    translation:
+      'We have entered the morning on the natural way of Islam, the word of sincere devotion, the religion of our Prophet Muhammad ﷺ, and the way of our father Ibrāhīm — a man of pure faith and a Muslim, and he was not of those who associate partners with Allah.',
+    source: 'Narrated by Ahmad',
+  },
+  {
+    id: 'morning_04_radhitu',
+    category: 'morning',
+    titleEn: 'Pleased with Allah as Lord',
+    arabic:
+      'رَضِيتُ بِٱللَّهِ رَبًّا، وَبِٱلْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا',
+    transliteration:
+      'Raḍītu billāhi rabbā, wa bi-l-Islāmi dīnā, wa bi-Muḥammadin ﷺ nabiyyā',
+    translation:
+      'I am pleased with Allah as Lord, with Islam as my religion, and with Muhammad ﷺ as my Prophet.',
+    source: 'Narrated by the authors of the Sunan',
+  },
+  {
+    id: 'morning_05_ilm_nafi',
+    category: 'morning',
+    titleEn: 'Beneficial knowledge, good provision, accepted deeds',
+    arabic:
+      'ٱللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا',
+    transliteration:
+      'Allāhumma innī asʾaluka ʿilman nāfiʿan, wa rizqan ṭayyiban, wa ʿamalan mutaqabbalan',
+    translation:
+      'O Allah, I ask You for beneficial knowledge, good provision, and accepted deeds.',
+    source: 'Narrated by Ibn Mājah',
+  },
+  {
+    id: 'morning_06_bika_asbahna',
+    category: 'morning',
+    titleEn: 'By You we enter the morning',
+    arabic:
+      'ٱللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ ٱلنُّشُورُ',
+    transliteration:
+      'Allāhumma bika aṣbaḥnā, wa bika amsaynā, wa bika naḥyā, wa bika namūt, wa ilayka-n-nushūr',
+    translation:
+      'O Allah, by You we enter the morning and by You we enter the evening, by You we live and by You we die, and to You is the resurrection.',
+    source: 'Narrated by the authors of the Sunan except an-Nasāʾī',
+  },
+  {
+    id: 'morning_07_la_ilaha_illa_allah',
+    category: 'morning',
+    titleEn: 'There is no god but Allah alone',
+    arabic:
+      'لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+    transliteration:
+      'Lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, wa huwa ʿalā kulli shayʾin qadīr',
+    translation:
+      'There is no god but Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise, and He is over all things capable.',
+    source: 'Narrated by al-Bazzār and aṭ-Ṭabarānī in al-Duʿāʾ',
+  },
+  {
+    id: 'morning_08_ya_hayyu_ya_qayyum',
+    category: 'morning',
+    titleEn: 'O Ever-Living, O Sustainer',
+    arabic:
+      'يَا حَيُّ يَا قَيُّومُ، بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ، وَلَا تَكِلْنِي إِلَىٰ نَفْسِي طَرْفَةَ عَيْنٍ أَبَدًا',
+    transliteration:
+      'Yā ḥayyu yā qayyūm, bi-raḥmatika astaghīth, aṣliḥ lī shaʾnī kullah, wa lā takilnī ilā nafsī ṭarfata ʿaynin abadā',
+    translation:
+      'O Ever-Living, O Self-Sustaining, by Your mercy I seek aid. Set right all my affairs, and do not entrust me to my own self for the blink of an eye.',
+    source: 'Narrated by al-Bazzār',
+  },
+  {
+    id: 'morning_09_sayyid_al_istighfar',
+    category: 'morning',
+    titleEn: 'Sayyid al-Istighfar (master supplication of forgiveness)',
+    arabic:
+      'ٱللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا ٱسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي، فَٱغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ ٱلذُّنُوبَ إِلَّا أَنْتَ',
+    transliteration:
+      'Allāhumma anta Rabbī lā ilāha illā anta, khalaqtanī wa anā ʿabduk, wa anā ʿalā ʿahdika wa waʿdika ma-staṭaʿt, aʿūdhu bika min sharri mā ṣanaʿt, abūʾu laka bi-niʿmatika ʿalayya, wa abūʾu bi-dhanbī, fa-ghfir lī, fa-innahu lā yaghfiru-dh-dhunūba illā ant',
+    translation:
+      'O Allah, You are my Lord — there is no god but You. You created me and I am Your servant. I uphold Your covenant and Your promise as best I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favour upon me, and I acknowledge my sin — so forgive me, for none forgives sins except You.',
+    source: 'Narrated by al-Bukhārī',
+  },
+  {
+    id: 'morning_10_fatir_as_samawat',
+    category: 'morning',
+    titleEn: 'Originator of the heavens and the earth',
+    arabic:
+      'ٱللَّهُمَّ فَاطِرَ ٱلسَّمَاوَاتِ وَٱلْأَرْضِ، عَالِمَ ٱلْغَيْبِ وَٱلشَّهَادَةِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ ٱلشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَىٰ نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَىٰ مُسْلِمٍ',
+    transliteration:
+      'Allāhumma fāṭira-s-samāwāti wa-l-arḍ, ʿālima-l-ghaybi wa-sh-shahādah, rabba kulli shayʾin wa malīkahu, ashhadu an lā ilāha illā ant, aʿūdhu bika min sharri nafsī, wa min sharri-sh-shayṭāni wa shirkih, wa an aqtarifa ʿalā nafsī sūʾan aw ajurrahu ilā muslim',
+    translation:
+      'O Allah, Originator of the heavens and the earth, Knower of the seen and unseen, Lord of every thing and its Sovereign — I bear witness that there is no god but You. I seek refuge in You from the evil of my own self and from the evil of Satan and his polytheism, and from committing wrong against myself or bringing it upon a Muslim.',
+    source: 'Narrated by at-Tirmidhī',
+  },
+  {
+    id: 'morning_11_asbahna_walmulku_lillah',
+    category: 'morning',
+    titleEn: 'We and the dominion have entered the morning for Allah',
+    arabic:
+      'أَصْبَحْنَا وَأَصْبَحَ ٱلْمُلْكُ لِلَّهِ، وَٱلْحَمْدُ لِلَّهِ، وَلَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ، أَسْأَلُكَ خَيْرَ مَا فِي هَٰذَا ٱلْيَوْمِ، وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ هَٰذَا ٱلْيَوْمِ، وَشَرِّ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنَ ٱلْكَسَلِ وَسُوءِ ٱلْكِبَرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ ٱلنَّارِ وَعَذَابِ ٱلْقَبْرِ',
+    transliteration:
+      'Aṣbaḥnā wa aṣbaḥa-l-mulku lillāh, wa-l-ḥamdu lillāh, wa lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, wa huwa ʿalā kulli shayʾin qadīr. Asʾaluka khayra mā fī hādhā-l-yawm, wa khayra mā baʿdah, wa aʿūdhu bika min sharri hādhā-l-yawm, wa sharri mā baʿdah, wa aʿūdhu bika mina-l-kasali wa sūʾi-l-kibar, wa aʿūdhu bika min ʿadhābi-n-nāri wa ʿadhābi-l-qabr',
+    translation:
+      'We have entered the morning, and to Allah belongs all dominion. Praise is for Allah. There is no god but Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise, and He is over all things capable. I ask You for the good of this day and the good of what follows it, and I seek refuge in You from the evil of this day and the evil of what follows it. I seek refuge in You from laziness and the evil of old age, and from the punishment of the Fire and the punishment of the grave.',
+    source: 'Narrated by Muslim',
+  },
+  {
+    id: 'morning_12_afw_wa_afiya',
+    category: 'morning',
+    titleEn: 'Pardon and well-being',
+    arabic:
+      'ٱللَّهُمَّ إِنِّي أَسْأَلُكَ ٱلْعَفْوَ وَٱلْعَافِيَةَ فِي ٱلدُّنْيَا وَٱلْآخِرَةِ، ٱللَّهُمَّ إِنِّي أَسْأَلُكَ ٱلْعَفْوَ وَٱلْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، ٱللَّهُمَّ ٱسْتُرْ عَوْرَاتِي، وَآمِنْ رَوْعَاتِي، وَٱحْفَظْنِي مِنْ بَيْنِ يَدَيَّ، وَمِنْ خَلْفِي، وَعَنْ يَمِينِي، وَعَنْ شِمَالِي، وَمِنْ فَوْقِي، وَأَعُوذُ بِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي',
+    transliteration:
+      'Allāhumma innī asʾaluka-l-ʿafwa wa-l-ʿāfiyata fī-d-dunyā wa-l-ākhirah, Allāhumma innī asʾaluka-l-ʿafwa wa-l-ʿāfiyata fī dīnī wa dunyāya wa ahlī wa mālī, Allāhumma-stur ʿawrātī, wa āmin rawʿātī, wa-ḥfaẓnī min bayni yadayya, wa min khalfī, wa ʿan yamīnī, wa ʿan shimālī, wa min fawqī, wa aʿūdhu bika an ughtāla min taḥtī',
+    translation:
+      'O Allah, I ask You for pardon and well-being in this world and the next. O Allah, I ask You for pardon and well-being in my religion, my worldly affairs, my family, and my wealth. O Allah, conceal my faults, ease my fears, and protect me from before me, behind me, on my right, on my left, and from above me. I seek refuge in You from being snatched away from below me.',
+    source: 'Narrated by Abū Dāwūd and Ibn Mājah',
+  },
+  {
+    id: 'morning_13_bismillah_la_yadurr',
+    category: 'morning',
+    titleEn: 'In the name of Allah with whose name nothing harms',
+    arabic:
+      'بِسْمِ ٱللَّهِ ٱلَّذِي لَا يَضُرُّ مَعَ ٱسْمِهِ شَيْءٌ فِي ٱلْأَرْضِ وَلَا فِي ٱلسَّمَاءِ، وَهُوَ ٱلسَّمِيعُ ٱلْعَلِيمُ',
+    transliteration:
+      'Bismillāhi-lladhī lā yaḍurru maʿasmihi shayʾun fī-l-arḍi wa lā fī-s-samāʾ, wa huwa-s-samīʿu-l-ʿalīm',
+    translation:
+      'In the name of Allah, with whose name nothing on earth or in the heaven can cause harm — and He is the All-Hearing, the All-Knowing.',
+    source: 'Narrated by the authors of the Sunan except an-Nasāʾī',
+    repeat: 3,
+  },
+  {
+    id: 'morning_14_subhan_allah_adada_khalqih',
+    category: 'morning',
+    titleEn: 'Glory be to Allah, by the number of His creation',
+    arabic:
+      'سُبْحَانَ ٱللَّهِ عَدَدَ خَلْقِهِ، سُبْحَانَ ٱللَّهِ رِضَا نَفْسِهِ، سُبْحَانَ ٱللَّهِ زِنَةَ عَرْشِهِ، سُبْحَانَ ٱللَّهِ مِدَادَ كَلِمَاتِهِ',
+    transliteration:
+      'Subḥāna-llāhi ʿadada khalqih, subḥāna-llāhi riḍā nafsih, subḥāna-llāhi zinata ʿarshih, subḥāna-llāhi midāda kalimātih',
+    translation:
+      'Glory be to Allah, equal to the number of His creation; Glory be to Allah, equal to His pleasure with Himself; Glory be to Allah, equal to the weight of His Throne; Glory be to Allah, equal to the ink of His words.',
+    source: 'Narrated by Muslim',
+    repeat: 3,
+  },
+  {
+    id: 'morning_15_afini_fi_badani',
+    category: 'morning',
+    titleEn: 'Grant me well-being in body, hearing, and sight',
+    arabic:
+      'ٱللَّهُمَّ عَافِنِي فِي بَدَنِي، ٱللَّهُمَّ عَافِنِي فِي سَمْعِي، ٱللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَٰهَ إِلَّا أَنْتَ، ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ ٱلْكُفْرِ وَٱلْفَقْرِ، ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ ٱلْقَبْرِ، لَا إِلَٰهَ إِلَّا أَنْتَ',
+    transliteration:
+      'Allāhumma ʿāfinī fī badanī, Allāhumma ʿāfinī fī samʿī, Allāhumma ʿāfinī fī baṣarī, lā ilāha illā ant, Allāhumma innī aʿūdhu bika mina-l-kufri wa-l-faqr, Allāhumma innī aʿūdhu bika min ʿadhābi-l-qabr, lā ilāha illā ant',
+    translation:
+      'O Allah, grant me well-being in my body. O Allah, grant me well-being in my hearing. O Allah, grant me well-being in my sight. There is no god but You. O Allah, I seek refuge in You from disbelief and from poverty. O Allah, I seek refuge in You from the punishment of the grave. There is no god but You.',
+    source: 'Narrated by Abū Dāwūd',
+    repeat: 3,
+  },
+  {
+    id: 'morning_16_hasbiy_allah',
+    category: 'morning',
+    titleEn: 'Allah suffices me',
+    arabic:
+      'حَسْبِيَ ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ ٱلْعَرْشِ ٱلْعَظِيمِ',
+    transliteration:
+      'Ḥasbiya-llāhu lā ilāha illā huwa ʿalayhi tawakkaltu wa huwa rabbu-l-ʿarshi-l-ʿaẓīm',
+    translation:
+      'Allah suffices me; there is no god but He. Upon Him I rely, and He is the Lord of the Mighty Throne.',
+    source: 'Quran 9:129 — narrated by Abū Dāwūd',
+    repeat: 7,
+  },
+  {
+    id: 'morning_17_ushhiduka',
+    category: 'morning',
+    titleEn: 'I take You as witness this morning',
+    arabic:
+      'ٱللَّهُمَّ إِنِّي أَصْبَحْتُ، أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ وَمَلَائِكَتَكَ وَجَمِيعَ خَلْقِكَ أَنَّكَ أَنْتَ ٱللَّهُ، وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ',
+    transliteration:
+      'Allāhumma innī aṣbaḥt, ushhiduka wa ushhidu ḥamalata ʿarshika wa malāʾikataka wa jamīʿa khalqika annaka anta-llāh, waḥdaka lā sharīka lak, wa anna Muḥammadan ʿabduka wa rasūluk',
+    translation:
+      "O Allah, I have entered the morning and I take You as witness, and I take Your throne-bearers, Your angels, and all of Your creation as witnesses, that You are Allah, alone with no partner, and that Muhammad is Your servant and Messenger.",
+    source: 'Narrated by Abū Dāwūd and at-Tirmidhī',
+    repeat: 4,
+  },
+  {
+    id: 'morning_18_la_ilaha_yuhyi_yumit',
+    category: 'morning',
+    titleEn: 'No god but Allah — He gives life and causes death',
+    arabic:
+      'لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، يُحْيِي وَيُمِيتُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+    transliteration:
+      'Lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, yuḥyī wa yumīt, wa huwa ʿalā kulli shayʾin qadīr',
+    translation:
+      'There is no god but Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise. He gives life and causes death, and He is over all things capable.',
+    source: 'Narrated by Ibn Ḥibbān',
+    repeat: 10,
+  },
+  {
+    id: 'morning_19_subhan_allah_wa_bihamdihi',
+    category: 'morning',
+    titleEn: 'Glory be to Allah and praise be to Him',
+    arabic:
+      'سُبْحَانَ ٱللَّهِ وَبِحَمْدِهِ — أَوْ — سُبْحَانَ ٱللَّهِ ٱلْعَظِيمِ وَبِحَمْدِهِ',
+    transliteration:
+      'Subḥāna-llāhi wa bi-ḥamdih — or — Subḥāna-llāhi-l-ʿaẓīmi wa bi-ḥamdih',
+    translation:
+      'Glory be to Allah and praise be to Him — or — Glory be to Allah the Magnificent and praise be to Him. (One hundred times or more.)',
+    source: 'Narrated by Muslim',
     repeat: 100,
   },
   {
-    id: 'morning_protection',
+    id: 'morning_20_astaghfirullah',
     category: 'morning',
-    titleEn: 'Seeking protection at daybreak',
-    arabic: 'أَعُوذُ بِكَلِمَاتِ ٱللَّٰهِ ٱلتَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
-    transliteration: 'Aʿūdhu bi-kalimāt-illāh-it-tāmmāti min sharri mā khalaq',
+    titleEn: 'I seek the forgiveness of Allah',
+    arabic: 'أَسْتَغْفِرُ ٱللَّهَ',
+    transliteration: 'Astaghfiru-llāh',
+    translation: 'I seek the forgiveness of Allah. (One hundred times.)',
+    source: 'Narrated by Ibn Abī Shaybah',
+    repeat: 100,
+  },
+  {
+    id: 'morning_21_subhan_alhamdu_takbir',
+    category: 'morning',
+    titleEn: 'Tasbih, Tahmid, Takbir, Tahlil',
+    arabic:
+      'سُبْحَانَ ٱللَّهِ، وَٱلْحَمْدُ لِلَّهِ، وَٱللَّهُ أَكْبَرُ، لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+    transliteration:
+      'Subḥāna-llāh, wa-l-ḥamdu lillāh, wa-llāhu akbar, lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, wa huwa ʿalā kulli shayʾin qadīr',
     translation:
-      'I seek refuge in the perfect words of Allah from the evil of what He has created.',
-    source: 'Sahih Muslim 2708',
+      'Glory be to Allah, praise be to Allah, and Allah is the Greatest. There is no god but Allah alone, with no partner; to Him belongs the dominion and the praise, and He is over all things capable. (One hundred times or more.)',
+    source: 'Narrated by at-Tirmidhī',
+    repeat: 100,
+  },
+
+  // — Evening adhkar — order, repeat counts, and content match the
+  //   uploaded أذكار المساء note exactly (recited between ʿAṣr and
+  //   sunset; can be made up later if missed).
+  {
+    id: 'evening_01_ayat_kursi',
+    category: 'evening',
+    titleEn: 'Ayat al-Kursi',
+    arabic:
+      'ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ٱلْحَيُّ ٱلْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي ٱلسَّمَاوَاتِ وَمَا فِي ٱلْأَرْضِ، مَنْ ذَا ٱلَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ ٱلسَّمَاوَاتِ وَٱلْأَرْضَ، وَلَا يَؤُودُهُ حِفْظُهُمَا، وَهُوَ ٱلْعَلِيُّ ٱلْعَظِيمُ',
+    transliteration:
+      'Allāhu lā ilāha illā huwa-l-ḥayyu-l-qayyūm, lā taʾkhudhuhu sinatun wa lā nawm, lahu mā fī-s-samāwāti wa mā fī-l-arḍ, man dhā-lladhī yashfaʿu ʿindahu illā bi-idhnih, yaʿlamu mā bayna aydīhim wa mā khalfahum, wa lā yuḥīṭūna bi-shayʾin min ʿilmihi illā bi-mā shāʾ, wasiʿa kursiyyuhu-s-samāwāti wa-l-arḍ, wa lā yaʾūduhu ḥifẓuhumā, wa huwa-l-ʿaliyyu-l-ʿaẓīm',
+    translation:
+      'Allah — there is no god but He, the Ever-Living, the Self-Sustaining. (See morning Ayat al-Kursi for full translation.)',
+    source: 'Quran 2:255 — narrated by al-Ḥākim and Ibn Ḥibbān',
+  },
+  {
+    id: 'evening_02_three_quls',
+    category: 'evening',
+    titleEn: 'Surah al-Ikhlas, al-Falaq, an-Nas',
+    arabic:
+      'قُلْ هُوَ ٱللَّهُ أَحَدٌ · قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ · قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ',
+    transliteration:
+      'Qul huwa-llāhu aḥad · Qul aʿūdhu bi-rabbi-l-falaq · Qul aʿūdhu bi-rabbi-n-nās',
+    translation:
+      'Recite Surah al-Ikhlas, al-Falaq, and an-Nas, three times each.',
+    source: 'Jami at-Tirmidhī',
     repeat: 3,
   },
-  // — Evening adhkar —
   {
-    id: 'evening_amsayna',
+    id: 'evening_03_fitra_islam',
     category: 'evening',
-    titleEn: 'Evening greeting',
+    titleEn: 'On the natural disposition of Islam (evening)',
     arabic:
-      'أَمْسَيْنَا وَأَمْسَى ٱلْمُلْكُ لِلَّٰهِ، وَٱلْحَمْدُ لِلَّٰهِ، لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ',
+      'أَمْسَيْنَا عَلَىٰ فِطْرَةِ ٱلْإِسْلَامِ، وَكَلِمَةِ ٱلْإِخْلَاصِ، وَدِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَمِلَّةِ أَبِينَا إِبْرَاهِيمَ، حَنِيفًا مُسْلِمًا، وَمَا كَانَ مِنَ ٱلْمُشْرِكِينَ',
     transliteration:
-      'Amsaynā wa amsal-mulku lillāh, walḥamdu lillāh, lā ilāha illallāhu waḥdahu lā sharīka lah',
+      'Amsaynā ʿalā fiṭrati-l-Islām, wa kalimati-l-ikhlāṣ, wa dīni nabiyyinā Muḥammadin ﷺ, wa millati abīnā Ibrāhīma, ḥanīfan musliman, wa mā kāna mina-l-mushrikīn.',
     translation:
-      'We have reached evening, and so has all dominion — to Allah belongs all praise. There is no god but Allah alone, with no partner.',
-    source: 'Sahih Muslim 2723',
+      'We have entered the evening on the natural way of Islam, the word of sincere devotion, the religion of our Prophet Muhammad ﷺ, and the way of our father Ibrāhīm — a man of pure faith and a Muslim, and he was not of those who associate partners with Allah.',
+    source: 'Narrated by Aḥmad',
+  },
+  {
+    id: 'evening_04_radhitu',
+    category: 'evening',
+    titleEn: 'Pleased with Allah as Lord',
+    arabic:
+      'رَضِيتُ بِٱللَّهِ رَبًّا، وَبِٱلْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا',
+    transliteration:
+      'Raḍītu billāhi rabbā, wa bi-l-Islāmi dīnā, wa bi-Muḥammadin ﷺ nabiyyā',
+    translation:
+      'I am pleased with Allah as Lord, with Islam as my religion, and with Muhammad ﷺ as my Prophet.',
+    source: 'Narrated by the authors of the Sunan',
+  },
+  {
+    id: 'evening_05_bika_amsayna',
+    category: 'evening',
+    titleEn: 'By You we enter the evening',
+    arabic:
+      'ٱللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ ٱلْمَصِيرُ',
+    transliteration:
+      'Allāhumma bika amsaynā, wa bika aṣbaḥnā, wa bika naḥyā, wa bika namūt, wa ilayka-l-maṣīr',
+    translation:
+      'O Allah, by You we enter the evening and by You we enter the morning, by You we live and by You we die, and to You is the final return.',
+    source: 'Narrated by the authors of the Sunan except an-Nasāʾī',
+  },
+  {
+    id: 'evening_06_la_ilaha_illa_allah',
+    category: 'evening',
+    titleEn: 'There is no god but Allah alone',
+    arabic:
+      'لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+    transliteration:
+      'Lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, wa huwa ʿalā kulli shayʾin qadīr',
+    translation:
+      'There is no god but Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise, and He is over all things capable.',
+    source: 'Narrated by al-Bazzār and aṭ-Ṭabarānī in al-Duʿāʾ',
+  },
+  {
+    id: 'evening_07_ya_hayyu_ya_qayyum',
+    category: 'evening',
+    titleEn: 'O Ever-Living, O Sustainer',
+    arabic:
+      'يَا حَيُّ يَا قَيُّومُ، بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ، وَلَا تَكِلْنِي إِلَىٰ نَفْسِي طَرْفَةَ عَيْنٍ أَبَدًا',
+    transliteration:
+      'Yā ḥayyu yā qayyūm, bi-raḥmatika astaghīth, aṣliḥ lī shaʾnī kullah, wa lā takilnī ilā nafsī ṭarfata ʿaynin abadā',
+    translation:
+      'O Ever-Living, O Self-Sustaining, by Your mercy I seek aid. Set right all my affairs, and do not entrust me to my own self for the blink of an eye.',
+    source: 'Narrated by al-Bazzār',
+  },
+  {
+    id: 'evening_08_sayyid_al_istighfar',
+    category: 'evening',
+    titleEn: 'Sayyid al-Istighfar (master supplication of forgiveness)',
+    arabic:
+      'ٱللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا ٱسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي، فَٱغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ ٱلذُّنُوبَ إِلَّا أَنْتَ',
+    transliteration:
+      'Allāhumma anta Rabbī lā ilāha illā anta, khalaqtanī wa anā ʿabduk, wa anā ʿalā ʿahdika wa waʿdika ma-staṭaʿt, aʿūdhu bika min sharri mā ṣanaʿt, abūʾu laka bi-niʿmatika ʿalayya, wa abūʾu bi-dhanbī, fa-ghfir lī, fa-innahu lā yaghfiru-dh-dhunūba illā ant',
+    translation:
+      'O Allah, You are my Lord — there is no god but You. You created me and I am Your servant. I uphold Your covenant and Your promise as best I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favour upon me, and I acknowledge my sin — so forgive me, for none forgives sins except You.',
+    source: 'Narrated by al-Bukhārī',
+  },
+  {
+    id: 'evening_09_fatir_as_samawat',
+    category: 'evening',
+    titleEn: 'Originator of the heavens and the earth',
+    arabic:
+      'ٱللَّهُمَّ فَاطِرَ ٱلسَّمَاوَاتِ وَٱلْأَرْضِ، عَالِمَ ٱلْغَيْبِ وَٱلشَّهَادَةِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ ٱلشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَىٰ نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَىٰ مُسْلِمٍ',
+    transliteration:
+      'Allāhumma fāṭira-s-samāwāti wa-l-arḍ, ʿālima-l-ghaybi wa-sh-shahādah, rabba kulli shayʾin wa malīkahu, ashhadu an lā ilāha illā ant, aʿūdhu bika min sharri nafsī, wa min sharri-sh-shayṭāni wa shirkih, wa an aqtarifa ʿalā nafsī sūʾan aw ajurrahu ilā muslim',
+    translation:
+      'O Allah, Originator of the heavens and the earth, Knower of the seen and unseen, Lord of every thing and its Sovereign — I bear witness that there is no god but You. I seek refuge in You from the evil of my own self and from the evil of Satan and his polytheism, and from committing wrong against myself or bringing it upon a Muslim.',
+    source: 'Narrated by at-Tirmidhī',
+  },
+  {
+    id: 'evening_10_amsayna_walmulku_lillah',
+    category: 'evening',
+    titleEn: 'We and the dominion have entered the evening for Allah',
+    arabic:
+      'أَمْسَيْنَا وَأَمْسَى ٱلْمُلْكُ لِلَّهِ، وَٱلْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، ٱللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ خَيْرِ مَا فِي هَٰذِهِ ٱللَّيْلَةِ، وَخَيْرِ مَا بَعْدَهَا، ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ شَرِّ هَٰذِهِ ٱللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ ٱلْكَسَلِ وَسُوءِ ٱلْكِبَرِ، وَأَعُوذُ بِكَ مِنْ عَذَابٍ فِي ٱلنَّارِ وَعَذَابٍ فِي ٱلْقَبْرِ',
+    transliteration:
+      'Amsaynā wa amsa-l-mulku lillāh, wa-l-ḥamdu lillāh, lā ilāha illa-llāhu waḥdahu lā sharīka lah. Allāhumma innī asʾaluka min khayri mā fī hādhihi-l-laylah, wa khayri mā baʿdahā. Allāhumma innī aʿūdhu bika min sharri hādhihi-l-laylah wa sharri mā baʿdahā. Allāhumma innī aʿūdhu bika mina-l-kasali wa sūʾi-l-kibar, wa aʿūdhu bika min ʿadhābin fī-n-nāri wa ʿadhābin fī-l-qabr',
+    translation:
+      'We have entered the evening, and to Allah belongs all dominion. Praise is for Allah. There is no god but Allah alone, with no partner. O Allah, I ask You for the good of this night and the good of what follows it. O Allah, I seek refuge in You from the evil of this night and the evil of what follows it. O Allah, I seek refuge in You from laziness and the evil of old age, and I seek refuge in You from punishment in the Fire and punishment in the grave.',
+    source: 'Narrated by Muslim',
+  },
+  {
+    id: 'evening_11_afw_wa_afiya',
+    category: 'evening',
+    titleEn: 'Pardon and well-being',
+    arabic:
+      'ٱللَّهُمَّ إِنِّي أَسْأَلُكَ ٱلْعَفْوَ وَٱلْعَافِيَةَ فِي ٱلدُّنْيَا وَٱلْآخِرَةِ، ٱللَّهُمَّ إِنِّي أَسْأَلُكَ ٱلْعَفْوَ وَٱلْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، ٱللَّهُمَّ ٱسْتُرْ عَوْرَاتِي، وَآمِنْ رَوْعَاتِي، وَٱحْفَظْنِي مِنْ بَيْنِ يَدَيَّ، وَمِنْ خَلْفِي، وَعَنْ يَمِينِي، وَعَنْ شِمَالِي، وَمِنْ فَوْقِي، وَأَعُوذُ بِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي',
+    transliteration:
+      'Allāhumma innī asʾaluka-l-ʿafwa wa-l-ʿāfiyata fī-d-dunyā wa-l-ākhirah, Allāhumma innī asʾaluka-l-ʿafwa wa-l-ʿāfiyata fī dīnī wa dunyāya wa ahlī wa mālī, Allāhumma-stur ʿawrātī, wa āmin rawʿātī, wa-ḥfaẓnī min bayni yadayya, wa min khalfī, wa ʿan yamīnī, wa ʿan shimālī, wa min fawqī, wa aʿūdhu bika an ughtāla min taḥtī',
+    translation:
+      'O Allah, I ask You for pardon and well-being in this world and the next. O Allah, I ask You for pardon and well-being in my religion, my worldly affairs, my family, and my wealth. O Allah, conceal my faults, ease my fears, and protect me from before me, behind me, on my right, on my left, and from above me. I seek refuge in You from being snatched away from below me.',
+    source: 'Narrated by Abū Dāwūd and Ibn Mājah',
+  },
+  {
+    id: 'evening_12_bismillah_la_yadurr',
+    category: 'evening',
+    titleEn: 'In the name of Allah with whose name nothing harms',
+    arabic:
+      'بِسْمِ ٱللَّهِ ٱلَّذِي لَا يَضُرُّ مَعَ ٱسْمِهِ شَيْءٌ فِي ٱلْأَرْضِ وَلَا فِي ٱلسَّمَاءِ، وَهُوَ ٱلسَّمِيعُ ٱلْعَلِيمُ',
+    transliteration:
+      'Bismillāhi-lladhī lā yaḍurru maʿasmihi shayʾun fī-l-arḍi wa lā fī-s-samāʾ, wa huwa-s-samīʿu-l-ʿalīm',
+    translation:
+      'In the name of Allah, with whose name nothing on earth or in the heaven can cause harm — and He is the All-Hearing, the All-Knowing.',
+    source: 'Narrated by the authors of the Sunan except an-Nasāʾī',
+    repeat: 3,
+  },
+  {
+    id: 'evening_13_taamat_protection',
+    category: 'evening',
+    titleEn: 'Refuge in the perfect words of Allah',
+    arabic:
+      'أَعُوذُ بِكَلِمَاتِ ٱللَّهِ ٱلتَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
+    transliteration:
+      'Aʿūdhu bi-kalimāti-llāhi-t-tāmmāti min sharri mā khalaq',
+    translation:
+      'I seek refuge in the perfect words of Allah from the evil of what He has created.',
+    source: 'Narrated by Muslim',
+    repeat: 3,
+  },
+  {
+    id: 'evening_14_afini_fi_badani',
+    category: 'evening',
+    titleEn: 'Grant me well-being in body, hearing, and sight',
+    arabic:
+      'ٱللَّهُمَّ عَافِنِي فِي بَدَنِي، ٱللَّهُمَّ عَافِنِي فِي سَمْعِي، ٱللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَٰهَ إِلَّا أَنْتَ، ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ ٱلْكُفْرِ وَٱلْفَقْرِ، ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ ٱلْقَبْرِ، لَا إِلَٰهَ إِلَّا أَنْتَ',
+    transliteration:
+      'Allāhumma ʿāfinī fī badanī, Allāhumma ʿāfinī fī samʿī, Allāhumma ʿāfinī fī baṣarī, lā ilāha illā ant, Allāhumma innī aʿūdhu bika mina-l-kufri wa-l-faqr, Allāhumma innī aʿūdhu bika min ʿadhābi-l-qabr, lā ilāha illā ant',
+    translation:
+      'O Allah, grant me well-being in my body. O Allah, grant me well-being in my hearing. O Allah, grant me well-being in my sight. There is no god but You. O Allah, I seek refuge in You from disbelief and from poverty. O Allah, I seek refuge in You from the punishment of the grave. There is no god but You.',
+    source: 'Narrated by Abū Dāwūd',
+    repeat: 3,
+  },
+  {
+    id: 'evening_15_hasbiy_allah',
+    category: 'evening',
+    titleEn: 'Allah suffices me',
+    arabic:
+      'حَسْبِيَ ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ ٱلْعَرْشِ ٱلْعَظِيمِ',
+    transliteration:
+      'Ḥasbiya-llāhu lā ilāha illā huwa ʿalayhi tawakkaltu wa huwa rabbu-l-ʿarshi-l-ʿaẓīm',
+    translation:
+      'Allah suffices me; there is no god but He. Upon Him I rely, and He is the Lord of the Mighty Throne.',
+    source: 'Quran 9:129 — narrated by Abū Dāwūd',
+    repeat: 7,
+  },
+  {
+    id: 'evening_16_ushhiduka',
+    category: 'evening',
+    titleEn: 'I take You as witness this evening',
+    arabic:
+      'ٱللَّهُمَّ إِنِّي أَمْسَيْتُ، أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ وَمَلَائِكَتَكَ وَجَمِيعَ خَلْقِكَ أَنَّكَ أَنْتَ ٱللَّهُ، وَحْدَكَ لَا شَرِيكَ لَكَ، وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ',
+    transliteration:
+      'Allāhumma innī amsayt, ushhiduka wa ushhidu ḥamalata ʿarshika wa malāʾikataka wa jamīʿa khalqika annaka anta-llāh, waḥdaka lā sharīka lak, wa anna Muḥammadan ʿabduka wa rasūluk',
+    translation:
+      "O Allah, I have entered the evening and I take You as witness, and I take Your throne-bearers, Your angels, and all of Your creation as witnesses, that You are Allah, alone with no partner, and that Muhammad is Your servant and Messenger.",
+    source: 'Narrated by Abū Dāwūd and at-Tirmidhī',
+    repeat: 4,
+  },
+  {
+    id: 'evening_17_la_ilaha_yuhyi_yumit',
+    category: 'evening',
+    titleEn: 'No god but Allah — He gives life and causes death',
+    arabic:
+      'لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، يُحْيِي وَيُمِيتُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+    transliteration:
+      'Lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, yuḥyī wa yumīt, wa huwa ʿalā kulli shayʾin qadīr',
+    translation:
+      'There is no god but Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise. He gives life and causes death, and He is over all things capable.',
+    source: 'Narrated by Ibn Ḥibbān',
+    repeat: 10,
+  },
+  {
+    id: 'evening_18_subhan_allah_wa_bihamdihi',
+    category: 'evening',
+    titleEn: 'Glory be to Allah and praise be to Him',
+    arabic:
+      'سُبْحَانَ ٱللَّهِ وَبِحَمْدِهِ — أَوْ — سُبْحَانَ ٱللَّهِ ٱلْعَظِيمِ وَبِحَمْدِهِ',
+    transliteration:
+      'Subḥāna-llāhi wa bi-ḥamdih — or — Subḥāna-llāhi-l-ʿaẓīmi wa bi-ḥamdih',
+    translation:
+      'Glory be to Allah and praise be to Him — or — Glory be to Allah the Magnificent and praise be to Him. (One hundred times or more.)',
+    source: 'Narrated by Muslim',
+    repeat: 100,
+  },
+  {
+    id: 'evening_19_astaghfirullah',
+    category: 'evening',
+    titleEn: 'I seek the forgiveness of Allah',
+    arabic: 'أَسْتَغْفِرُ ٱللَّهَ',
+    transliteration: 'Astaghfiru-llāh',
+    translation: 'I seek the forgiveness of Allah. (One hundred times.)',
+    source: 'Narrated by Ibn Abī Shaybah',
+    repeat: 100,
+  },
+  {
+    id: 'evening_20_subhan_alhamdu_takbir',
+    category: 'evening',
+    titleEn: 'Tasbih, Tahmid, Takbir, Tahlil',
+    arabic:
+      'سُبْحَانَ ٱللَّهِ، وَٱلْحَمْدُ لِلَّهِ، وَٱللَّهُ أَكْبَرُ، لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+    transliteration:
+      'Subḥāna-llāh, wa-l-ḥamdu lillāh, wa-llāhu akbar, lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, wa huwa ʿalā kulli shayʾin qadīr',
+    translation:
+      'Glory be to Allah, praise be to Allah, and Allah is the Greatest. There is no god but Allah alone, with no partner; to Him belongs the dominion and the praise, and He is over all things capable. (One hundred times or more.)',
+    source: 'Narrated by at-Tirmidhī',
+    repeat: 100,
   },
   // — After prayer —
   {
@@ -364,45 +842,8 @@ export const DUAS: ReadonlyArray<Dua> = [
       'I seek the forgiveness of Allah the Almighty, beside whom there is no god, the Ever-Living, the Sustainer, and I turn to Him in repentance.',
     source: 'Sunan Abi Dawud 1517, Jami at-Tirmidhi 3577',
   },
-  // — Additional morning/evening —
-  {
-    id: 'morning_three_protections',
-    category: 'morning',
-    titleEn: "Allah's name protects me",
-    arabic:
-      'بِسْمِ ٱللَّٰهِ ٱلَّذِي لَا يَضُرُّ مَعَ ٱسْمِهِ شَيْءٌ فِي ٱلْأَرْضِ وَلَا فِي ٱلسَّمَاءِ، وَهُوَ ٱلسَّمِيعُ ٱلْعَلِيمُ',
-    transliteration:
-      'Bismillāhi-lladhī lā yaḍurru maʿasmihi shayʾun fī-l-arḍi wa lā fī-s-samāʾ, wa huwa-s-samīʿu-l-ʿalīm',
-    translation:
-      'In the name of Allah, with whose name nothing on earth or in the heaven can cause harm — and He is the All-Hearing, the All-Knowing.',
-    source: 'Sunan Abi Dawud 5088, Jami at-Tirmidhi 3388',
-    repeat: 3,
-  },
-  {
-    id: 'morning_radhitu_billahi',
-    category: 'morning',
-    titleEn: 'Pleased with Allah as Lord',
-    arabic:
-      'رَضِيتُ بِٱللَّٰهِ رَبًّا، وَبِٱلْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا',
-    transliteration: 'Raḍītu billāhi rabbā, wa bil-Islāmi dīnā, wa bi-Muḥammadin nabiyyā',
-    translation:
-      'I am pleased with Allah as my Lord, with Islam as my religion, and with Muhammad ﷺ as my Prophet.',
-    source: 'Sunan Abi Dawud 5072',
-    repeat: 3,
-  },
-  {
-    id: 'evening_three_protections',
-    category: 'evening',
-    titleEn: "Allah's name protects me (evening)",
-    arabic:
-      'بِسْمِ ٱللَّٰهِ ٱلَّذِي لَا يَضُرُّ مَعَ ٱسْمِهِ شَيْءٌ فِي ٱلْأَرْضِ وَلَا فِي ٱلسَّمَاءِ، وَهُوَ ٱلسَّمِيعُ ٱلْعَلِيمُ',
-    transliteration:
-      'Bismillāhi-lladhī lā yaḍurru maʿasmihi shayʾun fī-l-arḍi wa lā fī-s-samāʾ, wa huwa-s-samīʿu-l-ʿalīm',
-    translation:
-      'In the name of Allah, with whose name nothing on earth or in the heaven can cause harm — and He is the All-Hearing, the All-Knowing.',
-    source: 'Sunan Abi Dawud 5088, Jami at-Tirmidhi 3388',
-    repeat: 3,
-  },
+  // (Morning + evening adhkar live at the top of the file in their
+  //  prescribed order — see the head of DUAS for the full lists.)
   // — Additional after-prayer —
   {
     id: 'afterPrayer_la_ilaha_illallah',
