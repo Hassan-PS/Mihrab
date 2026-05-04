@@ -2,7 +2,17 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import {
+  Alert,
+  BackHandler,
+  NativeModules,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppearanceSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -88,19 +98,74 @@ function AppearanceCardImpl() {
               value={settings.useSystemDynamicTheme}
               disabled={settings.appearance !== 'system'}
               onValueChange={v => {
-                // Material You uses PlatformColor attribute references
-                // resolved at view-attach time. Toggling them mid-session
-                // leaves stale theme colors on every already-rendered
-                // surface (#103). Tell the user the change requires a
-                // restart so the new attributes are picked up everywhere.
-                updateSettings({ useSystemDynamicTheme: v });
+                // Material You / iOS dynamic colors are resolved at
+                // view-attach time, so flipping them mid-session leaves
+                // stale tints on already-mounted surfaces (#110). Confirm
+                // with the user, then save + restart on yes / revert on
+                // no — the toggle should not flip if they decline.
                 Alert.alert(
                   t('settings.themeRestartTitle', 'Restart required'),
                   t(
                     'settings.themeRestartBody',
-                    'The system color setting has been saved. Please close and reopen the app for the change to take effect everywhere.',
+                    'Switching system colors needs the app to restart so every screen picks up the new theme. Restart now?',
                   ),
-                  [{ text: t('common.ok', 'OK'), style: 'default' }],
+                  [
+                    {
+                      text: t('common.cancel', 'Cancel'),
+                      style: 'cancel',
+                      onPress: () => {
+                        // Do nothing — the Switch is uncontrolled in
+                        // RN's onValueChange model; since we never
+                        // called updateSettings the persisted value is
+                        // unchanged and the next render snaps the
+                        // switch back to its prior position.
+                      },
+                    },
+                    {
+                      text: t('settings.themeRestartConfirm', 'Restart'),
+                      style: 'destructive',
+                      onPress: () => {
+                        // Persist the new value first.
+                        updateSettings({ useSystemDynamicTheme: v });
+                        // Try the native dev-settings reload (works in
+                        // dev + on a prod bridge that has it linked),
+                        // then fall back to BackHandler.exitApp on
+                        // Android. iOS has no programmatic restart;
+                        // surface a follow-up alert telling the user
+                        // to reopen the app manually.
+                        const tryReload = () => {
+                          try {
+                            const dev = (NativeModules as { DevSettings?: { reload?: () => void } })
+                              .DevSettings;
+                            if (dev?.reload) {
+                              dev.reload();
+                              return true;
+                            }
+                          } catch {
+                            // ignore
+                          }
+                          return false;
+                        };
+                        if (Platform.OS === 'android') {
+                          if (!tryReload()) {
+                            BackHandler.exitApp();
+                          }
+                        } else {
+                          // iOS: try reload, otherwise prompt manual.
+                          if (!tryReload()) {
+                            Alert.alert(
+                              t('settings.themeRestartManualTitle', 'Reopen the app'),
+                              t(
+                                'settings.themeRestartManualBody',
+                                'iOS does not allow apps to restart themselves. Please force-quit Prayer Times and reopen it for the new theme to take effect.',
+                              ),
+                              [{ text: t('common.ok', 'OK'), style: 'default' }],
+                            );
+                          }
+                        }
+                      },
+                    },
+                  ],
                 );
               }}
             />
