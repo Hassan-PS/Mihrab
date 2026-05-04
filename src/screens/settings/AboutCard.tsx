@@ -164,8 +164,8 @@ function Attributions({ palette }: { palette: AppPalette }) {
       <AttributionRow
         palette={palette}
         label="Mushaf page images (604)"
-        sub="archive.org/madinah_mushaf · King Fahd Quran Complex"
-        url="https://archive.org/details/madinah_mushaf"
+        sub="GovarJabbar/Quran-PNG · KFGQPC fonts · via jsDelivr"
+        url="https://github.com/GovarJabbar/Quran-PNG"
       />
       <AttributionRow
         palette={palette}
