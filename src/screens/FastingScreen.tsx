@@ -229,7 +229,7 @@ export function FastingScreen() {
           },
         ]}>
         <View style={styles.heroRow}>
-          <CrescentIcon color={String(palette.accent)} size={28} />
+          <CrescentIcon color={palette.accentSolid} size={28} />
           <Text style={[typeStyle('caption'), styles.eyebrow, { color: palette.muted }]}>
             {inRamadan
               ? t('fasting.ramadanDayLabel', { day: ramadanDay ?? 0 })

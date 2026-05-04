@@ -599,16 +599,19 @@ export const DUAS: ReadonlyArray<Dua> = [
     repeat: 33,
   },
   {
-    id: 'afterPrayer_ayat_kursi',
+    // The 100th completion of the after-prayer dhikr per the Sunnah:
+    // tasbīḥ + taḥmīd + takbīr (33×3 = 99) capped with this tahlīl to
+    // reach 100 — Sahih Muslim 597.
+    id: 'afterPrayer_la_ilaha_illa_allah_completion',
     category: 'afterPrayer',
-    titleEn: 'Ayat al-Kursi after every fard prayer',
+    titleEn: 'Tahlīl after the 33×3 — completes 100',
     arabic:
-      'ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ٱلْحَيُّ ٱلْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي ٱلسَّمَاوَاتِ وَمَا فِي ٱلْأَرْضِ، مَنْ ذَا ٱلَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ ٱلسَّمَاوَاتِ وَٱلْأَرْضَ، وَلَا يَؤُودُهُ حِفْظُهُمَا، وَهُوَ ٱلْعَلِيُّ ٱلْعَظِيمُ',
+      'لَا إِلَٰهَ إِلَّا ٱللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
     transliteration:
-      'Allāhu lā ilāha illā huwa-l-ḥayyu-l-qayyūm, lā taʾkhudhuhu sinatun wa lā nawm…',
+      'Lā ilāha illa-llāhu waḥdahu lā sharīka lah, lahu-l-mulku wa lahu-l-ḥamd, wa huwa ʿalā kulli shayʾin qadīr',
     translation:
-      'Whoever recites Ayat al-Kursi after every prescribed prayer, nothing prevents him from entering Paradise except death.',
-    source: 'Quran 2:255 — Sunan an-Nasāʾī al-Kubrā 9928',
+      'There is no god but Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise, and He is over all things capable. — Said once after the 33×3 to bring the dhikr to 100; sins are forgiven even if they were like the foam of the sea.',
+    source: 'Sahih Muslim 597',
   },
   {
     id: 'afterPrayer_three_quls',
@@ -622,6 +625,18 @@ export const DUAS: ReadonlyArray<Dua> = [
       'Recite the three Quls after every prescribed prayer (three times after Fajr and Maghrib).',
     source: 'Sunan Abī Dāwūd 1523, Jāmiʿ at-Tirmidhī 2903',
     repeat: 1,
+  },
+  {
+    id: 'afterPrayer_ayat_kursi',
+    category: 'afterPrayer',
+    titleEn: 'Ayat al-Kursi after every fard prayer',
+    arabic:
+      'ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ٱلْحَيُّ ٱلْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي ٱلسَّمَاوَاتِ وَمَا فِي ٱلْأَرْضِ، مَنْ ذَا ٱلَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ ٱلسَّمَاوَاتِ وَٱلْأَرْضَ، وَلَا يَؤُودُهُ حِفْظُهُمَا، وَهُوَ ٱلْعَلِيُّ ٱلْعَظِيمُ',
+    transliteration:
+      'Allāhu lā ilāha illā huwa-l-ḥayyu-l-qayyūm, lā taʾkhudhuhu sinatun wa lā nawm…',
+    translation:
+      'Whoever recites Ayat al-Kursi after every prescribed prayer, nothing prevents him from entering Paradise except death.',
+    source: 'Quran 2:255 — Sunan an-Nasāʾī al-Kubrā 9928',
   },
   // — Food — Sunnah is to begin with bismillāh, eat with the right
   //   hand from what is in front of you, and praise Allah at the end
@@ -1074,20 +1089,11 @@ export const DUAS: ReadonlyArray<Dua> = [
   },
   // (Morning + evening adhkar live at the top of the file in their
   //  prescribed order — see the head of DUAS for the full lists.)
-  // — Additional after-prayer —
-  {
-    id: 'afterPrayer_la_ilaha_illallah',
-    category: 'afterPrayer',
-    titleEn: 'Tahlil x10 after Fajr / Maghrib',
-    arabic:
-      'لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
-    transliteration:
-      'Lā ilāha illallāhu waḥdahu lā sharīka lah, lahul-mulku wa lahul-ḥamd, wa huwa ʿalā kulli shayʾin qadīr',
-    translation:
-      'There is no god but Allah alone, with no partner. To Him belongs all sovereignty and all praise, and He is over all things capable.',
-    source: 'Jami at-Tirmidhi 3474',
-    repeat: 10,
-  },
+  // (After-prayer "Lā ilāha illa-llāh waḥdah" was reordered to live
+  //  immediately after the 33×3 tasbīḥ — see the After prayer block
+  //  above. The tahlīl-x10 after Fajr / Maghrib is a separate Sunnah
+  //  not added here to avoid surfacing two near-identical entries
+  //  on the same screen.)
   // — Additional distress —
   {
     id: 'distress_grief',

@@ -92,7 +92,7 @@ function RamadanCountdownCardImpl({
         },
       ]}>
       <View style={styles.headerRow}>
-        <CrescentIcon color={String(palette.accent)} size={18} />
+        <CrescentIcon color={palette.accentSolid} size={18} />
         <Text style={[styles.label, { color: palette.muted }]}>
           {t('ramadan.title')}
         </Text>
