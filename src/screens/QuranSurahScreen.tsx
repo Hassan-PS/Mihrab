@@ -7,6 +7,7 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -192,14 +193,10 @@ export function QuranSurahScreen() {
       });
     };
   }, [navigation]);
-  const cycleEdition = () => {
-    // Open the translation picker via a quick cycle: rotate to the next
-    // bundled edition. A full Settings entry exists for granular choice;
-    // this row is a fast tap-to-switch from inside the reader.
-    const idx = QURAN_TRANSLATIONS.findIndex(e => e.id === activeEdition);
-    const next = QURAN_TRANSLATIONS[(idx + 1) % QURAN_TRANSLATIONS.length];
-    updateSettings({ quranTranslationEdition: next.id });
-  };
+  // Translation-edition picker modal — task #124. The user opens it by
+  // tapping the current-edition row in the surah header, then picks one
+  // of the 14 bundled translations from the list.
+  const [editionPickerVisible, setEditionPickerVisible] = useState(false);
 
   if (!surah) {
     return (
@@ -251,7 +248,7 @@ export function QuranSurahScreen() {
             accessibilityLabel={t('quran.translationEdition', 'Translation: {{label}}', {
               label: QURAN_TRANSLATIONS.find(e => e.id === activeEdition)?.label ?? activeEdition,
             })}
-            onPress={cycleEdition}
+            onPress={() => setEditionPickerVisible(true)}
             style={styles.editionRow}>
             <Text style={[styles.editionLabel, { color: palette.muted }]}>
               {t('quran.translationEdition', 'Translation: {{label}}', {
@@ -259,7 +256,7 @@ export function QuranSurahScreen() {
               })}
             </Text>
             <Text style={[styles.editionHint, { color: palette.accent }]}>
-              {t('quran.tapToCycle', 'tap to switch')}
+              {t('quran.tapToPick', 'choose')}
             </Text>
           </Pressable>
         ) : null}
@@ -307,9 +304,106 @@ export function QuranSurahScreen() {
           </Text>
         </View>
       )}
+
+      {/* Translation-edition picker — task #124. Bottom sheet listing
+          all 14 bundled editions; tap one to apply. */}
+      <Modal
+        visible={editionPickerVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditionPickerVisible(false)}>
+        <Pressable
+          style={pickerStyles.backdrop}
+          onPress={() => setEditionPickerVisible(false)}
+        />
+        <View
+          style={[
+            pickerStyles.sheet,
+            { backgroundColor: palette.card },
+          ]}>
+          <Text style={[pickerStyles.title, { color: palette.text }]}>
+            {t('quran.pickTranslation', 'Choose translation')}
+          </Text>
+          <ScrollView style={pickerStyles.list}>
+            {QURAN_TRANSLATIONS.map(ed => {
+              const selected = ed.id === activeEdition;
+              return (
+                <Pressable
+                  key={ed.id}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  onPress={() => {
+                    updateSettings({ quranTranslationEdition: ed.id });
+                    setEditionPickerVisible(false);
+                  }}
+                  style={[
+                    pickerStyles.row,
+                    {
+                      backgroundColor: selected
+                        ? palette.accentBg
+                        : 'transparent',
+                    },
+                  ]}>
+                  <View style={pickerStyles.rowText}>
+                    <Text style={[pickerStyles.rowLabel, { color: palette.text }]}>
+                      {ed.label}
+                    </Text>
+                    <Text style={[pickerStyles.rowSub, { color: palette.muted }]}>
+                      {ed.language}
+                    </Text>
+                  </View>
+                  {selected ? (
+                    <Text style={[pickerStyles.check, { color: palette.accent }]}>
+                      ✓
+                    </Text>
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
+
+const pickerStyles = StyleSheet.create({
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    maxHeight: '80%',
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    paddingHorizontal: 16,
+    paddingTop: 18,
+    paddingBottom: 28,
+  },
+  title: { fontSize: 17, fontWeight: '700', marginBottom: 12 },
+  list: { maxHeight: 480 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    gap: 12,
+    marginVertical: 2,
+  },
+  rowText: { flex: 1 },
+  rowLabel: { fontSize: 16, fontWeight: '600' },
+  rowSub: { fontSize: 12, marginTop: 2 },
+  check: { fontSize: 18, fontWeight: '700' },
+});
 
 /**
  * Mushaf-style page-by-page reader — task #111.
