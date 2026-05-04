@@ -147,7 +147,43 @@ function SavedLocationsCardImpl() {
       return;
     }
 
-    const next = addPreset(presets, {
+    // Preserve the user's existing manual location — task #136. If the
+    // user typed/picked a location via LocationCard and never saved it
+    // as a preset, then comes here to add a *different* location, the
+    // old behaviour overwrote `manualLat/Lng` and the previous location
+    // was lost forever. Auto-save it as a preset first so both end up
+    // in the list and the user can switch back with a tap.
+    let workingPresets = presets;
+    const currentLat = settings.manualLatitude;
+    const currentLng = settings.manualLongitude;
+    const hasCurrent =
+      Number.isFinite(currentLat) &&
+      Number.isFinite(currentLng) &&
+      !(currentLat === 0 && currentLng === 0);
+    const newCoordsAreCurrent =
+      hasCurrent &&
+      sameCoord(currentLat, lat) &&
+      sameCoord(currentLng, lng);
+    const currentAlreadyPreset =
+      hasCurrent &&
+      presets.some(
+        p => sameCoord(p.latitude, currentLat) && sameCoord(p.longitude, currentLng),
+      );
+    if (hasCurrent && !newCoordsAreCurrent && !currentAlreadyPreset) {
+      // Best-effort name for the auto-saved preset: the user's stored
+      // place label, otherwise a generic localized fallback.
+      const autoName =
+        (settings.manualLocationLabel?.split(',')[0] ?? '').trim() ||
+        t('locations.previousLocation', 'Previous location');
+      workingPresets = addPreset(workingPresets, {
+        name: autoName,
+        latitude: currentLat,
+        longitude: currentLng,
+        label: settings.manualLocationLabel,
+      });
+    }
+
+    const next = addPreset(workingPresets, {
       name,
       latitude: lat,
       longitude: lng,
