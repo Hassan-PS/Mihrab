@@ -598,27 +598,106 @@ export const DUAS: ReadonlyArray<Dua> = [
     source: 'Sahih al-Bukhari 843, Sahih Muslim 595',
     repeat: 33,
   },
-  // — Food —
+  {
+    id: 'afterPrayer_ayat_kursi',
+    category: 'afterPrayer',
+    titleEn: 'Ayat al-Kursi after every fard prayer',
+    arabic:
+      'ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ٱلْحَيُّ ٱلْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي ٱلسَّمَاوَاتِ وَمَا فِي ٱلْأَرْضِ، مَنْ ذَا ٱلَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ ٱلسَّمَاوَاتِ وَٱلْأَرْضَ، وَلَا يَؤُودُهُ حِفْظُهُمَا، وَهُوَ ٱلْعَلِيُّ ٱلْعَظِيمُ',
+    transliteration:
+      'Allāhu lā ilāha illā huwa-l-ḥayyu-l-qayyūm, lā taʾkhudhuhu sinatun wa lā nawm…',
+    translation:
+      'Whoever recites Ayat al-Kursi after every prescribed prayer, nothing prevents him from entering Paradise except death.',
+    source: 'Quran 2:255 — Sunan an-Nasāʾī al-Kubrā 9928',
+  },
+  {
+    id: 'afterPrayer_three_quls',
+    category: 'afterPrayer',
+    titleEn: 'Surah al-Ikhlas, al-Falaq, an-Nas after every fard prayer',
+    arabic:
+      'قُلْ هُوَ ٱللَّهُ أَحَدٌ · قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ · قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ',
+    transliteration:
+      'Qul huwa-llāhu aḥad · Qul aʿūdhu bi-rabbi-l-falaq · Qul aʿūdhu bi-rabbi-n-nās',
+    translation:
+      'Recite the three Quls after every prescribed prayer (three times after Fajr and Maghrib).',
+    source: 'Sunan Abī Dāwūd 1523, Jāmiʿ at-Tirmidhī 2903',
+    repeat: 1,
+  },
+  // — Food — Sunnah is to begin with bismillāh, eat with the right
+  //   hand from what is in front of you, and praise Allah at the end
+  //   with one of the wordings the Prophet ﷺ taught.
   {
     id: 'food_before',
     category: 'food',
-    titleEn: 'Before eating',
-    arabic: 'بِسْمِ ٱللَّٰهِ',
-    transliteration: 'Bismillāh',
-    translation: 'In the name of Allah.',
-    source: 'Sunan Abi Dawud 3767, Jami at-Tirmidhi 1858',
+    titleEn: 'Before eating — bismillāh',
+    arabic: 'بِسْمِ ٱللَّهِ — أَوْ — بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+    transliteration:
+      'Bismillāh — or — Bismillāhi-r-raḥmāni-r-raḥīm',
+    translation:
+      'In the name of Allah — or — In the name of Allah, the Most Gracious, the Most Merciful. Eat with the right hand from what is closest to you.',
+    source:
+      'The Prophet ﷺ to ʿUmar ibn Abī Salamah: "Say bismillāh, eat with your right hand, and eat from what is closest to you" — Sahih al-Bukhari 5376, Sahih Muslim 2022.',
   },
   {
-    id: 'food_after',
+    id: 'food_after_min_ghayri_hawlin',
     category: 'food',
-    titleEn: 'After eating',
+    titleEn: 'After eating — without might or power from me',
     arabic:
-      'ٱلْحَمْدُ لِلَّٰهِ ٱلَّذِي أَطْعَمَنِي هَٰذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ',
+      'ٱلْحَمْدُ لِلَّهِ ٱلَّذِي أَطْعَمَنِي هَٰذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ',
     transliteration:
-      'Al-ḥamdu lillāhilladhī aṭʿamanī hādhā wa razaqanīhi min ghayri ḥawlin minnī wa lā quwwah',
+      'Al-ḥamdu lillāhi-lladhī aṭʿamanī hādhā wa razaqanīhi min ghayri ḥawlin minnī wa lā quwwah',
     translation:
-      'All praise is for Allah who fed me this and provided it for me without any might nor power from myself.',
-    source: 'Sunan Abi Dawud 4023, Jami at-Tirmidhi 3458',
+      'All praise is for Allah who fed me this and provided it for me, without any might or power from myself.',
+    source:
+      'Whoever says this after eating, his past sins are forgiven — Sunan Abī Dāwūd 4023, Jāmiʿ at-Tirmidhī 3458.',
+  },
+  {
+    id: 'food_after_atamana_wa_saqana',
+    category: 'food',
+    titleEn: 'After eating — fed and quenched and made us Muslims',
+    arabic:
+      'ٱلْحَمْدُ لِلَّهِ ٱلَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ',
+    transliteration:
+      'Al-ḥamdu lillāhi-lladhī aṭʿamanā wa saqānā wa jaʿalanā muslimīn',
+    translation:
+      'All praise is for Allah who has fed us and given us drink and made us Muslims.',
+    source: 'Sunan Abī Dāwūd 3850, Jāmiʿ at-Tirmidhī 3457',
+  },
+  {
+    id: 'food_after_atama_wa_saqa_makhraj',
+    category: 'food',
+    titleEn: 'After eating — fed, quenched, and made it palatable',
+    arabic:
+      'ٱلْحَمْدُ لِلَّهِ ٱلَّذِي أَطْعَمَ وَسَقَىٰ، وَسَوَّغَهُ، وَجَعَلَ لَهُ مَخْرَجًا',
+    transliteration:
+      'Al-ḥamdu lillāhi-lladhī aṭʿama wa saqā, wa sawwaghahu, wa jaʿala lahu makhrajan',
+    translation:
+      'All praise is for Allah who fed and gave drink, made it easy to swallow, and provided a way out for it.',
+    source: 'Sunan Abī Dāwūd 3851',
+  },
+  {
+    id: 'food_after_atamana_wa_kafana',
+    category: 'food',
+    titleEn: 'After eating — fed, quenched, sufficed, sheltered',
+    arabic:
+      'ٱلْحَمْدُ لِلَّهِ ٱلَّذِي أَطْعَمَنَا وَسَقَانَا وَكَفَانَا وَآوَانَا، فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِيَ',
+    transliteration:
+      'Al-ḥamdu lillāhi-lladhī aṭʿamanā wa saqānā wa kafānā wa āwānā, fa-kam mimman lā kāfiya lahu wa lā muʾwī',
+    translation:
+      'All praise is for Allah who fed us, gave us drink, sufficed us, and gave us shelter — for how many have neither one to suffice them nor one to give them shelter.',
+    source: 'Sahih Muslim 2715',
+  },
+  {
+    id: 'food_after_kathiran_tayyiban',
+    category: 'food',
+    titleEn: 'After eating — much, good, blessed praise',
+    arabic:
+      'ٱلْحَمْدُ لِلَّهِ حَمْدًا كَثِيرًا طَيِّبًا مُبَارَكًا فِيهِ، غَيْرَ مَكْفِيٍّ وَلَا مَكْفُورٍ وَلَا مُوَدَّعٍ وَلَا مُسْتَغْنًى عَنْهُ رَبَّنَا',
+    transliteration:
+      'Al-ḥamdu lillāhi ḥamdan kathīran ṭayyiban mubārakan fīh, ghayra makfiyyin wa lā makfūrin wa lā muwaddaʿin wa lā mustaghnan ʿanhu rabbanā',
+    translation:
+      'All praise is for Allah — abundant, good, blessed praise — not insufficient, not denied, not bidden farewell to, never to be dispensed with, our Lord.',
+    source: 'Sahih al-Bukhari 5458',
   },
   // — Distress —
   {
@@ -685,39 +764,190 @@ export const DUAS: ReadonlyArray<Dua> = [
     source: 'The Prophet ﷺ said this when the people of Taif rejected him (Sirat Ibn Hisham; al-Tabarani al-Kabir).',
     repeat: 1,
   },
-  // — Sleep —
+  // — Sleep — Mu'awwidhāt + the prophetic supplications said when one
+  //   takes to one's bed. Order roughly follows Ibn al-Qayyim's
+  //   compilation in Zād al-Maʿād plus the longer Bukhārī/Muslim
+  //   narrations the user noted.
   {
-    id: 'sleep_bismika',
+    id: 'sleep_three_quls',
     category: 'sleep',
-    titleEn: 'Before sleeping',
-    arabic: 'بِٱسْمِكَ ٱللَّٰهُمَّ أَمُوتُ وَأَحْيَا',
-    transliteration: 'Bismika-Allāhumma amūtu wa aḥyā',
-    translation: 'In Your name, O Allah, I die and I live.',
-    source: 'Sahih al-Bukhari 6324',
+    titleEn: 'The Muʿawwidhāt — al-Ikhlas, al-Falaq, an-Nas',
+    arabic:
+      'قُلْ هُوَ ٱللَّهُ أَحَدٌ · قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ · قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ',
+    transliteration:
+      'Qul huwa-llāhu aḥad · Qul aʿūdhu bi-rabbi-l-falaq · Qul aʿūdhu bi-rabbi-n-nās',
+    translation:
+      'When the Prophet ﷺ went to bed he would blow into his hands while reciting the Muʿawwidhāt and Surah al-Ikhlas, then wipe over his face and as much of his body as his hands could reach.',
+    source: 'Sahih al-Bukhari 5017, Sahih Muslim 2192',
+    repeat: 3,
+  },
+  {
+    id: 'sleep_ayat_kursi',
+    category: 'sleep',
+    titleEn: 'Ayat al-Kursi before sleeping',
+    arabic:
+      'ٱللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ٱلْحَيُّ ٱلْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي ٱلسَّمَاوَاتِ وَمَا فِي ٱلْأَرْضِ، مَنْ ذَا ٱلَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ ٱلسَّمَاوَاتِ وَٱلْأَرْضَ، وَلَا يَؤُودُهُ حِفْظُهُمَا، وَهُوَ ٱلْعَلِيُّ ٱلْعَظِيمُ',
+    transliteration:
+      'Allāhu lā ilāha illā huwa-l-ḥayyu-l-qayyūm…',
+    translation:
+      'Whoever recites Ayat al-Kursi at night will have a guardian from Allah and Satan will not approach him until morning.',
+    source: 'Quran 2:255 — Sahih al-Bukhari 2311',
+  },
+  {
+    id: 'sleep_aslamtu_wajhi',
+    category: 'sleep',
+    titleEn: 'I have submitted my face to You',
+    arabic:
+      'ٱللَّهُمَّ إِنِّي أَسْلَمْتُ وَجْهِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ ٱلَّذِي أَنْزَلْتَ، وَبِنَبِيِّكَ ٱلَّذِي أَرْسَلْتَ',
+    transliteration:
+      'Allāhumma innī aslamtu wajhī ilayk, wa fawwaḍtu amrī ilayk, wa aljaʾtu ẓahrī ilayk, raghbatan wa rahbatan ilayk, lā maljaʾa wa lā manjā minka illā ilayk. Āmantu bi-kitābika-lladhī anzalt, wa bi-nabiyyika-lladhī arsalt.',
+    translation:
+      'Perform your wuḍūʾ as for prayer, lie on your right side, and say it. The Prophet ﷺ said: "And let these be the last words you speak — if you die that night, you die upon the fiṭra; and if you wake, you wake to good."',
+    source: 'Sahih al-Bukhari 247, Sahih Muslim 2710',
+  },
+  {
+    id: 'sleep_bismika_ahya',
+    category: 'sleep',
+    titleEn: 'In Your name, O Allah, I live and die',
+    arabic: 'ٱللَّهُمَّ بِٱسْمِكَ أَحْيَا، وَبِٱسْمِكَ أَمُوتُ',
+    transliteration: 'Allāhumma bi-smika aḥyā, wa bi-smika amūt',
+    translation:
+      'O Allah, in Your name I live and in Your name I die. (Said upon lying down to sleep.)',
+    source: 'Sahih al-Bukhari 6324, Sahih Muslim 2711',
   },
   {
     id: 'sleep_alhamdu_ahyana',
     category: 'sleep',
     titleEn: 'On waking',
     arabic:
-      'ٱلْحَمْدُ لِلَّٰهِ ٱلَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ ٱلنُّشُورُ',
+      'ٱلْحَمْدُ لِلَّهِ ٱلَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ ٱلنُّشُورُ',
     transliteration:
-      'Al-ḥamdu lillāhilladhī aḥyānā baʿda mā amātanā wa ilayhi-n-nushūr',
+      'Al-ḥamdu lillāhi-lladhī aḥyānā baʿda mā amātanā wa ilayhi-n-nushūr',
     translation:
-      'All praise is for Allah, who gave us life after having taken it from us, and to Him is the resurrection.',
+      'All praise is for Allah who gave us life after having taken it from us, and to Him is the resurrection.',
     source: 'Sahih al-Bukhari 6324',
   },
   {
-    id: 'sleep_three_quls',
+    id: 'sleep_khalaqta_nafsi',
     category: 'sleep',
-    titleEn: 'Three quls before sleep',
+    titleEn: 'You created my soul — protect or forgive it',
     arabic:
-      'قُلْ هُوَ ٱللَّٰهُ أَحَدٌ · قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ · قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ',
-    transliteration: 'Qul huwa-llāhu aḥad · Qul aʿūdhu bi-rabbil-falaq · Qul aʿūdhu bi-rabbin-nās',
+      'ٱللَّهُمَّ خَلَقْتَ نَفْسِي وَأَنْتَ تَوَفَّاهَا، لَكَ مَمَاتُهَا وَمَحْيَاهَا، إِنْ أَحْيَيْتَهَا فَٱحْفَظْهَا، وَإِنْ أَمَتَّهَا فَٱغْفِرْ لَهَا. ٱللَّهُمَّ إِنِّي أَسْأَلُكَ ٱلْعَافِيَةَ',
+    transliteration:
+      'Allāhumma khalaqta nafsī wa anta tawaffāhā, laka mamātuhā wa maḥyāhā. In aḥyaytahā fa-ḥfaẓhā, wa in amattahā fa-ghfir lahā. Allāhumma innī asʾaluka-l-ʿāfiyah.',
     translation:
-      'Recite Surah al-Ikhlas, al-Falaq, and an-Nas, then blow into the palms and wipe over the body.',
-    source: 'Sahih al-Bukhari 5017',
+      'O Allah, You created my soul and You take it back. To You belongs its death and its life. If You keep it alive, protect it; if You take it, forgive it. O Allah, I ask You for well-being.',
+    source: 'Sahih Muslim 2712',
+  },
+  {
+    id: 'sleep_rabba_samawat',
+    category: 'sleep',
+    titleEn: 'Lord of the heavens, the earth, and the Mighty Throne',
+    arabic:
+      'ٱللَّهُمَّ رَبَّ ٱلسَّمَاوَاتِ وَرَبَّ ٱلْأَرْضِ وَرَبَّ ٱلْعَرْشِ ٱلْعَظِيمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ، فَالِقَ ٱلْحَبِّ وَٱلنَّوَىٰ، وَمُنْزِلَ ٱلتَّوْرَاةِ وَٱلْإِنْجِيلِ وَٱلْفُرْقَانِ، أَعُوذُ بِكَ مِنْ شَرِّ كُلِّ شَيْءٍ أَنْتَ آخِذٌ بِنَاصِيَتِهِ. ٱللَّهُمَّ أَنْتَ ٱلْأَوَّلُ فَلَيْسَ قَبْلَكَ شَيْءٌ، وَأَنْتَ ٱلْآخِرُ فَلَيْسَ بَعْدَكَ شَيْءٌ، وَأَنْتَ ٱلظَّاهِرُ فَلَيْسَ فَوْقَكَ شَيْءٌ، وَأَنْتَ ٱلْبَاطِنُ فَلَيْسَ دُونَكَ شَيْءٌ، ٱقْضِ عَنَّا ٱلدَّيْنَ، وَأَغْنِنَا مِنَ ٱلْفَقْرِ',
+    transliteration:
+      'Allāhumma rabba-s-samāwāti wa rabba-l-arḍi wa rabba-l-ʿarshi-l-ʿaẓīm, rabbanā wa rabba kulli shayʾ, fāliqa-l-ḥabbi wa-n-nawā, wa munzila-t-tawrāti wa-l-injīli wa-l-furqān, aʿūdhu bika min sharri kulli shayʾin anta ākhidhun bi-nāṣiyatih. Allāhumma anta-l-awwalu fa-laysa qablaka shayʾ, wa anta-l-ākhiru fa-laysa baʿdaka shayʾ, wa anta-ẓ-ẓāhiru fa-laysa fawqaka shayʾ, wa anta-l-bāṭinu fa-laysa dūnaka shayʾ. Iqḍi ʿannā-d-dayna wa aghninā mina-l-faqr.',
+    translation:
+      'O Allah, Lord of the heavens and the earth and the Mighty Throne, our Lord and Lord of all things… settle our debts and free us from poverty.',
+    source: 'Sahih Muslim 2713',
+  },
+  {
+    id: 'sleep_dust_off_bed',
+    category: 'sleep',
+    titleEn: 'Dust off the bed and lie on the right side',
+    arabic:
+      'سُبْحَانَكَ ٱللَّهُمَّ رَبِّي بِكَ وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، إِنْ أَمْسَكْتَ نَفْسِي فَٱغْفِرْ لَهَا، وَإِنْ أَرْسَلْتَهَا فَٱحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ ٱلصَّالِحِينَ',
+    transliteration:
+      'Subḥānaka-llāhumma rabbī bika waḍaʿtu janbī, wa bika arfaʿuh. In amsakta nafsī fa-ghfir lahā, wa in arsaltahā fa-ḥfaẓhā bi-mā taḥfaẓu bihi ʿibādaka-ṣ-ṣāliḥīn.',
+    translation:
+      'Dust off the bed with the inside of your izār, mention Allah\'s name, lie on your right side, then say: Glory be to You, O Allah my Lord — by You I lay down my side and by You I raise it. If You take my soul, forgive it; if You release it, guard it as You guard Your righteous servants.',
+    source: 'Sahih Muslim 2714',
+  },
+  {
+    id: 'sleep_takbir_tasbih_tahmid',
+    category: 'sleep',
+    titleEn: 'Takbīr 34, Tasbīḥ 33, Taḥmīd 33 (better than a servant)',
+    arabic:
+      'ٱللَّهُ أَكْبَرُ (×٣٤) — سُبْحَانَ ٱللَّهِ (×٣٣) — ٱلْحَمْدُ لِلَّهِ (×٣٣)',
+    transliteration:
+      'Allāhu akbar (×34), Subḥāna-llāh (×33), al-ḥamdu lillāh (×33)',
+    translation:
+      'The Prophet ﷺ taught Fāṭimah and ʿAlī this is better for them than a servant: take takbīr 34 times, tasbīḥ 33 times, and taḥmīd 33 times before sleep.',
+    source: 'Sahih al-Bukhari 3705, Sahih Muslim 2727',
+    repeat: 33,
+  },
+  {
+    id: 'sleep_taamat_protection',
+    category: 'sleep',
+    titleEn: 'The perfect words of Allah from every harm',
+    arabic:
+      'أَعُوذُ بِكَلِمَاتِ ٱللَّهِ ٱلتَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
+    transliteration:
+      'Aʿūdhu bi-kalimāti-llāhi-t-tāmmāti min sharri mā khalaq',
+    translation:
+      'I seek refuge in the perfect words of Allah from the evil of what He has created. Whoever stops at a place and says this, nothing will harm him until he leaves.',
+    source: 'Sahih Muslim 2708',
     repeat: 3,
+  },
+  {
+    id: 'sleep_taamat_for_children',
+    category: 'sleep',
+    titleEn: 'Refuge for children — every devil and harmful creature',
+    arabic:
+      'أَعُوذُ بِكَلِمَاتِ ٱللَّهِ ٱلتَّامَّةِ، مِنْ كُلِّ شَيْطَانٍ وَهَامَّةٍ، وَمِنْ كُلِّ عَيْنٍ لَامَّةٍ',
+    transliteration:
+      'Aʿūdhu bi-kalimāti-llāhi-t-tāmmah, min kulli shayṭānin wa hāmmah, wa min kulli ʿaynin lāmmah',
+    translation:
+      'I seek refuge in the perfect words of Allah from every devil, every harmful creature, and every evil eye. The Prophet ﷺ used to recite this over al-Ḥasan and al-Ḥusayn.',
+    source: 'Sahih al-Bukhari 3371',
+  },
+  {
+    id: 'sleep_taamat_long',
+    category: 'sleep',
+    titleEn: "Refuge by Allah's perfect words — long form",
+    arabic:
+      'أَعُوذُ بِكَلِمَاتِ ٱللَّهِ ٱلتَّامَّاتِ ٱلَّتِي لَا يُجَاوِزُهُنَّ بَرٌّ وَلَا فَاجِرٌ، مِنْ شَرِّ مَا خَلَقَ وَذَرَأَ وَبَرَأَ، وَمِنْ شَرِّ مَا يَنْزِلُ مِنَ ٱلسَّمَاءِ، وَمِنْ شَرِّ مَا يَعْرُجُ فِيهَا، وَمِنْ شَرِّ مَا ذَرَأَ فِي ٱلْأَرْضِ، وَمِنْ شَرِّ مَا يَخْرُجُ مِنْهَا، وَمِنْ شَرِّ فِتَنِ ٱللَّيْلِ وَٱلنَّهَارِ، وَمِنْ شَرِّ كُلِّ طَارِقٍ إِلَّا طَارِقًا يَطْرُقُ بِخَيْرٍ، يَا رَحْمَٰنُ',
+    transliteration:
+      "Aʿūdhu bi-kalimāti-llāhi-t-tāmmāti-llatī lā yujāwizuhunna barrun wa lā fājir, min sharri mā khalaqa wa dharaʾa wa baraʾ, wa min sharri mā yanzilu mina-s-samāʾ, wa min sharri mā yaʿruju fīhā, wa min sharri mā dharaʾa fī-l-arḍ, wa min sharri mā yakhruju minhā, wa min sharri fitani-l-layli wa-n-nahār, wa min sharri kulli ṭāriqin illā ṭāriqan yaṭruqu bi-khayrin, yā raḥmān.",
+    translation:
+      "I seek refuge in Allah's perfect words, which neither the righteous nor the wicked can transgress, from every evil He has created, brought into being, and originated; from every evil that descends from the sky and ascends into it, and every evil sown in the earth and emerging from it; from the trials of night and day, and from every visitor at night except one who comes with good — O Most Merciful.",
+    source: 'Musnad Aḥmad 3:419',
+  },
+  {
+    id: 'sleep_nightmare',
+    category: 'sleep',
+    titleEn: 'On waking startled or from a nightmare',
+    arabic:
+      'أَعُوذُ بِكَلِمَاتِ ٱللَّهِ ٱلتَّامَّاتِ مِنْ غَضَبِهِ وَعِقَابِهِ وَشَرِّ عِبَادِهِ، وَمِنْ هَمَزَاتِ ٱلشَّيَاطِينِ وَأَنْ يَحْضُرُونِ',
+    transliteration:
+      'Aʿūdhu bi-kalimāti-llāhi-t-tāmmāti min ghaḍabihi wa ʿiqābihi wa sharri ʿibādih, wa min hamazāti-sh-shayāṭīni wa an yaḥḍurūn',
+    translation:
+      "I seek refuge in Allah's perfect words from His anger, from His punishment, from the evil of His servants, and from the whisperings of devils and their presence. (Said when startled in sleep — it will not harm you.)",
+    source: 'Jāmiʿ at-Tirmidhī 3528, Sunan Abī Dāwūd 3893',
+  },
+  {
+    id: 'sleep_wajhik_alkarim',
+    category: 'sleep',
+    titleEn: 'By Your Noble Face and Your perfect words',
+    arabic:
+      'ٱللَّهُمَّ إِنِّي أَعُوذُ بِوَجْهِكَ ٱلْكَرِيمِ، وَكَلِمَاتِكَ ٱلتَّامَّةِ، مِنْ شَرِّ مَا أَنْتَ آخِذٌ بِنَاصِيَتِهِ. ٱللَّهُمَّ أَنْتَ تَكْشِفُ ٱلْمَغْرَمَ وَٱلْمَأْثَمَ. ٱللَّهُمَّ لَا يُهْزَمُ جُنْدُكَ، وَلَا يُخْلَفُ وَعْدُكَ، وَلَا يَنْفَعُ ذَا ٱلْجَدِّ مِنْكَ ٱلْجَدُّ، سُبْحَانَكَ وَبِحَمْدِكَ',
+    transliteration:
+      'Allāhumma innī aʿūdhu bi-wajhika-l-karīm, wa kalimātika-t-tāmmah, min sharri mā anta ākhidhun bi-nāṣiyatih. Allāhumma anta takshifu-l-maghrama wa-l-maʾtham. Allāhumma lā yuhzamu junduk, wa lā yukhlafu waʿduk, wa lā yanfaʿu dhā-l-jaddi minka-l-jadd, subḥānaka wa bi-ḥamdik.',
+    translation:
+      'O Allah, I seek refuge by Your Noble Face and Your perfect words from the evil of every creature whose forelock You hold. O Allah, You relieve debt and sin… nothing avails the rich against You, glory and praise be to You.',
+    source: 'Sunan Abī Dāwūd 5052',
+  },
+  {
+    id: 'sleep_anta_rabbi',
+    category: 'sleep',
+    titleEn: 'You are my Lord — no calamity will reach me',
+    arabic:
+      'ٱللَّهُمَّ أَنْتَ رَبِّي، لَا إِلَٰهَ إِلَّا أَنْتَ، عَلَيْكَ تَوَكَّلْتُ وَأَنْتَ رَبُّ ٱلْعَرْشِ ٱلْعَظِيمِ. لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِٱللَّهِ ٱلْعَظِيمِ. مَا شَاءَ ٱللَّهُ كَانَ، وَمَا لَمْ يَشَأْ لَمْ يَكُنْ. أَعْلَمُ أَنَّ ٱللَّهَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ، وَأَنَّ ٱللَّهَ قَدْ أَحَاطَ بِكُلِّ شَيْءٍ عِلْمًا. ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ كُلِّ دَابَّةٍ أَنْتَ آخِذٌ بِنَاصِيَتِهَا، إِنَّ رَبِّي عَلَىٰ صِرَاطٍ مُسْتَقِيمٍ',
+    transliteration:
+      'Allāhumma anta rabbī, lā ilāha illā ant, ʿalayka tawakkaltu wa anta rabbu-l-ʿarshi-l-ʿaẓīm…',
+    translation:
+      'Whoever says these words by night or by day, no harm will reach him; whoever says them in the morning will not be afflicted by calamity until evening, and whoever says them in the evening will not be afflicted until morning.',
+    source: 'aṭ-Ṭabarānī from Abū al-Dardāʾ',
   },
   // — Travel —
   {
@@ -779,12 +1009,12 @@ export const DUAS: ReadonlyArray<Dua> = [
     category: 'mosque',
     titleEn: 'After hearing the adhan',
     arabic:
-      'ٱللَّٰهُمَّ رَبَّ هَٰذِهِ ٱلدَّعْوَةِ ٱلتَّامَّةِ وَٱلصَّلَاةِ ٱلْقَائِمَةِ، آتِ مُحَمَّدًا ٱلْوَسِيلَةَ وَٱلْفَضِيلَةَ',
+      'ٱللَّهُمَّ رَبَّ هَٰذِهِ ٱلدَّعْوَةِ ٱلتَّامَّةِ وَٱلصَّلَاةِ ٱلْقَائِمَةِ، آتِ مُحَمَّدًا ٱلْوَسِيلَةَ وَٱلْفَضِيلَةَ، وَٱبْعَثْهُ مَقَامًا مَحْمُودًا ٱلَّذِي وَعَدْتَهُ',
     transliteration:
-      'Allāhumma rabba hādhihid-daʿwati-t-tāmmati waṣ-ṣalātil-qāʾimah, āti Muḥammadan-il-wasīlata wal-faḍīlah',
+      'Allāhumma rabba hādhihi-d-daʿwati-t-tāmmati wa-ṣ-ṣalāti-l-qāʾimah, āti Muḥammadan-il-wasīlata wa-l-faḍīlah, wa-bʿathhu maqāman maḥmūdan-illadhī waʿadtah',
     translation:
-      'O Allah, Lord of this perfect call and the prayer about to be established, grant Muhammad al-Waseelah (the highest station) and excellence.',
-    source: 'Sahih al-Bukhari 614',
+      'O Allah, Lord of this perfect call and the prayer about to be established, grant Muhammad al-Wasīlah (the highest station) and excellence, and raise him to the praiseworthy station that You have promised him.',
+    source: 'Sahih al-Bukhari 614 — whoever says it after the adhan is granted the Prophet\'s ﷺ intercession on the Day of Resurrection.',
   },
   // — Gratitude —
   {
@@ -892,6 +1122,15 @@ export const DUAS: ReadonlyArray<Dua> = [
     source: 'Sahih al-Bukhari 1032',
   },
   // — Weather —
+  {
+    id: 'weather_during_rain',
+    category: 'weather',
+    titleEn: 'When rain begins to fall',
+    arabic: 'ٱللَّهُمَّ صَيِّبًا نَافِعًا',
+    transliteration: 'Allāhumma ṣayyiban nāfiʿā',
+    translation: 'O Allah, may it be a beneficial rain cloud.',
+    source: 'Sahih al-Bukhari 1032',
+  },
   {
     id: 'weather_after_rain',
     category: 'weather',

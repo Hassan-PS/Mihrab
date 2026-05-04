@@ -49,6 +49,12 @@ export function DuasScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
+      {/* Tabs are wrapped in a fixed-height row pinned just under the
+          system header, so when the active category has only one or two
+          duas the chips stay at the top instead of vertically centering
+          (#101 follow-up). The dua list ScrollView fills the rest of
+          the screen and starts at a predictable y-offset. */}
+      <View style={styles.tabsRow}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -81,8 +87,10 @@ export function DuasScreen() {
           );
         })}
       </ScrollView>
+      </View>
 
       <ScrollView
+        style={styles.listScroll}
         contentContainerStyle={styles.list}
         contentInsetAdjustmentBehavior="automatic">
         {duasByCategory(selected).map(dua => (
@@ -187,6 +195,12 @@ export { _DuasScreenMemo as DuasScreenMemo };
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  tabsRow: {
+    // Fixed-height pinned row so single-dua categories don't vertically
+    // center the chips. The list area below uses flex:1 underneath.
+    flexShrink: 0,
+  },
+  listScroll: { flex: 1 },
   tabs: { paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center' },
   tab: {
     paddingHorizontal: 16,
