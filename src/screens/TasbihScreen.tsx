@@ -129,7 +129,11 @@ export function TasbihScreen() {
           text: showCap ? `${count} / ${target}` : `${count}`,
         }}
         onPress={onIncrement}
-        android_ripple={{ color: palette.accentBg, foreground: false }}
+        // android_ripple's color prop only accepts a hex/rgb string —
+        // passing a PlatformColor (Material You's `accentBg`) throws
+        // "Unexpected color given for Ripple color" and crashes the
+        // bridge. Use the resolved hex via `accentSolid`. (#113)
+        android_ripple={{ color: palette.accentSolid, foreground: false }}
         style={({ pressed }: { pressed: boolean }) => [
           styles.tapTarget,
           {

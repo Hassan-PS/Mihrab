@@ -19,6 +19,7 @@ class MainApplication : Application(), ReactApplication {
           add(PrayerWidgetPackage())
           add(PrayerBuildInfoPackage())
           add(AppVersionPackage())
+          add(SystemThemePackage())
           if (BuildConfig.IAP_ENABLED) {
             addIapPackageIfPresent(this)
           }

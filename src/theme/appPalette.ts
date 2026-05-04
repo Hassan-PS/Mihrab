@@ -4,6 +4,7 @@ import {
   Platform,
   PlatformColor,
 } from 'react-native';
+import { getResolvedAccentHex } from '../native/SystemTheme';
 import type { AppearancePreference } from '../settings/types';
 
 export type AppPalette = {
@@ -150,12 +151,12 @@ function androidDynamicPalette(
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
     flatChrome: true,
-    // SVG icons can't consume PlatformColor; use a Material 3 baseline
-    // primary as the solid fallback so tiles stay visible. This is
-    // approximate (the real dynamic primary varies per device) but
-    // keeps the icon visible while text and chrome around it still
-    // honor the live system theme.
-    accentSolid: isDark ? '#D0BCFF' : '#6750A4',
+    // SVG icons can't consume PlatformColor; resolve the live system
+    // primary to a hex via the SystemTheme native module so tiles
+    // stay visible AND match the Material You wallpaper-derived
+    // accent that the rest of the app shows. Falls back to the
+    // Material 3 baseline if the native bridge is unavailable.
+    accentSolid: getResolvedAccentHex() ?? (isDark ? '#D0BCFF' : '#6750A4'),
   };
 }
 
