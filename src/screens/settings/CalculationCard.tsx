@@ -104,6 +104,8 @@ function CalculationCardImpl({
           </View>
           <Switch
             value={settings.school === 1}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor={settings.school === 1 ? palette.accentSolid : '#f3f4f6'}
             onValueChange={v => updateSettings({ school: v ? 1 : 0 })}
           />
         </View>

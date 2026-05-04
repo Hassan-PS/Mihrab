@@ -288,6 +288,8 @@ function MushafReader({
 }) {
   const initialPage = useMemo(() => findPageForAyah(surahNumber, 1), [surahNumber]);
   const flatListRef = useRef<FlatList<typeof MUSHAF_PAGES[number]>>(null);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const isDark = String(palette.text).toLowerCase() !== '#1a1a1a';
   const parchment = isDark ? '#1c1815' : '#fbf6e9';
@@ -295,6 +297,23 @@ function MushafReader({
   const ornament = isDark ? '#c9a96a' : '#8b6f2a';
 
   const screenWidth = Dimensions.get('window').width;
+
+  // Update the navigation title to reflect the surah on the currently-
+  // visible page when the user swipes to a new page (#115).
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: Array<{ item?: typeof MUSHAF_PAGES[number] }> }) => {
+      const visible = viewableItems[0]?.item;
+      if (!visible) return;
+      const surah = MUSHAF_SURAHS.find(s => s.number === visible.start.surah);
+      if (surah) {
+        navigation.setOptions({ title: surah.englishName });
+      }
+    },
+  ).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 60,
+  }).current;
 
   return (
     <FlatList
@@ -312,6 +331,8 @@ function MushafReader({
         offset: screenWidth * idx,
         index: idx,
       })}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={viewabilityConfig}
       showsHorizontalScrollIndicator={false}
       style={{ flex: 1, backgroundColor: parchment }}
       contentInsetAdjustmentBehavior="automatic"
@@ -422,9 +443,13 @@ function MushafPage({
             mushafPageStyles.body,
             {
               color: ink,
+              // Bundled in this build (#115): AmiriQuran.ttf in
+              // android/app/src/main/assets/fonts and registered in
+              // ios Info.plist UIAppFonts. iOS resolves by family
+              // name "Amiri Quran"; Android by file basename.
               fontFamily: Platform.select({
                 ios: 'Amiri Quran',
-                android: 'Amiri-Regular',
+                android: 'AmiriQuran',
                 default: undefined,
               }),
             },
