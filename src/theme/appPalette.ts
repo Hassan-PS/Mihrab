@@ -21,6 +21,17 @@ export type AppPalette = {
    * segments use filled selection instead of accent outlines.
    */
   flatChrome: boolean;
+  /**
+   * Solid hex string version of the accent color — task #104.
+   *
+   * `accent` itself can be a PlatformColor / DynamicColorIOS object so
+   * RN can resolve native theme attributes. SVG icons (react-native-svg)
+   * can't always consume those non-string `ColorValue`s as fills/strokes,
+   * which is why icons disappear under Material You. `accentSolid` is a
+   * plain "#RRGGBB" string that callers can hand directly to icon
+   * components.
+   */
+  accentSolid: string;
 };
 
 export function resolveEffectiveDark(
@@ -52,16 +63,16 @@ export function shouldUseDynamicSystemColors(
 type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg'>;
 
 /** App brand green when System theme + dynamic colors is off, or when appearance is forced light/dark. */
-function brandAccents(isDark: boolean): { accent: ColorValue; accentBg: ColorValue } {
+function brandAccents(isDark: boolean): { accent: ColorValue; accentBg: ColorValue; accentSolid: string } {
   if (isDark) {
-    return { accent: '#4ade80', accentBg: '#14532d' };
+    return { accent: '#4ade80', accentBg: '#14532d', accentSolid: '#4ade80' };
   }
-  return { accent: '#22c55e', accentBg: '#dcfce7' };
+  return { accent: '#22c55e', accentBg: '#dcfce7', accentSolid: '#22c55e' };
 }
 
 function withBrandAccents(base: PaletteBase, isDark: boolean): AppPalette {
-  const { accent, accentBg } = brandAccents(isDark);
-  return { ...base, accent, accentBg };
+  const { accent, accentBg, accentSolid } = brandAccents(isDark);
+  return { ...base, accent, accentBg, accentSolid };
 }
 
 /** Standard dark greys. Accent uses brand green unless dynamic system palette is active. */
@@ -116,6 +127,9 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
       highContrastDark: 'rgba(0,0,0,0.75)',
     }),
     flatChrome: true,
+    // iOS systemBlue is the typical tintColor when no override; matches
+    // the live PlatformColor tint closely enough for SVG icons.
+    accentSolid: isDark ? '#0A84FF' : '#007AFF',
   };
 }
 
@@ -136,6 +150,12 @@ function androidDynamicPalette(
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
     flatChrome: true,
+    // SVG icons can't consume PlatformColor; use a Material 3 baseline
+    // primary as the solid fallback so tiles stay visible. This is
+    // approximate (the real dynamic primary varies per device) but
+    // keeps the icon visible while text and chrome around it still
+    // honor the live system theme.
+    accentSolid: isDark ? '#D0BCFF' : '#6750A4',
   };
 }
 

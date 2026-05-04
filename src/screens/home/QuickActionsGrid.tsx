@@ -73,7 +73,9 @@ function QuickActionsGridImpl() {
               ...cardEdgeStyle(palette),
             },
           ]}>
-          <tool.Icon color={String(palette.accent)} size={24} />
+          {/* SVG icons need a plain hex string; PlatformColor (Material You)
+              renders blank as an SVG fill — see palette.accentSolid (#104). */}
+          <tool.Icon color={palette.accentSolid} size={24} />
           <Text style={[styles.label, { color: palette.text }]}>
             {t(tool.labelKey)}
           </Text>

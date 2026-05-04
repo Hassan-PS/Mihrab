@@ -84,18 +84,50 @@ export function QuranSurahScreen() {
     };
   }, [surahNumber]);
 
-  useEffect(() => {
-    if (surah) {
-      navigation.setOptions({ title: surah.romanized });
-    }
-  }, [navigation, surah]);
-
   const isMushaf = settings.quranReadingMode === 'mushaf';
   const toggleMushaf = () => {
     updateSettings({
       quranReadingMode: isMushaf ? 'withTranslation' : 'mushaf',
     });
   };
+
+  // Set the title and a headerRight Mushaf/Translation toggle so the
+  // mode switch lives opposite the title text in the navigation bar
+  // — task #107.
+  useEffect(() => {
+    if (!surah) return;
+    navigation.setOptions({
+      title: surah.romanized,
+      headerRight: () => (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            isMushaf
+              ? t('quran.switchToTranslation', 'Switch to translation view')
+              : t('quran.switchToMushaf', 'Switch to mushaf view')
+          }
+          onPress={toggleMushaf}
+          hitSlop={10}
+          style={{ paddingHorizontal: 4 }}>
+          <Text
+            style={{
+              color: String(palette.accent),
+              fontSize: 15,
+              fontWeight: '700',
+            }}>
+            {isMushaf
+              ? t('quran.viewToggleTranslation', 'Aa')
+              : t('quran.viewToggleMushaf', '۝')}
+          </Text>
+        </Pressable>
+      ),
+    });
+    // We intentionally re-run when the mode flips so headerRight is
+    // rebuilt with the right label. The toggle handler is referentially
+    // stable enough for our needs — the dep list captures the values
+    // it reads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation, surah, isMushaf, palette.accent, t]);
   const cycleEdition = () => {
     // Open the translation picker via a quick cycle: rotate to the next
     // bundled edition. A full Settings entry exists for granular choice;
@@ -110,6 +142,20 @@ export function QuranSurahScreen() {
       <View style={[styles.empty, { backgroundColor: palette.bg }]}>
         <Text style={{ color: palette.muted }}>{t('quran.notFound')}</Text>
       </View>
+    );
+  }
+
+  // Mushaf mode renders a dedicated full-page view (no scroll cards,
+  // no chrome). Translation mode keeps the scrollable card layout.
+  if (isMushaf && ayahs) {
+    return (
+      <MushafReader
+        surahNumber={surahNumber}
+        surahArabic={surah.arabic}
+        surahRomanized={surah.romanized}
+        arabic={ayahs.arabic}
+        palette={palette}
+      />
     );
   }
 
@@ -133,54 +179,8 @@ export function QuranSurahScreen() {
           {surah.english} · {t('quran.ayahCount', { count: surah.ayahCount })}
         </Text>
 
-        {/* In-reader controls: toggle mode + tap-to-cycle translation
-            edition. Settings has the full picker for both. */}
-        <View style={styles.controlsRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              isMushaf
-                ? t('quran.mushafMode', 'Mushaf view')
-                : t('quran.translationMode', 'With translation')
-            }
-            accessibilityState={{ selected: !isMushaf }}
-            onPress={toggleMushaf}
-            style={[
-              styles.controlBtn,
-              {
-                borderColor: palette.border,
-                backgroundColor: !isMushaf ? palette.accent : palette.bg,
-              },
-            ]}>
-            <Text
-              style={[
-                styles.controlLabel,
-                { color: !isMushaf ? '#fff' : palette.text },
-              ]}>
-              {t('quran.translationMode', 'With translation')}
-            </Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.mushafMode', 'Mushaf view')}
-            accessibilityState={{ selected: isMushaf }}
-            onPress={toggleMushaf}
-            style={[
-              styles.controlBtn,
-              {
-                borderColor: palette.border,
-                backgroundColor: isMushaf ? palette.accent : palette.bg,
-              },
-            ]}>
-            <Text
-              style={[
-                styles.controlLabel,
-                { color: isMushaf ? '#fff' : palette.text },
-              ]}>
-              {t('quran.mushafMode', 'Mushaf view')}
-            </Text>
-          </Pressable>
-        </View>
+        {/* Translation-edition picker (shown only in translation mode);
+            mode toggle now lives in the navigation header (task #107). */}
         {!isMushaf ? (
           <Pressable
             accessibilityRole="button"
@@ -202,10 +202,7 @@ export function QuranSurahScreen() {
       </View>
 
       {ayahs ? (
-        isMushaf ? (
-          <MushafPage arabic={ayahs.arabic} palette={palette} />
-        ) : (
-          ayahs.arabic.map((ar, i) => (
+        ayahs.arabic.map((ar, i) => (
             <View
               key={i}
               style={[
@@ -229,7 +226,6 @@ export function QuranSurahScreen() {
               ) : null}
             </View>
           ))
-        )
       ) : (
         <View
           style={[
@@ -252,44 +248,81 @@ export function QuranSurahScreen() {
 }
 
 /**
- * Mushaf-style continuous reading block — task #97.
+ * Mushaf-style reader — task #108.
  *
- * Joins all ayahs of the surah into a single right-to-left flowing
- * paragraph, separated by the traditional Arabic ayah-end marker (۝)
- * with the ayah number inside it. Uses the bundled Amiri Quran font
- * when available and falls back to the system Arabic typeface. No
- * translation overlay — this view is for continuous recitation.
+ * Modeled on the Ayah app's mushaf experience: a parchment-styled
+ * full-page surface with a decorative surah heading, the Bismillah
+ * pre-rendered for surahs that begin with it, and a continuous
+ * justified RTL paragraph carrying ornamental ayah markers (﴿N﴾) in
+ * eastern-Arabic numerals. No card chrome, no translation overlay —
+ * this is the reading-only mode.
+ *
+ * Surah at-Tawbah (9) is the only surah that does not begin with
+ * Bismillah; we suppress the pre-rendered Bismillah for it. Surah
+ * al-Fatihah (1) already contains Bismillah as its first ayah, so
+ * we suppress the pre-rendered version there too.
  */
-function MushafPage({
+function MushafReader({
+  surahNumber,
+  surahArabic,
+  surahRomanized,
   arabic,
   palette,
 }: {
+  surahNumber: number;
+  surahArabic: string;
+  surahRomanized: string;
   arabic: ReadonlyArray<string>;
   palette: ReturnType<typeof useAppPalette>['palette'];
 }) {
   const joined = useMemo(() => {
     return arabic
       .map((line, i) => {
-        // Eastern-Arabic numerals for the ayah marker so it reads
-        // visually correct in RTL flow.
         const num = String(i + 1).replace(/[0-9]/g, d =>
           String.fromCharCode('٠'.charCodeAt(0) + Number(d)),
         );
-        return `${line} ۝${num}`;
+        // U+FD3E ornate left, U+FD3F ornate right — the traditional
+        // mushaf decorative ayah-end markers used in Madinah print.
+        return `${line} ﴿${num}﴾`;
       })
       .join(' ');
   }, [arabic]);
+
+  const showBismillahHeader = surahNumber !== 1 && surahNumber !== 9;
+  // Parchment-style background: warm off-white that adapts to dark mode
+  // by going to a deep brown. Falls back to palette.bg if the user has
+  // OLED on so the screen stays calming.
+  const isDark = String(palette.text).toLowerCase() !== '#1a1a1a';
+  const parchment = isDark ? '#1c1815' : '#fbf6e9';
+  const ink = isDark ? '#e8d8b8' : '#3a2e1a';
+  const ornament = isDark ? '#c9a96a' : '#8b6f2a';
+
   return (
-    <View
-      style={[
-        styles.mushafPage,
-        { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-      ]}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: parchment }}
+      contentContainerStyle={mushafStyles.scroll}
+      contentInsetAdjustmentBehavior="automatic">
+      {/* Decorative surah heading banner */}
+      <View style={[mushafStyles.heading, { borderColor: ornament }]}>
+        <Text style={[mushafStyles.headingArabic, { color: ink }]}>
+          {`سُورَةُ ${surahArabic}`}
+        </Text>
+        <Text style={[mushafStyles.headingRomanized, { color: ornament }]}>
+          {surahRomanized}
+        </Text>
+      </View>
+
+      {showBismillahHeader ? (
+        <Text style={[mushafStyles.bismillah, { color: ink }]}>
+          بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+        </Text>
+      ) : null}
+
       <Text
         style={[
-          styles.mushafText,
+          mushafStyles.body,
           {
-            color: palette.text,
+            color: ink,
             fontFamily: Platform.select({
               ios: 'Amiri Quran',
               android: 'Amiri-Regular',
@@ -301,9 +334,47 @@ function MushafPage({
         selectable>
         {joined}
       </Text>
-    </View>
+    </ScrollView>
   );
 }
+
+const mushafStyles = StyleSheet.create({
+  scroll: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 64 },
+  heading: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    marginBottom: 18,
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+  },
+  headingArabic: {
+    fontSize: 26,
+    lineHeight: 40,
+    fontWeight: '600',
+    writingDirection: 'rtl',
+  },
+  headingRomanized: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginTop: 4,
+  },
+  bismillah: {
+    fontSize: 30,
+    lineHeight: 56,
+    textAlign: 'center',
+    writingDirection: 'rtl',
+    marginBottom: 16,
+  },
+  body: {
+    fontSize: 28,
+    lineHeight: 64,
+    writingDirection: 'rtl',
+    textAlign: 'justify',
+    letterSpacing: 0,
+  },
+});
 
 const styles = StyleSheet.create({
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },

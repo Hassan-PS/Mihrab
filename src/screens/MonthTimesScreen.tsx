@@ -3,7 +3,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, Text, View } from 'react-native';
 import { Skeleton } from '../components/ui/Skeleton';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -176,7 +176,7 @@ export function MonthTimesScreen() {
       <View
         accessibilityRole="text"
         accessibilityLabel={t('common.loading')}
-        style={[styles.skeletonScreen, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
+        style={[styles.skeletonScreen, { backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 }]}>
         <Skeleton width="60%" height={28} radius="sm" />
         <Skeleton width="40%" height={16} radius="sm" />
         {Array.from({ length: 12 }, (_, i) => (
@@ -194,7 +194,7 @@ export function MonthTimesScreen() {
 
   if (needsGpsPrime) {
     return (
-      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg, paddingTop: headerHeight }]}>
+      <View style={[styles.centered, styles.pad, { backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 }]}>
         <Text style={[styles.title, { color: palette.text }]}>{t('month.locationNotReadyTitle')}</Text>
         <Text style={[styles.body, { color: palette.muted }]}>{t('month.locationNotReadyBody')}</Text>
       </View>
@@ -233,7 +233,7 @@ export function MonthTimesScreen() {
 
   if (isShareView) {
     return (
-      <View style={{ flex: 1, backgroundColor: palette.bg, paddingTop: headerHeight }}>
+      <View style={{ flex: 1, backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 }}>
         {controlsHeader}
         <ShareMonthScreen
           route={{ key: 'ShareMonth', name: 'ShareMonth', params: { year: viewYear, month: viewMonth } }}
@@ -245,7 +245,7 @@ export function MonthTimesScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: palette.bg, paddingTop: headerHeight }}>
+    <View style={{ flex: 1, backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 }}>
       {controlsHeader}
       {columnHeader}
       <FlatList

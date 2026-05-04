@@ -68,7 +68,7 @@ export function CompassScreen() {
       <View
         style={[
           styles.centered,
-          { backgroundColor: palette.bg, paddingTop: headerHeight },
+          { backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 },
         ]}>
         <Text style={{ color: palette.muted }}>{t('common.loading')}</Text>
       </View>
@@ -81,7 +81,7 @@ export function CompassScreen() {
         style={[
           styles.centered,
           styles.pad,
-          { backgroundColor: palette.bg, paddingTop: headerHeight },
+          { backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 },
         ]}>
         <Text style={[styles.title, { color: palette.text }]}>
           {t('compass.needLocationTitle')}
@@ -97,7 +97,7 @@ export function CompassScreen() {
     <View
       style={[
         styles.root,
-        { backgroundColor: palette.bg, paddingTop: headerHeight },
+        { backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 },
       ]}>
       <BearingHeader qiblaDeg={qibla} />
 

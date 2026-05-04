@@ -2,7 +2,7 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo } from 'react';
-import { Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppearanceSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -87,7 +87,22 @@ function AppearanceCardImpl() {
             <Switch
               value={settings.useSystemDynamicTheme}
               disabled={settings.appearance !== 'system'}
-              onValueChange={v => updateSettings({ useSystemDynamicTheme: v })}
+              onValueChange={v => {
+                // Material You uses PlatformColor attribute references
+                // resolved at view-attach time. Toggling them mid-session
+                // leaves stale theme colors on every already-rendered
+                // surface (#103). Tell the user the change requires a
+                // restart so the new attributes are picked up everywhere.
+                updateSettings({ useSystemDynamicTheme: v });
+                Alert.alert(
+                  t('settings.themeRestartTitle', 'Restart required'),
+                  t(
+                    'settings.themeRestartBody',
+                    'The system color setting has been saved. Please close and reopen the app for the change to take effect everywhere.',
+                  ),
+                  [{ text: t('common.ok', 'OK'), style: 'default' }],
+                );
+              }}
             />
           </View>
         )}
