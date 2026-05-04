@@ -162,6 +162,34 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   ) {
     merged.appAccentCustomHex = DEFAULT_SETTINGS.appAccentCustomHex;
   }
+  // Reconcile coords with the active location preset — task #137. The
+  // user's coordinates live in two places: `manualLatitude/Longitude`
+  // (mirrored for the app's read path) and the entry inside
+  // `locationPresets[*]`. They can drift apart if the encrypted
+  // storage load partially failed, or if a previous version wrote
+  // one but not the other. When the active preset is known, treat
+  // its coords as authoritative and override the bare manual coords
+  // — this fixes the (0, 0) sentinel showing up after the user
+  // already saved a real location preset.
+  if (
+    typeof merged.activeLocationPresetId === 'string' &&
+    Array.isArray(merged.locationPresets)
+  ) {
+    const active = merged.locationPresets.find(
+      p => p.id === merged.activeLocationPresetId,
+    );
+    if (active) {
+      const noManual =
+        !Number.isFinite(merged.manualLatitude) ||
+        !Number.isFinite(merged.manualLongitude) ||
+        (merged.manualLatitude === 0 && merged.manualLongitude === 0);
+      if (noManual) {
+        merged.manualLatitude = active.latitude;
+        merged.manualLongitude = active.longitude;
+        merged.manualLocationLabel = active.label ?? merged.manualLocationLabel;
+      }
+    }
+  }
   merged.androidWidgetBackgroundOpacity = coerceWidgetOpacity(
     parsed.androidWidgetBackgroundOpacity,
   );
