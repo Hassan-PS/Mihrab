@@ -164,8 +164,8 @@ function Attributions({ palette }: { palette: AppPalette }) {
       <AttributionRow
         palette={palette}
         label="Mushaf page images (604)"
-        sub="GovarJabbar/Quran-PNG · KFGQPC fonts · via jsDelivr"
-        url="https://github.com/GovarJabbar/Quran-PNG"
+        sub="Hassan-PS/PrayerApp · KFGQPC fonts · via quran/quran.com-images"
+        url="https://github.com/Hassan-PS/PrayerApp/releases/tag/mushaf-assets-v2"
       />
       <AttributionRow
         palette={palette}

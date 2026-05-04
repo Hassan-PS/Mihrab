@@ -722,8 +722,11 @@ function MushafReader({
           position: 'absolute',
           // Sit at the safe-area top + a small offset so the button
           // lines up with where the navigation title bar would be.
+          // Anchored on the LEFT so it sits on the opposite side of
+          // the page's "Part X" running head (which is right-aligned
+          // to mirror the printed Madinah mushaf). (#132 follow-up)
           top: insets.top + 6,
-          right: 12,
+          left: 12,
           backgroundColor: 'rgba(0,0,0,0.32)',
           paddingHorizontal: 12,
           paddingVertical: 8,

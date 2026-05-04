@@ -236,6 +236,7 @@ export async function resetAppData(): Promise<void> {
     // download prompt to re-appear on first mushaf open after reset.
     'mushaf.assets.v1.complete',
     'mushaf.assets.v2.complete',
+    'mushaf.assets.v3.complete',
   ];
   try {
     await AsyncStorage.multiRemove(asyncKeys);
