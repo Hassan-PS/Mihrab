@@ -301,15 +301,16 @@
   },
   "locations": {
     "title": "Saved locations",
-    "empty": "Save the current location to switch quickly later.",
-    "add": "Save current as…",
+    "empty": "Add saved locations so you can switch between them quickly.",
+    "add": "نیا مقام شامل کریں",
     "addPrompt": "Name this location",
     "addPlaceholder": "Home, Work, Travel…",
     "cancel": "Cancel",
     "save": "Save",
     "use": "Use",
     "delete": "Delete",
-    "limitReached": "Maximum {{max}} saved locations reached."
+    "limitReached": "Maximum {{max}} saved locations reached.",
+    "previousLocation": "پچھلا مقام"
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",

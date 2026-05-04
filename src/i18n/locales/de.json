@@ -301,15 +301,16 @@
   },
   "locations": {
     "title": "Saved locations",
-    "empty": "Save the current location to switch quickly later.",
-    "add": "Save current as…",
-    "addPrompt": "Name this location",
+    "empty": "Speichere Orte, um schnell zwischen ihnen zu wechseln.",
+    "add": "Neuen Ort hinzufügen",
+    "addPrompt": "Diesen Ort benennen",
     "addPlaceholder": "Home, Work, Travel…",
     "cancel": "Cancel",
     "save": "Save",
     "use": "Use",
     "delete": "Delete",
-    "limitReached": "Maximum {{max}} saved locations reached."
+    "limitReached": "Maximum {{max}} saved locations reached.",
+    "previousLocation": "Vorheriger Ort"
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",

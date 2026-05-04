@@ -301,15 +301,16 @@
   },
   "locations": {
     "title": "Sparade platser",
-    "empty": "Spara din nuvarande plats för att snabbt växla senare.",
-    "add": "Spara nuvarande som…",
+    "empty": "Lägg till sparade platser så kan du växla snabbt mellan dem.",
+    "add": "Lägg till ny plats",
     "addPrompt": "Namnge platsen",
     "addPlaceholder": "Hem, Jobb, Resa…",
     "cancel": "Avbryt",
     "save": "Spara",
     "use": "Använd",
     "delete": "Ta bort",
-    "limitReached": "Max {{max}} sparade platser har nåtts."
+    "limitReached": "Max {{max}} sparade platser har nåtts.",
+    "previousLocation": "Tidigare plats"
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
