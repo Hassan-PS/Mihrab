@@ -31,6 +31,7 @@ import {
   MUSHAF_PAGES,
   MUSHAF_SURAHS,
 } from '../quran/pages';
+import { mushafPageAsset } from '../quran/mushafImages';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
 import { cardEdgeStyle } from '../theme/chrome';
@@ -345,6 +346,20 @@ function MushafReader({
       showsHorizontalScrollIndicator={false}
       style={{ flex: 1, backgroundColor: parchment }}
       contentInsetAdjustmentBehavior="automatic"
+      // Performance tuning — task #121:
+      //   • windowSize=5 keeps the active page + ~2 on each side mounted
+      //     so swipe is instant; pages farther away get unmounted to
+      //     keep memory steady.
+      //   • removeClippedSubviews lets RN/Android skip rendering pages
+      //     that are off-screen.
+      //   • initialNumToRender=1 — only the visible page is mounted on
+      //     first render so opening the reader is fast.
+      //   • maxToRenderPerBatch=2 — RN renders adjacent pages in tight
+      //     batches as the user nears the edge of the window.
+      windowSize={5}
+      removeClippedSubviews
+      initialNumToRender={1}
+      maxToRenderPerBatch={2}
       renderItem={({ item }) => (
         <MushafPage
           page={item}
@@ -359,26 +374,23 @@ function MushafReader({
 }
 
 /**
- * One physical page of the mushaf — task #116.
+ * One physical page of the mushaf — task #116, bundled locally in #121.
  *
  * Religious-accuracy invariant: rendering the Quran from text + font
  * leaves any number of ways the rendered output could subtly differ
  * from the authoritative print (diacritic substitutions, ligature
- * rendering bugs, font glyph variants). To eliminate that risk this
- * page is rendered from an authoritative PNG of the official
- * KFGQPC Madinah Mushaf, hosted on archive.org's `madinah_mushaf`
- * collection (community mirror of the King Fahd print).
+ * rendering bugs, font glyph variants). The page is therefore rendered
+ * from an authoritative PNG of the official KFGQPC Madinah Mushaf,
+ * bundled at full original quality (1014x1628 4-bit colormap PNGs from
+ * archive.org's `madinah_mushaf` collection — community mirror of the
+ * King Fahd print).
  *
- * The image is loaded over the network on first view and cached by
- * RN's native image loader; subsequent views are instant and offline.
- * A future task will bundle all 604 pages directly so first-view is
- * also offline.
+ * All 604 pages are now bundled locally via `mushafPageAsset(page)` —
+ * no network dependency, instant load, full quality preserved.
  *
  * Image base aspect ratio is 1014:1628 (the source resolution).
  */
 const MUSHAF_IMAGE_ASPECT = 1014 / 1628;
-const mushafPageImageUrl = (page: number): string =>
-  `https://archive.org/download/madinah_mushaf/page${page}.png`;
 
 function MushafPage({
   page,
@@ -428,7 +440,7 @@ function MushafPage({
 
       <View style={mushafPageStyles.imageWrap}>
         <Image
-          source={{ uri: mushafPageImageUrl(page.page) }}
+          source={mushafPageAsset(page.page)}
           style={[
             { width: imageWidth, height: imageHeight },
             // tintColor flattens the image to a single color while
@@ -439,8 +451,12 @@ function MushafPage({
           ]}
           resizeMode="contain"
           accessibilityLabel={`Mushaf page ${page.page}`}
+          // Local asset, but RN still decodes async on the first
+          // mount of each page; show a quick spinner so the swipe
+          // doesn't show a blank cell between pages.
           onLoad={() => setImageReady(true)}
           onError={() => setImageFailed(true)}
+          fadeDuration={0}
         />
         {!imageReady && !imageFailed ? (
           <View style={mushafPageStyles.imageOverlay}>
@@ -450,7 +466,7 @@ function MushafPage({
         {imageFailed ? (
           <View style={mushafPageStyles.imageOverlay}>
             <Text style={[mushafPageStyles.errorText, { color: ornament }]}>
-              Mushaf page unavailable offline. Connect to load page {page.page}.
+              Could not load mushaf page {page.page}.
             </Text>
           </View>
         ) : null}
