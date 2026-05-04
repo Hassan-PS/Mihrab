@@ -16,6 +16,7 @@ import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { usePrayerDay } from '../hooks/usePrayerDay';
+import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { syncPrayerWidget } from '../widget/syncPrayerWidget';
 import {
@@ -66,6 +67,11 @@ export function HomeScreen() {
   const { t, i18n } = useTranslation();
   const { settings, hydrated, updateSettings } = usePrayerSettings();
   const { state, retry } = usePrayerDay(settings, hydrated);
+  // Background prefetch of 12 months for every saved location preset, so
+  // switching presets is instant and doesn'\''t wipe the previously-cached
+  // months — task #145. Runs serially in the background, never blocks the
+  // home render.
+  usePrefetchSavedLocations();
   const { palette } = useAppPalette();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth - HOME_SCREEN_PADDING * 2;

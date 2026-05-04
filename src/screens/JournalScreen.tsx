@@ -26,6 +26,7 @@ import {
   entriesForDate,
   getEntryStatus,
   loggedDates,
+  removeEntry,
   setEntryNote,
   upsertEntry,
   type JournalEntry,
@@ -143,6 +144,14 @@ export function JournalScreen() {
 
   const onMark = useCallback(
     (prayer: JournalPrayer, status: JournalStatus) => {
+      // Tap-to-deselect — task #145. If the user taps the already-active
+      // status pill, clear the entry instead of being a no-op. Lets the
+      // user un-log a prayer they marked by mistake.
+      const currentStatus = getEntryStatus(entries, today, prayer);
+      if (currentStatus === status) {
+        void persist(removeEntry(entries, today, prayer));
+        return;
+      }
       void persist(upsertEntry(entries, today, prayer, status));
     },
     [entries, today, persist],

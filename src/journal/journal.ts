@@ -129,6 +129,20 @@ export function upsertEntry(
   ];
 }
 
+/**
+ * Remove the entry for a given (date, prayer). Returns the entries array with
+ * any matching entry stripped out. Used by the Journal "tap-to-deselect" UX
+ * (#145): tapping the already-active status pill clears the log instead of
+ * being a no-op.
+ */
+export function removeEntry(
+  entries: JournalEntry[],
+  date: string,
+  prayer: JournalPrayer,
+): JournalEntry[] {
+  return entries.filter(e => !(e.date === date && e.prayer === prayer));
+}
+
 /** Lookup the status of a single (date, prayer) cell, or null if unlogged. */
 export function getEntryStatus(
   entries: JournalEntry[],
