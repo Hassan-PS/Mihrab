@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { TimingsMap } from '../../types/prayer';
@@ -41,6 +41,15 @@ function DayCarouselImpl({
     scrollRef.current?.scrollTo({ x: 0, animated: false });
   }, [resetKey]);
 
+  // Back-to-today handler — passed to every non-today DayCard so the
+  // user can jump from any future day back to today's card with a
+  // single tap (#129). Animated scroll so the carousel slide makes
+  // the transition obvious.
+  const onBackToToday = useCallback(() => {
+    scrollRef.current?.scrollTo({ x: 0, animated: true });
+    setActiveDayIndex(0);
+  }, []);
+
   return (
     <>
       <ScrollView
@@ -63,6 +72,7 @@ function DayCarouselImpl({
             dayDate={getDayDate(dayIndex)}
             isToday={dayIndex === 0}
             nextPrayerName={nextPrayerName}
+            onBackToToday={dayIndex === 0 ? undefined : onBackToToday}
           />
         ))}
       </ScrollView>

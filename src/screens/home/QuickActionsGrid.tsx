@@ -11,7 +11,9 @@ import { cardEdgeStyle } from '../../theme/chrome';
 import {
   BookIcon,
   CrescentIcon,
+  DuaHandsIcon,
   MosqueIcon,
+  PenIcon,
   TasbihIcon,
 } from '../../theme/icons';
 import { RADIUS, SPACING } from '../../theme/tokens';
@@ -40,9 +42,13 @@ type Tool = {
 const TOOLS: Tool[] = [
   { id: 'Compass', labelKey: 'nav.compass', Icon: CompassIcon },
   { id: 'Tasbih', labelKey: 'nav.tasbih', Icon: TasbihIcon },
-  { id: 'Duas', labelKey: 'nav.duas', Icon: BookIcon },
+  // Two cupped hands raised in dua — distinct from the book icon to
+  // avoid visual collision with the Quran tile (#129).
+  { id: 'Duas', labelKey: 'nav.duas', Icon: DuaHandsIcon },
   { id: 'Quran', labelKey: 'nav.quran', Icon: BookIcon },
-  { id: 'Journal', labelKey: 'nav.journal', Icon: BookIcon },
+  // Pen icon for the journal — writing entries is the primary mental
+  // model, not "another book" (#129).
+  { id: 'Journal', labelKey: 'nav.journal', Icon: PenIcon },
   { id: 'Mosques', labelKey: 'nav.mosques', Icon: MosqueIcon },
   // Fasting tile is universally useful (Mondays/Thursdays + Ayyam al-Bidh
   // outside Ramadan), but the surface gracefully shows the Sunnah tracker

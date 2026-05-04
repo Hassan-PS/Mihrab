@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { TITLE_BAND_MAX_FONT_SCALE } from '../../theme/textScale';
@@ -27,6 +28,12 @@ type DayCardProps = {
   isToday: boolean;
   /** Name of the next prayer, or null if there is none today. Used to draw the highlight. */
   nextPrayerName: string | null;
+  /**
+   * Tap handler that returns the carousel to today's card — task #129.
+   * Only rendered (and visible) when `isToday` is false; on the today
+   * card the chip is hidden so it doesn't compete with the date.
+   */
+  onBackToToday?: () => void;
 };
 
 function DayCardImpl({
@@ -36,8 +43,10 @@ function DayCardImpl({
   dayDate,
   isToday,
   nextPrayerName,
+  onBackToToday,
 }: DayCardProps) {
   const { palette } = useAppPalette();
+  const { t } = useTranslation();
 
   return (
     <View
@@ -55,11 +64,31 @@ function DayCardImpl({
           styles.header,
           { borderBottomColor: palette.border ?? palette.muted },
         ]}>
-        <Text
-          style={[styles.title, { color: palette.text }]}
-          maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-          {dayLabel}
-        </Text>
+        <View style={styles.headerLeft}>
+          <Text
+            style={[styles.title, { color: palette.text }]}
+            maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+            {dayLabel}
+          </Text>
+          {!isToday && onBackToToday ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('home.backToToday', 'Back to today')}
+              onPress={onBackToToday}
+              hitSlop={8}
+              style={[
+                styles.backChip,
+                {
+                  backgroundColor: palette.accentBg,
+                  borderColor: palette.accent,
+                },
+              ]}>
+              <Text style={[styles.backChipLabel, { color: palette.accent }]}>
+                {t('home.backToToday', 'Back to today')}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
         <Text
           style={[styles.date, { color: palette.muted }]}
           maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
@@ -94,7 +123,7 @@ const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
   header: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 14,
@@ -102,6 +131,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 8,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
+  },
   title: { fontSize: 16, fontWeight: '700' },
   date: { fontSize: 13, fontWeight: '400' },
+  backChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  backChipLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
 });

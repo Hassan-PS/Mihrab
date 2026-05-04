@@ -15,6 +15,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -150,7 +151,7 @@ export function QuranSurahScreen() {
             style={{ paddingHorizontal: 4 }}>
             <Text
               style={{
-                color: String(palette.accent),
+                color: palette.accentSolid,
                 fontSize: 15,
                 fontWeight: '700',
               }}>
@@ -168,7 +169,7 @@ export function QuranSurahScreen() {
               style={{ paddingHorizontal: 4 }}>
               <Text
                 style={{
-                  color: String(palette.accent),
+                  color: palette.accentSolid,
                   fontSize: 18,
                   fontWeight: '700',
                 }}>
@@ -181,7 +182,7 @@ export function QuranSurahScreen() {
       ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, surah, isMushaf, isFullscreen, palette.accent, t]);
+  }, [navigation, surah, isMushaf, isFullscreen, palette.accentSolid, t]);
 
   // When the screen unmounts or we leave mushaf mode, ensure header
   // and orientation are restored.
@@ -440,10 +441,41 @@ function MushafReader({
   isFullscreen: boolean;
   onExitFullscreen: () => void;
 }) {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const initialPage = useMemo(() => findPageForAyah(surahNumber, 1), [surahNumber]);
   const flatListRef = useRef<FlatList<typeof MUSHAF_PAGES[number]>>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  // Tap-to-show fullscreen controls — the floating exit button hides
+  // by default so it doesn't sit on top of the Arabic text. A tap on
+  // the page surfaces it for ~2.5 seconds, after which it fades back
+  // out. (#129)
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showControls = () => {
+    setControlsVisible(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setControlsVisible(false), 2500);
+  };
+  // When fullscreen toggles off, drop the timer + visibility so we
+  // don't leak across re-entries.
+  useEffect(() => {
+    if (!isFullscreen) {
+      setControlsVisible(false);
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+    }
+    return () => {
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+    };
+  }, [isFullscreen]);
 
   // Use the default mushaf colours always — task #122. The page PNGs
   // carry the authentic dark ink + colored ayah markers; we render
@@ -519,24 +551,40 @@ function MushafReader({
         />
       )}
     />
-    {/* Floating exit-fullscreen affordance — only rendered when in
-        fullscreen, so the user can tap to bring the navigation header
-        back. Sits in the top-end corner with a subtle tap target so
-        it doesn't compete with the page text. (#123) */}
+    {/* Tap layer — only when fullscreen. A bare tap toggles the
+        controls (exit button + auto-hide). Doesn't block scrolling,
+        because horizontal pan gestures bubble up to the FlatList
+        which sits below. (#129) */}
     {isFullscreen ? (
       <Pressable
+        onPress={showControls}
+        // pointerEvents='box-only' — only the tap on this view
+        // itself counts; children would normally block, but here
+        // there are no children. Horizontal swipes don't fire
+        // onPress, so the FlatList still gets the gesture.
+        style={StyleSheet.absoluteFillObject}
+      />
+    ) : null}
+    {/* Floating exit-fullscreen affordance — sits at safe-area top
+        (matches where the title bar would be) instead of the very top
+        of the screen, and only shows when the user taps the page.
+        Auto-hides after 2.5s. (#129) */}
+    {isFullscreen && controlsVisible ? (
+      <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Exit fullscreen"
+        accessibilityLabel={t('quran.exitFullscreen', 'Exit fullscreen')}
         onPress={onExitFullscreen}
-        hitSlop={12}
+        hitSlop={16}
         style={{
           position: 'absolute',
-          top: 12,
+          // Sit at the safe-area top + a small offset so the button
+          // lines up with where the navigation title bar would be.
+          top: insets.top + 6,
           right: 12,
-          backgroundColor: 'rgba(0,0,0,0.18)',
-          paddingHorizontal: 10,
-          paddingVertical: 6,
-          borderRadius: 16,
+          backgroundColor: 'rgba(0,0,0,0.32)',
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 18,
         }}>
         <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>
           ✕
@@ -613,6 +661,11 @@ function MushafPage({
           source={mushafPageAsset(page.page)}
           style={{ width: imageWidth, height: imageHeight }}
           resizeMode="contain"
+          // Decode-time downsample on Android — produces a much
+          // smoother image than the default "auto" path which can
+          // pick a low-quality scaling for palette PNGs. iOS ignores
+          // this prop. (#129)
+          resizeMethod="resize"
           accessibilityLabel={`Mushaf page ${page.page}`}
           // No tintColor — the source pixels (dark ink + colored ayah
           // markers) render exactly as printed.

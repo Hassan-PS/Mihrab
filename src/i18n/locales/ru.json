@@ -47,7 +47,8 @@
     "today": "Сегодня",
     "tomorrow": "Завтра",
     "savedLocationLabel": "{{name}}",
-    "switchLocation": "Сменить место"
+    "switchLocation": "Сменить место",
+    "backToToday": "К сегодня"
   },
   "errors": {
     "locationNeededTitle": "Требуется местоположение",
@@ -175,7 +176,16 @@
     "attributions": "Источники",
     "attribQuran": "Текст Корана",
     "attribTranslation": "Перевод",
-    "attribDuas": "Дуа"
+    "attribDuas": "Дуа",
+    "accentColor": "Акцентный цвет",
+    "accent_green": "Green",
+    "accent_teal": "Teal",
+    "accent_blue": "Blue",
+    "accent_amber": "Amber",
+    "accent_custom": "Custom",
+    "accent_customAbbr": "Hex",
+    "accentColorHelp": "Used across the app and the home-screen widget.",
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",
@@ -342,7 +352,13 @@
     "ayahCount": "{{count}} ayahs",
     "notFound": "Surah not found.",
     "comingSoon": "Full text for this surah will arrive in a future data update.",
-    "pageLabel": "Страница {{page}}"
+    "pageLabel": "Страница {{page}}",
+    "switchToTranslation": "Switch to translation view",
+    "switchToMushaf": "Switch to mushaf view",
+    "viewToggleTranslation": "Перевод",
+    "viewToggleMushaf": "Мусхаф",
+    "enterFullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

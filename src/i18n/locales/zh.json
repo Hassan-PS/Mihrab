@@ -47,7 +47,8 @@
     "today": "今天",
     "tomorrow": "明天",
     "savedLocationLabel": "{{name}}",
-    "switchLocation": "切换位置"
+    "switchLocation": "切换位置",
+    "backToToday": "回到今天"
   },
   "errors": {
     "locationNeededTitle": "需要位置",
@@ -175,7 +176,16 @@
     "attributions": "署名",
     "attribQuran": "《古兰经》原文",
     "attribTranslation": "翻译",
-    "attribDuas": "杜阿"
+    "attribDuas": "杜阿",
+    "accentColor": "强调色",
+    "accent_green": "Green",
+    "accent_teal": "Teal",
+    "accent_blue": "Blue",
+    "accent_amber": "Amber",
+    "accent_custom": "Custom",
+    "accent_customAbbr": "Hex",
+    "accentColorHelp": "Used across the app and the home-screen widget.",
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -342,7 +352,13 @@
     "ayahCount": "{{count}} ayahs",
     "notFound": "Surah not found.",
     "comingSoon": "Full text for this surah will arrive in a future data update.",
-    "pageLabel": "第 {{page}} 页"
+    "pageLabel": "第 {{page}} 页",
+    "switchToTranslation": "Switch to translation view",
+    "switchToMushaf": "Switch to mushaf view",
+    "viewToggleTranslation": "译文",
+    "viewToggleMushaf": "穆斯哈夫",
+    "enterFullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

@@ -47,7 +47,8 @@
     "today": "Hari ini",
     "tomorrow": "Besok",
     "savedLocationLabel": "{{name}}",
-    "switchLocation": "Ganti lokasi"
+    "switchLocation": "Ganti lokasi",
+    "backToToday": "Kembali ke hari ini"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",
@@ -175,7 +176,16 @@
     "attributions": "Atribusi",
     "attribQuran": "Teks Al-Quran",
     "attribTranslation": "Terjemahan",
-    "attribDuas": "Doa"
+    "attribDuas": "Doa",
+    "accentColor": "Warna aksen",
+    "accent_green": "Green",
+    "accent_teal": "Teal",
+    "accent_blue": "Blue",
+    "accent_amber": "Amber",
+    "accent_custom": "Custom",
+    "accent_customAbbr": "Hex",
+    "accentColorHelp": "Used across the app and the home-screen widget.",
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -342,7 +352,13 @@
     "ayahCount": "{{count}} ayahs",
     "notFound": "Surah not found.",
     "comingSoon": "Full text for this surah will arrive in a future data update.",
-    "pageLabel": "Halaman {{page}}"
+    "pageLabel": "Halaman {{page}}",
+    "switchToTranslation": "Switch to translation view",
+    "switchToMushaf": "Switch to mushaf view",
+    "viewToggleTranslation": "Terjemahan",
+    "viewToggleMushaf": "Mushaf",
+    "enterFullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",
