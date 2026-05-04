@@ -1,27 +1,29 @@
 /**
- * iOS-only Mushaf reader — task #151, glitch fix in #152.
+ * Cross-platform Mushaf reader — task #153.
  *
- * The shared FlatList-based reader (`MushafReader` in QuranSurahScreen.tsx)
- * keeps hitting iOS-specific edge cases when combined with the Arabic
- * in-app locale and the 604-page mushaf data set. Beta.39 introduced this
- * iOS-only file with a 3-slot sliding-window ScrollView; it rendered
- * correctly but produced a visible glitch on every swipe (the previously-
- * shown page flashed for one frame before the new page settled). Root
- * cause: the recenter-after-swipe pattern updated React state and scroll
- * position in two distinct passes, leaving one render frame where they
- * disagreed.
+ * Originally written as iOS-only (#151) to dodge a stack of FlatList edge
+ * cases in Arabic UI on iOS. Beta.40 (#152) settled on an absolute-
+ * positioning approach. Beta.41 (#153) confirmed the same edge cases
+ * surface on Android (Arabic-locale mushaf goes blank for non-Fatiha
+ * surahs), so this reader is now the unified implementation for both
+ * platforms.
  *
- * This rewrite uses ABSOLUTE POSITIONING inside a 604-page-wide
- * ScrollView. Only 3 page <Image> components are mounted at any time,
- * but each one is positioned at its TRUE x-offset = `(page - 1) *
- * screenWidth`. The user scrolls naturally through the full 604-page
- * width; pagingEnabled snaps to whole pages. After the user swipes,
- * we update `currentPage` from the contentOffset — but the scroll
- * position itself never needs to be recentered because each page's
- * x-position is already correct. No frame mismatch, no glitch.
+ * The approach:
+ *   • One horizontal ScrollView with `pagingEnabled`.
+ *   • `contentSize` = `MUSHAF_TOTAL_PAGES * screenWidth` (604 pages
+ *     wide), so the user can scroll the full mushaf naturally.
+ *   • Only 3 page <Image> components are mounted at any time —
+ *     `currentPage - 1`, `currentPage`, `currentPage + 1` — each
+ *     ABSOLUTELY POSITIONED at `(page - 1) * screenWidth` inside the
+ *     big ScrollView.
+ *   • The scroll position naturally matches `(currentPage - 1) *
+ *     screenWidth`, so after a swipe we update `currentPage` from
+ *     `contentOffset` — but we never have to imperatively re-scroll.
+ *     React state and scroll offset are always in sync, so no
+ *     intermediate frame ever shows the wrong page.
  *
- * Memory: 3 images mounted. Scroll content size: 604 * screenWidth.
- * Performance: pagingEnabled handles snap/momentum natively.
+ * Memory: 3 mounted Images regardless of which page the user is on.
+ * Performance: native `pagingEnabled` handles snap/momentum.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -66,7 +68,7 @@ function easternNumerals(n: number): string {
     .join('');
 }
 
-export function MushafReaderIOS({
+export function MushafReader({
   surahNumber,
   isFullscreen,
   onExitFullscreen,
