@@ -269,6 +269,25 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     const run = async () => {
       // ── Manual mode: simple, no GPS needed ──────────────────────────────────
       if (settings.locationMode === 'manual') {
+        // (0, 0) is the explicit "no location set" sentinel from
+        // DEFAULT_SETTINGS — fetching prayer times for that point
+        // hits the middle of the Atlantic and confuses every
+        // provider (especially the islamiska_forbundet reverse
+        // geocoder). Prompt the user to set a location instead of
+        // burning network requests on a sentinel value (#137).
+        if (
+          (settings.manualLatitude === 0 && settings.manualLongitude === 0) ||
+          !Number.isFinite(settings.manualLatitude) ||
+          !Number.isFinite(settings.manualLongitude)
+        ) {
+          if (!isBackgroundRefresh) {
+            setState({
+              phase: 'manual_required',
+              message: 'No location set yet',
+            });
+          }
+          return;
+        }
         if (!isBackgroundRefresh) {
           setState({ phase: 'loading' });
         }

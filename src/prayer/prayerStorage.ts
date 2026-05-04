@@ -381,7 +381,12 @@ export async function refreshPrayerDataCache(
           });
           return { date, timings: res.timings };
         } catch (e) {
-          console.error('Failed to fetch for date', date, e);
+          // Background 12-month cache fill — failures are best-effort
+          // and recover automatically next time the user opens the
+          // app or hits a fresh batch. Use warn (not error) so dev
+          // builds don't flash a red LogBox banner over the UI for a
+          // recoverable network blip (#137).
+          console.warn('Failed to fetch for date', date, e);
           return null;
         }
       })
