@@ -41,6 +41,7 @@ import {
   type MushafDownloadHandle,
   type MushafDownloadProgress,
 } from '../quran/mushafDownload';
+import { MushafReaderIOS } from '../quran/MushafReaderIOS';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
 import { cardEdgeStyle } from '../theme/chrome';
@@ -217,7 +218,22 @@ export function QuranSurahScreen() {
   // Mushaf mode renders the page-by-page paginated view directly.
   // It pulls its own ayah text per page (since pages can span surahs)
   // so we don't need the per-surah `ayahs` state for this branch.
+  //
+  // Platform split — task #151. The shared FlatList-based reader works
+  // on Android but kept hitting iOS edge cases (especially in Arabic
+  // UI). iOS now uses a dedicated implementation built on a
+  // ScrollView with a 3-page sliding window.
   if (isMushaf) {
+    if (Platform.OS === 'ios') {
+      return (
+        <MushafReaderIOS
+          surahNumber={surahNumber}
+          isFullscreen={isFullscreen}
+          onExitFullscreen={() => setIsFullscreen(false)}
+          onTitleChange={title => navigation.setOptions({ title })}
+        />
+      );
+    }
     return (
       <MushafReader
         surahNumber={surahNumber}
