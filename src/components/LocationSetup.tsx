@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  View,
   type ColorValue,
 } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
