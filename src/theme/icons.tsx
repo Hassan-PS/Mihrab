@@ -120,6 +120,66 @@ export function BookIcon({ size = 24, color = '#000' }: IconProps) {
   );
 }
 
+/** Two cupped hands raised in dua — used for the duas/supplications nav
+ *  tile. Stylised as two slightly-opened palms meeting at the base, the
+ *  classic Islamic dua gesture. */
+export function DuaHandsIcon({ size = 24, color = '#000' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {/* Left palm */}
+      <Path
+        d="M11.5 21V11.5a2 2 0 00-4 0v3.2c-1.4-.4-2.5-.4-2.5 1 0 1.4 1.5 5.3 4 5.3"
+        fill="none"
+        stroke={color}
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Right palm (mirrored) */}
+      <Path
+        d="M12.5 21V11.5a2 2 0 014 0v3.2c1.4-.4 2.5-.4 2.5 1 0 1.4-1.5 5.3-4 5.3"
+        fill="none"
+        stroke={color}
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Three small accents above the hands — abstract "ascending dua" hint */}
+      <Path
+        d="M12 5v2M9 6.5l.5 1.5M15 6.5l-.5 1.5"
+        stroke={color}
+        strokeWidth={1.4}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+/** Pen — used for the journal nav tile (writing entries). Classic
+ *  pen-tilted-up silhouette. */
+export function PenIcon({ size = 24, color = '#000' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {/* Pen body */}
+      <Path
+        d="M14.5 4l5.5 5.5-11 11H3v-6L14.5 4z"
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {/* Nib hint — diagonal line near the tip */}
+      <Path
+        d="M13 5.5l5.5 5.5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 /** Map pin / location marker — used for the "Use device location" CTA on
  *  the welcome / location-setup screen. */
 export function MapPinIcon({ size = 24, color = '#000' }: IconProps) {

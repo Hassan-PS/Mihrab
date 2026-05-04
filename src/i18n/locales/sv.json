@@ -47,7 +47,8 @@
     "today": "Idag",
     "tomorrow": "Imorgon",
     "savedLocationLabel": "{{name}}",
-    "switchLocation": "Byt plats"
+    "switchLocation": "Byt plats",
+    "backToToday": "Till idag"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",
@@ -175,7 +176,16 @@
     "attributions": "Erkännanden",
     "attribQuran": "Koranens text",
     "attribTranslation": "Översättning",
-    "attribDuas": "Duas"
+    "attribDuas": "Duas",
+    "accentColor": "Accentfärg",
+    "accent_green": "Green",
+    "accent_teal": "Teal",
+    "accent_blue": "Blue",
+    "accent_amber": "Amber",
+    "accent_custom": "Custom",
+    "accent_customAbbr": "Hex",
+    "accentColorHelp": "Används i appen och på hemskärmens widget.",
+    "widgetColorFollowsAccentHelp": "Widgeten använder samma accentfärg som appen. Välj den under Utseende."
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -342,7 +352,13 @@
     "ayahCount": "{{count}} ayahs",
     "notFound": "Surah not found.",
     "comingSoon": "Full text for this surah will arrive in a future data update.",
-    "pageLabel": "Sida {{page}}"
+    "pageLabel": "Sida {{page}}",
+    "switchToTranslation": "Switch to translation view",
+    "switchToMushaf": "Switch to mushaf view",
+    "viewToggleTranslation": "Översättning",
+    "viewToggleMushaf": "Mushaf",
+    "enterFullscreen": "Helskärm",
+    "exitFullscreen": "Avsluta helskärm"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

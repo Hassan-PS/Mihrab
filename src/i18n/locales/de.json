@@ -47,7 +47,8 @@
     "today": "Heute",
     "tomorrow": "Morgen",
     "savedLocationLabel": "{{name}}",
-    "switchLocation": "Ort wechseln"
+    "switchLocation": "Ort wechseln",
+    "backToToday": "Zu heute"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",
@@ -175,7 +176,16 @@
     "attributions": "Zuschreibungen",
     "attribQuran": "Quran-Text",
     "attribTranslation": "Übersetzung",
-    "attribDuas": "Bittgebete"
+    "attribDuas": "Bittgebete",
+    "accentColor": "Akzentfarbe",
+    "accent_green": "Green",
+    "accent_teal": "Teal",
+    "accent_blue": "Blue",
+    "accent_amber": "Amber",
+    "accent_custom": "Custom",
+    "accent_customAbbr": "Hex",
+    "accentColorHelp": "Wird in der App und im Startbildschirm-Widget verwendet.",
+    "widgetColorFollowsAccentHelp": "Das Widget verwendet die gleiche Akzentfarbe wie die App. Wähle sie unter Darstellung."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -342,7 +352,13 @@
     "ayahCount": "{{count}} ayahs",
     "notFound": "Surah not found.",
     "comingSoon": "Full text for this surah will arrive in a future data update.",
-    "pageLabel": "Seite {{page}}"
+    "pageLabel": "Seite {{page}}",
+    "switchToTranslation": "Switch to translation view",
+    "switchToMushaf": "Switch to mushaf view",
+    "viewToggleTranslation": "Übersetzung",
+    "viewToggleMushaf": "Mushaf",
+    "enterFullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

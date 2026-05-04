@@ -47,7 +47,8 @@
     "today": "আজ",
     "tomorrow": "আগামীকাল",
     "savedLocationLabel": "{{name}}",
-    "switchLocation": "অবস্থান পরিবর্তন"
+    "switchLocation": "অবস্থান পরিবর্তন",
+    "backToToday": "আজে ফিরুন"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",
@@ -175,7 +176,16 @@
     "attributions": "কৃতজ্ঞতা",
     "attribQuran": "কুরআনের পাঠ",
     "attribTranslation": "অনুবাদ",
-    "attribDuas": "দোয়া"
+    "attribDuas": "দোয়া",
+    "accentColor": "অ্যাকসেন্ট রঙ",
+    "accent_green": "Green",
+    "accent_teal": "Teal",
+    "accent_blue": "Blue",
+    "accent_amber": "Amber",
+    "accent_custom": "Custom",
+    "accent_customAbbr": "Hex",
+    "accentColorHelp": "Used across the app and the home-screen widget.",
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",
@@ -342,7 +352,13 @@
     "ayahCount": "{{count}} ayahs",
     "notFound": "Surah not found.",
     "comingSoon": "Full text for this surah will arrive in a future data update.",
-    "pageLabel": "পৃষ্ঠা {{page}}"
+    "pageLabel": "পৃষ্ঠা {{page}}",
+    "switchToTranslation": "Switch to translation view",
+    "switchToMushaf": "Switch to mushaf view",
+    "viewToggleTranslation": "অনুবাদ",
+    "viewToggleMushaf": "মুসহাফ",
+    "enterFullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",
