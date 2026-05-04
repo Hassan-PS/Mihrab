@@ -628,15 +628,43 @@ function MushafReader({
       keyExtractor={p => String(p.page)}
       horizontal
       pagingEnabled
-      // RTL layout: pages flow right-to-left like a real mushaf.
-      // FlatList honors the RTL writingDirection when inverted.
-      inverted
+      // We previously used `inverted={true}` to mirror the RTL "turn pages
+      // from right to left" feel of a real mushaf. On iOS that combines
+      // badly with `initialScrollIndex` — the FlatList mounts but doesn'\''t
+      // actually scroll to the requested index, so opening any surah
+      // other than Al-Fatiha rendered a blank screen (the target page
+      // existed but was off-viewport). Verified by user with screenshots
+      // for Al-Baqara and Aal-i-Imraan — only the nav chrome was visible
+      // (#147).
+      //
+      // Drop `inverted`, keep the pages in natural 1..604 order, and use
+      // `initialScrollIndex` as it was always intended. Swipe direction is
+      // now LTR (forward = swipe left), matching how most modern Quran
+      // reader apps page through a mushaf even in Arabic UI. The page
+      // images themselves still typeset their Arabic content RTL — this
+      // change only affects the carousel's gesture direction.
       initialScrollIndex={initialPage - 1}
       getItemLayout={(_, idx) => ({
         length: screenWidth,
         offset: screenWidth * idx,
         index: idx,
       })}
+      onScrollToIndexFailed={info => {
+        // RN sometimes fires this when the target index hasn'\''t laid out
+        // yet (large initial offset like surah 50 at page 528). Retry on
+        // the next frame — `getItemLayout` guarantees the offset is
+        // computable.
+        const offset = info.averageItemLength * info.index;
+        flatListRef.current?.scrollToOffset({ offset, animated: false });
+        setTimeout(
+          () =>
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: false,
+            }),
+          50,
+        );
+      }}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       showsHorizontalScrollIndicator={false}
