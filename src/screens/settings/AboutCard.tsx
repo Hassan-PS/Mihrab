@@ -157,55 +157,55 @@ function Attributions({ palette }: { palette: AppPalette }) {
       </Text>
       <AttributionRow
         palette={palette}
-        label="Quran Uthmani text"
+        label={t('attributions.quranText', { defaultValue: 'Quran Uthmani text' })}
         sub="Tanzil.net · CC BY 3.0"
         url="https://tanzil.net/"
       />
       <AttributionRow
         palette={palette}
-        label="Mushaf page images (604)"
+        label={t('attributions.mushafImages', { defaultValue: 'Mushaf page images (604)' })}
         sub="Hassan-PS/PrayerApp · KFGQPC fonts · via quran/quran.com-images"
         url="https://github.com/Hassan-PS/PrayerApp/releases/tag/mushaf-assets-v2"
       />
       <AttributionRow
         palette={palette}
-        label="Translation editions (14)"
+        label={t('attributions.translationEditions', { defaultValue: 'Translation editions (14)' })}
         sub="alquran.cloud · Tanzil-derived · CC BY 3.0"
         url="https://alquran.cloud/"
       />
       <AttributionRow
         palette={palette}
-        label="Sahih International (English)"
+        label={t('attributions.sahihIntl', { defaultValue: 'Sahih International (English)' })}
         sub="public domain · via Tanzil"
         url="https://tanzil.net/trans/"
       />
       <AttributionRow
         palette={palette}
-        label="Pickthall (English)"
+        label={t('attributions.pickthall', { defaultValue: 'Pickthall (English)' })}
         sub="public domain"
         url="https://tanzil.net/trans/"
       />
       <AttributionRow
         palette={palette}
-        label="Mushaf page metadata"
+        label={t('attributions.mushafMetadata', { defaultValue: 'Mushaf page metadata' })}
         sub="alquran.cloud /v1/meta · Tanzil-derived · CC BY 3.0"
         url="https://alquran.cloud/api"
       />
       <AttributionRow
         palette={palette}
-        label="Amiri & Amiri Quran fonts"
+        label={t('attributions.amiriFonts', { defaultValue: 'Amiri & Amiri Quran fonts' })}
         sub="aliftype/amiri · SIL OFL 1.1"
         url="https://github.com/aliftype/amiri"
       />
       <AttributionRow
         palette={palette}
-        label="Scheherazade New"
+        label={t('attributions.scheherazade', { defaultValue: 'Scheherazade New' })}
         sub="SIL · SIL OFL 1.1"
         url="https://software.sil.org/scheherazade/"
       />
       <AttributionRow
         palette={palette}
-        label="Hisnul Muslim duas"
+        label={t('attributions.hisnulMuslim', { defaultValue: 'Hisnul Muslim duas' })}
         sub="rn0x/hisn_almuslim_json · MIT"
         url="https://github.com/rn0x/hisn_almuslim_json"
       />

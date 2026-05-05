@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com — large method list, coordinates worldwide; very widely used."
+      "desc": "api.aladhan.com — large method list, coordinates worldwide; very widely used.",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "Independent API — UK-style angles & offsets; Hanafi/Shafi; global coordinates."
+      "desc": "Independent API — UK-style angles & offsets; Hanafi/Shafi; global coordinates.",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "Calculated on your phone with Batoul Adhan — no network prayer API."
+      "desc": "Calculated on your phone with Batoul Adhan — no network prayer API.",
+      "name": "On-device (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "Prayer times for listed Swedish cities; your location is matched to the nearest city in the list."
+      "desc": "Prayer times for listed Swedish cities; your location is matched to the nearest city in the list.",
+      "name": "Sweden"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "Automatic (by location)",
+    "0": "Shia — Ithna Ashari",
+    "1": "University of Islamic Sciences, Karachi",
+    "2": "Islamic Society of North America (ISNA)",
+    "3": "Muslim World League",
+    "4": "Umm Al-Qura University, Makkah",
+    "5": "Egyptian General Authority of Survey",
+    "7": "Institute of Geophysics, University of Tehran",
+    "8": "Gulf Region",
+    "9": "Kuwait",
+    "10": "Qatar",
+    "11": "Singapore",
+    "12": "France",
+    "13": "Turkey",
+    "14": "Russia",
+    "15": "Moonsighting Committee Worldwide"
+  },
+  "attributions": {
+    "quranText": "Quran Uthmani text",
+    "mushafImages": "Mushaf page images (604)",
+    "translationEditions": "Translation editions (14)",
+    "sahihIntl": "Sahih International (English)",
+    "pickthall": "Pickthall (English)",
+    "mushafMetadata": "Mushaf page metadata",
+    "amiriFonts": "Amiri & Amiri Quran fonts",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "Hisnul Muslim duas"
   }
 }

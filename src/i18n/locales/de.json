@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com – große Methodenliste, Koordinaten weltweit; sehr weit verbreitet."
+      "desc": "api.aladhan.com — große Methodenliste, weltweite Koordinaten; sehr verbreitet.",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "Unabhängige API – Winkel und Versätze im britischen Stil; Hanafi/Schafi; globale Koordinaten."
+      "desc": "Unabhängige API — Winkel & Versätze im UK-Stil; Hanafi/Shafi; weltweite Koordinaten.",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "Berechnet auf Ihrem Telefon mit Batoul Adhan – keine Netzwerk-Gebets-API."
+      "desc": "Berechnet auf deinem Telefon mit Batoul Adhan — ohne Netzwerk-API.",
+      "name": "Auf dem Gerät (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "Gebetszeiten für aufgelistete schwedische Städte; Ihr Standort wird der nächstgelegenen Stadt in der Liste zugeordnet."
+      "desc": "Gebetszeiten für die aufgeführten schwedischen Städte; dein Standort wird der nächstgelegenen Stadt zugeordnet.",
+      "name": "Schweden"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "Automatisch (nach Standort)",
+    "0": "Schia — Ithna Ashari",
+    "1": "University of Islamic Sciences, Karatschi",
+    "2": "Islamic Society of North America (ISNA)",
+    "3": "Muslimische Weltliga",
+    "4": "Umm-al-Qura-Universität, Mekka",
+    "5": "Ägyptische Generalbehörde für Vermessung",
+    "7": "Institut für Geophysik, Universität Teheran",
+    "8": "Golfregion",
+    "9": "Kuwait",
+    "10": "Katar",
+    "11": "Singapur",
+    "12": "Frankreich",
+    "13": "Türkei",
+    "14": "Russland",
+    "15": "Moonsighting Committee Worldwide"
+  },
+  "attributions": {
+    "quranText": "Koran (Uthmani-Text)",
+    "mushafImages": "Mushaf-Seitenbilder (604)",
+    "translationEditions": "Übersetzungs-Editionen (14)",
+    "sahihIntl": "Sahih International (Englisch)",
+    "pickthall": "Pickthall (Englisch)",
+    "mushafMetadata": "Mushaf-Seiten-Metadaten",
+    "amiriFonts": "Schriftarten Amiri & Amiri Quran",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "Hisn al-Muslim Bittgebete"
   }
 }

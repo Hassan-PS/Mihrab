@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com - geniş yöntem listesi, dünya çapında koordinatlar; çok yaygın olarak kullanılmaktadır."
+      "desc": "api.aladhan.com — geniş yöntem listesi, dünya geneli koordinatlar; yaygın kullanılır.",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "Bağımsız API — Birleşik Krallık tarzı açılar ve ofsetler; Hanefi/Şafi; küresel koordinatlar."
+      "desc": "Bağımsız API — Birleşik Krallık tarzı açılar ve ofsetler; Hanefi/Şafii; dünya geneli koordinatlar.",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "Telefonunuzda Batoul Adhan ile hesaplanır - ağ duası API'sı yoktur."
+      "desc": "Telefonunuzda Batoul Adhan ile hesaplanır — ağ API’si gerekmez.",
+      "name": "Cihazda (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "Listelenen İsveç şehirleri için namaz vakitleri; konumunuz listedeki en yakın şehirle eşleştirilir."
+      "desc": "Listelenen İsveç şehirleri için namaz vakitleri; konumunuz listede en yakın şehirle eşleştirilir.",
+      "name": "İsveç"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "Es-selâmü aleyküm ve rahmetullâhi teâlâ ve berekâtüh"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "Otomatik (konuma göre)",
+    "0": "Şii — İsnâaşeriyye",
+    "1": "İslam Bilimleri Üniversitesi, Karaçi",
+    "2": "Kuzey Amerika İslam Cemiyeti (ISNA)",
+    "3": "Dünya İslam Birliği",
+    "4": "Ümmü’l-Kura Üniversitesi, Mekke",
+    "5": "Mısır Genel Topoğrafya İdaresi",
+    "7": "Tahran Üniversitesi Jeofizik Enstitüsü",
+    "8": "Körfez Bölgesi",
+    "9": "Kuveyt",
+    "10": "Katar",
+    "11": "Singapur",
+    "12": "Fransa",
+    "13": "Türkiye",
+    "14": "Rusya",
+    "15": "Dünya Hilal Gözlem Komitesi"
+  },
+  "attributions": {
+    "quranText": "Kur’an — Osmani metni",
+    "mushafImages": "Mushaf sayfa görselleri (604)",
+    "translationEditions": "Çeviri sürümleri (14)",
+    "sahihIntl": "Sahih International (İngilizce)",
+    "pickthall": "Pickthall (İngilizce)",
+    "mushafMetadata": "Mushaf sayfa meta verisi",
+    "amiriFonts": "Amiri ve Amiri Quran yazı tipleri",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "Hisn al-Muslim duaları"
   }
 }

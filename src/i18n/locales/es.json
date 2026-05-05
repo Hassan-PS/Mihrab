@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com: gran lista de métodos, coordenadas en todo el mundo; muy utilizado."
+      "desc": "api.aladhan.com — amplia lista de métodos, coordenadas mundiales; muy usada.",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "API independiente: ángulos y compensaciones estilo Reino Unido; Hanafi/Shafi; coordenadas globales."
+      "desc": "API independiente — ángulos y compensaciones estilo británico; Hanafi/Shafi; coordenadas globales.",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "Calculado en su teléfono con Batoul Adhan: sin API de oración de red."
+      "desc": "Calculado en tu teléfono con Batoul Adhan — sin API de red.",
+      "name": "En el dispositivo (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "Horarios de oración para las ciudades suecas incluidas en la lista; su ubicación coincide con la ciudad más cercana en la lista."
+      "desc": "Horarios de oración para las ciudades suecas listadas; tu ubicación se asocia con la ciudad más cercana.",
+      "name": "Suecia"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "Automático (según ubicación)",
+    "0": "Chiísmo — Ithna Ashari",
+    "1": "Universidad de Ciencias Islámicas, Karachi",
+    "2": "Islamic Society of North America (ISNA)",
+    "3": "Liga Mundial Musulmana",
+    "4": "Universidad Umm Al-Qura, La Meca",
+    "5": "Autoridad General Egipcia de Topografía",
+    "7": "Instituto de Geofísica, Universidad de Teherán",
+    "8": "Región del Golfo",
+    "9": "Kuwait",
+    "10": "Catar",
+    "11": "Singapur",
+    "12": "Francia",
+    "13": "Turquía",
+    "14": "Rusia",
+    "15": "Comité Mundial de Observación de la Luna"
+  },
+  "attributions": {
+    "quranText": "Texto coránico uzmaní",
+    "mushafImages": "Imágenes de páginas del mushaf (604)",
+    "translationEditions": "Ediciones de traducción (14)",
+    "sahihIntl": "Sahih International (inglés)",
+    "pickthall": "Pickthall (inglés)",
+    "mushafMetadata": "Metadatos de páginas del mushaf",
+    "amiriFonts": "Tipografías Amiri y Amiri Quran",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "Súplicas de Hisn al-Muslim"
   }
 }

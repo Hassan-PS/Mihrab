@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com — قائمة طرق كبيرة، إحداثيات عالمية؛ شائع الاستخدام."
+      "desc": "api.aladhan.com — قائمة طرق كبيرة، إحداثيات حول العالم؛ شائع الاستخدام.",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "واجهة مستقلة — زوايا وأوفست بأسلوب المملكة المتحدة؛ حنفي/شافعي؛ إحداثيات عالمية."
+      "desc": "واجهة برمجة مستقلة — زوايا وفروقات على النمط البريطاني؛ حنفي/شافعي؛ إحداثيات عالمية.",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "يُحسب على هاتفك باستخدام Batoul Adhan — دون واجهة شبكة لأوقات الصلاة."
+      "desc": "يُحسب على هاتفك بواسطة Batoul Adhan — دون الحاجة إلى خدمة شبكة.",
+      "name": "على الجهاز (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "أوقات صلاة لمدن سويدية مدرجة؛ يُطابق موقعك أقرب مدينة في القائمة."
+      "desc": "مواقيت الصلاة للمدن السويدية المدرجة؛ يُربط موقعك بأقرب مدينة في القائمة.",
+      "name": "السويد"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "السلام عليكم ورحمة الله تعالى وبركاته"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "تلقائي (حسب الموقع)",
+    "0": "الشيعة — الاثنا عشرية",
+    "1": "جامعة العلوم الإسلامية، كراتشي",
+    "2": "المجمع الإسلامي لأمريكا الشمالية (ISNA)",
+    "3": "رابطة العالم الإسلامي",
+    "4": "جامعة أم القرى، مكة المكرمة",
+    "5": "الهيئة المصرية العامة للمساحة",
+    "7": "مؤسسة الجيوفيزياء، جامعة طهران",
+    "8": "منطقة الخليج",
+    "9": "الكويت",
+    "10": "قطر",
+    "11": "سنغافورة",
+    "12": "فرنسا",
+    "13": "تركيا",
+    "14": "روسيا",
+    "15": "لجنة رؤية الهلال العالمية"
+  },
+  "attributions": {
+    "quranText": "النص العثماني للقرآن",
+    "mushafImages": "صور صفحات المصحف (604)",
+    "translationEditions": "إصدارات الترجمة (14)",
+    "sahihIntl": "صحيح إنترناشيونال (الإنجليزية)",
+    "pickthall": "بيكثول (الإنجليزية)",
+    "mushafMetadata": "بيانات صفحات المصحف الوصفية",
+    "amiriFonts": "خطوط Amiri و Amiri Quran",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "أدعية حصن المسلم"
   }
 }

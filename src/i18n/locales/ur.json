@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com — بڑے طریقہ کار کی فہرست، دنیا بھر میں کوآرڈینیٹ؛ بہت وسیع پیمانے پر استعمال کیا جاتا ہے."
+      "desc": "api.aladhan.com — وسیع طریقوں کی فہرست، دنیا بھر کے مقامات؛ عام استعمال۔",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "آزاد API — UK طرز کے زاویے اور آفسیٹ؛ حنفی/شافی؛ عالمی نقاط"
+      "desc": "آزاد API — برطانوی طرز کے زاویے اور آفسٹس؛ حنفی/شافعی؛ عالمی نقاط۔",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "بتول اذان کے ساتھ آپ کے فون پر حساب کیا گیا — کوئی نیٹ ورک نماز API نہیں ہے۔"
+      "desc": "آپ کے فون پر Batoul Adhan کے ذریعے حساب کیا جاتا ہے — کسی نیٹ ورک API کی ضرورت نہیں۔",
+      "name": "آلے پر (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "درج فہرست سویڈش شہروں میں نماز کے اوقات؛ آپ کا مقام فہرست کے قریب ترین شہر سے مماثل ہے۔"
+      "desc": "درج شدہ سویڈش شہروں کے اوقاتِ نماز؛ آپ کا مقام فہرست میں قریب ترین شہر سے ملایا جاتا ہے۔",
+      "name": "سویڈن"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "السلام علیکم ورحمۃ اللہ تعالیٰ وبرکاتہ"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "خودکار (مقام کے مطابق)",
+    "0": "شیعہ — اثنا عشری",
+    "1": "جامعۂ علومِ اسلامیہ، کراچی",
+    "2": "اسلامی سوسائٹی آف نارتھ امریکا (ISNA)",
+    "3": "رابطۂ عالمِ اسلامی",
+    "4": "جامعہ ام القریٰ، مکہ مکرمہ",
+    "5": "مصری جنرل اتھارٹی برائے سروے",
+    "7": "انسٹیٹیوٹ آف جیو فزکس، یونیورسٹی آف تہران",
+    "8": "خلیجی خطہ",
+    "9": "کویت",
+    "10": "قطر",
+    "11": "سنگاپور",
+    "12": "فرانس",
+    "13": "ترکی",
+    "14": "روس",
+    "15": "عالمی رویتِ ہلال کمیٹی"
+  },
+  "attributions": {
+    "quranText": "قرآن — عثمانی متن",
+    "mushafImages": "مصحف کے صفحات کی تصاویر (604)",
+    "translationEditions": "تراجم کے ایڈیشن (14)",
+    "sahihIntl": "صحیح انٹرنیشنل (انگریزی)",
+    "pickthall": "پکتھال (انگریزی)",
+    "mushafMetadata": "مصحف کے صفحات کی ڈیٹا معلومات",
+    "amiriFonts": "فونٹس Amiri و Amiri Quran",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "حصنُ المسلم کی دعائیں"
   }
 }

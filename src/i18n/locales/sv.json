@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com — stor metodlista, koordinater världen över; mycket använd."
+      "desc": "api.aladhan.com — stor metodlista, koordinater världen över; mycket använd.",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "Oberoende API — UK-vinklar och offset; Hanafi/Shafi; globala koordinater."
+      "desc": "Oberoende API — vinklar och offset i UK-stil; Hanafi/Shafi; globala koordinater.",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "Beräknas på telefonen med Batoul Adhan — ingen nätverks-API för bönetider."
+      "desc": "Beräknas på din telefon med Batoul Adhan — ingen nätverks-API.",
+      "name": "På enheten (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "Bönetider för listade svenska städer; din plats matchas till närmaste stad i listan."
+      "desc": "Bönetider för listade svenska städer; din plats matchas med närmaste stad i listan.",
+      "name": "Sverige"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "Automatiskt (efter plats)",
+    "0": "Shia — Ithna Ashari",
+    "1": "University of Islamic Sciences, Karachi",
+    "2": "Islamic Society of North America (ISNA)",
+    "3": "Muslim World League",
+    "4": "Umm Al-Qura-universitetet, Mecka",
+    "5": "Egyptian General Authority of Survey",
+    "7": "Institutet för geofysik, Teherans universitet",
+    "8": "Gulfregionen",
+    "9": "Kuwait",
+    "10": "Qatar",
+    "11": "Singapore",
+    "12": "Frankrike",
+    "13": "Turkiet",
+    "14": "Ryssland",
+    "15": "Moonsighting Committee Worldwide"
+  },
+  "attributions": {
+    "quranText": "Koranen — Uthmani-text",
+    "mushafImages": "Mushaf-sidbilder (604)",
+    "translationEditions": "Översättningar (14)",
+    "sahihIntl": "Sahih International (engelska)",
+    "pickthall": "Pickthall (engelska)",
+    "mushafMetadata": "Metadata för mushaf-sidor",
+    "amiriFonts": "Amiri och Amiri Quran-typsnitt",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "Hisn al-Muslim-duor"
   }
 }
