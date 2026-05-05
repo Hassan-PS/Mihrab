@@ -1,5 +1,6 @@
 package com.prayer_times
 
+import android.app.Activity
 import android.content.res.Configuration
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactActivity
@@ -42,8 +43,15 @@ class MainActivity : ReactActivity() {
     super.onConfigurationChanged(newConfig)
 
     // Re-apply Material3 dynamic color overlay for PlatformColor(?attr/...) resolution.
-    // Explicit SAM constructor required for F-Droid's older Kotlin toolchain.
-    DynamicColors.applyIfAvailable(this, DynamicColors.Precondition { _, _ -> true })
+    //
+    // We use an explicit anonymous-class instantiation rather than a Kotlin
+    // SAM lambda. The trailing-lambda form `Precondition { _, _ -> true }`
+    // breaks under Kotlin 2.2 (the F-Droid CI compiler) because
+    // `DynamicColors.Precondition` is a plain Java interface, not a Kotlin
+    // `fun interface`, and Kotlin 2.2 no longer auto-converts trailing
+    // lambdas in that case — both candidate overloads are then rejected
+    // with "None of the following candidates is applicable".
+    DynamicColors.applyIfAvailable(this, AlwaysApplyPrecondition)
 
     // Belt-and-suspenders: emit from the definitively-correct newConfig so useColorScheme()
     // fires in JS even on devices where activity.resources.configuration is stale above.
@@ -56,6 +64,22 @@ class MainActivity : ReactActivity() {
    * the same scheme — AppearanceModule will simply broadcast the same value again, which
    * React batches away without causing extra renders.
    */
+  /**
+   * Always-apply Precondition for [DynamicColors.applyIfAvailable].
+   *
+   * Defined as an `object` (singleton anonymous class) implementing the Java
+   * SAM interface explicitly, so we are not relying on the Kotlin
+   * trailing-lambda → Java SAM conversion. That conversion was tightened in
+   * Kotlin 2.2 — and the F-Droid build VM ships Kotlin 2.2, so a trailing
+   * lambda here failed CI overload resolution even though it compiled fine
+   * locally on Mac with an older Kotlin. Singleton because we always want
+   * the overlay re-applied; no per-activity state.
+   */
+  private object AlwaysApplyPrecondition : DynamicColors.Precondition {
+    override fun shouldApplyDynamicColors(activity: Activity, themeResId: Int): Boolean =
+        true
+  }
+
   private fun forceAppearanceUpdate(newConfig: Configuration) {
     val reactContext = (application as? ReactApplication)
         ?.reactHost
