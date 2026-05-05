@@ -7,35 +7,40 @@
   <!-- Outer pointed-arch frame: a rectangle with a pointed top.
        Built from a single path: bottom-left → up the left jamb → in to the
        arch springing → up to the apex → down to the right springing → down
-       the right jamb → close. -->
+       the right jamb → close.
+       Centred vertically: outer arch spans y=212..812 (geometric centre
+       512, matching the canvas centre). Earlier revisions ran y=232..832
+       which read 20 px low against the rounded-square background, giving
+       the icon a slightly "bottom-heavy" look at small launcher sizes. -->
   <path d="
-    M 312 832
-    L 312 480
-    Q 312 376 408 312
-    L 512 232
-    L 616 312
-    Q 712 376 712 480
-    L 712 832
+    M 312 812
+    L 312 460
+    Q 312 356 408 292
+    L 512 212
+    L 616 292
+    Q 712 356 712 460
+    L 712 812
     Z
   " fill="#F2E7D2"/>
 
   <!-- Inner arch: same shape, scaled-in. Cuts the niche so the cream becomes
-       a frame and the deep-teal background shows through inside. -->
+       a frame and the deep-teal background shows through inside. Shifted
+       up 20 px in lockstep with the outer arch. -->
   <path d="
-    M 360 800
-    L 360 488
-    Q 360 400 444 348
-    L 512 296
-    L 580 348
-    Q 664 400 664 488
-    L 664 800
+    M 360 780
+    L 360 468
+    Q 360 380 444 328
+    L 512 276
+    L 580 328
+    Q 664 380 664 468
+    L 664 780
     Z
   " fill="#0F4D44"/>
 
   <!-- Eight-pointed star inside the niche. Built as two overlapping squares
        rotated 45° apart — the canonical khatim Sulayman / rub al-hizb form
-       used in Islamic geometry. Centered at (512, 580). -->
-  <g transform="translate(512 580)" fill="#F2E7D2">
+       used in Islamic geometry. Centred at (512, 560). -->
+  <g transform="translate(512 560)" fill="#F2E7D2">
     <rect x="-72" y="-72" width="144" height="144"/>
     <rect x="-72" y="-72" width="144" height="144" transform="rotate(45)"/>
   </g>

@@ -40,6 +40,13 @@ function HomeHeaderRight() {
       monthA11yLabel={t('a11y.openMonth')}
       compassA11yLabel={t('a11y.openCompass')}
       settingsA11yLabel={t('a11y.openSettings')}
+      // Calendar (month) and Compass already exist on the home screen
+      // body — Calendar via the "Prayer times for the whole month" link
+      // under the prayer table, Compass as a tile in QuickActionsGrid.
+      // Surfacing them in the header too is duplication; only Settings
+      // has no body-row equivalent, so keep that one.
+      showMonth={false}
+      showCompass={false}
     />
   );
 }

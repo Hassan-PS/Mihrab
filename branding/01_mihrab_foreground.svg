@@ -1,46 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img">
   <title>Mihrab — adaptive-icon foreground</title>
-  <desc>Foreground-only variant of the Mihrab logo with Android adaptive-icon safe-zone padding. The arch + star live inside the 660px central safe square (≈64% of the 1024px canvas), so every launcher mask — circle, squircle, rounded-square, teardrop — crops into transparent space rather than into the artwork. The opaque deep-teal tile lives in the adaptive-icon background layer (ic_launcher_background) so the two compose into a single piece on-device.</desc>
+  <desc>Foreground-only variant of the Mihrab logo with Android adaptive-icon safe-zone padding. The arch + star live inside the central safe square (≈64% of the 1024px canvas), so every launcher mask — circle, squircle, rounded-square, teardrop — crops into transparent space rather than into the artwork. The opaque deep-teal tile lives in the adaptive-icon background layer (ic_launcher_background) so the two compose into a single piece on-device.</desc>
 
   <!-- Background is intentionally transparent — Android composites the
        background layer underneath this. The only opaque pixels on this
        canvas are the arch and star themselves, sized small enough that
        the worst-case launcher mask can't reach them. -->
 
-  <!-- Centered group, scaled to 0.65 of the canvas. Translates first to
-       the centre of the original 1024×1024 viewBox, scales, then offsets
-       back so the original (512, 512) centre stays at (512, 512). -->
+  <!-- Centred group, scaled to 0.66 of the canvas. The arch geometry
+       itself is now centred at y=512 (matching the canvas centre), so
+       the scale-around-(512,512) leaves the artwork visually centred
+       both on the rounded-square legacy mask and on every adaptive
+       launcher mask. -->
   <g transform="translate(512 512) scale(0.66) translate(-512 -512)">
-    <!-- Outer pointed-arch silhouette, cream. Same path as 01_mihrab.svg. -->
+    <!-- Outer pointed-arch silhouette, cream. -->
     <path d="
-      M 312 832
-      L 312 480
-      Q 312 376 408 312
-      L 512 232
-      L 616 312
-      Q 712 376 712 480
-      L 712 832
+      M 312 812
+      L 312 460
+      Q 312 356 408 292
+      L 512 212
+      L 616 292
+      Q 712 356 712 460
+      L 712 812
       Z
     " fill="#F2E7D2"/>
 
-    <!-- Inner arch: the niche cutout. Cream BG would normally show the
-         deep-teal tile through; for an adaptive-icon foreground, the
-         cutout has to render the background's deep teal explicitly,
-         since the foreground PNG is alpha-only and the host background
-         layer only paints OUTSIDE the foreground's silhouette. -->
+    <!-- Inner arch: the niche cutout. Painted in the background's deep
+         teal so it composes seamlessly over @color/ic_launcher_background. -->
     <path d="
-      M 360 800
-      L 360 488
-      Q 360 400 444 348
-      L 512 296
-      L 580 348
-      Q 664 400 664 488
-      L 664 800
+      M 360 780
+      L 360 468
+      Q 360 380 444 328
+      L 512 276
+      L 580 328
+      Q 664 380 664 468
+      L 664 780
       Z
     " fill="#0F4D44"/>
 
-    <!-- Eight-pointed star inside the niche. -->
-    <g transform="translate(512 580)" fill="#F2E7D2">
+    <!-- Eight-pointed star inside the niche, centred at (512, 560). -->
+    <g transform="translate(512 560)" fill="#F2E7D2">
       <rect x="-72" y="-72" width="144" height="144"/>
       <rect x="-72" y="-72" width="144" height="144" transform="rotate(45)"/>
     </g>
