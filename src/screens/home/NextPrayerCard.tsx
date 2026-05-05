@@ -104,19 +104,19 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
       <Text style={[styles.label, { color: palette.muted }]}>
         {t('home.nextPrayer')}
       </Text>
-      <View style={styles.row}>
-        <Text
-          style={[styles.name, { color: palette.text }]}
-          numberOfLines={1}
-          adjustsFontSizeToFit>
-          {t(`prayer.${nextInfo.name}`)}
-        </Text>
-        <Text
-          style={[styles.time, tabularNumeralStyle, { color: palette.accent }]}
-          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-          {formatLocalTime(nextInfo.at)}
-        </Text>
-      </View>
+      <Text
+        style={[styles.name, { color: palette.text }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit>
+        {t(`prayer.${nextInfo.name}`)}
+      </Text>
+      <Text
+        style={[styles.time, tabularNumeralStyle, { color: palette.accent }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+        {formatLocalTime(nextInfo.at)}
+      </Text>
       <View style={styles.countdownRow}>
         <View style={[styles.countdownPill, { backgroundColor: palette.card }]}>
           <Text
@@ -137,23 +137,38 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
 export const NextPrayerCard = memo(NextPrayerCardImpl);
 
 const styles = StyleSheet.create({
-  card: { overflow: 'hidden' },
+  card: { overflow: 'hidden', alignItems: 'center' },
   label: {
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  row: {
+  // Prayer name sits above the time as the secondary identifier — the time
+  // itself is the focal point of the card per CLAUDE.md's "calm before
+  // clever / one focal point per screen" principle.
+  name: {
+    fontSize: 22,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  // Hero time — large tabular numerals so the user can read it from a
+  // glance away. `adjustsFontSizeToFit` keeps very long formatted strings
+  // (e.g. 12-hour with AM/PM in some locales) from wrapping.
+  time: {
+    fontSize: 64,
+    fontWeight: '700',
+    lineHeight: 72,
+    textAlign: 'center',
+    letterSpacing: -1,
+  },
+  countdownRow: {
+    marginTop: 8,
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
+    justifyContent: 'center',
   },
-  name: { fontSize: 32, fontWeight: '700', flex: 1 },
-  time: { fontSize: 26, fontWeight: '700' },
-  countdownRow: { marginTop: 10, flexDirection: 'row' },
-  countdownPill: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  countdownPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   countdown: { fontSize: 14, fontWeight: '500' },
 });

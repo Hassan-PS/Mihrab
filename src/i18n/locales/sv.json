@@ -352,7 +352,352 @@
       "protection": "Skydd",
       "guidance": "Vägledning"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "Ayat al-Kursi"
+    },
+    "morning_02_three_quls": {
+      "title": "Surorna al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "morning_03_fitra_islam": {
+      "title": "På islams naturliga anlag"
+    },
+    "morning_04_radhitu": {
+      "title": "Nöjd med Allah som Herre"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "Nyttig kunskap, god försörjning, accepterade gärningar"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "Med Dig går vi in i morgonen"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "Det finns ingen gud utom Allah, ensam"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "O Evigt Levande, O Upprätthållare"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "Sayyid al-Istighfar (förlåtelsens mästardua)"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "Himlens och jordens skapare"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "Vi och herraväldet har gått in i morgonen för Allah"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "Förlåtelse och välbefinnande"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "I Allahs namn — med Hans namn skadar intet"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "Pris vare Allah, så många som Hans skapelse"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "Bevara mig i kropp, hörsel och syn"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "Allah är mig nog"
+    },
+    "morning_17_ushhiduka": {
+      "title": "Jag tar Dig till vittne i morgon"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "Ingen gud utom Allah — Han ger liv och tar liv"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "Pris och lov vare Allah"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "Jag söker Allahs förlåtelse"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "Tasbîh, Tahmîd, Takbîr, Tahlîl"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "Ayat al-Kursi"
+    },
+    "evening_02_three_quls": {
+      "title": "Surorna al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "evening_03_fitra_islam": {
+      "title": "På islams naturliga anlag (kväll)"
+    },
+    "evening_04_radhitu": {
+      "title": "Nöjd med Allah som Herre"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "Med Dig går vi in i kvällen"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "Det finns ingen gud utom Allah, ensam"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "O Evigt Levande, O Upprätthållare"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "Sayyid al-Istighfar (förlåtelsens mästardua)"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "Himlens och jordens skapare"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "Vi och herraväldet har gått in i kvällen för Allah"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "Förlåtelse och välbefinnande"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "I Allahs namn — med Hans namn skadar intet"
+    },
+    "evening_13_taamat_protection": {
+      "title": "Tillflykt till Allahs fullkomliga ord"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "Bevara mig i kropp, hörsel och syn"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "Allah är mig nog"
+    },
+    "evening_16_ushhiduka": {
+      "title": "Jag tar Dig till vittne i kväll"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "Ingen gud utom Allah — Han ger liv och tar liv"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "Pris och lov vare Allah"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "Jag söker Allahs förlåtelse"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "Tasbîh, Tahmîd, Takbîr, Tahlîl"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "Söka förlåtelse"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "Allah är fridens källa"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "Tasbîh (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "Surorna al-Ikhlas, al-Falaq, an-Nas efter varje fard-bön"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "Ayat al-Kursi efter varje fard-bön"
+    },
+    "food_before": {
+      "title": "Före måltid — bismillāh"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "Efter måltid — utan min makt eller kraft"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "Efter måltid — Han matade och släckte vår törst och gjorde oss till muslimer"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "Efter måltid — gav oss mat, dryck och en ren utgång"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "Efter måltid — matade, släckte törsten, räckte till och gav skydd"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "Efter måltid — mycken, god och välsignad lovprisning"
+    },
+    "distress_lahawla": {
+      "title": "Det finns ingen kraft utom hos Allah"
+    },
+    "distress_innallaha_maana": {
+      "title": "Vid rädsla"
+    },
+    "distress_yaa_hayyu": {
+      "title": "Att åkalla den Evigt Levande"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "Ayat al-Kursi (skydd vid sömn)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "Dua al-Faraj (lindring vid oro och sorg)"
+    },
+    "distress_dua_al_karb": {
+      "title": "Dua vid sorgens stund"
+    },
+    "sleep_three_quls": {
+      "title": "Muʿawwidhāt — al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "sleep_ayat_kursi": {
+      "title": "Ayat al-Kursi innan sömn"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "Jag har överlämnat mitt ansikte till Dig"
+    },
+    "sleep_bismika_ahya": {
+      "title": "I Ditt namn, Allah, lever och dör jag"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "Vid uppvaknande"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "Du skapade min själ — bevara den eller förlåt den"
+    },
+    "sleep_rabba_samawat": {
+      "title": "Herre över himlarna, jorden och den mäktiga tronen"
+    },
+    "sleep_dust_off_bed": {
+      "title": "Borsta av sängen och lägg dig på höger sida"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "Takbîr 34, Tasbîh 33, Tahmîd 33 (bättre än en tjänare)"
+    },
+    "sleep_taamat_protection": {
+      "title": "Allahs fullkomliga ord, mot allt ont"
+    },
+    "sleep_taamat_for_children": {
+      "title": "Skydd för barn — varje djävul och skadlig varelse"
+    },
+    "sleep_taamat_long": {
+      "title": "När man vaknar uppskärrad eller från en mardröm"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "Vid Ditt ädla ansikte och Dina fullkomliga ord"
+    },
+    "sleep_anta_rabbi": {
+      "title": "Du är min Herre — ingen olycka når mig"
+    },
+    "travel_subhanalladhi": {
+      "title": "Vid påstigning av ett fordon"
+    },
+    "travel_journey": {
+      "title": "För en resa — full text"
+    },
+    "travel_returning": {
+      "title": "När man kommer hem"
+    },
+    "mosque_entering": {
+      "title": "Vid moskéns inträde"
+    },
+    "mosque_leaving": {
+      "title": "Vid moskéns utgång"
+    },
+    "mosque_adhan_response": {
+      "title": "Efter att ha hört adhân"
+    },
+    "gratitude_blessing": {
+      "title": "När man får en välsignelse"
+    },
+    "gratitude_kindness": {
+      "title": "När någon gör dig en vänlighet"
+    },
+    "forgiveness_sayyidul": {
+      "title": "Förlåtelsens mästardua (Sayyid al-Istighfar)"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "Vända sig till Allah i ånger"
+    },
+    "distress_grief": {
+      "title": "För lindring av sorg och ångest"
+    },
+    "distress_difficulty": {
+      "title": "Vid svårigheter"
+    },
+    "distress_rain": {
+      "title": "När regnet faller"
+    },
+    "weather_during_rain": {
+      "title": "När regnet börjar falla"
+    },
+    "weather_after_rain": {
+      "title": "Efter att regnet fallit"
+    },
+    "weather_thunder": {
+      "title": "Vid åskskall"
+    },
+    "weather_strong_wind": {
+      "title": "Vid kraftig vind"
+    },
+    "family_for_offspring": {
+      "title": "För fromma efterkommande"
+    },
+    "family_for_parents": {
+      "title": "För föräldrarna"
+    },
+    "family_blessing_marriage": {
+      "title": "Vid lyckönskan till bröllop"
+    },
+    "family_for_child": {
+      "title": "Sökande skydd för ett barn"
+    },
+    "sickness_visit": {
+      "title": "Besöka den sjuke"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "Bön för en sjuk"
+    },
+    "sickness_when_in_pain": {
+      "title": "När man känner smärta i kroppen"
+    },
+    "funeral_inna_lillah": {
+      "title": "Vid besked om dödsfall"
+    },
+    "funeral_consolation": {
+      "title": "Att trösta de sörjande"
+    },
+    "funeral_graveyard_visit": {
+      "title": "Vid besök på en begravningsplats"
+    },
+    "eid_takbir": {
+      "title": "Eid-takbir"
+    },
+    "eid_taqabbal": {
+      "title": "Eid-hälsning"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "Söka skydd innan recitation"
+    },
+    "beforeQuran_basmalah": {
+      "title": "Att inleda varje handling"
+    },
+    "knowledge_seeking": {
+      "title": "Att be om mer kunskap"
+    },
+    "knowledge_understanding": {
+      "title": "För förståelse"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "Att avsluta en samling (kaffârat al-majlis)"
+    },
+    "protection_morning_evening": {
+      "title": "Förkortad Sayyid al-Istighfar (×3 morgon & kväll)"
+    },
+    "protection_evil_eye": {
+      "title": "Mot det onda ögat"
+    },
+    "protection_entering_home": {
+      "title": "Att gå in i hemmet"
+    },
+    "protection_leaving_home": {
+      "title": "Att lämna hemmet"
+    },
+    "protection_market": {
+      "title": "Att gå in på marknaden"
+    },
+    "guidance_istikharah": {
+      "title": "Salât al-Istikhâra (beslutssökande) — full text"
+    },
+    "guidance_steadfastness": {
+      "title": "För ståndaktighet i tron"
+    },
+    "guidance_rabbana_atina": {
+      "title": "För det goda i detta liv och det kommande"
+    },
+    "guidance_against_being_misled": {
+      "title": "För skydd mot vilseledande"
+    }
   },
   "quran": {
     "meccan": "Meckansk",

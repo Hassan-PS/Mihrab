@@ -352,7 +352,352 @@
       "protection": "حفاظت",
       "guidance": "ہدایت"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "آیت الکرسی"
+    },
+    "morning_02_three_quls": {
+      "title": "سورۃ الاخلاص، الفلق، الناس"
+    },
+    "morning_03_fitra_islam": {
+      "title": "اسلام کی فطرت پر"
+    },
+    "morning_04_radhitu": {
+      "title": "اللہ کو رب مان کر راضی"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "مفید علم، پاکیزہ رزق اور قبول شدہ عمل"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "تیرے ساتھ ہم نے صبح کی"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "اللہ کے سوا کوئی معبود نہیں، وہ اکیلا ہے"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "اے زندہ، اے قائم رکھنے والے"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "سیّد الاستغفار"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "آسمانوں اور زمین کا پیدا کرنے والا"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "ہم نے صبح کی اور بادشاہی اللہ کی ہوگئی"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "عفو اور عافیت"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "اللہ کے نام سے، جس کے نام کے ساتھ کوئی چیز نقصان نہیں دیتی"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "اللہ پاک ہے اس کی مخلوق کی تعداد کے برابر"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "مجھے میرے بدن، کان اور آنکھ میں عافیت دے"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "اللہ مجھے کافی ہے"
+    },
+    "morning_17_ushhiduka": {
+      "title": "میں اس صبح تجھے گواہ بناتا ہوں"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "اللہ کے سوا کوئی معبود نہیں — وہ زندہ کرتا ہے اور موت دیتا ہے"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "اللہ پاک ہے اور اس کی تعریف ہے"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "میں اللہ سے بخشش مانگتا ہوں"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "تسبیح، تحمید، تکبیر، تہلیل"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "آیت الکرسی"
+    },
+    "evening_02_three_quls": {
+      "title": "سورۃ الاخلاص، الفلق، الناس"
+    },
+    "evening_03_fitra_islam": {
+      "title": "اسلام کی فطرت پر (شام)"
+    },
+    "evening_04_radhitu": {
+      "title": "اللہ کو رب مان کر راضی"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "تیرے ساتھ ہم نے شام کی"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "اللہ کے سوا کوئی معبود نہیں، وہ اکیلا ہے"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "اے زندہ، اے قائم رکھنے والے"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "سیّد الاستغفار"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "آسمانوں اور زمین کا پیدا کرنے والا"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "ہم نے شام کی اور بادشاہی اللہ کی ہوگئی"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "عفو اور عافیت"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "اللہ کے نام سے، جس کے نام کے ساتھ کوئی چیز نقصان نہیں دیتی"
+    },
+    "evening_13_taamat_protection": {
+      "title": "اللہ کے کامل کلمات کی پناہ"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "مجھے میرے بدن، کان اور آنکھ میں عافیت دے"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "اللہ مجھے کافی ہے"
+    },
+    "evening_16_ushhiduka": {
+      "title": "میں اس شام تجھے گواہ بناتا ہوں"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "اللہ کے سوا کوئی معبود نہیں — وہ زندہ کرتا ہے اور موت دیتا ہے"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "اللہ پاک ہے اور اس کی تعریف ہے"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "میں اللہ سے بخشش مانگتا ہوں"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "تسبیح، تحمید، تکبیر، تہلیل"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "بخشش طلب کرنا"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "اے اللہ، تو سلام ہے"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "تسبیح (۳۳ × ۳)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "ہر فرض نماز کے بعد سورۃ الاخلاص، الفلق، الناس"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "ہر فرض نماز کے بعد آیت الکرسی"
+    },
+    "food_before": {
+      "title": "کھانے سے پہلے — بسم اللہ"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "کھانے کے بعد — میری طاقت و قوت کے بغیر"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "کھانے کے بعد — جس نے کھلایا، پلایا اور ہمیں مسلمان بنایا"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "کھانے کے بعد — جس نے کھلایا، پلایا اور باہر نکلنے کا راستہ بنایا"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "کھانے کے بعد — کھلایا، پلایا، کافی کیا اور پناہ دی"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "کھانے کے بعد — کثرت سے، پاکیزہ اور مبارک تعریف"
+    },
+    "distress_lahawla": {
+      "title": "اللہ کے سوا کوئی طاقت اور قوت نہیں"
+    },
+    "distress_innallaha_maana": {
+      "title": "خوف کے وقت"
+    },
+    "distress_yaa_hayyu": {
+      "title": "حیّ و قیّوم کو پکارنا"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "آیت الکرسی (نیند کی حفاظت)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "دعاءِ فرج"
+    },
+    "distress_dua_al_karb": {
+      "title": "کرب کے وقت کی دعا"
+    },
+    "sleep_three_quls": {
+      "title": "معوّذات — الاخلاص، الفلق، الناس"
+    },
+    "sleep_ayat_kursi": {
+      "title": "سونے سے پہلے آیت الکرسی"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "میں نے اپنا چہرہ تجھے سپرد کیا"
+    },
+    "sleep_bismika_ahya": {
+      "title": "اے اللہ، تیرے نام پر میں جیتا اور مرتا ہوں"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "بیدار ہونے پر"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "تو نے میری جان بنائی — اسے حفظ کر یا بخش دے"
+    },
+    "sleep_rabba_samawat": {
+      "title": "آسمانوں، زمین اور عرشِ عظیم کا رب"
+    },
+    "sleep_dust_off_bed": {
+      "title": "بستر جھاڑنا اور دائیں کروٹ لیٹنا"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "تکبیر ۳۴، تسبیح ۳۳، تحمید ۳۳ (خادم سے بہتر)"
+    },
+    "sleep_taamat_protection": {
+      "title": "اللہ کے کامل کلمات ہر شر سے"
+    },
+    "sleep_taamat_for_children": {
+      "title": "بچوں کی پناہ — ہر شیطان اور موذی مخلوق سے"
+    },
+    "sleep_taamat_long": {
+      "title": "گھبراہٹ یا برے خواب سے بیدار ہونے پر"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "تیرے کریم چہرے اور تیرے کامل کلمات کا واسطہ"
+    },
+    "sleep_anta_rabbi": {
+      "title": "تو میرا رب ہے — کوئی مصیبت مجھ تک نہیں پہنچے گی"
+    },
+    "travel_subhanalladhi": {
+      "title": "سواری پر سوار ہوتے وقت"
+    },
+    "travel_journey": {
+      "title": "سفر کے لیے — مکمل متن"
+    },
+    "travel_returning": {
+      "title": "گھر واپسی پر"
+    },
+    "mosque_entering": {
+      "title": "مسجد میں داخل ہوتے وقت"
+    },
+    "mosque_leaving": {
+      "title": "مسجد سے نکلتے وقت"
+    },
+    "mosque_adhan_response": {
+      "title": "اذان سننے کے بعد"
+    },
+    "gratitude_blessing": {
+      "title": "نعمت پانے پر"
+    },
+    "gratitude_kindness": {
+      "title": "جب کوئی آپ سے بھلائی کرے"
+    },
+    "forgiveness_sayyidul": {
+      "title": "سیّد الاستغفار"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "اللہ کی طرف توبہ"
+    },
+    "distress_grief": {
+      "title": "غم اور پریشانی سے نجات کے لیے"
+    },
+    "distress_difficulty": {
+      "title": "مشکل کے وقت"
+    },
+    "distress_rain": {
+      "title": "بارش برسنے پر"
+    },
+    "weather_during_rain": {
+      "title": "بارش کے شروع ہونے پر"
+    },
+    "weather_after_rain": {
+      "title": "بارش کے بعد"
+    },
+    "weather_thunder": {
+      "title": "گرج سننے پر"
+    },
+    "weather_strong_wind": {
+      "title": "تیز ہوا چلنے پر"
+    },
+    "family_for_offspring": {
+      "title": "نیک اولاد کے لیے"
+    },
+    "family_for_parents": {
+      "title": "والدین کے لیے"
+    },
+    "family_blessing_marriage": {
+      "title": "شادی کی مبارک باد"
+    },
+    "family_for_child": {
+      "title": "بچے کے لیے پناہ مانگنا"
+    },
+    "sickness_visit": {
+      "title": "مریض کی عیادت"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "مریض کے لیے دعا"
+    },
+    "sickness_when_in_pain": {
+      "title": "جسم میں درد محسوس ہونے پر"
+    },
+    "funeral_inna_lillah": {
+      "title": "وفات کی خبر سننے پر"
+    },
+    "funeral_consolation": {
+      "title": "اہلِ میت کی تعزیت"
+    },
+    "funeral_graveyard_visit": {
+      "title": "قبرستان میں داخل ہوتے وقت"
+    },
+    "eid_takbir": {
+      "title": "تکبیراتِ عید"
+    },
+    "eid_taqabbal": {
+      "title": "عید کی مبارک باد"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "تلاوت سے پہلے تعوذ"
+    },
+    "beforeQuran_basmalah": {
+      "title": "ہر کام کے آغاز میں بسم اللہ"
+    },
+    "knowledge_seeking": {
+      "title": "علم میں اضافے کی دعا"
+    },
+    "knowledge_understanding": {
+      "title": "فہم کی دعا"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "کفّارۃ المجلس"
+    },
+    "protection_morning_evening": {
+      "title": "سیّد الاستغفار مختصر (×3 صبح و شام)"
+    },
+    "protection_evil_eye": {
+      "title": "نظر بد سے بچاؤ"
+    },
+    "protection_entering_home": {
+      "title": "گھر میں داخل ہوتے وقت"
+    },
+    "protection_leaving_home": {
+      "title": "گھر سے نکلتے وقت"
+    },
+    "protection_market": {
+      "title": "بازار میں داخل ہوتے وقت"
+    },
+    "guidance_istikharah": {
+      "title": "صلاۃ الاستخارہ — مکمل متن"
+    },
+    "guidance_steadfastness": {
+      "title": "دین پر ثابت قدمی"
+    },
+    "guidance_rabbana_atina": {
+      "title": "دنیا و آخرت کی بھلائی کی دعا"
+    },
+    "guidance_against_being_misled": {
+      "title": "گمراہی سے بچاؤ کی دعا"
+    }
   },
   "quran": {
     "meccan": "مکی",
