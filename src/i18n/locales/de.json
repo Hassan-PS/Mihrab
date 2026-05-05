@@ -327,11 +327,11 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "Morgen",
+      "evening": "Abend",
+      "afterPrayer": "Nach dem Gebet",
+      "food": "Mahlzeit",
+      "distress": "Notlage",
       "sleep": "Schlaf",
       "travel": "Reise",
       "mosque": "Moschee",
@@ -350,46 +350,46 @@
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "Mekkanisch",
+    "medinan": "Medinensisch",
+    "ayahCount": "{{count}} Verse",
+    "notFound": "Sure nicht gefunden.",
+    "comingSoon": "Der vollständige Text dieser Sure kommt in einem späteren Daten-Update.",
     "pageLabel": "Seite {{page}}",
     "switchToTranslation": "Zur Tafsir-Ansicht wechseln",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "Zur Mushaf-Ansicht wechseln",
     "viewToggleTranslation": "Tafsir",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Vollbild",
-    "exitFullscreen": "Vollbild beenden",
+    "exitFullscreen": "Vollbild verlassen",
     "mushafDownloadTitle": "Mushaf herunterladen",
-    "mushafDownloadBody": "Der Madinah-Mushaf ist etwa 120 MB groß. Er ist nicht in der App enthalten — einmal herunterladen, danach bleiben die Seiten auf deinem Gerät gespeichert.",
+    "mushafDownloadBody": "Der Madinah-Mushaf ist etwa 120 MB groß. Er ist nicht in der App enthalten — einmal laden, dann bleibt er auf dem Gerät.",
     "mushafDownloadCta": "Mushaf herunterladen (~120 MB)",
     "mushafDownloading": "Mushaf wird heruntergeladen…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} Seiten · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "Suche nach Moscheen in der Nähe…",
+    "noneFound": "Keine Moscheen gefunden. Erweiterte den Suchradius.",
+    "unnamedMosque": "Moschee",
+    "needLocation": "Lege zuerst einen Standort fest, dann können wir in der Nähe suchen.",
+    "error": "Konnte die Moschee-Datenbank nicht erreichen. Bitte erneut versuchen."
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "Heute",
+    "streakDays": "Tage in Folge",
+    "onTimeRate": "Pünktlich",
+    "totalLogged": "Gesamt geloggt",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "Pünktlich",
+      "late": "Verspätet",
+      "missed": "Verpasst",
+      "qadha": "Nachgeholt (Qadha)"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
+      "on-time": "Pkt.",
+      "late": "Spät",
+      "missed": "Versp.",
       "qadha": "Qad"
     }
   },

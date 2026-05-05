@@ -327,13 +327,13 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "সকাল",
+      "evening": "সন্ধ্যা",
+      "afterPrayer": "নামাজের পর",
+      "food": "আহার",
+      "distress": "বিপদ",
       "sleep": "ঘুম",
-      "travel": "ভ্রমণ",
+      "travel": "সফর",
       "mosque": "মসজিদ",
       "gratitude": "কৃতজ্ঞতা",
       "forgiveness": "ক্ষমা",
@@ -344,53 +344,53 @@
       "eid": "ঈদ",
       "beforeQuran": "কুরআনের আগে",
       "knowledge": "জ্ঞান",
-      "protection": "সুরক্ষা",
-      "guidance": "হিদায়াত"
+      "protection": "রক্ষা",
+      "guidance": "হেদায়াত"
     },
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "মাক্কী",
+    "medinan": "মাদানী",
+    "ayahCount": "{{count}} আয়াত",
+    "notFound": "সূরা পাওয়া যায়নি।",
+    "comingSoon": "এই সূরার সম্পূর্ণ টেক্সট পরবর্তী ডেটা আপডেটে আসবে।",
     "pageLabel": "পৃষ্ঠা {{page}}",
     "switchToTranslation": "তাফসীর ভিউ-এ যান",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "মুসহাফ ভিউ-এ যান",
     "viewToggleTranslation": "তাফসীর",
     "viewToggleMushaf": "মুসহাফ",
-    "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "ফুলস্ক্রিন",
+    "exitFullscreen": "ফুলস্ক্রিন থেকে বের হও",
     "mushafDownloadTitle": "মুসহাফ ডাউনলোড করুন",
-    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
-    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloadBody": "মদিনা মুসহাফ প্রায় 120 এমবি। অ্যাপে অন্তর্ভুক্ত নেই — একবার ডাউনলোড করুন, পৃষ্ঠাগুলো ডিভাইসে সংরক্ষিত থাকবে।",
+    "mushafDownloadCta": "মুসহাফ ডাউনলোড করুন (~120 এমবি)",
     "mushafDownloading": "Downloading mushaf…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} পৃষ্ঠা · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",
+    "noneFound": "কাছে কোনো মসজিদ পাওয়া যায়নি। অনুসন্ধান পরিধি বাড়ান।",
+    "unnamedMosque": "মসজিদ",
+    "needLocation": "প্রথমে একটি লোকেশন নির্ধারণ করুন যাতে আমরা কাছাকাছি খুঁজতে পারি।",
+    "error": "মসজিদ ডাটাবেসে পৌঁছানো যায়নি। আবার চেষ্টা করুন।"
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "আজ",
+    "streakDays": "টানা দিন",
+    "onTimeRate": "সময়মতো",
+    "totalLogged": "মোট নথিভুক্ত",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "সময়মতো",
+      "late": "দেরিতে",
+      "missed": "মিস",
+      "qadha": "কাযা"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "on-time": "সময়",
+      "late": "দেরি",
+      "missed": "মিস",
+      "qadha": "কাযা"
     }
   },
   "events": {

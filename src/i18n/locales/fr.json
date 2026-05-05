@@ -327,11 +327,11 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "Matin",
+      "evening": "Soir",
+      "afterPrayer": "Après la prière",
+      "food": "Repas",
+      "distress": "Détresse",
       "sleep": "Sommeil",
       "travel": "Voyage",
       "mosque": "Mosquée",
@@ -350,46 +350,46 @@
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "Mecquoise",
+    "medinan": "Médinoise",
+    "ayahCount": "{{count}} versets",
+    "notFound": "Sourate introuvable.",
+    "comingSoon": "Le texte complet de cette sourate arrivera dans une future mise à jour.",
     "pageLabel": "Page {{page}}",
     "switchToTranslation": "Basculer vers la vue tafsir",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "Basculer vers la vue mushaf",
     "viewToggleTranslation": "Tafsir",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
     "mushafDownloadTitle": "Télécharger le mushaf",
-    "mushafDownloadBody": "Le mushaf de Médine fait environ 120 Mo. Il n'est pas inclus dans l'application — téléchargez-le une fois et les pages restent en cache sur votre appareil.",
+    "mushafDownloadBody": "Le mushaf de Médine fait environ 120 Mo. Il n’est pas inclus dans l’application — téléchargez-le une fois et les pages restent en cache.",
     "mushafDownloadCta": "Télécharger le mushaf (~120 Mo)",
     "mushafDownloading": "Téléchargement du mushaf…",
     "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "Recherche de mosquées à proximité…",
+    "noneFound": "Aucune mosquée trouvée. Essayez d’élargir le rayon.",
+    "unnamedMosque": "Mosquée",
+    "needLocation": "Définissez d’abord une position pour pouvoir chercher autour.",
+    "error": "Impossible d’atteindre la base des mosquées. Réessayez."
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "Aujourd’hui",
+    "streakDays": "Jours d’affilée",
+    "onTimeRate": "À l’heure",
+    "totalLogged": "Total enregistré",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "À l’heure",
+      "late": "En retard",
+      "missed": "Manquée",
+      "qadha": "Rattrapée (qadha)"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
+      "on-time": "À l’h.",
+      "late": "Retard",
+      "missed": "Manq.",
       "qadha": "Qad"
     }
   },

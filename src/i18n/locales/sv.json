@@ -327,11 +327,11 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "Morgon",
+      "evening": "Kväll",
+      "afterPrayer": "Efter bön",
+      "food": "Måltid",
+      "distress": "Nöd",
       "sleep": "Sömn",
       "travel": "Resa",
       "mosque": "Moské",
@@ -350,45 +350,45 @@
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "Meckansk",
+    "medinan": "Medinensisk",
+    "ayahCount": "{{count}} verser",
+    "notFound": "Sura hittades inte.",
+    "comingSoon": "Hela texten för denna sura kommer i en kommande datauppdatering.",
     "pageLabel": "Sida {{page}}",
     "switchToTranslation": "Byt till tafsir-vy",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "Byt till mushaf-vy",
     "viewToggleTranslation": "Tafsir",
     "viewToggleMushaf": "Mushaf",
-    "enterFullscreen": "Helskärm",
-    "exitFullscreen": "Avsluta helskärm",
+    "enterFullscreen": "Helskärmsläge",
+    "exitFullscreen": "Stäng helskärm",
     "mushafDownloadTitle": "Ladda ner mushafen",
-    "mushafDownloadBody": "Madinah-mushafen är cirka 120 MB. Den ingår inte i appen — ladda ner den en gång så lagras sidorna på din enhet.",
+    "mushafDownloadBody": "Madinah-mushafen är cirka 120 MB. Den ingår inte i appen — ladda ner den en gång så stannar sidorna på din enhet.",
     "mushafDownloadCta": "Ladda ner mushafen (~120 MB)",
     "mushafDownloading": "Laddar ner mushafen…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} sidor · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "Söker närliggande moskéer…",
+    "noneFound": "Inga moskéer hittades i närheten. Försök utöka sökradien.",
+    "unnamedMosque": "Moské",
+    "needLocation": "Ange en plats först så vi kan söka i närheten.",
+    "error": "Kunde inte nå moské-databasen. Försök igen."
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "Idag",
+    "streakDays": "Dagar i rad",
+    "onTimeRate": "I tid",
+    "totalLogged": "Totalt loggat",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "I tid",
+      "late": "Sent",
+      "missed": "Missad",
+      "qadha": "Make-up (qadhā)"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
+      "on-time": "I tid",
+      "late": "Sent",
       "missed": "Miss",
       "qadha": "Qad"
     }

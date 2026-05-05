@@ -43,7 +43,10 @@ export function TasbihScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Arabic readers don't need a Latin pronunciation guide — they read the
+  // Arabic directly. Hide it when the app language is Arabic.
+  const showPronunciation = i18n.language !== 'ar';
   const { palette } = useAppPalette();
   useAndroidSubScreenBack();
   // Plain <View> root: on iOS the header is transparent (for the blur
@@ -109,11 +112,13 @@ export function TasbihScreen() {
             {preset.arabic}
           </Text>
         ) : null}
-        <Text
-          style={[styles.pronunciation, { color: palette.text }]}
-          maxFontSizeMultiplier={1.6}>
-          {preset.pronunciation}
-        </Text>
+        {showPronunciation ? (
+          <Text
+            style={[styles.pronunciation, { color: palette.text }]}
+            maxFontSizeMultiplier={1.6}>
+            {preset.pronunciation}
+          </Text>
+        ) : null}
         <Text style={[styles.translit, { color: palette.muted }]}>
           {t(preset.labelKey)}
         </Text>
