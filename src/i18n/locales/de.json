@@ -33,7 +33,8 @@
     "automatic": "Automatisch",
     "openSettings": "Einstellungen öffnen",
     "cancel": "Abbrechen",
-    "ok": "OK"
+    "ok": "OK",
+    "today": "Heute"
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "Zurücksetzen",
     "salahonprophet": "Salah auf den Propheten ﷺ",
     "prev": "Zurück",
     "next": "Weiter"
@@ -377,7 +378,11 @@
     "noneFound": "Keine Moscheen gefunden. Erweiterte den Suchradius.",
     "unnamedMosque": "Moschee",
     "needLocation": "Lege zuerst einen Standort fest, dann können wir in der Nähe suchen.",
-    "error": "Konnte die Moschee-Datenbank nicht erreichen. Bitte erneut versuchen."
+    "error": "Konnte die Moschee-Datenbank nicht erreichen. Bitte erneut versuchen.",
+    "title": "Finde eine Moschee in deiner Nähe",
+    "bodyWithLocation": "Wir öffnen deine Karten-App mit einer Suche nach „mosque“ um deinen Standort. Wenn keine Karten-App verfügbar ist, öffnen wir Google Maps im Browser.",
+    "bodyNoLocation": "Lege zuerst einen Standort fest (Einstellungen → Standort). Dann öffnen wir deine Karten-App mit der Suche „mosque“ um diesen Ort. Sonst öffnen wir Google Maps im Browser.",
+    "openInMapsApp": "Maps öffnen und „mosque“ suchen"
   },
   "journal": {
     "todayLabel": "Heute",
@@ -395,7 +400,16 @@
       "late": "Spät",
       "missed": "Versp.",
       "qadha": "Qad"
-    }
+    },
+    "encourageEmpty": "Markiere heute das erste Gebet, um dein Tagebuch zu beginnen.",
+    "encourageActive": "Jedes festgehaltene Gebet ist ein Schritt vorwärts.",
+    "encourageStreak": "Mashallah, {{count}} Tage in Folge pünktlich. Weiter so.",
+    "notificationToggleTitle": "Aus der Benachrichtigung erfassen",
+    "notificationToggleOn": "Tippe in der Gebetszeit-Benachrichtigung auf „Gebet protokollieren“, um direkt hierher zu springen.",
+    "notificationToggleOff": "Füge jeder Gebetszeit-Benachrichtigung eine Aktion „Gebet protokollieren“ hinzu.",
+    "notificationToggleA11y": "Tagebuch-Aktion in Gebetsbenachrichtigungen aktivieren",
+    "notePlaceholder": "Private Notiz (nur auf diesem Gerät)",
+    "saveNote": "Notiz speichern"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "Weiße Tage",
+    "sixOfShawwal": "Sechs Tage in Shawwal"
   },
   "ramadan": {
     "title": "Ramadan",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Halte dein erstes Fasten fest, um den Verlauf zu beginnen.",
+    "encourageActive": "Jedes Fasten zählt. Möge Allah es annehmen.",
+    "encourageStreak": "Mashallah, {{count}} Tage in Folge. Mach weiter.",
+    "reminderToggleTitle": "Erinnerung am Vorabend",
+    "reminderToggleOn": "Du erhältst um {{hour}}:00 Uhr eine sanfte Benachrichtigung am Vorabend jedes Sunnah-Fastens.",
+    "reminderToggleOff": "Lass dich am Vorabend jedes Mo/Do und besonderen Fastentages benachrichtigen.",
+    "reminderToggleA11y": "Erinnerungen am Vorabend des Fastens aktivieren",
+    "upcomingLabel": "Bevorstehende Sunnah-Fastentage",
+    "daysAway": "in {{count}} T",
+    "daysSpan": "{{count}} Tage",
+    "daysCount": "{{count}} Tage",
+    "ramadanCountdownLabel": "Ramadan beginnt in",
+    "mondayEncouragement": "Der Montag ist ein Sunnah-Fasten — die Taten werden Allah montags und donnerstags vorgelegt.",
+    "thursdayEncouragement": "Der Donnerstag ist ein Sunnah-Fasten — die Taten werden Allah montags und donnerstags vorgelegt.",
+    "monthViewLabel": "Alle protokollierten Fasten",
+    "noLogsYet": "Die Tage, die du einhältst, erscheinen hier.",
+    "typeRamadan": "Ramadan",
+    "typeVoluntary": "Freiwillig / Sunnah"
   },
   "methods": {
     "auto": "Automatisch (nach Standort)",

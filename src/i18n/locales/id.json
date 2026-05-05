@@ -33,7 +33,8 @@
     "automatic": "Otomatis",
     "openSettings": "Buka Pengaturan",
     "cancel": "Batal",
-    "ok": "OK"
+    "ok": "OK",
+    "today": "Hari ini"
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "Atur ulang",
     "salahonprophet": "Salawat atas Nabi ﷺ",
     "prev": "Sebelumnya",
     "next": "Berikutnya"
@@ -377,7 +378,11 @@
     "noneFound": "Tidak ada masjid terdekat. Coba perluas radius pencarian.",
     "unnamedMosque": "Masjid",
     "needLocation": "Atur lokasi terlebih dahulu agar kami bisa mencari di sekitarnya.",
-    "error": "Tidak dapat mengakses basis data masjid. Coba lagi."
+    "error": "Tidak dapat mengakses basis data masjid. Coba lagi.",
+    "title": "Temukan masjid di dekatmu",
+    "bodyWithLocation": "Kami akan membuka aplikasi peta dengan pencarian \"mosque\" di sekitar lokasimu. Jika tidak tersedia, kami akan membuka Google Maps di browser.",
+    "bodyNoLocation": "Atur lokasi terlebih dahulu (Pengaturan → Lokasi). Kemudian kami akan membuka aplikasi peta dengan pencarian \"mosque\" di sekitarnya. Jika tidak tersedia, kami akan membuka Google Maps di browser.",
+    "openInMapsApp": "Buka Maps dan cari \"mosque\""
   },
   "journal": {
     "todayLabel": "Hari ini",
@@ -395,7 +400,16 @@
       "late": "Lmbt",
       "missed": "Lewat",
       "qadha": "Qad"
-    }
+    },
+    "encourageEmpty": "Tandai salat pertama hari ini untuk memulai jurnalmu.",
+    "encourageActive": "Setiap salat yang tercatat adalah langkah maju.",
+    "encourageStreak": "Mashallah, {{count}} hari beruntun tepat waktu. Lanjutkan.",
+    "notificationToggleTitle": "Catat dari notifikasi",
+    "notificationToggleOn": "Ketuk \"Catat salat\" di notifikasi waktu salat untuk langsung ke sini.",
+    "notificationToggleOff": "Tambahkan tindakan \"Catat salat\" ke setiap notifikasi waktu salat.",
+    "notificationToggleA11y": "Aktifkan tindakan jurnal di notifikasi salat",
+    "notePlaceholder": "Catatan pribadi (hanya di perangkat ini)",
+    "saveNote": "Simpan catatan"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "Ayyamul Bidh (Hari Putih)",
+    "sixOfShawwal": "Enam Hari Syawal"
   },
   "ramadan": {
     "title": "Ramadan",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Catat puasamu yang pertama untuk mulai melacak.",
+    "encourageActive": "Setiap puasa dihitung. Semoga Allah menerimanya.",
+    "encourageStreak": "Mashallah, beruntun {{count}} hari. Lanjutkan.",
+    "reminderToggleTitle": "Pengingat sehari sebelumnya",
+    "reminderToggleOn": "Kamu akan mendapat notifikasi lembut pukul {{hour}}:00 malam sebelum setiap puasa Sunnah.",
+    "reminderToggleOff": "Dapatkan notifikasi pada malam sebelum setiap hari Senin/Kamis dan hari puasa istimewa.",
+    "reminderToggleA11y": "Aktifkan pengingat sehari sebelum puasa",
+    "upcomingLabel": "Puasa Sunnah mendatang",
+    "daysAway": "{{count}} hari lagi",
+    "daysSpan": "{{count}} hari",
+    "daysCount": "{{count}} hari",
+    "ramadanCountdownLabel": "Ramadan dimulai dalam",
+    "mondayEncouragement": "Senin adalah puasa Sunnah — amal diperlihatkan kepada Allah pada Senin dan Kamis.",
+    "thursdayEncouragement": "Kamis adalah puasa Sunnah — amal diperlihatkan kepada Allah pada Senin dan Kamis.",
+    "monthViewLabel": "Semua puasa tercatat",
+    "noLogsYet": "Hari-hari yang kamu jalani akan muncul di sini.",
+    "typeRamadan": "Ramadan",
+    "typeVoluntary": "Sukarela / Sunnah"
   },
   "methods": {
     "auto": "Otomatis (berdasarkan lokasi)",

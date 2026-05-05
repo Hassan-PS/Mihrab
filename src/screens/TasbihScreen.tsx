@@ -119,9 +119,11 @@ export function TasbihScreen() {
             {preset.pronunciation}
           </Text>
         ) : null}
-        <Text style={[styles.translit, { color: palette.muted }]}>
-          {t(preset.labelKey)}
-        </Text>
+        {showPronunciation ? (
+          <Text style={[styles.translit, { color: palette.muted }]}>
+            {t(preset.labelKey)}
+          </Text>
+        ) : null}
       </View>
 
       <Pressable

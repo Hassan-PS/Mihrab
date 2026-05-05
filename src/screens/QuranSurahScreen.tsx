@@ -47,7 +47,10 @@ export function QuranSurahScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // For Arabic readers the romanized name + English meaning are
+  // redundant noise — the Arabic title above is the canonical one.
+  const isArabic = i18n.language === 'ar';
   const { palette } = useAppPalette();
   const { settings, updateSettings } = usePrayerSettings();
   const navigation =
@@ -233,11 +236,14 @@ export function QuranSurahScreen() {
         <Text style={[styles.surahArabic, { color: palette.text }]}>
           {surah.arabic}
         </Text>
-        <Text style={[styles.surahRomanized, { color: palette.text }]}>
-          {surah.romanized}
-        </Text>
+        {!isArabic ? (
+          <Text style={[styles.surahRomanized, { color: palette.text }]}>
+            {surah.romanized}
+          </Text>
+        ) : null}
         <Text style={[styles.surahMeta, { color: palette.muted }]}>
-          {surah.english} · {t('quran.ayahCount', { count: surah.ayahCount })}
+          {isArabic ? '' : `${surah.english} · `}
+          {t('quran.ayahCount', { count: surah.ayahCount })}
         </Text>
 
         {/* Translation-edition picker (shown only in translation mode);

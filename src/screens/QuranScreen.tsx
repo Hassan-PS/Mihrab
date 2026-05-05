@@ -27,11 +27,16 @@ export function QuranScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   useAndroidSubScreenBack();
+  // Arabic readers don't need the Latin transliteration of the surah
+  // name or its English meaning — the Arabic name (right column) is
+  // already the canonical name they recognise. Hide both for the
+  // Arabic locale so the row is calm rather than redundant.
+  const isArabic = i18n.language === 'ar';
 
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
@@ -63,11 +68,13 @@ export function QuranScreen() {
                 </Text>
               </View>
               <View style={styles.rowText}>
-                <Text style={[styles.romanized, { color: palette.text }]}>
-                  {item.romanized}
-                </Text>
+                {!isArabic ? (
+                  <Text style={[styles.romanized, { color: palette.text }]}>
+                    {item.romanized}
+                  </Text>
+                ) : null}
                 <Text style={[styles.english, { color: palette.muted }]}>
-                  {item.english} ·{' '}
+                  {isArabic ? '' : `${item.english} · `}
                   {t('quran.ayahCount', { count: item.ayahCount })} ·{' '}
                   {item.type === 'meccan'
                     ? t('quran.meccan')

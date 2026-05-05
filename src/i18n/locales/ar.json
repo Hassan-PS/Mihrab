@@ -33,7 +33,8 @@
     "automatic": "تلقائي",
     "openSettings": "فتح الإعدادات",
     "cancel": "إلغاء",
-    "ok": "حسناً"
+    "ok": "حسناً",
+    "today": "اليوم"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "إعادة تعيين",
     "salahonprophet": "الصلاة على النبي ﷺ",
     "prev": "السابق",
     "next": "التالي"
@@ -377,7 +378,11 @@
     "noneFound": "لم يتم العثور على مساجد قريبة. حاول توسيع نطاق البحث.",
     "unnamedMosque": "مسجد",
     "needLocation": "حدّد موقعاً أولاً حتى نتمكن من البحث في المنطقة المجاورة.",
-    "error": "تعذّر الوصول إلى قاعدة بيانات المساجد. حاول مرة أخرى."
+    "error": "تعذّر الوصول إلى قاعدة بيانات المساجد. حاول مرة أخرى.",
+    "title": "ابحث عن مسجد قريب منك",
+    "bodyWithLocation": "سنفتح تطبيق الخرائط مع بحث عن \"مسجد\" حول موقعك. إذا لم يكن تطبيق الخرائط متاحاً، سنفتح خرائط جوجل في المتصفح.",
+    "bodyNoLocation": "حدّد موقعاً أولاً (الإعدادات ← الموقع). سنفتح تطبيق الخرائط بعد ذلك مع بحث عن \"مسجد\" حوله. إذا لم يكن متاحاً، سنفتح خرائط جوجل في المتصفح.",
+    "openInMapsApp": "افتح الخرائط وابحث عن \"مسجد\""
   },
   "journal": {
     "todayLabel": "اليوم",
@@ -395,7 +400,16 @@
       "late": "متأخر",
       "missed": "فائتة",
       "qadha": "قضاء"
-    }
+    },
+    "encourageEmpty": "سجّل أول صلاة اليوم لبدء يومياتك.",
+    "encourageActive": "كل صلاة مسجَّلة خطوة إلى الأمام.",
+    "encourageStreak": "ما شاء الله، {{count}} يوماً متتالياً في الوقت. واصل.",
+    "notificationToggleTitle": "سجِّل من الإشعار",
+    "notificationToggleOn": "اضغط \"تسجيل الصلاة\" في تنبيه وقت الصلاة للانتقال هنا مباشرة.",
+    "notificationToggleOff": "أضف إجراء \"تسجيل الصلاة\" إلى كل تنبيه لوقت الصلاة.",
+    "notificationToggleA11y": "تفعيل إجراء التسجيل في إشعارات الصلاة",
+    "notePlaceholder": "ملاحظة خاصة (على هذا الجهاز فقط)",
+    "saveNote": "حفظ الملاحظة"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "الأيام البيض",
+    "sixOfShawwal": "ست من شوّال"
   },
   "ramadan": {
     "title": "رمضان",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "سجّل أول صيام لك لبدء التتبع.",
+    "encourageActive": "كل صيام محسوب — تقبَّل الله منك.",
+    "encourageStreak": "ما شاء الله، {{count}} يوماً متتالياً. استمر.",
+    "reminderToggleTitle": "تذكير قبل اليوم بيوم",
+    "reminderToggleOn": "ستصلك تذكرة لطيفة الساعة {{hour}}:00 مساءً قبل كل صيام سنة.",
+    "reminderToggleOff": "احصل على تنبيه مساء اليوم السابق لكل صيام إثنين/خميس ويوم سنة مميز.",
+    "reminderToggleA11y": "تفعيل تذكيرات قبل الصيام بيوم",
+    "upcomingLabel": "سنن الصيام القادمة",
+    "daysAway": "بعد {{count}} يوم",
+    "daysSpan": "{{count}} أيام",
+    "daysCount": "{{count}} أيام",
+    "ramadanCountdownLabel": "يبدأ رمضان بعد",
+    "mondayEncouragement": "الإثنين صيام سنة — تُعرض الأعمال على الله يومي الإثنين والخميس.",
+    "thursdayEncouragement": "الخميس صيام سنة — تُعرض الأعمال على الله يومي الإثنين والخميس.",
+    "monthViewLabel": "كل الصيام المسجَّل",
+    "noLogsYet": "الأيام التي تصومها ستظهر هنا.",
+    "typeRamadan": "رمضان",
+    "typeVoluntary": "تطوعي / سنة"
   },
   "methods": {
     "auto": "تلقائي (حسب الموقع)",

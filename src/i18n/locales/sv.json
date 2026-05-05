@@ -33,7 +33,8 @@
     "automatic": "Automatiskt",
     "openSettings": "Öppna inställningar",
     "cancel": "Avbryt",
-    "ok": "OK"
+    "ok": "OK",
+    "today": "Idag"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "Återställ",
     "salahonprophet": "Salawat över Profeten ﷺ",
     "prev": "Föregående",
     "next": "Nästa"
@@ -377,7 +378,11 @@
     "noneFound": "Inga moskéer hittades i närheten. Försök utöka sökradien.",
     "unnamedMosque": "Moské",
     "needLocation": "Ange en plats först så vi kan söka i närheten.",
-    "error": "Kunde inte nå moské-databasen. Försök igen."
+    "error": "Kunde inte nå moské-databasen. Försök igen.",
+    "title": "Hitta en moské nära dig",
+    "bodyWithLocation": "Vi öppnar din kart-app med sökningen \"mosque\" centrerad på din plats. Om appen inte finns öppnar vi Google Maps i webbläsaren.",
+    "bodyNoLocation": "Ange först en plats (Inställningar → Plats). Sedan öppnar vi din kart-app med sökningen \"mosque\" centrerad där. Om appen inte finns öppnar vi Google Maps i webbläsaren.",
+    "openInMapsApp": "Öppna Maps och sök \"mosque\""
   },
   "journal": {
     "todayLabel": "Idag",
@@ -395,7 +400,16 @@
       "late": "Sent",
       "missed": "Miss",
       "qadha": "Qad"
-    }
+    },
+    "encourageEmpty": "Markera dagens första bön för att börja journalen.",
+    "encourageActive": "Varje bön du loggar är ett steg framåt.",
+    "encourageStreak": "Mashallah, {{count}} dagar i tid på rad. Fortsätt.",
+    "notificationToggleTitle": "Logga från notisen",
+    "notificationToggleOn": "Tryck \"Logga bön\" i bönetidsnotisen för att hoppa hit direkt.",
+    "notificationToggleOff": "Lägg till en \"Logga bön\"-åtgärd i varje bönetidsnotis.",
+    "notificationToggleA11y": "Aktivera loggåtgärd i bönenotiser",
+    "notePlaceholder": "Privat anteckning (endast på denna enhet)",
+    "saveNote": "Spara anteckning"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "De vita dagarna",
+    "sixOfShawwal": "Sex i Shawwal"
   },
   "ramadan": {
     "title": "Ramadan",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Logga din första fasta för att börja följa.",
+    "encourageActive": "Varje fasta räknas. Må Allah ta emot den.",
+    "encourageStreak": "Mashallah, {{count}} dagar i rad. Fortsätt.",
+    "reminderToggleTitle": "Påminnelse dagen innan",
+    "reminderToggleOn": "Du får en mjuk notis kl. {{hour}}:00 kvällen före varje Sunnah-fasta.",
+    "reminderToggleOff": "Få en notis kvällen före varje måndag/torsdag och särskild fastedag.",
+    "reminderToggleA11y": "Aktivera påminnelser dagen innan fasta",
+    "upcomingLabel": "Kommande Sunnah-fastor",
+    "daysAway": "om {{count}} d",
+    "daysSpan": "{{count}} dagar",
+    "daysCount": "{{count}} dagar",
+    "ramadanCountdownLabel": "Ramadan börjar om",
+    "mondayEncouragement": "Måndag är en Sunnah-fasta — gärningar visas för Allah på måndagar och torsdagar.",
+    "thursdayEncouragement": "Torsdag är en Sunnah-fasta — gärningar visas för Allah på måndagar och torsdagar.",
+    "monthViewLabel": "Alla loggade fastor",
+    "noLogsYet": "Dagar du fastar visas här.",
+    "typeRamadan": "Ramadan",
+    "typeVoluntary": "Frivillig / Sunnah"
   },
   "methods": {
     "auto": "Automatiskt (efter plats)",

@@ -33,7 +33,8 @@
     "automatic": "স্বয়ংক্রিয়",
     "openSettings": "সেটিংস খুলুন",
     "cancel": "বাতিল",
-    "ok": "ঠিক আছে"
+    "ok": "ঠিক আছে",
+    "today": "আজ"
   },
   "home": {
     "loadingPrayer": "নামাজের সময় লোড হচ্ছে...",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "রিসেট",
     "salahonprophet": "নবীর উপর দরুদ ﷺ",
     "prev": "পূর্ববর্তী",
     "next": "পরবর্তী"
@@ -377,7 +378,11 @@
     "noneFound": "কাছে কোনো মসজিদ পাওয়া যায়নি। অনুসন্ধান পরিধি বাড়ান।",
     "unnamedMosque": "মসজিদ",
     "needLocation": "প্রথমে একটি লোকেশন নির্ধারণ করুন যাতে আমরা কাছাকাছি খুঁজতে পারি।",
-    "error": "মসজিদ ডাটাবেসে পৌঁছানো যায়নি। আবার চেষ্টা করুন।"
+    "error": "মসজিদ ডাটাবেসে পৌঁছানো যায়নি। আবার চেষ্টা করুন।",
+    "title": "কাছাকাছি একটি মসজিদ খুঁজুন",
+    "bodyWithLocation": "আমরা আপনার ম্যাপ অ্যাপ \"mosque\" সার্চসহ আপনার অবস্থান কেন্দ্রে খুলব। ম্যাপ অ্যাপ না থাকলে ব্রাউজারে গুগল ম্যাপস খুলব।",
+    "bodyNoLocation": "প্রথমে একটি অবস্থান নির্ধারণ করুন (সেটিংস → অবস্থান)। তারপর আমরা সেই অবস্থান কেন্দ্রে \"mosque\" সার্চসহ ম্যাপ অ্যাপ খুলব। না থাকলে ব্রাউজারে গুগল ম্যাপস খুলব।",
+    "openInMapsApp": "ম্যাপস খুলুন এবং \"mosque\" সার্চ করুন"
   },
   "journal": {
     "todayLabel": "আজ",
@@ -395,7 +400,16 @@
       "late": "দেরি",
       "missed": "মিস",
       "qadha": "কাযা"
-    }
+    },
+    "encourageEmpty": "আপনার জার্নাল শুরু করতে আজকের প্রথম নামাজ চিহ্নিত করুন।",
+    "encourageActive": "প্রতিটি নথিভুক্ত নামাজ এক ধাপ অগ্রগতি।",
+    "encourageStreak": "মাশাআল্লাহ, টানা {{count}} দিন সময়মতো। চালিয়ে যান।",
+    "notificationToggleTitle": "নোটিফিকেশন থেকে লগ করুন",
+    "notificationToggleOn": "নামাজের সময়ের বিজ্ঞপ্তিতে \"নামাজ লগ করুন\"-এ ট্যাপ করে সরাসরি এখানে আসুন।",
+    "notificationToggleOff": "প্রতিটি নামাজ-সময়ের বিজ্ঞপ্তিতে \"নামাজ লগ করুন\" অ্যাকশন যোগ করুন।",
+    "notificationToggleA11y": "নামাজ বিজ্ঞপ্তিতে জার্নাল লগ অ্যাকশন চালু করুন",
+    "notePlaceholder": "ব্যক্তিগত নোট (শুধু এই ডিভাইসে)",
+    "saveNote": "নোট সংরক্ষণ করুন"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "আইয়ামে বীয (শ্বেত দিনসমূহ)",
+    "sixOfShawwal": "শাওয়ালের ছয় রোজা"
   },
   "ramadan": {
     "title": "রমজান",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "ট্র্যাকিং শুরু করতে আপনার প্রথম রোজা লগ করুন।",
+    "encourageActive": "প্রতিটি রোজা গুরুত্বপূর্ণ। আল্লাহ কবুল করুন।",
+    "encourageStreak": "মাশাআল্লাহ, টানা {{count}} দিন। চালিয়ে যান।",
+    "reminderToggleTitle": "এক দিন আগের অনুস্মারক",
+    "reminderToggleOn": "প্রতিটি সুন্নত রোজার আগের সন্ধ্যা {{hour}}:00 টায় আপনি একটি মৃদু নোটিফিকেশন পাবেন।",
+    "reminderToggleOff": "প্রতি সোমবার/বৃহস্পতিবার এবং বিশেষ রোজার আগের সন্ধ্যায় বিজ্ঞপ্তি পান।",
+    "reminderToggleA11y": "রোজার এক দিন আগের অনুস্মারক চালু করুন",
+    "upcomingLabel": "আসন্ন সুন্নাহ রোজা",
+    "daysAway": "{{count}} দিনে",
+    "daysSpan": "{{count}} দিন",
+    "daysCount": "{{count}} দিন",
+    "ramadanCountdownLabel": "রমজান শুরু হবে",
+    "mondayEncouragement": "সোমবার সুন্নত রোজা — সোম ও বৃহস্পতিবার আমলসমূহ আল্লাহর কাছে পেশ করা হয়।",
+    "thursdayEncouragement": "বৃহস্পতিবার সুন্নত রোজা — সোম ও বৃহস্পতিবার আমলসমূহ আল্লাহর কাছে পেশ করা হয়।",
+    "monthViewLabel": "সব নথিভুক্ত রোজা",
+    "noLogsYet": "আপনি যেদিন রোজা রাখবেন সেই দিনগুলো এখানে দেখা যাবে।",
+    "typeRamadan": "রমজান",
+    "typeVoluntary": "নফল / সুন্নাহ"
   },
   "methods": {
     "auto": "স্বয়ংক্রিয় (অবস্থান অনুযায়ী)",
