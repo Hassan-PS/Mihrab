@@ -9,8 +9,8 @@
 
   <table><tr>
     <td><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="150" height="50"></a></td>
-    <td><a href="https://github.com/Hassan-PS/PrayerApp/releases"><img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" width="150" height="50"></a></td>
-    <td><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/PrayerApp"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Add to Obtainium" width="150" height="50"></a></td>
+    <td><a href="https://github.com/Hassan-PS/Mihrab/releases"><img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" width="150" height="50"></a></td>
+    <td><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/Mihrab"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Add to Obtainium" width="150" height="50"></a></td>
   </tr></table>
 
 </div>
@@ -49,8 +49,8 @@
 | Platform | Link |
 |---|---|
 | **iOS** | [App Store](https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256) |
-| **Android APK** | [GitHub Releases](https://github.com/Hassan-PS/PrayerApp/releases) → `app-fdroid-release.apk` |
-| **Android (Obtainium)** | [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/PrayerApp) — auto-updates directly from GitHub Releases |
+| **Android APK** | [GitHub Releases](https://github.com/Hassan-PS/Mihrab/releases) → `app-fdroid-release.apk` |
+| **Android (Obtainium)** | [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/Mihrab) — auto-updates directly from GitHub Releases |
 | **Google Play** | Coming soon |
 | **F-Droid** | Coming soon ([MR #36312](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/36312)) |
 

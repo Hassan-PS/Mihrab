@@ -8,7 +8,7 @@ Den här policyn beskriver hur appen **Prayer Times** hanterar uppgifter på din
 ## Personuppgiftsansvarig
 
 Appen utvecklas som öppen källkod. För frågor om denna policy, använd projektets GitHub‑issues:  
-[https://github.com/Hassan-PS/PrayerApp/issues](https://github.com/Hassan-PS/PrayerApp/issues)
+[https://github.com/Hassan-PS/Mihrab/issues](https://github.com/Hassan-PS/Mihrab/issues)
 
 ## Vilka uppgifter som kan behandlas
 
@@ -76,7 +76,7 @@ This policy describes how the **Prayer Times** app handles information on your d
 ## Data controller / contact
 
 The app is developed as open source. For questions about this policy, use the project’s GitHub issues:  
-[https://github.com/Hassan-PS/PrayerApp/issues](https://github.com/Hassan-PS/PrayerApp/issues)
+[https://github.com/Hassan-PS/Mihrab/issues](https://github.com/Hassan-PS/Mihrab/issues)
 
 ## Data that may be processed
 

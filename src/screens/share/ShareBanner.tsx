@@ -31,7 +31,7 @@ function ShareBannerImpl({
       <View style={[styles.bannerTop, { flexDirection: 'row' }]}>
         <View style={[styles.bannerLeft, { alignItems: 'flex-start' }]}>
           <Text style={styles.appName}>{t('app.name')}</Text>
-          <Text style={styles.githubLink}>github.com/Hassan-PS/PrayerApp</Text>
+          <Text style={styles.githubLink}>github.com/Hassan-PS/Mihrab</Text>
         </View>
         <View style={styles.bannerRight}>
           <Image

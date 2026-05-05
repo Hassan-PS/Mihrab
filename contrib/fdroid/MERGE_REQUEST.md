@@ -16,8 +16,8 @@ Add com.prayer_times (Prayer Times)
 - **Package ID:** `com.prayer_times`
 - **Name:** Prayer Times
 - **License:** Apache-2.0
-- **Source:** https://github.com/Hassan-PS/PrayerApp
-- **Upstream F-Droid notes:** [`contrib/fdroid/`](https://github.com/Hassan-PS/PrayerApp/tree/main/contrib/fdroid)
+- **Source:** https://github.com/Hassan-PS/Mihrab
+- **Upstream F-Droid notes:** [`contrib/fdroid/`](https://github.com/Hassan-PS/Mihrab/tree/main/contrib/fdroid)
 
 ### Build
 

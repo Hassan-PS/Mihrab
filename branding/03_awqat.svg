@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img">
+  <title>Awqat — the five prayer times along the day's arc</title>
+  <desc>A warm cream tile carries the day's arc from horizon to horizon. Five solid teal dots sit on the arc — Fajr at the dawn edge, Dhuhr at the apex, Isha at the dusk edge — making the literal meaning of "the times" visible at a glance.</desc>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="#F1E6D0"/>
+
+  <!-- Horizon line — the ground from which Fajr rises and Isha sets.
+       Anchors the arc visually; without it the arc floats. -->
+  <line x1="160" y1="700" x2="864" y2="700" stroke="#0F4D44" stroke-width="6" stroke-linecap="round" stroke-opacity="0.85"/>
+
+  <!-- The arc: a half-circle from west to east. The path goes from the
+       left horizon point up over the top of the canvas and back down
+       to the right horizon point. -->
+  <path d="M 160 700 A 352 352 0 0 1 864 700"
+        fill="none" stroke="#0F4D44" stroke-width="6" stroke-linecap="round" stroke-opacity="0.55"/>
+
+  <!-- Five prayer markers along the arc.
+       Positions are computed by walking the half-circle in equal angular
+       steps: θ = 180°, 135°, 90°, 45°, 0° gives Fajr, Dhuhr, Asr,
+       Maghrib, Isha read left-to-right. Coordinates pre-computed against
+       centre (512, 700) and radius 352. The middle (Asr) sits at the
+       apex, slightly offset toward dhuhr/asr boundary in real life but
+       the 5-point even split reads cleanest as an icon. -->
+  <circle cx="160" cy="700" r="34" fill="#0F4D44"/>                           <!-- Fajr  -->
+  <circle cx="263" cy="451" r="34" fill="#0F4D44"/>                           <!-- Dhuhr -->
+  <circle cx="512" cy="348" r="42" fill="#0F4D44"/>                           <!-- Asr   -->
+  <circle cx="761" cy="451" r="34" fill="#0F4D44"/>                           <!-- Maghrib -->
+  <circle cx="864" cy="700" r="34" fill="#0F4D44"/>                           <!-- Isha  -->
+
+  <!-- Subtle warm-gold halo behind the apex marker — the "sun overhead"
+       moment, the most visually emphasized prayer of the five. -->
+  <circle cx="512" cy="348" r="68" fill="none" stroke="#C7A85A" stroke-width="3" stroke-opacity="0.55"/>
+</svg>

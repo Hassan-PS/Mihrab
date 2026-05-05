@@ -3,5 +3,5 @@
     <!-- Overrides app_name from src/main/res/values/strings.xml when the
          beta build type is selected. Beta installs side-by-side with
          stable, so the launcher needs to make it visually distinct. -->
-    <string name="app_name">Prayer times test</string>
+    <string name="app_name">Mihrab test</string>
 </resources>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Adaptive icon backdrop (dark green); foreground art is zoom-cropped to fill the mask -->
-    <color name="ic_launcher_background">#143628</color>
+    <!-- Adaptive icon backdrop — matches the deep-teal of the Mihrab logo
+         so the adaptive mask reads as a single piece on launchers that
+         crop the foreground tighter than the foreground's own background. -->
+    <color name="ic_launcher_background">#0F4D44</color>
 </resources>

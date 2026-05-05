@@ -127,12 +127,12 @@ function AboutCardImpl() {
         </Text>
         <Text
           accessibilityRole="link"
-          accessibilityLabel="github.com/Hassan-PS/PrayerApp"
+          accessibilityLabel="github.com/Hassan-PS/Mihrab"
           style={[styles.versionLink, { color: palette.accent }]}
           onPress={() => {
-            void Linking.openURL('https://github.com/Hassan-PS/PrayerApp');
+            void Linking.openURL('https://github.com/Hassan-PS/Mihrab');
           }}>
-          github.com/Hassan-PS/PrayerApp
+          github.com/Hassan-PS/Mihrab
         </Text>
       </View>
       <Attributions palette={palette} />
@@ -164,8 +164,8 @@ function Attributions({ palette }: { palette: AppPalette }) {
       <AttributionRow
         palette={palette}
         label={t('attributions.mushafImages', { defaultValue: 'Mushaf page images (604)' })}
-        sub="Hassan-PS/PrayerApp · KFGQPC fonts · via quran/quran.com-images"
-        url="https://github.com/Hassan-PS/PrayerApp/releases/tag/mushaf-assets-v2"
+        sub="Hassan-PS/Mihrab · KFGQPC fonts · via quran/quran.com-images"
+        url="https://github.com/Hassan-PS/Mihrab/releases/tag/mushaf-assets-v2"
       />
       <AttributionRow
         palette={palette}
