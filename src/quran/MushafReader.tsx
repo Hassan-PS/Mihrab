@@ -141,18 +141,34 @@ export function MushafReader({
     if (surah) onTitleChange(surah.englishName);
   }, [currentPage, onTitleChange]);
 
+  // RTL page-flow — task #1 (v2.0.2).
+  //
+  // The mushaf is an Arabic book: it opens with page 1 on the RIGHT and
+  // turns toward the LEFT (page 604). Swiping right should advance one
+  // page — same as flipping a paper page in a real mushaf. We keep the
+  // ScrollView itself LTR (more reliable on iOS than `inverted` or any
+  // RTL ancestor flip), but mirror page positions inside the content:
+  //   page 1   → x = (TOTAL - 1) * screenWidth   (rightmost)
+  //   page 604 → x = 0                            (leftmost)
+  // contentSize.width remains TOTAL * screenWidth, so scrollX runs from
+  // 0 (page 604) to (TOTAL - 1) * screenWidth (page 1). The mapping
+  // page ↔ scrollX = (TOTAL - page) * screenWidth holds in both
+  // directions and is used for the initial scroll, the visible-page
+  // derivation, and absolute page positioning below.
+  //
+  // This is intentionally locale-independent: the Quran is always
+  // right-to-left regardless of the in-app UI language.
+  const pageToOffsetX = (page: number) =>
+    (MUSHAF_TOTAL_PAGES - page) * screenWidth;
+
   // Initial scroll to the surah's starting page once everything has laid
   // out. After this we never imperatively scroll again — the user drives
   // it via swipes, and `currentPage` is derived from contentOffset.
   const onScrollViewLayout = () => {
     if (didInitialScrollRef.current) return;
-    if (initialPage <= 1) {
-      didInitialScrollRef.current = true;
-      return;
-    }
     setTimeout(() => {
       scrollRef.current?.scrollTo({
-        x: (initialPage - 1) * screenWidth,
+        x: pageToOffsetX(initialPage),
         y: 0,
         animated: false,
       });
@@ -253,7 +269,9 @@ export function MushafReader({
         style={{
           position: 'absolute',
           top: 0,
-          left: (page - 1) * screenWidth,
+          // RTL page positioning — page 1 is rightmost, page 604 leftmost.
+          // See pageToOffsetX above for the mapping.
+          left: pageToOffsetX(page),
           width: screenWidth,
           height: '100%',
           backgroundColor: PARCHMENT,
@@ -310,7 +328,8 @@ export function MushafReader({
         // swipe gesture itself.
         onMomentumScrollEnd={e => {
           const x = e.nativeEvent.contentOffset.x;
-          const page = Math.round(x / screenWidth) + 1;
+          // Inverse of pageToOffsetX: scrollX → page number under RTL flow.
+          const page = MUSHAF_TOTAL_PAGES - Math.round(x / screenWidth);
           const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
           if (clamped !== currentPage) setCurrentPage(clamped);
         }}
