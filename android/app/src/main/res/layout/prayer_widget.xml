@@ -30,11 +30,24 @@
             android:layout_height="match_parent"
             android:layout_weight="1.0">
 
+            <!--
+                Refresh button — task #1 (v2.0.2).
+
+                Positioned at end|center_vertical of the left "Next Prayer"
+                FrameLayout so it sits next to the central divider line —
+                same anchor the medium widget (prayer_widget_horizontal.xml)
+                uses. The previous top|start placement put it at the very
+                top-left corner of the widget where it overlapped the
+                next-prayer name when the user resized the widget down to
+                a 2-row height. With the new placement the button stays
+                near the divider regardless of widget height, leaving the
+                "NEXT PRAYER" / time / location stack uncovered.
+            -->
             <TextView
                 android:id="@+id/widget_refresh_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|start"
+                android:layout_gravity="end|center_vertical"
                 android:padding="4dp"
                 android:text="↻"
                 android:textColor="#80FFFFFF"
