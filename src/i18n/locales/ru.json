@@ -327,11 +327,11 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "Утро",
+      "evening": "Вечер",
+      "afterPrayer": "После молитвы",
+      "food": "Еда",
+      "distress": "Беда",
       "sleep": "Сон",
       "travel": "Путешествие",
       "mosque": "Мечеть",
@@ -345,52 +345,52 @@
       "beforeQuran": "Перед Кораном",
       "knowledge": "Знание",
       "protection": "Защита",
-      "guidance": "Руководство"
+      "guidance": "Наставление"
     },
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "Мекканская",
+    "medinan": "Мединская",
+    "ayahCount": "{{count}} аятов",
+    "notFound": "Сура не найдена.",
+    "comingSoon": "Полный текст этой суры появится в будущем обновлении данных.",
     "pageLabel": "Страница {{page}}",
     "switchToTranslation": "Переключиться на тафсир",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "Переключиться на мусхаф",
     "viewToggleTranslation": "Тафсир",
     "viewToggleMushaf": "Мусхаф",
-    "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Полный экран",
+    "exitFullscreen": "Выйти из полного экрана",
     "mushafDownloadTitle": "Скачать мусхаф",
-    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
-    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloadBody": "Мединский мусхаф ~120 МБ. Не входит в приложение — скачайте один раз, страницы останутся на устройстве.",
+    "mushafDownloadCta": "Скачать мусхаф (~120 МБ)",
     "mushafDownloading": "Downloading mushaf…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} страниц · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "Ищем ближайшие мечети…",
+    "noneFound": "Поблизости мечетей не найдено. Расширьте радиус поиска.",
+    "unnamedMosque": "Мечеть",
+    "needLocation": "Сначала укажите местоположение, чтобы мы могли искать рядом.",
+    "error": "Не удалось обратиться к базе мечетей. Попробуйте снова."
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "Сегодня",
+    "streakDays": "Дней подряд",
+    "onTimeRate": "Вовремя",
+    "totalLogged": "Всего записано",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "Вовремя",
+      "late": "С опозданием",
+      "missed": "Пропущено",
+      "qadha": "Восполнено (қадха)"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "on-time": "Вовр.",
+      "late": "Опозд.",
+      "missed": "Проп.",
+      "qadha": "Қад."
     }
   },
   "events": {

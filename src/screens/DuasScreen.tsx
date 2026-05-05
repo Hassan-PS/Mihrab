@@ -28,8 +28,12 @@ export function DuasScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
+  // Arabic readers don't need a Latin pronunciation guide — they read the
+  // Arabic directly. Hide the transliteration line when the app language
+  // is Arabic so the row stays clean and reverent.
+  const showTranslit = i18n.language !== 'ar';
   useAndroidSubScreenBack();
   const [selected, setSelected] = useState<DuaCategory>('morning');
   // Per-dua tap-to-count state — task #94. Persists for the lifetime of
@@ -126,13 +130,16 @@ export function DuasScreen() {
               accessibilityLabel={dua.arabic}>
               {dua.arabic}
             </Text>
-            {/* Pronunciation guide — Latin transliteration always shown
-                under the Arabic so non-Arabic speakers can recite. */}
-            <Text
-              style={[styles.translit, { color: palette.muted }]}
-              accessibilityLabel={dua.transliteration}>
-              {dua.transliteration}
-            </Text>
+            {/* Pronunciation guide — Latin transliteration shown under the
+                Arabic so non-Arabic speakers can recite. Hidden for Arabic
+                readers (they read the Arabic line directly). */}
+            {showTranslit ? (
+              <Text
+                style={[styles.translit, { color: palette.muted }]}
+                accessibilityLabel={dua.transliteration}>
+                {dua.transliteration}
+              </Text>
+            ) : null}
             <Text style={[styles.translation, { color: palette.text }]}>
               {/* Per-dua localized translation falls back to bundled
                   English. To add another locale, drop entries under

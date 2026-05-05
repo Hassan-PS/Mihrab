@@ -327,70 +327,70 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "晨",
+      "evening": "晚",
+      "afterPrayer": "拜后",
+      "food": "饮食",
+      "distress": "困境",
       "sleep": "睡眠",
       "travel": "旅行",
       "mosque": "清真寺",
       "gratitude": "感恩",
-      "forgiveness": "求宽恕",
+      "forgiveness": "求恕",
       "weather": "天气",
       "family": "家庭",
       "sickness": "疾病",
       "funeral": "葬礼",
       "eid": "开斋节",
-      "beforeQuran": "诵读古兰经前",
+      "beforeQuran": "诵读前",
       "knowledge": "知识",
       "protection": "保护",
-      "guidance": "指引"
+      "guidance": "引导"
     },
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "麦加",
+    "medinan": "麦地那",
+    "ayahCount": "{{count}} 节",
+    "notFound": "未找到此章。",
+    "comingSoon": "本章全文将在后续数据更新中提供。",
     "pageLabel": "第 {{page}} 页",
     "switchToTranslation": "切换到经注视图",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "切换到经文视图",
     "viewToggleTranslation": "经注",
     "viewToggleMushaf": "穆斯哈夫",
-    "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "全屏",
+    "exitFullscreen": "退出全屏",
     "mushafDownloadTitle": "下载穆斯哈夫",
-    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
-    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloadBody": "麦地那经文约 120 MB，不随应用打包。下载一次后页面将缓存在设备上。",
+    "mushafDownloadCta": "下载经文 (~120 MB)",
     "mushafDownloading": "Downloading mushaf…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} 页 · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "正在查找附近的清真寺…",
+    "noneFound": "附近未找到清真寺，可扩大搜索范围。",
+    "unnamedMosque": "清真寺",
+    "needLocation": "请先设置位置，以便我们在附近搜索。",
+    "error": "无法连接清真寺数据库，请重试。"
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "今天",
+    "streakDays": "连续天数",
+    "onTimeRate": "准时",
+    "totalLogged": "共记录",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "准时",
+      "late": "迟到",
+      "missed": "错过",
+      "qadha": "补做 (qadha)"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "on-time": "准",
+      "late": "迟",
+      "missed": "错",
+      "qadha": "补"
     }
   },
   "events": {

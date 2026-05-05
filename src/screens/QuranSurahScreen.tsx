@@ -17,6 +17,7 @@ import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { findSurah, loadSurah, type LoadedSurah } from '../quran/quran';
 import {
   defaultEditionForLocale,
+  editionMatchesLocale,
   getSurahTranslation,
   QURAN_TRANSLATIONS,
   type QuranTranslationId,
@@ -61,9 +62,17 @@ export function QuranSurahScreen() {
   } | null>(null);
 
   // Resolve which translation edition to use. Empty string in settings
-  // means "follow the active app language"; explicit string overrides.
+  // means "follow the active app language"; explicit string overrides —
+  // BUT only when the saved edition's locale still matches the current
+  // app language. If the user previously picked, say, en.sahih in English
+  // mode and later switched the app language to Arabic, we want them to
+  // land on the locale-appropriate default (ar.muyassar / Tafsir
+  // al-Muyassar) rather than carry the stale English choice forward.
   const activeEdition: QuranTranslationId = useMemo(() => {
-    if (settings.quranTranslationEdition) {
+    if (
+      settings.quranTranslationEdition &&
+      editionMatchesLocale(settings.quranTranslationEdition, settings.language)
+    ) {
       return settings.quranTranslationEdition as QuranTranslationId;
     }
     return defaultEditionForLocale(settings.language);

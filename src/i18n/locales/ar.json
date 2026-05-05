@@ -327,22 +327,22 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "الصباح",
+      "evening": "المساء",
+      "afterPrayer": "بعد الصلاة",
+      "food": "الطعام",
+      "distress": "الكرب",
       "sleep": "النوم",
       "travel": "السفر",
       "mosque": "المسجد",
       "gratitude": "الشكر",
       "forgiveness": "الاستغفار",
       "weather": "الطقس",
-      "family": "العائلة",
+      "family": "الأهل",
       "sickness": "المرض",
       "funeral": "الجنازة",
       "eid": "العيد",
-      "beforeQuran": "قبل القرآن",
+      "beforeQuran": "قبل القراءة",
       "knowledge": "العلم",
       "protection": "الحماية",
       "guidance": "الهداية"
@@ -350,47 +350,47 @@
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "مكية",
+    "medinan": "مدنية",
+    "ayahCount": "{{count}} آيات",
+    "notFound": "لم يتم العثور على السورة.",
+    "comingSoon": "سيُتاح النص الكامل لهذه السورة في تحديث لاحق للبيانات.",
     "pageLabel": "صفحة {{page}}",
     "switchToTranslation": "التبديل إلى عرض التفسير",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "التبديل إلى عرض المصحف",
     "viewToggleTranslation": "تفسير",
     "viewToggleMushaf": "مصحف",
-    "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "دخول وضع ملء الشاشة",
+    "exitFullscreen": "الخروج من ملء الشاشة",
     "mushafDownloadTitle": "تحميل المصحف",
-    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
-    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloadBody": "حجم مصحف المدينة حوالي 120 ميجابايت. لم يتم تضمينه في التطبيق — قم بتنزيله مرة واحدة وستبقى الصفحات محفوظة على جهازك.",
+    "mushafDownloadCta": "تنزيل المصحف (~120 ميجابايت)",
     "mushafDownloading": "جارٍ تحميل المصحف…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} صفحات · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "البحث عن مساجد قريبة…",
+    "noneFound": "لم يتم العثور على مساجد قريبة. حاول توسيع نطاق البحث.",
+    "unnamedMosque": "مسجد",
+    "needLocation": "حدّد موقعاً أولاً حتى نتمكن من البحث في المنطقة المجاورة.",
+    "error": "تعذّر الوصول إلى قاعدة بيانات المساجد. حاول مرة أخرى."
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "اليوم",
+    "streakDays": "أيام متتالية",
+    "onTimeRate": "في الوقت",
+    "totalLogged": "إجمالي المسجَّل",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "في الوقت",
+      "late": "متأخر",
+      "missed": "فائتة",
+      "qadha": "قضاء"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "on-time": "في الوقت",
+      "late": "متأخر",
+      "missed": "فائتة",
+      "qadha": "قضاء"
     }
   },
   "events": {

@@ -327,13 +327,13 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "Sabah",
+      "evening": "Akşam",
+      "afterPrayer": "Namaz sonrası",
+      "food": "Yemek",
+      "distress": "Sıkıntı",
       "sleep": "Uyku",
-      "travel": "Seyahat",
+      "travel": "Yolculuk",
       "mosque": "Cami",
       "gratitude": "Şükür",
       "forgiveness": "Bağışlanma",
@@ -342,55 +342,55 @@
       "sickness": "Hastalık",
       "funeral": "Cenaze",
       "eid": "Bayram",
-      "beforeQuran": "Kur'an öncesi",
+      "beforeQuran": "Kur’an öncesi",
       "knowledge": "İlim",
-      "protection": "Korunma",
+      "protection": "Koruma",
       "guidance": "Hidayet"
     },
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "Mekki",
+    "medinan": "Medeni",
+    "ayahCount": "{{count}} ayet",
+    "notFound": "Sure bulunamadı.",
+    "comingSoon": "Bu surenin tam metni gelecek bir veri güncellemesinde gelecek.",
     "pageLabel": "Sayfa {{page}}",
     "switchToTranslation": "Tefsir görünümüne geç",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "Mushaf görünümüne geç",
     "viewToggleTranslation": "Tefsir",
     "viewToggleMushaf": "Mushaf",
-    "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "Tam ekran",
+    "exitFullscreen": "Tam ekrandan çık",
     "mushafDownloadTitle": "Mushaf'ı indir",
-    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
-    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloadBody": "Medine mushafı yaklaşık 120 MB’dir. Uygulamaya dahil değildir — bir kez indirin, sayfalar cihazınızda kalır.",
+    "mushafDownloadCta": "Mushafı indir (~120 MB)",
     "mushafDownloading": "Downloading mushaf…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} sayfa · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "Yakındaki camiler aranıyor…",
+    "noneFound": "Yakında cami bulunamadı. Arama yarıçapını genişletin.",
+    "unnamedMosque": "Cami",
+    "needLocation": "Önce bir konum belirleyin, böylece yakında arayabiliriz.",
+    "error": "Cami veritabanına ulaşılamadı. Lütfen tekrar deneyin."
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "Bugün",
+    "streakDays": "Üst üste gün",
+    "onTimeRate": "Vaktinde",
+    "totalLogged": "Toplam kayıtlı",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "Vaktinde",
+      "late": "Geç",
+      "missed": "Kaçırılmış",
+      "qadha": "Kaza"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "on-time": "V.",
+      "late": "Geç",
+      "missed": "Kaçt",
+      "qadha": "Kaza"
     }
   },
   "events": {

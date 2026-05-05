@@ -53,6 +53,26 @@ export function defaultEditionForLocale(locale: string): QuranTranslationId {
   return 'en.sahih';
 }
 
+/**
+ * Is this saved edition still appropriate for the current app language?
+ * Returns false when:
+ *   - the id isn't in our registry (data shape changed), or
+ *   - the saved edition belongs to a different locale than the active app
+ *     language (user switched languages after picking).
+ *
+ * Used by QuranSurahScreen so a stale `en.sahih` choice doesn't override
+ * the locale-appropriate default after the user changes the app language.
+ */
+export function editionMatchesLocale(
+  edition: string | undefined | null,
+  locale: string,
+): boolean {
+  if (!edition) return false;
+  const found = QURAN_TRANSLATIONS.find(e => e.id === edition);
+  if (!found) return false;
+  return found.locale === locale;
+}
+
 type ChapterMap = { [chapter: string]: { [ayah: string]: string } };
 
 /**

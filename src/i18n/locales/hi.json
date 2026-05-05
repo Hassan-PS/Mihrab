@@ -327,11 +327,11 @@
   },
   "duas": {
     "cat": {
-      "morning": "Morning",
-      "evening": "Evening",
-      "afterPrayer": "After prayer",
-      "food": "Food",
-      "distress": "Distress",
+      "morning": "सुबह",
+      "evening": "शाम",
+      "afterPrayer": "नमाज़ के बाद",
+      "food": "भोजन",
+      "distress": "विपदा",
       "sleep": "नींद",
       "travel": "यात्रा",
       "mosque": "मस्जिद",
@@ -344,53 +344,53 @@
       "eid": "ईद",
       "beforeQuran": "क़ुरआन से पहले",
       "knowledge": "ज्ञान",
-      "protection": "सुरक्षा",
+      "protection": "रक्षा",
       "guidance": "मार्गदर्शन"
     },
     "repeat": "Recite ×{{count}}"
   },
   "quran": {
-    "meccan": "Meccan",
-    "medinan": "Medinan",
-    "ayahCount": "{{count}} ayahs",
-    "notFound": "Surah not found.",
-    "comingSoon": "Full text for this surah will arrive in a future data update.",
+    "meccan": "मक्की",
+    "medinan": "मदनी",
+    "ayahCount": "{{count}} आयतें",
+    "notFound": "सूरह नहीं मिली।",
+    "comingSoon": "इस सूरह का पूरा पाठ अगले डेटा अपडेट में आएगा।",
     "pageLabel": "पृष्ठ {{page}}",
     "switchToTranslation": "तफ़सीर दृश्य पर जाएँ",
-    "switchToMushaf": "Switch to mushaf view",
+    "switchToMushaf": "मसहफ़ दृश्य पर जाएँ",
     "viewToggleTranslation": "तफ़सीर",
     "viewToggleMushaf": "मुसहफ़",
-    "enterFullscreen": "Enter fullscreen",
-    "exitFullscreen": "Exit fullscreen",
+    "enterFullscreen": "पूर्ण स्क्रीन",
+    "exitFullscreen": "पूर्ण स्क्रीन छोड़ें",
     "mushafDownloadTitle": "मुसहफ़ डाउनलोड करें",
-    "mushafDownloadBody": "The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.",
-    "mushafDownloadCta": "Download mushaf (~120 MB)",
+    "mushafDownloadBody": "मदीना मसहफ़ लगभग 120 एमबी का है। ऐप में शामिल नहीं है — एक बार डाउनलोड करें, पृष्ठ डिवाइस पर सहेजे रहेंगे।",
+    "mushafDownloadCta": "मसहफ़ डाउनलोड करें (~120 एमबी)",
     "mushafDownloading": "Downloading mushaf…",
-    "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%"
+    "mushafDownloadProgress": "{{done}} / {{total}} पृष्ठ · {{pct}}%"
   },
   "mosques": {
-    "searching": "Looking for nearby mosques…",
-    "noneFound": "No mosques found nearby. Try expanding the search radius.",
-    "unnamedMosque": "Mosque",
-    "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",
+    "noneFound": "पास कोई मस्जिद नहीं मिली। दायरा बढ़ाएँ।",
+    "unnamedMosque": "मस्जिद",
+    "needLocation": "पहले कोई स्थान सेट करें ताकि हम आस-पास खोज सकें।",
+    "error": "मस्जिद डेटाबेस से संपर्क नहीं हो सका। पुनः प्रयास करें।"
   },
   "journal": {
-    "todayLabel": "Today",
-    "streakDays": "Day streak",
-    "onTimeRate": "On-time",
-    "totalLogged": "Total logged",
+    "todayLabel": "आज",
+    "streakDays": "लगातार दिन",
+    "onTimeRate": "समय पर",
+    "totalLogged": "कुल दर्ज",
     "status": {
-      "on-time": "On time",
-      "late": "Late",
-      "missed": "Missed",
-      "qadha": "Make-up (Qadha)"
+      "on-time": "समय पर",
+      "late": "देर से",
+      "missed": "छूटी",
+      "qadha": "क़ज़ा"
     },
     "statusShort": {
-      "on-time": "On",
-      "late": "Late",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "on-time": "समय",
+      "late": "देर",
+      "missed": "छूट",
+      "qadha": "क़ज़ा"
     }
   },
   "events": {
