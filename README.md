@@ -1,16 +1,16 @@
 <div align="center">
-  <img src="assets/app-icon-rounded.png" alt="Prayer App Icon" width="120">
+  <img src="assets/app-icon-rounded.png" alt="Mihrab" width="120">
 
-  # Prayer Salah Times & Qibla
+  # Mihrab — prayer times, calmly
 
-  A simple, fast, and privacy-focused app for daily prayer times, Qibla direction, monthly calendar, and home screen widgets.
+  A simple, fast, and privacy-focused app for daily prayer times, Qibla direction, the Quran, dua and tasbih, fasting log, and home-screen widgets.
 
   <br>
 
   <table><tr>
     <td><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="150" height="50"></a></td>
-    <td><a href="https://github.com/Hassan-PS/Mihrab/releases"><img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" width="150" height="50"></a></td>
-    <td><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/Mihrab"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Add to Obtainium" width="150" height="50"></a></td>
+    <td><a href="https://github.com/Hassan-PS/Mihrab/releases/latest/download/app-fdroid-release.apk"><img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" width="150" height="50"></a></td>
+    <td><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.prayer_times%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FHassan-PS%2FMihrab%22%2C%22author%22%3A%22Hassan-PS%22%2C%22name%22%3A%22Mihrab%22%7D"><img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Add to Obtainium" width="150" height="50"></a></td>
   </tr></table>
 
 </div>
