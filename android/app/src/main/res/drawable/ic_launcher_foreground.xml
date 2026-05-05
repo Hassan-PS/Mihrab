@@ -1,0 +1,47 @@
+<!-- Vector drawable for the Mihrab adaptive-icon foreground.
+     Rendered at 108dp × 108dp per the Material adaptive-icon spec, with
+     the artwork scaled to 0.66 of the canvas so the launcher mask (typically
+     a circle/squircle inscribed in a 66dp safe zone) crops only into
+     transparent pixels — the deep teal field comes from the background
+     layer (@color/ic_launcher_background) underneath. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <group
+        android:pivotX="512"
+        android:pivotY="512"
+        android:scaleX="0.66"
+        android:scaleY="0.66">
+
+        <!-- Outer pointed-arch silhouette, cream. -->
+        <path
+            android:pathData="M 312 832 L 312 480 Q 312 376 408 312 L 512 232 L 616 312 Q 712 376 712 480 L 712 832 Z"
+            android:fillColor="#F2E7D2" />
+
+        <!-- Inner arch: niche cutout. Painted in the background's
+             deep teal so it composes seamlessly over @color/ic_launcher_background. -->
+        <path
+            android:pathData="M 360 800 L 360 488 Q 360 400 444 348 L 512 296 L 580 348 Q 664 400 664 488 L 664 800 Z"
+            android:fillColor="#0F4D44" />
+
+        <!-- Eight-pointed star (two squares rotated 45° apart) inside the niche. -->
+        <group
+            android:pivotX="512"
+            android:pivotY="580">
+            <path
+                android:pathData="M 440 508 L 584 508 L 584 652 L 440 652 Z"
+                android:fillColor="#F2E7D2" />
+        </group>
+        <group
+            android:pivotX="512"
+            android:pivotY="580"
+            android:rotation="45">
+            <path
+                android:pathData="M 440 508 L 584 508 L 584 652 L 440 652 Z"
+                android:fillColor="#F2E7D2" />
+        </group>
+    </group>
+</vector>
