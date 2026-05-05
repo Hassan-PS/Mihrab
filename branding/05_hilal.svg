@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img">
+  <title>Hilal — the new crescent</title>
+  <desc>A deep forest-green tile holds a thin cream crescent: a full disc with a slightly offset disc cut from it, leaving a clean waning sliver. A single small star sits in the open space, scaled down so the crescent reads as the focal element.</desc>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="#0F3D2E"/>
+
+  <!-- The crescent. Built using an evenodd fill rule on a path that
+       traces the outer disc and then traces a second, slightly offset
+       disc inside it — the inner disc subtracts to leave a pure
+       waning-crescent silhouette. Centred slightly left of the canvas
+       so the open "horns" face right, leaving room for the star. -->
+  <path fill-rule="evenodd"
+        d="
+          M 512 192
+          a 320 320 0 1 0 0 640
+          a 320 320 0 1 0 0 -640
+          Z
+          M 600 192
+          a 320 320 0 1 0 0 640
+          a 320 320 0 1 0 0 -640
+          Z
+        "
+        fill="#F2E7D2"/>
+
+  <!-- A small five-pointed star inside the crescent's mouth.
+       Hand-plotted as a polygon centered at (760, 512) with 56px outer
+       radius. Pre-computed coordinates: (cx + r·sin θ, cy − r·cos θ)
+       and (cx + r/2.5·sin(θ+36°), cy − r/2.5·cos(θ+36°)) for θ in
+       0°, 72°, 144°, 216°, 288°. -->
+  <polygon
+    points="
+      760,456
+      773,494
+      813,494
+      781,517
+      793,556
+      760,533
+      727,556
+      739,517
+      707,494
+      747,494
+    "
+    fill="#F2E7D2"/>
+</svg>

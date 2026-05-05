@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Время молитв",
+    "name": "Михраб",
     "tagline": "Время молитв сосредоточено на Швеции — источники настроены на шведские города и гибкие варианты в других местах."
   },
   "nav": {
@@ -807,7 +807,7 @@
     "exportSection": "Export",
     "exportHelp": "Save your settings, saved locations, prayer journal, and fasting log to a JSON file. Open it later to restore.",
     "exportCta": "Export backup",
-    "shareTitle": "Prayer Times backup",
+    "shareTitle": "Резервная копия Mihrab",
     "exportFailedTitle": "Could not export",
     "restoreSection": "Restore",
     "restoreHelp": "Paste a backup JSON below and tap Restore to preview it. The app will confirm before applying.",
@@ -816,7 +816,7 @@
     "restorePreviewTitle": "Backup found",
     "restorePreviewBody": "{{settings}} settings, {{presets}} saved locations, {{journal}} journal entries, {{fasting}} fasting days. Apply this on next pass.",
     "restoreFailedTitle": "Could not parse backup",
-    "notAnEnvelope": "That file does not look like a Prayer Times backup.",
+    "notAnEnvelope": "Этот файл не похож на резервную копию Mihrab.",
     "privacyNote": "Backups stay on your device until you share them. Coordinates and journal entries can be encrypted with a password in a future update — keep your backup file private until then."
   },
   "fasting": {

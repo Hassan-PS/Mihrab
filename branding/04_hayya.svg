@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img">
+  <title>Hayya — the call to prayer, given form</title>
+  <desc>A deep indigo tile holds an open circular path that starts at the bottom-left and curves up and inward, ending in a single warm dot at the centre. The motion reads as "come" — an invitation drawn rather than spoken.</desc>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="#1B2A4E"/>
+
+  <!-- A single calligraphic stroke: starts low-left, sweeps up around
+       the right and finishes pointing inward at the centre. The form is
+       borrowed from the shape of the Arabic letter ح (the first letter
+       of حيّ) — the open arc that opens upward and to the right. -->
+  <path d="
+    M 264 768
+    Q 264 624 384 528
+    Q 504 432 624 432
+    Q 768 432 800 552
+    Q 824 648 720 696
+    Q 624 736 540 696
+  "
+  fill="none" stroke="#E8C879" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- The "destination" — a warm-gold dot that the arc is calling toward.
+       Sized large enough to feel like the focal point at icon scale. -->
+  <circle cx="540" cy="696" r="56" fill="#F4D88A"/>
+
+  <!-- A second, smaller dot just above-and-right of the destination —
+       the diacritic / shadda above ح in حيّ. Tiny but Arabic readers
+       will recognise it instantly; non-readers see a balance accent. -->
+  <circle cx="640" cy="296" r="22" fill="#E8C879" fill-opacity="0.85"/>
+</svg>

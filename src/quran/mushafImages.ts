@@ -4,7 +4,7 @@
  * The 604 page PNGs of the official KFGQPC Madinah Mushaf are
  * downloaded on first open of the mushaf view, not bundled in the
  * APK. The pages are hosted on THIS repo's own release —
- * `mushaf-assets-v2` on Hassan-PS/PrayerApp — so the app fetches
+ * `mushaf-assets-v2` on Hassan-PS/Mihrab — so the app fetches
  * directly from the project we control. No external CDN, no
  * third-party dependency.
  *
@@ -21,7 +21,7 @@
 export function mushafPageUrl(page: number): string {
   const safe = Math.max(1, Math.min(604, Math.round(page)));
   const padded = String(safe).padStart(3, '0');
-  return `https://github.com/Hassan-PS/PrayerApp/releases/download/mushaf-assets-v2/${padded}.png`;
+  return `https://github.com/Hassan-PS/Mihrab/releases/download/mushaf-assets-v2/${padded}.png`;
 }
 
 /** Total number of pages in the mushaf — matches the standard Madinah print. */

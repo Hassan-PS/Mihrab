@@ -18,4 +18,4 @@ A comprehensive Islamic prayer times application built with React Native.
 
 ## Maintainer
 
-See [GitHub contributors](https://github.com/Hassan-PS/PrayerApp/graphs/contributors) for the current list.
+See [GitHub contributors](https://github.com/Hassan-PS/Mihrab/graphs/contributors) for the current list.

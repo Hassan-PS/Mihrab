@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img">
+  <title>Sakinah — point of stillness, ripples expanding outward</title>
+  <desc>A single golden dot of light at center on a deep night-blue field, surrounded by three concentric soft rings — a moment of divine tranquility radiating outward, like a stone laid gently on still water.</desc>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="#0C2340"/>
+
+  <!-- Three concentric rings, thin, fading outward. The visual metaphor:
+       sakinah lands and expands. Stroke widths step down so the eye
+       reads inward — the focal point is the dot, not the rings. -->
+  <circle cx="512" cy="512" r="380" fill="none" stroke="#C7A85A" stroke-width="1.5" stroke-opacity="0.20"/>
+  <circle cx="512" cy="512" r="280" fill="none" stroke="#C7A85A" stroke-width="2"   stroke-opacity="0.35"/>
+  <circle cx="512" cy="512" r="180" fill="none" stroke="#C7A85A" stroke-width="2.5" stroke-opacity="0.55"/>
+
+  <!-- The single point of light at the centre. The "nuqta" in Arabic
+       calligraphy is the smallest unit and the origin of every letter;
+       sakinah here begins from a single dot of warmth. -->
+  <circle cx="512" cy="512" r="56" fill="#E8C879"/>
+  <circle cx="512" cy="512" r="20" fill="#F8E7B0"/>
+</svg>

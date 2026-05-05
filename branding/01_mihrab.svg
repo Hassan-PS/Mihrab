@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img">
+  <title>Mihrab — pointed-arch niche</title>
+  <desc>Cream pointed-arch silhouette on deep teal, with an eight-pointed Islamic star centered inside the niche. The arch reads as Islamic architecture across the room.</desc>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="#0F4D44"/>
+
+  <!-- Outer pointed-arch frame: a rectangle with a pointed top.
+       Built from a single path: bottom-left → up the left jamb → in to the
+       arch springing → up to the apex → down to the right springing → down
+       the right jamb → close. -->
+  <path d="
+    M 312 832
+    L 312 480
+    Q 312 376 408 312
+    L 512 232
+    L 616 312
+    Q 712 376 712 480
+    L 712 832
+    Z
+  " fill="#F2E7D2"/>
+
+  <!-- Inner arch: same shape, scaled-in. Cuts the niche so the cream becomes
+       a frame and the deep-teal background shows through inside. -->
+  <path d="
+    M 360 800
+    L 360 488
+    Q 360 400 444 348
+    L 512 296
+    L 580 348
+    Q 664 400 664 488
+    L 664 800
+    Z
+  " fill="#0F4D44"/>
+
+  <!-- Eight-pointed star inside the niche. Built as two overlapping squares
+       rotated 45° apart — the canonical khatim Sulayman / rub al-hizb form
+       used in Islamic geometry. Centered at (512, 580). -->
+  <g transform="translate(512 580)" fill="#F2E7D2">
+    <rect x="-72" y="-72" width="144" height="144"/>
+    <rect x="-72" y="-72" width="144" height="144" transform="rotate(45)"/>
+  </g>
+</svg>

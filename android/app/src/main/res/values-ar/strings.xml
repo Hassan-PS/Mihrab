@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Prayer Times</string>
+    <string name="app_name">محراب</string>
     <string name="widget_description">أوقات اليوم في صف واحد، الصلاة التالية مميزة</string>
-    <string name="widget_placeholder_day">افتح Prayer Times لتحميل الأوقات</string>
+    <string name="widget_placeholder_day">افتح محراب لتحميل الأوقات</string>
     <string name="widget_error">تعذّر تحميل بيانات الودجة</string>
 </resources>
