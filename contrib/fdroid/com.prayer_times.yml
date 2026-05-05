@@ -20,8 +20,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -46,8 +45,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -72,8 +70,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -97,8 +94,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -122,8 +118,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -147,8 +142,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -172,8 +166,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -197,8 +190,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -222,8 +214,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -240,15 +231,14 @@ Builds:
       - node_modules
     ndk: 27.1.12297006
 
-  - versionName: 2.0.0
-    versionCode: 123
-    commit: v2.0.0
+  - versionName: 2.0.1
+    versionCode: 124
+    commit: v2.0.1
     subdir: android
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
-      - curl -Lo /tmp/jdk17.tar.gz 
-        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - curl -Lo /tmp/jdk17.tar.gz https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
       - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
       - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
@@ -264,7 +254,6 @@ Builds:
     scanignore:
       - node_modules
     ndk: 27.1.12297006
-
 
 MaintainerNotes: |
   React Native 0.83: Node 20 from upstream tarball (checksum-verified). `npm ci`
@@ -297,5 +286,5 @@ MaintainerNotes: |
 ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.0
-CurrentVersionCode: 123
+CurrentVersion: 2.0.1
+CurrentVersionCode: 124
