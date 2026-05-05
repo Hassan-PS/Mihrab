@@ -13,9 +13,9 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/PrayerApp
 
 Builds:
-  - versionName: 2.0.1
-    versionCode: 124
-    commit: v2.0.1
+  - versionName: 2.0.2
+    versionCode: 125
+    commit: v2.0.2
     subdir: android
     sudo:
       - apt-get update
@@ -69,5 +69,5 @@ MaintainerNotes: |
 ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.1
-CurrentVersionCode: 124
+CurrentVersion: 2.0.2
+CurrentVersionCode: 125
