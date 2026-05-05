@@ -13,8 +13,22 @@ type Props = {
   monthA11yLabel: string;
   compassA11yLabel: string;
   settingsA11yLabel: string;
-  /** When false, only month + compass (e.g. home body row). Default true. */
+  /** When false, settings doesn't render (e.g. home body row). Default true. */
   showSettings?: boolean;
+  /**
+   * When false, the calendar (month) icon doesn't render. Used on the home
+   * screen header where the same destination is offered by the
+   * "Prayer times for the whole month" link below the prayer table —
+   * the duplicate header icon was visual noise. Default true so other
+   * screens (Compass, Quran, Settings) keep their toolbar.
+   */
+  showMonth?: boolean;
+  /**
+   * When false, the compass icon doesn't render. Used on the home screen
+   * for the same reason as showMonth — Compass already lives in the
+   * QuickActionsGrid tile under the prayer table. Default true.
+   */
+  showCompass?: boolean;
 };
 
 const ICON = 24;
@@ -137,25 +151,31 @@ function HeaderToolbarIconsImpl({
   compassA11yLabel,
   settingsA11yLabel,
   showSettings = true,
+  showMonth = true,
+  showCompass = true,
 }: Props) {
   return (
     <View style={styles.row}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={monthA11yLabel}
-        onPress={onMonth}
-        hitSlop={10}
-        style={styles.hit}>
-        <CalendarIcon color={tintColor} />
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={compassA11yLabel}
-        onPress={onCompass}
-        hitSlop={10}
-        style={styles.hit}>
-        <CompassIcon color={tintColor} />
-      </Pressable>
+      {showMonth ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={monthA11yLabel}
+          onPress={onMonth}
+          hitSlop={10}
+          style={styles.hit}>
+          <CalendarIcon color={tintColor} />
+        </Pressable>
+      ) : null}
+      {showCompass ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={compassA11yLabel}
+          onPress={onCompass}
+          hitSlop={10}
+          style={styles.hit}>
+          <CompassIcon color={tintColor} />
+        </Pressable>
+      ) : null}
       {showSettings ? (
         <Pressable
           accessibilityRole="button"
