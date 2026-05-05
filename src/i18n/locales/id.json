@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com — daftar metode yang besar, berkoordinasi di seluruh dunia; sangat banyak digunakan."
+      "desc": "api.aladhan.com — daftar metode lengkap, koordinat global; sangat banyak digunakan.",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "API Independen — sudut & offset gaya Inggris; Hanafi/Syafi; koordinat global."
+      "desc": "API independen — sudut & offset gaya UK; Hanafi/Syafi’i; koordinat global.",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "Dihitung di ponsel Anda dengan Batoul Adzan — tanpa API doa jaringan."
+      "desc": "Dihitung di ponselmu dengan Batoul Adhan — tanpa API jaringan.",
+      "name": "Di perangkat (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "Waktu salat untuk kota-kota di Swedia yang terdaftar; lokasi Anda cocok dengan kota terdekat dalam daftar."
+      "desc": "Waktu salat untuk kota-kota Swedia yang terdaftar; lokasimu dicocokkan dengan kota terdekat dalam daftar.",
+      "name": "Swedia"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "Assalāmu ʿalaikum warahmatullāhi taʿālā wabarakātuh"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "Otomatis (berdasarkan lokasi)",
+    "0": "Syiah — Itsna Asyariyah",
+    "1": "Universitas Ilmu Islam, Karachi",
+    "2": "Islamic Society of North America (ISNA)",
+    "3": "Liga Muslim Dunia",
+    "4": "Universitas Umm Al-Qura, Mekkah",
+    "5": "Otoritas Survei Umum Mesir",
+    "7": "Institut Geofisika, Universitas Teheran",
+    "8": "Wilayah Teluk",
+    "9": "Kuwait",
+    "10": "Qatar",
+    "11": "Singapura",
+    "12": "Prancis",
+    "13": "Turki",
+    "14": "Rusia",
+    "15": "Komite Pengamatan Hilal Sedunia"
+  },
+  "attributions": {
+    "quranText": "Teks Al-Qur’an Utsmani",
+    "mushafImages": "Gambar halaman mushaf (604)",
+    "translationEditions": "Edisi terjemahan (14)",
+    "sahihIntl": "Sahih International (Inggris)",
+    "pickthall": "Pickthall (Inggris)",
+    "mushafMetadata": "Metadata halaman mushaf",
+    "amiriFonts": "Font Amiri & Amiri Quran",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "Doa-doa Hisnul Muslim"
   }
 }

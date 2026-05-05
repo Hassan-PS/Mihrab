@@ -108,7 +108,9 @@ function SalamHero({
   return (
     <View style={salamStyles.wrap}>
       <Animated.Text
-        accessibilityLabel="As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
+        accessibilityLabel={t('onboarding.salamA11y', {
+          defaultValue: 'As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh',
+        })}
         style={[
           salamStyles.salam,
           {

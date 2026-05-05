@@ -51,25 +51,28 @@ export const MethodModal = memo(function MethodModal({
           <FlatList
             data={CALCULATION_METHODS}
             keyExtractor={item => String(item.id)}
-            renderItem={({ item }) => (
-              <Pressable
-                accessibilityRole="radio"
-                accessibilityLabel={item.name}
-                accessibilityState={{ selected: currentMethod === item.id }}
-                style={[
-                  modalStyles.row,
-                  rowDividerStyle(palette),
-                  currentMethod === item.id && { backgroundColor: palette.bg },
-                ]}
-                onPress={() => {
-                  onSelect(item.id);
-                  onClose();
-                }}>
-                <Text style={[modalStyles.rowLabel, { color: palette.text }]}>
-                  {item.name}
-                </Text>
-              </Pressable>
-            )}
+            renderItem={({ item }) => {
+              const label = t(item.nameKey, { defaultValue: item.name });
+              return (
+                <Pressable
+                  accessibilityRole="radio"
+                  accessibilityLabel={label}
+                  accessibilityState={{ selected: currentMethod === item.id }}
+                  style={[
+                    modalStyles.row,
+                    rowDividerStyle(palette),
+                    currentMethod === item.id && { backgroundColor: palette.bg },
+                  ]}
+                  onPress={() => {
+                    onSelect(item.id);
+                    onClose();
+                  }}>
+                  <Text style={[modalStyles.rowLabel, { color: palette.text }]}>
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            }}
           />
         </View>
       </View>

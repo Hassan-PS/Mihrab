@@ -210,16 +210,20 @@
   },
   "providers": {
     "aladhan": {
-      "desc": "api.aladhan.com — 大型方法列表，全球坐标；使用非常广泛。"
+      "desc": "api.aladhan.com — 方法列表丰富，覆盖全球；使用极为广泛。",
+      "name": "AlAdhan"
     },
     "prayertimes_dev": {
-      "desc": "独立API——英国风格的角度和偏移；哈乃菲/沙菲；全局坐标。"
+      "desc": "独立 API — 英式角度与偏移；哈乃斐/沙菲仪；全球坐标。",
+      "name": "PrayTimes.dev"
     },
     "local_adhan": {
-      "desc": "使用 Batoul Adhan 在您的手机上计算 — 无网络祈祷 API。"
+      "desc": "在您的手机上使用 Batoul Adhan 计算 — 无需联网 API。",
+      "name": "本机计算 (Adhan JS)"
     },
     "islamiska_forbundet": {
-      "desc": "瑞典列出的城市的祈​​祷时间；您的位置与列表中最近的城市相匹配。"
+      "desc": "为列表中瑞典城市提供礼拜时间；您的位置会匹配到列表中最近的城市。",
+      "name": "瑞典"
     }
   },
   "compass": {
@@ -435,7 +439,8 @@
       "title": "Exact-time alerts",
       "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
       "cta": "Allow exact alerts"
-    }
+    },
+    "salamA11y": "愿真主的平安、慈悲与吉庆与你们同在"
   },
   "backup": {
     "exportSection": "Export",
@@ -467,5 +472,34 @@
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
     "privacyNote": "Fasting history stays encrypted on your device."
+  },
+  "methods": {
+    "auto": "自动（按位置）",
+    "0": "什叶派 — 十二伊玛目",
+    "1": "伊斯兰科学大学（卡拉奇）",
+    "2": "北美伊斯兰协会（ISNA）",
+    "3": "穆斯林世界联盟",
+    "4": "乌姆库拉大学（麦加）",
+    "5": "埃及测量总局",
+    "7": "德黑兰大学地球物理学研究所",
+    "8": "海湾地区",
+    "9": "科威特",
+    "10": "卡塔尔",
+    "11": "新加坡",
+    "12": "法国",
+    "13": "土耳其",
+    "14": "俄罗斯",
+    "15": "世界月相观测委员会"
+  },
+  "attributions": {
+    "quranText": "《古兰经》奥斯曼体经文",
+    "mushafImages": "《麦地那经》页面图像（604）",
+    "translationEditions": "译本（14）",
+    "sahihIntl": "Sahih International（英文）",
+    "pickthall": "Pickthall（英文）",
+    "mushafMetadata": "麦地那经页面元数据",
+    "amiriFonts": "Amiri 与 Amiri Quran 字体",
+    "scheherazade": "Scheherazade New",
+    "hisnulMuslim": "《穆斯林堡垒》中的祷词"
   }
 }

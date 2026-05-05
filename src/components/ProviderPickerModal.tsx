@@ -131,13 +131,12 @@ function ProviderPickerModalImpl({
       const opt = PRAYER_DATA_PROVIDERS.find(o => o.id === item.id)!;
       const selected =
         !settings.dataProviderAuto && settings.dataProvider === item.id;
-      const desc = t(`providers.${item.id}.desc`, {
-        defaultValue: opt.description,
-      });
+      const name = t(opt.nameKey, { defaultValue: opt.name });
+      const desc = t(opt.descriptionKey, { defaultValue: opt.description });
       return (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={opt.name}
+          accessibilityLabel={name}
           accessibilityState={{ selected }}
           style={[
             styles.row,
@@ -152,7 +151,7 @@ function ProviderPickerModalImpl({
             onClose();
           }}>
           <Text style={[styles.rowTitle, { color: palette.text }]}>
-            {opt.name}
+            {name}
           </Text>
           <Text style={[styles.rowSub, { color: palette.muted }]}>
             {desc}
