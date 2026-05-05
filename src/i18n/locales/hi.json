@@ -33,7 +33,8 @@
     "automatic": "स्वचालित",
     "openSettings": "सेटिंग्स खोलें",
     "cancel": "रद्द करें",
-    "ok": "ठीक है"
+    "ok": "ठीक है",
+    "today": "आज"
   },
   "home": {
     "loadingPrayer": "प्रार्थना का समय लोड हो रहा है...",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "रीसेट",
     "salahonprophet": "नबी ﷺ पर दरूद",
     "prev": "पिछला",
     "next": "अगला"
@@ -377,7 +378,11 @@
     "noneFound": "पास कोई मस्जिद नहीं मिली। दायरा बढ़ाएँ।",
     "unnamedMosque": "मस्जिद",
     "needLocation": "पहले कोई स्थान सेट करें ताकि हम आस-पास खोज सकें।",
-    "error": "मस्जिद डेटाबेस से संपर्क नहीं हो सका। पुनः प्रयास करें।"
+    "error": "मस्जिद डेटाबेस से संपर्क नहीं हो सका। पुनः प्रयास करें।",
+    "title": "अपने पास कोई मस्जिद ढूँढें",
+    "bodyWithLocation": "हम आपके मानचित्र ऐप में आपके स्थान के पास \"mosque\" खोज खोलेंगे। यदि उपलब्ध न हो तो ब्राउज़र में गूगल मैप्स खोलेंगे।",
+    "bodyNoLocation": "पहले कोई स्थान सेट करें (सेटिंग्स → स्थान)। फिर हम उसके आसपास \"mosque\" खोज के साथ मानचित्र ऐप खोलेंगे। न हो तो ब्राउज़र में गूगल मैप्स खोलेंगे।",
+    "openInMapsApp": "मानचित्र खोलें और \"mosque\" खोजें"
   },
   "journal": {
     "todayLabel": "आज",
@@ -395,7 +400,16 @@
       "late": "देर",
       "missed": "छूट",
       "qadha": "क़ज़ा"
-    }
+    },
+    "encourageEmpty": "अपनी डायरी शुरू करने के लिए आज की पहली नमाज़ चिह्नित करें।",
+    "encourageActive": "दर्ज की गई हर नमाज़ एक क़दम आगे है।",
+    "encourageStreak": "माशा अल्लाह, लगातार {{count}} दिन समय पर। जारी रखें।",
+    "notificationToggleTitle": "सूचना से दर्ज करें",
+    "notificationToggleOn": "नमाज़-समय की सूचना पर \"नमाज़ दर्ज करें\" पर टैप करके सीधे यहाँ आएँ।",
+    "notificationToggleOff": "हर नमाज़-समय की सूचना में \"नमाज़ दर्ज करें\" क्रिया जोड़ें।",
+    "notificationToggleA11y": "नमाज़ सूचनाओं में डायरी क्रिया सक्षम करें",
+    "notePlaceholder": "निजी नोट (केवल इस डिवाइस पर)",
+    "saveNote": "नोट सहेजें"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "अय्यामे बीज़ (श्वेत दिन)",
+    "sixOfShawwal": "शव्वाल के छह रोज़े"
   },
   "ramadan": {
     "title": "रमज़ान",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "ट्रैकिंग शुरू करने के लिए अपना पहला रोज़ा दर्ज करें।",
+    "encourageActive": "हर रोज़ा महत्वपूर्ण है। अल्लाह क़ुबूल फ़रमाए।",
+    "encourageStreak": "माशा अल्लाह, लगातार {{count}} दिन। जारी रखें।",
+    "reminderToggleTitle": "एक दिन पहले अनुस्मारक",
+    "reminderToggleOn": "हर सुन्नत रोज़े से एक रात पहले {{hour}}:00 बजे आपको एक कोमल सूचना मिलेगी।",
+    "reminderToggleOff": "हर सोमवार/गुरुवार और विशेष रोज़े के दिन से पहले रात सूचना पाएँ।",
+    "reminderToggleA11y": "रोज़े से एक दिन पहले अनुस्मारक चालू करें",
+    "upcomingLabel": "आने वाले सुन्नत रोज़े",
+    "daysAway": "{{count}} दिन में",
+    "daysSpan": "{{count}} दिन",
+    "daysCount": "{{count}} दिन",
+    "ramadanCountdownLabel": "रमज़ान शुरू होने में",
+    "mondayEncouragement": "सोमवार सुन्नत रोज़ा है — सोम और गुरुवार को आमाल अल्लाह के सामने पेश किए जाते हैं।",
+    "thursdayEncouragement": "गुरुवार सुन्नत रोज़ा है — सोम और गुरुवार को आमाल अल्लाह के सामने पेश किए जाते हैं।",
+    "monthViewLabel": "सभी दर्ज रोज़े",
+    "noLogsYet": "जो दिन आप रखेंगे वे यहाँ दिखाई देंगे।",
+    "typeRamadan": "रमज़ान",
+    "typeVoluntary": "नफ़्ल / सुन्नत"
   },
   "methods": {
     "auto": "स्वचालित (स्थान अनुसार)",

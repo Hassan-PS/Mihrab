@@ -33,7 +33,8 @@
     "automatic": "Automatic",
     "openSettings": "Open Settings",
     "cancel": "Cancel",
-    "ok": "OK"
+    "ok": "OK",
+    "today": "Today"
   },
   "home": {
     "loadingPrayer": "Loading prayer times…",
@@ -377,7 +378,11 @@
     "noneFound": "No mosques found nearby. Try expanding the search radius.",
     "unnamedMosque": "Mosque",
     "needLocation": "Set a location first so we can search nearby.",
-    "error": "Couldn't reach the mosque database. Please try again."
+    "error": "Couldn't reach the mosque database. Please try again.",
+    "title": "Find a mosque near you",
+    "bodyWithLocation": "We will open your maps app with a \"mosque\" search centered on your location. If your maps app is not available, we will open Google Maps in your browser.",
+    "bodyNoLocation": "Set a location first (Settings → Location). We will then open your maps app with a \"mosque\" search centered on it. If your maps app is not available, we will open Google Maps in your browser.",
+    "openInMapsApp": "Open Maps and search \"mosque\""
   },
   "journal": {
     "todayLabel": "Today",
@@ -395,7 +400,16 @@
       "late": "Late",
       "missed": "Miss",
       "qadha": "Qad"
-    }
+    },
+    "encourageEmpty": "Mark today's first prayer to begin your journal.",
+    "encourageActive": "Every prayer logged is a step forward.",
+    "encourageStreak": "Mashallah, {{count}}-day on-time streak. Keep going.",
+    "notificationToggleTitle": "Log from notification",
+    "notificationToggleOn": "Tap \"Log prayer\" on the prayer-time alert to jump straight here.",
+    "notificationToggleOff": "Add a \"Log prayer\" action to each prayer-time alert.",
+    "notificationToggleA11y": "Enable journal log action on prayer notifications",
+    "notePlaceholder": "Private note (only on this device)",
+    "saveNote": "Save note"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "White Days",
+    "sixOfShawwal": "Six of Shawwal"
   },
   "ramadan": {
     "title": "Ramadan",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Log your first fast to start tracking.",
+    "encourageActive": "Every fast counts. May Allah accept it.",
+    "encourageStreak": "Mashallah, {{count}}-day streak. Keep it up.",
+    "reminderToggleTitle": "Day-before reminder",
+    "reminderToggleOn": "You'll get a gentle notification at {{hour}}:00 the evening before each Sunnah fast.",
+    "reminderToggleOff": "Get notified the evening before each Mon/Thu and special fasting day.",
+    "reminderToggleA11y": "Enable day-before fasting reminders",
+    "upcomingLabel": "Upcoming fasting Sunnahs",
+    "daysAway": "in {{count}}d",
+    "daysSpan": "{{count}} days",
+    "daysCount": "{{count}} days",
+    "ramadanCountdownLabel": "Ramadan begins in",
+    "mondayEncouragement": "Monday is a Sunnah fast — deeds are presented to Allah on Mondays and Thursdays.",
+    "thursdayEncouragement": "Thursday is a Sunnah fast — deeds are presented to Allah on Mondays and Thursdays.",
+    "monthViewLabel": "All logged fasts",
+    "noLogsYet": "Days you keep will appear here.",
+    "typeRamadan": "Ramadan",
+    "typeVoluntary": "Voluntary / Sunnah"
   },
   "methods": {
     "auto": "Automatic (by location)",

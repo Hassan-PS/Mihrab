@@ -33,7 +33,8 @@
     "automatic": "خودکار",
     "openSettings": "ترتیبات کھولیں",
     "cancel": "منسوخ کریں",
-    "ok": "ٹھیک ہے"
+    "ok": "ٹھیک ہے",
+    "today": "آج"
   },
   "home": {
     "loadingPrayer": "نماز کے اوقات لوڈ ہو رہے ہیں…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "ری سیٹ",
     "salahonprophet": "نبی ﷺ پر درود",
     "prev": "پچھلا",
     "next": "اگلا"
@@ -377,7 +378,11 @@
     "noneFound": "قریب کوئی مسجد نہیں ملی۔ تلاش کا دائرہ بڑھائیں۔",
     "unnamedMosque": "مسجد",
     "needLocation": "پہلے مقام منتخب کریں تاکہ ہم قریب تلاش کر سکیں۔",
-    "error": "مسجد ڈیٹابیس تک رسائی نہ ہو سکی۔ دوبارہ کوشش کریں۔"
+    "error": "مسجد ڈیٹابیس تک رسائی نہ ہو سکی۔ دوبارہ کوشش کریں۔",
+    "title": "قریبی مسجد تلاش کریں",
+    "bodyWithLocation": "ہم آپ کے مقام پر \"mosque\" کی تلاش کے ساتھ آپ کا نقشہ ایپ کھولیں گے۔ اگر دستیاب نہ ہو تو براؤزر میں گوگل میپس کھولیں گے۔",
+    "bodyNoLocation": "پہلے ایک مقام منتخب کریں (سیٹنگز ← مقام)۔ پھر ہم اس کے ارد گرد \"mosque\" تلاش کے ساتھ نقشہ ایپ کھولیں گے۔ اگر دستیاب نہ ہو تو براؤزر میں گوگل میپس کھولیں گے۔",
+    "openInMapsApp": "نقشے کھولیں اور \"mosque\" تلاش کریں"
   },
   "journal": {
     "todayLabel": "آج",
@@ -395,7 +400,16 @@
       "late": "دیر",
       "missed": "چھوٹا",
       "qadha": "قضا"
-    }
+    },
+    "encourageEmpty": "اپنی ڈائری شروع کرنے کے لیے آج کی پہلی نماز نشان زد کریں۔",
+    "encourageActive": "ہر درج شدہ نماز ایک قدم آگے ہے۔",
+    "encourageStreak": "ماشاء اللہ، مسلسل {{count}} دن بروقت۔ جاری رکھیں۔",
+    "notificationToggleTitle": "اطلاع سے درج کریں",
+    "notificationToggleOn": "نماز کے وقت کی اطلاع پر \"نماز درج کریں\" پر ٹیپ کرکے براہ راست یہاں آئیں۔",
+    "notificationToggleOff": "ہر نماز-وقت کی اطلاع میں \"نماز درج کریں\" ایکشن شامل کریں۔",
+    "notificationToggleA11y": "نماز کی اطلاعات میں ڈائری ایکشن فعال کریں",
+    "notePlaceholder": "نجی نوٹ (صرف اس آلے پر)",
+    "saveNote": "نوٹ محفوظ کریں"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "ایامِ بیض",
+    "sixOfShawwal": "شوال کے چھ روزے"
   },
   "ramadan": {
     "title": "رمضان",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "ٹریکنگ شروع کرنے کے لیے اپنا پہلا روزہ درج کریں۔",
+    "encourageActive": "ہر روزہ معتبر ہے — اللہ قبول فرمائے۔",
+    "encourageStreak": "ماشاء اللہ، مسلسل {{count}} دن۔ جاری رکھیں۔",
+    "reminderToggleTitle": "ایک دن پہلے یاددہانی",
+    "reminderToggleOn": "ہر سنت روزے سے ایک دن پہلے رات {{hour}}:00 پر آپ کو ہلکی یاددہانی ملے گی۔",
+    "reminderToggleOff": "ہر پیر/جمعرات اور خصوصی روزے کے دن سے پہلے رات اطلاع پائیں۔",
+    "reminderToggleA11y": "روزے سے ایک دن پہلے یاددہانی فعال کریں",
+    "upcomingLabel": "آنے والے سنت روزے",
+    "daysAway": "{{count}} دن میں",
+    "daysSpan": "{{count}} دن",
+    "daysCount": "{{count}} دن",
+    "ramadanCountdownLabel": "رمضان شروع ہونے میں",
+    "mondayEncouragement": "پیر سنت روزہ ہے — اعمال پیر اور جمعرات کو اللہ کے سامنے پیش کیے جاتے ہیں۔",
+    "thursdayEncouragement": "جمعرات سنت روزہ ہے — اعمال پیر اور جمعرات کو اللہ کے سامنے پیش کیے جاتے ہیں۔",
+    "monthViewLabel": "تمام درج کردہ روزے",
+    "noLogsYet": "جو دن آپ روزہ رکھیں گے وہ یہاں ظاہر ہوں گے۔",
+    "typeRamadan": "رمضان",
+    "typeVoluntary": "نفلی / سنت"
   },
   "methods": {
     "auto": "خودکار (مقام کے مطابق)",

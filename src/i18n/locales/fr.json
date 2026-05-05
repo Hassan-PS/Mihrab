@@ -33,7 +33,8 @@
     "automatic": "Automatique",
     "openSettings": "Ouvrir les réglages",
     "cancel": "Annuler",
-    "ok": "OK"
+    "ok": "OK",
+    "today": "Aujourd'hui"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "Réinitialiser",
     "salahonprophet": "Salât sur le Prophète ﷺ",
     "prev": "Précédent",
     "next": "Suivant"
@@ -377,7 +378,11 @@
     "noneFound": "Aucune mosquée trouvée. Essayez d’élargir le rayon.",
     "unnamedMosque": "Mosquée",
     "needLocation": "Définissez d’abord une position pour pouvoir chercher autour.",
-    "error": "Impossible d’atteindre la base des mosquées. Réessayez."
+    "error": "Impossible d’atteindre la base des mosquées. Réessayez.",
+    "title": "Trouver une mosquée près de chez vous",
+    "bodyWithLocation": "Nous ouvrirons votre application de cartes avec une recherche « mosque » centrée sur votre position. Si l’application n’est pas disponible, nous ouvrirons Google Maps dans votre navigateur.",
+    "bodyNoLocation": "Définissez d’abord une position (Paramètres → Position). Nous ouvrirons ensuite l’application de cartes avec une recherche « mosque » autour. Sinon, nous ouvrirons Google Maps dans le navigateur.",
+    "openInMapsApp": "Ouvrir Maps et rechercher « mosque »"
   },
   "journal": {
     "todayLabel": "Aujourd’hui",
@@ -395,7 +400,16 @@
       "late": "Retard",
       "missed": "Manq.",
       "qadha": "Qad"
-    }
+    },
+    "encourageEmpty": "Cochez la première prière du jour pour commencer votre journal.",
+    "encourageActive": "Chaque prière enregistrée est un pas en avant.",
+    "encourageStreak": "Mashallah, {{count}} jours d'affilée à l'heure. Continuez.",
+    "notificationToggleTitle": "Enregistrer depuis la notification",
+    "notificationToggleOn": "Touchez « Enregistrer la prière » sur l'alerte d'heure de prière pour arriver ici directement.",
+    "notificationToggleOff": "Ajouter une action « Enregistrer la prière » à chaque alerte d'heure de prière.",
+    "notificationToggleA11y": "Activer l'action de journalisation dans les notifications de prière",
+    "notePlaceholder": "Note privée (uniquement sur cet appareil)",
+    "saveNote": "Enregistrer la note"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "Les Jours blancs",
+    "sixOfShawwal": "Les six de Chawwal"
   },
   "ramadan": {
     "title": "Ramadan",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Enregistrez votre premier jeûne pour commencer le suivi.",
+    "encourageActive": "Chaque jeûne compte. Qu’Allah l’accepte.",
+    "encourageStreak": "Mashallah, {{count}} jours d’affilée. Continue !",
+    "reminderToggleTitle": "Rappel la veille",
+    "reminderToggleOn": "Vous recevrez une notification douce à {{hour}}:00 la veille de chaque jeûne sunna.",
+    "reminderToggleOff": "Recevez une notification la veille de chaque lundi/jeudi et jour de jeûne spécial.",
+    "reminderToggleA11y": "Activer les rappels la veille du jeûne",
+    "upcomingLabel": "Prochains jeûnes sunna",
+    "daysAway": "dans {{count}} j",
+    "daysSpan": "{{count}} jours",
+    "daysCount": "{{count}} jours",
+    "ramadanCountdownLabel": "Ramadan commence dans",
+    "mondayEncouragement": "Le lundi est un jeûne sunna — les actes sont présentés à Allah les lundis et jeudis.",
+    "thursdayEncouragement": "Le jeudi est un jeûne sunna — les actes sont présentés à Allah les lundis et jeudis.",
+    "monthViewLabel": "Tous les jeûnes enregistrés",
+    "noLogsYet": "Les jours que vous observerez s’afficheront ici.",
+    "typeRamadan": "Ramadan",
+    "typeVoluntary": "Volontaire / Sunna"
   },
   "methods": {
     "auto": "Automatique (selon la localisation)",

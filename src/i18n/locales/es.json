@@ -33,7 +33,8 @@
     "automatic": "Automático",
     "openSettings": "Abrir Ajustes",
     "cancel": "Cancelar",
-    "ok": "Aceptar"
+    "ok": "Aceptar",
+    "today": "Hoy"
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "Reiniciar",
     "salahonprophet": "Salá sobre el Profeta ﷺ",
     "prev": "Anterior",
     "next": "Siguiente"
@@ -377,7 +378,11 @@
     "noneFound": "No se encontraron mezquitas. Prueba a ampliar el radio.",
     "unnamedMosque": "Mezquita",
     "needLocation": "Configura primero una ubicación para poder buscar cerca.",
-    "error": "No se pudo conectar con la base de mezquitas. Reintenta."
+    "error": "No se pudo conectar con la base de mezquitas. Reintenta.",
+    "title": "Encuentra una mezquita cerca de ti",
+    "bodyWithLocation": "Abriremos tu aplicación de mapas con una búsqueda \"mosque\" centrada en tu ubicación. Si no está disponible, abriremos Google Maps en tu navegador.",
+    "bodyNoLocation": "Primero establece una ubicación (Ajustes → Ubicación). Luego abriremos tu aplicación de mapas con una búsqueda \"mosque\" centrada en ella. Si no está disponible, abriremos Google Maps en el navegador.",
+    "openInMapsApp": "Abrir Maps y buscar \"mosque\""
   },
   "journal": {
     "todayLabel": "Hoy",
@@ -395,7 +400,16 @@
       "late": "Tarde",
       "missed": "Perd.",
       "qadha": "Qad"
-    }
+    },
+    "encourageEmpty": "Marca la primera oración de hoy para comenzar tu diario.",
+    "encourageActive": "Cada oración registrada es un paso adelante.",
+    "encourageStreak": "Mashallah, {{count}} días seguidos a tiempo. Sigue.",
+    "notificationToggleTitle": "Registrar desde la notificación",
+    "notificationToggleOn": "Toca \"Registrar oración\" en la alerta de hora de oración para venir aquí directamente.",
+    "notificationToggleOff": "Añade una acción \"Registrar oración\" a cada alerta de hora de oración.",
+    "notificationToggleA11y": "Activar la acción de registro en las notificaciones de oración",
+    "notePlaceholder": "Nota privada (solo en este dispositivo)",
+    "saveNote": "Guardar nota"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "Días blancos",
+    "sixOfShawwal": "Seis de Shawwal"
   },
   "ramadan": {
     "title": "Ramadán",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Registra tu primer ayuno para empezar a seguirlo.",
+    "encourageActive": "Cada ayuno cuenta. Que Allah lo acepte.",
+    "encourageStreak": "Mashallah, {{count}} días seguidos. Sigue así.",
+    "reminderToggleTitle": "Recordatorio el día antes",
+    "reminderToggleOn": "Recibirás una notificación suave a las {{hour}}:00 la víspera de cada ayuno sunna.",
+    "reminderToggleOff": "Recibe un aviso la víspera de cada lunes/jueves y día de ayuno especial.",
+    "reminderToggleA11y": "Activar recordatorios el día antes del ayuno",
+    "upcomingLabel": "Próximos ayunos sunna",
+    "daysAway": "en {{count}} d",
+    "daysSpan": "{{count}} días",
+    "daysCount": "{{count}} días",
+    "ramadanCountdownLabel": "Ramadán comienza en",
+    "mondayEncouragement": "El lunes es un ayuno sunna — las obras se presentan ante Allah los lunes y jueves.",
+    "thursdayEncouragement": "El jueves es un ayuno sunna — las obras se presentan ante Allah los lunes y jueves.",
+    "monthViewLabel": "Todos los ayunos registrados",
+    "noLogsYet": "Los días que ayunes aparecerán aquí.",
+    "typeRamadan": "Ramadán",
+    "typeVoluntary": "Voluntario / Sunna"
   },
   "methods": {
     "auto": "Automático (según ubicación)",

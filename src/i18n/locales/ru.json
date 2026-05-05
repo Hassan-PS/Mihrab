@@ -33,7 +33,8 @@
     "automatic": "Автоматический",
     "openSettings": "Открыть настройки",
     "cancel": "Отмена",
-    "ok": "OK"
+    "ok": "OK",
+    "today": "Сегодня"
   },
   "home": {
     "loadingPrayer": "Загрузка времени молитв…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "Сброс",
     "salahonprophet": "Салават Пророку ﷺ",
     "prev": "Назад",
     "next": "Далее"
@@ -377,7 +378,11 @@
     "noneFound": "Поблизости мечетей не найдено. Расширьте радиус поиска.",
     "unnamedMosque": "Мечеть",
     "needLocation": "Сначала укажите местоположение, чтобы мы могли искать рядом.",
-    "error": "Не удалось обратиться к базе мечетей. Попробуйте снова."
+    "error": "Не удалось обратиться к базе мечетей. Попробуйте снова.",
+    "title": "Найдите ближайшую мечеть",
+    "bodyWithLocation": "Мы откроем ваше картографическое приложение с поиском \"mosque\" вокруг вашего местоположения. Если приложение недоступно, откроем Google Карты в браузере.",
+    "bodyNoLocation": "Сначала укажите местоположение (Настройки → Местоположение). Затем мы откроем ваше картографическое приложение с поиском \"mosque\" вокруг него. Если приложения нет, откроем Google Карты в браузере.",
+    "openInMapsApp": "Открыть карты и найти \"mosque\""
   },
   "journal": {
     "todayLabel": "Сегодня",
@@ -395,7 +400,16 @@
       "late": "Опозд.",
       "missed": "Проп.",
       "qadha": "Қад."
-    }
+    },
+    "encourageEmpty": "Отметьте первую молитву сегодняшнего дня, чтобы начать дневник.",
+    "encourageActive": "Каждая записанная молитва — шаг вперёд.",
+    "encourageStreak": "Машаллах, {{count}} дней подряд вовремя. Так держать.",
+    "notificationToggleTitle": "Записывать из уведомления",
+    "notificationToggleOn": "Коснитесь \"Записать молитву\" в уведомлении о времени молитвы, чтобы сразу перейти сюда.",
+    "notificationToggleOff": "Добавьте действие \"Записать молитву\" к каждому уведомлению о времени молитвы.",
+    "notificationToggleA11y": "Включить запись в дневник из уведомлений о молитве",
+    "notePlaceholder": "Личная заметка (только на этом устройстве)",
+    "saveNote": "Сохранить заметку"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "Белые дни",
+    "sixOfShawwal": "Шесть дней Шавваля"
   },
   "ramadan": {
     "title": "Рамадан",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Запишите свой первый пост, чтобы начать отслеживание.",
+    "encourageActive": "Каждый пост важен. Да примет его Аллах.",
+    "encourageStreak": "Машаллах, {{count}} дней подряд. Так держать.",
+    "reminderToggleTitle": "Напоминание накануне",
+    "reminderToggleOn": "Вы получите мягкое уведомление в {{hour}}:00 накануне каждого Сунна-поста.",
+    "reminderToggleOff": "Получайте уведомление накануне каждого понедельника/четверга и особого постного дня.",
+    "reminderToggleA11y": "Включить напоминания накануне поста",
+    "upcomingLabel": "Предстоящие Сунна-посты",
+    "daysAway": "через {{count}} д",
+    "daysSpan": "{{count}} дн",
+    "daysCount": "{{count}} дн",
+    "ramadanCountdownLabel": "Рамадан начнётся через",
+    "mondayEncouragement": "Понедельник — Сунна-пост: дела представляются Аллаху по понедельникам и четвергам.",
+    "thursdayEncouragement": "Четверг — Сунна-пост: дела представляются Аллаху по понедельникам и четвергам.",
+    "monthViewLabel": "Все записанные посты",
+    "noLogsYet": "Дни, которые вы держите пост, появятся здесь.",
+    "typeRamadan": "Рамадан",
+    "typeVoluntary": "Добровольный / Сунна"
   },
   "methods": {
     "auto": "Автоматически (по местоположению)",

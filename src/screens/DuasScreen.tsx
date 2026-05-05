@@ -30,10 +30,13 @@ export function DuasScreen() {
   useBreakpoint();
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
-  // Arabic readers don't need a Latin pronunciation guide — they read the
-  // Arabic directly. Hide the transliteration line when the app language
-  // is Arabic so the row stays clean and reverent.
-  const showTranslit = i18n.language !== 'ar';
+  // Arabic readers don't need a Latin pronunciation guide or an English
+  // meaning — they read the Arabic directly. Hide both supplementary
+  // lines when the app language is Arabic so the row stays clean and
+  // reverent.
+  const isArabic = i18n.language === 'ar';
+  const showTranslit = !isArabic;
+  const showTranslation = !isArabic;
   useAndroidSubScreenBack();
   const [selected, setSelected] = useState<DuaCategory>('morning');
   // Per-dua tap-to-count state — task #94. Persists for the lifetime of
@@ -140,12 +143,15 @@ export function DuasScreen() {
                 {dua.transliteration}
               </Text>
             ) : null}
-            <Text style={[styles.translation, { color: palette.text }]}>
-              {/* Per-dua localized translation falls back to bundled
-                  English. To add another locale, drop entries under
-                  `duas.<id>.translation` in that locale's JSON. */}
-              {t(`duas.${dua.id}.translation`, { defaultValue: dua.translation })}
-            </Text>
+            {showTranslation ? (
+              <Text style={[styles.translation, { color: palette.text }]}>
+                {/* Per-dua localized translation falls back to bundled
+                    English. To add another locale, drop entries under
+                    `duas.<id>.translation` in that locale's JSON. Hidden
+                    entirely when the app language is Arabic. */}
+                {t(`duas.${dua.id}.translation`, { defaultValue: dua.translation })}
+              </Text>
+            ) : null}
             {dua.repeat ? (
               // Tap-to-count counter for duas with a recommended
               // repetition (e.g. ×3, ×100). Mirrors the Tasbih pattern:

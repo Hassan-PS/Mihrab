@@ -33,7 +33,8 @@
     "automatic": "Otomatik",
     "openSettings": "Ayarları Aç",
     "cancel": "İptal",
-    "ok": "Tamam"
+    "ok": "Tamam",
+    "today": "Bugün"
   },
   "home": {
     "loadingPrayer": "Namaz vakitleri yükleniyor…",
@@ -324,7 +325,7 @@
     "astaghfirullah": "Astaghfirullah",
     "open": "Open count",
     "increment": "Tap to count",
-    "reset": "Reset",
+    "reset": "Sıfırla",
     "salahonprophet": "Peygamber’e ﷺ Salavat",
     "prev": "Önceki",
     "next": "Sonraki"
@@ -377,7 +378,11 @@
     "noneFound": "Yakında cami bulunamadı. Arama yarıçapını genişletin.",
     "unnamedMosque": "Cami",
     "needLocation": "Önce bir konum belirleyin, böylece yakında arayabiliriz.",
-    "error": "Cami veritabanına ulaşılamadı. Lütfen tekrar deneyin."
+    "error": "Cami veritabanına ulaşılamadı. Lütfen tekrar deneyin.",
+    "title": "Yakınınızdaki bir cami bulun",
+    "bodyWithLocation": "Konumunuza odaklanan \"mosque\" aramasıyla harita uygulamanızı açacağız. Harita uygulamanız yoksa Google Haritalar tarayıcıda açılır.",
+    "bodyNoLocation": "Önce bir konum belirleyin (Ayarlar → Konum). Ardından harita uygulamanızı bu konuma odaklanan \"mosque\" aramasıyla açacağız. Mevcut değilse tarayıcıda Google Haritalar açılır.",
+    "openInMapsApp": "Haritaları aç ve \"mosque\" ara"
   },
   "journal": {
     "todayLabel": "Bugün",
@@ -395,7 +400,16 @@
       "late": "Geç",
       "missed": "Kaçt",
       "qadha": "Kaza"
-    }
+    },
+    "encourageEmpty": "Günlüğünü başlatmak için bugünün ilk namazını işaretle.",
+    "encourageActive": "Kaydedilen her namaz bir adım ilerlemedir.",
+    "encourageStreak": "Maşallah, {{count}} gün üst üste vaktinde. Devam et.",
+    "notificationToggleTitle": "Bildirimden kaydet",
+    "notificationToggleOn": "Namaz-vakti uyarısında \"Namazı kaydet\" öğesine dokunarak doğrudan buraya gel.",
+    "notificationToggleOff": "Her namaz-vakti uyarısına \"Namazı kaydet\" eylemi ekle.",
+    "notificationToggleA11y": "Namaz bildirimlerinde günlük kaydı eylemini aç",
+    "notePlaceholder": "Özel not (yalnızca bu cihazda)",
+    "saveNote": "Notu kaydet"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -407,7 +421,9 @@
     "laylatAlQadr": "Laylat al-Qadr (observed)",
     "eidAlFitr": "Eid al-Fitr",
     "arafah": "Day of Arafah",
-    "eidAlAdha": "Eid al-Adha"
+    "eidAlAdha": "Eid al-Adha",
+    "whiteDays": "Eyyâm-ı bîd (Beyaz Günler)",
+    "sixOfShawwal": "Şevval ayının altı orucu"
   },
   "ramadan": {
     "title": "Ramazan",
@@ -471,7 +487,25 @@
     "statStreak": "Streak",
     "gridLabel": "This Ramadan",
     "gridDayA11y": "Day {{day}} {{state}}",
-    "privacyNote": "Fasting history stays encrypted on your device."
+    "privacyNote": "Fasting history stays encrypted on your device.",
+    "encourageEmpty": "Takibe başlamak için ilk orucunu kaydet.",
+    "encourageActive": "Her oruç değerlidir. Allah kabul etsin.",
+    "encourageStreak": "Maşallah, {{count}} gün üst üste. Devam et.",
+    "reminderToggleTitle": "Bir gün öncesi hatırlatması",
+    "reminderToggleOn": "Her Sünnet orucundan bir önceki akşam saat {{hour}}:00’te hafif bir bildirim alırsın.",
+    "reminderToggleOff": "Her Pazartesi/Perşembe ve özel oruç gününden bir önceki akşam bildirim al.",
+    "reminderToggleA11y": "Oruçtan bir gün önceki hatırlatıcıları aç",
+    "upcomingLabel": "Yaklaşan Sünnet oruçları",
+    "daysAway": "{{count}} gün sonra",
+    "daysSpan": "{{count}} gün",
+    "daysCount": "{{count}} gün",
+    "ramadanCountdownLabel": "Ramazan başlamasına",
+    "mondayEncouragement": "Pazartesi Sünnet orucudur — ameller pazartesi ve perşembe günleri Allah’a arz edilir.",
+    "thursdayEncouragement": "Perşembe Sünnet orucudur — ameller pazartesi ve perşembe günleri Allah’a arz edilir.",
+    "monthViewLabel": "Kayıtlı tüm oruçlar",
+    "noLogsYet": "Tuttuğun günler burada görünür.",
+    "typeRamadan": "Ramazan",
+    "typeVoluntary": "Nafile / Sünnet"
   },
   "methods": {
     "auto": "Otomatik (konuma göre)",
