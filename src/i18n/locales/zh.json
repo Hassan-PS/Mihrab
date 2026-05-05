@@ -352,7 +352,352 @@
       "protection": "保护",
       "guidance": "引导"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "宝座经文（Ayat al-Kursi）"
+    },
+    "morning_02_three_quls": {
+      "title": "《忠诚》《破晓》《世人》三章"
+    },
+    "morning_03_fitra_islam": {
+      "title": "依伊斯兰天然之本性"
+    },
+    "morning_04_radhitu": {
+      "title": "满意以安拉为主"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "有益的知识、佳美的给养、被接受的功修"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "凭你我们进入早晨"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "万物非主，唯有安拉"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "永生主啊，自立主啊"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "求恕之主（Sayyid al-Istighfar）"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "创造天地的主"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "我们与一切主权为安拉而入清晨"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "宽恕与平安"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "奉安拉之名 — 凭其尊名，万物无害"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "赞颂安拉，与其造物之数相同"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "使我身体、听觉、视觉皆得平安"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "安拉足以使我满足"
+    },
+    "morning_17_ushhiduka": {
+      "title": "我于此晨以你为证"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "万物非主，唯有安拉，他主宰生与死"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "赞颂安拉清净，赞美归于他"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "求安拉宽恕"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "赞颂、感赞、诵大、唯一颂"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "宝座经文（Ayat al-Kursi）"
+    },
+    "evening_02_three_quls": {
+      "title": "《忠诚》《破晓》《世人》三章"
+    },
+    "evening_03_fitra_islam": {
+      "title": "依伊斯兰天然之本性（夜）"
+    },
+    "evening_04_radhitu": {
+      "title": "满意以安拉为主"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "凭你我们进入黄昏"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "万物非主，唯有安拉"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "永生主啊，自立主啊"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "求恕之主（Sayyid al-Istighfar）"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "创造天地的主"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "我们与一切主权为安拉而入夜"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "宽恕与平安"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "奉安拉之名 — 凭其尊名，万物无害"
+    },
+    "evening_13_taamat_protection": {
+      "title": "以安拉至全的尊词为庇护"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "使我身体、听觉、视觉皆得平安"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "安拉足以使我满足"
+    },
+    "evening_16_ushhiduka": {
+      "title": "我于此夜以你为证"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "万物非主，唯有安拉，他主宰生与死"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "赞颂安拉清净，赞美归于他"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "求安拉宽恕"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "赞颂、感赞、诵大、唯一颂"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "求恕"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "主啊，你是和平之源"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "赞颂 (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "每次主命拜后诵《忠诚》《破晓》《世人》"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "每次主命拜后诵宝座经文"
+    },
+    "food_before": {
+      "title": "进食前 — 奉真主名"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "餐后 — 非凭我的力量与能力"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "餐后 — 主赐我饮食并使我成为穆斯林"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "餐后 — 主赐饮食，并使之有出处"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "餐后 — 主赐饮食、足用与庇护"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "餐后 — 多而美好、蒙福的赞美"
+    },
+    "distress_lahawla": {
+      "title": "除安拉外，无任何力量与能力"
+    },
+    "distress_innallaha_maana": {
+      "title": "心生畏惧时"
+    },
+    "distress_yaa_hayyu": {
+      "title": "呼唤永生者"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "宝座经文（夜眠庇护）"
+    },
+    "distress_dua_al_faraj": {
+      "title": "解忧之祷 (Dua al-Faraj)"
+    },
+    "distress_dua_al_karb": {
+      "title": "困顿之际的祷词"
+    },
+    "sleep_three_quls": {
+      "title": "三章护身 — 《忠诚》《破晓》《世人》"
+    },
+    "sleep_ayat_kursi": {
+      "title": "睡前诵宝座经文"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "我已将我的颜面交付于你"
+    },
+    "sleep_bismika_ahya": {
+      "title": "主啊，奉你的尊名我生与死"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "醒来时"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "你造化了我的灵魂 — 庇护或宽恕它"
+    },
+    "sleep_rabba_samawat": {
+      "title": "诸天、大地与至大宝座的主"
+    },
+    "sleep_dust_off_bed": {
+      "title": "掸床后右侧而卧"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "诵大34、赞颂33、感赞33（胜于仆役）"
+    },
+    "sleep_taamat_protection": {
+      "title": "安拉至全的尊词，免一切伤害"
+    },
+    "sleep_taamat_for_children": {
+      "title": "孩童护佑 — 防一切恶魔与有害之物"
+    },
+    "sleep_taamat_long": {
+      "title": "惊醒或噩梦后"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "凭你尊贵的颜面与至全的尊词"
+    },
+    "sleep_anta_rabbi": {
+      "title": "你是我的主 — 灾难不会临到我"
+    },
+    "travel_subhanalladhi": {
+      "title": "登上交通工具时"
+    },
+    "travel_journey": {
+      "title": "出行祷词 — 完整文本"
+    },
+    "travel_returning": {
+      "title": "归家时"
+    },
+    "mosque_entering": {
+      "title": "进入清真寺时"
+    },
+    "mosque_leaving": {
+      "title": "离开清真寺时"
+    },
+    "mosque_adhan_response": {
+      "title": "听到宣礼之后"
+    },
+    "gratitude_blessing": {
+      "title": "蒙赐恩惠时"
+    },
+    "gratitude_kindness": {
+      "title": "他人施惠于你时"
+    },
+    "forgiveness_sayyidul": {
+      "title": "求恕之主 (Sayyid al-Istighfar)"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "向安拉忏悔"
+    },
+    "distress_grief": {
+      "title": "为消除忧愁与不安"
+    },
+    "distress_difficulty": {
+      "title": "困境之时"
+    },
+    "distress_rain": {
+      "title": "降雨时"
+    },
+    "weather_during_rain": {
+      "title": "雨初降时"
+    },
+    "weather_after_rain": {
+      "title": "雨过之后"
+    },
+    "weather_thunder": {
+      "title": "听见雷声时"
+    },
+    "weather_strong_wind": {
+      "title": "强风刮起时"
+    },
+    "family_for_offspring": {
+      "title": "为清廉的子嗣祈祷"
+    },
+    "family_for_parents": {
+      "title": "为父母祈祷"
+    },
+    "family_blessing_marriage": {
+      "title": "婚礼祝贺时"
+    },
+    "family_for_child": {
+      "title": "为孩子求庇护"
+    },
+    "sickness_visit": {
+      "title": "探望病人"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "为病人祷告"
+    },
+    "sickness_when_in_pain": {
+      "title": "身体感到疼痛时"
+    },
+    "funeral_inna_lillah": {
+      "title": "闻讣告时"
+    },
+    "funeral_consolation": {
+      "title": "安慰丧家"
+    },
+    "funeral_graveyard_visit": {
+      "title": "进入墓园时"
+    },
+    "eid_takbir": {
+      "title": "开斋节诵大"
+    },
+    "eid_taqabbal": {
+      "title": "节日问候"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "诵读前求护"
+    },
+    "beforeQuran_basmalah": {
+      "title": "每事开端的奉名词"
+    },
+    "knowledge_seeking": {
+      "title": "求增益学识"
+    },
+    "knowledge_understanding": {
+      "title": "求心领神会"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "会议收束（kaffarat al-majlis）"
+    },
+    "protection_morning_evening": {
+      "title": "求恕之主简短版（×3 晨夜）"
+    },
+    "protection_evil_eye": {
+      "title": "防恶眼之祷"
+    },
+    "protection_entering_home": {
+      "title": "进家时"
+    },
+    "protection_leaving_home": {
+      "title": "出家时"
+    },
+    "protection_market": {
+      "title": "进入市场时"
+    },
+    "guidance_istikharah": {
+      "title": "求决之拜（Salat al-Istikharah）— 完整文本"
+    },
+    "guidance_steadfastness": {
+      "title": "为信仰之坚定"
+    },
+    "guidance_rabbana_atina": {
+      "title": "为今世与后世之美善"
+    },
+    "guidance_against_being_misled": {
+      "title": "为免于迷失之祷"
+    }
   },
   "quran": {
     "meccan": "麦加",

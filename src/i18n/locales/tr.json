@@ -352,7 +352,352 @@
       "protection": "Koruma",
       "guidance": "Hidayet"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "Âyetü’l-Kürsî"
+    },
+    "morning_02_three_quls": {
+      "title": "İhlas, Felak ve Nâs sureleri"
+    },
+    "morning_03_fitra_islam": {
+      "title": "İslâm fıtratı üzere"
+    },
+    "morning_04_radhitu": {
+      "title": "Rabb olarak Allah’tan razıyım"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "Faydalı ilim, helâl rızık, makbul amel"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "Seninle sabahladık"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "Allah’tan başka ilâh yoktur, tek başına"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "Ey Hayy, ey Kayyûm"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "Seyyidü’l-İstiğfâr"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "Göklerin ve yerin yaratıcısı"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "Biz ve mülk, Allah için sabahladık"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "Af ve afiyet"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "Adıyla hiçbir şeyin zarar veremediği Allah’ın adıyla"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "Allah’ı yarattıklarının sayısınca tesbih ederim"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "Bedenime, işitmeme ve görmeme afiyet ver"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "Allah bana yeter"
+    },
+    "morning_17_ushhiduka": {
+      "title": "Bu sabah seni şahit tutarım"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "Allah’tan başka ilâh yoktur — diriltir ve öldürür"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "Allah’ı tesbih ve hamd ederim"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "Allah’tan bağışlanma dilerim"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "Tesbih, Tahmid, Tekbir, Tehlîl"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "Âyetü’l-Kürsî"
+    },
+    "evening_02_three_quls": {
+      "title": "İhlas, Felak ve Nâs sureleri"
+    },
+    "evening_03_fitra_islam": {
+      "title": "İslâm fıtratı üzere (akşam)"
+    },
+    "evening_04_radhitu": {
+      "title": "Rabb olarak Allah’tan razıyım"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "Seninle akşamladık"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "Allah’tan başka ilâh yoktur, tek başına"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "Ey Hayy, ey Kayyûm"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "Seyyidü’l-İstiğfâr"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "Göklerin ve yerin yaratıcısı"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "Biz ve mülk, Allah için akşamladık"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "Af ve afiyet"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "Adıyla hiçbir şeyin zarar veremediği Allah’ın adıyla"
+    },
+    "evening_13_taamat_protection": {
+      "title": "Allah’ın tam kelimelerine sığınma"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "Bedenime, işitmeme ve görmeme afiyet ver"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "Allah bana yeter"
+    },
+    "evening_16_ushhiduka": {
+      "title": "Bu akşam seni şahit tutarım"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "Allah’tan başka ilâh yoktur — diriltir ve öldürür"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "Allah’ı tesbih ve hamd ederim"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "Allah’tan bağışlanma dilerim"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "Tesbih, Tahmid, Tekbir, Tehlîl"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "Bağışlanma dileme"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "Allah’ım, sen Selâm’sın"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "Tesbih (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "Her farz namazdan sonra İhlas, Felak ve Nâs sureleri"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "Her farz namazdan sonra Âyetü’l-Kürsî"
+    },
+    "food_before": {
+      "title": "Yemekten önce — bismillâh"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "Yemekten sonra — benden bir güç ve kuvvet olmaksızın"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "Yemekten sonra — bize yedirip içiren ve bizi Müslüman kılan"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "Yemekten sonra — yediren, içiren ve onun için çıkış sağlayan"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "Yemekten sonra — yediren, içiren, yeten ve barındıran"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "Yemekten sonra — çok, hoş, mübarek hamdle"
+    },
+    "distress_lahawla": {
+      "title": "Güç ve kuvvet ancak Allah ile"
+    },
+    "distress_innallaha_maana": {
+      "title": "Korku anında"
+    },
+    "distress_yaa_hayyu": {
+      "title": "Hayy ve Kayyûm’a niyaz"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "Âyetü’l-Kürsî (uyku koruması)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "Duâü’l-Ferec (kaygı ve hüzünden ferahlama)"
+    },
+    "distress_dua_al_karb": {
+      "title": "Sıkıntı anının duâsı"
+    },
+    "sleep_three_quls": {
+      "title": "Muavvizat — İhlas, Felak, Nâs"
+    },
+    "sleep_ayat_kursi": {
+      "title": "Uyumadan önce Âyetü’l-Kürsî"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "Yüzümü sana teslim ettim"
+    },
+    "sleep_bismika_ahya": {
+      "title": "Senin adınla yaşar ve ölürüm Allah’ım"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "Uyandığında"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "Nefsimi sen yarattın — onu koru veya bağışla"
+    },
+    "sleep_rabba_samawat": {
+      "title": "Göklerin, yerin ve büyük arşın Rabbi"
+    },
+    "sleep_dust_off_bed": {
+      "title": "Yatağı silkmek ve sağ tarafa yatmak"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "Tekbir 34, Tesbih 33, Tahmid 33 (bir hizmetçiden hayırlı)"
+    },
+    "sleep_taamat_protection": {
+      "title": "Allah’ın tam kelimeleri her şerden"
+    },
+    "sleep_taamat_for_children": {
+      "title": "Çocuklar için sığınma — her şeytan ve zararlıdan"
+    },
+    "sleep_taamat_long": {
+      "title": "Korkuyla ya da kâbusla uyandığında"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "Senin Kerîm Yüzün ve tam kelimelerin hakkı için"
+    },
+    "sleep_anta_rabbi": {
+      "title": "Sen Rabbimsin — bana bir musibet erişmez"
+    },
+    "travel_subhanalladhi": {
+      "title": "Bir bineğe binerken"
+    },
+    "travel_journey": {
+      "title": "Yolculuk için — tam metin"
+    },
+    "travel_returning": {
+      "title": "Eve dönüşte"
+    },
+    "mosque_entering": {
+      "title": "Camiye girerken"
+    },
+    "mosque_leaving": {
+      "title": "Camiden çıkarken"
+    },
+    "mosque_adhan_response": {
+      "title": "Ezanı duyduktan sonra"
+    },
+    "gratitude_blessing": {
+      "title": "Bir nimete erince"
+    },
+    "gratitude_kindness": {
+      "title": "Sana iyilik yapıldığında"
+    },
+    "forgiveness_sayyidul": {
+      "title": "Seyyidü’l-İstiğfâr"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "Allah’a tövbe ile yöneliş"
+    },
+    "distress_grief": {
+      "title": "Tasa ve sıkıntının giderilmesi için"
+    },
+    "distress_difficulty": {
+      "title": "Zorluk anında"
+    },
+    "distress_rain": {
+      "title": "Yağmur yağdığında"
+    },
+    "weather_during_rain": {
+      "title": "Yağmur başladığında"
+    },
+    "weather_after_rain": {
+      "title": "Yağmur yağdıktan sonra"
+    },
+    "weather_thunder": {
+      "title": "Gök gürültüsünü duyunca"
+    },
+    "weather_strong_wind": {
+      "title": "Şiddetli rüzgâr estiğinde"
+    },
+    "family_for_offspring": {
+      "title": "Salih evlat için"
+    },
+    "family_for_parents": {
+      "title": "Anne-baba için"
+    },
+    "family_blessing_marriage": {
+      "title": "Düğün tebriği"
+    },
+    "family_for_child": {
+      "title": "Bir çocuk için sığınma"
+    },
+    "sickness_visit": {
+      "title": "Hasta ziyareti"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "Hasta için duâ"
+    },
+    "sickness_when_in_pain": {
+      "title": "Bedende ağrı hissedildiğinde"
+    },
+    "funeral_inna_lillah": {
+      "title": "Ölüm haberi alındığında"
+    },
+    "funeral_consolation": {
+      "title": "Yakınlarını yitirenleri teselli"
+    },
+    "funeral_graveyard_visit": {
+      "title": "Mezarlığa girerken"
+    },
+    "eid_takbir": {
+      "title": "Bayram tekbiri"
+    },
+    "eid_taqabbal": {
+      "title": "Bayram tebriği"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "Tilavetten önce isti‘âze"
+    },
+    "beforeQuran_basmalah": {
+      "title": "Her işin başında besmele"
+    },
+    "knowledge_seeking": {
+      "title": "İlmin artması için duâ"
+    },
+    "knowledge_understanding": {
+      "title": "Anlayış için"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "Meclis kefâreti"
+    },
+    "protection_morning_evening": {
+      "title": "Kısa Seyyidü’l-İstiğfâr (×3 sabah-akşam)"
+    },
+    "protection_evil_eye": {
+      "title": "Nazara karşı"
+    },
+    "protection_entering_home": {
+      "title": "Eve girerken"
+    },
+    "protection_leaving_home": {
+      "title": "Evden çıkarken"
+    },
+    "protection_market": {
+      "title": "Pazara girerken"
+    },
+    "guidance_istikharah": {
+      "title": "İstihâre namazı — tam metin"
+    },
+    "guidance_steadfastness": {
+      "title": "Dinde sebat için"
+    },
+    "guidance_rabbana_atina": {
+      "title": "Dünya ve ahirette hayır için"
+    },
+    "guidance_against_being_misled": {
+      "title": "Sapıklıktan korunma için"
+    }
   },
   "quran": {
     "meccan": "Mekki",

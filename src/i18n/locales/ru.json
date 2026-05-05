@@ -352,7 +352,352 @@
       "protection": "Защита",
       "guidance": "Наставление"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "Аят аль-Курси"
+    },
+    "morning_02_three_quls": {
+      "title": "Суры аль-Ихлас, аль-Фаляк, ан-Нас"
+    },
+    "morning_03_fitra_islam": {
+      "title": "На естественной природе ислама"
+    },
+    "morning_04_radhitu": {
+      "title": "Доволен Аллахом как Господом"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "Полезное знание, благое пропитание, принятые дела"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "Тобою мы встречаем утро"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "Нет божества, кроме одного Аллаха"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "О Живой, о Поддерживающий"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "Саййид аль-Истигфар (главное покаяние)"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "Создатель небес и земли"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "Мы и владычество встречаем утро ради Аллаха"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "Прощение и благополучие"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "Именем Аллаха — с Его именем ничто не вредит"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "Слава Аллаху — числом Его творений"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "Дай мне благополучие в теле, слухе и зрении"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "Достаточно мне Аллаха"
+    },
+    "morning_17_ushhiduka": {
+      "title": "Беру Тебя в свидетели в это утро"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "Нет божества, кроме Аллаха — Он оживляет и умерщвляет"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "Слава Аллаху и хвала Ему"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "Прошу прощения у Аллаха"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "Тасбих, Тахмид, Такбир, Тахлиль"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "Аят аль-Курси"
+    },
+    "evening_02_three_quls": {
+      "title": "Суры аль-Ихлас, аль-Фаляк, ан-Нас"
+    },
+    "evening_03_fitra_islam": {
+      "title": "На естественной природе ислама (вечер)"
+    },
+    "evening_04_radhitu": {
+      "title": "Доволен Аллахом как Господом"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "Тобою мы встречаем вечер"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "Нет божества, кроме одного Аллаха"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "О Живой, о Поддерживающий"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "Саййид аль-Истигфар"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "Создатель небес и земли"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "Мы и владычество встречаем вечер ради Аллаха"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "Прощение и благополучие"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "Именем Аллаха — с Его именем ничто не вредит"
+    },
+    "evening_13_taamat_protection": {
+      "title": "Прибежище в совершенных словах Аллаха"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "Дай мне благополучие в теле, слухе и зрении"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "Достаточно мне Аллаха"
+    },
+    "evening_16_ushhiduka": {
+      "title": "Беру Тебя в свидетели в этот вечер"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "Нет божества, кроме Аллаха — Он оживляет и умерщвляет"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "Слава Аллаху и хвала Ему"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "Прошу прощения у Аллаха"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "Тасбих, Тахмид, Такбир, Тахлиль"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "Прошение прощения"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "О Аллах, Ты — Источник мира"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "Тасбих (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "Суры аль-Ихлас, аль-Фаляк, ан-Нас после каждой обязательной молитвы"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "Аят аль-Курси после каждой обязательной молитвы"
+    },
+    "food_before": {
+      "title": "Перед едой — бисмилла"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "После еды — без моей силы и мощи"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "После еды — Тот, Кто накормил, напоил и сделал нас мусульманами"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "После еды — накормил, напоил и устроил исход"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "После еды — накормил, напоил, дал достаток и кров"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "После еды — обильное, благое, благословенное восхваление"
+    },
+    "distress_lahawla": {
+      "title": "Нет силы и мощи, кроме как с Аллахом"
+    },
+    "distress_innallaha_maana": {
+      "title": "При страхе"
+    },
+    "distress_yaa_hayyu": {
+      "title": "Призыв к Вечно Живому"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "Аят аль-Курси (защита сна)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "Дуа аль-Фарадж (избавление от тревоги и печали)"
+    },
+    "distress_dua_al_karb": {
+      "title": "Дуа во время скорби"
+    },
+    "sleep_three_quls": {
+      "title": "Аль-Муʿаввизат — аль-Ихлас, аль-Фаляк, ан-Нас"
+    },
+    "sleep_ayat_kursi": {
+      "title": "Аят аль-Курси перед сном"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "Я обратил лицо своё к Тебе"
+    },
+    "sleep_bismika_ahya": {
+      "title": "С Твоим именем, о Аллах, живу и умираю"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "При пробуждении"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "Ты создал мою душу — сохрани её или прости ей"
+    },
+    "sleep_rabba_samawat": {
+      "title": "Господь небес, земли и Великого Престола"
+    },
+    "sleep_dust_off_bed": {
+      "title": "Стряхнуть постель и лечь на правый бок"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "Такбир 34, Тасбих 33, Тахмид 33 (лучше слуги)"
+    },
+    "sleep_taamat_protection": {
+      "title": "Совершенные слова Аллаха — от всякого зла"
+    },
+    "sleep_taamat_for_children": {
+      "title": "Прибежище для детей — от всякого шайтана и вредного существа"
+    },
+    "sleep_taamat_long": {
+      "title": "При пробуждении в страхе или после кошмара"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "Твоим благородным Ликом и совершенными словами"
+    },
+    "sleep_anta_rabbi": {
+      "title": "Ты — мой Господь — не постигнет меня беда"
+    },
+    "travel_subhanalladhi": {
+      "title": "При посадке в транспорт"
+    },
+    "travel_journey": {
+      "title": "На путешествие — полный текст"
+    },
+    "travel_returning": {
+      "title": "При возвращении домой"
+    },
+    "mosque_entering": {
+      "title": "При входе в мечеть"
+    },
+    "mosque_leaving": {
+      "title": "При выходе из мечети"
+    },
+    "mosque_adhan_response": {
+      "title": "После слышания азана"
+    },
+    "gratitude_blessing": {
+      "title": "При получении благ"
+    },
+    "gratitude_kindness": {
+      "title": "Когда кто-то проявил к вам добро"
+    },
+    "forgiveness_sayyidul": {
+      "title": "Главное покаяние (Саййид аль-Истигфар)"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "Обращение к Аллаху с покаянием"
+    },
+    "distress_grief": {
+      "title": "Для облегчения печали и тревоги"
+    },
+    "distress_difficulty": {
+      "title": "В трудную минуту"
+    },
+    "distress_rain": {
+      "title": "Когда идёт дождь"
+    },
+    "weather_during_rain": {
+      "title": "Когда начинается дождь"
+    },
+    "weather_after_rain": {
+      "title": "После того как прошёл дождь"
+    },
+    "weather_thunder": {
+      "title": "При раскатах грома"
+    },
+    "weather_strong_wind": {
+      "title": "При сильном ветре"
+    },
+    "family_for_offspring": {
+      "title": "О праведном потомстве"
+    },
+    "family_for_parents": {
+      "title": "О родителях"
+    },
+    "family_blessing_marriage": {
+      "title": "Поздравление со свадьбой"
+    },
+    "family_for_child": {
+      "title": "Прибежище для ребёнка"
+    },
+    "sickness_visit": {
+      "title": "Посещение больного"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "Дуа за больного"
+    },
+    "sickness_when_in_pain": {
+      "title": "При ощущении боли в теле"
+    },
+    "funeral_inna_lillah": {
+      "title": "При известии о смерти"
+    },
+    "funeral_consolation": {
+      "title": "Утешение скорбящих"
+    },
+    "funeral_graveyard_visit": {
+      "title": "При входе на кладбище"
+    },
+    "eid_takbir": {
+      "title": "Такбир Ида"
+    },
+    "eid_taqabbal": {
+      "title": "Поздравление с Идом"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "Прибежище перед чтением"
+    },
+    "beforeQuran_basmalah": {
+      "title": "В начале всякого дела"
+    },
+    "knowledge_seeking": {
+      "title": "О приумножении знания"
+    },
+    "knowledge_understanding": {
+      "title": "О понимании"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "Завершение собрания (каффарат аль-маджлис)"
+    },
+    "protection_morning_evening": {
+      "title": "Краткий Саййид аль-Истигфар (×3 утром и вечером)"
+    },
+    "protection_evil_eye": {
+      "title": "От сглаза"
+    },
+    "protection_entering_home": {
+      "title": "При входе в дом"
+    },
+    "protection_leaving_home": {
+      "title": "При выходе из дома"
+    },
+    "protection_market": {
+      "title": "При входе на рынок"
+    },
+    "guidance_istikharah": {
+      "title": "Намаз аль-Истихара — полный текст"
+    },
+    "guidance_steadfastness": {
+      "title": "О стойкости в вере"
+    },
+    "guidance_rabbana_atina": {
+      "title": "О благе в этой и будущей жизни"
+    },
+    "guidance_against_being_misled": {
+      "title": "О защите от заблуждения"
+    }
   },
   "quran": {
     "meccan": "Мекканская",

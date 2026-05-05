@@ -352,7 +352,352 @@
       "protection": "Perlindungan",
       "guidance": "Petunjuk"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "Ayat al-Kursi"
+    },
+    "morning_02_three_quls": {
+      "title": "Surah al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "morning_03_fitra_islam": {
+      "title": "Atas fitrah Islam"
+    },
+    "morning_04_radhitu": {
+      "title": "Ridha kepada Allah sebagai Tuhan"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "Ilmu yang bermanfaat, rezeki yang baik, amal yang diterima"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "Dengan-Mu kami memasuki pagi"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "Tiada tuhan selain Allah semata"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "Wahai Yang Maha Hidup, Yang Maha Mengurus"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "Sayyidul Istighfar (tuan dari permohonan ampun)"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "Pencipta langit dan bumi"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "Kami dan kerajaan memasuki pagi untuk Allah"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "Maaf dan keafiatan"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "Dengan nama Allah yang dengan nama-Nya tiada apa pun yang membahayakan"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "Mahasuci Allah sebanyak ciptaan-Nya"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "Berilah aku afiat pada badan, pendengaran, dan penglihatan"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "Cukuplah Allah bagiku"
+    },
+    "morning_17_ushhiduka": {
+      "title": "Aku jadikan Engkau sebagai saksi pagi ini"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "Tiada tuhan selain Allah — Dia menghidupkan dan mematikan"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "Mahasuci Allah dan dengan memuji-Nya"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "Aku memohon ampunan Allah"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "Tasbih, Tahmid, Takbir, Tahlil"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "Ayat al-Kursi"
+    },
+    "evening_02_three_quls": {
+      "title": "Surah al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "evening_03_fitra_islam": {
+      "title": "Atas fitrah Islam (petang)"
+    },
+    "evening_04_radhitu": {
+      "title": "Ridha kepada Allah sebagai Tuhan"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "Dengan-Mu kami memasuki petang"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "Tiada tuhan selain Allah semata"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "Wahai Yang Maha Hidup, Yang Maha Mengurus"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "Sayyidul Istighfar (tuan dari permohonan ampun)"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "Pencipta langit dan bumi"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "Kami dan kerajaan memasuki petang untuk Allah"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "Maaf dan keafiatan"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "Dengan nama Allah yang dengan nama-Nya tiada apa pun yang membahayakan"
+    },
+    "evening_13_taamat_protection": {
+      "title": "Berlindung dengan kalimat-kalimat Allah yang sempurna"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "Berilah aku afiat pada badan, pendengaran, dan penglihatan"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "Cukuplah Allah bagiku"
+    },
+    "evening_16_ushhiduka": {
+      "title": "Aku jadikan Engkau sebagai saksi petang ini"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "Tiada tuhan selain Allah — Dia menghidupkan dan mematikan"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "Mahasuci Allah dan dengan memuji-Nya"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "Aku memohon ampunan Allah"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "Tasbih, Tahmid, Takbir, Tahlil"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "Memohon ampunan"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "Ya Allah, Engkau-lah As-Salam (sumber damai)"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "Tasbih (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "Surah al-Ikhlas, al-Falaq, an-Nas setelah setiap salat fardhu"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "Ayat al-Kursi setelah setiap salat fardhu"
+    },
+    "food_before": {
+      "title": "Sebelum makan — bismillāh"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "Setelah makan — tanpa daya dan kekuatan dariku"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "Setelah makan — yang memberi makan, minum, dan menjadikan kami muslim"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "Setelah makan — memberi makan, minum, dan menjadikan jalan keluarnya"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "Setelah makan — memberi makan, minum, mencukupi, dan melindungi"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "Setelah makan — pujian yang banyak, baik, dan diberkahi"
+    },
+    "distress_lahawla": {
+      "title": "Tiada daya dan kekuatan kecuali dengan Allah"
+    },
+    "distress_innallaha_maana": {
+      "title": "Ketika takut"
+    },
+    "distress_yaa_hayyu": {
+      "title": "Memohon kepada Yang Maha Hidup"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "Ayat al-Kursi (perlindungan tidur)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "Doa al-Faraj (pelega kegelisahan dan kesedihan)"
+    },
+    "distress_dua_al_karb": {
+      "title": "Doa saat dukacita"
+    },
+    "sleep_three_quls": {
+      "title": "Al-Muʿawwidhāt — al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "sleep_ayat_kursi": {
+      "title": "Ayat al-Kursi sebelum tidur"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "Aku serahkan wajahku kepada-Mu"
+    },
+    "sleep_bismika_ahya": {
+      "title": "Dengan nama-Mu, ya Allah, aku hidup dan mati"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "Saat bangun tidur"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "Engkau ciptakan jiwaku — peliharalah atau ampuni ia"
+    },
+    "sleep_rabba_samawat": {
+      "title": "Tuhan langit, bumi, dan Arsy yang Agung"
+    },
+    "sleep_dust_off_bed": {
+      "title": "Mengipas tempat tidur dan berbaring di sisi kanan"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "Takbir 34, Tasbih 33, Tahmid 33 (lebih baik dari pelayan)"
+    },
+    "sleep_taamat_protection": {
+      "title": "Kalimat-kalimat Allah yang sempurna dari segala kejahatan"
+    },
+    "sleep_taamat_for_children": {
+      "title": "Perlindungan untuk anak — dari setiap setan dan makhluk berbahaya"
+    },
+    "sleep_taamat_long": {
+      "title": "Saat bangun terkejut atau dari mimpi buruk"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "Demi wajah-Mu yang mulia dan kalimat-kalimat-Mu yang sempurna"
+    },
+    "sleep_anta_rabbi": {
+      "title": "Engkau Tuhanku — tiada bencana yang menimpaku"
+    },
+    "travel_subhanalladhi": {
+      "title": "Ketika menaiki kendaraan"
+    },
+    "travel_journey": {
+      "title": "Untuk perjalanan — teks lengkap"
+    },
+    "travel_returning": {
+      "title": "Saat pulang ke rumah"
+    },
+    "mosque_entering": {
+      "title": "Saat masuk masjid"
+    },
+    "mosque_leaving": {
+      "title": "Saat keluar dari masjid"
+    },
+    "mosque_adhan_response": {
+      "title": "Setelah mendengar azan"
+    },
+    "gratitude_blessing": {
+      "title": "Saat menerima nikmat"
+    },
+    "gratitude_kindness": {
+      "title": "Saat seseorang berbuat kebaikan kepadamu"
+    },
+    "forgiveness_sayyidul": {
+      "title": "Sayyidul Istighfar"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "Bertaubat kepada Allah"
+    },
+    "distress_grief": {
+      "title": "Untuk meringankan kesedihan dan kegelisahan"
+    },
+    "distress_difficulty": {
+      "title": "Ketika dalam kesulitan"
+    },
+    "distress_rain": {
+      "title": "Ketika hujan turun"
+    },
+    "weather_during_rain": {
+      "title": "Saat hujan mulai turun"
+    },
+    "weather_after_rain": {
+      "title": "Setelah hujan turun"
+    },
+    "weather_thunder": {
+      "title": "Saat mendengar guruh"
+    },
+    "weather_strong_wind": {
+      "title": "Saat angin bertiup kencang"
+    },
+    "family_for_offspring": {
+      "title": "Untuk keturunan yang saleh"
+    },
+    "family_for_parents": {
+      "title": "Untuk orang tua"
+    },
+    "family_blessing_marriage": {
+      "title": "Ucapan selamat pernikahan"
+    },
+    "family_for_child": {
+      "title": "Memohon perlindungan untuk anak"
+    },
+    "sickness_visit": {
+      "title": "Menjenguk orang sakit"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "Doa untuk orang sakit"
+    },
+    "sickness_when_in_pain": {
+      "title": "Saat merasakan sakit di tubuh"
+    },
+    "funeral_inna_lillah": {
+      "title": "Saat mendengar berita kematian"
+    },
+    "funeral_consolation": {
+      "title": "Menghibur keluarga yang berduka"
+    },
+    "funeral_graveyard_visit": {
+      "title": "Saat memasuki pemakaman"
+    },
+    "eid_takbir": {
+      "title": "Takbir Idul"
+    },
+    "eid_taqabbal": {
+      "title": "Ucapan selamat Idul"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "Berlindung sebelum membaca"
+    },
+    "beforeQuran_basmalah": {
+      "title": "Memulai setiap perbuatan"
+    },
+    "knowledge_seeking": {
+      "title": "Memohon tambahan ilmu"
+    },
+    "knowledge_understanding": {
+      "title": "Memohon pemahaman"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "Penutup majelis (kaffaratul majlis)"
+    },
+    "protection_morning_evening": {
+      "title": "Sayyidul Istighfar singkat (×3 pagi & petang)"
+    },
+    "protection_evil_eye": {
+      "title": "Dari ‘ain (mata jahat)"
+    },
+    "protection_entering_home": {
+      "title": "Saat masuk rumah"
+    },
+    "protection_leaving_home": {
+      "title": "Saat keluar rumah"
+    },
+    "protection_market": {
+      "title": "Saat masuk pasar"
+    },
+    "guidance_istikharah": {
+      "title": "Salat Istikharah (memohon petunjuk) — teks lengkap"
+    },
+    "guidance_steadfastness": {
+      "title": "Untuk teguh di atas iman"
+    },
+    "guidance_rabbana_atina": {
+      "title": "Untuk kebaikan dunia dan akhirat"
+    },
+    "guidance_against_being_misled": {
+      "title": "Memohon perlindungan dari kesesatan"
+    }
   },
   "quran": {
     "meccan": "Makkiyah",

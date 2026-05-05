@@ -352,7 +352,352 @@
       "protection": "रक्षा",
       "guidance": "मार्गदर्शन"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "आयतुल कुर्सी"
+    },
+    "morning_02_three_quls": {
+      "title": "सूरह अल-इख़्लास, अल-फ़लक़, अन-नास"
+    },
+    "morning_03_fitra_islam": {
+      "title": "इस्लाम की फ़ितरत पर"
+    },
+    "morning_04_radhitu": {
+      "title": "अल्लाह को रब मानकर प्रसन्न"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "लाभदायक ज्ञान, अच्छी रोज़ी, क़बूल आमाल"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "तेरे साथ हमने सुबह की"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "अल्लाह के सिवा कोई इलाह नहीं, वही अकेला"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "ऐ हय्य ऐ क़य्यूम"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "सय्यिदुल इस्तिग़फार"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "आकाशों और धरती का रचयिता"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "हम और सत्ता अल्लाह के लिए सुबह में आए"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "माफ़ी और आफ़ियत"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "अल्लाह के नाम पर — जिसके नाम के साथ कोई चीज़ नुक़्सान नहीं देती"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "अल्लाह पाक है — उसकी मख़लूक़ की संख्या के बराबर"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "मुझे शरीर, श्रवण और दृष्टि में आफ़ियत दे"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "अल्लाह मेरे लिए काफ़ी है"
+    },
+    "morning_17_ushhiduka": {
+      "title": "इस सुबह मैं तुझे गवाह बनाता हूँ"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "अल्लाह के सिवा कोई इलाह नहीं — वह जिलाता और मारता है"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "अल्लाह पाक है और उसकी प्रशंसा है"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "मैं अल्लाह से बख़शिश माँगता हूँ"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "तस्बीह, तहमीद, तकबीर, तहलील"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "आयतुल कुर्सी"
+    },
+    "evening_02_three_quls": {
+      "title": "सूरह अल-इख़्लास, अल-फ़लक़, अन-नास"
+    },
+    "evening_03_fitra_islam": {
+      "title": "इस्लाम की फ़ितरत पर (शाम)"
+    },
+    "evening_04_radhitu": {
+      "title": "अल्लाह को रब मानकर प्रसन्न"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "तेरे साथ हमने शाम की"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "अल्लाह के सिवा कोई इलाह नहीं, वही अकेला"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "ऐ हय्य ऐ क़य्यूम"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "सय्यिदुल इस्तिग़फार"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "आकाशों और धरती का रचयिता"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "हम और सत्ता अल्लाह के लिए शाम में आए"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "माफ़ी और आफ़ियत"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "अल्लाह के नाम पर — जिसके नाम के साथ कोई चीज़ नुक़्सान नहीं देती"
+    },
+    "evening_13_taamat_protection": {
+      "title": "अल्लाह के पूर्ण कलिमों की पनाह"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "मुझे शरीर, श्रवण और दृष्टि में आफ़ियत दे"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "अल्लाह मेरे लिए काफ़ी है"
+    },
+    "evening_16_ushhiduka": {
+      "title": "इस शाम मैं तुझे गवाह बनाता हूँ"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "अल्लाह के सिवा कोई इलाह नहीं — वह जिलाता और मारता है"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "अल्लाह पाक है और उसकी प्रशंसा है"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "मैं अल्लाह से बख़शिश माँगता हूँ"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "तस्बीह, तहमीद, तकबीर, तहलील"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "क्षमा माँगना"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "या अल्लाह, तू सलाम है"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "तस्बीह (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "हर फ़र्ज़ नमाज़ के बाद सूरह इख़्लास, फ़लक़, नास"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "हर फ़र्ज़ नमाज़ के बाद आयतुल कुर्सी"
+    },
+    "food_before": {
+      "title": "खाने से पहले — बिस्मिल्लाह"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "खाने के बाद — मेरी शक्ति या सामर्थ्य के बिना"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "खाने के बाद — जिसने खिलाया, पिलाया और हमें मुसलमान बनाया"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "खाने के बाद — खिलाया, पिलाया और निष्कासन का मार्ग बनाया"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "खाने के बाद — खिलाया, पिलाया, काफ़ी किया और शरण दी"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "खाने के बाद — प्रचुर, उत्तम, बरकतवाली प्रशंसा"
+    },
+    "distress_lahawla": {
+      "title": "अल्लाह के सिवा कोई ज़ोर और क़ुव्वत नहीं"
+    },
+    "distress_innallaha_maana": {
+      "title": "डर के समय"
+    },
+    "distress_yaa_hayyu": {
+      "title": "हय्य व क़य्यूम को पुकारना"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "आयतुल कुर्सी (नींद की हिफ़ाज़त)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "दुआ-ए-फ़रज (चिंता व दुख से राहत)"
+    },
+    "distress_dua_al_karb": {
+      "title": "कष्ट के समय की दुआ"
+    },
+    "sleep_three_quls": {
+      "title": "मुअव्विज़ात — इख़्लास, फ़लक़, नास"
+    },
+    "sleep_ayat_kursi": {
+      "title": "सोने से पहले आयतुल कुर्सी"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "मैंने अपना मुख तेरे हवाले किया"
+    },
+    "sleep_bismika_ahya": {
+      "title": "या अल्लाह, तेरे नाम पर मैं जीता और मरता हूँ"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "जागते समय"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "तूने मेरी जान बनाई — हिफ़ाज़त कर या बख़्श दे"
+    },
+    "sleep_rabba_samawat": {
+      "title": "आकाशों, धरती और महान अरश का रब"
+    },
+    "sleep_dust_off_bed": {
+      "title": "बिस्तर झाड़ कर दाहिनी करवट लेटना"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "तकबीर ३४, तस्बीह ३३, तहमीद ३३ (नौकर से बेहतर)"
+    },
+    "sleep_taamat_protection": {
+      "title": "अल्लाह के मुकम्मल कलिमे — हर बुराई से"
+    },
+    "sleep_taamat_for_children": {
+      "title": "बच्चों की पनाह — हर शैतान व नुक़्सानदेह मख़लूक़ से"
+    },
+    "sleep_taamat_long": {
+      "title": "घबराहट या बुरे ख्वाब से जागने पर"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "तेरे करीम चेहरे और तेरे कामिल कलिमों के वसीले से"
+    },
+    "sleep_anta_rabbi": {
+      "title": "तू मेरा रब है — कोई आफ़त मुझ तक न पहुँचेगी"
+    },
+    "travel_subhanalladhi": {
+      "title": "सवारी पर सवार होते समय"
+    },
+    "travel_journey": {
+      "title": "सफ़र के लिए — पूरा पाठ"
+    },
+    "travel_returning": {
+      "title": "घर लौटते समय"
+    },
+    "mosque_entering": {
+      "title": "मस्जिद में प्रवेश करते समय"
+    },
+    "mosque_leaving": {
+      "title": "मस्जिद से निकलते समय"
+    },
+    "mosque_adhan_response": {
+      "title": "अज़ान सुनने के बाद"
+    },
+    "gratitude_blessing": {
+      "title": "नेमत पाने पर"
+    },
+    "gratitude_kindness": {
+      "title": "जब कोई आपके साथ भलाई करे"
+    },
+    "forgiveness_sayyidul": {
+      "title": "सय्यिदुल इस्तिग़फार"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "अल्लाह की ओर तौबा"
+    },
+    "distress_grief": {
+      "title": "गम और चिंता से राहत के लिए"
+    },
+    "distress_difficulty": {
+      "title": "मुश्किल के समय"
+    },
+    "distress_rain": {
+      "title": "बारिश बरसते समय"
+    },
+    "weather_during_rain": {
+      "title": "बारिश शुरू होने पर"
+    },
+    "weather_after_rain": {
+      "title": "बारिश के बाद"
+    },
+    "weather_thunder": {
+      "title": "बादल की गरज सुनकर"
+    },
+    "weather_strong_wind": {
+      "title": "तेज़ हवा चलते समय"
+    },
+    "family_for_offspring": {
+      "title": "नेक संतान के लिए"
+    },
+    "family_for_parents": {
+      "title": "माता-पिता के लिए"
+    },
+    "family_blessing_marriage": {
+      "title": "शादी की मुबारकबाद"
+    },
+    "family_for_child": {
+      "title": "बच्चे के लिए पनाह माँगना"
+    },
+    "sickness_visit": {
+      "title": "बीमार की इयादत"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "मरीज़ के लिए दुआ"
+    },
+    "sickness_when_in_pain": {
+      "title": "शरीर में दर्द महसूस होने पर"
+    },
+    "funeral_inna_lillah": {
+      "title": "मौत की ख़बर सुनने पर"
+    },
+    "funeral_consolation": {
+      "title": "मातम मनाने वालों को सांत्वना"
+    },
+    "funeral_graveyard_visit": {
+      "title": "क़ब्रिस्तान में जाते समय"
+    },
+    "eid_takbir": {
+      "title": "ईद की तकबीर"
+    },
+    "eid_taqabbal": {
+      "title": "ईद की मुबारकबाद"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "तिलावत से पहले तअव्वुज़"
+    },
+    "beforeQuran_basmalah": {
+      "title": "हर काम की शुरुआत में बिस्मिल्लाह"
+    },
+    "knowledge_seeking": {
+      "title": "इल्म में बढ़ोतरी की दुआ"
+    },
+    "knowledge_understanding": {
+      "title": "समझ के लिए दुआ"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "मजलिस की कफ़्फ़ारत"
+    },
+    "protection_morning_evening": {
+      "title": "सय्यिदुल इस्तिग़फार संक्षेप (×3 सुबह व शाम)"
+    },
+    "protection_evil_eye": {
+      "title": "नज़र-ए-बद से बचाव"
+    },
+    "protection_entering_home": {
+      "title": "घर में दाख़िल होते समय"
+    },
+    "protection_leaving_home": {
+      "title": "घर से निकलते समय"
+    },
+    "protection_market": {
+      "title": "बाज़ार में दाख़िल होते समय"
+    },
+    "guidance_istikharah": {
+      "title": "सलात अल-इस्तिख़ारा — पूरा पाठ"
+    },
+    "guidance_steadfastness": {
+      "title": "दीन पर अडिगता के लिए"
+    },
+    "guidance_rabbana_atina": {
+      "title": "दुनिया व आख़िरत की भलाई की दुआ"
+    },
+    "guidance_against_being_misled": {
+      "title": "गुमराही से बचाव की दुआ"
+    }
   },
   "quran": {
     "meccan": "मक्की",

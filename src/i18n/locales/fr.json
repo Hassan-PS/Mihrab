@@ -352,7 +352,352 @@
       "protection": "Protection",
       "guidance": "Guidance"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "Âyat al-Kursî"
+    },
+    "morning_02_three_quls": {
+      "title": "Sourates al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "morning_03_fitra_islam": {
+      "title": "Sur la disposition naturelle de l'islam"
+    },
+    "morning_04_radhitu": {
+      "title": "Satisfait d’Allah comme Seigneur"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "Savoir utile, bonne subsistance, œuvres agréées"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "Par Toi nous entrons dans le matin"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "Nulle divinité sauf Allah, l’Unique"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "Ô Vivant, Ô Subsistant"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "Sayyid al-Istighfâr (la prière de pardon par excellence)"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "Créateur des cieux et de la terre"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "Nous et la royauté entrons dans le matin pour Allah"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "Pardon et bien-être"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "Au nom d'Allah, avec qui rien ne nuit"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "Gloire à Allah, autant que Sa création"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "Accorde-moi le bien-être dans le corps, l’ouïe et la vue"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "Allah me suffit"
+    },
+    "morning_17_ushhiduka": {
+      "title": "Je Te prends à témoin ce matin"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "Nulle divinité sauf Allah — Il donne la vie et cause la mort"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "Gloire et louange à Allah"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "Je demande pardon à Allah"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "Tasbîh, Tahmîd, Takbîr, Tahlîl"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "Âyat al-Kursî"
+    },
+    "evening_02_three_quls": {
+      "title": "Sourates al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "evening_03_fitra_islam": {
+      "title": "Sur la disposition naturelle de l'islam (soir)"
+    },
+    "evening_04_radhitu": {
+      "title": "Satisfait d’Allah comme Seigneur"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "Par Toi nous entrons dans le soir"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "Nulle divinité sauf Allah, l’Unique"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "Ô Vivant, Ô Subsistant"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "Sayyid al-Istighfâr (la prière de pardon par excellence)"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "Créateur des cieux et de la terre"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "Nous et la royauté entrons dans le soir pour Allah"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "Pardon et bien-être"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "Au nom d'Allah, avec qui rien ne nuit"
+    },
+    "evening_13_taamat_protection": {
+      "title": "Refuge dans les paroles parfaites d'Allah"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "Accorde-moi le bien-être dans le corps, l’ouïe et la vue"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "Allah me suffit"
+    },
+    "evening_16_ushhiduka": {
+      "title": "Je Te prends à témoin ce soir"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "Nulle divinité sauf Allah — Il donne la vie et cause la mort"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "Gloire et louange à Allah"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "Je demande pardon à Allah"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "Tasbîh, Tahmîd, Takbîr, Tahlîl"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "Demande de pardon"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "Allah est la source de la paix"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "Tasbîh (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "Sourates al-Ikhlas, al-Falaq, an-Nas après chaque prière fard"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "Âyat al-Kursî après chaque prière fard"
+    },
+    "food_before": {
+      "title": "Avant de manger — bismillāh"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "Après le repas — sans force ni puissance de ma part"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "Après le repas — Il nous a nourris, désaltérés et faits musulmans"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "Après le repas — nourris, désaltérés, avec une issue saine"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "Après le repas — nourris, désaltérés, suffis, abrités"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "Après le repas — louange abondante, bonne, bénie"
+    },
+    "distress_lahawla": {
+      "title": "Nulle force ni puissance hormis par Allah"
+    },
+    "distress_innallaha_maana": {
+      "title": "En cas de peur"
+    },
+    "distress_yaa_hayyu": {
+      "title": "Invoquer le Vivant"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "Âyat al-Kursî (protection du sommeil)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "Du'â al-Faraj (soulagement du souci et du chagrin)"
+    },
+    "distress_dua_al_karb": {
+      "title": "Invocation au moment du chagrin"
+    },
+    "sleep_three_quls": {
+      "title": "Les Muʿawwidhāt — al-Ikhlas, al-Falaq, an-Nas"
+    },
+    "sleep_ayat_kursi": {
+      "title": "Âyat al-Kursî avant de dormir"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "Je me suis remis à Toi"
+    },
+    "sleep_bismika_ahya": {
+      "title": "En Ton nom, ô Allah, je vis et je meurs"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "Au réveil"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "Tu as créé mon âme — préserve-la ou pardonne-lui"
+    },
+    "sleep_rabba_samawat": {
+      "title": "Seigneur des cieux, de la terre et du Trône immense"
+    },
+    "sleep_dust_off_bed": {
+      "title": "Épousseter le lit et se coucher sur le côté droit"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "Takbîr 34, Tasbîh 33, Tahmîd 33 (meilleur qu'un serviteur)"
+    },
+    "sleep_taamat_protection": {
+      "title": "Les paroles parfaites d'Allah contre tout mal"
+    },
+    "sleep_taamat_for_children": {
+      "title": "Refuge pour les enfants — tout démon et créature nuisible"
+    },
+    "sleep_taamat_long": {
+      "title": "Au réveil en sursaut ou après un cauchemar"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "Par Ta Noble Face et Tes paroles parfaites"
+    },
+    "sleep_anta_rabbi": {
+      "title": "Tu es mon Seigneur — aucune calamité ne m'atteindra"
+    },
+    "travel_subhanalladhi": {
+      "title": "Au moment de monter dans un véhicule"
+    },
+    "travel_journey": {
+      "title": "Pour un voyage — texte complet"
+    },
+    "travel_returning": {
+      "title": "Au retour à la maison"
+    },
+    "mosque_entering": {
+      "title": "Entrée à la mosquée"
+    },
+    "mosque_leaving": {
+      "title": "En sortant de la mosquée"
+    },
+    "mosque_adhan_response": {
+      "title": "Après avoir entendu l'adhân"
+    },
+    "gratitude_blessing": {
+      "title": "Au moment de recevoir un bienfait"
+    },
+    "gratitude_kindness": {
+      "title": "Lorsqu'on vous rend un service"
+    },
+    "forgiveness_sayyidul": {
+      "title": "La prière maîtresse de pardon (Sayyid al-Istighfâr)"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "Se tourner vers Allah en repentir"
+    },
+    "distress_grief": {
+      "title": "Pour soulager le chagrin et l’angoisse"
+    },
+    "distress_difficulty": {
+      "title": "En cas de difficulté"
+    },
+    "distress_rain": {
+      "title": "Quand la pluie tombe"
+    },
+    "weather_during_rain": {
+      "title": "Au début de la pluie"
+    },
+    "weather_after_rain": {
+      "title": "Après que la pluie est tombée"
+    },
+    "weather_thunder": {
+      "title": "En entendant le tonnerre"
+    },
+    "weather_strong_wind": {
+      "title": "Lorsque le vent souffle fort"
+    },
+    "family_for_offspring": {
+      "title": "Pour une descendance pieuse"
+    },
+    "family_for_parents": {
+      "title": "Pour les parents"
+    },
+    "family_blessing_marriage": {
+      "title": "Lors d'une félicitation de mariage"
+    },
+    "family_for_child": {
+      "title": "Demander refuge pour un enfant"
+    },
+    "sickness_visit": {
+      "title": "Visiter le malade"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "Invocation pour un malade"
+    },
+    "sickness_when_in_pain": {
+      "title": "Lorsqu’on ressent une douleur"
+    },
+    "funeral_inna_lillah": {
+      "title": "À l'annonce d'un décès"
+    },
+    "funeral_consolation": {
+      "title": "Consoler les endeuillés"
+    },
+    "funeral_graveyard_visit": {
+      "title": "Lors de l'entrée au cimetière"
+    },
+    "eid_takbir": {
+      "title": "Takbîr de l’Aïd"
+    },
+    "eid_taqabbal": {
+      "title": "Vœux de l’Aïd"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "Demander refuge avant la récitation"
+    },
+    "beforeQuran_basmalah": {
+      "title": "Au commencement de chaque action"
+    },
+    "knowledge_seeking": {
+      "title": "Pour l'accroissement du savoir"
+    },
+    "knowledge_understanding": {
+      "title": "Pour la compréhension"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "Clôture d'une assemblée (kaffârat al-majlis)"
+    },
+    "protection_morning_evening": {
+      "title": "Sayyid al-Istighfâr abrégé (×3 matin et soir)"
+    },
+    "protection_evil_eye": {
+      "title": "Contre le mauvais œil"
+    },
+    "protection_entering_home": {
+      "title": "En entrant à la maison"
+    },
+    "protection_leaving_home": {
+      "title": "En sortant de la maison"
+    },
+    "protection_market": {
+      "title": "En entrant au marché"
+    },
+    "guidance_istikharah": {
+      "title": "Salât al-Istikhâra (recherche d'orientation) — texte complet"
+    },
+    "guidance_steadfastness": {
+      "title": "Pour la fermeté dans la foi"
+    },
+    "guidance_rabbana_atina": {
+      "title": "Pour le bien d'ici-bas et de l'au-delà"
+    },
+    "guidance_against_being_misled": {
+      "title": "Pour se prémunir de l'égarement"
+    }
   },
   "quran": {
     "meccan": "Mecquoise",

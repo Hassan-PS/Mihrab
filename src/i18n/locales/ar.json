@@ -352,7 +352,352 @@
       "protection": "الحماية",
       "guidance": "الهداية"
     },
-    "repeat": "Recite ×{{count}}"
+    "repeat": "Recite ×{{count}}",
+    "morning_01_ayat_kursi": {
+      "title": "آية الكرسي"
+    },
+    "morning_02_three_quls": {
+      "title": "سور الإخلاص والفلق والناس"
+    },
+    "morning_03_fitra_islam": {
+      "title": "على فطرة الإسلام"
+    },
+    "morning_04_radhitu": {
+      "title": "رضيت بالله ربًّا"
+    },
+    "morning_05_ilm_nafi": {
+      "title": "علم نافع ورزق طيّب وعمل متقبَّل"
+    },
+    "morning_06_bika_asbahna": {
+      "title": "بك أصبحنا"
+    },
+    "morning_07_la_ilaha_illa_allah": {
+      "title": "لا إله إلا الله وحده"
+    },
+    "morning_08_ya_hayyu_ya_qayyum": {
+      "title": "يا حيُّ يا قيُّوم"
+    },
+    "morning_09_sayyid_al_istighfar": {
+      "title": "سيّد الاستغفار"
+    },
+    "morning_10_fatir_as_samawat": {
+      "title": "فاطر السماوات والأرض"
+    },
+    "morning_11_asbahna_walmulku_lillah": {
+      "title": "أصبحنا وأصبح الملك لله"
+    },
+    "morning_12_afw_wa_afiya": {
+      "title": "العفو والعافية"
+    },
+    "morning_13_bismillah_la_yadurr": {
+      "title": "بسم الله الذي لا يضر مع اسمه شيء"
+    },
+    "morning_14_subhan_allah_adada_khalqih": {
+      "title": "سبحان الله عدد خلقه"
+    },
+    "morning_15_afini_fi_badani": {
+      "title": "عافني في بدني وسمعي وبصري"
+    },
+    "morning_16_hasbiy_allah": {
+      "title": "حسبي الله"
+    },
+    "morning_17_ushhiduka": {
+      "title": "أُشهدك في هذا الصباح"
+    },
+    "morning_18_la_ilaha_yuhyi_yumit": {
+      "title": "لا إله إلا الله يحيي ويميت"
+    },
+    "morning_19_subhan_allah_wa_bihamdihi": {
+      "title": "سبحان الله وبحمده"
+    },
+    "morning_20_astaghfirullah": {
+      "title": "أستغفر الله"
+    },
+    "morning_21_subhan_alhamdu_takbir": {
+      "title": "تسبيح، تحميد، تكبير، تهليل"
+    },
+    "evening_01_ayat_kursi": {
+      "title": "آية الكرسي"
+    },
+    "evening_02_three_quls": {
+      "title": "سور الإخلاص والفلق والناس"
+    },
+    "evening_03_fitra_islam": {
+      "title": "على فطرة الإسلام (المساء)"
+    },
+    "evening_04_radhitu": {
+      "title": "رضيت بالله ربًّا"
+    },
+    "evening_05_bika_amsayna": {
+      "title": "بك أمسينا"
+    },
+    "evening_06_la_ilaha_illa_allah": {
+      "title": "لا إله إلا الله وحده"
+    },
+    "evening_07_ya_hayyu_ya_qayyum": {
+      "title": "يا حيُّ يا قيُّوم"
+    },
+    "evening_08_sayyid_al_istighfar": {
+      "title": "سيّد الاستغفار"
+    },
+    "evening_09_fatir_as_samawat": {
+      "title": "فاطر السماوات والأرض"
+    },
+    "evening_10_amsayna_walmulku_lillah": {
+      "title": "أمسينا وأمسى الملك لله"
+    },
+    "evening_11_afw_wa_afiya": {
+      "title": "العفو والعافية"
+    },
+    "evening_12_bismillah_la_yadurr": {
+      "title": "بسم الله الذي لا يضر مع اسمه شيء"
+    },
+    "evening_13_taamat_protection": {
+      "title": "الاستعاذة بكلمات الله التامّة"
+    },
+    "evening_14_afini_fi_badani": {
+      "title": "عافني في بدني وسمعي وبصري"
+    },
+    "evening_15_hasbiy_allah": {
+      "title": "حسبي الله"
+    },
+    "evening_16_ushhiduka": {
+      "title": "أُشهدك في هذا المساء"
+    },
+    "evening_17_la_ilaha_yuhyi_yumit": {
+      "title": "لا إله إلا الله يحيي ويميت"
+    },
+    "evening_18_subhan_allah_wa_bihamdihi": {
+      "title": "سبحان الله وبحمده"
+    },
+    "evening_19_astaghfirullah": {
+      "title": "أستغفر الله"
+    },
+    "evening_20_subhan_alhamdu_takbir": {
+      "title": "تسبيح، تحميد، تكبير، تهليل"
+    },
+    "afterPrayer_astaghfirullah": {
+      "title": "الاستغفار"
+    },
+    "afterPrayer_allahumma_antas_salam": {
+      "title": "اللهمّ أنت السلام"
+    },
+    "afterPrayer_subhanallah_33": {
+      "title": "تسبيح (33 × 3)"
+    },
+    "afterPrayer_three_quls": {
+      "title": "سور الإخلاص والفلق والناس بعد كل صلاة فرض"
+    },
+    "afterPrayer_ayat_kursi": {
+      "title": "آية الكرسي بعد كل صلاة فرض"
+    },
+    "food_before": {
+      "title": "قبل الأكل — بسم الله"
+    },
+    "food_after_min_ghayri_hawlin": {
+      "title": "بعد الأكل — من غير حول مني ولا قوة"
+    },
+    "food_after_atamana_wa_saqana": {
+      "title": "بعد الأكل — أطعمنا وسقانا وجعلنا مسلمين"
+    },
+    "food_after_atama_wa_saqa_makhraj": {
+      "title": "بعد الأكل — أطعمنا وسقانا وجعل له مَخرجًا"
+    },
+    "food_after_atamana_wa_kafana": {
+      "title": "بعد الأكل — أطعمنا وسقانا وكفانا وآوانا"
+    },
+    "food_after_kathiran_tayyiban": {
+      "title": "بعد الأكل — حمدًا كثيرًا طيّبًا مباركًا"
+    },
+    "distress_lahawla": {
+      "title": "لا حول ولا قوة إلا بالله"
+    },
+    "distress_innallaha_maana": {
+      "title": "عند الخوف"
+    },
+    "distress_yaa_hayyu": {
+      "title": "النداء يا حيُّ يا قيُّوم"
+    },
+    "distress_ayatkursi_intro": {
+      "title": "آية الكرسي (حفظ النوم)"
+    },
+    "distress_dua_al_faraj": {
+      "title": "دعاء الفرج"
+    },
+    "distress_dua_al_karb": {
+      "title": "دعاء الكرب"
+    },
+    "sleep_three_quls": {
+      "title": "المعوّذات — الإخلاص والفلق والناس"
+    },
+    "sleep_ayat_kursi": {
+      "title": "آية الكرسي قبل النوم"
+    },
+    "sleep_aslamtu_wajhi": {
+      "title": "أسلمتُ وجهي إليك"
+    },
+    "sleep_bismika_ahya": {
+      "title": "باسمك اللهمّ أحيا وأموت"
+    },
+    "sleep_alhamdu_ahyana": {
+      "title": "عند الاستيقاظ"
+    },
+    "sleep_khalaqta_nafsi": {
+      "title": "أنت خلقت نفسي — فاحفظها أو اغفر لها"
+    },
+    "sleep_rabba_samawat": {
+      "title": "ربّ السماوات والأرض وربّ العرش العظيم"
+    },
+    "sleep_dust_off_bed": {
+      "title": "نفض الفراش والاضطجاع على الجنب الأيمن"
+    },
+    "sleep_takbir_tasbih_tahmid": {
+      "title": "تكبير 34، تسبيح 33، تحميد 33 (خير من خادم)"
+    },
+    "sleep_taamat_protection": {
+      "title": "كلمات الله التامّة من كل شر"
+    },
+    "sleep_taamat_for_children": {
+      "title": "الاستعاذة للأطفال — من كل شيطان وحشرة سامّة"
+    },
+    "sleep_taamat_long": {
+      "title": "عند الفزع أو الكابوس"
+    },
+    "sleep_wajhik_alkarim": {
+      "title": "بوجهك الكريم وكلماتك التامّة"
+    },
+    "sleep_anta_rabbi": {
+      "title": "أنت ربّي — لا تصيبني مصيبة"
+    },
+    "travel_subhanalladhi": {
+      "title": "عند ركوب الدابة أو السيارة"
+    },
+    "travel_journey": {
+      "title": "دعاء السفر — النص الكامل"
+    },
+    "travel_returning": {
+      "title": "عند العودة إلى البيت"
+    },
+    "mosque_entering": {
+      "title": "دخول المسجد"
+    },
+    "mosque_leaving": {
+      "title": "الخروج من المسجد"
+    },
+    "mosque_adhan_response": {
+      "title": "بعد سماع الأذان"
+    },
+    "gratitude_blessing": {
+      "title": "عند الحصول على نعمة"
+    },
+    "gratitude_kindness": {
+      "title": "عند صنع المعروف إليك"
+    },
+    "forgiveness_sayyidul": {
+      "title": "سيّد الاستغفار"
+    },
+    "forgiveness_rabbi_ighfir": {
+      "title": "التوبة إلى الله"
+    },
+    "distress_grief": {
+      "title": "لتفريج الهمّ والغمّ"
+    },
+    "distress_difficulty": {
+      "title": "عند الشدة"
+    },
+    "distress_rain": {
+      "title": "عند نزول المطر"
+    },
+    "weather_during_rain": {
+      "title": "عند بدء نزول المطر"
+    },
+    "weather_after_rain": {
+      "title": "بعد نزول المطر"
+    },
+    "weather_thunder": {
+      "title": "عند سماع الرعد"
+    },
+    "weather_strong_wind": {
+      "title": "عند هبوب الريح الشديدة"
+    },
+    "family_for_offspring": {
+      "title": "للذرية الصالحة"
+    },
+    "family_for_parents": {
+      "title": "للوالدين"
+    },
+    "family_blessing_marriage": {
+      "title": "تهنئة بالزواج"
+    },
+    "family_for_child": {
+      "title": "الاستعاذة للولد"
+    },
+    "sickness_visit": {
+      "title": "زيارة المريض"
+    },
+    "sickness_prayer_for_sick": {
+      "title": "الدعاء للمريض"
+    },
+    "sickness_when_in_pain": {
+      "title": "عند الإحساس بألم في الجسد"
+    },
+    "funeral_inna_lillah": {
+      "title": "عند سماع خبر الوفاة"
+    },
+    "funeral_consolation": {
+      "title": "تعزية أهل الميت"
+    },
+    "funeral_graveyard_visit": {
+      "title": "دخول المقبرة"
+    },
+    "eid_takbir": {
+      "title": "تكبيرات العيد"
+    },
+    "eid_taqabbal": {
+      "title": "تهنئة العيد"
+    },
+    "beforeQuran_taawwudh": {
+      "title": "الاستعاذة قبل القراءة"
+    },
+    "beforeQuran_basmalah": {
+      "title": "البسملة في كل عمل"
+    },
+    "knowledge_seeking": {
+      "title": "الدعاء بزيادة العلم"
+    },
+    "knowledge_understanding": {
+      "title": "الدعاء بالفهم"
+    },
+    "knowledge_majlis_kaffarah": {
+      "title": "كفّارة المجلس"
+    },
+    "protection_morning_evening": {
+      "title": "سيّد الاستغفار المختصر (×3 صباحًا ومساءً)"
+    },
+    "protection_evil_eye": {
+      "title": "الوقاية من العين"
+    },
+    "protection_entering_home": {
+      "title": "دخول البيت"
+    },
+    "protection_leaving_home": {
+      "title": "الخروج من البيت"
+    },
+    "protection_market": {
+      "title": "دخول السوق"
+    },
+    "guidance_istikharah": {
+      "title": "صلاة الاستخارة — النص الكامل"
+    },
+    "guidance_steadfastness": {
+      "title": "الثبات على الدين"
+    },
+    "guidance_rabbana_atina": {
+      "title": "الدعاء بحسنة الدنيا والآخرة"
+    },
+    "guidance_against_being_misled": {
+      "title": "الاستعاذة من الضلالة"
+    }
   },
   "quran": {
     "meccan": "مكية",
