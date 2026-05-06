@@ -14,9 +14,9 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/Mihrab
 
 Builds:
-  - versionName: 2.0.13
-    versionCode: 136
-    commit: v2.0.13
+  - versionName: 2.0.14
+    versionCode: 137
+    commit: v2.0.14
     subdir: android
     sudo:
       - apt-get update
@@ -70,5 +70,5 @@ MaintainerNotes: |
 ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.0.13
-CurrentVersionCode: 136
+CurrentVersion: 2.0.14
+CurrentVersionCode: 137
