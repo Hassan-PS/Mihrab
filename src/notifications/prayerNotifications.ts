@@ -302,22 +302,21 @@ export async function syncPrayerNotifications(params: {
           style: { type: AndroidStyle.BIGTEXT, text: atPrayerBody },
           actions: (() => {
             const actions: { title: string; pressAction: { id: string } }[] = [];
-            // Order matters: Android only renders the first 3 actions.
-            // Per user feedback (v2.0.15), the "Disable adhan" action was
-            // dropped — a single "Stop adhan" button covers the immediate
-            // need and the more aggressive "disable until next prayer"
-            // gesture lives in Settings where it belongs. Final action set
-            // is at most two: Log prayer + Stop adhan.
-            if (params.journalLogActionEnabled) {
-              actions.push({
-                title: i18n.t('journal.logActionTitle', 'Log prayer'),
-                pressAction: {
-                  // Encode the prayer name in the action id so the
-                  // foreground handler can route to the right row.
-                  id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
-                },
-              });
-            }
+            // Log Prayer is always present — a useful affordance that
+            // doesn't take a slot the user could instead use for
+            // something more important (Android shows max 3 actions
+            // and we only ever schedule 2: Log prayer + Stop adhan).
+            // The previous opt-in gate via `journalLogActionEnabled`
+            // was over-engineered; nobody benefits from having to flip
+            // a toggle to make a clearly-helpful button appear.
+            actions.push({
+              title: i18n.t('journal.logActionTitle', 'Log prayer'),
+              pressAction: {
+                // Encode the prayer name in the action id so the
+                // foreground handler can route to the right row.
+                id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
+              },
+            });
             if (usesAdhan) {
               actions.push({
                 title: i18n.t('alertCopy.adhanStopAction'),

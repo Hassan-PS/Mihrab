@@ -7,7 +7,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -15,7 +14,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import notifee, { EventType } from '@notifee/react-native';
 import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
-import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
@@ -64,7 +62,6 @@ export function JournalScreen() {
   useBreakpoint();
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  const { settings, updateSettings } = usePrayerSettings();
   useAndroidSubScreenBack();
 
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -236,37 +233,12 @@ export function JournalScreen() {
         </View>
       </View>
 
-      {/* Reminder toggle (#99) — adds a "Log prayer" action to the
-          existing prayer-time notification. */}
-      <View
-        style={[
-          styles.reminderCard,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
-        <View style={styles.reminderTextCol}>
-          <Text style={[styles.reminderTitle, { color: palette.text }]}>
-            {t('journal.notificationToggleTitle', 'Log from notification')}
-          </Text>
-          <Text style={[styles.reminderBody, { color: palette.muted }]}>
-            {settings.journalNotificationActionsEnabled
-              ? t(
-                  'journal.notificationToggleOn',
-                  'Tap "Log prayer" on the prayer-time alert to jump straight here.',
-                )
-              : t(
-                  'journal.notificationToggleOff',
-                  'Add a "Log prayer" action to each prayer-time alert.',
-                )}
-          </Text>
-        </View>
-        <Switch
-          accessibilityLabel={t('journal.notificationToggleA11y', 'Enable journal log action on prayer notifications')}
-          value={settings.journalNotificationActionsEnabled}
-          onValueChange={v => updateSettings({ journalNotificationActionsEnabled: v })}
-          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-          thumbColor={settings.journalNotificationActionsEnabled ? palette.accentSolid : '#f3f4f6'}
-        />
-      </View>
+      {/* The journalNotificationActionsEnabled toggle was removed in
+          v2.0.17 — Log Prayer is now always present on every
+          prayer-time notification (it doesn't displace anything else
+          and the opt-in toggle was hiding a clearly-helpful
+          affordance). The setting key is left in storage for backward
+          compatibility but no longer controls anything. */}
 
       <Text style={[styles.sectionTitle, { color: palette.muted }]}>
         {t('journal.todayLabel')}
