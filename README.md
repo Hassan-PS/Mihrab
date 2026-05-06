@@ -1,9 +1,9 @@
 <div align="center">
   <img src="assets/app-icon-rounded.png" alt="Mihrab" width="120">
 
-  # Mihrab — prayer times, calmly
+  # Mihrab: The Muslim Companion
 
-  A simple, fast, and privacy-focused app for daily prayer times, Qibla direction, the Quran, dua and tasbih, fasting log, and home-screen widgets.
+  A calm, private, offline-first companion for the day's intentions. Prayer times, Qibla, the Quran, dua and tasbih, fasting + prayer journal, and home-screen widgets — no ads, no analytics, no tracking.
 
   <br>
 
@@ -19,14 +19,20 @@
 
 ## Features
 
-- **No Ads & Full Privacy** — No tracking, no data collection, fully open-source.
-- **Accurate Prayer Times** — Daily times or a full month view, up to a year ahead.
-- **Offline First** — Prayer times are cached on-device so the app loads instantly and works without a connection.
-- **Home Screen Widgets** — Customisable iOS and Android widgets showing the next prayer at a glance.
-- **Qibla Compass** — Accurate direction to the Kaaba using your device's sensors.
-- **Adhan & Reminders** — Notifications with built-in Adhan sounds and pre-prayer alerts.
-- **Multiple Providers** — AlAdhan, PrayerTimes.dev, Islamiska Förbundet (Sweden), or on-device calculation.
-- **Multi-Language** — English, Arabic, Swedish, Bengali, Urdu, Hindi, French, Spanish, German, Turkish, Indonesian, Russian, and Chinese.
+- **Privacy by design** — No ads, no analytics, no tracking. Coordinates and prayer history are encrypted on-device; nothing is shipped off your phone.
+- **Prayer times, online or off** — Daily times and a full month view up to a year ahead. Cached on-device so the app opens instantly without a connection.
+- **Home-screen widgets** — Customisable iOS and Android widgets showing the next prayer at a glance, with a per-prayer accent and dynamic color support.
+- **Quran reader** — All 114 surahs with Arabic Uthmani text, Madinah mushaf page images, and 14 translation editions (Sahih International, Pickthall, Bernström, Hamidullah, Diyanet, Cortés, Bubenheim, Ma Jian, Kuliev, Indonesian Ministry, Mujibur Rahman, Jalandhry, Suhel Farooq Khan, Tafsir al-Muyassar). RTL mushaf flow.
+- **Dua library** — 100+ duas across 19 categories (morning, evening, after prayer, food, sleep, travel, distress, gratitude, knowledge, protection, and more) with Arabic, transliteration, translation, and Hisn al-Muslim sources.
+- **Tasbih counter** — Tap-to-count for the four post-prayer dhikr plus open-ended Astaghfirullah and Salah on the Prophet ﷺ. Tabular numerals so digits don't shimmer on tick.
+- **Qibla compass** — Direction to the Ka'bah using your device's sensors.
+- **Fasting log** — Tracks Ramadan + voluntary Sunnah fasts (Mondays, Thursdays, Ayyam al-Bidh, Day of Arafah, Day of Ashura, Six of Shawwal). Day-before reminder. Encrypted on-device.
+- **Prayer journal** — Log each daily prayer as on-time / late / missed / qadha with optional private notes. Stay-streak stats. Optional "Log prayer" action on the prayer-time notification.
+- **Mosque finder** — One-tap to your maps app with a "mosque" search centred on your location.
+- **Adhan & reminders** — Notifications with built-in Adhan sounds and a pre-prayer reminder window.
+- **Multiple providers** — AlAdhan, PrayerTimes.dev, Islamiska Förbundet (Sweden), or on-device calculation (Adhan JS) — pick the source that matches your community.
+- **13 languages** — English, Arabic, Swedish, Bengali, Urdu, Hindi, French, Spanish, German, Turkish, Indonesian, Russian, and Chinese — every screen, every notification, every dua title.
+- **Open source** — Apache-2.0. F-Droid build is fully reproducible (no Play Billing, no Google Play Services).
 
 ---
 
