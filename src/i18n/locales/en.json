@@ -754,7 +754,8 @@
     "notificationToggleOff": "Add a \"Log prayer\" action to each prayer-time alert.",
     "notificationToggleA11y": "Enable journal log action on prayer notifications",
     "notePlaceholder": "Private note (only on this device)",
-    "saveNote": "Save note"
+    "saveNote": "Save note",
+    "logActionTitle": "Log prayer"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",

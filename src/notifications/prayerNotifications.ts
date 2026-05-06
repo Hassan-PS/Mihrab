@@ -271,7 +271,13 @@ export async function syncPrayerNotifications(params: {
     await notifee.createTriggerNotification(
       {
         id: notificationId,
-        title: e.name,
+        // Translate the prayer name through i18n so the notification reads
+        // in the active app language ("الفجر" rather than "Fajr" for an
+        // Arabic user). `e.name` is the canonical English key (Fajr,
+        // Sunrise, …) which doubles as the i18n lookup key under
+        // `prayer.<name>`. Falls back to the raw English name if the
+        // active locale is missing the entry.
+        title: i18n.t(`prayer.${e.name}`, { defaultValue: e.name }),
         body: i18n.t('alertCopy.atPrayer'),
         data: {
           kind: 'prayer_time',
@@ -322,7 +328,7 @@ export async function syncPrayerNotifications(params: {
     await notifee.createTriggerNotification(
       {
         id: notificationId,
-        title: e.name,
+        title: i18n.t(`prayer.${e.name}`, { defaultValue: e.name }),
         body: i18n.t('alertCopy.prePrayer', {
           count: reminderMinutes,
         }),

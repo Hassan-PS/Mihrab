@@ -30,7 +30,6 @@ import {
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
 import { DayCarousel } from './home/DayCarousel';
-import { LocationChip } from './home/LocationChip';
 import { MonthShortcut } from './home/MonthShortcut';
 import { NextPrayerCard } from './home/NextPrayerCard';
 import { PermissionBanners } from './home/PermissionBanners';
@@ -339,7 +338,9 @@ export function HomeScreen() {
         onRetryFetch={retry}
       />
 
-      <LocationChip />
+      {/* LocationChip moved into the navigation header (next to Settings)
+          so the top-of-screen controls all live in the same row. See
+          RootNavigator.HomeHeaderRight. */}
 
       <NextPrayerCard nextInfo={nextInfo} />
 
