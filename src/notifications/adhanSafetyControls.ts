@@ -66,17 +66,15 @@ export function registerAdhanSafetyControls() {
     void notifee.setNotificationCategories([
       {
         id: ADHAN_CONTROLS_CATEGORY_ID,
+        // Only the Stop action remains in the iOS category — the
+        // Disable action was removed in v2.0.15 to keep the
+        // notification simple. The disable-until-next-prayer
+        // affordance lives in Settings instead, where it belongs.
         actions: [
           {
             id: ADHAN_ACTION_STOP,
             title: i18n.t('alertCopy.adhanStopAction'),
             foreground: false,
-          },
-          {
-            id: ADHAN_ACTION_DISABLE,
-            title: i18n.t('alertCopy.adhanDisableAction'),
-            foreground: false,
-            destructive: true,
           },
         ],
       },

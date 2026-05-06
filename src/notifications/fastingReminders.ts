@@ -188,6 +188,11 @@ export async function rescheduleFastingReminders(opts: {
           body,
           android: {
             channelId: FASTING_CHANNEL_ID,
+            // Same monochrome status-bar icon as the prayer-time
+            // notifications so every Mihrab notification reads as one
+            // family in the system tray. Without an explicit smallIcon
+            // Android falls back to a default white circle.
+            smallIcon: 'ic_stat_prayer',
             pressAction: { id: 'open-fasting' },
           },
           ios: {

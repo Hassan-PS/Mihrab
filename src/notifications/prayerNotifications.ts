@@ -14,7 +14,6 @@ import {
   type NotificationSoundId,
 } from './notificationSounds';
 import {
-  ADHAN_ACTION_DISABLE,
   ADHAN_ACTION_STOP,
   ADHAN_CONTROLS_CATEGORY_ID,
 } from './adhanSafetyControls';
@@ -304,11 +303,11 @@ export async function syncPrayerNotifications(params: {
           actions: (() => {
             const actions: { title: string; pressAction: { id: string } }[] = [];
             // Order matters: Android only renders the first 3 actions.
-            // Put "Log prayer" FIRST so it survives even when adhan stop
-            // + disable are also present (was the v2.0.11 visibility
-            // issue). Stop and Disable still appear when adhan is in
-            // use; if the system collapses anything, it's the less
-            // critical Disable button.
+            // Per user feedback (v2.0.15), the "Disable adhan" action was
+            // dropped — a single "Stop adhan" button covers the immediate
+            // need and the more aggressive "disable until next prayer"
+            // gesture lives in Settings where it belongs. Final action set
+            // is at most two: Log prayer + Stop adhan.
             if (params.journalLogActionEnabled) {
               actions.push({
                 title: i18n.t('journal.logActionTitle', 'Log prayer'),
@@ -320,16 +319,10 @@ export async function syncPrayerNotifications(params: {
               });
             }
             if (usesAdhan) {
-              actions.push(
-                {
-                  title: i18n.t('alertCopy.adhanStopAction'),
-                  pressAction: { id: ADHAN_ACTION_STOP },
-                },
-                {
-                  title: i18n.t('alertCopy.adhanDisableAction'),
-                  pressAction: { id: ADHAN_ACTION_DISABLE },
-                },
-              );
+              actions.push({
+                title: i18n.t('alertCopy.adhanStopAction'),
+                pressAction: { id: ADHAN_ACTION_STOP },
+              });
             }
             return actions;
           })(),
