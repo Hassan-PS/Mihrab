@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useLocationSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -16,6 +17,25 @@ import { findPreset } from '../../settings/locationPresets';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { typeStyle } from '../../theme/typography';
+
+/**
+ * Compact map-pin icon for the header-mounted LocationChip variant.
+ * Same Feather-style stroke vocabulary as `HeaderToolbarIcons` so the
+ * three header glyphs (pin, settings) read as a set rather than as
+ * mismatched icons from different families.
+ */
+function PinIcon({ color, size = 22 }: { color: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24"
+      accessibilityElementsHidden importantForAccessibility="no">
+      <Path
+        d="M12 22s7-7 7-12a7 7 0 1 0-14 0c0 5 7 12 7 12z"
+        stroke={color} strokeWidth={2}
+        strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <Circle cx="12" cy="10" r="2.5" stroke={color} strokeWidth={2} fill="none" />
+    </Svg>
+  );
+}
 
 /**
  * Quick location switcher chip — task #18 follow-up wiring.
@@ -35,7 +55,17 @@ import { typeStyle } from '../../theme/typography';
  * `manualLatitude/Longitude/Label` + `activeLocationPresetId` in one
  * `updateSettings` call so the prayer-day re-fetch is debounced.
  */
-function LocationChipImpl() {
+type Props = {
+  /**
+   * When true, render as a slim header-mounted icon button (pin glyph
+   * + truncated label) rather than the body chip. Used in HomeScreen's
+   * navigation header next to the Settings gear so the chip lives in
+   * the same row as the other top-level controls.
+   */
+  compactHeader?: boolean;
+};
+
+function LocationChipImpl({ compactHeader = false }: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const { slice: settings, update: updateSettings } = useLocationSettings();
@@ -81,23 +111,39 @@ function LocationChipImpl() {
         accessibilityLabel={t('home.switchLocation')}
         accessibilityHint={chipLabel}
         onPress={() => setOpen(true)}
-        style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
-          styles.chip,
-          {
-            backgroundColor: palette.card,
-            borderRadius: RADIUS.full,
-            ...cardEdgeStyle(palette),
-          },
-          pressed && { opacity: 0.7 }, hovered && { opacity: 0.92 },
-        ]}>
-        <Text
-          numberOfLines={1}
-          style={[typeStyle('callout'), styles.chipText, { color: palette.text }]}>
-          {chipLabel}
-        </Text>
-        <Text style={[typeStyle('caption'), { color: palette.muted }]}>
-          {t('home.switchLocation')}
-        </Text>
+        hitSlop={compactHeader ? 10 : undefined}
+        style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) =>
+          compactHeader
+            ? [
+                styles.headerPin,
+                pressed && { opacity: 0.6 },
+                hovered && { opacity: 0.85 },
+              ]
+            : [
+                styles.chip,
+                {
+                  backgroundColor: palette.card,
+                  borderRadius: RADIUS.full,
+                  ...cardEdgeStyle(palette),
+                },
+                pressed && { opacity: 0.7 },
+                hovered && { opacity: 0.92 },
+              ]
+        }>
+        {compactHeader ? (
+          <PinIcon color={palette.accentSolid} />
+        ) : (
+          <>
+            <Text
+              numberOfLines={1}
+              style={[typeStyle('callout'), styles.chipText, { color: palette.text }]}>
+              {chipLabel}
+            </Text>
+            <Text style={[typeStyle('caption'), { color: palette.muted }]}>
+              {t('home.switchLocation')}
+            </Text>
+          </>
+        )}
       </Pressable>
 
       <Modal
@@ -165,6 +211,15 @@ function LocationChipImpl() {
 export const LocationChip = memo(LocationChipImpl);
 
 const styles = StyleSheet.create({
+  // Slim header-mounted variant: no card chrome, just the pin glyph
+  // sitting in the same icon-row context as HeaderToolbarIcons.
+  headerPin: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    minWidth: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',

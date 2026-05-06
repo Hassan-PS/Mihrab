@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
+import { LocationChip } from '../screens/home/LocationChip';
+import { View } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
 import { DuasScreen } from '../screens/DuasScreen';
@@ -32,22 +34,30 @@ function HomeHeaderRight() {
   const { t } = useTranslation();
   const theme = useTheme();
   return (
-    <HeaderToolbarIcons
-      tintColor={theme.colors.primary}
-      onMonth={() => navigation.navigate('MonthTimes')}
-      onCompass={() => navigation.navigate('Compass')}
-      onSettings={() => navigation.navigate('Settings')}
-      monthA11yLabel={t('a11y.openMonth')}
-      compassA11yLabel={t('a11y.openCompass')}
-      settingsA11yLabel={t('a11y.openSettings')}
-      // Calendar (month) and Compass already exist on the home screen
-      // body — Calendar via the "Prayer times for the whole month" link
-      // under the prayer table, Compass as a tile in QuickActionsGrid.
-      // Surfacing them in the header too is duplication; only Settings
-      // has no body-row equivalent, so keep that one.
-      showMonth={false}
-      showCompass={false}
-    />
+    // The location pin sits left of the Settings gear in the header, so
+    // both top-level controls live in the same row. The pin only renders
+    // for users on manual location with at least one saved preset (see
+    // LocationChip's own visibility rules) — GPS-mode users get a clean
+    // single-icon header.
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <LocationChip compactHeader />
+      <HeaderToolbarIcons
+        tintColor={theme.colors.primary}
+        onMonth={() => navigation.navigate('MonthTimes')}
+        onCompass={() => navigation.navigate('Compass')}
+        onSettings={() => navigation.navigate('Settings')}
+        monthA11yLabel={t('a11y.openMonth')}
+        compassA11yLabel={t('a11y.openCompass')}
+        settingsA11yLabel={t('a11y.openSettings')}
+        // Calendar (month) and Compass already exist on the home screen
+        // body — Calendar via the "Prayer times for the whole month" link
+        // under the prayer table, Compass as a tile in QuickActionsGrid.
+        // Surfacing them in the header too is duplication; only Settings
+        // has no body-row equivalent, so keep that one.
+        showMonth={false}
+        showCompass={false}
+      />
+    </View>
   );
 }
 
