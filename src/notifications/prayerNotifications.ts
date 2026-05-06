@@ -2,6 +2,7 @@ import notifee, {
   AlarmType,
   AndroidImportance,
   AndroidNotificationSetting,
+  AndroidStyle,
   AuthorizationStatus,
   TriggerType,
 } from '@notifee/react-native';
@@ -268,6 +269,8 @@ export async function syncPrayerNotifications(params: {
   for (const e of salahEvents) {
     const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`;
     const usesAdhan = prayerTimeSound.id !== 'default';
+    const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
+    const atPrayerBody = i18n.t('alertCopy.atPrayer');
     await notifee.createTriggerNotification(
       {
         id: notificationId,
@@ -277,8 +280,8 @@ export async function syncPrayerNotifications(params: {
         // Sunrise, …) which doubles as the i18n lookup key under
         // `prayer.<name>`. Falls back to the raw English name if the
         // active locale is missing the entry.
-        title: i18n.t(`prayer.${e.name}`, { defaultValue: e.name }),
-        body: i18n.t('alertCopy.atPrayer'),
+        title: atPrayerTitle,
+        body: atPrayerBody,
         data: {
           kind: 'prayer_time',
           usesAdhan: usesAdhan ? '1' : '0',
@@ -291,8 +294,31 @@ export async function syncPrayerNotifications(params: {
           channelId: prayerTimeSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
+          // BigText style: shows the body in full when the notification
+          // is expanded, and gives Android more room in the collapsed
+          // grouped-summary view than a single-line ticker. The text is
+          // intentionally short; the style mostly fixes the case where a
+          // longer prayer-name title squeezed the body to a single ellipsised
+          // word (reported in v2.0.13 with Arabic locale).
+          style: { type: AndroidStyle.BIGTEXT, text: atPrayerBody },
           actions: (() => {
             const actions: { title: string; pressAction: { id: string } }[] = [];
+            // Order matters: Android only renders the first 3 actions.
+            // Put "Log prayer" FIRST so it survives even when adhan stop
+            // + disable are also present (was the v2.0.11 visibility
+            // issue). Stop and Disable still appear when adhan is in
+            // use; if the system collapses anything, it's the less
+            // critical Disable button.
+            if (params.journalLogActionEnabled) {
+              actions.push({
+                title: i18n.t('journal.logActionTitle', 'Log prayer'),
+                pressAction: {
+                  // Encode the prayer name in the action id so the
+                  // foreground handler can route to the right row.
+                  id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
+                },
+              });
+            }
             if (usesAdhan) {
               actions.push(
                 {
@@ -305,16 +331,6 @@ export async function syncPrayerNotifications(params: {
                 },
               );
             }
-            if (params.journalLogActionEnabled) {
-              actions.push({
-                title: i18n.t('journal.logActionTitle', 'Log prayer'),
-                pressAction: {
-                  // Encode the prayer name in the action id so the
-                  // foreground handler can route to the right row.
-                  id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
-                },
-              });
-            }
             return actions;
           })(),
         },
@@ -325,17 +341,17 @@ export async function syncPrayerNotifications(params: {
 
   for (const e of reminderEvents) {
     const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}pre-${e.at.getTime()}-${e.name}`;
+    const preBody = i18n.t('alertCopy.prePrayer', { count: reminderMinutes });
     await notifee.createTriggerNotification(
       {
         id: notificationId,
         title: i18n.t(`prayer.${e.name}`, { defaultValue: e.name }),
-        body: i18n.t('alertCopy.prePrayer', {
-          count: reminderMinutes,
-        }),
+        body: preBody,
         ios: {
           sound: reminderSound.iosSound,
         },
         android: {
+          style: { type: AndroidStyle.BIGTEXT, text: preBody },
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
