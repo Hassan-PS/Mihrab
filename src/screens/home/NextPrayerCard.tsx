@@ -106,15 +106,24 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
       </Text>
       <Text
         style={[styles.name, { color: palette.text }]}
-        numberOfLines={1}
-        adjustsFontSizeToFit>
+        numberOfLines={1}>
         {t(`prayer.${nextInfo.name}`)}
       </Text>
       <Text
         style={[styles.time, tabularNumeralStyle, { color: palette.accent }]}
         numberOfLines={1}
-        adjustsFontSizeToFit
-        maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+        // Note: do NOT use `adjustsFontSizeToFit` here — combined with the
+        // tabular-nums fontVariant, iOS in some locales (Arabic in particular)
+        // mismeasures the text and shrinks it to ~10pt, causing the hero
+        // time to disappear entirely. The string "12:50" / "12:50 AM"
+        // comfortably fits at 64pt on every supported phone width, and
+        // maxFontSizeMultiplier already caps system-level text scaling.
+        maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
+        // Override the parent's RTL flow on the time — clock numerals are
+        // a logical Latin-style left-to-right unit ("12:50") regardless of
+        // app language, and the iOS Arabic font's bidi handling can otherwise
+        // collapse the line.
+        accessibilityLanguage="en-US">
         {formatLocalTime(nextInfo.at)}
       </Text>
       <View style={styles.countdownRow}>
@@ -155,14 +164,16 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   // Hero time — large tabular numerals so the user can read it from a
-  // glance away. `adjustsFontSizeToFit` keeps very long formatted strings
-  // (e.g. 12-hour with AM/PM in some locales) from wrapping.
+  // glance away. `lineHeight` left undefined so iOS uses the system
+  // glyph-aware default (font ascender + descender), avoiding clipping
+  // when the device font's metrics differ from a hand-tuned line height.
+  // `letterSpacing` removed for the same reason — iOS rendering of the
+  // tabular-nums variant interacts oddly with negative letter spacing
+  // in some locales (caused the time to collapse in Arabic).
   time: {
     fontSize: 64,
     fontWeight: '700',
-    lineHeight: 72,
     textAlign: 'center',
-    letterSpacing: -1,
   },
   countdownRow: {
     marginTop: 8,
