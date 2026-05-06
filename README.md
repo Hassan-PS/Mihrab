@@ -1,7 +1,5 @@
 <div align="center">
-  <img src="assets/app-icon-rounded.png" alt="Mihrab" width="120">
-
-  # Mihrab: The Muslim Companion
+  <img src="branding/github-hero.png" alt="Mihrab — prayer times, Quran, dua, tasbih, qibla, fasting log on iOS and Android">
 
   A calm, private, offline-first companion for the day's intentions. Prayer times, Qibla, the Quran, dua and tasbih, fasting + prayer journal, and home-screen widgets — no ads, no analytics, no tracking.
 
@@ -40,11 +38,9 @@
 
 <div align="center">
 
-<img src="assets/screenshots/01_prayer_times_at_a_glance.jpg" width="49%" alt="Prayer times at a glance">&nbsp;<img src="assets/screenshots/02_share_beautiful_calendars.jpg" width="49%" alt="Share beautiful calendars">
+<img src="branding/store-previews/01_home.png" width="32%" alt="Home — next prayer at a glance">&nbsp;<img src="branding/store-previews/02_quran.png" width="32%" alt="Quran reader — Surah al-Mulk">&nbsp;<img src="branding/store-previews/03_duas.png" width="32%" alt="Duas — Ayat al-Kursi">
 
-<img src="assets/screenshots/03_full_month_always_ready.jpg" width="49%" alt="Full month always ready">&nbsp;<img src="assets/screenshots/04_qibla_direction_anywhere.jpg" width="49%" alt="Qibla direction anywhere">
-
-<img src="assets/screenshots/05_fully_customisable.jpg" width="49%" alt="Fully customisable">
+<img src="branding/store-previews/04_tasbih.png" width="32%" alt="Tasbih counter">&nbsp;<img src="branding/store-previews/05_fasting.png" width="32%" alt="Fasting tracker — upcoming Sunnahs">&nbsp;<img src="branding/store-previews/06_qibla.png" width="32%" alt="Qibla compass">
 
 </div>
 
