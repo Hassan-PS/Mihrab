@@ -131,7 +131,20 @@ function LocationChipImpl({ compactHeader = false }: Props) {
               ]
         }>
         {compactHeader ? (
-          <PinIcon color={palette.accentSolid} />
+          // Pin glyph + the active location's name. The label is
+          // truncated to a single line with ellipsis so a long preset
+          // name (e.g. "Stockholm, Sweden") doesn't push the Settings
+          // gear off-screen on smaller iPhones; full name is in the
+          // accessibilityHint above for screen-reader users.
+          <View style={styles.headerPinRow}>
+            <PinIcon color={palette.accentSolid} size={20} />
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={[styles.headerPinLabel, { color: palette.text }]}>
+              {chipLabel}
+            </Text>
+          </View>
         ) : (
           <>
             <Text
@@ -211,14 +224,26 @@ function LocationChipImpl({ compactHeader = false }: Props) {
 export const LocationChip = memo(LocationChipImpl);
 
 const styles = StyleSheet.create({
-  // Slim header-mounted variant: no card chrome, just the pin glyph
-  // sitting in the same icon-row context as HeaderToolbarIcons.
+  // Slim header-mounted variant: pin glyph + truncated location label,
+  // sitting in the same icon-row context as HeaderToolbarIcons. The
+  // maxWidth keeps a long preset name from pushing the Settings gear
+  // off the right edge on the smallest supported iPhones (~375 pt).
   headerPin: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    minWidth: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    maxWidth: 160,
+  },
+  headerPinRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  headerPinLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    flexShrink: 1,
   },
   chip: {
     flexDirection: 'row',
