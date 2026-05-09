@@ -73,6 +73,11 @@ private func computeDynamicNext(
 struct WidgetPayload: Codable {
   let dayLabel: String
   let rows: [Row]
+  /// Sunrise row sent separately by the JS layer because Sunrise isn't
+  /// a salāh. The medium and large widget views splice it in at display
+  /// slot 1 (between Fajr and Dhuhr) so the visible order matches
+  /// Android's [Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha].
+  let sunriseRow: Row?
   let nextKey: String?
   let nextPrayerName: String?
   let nextPrayerTime: String?
@@ -90,6 +95,24 @@ struct WidgetPayload: Codable {
     let jumuah: Bool
     let ramadan: Bool
     let eid: String?
+  }
+
+  /// Display-ordered rows: [Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha]
+  /// when `sunriseRow` is present, otherwise just `rows`. The medium
+  /// and large widgets use this; the next-prayer computation still
+  /// uses `rows` alone since Sunrise isn't a "next prayer" target.
+  var displayRows: [Row] {
+    guard let sr = sunriseRow else { return rows }
+    var out = rows
+    // Splice Sunrise at index 1 (after Fajr) — matches the JS spec
+    // and the Android layout. If Fajr happens to be missing for any
+    // reason, fall back to prepending so Sunrise is at least visible.
+    if !out.isEmpty {
+      out.insert(sr, at: 1)
+    } else {
+      out.insert(sr, at: 0)
+    }
+    return out
   }
 }
 
@@ -173,12 +196,12 @@ struct Provider: TimelineProvider {
     dayLabel: "Wed, Apr 9",
     rows: [
       .init(key: "Fajr",    time: "05:12", abbr: "Fajr"),
-      .init(key: "Sunrise", time: "06:30", abbr: "Sunrise"),
       .init(key: "Dhuhr",   time: "12:10", abbr: "Dhuhr"),
       .init(key: "Asr",     time: "15:20", abbr: "Asr"),
       .init(key: "Maghrib", time: "18:05", abbr: "Magh"),
       .init(key: "Isha",    time: "19:30", abbr: "Isha"),
     ],
+    sunriseRow: .init(key: "Sunrise", time: "06:30", abbr: "Sun"),
     nextKey: "Dhuhr", nextPrayerName: "Dhuhr", nextPrayerTime: "12:10",
     locationName: "London",
     seasonal: nil
@@ -324,8 +347,11 @@ struct PrayerWidgetEntryView: View {
           .padding(.horizontal, 8)
 
         // ── Right: prayer list ──
+        // Use `displayRows` so Sunrise gets spliced in at slot 1 between
+        // Fajr and Dhuhr. The previous code iterated `p.rows` directly
+        // which omitted Sunrise on iOS (Android already merged it in).
         VStack(spacing: 0) {
-          ForEach(Array(p.rows.enumerated()), id: \.offset) { _, r in
+          ForEach(Array(p.displayRows.enumerated()), id: \.offset) { _, r in
             let isSunrise = r.key == "Sunrise"
             let label = r.abbr ?? r.key
             let currentNextKey = entry.dynamicNextKey ?? p.nextKey
