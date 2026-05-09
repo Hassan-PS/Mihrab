@@ -99,7 +99,7 @@ function NotificationsCardImpl({
         <Switch
           value={settings.notificationsEnabled}
           trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-          thumbColor={settings.notificationsEnabled ? palette.accentSolid : '#f3f4f6'}
+          thumbColor={'#ffffff'}
           onValueChange={onToggle}
         />
       </View>

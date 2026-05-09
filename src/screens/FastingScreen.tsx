@@ -391,7 +391,12 @@ export function FastingScreen() {
           value={settings.fastingRemindersEnabled}
           onValueChange={onToggleReminders}
           trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-          thumbColor={settings.fastingRemindersEnabled ? palette.accentSolid : '#f3f4f6'}
+          // Thumb stays light in BOTH states so it remains visible
+          // against the accent-coloured track when on. Previously the
+          // thumb was set to the same accent colour, which made the
+          // whole switch look like a solid pill rather than a toggle
+          // (reported on iOS in v2.0.17).
+          thumbColor={'#ffffff'}
         />
       </View>
 

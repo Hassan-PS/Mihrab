@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
 import { LocationChip } from '../screens/home/LocationChip';
 import { View } from 'react-native';
+import { useAppPalette } from '../hooks/useAppPalette';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
 import { DuasScreen } from '../screens/DuasScreen';
@@ -32,7 +33,7 @@ function HomeHeaderRight() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
-  const theme = useTheme();
+  const { palette } = useAppPalette();
   return (
     // The location pin sits left of the Settings gear in the header, so
     // both top-level controls live in the same row. The pin only renders
@@ -42,7 +43,14 @@ function HomeHeaderRight() {
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <LocationChip compactHeader />
       <HeaderToolbarIcons
-        tintColor={theme.colors.primary}
+        // Use palette.accentSolid (the user's chosen accent color from
+        // settings, resolved through the SystemTheme native module on
+        // Material You devices) instead of theme.colors.primary which
+        // is React Navigation's static "primary" and doesn't track the
+        // accent picker. This makes the Settings gear match the
+        // location-pin tint and every other accent-tinted glyph in
+        // the app.
+        tintColor={palette.accentSolid}
         onMonth={() => navigation.navigate('MonthTimes')}
         onCompass={() => navigation.navigate('Compass')}
         onSettings={() => navigation.navigate('Settings')}

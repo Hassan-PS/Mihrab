@@ -157,7 +157,7 @@ function AppearanceCardImpl() {
               // dynamic colors are off; under dynamic colors,
               // accentSolid resolves to the live system primary (#115).
               trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor={settings.useSystemDynamicTheme ? palette.accentSolid : '#f3f4f6'}
+              thumbColor={'#ffffff'}
               onValueChange={v => {
                 // Material You / iOS dynamic colors are resolved at
                 // view-attach time, so flipping them mid-session leaves
@@ -363,7 +363,7 @@ function AppearanceCardImpl() {
           <Switch
             value={settings.pureBlackDark}
             trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-            thumbColor={settings.pureBlackDark ? palette.accentSolid : '#f3f4f6'}
+            thumbColor={'#ffffff'}
             onValueChange={v => updateSettings({ pureBlackDark: v })}
           />
         </View>
