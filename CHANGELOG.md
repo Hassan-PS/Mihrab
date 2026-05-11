@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.4] — 2026-05-11
+
+### Fixed
+- **iOS Live Activity — race condition on launch**: Multiple React Native effects (`useFocusEffect`, settings change, next-prayer advance) firing simultaneously at app launch could race each other into a create/dismiss spiral, leaving no visible Live Activity. Fixed with two complementary guards: an 800 ms JS-side debounce that coalesces concurrent `syncLiveActivity` calls so only the freshest payload executes, and a Swift-side serial `DispatchQueue` + `isStarting` flag that skips duplicate in-flight `start()` calls. Existing activities are now updated in-place (`act.update(using:)`) instead of stop-then-restart, eliminating the flash-and-disappear on the lock screen.
+
 ## [2.1.3] — 2026-05-11
 
 ### Added

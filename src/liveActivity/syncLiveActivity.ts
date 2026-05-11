@@ -121,11 +121,39 @@ function localizedPrayerLabel(key: string | null | undefined): string {
   return i18n.exists(kLower) ? i18n.t(kLower) : key;
 }
 
+// Module-level debounce for syncLiveActivity.
+// Multiple React effects (state, nextInfo, focusEffect) can fire at nearly
+// the same instant when the app launches. Without debouncing, the iOS Swift
+// bridge receives 3-4 concurrent start() calls, which races the
+// stop-then-restart logic and leaves no active Live Activity on screen.
+// 800ms is long enough to coalesce a typical burst of launch-time effects
+// but short enough to feel instant to the user.
+let _debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let _pendingArgs: Parameters<typeof syncLiveActivityImpl>[0] | null = null;
+
+export function syncLiveActivity(
+  args: Parameters<typeof syncLiveActivityImpl>[0],
+): Promise<void> {
+  _pendingArgs = args;
+  if (_debounceTimer !== null) {
+    // Already waiting — just update the pending args so the latest wins.
+    return Promise.resolve();
+  }
+  return new Promise(resolve => {
+    _debounceTimer = setTimeout(() => {
+      _debounceTimer = null;
+      const a = _pendingArgs!;
+      _pendingArgs = null;
+      syncLiveActivityImpl(a).then(resolve).catch(resolve);
+    }, 800);
+  });
+}
+
 /**
  * Drive the Live Activity to match the supplied state. Idempotent — call
  * on settings change, on prayer-day data update, and on AppState 'active'.
  */
-export async function syncLiveActivity(args: {
+async function syncLiveActivityImpl(args: {
   options: LiveActivityDisplayOptions;
   today: TimingsMap | null;
   tomorrow?: TimingsMap | null;
@@ -222,19 +250,22 @@ export async function syncLiveActivity(args: {
       nextKey: payload.nextKey ?? '',
       nextLabel,
       nextTime: payload.nextPrayerTime ?? '',
-      nextEpochMs: nextPrayerTimestamp ?? 0,
+      // Swift ContentState.nextEpochSeconds is Double seconds-since-epoch.
+      // nextPrayerTimestamp is ms-since-epoch — divide by 1000.
+      nextEpochSeconds: (nextPrayerTimestamp ?? 0) / 1000,
       rows,
       sunriseRow: payload.sunriseRow,
       hijriLabel: '',
       locationLabel: '',
+      accentHex,
       compactMode: true,
       showSunrise: true,
       showHijri: false,
       showLocation: false,
     };
     try {
-      // Start is idempotent — module should detect a running activity and
-      // update in place.
+      // Start is idempotent — stops any existing activity, then requests
+      // a fresh one so the widget extension always renders the latest state.
       await mod.start(JSON.stringify(content));
     } catch (e) {
       console.warn('[liveActivity] ios start/update failed', e);

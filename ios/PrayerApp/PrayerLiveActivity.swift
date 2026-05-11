@@ -33,6 +33,11 @@ final class PrayerLiveActivity: NSObject {
 
   @objc static func requiresMainQueueSetup() -> Bool { false }
 
+  // Serial queue — prevents concurrent start() calls from racing each other
+  // into a create/destroy spiral when multiple React effects fire at once.
+  private let queue = DispatchQueue(label: "com.hassan.prayerapp.liveactivity", qos: .userInitiated)
+  private var isStarting = false
+
   // MARK: - start
 
   @objc
@@ -43,7 +48,20 @@ final class PrayerLiveActivity: NSObject {
   ) {
     #if canImport(ActivityKit)
     if #available(iOS 16.1, *) {
+      // Coalesce rapid concurrent calls: if a start is already in flight,
+      // resolve immediately. The in-flight call will apply the same (or
+      // newer) state. This prevents the create/dismiss race when the state,
+      // nextInfo, and focusEffect all fire simultaneously at app launch.
+      queue.sync {
+        if isStarting {
+          resolve(nil)
+          return
+        }
+        isStarting = true
+      }
+
       guard let data = json.data(using: .utf8) else {
+        queue.sync { isStarting = false }
         reject("BAD_JSON", "ContentState JSON could not be encoded as UTF-8", nil)
         return
       }
@@ -54,36 +72,44 @@ final class PrayerLiveActivity: NSObject {
           from: data
         )
       } catch {
+        queue.sync { isStarting = false }
         reject("DECODE_FAILED", error.localizedDescription, error)
         return
       }
 
-      // If we already have a running activity, update it instead of
-      // starting another — Live Activities are singletons-per-purpose
-      // from the user's POV and stacking would be jarring.
-      if let existing = Activity<PrayerLiveActivityAttributes>.activities.first {
+      // If there are already running activities, update them in place.
+      // Do NOT stop-then-restart: that pattern races when called concurrently
+      // and causes the card to flash off the lock screen.
+      let existing = Activity<PrayerLiveActivityAttributes>.activities
+
+      if !existing.isEmpty {
         Task {
-          await existing.update(using: state)
+          // Update all running activities with fresh state.
+          for act in existing {
+            await act.update(using: state)
+          }
+          self.queue.sync { self.isStarting = false }
           resolve(nil)
         }
         return
       }
 
-      let attrs = PrayerLiveActivityAttributes()
+      // No existing activity — request a fresh one.
       do {
-        _ = try Activity<PrayerLiveActivityAttributes>.request(
-          attributes: attrs,
+        let _ = try Activity<PrayerLiveActivityAttributes>.request(
+          attributes: PrayerLiveActivityAttributes(),
           contentState: state,
           pushType: nil
         )
+        queue.sync { isStarting = false }
         resolve(nil)
       } catch {
+        queue.sync { isStarting = false }
         reject("REQUEST_FAILED", error.localizedDescription, error)
       }
       return
     }
     #endif
-    // Pre-16.1 or simulator without ActivityKit headers — silently no-op.
     resolve(nil)
   }
 
