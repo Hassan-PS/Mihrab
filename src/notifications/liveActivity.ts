@@ -49,9 +49,16 @@ import {
 /** Stable notifee id — fixed so updates replace in place, not stack. */
 export const LIVE_ACTIVITY_NOTIFICATION_ID = 'mihrab.live_activity.prayer_countdown';
 
-/** Dedicated low-importance channel so the ongoing notification doesn't
- *  sound or vibrate when first posted. */
-const CHANNEL_ID = 'mihrab_live_activity_v1';
+/** Dedicated channel for the Live Activity. v2 was bumped in beta.8 —
+ *  v1 used IMPORTANCE_LOW which Android puts in the "Silent" section.
+ *  v2 uses IMPORTANCE_DEFAULT with sound + vibration explicitly off so
+ *  the notification renders in the main "Notifications" section like
+ *  Uber/Maps but stays passive (no sound, no popup, no vibration).
+ *
+ *  NotificationChannel importance is immutable after the first
+ *  createChannel call, so bumping required a new id. */
+const CHANNEL_ID = 'mihrab_live_activity_v2';
+const CHANNEL_ID_LEGACY = 'mihrab_live_activity_v1';
 
 export type LiveActivityRenderInput = {
   payload: WidgetPrayerPayload;
@@ -76,6 +83,14 @@ export type LiveActivityRenderInput = {
 
 async function ensureChannel(): Promise<void> {
   if (Platform.OS !== 'android') return;
+  // Clean up the v1 channel (IMPORTANCE_LOW → put us in the Silent
+  // section) so upgraders don't see a stale entry in their app
+  // notification settings.
+  try {
+    await notifee.deleteChannel(CHANNEL_ID_LEGACY);
+  } catch {
+    // Non-fatal.
+  }
   try {
     await notifee.createChannel({
       id: CHANNEL_ID,
@@ -84,9 +99,16 @@ async function ensureChannel(): Promise<void> {
         'liveActivity.channelDesc',
         'Pinned ongoing notification with the next-prayer countdown.',
       ),
-      importance: AndroidImportance.LOW,
+      // DEFAULT importance so the notification renders in the main
+      // "Notifications" section (Uber-style). We disable sound and
+      // vibration so it stays passive — no popup, no chime — but does
+      // NOT get filed under "Silent".
+      importance: AndroidImportance.DEFAULT,
       sound: undefined,
       vibration: false,
+      // Hide the badge dot on the launcher icon (this is a countdown,
+      // not a "you have a message" signal).
+      badge: false,
     });
   } catch {
     // Non-fatal.
@@ -158,19 +180,13 @@ function buildInboxLines(input: LiveActivityRenderInput): string[] {
 
 /** ── Public API ──────────────────────────────────────────────────── */
 
-/**
- * Compute fraction (0..1) of time elapsed since the PREVIOUS prayer
- * vs. the wait until the NEXT prayer. Used to drive the progress bar
- * in the native RemoteViews layout. Returns 0 if we can't infer the
- * previous prayer (e.g. before Fajr on day 1 of usage).
- */
-function computeProgressFraction(
+/** ms-since-epoch of the prayer that most recently passed before
+ *  `now`, given a widget payload. Returns 0 when we can't infer one
+ *  (very first use, before Fajr on day 1). */
+function computePrevPrayerEpoch(
   payload: WidgetPrayerPayload,
-  nextEpochMs: number | null,
   now: number,
 ): number {
-  if (nextEpochMs == null) return 0;
-  // Find the most recent prayer that's already passed.
   const ordered = [...payload.rows];
   if (payload.sunriseRow) {
     if (ordered.length > 0) ordered.splice(1, 0, payload.sunriseRow);
@@ -184,15 +200,28 @@ function computeProgressFraction(
     candidate.setHours(Number(m[1]), Number(m[2]), 0, 0);
     let t = candidate.getTime();
     if (t > now) {
-      // This row is later today — try yesterday's instance instead.
       t -= 24 * 60 * 60 * 1000;
     }
     if (t <= now && (prevEpoch == null || t > prevEpoch)) prevEpoch = t;
   }
-  if (prevEpoch == null) return 0;
-  const span = nextEpochMs - prevEpoch;
+  return prevEpoch ?? 0;
+}
+
+/**
+ * Compute fraction (0..1) of time elapsed since the PREVIOUS prayer
+ * vs. the wait until the NEXT prayer.
+ */
+function computeProgressFraction(
+  payload: WidgetPrayerPayload,
+  nextEpochMs: number | null,
+  now: number,
+): number {
+  if (nextEpochMs == null) return 0;
+  const prev = computePrevPrayerEpoch(payload, now);
+  if (prev <= 0) return 0;
+  const span = nextEpochMs - prev;
   if (span <= 0) return 0;
-  const done = now - prevEpoch;
+  const done = now - prev;
   return Math.max(0, Math.min(1, done / span));
 }
 
@@ -240,11 +269,16 @@ export async function startOrUpdateLiveActivity(
   // builds or test harnesses).
   const native = getMihrabLiveActivityModule();
   if (native && input.nextPrayerTimestamp != null) {
+    const nowMs = Date.now();
     const progressFraction = computeProgressFraction(
       input.payload,
       input.nextPrayerTimestamp,
-      Date.now(),
+      nowMs,
     );
+    // The native foreground service uses prevEpochMs / nextEpochMs to
+    // recompute progress on every minute tick — that's what makes the
+    // bar advance without the app being open.
+    const prevEpochMs = computePrevPrayerEpoch(input.payload, nowMs);
     // Project rows to the shape the native module expects (key/name/time).
     // We send the localised long names so the expanded list isn't reading
     // as widget abbrevs ("Magh") — the widget payload uses short forms,
@@ -269,6 +303,7 @@ export async function startOrUpdateLiveActivity(
       nextTime,
       nextKey: input.payload.nextKey ?? '',
       nextEpochMs: input.nextPrayerTimestamp,
+      prevEpochMs,
       title,
       body,
       progressFraction,
