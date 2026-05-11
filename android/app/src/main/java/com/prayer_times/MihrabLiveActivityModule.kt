@@ -11,6 +11,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.SystemClock
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -60,15 +61,17 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       val p = JSONObject(payloadJson)
       val notif = build(p)
       val nm = NotificationManagerCompat.from(reactContext)
+      Log.i(NAME, "display: nextLabel=${p.optString("nextLabel")} epochMs=${p.optLong("nextEpochMs")} progress=${p.optDouble("progressFraction")}")
       try {
         nm.notify(NOTIF_ID, notif)
+        Log.i(NAME, "display: posted id=$NOTIF_ID channel=$CHANNEL_ID")
         promise.resolve(null)
       } catch (se: SecurityException) {
-        // POST_NOTIFICATIONS permission denied on Android 13+ — the JS
-        // side handles the prompt path; we surface a soft failure.
+        Log.w(NAME, "display: POST_NOTIFICATIONS permission denied", se)
         promise.reject("PERM_DENIED", "Notifications permission denied", se)
       }
     } catch (e: Throwable) {
+      Log.e(NAME, "display: failed", e)
       promise.reject("DISPLAY_FAILED", e.message, e)
     }
   }
@@ -111,25 +114,19 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     val sunriseRow = p.optJSONObject("sunriseRow")?.let { rowFromJson(it) }
     val displayRows = computeDisplayRows(rows, sunriseRow, showSunrise)
 
-    val collapsed = buildCollapsedView(
-      nextLabel = nextLabel,
-      nextTime = nextTime,
-      nextEpochMs = nextEpochMs,
-      accentInt = accentInt,
-      progressPct = progressPct,
-    )
-    val expanded = buildExpandedView(
-      nextLabel = nextLabel,
-      nextTime = nextTime,
-      nextEpochMs = nextEpochMs,
-      nextKey = nextKey,
-      accentInt = accentInt,
-      progressPct = progressPct,
-      rows = displayRows,
-      hijriLabel = if (showHijri) hijriLabel else "",
-      locationLabel = if (showLocation) shortLocation(locationLabel) else "",
-      compactMode = compactMode,
-    )
+    // Custom RemoteViews (live_activity_collapsed.xml /
+    // live_activity_expanded.xml) were dropped after we discovered
+    // GrapheneOS silently strips them — the notification posted but
+    // contentView came back null in dumpsys and never rendered. The
+    // standard InboxStyle + chronometer + progress bar route below is
+    // universally supported and gives 95% of the visual story:
+    //   • countdown ticks in the metadata row via setUsesChronometer
+    //   • progress bar via setProgress
+    //   • prayer list via InboxStyle addLine
+    //   • accent via setColor
+    // The big-typography custom layout is a v2.2 task — likely needs a
+    // foreground service + a fully custom system-bar surface to land
+    // on hardened shells.
 
     val tapIntent = Intent(reactContext, MainActivity::class.java).apply {
       flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -141,23 +138,47 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 
+    // Build the InboxStyle expanded list. Each prayer renders as its
+    // own visible row; the upcoming prayer carries a leading "›". On
+    // GrapheneOS, MIUI, and other hardened shells custom RemoteViews
+    // are stripped silently — InboxStyle is the platform-native list
+    // style and renders reliably everywhere.
+    val inboxStyle = NotificationCompat.InboxStyle()
+      .setBigContentTitle(title)
+    if (!compactMode) {
+      for (row in displayRows) {
+        val marker = if (row.key == nextKey) "›" else " "
+        inboxStyle.addLine("$marker  ${row.name}  ${row.time}")
+      }
+    }
+    if (showHijri && hijriLabel.isNotEmpty()) {
+      inboxStyle.setSummaryText(hijriLabel)
+    }
+
     val builder = NotificationCompat.Builder(reactContext, CHANNEL_ID)
       .setSmallIcon(R.drawable.ic_stat_prayer)
       .setColor(accentInt)
-      .setColorized(false) // colorized only matters for media/foreground service banners
+      .setColorized(false)
       .setOngoing(true)
       .setOnlyAlertOnce(true)
-      .setShowWhen(false)
       .setLocalOnly(true)
       .setCategory(NotificationCompat.CATEGORY_STATUS)
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
       .setPriority(NotificationCompat.PRIORITY_LOW)
-      .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-      .setCustomContentView(collapsed)
-      .setCustomBigContentView(expanded)
       .setContentTitle(title)
       .setContentText(body)
       .setContentIntent(pi)
+      .setStyle(inboxStyle)
+      // Chronometer ticks the metadata row next to the app name. The
+      // system handles per-second updates; we just hand it the target.
+      .setWhen(nextEpochMs)
+      .setShowWhen(true)
+      .setUsesChronometer(true)
+      .setChronometerCountDown(true)
+      // Progress bar — fraction of time elapsed between previous and
+      // next prayer. The platform notification renders this as a thin
+      // horizontal bar below the body text on every shell.
+      .setProgress(100, progressPct, false)
 
     if (subText != null) {
       builder.setSubText(subText)
@@ -195,9 +216,17 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       true,
     )
     v.setTextColor(R.id.la_countdown, accentInt)
-    v.setInt(R.id.la_dot, "setColorFilter", accentInt)
+    // Dot tint: `setBackgroundColor(int)` exists on View and is one of
+    // the small set of setters RemoteViews accepts via setInt. We lose
+    // the circular shape (background gets replaced with a flat
+    // ColorDrawable) but gain a working accent-coloured marker. Custom
+    // tinting of the @drawable/live_activity_dot via setColorFilter
+    // doesn't work from RemoteViews — that setter exists on Drawable,
+    // not View, and RemoteViews validates setter signatures at apply
+    // time. An invalid setter rejects the WHOLE RemoteViews tree, which
+    // is what was previously breaking the notification.
+    v.setInt(R.id.la_dot, "setBackgroundColor", accentInt)
     v.setProgressBar(R.id.la_progress, 100, progressPct, false)
-    tintProgressBar(v, R.id.la_progress, accentInt)
     return v
   }
 
@@ -224,9 +253,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       true,
     )
     v.setTextColor(R.id.la_x_countdown, accentInt)
-    v.setInt(R.id.la_x_dot, "setColorFilter", accentInt)
+    v.setInt(R.id.la_x_dot, "setBackgroundColor", accentInt)
     v.setProgressBar(R.id.la_x_progress, 100, progressPct, false)
-    tintProgressBar(v, R.id.la_x_progress, accentInt)
 
     // Six row slots. Hide everything first, then populate from rows[] in
     // compact mode (just hide all) or all 6 rows in normal mode.
@@ -289,20 +317,6 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     if (epochMs <= 0L) return SystemClock.elapsedRealtime()
     val delta = epochMs - System.currentTimeMillis()
     return SystemClock.elapsedRealtime() + delta
-  }
-
-  private fun tintProgressBar(v: RemoteViews, viewId: Int, color: Int) {
-    // RemoteViews can call setColorFilter on ProgressBar's drawable via
-    // setProgressTintList on API 21+. We set both for compatibility.
-    v.setInt(viewId, "setProgressTintColor", color) // no-op on older shells
-    if (Build.VERSION.SDK_INT >= 31) {
-      // setColorFilter at the View-level is broken for ProgressBar from
-      // RemoteViews on some shells; rely on setProgressTintList instead.
-      // Note: setProgressTintList requires a ColorStateList, which we
-      // can't pass through RemoteViews directly — so on platforms that
-      // honour setProgressTint(int) (HUAWEI, MIUI), we set it. Others
-      // fall back to the system grey.
-    }
   }
 
   private fun parseColor(hex: String, fallback: Int): Int =
