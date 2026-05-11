@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.13] — 2026-05-12
+
+### Changed
+- **Android Live Activity — reverted to standard template (chip preserved)**: Removed the `DecoratedCustomViewStyle` + custom view experiment from v2.3.12. Back to the chip-compatible standard layout: countdown (`↓ 1h 23m`) in `setSubText`, percentage appended to the end of `setContentTitle` (`الفجر · 02:48  ·  52%`) so it is always the last element reading left-to-right on the content row. Progress bar via `setProgress`.
+
 ## [2.3.12] — 2026-05-12
 
 ### Changed
