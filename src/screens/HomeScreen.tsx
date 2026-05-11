@@ -19,7 +19,10 @@ import { usePrayerDay } from '../hooks/usePrayerDay';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { syncPrayerWidget } from '../widget/syncPrayerWidget';
-import { syncLiveActivity } from '../liveActivity/syncLiveActivity';
+import {
+  syncLiveActivity,
+  resolveAccentHex,
+} from '../liveActivity/syncLiveActivity';
 import {
   getEffectiveDataProvider,
   resolveCoordsForProvider,
@@ -194,6 +197,10 @@ export function HomeScreen() {
           locationName: locationLabel,
           coords: { lat: state.latitude, lng: state.longitude },
           seasonal: { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
+          accentHex: resolveAccentHex(
+            settings.appAccentId,
+            settings.appAccentCustomHex,
+          ),
         }).catch(e => console.warn('syncLiveActivity (focus):', e));
       }
 
@@ -229,6 +236,8 @@ export function HomeScreen() {
       settings.liveActivityShowSunrise,
       settings.liveActivityShowHijri,
       settings.liveActivityShowLocation,
+      settings.appAccentId,
+      settings.appAccentCustomHex,
     ]),
   );
 
@@ -269,6 +278,10 @@ export function HomeScreen() {
         ramadan: seasonal.ramadan,
         eid: seasonal.eid,
       },
+      accentHex: resolveAccentHex(
+        settings.appAccentId,
+        settings.appAccentCustomHex,
+      ),
     }).catch(e => console.warn('syncLiveActivity (effect):', e));
   }, [
     hydrated,
@@ -279,6 +292,8 @@ export function HomeScreen() {
     settings.liveActivityShowSunrise,
     settings.liveActivityShowHijri,
     settings.liveActivityShowLocation,
+    settings.appAccentId,
+    settings.appAccentCustomHex,
   ]);
 
   // Persist last-fetched coords so MonthScreen and offline use can fall back to them.

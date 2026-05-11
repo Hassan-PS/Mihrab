@@ -37,7 +37,12 @@
 		EA6B2A6659A3E2683A2EC666 /* adhan_minshawi.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */; };
 		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
 		F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */; };
-/* End PBXBuildFile section */
+		F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources (app) */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
+		F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources (ext) */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
+		F1A20000A001B001C001D005 /* PrayerLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */; };
+		F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */; };
+		F1A20000A001B001C001D009 /* PrayerLiveActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D008 /* PrayerLiveActivity.m */; };
+	/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */ = {
@@ -102,7 +107,11 @@
 		F1A100002294A1A2E3B4C5D7 /* PrayerApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PrayerApp.entitlements; path = PrayerApp/PrayerApp.entitlements; sourceTree = "<group>"; };
 		F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetTimelineReloader.swift; path = PrayerApp/WidgetTimelineReloader.swift; sourceTree = "<group>"; };
 		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
-/* End PBXFileReference section */
+		F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityAttributes.swift; sourceTree = "<group>"; };
+		F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityWidget.swift; sourceTree = "<group>"; };
+		F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrayerLiveActivity.swift; path = PrayerApp/PrayerLiveActivity.swift; sourceTree = "<group>"; };
+		F1A20000A001B001C001D008 /* PrayerLiveActivity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerLiveActivity.m; path = PrayerApp/PrayerLiveActivity.m; sourceTree = "<group>"; };
+	/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
@@ -154,6 +163,9 @@
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 				A62E49C8F92272DF77C323AA /* CompassModule.swift */,
 				F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */,
+				F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */,
+				F1A20000A001B001C001D008 /* PrayerLiveActivity.m */,
+				F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */,
 			);
 			name = PrayerApp;
 			sourceTree = "<group>";
@@ -211,6 +223,8 @@
 			isa = PBXGroup;
 			children = (
 				E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */,
+				F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */,
+				F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */,
 				E1D2C3B4A5968778695A4B3C3 /* Info.plist */,
 				E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */,
 				E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */,
@@ -420,6 +434,9 @@
 				F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */,
 				DF5D2FB480E49268AC15485E /* CompassModule.swift in Sources */,
 				BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */,
+				F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */,
+				F1A20000A001B001C001D009 /* PrayerLiveActivity.m in Sources */,
+				F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources (app) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,6 +445,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */,
+				F1A20000A001B001C001D005 /* PrayerLiveActivityWidget.swift in Sources */,
+				F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources (ext) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -451,7 +470,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 142;
+				CURRENT_PROJECT_VERSION = 143;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
@@ -485,7 +504,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 142;
+				CURRENT_PROJECT_VERSION = 143;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mihrab;
@@ -661,7 +680,7 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 142;
+				CURRENT_PROJECT_VERSION = 143;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -691,7 +710,7 @@
 				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 142;
+				CURRENT_PROJECT_VERSION = 143;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
