@@ -16,6 +16,7 @@
 import { Platform } from 'react-native';
 import i18n from '../i18n';
 import type { TimingsMap } from '../types/prayer';
+import type { AppAccentId } from '../settings/types';
 import {
   buildWidgetPayload,
   type WidgetCoords,
@@ -38,6 +39,36 @@ export type LiveActivityDisplayOptions = {
   showHijri: boolean;
   showLocation: boolean;
 };
+
+/**
+ * Resolve a #RRGGBB hex for the user's chosen app accent. The Android
+ * notification's `color` field tints the small icon + chronometer; the
+ * iOS Live Activity uses it as the system tint for the Lock-Screen
+ * Activity. We pick the LIGHT swatch because notifications render
+ * against the system shade, not the in-app dark mode — using the dark
+ * variant would muddy the tint against a colourful wallpaper.
+ *
+ * Kept local to the live-activity module so we don't drag the full
+ * `useAppPalette` (which needs RN's `useColorScheme()` and a hook
+ * context) into a pure-data path.
+ */
+const ACCENT_LIGHT: Record<Exclude<AppAccentId, 'custom'>, string> = {
+  green: '#22c55e',
+  teal: '#0d9488',
+  blue: '#2563eb',
+  amber: '#b45309',
+};
+
+export function resolveAccentHex(
+  accentId: AppAccentId,
+  customHex: string,
+): string {
+  if (accentId === 'custom') {
+    const valid = /^#[0-9a-fA-F]{6}$/.test(customHex.trim());
+    return valid ? customHex.trim() : '#22c55e';
+  }
+  return ACCENT_LIGHT[accentId] ?? ACCENT_LIGHT.green;
+}
 
 /**
  * Hijri month names (transliterated). For locales with their own script
@@ -100,6 +131,9 @@ export async function syncLiveActivity(args: {
   locationName?: string;
   coords?: WidgetCoords;
   seasonal?: WidgetSeasonalFlags;
+  /** App accent hex — drives the notification tint / Live Activity
+   *  system color. Optional; defaults to brand green. */
+  accentHex?: string;
 }): Promise<void> {
   const now = args.now ?? new Date();
 
@@ -150,6 +184,8 @@ export async function syncLiveActivity(args: {
   const location =
     args.options.showLocation && args.locationName ? args.locationName : '';
 
+  const accentHex = args.accentHex || '#22c55e';
+
   if (Platform.OS === 'android') {
     await androidStartOrUpdate({
       payload,
@@ -157,6 +193,7 @@ export async function syncLiveActivity(args: {
       nextPrayerLabel: nextLabel,
       hijriLabel: hijri,
       locationLabel: location,
+      accentHex,
       compactMode: args.options.compactMode,
       showSunrise: args.options.showSunrise,
       showHijri: args.options.showHijri,

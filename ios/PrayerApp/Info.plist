@@ -46,6 +46,10 @@
 	<string>Prayer Times needs access to your photo library to save the monthly prayer times image.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Prayer Times needs access to your photo library to save the monthly prayer times image.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
+	<true/>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

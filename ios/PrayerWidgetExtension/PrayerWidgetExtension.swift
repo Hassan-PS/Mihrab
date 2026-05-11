@@ -550,8 +550,12 @@ private struct WidgetBackgroundCompatModifier: ViewModifier {
   }
 }
 
-@main
-struct PrayerWidgetExtensionBundle: Widget {
+/// The existing home-screen + lock-screen-accessory widget. Renamed
+/// from `PrayerWidgetExtensionBundle` so it can be one of two widgets
+/// declared by the @main bundle below — adding the Live Activity widget
+/// requires we promote the bundle's protocol from `Widget` to
+/// `WidgetBundle`.
+struct PrayerTimesHomeWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "PrayerTimesWidget", provider: Provider()) { entry in
       PrayerWidgetEntryView(entry: entry)
@@ -572,5 +576,19 @@ struct PrayerWidgetExtensionBundle: Widget {
       ]
     }
     return [.systemSmall, .systemMedium, .systemLarge]
+  }
+}
+
+@main
+struct PrayerWidgetExtensionBundle: WidgetBundle {
+  @WidgetBundleBuilder
+  var body: some Widget {
+    PrayerTimesHomeWidget()
+    // ActivityKit only exists on iOS 16.1+. The widget is wrapped in an
+    // availability check so the extension itself still compiles for the
+    // 16.0 deployment target.
+    if #available(iOSApplicationExtension 16.1, *) {
+      PrayerLiveActivityWidget()
+    }
   }
 }
