@@ -49,16 +49,16 @@ import {
 /** Stable notifee id — fixed so updates replace in place, not stack. */
 export const LIVE_ACTIVITY_NOTIFICATION_ID = 'mihrab.live_activity.prayer_countdown';
 
-/** Dedicated channel for the Live Activity. v2 was bumped in beta.8 —
- *  v1 used IMPORTANCE_LOW which Android puts in the "Silent" section.
- *  v2 uses IMPORTANCE_DEFAULT with sound + vibration explicitly off so
- *  the notification renders in the main "Notifications" section like
- *  Uber/Maps but stays passive (no sound, no popup, no vibration).
- *
- *  NotificationChannel importance is immutable after the first
- *  createChannel call, so bumping required a new id. */
-const CHANNEL_ID = 'mihrab_live_activity_v2';
-const CHANNEL_ID_LEGACY = 'mihrab_live_activity_v1';
+/** Dedicated channel for the Live Activity.
+ *   v1 — IMPORTANCE_LOW → Silent section.
+ *   v2 — IMPORTANCE_DEFAULT → main section but no chip on Android 16.
+ *   v3 — IMPORTANCE_HIGH (sound + vibration explicitly off) — required
+ *        for the Android 16 status-bar "Live Update" chip on most
+ *        shells. NotificationChannel importance is immutable after
+ *        first create, so the bump needed a new id. */
+const CHANNEL_ID = 'mihrab_live_activity_v3';
+const CHANNEL_ID_LEGACY_V1 = 'mihrab_live_activity_v1';
+const CHANNEL_ID_LEGACY_V2 = 'mihrab_live_activity_v2';
 
 export type LiveActivityRenderInput = {
   payload: WidgetPrayerPayload;
@@ -83,13 +83,14 @@ export type LiveActivityRenderInput = {
 
 async function ensureChannel(): Promise<void> {
   if (Platform.OS !== 'android') return;
-  // Clean up the v1 channel (IMPORTANCE_LOW → put us in the Silent
-  // section) so upgraders don't see a stale entry in their app
-  // notification settings.
-  try {
-    await notifee.deleteChannel(CHANNEL_ID_LEGACY);
-  } catch {
-    // Non-fatal.
+  // Clean up legacy channels so upgraders don't see stale entries in
+  // their app notification settings.
+  for (const old of [CHANNEL_ID_LEGACY_V1, CHANNEL_ID_LEGACY_V2]) {
+    try {
+      await notifee.deleteChannel(old);
+    } catch {
+      // Non-fatal.
+    }
   }
   try {
     await notifee.createChannel({
@@ -99,15 +100,13 @@ async function ensureChannel(): Promise<void> {
         'liveActivity.channelDesc',
         'Pinned ongoing notification with the next-prayer countdown.',
       ),
-      // DEFAULT importance so the notification renders in the main
-      // "Notifications" section (Uber-style). We disable sound and
-      // vibration so it stays passive — no popup, no chime — but does
-      // NOT get filed under "Silent".
-      importance: AndroidImportance.DEFAULT,
+      // HIGH importance because Android 16's status-bar Live Update
+      // chip eligibility requires the channel be HIGH+. We disable
+      // sound + vibration explicitly so the notification stays
+      // passive — no chime on first post, no buzz, no popup.
+      importance: AndroidImportance.HIGH,
       sound: undefined,
       vibration: false,
-      // Hide the badge dot on the launcher icon (this is a countdown,
-      // not a "you have a message" signal).
       badge: false,
     });
   } catch {

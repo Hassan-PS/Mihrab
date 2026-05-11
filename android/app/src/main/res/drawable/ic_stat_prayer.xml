@@ -2,28 +2,31 @@
 <!--
   Mihrab notification status-bar icon.
 
-  One closed path forming a mihrab arch silhouette (the niche in a
-  mosque's qiblah wall). Single-subpath, fully closed, pure-white fill —
-  the requirements Android imposes on adaptive status-bar icons.
+  Pointed mihrab arch — the niche in a mosque's qiblah wall.
+  Two diagonal lines meet at the peak (outer + inner contour) so the
+  silhouette reads as the architectural mihrab shape used in Islamic
+  geometry, not a rounded "U". A rounded dome was used in earlier
+  versions; the pointed Gothic arch is the right reference and matches
+  the launcher icon's brand mark.
 
-  Earlier versions used a multi-subpath drawing of a mosque + two
-  minarets where one subpath (`M12,4 L13,8 L11,8`) was left unclosed;
-  some Android builds (notably 13+ MIUI / OxygenOS) silently dropped
-  the whole vector when any subpath failed validation, leaving the
-  system to render the default white circle. A single closed shape
-  removes that fragility.
+  Path geometry (24×24 dp viewport):
+    Outer outline (counter-clockwise from bottom-left):
+      M 3,21    bottom-left of plinth
+      L 3,9     up the outer-left wall
+      L 12,2    diagonal up to peak
+      L 21,9    diagonal down to outer-right
+      L 21,21   down the outer-right wall
+    Inner cutout (clockwise — even-odd fill rule):
+      L 17,21   left across the bottom step
+      L 17,11   up the inner-right wall
+      L 12,5    diagonal up to inner peak
+      L 7,11    diagonal down to inner-left
+      L 7,21    down the inner-left wall
+      Z         close (back to 3,21 across the base)
 
-  Path reads (left to right, bottom-up):
-    M3,21 — bottom-left of the niche base
-    H7    — across the base to the left interior shelf
-    V11   — up the inner-left wall
-    A5,7 0 0 1 17,11 — sweep over the top forming the pointed arch
-    V21   — down the inner-right wall
-    H21   — across to the bottom-right
-    V21   — (no-op) close the outer rect
-    Z     — close.
-  The 5,7 elliptical radii give the slightly tall arch that reads as a
-  mihrab rather than a generic rounded rectangle at 24×24 dp.
+  Pure white fill so Android renders it correctly as a status-bar icon
+  (status-bar icons are masked to alpha; any colour is replaced with
+  the system's foreground tint).
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
@@ -32,5 +35,5 @@
     android:viewportHeight="24">
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M3,21 L3,9 A9,9 0 0 1 21,9 L21,21 L17,21 L17,11 A5,7 0 0 0 7,11 L7,21 Z" />
+        android:pathData="M3,21 L3,9 L12,2 L21,9 L21,21 L17,21 L17,11 L12,5 L7,11 L7,21 Z" />
 </vector>

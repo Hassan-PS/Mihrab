@@ -113,16 +113,14 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
   companion object {
     const val NAME = "MihrabLiveActivity"
-    // v2 — bumped in beta.8 to IMPORTANCE_DEFAULT (sound/vibration off
-    // explicitly) so the notification renders in the main shade section
-    // instead of "Silent". Must match the id JS creates in liveActivity.ts.
-    const val CHANNEL_ID = "mihrab_live_activity_v2"
+    // v3 — bumped in beta.9 to IMPORTANCE_HIGH (sound + vibration off
+    // explicitly) so the Android 16 status-bar chip can promote us.
+    // Channel importance must match what JS creates in liveActivity.ts.
+    const val CHANNEL_ID = "mihrab_live_activity_v3"
     const val NOTIF_ID = 0xA1B2
 
     /** Ensure the channel exists with the right importance before any
-     *  startForeground call. The JS side also creates it via notifee on
-     *  app boot, but the FGS may post before that — we need this as a
-     *  safety net to avoid CannotPostForegroundServiceNotificationException. */
+     *  startForeground call. */
     @JvmStatic
     fun ensureChannelExists(ctx: Context) {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -132,12 +130,14 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       val ch = android.app.NotificationChannel(
         CHANNEL_ID,
         "Prayer countdown",
-        android.app.NotificationManager.IMPORTANCE_DEFAULT,
+        android.app.NotificationManager.IMPORTANCE_HIGH,
       ).apply {
         description = "Pinned countdown to the next prayer."
         setSound(null, null) // silent — passive countdown only
         enableVibration(false)
         setShowBadge(false)
+        // No heads-up popup — silently slots into the shade.
+        // setBypassDnd intentionally NOT called so the chip respects DnD.
       }
       nm.createNotificationChannel(ch)
     }
@@ -222,7 +222,11 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setOngoing(true)
           .setOnlyAlertOnce(true)
           .setLocalOnly(false)
-          .setCategory(Notification.CATEGORY_PROGRESS)
+          // CATEGORY_NAVIGATION is the documented chip-eligible category
+          // alongside CALL / TRANSPORT / WORKOUT / MISSED_CALL. PROGRESS
+          // shipped in beta.5–8 didn't unlock the chip; navigation does
+          // on most Android 16 builds we've seen.
+          .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
           .setContentTitle(title)
           .setContentText(body)
@@ -242,6 +246,19 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
               contentIntent,
             ).build(),
           )
+
+        // setSilent is API 29+. Suppresses heads-up popups even on a
+        // HIGH-importance channel — we need IMPORTANCE_HIGH for the
+        // Android 16 chip but don't want a banner popping every minute
+        // when the foreground service re-posts. Called via reflection so
+        // the build compiles against minSdk 24.
+        if (Build.VERSION.SDK_INT >= 29) {
+          runCatching {
+            Notification.Builder::class.java
+              .getMethod("setSilent", Boolean::class.javaPrimitiveType)
+              .invoke(builder, true)
+          }
+        }
 
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
