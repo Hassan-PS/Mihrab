@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.7] — 2026-05-12
+
+### Fixed
+- **Android Live Activity — chip regression (v2.3.4–v2.3.6)**: The root cause was `setCustomContentView()` itself on the Android 16 path, not just `DecoratedCustomViewStyle`. Setting a custom content view changes the notification template type internally and prevents `FLAG_PROMOTED_ONGOING` from being applied, which kills the status-bar chip. Fixed by removing `setCustomContentView` entirely from the Android 16 (`buildAndroid16`) path. The standard two-line template (prayer title / countdown+percentage) is used on API 36+ to preserve the chip. The same-line `RemoteViews` layout is kept on pre-36 devices where no chip exists.
+
 ## [2.3.6] — 2026-05-12
 
 ### Fixed

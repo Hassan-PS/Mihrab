@@ -297,14 +297,17 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
       )
 
-      // Build the custom RemoteViews content (prayer title left, countdown|pct
-      // right on the same line, progress bar below). Falls back to null on any
-      // error; both builder paths degrade gracefully to the standard template.
-      val contentView = buildContentView(ctx, title, nextEpochMs, progressPct)
-
       return if (Build.VERSION.SDK_INT >= 36) {
-        buildAndroid16(ctx, nextEpochMs, accentInt, progressPct, title, pi, contentView)
+        // Android 16+ path: standard template only — no custom RemoteViews.
+        // setCustomContentView changes the notification template type and
+        // breaks FLAG_PROMOTED_ONGOING (the status-bar chip). The chip is
+        // the primary feature on Android 16 so we protect it here; the
+        // same-line layout is available on pre-36 via the legacy path.
+        buildAndroid16(ctx, nextEpochMs, accentInt, progressPct, title, pi)
       } else {
+        // Pre-36 path: use the custom RemoteViews layout (prayer title left,
+        // countdown|pct right on the same line). No chip on these versions.
+        val contentView = buildContentView(ctx, title, nextEpochMs, progressPct)
         buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, pi, contentView)
       }
     }
@@ -361,12 +364,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       progressPct: Int,
       title: String,
       contentIntent: PendingIntent,
-      contentView: RemoteViews?,
     ): Notification {
       try {
         val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
         val countdown = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%"
 
+        // Standard template only — no setCustomContentView.
+        // Custom views change the notification template type and break
+        // FLAG_PROMOTED_ONGOING (the status-bar chip). The chip is the
+        // primary Android 16 feature so we use the standard template here;
+        // the same-line RemoteViews layout is reserved for pre-36 (buildLegacy).
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(accentInt)
@@ -375,24 +382,11 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          // Standard fields — accessibility text + fallback when RemoteViews
-          // are stripped (hardened shells / GrapheneOS).
-          .setContentTitle(title)
-          .setContentText(countdown)
+          .setContentTitle(title)     // "Asr · 17:08"
+          .setContentText(countdown)  // "↓ 1h 23m  |  52%"
           .setShowWhen(false)
           .setContentIntent(contentIntent)
-
-        if (contentView != null) {
-          // Custom layout handles the progress bar inside the RemoteViews.
-          // Do NOT call setProgress() — that renders a second bar.
-          // Do NOT use DecoratedCustomViewStyle — its apply() overwrites
-          // the promoted-ongoing state we set below, killing the chip.
-          // On Android 16 the system shade renders the header chrome
-          // (app icon, app name) automatically without needing a style.
-          builder.setCustomContentView(contentView)
-        } else {
-          builder.setProgress(100, progressPct, false)
-        }
+          .setProgress(100, progressPct, false)
 
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
@@ -400,7 +394,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         return builder.build()
       } catch (t: Throwable) {
         Log.w(NAME, "Android 16 path failed, falling back to legacy", t)
-        return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, contentView)
+        return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, null)
       }
     }
 
