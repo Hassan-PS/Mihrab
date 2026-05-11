@@ -430,9 +430,7 @@ Builds:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '
-org.gradle.java.home=/usr/local/jdk-17
-' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
@@ -580,9 +578,7 @@ org.gradle.java.home=/usr/local/jdk-17
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '
-org.gradle.java.home=/usr/local/jdk-17
-' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
@@ -606,9 +602,7 @@ org.gradle.java.home=/usr/local/jdk-17
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '
-org.gradle.java.home=/usr/local/jdk-17
-' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
@@ -632,9 +626,7 @@ org.gradle.java.home=/usr/local/jdk-17
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '
-org.gradle.java.home=/usr/local/jdk-17
-' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
@@ -658,9 +650,7 @@ org.gradle.java.home=/usr/local/jdk-17
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '
-org.gradle.java.home=/usr/local/jdk-17
-' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
