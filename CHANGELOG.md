@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.10] — 2026-05-12
+
+### Changed
+- **Android Live Activity — post-build `contentView` injection (chip + same-line layout)**: Instead of calling `builder.setCustomContentView()` (which flags the notification as "custom template" and causes the builder to suppress `FLAG_PROMOTED_ONGOING` during `build()`), the notification is now built as a standard template so chip state is fully preserved, then `notif.contentView` is assigned directly on the built `Notification` object post-build. This sidesteps the builder's template-type tracking entirely. Also injects `android.requestPromotedOngoing = true` and `android.shortCriticalText` into extras post-build as belt-and-suspenders, and clears the standard progress extras to prevent a double progress bar when the custom `ProgressBar` is in use.
+
 ## [2.3.9] — 2026-05-12
 
 ### Changed
