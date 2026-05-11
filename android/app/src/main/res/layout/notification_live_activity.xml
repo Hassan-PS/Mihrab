@@ -17,13 +17,18 @@
     android:orientation="vertical">
 
     <!-- Row 1 ─────────────────────────────────────────────────────── -->
+    <!-- layoutDirection=ltr keeps prayer-title LEFT and countdown RIGHT
+         even when the title text is RTL (Arabic/Urdu). Individual text
+         direction is still resolved from locale so Arabic glyphs render
+         correctly — we are only fixing the widget *order*, not the text. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layoutDirection="ltr"
         android:gravity="center_vertical">
 
-        <!-- Left: "Asr · 17:08" — expands, truncates with ellipsis -->
+        <!-- Left: "الفجر · 02:48" — expands, truncates with ellipsis -->
         <TextView
             android:id="@+id/la_prayer_title"
             android:layout_width="0dp"
@@ -31,14 +36,16 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="1"
+            android:textDirection="locale"
             android:textAppearance="@android:style/TextAppearance.Material.Notification.Title" />
 
-        <!-- Right: "↓ 1h 23m  |  52%" — pinned to the far right -->
+        <!-- Right: "↓ 1h 23m  |  52%" — always pinned to the far right -->
         <TextView
             android:id="@+id/la_countdown_pct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:textDirection="ltr"
             android:textAppearance="@android:style/TextAppearance.Material.Notification" />
 
     </LinearLayout>

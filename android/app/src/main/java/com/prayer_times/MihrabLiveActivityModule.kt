@@ -375,19 +375,22 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          // Standard fields — used as accessibility text and as fallback
-          // when RemoteViews are stripped (hardened shells).
+          // Standard fields — accessibility text + fallback when RemoteViews
+          // are stripped (hardened shells / GrapheneOS).
           .setContentTitle(title)
           .setContentText(countdown)
           .setShowWhen(false)
           .setContentIntent(contentIntent)
-          .setProgress(100, progressPct, false)
 
-        // Custom layout: prayer title left, countdown|pct right, progress bar below.
-        // DecoratedCustomViewStyle preserves the standard header chrome.
         if (contentView != null) {
+          // Custom layout handles the progress bar inside the RemoteViews.
+          // Do NOT also call setProgress() — that would render a second bar
+          // below the custom content view.
           builder.setCustomContentView(contentView)
           builder.setStyle(Notification.DecoratedCustomViewStyle())
+        } else {
+          // Fallback: standard template, use the built-in progress bar.
+          builder.setProgress(100, progressPct, false)
         }
 
         tryAttachShortCriticalText(builder, shortText)
@@ -428,12 +431,14 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .setContentText(countdown)
         .setContentIntent(contentIntent)
         .setShowWhen(false)
-        .setProgress(100, progressPct, false)
 
-      // Custom layout: prayer title left, countdown|pct right, progress bar below.
       if (contentView != null) {
+        // Custom layout handles the progress bar — don't call setProgress()
+        // or a second bar appears below the custom content view.
         builder.setCustomContentView(contentView)
         builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+      } else {
+        builder.setProgress(100, progressPct, false)
       }
 
       return builder.build()

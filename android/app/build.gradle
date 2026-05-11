@@ -111,8 +111,8 @@ android {
         applicationId "com.prayer_times"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 167
-        versionName "2.3.4"
+        versionCode 168
+        versionName "2.3.5"
     }
     flavorDimensions += "distribution"
     productFlavors {

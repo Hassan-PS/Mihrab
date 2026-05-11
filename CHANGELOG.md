@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.5] — 2026-05-12
+
+### Fixed
+- **Android Live Activity — double progress bar**: When the custom `RemoteViews` content view is active, `setProgress()` on the builder was also rendering a second progress bar below the custom view. Fixed by skipping `setProgress()` on the builder when the custom layout is in use (the `RemoteViews` `ProgressBar` is the only bar now).
+- **Android Live Activity — RTL layout flip with Arabic prayer names**: Arabic text in the prayer title (`الفجر · 02:48`) caused the notification's `LinearLayout` to flip to RTL, putting the prayer title on the right and the countdown on the left — the opposite of the intended layout. Fixed by setting `android:layoutDirection="ltr"` on the row `LinearLayout` to lock the left-prayer / right-countdown widget order, while keeping `android:textDirection="locale"` on each `TextView` so Arabic and Urdu glyphs still render correctly.
+
 ## [2.3.4] — 2026-05-11
 
 ### Changed
