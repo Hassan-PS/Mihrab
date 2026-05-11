@@ -113,10 +113,12 @@ function parseHHMMOnDate(hhmm: string, base: Date): Date | null {
 
 function localizedPrayerLabel(key: string | null | undefined): string {
   if (!key) return '';
-  // Re-use existing prayer label keys (settings.fajr, settings.dhuhr, …)
-  // when present, else fall back to the raw key.
-  const k = `prayer.${key.toLowerCase()}`;
-  return i18n.exists(k) ? i18n.t(k) : key;
+  // Locale files use capitalised keys: prayer.Fajr, prayer.Maghrib, etc.
+  // Try exact case first, then lowercase so older locale structures still work.
+  const kExact = `prayer.${key}`;
+  if (i18n.exists(kExact)) return i18n.t(kExact);
+  const kLower = `prayer.${key.toLowerCase()}`;
+  return i18n.exists(kLower) ? i18n.t(kLower) : key;
 }
 
 /**
@@ -194,7 +196,7 @@ export async function syncLiveActivity(args: {
       hijriLabel: '',
       locationLabel: '',
       accentHex,
-      compactMode: args.options.compactMode,
+      compactMode: true,
       showSunrise: true,
       showHijri: false,
       showLocation: false,
@@ -225,7 +227,7 @@ export async function syncLiveActivity(args: {
       sunriseRow: payload.sunriseRow,
       hijriLabel: '',
       locationLabel: '',
-      compactMode: args.options.compactMode,
+      compactMode: true,
       showSunrise: true,
       showHijri: false,
       showLocation: false,

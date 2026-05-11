@@ -896,6 +896,7 @@
     "now": "Jetzt",
     "soon": "Beginnt bald",
     "channelName": "Gebets-Countdown",
-    "channelDesc": "Angeheftete laufende Benachrichtigung mit dem Countdown zum nächsten Gebet."
+    "channelDesc": "Angeheftete laufende Benachrichtigung mit dem Countdown zum nächsten Gebet.",
+    "fgsText": "Gebets-Countdown aktiv"
   }
 }

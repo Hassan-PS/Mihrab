@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.2] — 2026-05-11
+
+### Fixed
+- **Android notifications — status-bar icon**: All notifications (prayer alerts, fasting reminders, Live Activity) now show a refined mihrab arch icon whose Bézier shoulder curves and eight-pointed star are derived directly from the launcher icon geometry, replacing the previous straight-line approximation.
+
+### Changed
+- **Android Live Activity — notification prayer names**: Prayer names in the Live Activity notification now correctly use the app's selected language (e.g. Arabic) instead of always falling back to English. Root cause was a lowercase key lookup (`prayer.fajr`) that missed the capitalised keys (`prayer.Fajr`) used in all 13 locale files.
+- **Android Live Activity — auto-advance**: When a prayer time passes while the app is in the background, the Live Activity foreground service now automatically advances to the next prayer and updates the notification without requiring the app to be opened.
+- **Android Live Activity — compact mode permanent**: The compact single-row layout is now the permanent default; the compact mode toggle has been removed from settings.
+
 ## [2.1.1] — 2026-05-11
 
 ### Changed

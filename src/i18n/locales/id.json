@@ -896,6 +896,7 @@
     "now": "Sekarang",
     "soon": "Segera dimulai",
     "channelName": "Hitungan mundur salat",
-    "channelDesc": "Notifikasi berkelanjutan tersemat yang menampilkan hitungan mundur ke salat berikutnya."
+    "channelDesc": "Notifikasi berkelanjutan tersemat yang menampilkan hitungan mundur ke salat berikutnya.",
+    "fgsText": "Hitung mundur shalat aktif"
   }
 }
