@@ -20,35 +20,24 @@ import org.json.JSONObject
 /**
  * Mihrab Live Activity — JS bridge for the Android Live Activity.
  *
- * Architecture (v2.1.0-beta.10+):
+ * Architecture (v2.3.0+, single-notification):
  *
  *   JS toggles ON  →  MihrabLiveActivityModule.display(payload)
  *                  →  ContextCompat.startForegroundService(payload)
  *                  →  MihrabLiveActivityService takes over:
- *                       1. startForeground(FGS_NOTIF_ID, buildFgsNotification())
- *                          — minimal silent placeholder; keeps process alive
- *                            so the per-minute ticker keeps running. This
- *                            notification is posted via startForeground() and
- *                            therefore receives FLAG_FOREGROUND_SERVICE.
- *                       2. notify(NOTIF_ID, buildNotificationFromPayload(...))
- *                          — rich chip notification posted via regular
- *                            notify(). Because it is NOT posted via
- *                            startForeground(), NMS can set FLAG_PROMOTED_ONGOING
- *                            on it, making it eligible for the Android 16
- *                            status-bar Live Update chip.
+ *                       startForeground(NOTIF_ID, buildNotificationFromPayload())
+ *                       — the rich notification IS the FGS notification.
+ *                         One notification keeps the process alive AND
+ *                         shows the prayer countdown. No hidden placeholder.
  *
  *   JS toggles OFF →  MihrabLiveActivityModule.cancel()
  *                  →  context.stopService(...)
- *                  →  service.onDestroy() cancels its ticker and both
- *                     notifications.
+ *                  →  service.onDestroy() cancels the ticker and the notification.
  *
- * Why dual notifications (discovered in beta.10 investigation):
- *   FLAG_PROMOTED_ONGOING and FLAG_FOREGROUND_SERVICE are mutually
- *   exclusive in Android 16's NMS. NMS only sets FLAG_PROMOTED_ONGOING
- *   on regular notify() notifications — never on FGS notifications.
- *   EasyPark (confirmed working chip) uses a regular service + notify().
- *   Our previous single-notification FGS approach always added
- *   FLAG_FOREGROUND_SERVICE, which permanently blocked chip promotion.
+ * Note: the single-notification approach means FLAG_FOREGROUND_SERVICE is
+ *   added to NOTIF_ID by NMS, which prevents FLAG_PROMOTED_ONGOING and
+ *   therefore the Android 16 status-bar chip. The cleaner single-notification
+ *   UX (no "silent" placeholder visible in settings) is the correct trade-off.
  *
  * The notification builder lives in the companion object so the
  * service can build the notification on its own ticker, without going
@@ -125,9 +114,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       // started (background FGS-start was blocked and we fell back to
       // notify()) or the service already exited.
       runCatching {
-        val nm = NotificationManagerCompat.from(reactContext)
-        nm.cancel(NOTIF_ID)
-        nm.cancel(FGS_NOTIF_ID)
+        NotificationManagerCompat.from(reactContext).cancel(NOTIF_ID)
       }
       promise.resolve(null)
     } catch (e: Throwable) {
@@ -328,7 +315,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle("$title  ·  $progressPct%") // "Asr · 17:08  ·  52%"
+          .setContentTitle(title)          // "Asr · 17:08"
+          .setSubText("$progressPct%")     // header-row percentage
           .setContentIntent(contentIntent)
           .setWhen(nextEpochMs)
           .setShowWhen(true)
@@ -367,7 +355,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .setCategory(NotificationCompat.CATEGORY_PROGRESS)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setContentTitle("$title  ·  $progressPct%") // "Asr · 17:08  ·  52%"
+        .setContentTitle(title)          // "Asr · 17:08"
+        .setSubText("$progressPct%")     // header-row percentage
         .setContentIntent(contentIntent)
         .setWhen(nextEpochMs)
         .setShowWhen(true)

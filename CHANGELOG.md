@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.0] — 2026-05-12
+
+### Changed
+- **Android Live Activity — single notification**: Replaced the dual-notification architecture (a hidden IMPORTANCE_NONE FGS placeholder + a separate rich notification) with a single notification. The rich prayer-countdown notification is now the foreground service notification itself — no more phantom entry in the "silent" section of the notification settings. The trade-off is losing the Android 16 status-bar chip; the cleaner single-notification UX is the correct call.
+- **Android Live Activity — progress percentage placement**: Moved the `52%` from the notification title (`"Asr · 17:08  ·  52%"`) to `setSubText`, which places it in the notification header row next to the app name. The title is now cleanly `"Asr · 17:08"` and the progress bar + percentage are visually grouped at the header level.
+
 ## [2.2.0] — 2026-05-11
 
 ### Fixed

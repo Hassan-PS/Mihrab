@@ -76,39 +76,25 @@ class MihrabLiveActivityService : Service() {
       MihrabLiveActivityModule.ensureChannelExists(this)
       MihrabLiveActivityModule.ensureFgsChannelExists(this)
 
-      // Step 1: start FGS with the minimal placeholder notification.
-      // The IMPORTANCE_NONE channel suppresses it from the shade entirely.
-      // Pass the localised fgsText from the JS payload so it uses the
-      // app's selected language rather than the device locale.
-      val fgsText = MihrabLiveActivityModule.fgsTextFromPayload(JSONObject(payload))
-      val fgsNotif = MihrabLiveActivityModule.buildFgsNotification(this, fgsText)
+      // Single-notification architecture: the rich notification IS the
+      // FGS notification. One notification keeps the process alive AND
+      // shows the prayer countdown — no hidden placeholder in the silent
+      // section. The trade-off (no Android 16 chip) is acceptable; the
+      // cleaner UX (single notification) is more important.
       try {
-        // Android 14+ requires the FGS type to match the manifest type.
+        val richNotif = build(payload)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
           startForeground(
-            MihrabLiveActivityModule.FGS_NOTIF_ID,
-            fgsNotif,
+            MihrabLiveActivityModule.NOTIF_ID,
+            richNotif,
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
           )
         } else {
-          startForeground(MihrabLiveActivityModule.FGS_NOTIF_ID, fgsNotif)
+          startForeground(MihrabLiveActivityModule.NOTIF_ID, richNotif)
         }
-        Log.i(TAG, "startForeground posted FGS placeholder id=${MihrabLiveActivityModule.FGS_NOTIF_ID}")
+        Log.i(TAG, "startForeground posted single rich notification id=${MihrabLiveActivityModule.NOTIF_ID}")
       } catch (t: Throwable) {
         Log.w(TAG, "startForeground failed", t)
-      }
-
-      // Step 2: post the rich chip notification via regular notify().
-      // Because this is NOT posted via startForeground(), NMS does NOT add
-      // FLAG_FOREGROUND_SERVICE — leaving it eligible for FLAG_PROMOTED_ONGOING
-      // and therefore the Android 16 status-bar Live Update chip.
-      try {
-        val richNotif = build(payload)
-        NotificationManagerCompat.from(this)
-          .notify(MihrabLiveActivityModule.NOTIF_ID, richNotif)
-        Log.i(TAG, "notify() posted rich chip notification id=${MihrabLiveActivityModule.NOTIF_ID}")
-      } catch (t: Throwable) {
-        Log.w(TAG, "notify() rich notification failed", t)
       }
 
       scheduleTicker()
@@ -139,24 +125,6 @@ class MihrabLiveActivityService : Service() {
         val advancedPayload = tryAdvanceToNextPrayer(payload)
         val currentPayload = if (advancedPayload != null) {
           lastPayload = advancedPayload
-          // Also refresh the FGS placeholder text from the new payload.
-          try {
-            val fgsText = MihrabLiveActivityModule.fgsTextFromPayload(
-              org.json.JSONObject(advancedPayload)
-            )
-            val fgsNotif = MihrabLiveActivityModule.buildFgsNotification(this, fgsText)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-              startForeground(
-                MihrabLiveActivityModule.FGS_NOTIF_ID,
-                fgsNotif,
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
-              )
-            } else {
-              startForeground(MihrabLiveActivityModule.FGS_NOTIF_ID, fgsNotif)
-            }
-          } catch (t: Throwable) {
-            Log.w(TAG, "ticker FGS refresh failed", t)
-          }
           advancedPayload
         } else {
           payload
@@ -296,9 +264,7 @@ class MihrabLiveActivityService : Service() {
       }
     }
     runCatching {
-      val nm = NotificationManagerCompat.from(this)
-      nm.cancel(MihrabLiveActivityModule.NOTIF_ID)
-      nm.cancel(MihrabLiveActivityModule.FGS_NOTIF_ID)
+      NotificationManagerCompat.from(this).cancel(MihrabLiveActivityModule.NOTIF_ID)
     }
     Log.i(TAG, "onDestroy — service stopped, both notifications cancelled")
   }
