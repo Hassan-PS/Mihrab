@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "নামাজের কয়েক মিনিট আগে",
     "prePrayerReminderOff": "বন্ধ",
     "prePrayerReminderOption": "{{count}} মিনিট আগে",
+    "liveActivity": "লাইভ কার্যকলাপ",
+    "liveActivityHelp": "পরবর্তী নামাযের কাউন্টডাউন এবং দিনের বাকি সময়সূচি দেখানো পিন করা নোটিফিকেশন।",
+    "liveActivityCustomize": "কাস্টমাইজ করুন",
+    "liveActivityCompact": "সংক্ষিপ্ত মোড",
+    "liveActivityCompactHelp": "শুধু কাউন্টডাউন দেখান; নামাযের তালিকা লুকান।",
+    "liveActivityShowSunriseLabel": "সূর্যোদয় দেখান",
+    "liveActivityShowHijriLabel": "হিজরি তারিখ দেখান",
+    "liveActivityShowLocationLabel": "অবস্থান দেখান",
     "language": "ভাষা",
     "languageHelp": "ইংরেজি, সুইডিশ বা আরবি। আরবি ডান-থেকে-বাম লেআউট ব্যবহার করে।",
     "langEn": "ইংরেজি",
@@ -881,5 +889,13 @@
     "amiriFonts": "Amiri ও Amiri Quran ফন্ট",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "হিসনুল মুসলিম-এর দোআ"
+  },
+  "liveActivity": {
+    "title": "পরবর্তী নামায",
+    "in": "{{remaining}} এ",
+    "now": "এখন",
+    "soon": "শীঘ্রই শুরু হচ্ছে",
+    "channelName": "নামাযের কাউন্টডাউন",
+    "channelDesc": "পরবর্তী নামাযের কাউন্টডাউন দেখানো পিন করা চলমান নোটিফিকেশন।"
   }
 }

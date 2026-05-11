@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "نماز سے چند منٹ پہلے",
     "prePrayerReminderOff": "آف",
     "prePrayerReminderOption": "{{count}} منٹ پہلے",
+    "liveActivity": "لائیو سرگرمی",
+    "liveActivityHelp": "اگلی نماز تک گنتی کی ایک نتھی نوٹیفکیشن، توسیع شدہ منظر میں آج کے دیگر اوقات کے ساتھ۔",
+    "liveActivityCustomize": "حسب ضرورت بنائیں",
+    "liveActivityCompact": "کمپیکٹ موڈ",
+    "liveActivityCompactHelp": "صرف الٹی گنتی دکھائیں؛ نماز کی فہرست چھپائیں۔",
+    "liveActivityShowSunriseLabel": "طلوع آفتاب دکھائیں",
+    "liveActivityShowHijriLabel": "ہجری تاریخ دکھائیں",
+    "liveActivityShowLocationLabel": "مقام دکھائیں",
     "language": "زبان",
     "languageHelp": "انگریزی، سویڈش یا عربی۔ عربی میں دائیں سے بائیں ترتیب استعمال ہوتی ہے۔",
     "langEn": "انگریزی",
@@ -881,5 +889,13 @@
     "amiriFonts": "فونٹس Amiri و Amiri Quran",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "حصنُ المسلم کی دعائیں"
+  },
+  "liveActivity": {
+    "title": "اگلی نماز",
+    "in": "{{remaining}} میں",
+    "now": "ابھی",
+    "soon": "جلد شروع ہو رہی ہے",
+    "channelName": "نماز کی گنتی",
+    "channelDesc": "اگلی نماز کی الٹی گنتی دکھانے والی نتھی جاری نوٹیفکیشن۔"
   }
 }

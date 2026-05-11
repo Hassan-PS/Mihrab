@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Minutes avant la prière",
     "prePrayerReminderOff": "Désactivé",
     "prePrayerReminderOption": "{{count}} minute avant",
+    "liveActivity": "Activité en direct",
+    "liveActivityHelp": "Notification épinglée avec le compte à rebours vers la prochaine prière et le reste des horaires du jour.",
+    "liveActivityCustomize": "Personnaliser",
+    "liveActivityCompact": "Mode compact",
+    "liveActivityCompactHelp": "N'afficher que le compte à rebours ; masquer la liste des prières.",
+    "liveActivityShowSunriseLabel": "Afficher le Lever du soleil",
+    "liveActivityShowHijriLabel": "Afficher la date hégirienne",
+    "liveActivityShowLocationLabel": "Afficher le lieu",
     "language": "Langue",
     "languageHelp": "Anglais, suédois ou arabe. L'arabe utilise une disposition de droite à gauche.",
     "langEn": "Anglais",
@@ -881,5 +889,13 @@
     "amiriFonts": "Polices Amiri et Amiri Quran",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Invocations de Hisn al-Muslim"
+  },
+  "liveActivity": {
+    "title": "Prochaine prière",
+    "in": "dans {{remaining}}",
+    "now": "Maintenant",
+    "soon": "Commence bientôt",
+    "channelName": "Compte à rebours de la prière",
+    "channelDesc": "Notification continue épinglée affichant le compte à rebours vers la prochaine prière."
   }
 }

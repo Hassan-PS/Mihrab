@@ -176,6 +176,28 @@ export type PrayerAppSettings = {
   appAccentId: AppAccentId;
   /** When `appAccentId` is 'custom', the user-typed #RRGGBB hex. */
   appAccentCustomHex: string;
+  /**
+   * Live Activity / persistent prayer-countdown notification — task #128.
+   *
+   * When ON, the app pins an ongoing notification (Android) or starts an
+   * ActivityKit Live Activity (iOS 16.1+) showing the countdown to the
+   * next prayer plus the rest of the day's times. Off by default so
+   * notifications don't surprise upgraders.
+   */
+  liveActivityEnabled: boolean;
+  /**
+   * Compact mode hides the prayer list and shows only the countdown
+   * line. The Dynamic Island compact / lock-screen minimised renders
+   * are unaffected (they're always compact).
+   */
+  liveActivityCompactMode: boolean;
+  /** Include Sunrise in the prayer list (it's not a prayer, but
+   *  bookends Fajr and marks the end of the dawn window). */
+  liveActivityShowSunrise: boolean;
+  /** Show the Hijri date as a thin caption line. */
+  liveActivityShowHijri: boolean;
+  /** Show the active location label (city) as a thin caption line. */
+  liveActivityShowLocation: boolean;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -222,4 +244,13 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // upgrade).
   appAccentId: 'green',
   appAccentCustomHex: '#22c55e',
+  // Live Activity defaults: OFF; when enabled, the detail-rich layout
+  // (full list + hijri + location) is the default — it's the more
+  // useful version on the lock screen / shade. Sunrise included because
+  // it's the most-requested data point not in the headline countdown.
+  liveActivityEnabled: false,
+  liveActivityCompactMode: false,
+  liveActivityShowSunrise: true,
+  liveActivityShowHijri: true,
+  liveActivityShowLocation: true,
 };

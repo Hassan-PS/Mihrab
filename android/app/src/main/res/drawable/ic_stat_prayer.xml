@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Mihrab notification status-bar icon.
+
+  One closed path forming a mihrab arch silhouette (the niche in a
+  mosque's qiblah wall). Single-subpath, fully closed, pure-white fill —
+  the requirements Android imposes on adaptive status-bar icons.
+
+  Earlier versions used a multi-subpath drawing of a mosque + two
+  minarets where one subpath (`M12,4 L13,8 L11,8`) was left unclosed;
+  some Android builds (notably 13+ MIUI / OxygenOS) silently dropped
+  the whole vector when any subpath failed validation, leaving the
+  system to render the default white circle. A single closed shape
+  removes that fragility.
+
+  Path reads (left to right, bottom-up):
+    M3,21 — bottom-left of the niche base
+    H7    — across the base to the left interior shelf
+    V11   — up the inner-left wall
+    A5,7 0 0 1 17,11 — sweep over the top forming the pointed arch
+    V21   — down the inner-right wall
+    H21   — across to the bottom-right
+    V21   — (no-op) close the outer rect
+    Z     — close.
+  The 5,7 elliptical radii give the slightly tall arch that reads as a
+  mihrab rather than a generic rounded rectangle at 24×24 dp.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
@@ -6,5 +32,5 @@
     android:viewportHeight="24">
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M4.5,5 L3,7.5 L3,22 L6,22 L6,7.5 Z M19.5,5 L18,7.5 L18,22 L21,22 L21,7.5 Z M12,4 L13,8 L11,8 Z M7,15 Q7,8 12,8 Q17,8 17,15 L17,22 L7,22 Z" />
+        android:pathData="M3,21 L3,9 A9,9 0 0 1 21,9 L21,21 L17,21 L17,11 A5,7 0 0 0 7,11 L7,21 Z" />
 </vector>

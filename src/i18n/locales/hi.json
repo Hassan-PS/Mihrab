@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "प्रार्थना से कुछ मिनट पहले",
     "prePrayerReminderOff": "बंद",
     "prePrayerReminderOption": "{{count}} मिनट पहले",
+    "liveActivity": "लाइव गतिविधि",
+    "liveActivityHelp": "अगली नमाज़ की उलटी गिनती और दिन के बाकी समय दिखाने वाली पिन की गई सूचना।",
+    "liveActivityCustomize": "अनुकूलित करें",
+    "liveActivityCompact": "कॉम्पैक्ट मोड",
+    "liveActivityCompactHelp": "केवल उलटी गिनती दिखाएँ; नमाज़ की सूची छिपाएँ।",
+    "liveActivityShowSunriseLabel": "सूर्योदय दिखाएँ",
+    "liveActivityShowHijriLabel": "हिजरी तारीख़ दिखाएँ",
+    "liveActivityShowLocationLabel": "स्थान दिखाएँ",
     "language": "भाषा",
     "languageHelp": "अंग्रेजी, स्वीडिश, या अरबी। अरबी दाएं से बाएं लेआउट का उपयोग करता है।",
     "langEn": "अंग्रेज़ी",
@@ -881,5 +889,13 @@
     "amiriFonts": "Amiri व Amiri Quran फ़ॉन्ट",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "हिस्न अल-मुस्लिम की दुआएँ"
+  },
+  "liveActivity": {
+    "title": "अगली नमाज़",
+    "in": "{{remaining}} में",
+    "now": "अभी",
+    "soon": "जल्द शुरू हो रही है",
+    "channelName": "नमाज़ की उलटी गिनती",
+    "channelDesc": "अगली नमाज़ की उलटी गिनती दिखाने वाली पिन की गई जारी सूचना।"
   }
 }

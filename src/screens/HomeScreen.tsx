@@ -19,6 +19,7 @@ import { usePrayerDay } from '../hooks/usePrayerDay';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { syncPrayerWidget } from '../widget/syncPrayerWidget';
+import { syncLiveActivity } from '../liveActivity/syncLiveActivity';
 import {
   getEffectiveDataProvider,
   resolveCoordsForProvider,
@@ -177,6 +178,23 @@ export function HomeScreen() {
           { lat: state.latitude, lng: state.longitude },
           { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
         ).catch(e => console.warn('syncPrayerWidget (focus):', e));
+        // Live activity — task #128. Same cadence as the widget so the
+        // notification stays in sync with what's on the home screen.
+        syncLiveActivity({
+          options: {
+            enabled: settings.liveActivityEnabled,
+            compactMode: settings.liveActivityCompactMode,
+            showSunrise: settings.liveActivityShowSunrise,
+            showHijri: settings.liveActivityShowHijri,
+            showLocation: settings.liveActivityShowLocation,
+          },
+          today: state.today,
+          tomorrow: state.tomorrow,
+          now: new Date(),
+          locationName: locationLabel,
+          coords: { lat: state.latitude, lng: state.longitude },
+          seasonal: { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
+        }).catch(e => console.warn('syncLiveActivity (focus):', e));
       }
 
       if (settings.notificationsEnabled) {
@@ -206,6 +224,11 @@ export function HomeScreen() {
       settings.notificationSound,
       state,
       locationLabel,
+      settings.liveActivityEnabled,
+      settings.liveActivityCompactMode,
+      settings.liveActivityShowSunrise,
+      settings.liveActivityShowHijri,
+      settings.liveActivityShowLocation,
     ]),
   );
 
@@ -227,7 +250,36 @@ export function HomeScreen() {
       { lat: state.latitude, lng: state.longitude },
       { jumuah: seasonal.jumuah, ramadan: seasonal.ramadan, eid: seasonal.eid },
     ).catch(e => console.warn('syncPrayerWidget (effect):', e));
-  }, [hydrated, state, locationLabel]);
+    // Live activity — same data path as the widget (task #128).
+    syncLiveActivity({
+      options: {
+        enabled: settings.liveActivityEnabled,
+        compactMode: settings.liveActivityCompactMode,
+        showSunrise: settings.liveActivityShowSunrise,
+        showHijri: settings.liveActivityShowHijri,
+        showLocation: settings.liveActivityShowLocation,
+      },
+      today: state.today,
+      tomorrow: state.tomorrow,
+      now: new Date(),
+      locationName: locationLabel,
+      coords: { lat: state.latitude, lng: state.longitude },
+      seasonal: {
+        jumuah: seasonal.jumuah,
+        ramadan: seasonal.ramadan,
+        eid: seasonal.eid,
+      },
+    }).catch(e => console.warn('syncLiveActivity (effect):', e));
+  }, [
+    hydrated,
+    state,
+    locationLabel,
+    settings.liveActivityEnabled,
+    settings.liveActivityCompactMode,
+    settings.liveActivityShowSunrise,
+    settings.liveActivityShowHijri,
+    settings.liveActivityShowLocation,
+  ]);
 
   // Persist last-fetched coords so MonthScreen and offline use can fall back to them.
   const readyLat = state.phase === 'ready' ? state.latitude : undefined;

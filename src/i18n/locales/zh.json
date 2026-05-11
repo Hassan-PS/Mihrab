@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "祈祷前几分钟",
     "prePrayerReminderOff": "离开",
     "prePrayerReminderOption": "{{count}} 分钟前",
+    "liveActivity": "实时活动",
+    "liveActivityHelp": "已固定通知，显示距下一次礼拜的倒计时以及今日其余礼拜时间。",
+    "liveActivityCustomize": "自定义",
+    "liveActivityCompact": "紧凑模式",
+    "liveActivityCompactHelp": "仅显示倒计时；隐藏礼拜列表。",
+    "liveActivityShowSunriseLabel": "显示日出",
+    "liveActivityShowHijriLabel": "显示伊斯兰历日期",
+    "liveActivityShowLocationLabel": "显示位置",
     "language": "语言",
     "languageHelp": "英语、瑞典语或阿拉伯语。阿拉伯语使用从右到左的布局。",
     "langEn": "英语",
@@ -881,5 +889,13 @@
     "amiriFonts": "Amiri 与 Amiri Quran 字体",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "《穆斯林堡垒》中的祷词"
+  },
+  "liveActivity": {
+    "title": "下一次礼拜",
+    "in": "{{remaining}} 后",
+    "now": "现在",
+    "soon": "即将开始",
+    "channelName": "礼拜倒计时",
+    "channelDesc": "持续固定的通知，显示距下一次礼拜的倒计时。"
   }
 }

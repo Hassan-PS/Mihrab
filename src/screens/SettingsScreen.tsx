@@ -14,6 +14,7 @@ import { LanguageModal } from './settings/LanguageModal';
 import { LocationCard } from './settings/LocationCard';
 import { MethodModal } from './settings/MethodModal';
 import { NotificationsCard } from './settings/NotificationsCard';
+import { LiveActivityCard } from './settings/LiveActivityCard';
 import { PrayerOffsetsModal } from './settings/PrayerOffsetsModal';
 import { PreReminderModal } from './settings/PreReminderModal';
 import { SavedLocationsCard } from './settings/SavedLocationsCard';
@@ -103,6 +104,7 @@ export function SettingsScreen() {
           onOpenSoundPicker={openSoundPicker}
           onOpenPreReminderPicker={openPreReminder}
         />
+        <LiveActivityCard />
         <AboutCard />
       </ScrollView>
 
