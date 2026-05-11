@@ -89,22 +89,6 @@ Archive and upload via Xcode Organizer for App Store / TestFlight.
 
 ---
 
-## For contributors
-
-If you're here to contribute code, dig deeper, or understand how the app gets to the stores, start with these:
-
-| Doc | What it covers |
-|---|---|
-| [CLAUDE.md](CLAUDE.md) | Canonical project guide — architecture, stack, non-negotiables, native modules, patterns. Loaded by Claude Code agents and read first by every contributor. |
-| [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md) | F-Droid, Google Play, App Store + Xcode Cloud — channel-by-channel release flow with the per-step checklist. |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution flow + the hard rules (privacy, locale parity, F-Droid compatibility, design system). |
-| [IMPROVEMENT_ROADMAP.md](IMPROVEMENT_ROADMAP.md) | The numbered task list every commit references. |
-| [docs/design/principles.md](docs/design/principles.md) | The five design principles every visual change routes through. |
-| [docs/data-sources.md](docs/data-sources.md) | The four prayer-time providers and their failure modes. |
-| [CHANGELOG.md](CHANGELOG.md) | Release-by-release diffs. |
-| [SECURITY.md](SECURITY.md) | Vulnerability disclosure policy. |
-| [contrib/fdroid/README.md](contrib/fdroid/README.md) | F-Droid submission kit (recipe, MR template, per-merge checklist). |
-
 ## License
 
 [Apache-2.0](LICENSE)
