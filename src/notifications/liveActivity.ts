@@ -41,6 +41,10 @@ import notifee, {
 } from '@notifee/react-native';
 import i18n from '../i18n';
 import type { WidgetPrayerPayload } from '../widget/buildWidgetPayload';
+import {
+  getMihrabLiveActivityModule,
+  type MihrabLiveActivityPayload,
+} from '../native/MihrabLiveActivity';
 
 /** Stable notifee id — fixed so updates replace in place, not stack. */
 export const LIVE_ACTIVITY_NOTIFICATION_ID = 'mihrab.live_activity.prayer_countdown';
@@ -119,13 +123,14 @@ function formatRemaining(ms: number): string {
 
 /**
  * Look up the long localised prayer name (e.g. "Maghrib" not "Magh"),
- * falling back to the canonical row key if no translation exists. Row
- * keys are stable (Fajr/Sunrise/Dhuhr/Asr/Maghrib/Isha) so the fallback
- * is always meaningful.
+ * falling back to the supplied abbreviation, then to the canonical row
+ * key. Row keys are stable (Fajr/Sunrise/Dhuhr/Asr/Maghrib/Isha) so the
+ * fallback is always meaningful.
  */
-function localizedPrayerName(key: string): string {
+function localizedPrayerName(key: string, abbrFallback?: string): string {
   const k = `prayer.${key.toLowerCase()}`;
-  return i18n.exists(k) ? i18n.t(k) : key;
+  if (i18n.exists(k)) return i18n.t(k);
+  return abbrFallback || key;
 }
 
 /**
@@ -152,6 +157,44 @@ function buildInboxLines(input: LiveActivityRenderInput): string[] {
 }
 
 /** ── Public API ──────────────────────────────────────────────────── */
+
+/**
+ * Compute fraction (0..1) of time elapsed since the PREVIOUS prayer
+ * vs. the wait until the NEXT prayer. Used to drive the progress bar
+ * in the native RemoteViews layout. Returns 0 if we can't infer the
+ * previous prayer (e.g. before Fajr on day 1 of usage).
+ */
+function computeProgressFraction(
+  payload: WidgetPrayerPayload,
+  nextEpochMs: number | null,
+  now: number,
+): number {
+  if (nextEpochMs == null) return 0;
+  // Find the most recent prayer that's already passed.
+  const ordered = [...payload.rows];
+  if (payload.sunriseRow) {
+    if (ordered.length > 0) ordered.splice(1, 0, payload.sunriseRow);
+    else ordered.push(payload.sunriseRow);
+  }
+  let prevEpoch: number | null = null;
+  for (const r of ordered) {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(r.time);
+    if (!m) continue;
+    const candidate = new Date(now);
+    candidate.setHours(Number(m[1]), Number(m[2]), 0, 0);
+    let t = candidate.getTime();
+    if (t > now) {
+      // This row is later today — try yesterday's instance instead.
+      t -= 24 * 60 * 60 * 1000;
+    }
+    if (t <= now && (prevEpoch == null || t > prevEpoch)) prevEpoch = t;
+  }
+  if (prevEpoch == null) return 0;
+  const span = nextEpochMs - prevEpoch;
+  if (span <= 0) return 0;
+  const done = now - prevEpoch;
+  return Math.max(0, Math.min(1, done / span));
+}
 
 export async function startOrUpdateLiveActivity(
   input: LiveActivityRenderInput,
@@ -186,6 +229,68 @@ export async function startOrUpdateLiveActivity(
   // Summary — Hijri date when enabled. Lives below the InboxStyle list.
   const summary =
     input.showHijri && input.hijriLabel ? input.hijriLabel : undefined;
+
+  // ── Native module first ─────────────────────────────────────────
+  // When the MihrabLiveActivity native module is linked (always true
+  // in builds from this repo on Android), we route through it for the
+  // rich custom-RemoteViews layout: big chronometer + accent-tinted
+  // progress bar + per-row visual list, plus the Android 16 status-bar
+  // "Live Update" chip via Notification.ProgressStyle. The notifee
+  // fallback below only runs when the module isn't available (older
+  // builds or test harnesses).
+  const native = getMihrabLiveActivityModule();
+  if (native && input.nextPrayerTimestamp != null) {
+    const progressFraction = computeProgressFraction(
+      input.payload,
+      input.nextPrayerTimestamp,
+      Date.now(),
+    );
+    // Project rows to the shape the native module expects (key/name/time).
+    // We send the localised long names so the expanded list isn't reading
+    // as widget abbrevs ("Magh") — the widget payload uses short forms,
+    // we want long forms here.
+    const rows = input.payload.rows.map(r => ({
+      key: r.key,
+      name: localizedPrayerName(r.key, r.abbr),
+      time: r.time,
+    }));
+    const sunriseRow = input.payload.sunriseRow
+      ? {
+          key: input.payload.sunriseRow.key,
+          name: localizedPrayerName(
+            input.payload.sunriseRow.key,
+            input.payload.sunriseRow.abbr,
+          ),
+          time: input.payload.sunriseRow.time,
+        }
+      : undefined;
+    const nativePayload: MihrabLiveActivityPayload = {
+      nextLabel: input.nextPrayerLabel,
+      nextTime,
+      nextKey: input.payload.nextKey ?? '',
+      nextEpochMs: input.nextPrayerTimestamp,
+      title,
+      body,
+      progressFraction,
+      rows,
+      sunriseRow,
+      hijriLabel: input.hijriLabel,
+      locationLabel: input.locationLabel,
+      accentHex: input.accentHex,
+      compactMode: input.compactMode,
+      showSunrise: input.showSunrise,
+      showHijri: input.showHijri,
+      showLocation: input.showLocation,
+    };
+    try {
+      await native.display(JSON.stringify(nativePayload));
+      return;
+    } catch (e) {
+      // Native failed (e.g. POST_NOTIFICATIONS denied) — fall through
+      // to the notifee path so the user still sees something.
+      console.warn('[liveActivity] native module display failed', e);
+    }
+  }
 
   try {
     await notifee.displayNotification({
@@ -234,6 +339,17 @@ export async function startOrUpdateLiveActivity(
 
 export async function stopLiveActivity(): Promise<void> {
   if (Platform.OS !== 'android') return;
+  // The two paths post their notifications to different ids
+  // (NotificationManager int vs notifee string), so cancel both so we
+  // don't leave a stray pinned banner around when the user flips off.
+  const native = getMihrabLiveActivityModule();
+  if (native) {
+    try {
+      await native.cancel();
+    } catch {
+      // Non-fatal.
+    }
+  }
   try {
     await notifee.cancelNotification(LIVE_ACTIVITY_NOTIFICATION_ID);
   } catch {

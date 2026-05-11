@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Circular dot used as the accent indicator on the prayer-countdown
+  ongoing notification. The fill is overridden at runtime from Kotlin via
+  RemoteViews.setInt(id, "setColorFilter", accentInt) so it picks up the
+  user's chosen accent.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#22C55E" />
+    <size android:width="10dp" android:height="10dp" />
+</shape>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Collapsed RemoteViews for the prayer-countdown ongoing notification.
+
+  Layout:
+      ┌───┬──────────────┬─────────┐
+      │ ● │ Prayer  Time │  3:47   │
+      └───┴──────────────┴─────────┘
+      ─────── progress bar ───────
+
+  • Accent dot (R.id.la_dot)        — coloured square sized as a dot via
+                                      a circular drawable applied in code.
+  • Prayer name (R.id.la_prayer_name)  — bold, 16sp.
+  • Prayer time (R.id.la_prayer_time)  — monospaced HH:MM, secondary text.
+  • Big chronometer (R.id.la_countdown) — 22sp monospace; counts DOWN to the
+    target instant set via setBase + setStarted. Ticks every second without
+    requiring us to re-post the notification.
+  • Progress bar (R.id.la_progress)    — slim horizontal bar showing the
+    fraction of time elapsed since the previous prayer. Tinted to the
+    user's accent colour at runtime.
+
+  Padding is intentionally restrained — the system notification shade
+  adds its own outer chrome and we don't want to feel cramped.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <View
+            android:id="@+id/la_dot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/live_activity_dot" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/la_prayer_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:textColor="?android:attr/textColorPrimary"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/la_prayer_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textColor="?android:attr/textColorSecondary"
+                android:text="" />
+        </LinearLayout>
+
+        <Chronometer
+            android:id="@+id/la_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:textColor="?android:attr/textColorPrimary"
+            android:gravity="end"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/la_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:max="100"
+        android:progress="0"
+        android:indeterminate="false" />
+</LinearLayout>

@@ -20,6 +20,7 @@ class MainApplication : Application(), ReactApplication {
           add(PrayerBuildInfoPackage())
           add(AppVersionPackage())
           add(SystemThemePackage())
+          add(MihrabLiveActivityPackage())
           if (BuildConfig.IAP_ENABLED) {
             addIapPackageIfPresent(this)
           }
