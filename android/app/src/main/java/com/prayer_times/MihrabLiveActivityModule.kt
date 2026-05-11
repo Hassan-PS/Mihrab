@@ -335,17 +335,22 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
      * On hardened shells that strip custom RemoteViews (GrapheneOS, some MIUI
      * builds), the standard setContentTitle/setContentText fields are shown.
      */
+    /** Build a RemoteViews for the collapsed notification content area.
+     *  [rightText] overrides the default full countdown+percentage string —
+     *  pass just "$progressPct%" for Android 16 (countdown lives in subText),
+     *  or null for the full "↓ time | pct%" used by the pre-36 legacy path. */
     private fun buildContentView(
       ctx: Context,
       title: String,
       nextEpochMs: Long,
       progressPct: Int,
+      rightText: String? = null,
     ): RemoteViews? = try {
       val rv = RemoteViews(ctx.packageName, R.layout.notification_live_activity)
       rv.setTextViewText(R.id.la_prayer_title, title)
       rv.setTextViewText(
         R.id.la_countdown_pct,
-        "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%",
+        rightText ?: "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%",
       )
       rv.setProgressBar(R.id.la_progress, 100, progressPct, false)
       rv
@@ -368,20 +373,23 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       try {
         val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
 
-        // Standard-template layout (required for FLAG_PROMOTED_ONGOING chip):
+        // Target layout (Material You, Pixel):
         //
-        //   [icon] Mihrab          ↓ 1h 23m     ← header row; subText = countdown only
-        //   الفجر · 02:48  ·  52%              ← contentTitle = prayer + percentage
-        //   [████████████░░░░░░░░░░░░░░░░░░]   ← progress bar
+        //   [icon] Mihrab          ↓ 1h 23m     ← header; subText = countdown only
+        //   الفجر · 02:48                 52%  ← custom content row: prayer LEFT, pct RIGHT
+        //   [████████████░░░░░░░░░░░░░░░░░░]   ← Material You progress bar
         //
-        // setCustomContentView is intentionally absent — setting it (or assigning
-        // notif.contentView post-build) excludes the notification from chip
-        // promotion on Android 16 regardless of how/when the flag is set.
-        // The percentage lives in contentTitle because the content row is the
-        // only row wide enough to show it alongside the prayer name without
-        // wrapping; the header row (subText) carries the countdown.
+        // Strategy: use platform Notification.DecoratedCustomViewStyle() (not
+        // NotificationCompat) together with setCustomContentView. The platform
+        // style wraps the custom view in standard Material You notification chrome
+        // and may be treated as a "decorated standard" template by NMS, unlike a
+        // bare custom view. Chip flags are attached before style/view are set.
+        // Fallback: standard template if contentView build fails.
+        val contentView = buildContentView(
+          ctx, title, nextEpochMs, progressPct,
+          rightText = "$progressPct%",  // countdown lives in subText; only pct here
+        )
         val countdownSubText = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}"
-        val titleWithPct = "$title  ·  $progressPct%"
 
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
@@ -391,18 +399,32 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(titleWithPct)   // "الفجر · 02:48  ·  52%"
+          .setContentTitle(title)          // fallback text (hardened shells / no contentView)
           .setSubText(countdownSubText)    // "↓ 1h 23m" — right of app name in header
           .setShowWhen(false)
           .setContentIntent(contentIntent)
-          .setProgress(100, progressPct, false)
 
+        // Chip metadata — attached before custom view/style so the builder
+        // state has them when build() is called regardless of style resolution.
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
 
-        val notif = builder.build()
+        if (contentView != null) {
+          // Platform DecoratedCustomViewStyle wraps the view in Material You
+          // notification chrome. Unlike a bare setCustomContentView without a
+          // style, the decorated style signals to the system that standard chrome
+          // (icon, app name, subText) is still present, which may allow chip
+          // promotion. No setProgress — the custom view's ProgressBar renders it.
+          builder.setStyle(Notification.DecoratedCustomViewStyle())
+          builder.setCustomContentView(contentView)
+        } else {
+          // Fallback: full standard template
+          val countdown = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%"
+          builder.setSubText(countdown)
+          builder.setProgress(100, progressPct, false)
+        }
 
-        return notif
+        return builder.build()
       } catch (t: Throwable) {
         Log.w(NAME, "Android 16 path failed, falling back to legacy", t)
         return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, null)

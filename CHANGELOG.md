@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.12] — 2026-05-12
+
+### Changed
+- **Android Live Activity — platform `DecoratedCustomViewStyle` + percentage far-right**: Uses `Notification.DecoratedCustomViewStyle()` (platform API 36, not compat) with `setCustomContentView` so the prayer title sits LEFT and `52%` sits far RIGHT on the same content row. Countdown (`↓ 1h 23m`) stays in `setSubText` in the header. The platform style wraps the custom view in standard Material You chrome and may allow chip promotion where a bare custom view does not. Progress bar rendered by the custom view's `ProgressBar` (no double bar).
+
 ## [2.3.11] — 2026-05-12
 
 ### Changed
