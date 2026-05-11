@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.6] — 2026-05-11
+
+### Fixed
+- **Android Live Activity — progress bar starts at ~20% at Isha adhan**: After Isha passes, `buildWidgetPayload` rolls the widget over to tomorrow's prayer data. The previous `prevEpochMs` computation iterated through those tomorrow-rows and — because tomorrow's Isha in Stockholm (May, days getting longer) is slightly later than today's — it mis-identified tomorrow's Maghrib as the most recent past prayer, inflating the initial progress to ~23%. Fixed by passing the raw `today` TimingsMap directly to `computePrevPrayerEpoch`; it now always scans the actual current-day `HH:MM` strings (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha) and correctly finds today's Isha as the previous anchor, so the bar resets to 0% at rollover.
+
 ## [2.1.5] — 2026-05-11
 
 ### Changed

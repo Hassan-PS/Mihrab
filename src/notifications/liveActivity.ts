@@ -77,6 +77,14 @@ export type LiveActivityRenderInput = {
   showSunrise: boolean;
   showHijri: boolean;
   showLocation: boolean;
+  /**
+   * The raw today TimingsMap (HH:MM strings for the actual calendar day).
+   * Used to compute prevEpochMs correctly after the payload rolls over to
+   * tomorrow — payload.rows is tomorrow's data at that point, so looking
+   * there would mis-identify tomorrow's Maghrib as the previous prayer
+   * instead of today's Isha.
+   */
+  todayTimings?: Record<string, string> | null;
 };
 
 /** ── Channel ─────────────────────────────────────────────────────── */
@@ -185,20 +193,35 @@ function buildInboxLines(input: LiveActivityRenderInput): string[] {
 /** ── Public API ──────────────────────────────────────────────────── */
 
 /** ms-since-epoch of the prayer that most recently passed before
- *  `now`, given a widget payload. Returns 0 when we can't infer one
- *  (very first use, before Fajr on day 1). */
+ *  `now`. Returns 0 when we can't infer one (very first use, before Fajr).
+ *
+ *  Prefers `todayTimings` (the raw TimingsMap for the actual calendar day)
+ *  over `payload.rows`, because `payload.rows` rolls over to tomorrow's data
+ *  after Isha — at that point iterating the rows would mis-identify
+ *  tomorrow's Maghrib (applied to today's date) as the previous prayer
+ *  instead of today's Isha, producing an inflated progress % at rollover. */
 function computePrevPrayerEpoch(
   payload: WidgetPrayerPayload,
   now: number,
+  todayTimings?: Record<string, string> | null,
 ): number {
-  const ordered = [...payload.rows];
-  if (payload.sunriseRow) {
-    if (ordered.length > 0) ordered.splice(1, 0, payload.sunriseRow);
-    else ordered.push(payload.sunriseRow);
-  }
+  // Build the list of HH:MM strings to scan.  Prefer the raw today-timings
+  // (stable salah keys + Sunrise) over the widget rows which may be tomorrow.
+  const SALAH_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const times: string[] = todayTimings
+    ? SALAH_KEYS.map(k => todayTimings[k]).filter((v): v is string => typeof v === 'string' && /^\d{1,2}:\d{2}$/.test(v))
+    : (() => {
+        const ordered = [...payload.rows];
+        if (payload.sunriseRow) {
+          if (ordered.length > 0) ordered.splice(1, 0, payload.sunriseRow);
+          else ordered.push(payload.sunriseRow);
+        }
+        return ordered.map(r => r.time).filter(t => /^\d{1,2}:\d{2}$/.test(t));
+      })();
+
   let prevEpoch: number | null = null;
-  for (const r of ordered) {
-    const m = /^(\d{1,2}):(\d{2})$/.exec(r.time);
+  for (const hhmm of times) {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm);
     if (!m) continue;
     const candidate = new Date(now);
     candidate.setHours(Number(m[1]), Number(m[2]), 0, 0);
@@ -219,9 +242,10 @@ function computeProgressFraction(
   payload: WidgetPrayerPayload,
   nextEpochMs: number | null,
   now: number,
+  todayTimings?: Record<string, string> | null,
 ): number {
   if (nextEpochMs == null) return 0;
-  const prev = computePrevPrayerEpoch(payload, now);
+  const prev = computePrevPrayerEpoch(payload, now, todayTimings);
   if (prev <= 0) return 0;
   const span = nextEpochMs - prev;
   if (span <= 0) return 0;
@@ -278,11 +302,12 @@ export async function startOrUpdateLiveActivity(
       input.payload,
       input.nextPrayerTimestamp,
       nowMs,
+      input.todayTimings,
     );
     // The native foreground service uses prevEpochMs / nextEpochMs to
     // recompute progress on every minute tick — that's what makes the
     // bar advance without the app being open.
-    const prevEpochMs = computePrevPrayerEpoch(input.payload, nowMs);
+    const prevEpochMs = computePrevPrayerEpoch(input.payload, nowMs, input.todayTimings);
     // Project rows to the shape the native module expects (key/name/time).
     // We send the localised long names so the expanded list isn't reading
     // as widget abbrevs ("Magh") — the widget payload uses short forms,

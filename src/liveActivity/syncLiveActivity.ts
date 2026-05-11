@@ -228,6 +228,9 @@ async function syncLiveActivityImpl(args: {
       showSunrise: true,
       showHijri: false,
       showLocation: false,
+      // Pass today's raw timings so computePrevPrayerEpoch uses the actual
+      // current-day HH:MM strings even after payload rolls over to tomorrow.
+      todayTimings: args.today,
     });
     return;
   }
