@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.8] — 2026-05-12
+
+### Changed
+- **Android Live Activity — compact layout on Android 16**: The countdown and percentage (`↓ 1h 23m  |  52%`) are now placed in `setSubText`, which pins them to the right of the notification header row. The prayer title (`الفجر · 02:48`) gets the full content row below it, and the Material You progress bar sits below that. This is the most compact layout achievable with the standard notification template that also preserves the Android 16 status-bar chip (`setRequestPromotedOngoing`) — `setCustomContentView` / `RemoteViews` breaks chip promotion and cannot be used on this path.
+
 ## [2.3.7] — 2026-05-12
 
 ### Fixed

@@ -382,8 +382,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(title)     // "Asr · 17:08"
-          .setContentText(countdown)  // "↓ 1h 23m  |  52%"
+          // Layout:
+          //   [icon] Mihrab         ↓ 1h 23m  |  52%  ← header + subText (right)
+          //   الفجر · 02:48                           ← contentTitle (full row)
+          //   [████████████░░░░░░░░░░░░░░░░░░░░░░]   ← progress bar
+          //
+          // setSubText is the only right-anchored slot in the standard template
+          // that doesn't require RemoteViews (which would break the chip).
+          // No setContentText → prayer title gets the full content row.
+          .setContentTitle(title)  // "الفجر · 02:48"
+          .setSubText(countdown)   // "↓ 1h 23m  |  52%" — right of header
           .setShowWhen(false)
           .setContentIntent(contentIntent)
           .setProgress(100, progressPct, false)
