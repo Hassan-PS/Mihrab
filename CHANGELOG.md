@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.3] — 2026-05-11
+
+### Changed
+- **Android Live Activity — countdown + percentage in content area**: Moved the `↓ 1h 23m  |  52%` line from the notification header row (`setSubText`, far from the content) into `setContentText` so it sits directly below the prayer title on the same visual block. Layout: line 1 = "Asr · 17:08", line 2 = "↓ 1h 23m  |  52%", progress bar below. Applied to both the Android 16 and legacy (pre-36) notification paths. The legacy path also drops the chronometer/countdown-timer display in the header row in favour of the explicit text line.
+
 ## [2.3.2] — 2026-05-12
 
 ### Changed

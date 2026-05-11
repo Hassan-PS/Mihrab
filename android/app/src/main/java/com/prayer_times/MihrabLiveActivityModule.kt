@@ -257,11 +257,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
      * screen density. Works on every Android shell including GrapheneOS
      * because it is plain text in setContentText, not a RemoteView.
      */
-    private fun buildProgressLine(percent: Int): String {
-      val total = 20
-      val filled = (percent * total / 100).coerceIn(0, total)
-      val empty  = total - filled
-      return "█".repeat(filled) + "░".repeat(empty) + "  $percent%"
+    /**
+     * Format a millisecond delta as "1h 23m" or "45m".
+     * Used in the notification subText alongside the percentage so the
+     * countdown and percentage are in the same right-anchored row.
+     */
+    private fun formatRemaining(deltaMs: Long): String {
+      val totalSec = (deltaMs / 1000).coerceAtLeast(0)
+      val h = totalSec / 3600
+      val m = (totalSec % 3600) / 60
+      return if (h > 0) "${h}h ${m}m" else "${m}m"
     }
 
     /** Top-level entry point — used by both the JS bridge (as a
@@ -331,13 +336,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(title)          // "Asr · 17:08"
-          .setContentText("$progressPct%") // percentage sits directly above the bar
+          .setContentTitle(title)   // "Asr · 17:08"
+          // Line 2: countdown and percentage sit in the content area,
+          // right below the prayer title — same visual block.
+          // Format: "↓ 1h 23m  |  52%"
+          .setContentText("↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%")
+          .setShowWhen(false)
           .setContentIntent(contentIntent)
-          .setWhen(nextEpochMs)
-          .setShowWhen(true)
-          .setUsesChronometer(true)
-          .setChronometerCountDown(true)
           .setProgress(100, progressPct, false)
 
         tryAttachShortCriticalText(builder, shortText)
@@ -372,12 +377,11 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         .setContentTitle(title)          // "Asr · 17:08"
-        .setContentText("$progressPct%") // percentage sits directly above the bar
+        // Line 2: countdown and percentage in the same content block as
+        // the prayer title — mirrors the Android 16 path layout.
+        .setContentText("↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%")
         .setContentIntent(contentIntent)
-        .setWhen(nextEpochMs)
-        .setShowWhen(true)
-        .setUsesChronometer(true)
-        .setChronometerCountDown(true)
+        .setShowWhen(false)
         .setProgress(100, progressPct, false)
         .build()
     }
