@@ -121,7 +121,7 @@
     "prePrayerReminderOff": "Mati",
     "prePrayerReminderOption": "{{count}} menit sebelumnya",
     "liveActivity": "Aktivitas langsung",
-    "liveActivityHelp": "Notifikasi tersemat dengan hitungan mundur ke salat berikutnya dan jadwal lainnya hari ini.",
+    "liveActivityHelp": "Notifikasi tersemat dengan hitungan mundur ke salat berikutnya dan jadwal lainnya hari ini. Dukungan iOS masih eksperimental.",
     "liveActivityCustomize": "Sesuaikan",
     "liveActivityCompact": "Mode ringkas",
     "liveActivityCompactHelp": "Tampilkan hanya hitungan mundur; sembunyikan daftar salat.",

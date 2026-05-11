@@ -121,7 +121,7 @@
     "prePrayerReminderOff": "Kapalı",
     "prePrayerReminderOption": "{{count}} dakika önce",
     "liveActivity": "Canlı etkinlik",
-    "liveActivityHelp": "Sıradaki namaza geri sayım ve günün diğer vakitlerini gösteren sabitlenmiş bildirim.",
+    "liveActivityHelp": "Sıradaki namaza geri sayım ve günün diğer vakitlerini gösteren sabitlenmiş bildirim. iOS desteği deneyseldir.",
     "liveActivityCustomize": "Özelleştir",
     "liveActivityCompact": "Kompakt mod",
     "liveActivityCompactHelp": "Yalnızca geri sayımı göster; namaz listesini gizle.",

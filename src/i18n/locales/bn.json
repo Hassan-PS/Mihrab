@@ -121,7 +121,7 @@
     "prePrayerReminderOff": "বন্ধ",
     "prePrayerReminderOption": "{{count}} মিনিট আগে",
     "liveActivity": "লাইভ কার্যকলাপ",
-    "liveActivityHelp": "পরবর্তী নামাযের কাউন্টডাউন এবং দিনের বাকি সময়সূচি দেখানো পিন করা নোটিফিকেশন।",
+    "liveActivityHelp": "পরবর্তী নামাযের কাউন্টডাউন এবং দিনের বাকি সময়সূচি দেখানো পিন করা নোটিফিকেশন। iOS সাপোর্ট পরীক্ষামূলক।",
     "liveActivityCustomize": "কাস্টমাইজ করুন",
     "liveActivityCompact": "সংক্ষিপ্ত মোড",
     "liveActivityCompactHelp": "শুধু কাউন্টডাউন দেখান; নামাযের তালিকা লুকান।",

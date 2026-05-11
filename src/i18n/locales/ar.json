@@ -121,7 +121,7 @@
     "prePrayerReminderOff": "إيقاف",
     "prePrayerReminderOption": "{{count}} د قبل الصلاة",
     "liveActivity": "النشاط المباشر",
-    "liveActivityHelp": "إشعار مثبت يعرض العد التنازلي للصلاة القادمة، مع بقية أوقات اليوم في العرض الموسّع.",
+    "liveActivityHelp": "إشعار مثبت يعرض العد التنازلي للصلاة القادمة، مع بقية أوقات اليوم في العرض الموسّع. دعم iOS تجريبي.",
     "liveActivityCustomize": "تخصيص",
     "liveActivityCompact": "وضع مضغوط",
     "liveActivityCompactHelp": "عرض العد التنازلي فقط؛ إخفاء قائمة الصلوات.",

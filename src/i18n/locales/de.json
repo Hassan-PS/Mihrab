@@ -121,7 +121,7 @@
     "prePrayerReminderOff": "Aus",
     "prePrayerReminderOption": "{{count}} Minuten vorher",
     "liveActivity": "Live-Aktivität",
-    "liveActivityHelp": "Angeheftete Benachrichtigung mit dem Countdown bis zum nächsten Gebet und den restlichen Gebetszeiten des Tages.",
+    "liveActivityHelp": "Angeheftete Benachrichtigung mit dem Countdown bis zum nächsten Gebet und den restlichen Gebetszeiten des Tages. iOS-Unterstützung ist experimentell.",
     "liveActivityCustomize": "Anpassen",
     "liveActivityCompact": "Kompakter Modus",
     "liveActivityCompactHelp": "Nur den Countdown anzeigen; Gebetsliste ausblenden.",

@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.5] — 2026-05-11
+
+### Changed
+- **Settings — Live Activity description**: The help text beneath the Live Activity toggle now notes that iOS support is experimental. Updated across all 13 supported locales.
+
 ## [2.1.4] — 2026-05-11
 
 ### Fixed
