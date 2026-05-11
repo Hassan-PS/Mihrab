@@ -63,6 +63,10 @@ export type MihrabLiveActivityPayload = {
   showSunrise: boolean;
   showHijri: boolean;
   showLocation: boolean;
+  /** Localised "Prayer countdown active" text for the silent FGS
+   *  placeholder notification — respects the app's selected language
+   *  rather than the device OS locale. */
+  fgsText?: string;
 };
 
 export interface MihrabLiveActivityInterface {

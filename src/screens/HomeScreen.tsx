@@ -186,7 +186,7 @@ export function HomeScreen() {
         syncLiveActivity({
           options: {
             enabled: settings.liveActivityEnabled,
-            compactMode: settings.liveActivityCompactMode,
+            compactMode: true,
             showSunrise: settings.liveActivityShowSunrise,
             showHijri: settings.liveActivityShowHijri,
             showLocation: settings.liveActivityShowLocation,
@@ -232,7 +232,6 @@ export function HomeScreen() {
       state,
       locationLabel,
       settings.liveActivityEnabled,
-      settings.liveActivityCompactMode,
       settings.liveActivityShowSunrise,
       settings.liveActivityShowHijri,
       settings.liveActivityShowLocation,
@@ -263,7 +262,7 @@ export function HomeScreen() {
     syncLiveActivity({
       options: {
         enabled: settings.liveActivityEnabled,
-        compactMode: settings.liveActivityCompactMode,
+        compactMode: true,
         showSunrise: settings.liveActivityShowSunrise,
         showHijri: settings.liveActivityShowHijri,
         showLocation: settings.liveActivityShowLocation,
@@ -288,7 +287,6 @@ export function HomeScreen() {
     state,
     locationLabel,
     settings.liveActivityEnabled,
-    settings.liveActivityCompactMode,
     settings.liveActivityShowSunrise,
     settings.liveActivityShowHijri,
     settings.liveActivityShowLocation,

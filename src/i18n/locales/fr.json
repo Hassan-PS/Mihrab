@@ -896,6 +896,7 @@
     "now": "Maintenant",
     "soon": "Commence bientôt",
     "channelName": "Compte à rebours de la prière",
-    "channelDesc": "Notification continue épinglée affichant le compte à rebours vers la prochaine prière."
+    "channelDesc": "Notification continue épinglée affichant le compte à rebours vers la prochaine prière.",
+    "fgsText": "Compte à rebours de la prière actif"
   }
 }

@@ -149,8 +149,13 @@ function formatRemaining(ms: number): string {
  * fallback is always meaningful.
  */
 function localizedPrayerName(key: string, abbrFallback?: string): string {
-  const k = `prayer.${key.toLowerCase()}`;
-  if (i18n.exists(k)) return i18n.t(k);
+  // Keys in the locale files are capitalised exactly as the row key
+  // (e.g. prayer.Fajr, prayer.Maghrib). Try exact case first, then
+  // lowercase as a fallback so older locale structures still work.
+  const kExact = `prayer.${key}`;
+  if (i18n.exists(kExact)) return i18n.t(kExact);
+  const kLower = `prayer.${key.toLowerCase()}`;
+  if (i18n.exists(kLower)) return i18n.t(kLower);
   return abbrFallback || key;
 }
 
@@ -315,6 +320,7 @@ export async function startOrUpdateLiveActivity(
       showSunrise: input.showSunrise,
       showHijri: input.showHijri,
       showLocation: input.showLocation,
+      fgsText: i18n.t('liveActivity.fgsText', 'Prayer countdown active'),
     };
     try {
       await native.display(JSON.stringify(nativePayload));

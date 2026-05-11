@@ -145,7 +145,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     // it stays silent and out of the way. The rich chip notification
     // (NOTIF_ID) is posted via regular notify() on this same channel.
     const val FGS_NOTIF_ID = 0xA1B3
-    const val FGS_CHANNEL_ID = "mihrab_fgs_v1"
+    // v2 — IMPORTANCE_NONE so the placeholder never appears in the shade.
+    const val FGS_CHANNEL_ID = "mihrab_fgs_v2"
 
     /** Ensure the channel exists with the right importance before any
      *  startForeground call. */
@@ -170,10 +171,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       nm.createNotificationChannel(ch)
     }
 
-    /** Ensure the low-importance FGS placeholder channel exists.
-     *  IMPORTANCE_MIN keeps the placeholder out of the main shade and
-     *  suppresses any status-bar icon for it; the rich chip notification
-     *  on CHANNEL_ID (IMPORTANCE_HIGH) owns the status-bar real-estate. */
+    /** Ensure the hidden FGS placeholder channel exists.
+     *  IMPORTANCE_NONE suppresses the placeholder completely from the
+     *  notification shade. The rich chip notification on CHANNEL_ID
+     *  (IMPORTANCE_HIGH) is the only user-visible notification. */
     @JvmStatic
     fun ensureFgsChannelExists(ctx: Context) {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -183,7 +184,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       val ch = android.app.NotificationChannel(
         FGS_CHANNEL_ID,
         ctx.getString(R.string.live_activity_fgs_channel_name),
-        android.app.NotificationManager.IMPORTANCE_MIN,
+        android.app.NotificationManager.IMPORTANCE_NONE,
       ).apply {
         description = ctx.getString(R.string.live_activity_fgs_channel_desc)
         setSound(null, null)
@@ -195,10 +196,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
     /** Build the minimal FGS placeholder notification. Posted via
      *  startForeground() to satisfy Android's FGS requirement and keep
-     *  the process alive; intentionally silent and hidden so only the
-     *  rich chip notification (NOTIF_ID, posted via notify()) is visible. */
+     *  the process alive. The IMPORTANCE_NONE channel suppresses it from
+     *  the notification shade on Android 8+.
+     *  @param fgsText Localised "Prayer countdown active" string passed
+     *    from JS so it respects the app's language setting. Falls back to
+     *    the Android string resource (device locale) if absent. */
     @JvmStatic
-    fun buildFgsNotification(ctx: Context): Notification {
+    fun buildFgsNotification(ctx: Context, fgsText: String? = null): Notification {
       val tap = Intent(ctx, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
       }
@@ -206,10 +210,12 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         ctx, 1, tap,
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
       )
+      val text = if (!fgsText.isNullOrEmpty()) fgsText
+                 else ctx.getString(R.string.live_activity_countdown_active)
       return NotificationCompat.Builder(ctx, FGS_CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_stat_prayer)
         .setContentTitle(ctx.getString(R.string.app_name))
-        .setContentText(ctx.getString(R.string.live_activity_countdown_active))
+        .setContentText(text)
         .setContentIntent(pi)
         .setOngoing(true)
         .setOnlyAlertOnce(true)
@@ -221,7 +227,9 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
     /** Top-level entry point — used by both the JS bridge (as a
      *  fallback when foreground-service start is denied) and by the
-     *  MihrabLiveActivityService on its periodic ticker. */
+     *  MihrabLiveActivityService on its periodic ticker.
+     *  Returns a Pair of (richNotification, fgsText) so callers can
+     *  rebuild the FGS placeholder with the same localized string. */
     @JvmStatic
     fun buildNotificationFromPayload(ctx: Context, p: JSONObject): Notification {
       val nextLabel = p.optString("nextLabel", "")
@@ -251,6 +259,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       }
     }
 
+    /** Extract the localised FGS placeholder text from a payload JSON.
+     *  Called by MihrabLiveActivityService so the FGS notification text
+     *  matches the app's selected language (set by JS via i18n). */
+    @JvmStatic
+    fun fgsTextFromPayload(p: JSONObject): String? =
+      p.optString("fgsText", "").takeIf { it.isNotEmpty() }
+
     // ── Android 16+ path ────────────────────────────────────────────
 
     @SuppressLint("NewApi")
@@ -277,8 +292,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(title)               // "Asr · 17:08"
-          .setContentText("$progressPct%")      // "52%" — above the progress bar
+          .setContentTitle("$title  ·  $progressPct%") // "Asr · 17:08  ·  52%"
           .setContentIntent(contentIntent)
           .setWhen(nextEpochMs)
           .setShowWhen(true)
@@ -317,8 +331,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .setCategory(NotificationCompat.CATEGORY_PROGRESS)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setContentTitle(title)               // "Asr · 17:08"
-        .setContentText("$progressPct%")      // "52%"
+        .setContentTitle("$title  ·  $progressPct%") // "Asr · 17:08  ·  52%"
         .setContentIntent(contentIntent)
         .setWhen(nextEpochMs)
         .setShowWhen(true)

@@ -896,6 +896,7 @@
     "now": "Ahora",
     "soon": "Comienza pronto",
     "channelName": "Cuenta regresiva de oración",
-    "channelDesc": "Notificación continua fijada mostrando la cuenta regresiva hasta la próxima oración."
+    "channelDesc": "Notificación continua fijada mostrando la cuenta regresiva hasta la próxima oración.",
+    "fgsText": "Cuenta regresiva de oración activa"
   }
 }

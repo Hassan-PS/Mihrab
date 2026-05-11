@@ -51,29 +51,6 @@ function LiveActivityCardImpl() {
         />
       </View>
 
-      {settings.liveActivityEnabled && (
-        <View
-          style={[
-            s.card,
-            s.switchRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <View style={s.switchCopy}>
-            <Text style={[s.valueText, { color: palette.text }]}>
-              {t('settings.liveActivityCompact')}
-            </Text>
-            <Text style={[s.help, { color: palette.muted }]}>
-              {t('settings.liveActivityCompactHelp')}
-            </Text>
-          </View>
-          <Switch
-            value={settings.liveActivityCompactMode}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-            thumbColor={'#ffffff'}
-            onValueChange={v => update({ liveActivityCompactMode: v })}
-          />
-        </View>
-      )}
       {/*
        * Hijri date and Location toggles intentionally removed in
        * v2.1.0-beta.5 — they cluttered the notification header and the

@@ -1,39 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Mihrab notification status-bar icon.
+  Mihrab notification status-bar icon — v3.
 
-  Pointed mihrab arch — the niche in a mosque's qiblah wall.
-  Two diagonal lines meet at the peak (outer + inner contour) so the
-  silhouette reads as the architectural mihrab shape used in Islamic
-  geometry, not a rounded "U". A rounded dome was used in earlier
-  versions; the pointed Gothic arch is the right reference and matches
-  the launcher icon's brand mark.
+  Coordinates derived directly from ic_launcher_foreground.xml (1024×1024 viewport)
+  and scaled to this 24×24 viewport with the same aspect ratio.
 
-  Path geometry (24×24 dp viewport):
-    Outer outline (counter-clockwise from bottom-left):
-      M 3,21    bottom-left of plinth
-      L 3,9     up the outer-left wall
-      L 12,2    diagonal up to peak
-      L 21,9    diagonal down to outer-right
-      L 21,21   down the outer-right wall
-    Inner cutout (clockwise — even-odd fill rule):
-      L 17,21   left across the bottom step
-      L 17,11   up the inner-right wall
-      L 12,5    diagonal up to inner peak
-      L 7,11    diagonal down to inner-left
-      L 7,21    down the inner-left wall
-      Z         close (back to 3,21 across the base)
+  Transform:  scale = 1/30,  x_off = 5.33,  y_off = 2
+    x_new = (x_orig − 312) / 30 + 5.33
+    y_new = (y_orig − 212) / 30 + 2
 
-  Pure white fill so Android renders it correctly as a status-bar icon
-  (status-bar icons are masked to alpha; any colour is replaced with
-  the system's foreground tint).
+  Source paths (launcher, 1024×1024):
+    Outer arch:   M 312 812 L 312 460 Q 312 356 408 292 L 512 212 L 616 292 Q 712 356 712 460 L 712 812 Z
+    Inner arch:   M 360 780 L 360 468 Q 360 380 444 328 L 512 276 L 580 328 Q 664 380 664 468 L 664 780 Z
+    Star sq 1:    M 440 488 L 584 488 L 584 632 L 440 632 Z  (axis-aligned, centre 512,560)
+    Star sq 2:    same square rotated 45° around (512,560)
+                  → diamond vertices: top (512,458.2) right (613.8,560) bottom (512,661.8) left (410.2,560)
+
+  Rendering:
+    Path 1 — arch ring: outer + inner sub-paths, fillType="evenOdd"
+             outer fills solid; inner cuts a transparent niche.
+    Path 2 — eight-pointed star: sq1 + sq2 sub-paths, default nonzero fill
+             nonzero fills the full union of both squares (solid star silhouette).
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+
+    <!-- Arch ring: outer solid arch with inner niche punched out via evenOdd. -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M3,21 L3,9 L12,2 L21,9 L21,21 L17,21 L17,11 L12,5 L7,11 L7,21 Z" />
+        android:fillType="evenOdd"
+        android:pathData="
+M 5.3,22 L 5.3,10.3 Q 5.3,6.8 8.5,4.7 L 12,2 L 15.5,4.7 Q 18.7,6.8 18.7,10.3 L 18.7,22 Z
+M 6.9,20.9 L 6.9,10.5 Q 6.9,7.6 9.7,5.9 L 12,4.1 L 14.3,5.9 Q 17.1,7.6 17.1,10.5 L 17.1,20.9 Z" />
+
+    <!-- Eight-pointed star: axis-aligned square + 45°-rotated diamond.
+         nonzero fill → full union is solid, giving the star silhouette. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="
+M 9.6,11.2 L 14.4,11.2 L 14.4,16 L 9.6,16 Z
+M 12,10.2 L 15.4,13.6 L 12,17 L 8.6,13.6 Z" />
 </vector>

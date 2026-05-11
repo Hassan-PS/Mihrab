@@ -896,6 +896,7 @@
     "now": "Nu",
     "soon": "Börjar snart",
     "channelName": "Bönnedräkning",
-    "channelDesc": "Fastnålad pågående notis som visar nedräkning till nästa bön."
+    "channelDesc": "Fastnålad pågående notis som visar nedräkning till nästa bön.",
+    "fgsText": "Bönernedräkning aktiv"
   }
 }

@@ -76,12 +76,12 @@ class MihrabLiveActivityService : Service() {
       MihrabLiveActivityModule.ensureChannelExists(this)
       MihrabLiveActivityModule.ensureFgsChannelExists(this)
 
-      // Step 1: start FGS with the minimal silent placeholder notification.
-      // This satisfies Android's foreground-service requirement and keeps the
-      // process alive for the per-minute ticker. The placeholder is posted via
-      // startForeground(), so NMS adds FLAG_FOREGROUND_SERVICE to it — making
-      // it ineligible for chip promotion (which is fine; it's just a keeplive).
-      val fgsNotif = MihrabLiveActivityModule.buildFgsNotification(this)
+      // Step 1: start FGS with the minimal placeholder notification.
+      // The IMPORTANCE_NONE channel suppresses it from the shade entirely.
+      // Pass the localised fgsText from the JS payload so it uses the
+      // app's selected language rather than the device locale.
+      val fgsText = MihrabLiveActivityModule.fgsTextFromPayload(JSONObject(payload))
+      val fgsNotif = MihrabLiveActivityModule.buildFgsNotification(this, fgsText)
       try {
         // Android 14+ requires the FGS type to match the manifest type.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -123,14 +123,46 @@ class MihrabLiveActivityService : Service() {
   /** Re-post the notification once a minute so the progress bar /
    *  chronometer advance. The Notification's own chronometer ticks
    *  every second on its own via setUsesChronometer(true); the progress
-   *  bar is what needs a fresh post. */
+   *  bar is what needs a fresh post.
+   *
+   *  Auto-advance: if the current `nextEpochMs` has passed (i.e. the
+   *  prayer time has been reached), the ticker advances to the next
+   *  prayer in `rows[]` so the notification updates without the user
+   *  needing to open the app. */
   private fun scheduleTicker() {
     ticker?.let { handler.removeCallbacks(it) }
     ticker = Runnable {
       val payload = lastPayload
       if (payload != null) {
+        // Check whether the countdown has expired and we should advance
+        // to the next prayer in the rows[] list.
+        val advancedPayload = tryAdvanceToNextPrayer(payload)
+        val currentPayload = if (advancedPayload != null) {
+          lastPayload = advancedPayload
+          // Also refresh the FGS placeholder text from the new payload.
+          try {
+            val fgsText = MihrabLiveActivityModule.fgsTextFromPayload(
+              org.json.JSONObject(advancedPayload)
+            )
+            val fgsNotif = MihrabLiveActivityModule.buildFgsNotification(this, fgsText)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+              startForeground(
+                MihrabLiveActivityModule.FGS_NOTIF_ID,
+                fgsNotif,
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+              )
+            } else {
+              startForeground(MihrabLiveActivityModule.FGS_NOTIF_ID, fgsNotif)
+            }
+          } catch (t: Throwable) {
+            Log.w(TAG, "ticker FGS refresh failed", t)
+          }
+          advancedPayload
+        } else {
+          payload
+        }
         try {
-          val notif = build(payload)
+          val notif = build(currentPayload)
           NotificationManagerCompat.from(this)
             .notify(MihrabLiveActivityModule.NOTIF_ID, notif)
         } catch (t: Throwable) {
@@ -144,6 +176,86 @@ class MihrabLiveActivityService : Service() {
       if (next != null) handler.postDelayed(next, TICK_MS)
     }
     handler.postDelayed(ticker!!, TICK_MS)
+  }
+
+  /**
+   * If `nextEpochMs` in the cached payload has passed, scan `rows[]` for
+   * the next prayer that is in the future and return an updated payload
+   * JSON string. Returns null when no advance is needed or when the
+   * rows list is exhausted (after Isha — JS will re-sync on next open).
+   */
+  private fun tryAdvanceToNextPrayer(payload: String): String? {
+    return try {
+      val p = org.json.JSONObject(payload)
+      val now = System.currentTimeMillis()
+      val nextEpochMs = p.optLong("nextEpochMs", 0L)
+
+      // Not yet time to advance — current prayer is still in the future.
+      if (nextEpochMs > 0L && now < nextEpochMs) return null
+
+      val rows = p.optJSONArray("rows") ?: return null
+      val currentKey = p.optString("nextKey", "")
+
+      // Collect rows into an ordered list.
+      data class Row(val key: String, val name: String, val time: String)
+      val rowList = mutableListOf<Row>()
+      for (i in 0 until rows.length()) {
+        val r = rows.getJSONObject(i)
+        rowList.add(Row(r.optString("key"), r.optString("name"), r.optString("time")))
+      }
+      if (rowList.isEmpty()) return null
+
+      // Start scanning from the row after the current one; wrap-around
+      // is intentionally NOT supported here — after Isha there is nothing
+      // in the list until tomorrow, so we leave the notification frozen
+      // (JS will re-sync when the app is foregrounded tomorrow morning).
+      val currentIdx = rowList.indexOfFirst { it.key == currentKey }
+      val candidates = if (currentIdx >= 0) rowList.drop(currentIdx + 1) else rowList
+
+      for (row in candidates) {
+        val epochMs = parseHHMMToEpochMs(row.time, now)
+        if (epochMs > now) {
+          // Found the next prayer — build the updated payload.
+          val updated = org.json.JSONObject(payload)
+          updated.put("prevEpochMs", nextEpochMs)
+          updated.put("nextEpochMs", epochMs)
+          updated.put("nextKey", row.key)
+          updated.put("nextLabel", row.name)
+          updated.put("nextTime", row.time)
+          updated.put("title", "${row.name} · ${row.time}")
+          Log.i(TAG, "Auto-advance: $currentKey → ${row.key} @ ${row.time} (epoch=$epochMs)")
+          return updated.toString()
+        }
+      }
+      // No future row found today (e.g. post-Isha). Leave frozen.
+      Log.i(TAG, "Auto-advance: no future row after $currentKey — freezing until JS resyncs")
+      null
+    } catch (t: Throwable) {
+      Log.w(TAG, "tryAdvanceToNextPrayer failed", t)
+      null
+    }
+  }
+
+  /**
+   * Parse an "HH:MM" string into a ms-since-epoch timestamp using
+   * `referenceMs` as the base date. If the resolved time is in the past,
+   * it is advanced by 24 hours to handle midnight roll-overs gracefully.
+   */
+  private fun parseHHMMToEpochMs(hhmm: String, referenceMs: Long): Long {
+    val m = Regex("^(\\d{1,2}):(\\d{2})$").find(hhmm) ?: return 0L
+    val h = m.groupValues[1].toInt()
+    val min = m.groupValues[2].toInt()
+    if (h !in 0..23 || min !in 0..59) return 0L
+    val cal = java.util.Calendar.getInstance().apply {
+      timeInMillis = referenceMs
+      set(java.util.Calendar.HOUR_OF_DAY, h)
+      set(java.util.Calendar.MINUTE, min)
+      set(java.util.Calendar.SECOND, 0)
+      set(java.util.Calendar.MILLISECOND, 0)
+    }
+    var t = cal.timeInMillis
+    if (t <= referenceMs) t += 24L * 60L * 60L * 1000L
+    return t
   }
 
   /** Build the notification fresh on each tick so the progress bar

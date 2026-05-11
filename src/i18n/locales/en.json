@@ -896,6 +896,7 @@
     "now": "Now",
     "soon": "Starting soon",
     "channelName": "Prayer countdown",
-    "channelDesc": "Pinned ongoing notification with the next-prayer countdown."
+    "channelDesc": "Pinned ongoing notification with the next-prayer countdown.",
+    "fgsText": "Prayer countdown active"
   }
 }
