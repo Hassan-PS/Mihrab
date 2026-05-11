@@ -182,6 +182,7 @@ function LocationCardImpl() {
             <Button
               label={t('settings.applyCoords')}
               onPress={applyCoords}
+              variant="secondary"
             />
           </View>
         )}

@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.9] — 2026-05-11
+
+### Fixed
+- **Settings — "Apply coordinates" button too prominent**: The button was using the `primary` filled-accent variant, giving it the same visual weight as a main-screen call-to-action. Switched to `secondary` (outlined accent, transparent fill) so it sits at the same visual level as the rest of the settings surface.
+
 ## [2.1.8] — 2026-05-11
 
 ### Fixed
