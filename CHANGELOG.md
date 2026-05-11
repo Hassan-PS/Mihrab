@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.9] — 2026-05-12
+
+### Changed
+- **Android Live Activity — same-line layout on Android 16 with chip preservation attempt**: Restored `setCustomContentView` on the Android 16 path so prayer title and countdown+percentage (`↓ 1h 23m  |  52%`) appear on the exact same line again (left / right). The Android 16 chip is preserved via post-build flag injection: `FLAG_PROMOTED_ONGOING` and `android.shortCriticalText` are written directly onto the built `Notification` object after `builder.build()`, bypassing any template-type resolution that might strip them during the build phase. Falls back to standard template (subText countdown) if the custom view fails.
+
 ## [2.3.8] — 2026-05-12
 
 ### Changed

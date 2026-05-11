@@ -367,13 +367,20 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     ): Notification {
       try {
         val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
-        val countdown = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%"
 
-        // Standard template only — no setCustomContentView.
-        // Custom views change the notification template type and break
-        // FLAG_PROMOTED_ONGOING (the status-bar chip). The chip is the
-        // primary Android 16 feature so we use the standard template here;
-        // the same-line RemoteViews layout is reserved for pre-36 (buildLegacy).
+        // Layout goal:
+        //   [icon] Mihrab                              ← standard header chrome
+        //   الفجر · 02:48          ↓ 1h 23m  |  52%  ← custom content row (left + right)
+        //   [████████████░░░░░░░░░░░░░░░░░░░░░░]      ← Material progress bar
+        //
+        // We use setCustomContentView for the same-line layout AND attempt
+        // to preserve the Android 16 chip via post-build flag injection.
+        // The chip flags (FLAG_PROMOTED_ONGOING + android.shortCriticalText
+        // extra) are written both on the builder (standard path) AND directly
+        // on the built Notification object — whichever survives the template
+        // resolution is what the NMS reads.
+        val contentView = buildContentView(ctx, title, nextEpochMs, progressPct)
+
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(accentInt)
@@ -382,24 +389,44 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          // Layout:
-          //   [icon] Mihrab         ↓ 1h 23m  |  52%  ← header + subText (right)
-          //   الفجر · 02:48                           ← contentTitle (full row)
-          //   [████████████░░░░░░░░░░░░░░░░░░░░░░]   ← progress bar
-          //
-          // setSubText is the only right-anchored slot in the standard template
-          // that doesn't require RemoteViews (which would break the chip).
-          // No setContentText → prayer title gets the full content row.
-          .setContentTitle(title)  // "الفجر · 02:48"
-          .setSubText(countdown)   // "↓ 1h 23m  |  52%" — right of header
+          .setContentTitle(title)   // fallback text when RemoteViews are stripped
+          .setContentText(shortText) // fallback countdown (hardened shells)
           .setShowWhen(false)
           .setContentIntent(contentIntent)
-          .setProgress(100, progressPct, false)
+          // No setProgress here — the custom view's ProgressBar renders it.
+          // Adding setProgress when a contentView is set causes a double bar.
 
+        if (contentView != null) {
+          builder.setCustomContentView(contentView)
+        } else {
+          // Fallback: standard template with subText for right-side countdown
+          val countdown = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%"
+          builder.setSubText(countdown)
+          builder.setProgress(100, progressPct, false)
+        }
+
+        // Attach chip metadata to the builder — may or may not survive build()
+        // when a custom content view is attached (platform-dependent).
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
 
-        return builder.build()
+        val notif = builder.build()
+
+        // Post-build injection: write chip metadata directly onto the built
+        // Notification so it survives regardless of what the template resolver
+        // does. NMS reads FLAG_PROMOTED_ONGOING from flags and
+        // android.shortCriticalText from extras independently of template type.
+        notif.extras?.putCharSequence("android.shortCriticalText", shortText)
+        runCatching {
+          val flag = Notification::class.java
+            .getField("FLAG_PROMOTED_ONGOING").getInt(null)
+          notif.flags = notif.flags or flag
+          Log.i(NAME, "FLAG_PROMOTED_ONGOING injected post-build: flag=$flag")
+        }.onFailure { t ->
+          Log.w(NAME, "FLAG_PROMOTED_ONGOING not found, chip may not show: $t")
+        }
+
+        return notif
       } catch (t: Throwable) {
         Log.w(NAME, "Android 16 path failed, falling back to legacy", t)
         return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, null)
