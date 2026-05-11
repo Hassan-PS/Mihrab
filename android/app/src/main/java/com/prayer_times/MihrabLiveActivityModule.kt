@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.util.Log
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -296,10 +297,15 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
       )
 
+      // Build the custom RemoteViews content (prayer title left, countdown|pct
+      // right on the same line, progress bar below). Falls back to null on any
+      // error; both builder paths degrade gracefully to the standard template.
+      val contentView = buildContentView(ctx, title, nextEpochMs, progressPct)
+
       return if (Build.VERSION.SDK_INT >= 36) {
-        buildAndroid16(ctx, nextEpochMs, accentInt, progressPct, title, pi)
+        buildAndroid16(ctx, nextEpochMs, accentInt, progressPct, title, pi, contentView)
       } else {
-        buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, pi)
+        buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, pi, contentView)
       }
     }
 
@@ -309,6 +315,41 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     @JvmStatic
     fun fgsTextFromPayload(p: JSONObject): String? =
       p.optString("fgsText", "").takeIf { it.isNotEmpty() }
+
+    // ── Custom RemoteViews content layout ───────────────────────────
+
+    /**
+     * Build the custom notification content view:
+     *
+     *   [Asr · 17:08          ↓ 1h 23m  |  52%]
+     *   [████████████░░░░░░░░░░░░░░░░░░░░░░░░░]
+     *
+     * Prayer title is left-weighted (layout_weight=1); countdown+percentage
+     * is right-pinned. Used with DecoratedCustomViewStyle so the standard
+     * header chrome (app icon, app name) is still rendered by the system.
+     *
+     * Returns null on any error so callers fall back to the standard template.
+     * On hardened shells that strip custom RemoteViews (GrapheneOS, some MIUI
+     * builds), the standard setContentTitle/setContentText fields are shown.
+     */
+    private fun buildContentView(
+      ctx: Context,
+      title: String,
+      nextEpochMs: Long,
+      progressPct: Int,
+    ): RemoteViews? = try {
+      val rv = RemoteViews(ctx.packageName, R.layout.notification_live_activity)
+      rv.setTextViewText(R.id.la_prayer_title, title)
+      rv.setTextViewText(
+        R.id.la_countdown_pct,
+        "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%",
+      )
+      rv.setProgressBar(R.id.la_progress, 100, progressPct, false)
+      rv
+    } catch (t: Throwable) {
+      Log.w(NAME, "buildContentView failed, using standard template", t)
+      null
+    }
 
     // ── Android 16+ path ────────────────────────────────────────────
 
@@ -320,30 +361,34 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       progressPct: Int,
       title: String,
       contentIntent: PendingIntent,
+      contentView: RemoteViews?,
     ): Notification {
       try {
         val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
+        val countdown = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%"
 
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(accentInt)
-          // setOngoing(true) adds FLAG_ONGOING_EVENT which prevents both
-          // swipe-to-dismiss AND "Clear All" from removing the chip
-          // notification. The chip stays alive until Live Activity is
-          // explicitly turned off or the prayer window ends.
           .setOngoing(true)
           .setOnlyAlertOnce(true)
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(title)   // "Asr · 17:08"
-          // Line 2: countdown and percentage sit in the content area,
-          // right below the prayer title — same visual block.
-          // Format: "↓ 1h 23m  |  52%"
-          .setContentText("↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%")
+          // Standard fields — used as accessibility text and as fallback
+          // when RemoteViews are stripped (hardened shells).
+          .setContentTitle(title)
+          .setContentText(countdown)
           .setShowWhen(false)
           .setContentIntent(contentIntent)
           .setProgress(100, progressPct, false)
+
+        // Custom layout: prayer title left, countdown|pct right, progress bar below.
+        // DecoratedCustomViewStyle preserves the standard header chrome.
+        if (contentView != null) {
+          builder.setCustomContentView(contentView)
+          builder.setStyle(Notification.DecoratedCustomViewStyle())
+        }
 
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
@@ -351,7 +396,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         return builder.build()
       } catch (t: Throwable) {
         Log.w(NAME, "Android 16 path failed, falling back to legacy", t)
-        return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent)
+        return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, contentView)
       }
     }
 
@@ -364,8 +409,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       progressPct: Int,
       title: String,
       contentIntent: PendingIntent,
+      contentView: RemoteViews?,
     ): Notification {
-      return NotificationCompat.Builder(ctx, CHANNEL_ID)
+      val countdown = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%"
+      val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_stat_prayer)
         .setColor(accentInt)
         .setColorized(false)
@@ -376,14 +423,20 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .setCategory(NotificationCompat.CATEGORY_PROGRESS)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setContentTitle(title)          // "Asr · 17:08"
-        // Line 2: countdown and percentage in the same content block as
-        // the prayer title — mirrors the Android 16 path layout.
-        .setContentText("↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%")
+        // Standard fields — accessibility text + fallback for hardened shells.
+        .setContentTitle(title)
+        .setContentText(countdown)
         .setContentIntent(contentIntent)
         .setShowWhen(false)
         .setProgress(100, progressPct, false)
-        .build()
+
+      // Custom layout: prayer title left, countdown|pct right, progress bar below.
+      if (contentView != null) {
+        builder.setCustomContentView(contentView)
+        builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+      }
+
+      return builder.build()
     }
 
     // ── Reflection helpers for Android 16 chip APIs ─────────────────

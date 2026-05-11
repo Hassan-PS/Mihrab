@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.4] — 2026-05-11
+
+### Changed
+- **Android Live Activity — prayer title and countdown on the same line**: Replaced the two-line layout (title / countdown+percentage) with a custom `RemoteViews` content view using `DecoratedCustomViewStyle`. The prayer title is now left-weighted and the `↓ 1h 23m  |  52%` text is right-pinned on the exact same line. The progress bar sits below, full-width. The standard `setContentTitle`/`setContentText` fields are kept as fallback for hardened shells (GrapheneOS, some MIUI builds) that strip custom `RemoteViews` silently.
+
 ## [2.3.3] — 2026-05-11
 
 ### Changed
