@@ -31,6 +31,11 @@ export type MihrabLiveActivityPayload = {
   /** ms-since-epoch of the upcoming prayer — drives the Chronometer
    *  countdown and the progress-bar fraction calculation. */
   nextEpochMs: number;
+  /** ms-since-epoch of the PREVIOUS prayer. The native foreground
+   *  service uses (now - prev) / (next - prev) to recompute the
+   *  progress bar on every minute-tick so the bar advances even when
+   *  the app isn't open. */
+  prevEpochMs: number;
   /** Already-localised title rendered in `setContentTitle`; mostly
    *  shown by Wear OS / connected devices that ignore RemoteViews. */
   title: string;

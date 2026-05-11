@@ -7,6 +7,12 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Live Activity foreground service. Required on Android 14+ — the
+         FOREGROUND_SERVICE_SPECIAL_USE type covers our case (pinned
+         prayer-countdown notification with a live progress bar that
+         must auto-tick without the app being open). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
       android:name=".MainApplication"
@@ -81,6 +87,21 @@
           <category android:name="android.intent.category.DEFAULT" />
         </intent-filter>
       </activity>
+
+      <!-- Live Activity foreground service. specialUse type because
+           we don't fit any of the predefined types (camera/location/
+           media/etc.) — we're posting a system-level pinned countdown
+           that needs to keep ticking when the app isn't in foreground.
+           The `property` element explains the use so Play Store / Play
+           Protect doesn't flag the manifest. -->
+      <service
+        android:name=".MihrabLiveActivityService"
+        android:exported="false"
+        android:foregroundServiceType="specialUse">
+        <property
+          android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+          android:value="prayerCountdown" />
+      </service>
 
       <activity
         android:name=".MainActivity"
