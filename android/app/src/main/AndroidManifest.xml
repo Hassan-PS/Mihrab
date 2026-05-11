@@ -122,5 +122,20 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+
+      <!-- Revives the Live Activity after an app update or device reboot.
+           MY_PACKAGE_REPLACED fires in the new process immediately after
+           the APK is replaced; BOOT_COMPLETED fires after a full reboot.
+           Both read the SharedPreferences payload saved by
+           MihrabLiveActivityModule.display() and restart the service. -->
+      <receiver
+        android:name=".MihrabRestartReceiver"
+        android:exported="false">
+        <intent-filter>
+          <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+        </intent-filter>
+      </receiver>
+
     </application>
 </manifest>

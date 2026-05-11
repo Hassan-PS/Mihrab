@@ -80,6 +80,9 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       // FGS may try to post before notifee has run.
       ensureChannelExists(reactContext)
       ensureFgsChannelExists(reactContext)
+      // Persist before starting the service so the restart receiver can
+      // revive the Live Activity after an app update or device reboot.
+      savePayload(reactContext, payloadJson)
       val intent = Intent(reactContext, MihrabLiveActivityService::class.java).apply {
         putExtra(MihrabLiveActivityService.EXTRA_PAYLOAD, payloadJson)
       }
@@ -112,6 +115,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
   @ReactMethod
   fun cancel(promise: Promise) {
     try {
+      // Clear persisted payload so the restart receiver doesn't revive
+      // the Live Activity after an update / reboot when the user has
+      // explicitly turned it off.
+      clearPayload(reactContext)
       val intent = Intent(reactContext, MihrabLiveActivityService::class.java)
       reactContext.stopService(intent)
       // Also cancel both notifications in case the service was never
@@ -133,6 +140,35 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
   companion object {
     const val NAME = "MihrabLiveActivity"
+
+    // SharedPreferences key/name used to persist the last payload across
+    // process death (app update, device boot). The restart receiver reads
+    // these to revive the Live Activity without requiring the app to open.
+    const val PREFS_NAME = "mihrab_live_activity"
+    const val PREF_KEY_PAYLOAD = "last_payload"
+    const val PREF_KEY_ENABLED = "enabled"
+
+    fun savePayload(context: android.content.Context, payloadJson: String) {
+      context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
+        .edit()
+        .putString(PREF_KEY_PAYLOAD, payloadJson)
+        .putBoolean(PREF_KEY_ENABLED, true)
+        .apply()
+    }
+
+    fun clearPayload(context: android.content.Context) {
+      context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
+        .edit()
+        .remove(PREF_KEY_PAYLOAD)
+        .putBoolean(PREF_KEY_ENABLED, false)
+        .apply()
+    }
+
+    fun loadPayload(context: android.content.Context): String? {
+      val prefs = context.getSharedPreferences(PREFS_NAME, android.content.Context.MODE_PRIVATE)
+      if (!prefs.getBoolean(PREF_KEY_ENABLED, false)) return null
+      return prefs.getString(PREF_KEY_PAYLOAD, null)
+    }
     // v3 — bumped in beta.9 to IMPORTANCE_HIGH (sound + vibration off
     // explicitly) so the Android 16 status-bar chip can promote us.
     // Channel importance must match what JS creates in liveActivity.ts.

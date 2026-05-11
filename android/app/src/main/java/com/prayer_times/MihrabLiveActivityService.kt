@@ -205,6 +205,23 @@ class MihrabLiveActivityService : Service() {
       }
       if (rowList.isEmpty()) return null
 
+      // Inject sunriseRow into the ordered list right after Fajr so
+      // that when currentKey="Sunrise" we can find it by key and select
+      // Dhuhr as the next candidate. Without this, Sunrise is absent
+      // from rowList, currentIdx=-1, and the fallback scans from Fajr —
+      // finding it already in the past → +24h → tomorrow's Fajr (wrong).
+      val sunriseObj = p.optJSONObject("sunriseRow")
+      if (sunriseObj != null) {
+        val srKey = sunriseObj.optString("key", "Sunrise")
+        val srName = sunriseObj.optString("name", "Sunrise")
+        val srTime = sunriseObj.optString("time", "")
+        if (srTime.isNotEmpty()) {
+          val fajrIdx = rowList.indexOfFirst { it.key.equals("Fajr", ignoreCase = true) }
+          val insertAt = (if (fajrIdx >= 0) fajrIdx + 1 else 1).coerceAtMost(rowList.size)
+          rowList.add(insertAt, Row(srKey, srName, srTime))
+        }
+      }
+
       // Start scanning from the row after the current one; wrap-around
       // is intentionally NOT supported here — after Isha there is nothing
       // in the list until tomorrow, so we leave the notification frozen

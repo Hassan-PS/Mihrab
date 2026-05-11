@@ -22,8 +22,9 @@ export type PrayerLiveActivityContent = {
   nextLabel: string;
   /** Wall-clock string for the next prayer, e.g. '05:14'. */
   nextTime: string;
-  /** ms-since-epoch of the next prayer — used for the countdown Text(timerInterval:). */
-  nextEpochMs: number;
+  /** Seconds-since-epoch of the next prayer — matches Swift ContentState.nextEpochSeconds.
+   *  Convert from ms: nextPrayerTimestamp / 1000. */
+  nextEpochSeconds: number;
   /** Same row list the home-screen widget uses (Fajr, Dhuhr, Asr, Maghrib, Isha). */
   rows: { key: string; abbr: string; time: string }[];
   /** Sunrise row when the user opted to show it. */

@@ -84,7 +84,16 @@ def requiredReleaseKeys = ["storeFile", "storePassword", "keyAlias", "keyPasswor
 def hasReleaseSigningConfig = keystorePropertiesFile.exists() &&
     requiredReleaseKeys.every { key -> (keystoreProperties[key] ?: "").toString().trim() }
 def requestedTasks = gradle.startParameter.taskNames.collect { it.toLowerCase() }
-def wantsPlayRelease = requestedTasks.any { it.contains("playrelease") || it.contains("playbeta") }
+// Only enable ABI splits / strict signing for explicit play-flavor release/beta tasks.
+// The check must exclude fdroid tasks (e.g. "assemblefdroidrelease") even though the
+// string "playrelease" does NOT appear there — but running both tasks in one invocation
+// (e.g. `assembleFdroidRelease bundlePlayRelease`) would previously match via the
+// lowercased "bundleplayrelease" containing "playrelease". Being explicit prevents that.
+def wantsPlayRelease = requestedTasks.any { t ->
+    (t == "assembleplayrelease" || t == "bundleplayrelease" ||
+     t == "assembleplaybeta"   || t == "bundleplaybeta") &&
+    !t.contains("fdroid")
+}
 if (wantsPlayRelease && !hasReleaseSigningConfig) {
     throw new GradleException(
         "Play release/beta builds require android/keystore.properties with storeFile/storePassword/keyAlias/keyPassword. " +
@@ -102,8 +111,8 @@ android {
         applicationId "com.prayer_times"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 161
-        versionName "2.1.9"
+        versionCode 162
+        versionName "2.2.0"
     }
     flavorDimensions += "distribution"
     productFlavors {

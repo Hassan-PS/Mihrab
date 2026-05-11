@@ -70,79 +70,77 @@ struct PrayerLiveActivityWidget: Widget {
 private struct LockScreenLiveActivityView: View {
   let state: PrayerLiveActivityAttributes.ContentState
 
+  /// True when nextEpochSeconds points to a real future instant.
+  /// Guards Text(timerInterval:) — an invalid ClosedRange (end ≤ start)
+  /// would crash the widget extension.
+  private var countdownEndDate: Date? {
+    let d = Date(timeIntervalSince1970: state.nextEpochSeconds)
+    return d > Date() ? d : nil
+  }
+
   var body: some View {
-    VStack(alignment: .leading, spacing: 10) {
-      // Headline row — accent dot + prayer name (+ HH:MM as subtitle)
-      // on the left, monospaced countdown on the right.
-      HStack(alignment: .center, spacing: 10) {
+    VStack(alignment: .leading, spacing: 8) {
+      // Headline row — accent dot + prayer name + countdown.
+      // Kept to a single compact line so the full prayer strip fits below
+      // within iOS 26's constrained lock-screen card height (~80–120 pt).
+      HStack(alignment: .center, spacing: 8) {
         Circle()
           .fill(liveActivityAccent(state: state))
-          .frame(width: 8, height: 8)
-        VStack(alignment: .leading, spacing: 1) {
-          Text(state.nextLabel)
-            .font(.system(size: 17, weight: .semibold))
-            .lineLimit(1)
-          Text(state.nextTime)
-            .font(.system(size: 13, design: .monospaced))
-            .foregroundColor(.secondary)
+          .frame(width: 7, height: 7)
+        Text(state.nextLabel)
+          .font(.system(size: 16, weight: .semibold))
+          .foregroundColor(.white)
+          .lineLimit(1)
+        Text(state.nextTime)
+          .font(.system(size: 13, design: .monospaced))
+          .foregroundColor(Color.white.opacity(0.7))
+        Spacer(minLength: 4)
+        if let end = countdownEndDate {
+          Text(timerInterval: Date()...end, countsDown: true)
+            .font(.system(.callout, design: .rounded).monospacedDigit())
+            .foregroundColor(liveActivityAccent(state: state))
+            .fixedSize()
         }
-        Spacer(minLength: 8)
-        Text(
-          timerInterval:
-            Date()...Date(timeIntervalSince1970: state.nextEpochSeconds),
-          countsDown: true
-        )
-        .font(.system(.title3, design: .rounded).monospacedDigit())
-        .foregroundColor(liveActivityAccent(state: state))
-        .fixedSize()
       }
 
-      // Prayer list — chronological, "›" marks the next prayer in the
-      // accent colour. Hidden when the user has compact mode ON.
-      if !state.compactMode {
-        Divider().opacity(0.5)
-        VStack(alignment: .leading, spacing: 5) {
-          ForEach(displayRows(), id: \.key) { row in
-            HStack {
-              Text(row.key == state.nextKey ? "›" : " ")
-                .font(.system(size: 14, weight: .bold))
+      // All-prayer strip — horizontal layout fits all 5-6 prayers in
+      // ~24 pt instead of the ~115 pt the vertical list required.
+      // Each column shows the short label above the time; the next
+      // prayer is tinted with the accent colour.
+      // NOTE: avoid `let` bindings inside ForEach ViewBuilder —
+      // inline all comparisons to ensure the loop body is not
+      // silently dropped by the SwiftUI engine on iOS 26.
+      let allRows = displayRows()
+      if !allRows.isEmpty {
+        HStack(spacing: 0) {
+          ForEach(allRows, id: \.key) { row in
+            VStack(spacing: 2) {
+              Text(row.abbr)
+                .font(.system(size: 10))
+                // Use explicit white-opacity so text is always readable on
+                // the dark frosted-glass lock-screen card, regardless of
+                // whether the system renders this view in light or dark mode.
                 .foregroundColor(
                   row.key == state.nextKey
                     ? liveActivityAccent(state: state)
-                    : .clear
+                    : Color.white.opacity(0.5)
                 )
-                .frame(width: 10, alignment: .center)
-              Text(row.abbr)
-                .font(.system(
-                  size: 14,
-                  weight: row.key == state.nextKey ? .semibold : .regular
-                ))
-                .foregroundColor(
-                  row.key == state.nextKey ? .primary : .secondary
-                )
-              Spacer()
               Text(row.time)
-                .font(.system(size: 14, design: .monospaced))
+                .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(
-                  row.key == state.nextKey ? .primary : .secondary
+                  row.key == state.nextKey
+                    ? Color.white
+                    : Color.white.opacity(0.6)
                 )
+                .fontWeight(row.key == state.nextKey ? .semibold : .regular)
             }
+            .frame(maxWidth: .infinity)
           }
         }
       }
-
-      // Footer captions — Hijri date and / or short location, separated
-      // by a middle dot. Only renders when at least one is non-empty.
-      let footer = footerText(state: state)
-      if !footer.isEmpty {
-        Text(footer)
-          .font(.system(size: 11))
-          .foregroundColor(.secondary)
-          .padding(.top, 2)
-      }
     }
     .padding(.horizontal, 14)
-    .padding(.vertical, 12)
+    .padding(.vertical, 8)
   }
 
   private func displayRows() -> [PrayerLiveActivityAttributes.Row] {
@@ -171,15 +169,26 @@ private struct DynamicIslandCompactLeading: View {
 @available(iOS 16.1, *)
 private struct DynamicIslandCompactTrailing: View {
   let state: PrayerLiveActivityAttributes.ContentState
+
+  private var countdownEndDate: Date? {
+    let d = Date(timeIntervalSince1970: state.nextEpochSeconds)
+    return d > Date() ? d : nil
+  }
+
   var body: some View {
-    Text(
-      timerInterval:
-        Date()...Date(timeIntervalSince1970: state.nextEpochSeconds),
-      countsDown: true
-    )
-    .font(.system(.body, design: .rounded).monospacedDigit())
-    .foregroundColor(liveActivityAccent(state: state))
-    .fixedSize()
+    Group {
+      if let end = countdownEndDate {
+        Text(timerInterval: Date()...end, countsDown: true)
+          .font(.system(.body, design: .rounded).monospacedDigit())
+          .foregroundColor(liveActivityAccent(state: state))
+          .fixedSize()
+      } else {
+        Text(state.nextTime)
+          .font(.system(.body, design: .monospaced))
+          .foregroundColor(liveActivityAccent(state: state))
+          .fixedSize()
+      }
+    }
     .padding(.trailing, 2)
   }
 }
@@ -187,15 +196,26 @@ private struct DynamicIslandCompactTrailing: View {
 @available(iOS 16.1, *)
 private struct DynamicIslandMinimal: View {
   let state: PrayerLiveActivityAttributes.ContentState
+
+  private var countdownEndDate: Date? {
+    let d = Date(timeIntervalSince1970: state.nextEpochSeconds)
+    return d > Date() ? d : nil
+  }
+
   var body: some View {
-    Text(
-      timerInterval:
-        Date()...Date(timeIntervalSince1970: state.nextEpochSeconds),
-      countsDown: true
-    )
-    .font(.system(.caption, design: .rounded).monospacedDigit())
-    .foregroundColor(liveActivityAccent(state: state))
-    .fixedSize()
+    Group {
+      if let end = countdownEndDate {
+        Text(timerInterval: Date()...end, countsDown: true)
+          .font(.system(.caption, design: .rounded).monospacedDigit())
+          .foregroundColor(liveActivityAccent(state: state))
+          .fixedSize()
+      } else {
+        Text(state.nextTime)
+          .font(.system(.caption, design: .monospaced))
+          .foregroundColor(liveActivityAccent(state: state))
+          .fixedSize()
+      }
+    }
   }
 }
 
@@ -222,15 +242,26 @@ private struct DynamicIslandLeading: View {
 @available(iOS 16.1, *)
 private struct DynamicIslandTrailing: View {
   let state: PrayerLiveActivityAttributes.ContentState
+
+  private var countdownEndDate: Date? {
+    let d = Date(timeIntervalSince1970: state.nextEpochSeconds)
+    return d > Date() ? d : nil
+  }
+
   var body: some View {
-    Text(
-      timerInterval:
-        Date()...Date(timeIntervalSince1970: state.nextEpochSeconds),
-      countsDown: true
-    )
-    .font(.system(.title3, design: .rounded).monospacedDigit())
-    .foregroundColor(liveActivityAccent(state: state))
-    .fixedSize()
+    Group {
+      if let end = countdownEndDate {
+        Text(timerInterval: Date()...end, countsDown: true)
+          .font(.system(.title3, design: .rounded).monospacedDigit())
+          .foregroundColor(liveActivityAccent(state: state))
+          .fixedSize()
+      } else {
+        Text(state.nextTime)
+          .font(.system(.title3, design: .monospaced))
+          .foregroundColor(liveActivityAccent(state: state))
+          .fixedSize()
+      }
+    }
     .padding(.trailing, 4)
   }
 }

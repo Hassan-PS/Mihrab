@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.2.0] — 2026-05-11
+
+### Fixed
+- **Android Live Activity — disappears after app update**: When Android installs an update it kills the app process, stopping the foreground service. The last payload was held only in memory, so the Live Activity notification was gone until the user opened the app. Fixed by persisting the payload to SharedPreferences on every `display()` call and clearing it on `cancel()`. A new `MihrabRestartReceiver` handles `MY_PACKAGE_REPLACED` (fires immediately after an OTA update in the fresh process) and `BOOT_COMPLETED` (fires after a device reboot). Both cases read the persisted payload and restart the service without requiring the app to open.
+- **Android build — fdroid APK got ABI splits when building play and fdroid tasks together**: The `wantsPlayRelease` guard in `build.gradle` matched "bundleplayrelease" as a substring when both tasks were run in the same Gradle invocation, enabling ABI splits for the fdroid flavor too. Replaced the substring check with an explicit allowlist of play-flavor task names so fdroid always produces a single universal APK.
+
 ## [2.1.9] — 2026-05-11
 
 ### Fixed
