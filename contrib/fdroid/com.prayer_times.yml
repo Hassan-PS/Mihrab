@@ -139,9 +139,9 @@ Builds:
       - node_modules
     ndk: 27.1.12297006
 
-  - versionName: 2.1.6
-    versionCode: 158
-    commit: v2.1.6
+  - versionName: 2.1.4
+    versionCode: 156
+    commit: v2.1.4
     subdir: android
     sudo:
       - apt-get update
@@ -189,9 +189,9 @@ Builds:
       - node_modules
     ndk: 27.1.12297006
 
-  - versionName: 2.1.4
-    versionCode: 156
-    commit: v2.1.4
+  - versionName: 2.1.6
+    versionCode: 158
+    commit: v2.1.6
     subdir: android
     sudo:
       - apt-get update
@@ -213,6 +213,56 @@ Builds:
     scanignore:
       - node_modules
     ndk: 27.1.12297006
+
+  - versionName: 2.1.7
+    versionCode: 159
+    commit: v2.1.7
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y npm curl ca-certificates
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
+    gradle:
+      - fdroid
+    output: app/build/outputs/apk/fdroid/release/*.apk
+    prebuild:
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'org.gradle.daemon=false' >> gradle.properties
+      - cd ..
+      - npm ci --no-audit --build-from-source
+    scanignore:
+      - node_modules
+    ndk: 27.1.12297006
+  - versionName: 2.1.8
+    versionCode: 160
+    commit: v2.1.8
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y npm curl ca-certificates
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
+    gradle:
+      - fdroid
+    output: app/build/outputs/apk/fdroid/release/*.apk
+    prebuild:
+      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'org.gradle.daemon=false' >> gradle.properties
+      - cd ..
+      - npm ci --no-audit --build-from-source
+    scanignore:
+      - node_modules
+    ndk: 27.1.12297006
+
 
 MaintainerNotes: |
   React Native 0.83: Node 20 from upstream tarball (checksum-verified). `npm ci`
@@ -245,5 +295,5 @@ MaintainerNotes: |
 ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.1.6
-CurrentVersionCode: 158
+CurrentVersion: 2.1.8
+CurrentVersionCode: 160

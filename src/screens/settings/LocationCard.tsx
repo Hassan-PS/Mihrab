@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { PlaceSearchSection } from '../../components/PlaceSearchSection';
+import { Button } from '../../components/ui/Button';
 import { useLocationSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { GeocodedPlace } from '../../geocoding/nominatim';
@@ -178,15 +179,10 @@ function LocationCardImpl() {
               ]}
             />
             {coordError && <Text style={styles.errorText}>{coordError}</Text>}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('settings.applyCoords')}
+            <Button
+              label={t('settings.applyCoords')}
               onPress={applyCoords}
-              style={[styles.applyBtn, { backgroundColor: palette.accent }]}>
-              <Text style={styles.applyBtnLabel}>
-                {t('settings.applyCoords')}
-              </Text>
-            </Pressable>
+            />
           </View>
         )}
       </View>
@@ -204,16 +200,5 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#b91c1c',
     fontSize: 14,
-  },
-  applyBtn: {
-    marginTop: 4,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  applyBtnLabel: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

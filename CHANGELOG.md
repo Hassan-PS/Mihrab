@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.8] — 2026-05-11
+
+### Fixed
+- **Settings — "Apply coordinates" button visual consistency**: The manual-coordinates Apply button in the Location card was rendered as a raw `Pressable` with a solid accent fill and no pressed-opacity handler, making it appear brighter and heavier than every other action button in settings. Replaced with the shared `Button` component so it gets the same pressed-state opacity (0.85), typography, padding, and border-radius as all other primary buttons.
+- **F-Droid recipe — build entries out of order**: The `rewritemeta` linter sorts `Builds:` entries by `versionCode` ascending and fails if it has to reorder them. Builds 2.1.4 / 2.1.5 / 2.1.6 were added in the wrong order (2.1.6 → 2.1.5 → 2.1.4). Reordered to correct ascending sequence so `rewritemeta` is a no-op.
+
+## [2.1.7] — 2026-05-11
+
+### Fixed
+- **Android Live Activity — wrong prayer after Sunrise (background advance)**: The foreground service ticker that auto-advances the countdown when a prayer passes while the app is closed was not including Sunrise in its candidate row list. When `nextKey="Sunrise"` and Sunrise passed with the app closed, the ticker's index-of lookup returned -1 (Sunrise absent from `rows[]`), causing it to scan from Fajr, find it in the past, and advance +24h to **tomorrow's Fajr** instead of today's Dhuhr. Fixed by injecting `sunriseRow` into the ordered list immediately after Fajr before the candidate scan, so the full six-point sequence [Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha] is searched correctly.
+
 ## [2.1.6] — 2026-05-11
 
 ### Fixed
