@@ -170,17 +170,39 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       // fits the small pill next to the clock. Format: "3h 21m" / "47m".
       val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
 
+      // InboxStyle for the expanded prayer list — this is what
+      // renders cleanly on every shell we've tested (stock Pixel,
+      // GrapheneOS, OEM forks). ProgressStyle tried in earlier betas
+      // looked beautiful in the expanded view but killed the
+      // collapsed-view progress bar on Android 16 because it replaces
+      // the standard Notification template, and the standard template
+      // is where the collapsed bar lives.
+      //
+      // The Live Update chip metadata below (setShortCriticalText +
+      // setRequestPromotedOngoing) still attaches even with InboxStyle,
+      // so we keep the chip path alive on Android 16+.
+      val inbox = Notification.InboxStyle().setBigContentTitle(title)
+      if (!compactMode) {
+        // Format: "Dhuhr 12:49"   — single space between name and time
+        // for the system InboxStyle. We pad the prayer name so the
+        // times line up vertically as a column.
+        val maxNameLen = rows.maxOfOrNull { it.name.length } ?: 0
+        for (row in rows) {
+          val isNext = row.key == nextKey
+          val marker = if (isNext) "›" else " "
+          val padded = row.name.padEnd(maxNameLen, ' ')
+          // Bullet + non-breaking-space pairs keep alignment intact
+          // across renderers; "·" gives the line a friendly cadence.
+          inbox.addLine("$marker  $padded   ${row.time}")
+        }
+      }
+
       val builder = Notification.Builder(reactContext, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_stat_prayer)
         .setColor(accentInt)
         .setOngoing(true)
         .setOnlyAlertOnce(true)
-        // localOnly intentionally false here — Android 16's Live Update
-        // chip is gated against localOnly notifications on some shells.
         .setLocalOnly(false)
-        // PROGRESS is the eligible category for the status-bar Live
-        // Update chip on Android 16. STATUS is reserved for system
-        // status (battery, network, etc.) and isn't promoted.
         .setCategory(Notification.CATEGORY_PROGRESS)
         .setVisibility(Notification.VISIBILITY_PUBLIC)
         .setContentTitle(title)
@@ -190,66 +212,35 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .setShowWhen(true)
         .setUsesChronometer(true)
         .setChronometerCountDown(true)
+        // ALWAYS-VISIBLE progress bar. The standard template renders
+        // this in BOTH collapsed and expanded views on every shell.
+        .setProgress(100, progressPct, false)
+        .setStyle(inbox)
+        // Single "Open" action so the notification feels actionable
+        // beyond a body tap.
+        .addAction(
+          Notification.Action.Builder(
+            android.graphics.drawable.Icon.createWithResource(
+              reactContext,
+              R.drawable.ic_stat_prayer,
+            ),
+            "Open",
+            contentIntent,
+          ).build(),
+        )
 
-      // ProgressStyle — the new style class on Android 16. Reflection
-      // for instantiation in case the build classes diverge from the
-      // stable SDK; if reflection fails we fall back to setProgress
-      // below.
-      val progressStyleAttached = tryAttachProgressStyle(builder, progressPct)
-
-      // Short critical text — drives the status-bar chip on Android 16.
-      // Method may be called setShortCriticalText OR live behind a
-      // different name on certain OEM forks; we try both.
+      // Short critical text — chip text on Android 16+ status bar.
       tryAttachShortCriticalText(builder, shortText)
 
-      // ASK the system to promote this to an ongoing chip. New in API 36;
-      // the method name varies between SDK rev/preview builds, so we
-      // probe by signature.
+      // Request promotion to a chip.
       tryRequestPromotedOngoing(builder)
-      // Also log every Builder method on first call so we have a complete
-      // map of the API surface this device exposes — invaluable when an
-      // OEM strips or renames methods.
+
       if (!loggedBuilderMethods) {
         loggedBuilderMethods = true
         val all = Notification.Builder::class.java.methods
           .map { "${it.name}(${it.parameterTypes.joinToString { p -> p.simpleName }})" }
           .sorted()
         Log.i(NAME, "Notification.Builder methods (${all.size}): ${all.joinToString("; ")}")
-      }
-
-      // Inbox-style line list as a secondary expansion fallback. Newer
-      // shells render the ProgressStyle expansion, but if the chip
-      // doesn't kick in we still get a useful row list when the user
-      // pulls the shade down.
-      if (!progressStyleAttached) {
-        val inbox = Notification.InboxStyle().setBigContentTitle(title)
-        if (!compactMode) {
-          for (row in rows) {
-            val marker = if (row.key == nextKey) "›" else " "
-            inbox.addLine("$marker  ${row.name}  ${row.time}")
-          }
-        }
-        builder.setStyle(inbox)
-        builder.setProgress(100, progressPct, false)
-      } else {
-        // ProgressStyle handles the body; we still attach the prayer
-        // list via extras so the system can render it where it makes
-        // sense.
-        if (!compactMode) {
-          val lines = rows.map { r ->
-            val marker = if (r.key == nextKey) "›" else " "
-            "$marker  ${r.name}  ${r.time}"
-          }
-          // android.textLines is the platform extras key InboxStyle
-          // writes to. Setting it directly lets the system pick up the
-          // list even when the primary style is ProgressStyle.
-          val extras = builder.extras
-          extras.putCharSequenceArray(
-            "android.textLines",
-            lines.map { it as CharSequence }.toTypedArray(),
-          )
-          extras.putCharSequence("android.title.big", title)
-        }
       }
 
       return builder.build()
@@ -271,36 +262,14 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     }
   }
 
-  /** Reflectively instantiate Notification.ProgressStyle and attach it
-   *  to the builder. Returns true on success. */
-  private fun tryAttachProgressStyle(
-    builder: Notification.Builder,
-    progressPct: Int,
-  ): Boolean {
-    return try {
-      val styleClass = Class.forName("android.app.Notification\$ProgressStyle")
-      val ctor = styleClass.getConstructor()
-      val style = ctor.newInstance()
-      runCatching {
-        val setProgress = styleClass.getMethod("setProgress", Int::class.javaPrimitiveType)
-        setProgress.invoke(style, progressPct)
-      }
-      runCatching {
-        val setStyledByProgress =
-          styleClass.getMethod("setStyledByProgress", Boolean::class.javaPrimitiveType)
-        setStyledByProgress.invoke(style, true)
-      }
-      // builder.setStyle(Style) — Style is the abstract parent
-      val styleParent = Class.forName("android.app.Notification\$Style")
-      val setStyle = Notification.Builder::class.java.getMethod("setStyle", styleParent)
-      setStyle.invoke(builder, style)
-      Log.i(NAME, "ProgressStyle attached, progress=$progressPct")
-      true
-    } catch (t: Throwable) {
-      Log.w(NAME, "ProgressStyle reflection failed", t)
-      false
-    }
-  }
+  // Note: a prayer-day ProgressStyle (segments + points) was tried in
+  // beta.6 and reverted in beta.7 — the segmented bar looks great
+  // expanded but ProgressStyle replaces the standard Notification
+  // template, which is where the collapsed-view progress bar lives. We
+  // lost the always-visible bar. A follow-up will try delivering
+  // segments via a foreground-service notification (where some shells
+  // ALSO render custom RemoteViews reliably) or wait for AndroidX to
+  // wrap ProgressStyle properly.
 
   /** Set the short critical text on the notification — drives the
    *  status-bar Live Update chip on Android 16+. We enumerate the
