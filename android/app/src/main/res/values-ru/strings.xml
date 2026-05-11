@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">Отсчёт молитвы</string>
+    <string name="live_activity_channel_desc">Закреплённый обратный отсчёт до следующей молитвы.</string>
+    <string name="live_activity_fgs_channel_name">Отсчёт молитвы (система)</string>
+    <string name="live_activity_fgs_channel_desc">Внутренний служебный канал для обратного отсчёта молитвы. Не отображается пользователю.</string>
+    <string name="live_activity_countdown_active">Отсчёт молитвы активен</string>
+</resources>

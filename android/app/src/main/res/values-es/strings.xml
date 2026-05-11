@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">Cuenta regresiva de oración</string>
+    <string name="live_activity_channel_desc">Cuenta regresiva fijada hasta la próxima oración.</string>
+    <string name="live_activity_fgs_channel_name">Cuenta regresiva de oración (sistema)</string>
+    <string name="live_activity_fgs_channel_desc">Canal de servicio interno para la cuenta regresiva de oración. No visible para el usuario.</string>
+    <string name="live_activity_countdown_active">Cuenta regresiva de oración activa</string>
+</resources>

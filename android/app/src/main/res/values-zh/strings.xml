@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">礼拜倒计时</string>
+    <string name="live_activity_channel_desc">固定的下一次礼拜倒计时。</string>
+    <string name="live_activity_fgs_channel_name">礼拜倒计时（系统）</string>
+    <string name="live_activity_fgs_channel_desc">礼拜倒计时的内部服务通道。用户不可见。</string>
+    <string name="live_activity_countdown_active">礼拜倒计时进行中</string>
+</resources>

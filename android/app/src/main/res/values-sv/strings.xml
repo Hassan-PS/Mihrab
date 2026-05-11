@@ -4,4 +4,9 @@
     <string name="widget_description">Dagens tider på en rad, nästa bön markerad</string>
     <string name="widget_placeholder_day">Öppna Mihrab för att ladda tider</string>
     <string name="widget_error">Kunde inte ladda widgetdata</string>
+    <string name="live_activity_channel_name">Bönnedräkning</string>
+    <string name="live_activity_channel_desc">Fastnålad nedräkning till nästa bön.</string>
+    <string name="live_activity_fgs_channel_name">Bönnedräkning (system)</string>
+    <string name="live_activity_fgs_channel_desc">Intern tjänstekanal för bönnedräkning. Inte användarsynlig.</string>
+    <string name="live_activity_countdown_active">Bönnedräkning aktiv</string>
 </resources>

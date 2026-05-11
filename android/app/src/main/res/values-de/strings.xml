@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">Gebets-Countdown</string>
+    <string name="live_activity_channel_desc">Angehefteter Countdown zum nächsten Gebet.</string>
+    <string name="live_activity_fgs_channel_name">Gebets-Countdown (System)</string>
+    <string name="live_activity_fgs_channel_desc">Interner Dienstkanal für den Gebets-Countdown. Nicht für Benutzer sichtbar.</string>
+    <string name="live_activity_countdown_active">Gebets-Countdown aktiv</string>
+</resources>

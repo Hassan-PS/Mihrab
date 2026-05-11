@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">Compte à rebours de la prière</string>
+    <string name="live_activity_channel_desc">Compte à rebours épinglé jusqu\'à la prochaine prière.</string>
+    <string name="live_activity_fgs_channel_name">Compte à rebours de la prière (système)</string>
+    <string name="live_activity_fgs_channel_desc">Canal de service interne pour le compte à rebours de la prière. Non visible par l\'utilisateur.</string>
+    <string name="live_activity_countdown_active">Compte à rebours de la prière actif</string>
+</resources>

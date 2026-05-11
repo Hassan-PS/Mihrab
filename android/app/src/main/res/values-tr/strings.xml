@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">Namaz geri sayımı</string>
+    <string name="live_activity_channel_desc">Sıradaki namaza sabitlenmiş geri sayım.</string>
+    <string name="live_activity_fgs_channel_name">Namaz geri sayımı (sistem)</string>
+    <string name="live_activity_fgs_channel_desc">Namaz geri sayımı için dahili hizmet kanalı. Kullanıcıya görünmez.</string>
+    <string name="live_activity_countdown_active">Namaz geri sayımı etkin</string>
+</resources>

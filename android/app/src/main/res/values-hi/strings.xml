@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">नमाज़ की उलटी गिनती</string>
+    <string name="live_activity_channel_desc">अगली नमाज़ के लिए पिन की गई उलटी गिनती।</string>
+    <string name="live_activity_fgs_channel_name">नमाज़ की उलटी गिनती (सिस्टम)</string>
+    <string name="live_activity_fgs_channel_desc">नमाज़ की उलटी गिनती के लिए आंतरिक सेवा चैनल। उपयोगकर्ता-सामना नहीं।</string>
+    <string name="live_activity_countdown_active">नमाज़ की उलटी गिनती सक्रिय</string>
+</resources>

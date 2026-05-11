@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">نماز کی گنتی</string>
+    <string name="live_activity_channel_desc">اگلی نماز کے لیے نتھی الٹی گنتی۔</string>
+    <string name="live_activity_fgs_channel_name">نماز کی گنتی (نظام)</string>
+    <string name="live_activity_fgs_channel_desc">نماز کی گنتی کے لیے اندرونی سروس چینل۔ صارف کو نظر نہیں آتا۔</string>
+    <string name="live_activity_countdown_active">نماز کی الٹی گنتی فعال</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_activity_channel_name">নামাযের কাউন্টডাউন</string>
+    <string name="live_activity_channel_desc">পরবর্তী নামাযের জন্য পিন করা কাউন্টডাউন।</string>
+    <string name="live_activity_fgs_channel_name">নামাযের কাউন্টডাউন (সিস্টেম)</string>
+    <string name="live_activity_fgs_channel_desc">নামাযের কাউন্টডাউনের জন্য অভ্যন্তরীণ পরিষেবা চ্যানেল। ব্যবহারকারী-মুখী নয়।</string>
+    <string name="live_activity_countdown_active">নামাযের কাউন্টডাউন সক্রিয়</string>
+</resources>

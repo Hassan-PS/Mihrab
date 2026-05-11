@@ -22,4 +22,10 @@
     <string name="widget_configure_hex_hint">#RRGGBB</string>
     <string name="widget_configure_theme_accent_hint">Choose Dynamic to follow your phone accent color for the highlight.</string>
     <string name="widget_configure_save">Save</string>
+    <!-- Live Activity notification strings -->
+    <string name="live_activity_channel_name">Prayer countdown</string>
+    <string name="live_activity_channel_desc">Pinned countdown to the next prayer.</string>
+    <string name="live_activity_fgs_channel_name">Prayer countdown (system)</string>
+    <string name="live_activity_fgs_channel_desc">Internal service channel for the prayer countdown. Not user-facing.</string>
+    <string name="live_activity_countdown_active">Prayer countdown active</string>
 </resources>

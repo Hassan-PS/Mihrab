@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.1] — 2026-05-11
+
+### Changed
+- **Android Live Activity — localised notification strings**: Channel name, channel description, and FGS placeholder text are now translated into all 13 supported locales (ar, bn, de, es, fr, hi, id, ru, sv, tr, ur, zh) via Android `strings.xml` resources. Previously these were hardcoded English strings shown in Android Settings → Notifications.
+
 ## [2.1.0] — 2026-05-11
 
 ### Added

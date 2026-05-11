@@ -157,10 +157,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       if (nm.getNotificationChannel(CHANNEL_ID) != null) return
       val ch = android.app.NotificationChannel(
         CHANNEL_ID,
-        "Prayer countdown",
+        ctx.getString(R.string.live_activity_channel_name),
         android.app.NotificationManager.IMPORTANCE_HIGH,
       ).apply {
-        description = "Pinned countdown to the next prayer."
+        description = ctx.getString(R.string.live_activity_channel_desc)
         setSound(null, null) // silent — passive countdown only
         enableVibration(false)
         setShowBadge(false)
@@ -182,10 +182,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       if (nm.getNotificationChannel(FGS_CHANNEL_ID) != null) return
       val ch = android.app.NotificationChannel(
         FGS_CHANNEL_ID,
-        "Prayer countdown (system)",
+        ctx.getString(R.string.live_activity_fgs_channel_name),
         android.app.NotificationManager.IMPORTANCE_MIN,
       ).apply {
-        description = "Internal service channel for the prayer countdown. Not user-facing."
+        description = ctx.getString(R.string.live_activity_fgs_channel_desc)
         setSound(null, null)
         enableVibration(false)
         setShowBadge(false)
@@ -209,7 +209,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       return NotificationCompat.Builder(ctx, FGS_CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_stat_prayer)
         .setContentTitle(ctx.getString(R.string.app_name))
-        .setContentText("Prayer countdown active")
+        .setContentText(ctx.getString(R.string.live_activity_countdown_active))
         .setContentIntent(pi)
         .setOngoing(true)
         .setOnlyAlertOnce(true)
