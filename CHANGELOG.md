@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.6] — 2026-05-12
+
+### Fixed
+- **Android Live Activity — chip regression (v2.3.4–v2.3.5)**: Adding `DecoratedCustomViewStyle` in v2.3.4 broke the Android 16 status-bar chip. The style's internal `apply()` call during `build()` was overwriting the promoted-ongoing state set via reflection (`setRequestPromotedOngoing`). Fixed by removing `DecoratedCustomViewStyle` from the Android 16 notification path — on API 36 the system shade renders the header chrome (app icon, app name) automatically without needing an explicit style, so the style was unnecessary and harmful.
+
 ## [2.3.5] — 2026-05-12
 
 ### Fixed

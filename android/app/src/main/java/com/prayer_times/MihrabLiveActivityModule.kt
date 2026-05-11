@@ -384,12 +384,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
         if (contentView != null) {
           // Custom layout handles the progress bar inside the RemoteViews.
-          // Do NOT also call setProgress() — that would render a second bar
-          // below the custom content view.
+          // Do NOT call setProgress() — that renders a second bar.
+          // Do NOT use DecoratedCustomViewStyle — its apply() overwrites
+          // the promoted-ongoing state we set below, killing the chip.
+          // On Android 16 the system shade renders the header chrome
+          // (app icon, app name) automatically without needing a style.
           builder.setCustomContentView(contentView)
-          builder.setStyle(Notification.DecoratedCustomViewStyle())
         } else {
-          // Fallback: standard template, use the built-in progress bar.
           builder.setProgress(100, progressPct, false)
         }
 
