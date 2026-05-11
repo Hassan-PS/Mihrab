@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.11] — 2026-05-12
+
+### Changed
+- **Android Live Activity — layout refinement (chip preserved)**: Countdown (`↓ 1h 23m`) is now shown alone in `setSubText` (right of app name in header row). Percentage (`52%`) moves to the content title row, appended to the prayer name: `"الفجر · 02:48  ·  52%"`. Progress bar remains below. `setCustomContentView` is intentionally absent — assigning a custom content view (even post-build) excludes the notification from chip promotion on Android 16.
+
 ## [2.3.10] — 2026-05-12
 
 ### Changed

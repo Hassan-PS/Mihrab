@@ -356,7 +356,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
     // ── Android 16+ path ────────────────────────────────────────────
 
-    @SuppressLint("NewApi", "Deprecation")
+    @SuppressLint("NewApi")
     private fun buildAndroid16(
       ctx: Context,
       nextEpochMs: Long,
@@ -368,24 +368,21 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       try {
         val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
 
-        // Layout goal:
-        //   [icon] Mihrab                              ← standard header chrome
-        //   الفجر · 02:48          ↓ 1h 23m  |  52%  ← custom content row (left + right)
-        //   [████████████░░░░░░░░░░░░░░░░░░░░░░]      ← Material progress bar
+        // Standard-template layout (required for FLAG_PROMOTED_ONGOING chip):
         //
-        // Strategy: build with the standard template (so the builder never
-        // marks the notification as "custom template" and never suppresses
-        // FLAG_PROMOTED_ONGOING during build()), then assign the RemoteViews
-        // directly to notif.contentView AFTER build(). This is the public
-        // deprecated field that setCustomContentView() writes internally;
-        // writing it post-build sidesteps the builder's template-type tracking.
-        val contentView = buildContentView(ctx, title, nextEpochMs, progressPct)
+        //   [icon] Mihrab          ↓ 1h 23m     ← header row; subText = countdown only
+        //   الفجر · 02:48  ·  52%              ← contentTitle = prayer + percentage
+        //   [████████████░░░░░░░░░░░░░░░░░░]   ← progress bar
+        //
+        // setCustomContentView is intentionally absent — setting it (or assigning
+        // notif.contentView post-build) excludes the notification from chip
+        // promotion on Android 16 regardless of how/when the flag is set.
+        // The percentage lives in contentTitle because the content row is the
+        // only row wide enough to show it alongside the prayer name without
+        // wrapping; the header row (subText) carries the countdown.
+        val countdownSubText = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}"
+        val titleWithPct = "$title  ·  $progressPct%"
 
-        // Build a standard-template notification so chip flags are preserved.
-        // Countdown shown in subText (fallback / for hardened shells that
-        // strip the contentView). Progress bar here is ONLY for the fallback
-        // path (removed post-build when the custom view is injected).
-        val countdown = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}  |  $progressPct%"
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(accentInt)
@@ -394,46 +391,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(title)    // prayer title — also the fallback content row
-          .setContentText(shortText) // fallback for hardened shells
-          .setSubText(countdown)     // fallback right-side countdown if contentView stripped
+          .setContentTitle(titleWithPct)   // "الفجر · 02:48  ·  52%"
+          .setSubText(countdownSubText)    // "↓ 1h 23m" — right of app name in header
           .setShowWhen(false)
           .setContentIntent(contentIntent)
-          .setProgress(100, progressPct, false) // kept so fallback bar renders if needed
+          .setProgress(100, progressPct, false)
 
-        // Chip metadata on the builder — fully preserved since no custom view
-        // is passed to the builder here.
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
 
         val notif = builder.build()
-
-        // Post-build: inject the custom RemoteViews layout directly onto the
-        // Notification object. notif.contentView is the same public field that
-        // builder.setCustomContentView() ultimately writes, but doing it here
-        // means the builder never set its "has custom view" flag, so
-        // FLAG_PROMOTED_ONGOING and android.requestPromotedOngoing survive.
-        // Also reinforce all chip extras — belt-and-suspenders.
-        if (contentView != null) {
-          @Suppress("DEPRECATION")
-          notif.contentView = contentView
-          // Custom view has its own ProgressBar, so clear the builder-set
-          // standard progress to prevent a double bar on shells that render both.
-          notif.extras?.remove("android.progress")
-          notif.extras?.remove("android.progressMax")
-          notif.extras?.remove("android.progressIndeterminate")
-          Log.i(NAME, "contentView injected post-build for same-line layout")
-        }
-        notif.extras?.putCharSequence("android.shortCriticalText", shortText)
-        notif.extras?.putBoolean("android.requestPromotedOngoing", true)
-        runCatching {
-          val flag = Notification::class.java
-            .getField("FLAG_PROMOTED_ONGOING").getInt(null)
-          notif.flags = notif.flags or flag
-          Log.i(NAME, "FLAG_PROMOTED_ONGOING confirmed on notif.flags: 0x${flag.toString(16)}")
-        }.onFailure { t ->
-          Log.w(NAME, "FLAG_PROMOTED_ONGOING field not found: $t")
-        }
 
         return notif
       } catch (t: Throwable) {
