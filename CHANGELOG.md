@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.0] — 2026-05-11
+
+### Added
+- **Android Live Activity — status-bar chip (Android 16+)**: The prayer countdown now appears as a Live Update chip in the Android 16 status bar alongside the clock. Implemented via `setRequestPromotedOngoing` and `setShortCriticalText` (reflected from `Notification.Builder` API 36).
+- **Android Live Activity — dual-notification architecture**: The foreground service now posts two notifications — a minimal silent placeholder via `startForeground()` (keeps the process alive) and a rich chip notification via `notify()`. This is required because `FLAG_FOREGROUND_SERVICE` and `FLAG_PROMOTED_ONGOING` are mutually exclusive in Android 16's NMS; only `notify()` notifications can be promoted to the chip.
+- **Android Live Activity — progress percentage**: The notification content text now shows the elapsed percentage (e.g. "52%") above the progress bar, giving a quick at-a-glance sense of where the prayer window stands.
+- **Android Live Activity — compact single-row layout**: Prayer name and time are now combined on one line ("Asr · 17:08") instead of separate title/body rows, matching the clean Material style of system apps like EasyPark and Uber.
+- **Android Live Activity — `POST_PROMOTED_NOTIFICATIONS` permission**: Declared in `AndroidManifest.xml`; auto-granted at install (`prot=normal|appop`). Required by Android 16's `api_rich_ongoing_permission` feature flag.
+- **FGS channel `mihrab_fgs_v1`** (`IMPORTANCE_MIN`): Dedicated silent/hidden channel for the foreground-service placeholder notification so it never appears in the user-facing shade.
+
+### Fixed
+- **Android Live Activity — chip blocked by `FLAG_FOREGROUND_SERVICE`**: Previous single-FGS-notification approach permanently blocked chip promotion. Split into FGS placeholder + regular `notify()` chip notification.
+- **Android Live Activity — `setSilent` compile error**: Removed `.setSilent(true)` from the platform `Notification.Builder` path (API 36); it only exists on `NotificationCompat.Builder`. The `mihrab_live_activity_v3` channel already sets `sound=null` and `vibration=false`.
+
+### Changed
+- **Android Live Activity — notification design**: Removed the InboxStyle prayer table from the expanded notification. The notification is now compact-only — a single title row + percentage text + progress bar + chronometer countdown — matching Material Design ongoing-activity conventions.
+
 ## [1.5.46] — 2026-04-28
 
 ### Fixed

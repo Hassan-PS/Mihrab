@@ -15,45 +15,44 @@ import org.json.JSONObject
 /**
  * Mihrab Live Activity foreground service.
  *
- * Why a foreground service (added in v2.1.0-beta.8): a plain
- * `NotificationManagerCompat.notify(...)` call posts a notification
- * that the system files under "Silent" on most ROMs and that doesn't
- * auto-tick — the progress bar only advances when the app is opened
- * and the React Native side re-posts. That's the wrong UX for a
- * countdown.
+ * Why a foreground service: the OS keeps the app process alive while
+ * the service is up, so our internal Handler can re-post the rich
+ * notification once a minute and the progress bar actually advances
+ * without anyone opening the app.
  *
- * Foreground services in Android (10+) get three things for free that
- * a regular notify() doesn't:
+ * Dual-notification architecture (v2.1.0-beta.10+):
  *
- *   1. The notification renders in the **main "Notifications" section**
- *      of the shade — not in "Silent". (Foreground service notifications
- *      are excluded from silent by design — they signal "this is an
- *      ongoing user-visible activity".)
- *   2. The OS keeps the app process alive while the service is up, so
- *      our internal Handler can re-post the notification once a minute
- *      and the progress bar / chronometer actually progresses without
- *      anyone opening the app.
- *   3. Foreground-service notifications are the eligible candidate for
- *      Android 16's **status-bar Live Update chip** (`ProgressStyle` +
- *      `setShortCriticalText` + `setRequestPromotedOngoing`). Regular
- *      `notify()` calls are NOT promoted to the chip.
+ *   Notification A — FGS placeholder (FGS_NOTIF_ID, mihrab_fgs_v1 channel,
+ *     IMPORTANCE_MIN): posted via startForeground(). This satisfies
+ *     Android's foreground-service requirement and keeps the process alive.
+ *     It is intentionally silent and hidden — users never see it.
  *
- * This is the exact pattern Uber, Lyft, EasyPark, Google Maps Navigation,
- * Spotify, Strava, and most other "ongoing activity" apps use.
+ *   Notification B — rich chip notification (NOTIF_ID, mihrab_live_activity_v3
+ *     channel, IMPORTANCE_HIGH): posted via regular notify(). Because it is
+ *     NOT the FGS notification, NMS does NOT add FLAG_FOREGROUND_SERVICE to
+ *     it, which means NMS CAN set FLAG_PROMOTED_ONGOING on it — making it
+ *     eligible for the Android 16 status-bar Live Update chip.
+ *
+ * KEY INSIGHT (confirmed by inspecting EasyPark's live StatusBarNotification):
+ *   FLAG_PROMOTED_ONGOING and FLAG_FOREGROUND_SERVICE are mutually exclusive.
+ *   NMS only promotes regular notify() notifications to the chip — never FGS
+ *   notifications. EasyPark's chip works because their parking notification is
+ *   posted via notify(), not startForeground().
  *
  * Lifecycle:
  *  - JS toggles Live Activity ON  → MihrabLiveActivityModule.display(json)
  *      → ContextCompat.startForegroundService(...) with the payload as
- *        an Intent extra. The service builds the notification, calls
- *        startForeground(), and schedules its own ticker.
- *  - Every minute the ticker re-runs build() with the SAME payload so
- *    the progress bar advances (the bar's `progress` value is recomputed
- *    each tick from `prevEpochMs` / `nextEpochMs`).
+ *        an Intent extra. The service calls startForeground() with the
+ *        FGS placeholder, then notify() with the rich chip notification,
+ *        then schedules its own per-minute ticker.
+ *  - Every minute the ticker re-posts the rich notification (NOTIF_ID)
+ *    via notify() so the progress bar advances (progress value is
+ *    recomputed each tick from prevEpochMs / nextEpochMs).
  *  - JS pushes a fresh payload (e.g. when a prayer time passes) →
  *      service updates its cached payload and re-posts immediately.
  *  - JS toggles Live Activity OFF → MihrabLiveActivityModule.cancel()
  *      → context.stopService(serviceIntent), service onDestroy() cancels
- *        the ticker and removes the notification.
+ *        the ticker and removes both notifications.
  *
  * Foreground service type: `specialUse` (Android 14+ requires a type).
  * The manifest declares the property with subtype `prayerCountdown` so
@@ -72,33 +71,46 @@ class MihrabLiveActivityService : Service() {
     if (payload != null) {
       lastPayload = payload
       // Channel safety net — required on Android 8+ before startForeground.
-      // The JS bridge creates it too, but the service can run independent
+      // The JS bridge creates them too, but the service can run independent
       // of that path (system-restarted instance after OOM, etc.).
       MihrabLiveActivityModule.ensureChannelExists(this)
-      val notif = build(payload)
+      MihrabLiveActivityModule.ensureFgsChannelExists(this)
+
+      // Step 1: start FGS with the minimal silent placeholder notification.
+      // This satisfies Android's foreground-service requirement and keeps the
+      // process alive for the per-minute ticker. The placeholder is posted via
+      // startForeground(), so NMS adds FLAG_FOREGROUND_SERVICE to it — making
+      // it ineligible for chip promotion (which is fine; it's just a keeplive).
+      val fgsNotif = MihrabLiveActivityModule.buildFgsNotification(this)
       try {
         // Android 14+ requires the FGS type to match the manifest type.
-        // specialUse covers our case.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
           startForeground(
-            MihrabLiveActivityModule.NOTIF_ID,
-            notif,
+            MihrabLiveActivityModule.FGS_NOTIF_ID,
+            fgsNotif,
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
           )
         } else {
-          startForeground(MihrabLiveActivityModule.NOTIF_ID, notif)
+          startForeground(MihrabLiveActivityModule.FGS_NOTIF_ID, fgsNotif)
         }
-        Log.i(TAG, "startForeground posted id=${MihrabLiveActivityModule.NOTIF_ID}")
+        Log.i(TAG, "startForeground posted FGS placeholder id=${MihrabLiveActivityModule.FGS_NOTIF_ID}")
       } catch (t: Throwable) {
-        // Some shells refuse FGS posts when the app isn't in a privileged
-        // state (Doze mode, background). Fall back to a plain notify so
-        // the user still sees something.
-        Log.w(TAG, "startForeground failed; falling back to notify()", t)
-        runCatching {
-          NotificationManagerCompat.from(this)
-            .notify(MihrabLiveActivityModule.NOTIF_ID, notif)
-        }
+        Log.w(TAG, "startForeground failed", t)
       }
+
+      // Step 2: post the rich chip notification via regular notify().
+      // Because this is NOT posted via startForeground(), NMS does NOT add
+      // FLAG_FOREGROUND_SERVICE — leaving it eligible for FLAG_PROMOTED_ONGOING
+      // and therefore the Android 16 status-bar Live Update chip.
+      try {
+        val richNotif = build(payload)
+        NotificationManagerCompat.from(this)
+          .notify(MihrabLiveActivityModule.NOTIF_ID, richNotif)
+        Log.i(TAG, "notify() posted rich chip notification id=${MihrabLiveActivityModule.NOTIF_ID}")
+      } catch (t: Throwable) {
+        Log.w(TAG, "notify() rich notification failed", t)
+      }
+
       scheduleTicker()
     }
     // START_STICKY so the system restarts the service if the OS kills it
@@ -155,9 +167,11 @@ class MihrabLiveActivityService : Service() {
       }
     }
     runCatching {
-      NotificationManagerCompat.from(this).cancel(MihrabLiveActivityModule.NOTIF_ID)
+      val nm = NotificationManagerCompat.from(this)
+      nm.cancel(MihrabLiveActivityModule.NOTIF_ID)
+      nm.cancel(MihrabLiveActivityModule.FGS_NOTIF_ID)
     }
-    Log.i(TAG, "onDestroy — service stopped, notification cancelled")
+    Log.i(TAG, "onDestroy — service stopped, both notifications cancelled")
   }
 
   override fun onBind(intent: Intent?): IBinder? = null

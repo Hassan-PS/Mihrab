@@ -15,24 +15,40 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
  * Mihrab Live Activity — JS bridge for the Android Live Activity.
  *
- * Architecture (v2.1.0-beta.8+):
+ * Architecture (v2.1.0-beta.10+):
  *
  *   JS toggles ON  →  MihrabLiveActivityModule.display(payload)
  *                  →  ContextCompat.startForegroundService(payload)
- *                  →  MihrabLiveActivityService takes over: it owns
- *                     the notification AND a per-minute ticker that
- *                     re-posts with a freshly-computed progress value.
+ *                  →  MihrabLiveActivityService takes over:
+ *                       1. startForeground(FGS_NOTIF_ID, buildFgsNotification())
+ *                          — minimal silent placeholder; keeps process alive
+ *                            so the per-minute ticker keeps running. This
+ *                            notification is posted via startForeground() and
+ *                            therefore receives FLAG_FOREGROUND_SERVICE.
+ *                       2. notify(NOTIF_ID, buildNotificationFromPayload(...))
+ *                          — rich chip notification posted via regular
+ *                            notify(). Because it is NOT posted via
+ *                            startForeground(), NMS can set FLAG_PROMOTED_ONGOING
+ *                            on it, making it eligible for the Android 16
+ *                            status-bar Live Update chip.
  *
  *   JS toggles OFF →  MihrabLiveActivityModule.cancel()
  *                  →  context.stopService(...)
- *                  →  service.onDestroy() cancels its ticker and the
- *                     notification.
+ *                  →  service.onDestroy() cancels its ticker and both
+ *                     notifications.
+ *
+ * Why dual notifications (discovered in beta.10 investigation):
+ *   FLAG_PROMOTED_ONGOING and FLAG_FOREGROUND_SERVICE are mutually
+ *   exclusive in Android 16's NMS. NMS only sets FLAG_PROMOTED_ONGOING
+ *   on regular notify() notifications — never on FGS notifications.
+ *   EasyPark (confirmed working chip) uses a regular service + notify().
+ *   Our previous single-notification FGS approach always added
+ *   FLAG_FOREGROUND_SERVICE, which permanently blocked chip promotion.
  *
  * The notification builder lives in the companion object so the
  * service can build the notification on its own ticker, without going
@@ -63,6 +79,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       // creates it via notifee on app boot, but on first install the
       // FGS may try to post before notifee has run.
       ensureChannelExists(reactContext)
+      ensureFgsChannelExists(reactContext)
       val intent = Intent(reactContext, MihrabLiveActivityService::class.java).apply {
         putExtra(MihrabLiveActivityService.EXTRA_PAYLOAD, payloadJson)
       }
@@ -97,10 +114,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     try {
       val intent = Intent(reactContext, MihrabLiveActivityService::class.java)
       reactContext.stopService(intent)
-      // Also cancel in case the service was never started (background
-      // FGS-start was blocked and we fell back to notify()).
+      // Also cancel both notifications in case the service was never
+      // started (background FGS-start was blocked and we fell back to
+      // notify()) or the service already exited.
       runCatching {
-        NotificationManagerCompat.from(reactContext).cancel(NOTIF_ID)
+        val nm = NotificationManagerCompat.from(reactContext)
+        nm.cancel(NOTIF_ID)
+        nm.cancel(FGS_NOTIF_ID)
       }
       promise.resolve(null)
     } catch (e: Throwable) {
@@ -118,6 +138,14 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     // Channel importance must match what JS creates in liveActivity.ts.
     const val CHANNEL_ID = "mihrab_live_activity_v3"
     const val NOTIF_ID = 0xA1B2
+
+    // Foreground-service placeholder notification (beta.10+ dual-notification
+    // architecture). This notification is posted via startForeground() to
+    // keep the process alive; it uses a separate low-importance channel so
+    // it stays silent and out of the way. The rich chip notification
+    // (NOTIF_ID) is posted via regular notify() on this same channel.
+    const val FGS_NOTIF_ID = 0xA1B3
+    const val FGS_CHANNEL_ID = "mihrab_fgs_v1"
 
     /** Ensure the channel exists with the right importance before any
      *  startForeground call. */
@@ -142,7 +170,54 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       nm.createNotificationChannel(ch)
     }
 
-    @Volatile private var loggedBuilderMethods = false
+    /** Ensure the low-importance FGS placeholder channel exists.
+     *  IMPORTANCE_MIN keeps the placeholder out of the main shade and
+     *  suppresses any status-bar icon for it; the rich chip notification
+     *  on CHANNEL_ID (IMPORTANCE_HIGH) owns the status-bar real-estate. */
+    @JvmStatic
+    fun ensureFgsChannelExists(ctx: Context) {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+      val nm = ctx.getSystemService(android.app.NotificationManager::class.java)
+        ?: return
+      if (nm.getNotificationChannel(FGS_CHANNEL_ID) != null) return
+      val ch = android.app.NotificationChannel(
+        FGS_CHANNEL_ID,
+        "Prayer countdown (system)",
+        android.app.NotificationManager.IMPORTANCE_MIN,
+      ).apply {
+        description = "Internal service channel for the prayer countdown. Not user-facing."
+        setSound(null, null)
+        enableVibration(false)
+        setShowBadge(false)
+      }
+      nm.createNotificationChannel(ch)
+    }
+
+    /** Build the minimal FGS placeholder notification. Posted via
+     *  startForeground() to satisfy Android's FGS requirement and keep
+     *  the process alive; intentionally silent and hidden so only the
+     *  rich chip notification (NOTIF_ID, posted via notify()) is visible. */
+    @JvmStatic
+    fun buildFgsNotification(ctx: Context): Notification {
+      val tap = Intent(ctx, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+      }
+      val pi = PendingIntent.getActivity(
+        ctx, 1, tap,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+      )
+      return NotificationCompat.Builder(ctx, FGS_CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_stat_prayer)
+        .setContentTitle(ctx.getString(R.string.app_name))
+        .setContentText("Prayer countdown active")
+        .setContentIntent(pi)
+        .setOngoing(true)
+        .setOnlyAlertOnce(true)
+        .setSilent(true)
+        .setPriority(NotificationCompat.PRIORITY_MIN)
+        .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+        .build()
+    }
 
     /** Top-level entry point — used by both the JS bridge (as a
      *  fallback when foreground-service start is denied) and by the
@@ -150,21 +225,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     @JvmStatic
     fun buildNotificationFromPayload(ctx: Context, p: JSONObject): Notification {
       val nextLabel = p.optString("nextLabel", "")
-      val nextTime = p.optString("nextTime", "")
       val nextEpochMs = p.optLong("nextEpochMs", 0L)
       val prevEpochMs = p.optLong("prevEpochMs", 0L)
-      val nextKey = p.optString("nextKey", "")
       val accentInt = parseColor(
         p.optString("accentHex", "#22C55E"),
         Color.parseColor("#22C55E"),
       )
       val progressPct = computeProgressPercent(prevEpochMs, nextEpochMs)
-      val compactMode = p.optBoolean("compactMode", false)
+      // JS sends title as the combined "Asr · 17:08" string; falls back to
+      // just the label if the title field is absent.
       val title = p.optString("title", nextLabel)
-      val body = p.optString("body", nextTime)
-      val rows = jsonRowsToList(p.optJSONArray("rows"))
-      val sunriseRow = p.optJSONObject("sunriseRow")?.let { rowFromJson(it) }
-      val displayRows = computeDisplayRows(rows, sunriseRow)
 
       val tap = Intent(ctx, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -175,15 +245,9 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       )
 
       return if (Build.VERSION.SDK_INT >= 36) {
-        buildAndroid16(
-          ctx, nextEpochMs, nextKey, accentInt,
-          progressPct, compactMode, displayRows, title, body, pi,
-        )
+        buildAndroid16(ctx, nextEpochMs, accentInt, progressPct, title, pi)
       } else {
-        buildLegacy(
-          ctx, nextEpochMs, nextKey, accentInt,
-          progressPct, compactMode, displayRows, title, body, pi,
-        )
+        buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, pi)
       }
     }
 
@@ -193,91 +257,42 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     private fun buildAndroid16(
       ctx: Context,
       nextEpochMs: Long,
-      nextKey: String,
       accentInt: Int,
       progressPct: Int,
-      compactMode: Boolean,
-      rows: List<Row>,
       title: String,
-      body: String,
       contentIntent: PendingIntent,
     ): Notification {
       try {
         val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
 
-        val inbox = Notification.InboxStyle().setBigContentTitle(title)
-        if (!compactMode) {
-          val maxNameLen = rows.maxOfOrNull { it.name.length } ?: 0
-          for (row in rows) {
-            val isNext = row.key == nextKey
-            val marker = if (isNext) "›" else " "
-            val padded = row.name.padEnd(maxNameLen, ' ')
-            inbox.addLine("$marker  $padded   ${row.time}")
-          }
-        }
-
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(accentInt)
+          // setOngoing(true) adds FLAG_ONGOING_EVENT which prevents both
+          // swipe-to-dismiss AND "Clear All" from removing the chip
+          // notification. The chip stays alive until Live Activity is
+          // explicitly turned off or the prayer window ends.
           .setOngoing(true)
           .setOnlyAlertOnce(true)
           .setLocalOnly(false)
-          // CATEGORY_NAVIGATION is the documented chip-eligible category
-          // alongside CALL / TRANSPORT / WORKOUT / MISSED_CALL. PROGRESS
-          // shipped in beta.5–8 didn't unlock the chip; navigation does
-          // on most Android 16 builds we've seen.
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(title)
-          .setContentText(body)
+          .setContentTitle(title)               // "Asr · 17:08"
+          .setContentText("$progressPct%")      // "52%" — above the progress bar
           .setContentIntent(contentIntent)
           .setWhen(nextEpochMs)
           .setShowWhen(true)
           .setUsesChronometer(true)
           .setChronometerCountDown(true)
           .setProgress(100, progressPct, false)
-          .setStyle(inbox)
-          .addAction(
-            Notification.Action.Builder(
-              android.graphics.drawable.Icon.createWithResource(
-                ctx, R.drawable.ic_stat_prayer
-              ),
-              "Open",
-              contentIntent,
-            ).build(),
-          )
-
-        // setSilent is API 29+. Suppresses heads-up popups even on a
-        // HIGH-importance channel — we need IMPORTANCE_HIGH for the
-        // Android 16 chip but don't want a banner popping every minute
-        // when the foreground service re-posts. Called via reflection so
-        // the build compiles against minSdk 24.
-        if (Build.VERSION.SDK_INT >= 29) {
-          runCatching {
-            Notification.Builder::class.java
-              .getMethod("setSilent", Boolean::class.javaPrimitiveType)
-              .invoke(builder, true)
-          }
-        }
 
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
 
-        if (!loggedBuilderMethods) {
-          loggedBuilderMethods = true
-          val all = Notification.Builder::class.java.methods
-            .map { "${it.name}(${it.parameterTypes.joinToString { p -> p.simpleName }})" }
-            .sorted()
-          Log.i(NAME, "Notification.Builder methods (${all.size}): ${all.joinToString("; ")}")
-        }
-
         return builder.build()
       } catch (t: Throwable) {
         Log.w(NAME, "Android 16 path failed, falling back to legacy", t)
-        return buildLegacy(
-          ctx, nextEpochMs, nextKey, accentInt,
-          progressPct, compactMode, rows, title, body, contentIntent,
-        )
+        return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent)
       }
     }
 
@@ -286,56 +301,31 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     private fun buildLegacy(
       ctx: Context,
       nextEpochMs: Long,
-      nextKey: String,
       accentInt: Int,
       progressPct: Int,
-      compactMode: Boolean,
-      rows: List<Row>,
       title: String,
-      body: String,
       contentIntent: PendingIntent,
     ): Notification {
-      val inboxStyle = NotificationCompat.InboxStyle().setBigContentTitle(title)
-      if (!compactMode) {
-        for (row in rows) {
-          val marker = if (row.key == nextKey) "›" else " "
-          inboxStyle.addLine("$marker  ${row.name}  ${row.time}")
-        }
-      }
-      val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
+      return NotificationCompat.Builder(ctx, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_stat_prayer)
         .setColor(accentInt)
         .setColorized(false)
         .setOngoing(true)
         .setOnlyAlertOnce(true)
-        // localOnly is false on the FGS path so the notification can
-        // be promoted (some shells block localOnly notifications from
-        // appearing in the main "Notifications" section).
+        .setSilent(true)
         .setLocalOnly(false)
-        // CATEGORY_PROGRESS so the system understands this is an
-        // ongoing journey/timed activity rather than a quiet status.
         .setCategory(NotificationCompat.CATEGORY_PROGRESS)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        // PRIORITY_DEFAULT (not LOW) so the notification renders in the
-        // main "Notifications" section, not "Silent".
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setContentTitle(title)
-        .setContentText(body)
+        .setContentTitle(title)               // "Asr · 17:08"
+        .setContentText("$progressPct%")      // "52%"
         .setContentIntent(contentIntent)
-        .setStyle(inboxStyle)
         .setWhen(nextEpochMs)
         .setShowWhen(true)
         .setUsesChronometer(true)
         .setChronometerCountDown(true)
         .setProgress(100, progressPct, false)
-        .addAction(
-          NotificationCompat.Action.Builder(
-            R.drawable.ic_stat_prayer,
-            "Open",
-            contentIntent,
-          ).build(),
-        )
-      return builder.build()
+        .build()
     }
 
     // ── Reflection helpers for Android 16 chip APIs ─────────────────
@@ -424,33 +414,5 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     private fun parseColor(hex: String, fallback: Int): Int =
       try { Color.parseColor(if (hex.startsWith("#")) hex else "#$hex") }
       catch (_: Throwable) { fallback }
-
-    data class Row(val key: String, val name: String, val time: String)
-
-    private fun rowFromJson(o: JSONObject): Row =
-      Row(
-        key = o.optString("key", ""),
-        name = o.optString("name", o.optString("abbr", "")),
-        time = o.optString("time", ""),
-      )
-
-    private fun jsonRowsToList(arr: JSONArray?): List<Row> {
-      if (arr == null) return emptyList()
-      val out = ArrayList<Row>(arr.length())
-      for (i in 0 until arr.length()) {
-        val o = arr.optJSONObject(i) ?: continue
-        out.add(rowFromJson(o))
-      }
-      return out
-    }
-
-    /** Splice sunrise at slot 1 (between Fajr and Dhuhr). Sunrise is
-     *  always shown — no toggle. */
-    private fun computeDisplayRows(base: List<Row>, sunrise: Row?): List<Row> {
-      if (sunrise == null) return base
-      val out = base.toMutableList()
-      if (out.isEmpty()) out.add(sunrise) else out.add(1, sunrise)
-      return out
-    }
   }
 }

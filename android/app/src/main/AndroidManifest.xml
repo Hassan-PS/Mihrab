@@ -13,6 +13,12 @@
          must auto-tick without the app being open). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Android 16 (API 36) Live Update chip (status-bar "promoted ongoing"
+         pill). Protection level is normal|appop — automatically granted at
+         install time when declared, no runtime prompt needed.
+         Required by the android.app.api_rich_ongoing_permission feature flag
+         that gates chip promotion on Pixel 10 / Android 16 builds. -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
     <application
       android:name=".MainApplication"
