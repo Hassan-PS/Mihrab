@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.3] — 2026-05-11
+
+### Added
+- **Home screen — Mihrab logo in header**: The app name in the home screen navigation bar now shows a transparent-fill pointed-arch icon (matching the launcher icon geometry) alongside the text. The arch interior shows through to the navigation bar background, adapting to light and dark themes automatically.
+
+### Fixed
+- **Home screen — title always "Mihrab"**: The home screen header title is now always the proper app name "Mihrab" regardless of the selected language. Previously it was translated (e.g. "محراب" in Arabic), which obscured the brand name.
+- **iOS Live Activity — next-prayer advance**: When a prayer passes while the app is open in the foreground, the Live Activity now immediately updates to show the next prayer and a fresh countdown. Root cause: `syncLiveActivity` was not re-triggered when the "next prayer" pointer advanced; adding `nextInfo` to the effect dependency array fixes this.
+
 ## [2.1.2] — 2026-05-11
 
 ### Fixed

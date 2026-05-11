@@ -258,7 +258,25 @@ export function HomeScreen() {
       { lat: state.latitude, lng: state.longitude },
       { jumuah: seasonal.jumuah, ramadan: seasonal.ramadan, eid: seasonal.eid },
     ).catch(e => console.warn('syncPrayerWidget (effect):', e));
-    // Live activity — same data path as the widget (task #128).
+  }, [
+    hydrated,
+    state,
+    locationLabel,
+  ]);
+
+  // Live Activity sync — runs whenever prayer data changes OR whenever the
+  // "next prayer" pointer advances (nextInfo change is detected by the 30-second
+  // watchdog above). Including nextInfo here is the key fix for the countdown
+  // reaching zero without advancing: when Fajr passes and nextInfo flips to
+  // Dhuhr, this effect re-fires with `now: new Date()`, so syncLiveActivity
+  // recomputes the correct next prayer and pushes updated content.
+  useEffect(() => {
+    if (!hydrated || state.phase !== 'ready') return;
+    const seasonal = computeSeasonalTreatment(
+      state.today,
+      state.tomorrow,
+      new Date(),
+    );
     syncLiveActivity({
       options: {
         enabled: settings.liveActivityEnabled,
@@ -285,6 +303,10 @@ export function HomeScreen() {
   }, [
     hydrated,
     state,
+    // nextInfo is the computed "which prayer is next right now" value.
+    // The 30-second watchdog updates it whenever a prayer passes, triggering
+    // this effect to re-sync the Live Activity with the new next prayer.
+    nextInfo,
     locationLabel,
     settings.liveActivityEnabled,
     settings.liveActivityShowSunrise,

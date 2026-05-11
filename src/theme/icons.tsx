@@ -65,6 +65,43 @@ export function MihrabArchIcon({ size = 24, color = '#000' }: IconProps) {
   );
 }
 
+/**
+ * Mihrab logo icon — matches the actual app launcher icon geometry.
+ *
+ * Outer pointed arch minus inner cutout rendered with evenodd fill rule so the
+ * interior is transparent (shows the header/theme background through it).
+ * An eight-pointed star sits inside the niche.
+ *
+ * Paths derived from branding/01_mihrab.svg (1024×1024 canvas), scaled to a
+ * 24×24 viewBox with 14 px arch width and 1.5 px top padding.
+ *
+ * Use when the full brand mark is needed — e.g. the home screen header title.
+ */
+export function MihrabLogoIcon({ size = 24, color = '#000' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {/* Arch frame: outer arch - inner cutout (evenodd → centre is transparent) */}
+      <Path
+        // Outer: M5 22.5 ... Z  Inner: M6.7 21.4 ... Z
+        d="M5 22.5 L5 10.2 Q5 6.5 8.4 4.3 L12 1.5 L15.6 4.3 Q19 6.5 19 10.2 L19 22.5 Z M6.7 21.4 L6.7 10.5 Q6.7 7.4 9.6 5.6 L12 3.7 L14.4 5.6 Q17.3 7.4 17.3 10.5 L17.3 21.4 Z"
+        fillRule="evenodd"
+        fill={color}
+      />
+      {/* Eight-pointed star — two overlapping squares rotated 45° apart.
+          Centred at (12, 13.7), half-side 2.5 px. */}
+      <Path
+        d="M9.5 11.2 H14.5 V16.2 H9.5 Z"
+        fill={color}
+      />
+      <Path
+        d="M9.5 11.2 H14.5 V16.2 H9.5 Z"
+        fill={color}
+        transform="rotate(45, 12, 13.7)"
+      />
+    </Svg>
+  );
+}
+
 /** 8-pointed star — Islamic geometric motif used as Eid flourish.
  *  Reverent accent only — never tiled, never used as background. */
 export function EightPointStarIcon({ size = 24, color = '#000' }: IconProps) {

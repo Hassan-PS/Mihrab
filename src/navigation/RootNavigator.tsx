@@ -3,10 +3,11 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform } from 'react-native';
+import { Platform, Text } from 'react-native';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
 import { LocationChip } from '../screens/home/LocationChip';
 import { View } from 'react-native';
+import { MihrabLogoIcon } from '../theme/icons';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
@@ -28,6 +29,31 @@ import type { RootStackParamList } from './types';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const isIOS = Platform.OS === 'ios';
+
+/**
+ * Home screen header title — always renders "Mihrab" in English regardless of
+ * the user's selected language, because "Mihrab" is the app's proper name, not
+ * a translated label. The outline logo icon sits left of the text; its interior
+ * is transparent so the navigation bar background (light or dark theme) shows
+ * through it.
+ */
+function MihrabHeaderTitle() {
+  const { colors } = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+      <MihrabLogoIcon size={20} color={colors.text} />
+      <Text
+        style={{
+          color: colors.text,
+          fontSize: isIOS ? 17 : 20,
+          fontWeight: isIOS ? '600' : '700',
+          letterSpacing: isIOS ? -0.3 : 0,
+        }}>
+        Mihrab
+      </Text>
+    </View>
+  );
+}
 
 function HomeHeaderRight() {
   const navigation =
@@ -142,7 +168,12 @@ export function RootNavigator() {
         name="Home"
         component={HomeScreenWrapper}
         options={{
-          title: t('nav.home'),
+          // Always "Mihrab" — the app's proper name, not a translated label.
+          // The custom headerTitle renders the arch logo icon alongside the text.
+          // headerLargeTitle is disabled here so the icon is always visible; the
+          // iOS large-title API does not support custom components.
+          headerTitle: () => <MihrabHeaderTitle />,
+          headerLargeTitle: false,
           headerRight: () => <HomeHeaderRight />,
         }}
       />
