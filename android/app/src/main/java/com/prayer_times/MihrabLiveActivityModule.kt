@@ -248,6 +248,22 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .build()
     }
 
+    /**
+     * Render a single-line text progress bar with the percentage on the
+     * same line: "████████████░░░░░░░░  52%"
+     *
+     * Uses Unicode FULL BLOCK (U+2588) for filled and LIGHT SHADE (U+2591)
+     * for empty. 20 cells wide — readable at notification text size on any
+     * screen density. Works on every Android shell including GrapheneOS
+     * because it is plain text in setContentText, not a RemoteView.
+     */
+    private fun buildProgressLine(percent: Int): String {
+      val total = 20
+      val filled = (percent * total / 100).coerceIn(0, total)
+      val empty  = total - filled
+      return "█".repeat(filled) + "░".repeat(empty) + "  $percent%"
+    }
+
     /** Top-level entry point — used by both the JS bridge (as a
      *  fallback when foreground-service start is denied) and by the
      *  MihrabLiveActivityService on its periodic ticker.
@@ -316,7 +332,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
           .setContentTitle(title)          // "Asr · 17:08"
-          .setSubText("$progressPct%")     // header-row percentage
+          .setContentText("$progressPct%") // percentage sits directly above the bar
           .setContentIntent(contentIntent)
           .setWhen(nextEpochMs)
           .setShowWhen(true)
@@ -356,7 +372,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         .setContentTitle(title)          // "Asr · 17:08"
-        .setSubText("$progressPct%")     // header-row percentage
+        .setContentText("$progressPct%") // percentage sits directly above the bar
         .setContentIntent(contentIntent)
         .setWhen(nextEpochMs)
         .setShowWhen(true)

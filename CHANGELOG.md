@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.2] — 2026-05-12
+
+### Changed
+- **Android Live Activity — Material You progress bar**: Reverted the Unicode text bar back to the system `setProgress()` bar, which Android 12+ (Pixel) renders with Material You styling — rounded ends, accent tint, smooth fill. The percentage is shown as `setContentText("52%")` directly above the bar so they read as a single visual unit.
+
+## [2.3.1] — 2026-05-12
+
+### Changed
+- **Android Live Activity — progress bar with inline percentage**: Replaced the system `setProgress()` bar (which gives no control over placement) with a Unicode text bar rendered directly in the notification content line: `████████████░░░░░░  52%`. The bar and percentage are now on the same line with no gap between them, exactly as intended. Works on all Android shells including hardened ones (it is plain `setContentText`, not a RemoteView).
+
 ## [2.3.0] — 2026-05-12
 
 ### Changed
