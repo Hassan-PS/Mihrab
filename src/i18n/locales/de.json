@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Minuten vor dem Gebet",
     "prePrayerReminderOff": "Aus",
     "prePrayerReminderOption": "{{count}} Minuten vorher",
+    "liveActivity": "Live-Aktivität",
+    "liveActivityHelp": "Angeheftete Benachrichtigung mit dem Countdown bis zum nächsten Gebet und den restlichen Gebetszeiten des Tages.",
+    "liveActivityCustomize": "Anpassen",
+    "liveActivityCompact": "Kompakter Modus",
+    "liveActivityCompactHelp": "Nur den Countdown anzeigen; Gebetsliste ausblenden.",
+    "liveActivityShowSunriseLabel": "Sonnenaufgang anzeigen",
+    "liveActivityShowHijriLabel": "Hidschri-Datum anzeigen",
+    "liveActivityShowLocationLabel": "Standort anzeigen",
     "language": "Sprache",
     "languageHelp": "Englisch, Schwedisch oder Arabisch. Arabisch verwendet das Layout von rechts nach links.",
     "langEn": "Englisch",
@@ -881,5 +889,13 @@
     "amiriFonts": "Schriftarten Amiri & Amiri Quran",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim Bittgebete"
+  },
+  "liveActivity": {
+    "title": "Nächstes Gebet",
+    "in": "in {{remaining}}",
+    "now": "Jetzt",
+    "soon": "Beginnt bald",
+    "channelName": "Gebets-Countdown",
+    "channelDesc": "Angeheftete laufende Benachrichtigung mit dem Countdown zum nächsten Gebet."
   }
 }

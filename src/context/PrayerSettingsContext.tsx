@@ -81,6 +81,15 @@ export type WidgetSlice = Pick<
   | 'widgetHighlightCustomHex'
 >;
 
+export type LiveActivitySlice = Pick<
+  PrayerAppSettings,
+  | 'liveActivityEnabled'
+  | 'liveActivityCompactMode'
+  | 'liveActivityShowSunrise'
+  | 'liveActivityShowHijri'
+  | 'liveActivityShowLocation'
+>;
+
 type SliceCtxValue<S> = {
   slice: S;
   /** Partial update against this slice only. */
@@ -102,6 +111,7 @@ const LocationContext = createContext<SliceCtxValue<LocationSlice> | null>(null)
 const NotificationsContext = createContext<SliceCtxValue<NotificationsSlice> | null>(null);
 const DataSourceContext = createContext<SliceCtxValue<DataSourceSlice> | null>(null);
 const WidgetContext = createContext<SliceCtxValue<WidgetSlice> | null>(null);
+const LiveActivityContext = createContext<SliceCtxValue<LiveActivitySlice> | null>(null);
 
 // ── Provider ──────────────────────────────────────────────────────────────
 
@@ -234,6 +244,23 @@ export function PrayerSettingsProvider({
     ],
   );
 
+  const liveActivity = useMemo<LiveActivitySlice>(
+    () => ({
+      liveActivityEnabled: settings.liveActivityEnabled,
+      liveActivityCompactMode: settings.liveActivityCompactMode,
+      liveActivityShowSunrise: settings.liveActivityShowSunrise,
+      liveActivityShowHijri: settings.liveActivityShowHijri,
+      liveActivityShowLocation: settings.liveActivityShowLocation,
+    }),
+    [
+      settings.liveActivityEnabled,
+      settings.liveActivityCompactMode,
+      settings.liveActivityShowSunrise,
+      settings.liveActivityShowHijri,
+      settings.liveActivityShowLocation,
+    ],
+  );
+
   // The narrow `update` callbacks are stable because `updateSettings` is
   // stable. They simply forward to the root updater.
   const appearanceCtx = useMemo<SliceCtxValue<AppearanceSlice>>(
@@ -256,6 +283,10 @@ export function PrayerSettingsProvider({
     () => ({ slice: widget, update: updateSettings, hydrated }),
     [widget, updateSettings, hydrated],
   );
+  const liveActivityCtx = useMemo<SliceCtxValue<LiveActivitySlice>>(
+    () => ({ slice: liveActivity, update: updateSettings, hydrated }),
+    [liveActivity, updateSettings, hydrated],
+  );
 
   const fullValue = useMemo<Ctx>(
     () => ({ settings, hydrated, updateSettings }),
@@ -269,7 +300,9 @@ export function PrayerSettingsProvider({
           <NotificationsContext.Provider value={notificationsCtx}>
             <DataSourceContext.Provider value={dataSourceCtx}>
               <WidgetContext.Provider value={widgetCtx}>
-                {children}
+                <LiveActivityContext.Provider value={liveActivityCtx}>
+                  {children}
+                </LiveActivityContext.Provider>
               </WidgetContext.Provider>
             </DataSourceContext.Provider>
           </NotificationsContext.Provider>
@@ -324,4 +357,9 @@ export function useDataSourceSettings() {
 /** Subscribe only to widget fields (opacity, highlight color). */
 export function useWidgetSettings() {
   return useSliceCtx(WidgetContext, 'useWidgetSettings');
+}
+
+/** Subscribe only to live-activity fields (enabled flag + display options). */
+export function useLiveActivitySettings() {
+  return useSliceCtx(LiveActivityContext, 'useLiveActivitySettings');
 }

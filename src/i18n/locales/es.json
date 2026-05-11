@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Minutos antes de la oración",
     "prePrayerReminderOff": "Apagado",
     "prePrayerReminderOption": "{{count}} minutos antes",
+    "liveActivity": "Actividad en vivo",
+    "liveActivityHelp": "Notificación fijada con la cuenta regresiva hasta la próxima oración y el resto de los horarios del día.",
+    "liveActivityCustomize": "Personalizar",
+    "liveActivityCompact": "Modo compacto",
+    "liveActivityCompactHelp": "Mostrar solo la cuenta regresiva; ocultar la lista de oraciones.",
+    "liveActivityShowSunriseLabel": "Mostrar el Amanecer",
+    "liveActivityShowHijriLabel": "Mostrar fecha hijri",
+    "liveActivityShowLocationLabel": "Mostrar ubicación",
     "language": "Idioma",
     "languageHelp": "Inglés, sueco o árabe. El árabe utiliza un diseño de derecha a izquierda.",
     "langEn": "Inglés",
@@ -881,5 +889,13 @@
     "amiriFonts": "Tipografías Amiri y Amiri Quran",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Súplicas de Hisn al-Muslim"
+  },
+  "liveActivity": {
+    "title": "Próxima oración",
+    "in": "en {{remaining}}",
+    "now": "Ahora",
+    "soon": "Comienza pronto",
+    "channelName": "Cuenta regresiva de oración",
+    "channelDesc": "Notificación continua fijada mostrando la cuenta regresiva hasta la próxima oración."
   }
 }

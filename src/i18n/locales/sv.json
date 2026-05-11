@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Minuter före bön",
     "prePrayerReminderOff": "Av",
     "prePrayerReminderOption": "{{count}} min före",
+    "liveActivity": "Live-aktivitet",
+    "liveActivityHelp": "Fastnålad nedräkning till nästa bön, med dagens övriga tider i den utökade vyn.",
+    "liveActivityCustomize": "Anpassa",
+    "liveActivityCompact": "Kompakt läge",
+    "liveActivityCompactHelp": "Visa endast nedräkningen; dölj bönlistan.",
+    "liveActivityShowSunriseLabel": "Visa Soluppgång",
+    "liveActivityShowHijriLabel": "Visa Hijri-datum",
+    "liveActivityShowLocationLabel": "Visa plats",
     "language": "Språk",
     "languageHelp": "Engelska, svenska eller arabiska. Arabiska använder höger-till-vänster-layout.",
     "langEn": "Engelska",
@@ -881,5 +889,13 @@
     "amiriFonts": "Amiri och Amiri Quran-typsnitt",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim-duor"
+  },
+  "liveActivity": {
+    "title": "Nästa bön",
+    "in": "om {{remaining}}",
+    "now": "Nu",
+    "soon": "Börjar snart",
+    "channelName": "Bönnedräkning",
+    "channelDesc": "Fastnålad pågående notis som visar nedräkning till nästa bön."
   }
 }

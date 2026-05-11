@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Namaza dakikalar kala",
     "prePrayerReminderOff": "Kapalı",
     "prePrayerReminderOption": "{{count}} dakika önce",
+    "liveActivity": "Canlı etkinlik",
+    "liveActivityHelp": "Sıradaki namaza geri sayım ve günün diğer vakitlerini gösteren sabitlenmiş bildirim.",
+    "liveActivityCustomize": "Özelleştir",
+    "liveActivityCompact": "Kompakt mod",
+    "liveActivityCompactHelp": "Yalnızca geri sayımı göster; namaz listesini gizle.",
+    "liveActivityShowSunriseLabel": "Güneşi göster",
+    "liveActivityShowHijriLabel": "Hicri tarihi göster",
+    "liveActivityShowLocationLabel": "Konumu göster",
     "language": "Dil",
     "languageHelp": "İngilizce, İsveççe veya Arapça. Arapça sağdan sola düzeni kullanır.",
     "langEn": "İngilizce",
@@ -881,5 +889,13 @@
     "amiriFonts": "Amiri ve Amiri Quran yazı tipleri",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim duaları"
+  },
+  "liveActivity": {
+    "title": "Sıradaki namaz",
+    "in": "{{remaining}} içinde",
+    "now": "Şimdi",
+    "soon": "Yakında başlıyor",
+    "channelName": "Namaz geri sayımı",
+    "channelDesc": "Sıradaki namaza geri sayımı gösteren sabitlenmiş sürekli bildirim."
   }
 }

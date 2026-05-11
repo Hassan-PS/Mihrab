@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Beberapa menit sebelum sholat",
     "prePrayerReminderOff": "Mati",
     "prePrayerReminderOption": "{{count}} menit sebelumnya",
+    "liveActivity": "Aktivitas langsung",
+    "liveActivityHelp": "Notifikasi tersemat dengan hitungan mundur ke salat berikutnya dan jadwal lainnya hari ini.",
+    "liveActivityCustomize": "Sesuaikan",
+    "liveActivityCompact": "Mode ringkas",
+    "liveActivityCompactHelp": "Tampilkan hanya hitungan mundur; sembunyikan daftar salat.",
+    "liveActivityShowSunriseLabel": "Tampilkan Syuruq",
+    "liveActivityShowHijriLabel": "Tampilkan tanggal Hijriah",
+    "liveActivityShowLocationLabel": "Tampilkan lokasi",
     "language": "Bahasa",
     "languageHelp": "Inggris, Swedia, atau Arab. Bahasa Arab menggunakan tata letak kanan ke kiri.",
     "langEn": "Bahasa inggris",
@@ -881,5 +889,13 @@
     "amiriFonts": "Font Amiri & Amiri Quran",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Doa-doa Hisnul Muslim"
+  },
+  "liveActivity": {
+    "title": "Salat berikutnya",
+    "in": "dalam {{remaining}}",
+    "now": "Sekarang",
+    "soon": "Segera dimulai",
+    "channelName": "Hitungan mundur salat",
+    "channelDesc": "Notifikasi berkelanjutan tersemat yang menampilkan hitungan mundur ke salat berikutnya."
   }
 }

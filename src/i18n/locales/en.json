@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Minutes before prayer",
     "prePrayerReminderOff": "Off",
     "prePrayerReminderOption": "{{count}} min before",
+    "liveActivity": "Live activity",
+    "liveActivityHelp": "Pinned countdown to the next prayer, with today's other times in the expanded view.",
+    "liveActivityCustomize": "Customize",
+    "liveActivityCompact": "Compact mode",
+    "liveActivityCompactHelp": "Show only the countdown; hide the prayer list.",
+    "liveActivityShowSunriseLabel": "Show Sunrise",
+    "liveActivityShowHijriLabel": "Show Hijri date",
+    "liveActivityShowLocationLabel": "Show location",
     "language": "Language",
     "languageHelp": "Select the app language. Arabic and Urdu use right-to-left layout.",
     "langEn": "English",
@@ -881,5 +889,13 @@
     "amiriFonts": "Amiri & Amiri Quran fonts",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisnul Muslim duas"
+  },
+  "liveActivity": {
+    "title": "Next prayer",
+    "in": "in {{remaining}}",
+    "now": "Now",
+    "soon": "Starting soon",
+    "channelName": "Prayer countdown",
+    "channelDesc": "Pinned ongoing notification with the next-prayer countdown."
   }
 }

@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "الدقائق قبل الصلاة",
     "prePrayerReminderOff": "إيقاف",
     "prePrayerReminderOption": "{{count}} د قبل الصلاة",
+    "liveActivity": "النشاط المباشر",
+    "liveActivityHelp": "إشعار مثبت يعرض العد التنازلي للصلاة القادمة، مع بقية أوقات اليوم في العرض الموسّع.",
+    "liveActivityCustomize": "تخصيص",
+    "liveActivityCompact": "وضع مضغوط",
+    "liveActivityCompactHelp": "عرض العد التنازلي فقط؛ إخفاء قائمة الصلوات.",
+    "liveActivityShowSunriseLabel": "إظهار الشروق",
+    "liveActivityShowHijriLabel": "إظهار التاريخ الهجري",
+    "liveActivityShowLocationLabel": "إظهار الموقع",
     "language": "اللغة",
     "languageHelp": "الإنجليزية أو السويدية أو العربية. العربية تستخدم تخطيطًا من اليمين لليسار.",
     "langEn": "الإنجليزية",
@@ -881,5 +889,13 @@
     "amiriFonts": "خطوط Amiri و Amiri Quran",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "أدعية حصن المسلم"
+  },
+  "liveActivity": {
+    "title": "الصلاة التالية",
+    "in": "خلال {{remaining}}",
+    "now": "الآن",
+    "soon": "تبدأ قريباً",
+    "channelName": "العد التنازلي للصلاة",
+    "channelDesc": "إشعار مستمر مثبت يعرض العد التنازلي للصلاة التالية."
   }
 }

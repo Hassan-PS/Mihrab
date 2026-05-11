@@ -120,6 +120,14 @@
     "prePrayerReminderModalTitle": "Минуты до молитвы",
     "prePrayerReminderOff": "Выключенный",
     "prePrayerReminderOption": "{{count}} минута назад",
+    "liveActivity": "Живая активность",
+    "liveActivityHelp": "Закреплённое уведомление с отсчётом до следующей молитвы и остальными временами на сегодня.",
+    "liveActivityCustomize": "Настроить",
+    "liveActivityCompact": "Компактный режим",
+    "liveActivityCompactHelp": "Показывать только отсчёт; скрыть список молитв.",
+    "liveActivityShowSunriseLabel": "Показывать Восход",
+    "liveActivityShowHijriLabel": "Показывать дату по хиджре",
+    "liveActivityShowLocationLabel": "Показывать местоположение",
     "language": "Язык",
     "languageHelp": "Английский, шведский или арабский. В арабском языке используется раскладка справа налево.",
     "langEn": "Английский",
@@ -881,5 +889,13 @@
     "amiriFonts": "Шрифты Amiri и Amiri Quran",
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Дуа из Хисн аль-Муслим"
+  },
+  "liveActivity": {
+    "title": "Следующая молитва",
+    "in": "через {{remaining}}",
+    "now": "Сейчас",
+    "soon": "Скоро начнётся",
+    "channelName": "Отсчёт молитвы",
+    "channelDesc": "Закреплённое продолжающееся уведомление с отсчётом до следующей молитвы."
   }
 }
