@@ -180,10 +180,10 @@ export async function syncLiveActivity(args: {
   }
 
   const nextLabel = localizedPrayerLabel(payload.nextKey);
-  const hijri = args.options.showHijri ? formatHijriLabel(now) : '';
-  const location =
-    args.options.showLocation && args.locationName ? args.locationName : '';
-
+  // Hijri and location intentionally NOT included in the Live Activity
+  // anymore — the user explicitly asked for them removed in beta.5.
+  // Sunrise is now permanent (not user-toggleable) — always shown in
+  // the prayer list as it marks the end of the Fajr window.
   const accentHex = args.accentHex || '#22c55e';
 
   if (Platform.OS === 'android') {
@@ -191,13 +191,13 @@ export async function syncLiveActivity(args: {
       payload,
       nextPrayerTimestamp,
       nextPrayerLabel: nextLabel,
-      hijriLabel: hijri,
-      locationLabel: location,
+      hijriLabel: '',
+      locationLabel: '',
       accentHex,
       compactMode: args.options.compactMode,
-      showSunrise: args.options.showSunrise,
-      showHijri: args.options.showHijri,
-      showLocation: args.options.showLocation,
+      showSunrise: true,
+      showHijri: false,
+      showLocation: false,
     });
     return;
   }
@@ -222,13 +222,13 @@ export async function syncLiveActivity(args: {
       nextTime: payload.nextPrayerTime ?? '',
       nextEpochMs: nextPrayerTimestamp ?? 0,
       rows,
-      sunriseRow: args.options.showSunrise ? payload.sunriseRow : undefined,
-      hijriLabel: hijri,
-      locationLabel: location,
+      sunriseRow: payload.sunriseRow,
+      hijriLabel: '',
+      locationLabel: '',
       compactMode: args.options.compactMode,
-      showSunrise: args.options.showSunrise,
-      showHijri: args.options.showHijri,
-      showLocation: args.options.showLocation,
+      showSunrise: true,
+      showHijri: false,
+      showLocation: false,
     };
     try {
       // Start is idempotent — module should detect a running activity and

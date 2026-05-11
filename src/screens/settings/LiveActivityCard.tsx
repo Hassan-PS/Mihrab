@@ -52,87 +52,37 @@ function LiveActivityCardImpl() {
       </View>
 
       {settings.liveActivityEnabled && (
-        <>
-          <View
-            style={[
-              s.card,
-              s.switchRow,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <View style={s.switchCopy}>
-              <Text style={[s.valueText, { color: palette.text }]}>
-                {t('settings.liveActivityCompact')}
-              </Text>
-              <Text style={[s.help, { color: palette.muted }]}>
-                {t('settings.liveActivityCompactHelp')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.liveActivityCompactMode}
-              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor={'#ffffff'}
-              onValueChange={v => update({ liveActivityCompactMode: v })}
-            />
+        <View
+          style={[
+            s.card,
+            s.switchRow,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <View style={s.switchCopy}>
+            <Text style={[s.valueText, { color: palette.text }]}>
+              {t('settings.liveActivityCompact')}
+            </Text>
+            <Text style={[s.help, { color: palette.muted }]}>
+              {t('settings.liveActivityCompactHelp')}
+            </Text>
           </View>
-
-          <View
-            style={[
-              s.card,
-              s.switchRow,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <View style={s.switchCopy}>
-              <Text style={[s.valueText, { color: palette.text }]}>
-                {t('settings.liveActivityShowSunriseLabel')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.liveActivityShowSunrise}
-              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor={'#ffffff'}
-              onValueChange={v => update({ liveActivityShowSunrise: v })}
-            />
-          </View>
-
-          <View
-            style={[
-              s.card,
-              s.switchRow,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <View style={s.switchCopy}>
-              <Text style={[s.valueText, { color: palette.text }]}>
-                {t('settings.liveActivityShowHijriLabel')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.liveActivityShowHijri}
-              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor={'#ffffff'}
-              onValueChange={v => update({ liveActivityShowHijri: v })}
-            />
-          </View>
-
-          <View
-            style={[
-              s.card,
-              s.switchRow,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <View style={s.switchCopy}>
-              <Text style={[s.valueText, { color: palette.text }]}>
-                {t('settings.liveActivityShowLocationLabel')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.liveActivityShowLocation}
-              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor={'#ffffff'}
-              onValueChange={v => update({ liveActivityShowLocation: v })}
-            />
-          </View>
-        </>
+          <Switch
+            value={settings.liveActivityCompactMode}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor={'#ffffff'}
+            onValueChange={v => update({ liveActivityCompactMode: v })}
+          />
+        </View>
       )}
+      {/*
+       * Hijri date and Location toggles intentionally removed in
+       * v2.1.0-beta.5 — they cluttered the notification header and the
+       * user didn't want them surfacing in the Live Activity.
+       *
+       * Sunrise is now always shown in the prayer list (no toggle) —
+       * it's a useful data point (end of Fajr window / start of
+       * forbidden prayer time) and most users want it visible.
+       */}
     </>
   );
 }
