@@ -31,8 +31,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -56,8 +58,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -81,8 +85,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -106,8 +112,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -131,8 +139,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -156,8 +166,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -181,8 +193,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -206,8 +220,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -231,8 +247,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -256,8 +274,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -281,8 +301,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -306,8 +328,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -331,8 +355,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -356,8 +382,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -381,8 +409,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -406,8 +436,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -431,8 +463,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -456,8 +490,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -481,8 +517,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -506,8 +544,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -531,8 +571,10 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
@@ -682,13 +724,15 @@ MaintainerNotes: |
   install Eclipse Temurin 17.0.18+8 (checksum-verified) to `/usr/local/jdk-17` and
   set `org.gradle.java.home` in `prebuild`.
   `output` points at `app/build/.../fdroid/release/*.apk` (RN app module); the
-  default Gradle discovery path does not include `app/`. `prebuild` sets
-  `reactNativeArchitectures=arm64-v8a` (v2.3.9+; previously arm64-v8a,armeabi-v7a)
-  to fit within the 1h CI timeout — react-native-svg C++ codegen for two ABIs
-  exceeded the limit. armeabi-v7a (32-bit) dropped; virtually all active Android
-  devices are arm64. Earlier entries retain the two-ABI set. `prebuild` also sets
-  `org.gradle.daemon=false` to free JVM heap for the parallel C++ compiler
-  processes (prevents OOM on CI runners).
+  default Gradle discovery path does not include `app/`. All `prebuild` blocks set
+  `reactNativeArchitectures=arm64-v8a` (arm64 only — two ABIs push react-native-svg
+  C++ codegen past the 1h CI timeout), `org.gradle.daemon=false` (free JVM heap for
+  parallel C++ workers), `org.gradle.jvmargs=-Xmx2g` (cap heap to prevent AAPT2/
+  Gradle daemon OOM-kill during parallel lint+R8), and append
+  `android { lint { checkReleaseBuilds false } }` to `app/build.gradle` (skip
+  `lintVitalAnalyzeRelease` on all native npm modules — runs in parallel with R8 and
+  otherwise OOM-kills the daemons even on arm64-only). Groovy DSL merges duplicate
+  `android {}` blocks; no patch file needed.
   Scanner: `scanignore` uses `node_modules` (RN layout
   changes make per-package paths brittle) plus `android/build.gradle` for the
   AsyncStorage `local_repo` maven entry. If policy tightens, consider `scandelete`
