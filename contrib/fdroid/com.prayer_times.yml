@@ -34,10 +34,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -62,10 +63,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -90,10 +92,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -118,10 +121,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -146,10 +150,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -174,10 +179,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -202,10 +208,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -230,10 +237,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -258,10 +266,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -286,10 +295,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -314,10 +324,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -342,10 +353,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -370,10 +382,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -398,10 +411,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -426,10 +440,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -454,10 +469,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -482,10 +498,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -510,10 +527,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -538,10 +556,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -566,10 +585,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -594,10 +614,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -622,10 +643,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -650,10 +672,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -678,10 +701,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -706,10 +730,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -734,10 +759,11 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
     ndk: 27.1.12297006
