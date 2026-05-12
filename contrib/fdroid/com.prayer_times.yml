@@ -21,6 +21,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -36,7 +37,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -48,6 +49,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -63,7 +65,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -75,6 +77,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -90,7 +93,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -102,6 +105,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -117,7 +121,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -129,6 +133,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -144,7 +149,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -156,6 +161,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -171,7 +177,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -183,6 +189,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -198,7 +205,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -210,6 +217,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -225,7 +233,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -237,6 +245,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -252,7 +261,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -264,6 +273,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -279,7 +289,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -291,6 +301,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -306,7 +317,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -318,6 +329,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -333,7 +345,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -345,6 +357,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -360,7 +373,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -372,6 +385,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -387,7 +401,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -399,6 +413,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -414,7 +429,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -426,6 +441,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -441,7 +457,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -453,6 +469,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -468,7 +485,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -480,6 +497,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -495,7 +513,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -507,6 +525,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -522,7 +541,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -534,6 +553,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -549,7 +569,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -561,6 +581,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -576,7 +597,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -588,6 +609,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -603,7 +625,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -615,6 +637,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -630,7 +653,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -642,6 +665,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -657,7 +681,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -669,6 +693,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -684,7 +709,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
@@ -696,6 +721,7 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates
+      - npm install -g npm@10
       - curl -Lo /tmp/jdk17.tar.gz 
         https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
       - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
@@ -711,7 +737,7 @@ Builds:
       - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit
     scanignore:
       - node_modules
     ndk: 27.1.12297006
