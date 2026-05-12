@@ -34,7 +34,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -64,7 +64,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -94,7 +94,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -124,7 +124,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -154,7 +154,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -184,7 +184,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -214,7 +214,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -244,7 +244,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -274,7 +274,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -304,7 +304,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -334,7 +334,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -364,7 +364,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -394,7 +394,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -424,7 +424,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -454,7 +454,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -484,7 +484,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -514,7 +514,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -544,7 +544,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -574,7 +574,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -604,7 +604,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -634,7 +634,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -664,7 +664,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -694,7 +694,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
@@ -724,7 +724,7 @@ Builds:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
