@@ -12,17 +12,18 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
 
 ## Adding a new `Builds:` entry — canonical prebuild template
 
-**Always copy this prebuild block exactly.** Do not use older entries (pre-v2.3.9) as a template.
+**Always copy this prebuild block exactly.** Do not use older entries as a template.
 
 ```yaml
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --build-from-source
+      - npm ci --no-audit --ignore-scripts
+      - node node_modules/.bin/patch-package
 ```
 
 ## Common pitfalls (all learned from real CI failures on MR 36312)
@@ -58,10 +59,22 @@ memory pressure OOM-kills the AAPT2 and Gradle daemons ("Gradle build daemon dis
 unexpectedly"), which then triggers the 1h timeout.
 
 The canonical prebuild block above handles both issues:
-- `org.gradle.jvmargs=-Xmx2g` caps Gradle heap so it doesn't compete with AAPT2 workers.
+- `org.gradle.jvmargs=-Xmx1g` caps Gradle heap so it doesn't compete with AAPT2 workers or Metro.
 - `printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle` disables all
   `lintVital*` tasks including those for dependencies. Groovy DSL merges duplicate `android {}`
   blocks in the same file, so appending a second block is safe.
+
+### 5. Metro OOM-kill → hermesc exit code 5 (v2.3.x+)
+Metro (the JS bundler, a Node.js subprocess) runs during `createBundleFdroidReleaseJsAndAssets`.
+If Gradle holds too much heap (`-Xmx2g`), there is insufficient RAM left for Node.js → Metro is
+OOM-killed → `index.android.bundle` is never written → hermesc exits with code 5 ("Failed to
+open file"). Fix: `-Xmx1g` (see §4 above) plus `--ignore-scripts` on npm ci to finish faster.
+
+### 6. npm ci postinstall scripts → slow install (~55+ min)
+npm ci with postinstall scripts (native module compilation, etc.) takes ~55–60 min on the CI
+runner, eating into the 1h budget and leaving no time for Gradle. Fix: `--ignore-scripts` skips
+them; `node node_modules/.bin/patch-package` is then run explicitly to re-apply the
+`patches/` patches (specifically the Google Play Services strip for `@react-native-community/geolocation`).
 
 ---
 
