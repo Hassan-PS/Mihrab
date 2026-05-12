@@ -38,7 +38,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -68,7 +68,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -98,7 +98,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -128,7 +128,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -158,7 +158,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -188,7 +188,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -218,7 +218,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -248,7 +248,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -278,7 +278,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -308,7 +308,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -338,7 +338,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -368,7 +368,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -398,7 +398,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -428,7 +428,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -458,7 +458,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -488,7 +488,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -518,7 +518,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -548,7 +548,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -578,7 +578,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -608,7 +608,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -638,7 +638,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -668,7 +668,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -698,7 +698,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
@@ -728,7 +728,7 @@ Builds:
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
     scanignore:
       - node_modules
