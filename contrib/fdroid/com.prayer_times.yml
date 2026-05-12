@@ -538,6 +538,7 @@ Builds:
     scanignore:
       - node_modules
     ndk: 27.1.12297006
+
   - versionName: 2.3.9
     versionCode: 172
     commit: v2.3.9
@@ -555,13 +556,14 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
       - node_modules
     ndk: 27.1.12297006
+
   - versionName: 2.3.10
     versionCode: 173
     commit: v2.3.10
@@ -579,13 +581,14 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
       - node_modules
     ndk: 27.1.12297006
+
   - versionName: 2.3.11
     versionCode: 174
     commit: v2.3.11
@@ -603,13 +606,14 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
       - node_modules
     ndk: 27.1.12297006
+
   - versionName: 2.3.12
     versionCode: 175
     commit: v2.3.12
@@ -627,13 +631,14 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
       - npm ci --no-audit --build-from-source
     scanignore:
       - node_modules
     ndk: 27.1.12297006
+
   - versionName: 2.3.13
     versionCode: 176
     commit: v2.3.13
@@ -651,7 +656,7 @@ Builds:
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a,armeabi-v7a' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - cd ..
       - npm ci --no-audit --build-from-source
@@ -668,8 +673,10 @@ MaintainerNotes: |
   set `org.gradle.java.home` in `prebuild`.
   `output` points at `app/build/.../fdroid/release/*.apk` (RN app module); the
   default Gradle discovery path does not include `app/`. `prebuild` sets
-  `reactNativeArchitectures=arm64-v8a,armeabi-v7a` to halve NDK C++ codegen
-  compile time (x86/x86_64 omitted; real devices only need the ARM ABIs) and
+  `reactNativeArchitectures=arm64-v8a` (v2.3.9+; previously arm64-v8a,armeabi-v7a)
+  to fit within the 1h CI timeout — react-native-svg C++ codegen for two ABIs
+  exceeded the limit. armeabi-v7a (32-bit) dropped; virtually all active Android
+  devices are arm64. Earlier entries retain the two-ABI set. `prebuild` also sets
   `org.gradle.daemon=false` to free JVM heap for the parallel C++ compiler
   processes (prevents OOM on CI runners).
   Scanner: `scanignore` uses `node_modules` (RN layout
