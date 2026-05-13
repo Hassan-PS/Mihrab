@@ -17,13 +17,13 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
 ```yaml
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-17-jdk-headless
+      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
       - npm install -g npm@10
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '\norg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64\n' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/lib/jvm/java-21-openjdk-amd64\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
