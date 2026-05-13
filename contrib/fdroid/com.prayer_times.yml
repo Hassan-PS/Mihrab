@@ -24,6 +24,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -54,6 +55,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -84,6 +86,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -114,6 +117,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -144,6 +148,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -174,6 +179,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -204,6 +210,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -234,6 +241,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -264,6 +272,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -294,6 +303,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -324,6 +334,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -354,6 +365,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -384,6 +396,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -414,6 +427,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -444,6 +458,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -474,6 +489,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -504,6 +520,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -534,6 +551,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -564,6 +582,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -594,6 +613,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -624,6 +644,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -654,6 +675,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -684,6 +706,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
@@ -714,6 +737,7 @@ Builds:
       - npm install -g npm@10
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
       - mkdir -p /home/vagrant/.cache/gradlew-fdroid
+      - chmod a+w /home/vagrant/.cache/gradlew-fdroid
       - ln -snf /home/vagrant/.cache/gradlew-fdroid /tmp/guh
     gradle:
       - fdroid
