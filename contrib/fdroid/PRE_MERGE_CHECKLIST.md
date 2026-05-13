@@ -12,18 +12,29 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
 
 ## Adding a new `Builds:` entry — canonical prebuild template
 
-**Always copy this prebuild block exactly.** Do not use older entries as a template.
+**Always copy these blocks exactly.** Do not use older entries as a template.
 
 ```yaml
+    sudo:
+      - apt-get update
+      - apt-get install -y npm curl ca-certificates openjdk-17-jdk-headless
+      - npm install -g npm@10
+    gradle:
+      - fdroid
+    output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64\n' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
+      - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts
+      - npm ci --no-audit --ignore-scripts --omit=optional
       - node node_modules/.bin/patch-package
+    scanignore:
+      - node_modules
+    ndk: 27.1.12297006
 ```
 
 ## Common pitfalls (all learned from real CI failures on MR 36312)
