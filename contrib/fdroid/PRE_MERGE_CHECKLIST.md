@@ -19,19 +19,26 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
       - apt-get update
       - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
       - npm install -g npm@10
+      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '\norg.gradle.java.home=/usr/lib/jvm/java-21-openjdk-amd64\n' >> gradle.properties
+      - printf '\norg.gradle.java.home=/usr/local/jdk21\n' >> gradle.properties
+      - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
+      - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts --omit=optional
+      - npm ci --no-audit --ignore-scripts --omit=optional --omit=dev
+      - npm install --no-save --ignore-scripts patch-package
       - node node_modules/.bin/patch-package
+      - RNG=node_modules/@react-native/gradle-plugin
+      - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
     scanignore:
       - node_modules
     ndk: 27.1.12297006
