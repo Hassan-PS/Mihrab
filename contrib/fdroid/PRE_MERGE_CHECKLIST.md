@@ -29,7 +29,6 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
       - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
@@ -77,7 +76,7 @@ memory pressure OOM-kills the AAPT2 and Gradle daemons ("Gradle build daemon dis
 unexpectedly"), which then triggers the 1h timeout.
 
 The canonical prebuild block above handles both issues:
-- `org.gradle.jvmargs=-Xmx1g` caps Gradle heap so it doesn't compete with AAPT2 workers or Metro.
+- `org.gradle.jvmargs=-Xmx1536m` caps Gradle heap so it doesn't compete with AAPT2 workers or Metro.
 - `printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle` disables all
   `lintVital*` tasks including those for dependencies. Groovy DSL merges duplicate `android {}`
   blocks in the same file, so appending a second block is safe.
@@ -86,13 +85,34 @@ The canonical prebuild block above handles both issues:
 Metro (the JS bundler, a Node.js subprocess) runs during `createBundleFdroidReleaseJsAndAssets`.
 If Gradle holds too much heap (`-Xmx2g`), there is insufficient RAM left for Node.js → Metro is
 OOM-killed → `index.android.bundle` is never written → hermesc exits with code 5 ("Failed to
-open file"). Fix: `-Xmx1g` (see §4 above) plus `--ignore-scripts` on npm ci to finish faster.
+open file"). Fix: `-Xmx1536m` (see §4 above) plus `--ignore-scripts` on npm ci to finish faster.
 
 ### 6. npm ci postinstall scripts → slow install (~55+ min)
 npm ci with postinstall scripts (native module compilation, etc.) takes ~55–60 min on the CI
 runner, eating into the 1h budget and leaving no time for Gradle. Fix: `--ignore-scripts` skips
 them; `node node_modules/.bin/patch-package` is then run explicitly to re-apply the
 `patches/` patches (specifically the Google Play Services strip for `@react-native-community/geolocation`).
+
+### 7. `org.gradle.parallel=true` → C++ OOM → cmake exit code 1
+`org.gradle.parallel=true` causes multiple native module CMake builds to run simultaneously.
+React Native autolinking compiles C++ specs for 10+ native modules (react-native-screens,
+gesture-handler, safe-area-context, notifee, svg, etc.) as subdirectories of the app's single
+CMake build. With parallel enabled, all modules' clang++ processes run at once — combined with
+the 1.5 GB Gradle JVM heap, this exhausts available RAM, the OOM killer sends SIGTERM to clang++
+processes, and cmake exits with code 1.
+
+**Do NOT add `org.gradle.parallel=true`.** Sequential C++ compilation (the Gradle default) keeps
+one module compiling at a time; each gets full CPU cores from Ninja and finishes in ~25-30 min
+total without OOM.
+
+### 8. `newArchEnabled=false` is silently ignored for library subprojects
+`ReactRootProjectPlugin` (applied to `android/build.gradle` as `com.facebook.react.rootproject`)
+**forcibly sets `newArchEnabled=true` on all subprojects** at configuration time — overriding any
+root `gradle.properties` value. Native module build.gradles that check `isNewArchitectureEnabled()`
+will always see `true`. Setting `newArchEnabled=false` in the root `gradle.properties` has no
+effect on C++ compilation of library modules.
+
+**Do NOT add `newArchEnabled=false`.** It is a no-op and will cause confusion.
 
 ---
 
