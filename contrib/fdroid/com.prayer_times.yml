@@ -31,6 +31,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -63,6 +64,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -95,6 +97,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -127,6 +130,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -159,6 +163,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -191,6 +196,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -223,6 +229,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -255,6 +262,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -287,6 +295,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -319,6 +328,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -351,6 +361,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -383,6 +394,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -415,6 +427,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -447,6 +460,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -479,6 +493,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -511,6 +526,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -543,6 +559,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -575,6 +592,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -607,6 +625,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -639,6 +658,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -671,6 +691,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -703,6 +724,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -735,6 +757,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -767,6 +790,7 @@ Builds:
       - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
       - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'newArchEnabled=false' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.parallel=true' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
