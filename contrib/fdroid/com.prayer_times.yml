@@ -20,16 +20,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -48,16 +50,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -76,16 +80,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -104,16 +110,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -132,16 +140,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -160,16 +170,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -188,16 +200,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -216,16 +230,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -244,16 +260,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -272,16 +290,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -300,16 +320,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -328,16 +350,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -356,16 +380,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -384,16 +410,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -412,16 +440,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -440,16 +470,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -468,16 +500,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -496,16 +530,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -524,16 +560,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -552,16 +590,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -580,16 +620,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -608,16 +650,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -636,16 +680,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
@@ -664,16 +710,18 @@ Builds:
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - apt-get install -y npm curl ca-certificates
       - npm install -g npm@10
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk-17
+      - curl -Lo /tmp/jdk17.tar.gz 
+        https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.19%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz
+      - sha256sum /tmp/jdk17.tar.gz | grep -qF d8afc263758141a66e0e3aafc321e783f7016696f4eaea067d340a269037d331
+      - tar -xzf /tmp/jdk17.tar.gz -C /usr/local
+      - ln -snf /usr/local/jdk-17.0.19+10 /usr/local/jdk-17
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
       - printf '\norg.gradle.java.home=/usr/local/jdk-17\n' >> gradle.properties
-      - mkdir -p ~/.gradle
-      - echo org.gradle.java.installations.paths=/usr/local/jdk-17 >> ~/.gradle/gradle.properties
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
