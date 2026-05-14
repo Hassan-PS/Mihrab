@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.14] — 2026-05-14
+
+### Fixed
+- **Android Live Activity — advance past Isha to tomorrow's Fajr**: When the app process was killed (user force-stopped the app) while the foreground-service Live Activity was running, the service's internal 60-second ticker would find no rows after Isha and freeze the notification permanently on "Isha" until the app was reopened. The ticker now wraps around to Fajr after Isha: it locates the Fajr row in the cached payload and calls `parseHHMMToEpochMs`, which automatically places Fajr 24 hours ahead when today's Fajr is already in the past. This matches the behaviour of every other prayer transition (Fajr→Sunrise→Dhuhr→Asr→Maghrib→Isha all advanced correctly via the same ticker logic; Isha→Fajr is the only after-midnight roll-over the ticker needs to handle itself when JS is not running).
+
 ## [2.3.13] — 2026-05-12
 
 ### Changed

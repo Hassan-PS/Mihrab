@@ -212,8 +212,28 @@ class MihrabLiveActivityService : Service() {
           return updated.toString()
         }
       }
-      // No future row found today (e.g. post-Isha). Leave frozen.
-      Log.i(TAG, "Auto-advance: no future row after $currentKey — freezing until JS resyncs")
+
+      // No future row found in today's prayers (post-Isha).
+      // Wrap around to tomorrow's Fajr: parseHHMMToEpochMs automatically
+      // adds 24 h for any time that has already passed today, so Fajr's
+      // HH:MM string resolves to tomorrow's epoch without extra math.
+      val fajrRow = rowList.firstOrNull { it.key.equals("Fajr", ignoreCase = true) }
+      if (fajrRow != null && fajrRow.time.isNotEmpty()) {
+        val epochMs = parseHHMMToEpochMs(fajrRow.time, now)
+        if (epochMs > now) {
+          val updated = org.json.JSONObject(payload)
+          updated.put("prevEpochMs", nextEpochMs)
+          updated.put("nextEpochMs", epochMs)
+          updated.put("nextKey", fajrRow.key)
+          updated.put("nextLabel", fajrRow.name)
+          updated.put("nextTime", fajrRow.time)
+          updated.put("title", "${fajrRow.name} · ${fajrRow.time}")
+          Log.i(TAG, "Auto-advance: $currentKey → Fajr (tomorrow) @ ${fajrRow.time} epoch=$epochMs")
+          return updated.toString()
+        }
+      }
+
+      Log.i(TAG, "Auto-advance: no future row after $currentKey and no Fajr fallback — freezing")
       null
     } catch (t: Throwable) {
       Log.w(TAG, "tryAdvanceToNextPrayer failed", t)
