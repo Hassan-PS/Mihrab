@@ -74,19 +74,20 @@ private func countdownRange(
   return now...end
 }
 
-/// prev…next range for the auto-filling progress bar. Falls back to a 1-hour
-/// window ending at the next prayer when no valid previous anchor was sent.
+/// Fraction (0…1) of elapsed time from the previous prayer to the next,
+/// evaluated at render time. Used for a determinate progress bar that always
+/// renders (the timerInterval ProgressView was rendering blank in the Dynamic
+/// Island / banner). Updates on each content push (foreground + BGTask).
 @available(iOS 16.1, *)
-private func progressRange(
+private func progressFraction(
   _ s: PrayerLiveActivityAttributes.ContentState
-) -> ClosedRange<Date>? {
-  let end = nextPrayerDate(s)
-  var start = Date(timeIntervalSince1970: s.prevEpochSeconds)
-  if start >= end {
-    start = end.addingTimeInterval(-3600)
-  }
-  guard start < end else { return nil }
-  return start...end
+) -> Double {
+  let end = s.nextEpochSeconds
+  var start = s.prevEpochSeconds
+  if start >= end { start = end - 3600 }
+  guard end > start else { return 0 }
+  let now = Date().timeIntervalSince1970
+  return min(1, max(0, (now - start) / (end - start)))
 }
 
 @available(iOS 16.1, *)
@@ -118,13 +119,15 @@ private struct CountdownText: View {
           .font(font)
           .monospacedDigit()
           .foregroundColor(color)
-          .fixedSize()
+          .lineLimit(1)
+          .minimumScaleFactor(0.5)
       } else {
         Text(state.nextTime)
           .font(font)
           .monospacedDigit()
           .foregroundColor(color)
-          .fixedSize()
+          .lineLimit(1)
+          .minimumScaleFactor(0.5)
       }
     }
   }
@@ -137,20 +140,18 @@ private struct PrayerProgressBar: View {
   var height: CGFloat = 5
 
   var body: some View {
-    if let range = progressRange(state) {
-      ProgressView(timerInterval: range, countsDown: false) {
-        EmptyView()
-      } currentValueLabel: {
-        EmptyView()
+    // Determinate bar drawn manually so it ALWAYS renders (the timerInterval
+    // ProgressView came back blank in the Live Activity). Track + accent fill.
+    GeometryReader { geo in
+      ZStack(alignment: .leading) {
+        Capsule()
+          .fill(Color.white.opacity(0.18))
+        Capsule()
+          .fill(liveActivityAccent(state: state))
+          .frame(width: max(0, geo.size.width * progressFraction(state)))
       }
-      .progressViewStyle(.linear)
-      .tint(liveActivityAccent(state: state))
-      .frame(height: height)
-    } else {
-      Capsule()
-        .fill(Color.white.opacity(0.18))
-        .frame(height: height)
     }
+    .frame(height: height)
   }
 }
 
