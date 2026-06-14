@@ -155,8 +155,14 @@ export function RootNavigator() {
         headerTransparent: isIOS,
         headerStyle: { backgroundColor: isIOS ? 'transparent' : theme.colors.background },
         headerLargeStyle: { backgroundColor: 'transparent' },
-        headerTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection },
-        headerLargeTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection },
+        // writingDirection is a valid RN TextStyle prop (needed for the RTL
+        // title fix) but react-navigation types the title style as a narrower
+        // Pick<TextStyle, …> that omits it; cast past the type to keep the
+        // runtime behavior.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        headerTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection } as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        headerLargeTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection } as any,
         // Default portrait everywhere; the Quran mushaf-fullscreen mode
         // overrides this to 'all' via navigation.setOptions so the user
         // can rotate the phone for landscape reading. The activity's

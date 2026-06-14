@@ -17,6 +17,25 @@ export type WidgetPrayerRow = {
   abbr: string;
 };
 
+/**
+ * One day of prayer times in the multi-day schedule pushed to the native
+ * renderers (home-screen widget + Android Live Activity). The native side
+ * selects the entry whose `dateKey` matches the device's current local date
+ * and rolls forward on its own — this is what stops the widget / Live Activity
+ * going stale ~24h after the app was last opened (the times were previously a
+ * single-day snapshot that only refreshed when the app was reopened).
+ */
+export type WidgetDay = {
+  /** Local calendar date these times apply to, formatted YYYY-MM-DD. */
+  dateKey: string;
+  /** Short human label, e.g. "Wed, Apr 9". */
+  dayLabel: string;
+  /** Five salāh rows: Fajr, Dhuhr, Asr, Maghrib, Isha. */
+  rows: WidgetPrayerRow[];
+  /** Sunrise rendered separately (slot 1) — not a salāh. */
+  sunriseRow?: WidgetPrayerRow;
+};
+
 /** Five salāh shown as rows on the widget (Sunrise rendered separately at slot 1). */
 export const WIDGET_ROW_KEYS = [
   'Fajr',
@@ -59,6 +78,14 @@ export type WidgetPrayerPayload = {
    * home-screen widget on Android can ignore them without a schema bump.
    */
   seasonal?: WidgetSeasonalFlags;
+  /**
+   * Multi-day schedule (index 0 = today). Lets the native renderers roll the
+   * displayed times forward day-by-day without the app being reopened. Optional
+   * for backward compatibility — when absent, native falls back to the
+   * single-day `rows`. Built from the `week` argument; defaults to today
+   * (+ tomorrow when supplied) so the field is always at least a short window.
+   */
+  days?: WidgetDay[];
 };
 
 /** Seasonal flags consumed by the iOS widget extension to tint the
@@ -74,6 +101,63 @@ export type WidgetSeasonalFlags = {
 
 /** Optional coordinates for the (0,0) assertion gate. */
 export type WidgetCoords = { lat: number; lng: number };
+
+/** Local YYYY-MM-DD for the given date (device-local, not UTC). */
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+/** Build the five salāh rows + the Sunrise row for one day's timings. */
+function buildDayRows(timings: TimingsMap): {
+  rows: WidgetPrayerRow[];
+  sunriseRow: WidgetPrayerRow;
+} {
+  const rows: WidgetPrayerRow[] = WIDGET_ROW_KEYS.map((key: WidgetPrayerKey) => {
+    const raw = timings[key];
+    return {
+      key,
+      time: raw ? formatDisplayTime(raw) : '—',
+      abbr: i18n.t(`prayer.${key}_abbr`, {
+        defaultValue: i18n.t(`prayer.${key}`),
+      }),
+    };
+  });
+  const sunriseRaw = timings['Sunrise'];
+  const sunriseRow: WidgetPrayerRow = {
+    key: 'Sunrise',
+    time: sunriseRaw ? formatDisplayTime(sunriseRaw) : '—',
+    abbr: i18n.t('prayer.Sunrise_abbr', {
+      defaultValue: i18n.t('prayer.Sunrise'),
+    }),
+  };
+  return { rows, sunriseRow };
+}
+
+/**
+ * Build the multi-day schedule (`days[]`). `week[0]` is today, `week[1]`
+ * tomorrow, etc. Each entry is dated by adding its index to the start of the
+ * local day containing `now`, so the native side can match by wall-clock date.
+ */
+function buildDays(week: TimingsMap[], now: Date): WidgetDay[] {
+  const base = startOfLocalDay(now);
+  return week.map((timings, i) => {
+    const date = addDays(base, i);
+    const { rows, sunriseRow } = buildDayRows(timings);
+    return {
+      dateKey: localDateKey(date),
+      dayLabel: date.toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      }),
+      rows,
+      sunriseRow,
+    };
+  });
+}
 
 /**
  * After the last prayer of the day (Isha), uses tomorrow's timings so the widget
@@ -94,6 +178,12 @@ export function buildWidgetPayload(
   locationName?: string,
   coords?: WidgetCoords,
   seasonal?: WidgetSeasonalFlags,
+  /**
+   * Consecutive days starting today (index 0 = today). When supplied, drives
+   * the `days[]` multi-day schedule so native renderers roll over on their own.
+   * Falls back to `[today, tomorrow]` when omitted.
+   */
+  week?: TimingsMap[],
 ): WidgetPrayerPayload {
   if (coords && coords.lat === 0 && coords.lng === 0) {
     throw new Error(
@@ -138,21 +228,20 @@ export function buildWidgetPayload(
       ? next.name
       : null;
 
-  const rows: WidgetPrayerRow[] = WIDGET_ROW_KEYS.map((key: WidgetPrayerKey) => {
-    const raw = timings[key];
-    return {
-      key,
-      time: raw ? formatDisplayTime(raw) : '—',
-      abbr: i18n.t(`prayer.${key}_abbr`, { defaultValue: i18n.t(`prayer.${key}`) }),
-    };
-  });
+  // The visible single-day `rows` reflect the day currently being shown
+  // (today, or tomorrow after Isha) — same as before. The new `days[]` field
+  // below carries the full window so native can roll over on its own.
+  const { rows, sunriseRow } = buildDayRows(timings);
 
-  const sunriseRaw = timings['Sunrise'];
-  const sunriseRow: WidgetPrayerRow = {
-    key: 'Sunrise',
-    time: sunriseRaw ? formatDisplayTime(sunriseRaw) : '—',
-    abbr: i18n.t('prayer.Sunrise_abbr', { defaultValue: i18n.t('prayer.Sunrise') }),
-  };
+  // Multi-day schedule. Prefer the supplied `week`; otherwise synthesise the
+  // shortest useful window from today (+ tomorrow when available).
+  const weekSource =
+    week && week.length > 0
+      ? week
+      : tomorrow
+        ? [today, tomorrow]
+        : [today];
+  const days = buildDays(weekSource, now);
 
   return {
     dayLabel,
@@ -164,5 +253,6 @@ export function buildWidgetPayload(
     locationName,
     ...(tomorrowEstimated ? { tomorrowEstimated: true } : {}),
     ...(seasonal ? { seasonal } : {}),
+    days,
   };
 }

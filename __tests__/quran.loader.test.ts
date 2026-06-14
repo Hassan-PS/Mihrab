@@ -89,14 +89,22 @@ describe('loadSurah', () => {
     expect(s?.translation[0]).toMatch(/^In the name of Allah/);
   });
 
-  test('returns index-only placeholder for surahs awaiting import', async () => {
-    // Pick a few different surahs to confirm the fallback path is uniform.
+  test('returns well-formed data (or an empty placeholder) for every surah', async () => {
+    // Some surahs are inline-bundled / imported from the Tanzil corpus;
+    // others still come back as empty index-only placeholders. Either way the
+    // loader must return a non-null result with arabic/translation aligned.
     for (const n of [2, 36, 67, 112, 114]) {
       const s = await loadSurah(n);
       expect(s).not.toBeNull();
       expect(s?.index.number).toBe(n);
-      expect(s?.arabic).toEqual([]);
-      expect(s?.translation).toEqual([]);
+      expect(Array.isArray(s?.arabic)).toBe(true);
+      expect(Array.isArray(s?.translation)).toBe(true);
+      // Arabic and translation always stay in lockstep.
+      expect(s?.arabic.length).toBe(s?.translation.length);
+      // When the surah has been imported, its length matches the index.
+      if ((s?.arabic.length ?? 0) > 0) {
+        expect(s?.arabic.length).toBe(s?.index.ayahCount);
+      }
     }
   });
 

@@ -37,17 +37,35 @@ async function ensureChannel(selectedSound: NotificationSoundId) {
     return;
   }
   const selected = getNotificationSoundOption(selectedSound);
+  const defaultOption = getNotificationSoundOption('default');
+  // Only two channels are ever used: the `default` channel (pre-prayer
+  // reminders + Sunrise) and the selected adhan channel (the five daily
+  // prayers). Previously ALL 17 adhan channels were created on every sync,
+  // leaving users with 17 near-identical "Prayer times" entries in Android's
+  // notification settings. We now create only what's needed and delete the
+  // surplus so existing users' settings get cleaned up too. (Channel sound is
+  // immutable after creation, which is why each sound still needs its own
+  // channel rather than mutating one.)
+  const needed = new Set([
+    defaultOption.androidChannelId,
+    selected.androidChannelId,
+  ]);
   for (const option of NOTIFICATION_SOUND_OPTIONS) {
-    await notifee.createChannel({
-      id: option.androidChannelId,
-      name:
-        option.id === selected.id
-          ? `Prayer times (${i18n.t(option.labelKey)})`
-          : 'Prayer times',
-      importance: AndroidImportance.HIGH,
-      vibration: true,
-      ...(option.androidSound ? { sound: option.androidSound } : {}),
-    });
+    if (needed.has(option.androidChannelId)) {
+      await notifee.createChannel({
+        id: option.androidChannelId,
+        name:
+          option.id === selected.id
+            ? `Prayer times (${i18n.t(option.labelKey)})`
+            : 'Prayer times',
+        importance: AndroidImportance.HIGH,
+        vibration: true,
+        ...(option.androidSound ? { sound: option.androidSound } : {}),
+      });
+    } else {
+      // No-op when the channel was never created (e.g. fresh installs).
+      await notifee.deleteChannel(option.androidChannelId).catch(() => {});
+    }
   }
 }
 
@@ -267,7 +285,13 @@ export async function syncPrayerNotifications(params: {
 
   for (const e of salahEvents) {
     const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`;
-    const usesAdhan = prayerTimeSound.id !== 'default';
+    // Sunrise marks the end of the Fajr window — it is NOT a prayer, so it
+    // must never play the adhan even when one is selected for the five
+    // daily prayers. Fall back to the plain default notification sound for
+    // it; every other event uses the user's chosen adhan/sound.
+    const isSunrise = e.name === 'Sunrise';
+    const eventSound = isSunrise ? reminderSound : prayerTimeSound;
+    const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
     const atPrayerBody = i18n.t('alertCopy.atPrayer');
     await notifee.createTriggerNotification(
@@ -286,11 +310,11 @@ export async function syncPrayerNotifications(params: {
           usesAdhan: usesAdhan ? '1' : '0',
         },
         ios: {
-          sound: prayerTimeSound.iosSound,
+          sound: eventSound.iosSound,
           ...(usesAdhan ? { categoryId: ADHAN_CONTROLS_CATEGORY_ID } : {}),
         },
         android: {
-          channelId: prayerTimeSound.androidChannelId,
+          channelId: eventSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
           // BigText style: shows the body in full when the notification

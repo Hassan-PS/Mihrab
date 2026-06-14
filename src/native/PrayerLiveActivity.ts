@@ -25,13 +25,22 @@ export type PrayerLiveActivityContent = {
   /** Seconds-since-epoch of the next prayer — matches Swift ContentState.nextEpochSeconds.
    *  Convert from ms: nextPrayerTimestamp / 1000. */
   nextEpochSeconds: number;
-  /** Same row list the home-screen widget uses (Fajr, Dhuhr, Asr, Maghrib, Isha). */
-  rows: { key: string; abbr: string; time: string }[];
+  /** Seconds-since-epoch of the PREVIOUS prayer — the start anchor for the
+   *  Live Activity's auto-filling progress bar (prev → next). Matches Swift
+   *  ContentState.prevEpochSeconds. */
+  prevEpochSeconds: number;
+  /** Same row list the home-screen widget uses (Fajr, Dhuhr, Asr, Maghrib, Isha).
+   *  `name` is the localized full prayer name (the strip renders `abbr`; the
+   *  background refresh task uses `name` to rebuild the hero label). */
+  rows: { key: string; abbr: string; name: string; time: string }[];
   /** Sunrise row when the user opted to show it. */
-  sunriseRow?: { key: string; abbr: string; time: string };
+  sunriseRow?: { key: string; abbr: string; name: string; time: string };
   /** Optional caption lines — pass empty strings to omit. */
   hijriLabel: string;
   locationLabel: string;
+  /** App accent hex (#RRGGBB) — drives the Live Activity keyline tint, the
+   *  next-prayer name, the countdown and the progress bar. */
+  accentHex: string;
   /** Display knobs — the widget reads these to decide what to show. */
   compactMode: boolean;
   showSunrise: boolean;

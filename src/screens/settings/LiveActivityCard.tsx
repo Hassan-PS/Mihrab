@@ -2,7 +2,7 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo } from 'react';
-import { Switch, Text, View } from 'react-native';
+import { Platform, Switch, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useLiveActivitySettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -42,6 +42,12 @@ function LiveActivityCardImpl() {
           <Text style={[s.help, { color: palette.muted }]}>
             {t('settings.liveActivityHelp')}
           </Text>
+          {Platform.OS === 'ios' && (
+            <Text
+              style={[s.help, { color: palette.muted, fontStyle: 'italic' }]}>
+              {t('settings.liveActivityExperimental')}
+            </Text>
+          )}
         </View>
         <Switch
           value={settings.liveActivityEnabled}

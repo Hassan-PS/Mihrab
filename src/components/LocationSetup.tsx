@@ -27,6 +27,8 @@ type Palette = {
   border: ColorValue;
   accent: ColorValue;
   accentBg: ColorValue;
+  /** Plain "#RRGGBB" accent for SVG icon fills (task #104). */
+  accentSolid: string;
   card: ColorValue;
   danger: ColorValue;
   flatChrome: boolean;

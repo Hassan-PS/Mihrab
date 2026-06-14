@@ -1,7 +1,10 @@
 package com.prayer_times
 
+import android.app.AlarmManager
 import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
@@ -67,8 +70,19 @@ class MihrabLiveActivityService : Service() {
   @Volatile private var lastPayload: String? = null
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-    val payload = intent?.getStringExtra(EXTRA_PAYLOAD)
-    if (payload != null) {
+    // Payload source: a fresh push from JS (EXTRA_PAYLOAD), or — when the OS or
+    // our own wake-alarm restarted us with no extra — the persisted last
+    // payload. This is what lets the exact alarm below revive/advance the
+    // notification during deep sleep without the app being opened.
+    val incoming = intent?.getStringExtra(EXTRA_PAYLOAD)
+      ?: MihrabLiveActivityModule.loadPayload(this)
+    if (incoming != null) {
+      // Advance to the interval that is current *right now* before the first
+      // paint — critical when an exact alarm woke us at a prayer boundary
+      // during doze (otherwise we'd briefly repaint the just-elapsed prayer).
+      val payload = recomputeFromDays(incoming)
+        ?: tryAdvanceToNextPrayer(incoming)
+        ?: incoming
       lastPayload = payload
       // Channel safety net — required on Android 8+ before startForeground.
       // The JS bridge creates them too, but the service can run independent
@@ -98,6 +112,9 @@ class MihrabLiveActivityService : Service() {
       }
 
       scheduleTicker()
+      // Wake the device at the next prayer so the countdown advances even in
+      // deep sleep, when the Handler ticker (uptime-based) is suspended.
+      scheduleWakeAlarm(payload)
     }
     // START_STICKY so the system restarts the service if the OS kills it
     // for memory. The last payload is replayed when re-started — the
@@ -120,9 +137,13 @@ class MihrabLiveActivityService : Service() {
     ticker = Runnable {
       val payload = lastPayload
       if (payload != null) {
-        // Check whether the countdown has expired and we should advance
-        // to the next prayer in the rows[] list.
-        val advancedPayload = tryAdvanceToNextPrayer(payload)
+        // Recompute the current prayer interval from the absolute, dated
+        // multi-day schedule (`days[]`) when present — this rolls the
+        // countdown onto the correct day's times (including the overnight
+        // Isha→Fajr interval) without the app being reopened, which is the
+        // fix for the times going stale after ~24h. When no `days[]` is
+        // present (older payloads), fall back to the single-day HH:MM advance.
+        val advancedPayload = recomputeFromDays(payload) ?: tryAdvanceToNextPrayer(payload)
         val currentPayload = if (advancedPayload != null) {
           lastPayload = advancedPayload
           advancedPayload
@@ -133,6 +154,9 @@ class MihrabLiveActivityService : Service() {
           val notif = build(currentPayload)
           NotificationManagerCompat.from(this)
             .notify(MihrabLiveActivityModule.NOTIF_ID, notif)
+          // Keep the wake alarm aligned with the (possibly advanced) next
+          // prayer so deep-sleep wake-ups land on the right boundary.
+          scheduleWakeAlarm(currentPayload)
         } catch (t: Throwable) {
           Log.w(TAG, "ticker re-post failed", t)
         }
@@ -144,6 +168,108 @@ class MihrabLiveActivityService : Service() {
       if (next != null) handler.postDelayed(next, TICK_MS)
     }
     handler.postDelayed(ticker!!, TICK_MS)
+  }
+
+  /**
+   * Convert a `dateKey` (yyyy-MM-dd) + `HH:MM` time into a ms-since-epoch
+   * timestamp in the device's local timezone. Returns 0 on a parse failure.
+   */
+  private fun epochForDayTime(dateKey: String, hhmm: String): Long {
+    val dm = Regex("^(\\d{4})-(\\d{2})-(\\d{2})$").find(dateKey) ?: return 0L
+    val tm = Regex("^(\\d{1,2}):(\\d{2})$").find(hhmm) ?: return 0L
+    val h = tm.groupValues[1].toInt()
+    val min = tm.groupValues[2].toInt()
+    if (h !in 0..23 || min !in 0..59) return 0L
+    return java.util.Calendar.getInstance().apply {
+      set(java.util.Calendar.YEAR, dm.groupValues[1].toInt())
+      set(java.util.Calendar.MONTH, dm.groupValues[2].toInt() - 1)
+      set(java.util.Calendar.DAY_OF_MONTH, dm.groupValues[3].toInt())
+      set(java.util.Calendar.HOUR_OF_DAY, h)
+      set(java.util.Calendar.MINUTE, min)
+      set(java.util.Calendar.SECOND, 0)
+      set(java.util.Calendar.MILLISECOND, 0)
+    }.timeInMillis
+  }
+
+  /**
+   * Recompute the current prayer interval from the multi-day `days[]`
+   * schedule. Builds a chronological, absolutely-dated list of every event
+   * (the five salāh + Sunrise across all supplied days), then picks the next
+   * event after `now` and the most recent event at/before `now`. This is what
+   * lets the Live Activity advance to the correct day's times — and render the
+   * correct overnight Isha→Fajr progress — without the app being reopened.
+   *
+   * Returns an updated payload JSON, or null when there is no `days[]` data or
+   * no future event remains in the window (caller then falls back to the
+   * single-day HH:MM advance).
+   */
+  private fun recomputeFromDays(payload: String): String? {
+    return try {
+      val p = JSONObject(payload)
+      val days = p.optJSONArray("days") ?: return null
+      if (days.length() == 0) return null
+
+      data class Ev(
+        val epoch: Long,
+        val key: String,
+        val name: String,
+        val time: String,
+        val dateKey: String,
+      )
+      val events = mutableListOf<Ev>()
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        val dateKey = day.optString("dateKey")
+        if (dateKey.isEmpty()) continue
+        day.optJSONArray("rows")?.let { rows ->
+          for (j in 0 until rows.length()) {
+            val r = rows.optJSONObject(j) ?: continue
+            val t = r.optString("time")
+            val e = epochForDayTime(dateKey, t)
+            if (e > 0L) {
+              events.add(Ev(e, r.optString("key"), r.optString("name"), t, dateKey))
+            }
+          }
+        }
+        day.optJSONObject("sunriseRow")?.let { sr ->
+          val t = sr.optString("time")
+          val e = epochForDayTime(dateKey, t)
+          if (e > 0L) {
+            events.add(Ev(e, sr.optString("key", "Sunrise"), sr.optString("name", "Sunrise"), t, dateKey))
+          }
+        }
+      }
+      if (events.isEmpty()) return null
+      events.sortBy { it.epoch }
+
+      val now = System.currentTimeMillis()
+      val next = events.firstOrNull { it.epoch > now } ?: return null
+      val prev = events.lastOrNull { it.epoch <= now }
+
+      val updated = JSONObject(payload)
+      updated.put("nextEpochMs", next.epoch)
+      if (prev != null) updated.put("prevEpochMs", prev.epoch)
+      updated.put("nextKey", next.key)
+      updated.put("nextLabel", next.name)
+      updated.put("nextTime", next.time)
+      updated.put("title", "${next.name} · ${next.time}")
+
+      // Swap the displayed prayer list to the day currently in progress so any
+      // list rendering (and the notifee fallback path) reflects today's times.
+      val currentDateKey = prev?.dateKey ?: next.dateKey
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        if (day.optString("dateKey") == currentDateKey) {
+          day.optJSONArray("rows")?.let { updated.put("rows", it) }
+          day.optJSONObject("sunriseRow")?.let { updated.put("sunriseRow", it) }
+          break
+        }
+      }
+      updated.toString()
+    } catch (t: Throwable) {
+      Log.w(TAG, "recomputeFromDays failed", t)
+      null
+    }
   }
 
   /**
@@ -271,8 +397,59 @@ class MihrabLiveActivityService : Service() {
     return MihrabLiveActivityModule.buildNotificationFromPayload(this, JSONObject(payload))
   }
 
+  /**
+   * Schedule an exact, wake-the-device alarm at the next prayer instant. The
+   * Handler ticker (SystemClock.uptimeMillis based) is suspended while the
+   * device sleeps, so without this the countdown/progress would freeze
+   * overnight until the screen next turned on. The alarm restarts this service
+   * (no payload extra → it reloads the persisted payload and re-advances),
+   * guaranteeing the notification rolls over exactly when a prayer passes.
+   */
+  private fun scheduleWakeAlarm(payload: String) {
+    try {
+      val nextEpochMs = JSONObject(payload).optLong("nextEpochMs", 0L)
+      val now = System.currentTimeMillis()
+      if (nextEpochMs <= now) return
+      val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+      val pi = wakeAlarmPendingIntent()
+      val triggerAt = nextEpochMs + 1000L
+      // setExactAndAllowWhileIdle fires even in Doze. Fall back to the inexact
+      // allow-while-idle variant when the exact-alarm permission is withheld.
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !am.canScheduleExactAlarms()) {
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+      } else {
+        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+      }
+    } catch (t: Throwable) {
+      Log.w(TAG, "scheduleWakeAlarm failed", t)
+    }
+  }
+
+  private fun cancelWakeAlarm() {
+    try {
+      val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+      am.cancel(wakeAlarmPendingIntent())
+    } catch (_: Throwable) {
+      // Non-fatal.
+    }
+  }
+
+  /** PendingIntent that restarts this foreground service. Uses
+   *  getForegroundService on API 26+ (exact alarms grant a brief FGS-start
+   *  allowlist window). */
+  private fun wakeAlarmPendingIntent(): PendingIntent {
+    val intent = Intent(this, MihrabLiveActivityService::class.java)
+    val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      PendingIntent.getForegroundService(this, ALARM_REQUEST_CODE, intent, flags)
+    } else {
+      PendingIntent.getService(this, ALARM_REQUEST_CODE, intent, flags)
+    }
+  }
+
   override fun onDestroy() {
     super.onDestroy()
+    cancelWakeAlarm()
     ticker?.let { handler.removeCallbacks(it) }
     ticker = null
     runCatching {
@@ -294,6 +471,9 @@ class MihrabLiveActivityService : Service() {
   companion object {
     const val TAG = "MihrabLiveActivitySvc"
     const val EXTRA_PAYLOAD = "payload"
+    /** Request code for the deep-sleep wake alarm (distinct from the widget's
+     *  alarm request codes in PrayerWidgetProvider). */
+    const val ALARM_REQUEST_CODE = 0xA1B4
     /** 60-second tick. Battery-friendly; the chronometer text inside
      *  the notification continues to tick every second on its own via
      *  the platform Chronometer view. */

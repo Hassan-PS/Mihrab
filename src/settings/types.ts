@@ -185,18 +185,14 @@ export type PrayerAppSettings = {
    * notifications don't surprise upgraders.
    */
   liveActivityEnabled: boolean;
-  /**
-   * Compact mode hides the prayer list and shows only the countdown
-   * line. The Dynamic Island compact / lock-screen minimised renders
-   * are unaffected (they're always compact).
-   */
+  // ── Retained-but-unused (since v2.1.0-beta.5) ──────────────────────────
+  // These Live Activity display knobs were removed from the UI: Sunrise is
+  // always shown and the Hijri/location captions are always omitted. The
+  // fields are kept because the settings schema is additive-only (removing a
+  // field breaks upgraders, see CLAUDE.md §12). Nothing reads them anymore.
   liveActivityCompactMode: boolean;
-  /** Include Sunrise in the prayer list (it's not a prayer, but
-   *  bookends Fajr and marks the end of the dawn window). */
   liveActivityShowSunrise: boolean;
-  /** Show the Hijri date as a thin caption line. */
   liveActivityShowHijri: boolean;
-  /** Show the active location label (city) as a thin caption line. */
   liveActivityShowLocation: boolean;
 };
 

@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.4.0] — 2026-06-14
+
+### Added
+- **Multi-day schedule for the home-screen widget + Live Activity**: The app now pushes a multi-day schedule (`days[]`, one dated entry per day) instead of a single-day snapshot. Each native renderer selects the day matching the device's wall-clock date and rolls forward on its own. This fixes prayer times going stale ~24 hours after the app was last opened (previously they only refreshed when the app was reopened). Applies to the iOS widget (timeline now spans every supplied day), the Android widget (selects today's entry; also arms a midnight rollover refresh — previously no refresh was scheduled after Isha), and the Android Live Activity (recomputes next/previous prayer from the absolute dated schedule, including the overnight Isha→Fajr interval).
+- **iOS Live Activity — redesigned**: Rebuilt the Lock Screen and Dynamic Island presentations with a live countdown (`Text(timerInterval:)`) and an auto-filling progress bar (`ProgressView(timerInterval:)`) spanning the previous → next prayer, plus a prayer strip with the upcoming prayer accented — mirroring the Android Live Activity feature set. Adopts `ActivityContent(staleDate:)` on iOS 16.2+. Background rollover of the highlighted prayer is handled **locally with no server** via `BGTaskScheduler` (the app stays local-first; APNs/push was explicitly ruled out — see `docs/ios-live-activity-push.md`). The Live Activity setting is labelled **experimental** on iOS (localized across all 13 locales).
+- **CI**: Added a GitHub Actions workflow that runs the TypeScript typecheck and the Jest suite on every push/PR (there was previously no automated test run).
+
+### Changed
+- **Android Live Activity — advances during deep sleep**: The foreground service now schedules an exact `setExactAndAllowWhileIdle` wake alarm at the next prayer, so the countdown/progress roll over even while the device is dozing (the `Handler` ticker is suspended during sleep).
+- **Fewer Android notification channels**: Only the selected adhan channel and the default channel are created (and surplus channels are cleaned up), instead of creating all 17 adhan channels on every sync.
+
+### Fixed
+- **Sunrise no longer plays the adhan**: When an adhan sound is selected it now plays for the five daily prayers only; Sunrise (which is not a prayer) uses the default notification sound and drops the "Stop adhan" action.
+- **Test suite + typecheck restored to green**: Fixed the half-finished `accentSolid` palette typing and an RTL-title style cast, converted directional CSS in the Quran reader to start/end, and refreshed stale tests (tasbih presets, Quran loader, the relocated LocationChip) that had drifted from the shipped source.
+
 ## [2.3.14] — 2026-05-14
 
 ### Fixed

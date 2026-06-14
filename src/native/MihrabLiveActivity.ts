@@ -50,6 +50,17 @@ export type MihrabLiveActivityPayload = {
   /** Sunrise row sent separately so the native module can splice it
    *  into slot 1 only when the user has the toggle on. */
   sunriseRow?: { key: string; name: string; time: string };
+  /** Multi-day schedule (index 0 = today). The foreground-service ticker
+   *  uses this to recompute the next/previous prayer against the absolute
+   *  dated schedule, so the countdown rolls onto the correct day's times
+   *  without the app being reopened. Each day carries the localised long
+   *  prayer names. Optional — when absent the service falls back to the
+   *  single-day `rows` + HH:MM advance logic. */
+  days?: {
+    dateKey: string;
+    rows: { key: string; name: string; time: string }[];
+    sunriseRow?: { key: string; name: string; time: string };
+  }[];
   /** Hijri caption, empty string → omit. */
   hijriLabel: string;
   /** Location caption — already shortened to the first comma-separated

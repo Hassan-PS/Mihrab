@@ -273,6 +273,56 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       )
     }
 
+    /** Today's local date as yyyy-MM-dd, matching the JS `dateKey` format. */
+    private fun todayDateKey(): String {
+      val cal = java.util.Calendar.getInstance()
+      return String.format(
+        java.util.Locale.US,
+        "%04d-%02d-%02d",
+        cal.get(java.util.Calendar.YEAR),
+        cal.get(java.util.Calendar.MONTH) + 1,
+        cal.get(java.util.Calendar.DAY_OF_MONTH),
+      )
+    }
+
+    /** Find the entry in the multi-day `days[]` schedule that applies to the
+     *  current local date, or null when there is no `days[]` / no match. */
+    private fun selectTodayDay(o: JSONObject): JSONObject? {
+      val days = o.optJSONArray("days") ?: return null
+      if (days.length() == 0) return null
+      val todayKey = todayDateKey()
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        if (day.optString("dateKey") == todayKey) return day
+      }
+      return null
+    }
+
+    /** Schedule a refresh just after the next local midnight so the widget
+     *  rolls onto the next day's times by itself — even after Isha, when no
+     *  further prayer remains today and the per-prayer alarm is not set.
+     *  Inexact (and independent of the exact-alarm permission); ACTION_SCREEN_ON
+     *  / ACTION_USER_PRESENT also refresh the widget when the user wakes the
+     *  device, so this is a backstop rather than the sole rollover path. */
+    private fun scheduleMidnightRollover(context: Context) {
+      val midnight = java.util.Calendar.getInstance().apply {
+        add(java.util.Calendar.DAY_OF_MONTH, 1)
+        set(java.util.Calendar.HOUR_OF_DAY, 0)
+        set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 30)
+        set(java.util.Calendar.MILLISECOND, 0)
+      }
+      val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
+        action = ACTION_PRAYER_TIME_ELAPSED
+      }
+      val pi = PendingIntent.getBroadcast(
+        context, 1002, intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+      val am = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+      am.set(android.app.AlarmManager.RTC, midnight.timeInMillis, pi)
+    }
+
     private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context, isHorizontal: Boolean) {
       val o = JSONObject(json)
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
@@ -291,9 +341,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       var nextPrayerTime = o.optString("nextPrayerTime", "")
       val locationName = o.optString("locationName", "")
 
-      val rows = o.getJSONArray("rows")
+      // Prefer the entry from the multi-day `days[]` schedule whose dateKey
+      // matches the device's current local date. This is what lets the widget
+      // roll onto the correct day's times on its own — previously `rows` was a
+      // single-day snapshot that only refreshed when the app was reopened, so
+      // the times went stale ~24h later. Falls back to the top-level single-day
+      // fields when no `days[]` is present (older payloads) or none matches.
+      val todayDay = selectTodayDay(o)
+      val rows = todayDay?.optJSONArray("rows") ?: o.getJSONArray("rows")
       // sunriseRow is a separate object (not in `rows`) rendered at display slot 1.
-      val sunriseRowObj = o.optJSONObject("sunriseRow")
+      val sunriseRowObj = todayDay?.optJSONObject("sunriseRow") ?: o.optJSONObject("sunriseRow")
 
       // Build the ordered display list: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha
       val displayRows = mutableListOf<org.json.JSONObject>()
@@ -407,6 +464,10 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           alarmManager.set(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
         }
       }
+
+      // Always arm the next-midnight rollover so the widget advances to the
+      // next day's times even when no more prayers remain today (post-Isha).
+      scheduleMidnightRollover(context)
     }
   }
 }

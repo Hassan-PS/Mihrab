@@ -22,6 +22,8 @@ export async function syncPrayerWidget(
   locationName?: string,
   coords?: WidgetCoords,
   seasonal?: WidgetSeasonalFlags,
+  /** Consecutive days starting today — drives the multi-day rollover. */
+  week?: TimingsMap[],
 ): Promise<void> {
   if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
     return;
@@ -37,6 +39,7 @@ export async function syncPrayerWidget(
     locationName,
     coords,
     seasonal,
+    week,
   );
   try {
     await mod.setData(JSON.stringify(payload));

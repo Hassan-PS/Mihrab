@@ -32,9 +32,16 @@ describe('HomeScreen integration (tasks #45–#47)', () => {
     expect(HOME).toMatch(/<RamadanCountdownCard\s+today=/);
   });
 
-  test('imports LocationChip and renders it without props', () => {
-    expect(HOME).toMatch(/from '\.\/home\/LocationChip'/);
-    expect(HOME).toMatch(/<LocationChip\s*\/?>/);
+  test('LocationChip is mounted in the navigation header (moved out of HomeScreen body)', () => {
+    // #47 follow-up: the chip was relocated from the HomeScreen body into the
+    // navigation header (next to Settings) so the top-row controls live
+    // together. Assert it's wired into RootNavigator, not HomeScreen.
+    const NAV = fs.readFileSync(
+      path.join(__dirname, '..', 'src', 'navigation', 'RootNavigator.tsx'),
+      'utf-8',
+    );
+    expect(NAV).toMatch(/from '\.\.\/screens\/home\/LocationChip'/);
+    expect(NAV).toMatch(/<LocationChip\b/);
   });
 });
 

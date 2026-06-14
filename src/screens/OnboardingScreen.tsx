@@ -308,6 +308,7 @@ export function OnboardingScreen() {
               border: palette.border,
               accent: palette.accent,
               accentBg: palette.accentBg,
+              accentSolid: palette.accentSolid,
               card: palette.card,
               danger: palette.danger,
               flatChrome: palette.flatChrome,

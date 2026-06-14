@@ -61,7 +61,9 @@ export function shouldUseDynamicSystemColors(
   );
 }
 
-type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg'>;
+// accentSolid, like accent/accentBg, is layered on by withBrandAccents() — so
+// the base palette objects below don't (and shouldn't) declare it.
+type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg' | 'accentSolid'>;
 
 /**
  * Hex swatches for each selectable app accent — task #127.

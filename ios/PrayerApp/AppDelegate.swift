@@ -21,6 +21,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
+    // Register the Live Activity background-refresh task (local rollover, no
+    // server). MUST run before launch finishes. No-op when no activity exists.
+    LiveActivityRefresher.registerTask()
+
     window = UIWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(
@@ -30,6 +34,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     )
 
     return true
+  }
+
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    // Queue the next Live Activity refresh as we background, so iOS has a
+    // pending task to run while suspended (no-op when no activity is running).
+    LiveActivityRefresher.scheduleRefresh()
   }
 }
 

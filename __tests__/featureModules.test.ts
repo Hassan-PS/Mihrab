@@ -45,20 +45,21 @@ import { buildLockScreenPayload, isFridayBeforeMaghrib } from '../src/widget/loc
 // #19 Tasbih
 // ─────────────────────────────────────────────────────────────────────────
 describe('tasbih', () => {
-  test('TASBIH_PRESETS includes the canonical five + open count', () => {
+  test('TASBIH_PRESETS includes the canonical dhikr set', () => {
     const ids = TASBIH_PRESETS.map(p => p.id);
     expect(ids).toEqual(expect.arrayContaining([
-      'subhanallah', 'alhamdulillah', 'allahuakbar', 'lailaha',
-      'astaghfirullah', 'open',
+      'subhanallah', 'alhamdulillah', 'lailaha', 'allahuakbar',
+      'astaghfirullah', 'salahonprophet',
     ]));
   });
 
-  test('default targets follow Sunnah convention (33/33/34, 100, 100)', () => {
+  test('default targets follow the tasbih convention (33s, then 100s)', () => {
     expect(findPreset('subhanallah').defaultTarget).toBe(33);
     expect(findPreset('alhamdulillah').defaultTarget).toBe(33);
-    expect(findPreset('allahuakbar').defaultTarget).toBe(34);
-    expect(findPreset('lailaha').defaultTarget).toBe(100);
-    expect(findPreset('open').defaultTarget).toBe(0);
+    expect(findPreset('lailaha').defaultTarget).toBe(33);
+    expect(findPreset('allahuakbar').defaultTarget).toBe(33);
+    expect(findPreset('astaghfirullah').defaultTarget).toBe(100);
+    expect(findPreset('salahonprophet').defaultTarget).toBe(100);
   });
 
   test('increment returns reachedTarget=true exactly once at the boundary', () => {

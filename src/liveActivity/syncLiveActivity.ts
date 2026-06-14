@@ -34,11 +34,12 @@ import {
 
 export type LiveActivityDisplayOptions = {
   enabled: boolean;
-  compactMode: boolean;
-  showSunrise: boolean;
-  showHijri: boolean;
-  showLocation: boolean;
 };
+// Note: Hijri/location/sunrise/compact display knobs were removed from the
+// Live Activity UI in v2.1.0-beta.5. Sunrise is always shown and the other
+// captions are always omitted, so the orchestrator no longer takes per-display
+// options beyond the master `enabled` flag. The `liveActivity*` fields still
+// persist in settings storage (schema is additive-only) but are unused.
 
 /**
  * Resolve a #RRGGBB hex for the user's chosen app accent. The Android
@@ -100,6 +101,32 @@ function formatHijriLabel(d: Date): string {
   return `${h.day} ${m} ${h.year}`;
 }
 
+/**
+ * Epoch (ms) of the prayer that most recently passed at or before `now`,
+ * scanning today's raw timings (the five salāh + Sunrise). Used as the start
+ * anchor for the iOS Live Activity progress bar. Returns null before the day's
+ * first event so the caller can fall back to a sensible default.
+ */
+export function computePrevPrayerEpochMs(
+  today: TimingsMap,
+  now: Date,
+): number | null {
+  const SALAH_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const nowMs = now.getTime();
+  let prev: number | null = null;
+  for (const key of SALAH_KEYS) {
+    const hhmm = today[key];
+    const at = hhmm ? parseHHMMOnDate(hhmm, now) : null;
+    if (!at) continue;
+    let t = at.getTime();
+    // A time that reads as "future" belongs to the previous calendar day's
+    // occurrence when we're looking backwards (e.g. just after midnight).
+    if (t > nowMs) t -= 24 * 60 * 60 * 1000;
+    if (t <= nowMs && (prev == null || t > prev)) prev = t;
+  }
+  return prev;
+}
+
 function parseHHMMOnDate(hhmm: string, base: Date): Date | null {
   const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm);
   if (!m) return null;
@@ -157,6 +184,9 @@ async function syncLiveActivityImpl(args: {
   options: LiveActivityDisplayOptions;
   today: TimingsMap | null;
   tomorrow?: TimingsMap | null;
+  /** Consecutive days starting today — drives the multi-day rollover so the
+   *  Live Activity advances to the correct day without the app being opened. */
+  week?: TimingsMap[] | null;
   now?: Date;
   locationName?: string;
   coords?: WidgetCoords;
@@ -184,6 +214,7 @@ async function syncLiveActivityImpl(args: {
       args.locationName,
       args.coords,
       args.seasonal,
+      args.week ?? undefined,
     );
   } catch (e) {
     console.warn('[liveActivity] payload build failed', e);
@@ -246,8 +277,18 @@ async function syncLiveActivityImpl(args: {
     const rows = payload.rows.map(r => ({
       key: r.key,
       abbr: r.abbr,
+      // Localized full name so the background refresh task can rebuild the
+      // hero label after a rollover (the strip still uses `abbr`).
+      name: localizedPrayerLabel(r.key),
       time: r.time,
     }));
+    // Start anchor for the progress bar — previous prayer, falling back to one
+    // hour before the next prayer so the bar still renders sensibly before the
+    // day's first event (or when today's timings are unavailable).
+    const prevEpochMs =
+      (args.today ? computePrevPrayerEpochMs(args.today, now) : null) ??
+      (nextPrayerTimestamp != null ? nextPrayerTimestamp - 60 * 60 * 1000 : 0);
+
     const content: PrayerLiveActivityContent = {
       locale: i18n.language || 'en',
       nextKey: payload.nextKey ?? '',
@@ -256,8 +297,16 @@ async function syncLiveActivityImpl(args: {
       // Swift ContentState.nextEpochSeconds is Double seconds-since-epoch.
       // nextPrayerTimestamp is ms-since-epoch — divide by 1000.
       nextEpochSeconds: (nextPrayerTimestamp ?? 0) / 1000,
+      prevEpochSeconds: prevEpochMs / 1000,
       rows,
-      sunriseRow: payload.sunriseRow,
+      sunriseRow: payload.sunriseRow
+        ? {
+            key: payload.sunriseRow.key,
+            abbr: payload.sunriseRow.abbr,
+            name: localizedPrayerLabel(payload.sunriseRow.key),
+            time: payload.sunriseRow.time,
+          }
+        : undefined,
       hijriLabel: '',
       locationLabel: '',
       accentHex,

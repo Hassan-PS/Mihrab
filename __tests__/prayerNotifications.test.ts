@@ -33,6 +33,11 @@ const today = {
 const ORIGINAL_OS = Platform.OS;
 
 beforeEach(() => {
+  // Pin a deterministic wall clock (10:00 local) so tests that schedule from
+  // `today` always have future events regardless of when the suite runs —
+  // these were previously flaky after Isha (e.g. on CI in the evening).
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date(2026, 5, 14, 10, 0, 0));
   jest.clearAllMocks();
   Object.defineProperty(Platform, 'OS', {
     configurable: true,
@@ -44,6 +49,10 @@ beforeEach(() => {
     authorizationStatus: 1, // AUTHORIZED
   });
   (notifee.getTriggerNotifications as jest.Mock).mockResolvedValue([]);
+});
+
+afterEach(() => {
+  jest.useRealTimers();
 });
 
 afterAll(() => {
@@ -300,5 +309,101 @@ describe('syncPrayerNotifications: diff-based cancellation', () => {
       // Every ID our notifications use starts with the prayer prefix, never anything else.
       expect(id).toMatch(/^pt-(?:pre-)?\d+-[A-Za-z]+$/);
     }
+  });
+});
+
+describe('syncPrayerNotifications: notification channels', () => {
+  test('creates only the default + selected channels, deletes the surplus', async () => {
+    await syncPrayerNotifications({
+      enabled: true,
+      prePrayerReminderMinutes: 0,
+      notificationSound: 'adhan_makkah',
+      today,
+      tomorrow: today,
+    });
+
+    const createdIds = (notifee.createChannel as jest.Mock).mock.calls.map(
+      c => c[0].id,
+    );
+    // Exactly the two channels we actually use.
+    expect(new Set(createdIds)).toEqual(
+      new Set(['prayer-times-default', 'prayer-times-adhan-makkah']),
+    );
+
+    const deletedIds = (notifee.deleteChannel as jest.Mock).mock.calls.map(
+      c => c[0],
+    );
+    // Surplus adhan channels are cleaned up, never the two needed ones.
+    expect(deletedIds).toContain('prayer-times-adhan-madina');
+    expect(deletedIds).not.toContain('prayer-times-default');
+    expect(deletedIds).not.toContain('prayer-times-adhan-makkah');
+  });
+
+  test('default sound → only the default channel is created', async () => {
+    await syncPrayerNotifications({
+      enabled: true,
+      prePrayerReminderMinutes: 0,
+      notificationSound: 'default',
+      today,
+      tomorrow: today,
+    });
+    const createdIds = (notifee.createChannel as jest.Mock).mock.calls.map(
+      c => c[0].id,
+    );
+    expect(new Set(createdIds)).toEqual(new Set(['prayer-times-default']));
+  });
+});
+
+describe('syncPrayerNotifications: Sunrise never plays the adhan', () => {
+  // Pass `tomorrow` as well so a full set of future events always exists
+  // regardless of the wall-clock time the test runs at.
+  const findSalahCall = (name: string) =>
+    (notifee.createTriggerNotification as jest.Mock).mock.calls.find(
+      c => typeof c[0].id === 'string' && c[0].id.endsWith(`-${name}`),
+    )?.[0];
+
+  test('with an adhan selected, Sunrise uses the default sound + no adhan controls', async () => {
+    await syncPrayerNotifications({
+      enabled: true,
+      prePrayerReminderMinutes: 0,
+      notificationSound: 'adhan_makkah',
+      today,
+      tomorrow: today,
+    });
+
+    const sunrise = findSalahCall('Sunrise');
+    expect(sunrise).toBeDefined();
+    // Plain default sound + channel, not the adhan ones.
+    expect(sunrise.android.channelId).toBe('prayer-times-default');
+    expect(sunrise.ios.sound).toBe('default');
+    // No adhan category (iOS) and no usesAdhan flag.
+    expect(sunrise.ios.categoryId).toBeUndefined();
+    expect(sunrise.data.usesAdhan).toBe('0');
+    // No "Stop adhan" action — only the Log prayer action remains.
+    const sunriseActionIds = (sunrise.android.actions ?? []).map(
+      (a: { pressAction: { id: string } }) => a.pressAction.id,
+    );
+    expect(sunriseActionIds).not.toContain('adhan_stop');
+  });
+
+  test('with an adhan selected, the five daily prayers still play the adhan', async () => {
+    await syncPrayerNotifications({
+      enabled: true,
+      prePrayerReminderMinutes: 0,
+      notificationSound: 'adhan_makkah',
+      today,
+      tomorrow: today,
+    });
+
+    const dhuhr = findSalahCall('Dhuhr');
+    expect(dhuhr).toBeDefined();
+    expect(dhuhr.android.channelId).toBe('prayer-times-adhan-makkah');
+    expect(dhuhr.ios.sound).toBe('adhan_makkah.caf');
+    expect(dhuhr.ios.categoryId).toBe('adhan_controls');
+    expect(dhuhr.data.usesAdhan).toBe('1');
+    const dhuhrActionIds = (dhuhr.android.actions ?? []).map(
+      (a: { pressAction: { id: string } }) => a.pressAction.id,
+    );
+    expect(dhuhrActionIds).toContain('adhan_stop');
   });
 });

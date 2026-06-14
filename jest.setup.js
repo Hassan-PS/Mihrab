@@ -162,6 +162,7 @@ jest.mock('@notifee/react-native', () => ({
     cancelTriggerNotification: jest.fn(() => Promise.resolve()),
     cancelNotification: jest.fn(() => Promise.resolve()),
     createChannel: jest.fn(() => Promise.resolve()),
+    deleteChannel: jest.fn(() => Promise.resolve()),
     createTriggerNotification: jest.fn(() => Promise.resolve()),
     displayNotification: jest.fn(() => Promise.resolve()),
     getNotificationSettings: jest.fn(() =>
@@ -174,7 +175,10 @@ jest.mock('@notifee/react-native', () => ({
     openAlarmPermissionSettings: jest.fn(() => Promise.resolve()),
   },
   TriggerType: { TIMESTAMP: 0, INTERVAL: 1 },
-  AndroidImportance: { DEFAULT: 3, HIGH: 4 },
+  AndroidStyle: { BIGTEXT: 0, BIGPICTURE: 1, INBOX: 2, MESSAGING: 3 },
+  AndroidCategory: { STATUS: 'status', ALARM: 'alarm', REMINDER: 'reminder' },
+  AndroidVisibility: { PRIVATE: 0, PUBLIC: 1, SECRET: -1 },
+  AndroidImportance: { DEFAULT: 3, HIGH: 4, LOW: 2, MIN: 1, NONE: 0 },
   AndroidNotificationSetting: { DISABLED: 0, ENABLED: 1, NOT_SUPPORTED: -1 },
   AuthorizationStatus: {
     NOT_DETERMINED: -1,

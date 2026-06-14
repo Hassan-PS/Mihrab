@@ -180,19 +180,15 @@ export function HomeScreen() {
           locationLabel,
           { lat: state.latitude, lng: state.longitude },
           { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
+          state.week,
         ).catch(e => console.warn('syncPrayerWidget (focus):', e));
         // Live activity — task #128. Same cadence as the widget so the
         // notification stays in sync with what's on the home screen.
         syncLiveActivity({
-          options: {
-            enabled: settings.liveActivityEnabled,
-            compactMode: true,
-            showSunrise: settings.liveActivityShowSunrise,
-            showHijri: settings.liveActivityShowHijri,
-            showLocation: settings.liveActivityShowLocation,
-          },
+          options: { enabled: settings.liveActivityEnabled },
           today: state.today,
           tomorrow: state.tomorrow,
+          week: state.week,
           now: new Date(),
           locationName: locationLabel,
           coords: { lat: state.latitude, lng: state.longitude },
@@ -232,9 +228,6 @@ export function HomeScreen() {
       state,
       locationLabel,
       settings.liveActivityEnabled,
-      settings.liveActivityShowSunrise,
-      settings.liveActivityShowHijri,
-      settings.liveActivityShowLocation,
       settings.appAccentId,
       settings.appAccentCustomHex,
     ]),
@@ -257,6 +250,7 @@ export function HomeScreen() {
       locationLabel,
       { lat: state.latitude, lng: state.longitude },
       { jumuah: seasonal.jumuah, ramadan: seasonal.ramadan, eid: seasonal.eid },
+      state.week,
     ).catch(e => console.warn('syncPrayerWidget (effect):', e));
   }, [
     hydrated,
@@ -278,15 +272,10 @@ export function HomeScreen() {
       new Date(),
     );
     syncLiveActivity({
-      options: {
-        enabled: settings.liveActivityEnabled,
-        compactMode: true,
-        showSunrise: settings.liveActivityShowSunrise,
-        showHijri: settings.liveActivityShowHijri,
-        showLocation: settings.liveActivityShowLocation,
-      },
+      options: { enabled: settings.liveActivityEnabled },
       today: state.today,
       tomorrow: state.tomorrow,
+      week: state.week,
       now: new Date(),
       locationName: locationLabel,
       coords: { lat: state.latitude, lng: state.longitude },
@@ -309,9 +298,6 @@ export function HomeScreen() {
     nextInfo,
     locationLabel,
     settings.liveActivityEnabled,
-    settings.liveActivityShowSunrise,
-    settings.liveActivityShowHijri,
-    settings.liveActivityShowLocation,
     settings.appAccentId,
     settings.appAccentCustomHex,
   ]);

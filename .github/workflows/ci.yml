@@ -1,0 +1,32 @@
+name: CI
+
+# Runs the JS test suite + TypeScript typecheck on every push and PR.
+# Previously there was no CI, so the Jest suite could (and did) drift red
+# without anyone noticing — this workflow makes `npx jest` a merge gate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: Jest
+        run: npx jest --ci --runInBand

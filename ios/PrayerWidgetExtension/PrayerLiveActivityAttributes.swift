@@ -32,6 +32,12 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
     /// Text(timerInterval:countsDown:) so the widget ticks without our
     /// pushes touching ActivityKit every second.
     public var nextEpochSeconds: Double
+    /// Wall-clock instant of the PREVIOUS prayer (seconds since epoch). The
+    /// start anchor for the auto-filling progress bar — the bar fills from
+    /// `prevEpochSeconds` → `nextEpochSeconds` on-device, so progress advances
+    /// without us pushing every minute (mirrors the Android progress bar).
+    /// Defaults to 0 so older JS payloads still decode.
+    public var prevEpochSeconds: Double = 0
     /// Stable row key for the upcoming prayer (matches WIDGET_ROW_KEYS).
     public var nextKey: String
 
@@ -66,6 +72,12 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
   public struct Row: Codable, Hashable {
     public var key: String
     public var abbr: String
+    /// Localized full prayer name (e.g. "Dhuhr" / "الظهر"). Used by the
+    /// background refresh task to rebuild the hero `nextLabel` when it rolls
+    /// the activity forward, without needing localization tables in the
+    /// extension. Defaults to "" so older payloads still decode (callers fall
+    /// back to `abbr`).
+    public var name: String = ""
     public var time: String
   }
 }

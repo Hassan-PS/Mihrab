@@ -327,6 +327,24 @@ export async function startOrUpdateLiveActivity(
           time: input.payload.sunriseRow.time,
         }
       : undefined;
+    // Project the multi-day schedule to the native shape with localised long
+    // names. This is what lets the foreground-service ticker advance to the
+    // right day's prayers (and overnight Isha→Fajr interval) on its own.
+    const days = (input.payload.days ?? []).map(d => ({
+      dateKey: d.dateKey,
+      rows: d.rows.map(r => ({
+        key: r.key,
+        name: localizedPrayerName(r.key, r.abbr),
+        time: r.time,
+      })),
+      sunriseRow: d.sunriseRow
+        ? {
+            key: d.sunriseRow.key,
+            name: localizedPrayerName(d.sunriseRow.key, d.sunriseRow.abbr),
+            time: d.sunriseRow.time,
+          }
+        : undefined,
+    }));
     const nativePayload: MihrabLiveActivityPayload = {
       nextLabel: input.nextPrayerLabel,
       nextTime,
@@ -338,6 +356,7 @@ export async function startOrUpdateLiveActivity(
       progressFraction,
       rows,
       sunriseRow,
+      days,
       hijriLabel: input.hijriLabel,
       locationLabel: input.locationLabel,
       accentHex: input.accentHex,

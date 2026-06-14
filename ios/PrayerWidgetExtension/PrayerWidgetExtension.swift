@@ -86,10 +86,23 @@ struct WidgetPayload: Codable {
   /// versions push payloads without this field; absent treats as
   /// all-false.
   let seasonal: SeasonalFlags?
+  /// Multi-day schedule (index 0 = today). When present, the timeline
+  /// provider builds entries spanning every supplied day, each rendering
+  /// that day's own times — so the widget rolls onto the correct day on its
+  /// own and never goes stale ~24h after the app was last opened. Optional:
+  /// when absent the provider falls back to the legacy single-day timeline.
+  let days: [Day]?
   struct Row: Codable {
     let key: String
     let time: String
     let abbr: String?
+  }
+  struct Day: Codable {
+    /// Local calendar date these times apply to (yyyy-MM-dd).
+    let dateKey: String
+    let dayLabel: String
+    let rows: [Row]
+    let sunriseRow: Row?
   }
   struct SeasonalFlags: Codable {
     let jumuah: Bool
@@ -139,8 +152,20 @@ struct Provider: TimelineProvider {
       return
     }
 
-    var entries: [Entry] = []
     let now = Date(); let cal = Calendar.current
+
+    // ── Multi-day path ───────────────────────────────────────────────
+    // When the app pushes a `days[]` schedule, build a timeline spanning
+    // every supplied day so the widget rolls onto the correct day's times by
+    // itself. This is the fix for the widget going stale ~24h after the app
+    // was last opened (it previously only ever held a single day's snapshot).
+    if let days = payload.days, !days.isEmpty {
+      buildMultiDayTimeline(payload: payload, days: days, now: now, cal: cal, completion: completion)
+      return
+    }
+
+    // ── Legacy single-day path (no `days[]` in payload) ──────────────
+    var entries: [Entry] = []
     let currentNext = computeDynamicNext(after: now, rows: payload.rows, calendar: cal)
     entries.append(Entry(date: now, payload: payload, dynamicNextKey: currentNext?.key, dynamicNextName: currentNext?.name, dynamicNextTime: currentNext?.time))
 
@@ -184,6 +209,110 @@ struct Provider: TimelineProvider {
     completion(Timeline(entries: entries, policy: .after(refresh)))
   }
 
+  /// Build a timeline spanning every day in `days[]`. Produces one entry at
+  /// each content-change boundary (the start of each day, and each prayer
+  /// time), each carrying a per-day payload so the rendered rows, day label
+  /// and "next prayer" highlight always match the wall clock. The next-prayer
+  /// computation rolls across day boundaries (e.g. after Isha → tomorrow's
+  /// Fajr) because it scans the flattened, absolutely-dated prayer list.
+  private func buildMultiDayTimeline(
+    payload: WidgetPayload,
+    days: [WidgetPayload.Day],
+    now: Date,
+    cal: Calendar,
+    completion: @escaping (Timeline<Entry>) -> Void
+  ) {
+    let fmt = DateFormatter()
+    fmt.calendar = cal
+    fmt.locale = Locale(identifier: "en_US_POSIX")
+    fmt.timeZone = cal.timeZone
+    fmt.dateFormat = "yyyy-MM-dd"
+
+    struct DayInfo { let date: Date; let day: WidgetPayload.Day }
+    var dayInfos: [DayInfo] = []
+    for d in days {
+      if let dd = fmt.date(from: d.dateKey) {
+        dayInfos.append(DayInfo(date: cal.startOfDay(for: dd), day: d))
+      }
+    }
+    // Couldn't parse any dateKey — degrade to a single immediate entry rather
+    // than producing an empty timeline.
+    guard !dayInfos.isEmpty else {
+      let next = computeDynamicNext(after: now, rows: payload.rows, calendar: cal)
+      let e = Entry(date: now, payload: payload, dynamicNextKey: next?.key, dynamicNextName: next?.name, dynamicNextTime: next?.time)
+      let refresh = cal.date(byAdding: .minute, value: 30, to: now) ?? now.addingTimeInterval(1800)
+      completion(Timeline(entries: [e], policy: .after(refresh)))
+      return
+    }
+    dayInfos.sort { $0.date < $1.date }
+
+    // Flatten the five salāh of every day into one chronological list of
+    // absolutely-dated prayer events. Sunrise is intentionally excluded from
+    // the "next prayer" target set, matching the single-day behaviour.
+    struct PrayerEvent { let date: Date; let key: String; let name: String; let time: String }
+    var prayers: [PrayerEvent] = []
+    for info in dayInfos {
+      for r in info.day.rows {
+        let parts = r.time.split(separator: ":")
+        if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
+           let pd = cal.date(bySettingHour: h, minute: m, second: 0, of: info.date) {
+          prayers.append(PrayerEvent(date: pd, key: r.key, name: r.abbr ?? r.key, time: r.time))
+        }
+      }
+    }
+    prayers.sort { $0.date < $1.date }
+
+    func nextPrayer(after t: Date) -> PrayerEvent? { prayers.first { $0.date > t } }
+    func activeDay(at t: Date) -> DayInfo {
+      var chosen = dayInfos[0]
+      for info in dayInfos where info.date <= t { chosen = info }
+      return chosen
+    }
+    func perDayPayload(_ info: DayInfo, _ np: PrayerEvent?) -> WidgetPayload {
+      WidgetPayload(
+        dayLabel: info.day.dayLabel,
+        rows: info.day.rows,
+        sunriseRow: info.day.sunriseRow,
+        nextKey: np?.key,
+        nextPrayerName: np?.name,
+        nextPrayerTime: np?.time,
+        locationName: payload.locationName,
+        seasonal: payload.seasonal,
+        days: nil
+      )
+    }
+
+    // Entry boundaries: now, the start of each future day (so the rows roll at
+    // midnight), and each future prayer time (so the highlight advances).
+    var boundarySet: Set<Date> = [now]
+    for info in dayInfos where info.date > now { boundarySet.insert(info.date) }
+    for p in prayers where p.date > now { boundarySet.insert(p.date) }
+    var boundaries = boundarySet.sorted()
+    // WidgetKit tolerates large timelines, but keep it bounded.
+    if boundaries.count > 60 { boundaries = Array(boundaries.prefix(60)) }
+
+    var entries: [Entry] = []
+    for b in boundaries {
+      let info = activeDay(at: b)
+      let np = nextPrayer(after: b)
+      entries.append(Entry(
+        date: b,
+        payload: perDayPayload(info, np),
+        dynamicNextKey: np?.key,
+        dynamicNextName: np?.name,
+        dynamicNextTime: np?.time
+      ))
+    }
+
+    // Refresh a couple of hours after the final entry. By then the app has
+    // usually been opened and pushed a fresh window; if not, the provider
+    // re-runs against the same stored schedule (still correct until the last
+    // day in the window elapses).
+    let last = boundaries.last ?? now
+    let refresh = cal.date(byAdding: .hour, value: 2, to: last) ?? last.addingTimeInterval(7200)
+    completion(Timeline(entries: entries, policy: .after(refresh)))
+  }
+
   private func loadPayload() -> WidgetPayload? {
     guard let json = UserDefaults(suiteName: kSuite)?.string(forKey: kKey),
           let data = json.data(using: .utf8),
@@ -204,7 +333,8 @@ struct Provider: TimelineProvider {
     sunriseRow: .init(key: "Sunrise", time: "06:30", abbr: "Sun"),
     nextKey: "Dhuhr", nextPrayerName: "Dhuhr", nextPrayerTime: "12:10",
     locationName: "London",
-    seasonal: nil
+    seasonal: nil,
+    days: nil
   )
 }
 

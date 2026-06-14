@@ -24,6 +24,7 @@
 
 import Foundation
 import React
+import BackgroundTasks
 #if canImport(ActivityKit)
 import ActivityKit
 #endif
@@ -77,6 +78,12 @@ final class PrayerLiveActivity: NSObject {
         return
       }
 
+      // staleDate = just after the next prayer, so once the countdown elapses
+      // the system knows the content is out of date (and dims/refreshes it)
+      // rather than showing a frozen 0:00 indefinitely. nil when we don't have
+      // a valid future target.
+      let staleDate = Self.staleDate(for: state)
+
       // If there are already running activities, update them in place.
       // Do NOT stop-then-restart: that pattern races when called concurrently
       // and causes the card to flash off the lock screen.
@@ -86,8 +93,13 @@ final class PrayerLiveActivity: NSObject {
         Task {
           // Update all running activities with fresh state.
           for act in existing {
-            await act.update(using: state)
+            if #available(iOS 16.2, *) {
+              await act.update(ActivityContent(state: state, staleDate: staleDate))
+            } else {
+              await act.update(using: state)
+            }
           }
+          LiveActivityRefresher.scheduleRefresh()
           self.queue.sync { self.isStarting = false }
           resolve(nil)
         }
@@ -95,12 +107,25 @@ final class PrayerLiveActivity: NSObject {
       }
 
       // No existing activity — request a fresh one.
+      // Local-first: pushType is nil (no APNs / no server). The next-prayer
+      // pointer advances via (a) the always-live on-device countdown/progress
+      // views, (b) foreground updates, and (c) a BGTaskScheduler background
+      // refresh — see LiveActivityRefresher below and docs/ios-live-activity-push.md.
       do {
-        let _ = try Activity<PrayerLiveActivityAttributes>.request(
-          attributes: PrayerLiveActivityAttributes(),
-          contentState: state,
-          pushType: nil
-        )
+        if #available(iOS 16.2, *) {
+          let _ = try Activity<PrayerLiveActivityAttributes>.request(
+            attributes: PrayerLiveActivityAttributes(),
+            content: ActivityContent(state: state, staleDate: staleDate),
+            pushType: nil
+          )
+        } else {
+          let _ = try Activity<PrayerLiveActivityAttributes>.request(
+            attributes: PrayerLiveActivityAttributes(),
+            contentState: state,
+            pushType: nil
+          )
+        }
+        LiveActivityRefresher.scheduleRefresh()
         queue.sync { isStarting = false }
         resolve(nil)
       } catch {
@@ -137,10 +162,16 @@ final class PrayerLiveActivity: NSObject {
         reject("DECODE_FAILED", error.localizedDescription, error)
         return
       }
+      let staleDate = Self.staleDate(for: state)
       Task {
         for activity in Activity<PrayerLiveActivityAttributes>.activities {
-          await activity.update(using: state)
+          if #available(iOS 16.2, *) {
+            await activity.update(ActivityContent(state: state, staleDate: staleDate))
+          } else {
+            await activity.update(using: state)
+          }
         }
+        LiveActivityRefresher.scheduleRefresh()
         resolve(nil)
       }
       return
@@ -148,6 +179,20 @@ final class PrayerLiveActivity: NSObject {
     #endif
     resolve(nil)
   }
+
+  // MARK: - staleDate helper
+
+  #if canImport(ActivityKit)
+  /// Just after the next prayer instant, or nil when there is no valid future
+  /// target (so we don't mark fresh content immediately stale).
+  @available(iOS 16.1, *)
+  private static func staleDate(
+    for state: PrayerLiveActivityAttributes.ContentState
+  ) -> Date? {
+    let target = Date(timeIntervalSince1970: state.nextEpochSeconds)
+    return target > Date() ? target.addingTimeInterval(60) : nil
+  }
+  #endif
 
   // MARK: - stop
 
@@ -158,6 +203,7 @@ final class PrayerLiveActivity: NSObject {
   ) {
     #if canImport(ActivityKit)
     if #available(iOS 16.1, *) {
+      LiveActivityRefresher.cancelScheduledRefresh()
       Task {
         for activity in Activity<PrayerLiveActivityAttributes>.activities {
           await activity.end(dismissalPolicy: .immediate)
@@ -185,4 +231,154 @@ final class PrayerLiveActivity: NSObject {
     #endif
     resolve(false)
   }
+}
+
+// MARK: - LiveActivityRefresher (BGTaskScheduler — local, no server)
+//
+// Advances the Live Activity's highlighted prayer while the app is
+// backgrounded, with no push / no server. A BGAppRefreshTask recomputes the
+// next prayer from the activity's OWN rows (each carries HH:MM + a localized
+// name) and calls `Activity.update`. iOS runs these opportunistically (timing
+// is best-effort), which is fine: the on-device countdown/progress views stay
+// live regardless, and the foreground path covers the rest. Lives in this file
+// (already in the main app target) so no new file / pbxproj entry is needed.
+//
+// Registration MUST happen before the app finishes launching — see
+// AppDelegate.registerLiveActivityRefresh(). The identifier must also be listed
+// under BGTaskSchedulerPermittedIdentifiers in Info.plist.
+
+enum LiveActivityRefresher {
+  static let taskIdentifier = "com.hassan.prayerapp.liveactivity.refresh"
+
+  /// Register the BG task handler. Call once from AppDelegate before launch
+  /// finishes. Safe to call when ActivityKit is unavailable (handler no-ops).
+  static func registerTask() {
+    BGTaskScheduler.shared.register(
+      forTaskWithIdentifier: taskIdentifier,
+      using: nil
+    ) { task in
+      guard let refresh = task as? BGAppRefreshTask else {
+        task.setTaskCompleted(success: false)
+        return
+      }
+      handle(refresh)
+    }
+  }
+
+  /// Queue the next background refresh (no-op when no activity is running).
+  /// earliestBeginDate is the next prayer instant when known, else +15 min.
+  static func scheduleRefresh() {
+    #if canImport(ActivityKit)
+    if #available(iOS 16.2, *) {
+      guard !Activity<PrayerLiveActivityAttributes>.activities.isEmpty else { return }
+      let earliest = soonestNextPrayerDate() ?? Date().addingTimeInterval(15 * 60)
+      let request = BGAppRefreshTaskRequest(identifier: taskIdentifier)
+      request.earliestBeginDate = earliest
+      do {
+        try BGTaskScheduler.shared.submit(request)
+      } catch {
+        NSLog("[LiveActivityRefresher] submit failed: \(error.localizedDescription)")
+      }
+    }
+    #endif
+  }
+
+  static func cancelScheduledRefresh() {
+    BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: taskIdentifier)
+  }
+
+  private static func handle(_ task: BGAppRefreshTask) {
+    // Reschedule first so the chain continues even if the work below is cut off.
+    scheduleRefresh()
+    #if canImport(ActivityKit)
+    if #available(iOS 16.2, *) {
+      let work = Task {
+        await refreshRunningActivities()
+        task.setTaskCompleted(success: true)
+      }
+      task.expirationHandler = { work.cancel() }
+      return
+    }
+    #endif
+    task.setTaskCompleted(success: true)
+  }
+
+  #if canImport(ActivityKit)
+  @available(iOS 16.2, *)
+  private static func refreshRunningActivities() async {
+    let now = Date()
+    for activity in Activity<PrayerLiveActivityAttributes>.activities {
+      let state = activity.content.state
+      guard let next = computeNext(state: state, now: now) else { continue }
+      // Nothing to do if the activity already points at the same future prayer.
+      if next.key == state.nextKey && next.epoch == state.nextEpochSeconds { continue }
+      var newState = state
+      newState.nextKey = next.key
+      newState.nextLabel = next.label
+      newState.nextTime = next.time
+      newState.nextEpochSeconds = next.epoch
+      newState.prevEpochSeconds = next.prevEpoch
+      let stale = Date(timeIntervalSince1970: next.epoch + 60)
+      await activity.update(ActivityContent(state: newState, staleDate: stale))
+    }
+  }
+
+  @available(iOS 16.2, *)
+  private static func soonestNextPrayerDate() -> Date? {
+    let now = Date()
+    var soonest: Date?
+    for activity in Activity<PrayerLiveActivityAttributes>.activities {
+      if let n = computeNext(state: activity.content.state, now: now) {
+        let d = Date(timeIntervalSince1970: n.epoch)
+        if soonest == nil || d < soonest! { soonest = d }
+      }
+    }
+    return soonest
+  }
+
+  private struct NextInfo {
+    let key: String
+    let label: String
+    let time: String
+    let epoch: Double
+    let prevEpoch: Double
+  }
+
+  /// Next prayer (and previous, for the progress bar) computed from the
+  /// activity's own rows by wall clock. Self-contained — needs no app data.
+  /// Returns nil after the day's last event (the activity is short-lived and
+  /// gets re-armed from the foreground next time the app opens).
+  @available(iOS 16.1, *)
+  private static func computeNext(
+    state: PrayerLiveActivityAttributes.ContentState,
+    now: Date
+  ) -> NextInfo? {
+    var rows = state.rows
+    if let sun = state.sunriseRow {
+      if rows.isEmpty { rows.append(sun) } else { rows.insert(sun, at: 1) }
+    }
+    let cal = Calendar.current
+    var events: [(date: Date, row: PrayerLiveActivityAttributes.Row)] = []
+    for row in rows {
+      let parts = row.time.split(separator: ":")
+      guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
+            let d = cal.date(bySettingHour: h, minute: m, second: 0, of: now)
+      else { continue }
+      events.append((d, row))
+    }
+    guard !events.isEmpty else { return nil }
+    events.sort { $0.date < $1.date }
+    guard let next = events.first(where: { $0.date > now }) else { return nil }
+    let prev = events.last(where: { $0.date <= now })
+    let prevEpoch = (prev?.date ?? next.date.addingTimeInterval(-3600)).timeIntervalSince1970
+    let label = next.row.name.isEmpty ? next.row.abbr : next.row.name
+    return NextInfo(
+      key: next.row.key,
+      label: label,
+      time: next.row.time,
+      epoch: next.date.timeIntervalSince1970,
+      prevEpoch: prevEpoch
+    )
+  }
+  #endif
 }
