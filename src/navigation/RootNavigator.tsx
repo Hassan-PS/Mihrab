@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
 import { LocationChip } from '../screens/home/LocationChip';
 import { View } from 'react-native';
@@ -126,6 +127,14 @@ function HomeScreenWrapper() {
 export function RootNavigator() {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
+  // Bottom safe-area inset. RN 0.83 draws edge-to-edge on Android (targetSdk 36
+  // can't opt out), so without this the screen content renders *under* the
+  // system navigation bar — most visible with 3-button navigation, where the
+  // taller bar hides bottom buttons (Tasbih controls, Month "Share image") and
+  // list footers. Applied globally via the native-stack contentStyle so every
+  // screen's content clears the nav bar (scroll viewports shorten, fixed bottom
+  // bars push up). No colour seam because theme.colors.background === palette.bg.
+  const insets = useSafeAreaInsets();
   // RTL-aware title rendering — task #142.
   //
   // iOS native-stack `headerLargeTitle` is a UIKit `UINavigationBar` large
@@ -155,6 +164,8 @@ export function RootNavigator() {
         headerTransparent: isIOS,
         headerStyle: { backgroundColor: isIOS ? 'transparent' : theme.colors.background },
         headerLargeStyle: { backgroundColor: 'transparent' },
+        // Keep content above the system navigation bar (edge-to-edge bottom inset).
+        contentStyle: { paddingBottom: insets.bottom, backgroundColor: theme.colors.background },
         // writingDirection is a valid RN TextStyle prop (needed for the RTL
         // title fix) but react-navigation types the title style as a narrower
         // Pick<TextStyle, …> that omits it; cast past the type to keep the
