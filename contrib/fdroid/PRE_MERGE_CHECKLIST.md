@@ -18,7 +18,7 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
     sudo:
       - apt-get update
       - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
-      - npm install -g npm@10
+      - npm install -g npm@10 --loglevel=error --no-fund
       - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
     gradle:
       - fdroid
@@ -30,11 +30,15 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
-      - printf '\nandroid { lint { checkReleaseBuilds false } }' >> app/build.gradle
-      - printf '\nandroid { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
+      - echo 'org.gradle.warning.mode=none' >> gradle.properties
+      - echo 'org.gradle.logging.level=quiet' >> gradle.properties
+      - echo 'org.gradle.console=plain' >> gradle.properties
+      - echo 'android.javaCompile.suppressSourceTargetDeprecationWarning=true' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> app/build.gradle
+      - echo 'android { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
-      - npm ci --no-audit --ignore-scripts --omit=optional --omit=dev
-      - npm install --no-save --ignore-scripts patch-package
+      - npm ci --no-audit --no-fund --loglevel=error --ignore-scripts --omit=optional --omit=dev
+      - npm install --no-save --no-fund --loglevel=error --ignore-scripts patch-package
       - node node_modules/.bin/patch-package
       - RNG=node_modules/@react-native/gradle-plugin
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
@@ -42,6 +46,13 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
       - node_modules
     ndk: 27.1.12297006
 ```
+
+**Keep only the current version in `Builds:`.** The fdroiddata MR diff adds every
+entry, and CI builds each one in sequence starting from the oldest. Historical
+versions were never on F-Droid, so building them wastes the pipeline budget — and
+old entries that predate the log-quieting flags overflow GitLab's 4 MB job-log cap
+(see pitfall §9). New versions are picked up automatically via
+`AutoUpdateMode: Version` + `UpdateCheckMode: Tags`.
 
 ## Common pitfalls (all learned from real CI failures on MR 36312)
 
@@ -113,6 +124,24 @@ will always see `true`. Setting `newArchEnabled=false` in the root `gradle.prope
 effect on C++ compilation of library modules.
 
 **Do NOT add `newArchEnabled=false`.** It is a no-op and will cause confusion.
+
+### 9. Job log exceeds GitLab's 4 MB cap → "Job's log exceeded limit" (truncated, unreadable)
+The fdroiddata MR pipeline runs `fdroid build --verbose` on **every** `Builds:` entry the
+MR adds, in `versionCode` order (oldest first). A single React Native build emits thousands
+of repeated warning lines — the per-CMake `NDK was located by using ndk.dir property`
+deprecation (one block per native module × per ABI), npm `EBADENGINE` warnings, and Java
+`source/target value 8 is obsolete` warnings. Left unsilenced, one build alone can blow past
+GitLab's **4 MB** job-log limit; the job then continues but stops collecting output, so any
+later real failure is invisible.
+
+Two fixes, both required:
+- **Quiet the build** (in every entry's prebuild): `org.gradle.logging.level=quiet`,
+  `org.gradle.warning.mode=none`, `org.gradle.console=plain`,
+  `android.javaCompile.suppressSourceTargetDeprecationWarning=true`, and run every npm
+  command with `--loglevel=error --no-fund`. (`quiet` still prints errors, so failures stay
+  debuggable.)
+- **Build fewer versions**: keep only the current version in `Builds:` (see the note under
+  the template above).
 
 ---
 
