@@ -56,10 +56,11 @@ react {
     debuggableVariants = ["playDebug", "fdroidDebug"]
 }
 
-/**
- * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
- */
-def enableProguardInReleaseBuilds = true
+// R8/Proguard is ON for the Play release (smaller APK / store expectation) but
+// OFF for the F-Droid build: F-Droid CI runs R8 in parallel with lintVital on
+// every native module and OOM-kills the runner. `enableProguardInReleaseBuilds`
+// is computed from the requested tasks just below (see `wantsFdroid`) so the two
+// distribution flavors differ without any recipe-side prebuild injection.
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -94,6 +95,10 @@ def wantsPlayRelease = requestedTasks.any { t ->
      t == "assembleplaybeta"   || t == "bundleplaybeta") &&
     !t.contains("fdroid")
 }
+// True when this invocation builds the F-Droid flavor. Used to trim R8 + release
+// lint for the F-Droid build only (keeps the Play build fully minified + linted).
+def wantsFdroid = requestedTasks.any { it.contains("fdroid") }
+def enableProguardInReleaseBuilds = !wantsFdroid
 if (wantsPlayRelease && !hasReleaseSigningConfig) {
     throw new GradleException(
         "Play release/beta builds require android/keystore.properties with storeFile/storePassword/keyAlias/keyPassword. " +
@@ -183,6 +188,13 @@ android {
                 signingConfig signingConfigs.debug
             }
         }
+    }
+
+    lint {
+        // The F-Droid build runs lintVitalAnalyze on every native module in
+        // parallel with R8 and OOM-kills the CI runner, so skip release lint for
+        // the F-Droid flavor only. The Play release keeps full lint coverage.
+        checkReleaseBuilds !wantsFdroid
     }
 
     // Per-ABI APK splits: only for the `play` flavor so F-Droid still produces
