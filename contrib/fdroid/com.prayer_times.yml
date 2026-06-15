@@ -808,6 +808,9 @@ Builds:
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'android.javaCompile.suppressSourceTargetDeprecationWarning=true' >> gradle.properties
+      - echo 'org.gradle.warning.mode=none' >> gradle.properties
+      - echo 'org.gradle.logging.level=quiet' >> gradle.properties
       - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> app/build.gradle
       - echo 'android { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
       - cd ..
