@@ -28,6 +28,7 @@ Builds:
       - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m' >> gradle.properties
       - echo 'org.gradle.daemon=false' >> gradle.properties
+      - cd ..
       - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
       - npm i --no-save --ignore-scripts --loglevel=error patch-package
       - node node_modules/.bin/patch-package
