@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CalendarIcon } from '../../components/HeaderToolbarIcons';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { HOME_CARD_RADIUS } from './tokens';
 
@@ -23,13 +24,14 @@ function MonthShortcutImpl({ onPress }: MonthShortcutProps) {
       onPress={onPress}
       style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
         styles.shortcut,
+        styles.clip,
         {
-          backgroundColor: palette.card,
           borderRadius: HOME_CARD_RADIUS,
           ...cardEdgeStyle(palette),
         },
         pressed && { opacity: 0.75 }, hovered && { opacity: 0.92 },
       ]}>
+      <GlassSurface style={StyleSheet.absoluteFill} bordered={false} />
       <CalendarIcon color={palette.accent} size={20} />
       <Text style={[styles.label, { color: palette.accent }]}>
         {t('home.monthTimesLink')}
@@ -49,5 +51,6 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     paddingHorizontal: 16,
   },
+  clip: { overflow: 'hidden' },
   label: { fontSize: 16, fontWeight: '600' },
 });

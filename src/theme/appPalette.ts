@@ -23,6 +23,12 @@ export type AppPalette = {
    */
   flatChrome: boolean;
   /**
+   * iOS "Liquid Glass" mode — surfaces should render as translucent blurred
+   * material (via GlassSurface / BlurView) instead of a solid `card` colour.
+   * Only true on iOS under the system (Liquid Glass) palette.
+   */
+  glass: boolean;
+  /**
    * Solid hex string version of the accent color — task #104.
    *
    * `accent` itself can be a PlatformColor / DynamicColorIOS object so
@@ -53,9 +59,17 @@ export function shouldUseDynamicSystemColors(
   appearance: AppearancePreference | undefined,
   useSystemDynamicTheme: boolean | undefined,
 ): boolean {
-  /** Material You / dynamic palette — Android only; iOS uses brand accents with System theme. */
+  /**
+   * System-driven palette:
+   *  • Android → Material You dynamic colours (wallpaper-derived).
+   *  • iOS     → "Liquid Glass": native semantic system colours + the
+   *    translucent blurred chrome iOS provides, so the app reads as part of
+   *    the OS and adapts to light/dark automatically.
+   * Both are opt-in via the same toggle and only apply under the "System"
+   * appearance (so an explicit Light/Dark choice still uses brand accents).
+   */
   return (
-    Platform.OS === 'android' &&
+    (Platform.OS === 'android' || Platform.OS === 'ios') &&
     (appearance ?? 'system') === 'system' &&
     !!useSystemDynamicTheme
   );
@@ -160,6 +174,7 @@ const DARK_BASE: PaletteBase = {
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.65)',
   flatChrome: false,
+  glass: false,
 };
 
 const DARK_PURE_BLACK_BASE: PaletteBase = {
@@ -171,6 +186,7 @@ const DARK_PURE_BLACK_BASE: PaletteBase = {
   danger: '#f87171',
   overlay: 'rgba(0,0,0,0.75)',
   flatChrome: false,
+  glass: false,
 };
 
 const LIGHT_BASE: PaletteBase = {
@@ -182,6 +198,7 @@ const LIGHT_BASE: PaletteBase = {
   danger: '#b91c1c',
   overlay: 'rgba(0,0,0,0.4)',
   flatChrome: false,
+  glass: false,
 };
 
 function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette {
@@ -192,7 +209,10 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
     text: PlatformColor('label'),
     muted: PlatformColor('secondaryLabel'),
     border: 'transparent',
-    accent: PlatformColor('tintColor'),
+    // systemBlue is the iOS default tint and always resolves (PlatformColor
+    // 'tintColor' is nil without an app-wide UIView tint, which made accent-
+    // coloured text render invisible). It adapts to light/dark automatically.
+    accent: PlatformColor('systemBlue'),
     accentBg: PlatformColor('tertiarySystemGroupedBackground'),
     danger: PlatformColor('systemRed'),
     overlay: DynamicColorIOS({
@@ -202,6 +222,7 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
       highContrastDark: 'rgba(0,0,0,0.75)',
     }),
     flatChrome: true,
+    glass: true,
     // iOS systemBlue is the typical tintColor when no override; matches
     // the live PlatformColor tint closely enough for SVG icons.
     accentSolid: isDark ? '#0A84FF' : '#007AFF',
@@ -225,6 +246,7 @@ function androidDynamicPalette(
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
     flatChrome: true,
+    glass: false,
     // SVG icons can't consume PlatformColor; resolve the live system
     // primary to a hex via the SystemTheme native module so tiles
     // stay visible AND match the Material You wallpaper-derived

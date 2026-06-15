@@ -7,6 +7,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import {
   BookIcon,
@@ -74,11 +75,14 @@ function QuickActionsGridImpl() {
           onPress={() => navigation.navigate(tool.id as never)}
           style={[
             styles.tile,
-            {
-              backgroundColor: palette.card,
-              ...cardEdgeStyle(palette),
-            },
+            styles.tileClip,
+            cardEdgeStyle(palette),
           ]}>
+          <GlassSurface
+            style={StyleSheet.absoluteFill}
+            intensity="thin"
+            bordered={false}
+          />
           {/* `palette.accentSolid` is the SystemTheme native module's
               resolved hex for `?attr/colorPrimary` — the same value the
               title-bar icons render under Material You. SVG can render
@@ -116,5 +120,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     minHeight: 76,
   },
+  // Clip the blur layer to the tile's rounded rect.
+  tileClip: { overflow: 'hidden' },
   label: { fontSize: 13, fontWeight: '600', textAlign: 'center' },
 });

@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import {
   TABULAR_MAX_FONT_SCALE,
@@ -88,14 +89,15 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
   }
 
   return (
-    <View
+    <GlassSurface
+      intensity="thick"
+      fallbackColor={palette.accentBg}
       accessibilityLiveRegion="polite"
       accessibilityRole="text"
       accessibilityLabel={`${t('home.nextPrayer')}: ${t(`prayer.${nextInfo.name}`)} ${formatLocalTime(nextInfo.at)} — ${t('home.nextIn', { time: formatCountdown(remainingSeconds) })}`}
       style={[
         styles.card,
         {
-          backgroundColor: palette.accentBg,
           borderRadius: HOME_CARD_RADIUS,
           padding: HOME_CARD_PADDING,
           ...cardEdgeStyle(palette),
@@ -139,7 +141,7 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
           </Text>
         </View>
       </View>
-    </View>
+    </GlassSurface>
   );
 }
 

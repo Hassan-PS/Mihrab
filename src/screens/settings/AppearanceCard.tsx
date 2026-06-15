@@ -57,10 +57,11 @@ function AppearanceCardImpl() {
   }, [settings.appAccentCustomHex]);
 
   // Picker is hidden under dynamic colors — both app and widget follow OS.
+  // Android = Material You; iOS = Liquid Glass (system colours).
   const dynamicColorsActive =
     settings.appearance === 'system' &&
     settings.useSystemDynamicTheme &&
-    Platform.OS === 'android';
+    (Platform.OS === 'android' || Platform.OS === 'ios');
 
   /**
    * Atomic accent change: write app accent + mirror widget highlight.
@@ -132,7 +133,7 @@ function AppearanceCardImpl() {
             </Pressable>
           ))}
         </View>
-        {Platform.OS === 'android' && (
+        {(Platform.OS === 'android' || Platform.OS === 'ios') && (
           <View
             style={[
               s.switchRow,
@@ -144,10 +145,17 @@ function AppearanceCardImpl() {
             pointerEvents={settings.appearance === 'system' ? 'auto' : 'none'}>
             <View style={s.switchCopy}>
               <Text style={[s.valueText, { color: palette.text }]}>
-                {t('settings.systemDynamicColors')}
+                {Platform.OS === 'ios'
+                  ? t('settings.liquidGlass', 'Liquid Glass')
+                  : t('settings.systemDynamicColors')}
               </Text>
               <Text style={[s.help, { color: palette.muted }]}>
-                {t('settings.systemDynamicColorsHelp')}
+                {Platform.OS === 'ios'
+                  ? t(
+                      'settings.liquidGlassHelp',
+                      'Adopt iOS system colours and translucent glass chrome. Follows Light/Dark automatically.',
+                    )
+                  : t('settings.systemDynamicColorsHelp')}
               </Text>
             </View>
             <Switch

@@ -37,12 +37,12 @@
 		EA6B2A6659A3E2683A2EC666 /* adhan_minshawi.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */; };
 		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
 		F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */; };
-		F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources (app) */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
-		F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources (ext) */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
+		F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
+		F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
 		F1A20000A001B001C001D005 /* PrayerLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */; };
 		F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */; };
 		F1A20000A001B001C001D009 /* PrayerLiveActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D008 /* PrayerLiveActivity.m */; };
-	/* End PBXBuildFile section */
+/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */ = {
@@ -106,12 +106,12 @@
 		F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerWidget.m; path = PrayerApp/PrayerWidget.m; sourceTree = "<group>"; };
 		F1A100002294A1A2E3B4C5D7 /* PrayerApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = PrayerApp.entitlements; path = PrayerApp/PrayerApp.entitlements; sourceTree = "<group>"; };
 		F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WidgetTimelineReloader.swift; path = PrayerApp/WidgetTimelineReloader.swift; sourceTree = "<group>"; };
-		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
 		F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityAttributes.swift; sourceTree = "<group>"; };
 		F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityWidget.swift; sourceTree = "<group>"; };
 		F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrayerLiveActivity.swift; path = PrayerApp/PrayerLiveActivity.swift; sourceTree = "<group>"; };
 		F1A20000A001B001C001D008 /* PrayerLiveActivity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerLiveActivity.m; path = PrayerApp/PrayerLiveActivity.m; sourceTree = "<group>"; };
-	/* End PBXFileReference section */
+		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
@@ -436,7 +436,7 @@
 				BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */,
 				F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */,
 				F1A20000A001B001C001D009 /* PrayerLiveActivity.m in Sources */,
-				F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources (app) */,
+				F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -446,7 +446,7 @@
 			files = (
 				E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */,
 				F1A20000A001B001C001D005 /* PrayerLiveActivityWidget.swift in Sources */,
-				F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources (ext) */,
+				F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { TITLE_BAND_MAX_FONT_SCALE } from '../../theme/textScale';
 import { DISPLAY_ORDER } from '../../types/prayer';
@@ -49,12 +50,11 @@ function DayCardImpl({
   const { t } = useTranslation();
 
   return (
-    <View
+    <GlassSurface
       style={[
         styles.card,
         {
           width: cardWidth,
-          backgroundColor: palette.card,
           borderRadius: HOME_TABLE_RADIUS,
           ...cardEdgeStyle(palette),
         },
@@ -113,7 +113,7 @@ function DayCardImpl({
           />
         );
       })}
-    </View>
+    </GlassSurface>
   );
 }
 
