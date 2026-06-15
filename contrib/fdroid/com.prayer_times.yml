@@ -34,6 +34,8 @@ Builds:
       - node node_modules/.bin/patch-package
       - RNG=node_modules/@react-native/gradle-plugin
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
+    scanignore:
+      - node_modules
     ndk: 27.1.12297006
 
 MaintainerNotes: |
@@ -61,6 +63,14 @@ MaintainerNotes: |
     patch strips `play-services-location` from
     `@react-native-community/geolocation` so no proprietary `com.google.android.gms`
     classes ship).
+
+  `scanignore: node_modules` is required: React Native's node_modules trips the
+  scanner with ~67 findings inherent to RN and not proprietary — bundled i18n
+  binary packs (`react-native/React/I18n/strings/*/fbt_language_pack.bin`) and
+  the local-path Maven repos declared in each native module's build.gradle (e.g.
+  `$rootDir/../node_modules/react-native/android`). Per-package paths are brittle
+  across RN versions, so the whole tree is ignored; the one proprietary concern,
+  play-services-location, is stripped via patch-package.
 
   Single universal fdroidRelease APK (no ABI splits). Listing text + screenshots
   come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
