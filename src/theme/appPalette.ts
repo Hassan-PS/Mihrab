@@ -234,15 +234,19 @@ function androidDynamicPalette(
   pureBlackDark: boolean,
 ): AppPalette {
   const oled = pureBlackDark && isDark;
+  // Material 3 tonal surface hierarchy (wallpaper-tinted under Material You):
+  //   window  → colorSurface (base)
+  //   cards   → colorSurfaceContainerHigh  (clear, border-free elevation)
+  //   hero/highlight → colorSurfaceContainerHighest (top of the neutral ramp)
+  // All neutral tones, so colorPrimary text keeps predictable contrast on each.
   return {
     bg: oled ? '#000000' : PlatformColor('?attr/colorSurface'),
-    card: oled ? '#0d0d0d' : PlatformColor('?attr/colorSurfaceContainerHighest'),
+    card: oled ? '#0d0d0d' : PlatformColor('?attr/colorSurfaceContainerHigh'),
     text: PlatformColor('?attr/colorOnSurface'),
     muted: PlatformColor('?attr/colorOnSurfaceVariant'),
     border: 'transparent',
     accent: PlatformColor('?attr/colorPrimary'),
-    // Use a neutral container to keep text contrast predictable with dynamic palettes.
-    accentBg: PlatformColor('?attr/colorSurfaceContainerHigh'),
+    accentBg: PlatformColor('?attr/colorSurfaceContainerHighest'),
     danger: PlatformColor('?attr/colorError'),
     overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
     flatChrome: true,

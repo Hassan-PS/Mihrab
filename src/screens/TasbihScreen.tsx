@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { GlassSurface } from '../components/GlassSurface';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
@@ -97,11 +98,10 @@ export function TasbihScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: palette.bg, paddingTop: topInset + 12 }]}>
-      <View
+      <GlassSurface
         style={[
           styles.dhikrCard,
           {
-            backgroundColor: palette.card,
             ...cardEdgeStyle(palette),
           },
         ]}>
@@ -124,7 +124,7 @@ export function TasbihScreen() {
             {t(preset.labelKey)}
           </Text>
         ) : null}
-      </View>
+      </GlassSurface>
 
       <Pressable
         accessibilityRole="button"
