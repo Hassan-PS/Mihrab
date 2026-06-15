@@ -24,21 +24,23 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '\norg.gradle.java.home=/usr/local/jdk21\n' >> gradle.properties
-      - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
-      - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
-      - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
-      - echo 'org.gradle.warning.mode=none' >> gradle.properties
-      - echo 'org.gradle.logging.level=quiet' >> gradle.properties
-      - echo 'org.gradle.console=plain' >> gradle.properties
-      - echo 'android.javaCompile.suppressSourceTargetDeprecationWarning=true' >> gradle.properties
-      - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> app/build.gradle
-      - echo 'android { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
+      - G=gradle.properties
+      - A=app/build.gradle
+      - printf '\norg.gradle.java.home=/usr/local/jdk21\n' >> $G
+      - echo 'react.internal.disableJavaVersionAlignment=true' >> $G
+      - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> $G
+      - echo 'reactNativeArchitectures=arm64-v8a' >> $G
+      - echo 'org.gradle.daemon=false' >> $G
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> $G
+      - echo 'org.gradle.warning.mode=none' >> $G
+      - echo 'org.gradle.logging.level=quiet' >> $G
+      - echo 'org.gradle.console=plain' >> $G
+      - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> $A
+      - echo 'android { buildTypes { release { minifyEnabled false } } }' >> $A
       - cd ..
-      - npm ci --no-audit --no-fund --loglevel=error --ignore-scripts --omit=optional --omit=dev
-      - npm install --no-save --no-fund --loglevel=error --ignore-scripts patch-package
+      - npm set loglevel=error fund=false audit=false
+      - npm ci --ignore-scripts --omit=optional --omit=dev
+      - npm i --no-save --ignore-scripts patch-package
       - node node_modules/.bin/patch-package
       - RNG=node_modules/@react-native/gradle-plugin
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
@@ -46,6 +48,13 @@ Expect: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
       - node_modules
     ndk: 27.1.12297006
 ```
+
+> **Keep prebuild lines under 80 columns.** `fdroid rewritemeta` wraps longer lines
+> and leaves a trailing space on the wrap, which `fdroid lint` then flags
+> (`trailing-spaces`). Use the `G`/`A` shell vars (set on the first two prebuild
+> lines, they persist across the shared prebuild shell) and `npm set ...` to keep
+> each command short. Validate locally with `fdroid rewritemeta com.prayer_times`
+> (must produce no diff) and `fdroid lint com.prayer_times` (must exit 0).
 
 **Keep only the current version in `Builds:`.** The fdroiddata MR diff adds every
 entry, and CI builds each one in sequence starting from the oldest. Historical

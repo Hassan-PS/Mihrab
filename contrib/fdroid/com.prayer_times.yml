@@ -27,21 +27,23 @@ Builds:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - printf '\norg.gradle.java.home=/usr/local/jdk21\n' >> gradle.properties
-      - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
-      - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
-      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
-      - echo 'org.gradle.daemon=false' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
-      - echo 'org.gradle.warning.mode=none' >> gradle.properties
-      - echo 'org.gradle.logging.level=quiet' >> gradle.properties
-      - echo 'org.gradle.console=plain' >> gradle.properties
-      - echo 'android.javaCompile.suppressSourceTargetDeprecationWarning=true' >> gradle.properties
-      - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> app/build.gradle
-      - echo 'android { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
+      - G=gradle.properties
+      - A=app/build.gradle
+      - printf '\norg.gradle.java.home=/usr/local/jdk21\n' >> $G
+      - echo 'react.internal.disableJavaVersionAlignment=true' >> $G
+      - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> $G
+      - echo 'reactNativeArchitectures=arm64-v8a' >> $G
+      - echo 'org.gradle.daemon=false' >> $G
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> $G
+      - echo 'org.gradle.warning.mode=none' >> $G
+      - echo 'org.gradle.logging.level=quiet' >> $G
+      - echo 'org.gradle.console=plain' >> $G
+      - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> $A
+      - echo 'android { buildTypes { release { minifyEnabled false } } }' >> $A
       - cd ..
-      - npm ci --no-audit --no-fund --loglevel=error --ignore-scripts --omit=optional --omit=dev
-      - npm install --no-save --no-fund --loglevel=error --ignore-scripts patch-package
+      - npm set loglevel=error fund=false audit=false
+      - npm ci --ignore-scripts --omit=optional --omit=dev
+      - npm i --no-save --ignore-scripts patch-package
       - node node_modules/.bin/patch-package
       - RNG=node_modules/@react-native/gradle-plugin
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
@@ -68,12 +70,13 @@ MaintainerNotes: |
   picked up automatically (AutoUpdateMode: Version, UpdateCheckMode: Tags).
 
   Log size: the prebuild sets `org.gradle.logging.level=quiet`,
-  `org.gradle.warning.mode=none`, `org.gradle.console=plain` and
-  `android.javaCompile.suppressSourceTargetDeprecationWarning=true`, and runs every
-  npm command with `--loglevel=error --no-fund`. Without these, the per-CMake NDK
-  `ndk.dir` deprecation warning, npm `EBADENGINE` warnings and Java source/target 8
-  warnings flood the job log past the 4 MB cap. Build errors are still printed at
-  quiet level, so failures remain debuggable.
+  `org.gradle.warning.mode=none` and `org.gradle.console=plain`, and runs npm with
+  `loglevel=error fund=false audit=false`. Without these, the per-CMake NDK
+  `ndk.dir` deprecation warning, npm `EBADENGINE` warnings and the Java
+  source/target 8 warnings flood the job log past the 4 MB cap (quiet also hides the
+  javac warnings). Build errors are still printed at quiet level, so failures remain
+  debuggable. Prebuild lines are kept under 80 columns so `fdroid rewritemeta` does
+  not wrap them (a wrap leaves a trailing space that `fdroid lint` then flags).
 
   Resources / memory (arm64 CI runner, 1 h job timeout):
   - `reactNativeArchitectures=arm64-v8a` only. Two ABIs push react-native-svg C++
