@@ -194,6 +194,13 @@ export type PrayerAppSettings = {
   liveActivityShowSunrise: boolean;
   liveActivityShowHijri: boolean;
   liveActivityShowLocation: boolean;
+  /**
+   * Visual style for the Android Live Activity (Android 16 ProgressStyle).
+   *   'colorized'  — accent-coloured notification background (bold).
+   *   'timeOfDay'  — neutral card with a dawn→dusk→night colour ramp on the bar.
+   * Both keep the status-bar chip + the always-on ongoing notification.
+   */
+  liveActivityDesign: 'colorized' | 'timeOfDay';
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -249,4 +256,5 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   liveActivityShowSunrise: true,
   liveActivityShowHijri: true,
   liveActivityShowLocation: true,
+  liveActivityDesign: 'timeOfDay',
 };

@@ -271,6 +271,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       return if (h > 0) "${h}h ${m}m" else "${m}m"
     }
 
+    /** Live ticking countdown with seconds: "3:07:05" (≥1h) or "7:05" (<1h). */
+    private fun formatHMS(deltaMs: Long): String {
+      val totalSec = (deltaMs / 1000).coerceAtLeast(0)
+      val h = totalSec / 3600
+      val m = (totalSec % 3600) / 60
+      val s = totalSec % 60
+      return if (h > 0) String.format("%d:%02d:%02d", h, m, s)
+             else String.format("%d:%02d", m, s)
+    }
+
     /** Top-level entry point — used by both the JS bridge (as a
      *  fallback when foreground-service start is denied) and by the
      *  MihrabLiveActivityService on its periodic ticker.
@@ -374,13 +384,22 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       contentIntent: PendingIntent,
     ): Notification {
       try {
-        val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
-        val countdownSubText = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}"
+        val now = System.currentTimeMillis()
+        // When the screen is interactive the service ticks every second and
+        // sets withSeconds=true → live H:MM:SS; on AOD/screen-off it ticks each
+        // minute with withSeconds=false → H:MM (no seconds, lower power).
+        val withSeconds = p.optBoolean("withSeconds", false)
+        val remaining = nextEpochMs - now
+        val countdown = if (withSeconds) formatHMS(remaining) else formatRemaining(remaining)
+        val shortText = if (withSeconds) formatHMS(remaining) else formatRemainingShort(remaining)
+        val nextLabel = p.optString("nextLabel", "")
+        // Inline countdown next to the prayer name.
+        val inlineTitle =
+          if (nextLabel.isNotEmpty()) "$nextLabel · $countdown" else title
 
-        // Try the rich day-timeline ProgressStyle first. When available the
-        // bar itself conveys progress + each prayer marker, so the content
-        // title stays clean ("Fajr · 04:12"); the percentage is only folded
-        // into the title on the plain-bar fallback.
+        // v2.5.0 neutral card (NOT colorized — a colorized notification is not
+        // eligible for the status-bar chip). The system colour is applied to
+        // the ProgressStyle line via setColor + the day timeline below.
         val dayStyle = buildDayProgressStyle(ctx, p, accentInt)
 
         val builder = Notification.Builder(ctx, CHANNEL_ID)
@@ -392,10 +411,14 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(if (dayStyle != null) title else "$title  ·  $progressPct%")
-          .setSubText(countdownSubText)    // "↓ 1h 23m" — right of app name in header
+          .setContentTitle(if (dayStyle != null) inlineTitle else "$inlineTitle · $progressPct%")
+          .setUsesChronometer(false)
           .setShowWhen(false)
           .setContentIntent(contentIntent)
+
+        // Actual prayer time shown small/grey in the header (next to app name).
+        val nextTime = p.optString("nextTime", "")
+        if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
 
         if (dayStyle != null) {
           builder.setStyle(dayStyle)
@@ -467,8 +490,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val cycleEnd = fajrs.firstOrNull { it.first > now }?.first
         if (cycleStart == null || cycleEnd == null || cycleEnd <= cycleStart) return null
 
-        // Interior prayer instants strictly inside the cycle become points;
-        // the gaps between consecutive marks become segments.
+        // Interior prayer instants → markers; gaps between consecutive marks →
+        // segments, so spacing is proportional to the real time between prayers.
         val interior = epochs.map { it.first }
           .filter { it > cycleStart && it < cycleEnd }
           .distinct()
@@ -476,41 +499,39 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val marks = ArrayList<Long>().apply {
           add(cycleStart); addAll(interior); add(cycleEnd)
         }
-        val totalMin = ((cycleEnd - cycleStart) / 60_000L).toInt().coerceAtLeast(1)
+        // Work in SECONDS (not minutes) so segment widths are exactly
+        // proportional to the real time between prayers AND the tracker
+        // advances smoothly every second (the service re-posts each second
+        // while the screen is on) rather than jumping once a minute.
+        val totalSec = ((cycleEnd - cycleStart) / 1000L).toInt().coerceAtLeast(1)
         val pointColor = contrastColor(accentInt)
 
+        // Each inter-prayer gap is one segment, its length = the real seconds
+        // between those two prayers → distances are accurate to the actual
+        // time between prayer times. The line uses the (system) accent colour.
         val segments = ArrayList<Notification.ProgressStyle.Segment>()
         for (k in 0 until marks.size - 1) {
-          val lenMin = ((marks[k + 1] - marks[k]) / 60_000L).toInt().coerceAtLeast(1)
-          segments.add(Notification.ProgressStyle.Segment(lenMin).setColor(accentInt))
+          val lenSec = ((marks[k + 1] - marks[k]) / 1000L).toInt().coerceAtLeast(1)
+          segments.add(Notification.ProgressStyle.Segment(lenSec).setColor(accentInt))
         }
-        // The upcoming prayer's marker is drawn in the accent colour so it
-        // pops on the dim (not-yet-reached) part of the track; the other
-        // markers use the neutral contrast colour.
+        // The upcoming prayer's marker pops in the accent; the rest are neutral.
         val nextPrayerEpoch = interior.firstOrNull { it > now }
         val points = interior.map { e ->
-          val pos = ((e - cycleStart) / 60_000L).toInt().coerceIn(0, totalMin)
+          val pos = ((e - cycleStart) / 1000L).toInt().coerceIn(0, totalSec)
           val color = if (e == nextPrayerEpoch) accentInt else pointColor
           Notification.ProgressStyle.Point(pos).setColor(color)
         }
-        val progressMin = ((now - cycleStart) / 60_000L).toInt().coerceIn(0, totalMin)
+        // Current position, recomputed from the wall clock on every (re)post.
+        val progressSec = ((now - cycleStart) / 1000L).toInt().coerceIn(0, totalSec)
 
         val style = Notification.ProgressStyle()
-          .setProgress(progressMin)
+          .setProgress(progressSec)
           .setProgressSegments(segments)
           .setProgressPoints(points)
         runCatching {
-          // Tracker dot at the current moment; sun→moon icons bookend the day
-          // cycle (dawn at the start, night at the end) for an at-a-glance read.
-          style.setProgressTrackerIcon(
-            Icon.createWithResource(ctx, R.drawable.ic_la_tracker),
-          )
-          style.setProgressStartIcon(
-            Icon.createWithResource(ctx, R.drawable.ic_la_sunrise),
-          )
-          style.setProgressEndIcon(
-            Icon.createWithResource(ctx, R.drawable.ic_la_moon),
-          )
+          style.setProgressTrackerIcon(Icon.createWithResource(ctx, R.drawable.ic_la_tracker))
+          style.setProgressStartIcon(Icon.createWithResource(ctx, R.drawable.ic_la_sunrise))
+          style.setProgressEndIcon(Icon.createWithResource(ctx, R.drawable.ic_la_moon))
         }
         style
       } catch (t: Throwable) {

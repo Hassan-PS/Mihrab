@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.6.0] — 2026-06-15
+
+### Changed
+- **Android Live Activity — live ticking countdown + true-to-time day timeline**: The notification title now shows the next prayer with an inline countdown that ticks every second while the screen is on (`Asr · 2:18:42`) and drops to `H:MM` on the always-on display to save power; the actual prayer time sits in the subtext. The day-timeline segments are now sized from the exact number of seconds between each pair of prayers (previously minute-resolution), including the overnight Isha→Fajr stretch, and the tracker advances continuously, so the spacing stays proportional to the real time of day. The progress line uses the device's system (Material You) colour when system colours are enabled in the app, otherwise the default system tint. The status-bar chip now also shows seconds.
+
 ## [2.5.0] — 2026-06-15
 
 ### Added

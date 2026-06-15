@@ -23,6 +23,20 @@ import {
   syncLiveActivity,
   resolveAccentHex,
 } from '../liveActivity/syncLiveActivity';
+import { getResolvedAccentHex } from '../native/SystemTheme';
+
+/**
+ * Colour for the Android Live Activity notification. Uses the device's system
+ * (Material You) colour so the colorized card reads as part of the OS rather
+ * than the in-app brand accent; falls back to the brand accent off Android /
+ * when the system colour can't be resolved.
+ */
+function liveActivityColor(accentId: string, customHex: string): string {
+  if (Platform.OS === 'android') {
+    return getResolvedAccentHex() ?? resolveAccentHex(accentId as never, customHex);
+  }
+  return resolveAccentHex(accentId as never, customHex);
+}
 import {
   getEffectiveDataProvider,
   resolveCoordsForProvider,
@@ -193,7 +207,7 @@ export function HomeScreen() {
           locationName: locationLabel,
           coords: { lat: state.latitude, lng: state.longitude },
           seasonal: { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
-          accentHex: resolveAccentHex(
+          accentHex: liveActivityColor(
             settings.appAccentId,
             settings.appAccentCustomHex,
           ),
@@ -203,6 +217,7 @@ export function HomeScreen() {
             Platform.OS === 'ios' &&
             settings.appearance === 'system' &&
             settings.useSystemDynamicTheme,
+          design: settings.liveActivityDesign,
         }).catch(e => console.warn('syncLiveActivity (focus):', e));
       }
 
@@ -238,6 +253,7 @@ export function HomeScreen() {
       settings.appAccentCustomHex,
       settings.appearance,
       settings.useSystemDynamicTheme,
+      settings.liveActivityDesign,
     ]),
   );
 
@@ -292,7 +308,7 @@ export function HomeScreen() {
         ramadan: seasonal.ramadan,
         eid: seasonal.eid,
       },
-      accentHex: resolveAccentHex(
+      accentHex: liveActivityColor(
         settings.appAccentId,
         settings.appAccentCustomHex,
       ),
@@ -301,6 +317,7 @@ export function HomeScreen() {
         Platform.OS === 'ios' &&
         settings.appearance === 'system' &&
         settings.useSystemDynamicTheme,
+      design: settings.liveActivityDesign,
     }).catch(e => console.warn('syncLiveActivity (effect):', e));
   }, [
     hydrated,
@@ -315,6 +332,7 @@ export function HomeScreen() {
     settings.appAccentCustomHex,
     settings.appearance,
     settings.useSystemDynamicTheme,
+    settings.liveActivityDesign,
   ]);
 
   // Persist last-fetched coords so MonthScreen and offline use can fall back to them.

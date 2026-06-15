@@ -198,6 +198,8 @@ async function syncLiveActivityImpl(args: {
    *  Live Activity should ignore the brand accent and use the dynamic iOS
    *  system tint so it matches the in-app theme and adapts to light/dark. */
   systemTinted?: boolean;
+  /** Android only: which enhanced Live Activity visual style to render. */
+  design?: 'colorized' | 'timeOfDay';
 }): Promise<void> {
   const now = args.now ?? new Date();
 
@@ -259,6 +261,7 @@ async function syncLiveActivityImpl(args: {
       hijriLabel: '',
       locationLabel: '',
       accentHex,
+      design: args.design ?? 'timeOfDay',
       compactMode: true,
       showSunrise: true,
       showHijri: false,

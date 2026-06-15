@@ -72,6 +72,8 @@ export type LiveActivityRenderInput = {
   locationLabel: string;
   /** App accent color hex, e.g. "#6BC98A". */
   accentHex: string;
+  /** Enhanced Live Activity visual style (Android 16 ProgressStyle). */
+  design?: 'colorized' | 'timeOfDay';
   /** Display knobs from settings. */
   compactMode: boolean;
   showSunrise: boolean;
@@ -360,6 +362,7 @@ export async function startOrUpdateLiveActivity(
       hijriLabel: input.hijriLabel,
       locationLabel: input.locationLabel,
       accentHex: input.accentHex,
+      design: input.design ?? 'timeOfDay',
       compactMode: input.compactMode,
       showSunrise: input.showSunrise,
       showHijri: input.showHijri,

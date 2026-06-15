@@ -4,13 +4,16 @@ import android.app.AlarmManager
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import org.json.JSONObject
@@ -69,6 +72,55 @@ class MihrabLiveActivityService : Service() {
    *  notification from this every minute. */
   @Volatile private var lastPayload: String? = null
 
+  /** True while the screen is interactive. Drives the tick cadence (1s vs
+   *  60s) and the H:MM:SS-vs-H:MM countdown format: live seconds when the
+   *  user is looking, no seconds on AOD / screen-off (saves power). */
+  @Volatile private var screenOn = true
+
+  /** Next-prayer epoch the deep-sleep wake alarm is currently set for. Lets
+   *  the per-second ticker skip re-arming the exact alarm every tick — it only
+   *  reschedules when the upcoming prayer actually changes. */
+  @Volatile private var lastAlarmEpoch = 0L
+
+  /** Flips [screenOn] and re-posts immediately so the countdown switches
+   *  between the per-second and per-minute formats the instant the screen
+   *  turns on or off. */
+  private val screenReceiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+      when (intent?.action) {
+        Intent.ACTION_SCREEN_ON, Intent.ACTION_USER_PRESENT -> screenOn = true
+        Intent.ACTION_SCREEN_OFF -> screenOn = false
+        else -> return
+      }
+      repostNow()
+      scheduleTicker()
+    }
+  }
+
+  override fun onCreate() {
+    super.onCreate()
+    screenOn = (getSystemService(Context.POWER_SERVICE) as? PowerManager)?.isInteractive ?: true
+    runCatching {
+      registerReceiver(
+        screenReceiver,
+        IntentFilter().apply {
+          addAction(Intent.ACTION_SCREEN_ON)
+          addAction(Intent.ACTION_SCREEN_OFF)
+          addAction(Intent.ACTION_USER_PRESENT)
+        },
+      )
+    }
+  }
+
+  /** Rebuild + re-post the rich notification from the cached payload now. */
+  private fun repostNow() {
+    val payload = lastPayload ?: return
+    runCatching {
+      NotificationManagerCompat.from(this)
+        .notify(MihrabLiveActivityModule.NOTIF_ID, build(payload))
+    }
+  }
+
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     // Payload source: a fresh push from JS (EXTRA_PAYLOAD), or — when the OS or
     // our own wake-alarm restarted us with no extra — the persisted last
@@ -90,11 +142,9 @@ class MihrabLiveActivityService : Service() {
       MihrabLiveActivityModule.ensureChannelExists(this)
       MihrabLiveActivityModule.ensureFgsChannelExists(this)
 
-      // Single-notification architecture: the rich notification IS the
-      // FGS notification. One notification keeps the process alive AND
-      // shows the prayer countdown — no hidden placeholder in the silent
-      // section. The trade-off (no Android 16 chip) is acceptable; the
-      // cleaner UX (single notification) is more important.
+      // Single-notification architecture (v2.5.0): the rich ProgressStyle
+      // notification IS the foreground-service notification. On this platform
+      // it is still eligible for the Android 16 status-bar Live Update chip.
       try {
         val richNotif = build(payload)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -106,7 +156,7 @@ class MihrabLiveActivityService : Service() {
         } else {
           startForeground(MihrabLiveActivityModule.NOTIF_ID, richNotif)
         }
-        Log.i(TAG, "startForeground posted single rich notification id=${MihrabLiveActivityModule.NOTIF_ID}")
+        Log.i(TAG, "startForeground posted rich notification id=${MihrabLiveActivityModule.NOTIF_ID}")
       } catch (t: Throwable) {
         Log.w(TAG, "startForeground failed", t)
       }
@@ -154,20 +204,23 @@ class MihrabLiveActivityService : Service() {
           val notif = build(currentPayload)
           NotificationManagerCompat.from(this)
             .notify(MihrabLiveActivityModule.NOTIF_ID, notif)
-          // Keep the wake alarm aligned with the (possibly advanced) next
-          // prayer so deep-sleep wake-ups land on the right boundary.
-          scheduleWakeAlarm(currentPayload)
+          // Keep the wake alarm aligned with the next prayer, but only re-arm
+          // it when that prayer actually changes (not every 1s screen-on tick).
+          val nextEpoch = JSONObject(currentPayload).optLong("nextEpochMs", 0L)
+          if (nextEpoch != lastAlarmEpoch) {
+            lastAlarmEpoch = nextEpoch
+            scheduleWakeAlarm(currentPayload)
+          }
         } catch (t: Throwable) {
           Log.w(TAG, "ticker re-post failed", t)
         }
       }
-      // Self-rescheduling tick — every 60 seconds. ProgressBar's max is
-      // 1440 (minutes per day), so each tick advances the bar by exactly
-      // one unit.
+      // Self-rescheduling tick — 1s while the screen is on (live seconds),
+      // 60s otherwise.
       val next = ticker
-      if (next != null) handler.postDelayed(next, TICK_MS)
+      if (next != null) handler.postDelayed(next, tickInterval())
     }
-    handler.postDelayed(ticker!!, TICK_MS)
+    handler.postDelayed(ticker!!, tickInterval())
   }
 
   /**
@@ -394,8 +447,16 @@ class MihrabLiveActivityService : Service() {
    *  static builder so the same code path is used as when JS posts
    *  the initial notification. */
   private fun build(payload: String): Notification {
-    return MihrabLiveActivityModule.buildNotificationFromPayload(this, JSONObject(payload))
+    val o = JSONObject(payload)
+    // Live seconds only while the screen is on (the per-second ticker keeps
+    // them current); H:MM otherwise.
+    o.put("withSeconds", screenOn)
+    return MihrabLiveActivityModule.buildNotificationFromPayload(this, o)
   }
+
+  /** Tick cadence: every second while the screen is interactive (so the
+   *  H:MM:SS countdown advances), every minute otherwise. */
+  private fun tickInterval(): Long = if (screenOn) TICK_MS_SCREEN_ON else TICK_MS
 
   /**
    * Schedule an exact, wake-the-device alarm at the next prayer instant. The
@@ -449,6 +510,7 @@ class MihrabLiveActivityService : Service() {
 
   override fun onDestroy() {
     super.onDestroy()
+    runCatching { unregisterReceiver(screenReceiver) }
     cancelWakeAlarm()
     ticker?.let { handler.removeCallbacks(it) }
     ticker = null
@@ -474,9 +536,10 @@ class MihrabLiveActivityService : Service() {
     /** Request code for the deep-sleep wake alarm (distinct from the widget's
      *  alarm request codes in PrayerWidgetProvider). */
     const val ALARM_REQUEST_CODE = 0xA1B4
-    /** 60-second tick. Battery-friendly; the chronometer text inside
-     *  the notification continues to tick every second on its own via
-     *  the platform Chronometer view. */
+    /** Tick cadence while the screen is off / AOD — battery-friendly. */
     const val TICK_MS = 60_000L
+    /** Tick cadence while the screen is interactive — drives the live
+     *  H:MM:SS countdown (re-posts the notification once per second). */
+    const val TICK_MS_SCREEN_ON = 1_000L
   }
 }
