@@ -32,7 +32,8 @@ export type WidgetDay = {
   dayLabel: string;
   /** Five salāh rows: Fajr, Dhuhr, Asr, Maghrib, Isha. */
   rows: WidgetPrayerRow[];
-  /** Sunrise rendered separately (slot 1) — not a salāh. */
+  /** Sunrise rendered separately (slot 1) — not a salāh. Omitted when the
+   *  user has turned Sunrise off. */
   sunriseRow?: WidgetPrayerRow;
 };
 
@@ -53,7 +54,8 @@ export type WidgetPrayerPayload = {
   rows: WidgetPrayerRow[];
   /**
    * Sunrise row rendered at display slot 1 (between Fajr and Dhuhr).
-   * Kept separate from salāh rows because Sunrise is not a prayer.
+   * Kept separate from salāh rows because Sunrise is not a prayer. Omitted
+   * when the user has turned Sunrise off (the kill-switch).
    */
   sunriseRow?: WidgetPrayerRow;
   /** Row `key` to highlight as the next salāh (matches WIDGET_ROW_KEYS or 'Sunrise'). */
@@ -110,29 +112,29 @@ function localDateKey(d: Date): string {
   return `${y}-${m}-${dd}`;
 }
 
-/** Build the five salāh rows + the Sunrise row for one day's timings. */
-function buildDayRows(timings: TimingsMap): {
-  rows: WidgetPrayerRow[];
-  sunriseRow: WidgetPrayerRow;
-} {
-  const rows: WidgetPrayerRow[] = WIDGET_ROW_KEYS.map((key: WidgetPrayerKey) => {
-    const raw = timings[key];
-    return {
-      key,
-      time: raw ? formatDisplayTime(raw) : '—',
-      abbr: i18n.t(`prayer.${key}_abbr`, {
-        defaultValue: i18n.t(`prayer.${key}`),
-      }),
-    };
-  });
-  const sunriseRaw = timings['Sunrise'];
-  const sunriseRow: WidgetPrayerRow = {
-    key: 'Sunrise',
-    time: sunriseRaw ? formatDisplayTime(sunriseRaw) : '—',
-    abbr: i18n.t('prayer.Sunrise_abbr', {
-      defaultValue: i18n.t('prayer.Sunrise'),
+/** Build a single labelled row for a prayer/event key. */
+function buildRow(key: string, timings: TimingsMap): WidgetPrayerRow {
+  const raw = timings[key];
+  return {
+    key,
+    time: raw ? formatDisplayTime(raw) : '—',
+    abbr: i18n.t(`prayer.${key}_abbr`, {
+      defaultValue: i18n.t(`prayer.${key}`),
     }),
   };
+}
+
+/**
+ * Build the five salāh rows and the optional Sunrise row for one day's timings.
+ * `sunriseRow` is undefined when Sunrise has been turned off (its key was
+ * filtered out of `timings` upstream).
+ */
+function buildDayRows(timings: TimingsMap): {
+  rows: WidgetPrayerRow[];
+  sunriseRow?: WidgetPrayerRow;
+} {
+  const rows = WIDGET_ROW_KEYS.map(key => buildRow(key, timings));
+  const sunriseRow = timings['Sunrise'] ? buildRow('Sunrise', timings) : undefined;
   return { rows, sunriseRow };
 }
 
@@ -154,7 +156,7 @@ function buildDays(week: TimingsMap[], now: Date): WidgetDay[] {
         day: 'numeric',
       }),
       rows,
-      sunriseRow,
+      ...(sunriseRow ? { sunriseRow } : {}),
     };
   });
 }
@@ -221,10 +223,9 @@ export function buildWidgetPayload(
 
   // nextKey can be a salāh key OR 'Sunrise' (when sunrise is the next upcoming event)
   const nextKey =
-    next && (
-      (WIDGET_ROW_KEYS as readonly string[]).includes(next.name) ||
-      next.name === 'Sunrise'
-    )
+    next &&
+    ((WIDGET_ROW_KEYS as readonly string[]).includes(next.name) ||
+      next.name === 'Sunrise')
       ? next.name
       : null;
 
@@ -246,7 +247,7 @@ export function buildWidgetPayload(
   return {
     dayLabel,
     rows,
-    sunriseRow,
+    ...(sunriseRow ? { sunriseRow } : {}),
     nextKey,
     nextPrayerName: next ? i18n.t(`prayer.${next.name}`) : undefined,
     nextPrayerTime: next ? formatLocalTime(next.at) : undefined,

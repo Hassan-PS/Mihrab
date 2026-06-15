@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "يُستخدم في جميع أنحاء التطبيق وفي أداة الشاشة الرئيسية.",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "أوقات إضافية",
+    "sunriseTime": "الشروق",
+    "sunriseTimeHelp": "إظهار الشروق في جدول الصلاة والإشعارات والأداة والنشاط المباشر.",
+    "islamicMidnight": "منتصف الليل",
+    "islamicMidnightHelp": "منتصف الليل بين المغرب والفجر. معطّل افتراضيًا.",
+    "lastThird": "الثلث الأخير من الليل",
+    "lastThirdHelp": "بداية الثلث الأخير من الليل — وقت قيام الليل. معطّل افتراضيًا."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "ظهر",
     "Asr_abbr": "عصر",
     "Maghrib_abbr": "مغرب",
-    "Isha_abbr": "عشاء"
+    "Isha_abbr": "عشاء",
+    "Midnight": "منتصف الليل",
+    "Midnight_abbr": "منتصف",
+    "Lastthird": "الثلث الأخير",
+    "Lastthird_abbr": "قيام"
   },
   "placeSearch": {
     "label": "ابحث عن مدينة أو عنوان",
@@ -863,7 +874,6 @@
     "typeVoluntary": "تطوعي / سنة"
   },
   "methods": {
-    "auto": "تلقائي (حسب الموقع)",
     "0": "الشيعة — الاثنا عشرية",
     "1": "جامعة العلوم الإسلامية، كراتشي",
     "2": "المجمع الإسلامي لأمريكا الشمالية (ISNA)",
@@ -878,7 +888,8 @@
     "12": "فرنسا",
     "13": "تركيا",
     "14": "روسيا",
-    "15": "لجنة رؤية الهلال العالمية"
+    "15": "لجنة رؤية الهلال العالمية",
+    "auto": "تلقائي (حسب الموقع)"
   },
   "attributions": {
     "quranText": "النص العثماني للقرآن",

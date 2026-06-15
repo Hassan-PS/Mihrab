@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Uygulama genelinde ve ana ekran widget’ında kullanılır.",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "Ek vakitler",
+    "sunriseTime": "Gündoğumu",
+    "sunriseTimeHelp": "Gündoğumunu namaz tablosunda, bildirimlerde, widget'ta ve Live Activity'de göster.",
+    "islamicMidnight": "İslami gece yarısı",
+    "islamicMidnightHelp": "Akşam (Maghrib) ile imsak (Fajr) arasındaki gecenin orta noktası. Varsayılan olarak kapalı.",
+    "lastThird": "Gecenin son üçte biri",
+    "lastThirdHelp": "Gecenin son üçte birinin başlangıcı — Kıyamü'l-Leyl vakti. Varsayılan olarak kapalı."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "Öğle",
     "Asr_abbr": "İknd",
     "Maghrib_abbr": "Akşam",
-    "Isha_abbr": "Yatsı"
+    "Isha_abbr": "Yatsı",
+    "Midnight": "Gece yarısı",
+    "Midnight_abbr": "Yarı",
+    "Lastthird": "Son üçte bir",
+    "Lastthird_abbr": "Kıyam"
   },
   "placeSearch": {
     "label": "Şehir veya adres arayın",
@@ -863,7 +874,6 @@
     "typeVoluntary": "Nafile / Sünnet"
   },
   "methods": {
-    "auto": "Otomatik (konuma göre)",
     "0": "Şii — İsnâaşeriyye",
     "1": "İslam Bilimleri Üniversitesi, Karaçi",
     "2": "Kuzey Amerika İslam Cemiyeti (ISNA)",
@@ -878,7 +888,8 @@
     "12": "Fransa",
     "13": "Türkiye",
     "14": "Rusya",
-    "15": "Dünya Hilal Gözlem Komitesi"
+    "15": "Dünya Hilal Gözlem Komitesi",
+    "auto": "Otomatik (konuma göre)"
   },
   "attributions": {
     "quranText": "Kur’an — Osmani metni",

@@ -201,6 +201,21 @@ export type PrayerAppSettings = {
    * Both keep the status-bar chip + the always-on ongoing notification.
    */
   liveActivityDesign: 'colorized' | 'timeOfDay';
+  /**
+   * Non-prayer time toggles. Each gates one optional entry across the prayer
+   * table, notifications, home-screen widget, and Live Activity. All three use
+   * the default notification sound (never the adhan).
+   *
+   *  - `sunriseEnabled` — kill-switch for Sunrise (defaults ON: existing
+   *    behaviour). When off, Sunrise disappears everywhere.
+   *  - `islamicMidnightEnabled` — Islamic Midnight, the midpoint of the night
+   *    (Maghrib → Fajr). Defaults OFF.
+   *  - `lastThirdEnabled` — start of the last third of the night (Qiyām
+   *    al-Layl). Defaults OFF.
+   */
+  sunriseEnabled: boolean;
+  islamicMidnightEnabled: boolean;
+  lastThirdEnabled: boolean;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -257,4 +272,9 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   liveActivityShowHijri: true,
   liveActivityShowLocation: true,
   liveActivityDesign: 'timeOfDay',
+  // Sunrise on by default (unchanged behaviour); the two night times off by
+  // default so existing users see no new rows/notifications until they opt in.
+  sunriseEnabled: true,
+  islamicMidnightEnabled: false,
+  lastThirdEnabled: false,
 };

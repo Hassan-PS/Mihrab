@@ -45,6 +45,7 @@ import {
   addDays,
   getNextPrayerDisplay,
 } from '../utils/prayerTimes';
+import { filterOptionalTimes } from '../utils/nightTimes';
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
 import { DayCarousel } from './home/DayCarousel';
@@ -100,6 +101,48 @@ export function HomeScreen() {
     null,
   );
 
+  // Reactive gating of the optional non-prayer entries, so flipping a toggle
+  // updates the surfaces immediately without a re-fetch. usePrayerDay always
+  // derives Sunrise + the two night times into the raw `week`; here we strip
+  // per-surface:
+  //   • table / notifications → respect all three toggles (Sunrise + the two
+  //     night times) — this is where Islamic Midnight / Last Third appear.
+  //   • Live Activity → Sunrise kill-switch only; the night times are never
+  //     shown there (user scope).
+  //   • home-screen widget → unchanged from before: Sunrise always shown, the
+  //     night times never shown.
+  const view = useMemo(() => {
+    if (state.phase !== 'ready') return null;
+    const { today, tomorrow, week } = state;
+    const mk = (tg: {
+      Sunrise: boolean;
+      Midnight: boolean;
+      Lastthird: boolean;
+    }) => ({
+      today: filterOptionalTimes(today, tg),
+      tomorrow: tomorrow ? filterOptionalTimes(tomorrow, tg) : undefined,
+      week: week.map(d => filterOptionalTimes(d, tg)),
+    });
+    return {
+      table: mk({
+        Sunrise: settings.sunriseEnabled,
+        Midnight: settings.islamicMidnightEnabled,
+        Lastthird: settings.lastThirdEnabled,
+      }),
+      la: mk({
+        Sunrise: settings.sunriseEnabled,
+        Midnight: false,
+        Lastthird: false,
+      }),
+      widget: mk({ Sunrise: true, Midnight: false, Lastthird: false }),
+    };
+  }, [
+    state,
+    settings.sunriseEnabled,
+    settings.islamicMidnightEnabled,
+    settings.lastThirdEnabled,
+  ]);
+
   const loadedDateKeyRef = useRef<string | null>(null);
   const loadedTzOffsetRef = useRef<number | null>(null);
 
@@ -129,7 +172,9 @@ export function HomeScreen() {
         retry();
         return;
       }
-      const next = getNextPrayerDisplay(state.today, state.tomorrow, current);
+      const next = view
+        ? getNextPrayerDisplay(view.table.today, view.table.tomorrow, current)
+        : null;
       setNextInfo(prev => {
         if (
           prev?.name === next?.name &&
@@ -144,16 +189,16 @@ export function HomeScreen() {
     tick();
     const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
-  }, [state, retry]);
+  }, [state, retry, view]);
 
   useEffect(() => {
-    if (!hydrated || state.phase !== 'ready') return;
+    if (!hydrated || state.phase !== 'ready' || !view) return;
     syncPrayerNotifications({
       enabled: settings.notificationsEnabled,
       prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
       notificationSound: settings.notificationSound,
-      today: state.today,
-      tomorrow: state.tomorrow,
+      today: view.table.today,
+      tomorrow: view.table.tomorrow,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
   }, [
@@ -163,6 +208,7 @@ export function HomeScreen() {
     settings.notificationSound,
     settings.journalNotificationActionsEnabled,
     state,
+    view,
   ]);
 
   const locationLabel = useMemo(() => {
@@ -177,32 +223,36 @@ export function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!hydrated || state.phase !== 'ready') return;
+      if (!hydrated || state.phase !== 'ready' || !view) return;
       syncPrayerNotifications({
         enabled: settings.notificationsEnabled,
         prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
         notificationSound: settings.notificationSound,
-        today: state.today,
-        tomorrow: state.tomorrow,
+        today: view.table.today,
+        tomorrow: view.table.tomorrow,
       }).catch(e => console.warn('syncPrayerNotifications (focus):', e));
       {
-        const t = computeSeasonalTreatment(state.today, state.tomorrow, new Date());
+        const t = computeSeasonalTreatment(
+          view.table.today,
+          view.table.tomorrow,
+          new Date(),
+        );
         syncPrayerWidget(
-          state.today,
-          state.tomorrow,
+          view.widget.today,
+          view.widget.tomorrow,
           new Date(),
           locationLabel,
           { lat: state.latitude, lng: state.longitude },
           { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
-          state.week,
+          view.widget.week,
         ).catch(e => console.warn('syncPrayerWidget (focus):', e));
         // Live activity — task #128. Same cadence as the widget so the
         // notification stays in sync with what's on the home screen.
         syncLiveActivity({
           options: { enabled: settings.liveActivityEnabled },
-          today: state.today,
-          tomorrow: state.tomorrow,
-          week: state.week,
+          today: view.la.today,
+          tomorrow: view.la.tomorrow,
+          week: view.la.week,
           now: new Date(),
           locationName: locationLabel,
           coords: { lat: state.latitude, lng: state.longitude },
@@ -247,6 +297,7 @@ export function HomeScreen() {
       settings.prePrayerReminderMinutes,
       settings.notificationSound,
       state,
+      view,
       locationLabel,
       settings.liveActivityEnabled,
       settings.appAccentId,
@@ -261,24 +312,25 @@ export function HomeScreen() {
   // include `now` in the deps any more — the widget doesn't need a tick-by-tick
   // refresh; it updates when the underlying data does.
   useEffect(() => {
-    if (!hydrated || state.phase !== 'ready') return;
+    if (!hydrated || state.phase !== 'ready' || !view) return;
     const seasonal = computeSeasonalTreatment(
-      state.today,
-      state.tomorrow,
+      view.table.today,
+      view.table.tomorrow,
       new Date(),
     );
     syncPrayerWidget(
-      state.today,
-      state.tomorrow,
+      view.widget.today,
+      view.widget.tomorrow,
       new Date(),
       locationLabel,
       { lat: state.latitude, lng: state.longitude },
       { jumuah: seasonal.jumuah, ramadan: seasonal.ramadan, eid: seasonal.eid },
-      state.week,
+      view.widget.week,
     ).catch(e => console.warn('syncPrayerWidget (effect):', e));
   }, [
     hydrated,
     state,
+    view,
     locationLabel,
   ]);
 
@@ -289,17 +341,17 @@ export function HomeScreen() {
   // Dhuhr, this effect re-fires with `now: new Date()`, so syncLiveActivity
   // recomputes the correct next prayer and pushes updated content.
   useEffect(() => {
-    if (!hydrated || state.phase !== 'ready') return;
+    if (!hydrated || state.phase !== 'ready' || !view) return;
     const seasonal = computeSeasonalTreatment(
-      state.today,
-      state.tomorrow,
+      view.table.today,
+      view.table.tomorrow,
       new Date(),
     );
     syncLiveActivity({
       options: { enabled: settings.liveActivityEnabled },
-      today: state.today,
-      tomorrow: state.tomorrow,
-      week: state.week,
+      today: view.la.today,
+      tomorrow: view.la.tomorrow,
+      week: view.la.week,
       now: new Date(),
       locationName: locationLabel,
       coords: { lat: state.latitude, lng: state.longitude },
@@ -322,6 +374,7 @@ export function HomeScreen() {
   }, [
     hydrated,
     state,
+    view,
     // nextInfo is the computed "which prayer is next right now" value.
     // The 30-second watchdog updates it whenever a prayer passes, triggering
     // this effect to re-sync the Live Activity with the new next prayer.
@@ -427,7 +480,7 @@ export function HomeScreen() {
     retry,
   });
   if (nonReadyEl) return nonReadyEl;
-  if (state.phase !== 'ready') return null; // narrowing for TS
+  if (state.phase !== 'ready' || !view) return null; // narrowing for TS
 
   // ── Ready layout ──────────────────────────────────────────────────────────
   const carouselResetKey = `${state.latitude}-${state.longitude}`;
@@ -451,7 +504,7 @@ export function HomeScreen() {
       <NextPrayerCard nextInfo={nextInfo} />
 
       <DayCarousel
-        week={state.week}
+        week={view.table.week}
         cardWidth={cardWidth}
         nextPrayerName={nextInfo?.name ?? null}
         resetKey={carouselResetKey}

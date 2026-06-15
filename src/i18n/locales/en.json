@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Used across the app and the home-screen widget.",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "Additional times",
+    "sunriseTime": "Sunrise",
+    "sunriseTimeHelp": "Show sunrise in the prayer table, notifications, widget, and Live Activity.",
+    "islamicMidnight": "Islamic Midnight",
+    "islamicMidnightHelp": "The midpoint of the night between Maghrib and Fajr. Off by default.",
+    "lastThird": "Last Third of the Night",
+    "lastThirdHelp": "The start of the last third of the night — the time for Qiyam al-Layl. Off by default."
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "Dhuhr",
     "Asr_abbr": "Asr",
     "Maghrib_abbr": "Magh",
-    "Isha_abbr": "Isha"
+    "Isha_abbr": "Isha",
+    "Midnight": "Islamic Midnight",
+    "Midnight_abbr": "Mid",
+    "Lastthird": "Last Third",
+    "Lastthird_abbr": "Qiyam"
   },
   "placeSearch": {
     "label": "Search city or address",
@@ -863,7 +874,6 @@
     "typeVoluntary": "Voluntary / Sunnah"
   },
   "methods": {
-    "auto": "Automatic (by location)",
     "0": "Shia — Ithna Ashari",
     "1": "University of Islamic Sciences, Karachi",
     "2": "Islamic Society of North America (ISNA)",
@@ -878,7 +888,8 @@
     "12": "France",
     "13": "Turkey",
     "14": "Russia",
-    "15": "Moonsighting Committee Worldwide"
+    "15": "Moonsighting Committee Worldwide",
+    "auto": "Automatic (by location)"
   },
   "attributions": {
     "quranText": "Quran Uthmani text",

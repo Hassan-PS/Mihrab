@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Används i hela appen och i hemskärmens widget.",
-    "widgetColorFollowsAccentHelp": "Widgeten använder samma accentfärg som appen. Välj den under Utseende."
+    "widgetColorFollowsAccentHelp": "Widgeten använder samma accentfärg som appen. Välj den under Utseende.",
+    "additionalTimes": "Ytterligare tider",
+    "sunriseTime": "Soluppgång",
+    "sunriseTimeHelp": "Visa soluppgång i bönetabellen, aviseringar, widgeten och Live Activity.",
+    "islamicMidnight": "Islamisk midnatt",
+    "islamicMidnightHelp": "Mittpunkten av natten mellan Maghrib och Fajr. Av som standard.",
+    "lastThird": "Nattens sista tredjedel",
+    "lastThirdHelp": "Början på nattens sista tredjedel — tiden för Qiyam al-Layl. Av som standard."
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "Dhuhr",
     "Asr_abbr": "Asr",
     "Maghrib_abbr": "Magh",
-    "Isha_abbr": "Isha"
+    "Isha_abbr": "Isha",
+    "Midnight": "Islamisk midnatt",
+    "Midnight_abbr": "Mitt",
+    "Lastthird": "Sista tredjedelen",
+    "Lastthird_abbr": "Qiyam"
   },
   "placeSearch": {
     "label": "Sök stad eller adress",
@@ -863,7 +874,6 @@
     "typeVoluntary": "Frivillig / Sunnah"
   },
   "methods": {
-    "auto": "Automatiskt (efter plats)",
     "0": "Shia — Ithna Ashari",
     "1": "University of Islamic Sciences, Karachi",
     "2": "Islamic Society of North America (ISNA)",
@@ -878,7 +888,8 @@
     "12": "Frankrike",
     "13": "Turkiet",
     "14": "Ryssland",
-    "15": "Moonsighting Committee Worldwide"
+    "15": "Moonsighting Committee Worldwide",
+    "auto": "Automatiskt (efter plats)"
   },
   "attributions": {
     "quranText": "Koranen — Uthmani-text",

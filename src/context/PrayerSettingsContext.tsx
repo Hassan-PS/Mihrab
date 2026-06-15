@@ -66,7 +66,12 @@ export type LocationSlice = Pick<
 
 export type NotificationsSlice = Pick<
   PrayerAppSettings,
-  'notificationsEnabled' | 'prePrayerReminderMinutes' | 'notificationSound'
+  | 'notificationsEnabled'
+  | 'prePrayerReminderMinutes'
+  | 'notificationSound'
+  | 'sunriseEnabled'
+  | 'islamicMidnightEnabled'
+  | 'lastThirdEnabled'
 >;
 
 export type DataSourceSlice = Pick<
@@ -209,11 +214,17 @@ export function PrayerSettingsProvider({
       notificationsEnabled: settings.notificationsEnabled,
       prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
       notificationSound: settings.notificationSound,
+      sunriseEnabled: settings.sunriseEnabled,
+      islamicMidnightEnabled: settings.islamicMidnightEnabled,
+      lastThirdEnabled: settings.lastThirdEnabled,
     }),
     [
       settings.notificationsEnabled,
       settings.prePrayerReminderMinutes,
       settings.notificationSound,
+      settings.sunriseEnabled,
+      settings.islamicMidnightEnabled,
+      settings.lastThirdEnabled,
     ],
   );
 

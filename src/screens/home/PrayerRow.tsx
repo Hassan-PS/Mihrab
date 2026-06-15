@@ -20,7 +20,11 @@ type PrayerRowProps = {
   prayerKey: string;
   rawTime: string;
   isNext: boolean;
-  isSunrise: boolean;
+  /**
+   * Non-salāh row (Sunrise, Islamic Midnight, Last Third) — rendered muted +
+   * italic to read as a quieter, secondary entry beside the five daily prayers.
+   */
+  isSecondary: boolean;
   isLast: boolean;
 };
 
@@ -28,7 +32,7 @@ function PrayerRowImpl({
   prayerKey,
   rawTime,
   isNext,
-  isSunrise,
+  isSecondary,
   isLast,
 }: PrayerRowProps) {
   const { t } = useTranslation();
@@ -50,8 +54,8 @@ function PrayerRowImpl({
         style={[
           styles.name,
           {
-            color: isSunrise && !isNext ? palette.muted : palette.text,
-            fontStyle: isSunrise ? 'italic' : 'normal',
+            color: isSecondary && !isNext ? palette.muted : palette.text,
+            fontStyle: isSecondary ? 'italic' : 'normal',
             fontWeight: isNext ? '600' : '500',
           },
         ]}
@@ -65,7 +69,7 @@ function PrayerRowImpl({
           {
             color: isNext
               ? palette.accent
-              : isSunrise
+              : isSecondary
               ? palette.muted
               : palette.text,
             fontWeight: isNext ? '700' : '500',

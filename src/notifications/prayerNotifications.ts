@@ -18,10 +18,14 @@ import {
   ADHAN_CONTROLS_CATEGORY_ID,
 } from './adhanSafetyControls';
 import type { TimingsMap } from '../types/prayer';
+import { OPTIONAL_TIME_KEYS } from '../types/prayer';
 import {
   buildPrePrayerReminderEvents,
   buildUpcomingSalahEvents,
 } from '../utils/prayerTimes';
+
+/** Sunrise + the two night times are not salāh: default sound, no adhan, no journal action. */
+const NON_PRAYER_EVENTS = new Set<string>(OPTIONAL_TIME_KEYS);
 
 /** Prefix used for all prayer-time and pre-prayer trigger notification IDs.
  *  Used to identify "ours" vs other notifications (e.g. the adhan preview)
@@ -285,12 +289,12 @@ export async function syncPrayerNotifications(params: {
 
   for (const e of salahEvents) {
     const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`;
-    // Sunrise marks the end of the Fajr window — it is NOT a prayer, so it
-    // must never play the adhan even when one is selected for the five
-    // daily prayers. Fall back to the plain default notification sound for
-    // it; every other event uses the user's chosen adhan/sound.
-    const isSunrise = e.name === 'Sunrise';
-    const eventSound = isSunrise ? reminderSound : prayerTimeSound;
+    // Sunrise, Islamic Midnight and the Last Third are NOT prayers, so they
+    // must never play the adhan even when one is selected for the five daily
+    // prayers. They fall back to the plain default notification sound; every
+    // actual prayer uses the user's chosen adhan/sound.
+    const isNonPrayer = NON_PRAYER_EVENTS.has(e.name);
+    const eventSound = isNonPrayer ? reminderSound : prayerTimeSound;
     const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
     const atPrayerBody = i18n.t('alertCopy.atPrayer');
@@ -326,21 +330,22 @@ export async function syncPrayerNotifications(params: {
           style: { type: AndroidStyle.BIGTEXT, text: atPrayerBody },
           actions: (() => {
             const actions: { title: string; pressAction: { id: string } }[] = [];
-            // Log Prayer is always present — a useful affordance that
-            // doesn't take a slot the user could instead use for
-            // something more important (Android shows max 3 actions
-            // and we only ever schedule 2: Log prayer + Stop adhan).
-            // The previous opt-in gate via `journalLogActionEnabled`
-            // was over-engineered; nobody benefits from having to flip
-            // a toggle to make a clearly-helpful button appear.
-            actions.push({
-              title: i18n.t('journal.logActionTitle', 'Log prayer'),
-              pressAction: {
-                // Encode the prayer name in the action id so the
-                // foreground handler can route to the right row.
-                id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
-              },
-            });
+            // Log Prayer is present for the five daily prayers — a useful
+            // affordance that doesn't take a slot the user could instead use
+            // for something more important (Android shows max 3 actions and we
+            // only ever schedule 2: Log prayer + Stop adhan). The non-prayer
+            // events (Sunrise, Islamic Midnight, Last Third) get no journal
+            // action — there is no prayer row to log them against.
+            if (!isNonPrayer) {
+              actions.push({
+                title: i18n.t('journal.logActionTitle', 'Log prayer'),
+                pressAction: {
+                  // Encode the prayer name in the action id so the
+                  // foreground handler can route to the right row.
+                  id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
+                },
+              });
+            }
             if (usesAdhan) {
               actions.push({
                 title: i18n.t('alertCopy.adhanStopAction'),

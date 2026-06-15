@@ -62,6 +62,7 @@ export type PrayerDayState =
 // native modules.
 import { coordsChangedSignificantly } from '../utils/coords';
 import { applyOffsets, type PrayerOffsetMinutes } from '../settings/prayerOffsets';
+import { injectNightTimes } from '../utils/nightTimes';
 
 /**
  * Apply per-prayer offsets uniformly across a week of timings — task #22 +
@@ -144,9 +145,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
 
         // Apply per-prayer offsets at READ time so the cache stays raw —
         // a setting change immediately re-derives without a re-fetch.
-        const offsettedWeek = applyOffsetsToWeek(
-          weekTimings,
-          settings.prayerOffsets,
+        // Apply offsets first, then derive the night times (Islamic Midnight +
+        // Last Third) from the adjusted Maghrib/Fajr so they track any nudge.
+        const offsettedWeek = injectNightTimes(
+          applyOffsetsToWeek(weekTimings, settings.prayerOffsets),
         );
 
         // Check whether the local cache needs a background fill.  We do this
@@ -233,9 +235,8 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
 
           // Apply per-prayer offsets to the local-adhan fallback too —
           // the user's adjustment must be honored even when offline.
-          const offsettedLocalWeek = applyOffsetsToWeek(
-            localWeek,
-            settings.prayerOffsets,
+          const offsettedLocalWeek = injectNightTimes(
+            applyOffsetsToWeek(localWeek, settings.prayerOffsets),
           );
 
           setState({

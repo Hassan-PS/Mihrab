@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "पूरे ऐप और होम-स्क्रीन विजेट में उपयोग किया जाता है।",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "अतिरिक्त समय",
+    "sunriseTime": "सूर्योदय",
+    "sunriseTimeHelp": "नमाज़ तालिका, सूचनाओं, विजेट और Live Activity में सूर्योदय दिखाएँ।",
+    "islamicMidnight": "इस्लामी आधी रात",
+    "islamicMidnightHelp": "मग़रिब और फ़ज्र के बीच रात का मध्यबिंदु। डिफ़ॉल्ट रूप से बंद।",
+    "lastThird": "रात का अंतिम तिहाई भाग",
+    "lastThirdHelp": "रात के अंतिम तिहाई की शुरुआत — क़ियाम अल-लैल का समय। डिफ़ॉल्ट रूप से बंद।"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "धुहर",
     "Asr_abbr": "अस्र",
     "Maghrib_abbr": "मगरि",
-    "Isha_abbr": "ईशा"
+    "Isha_abbr": "ईशा",
+    "Midnight": "इस्लामी आधी रात",
+    "Midnight_abbr": "मध्य",
+    "Lastthird": "अंतिम तिहाई",
+    "Lastthird_abbr": "क़ियाम"
   },
   "placeSearch": {
     "label": "शहर या पता खोजें",
@@ -863,7 +874,6 @@
     "typeVoluntary": "नफ़्ल / सुन्नत"
   },
   "methods": {
-    "auto": "स्वचालित (स्थान अनुसार)",
     "0": "शिया — इस्ना अशरी",
     "1": "यूनिवर्सिटी ऑफ़ इस्लामिक साइंसेज़, कराची",
     "2": "इस्लामिक सोसाइटी ऑफ़ नॉर्थ अमेरिका (ISNA)",
@@ -878,7 +888,8 @@
     "12": "फ़्रांस",
     "13": "तुर्की",
     "14": "रूस",
-    "15": "विश्व चाँद-दर्शन समिति"
+    "15": "विश्व चाँद-दर्शन समिति",
+    "auto": "स्वचालित (स्थान अनुसार)"
   },
   "attributions": {
     "quranText": "क़ुरआन — उस्मानी पाठ",

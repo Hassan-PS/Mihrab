@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.0] — 2026-06-15
+
+### Added
+- **Islamic Midnight & Last Third of the night (Qiyām)**: Two optional pre-dawn times, computed on the classical Maghrib→Fajr basis (Islamic Midnight is the midpoint of the night; the Last Third marks the start of the final third, the time of Qiyām al-Layl). Off by default; when enabled they appear in the prayer table and fire notifications. Like Sunrise, they use the default notification sound (never the adhan).
+- **Sunrise toggle (kill-switch)**: A new toggle (on by default) to hide Sunrise from the prayer table, notifications, and the Live Activity.
+
+All three live under Settings → Notifications → "Additional times", translated across all 13 locales.
+
+### Changed
+- **F-Droid build no longer depends on jitpack**: The Liquid-Glass blur is iOS-only, so `@react-native-community/blur` (which pulled `BlurView` from jitpack) is excluded from Android autolinking entirely. The F-Droid/Android build is now fully resolvable from standard repositories; iOS keeps the blur.
+
 ## [2.6.0] — 2026-06-15
 
 ### Changed

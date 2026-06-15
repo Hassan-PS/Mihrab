@@ -161,6 +161,81 @@ function NotificationsCardImpl({
           </Text>
         </Pressable>
       )}
+
+      {/* Additional, non-prayer times. Each gates one entry across the prayer
+          table, notifications, home-screen widget, and Live Activity. They use
+          the default notification sound (never the adhan). Shown regardless of
+          the master alerts toggle because they also control table/widget
+          visibility, not just notifications. */}
+      <Text style={[s.sectionTitle, { color: palette.muted }]}>
+        {t('settings.additionalTimes')}
+      </Text>
+
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.sunriseTime')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t('settings.sunriseTimeHelp')}
+          </Text>
+        </View>
+        <Switch
+          value={settings.sunriseEnabled}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={v => updateSettings({ sunriseEnabled: v })}
+        />
+      </View>
+
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.islamicMidnight')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t('settings.islamicMidnightHelp')}
+          </Text>
+        </View>
+        <Switch
+          value={settings.islamicMidnightEnabled}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={v => updateSettings({ islamicMidnightEnabled: v })}
+        />
+      </View>
+
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.lastThird')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t('settings.lastThirdHelp')}
+          </Text>
+        </View>
+        <Switch
+          value={settings.lastThirdEnabled}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={v => updateSettings({ lastThirdEnabled: v })}
+        />
+      </View>
     </>
   );
 }

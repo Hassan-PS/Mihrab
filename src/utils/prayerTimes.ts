@@ -82,17 +82,31 @@ export function getNextPrayerDisplay(
   tomorrow: TimingsMap | undefined,
   now: Date,
 ): { name: string; at: Date } | null {
-  const next = computeNextSalah(today, now);
-  if (next) {
-    return { name: next.name, at: next.at };
+  // Gather every still-upcoming event from today plus every event tomorrow,
+  // then return the chronologically earliest. This is order-agnostic, so it
+  // correctly surfaces a pre-dawn night time (Islamic Midnight / Last Third)
+  // as the next event after Isha when those toggles are on — they sit before
+  // tomorrow's Fajr. For the default five-salāh-plus-sunrise map it behaves
+  // exactly as before (next salāh during the day; tomorrow's Fajr after Isha).
+  const dayStart = startOfLocalDay(now);
+  const candidates: { name: string; at: Date }[] = [];
+  for (const name of NEXT_SALAH_ORDER) {
+    const raw = today[name];
+    if (!raw) continue;
+    const at = combineLocalDateAndTime(dayStart, raw);
+    if (at > now) candidates.push({ name, at });
   }
-  const fajr = tomorrow?.Fajr;
-  if (!fajr) {
-    return null;
+  if (tomorrow) {
+    const tomorrowDay = addDays(dayStart, 1);
+    for (const name of NEXT_SALAH_ORDER) {
+      const raw = tomorrow[name];
+      if (!raw) continue;
+      candidates.push({ name, at: combineLocalDateAndTime(tomorrowDay, raw) });
+    }
   }
-  const tomorrowDay = addDays(startOfLocalDay(now), 1);
-  const at = combineLocalDateAndTime(tomorrowDay, fajr);
-  return { name: 'Fajr', at };
+  if (candidates.length === 0) return null;
+  candidates.sort((a, b) => a.at.getTime() - b.at.getTime());
+  return candidates[0];
 }
 
 const NOTIFICATION_BUFFER_MS = 15_000;

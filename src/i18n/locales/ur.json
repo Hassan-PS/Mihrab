@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "پورے ایپ اور ہوم اسکرین ویجٹ میں استعمال ہوتا ہے۔",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "اضافی اوقات",
+    "sunriseTime": "طلوع آفتاب",
+    "sunriseTimeHelp": "نماز کے جدول، اطلاعات، وجٹ اور Live Activity میں طلوع آفتاب دکھائیں۔",
+    "islamicMidnight": "نصف شب",
+    "islamicMidnightHelp": "مغرب اور فجر کے درمیان رات کا وسطی نقطہ۔ بطورِ پہلے سے بند۔",
+    "lastThird": "رات کا آخری تہائی حصہ",
+    "lastThirdHelp": "رات کے آخری تہائی حصے کا آغاز — قیام اللیل کا وقت۔ بطورِ پہلے سے بند۔"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "ظہر",
     "Asr_abbr": "عصر",
     "Maghrib_abbr": "مغرب",
-    "Isha_abbr": "عشاء"
+    "Isha_abbr": "عشاء",
+    "Midnight": "نصف شب",
+    "Midnight_abbr": "نصف",
+    "Lastthird": "آخری تہائی",
+    "Lastthird_abbr": "قیام"
   },
   "placeSearch": {
     "label": "شہر یا پتہ تلاش کریں۔",
@@ -863,7 +874,6 @@
     "typeVoluntary": "نفلی / سنت"
   },
   "methods": {
-    "auto": "خودکار (مقام کے مطابق)",
     "0": "شیعہ — اثنا عشری",
     "1": "جامعۂ علومِ اسلامیہ، کراچی",
     "2": "اسلامی سوسائٹی آف نارتھ امریکا (ISNA)",
@@ -878,7 +888,8 @@
     "12": "فرانس",
     "13": "ترکی",
     "14": "روس",
-    "15": "عالمی رویتِ ہلال کمیٹی"
+    "15": "عالمی رویتِ ہلال کمیٹی",
+    "auto": "خودکار (مقام کے مطابق)"
   },
   "attributions": {
     "quranText": "قرآن — عثمانی متن",

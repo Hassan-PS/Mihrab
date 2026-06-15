@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Используется по всему приложению и в виджете на главном экране.",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "Дополнительные времена",
+    "sunriseTime": "Восход",
+    "sunriseTimeHelp": "Показывать восход в таблице молитв, уведомлениях, виджете и Live Activity.",
+    "islamicMidnight": "Исламская полночь",
+    "islamicMidnightHelp": "Середина ночи между Магрибом и Фаджром. По умолчанию выключено.",
+    "lastThird": "Последняя треть ночи",
+    "lastThirdHelp": "Начало последней трети ночи — время для Кияам аль-Лайль. По умолчанию выключено."
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "Зухр",
     "Asr_abbr": "Аср",
     "Maghrib_abbr": "Магр",
-    "Isha_abbr": "Иша"
+    "Isha_abbr": "Иша",
+    "Midnight": "Исламская полночь",
+    "Midnight_abbr": "Полн",
+    "Lastthird": "Последняя треть",
+    "Lastthird_abbr": "Кияам"
   },
   "placeSearch": {
     "label": "Поиск города или адреса",
@@ -863,7 +874,6 @@
     "typeVoluntary": "Добровольный / Сунна"
   },
   "methods": {
-    "auto": "Автоматически (по местоположению)",
     "0": "Шииты — Иснаашария",
     "1": "Университет исламских наук, Карачи",
     "2": "Исламское общество Северной Америки (ISNA)",
@@ -878,7 +888,8 @@
     "12": "Франция",
     "13": "Турция",
     "14": "Россия",
-    "15": "Всемирный комитет наблюдения за луной"
+    "15": "Всемирный комитет наблюдения за луной",
+    "auto": "Автоматически (по местоположению)"
   },
   "attributions": {
     "quranText": "Коран — османский текст",

@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "用于整个应用程序和主屏幕小部件。",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "其他时间",
+    "sunriseTime": "日出",
+    "sunriseTimeHelp": "在礼拜时间表、通知、小组件和 Live Activity 中显示日出。",
+    "islamicMidnight": "伊斯兰午夜",
+    "islamicMidnightHelp": "马格里布与法吉尔之间夜晚的中点。默认关闭。",
+    "lastThird": "夜晚的最后三分之一",
+    "lastThirdHelp": "夜晚最后三分之一的开始——夜间礼拜（Qiyam al-Layl）的时间。默认关闭。"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "杜尔",
     "Asr_abbr": "晡气",
     "Maghrib_abbr": "昏礼",
-    "Isha_abbr": "伊莎"
+    "Isha_abbr": "伊莎",
+    "Midnight": "伊斯兰午夜",
+    "Midnight_abbr": "午夜",
+    "Lastthird": "最后三分之一",
+    "Lastthird_abbr": "夜祷"
   },
   "placeSearch": {
     "label": "搜索城市或地址",
@@ -863,7 +874,6 @@
     "typeVoluntary": "自愿 / 圣行"
   },
   "methods": {
-    "auto": "自动（按位置）",
     "0": "什叶派 — 十二伊玛目",
     "1": "伊斯兰科学大学（卡拉奇）",
     "2": "北美伊斯兰协会（ISNA）",
@@ -878,7 +888,8 @@
     "12": "法国",
     "13": "土耳其",
     "14": "俄罗斯",
-    "15": "世界月相观测委员会"
+    "15": "世界月相观测委员会",
+    "auto": "自动（按位置）"
   },
   "attributions": {
     "quranText": "《古兰经》奥斯曼体经文",

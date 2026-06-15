@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Digunakan di seluruh aplikasi dan widget layar utama.",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "Waktu tambahan",
+    "sunriseTime": "Matahari terbit",
+    "sunriseTimeHelp": "Tampilkan matahari terbit di tabel salat, notifikasi, widget, dan Live Activity.",
+    "islamicMidnight": "Tengah malam",
+    "islamicMidnightHelp": "Titik tengah malam antara Magrib dan Subuh. Nonaktif secara default.",
+    "lastThird": "Sepertiga malam terakhir",
+    "lastThirdHelp": "Awal sepertiga malam terakhir — waktu untuk Qiyamul Lail. Nonaktif secara default."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "Dhuhr",
     "Asr_abbr": "Asar",
     "Maghrib_abbr": "Magh",
-    "Isha_abbr": "Isya"
+    "Isha_abbr": "Isya",
+    "Midnight": "Tengah malam",
+    "Midnight_abbr": "Tgh",
+    "Lastthird": "Sepertiga akhir",
+    "Lastthird_abbr": "Qiyam"
   },
   "placeSearch": {
     "label": "Cari kota atau alamat",
@@ -863,7 +874,6 @@
     "typeVoluntary": "Sukarela / Sunnah"
   },
   "methods": {
-    "auto": "Otomatis (berdasarkan lokasi)",
     "0": "Syiah — Itsna Asyariyah",
     "1": "Universitas Ilmu Islam, Karachi",
     "2": "Islamic Society of North America (ISNA)",
@@ -878,7 +888,8 @@
     "12": "Prancis",
     "13": "Turki",
     "14": "Rusia",
-    "15": "Komite Pengamatan Hilal Sedunia"
+    "15": "Komite Pengamatan Hilal Sedunia",
+    "auto": "Otomatis (berdasarkan lokasi)"
   },
   "attributions": {
     "quranText": "Teks Al-Qur’an Utsmani",

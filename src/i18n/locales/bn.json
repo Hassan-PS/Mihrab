@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "সম্পূর্ণ অ্যাপ এবং হোম-স্ক্রিন উইজেটে ব্যবহৃত হয়।",
-    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance."
+    "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
+    "additionalTimes": "অতিরিক্ত সময়",
+    "sunriseTime": "সূর্যোদয়",
+    "sunriseTimeHelp": "নামাজের তালিকা, বিজ্ঞপ্তি, উইজেট এবং Live Activity-তে সূর্যোদয় দেখান।",
+    "islamicMidnight": "ইসলামিক মধ্যরাত",
+    "islamicMidnightHelp": "মাগরিব ও ফজরের মাঝের রাতের মধ্যবিন্দু। ডিফল্টভাবে বন্ধ।",
+    "lastThird": "রাতের শেষ তৃতীয়াংশ",
+    "lastThirdHelp": "রাতের শেষ তৃতীয়াংশের শুরু — কিয়ামুল লাইলের সময়। ডিফল্টভাবে বন্ধ।"
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "ধুহর",
     "Asr_abbr": "আসর",
     "Maghrib_abbr": "মাগর",
-    "Isha_abbr": "ইশা"
+    "Isha_abbr": "ইশা",
+    "Midnight": "মধ্যরাত",
+    "Midnight_abbr": "মধ্য",
+    "Lastthird": "শেষ তৃতীয়াংশ",
+    "Lastthird_abbr": "কিয়াম"
   },
   "placeSearch": {
     "label": "শহর বা ঠিকানা খুঁজুন",
@@ -863,7 +874,6 @@
     "typeVoluntary": "নফল / সুন্নাহ"
   },
   "methods": {
-    "auto": "স্বয়ংক্রিয় (অবস্থান অনুযায়ী)",
     "0": "শিয়া — ইসনা আশারিয়া",
     "1": "ইউনিভার্সিটি অব ইসলামিক সায়েন্সেস, করাচি",
     "2": "ইসলামিক সোসাইটি অব নর্থ আমেরিকা (ISNA)",
@@ -878,7 +888,8 @@
     "12": "ফ্রান্স",
     "13": "তুরস্ক",
     "14": "রাশিয়া",
-    "15": "বিশ্ব চাঁদ দেখা কমিটি"
+    "15": "বিশ্ব চাঁদ দেখা কমিটি",
+    "auto": "স্বয়ংক্রিয় (অবস্থান অনুযায়ী)"
   },
   "attributions": {
     "quranText": "কুরআন — উসমানি টেক্সট",

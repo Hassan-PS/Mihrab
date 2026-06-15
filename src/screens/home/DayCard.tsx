@@ -5,7 +5,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { TITLE_BAND_MAX_FONT_SCALE } from '../../theme/textScale';
-import { DISPLAY_ORDER } from '../../types/prayer';
+import { DISPLAY_ORDER, OPTIONAL_TIME_KEYS } from '../../types/prayer';
 import type { TimingsMap } from '../../types/prayer';
 import { PrayerRow } from './PrayerRow';
 import { HOME_TABLE_RADIUS } from './tokens';
@@ -96,23 +96,23 @@ function DayCardImpl({
         </Text>
       </View>
 
-      {DISPLAY_ORDER.map((key, rowIndex) => {
-        const raw = timings[key];
-        if (!raw) return null;
-        const isNext = isToday && nextPrayerName === key;
-        const isSunrise = key === 'Sunrise';
-        const isLast = rowIndex === DISPLAY_ORDER.length - 1;
-        return (
+      {(() => {
+        // Only the rows actually present in `timings` are rendered — the two
+        // night times and Sunrise are filtered out upstream when their toggle
+        // is off, so `isLast` (which drops the divider) must track the visible
+        // set, not the fixed DISPLAY_ORDER length.
+        const visible = DISPLAY_ORDER.filter(key => timings[key]);
+        return visible.map((key, rowIndex) => (
           <PrayerRow
             key={key}
             prayerKey={key}
-            rawTime={raw}
-            isNext={isNext}
-            isSunrise={isSunrise}
-            isLast={isLast}
+            rawTime={timings[key]}
+            isNext={isToday && nextPrayerName === key}
+            isSecondary={(OPTIONAL_TIME_KEYS as readonly string[]).includes(key)}
+            isLast={rowIndex === visible.length - 1}
           />
-        );
-      })}
+        ));
+      })()}
     </GlassSurface>
   );
 }

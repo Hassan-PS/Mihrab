@@ -197,7 +197,14 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Wird in der gesamten App und im Homescreen-Widget verwendet.",
-    "widgetColorFollowsAccentHelp": "Das Widget verwendet die gleiche Akzentfarbe wie die App. Wähle sie unter Darstellung."
+    "widgetColorFollowsAccentHelp": "Das Widget verwendet die gleiche Akzentfarbe wie die App. Wähle sie unter Darstellung.",
+    "additionalTimes": "Weitere Zeiten",
+    "sunriseTime": "Sonnenaufgang",
+    "sunriseTimeHelp": "Sonnenaufgang in der Gebetstabelle, in Benachrichtigungen, im Widget und in der Live-Aktivität anzeigen.",
+    "islamicMidnight": "Islamische Mitternacht",
+    "islamicMidnightHelp": "Der Mittelpunkt der Nacht zwischen Maghrib und Fadschr. Standardmäßig aus.",
+    "lastThird": "Letztes Drittel der Nacht",
+    "lastThirdHelp": "Der Beginn des letzten Drittels der Nacht — die Zeit für Qiyam al-Lail. Standardmäßig aus."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -284,7 +291,11 @@
     "Dhuhr_abbr": "Dhuhr",
     "Asr_abbr": "Asr",
     "Maghrib_abbr": "Magh",
-    "Isha_abbr": "Isha"
+    "Isha_abbr": "Isha",
+    "Midnight": "Islamische Mitternacht",
+    "Midnight_abbr": "Mitte",
+    "Lastthird": "Letztes Drittel",
+    "Lastthird_abbr": "Qiyam"
   },
   "placeSearch": {
     "label": "Stadt oder Adresse suchen",
@@ -863,7 +874,6 @@
     "typeVoluntary": "Freiwillig / Sunnah"
   },
   "methods": {
-    "auto": "Automatisch (nach Standort)",
     "0": "Schia — Ithna Ashari",
     "1": "University of Islamic Sciences, Karatschi",
     "2": "Islamic Society of North America (ISNA)",
@@ -878,7 +888,8 @@
     "12": "Frankreich",
     "13": "Türkei",
     "14": "Russland",
-    "15": "Moonsighting Committee Worldwide"
+    "15": "Moonsighting Committee Worldwide",
+    "auto": "Automatisch (nach Standort)"
   },
   "attributions": {
     "quranText": "Koran (Uthmani-Text)",
