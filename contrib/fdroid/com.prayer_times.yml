@@ -16,90 +16,54 @@ Repo: https://github.com/Hassan-PS/Mihrab
 Builds:
   - versionName: 2.6.0
     versionCode: 180
-    commit: v2.6.0
+    commit: 6aed242c59ca6fa088f50d80503dcd7669516f68
     subdir: android
     sudo:
       - apt-get update
-      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
-      - npm install -g npm@10 --loglevel=error --no-fund
-      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
+      - apt-get install -y npm
     gradle:
       - fdroid
     output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - G=gradle.properties
-      - A=app/build.gradle
-      - printf '\norg.gradle.java.home=/usr/local/jdk21\n' >> $G
-      - echo 'react.internal.disableJavaVersionAlignment=true' >> $G
-      - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> $G
-      - echo 'reactNativeArchitectures=arm64-v8a' >> $G
-      - echo 'org.gradle.daemon=false' >> $G
-      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> $G
-      - echo 'org.gradle.warning.mode=none' >> $G
-      - echo 'org.gradle.logging.level=quiet' >> $G
-      - echo 'org.gradle.console=plain' >> $G
-      - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> $A
-      - echo 'android { buildTypes { release { minifyEnabled false } } }' >> $A
-      - cd ..
-      - npm set loglevel=error fund=false audit=false
-      - npm ci --ignore-scripts --omit=optional --omit=dev
-      - npm i --no-save --ignore-scripts patch-package
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m' >> gradle.properties
+      - echo 'org.gradle.daemon=false' >> gradle.properties
+      - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
+      - npm i --no-save --ignore-scripts --loglevel=error patch-package
       - node node_modules/.bin/patch-package
       - RNG=node_modules/@react-native/gradle-plugin
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
-    scanignore:
-      - node_modules
     ndk: 27.1.12297006
 
 MaintainerNotes: |
   React Native 0.83 app. `npm ci` runs from the repo root; Gradle runs in
   `android/` with the `fdroid` product flavor (no Play Billing / no Google Play
-  Services). `output` points at `app/build/.../fdroid/release/*.apk` (the RN app
-  module — the default Gradle discovery path does not include `app/`).
+  Services). The build uses the build server's default JDK (RN's
+  `@react-native/gradle-plugin` requests `jvmToolchain(17)`; the `find … sed`
+  line strips that request so the running JDK is used regardless of its version).
 
-  JDK: install OpenJDK 21 and point `org.gradle.java.home` at it. RN's
-  `@react-native/gradle-plugin` requests `jvmToolchain(17)`, which JDK 21 does not
-  satisfy, so the prebuild strips the `jvmToolchain` lines from the plugin's Kotlin
-  build scripts. No separate JDK 17 install is needed.
+  Build configuration lives in the repo, not the recipe: `gradle.properties`
+  carries the RN/Kotlin build-compat flags, and `app/build.gradle` turns R8 and
+  release lint off for the `fdroid` flavor only (they OOM the CI runner when run
+  in parallel) while keeping them on for the upstream Play release. The few
+  remaining prebuild lines are the only settings that genuinely cannot live in
+  the repo without breaking the upstream Play build or the CI budget:
+  - `reactNativeArchitectures=arm64-v8a` — the repo default is all four ABIs for
+    the Play release; two ABIs push react-native-svg's C++ codegen past the 1 h
+    CI timeout, so the F-Droid build is arm64-only (covers virtually all active
+    devices).
+  - `org.gradle.jvmargs=-Xmx1536m` + `org.gradle.daemon=false` — the repo default
+    is 2 GB for local dev; on the CI runner that starves the parallel C++ workers
+    and the Metro/Hermes Node process (hermesc exit 5), so the heap is capped.
+  - `npm ci --ignore-scripts` skips slow postinstall native compilation; the
+    `patches/` are then re-applied explicitly via `patch-package` (the Location
+    patch strips `play-services-location` from
+    `@react-native-community/geolocation` so no proprietary `com.google.android.gms`
+    classes ship).
 
-  Single current `Builds:` entry only. Historical versions were never published on
-  F-Droid, so building them adds no value and, because the MR diff adds every entry,
-  the CI pipeline would build each one in sequence — the oldest entries predate the
-  log-quieting flags below and overflow GitLab's 4 MB job-log limit. Keeping just the
-  current version keeps the pipeline fast and the log small. Future versions are
-  picked up automatically (AutoUpdateMode: Version, UpdateCheckMode: Tags).
-
-  Log size: the prebuild sets `org.gradle.logging.level=quiet`,
-  `org.gradle.warning.mode=none` and `org.gradle.console=plain`, and runs npm with
-  `loglevel=error fund=false audit=false`. Without these, the per-CMake NDK
-  `ndk.dir` deprecation warning, npm `EBADENGINE` warnings and the Java
-  source/target 8 warnings flood the job log past the 4 MB cap (quiet also hides the
-  javac warnings). Build errors are still printed at quiet level, so failures remain
-  debuggable. Prebuild lines are kept under 80 columns so `fdroid rewritemeta` does
-  not wrap them (a wrap leaves a trailing space that `fdroid lint` then flags).
-
-  Resources / memory (arm64 CI runner, 1 h job timeout):
-  - `reactNativeArchitectures=arm64-v8a` only. Two ABIs push react-native-svg C++
-    codegen past the 1 h timeout; arm64 alone covers virtually all active devices.
-  - `org.gradle.jvmargs=-Xmx1536m` caps the Gradle heap so it does not compete with
-    the parallel C++ (Ninja/clang++) workers or the Metro/Hermes Node process
-    (`-Xmx2g` starves Metro → hermesc exit 5).
-  - `android { lint { checkReleaseBuilds false } }` disables `lintVital*` on every
-    native module; otherwise lint runs in parallel with R8 and OOM-kills the daemons.
-  - Do NOT add `org.gradle.parallel=true` (simultaneous module CMake builds OOM) or
-    `newArchEnabled=false` (a no-op for library subprojects under
-    `com.facebook.react.rootproject`).
-  - `npm ci --ignore-scripts` skips slow postinstall native compilation; the patches
-    in `patches/` are re-applied explicitly via `patch-package`. The Location patch
-    strips `play-services-location` from `@react-native-community/geolocation` so the
-    scanner does not flag proprietary `com.google.android.gms` classes.
-
-  Scanner: `scanignore: node_modules` (RN layout changes make per-package paths
-  brittle).
-  Upstream recipe + checklist: https://github.com/Hassan-PS/Mihrab/tree/main/contrib/fdroid
-  Listing text mirrors upstream Fastlane: fastlane/metadata/android/en-US/
-  Single universal fdroidRelease APK (no ABI splits). Reproducible builds not
-  requested yet (RN/Hermes); APK is F-Droid-signed.
+  Single universal fdroidRelease APK (no ABI splits). Listing text + screenshots
+  come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
+  builds not requested yet (RN/Hermes); APK is F-Droid-signed.
 
 ArchivePolicy: 6
 AutoUpdateMode: Version
