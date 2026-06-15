@@ -17,18 +17,17 @@ Builds:
   - versionName: 2.6.0
     versionCode: 180
     commit: 6aed242c59ca6fa088f50d80503dcd7669516f68
-    subdir: android
+    subdir: android/app
     sudo:
       - apt-get update
       - apt-get install -y npm
     gradle:
       - fdroid
-    output: app/build/outputs/apk/fdroid/release/*.apk
     prebuild:
-      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
-      - echo 'org.gradle.jvmargs=-Xmx1536m' >> gradle.properties
-      - echo 'org.gradle.daemon=false' >> gradle.properties
-      - cd ..
+      - echo 'reactNativeArchitectures=arm64-v8a' >> ../gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m' >> ../gradle.properties
+      - echo 'org.gradle.daemon=false' >> ../gradle.properties
+      - cd ../..
       - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
       - npm i --no-save --ignore-scripts --loglevel=error patch-package
       - node node_modules/.bin/patch-package
@@ -76,7 +75,6 @@ MaintainerNotes: |
   come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
   builds not requested yet (RN/Hermes); APK is F-Droid-signed.
 
-ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 2.6.0
