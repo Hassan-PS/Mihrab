@@ -21,6 +21,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 import WidgetKit
 #if canImport(ActivityKit)
 import ActivityKit
@@ -331,7 +332,13 @@ private struct DynamicIslandBottom: View {
 private func liveActivityAccent(
   state: PrayerLiveActivityAttributes.ContentState
 ) -> Color {
-  Color(hex: state.accentHex) ?? Color(red: 0.13, green: 0.77, blue: 0.37) // green-500
+  // Liquid Glass / system colours active in-app: use the dynamic iOS system
+  // tint (the same systemBlue the app's system theme uses), which adapts to
+  // light/dark on its own — so the Live Activity matches the selected theme.
+  if state.systemTinted {
+    return Color(uiColor: .systemBlue)
+  }
+  return Color(hex: state.accentHex) ?? Color(red: 0.13, green: 0.77, blue: 0.37) // green-500
 }
 
 extension Color {

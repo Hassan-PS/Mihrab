@@ -1,9 +1,18 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { useEffect, useMemo, useRef } from 'react';
-import { Platform, StatusBar, useColorScheme, View } from 'react-native';
+import {
+  AppState,
+  Platform,
+  StatusBar,
+  useColorScheme,
+  View,
+} from 'react-native';
 import { usePrayerSettings } from './context/PrayerSettingsContext';
 import { RootNavigator } from './navigation/RootNavigator';
-import { restartApp as nativeRestartApp } from './native/SystemTheme';
+import {
+  restartApp as nativeRestartApp,
+  setNavigationBarStyle,
+} from './native/SystemTheme';
 import {
   resolveAppPalette,
   resolveEffectiveDark,
@@ -70,6 +79,19 @@ export function AppNavigationRoot() {
     () => buildNavigationTheme(palette, isDark),
     [palette, isDark],
   );
+
+  // Keep the Android system navigation bar in step with the app theme.
+  // Re-applied whenever dark/light flips and again when the app returns
+  // to the foreground (the OS can reset the inset controller across some
+  // backgrounding paths). No-op on iOS.
+  useEffect(() => {
+    setNavigationBarStyle(isDark);
+    if (Platform.OS !== 'android') return;
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') setNavigationBarStyle(isDark);
+    });
+    return () => sub.remove();
+  }, [isDark]);
 
   const layoutDir = settings.language === 'ar' ? 'rtl' : 'ltr';
 

@@ -63,12 +63,18 @@ function HomeHeaderRight() {
   const { palette } = useAppPalette();
   return (
     // The location pin sits left of the Settings gear in the header, so
-    // both top-level controls live in the same row. The pin only renders
-    // for users on manual location with at least one saved preset (see
-    // LocationChip's own visibility rules) — GPS-mode users get a clean
-    // single-icon header.
+    // both top-level controls live in the same row. The pin renders for
+    // users on manual location (with or without saved presets) and shows
+    // the current location label; tapping it opens the preset switcher
+    // when presets exist, otherwise Settings. GPS/automatic-mode users get
+    // a clean single-icon header (no static location label to show).
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <LocationChip compactHeader />
+      <LocationChip
+        compactHeader
+        onAddLocation={() =>
+          navigation.navigate('Settings', { highlight: 'savedLocations' })
+        }
+      />
       <HeaderToolbarIcons
         // Use palette.accentSolid (the user's chosen accent color from
         // settings, resolved through the SystemTheme native module on

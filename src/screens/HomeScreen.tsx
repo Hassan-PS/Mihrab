@@ -197,6 +197,12 @@ export function HomeScreen() {
             settings.appAccentId,
             settings.appAccentCustomHex,
           ),
+          // iOS Liquid Glass: let the Live Activity use the dynamic system
+          // tint instead of the brand accent so it matches the system theme.
+          systemTinted:
+            Platform.OS === 'ios' &&
+            settings.appearance === 'system' &&
+            settings.useSystemDynamicTheme,
         }).catch(e => console.warn('syncLiveActivity (focus):', e));
       }
 
@@ -230,6 +236,8 @@ export function HomeScreen() {
       settings.liveActivityEnabled,
       settings.appAccentId,
       settings.appAccentCustomHex,
+      settings.appearance,
+      settings.useSystemDynamicTheme,
     ]),
   );
 
@@ -288,6 +296,11 @@ export function HomeScreen() {
         settings.appAccentId,
         settings.appAccentCustomHex,
       ),
+      // iOS Liquid Glass: dynamic system tint instead of the brand accent.
+      systemTinted:
+        Platform.OS === 'ios' &&
+        settings.appearance === 'system' &&
+        settings.useSystemDynamicTheme,
     }).catch(e => console.warn('syncLiveActivity (effect):', e));
   }, [
     hydrated,
@@ -300,6 +313,8 @@ export function HomeScreen() {
     settings.liveActivityEnabled,
     settings.appAccentId,
     settings.appAccentCustomHex,
+    settings.appearance,
+    settings.useSystemDynamicTheme,
   ]);
 
   // Persist last-fetched coords so MonthScreen and offline use can fall back to them.

@@ -22,6 +22,7 @@ import { NativeModules, Platform } from 'react-native';
 type SystemThemeNative = {
   restartApp?: () => void;
   resolveAccentHex?: () => string;
+  setNavigationBarStyle?: (isDark: boolean) => void;
 };
 
 const native: SystemThemeNative | undefined = (
@@ -36,6 +37,20 @@ export function restartApp(): boolean {
   } catch (e) {
     console.warn('SystemTheme.restartApp failed:', e);
     return false;
+  }
+}
+
+/**
+ * Make the Android system navigation bar match the app theme (icon
+ * appearance + adaptive scrim). No-op on iOS and on builds without the
+ * native module. Safe to call on every theme change.
+ */
+export function setNavigationBarStyle(isDark: boolean): void {
+  if (Platform.OS !== 'android' || !native?.setNavigationBarStyle) return;
+  try {
+    native.setNavigationBarStyle(isDark);
+  } catch {
+    // best-effort cosmetic; ignore
   }
 }
 

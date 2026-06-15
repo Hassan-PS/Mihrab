@@ -94,7 +94,12 @@ const ACCENT_SWATCHES: Record<
   Exclude<AppAccentId, 'custom'>,
   { light: string; dark: string; lightBg: string; darkBg: string }
 > = {
-  green: { light: '#22c55e', dark: '#4ade80', lightBg: '#dcfce7', darkBg: '#14532d' },
+  // Reverent deep/lifted emerald (task #36) — replaces the old neon tailwind
+  // green. `light` is a deep emerald that reads as ink on warm paper; `dark`
+  // is a lifted emerald tuned to ~5.9:1 on the ink-blue bg so small accent
+  // text stays legible. Backgrounds are soft, low-saturation tints used only
+  // for gentle highlights (active row, countdown chip) — never a full block.
+  green: { light: '#1F5F4A', dark: '#46A081', lightBg: '#E2EEE9', darkBg: '#152F25' },
   teal: { light: '#0d9488', dark: '#5eead4', lightBg: '#ccfbf1', darkBg: '#134e4a' },
   blue: { light: '#2563eb', dark: '#7dd3fc', lightBg: '#dbeafe', darkBg: '#0c2a52' },
   amber: { light: '#b45309', dark: '#fbbf24', lightBg: '#fef3c7', darkBg: '#3f2a05' },
@@ -164,39 +169,52 @@ function withBrandAccents(
   return { ...base, accent, accentBg, accentSolid };
 }
 
-/** Standard dark greys. Accent uses brand green unless dynamic system palette is active. */
+/**
+ * Standard dark theme — warm "ink-blue" night (task #36).
+ *
+ * Migrated off the old cold blue-greys (#0f1419/#1a2230) to the deeper,
+ * slightly warmer ink tones the design tokens (`tokens.ts`) always intended.
+ * Reads as reverent and quiet; the emerald accent does the colour work.
+ */
 const DARK_BASE: PaletteBase = {
-  bg: '#0f1419',
-  card: '#1a2230',
-  text: '#e8ecf1',
-  muted: '#8b95a5',
-  border: '#2a3444',
-  danger: '#f87171',
-  overlay: 'rgba(0,0,0,0.65)',
+  bg: '#0E1218',
+  card: '#161B23',
+  text: '#E8E5DE',
+  muted: '#8A8780',
+  border: '#1F2530',
+  danger: '#F87171',
+  overlay: 'rgba(0,0,0,0.6)',
   flatChrome: false,
   glass: false,
 };
 
 const DARK_PURE_BLACK_BASE: PaletteBase = {
   bg: '#000000',
-  card: '#0d0d0d',
-  text: '#e8ecf1',
-  muted: '#8b95a5',
-  border: '#262626',
-  danger: '#f87171',
+  card: '#0E1218',
+  text: '#E8E5DE',
+  muted: '#8A8780',
+  border: '#171C24',
+  danger: '#F87171',
   overlay: 'rgba(0,0,0,0.75)',
   flatChrome: false,
   glass: false,
 };
 
+/**
+ * Standard light theme — warm "paper" daylight (task #36).
+ *
+ * Warm off-white paper instead of the old cool grey (#f5f6f8); ink-brown
+ * text instead of flat near-black; warm grey dividers. The deep emerald
+ * accent reads as ink on this surface.
+ */
 const LIGHT_BASE: PaletteBase = {
-  bg: '#f5f6f8',
-  card: '#ffffff',
-  text: '#1a1a1a',
-  muted: '#5c6570',
-  border: '#e2e5ea',
-  danger: '#b91c1c',
-  overlay: 'rgba(0,0,0,0.4)',
+  bg: '#FAF7F2',
+  card: '#FFFFFF',
+  text: '#1A1814',
+  muted: '#6B6660',
+  border: '#EDE8DF',
+  danger: '#B91C1C',
+  overlay: 'rgba(26,24,20,0.45)',
   flatChrome: false,
   glass: false,
 };

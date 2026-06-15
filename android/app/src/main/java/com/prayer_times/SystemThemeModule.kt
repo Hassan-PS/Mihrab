@@ -3,6 +3,7 @@ package com.prayer_times
 import android.content.Intent
 import android.os.Process
 import android.util.TypedValue
+import androidx.core.view.WindowCompat
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -38,6 +39,28 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
     reactContext.startActivity(intent)
     Process.killProcess(Process.myPid())
     exitProcess(0)
+  }
+
+  /**
+   * Make the system navigation bar follow the app's selected theme.
+   *
+   * Under the targetSdk-36 enforced edge-to-edge mode the navigation-bar
+   * *background* is transparent and the OS draws an adaptive scrim, so the
+   * only lever we control is the icon appearance: light icons on dark
+   * themes, dark icons on light themes. We flip
+   * `isAppearanceLightNavigationBars` (true ⇒ dark icons for a light bar)
+   * via the AndroidX inset controller so the back/home/recents glyphs —
+   * and the 3-button scrim — match the in-app palette, not just the OS
+   * dark/light setting. Must run on the UI thread.
+   */
+  @ReactMethod
+  fun setNavigationBarStyle(isDark: Boolean) {
+    val activity = getCurrentActivity() ?: return
+    activity.runOnUiThread {
+      val window = activity.window ?: return@runOnUiThread
+      val controller = WindowCompat.getInsetsController(window, window.decorView)
+      controller.isAppearanceLightNavigationBars = !isDark
+    }
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)

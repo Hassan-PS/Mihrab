@@ -17,6 +17,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppearanceSettings, usePrayerSettings, useWidgetSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { ConfirmModal } from '../../components/ConfirmModal';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { saveSettings } from '../../settings/storage';
 import type { AppAccentId } from '../../settings/types';
@@ -33,11 +34,18 @@ import { sharedSettingsStyles as s } from './sharedStyles';
 // src/theme/appPalette.ts. The chosen color drives palette.accent and
 // (when dynamic colors are off) is mirrored into widgetHighlightId so
 // the home-screen widget picks up the same color (#127).
-const APP_ACCENT_SWATCHES: { id: Exclude<AppAccentId, 'custom'>; hex: string }[] = [
-  { id: 'green', hex: '#22c55e' },
-  { id: 'teal', hex: '#0d9488' },
-  { id: 'blue', hex: '#2563eb' },
-  { id: 'amber', hex: '#b45309' },
+const APP_ACCENT_SWATCHES: {
+  id: Exclude<AppAccentId, 'custom'>;
+  light: string;
+  dark: string;
+}[] = [
+  // Mirror ACCENT_SWATCHES in src/theme/appPalette.ts so the preview dot
+  // matches the accent that actually gets applied in the current mode
+  // (the green default is now a refined deep/lifted emerald, not neon).
+  { id: 'green', light: '#1F5F4A', dark: '#46A081' },
+  { id: 'teal', light: '#0d9488', dark: '#5eead4' },
+  { id: 'blue', light: '#2563eb', dark: '#7dd3fc' },
+  { id: 'amber', light: '#b45309', dark: '#fbbf24' },
 ];
 
 function AppearanceCardImpl() {
@@ -55,6 +63,53 @@ function AppearanceCardImpl() {
   useEffect(() => {
     setAccentHexDraft(settings.appAccentCustomHex);
   }, [settings.appAccentCustomHex]);
+
+  // Pending value for the "restart required" themed confirm modal. Null
+  // ⇒ hidden; true/false ⇒ the dynamic-colours value the user is trying
+  // to switch to, awaiting confirmation.
+  const [pendingDynamic, setPendingDynamic] = useState<boolean | null>(null);
+
+  // Persist the toggled value to disk, then restart so PlatformColor /
+  // dynamic refs re-resolve. Persist DIRECTLY (not via the async
+  // updateSettings save) because the imminent Process.exit can kill an
+  // in-flight write, leaving the next launch reading the old value (#114).
+  const applyDynamicAndRestart = (v: boolean) => {
+    void (async () => {
+      try {
+        await saveSettings({ ...fullSettings, useSystemDynamicTheme: v });
+      } catch (e) {
+        console.warn('Failed to persist toggle before restart:', e);
+      }
+      updateSettings({ useSystemDynamicTheme: v });
+      const tryReload = () => {
+        try {
+          const dev = (
+            NativeModules as { DevSettings?: { reload?: () => void } }
+          ).DevSettings;
+          if (dev?.reload) {
+            dev.reload();
+            return true;
+          }
+        } catch {
+          // ignore
+        }
+        return false;
+      };
+      if (Platform.OS === 'android') {
+        if (nativeRestartApp()) return;
+        if (!tryReload()) BackHandler.exitApp();
+      } else if (!tryReload()) {
+        Alert.alert(
+          t('settings.themeRestartManualTitle', 'Reopen the app'),
+          t(
+            'settings.themeRestartManualBody',
+            'iOS does not allow apps to restart themselves. Please force-quit Prayer Times and reopen it for the new theme to take effect.',
+          ),
+          [{ text: t('common.ok', 'OK'), style: 'default' }],
+        );
+      }
+    })();
+  };
 
   // Picker is hidden under dynamic colors — both app and widget follow OS.
   // Android = Material You; iOS = Liquid Glass (system colours).
@@ -166,93 +221,13 @@ function AppearanceCardImpl() {
               // accentSolid resolves to the live system primary (#115).
               trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
               thumbColor={'#ffffff'}
-              onValueChange={v => {
-                // Material You / iOS dynamic colors are resolved at
-                // view-attach time, so flipping them mid-session leaves
-                // stale tints on already-mounted surfaces (#110). Confirm
-                // with the user, then save + restart on yes / revert on
-                // no — the toggle should not flip if they decline.
-                Alert.alert(
-                  t('settings.themeRestartTitle', 'Restart required'),
-                  t(
-                    'settings.themeRestartBody',
-                    'Switching system colors needs the app to restart so every screen picks up the new theme. Restart now?',
-                  ),
-                  [
-                    {
-                      text: t('common.cancel', 'Cancel'),
-                      style: 'cancel',
-                      onPress: () => {
-                        // Do nothing — the Switch is uncontrolled in
-                        // RN's onValueChange model; since we never
-                        // called updateSettings the persisted value is
-                        // unchanged and the next render snaps the
-                        // switch back to its prior position.
-                      },
-                    },
-                    {
-                      text: t('settings.themeRestartConfirm', 'Restart'),
-                      style: 'destructive',
-                      onPress: () => {
-                        // Persist the new value DIRECTLY to disk before
-                        // restarting — calling updateSettings() alone
-                        // schedules an async save whose write can be
-                        // killed by the imminent Process.exit, leaving
-                        // the next launch to read the old value (#114).
-                        // saveSettings() awaits the AsyncStorage commit
-                        // first, then the native restart proceeds.
-                        void (async () => {
-                          try {
-                            await saveSettings({
-                              ...fullSettings,
-                              useSystemDynamicTheme: v,
-                            });
-                          } catch (e) {
-                            console.warn('Failed to persist toggle before restart:', e);
-                          }
-                          // Update in-memory state too so if anything
-                          // delays the actual restart the UI matches.
-                          updateSettings({ useSystemDynamicTheme: v });
-                          const tryReload = () => {
-                            try {
-                              const dev = (NativeModules as { DevSettings?: { reload?: () => void } })
-                                .DevSettings;
-                              if (dev?.reload) {
-                                dev.reload();
-                                return true;
-                              }
-                            } catch {
-                              // ignore
-                            }
-                            return false;
-                          };
-                          if (Platform.OS === 'android') {
-                            // Native restart launches a fresh Activity
-                            // and kills the process so PlatformColor
-                            // refs re-resolve.
-                            if (nativeRestartApp()) return;
-                            if (!tryReload()) {
-                              BackHandler.exitApp();
-                            }
-                          } else {
-                            // iOS: try reload, otherwise prompt manual.
-                            if (!tryReload()) {
-                              Alert.alert(
-                                t('settings.themeRestartManualTitle', 'Reopen the app'),
-                                t(
-                                  'settings.themeRestartManualBody',
-                                  'iOS does not allow apps to restart themselves. Please force-quit Prayer Times and reopen it for the new theme to take effect.',
-                                ),
-                                [{ text: t('common.ok', 'OK'), style: 'default' }],
-                              );
-                            }
-                          }
-                        })();
-                      },
-                    },
-                  ],
-                );
-              }}
+              // Material You / iOS dynamic colors are resolved at
+              // view-attach time, so flipping them mid-session leaves
+              // stale tints on already-mounted surfaces (#110). Defer the
+              // actual change to a themed confirm modal; the Switch is
+              // controlled by the persisted value, so until the user
+              // confirms it snaps back to its prior position.
+              onValueChange={v => setPendingDynamic(v)}
             />
           </View>
         )}
@@ -286,7 +261,7 @@ function AppearanceCardImpl() {
                   style={[
                     styles.swatch,
                     {
-                      backgroundColor: sw.hex,
+                      backgroundColor: isDark ? sw.dark : sw.light,
                       borderColor: selected ? palette.accent : palette.border,
                       borderWidth: selected ? 3 : 2,
                     },
@@ -376,6 +351,23 @@ function AppearanceCardImpl() {
           />
         </View>
       ) : null}
+
+      <ConfirmModal
+        visible={pendingDynamic !== null}
+        title={t('settings.themeRestartTitle', 'Restart required')}
+        message={t(
+          'settings.themeRestartBody',
+          'Switching system colors needs the app to restart so every screen picks up the new theme. Restart now?',
+        )}
+        confirmLabel={t('settings.themeRestartConfirm', 'Restart')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        onCancel={() => setPendingDynamic(null)}
+        onConfirm={() => {
+          const v = pendingDynamic;
+          setPendingDynamic(null);
+          if (v !== null) applyDynamicAndRestart(v);
+        }}
+      />
     </>
   );
 }

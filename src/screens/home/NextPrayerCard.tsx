@@ -91,7 +91,10 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
   return (
     <GlassSurface
       intensity="thick"
-      fallbackColor={palette.accentBg}
+      // Calm neutral hero (task #37): the surface is an elevated neutral card,
+      // not a saturated accent block. Colour is carried only by the countdown
+      // numerals + the small "in …" chip, per "the app shouldn't shout".
+      fallbackColor={palette.card}
       accessibilityLiveRegion="polite"
       accessibilityRole="text"
       accessibilityLabel={`${t('home.nextPrayer')}: ${t(`prayer.${nextInfo.name}`)} ${formatLocalTime(nextInfo.at)} — ${t('home.nextIn', { time: formatCountdown(remainingSeconds) })}`}
@@ -129,12 +132,13 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
         {formatLocalTime(nextInfo.at)}
       </Text>
       <View style={styles.countdownRow}>
-        <View style={[styles.countdownPill, { backgroundColor: palette.card }]}>
+        <View
+          style={[styles.countdownPill, { backgroundColor: palette.accentBg }]}>
           <Text
             style={[
               styles.countdown,
               tabularNumeralStyle,
-              { color: palette.muted },
+              { color: palette.accent },
             ]}
             maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
             {t('home.nextIn', { time: formatCountdown(remainingSeconds) })}

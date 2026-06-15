@@ -822,6 +822,39 @@ Builds:
       - node_modules
     ndk: 27.1.12297006
 
+  - versionName: 2.5.0
+    versionCode: 179
+    commit: v2.5.0
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y npm curl ca-certificates openjdk-21-jdk-headless
+      - npm install -g npm@10
+      - ln -snf /usr/lib/jvm/java-21-openjdk-amd64 /usr/local/jdk21
+    gradle:
+      - fdroid
+    output: app/build/outputs/apk/fdroid/release/*.apk
+    prebuild:
+      - printf '\norg.gradle.java.home=/usr/local/jdk21\n' >> gradle.properties
+      - echo 'react.internal.disableJavaVersionAlignment=true' >> gradle.properties
+      - echo 'kotlin.jvm.target.validation.mode=IGNORE' >> gradle.properties
+      - echo 'reactNativeArchitectures=arm64-v8a' >> gradle.properties
+      - echo 'org.gradle.daemon=false' >> gradle.properties
+      - echo 'org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m' >> gradle.properties
+      - echo 'org.gradle.warning.mode=none' >> gradle.properties
+      - echo 'org.gradle.logging.level=quiet' >> gradle.properties
+      - printf '\nandroid { lint { checkReleaseBuilds false } }\n' >> app/build.gradle
+      - echo 'android { buildTypes { release { minifyEnabled false } } }' >> app/build.gradle
+      - cd ..
+      - npm ci --no-audit --ignore-scripts --omit=optional --omit=dev
+      - npm install --no-save --ignore-scripts patch-package
+      - node node_modules/.bin/patch-package
+      - RNG=node_modules/@react-native/gradle-plugin
+      - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
+    scanignore:
+      - node_modules
+    ndk: 27.1.12297006
+
 MaintainerNotes: |
   React Native 0.83: Node 20 from upstream tarball (checksum-verified). `npm ci`
   runs from repo root; Gradle runs in `android/` with product flavor `fdroid`
@@ -857,5 +890,5 @@ MaintainerNotes: |
 ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.4.0
-CurrentVersionCode: 178
+CurrentVersion: 2.5.0
+CurrentVersionCode: 179

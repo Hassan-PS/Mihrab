@@ -111,6 +111,24 @@ describe('syncLiveActivity → iOS content', () => {
     expect(content.prevEpochSeconds).toBe(
       new Date(2026, 5, 14, 12, 0, 0, 0).getTime() / 1000,
     );
+    // Brand-accent path → not system tinted.
+    expect(content.systemTinted).toBe(false);
+  });
+
+  test('systemTinted flag is forwarded to the iOS content', async () => {
+    const now = new Date(2026, 5, 14, 14, 0, 0, 0);
+    const p = syncLiveActivity({
+      options: { enabled: true },
+      today,
+      now,
+      accentHex: '#22c55e',
+      systemTinted: true,
+    });
+    await jest.advanceTimersByTimeAsync(900);
+    await p;
+
+    const content = JSON.parse(startMock.mock.calls[0][0]);
+    expect(content.systemTinted).toBe(true);
   });
 
   test('disabled → ends the activity, does not start one', async () => {

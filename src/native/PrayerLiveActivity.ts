@@ -39,8 +39,13 @@ export type PrayerLiveActivityContent = {
   hijriLabel: string;
   locationLabel: string;
   /** App accent hex (#RRGGBB) — drives the Live Activity keyline tint, the
-   *  next-prayer name, the countdown and the progress bar. */
+   *  next-prayer name, the countdown and the progress bar. Ignored when
+   *  `systemTinted` is true. */
   accentHex: string;
+  /** When true (iOS Liquid Glass / system colours active) the Live Activity
+   *  ignores `accentHex` and uses the dynamic iOS system tint so it matches
+   *  the in-app system theme and adapts to light/dark on its own. */
+  systemTinted: boolean;
   /** Display knobs — the widget reads these to decide what to show. */
   compactMode: boolean;
   showSunrise: boolean;

@@ -194,6 +194,10 @@ async function syncLiveActivityImpl(args: {
   /** App accent hex — drives the notification tint / Live Activity
    *  system color. Optional; defaults to brand green. */
   accentHex?: string;
+  /** iOS only: when the Liquid Glass / system-colours theme is active, the
+   *  Live Activity should ignore the brand accent and use the dynamic iOS
+   *  system tint so it matches the in-app theme and adapts to light/dark. */
+  systemTinted?: boolean;
 }): Promise<void> {
   const now = args.now ?? new Date();
 
@@ -310,6 +314,7 @@ async function syncLiveActivityImpl(args: {
       hijriLabel: '',
       locationLabel: '',
       accentHex,
+      systemTinted: !!args.systemTinted,
       compactMode: true,
       showSunrise: true,
       showHijri: false,

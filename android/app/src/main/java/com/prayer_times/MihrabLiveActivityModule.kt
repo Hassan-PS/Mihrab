@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Log
 import android.widget.RemoteViews
@@ -298,12 +299,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       )
 
       return if (Build.VERSION.SDK_INT >= 36) {
-        // Android 16+ path: standard template only — no custom RemoteViews.
-        // setCustomContentView changes the notification template type and
-        // breaks FLAG_PROMOTED_ONGOING (the status-bar chip). The chip is
-        // the primary feature on Android 16 so we protect it here; the
-        // same-line layout is available on pre-36 via the legacy path.
-        buildAndroid16(ctx, nextEpochMs, accentInt, progressPct, title, pi)
+        // Android 16+ path: native Notification.ProgressStyle (the platform
+        // "Live Update" API) for a sleek segmented day timeline with a point
+        // per prayer + a tracker dot. ProgressStyle is a first-class template
+        // (unlike custom RemoteViews), so it's chip-compatible. Falls back to
+        // the plain progress bar inside buildAndroid16 if the timeline can't
+        // be built (e.g. pre-dawn before today's Fajr, or missing day data).
+        buildAndroid16(ctx, p, nextEpochMs, accentInt, progressPct, title, pi)
       } else {
         // Pre-36 path: use the custom RemoteViews layout (prayer title left,
         // countdown|pct right on the same line). No chip on these versions.
@@ -364,6 +366,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     @SuppressLint("NewApi")
     private fun buildAndroid16(
       ctx: Context,
+      p: JSONObject,
       nextEpochMs: Long,
       accentInt: Int,
       progressPct: Int,
@@ -372,31 +375,34 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     ): Notification {
       try {
         val shortText = formatRemainingShort(nextEpochMs - System.currentTimeMillis())
-
-        // Standard-template layout (chip-compatible — no custom content view):
-        //
-        //   [icon] Mihrab          ↓ 1h 23m     ← header row; subText = countdown only
-        //   الفجر · 02:48  ·  52%              ← contentTitle; pct is last element L→R
-        //   [████████████░░░░░░░░░░░░░░░░░░]   ← progress bar
-        //
-        // Percentage is appended to contentTitle so it always reads as the
-        // rightmost element in the content row (left-to-right reading order).
         val countdownSubText = "↓ ${formatRemaining(nextEpochMs - System.currentTimeMillis())}"
-        val titleWithPct = "$title  ·  $progressPct%"
+
+        // Try the rich day-timeline ProgressStyle first. When available the
+        // bar itself conveys progress + each prayer marker, so the content
+        // title stays clean ("Fajr · 04:12"); the percentage is only folded
+        // into the title on the plain-bar fallback.
+        val dayStyle = buildDayProgressStyle(ctx, p, accentInt)
 
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(accentInt)
+          .setColorized(false)
           .setOngoing(true)
           .setOnlyAlertOnce(true)
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(titleWithPct)   // "الفجر · 02:48  ·  52%"
+          .setContentTitle(if (dayStyle != null) title else "$title  ·  $progressPct%")
           .setSubText(countdownSubText)    // "↓ 1h 23m" — right of app name in header
           .setShowWhen(false)
           .setContentIntent(contentIntent)
-          .setProgress(100, progressPct, false)
+
+        if (dayStyle != null) {
+          builder.setStyle(dayStyle)
+        } else {
+          // No timeline (pre-dawn / missing day data): plain determinate bar.
+          builder.setProgress(100, progressPct, false)
+        }
 
         tryAttachShortCriticalText(builder, shortText)
         tryRequestPromotedOngoing(builder)
@@ -406,6 +412,138 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         Log.w(NAME, "Android 16 path failed, falling back to legacy", t)
         return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, null)
       }
+    }
+
+    /**
+     * Build a native [Notification.ProgressStyle] day timeline (Android 16+):
+     *
+     *   ☀ ──●──────●────◆────●──────●─────── 🌙
+     *      Sun   Dhuhr  now  Asr  Maghrib  Isha
+     *
+     * The whole prayer-day cycle (Fajr → next Fajr) is one timeline. Each
+     * inter-prayer gap is a segment, each prayer is a point, and a tracker dot
+     * sits at the current moment. `styledByProgress` (default) fills the
+     * elapsed part with the accent and dims the rest, so the bar reads as "how
+     * far through the day's prayers we are". Returns null when the cycle can't
+     * be resolved (e.g. before today's Fajr, or no `days[]`), so the caller
+     * falls back to a plain progress bar.
+     */
+    @SuppressLint("NewApi")
+    private fun buildDayProgressStyle(
+      ctx: Context,
+      p: JSONObject,
+      accentInt: Int,
+    ): Notification.ProgressStyle? {
+      if (Build.VERSION.SDK_INT < 36) return null
+      return try {
+        val now = System.currentTimeMillis()
+        val days = p.optJSONArray("days")
+        if (days == null || days.length() == 0) return null
+
+        // Dated prayer instants across all supplied days.
+        val epochs = ArrayList<Pair<Long, String>>()
+        for (i in 0 until days.length()) {
+          val day = days.optJSONObject(i) ?: continue
+          val dateKey = day.optString("dateKey")
+          if (dateKey.isEmpty()) continue
+          day.optJSONArray("rows")?.let { rows ->
+            for (j in 0 until rows.length()) {
+              val r = rows.optJSONObject(j) ?: continue
+              val e = epochForDayTime(dateKey, r.optString("time"))
+              if (e > 0L) epochs.add(e to r.optString("key"))
+            }
+          }
+          day.optJSONObject("sunriseRow")?.let { sr ->
+            val e = epochForDayTime(dateKey, sr.optString("time"))
+            if (e > 0L) epochs.add(e to sr.optString("key", "Sunrise"))
+          }
+        }
+        if (epochs.size < 3) return null
+        epochs.sortBy { it.first }
+
+        // Cycle window: the Fajr at/just-before now → the next Fajr after now.
+        val fajrs = epochs.filter { it.second.equals("Fajr", ignoreCase = true) }
+        val cycleStart = fajrs.lastOrNull { it.first <= now }?.first
+        val cycleEnd = fajrs.firstOrNull { it.first > now }?.first
+        if (cycleStart == null || cycleEnd == null || cycleEnd <= cycleStart) return null
+
+        // Interior prayer instants strictly inside the cycle become points;
+        // the gaps between consecutive marks become segments.
+        val interior = epochs.map { it.first }
+          .filter { it > cycleStart && it < cycleEnd }
+          .distinct()
+          .sorted()
+        val marks = ArrayList<Long>().apply {
+          add(cycleStart); addAll(interior); add(cycleEnd)
+        }
+        val totalMin = ((cycleEnd - cycleStart) / 60_000L).toInt().coerceAtLeast(1)
+        val pointColor = contrastColor(accentInt)
+
+        val segments = ArrayList<Notification.ProgressStyle.Segment>()
+        for (k in 0 until marks.size - 1) {
+          val lenMin = ((marks[k + 1] - marks[k]) / 60_000L).toInt().coerceAtLeast(1)
+          segments.add(Notification.ProgressStyle.Segment(lenMin).setColor(accentInt))
+        }
+        // The upcoming prayer's marker is drawn in the accent colour so it
+        // pops on the dim (not-yet-reached) part of the track; the other
+        // markers use the neutral contrast colour.
+        val nextPrayerEpoch = interior.firstOrNull { it > now }
+        val points = interior.map { e ->
+          val pos = ((e - cycleStart) / 60_000L).toInt().coerceIn(0, totalMin)
+          val color = if (e == nextPrayerEpoch) accentInt else pointColor
+          Notification.ProgressStyle.Point(pos).setColor(color)
+        }
+        val progressMin = ((now - cycleStart) / 60_000L).toInt().coerceIn(0, totalMin)
+
+        val style = Notification.ProgressStyle()
+          .setProgress(progressMin)
+          .setProgressSegments(segments)
+          .setProgressPoints(points)
+        runCatching {
+          // Tracker dot at the current moment; sun→moon icons bookend the day
+          // cycle (dawn at the start, night at the end) for an at-a-glance read.
+          style.setProgressTrackerIcon(
+            Icon.createWithResource(ctx, R.drawable.ic_la_tracker),
+          )
+          style.setProgressStartIcon(
+            Icon.createWithResource(ctx, R.drawable.ic_la_sunrise),
+          )
+          style.setProgressEndIcon(
+            Icon.createWithResource(ctx, R.drawable.ic_la_moon),
+          )
+        }
+        style
+      } catch (t: Throwable) {
+        Log.w(NAME, "buildDayProgressStyle failed", t)
+        null
+      }
+    }
+
+    /** Local-timezone epoch (ms) for a `yyyy-MM-dd` + `HH:MM` pair, or 0. */
+    private fun epochForDayTime(dateKey: String, hhmm: String): Long {
+      val dm = Regex("^(\\d{4})-(\\d{2})-(\\d{2})$").find(dateKey) ?: return 0L
+      val tm = Regex("^(\\d{1,2}):(\\d{2})$").find(hhmm) ?: return 0L
+      val h = tm.groupValues[1].toInt()
+      val min = tm.groupValues[2].toInt()
+      if (h !in 0..23 || min !in 0..59) return 0L
+      return java.util.Calendar.getInstance().apply {
+        set(java.util.Calendar.YEAR, dm.groupValues[1].toInt())
+        set(java.util.Calendar.MONTH, dm.groupValues[2].toInt() - 1)
+        set(java.util.Calendar.DAY_OF_MONTH, dm.groupValues[3].toInt())
+        set(java.util.Calendar.HOUR_OF_DAY, h)
+        set(java.util.Calendar.MINUTE, min)
+        set(java.util.Calendar.SECOND, 0)
+        set(java.util.Calendar.MILLISECOND, 0)
+      }.timeInMillis
+    }
+
+    /** Pick black or white for markers so they read against the accent fill. */
+    private fun contrastColor(color: Int): Int {
+      val r = Color.red(color) / 255.0
+      val g = Color.green(color) / 255.0
+      val b = Color.blue(color) / 255.0
+      val lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+      return if (lum > 0.6) Color.parseColor("#1A1A1A") else Color.WHITE
     }
 
     // ── Pre-Android 16 path ─────────────────────────────────────────

@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.5.0] — 2026-06-15
+
+### Added
+- **Android Live Activity — native day-timeline (Android 16)**: The Live Activity now uses the platform `Notification.ProgressStyle` "Live Update" API to render the whole prayer day as a segmented timeline — accent-filled progress with a point marker at each prayer, a tracker dot at the current moment, and sunrise/crescent icons bookending the dawn→night cycle. The upcoming prayer's marker is highlighted in the accent colour. Falls back to a plain progress bar when the day cycle can't be resolved, and to the existing custom layout on pre-Android-16 devices.
+- **Header location chip on Android (parity with iOS)**: The current location is shown next to the Settings gear whenever a manual location is set — with or without saved presets. Tapping it always opens the location selector, which now includes an "Add a new location" action that jumps to Settings and briefly highlights the Saved Locations section.
+- **iOS Live Activity follows the system theme**: When Liquid Glass / system colours is selected, the Live Activity uses the dynamic iOS system tint (adapting to light/dark on its own) instead of the brand accent, so it matches the in-app theme.
+
+### Changed
+- **Refined standard theme (light + dark)**: Warmer, more reverent neutrals (deep ink-blue at night, warm paper by day); a calmer Next-Prayer hero (neutral surface with the countdown carrying the accent, instead of a saturated colour block); a refined deep/lifted emerald accent in place of the old neon green; softer, unified card radii; and a gentler active-row indicator.
+- **Android navigation bar follows the app theme**: The system navigation bar icons now match the selected light/dark theme (previously always dark).
+- **Themed restart prompt**: The "Restart required" dialog shown when toggling System colours is now a custom themed modal instead of the stock system alert.
+
 ## [2.4.0] — 2026-06-14
 
 ### Added

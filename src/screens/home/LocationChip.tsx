@@ -63,9 +63,15 @@ type Props = {
    * the same row as the other top-level controls.
    */
   compactHeader?: boolean;
+  /**
+   * Called from the selector's "Add new location" button — the caller
+   * routes to Settings (and flashes the Saved Locations section) so the
+   * user knows where to add a location.
+   */
+  onAddLocation?: () => void;
 };
 
-function LocationChipImpl({ compactHeader = false }: Props) {
+function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const { slice: settings, update: updateSettings } = useLocationSettings();
@@ -85,6 +91,15 @@ function LocationChipImpl({ compactHeader = false }: Props) {
 
   const onClose = useCallback(() => setOpen(false), []);
 
+  // Tapping the chip always opens the location selector — even with no
+  // saved presets, since the sheet always offers "Add new location".
+  const onPressChip = useCallback(() => setOpen(true), []);
+
+  const onAdd = useCallback(() => {
+    setOpen(false);
+    onAddLocation?.();
+  }, [onAddLocation]);
+
   const onPick = useCallback(
     (id: string) => {
       const preset = findPreset(presets, id);
@@ -100,7 +115,11 @@ function LocationChipImpl({ compactHeader = false }: Props) {
     [presets, updateSettings],
   );
 
-  if (settings.locationMode !== 'manual' || presets.length === 0) {
+  // Show whenever a manual location is set — even with no saved presets —
+  // so the header always surfaces the current location next to the gear
+  // (matching iOS). GPS/automatic mode has no static "selected location"
+  // label (only coords), so the chip stays hidden there.
+  if (settings.locationMode !== 'manual') {
     return null;
   }
 
@@ -110,7 +129,7 @@ function LocationChipImpl({ compactHeader = false }: Props) {
         accessibilityRole="button"
         accessibilityLabel={t('home.switchLocation')}
         accessibilityHint={chipLabel}
-        onPress={() => setOpen(true)}
+        onPress={onPressChip}
         hitSlop={compactHeader ? 10 : undefined}
         style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) =>
           compactHeader
@@ -186,6 +205,15 @@ function LocationChipImpl({ compactHeader = false }: Props) {
             <Text style={[typeStyle('headline'), { color: palette.text, marginBottom: SPACING.sm }]}>
               {t('locations.title')}
             </Text>
+            {presets.length === 0 ? (
+              <Text
+                style={[
+                  typeStyle('callout'),
+                  { color: palette.muted, marginBottom: SPACING.sm },
+                ]}>
+                {t('locations.empty')}
+              </Text>
+            ) : null}
             {presets.map(preset => {
               const isActive = preset.id === settings.activeLocationPresetId;
               return (
@@ -214,6 +242,21 @@ function LocationChipImpl({ compactHeader = false }: Props) {
                 </Pressable>
               );
             })}
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('locations.add')}
+              onPress={onAdd}
+              style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+                styles.addRow,
+                { borderTopColor: palette.border },
+                pressed && { opacity: 0.7 },
+                hovered && { opacity: 0.92 },
+              ]}>
+              <Text style={[typeStyle('body'), styles.addLabel, { color: palette.accent }]}>
+                + {t('locations.add')}
+              </Text>
+            </Pressable>
           </Pressable>
         </Pressable>
       </Modal>
@@ -271,5 +314,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
+  },
+  addRow: {
+    marginTop: 4,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  addLabel: {
+    fontWeight: '600',
   },
 });

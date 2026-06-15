@@ -1,8 +1,16 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { memo, useEffect, useRef, useState } from 'react';
+import {
+  Alert,
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useLocationSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -40,10 +48,29 @@ function sameCoord(a: number, b: number): boolean {
  * preset doesn't make sense — task #18's spec is about switching between
  * manual locations.
  */
-function SavedLocationsCardImpl() {
+function SavedLocationsCardImpl({
+  highlightSignal = 0,
+}: {
+  /** Bumped by the parent to trigger a brief attention flash (deep-link
+   *  from the home location selector's "Add new location"). */
+  highlightSignal?: number;
+}) {
   const { t } = useTranslation();
   const { slice: settings, update: updateSettings } = useLocationSettings();
   const { palette } = useAppPalette();
+
+  // Brief accent flash when the user is deep-linked here to add a location.
+  const flash = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!highlightSignal) return;
+    flash.setValue(0);
+    Animated.sequence([
+      Animated.timing(flash, { toValue: 1, duration: 280, useNativeDriver: false }),
+      Animated.timing(flash, { toValue: 0, duration: 280, useNativeDriver: false }),
+      Animated.timing(flash, { toValue: 1, duration: 280, useNativeDriver: false }),
+      Animated.timing(flash, { toValue: 0, duration: 420, useNativeDriver: false }),
+    ]).start();
+  }, [highlightSignal, flash]);
   const [draftName, setDraftName] = useState('');
   const [draftPlace, setDraftPlace] = useState<GeocodedPlace | null>(null);
   const [draftLatStr, setDraftLatStr] = useState('');
@@ -214,8 +241,24 @@ function SavedLocationsCardImpl() {
       <View
         style={[
           s.card,
+          styles.cardClip,
           { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
         ]}>
+        {/* Attention flash overlay — a soft accent wash that pulses when the
+            user is routed here to add a location. Non-interactive. */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: palette.accent,
+              opacity: flash.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.24],
+              }),
+            },
+          ]}
+        />
         {presets.length === 0 ? (
           <Text style={[s.help, { color: palette.muted }]}>
             {t('locations.empty')}
@@ -414,6 +457,11 @@ function SavedLocationsCardImpl() {
 export const SavedLocationsCard = memo(SavedLocationsCardImpl);
 
 const styles = StyleSheet.create({
+  // Clip the flash overlay to the card's rounded corners.
+  cardClip: {
+    overflow: 'hidden',
+    position: 'relative',
+  },
   list: {
     gap: 4,
   },

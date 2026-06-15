@@ -55,8 +55,15 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
     /// Empty string → omit.
     public var locationLabel: String
 
-    /// "#RRGGBB" — drives keyline tint + accent colour.
+    /// "#RRGGBB" — drives keyline tint + accent colour. Ignored when
+    /// `systemTinted` is true.
     public var accentHex: String
+
+    /// When true (iOS Liquid Glass / system colours active in-app) the views
+    /// ignore `accentHex` and use the dynamic iOS system tint, so the Live
+    /// Activity matches the system theme and adapts to light/dark by itself.
+    /// Defaults to false so older JS payloads still decode.
+    public var systemTinted: Bool = false
 
     /// Display knobs from the user's Settings → Live activity card.
     public var compactMode: Bool

@@ -90,12 +90,16 @@ const styles = StyleSheet.create({
     paddingStart: 20,
     position: 'relative',
   },
+  // Inset, rounded indicator pill instead of a full-bleed block — reads
+  // as a quieter, more refined "current" marker against the tinted row.
   activeBar: {
     position: 'absolute',
     start: 0,
-    top: 0,
-    bottom: 0,
-    width: 4,
+    top: 8,
+    bottom: 8,
+    width: 3,
+    borderTopEndRadius: 3,
+    borderBottomEndRadius: 3,
   },
   name: { fontSize: 17 },
   time: { fontSize: 17 },

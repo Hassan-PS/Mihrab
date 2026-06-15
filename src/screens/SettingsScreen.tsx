@@ -1,5 +1,7 @@
-import { useCallback, useRef, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useRoute, type RouteProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../navigation/types';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -40,6 +42,30 @@ export function SettingsScreen() {
   useBreakpoint();
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
+
+  // Deep-link highlight: when arriving from the home location selector's
+  // "Add new location" action, scroll to and briefly flash the Saved
+  // Locations section so the user knows where to add a location.
+  const route = useRoute<RouteProp<RootStackParamList, 'Settings'>>();
+  const scrollRef = useRef<ScrollView>(null);
+  const savedLocationsYRef = useRef(0);
+  const [savedHighlightSignal, setSavedHighlightSignal] = useState(0);
+  const didHighlightRef = useRef(false);
+
+  useEffect(() => {
+    if (route.params?.highlight !== 'savedLocations') return;
+    if (didHighlightRef.current) return;
+    didHighlightRef.current = true;
+    // Let the cards lay out (so the y-offset is measured) before scrolling.
+    const id = setTimeout(() => {
+      scrollRef.current?.scrollTo({
+        y: Math.max(0, savedLocationsYRef.current - 12),
+        animated: true,
+      });
+      setSavedHighlightSignal(s => s + 1);
+    }, 400);
+    return () => clearTimeout(id);
+  }, [route.params?.highlight]);
 
   const [methodModal, setMethodModal] = useState(false);
   const [offsetsModal, setOffsetsModal] = useState(false);
@@ -86,6 +112,7 @@ export function SettingsScreen() {
   return (
     <>
       <ScrollView
+        ref={scrollRef}
         style={[styles.scroll, { backgroundColor: palette.bg }]}
         contentContainerStyle={styles.scrollContent}
         contentInsetAdjustmentBehavior="automatic"
@@ -95,7 +122,12 @@ export function SettingsScreen() {
         <WidgetCard />
         <DataSourceCard onOpenProviderPicker={openProvider} />
         <LocationCard />
-        <SavedLocationsCard />
+        <View
+          onLayout={e => {
+            savedLocationsYRef.current = e.nativeEvent.layout.y;
+          }}>
+          <SavedLocationsCard highlightSignal={savedHighlightSignal} />
+        </View>
         <CalculationCard
           onOpenMethodPicker={openMethod}
           onOpenOffsetsModal={openOffsets}
