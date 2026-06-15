@@ -8,8 +8,18 @@ import {
   type ViewProps,
   type ViewStyle,
 } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
 import { useAppPalette } from '../hooks/useAppPalette';
+
+// The blur native module is iOS-only here (see the Platform.OS === 'ios' gate
+// below). It's excluded from Android autolinking (react-native.config.js) to
+// keep jitpack out of the Android/F-Droid build, so require it lazily on iOS
+// only — importing it on Android would try to resolve a native component that
+// isn't linked.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const BlurView: any =
+  Platform.OS === 'ios'
+    ? require('@react-native-community/blur').BlurView
+    : null;
 
 /**
  * GlassSurface — a card surface that renders as translucent blurred material
