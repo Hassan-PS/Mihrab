@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.8] — 2026-06-16
+
+### Changed
+- **See-through navigation bar (Android)**: the 3-button navigation bar is now fully transparent and integrated — the app's background flows underneath it (the OS contrast scrim is disabled), while content stays above the buttons. Button icons still follow the light/dark theme.
+
 ## [2.7.7] — 2026-06-16
 
 ### Changed

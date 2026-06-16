@@ -1,6 +1,8 @@
 package com.prayer_times
 
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Process
 import android.util.TypedValue
 import androidx.core.view.WindowCompat
@@ -52,12 +54,28 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
    * via the AndroidX inset controller so the back/home/recents glyphs —
    * and the 3-button scrim — match the in-app palette, not just the OS
    * dark/light setting. Must run on the UI thread.
+   *
+   * It also makes the navigation bar fully see-through so the app content
+   * flows underneath it (integrated, edge-to-edge look):
+   *  • decor draws behind the system bars (setDecorFitsSystemWindows=false);
+   *  • the nav-bar background is transparent;
+   *  • the OS contrast scrim behind the 3-button bar is disabled
+   *    (isNavigationBarContrastEnforced=false) so the buttons sit directly
+   *    over the app's own background instead of a grey band.
+   * The app's per-screen bottom insets keep interactive content above the
+   * buttons; only the background shows through.
    */
   @ReactMethod
   fun setNavigationBarStyle(isDark: Boolean) {
     val activity = getCurrentActivity() ?: return
     activity.runOnUiThread {
       val window = activity.window ?: return@runOnUiThread
+      WindowCompat.setDecorFitsSystemWindows(window, false)
+      @Suppress("DEPRECATION")
+      window.navigationBarColor = Color.TRANSPARENT
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        window.isNavigationBarContrastEnforced = false
+      }
       val controller = WindowCompat.getInsetsController(window, window.decorView)
       controller.isAppearanceLightNavigationBars = !isDark
     }
