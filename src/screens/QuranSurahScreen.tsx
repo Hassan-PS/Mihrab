@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
@@ -52,6 +53,7 @@ export function QuranSurahScreen() {
   // redundant noise — the Arabic title above is the canonical one.
   const isArabic = i18n.language === 'ar';
   const { palette } = useAppPalette();
+  const insets = useSafeAreaInsets();
   const { settings, updateSettings } = usePrayerSettings();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -226,7 +228,7 @@ export function QuranSurahScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: palette.bg }}
-      contentContainerStyle={styles.scroll}
+      contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
       contentInsetAdjustmentBehavior="automatic">
       <View
         style={[

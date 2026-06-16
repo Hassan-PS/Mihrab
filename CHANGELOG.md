@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.9] — 2026-06-16
+
+### Fixed
+- **Content no longer clipped by the see-through navigation bar (Android)**: with the nav bar now transparent and the app drawing edge-to-edge, the Home, Settings, Monthly times, and Quran reader screens now pad their scroll content by the bottom safe-area inset, so the last row of cards/tiles/ayahs sits fully above the navigation buttons instead of being hidden behind them.
+
 ## [2.7.8] — 2026-06-16
 
 ### Changed

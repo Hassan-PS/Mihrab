@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, type RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/types';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
@@ -42,6 +43,7 @@ export function SettingsScreen() {
   useBreakpoint();
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
+  const insets = useSafeAreaInsets();
 
   // Deep-link highlight: when arriving from the home location selector's
   // "Add new location" action, scroll to and briefly flash the Saved
@@ -114,7 +116,10 @@ export function SettingsScreen() {
       <ScrollView
         ref={scrollRef}
         style={[styles.scroll, { backgroundColor: palette.bg }]}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 24 },
+        ]}
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled">
         <AppearanceCard />

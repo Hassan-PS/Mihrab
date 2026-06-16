@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Platform, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Skeleton } from '../components/ui/Skeleton';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -36,6 +37,7 @@ export function MonthTimesScreen() {
   const { t, i18n } = useTranslation();
   const { settings, hydrated } = usePrayerSettings();
   const { palette } = useAppPalette();
+  const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
   const today = useMemo(() => {
@@ -254,7 +256,7 @@ export function MonthTimesScreen() {
         contentInsetAdjustmentBehavior="never"
         keyExtractor={item => formatLocalDate(item.date)}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
         ListEmptyComponent={
           !loading && !error ? (
             <Text style={[styles.empty, { color: palette.muted }]}>{t('month.empty')}</Text>

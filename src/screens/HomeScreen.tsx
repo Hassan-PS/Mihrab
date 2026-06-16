@@ -12,6 +12,7 @@ import notifee, {
   AndroidNotificationSetting,
   AuthorizationStatus,
 } from '@notifee/react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -74,6 +75,7 @@ export function HomeScreen() {
   // home render.
   usePrefetchSavedLocations();
   const { palette } = useAppPalette();
+  const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth - HOME_SCREEN_PADDING * 2;
 
@@ -483,7 +485,10 @@ export function HomeScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: palette.bg }]}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingBottom: insets.bottom + 28 },
+      ]}
       contentInsetAdjustmentBehavior="automatic">
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
