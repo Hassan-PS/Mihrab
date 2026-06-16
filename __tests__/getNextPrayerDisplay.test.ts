@@ -63,14 +63,20 @@ describe('getNextPrayerDisplay', () => {
     expect(next).toBeNull();
   });
 
-  test('returns null after Isha when tomorrow has no Fajr', () => {
+  test('after Isha, falls back to the earliest tomorrow event when Fajr is missing', () => {
+    // getNextPrayerDisplay returns the chronologically earliest upcoming event
+    // across today + tomorrow (not just tomorrow's Fajr), so optional pre-dawn
+    // times (Islamic Midnight / Last Third) can surface as "next" after Isha.
+    // When tomorrow's Fajr is absent it therefore yields the next available
+    // tomorrow event (Sunrise here) rather than null.
     const now = new Date(2026, 3, 9, 21, 0, 0);
     const next = getNextPrayerDisplay(
       TODAY,
       { ...TOMORROW, Fajr: '' } as Record<string, string>,
       now,
     );
-    expect(next).toBeNull();
+    expect(next?.name).toBe('Sunrise');
+    expect(next?.at.getDate()).toBe(10);
   });
 
   test('"at" timestamp is always strictly in the future', () => {
