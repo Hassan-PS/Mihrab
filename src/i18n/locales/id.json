@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
     "sub": "Waktu sholat tergantung di mana Anda berada. Pilih salah satu opsi di bawah — Anda dapat mengubahnya nanti di Pengaturan.",
-    "useAutomatic": "Gunakan lokasi perangkat",
+    "useAutomatic": "Gunakan lokasi saya",
     "searchCoords": "Cari atau masukkan koordinat",
     "manualHeadline": "Lokasi manual",
     "manualSub": "Cari dan ketuk hasil untuk menyelesaikannya — atau ketik lintang dan bujur di bawah dan tekan Lanjutkan.",

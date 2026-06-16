@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.2] — 2026-06-16
+
+### Changed
+- **Live Activity timeline — one gap per prayer**: The Android day-timeline is now a clean segmented bar with a separator at each of the six events (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha) — no milestone dots, tracker thumb, or start/end icons. The bar is anchored at the middle of the night so every prayer (including Fajr and Isha) sits as its own gap rather than at an edge, with the night shown as the two end pieces. Short intervals are floored to a minimum width so all six gaps stay readable; the filled/unfilled boundary still marks "now".
+- **Live Activity "Countdown" design reverted to the chip-safe layout**: On Android 16 a larger shade countdown can't coexist with the status-bar chip and always-on display (a custom view or enlarged title disqualifies the promoted-ongoing chip), so the Countdown design keeps the standard layout that preserves both.
+
+### Fixed
+- **Location onboarding (App Store guideline 5.1.1)**: The "Set your location" step no longer has a "Skip for now" exit, and the GPS button is now neutrally labelled "Use my location". Users can still avoid the OS prompt by entering a location manually.
+
 ## [2.7.1] — 2026-06-16
 
 ### Added

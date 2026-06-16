@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Log
 import android.widget.RemoteViews
@@ -419,9 +418,11 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
         if (design == "countdown") {
           // The live countdown is the prominent title (the largest text the
-          // standard template renders — keeping it standard, not custom
-          // RemoteViews, is what preserves the chip + AOD on hardened shells).
-          // The next prayer's name + clock time sit beneath it.
+          // standard template renders — keeping it a standard base template,
+          // not custom RemoteViews, is what preserves the Android 16
+          // promoted-ongoing chip + always-on display; a custom view of any
+          // kind disqualifies the chip, as does a title size span being
+          // stripped). The next prayer's name + clock time sit beneath it.
           builder.setContentTitle(countdown)
           val sub = when {
             nextLabel.isNotEmpty() && nextTime.isNotEmpty() -> "$nextLabel · $nextTime"
@@ -512,18 +513,43 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         if (epochs.size < 3) return null
         epochs.sortBy { it.first }
 
-        // Cycle window: the Fajr at/just-before now → the next Fajr after now.
-        val fajrs = epochs.filter { it.second.equals("Fajr", ignoreCase = true) }
-        val cycleStart = fajrs.lastOrNull { it.first <= now }?.first
-        val cycleEnd = fajrs.firstOrNull { it.first > now }?.first
+        // Cycle window: solar-midnight → next solar-midnight, where solar
+        // midnight is the midpoint of the night (an Isha → the next Fajr).
+        // Anchoring at the middle of the night puts ALL SIX events (Fajr,
+        // Sunrise, Dhuhr, Asr, Maghrib, Isha) strictly INSIDE the bar, so each
+        // is its own gap and neither Fajr nor Isha sits flush at an edge. The
+        // night then shows as the two end pieces — the half after Isha and the
+        // half before Fajr — i.e. "the space between Isha and Fajr".
+        val fajrEpochs = epochs.filter { it.second.equals("Fajr", true) }
+          .map { it.first }.sorted()
+        val ishaEpochs = epochs.filter { it.second.equals("Isha", true) }
+          .map { it.first }.sorted()
+        if (fajrEpochs.isEmpty() || ishaEpochs.isEmpty()) return null
+        // Midpoint of each night (Isha → the next Fajr after it).
+        val nightMids = ishaEpochs.mapNotNull { isha ->
+          fajrEpochs.firstOrNull { it > isha }?.let { f -> (isha + f) / 2 }
+        }.toMutableList()
+        // We usually don't have yesterday's Isha / the day-after's Fajr, so
+        // synthesize a midpoint just before the first Fajr and just after the
+        // last Isha (using a typical half-night) to cover a pre-dawn / late
+        // post-midnight "now".
+        val typicalHalfNight = ishaEpochs.firstOrNull()?.let { isha ->
+          fajrEpochs.firstOrNull { it > isha }?.let { f -> (f - isha) / 2 }
+        } ?: (4L * 3600_000L)
+        nightMids.add(fajrEpochs.first() - typicalHalfNight)
+        nightMids.add(ishaEpochs.last() + typicalHalfNight)
+        val mids = nightMids.distinct().sorted()
+        val cycleStart = mids.lastOrNull { it <= now }
+        val cycleEnd = mids.firstOrNull { it > now }
         if (cycleStart == null || cycleEnd == null || cycleEnd <= cycleStart) return null
 
-        // Interior prayer instants → markers; gaps between consecutive marks →
-        // segments, so spacing is proportional to the real time between prayers.
+        // The six events fall strictly inside the night→night window, so each
+        // becomes an interior gap; segments are the spans between marks.
         val interior = epochs.map { it.first }
           .filter { it > cycleStart && it < cycleEnd }
           .distinct()
           .sorted()
+        if (interior.isEmpty()) return null
         val marks = ArrayList<Long>().apply {
           add(cycleStart); addAll(interior); add(cycleEnd)
         }
@@ -531,37 +557,55 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         // proportional to the real time between prayers AND the tracker
         // advances smoothly every second (the service re-posts each second
         // while the screen is on) rather than jumping once a minute.
-        val totalSec = ((cycleEnd - cycleStart) / 1000L).toInt().coerceAtLeast(1)
-        val pointColor = contrastColor(accentInt)
-
-        // Each inter-prayer gap is one segment, its length = the real seconds
-        // between those two prayers → distances are accurate to the actual
-        // time between prayer times. The line uses the (system) accent colour.
-        val segments = ArrayList<Notification.ProgressStyle.Segment>()
-        for (k in 0 until marks.size - 1) {
-          val lenSec = ((marks[k + 1] - marks[k]) / 1000L).toInt().coerceAtLeast(1)
-          segments.add(Notification.ProgressStyle.Segment(lenSec).setColor(accentInt))
+        // Segments are the spans between marks. With the night→night window
+        // there are seven: the half-night before Fajr, the five daytime spans
+        // (Fajr→Sunrise→Dhuhr→Asr→Maghrib→Isha), and the half-night after Isha
+        // — separated by SIX notches, one at each of the six events (each
+        // prayer + Sunrise gets its own gap). Widths are time-proportional, BUT
+        // each is floored to a minimum share of the bar — otherwise short spans
+        // (Fajr→Sunrise, Maghrib→Isha, a short summer night-half) shrink to an
+        // unreadable sliver and the gaps get lost. Android 16 draws the notch
+        // between segments — no milestone dots, no start/end icons (which also
+        // frees the full width).
+        val rawLens = (0 until marks.size - 1).map {
+          (marks[it + 1] - marks[it]).coerceAtLeast(1L)
         }
-        // The upcoming prayer's marker pops in the accent; the rest are neutral.
-        val nextPrayerEpoch = interior.firstOrNull { it > now }
-        val points = interior.map { e ->
-          val pos = ((e - cycleStart) / 1000L).toInt().coerceIn(0, totalSec)
-          val color = if (e == nextPrayerEpoch) accentInt else pointColor
-          Notification.ProgressStyle.Point(pos).setColor(color)
+        val rawTotal = rawLens.sum().toDouble()
+        val n = rawLens.size
+        // Each gap is at least `minShare` of the bar; cap the total floor so the
+        // minimums can never exceed ~66% of the bar (leaves room to stay
+        // proportional when one gap — e.g. a winter night — is very long).
+        val minShare = minOf(0.12, 0.66 / n)
+        val floorLen = rawTotal * minShare
+        val adjLens = rawLens.map { maxOf(it.toDouble(), floorLen) }
+        val adjTotal = adjLens.sum()
+        // Integer unit space shared by the segment lengths and the progress.
+        val unit = 100_000.0
+        val segUnits = adjLens.map { (it / adjTotal * unit).toInt().coerceAtLeast(1) }
+        val segments = segUnits.mapIndexed { _, u ->
+          Notification.ProgressStyle.Segment(u).setColor(accentInt)
         }
-        // Current position, recomputed from the wall clock on every (re)post.
-        val progressSec = ((now - cycleStart) / 1000L).toInt().coerceIn(0, totalSec)
+        // "Now" remapped into the same floored space so the filled/unfilled
+        // boundary (the only "now" marker — no tracker thumb) still lands at the
+        // real current time within whichever gap we're in.
+        var progressUnits = 0
+        for (i in 0 until n) {
+          val segStart = marks[i]
+          val segEnd = marks[i + 1]
+          if (now >= segEnd) {
+            progressUnits += segUnits[i]
+          } else if (now > segStart) {
+            val frac = (now - segStart).toDouble() / (segEnd - segStart).toDouble()
+            progressUnits += (segUnits[i] * frac).toInt()
+            break
+          } else {
+            break
+          }
+        }
 
-        val style = Notification.ProgressStyle()
-          .setProgress(progressSec)
+        Notification.ProgressStyle()
+          .setProgress(progressUnits)
           .setProgressSegments(segments)
-          .setProgressPoints(points)
-        runCatching {
-          style.setProgressTrackerIcon(Icon.createWithResource(ctx, R.drawable.ic_la_tracker))
-          style.setProgressStartIcon(Icon.createWithResource(ctx, R.drawable.ic_la_sunrise))
-          style.setProgressEndIcon(Icon.createWithResource(ctx, R.drawable.ic_la_moon))
-        }
-        style
       } catch (t: Throwable) {
         Log.w(NAME, "buildDayProgressStyle failed", t)
         null
@@ -584,15 +628,6 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         set(java.util.Calendar.SECOND, 0)
         set(java.util.Calendar.MILLISECOND, 0)
       }.timeInMillis
-    }
-
-    /** Pick black or white for markers so they read against the accent fill. */
-    private fun contrastColor(color: Int): Int {
-      val r = Color.red(color) / 255.0
-      val g = Color.green(color) / 255.0
-      val b = Color.blue(color) / 255.0
-      val lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
-      return if (lum > 0.6) Color.parseColor("#1A1A1A") else Color.WHITE
     }
 
     // ── Pre-Android 16 path ─────────────────────────────────────────

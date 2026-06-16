@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
     "sub": "Namaz vakitleri nerede olduğunuza bağlıdır. Aşağıdaki seçeneklerden birini seçin; bunu daha sonra Ayarlar'dan değiştirebilirsiniz.",
-    "useAutomatic": "Cihaz konumunu kullan",
+    "useAutomatic": "Konumumu kullan",
     "searchCoords": "Koordinatları arayın veya girin",
     "manualHeadline": "Manuel konum",
     "manualSub": "Bitirmek için bir sonucu arayın ve dokunun — veya aşağıya enlem ve boylam yazın ve Devam'a basın.",

@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "Set your location",
     "sub": "Prayer times depend on where you are. Choose one of the options below — you can change this later in Settings.",
-    "useAutomatic": "Use device location",
+    "useAutomatic": "Use my location",
     "searchCoords": "Search or enter coordinates",
     "manualHeadline": "Manual location",
     "manualSub": "Search and tap a result to finish — or type latitude and longitude below and press Continue.",

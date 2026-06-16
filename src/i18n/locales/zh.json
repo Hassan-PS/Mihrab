@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "设置您的位置",
     "sub": "祈祷时间取决于您所在的位置。选择以下选项之一 - 您可以稍后在“设置”中更改此选项。",
-    "useAutomatic": "使用设备位置",
+    "useAutomatic": "使用我的位置",
     "searchCoords": "搜索或输入坐标",
     "manualHeadline": "手动定位",
     "manualSub": "搜索并点击结果即可完成 - 或在下面输入纬度和经度，然后按继续。",

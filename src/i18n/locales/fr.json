@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "Définissez votre emplacement",
     "sub": "Les horaires de prière dépendent de l'endroit où vous vous trouvez. Choisissez l’une des options ci-dessous – vous pourrez la modifier ultérieurement dans Paramètres.",
-    "useAutomatic": "Utiliser l'emplacement de l'appareil",
+    "useAutomatic": "Utiliser ma position",
     "searchCoords": "Rechercher ou saisir des coordonnées",
     "manualHeadline": "Localisation manuelle",
     "manualSub": "Recherchez et appuyez sur un résultat pour terminer – ou saisissez la latitude et la longitude ci-dessous et appuyez sur Continuer.",

@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "Establece tu ubicación",
     "sub": "Los tiempos de oración dependen de dónde se encuentre. Elija una de las opciones siguientes; podrá cambiarla más adelante en Configuración.",
-    "useAutomatic": "Usar la ubicación del dispositivo",
+    "useAutomatic": "Usar mi ubicación",
     "searchCoords": "Buscar o ingresar coordenadas",
     "manualHeadline": "Ubicación manual",
     "manualSub": "Busque y toque un resultado para finalizar, o escriba latitud y longitud a continuación y presione Continuar.",

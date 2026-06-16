@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "Ange din plats",
     "sub": "Bönetider beror på var du är. Välj ett av alternativen nedan — du kan ändra det senare i Inställningar.",
-    "useAutomatic": "Använd enhetens plats",
+    "useAutomatic": "Använd min plats",
     "searchCoords": "Sök eller ange koordinater",
     "manualHeadline": "Manuell plats",
     "manualSub": "Sök och tryck på ett resultat för att slutföra — eller skriv latitud och longitud nedan och tryck Fortsätt.",

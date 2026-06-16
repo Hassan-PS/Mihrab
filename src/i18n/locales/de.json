@@ -212,7 +212,7 @@
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
     "sub": "Die Gebetszeiten hängen davon ab, wo Sie sich befinden. Wählen Sie eine der folgenden Optionen – Sie können dies später in den Einstellungen ändern.",
-    "useAutomatic": "Verwenden Sie den Gerätestandort",
+    "useAutomatic": "Meinen Standort verwenden",
     "searchCoords": "Koordinaten suchen oder eingeben",
     "manualHeadline": "Manueller Standort",
     "manualSub": "Suchen Sie und tippen Sie auf ein Ergebnis, um den Vorgang abzuschließen – oder geben Sie unten Breiten- und Längengrad ein und klicken Sie auf „Weiter“.",

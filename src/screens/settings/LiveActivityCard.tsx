@@ -34,16 +34,23 @@ function DesignPreview({
       </View>
     );
   }
-  // timeline
+  // timeline — segmented bar, one gap per prayer (no dots/circles); the
+  // filled segments up to "now", the rest dimmed.
   return (
     <View style={[styles.preview, { backgroundColor: surface }]}>
       <Text style={[styles.previewRow, { color: text }]}>Maghrib · 2:18</Text>
-      <View style={styles.barTrack}>
-        <View style={[styles.barFill, { backgroundColor: accent }]} />
-        <View style={[styles.dot, { start: '20%', backgroundColor: muted }]} />
-        <View style={[styles.dot, { start: '45%', backgroundColor: accent }]} />
-        <View style={[styles.dot, { start: '70%', backgroundColor: muted }]} />
-        <View style={[styles.dot, { start: '90%', backgroundColor: muted }]} />
+      <View style={styles.segRow}>
+        {[0, 1, 2, 3, 4, 5, 6].map(i => (
+          <View
+            key={i}
+            style={[
+              styles.seg,
+              i < 4
+                ? { backgroundColor: accent }
+                : { backgroundColor: muted, opacity: 0.4 },
+            ]}
+          />
+        ))}
       </View>
     </View>
   );
@@ -185,27 +192,15 @@ const styles = StyleSheet.create({
   previewCountdown: { fontSize: 22, fontWeight: '800', letterSpacing: 0.5 },
   previewSub: { fontSize: 11, fontWeight: '500' },
   previewRow: { fontSize: 13, fontWeight: '700' },
-  barTrack: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(127,127,127,0.25)',
+  segRow: {
+    flexDirection: 'row',
+    gap: 3,
     marginTop: 6,
-    position: 'relative',
-    justifyContent: 'center',
+    alignItems: 'center',
   },
-  barFill: {
-    position: 'absolute',
-    start: 0,
-    top: 0,
-    bottom: 0,
-    width: '55%',
+  seg: {
+    flex: 1,
+    height: 5,
     borderRadius: 3,
-  },
-  dot: {
-    position: 'absolute',
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginStart: -3,
   },
 });

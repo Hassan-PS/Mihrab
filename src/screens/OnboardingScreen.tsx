@@ -336,21 +336,30 @@ export function OnboardingScreen() {
           </Pressable>
         ) : null}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t(step.secondaryKey)}
-          onPress={advance}
-          style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
-            styles.secondary,
-            { borderRadius: RADIUS.md },
-            pressed && { opacity: 0.6 }, hovered && { opacity: 0.92 },
-          ]}>
-          <Text
-            style={[typeStyle('callout'), { color: palette.muted }]}
-            numberOfLines={1}>
-            {t(step.secondaryKey)}
-          </Text>
-        </Pressable>
+        {/* The location step intentionally has NO "Skip for now" button:
+            App Store guideline 5.1.1(iv) requires the location pre-permission
+            screen to always lead to the prompt with no exit/delay control.
+            Users still aren't forced to grant GPS — LocationSetup offers a
+            manual "Search for a city" path that completes the step without
+            the OS permission. Other steps (notifications, exact alarms) keep
+            the skip affordance. */}
+        {step.id !== 'location' ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t(step.secondaryKey)}
+            onPress={advance}
+            style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+              styles.secondary,
+              { borderRadius: RADIUS.md },
+              pressed && { opacity: 0.6 }, hovered && { opacity: 0.92 },
+            ]}>
+            <Text
+              style={[typeStyle('callout'), { color: palette.muted }]}
+              numberOfLines={1}>
+              {t(step.secondaryKey)}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
     </ScrollView>
   );
