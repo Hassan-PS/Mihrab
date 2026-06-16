@@ -83,6 +83,9 @@
     "prayerTimes": "نماز کے اوقات"
   },
   "settings": {
+    "laDesignLabel": "انداز",
+    "laDesignTimeline": "ٹائم لائن",
+    "laDesignCountdown": "الٹی گنتی",
     "appearance": "ظاہری شکل",
     "theme": "تھیم",
     "themeSystem": "سسٹم",

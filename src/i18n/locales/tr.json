@@ -83,6 +83,9 @@
     "prayerTimes": "Namaz Vakitleri"
   },
   "settings": {
+    "laDesignLabel": "Stil",
+    "laDesignTimeline": "Zaman çizelgesi",
+    "laDesignCountdown": "Geri sayım",
     "appearance": "Dış görünüş",
     "theme": "Tema",
     "themeSystem": "Sistem",

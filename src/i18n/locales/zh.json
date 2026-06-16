@@ -83,6 +83,9 @@
     "prayerTimes": "祈祷时间"
   },
   "settings": {
+    "laDesignLabel": "样式",
+    "laDesignTimeline": "时间轴",
+    "laDesignCountdown": "倒计时",
     "appearance": "外貌",
     "theme": "主题",
     "themeSystem": "系统",

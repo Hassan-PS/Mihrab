@@ -195,12 +195,15 @@ export type PrayerAppSettings = {
   liveActivityShowHijri: boolean;
   liveActivityShowLocation: boolean;
   /**
-   * Visual style for the Android Live Activity (Android 16 ProgressStyle).
-   *   'colorized'  — accent-coloured notification background (bold).
-   *   'timeOfDay'  — neutral card with a dawn→dusk→night colour ramp on the bar.
-   * Both keep the status-bar chip + the always-on ongoing notification.
+   * Visual style for the Android Live Activity. Both preserve the Android 16
+   * status-bar chip + the always-on ongoing notification.
+   *   'timeline'  — the full prayer-day ProgressStyle timeline with a marker at
+   *                 each prayer and an inline countdown in the title (default).
+   *   'countdown' — countdown-focused: the live countdown is the prominent title,
+   *                 with the next prayer's name + clock time beneath it.
+   * Android only; ignored on iOS.
    */
-  liveActivityDesign: 'colorized' | 'timeOfDay';
+  liveActivityDesign: 'timeline' | 'countdown';
   /**
    * Non-prayer time toggles. Each gates one optional entry across the prayer
    * table, notifications, home-screen widget, and Live Activity. All three use
@@ -271,7 +274,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   liveActivityShowSunrise: true,
   liveActivityShowHijri: true,
   liveActivityShowLocation: true,
-  liveActivityDesign: 'timeOfDay',
+  liveActivityDesign: 'timeline',
   // Sunrise on by default (unchanged behaviour); the two night times off by
   // default so existing users see no new rows/notifications until they opt in.
   sunriseEnabled: true,

@@ -83,6 +83,9 @@
     "prayerTimes": "مواقيت الصلاة"
   },
   "settings": {
+    "laDesignLabel": "النمط",
+    "laDesignTimeline": "الجدول الزمني",
+    "laDesignCountdown": "العد التنازلي",
     "appearance": "المظهر",
     "theme": "السمة",
     "themeSystem": "النظام",

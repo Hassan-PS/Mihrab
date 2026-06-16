@@ -83,6 +83,9 @@
     "prayerTimes": "Время молитв"
   },
   "settings": {
+    "laDesignLabel": "Стиль",
+    "laDesignTimeline": "Хронология",
+    "laDesignCountdown": "Обратный отсчёт",
     "appearance": "Появление",
     "theme": "Тема",
     "themeSystem": "Система",

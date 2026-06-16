@@ -73,10 +73,10 @@ export type MihrabLiveActivityPayload = {
   /** App accent hex (#RRGGBB) — drives the dot, chronometer text,
    *  progress-bar tint. */
   accentHex: string;
-  /** Enhanced visual style for the Android 16 ProgressStyle Live Activity:
-   *   'colorized' — accent-coloured notification background.
-   *   'timeOfDay' — neutral card with a dawn→dusk→night colour ramp. */
-  design?: 'colorized' | 'timeOfDay';
+  /** Android Live Activity visual style (both keep the chip + AOD):
+   *   'timeline'  — full prayer-day ProgressStyle timeline + inline countdown.
+   *   'countdown' — countdown-focused: big countdown title + prayer name/time. */
+  design?: 'timeline' | 'countdown';
   /** Display knobs. */
   compactMode: boolean;
   showSunrise: boolean;

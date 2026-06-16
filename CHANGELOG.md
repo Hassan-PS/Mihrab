@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.1] — 2026-06-16
+
+### Added
+- **Android Live Activity — new "Countdown" design + style picker**: A second Live Activity layout for Android that puts the live countdown front-and-centre as the large title, with the next prayer's name and clock time beneath it. Both designs keep the Android 16 status-bar chip and the always-on display. Choose between **Timeline** (the prayer-day progress bar with a marker at each prayer) and **Countdown** under Settings → Live Activity, with a live preview of each. Android only.
+
+### Changed
+- **Live Activity countdown includes the night times**: When Islamic Midnight / Last Third are enabled, the Live Activity now counts down to them (and shows them on the Android timeline) as well as the five prayers and sunrise.
+
 ## [2.7.0] — 2026-06-15
 
 ### Added

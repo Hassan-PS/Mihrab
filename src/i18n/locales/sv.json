@@ -83,6 +83,9 @@
     "prayerTimes": "Bönetider"
   },
   "settings": {
+    "laDesignLabel": "Stil",
+    "laDesignTimeline": "Tidslinje",
+    "laDesignCountdown": "Nedräkning",
     "appearance": "Utseende",
     "theme": "Tema",
     "themeSystem": "System",

@@ -202,7 +202,7 @@ async function syncLiveActivityImpl(args: {
    *  system tint so it matches the in-app theme and adapts to light/dark. */
   systemTinted?: boolean;
   /** Android only: which enhanced Live Activity visual style to render. */
-  design?: 'colorized' | 'timeOfDay';
+  design?: 'timeline' | 'countdown';
 }): Promise<void> {
   const now = args.now ?? new Date();
 
@@ -264,7 +264,7 @@ async function syncLiveActivityImpl(args: {
       hijriLabel: '',
       locationLabel: '',
       accentHex,
-      design: args.design ?? 'timeOfDay',
+      design: args.design ?? 'timeline',
       compactMode: true,
       showSunrise: true,
       showHijri: false,

@@ -83,6 +83,9 @@
     "prayerTimes": "Horaires de prière"
   },
   "settings": {
+    "laDesignLabel": "Style",
+    "laDesignTimeline": "Chronologie",
+    "laDesignCountdown": "Compte à rebours",
     "appearance": "Apparence",
     "theme": "Thème",
     "themeSystem": "Système",

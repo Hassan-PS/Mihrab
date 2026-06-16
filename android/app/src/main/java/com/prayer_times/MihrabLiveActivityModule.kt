@@ -397,10 +397,12 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val inlineTitle =
           if (nextLabel.isNotEmpty()) "$nextLabel · $countdown" else title
 
-        // v2.5.0 neutral card (NOT colorized — a colorized notification is not
-        // eligible for the status-bar chip). The system colour is applied to
-        // the ProgressStyle line via setColor + the day timeline below.
-        val dayStyle = buildDayProgressStyle(ctx, p, accentInt)
+        // Two designs, both NOT colorized (a colorized notification is not
+        // eligible for the status-bar chip) and both keeping the chip + AOD:
+        //   'timeline'  — full ProgressStyle prayer-day timeline + inline title.
+        //   'countdown' — countdown-focused: big countdown title + prayer/time.
+        val design = p.optString("design", "timeline")
+        val nextTime = p.optString("nextTime", "")
 
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
@@ -411,20 +413,37 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setContentTitle(if (dayStyle != null) inlineTitle else "$inlineTitle · $progressPct%")
           .setUsesChronometer(false)
           .setShowWhen(false)
           .setContentIntent(contentIntent)
 
-        // Actual prayer time shown small/grey in the header (next to app name).
-        val nextTime = p.optString("nextTime", "")
-        if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
-
-        if (dayStyle != null) {
-          builder.setStyle(dayStyle)
-        } else {
-          // No timeline (pre-dawn / missing day data): plain determinate bar.
+        if (design == "countdown") {
+          // The live countdown is the prominent title (the largest text the
+          // standard template renders — keeping it standard, not custom
+          // RemoteViews, is what preserves the chip + AOD on hardened shells).
+          // The next prayer's name + clock time sit beneath it.
+          builder.setContentTitle(countdown)
+          val sub = when {
+            nextLabel.isNotEmpty() && nextTime.isNotEmpty() -> "$nextLabel · $nextTime"
+            nextLabel.isNotEmpty() -> nextLabel
+            else -> title
+          }
+          builder.setContentText(sub)
+          // Simple linear progress toward the next prayer (no day timeline).
           builder.setProgress(100, progressPct, false)
+        } else {
+          // timeline (default): inline countdown in the title + the day timeline.
+          val dayStyle = buildDayProgressStyle(ctx, p, accentInt)
+          builder.setContentTitle(
+            if (dayStyle != null) inlineTitle else "$inlineTitle · $progressPct%",
+          )
+          // Actual prayer time shown small/grey in the header (next to app name).
+          if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
+          if (dayStyle != null) {
+            builder.setStyle(dayStyle)
+          } else {
+            builder.setProgress(100, progressPct, false)
+          }
         }
 
         tryAttachShortCriticalText(builder, shortText)

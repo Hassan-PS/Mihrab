@@ -83,6 +83,9 @@
     "prayerTimes": "নামাজের সময়"
   },
   "settings": {
+    "laDesignLabel": "শৈলী",
+    "laDesignTimeline": "টাইমলাইন",
+    "laDesignCountdown": "কাউন্টডাউন",
     "appearance": "চেহারা",
     "theme": "থিম",
     "themeSystem": "সিস্টেম",

@@ -83,6 +83,9 @@
     "prayerTimes": "प्रार्थना का समय"
   },
   "settings": {
+    "laDesignLabel": "शैली",
+    "laDesignTimeline": "टाइमलाइन",
+    "laDesignCountdown": "उलटी गिनती",
     "appearance": "उपस्थिति",
     "theme": "विषय",
     "themeSystem": "प्रणाली",

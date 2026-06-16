@@ -83,6 +83,9 @@
     "prayerTimes": "Waktu Sholat"
   },
   "settings": {
+    "laDesignLabel": "Gaya",
+    "laDesignTimeline": "Lini masa",
+    "laDesignCountdown": "Hitung mundur",
     "appearance": "Penampilan",
     "theme": "Tema",
     "themeSystem": "Sistem",
