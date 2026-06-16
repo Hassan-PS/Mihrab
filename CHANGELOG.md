@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.4] — 2026-06-16
+
+### Changed
+- **System colours (Android) now recolour only the accent**: Enabling system colours keeps the standard theme's design (surfaces, text, bordered chrome) and just overrides the accent with the live Material You wallpaper colour, instead of swapping the whole Material 3 surface palette. It now also applies without a restart.
+- **Live Activity tint follows the app accent**: The Android Live Activity uses the app's actual accent — the brand emerald on the standard theme (previously it was stuck on an old lime green and ignored the setting), or the Material You colour when system colours are on. With system colours on it re-resolves the live system accent on every update (and on configuration changes), so the notification colour tracks a wallpaper/colour change without reopening the app.
+
 ## [2.7.3] — 2026-06-16
 
 ### Changed
