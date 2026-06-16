@@ -40,10 +40,10 @@ function DesignPreview({
       <Text style={[styles.previewRow, { color: text }]}>Maghrib · 2:18</Text>
       <View style={styles.barTrack}>
         <View style={[styles.barFill, { backgroundColor: accent }]} />
-        <View style={[styles.dot, { left: '20%', backgroundColor: muted }]} />
-        <View style={[styles.dot, { left: '45%', backgroundColor: accent }]} />
-        <View style={[styles.dot, { left: '70%', backgroundColor: muted }]} />
-        <View style={[styles.dot, { left: '90%', backgroundColor: muted }]} />
+        <View style={[styles.dot, { start: '20%', backgroundColor: muted }]} />
+        <View style={[styles.dot, { start: '45%', backgroundColor: accent }]} />
+        <View style={[styles.dot, { start: '70%', backgroundColor: muted }]} />
+        <View style={[styles.dot, { start: '90%', backgroundColor: muted }]} />
       </View>
     </View>
   );
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   barFill: {
     position: 'absolute',
-    left: 0,
+    start: 0,
     top: 0,
     bottom: 0,
     width: '55%',
@@ -206,6 +206,6 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    marginLeft: -3,
+    marginStart: -3,
   },
 });
