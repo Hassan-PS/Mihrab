@@ -50,6 +50,9 @@ export type MihrabLiveActivityPayload = {
   /** Sunrise row sent separately so the native module can splice it
    *  into slot 1 only when the user has the toggle on. */
   sunriseRow?: { key: string; name: string; time: string };
+  /** Enabled pre-dawn night rows (Islamic Midnight / Last Third) for the
+   *  currently-shown day. Added as timeline markers + countdown candidates. */
+  extraRows?: { key: string; name: string; time: string }[];
   /** Multi-day schedule (index 0 = today). The foreground-service ticker
    *  uses this to recompute the next/previous prayer against the absolute
    *  dated schedule, so the countdown rolls onto the correct day's times
@@ -60,6 +63,7 @@ export type MihrabLiveActivityPayload = {
     dateKey: string;
     rows: { key: string; name: string; time: string }[];
     sunriseRow?: { key: string; name: string; time: string };
+    extraRows?: { key: string; name: string; time: string }[];
   }[];
   /** Hijri caption, empty string → omit. */
   hijriLabel: string;

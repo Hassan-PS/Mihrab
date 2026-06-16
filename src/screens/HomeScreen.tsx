@@ -105,10 +105,9 @@ export function HomeScreen() {
   // updates the surfaces immediately without a re-fetch. usePrayerDay always
   // derives Sunrise + the two night times into the raw `week`; here we strip
   // per-surface:
-  //   • table / notifications → respect all three toggles (Sunrise + the two
-  //     night times) — this is where Islamic Midnight / Last Third appear.
-  //   • Live Activity → Sunrise kill-switch only; the night times are never
-  //     shown there (user scope).
+  //   • table / notifications / Live Activity → respect all three toggles
+  //     (Sunrise + the two night times). The LA counts down to Islamic Midnight
+  //     and the Last Third when they're the next event.
   //   • home-screen widget → unchanged from before: Sunrise always shown, the
   //     night times never shown.
   const view = useMemo(() => {
@@ -131,8 +130,8 @@ export function HomeScreen() {
       }),
       la: mk({
         Sunrise: settings.sunriseEnabled,
-        Midnight: false,
-        Lastthird: false,
+        Midnight: settings.islamicMidnightEnabled,
+        Lastthird: settings.lastThirdEnabled,
       }),
       widget: mk({ Sunrise: true, Midnight: false, Lastthird: false }),
     };

@@ -35,6 +35,8 @@ export type PrayerLiveActivityContent = {
   rows: { key: string; abbr: string; name: string; time: string }[];
   /** Sunrise row when the user opted to show it. */
   sunriseRow?: { key: string; abbr: string; name: string; time: string };
+  /** Enabled pre-dawn night rows (Islamic Midnight / Last Third). May be empty. */
+  extraRows?: { key: string; abbr: string; name: string; time: string }[];
   /** Optional caption lines — pass empty strings to omit. */
   hijriLabel: string;
   locationLabel: string;

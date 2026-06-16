@@ -16,6 +16,7 @@
 import { Platform } from 'react-native';
 import i18n from '../i18n';
 import type { TimingsMap } from '../types/prayer';
+import { NEXT_SALAH_ORDER } from '../types/prayer';
 import type { AppAccentId } from '../settings/types';
 import {
   buildWidgetPayload,
@@ -111,10 +112,12 @@ export function computePrevPrayerEpochMs(
   today: TimingsMap,
   now: Date,
 ): number | null {
-  const SALAH_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
   const nowMs = now.getTime();
   let prev: number | null = null;
-  for (const key of SALAH_KEYS) {
+  // Scan every event present in today's (already-filtered) timings — the five
+  // salāh, Sunrise, and any enabled night times — so the progress bar anchors
+  // on whichever one most recently passed (e.g. Islamic Midnight before Fajr).
+  for (const key of NEXT_SALAH_ORDER) {
     const hhmm = today[key];
     const at = hhmm ? parseHHMMOnDate(hhmm, now) : null;
     if (!at) continue;
@@ -314,6 +317,12 @@ async function syncLiveActivityImpl(args: {
             time: payload.sunriseRow.time,
           }
         : undefined,
+      extraRows: (payload.extraRows ?? []).map(r => ({
+        key: r.key,
+        abbr: r.abbr,
+        name: localizedPrayerLabel(r.key),
+        time: r.time,
+      })),
       hijriLabel: '',
       locationLabel: '',
       accentHex,

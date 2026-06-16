@@ -35,6 +35,9 @@ export type WidgetDay = {
   /** Sunrise rendered separately (slot 1) — not a salāh. Omitted when the
    *  user has turned Sunrise off. */
   sunriseRow?: WidgetPrayerRow;
+  /** Enabled pre-dawn night rows (Islamic Midnight / Last Third). Present only
+   *  for the Live Activity day-timeline; absent for the home-screen widget. */
+  extraRows?: WidgetPrayerRow[];
 };
 
 /** Five salāh shown as rows on the widget (Sunrise rendered separately at slot 1). */
@@ -48,6 +51,14 @@ export const WIDGET_ROW_KEYS = [
 
 export type WidgetPrayerKey = (typeof WIDGET_ROW_KEYS)[number];
 
+/**
+ * Optional pre-dawn non-salāh rows (Islamic Midnight / Last Third). Sunrise has
+ * its own dedicated slot. Only the Live Activity consumes these — the
+ * home-screen widget is fed a map with them stripped, so its `extraRows` is
+ * always empty.
+ */
+const EXTRA_ROW_KEYS = ['Midnight', 'Lastthird'] as const;
+
 export type WidgetPrayerPayload = {
   /** Calendar day these times apply to (e.g. Wed, Apr 9). */
   dayLabel: string;
@@ -58,7 +69,9 @@ export type WidgetPrayerPayload = {
    * when the user has turned Sunrise off (the kill-switch).
    */
   sunriseRow?: WidgetPrayerRow;
-  /** Row `key` to highlight as the next salāh (matches WIDGET_ROW_KEYS or 'Sunrise'). */
+  /** Enabled pre-dawn night rows for the currently-shown day (Live Activity only). */
+  extraRows?: WidgetPrayerRow[];
+  /** Row `key` to highlight as the next event (salāh, Sunrise, or a night time). */
   nextKey: string | null;
   /** Name of the next prayer */
   nextPrayerName?: string;
@@ -132,10 +145,14 @@ function buildRow(key: string, timings: TimingsMap): WidgetPrayerRow {
 function buildDayRows(timings: TimingsMap): {
   rows: WidgetPrayerRow[];
   sunriseRow?: WidgetPrayerRow;
+  extraRows: WidgetPrayerRow[];
 } {
   const rows = WIDGET_ROW_KEYS.map(key => buildRow(key, timings));
   const sunriseRow = timings['Sunrise'] ? buildRow('Sunrise', timings) : undefined;
-  return { rows, sunriseRow };
+  const extraRows = EXTRA_ROW_KEYS.filter(key => timings[key]).map(key =>
+    buildRow(key, timings),
+  );
+  return { rows, sunriseRow, extraRows };
 }
 
 /**
@@ -147,7 +164,7 @@ function buildDays(week: TimingsMap[], now: Date): WidgetDay[] {
   const base = startOfLocalDay(now);
   return week.map((timings, i) => {
     const date = addDays(base, i);
-    const { rows, sunriseRow } = buildDayRows(timings);
+    const { rows, sunriseRow, extraRows } = buildDayRows(timings);
     return {
       dateKey: localDateKey(date),
       dayLabel: date.toLocaleDateString(undefined, {
@@ -157,6 +174,7 @@ function buildDays(week: TimingsMap[], now: Date): WidgetDay[] {
       }),
       rows,
       ...(sunriseRow ? { sunriseRow } : {}),
+      ...(extraRows.length > 0 ? { extraRows } : {}),
     };
   });
 }
@@ -221,18 +239,20 @@ export function buildWidgetPayload(
     }
   }
 
-  // nextKey can be a salāh key OR 'Sunrise' (when sunrise is the next upcoming event)
+  // nextKey can be a salāh key, 'Sunrise', or a night time (Midnight/Lastthird)
+  // when that's the next upcoming event (the Live Activity counts down to it).
   const nextKey =
     next &&
     ((WIDGET_ROW_KEYS as readonly string[]).includes(next.name) ||
-      next.name === 'Sunrise')
+      next.name === 'Sunrise' ||
+      (EXTRA_ROW_KEYS as readonly string[]).includes(next.name))
       ? next.name
       : null;
 
   // The visible single-day `rows` reflect the day currently being shown
   // (today, or tomorrow after Isha) — same as before. The new `days[]` field
   // below carries the full window so native can roll over on its own.
-  const { rows, sunriseRow } = buildDayRows(timings);
+  const { rows, sunriseRow, extraRows } = buildDayRows(timings);
 
   // Multi-day schedule. Prefer the supplied `week`; otherwise synthesise the
   // shortest useful window from today (+ tomorrow when available).
@@ -248,6 +268,7 @@ export function buildWidgetPayload(
     dayLabel,
     rows,
     ...(sunriseRow ? { sunriseRow } : {}),
+    ...(extraRows.length > 0 ? { extraRows } : {}),
     nextKey,
     nextPrayerName: next ? i18n.t(`prayer.${next.name}`) : undefined,
     nextPrayerTime: next ? formatLocalTime(next.at) : undefined,

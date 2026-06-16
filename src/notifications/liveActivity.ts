@@ -181,6 +181,11 @@ function buildInboxLines(input: LiveActivityRenderInput): string[] {
     if (ordered.length > 0) ordered.splice(1, 0, payload.sunriseRow);
     else ordered.push(payload.sunriseRow);
   }
+  // Enabled pre-dawn night times (Islamic Midnight / Last Third) appended after
+  // Isha so they read as "later tonight" in the expanded list.
+  if (payload.extraRows && payload.extraRows.length > 0) {
+    ordered.push(...payload.extraRows);
+  }
   return ordered.map(r => {
     const isNext = r.key === payload.nextKey;
     const marker = isNext ? '›' : ' ';
@@ -209,7 +214,16 @@ function computePrevPrayerEpoch(
 ): number {
   // Build the list of HH:MM strings to scan.  Prefer the raw today-timings
   // (stable salah keys + Sunrise) over the widget rows which may be tomorrow.
-  const SALAH_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const SALAH_KEYS = [
+    'Midnight',
+    'Lastthird',
+    'Fajr',
+    'Sunrise',
+    'Dhuhr',
+    'Asr',
+    'Maghrib',
+    'Isha',
+  ];
   const times: string[] = todayTimings
     ? SALAH_KEYS.map(k => todayTimings[k]).filter((v): v is string => typeof v === 'string' && /^\d{1,2}:\d{2}$/.test(v))
     : (() => {
@@ -329,6 +343,11 @@ export async function startOrUpdateLiveActivity(
           time: input.payload.sunriseRow.time,
         }
       : undefined;
+    const extraRows = (input.payload.extraRows ?? []).map(r => ({
+      key: r.key,
+      name: localizedPrayerName(r.key, r.abbr),
+      time: r.time,
+    }));
     // Project the multi-day schedule to the native shape with localised long
     // names. This is what lets the foreground-service ticker advance to the
     // right day's prayers (and overnight Isha→Fajr interval) on its own.
@@ -346,6 +365,11 @@ export async function startOrUpdateLiveActivity(
             time: d.sunriseRow.time,
           }
         : undefined,
+      extraRows: (d.extraRows ?? []).map(r => ({
+        key: r.key,
+        name: localizedPrayerName(r.key, r.abbr),
+        time: r.time,
+      })),
     }));
     const nativePayload: MihrabLiveActivityPayload = {
       nextLabel: input.nextPrayerLabel,
@@ -358,6 +382,7 @@ export async function startOrUpdateLiveActivity(
       progressFraction,
       rows,
       sunriseRow,
+      extraRows,
       days,
       hijriLabel: input.hijriLabel,
       locationLabel: input.locationLabel,

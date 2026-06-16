@@ -480,6 +480,15 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             val e = epochForDayTime(dateKey, sr.optString("time"))
             if (e > 0L) epochs.add(e to sr.optString("key", "Sunrise"))
           }
+          // Enabled pre-dawn night times (Islamic Midnight / Last Third) become
+          // additional timeline markers, positioned by their real clock time.
+          day.optJSONArray("extraRows")?.let { extra ->
+            for (j in 0 until extra.length()) {
+              val r = extra.optJSONObject(j) ?: continue
+              val e = epochForDayTime(dateKey, r.optString("time"))
+              if (e > 0L) epochs.add(e to r.optString("key"))
+            }
+          }
         }
         if (epochs.size < 3) return null
         epochs.sortBy { it.first }
