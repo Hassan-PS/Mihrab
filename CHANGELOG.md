@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.6] — 2026-06-16
+
+### Changed
+- **Widget polish**: the large widget's prayer list fills its height again (no large empty area below) and defaults to a more compact size; the small widget is now a 1×1 countdown (next prayer name + auto-sizing time).
+
 ## [2.7.5] — 2026-06-16
 
 ### Changed
