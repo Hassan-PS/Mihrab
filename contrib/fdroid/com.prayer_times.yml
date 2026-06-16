@@ -7,13 +7,15 @@ SourceCode: https://github.com/Hassan-PS/Mihrab
 IssueTracker: https://github.com/Hassan-PS/Mihrab/issues
 Changelog: https://github.com/Hassan-PS/Mihrab/blob/HEAD/CHANGELOG.md
 
+AutoName: Mihrab
+
 RepoType: git
 Repo: https://github.com/Hassan-PS/Mihrab
 
 Builds:
-  - versionName: 2.7.2
-    versionCode: 183
-    commit: 58370c6478f0e2be3cb838f2c8b0e5fabe68ddf6
+  - versionName: 2.7.3
+    versionCode: 184
+    commit: fab98d9545d2402ac3b06a96360aab009fb6d770
     subdir: android/app
     sudo:
       - apt-get update
@@ -74,5 +76,5 @@ MaintainerNotes: |
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.7.2
-CurrentVersionCode: 183
+CurrentVersion: 2.7.3
+CurrentVersionCode: 184
