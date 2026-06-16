@@ -19,28 +19,7 @@ import { usePrayerDay } from '../hooks/usePrayerDay';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { syncPrayerWidget } from '../widget/syncPrayerWidget';
-import {
-  syncLiveActivity,
-  resolveAccentHex,
-} from '../liveActivity/syncLiveActivity';
-import { getResolvedAccentHex } from '../native/SystemTheme';
-
-/**
- * Colour for the Android Live Activity notification. Follows the device's
- * Material You system colour ONLY when the user has enabled system colours;
- * otherwise it uses the chosen brand accent. (Previously Android always used
- * the system colour, so the Live Activity ignored the app's accent setting.)
- */
-function liveActivityColor(
-  accentId: string,
-  customHex: string,
-  androidSystemColors: boolean,
-): string {
-  if (Platform.OS === 'android' && androidSystemColors) {
-    return getResolvedAccentHex() ?? resolveAccentHex(accentId as never, customHex);
-  }
-  return resolveAccentHex(accentId as never, customHex);
-}
+import { syncLiveActivity } from '../liveActivity/syncLiveActivity';
 import {
   getEffectiveDataProvider,
   resolveCoordsForProvider,
@@ -260,13 +239,11 @@ export function HomeScreen() {
           locationName: locationLabel,
           coords: { lat: state.latitude, lng: state.longitude },
           seasonal: { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
-          accentHex: liveActivityColor(
-            settings.appAccentId,
-            settings.appAccentCustomHex,
-            Platform.OS === 'android' &&
-              settings.appearance === 'system' &&
-              settings.useSystemDynamicTheme,
-          ),
+          // Use the app's actual current accent so the notification matches the
+          // app exactly (standard theme → the brand emerald; system colours →
+          // the live Material You colour). When systemAccent is set, the native
+          // side re-resolves the live system colour on each repost.
+          accentHex: palette.accentSolid,
           // Android: follow the live Material You system colour (re-resolved
           // natively on each repost) only when system colours are enabled.
           systemAccent:
@@ -312,6 +289,7 @@ export function HomeScreen() {
       view,
       locationLabel,
       settings.liveActivityEnabled,
+      palette.accentSolid,
       settings.appAccentId,
       settings.appAccentCustomHex,
       settings.appearance,
@@ -372,13 +350,8 @@ export function HomeScreen() {
         ramadan: seasonal.ramadan,
         eid: seasonal.eid,
       },
-      accentHex: liveActivityColor(
-        settings.appAccentId,
-        settings.appAccentCustomHex,
-        Platform.OS === 'android' &&
-          settings.appearance === 'system' &&
-          settings.useSystemDynamicTheme,
-      ),
+      // App's actual current accent (see focus-effect note above).
+      accentHex: palette.accentSolid,
       // Android: follow the live Material You system colour only when system
       // colours are enabled (re-resolved natively on each repost).
       systemAccent:
@@ -402,6 +375,7 @@ export function HomeScreen() {
     nextInfo,
     locationLabel,
     settings.liveActivityEnabled,
+    palette.accentSolid,
     settings.appAccentId,
     settings.appAccentCustomHex,
     settings.appearance,
