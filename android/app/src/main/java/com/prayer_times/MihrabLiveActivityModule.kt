@@ -500,15 +500,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             val e = epochForDayTime(dateKey, sr.optString("time"))
             if (e > 0L) epochs.add(e to sr.optString("key", "Sunrise"))
           }
-          // Enabled pre-dawn night times (Islamic Midnight / Last Third) become
-          // additional timeline markers, positioned by their real clock time.
-          day.optJSONArray("extraRows")?.let { extra ->
-            for (j in 0 until extra.length()) {
-              val r = extra.optJSONObject(j) ?: continue
-              val e = epochForDayTime(dateKey, r.optString("time"))
-              if (e > 0L) epochs.add(e to r.optString("key"))
-            }
-          }
+          // NOTE: the optional pre-dawn night times (Islamic Midnight / Last
+          // Third) are deliberately NOT added to the timeline. They would slot
+          // into the night region and add extra gaps, but the bar is meant to
+          // show only the five prayers + Sunrise (six gaps). The night times
+          // still drive the countdown — when one is the next event, the title's
+          // inline countdown (and the Countdown design) targets it via
+          // nextLabel/nextEpochMs — they just don't appear as timeline marks.
         }
         if (epochs.size < 3) return null
         epochs.sortBy { it.first }

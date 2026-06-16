@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.3] — 2026-06-16
+
+### Changed
+- **Live Activity timeline shows only the five prayers + Sunrise**: When Islamic Midnight / Last Third (Qiyām) are enabled they no longer add a gap to the Android Live Activity timeline — the bar stays at the six prayer/Sunrise gaps. They still drive the countdown: when one is the next event, the title's inline countdown (and the Countdown design) targets it.
+
 ## [2.7.2] — 2026-06-16
 
 ### Changed
