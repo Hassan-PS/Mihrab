@@ -73,6 +73,11 @@ export type MihrabLiveActivityPayload = {
   /** App accent hex (#RRGGBB) — drives the dot, chronometer text,
    *  progress-bar tint. */
   accentHex: string;
+  /** When true, the native module re-resolves the live Material You system
+   *  accent on each repost instead of using `accentHex` (Android system
+   *  colours on), so the tint matches the app and auto-updates on wallpaper
+   *  colour changes without reopening. */
+  systemAccent?: boolean;
   /** Android Live Activity visual style (both keep the chip + AOD):
    *   'timeline'  — full prayer-day ProgressStyle timeline + inline countdown.
    *   'countdown' — countdown-focused: big countdown title + prayer name/time. */

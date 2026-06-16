@@ -251,31 +251,24 @@ function androidDynamicPalette(
   isDark: boolean,
   pureBlackDark: boolean,
 ): AppPalette {
-  const oled = pureBlackDark && isDark;
-  // Material 3 tonal surface hierarchy (wallpaper-tinted under Material You):
-  //   window  → colorSurface (base)
-  //   cards   → colorSurfaceContainerHigh  (clear, border-free elevation)
-  //   hero/highlight → colorSurfaceContainerHighest (top of the neutral ramp)
-  // All neutral tones, so colorPrimary text keeps predictable contrast on each.
-  return {
-    bg: oled ? '#000000' : PlatformColor('?attr/colorSurface'),
-    card: oled ? '#0d0d0d' : PlatformColor('?attr/colorSurfaceContainerHigh'),
-    text: PlatformColor('?attr/colorOnSurface'),
-    muted: PlatformColor('?attr/colorOnSurfaceVariant'),
-    border: 'transparent',
-    accent: PlatformColor('?attr/colorPrimary'),
-    accentBg: PlatformColor('?attr/colorSurfaceContainerHighest'),
-    danger: PlatformColor('?attr/colorError'),
-    overlay: isDark ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.4)',
-    flatChrome: true,
-    glass: false,
-    // SVG icons can't consume PlatformColor; resolve the live system
-    // primary to a hex via the SystemTheme native module so tiles
-    // stay visible AND match the Material You wallpaper-derived
-    // accent that the rest of the app shows. Falls back to the
-    // Material 3 baseline if the native bridge is unavailable.
-    accentSolid: getResolvedAccentHex() ?? (isDark ? '#D0BCFF' : '#6750A4'),
-  };
+  // System colours on Android keep the STANDARD theme's design (surfaces,
+  // text, dividers, bordered chrome) and ONLY recolour the accent to the
+  // live Material You wallpaper colour. Previously this swapped the whole
+  // Material 3 tonal surface hierarchy, which changed the app's look far more
+  // than the user wants — now it's an accent-only override.
+  const base = isDark
+    ? pureBlackDark
+      ? DARK_PURE_BLACK_BASE
+      : DARK_BASE
+    : LIGHT_BASE;
+  // Live system primary as a hex (SVG icons can't consume PlatformColor, and
+  // the rest of the standard palette is hex too). Falls back to the Material 3
+  // baseline if the native bridge is unavailable.
+  const hex = getResolvedAccentHex() ?? (isDark ? '#D0BCFF' : '#6750A4');
+  // Soft tinted accent background, matching how the standard 'custom' accent
+  // derives its highlight (light: mix toward white, dark: toward black).
+  const accentBg = isDark ? shiftHex(hex, -0.7) : shiftHex(hex, 0.82);
+  return { ...base, accent: hex, accentBg, accentSolid: hex };
 }
 
 function buildDynamicSystemPalette(

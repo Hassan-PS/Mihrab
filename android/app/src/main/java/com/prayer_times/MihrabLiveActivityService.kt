@@ -112,6 +112,17 @@ class MihrabLiveActivityService : Service() {
     }
   }
 
+  /**
+   * Material You wallpaper-colour changes (and light/dark switches) arrive as
+   * a configuration change. Re-post immediately so a system-accent Live
+   * Activity picks up the new colour without waiting for the next tick or the
+   * app being reopened.
+   */
+  override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+    super.onConfigurationChanged(newConfig)
+    repostNow()
+  }
+
   /** Rebuild + re-post the rich notification from the cached payload now. */
   private fun repostNow() {
     val payload = lastPayload ?: return

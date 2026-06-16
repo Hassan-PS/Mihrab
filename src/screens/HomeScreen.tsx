@@ -26,13 +26,17 @@ import {
 import { getResolvedAccentHex } from '../native/SystemTheme';
 
 /**
- * Colour for the Android Live Activity notification. Uses the device's system
- * (Material You) colour so the colorized card reads as part of the OS rather
- * than the in-app brand accent; falls back to the brand accent off Android /
- * when the system colour can't be resolved.
+ * Colour for the Android Live Activity notification. Follows the device's
+ * Material You system colour ONLY when the user has enabled system colours;
+ * otherwise it uses the chosen brand accent. (Previously Android always used
+ * the system colour, so the Live Activity ignored the app's accent setting.)
  */
-function liveActivityColor(accentId: string, customHex: string): string {
-  if (Platform.OS === 'android') {
+function liveActivityColor(
+  accentId: string,
+  customHex: string,
+  androidSystemColors: boolean,
+): string {
+  if (Platform.OS === 'android' && androidSystemColors) {
     return getResolvedAccentHex() ?? resolveAccentHex(accentId as never, customHex);
   }
   return resolveAccentHex(accentId as never, customHex);
@@ -259,7 +263,16 @@ export function HomeScreen() {
           accentHex: liveActivityColor(
             settings.appAccentId,
             settings.appAccentCustomHex,
+            Platform.OS === 'android' &&
+              settings.appearance === 'system' &&
+              settings.useSystemDynamicTheme,
           ),
+          // Android: follow the live Material You system colour (re-resolved
+          // natively on each repost) only when system colours are enabled.
+          systemAccent:
+            Platform.OS === 'android' &&
+            settings.appearance === 'system' &&
+            settings.useSystemDynamicTheme,
           // iOS Liquid Glass: let the Live Activity use the dynamic system
           // tint instead of the brand accent so it matches the system theme.
           systemTinted:
@@ -362,7 +375,16 @@ export function HomeScreen() {
       accentHex: liveActivityColor(
         settings.appAccentId,
         settings.appAccentCustomHex,
+        Platform.OS === 'android' &&
+          settings.appearance === 'system' &&
+          settings.useSystemDynamicTheme,
       ),
+      // Android: follow the live Material You system colour only when system
+      // colours are enabled (re-resolved natively on each repost).
+      systemAccent:
+        Platform.OS === 'android' &&
+        settings.appearance === 'system' &&
+        settings.useSystemDynamicTheme,
       // iOS Liquid Glass: dynamic system tint instead of the brand accent.
       systemTinted:
         Platform.OS === 'ios' &&

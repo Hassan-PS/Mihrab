@@ -72,6 +72,11 @@ export type LiveActivityRenderInput = {
   locationLabel: string;
   /** App accent color hex, e.g. "#6BC98A". */
   accentHex: string;
+  /** When true (Android system colours on), the native module re-resolves the
+   *  live Material You system accent on each repost instead of using
+   *  `accentHex`, so the notification matches the app and auto-updates when the
+   *  wallpaper colour changes. */
+  systemAccent?: boolean;
   /** Enhanced Live Activity visual style (Android 16 ProgressStyle). */
   design?: 'timeline' | 'countdown';
   /** Display knobs from settings. */
@@ -387,6 +392,7 @@ export async function startOrUpdateLiveActivity(
       hijriLabel: input.hijriLabel,
       locationLabel: input.locationLabel,
       accentHex: input.accentHex,
+      systemAccent: input.systemAccent === true,
       design: input.design ?? 'timeline',
       compactMode: input.compactMode,
       showSunrise: input.showSunrise,

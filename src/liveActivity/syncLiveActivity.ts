@@ -201,6 +201,11 @@ async function syncLiveActivityImpl(args: {
    *  Live Activity should ignore the brand accent and use the dynamic iOS
    *  system tint so it matches the in-app theme and adapts to light/dark. */
   systemTinted?: boolean;
+  /** Android only: when system colours are enabled, the notification should
+   *  follow the live Material You system accent (re-resolved natively on each
+   *  repost) instead of the static brand accent, so it matches the app and
+   *  auto-updates when the wallpaper colour changes. */
+  systemAccent?: boolean;
   /** Android only: which enhanced Live Activity visual style to render. */
   design?: 'timeline' | 'countdown';
 }): Promise<void> {
@@ -264,6 +269,7 @@ async function syncLiveActivityImpl(args: {
       hijriLabel: '',
       locationLabel: '',
       accentHex,
+      systemAccent: args.systemAccent === true,
       design: args.design ?? 'timeline',
       compactMode: true,
       showSunrise: true,

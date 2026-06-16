@@ -290,10 +290,15 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       val nextLabel = p.optString("nextLabel", "")
       val nextEpochMs = p.optLong("nextEpochMs", 0L)
       val prevEpochMs = p.optLong("prevEpochMs", 0L)
-      val accentInt = parseColor(
-        p.optString("accentHex", "#22C55E"),
-        Color.parseColor("#22C55E"),
-      )
+      // When system colours are on, follow the LIVE Material You accent,
+      // resolved fresh on every (re)post — so the tint matches the app and
+      // auto-updates when the wallpaper colour changes, without reopening the
+      // app. Otherwise use the app's chosen brand accent from the payload.
+      val accentInt = if (p.optBoolean("systemAccent", false)) {
+        resolveSystemAccent(ctx)
+      } else {
+        parseColor(p.optString("accentHex", "#22C55E"), Color.parseColor("#22C55E"))
+      }
       val progressPct = computeProgressPercent(prevEpochMs, nextEpochMs)
       // JS sends title as the combined "Asr · 17:08" string; falls back to
       // just the label if the title field is absent.
@@ -755,5 +760,30 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
     private fun parseColor(hex: String, fallback: Int): Int =
       try { Color.parseColor(if (hex.startsWith("#")) hex else "#$hex") }
       catch (_: Throwable) { fallback }
+
+    /**
+     * Resolve the device's current Material You system accent as an ARGB int.
+     * Read fresh from the context each call so re-posts pick up wallpaper
+     * colour changes. Uses the platform `system_accent1_600` resource (the same
+     * source the home-screen widget uses) on Android 12+, falling back to the
+     * AppTheme's colorPrimary, then brand green.
+     */
+    private fun resolveSystemAccent(ctx: Context): Int {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        runCatching {
+          return ContextCompat.getColor(ctx, android.R.color.system_accent1_600)
+        }
+      }
+      runCatching {
+        val wrapped = android.view.ContextThemeWrapper(ctx.applicationContext, R.style.AppTheme)
+        val ta = wrapped.obtainStyledAttributes(intArrayOf(android.R.attr.colorPrimary))
+        try {
+          return ta.getColor(0, Color.parseColor("#22C55E"))
+        } finally {
+          ta.recycle()
+        }
+      }
+      return Color.parseColor("#22C55E")
+    }
   }
 }
