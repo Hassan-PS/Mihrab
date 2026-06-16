@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.7] — 2026-06-16
+
+### Changed
+- **Small widget is now a compact 2×1**: laid out as one row with two columns — next prayer name + time on the left, time remaining + location on the right.
+
 ## [2.7.6] — 2026-06-16
 
 ### Changed
