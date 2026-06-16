@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.5] — 2026-06-16
+
+### Changed
+- **Home-screen widgets — cleaner, better-proportioned layouts**: The large widget's prayer list is now a tidy top-anchored list instead of rows stretched into big gaps; the small widget fills its space; the next-prayer time auto-sizes to use the available room; prayer names show in full ("Maghrib", "Sunrise") instead of abbreviations; and each size shows a "time remaining until next" caption. The default green highlight now matches the app's emerald accent.
+
 ## [2.7.4] — 2026-06-16
 
 ### Changed
