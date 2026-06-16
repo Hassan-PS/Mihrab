@@ -16,33 +16,59 @@ fi
 
 cd "${ROOT}"
 
+# Keep Homebrew quiet/fast in CI (no slow auto-update churn before `brew install`).
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
+# Retry a command a few times. Xcode Cloud intermittently hits transient
+# DNS/TCP failures on network steps — most notably the React Native
+# `hermes-engine` podspec, which resolves the prebuilt Hermes artifact from
+# Maven Central (central.sonatype.com) while `pod install` evaluates it. A
+# short retry rides out those blips instead of failing the whole build.
+retry() {
+  attempt=1
+  max=4
+  while true; do
+    if "$@"; then
+      return 0
+    fi
+    if [ "${attempt}" -ge "${max}" ]; then
+      echo "ci_post_clone: '$*' failed after ${max} attempts" >&2
+      return 1
+    fi
+    echo "ci_post_clone: '$*' failed (attempt ${attempt}/${max}); retrying in 15s…" >&2
+    attempt=$((attempt + 1))
+    sleep 15
+  done
+}
+
 if ! command -v node >/dev/null 2>&1; then
   echo "ci_post_clone: installing Node via Homebrew (not on PATH)"
-  brew install node
+  retry brew install node
 fi
 
 echo "ci_post_clone: ROOT=${ROOT} IOS=${IOS}"
 echo "ci_post_clone: node $(node --version)"
 
 if [ -f package-lock.json ]; then
-  npm ci
+  retry npm ci
 else
-  npm install
+  retry npm install
 fi
 
 cd "${IOS}"
 export NODE_BINARY="${NODE_BINARY:-$(command -v node)}"
 echo "ci_post_clone: NODE_BINARY=$NODE_BINARY"
 
-if command -v pod >/dev/null 2>&1; then
-  echo "ci_post_clone: running pod install (system pod)"
-  pod install
-else
-  echo "ci_post_clone: pod not on PATH, using bundle exec"
-  cd "${ROOT}"
-  bundle install
-  cd "${IOS}"
-  bundle exec pod install
-fi
+pod_install() {
+  if command -v pod >/dev/null 2>&1; then
+    echo "ci_post_clone: running pod install (system pod)"
+    pod install
+  else
+    echo "ci_post_clone: pod not on PATH, using bundle exec"
+    ( cd "${ROOT}" && bundle install ) && bundle exec pod install
+  fi
+}
+retry pod_install
 
 echo "ci_post_clone: done"
