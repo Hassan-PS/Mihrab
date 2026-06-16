@@ -61,14 +61,18 @@
 
                 <TextView
                     android:id="@+id/widget_next_time"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="#E8EAED"
-                    android:textSize="40sp"
+                    android:textSize="44sp"
                     android:fontFamily="sans-serif-light"
                     android:includeFontPadding="false"
                     android:layout_marginTop="4dp"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:gravity="start"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="28sp"
+                    android:autoSizeMaxTextSize="56sp" />
 
                 <TextView
                     android:id="@+id/widget_remaining"
