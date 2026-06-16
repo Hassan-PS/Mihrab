@@ -37,23 +37,23 @@ private data class WidgetStyle(
         return try {
           Color.parseColor(h)
         } catch (_: Exception) {
-          Color.parseColor("#6BC98A")
+          Color.parseColor("#46A081")
         }
       }
-      return Color.parseColor("#6BC98A")
+      return Color.parseColor("#46A081")
     }
     val hex =
       when (highlightId.lowercase()) {
-        "green" -> "#6BC98A"
+        "green" -> "#46A081"
         "teal" -> "#4EC9B0"
         "blue" -> "#6BA3F5"
         "amber" -> "#E5C07B"
-        else -> "#6BC98A"
+        else -> "#46A081"
       }
     return try {
       Color.parseColor(hex)
     } catch (_: Exception) {
-      Color.parseColor("#6BC98A")
+      Color.parseColor("#46A081")
     }
   }
 }
@@ -67,7 +67,7 @@ private fun resolveDynamicHighlightColor(context: Context): Int {
     }
   }
   val wrapped = ContextThemeWrapper(context.applicationContext, R.style.AppTheme)
-  val fallback = Color.parseColor("#6BC98A")
+  val fallback = Color.parseColor("#46A081")
   val ta = wrapped.obtainStyledAttributes(intArrayOf(android.R.attr.colorPrimary))
   try {
     return ta.getColor(0, fallback)

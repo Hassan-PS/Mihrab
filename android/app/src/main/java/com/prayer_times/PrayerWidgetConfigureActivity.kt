@@ -127,7 +127,7 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
       if (storedHex.matches(Regex("^#([0-9A-Fa-f]{6})$"))) {
         storedHex
       } else {
-        "#6BC98A"
+        "#46A081"
       },
     )
     syncHexVisibility()
@@ -150,7 +150,7 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
           if (raw.matches(Regex("^#([0-9A-Fa-f]{6})$"))) {
             raw
           } else {
-            "#6BC98A"
+            "#46A081"
           }
         } else {
           ""
