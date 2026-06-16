@@ -376,7 +376,9 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           val rowMinutes = h * 60 + m
           if (rowMinutes > currentMinutes) {
             dynamicNextKey = row.getString("key")
-            dynamicNextName = row.optString("abbr", "").trim().ifEmpty { dynamicNextKey!! }
+            dynamicNextName = row.optString("name", "").trim()
+              .ifEmpty { row.optString("abbr", "").trim() }
+              .ifEmpty { dynamicNextKey!! }
             dynamicNextTime = timeStr
             nextUpdateMinutes = rowMinutes
             break
@@ -390,7 +392,9 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       } else if (nextPrayerName.isEmpty() && nextKey != null) {
         for (row in displayRows) {
           if (row.getString("key") == nextKey) {
-            nextPrayerName = row.optString("abbr", "").trim().ifEmpty { nextKey }
+            nextPrayerName = row.optString("name", "").trim()
+              .ifEmpty { row.optString("abbr", "").trim() }
+              .ifEmpty { nextKey }
             nextPrayerTime = row.getString("time")
             break
           }
@@ -414,6 +418,25 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setTextColor(R.id.widget_next_time, highlightColor)
       views.setTextColor(R.id.widget_location, Color.parseColor(NEUTRAL_MUTED))
 
+      // Remaining-until-next caption (e.g. "1h 54m"). The widget can't tick, but
+      // it refreshes on screen-on and at each prayer transition, so this is
+      // fresh whenever the user looks. Hidden once no event remains today
+      // (post-Isha) until the midnight rollover picks up tomorrow's Fajr.
+      val remainingText = if (nextUpdateMinutes != -1 && nextUpdateMinutes >= currentMinutes) {
+        val rem = nextUpdateMinutes - currentMinutes
+        val rh = rem / 60
+        val rm = rem % 60
+        if (rh > 0) "${rh}h ${rm}m" else "${rm}m"
+      } else {
+        ""
+      }
+      views.setTextViewText(R.id.widget_remaining, remainingText)
+      views.setViewVisibility(
+        R.id.widget_remaining,
+        if (remainingText.isEmpty()) View.GONE else View.VISIBLE,
+      )
+      views.setTextColor(R.id.widget_remaining, Color.parseColor(NEUTRAL_MUTED))
+
       views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
       for (i in COL_LABELS.indices) {
@@ -424,7 +447,9 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         val row = displayRows[i]
         val key = row.getString("key")
         val time = row.getString("time")
-        val label = row.optString("abbr", "").trim().ifEmpty { key }
+        val label = row.optString("name", "").trim()
+          .ifEmpty { row.optString("abbr", "").trim() }
+          .ifEmpty { key }
         val highlight = effectiveNextKey != null && effectiveNextKey == key
         val isSunrise = key.equals("Sunrise", ignoreCase = true)
         val col = when {

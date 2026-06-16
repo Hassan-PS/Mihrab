@@ -55,7 +55,6 @@
                     android:textColor="#9AA0A6"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"
-                    android:textAllCaps="true"
                     android:maxLines="1"
                     android:ellipsize="end" />
 
@@ -67,6 +66,16 @@
                     android:textSize="28sp"
                     android:fontFamily="sans-serif-light"
                     android:includeFontPadding="false"
+                    android:layout_marginTop="2dp"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/widget_remaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium"
                     android:layout_marginTop="2dp"
                     android:maxLines="1" />
 

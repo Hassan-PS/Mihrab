@@ -15,6 +15,8 @@ export type WidgetPrayerRow = {
   time: string;
   /** Short label for narrow / horizontal layouts (e.g. widget columns). */
   abbr: string;
+  /** Full localized name (e.g. "Maghrib", "Sunrise") for layouts with room. */
+  name: string;
 };
 
 /**
@@ -134,6 +136,7 @@ function buildRow(key: string, timings: TimingsMap): WidgetPrayerRow {
     abbr: i18n.t(`prayer.${key}_abbr`, {
       defaultValue: i18n.t(`prayer.${key}`),
     }),
+    name: i18n.t(`prayer.${key}`),
   };
 }
 
