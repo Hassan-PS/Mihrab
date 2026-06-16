@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E01C1C1E"
-    android:padding="8dp">
+    android:padding="10dp">
 
     <TextView
         android:id="@+id/widget_placeholder"
@@ -20,34 +20,72 @@
         android:id="@+id/widget_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
         android:visibility="gone">
 
-        <TextView
-            android:id="@+id/widget_next_name"
-            android:layout_width="match_parent"
+        <!-- Left column: next prayer name + time -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="#9AA0A6"
-            android:textSize="12sp"
-            android:fontFamily="sans-serif-medium"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/widget_next_time"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
             android:layout_weight="1"
-            android:textColor="#E8EAED"
-            android:fontFamily="sans-serif-light"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:gravity="center"
-            android:textSize="40sp"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="18sp"
-            android:autoSizeMaxTextSize="60sp" />
+            android:orientation="vertical"
+            android:paddingEnd="6dp">
+
+            <TextView
+                android:id="@+id/widget_next_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/widget_next_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E8EAED"
+                android:textSize="36sp"
+                android:fontFamily="sans-serif-light"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:gravity="start"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="22sp"
+                android:autoSizeMaxTextSize="44sp" />
+        </LinearLayout>
+
+        <!-- Right column: remaining + location -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/widget_remaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:gravity="end" />
+
+            <TextView
+                android:id="@+id/widget_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
