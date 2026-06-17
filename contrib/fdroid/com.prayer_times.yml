@@ -25,6 +25,8 @@ Builds:
       - echo 'reactNativeArchitectures=arm64-v8a' >> ../gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m' >> ../gradle.properties
       - echo 'org.gradle.daemon=false' >> ../gradle.properties
+      - cd ../..
+      - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
     scandelete:
       - node_modules
     build:
@@ -62,15 +64,19 @@ MaintainerNotes: |
     `@react-native-community/geolocation` so no proprietary `com.google.android.gms`
     classes ship).
 
-  `npm ci` runs in the `build` step (not `prebuild`) so node_modules is created
-  AFTER `scanner.scan_source`, which keeps the scanner from flagging RN's ~67
-  inherent (non-proprietary) findings — bundled i18n binary packs
-  (`react-native/React/I18n/strings/*/fbt_language_pack.bin`) and the local-path
-  Maven repos declared in each native module's build.gradle (e.g.
-  `$rootDir/../node_modules/react-native/android`). `scandelete: node_modules`
-  (per templates/build-react-native.yml) is kept as a safety net for the
-  generated tree. The one proprietary concern, play-services-location, is
-  stripped via patch-package.
+  node_modules handling (per templates/build-react-native.yml). `npm ci` runs
+  twice on purpose:
+  - in `prebuild` so node_modules exists for `scandelete: node_modules`. fdroidserver
+    requires a scandelete path to exist and match something, and the scanner then
+    cleans RN's ~67 inherent (non-proprietary) findings — bundled i18n binary packs
+    (`react-native/React/I18n/strings/*/fbt_language_pack.bin`), the per-module
+    gradle-wrapper.jars, and the local-path Maven repos in each native module's
+    build.gradle (e.g. `$rootDir/../node_modules/react-native/android`).
+  - again in `build` (which runs AFTER the scan) to restore the full tree —
+    including the wrapper jars and Maven-repo build.gradle entries the scan
+    stripped — so the gradle build resolves its dependencies. patch-package is
+    re-applied here (it strips `play-services-location` so no proprietary
+    `com.google.android.gms` classes ship).
 
   Single universal fdroidRelease APK (no ABI splits). Listing text + screenshots
   come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
