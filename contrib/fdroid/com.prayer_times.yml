@@ -27,15 +27,27 @@ Builds:
       - echo 'org.gradle.daemon=false' >> ../gradle.properties
       - cd ../..
       - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
-    scandelete:
-      - node_modules
-    build:
-      - cd ../..
-      - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
       - npm i --no-save --ignore-scripts --loglevel=error patch-package
       - node node_modules/.bin/patch-package
       - RNG=node_modules/@react-native/gradle-plugin
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
+    scanignore:
+      - node_modules/@notifee/react-native/android/build.gradle
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@react-native-community/blur/android/build.gradle
+      - node_modules/@react-native-community/geolocation/android/build.gradle
+      - node_modules/@react-native-community/netinfo/android/build.gradle
+      - node_modules/react-native-encrypted-storage/android/build.gradle
+      - node_modules/react-native-iap/android/build.gradle
+      - node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/react-native-screens/android/build.gradle
+      - node_modules/react-native-share/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-view-shot/android/build.gradle
+      - node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
+    scandelete:
+      - node_modules
     ndk: 27.1.12297006
 
 MaintainerNotes: |
@@ -64,19 +76,19 @@ MaintainerNotes: |
     `@react-native-community/geolocation` so no proprietary `com.google.android.gms`
     classes ship).
 
-  node_modules handling (per templates/build-react-native.yml). `npm ci` runs
-  twice on purpose:
-  - in `prebuild` so node_modules exists for `scandelete: node_modules`. fdroidserver
-    requires a scandelete path to exist and match something, and the scanner then
-    cleans RN's ~67 inherent (non-proprietary) findings — bundled i18n binary packs
-    (`react-native/React/I18n/strings/*/fbt_language_pack.bin`), the per-module
-    gradle-wrapper.jars, and the local-path Maven repos in each native module's
-    build.gradle (e.g. `$rootDir/../node_modules/react-native/android`).
-  - again in `build` (which runs AFTER the scan) to restore the full tree —
-    including the wrapper jars and Maven-repo build.gradle entries the scan
-    stripped — so the gradle build resolves its dependencies. patch-package is
-    re-applied here (it strips `play-services-location` so no proprietary
-    `com.google.android.gms` classes ship).
+  node_modules handling (per templates/build-react-native.yml). `npm ci` +
+  patch-package run in `prebuild`; patch-package strips `play-services-location`
+  so no proprietary `com.google.android.gms` classes ship. `scandelete:
+  node_modules` then removes RN's inherent (non-proprietary) generated artefacts
+  from the scanned/archived source — the bundled i18n binary packs
+  (`react-native/React/I18n/strings/*/fbt_language_pack.bin`), prebuilt host
+  binaries (other-platform hermesc, fb-dotslash), and stray per-module
+  gradle-wrapper.jars. `scanignore` lists the few generated files the gradle
+  build genuinely needs so the scan leaves them in place: each autolinked native
+  module's `android/build.gradle` (they declare local-path Maven repos pointing at
+  `node_modules/react-native/android`), `react-native/ReactAndroid/publish.gradle`,
+  and the linux `hermes-compiler` hermesc binary used to compile the Hermes
+  bytecode bundle.
 
   Single universal fdroidRelease APK (no ABI splits). Listing text + screenshots
   come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
