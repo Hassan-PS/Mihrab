@@ -12,10 +12,11 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/Mihrab
 
 Builds:
-  - versionName: 2.7.9
-    versionCode: 190
-    commit: 19bf0f584ed027485c68b4ed9919139dcf332f02
+  - versionName: 2.7.10
+    versionCode: 191
+    commit: e36d7a00c8d9ce810d1f212da5999e639d9cf496
     subdir: android/app
+    submodules: true
     sudo:
       - apt-get update
       - apt-get install -y npm
@@ -31,9 +32,10 @@ Builds:
       - node node_modules/.bin/patch-package
       - RNG=node_modules/@react-native/gradle-plugin
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
+      - sed -i -e '/System.exit/d' notifee_fork/android/build.gradle
     scanignore:
       - node_modules/@notifee/react-native/android/build.gradle
-      - node_modules/@notifee/react-native/android/libs
+      - notifee_fork/android/build.gradle
       - node_modules/@react-native-async-storage/async-storage/android/build.gradle
       - node_modules/@react-native-community/blur/android/build.gradle
       - node_modules/@react-native-community/geolocation/android/build.gradle
@@ -49,6 +51,7 @@ Builds:
       - node_modules/hermes-compiler/hermesc/linux64-bin/hermesc
     scandelete:
       - node_modules
+      - notifee_fork
     ndk: 27.1.12297006
 
 MaintainerNotes: |
@@ -88,9 +91,19 @@ MaintainerNotes: |
   build genuinely needs so the scan leaves them in place: each autolinked native
   module's `android/build.gradle` (they declare local-path Maven repos pointing at
   `node_modules/react-native/android`), `react-native/ReactAndroid/publish.gradle`,
-  the linux `hermes-compiler` hermesc binary used to compile the Hermes bytecode
-  bundle, and `@notifee/react-native/android/libs` (notifee ships its `core` as a
-  prebuilt AAR in a flatDir Maven repo there).
+  and the linux `hermes-compiler` hermesc binary used to compile the Hermes
+  bytecode bundle.
+
+  notifee is built from source, not from the prebuilt `core` AAR it ships. The
+  notifee source (the `notifee_fork` git submodule, fetched via `submodules:
+  true`) is built as the `:notifee_core` gradle project — `android/settings.gradle`
+  wires it in when the submodule is present, and notifee's own build.gradle prefers
+  that project over the bundled `app.notifee:core` AAR. `scandelete: notifee_fork`
+  strips the binaries inside the submodule (its bundled core AAR, wrapper jars,
+  example keystores) while leaving the Java source that gets compiled;
+  `scanignore: notifee_fork/android/build.gradle` keeps the core module's build
+  config. The prebuild `sed` drops notifee_core's JVM-version `System.exit` guard
+  so the build server's JDK (21) is accepted.
 
   Single universal fdroidRelease APK (no ABI splits). Listing text + screenshots
   come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
@@ -98,5 +111,5 @@ MaintainerNotes: |
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.7.9
-CurrentVersionCode: 190
+CurrentVersion: 2.7.10
+CurrentVersionCode: 191
