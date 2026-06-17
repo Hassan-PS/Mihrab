@@ -33,6 +33,7 @@ Builds:
       - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
     scanignore:
       - node_modules/@notifee/react-native/android/build.gradle
+      - node_modules/@notifee/react-native/android/libs
       - node_modules/@react-native-async-storage/async-storage/android/build.gradle
       - node_modules/@react-native-community/blur/android/build.gradle
       - node_modules/@react-native-community/geolocation/android/build.gradle
@@ -87,8 +88,9 @@ MaintainerNotes: |
   build genuinely needs so the scan leaves them in place: each autolinked native
   module's `android/build.gradle` (they declare local-path Maven repos pointing at
   `node_modules/react-native/android`), `react-native/ReactAndroid/publish.gradle`,
-  and the linux `hermes-compiler` hermesc binary used to compile the Hermes
-  bytecode bundle.
+  the linux `hermes-compiler` hermesc binary used to compile the Hermes bytecode
+  bundle, and `@notifee/react-native/android/libs` (notifee ships its `core` as a
+  prebuilt AAR in a flatDir Maven repo there).
 
   Single universal fdroidRelease APK (no ABI splits). Listing text + screenshots
   come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
