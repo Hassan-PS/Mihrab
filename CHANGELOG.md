@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.10] — 2026-06-17
+
+### Changed
+- **F-Droid build now compiles notifee's core from source** instead of using the prebuilt `core` AAR notifee ships. The notifee source (a community fork that reproduces the `app.notifee:core` engine without Google Play Services) is vendored as the `notifee_fork` git submodule, and `android/settings.gradle` builds it as `:notifee_core` when the submodule is present. Play/local builds without the submodule checked out continue to use the bundled AAR unchanged.
+
 ## [2.7.9] — 2026-06-16
 
 ### Fixed
