@@ -14,8 +14,8 @@
  *     render to a memo'd child.
  */
 
-import { act, create } from 'react-test-renderer';
-import { useState } from 'react';
+import { create } from 'react-test-renderer';
+import { act, useState } from 'react';
 import { Text, View } from 'react-native';
 import {
   CalendarIcon,

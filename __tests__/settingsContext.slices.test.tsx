@@ -11,7 +11,8 @@
  * is purely a React-tree refactor, not a storage migration.
  */
 
-import { act, create } from 'react-test-renderer';
+import { act } from 'react';
+import { create } from 'react-test-renderer';
 import { Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {

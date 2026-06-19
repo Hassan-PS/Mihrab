@@ -2,7 +2,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { act } from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import App from '../App';
 
@@ -68,7 +68,7 @@ jest.mock('../src/hooks/usePrayerDay', () => {
 });
 
 test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
+  await act(() => {
     ReactTestRenderer.create(<App />);
   });
 });

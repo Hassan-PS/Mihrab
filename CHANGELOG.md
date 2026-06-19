@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.13] — 2026-06-19
+
+### Changed
+- Maintenance release rolling up the recent theme fixes (iOS header chrome follows the in-app theme; "System" theme no longer lags on the opposite appearance) and internal test-suite updates for React 19.
+
 ## [2.7.12] — 2026-06-19
 
 ### Fixed
