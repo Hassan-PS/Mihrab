@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.12] — 2026-06-19
+
+### Fixed
+- **"System" theme no longer lags or sticks on the opposite appearance (Android & iOS)**: when following the system light/dark setting, the app could stay on the previous (now-opposite) theme after the OS appearance changed — most often when the change happened while the app was in the background. The app now re-reads the authoritative current appearance on every system appearance event and whenever it returns to the foreground, so the theme tracks the OS without lag.
+
 ## [2.7.11] — 2026-06-19
 
 ### Fixed

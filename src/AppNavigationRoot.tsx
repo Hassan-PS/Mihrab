@@ -5,10 +5,10 @@ import {
   AppState,
   Platform,
   StatusBar,
-  useColorScheme,
   View,
 } from 'react-native';
 import { usePrayerSettings } from './context/PrayerSettingsContext';
+import { useSystemColorScheme } from './hooks/useSystemColorScheme';
 import { RootNavigator } from './navigation/RootNavigator';
 import {
   restartApp as nativeRestartApp,
@@ -23,7 +23,7 @@ import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
 
 export function AppNavigationRoot() {
   const { settings } = usePrayerSettings();
-  const systemScheme = useColorScheme();
+  const systemScheme = useSystemColorScheme();
 
   useSyncWidgetUiHints();
 

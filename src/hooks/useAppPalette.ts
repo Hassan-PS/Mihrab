@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Appearance, Platform, useColorScheme } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
+import { useSystemColorScheme } from './useSystemColorScheme';
 import {
   resolveAppPalette,
   resolveEffectiveDark,
@@ -34,7 +35,9 @@ export function useAppPalette(): {
   isDark: boolean;
 } {
   const { settings } = usePrayerSettings();
-  const systemScheme = useColorScheme();
+  // Authoritative scheme (re-reads on appearance change + foreground) so the
+  // palette never lags behind the OS in "System" mode — see useSystemColorScheme.
+  const systemScheme = useSystemColorScheme();
 
   // Wake-up counter that increments on every Appearance event. We don't
   // care about the value, only that it changes — that's what forces the
