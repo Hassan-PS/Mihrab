@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.11] — 2026-06-19
+
+### Fixed
+- **iOS header now follows the in-app theme (location + settings chip)**: when the app's appearance is set to the opposite of the system (e.g. app Light on a Dark device), the navigation-bar material behind the header location-pin and Settings gear used to follow the system appearance while the chip's own text/icons used the app theme — a mismatched header. The app now forces the iOS window's interface style to its chosen appearance so all native chrome matches.
+
 ## [2.7.10] — 2026-06-17
 
 ### Changed

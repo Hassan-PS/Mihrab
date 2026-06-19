@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { useEffect, useMemo, useRef } from 'react';
 import {
+  Appearance,
   AppState,
   Platform,
   StatusBar,
@@ -49,6 +50,23 @@ export function AppNavigationRoot() {
     if (!settings.useSystemDynamicTheme) return;
     nativeRestartApp();
   }, [systemScheme, settings.appearance, settings.useSystemDynamicTheme]);
+
+  // iOS: force the window's userInterfaceStyle to the app's chosen appearance
+  // so native chrome follows the in-app theme, not the system one, when they
+  // differ. Without this the navigation-bar Liquid Glass / blur material behind
+  // the header location-pin + Settings-gear chip resolves against the device
+  // trait collection (system light/dark) while the chip's own glyphs/text use
+  // the app palette — so a light-app-on-dark-system (or vice-versa) device gets
+  // a mismatched header. `Appearance.setColorScheme` sets the key window's
+  // overrideUserInterfaceStyle; 'system' clears the override. iOS-only: Android
+  // theming already flows through the palette + native nav-bar style + the
+  // dynamic-colour restart path above, and an override there would fight it.
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    Appearance.setColorScheme(
+      settings.appearance === 'system' ? 'unspecified' : settings.appearance,
+    );
+  }, [settings.appearance]);
 
   const isDark = useMemo(
     () => resolveEffectiveDark(settings.appearance, systemScheme),
