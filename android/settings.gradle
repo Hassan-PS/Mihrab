@@ -8,14 +8,3 @@ includeBuild('../node_modules/@react-native/gradle-plugin')
 include ':react-native-iap'
 project(':react-native-iap').projectDir =
     new File(rootProject.projectDir, '../node_modules/react-native-iap/android')
-
-// Build notifee's core from source when the `notifee_fork` submodule is present
-// (used by the F-Droid build, which forbids the prebuilt core AAR notifee ships).
-// notifee's android/build.gradle prefers project(':notifee_core') over the AAR
-// when it exists. When the submodule isn't checked out (default Play/local clone
-// without --recurse-submodules), this is skipped and the bundled AAR is used.
-def notifeeCoreDir = new File(rootProject.projectDir, '../notifee_fork/android')
-if (notifeeCoreDir.exists()) {
-    include ':notifee_core'
-    project(':notifee_core').projectDir = notifeeCoreDir
-}

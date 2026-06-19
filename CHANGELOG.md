@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.14] — 2026-06-19
+
+### Fixed
+- **Crash on launch (Android)**: 2.7.13's F-Droid build compiled notifee's core from source, which turned out to be binary-incompatible with notifee's current wrapper at runtime and crashed immediately on launch. Reverted to notifee's published `core` library so the app starts normally again.
+
 ## [2.7.13] — 2026-06-19
 
 ### Changed
