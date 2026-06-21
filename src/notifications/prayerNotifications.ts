@@ -17,6 +17,7 @@ import {
   ADHAN_ACTION_STOP,
   ADHAN_CONTROLS_CATEGORY_ID,
 } from './adhanSafetyControls';
+import { AdhanPlayer } from '../native/AdhanPlayer';
 import type { TimingsMap } from '../types/prayer';
 import { OPTIONAL_TIME_KEYS } from '../types/prayer';
 import {
@@ -179,6 +180,15 @@ export async function previewAdhanSound(
   }
   await notifee.cancelNotification(PREVIEW_NOTIFICATION_ID).catch(() => {});
 
+  // iOS: play the FULL adhan in-app (the Settings screen is open, so this is
+  // foreground playback). The notification sound is capped at 30s, so previewing
+  // via a notification would only play a 29s clip — playing the bundled full
+  // recording lets the user actually hear the complete adhan they're choosing.
+  if (Platform.OS === 'ios' && soundId !== 'default') {
+    void AdhanPlayer.play(soundId);
+    return;
+  }
+
   await ensureChannel(soundId);
   const option = getNotificationSoundOption(soundId);
 
@@ -207,6 +217,7 @@ export async function stopAdhanPreview(): Promise<void> {
     clearTimeout(_previewCancelTimeout);
     _previewCancelTimeout = null;
   }
+  void AdhanPlayer.stop();
   await notifee.cancelNotification(PREVIEW_NOTIFICATION_ID).catch(() => {});
 }
 
@@ -312,6 +323,11 @@ export async function syncPrayerNotifications(params: {
         data: {
           kind: 'prayer_time',
           usesAdhan: usesAdhan ? '1' : '0',
+          // The selected adhan's id doubles as the bundled audio base name
+          // (e.g. 'adhan_makkah' → adhan_makkah.mp3). The iOS foreground handler
+          // uses it to play the FULL adhan on tap / when the app is open, since
+          // iOS caps the notification sound itself at 30s.
+          adhanSound: eventSound.id,
         },
         ios: {
           sound: eventSound.iosSound,

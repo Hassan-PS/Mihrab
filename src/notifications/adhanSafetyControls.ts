@@ -6,6 +6,7 @@ import notifee, {
 import { Platform } from 'react-native';
 import i18n from '../i18n';
 import { loadSettings, saveSettings } from '../settings/storage';
+import { AdhanPlayer } from '../native/AdhanPlayer';
 
 export const ADHAN_CONTROLS_CATEGORY_ID = 'adhan_controls';
 export const ADHAN_ACTION_STOP = 'adhan_stop';
@@ -26,14 +27,32 @@ async function disableAdhanAndClose(notificationId?: string) {
   }
 }
 
-async function handleAdhanAction(event: Event) {
+async function handleAdhanAction(event: Event, foreground: boolean) {
   const { type, detail } = event;
   const notification = detail.notification;
   if (!isAdhanPrayerNotification(notification)) {
     return;
   }
+
+  // iOS only: play the FULL adhan when the user taps the notification (which
+  // foregrounds the app) or when it's delivered while the app is already open.
+  // iOS caps the notification's own sound at 30s, so this is how the complete
+  // adhan plays. Foreground-only (no background audio) keeps it App Store-safe.
+  if (
+    foreground &&
+    Platform.OS === 'ios' &&
+    (type === EventType.PRESS || type === EventType.DELIVERED)
+  ) {
+    const soundId = notification?.data?.adhanSound;
+    if (typeof soundId === 'string' && soundId !== 'default') {
+      void AdhanPlayer.play(soundId);
+    }
+    return;
+  }
+
   if (type === EventType.DISMISSED) {
-    // Just stop the sound if dismissed, do not disable the preference
+    // Stop the in-app adhan + clear the banner; don't disable the preference.
+    void AdhanPlayer.stop();
     if (notification?.id) {
       await notifee.cancelNotification(notification.id);
     }
@@ -44,12 +63,14 @@ async function handleAdhanAction(event: Event) {
   }
   const pressId = detail.pressAction?.id;
   if (pressId === ADHAN_ACTION_STOP) {
+    void AdhanPlayer.stop();
     if (notification?.id) {
       await notifee.cancelNotification(notification.id);
     }
     return;
   }
   if (pressId === ADHAN_ACTION_DISABLE) {
+    void AdhanPlayer.stop();
     await disableAdhanAndClose(notification?.id);
   }
 }
@@ -82,10 +103,10 @@ export function registerAdhanSafetyControls() {
   }
 
   notifee.onForegroundEvent(event => {
-    void handleAdhanAction(event);
+    void handleAdhanAction(event, true);
   });
 
   notifee.onBackgroundEvent(async event => {
-    await handleAdhanAction(event);
+    await handleAdhanAction(event, false);
   });
 }

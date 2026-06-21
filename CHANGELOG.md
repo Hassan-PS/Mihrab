@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **Full adhan on iOS (compliant)**: iOS caps notification sounds at 30s, so the prayer notification can only play a 29s clip. The complete adhan now plays in-app when you **tap** an adhan notification (which opens the app) or when a prayer notification arrives **while the app is open**, and when you **preview** an adhan in Settings. Uses a foreground-only audio player (no background audio mode), so it's App Store-compliant. Android is unchanged (its notification channel already plays the full adhan).
+
 ## [2.7.14] — 2026-06-19
 
 ### Fixed
