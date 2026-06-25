@@ -227,7 +227,19 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
  * coordinates after this call. The regression test
  * `__tests__/secureStorage.migration.test.ts` confirms this invariant.
  */
-export async function saveSettings(settings: PrayerAppSettings): Promise<void> {
+// Write serialization — a single in-order queue for ALL settings saves.
+//
+// `updateSettings` fires `saveSettings(next)` for every change, and `next` is
+// always derived from the latest state (functional setState). But each save is
+// two async writes (encrypted + plaintext) with no ordering guarantee, so two
+// rapid changes — e.g. removing a saved location and then picking a new place —
+// could complete out of order and leave the OLDER snapshot on disk. The user
+// then sees their location change "not take" and has to redo it. Chaining every
+// save through one promise guarantees they land in call order, so the most
+// recent state always wins. (Mirrors the write-mutex used in prayerStorage.)
+let _saveQueue: Promise<void> = Promise.resolve();
+
+async function performSave(settings: PrayerAppSettings): Promise<void> {
   const secure = extractSecureFields(settings as unknown as Record<string, unknown>);
   const plaintext = stripSecureFields(
     settings as unknown as Record<string, unknown>,
@@ -247,6 +259,17 @@ export async function saveSettings(settings: PrayerAppSettings): Promise<void> {
     );
   }
   await AsyncStorage.setItem(KEY, JSON.stringify(plaintext));
+}
+
+export function saveSettings(settings: PrayerAppSettings): Promise<void> {
+  // Chain onto the queue regardless of whether the previous save resolved or
+  // rejected, so one failed write can't wedge every later save.
+  const next = _saveQueue.then(
+    () => performSave(settings),
+    () => performSave(settings),
+  );
+  _saveQueue = next.catch(() => {});
+  return next;
 }
 
 /**

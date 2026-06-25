@@ -67,11 +67,30 @@ export function getEffectiveDataProvider(
   dataProvider: PrayerDataProviderId,
   coords: { latitude: number; longitude: number } | null,
 ): PrayerDataProviderId {
-  if (!dataProviderAuto) {
-    return dataProvider;
+  if (dataProviderAuto) {
+    // Automatic: Sweden → the Swedish city source, everywhere else → the
+    // global default. Switches intuitively as the user's location changes.
+    if (coords && isCoordinateInSweden(coords.latitude, coords.longitude)) {
+      return 'islamiska_forbundet';
+    }
+    return AUTO_DEFAULT_OUTSIDE_SWEDEN;
   }
-  if (coords && isCoordinateInSweden(coords.latitude, coords.longitude)) {
-    return 'islamiska_forbundet';
+
+  // Manual provider — honour the user's pick, with ONE safety guard:
+  // `islamiska_forbundet` only has data for Swedish cities, so it returns
+  // nonsense for coordinates outside Sweden (it maps to the nearest Swedish
+  // city). When the user has it pinned but has moved outside Sweden, fall
+  // back to the global default for that location so prayer times stay
+  // correct. We only redirect when we KNOW the coordinate is out of region;
+  // with no coords yet we leave the pick untouched and re-resolve once the
+  // location loads. The reverse (forcing the Swedish source while in Sweden)
+  // is left to automatic mode — a deliberate non-Sweden pick is respected.
+  if (
+    dataProvider === 'islamiska_forbundet' &&
+    coords &&
+    !isCoordinateInSweden(coords.latitude, coords.longitude)
+  ) {
+    return AUTO_DEFAULT_OUTSIDE_SWEDEN;
   }
-  return AUTO_DEFAULT_OUTSIDE_SWEDEN;
+  return dataProvider;
 }
