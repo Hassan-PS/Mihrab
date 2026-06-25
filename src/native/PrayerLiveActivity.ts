@@ -63,6 +63,11 @@ export interface PrayerLiveActivityInterface {
   update(json: string): Promise<void>;
   /** End any running Live Activity. */
   stop(): Promise<void>;
+  /** Re-show the Live Activity if it was dismissed while the feature is still
+   *  enabled (iOS can't prevent dismissal, so call this on app foreground).
+   *  No-op when the feature is off, a card is already showing, or there's no
+   *  remaining prayer today. May be absent on older app binaries. */
+  reassert?(): Promise<void>;
   /** True when the OS supports Live Activities and the user hasn't disabled them. */
   isAvailable(): Promise<boolean>;
 }

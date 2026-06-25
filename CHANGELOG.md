@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **Live Activity comes back after being dismissed (iOS)**: if you swipe the prayer Live Activity away (or clear it) while the feature is enabled, it's now re-shown automatically the next time you open the app — from any screen, not just Home. (iOS doesn't let apps make a Live Activity un-dismissible or start one in the background, so this revives it on every foreground rather than truly pinning it.)
+
 ## [2.7.15] — 2026-06-21
 
 ### Added

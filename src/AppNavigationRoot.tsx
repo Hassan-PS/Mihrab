@@ -20,12 +20,31 @@ import {
 } from './theme/appPalette';
 import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
+import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 
 export function AppNavigationRoot() {
   const { settings } = usePrayerSettings();
   const systemScheme = useSystemColorScheme();
 
   useSyncWidgetUiHints();
+
+  // iOS: re-show the Live Activity if the user dismissed it (swipe / "Clear
+  // all") while the feature is still enabled. iOS forbids starting one from the
+  // background and can't prevent dismissal, so we revive it on every foreground
+  // — the closest to "always shown while enabled". The native side no-ops when
+  // the feature is off, a card is already showing, or there's no next prayer
+  // today. (HomeScreen still re-syncs on focus; this also covers other screens.)
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    const reassert = () => {
+      getPrayerLiveActivityModule()?.reassert?.().catch(() => {});
+    };
+    reassert();
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') reassert();
+    });
+    return () => sub.remove();
+  }, []);
 
   // Auto-restart on a system dark/light flip when dynamic colors are
   // active — task #118. Material You's PlatformColor refs resolve at

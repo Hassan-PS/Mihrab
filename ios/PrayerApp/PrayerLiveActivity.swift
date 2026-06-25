@@ -39,6 +39,12 @@ final class PrayerLiveActivity: NSObject {
   private let queue = DispatchQueue(label: "com.hassan.prayerapp.liveactivity", qos: .userInitiated)
   private var isStarting = false
 
+  // Last content pushed while the feature was enabled. Used by `reassert()` to
+  // revive the card after the user swipes it away / clears it. Cleared by
+  // `stop()` so a disabled feature never revives. iOS forbids starting a Live
+  // Activity from the background, so revival only happens on app foreground.
+  private static var cachedStateJSON: String?
+
   // MARK: - start
 
   @objc
@@ -77,6 +83,10 @@ final class PrayerLiveActivity: NSObject {
         reject("DECODE_FAILED", error.localizedDescription, error)
         return
       }
+
+      // Remember the latest content so `reassert()` can revive the card if the
+      // user dismisses it while the feature is still enabled.
+      Self.cachedStateJSON = json
 
       // staleDate = just after the next prayer, so once the countdown elapses
       // the system knows the content is out of date (and dims/refreshes it)
@@ -162,6 +172,7 @@ final class PrayerLiveActivity: NSObject {
         reject("DECODE_FAILED", error.localizedDescription, error)
         return
       }
+      Self.cachedStateJSON = json
       let staleDate = Self.staleDate(for: state)
       Task {
         for activity in Activity<PrayerLiveActivityAttributes>.activities {
@@ -201,6 +212,9 @@ final class PrayerLiveActivity: NSObject {
     _ resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
+    // Feature turned off — forget the cached content so `reassert()` won't
+    // revive the card.
+    Self.cachedStateJSON = nil
     #if canImport(ActivityKit)
     if #available(iOS 16.1, *) {
       LiveActivityRefresher.cancelScheduledRefresh()
@@ -210,6 +224,65 @@ final class PrayerLiveActivity: NSObject {
         }
         resolve(nil)
       }
+      return
+    }
+    #endif
+    resolve(nil)
+  }
+
+  // MARK: - reassert
+  //
+  // Re-show the Live Activity if it was dismissed (swiped away / "Clear all")
+  // while the feature is still enabled. Called from JS whenever the app comes
+  // to the foreground. iOS does NOT allow apps to start a Live Activity from
+  // the background or to prevent the user from dismissing one, so this is the
+  // closest we can get to "always shown while enabled": it reappears every time
+  // the app is opened. No-op when the feature is off (no cached content), when a
+  // card is already showing, or when there's no remaining prayer today.
+  @objc
+  func reassert(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    rejecter reject: @escaping RCTPromiseRejectBlock
+  ) {
+    #if canImport(ActivityKit)
+    if #available(iOS 16.2, *) {
+      guard let json = Self.cachedStateJSON,
+            let data = json.data(using: .utf8),
+            var state = try? JSONDecoder().decode(
+              PrayerLiveActivityAttributes.ContentState.self, from: data)
+      else { resolve(nil); return }
+
+      // Already showing → nothing to do.
+      guard Activity<PrayerLiveActivityAttributes>.activities.isEmpty else {
+        resolve(nil)
+        return
+      }
+
+      // Re-point to the current next prayer so the revived card isn't stale.
+      let now = Date()
+      guard let next = LiveActivityRefresher.computeNext(state: state, now: now) else {
+        // No remaining event today — let the foreground sync re-arm with
+        // tomorrow's data instead of reviving a past countdown.
+        resolve(nil)
+        return
+      }
+      state.nextKey = next.key
+      state.nextLabel = next.label
+      state.nextTime = next.time
+      state.nextEpochSeconds = next.epoch
+      state.prevEpochSeconds = next.prevEpoch
+      let stale = Date(timeIntervalSince1970: next.epoch + 60)
+      do {
+        let _ = try Activity<PrayerLiveActivityAttributes>.request(
+          attributes: PrayerLiveActivityAttributes(),
+          content: ActivityContent(state: state, staleDate: stale),
+          pushType: nil
+        )
+        LiveActivityRefresher.scheduleRefresh()
+      } catch {
+        NSLog("[PrayerLiveActivity] reassert request failed: \(error.localizedDescription)")
+      }
+      resolve(nil)
       return
     }
     #endif
@@ -336,7 +409,7 @@ enum LiveActivityRefresher {
     return soonest
   }
 
-  private struct NextInfo {
+  fileprivate struct NextInfo {
     let key: String
     let label: String
     let time: String
@@ -349,7 +422,7 @@ enum LiveActivityRefresher {
   /// Returns nil after the day's last event (the activity is short-lived and
   /// gets re-armed from the foreground next time the app opens).
   @available(iOS 16.1, *)
-  private static func computeNext(
+  fileprivate static func computeNext(
     state: PrayerLiveActivityAttributes.ContentState,
     now: Date
   ) -> NextInfo? {
