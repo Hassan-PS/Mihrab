@@ -41,8 +41,10 @@ it('persists the most recent save when two are fired back-to-back', async () => 
     }
   });
 
-  const first = { ...DEFAULT_SETTINGS, appAccentId: 'first' };
-  const second = { ...DEFAULT_SETTINGS, appAccentId: 'second' };
+  // `language` is a plaintext field with several valid values — use two of
+  // them as the distinguishing marker between the first and second save.
+  const first = { ...DEFAULT_SETTINGS, language: 'en' as const };
+  const second = { ...DEFAULT_SETTINGS, language: 'ar' as const };
 
   const p1 = saveSettings(first);
   const p2 = saveSettings(second);
@@ -50,5 +52,5 @@ it('persists the most recent save when two are fired back-to-back', async () => 
 
   const raw = await AsyncStorage.getItem(KEY);
   expect(raw).toBeTruthy();
-  expect(JSON.parse(raw as string).appAccentId).toBe('second');
+  expect(JSON.parse(raw as string).language).toBe('ar');
 });
