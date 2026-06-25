@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.7.17] — 2026-06-25
 
 ### Fixed
 - **Prayer times follow your location's region (provider auto-switch)**: the Swedish source (Islamiska Förbundet) only has data for Swedish cities, so for a location outside Sweden it produced wrong times. The data source now switches by region — Sweden uses the Swedish source, everywhere else uses the global source — in both automatic mode and when the Swedish source is pinned manually. (Outside Sweden a pinned Swedish source falls back to the global source for that location.)
