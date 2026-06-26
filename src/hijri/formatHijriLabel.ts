@@ -24,11 +24,21 @@ const HIJRI_MONTHS_EN = [
   'Dhul-Hijjah',
 ] as const;
 
+/** Arabic-Indic digits, so the Hijri date reads fully in Arabic (١٢ محرم ١٤٤٧)
+ *  when the app language is Arabic — the Hijri calendar is an Arabic system. */
+const ARABIC_INDIC = '٠١٢٣٤٥٦٧٨٩';
+function toArabicIndic(n: number): string {
+  return String(n).replace(/\d/g, c => ARABIC_INDIC[Number(c)]);
+}
+
 export function formatHijriLabel(d: Date): string {
   const h = gregorianToHijri(d);
   const monthKey = `hijri.month_${h.month}`;
   const month = i18n.exists(monthKey)
     ? i18n.t(monthKey)
     : HIJRI_MONTHS_EN[h.month - 1];
-  return `${h.day} ${month} ${h.year}`;
+  const arabic = (i18n.language || '').slice(0, 2) === 'ar';
+  const day = arabic ? toArabicIndic(h.day) : String(h.day);
+  const year = arabic ? toArabicIndic(h.year) : String(h.year);
+  return `${day} ${month} ${year}`;
 }

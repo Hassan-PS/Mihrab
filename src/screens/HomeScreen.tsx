@@ -387,6 +387,11 @@ export function HomeScreen() {
     // Re-push the Live Activity the instant the user changes its options
     // (HomeScreen stays mounted, so this fires even from the Settings screen).
     settings.liveActivitySecondMetric,
+    // Re-push when the app language changes so the notification's localised
+    // labels (In/At/Since, mute toggle, Hijri month) update. Using i18n.language
+    // (not settings.language) guarantees i18n has already switched before we
+    // rebuild the payload via i18n.t.
+    i18n.language,
   ]);
 
   // Persist last-fetched coords so MonthScreen and offline use can fall back to them.

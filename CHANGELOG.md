@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.21] — 2026-06-27
+
+### Fixed
+- **Live Activity now follows the app language immediately**: changing the app language re-pushes the notification, so the metric labels ("In"/"At"/"Since"), the mute toggle and the Hijri month all switch language right away instead of staying in the previous language.
+- **Arabic Hijri date**: when the app language is Arabic, the Hijri date uses Arabic-Indic numerals (e.g. ١٢ محرم ١٤٤٧) so the whole date reads in Arabic.
+
 ## [2.7.20] — 2026-06-27
 
 ### Changed
