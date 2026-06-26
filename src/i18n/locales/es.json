@@ -914,6 +914,23 @@
     "channelDesc": "Notificación continua fijada mostrando la cuenta regresiva hasta la próxima oración.",
     "fgsText": "Cuenta regresiva de oración activa",
     "muteNext": "Silenciar el próximo adhán",
-    "unmuteNext": "Activar el próximo adhán"
+    "unmuteNext": "Activar el próximo adhán",
+    "inWord": "En",
+    "atWord": "A las",
+    "sinceWord": "Desde"
+  },
+  "hijri": {
+    "month_1": "Muharram",
+    "month_2": "Safar",
+    "month_3": "Rabi I",
+    "month_4": "Rabi II",
+    "month_5": "Yumada I",
+    "month_6": "Yumada II",
+    "month_7": "Rayab",
+    "month_8": "Sha'ban",
+    "month_9": "Ramadán",
+    "month_10": "Shawwal",
+    "month_11": "Dhul-Qa'dah",
+    "month_12": "Dhul-Hiyyah"
   }
 }

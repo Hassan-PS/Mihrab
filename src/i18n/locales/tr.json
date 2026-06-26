@@ -914,6 +914,23 @@
     "channelDesc": "Sıradaki namaza geri sayımı gösteren sabitlenmiş sürekli bildirim.",
     "fgsText": "Namaz geri sayımı aktif",
     "muteNext": "Sonraki ezanı sessize al",
-    "unmuteNext": "Sonraki ezanı aç"
+    "unmuteNext": "Sonraki ezanı aç",
+    "inWord": "Kalan",
+    "atWord": "Saat",
+    "sinceWord": "Geçen"
+  },
+  "hijri": {
+    "month_1": "Muharrem",
+    "month_2": "Safer",
+    "month_3": "Rebiülevvel",
+    "month_4": "Rebiülahir",
+    "month_5": "Cemaziyelevvel",
+    "month_6": "Cemaziyelahir",
+    "month_7": "Recep",
+    "month_8": "Şaban",
+    "month_9": "Ramazan",
+    "month_10": "Şevval",
+    "month_11": "Zilkade",
+    "month_12": "Zilhicce"
   }
 }

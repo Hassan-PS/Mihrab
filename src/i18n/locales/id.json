@@ -914,6 +914,23 @@
     "channelDesc": "Notifikasi berkelanjutan tersemat yang menampilkan hitungan mundur ke salat berikutnya.",
     "fgsText": "Hitung mundur shalat aktif",
     "muteNext": "Bisukan adzan berikutnya",
-    "unmuteNext": "Aktifkan adzan berikutnya"
+    "unmuteNext": "Aktifkan adzan berikutnya",
+    "inWord": "Dalam",
+    "atWord": "Pukul",
+    "sinceWord": "Sejak"
+  },
+  "hijri": {
+    "month_1": "Muharram",
+    "month_2": "Safar",
+    "month_3": "Rabiulawal",
+    "month_4": "Rabiulakhir",
+    "month_5": "Jumadilawal",
+    "month_6": "Jumadilakhir",
+    "month_7": "Rajab",
+    "month_8": "Syakban",
+    "month_9": "Ramadan",
+    "month_10": "Syawal",
+    "month_11": "Zulkaidah",
+    "month_12": "Zulhijah"
   }
 }

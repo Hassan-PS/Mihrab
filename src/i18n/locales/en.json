@@ -914,6 +914,23 @@
     "channelDesc": "Pinned ongoing notification with the next-prayer countdown.",
     "fgsText": "Prayer countdown active",
     "muteNext": "Mute next adhan",
-    "unmuteNext": "Unmute next adhan"
+    "unmuteNext": "Unmute next adhan",
+    "inWord": "In",
+    "atWord": "At",
+    "sinceWord": "Since"
+  },
+  "hijri": {
+    "month_1": "Muharram",
+    "month_2": "Safar",
+    "month_3": "Rabi I",
+    "month_4": "Rabi II",
+    "month_5": "Jumada I",
+    "month_6": "Jumada II",
+    "month_7": "Rajab",
+    "month_8": "Sha'ban",
+    "month_9": "Ramadan",
+    "month_10": "Shawwal",
+    "month_11": "Dhul-Qa'dah",
+    "month_12": "Dhul-Hijjah"
   }
 }

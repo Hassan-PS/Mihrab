@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.20] — 2026-06-27
+
+### Changed
+- **Live Activity fully localized**: the countdown metric labels ("In", "At", "Since") and the Hijri month names now translate into all 13 app languages, so the entire Live Activity reads in the user's chosen language.
+
 ## [2.7.19] — 2026-06-27
 
 ### Changed

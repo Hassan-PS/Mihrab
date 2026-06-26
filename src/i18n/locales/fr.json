@@ -914,6 +914,23 @@
     "channelDesc": "Notification continue épinglée affichant le compte à rebours vers la prochaine prière.",
     "fgsText": "Compte à rebours de la prière actif",
     "muteNext": "Couper le prochain adhan",
-    "unmuteNext": "Activer le prochain adhan"
+    "unmuteNext": "Activer le prochain adhan",
+    "inWord": "Dans",
+    "atWord": "À",
+    "sinceWord": "Depuis"
+  },
+  "hijri": {
+    "month_1": "Mouharram",
+    "month_2": "Safar",
+    "month_3": "Rabi al-Awwal",
+    "month_4": "Rabi al-Thani",
+    "month_5": "Joumada al-Oula",
+    "month_6": "Joumada al-Thania",
+    "month_7": "Rajab",
+    "month_8": "Cha'ban",
+    "month_9": "Ramadan",
+    "month_10": "Chawwal",
+    "month_11": "Dhou al-Qi'da",
+    "month_12": "Dhou al-Hijja"
   }
 }
