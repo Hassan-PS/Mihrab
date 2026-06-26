@@ -22,7 +22,8 @@ Builds:
     gradle:
       - fdroid
     prebuild:
-      - sed -i 's/compileSdkVersion = 37/compileSdkVersion = 36/; s/buildToolsVersion = "37.0.0"/buildToolsVersion = "36.0.0"/' ../build.gradle
+      - sed -i 's/SdkVersion = 37/SdkVersion = 36/' ../build.gradle
+      - sed -i 's/"37.0.0"/"36.0.0"/' ../build.gradle
       - echo 'reactNativeArchitectures=arm64-v8a' >> ../gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m' >> ../gradle.properties
       - echo 'org.gradle.daemon=false' >> ../gradle.properties
