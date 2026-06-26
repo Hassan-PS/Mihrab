@@ -912,6 +912,8 @@
     "soon": "Commence bientôt",
     "channelName": "Compte à rebours de la prière",
     "channelDesc": "Notification continue épinglée affichant le compte à rebours vers la prochaine prière.",
-    "fgsText": "Compte à rebours de la prière actif"
+    "fgsText": "Compte à rebours de la prière actif",
+    "muteNext": "Couper le prochain adhan",
+    "unmuteNext": "Activer le prochain adhan"
   }
 }

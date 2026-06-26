@@ -384,6 +384,9 @@ export function HomeScreen() {
     settings.appearance,
     settings.useSystemDynamicTheme,
     settings.liveActivityDesign,
+    // Re-push the Live Activity the instant the user changes its options
+    // (HomeScreen stays mounted, so this fires even from the Settings screen).
+    settings.liveActivitySecondMetric,
   ]);
 
   // Persist last-fetched coords so MonthScreen and offline use can fall back to them.

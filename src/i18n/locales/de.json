@@ -912,6 +912,8 @@
     "soon": "Beginnt bald",
     "channelName": "Gebets-Countdown",
     "channelDesc": "Angeheftete laufende Benachrichtigung mit dem Countdown zum nächsten Gebet.",
-    "fgsText": "Gebets-Countdown aktiv"
+    "fgsText": "Gebets-Countdown aktiv",
+    "muteNext": "Nächsten Adhan stummschalten",
+    "unmuteNext": "Nächsten Adhan einschalten"
   }
 }

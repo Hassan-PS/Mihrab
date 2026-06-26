@@ -912,6 +912,8 @@
     "soon": "Yakında başlıyor",
     "channelName": "Namaz geri sayımı",
     "channelDesc": "Sıradaki namaza geri sayımı gösteren sabitlenmiş sürekli bildirim.",
-    "fgsText": "Namaz geri sayımı aktif"
+    "fgsText": "Namaz geri sayımı aktif",
+    "muteNext": "Sonraki ezanı sessize al",
+    "unmuteNext": "Sonraki ezanı aç"
   }
 }

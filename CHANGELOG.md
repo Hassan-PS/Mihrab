@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.19] — 2026-06-27
+
+### Changed
+- **Android 17 Live Activity polish**: the countdown design now keeps its larger, two-row layout even with no second metric, so the Hijri date always has room. Changing a Live Activity option (design or second metric) now refreshes the notification immediately. The "Mute next adhan" toggle is now translated into all 13 app languages.
+
 ## [2.7.18] — 2026-06-27
 
 ### Added

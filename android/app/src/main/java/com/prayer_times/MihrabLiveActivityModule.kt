@@ -568,10 +568,9 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           val inWord = p.optString("inWord", "In")
           val countdownMetric = Notification.Metric(timer, inWord, semantic)
           val second = buildSecondMetric(p, secondMetric, prevEpochMs)
-          builder.setContentTitle(
+          val arrivedTitle =
             if (justArrived && arrivedLabel.isNotEmpty()) "$arrivedLabel · $nowWord"
-            else name,
-          )
+            else null
           val metricStyle: Notification.MetricStyle
           if (second != null) {
             // [At · 17:35 | In · 3:13:09]; chip = the countdown (index 1). The
@@ -579,14 +578,18 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             metricStyle = Notification.MetricStyle()
               .setMetrics(arrayListOf(second, countdownMetric))
               .setCriticalMetric(1)
+            builder.setContentTitle(arrivedTitle ?: name)
             if (hijri.isNotEmpty()) builder.setSubText(hijri)
           } else {
-            // Single big countdown; clock time + Hijri go in the header subtext.
+            // No second metric: keep the big single countdown but render in the
+            // taller two-row form by carrying the prayer name + Hijri on the
+            // prominent title line (so the Hijri has room and isn't squeezed
+            // onto one line with the time) and the clock time in the subtext.
             metricStyle = Notification.MetricStyle()
               .addMetric(countdownMetric)
               .setCriticalMetric(0)
-            val sub = joinDot(nextTime, hijri)
-            if (sub.isNotEmpty()) builder.setSubText(sub)
+            builder.setContentTitle(arrivedTitle ?: joinDot(name, hijri))
+            if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
           }
           builder.setStyle(metricStyle)
           // Chip is driven by the critical metric (auto-ticking) — no
