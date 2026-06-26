@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.22] — 2026-06-27
+
+### Fixed
+- **F-Droid build**: the Android 17 Live Activity APIs (MetricStyle countdown, etc.) are now invoked via runtime reflection, so the app compiles against the Android 16 SDK on F-Droid's build server (which doesn't yet have the Android 17 SDK) while keeping every feature on Android 17 devices. No user-facing change; the GitHub/Play builds still target the Android 17 SDK.
+
 ## [2.7.21] — 2026-06-27
 
 ### Fixed
