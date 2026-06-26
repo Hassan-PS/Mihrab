@@ -22,6 +22,7 @@ Builds:
     gradle:
       - fdroid
     prebuild:
+      - 'for s in "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager "$ANDROID_HOME"/tools/bin/sdkmanager; do [ -x "$s" ] && yes | "$s" "platforms;android-37.0" >/dev/null 2>&1 && break; done; ln -sfn "$ANDROID_HOME/platforms/android-37.0" "$ANDROID_HOME/platforms/android-37"'
       - echo 'reactNativeArchitectures=arm64-v8a' >> ../gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m' >> ../gradle.properties
       - echo 'org.gradle.daemon=false' >> ../gradle.properties
