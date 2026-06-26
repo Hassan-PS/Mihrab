@@ -23,7 +23,7 @@ import {
   type WidgetCoords,
   type WidgetSeasonalFlags,
 } from '../widget/buildWidgetPayload';
-import { gregorianToHijri } from '../hijri/convert';
+import { formatHijriLabel } from '../hijri/formatHijriLabel';
 import {
   startOrUpdateLiveActivity as androidStartOrUpdate,
   stopLiveActivity as androidStop,
@@ -72,35 +72,8 @@ export function resolveAccentHex(
   return ACCENT_LIGHT[accentId] ?? ACCENT_LIGHT.green;
 }
 
-/**
- * Hijri month names (transliterated). For locales with their own script
- * we let i18n's namespace handle it via the optional `hijri.month_<n>`
- * keys; falling back to this English transliteration when missing keeps
- * the format readable for every locale without forcing 12 new keys
- * across all 13 files in this beta.
- */
-const HIJRI_MONTHS_EN = [
-  'Muharram',
-  'Safar',
-  'Rabi I',
-  'Rabi II',
-  'Jumada I',
-  'Jumada II',
-  'Rajab',
-  "Sha'ban",
-  'Ramadan',
-  'Shawwal',
-  "Dhul-Qa'dah",
-  'Dhul-Hijjah',
-] as const;
-
-function formatHijriLabel(d: Date): string {
-  const h = gregorianToHijri(d);
-  const monthKey = `hijri.month_${h.month}`;
-  const m =
-    i18n.exists(monthKey) ? i18n.t(monthKey) : HIJRI_MONTHS_EN[h.month - 1];
-  return `${h.day} ${m} ${h.year}`;
-}
+// Hijri label now comes from the shared `formatHijriLabel` util (also used by
+// the home day cards) so the format stays identical everywhere.
 
 /**
  * Epoch (ms) of the prayer that most recently passed at or before `now`,
@@ -266,14 +239,18 @@ async function syncLiveActivityImpl(args: {
       payload,
       nextPrayerTimestamp,
       nextPrayerLabel: nextLabel,
-      hijriLabel: '',
+      // Hijri date of the day the next prayer falls on (handles after-Isha
+      // rollover), shown next to the next prayer in the notification header.
+      hijriLabel: formatHijriLabel(
+        new Date(nextPrayerTimestamp ?? now.getTime()),
+      ),
       locationLabel: '',
       accentHex,
       systemAccent: args.systemAccent === true,
       design: args.design ?? 'timeline',
       compactMode: true,
       showSunrise: true,
-      showHijri: false,
+      showHijri: true,
       showLocation: false,
       // Pass today's raw timings so computePrevPrayerEpoch uses the actual
       // current-day HH:MM strings even after payload rolls over to tomorrow.

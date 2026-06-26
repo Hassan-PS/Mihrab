@@ -25,6 +25,8 @@ type DayCarouselProps = {
   getDayLabel: (dayOffset: number) => string;
   /** Day-date generator (e.g., "30 Apr"). */
   getDayDate: (dayOffset: number) => string;
+  /** Hijri-date generator (e.g., "12 Dhul-Qa'dah 1447"). */
+  getHijriDate?: (dayOffset: number) => string;
 };
 
 function DayCarouselImpl({
@@ -34,6 +36,7 @@ function DayCarouselImpl({
   resetKey,
   getDayLabel,
   getDayDate,
+  getHijriDate,
 }: DayCarouselProps) {
   const { palette } = useAppPalette();
   const { i18n } = useTranslation();
@@ -104,6 +107,7 @@ function DayCarouselImpl({
             cardWidth={cardWidth}
             dayLabel={getDayLabel(dayIndex)}
             dayDate={getDayDate(dayIndex)}
+            hijriDate={getHijriDate?.(dayIndex)}
             isToday={dayIndex === 0}
             nextPrayerName={nextPrayerName}
             onBackToToday={dayIndex === 0 ? undefined : onBackToToday}

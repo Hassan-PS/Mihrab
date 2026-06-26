@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Log
 import android.widget.RemoteViews
@@ -17,6 +18,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import org.json.JSONObject
+import java.time.Instant
 
 /**
  * Mihrab Live Activity — JS bridge for the Android Live Activity.
@@ -263,6 +265,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
      * Used in the notification subText alongside the percentage so the
      * countdown and percentage are in the same right-anchored row.
      */
+    /** Join non-empty parts with a middle dot for the header subtext. */
+    private fun joinDot(vararg parts: String): String =
+      parts.filter { it.isNotEmpty() }.joinToString(" · ")
+
     private fun formatRemaining(deltaMs: Long): String {
       val totalSec = (deltaMs / 1000).coerceAtLeast(0)
       val h = totalSec / 3600
@@ -312,19 +318,26 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
       )
 
-      return if (Build.VERSION.SDK_INT >= 36) {
-        // Android 16+ path: native Notification.ProgressStyle (the platform
-        // "Live Update" API) for a sleek segmented day timeline with a point
-        // per prayer + a tracker dot. ProgressStyle is a first-class template
-        // (unlike custom RemoteViews), so it's chip-compatible. Falls back to
-        // the plain progress bar inside buildAndroid16 if the timeline can't
-        // be built (e.g. pre-dawn before today's Fajr, or missing day data).
-        buildAndroid16(ctx, p, nextEpochMs, accentInt, progressPct, title, pi)
-      } else {
-        // Pre-36 path: use the custom RemoteViews layout (prayer title left,
-        // countdown|pct right on the same line). No chip on these versions.
-        val contentView = buildContentView(ctx, title, nextEpochMs, progressPct)
-        buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, pi, contentView)
+      return when {
+        Build.VERSION.SDK_INT >= 37 -> {
+          // Android 17+ path: full Live Update feature set — direct (non-
+          // reflective) promotion APIs, ProgressStyle with per-prayer points +
+          // tracker icon (timeline design) OR MetricStyle with a system-ticking
+          // TimeDifference countdown (countdown design), plus Semantic Color for
+          // the imminent (<5 min) state. Falls back to buildAndroid16 on error.
+          buildAndroid17(ctx, p, nextEpochMs, accentInt, progressPct, title, pi)
+        }
+        Build.VERSION.SDK_INT >= 36 -> {
+          // Android 16 path (UNCHANGED): native Notification.ProgressStyle day
+          // timeline + reflective chip APIs. Kept exactly as-is for Android 16
+          // users. Falls back to the plain progress bar inside buildAndroid16.
+          buildAndroid16(ctx, p, nextEpochMs, accentInt, progressPct, title, pi)
+        }
+        else -> {
+          // Pre-36 path: custom RemoteViews layout. No chip on these versions.
+          val contentView = buildContentView(ctx, title, nextEpochMs, progressPct)
+          buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, pi, contentView)
+        }
       }
     }
 
@@ -462,6 +475,247 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       }
     }
 
+    // ── Android 17+ path ────────────────────────────────────────────
+    //
+    // Uses the real Live Update APIs directly (compileSdk 37): no reflection
+    // for promotion, a richer ProgressStyle (per-prayer points + tracker icon),
+    // an alternative MetricStyle countdown that the system ticks on its own
+    // (Notification.Metric.TimeDifference), and the new Semantic Color API to
+    // flag an imminent prayer. Both designs stay chip- and AOD-eligible:
+    // ProgressStyle/MetricStyle are first-class promotable templates, we never
+    // colorize or attach custom RemoteViews, and the channel is IMPORTANCE_HIGH.
+
+    private const val IMMINENT_WINDOW_MS = 5L * 60L * 1000L
+
+    @SuppressLint("NewApi")
+    private fun buildAndroid17(
+      ctx: Context,
+      p: JSONObject,
+      nextEpochMs: Long,
+      accentInt: Int,
+      progressPct: Int,
+      title: String,
+      contentIntent: PendingIntent,
+    ): Notification {
+      try {
+        val now = System.currentTimeMillis()
+        val remaining = nextEpochMs - now
+        val withSeconds = p.optBoolean("withSeconds", false)
+        val countdown = if (withSeconds) formatHMS(remaining) else formatRemaining(remaining)
+        val shortText = if (withSeconds) formatHMS(remaining) else formatRemainingShort(remaining)
+        val nextLabel = p.optString("nextLabel", "")
+        val nextTime = p.optString("nextTime", "")
+        val design = p.optString("design", "timeline")
+        // Imminent = within the next 5 minutes (and not already past). Drives the
+        // Semantic Color caution tint on the upcoming segment / metric.
+        val imminent = remaining in 1 until IMMINENT_WINDOW_MS
+        val prevEpochMs = p.optLong("prevEpochMs", 0L)
+        // "It's <prayer> time" — brief SAFE (green) state for ~90s right after a
+        // prayer instant. The just-passed prayer's localised name is looked up
+        // from the day rows by its epoch.
+        val sinceArrival = if (prevEpochMs > 0L) now - prevEpochMs else Long.MAX_VALUE
+        val justArrived = sinceArrival in 0 until 90_000L
+        val arrivedLabel = if (justArrived) labelForEpoch(p, prevEpochMs) else ""
+        val nowWord = p.optString("nowWord", "Now")
+        val nextKey = p.optString("nextKey", "")
+        val secondMetric = p.optString("secondMetric", "off")
+        // Hijri date shown next to the next prayer (in the header subtext).
+        val hijri = if (p.optBoolean("showHijri", false)) p.optString("hijriLabel", "") else ""
+        // On arrival, flag SAFE green regardless of the brand/Material accent.
+        val effectiveAccent = if (justArrived) Color.parseColor("#22C55E") else accentInt
+
+        val prefs = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val muteEpoch = prefs.getLong(MihrabLiveActivityActionReceiver.KEY_MUTED_EPOCH, -1L)
+        val isMutedNext = muteEpoch == nextEpochMs
+
+        val builder = Notification.Builder(ctx, CHANNEL_ID)
+          .setSmallIcon(R.drawable.ic_stat_prayer)
+          .setColor(effectiveAccent)
+          .setColorized(false)
+          .setOngoing(true)
+          .setOnlyAlertOnce(true)
+          .setLocalOnly(false)
+          .setCategory(Notification.CATEGORY_NAVIGATION)
+          .setVisibility(Notification.VISIBILITY_PUBLIC)
+          .setShowWhen(false)
+          .setContentIntent(contentIntent)
+
+        if (design == "countdown") {
+          // MetricStyle: a single metric whose value is a TimeDifference timer
+          // to the next prayer. FORMAT_CHRONOMETER makes the SYSTEM tick the
+          // countdown (no per-second re-posts needed), and setCriticalMetric(0)
+          // drives the status-bar chip from that same live value. The clock time
+          // sits in the header via subText (per the MetricStyle Live Update spec).
+          // Live seconds (H:MM:SS) only while the screen is on; on AOD /
+          // screen-off use the adaptive format (coarser units, no per-second
+          // churn) so the always-on display doesn't refresh every second and
+          // drain battery. The service already flips `withSeconds` on screen
+          // state and re-posts on the transition.
+          val timerFormat =
+            if (withSeconds) Notification.Metric.TimeDifference.FORMAT_CHRONOMETER
+            else Notification.Metric.TimeDifference.FORMAT_ADAPTIVE
+          val timer = Notification.Metric.TimeDifference.forTimer(
+            Instant.ofEpochMilli(nextEpochMs),
+            timerFormat,
+          )
+          val semantic =
+            if (justArrived) Notification.SEMANTIC_STYLE_SAFE
+            else if (imminent) Notification.SEMANTIC_STYLE_CAUTION
+            else Notification.SEMANTIC_STYLE_UNSPECIFIED
+          val name = if (nextLabel.isNotEmpty()) nextLabel else title
+          // Prayer name appears ONCE, at the top (header). The countdown metric
+          // is labelled "In" (e.g. "In · 3:13:09"), never the prayer name.
+          val inWord = p.optString("inWord", "In")
+          val countdownMetric = Notification.Metric(timer, inWord, semantic)
+          val second = buildSecondMetric(p, secondMetric, prevEpochMs)
+          builder.setContentTitle(
+            if (justArrived && arrivedLabel.isNotEmpty()) "$arrivedLabel · $nowWord"
+            else name,
+          )
+          val metricStyle: Notification.MetricStyle
+          if (second != null) {
+            // [At · 17:35 | In · 3:13:09]; chip = the countdown (index 1). The
+            // clock time is the left metric, so the subtext carries the Hijri.
+            metricStyle = Notification.MetricStyle()
+              .setMetrics(arrayListOf(second, countdownMetric))
+              .setCriticalMetric(1)
+            if (hijri.isNotEmpty()) builder.setSubText(hijri)
+          } else {
+            // Single big countdown; clock time + Hijri go in the header subtext.
+            metricStyle = Notification.MetricStyle()
+              .addMetric(countdownMetric)
+              .setCriticalMetric(0)
+            val sub = joinDot(nextTime, hijri)
+            if (sub.isNotEmpty()) builder.setSubText(sub)
+          }
+          builder.setStyle(metricStyle)
+          // Chip is driven by the critical metric (auto-ticking) — no
+          // setShortCriticalText here so the two don't fight.
+        } else {
+          // timeline (default): keep the clean segmented bar — per-prayer
+          // points and a tracker thumb cluttered it, so they're dropped. The
+          // Android-17 gains here are the direct (non-reflective) promotion and
+          // a subtle caution tint on the current segment when imminent.
+          val dayStyle = buildDayProgressStyle(
+            ctx, p, effectiveAccent,
+            markImminentSegment = imminent,
+          )
+          val inlineTitle = when {
+            justArrived && arrivedLabel.isNotEmpty() -> "$arrivedLabel · $nowWord"
+            nextLabel.isNotEmpty() -> "$nextLabel · $countdown"
+            else -> title
+          }
+          if (dayStyle != null) {
+            builder.setContentTitle(inlineTitle)
+            val sub = joinDot(nextTime, hijri)
+            if (sub.isNotEmpty()) builder.setSubText(sub)
+            builder.setStyle(dayStyle)
+          } else {
+            builder.setContentTitle("$inlineTitle · $progressPct%")
+            builder.setProgress(100, progressPct, false)
+          }
+          if (shortText.isNotEmpty()) builder.setShortCriticalText(shortText)
+        }
+
+        // "Mute next adhan" toggle action — shown when an adhan is selected and
+        // the upcoming event is a real prayer. The label reflects the current
+        // mute state (stored natively); the broadcast routes to the headless
+        // reschedule. Independent of the rest so a failure can't break the card.
+        if (p.optBoolean("adhanActionEnabled", false) && nextKey.isNotEmpty()) {
+          runCatching {
+            val actionLabel =
+              if (isMutedNext) p.optString("unmuteLabel", "Unmute next adhan")
+              else p.optString("muteLabel", "Mute next adhan")
+            val muteIntent = Intent(ctx, MihrabLiveActivityActionReceiver::class.java).apply {
+              action = MihrabLiveActivityActionReceiver.ACTION_TOGGLE_MUTE_NEXT
+              putExtra(MihrabLiveActivityActionReceiver.EXTRA_EPOCH, nextEpochMs)
+              putExtra(MihrabLiveActivityActionReceiver.EXTRA_NAME, nextKey)
+            }
+            val mutePi = PendingIntent.getBroadcast(
+              ctx, 0x4D55, muteIntent,
+              PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            val actIcon = Icon.createWithResource(ctx, R.drawable.ic_stat_prayer)
+            builder.addAction(
+              Notification.Action.Builder(actIcon, actionLabel, mutePi).build(),
+            )
+          }
+        }
+
+        // Promotion to the status-bar chip / AOD — direct API on Android 17.
+        builder.setRequestPromotedOngoing(true)
+        return builder.build()
+      } catch (t: Throwable) {
+        Log.w(NAME, "Android 17 path failed, falling back to Android 16 path", t)
+        return buildAndroid16(ctx, p, nextEpochMs, accentInt, progressPct, title, contentIntent)
+      }
+    }
+
+    /** Localised name of the prayer whose instant is closest to [epochMs]
+     *  (within 2 min), looked up from the payload's day rows. "" if none. */
+    private fun labelForEpoch(p: JSONObject, epochMs: Long): String {
+      return try {
+        val days = p.optJSONArray("days") ?: return ""
+        var best = ""
+        var bestDiff = Long.MAX_VALUE
+        for (i in 0 until days.length()) {
+          val day = days.optJSONObject(i) ?: continue
+          val dateKey = day.optString("dateKey")
+          val rows = day.optJSONArray("rows") ?: continue
+          for (j in 0 until rows.length()) {
+            val r = rows.optJSONObject(j) ?: continue
+            val e = epochForDayTime(dateKey, r.optString("time"))
+            if (e <= 0L) continue
+            val d = kotlin.math.abs(e - epochMs)
+            if (d < bestDiff) {
+              bestDiff = d
+              best = r.optString("name").ifEmpty { r.optString("key") }
+            }
+          }
+        }
+        if (bestDiff <= 120_000L) best else ""
+      } catch (t: Throwable) {
+        ""
+      }
+    }
+
+    /** Optional second metric for the countdown (MetricStyle) design.
+     *  'time' = the prayer's clock time (FixedTime); 'elapsed' = a count-up
+     *  since the previous prayer (TimeDifference stopwatch). null when off or
+     *  the data isn't available. */
+    @SuppressLint("NewApi")
+    private fun buildSecondMetric(
+      p: JSONObject,
+      kind: String,
+      prevEpochMs: Long,
+    ): Notification.Metric? {
+      return try {
+        when (kind) {
+          "time" -> {
+            val t = p.optString("nextTime", "")
+            val m = Regex("^(\\d{1,2}):(\\d{2})$").find(t) ?: return null
+            val lt = java.time.LocalTime.of(
+              m.groupValues[1].toInt(), m.groupValues[2].toInt(),
+            )
+            Notification.Metric(
+              Notification.Metric.FixedTime(lt), p.optString("atWord", "At"),
+            )
+          }
+          "elapsed" -> {
+            if (prevEpochMs <= 0L) return null
+            val sw = Notification.Metric.TimeDifference.forStopwatch(
+              Instant.ofEpochMilli(prevEpochMs),
+              Notification.Metric.TimeDifference.FORMAT_ADAPTIVE,
+            )
+            Notification.Metric(sw, p.optString("sinceWord", "Since"))
+          }
+          else -> null
+        }
+      } catch (t: Throwable) {
+        null
+      }
+    }
+
     /**
      * Build a native [Notification.ProgressStyle] day timeline (Android 16+):
      *
@@ -481,6 +735,11 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       ctx: Context,
       p: JSONObject,
       accentInt: Int,
+      // Android 17+ enhancements. All default to the Android 16 behaviour so
+      // the existing buildAndroid16 caller is byte-for-byte unchanged.
+      addPoints: Boolean = false,
+      trackerIcon: Icon? = null,
+      markImminentSegment: Boolean = false,
     ): Notification.ProgressStyle? {
       if (Build.VERSION.SDK_INT < 36) return null
       return try {
@@ -592,6 +851,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         // boundary (the only "now" marker — no tracker thumb) still lands at the
         // real current time within whichever gap we're in.
         var progressUnits = 0
+        var currentSegIdx = -1
         for (i in 0 until n) {
           val segStart = marks[i]
           val segEnd = marks[i + 1]
@@ -600,15 +860,38 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           } else if (now > segStart) {
             val frac = (now - segStart).toDouble() / (segEnd - segStart).toDouble()
             progressUnits += (segUnits[i] * frac).toInt()
+            currentSegIdx = i
             break
           } else {
             break
           }
         }
 
-        Notification.ProgressStyle()
+        // Android 17: tint the in-progress segment amber (caution) when the next
+        // prayer is imminent, via the new Semantic Color API.
+        if (markImminentSegment && currentSegIdx in segments.indices) {
+          segments[currentSegIdx].setSemanticStyle(Notification.SEMANTIC_STYLE_CAUTION)
+        }
+
+        val style = Notification.ProgressStyle()
           .setProgress(progressUnits)
           .setProgressSegments(segments)
+
+        // Android 17: a point at each prayer boundary (Fajr…Isha) + a tracker
+        // icon at "now". The boundary after segment i is the cumulative unit sum;
+        // the last segment ends at the night edge (not a prayer), so it's skipped.
+        if (addPoints && n > 1) {
+          val points = ArrayList<Notification.ProgressStyle.Point>(n - 1)
+          var cum = 0
+          for (i in 0 until n - 1) {
+            cum += segUnits[i]
+            points.add(Notification.ProgressStyle.Point(cum).setColor(accentInt))
+          }
+          if (points.isNotEmpty()) style.setProgressPoints(points)
+        }
+        if (trackerIcon != null) style.setProgressTrackerIcon(trackerIcon)
+
+        style
       } catch (t: Throwable) {
         Log.w(NAME, "buildDayProgressStyle failed", t)
         null

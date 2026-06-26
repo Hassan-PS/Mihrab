@@ -163,6 +163,55 @@ function LiveActivityCardImpl() {
               );
             })}
           </View>
+
+          {design === 'countdown' && (
+            <View style={{ marginTop: 16 }}>
+              <Text style={[s.label, { color: palette.muted }]}>
+                {t('settings.laSecondMetricLabel', {
+                  defaultValue: 'Second metric',
+                })}
+              </Text>
+              <View style={styles.chipRow}>
+                {(
+                  [
+                    { id: 'off', dv: 'None' },
+                    { id: 'time', dv: 'Prayer time' },
+                    { id: 'elapsed', dv: 'Since last' },
+                  ] as const
+                ).map(opt => {
+                  const sel =
+                    (settings.liveActivitySecondMetric ?? 'off') === opt.id;
+                  return (
+                    <Pressable
+                      key={opt.id}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: sel }}
+                      onPress={() => update({ liveActivitySecondMetric: opt.id })}
+                      style={[
+                        styles.chip,
+                        {
+                          borderColor: sel ? palette.accent : palette.border,
+                          backgroundColor: sel
+                            ? palette.accentBg
+                            : 'transparent',
+                          borderWidth: sel ? 2 : StyleSheet.hairlineWidth,
+                        },
+                      ]}>
+                      <Text
+                        style={{
+                          color: sel ? palette.accent : palette.text,
+                          fontSize: 14,
+                        }}>
+                        {t(`settings.laSecondMetric_${opt.id}`, {
+                          defaultValue: opt.dv,
+                        })}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          )}
         </View>
       )}
     </>
@@ -173,6 +222,12 @@ export const LiveActivityCard = memo(LiveActivityCardImpl);
 
 const styles = StyleSheet.create({
   optionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  chipRow: { flexDirection: 'row', gap: 8, marginTop: 8, flexWrap: 'wrap' },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
   option: {
     flex: 1,
     borderRadius: 12,

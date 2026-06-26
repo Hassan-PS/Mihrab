@@ -18,6 +18,7 @@ import {
   ADHAN_CONTROLS_CATEGORY_ID,
 } from './adhanSafetyControls';
 import { AdhanPlayer } from '../native/AdhanPlayer';
+import { getMutedNextAdhan } from './adhanMute';
 import type { TimingsMap } from '../types/prayer';
 import { OPTIONAL_TIME_KEYS } from '../types/prayer';
 import {
@@ -271,6 +272,10 @@ export async function syncPrayerNotifications(params: {
   const reminderSound = getNotificationSoundOption('default');
   const exactAlarms = await canUseExactAlarms();
   const now = new Date();
+  // "Mute next adhan" marker ("<epochMs>-<name>") set from the Live Activity
+  // toggle. The matching prayer is scheduled with the plain default sound so a
+  // full resync (e.g. on app focus) doesn't undo the mute.
+  const mutedNextAdhan = await getMutedNextAdhan();
   const salahEvents = buildUpcomingSalahEvents(
     params.today,
     params.tomorrow,
@@ -305,7 +310,9 @@ export async function syncPrayerNotifications(params: {
     // prayers. They fall back to the plain default notification sound; every
     // actual prayer uses the user's chosen adhan/sound.
     const isNonPrayer = NON_PRAYER_EVENTS.has(e.name);
-    const eventSound = isNonPrayer ? reminderSound : prayerTimeSound;
+    const isMutedNext = mutedNextAdhan === `${e.at.getTime()}-${e.name}`;
+    const eventSound =
+      isNonPrayer || isMutedNext ? reminderSound : prayerTimeSound;
     const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
     const atPrayerBody = i18n.t('alertCopy.atPrayer');

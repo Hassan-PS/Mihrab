@@ -329,6 +329,27 @@ class MihrabLiveActivityService : Service() {
           break
         }
       }
+
+      // Roll the Hijri date with the day so it stays in step with the prayer
+      // times across midnight without reopening the app. Keyed to the CIVIL
+      // current date (not the in-progress prayer day) so it always matches the
+      // home cards — e.g. between midnight and Fajr it shows today's Hijri, not
+      // the previous day's.
+      val cal = java.util.Calendar.getInstance().apply { timeInMillis = now }
+      val nowDateKey = String.format(
+        "%04d-%02d-%02d",
+        cal.get(java.util.Calendar.YEAR),
+        cal.get(java.util.Calendar.MONTH) + 1,
+        cal.get(java.util.Calendar.DAY_OF_MONTH),
+      )
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        if (day.optString("dateKey") == nowDateKey) {
+          val dayHijri = day.optString("hijriLabel", "")
+          if (dayHijri.isNotEmpty()) updated.put("hijriLabel", dayHijri)
+          break
+        }
+      }
       updated.toString()
     } catch (t: Throwable) {
       Log.w(TAG, "recomputeFromDays failed", t)

@@ -45,6 +45,17 @@ import {
   getMihrabLiveActivityModule,
   type MihrabLiveActivityPayload,
 } from '../native/MihrabLiveActivity';
+import { loadSettings } from '../settings/storage';
+import { getNotificationSoundOption } from './notificationSounds';
+import { OPTIONAL_TIME_KEYS } from '../types/prayer';
+import { formatHijriLabel } from '../hijri/formatHijriLabel';
+
+/** Hijri label for a "yyyy-MM-dd" day key (parsed in local time). */
+function hijriLabelForDateKey(dateKey: string): string {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  if (!y || !m || !d) return '';
+  return formatHijriLabel(new Date(y, m - 1, d));
+}
 
 /** Stable notifee id — fixed so updates replace in place, not stack. */
 export const LIVE_ACTIVITY_NOTIFICATION_ID = 'mihrab.live_activity.prayer_countdown';
@@ -358,6 +369,9 @@ export async function startOrUpdateLiveActivity(
     // right day's prayers (and overnight Isha→Fajr interval) on its own.
     const days = (input.payload.days ?? []).map(d => ({
       dateKey: d.dateKey,
+      // Per-day Hijri label so the native ticker can roll the Hijri date across
+      // midnight/days in step with the prayer times — without reopening the app.
+      hijriLabel: hijriLabelForDateKey(d.dateKey),
       rows: d.rows.map(r => ({
         key: r.key,
         name: localizedPrayerName(r.key, r.abbr),
@@ -376,6 +390,29 @@ export async function startOrUpdateLiveActivity(
         time: r.time,
       })),
     }));
+    // Android 17 extras: second metric + the "Mute next adhan" toggle. Read
+    // from settings here (once per JS sync — the per-second redraw is native)
+    // rather than threading through every layer.
+    let secondMetric: 'off' | 'time' | 'elapsed' = 'off';
+    let adhanActionEnabled = false;
+    let adhanChannelId = 'prayer-times-default';
+    let adhanSoundId = 'default';
+    try {
+      const s = await loadSettings();
+      secondMetric = s.liveActivitySecondMetric ?? 'off';
+      const soundOpt = getNotificationSoundOption(s.notificationSound);
+      adhanChannelId = soundOpt.androidChannelId;
+      adhanSoundId = soundOpt.id;
+      const nextKey = input.payload.nextKey ?? '';
+      const nextIsRealPrayer = !(
+        OPTIONAL_TIME_KEYS as readonly string[]
+      ).includes(nextKey);
+      adhanActionEnabled =
+        s.notificationsEnabled && soundOpt.id !== 'default' && nextIsRealPrayer;
+    } catch {
+      // Non-fatal — the Live Activity still renders without the extras.
+    }
+
     const nativePayload: MihrabLiveActivityPayload = {
       nextLabel: input.nextPrayerLabel,
       nextTime,
@@ -399,6 +436,18 @@ export async function startOrUpdateLiveActivity(
       showHijri: input.showHijri,
       showLocation: input.showLocation,
       fgsText: i18n.t('liveActivity.fgsText', 'Prayer countdown active'),
+      secondMetric,
+      adhanActionEnabled,
+      muteLabel: i18n.t('liveActivity.muteNext', 'Mute next adhan'),
+      unmuteLabel: i18n.t('liveActivity.unmuteNext', 'Unmute next adhan'),
+      nowWord: i18n.t('liveActivity.now', 'Now'),
+      inWord: i18n.t('liveActivity.inWord', 'In'),
+      atWord: i18n.t('liveActivity.atWord', 'At'),
+      sinceWord: i18n.t('liveActivity.sinceWord', 'Since'),
+      atPrayerBody: i18n.t('alertCopy.atPrayer', 'Prayer time'),
+      adhanChannelId,
+      adhanSoundId,
+      defaultChannelId: 'prayer-times-default',
     };
     try {
       await native.display(JSON.stringify(nativePayload));

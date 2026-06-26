@@ -61,6 +61,9 @@ export type MihrabLiveActivityPayload = {
    *  single-day `rows` + HH:MM advance logic. */
   days?: {
     dateKey: string;
+    /** Hijri label for this day; the native ticker promotes it to the
+     *  top-level hijriLabel as the day rolls over. */
+    hijriLabel?: string;
     rows: { key: string; name: string; time: string }[];
     sunriseRow?: { key: string; name: string; time: string };
     extraRows?: { key: string; name: string; time: string }[];
@@ -91,6 +94,30 @@ export type MihrabLiveActivityPayload = {
    *  placeholder notification — respects the app's selected language
    *  rather than the device OS locale. */
   fgsText?: string;
+  // ── Android 17 enhancements ──────────────────────────────────────
+  /** Optional second metric on the countdown (MetricStyle) design.
+   *  'time' = prayer clock time, 'elapsed' = since previous prayer. */
+  secondMetric?: 'off' | 'time' | 'elapsed';
+  /** When true, show the "Mute next adhan" toggle action (an adhan is
+   *  selected and prayer notifications are enabled). */
+  adhanActionEnabled?: boolean;
+  /** Localised action labels for the mute toggle. */
+  muteLabel?: string;
+  unmuteLabel?: string;
+  /** Localised "now" word for the brief "it's <prayer>" arrival state. */
+  nowWord?: string;
+  /** Localised metric labels for the countdown design: "In" (countdown),
+   *  "At" (prayer time), "Since" (elapsed). */
+  inWord?: string;
+  atWord?: string;
+  sinceWord?: string;
+  /** Data the native mute action forwards to the HeadlessJS reschedule
+   *  task so it can re-create the next prayer's trigger silently / with
+   *  the adhan. */
+  atPrayerBody?: string;
+  adhanChannelId?: string;
+  adhanSoundId?: string;
+  defaultChannelId?: string;
 };
 
 export interface MihrabLiveActivityInterface {

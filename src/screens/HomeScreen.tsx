@@ -33,6 +33,7 @@ import { filterOptionalTimes } from '../utils/nightTimes';
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
 import { DayCarousel } from './home/DayCarousel';
+import { formatHijriLabel } from '../hijri/formatHijriLabel';
 import { MonthShortcut } from './home/MonthShortcut';
 import { NextPrayerCard } from './home/NextPrayerCard';
 import { PermissionBanners } from './home/PermissionBanners';
@@ -440,6 +441,12 @@ export function HomeScreen() {
       }),
     [i18n.language],
   );
+  const getHijriDate = useCallback(
+    (dayOffset: number): string => formatHijriLabel(addDays(new Date(), dayOffset)),
+    // i18n.language drives the localised Hijri month name inside the formatter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [i18n.language],
+  );
 
   const pickerPalette = useMemo(
     () => ({
@@ -510,6 +517,7 @@ export function HomeScreen() {
         resetKey={carouselResetKey}
         getDayLabel={getDayLabel}
         getDayDate={getDayDate}
+        getHijriDate={getHijriDate}
       />
 
       <RamadanCountdownCard today={state.today} tomorrow={state.tomorrow} />

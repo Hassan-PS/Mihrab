@@ -21,6 +21,8 @@ type DayCardProps = {
   cardWidth: number;
   dayLabel: string;
   dayDate: string;
+  /** Hijri date for this day, e.g. "12 Dhul-Qa'dah 1447". */
+  hijriDate?: string;
   /**
    * True for `dayIndex === 0`. The "next prayer" highlight is only ever drawn
    * on today's card; tomorrow's Fajr is shown plainly even when it IS the
@@ -42,6 +44,7 @@ function DayCardImpl({
   cardWidth,
   dayLabel,
   dayDate,
+  hijriDate,
   isToday,
   nextPrayerName,
   onBackToToday,
@@ -89,11 +92,21 @@ function DayCardImpl({
             </Pressable>
           ) : null}
         </View>
-        <Text
-          style={[styles.date, { color: palette.muted }]}
-          maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-          {dayDate}
-        </Text>
+        <View style={styles.headerRight}>
+          <Text
+            style={[styles.date, { color: palette.text }]}
+            maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+            {dayDate}
+          </Text>
+          {hijriDate ? (
+            <Text
+              style={[styles.hijri, { color: palette.muted }]}
+              numberOfLines={1}
+              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+              {hijriDate}
+            </Text>
+          ) : null}
+        </View>
       </View>
 
       {(() => {
@@ -138,7 +151,9 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   title: { fontSize: 16, fontWeight: '700' },
+  headerRight: { alignItems: 'flex-end', flexShrink: 1 },
   date: { fontSize: 13, fontWeight: '400' },
+  hijri: { fontSize: 12, fontWeight: '400', marginTop: 1 },
   backChip: {
     paddingHorizontal: 8,
     paddingVertical: 3,

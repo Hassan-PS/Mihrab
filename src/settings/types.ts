@@ -205,6 +205,13 @@ export type PrayerAppSettings = {
    */
   liveActivityDesign: 'timeline' | 'countdown';
   /**
+   * Optional second metric shown on the Android 17 countdown (MetricStyle)
+   * design. Metrics must be numeric/time values, so the choices are the prayer
+   * clock time or the time elapsed since the previous prayer. 'off' keeps the
+   * single big countdown. Android 17 only; ignored elsewhere.
+   */
+  liveActivitySecondMetric: 'off' | 'time' | 'elapsed';
+  /**
    * Non-prayer time toggles. Each gates one optional entry across the prayer
    * table, notifications, home-screen widget, and Live Activity. All three use
    * the default notification sound (never the adhan).
@@ -275,6 +282,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   liveActivityShowHijri: true,
   liveActivityShowLocation: true,
   liveActivityDesign: 'timeline',
+  liveActivitySecondMetric: 'off',
   // Sunrise on by default (unchanged behaviour); the two night times off by
   // default so existing users see no new rows/notifications until they opt in.
   sunriseEnabled: true,

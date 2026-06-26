@@ -7,6 +7,7 @@ import { enableFreeze } from 'react-native-screens';
 import { AppRegistry } from 'react-native';
 import App from './App';
 import { registerAdhanSafetyControls } from './src/notifications/adhanSafetyControls';
+import { adhanMuteToggleTask } from './src/notifications/adhanMute';
 
 // The React Native module name MUST match what the native side requests
 // in `getMainComponentName()` (Android: MainActivity.kt) and the iOS
@@ -40,3 +41,7 @@ try {
 }
 
 AppRegistry.registerComponent(APP_REGISTRY_NAME, () => App);
+
+// HeadlessJS task for the Live Activity "Mute next adhan" toggle (Android 17+).
+// Dispatched by AdhanMuteHeadlessService; must match its task name.
+AppRegistry.registerHeadlessTask('AdhanMuteToggle', () => adhanMuteToggleTask);

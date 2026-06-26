@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.18] — 2026-06-27
+
+### Added
+- **Hijri date in the app**: the Today card and every day in the upcoming-week carousel now show the Hijri date beneath the Gregorian date (iOS + Android). On Android it also appears next to the next prayer in the Live Activity, and rolls over to the new day automatically.
+- **Android 17 Live Activity**: a dedicated Android 17 path using the platform Live Update APIs. Two designs — a refined ProgressStyle prayer-day timeline and a MetricStyle countdown (system-ticked; live seconds while the screen is on, battery-friendly adaptive format on Always-On Display). Adds an optional second metric on the countdown (prayer time / time since last prayer), a "Mute next adhan" toggle action, and a brief "it's prayer time" state when a prayer arrives. Android 16 keeps its existing implementation unchanged.
+
 ## [2.7.17] — 2026-06-25
 
 ### Fixed

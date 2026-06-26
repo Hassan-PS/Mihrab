@@ -1,8 +1,11 @@
 buildscript {
     ext {
-        buildToolsVersion = "36.0.0"
+        buildToolsVersion = "37.0.0"
         minSdkVersion = 24
-        compileSdkVersion = 36
+        // compileSdk 37 so the Android 17 Live Update APIs (MetricStyle,
+        // Semantic Color, direct setRequestPromotedOngoing) compile. targetSdk
+        // stays 36 to avoid unrelated API-37 behaviour changes for now.
+        compileSdkVersion = 37
         targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.1.20"
