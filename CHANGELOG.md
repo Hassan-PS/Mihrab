@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.25] — 2026-06-27
+
+### Changed
+- **Live Activity countdown is now identical on the Always-On Display and when the screen is on (Android 17)**: the countdown keeps the same MetricStyle layout in both states (the earlier dashed-seconds AOD variant used a different layout, which looked inconsistent).
+
 ## [2.7.24] — 2026-06-27
 
 ### Changed
