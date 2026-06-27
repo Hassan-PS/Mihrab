@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.23] — 2026-06-27
+
+### Fixed
+- **Live Activity countdown on Always-On Display (Android 17)**: the countdown showed a coarse "4h" on AOD; it now shows the full hours and minutes. The metric uses the system chronometer format, which renders H:MM:SS while the screen is on and H:MM on AOD (no per-second churn).
+
 ## [2.7.22] — 2026-06-27
 
 ### Fixed

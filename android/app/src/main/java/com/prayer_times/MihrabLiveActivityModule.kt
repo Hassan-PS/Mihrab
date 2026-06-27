@@ -550,7 +550,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           val atWord = p.optString("atWord", "At")
           val sinceWord = p.optString("sinceWord", "Since")
           val ms = tryBuildCountdownMetricStyle(
-            nextEpochMs, withSeconds, inWord, secondMetric, nextTime, prevEpochMs,
+            nextEpochMs, inWord, secondMetric, nextTime, prevEpochMs,
             atWord, sinceWord,
           )
           if (ms != null) {
@@ -675,7 +675,6 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
      */
     private fun tryBuildCountdownMetricStyle(
       nextEpochMs: Long,
-      withSeconds: Boolean,
       inWord: String,
       secondKind: String,
       nextTime: String,
@@ -702,10 +701,14 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val setMetrics = msCls.getMethod("setMetrics", java.util.List::class.java)
         val setCritical = msCls.getMethod("setCriticalMetric", Int::class.javaPrimitiveType)
 
+        // Always the chronometer format: the system shows H:MM:SS while the
+        // screen is on and H:MM on the Always-On Display (it drops the seconds
+        // there itself), so the full hours and minutes are always visible. The
+        // adaptive format collapsed to a coarse "4h" on AOD.
         val timer = forTimer.invoke(
           null,
           Instant.ofEpochMilli(nextEpochMs),
-          if (withSeconds) fmtChrono else fmtAdapt,
+          fmtChrono,
         )
         val countdownMetric = metricCtor.newInstance(timer, inWord as CharSequence)
 
