@@ -276,6 +276,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       return if (h > 0) "${h}h ${m}m" else "${m}m"
     }
 
+    /** Countdown with the seconds shown as a dash, for the Always-On Display:
+     *  "3:07:-" (≥1h) or "7:-" (<1h). Updated each minute by the ticker. */
+    private fun formatHMDash(deltaMs: Long): String {
+      val totalSec = (deltaMs / 1000).coerceAtLeast(0)
+      val h = totalSec / 3600
+      val m = (totalSec % 3600) / 60
+      return if (h > 0) String.format("%d:%02d:-", h, m)
+             else String.format("%d:-", m)
+    }
+
     /** Live ticking countdown with seconds: "3:07:05" (≥1h) or "7:05" (<1h). */
     private fun formatHMS(deltaMs: Long): String {
       val totalSec = (deltaMs / 1000).coerceAtLeast(0)
@@ -540,39 +550,48 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           if (justArrived && arrivedLabel.isNotEmpty()) "$arrivedLabel · $nowWord"
           else null
         if (design == "countdown") {
-          // MetricStyle is an Android 17-only API. We build it via REFLECTION so
-          // this same source also compiles against compileSdk 36 (the F-Droid
-          // build) — there it simply returns null and we fall back to the
-          // standard big-countdown. The metric's TimeDifference value is ticked
-          // by the SYSTEM (live H:MM:SS while the screen is on; adaptive/coarse
-          // on AOD), and the critical metric drives the status-bar chip.
           val inWord = p.optString("inWord", "In")
           val atWord = p.optString("atWord", "At")
           val sinceWord = p.optString("sinceWord", "Since")
-          val ms = tryBuildCountdownMetricStyle(
-            nextEpochMs, inWord, secondMetric, nextTime, prevEpochMs,
-            atWord, sinceWord,
-          )
-          if (ms != null) {
-            val (style, hasSecond) = ms
-            if (hasSecond) {
-              // [At · 17:35 | In · 3:13:09]; subtext carries the Hijri.
-              builder.setContentTitle(arrivedTitle ?: name)
-              if (hijri.isNotEmpty()) builder.setSubText(hijri)
-            } else {
-              // Single big countdown: name + Hijri on the title line, time below.
-              builder.setContentTitle(arrivedTitle ?: joinDot(name, hijri))
-              if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
-            }
-            builder.setStyle(style)
-          } else {
-            // Fallback (compileSdk 36 / API unavailable): standard big-title
-            // countdown; the chip comes from shortCriticalText.
-            builder.setContentTitle(arrivedTitle ?: "$name · $countdown")
+          if (!withSeconds) {
+            // AOD / screen off: the MetricStyle metric is system-rendered and
+            // can't paint a "paused seconds" placeholder, so render a standard
+            // promoted card with the seconds shown as a dash ("4:23:-"). The
+            // per-second ticker reposts the live MetricStyle countdown again the
+            // moment the screen turns on.
+            builder.setContentTitle(arrivedTitle ?: "$name · ${formatHMDash(remaining)}")
             val sub = joinDot(nextTime, hijri)
             if (sub.isNotEmpty()) builder.setSubText(sub)
-            builder.setProgress(100, progressPct, false)
             tryAttachShortCriticalText(builder, shortText)
+          } else {
+            // Screen on: live MetricStyle countdown (Android 17). Built via
+            // REFLECTION so this same source compiles against compileSdk 36
+            // (the F-Droid build); there it returns null and we fall back to the
+            // standard big-countdown. The TimeDifference value is system-ticked
+            // (H:MM:SS) and the critical metric drives the status-bar chip.
+            val ms = tryBuildCountdownMetricStyle(
+              nextEpochMs, inWord, secondMetric, nextTime, prevEpochMs,
+              atWord, sinceWord,
+            )
+            if (ms != null) {
+              val (style, hasSecond) = ms
+              if (hasSecond) {
+                // [At · 17:35 | In · 3:13:09]; subtext carries the Hijri.
+                builder.setContentTitle(arrivedTitle ?: name)
+                if (hijri.isNotEmpty()) builder.setSubText(hijri)
+              } else {
+                // Single big countdown: name + Hijri on the title line, time below.
+                builder.setContentTitle(arrivedTitle ?: joinDot(name, hijri))
+                if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
+              }
+              builder.setStyle(style)
+            } else {
+              builder.setContentTitle(arrivedTitle ?: "$name · $countdown")
+              val sub = joinDot(nextTime, hijri)
+              if (sub.isNotEmpty()) builder.setSubText(sub)
+              builder.setProgress(100, progressPct, false)
+              tryAttachShortCriticalText(builder, shortText)
+            }
           }
         } else {
           // timeline (default): the clean segmented ProgressStyle bar (all

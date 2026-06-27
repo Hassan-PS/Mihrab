@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.24] — 2026-06-27
+
+### Changed
+- **Live Activity countdown on Always-On Display (Android 17)**: on the AOD the seconds now show as a dash (e.g. "4:23:-") instead of ticking; the full live H:MM:SS returns as soon as the screen is on.
+
 ## [2.7.23] — 2026-06-27
 
 ### Fixed
