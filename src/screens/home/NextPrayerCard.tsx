@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useAppearanceSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
@@ -37,6 +38,7 @@ type NextPrayerCardProps = {
 function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const { slice: appearance } = useAppearanceSettings();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -94,10 +96,18 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
   // carries a whisper of the day's current character — a slim tinted rule
   // along the card's top edge plus the eyebrow label taking the same hue.
   // Felt, not announced: the tint never exceeds a 3-pt line + 12-pt label.
-  const periodTint =
-    PERIOD_TINTS[tintForNextPrayerName(nextInfo.name)][
-      palette.isDark ? 'dark' : 'light'
-    ];
+  //
+  // ONLY under Material You (dynamic colors): there the whole palette
+  // already shifts with the wallpaper, so one more ambient hue reads as
+  // part of the system. With a fixed accent theme the free-floating
+  // period hue clashed with the user's chosen accent and looked
+  // disconnected from the rest of the Home page — so the rule + eyebrow
+  // follow the app accent instead, keeping the card coherent.
+  const periodTint = appearance.useSystemDynamicTheme
+    ? PERIOD_TINTS[tintForNextPrayerName(nextInfo.name)][
+        palette.isDark ? 'dark' : 'light'
+      ]
+    : String(palette.accentSolid);
 
   return (
     <GlassSurface
