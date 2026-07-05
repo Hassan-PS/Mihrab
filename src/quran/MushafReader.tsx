@@ -106,8 +106,14 @@ type Props = {
 };
 
 const IMAGE_ASPECT = 2600 / 4206; // KFGQPC source page ratio
-/** Max vertical text stretch on full pages (v2.7.29 screen-use pass). */
-const MAX_VERTICAL_STRETCH = 1.5;
+/**
+ * Max vertical text stretch on full pages (v2.7.29 screen-use pass).
+ * Fullscreen would need ~1.35× to fill the height completely, which
+ * reads as visibly drawn-out calligraphy — 1.25 is the middle ground:
+ * most of the letterbox goes, the letterforms stay natural. Portrait
+ * non-fullscreen needs only ~1.1× so it fills fully either way.
+ */
+const MAX_VERTICAL_STRETCH = 1.25;
 
 function easternNumerals(n: number): string {
   const map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -402,8 +408,10 @@ export function MushafReader({
     if (dispH > maxHeight) {
       dispH = maxHeight;
       dispW = dispH * cropAspect;
-    } else {
-      // Stretch the text vertically into the free space, up to 1.5×.
+    } else if (page > 2) {
+      // Stretch the text vertically into the free space (full-text
+      // pages only — 1–2 are decorative plates that must keep their
+      // true proportions even though they also carry a crop).
       dispH = Math.min(maxHeight, dispH * MAX_VERTICAL_STRETCH);
     }
     const fullW = dispW / crop.w;
