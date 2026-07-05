@@ -106,6 +106,8 @@ type Props = {
 };
 
 const IMAGE_ASPECT = 2600 / 4206; // KFGQPC source page ratio
+/** Max vertical text stretch on full pages (v2.7.29 screen-use pass). */
+const MAX_VERTICAL_STRETCH = 1.5;
 
 function easternNumerals(n: number): string {
   const map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -210,6 +212,8 @@ export function MushafReader({
   // ── Page state (unchanged core from #153) ───────────────────────────
   const screenWidth = windowWidth;
   const [currentPage, setCurrentPage] = useState(initialPage);
+  // Measured height of the page viewport (imageWrap) — see maxHeight.
+  const [wrapHeight, setWrapHeight] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
   const didInitialScrollRef = useRef(false);
 
@@ -344,12 +348,21 @@ export function MushafReader({
   // Floating mini-player card: 3px track + row (~54) + 10 bottom margin.
   const playerReserve = playback.active ? 68 : 0;
   const maxWidth = screenWidth - horizontalPadding * 2;
-  const maxHeight =
+  const estMaxHeight =
     windowHeight -
     navOverlayPad -
     headerFooterReserve -
     playerReserve -
     (isFullscreen ? insets.top + insets.bottom : 0);
+  // Measured page viewport (the flex imageWrap box) — authoritative
+  // once known, since the estimate can't see the real nav header or
+  // chrome heights. The estimate only covers the first frame before
+  // onLayout fires. Critical for the vertical stretch (v2.7.29): an
+  // overshooting estimate would stretch text under the page chrome.
+  const maxHeight =
+    wrapHeight > 0
+      ? Math.max(120, wrapHeight - playerReserve - 6)
+      : estMaxHeight;
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / IMAGE_ASPECT;
   if (imageHeight > maxHeight) {
@@ -363,6 +376,13 @@ export function MushafReader({
    * underlying image is drawn larger inside an overflow-hidden window.
    * `fullW`/`fullH` are the virtual full-image dimensions — geometry
    * hit-testing and the overlay both work in that space.
+   *
+   * Vertical stretch (v2.7.29): the Madinah page is a fixed ~0.61
+   * aspect while phones are ~0.45, so a width-fit page letterboxes
+   * vertically. Full-text pages (3+, i.e. every cropped page) stretch
+   * the text block vertically — capped so the calligraphy never looks
+   * drawn out — to use that space. Pages 1–2 keep their decorative
+   * frames undistorted.
    */
   const pageDims = (page: number) => {
     const crop = mushafPageCrop(page);
@@ -382,6 +402,9 @@ export function MushafReader({
     if (dispH > maxHeight) {
       dispH = maxHeight;
       dispW = dispH * cropAspect;
+    } else {
+      // Stretch the text vertically into the free space, up to 1.5×.
+      dispH = Math.min(maxHeight, dispH * MAX_VERTICAL_STRETCH);
     }
     const fullW = dispW / crop.w;
     const fullH = dispH / crop.h;
@@ -394,6 +417,18 @@ export function MushafReader({
       offY: -crop.y * fullH,
     };
   };
+
+  /**
+   * Render-cache request width (physical px). Derived from the display
+   * HEIGHT so the cached bitmap's rows map 1:1 onto screen rows after
+   * the vertical stretch — thin horizontal strokes stay sharp. The GPU
+   * then minifies horizontally by at most 1/1.5 ≈ 0.67–1×, which stays
+   * clean. With no stretch this equals the display width exactly.
+   */
+  const cachePxWidth = (d: { fullH: number }) =>
+    Math.round(
+      PixelRatio.getPixelSizeForLayoutSize(d.fullH) * IMAGE_ASPECT,
+    );
 
   // ── Display-size render cache (v2.7.28 sharpness fix) ───────────────
   // Re-render when a sharper exact-size page copy lands on disk.
@@ -409,11 +444,7 @@ export function MushafReader({
     for (const p of [currentPage - 1, currentPage, currentPage + 1]) {
       if (p < 1 || p > MUSHAF_TOTAL_PAGES) continue;
       const d = pageDims(p);
-      ensureScaledPage(
-        p,
-        Math.round(PixelRatio.getPixelSizeForLayoutSize(d.fullW)),
-        2600,
-      );
+      ensureScaledPage(p, cachePxWidth(d), 2600);
     }
   });
 
@@ -518,6 +549,7 @@ export function MushafReader({
       locationX - d.offX,
       locationY - d.offY,
       d.fullW,
+      d.fullH,
     );
     if (hit) {
       setSelected({ ...hit, page });
@@ -538,10 +570,7 @@ export function MushafReader({
     // Prefer the exact-display-size copy (sharpness fix, v2.7.28);
     // fall back to the original file / stream while it generates.
     const scaledPath = useLocalFiles
-      ? scaledPagePathIfReady(
-          page,
-          Math.round(PixelRatio.getPixelSizeForLayoutSize(dims.fullW)),
-        )
+      ? scaledPagePathIfReady(page, cachePxWidth(dims))
       : null;
     const imageSource = scaledPath
       ? { uri: `file://${scaledPath}` }
@@ -588,7 +617,12 @@ export function MushafReader({
             </Pressable>
           </View>
         ) : null}
-        <View style={styles.imageWrap}>
+        <View
+          style={styles.imageWrap}
+          onLayout={e => {
+            const h = e.nativeEvent.layout.height;
+            setWrapHeight(prev => (Math.abs(prev - h) > 1 ? h : prev));
+          }}>
           <Pressable
             accessibilityRole="imagebutton"
             accessibilityLabel={t('quran.pageA11y', {
@@ -632,7 +666,10 @@ export function MushafReader({
                   <Image
                     source={imageSource}
                     style={{ width: dims.fullW, height: dims.fullH }}
-                    resizeMode="contain"
+                    // 'stretch' honors the (possibly vertically
+                    // stretched) box exactly; for unstretched pages the
+                    // box is aspect-correct so this equals 'contain'.
+                    resizeMode="stretch"
                     fadeDuration={0}
                   />
                 </ColorMatrix>
@@ -640,13 +677,14 @@ export function MushafReader({
                 <Image
                   source={imageSource}
                   style={{ width: dims.fullW, height: dims.fullH }}
-                  resizeMode="contain"
+                  resizeMode="stretch"
                   fadeDuration={0}
                 />
               )}
               <MushafPageOverlay
                 page={page}
                 renderedWidth={dims.fullW}
+                renderedHeight={dims.fullH}
                 selected={
                   sheetVisible && selected?.page === page ? selected : null
                 }

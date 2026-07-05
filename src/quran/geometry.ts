@@ -126,7 +126,10 @@ export function pageAyahLineRects(page: number): AyahLineRect[] {
 
 /**
  * Hit-test a tap at rendered-image coordinates `(x, y)` against a page.
- * `renderedWidth` is the on-screen image width; the scale is uniform.
+ * `renderedWidth` is the on-screen image width. When the page is drawn
+ * vertically stretched (v2.7.29 full-page stretch) pass `renderedHeight`
+ * too so the y axis maps through its own scale; omitted, the scale is
+ * uniform.
  * Uses line-band matching first (generous vertical target), then the
  * horizontally nearest ayah on that line — so taps in the whitespace
  * between words still resolve, matching how a finger reads a line.
@@ -136,12 +139,15 @@ export function hitTestAyah(
   x: number,
   y: number,
   renderedWidth: number,
+  renderedHeight?: number,
 ): { surah: number; ayah: number } | null {
   const glyphs = pageWordGlyphs(page);
   if (glyphs.length === 0) return null;
   const scale = renderedWidth / GEOMETRY_REF_WIDTH;
+  const scaleY =
+    renderedHeight != null ? renderedHeight / GEOMETRY_REF_HEIGHT : scale;
   const rx = x / scale;
-  const ry = y / scale;
+  const ry = y / scaleY;
 
   // Group into lines and find the line whose vertical band contains ry.
   const lines = new Map<number, WordGlyph[]>();

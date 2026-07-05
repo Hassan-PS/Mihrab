@@ -16,6 +16,7 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
+  GEOMETRY_REF_HEIGHT,
   GEOMETRY_REF_WIDTH,
   pageAyahLineRects,
   type AyahLineRect,
@@ -29,6 +30,9 @@ import {
 type Props = {
   page: number;
   renderedWidth: number;
+  /** Pass when the page is drawn vertically stretched (v2.7.29) so
+   *  highlight rects track the stretched text; defaults to uniform. */
+  renderedHeight?: number;
   selected: { surah: number; ayah: number } | null;
   playing: { surah: number; ayah: number } | null;
   bookmarks: QuranBookmark[];
@@ -49,6 +53,7 @@ function rectsFor(
 export const MushafPageOverlay = memo(function MushafPageOverlay({
   page,
   renderedWidth,
+  renderedHeight,
   selected,
   playing,
   bookmarks,
@@ -59,6 +64,8 @@ export const MushafPageOverlay = memo(function MushafPageOverlay({
   const rects = pageAyahLineRects(page);
   if (rects.length === 0) return null;
   const scale = renderedWidth / GEOMETRY_REF_WIDTH;
+  const scaleY =
+    renderedHeight != null ? renderedHeight / GEOMETRY_REF_HEIGHT : scale;
 
   const box = (r: AyahLineRect, key: string, color: string, opacity: number) => (
     <View
@@ -68,9 +75,9 @@ export const MushafPageOverlay = memo(function MushafPageOverlay({
         styles.rect,
         {
           left: r.x0 * scale - 2,
-          top: r.y0 * scale - 2,
+          top: r.y0 * scaleY - 2,
           width: (r.x1 - r.x0) * scale + 4,
-          height: (r.y1 - r.y0) * scale + 4,
+          height: (r.y1 - r.y0) * scaleY + 4,
           backgroundColor: color,
           opacity,
         },
