@@ -1,85 +1,259 @@
 /**
- * Mushaf download manager — task #130.
+ * Mushaf managed file store — QR-5 (docs/quran-reader-plan.md).
  *
- * The 604 mushaf page PNGs are no longer bundled inside the APK; they
- * live on a one-shot GitHub release (`mushaf-assets-v1`). On first
- * open of the mushaf view, the app prompts the user to download all
- * 604 pages (~120 MB), prefetches them via RN's `Image.prefetch()`
- * (which uses the platform image cache — Glide on Android, SDWebImage
- * on iOS), and remembers the completion state in AsyncStorage.
+ * Replaces the old `Image.prefetch()` approach (task #130), which parked
+ * the 604 page PNGs in the OS image cache — evictable at any time, with
+ * an AsyncStorage completion flag that could go stale and leave the
+ * reader blank offline. Pages now live as real files under the app's
+ * document directory:
  *
- * After download, every `<Image source={{ uri: mushafPageUrl(n) }} />`
- * call hits the warm cache; no network round-trip. If the OS evicts
- * the cache (rare for app-managed disk caches on modern devices) or
- * the user clears the app cache manually, we fall back to streaming
- * each page on demand — quality is preserved either way; the only
- * downside is a per-page network hit.
+ *   <Documents>/quran/mushaf/v2/{001..604}.png
+ *   <Documents>/quran/mushaf/v2/manifest.json
+ *
+ * The manifest records per-page byte sizes at download time; integrity
+ * checks are existence + non-trivial size. Missing pages stream from
+ * the GitHub release on demand (same URL space), so a partially
+ * downloaded mushaf still reads correctly — just with a network hit for
+ * the gaps.
+ *
+ * Migration: users who downloaded via the old prefetch path have no
+ * files here and will be prompted once to re-download. The old
+ * `mushaf.assets.v3.complete` flag is cleared on first check.
  */
-import { Image } from 'react-native';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MUSHAF_TOTAL_PAGES, mushafPageUrl } from './mushafImages';
 
-// Bumped to `.v3.` in #132. Each version reflects a distinct URL
-// space; the platform image cache is keyed by URL, so when we
-// switch source releases the old cache entries become irrelevant
-// and the user has to re-download. The reset path wipes all
-// historical keys.
-const COMPLETION_KEY = 'mushaf.assets.v3.complete';
+const LEGACY_COMPLETION_KEY = 'mushaf.assets.v3.complete';
 
-/** Has the user already completed the one-time download? */
-export async function isMushafDownloaded(): Promise<boolean> {
+const STORE_VERSION = 'v2'; // tracks the mushaf-assets-v2 release
+
+function storeDir(): string {
+  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/mushaf/${STORE_VERSION}`;
+}
+
+/**
+ * `fs.mkdir` is NOT recursive — creating `<Documents>/quran/mushaf/v2`
+ * fails outright while `<Documents>/quran` doesn't exist yet. Create
+ * each path segment in turn (EEXIST errors are ignored).
+ */
+export async function mkdirDeep(path: string): Promise<void> {
+  const root = ReactNativeBlobUtil.fs.dirs.DocumentDir;
+  if (!path.startsWith(root)) {
+    await ReactNativeBlobUtil.fs.mkdir(path).catch(() => undefined);
+    return;
+  }
+  const rel = path.slice(root.length).split('/').filter(Boolean);
+  let cur = root;
+  for (const seg of rel) {
+    cur = `${cur}/${seg}`;
+    // eslint-disable-next-line no-await-in-loop
+    await ReactNativeBlobUtil.fs.mkdir(cur).catch(() => undefined);
+  }
+}
+
+function manifestPath(): string {
+  return `${storeDir()}/manifest.json`;
+}
+
+export function pageFilePath(page: number): string {
+  const safe = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, Math.round(page)));
+  return `${storeDir()}/${String(safe).padStart(3, '0')}.png`;
+}
+
+type Manifest = {
+  version: string;
+  /** Pages recorded as fully downloaded (count). */
+  complete: number;
+  /** Byte size per page, keyed by page number string. */
+  sizes: { [page: string]: number };
+  updatedAt: number;
+};
+
+async function readManifest(): Promise<Manifest | null> {
   try {
-    const v = await AsyncStorage.getItem(COMPLETION_KEY);
-    return v === '1';
+    const exists = await ReactNativeBlobUtil.fs.exists(manifestPath());
+    if (!exists) return null;
+    const raw = await ReactNativeBlobUtil.fs.readFile(manifestPath(), 'utf8');
+    const m = JSON.parse(String(raw)) as Manifest;
+    if (m.version !== STORE_VERSION) return null;
+    return m;
+  } catch {
+    return null;
+  }
+}
+
+async function writeManifest(m: Manifest): Promise<void> {
+  try {
+    await ReactNativeBlobUtil.fs.writeFile(
+      manifestPath(),
+      JSON.stringify(m),
+      'utf8',
+    );
+  } catch (e) {
+    console.warn('mushafStore: manifest write failed', e);
+  }
+}
+
+/** A page file is considered valid if present and larger than 10 KB. */
+async function pageFileValid(page: number): Promise<boolean> {
+  try {
+    const path = pageFilePath(page);
+    const exists = await ReactNativeBlobUtil.fs.exists(path);
+    if (!exists) return false;
+    const stat = await ReactNativeBlobUtil.fs.stat(path);
+    return Number(stat.size) > 10_000;
   } catch {
     return false;
   }
 }
 
-async function markComplete(): Promise<void> {
+/**
+ * Fast "is the mushaf ready?" check used by the reader gate: manifest
+ * present with all 604 recorded + a 13-page sample spot-check on disk.
+ * Also clears the legacy prefetch flag so old installs re-prompt once.
+ */
+export async function isMushafDownloaded(): Promise<boolean> {
   try {
-    await AsyncStorage.setItem(COMPLETION_KEY, '1');
-  } catch {
-    /* non-critical — UI will retry next open */
-  }
-}
-
-/** Clear the completion flag — used by the "show onboarding again" reset. */
-export async function clearMushafDownloadFlag(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(COMPLETION_KEY);
+    await AsyncStorage.removeItem(LEGACY_COMPLETION_KEY);
   } catch {
     /* ignore */
+  }
+  const manifest = await readManifest();
+  if (!manifest || manifest.complete < MUSHAF_TOTAL_PAGES) return false;
+  for (let page = 1; page <= MUSHAF_TOTAL_PAGES; page += 50) {
+    if (!(await pageFileValid(page))) return false;
+  }
+  return true;
+}
+
+/** Full integrity sweep — returns the list of missing/corrupt pages. */
+export async function verifyMushaf(): Promise<number[]> {
+  const missing: number[] = [];
+  for (let page = 1; page <= MUSHAF_TOTAL_PAGES; page++) {
+    if (!(await pageFileValid(page))) missing.push(page);
+  }
+  return missing;
+}
+
+/** Total bytes on disk (for the "Manage downloads" UI). */
+export async function mushafDiskUsage(): Promise<number> {
+  const manifest = await readManifest();
+  if (!manifest) return 0;
+  return Object.values(manifest.sizes).reduce((a, b) => a + b, 0);
+}
+
+/** Remove all downloaded pages + manifest. */
+export async function deleteMushaf(): Promise<void> {
+  try {
+    await ReactNativeBlobUtil.fs.unlink(storeDir());
+  } catch {
+    /* already gone */
   }
 }
 
 export type MushafDownloadProgress = {
-  /** Pages successfully prefetched so far. */
   done: number;
-  /** Total pages to fetch (always 604). */
   total: number;
-  /** Pages that returned an error during prefetch (keep for retry hint). */
   failed: number;
 };
 
 export type MushafDownloadHandle = {
-  /** Resolves with `true` if the run completed (even with some failures), `false` if cancelled. */
+  /** Resolves `true` when every page is on disk, `false` if cancelled or incomplete. */
   promise: Promise<boolean>;
-  /** Cancel the in-flight download — already-downloaded pages stay cached. */
   cancel: () => void;
 };
 
 /**
- * Run the one-time download. Fetches all 604 pages in batches of
- * `concurrency` parallel requests. Calls `onProgress` after each
- * page resolves (success or error).
- *
- * Returns a handle with `promise` (the run) and `cancel()` (early
- * exit). Cancellation is cooperative — in-flight network requests
- * complete but no further pages are scheduled.
+ * Download all (or the missing subset of) mushaf pages into the managed
+ * store with `concurrency` parallel workers. Already-valid pages are
+ * skipped, so this doubles as "retry failed pages".
  */
+/**
+ * Last-resort transport: RN's own fetch() (the networking stack the rest
+ * of the app uses) → blob → base64 → fs.writeFile. Slower than a native
+ * streaming download, but it survives environments where RNBlobUtil's
+ * downloader fails with "Download interrupted" (seen on emulator NAT).
+ */
+async function fetchPageViaRNFetch(page: number): Promise<number> {
+  const response = await fetch(mushafPageUrl(page));
+  if (!response.ok) throw new Error(`page ${page}: HTTP ${response.status}`);
+  const blob = await response.blob();
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(`page ${page}: read failed`));
+    reader.onloadend = () => {
+      const result = String(reader.result ?? '');
+      resolve(result.slice(result.indexOf(',') + 1));
+    };
+    reader.readAsDataURL(blob);
+  });
+  if (base64.length < 10_000) throw new Error(`page ${page}: truncated`);
+  await ReactNativeBlobUtil.fs
+    .unlink(pageFilePath(page))
+    .catch(() => undefined);
+  await ReactNativeBlobUtil.fs.writeFile(pageFilePath(page), base64, 'base64');
+  const stat = await ReactNativeBlobUtil.fs.stat(pageFilePath(page));
+  if (Number(stat.size) <= 10_000) throw new Error(`page ${page}: bad write`);
+  return Number(stat.size);
+}
+
+/**
+ * Fetch one page to its final location. GitHub's asset CDN intermittently
+ * resets multiplexed HTTP/2 streams under concurrent load ("Download
+ * interrupted."), so each page gets up to `attempts` tries with a short
+ * backoff — and the final attempt switches to the RN-fetch transport.
+ */
+async function fetchPage(page: number, attempts = 3): Promise<number> {
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const tmp = `${pageFilePath(page)}.part`;
+    try {
+      if (attempt === attempts) {
+        return await fetchPageViaRNFetch(page);
+      }
+      // NOTE: do NOT use RNBlobUtil's `timeout` config — on Android it
+      // makes every download die instantly with "Download interrupted".
+      // Hung sockets are guarded by the JS watchdog below instead.
+      const task = ReactNativeBlobUtil.config({
+        path: tmp,
+        overwrite: true,
+      }).fetch('GET', mushafPageUrl(page));
+      let watchdog: ReturnType<typeof setTimeout> | null = null;
+      const res = await Promise.race([
+        task,
+        new Promise<never>((_, reject) => {
+          watchdog = setTimeout(() => {
+            task.cancel(() => undefined);
+            reject(new Error(`page ${page}: timed out`));
+          }, 60_000);
+        }),
+      ]).finally(() => {
+        if (watchdog != null) clearTimeout(watchdog);
+      });
+      const status = res.info().status;
+      const stat = await ReactNativeBlobUtil.fs.stat(tmp).catch(() => null);
+      if (status !== 200 || !stat || Number(stat.size) <= 10_000) {
+        throw new Error(`page ${page}: HTTP ${status}`);
+      }
+      await ReactNativeBlobUtil.fs
+        .unlink(pageFilePath(page))
+        .catch(() => undefined);
+      await ReactNativeBlobUtil.fs.mv(tmp, pageFilePath(page));
+      return Number(stat.size);
+    } catch (e) {
+      lastError = e;
+      await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
+      if (attempt < attempts) {
+        await new Promise<void>(r => setTimeout(r, 400 * attempt));
+      }
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
 export function downloadMushafAssets({
-  concurrency = 8,
+  concurrency = 3,
   onProgress,
 }: {
   concurrency?: number;
@@ -88,40 +262,52 @@ export function downloadMushafAssets({
   let cancelled = false;
   let done = 0;
   let failed = 0;
+  const sizes: { [page: string]: number } = {};
 
   const run = async (): Promise<boolean> => {
+    await mkdirDeep(storeDir());
+
+    // Preserve sizes of pages we already have.
+    const existing = await readManifest();
+    if (existing) Object.assign(sizes, existing.sizes);
+
     const queue: number[] = [];
     for (let i = 1; i <= MUSHAF_TOTAL_PAGES; i++) queue.push(i);
 
-    const next = async (): Promise<void> => {
+    const worker = async (): Promise<void> => {
       while (!cancelled) {
         const page = queue.shift();
         if (page == null) return;
-        const url = mushafPageUrl(page);
         try {
-          // Image.prefetch returns a Promise<boolean> resolving to true
-          // on cache success. Throws on network errors.
-          await Image.prefetch(url);
-        } catch {
+          if (await pageFileValid(page)) {
+            const stat = await ReactNativeBlobUtil.fs.stat(pageFilePath(page));
+            sizes[String(page)] = Number(stat.size);
+          } else {
+            sizes[String(page)] = await fetchPage(page);
+          }
+        } catch (e) {
           failed += 1;
+          if (failed <= 3) {
+            console.warn(`mushafStore: page ${page} failed`, e);
+          }
         } finally {
           done += 1;
-          if (onProgress) {
-            onProgress({ done, total: MUSHAF_TOTAL_PAGES, failed });
-          }
+          onProgress?.({ done, total: MUSHAF_TOTAL_PAGES, failed });
         }
       }
     };
 
-    // Spin up `concurrency` workers; each pulls from the shared queue.
-    const workers = Array.from({ length: concurrency }, () => next());
-    await Promise.all(workers);
-
+    await Promise.all(Array.from({ length: concurrency }, () => worker()));
     if (cancelled) return false;
-    // Even with some failures, mark complete so the user isn't blocked
-    // forever — the UI will lazy-fetch any missing pages on demand.
-    await markComplete();
-    return true;
+
+    const complete = MUSHAF_TOTAL_PAGES - failed;
+    await writeManifest({
+      version: STORE_VERSION,
+      complete,
+      sizes,
+      updatedAt: Date.now(),
+    });
+    return failed === 0;
   };
 
   return {
@@ -130,4 +316,9 @@ export function downloadMushafAssets({
       cancelled = true;
     },
   };
+}
+
+/** Legacy export kept for API compatibility (used by settings reset). */
+export async function clearMushafDownloadFlag(): Promise<void> {
+  await deleteMushaf();
 }

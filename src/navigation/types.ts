@@ -10,7 +10,13 @@ export type RootStackParamList = {
   Tasbih: undefined;
   Duas: undefined;
   Quran: undefined;
-  QuranSurah: { surahNumber: number };
+  QuranSurah: {
+    surahNumber: number;
+    /** Mushaf mode: open at this exact page (Juz/Page/Bookmark deep links). */
+    initialPage?: number;
+    /** Translation mode: scroll to this ayah (search / bookmark deep links). */
+    scrollToAyah?: number;
+  };
   Mosques: undefined;
   Journal: undefined;
   Onboarding: undefined;

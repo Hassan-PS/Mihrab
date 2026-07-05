@@ -39,6 +39,12 @@ export type AppPalette = {
    * components.
    */
   accentSolid: string;
+  /**
+   * Effective dark-mode flag baked into the palette so style helpers
+   * (e.g. `cardEdgeStyle`'s light-only shadow) can branch without every
+   * caller threading `isDark` through separately.
+   */
+  isDark: boolean;
 };
 
 export function resolveEffectiveDark(
@@ -77,7 +83,10 @@ export function shouldUseDynamicSystemColors(
 
 // accentSolid, like accent/accentBg, is layered on by withBrandAccents() — so
 // the base palette objects below don't (and shouldn't) declare it.
-type PaletteBase = Omit<AppPalette, 'accent' | 'accentBg' | 'accentSolid'>;
+type PaletteBase = Omit<
+  AppPalette,
+  'accent' | 'accentBg' | 'accentSolid' | 'isDark'
+>;
 
 /**
  * Hex swatches for each selectable app accent — task #127.
@@ -103,6 +112,11 @@ const ACCENT_SWATCHES: Record<
   teal: { light: '#0d9488', dark: '#5eead4', lightBg: '#ccfbf1', darkBg: '#134e4a' },
   blue: { light: '#2563eb', dark: '#7dd3fc', lightBg: '#dbeafe', darkBg: '#0c2a52' },
   amber: { light: '#b45309', dark: '#fbbf24', lightBg: '#fef3c7', darkBg: '#3f2a05' },
+  // Task: look-and-feel upgrade — two quieter jewel tones rounding out the
+  // picker. Both tuned like the emerald: deep ink-like in light mode,
+  // lifted (≥4.5:1 on ink-blue) in dark mode, with soft low-sat tints.
+  rose: { light: '#9F2D4D', dark: '#E58FA6', lightBg: '#F7E3E9', darkBg: '#3A1622' },
+  violet: { light: '#5B4B9E', dark: '#B4A6E8', lightBg: '#E9E4F6', darkBg: '#241D40' },
 };
 
 /**
@@ -166,7 +180,7 @@ function withBrandAccents(
     accentId,
     customHex,
   );
-  return { ...base, accent, accentBg, accentSolid };
+  return { ...base, accent, accentBg, accentSolid, isDark };
 }
 
 /**
@@ -241,6 +255,7 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
     }),
     flatChrome: true,
     glass: true,
+    isDark,
     // iOS systemBlue is the typical tintColor when no override; matches
     // the live PlatformColor tint closely enough for SVG icons.
     accentSolid: isDark ? '#0A84FF' : '#007AFF',
@@ -268,7 +283,7 @@ function androidDynamicPalette(
   // Soft tinted accent background, matching how the standard 'custom' accent
   // derives its highlight (light: mix toward white, dark: toward black).
   const accentBg = isDark ? shiftHex(hex, -0.7) : shiftHex(hex, 0.82);
-  return { ...base, accent: hex, accentBg, accentSolid: hex };
+  return { ...base, accent: hex, accentBg, accentSolid: hex, isDark };
 }
 
 function buildDynamicSystemPalette(

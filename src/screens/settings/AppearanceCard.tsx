@@ -20,7 +20,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { saveSettings } from '../../settings/storage';
-import type { AppAccentId } from '../../settings/types';
+import type { AppAccentId, WidgetHighlightId } from '../../settings/types';
 import { cardEdgeStyle, segmentChromeStyle } from '../../theme/chrome';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
@@ -46,7 +46,22 @@ const APP_ACCENT_SWATCHES: {
   { id: 'teal', light: '#0d9488', dark: '#5eead4' },
   { id: 'blue', light: '#2563eb', dark: '#7dd3fc' },
   { id: 'amber', light: '#b45309', dark: '#fbbf24' },
+  { id: 'rose', light: '#9F2D4D', dark: '#E58FA6' },
+  { id: 'violet', light: '#5B4B9E', dark: '#B4A6E8' },
 ];
+
+/**
+ * Accent ids the NATIVE widget modules understand. Newer app accents
+ * (rose, violet) are mirrored to the widget as a custom hex instead, so
+ * the widget still matches without touching Kotlin/Swift swatch tables.
+ */
+const NATIVE_WIDGET_ACCENT_IDS = new Set([
+  'green',
+  'teal',
+  'blue',
+  'amber',
+  'custom',
+]);
 
 function AppearanceCardImpl() {
   const { t } = useTranslation();
@@ -132,13 +147,24 @@ function AppearanceCardImpl() {
       ...(customHex ? { appAccentCustomHex: customHex } : {}),
     });
     if (!dynamicColorsActive) {
-      const widgetPatch: { widgetHighlightId: AppAccentId; widgetHighlightCustomHex?: string } = {
-        widgetHighlightId: id,
-      };
-      if (id === 'custom' && customHex) {
-        widgetPatch.widgetHighlightCustomHex = customHex;
+      if (NATIVE_WIDGET_ACCENT_IDS.has(id)) {
+        const widgetPatch: {
+          widgetHighlightId: WidgetHighlightId;
+          widgetHighlightCustomHex?: string;
+        } = { widgetHighlightId: id as WidgetHighlightId };
+        if (id === 'custom' && customHex) {
+          widgetPatch.widgetHighlightCustomHex = customHex;
+        }
+        updateWidget(widgetPatch);
+      } else {
+        // rose / violet → mirror as a custom hex (light-mode swatch; the
+        // widget renders on wallpaper, where the deeper ink reads best).
+        const sw = APP_ACCENT_SWATCHES.find(s => s.id === id);
+        updateWidget({
+          widgetHighlightId: 'custom',
+          widgetHighlightCustomHex: sw?.light ?? '#1F5F4A',
+        });
       }
-      updateWidget(widgetPatch);
     }
   };
 

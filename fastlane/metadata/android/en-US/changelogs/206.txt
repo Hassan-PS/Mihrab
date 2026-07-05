@@ -1,0 +1,10 @@
+Welcome to Mihrab — a calm, privacy-first companion for the five daily prayers.
+
+• Accurate prayer times that work offline
+• Adhan and pre-prayer reminders
+• Home-screen widgets and a live countdown to the next prayer
+• Qibla compass and a full monthly calendar
+• Quran reader, duas, tasbih, prayer journal and fasting tracker
+• Hijri dates, 13 languages, light and dark themes
+
+No ads, no tracking, ever. Open source.

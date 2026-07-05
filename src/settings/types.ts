@@ -34,7 +34,14 @@ export type WidgetHighlightId =
  * Note: 'dynamic' is intentionally absent here — the unified
  * dynamic-color toggle on AppearanceCard handles that case.
  */
-export type AppAccentId = 'green' | 'teal' | 'blue' | 'amber' | 'custom';
+export type AppAccentId =
+  | 'green'
+  | 'teal'
+  | 'blue'
+  | 'amber'
+  | 'rose'
+  | 'violet'
+  | 'custom';
 
 /**
  * A user-saved location preset — task #18.
@@ -203,7 +210,7 @@ export type PrayerAppSettings = {
    *                 with the next prayer's name + clock time beneath it.
    * Android only; ignored on iOS.
    */
-  liveActivityDesign: 'timeline' | 'countdown';
+  liveActivityDesign: 'timeline' | 'countdown' | 'markers';
   /**
    * Optional second metric shown on the Android 17 countdown (MetricStyle)
    * design. Metrics must be numeric/time values, so the choices are the prayer

@@ -1,0 +1,10 @@
+Välkommen till Mihrab — en lugn och integritetsvänlig följeslagare för de fem dagliga bönerna.
+
+• Exakta bönetider som fungerar offline
+• Adhan- och förbönspåminnelser
+• Widgetar på hemskärmen och en live-nedräkning till nästa bön
+• Qibla-kompass och en fullständig månadskalender
+• Koranläsare, duas, tasbih, böndagbok och fasteräknare
+• Hijri-datum, 13 språk, ljust och mörkt tema
+
+Inga annonser, ingen spårning, någonsin. Öppen källkod.

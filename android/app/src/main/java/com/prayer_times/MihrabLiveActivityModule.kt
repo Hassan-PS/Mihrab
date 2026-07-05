@@ -451,8 +451,17 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           // Simple linear progress toward the next prayer (no day timeline).
           builder.setProgress(100, progressPct, false)
         } else {
-          // timeline (default): inline countdown in the title + the day timeline.
-          val dayStyle = buildDayProgressStyle(ctx, p, accentInt)
+          // timeline (default) or markers: inline countdown in the title + the
+          // day timeline. 'markers' additionally draws a point at each prayer
+          // and a tracker icon at "now" — all native ProgressStyle APIs
+          // (Android 16), so the chip + AOD eligibility is identical.
+          val dayStyle = buildDayProgressStyle(
+            ctx, p, accentInt,
+            addPoints = design == "markers",
+            trackerIcon = if (design == "markers") {
+              Icon.createWithResource(ctx, R.drawable.ic_stat_prayer)
+            } else null,
+          )
           builder.setContentTitle(
             if (dayStyle != null) inlineTitle else "$inlineTitle · $progressPct%",
           )
@@ -573,9 +582,16 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             tryAttachShortCriticalText(builder, shortText)
           }
         } else {
-          // timeline (default): the clean segmented ProgressStyle bar (all
-          // Android 16 APIs, so this compiles on compileSdk 36 too).
-          val dayStyle = buildDayProgressStyle(ctx, p, effectiveAccent)
+          // timeline (default) or markers: the segmented ProgressStyle bar (all
+          // Android 16 APIs, so this compiles on compileSdk 36 too). 'markers'
+          // adds per-prayer points + a tracker icon at "now".
+          val dayStyle = buildDayProgressStyle(
+            ctx, p, effectiveAccent,
+            addPoints = design == "markers",
+            trackerIcon = if (design == "markers") {
+              Icon.createWithResource(ctx, R.drawable.ic_stat_prayer)
+            } else null,
+          )
           val inlineTitle = when {
             arrivedTitle != null -> arrivedTitle
             nextLabel.isNotEmpty() -> "$nextLabel · $countdown"

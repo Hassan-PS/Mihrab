@@ -15,6 +15,7 @@ import {
   type DuaCategory,
 } from '../duas/duas';
 import { cardEdgeStyle } from '../theme/chrome';
+import { arabicTextStyle } from '../theme/typography';
 import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
 
 /**
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
   list: { padding: 16, paddingTop: 0, gap: 12 },
   card: { borderRadius: 14, padding: 16, gap: 8 },
   title: { fontSize: 14, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
-  arabic: { fontSize: 24, lineHeight: 40, textAlign: 'right', writingDirection: 'rtl' },
+  arabic: { fontSize: 24, lineHeight: 52, textAlign: 'right', writingDirection: 'rtl', ...arabicTextStyle('body') },
   translit: { fontSize: 14, fontStyle: 'italic' },
   translation: { fontSize: 15, lineHeight: 22 },
   metaRow: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 4 },

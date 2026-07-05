@@ -29,7 +29,17 @@ export function tintForTime(
   const next = computeNextSalah(today, now);
   // The "next" prayer name tells us where we are in the day.
   if (!next) return 'night'; // after Isha
-  switch (next.name) {
+  return tintForNextPrayerName(next.name);
+}
+
+/**
+ * Same mapping keyed directly off the upcoming prayer's name — for
+ * consumers (the HomeScreen hero) that already know the next prayer and
+ * don't hold the full timings map. Pairs with `PERIOD_TINTS` in
+ * `src/theme/tokens.ts` for the actual hues.
+ */
+export function tintForNextPrayerName(name: string): TimeOfDayTint {
+  switch (name) {
     case 'Fajr':
       return 'night'; // pre-Fajr is the deepest night
     case 'Sunrise':

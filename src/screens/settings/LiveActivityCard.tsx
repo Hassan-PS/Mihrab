@@ -6,7 +6,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
-type LADesign = 'timeline' | 'countdown';
+type LADesign = 'timeline' | 'countdown' | 'markers';
 
 /**
  * Mini mock of the Android Live Activity notification for each design, so the
@@ -31,6 +31,41 @@ function DesignPreview({
       <View style={[styles.preview, { backgroundColor: surface }]}>
         <Text style={[styles.previewCountdown, { color: text }]}>2:18:42</Text>
         <Text style={[styles.previewSub, { color: muted }]}>Maghrib · 22:12</Text>
+      </View>
+    );
+  }
+  if (design === 'markers') {
+    // markers — the same day timeline, but with a dot at each prayer and a
+    // tracker thumb at "now" (native ProgressStyle points + tracker icon).
+    return (
+      <View style={[styles.preview, { backgroundColor: surface }]}>
+        <Text style={[styles.previewRow, { color: text }]}>Maghrib · 2:18</Text>
+        <View style={styles.segRow}>
+          {[0, 1, 2, 3, 4, 5, 6].map(i => (
+            <View key={i} style={styles.markerSegWrap}>
+              <View
+                style={[
+                  styles.seg,
+                  i < 4
+                    ? { backgroundColor: accent }
+                    : { backgroundColor: muted, opacity: 0.4 },
+                ]}
+              />
+              {i < 6 ? (
+                <View
+                  style={[
+                    styles.markerDot,
+                    {
+                      backgroundColor: i < 4 ? accent : muted,
+                      opacity: i < 4 ? 1 : 0.55,
+                    },
+                  ]}
+                />
+              ) : null}
+            </View>
+          ))}
+          <View style={[styles.markerTracker, { borderColor: accent }]} />
+        </View>
       </View>
     );
   }
@@ -74,10 +109,15 @@ function LiveActivityCardImpl() {
 
   // Coerce any legacy stored value to the current options.
   const design: LADesign =
-    settings.liveActivityDesign === 'countdown' ? 'countdown' : 'timeline';
+    settings.liveActivityDesign === 'countdown'
+      ? 'countdown'
+      : settings.liveActivityDesign === 'markers'
+        ? 'markers'
+        : 'timeline';
 
   const options: { id: LADesign; labelKey: string }[] = [
     { id: 'timeline', labelKey: 'settings.laDesignTimeline' },
+    { id: 'markers', labelKey: 'settings.laDesignMarkers' },
     { id: 'countdown', labelKey: 'settings.laDesignCountdown' },
   ];
 
@@ -156,7 +196,12 @@ function LiveActivityCardImpl() {
                       { color: selected ? palette.accent : palette.text },
                     ]}>
                     {t(opt.labelKey, {
-                      defaultValue: opt.id === 'countdown' ? 'Countdown' : 'Timeline',
+                      defaultValue:
+                        opt.id === 'countdown'
+                          ? 'Countdown'
+                          : opt.id === 'markers'
+                            ? 'Markers'
+                            : 'Timeline',
                     })}
                   </Text>
                 </Pressable>
@@ -257,5 +302,25 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 5,
     borderRadius: 3,
+  },
+  markerSegWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  markerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  markerTracker: {
+    position: 'absolute',
+    left: '56%',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+    backgroundColor: 'transparent',
   },
 });

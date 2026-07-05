@@ -147,6 +147,121 @@ jest.mock('react-native-view-shot', () => ({
   captureScreen: jest.fn(() => Promise.resolve('file://mock.png')),
 }));
 
+// Quran Reader v2 native deps (docs/quran-reader-plan.md). All three are
+// mocked wholesale: the JS-level logic they back (queue building, repeat
+// expansion, store paths) is unit-tested against these fakes.
+jest.mock('@sayem314/react-native-keep-awake', () => ({
+  __esModule: true,
+  default: () => null,
+  activateKeepAwake: jest.fn(),
+  deactivateKeepAwake: jest.fn(),
+  useKeepAwake: jest.fn(),
+}));
+
+jest.mock('react-native-blob-util', () => {
+  const files = new Map();
+  const fs = {
+    dirs: { DocumentDir: '/mock/documents', CacheDir: '/mock/cache' },
+    exists: jest.fn(async path => files.has(path)),
+    stat: jest.fn(async path => {
+      if (!files.has(path)) throw new Error('ENOENT');
+      return { size: files.get(path).length, path };
+    }),
+    lstat: jest.fn(async () => []),
+    ls: jest.fn(async () => []),
+    readFile: jest.fn(async path => {
+      if (!files.has(path)) throw new Error('ENOENT');
+      return files.get(path);
+    }),
+    writeFile: jest.fn(async (path, data) => {
+      files.set(path, String(data));
+    }),
+    unlink: jest.fn(async path => {
+      files.delete(path);
+    }),
+    mv: jest.fn(async (from, to) => {
+      files.set(to, files.get(from) ?? '');
+      files.delete(from);
+    }),
+    mkdir: jest.fn(async () => {}),
+  };
+  return {
+    __esModule: true,
+    default: {
+      fs,
+      config: jest.fn(() => ({
+        fetch: jest.fn(async () => ({ info: () => ({ status: 200 }) })),
+      })),
+    },
+    __files: files,
+  };
+});
+
+jest.mock('react-native-track-player', () => ({
+  __esModule: true,
+  default: {
+    setupPlayer: jest.fn(async () => {}),
+    updateOptions: jest.fn(async () => {}),
+    registerPlaybackService: jest.fn(),
+    addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+    add: jest.fn(async () => {}),
+    reset: jest.fn(async () => {}),
+    play: jest.fn(async () => {}),
+    pause: jest.fn(async () => {}),
+    stop: jest.fn(async () => {}),
+    seekTo: jest.fn(async () => {}),
+    setRate: jest.fn(async () => {}),
+    skipToNext: jest.fn(async () => {}),
+    skipToPrevious: jest.fn(async () => {}),
+    getQueue: jest.fn(async () => []),
+  },
+  useProgress: jest.fn(() => ({ position: 0, duration: 0, buffered: 0 })),
+  usePlaybackState: jest.fn(() => ({ state: 'none' })),
+  State: {
+    None: 'none',
+    Stopped: 'stopped',
+    Paused: 'paused',
+    Playing: 'playing',
+    Loading: 'loading',
+    Buffering: 'buffering',
+  },
+  Event: {
+    PlaybackState: 'playback-state',
+    PlaybackActiveTrackChanged: 'playback-active-track-changed',
+    PlaybackQueueEnded: 'playback-queue-ended',
+    RemotePlay: 'remote-play',
+    RemotePause: 'remote-pause',
+    RemoteNext: 'remote-next',
+    RemotePrevious: 'remote-previous',
+    RemoteStop: 'remote-stop',
+    RemoteSeek: 'remote-seek',
+    RemoteDuck: 'remote-duck',
+  },
+  Capability: {
+    Play: 0,
+    Pause: 1,
+    Stop: 2,
+    SeekTo: 3,
+    SkipToNext: 4,
+    SkipToPrevious: 5,
+  },
+  AppKilledPlaybackBehavior: {
+    StopPlaybackAndRemoveNotification: 'stop-playback-and-remove-notification',
+    ContinuePlayback: 'continue-playback',
+  },
+}));
+
+jest.mock('react-native-color-matrix-image-filters', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    ColorMatrix: View,
+    concatColorMatrices: (...ms) => ms.flat(),
+    invert: () => [],
+    brightness: () => [],
+  };
+});
+
 jest.mock('react-native-sensors', () => ({
   magnetometer: {
     subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),

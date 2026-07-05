@@ -89,7 +89,7 @@ export type LiveActivityRenderInput = {
    *  wallpaper colour changes. */
   systemAccent?: boolean;
   /** Enhanced Live Activity visual style (Android 16 ProgressStyle). */
-  design?: 'timeline' | 'countdown';
+  design?: 'timeline' | 'countdown' | 'markers';
   /** Display knobs from settings. */
   compactMode: boolean;
   showSunrise: boolean;

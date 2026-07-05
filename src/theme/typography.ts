@@ -13,6 +13,7 @@
  * principle 3 ("tabular precision for sacred data").
  */
 
+import { Platform } from 'react-native';
 import { tabularNumeralStyle } from './textScale';
 
 export type TypeToken = {
@@ -80,11 +81,23 @@ export const FONTS = {
   /** Primary Latin face — undefined falls back to the system default
    *  (SF Pro on iOS, Roboto on Android). We don't override Latin. */
   primary: undefined as string | undefined,
-  /** Arabic body face — Naskh, used for dua / hadith / general Arabic. */
-  arabicBody: 'Scheherazade New' as const,
-  /** Arabic Quran face — used only for Quran ayahs (heavier diacritic
-   *  handling, classical mushaf shapes). */
-  arabicQuran: 'Amiri' as const,
+  /**
+   * Arabic body face — Amiri (classical Naskh). Used for dua text, surah
+   * names and general Arabic. Android resolves custom fonts by asset
+   * FILENAME (`assets/fonts/Amiri.ttf`), iOS by the font's internal
+   * family name ("Amiri") — both align on this string.
+   */
+  arabicBody: 'Amiri' as const,
+  /**
+   * Arabic Quran face — AmiriQuran, ayah text only (quranic annotation
+   * glyphs, taller diacritics, mushaf letterforms). The family name
+   * differs per platform: iOS reads the internal name "Amiri Quran";
+   * Android matches the asset filename "AmiriQuran".
+   */
+  arabicQuran: Platform.select({
+    ios: 'Amiri Quran',
+    default: 'AmiriQuran',
+  }) as string,
 } as const;
 
 /**
@@ -93,11 +106,10 @@ export const FONTS = {
  * `kind='body'` for everything else (dua text, transliterations,
  * Islamic event names).
  *
- * Implementation: returns the family name unconditionally — RN gracefully
- * falls back to the system face when a family isn't registered, so this
- * helper is safe to use before the .ttf binaries land. After the binaries
- * are dropped in, the same call sites switch to the bundled face with no
- * code changes.
+ * NOTE (look-and-feel upgrade): Amiri's ascenders/descenders are much
+ * taller than the system Arabic face — call sites must pair this with a
+ * roomier lineHeight (≈ 2.1× fontSize for fully-vocalised ayah text) or
+ * diacritics clip.
  */
 export function arabicTextStyle(kind: 'quran' | 'body' = 'body'): {
   fontFamily: string;

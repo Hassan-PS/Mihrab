@@ -42,6 +42,19 @@ try {
 
 AppRegistry.registerComponent(APP_REGISTRY_NAME, () => App);
 
+// Quran recitation playback service (lock-screen / notification remote
+// controls + memorization pause-between-repeats). The player itself is
+// only set up on first play (see src/quran/audio/playback.ts).
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const TrackPlayer = require('react-native-track-player').default;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { PlaybackService } = require('./src/quran/audio/PlaybackService');
+  TrackPlayer.registerPlaybackService(() => PlaybackService);
+} catch (e) {
+  console.error('[mihrab] registerPlaybackService failed:', e);
+}
+
 // HeadlessJS task for the Live Activity "Mute next adhan" toggle (Android 17+).
 // Dispatched by AdhanMuteHeadlessService; must match its task name.
 AppRegistry.registerHeadlessTask('AdhanMuteToggle', () => adhanMuteToggleTask);

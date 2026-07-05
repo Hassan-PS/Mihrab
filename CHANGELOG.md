@@ -2,6 +2,32 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.26] — 2026-07-05 — Quran Reader v2 (docs/quran-reader-plan.md)
+
+### Added
+- **Feature tour for new users**: a swipeable four-slide walkthrough (welcome, prayer times, Quran, customization) shows once after onboarding completes; replayable any time from Settings → "Show the app tour". Fully localized in all 13 languages and palette-aware.
+- **Rate Mihrab**: a Settings row that opens the native in-app review sheet on iOS (SKStoreReviewController), the Play Store listing on Google Play builds, and the GitHub project page on F-Droid builds — no trackers, no SDKs.
+- **Live Activity "Markers" design (Android 16+)**: a third look for the countdown notification — the day progress bar gains a dot at each prayer boundary and a crescent tracker that travels along the track, using the native ProgressStyle points API. Keeps the status-bar chip and Always-On Display, like the other designs.
+- **Data survives uninstall → reinstall (Android)**: all settings, journal, fasting log, tasbih, Quran bookmarks/khatmah are now covered by Android Auto Backup (cloud + device-to-device transfer), and uninstalling on Android 10+ offers a "Keep app data" checkbox — reinstalling later restores everything without redoing setup. Downloaded mushaf pages/audio are excluded (re-downloadable, would blow the backup quota).
+- **Interactive mushaf**: tap any ayah on the page → highlight + action sheet with translation peek, play-from-here, repeat, colored bookmarks (5 colors), star, share (text or a rendered image card). Word-accurate ayah geometry (quran.com ayahinfo data) validated pixel-perfect against the KFGQPC page images.
+- **Audio recitation**: 5 reciters (Al-Husary, Alafasy, Abdul Basit, Al-Minshawi, Al-Shuraim) streamed per-ayah from EveryAyah, with lock-screen/notification controls, background playback, speed control (0.75×–2×), and per-surah offline downloads. The playing ayah is highlighted on the mushaf and auto-turns pages; the translation view highlights the live word using quran-align timings (CC BY 4.0, re-hosted on this repo's `quran-timings-v1` release).
+- **Memorization (hifz) tools**: repeat each ayah ×N, repeat a range ×M, pause-between-repeats (recite-back gap), explicit range player, and hide/reveal masking of Arabic or translation per ayah.
+- **Khatmah tracking**: 30/60/90-day plans with daily portion, progress bar and gentle catch-up hints, advanced automatically by sequential mushaf page turns.
+- **Navigation**: Surah / Juz / Bookmarks tabs, continue-reading resume card, go-to-page jump, verse of the day, diacritic-insensitive Arabic + translation search.
+- **Night mode** for the mushaf (clean page inversion) + keep-screen-awake while reading.
+
+### Added — look & feel upgrade
+- **Real Arabic typography**: the bundled Amiri fonts are now actually registered and applied — ayah text renders in Amiri Quran (classical mushaf letterforms with correct stacked diacritics) and surah names / duas in Amiri Naskh, on both platforms. Previously everything fell back to the system Arabic face.
+- **Depth**: every card in the standard light theme gets a soft warm shadow lift (`cardEdgeStyle`); dark themes keep the calm border-only look, dynamic/glass chrome untouched.
+- **Time-of-day awareness (principle 5)**: the Home hero now carries a slim tinted rule + eyebrow label whose hue follows the prayer day — pre-dawn indigo, morning amber, midday teal, golden Asr, sunset rose, violet dusk. Felt, not announced.
+- **Two new accent colors**: Rose and Violet join the picker (deep ink tones in light mode, lifted variants in dark), mirrored to the home-screen widget as a custom hex so no native changes were needed.
+
+### Changed
+- **Mushaf storage** moved from the evictable OS image cache to a managed on-disk store with a manifest, partial-download resume and a retry-missing-pages path (fixes blank pages after cache eviction).
+- **Translation view virtualized** (FlatList) and translation JSON loading deferred off the navigation transition — Al-Baqarah opens instantly.
+- Mushaf chrome now follows the app palette (was hardcoded light) and reflows correctly on rotation.
+- New deps: react-native-track-player (Apache-2.0, patched for Kotlin 2 nullability), react-native-blob-util (MIT), @sayem314/react-native-keep-awake (MIT). All FOSS, no Google Play Services — F-Droid-safe.
+
 ## [2.7.25] — 2026-06-27
 
 ### Changed

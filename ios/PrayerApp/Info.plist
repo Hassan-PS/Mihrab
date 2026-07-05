@@ -56,6 +56,7 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 	</array>
 	<key>RCTNewArchEnabled</key>
@@ -97,8 +98,6 @@
 	<array>
 		<string>Amiri-Regular.ttf</string>
 		<string>AmiriQuran.ttf</string>
-		<string>Amiri-Bold.ttf</string>
-		<string>ScheherazadeNew-Regular.ttf</string>
 	</array>
 </dict>
 </plist>

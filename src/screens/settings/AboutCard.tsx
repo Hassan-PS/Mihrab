@@ -15,6 +15,8 @@ import { getInstalledAppVersionLabel } from '../../appVersion';
 import type { RootStackParamList } from '../../navigation/types';
 import { resetAppData } from '../../settings/storage';
 import { DEFAULT_SETTINGS } from '../../settings/types';
+import { rateApp } from '../../polish/rateApp';
+import { resetFeatureTour } from '../../polish/FeatureTourModal';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
@@ -104,6 +106,52 @@ function AboutCardImpl() {
       </Pressable>
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel={t('settings.rateApp', 'Rate Mihrab')}
+        style={[
+          s.card,
+          s.rowPress,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}
+        onPress={() => {
+          void rateApp();
+        }}>
+        <View>
+          <Text style={[s.label, { color: palette.muted }]}>
+            {t('settings.rateApp', 'Rate Mihrab')}
+          </Text>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.rateAppHelp', 'Enjoying the app? A rating helps others find it.')}
+          </Text>
+        </View>
+        <Text style={[s.changeLink, { color: palette.accent }]}>★</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('settings.showTour', 'Show the app tour')}
+        style={[
+          s.card,
+          s.rowPress,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}
+        onPress={() => {
+          // Clear the seen-flag and pop back to Home, where the tour
+          // auto-presents (same path as a fresh install).
+          void resetFeatureTour().then(() => {
+            navigation.navigate('Home');
+          });
+        }}>
+        <View>
+          <Text style={[s.label, { color: palette.muted }]}>
+            {t('settings.showTour', 'Show the app tour')}
+          </Text>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.showTourHelp', 'Replay the quick feature walkthrough.')}
+          </Text>
+        </View>
+        <Text style={[s.changeLink, { color: palette.accent }]}>›</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
         accessibilityLabel={t('settings.replayOnboarding')}
         style={[
           s.card,
@@ -166,6 +214,18 @@ function Attributions({ palette }: { palette: AppPalette }) {
         label={t('attributions.mushafImages', { defaultValue: 'Mushaf page images (604)' })}
         sub="Hassan-PS/Mihrab · KFGQPC fonts · via quran/quran.com-images"
         url="https://github.com/Hassan-PS/Mihrab/releases/tag/mushaf-assets-v2"
+      />
+      <AttributionRow
+        palette={palette}
+        label={t('attributions.quranGeometry', { defaultValue: 'Ayah position data (quran.com / Quran for Android project)' })}
+        sub="quran.com · files.quran.app ayahinfo"
+        url="https://github.com/quran/quran_android"
+      />
+      <AttributionRow
+        palette={palette}
+        label={t('attributions.recitation', { defaultValue: 'Recitation audio: EveryAyah.com · word timings: quran-align (CC BY 4.0)' })}
+        sub="everyayah.com · cpfair/quran-align"
+        url="https://everyayah.com/"
       />
       <AttributionRow
         palette={palette}

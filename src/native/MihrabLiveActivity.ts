@@ -84,7 +84,7 @@ export type MihrabLiveActivityPayload = {
   /** Android Live Activity visual style (both keep the chip + AOD):
    *   'timeline'  — full prayer-day ProgressStyle timeline + inline countdown.
    *   'countdown' — countdown-focused: big countdown title + prayer name/time. */
-  design?: 'timeline' | 'countdown';
+  design?: 'timeline' | 'countdown' | 'markers';
   /** Display knobs. */
   compactMode: boolean;
   showSunrise: boolean;

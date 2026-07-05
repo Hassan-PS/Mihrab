@@ -1,15 +1,30 @@
 import { StyleSheet, type ViewStyle } from 'react-native';
 import type { AppPalette } from './appPalette';
+import { CARD_SHADOW } from './tokens';
 
 type ChromePalette = Pick<
   AppPalette,
   'flatChrome' | 'border' | 'accent' | 'accentBg'
->;
+> &
+  Partial<Pick<AppPalette, 'isDark'>>;
 
-/** Card / boxed regions: hairline border, or none when using flat dynamic chrome. */
+/**
+ * Card / boxed regions: hairline border, or none when using flat dynamic
+ * chrome. In the standard LIGHT theme the border is paired with a soft
+ * warm shadow (look-and-feel upgrade): cards read as gently lifted paper
+ * instead of flat outlined boxes. Dark themes keep the border-only look —
+ * shadows disappear against ink backgrounds, surface lift does the work.
+ */
 export function cardEdgeStyle(palette: ChromePalette): ViewStyle {
   if (palette.flatChrome) {
     return { borderWidth: 0, borderColor: 'transparent' };
+  }
+  if (palette.isDark === false) {
+    return {
+      borderWidth: 1,
+      borderColor: palette.border,
+      ...CARD_SHADOW,
+    };
   }
   return { borderWidth: 1, borderColor: palette.border };
 }

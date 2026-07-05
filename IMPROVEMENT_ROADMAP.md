@@ -126,7 +126,7 @@ Ordered roughly by user value × implementation cost.
 
 - **Prayer journal / streak tracker.** Tap each of the 5 prayers when prayed; weekly/monthly stats; longest streak. All local, no account needed.
 - **Dua library** — categorized supplications (morning/evening, after prayer, travel, food, etc.) with Arabic + transliteration + translation. Static JSON, ships in app.
-- **Complete Quran reader with audio recitation** — all 114 surahs offline (Tanzil text bundled), side-by-side translations, multiple reciters streamed with offline-per-surah download, bookmarks, last-read marker, repeat-ayah for memorization. The killer feature most competitors lead with. See task #27.
+- **Complete Quran reader with audio recitation** — all 114 surahs offline (Tanzil text bundled), side-by-side translations, multiple reciters streamed with offline-per-surah download, bookmarks, last-read marker, repeat-ayah for memorization. The killer feature most competitors lead with. See task #27. **Full phased plan (QR-1…QR-24): `docs/quran-reader-plan.md`.**
 - **Mosque finder** — Overpass/OSM query for `amenity=place_of_worship + religion=muslim` near the user. No new accounts, no API keys.
 - **Wear OS / Apple Watch complication** — show next prayer + countdown. WatchOS via the existing widget data, Wear OS as a lightweight Compose tile.
 - **Fasting tracker for Ramadan** — checkbox per day with intention (niyyah) reminder before suhoor.

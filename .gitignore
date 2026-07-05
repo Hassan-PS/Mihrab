@@ -94,3 +94,6 @@ src/quran/data/source/
 *.apk
 *.aab
 *.ipa
+
+# Quran reader debug scratch (screenshots, geometry sources)
+.qr-data/

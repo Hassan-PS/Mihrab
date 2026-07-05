@@ -28,12 +28,17 @@ export function mushafPageUrl(page: number): string {
 export const MUSHAF_TOTAL_PAGES = 604;
 
 /**
- * Image source spec for `<Image source={…} />`. Returns a `{ uri }`
- * pointing at the GitHub release. RN's image cache will populate
- * itself the first time each page is loaded; we explicitly prefetch
- * all 604 on the user's first download (see `mushafDownload.ts`) so
- * subsequent reads are warm-cache.
+ * Image source spec for `<Image source={…} />`.
+ *
+ * When the managed file store has the page (QR-5), we point at the
+ * local `file://` path — fully offline, never evicted. Otherwise we
+ * fall back to streaming the page from the GitHub release; the reader
+ * stays usable during/after a partial download.
  */
-export function mushafPageAsset(page: number): { uri: string } {
+export function mushafPageAsset(
+  page: number,
+  localPath?: string | null,
+): { uri: string } {
+  if (localPath) return { uri: `file://${localPath}` };
   return { uri: mushafPageUrl(page) };
 }

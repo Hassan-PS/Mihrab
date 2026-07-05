@@ -1,8 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+/**
+ * Surah reading screen — Quran Reader v2
+ * (docs/quran-reader-plan.md, QR-1/2/8/17/20).
+ *
+ * Two reading modes (gated by `settings.quranReadingMode`):
+ *   • `withTranslation` — VIRTUALIZED ayah-by-ayah list (QR-1: Al-Baqarah
+ *     no longer mounts 286 cards at once). Arabic renders word-by-word so
+ *     recitation can highlight the live word (QR-17); memorization
+ *     hide/reveal masks Arabic or translation per ayah (QR-20).
+ *   • `mushaf` — the interactive page reader (MushafReader).
+ *
+ * Translation text loads asynchronously after first paint (QR-2) — the
+ * 1–2 MB edition JSON no longer blocks the navigation transition.
+ */
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+  FlatList,
   Modal,
   Pressable,
   ScrollView,
@@ -15,42 +30,40 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
-import { findSurah, loadSurah, type LoadedSurah } from '../quran/quran';
+import { findSurah, loadSurah } from '../quran/quran';
 import {
-  defaultEditionForLocale,
-  editionMatchesLocale,
   getSurahTranslation,
   QURAN_TRANSLATIONS,
-  type QuranTranslationId,
 } from '../quran/translations';
+import { useActiveEdition } from '../quran/useActiveEdition';
 import { MushafReader } from '../quran/MushafReader';
+import { findPageForAyah } from '../quran/pages';
+import {
+  findBookmark,
+  hydrateQuranState,
+  isStarred,
+  setLastRead,
+  useQuranState,
+  BOOKMARK_COLORS,
+} from '../quran/quranState';
+import { usePlaybackStatus } from '../quran/audio/playback';
+import { useActiveWordIndex } from '../quran/audio/useWordTiming';
+import { AyahActionSheet } from '../quran/mushaf/AyahActionSheet';
+import { PlaybackSettingsSheet } from '../quran/audio/PlaybackSettingsSheet';
+import { MiniPlayer } from '../quran/audio/MiniPlayer';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
 import { cardEdgeStyle } from '../theme/chrome';
+import { arabicTextStyle } from '../theme/typography';
 
-/**
- * Surah reading screen — task #27, expanded under #96 + #97.
- *
- * Two reading modes (gated by `settings.quranReadingMode`):
- *   • `withTranslation` — ayah-by-ayah cards with Arabic + the user's
- *     selected translation edition + ayah number. Default.
- *   • `mushaf` — Arabic-only continuous reading view styled like a
- *     printed mushaf page. Larger Uthmani script, RTL flow with the
- *     traditional ۝ ayah-end markers, no translation.
- *
- * The active translation edition is `settings.quranTranslationEdition`,
- * falling back to `defaultEditionForLocale(language)` when empty.
- *
- * The header gets a translation-picker affordance + mode toggle so
- * switching is one tap away while reading.
- */
+type AyahRow = {
+  ayah: number; // 1-based
+  arabic: string;
+};
+
 export function QuranSurahScreen() {
-  // Subscribe to width changes so future master-detail layouts pick up
-  // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
   const { t, i18n } = useTranslation();
-  // For Arabic readers the romanized name + English meaning are
-  // redundant noise — the Arabic title above is the canonical one.
   const isArabic = i18n.language === 'ar';
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
@@ -58,81 +71,78 @@ export function QuranSurahScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'QuranSurah'>>();
-  const { surahNumber } = route.params;
+  const { surahNumber, initialPage, scrollToAyah } = route.params;
   useAndroidSubScreenBack();
 
   const surah = findSurah(surahNumber);
-  const [ayahs, setAyahs] = useState<{
-    arabic: ReadonlyArray<string>;
-  } | null>(null);
+  const quran = useQuranState();
+  const playback = usePlaybackStatus();
+  const activeWord = useActiveWordIndex();
+  const edition = useActiveEdition();
 
-  // Resolve which translation edition to use. Empty string in settings
-  // means "follow the active app language"; explicit string overrides —
-  // BUT only when the saved edition's locale still matches the current
-  // app language. If the user previously picked, say, en.sahih in English
-  // mode and later switched the app language to Arabic, we want them to
-  // land on the locale-appropriate default (ar.muyassar / Tafsir
-  // al-Muyassar) rather than carry the stale English choice forward.
-  const activeEdition: QuranTranslationId = useMemo(() => {
-    if (
-      settings.quranTranslationEdition &&
-      editionMatchesLocale(settings.quranTranslationEdition, settings.language)
-    ) {
-      return settings.quranTranslationEdition as QuranTranslationId;
-    }
-    return defaultEditionForLocale(settings.language);
-  }, [settings.quranTranslationEdition, settings.language]);
+  useEffect(() => {
+    void hydrateQuranState();
+  }, []);
 
-  // Pull the active edition's translation lazily (Metro caches the
-  // require). Done in a useMemo so switching editions doesn't re-load
-  // for the same one.
-  const translationAyahs = useMemo(() => {
-    return getSurahTranslation(activeEdition, surahNumber);
-  }, [activeEdition, surahNumber]);
+  // ── Async data: Arabic + translation (QR-2) ─────────────────────────
+  const [rows, setRows] = useState<AyahRow[] | null>(null);
+  const [translations, setTranslations] = useState<string[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    void loadSurah(surahNumber).then((loaded: LoadedSurah | null) => {
-      if (cancelled) return;
-      if (!loaded) return;
-      if (loaded.arabic.length === 0) {
-        setAyahs(null);
-        return;
-      }
-      setAyahs({ arabic: loaded.arabic });
+    setRows(null);
+    void loadSurah(surahNumber).then(loaded => {
+      if (cancelled || !loaded) return;
+      setRows(
+        loaded.arabic.map((arabic, i) => ({ ayah: i + 1, arabic })),
+      );
     });
     return () => {
       cancelled = true;
     };
   }, [surahNumber]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setTranslations(null);
+    // Defer the (potentially first-time) 1–2 MB edition require until
+    // after the transition/paint.
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      setTranslations(getSurahTranslation(edition, surahNumber));
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [edition, surahNumber]);
+
+  // ── Selection / sheets ──────────────────────────────────────────────
+  const [selectedAyah, setSelectedAyah] = useState<number | null>(null);
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [playbackSheetVisible, setPlaybackSheetVisible] = useState(false);
+  const [editionPickerVisible, setEditionPickerVisible] = useState(false);
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    // Reset per-surah reveal state when hide mode or surah changes.
+    setRevealed(new Set());
+  }, [quran.prefs.hideMode, surahNumber]);
+
+  // ── Mode toggle + header controls ───────────────────────────────────
   const isMushaf = settings.quranReadingMode === 'mushaf';
-  const toggleMushaf = () => {
+  const toggleMushaf = useCallback(() => {
     updateSettings({
       quranReadingMode: isMushaf ? 'withTranslation' : 'mushaf',
     });
-  };
+  }, [isMushaf, updateSettings]);
 
-  // Fullscreen state — only reachable from mushaf mode (#123). Hides
-  // the navigation header + status bar and unlocks orientation so the
-  // user can rotate the phone for landscape reading.
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const toggleFullscreen = () => setIsFullscreen(s => !s);
 
-  // Set the title + headerRight controls. In mushaf mode we render a
-  // text "Translation" label (tap to flip to translation mode) and a
-  // fullscreen icon next to it. In translation mode we render a
-  // "Mushaf" text label. Header is hidden entirely in fullscreen.
-  // — tasks #107, #123.
   useEffect(() => {
     if (!surah) return;
     if (isFullscreen) {
-      navigation.setOptions({
-        headerShown: false,
-        // Allow the user to rotate while reading; reset to portrait
-        // when fullscreen exits or the screen unmounts.
-        orientation: 'all',
-      });
+      navigation.setOptions({ headerShown: false, orientation: 'all' });
       return;
     }
     navigation.setOptions({
@@ -141,6 +151,14 @@ export function QuranSurahScreen() {
       title: surah.romanized,
       headerRight: () => (
         <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.playbackSettings', 'Recitation')}
+            onPress={() => setPlaybackSheetVisible(true)}
+            hitSlop={10}
+            style={{ paddingHorizontal: 4 }}>
+            <Text style={{ color: palette.accentSolid, fontSize: 17 }}>♪</Text>
+          </Pressable>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
@@ -158,7 +176,7 @@ export function QuranSurahScreen() {
                 fontWeight: '700',
               }}>
               {isMushaf
-                ? t('quran.viewToggleTranslation', 'Translation')
+                ? t('quran.viewToggleTranslation', 'Tafsir')
                 : t('quran.viewToggleMushaf', 'Mushaf')}
             </Text>
           </Pressable>
@@ -166,7 +184,7 @@ export function QuranSurahScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('quran.enterFullscreen', 'Enter fullscreen')}
-              onPress={toggleFullscreen}
+              onPress={() => setIsFullscreen(true)}
               hitSlop={10}
               style={{ paddingHorizontal: 4 }}>
               <Text
@@ -175,7 +193,6 @@ export function QuranSurahScreen() {
                   fontSize: 18,
                   fontWeight: '700',
                 }}>
-                {/* Box-with-arrow glyph for "expand to fullscreen". */}
                 ⛶
               </Text>
             </Pressable>
@@ -184,22 +201,48 @@ export function QuranSurahScreen() {
       ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, surah, isMushaf, isFullscreen, palette.accentSolid, t]);
+  }, [navigation, surah, isMushaf, isFullscreen, palette.accentSolid, t, toggleMushaf]);
 
-  // When the screen unmounts or we leave mushaf mode, ensure header
-  // and orientation are restored.
   useEffect(() => {
     return () => {
-      navigation.setOptions({
-        headerShown: true,
-        orientation: 'portrait',
-      });
+      navigation.setOptions({ headerShown: true, orientation: 'portrait' });
     };
   }, [navigation]);
-  // Translation-edition picker modal — task #124. The user opens it by
-  // tapping the current-edition row in the surah header, then picks one
-  // of the 14 bundled translations from the list.
-  const [editionPickerVisible, setEditionPickerVisible] = useState(false);
+
+  // ── Last-read for translation mode (QR-10) ──────────────────────────
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 });
+  const onViewableItemsChanged = useRef(
+    (info: { viewableItems: Array<{ item: unknown; isViewable: boolean }> }) => {
+      const first = info.viewableItems.find(v => v.isViewable);
+      if (!first) return;
+      const row = first.item as AyahRow;
+      if (typeof row?.ayah !== 'number') return;
+      setLastRead({
+        surah: surahNumberRef.current,
+        ayah: row.ayah,
+        page: findPageForAyah(surahNumberRef.current, row.ayah),
+        mode: 'withTranslation',
+      });
+    },
+  );
+  const surahNumberRef = useRef(surahNumber);
+  surahNumberRef.current = surahNumber;
+
+  // ── Auto-scroll to the playing ayah ─────────────────────────────────
+  const listRef = useRef<FlatList<AyahRow>>(null);
+  const lastAutoScrolled = useRef<number>(0);
+  useEffect(() => {
+    if (!playback.active || !playback.playing) return;
+    if (playback.active.surah !== surahNumber) return;
+    const idx = playback.active.ayah - 1;
+    if (idx === lastAutoScrolled.current) return;
+    lastAutoScrolled.current = idx;
+    listRef.current?.scrollToIndex({
+      index: idx,
+      viewPosition: 0.3,
+      animated: true,
+    });
+  }, [playback.active, playback.playing, surahNumber]);
 
   if (!surah) {
     return (
@@ -209,15 +252,11 @@ export function QuranSurahScreen() {
     );
   }
 
-  // Mushaf mode renders the page-by-page paginated view via the unified
-  // ScrollView-based reader (task #153). The previous platform split
-  // (iOS new reader / Android FlatList reader) was redundant since the
-  // Arabic-locale blank-page bug also surfaces on Android — same
-  // reader works on both.
   if (isMushaf) {
     return (
       <MushafReader
         surahNumber={surahNumber}
+        initialPage={initialPage}
         isFullscreen={isFullscreen}
         onExitFullscreen={() => setIsFullscreen(false)}
         onTitleChange={title => navigation.setOptions({ title })}
@@ -225,116 +264,242 @@ export function QuranSurahScreen() {
     );
   }
 
-  return (
-    <ScrollView
-      style={{ backgroundColor: palette.bg }}
-      contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
-      contentInsetAdjustmentBehavior="automatic">
-      <View
+  // ── Translation mode ────────────────────────────────────────────────
+  const hideMode = quran.prefs.hideMode;
+
+  const renderAyah = ({ item }: { item: AyahRow }) => {
+    const { ayah, arabic } = item;
+    const starred = isStarred(quran, surahNumber, ayah);
+    const bookmark = findBookmark(quran, surahNumber, ayah);
+    const isPlayingThis =
+      playback.active?.surah === surahNumber &&
+      playback.active?.ayah === ayah &&
+      playback.playing;
+    const wordIdx =
+      activeWord &&
+      activeWord.surah === surahNumber &&
+      activeWord.ayah === ayah
+        ? activeWord.wordIndex
+        : -1;
+    const translation = translations?.[ayah - 1] ?? '';
+    const isRevealed = revealed.has(ayah);
+    const maskArabic = hideMode === 'arabic' && !isRevealed;
+    const maskTranslation = hideMode === 'translation' && !isRevealed;
+
+    const words = arabic.split(' ');
+
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('quran.ayahA11y', {
+          defaultValue: 'Ayah {{ayah}} — tap for actions',
+          ayah,
+        })}
+        onPress={() => {
+          if (hideMode !== 'none' && !isRevealed) {
+            setRevealed(prev => new Set(prev).add(ayah));
+            return;
+          }
+          setSelectedAyah(ayah);
+          setSheetVisible(true);
+        }}
         style={[
-          styles.header,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          styles.ayahCard,
+          {
+            backgroundColor: isPlayingThis ? palette.accentBg : palette.card,
+            ...cardEdgeStyle(palette),
+          },
         ]}>
-        <Text style={[styles.surahArabic, { color: palette.text }]}>
-          {surah.arabic}
-        </Text>
-        {!isArabic ? (
-          <Text style={[styles.surahRomanized, { color: palette.text }]}>
-            {surah.romanized}
-          </Text>
-        ) : null}
-        <Text style={[styles.surahMeta, { color: palette.muted }]}>
-          {isArabic ? '' : `${surah.english} · `}
-          {t('quran.ayahCount', { count: surah.ayahCount })}
-        </Text>
-
-        {/* Translation-edition picker (shown only in translation mode);
-            mode toggle now lives in the navigation header (task #107). */}
-        {!isMushaf ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.translationEdition', 'Translation: {{label}}', {
-              label: QURAN_TRANSLATIONS.find(e => e.id === activeEdition)?.label ?? activeEdition,
-            })}
-            onPress={() => setEditionPickerVisible(true)}
-            style={styles.editionRow}>
-            <Text style={[styles.editionLabel, { color: palette.muted }]}>
-              {t('quran.translationEdition', 'Translation: {{label}}', {
-                label: QURAN_TRANSLATIONS.find(e => e.id === activeEdition)?.label ?? activeEdition,
-              })}
-            </Text>
-            <Text style={[styles.editionHint, { color: palette.accent }]}>
-              {t('quran.tapToPick', 'choose')}
-            </Text>
-          </Pressable>
-        ) : null}
-      </View>
-
-      {ayahs ? (
-        ayahs.arabic.map((ar, i) => (
+        <View style={styles.ayahMetaRow}>
+          {bookmark ? (
             <View
-              key={i}
               style={[
-                styles.ayahCard,
-                { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-              ]}>
-              <View style={styles.ayahNumberRow}>
-                <Text style={[styles.ayahNumber, { color: palette.accent }]}>
-                  {i + 1}
-                </Text>
-              </View>
-              <Text
-                style={[styles.ayahArabic, { color: palette.text }]}
-                accessibilityLabel={ar}>
-                {ar}
-              </Text>
-              {translationAyahs[i] ? (
-                <Text style={[styles.ayahTranslation, { color: palette.muted }]}>
-                  {translationAyahs[i]}
-                </Text>
-              ) : null}
-            </View>
-          ))
-      ) : (
-        <View
-          style={[
-            styles.comingSoon,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <Text style={[styles.comingSoonText, { color: palette.muted }]}>
-            {t('quran.comingSoon')}
-          </Text>
-          <Text style={[styles.comingSoonHint, { color: palette.muted }]}>
-            {t(
-              'quran.importHint',
-              'The full corpus arrives once the Tanzil source files are imported (see Settings → About → Attributions).',
-            )}
+                styles.bookmarkBar,
+                { backgroundColor: BOOKMARK_COLORS[bookmark.color] },
+              ]}
+            />
+          ) : null}
+          {starred ? (
+            <Text style={{ color: '#e0a52e', fontSize: 13 }}>★</Text>
+          ) : null}
+          <Text style={[styles.ayahNumber, { color: palette.accent }]}>
+            {ayah}
           </Text>
         </View>
-      )}
+        {maskArabic ? (
+          <Text style={[styles.masked, { color: palette.muted }]}>
+            {t('quran.tapToReveal', 'Tap to reveal')}
+          </Text>
+        ) : (
+          <Text
+            style={[styles.ayahArabic, { color: palette.text }]}
+            accessibilityLabel={arabic}>
+            {wordIdx >= 0
+              ? words.map((w, i) => (
+                  <Text
+                    key={i}
+                    style={
+                      i === wordIdx
+                        ? {
+                            color: palette.accentSolid,
+                            backgroundColor: palette.accentBg,
+                          }
+                        : undefined
+                    }>
+                    {w}
+                    {i < words.length - 1 ? ' ' : ''}
+                  </Text>
+                ))
+              : arabic}
+          </Text>
+        )}
+        {translations == null ? (
+          <View
+            style={[styles.skeleton, { backgroundColor: palette.accentBg }]}
+          />
+        ) : maskTranslation && translation ? (
+          <Text style={[styles.masked, { color: palette.muted }]}>
+            {t('quran.tapToReveal', 'Tap to reveal')}
+          </Text>
+        ) : translation ? (
+          <Text style={[styles.ayahTranslation, { color: palette.muted }]}>
+            {translation}
+          </Text>
+        ) : null}
+      </Pressable>
+    );
+  };
 
-      {/* Translation-edition picker — task #124. Bottom sheet listing
-          all 14 bundled editions; tap one to apply. */}
+  const header = (
+    <View
+      style={[
+        styles.header,
+        { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+      ]}>
+      <Text style={[styles.surahArabic, { color: palette.text }]}>
+        {surah.arabic}
+      </Text>
+      {!isArabic ? (
+        <Text style={[styles.surahRomanized, { color: palette.text }]}>
+          {surah.romanized}
+        </Text>
+      ) : null}
+      <Text style={[styles.surahMeta, { color: palette.muted }]}>
+        {isArabic ? '' : `${surah.english} · `}
+        {t('quran.ayahCount', { count: surah.ayahCount })}
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('quran.translationEdition', 'Translation: {{label}}', {
+          label:
+            QURAN_TRANSLATIONS.find(e => e.id === edition)?.label ?? edition,
+        })}
+        onPress={() => setEditionPickerVisible(true)}
+        style={styles.editionRow}>
+        <Text style={[styles.editionLabel, { color: palette.muted }]}>
+          {t('quran.translationEdition', 'Translation: {{label}}', {
+            label:
+              QURAN_TRANSLATIONS.find(e => e.id === edition)?.label ?? edition,
+          })}
+        </Text>
+        <Text style={[styles.editionHint, { color: palette.accent }]}>
+          {t('quran.tapToPick', 'choose')}
+        </Text>
+      </Pressable>
+      {hideMode !== 'none' ? (
+        <Text style={[styles.hideHint, { color: palette.accentSolid }]}>
+          {t('quran.hideModeActive', {
+            defaultValue: 'Memorization mode: {{what}} hidden — tap an ayah to reveal',
+            what:
+              hideMode === 'arabic'
+                ? t('quran.hideArabic', 'Arabic')
+                : t('quran.hideTranslation', 'Translation'),
+          })}
+        </Text>
+      ) : null}
+    </View>
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: palette.bg }}>
+      <FlatList
+        ref={listRef}
+        data={rows ?? []}
+        keyExtractor={r => String(r.ayah)}
+        renderItem={renderAyah}
+        ListHeaderComponent={header}
+        ListEmptyComponent={
+          <View
+            style={[
+              styles.comingSoon,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}>
+            <Text style={[styles.comingSoonText, { color: palette.muted }]}>
+              {rows == null ? t('quran.loading', 'Loading…') : t('quran.comingSoon')}
+            </Text>
+          </View>
+        }
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingBottom: insets.bottom + 24 },
+        ]}
+        contentInsetAdjustmentBehavior="automatic"
+        initialNumToRender={8}
+        maxToRenderPerBatch={10}
+        windowSize={9}
+        initialScrollIndex={
+          scrollToAyah && rows && scrollToAyah <= rows.length
+            ? scrollToAyah - 1
+            : undefined
+        }
+        onScrollToIndexFailed={info => {
+          // Dynamic row heights: retry after the list settles.
+          setTimeout(() => {
+            listRef.current?.scrollToIndex({
+              index: Math.min(info.index, info.highestMeasuredFrameIndex),
+              animated: false,
+            });
+          }, 120);
+        }}
+        viewabilityConfig={viewabilityConfig.current}
+        onViewableItemsChanged={onViewableItemsChanged.current}
+      />
+      <MiniPlayer />
+
+      {selectedAyah != null ? (
+        <AyahActionSheet
+          visible={sheetVisible}
+          onClose={() => setSheetVisible(false)}
+          surah={surahNumber}
+          ayah={selectedAyah}
+          page={findPageForAyah(surahNumber, selectedAyah)}
+        />
+      ) : null}
+
+      <PlaybackSettingsSheet
+        visible={playbackSheetVisible}
+        onClose={() => setPlaybackSheetVisible(false)}
+        surahNumber={surahNumber}
+      />
+
+      {/* Translation-edition picker (task #124) */}
       <Modal
         visible={editionPickerVisible}
         transparent
         animationType="slide"
         onRequestClose={() => setEditionPickerVisible(false)}>
         <Pressable
-          style={pickerStyles.backdrop}
+          style={[pickerStyles.backdrop, { backgroundColor: palette.overlay }]}
+          accessibilityLabel={t('common.close', 'Close')}
           onPress={() => setEditionPickerVisible(false)}
         />
-        <View
-          style={[
-            pickerStyles.sheet,
-            { backgroundColor: palette.card },
-          ]}>
+        <View style={[pickerStyles.sheet, { backgroundColor: palette.card }]}>
           <Text style={[pickerStyles.title, { color: palette.text }]}>
             {t('quran.pickTranslation', 'Choose translation')}
           </Text>
           <ScrollView style={pickerStyles.list}>
             {QURAN_TRANSLATIONS.map(ed => {
-              const selected = ed.id === activeEdition;
+              const selected = ed.id === edition;
               return (
                 <Pressable
                   key={ed.id}
@@ -371,7 +536,7 @@ export function QuranSurahScreen() {
           </ScrollView>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -382,7 +547,6 @@ const pickerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheet: {
     position: 'absolute',
@@ -413,7 +577,6 @@ const pickerStyles = StyleSheet.create({
   check: { fontSize: 18, fontWeight: '700' },
 });
 
-
 const styles = StyleSheet.create({
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { padding: 16, gap: 12 },
@@ -422,18 +585,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     gap: 6,
+    marginBottom: 4,
   },
-  surahArabic: { fontSize: 32, lineHeight: 48 },
+  surahArabic: { fontSize: 32, lineHeight: 62, ...arabicTextStyle('body') },
   surahRomanized: { fontSize: 18, fontWeight: '700' },
   surahMeta: { fontSize: 12 },
-  controlsRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
-  controlBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  controlLabel: { fontSize: 13, fontWeight: '600' },
   editionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -441,29 +597,39 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   editionLabel: { fontSize: 12 },
-  editionHint: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
-  ayahCard: { padding: 16, borderRadius: 12, gap: 10 },
-  ayahNumberRow: { alignSelf: 'flex-end' },
-  ayahNumber: { fontSize: 13, fontWeight: '700' },
+  editionHint: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  hideHint: { fontSize: 12, fontWeight: '600', textAlign: 'center', marginTop: 6 },
+  ayahCard: { padding: 16, borderRadius: 12, gap: 10, marginTop: 12 },
+  ayahMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  bookmarkBar: { width: 18, height: 5, borderRadius: 3 },
+  ayahNumber: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
   ayahArabic: {
     fontSize: 24,
-    lineHeight: 44,
+    // Amiri Quran carries tall stacked diacritics — ~2.2× line height
+    // keeps fatha/kasra clusters unclipped (see arabicTextStyle docs).
+    lineHeight: 54,
     textAlign: 'right',
     writingDirection: 'rtl',
+    ...arabicTextStyle('quran'),
   },
   ayahTranslation: { fontSize: 15, lineHeight: 22 },
-  mushafPage: {
-    padding: 22,
-    borderRadius: 14,
+  masked: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 12,
   },
-  mushafText: {
-    fontSize: 26,
-    lineHeight: 56,
-    writingDirection: 'rtl',
-    textAlign: 'right',
-    letterSpacing: 0,
-  },
-  comingSoon: { padding: 24, borderRadius: 12, alignItems: 'center', gap: 8 },
+  skeleton: { height: 14, borderRadius: 7, opacity: 0.5, marginTop: 4 },
+  comingSoon: { padding: 24, borderRadius: 12, alignItems: 'center', gap: 8, marginTop: 12 },
   comingSoonText: { fontSize: 14, textAlign: 'center', fontWeight: '600' },
-  comingSoonHint: { fontSize: 12, textAlign: 'center', lineHeight: 18, opacity: 0.85 },
 });

@@ -59,6 +59,8 @@ const ACCENT_LIGHT: Record<Exclude<AppAccentId, 'custom'>, string> = {
   teal: '#0d9488',
   blue: '#2563eb',
   amber: '#b45309',
+  rose: '#9F2D4D',
+  violet: '#5B4B9E',
 };
 
 export function resolveAccentHex(
@@ -180,7 +182,7 @@ async function syncLiveActivityImpl(args: {
    *  auto-updates when the wallpaper colour changes. */
   systemAccent?: boolean;
   /** Android only: which enhanced Live Activity visual style to render. */
-  design?: 'timeline' | 'countdown';
+  design?: 'timeline' | 'countdown' | 'markers';
 }): Promise<void> {
   const now = args.now ?? new Date();
 

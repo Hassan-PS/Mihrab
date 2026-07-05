@@ -1,63 +1,86 @@
 /**
- * Cross-platform Mushaf reader — task #153.
+ * Interactive mushaf reader — Quran Reader v2
+ * (docs/quran-reader-plan.md, QR-3/4/5/8/10/11/13/17).
  *
- * Originally written as iOS-only (#151) to dodge a stack of FlatList edge
- * cases in Arabic UI on iOS. Beta.40 (#152) settled on an absolute-
- * positioning approach. Beta.41 (#153) confirmed the same edge cases
- * surface on Android (Arabic-locale mushaf goes blank for non-Fatiha
- * surahs), so this reader is now the unified implementation for both
- * platforms.
+ * Evolves the unified paged reader (#153) into a live surface:
  *
- * The approach:
- *   • One horizontal ScrollView with `pagingEnabled`.
- *   • `contentSize` = `MUSHAF_TOTAL_PAGES * screenWidth` (604 pages
- *     wide), so the user can scroll the full mushaf naturally.
- *   • Only 3 page <Image> components are mounted at any time —
- *     `currentPage - 1`, `currentPage`, `currentPage + 1` — each
- *     ABSOLUTELY POSITIONED at `(page - 1) * screenWidth` inside the
- *     big ScrollView.
- *   • The scroll position naturally matches `(currentPage - 1) *
- *     screenWidth`, so after a swipe we update `currentPage` from
- *     `contentOffset` — but we never have to imperatively re-scroll.
- *     React state and scroll offset are always in sync, so no
- *     intermediate frame ever shows the wrong page.
+ *   • Same proven 3-mounted-pages / absolute-positioning ScrollView
+ *     core with RTL page flow (page 1 rightmost).
+ *   • Ayah geometry overlays: tap any ayah → highlight + action sheet
+ *     (translation peek, play, bookmark, star, share).
+ *   • Recitation follow: the playing ayah stays highlighted and the
+ *     reader auto-turns pages as playback crosses a page boundary.
+ *   • Last-read + khatmah progress persist on every sequential turn.
+ *   • Palette-aware chrome + optional night mode (page inversion via
+ *     `mixBlendMode: 'difference'`, dependency-free).
+ *   • `useWindowDimensions` so fullscreen rotation reflows correctly.
+ *   • Managed file store (QR-5): pages are real files on disk; missing
+ *     pages stream from the release while a retry pass can fill gaps.
+ *   • Keep-awake while the reader is mounted (user-settable).
  *
- * Memory: 3 mounted Images regardless of which page the user is on.
- * Performance: native `pagingEnabled` handles snap/momentum.
+ * The page images stay untouched underneath — geometry rects float
+ * above, so rendering quality is exactly the KFGQPC source at every
+ * display size.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
+import {
+  ColorMatrix,
+  concatColorMatrices,
+  invert,
+  brightness,
+} from 'react-native-color-matrix-image-filters';
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
+import { useAppPalette } from '../hooks/useAppPalette';
 import { findPageForAyah, MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
 import { mushafPageAsset, MUSHAF_TOTAL_PAGES } from './mushafImages';
 import {
   downloadMushafAssets,
   isMushafDownloaded,
+  pageFilePath,
   type MushafDownloadHandle,
   type MushafDownloadProgress,
 } from './mushafDownload';
+import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
+import {
+  recordKhatmahProgress,
+  setLastRead,
+  setQuranPrefs,
+  useQuranState,
+} from './quranState';
+import { usePlaybackStatus } from './audio/playback';
+import { AyahActionSheet } from './mushaf/AyahActionSheet';
+import { MushafPageOverlay } from './mushaf/MushafPageOverlay';
+import { MiniPlayer } from './audio/MiniPlayer';
 
 type Props = {
   surahNumber: number;
+  /** Open at an explicit page (deep links from Juz/Page/Bookmark nav). */
+  initialPage?: number;
   isFullscreen: boolean;
   onExitFullscreen: () => void;
   onTitleChange?: (title: string) => void;
 };
 
-const PARCHMENT = '#ffffff';
-const ORNAMENT = '#7a5e1f';
 const IMAGE_ASPECT = 2600 / 4206; // KFGQPC source page ratio
 
 function easternNumerals(n: number): string {
@@ -70,19 +93,52 @@ function easternNumerals(n: number): string {
 
 export function MushafReader({
   surahNumber,
+  initialPage: initialPageProp,
   isFullscreen,
   onExitFullscreen,
   onTitleChange,
 }: Props) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  // iOS native-stack headers float translucently over the content; pad
+  // our in-page chrome below them (0 on Android's opaque header).
+  const headerHeight = useHeaderHeight();
+  const { palette, isDark } = useAppPalette();
+  const quran = useQuranState();
+  const playback = usePlaybackStatus();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+
+  const nightMode = quran.prefs.mushafNightMode;
+  const pageBg = nightMode ? '#101010' : '#ffffff';
+  const ornament = nightMode ? '#c9b47a' : '#7a5e1f';
 
   const initialPage = useMemo(
-    () => findPageForAyah(surahNumber, 1),
-    [surahNumber],
+    () => initialPageProp ?? findPageForAyah(surahNumber, 1),
+    [surahNumber, initialPageProp],
   );
 
-  // ── Download gating ──────────────────────────────────────────────────
+  // ── Keep the screen awake while reading (QR-13) ─────────────────────
+  useEffect(() => {
+    if (!quran.prefs.keepAwake) return;
+    activateKeepAwake();
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, [quran.prefs.keepAwake]);
+
+  // ── Geometry (QR-7) ─────────────────────────────────────────────────
+  const [geometryReady, setGeometryReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    void loadGeometry().then(() => {
+      if (!cancelled) setGeometryReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ── Download gating (QR-5) ──────────────────────────────────────────
   const [downloadStatus, setDownloadStatus] = useState<
     'checking' | 'needs_download' | 'downloading' | 'ready'
   >('checking');
@@ -91,12 +147,17 @@ export function MushafReader({
     total: MUSHAF_TOTAL_PAGES,
     failed: 0,
   });
+  const [lastRunFailed, setLastRunFailed] = useState(0);
   const downloadHandleRef = useRef<MushafDownloadHandle | null>(null);
+  // While not fully downloaded, pages stream remotely; after the store
+  // reports ready we switch every mounted Image to its file:// path.
+  const [useLocalFiles, setUseLocalFiles] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     void isMushafDownloaded().then(yes => {
       if (cancelled) return;
+      setUseLocalFiles(yes);
       setDownloadStatus(yes ? 'ready' : 'needs_download');
     });
     return () => {
@@ -109,61 +170,41 @@ export function MushafReader({
     if (downloadStatus === 'downloading') return;
     setDownloadStatus('downloading');
     setProgress({ done: 0, total: MUSHAF_TOTAL_PAGES, failed: 0 });
-    const handle = downloadMushafAssets({
-      concurrency: 8,
-      onProgress: setProgress,
-    });
+    const handle = downloadMushafAssets({ onProgress: setProgress });
     downloadHandleRef.current = handle;
-    void handle.promise.then(completed => {
+    void handle.promise.then(complete => {
       downloadHandleRef.current = null;
-      setDownloadStatus(completed ? 'ready' : 'needs_download');
+      setLastRunFailed(complete ? 0 : progressRef.current.failed);
+      setUseLocalFiles(true); // whatever landed on disk is usable
+      setDownloadStatus(complete ? 'ready' : 'needs_download');
     });
   };
+  const progressRef = useRef(progress);
+  progressRef.current = progress;
 
-  // ── Page state ───────────────────────────────────────────────────────
-  // Source of truth is the actual page number (1..604). The 3 mounted
-  // images are { current - 1, current, current + 1 } each absolutely
-  // positioned at their (page - 1) * screenWidth x-coordinate inside the
-  // big ScrollView, so the scroll position matches the visible page
-  // exactly without any imperative recentering after a swipe.
-  const screenWidth = Dimensions.get('window').width;
+  // ── Page state (unchanged core from #153) ───────────────────────────
+  const screenWidth = windowWidth;
   const [currentPage, setCurrentPage] = useState(initialPage);
   const scrollRef = useRef<ScrollView>(null);
-  // Track whether we've already done the initial scroll so we don't keep
-  // jumping back when the user navigates within the reader.
   const didInitialScrollRef = useRef(false);
 
+  const pageToOffsetX = useCallback(
+    (page: number) => (MUSHAF_TOTAL_PAGES - page) * screenWidth,
+    [screenWidth],
+  );
+
+  // Re-anchor the scroll position when width changes (rotation, QR-4) —
+  // offsets are width-dependent, so without this the visible page drifts.
   useEffect(() => {
-    if (!onTitleChange) return;
-    const visiblePage = MUSHAF_PAGES.find(p => p.page === currentPage);
-    if (!visiblePage) return;
-    const surah = MUSHAF_SURAHS.find(s => s.number === visiblePage.start.surah);
-    if (surah) onTitleChange(surah.englishName);
-  }, [currentPage, onTitleChange]);
+    if (!didInitialScrollRef.current) return;
+    scrollRef.current?.scrollTo({
+      x: pageToOffsetX(currentPage),
+      y: 0,
+      animated: false,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screenWidth]);
 
-  // RTL page-flow — task #1 (v2.0.2).
-  //
-  // The mushaf is an Arabic book: it opens with page 1 on the RIGHT and
-  // turns toward the LEFT (page 604). Swiping right should advance one
-  // page — same as flipping a paper page in a real mushaf. We keep the
-  // ScrollView itself LTR (more reliable on iOS than `inverted` or any
-  // RTL ancestor flip), but mirror page positions inside the content:
-  //   page 1   → x = (TOTAL - 1) * screenWidth   (rightmost)
-  //   page 604 → x = 0                            (leftmost)
-  // contentSize.width remains TOTAL * screenWidth, so scrollX runs from
-  // 0 (page 604) to (TOTAL - 1) * screenWidth (page 1). The mapping
-  // page ↔ scrollX = (TOTAL - page) * screenWidth holds in both
-  // directions and is used for the initial scroll, the visible-page
-  // derivation, and absolute page positioning below.
-  //
-  // This is intentionally locale-independent: the Quran is always
-  // right-to-left regardless of the in-app UI language.
-  const pageToOffsetX = (page: number) =>
-    (MUSHAF_TOTAL_PAGES - page) * screenWidth;
-
-  // Initial scroll to the surah's starting page once everything has laid
-  // out. After this we never imperatively scroll again — the user drives
-  // it via swipes, and `currentPage` is derived from contentOffset.
   const onScrollViewLayout = () => {
     if (didInitialScrollRef.current) return;
     setTimeout(() => {
@@ -176,36 +217,113 @@ export function MushafReader({
     }, 0);
   };
 
-  // ── Download-prompt screens ──────────────────────────────────────────
+  // Header title follows the visible page's starting surah.
+  useEffect(() => {
+    if (!onTitleChange) return;
+    const visiblePage = MUSHAF_PAGES.find(p => p.page === currentPage);
+    if (!visiblePage) return;
+    const surah = MUSHAF_SURAHS.find(
+      s => s.number === visiblePage.start.surah,
+    );
+    if (surah) onTitleChange(surah.englishName);
+  }, [currentPage, onTitleChange]);
+
+  // ── Last-read + khatmah on page turns (QR-10/21) ────────────────────
+  const commitPage = useCallback(
+    (newPage: number, prevPage: number) => {
+      const first = firstAyahOnPage(newPage);
+      setLastRead({
+        surah: first.surah,
+        ayah: first.ayah,
+        page: newPage,
+        mode: 'mushaf',
+      });
+      // Sequential forward turn = previous page completed.
+      if (newPage === prevPage + 1) recordKhatmahProgress(prevPage);
+    },
+    [],
+  );
+
+  // ── Recitation follow (QR-17) ───────────────────────────────────────
+  const followRef = useRef(true);
+  useEffect(() => {
+    if (!playback.active || !playback.playing || !followRef.current) return;
+    const page = findPageForAyah(playback.active.surah, playback.active.ayah);
+    if (page !== currentPage && didInitialScrollRef.current) {
+      setCurrentPage(page);
+      scrollRef.current?.scrollTo({
+        x: pageToOffsetX(page),
+        y: 0,
+        animated: false,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playback.active?.surah, playback.active?.ayah, playback.playing]);
+
+  // ── Ayah selection (QR-8) ───────────────────────────────────────────
+  const [selected, setSelected] = useState<{
+    surah: number;
+    ayah: number;
+    page: number;
+  } | null>(null);
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [chromeVisible, setChromeVisible] = useState(true);
+
+  // ── Jump-to-page (QR-11) ────────────────────────────────────────────
+  const [jumpVisible, setJumpVisible] = useState(false);
+  const [jumpText, setJumpText] = useState('');
+  const jumpToPage = (page: number) => {
+    const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
+    setCurrentPage(clamped);
+    scrollRef.current?.scrollTo({
+      x: pageToOffsetX(clamped),
+      y: 0,
+      animated: false,
+    });
+    commitPage(clamped, clamped); // record position; not a sequential turn
+    setJumpVisible(false);
+    setJumpText('');
+  };
+
+  // ── Gate screens ────────────────────────────────────────────────────
   if (downloadStatus === 'checking') {
     return (
-      <View style={[styles.gate, { backgroundColor: PARCHMENT }]}>
-        <ActivityIndicator color={ORNAMENT} size="large" />
+      <View style={[styles.gate, { backgroundColor: palette.bg }]}>
+        <ActivityIndicator color={palette.accentSolid} size="large" />
       </View>
     );
   }
   if (downloadStatus === 'needs_download') {
     return (
-      <View style={[styles.gate, { backgroundColor: PARCHMENT }]}>
-        <Text style={styles.gateTitle}>
+      <View style={[styles.gate, { backgroundColor: palette.bg }]}>
+        <Text style={[styles.gateTitle, { color: palette.text }]}>
           {t('quran.mushafDownloadTitle', 'Download the mushaf')}
         </Text>
-        <Text style={styles.gateBody}>
-          {t(
-            'quran.mushafDownloadBody',
-            'The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay cached on your device.',
-          )}
+        <Text style={[styles.gateBody, { color: palette.muted }]}>
+          {lastRunFailed > 0
+            ? t('quran.mushafDownloadRetryBody', {
+                defaultValue:
+                  '{{count}} pages did not download. Retry to fetch the missing pages — everything already downloaded is kept.',
+                count: lastRunFailed,
+              })
+            : t(
+                'quran.mushafDownloadBody',
+                'The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay on your device.',
+              )}
         </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t(
-            'quran.mushafDownloadCta',
-            'Download mushaf (~120 MB)',
-          )}
+          accessibilityLabel={
+            lastRunFailed > 0
+              ? t('quran.mushafDownloadRetryCta', 'Retry missing pages')
+              : t('quran.mushafDownloadCta', 'Download mushaf (~120 MB)')
+          }
           onPress={startDownload}
-          style={styles.cta}>
+          style={[styles.cta, { backgroundColor: palette.accentSolid }]}>
           <Text style={styles.ctaLabel}>
-            {t('quran.mushafDownloadCta', 'Download mushaf (~120 MB)')}
+            {lastRunFailed > 0
+              ? t('quran.mushafDownloadRetryCta', 'Retry missing pages')
+              : t('quran.mushafDownloadCta', 'Download mushaf (~120 MB)')}
           </Text>
         </Pressable>
       </View>
@@ -213,28 +331,35 @@ export function MushafReader({
   }
   if (downloadStatus === 'downloading') {
     const pct =
-      progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+      progress.total > 0
+        ? Math.round((progress.done / progress.total) * 100)
+        : 0;
     return (
-      <View style={[styles.gate, { backgroundColor: PARCHMENT }]}>
-        <Text style={styles.gateTitle}>
+      <View style={[styles.gate, { backgroundColor: palette.bg }]}>
+        <Text style={[styles.gateTitle, { color: palette.text }]}>
           {t('quran.mushafDownloading', 'Downloading mushaf…')}
         </Text>
-        <Text style={styles.progressLabel}>
-          {t(
-            'quran.mushafDownloadProgress',
-            '{{done}} / {{total}} pages · {{pct}}%',
-            { done: progress.done, total: progress.total, pct },
-          )}
+        <Text style={[styles.progressLabel, { color: palette.muted }]}>
+          {t('quran.mushafDownloadProgress', '{{done}} / {{total}} pages · {{pct}}%', {
+            done: progress.done,
+            total: progress.total,
+            pct,
+          })}
         </Text>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${pct}%` }]} />
+        <View style={[styles.progressTrack, { backgroundColor: palette.accentBg }]}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${pct}%`, backgroundColor: palette.accentSolid },
+            ]}
+          />
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('common.cancel', 'Cancel')}
           onPress={() => downloadHandleRef.current?.cancel()}
           style={styles.cancelBtn}>
-          <Text style={styles.cancelLabel}>
+          <Text style={[styles.cancelLabel, { color: palette.accentSolid }]}>
             {t('common.cancel', 'Cancel')}
           </Text>
         </Pressable>
@@ -242,14 +367,21 @@ export function MushafReader({
     );
   }
 
-  // ── Reader ───────────────────────────────────────────────────────────
-  // Page-image dimensions, computed once.
-  const horizontalPadding = 16;
-  const headerFooterReserve = 80;
+  // ── Reader layout ───────────────────────────────────────────────────
+  // iOS floats a translucent nav header over the content; keep our page
+  // chrome below it. Android's opaque header already offsets the view.
+  const navOverlayPad =
+    !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
+  const horizontalPadding = 12;
+  const headerFooterReserve = isFullscreen ? 0 : 76;
+  const playerReserve = playback.active ? 56 : 0;
   const maxWidth = screenWidth - horizontalPadding * 2;
-  const maxHeight = isFullscreen
-    ? Dimensions.get('window').height
-    : Dimensions.get('window').height - headerFooterReserve;
+  const maxHeight =
+    windowHeight -
+    navOverlayPad -
+    headerFooterReserve -
+    playerReserve -
+    (isFullscreen ? insets.top + insets.bottom : 0);
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / IMAGE_ASPECT;
   if (imageHeight > maxHeight) {
@@ -260,61 +392,149 @@ export function MushafReader({
   const pageMeta = (page: number) =>
     MUSHAF_PAGES.find(p => p.page === page) ?? MUSHAF_PAGES[0];
 
+  const showChrome = !isFullscreen || chromeVisible;
+
+  const onPageTap = (
+    page: number,
+    locationX: number,
+    locationY: number,
+  ) => {
+    if (geometryReady) {
+      const hit = hitTestAyah(page, locationX, locationY, imageWidth);
+      if (hit) {
+        setSelected({ ...hit, page });
+        setSheetVisible(true);
+        return;
+      }
+    }
+    // Margin tap: toggle immersive chrome.
+    setChromeVisible(v => !v);
+  };
+
   const renderPage = (page: number) => {
     if (page < 1 || page > MUSHAF_TOTAL_PAGES) return null;
     const meta = pageMeta(page);
+    const pageBookmarks = quran.bookmarks.filter(b => {
+      const p = findPageForAyah(b.surah, b.ayah);
+      return p === page;
+    });
     return (
       <View
         key={page}
         style={{
           position: 'absolute',
           top: 0,
-          // RTL page positioning — page 1 is rightmost, page 604 leftmost.
-          // See pageToOffsetX above for the mapping.
           left: pageToOffsetX(page),
           width: screenWidth,
           height: '100%',
-          backgroundColor: PARCHMENT,
+          backgroundColor: pageBg,
         }}>
-        {!isFullscreen ? (
-          <View style={styles.pageHeader}>
-            <Text style={styles.pageHeaderText}>
-              {`Part ${easternNumerals(meta.juz)}`}
+        {showChrome ? (
+          <View style={[styles.pageHeader, { marginTop: navOverlayPad }]}>
+            <Text style={[styles.pageHeaderText, { color: ornament }]}>
+              {t('quran.juzLabel', {
+                defaultValue: 'Juz {{juz}}',
+                juz: easternNumerals(meta.juz),
+              })}
             </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.nightMode', 'Night mode')}
+              hitSlop={8}
+              onPress={() =>
+                setQuranPrefs({ mushafNightMode: !nightMode })
+              }>
+              <Text style={[styles.pageHeaderText, { color: ornament }]}>
+                {nightMode ? '☀' : '☾'}
+              </Text>
+            </Pressable>
           </View>
         ) : null}
         <View style={styles.imageWrap}>
-          <Image
-            source={mushafPageAsset(page)}
-            style={{ width: imageWidth, height: imageHeight }}
-            resizeMode="contain"
-            accessibilityLabel={`Mushaf page ${page}`}
-            fadeDuration={0}
-          />
-        </View>
-        {!isFullscreen ? (
-          <View style={styles.pageFooter}>
-            <View style={styles.pageNumberFrame}>
-              <Text style={styles.pageNumber}>{easternNumerals(page)}</Text>
+          <Pressable
+            accessibilityRole="imagebutton"
+            accessibilityLabel={t('quran.pageA11y', {
+              defaultValue: 'Mushaf page {{page}} — tap an ayah for actions',
+              page,
+            })}
+            onPress={e =>
+              onPageTap(
+                page,
+                e.nativeEvent.locationX,
+                e.nativeEvent.locationY,
+              )
+            }
+            style={{ width: imageWidth, height: imageHeight }}>
+            <View style={{ width: imageWidth, height: imageHeight }}>
+              {nightMode ? (
+                // True page inversion via color matrix (QR-3): black ink
+                // becomes soft white on a near-black page, dimmed slightly
+                // so the page never glares in the dark.
+                <ColorMatrix
+                  matrix={concatColorMatrices(invert(), brightness(0.92))}>
+                  <Image
+                    source={mushafPageAsset(
+                      page,
+                      useLocalFiles ? pageFilePath(page) : null,
+                    )}
+                    style={{ width: imageWidth, height: imageHeight }}
+                    resizeMode="contain"
+                    fadeDuration={0}
+                  />
+                </ColorMatrix>
+              ) : (
+                <Image
+                  source={mushafPageAsset(
+                    page,
+                    useLocalFiles ? pageFilePath(page) : null,
+                  )}
+                  style={{ width: imageWidth, height: imageHeight }}
+                  resizeMode="contain"
+                  fadeDuration={0}
+                />
+              )}
+              <MushafPageOverlay
+                page={page}
+                renderedWidth={imageWidth}
+                selected={
+                  sheetVisible && selected?.page === page ? selected : null
+                }
+                playing={
+                  playback.active && playback.playing ? playback.active : null
+                }
+                bookmarks={pageBookmarks}
+                accentColor={palette.accentSolid}
+                nightMode={nightMode}
+              />
             </View>
+          </Pressable>
+        </View>
+        {showChrome ? (
+          <View style={styles.pageFooter}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+              onPress={() => setJumpVisible(true)}
+              style={[styles.pageNumberFrame, { borderColor: ornament }]}>
+              <Text style={[styles.pageNumber, { color: ornament }]}>
+                {easternNumerals(page)}
+              </Text>
+            </Pressable>
           </View>
         ) : null}
       </View>
     );
   };
 
-  // The 3 pages we keep mounted: prev, current, next.
-  const mountedPages = [
-    currentPage - 1,
-    currentPage,
-    currentPage + 1,
-  ].filter(p => p >= 1 && p <= MUSHAF_TOTAL_PAGES);
+  const mountedPages = [currentPage - 1, currentPage, currentPage + 1].filter(
+    p => p >= 1 && p <= MUSHAF_TOTAL_PAGES,
+  );
 
   return (
     <View
       style={[
         styles.container,
-        { paddingTop: isFullscreen ? insets.top : 0 },
+        { backgroundColor: pageBg, paddingTop: isFullscreen ? insets.top : 0 },
       ]}>
       <StatusBar hidden={isFullscreen} animated />
       <ScrollView
@@ -323,29 +543,31 @@ export function MushafReader({
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
-        // Don't react to live scroll events — only commit currentPage
-        // after momentum has stopped. This prevents flicker during the
-        // swipe gesture itself.
         onMomentumScrollEnd={e => {
           const x = e.nativeEvent.contentOffset.x;
-          // Inverse of pageToOffsetX: scrollX → page number under RTL flow.
           const page = MUSHAF_TOTAL_PAGES - Math.round(x / screenWidth);
           const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
-          if (clamped !== currentPage) setCurrentPage(clamped);
+          if (clamped !== currentPage) {
+            commitPage(clamped, currentPage);
+            setCurrentPage(clamped);
+          }
+        }}
+        onScrollBeginDrag={() => {
+          // Manual page turns take navigation back from recitation follow.
+          followRef.current = false;
+          setTimeout(() => {
+            followRef.current = true;
+          }, 30_000);
         }}
         onLayout={onScrollViewLayout}
-        // Native ScrollView allocates contentSize from contentContainerStyle.
-        // 604 * screenWidth gives the user the natural feel of paging
-        // through a real mushaf — content size is computed once and never
-        // changes; only the 3 absolutely-positioned children move with
-        // currentPage.
         contentContainerStyle={{
           width: screenWidth * MUSHAF_TOTAL_PAGES,
           height: '100%',
         }}>
         {mountedPages.map(renderPage)}
       </ScrollView>
-      {isFullscreen ? (
+
+      {isFullscreen && showChrome ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('quran.exitFullscreen', 'Exit fullscreen')}
@@ -355,12 +577,80 @@ export function MushafReader({
           <Text style={styles.exitGlyph}>✕</Text>
         </Pressable>
       ) : null}
+
+      <MiniPlayer />
+
+      {selected ? (
+        <AyahActionSheet
+          visible={sheetVisible}
+          onClose={() => setSheetVisible(false)}
+          surah={selected.surah}
+          ayah={selected.ayah}
+          page={selected.page}
+        />
+      ) : null}
+
+      {/* Jump-to-page (QR-11) */}
+      {jumpVisible ? (
+        <View style={[styles.jumpBackdrop, { backgroundColor: palette.overlay }]}>
+          <View style={[styles.jumpCard, { backgroundColor: palette.card }]}>
+            <Text style={[styles.jumpTitle, { color: palette.text }]}>
+              {t('quran.jumpToPage', 'Go to page')}
+            </Text>
+            <TextInput
+              value={jumpText}
+              onChangeText={setJumpText}
+              keyboardType="number-pad"
+              autoFocus
+              maxLength={3}
+              accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+              placeholder={`1–${MUSHAF_TOTAL_PAGES}`}
+              placeholderTextColor={String(palette.muted)}
+              style={[
+                styles.jumpInput,
+                { color: palette.text, borderColor: palette.border },
+              ]}
+              onSubmitEditing={() => {
+                const n = Number(jumpText);
+                if (Number.isFinite(n) && n >= 1) jumpToPage(n);
+              }}
+            />
+            <View style={styles.jumpRow}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('common.cancel', 'Cancel')}
+                onPress={() => {
+                  setJumpVisible(false);
+                  setJumpText('');
+                }}
+                style={styles.jumpBtn}>
+                <Text style={{ color: palette.muted, fontWeight: '600' }}>
+                  {t('common.cancel', 'Cancel')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.go', 'Go')}
+                onPress={() => {
+                  const n = Number(jumpText);
+                  if (Number.isFinite(n) && n >= 1) jumpToPage(n);
+                }}
+                style={styles.jumpBtn}>
+                <Text
+                  style={{ color: palette.accentSolid, fontWeight: '700' }}>
+                  {t('quran.go', 'Go')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: PARCHMENT },
+  container: { flex: 1 },
   gate: {
     flex: 1,
     alignItems: 'center',
@@ -368,60 +658,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     gap: 16,
   },
-  gateTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-    color: '#1c1c1e',
-  },
-  gateBody: {
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-    color: '#3a3a3c',
-  },
+  gateTitle: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
+  gateBody: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
   cta: {
     marginTop: 8,
     paddingHorizontal: 22,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: '#0a7c30',
   },
   ctaLabel: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
-  progressLabel: { fontSize: 13, color: '#3a3a3c' },
+  progressLabel: { fontSize: 13, fontVariant: ['tabular-nums'] },
   progressTrack: {
     width: '100%',
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',
     marginTop: 6,
-    backgroundColor: 'rgba(0,0,0,0.08)',
   },
-  progressFill: { height: '100%', backgroundColor: '#0a7c30' },
+  progressFill: { height: '100%' },
   cancelBtn: { marginTop: 12, paddingHorizontal: 16, paddingVertical: 8 },
-  cancelLabel: { fontSize: 14, fontWeight: '600', color: '#0a7c30' },
+  cancelLabel: { fontSize: 14, fontWeight: '600' },
   pageHeader: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 8,
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingBottom: 6,
+    paddingHorizontal: 18,
+    paddingTop: 10,
   },
   pageHeaderText: {
     fontSize: 13,
     fontWeight: '600',
-    fontStyle: 'italic',
     letterSpacing: 0.4,
-    color: ORNAMENT,
+    fontVariant: ['tabular-nums'],
   },
   imageWrap: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
   },
-  pageFooter: { alignItems: 'center', paddingTop: 8, paddingBottom: 12 },
+  pageFooter: { alignItems: 'center', paddingTop: 6, paddingBottom: 10 },
   pageNumberFrame: {
     minWidth: 38,
     paddingHorizontal: 10,
@@ -429,9 +705,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 18,
     alignItems: 'center',
-    borderColor: ORNAMENT,
   },
-  pageNumber: { fontSize: 13, fontWeight: '700', color: ORNAMENT },
+  pageNumber: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
   exitBtn: {
     position: 'absolute',
     left: 12,
@@ -443,4 +718,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   exitGlyph: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  jumpBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  jumpCard: {
+    width: 260,
+    borderRadius: 16,
+    padding: 18,
+    gap: 12,
+  },
+  jumpTitle: { fontSize: 16, fontWeight: '700' },
+  jumpInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 18,
+    fontVariant: ['tabular-nums'],
+  },
+  jumpRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
+  jumpBtn: { paddingHorizontal: 12, paddingVertical: 8 },
 });

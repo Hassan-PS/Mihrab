@@ -162,6 +162,55 @@ export const ELEVATION = {
 
 export type ElevationToken = keyof typeof ELEVATION;
 
+/**
+ * App-wide card shadow (light theme, standard chrome only) — the soft
+ * warm-ink lift every bordered card gets via `cardEdgeStyle`. Tuned to be
+ * felt rather than seen: warm shadow color (never pure black on the warm
+ * paper bg), low opacity, gentle spread. Dark themes use surface lifts
+ * instead of shadows; flat/glass chrome brings its own material.
+ */
+export const CARD_SHADOW = {
+  shadowColor: RAW.inkDeep,
+  shadowOpacity: 0.07,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 2,
+} as const;
+
+// ─── Time-of-day period tints (principle 5) ───────────────────────────────
+// Subtle hue identities for each stretch of the prayer day. Consumed by the
+// HomeScreen hero (top rule + eyebrow label) — a quiet wash, never a theme
+// swap. Each entry pairs a light-mode ink and a dark-mode lifted variant.
+
+export type PeriodTintKey =
+  | 'fajr'
+  | 'sunrise'
+  | 'midday'
+  | 'asr'
+  | 'maghrib'
+  | 'isha'
+  | 'night';
+
+export const PERIOD_TINTS: Record<
+  PeriodTintKey,
+  { light: string; dark: string }
+> = {
+  /** Pre-dawn — cool indigo, the sky before Fajr's light. */
+  fajr: { light: '#5B6B9E', dark: '#93A3D6' },
+  /** Morning — warming amber, sun just up. */
+  sunrise: { light: '#B08A3E', dark: '#DCB56A' },
+  /** Midday — clear, slightly cool teal-sky. */
+  midday: { light: '#3E7D8C', dark: '#7FB9C8' },
+  /** Afternoon — golden Asr light. */
+  asr: { light: '#A9752C', dark: '#D9A959' },
+  /** Sunset — burnt amber-rose. */
+  maghrib: { light: '#A65B3B', dark: '#DC9070' },
+  /** Evening — deep violet dusk. */
+  isha: { light: '#5D5390', dark: '#9C93CF' },
+  /** Late night / pre-Fajr — deep slate-indigo. */
+  night: { light: '#46517A', dark: '#7D89BE' },
+} as const;
+
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 /** Returns the matching semantic palette for a theme key. */

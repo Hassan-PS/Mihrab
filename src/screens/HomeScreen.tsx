@@ -42,6 +42,10 @@ import { QuickActionsGrid } from './home/QuickActionsGrid';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
+import {
+  FeatureTourModal,
+  hasSeenFeatureTour,
+} from '../polish/FeatureTourModal';
 
 /**
  * HomeScreen orchestrator — task #8 split.
@@ -85,6 +89,23 @@ export function HomeScreen() {
   const [notifPermDenied, setNotifPermDenied] = useState(false);
   const [nextInfo, setNextInfo] = useState<{ name: string; at: Date } | null>(
     null,
+  );
+
+  // First-run feature walkthrough: shown once after onboarding completes.
+  // Focus-scoped (not mount-scoped) so the Settings "Show the app tour"
+  // replay — which clears the flag and pops back here — re-triggers it.
+  const [tourVisible, setTourVisible] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (!settings.onboardingComplete) return;
+      let cancelled = false;
+      void hasSeenFeatureTour().then(seen => {
+        if (!cancelled && !seen) setTourVisible(true);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [settings.onboardingComplete]),
   );
 
   // Reactive gating of the optional non-prayer entries, so flipping a toggle
@@ -550,6 +571,11 @@ export function HomeScreen() {
         settings={settings}
         updateSettings={updateSettings}
         palette={pickerPalette}
+      />
+
+      <FeatureTourModal
+        visible={tourVisible}
+        onClose={() => setTourVisible(false)}
       />
     </ScrollView>
   );

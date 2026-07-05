@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
+import { PERIOD_TINTS } from '../../theme/tokens';
+import { tintForNextPrayerName } from '../../polish/timeOfDayTint';
 import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
@@ -88,6 +90,15 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
       .catch(() => {});
   }
 
+  // Time-of-day awareness (principle 5, look-and-feel upgrade): the hero
+  // carries a whisper of the day's current character — a slim tinted rule
+  // along the card's top edge plus the eyebrow label taking the same hue.
+  // Felt, not announced: the tint never exceeds a 3-pt line + 12-pt label.
+  const periodTint =
+    PERIOD_TINTS[tintForNextPrayerName(nextInfo.name)][
+      palette.isDark ? 'dark' : 'light'
+    ];
+
   return (
     <GlassSurface
       intensity="thick"
@@ -106,7 +117,11 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
           ...cardEdgeStyle(palette),
         },
       ]}>
-      <Text style={[styles.label, { color: palette.muted }]}>
+      <View
+        pointerEvents="none"
+        style={[styles.periodRule, { backgroundColor: periodTint }]}
+      />
+      <Text style={[styles.label, { color: periodTint }]}>
         {t('home.nextPrayer')}
       </Text>
       <Text
@@ -153,6 +168,15 @@ export const NextPrayerCard = memo(NextPrayerCardImpl);
 
 const styles = StyleSheet.create({
   card: { overflow: 'hidden', alignItems: 'center' },
+  // Slim time-of-day rule hugging the card's top edge (principle 5).
+  periodRule: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    opacity: 0.85,
+  },
   label: {
     fontSize: 12,
     fontWeight: '600',
