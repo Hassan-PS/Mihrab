@@ -51,8 +51,10 @@
 		AFCC85C860A9E992FFA3E2C9 /* adhan_yusuf_islam.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */; };
 		B5C72EE49F32E58EDF1BC8CA /* adhan_abdul_basit.caf in Resources */ = {isa = PBXBuildFile; fileRef = D5FC0C5A1FDA3B8C9843426D /* adhan_abdul_basit.caf */; };
 		BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */; };
+		FA22B0071AD0000000000004 /* MushafPageScaler.m in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000002 /* MushafPageScaler.m */; };
 		CE1E4BEE25F612B8320B7886 /* adhan_hafiz_murad.caf in Resources */ = {isa = PBXBuildFile; fileRef = 91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */; };
 		DF5D2FB480E49268AC15485E /* CompassModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62E49C8F92272DF77C323AA /* CompassModule.swift */; };
+		FA22B0071AD0000000000003 /* MushafPageScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000001 /* MushafPageScaler.swift */; };
 		E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */; };
 		E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E1D2C3B4A5968778695A4B3D5 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */; };
@@ -115,6 +117,7 @@
 		8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_ghaffar.caf; path = PrayerApp/adhan_abdul_ghaffar.caf; sourceTree = "<group>"; };
 		91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_hafiz_murad.caf; path = PrayerApp/adhan_hafiz_murad.caf; sourceTree = "<group>"; };
 		A62E49C8F92272DF77C323AA /* CompassModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CompassModule.swift; path = PrayerApp/CompassModule.swift; sourceTree = "<group>"; };
+		FA22B0071AD0000000000001 /* MushafPageScaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MushafPageScaler.swift; path = PrayerApp/MushafPageScaler.swift; sourceTree = "<group>"; };
 		ADFR0000000000 /* adhan_abdul_basit.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = PrayerApp/adhan_abdul_basit.mp3; sourceTree = "<group>"; };
 		ADFR0000000001 /* adhan_abdul_ghaffar.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = PrayerApp/adhan_abdul_ghaffar.mp3; sourceTree = "<group>"; };
 		ADFR0000000002 /* adhan_abdul_hakam.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = PrayerApp/adhan_abdul_hakam.mp3; sourceTree = "<group>"; };
@@ -155,6 +158,7 @@
 		F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrayerLiveActivity.swift; path = PrayerApp/PrayerLiveActivity.swift; sourceTree = "<group>"; };
 		F1A20000A001B001C001D008 /* PrayerLiveActivity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerLiveActivity.m; path = PrayerApp/PrayerLiveActivity.m; sourceTree = "<group>"; };
 		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
+		FA22B0071AD0000000000002 /* MushafPageScaler.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MushafPageScaler.m; path = PrayerApp/MushafPageScaler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,9 +230,11 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 				A62E49C8F92272DF77C323AA /* CompassModule.swift */,
+				FA22B0071AD0000000000001 /* MushafPageScaler.swift */,
 				ADPF0000000000 /* AdhanPlayer.swift */,
 				ADPF0000000001 /* AdhanPlayer.m */,
 				F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */,
+				FA22B0071AD0000000000002 /* MushafPageScaler.m */,
 				F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */,
 				F1A20000A001B001C001D008 /* PrayerLiveActivity.m */,
 				F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */,
@@ -519,9 +525,11 @@
 				F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */,
 				F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */,
 				DF5D2FB480E49268AC15485E /* CompassModule.swift in Sources */,
+				FA22B0071AD0000000000003 /* MushafPageScaler.swift in Sources */,
 				ADPB0000000000 /* AdhanPlayer.swift in Sources */,
 				ADPB0000000001 /* AdhanPlayer.m in Sources */,
 				BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */,
+				FA22B0071AD0000000000004 /* MushafPageScaler.m in Sources */,
 				F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */,
 				F1A20000A001B001C001D009 /* PrayerLiveActivity.m in Sources */,
 				F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources */,

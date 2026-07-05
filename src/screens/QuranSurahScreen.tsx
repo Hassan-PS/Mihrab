@@ -284,7 +284,6 @@ export function QuranSurahScreen() {
         surahNumber={surahNumber}
         initialPage={initialPage}
         isFullscreen={isFullscreen}
-        onExitFullscreen={() => setIsFullscreen(false)}
         onToggleFullscreen={() => setIsFullscreen(f => !f)}
         audioSheetSignal={audioSheetSignal}
         onTitleChange={title => navigation.setOptions({ title })}

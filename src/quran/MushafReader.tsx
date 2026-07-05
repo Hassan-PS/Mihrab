@@ -23,10 +23,18 @@
  * display size.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import {
   ActivityIndicator,
   Image,
+  PixelRatio,
   Platform,
   Pressable,
   ScrollView,
@@ -66,6 +74,12 @@ import {
 } from './mushafDownload';
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import {
+  ensureScaledPage,
+  getRenderCacheVersion,
+  scaledPagePathIfReady,
+  subscribeRenderCache,
+} from './mushafRenderCache';
+import {
   activeKhatmah,
   recordKhatmahProgress,
   setLastRead,
@@ -82,8 +96,8 @@ type Props = {
   /** Open at an explicit page (deep links from Juz/Page/Bookmark nav). */
   initialPage?: number;
   isFullscreen: boolean;
-  onExitFullscreen: () => void;
-  /** Single tap on the page toggles fullscreen (v2.7.28). */
+  /** Single tap on the page toggles fullscreen (v2.7.28) — no exit
+   *  button; tapping again leaves fullscreen. */
   onToggleFullscreen: () => void;
   /** Increment to open the unified sheet scrolled to the recitation
    *  section (the header "Recitation" button). */
@@ -105,7 +119,6 @@ export function MushafReader({
   surahNumber,
   initialPage: initialPageProp,
   isFullscreen,
-  onExitFullscreen,
   onToggleFullscreen,
   audioSheetSignal,
   onTitleChange,
@@ -318,6 +331,92 @@ export function MushafReader({
     setJumpText('');
   };
 
+  // ── Reader layout ───────────────────────────────────────────────────
+  // (Computed before the gate returns so hooks below can use it.)
+  // iOS floats a translucent nav header over the content; keep our page
+  // chrome below it. Android's opaque header already offsets the view.
+  const navOverlayPad =
+    !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
+  // Slim gutters (v2.7.28 screen-use pass): the page background matches
+  // the reader background, so wide gutters bought nothing but smaller text.
+  const horizontalPadding = 4;
+  const headerFooterReserve = isFullscreen ? 0 : 76;
+  // Floating mini-player card: 3px track + row (~54) + 10 bottom margin.
+  const playerReserve = playback.active ? 68 : 0;
+  const maxWidth = screenWidth - horizontalPadding * 2;
+  const maxHeight =
+    windowHeight -
+    navOverlayPad -
+    headerFooterReserve -
+    playerReserve -
+    (isFullscreen ? insets.top + insets.bottom : 0);
+  let imageWidth = maxWidth;
+  let imageHeight = imageWidth / IMAGE_ASPECT;
+  if (imageHeight > maxHeight) {
+    imageHeight = maxHeight;
+    imageWidth = imageHeight * IMAGE_ASPECT;
+  }
+
+  /**
+   * Per-page display geometry (v2.7.28). Pages with a content crop
+   * render the crop region scaled to fill the available box; the
+   * underlying image is drawn larger inside an overflow-hidden window.
+   * `fullW`/`fullH` are the virtual full-image dimensions — geometry
+   * hit-testing and the overlay both work in that space.
+   */
+  const pageDims = (page: number) => {
+    const crop = mushafPageCrop(page);
+    if (!crop) {
+      return {
+        dispW: imageWidth,
+        dispH: imageHeight,
+        fullW: imageWidth,
+        fullH: imageHeight,
+        offX: 0,
+        offY: 0,
+      };
+    }
+    const cropAspect = (crop.w * 2600) / (crop.h * 4206);
+    let dispW = maxWidth;
+    let dispH = dispW / cropAspect;
+    if (dispH > maxHeight) {
+      dispH = maxHeight;
+      dispW = dispH * cropAspect;
+    }
+    const fullW = dispW / crop.w;
+    const fullH = dispH / crop.h;
+    return {
+      dispW,
+      dispH,
+      fullW,
+      fullH,
+      offX: -crop.x * fullW,
+      offY: -crop.y * fullH,
+    };
+  };
+
+  // ── Display-size render cache (v2.7.28 sharpness fix) ───────────────
+  // Re-render when a sharper exact-size page copy lands on disk.
+  useSyncExternalStore(
+    subscribeRenderCache,
+    getRenderCacheVersion,
+    getRenderCacheVersion,
+  );
+  // Warm exact-size copies for the mounted pages. Runs after every
+  // render; ensureScaledPage dedupes, so steady state is a no-op.
+  useEffect(() => {
+    if (!useLocalFiles || downloadStatus !== 'ready') return;
+    for (const p of [currentPage - 1, currentPage, currentPage + 1]) {
+      if (p < 1 || p > MUSHAF_TOTAL_PAGES) continue;
+      const d = pageDims(p);
+      ensureScaledPage(
+        p,
+        Math.round(PixelRatio.getPixelSizeForLayoutSize(d.fullW)),
+        2600,
+      );
+    }
+  });
+
   // ── Gate screens ────────────────────────────────────────────────────
   if (downloadStatus === 'checking') {
     return (
@@ -400,71 +499,10 @@ export function MushafReader({
     );
   }
 
-  // ── Reader layout ───────────────────────────────────────────────────
-  // iOS floats a translucent nav header over the content; keep our page
-  // chrome below it. Android's opaque header already offsets the view.
-  const navOverlayPad =
-    !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
-  const horizontalPadding = 12;
-  const headerFooterReserve = isFullscreen ? 0 : 76;
-  // Floating mini-player card: 3px track + row (~54) + 10 bottom margin.
-  const playerReserve = playback.active ? 68 : 0;
-  const maxWidth = screenWidth - horizontalPadding * 2;
-  const maxHeight =
-    windowHeight -
-    navOverlayPad -
-    headerFooterReserve -
-    playerReserve -
-    (isFullscreen ? insets.top + insets.bottom : 0);
-  let imageWidth = maxWidth;
-  let imageHeight = imageWidth / IMAGE_ASPECT;
-  if (imageHeight > maxHeight) {
-    imageHeight = maxHeight;
-    imageWidth = imageHeight * IMAGE_ASPECT;
-  }
-
   const pageMeta = (page: number) =>
     MUSHAF_PAGES.find(p => p.page === page) ?? MUSHAF_PAGES[0];
 
   const showChrome = !isFullscreen;
-
-  /**
-   * Per-page display geometry (v2.7.28). Pages with a content crop
-   * (1–2) render the crop region scaled to fill the available box; the
-   * underlying image is drawn larger inside an overflow-hidden window.
-   * `fullW`/`fullH` are the virtual full-image dimensions — geometry
-   * hit-testing and the overlay both work in that space.
-   */
-  const pageDims = (page: number) => {
-    const crop = mushafPageCrop(page);
-    if (!crop) {
-      return {
-        dispW: imageWidth,
-        dispH: imageHeight,
-        fullW: imageWidth,
-        fullH: imageHeight,
-        offX: 0,
-        offY: 0,
-      };
-    }
-    const cropAspect = (crop.w * 2600) / (crop.h * 4206);
-    let dispW = maxWidth;
-    let dispH = dispW / cropAspect;
-    if (dispH > maxHeight) {
-      dispH = maxHeight;
-      dispW = dispH * cropAspect;
-    }
-    const fullW = dispW / crop.w;
-    const fullH = dispH / crop.h;
-    return {
-      dispW,
-      dispH,
-      fullW,
-      fullH,
-      offX: -crop.x * fullW,
-      offY: -crop.y * fullH,
-    };
-  };
 
   /** Long press selects the ayah under the finger (v2.7.28). */
   const onPageLongPress = (
@@ -497,6 +535,17 @@ export function MushafReader({
       return p === page;
     });
     const khatmahPos = activeKhatmah(quran)?.position ?? null;
+    // Prefer the exact-display-size copy (sharpness fix, v2.7.28);
+    // fall back to the original file / stream while it generates.
+    const scaledPath = useLocalFiles
+      ? scaledPagePathIfReady(
+          page,
+          Math.round(PixelRatio.getPixelSizeForLayoutSize(dims.fullW)),
+        )
+      : null;
+    const imageSource = scaledPath
+      ? { uri: `file://${scaledPath}` }
+      : mushafPageAsset(page, useLocalFiles ? pageFilePath(page) : null);
     return (
       <View
         key={page}
@@ -581,10 +630,7 @@ export function MushafReader({
                 <ColorMatrix
                   matrix={concatColorMatrices(invert(), brightness(0.92))}>
                   <Image
-                    source={mushafPageAsset(
-                      page,
-                      useLocalFiles ? pageFilePath(page) : null,
-                    )}
+                    source={imageSource}
                     style={{ width: dims.fullW, height: dims.fullH }}
                     resizeMode="contain"
                     fadeDuration={0}
@@ -592,10 +638,7 @@ export function MushafReader({
                 </ColorMatrix>
               ) : (
                 <Image
-                  source={mushafPageAsset(
-                    page,
-                    useLocalFiles ? pageFilePath(page) : null,
-                  )}
+                  source={imageSource}
                   style={{ width: dims.fullW, height: dims.fullH }}
                   resizeMode="contain"
                   fadeDuration={0}
@@ -675,17 +718,6 @@ export function MushafReader({
         }}>
         {mountedPages.map(renderPage)}
       </ScrollView>
-
-      {isFullscreen ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('quran.exitFullscreen', 'Exit fullscreen')}
-          onPress={onExitFullscreen}
-          hitSlop={16}
-          style={[styles.exitBtn, { top: insets.top + 6 }]}>
-          <Text style={styles.exitGlyph}>✕</Text>
-        </Pressable>
-      ) : null}
 
       <MiniPlayer />
 
@@ -824,17 +856,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pageNumber: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  exitBtn: {
-    position: 'absolute',
-    left: 12,
-    backgroundColor: 'rgba(0,0,0,0.32)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 18,
-    minWidth: 40,
-    alignItems: 'center',
-  },
-  exitGlyph: { color: '#fff', fontSize: 16, fontWeight: '700' },
   jumpBackdrop: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',

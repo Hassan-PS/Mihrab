@@ -14,7 +14,10 @@ All notable changes to this project are documented here. The format is inspired 
 ### Changed
 - **Mushaf gestures**: single tap toggles fullscreen; long-press selects the ayah. The header button is now labeled "♪ Audio" and opens the same ayah panel scrolled to the recitation controls — translation, tafsir, bookmarks, khatmah pin, playback, and memorization all live in one sheet. The view toggle is now labeled "Translation" (it shows translations; tafsir is the new separate feature).
 - **Bookmarked ayahs are now highlighted in full** on the mushaf page in their bookmark color (translucent, ink stays readable) — the old margin marker sat at the *start* of the ayah, which read as the previous ayah.
-- **Pages 1–2 render ~60% larger**: the ornamental Fatihah/Baqarah plates occupy only ~59%×42% of the source canvas; the reader now crops to the content box. Regular pages already use ~90% of the canvas and are unchanged.
+- **Pages 1–2 render ~60% larger**: the ornamental Fatihah/Baqarah plates occupy only ~59%×42% of the source canvas; the reader now crops to the content box.
+- **Regular pages use more of the screen**: a safe uniform crop (union of all 602 page content boxes, so nothing can clip) plus slimmer reader gutters make the text ~6% larger edge to edge.
+- **Sharper mushaf rendering**: a new native `MushafPageScaler` module (Kotlin + Swift) caches each page at the exact display pixel size using high-quality multi-step scaling, so the GPU no longer minifies the 2600px source in one aliasing-prone step — strokes render pixel-perfect. Cache lives inside the managed mushaf store (covered by Manage downloads).
+- **Fullscreen lost its ✕ button** — a single tap toggles fullscreen in both directions; the overlay button looked bolted-on.
 - **Gapless recitation**: upcoming ayahs are prefetched to disk during playback and swapped into the queue, so longer sessions play without network gaps between ayahs.
 - **Adhan reliability (Android)**: prayer triggers now always ride AlarmManager (exact when permitted, allow-while-idle otherwise) instead of falling back to WorkManager, which OEM battery managers defer.
 - **Sweden provider cooldown**: after 3 consecutive failures the Swedish city source rests for 12 h (AlAdhan + cache serve meanwhile) instead of being retried noisily every fetch.

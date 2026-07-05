@@ -42,11 +42,22 @@ export const MUSHAF_TOTAL_PAGES = 604;
  */
 export type PageCrop = { x: number; y: number; w: number; h: number };
 
+/**
+ * Regular pages (3–604) carry a small uniform white margin. The union
+ * of the non-white bounding boxes across ALL 602 pages is
+ * x 36–2564, y 40–4188 (pixels on the 2600×4206 canvas) — so cropping
+ * to that union (with a few px of safety) can never clip content on
+ * any page, while buying ~3% larger text on top of the reduced reader
+ * padding. Per-page cropping would gain more on average but would make
+ * the text size jump between pages while swiping.
+ */
+const REGULAR_CROP: PageCrop = { x: 0.0115, y: 0.008, w: 0.977, h: 0.9885 };
+
 export function mushafPageCrop(page: number): PageCrop | null {
   if (page === 1 || page === 2) {
     return { x: 0.194, y: 0.033, w: 0.614, h: 0.438 };
   }
-  return null;
+  return REGULAR_CROP;
 }
 
 /**
