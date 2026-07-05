@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.7.28] — 2026-07-05
 
 ### Added
 - **Real tafsir**: classical tafsir in the ayah panel — Ibn Kathir (abridged) and Maarif-ul-Quran in English, al-Muyassar and Ibn Kathir in Arabic, plus Urdu and Bengali Ibn Kathir. Fetched per ayah on demand (spa5k/tafsir_api mirror of the Quran.com corpus, attributed in About) and cached for offline re-reading.

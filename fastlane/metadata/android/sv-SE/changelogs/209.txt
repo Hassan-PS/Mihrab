@@ -1,0 +1,8 @@
+Läsaruppgraderingar:
+
+• Riktig tafsir (Ibn Kathir m.fl.) i aya-panelen, cachad offline
+• Skarpare och större mushaf-sidor; tryck för helskärm, långtryck väljer aya
+• Alla recitationskontroller samlade i en panel
+• Khatmah: fortsätt-knapp, återställningsval, fäst din exakta position
+• Nytt: daglig khatmah-påminnelse; skärm för nedladdningar
+• Pålitligare adhan-tider och jämnare långa recitationssessioner

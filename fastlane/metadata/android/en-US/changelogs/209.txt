@@ -1,0 +1,8 @@
+Reader upgrades:
+
+• Real tafsir (Ibn Kathir & more) in the ayah panel, cached offline
+• Sharper, larger mushaf pages; tap toggles fullscreen, long-press selects an ayah
+• All recitation controls unified in one panel
+• Khatmah: continue button, reset options, pin your exact position
+• New: khatmah daily reminder; Manage downloads screen
+• More reliable adhan timing and smoother long recitation sessions
