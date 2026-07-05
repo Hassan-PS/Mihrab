@@ -105,10 +105,18 @@ function buildTimestampTrigger(
     type: TriggerType.TIMESTAMP as const,
     timestamp,
   };
-  if (Platform.OS === 'android' && exactAlarms) {
+  if (Platform.OS === 'android') {
+    // Always ride AlarmManager on Android (v2.7.28). Without this,
+    // notifee schedules through WorkManager, which aggressive OEM
+    // battery managers (MIUI, One UI, etc.) defer by minutes — a late
+    // adhan is a broken adhan. Exact when the user granted exact-alarm
+    // access; otherwise the inexact allow-while-idle variant, which
+    // needs no permission and is still far more punctual than WM.
     Object.assign(trigger, {
       alarmManager: {
-        type: AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE,
+        type: exactAlarms
+          ? AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE
+          : AlarmType.SET_AND_ALLOW_WHILE_IDLE,
       },
     });
   }

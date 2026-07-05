@@ -37,7 +37,8 @@
     "today": "اليوم",
     "close": "إغلاق",
     "share": "مشاركة",
-    "done": "تم"
+    "done": "تم",
+    "delete": "حذف"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "آية تُختار عشوائيًا مع ترجمتها، كل يوم.",
     "ayahOfDayTime": "وقت الإشعار",
     "hourDown": "الساعة −",
-    "hourUp": "الساعة +"
+    "hourUp": "الساعة +",
+    "khatmahReminder": "تذكير الختمة اليومي",
+    "khatmahReminderHelp": "وِرد اليوم وموضع المتابعة، أثناء وجود ختمة نشطة.",
+    "resetApp": "إعادة ضبط بيانات التطبيق",
+    "resetAppHelp": "يمحو جميع الإعدادات والبيانات. لا يمكن التراجع."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -746,7 +751,7 @@
     "pageLabel": "صفحة {{page}}",
     "switchToTranslation": "التبديل إلى عرض التفسير",
     "switchToMushaf": "التبديل إلى عرض المصحف",
-    "viewToggleTranslation": "تفسير",
+    "viewToggleTranslation": "الترجمة",
     "viewToggleMushaf": "مصحف",
     "enterFullscreen": "دخول وضع ملء الشاشة",
     "exitFullscreen": "الخروج من ملء الشاشة",
@@ -824,7 +829,26 @@
     "switchToNight": "التبديل إلى الوضع الليلي",
     "switchToLight": "التبديل إلى الوضع الفاتح",
     "ayahOfDayTitle": "آية اليوم",
-    "ayahOfDayChannelName": "آية اليوم"
+    "ayahOfDayChannelName": "آية اليوم",
+    "tafsir": "التفسير",
+    "showTafsir": "عرض التفسير",
+    "tafsirUnavailable": "التفسير غير متاح — اتصل بالإنترنت مرة واحدة لتنزيله.",
+    "khatmahPin": "تعيين كموضعي في الختمة",
+    "khatmahPinned": "موضع الختمة — انقر للإزالة",
+    "khatmahUnpin": "إزالة موضع الختمة",
+    "khatmahContinue": "متابعة",
+    "khatmahReset": "إعادة ضبط",
+    "khatmahResetTitle": "إعادة ضبط الختمة",
+    "khatmahResetToday": "إعادة ضبط قراءة اليوم",
+    "khatmahResetTodayHelp": "يعيد فقط الصفحات المسجلة اليوم.",
+    "khatmahResetAll": "إعادة بدء الختمة",
+    "khatmahResetAllHelp": "العودة إلى الصفحة 0 بجدول جديد.",
+    "khatmahDelete": "حذف الختمة",
+    "khatmahDeleteHelp": "يزيل الخطة بالكامل.",
+    "khatmahReminderChannelName": "تذكير الختمة",
+    "khatmahReminderTitle": "الختمة",
+    "khatmahReminderBody": "وِرد اليوم: {{pages}} صفحات — تابع من الصفحة {{page}}.",
+    "audioButton": "الصوت"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "أدعية حصن المسلم",
     "quranGeometry": "بيانات مواضع الآيات (quran.com / مشروع Quran for Android)",
-    "recitation": "صوت التلاوة (21 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)"
+    "recitation": "صوت التلاوة (21 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)",
+    "tafsir": "نصوص التفسير: ابن كثير، معارف القرآن، الميسر"
   },
   "liveActivity": {
     "title": "الصلاة التالية",
@@ -1032,5 +1057,17 @@
     "skip": "تخطي",
     "next": "التالي",
     "done": "ابدأ الآن"
+  },
+  "downloads": {
+    "title": "إدارة التنزيلات",
+    "settingsHelp": "صفحات المصحف وصوت التلاوة والتفسير على هذا الجهاز.",
+    "deleteTitle": "حذف التنزيل؟",
+    "deleteBody": "سيُزال {{what}} من هذا الجهاز. يمكنك تنزيله مرة أخرى في أي وقت.",
+    "total": "الإجمالي على الجهاز: {{size}}",
+    "mushaf": "صفحات المصحف",
+    "mushafSub": "604 صفحات مصحف المدينة",
+    "audioSub": "صوت التلاوة",
+    "tafsirSub": "نصوص التفسير المخزنة",
+    "empty": "لا توجد تنزيلات بعد. تظهر هنا صفحات المصحف وصوت التلاوة والتفسير التي تنزلها."
   }
 }

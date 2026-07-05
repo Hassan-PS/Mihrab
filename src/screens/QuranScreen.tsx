@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   FlatList,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -31,10 +32,14 @@ import { findSurah, loadSurah, SURAHS, type SurahIndex } from '../quran/quran';
 import { getAyahTranslation } from '../quran/translations';
 import { useActiveEdition } from '../quran/useActiveEdition';
 import {
+  abandonKhatmah,
   activeKhatmah,
   hydrateQuranState,
+  khatmahCurrentPage,
   khatmahToday,
   removeBookmark,
+  resetKhatmahAll,
+  resetKhatmahToday,
   startKhatmah,
   toggleStar,
   useQuranState,
@@ -69,6 +74,7 @@ export function QuranScreen() {
   }, []);
 
   const [tab, setTab] = useState<Tab>('surah');
+  const [khatmahMenuVisible, setKhatmahMenuVisible] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<QuranSearchResult[] | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -221,6 +227,37 @@ export function QuranScreen() {
                   })}`
                 : ''}
             </Text>
+            {/* Continue + reset (v2.7.28) */}
+            <View style={styles.khatmahActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.khatmahContinue', 'Continue')}
+                onPress={() => {
+                  const page = khatmahCurrentPage(plan);
+                  const startSurah =
+                    plan.position?.surah ??
+                    MUSHAF_PAGES.find(p => p.page === page)?.start.surah ??
+                    1;
+                  openSurah(startSurah, undefined, page);
+                }}
+                style={[
+                  styles.khatmahBtn,
+                  { backgroundColor: palette.accentSolid },
+                ]}>
+                <Text style={styles.khatmahBtnLabel}>
+                  {`${t('quran.khatmahContinue', 'Continue')} · ${t('quran.pageLabel', { page: khatmahCurrentPage(plan) })}`}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.khatmahReset', 'Reset')}
+                onPress={() => setKhatmahMenuVisible(true)}
+                style={[styles.khatmahBtnGhost, { borderColor: palette.border }]}>
+                <Text style={{ color: palette.muted, fontWeight: '600', fontSize: 13 }}>
+                  {t('quran.khatmahReset', 'Reset')}
+                </Text>
+              </Pressable>
+            </View>
           </>
         ) : (
           <>
@@ -332,6 +369,17 @@ export function QuranScreen() {
           );
         })}
       </View>
+
+      {/* Manage downloads (v2.7.28) */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('downloads.title', 'Manage downloads')}
+        onPress={() => navigation.navigate('QuranDownloads')}
+        style={styles.downloadsLink}>
+        <Text style={{ color: palette.muted, fontSize: 12, fontWeight: '600' }}>
+          {t('downloads.title', 'Manage downloads')} ›
+        </Text>
+      </Pressable>
 
       {/* Full-text results */}
       {results != null ? (
@@ -584,6 +632,86 @@ export function QuranScreen() {
           renderItem={renderBookmarks}
         />
       )}
+
+      {/* Khatmah reset menu (v2.7.28): today / whole plan / delete. */}
+      <Modal
+        visible={khatmahMenuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setKhatmahMenuVisible(false)}>
+        <Pressable
+          style={[styles.menuBackdrop, { backgroundColor: palette.overlay }]}
+          accessibilityLabel={t('common.close', 'Close')}
+          onPress={() => setKhatmahMenuVisible(false)}
+        />
+        <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
+          <Text style={[styles.menuTitle, { color: palette.text }]}>
+            {t('quran.khatmahResetTitle', 'Reset khatmah')}
+          </Text>
+          {(
+            [
+              [
+                t('quran.khatmahResetToday', "Reset today's reading"),
+                t(
+                  'quran.khatmahResetTodayHelp',
+                  'Rewinds only the pages recorded today.',
+                ),
+                () => resetKhatmahToday(),
+                false,
+              ],
+              [
+                t('quran.khatmahResetAll', 'Restart the khatmah'),
+                t(
+                  'quran.khatmahResetAllHelp',
+                  'Back to page 0 with a fresh schedule.',
+                ),
+                () => resetKhatmahAll(),
+                false,
+              ],
+              [
+                t('quran.khatmahDelete', 'Delete the khatmah'),
+                t('quran.khatmahDeleteHelp', 'Removes the plan entirely.'),
+                () => {
+                  const p = activeKhatmah(quran);
+                  if (p) abandonKhatmah(p.id);
+                },
+                true,
+              ],
+            ] as Array<[string, string, () => void, boolean]>
+          ).map(([label, help, action, destructive]) => (
+            <Pressable
+              key={label}
+              accessibilityRole="button"
+              accessibilityLabel={label}
+              onPress={() => {
+                setKhatmahMenuVisible(false);
+                action();
+              }}
+              style={[styles.menuRow, { borderColor: palette.border }]}>
+              <Text
+                style={{
+                  color: destructive ? '#d43f3f' : palette.text,
+                  fontWeight: '600',
+                  fontSize: 15,
+                }}>
+                {label}
+              </Text>
+              <Text style={{ color: palette.muted, fontSize: 12, marginTop: 2 }}>
+                {help}
+              </Text>
+            </Pressable>
+          ))}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('common.cancel', 'Cancel')}
+            onPress={() => setKhatmahMenuVisible(false)}
+            style={styles.menuCancel}>
+            <Text style={{ color: palette.accentSolid, fontWeight: '700' }}>
+              {t('common.cancel', 'Cancel')}
+            </Text>
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -688,6 +816,41 @@ const styles = StyleSheet.create({
   bookmarkDot: { width: 14, height: 14, borderRadius: 7 },
   deleteBtn: { paddingHorizontal: 6, paddingVertical: 6 },
   deleteGlyph: { fontSize: 14, fontWeight: '700' },
+  khatmahActions: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  khatmahBtn: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  khatmahBtnLabel: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
+  khatmahBtnGhost: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  menuCard: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    top: '25%',
+    borderRadius: 16,
+    padding: 18,
+    gap: 10,
+  },
+  menuTitle: { fontSize: 17, fontWeight: '700', marginBottom: 4 },
+  menuRow: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  menuCancel: { alignItems: 'center', paddingVertical: 8 },
+  downloadsLink: { alignSelf: 'flex-end', paddingVertical: 2 },
   starredHeading: {
     fontSize: 12,
     fontWeight: '700',

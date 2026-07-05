@@ -20,6 +20,7 @@ import { MosquesScreen } from '../screens/MosquesScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { QuranScreen } from '../screens/QuranScreen';
 import { QuranSurahScreen } from '../screens/QuranSurahScreen';
+import { QuranDownloadsScreen } from '../screens/QuranDownloadsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import { TasbihScreen } from '../screens/TasbihScreen';
@@ -245,6 +246,14 @@ export function RootNavigator() {
         name="QuranSurah"
         component={QuranSurahScreen}
         options={{ title: '', headerLargeTitle: false }}
+      />
+      <Stack.Screen
+        name="QuranDownloads"
+        component={QuranDownloadsScreen}
+        options={{
+          title: t('downloads.title', 'Manage downloads'),
+          headerLargeTitle: false,
+        }}
       />
       <Stack.Screen
         name="Mosques"

@@ -37,7 +37,8 @@
     "today": "Bugün",
     "close": "Kapat",
     "share": "Paylaş",
-    "done": "Bitti"
+    "done": "Bitti",
+    "delete": "Sil"
   },
   "home": {
     "loadingPrayer": "Namaz vakitleri yükleniyor…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "Her gün rastgele seçilen bir ayet ve meali.",
     "ayahOfDayTime": "Bildirim saati",
     "hourDown": "Saat −",
-    "hourUp": "Saat +"
+    "hourUp": "Saat +",
+    "khatmahReminder": "Günlük hatim hatırlatıcısı",
+    "khatmahReminderHelp": "Hatim aktifken bugünkü bölüm ve nereden devam edileceği.",
+    "resetApp": "Uygulama verilerini sıfırla",
+    "resetAppHelp": "Tüm ayarları ve verileri siler. Geri alınamaz."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -746,7 +751,7 @@
     "pageLabel": "Sayfa {{page}}",
     "switchToTranslation": "Tefsir görünümüne geç",
     "switchToMushaf": "Mushaf görünümüne geç",
-    "viewToggleTranslation": "Tefsir",
+    "viewToggleTranslation": "Meal",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Tam ekran",
     "exitFullscreen": "Tam ekrandan çık",
@@ -824,7 +829,26 @@
     "switchToNight": "Gece sayfasına geç",
     "switchToLight": "Aydınlık sayfaya geç",
     "ayahOfDayTitle": "Günün ayeti",
-    "ayahOfDayChannelName": "Günün ayeti"
+    "ayahOfDayChannelName": "Günün ayeti",
+    "tafsir": "Tefsir",
+    "showTafsir": "Tefsiri göster",
+    "tafsirUnavailable": "Tefsir mevcut değil — indirmek için bir kez internete bağlanın.",
+    "khatmahPin": "Hatim konumum olarak ayarla",
+    "khatmahPinned": "Hatim konumu — kaldırmak için dokunun",
+    "khatmahUnpin": "Hatim konumunu kaldır",
+    "khatmahContinue": "Devam et",
+    "khatmahReset": "Sıfırla",
+    "khatmahResetTitle": "Hatmi sıfırla",
+    "khatmahResetToday": "Bugünkü okumayı sıfırla",
+    "khatmahResetTodayHelp": "Yalnızca bugün kaydedilen sayfaları geri alır.",
+    "khatmahResetAll": "Hatmi yeniden başlat",
+    "khatmahResetAllHelp": "Yeni programla 0. sayfaya döner.",
+    "khatmahDelete": "Hatmi sil",
+    "khatmahDeleteHelp": "Planı tamamen kaldırır.",
+    "khatmahReminderChannelName": "Hatim hatırlatıcısı",
+    "khatmahReminderTitle": "Hatim",
+    "khatmahReminderBody": "Bugünkü bölüm: {{pages}} sayfa — {{page}}. sayfadan devam edin.",
+    "audioButton": "Ses"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim duaları",
     "quranGeometry": "Ayet konum verileri (quran.com / Quran for Android projesi)",
-    "recitation": "Tilavet sesi (21 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)"
+    "recitation": "Tilavet sesi (21 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)",
+    "tafsir": "Tefsir metinleri: İbn Kesir, Maarif-ul-Kuran, el-Müyesser"
   },
   "liveActivity": {
     "title": "Sıradaki namaz",
@@ -1032,5 +1057,17 @@
     "skip": "Atla",
     "next": "Sonraki",
     "done": "Başla"
+  },
+  "downloads": {
+    "title": "İndirmeleri yönet",
+    "settingsHelp": "Bu cihazdaki mushaf sayfaları, tilavet sesi ve tefsir.",
+    "deleteTitle": "İndirme silinsin mi?",
+    "deleteBody": "{{what}} bu cihazdan kaldırılacak. İstediğiniz zaman yeniden indirebilirsiniz.",
+    "total": "Cihazdaki toplam: {{size}}",
+    "mushaf": "Mushaf sayfaları",
+    "mushafSub": "604 Medine sayfası",
+    "audioSub": "Tilavet sesi",
+    "tafsirSub": "Önbelleğe alınmış tefsirler",
+    "empty": "Henüz bir şey indirilmedi. İndirilen mushaf sayfaları, ses ve tefsir burada görünür."
   }
 }

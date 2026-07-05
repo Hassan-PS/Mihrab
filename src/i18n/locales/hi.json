@@ -37,7 +37,8 @@
     "today": "आज",
     "close": "बंद करें",
     "share": "साझा करें",
-    "done": "हो गया"
+    "done": "हो गया",
+    "delete": "हटाएँ"
   },
   "home": {
     "loadingPrayer": "प्रार्थना का समय लोड हो रहा है...",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "हर दिन एक यादृच्छिक चुनी गई आयत और उसका अनुवाद।",
     "ayahOfDayTime": "सूचना का समय",
     "hourDown": "घंटा −",
-    "hourUp": "घंटा +"
+    "hourUp": "घंटा +",
+    "khatmahReminder": "दैनिक ख़त्मा अनुस्मारक",
+    "khatmahReminderHelp": "ख़त्मा सक्रिय रहते हुए आज का हिस्सा और कहाँ से जारी रखें।",
+    "resetApp": "ऐप डेटा रीसेट करें",
+    "resetAppHelp": "सभी सेटिंग्स और डेटा मिटा देता है। पूर्ववत नहीं हो सकता।"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",
@@ -746,7 +751,7 @@
     "pageLabel": "पृष्ठ {{page}}",
     "switchToTranslation": "तफ़सीर दृश्य पर जाएँ",
     "switchToMushaf": "मसहफ़ दृश्य पर जाएँ",
-    "viewToggleTranslation": "तफ़सीर",
+    "viewToggleTranslation": "अनुवाद",
     "viewToggleMushaf": "मुसहफ़",
     "enterFullscreen": "पूर्ण स्क्रीन",
     "exitFullscreen": "पूर्ण स्क्रीन छोड़ें",
@@ -824,7 +829,26 @@
     "switchToNight": "रात वाले पृष्ठ पर जाएँ",
     "switchToLight": "उजले पृष्ठ पर जाएँ",
     "ayahOfDayTitle": "आज की आयत",
-    "ayahOfDayChannelName": "आज की आयत"
+    "ayahOfDayChannelName": "आज की आयत",
+    "tafsir": "तफ़सीर",
+    "showTafsir": "तफ़सीर दिखाएँ",
+    "tafsirUnavailable": "तफ़सीर उपलब्ध नहीं — डाउनलोड करने के लिए एक बार इंटरनेट से जुड़ें।",
+    "khatmahPin": "मेरी ख़त्मा स्थिति के रूप में सेट करें",
+    "khatmahPinned": "ख़त्मा स्थिति — हटाने के लिए टैप करें",
+    "khatmahUnpin": "ख़त्मा स्थिति हटाएँ",
+    "khatmahContinue": "जारी रखें",
+    "khatmahReset": "रीसेट",
+    "khatmahResetTitle": "ख़त्मा रीसेट करें",
+    "khatmahResetToday": "आज की पढ़ाई रीसेट करें",
+    "khatmahResetTodayHelp": "केवल आज दर्ज पृष्ठ वापस करता है।",
+    "khatmahResetAll": "ख़त्मा फिर से शुरू करें",
+    "khatmahResetAllHelp": "नए कार्यक्रम के साथ पृष्ठ 0 से।",
+    "khatmahDelete": "ख़त्मा हटाएँ",
+    "khatmahDeleteHelp": "योजना को पूरी तरह हटा देता है।",
+    "khatmahReminderChannelName": "ख़त्मा अनुस्मारक",
+    "khatmahReminderTitle": "ख़त्मा",
+    "khatmahReminderBody": "आज का हिस्सा: {{pages}} पृष्ठ — पृष्ठ {{page}} से जारी रखें।",
+    "audioButton": "ऑडियो"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "हिस्न अल-मुस्लिम की दुआएँ",
     "quranGeometry": "आयत स्थिति डेटा (quran.com / Quran for Android प्रोजेक्ट)",
-    "recitation": "तिलावत ऑडियो (21 क़ारी): EveryAyah.com · शब्द समय: quran-align (CC BY 4.0)"
+    "recitation": "तिलावत ऑडियो (21 क़ारी): EveryAyah.com · शब्द समय: quran-align (CC BY 4.0)",
+    "tafsir": "तफ़सीर: इब्न कसीर, मआरिफ़-उल-क़ुरआन, अल-मुयस्सर"
   },
   "liveActivity": {
     "title": "अगली नमाज़",
@@ -1032,5 +1057,17 @@
     "skip": "छोड़ें",
     "next": "अगला",
     "done": "शुरू करें"
+  },
+  "downloads": {
+    "title": "डाउनलोड प्रबंधित करें",
+    "settingsHelp": "इस डिवाइस पर मुसहफ़ पृष्ठ, तिलावत ऑडियो और तफ़सीर।",
+    "deleteTitle": "डाउनलोड हटाएँ?",
+    "deleteBody": "{{what}} इस डिवाइस से हटा दिया जाएगा। आप इसे कभी भी फिर से डाउनलोड कर सकते हैं।",
+    "total": "डिवाइस पर कुल: {{size}}",
+    "mushaf": "मुसहफ़ पृष्ठ",
+    "mushafSub": "604 मदीना पृष्ठ",
+    "audioSub": "तिलावत ऑडियो",
+    "tafsirSub": "संचित तफ़सीर",
+    "empty": "अभी कुछ डाउनलोड नहीं हुआ। डाउनलोड किए गए मुसहफ़ पृष्ठ, ऑडियो और तफ़सीर यहाँ दिखेंगे।"
   }
 }

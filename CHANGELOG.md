@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **Real tafsir**: classical tafsir in the ayah panel — Ibn Kathir (abridged) and Maarif-ul-Quran in English, al-Muyassar and Ibn Kathir in Arabic, plus Urdu and Bengali Ibn Kathir. Fetched per ayah on demand (spa5k/tafsir_api mirror of the Quran.com corpus, attributed in About) and cached for offline re-reading.
+- **Manage downloads screen** (Settings → Data & privacy, and from the Quran screen): disk usage and one-tap delete for mushaf pages, per-reciter audio, and the tafsir cache.
+- **Khatmah upgrades**: a Continue button that jumps straight to your current page; a Reset menu (today's reading / restart the plan / delete it); and an explicit "Set as my khatmah position" pin in the ayah panel, shown on the mushaf in a reserved cyan highlight. Automatic page tracking still works alongside.
+- **Khatmah daily reminder**: optional notification at a chosen time with today's portion and where to continue.
+- **First E2E test suite** (Maestro): home, Quran reader, and settings smoke flows (`npm run e2e`).
+
+### Changed
+- **Mushaf gestures**: single tap toggles fullscreen; long-press selects the ayah. The header button is now labeled "♪ Audio" and opens the same ayah panel scrolled to the recitation controls — translation, tafsir, bookmarks, khatmah pin, playback, and memorization all live in one sheet. The view toggle is now labeled "Translation" (it shows translations; tafsir is the new separate feature).
+- **Bookmarked ayahs are now highlighted in full** on the mushaf page in their bookmark color (translucent, ink stays readable) — the old margin marker sat at the *start* of the ayah, which read as the previous ayah.
+- **Pages 1–2 render ~60% larger**: the ornamental Fatihah/Baqarah plates occupy only ~59%×42% of the source canvas; the reader now crops to the content box. Regular pages already use ~90% of the canvas and are unchanged.
+- **Gapless recitation**: upcoming ayahs are prefetched to disk during playback and swapped into the queue, so longer sessions play without network gaps between ayahs.
+- **Adhan reliability (Android)**: prayer triggers now always ride AlarmManager (exact when permitted, allow-while-idle otherwise) instead of falling back to WorkManager, which OEM battery managers defer.
+- **Sweden provider cooldown**: after 3 consecutive failures the Swedish city source rests for 12 h (AlAdhan + cache serve meanwhile) instead of being retried noisily every fetch.
+- **Fasting reminders** now resync on every app foreground (previously only when visiting the Fasting screen, letting the 60-day window drain).
+- **"Show onboarding again" no longer wipes data** — it simply replays the welcome flow; the destructive wipe moved to its own clearly-labeled "Reset app data" row.
+- Word-highlight coverage audited: all 9 recordings with public quran-align data are wired; the other 12 have no published alignment (documented in `reciters.ts`).
+
+### Removed
+- Stale Scheherazade New references (the font was never bundled): attribution row and scaffolding notes.
+
 ## [2.7.27] — 2026-07-05
 
 ### Added

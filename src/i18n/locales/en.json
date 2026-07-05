@@ -37,7 +37,8 @@
     "today": "Today",
     "close": "Close",
     "share": "Share",
-    "done": "Done"
+    "done": "Done",
+    "delete": "Delete"
   },
   "home": {
     "loadingPrayer": "Loading prayer times…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "A randomly chosen ayah with its translation, every day.",
     "ayahOfDayTime": "Notification time",
     "hourDown": "Hour −",
-    "hourUp": "Hour +"
+    "hourUp": "Hour +",
+    "khatmahReminder": "Khatmah daily reminder",
+    "khatmahReminderHelp": "Today's portion and where to continue, while a khatmah is active.",
+    "resetApp": "Reset app data",
+    "resetAppHelp": "Erase all settings and data. Cannot be undone."
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -746,7 +751,7 @@
     "pageLabel": "Page {{page}}",
     "switchToTranslation": "Switch to tafsir view",
     "switchToMushaf": "Switch to mushaf view",
-    "viewToggleTranslation": "Tafsir",
+    "viewToggleTranslation": "Translation",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Enter fullscreen",
     "exitFullscreen": "Exit fullscreen",
@@ -757,7 +762,7 @@
     "mushafDownloadProgress": "{{done}} / {{total}} pages · {{pct}}%",
     "juzLabel": "Juz {{juz}}",
     "nightMode": "Night mode",
-    "pageA11y": "Mushaf page {{page}} — tap an ayah for actions",
+    "pageA11y": "Mushaf page {{page}} — tap to toggle fullscreen, long-press an ayah for actions",
     "jumpToPage": "Go to page",
     "go": "Go",
     "mushafDownloadRetryBody": "{{count}} pages did not download. Retry to fetch the missing pages — everything already downloaded is kept.",
@@ -824,7 +829,26 @@
     "switchToNight": "Switch to night page",
     "switchToLight": "Switch to light page",
     "ayahOfDayTitle": "Ayah of the day",
-    "ayahOfDayChannelName": "Ayah of the day"
+    "ayahOfDayChannelName": "Ayah of the day",
+    "tafsir": "Tafsir",
+    "showTafsir": "Show tafsir",
+    "tafsirUnavailable": "Tafsir unavailable — connect to the internet once to download it.",
+    "khatmahPin": "Set as my khatmah position",
+    "khatmahPinned": "Khatmah position — tap to remove",
+    "khatmahUnpin": "Remove khatmah position",
+    "khatmahContinue": "Continue",
+    "khatmahReset": "Reset",
+    "khatmahResetTitle": "Reset khatmah",
+    "khatmahResetToday": "Reset today's reading",
+    "khatmahResetTodayHelp": "Rewinds only the pages recorded today.",
+    "khatmahResetAll": "Restart the khatmah",
+    "khatmahResetAllHelp": "Back to page 0 with a fresh schedule.",
+    "khatmahDelete": "Delete the khatmah",
+    "khatmahDeleteHelp": "Removes the plan entirely.",
+    "khatmahReminderChannelName": "Khatmah reminder",
+    "khatmahReminderTitle": "Khatmah",
+    "khatmahReminderBody": "Today's portion: {{pages}} pages — continue from page {{page}}.",
+    "audioButton": "Audio"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisnul Muslim duas",
     "quranGeometry": "Ayah position data (quran.com / Quran for Android project)",
-    "recitation": "Recitation audio (21 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)"
+    "recitation": "Recitation audio (21 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)",
+    "tafsir": "Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
     "title": "Next prayer",
@@ -1032,5 +1057,17 @@
     "skip": "Skip",
     "next": "Next",
     "done": "Get started"
+  },
+  "downloads": {
+    "title": "Manage downloads",
+    "settingsHelp": "Mushaf pages, recitation audio and tafsir on this device.",
+    "deleteTitle": "Delete download?",
+    "deleteBody": "{{what}} will be removed from this device. You can download it again at any time.",
+    "total": "Total on device: {{size}}",
+    "mushaf": "Mushaf pages",
+    "mushafSub": "604 Madinah pages",
+    "audioSub": "Recitation audio",
+    "tafsirSub": "Cached tafsir texts",
+    "empty": "Nothing downloaded yet. Mushaf pages, recitation audio and tafsir you download appear here."
   }
 }

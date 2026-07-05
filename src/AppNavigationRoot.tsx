@@ -22,6 +22,8 @@ import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
 import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
+import { rescheduleFastingReminders } from './notifications/fastingReminders';
+import { rescheduleKhatmahReminder } from './notifications/khatmahReminder';
 
 export function AppNavigationRoot() {
   const { settings, hydrated } = usePrayerSettings();
@@ -29,24 +31,35 @@ export function AppNavigationRoot() {
 
   useSyncWidgetUiHints();
 
-  // Ayah of the day — keep the rolling 14-day trigger window fresh.
-  // Re-syncs when the toggle/time/edition/language changes and on every
-  // foreground, throttled to once per hour (each sync draws new random
-  // ayahs for days not yet scheduled; ids are date-stable so re-running
-  // simply re-rolls the window forward).
-  const lastAyahSyncRef = useRef(0);
+  // Daily-notification resync — ayah of the day, khatmah reminder, and
+  // fasting reminders keep their rolling trigger windows fresh here.
+  // Re-syncs when the relevant settings change and on every foreground,
+  // throttled to once per hour (each scheduler cancels + recreates its
+  // own date-stable trigger ids, so re-running is idempotent).
+  // Fasting reminders used to resync only from the Fasting screen,
+  // which let the 60-day window silently drain (v2.7.28 fix).
+  const lastDailySyncRef = useRef(0);
   useEffect(() => {
     if (!hydrated) return;
     const sync = (force: boolean) => {
       const now = Date.now();
-      if (!force && now - lastAyahSyncRef.current < 60 * 60 * 1000) return;
-      lastAyahSyncRef.current = now;
+      if (!force && now - lastDailySyncRef.current < 60 * 60 * 1000) return;
+      lastDailySyncRef.current = now;
       void rescheduleAyahOfDay({
         enabled: settings.ayahOfDayEnabled,
         hour: settings.ayahOfDayHour,
         minute: settings.ayahOfDayMinute,
         quranTranslationEdition: settings.quranTranslationEdition,
         language: settings.language,
+      });
+      void rescheduleKhatmahReminder({
+        enabled: settings.khatmahReminderEnabled,
+        hour: settings.khatmahReminderHour,
+        minute: settings.khatmahReminderMinute,
+      });
+      void rescheduleFastingReminders({
+        enabled: settings.fastingRemindersEnabled,
+        hour: settings.fastingReminderHour,
       });
     };
     sync(true);
@@ -61,6 +74,11 @@ export function AppNavigationRoot() {
     settings.ayahOfDayMinute,
     settings.quranTranslationEdition,
     settings.language,
+    settings.khatmahReminderEnabled,
+    settings.khatmahReminderHour,
+    settings.khatmahReminderMinute,
+    settings.fastingRemindersEnabled,
+    settings.fastingReminderHour,
   ]);
 
   // iOS: re-show the Live Activity if the user dismissed it (swipe / "Clear

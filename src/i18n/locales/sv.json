@@ -37,7 +37,8 @@
     "today": "Idag",
     "close": "Stäng",
     "share": "Dela",
-    "done": "Klar"
+    "done": "Klar",
+    "delete": "Ta bort"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "En slumpmässigt vald aya med översättning, varje dag.",
     "ayahOfDayTime": "Aviseringstid",
     "hourDown": "Timme −",
-    "hourUp": "Timme +"
+    "hourUp": "Timme +",
+    "khatmahReminder": "Daglig khatmah-påminnelse",
+    "khatmahReminderHelp": "Dagens portion och var du ska fortsätta, medan en khatmah är aktiv.",
+    "resetApp": "Återställ appdata",
+    "resetAppHelp": "Raderar alla inställningar och data. Kan inte ångras."
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -746,7 +751,7 @@
     "pageLabel": "Sida {{page}}",
     "switchToTranslation": "Byt till tafsir-vy",
     "switchToMushaf": "Byt till mushaf-vy",
-    "viewToggleTranslation": "Tafsir",
+    "viewToggleTranslation": "Översättning",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Helskärmsläge",
     "exitFullscreen": "Stäng helskärm",
@@ -824,7 +829,26 @@
     "switchToNight": "Byt till nattläge",
     "switchToLight": "Byt till ljust läge",
     "ayahOfDayTitle": "Dagens aya",
-    "ayahOfDayChannelName": "Dagens aya"
+    "ayahOfDayChannelName": "Dagens aya",
+    "tafsir": "Tafsir",
+    "showTafsir": "Visa tafsir",
+    "tafsirUnavailable": "Tafsir är inte tillgänglig — anslut till internet en gång för att hämta den.",
+    "khatmahPin": "Ange som min khatmah-position",
+    "khatmahPinned": "Khatmah-position — tryck för att ta bort",
+    "khatmahUnpin": "Ta bort khatmah-position",
+    "khatmahContinue": "Fortsätt",
+    "khatmahReset": "Återställ",
+    "khatmahResetTitle": "Återställ khatmah",
+    "khatmahResetToday": "Återställ dagens läsning",
+    "khatmahResetTodayHelp": "Spolar bara tillbaka dagens registrerade sidor.",
+    "khatmahResetAll": "Starta om khatman",
+    "khatmahResetAllHelp": "Tillbaka till sida 0 med nytt schema.",
+    "khatmahDelete": "Ta bort khatman",
+    "khatmahDeleteHelp": "Tar bort planen helt.",
+    "khatmahReminderChannelName": "Khatmah-påminnelse",
+    "khatmahReminderTitle": "Khatmah",
+    "khatmahReminderBody": "Dagens portion: {{pages}} sidor — fortsätt från sida {{page}}.",
+    "audioButton": "Ljud"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim-duor",
     "quranGeometry": "Data för ayah-positioner (quran.com / projektet Quran for Android)",
-    "recitation": "Recitationsljud (21 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)"
+    "recitation": "Recitationsljud (21 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)",
+    "tafsir": "Tafsir-texter: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
     "title": "Nästa bön",
@@ -1032,5 +1057,17 @@
     "skip": "Hoppa över",
     "next": "Nästa",
     "done": "Kom igång"
+  },
+  "downloads": {
+    "title": "Hantera nedladdningar",
+    "settingsHelp": "Mushaf-sidor, recitationsljud och tafsir på den här enheten.",
+    "deleteTitle": "Ta bort nedladdning?",
+    "deleteBody": "{{what}} tas bort från enheten. Du kan hämta den igen när som helst.",
+    "total": "Totalt på enheten: {{size}}",
+    "mushaf": "Mushaf-sidor",
+    "mushafSub": "604 Madinah-sidor",
+    "audioSub": "Recitationsljud",
+    "tafsirSub": "Cachade tafsir-texter",
+    "empty": "Inget nedladdat ännu. Mushaf-sidor, recitationsljud och tafsir du hämtar visas här."
   }
 }

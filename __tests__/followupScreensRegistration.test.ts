@@ -88,7 +88,10 @@ describe('font scaffolding', () => {
     );
     expect(plist).toMatch(/UIAppFonts/);
     expect(plist).toMatch(/Amiri-Regular\.ttf/);
-    expect(plist).toMatch(/ScheherazadeNew-Regular\.ttf/);
+    expect(plist).toMatch(/AmiriQuran\.ttf/);
+    // Scheherazade was never bundled — the stale scaffolding note was
+    // removed in v2.7.28 along with its attribution row.
+    expect(plist).not.toMatch(/Scheherazade/);
   });
 
   test('Android fonts assets directory has README', () => {

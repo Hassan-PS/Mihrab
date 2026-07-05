@@ -1,0 +1,40 @@
+appId: com.prayer_times
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Mihrab"
+    timeout: 20000
+# centerElement keeps the target away from screen edges — on debug
+# builds the RN LogBox toast hugs the bottom and swallows taps there.
+- scrollUntilVisible:
+    element:
+      text: "Quran"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+# Let the fling settle before tapping, or the tap lands on stale
+# coordinates while the list is still decelerating.
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: "Quran"
+# Quran index: the Surah/Juz/Bookmarks tab bar is always present.
+- extendedWaitUntil:
+    visible: "Juz"
+    timeout: 15000
+- assertVisible: "Bookmarks"
+- assertVisible: ".*Manage downloads.*"
+# Open Al-Fatihah — lands on the mushaf by default (v2.7.27).
+- scrollUntilVisible:
+    element:
+      text: "Al-Fatihah"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: "Al-Fatihah"
+- extendedWaitUntil:
+    visible: ".*Audio.*"
+    timeout: 20000
+- assertVisible: "Translation"
+- back

@@ -254,6 +254,14 @@ export type PrayerAppSettings = {
   ayahOfDayHour: number;
   /** Minute (0–59) the ayah-of-the-day notification fires. */
   ayahOfDayMinute: number;
+  /**
+   * Khatmah daily reminder — v2.7.28. A gentle daily notification with
+   * today's portion while a khatmah plan is active. Same scheduling
+   * pattern as the ayah of the day (rolling window, foreground resync).
+   */
+  khatmahReminderEnabled: boolean;
+  khatmahReminderHour: number;
+  khatmahReminderMinute: number;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -324,4 +332,9 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   ayahOfDayEnabled: false,
   ayahOfDayHour: 9,
   ayahOfDayMinute: 0,
+  // Khatmah reminder: off by default; 6 PM when enabled — early evening,
+  // with time left to read before the day ends.
+  khatmahReminderEnabled: false,
+  khatmahReminderHour: 18,
+  khatmahReminderMinute: 0,
 };

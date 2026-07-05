@@ -28,6 +28,28 @@ export function mushafPageUrl(page: number): string {
 export const MUSHAF_TOTAL_PAGES = 604;
 
 /**
+ * Content crop for pages whose artwork leaves large blank margins —
+ * v2.7.28. Fractions of the full 2600×4206 canvas.
+ *
+ * Pages 1–2 (Al-Fatihah + the opening of Al-Baqarah) are ornamental
+ * plates whose content box occupies only ~59% × ~42% of the canvas,
+ * pinned to the TOP of the page (measured from the actual PNGs:
+ * non-white bbox ≈ x 532–2070, y 165–1921, plus the ayah-marker glyph
+ * bounds which extend to y≈1960). Cropping lets the plate render ~60%
+ * larger. Pages 3–604 already use ~90% × 95% of the canvas — cropping
+ * them would clip the decorative frame for a negligible gain, so they
+ * render uncropped.
+ */
+export type PageCrop = { x: number; y: number; w: number; h: number };
+
+export function mushafPageCrop(page: number): PageCrop | null {
+  if (page === 1 || page === 2) {
+    return { x: 0.194, y: 0.033, w: 0.614, h: 0.438 };
+  }
+  return null;
+}
+
+/**
  * Image source spec for `<Image source={…} />`.
  *
  * When the managed file store has the page (QR-5), we point at the

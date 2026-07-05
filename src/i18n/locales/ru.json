@@ -37,7 +37,8 @@
     "today": "Сегодня",
     "close": "Закрыть",
     "share": "Поделиться",
-    "done": "Готово"
+    "done": "Готово",
+    "delete": "Удалить"
   },
   "home": {
     "loadingPrayer": "Загрузка времени молитв…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "Каждый день — случайно выбранный аят с переводом.",
     "ayahOfDayTime": "Время уведомления",
     "hourDown": "Час −",
-    "hourUp": "Час +"
+    "hourUp": "Час +",
+    "khatmahReminder": "Ежедневное напоминание о хатме",
+    "khatmahReminderHelp": "Сегодняшняя порция и место продолжения, пока хатма активна.",
+    "resetApp": "Сбросить данные приложения",
+    "resetAppHelp": "Стирает все настройки и данные. Необратимо."
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",
@@ -746,7 +751,7 @@
     "pageLabel": "Страница {{page}}",
     "switchToTranslation": "Переключиться на тафсир",
     "switchToMushaf": "Переключиться на мусхаф",
-    "viewToggleTranslation": "Тафсир",
+    "viewToggleTranslation": "Перевод",
     "viewToggleMushaf": "Мусхаф",
     "enterFullscreen": "Полный экран",
     "exitFullscreen": "Выйти из полного экрана",
@@ -824,7 +829,26 @@
     "switchToNight": "Переключить на ночную страницу",
     "switchToLight": "Переключить на светлую страницу",
     "ayahOfDayTitle": "Аят дня",
-    "ayahOfDayChannelName": "Аят дня"
+    "ayahOfDayChannelName": "Аят дня",
+    "tafsir": "Тафсир",
+    "showTafsir": "Показать тафсир",
+    "tafsirUnavailable": "Тафсир недоступен — один раз подключитесь к интернету, чтобы загрузить его.",
+    "khatmahPin": "Отметить как мою позицию хатмы",
+    "khatmahPinned": "Позиция хатмы — нажмите, чтобы убрать",
+    "khatmahUnpin": "Убрать позицию хатмы",
+    "khatmahContinue": "Продолжить",
+    "khatmahReset": "Сброс",
+    "khatmahResetTitle": "Сбросить хатму",
+    "khatmahResetToday": "Сбросить сегодняшнее чтение",
+    "khatmahResetTodayHelp": "Отменяет только страницы, записанные сегодня.",
+    "khatmahResetAll": "Начать хатму заново",
+    "khatmahResetAllHelp": "Снова со страницы 0 и новым графиком.",
+    "khatmahDelete": "Удалить хатму",
+    "khatmahDeleteHelp": "Полностью удаляет план.",
+    "khatmahReminderChannelName": "Напоминание о хатме",
+    "khatmahReminderTitle": "Хатма",
+    "khatmahReminderBody": "Сегодняшняя порция: {{pages}} стр. — продолжайте со страницы {{page}}.",
+    "audioButton": "Аудио"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Дуа из Хисн аль-Муслим",
     "quranGeometry": "Данные о положении аятов (quran.com / проект Quran for Android)",
-    "recitation": "Аудио чтения (21 чтец): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)"
+    "recitation": "Аудио чтения (21 чтец): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)",
+    "tafsir": "Тафсиры: Ибн Касир, Маариф-уль-Куран, аль-Муяссар"
   },
   "liveActivity": {
     "title": "Следующая молитва",
@@ -1032,5 +1057,17 @@
     "skip": "Пропустить",
     "next": "Далее",
     "done": "Начать"
+  },
+  "downloads": {
+    "title": "Управление загрузками",
+    "settingsHelp": "Страницы мусхафа, аудио чтения и тафсир на этом устройстве.",
+    "deleteTitle": "Удалить загрузку?",
+    "deleteBody": "{{what}} будет удалено с устройства. Вы можете загрузить это снова в любой момент.",
+    "total": "Всего на устройстве: {{size}}",
+    "mushaf": "Страницы мусхафа",
+    "mushafSub": "604 мединские страницы",
+    "audioSub": "Аудио чтения",
+    "tafsirSub": "Кэш тафсира",
+    "empty": "Пока ничего не загружено. Загруженные страницы мусхафа, аудио и тафсир появятся здесь."
   }
 }

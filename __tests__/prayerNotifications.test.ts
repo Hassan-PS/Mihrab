@@ -182,9 +182,11 @@ describe('syncPrayerNotifications: exact-alarm permission', () => {
     });
     // Verify scheduling continued — degraded, not skipped.
     expect(notifee.createTriggerNotification).toHaveBeenCalled();
-    // Verify the trigger does NOT request alarmManager (inexact path).
+    // v2.7.28: even without exact-alarm permission the trigger rides
+    // AlarmManager (inexact allow-while-idle) — WorkManager scheduling
+    // gets deferred by OEM battery managers, making the adhan late.
     const triggerArg = (notifee.createTriggerNotification as jest.Mock).mock.calls[0][1];
-    expect(triggerArg.alarmManager).toBeUndefined();
+    expect(triggerArg.alarmManager).toBeDefined();
   });
 });
 

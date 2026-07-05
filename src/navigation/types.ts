@@ -17,6 +17,8 @@ export type RootStackParamList = {
     /** Translation mode: scroll to this ayah (search / bookmark deep links). */
     scrollToAyah?: number;
   };
+  /** Manage downloads: mushaf pages, recitation audio, tafsir cache. */
+  QuranDownloads: undefined;
   Mosques: undefined;
   Journal: undefined;
   Onboarding: undefined;

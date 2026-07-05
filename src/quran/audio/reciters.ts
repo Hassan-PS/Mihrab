@@ -11,6 +11,14 @@
  * Reciters without timings still play perfectly — the reader falls back
  * from word-level to ayah-level highlighting (see `useWordTiming.ts`).
  *
+ * Coverage note (v2.7.28 audit): quran-align's corpus covers 9 of our
+ * 21 recordings — every timing set it publishes for an EveryAyah
+ * murattal folder we ship is hosted and wired up. The remaining 12
+ * recordings have NO public forced-alignment data (word timings are
+ * per-recording; generating them needs an offline CMUSphinx alignment
+ * run against each reciter's audio), so ayah-level highlight is the
+ * honest ceiling for them today.
+ *
  * Audio streams from everyayah.com on explicit user action, or plays
  * fully offline once a surah is downloaded (see `audioStore.ts`).
  */

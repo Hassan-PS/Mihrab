@@ -40,7 +40,16 @@ function AboutCardImpl() {
   const { updateSettings } = usePrayerSettings();
 
   const goToBackup = () => navigation.navigate('Backup');
+
+  // v2.7.28: replaying onboarding no longer wipes anything — it simply
+  // reruns the welcome flow over the existing data. The destructive
+  // wipe lives in its own clearly-labeled row below.
   const replayOnboarding = () => {
+    updateSettings({ onboardingComplete: false });
+    navigation.navigate('Onboarding');
+  };
+
+  const resetEverything = () => {
     // Destructive reset — wipes all data and walks the user through
     // onboarding again. Confirm before doing this so a stray tap can't
     // erase the journal / fasting log / settings.
@@ -100,6 +109,28 @@ function AboutCardImpl() {
           </Text>
           <Text style={[s.valueText, { color: palette.text }]}>
             {t('backup.exportSection')}
+          </Text>
+        </View>
+        <Text style={[s.changeLink, { color: palette.accent }]}>›</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('downloads.title', 'Manage downloads')}
+        style={[
+          s.card,
+          s.rowPress,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}
+        onPress={() => navigation.navigate('QuranDownloads')}>
+        <View>
+          <Text style={[s.label, { color: palette.muted }]}>
+            {t('downloads.title', 'Manage downloads')}
+          </Text>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t(
+              'downloads.settingsHelp',
+              'Mushaf pages, recitation audio and tafsir on this device.',
+            )}
           </Text>
         </View>
         <Text style={[s.changeLink, { color: palette.accent }]}>›</Text>
@@ -169,6 +200,28 @@ function AboutCardImpl() {
         </View>
         <Text style={[s.changeLink, { color: palette.accent }]}>›</Text>
       </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('settings.resetApp', 'Reset app data')}
+        style={[
+          s.card,
+          s.rowPress,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}
+        onPress={resetEverything}>
+        <View>
+          <Text style={[s.label, { color: '#d43f3f' }]}>
+            {t('settings.resetApp', 'Reset app data')}
+          </Text>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t(
+              'settings.resetAppHelp',
+              'Erase all settings and data. Cannot be undone.',
+            )}
+          </Text>
+        </View>
+        <Text style={[s.changeLink, { color: '#d43f3f' }]}>›</Text>
+      </Pressable>
       <View style={styles.versionBlock}>
         <Text style={[styles.versionText, { color: palette.muted }]}>
           {t('settings.versionInstalled', { version: versionLabel })}
@@ -235,6 +288,12 @@ function Attributions({ palette }: { palette: AppPalette }) {
       />
       <AttributionRow
         palette={palette}
+        label={t('attributions.tafsir', { defaultValue: 'Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar' })}
+        sub="spa5k/tafsir_api · Quran.com tafsir corpus"
+        url="https://github.com/spa5k/tafsir_api"
+      />
+      <AttributionRow
+        palette={palette}
         label={t('attributions.sahihIntl', { defaultValue: 'Sahih International (English)' })}
         sub="public domain · via Tanzil"
         url="https://tanzil.net/trans/"
@@ -256,12 +315,6 @@ function Attributions({ palette }: { palette: AppPalette }) {
         label={t('attributions.amiriFonts', { defaultValue: 'Amiri & Amiri Quran fonts' })}
         sub="aliftype/amiri · SIL OFL 1.1"
         url="https://github.com/aliftype/amiri"
-      />
-      <AttributionRow
-        palette={palette}
-        label={t('attributions.scheherazade', { defaultValue: 'Scheherazade New' })}
-        sub="SIL · SIL OFL 1.1"
-        url="https://software.sil.org/scheherazade/"
       />
       <AttributionRow
         palette={palette}

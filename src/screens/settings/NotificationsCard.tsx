@@ -41,7 +41,10 @@ function NotificationsCardImpl({
   // Subscribes only to the notifications slice (task #11).
   const { slice: settings, update: updateSettings } = useNotificationsSettings();
   const { palette } = useAppPalette();
-  const [ayahTimeVisible, setAyahTimeVisible] = useState(false);
+  // Which daily-notification time the picker edits (v2.7.28: khatmah too).
+  const [timeTarget, setTimeTarget] = useState<'ayah' | 'khatmah' | null>(
+    null,
+  );
 
   /** Platform notification permission (subset of the master toggle flow). */
   const ensureNotifPermission = async (): Promise<boolean> => {
@@ -78,8 +81,34 @@ function NotificationsCardImpl({
     updateSettings({ ayahOfDayEnabled: true });
   };
 
+  const onToggleKhatmahReminder = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ khatmahReminderEnabled: false });
+      return;
+    }
+    if (!(await ensureNotifPermission())) return;
+    updateSettings({ khatmahReminderEnabled: true });
+  };
+
   const fmtTime = (h: number, m: number) =>
     `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+  const pickerHour =
+    timeTarget === 'khatmah'
+      ? settings.khatmahReminderHour
+      : settings.ayahOfDayHour;
+  const pickerMinute =
+    timeTarget === 'khatmah'
+      ? settings.khatmahReminderMinute
+      : settings.ayahOfDayMinute;
+  const setPickerHour = (h: number) => {
+    if (timeTarget === 'khatmah') updateSettings({ khatmahReminderHour: h });
+    else updateSettings({ ayahOfDayHour: h });
+  };
+  const setPickerMinute = (m: number) => {
+    if (timeTarget === 'khatmah') updateSettings({ khatmahReminderMinute: m });
+    else updateSettings({ ayahOfDayMinute: m });
+  };
 
   const selectedNotificationSound = useMemo(
     () => getNotificationSoundOption(settings.notificationSound),
@@ -325,7 +354,7 @@ function NotificationsCardImpl({
             s.rowPress,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}
-          onPress={() => setAyahTimeVisible(true)}>
+          onPress={() => setTimeTarget('ayah')}>
           <View style={s.switchCopy}>
             <Text style={[s.label, { color: palette.muted }]}>
               {t('settings.ayahOfDayTime', 'Notification time')}
@@ -340,16 +369,71 @@ function NotificationsCardImpl({
         </Pressable>
       )}
 
-      {/* Time picker — hour stepper + quarter-hour minute chips. */}
+      {/* Khatmah daily reminder (v2.7.28) — only meaningful while a plan
+          is active; the scheduler no-ops otherwise. */}
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.khatmahReminder', 'Khatmah daily reminder')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t(
+              'settings.khatmahReminderHelp',
+              "Today's portion and where to continue, while a khatmah is active.",
+            )}
+          </Text>
+        </View>
+        <Switch
+          value={settings.khatmahReminderEnabled}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={onToggleKhatmahReminder}
+        />
+      </View>
+
+      {settings.khatmahReminderEnabled && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.ayahOfDayTime', 'Notification time')}
+          style={[
+            s.card,
+            s.rowPress,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}
+          onPress={() => setTimeTarget('khatmah')}>
+          <View style={s.switchCopy}>
+            <Text style={[s.label, { color: palette.muted }]}>
+              {t('settings.ayahOfDayTime', 'Notification time')}
+            </Text>
+            <Text style={[s.valueText, { color: palette.text }]}>
+              {fmtTime(
+                settings.khatmahReminderHour,
+                settings.khatmahReminderMinute,
+              )}
+            </Text>
+          </View>
+          <Text style={[s.changeLink, { color: palette.accent }]}>
+            {t('common.change')}
+          </Text>
+        </Pressable>
+      )}
+
+      {/* Time picker — hour stepper + quarter-hour minute chips. Shared
+          by the ayah-of-the-day and khatmah reminder rows. */}
       <Modal
-        visible={ayahTimeVisible}
+        visible={timeTarget != null}
         transparent
         animationType="slide"
-        onRequestClose={() => setAyahTimeVisible(false)}>
+        onRequestClose={() => setTimeTarget(null)}>
         <Pressable
           style={[timeStyles.backdrop, { backgroundColor: palette.overlay }]}
           accessibilityLabel={t('common.close', 'Close')}
-          onPress={() => setAyahTimeVisible(false)}
+          onPress={() => setTimeTarget(null)}
         />
         <View style={[timeStyles.sheet, { backgroundColor: palette.card }]}>
           <Text style={[timeStyles.title, { color: palette.text }]}>
@@ -360,28 +444,20 @@ function NotificationsCardImpl({
               accessibilityRole="button"
               accessibilityLabel={t('settings.hourDown', 'Hour −')}
               hitSlop={8}
-              onPress={() =>
-                updateSettings({
-                  ayahOfDayHour: (settings.ayahOfDayHour + 23) % 24,
-                })
-              }
+              onPress={() => setPickerHour((pickerHour + 23) % 24)}
               style={[timeStyles.stepBtn, { borderColor: palette.border }]}>
               <Text style={[timeStyles.stepGlyph, { color: palette.accentSolid }]}>
                 −
               </Text>
             </Pressable>
             <Text style={[timeStyles.timeValue, { color: palette.text }]}>
-              {fmtTime(settings.ayahOfDayHour, settings.ayahOfDayMinute)}
+              {fmtTime(pickerHour, pickerMinute)}
             </Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('settings.hourUp', 'Hour +')}
               hitSlop={8}
-              onPress={() =>
-                updateSettings({
-                  ayahOfDayHour: (settings.ayahOfDayHour + 1) % 24,
-                })
-              }
+              onPress={() => setPickerHour((pickerHour + 1) % 24)}
               style={[timeStyles.stepBtn, { borderColor: palette.border }]}>
               <Text style={[timeStyles.stepGlyph, { color: palette.accentSolid }]}>
                 +
@@ -390,13 +466,13 @@ function NotificationsCardImpl({
           </View>
           <View style={timeStyles.minuteRow}>
             {[0, 15, 30, 45].map(m => {
-              const selected = settings.ayahOfDayMinute === m;
+              const selected = pickerMinute === m;
               return (
                 <Pressable
                   key={m}
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
-                  onPress={() => updateSettings({ ayahOfDayMinute: m })}
+                  onPress={() => setPickerMinute(m)}
                   style={[
                     timeStyles.chip,
                     {
@@ -424,7 +500,7 @@ function NotificationsCardImpl({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.done', 'Done')}
-            onPress={() => setAyahTimeVisible(false)}
+            onPress={() => setTimeTarget(null)}
             style={[timeStyles.doneBtn, { backgroundColor: palette.accentSolid }]}>
             <Text style={timeStyles.doneLabel}>{t('common.done', 'Done')}</Text>
           </Pressable>

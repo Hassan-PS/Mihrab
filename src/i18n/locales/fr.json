@@ -37,7 +37,8 @@
     "today": "Aujourd'hui",
     "close": "Fermer",
     "share": "Partager",
-    "done": "Terminé"
+    "done": "Terminé",
+    "delete": "Supprimer"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "Un verset choisi au hasard avec sa traduction, chaque jour.",
     "ayahOfDayTime": "Heure de la notification",
     "hourDown": "Heure −",
-    "hourUp": "Heure +"
+    "hourUp": "Heure +",
+    "khatmahReminder": "Rappel quotidien de khatma",
+    "khatmahReminderHelp": "La portion du jour et où continuer, tant qu'une khatma est active.",
+    "resetApp": "Réinitialiser les données de l'app",
+    "resetAppHelp": "Efface tous les réglages et données. Irréversible."
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -746,7 +751,7 @@
     "pageLabel": "Page {{page}}",
     "switchToTranslation": "Basculer vers la vue tafsir",
     "switchToMushaf": "Basculer vers la vue mushaf",
-    "viewToggleTranslation": "Tafsir",
+    "viewToggleTranslation": "Traduction",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
@@ -824,7 +829,26 @@
     "switchToNight": "Passer à la page nuit",
     "switchToLight": "Passer à la page claire",
     "ayahOfDayTitle": "Verset du jour",
-    "ayahOfDayChannelName": "Verset du jour"
+    "ayahOfDayChannelName": "Verset du jour",
+    "tafsir": "Tafsir",
+    "showTafsir": "Afficher le tafsir",
+    "tafsirUnavailable": "Tafsir indisponible — connectez-vous une fois à Internet pour le télécharger.",
+    "khatmahPin": "Définir comme ma position de khatma",
+    "khatmahPinned": "Position de khatma — touchez pour retirer",
+    "khatmahUnpin": "Retirer la position de khatma",
+    "khatmahContinue": "Continuer",
+    "khatmahReset": "Réinitialiser",
+    "khatmahResetTitle": "Réinitialiser la khatma",
+    "khatmahResetToday": "Réinitialiser la lecture d'aujourd'hui",
+    "khatmahResetTodayHelp": "Annule uniquement les pages enregistrées aujourd'hui.",
+    "khatmahResetAll": "Recommencer la khatma",
+    "khatmahResetAllHelp": "Retour à la page 0 avec un nouveau calendrier.",
+    "khatmahDelete": "Supprimer la khatma",
+    "khatmahDeleteHelp": "Supprime entièrement le plan.",
+    "khatmahReminderChannelName": "Rappel de khatma",
+    "khatmahReminderTitle": "Khatma",
+    "khatmahReminderBody": "Portion du jour : {{pages}} pages — continuez à partir de la page {{page}}.",
+    "audioButton": "Audio"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Invocations de Hisn al-Muslim",
     "quranGeometry": "Données de position des versets (quran.com / projet Quran for Android)",
-    "recitation": "Audio de récitation (21 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)"
+    "recitation": "Audio de récitation (21 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)",
+    "tafsir": "Textes de tafsir : Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
     "title": "Prochaine prière",
@@ -1032,5 +1057,17 @@
     "skip": "Passer",
     "next": "Suivant",
     "done": "Commencer"
+  },
+  "downloads": {
+    "title": "Gérer les téléchargements",
+    "settingsHelp": "Pages du mushaf, audio de récitation et tafsir sur cet appareil.",
+    "deleteTitle": "Supprimer le téléchargement ?",
+    "deleteBody": "{{what}} sera retiré de cet appareil. Vous pourrez le retélécharger à tout moment.",
+    "total": "Total sur l'appareil : {{size}}",
+    "mushaf": "Pages du mushaf",
+    "mushafSub": "604 pages de Médine",
+    "audioSub": "Audio de récitation",
+    "tafsirSub": "Textes de tafsir en cache",
+    "empty": "Rien de téléchargé pour le moment. Les pages du mushaf, l'audio et le tafsir téléchargés apparaîtront ici."
   }
 }

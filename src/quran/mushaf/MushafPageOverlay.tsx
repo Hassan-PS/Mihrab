@@ -2,9 +2,13 @@
  * Per-page mushaf overlay — QR-8/12/17 (docs/quran-reader-plan.md).
  *
  * Renders on top of a page image, in image-local coordinates:
- *   • selected-ayah highlight (tap feedback / action-sheet anchor),
+ *   • selected-ayah highlight (long-press feedback / action-sheet anchor),
  *   • playing-ayah highlight that follows recitation,
- *   • bookmark markers in the margin of the ayah's first line.
+ *   • bookmarked ayahs highlighted IN FULL in their bookmark color
+ *     (v2.7.28 — the old margin marker sat at the *start* of the ayah,
+ *     which reads as the previous ayah since the ayah number comes
+ *     after the text). Kept translucent so the page stays readable.
+ *   • the khatmah position ayah in the reserved khatmah color.
  *
  * Pure presentational; geometry must already be loaded (the reader
  * gates on `loadGeometry()`), so all lookups here are synchronous.
@@ -16,7 +20,11 @@ import {
   pageAyahLineRects,
   type AyahLineRect,
 } from '../geometry';
-import { BOOKMARK_COLORS, type QuranBookmark } from '../quranState';
+import {
+  BOOKMARK_COLORS,
+  KHATMAH_COLOR,
+  type QuranBookmark,
+} from '../quranState';
 
 type Props = {
   page: number;
@@ -24,6 +32,8 @@ type Props = {
   selected: { surah: number; ayah: number } | null;
   playing: { surah: number; ayah: number } | null;
   bookmarks: QuranBookmark[];
+  /** Active khatmah pinned position, if it falls on this page. */
+  khatmahPosition: { surah: number; ayah: number } | null;
   accentColor: string;
   nightMode: boolean;
 };
@@ -42,6 +52,7 @@ export const MushafPageOverlay = memo(function MushafPageOverlay({
   selected,
   playing,
   bookmarks,
+  khatmahPosition,
   accentColor,
   nightMode,
 }: Props) {
@@ -69,51 +80,39 @@ export const MushafPageOverlay = memo(function MushafPageOverlay({
 
   const selectedRects = rectsFor(rects, selected);
   const playingRects = rectsFor(rects, playing);
+  const khatmahRects = rectsFor(rects, khatmahPosition);
 
-  // Bookmark markers: at the first (topmost, rightmost) rect of the ayah.
-  const markers = bookmarks
-    .map(b => {
-      const own = rects
-        .filter(r => r.surah === b.surah && r.ayah === b.ayah)
-        .sort((p, q) => p.line - q.line);
-      if (own.length === 0) return null;
-      const r = own[0];
-      return { b, r };
-    })
-    .filter((m): m is { b: QuranBookmark; r: AyahLineRect } => m != null);
+  // Full-ayah bookmark highlights. Opacities stay low so the black
+  // (light mode) / inverted-white (night mode) ink keeps full contrast.
+  const bookmarkBoxes = bookmarks.flatMap(b =>
+    rects
+      .filter(r => r.surah === b.surah && r.ayah === b.ayah)
+      .map((r, i) =>
+        box(
+          r,
+          `b${b.id}-${i}`,
+          BOOKMARK_COLORS[b.color],
+          nightMode ? 0.28 : 0.16,
+        ),
+      ),
+  );
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      {bookmarkBoxes}
+      {khatmahRects.map((r, i) =>
+        box(r, `k${i}`, KHATMAH_COLOR, nightMode ? 0.3 : 0.18),
+      )}
       {playingRects.map((r, i) =>
         box(r, `p${i}`, accentColor, nightMode ? 0.35 : 0.22),
       )}
       {selectedRects.map((r, i) =>
         box(r, `s${i}`, accentColor, nightMode ? 0.3 : 0.18),
       )}
-      {markers.map(({ b, r }) => (
-        <View
-          key={b.id}
-          pointerEvents="none"
-          style={[
-            styles.marker,
-            {
-              backgroundColor: BOOKMARK_COLORS[b.color],
-              left: r.x1 * scale + 2,
-              top: r.y0 * scale,
-              height: Math.max(14, (r.y1 - r.y0) * scale * 0.6),
-            },
-          ]}
-        />
-      ))}
     </View>
   );
 });
 
 const styles = StyleSheet.create({
   rect: { position: 'absolute', borderRadius: 6 },
-  marker: {
-    position: 'absolute',
-    width: 4,
-    borderRadius: 2,
-  },
 });

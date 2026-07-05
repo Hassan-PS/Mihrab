@@ -186,6 +186,53 @@ export function downloadSurahAudio(
   };
 }
 
+/**
+ * Prefetch a single ayah MP3 for gapless playback — v2.7.28. Called by
+ * the playback orchestrator for upcoming queue items so long listening
+ * sessions turn local (no network gap between ayahs) after warmup.
+ * Best-effort: one attempt with a 30 s watchdog; resolves the local
+ * path or null.
+ */
+export async function prefetchAyahAudio(
+  reciterId: string,
+  surah: number,
+  ayah: number,
+): Promise<string | null> {
+  const path = ayahAudioFilePath(reciterId, surah, ayah);
+  try {
+    if (await fileValid(path)) return path;
+    await mkdirDeep(audioDir(reciterId));
+    const reciter = findReciter(reciterId);
+    const tmp = `${path}.part`;
+    const task = ReactNativeBlobUtil.config({
+      path: tmp,
+      overwrite: true,
+    }).fetch('GET', ayahAudioUrl(reciter, surah, ayah));
+    let watchdog: ReturnType<typeof setTimeout> | null = null;
+    const res = await Promise.race([
+      task,
+      new Promise<never>((_, reject) => {
+        watchdog = setTimeout(() => {
+          task.cancel(() => undefined);
+          reject(new Error('prefetch timed out'));
+        }, 30_000);
+      }),
+    ]).finally(() => {
+      if (watchdog != null) clearTimeout(watchdog);
+    });
+    const stat = await ReactNativeBlobUtil.fs.stat(tmp).catch(() => null);
+    if (res.info().status !== 200 || !stat || Number(stat.size) <= 1000) {
+      await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
+      return null;
+    }
+    await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
+    await ReactNativeBlobUtil.fs.mv(tmp, path);
+    return path;
+  } catch {
+    return null;
+  }
+}
+
 /** Delete all downloaded audio for one reciter. */
 export async function deleteReciterAudio(reciterId: string): Promise<void> {
   try {

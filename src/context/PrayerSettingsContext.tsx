@@ -75,6 +75,9 @@ export type NotificationsSlice = Pick<
   | 'ayahOfDayEnabled'
   | 'ayahOfDayHour'
   | 'ayahOfDayMinute'
+  | 'khatmahReminderEnabled'
+  | 'khatmahReminderHour'
+  | 'khatmahReminderMinute'
 >;
 
 export type DataSourceSlice = Pick<
@@ -224,6 +227,9 @@ export function PrayerSettingsProvider({
       ayahOfDayEnabled: settings.ayahOfDayEnabled,
       ayahOfDayHour: settings.ayahOfDayHour,
       ayahOfDayMinute: settings.ayahOfDayMinute,
+      khatmahReminderEnabled: settings.khatmahReminderEnabled,
+      khatmahReminderHour: settings.khatmahReminderHour,
+      khatmahReminderMinute: settings.khatmahReminderMinute,
     }),
     [
       settings.notificationsEnabled,
@@ -235,6 +241,9 @@ export function PrayerSettingsProvider({
       settings.ayahOfDayEnabled,
       settings.ayahOfDayHour,
       settings.ayahOfDayMinute,
+      settings.khatmahReminderEnabled,
+      settings.khatmahReminderHour,
+      settings.khatmahReminderMinute,
     ],
   );
 

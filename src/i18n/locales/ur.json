@@ -37,7 +37,8 @@
     "today": "آج",
     "close": "بند کریں",
     "share": "شیئر کریں",
-    "done": "ہو گیا"
+    "done": "ہو گیا",
+    "delete": "حذف کریں"
   },
   "home": {
     "loadingPrayer": "نماز کے اوقات لوڈ ہو رہے ہیں…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "ہر روز ایک بے ترتیب منتخب آیت مع ترجمہ۔",
     "ayahOfDayTime": "اطلاع کا وقت",
     "hourDown": "گھنٹہ −",
-    "hourUp": "گھنٹہ +"
+    "hourUp": "گھنٹہ +",
+    "khatmahReminder": "روزانہ ختم یاد دہانی",
+    "khatmahReminderHelp": "ختم جاری رہنے کے دوران آج کا حصہ اور کہاں سے جاری رکھیں۔",
+    "resetApp": "ایپ ڈیٹا ری سیٹ کریں",
+    "resetAppHelp": "تمام ترتیبات اور ڈیٹا مٹا دیتا ہے۔ واپس نہیں ہو سکتا۔"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",
@@ -746,7 +751,7 @@
     "pageLabel": "صفحہ {{page}}",
     "switchToTranslation": "تفسیر منظر پر جائیں",
     "switchToMushaf": "مصحف منظر پر جائیں",
-    "viewToggleTranslation": "تفسیر",
+    "viewToggleTranslation": "ترجمہ",
     "viewToggleMushaf": "مصحف",
     "enterFullscreen": "فل اسکرین",
     "exitFullscreen": "فل اسکرین سے باہر",
@@ -824,7 +829,26 @@
     "switchToNight": "رات کے صفحے پر جائیں",
     "switchToLight": "روشن صفحے پر جائیں",
     "ayahOfDayTitle": "آج کی آیت",
-    "ayahOfDayChannelName": "آج کی آیت"
+    "ayahOfDayChannelName": "آج کی آیت",
+    "tafsir": "تفسیر",
+    "showTafsir": "تفسیر دکھائیں",
+    "tafsirUnavailable": "تفسیر دستیاب نہیں — ڈاؤن لوڈ کے لیے ایک بار انٹرنیٹ سے جڑیں۔",
+    "khatmahPin": "میری ختم کی پوزیشن مقرر کریں",
+    "khatmahPinned": "ختم کی پوزیشن — ہٹانے کے لیے دبائیں",
+    "khatmahUnpin": "ختم کی پوزیشن ہٹائیں",
+    "khatmahContinue": "جاری رکھیں",
+    "khatmahReset": "ری سیٹ",
+    "khatmahResetTitle": "ختم ری سیٹ کریں",
+    "khatmahResetToday": "آج کی تلاوت ری سیٹ کریں",
+    "khatmahResetTodayHelp": "صرف آج درج شدہ صفحات واپس کرتا ہے۔",
+    "khatmahResetAll": "ختم دوبارہ شروع کریں",
+    "khatmahResetAllHelp": "نئے شیڈول کے ساتھ صفحہ 0 سے۔",
+    "khatmahDelete": "ختم حذف کریں",
+    "khatmahDeleteHelp": "منصوبہ مکمل طور پر ہٹا دیتا ہے۔",
+    "khatmahReminderChannelName": "ختم یاد دہانی",
+    "khatmahReminderTitle": "ختم",
+    "khatmahReminderBody": "آج کا حصہ: {{pages}} صفحات — صفحہ {{page}} سے جاری رکھیں۔",
+    "audioButton": "آڈیو"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "حصنُ المسلم کی دعائیں",
     "quranGeometry": "آیات کی پوزیشن کا ڈیٹا (quran.com / Quran for Android پروجیکٹ)",
-    "recitation": "تلاوت کی آڈیو (21 قاری): EveryAyah.com · الفاظ کی ٹائمنگ: quran-align (CC BY 4.0)"
+    "recitation": "تلاوت کی آڈیو (21 قاری): EveryAyah.com · الفاظ کی ٹائمنگ: quran-align (CC BY 4.0)",
+    "tafsir": "تفسیری متون: ابن کثیر، معارف القرآن، المیسر"
   },
   "liveActivity": {
     "title": "اگلی نماز",
@@ -1032,5 +1057,17 @@
     "skip": "چھوڑ دیں",
     "next": "اگلا",
     "done": "شروع کریں"
+  },
+  "downloads": {
+    "title": "ڈاؤن لوڈز کا نظم کریں",
+    "settingsHelp": "اس آلے پر مصحف کے صفحات، تلاوت کی آڈیو اور تفسیر۔",
+    "deleteTitle": "ڈاؤن لوڈ حذف کریں؟",
+    "deleteBody": "{{what}} اس آلے سے ہٹا دیا جائے گا۔ آپ اسے کسی بھی وقت دوبارہ ڈاؤن لوڈ کر سکتے ہیں۔",
+    "total": "آلے پر کل: {{size}}",
+    "mushaf": "مصحف کے صفحات",
+    "mushafSub": "مدینہ مصحف کے 604 صفحات",
+    "audioSub": "تلاوت کی آڈیو",
+    "tafsirSub": "محفوظ شدہ تفسیر",
+    "empty": "ابھی کچھ ڈاؤن لوڈ نہیں ہوا۔ ڈاؤن لوڈ کردہ مصحف صفحات، آڈیو اور تفسیر یہاں نظر آئیں گے۔"
   }
 }

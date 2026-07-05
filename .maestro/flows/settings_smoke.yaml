@@ -1,0 +1,28 @@
+appId: com.prayer_times
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Mihrab"
+    timeout: 20000
+# Settings gear sits in the header (top-right).
+- tapOn:
+    point: "91%,6%"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 15000
+- assertVisible: "Theme"
+- scrollUntilVisible:
+    element:
+      text: "Ayah of the day"
+    direction: DOWN
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Manage downloads"
+    direction: DOWN
+    timeout: 30000
+- tapOn: "Manage downloads"
+- extendedWaitUntil:
+    visible: ".*on device.*|.*Nothing downloaded.*|Total.*"
+    timeout: 15000
+- back

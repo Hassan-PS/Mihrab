@@ -85,14 +85,10 @@
 	below match the font's PostScript / family name (NOT the filename),
 	which is what RN reads at runtime as `fontFamily`.
 
-	Recommended files (both have permissive licenses for app distribution):
-	  * Amiri-Regular.ttf and Amiri-Bold.ttf — https://github.com/aliftype/amiri (OFL).
-	    Used for Quran ayahs (FONTS.arabicQuran in src/theme/typography.ts).
-	  * ScheherazadeNew-Regular.ttf — https://software.sil.org/scheherazade/ (OFL).
-	    Used for general Arabic body text (FONTS.arabicBody).
-
-	Until the .ttf files land here, RN falls back to the system Arabic
-	face — which is fine for development but visually thin for ayah text.
+	Bundled files (permissive OFL licenses for app distribution):
+	  * Amiri-Regular.ttf — https://github.com/aliftype/amiri (OFL).
+	    General Arabic body text (FONTS.arabicBody).
+	  * AmiriQuran.ttf — Quran ayahs (FONTS.arabicQuran).
 	-->
 	<key>UIAppFonts</key>
 	<array>

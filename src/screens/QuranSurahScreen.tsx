@@ -49,7 +49,6 @@ import {
 import { usePlaybackStatus } from '../quran/audio/playback';
 import { useActiveWordIndex } from '../quran/audio/useWordTiming';
 import { AyahActionSheet } from '../quran/mushaf/AyahActionSheet';
-import { PlaybackSettingsSheet } from '../quran/audio/PlaybackSettingsSheet';
 import { MiniPlayer } from '../quran/audio/MiniPlayer';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
@@ -77,6 +76,10 @@ export function QuranSurahScreen() {
   const surah = findSurah(surahNumber);
   const quran = useQuranState();
   const playback = usePlaybackStatus();
+  // Header closures read playback via a ref so the nav header doesn't
+  // rebuild on every ayah change.
+  const playbackRef = useRef(playback);
+  playbackRef.current = playback;
   const activeWord = useActiveWordIndex();
   const edition = useActiveEdition();
 
@@ -120,7 +123,10 @@ export function QuranSurahScreen() {
   // ── Selection / sheets ──────────────────────────────────────────────
   const [selectedAyah, setSelectedAyah] = useState<number | null>(null);
   const [sheetVisible, setSheetVisible] = useState(false);
-  const [playbackSheetVisible, setPlaybackSheetVisible] = useState(false);
+  const [sheetScrollAudio, setSheetScrollAudio] = useState(false);
+  // Mushaf mode: incrementing signal → MushafReader opens the unified
+  // sheet scrolled to the recitation section.
+  const [audioSheetSignal, setAudioSheetSignal] = useState(0);
   const [editionPickerVisible, setEditionPickerVisible] = useState(false);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
 
@@ -154,10 +160,30 @@ export function QuranSurahScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('quran.playbackSettings', 'Recitation')}
-            onPress={() => setPlaybackSheetVisible(true)}
+            onPress={() => {
+              // Unified sheet (v2.7.28): open the ayah panel scrolled to
+              // the recitation controls — everything lives in one place.
+              if (isMushaf) {
+                setAudioSheetSignal(s => s + 1);
+              } else {
+                const active = playbackRef.current.active;
+                setSelectedAyah(
+                  active?.surah === surahNumber ? active.ayah : 1,
+                );
+                setSheetScrollAudio(true);
+                setSheetVisible(true);
+              }
+            }}
             hitSlop={10}
             style={{ paddingHorizontal: 4 }}>
-            <Text style={{ color: palette.accentSolid, fontSize: 17 }}>♪</Text>
+            <Text
+              style={{
+                color: palette.accentSolid,
+                fontSize: 15,
+                fontWeight: '700',
+              }}>
+              {`♪ ${t('quran.audioButton', 'Audio')}`}
+            </Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -254,23 +280,15 @@ export function QuranSurahScreen() {
 
   if (isMushaf) {
     return (
-      <>
-        <MushafReader
-          surahNumber={surahNumber}
-          initialPage={initialPage}
-          isFullscreen={isFullscreen}
-          onExitFullscreen={() => setIsFullscreen(false)}
-          onTitleChange={title => navigation.setOptions({ title })}
-        />
-        {/* The header ♪ button lives on this screen, so the recitation
-            sheet must mount here too — the early return used to leave it
-            unmounted in mushaf mode (button silently did nothing). */}
-        <PlaybackSettingsSheet
-          visible={playbackSheetVisible}
-          onClose={() => setPlaybackSheetVisible(false)}
-          surahNumber={surahNumber}
-        />
-      </>
+      <MushafReader
+        surahNumber={surahNumber}
+        initialPage={initialPage}
+        isFullscreen={isFullscreen}
+        onExitFullscreen={() => setIsFullscreen(false)}
+        onToggleFullscreen={() => setIsFullscreen(f => !f)}
+        audioSheetSignal={audioSheetSignal}
+        onTitleChange={title => navigation.setOptions({ title })}
+      />
     );
   }
 
@@ -311,6 +329,7 @@ export function QuranSurahScreen() {
             return;
           }
           setSelectedAyah(ayah);
+          setSheetScrollAudio(false);
           setSheetVisible(true);
         }}
         style={[
@@ -483,14 +502,9 @@ export function QuranSurahScreen() {
           surah={surahNumber}
           ayah={selectedAyah}
           page={findPageForAyah(surahNumber, selectedAyah)}
+          scrollToAudio={sheetScrollAudio}
         />
       ) : null}
-
-      <PlaybackSettingsSheet
-        visible={playbackSheetVisible}
-        onClose={() => setPlaybackSheetVisible(false)}
-        surahNumber={surahNumber}
-      />
 
       {/* Translation-edition picker (task #124) */}
       <Modal

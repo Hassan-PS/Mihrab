@@ -37,7 +37,8 @@
     "today": "今天",
     "close": "关闭",
     "share": "分享",
-    "done": "完成"
+    "done": "完成",
+    "delete": "删除"
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "每天随机挑选一节经文及其译文。",
     "ayahOfDayTime": "通知时间",
     "hourDown": "小时 −",
-    "hourUp": "小时 +"
+    "hourUp": "小时 +",
+    "khatmahReminder": "每日完读提醒",
+    "khatmahReminderHelp": "完读计划进行期间，提示今日份额及继续位置。",
+    "resetApp": "重置应用数据",
+    "resetAppHelp": "清除所有设置和数据。无法撤销。"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -746,7 +751,7 @@
     "pageLabel": "第 {{page}} 页",
     "switchToTranslation": "切换到经注视图",
     "switchToMushaf": "切换到经文视图",
-    "viewToggleTranslation": "经注",
+    "viewToggleTranslation": "译文",
     "viewToggleMushaf": "穆斯哈夫",
     "enterFullscreen": "全屏",
     "exitFullscreen": "退出全屏",
@@ -824,7 +829,26 @@
     "switchToNight": "切换到夜间页面",
     "switchToLight": "切换到明亮页面",
     "ayahOfDayTitle": "每日经文",
-    "ayahOfDayChannelName": "每日经文"
+    "ayahOfDayChannelName": "每日经文",
+    "tafsir": "经注",
+    "showTafsir": "显示经注",
+    "tafsirUnavailable": "经注不可用 — 请联网一次以下载。",
+    "khatmahPin": "设为我的完读位置",
+    "khatmahPinned": "完读位置 — 点按以移除",
+    "khatmahUnpin": "移除完读位置",
+    "khatmahContinue": "继续",
+    "khatmahReset": "重置",
+    "khatmahResetTitle": "重置完读计划",
+    "khatmahResetToday": "重置今日阅读",
+    "khatmahResetTodayHelp": "仅撤销今天记录的页数。",
+    "khatmahResetAll": "重新开始完读",
+    "khatmahResetAllHelp": "回到第 0 页并重新排期。",
+    "khatmahDelete": "删除完读计划",
+    "khatmahDeleteHelp": "完全移除该计划。",
+    "khatmahReminderChannelName": "完读提醒",
+    "khatmahReminderTitle": "完读",
+    "khatmahReminderBody": "今日份额：{{pages}} 页 — 从第 {{page}} 页继续。",
+    "audioButton": "音频"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "《穆斯林堡垒》中的祷词",
     "quranGeometry": "经文位置数据（quran.com / Quran for Android 项目）",
-    "recitation": "诵读音频（21位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）"
+    "recitation": "诵读音频（21位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）",
+    "tafsir": "经注文本：伊本·凯西尔、Maarif-ul-Quran、简明经注"
   },
   "liveActivity": {
     "title": "下一次礼拜",
@@ -1032,5 +1057,17 @@
     "skip": "跳过",
     "next": "下一步",
     "done": "开始使用"
+  },
+  "downloads": {
+    "title": "管理下载",
+    "settingsHelp": "此设备上的穆斯哈夫页面、诵读音频与经注。",
+    "deleteTitle": "删除下载？",
+    "deleteBody": "{{what}} 将从此设备移除。您可以随时重新下载。",
+    "total": "设备上共计：{{size}}",
+    "mushaf": "穆斯哈夫页面",
+    "mushafSub": "604 页麦地那版",
+    "audioSub": "诵读音频",
+    "tafsirSub": "已缓存的经注",
+    "empty": "尚无下载。下载的穆斯哈夫页面、音频与经注会显示在这里。"
   }
 }

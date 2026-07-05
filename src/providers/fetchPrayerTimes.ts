@@ -5,6 +5,10 @@ import { fetchIslamiskaForbundetTimes } from './islamiskaForbundet';
 import { computeLocalAdhanTimes } from './localAdhan';
 import { computeImsak, DEFAULT_IMSAK_OFFSET_MINUTES } from './imsak';
 import { validateTimings } from './validateTimings';
+import {
+  isProviderCoolingDown,
+  recordProviderResult,
+} from './providerHealth';
 
 export async function fetchPrayerTimesUnified(
   p: UnifiedFetchParams,
@@ -28,13 +32,35 @@ export async function fetchPrayerTimesUnified(
         school: p.school,
       });
       break;
-    case 'islamiska_forbundet':
-      result = await fetchIslamiskaForbundetTimes({
-        latitude: p.latitude,
-        longitude: p.longitude,
-        date: p.date,
-      });
+    case 'islamiska_forbundet': {
+      // The Swedish scraper origin regularly times out. After 3
+      // consecutive failures it enters a 12 h cooldown during which we
+      // silently serve AlAdhan for the same coordinates instead of
+      // hammering (and warn-spamming about) a dead origin. Cached days
+      // remain authoritative either way (see prayerStorage).
+      if (await isProviderCoolingDown('islamiska_forbundet')) {
+        result = await fetchAladhanTimes({
+          latitude: p.latitude,
+          longitude: p.longitude,
+          date: p.date,
+          method: p.calculationMethod,
+          school: p.school,
+        });
+        break;
+      }
+      try {
+        result = await fetchIslamiskaForbundetTimes({
+          latitude: p.latitude,
+          longitude: p.longitude,
+          date: p.date,
+        });
+        void recordProviderResult('islamiska_forbundet', true);
+      } catch (e) {
+        void recordProviderResult('islamiska_forbundet', false);
+        throw e;
+      }
       break;
+    }
     case 'local_adhan':
       // On-device calculation — skip network validation, it always produces valid output.
       return computeLocalAdhanTimes({

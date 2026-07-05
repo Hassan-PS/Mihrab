@@ -24,7 +24,7 @@ import TrackPlayer, {
 import { findSurah, SURAHS } from '../quran';
 import { getQuranState } from '../quranState';
 import { ayahAudioUrl, findReciter } from './reciters';
-import { localAudioPathIfAny } from './audioStore';
+import { localAudioPathIfAny, prefetchAyahAudio } from './audioStore';
 
 export type AyahRef = { surah: number; ayah: number };
 
@@ -106,6 +106,8 @@ async function ensureSetup(): Promise<void> {
     TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, e => {
       const ref = e.track ? parseTrackId(String(e.track.id)) : null;
       setStatus({ active: ref });
+      // Gapless: warm the next few ayahs onto disk (v2.7.28).
+      void prefetchUpcoming();
     });
     TrackPlayer.addEventListener(Event.PlaybackState, e => {
       setStatus({
@@ -121,6 +123,68 @@ async function ensureSetup(): Promise<void> {
     });
   })();
   return setupPromise;
+}
+
+// ── Gapless prefetch (v2.7.28) ───────────────────────────────────────
+//
+// On every track change, warm the next few ayahs onto disk and swap
+// their queue entries from remote URL → local file. Entries closer
+// than +2 are never touched (ExoPlayer may already be buffering the
+// immediate next item; replacing it would cause the very gap we're
+// removing). After a short warmup a long session plays entirely from
+// disk — no network pause between ayahs.
+
+const PREFETCH_AHEAD = 3;
+const inFlightPrefetch = new Set<string>();
+
+async function prefetchUpcoming(): Promise<void> {
+  try {
+    const [queue, idx] = await Promise.all([
+      TrackPlayer.getQueue(),
+      TrackPlayer.getActiveTrackIndex(),
+    ]);
+    if (idx == null) return;
+    const reciterId = status.reciterId;
+    const last = Math.min(idx + PREFETCH_AHEAD, queue.length - 1);
+    for (let i = idx + 1; i <= last; i++) {
+      const tr = queue[i];
+      if (!tr || typeof tr.url !== 'string' || !tr.url.startsWith('http')) {
+        continue;
+      }
+      const ref = parseTrackId(String(tr.id));
+      if (!ref) continue;
+      const key = `${reciterId}:${ref.surah}:${ref.ayah}`;
+      if (inFlightPrefetch.has(key)) continue;
+      inFlightPrefetch.add(key);
+      void prefetchAyahAudio(reciterId, ref.surah, ref.ayah)
+        .then(async path => {
+          inFlightPrefetch.delete(key);
+          if (!path) return;
+          const [q2, idx2] = await Promise.all([
+            TrackPlayer.getQueue(),
+            TrackPlayer.getActiveTrackIndex(),
+          ]);
+          if (idx2 == null) return;
+          for (let j = idx2 + 2; j < q2.length; j++) {
+            const t2 = q2[j];
+            if (
+              t2?.id === tr.id &&
+              typeof t2.url === 'string' &&
+              t2.url.startsWith('http')
+            ) {
+              await TrackPlayer.remove([j]);
+              await TrackPlayer.add({ ...t2, url: `file://${path}` }, j);
+              break;
+            }
+          }
+        })
+        .catch(() => {
+          inFlightPrefetch.delete(key);
+        });
+    }
+  } catch {
+    /* best effort */
+  }
 }
 
 // ── Queue building ───────────────────────────────────────────────────

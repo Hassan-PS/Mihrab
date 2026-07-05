@@ -37,7 +37,8 @@
     "today": "আজ",
     "close": "বন্ধ করুন",
     "share": "শেয়ার করুন",
-    "done": "সম্পন্ন"
+    "done": "সম্পন্ন",
+    "delete": "মুছুন"
   },
   "home": {
     "loadingPrayer": "নামাজের সময় লোড হচ্ছে...",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "প্রতিদিন একটি এলোমেলোভাবে নির্বাচিত আয়াত ও তার অনুবাদ।",
     "ayahOfDayTime": "বিজ্ঞপ্তির সময়",
     "hourDown": "ঘণ্টা −",
-    "hourUp": "ঘণ্টা +"
+    "hourUp": "ঘণ্টা +",
+    "khatmahReminder": "দৈনিক খতম স্মরণিকা",
+    "khatmahReminderHelp": "খতম চলাকালীন আজকের অংশ ও কোথা থেকে চালিয়ে যাবেন।",
+    "resetApp": "অ্যাপের ডেটা রিসেট করুন",
+    "resetAppHelp": "সব সেটিংস ও ডেটা মুছে দেয়। ফেরানো যাবে না।"
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",
@@ -746,7 +751,7 @@
     "pageLabel": "পৃষ্ঠা {{page}}",
     "switchToTranslation": "তাফসীর ভিউ-এ যান",
     "switchToMushaf": "মুসহাফ ভিউ-এ যান",
-    "viewToggleTranslation": "তাফসীর",
+    "viewToggleTranslation": "অনুবাদ",
     "viewToggleMushaf": "মুসহাফ",
     "enterFullscreen": "ফুলস্ক্রিন",
     "exitFullscreen": "ফুলস্ক্রিন থেকে বের হও",
@@ -824,7 +829,26 @@
     "switchToNight": "রাতের পৃষ্ঠায় যান",
     "switchToLight": "আলোর পৃষ্ঠায় যান",
     "ayahOfDayTitle": "আজকের আয়াত",
-    "ayahOfDayChannelName": "আজকের আয়াত"
+    "ayahOfDayChannelName": "আজকের আয়াত",
+    "tafsir": "তাফসীর",
+    "showTafsir": "তাফসীর দেখান",
+    "tafsirUnavailable": "তাফসীর পাওয়া যাচ্ছে না — ডাউনলোড করতে একবার ইন্টারনেটে সংযোগ করুন।",
+    "khatmahPin": "আমার খতমের অবস্থান হিসেবে সেট করুন",
+    "khatmahPinned": "খতমের অবস্থান — সরাতে চাপুন",
+    "khatmahUnpin": "খতমের অবস্থান সরান",
+    "khatmahContinue": "চালিয়ে যান",
+    "khatmahReset": "রিসেট",
+    "khatmahResetTitle": "খতম রিসেট করুন",
+    "khatmahResetToday": "আজকের পড়া রিসেট করুন",
+    "khatmahResetTodayHelp": "শুধু আজ রেকর্ড হওয়া পৃষ্ঠাগুলো ফিরিয়ে নেয়।",
+    "khatmahResetAll": "খতম নতুন করে শুরু করুন",
+    "khatmahResetAllHelp": "নতুন সময়সূচিসহ পৃষ্ঠা ০ থেকে শুরু।",
+    "khatmahDelete": "খতম মুছে ফেলুন",
+    "khatmahDeleteHelp": "পরিকল্পনাটি সম্পূর্ণ মুছে দেয়।",
+    "khatmahReminderChannelName": "খতম স্মরণিকা",
+    "khatmahReminderTitle": "খতম",
+    "khatmahReminderBody": "আজকের অংশ: {{pages}} পৃষ্ঠা — পৃষ্ঠা {{page}} থেকে চালিয়ে যান।",
+    "audioButton": "অডিও"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "হিসনুল মুসলিম-এর দোআ",
     "quranGeometry": "আয়াতের অবস্থানের ডেটা (quran.com / Quran for Android প্রকল্প)",
-    "recitation": "তিলাওয়াতের অডিও (২১ জন ক্বারী): EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)"
+    "recitation": "তিলাওয়াতের অডিও (২১ জন ক্বারী): EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)",
+    "tafsir": "তাফসীর: ইবনে কাসীর, মাআরিফুল কুরআন, আল-মুয়াসসার"
   },
   "liveActivity": {
     "title": "পরবর্তী নামায",
@@ -1032,5 +1057,17 @@
     "skip": "এড়িয়ে যান",
     "next": "পরবর্তী",
     "done": "শুরু করুন"
+  },
+  "downloads": {
+    "title": "ডাউনলোড ব্যবস্থাপনা",
+    "settingsHelp": "এই ডিভাইসে মুসহাফ পৃষ্ঠা, তিলাওয়াত অডিও ও তাফসীর।",
+    "deleteTitle": "ডাউনলোড মুছবেন?",
+    "deleteBody": "{{what}} এই ডিভাইস থেকে সরানো হবে। যেকোনো সময় আবার ডাউনলোড করা যাবে।",
+    "total": "ডিভাইসে মোট: {{size}}",
+    "mushaf": "মুসহাফ পৃষ্ঠা",
+    "mushafSub": "৬০৪টি মদিনা পৃষ্ঠা",
+    "audioSub": "তিলাওয়াত অডিও",
+    "tafsirSub": "সংরক্ষিত তাফসীর",
+    "empty": "এখনো কিছু ডাউনলোড হয়নি। ডাউনলোড করা মুসহাফ পৃষ্ঠা, অডিও ও তাফসীর এখানে দেখা যাবে।"
   }
 }

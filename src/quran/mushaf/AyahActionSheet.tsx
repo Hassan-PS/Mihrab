@@ -1,13 +1,17 @@
 /**
- * Ayah action sheet — QR-8/9/12 (docs/quran-reader-plan.md).
+ * Ayah action sheet — QR-8/9/12, unified in v2.7.28.
  *
- * Bottom sheet shown when the user taps an ayah (mushaf page or
- * translation card). Combines the "translation peek" (read the meaning
- * without leaving the mushaf — Ayah's signature flow) with the action
- * row: play from here, repeat this ayah, bookmark (five colors), star,
- * copy, share.
+ * Bottom sheet shown on long-pressing an ayah (mushaf page or
+ * translation card). ONE panel for everything about the ayah:
+ *
+ *   • translation peek + real tafsir (on-demand, cached offline),
+ *   • bookmark (five colors), star, khatmah "I am here" pin,
+ *   • play from here / repeat / share (text or image card),
+ *   • the full recitation controls (reciter, download, speed,
+ *     memorization, range player) — the header "Recitation" button
+ *     opens this same sheet scrolled straight to this section.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -24,17 +28,28 @@ import { findSurah, loadSurah } from '../quran';
 import { getAyahTranslation } from '../translations';
 import { useActiveEdition } from '../useActiveEdition';
 import {
+  activeKhatmah,
   addBookmark,
-  BOOKMARK_COLORS,
+  clearKhatmahPosition,
   findBookmark,
   isStarred,
   removeBookmark,
+  setKhatmahPosition,
   toggleStar,
   useQuranState,
+  BOOKMARK_COLORS,
+  KHATMAH_COLOR,
   type BookmarkColor,
 } from '../quranState';
+import {
+  loadTafsir,
+  tafsirEditionsForLocale,
+  type TafsirEdition,
+} from '../tafsir';
 import { playFromAyah, playRange } from '../audio/playback';
+import { RecitationControls } from '../audio/RecitationControls';
 import { ShareAyahModal } from './ShareAyahModal';
+import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 
 type Props = {
   visible: boolean;
@@ -42,20 +57,44 @@ type Props = {
   surah: number;
   ayah: number;
   page: number;
+  /** Open pre-scrolled to the recitation section (header button). */
+  scrollToAudio?: boolean;
 };
 
-export function AyahActionSheet({ visible, onClose, surah, ayah, page }: Props) {
+export function AyahActionSheet({
+  visible,
+  onClose,
+  surah,
+  ayah,
+  page,
+  scrollToAudio,
+}: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const { settings } = usePrayerSettings();
   const edition = useActiveEdition();
   const state = useQuranState();
   const [arabic, setArabic] = useState<string>('');
   const [shareCardVisible, setShareCardVisible] = useState(false);
 
+  // ── Tafsir (v2.7.28) ────────────────────────────────────────────────
+  const tafsirEditions = tafsirEditionsForLocale(settings.language);
+  const [tafsirOpen, setTafsirOpen] = useState(false);
+  const [tafsirEdition, setTafsirEdition] = useState<TafsirEdition>(
+    tafsirEditions[0],
+  );
+  const [tafsirText, setTafsirText] = useState<string | null>(null);
+  const [tafsirLoading, setTafsirLoading] = useState(false);
+
+  const scrollRef = useRef<ScrollView>(null);
+  const audioSectionY = useRef(0);
+
   useEffect(() => {
     if (!visible) return;
     let cancelled = false;
     setArabic('');
+    setTafsirOpen(false);
+    setTafsirText(null);
     void loadSurah(surah).then(loaded => {
       if (cancelled || !loaded) return;
       setArabic(loaded.arabic[ayah - 1] ?? '');
@@ -65,10 +104,37 @@ export function AyahActionSheet({ visible, onClose, surah, ayah, page }: Props) 
     };
   }, [visible, surah, ayah]);
 
+  // Scroll to the recitation section when opened from the header button.
+  useEffect(() => {
+    if (!visible || !scrollToAudio) return;
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollTo({ y: audioSectionY.current, animated: true });
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [visible, scrollToAudio]);
+
+  useEffect(() => {
+    if (!visible || !tafsirOpen) return;
+    let cancelled = false;
+    setTafsirLoading(true);
+    setTafsirText(null);
+    void loadTafsir(tafsirEdition.id, surah, ayah).then(text => {
+      if (cancelled) return;
+      setTafsirLoading(false);
+      setTafsirText(text);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, tafsirOpen, tafsirEdition, surah, ayah]);
+
   const meta = findSurah(surah);
   const translation = getAyahTranslation(edition, surah, ayah);
   const starred = isStarred(state, surah, ayah);
   const bookmark = findBookmark(state, surah, ayah);
+  const plan = activeKhatmah(state);
+  const isKhatmahHere =
+    plan?.position?.surah === surah && plan?.position?.ayah === ayah;
   const reference = `${meta?.romanized ?? ''} ${surah}:${ayah}`;
 
   const shareText = async () => {
@@ -142,7 +208,7 @@ export function AyahActionSheet({ visible, onClose, surah, ayah, page }: Props) 
           </Pressable>
         </View>
 
-        <ScrollView style={styles.peek} bounces={false}>
+        <ScrollView ref={scrollRef} style={styles.body} bounces={false}>
           {arabic ? (
             <Text style={[styles.arabic, { color: palette.text }]}>
               {arabic}
@@ -153,59 +219,177 @@ export function AyahActionSheet({ visible, onClose, surah, ayah, page }: Props) 
               {translation}
             </Text>
           ) : null}
-        </ScrollView>
 
-        {/* Bookmark colors — one bookmark per ayah, tap active color to remove. */}
-        <View style={styles.bookmarkRow}>
-          <Text style={[styles.bookmarkLabel, { color: palette.muted }]}>
-            {t('quran.bookmark', 'Bookmark')}
-          </Text>
-          {(Object.keys(BOOKMARK_COLORS) as BookmarkColor[]).map(color => {
-            const selected = bookmark?.color === color;
-            return (
-              <Pressable
-                key={color}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                accessibilityLabel={t('quran.bookmarkColor', {
-                  defaultValue: 'Bookmark color {{color}}',
-                  color,
-                })}
-                hitSlop={6}
-                onPress={() => {
-                  if (selected && bookmark) removeBookmark(bookmark.id);
-                  else addBookmark(surah, ayah, page, color);
-                }}
-                style={[
-                  styles.colorDot,
-                  { backgroundColor: BOOKMARK_COLORS[color] },
-                  selected && styles.colorDotSelected,
-                ]}
+          {/* Tafsir (v2.7.28) */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: tafsirOpen }}
+            accessibilityLabel={t('quran.tafsir', 'Tafsir')}
+            onPress={() => setTafsirOpen(o => !o)}
+            style={[styles.tafsirToggle, { borderColor: palette.border }]}>
+            <Text style={[styles.tafsirToggleLabel, { color: palette.accentSolid }]}>
+              {tafsirOpen
+                ? `▾ ${t('quran.tafsir', 'Tafsir')}`
+                : `▸ ${t('quran.showTafsir', 'Show tafsir')}`}
+            </Text>
+          </Pressable>
+          {tafsirOpen ? (
+            <View style={styles.tafsirBlock}>
+              {tafsirEditions.length > 1 ? (
+                <View style={styles.tafsirChips}>
+                  {tafsirEditions.map(ed => {
+                    const sel = ed.id === tafsirEdition.id;
+                    return (
+                      <Pressable
+                        key={ed.id}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: sel }}
+                        onPress={() => setTafsirEdition(ed)}
+                        style={[
+                          styles.tafsirChip,
+                          {
+                            backgroundColor: sel
+                              ? palette.accentBg
+                              : 'transparent',
+                            borderColor: sel
+                              ? palette.accentSolid
+                              : palette.border,
+                          },
+                        ]}>
+                        <Text
+                          style={{
+                            color: sel ? palette.accentSolid : palette.muted,
+                            fontSize: 12,
+                            fontWeight: '600',
+                          }}>
+                          {ed.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : null}
+              {tafsirLoading ? (
+                <Text style={[styles.tafsirMeta, { color: palette.muted }]}>
+                  {t('quran.loading', 'Loading…')}
+                </Text>
+              ) : tafsirText ? (
+                <Text
+                  style={[
+                    styles.tafsirText,
+                    { color: palette.text },
+                    tafsirEdition.rtl && styles.tafsirRtl,
+                  ]}>
+                  {tafsirText}
+                </Text>
+              ) : (
+                <Text style={[styles.tafsirMeta, { color: palette.muted }]}>
+                  {t(
+                    'quran.tafsirUnavailable',
+                    'Tafsir unavailable — connect to the internet once to download it.',
+                  )}
+                </Text>
+              )}
+            </View>
+          ) : null}
+
+          {/* Bookmark colors — one bookmark per ayah, tap active color to remove. */}
+          <View style={styles.bookmarkRow}>
+            <Text style={[styles.bookmarkLabel, { color: palette.muted }]}>
+              {t('quran.bookmark', 'Bookmark')}
+            </Text>
+            {(Object.keys(BOOKMARK_COLORS) as BookmarkColor[]).map(color => {
+              const selected = bookmark?.color === color;
+              return (
+                <Pressable
+                  key={color}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={t('quran.bookmarkColor', {
+                    defaultValue: 'Bookmark color {{color}}',
+                    color,
+                  })}
+                  hitSlop={6}
+                  onPress={() => {
+                    if (selected && bookmark) removeBookmark(bookmark.id);
+                    else addBookmark(surah, ayah, page, color);
+                  }}
+                  style={[
+                    styles.colorDot,
+                    { backgroundColor: BOOKMARK_COLORS[color] },
+                    selected && styles.colorDotSelected,
+                  ]}
+                />
+              );
+            })}
+          </View>
+
+          {/* Khatmah pin (v2.7.28) — only while a plan is active. */}
+          {plan ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: isKhatmahHere }}
+              accessibilityLabel={
+                isKhatmahHere
+                  ? t('quran.khatmahUnpin', 'Remove khatmah position')
+                  : t('quran.khatmahPin', 'Set as my khatmah position')
+              }
+              onPress={() => {
+                if (isKhatmahHere) clearKhatmahPosition();
+                else setKhatmahPosition(surah, ayah, page);
+              }}
+              style={[
+                styles.khatmahPin,
+                {
+                  borderColor: KHATMAH_COLOR,
+                  backgroundColor: isKhatmahHere
+                    ? `${KHATMAH_COLOR}26`
+                    : 'transparent',
+                },
+              ]}>
+              <View
+                style={[styles.khatmahDot, { backgroundColor: KHATMAH_COLOR }]}
               />
-            );
-          })}
-        </View>
+              <Text style={[styles.khatmahPinLabel, { color: palette.text }]}>
+                {isKhatmahHere
+                  ? t('quran.khatmahPinned', 'Khatmah position — tap to remove')
+                  : t('quran.khatmahPin', 'Set as my khatmah position')}
+              </Text>
+            </Pressable>
+          ) : null}
 
-        <View style={styles.actionsRow}>
-          {actionBtn(
-            t('quran.playFromHere', 'Play from here'),
-            () => {
+          <View style={styles.actionsRow}>
+            {actionBtn(
+              t('quran.playFromHere', 'Play from here'),
+              () => {
+                onClose();
+                void playFromAyah(surah, ayah);
+              },
+              true,
+            )}
+            {actionBtn(t('quran.repeatAyah', 'Repeat this ayah'), () => {
               onClose();
-              void playFromAyah(surah, ayah);
-            },
-            true,
-          )}
-          {actionBtn(t('quran.repeatAyah', 'Repeat this ayah'), () => {
-            onClose();
-            void playRange({ surah, ayah }, { surah, ayah });
-          })}
-          {actionBtn(t('common.share', 'Share'), () => {
-            void shareText();
-          })}
-          {actionBtn(t('quran.shareAsImage', 'Share as image'), () => {
-            setShareCardVisible(true);
-          })}
-        </View>
+              void playRange({ surah, ayah }, { surah, ayah });
+            })}
+            {actionBtn(t('common.share', 'Share'), () => {
+              void shareText();
+            })}
+            {actionBtn(t('quran.shareAsImage', 'Share as image'), () => {
+              setShareCardVisible(true);
+            })}
+          </View>
+
+          {/* Recitation controls — the header button lands here. */}
+          <View
+            onLayout={e => {
+              audioSectionY.current = e.nativeEvent.layout.y;
+            }}>
+            <RecitationControls
+              surahNumber={surah}
+              onStartPlayback={onClose}
+            />
+          </View>
+        </ScrollView>
       </View>
       <ShareAyahModal
         visible={shareCardVisible}
@@ -232,7 +416,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: '70%',
+    maxHeight: '82%',
     borderTopStartRadius: 18,
     borderTopEndRadius: 18,
     paddingHorizontal: 18,
@@ -246,7 +430,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reference: { fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
-  peek: { maxHeight: 240 },
+  body: { flexGrow: 0 },
   arabic: {
     fontSize: 24,
     lineHeight: 54,
@@ -255,10 +439,31 @@ const styles = StyleSheet.create({
     ...arabicTextStyle('quran'),
   },
   translation: { fontSize: 15, lineHeight: 22, marginTop: 10 },
+  tafsirToggle: {
+    marginTop: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignSelf: 'flex-start',
+  },
+  tafsirToggleLabel: { fontSize: 13, fontWeight: '700' },
+  tafsirBlock: { marginTop: 10, gap: 8 },
+  tafsirChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  tafsirChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  tafsirMeta: { fontSize: 13, fontStyle: 'italic' },
+  tafsirText: { fontSize: 14, lineHeight: 22 },
+  tafsirRtl: { textAlign: 'right', writingDirection: 'rtl' },
   bookmarkRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginTop: 14,
   },
   bookmarkLabel: { fontSize: 13, marginEnd: 4 },
   colorDot: { width: 24, height: 24, borderRadius: 12 },
@@ -267,10 +472,23 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.9)',
     transform: [{ scale: 1.15 }],
   },
+  khatmahPin: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+  },
+  khatmahDot: { width: 12, height: 12, borderRadius: 6 },
+  khatmahPinLabel: { fontSize: 13, fontWeight: '600', flex: 1 },
   actionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginTop: 14,
   },
   action: {
     paddingHorizontal: 14,

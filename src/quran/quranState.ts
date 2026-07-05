@@ -57,7 +57,19 @@ export type KhatmahPlan = {
   pagesRead: number;
   /** Set when pagesRead reaches 604. */
   completedAt: number | null;
+  // ── Additive fields (v2.7.28) ─────────────────────────────────────
+  /** Explicit user-pinned position ("I am here"), shown on the mushaf
+   *  in the reserved khatmah color. Overrides the derived page. */
+  position?: { surah: number; ayah: number; page: number } | null;
+  /** `pagesRead` snapshot at the start of the local day (yyyy-mm-dd) —
+   *  lets "reset today's reading" rewind only today's progress. */
+  dayStartPagesRead?: number;
+  dayStartDate?: string;
 };
+
+/** Reserved highlight color for the khatmah position (distinct from the
+ *  five bookmark colors — cyan, used nowhere else in the reader). */
+export const KHATMAH_COLOR = '#0891b2';
 
 export type RepeatSettings = {
   /** Repeat each ayah N times (1 = play once). */
@@ -290,6 +302,20 @@ export function activeKhatmah(s: QuranState): KhatmahPlan | undefined {
   return s.khatmah.find(k => k.completedAt == null);
 }
 
+function localYmd(now: number = Date.now()): string {
+  const d = new Date(now);
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${dd}`;
+}
+
+/** Snapshot pagesRead at the first progress of each local day. */
+function withDaySnapshot(plan: KhatmahPlan, now?: number): KhatmahPlan {
+  const today = localYmd(now);
+  if (plan.dayStartDate === today) return plan;
+  return { ...plan, dayStartDate: today, dayStartPagesRead: plan.pagesRead };
+}
+
 export function recordKhatmahProgress(page: number): void {
   updateQuranState(prev => {
     const active = prev.khatmah.find(k => k.completedAt == null);
@@ -300,9 +326,107 @@ export function recordKhatmahProgress(page: number): void {
       khatmah: prev.khatmah.map(k =>
         k.id === active.id
           ? {
-              ...k,
+              ...withDaySnapshot(k),
               pagesRead: done,
               completedAt: done >= KHATMAH_TOTAL_PAGES ? Date.now() : null,
+            }
+          : k,
+      ),
+    };
+  });
+}
+
+/** The page the reader should land on to continue the khatmah. */
+export function khatmahCurrentPage(plan: KhatmahPlan): number {
+  if (plan.position) return plan.position.page;
+  return Math.min(KHATMAH_TOTAL_PAGES, plan.pagesRead + 1);
+}
+
+/**
+ * Pin an explicit "I am here" position (v2.7.28). Also aligns
+ * `pagesRead` to the pinned page (pages before it count as read) —
+ * moving backward is allowed: an explicit pin is authoritative.
+ */
+export function setKhatmahPosition(
+  surah: number,
+  ayah: number,
+  page: number,
+): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(k => k.completedAt == null);
+    if (!active) return prev;
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k =>
+        k.id === active.id
+          ? {
+              ...withDaySnapshot(k),
+              position: { surah, ayah, page },
+              pagesRead: Math.max(0, Math.min(KHATMAH_TOTAL_PAGES, page - 1)),
+              completedAt: null,
+            }
+          : k,
+      ),
+    };
+  });
+}
+
+/** Clear the pinned position (falls back to automatic page tracking). */
+export function clearKhatmahPosition(): void {
+  updateQuranState(prev => ({
+    ...prev,
+    khatmah: prev.khatmah.map(k =>
+      k.completedAt == null ? { ...k, position: null } : k,
+    ),
+  }));
+}
+
+/** Rewind only today's progress (to the day-start snapshot). */
+export function resetKhatmahToday(): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(k => k.completedAt == null);
+    if (!active) return prev;
+    const today = localYmd();
+    const base =
+      active.dayStartDate === today
+        ? (active.dayStartPagesRead ?? active.pagesRead)
+        : active.pagesRead; // no progress today — nothing to rewind
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k =>
+        k.id === active.id
+          ? {
+              ...k,
+              pagesRead: base,
+              dayStartDate: today,
+              dayStartPagesRead: base,
+              position:
+                k.position && k.position.page > base + 1 ? null : k.position,
+              completedAt: null,
+            }
+          : k,
+      ),
+    };
+  });
+}
+
+/** Restart the active plan from page 0 with a fresh clock. */
+export function resetKhatmahAll(): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(k => k.completedAt == null);
+    if (!active) return prev;
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k =>
+        k.id === active.id
+          ? {
+              ...k,
+              startedAt: Date.now(),
+              pagesRead: 0,
+              position: null,
+              dayStartDate: localYmd(),
+              dayStartPagesRead: 0,
+              completedAt: null,
             }
           : k,
       ),

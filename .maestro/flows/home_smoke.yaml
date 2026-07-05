@@ -1,0 +1,14 @@
+appId: com.prayer_times
+---
+- launchApp
+# Home renders: header brand + the month link below the prayer table.
+- extendedWaitUntil:
+    visible: "Mihrab"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      text: "Prayer times for the whole month"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "Qibla"
+- assertVisible: "Quran"

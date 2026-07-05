@@ -52,7 +52,11 @@ import {
 } from '@sayem314/react-native-keep-awake';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { findPageForAyah, MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
-import { mushafPageAsset, MUSHAF_TOTAL_PAGES } from './mushafImages';
+import {
+  mushafPageAsset,
+  mushafPageCrop,
+  MUSHAF_TOTAL_PAGES,
+} from './mushafImages';
 import {
   downloadMushafAssets,
   isMushafDownloaded,
@@ -62,6 +66,7 @@ import {
 } from './mushafDownload';
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import {
+  activeKhatmah,
   recordKhatmahProgress,
   setLastRead,
   setQuranPrefs,
@@ -78,6 +83,11 @@ type Props = {
   initialPage?: number;
   isFullscreen: boolean;
   onExitFullscreen: () => void;
+  /** Single tap on the page toggles fullscreen (v2.7.28). */
+  onToggleFullscreen: () => void;
+  /** Increment to open the unified sheet scrolled to the recitation
+   *  section (the header "Recitation" button). */
+  audioSheetSignal?: number;
   onTitleChange?: (title: string) => void;
 };
 
@@ -96,6 +106,8 @@ export function MushafReader({
   initialPage: initialPageProp,
   isFullscreen,
   onExitFullscreen,
+  onToggleFullscreen,
+  audioSheetSignal,
   onTitleChange,
 }: Props) {
   const { t } = useTranslation();
@@ -267,7 +279,28 @@ export function MushafReader({
     page: number;
   } | null>(null);
   const [sheetVisible, setSheetVisible] = useState(false);
-  const [chromeVisible, setChromeVisible] = useState(true);
+  // When the sheet is opened via the header "Recitation" button it
+  // scrolls straight to the recitation controls section.
+  const [sheetScrollAudio, setSheetScrollAudio] = useState(false);
+
+  // Header "Recitation" button → unified sheet at the audio section,
+  // anchored to the first ayah of the visible page (or the playing one).
+  const lastAudioSignal = useRef(audioSheetSignal ?? 0);
+  useEffect(() => {
+    if (audioSheetSignal == null) return;
+    if (audioSheetSignal === lastAudioSignal.current) return;
+    lastAudioSignal.current = audioSheetSignal;
+    const anchor =
+      playback.active ?? firstAyahOnPage(currentPage);
+    setSelected({
+      surah: anchor.surah,
+      ayah: anchor.ayah,
+      page: findPageForAyah(anchor.surah, anchor.ayah),
+    });
+    setSheetScrollAudio(true);
+    setSheetVisible(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioSheetSignal]);
 
   // ── Jump-to-page (QR-11) ────────────────────────────────────────────
   const [jumpVisible, setJumpVisible] = useState(false);
@@ -393,32 +426,77 @@ export function MushafReader({
   const pageMeta = (page: number) =>
     MUSHAF_PAGES.find(p => p.page === page) ?? MUSHAF_PAGES[0];
 
-  const showChrome = !isFullscreen || chromeVisible;
+  const showChrome = !isFullscreen;
 
-  const onPageTap = (
+  /**
+   * Per-page display geometry (v2.7.28). Pages with a content crop
+   * (1–2) render the crop region scaled to fill the available box; the
+   * underlying image is drawn larger inside an overflow-hidden window.
+   * `fullW`/`fullH` are the virtual full-image dimensions — geometry
+   * hit-testing and the overlay both work in that space.
+   */
+  const pageDims = (page: number) => {
+    const crop = mushafPageCrop(page);
+    if (!crop) {
+      return {
+        dispW: imageWidth,
+        dispH: imageHeight,
+        fullW: imageWidth,
+        fullH: imageHeight,
+        offX: 0,
+        offY: 0,
+      };
+    }
+    const cropAspect = (crop.w * 2600) / (crop.h * 4206);
+    let dispW = maxWidth;
+    let dispH = dispW / cropAspect;
+    if (dispH > maxHeight) {
+      dispH = maxHeight;
+      dispW = dispH * cropAspect;
+    }
+    const fullW = dispW / crop.w;
+    const fullH = dispH / crop.h;
+    return {
+      dispW,
+      dispH,
+      fullW,
+      fullH,
+      offX: -crop.x * fullW,
+      offY: -crop.y * fullH,
+    };
+  };
+
+  /** Long press selects the ayah under the finger (v2.7.28). */
+  const onPageLongPress = (
     page: number,
     locationX: number,
     locationY: number,
   ) => {
-    if (geometryReady) {
-      const hit = hitTestAyah(page, locationX, locationY, imageWidth);
-      if (hit) {
-        setSelected({ ...hit, page });
-        setSheetVisible(true);
-        return;
-      }
+    if (!geometryReady) return;
+    const d = pageDims(page);
+    // Map window-local coords into virtual full-image space.
+    const hit = hitTestAyah(
+      page,
+      locationX - d.offX,
+      locationY - d.offY,
+      d.fullW,
+    );
+    if (hit) {
+      setSelected({ ...hit, page });
+      setSheetScrollAudio(false);
+      setSheetVisible(true);
     }
-    // Margin tap: toggle immersive chrome.
-    setChromeVisible(v => !v);
   };
 
   const renderPage = (page: number) => {
     if (page < 1 || page > MUSHAF_TOTAL_PAGES) return null;
     const meta = pageMeta(page);
+    const dims = pageDims(page);
     const pageBookmarks = quran.bookmarks.filter(b => {
       const p = findPageForAyah(b.surah, b.ayah);
       return p === page;
     });
+    const khatmahPos = activeKhatmah(quran)?.position ?? null;
     return (
       <View
         key={page}
@@ -465,18 +543,37 @@ export function MushafReader({
           <Pressable
             accessibilityRole="imagebutton"
             accessibilityLabel={t('quran.pageA11y', {
-              defaultValue: 'Mushaf page {{page}} — tap an ayah for actions',
+              defaultValue:
+                'Mushaf page {{page}} — tap to toggle fullscreen, long-press an ayah for actions',
               page,
             })}
-            onPress={e =>
-              onPageTap(
+            // v2.7.28 gesture model: single tap toggles fullscreen,
+            // long press selects the ayah under the finger.
+            onPress={onToggleFullscreen}
+            onLongPress={e =>
+              onPageLongPress(
                 page,
                 e.nativeEvent.locationX,
                 e.nativeEvent.locationY,
               )
             }
-            style={{ width: imageWidth, height: imageHeight }}>
-            <View style={{ width: imageWidth, height: imageHeight }}>
+            delayLongPress={280}
+            style={{
+              width: dims.dispW,
+              height: dims.dispH,
+              overflow: 'hidden',
+            }}>
+            {/* Inner surface at virtual full-image size; cropped pages
+                shift it so the content window fills the pressable. */}
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                left: dims.offX,
+                top: dims.offY,
+                width: dims.fullW,
+                height: dims.fullH,
+              }}>
               {nightMode ? (
                 // True page inversion via color matrix (QR-3): black ink
                 // becomes soft white on a near-black page, dimmed slightly
@@ -488,7 +585,7 @@ export function MushafReader({
                       page,
                       useLocalFiles ? pageFilePath(page) : null,
                     )}
-                    style={{ width: imageWidth, height: imageHeight }}
+                    style={{ width: dims.fullW, height: dims.fullH }}
                     resizeMode="contain"
                     fadeDuration={0}
                   />
@@ -499,14 +596,14 @@ export function MushafReader({
                     page,
                     useLocalFiles ? pageFilePath(page) : null,
                   )}
-                  style={{ width: imageWidth, height: imageHeight }}
+                  style={{ width: dims.fullW, height: dims.fullH }}
                   resizeMode="contain"
                   fadeDuration={0}
                 />
               )}
               <MushafPageOverlay
                 page={page}
-                renderedWidth={imageWidth}
+                renderedWidth={dims.fullW}
                 selected={
                   sheetVisible && selected?.page === page ? selected : null
                 }
@@ -514,6 +611,7 @@ export function MushafReader({
                   playback.active && playback.playing ? playback.active : null
                 }
                 bookmarks={pageBookmarks}
+                khatmahPosition={khatmahPos}
                 accentColor={palette.accentSolid}
                 nightMode={nightMode}
               />
@@ -578,7 +676,7 @@ export function MushafReader({
         {mountedPages.map(renderPage)}
       </ScrollView>
 
-      {isFullscreen && showChrome ? (
+      {isFullscreen ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('quran.exitFullscreen', 'Exit fullscreen')}
@@ -598,6 +696,7 @@ export function MushafReader({
           surah={selected.surah}
           ayah={selected.ayah}
           page={selected.page}
+          scrollToAudio={sheetScrollAudio}
         />
       ) : null}
 

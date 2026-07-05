@@ -37,7 +37,8 @@
     "today": "Hari ini",
     "close": "Tutup",
     "share": "Bagikan",
-    "done": "Selesai"
+    "done": "Selesai",
+    "delete": "Hapus"
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -222,7 +223,11 @@
     "ayahOfDayHelp": "Satu ayat yang dipilih acak beserta terjemahannya, setiap hari.",
     "ayahOfDayTime": "Waktu notifikasi",
     "hourDown": "Jam −",
-    "hourUp": "Jam +"
+    "hourUp": "Jam +",
+    "khatmahReminder": "Pengingat khataman harian",
+    "khatmahReminderHelp": "Bagian hari ini dan tempat melanjutkan, selama khataman aktif.",
+    "resetApp": "Atur ulang data aplikasi",
+    "resetAppHelp": "Menghapus semua pengaturan dan data. Tidak dapat dibatalkan."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -746,7 +751,7 @@
     "pageLabel": "Halaman {{page}}",
     "switchToTranslation": "Beralih ke tampilan tafsir",
     "switchToMushaf": "Beralih ke tampilan mushaf",
-    "viewToggleTranslation": "Tafsir",
+    "viewToggleTranslation": "Terjemahan",
     "viewToggleMushaf": "Mushaf",
     "enterFullscreen": "Layar penuh",
     "exitFullscreen": "Keluar layar penuh",
@@ -824,7 +829,26 @@
     "switchToNight": "Beralih ke halaman malam",
     "switchToLight": "Beralih ke halaman terang",
     "ayahOfDayTitle": "Ayat hari ini",
-    "ayahOfDayChannelName": "Ayat hari ini"
+    "ayahOfDayChannelName": "Ayat hari ini",
+    "tafsir": "Tafsir",
+    "showTafsir": "Tampilkan tafsir",
+    "tafsirUnavailable": "Tafsir tidak tersedia — sambungkan ke internet sekali untuk mengunduhnya.",
+    "khatmahPin": "Jadikan posisi khataman saya",
+    "khatmahPinned": "Posisi khataman — ketuk untuk menghapus",
+    "khatmahUnpin": "Hapus posisi khataman",
+    "khatmahContinue": "Lanjutkan",
+    "khatmahReset": "Atur ulang",
+    "khatmahResetTitle": "Atur ulang khataman",
+    "khatmahResetToday": "Atur ulang bacaan hari ini",
+    "khatmahResetTodayHelp": "Hanya mengembalikan halaman yang tercatat hari ini.",
+    "khatmahResetAll": "Mulai ulang khataman",
+    "khatmahResetAllHelp": "Kembali ke halaman 0 dengan jadwal baru.",
+    "khatmahDelete": "Hapus khataman",
+    "khatmahDeleteHelp": "Menghapus rencana sepenuhnya.",
+    "khatmahReminderChannelName": "Pengingat khataman",
+    "khatmahReminderTitle": "Khataman",
+    "khatmahReminderBody": "Bagian hari ini: {{pages}} halaman — lanjutkan dari halaman {{page}}.",
+    "audioButton": "Audio"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",
@@ -990,7 +1014,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Doa-doa Hisnul Muslim",
     "quranGeometry": "Data posisi ayat (quran.com / proyek Quran for Android)",
-    "recitation": "Audio tilawah (21 qari): EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)"
+    "recitation": "Audio tilawah (21 qari): EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)",
+    "tafsir": "Teks tafsir: Ibnu Katsir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
     "title": "Salat berikutnya",
@@ -1032,5 +1057,17 @@
     "skip": "Lewati",
     "next": "Berikutnya",
     "done": "Mulai"
+  },
+  "downloads": {
+    "title": "Kelola unduhan",
+    "settingsHelp": "Halaman mushaf, audio tilawah, dan tafsir di perangkat ini.",
+    "deleteTitle": "Hapus unduhan?",
+    "deleteBody": "{{what}} akan dihapus dari perangkat ini. Anda dapat mengunduhnya lagi kapan saja.",
+    "total": "Total di perangkat: {{size}}",
+    "mushaf": "Halaman mushaf",
+    "mushafSub": "604 halaman Madinah",
+    "audioSub": "Audio tilawah",
+    "tafsirSub": "Teks tafsir tersimpan",
+    "empty": "Belum ada unduhan. Halaman mushaf, audio, dan tafsir yang diunduh akan muncul di sini."
   }
 }
