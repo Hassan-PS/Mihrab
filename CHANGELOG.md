@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.7.29] — 2026-07-06
 
 ### Changed
 - **Fullscreen keeps the essentials**: the surah name (replacing the Juz label, since the nav header is hidden), the night/light toggle, and the tappable page number stay visible in fullscreen reading.

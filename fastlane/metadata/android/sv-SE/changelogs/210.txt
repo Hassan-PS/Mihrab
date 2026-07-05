@@ -1,0 +1,6 @@
+Mushaf-läsaren:
+
+• Fulla sidor utnyttjar skärmen bättre — texten fyller varsamt det lediga vertikala utrymmet
+• Helskärm behåller surans namn, natt/ljus-knappen och sidnumret
+• Mjukare övergång in och ut ur helskärm
+• Sidorna 1–2 behåller sina dekorativa ramar oförändrade

@@ -1,0 +1,6 @@
+Mushaf reader:
+
+• Full pages now use the screen better — the text gently fills the free vertical space
+• Fullscreen keeps the surah name, night/light toggle and page number
+• Smoother fullscreen enter/exit
+• Pages 1–2 keep their decorative plates untouched
