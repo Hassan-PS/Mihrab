@@ -27,6 +27,9 @@ type DayCarouselProps = {
   getDayDate: (dayOffset: number) => string;
   /** Hijri-date generator (e.g., "12 Dhul-Qa'dah 1447"). */
   getHijriDate?: (dayOffset: number) => string;
+  /** Opens the month view — rendered as a small calendar chip next to
+   *  "Today" on the today card (v2.7.30). */
+  onOpenMonth?: () => void;
 };
 
 function DayCarouselImpl({
@@ -37,6 +40,7 @@ function DayCarouselImpl({
   getDayLabel,
   getDayDate,
   getHijriDate,
+  onOpenMonth,
 }: DayCarouselProps) {
   const { palette } = useAppPalette();
   const { i18n } = useTranslation();
@@ -111,6 +115,7 @@ function DayCarouselImpl({
             isToday={dayIndex === 0}
             nextPrayerName={nextPrayerName}
             onBackToToday={dayIndex === 0 ? undefined : onBackToToday}
+            onOpenMonth={dayIndex === 0 ? onOpenMonth : undefined}
           />
         ))}
       </ScrollView>

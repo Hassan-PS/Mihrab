@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.30] — 2026-07-06
+
+### Added
+- **Data-freshness indicator on the Home hero**: a quiet line under the countdown showing when prayer times last landed from the provider and how many days are stored offline.
+
+### Changed
+- **Sweden provider (Islamiska Förbundet) fails over instantly**: if the scraper origin is down, the SAME request now silently serves AlAdhan instead of waiting for three failed sessions before the 12 h cooldown engaged. Retry chain shortened (2×6 s instead of 4×7 s) so the failover is quick; the existing cooldown still stops repeat probing.
+- **Home layout swap**: the wide shortcut under the day carousel now opens the **Quran** (with a new open-mushaf icon) — one of the app's main thoughts. The month view moved to a calendar chip right next to "Today" and a tile in the tools grid (replacing the old Quran tile).
+- **Hero tint matches the palette under dynamic colors too**: the slim rule + "NEXT PRAYER" label followed a fixed time-of-day hue under Material You, clashing with the wallpaper accent. They now always follow the current accent.
+- **Mushaf pages 1–2 render sharp**: the page scaler's single bilinear step landed in the pixel-skipping 0.5–0.7× zone exactly at those pages' display size. The scaler now downscales progressively (≈0.71× per step, area-filter quality at any factor); the render cache regenerates itself (v2) on first open.
+
 ## [2.7.29] — 2026-07-06
 
 ### Changed

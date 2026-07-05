@@ -55,7 +55,10 @@
     "tomorrow": "کل",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "مقام تبدیل کریں",
-    "backToToday": "آج پر واپس"
+    "backToToday": "آج پر واپس",
+    "updatedAt": "اپ ڈیٹ {{when}}",
+    "daysStored": "{{count}} دن محفوظ",
+    "quranShortcut": "قرآن کھولیں"
   },
   "errors": {
     "locationNeededTitle": "مقام درکار ہے۔",

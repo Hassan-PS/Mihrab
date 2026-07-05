@@ -17,6 +17,7 @@ import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { usePrayerDay } from '../hooks/usePrayerDay';
+import { getCacheStatus } from '../prayer/prayerStorage';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { syncPrayerWidget } from '../widget/syncPrayerWidget';
@@ -34,7 +35,7 @@ import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
 import { DayCarousel } from './home/DayCarousel';
 import { formatHijriLabel } from '../hijri/formatHijriLabel';
-import { MonthShortcut } from './home/MonthShortcut';
+import { QuranShortcut } from './home/QuranShortcut';
 import { NextPrayerCard } from './home/NextPrayerCard';
 import { PermissionBanners } from './home/PermissionBanners';
 import { ProviderFooter } from './home/ProviderFooter';
@@ -496,6 +497,46 @@ export function HomeScreen() {
     () => navigation.navigate('MonthTimes'),
     [navigation],
   );
+  const handleOpenQuran = useCallback(
+    () => navigation.navigate('Quran' as never),
+    [navigation],
+  );
+
+  // Data-freshness status for the hero indicator (v2.7.30): when timings
+  // last landed from the provider + how many days sit in the on-device
+  // cache. Re-checked whenever the fetch state changes (a background
+  // refresh completing flips `state`, which re-runs this).
+  const [dataStatus, setDataStatus] = useState<{
+    lastFetchedAt: Date | null;
+    totalDaysCached: number;
+  } | null>(null);
+  useEffect(() => {
+    if (state.phase !== 'ready') return;
+    let cancelled = false;
+    getCacheStatus({
+      provider: effectiveProvider,
+      latitude: state.latitude,
+      longitude: state.longitude,
+      calculationMethod: settings.calculationMethod,
+      school: settings.school,
+    })
+      .then(s => {
+        if (cancelled) return;
+        setDataStatus({
+          lastFetchedAt: s.lastFetchedAt ? new Date(s.lastFetchedAt) : null,
+          totalDaysCached: s.totalDaysCached,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    state,
+    effectiveProvider,
+    settings.calculationMethod,
+    settings.school,
+  ]);
   const handleOpenProviderPicker = useCallback(
     () => setProviderPickerOpen(true),
     [],
@@ -537,7 +578,7 @@ export function HomeScreen() {
           so the top-of-screen controls all live in the same row. See
           RootNavigator.HomeHeaderRight. */}
 
-      <NextPrayerCard nextInfo={nextInfo} />
+      <NextPrayerCard nextInfo={nextInfo} dataStatus={dataStatus} />
 
       <DayCarousel
         week={view.table.week}
@@ -547,11 +588,12 @@ export function HomeScreen() {
         getDayLabel={getDayLabel}
         getDayDate={getDayDate}
         getHijriDate={getHijriDate}
+        onOpenMonth={handleOpenMonth}
       />
 
       <RamadanCountdownCard today={state.today} tomorrow={state.tomorrow} />
 
-      <MonthShortcut onPress={handleOpenMonth} />
+      <QuranShortcut onPress={handleOpenQuran} />
 
       <QuickActionsGrid />
 

@@ -10,7 +10,6 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import {
-  BookIcon,
   CrescentIcon,
   DuaHandsIcon,
   MosqueIcon,
@@ -18,7 +17,10 @@ import {
   TasbihIcon,
 } from '../../theme/icons';
 import { RADIUS, SPACING } from '../../theme/tokens';
-import { CompassIcon } from '../../components/HeaderToolbarIcons';
+import {
+  CalendarIcon,
+  CompassIcon,
+} from '../../components/HeaderToolbarIcons';
 import type { RootStackParamList } from '../../navigation/types';
 
 /**
@@ -46,7 +48,10 @@ const TOOLS: Tool[] = [
   // Two cupped hands raised in dua — distinct from the book icon to
   // avoid visual collision with the Quran tile (#129).
   { id: 'Duas', labelKey: 'nav.duas', Icon: DuaHandsIcon },
-  { id: 'Quran', labelKey: 'nav.quran', Icon: BookIcon },
+  // Month view tile (v2.7.30): the Quran moved OUT of the grid into the
+  // wide hero shortcut below it, and the month view moved IN from the
+  // wide shortcut — swap of prominence, not a removal.
+  { id: 'MonthTimes', labelKey: 'nav.month', Icon: CalendarIcon },
   // Pen icon for the journal — writing entries is the primary mental
   // model, not "another book" (#129).
   { id: 'Journal', labelKey: 'nav.journal', Icon: PenIcon },

@@ -329,7 +329,10 @@ export async function fetchIslamiskaForbundetTimes(params: {
         },
         body: body.toString(),
       },
-      { maxAttempts: 4, baseDelayMs: 800, timeoutMs: 7000 },
+      // 2 attempts × 6 s (v2.7.30, down from 4 × 7 s): when this small
+      // origin is down it's down for hours — long retry chains just
+      // delay the same-request AlAdhan failover in fetchPrayerTimes.
+      { maxAttempts: 2, baseDelayMs: 600, timeoutMs: 6000 },
     );
   } catch (e) {
     if (isAbortOrTimeoutError(e)) {

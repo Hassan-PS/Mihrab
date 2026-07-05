@@ -30,6 +30,42 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 type IconProps = { size?: number; color?: string };
 
+/** Open mushaf — the Quran shortcut's hero icon (v2.7.30). An open book
+ *  with soft text-line hints on each page and a rehl-style base notch so
+ *  it reads as a mushaf, not a generic book. Stroked, single-color, per
+ *  the style guide. */
+export function QuranBookIcon({ size = 24, color = '#000' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {/* Open covers, drawn as one mirrored outline. */}
+      <Path
+        d="M12 6C10.6 4.6 8.6 4 6.4 4 5 4 3.7 4.3 2.5 4.8V19c1.2-.5 2.5-.8 3.9-.8 2.2 0 4.2.7 5.6 2 1.4-1.3 3.4-2 5.6-2 1.4 0 2.7.3 3.9.8V4.8C20.3 4.3 19 4 17.6 4 15.4 4 13.4 4.6 12 6Z"
+        fill="none"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Spine */}
+      <Path
+        d="M12 6v14.2"
+        fill="none"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+      {/* Ayah-line hints, two per page. */}
+      <Path
+        d="M5.2 8.5c1.3-.25 2.6-.15 3.9.3M5.2 11.3c1.3-.25 2.6-.15 3.9.3M18.8 8.5c-1.3-.25-2.6-.15-3.9.3M18.8 11.3c-1.3-.25-2.6-.15-3.9.3"
+        fill="none"
+        stroke={color}
+        strokeWidth={1.4}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 /** Crescent moon — used for Ramadan banner, dynamic icon variant.
  *  Geometric, never decorative wallpaper (principle 2: reverent, not heavy). */
 export function CrescentIcon({ size = 24, color = '#000' }: IconProps) {

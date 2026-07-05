@@ -55,7 +55,10 @@
     "tomorrow": "Yarın",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Konumu değiştir",
-    "backToToday": "Bugüne dön"
+    "backToToday": "Bugüne dön",
+    "updatedAt": "Güncellendi: {{when}}",
+    "daysStored": "{{count}} gün kayıtlı",
+    "quranShortcut": "Kur'an'ı aç"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",

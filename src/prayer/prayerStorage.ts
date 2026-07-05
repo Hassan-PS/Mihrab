@@ -37,6 +37,11 @@ type CacheEntry = StoredPrayerData & {
   /** ISO timestamp of the last `getCachedPrayerTimes`/`getOrFetch…` hit on
    *  this entry. Used as the LRU key when storage hits quota. */
   lastAccessedAt: string;
+  /** ISO timestamp of the last time fresh timings LANDED from a provider
+   *  (network or on-device computation) — additive field (v2.7.30), absent
+   *  on entries written by older versions. Surfaced on the Home hero as
+   *  the data-freshness indicator. */
+  lastFetchedAt?: string;
 };
 
 type V2Shape = {
@@ -361,6 +366,7 @@ export async function getOrFetchPrayerTimes(
                 school: params.school,
                 months,
                 lastAccessedAt: new Date().toISOString(),
+                lastFetchedAt: new Date().toISOString(),
               },
             },
           };
@@ -389,6 +395,9 @@ export async function getCacheStatus(
   isExpired: boolean;
   daysMissingThisMonth: number;
   totalDaysCached: number;
+  /** When fresh timings last landed from a provider, or null if unknown
+   *  (pre-v2.7.30 entries / empty cache). */
+  lastFetchedAt: string | null;
 }> {
   const v2 = await loadV2();
   const k = cacheKey(params);
@@ -401,6 +410,7 @@ export async function getCacheStatus(
       isExpired: true,
       daysMissingThisMonth: dim,
       totalDaysCached: 0,
+      lastFetchedAt: null,
     };
   }
 
@@ -434,6 +444,7 @@ export async function getCacheStatus(
     isExpired,
     daysMissingThisMonth,
     totalDaysCached,
+    lastFetchedAt: entry.lastFetchedAt ?? null,
   };
 }
 
@@ -542,6 +553,7 @@ export async function refreshPrayerDataCache(
         school: params.school,
         months,
         lastAccessedAt: new Date().toISOString(),
+        lastFetchedAt: new Date().toISOString(),
       },
     },
   };

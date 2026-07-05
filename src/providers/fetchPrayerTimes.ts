@@ -57,7 +57,23 @@ export async function fetchPrayerTimesUnified(
         void recordProviderResult('islamiska_forbundet', true);
       } catch (e) {
         void recordProviderResult('islamiska_forbundet', false);
-        throw e;
+        // Same-request failover (v2.7.30): don't make the caller wait
+        // for 3 failed sessions before the cooldown kicks in — serve
+        // AlAdhan for THIS request too. Only if the fallback also
+        // fails does the original scraper error propagate (so the
+        // caller's local-adhan last resort still applies).
+        try {
+          result = await fetchAladhanTimes({
+            latitude: p.latitude,
+            longitude: p.longitude,
+            date: p.date,
+            method: p.calculationMethod,
+            school: p.school,
+          });
+          break;
+        } catch {
+          throw e;
+        }
       }
       break;
     }

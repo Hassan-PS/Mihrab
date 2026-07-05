@@ -263,6 +263,7 @@ describe('getCacheStatus: per-day completeness', () => {
       isExpired: true,
       daysMissingThisMonth: 30, // April has 30 days
       totalDaysCached: 0,
+      lastFetchedAt: null,
     });
   });
 

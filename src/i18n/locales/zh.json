@@ -55,7 +55,10 @@
     "tomorrow": "明天",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "切换位置",
-    "backToToday": "回到今天"
+    "backToToday": "回到今天",
+    "updatedAt": "更新于 {{when}}",
+    "daysStored": "已存储 {{count}} 天",
+    "quranShortcut": "打开古兰经"
   },
   "errors": {
     "locationNeededTitle": "需要位置",

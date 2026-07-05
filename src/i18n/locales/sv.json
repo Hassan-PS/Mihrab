@@ -55,7 +55,10 @@
     "tomorrow": "Imorgon",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Byt plats",
-    "backToToday": "Till idag"
+    "backToToday": "Till idag",
+    "updatedAt": "Uppdaterad {{when}}",
+    "daysStored": "{{count}} dagar sparade",
+    "quranShortcut": "Öppna Koranen"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",

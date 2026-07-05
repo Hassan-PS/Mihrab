@@ -1,0 +1,5 @@
+• Svenska bönetidskällan växlar direkt till AlAdhan när den inte kan nås
+• Hemskärmen visar när tiderna senast hämtades och hur många dagar som lagras offline
+• Bred Koran-genväg på hemskärmen; månadsvyn flyttad intill "Idag" och till rutnätet
+• Accentlinjen matchar nu dynamiska färger
+• Koransidorna 1–2 renderas skarpt

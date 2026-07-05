@@ -55,7 +55,10 @@
     "tomorrow": "कल",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "स्थान बदलें",
-    "backToToday": "आज पर वापस"
+    "backToToday": "आज पर वापस",
+    "updatedAt": "अपडेट {{when}}",
+    "daysStored": "{{count}} दिनों का डेटा संग्रहीत",
+    "quranShortcut": "क़ुरआन खोलें"
   },
   "errors": {
     "locationNeededTitle": "स्थान की आवश्यकता है",

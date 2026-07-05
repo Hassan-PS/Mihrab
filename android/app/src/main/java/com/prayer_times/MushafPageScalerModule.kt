@@ -46,12 +46,20 @@ class MushafPageScalerModule(reactContext: ReactApplicationContext) :
         if (targetWidth <= 0) throw IllegalArgumentException("bad targetWidth")
         var bmp = BitmapFactory.decodeFile(srcPath)
           ?: throw IllegalStateException("decode failed: $srcPath")
-        // Iterative halving while still ≥ 2× the target — each step is a
-        // clean 2×2 average, no pixel skipping.
-        while (bmp.width >= targetWidth * 2) {
-          val half = Bitmap.createScaledBitmap(bmp, bmp.width / 2, bmp.height / 2, true)
-          if (half !== bmp) bmp.recycle()
-          bmp = half
+        // Progressive downscale (v2.7.30): repeated bilinear steps of
+        // ≈0.71 per step. A SINGLE bilinear step with a factor in the
+        // 0.5–0.7 zone skips source pixels (bilinear only samples a 2×2
+        // neighborhood) and leaves thin Arabic strokes ragged — mushaf
+        // pages 1–2 landed exactly there (2600 → ~1720, 0.66×) and
+        // rendered pixelated while pages 3+ (≈0.44×, caught by the old
+        // halving loop) were sharp. Chaining steps that each stay above
+        // ~0.7× approximates an area filter for ANY total factor.
+        while (bmp.width > targetWidth) {
+          val next = Math.max(targetWidth, Math.round(bmp.width * 0.71f))
+          val h = Math.max(1, Math.round(bmp.height.toFloat() * next / bmp.width))
+          val step = Bitmap.createScaledBitmap(bmp, next, h, true)
+          if (step !== bmp) bmp.recycle()
+          bmp = step
         }
         if (bmp.width != targetWidth) {
           val h = Math.max(1, Math.round(bmp.height.toFloat() * targetWidth / bmp.width))

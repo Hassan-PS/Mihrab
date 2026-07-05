@@ -6,12 +6,9 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAppearanceSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
-import { PERIOD_TINTS } from '../../theme/tokens';
-import { tintForNextPrayerName } from '../../polish/timeOfDayTint';
 import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
@@ -33,12 +30,15 @@ import { HOME_CARD_PADDING, HOME_CARD_RADIUS } from './tokens';
 type NextPrayerCardProps = {
   /** Next prayer's name and absolute Date. Pass null to hide the card. */
   nextInfo: { name: string; at: Date } | null;
+  /** Data-freshness indicator (v2.7.30): when timings last landed from
+   *  the provider and how many days are cached on-device. Null hides
+   *  the row (status not loaded yet). */
+  dataStatus?: { lastFetchedAt: Date | null; totalDaysCached: number } | null;
 };
 
-function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
+function NextPrayerCardImpl({ nextInfo, dataStatus }: NextPrayerCardProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  const { slice: appearance } = useAppearanceSettings();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -92,22 +92,12 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
       .catch(() => {});
   }
 
-  // Time-of-day awareness (principle 5, look-and-feel upgrade): the hero
-  // carries a whisper of the day's current character — a slim tinted rule
-  // along the card's top edge plus the eyebrow label taking the same hue.
-  // Felt, not announced: the tint never exceeds a 3-pt line + 12-pt label.
-  //
-  // ONLY under Material You (dynamic colors): there the whole palette
-  // already shifts with the wallpaper, so one more ambient hue reads as
-  // part of the system. With a fixed accent theme the free-floating
-  // period hue clashed with the user's chosen accent and looked
-  // disconnected from the rest of the Home page — so the rule + eyebrow
-  // follow the app accent instead, keeping the card coherent.
-  const periodTint = appearance.useSystemDynamicTheme
-    ? PERIOD_TINTS[tintForNextPrayerName(nextInfo.name)][
-        palette.isDark ? 'dark' : 'light'
-      ]
-    : String(palette.accentSolid);
+  // The slim rule along the card's top edge + the eyebrow label follow
+  // the app accent — ALWAYS. The earlier time-of-day period hue (v2.7.2x)
+  // clashed with the fixed accent themes AND, under Material You, with
+  // the wallpaper accent itself (a periwinkle rule over a salmon UI) —
+  // the hero must read as one coherent piece of the current palette.
+  const periodTint = String(palette.accentSolid);
 
   return (
     <GlassSurface
@@ -170,6 +160,28 @@ function NextPrayerCardImpl({ nextInfo }: NextPrayerCardProps) {
           </Text>
         </View>
       </View>
+      {dataStatus && dataStatus.totalDaysCached > 0 ? (
+        // Data-freshness whisper (v2.7.30): when timings last landed +
+        // how many days are stored offline. Muted 11-pt — informational,
+        // never competing with the hero time.
+        <Text
+          style={[styles.dataStatus, { color: palette.muted }]}
+          numberOfLines={1}
+          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+          {(dataStatus.lastFetchedAt
+            ? t('home.updatedAt', {
+                when:
+                  dataStatus.lastFetchedAt.toDateString() === now.toDateString()
+                    ? formatLocalTime(dataStatus.lastFetchedAt)
+                    : dataStatus.lastFetchedAt.toLocaleDateString(undefined, {
+                        day: 'numeric',
+                        month: 'short',
+                      }),
+              }) + ' · '
+            : '') +
+            t('home.daysStored', { count: dataStatus.totalDaysCached })}
+        </Text>
+      ) : null}
     </GlassSurface>
   );
 }
@@ -222,4 +234,5 @@ const styles = StyleSheet.create({
   },
   countdownPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   countdown: { fontSize: 14, fontWeight: '500' },
+  dataStatus: { marginTop: 10, fontSize: 11, fontWeight: '500' },
 });

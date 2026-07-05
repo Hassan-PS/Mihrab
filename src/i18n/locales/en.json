@@ -55,7 +55,10 @@
     "tomorrow": "Tomorrow",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Switch location",
-    "backToToday": "Back to today"
+    "backToToday": "Back to today",
+    "updatedAt": "Updated {{when}}",
+    "daysStored": "{{count}} days stored",
+    "quranShortcut": "Open the Quran"
   },
   "errors": {
     "locationNeededTitle": "Location needed",

@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { CalendarIcon } from '../../components/HeaderToolbarIcons';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
@@ -37,6 +38,12 @@ type DayCardProps = {
    * card the chip is hidden so it doesn't compete with the date.
    */
   onBackToToday?: () => void;
+  /**
+   * Opens the month view. Rendered as a small calendar chip next to the
+   * "Today" label (v2.7.30) — the month view's home now that the wide
+   * shortcut below the carousel belongs to the Quran.
+   */
+  onOpenMonth?: () => void;
 };
 
 function DayCardImpl({
@@ -48,6 +55,7 @@ function DayCardImpl({
   isToday,
   nextPrayerName,
   onBackToToday,
+  onOpenMonth,
 }: DayCardProps) {
   const { palette } = useAppPalette();
   const { t } = useTranslation();
@@ -73,6 +81,22 @@ function DayCardImpl({
             maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
             {dayLabel}
           </Text>
+          {isToday && onOpenMonth ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('home.monthTimesLink')}
+              accessibilityHint={t('a11y.openMonth')}
+              onPress={onOpenMonth}
+              hitSlop={8}
+              style={[
+                styles.monthChip,
+                {
+                  backgroundColor: palette.accentBg,
+                },
+              ]}>
+              <CalendarIcon color={palette.accent} size={15} />
+            </Pressable>
+          ) : null}
           {!isToday && onBackToToday ? (
             <Pressable
               accessibilityRole="button"
@@ -159,6 +183,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 12,
     borderWidth: 1,
+  },
+  monthChip: {
+    padding: 5,
+    borderRadius: 12,
   },
   backChipLabel: {
     fontSize: 11,

@@ -55,7 +55,10 @@
     "tomorrow": "Besok",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Ganti lokasi",
-    "backToToday": "Kembali ke hari ini"
+    "backToToday": "Kembali ke hari ini",
+    "updatedAt": "Diperbarui {{when}}",
+    "daysStored": "{{count}} hari tersimpan",
+    "quranShortcut": "Buka Al-Qur'an"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",

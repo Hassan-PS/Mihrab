@@ -1,0 +1,5 @@
+• Sweden prayer-time source now falls back to AlAdhan instantly when unreachable
+• Home shows when times were last updated and how many days are stored offline
+• Wide Quran shortcut on Home; month view moved next to "Today" and into the grid
+• Hero accent line now matches dynamic colors
+• Quran pages 1–2 render sharp

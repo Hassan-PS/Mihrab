@@ -20,8 +20,42 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import { getMushafPageScaler } from '../native/MushafPageScaler';
 import { pageFilePath } from './mushafDownload';
 
+/**
+ * Cache-format version. v2 (2.7.30): the Android scaler switched from
+ * halving+single-bilinear to progressive ≈0.71 steps — copies produced
+ * by v1 with a total factor in the 0.5–0.7 zone (pages 1–2 at phone
+ * sizes) are ragged and must regenerate, so the version segments the
+ * directory. Legacy v1 bucket dirs are swept on first ensure call.
+ */
+const RENDER_CACHE_VERSION = 'v2';
+
+function renderRoot(): string {
+  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/mushaf/render`;
+}
+
 function renderDir(bucket: number): string {
-  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/mushaf/render/${bucket}`;
+  return `${renderRoot()}/${RENDER_CACHE_VERSION}/${bucket}`;
+}
+
+let legacySweepDone = false;
+/** Delete pre-versioned bucket dirs (plain digits under render/). */
+async function sweepLegacyRenderDirs(): Promise<void> {
+  if (legacySweepDone) return;
+  legacySweepDone = true;
+  try {
+    const root = renderRoot();
+    if (!(await ReactNativeBlobUtil.fs.exists(root))) return;
+    const entries = await ReactNativeBlobUtil.fs.ls(root);
+    for (const name of entries) {
+      if (/^\d+$/.test(name)) {
+        await ReactNativeBlobUtil.fs
+          .unlink(`${root}/${name}`)
+          .catch(() => undefined);
+      }
+    }
+  } catch {
+    /* best effort */
+  }
 }
 
 export function widthBucket(targetPxWidth: number): number {
@@ -83,6 +117,7 @@ export function ensureScaledPage(
   inFlight.add(key);
   void (async () => {
     try {
+      await sweepLegacyRenderDirs();
       const src = pageFilePath(page);
       if (!(await ReactNativeBlobUtil.fs.exists(src))) return;
       const dest = renderedPagePath(page, bucket);

@@ -55,7 +55,10 @@
     "tomorrow": "Morgen",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Ort wechseln",
-    "backToToday": "Zu heute"
+    "backToToday": "Zu heute",
+    "updatedAt": "Aktualisiert {{when}}",
+    "daysStored": "{{count}} Tage gespeichert",
+    "quranShortcut": "Koran öffnen"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",
