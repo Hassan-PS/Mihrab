@@ -218,8 +218,12 @@ export function MushafReader({
   // ── Page state (unchanged core from #153) ───────────────────────────
   const screenWidth = windowWidth;
   const [currentPage, setCurrentPage] = useState(initialPage);
-  // Measured height of the page viewport (imageWrap) — see maxHeight.
-  const [wrapHeight, setWrapHeight] = useState(0);
+  // Measured height of the page viewport (imageWrap), tagged with the
+  // fullscreen mode it was measured in — see maxHeight. The tag matters:
+  // right after a fullscreen toggle the old measurement is stale for a
+  // frame, and sizing pages with it would overflow the page chrome
+  // ("misformed bars") until onLayout catches up.
+  const [wrapBox, setWrapBox] = useState({ h: 0, fs: false });
   const scrollRef = useRef<ScrollView>(null);
   const didInitialScrollRef = useRef(false);
 
@@ -350,7 +354,9 @@ export function MushafReader({
   // Slim gutters (v2.7.28 screen-use pass): the page background matches
   // the reader background, so wide gutters bought nothing but smaller text.
   const horizontalPadding = 4;
-  const headerFooterReserve = isFullscreen ? 0 : 76;
+  // The page header (surah/juz + night pill) and footer (page number)
+  // stay visible in fullscreen too (v2.7.29).
+  const headerFooterReserve = 76;
   // Floating mini-player card: 3px track + row (~54) + 10 bottom margin.
   const playerReserve = playback.active ? 68 : 0;
   const maxWidth = screenWidth - horizontalPadding * 2;
@@ -362,12 +368,13 @@ export function MushafReader({
     (isFullscreen ? insets.top + insets.bottom : 0);
   // Measured page viewport (the flex imageWrap box) — authoritative
   // once known, since the estimate can't see the real nav header or
-  // chrome heights. The estimate only covers the first frame before
-  // onLayout fires. Critical for the vertical stretch (v2.7.29): an
-  // overshooting estimate would stretch text under the page chrome.
+  // chrome heights. The estimate covers the first frame and the frames
+  // right after a fullscreen toggle (stale-mode measurements are
+  // ignored). Critical for the vertical stretch (v2.7.29): an
+  // overshooting height would stretch text under the page chrome.
   const maxHeight =
-    wrapHeight > 0
-      ? Math.max(120, wrapHeight - playerReserve - 6)
+    wrapBox.h > 0 && wrapBox.fs === isFullscreen
+      ? Math.max(120, wrapBox.h - playerReserve - 6)
       : estMaxHeight;
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / IMAGE_ASPECT;
@@ -541,8 +548,6 @@ export function MushafReader({
   const pageMeta = (page: number) =>
     MUSHAF_PAGES.find(p => p.page === page) ?? MUSHAF_PAGES[0];
 
-  const showChrome = !isFullscreen;
-
   /** Long press selects the ayah under the finger (v2.7.28). */
   const onPageLongPress = (
     page: number,
@@ -594,13 +599,20 @@ export function MushafReader({
           height: '100%',
           backgroundColor: pageBg,
         }}>
-        {showChrome ? (
-          <View style={[styles.pageHeader, { marginTop: navOverlayPad }]}>
-            <Text style={[styles.pageHeaderText, { color: ornament }]}>
-              {t('quran.juzLabel', {
-                defaultValue: 'Juz {{juz}}',
-                juz: easternNumerals(meta.juz),
-              })}
+        {/* Header + footer stay in fullscreen (v2.7.29): surah name
+            replaces the Juz label there (the nav header is hidden), and
+            the night toggle + page number remain reachable. */}
+        <View style={[styles.pageHeader, { marginTop: navOverlayPad }]}>
+            <Text
+              numberOfLines={1}
+              style={[styles.pageHeaderText, { color: ornament }]}>
+              {isFullscreen
+                ? MUSHAF_SURAHS.find(s => s.number === meta.start.surah)
+                    ?.englishName ?? ''
+                : t('quran.juzLabel', {
+                    defaultValue: 'Juz {{juz}}',
+                    juz: easternNumerals(meta.juz),
+                  })}
             </Text>
             <Pressable
               accessibilityRole="button"
@@ -623,13 +635,16 @@ export function MushafReader({
                   : `☾︎ ${t('quran.nightShort', 'Night')}`}
               </Text>
             </Pressable>
-          </View>
-        ) : null}
+        </View>
         <View
           style={styles.imageWrap}
           onLayout={e => {
             const h = e.nativeEvent.layout.height;
-            setWrapHeight(prev => (Math.abs(prev - h) > 1 ? h : prev));
+            setWrapBox(prev =>
+              Math.abs(prev.h - h) > 1 || prev.fs !== isFullscreen
+                ? { h, fs: isFullscreen }
+                : prev,
+            );
           }}>
           <Pressable
             accessibilityRole="imagebutton"
@@ -707,19 +722,17 @@ export function MushafReader({
             </View>
           </Pressable>
         </View>
-        {showChrome ? (
-          <View style={styles.pageFooter}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
-              onPress={() => setJumpVisible(true)}
-              style={[styles.pageNumberFrame, { borderColor: ornament }]}>
-              <Text style={[styles.pageNumber, { color: ornament }]}>
-                {easternNumerals(page)}
-              </Text>
-            </Pressable>
-          </View>
-        ) : null}
+        <View style={styles.pageFooter}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+            onPress={() => setJumpVisible(true)}
+            style={[styles.pageNumberFrame, { borderColor: ornament }]}>
+            <Text style={[styles.pageNumber, { color: ornament }]}>
+              {easternNumerals(page)}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     );
   };

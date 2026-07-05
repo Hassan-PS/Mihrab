@@ -5,6 +5,8 @@ All notable changes to this project are documented here. The format is inspired 
 ## [Unreleased]
 
 ### Changed
+- **Fullscreen keeps the essentials**: the surah name (replacing the Juz label, since the nav header is hidden), the night/light toggle, and the tappable page number stay visible in fullscreen reading.
+- **Fixed a brief chrome misform when exiting fullscreen**: the page was sized against the stale fullscreen viewport for a few frames, letting text run under the reappearing bars; measurements are now tagged with the mode they were taken in.
 - **Full mushaf pages stretch vertically to fill the screen**: the Madinah page is a fixed ~0.61 aspect while phones are ~0.45, so a width-fit page always letterboxed above and below — especially in fullscreen. Full-text pages (3+) now stretch their text block vertically into that space (capped at 1.25× — fullscreen would need ~1.35× to fill completely, which reads as drawn-out calligraphy), bounded by the real measured page viewport so text never runs under the Juz marker or the page-number frame. Ayah highlights and long-press hit-testing map through the same stretch; the render cache keys off the display height so stretched pages stay pixel-sharp. Pages 1–2 keep their decorative plates undistorted.
 
 ## [2.7.28] — 2026-07-05
