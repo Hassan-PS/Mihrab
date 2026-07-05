@@ -36,7 +36,8 @@
     "ok": "Tamam",
     "today": "Bugün",
     "close": "Kapat",
-    "share": "Paylaş"
+    "share": "Paylaş",
+    "done": "Bitti"
   },
   "home": {
     "loadingPrayer": "Namaz vakitleri yükleniyor…",
@@ -216,7 +217,12 @@
     "showTour": "Uygulama turunu göster",
     "rateApp": "Mihrab'ı değerlendir",
     "rateAppHelp": "Uygulamayı beğendiniz mi? Puanınız başkalarının bulmasına yardımcı olur.",
-    "showTourHelp": "Hızlı özellik turunu yeniden izleyin."
+    "showTourHelp": "Hızlı özellik turunu yeniden izleyin.",
+    "ayahOfDay": "Günlük ayet bildirimi",
+    "ayahOfDayHelp": "Her gün rastgele seçilen bir ayet ve meali.",
+    "ayahOfDayTime": "Bildirim saati",
+    "hourDown": "Saat −",
+    "hourUp": "Saat +"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} ayet eşleşti",
     "noBookmarks": "Henüz yer imi yok — okurken herhangi bir ayete dokunarak yer imi ekleyin veya yıldızlayın.",
     "starred": "Yıldızlı",
-    "shareAsImage": "Görsel olarak paylaş"
+    "shareAsImage": "Görsel olarak paylaş",
+    "chooseReciter": "Kâri seç",
+    "searchReciters": "Kâri ara…",
+    "wordHighlightBadge": "kelime vurgusu",
+    "changeReciter": "Değiştir",
+    "deleteBookmark": "Yer imini sil",
+    "removeStar": "Yıldızı kaldır",
+    "nightShort": "Gece",
+    "lightShort": "Aydınlık",
+    "switchToNight": "Gece sayfasına geç",
+    "switchToLight": "Aydınlık sayfaya geç",
+    "ayahOfDayTitle": "Günün ayeti",
+    "ayahOfDayChannelName": "Günün ayeti"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim duaları",
     "quranGeometry": "Ayet konum verileri (quran.com / Quran for Android projesi)",
-    "recitation": "Tilavet sesi: EveryAyah.com · kelime zamanlamaları: quran-align (CC BY 4.0)"
+    "recitation": "Tilavet sesi (21 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "Sıradaki namaz",

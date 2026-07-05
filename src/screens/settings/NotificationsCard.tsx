@@ -1,8 +1,17 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useMemo } from 'react';
-import { PermissionsAndroid, Platform, Pressable, Switch, Text, View } from 'react-native';
+import { memo, useMemo, useState } from 'react';
+import {
+  Modal,
+  PermissionsAndroid,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import notifee, {
   AndroidNotificationSetting,
@@ -32,6 +41,45 @@ function NotificationsCardImpl({
   // Subscribes only to the notifications slice (task #11).
   const { slice: settings, update: updateSettings } = useNotificationsSettings();
   const { palette } = useAppPalette();
+  const [ayahTimeVisible, setAyahTimeVisible] = useState(false);
+
+  /** Platform notification permission (subset of the master toggle flow). */
+  const ensureNotifPermission = async (): Promise<boolean> => {
+    if (Platform.OS === 'ios') {
+      const perm = await notifee.requestPermission({
+        alert: true,
+        badge: true,
+        sound: true,
+      });
+      return (
+        perm.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+        perm.authorizationStatus === AuthorizationStatus.PROVISIONAL
+      );
+    }
+    if (
+      Platform.OS === 'android' &&
+      typeof Platform.Version === 'number' &&
+      Platform.Version >= 33
+    ) {
+      const result = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+      return result === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  };
+
+  const onToggleAyahOfDay = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ ayahOfDayEnabled: false });
+      return;
+    }
+    if (!(await ensureNotifPermission())) return;
+    updateSettings({ ayahOfDayEnabled: true });
+  };
+
+  const fmtTime = (h: number, m: number) =>
+    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 
   const selectedNotificationSound = useMemo(
     () => getNotificationSoundOption(settings.notificationSound),
@@ -236,8 +284,211 @@ function NotificationsCardImpl({
           onValueChange={v => updateSettings({ lastThirdEnabled: v })}
         />
       </View>
+
+      {/* Ayah of the day (v2.7.27) — daily random ayah + translation at a
+          chosen time. Independent of the master prayer-alerts toggle. */}
+      <Text style={[s.sectionTitle, { color: palette.muted }]}>
+        {t('quran.ayahOfDayTitle', 'Ayah of the day')}
+      </Text>
+
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.ayahOfDay', 'Daily ayah notification')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t(
+              'settings.ayahOfDayHelp',
+              'A randomly chosen ayah with its translation, every day.',
+            )}
+          </Text>
+        </View>
+        <Switch
+          value={settings.ayahOfDayEnabled}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={onToggleAyahOfDay}
+        />
+      </View>
+
+      {settings.ayahOfDayEnabled && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.ayahOfDayTime', 'Notification time')}
+          style={[
+            s.card,
+            s.rowPress,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}
+          onPress={() => setAyahTimeVisible(true)}>
+          <View style={s.switchCopy}>
+            <Text style={[s.label, { color: palette.muted }]}>
+              {t('settings.ayahOfDayTime', 'Notification time')}
+            </Text>
+            <Text style={[s.valueText, { color: palette.text }]}>
+              {fmtTime(settings.ayahOfDayHour, settings.ayahOfDayMinute)}
+            </Text>
+          </View>
+          <Text style={[s.changeLink, { color: palette.accent }]}>
+            {t('common.change')}
+          </Text>
+        </Pressable>
+      )}
+
+      {/* Time picker — hour stepper + quarter-hour minute chips. */}
+      <Modal
+        visible={ayahTimeVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setAyahTimeVisible(false)}>
+        <Pressable
+          style={[timeStyles.backdrop, { backgroundColor: palette.overlay }]}
+          accessibilityLabel={t('common.close', 'Close')}
+          onPress={() => setAyahTimeVisible(false)}
+        />
+        <View style={[timeStyles.sheet, { backgroundColor: palette.card }]}>
+          <Text style={[timeStyles.title, { color: palette.text }]}>
+            {t('settings.ayahOfDayTime', 'Notification time')}
+          </Text>
+          <View style={timeStyles.hourRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.hourDown', 'Hour −')}
+              hitSlop={8}
+              onPress={() =>
+                updateSettings({
+                  ayahOfDayHour: (settings.ayahOfDayHour + 23) % 24,
+                })
+              }
+              style={[timeStyles.stepBtn, { borderColor: palette.border }]}>
+              <Text style={[timeStyles.stepGlyph, { color: palette.accentSolid }]}>
+                −
+              </Text>
+            </Pressable>
+            <Text style={[timeStyles.timeValue, { color: palette.text }]}>
+              {fmtTime(settings.ayahOfDayHour, settings.ayahOfDayMinute)}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.hourUp', 'Hour +')}
+              hitSlop={8}
+              onPress={() =>
+                updateSettings({
+                  ayahOfDayHour: (settings.ayahOfDayHour + 1) % 24,
+                })
+              }
+              style={[timeStyles.stepBtn, { borderColor: palette.border }]}>
+              <Text style={[timeStyles.stepGlyph, { color: palette.accentSolid }]}>
+                +
+              </Text>
+            </Pressable>
+          </View>
+          <View style={timeStyles.minuteRow}>
+            {[0, 15, 30, 45].map(m => {
+              const selected = settings.ayahOfDayMinute === m;
+              return (
+                <Pressable
+                  key={m}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  onPress={() => updateSettings({ ayahOfDayMinute: m })}
+                  style={[
+                    timeStyles.chip,
+                    {
+                      backgroundColor: selected
+                        ? palette.accentBg
+                        : 'transparent',
+                      borderColor: selected
+                        ? palette.accentSolid
+                        : palette.border,
+                    },
+                  ]}>
+                  <Text
+                    style={{
+                      color: selected ? palette.accentSolid : palette.muted,
+                      fontWeight: '600',
+                      fontSize: 13,
+                      fontVariant: ['tabular-nums'],
+                    }}>
+                    :{String(m).padStart(2, '0')}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('common.done', 'Done')}
+            onPress={() => setAyahTimeVisible(false)}
+            style={[timeStyles.doneBtn, { backgroundColor: palette.accentSolid }]}>
+            <Text style={timeStyles.doneLabel}>{t('common.done', 'Done')}</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </>
   );
 }
+
+const timeStyles = StyleSheet.create({
+  backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopStartRadius: 18,
+    borderTopEndRadius: 18,
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 32,
+  },
+  title: { fontSize: 17, fontWeight: '700', marginBottom: 14 },
+  hourRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 18,
+  },
+  stepBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepGlyph: { fontSize: 20, fontWeight: '700' },
+  timeValue: {
+    fontSize: 30,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+    minWidth: 110,
+    textAlign: 'center',
+  },
+  minuteRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 14,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  doneBtn: {
+    marginTop: 18,
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  doneLabel: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+});
 
 export const NotificationsCard = memo(NotificationsCardImpl);

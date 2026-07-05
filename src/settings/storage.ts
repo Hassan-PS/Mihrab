@@ -146,10 +146,26 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (!('useSystemDynamicTheme' in parsed)) {
     merged.useSystemDynamicTheme = false;
   }
+  // One-time v2.7.27 migration: the mushaf became the default reading
+  // mode. Blobs written before the marker existed carry the OLD default
+  // ('withTranslation') that virtually no user chose explicitly — apply
+  // the new default once, then never touch the user's choice again.
+  if (!('quranModeMushafDefault' in parsed)) {
+    merged.quranReadingMode = 'mushaf';
+    merged.quranModeMushafDefault = true;
+  }
   // App accent (#127). Older installs persisted no `appAccentId`; fall
   // back to the brand green default and a valid 6-char hex so the
   // palette resolver always has something concrete to work with.
-  const validAccentIds: ReadonlyArray<string> = ['green', 'teal', 'blue', 'amber', 'custom'];
+  const validAccentIds: ReadonlyArray<string> = [
+    'green',
+    'teal',
+    'blue',
+    'amber',
+    'rose',
+    'violet',
+    'custom',
+  ];
   if (
     typeof parsed.appAccentId !== 'string' ||
     !validAccentIds.includes(parsed.appAccentId)

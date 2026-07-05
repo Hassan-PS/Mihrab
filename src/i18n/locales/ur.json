@@ -36,7 +36,8 @@
     "ok": "ٹھیک ہے",
     "today": "آج",
     "close": "بند کریں",
-    "share": "شیئر کریں"
+    "share": "شیئر کریں",
+    "done": "ہو گیا"
   },
   "home": {
     "loadingPrayer": "نماز کے اوقات لوڈ ہو رہے ہیں…",
@@ -216,7 +217,12 @@
     "showTour": "ایپ کا تعارفی دورہ دکھائیں",
     "rateApp": "محراب کی درجہ بندی کریں",
     "rateAppHelp": "ایپ پسند آئی؟ درجہ بندی دوسروں کو اسے تلاش کرنے میں مدد دیتی ہے۔",
-    "showTourHelp": "فیچر ٹور دوبارہ دیکھیں۔"
+    "showTourHelp": "فیچر ٹور دوبارہ دیکھیں۔",
+    "ayahOfDay": "روزانہ آیت کی اطلاع",
+    "ayahOfDayHelp": "ہر روز ایک بے ترتیب منتخب آیت مع ترجمہ۔",
+    "ayahOfDayTime": "اطلاع کا وقت",
+    "hourDown": "گھنٹہ −",
+    "hourUp": "گھنٹہ +"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} آیات ملیں",
     "noBookmarks": "ابھی کوئی بک مارک نہیں — پڑھتے ہوئے کسی بھی آیت پر ٹیپ کر کے بک مارک یا ستارہ لگائیں۔",
     "starred": "ستارہ شدہ",
-    "shareAsImage": "بطور تصویر شیئر کریں"
+    "shareAsImage": "بطور تصویر شیئر کریں",
+    "chooseReciter": "قاری منتخب کریں",
+    "searchReciters": "قاری تلاش کریں…",
+    "wordHighlightBadge": "الفاظ کی نمایاں کاری",
+    "changeReciter": "تبدیل کریں",
+    "deleteBookmark": "بک مارک حذف کریں",
+    "removeStar": "ستارہ ہٹائیں",
+    "nightShort": "رات",
+    "lightShort": "روشن",
+    "switchToNight": "رات کے صفحے پر جائیں",
+    "switchToLight": "روشن صفحے پر جائیں",
+    "ayahOfDayTitle": "آج کی آیت",
+    "ayahOfDayChannelName": "آج کی آیت"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "حصنُ المسلم کی دعائیں",
     "quranGeometry": "آیات کی پوزیشن کا ڈیٹا (quran.com / Quran for Android پروجیکٹ)",
-    "recitation": "تلاوت کی آڈیو: EveryAyah.com · الفاظ کے اوقات: quran-align (CC BY 4.0)"
+    "recitation": "تلاوت کی آڈیو (21 قاری): EveryAyah.com · الفاظ کی ٹائمنگ: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "اگلی نماز",

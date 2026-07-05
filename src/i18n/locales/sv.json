@@ -36,7 +36,8 @@
     "ok": "OK",
     "today": "Idag",
     "close": "Stäng",
-    "share": "Dela"
+    "share": "Dela",
+    "done": "Klar"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -216,7 +217,12 @@
     "showTour": "Visa rundturen i appen",
     "rateApp": "Betygsätt Mihrab",
     "rateAppHelp": "Gillar du appen? Ett betyg hjälper andra att hitta den.",
-    "showTourHelp": "Spela upp funktionsgenomgången igen."
+    "showTourHelp": "Spela upp funktionsgenomgången igen.",
+    "ayahOfDay": "Daglig aya-avisering",
+    "ayahOfDayHelp": "En slumpmässigt vald aya med översättning, varje dag.",
+    "ayahOfDayTime": "Aviseringstid",
+    "hourDown": "Timme −",
+    "hourUp": "Timme +"
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} ayah-träffar",
     "noBookmarks": "Inga bokmärken än — tryck på en ayah medan du läser för att bokmärka eller stjärnmärka den.",
     "starred": "Stjärnmärkta",
-    "shareAsImage": "Dela som bild"
+    "shareAsImage": "Dela som bild",
+    "chooseReciter": "Välj recitatör",
+    "searchReciters": "Sök recitatörer…",
+    "wordHighlightBadge": "ordmarkering",
+    "changeReciter": "Byt",
+    "deleteBookmark": "Ta bort bokmärke",
+    "removeStar": "Ta bort stjärna",
+    "nightShort": "Natt",
+    "lightShort": "Ljus",
+    "switchToNight": "Byt till nattläge",
+    "switchToLight": "Byt till ljust läge",
+    "ayahOfDayTitle": "Dagens aya",
+    "ayahOfDayChannelName": "Dagens aya"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim-duor",
     "quranGeometry": "Data för ayah-positioner (quran.com / projektet Quran for Android)",
-    "recitation": "Recitationsljud: EveryAyah.com · ordtider: quran-align (CC BY 4.0)"
+    "recitation": "Recitationsljud (21 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "Nästa bön",

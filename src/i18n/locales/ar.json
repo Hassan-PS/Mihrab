@@ -36,7 +36,8 @@
     "ok": "حسناً",
     "today": "اليوم",
     "close": "إغلاق",
-    "share": "مشاركة"
+    "share": "مشاركة",
+    "done": "تم"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
@@ -216,7 +217,12 @@
     "showTour": "عرض جولة التطبيق",
     "rateApp": "قيّم محراب",
     "rateAppHelp": "هل تعجبك التطبيق؟ تقييمك يساعد الآخرين في العثور عليه.",
-    "showTourHelp": "أعد عرض الجولة التعريفية السريعة."
+    "showTourHelp": "أعد عرض الجولة التعريفية السريعة.",
+    "ayahOfDay": "إشعار آية اليوم",
+    "ayahOfDayHelp": "آية تُختار عشوائيًا مع ترجمتها، كل يوم.",
+    "ayahOfDayTime": "وقت الإشعار",
+    "hourDown": "الساعة −",
+    "hourUp": "الساعة +"
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} من الآيات المطابقة",
     "noBookmarks": "لا توجد إشارات مرجعية بعد — انقر على أي آية أثناء القراءة لإضافة إشارة أو نجمة.",
     "starred": "المميَّزة بنجمة",
-    "shareAsImage": "مشاركة كصورة"
+    "shareAsImage": "مشاركة كصورة",
+    "chooseReciter": "اختر القارئ",
+    "searchReciters": "ابحث عن قارئ…",
+    "wordHighlightBadge": "تمييز الكلمات",
+    "changeReciter": "تغيير",
+    "deleteBookmark": "حذف الإشارة المرجعية",
+    "removeStar": "إزالة النجمة",
+    "nightShort": "ليلي",
+    "lightShort": "فاتح",
+    "switchToNight": "التبديل إلى الوضع الليلي",
+    "switchToLight": "التبديل إلى الوضع الفاتح",
+    "ayahOfDayTitle": "آية اليوم",
+    "ayahOfDayChannelName": "آية اليوم"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "أدعية حصن المسلم",
     "quranGeometry": "بيانات مواضع الآيات (quran.com / مشروع Quran for Android)",
-    "recitation": "صوت التلاوة: EveryAyah.com · توقيتات الكلمات: quran-align (CC BY 4.0)"
+    "recitation": "صوت التلاوة (21 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "الصلاة التالية",

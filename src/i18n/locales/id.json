@@ -36,7 +36,8 @@
     "ok": "OK",
     "today": "Hari ini",
     "close": "Tutup",
-    "share": "Bagikan"
+    "share": "Bagikan",
+    "done": "Selesai"
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -216,7 +217,12 @@
     "showTour": "Tampilkan tur aplikasi",
     "rateApp": "Beri nilai Mihrab",
     "rateAppHelp": "Suka aplikasinya? Penilaian membantu orang lain menemukannya.",
-    "showTourHelp": "Putar ulang tur fitur singkat."
+    "showTourHelp": "Putar ulang tur fitur singkat.",
+    "ayahOfDay": "Notifikasi ayat harian",
+    "ayahOfDayHelp": "Satu ayat yang dipilih acak beserta terjemahannya, setiap hari.",
+    "ayahOfDayTime": "Waktu notifikasi",
+    "hourDown": "Jam −",
+    "hourUp": "Jam +"
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} ayat ditemukan",
     "noBookmarks": "Belum ada penanda — ketuk ayat mana pun saat membaca untuk menandai atau membintanginya.",
     "starred": "Berbintang",
-    "shareAsImage": "Bagikan sebagai gambar"
+    "shareAsImage": "Bagikan sebagai gambar",
+    "chooseReciter": "Pilih qari",
+    "searchReciters": "Cari qari…",
+    "wordHighlightBadge": "sorotan kata",
+    "changeReciter": "Ubah",
+    "deleteBookmark": "Hapus markah",
+    "removeStar": "Hapus bintang",
+    "nightShort": "Malam",
+    "lightShort": "Terang",
+    "switchToNight": "Beralih ke halaman malam",
+    "switchToLight": "Beralih ke halaman terang",
+    "ayahOfDayTitle": "Ayat hari ini",
+    "ayahOfDayChannelName": "Ayat hari ini"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Doa-doa Hisnul Muslim",
     "quranGeometry": "Data posisi ayat (quran.com / proyek Quran for Android)",
-    "recitation": "Audio tilawah: EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)"
+    "recitation": "Audio tilawah (21 qari): EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "Salat berikutnya",

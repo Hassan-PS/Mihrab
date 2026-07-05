@@ -36,7 +36,8 @@
     "ok": "OK",
     "today": "Aujourd'hui",
     "close": "Fermer",
-    "share": "Partager"
+    "share": "Partager",
+    "done": "Terminé"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -216,7 +217,12 @@
     "showTour": "Afficher la visite guidée",
     "rateApp": "Évaluer Mihrab",
     "rateAppHelp": "Vous aimez l'application ? Une note aide les autres à la découvrir.",
-    "showTourHelp": "Revoir la visite rapide des fonctionnalités."
+    "showTourHelp": "Revoir la visite rapide des fonctionnalités.",
+    "ayahOfDay": "Notification quotidienne d'un verset",
+    "ayahOfDayHelp": "Un verset choisi au hasard avec sa traduction, chaque jour.",
+    "ayahOfDayTime": "Heure de la notification",
+    "hourDown": "Heure −",
+    "hourUp": "Heure +"
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} versets correspondants",
     "noBookmarks": "Aucun signet pour l'instant — touchez un verset pendant la lecture pour lui ajouter un signet ou une étoile.",
     "starred": "Favoris",
-    "shareAsImage": "Partager en image"
+    "shareAsImage": "Partager en image",
+    "chooseReciter": "Choisir un récitateur",
+    "searchReciters": "Rechercher un récitateur…",
+    "wordHighlightBadge": "surlignage des mots",
+    "changeReciter": "Changer",
+    "deleteBookmark": "Supprimer le signet",
+    "removeStar": "Retirer l'étoile",
+    "nightShort": "Nuit",
+    "lightShort": "Clair",
+    "switchToNight": "Passer à la page nuit",
+    "switchToLight": "Passer à la page claire",
+    "ayahOfDayTitle": "Verset du jour",
+    "ayahOfDayChannelName": "Verset du jour"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Invocations de Hisn al-Muslim",
     "quranGeometry": "Données de position des versets (quran.com / projet Quran for Android)",
-    "recitation": "Audio de récitation : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)"
+    "recitation": "Audio de récitation (21 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "Prochaine prière",

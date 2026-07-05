@@ -36,7 +36,8 @@
     "ok": "Aceptar",
     "today": "Hoy",
     "close": "Cerrar",
-    "share": "Compartir"
+    "share": "Compartir",
+    "done": "Hecho"
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -216,7 +217,12 @@
     "showTour": "Mostrar el recorrido de la app",
     "rateApp": "Valora Mihrab",
     "rateAppHelp": "¿Te gusta la app? Una valoración ayuda a otros a encontrarla.",
-    "showTourHelp": "Vuelve a ver el recorrido rápido por las funciones."
+    "showTourHelp": "Vuelve a ver el recorrido rápido por las funciones.",
+    "ayahOfDay": "Notificación diaria de aleya",
+    "ayahOfDayHelp": "Una aleya elegida al azar con su traducción, cada día.",
+    "ayahOfDayTime": "Hora de la notificación",
+    "hourDown": "Hora −",
+    "hourUp": "Hora +"
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} aleyas encontradas",
     "noBookmarks": "Aún no hay marcadores; toca cualquier aleya mientras lees para marcarla o destacarla.",
     "starred": "Destacadas",
-    "shareAsImage": "Compartir como imagen"
+    "shareAsImage": "Compartir como imagen",
+    "chooseReciter": "Elegir recitador",
+    "searchReciters": "Buscar recitadores…",
+    "wordHighlightBadge": "resaltado de palabras",
+    "changeReciter": "Cambiar",
+    "deleteBookmark": "Eliminar marcador",
+    "removeStar": "Quitar estrella",
+    "nightShort": "Noche",
+    "lightShort": "Claro",
+    "switchToNight": "Cambiar a página nocturna",
+    "switchToLight": "Cambiar a página clara",
+    "ayahOfDayTitle": "Aleya del día",
+    "ayahOfDayChannelName": "Aleya del día"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Súplicas de Hisn al-Muslim",
     "quranGeometry": "Datos de posición de aleyas (quran.com / proyecto Quran for Android)",
-    "recitation": "Audio de recitación: EveryAyah.com · tiempos de palabras: quran-align (CC BY 4.0)"
+    "recitation": "Audio de recitación (21 recitadores): EveryAyah.com · tiempos de palabras: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "Próxima oración",

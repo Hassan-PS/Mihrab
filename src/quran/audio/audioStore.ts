@@ -222,6 +222,9 @@ export async function audioDiskUsage(): Promise<number> {
 export async function loadReciterTimings(
   reciterId: string,
 ): Promise<{ [key: string]: number[][] } | null> {
+  // No timing data published for this reciter — skip the network round
+  // trip entirely; the UI falls back to ayah-level highlighting.
+  if (!findReciter(reciterId).hasTimings) return null;
   const path = timingsFilePath(reciterId);
   try {
     if (!(await fileValid(path, 10_000))) {

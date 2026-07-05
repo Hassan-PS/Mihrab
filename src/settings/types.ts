@@ -152,11 +152,18 @@ export type PrayerAppSettings = {
   /**
    * Reading mode for the QuranSurahScreen — task #97.
    *
-   * `withTranslation` (default) shows ayah-by-ayah cards with Arabic +
-   * translation. `mushaf` is a continuous Arabic-only reading view
-   * styled like a printed mushaf page.
+   * `mushaf` (default since v2.7.27) is the interactive Arabic page
+   * reader — opening a surah lands on the raw mushaf. `withTranslation`
+   * shows ayah-by-ayah cards with Arabic + translation. The header
+   * toggle persists the user's last choice.
    */
   quranReadingMode: 'withTranslation' | 'mushaf';
+  /**
+   * Migration marker (v2.7.27): set once the mushaf-as-default reading
+   * mode has been applied to this install. Never removed — additive
+   * schema. See `storage.ts`.
+   */
+  quranModeMushafDefault: boolean;
   /**
    * Day-before fasting reminder — task #98.
    *
@@ -233,6 +240,20 @@ export type PrayerAppSettings = {
   sunriseEnabled: boolean;
   islamicMidnightEnabled: boolean;
   lastThirdEnabled: boolean;
+  /**
+   * Ayah of the day notification — v2.7.27.
+   *
+   * When on, a daily notification fires at the chosen time with a
+   * randomly drawn ayah (uniform over all 6,236) plus its translation in
+   * the user's active edition ("default tafsir" — the same resolution
+   * the reader uses). Scheduled 14 days ahead, each day's ayah drawn at
+   * scheduling time; re-synced on app foreground and settings change.
+   */
+  ayahOfDayEnabled: boolean;
+  /** Hour (0–23) the ayah-of-the-day notification fires. */
+  ayahOfDayHour: number;
+  /** Minute (0–59) the ayah-of-the-day notification fires. */
+  ayahOfDayMinute: number;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -268,7 +289,10 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // Empty string = follow app language (resolved at read time via
   // `defaultEditionForLocale`).
   quranTranslationEdition: '',
-  quranReadingMode: 'withTranslation',
+  // Raw Arabic mushaf is the default reading experience (v2.7.27);
+  // toggling to translation view persists per user.
+  quranReadingMode: 'mushaf',
+  quranModeMushafDefault: true,
   fastingRemindersEnabled: false,
   // 8 PM by default — late enough to land after isha, early enough that
   // the user notices before sleeping.
@@ -295,4 +319,9 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   sunriseEnabled: true,
   islamicMidnightEnabled: false,
   lastThirdEnabled: false,
+  // Ayah of the day: off by default (no surprise notifications); 9:00 AM
+  // when enabled — a quiet mid-morning moment.
+  ayahOfDayEnabled: false,
+  ayahOfDayHour: 9,
+  ayahOfDayMinute: 0,
 };

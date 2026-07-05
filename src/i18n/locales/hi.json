@@ -36,7 +36,8 @@
     "ok": "ठीक है",
     "today": "आज",
     "close": "बंद करें",
-    "share": "साझा करें"
+    "share": "साझा करें",
+    "done": "हो गया"
   },
   "home": {
     "loadingPrayer": "प्रार्थना का समय लोड हो रहा है...",
@@ -216,7 +217,12 @@
     "showTour": "ऐप टूर दिखाएँ",
     "rateApp": "मिहराब को रेट करें",
     "rateAppHelp": "ऐप पसंद आया? रेटिंग दूसरों को इसे खोजने में मदद करती है।",
-    "showTourHelp": "त्वरित फ़ीचर टूर फिर से देखें।"
+    "showTourHelp": "त्वरित फ़ीचर टूर फिर से देखें।",
+    "ayahOfDay": "दैनिक आयत सूचना",
+    "ayahOfDayHelp": "हर दिन एक यादृच्छिक चुनी गई आयत और उसका अनुवाद।",
+    "ayahOfDayTime": "सूचना का समय",
+    "hourDown": "घंटा −",
+    "hourUp": "घंटा +"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} आयतें मिलीं",
     "noBookmarks": "अभी कोई बुकमार्क नहीं — पढ़ते समय किसी आयत पर टैप करके उसे बुकमार्क या तारांकित करें।",
     "starred": "तारांकित",
-    "shareAsImage": "छवि के रूप में साझा करें"
+    "shareAsImage": "छवि के रूप में साझा करें",
+    "chooseReciter": "क़ारी चुनें",
+    "searchReciters": "क़ारी खोजें…",
+    "wordHighlightBadge": "शब्द हाइलाइट",
+    "changeReciter": "बदलें",
+    "deleteBookmark": "बुकमार्क हटाएँ",
+    "removeStar": "तारा हटाएँ",
+    "nightShort": "रात",
+    "lightShort": "उजला",
+    "switchToNight": "रात वाले पृष्ठ पर जाएँ",
+    "switchToLight": "उजले पृष्ठ पर जाएँ",
+    "ayahOfDayTitle": "आज की आयत",
+    "ayahOfDayChannelName": "आज की आयत"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "हिस्न अल-मुस्लिम की दुआएँ",
     "quranGeometry": "आयत स्थिति डेटा (quran.com / Quran for Android प्रोजेक्ट)",
-    "recitation": "तिलावत ऑडियो: EveryAyah.com · शब्द समय: quran-align (CC BY 4.0)"
+    "recitation": "तिलावत ऑडियो (21 क़ारी): EveryAyah.com · शब्द समय: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "अगली नमाज़",

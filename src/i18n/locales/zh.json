@@ -36,7 +36,8 @@
     "ok": "确定",
     "today": "今天",
     "close": "关闭",
-    "share": "分享"
+    "share": "分享",
+    "done": "完成"
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",
@@ -216,7 +217,12 @@
     "showTour": "显示应用导览",
     "rateApp": "为 Mihrab 评分",
     "rateAppHelp": "喜欢这个应用吗？评分能帮助更多人发现它。",
-    "showTourHelp": "重新播放功能导览。"
+    "showTourHelp": "重新播放功能导览。",
+    "ayahOfDay": "每日经文通知",
+    "ayahOfDayHelp": "每天随机挑选一节经文及其译文。",
+    "ayahOfDayTime": "通知时间",
+    "hourDown": "小时 −",
+    "hourUp": "小时 +"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -806,7 +812,19 @@
     "searchResults": "找到 {{count}} 节",
     "noBookmarks": "暂无书签 — 阅读时点按任意经文即可添加书签或星标。",
     "starred": "已加星标",
-    "shareAsImage": "以图片分享"
+    "shareAsImage": "以图片分享",
+    "chooseReciter": "选择诵读者",
+    "searchReciters": "搜索诵读者…",
+    "wordHighlightBadge": "逐词高亮",
+    "changeReciter": "更换",
+    "deleteBookmark": "删除书签",
+    "removeStar": "移除星标",
+    "nightShort": "夜间",
+    "lightShort": "明亮",
+    "switchToNight": "切换到夜间页面",
+    "switchToLight": "切换到明亮页面",
+    "ayahOfDayTitle": "每日经文",
+    "ayahOfDayChannelName": "每日经文"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "《穆斯林堡垒》中的祷词",
     "quranGeometry": "经文位置数据（quran.com / Quran for Android 项目）",
-    "recitation": "诵读音频：EveryAyah.com · 逐词时间轴：quran-align（CC BY 4.0）"
+    "recitation": "诵读音频（21位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）"
   },
   "liveActivity": {
     "title": "下一次礼拜",

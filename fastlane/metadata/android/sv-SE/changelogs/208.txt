@@ -1,0 +1,7 @@
+Uppgraderad Koranläsare:
+
+• 16 nya recitatörer (21 totalt) med sökbar recitatörsväljare
+• Mushaf-sidan är nu standardvyn, med tydligare natt/ljus-växling
+• Snyggare recitationsspelare
+• Bokmärken kan nu tas bort från bokmärkesfliken
+• Nytt: daglig "Dagens aya"-avisering vid valfri tid, med översättning

@@ -36,7 +36,8 @@
     "ok": "OK",
     "today": "Сегодня",
     "close": "Закрыть",
-    "share": "Поделиться"
+    "share": "Поделиться",
+    "done": "Готово"
   },
   "home": {
     "loadingPrayer": "Загрузка времени молитв…",
@@ -216,7 +217,12 @@
     "showTour": "Показать тур по приложению",
     "rateApp": "Оценить Mihrab",
     "rateAppHelp": "Нравится приложение? Оценка поможет другим его найти.",
-    "showTourHelp": "Посмотреть краткий обзор функций ещё раз."
+    "showTourHelp": "Посмотреть краткий обзор функций ещё раз.",
+    "ayahOfDay": "Ежедневное уведомление с аятом",
+    "ayahOfDayHelp": "Каждый день — случайно выбранный аят с переводом.",
+    "ayahOfDayTime": "Время уведомления",
+    "hourDown": "Час −",
+    "hourUp": "Час +"
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",
@@ -806,7 +812,19 @@
     "searchResults": "Найдено аятов: {{count}}",
     "noBookmarks": "Закладок пока нет — нажмите на любой аят во время чтения, чтобы добавить закладку или звезду.",
     "starred": "Отмеченные звездой",
-    "shareAsImage": "Поделиться картинкой"
+    "shareAsImage": "Поделиться картинкой",
+    "chooseReciter": "Выбрать чтеца",
+    "searchReciters": "Поиск чтецов…",
+    "wordHighlightBadge": "подсветка слов",
+    "changeReciter": "Изменить",
+    "deleteBookmark": "Удалить закладку",
+    "removeStar": "Убрать звезду",
+    "nightShort": "Ночь",
+    "lightShort": "Светлая",
+    "switchToNight": "Переключить на ночную страницу",
+    "switchToLight": "Переключить на светлую страницу",
+    "ayahOfDayTitle": "Аят дня",
+    "ayahOfDayChannelName": "Аят дня"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Дуа из Хисн аль-Муслим",
     "quranGeometry": "Данные о положении аятов (quran.com / проект Quran for Android)",
-    "recitation": "Аудио чтения: EveryAyah.com · тайминги слов: quran-align (CC BY 4.0)"
+    "recitation": "Аудио чтения (21 чтец): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "Следующая молитва",

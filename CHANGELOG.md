@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.27] — 2026-07-05
+
+### Added
+- **16 new reciters** (21 total): As-Sudais, Ash-Shatri, Ar-Rifai, Al-Tablawi (all four with word-level highlight), Maher Al-Muaiqly, Saad Al-Ghamdi, Ahmed Al-Ajmi, Muhammad Ayyub, Muhammad Jibreel, Yasser Ad-Dossari, Ali Al-Hudhaify, Nasser Al-Qatami, Abdullah Basfar, Fares Abbad, Salah Al-Budair, and Abdullah Al-Juhany. All verified against EveryAyah; reciters without word timings fall back to ayah-level highlight.
+- **Searchable reciter picker**: switching reciters is now a dedicated sheet with type-ahead search (Latin or Arabic) and a "word highlight" badge — reachable from the recitation settings *and* by tapping the reciter name in the player.
+- **Ayah of the day notification**: opt-in daily notification at a chosen time with a randomly drawn ayah (uniform over all 6,236) and its translation in your active edition. Settings → Notifications → Ayah of the day.
+
+### Changed
+- **The mushaf is now the default reading view** — opening a surah lands on the raw Arabic page; the header toggle still switches to the translation view and remembers your choice (applied once to existing installs).
+- **Night/light toggle is a labeled pill** on the mushaf page header (was a small glyph), and its icons stay monochrome.
+- **Sleeker recitation player**: floating card matching the app chrome, accent-filled circular play button, ayah progress hairline, tappable reciter name.
+- **Bookmarks are deletable** from the Bookmarks tab (and stars removable) with an ✕ on each row.
+- Updated the in-app attributions for the expanded reciter set.
+
+### Fixed
+- **Recitation sheet in mushaf view**: the header ♪ button now opens the recitation settings in mushaf mode (it silently did nothing before).
+- **Rose/Violet accents no longer reset to green after an app restart** (settings validation list was missing the two new accent ids).
+
 ## [2.7.26] — 2026-07-05 — Quran Reader v2 (docs/quran-reader-plan.md)
 
 ### Added

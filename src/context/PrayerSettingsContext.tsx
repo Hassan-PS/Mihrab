@@ -72,6 +72,9 @@ export type NotificationsSlice = Pick<
   | 'sunriseEnabled'
   | 'islamicMidnightEnabled'
   | 'lastThirdEnabled'
+  | 'ayahOfDayEnabled'
+  | 'ayahOfDayHour'
+  | 'ayahOfDayMinute'
 >;
 
 export type DataSourceSlice = Pick<
@@ -218,6 +221,9 @@ export function PrayerSettingsProvider({
       sunriseEnabled: settings.sunriseEnabled,
       islamicMidnightEnabled: settings.islamicMidnightEnabled,
       lastThirdEnabled: settings.lastThirdEnabled,
+      ayahOfDayEnabled: settings.ayahOfDayEnabled,
+      ayahOfDayHour: settings.ayahOfDayHour,
+      ayahOfDayMinute: settings.ayahOfDayMinute,
     }),
     [
       settings.notificationsEnabled,
@@ -226,6 +232,9 @@ export function PrayerSettingsProvider({
       settings.sunriseEnabled,
       settings.islamicMidnightEnabled,
       settings.lastThirdEnabled,
+      settings.ayahOfDayEnabled,
+      settings.ayahOfDayHour,
+      settings.ayahOfDayMinute,
     ],
   );
 

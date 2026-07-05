@@ -254,13 +254,23 @@ export function QuranSurahScreen() {
 
   if (isMushaf) {
     return (
-      <MushafReader
-        surahNumber={surahNumber}
-        initialPage={initialPage}
-        isFullscreen={isFullscreen}
-        onExitFullscreen={() => setIsFullscreen(false)}
-        onTitleChange={title => navigation.setOptions({ title })}
-      />
+      <>
+        <MushafReader
+          surahNumber={surahNumber}
+          initialPage={initialPage}
+          isFullscreen={isFullscreen}
+          onExitFullscreen={() => setIsFullscreen(false)}
+          onTitleChange={title => navigation.setOptions({ title })}
+        />
+        {/* The header ♪ button lives on this screen, so the recitation
+            sheet must mount here too — the early return used to leave it
+            unmounted in mushaf mode (button silently did nothing). */}
+        <PlaybackSettingsSheet
+          visible={playbackSheetVisible}
+          onClose={() => setPlaybackSheetVisible(false)}
+          surahNumber={surahNumber}
+        />
+      </>
     );
   }
 

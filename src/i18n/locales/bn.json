@@ -36,7 +36,8 @@
     "ok": "ঠিক আছে",
     "today": "আজ",
     "close": "বন্ধ করুন",
-    "share": "শেয়ার করুন"
+    "share": "শেয়ার করুন",
+    "done": "সম্পন্ন"
   },
   "home": {
     "loadingPrayer": "নামাজের সময় লোড হচ্ছে...",
@@ -216,7 +217,12 @@
     "showTour": "অ্যাপ ট্যুর দেখান",
     "rateApp": "মিহরাবকে রেট দিন",
     "rateAppHelp": "অ্যাপটি ভালো লাগছে? একটি রেটিং অন্যদের এটি খুঁজে পেতে সাহায্য করে।",
-    "showTourHelp": "দ্রুত ফিচার ওয়াকথ্রু আবার দেখুন।"
+    "showTourHelp": "দ্রুত ফিচার ওয়াকথ্রু আবার দেখুন।",
+    "ayahOfDay": "দৈনিক আয়াত বিজ্ঞপ্তি",
+    "ayahOfDayHelp": "প্রতিদিন একটি এলোমেলোভাবে নির্বাচিত আয়াত ও তার অনুবাদ।",
+    "ayahOfDayTime": "বিজ্ঞপ্তির সময়",
+    "hourDown": "ঘণ্টা −",
+    "hourUp": "ঘণ্টা +"
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}}টি আয়াত মিলেছে",
     "noBookmarks": "এখনও কোনো বুকমার্ক নেই — পড়ার সময় যেকোনো আয়াতে ট্যাপ করে বুকমার্ক বা তারকা দিন।",
     "starred": "তারকাচিহ্নিত",
-    "shareAsImage": "ছবি হিসেবে শেয়ার করুন"
+    "shareAsImage": "ছবি হিসেবে শেয়ার করুন",
+    "chooseReciter": "ক্বারী নির্বাচন করুন",
+    "searchReciters": "ক্বারী খুঁজুন…",
+    "wordHighlightBadge": "শব্দ হাইলাইট",
+    "changeReciter": "পরিবর্তন",
+    "deleteBookmark": "বুকমার্ক মুছুন",
+    "removeStar": "তারকা সরান",
+    "nightShort": "রাত",
+    "lightShort": "আলো",
+    "switchToNight": "রাতের পৃষ্ঠায় যান",
+    "switchToLight": "আলোর পৃষ্ঠায় যান",
+    "ayahOfDayTitle": "আজকের আয়াত",
+    "ayahOfDayChannelName": "আজকের আয়াত"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "হিসনুল মুসলিম-এর দোআ",
     "quranGeometry": "আয়াতের অবস্থানের ডেটা (quran.com / Quran for Android প্রকল্প)",
-    "recitation": "তিলাওয়াতের অডিও: EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)"
+    "recitation": "তিলাওয়াতের অডিও (২১ জন ক্বারী): EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "পরবর্তী নামায",

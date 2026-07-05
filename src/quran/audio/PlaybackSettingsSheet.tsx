@@ -20,7 +20,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { findSurah } from '../quran';
-import { RECITERS } from './reciters';
+import { findReciter } from './reciters';
+import { ReciterPickerSheet } from './ReciterPickerSheet';
 import {
   downloadSurahAudio,
   isSurahDownloaded,
@@ -48,6 +49,7 @@ export function PlaybackSettingsSheet({ visible, onClose, surahNumber }: Props) 
 
   const [downloaded, setDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [reciterPickerVisible, setReciterPickerVisible] = useState(false);
   const [dlProgress, setDlProgress] = useState({ done: 0, total: 0 });
   const dlHandle = useRef<AudioDownloadHandle | null>(null);
 
@@ -174,36 +176,27 @@ export function PlaybackSettingsSheet({ visible, onClose, surahNumber }: Props) 
             {t('quran.playbackSettings', 'Recitation')}
           </Text>
 
-          {/* Reciter */}
+          {/* Reciter — compact row; tap opens the searchable picker. */}
           <Text style={[styles.section, { color: palette.muted }]}>
             {t('quran.reciter', 'Reciter')}
           </Text>
-          {RECITERS.map(r => {
-            const selected = r.id === prefs.reciterId;
-            return (
-              <Pressable
-                key={r.id}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                onPress={() => setQuranPrefs({ reciterId: r.id })}
-                style={[
-                  styles.reciterRow,
-                  { backgroundColor: selected ? palette.accentBg : 'transparent' },
-                ]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.reciterName, { color: palette.text }]}>
-                    {r.name}
-                  </Text>
-                  <Text style={[styles.reciterArabic, { color: palette.muted }]}>
-                    {r.arabicName}
-                  </Text>
-                </View>
-                {selected ? (
-                  <Text style={{ color: palette.accentSolid, fontSize: 16 }}>✓</Text>
-                ) : null}
-              </Pressable>
-            );
-          })}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.chooseReciter', 'Choose reciter')}
+            onPress={() => setReciterPickerVisible(true)}
+            style={[styles.reciterRow, { backgroundColor: palette.accentBg }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.reciterName, { color: palette.text }]}>
+                {findReciter(prefs.reciterId).name}
+              </Text>
+              <Text style={[styles.reciterArabic, { color: palette.muted }]}>
+                {findReciter(prefs.reciterId).arabicName}
+              </Text>
+            </View>
+            <Text style={{ color: palette.accentSolid, fontSize: 13, fontWeight: '700' }}>
+              {t('quran.changeReciter', 'Change')}
+            </Text>
+          </Pressable>
 
           {/* Offline download for this surah */}
           <Pressable
@@ -324,6 +317,10 @@ export function PlaybackSettingsSheet({ visible, onClose, surahNumber }: Props) 
           </View>
         </ScrollView>
       </View>
+      <ReciterPickerSheet
+        visible={reciterPickerVisible}
+        onClose={() => setReciterPickerVisible(false)}
+      />
     </Modal>
   );
 }

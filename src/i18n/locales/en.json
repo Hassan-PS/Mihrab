@@ -36,7 +36,8 @@
     "ok": "OK",
     "today": "Today",
     "close": "Close",
-    "share": "Share"
+    "share": "Share",
+    "done": "Done"
   },
   "home": {
     "loadingPrayer": "Loading prayer times…",
@@ -216,7 +217,12 @@
     "showTour": "Show the app tour",
     "rateApp": "Rate Mihrab",
     "rateAppHelp": "Enjoying the app? A rating helps others find it.",
-    "showTourHelp": "Replay the quick feature walkthrough."
+    "showTourHelp": "Replay the quick feature walkthrough.",
+    "ayahOfDay": "Daily ayah notification",
+    "ayahOfDayHelp": "A randomly chosen ayah with its translation, every day.",
+    "ayahOfDayTime": "Notification time",
+    "hourDown": "Hour −",
+    "hourUp": "Hour +"
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -806,7 +812,19 @@
     "searchResults": "{{count}} ayah matches",
     "noBookmarks": "No bookmarks yet — tap any ayah while reading to bookmark or star it.",
     "starred": "Starred",
-    "shareAsImage": "Share as image"
+    "shareAsImage": "Share as image",
+    "chooseReciter": "Choose reciter",
+    "searchReciters": "Search reciters…",
+    "wordHighlightBadge": "word highlight",
+    "changeReciter": "Change",
+    "deleteBookmark": "Delete bookmark",
+    "removeStar": "Remove star",
+    "nightShort": "Night",
+    "lightShort": "Light",
+    "switchToNight": "Switch to night page",
+    "switchToLight": "Switch to light page",
+    "ayahOfDayTitle": "Ayah of the day",
+    "ayahOfDayChannelName": "Ayah of the day"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",
@@ -972,7 +990,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisnul Muslim duas",
     "quranGeometry": "Ayah position data (quran.com / Quran for Android project)",
-    "recitation": "Recitation audio: EveryAyah.com · word timings: quran-align (CC BY 4.0)"
+    "recitation": "Recitation audio (21 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)"
   },
   "liveActivity": {
     "title": "Next prayer",

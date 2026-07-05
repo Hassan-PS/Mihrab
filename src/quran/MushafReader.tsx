@@ -374,7 +374,8 @@ export function MushafReader({
     !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
   const horizontalPadding = 12;
   const headerFooterReserve = isFullscreen ? 0 : 76;
-  const playerReserve = playback.active ? 56 : 0;
+  // Floating mini-player card: 3px track + row (~54) + 10 bottom margin.
+  const playerReserve = playback.active ? 68 : 0;
   const maxWidth = screenWidth - horizontalPadding * 2;
   const maxHeight =
     windowHeight -
@@ -439,13 +440,23 @@ export function MushafReader({
             </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t('quran.nightMode', 'Night mode')}
+              accessibilityLabel={
+                nightMode
+                  ? t('quran.switchToLight', 'Switch to light page')
+                  : t('quran.switchToNight', 'Switch to night page')
+              }
               hitSlop={8}
               onPress={() =>
                 setQuranPrefs({ mushafNightMode: !nightMode })
-              }>
-              <Text style={[styles.pageHeaderText, { color: ornament }]}>
-                {nightMode ? '☀' : '☾'}
+              }
+              style={[styles.nightPill, { borderColor: ornament }]}>
+              <Text style={[styles.nightPillText, { color: ornament }]}>
+                {nightMode
+                  ? // U+FE0E variation selectors force the monochrome text
+                    // glyphs — Android otherwise renders the sun as a
+                    // colored emoji, which shouts against the quiet page.
+                    `☀︎ ${t('quran.lightShort', 'Light')}`
+                  : `☾︎ ${t('quran.nightShort', 'Night')}`}
               </Text>
             </Pressable>
           </View>
@@ -692,6 +703,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     fontVariant: ['tabular-nums'],
   },
+  nightPill: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  nightPillText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.3 },
   imageWrap: {
     flex: 1,
     alignItems: 'center',

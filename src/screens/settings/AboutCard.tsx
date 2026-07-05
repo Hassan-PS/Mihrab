@@ -223,7 +223,7 @@ function Attributions({ palette }: { palette: AppPalette }) {
       />
       <AttributionRow
         palette={palette}
-        label={t('attributions.recitation', { defaultValue: 'Recitation audio: EveryAyah.com · word timings: quran-align (CC BY 4.0)' })}
+        label={t('attributions.recitation', { defaultValue: 'Recitation audio (21 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)' })}
         sub="everyayah.com · cpfair/quran-align"
         url="https://everyayah.com/"
       />

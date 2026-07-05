@@ -34,7 +34,9 @@ import {
   activeKhatmah,
   hydrateQuranState,
   khatmahToday,
+  removeBookmark,
   startKhatmah,
+  toggleStar,
   useQuranState,
   BOOKMARK_COLORS,
   KHATMAH_TOTAL_PAGES,
@@ -502,6 +504,16 @@ export function QuranScreen() {
               {t('quran.pageLabel', { page: b.page })}
             </Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.deleteBookmark', 'Delete bookmark')}
+            hitSlop={10}
+            onPress={() => removeBookmark(b.id)}
+            style={styles.deleteBtn}>
+            <Text style={[styles.deleteGlyph, { color: palette.muted }]}>
+              ✕
+            </Text>
+          </Pressable>
         </Pressable>
       ))}
       {starredRefs.length > 0 ? (
@@ -525,6 +537,16 @@ export function QuranScreen() {
               {`${findSurah(r.surah)?.romanized ?? ''} ${r.surah}:${r.ayah}`}
             </Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.removeStar', 'Remove star')}
+            hitSlop={10}
+            onPress={() => toggleStar(r.surah, r.ayah)}
+            style={styles.deleteBtn}>
+            <Text style={[styles.deleteGlyph, { color: palette.muted }]}>
+              ✕
+            </Text>
+          </Pressable>
         </Pressable>
       ))}
     </View>
@@ -664,6 +686,8 @@ const styles = StyleSheet.create({
   pageHint: { fontSize: 11, marginTop: 2, fontVariant: ['tabular-nums'] },
   arabic: { fontSize: 22, lineHeight: 42, ...arabicTextStyle('body') },
   bookmarkDot: { width: 14, height: 14, borderRadius: 7 },
+  deleteBtn: { paddingHorizontal: 6, paddingVertical: 6 },
+  deleteGlyph: { fontSize: 14, fontWeight: '700' },
   starredHeading: {
     fontSize: 12,
     fontWeight: '700',

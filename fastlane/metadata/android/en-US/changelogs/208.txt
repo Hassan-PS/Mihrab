@@ -1,0 +1,7 @@
+Quran reader upgrades:
+
+• 16 new reciters (21 total) with a searchable reciter picker
+• The mushaf page is now the default reading view, with a clearer night/light toggle
+• Sleeker recitation player
+• Bookmarks can now be deleted from the Bookmarks tab
+• New: daily "Ayah of the day" notification at a time you choose, with translation

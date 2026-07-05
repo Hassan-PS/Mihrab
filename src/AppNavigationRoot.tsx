@@ -21,12 +21,47 @@ import {
 import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
 import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
+import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
 
 export function AppNavigationRoot() {
-  const { settings } = usePrayerSettings();
+  const { settings, hydrated } = usePrayerSettings();
   const systemScheme = useSystemColorScheme();
 
   useSyncWidgetUiHints();
+
+  // Ayah of the day — keep the rolling 14-day trigger window fresh.
+  // Re-syncs when the toggle/time/edition/language changes and on every
+  // foreground, throttled to once per hour (each sync draws new random
+  // ayahs for days not yet scheduled; ids are date-stable so re-running
+  // simply re-rolls the window forward).
+  const lastAyahSyncRef = useRef(0);
+  useEffect(() => {
+    if (!hydrated) return;
+    const sync = (force: boolean) => {
+      const now = Date.now();
+      if (!force && now - lastAyahSyncRef.current < 60 * 60 * 1000) return;
+      lastAyahSyncRef.current = now;
+      void rescheduleAyahOfDay({
+        enabled: settings.ayahOfDayEnabled,
+        hour: settings.ayahOfDayHour,
+        minute: settings.ayahOfDayMinute,
+        quranTranslationEdition: settings.quranTranslationEdition,
+        language: settings.language,
+      });
+    };
+    sync(true);
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') sync(false);
+    });
+    return () => sub.remove();
+  }, [
+    hydrated,
+    settings.ayahOfDayEnabled,
+    settings.ayahOfDayHour,
+    settings.ayahOfDayMinute,
+    settings.quranTranslationEdition,
+    settings.language,
+  ]);
 
   // iOS: re-show the Live Activity if the user dismissed it (swipe / "Clear
   // all") while the feature is still enabled. iOS forbids starting one from the
