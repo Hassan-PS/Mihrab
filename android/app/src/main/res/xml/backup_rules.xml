@@ -7,9 +7,12 @@
   tasbih, Quran bookmarks/khatmah/last-read (mihrab.quran.v1) — plus all
   shared preferences (widget/live-activity native prefs).
 
-  WHAT'S EXCLUDED: the managed Quran content store (files/quran/ — mushaf
-  pages + recitation audio, 100+ MB). It blows the 25 MB Auto Backup quota
-  and is fully re-downloadable; the reader re-prompts on first open.
+  WHAT'S EXCLUDED: everything else — most importantly the managed Quran
+  content store (files/quran/ — mushaf pages + recitation audio, 100+ MB;
+  it would blow the 25 MB Auto Backup quota and is fully re-downloadable).
+  Because at least one <include> is present, ONLY the included paths are
+  backed up; no explicit <exclude> is needed (and lint rejects an exclude
+  whose path is not inside an included domain path).
 
   NOTE: react-native-encrypted-storage values (saved location presets) are
   keyed to the Android Keystore, which the OS wipes on uninstall — after a
@@ -20,5 +23,4 @@
 <full-backup-content>
   <include domain="database" path="RKStorage" />
   <include domain="sharedpref" path="." />
-  <exclude domain="file" path="quran" />
 </full-backup-content>

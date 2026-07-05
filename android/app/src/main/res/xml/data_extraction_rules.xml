@@ -2,18 +2,17 @@
 <!--
   Android 12+ backup & device-transfer rules — mirrors backup_rules.xml
   (see the rationale there). Cloud backup and device-to-device transfer
-  both carry the AsyncStorage database + shared prefs and skip the large
-  re-downloadable Quran content store.
+  both carry the AsyncStorage database + shared prefs. Since includes are
+  present, only the included paths transfer — the large re-downloadable
+  Quran content store (files/quran/) is implicitly excluded.
 -->
 <data-extraction-rules>
   <cloud-backup>
     <include domain="database" path="RKStorage" />
     <include domain="sharedpref" path="." />
-    <exclude domain="file" path="quran" />
   </cloud-backup>
   <device-transfer>
     <include domain="database" path="RKStorage" />
     <include domain="sharedpref" path="." />
-    <exclude domain="file" path="quran" />
   </device-transfer>
 </data-extraction-rules>
