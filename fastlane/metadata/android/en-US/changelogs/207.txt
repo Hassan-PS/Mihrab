@@ -1,0 +1,8 @@
+All-new Quran reader:
+
+• Interactive Madinah mushaf — tap any ayah to translate, bookmark, star or share
+• Recitation with 5 reciters, background playback and offline downloads
+• Memorization tools: repeat, ranges, hide-and-reveal
+• Khatmah plans with daily progress
+
+Also new: a quick feature tour, richer themes with real Amiri typography, two new accent colors, a third Live Activity design, and your data now survives uninstall/reinstall via Android backup.
