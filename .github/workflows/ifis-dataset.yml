@@ -29,6 +29,10 @@ on:
         description: 'How many days ahead to cover'
         required: false
         default: '400'
+      freshness_min_days:
+        description: 'Min near-term coverage before alerting (0 disables, e.g. for a small test run)'
+        required: false
+        default: '14'
       test_alert:
         description: 'Set true to force a failure and verify the email alert'
         required: false
@@ -64,6 +68,7 @@ jobs:
           IFIS_MAX_REQUESTS: ${{ github.event.inputs.max_requests || '8000' }}
           IFIS_MAX_WALL_MIN: ${{ github.event.inputs.wall_minutes || '50' }}
           IFIS_HORIZON_DAYS: ${{ github.event.inputs.horizon_days || '400' }}
+          IFIS_FRESHNESS_MIN_DAYS: ${{ github.event.inputs.freshness_min_days || '14' }}
         run: npx --yes tsx@4 tools/ifis-dataset/build.ts
 
       - name: Commit refreshed dataset
