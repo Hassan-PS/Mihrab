@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "builtAt": "2026-07-06T14:34:35.373Z",
+  "builtAt": "2026-07-06T14:40:15.930Z",
   "timezone": "Europe/Stockholm",
   "horizonDays": 400,
   "seedDays": 60,
-  "minCoverageDays": 50,
+  "minCoverageDays": 51,
   "nearTermFillPct": 99,
   "deadCities": [
     "Karlshamn"
