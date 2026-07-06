@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "Pengingat khataman",
     "khatmahReminderTitle": "Khataman",
     "khatmahReminderBody": "Bagian hari ini: {{pages}} halaman — lanjutkan dari halaman {{page}}.",
-    "audioButton": "Audio"
+    "audioButton": "Audio",
+    "khatmahCustom": "Kustom…",
+    "khatmahLengthTitle": "Durasi khatmah (hari)",
+    "khatmahStartCta": "Mulai"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

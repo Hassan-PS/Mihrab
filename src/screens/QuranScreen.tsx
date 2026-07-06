@@ -40,12 +40,14 @@ import {
   removeBookmark,
   resetKhatmahAll,
   resetKhatmahToday,
+  setQuranPrefs,
   startKhatmah,
   toggleStar,
   useQuranState,
   BOOKMARK_COLORS,
   KHATMAH_TOTAL_PAGES,
 } from '../quran/quranState';
+import { loadTafsir, tafsirEditionsForLocale } from '../quran/tafsir';
 import {
   searchQuran,
   verseOfTheDayRef,
@@ -75,6 +77,10 @@ export function QuranScreen() {
 
   const [tab, setTab] = useState<Tab>('surah');
   const [khatmahMenuVisible, setKhatmahMenuVisible] = useState(false);
+  // Custom khatmah length (v2.7.31) — the 30/60/90 presets plus a
+  // free-form day count entered in a small modal.
+  const [customDaysVisible, setCustomDaysVisible] = useState(false);
+  const [customDaysText, setCustomDaysText] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<QuranSearchResult[] | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -110,6 +116,22 @@ export function QuranScreen() {
   }, [votdRef]);
   const votdTranslation = getAyahTranslation(edition, votdRef.surah, votdRef.ayah);
   const votdSurah = findSurah(votdRef.surah);
+  // Second row of the card: translation or real tafsir — the user picks
+  // via the small toggle on the card (persisted, v2.7.31).
+  const votdMode = quran.prefs.votdMode;
+  const [votdTafsir, setVotdTafsir] = useState<string | null>(null);
+  useEffect(() => {
+    if (votdMode !== 'tafsir') return;
+    let cancelled = false;
+    const ed = tafsirEditionsForLocale((i18n.language || 'en').slice(0, 2))[0];
+    if (!ed) return;
+    void loadTafsir(ed.id, votdRef.surah, votdRef.ayah).then(text => {
+      if (!cancelled) setVotdTafsir(text);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [votdMode, votdRef, i18n.language]);
 
   const openSurah = (surahNumber: number, scrollToAyah?: number, page?: number) => {
     navigation.navigate('QuranSurah', {
@@ -283,6 +305,18 @@ export function QuranScreen() {
                   </Text>
                 </Pressable>
               ))}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.khatmahCustom', 'Custom…')}
+                onPress={() => {
+                  setCustomDaysText('');
+                  setCustomDaysVisible(true);
+                }}
+                style={[styles.chip, { borderColor: palette.border }]}>
+                <Text style={{ color: palette.accentSolid, fontWeight: '600', fontSize: 13 }}>
+                  {t('quran.khatmahCustom', 'Custom…')}
+                </Text>
+              </Pressable>
             </View>
           </>
         )}
@@ -298,17 +332,63 @@ export function QuranScreen() {
             styles.votdCard,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <Text style={[styles.votdLabel, { color: palette.muted }]}>
-            {t('quran.verseOfDay', 'Verse of the day')}
-          </Text>
+          <View style={styles.votdHeaderRow}>
+            <Text style={[styles.votdLabel, { color: palette.muted }]}>
+              {t('quran.verseOfDay', 'Verse of the day')}
+            </Text>
+            {/* Second-row source toggle (v2.7.31): translation ⇄ tafsir. */}
+            <View style={[styles.votdToggle, { borderColor: palette.border }]}>
+              {(
+                [
+                  ['translation', t('quran.viewToggleTranslation', 'Translation')],
+                  ['tafsir', t('quran.tafsir', 'Tafsir')],
+                ] as Array<['translation' | 'tafsir', string]>
+              ).map(([mode, label]) => {
+                const selected = votdMode === mode;
+                return (
+                  <Pressable
+                    key={mode}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={label}
+                    hitSlop={6}
+                    onPress={() => setQuranPrefs({ votdMode: mode })}
+                    style={[
+                      styles.votdToggleSeg,
+                      selected && { backgroundColor: palette.accentBg },
+                    ]}>
+                    <Text
+                      style={{
+                        color: selected ? palette.accentSolid : palette.muted,
+                        fontWeight: '700',
+                        fontSize: 11,
+                      }}>
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+          {/* Row 1: the ayah. Row 2: translation or tafsir. */}
           <Text
             numberOfLines={2}
             style={[styles.votdArabic, { color: palette.text }]}>
             {votdArabic}
           </Text>
-          {votdTranslation ? (
+          {votdMode === 'tafsir' ? (
             <Text
-              numberOfLines={2}
+              numberOfLines={4}
+              style={[styles.votdTranslation, { color: palette.muted }]}>
+              {votdTafsir ??
+                t(
+                  'quran.tafsirUnavailable',
+                  'Tafsir unavailable — connect to the internet once to download it.',
+                )}
+            </Text>
+          ) : votdTranslation ? (
+            <Text
+              numberOfLines={3}
               style={[styles.votdTranslation, { color: palette.muted }]}>
               {votdTranslation}
             </Text>
@@ -712,6 +792,73 @@ export function QuranScreen() {
           </Pressable>
         </View>
       </Modal>
+
+      {/* Custom khatmah length (v2.7.31). */}
+      <Modal
+        visible={customDaysVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCustomDaysVisible(false)}>
+        <Pressable
+          style={[styles.menuBackdrop, { backgroundColor: palette.overlay }]}
+          accessibilityLabel={t('common.close', 'Close')}
+          onPress={() => setCustomDaysVisible(false)}
+        />
+        <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
+          <Text style={[styles.menuTitle, { color: palette.text }]}>
+            {t('quran.khatmahLengthTitle', 'Khatmah length (days)')}
+          </Text>
+          <TextInput
+            value={customDaysText}
+            onChangeText={setCustomDaysText}
+            keyboardType="number-pad"
+            autoFocus
+            maxLength={3}
+            accessibilityLabel={t('quran.khatmahLengthTitle', 'Khatmah length (days)')}
+            placeholder="1–604"
+            placeholderTextColor={String(palette.muted)}
+            style={[
+              styles.customDaysInput,
+              { color: palette.text, borderColor: palette.border },
+            ]}
+            onSubmitEditing={() => {
+              const n = Number(customDaysText);
+              if (Number.isFinite(n) && n >= 1) {
+                startKhatmah(Math.min(604, Math.round(n)));
+                setCustomDaysVisible(false);
+              }
+            }}
+          />
+          <View style={styles.customDaysRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel', 'Cancel')}
+              onPress={() => setCustomDaysVisible(false)}
+              style={styles.menuCancel}>
+              <Text style={{ color: palette.muted, fontWeight: '600' }}>
+                {t('common.cancel', 'Cancel')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.khatmahStartCta', 'Start')}
+              onPress={() => {
+                const n = Number(customDaysText);
+                if (Number.isFinite(n) && n >= 1) {
+                  // A khatmah can't be shorter than a day per page-set
+                  // beyond the mushaf itself — clamp to 1..604 days.
+                  startKhatmah(Math.min(604, Math.round(n)));
+                  setCustomDaysVisible(false);
+                }
+              }}
+              style={styles.menuCancel}>
+              <Text style={{ color: palette.accentSolid, fontWeight: '700' }}>
+                {t('quran.khatmahStartCta', 'Start')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -763,6 +910,34 @@ const styles = StyleSheet.create({
   },
   votdTranslation: { fontSize: 13, lineHeight: 19 },
   votdRef: { fontSize: 12, fontWeight: '700' },
+  votdHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  votdToggle: {
+    flexDirection: 'row',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  votdToggleSeg: { paddingHorizontal: 10, paddingVertical: 4 },
+  customDaysInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 18,
+    fontVariant: ['tabular-nums'],
+    marginTop: 4,
+  },
+  customDaysRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 16,
+    marginTop: 6,
+  },
   search: {
     borderRadius: 12,
     paddingHorizontal: 14,

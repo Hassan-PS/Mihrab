@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "تذكير الختمة",
     "khatmahReminderTitle": "الختمة",
     "khatmahReminderBody": "وِرد اليوم: {{pages}} صفحات — تابع من الصفحة {{page}}.",
-    "audioButton": "الصوت"
+    "audioButton": "الصوت",
+    "khatmahCustom": "مخصص…",
+    "khatmahLengthTitle": "مدة الختمة (أيام)",
+    "khatmahStartCta": "ابدأ"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

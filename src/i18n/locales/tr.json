@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "Hatim hatırlatıcısı",
     "khatmahReminderTitle": "Hatim",
     "khatmahReminderBody": "Bugünkü bölüm: {{pages}} sayfa — {{page}}. sayfadan devam edin.",
-    "audioButton": "Ses"
+    "audioButton": "Ses",
+    "khatmahCustom": "Özel…",
+    "khatmahLengthTitle": "Hatim süresi (gün)",
+    "khatmahStartCta": "Başla"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

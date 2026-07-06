@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "ख़त्मा अनुस्मारक",
     "khatmahReminderTitle": "ख़त्मा",
     "khatmahReminderBody": "आज का हिस्सा: {{pages}} पृष्ठ — पृष्ठ {{page}} से जारी रखें।",
-    "audioButton": "ऑडियो"
+    "audioButton": "ऑडियो",
+    "khatmahCustom": "कस्टम…",
+    "khatmahLengthTitle": "ख़त्म की अवधि (दिन)",
+    "khatmahStartCta": "शुरू करें"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

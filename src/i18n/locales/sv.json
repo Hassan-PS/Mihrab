@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "Khatmah-påminnelse",
     "khatmahReminderTitle": "Khatmah",
     "khatmahReminderBody": "Dagens portion: {{pages}} sidor — fortsätt från sida {{page}}.",
-    "audioButton": "Ljud"
+    "audioButton": "Ljud",
+    "khatmahCustom": "Anpassad…",
+    "khatmahLengthTitle": "Khatmahns längd (dagar)",
+    "khatmahStartCta": "Starta"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

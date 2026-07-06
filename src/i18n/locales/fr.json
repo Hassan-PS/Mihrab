@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "Rappel de khatma",
     "khatmahReminderTitle": "Khatma",
     "khatmahReminderBody": "Portion du jour : {{pages}} pages — continuez à partir de la page {{page}}.",
-    "audioButton": "Audio"
+    "audioButton": "Audio",
+    "khatmahCustom": "Personnalisé…",
+    "khatmahLengthTitle": "Durée de la khatma (jours)",
+    "khatmahStartCta": "Commencer"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

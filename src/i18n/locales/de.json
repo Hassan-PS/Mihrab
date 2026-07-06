@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "Khatmah-Erinnerung",
     "khatmahReminderTitle": "Khatmah",
     "khatmahReminderBody": "Heutige Portion: {{pages}} Seiten — weiter ab Seite {{page}}.",
-    "audioButton": "Audio"
+    "audioButton": "Audio",
+    "khatmahCustom": "Eigene…",
+    "khatmahLengthTitle": "Khatma-Dauer (Tage)",
+    "khatmahStartCta": "Starten"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "Recordatorio de jatma",
     "khatmahReminderTitle": "Jatma",
     "khatmahReminderBody": "Porción de hoy: {{pages}} páginas — continúa desde la página {{page}}.",
-    "audioButton": "Audio"
+    "audioButton": "Audio",
+    "khatmahCustom": "Personalizado…",
+    "khatmahLengthTitle": "Duración del jatma (días)",
+    "khatmahStartCta": "Comenzar"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

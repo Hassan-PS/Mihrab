@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "খতম স্মরণিকা",
     "khatmahReminderTitle": "খতম",
     "khatmahReminderBody": "আজকের অংশ: {{pages}} পৃষ্ঠা — পৃষ্ঠা {{page}} থেকে চালিয়ে যান।",
-    "audioButton": "অডিও"
+    "audioButton": "অডিও",
+    "khatmahCustom": "কাস্টম…",
+    "khatmahLengthTitle": "খতমের দৈর্ঘ্য (দিন)",
+    "khatmahStartCta": "শুরু"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

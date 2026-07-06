@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.31] — 2026-07-06
+
+### Added
+- **Custom khatmah length**: alongside the 30/60/90-day presets, a "Custom…" chip opens a small dialog to start a plan of any length (1–604 days); the daily portion adjusts accordingly.
+- **Verse of the day: translation ⇄ tafsir toggle**: the card now lays the ayah on its own row with the companion text below it, and a small toggle chooses whether that second row shows the translation or real tafsir (Ibn Kathir et al., cached offline like the ayah panel). The choice persists.
+
 ## [2.7.30] — 2026-07-06
 
 ### Added

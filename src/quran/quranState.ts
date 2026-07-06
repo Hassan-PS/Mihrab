@@ -89,6 +89,8 @@ export type QuranPrefs = {
   /** Memorization masking in translation view. */
   hideMode: 'none' | 'arabic' | 'translation';
   repeat: RepeatSettings;
+  /** Second row of the Verse-of-the-day card (v2.7.31, additive). */
+  votdMode: 'translation' | 'tafsir';
 };
 
 export type QuranState = {
@@ -114,6 +116,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     keepAwake: true,
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
+    votdMode: 'translation',
   },
 };
 

@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "ختم یاد دہانی",
     "khatmahReminderTitle": "ختم",
     "khatmahReminderBody": "آج کا حصہ: {{pages}} صفحات — صفحہ {{page}} سے جاری رکھیں۔",
-    "audioButton": "آڈیو"
+    "audioButton": "آڈیو",
+    "khatmahCustom": "حسبِ منشا…",
+    "khatmahLengthTitle": "ختم کی مدت (دن)",
+    "khatmahStartCta": "شروع کریں"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

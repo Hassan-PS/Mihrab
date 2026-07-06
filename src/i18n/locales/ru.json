@@ -851,7 +851,10 @@
     "khatmahReminderChannelName": "Напоминание о хатме",
     "khatmahReminderTitle": "Хатма",
     "khatmahReminderBody": "Сегодняшняя порция: {{pages}} стр. — продолжайте со страницы {{page}}.",
-    "audioButton": "Аудио"
+    "audioButton": "Аудио",
+    "khatmahCustom": "Свой срок…",
+    "khatmahLengthTitle": "Длительность хатмы (дней)",
+    "khatmahStartCta": "Начать"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",
