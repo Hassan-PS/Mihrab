@@ -58,7 +58,9 @@ type HostCityFile = {
 
 type CachedCity = { fetchedAt: number; timezone: string; days: CityDays };
 
-const seed = seedJson as SeedFile;
+// `as unknown as` because resolveJsonModule infers the day arrays as `string[]`,
+// which doesn't structurally overlap the fixed 7-tuple in DatasetDayTuple.
+const seed = seedJson as unknown as SeedFile;
 
 // Process-lifetime memo of the parsed cache, keyed by slug.
 const memCity = new Map<string, CachedCity>();

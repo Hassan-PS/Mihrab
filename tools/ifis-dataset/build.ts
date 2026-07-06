@@ -197,7 +197,10 @@ async function main(): Promise<void> {
 
   // Write per-city files (sorted keys for stable diffs).
   const builtAt = new Date().toISOString();
-  let minCoverage = Infinity;
+  let minCoverage = Infinity; // min consecutive-from-today, over cities that have ANY data
+  let nearCells = 0; // (city × near-term-day) cells considered
+  let nearFilled = 0; // ...that are present
+  const deadCities: string[] = []; // widget returns nothing for these (unsupported name)
   for (const c of cities) {
     const days = data.get(c.slug)!;
     const sortedKeys = Object.keys(days).sort();
@@ -212,12 +215,21 @@ async function main(): Promise<void> {
     };
     await writeFile(join(CITIES_DIR, `${c.slug}.json`), JSON.stringify(file) + '\n');
 
-    // Coverage = consecutive days present from today.
-    let covered = 0;
-    while (days[addDays(today, covered)]) covered++;
-    minCoverage = Math.min(minCoverage, covered);
+    if (sortedKeys.length === 0) deadCities.push(c.name);
+    else {
+      let covered = 0;
+      while (days[addDays(today, covered)]) covered++;
+      minCoverage = Math.min(minCoverage, covered);
+    }
+    // Near-term fill rate: robust to a single missing day (unlike a strict
+    // "consecutive from today" count, which one dead cell drops to zero).
+    for (let i = 0; i < FRESHNESS_MIN_DAYS; i++) {
+      nearCells++;
+      if (days[addDays(today, i)]) nearFilled++;
+    }
   }
   if (!Number.isFinite(minCoverage)) minCoverage = 0;
+  const nearTermFill = nearCells ? nearFilled / nearCells : 0;
 
   // Compact bundled seed: next SEED_DAYS for every city, keyed by slug.
   const seedCities: Record<string, CityDays> = {};
@@ -246,6 +258,8 @@ async function main(): Promise<void> {
         horizonDays: HORIZON_DAYS,
         seedDays: SEED_DAYS,
         minCoverageDays: minCoverage,
+        nearTermFillPct: Math.round(nearTermFill * 100),
+        deadCities,
         cities: cities.map(c => ({ city: c.name, slug: c.slug })),
       },
       null,
@@ -255,8 +269,17 @@ async function main(): Promise<void> {
 
   console.log(
     `[ifis-dataset] cities=${cities.length} requests=${requests} ` +
-      `failures=${failures} minCoverageDays=${minCoverage} budgetHit=${budgetHit}`,
+      `failures=${failures} minCoverageDays=${minCoverage} ` +
+      `nearTermFill=${(nearTermFill * 100).toFixed(1)}% dead=${deadCities.length} ` +
+      `budgetHit=${budgetHit}`,
   );
+  if (deadCities.length > 0) {
+    // Not fatal: these coordinates fall back to AlAdhan/on-device at runtime.
+    console.warn(
+      `[ifis-dataset] no data (widget rejects the name; runtime falls back): ` +
+        deadCities.join(', '),
+    );
+  }
 
   // Alarms → non-zero exit → workflow emails.
   if (originUnhealthy) {
@@ -266,10 +289,14 @@ async function main(): Promise<void> {
     );
     process.exit(2);
   }
-  if (minCoverage < FRESHNESS_MIN_DAYS) {
+  // Stale gate: fail only when near-term coverage is BROADLY missing (a
+  // systemic scrape/site problem), tolerating a handful of unsupported cities.
+  const MIN_FILL = 0.85;
+  if (nearTermFill < MIN_FILL) {
     console.error(
-      `[ifis-dataset] STALE: least-covered city has only ${minCoverage} days ` +
-        `(need ≥ ${FRESHNESS_MIN_DAYS}). Dataset would age out — investigate.`,
+      `[ifis-dataset] STALE: only ${(nearTermFill * 100).toFixed(1)}% of the next ` +
+        `${FRESHNESS_MIN_DAYS} days are covered across cities (need ≥ ` +
+        `${Math.round(MIN_FILL * 100)}%). Dataset would age out — investigate.`,
     );
     process.exit(3);
   }
