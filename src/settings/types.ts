@@ -82,6 +82,12 @@ export type PrayerAppSettings = {
    * Choosing a provider from the list sets this to false.
    */
   dataProviderAuto: boolean;
+  /** Whether the hidden data-statistics toggle has been revealed (unlocked by
+   *  tapping the version 5× in Settings, like Android developer mode). */
+  dataStatsUnlocked: boolean;
+  /** Show the data-statistics card at the bottom of Home (source, coverage,
+   *  refresh timing, last server-run status). Diagnostic; default off. */
+  showDataStats: boolean;
   calculationMethod: number | 'auto';
   school: number;
   locationMode: LocationMode;
@@ -270,6 +276,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   pureBlackDark: false,
   dataProvider: 'aladhan',
   dataProviderAuto: true,
+  dataStatsUnlocked: false,
+  showDataStats: false,
   calculationMethod: 'auto',
   school: 0,
   // Default to GPS so first-run users in Sweden (or anywhere) don't get

@@ -1,8 +1,8 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useMemo } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { memo, useMemo, useRef } from 'react';
+import { Alert, Linking, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +37,29 @@ function AboutCardImpl() {
   const versionLabel = useMemo(() => getInstalledAppVersionLabel(), []);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { updateSettings } = usePrayerSettings();
+  const { settings, updateSettings } = usePrayerSettings();
+
+  // Hidden "developer mode" unlock: tap the version 5× (resets after a 1.5 s
+  // pause) to reveal the data-statistics toggle, à la Android developer mode.
+  const versionTaps = useRef(0);
+  const lastVersionTap = useRef(0);
+  const onVersionTap = () => {
+    if (settings.dataStatsUnlocked) return;
+    const now = Date.now();
+    versionTaps.current = now - lastVersionTap.current > 1500 ? 1 : versionTaps.current + 1;
+    lastVersionTap.current = now;
+    if (versionTaps.current >= 5) {
+      versionTaps.current = 0;
+      updateSettings({ dataStatsUnlocked: true, showDataStats: true });
+      Alert.alert(
+        t('dataStats.unlockedTitle', 'Data statistics enabled'),
+        t(
+          'dataStats.unlockedBody',
+          'A statistics card now appears at the bottom of the home screen. Turn it off any time below.',
+        ),
+      );
+    }
+  };
 
   const goToBackup = () => navigation.navigate('Backup');
 
@@ -222,8 +244,34 @@ function AboutCardImpl() {
         </View>
         <Text style={[s.changeLink, { color: '#d43f3f' }]}>›</Text>
       </Pressable>
+      {settings.dataStatsUnlocked && (
+        <View
+          style={[
+            s.card,
+            s.switchRow,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <View style={s.switchCopy}>
+            <Text style={[s.valueText, { color: palette.text }]}>
+              {t('dataStats.toggle')}
+            </Text>
+            <Text style={[s.help, { color: palette.muted }]}>
+              {t('dataStats.toggleHelp')}
+            </Text>
+          </View>
+          <Switch
+            value={settings.showDataStats}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor={'#ffffff'}
+            onValueChange={v => updateSettings({ showDataStats: v })}
+          />
+        </View>
+      )}
       <View style={styles.versionBlock}>
-        <Text style={[styles.versionText, { color: palette.muted }]}>
+        <Text
+          suppressHighlighting
+          onPress={onVersionTap}
+          style={[styles.versionText, { color: palette.muted }]}>
           {t('settings.versionInstalled', { version: versionLabel })}
         </Text>
         <Text

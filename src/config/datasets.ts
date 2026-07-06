@@ -13,5 +13,35 @@
 export const IFIS_DATASET_BASE_URL =
   'https://raw.githubusercontent.com/Hassan-PS/Mihrab/main/data/prayer-times/v1';
 
-/** Refresh a cached city file when the local copy is older than this. */
+/** Refresh a cached city file when the local copy is older than this (a
+ *  fallback for when the index poll can't reach the server). */
 export const IFIS_DATASET_REFRESH_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+
+/**
+ * How often the client re-reads the tiny `index.json` to learn whether the
+ * server has published a newer build. The server commits atomically at the end
+ * of its run, so a client that polls mid-run simply sees the previous build and
+ * skips — no collision. ±25% jitter (applied at call sites) spreads client load
+ * and de-synchronises devices.
+ */
+export const IFIS_INDEX_POLL_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+/**
+ * The server's weekly schedule (`.github/workflows/ifis-dataset.yml`
+ * cron `17 3 * * 1`), in UTC. Used only to *display* the next expected server
+ * run in the statistics panel — not to gate fetching.
+ */
+export const IFIS_SERVER_CRON_UTC = { weekday: 1, hour: 3, minute: 17 }; // Mon 03:17 UTC
+
+/** Compute the next server run (UTC) after `from`. */
+export function nextServerRunAfter(from: Date = new Date()): Date {
+  const d = new Date(from.getTime());
+  d.setUTCSeconds(0, 0);
+  // Advance minute-by-minute is overkill; jump to the target time today then roll.
+  d.setUTCHours(IFIS_SERVER_CRON_UTC.hour, IFIS_SERVER_CRON_UTC.minute, 0, 0);
+  // Move to the correct weekday (1 = Monday); if already past, add a week.
+  const dowDiff = (IFIS_SERVER_CRON_UTC.weekday - d.getUTCDay() + 7) % 7;
+  d.setUTCDate(d.getUTCDate() + dowDiff);
+  if (d.getTime() <= from.getTime()) d.setUTCDate(d.getUTCDate() + 7);
+  return d;
+}

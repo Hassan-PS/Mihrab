@@ -39,6 +39,7 @@ import { QuranShortcut } from './home/QuranShortcut';
 import { NextPrayerCard } from './home/NextPrayerCard';
 import { PermissionBanners } from './home/PermissionBanners';
 import { ProviderFooter } from './home/ProviderFooter';
+import { DataStatsPanel } from './home/DataStatsPanel';
 import { QuickActionsGrid } from './home/QuickActionsGrid';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
@@ -606,6 +607,8 @@ export function HomeScreen() {
         backgroundRefreshing={state.backgroundRefreshing ?? false}
         onPress={handleOpenProviderPicker}
       />
+
+      {settings.showDataStats && <DataStatsPanel />}
 
       <ProviderPickerModal
         visible={providerPickerOpen}

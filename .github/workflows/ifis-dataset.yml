@@ -29,10 +29,14 @@ on:
         description: 'How many days ahead to cover'
         required: false
         default: '400'
-      freshness_min_days:
-        description: 'Min near-term coverage before alerting (0 disables, e.g. for a small test run)'
+      coverage_warn_days:
+        description: 'Warn (email) when any city holds fewer than this many upcoming days'
         required: false
-        default: '14'
+        default: '40'
+      coverage_fail_days:
+        description: 'Hard-fail when any city holds fewer than this many upcoming days'
+        required: false
+        default: '30'
       test_alert:
         description: 'Set true to force a failure and verify the email alert'
         required: false
@@ -68,7 +72,8 @@ jobs:
           IFIS_MAX_REQUESTS: ${{ github.event.inputs.max_requests || '8000' }}
           IFIS_MAX_WALL_MIN: ${{ github.event.inputs.wall_minutes || '50' }}
           IFIS_HORIZON_DAYS: ${{ github.event.inputs.horizon_days || '400' }}
-          IFIS_FRESHNESS_MIN_DAYS: ${{ github.event.inputs.freshness_min_days || '14' }}
+          IFIS_COVERAGE_WARN_DAYS: ${{ github.event.inputs.coverage_warn_days || '40' }}
+          IFIS_COVERAGE_FAIL_DAYS: ${{ github.event.inputs.coverage_fail_days || '30' }}
         run: npx --yes tsx@4 tools/ifis-dataset/build.ts
 
       - name: Commit refreshed dataset
@@ -100,11 +105,11 @@ jobs:
           to: mihrab@elghamri.se
           subject: '[Mihrab] IFiS prayer-times dataset job FAILED'
           body: |
-            The scheduled Islamiska Förbundet dataset refresh failed.
+            The scheduled Islamiska Förbundet dataset refresh FAILED.
 
             This usually means one of:
               • islamiskaforbundet.se is down (most fetches failed), or
-              • near-term coverage dropped below the freshness floor, or
+              • a city's upcoming coverage fell below the 30-day floor, or
               • the commit/push step failed.
 
             Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -112,3 +117,30 @@ jobs:
             The app keeps serving the last good dataset + its computed-times
             fallback, so users are not immediately affected — but the data will
             age out if this keeps failing. Check the run log above.
+
+      - name: Email coverage warning
+        if: success() && steps.build.outputs.coverage_warning == 'true' && env.MAIL_SERVER != ''
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Mihrab Dataset Bot <${{ secrets.MAIL_USERNAME }}>
+          to: mihrab@elghamri.se
+          subject: '[Mihrab] IFiS dataset coverage LOW (early warning)'
+          body: |
+            Early warning: the prepared dataset is getting thin for at least one city.
+
+            Least-covered city "${{ steps.build.outputs.min_coverage_city }}" now holds
+            only ${{ steps.build.outputs.min_coverage }} upcoming days. The run stayed
+            green (still above the 30-day hard floor), but coverage should be topped up
+            before it drops further.
+
+            Likely cause: the weekly runs aren't extending the far edge fast enough, or
+            that city started failing to scrape. Consider dispatching the workflow with a
+            larger request/wall budget to backfill.
+
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

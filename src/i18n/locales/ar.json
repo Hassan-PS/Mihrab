@@ -1075,5 +1075,29 @@
     "audioSub": "صوت التلاوة",
     "tafsirSub": "نصوص التفسير المخزنة",
     "empty": "لا توجد تنزيلات بعد. تظهر هنا صفحات المصحف وصوت التلاوة والتفسير التي تنزلها."
+  },
+  "dataStats": {
+    "title": "إحصائيات البيانات",
+    "toggle": "عرض إحصائيات البيانات",
+    "toggleHelp": "اطلع على مصدر أوقات الصلاة، وحجم البيانات المخزنة، وموعد التحديث.",
+    "source": "المصدر الحالي",
+    "daysStored": "المخزن على الجهاز",
+    "lastUpdated": "آخر تحديث",
+    "nextCheck": "التحقق التالي من التحديث",
+    "serverRun": "آخر تشغيل للخادم",
+    "nextServerRun": "التشغيل التالي للخادم",
+    "never": "—",
+    "daysUnit": "أيام",
+    "sourceCdn": "بيانات الخادم (حديثة)",
+    "sourceSeed": "بيانات مضمّنة دون اتصال",
+    "sourceScrape": "مباشر من Islamiska Förbundet",
+    "sourceAladhan": "AlAdhan",
+    "sourceLocal": "حساب على الجهاز",
+    "sourceUnknown": "غير معروف",
+    "serverOk": "سليم",
+    "serverWarning": "تغطية منخفضة",
+    "serverUnknown": "لم يُتحقق بعد",
+    "unlockedTitle": "Data statistics enabled",
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
   }
 }

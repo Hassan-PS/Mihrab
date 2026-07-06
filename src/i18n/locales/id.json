@@ -1075,5 +1075,29 @@
     "audioSub": "Audio tilawah",
     "tafsirSub": "Teks tafsir tersimpan",
     "empty": "Belum ada unduhan. Halaman mushaf, audio, dan tafsir yang diunduh akan muncul di sini."
+  },
+  "dataStats": {
+    "title": "Data statistics",
+    "toggle": "Show data statistics",
+    "toggleHelp": "See where prayer times come from, how much is stored, and refresh timing.",
+    "source": "Current source",
+    "daysStored": "Stored on device",
+    "lastUpdated": "Last updated",
+    "nextCheck": "Next update check",
+    "serverRun": "Last server run",
+    "nextServerRun": "Next server run",
+    "never": "—",
+    "daysUnit": "days",
+    "sourceCdn": "Server dataset (fresh)",
+    "sourceSeed": "Offline bundled data",
+    "sourceScrape": "Live Islamiska Förbundet",
+    "sourceAladhan": "AlAdhan",
+    "sourceLocal": "On-device calculation",
+    "sourceUnknown": "Unknown",
+    "serverOk": "OK",
+    "serverWarning": "Low coverage",
+    "serverUnknown": "Not checked yet",
+    "unlockedTitle": "Data statistics enabled",
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
   }
 }

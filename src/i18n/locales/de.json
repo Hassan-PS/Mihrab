@@ -1075,5 +1075,29 @@
     "audioSub": "Rezitationsaudio",
     "tafsirSub": "Zwischengespeicherte Tafsir-Texte",
     "empty": "Noch nichts heruntergeladen. Geladene Mushaf-Seiten, Audio und Tafsir erscheinen hier."
+  },
+  "dataStats": {
+    "title": "Datenstatistik",
+    "toggle": "Datenstatistik anzeigen",
+    "toggleHelp": "Sehen Sie, woher die Gebetszeiten stammen, wie viel gespeichert ist und wann aktualisiert wird.",
+    "source": "Aktuelle Quelle",
+    "daysStored": "Auf dem Gerät gespeichert",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "nextCheck": "Nächste Aktualisierungsprüfung",
+    "serverRun": "Letzter Serverlauf",
+    "nextServerRun": "Nächster Serverlauf",
+    "never": "—",
+    "daysUnit": "Tage",
+    "sourceCdn": "Serverdaten (aktuell)",
+    "sourceSeed": "Integrierte Offline-Daten",
+    "sourceScrape": "Live Islamiska Förbundet",
+    "sourceAladhan": "AlAdhan",
+    "sourceLocal": "Berechnung auf dem Gerät",
+    "sourceUnknown": "Unbekannt",
+    "serverOk": "OK",
+    "serverWarning": "Geringe Abdeckung",
+    "serverUnknown": "Noch nicht geprüft",
+    "unlockedTitle": "Data statistics enabled",
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
   }
 }

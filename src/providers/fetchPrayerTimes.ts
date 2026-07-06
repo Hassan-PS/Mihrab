@@ -24,6 +24,7 @@ export async function fetchPrayerTimesUnified(
         method: p.calculationMethod,
         school: p.school,
       });
+      result.source = 'aladhan';
       break;
     case 'prayertimes_dev':
       result = await fetchPrayTimesDev({
@@ -62,6 +63,7 @@ export async function fetchPrayerTimesUnified(
           method: p.calculationMethod,
           school: p.school,
         });
+        result.source = 'aladhan';
         break;
       }
       try {
@@ -70,6 +72,7 @@ export async function fetchPrayerTimesUnified(
           longitude: p.longitude,
           date: p.date,
         });
+        result.source = 'scrape';
         void recordProviderResult('islamiska_forbundet', true);
       } catch (e) {
         void recordProviderResult('islamiska_forbundet', false);
@@ -86,6 +89,7 @@ export async function fetchPrayerTimesUnified(
             method: p.calculationMethod,
             school: p.school,
           });
+          result.source = 'aladhan';
           break;
         } catch {
           throw e;
@@ -95,13 +99,16 @@ export async function fetchPrayerTimesUnified(
     }
     case 'local_adhan':
       // On-device calculation — skip network validation, it always produces valid output.
-      return computeLocalAdhanTimes({
-        latitude: p.latitude,
-        longitude: p.longitude,
-        date: p.date,
-        calculationMethod: p.calculationMethod,
-        school: p.school,
-      });
+      return {
+        ...computeLocalAdhanTimes({
+          latitude: p.latitude,
+          longitude: p.longitude,
+          date: p.date,
+          calculationMethod: p.calculationMethod,
+          school: p.school,
+        }),
+        source: 'local',
+      };
     default:
       throw new Error(`Unknown prayer data provider: ${String(p.provider)}`);
   }

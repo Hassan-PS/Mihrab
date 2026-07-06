@@ -1075,5 +1075,29 @@
     "audioSub": "Recitationsljud",
     "tafsirSub": "Cachade tafsir-texter",
     "empty": "Inget nedladdat ännu. Mushaf-sidor, recitationsljud och tafsir du hämtar visas här."
+  },
+  "dataStats": {
+    "title": "Datastatistik",
+    "toggle": "Visa datastatistik",
+    "toggleHelp": "Se varifrån bönetiderna kommer, hur mycket som sparas och när det uppdateras.",
+    "source": "Aktuell källa",
+    "daysStored": "Sparat på enheten",
+    "lastUpdated": "Senast uppdaterad",
+    "nextCheck": "Nästa uppdateringskoll",
+    "serverRun": "Senaste serverkörning",
+    "nextServerRun": "Nästa serverkörning",
+    "never": "—",
+    "daysUnit": "dagar",
+    "sourceCdn": "Serverdata (färsk)",
+    "sourceSeed": "Inbyggd offlinedata",
+    "sourceScrape": "Live Islamiska Förbundet",
+    "sourceAladhan": "AlAdhan",
+    "sourceLocal": "Beräkning på enheten",
+    "sourceUnknown": "Okänd",
+    "serverOk": "OK",
+    "serverWarning": "Låg täckning",
+    "serverUnknown": "Inte kontrollerad än",
+    "unlockedTitle": "Data statistics enabled",
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
   }
 }

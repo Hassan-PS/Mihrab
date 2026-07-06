@@ -1075,5 +1075,29 @@
     "audioSub": "तिलावत ऑडियो",
     "tafsirSub": "संचित तफ़सीर",
     "empty": "अभी कुछ डाउनलोड नहीं हुआ। डाउनलोड किए गए मुसहफ़ पृष्ठ, ऑडियो और तफ़सीर यहाँ दिखेंगे।"
+  },
+  "dataStats": {
+    "title": "डेटा आँकड़े",
+    "toggle": "डेटा आँकड़े दिखाएँ",
+    "toggleHelp": "देखें कि नमाज़ के समय कहाँ से आते हैं, कितना संग्रहीत है और कब अपडेट होता है।",
+    "source": "वर्तमान स्रोत",
+    "daysStored": "डिवाइस पर संग्रहीत",
+    "lastUpdated": "अंतिम अपडेट",
+    "nextCheck": "अगली अपडेट जाँच",
+    "serverRun": "अंतिम सर्वर रन",
+    "nextServerRun": "अगला सर्वर रन",
+    "never": "—",
+    "daysUnit": "दिन",
+    "sourceCdn": "सर्वर डेटासेट (ताज़ा)",
+    "sourceSeed": "ऑफ़लाइन अंतर्निहित डेटा",
+    "sourceScrape": "लाइव Islamiska Förbundet",
+    "sourceAladhan": "AlAdhan",
+    "sourceLocal": "डिवाइस पर गणना",
+    "sourceUnknown": "अज्ञात",
+    "serverOk": "ठीक है",
+    "serverWarning": "कम कवरेज",
+    "serverUnknown": "अभी तक जाँचा नहीं गया",
+    "unlockedTitle": "Data statistics enabled",
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
   }
 }

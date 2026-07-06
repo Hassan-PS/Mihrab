@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchPrayerTimesUnified } from '../providers/fetchPrayerTimes';
+import { recordDataSource } from './dataStatus';
 import type { PrayerDataProviderId } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { formatLocalDate } from '../utils/date';
@@ -339,6 +340,8 @@ export async function getOrFetchPrayerTimes(
     calculationMethod: params.calculationMethod,
     school: params.school,
   });
+  // Record which source answered (for the Settings → data-stats panel).
+  if (res.source) void recordDataSource(res.source);
 
   // Save under the cacheKey, preserving every other location'\''s entry.
   // The mutex guards against concurrent month-scroll writes; the timeout

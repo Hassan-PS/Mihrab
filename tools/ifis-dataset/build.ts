@@ -19,7 +19,7 @@
  *
  * Run: `npx tsx tools/ifis-dataset/build.ts`
  */
-import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir, appendFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -50,12 +50,21 @@ const SEED_DAYS = intEnv('IFIS_SEED_DAYS', 60); // bundled seed window
 const MAX_REQUESTS = intEnv('IFIS_MAX_REQUESTS', 8000); // per-run request budget
 const MAX_WALL_MS = intEnv('IFIS_MAX_WALL_MIN', 50) * 60_000; // per-run time budget
 const REQUEST_DELAY_MS = intEnv('IFIS_REQUEST_DELAY_MS', 300);
-const FRESHNESS_MIN_DAYS = intEnv('IFIS_FRESHNESS_MIN_DAYS', 14);
+// Per-city upcoming-days coverage floor. The server must hold ≥ a month for
+// every city: warn (email, run stays green) under WARN, hard-fail under FAIL.
+const COVERAGE_WARN_DAYS = intEnv('IFIS_COVERAGE_WARN_DAYS', 40);
+const COVERAGE_FAIL_DAYS = intEnv('IFIS_COVERAGE_FAIL_DAYS', 30);
 
 function intEnv(name: string, def: number): number {
   const v = process.env[name];
   const n = v ? parseInt(v, 10) : NaN;
   return Number.isFinite(n) ? n : def;
+}
+
+/** Expose a value to later workflow steps (no-op outside GitHub Actions). */
+async function emitOutput(key: string, value: string): Promise<void> {
+  const f = process.env.GITHUB_OUTPUT;
+  if (f) await appendFile(f, `${key}=${value}\n`);
 }
 
 type CityDays = Record<string, DatasetDayTuple>;
@@ -197,10 +206,13 @@ async function main(): Promise<void> {
 
   // Write per-city files (sorted keys for stable diffs).
   const builtAt = new Date().toISOString();
-  let minCoverage = Infinity; // min consecutive-from-today, over cities that have ANY data
-  let nearCells = 0; // (city × near-term-day) cells considered
-  let nearFilled = 0; // ...that are present
-  const deadCities: string[] = []; // widget returns nothing for these (unsupported name)
+  // Coverage = number of UPCOMING days (today onward) a city holds. Robust to
+  // sparse gaps (it's a count, not a consecutive run). Cities the widget never
+  // returns (0 rows) are "dead": tolerated + excluded from the floor, since
+  // their coordinates fall back to AlAdhan/on-device at runtime.
+  let minCoverage = Infinity;
+  let minCoverageCity = '';
+  const deadCities: string[] = [];
   for (const c of cities) {
     const days = data.get(c.slug)!;
     const sortedKeys = Object.keys(days).sort();
@@ -215,21 +227,20 @@ async function main(): Promise<void> {
     };
     await writeFile(join(CITIES_DIR, `${c.slug}.json`), JSON.stringify(file) + '\n');
 
-    if (sortedKeys.length === 0) deadCities.push(c.name);
-    else {
-      let covered = 0;
-      while (days[addDays(today, covered)]) covered++;
-      minCoverage = Math.min(minCoverage, covered);
+    if (sortedKeys.length === 0) {
+      deadCities.push(c.name);
+      continue;
     }
-    // Near-term fill rate: robust to a single missing day (unlike a strict
-    // "consecutive from today" count, which one dead cell drops to zero).
-    for (let i = 0; i < FRESHNESS_MIN_DAYS; i++) {
-      nearCells++;
-      if (days[addDays(today, i)]) nearFilled++;
+    let upcoming = 0;
+    for (const k of sortedKeys) if (k >= today) upcoming++;
+    if (upcoming < minCoverage) {
+      minCoverage = upcoming;
+      minCoverageCity = c.name;
     }
   }
   if (!Number.isFinite(minCoverage)) minCoverage = 0;
-  const nearTermFill = nearCells ? nearFilled / nearCells : 0;
+  const serverStatus: 'ok' | 'warning' =
+    minCoverage < COVERAGE_WARN_DAYS ? 'warning' : 'ok';
 
   // Compact bundled seed: next SEED_DAYS for every city, keyed by slug.
   const seedCities: Record<string, CityDays> = {};
@@ -258,7 +269,8 @@ async function main(): Promise<void> {
         horizonDays: HORIZON_DAYS,
         seedDays: SEED_DAYS,
         minCoverageDays: minCoverage,
-        nearTermFillPct: Math.round(nearTermFill * 100),
+        coverageFloorDays: COVERAGE_WARN_DAYS,
+        serverStatus,
         deadCities,
         cities: cities.map(c => ({ city: c.name, slug: c.slug })),
       },
@@ -269,9 +281,8 @@ async function main(): Promise<void> {
 
   console.log(
     `[ifis-dataset] cities=${cities.length} requests=${requests} ` +
-      `failures=${failures} minCoverageDays=${minCoverage} ` +
-      `nearTermFill=${(nearTermFill * 100).toFixed(1)}% dead=${deadCities.length} ` +
-      `budgetHit=${budgetHit}`,
+      `failures=${failures} minCoverageDays=${minCoverage} (${minCoverageCity}) ` +
+      `status=${serverStatus} dead=${deadCities.length} budgetHit=${budgetHit}`,
   );
   if (deadCities.length > 0) {
     // Not fatal: these coordinates fall back to AlAdhan/on-device at runtime.
@@ -289,16 +300,24 @@ async function main(): Promise<void> {
     );
     process.exit(2);
   }
-  // Stale gate: fail only when near-term coverage is BROADLY missing (a
-  // systemic scrape/site problem), tolerating a handful of unsupported cities.
-  const MIN_FILL = 0.85;
-  if (nearTermFill < MIN_FILL) {
+  // Hard floor: a real coverage collapse (a month is the minimum we promise).
+  if (minCoverage < COVERAGE_FAIL_DAYS) {
     console.error(
-      `[ifis-dataset] STALE: only ${(nearTermFill * 100).toFixed(1)}% of the next ` +
-        `${FRESHNESS_MIN_DAYS} days are covered across cities (need ≥ ` +
-        `${Math.round(MIN_FILL * 100)}%). Dataset would age out — investigate.`,
+      `[ifis-dataset] CRITICAL: "${minCoverageCity}" holds only ${minCoverage} ` +
+        `upcoming days (floor ${COVERAGE_FAIL_DAYS}). Below a month — failing.`,
     );
     process.exit(3);
+  }
+  // Early warning: run stays green, but email so it's fixed before it hits the
+  // floor. The warning-email workflow step keys off these outputs.
+  if (minCoverage < COVERAGE_WARN_DAYS) {
+    console.warn(
+      `[ifis-dataset] WARNING: "${minCoverageCity}" holds only ${minCoverage} ` +
+        `upcoming days (want ≥ ${COVERAGE_WARN_DAYS}).`,
+    );
+    await emitOutput('coverage_warning', 'true');
+    await emitOutput('min_coverage', String(minCoverage));
+    await emitOutput('min_coverage_city', minCoverageCity);
   }
 }
 

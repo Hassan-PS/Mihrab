@@ -1075,5 +1075,29 @@
     "audioSub": "তিলাওয়াত অডিও",
     "tafsirSub": "সংরক্ষিত তাফসীর",
     "empty": "এখনো কিছু ডাউনলোড হয়নি। ডাউনলোড করা মুসহাফ পৃষ্ঠা, অডিও ও তাফসীর এখানে দেখা যাবে।"
+  },
+  "dataStats": {
+    "title": "ডেটা পরিসংখ্যান",
+    "toggle": "ডেটা পরিসংখ্যান দেখান",
+    "toggleHelp": "নামাজের সময় কোথা থেকে আসে, কতটা সংরক্ষিত আছে এবং কখন হালনাগাদ হয় দেখুন।",
+    "source": "বর্তমান উৎস",
+    "daysStored": "ডিভাইসে সংরক্ষিত",
+    "lastUpdated": "সর্বশেষ হালনাগাদ",
+    "nextCheck": "পরবর্তী হালনাগাদ যাচাই",
+    "serverRun": "সর্বশেষ সার্ভার রান",
+    "nextServerRun": "পরবর্তী সার্ভার রান",
+    "never": "—",
+    "daysUnit": "দিন",
+    "sourceCdn": "সার্ভার ডেটাসেট (নতুন)",
+    "sourceSeed": "অফলাইন অন্তর্ভুক্ত ডেটা",
+    "sourceScrape": "সরাসরি Islamiska Förbundet",
+    "sourceAladhan": "AlAdhan",
+    "sourceLocal": "ডিভাইসে গণনা",
+    "sourceUnknown": "অজানা",
+    "serverOk": "ঠিক আছে",
+    "serverWarning": "কম কভারেজ",
+    "serverUnknown": "এখনও যাচাই করা হয়নি",
+    "unlockedTitle": "Data statistics enabled",
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
   }
 }

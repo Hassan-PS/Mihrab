@@ -16,6 +16,13 @@ jest.mock('../src/providers/islamiskaForbundet', () => ({
 jest.mock('../src/providers/aladhan', () => ({
   fetchAladhanTimes: jest.fn(),
 }));
+// This suite exercises the LIVE scraper → AlAdhan failover, so force the
+// prepared-dataset rung (tried first) to miss and fall through.
+jest.mock('../src/providers/islamiskaForbundetDataset', () => ({
+  getIslamiskaForbundetDatasetTimes: jest
+    .fn()
+    .mockRejectedValue(new Error('dataset miss (test)')),
+}));
 
 import { fetchIslamiskaForbundetTimes } from '../src/providers/islamiskaForbundet';
 import { fetchAladhanTimes } from '../src/providers/aladhan';

@@ -1075,5 +1075,29 @@
     "audioSub": "Audio de recitación",
     "tafsirSub": "Textos de tafsir en caché",
     "empty": "Aún no hay descargas. Las páginas del mushaf, el audio y el tafsir descargados aparecerán aquí."
+  },
+  "dataStats": {
+    "title": "Estadísticas de datos",
+    "toggle": "Mostrar estadísticas de datos",
+    "toggleHelp": "Consulta de dónde provienen los horarios de oración, cuántos se almacenan y cuándo se actualizan.",
+    "source": "Fuente actual",
+    "daysStored": "Almacenado en el dispositivo",
+    "lastUpdated": "Última actualización",
+    "nextCheck": "Próxima comprobación de actualización",
+    "serverRun": "Última ejecución del servidor",
+    "nextServerRun": "Próxima ejecución del servidor",
+    "never": "—",
+    "daysUnit": "días",
+    "sourceCdn": "Datos del servidor (recientes)",
+    "sourceSeed": "Datos integrados sin conexión",
+    "sourceScrape": "En vivo Islamiska Förbundet",
+    "sourceAladhan": "AlAdhan",
+    "sourceLocal": "Cálculo en el dispositivo",
+    "sourceUnknown": "Desconocido",
+    "serverOk": "OK",
+    "serverWarning": "Cobertura baja",
+    "serverUnknown": "Aún sin comprobar",
+    "unlockedTitle": "Data statistics enabled",
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
   }
 }
