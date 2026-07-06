@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchPrayerTimesUnified } from '../providers/fetchPrayerTimes';
+import { getIslamiskaForbundetDatasetTimes } from '../providers/islamiskaForbundetDataset';
 import { recordDataSource } from './dataStatus';
 import type { PrayerDataProviderId } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
@@ -329,6 +330,27 @@ export async function getCachedPrayerTimes(
 export async function getOrFetchPrayerTimes(
   params: Omit<StoredPrayerData, 'months'> & { date: Date },
 ): Promise<TimingsMap> {
+  // For Sweden, consult the prepared dataset BEFORE the local cache. The
+  // dataset is the authoritative Islamiska Förbundet source, so any day the
+  // server now covers is served as exact IFiS times — a day that was cached
+  // earlier from a fallback (AlAdhan/computed, before the server reached that
+  // far out) auto-upgrades the moment the server's coverage catches up, with
+  // no cache rewrite. A miss (beyond coverage / offline) falls through to the
+  // cache and the normal fetch chain, so offline + far-future still work.
+  if (params.provider === 'islamiska_forbundet') {
+    try {
+      const ds = await getIslamiskaForbundetDatasetTimes({
+        latitude: params.latitude,
+        longitude: params.longitude,
+        date: params.date,
+      });
+      if (ds.source) void recordDataSource(ds.source);
+      return ds.timings;
+    } catch {
+      /* dataset miss — use the cache / fetch chain below */
+    }
+  }
+
   const cached = await getCachedPrayerTimes(params);
   if (cached) return cached;
 

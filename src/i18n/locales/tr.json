@@ -1098,6 +1098,7 @@
     "serverWarning": "Düşük kapsama",
     "serverUnknown": "Henüz kontrol edilmedi",
     "unlockedTitle": "Veri istatistikleri etkin",
-    "unlockedBody": "Artık ana ekranın altında bir istatistik kartı görünür. Aşağıdan istediğiniz zaman kapatabilirsiniz."
+    "unlockedBody": "Artık ana ekranın altında bir istatistik kartı görünür. Aşağıdan istediğiniz zaman kapatabilirsiniz.",
+    "serverCoverage": "Sunucu kapsamı"
   }
 }

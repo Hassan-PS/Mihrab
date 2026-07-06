@@ -1098,6 +1098,7 @@
     "serverWarning": "覆盖不足",
     "serverUnknown": "尚未检查",
     "unlockedTitle": "已启用数据统计",
-    "unlockedBody": "现在主屏幕底部会显示一张统计卡片。可随时在下方关闭。"
+    "unlockedBody": "现在主屏幕底部会显示一张统计卡片。可随时在下方关闭。",
+    "serverCoverage": "服务器覆盖天数"
   }
 }

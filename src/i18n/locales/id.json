@@ -1098,6 +1098,7 @@
     "serverWarning": "Cakupan rendah",
     "serverUnknown": "Belum diperiksa",
     "unlockedTitle": "Statistik data diaktifkan",
-    "unlockedBody": "Kartu statistik kini muncul di bagian bawah layar utama. Matikan kapan saja di bawah ini."
+    "unlockedBody": "Kartu statistik kini muncul di bagian bawah layar utama. Matikan kapan saja di bawah ini.",
+    "serverCoverage": "Cakupan server"
   }
 }

@@ -1098,6 +1098,7 @@
     "serverWarning": "Geringe Abdeckung",
     "serverUnknown": "Noch nicht geprüft",
     "unlockedTitle": "Datenstatistik aktiviert",
-    "unlockedBody": "Unten auf dem Startbildschirm erscheint nun eine Statistikkarte. Sie können sie jederzeit unten deaktivieren."
+    "unlockedBody": "Unten auf dem Startbildschirm erscheint nun eine Statistikkarte. Sie können sie jederzeit unten deaktivieren.",
+    "serverCoverage": "Server-Abdeckung"
   }
 }

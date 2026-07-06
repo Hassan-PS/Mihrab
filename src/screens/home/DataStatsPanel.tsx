@@ -7,7 +7,11 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import type { AppPalette } from '../../theme/appPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { HOME_CARD_RADIUS } from './tokens';
-import { getDataStatus, recordDataSource, type DataStatus } from '../../prayer/dataStatus';
+import {
+  getDataStatus,
+  recordDataSource,
+  type DataStatus,
+} from '../../prayer/dataStatus';
 import {
   getIslamiskaForbundetDatasetTimes,
   pollServerIndexNow,
@@ -22,11 +26,13 @@ import type { DataSource } from '../../providers/types';
 
 type DeviceCache = { total: number; lastFetchedAt: string | null };
 
+// Semantic status colours — universal (not the user accent), used sparingly.
+const OK_GREEN = '#3fae6b';
+const WARN_AMBER = '#d99a2b';
+
 /**
- * Home-screen data-diagnostics card (shown at the very bottom when the hidden
+ * Home-screen data-diagnostics card (shown at the bottom when the hidden
  * `showDataStats` flag is on — unlocked via 5 taps on the version in Settings).
- * Displays where today's times came from, coverage, refresh timing and the last
- * server-run status.
  */
 function DataStatsPanelImpl() {
   const { t, i18n } = useTranslation();
@@ -45,10 +51,6 @@ function DataStatsPanelImpl() {
         )
       : null;
 
-    // Refresh the server-index snapshot (throttled) and, for Sweden, resolve
-    // whether today's times come from the CDN mirror or the bundled seed — so
-    // the last-server-run / next-check / source fields populate even when the
-    // times themselves are being served from a warm cache.
     void (async () => {
       try {
         await pollServerIndexNow();
@@ -125,59 +127,71 @@ function DataStatsPanelImpl() {
     }
   };
 
-  const serverLabel = (): string => {
-    const st = status?.serverStatus ?? 'unknown';
-    const text =
-      st === 'ok'
-        ? t('dataStats.serverOk')
-        : st === 'warning'
-          ? t('dataStats.serverWarning')
-          : t('dataStats.serverUnknown');
-    if (!status?.serverBuiltAt) return text;
-    const cov =
-      status.serverMinCoverageDays != null
-        ? ` · ${status.serverMinCoverageDays} ${t('dataStats.daysUnit')}`
-        : '';
-    return `${text}${cov} · ${fmt(status.serverBuiltAt)}`;
+  const statusMeta = (): { color: string; label: string } => {
+    switch (status?.serverStatus) {
+      case 'ok':
+        return { color: OK_GREEN, label: t('dataStats.serverOk') };
+      case 'warning':
+        return { color: WARN_AMBER, label: t('dataStats.serverWarning') };
+      default:
+        return { color: String(palette.muted), label: t('dataStats.serverUnknown') };
+    }
   };
+
+  const sm = statusMeta();
+  const coverage =
+    status?.serverMinCoverageDays != null
+      ? `${status.serverMinCoverageDays} ${t('dataStats.daysUnit')}`
+      : dash;
 
   return (
     <View
       style={[
         styles.card,
-        { backgroundColor: palette.card, borderRadius: HOME_CARD_RADIUS, ...cardEdgeStyle(palette) },
+        {
+          backgroundColor: palette.card,
+          borderRadius: HOME_CARD_RADIUS,
+          ...cardEdgeStyle(palette),
+        },
       ]}>
-      <Text style={[styles.title, { color: palette.muted }]}>
-        {t('dataStats.title')}
-      </Text>
-      <StatRow palette={palette} label={t('dataStats.source')} value={sourceLabel(status?.lastSource)} />
-      <StatRow
-        palette={palette}
-        label={t('dataStats.daysStored')}
-        value={cache ? `${cache.total} ${t('dataStats.daysUnit')}` : dash}
-      />
-      <StatRow
-        palette={palette}
-        label={t('dataStats.lastUpdated')}
-        value={fmt(cache?.lastFetchedAt ?? status?.lastSourceAt)}
-      />
-      <StatRow
-        palette={palette}
-        label={t('dataStats.nextCheck')}
-        value={fmt(status?.nextServerCheckDue)}
-      />
-      <StatRow palette={palette} label={t('dataStats.serverRun')} value={serverLabel()} />
-      <StatRow
-        palette={palette}
-        label={t('dataStats.nextServerRun')}
-        value={fmt(nextServerRunAfter().toISOString())}
-        last
-      />
+      {/* header: title + server status pill */}
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: palette.muted }]}>
+          {t('dataStats.title')}
+        </Text>
+        <View style={styles.statusPill}>
+          <View style={[styles.dot, { backgroundColor: sm.color }]} />
+          <Text style={[styles.statusText, { color: sm.color }]}>{sm.label}</Text>
+        </View>
+      </View>
+
+      {/* source — the headline fact, in an accent pill */}
+      <View style={styles.sourceRow}>
+        <Text style={[styles.sourceLabel, { color: palette.muted }]}>
+          {t('dataStats.source')}
+        </Text>
+        <View style={[styles.sourcePill, { backgroundColor: palette.accentBg }]}>
+          <Text
+            style={[styles.sourceValue, { color: palette.accent }]}
+            numberOfLines={1}>
+            {sourceLabel(status?.lastSource)}
+          </Text>
+        </View>
+      </View>
+
+      <View style={[styles.groupGap, { borderTopColor: palette.border }]} />
+
+      <Row palette={palette} label={t('dataStats.daysStored')} value={cache ? `${cache.total} ${t('dataStats.daysUnit')}` : dash} />
+      <Row palette={palette} label={t('dataStats.lastUpdated')} value={fmt(cache?.lastFetchedAt ?? status?.lastSourceAt)} />
+      <Row palette={palette} label={t('dataStats.nextCheck')} value={fmt(status?.nextServerCheckDue)} />
+      <Row palette={palette} label={t('dataStats.serverCoverage')} value={coverage} />
+      <Row palette={palette} label={t('dataStats.serverRun')} value={fmt(status?.serverBuiltAt)} />
+      <Row palette={palette} label={t('dataStats.nextServerRun')} value={fmt(nextServerRunAfter().toISOString())} last />
     </View>
   );
 }
 
-function StatRow({
+function Row({
   palette,
   label,
   value,
@@ -197,8 +211,8 @@ function StatRow({
           borderBottomColor: palette.border,
         },
       ]}>
-      <Text style={[styles.label, { color: palette.muted }]}>{label}</Text>
-      <Text style={[styles.value, { color: palette.text }]} numberOfLines={2}>
+      <Text style={[styles.rowLabel, { color: palette.muted }]}>{label}</Text>
+      <Text style={[styles.rowValue, { color: palette.text }]} numberOfLines={2}>
         {value}
       </Text>
     </View>
@@ -211,15 +225,47 @@ const styles = StyleSheet.create({
   card: {
     marginTop: 12,
     paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingTop: 14,
+    paddingBottom: 6,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
   },
   title: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dot: { width: 7, height: 7, borderRadius: 4 },
+  statusText: { fontSize: 12, fontWeight: '700' },
+  sourceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+    gap: 12,
+  },
+  sourceLabel: { fontSize: 14, fontWeight: '600' },
+  sourcePill: {
+    borderRadius: 999,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    flexShrink: 1,
+  },
+  sourceValue: { fontSize: 13, fontWeight: '700' },
+  groupGap: {
     marginTop: 10,
     marginBottom: 2,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
   row: {
     flexDirection: 'row',
@@ -228,6 +274,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 12,
   },
-  label: { fontSize: 13, flexShrink: 0 },
-  value: { fontSize: 13, fontWeight: '600', flexShrink: 1, textAlign: 'right' },
+  rowLabel: { fontSize: 13, flexShrink: 0 },
+  rowValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    flexShrink: 1,
+    textAlign: 'right',
+  },
 });

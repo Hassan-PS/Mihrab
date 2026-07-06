@@ -1098,6 +1098,7 @@
     "serverWarning": "Cobertura baja",
     "serverUnknown": "Aún sin comprobar",
     "unlockedTitle": "Estadísticas de datos activadas",
-    "unlockedBody": "Ahora aparece una tarjeta de estadísticas en la parte inferior de la pantalla de inicio. Desactívala cuando quieras abajo."
+    "unlockedBody": "Ahora aparece una tarjeta de estadísticas en la parte inferior de la pantalla de inicio. Desactívala cuando quieras abajo.",
+    "serverCoverage": "Cobertura del servidor"
   }
 }

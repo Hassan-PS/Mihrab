@@ -40,6 +40,7 @@ import { NextPrayerCard } from './home/NextPrayerCard';
 import { PermissionBanners } from './home/PermissionBanners';
 import { ProviderFooter } from './home/ProviderFooter';
 import { DataStatsPanel } from './home/DataStatsPanel';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { QuickActionsGrid } from './home/QuickActionsGrid';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
@@ -608,7 +609,11 @@ export function HomeScreen() {
         onPress={handleOpenProviderPicker}
       />
 
-      {settings.showDataStats && <DataStatsPanel />}
+      {settings.showDataStats && (
+        <ErrorBoundary label="DataStatsPanel">
+          <DataStatsPanel />
+        </ErrorBoundary>
+      )}
 
       <ProviderPickerModal
         visible={providerPickerOpen}

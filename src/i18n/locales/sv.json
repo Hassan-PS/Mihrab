@@ -1098,6 +1098,7 @@
     "serverWarning": "Låg täckning",
     "serverUnknown": "Inte kontrollerad än",
     "unlockedTitle": "Datastatistik aktiverad",
-    "unlockedBody": "Ett statistikkort visas nu längst ned på startskärmen. Stäng av det när som helst nedan."
+    "unlockedBody": "Ett statistikkort visas nu längst ned på startskärmen. Stäng av det när som helst nedan.",
+    "serverCoverage": "Servertäckning"
   }
 }

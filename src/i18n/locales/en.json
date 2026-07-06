@@ -1098,6 +1098,7 @@
     "serverWarning": "Low coverage",
     "serverUnknown": "Not checked yet",
     "unlockedTitle": "Data statistics enabled",
-    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
+    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below.",
+    "serverCoverage": "Server coverage"
   }
 }
