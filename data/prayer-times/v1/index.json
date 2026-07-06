@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "builtAt": "2026-07-06T13:33:33.505Z",
+  "builtAt": "2026-07-06T14:25:21.851Z",
   "timezone": "Europe/Stockholm",
-  "horizonDays": 3,
+  "horizonDays": 400,
   "seedDays": 60,
   "minCoverageDays": 0,
   "cities": [
