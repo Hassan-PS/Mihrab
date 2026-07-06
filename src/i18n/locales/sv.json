@@ -1097,7 +1097,7 @@
     "serverOk": "OK",
     "serverWarning": "Låg täckning",
     "serverUnknown": "Inte kontrollerad än",
-    "unlockedTitle": "Data statistics enabled",
-    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
+    "unlockedTitle": "Datastatistik aktiverad",
+    "unlockedBody": "Ett statistikkort visas nu längst ned på startskärmen. Stäng av det när som helst nedan."
   }
 }

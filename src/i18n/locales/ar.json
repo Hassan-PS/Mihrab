@@ -1097,7 +1097,7 @@
     "serverOk": "سليم",
     "serverWarning": "تغطية منخفضة",
     "serverUnknown": "لم يُتحقق بعد",
-    "unlockedTitle": "Data statistics enabled",
-    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
+    "unlockedTitle": "تم تفعيل إحصائيات البيانات",
+    "unlockedBody": "تظهر الآن بطاقة إحصائيات أسفل الشاشة الرئيسية. يمكنك إيقافها في أي وقت من الأسفل."
   }
 }

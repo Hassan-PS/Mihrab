@@ -1097,7 +1097,7 @@
     "serverOk": "ठीक है",
     "serverWarning": "कम कवरेज",
     "serverUnknown": "अभी तक जाँचा नहीं गया",
-    "unlockedTitle": "Data statistics enabled",
-    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
+    "unlockedTitle": "डेटा आँकड़े सक्षम",
+    "unlockedBody": "अब होम स्क्रीन के नीचे एक आँकड़े कार्ड दिखाई देता है। इसे नीचे कभी भी बंद करें।"
   }
 }

@@ -1097,7 +1097,7 @@
     "serverOk": "ঠিক আছে",
     "serverWarning": "কম কভারেজ",
     "serverUnknown": "এখনও যাচাই করা হয়নি",
-    "unlockedTitle": "Data statistics enabled",
-    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
+    "unlockedTitle": "ডেটা পরিসংখ্যান চালু হয়েছে",
+    "unlockedBody": "এখন হোম স্ক্রিনের নিচে একটি পরিসংখ্যান কার্ড দেখা যাবে। নিচে যেকোনো সময় এটি বন্ধ করুন।"
   }
 }

@@ -1097,7 +1097,7 @@
     "serverOk": "OK",
     "serverWarning": "Cobertura baja",
     "serverUnknown": "Aún sin comprobar",
-    "unlockedTitle": "Data statistics enabled",
-    "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below."
+    "unlockedTitle": "Estadísticas de datos activadas",
+    "unlockedBody": "Ahora aparece una tarjeta de estadísticas en la parte inferior de la pantalla de inicio. Desactívala cuando quieras abajo."
   }
 }
