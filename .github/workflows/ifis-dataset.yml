@@ -71,7 +71,9 @@ jobs:
         run: |
           git config user.name 'mihrab-dataset-bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add data/prayer-times/v1 src/providers/data/ifisSeed.json
+          # Tolerate missing paths (e.g. the alert-test run skips the build).
+          git add src/providers/data/ifisSeed.json 2>/dev/null || true
+          git add data/prayer-times 2>/dev/null || true
           if git diff --cached --quiet; then
             echo 'No dataset changes to commit.'
           else
