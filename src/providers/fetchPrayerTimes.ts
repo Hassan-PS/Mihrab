@@ -2,6 +2,7 @@ import type { PrayerTimesResult, UnifiedFetchParams } from './types';
 import { fetchAladhanTimes } from './aladhan';
 import { fetchPrayTimesDev } from './praytimesDev';
 import { fetchIslamiskaForbundetTimes } from './islamiskaForbundet';
+import { getIslamiskaForbundetDatasetTimes } from './islamiskaForbundetDataset';
 import { computeLocalAdhanTimes } from './localAdhan';
 import { computeImsak, DEFAULT_IMSAK_OFFSET_MINUTES } from './imsak';
 import { validateTimings } from './validateTimings';
@@ -33,11 +34,26 @@ export async function fetchPrayerTimesUnified(
       });
       break;
     case 'islamiska_forbundet': {
+      // 0. Prepared dataset FIRST (v2.7.x): a scheduled server-side job mirrors
+      // the bönetider times into a static CDN file (+ a bundled seed), so the
+      // normal path has NO live dependency on the flaky origin. A miss (date
+      // beyond the dataset / unknown city) falls through to the live chain.
+      try {
+        result = await getIslamiskaForbundetDatasetTimes({
+          latitude: p.latitude,
+          longitude: p.longitude,
+          date: p.date,
+        });
+        break;
+      } catch {
+        /* dataset miss — try the live sources below */
+      }
       // The Swedish scraper origin regularly times out. After 3
       // consecutive failures it enters a 12 h cooldown during which we
       // silently serve AlAdhan for the same coordinates instead of
       // hammering (and warn-spamming about) a dead origin. Cached days
-      // remain authoritative either way (see prayerStorage).
+      // remain authoritative either way (see prayerStorage). The live
+      // scrape now acts as a FALLBACK rung behind the dataset above.
       if (await isProviderCoolingDown('islamiska_forbundet')) {
         result = await fetchAladhanTimes({
           latitude: p.latitude,

@@ -1,0 +1,107 @@
+name: IFiS prayer-times dataset
+
+# Rebuilds the Islamiska Förbundet prayer-times dataset that the app reads
+# instead of scraping the flaky bönetider widget on every device. Runs
+# server-side, commits the refreshed JSON to `main`, and EMAILS on failure
+# (origin down, data going stale, or the commit/push failing).
+#
+# Required repo secrets for the failure email (Settings → Secrets → Actions):
+#   MAIL_SERVER    SMTP host        e.g. mail.elghamri.se  (or smtp.gmail.com)
+#   MAIL_PORT      SMTP port        465 (SSL) or 587 (STARTTLS)
+#   MAIL_USERNAME  SMTP username / from-address
+#   MAIL_PASSWORD  SMTP password / app-password
+# If these are unset the workflow still runs; only the email step is skipped.
+
+on:
+  schedule:
+    - cron: '17 3 * * 1' # every Monday 03:17 UTC
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: 'Per-run request budget (raise for the initial backfill)'
+        required: false
+        default: '8000'
+      wall_minutes:
+        description: 'Per-run wall-clock budget in minutes'
+        required: false
+        default: '50'
+      horizon_days:
+        description: 'How many days ahead to cover'
+        required: false
+        default: '400'
+      test_alert:
+        description: 'Set true to force a failure and verify the email alert'
+        required: false
+        default: 'false'
+
+concurrency:
+  group: ifis-dataset
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Alert test (force failure)
+        if: ${{ github.event.inputs.test_alert == 'true' }}
+        run: |
+          echo 'Intentional failure to verify the alert email is delivered.'
+          exit 1
+
+      - name: Build dataset
+        id: build
+        env:
+          IFIS_MAX_REQUESTS: ${{ github.event.inputs.max_requests || '8000' }}
+          IFIS_MAX_WALL_MIN: ${{ github.event.inputs.wall_minutes || '50' }}
+          IFIS_HORIZON_DAYS: ${{ github.event.inputs.horizon_days || '400' }}
+        run: npx --yes tsx@4 tools/ifis-dataset/build.ts
+
+      - name: Commit refreshed dataset
+        if: always() # commit whatever progress we made, even if the gate failed
+        run: |
+          git config user.name 'mihrab-dataset-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/prayer-times/v1 src/providers/data/ifisSeed.json
+          if git diff --cached --quiet; then
+            echo 'No dataset changes to commit.'
+          else
+            git commit -m "data: refresh IFiS prayer times ($(date -u +%F))"
+            git push
+          fi
+
+      - name: Email on failure
+        if: failure() && env.MAIL_SERVER != ''
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Mihrab Dataset Bot <${{ secrets.MAIL_USERNAME }}>
+          to: mihrab@elghamri.se
+          subject: '[Mihrab] IFiS prayer-times dataset job FAILED'
+          body: |
+            The scheduled Islamiska Förbundet dataset refresh failed.
+
+            This usually means one of:
+              • islamiskaforbundet.se is down (most fetches failed), or
+              • near-term coverage dropped below the freshness floor, or
+              • the commit/push step failed.
+
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            The app keeps serving the last good dataset + its computed-times
+            fallback, so users are not immediately affected — but the data will
+            age out if this keeps failing. Check the run log above.
