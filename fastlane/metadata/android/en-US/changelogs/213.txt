@@ -1,0 +1,1 @@
+More reliable prayer times for Sweden: they now come from a regularly refreshed set of Islamiska Förbundet times, work offline, and fall back gracefully if the network is unavailable — so your times always show.

@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.32] — 2026-07-06
+
+### Changed
+- **Sweden prayer times are now served from a prepared dataset instead of scraping on every device.** A scheduled server-side job mirrors the Islamiska Förbundet bönetider into per-city JSON on a CDN (+ a compact seed bundled in the app), and the app reads that — with the live scrape, AlAdhan, and on-device calculation kept as fallbacks. Result: the flaky origin is off the normal path, times work offline, and a day cached earlier from a fallback auto-upgrades to exact IFiS times once the server's coverage reaches it. Client refresh is index-driven (polls a tiny `index.json`, pulls only when the server publishes a newer build; ±jitter, atomic-commit-safe).
+
+### Added
+- **Hidden data-statistics panel** (unlock with 5 taps on the version in Settings, à la developer mode): a card at the bottom of Home showing the current source (server dataset / offline bundled / live scrape / AlAdhan / on-device), days stored, last-updated and next-check times, and the last/next server-run status. Wrapped in an error boundary so it can never affect the prayer screen.
+
+### Infrastructure
+- Weekly GitHub Actions job builds + commits the dataset with coverage safeguards: warns by email under 40 days of per-city coverage and hard-fails under a 30-day floor. Karlshamn (unsupported by the widget) dropped from the city table; its coordinates map to the nearest supported city.
+
 ## [2.7.31] — 2026-07-06
 
 ### Added

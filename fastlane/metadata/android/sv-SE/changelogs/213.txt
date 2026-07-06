@@ -1,0 +1,1 @@
+Mer tillförlitliga bönetider för Sverige: de hämtas nu från en regelbundet uppdaterad uppsättning tider från Islamiska Förbundet, fungerar offline och faller tillbaka smidigt om nätverket saknas — så dina tider visas alltid.
