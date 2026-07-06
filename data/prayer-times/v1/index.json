@@ -1,14 +1,12 @@
 {
   "version": 1,
-  "builtAt": "2026-07-06T14:40:15.930Z",
+  "builtAt": "2026-07-06T14:46:11.248Z",
   "timezone": "Europe/Stockholm",
   "horizonDays": 400,
   "seedDays": 60,
   "minCoverageDays": 51,
-  "nearTermFillPct": 99,
-  "deadCities": [
-    "Karlshamn"
-  ],
+  "nearTermFillPct": 100,
+  "deadCities": [],
   "cities": [
     {
       "city": "Stockholm",
@@ -145,10 +143,6 @@
     {
       "city": "Kalmar",
       "slug": "kalmar"
-    },
-    {
-      "city": "Karlshamn",
-      "slug": "karlshamn"
     },
     {
       "city": "Karlskoga",
