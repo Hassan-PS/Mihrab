@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.33] — 2026-07-07
+
+### Fixed
+- **iOS version bump only.** After the 2.7.32 build was delivered to App Store Connect, that pre-release train closed, so a later build couldn't reuse version 2.7.32. Bumped to 2.7.33 so iOS delivery succeeds. No functional changes from 2.7.32.
+
 ## [2.7.32] — 2026-07-06
 
 ### Changed
