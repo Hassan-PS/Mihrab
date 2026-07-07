@@ -86,10 +86,24 @@ jobs:
           git add data/prayer-times 2>/dev/null || true
           if git diff --cached --quiet; then
             echo 'No dataset changes to commit.'
-          else
-            git commit -m "data: refresh IFiS prayer times ($(date -u +%F))"
-            git push
+            exit 0
           fi
+          git commit -m "data: refresh IFiS prayer times ($(date -u +%F))"
+          # `main` may have advanced during the ~50-min build (a release, another
+          # run). Rebase our generated-data commit onto the latest — keeping our
+          # fresh build on any conflict (`-X theirs`, which in a rebase is the
+          # commit being replayed = ours) — and retry the push a few times.
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Pushed on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push rejected (attempt ${attempt}) — rebasing onto latest main."
+            git pull --rebase -X theirs origin main || git rebase --abort || true
+            sleep 3
+          done
+          echo 'Failed to push dataset after 3 attempts.'
+          exit 1
 
       - name: Email on failure
         if: failure() && env.MAIL_SERVER != ''
