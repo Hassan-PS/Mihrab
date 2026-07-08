@@ -12,9 +12,9 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/Mihrab
 
 Builds:
-  - versionName: 2.7.34
-    versionCode: 215
-    commit: 3a178bb3b9d3aed3f9e05263c67c97f5830c508a
+  - versionName: 2.7.35
+    versionCode: 216
+    commit: a36e24edd7bfffe6eecc84a1bfcea8739f3478e9
     subdir: android/app
     sudo:
       - apt-get update
@@ -109,5 +109,5 @@ MaintainerNotes: |
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.7.34
-CurrentVersionCode: 215
+CurrentVersion: 2.7.35
+CurrentVersionCode: 216
