@@ -20,9 +20,9 @@
 
 <div align="center">
 
-<img src="branding/store/play/01_home.png" width="32%" alt="Prayer times, online or off — next prayer countdown and the day's times">&nbsp;<img src="branding/store/play/02_quran.png" width="32%" alt="The whole Quran, beautifully read — Madinah mushaf reader">&nbsp;<img src="branding/store/play/03_duas.png" width="32%" alt="A dua for every moment — Ayat al-Kursi with transliteration and source">
+<img src="branding/readme/01_home.png" width="32%" alt="Home — next prayer countdown and the day's times">&nbsp;<img src="branding/readme/02_quran.png" width="32%" alt="Madinah mushaf reader — Surah Al-Mulk">&nbsp;<img src="branding/readme/03_duas.png" width="32%" alt="Duas — Ayat al-Kursi with transliteration and source">
 
-<img src="branding/store/play/04_tasbih.png" width="32%" alt="Dhikr that stays calm — tasbih counter">&nbsp;<img src="branding/store/play/05_fasting.png" width="32%" alt="Track every fast — Ramadan and Sunnah fasting tracker">&nbsp;<img src="branding/store/play/06_qibla.png" width="32%" alt="Always toward the Ka'bah — Qibla compass">
+<img src="branding/readme/04_tasbih.png" width="32%" alt="Tasbih counter — dhikr with tabular digits">&nbsp;<img src="branding/readme/05_fasting.png" width="32%" alt="Fasting tracker — Ramadan and Sunnah fasts">&nbsp;<img src="branding/readme/06_qibla.png" width="32%" alt="Qibla compass">
 
 </div>
 
