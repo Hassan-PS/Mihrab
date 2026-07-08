@@ -3,6 +3,7 @@ package com.prayer_times
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.RadioGroup
@@ -39,7 +40,13 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
     }
 
     setResult(RESULT_CANCELED)
-    WindowCompat.setDecorFitsSystemWindows(window, false)
+    // On Android 15+ edge-to-edge is enforced, so this deprecated call is a
+    // no-op that only trips Play's deprecated-API check; the inset listener
+    // below handles padding on every version. Only call it on older versions.
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+      @Suppress("DEPRECATION")
+      WindowCompat.setDecorFitsSystemWindows(window, false)
+    }
     setContentView(R.layout.activity_prayer_widget_configure)
 
     val root = findViewById<LinearLayout>(R.id.widget_configure_root)

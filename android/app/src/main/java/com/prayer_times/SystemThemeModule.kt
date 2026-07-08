@@ -70,12 +70,23 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
     val activity = getCurrentActivity() ?: return
     activity.runOnUiThread {
       val window = activity.window ?: return@runOnUiThread
-      WindowCompat.setDecorFitsSystemWindows(window, false)
-      @Suppress("DEPRECATION")
-      window.navigationBarColor = Color.TRANSPARENT
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        window.isNavigationBarContrastEnforced = false
+      // Android 15+ (API 35) ENFORCES edge-to-edge: the system bars are
+      // already transparent and the OS draws its own adaptive scrim, so the
+      // window color/contrast/decor setters below are deprecated no-ops that
+      // only trip Play Console's "deprecated edge-to-edge API" check. Touch
+      // them only on older versions where they still have a visible effect.
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        @Suppress("DEPRECATION")
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+          @Suppress("DEPRECATION")
+          window.isNavigationBarContrastEnforced = false
+        }
       }
+      // Icon appearance (light/dark nav-bar glyphs) is NOT deprecated and is
+      // the only lever under enforced edge-to-edge — always apply it.
       val controller = WindowCompat.getInsetsController(window, window.decorView)
       controller.isAppearanceLightNavigationBars = !isDark
     }
