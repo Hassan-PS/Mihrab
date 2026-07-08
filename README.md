@@ -20,9 +20,9 @@
 
 <div align="center">
 
-<img src="branding/readme/01_home.png" width="32%" alt="Home — next prayer countdown and the day's times">&nbsp;<img src="branding/readme/02_mushaf.png" width="32%" alt="Madinah mushaf reader with khatmah position highlighted">&nbsp;<img src="branding/readme/03_tafsir.png" width="32%" alt="Ayah panel — translation and Ibn Kathir tafsir">
+<img src="branding/store/play/01_home.png" width="32%" alt="Prayer times, online or off — next prayer countdown and the day's times">&nbsp;<img src="branding/store/play/02_quran.png" width="32%" alt="The whole Quran, beautifully read — Madinah mushaf reader">&nbsp;<img src="branding/store/play/03_duas.png" width="32%" alt="A dua for every moment — Ayat al-Kursi with transliteration and source">
 
-<img src="branding/readme/04_quran.png" width="32%" alt="Quran index — khatmah plan, verse of the day, search">&nbsp;<img src="branding/readme/05_reciters.png" width="32%" alt="Searchable reciter picker with word-highlight badges">&nbsp;<img src="branding/readme/06_duas.png" width="32%" alt="Duas — Ayat al-Kursi with transliteration and translation">
+<img src="branding/store/play/04_tasbih.png" width="32%" alt="Dhikr that stays calm — tasbih counter">&nbsp;<img src="branding/store/play/05_fasting.png" width="32%" alt="Track every fast — Ramadan and Sunnah fasting tracker">&nbsp;<img src="branding/store/play/06_qibla.png" width="32%" alt="Always toward the Ka'bah — Qibla compass">
 
 </div>
 
