@@ -1,0 +1,7 @@
+Mycket nytt sedan förra uppdateringen:
+- En komplett Koranläsare — interaktiv mushaf, 21 recitatörer med ljud och ord‑för‑ord‑markering, memoreringsverktyg, khatmah‑planer, tafsir och sökning
+- Dagens vers och dagliga påminnelser
+- Svenska bönetider fungerar nu helt offline och mer pålitligt
+- Mer pålitlig automatisk plats (Wi‑Fi + GPS, fungerar inomhus) som byter korrekt när du reser
+- Stabilare adhan‑larm; dina data överlever ominstallation på Android
+- Många fixar och förbättringar

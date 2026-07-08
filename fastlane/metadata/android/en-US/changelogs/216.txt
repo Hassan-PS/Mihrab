@@ -1,0 +1,7 @@
+A lot has landed since the last update:
+- A full Quran reader — interactive mushaf, 21 reciters with audio and word‑by‑word highlight, memorization tools, khatmah plans, tafsir and search
+- Ayah of the day and daily reminders
+- Swedish prayer times now work fully offline and more reliably
+- More reliable automatic location (Wi‑Fi + GPS, works indoors) that switches correctly when you travel
+- Steadier adhan alarms; your data survives reinstalls on Android
+- Many fixes and polish

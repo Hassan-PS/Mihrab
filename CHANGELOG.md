@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.35] — 2026-07-08
+
+### Fixed
+- **Removed deprecated edge-to-edge calls (Android).** Under the enforced edge-to-edge mode on Android 15+, the native theme code still called the deprecated `Window.navigationBarColor` / `setDecorFitsSystemWindows` / `isNavigationBarContrastEnforced` setters — no-ops on those versions that tripped Play Console's "deprecated edge-to-edge API" recommendation. They're now guarded behind API < 35; the still-valid light/dark nav-bar icon appearance is applied on every version, so there is no visual change.
+
 ## [2.7.34] — 2026-07-08
 
 ### Fixed
