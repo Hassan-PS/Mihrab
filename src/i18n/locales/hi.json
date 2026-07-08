@@ -854,7 +854,9 @@
     "audioButton": "ऑडियो",
     "khatmahCustom": "कस्टम…",
     "khatmahLengthTitle": "ख़त्म की अवधि (दिन)",
-    "khatmahStartCta": "शुरू करें"
+    "khatmahStartCta": "शुरू करें",
+    "showMore": "और दिखाएँ",
+    "showLess": "कम दिखाएँ"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

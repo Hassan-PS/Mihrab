@@ -854,7 +854,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Personnalisé…",
     "khatmahLengthTitle": "Durée de la khatma (jours)",
-    "khatmahStartCta": "Commencer"
+    "khatmahStartCta": "Commencer",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

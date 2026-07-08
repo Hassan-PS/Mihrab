@@ -854,7 +854,9 @@
     "audioButton": "Аудио",
     "khatmahCustom": "Свой срок…",
     "khatmahLengthTitle": "Длительность хатмы (дней)",
-    "khatmahStartCta": "Начать"
+    "khatmahStartCta": "Начать",
+    "showMore": "Показать больше",
+    "showLess": "Показать меньше"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

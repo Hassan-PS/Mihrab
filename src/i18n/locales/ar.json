@@ -854,7 +854,9 @@
     "audioButton": "الصوت",
     "khatmahCustom": "مخصص…",
     "khatmahLengthTitle": "مدة الختمة (أيام)",
-    "khatmahStartCta": "ابدأ"
+    "khatmahStartCta": "ابدأ",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

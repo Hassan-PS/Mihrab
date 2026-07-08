@@ -854,7 +854,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Personalizado…",
     "khatmahLengthTitle": "Duración del jatma (días)",
-    "khatmahStartCta": "Comenzar"
+    "khatmahStartCta": "Comenzar",
+    "showMore": "Mostrar más",
+    "showLess": "Mostrar menos"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

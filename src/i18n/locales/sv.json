@@ -854,7 +854,9 @@
     "audioButton": "Ljud",
     "khatmahCustom": "Anpassad…",
     "khatmahLengthTitle": "Khatmahns längd (dagar)",
-    "khatmahStartCta": "Starta"
+    "khatmahStartCta": "Starta",
+    "showMore": "Visa mer",
+    "showLess": "Visa mindre"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

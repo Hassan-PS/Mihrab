@@ -854,7 +854,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Kustom…",
     "khatmahLengthTitle": "Durasi khatmah (hari)",
-    "khatmahStartCta": "Mulai"
+    "khatmahStartCta": "Mulai",
+    "showMore": "Tampilkan selengkapnya",
+    "showLess": "Tampilkan lebih sedikit"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

@@ -854,7 +854,9 @@
     "audioButton": "Ses",
     "khatmahCustom": "Özel…",
     "khatmahLengthTitle": "Hatim süresi (gün)",
-    "khatmahStartCta": "Başla"
+    "khatmahStartCta": "Başla",
+    "showMore": "Daha fazla göster",
+    "showLess": "Daha az göster"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

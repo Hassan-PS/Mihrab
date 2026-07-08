@@ -854,7 +854,9 @@
     "audioButton": "অডিও",
     "khatmahCustom": "কাস্টম…",
     "khatmahLengthTitle": "খতমের দৈর্ঘ্য (দিন)",
-    "khatmahStartCta": "শুরু"
+    "khatmahStartCta": "শুরু",
+    "showMore": "আরও দেখুন",
+    "showLess": "কম দেখুন"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

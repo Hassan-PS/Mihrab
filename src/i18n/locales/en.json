@@ -854,7 +854,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Custom…",
     "khatmahLengthTitle": "Khatmah length (days)",
-    "khatmahStartCta": "Start"
+    "khatmahStartCta": "Start",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

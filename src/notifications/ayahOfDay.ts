@@ -73,6 +73,42 @@ function clip(text: string, max: number): string {
   return t.length <= max ? t : `${t.slice(0, max - 1).trimEnd()}…`;
 }
 
+/**
+ * Skip verses whose Arabic runs past this — a handful of very long ayahs
+ * (e.g. 2:282, the "debt verse") span most of a page and never render sensibly
+ * in a notification even with BigTextStyle. We re-draw a few times to avoid
+ * them; the daily ayah stays a normal, readable length.
+ */
+const MAX_AYAH_ARABIC_CHARS = 400;
+
+/** Draw a random ayah short enough to render as a notification. */
+async function drawNotifiableAyah(edition: QuranTranslationId): Promise<{
+  ref: { surah: number; ayah: number };
+  arabic: string;
+  translation: string;
+}> {
+  let last: { ref: { surah: number; ayah: number }; arabic: string; translation: string } = {
+    ref: { surah: 1, ayah: 1 },
+    arabic: '',
+    translation: '',
+  };
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const ref = randomAyahRef();
+    let arabic = '';
+    try {
+      const loaded = await loadSurah(ref.surah);
+      arabic = loaded?.arabic[ref.ayah - 1] ?? '';
+    } catch {
+      // Arabic text unavailable — translation-only body still works.
+    }
+    const translation = getAyahTranslation(edition, ref.surah, ref.ayah) ?? '';
+    last = { ref, arabic, translation };
+    // Accept anything within the cap; if Arabic couldn't load, don't loop forever.
+    if (arabic.length <= MAX_AYAH_ARABIC_CHARS) return last;
+  }
+  return last; // gave up after 6 tries — use the last pick
+}
+
 /** Cancel every scheduled ayah-of-the-day notification. */
 export async function cancelAllAyahOfDay(): Promise<void> {
   try {
@@ -126,21 +162,15 @@ export async function rescheduleAyahOfDay(opts: {
     fireAt.setHours(hour, minute, 0, 0);
     if (fireAt.getTime() <= now.getTime()) continue;
 
-    const ref = randomAyahRef();
+    const { ref, arabic, translation } = await drawNotifiableAyah(edition);
     const surahMeta = findSurah(ref.surah);
-    let arabic = '';
-    try {
-      const loaded = await loadSurah(ref.surah);
-      arabic = loaded?.arabic[ref.ayah - 1] ?? '';
-    } catch {
-      // Arabic text unavailable — translation-only body still works.
-    }
-    const translation = getAyahTranslation(edition, ref.surah, ref.ayah) ?? '';
 
     const refLabel = `${surahMeta?.romanized ?? ''} ${ref.surah}:${ref.ayah}`;
-    const body = [clip(arabic, 180), clip(translation, 220)]
+    // BigTextStyle renders the whole thing on expand (like a long chat message),
+    // so keep the caps generous; a blank line separates Arabic from translation.
+    const body = [clip(arabic, 400), clip(translation, 500)]
       .filter(Boolean)
-      .join('\n');
+      .join('\n\n');
 
     try {
       await notifee.createTriggerNotification(

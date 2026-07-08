@@ -120,6 +120,8 @@ export function QuranScreen() {
   // via the small toggle on the card (persisted, v2.7.31).
   const votdMode = quran.prefs.votdMode;
   const [votdTafsir, setVotdTafsir] = useState<string | null>(null);
+  // Tafsir can be long — show a few lines by default with a "Show more" expand.
+  const [votdExpanded, setVotdExpanded] = useState(false);
   useEffect(() => {
     if (votdMode !== 'tafsir') return;
     let cancelled = false;
@@ -327,7 +329,13 @@ export function QuranScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('quran.verseOfDay', 'Verse of the day')}
-          onPress={() => openSurah(votdRef.surah, votdRef.ayah)}
+          onPress={() =>
+            openSurah(
+              votdRef.surah,
+              votdRef.ayah,
+              findPageForAyah(votdRef.surah, votdRef.ayah),
+            )
+          }
           style={[
             styles.votdCard,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
@@ -352,7 +360,10 @@ export function QuranScreen() {
                     accessibilityState={{ selected }}
                     accessibilityLabel={label}
                     hitSlop={6}
-                    onPress={() => setQuranPrefs({ votdMode: mode })}
+                    onPress={() => {
+                      setVotdExpanded(false);
+                      setQuranPrefs({ votdMode: mode });
+                    }}
                     style={[
                       styles.votdToggleSeg,
                       selected && { backgroundColor: palette.accentBg },
@@ -377,15 +388,31 @@ export function QuranScreen() {
             {votdArabic}
           </Text>
           {votdMode === 'tafsir' ? (
-            <Text
-              numberOfLines={4}
-              style={[styles.votdTranslation, { color: palette.muted }]}>
-              {votdTafsir ??
-                t(
-                  'quran.tafsirUnavailable',
-                  'Tafsir unavailable — connect to the internet once to download it.',
-                )}
-            </Text>
+            <>
+              <Text
+                numberOfLines={votdExpanded ? undefined : 4}
+                style={[styles.votdTranslation, { color: palette.muted }]}>
+                {votdTafsir ??
+                  t(
+                    'quran.tafsirUnavailable',
+                    'Tafsir unavailable — connect to the internet once to download it.',
+                  )}
+              </Text>
+              {votdTafsir && votdTafsir.length > 220 ? (
+                // Own Pressable — claims the touch so the card's open-in-reader
+                // press doesn't also fire when expanding the tafsir.
+                <Pressable
+                  hitSlop={6}
+                  accessibilityRole="button"
+                  onPress={() => setVotdExpanded(v => !v)}>
+                  <Text style={[styles.votdShowMore, { color: palette.accentSolid }]}>
+                    {votdExpanded
+                      ? t('quran.showLess', 'Show less')
+                      : t('quran.showMore', 'Show more')}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </>
           ) : votdTranslation ? (
             <Text
               numberOfLines={3}
@@ -909,6 +936,7 @@ const styles = StyleSheet.create({
     ...arabicTextStyle('quran'),
   },
   votdTranslation: { fontSize: 13, lineHeight: 19 },
+  votdShowMore: { fontSize: 12, fontWeight: '700', marginTop: 4 },
   votdRef: { fontSize: 12, fontWeight: '700' },
   votdHeaderRow: {
     flexDirection: 'row',

@@ -854,7 +854,9 @@
     "audioButton": "آڈیو",
     "khatmahCustom": "حسبِ منشا…",
     "khatmahLengthTitle": "ختم کی مدت (دن)",
-    "khatmahStartCta": "شروع کریں"
+    "khatmahStartCta": "شروع کریں",
+    "showMore": "مزید دکھائیں",
+    "showLess": "کم دکھائیں"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

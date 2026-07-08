@@ -854,7 +854,9 @@
     "audioButton": "音频",
     "khatmahCustom": "自定义…",
     "khatmahLengthTitle": "完整诵读时长（天）",
-    "khatmahStartCta": "开始"
+    "khatmahStartCta": "开始",
+    "showMore": "显示更多",
+    "showLess": "显示更少"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",
