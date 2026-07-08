@@ -55,6 +55,8 @@
     "tomorrow": "Mañana",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Cambiar ubicación",
+    "autoBadge": "Auto",
+    "locating": "Ubicando…",
     "backToToday": "Volver a hoy",
     "updatedAt": "Actualizado {{when}}",
     "daysStored": "{{count}} días guardados",

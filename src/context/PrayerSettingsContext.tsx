@@ -59,6 +59,7 @@ export type LocationSlice = Pick<
   | 'manualLocationLabel'
   | 'lastFetchedLatitude'
   | 'lastFetchedLongitude'
+  | 'autoLocationLabel'
   | 'locationOnboardingComplete'
   | 'locationPresets'
   | 'activeLocationPresetId'
@@ -161,6 +162,7 @@ export function PrayerSettingsProvider({
           ...next,
           lastFetchedLatitude: undefined,
           lastFetchedLongitude: undefined,
+          autoLocationLabel: undefined,
         };
       }
       saveSettings(next).catch(e => console.error('Failed to save settings', e));
@@ -199,6 +201,7 @@ export function PrayerSettingsProvider({
       manualLocationLabel: settings.manualLocationLabel,
       lastFetchedLatitude: settings.lastFetchedLatitude,
       lastFetchedLongitude: settings.lastFetchedLongitude,
+      autoLocationLabel: settings.autoLocationLabel,
       locationOnboardingComplete: settings.locationOnboardingComplete,
       locationPresets: settings.locationPresets,
       activeLocationPresetId: settings.activeLocationPresetId,
@@ -210,6 +213,7 @@ export function PrayerSettingsProvider({
       settings.manualLocationLabel,
       settings.lastFetchedLatitude,
       settings.lastFetchedLongitude,
+      settings.autoLocationLabel,
       settings.locationOnboardingComplete,
       settings.locationPresets,
       settings.activeLocationPresetId,

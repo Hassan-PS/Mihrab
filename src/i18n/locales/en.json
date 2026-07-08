@@ -55,6 +55,8 @@
     "tomorrow": "Tomorrow",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Switch location",
+    "autoBadge": "Auto",
+    "locating": "Locating…",
     "backToToday": "Back to today",
     "updatedAt": "Updated {{when}}",
     "daysStored": "{{count}} days stored",

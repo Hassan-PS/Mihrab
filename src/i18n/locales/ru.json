@@ -55,6 +55,8 @@
     "tomorrow": "Завтра",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Сменить место",
+    "autoBadge": "Авто",
+    "locating": "Определение…",
     "backToToday": "К сегодня",
     "updatedAt": "Обновлено {{when}}",
     "daysStored": "Сохранено дней: {{count}}",

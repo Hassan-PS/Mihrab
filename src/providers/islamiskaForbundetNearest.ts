@@ -17,7 +17,10 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
-export function getNearestIslamiskaForbundetCity(latitude: number, longitude: number): string {
+export function getNearestIslamiskaForbundetCityWithDistance(
+  latitude: number,
+  longitude: number,
+): { city: string; distanceKm: number } {
   let nearestCity = 'Stockholm';
   let minDistance = Infinity;
 
@@ -29,5 +32,9 @@ export function getNearestIslamiskaForbundetCity(latitude: number, longitude: nu
     }
   }
 
-  return nearestCity;
+  return { city: nearestCity, distanceKm: minDistance };
+}
+
+export function getNearestIslamiskaForbundetCity(latitude: number, longitude: number): string {
+  return getNearestIslamiskaForbundetCityWithDistance(latitude, longitude).city;
 }

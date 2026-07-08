@@ -102,6 +102,10 @@ export type PrayerAppSettings = {
   /** Last coordinates used for API/GPS (for month view when GPS). */
   lastFetchedLatitude?: number;
   lastFetchedLongitude?: number;
+  /** Reverse-geocoded city name for the CURRENT automatic-mode location.
+   *  Surfaced on the location chip so automatic mode names the city (not just
+   *  coords). Derived from location, so stored in the encrypted slice. */
+  autoLocationLabel?: string;
   notificationsEnabled: boolean;
   /**
    * Extra notification this many minutes before each prayer (0 = off).

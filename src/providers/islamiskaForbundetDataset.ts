@@ -25,7 +25,7 @@ import {
   IFIS_DATASET_BASE_URL,
   IFIS_INDEX_POLL_INTERVAL_MS,
 } from '../config/datasets';
-import { getNearestIslamiskaForbundetCity } from './islamiskaForbundetNearest';
+import { getNearestIslamiskaForbundetCityWithDistance } from './islamiskaForbundetNearest';
 import {
   citySlug,
   tupleToTimings,
@@ -41,6 +41,18 @@ import seedJson from './data/ifisSeed.json';
 const PROVIDER = 'islamiska_forbundet';
 const DEFAULT_TZ = 'Europe/Stockholm';
 const CACHE_PREFIX = 'ifis.dataset.v1.city.';
+
+/**
+ * Defence-in-depth distance cap. The provider is already region-guarded to
+ * Sweden before this module is consulted, but the coarse Sweden bounding box
+ * can catch a few non-Swedish slivers (e.g. Åland, border areas). If the
+ * nearest dataset city is absurdly far, the coordinate isn't really "in" any
+ * covered city, so we MISS and let the caller fall through to the live scrape
+ * / AlAdhan / on-device chain (which computes for the exact coordinate) rather
+ * than serving a Swedish city's times to somewhere hundreds of km away.
+ * 250 km is generous — real Swedish locations are always well within it.
+ */
+const MAX_DATASET_CITY_KM = 250;
 
 /** `"YYYY-MM-DD" -> [Imsak,Fajr,Sunrise,Dhuhr,Asr,Maghrib,Isha]`. */
 type CityDays = Record<string, DatasetDayTuple>;
@@ -224,10 +236,18 @@ export async function getIslamiskaForbundetDatasetTimes(params: {
   longitude: number;
   date: Date;
 }): Promise<PrayerTimesResult> {
-  const city = getNearestIslamiskaForbundetCity(
+  const { city, distanceKm } = getNearestIslamiskaForbundetCityWithDistance(
     params.latitude,
     params.longitude,
   );
+  if (distanceKm > MAX_DATASET_CITY_KM) {
+    throw new ProviderError(
+      PROVIDER,
+      'shape',
+      `Nearest dataset city "${city}" is ${Math.round(distanceKm)} km away ` +
+        `(> ${MAX_DATASET_CITY_KM} km) — coordinate is outside dataset coverage.`,
+    );
+  }
   const slug = citySlug(city);
   const dateKey = formatLocalDate(params.date);
 

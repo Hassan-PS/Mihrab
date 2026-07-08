@@ -253,7 +253,7 @@ async function fetchPage(page: number, attempts = 3): Promise<number> {
 }
 
 export function downloadMushafAssets({
-  concurrency = 3,
+  concurrency = 6,
   onProgress,
 }: {
   concurrency?: number;

@@ -55,6 +55,8 @@
     "tomorrow": "明天",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "切换位置",
+    "autoBadge": "自动",
+    "locating": "定位中…",
     "backToToday": "回到今天",
     "updatedAt": "更新于 {{when}}",
     "daysStored": "已存储 {{count}} 天",

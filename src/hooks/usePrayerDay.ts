@@ -1,13 +1,17 @@
-import Geolocation from '@react-native-community/geolocation';
 import NetInfo from '@react-native-community/netinfo';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, PermissionsAndroid, Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
+import { requestAndroidLocationPermission } from '../utils/locationPermission';
 import {
   getOrFetchPrayerTimes,
   getCacheStatus,
   refreshPrayerDataCache,
   maybeFullSyncOnWifi,
+  purgeCachesNear,
 } from '../prayer/prayerStorage';
+import { getPositionStaged } from '../utils/getPosition';
+import { recordLocationFix } from '../prayer/cityRegistry';
+import { reverseLocality, type ReverseLocality } from '../geocoding/nominatim';
 import { computeLocalAdhanTimes } from '../providers/localAdhan';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
@@ -35,6 +39,10 @@ export type PrayerDayState =
       phase: 'ready';
       latitude: number;
       longitude: number;
+      /** Reverse-geocoded city name for the active location (automatic mode).
+       *  Undefined in manual mode or before geocoding resolves. Surfaced on
+       *  the location chip so automatic mode names the city. */
+      cityName?: string;
       /** Convenience alias for week[0]. */
       today: TimingsMap;
       /** Convenience alias for week[1] (may be undefined). */
@@ -84,12 +92,39 @@ function applyOffsetsToWeek(
 export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
   const [state, setState] = useState<PrayerDayState>({ phase: 'idle' });
   const loadGenerationRef = useRef(0);
+  // City-registry wiring (automatic mode). Track the last coords we
+  // reverse-geocoded so we only hit the network when the device has actually
+  // moved a meaningful distance, and the city we last loaded times for so a
+  // second fix in the same city is a no-op.
+  const lastGeocodeRef = useRef<{
+    lat: number;
+    lng: number;
+    locality: ReverseLocality | null;
+  } | null>(null);
+  const loadedCityIdRef = useRef<string | null>(null);
+  // Latest auto-mode load OUTPUTS (last-fetched coords + resolved city name).
+  // Read through a ref — NOT the requestAndLoad dependency array — so that a
+  // completed load persisting these back into settings does NOT re-trigger the
+  // whole GPS cycle. That feedback loop used to race an in-flight fetch for a
+  // newly-entered city against a stale re-run, leaving the screen on the old
+  // city's times while the label had already switched (Sweden→abroad bug).
+  const autoRef = useRef<{
+    lat: number | null | undefined;
+    lng: number | null | undefined;
+    label: string | undefined;
+  }>({ lat: undefined, lng: undefined, label: undefined });
+  autoRef.current = {
+    lat: settings.lastFetchedLatitude,
+    lng: settings.lastFetchedLongitude,
+    label: settings.autoLocationLabel,
+  };
 
   const loadTimes = useCallback(
     async (
       latitude: number,
       longitude: number,
       isBackgroundRefresh: boolean = false,
+      label?: string,
     ) => {
       const gen = ++loadGenerationRef.current;
       const coords = { latitude, longitude };
@@ -170,15 +205,18 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
 
         if (gen !== loadGenerationRef.current) return;
 
-        setState({
+        setState(prev => ({
           phase: 'ready',
           latitude,
           longitude,
+          // Preserve a previously-resolved city name if this refresh didn't
+          // carry one (e.g. the instant cached re-render before geocoding).
+          cityName: label ?? (prev.phase === 'ready' ? prev.cityName : undefined),
           today: offsettedWeek[0],
           tomorrow: offsettedWeek[1],
           week: offsettedWeek,
           backgroundRefreshing: needsCacheFill,
-        });
+        }));
 
         if (needsCacheFill) {
           // Fill up to 12 months ahead in the background; clear the indicator
@@ -239,16 +277,18 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             applyOffsetsToWeek(localWeek, settings.prayerOffsets),
           );
 
-          setState({
+          setState(prev => ({
             phase: 'ready',
             latitude,
             longitude,
+            cityName:
+              label ?? (prev.phase === 'ready' ? prev.cityName : undefined),
             today: offsettedLocalWeek[0],
             tomorrow: offsettedLocalWeek[1],
             week: offsettedLocalWeek,
             usingLocalFallback: true,
             backgroundRefreshing: false,
-          });
+          }));
         } catch {
           // Local calculation also failed (invalid coordinates?)
           if (gen !== loadGenerationRef.current) return;
@@ -309,25 +349,30 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       //  4. Whether or not position changed, always check cache staleness and
       //     fill gaps in the background, signalling via backgroundRefreshing.
 
-      const cachedLat = settings.lastFetchedLatitude;
-      const cachedLng = settings.lastFetchedLongitude;
+      // Read the last-known coords/label from the ref (see autoRef above) so
+      // this callback is stable across loads and doesn't re-fire the GPS cycle.
+      const cachedLat = autoRef.current.lat;
+      const cachedLng = autoRef.current.lng;
+      const cachedLabel = autoRef.current.label;
       const hasCached = cachedLat != null && cachedLng != null;
 
       if (hasCached) {
         // Instantly render last-known times while GPS resolves in background.
-        // isBackgroundRefresh=true prevents the 'loading' flash.
-        loadTimes(cachedLat, cachedLng, true).catch(() => {});
+        // isBackgroundRefresh=true prevents the 'loading' flash. Seed the chip
+        // with the previously-resolved city name so it doesn't flash coords.
+        loadTimes(cachedLat, cachedLng, true, cachedLabel).catch(() => {});
       } else if (!isBackgroundRefresh) {
         setState({ phase: 'loading' });
       }
 
       // Request Android location permission. Because we already have data on
       // screen (if hasCached), the permission dialog doesn't block a blank UI.
+      // Accepts an "Approximate" (COARSE-only) grant — that's enough for
+      // prayer times and is the Wi-Fi positioning the user wants when GPS is
+      // unavailable, so a coarse grant must NOT be treated as a refusal.
       if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        const perm = await requestAndroidLocationPermission();
+        if (perm !== 'granted') {
           if (!hasCached) {
             // No previous location AND no permission → ask the user to set
             // a manual location instead of stranding them on a dead-end
@@ -338,15 +383,17 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         }
       }
 
-      // Resolve fresh GPS in the background.  A 25 s watchdog fires if the OS
-      // never responds (seen on certain Android ROMs and iOS edge cases).
+      // Resolve fresh position in the background using the staged locator
+      // (fast Wi-Fi/cell coarse fix first, precise GPS refine after). A 25 s
+      // watchdog fires only if NOTHING lands (seen on certain Android ROMs and
+      // iOS edge cases).
+      let gotAnyFix = false;
       let watchdogFired = false;
       const watchdog = setTimeout(() => {
         watchdogFired = true;
-        if (!hasCached && !isBackgroundRefresh) {
-          // No previous coords + GPS hung → prompt for manual entry rather
-          // than computing prayer times against bogus on-device defaults
-          // (#125).
+        if (!gotAnyFix && !hasCached && !isBackgroundRefresh) {
+          // No previous coords + no fix at all → prompt for manual entry
+          // rather than computing prayer times against bogus defaults (#125).
           setState({
             phase: 'manual_required',
             message: 'Location request timed out',
@@ -354,40 +401,97 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         }
       }, 25_000);
 
-      Geolocation.getCurrentPosition(
-        pos => {
-          clearTimeout(watchdog);
-          if (watchdogFired) return;
-
-          const { latitude: newLat, longitude: newLng } = pos.coords;
-
-          if (coordsChangedSignificantly(newLat, newLng, cachedLat, cachedLng)) {
-            // New location — fetch fresh data and swap atomically when ready.
-            // The screen already shows the old cached data with backgroundRefreshing.
-            loadTimes(newLat, newLng, true).catch(() => {});
+      // Turn a raw fix into the right city + anchor, then (if the city
+      // changed) fetch its times against the STABLE anchor coordinate so
+      // moving within a city never re-downloads. Serialised so a fast coarse
+      // fix and a slightly-later fine fix don't interleave their registry
+      // writes.
+      let onFixChain: Promise<void> = Promise.resolve();
+      const handleFix = async (fixLat: number, fixLng: number) => {
+        // Throttle reverse-geocoding: only re-geocode when we've moved
+        // meaningfully (~1 km) from the last geocoded point; otherwise reuse
+        // the cached locality (or null offline).
+        let locality: ReverseLocality | null = null;
+        const prev = lastGeocodeRef.current;
+        if (
+          prev &&
+          prev.locality &&
+          !coordsChangedSignificantly(fixLat, fixLng, prev.lat, prev.lng)
+        ) {
+          // Reuse only a SUCCESSFUL nearby result. We never cache a failure,
+          // so a transient geocoder outage self-heals on the next fix instead
+          // of sticking to coords until the device moves >1 km.
+          locality = prev.locality;
+        } else {
+          try {
+            locality = await reverseLocality(fixLat, fixLng);
+          } catch {
+            locality = null; // offline / geocoder down → registry falls back
           }
-          // If coords haven't changed, loadTimes(cachedLat, cachedLng, true)
-          // already ran above and handles cache-staleness proactively.
+          if (locality) {
+            lastGeocodeRef.current = { lat: fixLat, lng: fixLng, locality };
+          }
+        }
+
+        const summary = await recordLocationFix(
+          fixLat,
+          fixLng,
+          locality,
+          new Date(),
+        );
+
+        // Purge the prayer cache of any city whose retention window lapsed.
+        for (const a of summary.evictedAnchors) {
+          purgeCachesNear(a.latitude, a.longitude).catch(() => {});
+        }
+
+        // Only (re)fetch when the ACTIVE city changed since the last load —
+        // this is what makes intra-city movement free.
+        const cityChanged = loadedCityIdRef.current !== summary.cityId;
+        if (cityChanged) {
+          loadedCityIdRef.current = summary.cityId;
+          loadTimes(
+            summary.anchorLat,
+            summary.anchorLng,
+            true,
+            summary.displayName,
+          ).catch(() => {});
+        } else if (summary.displayName) {
+          // Same city, but we may now have a nicer name than the seed — patch
+          // it onto the ready state without a re-fetch.
+          setState(cur =>
+            cur.phase === 'ready'
+              ? { ...cur, cityName: summary.displayName }
+              : cur,
+          );
+        }
+      };
+
+      getPositionStaged(
+        fix => {
+          if (watchdogFired) return;
+          // A fix landed → the watchdog no longer needs to fire.
+          gotAnyFix = true;
+          clearTimeout(watchdog);
+          onFixChain = onFixChain.then(() =>
+            handleFix(fix.latitude, fix.longitude).catch(() => {}),
+          );
         },
         err => {
           clearTimeout(watchdog);
-          if (watchdogFired) return;
+          if (watchdogFired || gotAnyFix) return;
           if (!hasCached && !isBackgroundRefresh) {
-            // GPS failed AND we have no previously-saved location. The user
-            // must manually set a city or coordinates — bouncing them to
-            // LocationSetup is friendlier than showing "Could not get
-            // location" with only a "Try again" button (#125).
+            // No fix at all AND no previously-saved location → send the user
+            // to manual entry rather than stranding them (#125).
             setState({
               phase: 'manual_required',
               message: err.message || 'Could not get location',
             });
           }
-          // GPS failed but cached data is already on screen — stay on it.
-          // The user's previous location keeps working; we explicitly do
-          // NOT switch to on-device calculation against fresh GPS-less
+          // Fix failed but cached data is already on screen — stay on it. We
+          // explicitly do NOT compute on-device times against GPS-less
           // coordinates (#125).
         },
-        { enableHighAccuracy: true, timeout: 20_000, maximumAge: 60_000 },
       );
     };
     run().catch(() => {});
@@ -396,8 +500,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     settings.locationMode,
     settings.manualLatitude,
     settings.manualLongitude,
-    settings.lastFetchedLatitude,
-    settings.lastFetchedLongitude,
+    // NOTE: lastFetchedLatitude/Longitude/autoLocationLabel are intentionally
+    // read via autoRef (not deps) so a completed load doesn't re-fire the GPS
+    // cycle and race itself. Manual coords + mode stay as deps because a real
+    // user change there SHOULD re-resolve.
   ]);
 
   // WiFi-triggered background sync: silently top up the 12-month cache

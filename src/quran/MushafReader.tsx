@@ -203,7 +203,12 @@ export function MushafReader({
     if (downloadStatus === 'downloading') return;
     setDownloadStatus('downloading');
     setProgress({ done: 0, total: MUSHAF_TOTAL_PAGES, failed: 0 });
-    const handle = downloadMushafAssets({ onProgress: setProgress });
+    // Concurrency 8 (was 3): the 604-page first-time download is the slow
+    // part of the Quran reader. GitHub's asset CDN serves these over HTTP/2,
+    // so ~8 parallel workers roughly triples throughput; the per-page retry +
+    // RN-fetch fallback in fetchPage() already absorbs the occasional HTTP/2
+    // stream reset that higher concurrency provokes.
+    const handle = downloadMushafAssets({ concurrency: 8, onProgress: setProgress });
     downloadHandleRef.current = handle;
     void handle.promise.then(complete => {
       downloadHandleRef.current = null;

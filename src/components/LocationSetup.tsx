@@ -1,9 +1,8 @@
-import Geolocation from '@react-native-community/geolocation';
+import { getPositionStaged } from '../utils/getPosition';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  PermissionsAndroid,
   Platform,
   Pressable,
   ScrollView,
@@ -13,6 +12,7 @@ import {
   View,
   type ColorValue,
 } from 'react-native';
+import { requestAndroidLocationPermission } from '../utils/locationPermission';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { GeocodedPlace } from '../geocoding/nominatim';
 import { inputChromeStyle } from '../theme/chrome';
@@ -90,17 +90,20 @@ export function LocationSetup({ palette }: Props) {
     const run = async () => {
       try {
         if (Platform.OS === 'android') {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          );
-          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          // Accept an "Approximate" (coarse) grant too — enough for prayer
+          // times and works over Wi-Fi when GPS is unavailable.
+          const perm = await requestAndroidLocationPermission();
+          if (perm !== 'granted') {
             setGpsError(t('errors.gpsPermission'));
             setGpsBusy(false);
             return;
           }
         }
-        Geolocation.getCurrentPosition(
-          pos => {
+        // Staged locator: a fast Wi-Fi/cell fix first (works indoors, where
+        // people usually set the app up), refined by GPS. onFix may fire
+        // twice — the second (precise) fix just updates the saved coords.
+        getPositionStaged(
+          fix => {
             // Persist the coords as lastFetched so usePrayerDay's effect
             // re-fires even when locationMode/onboardingComplete are
             // already set (e.g., re-entering after a manual_required
@@ -110,8 +113,8 @@ export function LocationSetup({ palette }: Props) {
               locationMode: 'automatic',
               locationOnboardingComplete: true,
               manualLocationLabel: undefined,
-              lastFetchedLatitude: pos.coords.latitude,
-              lastFetchedLongitude: pos.coords.longitude,
+              lastFetchedLatitude: fix.latitude,
+              lastFetchedLongitude: fix.longitude,
             });
             setGpsBusy(false);
           },
@@ -119,7 +122,6 @@ export function LocationSetup({ palette }: Props) {
             setGpsError(err.message || t('errors.gpsRead'));
             setGpsBusy(false);
           },
-          { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 },
         );
       } catch (e) {
         setGpsError(

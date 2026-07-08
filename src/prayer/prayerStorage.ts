@@ -585,6 +585,51 @@ export async function refreshPrayerDataCache(
   await saveV2(next, k);
 }
 
+/**
+ * Drop every cache slot whose coordinates are within `radiusDeg` of the given
+ * point — used by the city registry to evict a city's prayer-times cache when
+ * its retention window lapses (a pass-through city a day after you left, a
+ * city you'd settled in a week after). Best-effort and self-contained: a
+ * failure here never affects the times currently on screen. No-op if nothing
+ * matches. Returns the number of slots removed.
+ *
+ * `radiusDeg` defaults to 0.05° (~5.5 km) so it catches every 2-decimal
+ * cacheKey slot that belongs to the same city anchor without touching a
+ * neighbouring city.
+ */
+export async function purgeCachesNear(
+  latitude: number,
+  longitude: number,
+  radiusDeg: number = 0.05,
+): Promise<number> {
+  let removed = 0;
+  try {
+    await withTimeout(
+      (async () => {
+        const v2 = await loadV2();
+        const caches = { ...v2.caches };
+        for (const [key, entry] of Object.entries(v2.caches)) {
+          if (
+            Math.abs(entry.latitude - latitude) <= radiusDeg &&
+            Math.abs(entry.longitude - longitude) <= radiusDeg
+          ) {
+            delete caches[key];
+            removed += 1;
+          }
+        }
+        if (removed > 0) {
+          await saveV2Once({ caches });
+        }
+      })(),
+      MUTEX_TIMEOUT_MS,
+      'purge near',
+    );
+  } catch (e) {
+    console.warn('prayerStorage: purgeCachesNear failed', e);
+  }
+  return removed;
+}
+
 /** Minimum gap between automatic full 12-month syncs (1 hour). */
 const FULL_SYNC_COOLDOWN_MS = 60 * 60 * 1000;
 const _lastFullSyncAttemptByKey = new Map<string, number>();

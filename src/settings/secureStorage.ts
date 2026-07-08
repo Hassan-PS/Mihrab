@@ -57,6 +57,8 @@ export type SecureSettings = {
   /** Last GPS-resolved coordinates (used for offline + month view). */
   lastFetchedLatitude?: number;
   lastFetchedLongitude?: number;
+  /** Reverse-geocoded city name for the current automatic location. */
+  autoLocationLabel?: string;
   /** User-saved location presets — task #18. PII (coordinates), encrypted at rest. */
   locationPresets?: LocationPreset[];
 };
@@ -70,6 +72,7 @@ export const SECURE_FIELD_NAMES: ReadonlyArray<keyof SecureSettings> = [
   'manualLocationLabel',
   'lastFetchedLatitude',
   'lastFetchedLongitude',
+  'autoLocationLabel',
   'locationPresets',
 ];
 
@@ -163,6 +166,8 @@ function sanitize(input: Partial<SecureSettings>): SecureSettings {
     out.lastFetchedLatitude = input.lastFetchedLatitude;
   if (typeof input.lastFetchedLongitude === 'number')
     out.lastFetchedLongitude = input.lastFetchedLongitude;
+  if (typeof input.autoLocationLabel === 'string')
+    out.autoLocationLabel = input.autoLocationLabel;
   if (input.locationPresets !== undefined) {
     out.locationPresets = coerceLocationPresets(input.locationPresets);
   }

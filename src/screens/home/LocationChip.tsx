@@ -83,11 +83,36 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
     [presets, settings.activeLocationPresetId],
   );
 
+  // Automatic mode is anything that isn't explicit manual entry (GPS).
+  const isAuto = settings.locationMode !== 'manual';
+
   const chipLabel = useMemo(() => {
+    if (isAuto) {
+      // Prefer the reverse-geocoded city name; fall back to last-known coords,
+      // then to a "locating…" placeholder before the first fix lands.
+      if (settings.autoLocationLabel) return settings.autoLocationLabel;
+      if (
+        settings.lastFetchedLatitude != null &&
+        settings.lastFetchedLongitude != null
+      ) {
+        return `${settings.lastFetchedLatitude.toFixed(2)}°, ${settings.lastFetchedLongitude.toFixed(2)}°`;
+      }
+      return t('home.locating');
+    }
     if (activePreset) return activePreset.name;
     if (settings.manualLocationLabel) return settings.manualLocationLabel;
     return `${settings.manualLatitude.toFixed(2)}°, ${settings.manualLongitude.toFixed(2)}°`;
-  }, [activePreset, settings.manualLocationLabel, settings.manualLatitude, settings.manualLongitude]);
+  }, [
+    isAuto,
+    settings.autoLocationLabel,
+    settings.lastFetchedLatitude,
+    settings.lastFetchedLongitude,
+    activePreset,
+    settings.manualLocationLabel,
+    settings.manualLatitude,
+    settings.manualLongitude,
+    t,
+  ]);
 
   const onClose = useCallback(() => setOpen(false), []);
 
@@ -105,6 +130,9 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
       const preset = findPreset(presets, id);
       if (!preset) return;
       updateSettings({
+        // Picking a saved location switches to manual mode — so the chip
+        // works as a real switcher even when currently on automatic.
+        locationMode: 'manual',
         manualLatitude: preset.latitude,
         manualLongitude: preset.longitude,
         manualLocationLabel: preset.label,
@@ -115,13 +143,9 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
     [presets, updateSettings],
   );
 
-  // Show whenever a manual location is set — even with no saved presets —
-  // so the header always surfaces the current location next to the gear
-  // (matching iOS). GPS/automatic mode has no static "selected location"
-  // label (only coords), so the chip stays hidden there.
-  if (settings.locationMode !== 'manual') {
-    return null;
-  }
+  // The chip always renders now — in manual mode it shows the saved
+  // location, in automatic mode the reverse-geocoded city + an "Auto" badge
+  // so the current location is always visible next to the gear.
 
   return (
     <>
@@ -157,20 +181,45 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
           // accessibilityHint above for screen-reader users.
           <View style={styles.headerPinRow}>
             <PinIcon color={palette.accentSolid} size={20} />
+            {/* City name + an inline "· Auto" suffix in the accent colour.
+                Nested Text (rather than a sibling pill) is used deliberately:
+                iOS's native header wraps headerRight in a glass capsule that
+                drops extra flex children, so a separate badge View vanished
+                there. An inline nested Text always renders. */}
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
               style={[styles.headerPinLabel, { color: palette.text }]}>
               {chipLabel}
+              {isAuto ? (
+                <Text style={{ color: palette.accentSolid }}>
+                  {'  '}
+                  {t('home.autoBadge')}
+                </Text>
+              ) : null}
             </Text>
           </View>
         ) : (
           <>
-            <Text
-              numberOfLines={1}
-              style={[typeStyle('callout'), styles.chipText, { color: palette.text }]}>
-              {chipLabel}
-            </Text>
+            <View style={styles.chipLabelRow}>
+              <Text
+                numberOfLines={1}
+                style={[typeStyle('callout'), styles.chipText, { color: palette.text }]}>
+                {chipLabel}
+              </Text>
+              {isAuto ? (
+                <Text
+                  style={[
+                    styles.autoBadge,
+                    {
+                      color: palette.accent,
+                      backgroundColor: palette.accentBg,
+                    },
+                  ]}>
+                  {t('home.autoBadge')}
+                </Text>
+              ) : null}
+            </View>
             <Text style={[typeStyle('caption'), { color: palette.muted }]}>
               {t('home.switchLocation')}
             </Text>
@@ -276,17 +325,40 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    maxWidth: 160,
+    // Roomier than before so the city name AND the "Auto" badge both fit; the
+    // label truncates (numberOfLines=1) before the badge gets squeezed out.
+    maxWidth: 210,
   },
   headerPinRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexShrink: 1,
   },
   headerPinLabel: {
     fontSize: 14,
     fontWeight: '600',
     flexShrink: 1,
+  },
+  chipLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 1,
+  },
+  // Small "Auto" pill shown when the app is on automatic (GPS) location.
+  // flexShrink:0 so it never gets squeezed out — the city label truncates
+  // instead (seen clipped on iOS where the name filled the whole chip).
+  autoBadge: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: RADIUS.sm,
+    overflow: 'hidden',
+    flexShrink: 0,
   },
   chip: {
     flexDirection: 'row',

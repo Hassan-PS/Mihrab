@@ -55,6 +55,8 @@
     "tomorrow": "আগামীকাল",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "অবস্থান পরিবর্তন",
+    "autoBadge": "অটো",
+    "locating": "অবস্থান খোঁজা হচ্ছে…",
     "backToToday": "আজে ফিরুন",
     "updatedAt": "আপডেট {{when}}",
     "daysStored": "{{count}} দিনের ডেটা সংরক্ষিত",

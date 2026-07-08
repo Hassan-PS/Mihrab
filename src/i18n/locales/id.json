@@ -55,6 +55,8 @@
     "tomorrow": "Besok",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Ganti lokasi",
+    "autoBadge": "Auto",
+    "locating": "Mencari lokasi…",
     "backToToday": "Kembali ke hari ini",
     "updatedAt": "Diperbarui {{when}}",
     "daysStored": "{{count}} hari tersimpan",

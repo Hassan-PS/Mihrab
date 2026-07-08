@@ -55,6 +55,8 @@
     "tomorrow": "Yarın",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "Konumu değiştir",
+    "autoBadge": "Oto",
+    "locating": "Konum bulunuyor…",
     "backToToday": "Bugüne dön",
     "updatedAt": "Güncellendi: {{when}}",
     "daysStored": "{{count}} gün kayıtlı",

@@ -418,26 +418,41 @@ export function HomeScreen() {
     i18n.language,
   ]);
 
-  // Persist last-fetched coords so MonthScreen and offline use can fall back to them.
+  // Persist last-fetched coords so MonthScreen and offline use can fall back to
+  // them, plus the reverse-geocoded city name so the location chip can name the
+  // automatic location (and keep naming it across restarts).
   const readyLat = state.phase === 'ready' ? state.latitude : undefined;
   const readyLng = state.phase === 'ready' ? state.longitude : undefined;
+  const readyCity = state.phase === 'ready' ? state.cityName : undefined;
   useEffect(() => {
     if (readyLat == null || readyLng == null) return;
-    if (
+    const coordsSame =
       settings.lastFetchedLatitude === readyLat &&
-      settings.lastFetchedLongitude === readyLng
-    ) {
-      return;
-    }
-    updateSettings({
+      settings.lastFetchedLongitude === readyLng;
+    // Only track the auto city name in automatic mode; manual mode uses
+    // manualLocationLabel instead.
+    const nextCity =
+      settings.locationMode === 'automatic' ? readyCity : undefined;
+    const citySame = settings.autoLocationLabel === nextCity;
+    if (coordsSame && citySame) return;
+    const patch: {
+      lastFetchedLatitude: number;
+      lastFetchedLongitude: number;
+      autoLocationLabel?: string;
+    } = {
       lastFetchedLatitude: readyLat,
       lastFetchedLongitude: readyLng,
-    });
+    };
+    if (!citySame) patch.autoLocationLabel = nextCity;
+    updateSettings(patch);
   }, [
     readyLat,
     readyLng,
+    readyCity,
+    settings.locationMode,
     settings.lastFetchedLatitude,
     settings.lastFetchedLongitude,
+    settings.autoLocationLabel,
     updateSettings,
   ]);
 

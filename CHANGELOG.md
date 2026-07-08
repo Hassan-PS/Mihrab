@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.34] — 2026-07-08
+
+### Fixed
+- **Prayer times now follow you across borders reliably.** Fixed a feedback loop where a completed location fetch re-triggered the whole GPS cycle and raced itself, which could leave the screen showing the previous city's times after you'd moved (e.g. travelling Sweden→abroad updated the city name but not the times). The displayed times, city name, and data source now switch together. Verified Stockholm→London→Stockholm: the Swedish source (Islamiska Förbundet) and the global source (AlAdhan) swap correctly, and returning to a recent city reuses its cached week with no re-download.
+- **"Approximate location" (Android 12+) now works.** If you grant *Approximate* rather than *Precise* location, automatic mode previously treated it as denied. It now accepts a coarse grant — which is plenty for prayer times and is exactly the Wi-Fi positioning used when GPS is unavailable.
+- **Defence-in-depth for the Swedish source.** Coordinates far from any covered Swedish city (bounding-box edge cases like Åland) now miss the prepared dataset and fall through to the live/computed sources instead of being pinned to a distant Swedish city.
+
+### Changed
+- **More reliable automatic location.** The app now asks the OS for a fast Wi-Fi/cell fix first (works indoors, resolves in ~1 s, and on the Play build taps the network locator) and refines it with GPS — instead of forcing a GPS lock that often never resolved indoors. The Android location provider is pinned to the platform `LocationManager` so the Wi-Fi/network path is used and the F-Droid build stays free of Google Play Services. Cross-flavor safe: on de-Googled builds it still falls through to GPS.
+- **Resourceful handling of location changes.** Each city gets a stable anchor coordinate, so moving *within* a city no longer re-downloads the same prayer times. When the city actually changes, the new city's times are fetched while the previous city stays cached for a week in case you return; cities you only pass through (active less than a day) are dropped a day after you leave, so travelling through many cities doesn't hoard data.
+- **Location chip shows the current city in both modes.** In automatic mode it now names the reverse-geocoded city (e.g. "Göteborg") with an "Auto" badge, not just coordinates; manual mode still shows the saved location.
+- **Faster first-time Quran (mushaf) download.** The 604 page images now download 8-at-a-time (was 3), roughly tripling throughput, with the existing per-page retry/fallback intact.
+
 ## [2.7.33] — 2026-07-07
 
 ### Fixed

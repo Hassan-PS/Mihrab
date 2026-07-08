@@ -55,6 +55,8 @@
     "tomorrow": "کل",
     "savedLocationLabel": "{{name}}",
     "switchLocation": "مقام تبدیل کریں",
+    "autoBadge": "خودکار",
+    "locating": "مقام تلاش…",
     "backToToday": "آج پر واپس",
     "updatedAt": "اپ ڈیٹ {{when}}",
     "daysStored": "{{count}} دن محفوظ",
