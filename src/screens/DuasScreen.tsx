@@ -8,6 +8,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
+import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
   DUA_CATEGORIES,
@@ -116,6 +117,7 @@ export function DuasScreen() {
         style={styles.listScroll}
         contentContainerStyle={styles.list}
         contentInsetAdjustmentBehavior="automatic">
+        <CenteredColumn>
         {duasByCategory(selected).map(dua => (
           <View
             key={dua.id}
@@ -214,6 +216,7 @@ export function DuasScreen() {
             </View>
           </View>
         ))}
+        </CenteredColumn>
       </ScrollView>
     </View>
   );
