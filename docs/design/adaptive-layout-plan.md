@@ -33,6 +33,31 @@ Current state: `breakpoints.ts` exists; `useBreakpoint()` is imported+called (bu
 result **discarded**) in Duas/Tasbih/Fasting/Settings/Journal/MonthTimes; `contentColumnWidth`
 / `MAX_CONTENT_WIDTH` have **no consumers**. So: foundation stubbed, zero screens reflow yet.
 
+### ⚠️ Critical prerequisite (fixed) — device family
+
+Before ANY of this is visible on iPad/Mac: the **main app target had no
+`TARGETED_DEVICE_FAMILY`**, so iOS ran the app at **375 pt iPhone-compat** even on
+iPad — every responsive layout silently stayed on the `compact` path. Fixed by adding
+`TARGETED_DEVICE_FAMILY = "1,2"` to the app target (Debug + Release); verified the built
+app now reports `UIDeviceFamily [1,2]` and renders at native iPad width. Also note the
+**iPad Air 11" simulator reports a 663 pt portrait window** (below the 700 `regular`
+threshold → `compact`), so `regular`/`expanded` layouts only engage on a **larger iPad
+(Pro 13" = 1024 pt portrait) or in landscape**. Test wide layouts there.
+
+### Progress log
+
+- **Phase 0 — DONE & verified.** `breakpoints.ts` extended (`useResponsive`, `useColumns`,
+  `columnsFor`, `isMacCatalyst`); `CenteredColumn` + `AdaptiveGrid` built; unit tests green.
+- **Phase 1 — partial.** Home / Settings / Fasting / Journal content centered;
+  `QuickActionsGrid` → `AdaptiveGrid` (verified 6-column reflow on iPad). Remaining:
+  Duas, Tasbih, Month, Quran index, secondary screens; modals → `ResponsiveModal`.
+- **Phase 2 — DONE & verified.** Home two-column dashboard on `expanded` (fixed "today"
+  main column + flexible tools sidebar); collapses to single column below. Verified the
+  2-column layout renders on the iPad (forced-low breakpoint).
+- **Catalyst groundwork — DONE.** iPad family + all iPad orientations + `UIRequiresFullScreen NO`.
+- **Phases 3–6 — remaining.** Mushaf dual-page (Phase 3), master-detail screens (Phase 4),
+  nav shell (Phase 5), widget port + feature-gating + signing/distribution (Phase 6).
+
 ---
 
 ## 1. Foundations (build first — Phase 0)
