@@ -18,10 +18,7 @@ import {
   TasbihIcon,
 } from '../../theme/icons';
 import { RADIUS, SPACING } from '../../theme/tokens';
-import {
-  CalendarIcon,
-  CompassIcon,
-} from '../../components/HeaderToolbarIcons';
+import { CalendarIcon } from '../../components/HeaderToolbarIcons';
 import type { RootStackParamList } from '../../navigation/types';
 
 /**
@@ -44,7 +41,9 @@ type Tool = {
 };
 
 const TOOLS: Tool[] = [
-  { id: 'Compass', labelKey: 'nav.compass', Icon: CompassIcon },
+  // Qibla compass removed for this version (no magnetometer on Mac; the
+  // feature is hidden from the tools grid — the CompassScreen route stays
+  // registered but is unreachable from the UI).
   { id: 'Tasbih', labelKey: 'nav.tasbih', Icon: TasbihIcon },
   // Two cupped hands raised in dua — distinct from the book icon to
   // avoid visual collision with the Quran tile (#129).

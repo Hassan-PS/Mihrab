@@ -55,8 +55,13 @@ threshold → `compact`), so `regular`/`expanded` layouts only engage on a **lar
   main column + flexible tools sidebar); collapses to single column below. Verified the
   2-column layout renders on the iPad (forced-low breakpoint).
 - **Catalyst groundwork — DONE.** iPad family + all iPad orientations + `UIRequiresFullScreen NO`.
-- **Phases 3–6 — remaining.** Mushaf dual-page (Phase 3), master-detail screens (Phase 4),
-  nav shell (Phase 5), widget port + feature-gating + signing/distribution (Phase 6).
+- **Phase 3 — DROPPED (product decision).** The mushaf stays **single-page in every
+  orientation**, including landscape/horizontal. No dual-page spread.
+- **Qibla — REMOVED (product decision).** The Qibla compass is hidden from the tools grid
+  for this version (no magnetometer on Mac). The `CompassScreen` route stays registered but
+  unreachable; no compass entry point remains in the UI.
+- **Phases 4–6 — remaining.** Master-detail screens (Phase 4), nav shell (Phase 5),
+  widget port + feature-gating + signing/distribution (Phase 6).
 
 ---
 
