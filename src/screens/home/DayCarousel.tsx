@@ -84,15 +84,17 @@ function DayCarouselImpl({
 
   return (
     <>
+      {/* Cap the carousel width on a WRAPPER, not on the ScrollView itself.
+          `pagingEnabled` snaps by the ScrollView's frame width; if the frame is
+          wider than a card (iPad/Mac, once the content column is capped narrower
+          than the screen) the snap lands mid-card and the next day peeks in.
+          The ScrollView fills this fixed-width wrapper (the canonical, reliable
+          paging pattern) so the frame equals cardWidth AND horizontal swiping
+          keeps working — setting width/alignSelf directly on the ScrollView can
+          interfere with its pan gesture in some RN layouts. */}
+      <View style={{ width: cardWidth, alignSelf: 'center', overflow: 'hidden' }}>
       <ScrollView
         ref={scrollRef}
-        // Constrain the viewport to exactly one card. `pagingEnabled` snaps by
-        // the ScrollView's frame width, so if the frame is wider than a card
-        // (which happens on iPad/Mac once the content column is capped narrower
-        // than the screen) the snap lands mid-card and the neighbouring day
-        // peeks in / the current day is clipped. Pinning the frame to cardWidth
-        // (centered) keeps one clean day per page at every window size.
-        style={{ width: cardWidth, alignSelf: 'center' }}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -126,6 +128,7 @@ function DayCarouselImpl({
           />
         ))}
       </ScrollView>
+      </View>
 
       {week.length > 1 && (
         <View style={styles.dotRow} accessibilityElementsHidden>
