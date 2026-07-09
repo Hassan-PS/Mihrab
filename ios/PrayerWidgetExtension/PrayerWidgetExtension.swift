@@ -698,7 +698,17 @@ struct PrayerTimesHomeWidget: Widget {
 
   /// iOS 16+ adds the Lock Screen accessory families. Fall back to the
   /// home-screen-only set on older deployments.
+  ///
+  /// Mac Catalyst: the Lock Screen accessory families (`accessoryInline`,
+  /// `accessoryCircular`, `accessoryRectangular`) do not exist on macOS — the
+  /// Mac has no Lock Screen. WidgetKit still surfaces the `system*` families in
+  /// Notification Center / on the desktop, so we compile only those into the
+  /// Catalyst binary. The guard is compile-time, so the iOS/iPadOS build keeps
+  /// the full accessory set unchanged.
   private func supportedFamilies() -> [WidgetFamily] {
+    #if targetEnvironment(macCatalyst)
+    return [.systemSmall, .systemMedium, .systemLarge]
+    #else
     if #available(iOSApplicationExtension 16.0, *) {
       return [
         .systemSmall, .systemMedium, .systemLarge,
@@ -706,6 +716,7 @@ struct PrayerTimesHomeWidget: Widget {
       ]
     }
     return [.systemSmall, .systemMedium, .systemLarge]
+    #endif
   }
 }
 
