@@ -15,6 +15,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { CenteredColumn } from '../responsive/CenteredColumn';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -142,6 +143,7 @@ export function QuranDownloadsScreen() {
       style={{ flex: 1, backgroundColor: palette.bg }}
       contentContainerStyle={styles.list}
       contentInsetAdjustmentBehavior="automatic">
+      <CenteredColumn>
       <Text style={[styles.total, { color: palette.muted }]}>
         {loading
           ? t('quran.loading', 'Loading…')
@@ -203,6 +205,7 @@ export function QuranDownloadsScreen() {
           </Text>
         </View>
       ) : null}
+      </CenteredColumn>
     </ScrollView>
   );
 }

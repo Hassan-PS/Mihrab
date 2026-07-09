@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -126,6 +127,7 @@ export function BackupScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic">
+      <CenteredColumn>
       <Text style={[typeStyle('caption'), styles.section, { color: palette.muted }]}>
         {t('backup.exportSection')}
       </Text>
@@ -211,6 +213,7 @@ export function BackupScreen() {
       <Text style={[typeStyle('footnote'), { color: palette.muted, textAlign: 'center' }]}>
         {t('backup.privacyNote')}
       </Text>
+      </CenteredColumn>
     </ScrollView>
   );
 }

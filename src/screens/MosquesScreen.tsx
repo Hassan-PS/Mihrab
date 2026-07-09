@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useTranslation } from 'react-i18next';
 import { useLocationSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -112,6 +113,7 @@ export function MosquesScreen() {
       style={[styles.root, { backgroundColor: palette.bg }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic">
+      <CenteredColumn>
       <View
         style={[
           styles.card,
@@ -141,6 +143,7 @@ export function MosquesScreen() {
           </Text>
         </Pressable>
       </View>
+      </CenteredColumn>
     </ScrollView>
   );
 }
