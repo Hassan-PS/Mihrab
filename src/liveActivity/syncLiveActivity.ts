@@ -14,6 +14,7 @@
  */
 
 import { Platform } from 'react-native';
+import { isMacCatalyst } from '../responsive/breakpoints';
 import i18n from '../i18n';
 import type { TimingsMap } from '../types/prayer';
 import { NEXT_SALAH_ORDER } from '../types/prayer';
@@ -184,6 +185,11 @@ async function syncLiveActivityImpl(args: {
   /** Android only: which enhanced Live Activity visual style to render. */
   design?: 'timeline' | 'countdown' | 'markers';
 }): Promise<void> {
+  // Mac Catalyst has no ActivityKit Live Activity surface (no Lock Screen /
+  // Dynamic Island), so the whole feature no-ops there. Gated here rather than
+  // at every call site so the HomeScreen sync effect stays platform-agnostic.
+  if (isMacCatalyst) return;
+
   const now = args.now ?? new Date();
 
   // Off → ensure we cancel any pre-existing pinned activity.

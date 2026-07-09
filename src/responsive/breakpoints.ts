@@ -115,5 +115,12 @@ export function useColumns(
  */
 export const isMacCatalyst: boolean =
   Platform.OS === 'ios' &&
-  // RN exposes this on newer versions; guarded so older typings don't break.
-  ((Platform as unknown as { isMacCatalyst?: boolean }).isMacCatalyst ?? false);
+  // Two detection paths, either is sufficient:
+  //  1. RN's `Platform.isMacCatalyst` (newer RN; guarded so old typings don't
+  //     break the build).
+  //  2. iOS `interfaceIdiom` reported as 'mac' — set by UIKit when the binary
+  //     runs as a Mac Catalyst app. This works WITHOUT a custom native module,
+  //     so feature-gating is correct the moment a Catalyst target is built.
+  (((Platform as unknown as { isMacCatalyst?: boolean }).isMacCatalyst ?? false) ||
+    (Platform.constants as unknown as { interfaceIdiom?: string })
+      ?.interfaceIdiom === 'mac');

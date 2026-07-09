@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLiveActivitySettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
+import { isMacCatalyst } from '../../responsive/breakpoints';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 type LADesign = 'timeline' | 'countdown' | 'markers';
@@ -106,6 +107,9 @@ function LiveActivityCardImpl() {
   const { t } = useTranslation();
   const { slice: settings, update } = useLiveActivitySettings();
   const { palette } = useAppPalette();
+
+  // Mac Catalyst has no Live Activity surface, so hide the whole card there.
+  if (isMacCatalyst) return null;
 
   // Coerce any legacy stored value to the current options.
   const design: LADesign =
