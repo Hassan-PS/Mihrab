@@ -98,3 +98,4 @@ src/quran/data/source/
 # Quran reader debug scratch (screenshots, geometry sources)
 .qr-data/
 branding/tools/__pycache__/
+.ipadshots/
