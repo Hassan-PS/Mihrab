@@ -48,9 +48,12 @@ threshold → `compact`), so `regular`/`expanded` layouts only engage on a **lar
 
 - **Phase 0 — DONE & verified.** `breakpoints.ts` extended (`useResponsive`, `useColumns`,
   `columnsFor`, `isMacCatalyst`); `CenteredColumn` + `AdaptiveGrid` built; unit tests green.
-- **Phase 1 — partial.** Home / Settings / Fasting / Journal content centered;
-  `QuickActionsGrid` → `AdaptiveGrid` (verified 6-column reflow on iPad). Remaining:
-  Duas, Tasbih, Month, Quran index, secondary screens; modals → `ResponsiveModal`.
+- **Phase 1 — DONE.** Home / Settings / Fasting / Journal / Duas / Mosques / Quran-downloads /
+  Backup content centered; `QuickActionsGrid` → `AdaptiveGrid` (verified 6-column reflow on
+  iPad). Tail landed: **Tasbih** counter capped/centered (`capWide` 520), **Quran index**
+  rows centered/capped (`listWide` 720), **Month** schedule wrapped in a centered 900-wide
+  column on wide. `ResponsiveModal` primitive built (bottom sheet on compact, centered popover
+  on wide) — available for incremental modal adoption.
 - **Phase 2 — DONE & verified.** Home two-column dashboard on `expanded` (fixed "today"
   main column + flexible tools sidebar); collapses to single column below. Verified the
   2-column layout renders on the iPad (forced-low breakpoint).
@@ -60,8 +63,29 @@ threshold → `compact`), so `regular`/`expanded` layouts only engage on a **lar
 - **Qibla — REMOVED (product decision).** The Qibla compass is hidden from the tools grid
   for this version (no magnetometer on Mac). The `CompassScreen` route stays registered but
   unreachable; no compass entry point remains in the UI.
-- **Phases 4–6 — remaining.** Master-detail screens (Phase 4), nav shell (Phase 5),
-  widget port + feature-gating + signing/distribution (Phase 6).
+- **Phase 4 — DONE (Settings).** Settings reflows into **two balanced columns** on `expanded`
+  (CenteredColumn widened to 1080). A true master-detail with a category sidebar was
+  deliberately rejected: the 10 settings cards are heterogeneous and prayer-critical, and the
+  two-column reflow realizes the "cards align themselves as the window grows" vision at far
+  lower risk. Month table already lands via the Phase 1 centered-column treatment.
+- **Phase 6 — feature-gating DONE; native target is the user's step.** `isMacCatalyst` now
+  detects Catalyst at runtime via `Platform.constants.interfaceIdiom === 'mac'` (no native
+  module needed). Live Activity **no-ops** on Catalyst (`syncLiveActivity` early-return) and
+  the **Live Activity settings card is hidden**. The home-screen widget drops the Lock-Screen
+  accessory families on Catalyst via a compile-time `#if targetEnvironment(macCatalyst)` guard
+  (iOS build byte-identical).
+  **Remaining Catalyst-enablement (needs the user — Xcode + Apple signing to iterate):**
+  1. Add the Mac Catalyst destination to the app target (`SUPPORTS_MACCATALYST = YES`) in
+     `project.pbxproj`, set the Mac team/bundle-id + entitlements.
+  2. Guard the **ActivityKit** surfaces for Catalyst (unavailable on macOS): wrap
+     `PrayerLiveActivityWidget.swift`, the LA bundle inclusion in `PrayerWidgetExtensionBundle`,
+     `PrayerLiveActivityAttributes.swift`, and the app-side `PrayerLiveActivity.swift/.m`
+     bridge in `#if !targetEnvironment(macCatalyst)`. These must be verified against a real
+     Catalyst compile (only reachable with the user's signing), so they are intentionally NOT
+     applied blind here.
+  3. Sign + archive the Catalyst build and submit to the Mac App Store (Apple-side).
+- **Phase 5 — nav shell: optional, not started.** Persistent left sidebar on `expanded`. The
+  app is fully usable and "desktop-shaped" without it; documented for a later pass.
 
 ---
 
