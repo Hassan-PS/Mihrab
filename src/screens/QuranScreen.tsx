@@ -61,7 +61,8 @@ type Tab = 'surah' | 'juz' | 'bookmarks';
 type JuzRow = { juz: number; page: number; startSurah: SurahIndex | undefined };
 
 export function QuranScreen() {
-  useBreakpoint();
+  const quranWide = useBreakpoint() !== 'compact';
+  const listCap = quranWide ? styles.listWide : null;
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const navigation =
@@ -713,7 +714,7 @@ export function QuranScreen() {
         <FlatList<SurahIndex>
           data={[...filteredSurahs]}
           keyExtractor={s => String(s.number)}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, listCap]}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           initialNumToRender={12}
@@ -724,7 +725,7 @@ export function QuranScreen() {
         <FlatList<JuzRow>
           data={juzRows}
           keyExtractor={j => String(j.juz)}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, listCap]}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           renderItem={renderJuzRow}
@@ -733,7 +734,7 @@ export function QuranScreen() {
         <FlatList
           data={[0]}
           keyExtractor={() => 'bookmarks'}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, listCap]}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           renderItem={renderBookmarks}
@@ -893,6 +894,8 @@ export function QuranScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   list: { padding: 16, gap: 8 },
+  // Center + cap the index column on iPad/Mac so surah rows stay readable.
+  listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' },
   headerWrap: { gap: 10, marginBottom: 8 },
   resumeCard: {
     flexDirection: 'row',
