@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   useWindowDimensions,
+  View,
 } from 'react-native';
 import notifee, {
   AndroidNotificationSetting,
@@ -43,7 +44,7 @@ import { DataStatsPanel } from './home/DataStatsPanel';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { QuickActionsGrid } from './home/QuickActionsGrid';
 import { CenteredColumn } from '../responsive/CenteredColumn';
-import { contentColumnWidth } from '../responsive/breakpoints';
+import { classifyWidth, contentColumnWidth } from '../responsive/breakpoints';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
@@ -90,6 +91,15 @@ export function HomeScreen() {
   // Cap the day-card width to the centered content column so the carousel
   // doesn't overflow the capped column on iPad/Mac windows.
   const cardWidth = contentColumnWidth(screenWidth) - HOME_SCREEN_PADDING * 2;
+  // Expanded (wide iPad landscape / Mac window): lay Home out as a two-column
+  // dashboard — a fixed "today" main column beside a flexible tools sidebar —
+  // so the cards fill the window and fit without scrolling. The day carousel
+  // is sized to the fixed main column so its pages stay crisp and aligned.
+  const isDashboard = classifyWidth(screenWidth) === 'expanded';
+  const HOME_MAIN_COL = 620;
+  const carouselCardWidth = isDashboard
+    ? HOME_MAIN_COL - HOME_SCREEN_PADDING * 2
+    : cardWidth;
 
   const [providerPickerOpen, setProviderPickerOpen] = useState(false);
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
@@ -588,7 +598,7 @@ export function HomeScreen() {
         { paddingBottom: insets.bottom + 28 },
       ]}
       contentInsetAdjustmentBehavior="automatic">
-      <CenteredColumn>
+      <CenteredColumn maxWidth={isDashboard ? 1180 : undefined}>
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
         exactAlarmDenied={exactAlarmDenied}
@@ -600,40 +610,73 @@ export function HomeScreen() {
           so the top-of-screen controls all live in the same row. See
           RootNavigator.HomeHeaderRight. */}
 
-      <NextPrayerCard nextInfo={nextInfo} dataStatus={dataStatus} />
+      {(() => {
+        const heroCard = (
+          <NextPrayerCard nextInfo={nextInfo} dataStatus={dataStatus} />
+        );
+        const dayTable = (
+          <DayCarousel
+            week={view.table.week}
+            cardWidth={carouselCardWidth}
+            nextPrayerName={nextInfo?.name ?? null}
+            resetKey={carouselResetKey}
+            getDayLabel={getDayLabel}
+            getDayDate={getDayDate}
+            getHijriDate={getHijriDate}
+            onOpenMonth={handleOpenMonth}
+          />
+        );
+        const ramadanCard = (
+          <RamadanCountdownCard today={state.today} tomorrow={state.tomorrow} />
+        );
+        const quranShortcut = <QuranShortcut onPress={handleOpenQuran} />;
+        const toolsGrid = <QuickActionsGrid />;
+        const providerFooter = (
+          <ProviderFooter
+            effectiveProvider={effectiveProvider}
+            calculationMethod={settings.calculationMethod}
+            school={settings.school}
+            dataProviderAuto={settings.dataProviderAuto}
+            locationLabel={locationLabel}
+            backgroundRefreshing={state.backgroundRefreshing ?? false}
+            onPress={handleOpenProviderPicker}
+          />
+        );
+        const statsPanel = settings.showDataStats ? (
+          <ErrorBoundary label="DataStatsPanel">
+            <DataStatsPanel />
+          </ErrorBoundary>
+        ) : null;
 
-      <DayCarousel
-        week={view.table.week}
-        cardWidth={cardWidth}
-        nextPrayerName={nextInfo?.name ?? null}
-        resetKey={carouselResetKey}
-        getDayLabel={getDayLabel}
-        getDayDate={getDayDate}
-        getHijriDate={getHijriDate}
-        onOpenMonth={handleOpenMonth}
-      />
-
-      <RamadanCountdownCard today={state.today} tomorrow={state.tomorrow} />
-
-      <QuranShortcut onPress={handleOpenQuran} />
-
-      <QuickActionsGrid />
-
-      <ProviderFooter
-        effectiveProvider={effectiveProvider}
-        calculationMethod={settings.calculationMethod}
-        school={settings.school}
-        dataProviderAuto={settings.dataProviderAuto}
-        locationLabel={locationLabel}
-        backgroundRefreshing={state.backgroundRefreshing ?? false}
-        onPress={handleOpenProviderPicker}
-      />
-
-      {settings.showDataStats && (
-        <ErrorBoundary label="DataStatsPanel">
-          <DataStatsPanel />
-        </ErrorBoundary>
-      )}
+        if (isDashboard) {
+          return (
+            <View style={styles.dashRow}>
+              <View style={{ width: HOME_MAIN_COL }}>
+                {heroCard}
+                {dayTable}
+                {quranShortcut}
+              </View>
+              <View style={styles.dashSide}>
+                {toolsGrid}
+                {ramadanCard}
+                {providerFooter}
+                {statsPanel}
+              </View>
+            </View>
+          );
+        }
+        return (
+          <>
+            {heroCard}
+            {dayTable}
+            {ramadanCard}
+            {quranShortcut}
+            {toolsGrid}
+            {providerFooter}
+            {statsPanel}
+          </>
+        );
+      })()}
       </CenteredColumn>
 
       <ProviderPickerModal
@@ -653,6 +696,17 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Expanded-width dashboard: fixed "today" main column + flexible tools
+  // sidebar, so Home fills a wide window and fits without scrolling.
+  dashRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 20,
+  },
+  dashSide: {
+    flex: 1,
+    gap: 12,
+  },
   scroll: { flex: 1 },
   scrollContent: {
     padding: HOME_SCREEN_PADDING,
