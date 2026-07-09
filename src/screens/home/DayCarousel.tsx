@@ -86,6 +86,13 @@ function DayCarouselImpl({
     <>
       <ScrollView
         ref={scrollRef}
+        // Constrain the viewport to exactly one card. `pagingEnabled` snaps by
+        // the ScrollView's frame width, so if the frame is wider than a card
+        // (which happens on iPad/Mac once the content column is capped narrower
+        // than the screen) the snap lands mid-card and the neighbouring day
+        // peeks in / the current day is clipped. Pinning the frame to cardWidth
+        // (centered) keeps one clean day per page at every window size.
+        style={{ width: cardWidth, alignSelf: 'center' }}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
