@@ -7,6 +7,7 @@ import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
+import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { AboutCard } from './settings/AboutCard';
 import { AppearanceCard } from './settings/AppearanceCard';
@@ -122,6 +123,7 @@ export function SettingsScreen() {
         ]}
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled">
+        <CenteredColumn>
         <AppearanceCard />
         <LanguageCard onOpenLanguagePicker={openLanguage} />
         <WidgetCard />
@@ -143,6 +145,7 @@ export function SettingsScreen() {
         />
         <LiveActivityCard />
         <AboutCard />
+        </CenteredColumn>
       </ScrollView>
 
       <ProviderPickerModal

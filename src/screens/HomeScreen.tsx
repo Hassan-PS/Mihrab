@@ -42,6 +42,8 @@ import { ProviderFooter } from './home/ProviderFooter';
 import { DataStatsPanel } from './home/DataStatsPanel';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { QuickActionsGrid } from './home/QuickActionsGrid';
+import { CenteredColumn } from '../responsive/CenteredColumn';
+import { contentColumnWidth } from '../responsive/breakpoints';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
@@ -85,7 +87,9 @@ export function HomeScreen() {
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
-  const cardWidth = screenWidth - HOME_SCREEN_PADDING * 2;
+  // Cap the day-card width to the centered content column so the carousel
+  // doesn't overflow the capped column on iPad/Mac windows.
+  const cardWidth = contentColumnWidth(screenWidth) - HOME_SCREEN_PADDING * 2;
 
   const [providerPickerOpen, setProviderPickerOpen] = useState(false);
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
@@ -584,6 +588,7 @@ export function HomeScreen() {
         { paddingBottom: insets.bottom + 28 },
       ]}
       contentInsetAdjustmentBehavior="automatic">
+      <CenteredColumn>
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
         exactAlarmDenied={exactAlarmDenied}
@@ -629,6 +634,7 @@ export function HomeScreen() {
           <DataStatsPanel />
         </ErrorBoundary>
       )}
+      </CenteredColumn>
 
       <ProviderPickerModal
         visible={providerPickerOpen}

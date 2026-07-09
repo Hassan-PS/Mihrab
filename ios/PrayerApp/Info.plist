@@ -74,7 +74,15 @@
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Mac Catalyst / iPad: the window is freely resizable, so all
+	     orientations are supported and layouts reflow via useBreakpoint.
+	     iPhone stays portrait-only (the key above). -->
+	<key>UIRequiresFullScreen</key>
+	<false/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<!--

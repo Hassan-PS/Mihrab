@@ -16,6 +16,7 @@ import notifee, { EventType } from '@notifee/react-native';
 import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
+import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
   coerceJournalEntries,
@@ -190,6 +191,7 @@ export function JournalScreen() {
       style={{ backgroundColor: palette.bg }}
       contentContainerStyle={styles.scroll}
       contentInsetAdjustmentBehavior="automatic">
+      <CenteredColumn>
       {/* Encouragement copy above the stats — task #95. Adapts to the
           user's progress: a fresh user sees an inviting first-step
           nudge, an active user sees Mashallah-style affirmation. */}
@@ -393,6 +395,7 @@ export function JournalScreen() {
           {t('common.loading')}
         </Text>
       )}
+      </CenteredColumn>
     </ScrollView>
   );
 }

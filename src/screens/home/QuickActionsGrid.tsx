@@ -4,9 +4,10 @@
 import { memo, type ComponentType } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { AdaptiveGrid } from '../../responsive/AdaptiveGrid';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import {
@@ -68,7 +69,11 @@ function QuickActionsGridImpl() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    <View style={styles.row}>
+    // Auto-flowing grid: 3 columns on a phone, filling to more as the window
+    // widens (iPad / Mac) so the tools spread across the available space
+    // instead of staying a narrow 3-wide strip. minItemWidth 88 keeps 3
+    // columns on the smallest supported phones.
+    <AdaptiveGrid minItemWidth={88} gutter={SPACING.sm} maxColumns={6}>
       {TOOLS.map(tool => (
         <Pressable
           key={tool.id}
@@ -102,21 +107,15 @@ function QuickActionsGridImpl() {
           </Text>
         </Pressable>
       ))}
-    </View>
+    </AdaptiveGrid>
   );
 }
 
 export const QuickActionsGrid = memo(QuickActionsGridImpl);
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-  },
   tile: {
-    flexBasis: '31%',
-    flexGrow: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: SPACING.md,

@@ -9,6 +9,7 @@ import {
 } from '../storage/durableWrite';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
+import { CenteredColumn } from '../responsive/CenteredColumn';
 import { cardEdgeStyle } from '../theme/chrome';
 import { CrescentIcon } from '../theme/icons';
 import { gregorianToHijri } from '../hijri/convert';
@@ -195,6 +196,7 @@ export function FastingScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic">
+      <CenteredColumn>
       {/* Ramadan countdown — only when <= 90 days away. Sits at the top
           to reflect the user's spec: build anticipation as Ramadan
           approaches, fade away once we're in the month. */}
@@ -485,6 +487,7 @@ export function FastingScreen() {
       <Text style={[typeStyle('footnote'), { color: palette.muted, textAlign: 'center' }]}>
         {t('fasting.privacyNote')}
       </Text>
+      </CenteredColumn>
     </ScrollView>
   );
 }
