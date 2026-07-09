@@ -858,7 +858,8 @@
     "khatmahLengthTitle": "Duración del jatma (días)",
     "khatmahStartCta": "Comenzar",
     "showMore": "Mostrar más",
-    "showLess": "Mostrar menos"
+    "showLess": "Mostrar menos",
+    "tafsirEditionHelp": "El comentario que se muestra debajo de cada versículo. También se puede cambiar desde cualquier versículo en la página del Corán."
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

@@ -79,6 +79,21 @@ export function findTafsirEdition(id: string): TafsirEdition | undefined {
   return TAFSIR_EDITIONS.find(e => e.id === id);
 }
 
+/**
+ * Resolve the tafsir edition to show for a stored preference + app locale.
+ * Honours the stored id when it is offered for the current locale; otherwise
+ * falls back to the locale's first edition. This keeps the Quran-page picker
+ * and the Settings selector in agreement and guarantees a valid edition even
+ * after a language change or an unknown/blank stored id.
+ */
+export function resolveTafsirEdition(
+  storedId: string,
+  locale: string,
+): TafsirEdition {
+  const offered = tafsirEditionsForLocale(locale);
+  return offered.find(e => e.id === storedId) ?? offered[0];
+}
+
 function tafsirUrl(edition: string, surah: number, ayah: number): string {
   return `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${edition}/${surah}/${ayah}.json`;
 }

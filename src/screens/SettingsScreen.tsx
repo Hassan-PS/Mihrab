@@ -18,6 +18,7 @@ import { LanguageModal } from './settings/LanguageModal';
 import { LocationCard } from './settings/LocationCard';
 import { MethodModal } from './settings/MethodModal';
 import { NotificationsCard } from './settings/NotificationsCard';
+import { QuranCard } from './settings/QuranCard';
 import { LiveActivityCard } from './settings/LiveActivityCard';
 import { PrayerOffsetsModal } from './settings/PrayerOffsetsModal';
 import { PreReminderModal } from './settings/PreReminderModal';
@@ -155,6 +156,7 @@ export function SettingsScreen() {
             />
           );
           const liveActivity = <LiveActivityCard />;
+          const quran = <QuranCard />;
           const about = <AboutCard />;
 
           if (isExpanded) {
@@ -175,6 +177,7 @@ export function SettingsScreen() {
                     {location}
                     {savedLocations}
                     {notifications}
+                    {quran}
                     {about}
                   </View>
                 </View>
@@ -193,6 +196,7 @@ export function SettingsScreen() {
               {calculation}
               {notifications}
               {liveActivity}
+              {quran}
               {about}
             </CenteredColumn>
           );

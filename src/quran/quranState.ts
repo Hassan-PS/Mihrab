@@ -91,6 +91,15 @@ export type QuranPrefs = {
   repeat: RepeatSettings;
   /** Second row of the Verse-of-the-day card (v2.7.31, additive). */
   votdMode: 'translation' | 'tafsir';
+  /**
+   * Chosen tafsir edition id (v2.8, additive). Empty string = "use the
+   * locale default". Persisted here so the pick sticks across ayah-sheet
+   * reopens and stays in sync between the Quran page and Settings — the old
+   * behaviour kept it in ephemeral component state, so it reverted to the
+   * default every time the sheet remounted. Resolve with `resolveTafsirEdition`
+   * (which falls back to the locale default when the stored id isn't offered).
+   */
+  tafsirEditionId: string;
 };
 
 export type QuranState = {
@@ -117,6 +126,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
     votdMode: 'translation',
+    tafsirEditionId: '',
   },
 };
 

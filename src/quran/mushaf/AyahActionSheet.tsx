@@ -37,6 +37,7 @@ import {
   setKhatmahPosition,
   toggleStar,
   useQuranState,
+  setQuranPrefs,
   BOOKMARK_COLORS,
   KHATMAH_COLOR,
   type BookmarkColor,
@@ -44,7 +45,7 @@ import {
 import {
   loadTafsir,
   tafsirEditionsForLocale,
-  type TafsirEdition,
+  resolveTafsirEdition,
 } from '../tafsir';
 import { playFromAyah, playRange } from '../audio/playback';
 import { RecitationControls } from '../audio/RecitationControls';
@@ -77,12 +78,19 @@ export function AyahActionSheet({
   const [arabic, setArabic] = useState<string>('');
   const [shareCardVisible, setShareCardVisible] = useState(false);
 
-  // ── Tafsir (v2.7.28) ────────────────────────────────────────────────
+  // ── Tafsir (v2.7.28; persisted v2.8) ────────────────────────────────
+  // The chosen edition is derived from the persisted quran pref so it sticks
+  // across sheet reopens and stays in sync with the Settings selector — it
+  // used to live in ephemeral component state, which reverted to the default
+  // on every remount.
   const tafsirEditions = tafsirEditionsForLocale(settings.language);
   const [tafsirOpen, setTafsirOpen] = useState(false);
-  const [tafsirEdition, setTafsirEdition] = useState<TafsirEdition>(
-    tafsirEditions[0],
+  const tafsirEdition = resolveTafsirEdition(
+    state.prefs.tafsirEditionId,
+    settings.language,
   );
+  const setTafsirEdition = (ed: { id: string }) =>
+    setQuranPrefs({ tafsirEditionId: ed.id });
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [tafsirLoading, setTafsirLoading] = useState(false);
 
@@ -126,7 +134,7 @@ export function AyahActionSheet({
     return () => {
       cancelled = true;
     };
-  }, [visible, tafsirOpen, tafsirEdition, surah, ayah]);
+  }, [visible, tafsirOpen, tafsirEdition.id, surah, ayah]);
 
   const meta = findSurah(surah);
   const translation = getAyahTranslation(edition, surah, ayah);

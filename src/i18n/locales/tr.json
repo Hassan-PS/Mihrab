@@ -858,7 +858,8 @@
     "khatmahLengthTitle": "Hatim süresi (gün)",
     "khatmahStartCta": "Başla",
     "showMore": "Daha fazla göster",
-    "showLess": "Daha az göster"
+    "showLess": "Daha az göster",
+    "tafsirEditionHelp": "Her ayetin altında gösterilen tefsir. Kur’an sayfasındaki herhangi bir ayetten de değiştirilebilir."
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

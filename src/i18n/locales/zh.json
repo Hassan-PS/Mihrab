@@ -858,7 +858,8 @@
     "khatmahLengthTitle": "完整诵读时长（天）",
     "khatmahStartCta": "开始",
     "showMore": "显示更多",
-    "showLess": "显示更少"
+    "showLess": "显示更少",
+    "tafsirEditionHelp": "显示在每节经文下方的经注。也可在《古兰经》页面的任意经文处更改。"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

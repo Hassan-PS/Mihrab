@@ -858,7 +858,8 @@
     "khatmahLengthTitle": "Khatmah length (days)",
     "khatmahStartCta": "Start",
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "tafsirEditionHelp": "The commentary shown under each verse. Also changeable from any verse on the Quran page."
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

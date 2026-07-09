@@ -858,7 +858,8 @@
     "khatmahLengthTitle": "Durée de la khatma (jours)",
     "khatmahStartCta": "Commencer",
     "showMore": "Afficher plus",
-    "showLess": "Afficher moins"
+    "showLess": "Afficher moins",
+    "tafsirEditionHelp": "Le commentaire affiché sous chaque verset. Modifiable aussi depuis n’importe quel verset sur la page du Coran."
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",
