@@ -43,7 +43,8 @@ import {
 export function TasbihScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
-  useBreakpoint();
+  const tasbihWide = useBreakpoint() !== 'compact';
+  const capStyle = tasbihWide ? styles.capWide : null;
   const { t, i18n } = useTranslation();
   // Arabic readers don't need a Latin pronunciation guide — they read the
   // Arabic directly. Hide it when the app language is Arabic.
@@ -101,6 +102,7 @@ export function TasbihScreen() {
       <GlassSurface
         style={[
           styles.dhikrCard,
+          capStyle,
           {
             ...cardEdgeStyle(palette),
           },
@@ -143,6 +145,7 @@ export function TasbihScreen() {
         android_ripple={{ color: palette.accentSolid, foreground: false }}
         style={({ pressed }: { pressed: boolean }) => [
           styles.tapTarget,
+          capStyle,
           {
             backgroundColor: targetReached ? palette.accentBg : palette.card,
             borderColor: targetReached ? palette.accent : palette.border,
@@ -167,7 +170,7 @@ export function TasbihScreen() {
         ) : null}
       </Pressable>
 
-      <View style={styles.navRow}>
+      <View style={[styles.navRow, capStyle]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('tasbih.prev', 'Previous')}
@@ -211,6 +214,9 @@ export function TasbihScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Cap the counter column on iPad/Mac so the big number stays centered
+  // instead of stretching across a wide window.
+  capWide: { width: '100%', maxWidth: 520, alignSelf: 'center' },
   root: { flex: 1, padding: 16, gap: 16 },
   dhikrCard: {
     padding: 20,

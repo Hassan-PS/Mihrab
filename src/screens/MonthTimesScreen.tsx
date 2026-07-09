@@ -31,7 +31,7 @@ import {
 export function MonthTimesScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
-  useBreakpoint();
+  const monthWide = useBreakpoint() !== 'compact';
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t, i18n } = useTranslation();
@@ -248,6 +248,7 @@ export function MonthTimesScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.bg, paddingTop: Platform.OS === 'ios' ? headerHeight : 0 }}>
+      <View style={[styles.monthInner, monthWide && styles.monthCap]}>
       {controlsHeader}
       {columnHeader}
       <FlatList
@@ -271,11 +272,15 @@ export function MonthTimesScreen() {
         })}
         onScrollToIndexFailed={() => {}}
       />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  monthInner: { flex: 1, width: '100%' },
+  // Month schedule benefits from width; cap + center on very wide windows.
+  monthCap: { maxWidth: 900, alignSelf: 'center' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   skeletonScreen: { flex: 1, padding: SPACING.lg, gap: SPACING.sm },
   skelRow: {
