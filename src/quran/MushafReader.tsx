@@ -61,6 +61,11 @@ import {
 import { useAppPalette } from '../hooks/useAppPalette';
 import { findPageForAyah, MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
 import {
+  pageOffsetX,
+  pageFromScroll,
+  scrollXForPage as scrollXForPageMath,
+} from './mushafSpread';
+import {
   mushafPageAsset,
   mushafPageCrop,
   MUSHAF_TOTAL_PAGES,
@@ -222,6 +227,19 @@ export function MushafReader({
 
   // ── Page state (unchanged core from #153) ───────────────────────────
   const screenWidth = windowWidth;
+  // ── Dual-page (facing pages) in landscape (v2.8) ────────────────────
+  // When the window is landscape and wide enough, show two facing mushaf
+  // pages side by side — a real "spread", right page odd / left page even
+  // (RTL: page 1 is rightmost, so the higher page sits to the LEFT). Each
+  // page still fills exactly one `pageW` column; a spread is two columns
+  // and equals the full viewport width, so the existing `pagingEnabled`
+  // snap (by the ScrollView frame = screenWidth) lands cleanly on spread
+  // boundaries with zero extra snapping logic. In portrait / on phones
+  // `dualPage` is false and every value below collapses to the original
+  // single-page math (pageW === screenWidth), so that path is unchanged.
+  const isLandscape = windowWidth > windowHeight;
+  const dualPage = isLandscape && windowWidth >= 900;
+  const pageW = dualPage ? windowWidth / 2 : windowWidth;
   const [currentPage, setCurrentPage] = useState(initialPage);
   // Measured height of the page viewport (imageWrap), tagged with the
   // fullscreen mode it was measured in — see maxHeight. The tag matters:
@@ -232,9 +250,17 @@ export function MushafReader({
   const scrollRef = useRef<ScrollView>(null);
   const didInitialScrollRef = useRef(false);
 
+  // Left edge of a single page's own column (in `pageW` units).
   const pageToOffsetX = useCallback(
-    (page: number) => (MUSHAF_TOTAL_PAGES - page) * screenWidth,
-    [screenWidth],
+    (page: number) => pageOffsetX(page, pageW, MUSHAF_TOTAL_PAGES),
+    [pageW],
+  );
+
+  // The scroll offset that brings the SPREAD containing `page` flush to the
+  // viewport's left edge (see mushafSpread.ts for the RTL pairing model).
+  const scrollXForPage = useCallback(
+    (page: number) => scrollXForPageMath(page, pageW, MUSHAF_TOTAL_PAGES, dualPage),
+    [dualPage, pageW],
   );
 
   // Re-anchor the scroll position when width changes (rotation, QR-4) —
@@ -242,18 +268,18 @@ export function MushafReader({
   useEffect(() => {
     if (!didInitialScrollRef.current) return;
     scrollRef.current?.scrollTo({
-      x: pageToOffsetX(currentPage),
+      x: scrollXForPage(currentPage),
       y: 0,
       animated: false,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screenWidth]);
+  }, [screenWidth, dualPage]);
 
   const onScrollViewLayout = () => {
     if (didInitialScrollRef.current) return;
     setTimeout(() => {
       scrollRef.current?.scrollTo({
-        x: pageToOffsetX(initialPage),
+        x: scrollXForPage(initialPage),
         y: 0,
         animated: false,
       });
@@ -296,7 +322,7 @@ export function MushafReader({
     if (page !== currentPage && didInitialScrollRef.current) {
       setCurrentPage(page);
       scrollRef.current?.scrollTo({
-        x: pageToOffsetX(page),
+        x: scrollXForPage(page),
         y: 0,
         animated: false,
       });
@@ -341,7 +367,7 @@ export function MushafReader({
     const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
     setCurrentPage(clamped);
     scrollRef.current?.scrollTo({
-      x: pageToOffsetX(clamped),
+      x: scrollXForPage(clamped),
       y: 0,
       animated: false,
     });
@@ -364,7 +390,7 @@ export function MushafReader({
   const headerFooterReserve = 76;
   // Floating mini-player card: 3px track + row (~54) + 10 bottom margin.
   const playerReserve = playback.active ? 68 : 0;
-  const maxWidth = screenWidth - horizontalPadding * 2;
+  const maxWidth = pageW - horizontalPadding * 2;
   const estMaxHeight =
     windowHeight -
     navOverlayPad -
@@ -461,7 +487,18 @@ export function MushafReader({
   // render; ensureScaledPage dedupes, so steady state is a no-op.
   useEffect(() => {
     if (!useLocalFiles || downloadStatus !== 'ready') return;
-    for (const p of [currentPage - 1, currentPage, currentPage + 1]) {
+    // Warm the same window the reader mounts (wider in dual-page mode).
+    const warm = dualPage
+      ? [
+          currentPage - 2,
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          currentPage + 2,
+          currentPage + 3,
+        ]
+      : [currentPage - 1, currentPage, currentPage + 1];
+    for (const p of warm) {
       if (p < 1 || p > MUSHAF_TOTAL_PAGES) continue;
       const d = pageDims(p);
       ensureScaledPage(p, cachePxWidth(d), 2600);
@@ -600,7 +637,7 @@ export function MushafReader({
           position: 'absolute',
           top: 0,
           left: pageToOffsetX(page),
-          width: screenWidth,
+          width: pageW,
           height: '100%',
           backgroundColor: pageBg,
         }}>
@@ -742,9 +779,21 @@ export function MushafReader({
     );
   };
 
-  const mountedPages = [currentPage - 1, currentPage, currentPage + 1].filter(
-    p => p >= 1 && p <= MUSHAF_TOTAL_PAGES,
-  );
+  // Single mode mounts the current page + one on each side. Dual mode mounts
+  // the current spread plus the neighbouring spread on each side (six pages)
+  // so a swipe reveals the next facing pair without a blank frame.
+  const mountedPages = (
+    dualPage
+      ? [
+          currentPage - 2,
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          currentPage + 2,
+          currentPage + 3,
+        ]
+      : [currentPage - 1, currentPage, currentPage + 1]
+  ).filter(p => p >= 1 && p <= MUSHAF_TOTAL_PAGES);
 
   return (
     <View
@@ -761,8 +810,15 @@ export function MushafReader({
         bounces={false}
         onMomentumScrollEnd={e => {
           const x = e.nativeEvent.contentOffset.x;
-          const page = MUSHAF_TOTAL_PAGES - Math.round(x / screenWidth);
-          const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
+          // The viewport frame is always screenWidth (= one page in single
+          // mode, one spread in dual mode). In dual mode each snap step is two
+          // pages; we land on the spread's right-hand (odd) page as "current".
+          const clamped = pageFromScroll(
+            x,
+            screenWidth,
+            MUSHAF_TOTAL_PAGES,
+            dualPage,
+          );
           if (clamped !== currentPage) {
             commitPage(clamped, currentPage);
             setCurrentPage(clamped);
@@ -777,7 +833,7 @@ export function MushafReader({
         }}
         onLayout={onScrollViewLayout}
         contentContainerStyle={{
-          width: screenWidth * MUSHAF_TOTAL_PAGES,
+          width: pageW * MUSHAF_TOTAL_PAGES,
           height: '100%',
         }}>
         {mountedPages.map(renderPage)}
