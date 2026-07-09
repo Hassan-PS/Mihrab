@@ -39,9 +39,10 @@ import type { NotificationSoundId } from '../notifications/notificationSounds';
  * per-domain slices).
  */
 export function SettingsScreen() {
-  // Subscribe to width changes so future master-detail layouts pick up
-  // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
-  useBreakpoint();
+  // On the widest windows (iPad landscape / Mac) the long single scroll of
+  // settings cards wastes horizontal space, so we reflow the cards into two
+  // balanced columns. Compact/regular keep the historical single column.
+  const isExpanded = useBreakpoint() === 'expanded';
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
@@ -123,29 +124,79 @@ export function SettingsScreen() {
         ]}
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled">
-        <CenteredColumn>
-        <AppearanceCard />
-        <LanguageCard onOpenLanguagePicker={openLanguage} />
-        <WidgetCard />
-        <DataSourceCard onOpenProviderPicker={openProvider} />
-        <LocationCard />
-        <View
-          onLayout={e => {
-            savedLocationsYRef.current = e.nativeEvent.layout.y;
-          }}>
-          <SavedLocationsCard highlightSignal={savedHighlightSignal} />
-        </View>
-        <CalculationCard
-          onOpenMethodPicker={openMethod}
-          onOpenOffsetsModal={openOffsets}
-        />
-        <NotificationsCard
-          onOpenSoundPicker={openSoundPicker}
-          onOpenPreReminderPicker={openPreReminder}
-        />
-        <LiveActivityCard />
-        <AboutCard />
-        </CenteredColumn>
+        {(() => {
+          const savedLocations = (
+            <View
+              onLayout={e => {
+                savedLocationsYRef.current = e.nativeEvent.layout.y;
+              }}>
+              <SavedLocationsCard highlightSignal={savedHighlightSignal} />
+            </View>
+          );
+          const appearance = <AppearanceCard />;
+          const language = (
+            <LanguageCard onOpenLanguagePicker={openLanguage} />
+          );
+          const widget = <WidgetCard />;
+          const dataSource = (
+            <DataSourceCard onOpenProviderPicker={openProvider} />
+          );
+          const location = <LocationCard />;
+          const calculation = (
+            <CalculationCard
+              onOpenMethodPicker={openMethod}
+              onOpenOffsetsModal={openOffsets}
+            />
+          );
+          const notifications = (
+            <NotificationsCard
+              onOpenSoundPicker={openSoundPicker}
+              onOpenPreReminderPicker={openPreReminder}
+            />
+          );
+          const liveActivity = <LiveActivityCard />;
+          const about = <AboutCard />;
+
+          if (isExpanded) {
+            // Two balanced columns. Left holds appearance/display + calc/notify;
+            // right holds the data-source & location group + about.
+            return (
+              <CenteredColumn maxWidth={1080}>
+                <View style={styles.twoCol}>
+                  <View style={styles.col}>
+                    {appearance}
+                    {language}
+                    {widget}
+                    {calculation}
+                    {liveActivity}
+                  </View>
+                  <View style={styles.col}>
+                    {dataSource}
+                    {location}
+                    {savedLocations}
+                    {notifications}
+                    {about}
+                  </View>
+                </View>
+              </CenteredColumn>
+            );
+          }
+
+          return (
+            <CenteredColumn>
+              {appearance}
+              {language}
+              {widget}
+              {dataSource}
+              {location}
+              {savedLocations}
+              {calculation}
+              {notifications}
+              {liveActivity}
+              {about}
+            </CenteredColumn>
+          );
+        })()}
       </ScrollView>
 
       <ProviderPickerModal
@@ -216,4 +267,7 @@ export function SettingsScreen() {
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 40 },
+  // Expanded (iPad landscape / Mac) two-column settings reflow.
+  twoCol: { flexDirection: 'row', alignItems: 'flex-start', gap: 20 },
+  col: { flex: 1 },
 });
