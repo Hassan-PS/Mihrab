@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "builtAt": "2026-07-08T15:15:40.906Z",
+  "builtAt": "2026-07-13T07:20:47.046Z",
   "timezone": "Europe/Stockholm",
   "horizonDays": 400,
   "seedDays": 60,
-  "minCoverageDays": 170,
+  "minCoverageDays": 215,
   "coverageFloorDays": 40,
   "serverStatus": "ok",
   "deadCities": [],
