@@ -1040,7 +1040,9 @@
     "unmuteNext": "Aktifkan adzan berikutnya",
     "inWord": "Dalam",
     "atWord": "Pukul",
-    "sinceWord": "Sejak"
+    "sinceWord": "Sejak",
+    "hideOnLock": "Sembunyikan di layar kunci",
+    "showOnLock": "Tampilkan di layar kunci"
   },
   "hijri": {
     "month_1": "Muharram",

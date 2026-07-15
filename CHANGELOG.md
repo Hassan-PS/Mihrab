@@ -8,10 +8,13 @@ All notable changes to this project are documented here. The format is inspired 
 - **Mihrab is now a real iPad app — and runs on Mac.** The whole app adapts to the window size: on a wide iPad (or a resizable window on Apple Silicon Macs) the Home screen becomes a two-column dashboard, reading content stays centred and comfortably measured instead of stretching, and the tools grid, Settings, and month schedule reflow to fill the space; narrow it and everything gracefully returns to the single-column phone layout.
 - **Dual-page Quran (mushaf) in landscape.** When the window is wide enough, the mushaf shows two facing pages side by side like a printed copy; in portrait or on a phone it stays single-page.
 - **Tafsir selector in Settings.** Pick your tafsir edition in Settings, or from any verse on the Quran page — the two stay in sync.
+- **Hide the Live Activity from the lock screen (Android).** The prayer-countdown Live Activity now has a second action, next to "Mute next adhan," that hides or shows it on the lock screen / always-on display while keeping it in the notification shade. It's separate from the on/off setting.
 
 ### Fixed
 - **Your tafsir choice now sticks.** Choosing a tafsir edition used to revert to the default every time you reopened a verse; the selection now persists across the app.
 - **Day carousel on large screens.** On iPad/Mac the day cards no longer clip or show a sliver of the neighbouring day — each day fills its page cleanly and swiping between days works.
+- **Stale prayer notifications cleared (Android).** A fired prayer's notification now auto-dismisses when the next prayer arrives, so an old "Prayer time" alert can no longer linger on the lock screen next to a different, current prayer.
+- **Sunrise notification wording.** The Sunrise alert no longer says "Prayer time" (Sunrise isn't a prayer) — it now shows the time instead.
 
 ### Changed
 - **Qibla compass is temporarily hidden** while the iPad/Mac layout work lands (there's no magnetometer on Mac). It will return in a later update.

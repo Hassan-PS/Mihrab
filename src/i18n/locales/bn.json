@@ -1040,7 +1040,9 @@
     "unmuteNext": "পরবর্তী আজান চালু করুন",
     "inWord": "পরে",
     "atWord": "টায়",
-    "sinceWord": "থেকে"
+    "sinceWord": "থেকে",
+    "hideOnLock": "লক স্ক্রিনে লুকান",
+    "showOnLock": "লক স্ক্রিনে দেখান"
   },
   "hijri": {
     "month_1": "মুহাররম",

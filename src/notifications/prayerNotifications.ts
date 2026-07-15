@@ -24,10 +24,54 @@ import { OPTIONAL_TIME_KEYS } from '../types/prayer';
 import {
   buildPrePrayerReminderEvents,
   buildUpcomingSalahEvents,
+  formatLocalTime,
 } from '../utils/prayerTimes';
 
 /** Sunrise + the two night times are not salāh: default sound, no adhan, no journal action. */
 const NON_PRAYER_EVENTS = new Set<string>(OPTIONAL_TIME_KEYS);
+
+/** Safety cap for how long a delivered prayer notification lingers before it
+ *  auto-dismisses, when the next prayer is unusually far off (e.g. Isha→Fajr). */
+const MAX_LINGER_MS = 12 * 60 * 60 * 1000;
+/** A delivered prayer/reminder notification older than this (its scheduled time
+ *  is this far in the past) is considered stale and cleared on the next sync. */
+const STALE_DISPLAYED_GRACE_MS = 60 * 60 * 1000;
+
+/** Extract the scheduled epoch-ms encoded in one of our notification ids
+ *  (`pt-<ms>-<name>` or `pt-pre-<ms>-<name>`). Returns null for foreign ids. */
+function prayerNotificationTime(id: string): number | null {
+  const m = /^pt-(?:pre-)?(\d+)-/.exec(id);
+  return m ? Number(m[1]) : null;
+}
+
+/**
+ * Clear already-DELIVERED prayer/reminder notifications whose scheduled time is
+ * well in the past. `cancelOwnedPrayerNotifications` only cancels pending
+ * *triggers*; once a notification has fired it lingers in the shade / AOD until
+ * dismissed — which is how a previous prayer's "Prayer time" alert stayed on
+ * screen next to the next prayer's reminder (the reported "it says Isha when it
+ * isn't"). Going forward `timeoutAfter` auto-dismisses each one when the next
+ * prayer arrives; this pass also cleans up ones delivered before that fix.
+ */
+async function clearStaleDisplayedPrayerNotifications(now: number): Promise<void> {
+  if (Platform.OS !== 'android') return; // iOS delivered list isn't reliably enumerable
+  let displayed;
+  try {
+    displayed = await notifee.getDisplayedNotifications();
+  } catch {
+    return;
+  }
+  for (const d of displayed) {
+    const id = d.notification?.id;
+    if (typeof id !== 'string' || !id.startsWith(PRAYER_NOTIFICATION_ID_PREFIX)) {
+      continue;
+    }
+    const t = prayerNotificationTime(id);
+    if (t != null && t < now - STALE_DISPLAYED_GRACE_MS) {
+      await notifee.cancelDisplayedNotification(id).catch(() => {});
+    }
+  }
+}
 
 /** Prefix used for all prayer-time and pre-prayer trigger notification IDs.
  *  Used to identify "ours" vs other notifications (e.g. the adhan preview)
@@ -310,8 +354,13 @@ export async function syncPrayerNotifications(params: {
     );
   }
   await cancelOwnedPrayerNotifications([...desiredIds]);
+  // Sweep up any previously-delivered prayer/reminder alerts that are now stale
+  // (their time is well past) so an old prayer's banner can't sit next to the
+  // current one in the shade / AOD.
+  await clearStaleDisplayedPrayerNotifications(now.getTime());
 
-  for (const e of salahEvents) {
+  for (let i = 0; i < salahEvents.length; i++) {
+    const e = salahEvents[i];
     const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`;
     // Sunrise, Islamic Midnight and the Last Third are NOT prayers, so they
     // must never play the adhan even when one is selected for the five daily
@@ -323,7 +372,21 @@ export async function syncPrayerNotifications(params: {
       isNonPrayer || isMutedNext ? reminderSound : prayerTimeSound;
     const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
-    const atPrayerBody = i18n.t('alertCopy.atPrayer');
+    // A prayer alert says "Prayer time"; Sunrise / the night times are NOT
+    // prayers, so they show the clock time instead of the misleading
+    // "Prayer time" line (reported for the Sunrise alert).
+    const atPrayerBody = isNonPrayer
+      ? formatLocalTime(e.at)
+      : i18n.t('alertCopy.atPrayer');
+    // Auto-dismiss this alert when the NEXT event is due, so a fired prayer's
+    // notification never lingers into (or past) the following prayer. Capped
+    // for the long Isha→Fajr gap. Android honours this even if the app is
+    // killed, which is the case that produced the stale "Isha" alert.
+    const nextAt = salahEvents[i + 1]?.at.getTime();
+    const timeoutAfterMs = Math.max(
+      60_000,
+      Math.min(nextAt ? nextAt - e.at.getTime() : MAX_LINGER_MS, MAX_LINGER_MS),
+    );
     await notifee.createTriggerNotification(
       {
         id: notificationId,
@@ -352,6 +415,8 @@ export async function syncPrayerNotifications(params: {
           channelId: eventSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
+          // Self-clear when the next prayer arrives (see timeoutAfterMs above).
+          timeoutAfter: timeoutAfterMs,
           // BigText style: shows the body in full when the notification
           // is expanded, and gives Android more room in the collapsed
           // grouped-summary view than a single-line ticker. The text is
@@ -407,6 +472,9 @@ export async function syncPrayerNotifications(params: {
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
+          // The "starts in N min" reminder auto-dismisses when the prayer
+          // actually begins, so it never lingers past its own prayer.
+          timeoutAfter: Math.max(60_000, reminderMinutes * 60_000),
         },
       },
       buildTimestampTrigger(e.at.getTime(), exactAlarms),

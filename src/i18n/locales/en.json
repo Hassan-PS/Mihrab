@@ -1040,7 +1040,9 @@
     "unmuteNext": "Unmute next adhan",
     "inWord": "In",
     "atWord": "At",
-    "sinceWord": "Since"
+    "sinceWord": "Since",
+    "hideOnLock": "Hide on lock screen",
+    "showOnLock": "Show on lock screen"
   },
   "hijri": {
     "month_1": "Muharram",

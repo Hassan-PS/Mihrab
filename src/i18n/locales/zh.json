@@ -1040,7 +1040,9 @@
     "unmuteNext": "开启下一次宣礼",
     "inWord": "还有",
     "atWord": "于",
-    "sinceWord": "已过"
+    "sinceWord": "已过",
+    "hideOnLock": "在锁屏上隐藏",
+    "showOnLock": "在锁屏上显示"
   },
   "hijri": {
     "month_1": "穆哈兰姆月",

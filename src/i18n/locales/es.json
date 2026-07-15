@@ -1040,7 +1040,9 @@
     "unmuteNext": "Activar el próximo adhán",
     "inWord": "En",
     "atWord": "A las",
-    "sinceWord": "Desde"
+    "sinceWord": "Desde",
+    "hideOnLock": "Ocultar en la pantalla de bloqueo",
+    "showOnLock": "Mostrar en la pantalla de bloqueo"
   },
   "hijri": {
     "month_1": "Muharram",

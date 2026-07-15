@@ -440,6 +440,11 @@ export async function startOrUpdateLiveActivity(
       adhanActionEnabled,
       muteLabel: i18n.t('liveActivity.muteNext', 'Mute next adhan'),
       unmuteLabel: i18n.t('liveActivity.unmuteNext', 'Unmute next adhan'),
+      // Second action: toggle the card's lock-screen / always-on-display
+      // visibility (native-only state; independent of the master on/off setting).
+      aodActionEnabled: true,
+      aodHideLabel: i18n.t('liveActivity.hideOnLock', 'Hide on lock screen'),
+      aodShowLabel: i18n.t('liveActivity.showOnLock', 'Show on lock screen'),
       nowWord: i18n.t('liveActivity.now', 'Now'),
       inWord: i18n.t('liveActivity.inWord', 'In'),
       atWord: i18n.t('liveActivity.atWord', 'At'),

@@ -104,6 +104,15 @@ export type MihrabLiveActivityPayload = {
   /** Localised action labels for the mute toggle. */
   muteLabel?: string;
   unmuteLabel?: string;
+  /** When true, show the second "hide/show on lock screen" toggle action that
+   *  controls whether the ongoing Live Activity appears on the lock screen /
+   *  always-on display (independent of the master on/off setting). */
+  aodActionEnabled?: boolean;
+  /** Localised labels for the lock-screen visibility toggle. `aodHideLabel`
+   *  shows while the card is visible on the lock screen (press → hide);
+   *  `aodShowLabel` shows while it is hidden (press → show). */
+  aodHideLabel?: string;
+  aodShowLabel?: string;
   /** Localised "now" word for the brief "it's <prayer>" arrival state. */
   nowWord?: string;
   /** Localised metric labels for the countdown design: "In" (countdown),

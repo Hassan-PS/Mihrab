@@ -1040,7 +1040,9 @@
     "unmuteNext": "Slå på nästa böneutrop",
     "inWord": "Om",
     "atWord": "Kl.",
-    "sinceWord": "Sedan"
+    "sinceWord": "Sedan",
+    "hideOnLock": "Dölj på låsskärmen",
+    "showOnLock": "Visa på låsskärmen"
   },
   "hijri": {
     "month_1": "Muharram",

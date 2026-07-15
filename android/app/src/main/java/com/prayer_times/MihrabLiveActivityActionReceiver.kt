@@ -30,7 +30,37 @@ import org.json.JSONObject
  */
 class MihrabLiveActivityActionReceiver : BroadcastReceiver() {
   override fun onReceive(ctx: Context, intent: Intent) {
-    if (intent.action != ACTION_TOGGLE_MUTE_NEXT) return
+    when (intent.action) {
+      ACTION_TOGGLE_MUTE_NEXT -> handleMuteToggle(ctx, intent)
+      ACTION_TOGGLE_AOD -> handleAodToggle(ctx)
+    }
+  }
+
+  /**
+   * Toggle whether the ongoing Live Activity shows on the lock screen /
+   * always-on display. Purely native: flips a persisted flag and re-posts the
+   * card so the new visibility takes effect immediately. The notification stays
+   * in the shade either way — only its lock-screen/AOD visibility changes. This
+   * is independent of the master on/off setting (which stops the card entirely).
+   */
+  private fun handleAodToggle(ctx: Context) {
+    val prefs = ctx.getSharedPreferences(
+      MihrabLiveActivityModule.PREFS_NAME, Context.MODE_PRIVATE,
+    )
+    val nowHidden = !prefs.getBoolean(KEY_AOD_HIDDEN, false)
+    prefs.edit().putBoolean(KEY_AOD_HIDDEN, nowHidden).apply()
+    Log.i(TAG, "toggle AOD visibility -> hidden=$nowHidden")
+    val payloadJson = MihrabLiveActivityModule.loadPayload(ctx)
+    val payload = runCatching { payloadJson?.let { JSONObject(it) } }.getOrNull()
+    runCatching {
+      if (payload != null) {
+        val notif = MihrabLiveActivityModule.buildNotificationFromPayload(ctx, payload)
+        NotificationManagerCompat.from(ctx).notify(MihrabLiveActivityModule.NOTIF_ID, notif)
+      }
+    }.onFailure { Log.w(TAG, "re-post after AOD toggle failed", it) }
+  }
+
+  private fun handleMuteToggle(ctx: Context, intent: Intent) {
     val epoch = intent.getLongExtra(EXTRA_EPOCH, 0L)
     val name = intent.getStringExtra(EXTRA_NAME) ?: ""
     if (epoch <= 0L) return
@@ -80,12 +110,16 @@ class MihrabLiveActivityActionReceiver : BroadcastReceiver() {
   companion object {
     const val TAG = "MihrabLAAction"
     const val ACTION_TOGGLE_MUTE_NEXT = "com.prayer_times.ACTION_TOGGLE_MUTE_NEXT"
+    const val ACTION_TOGGLE_AOD = "com.prayer_times.ACTION_TOGGLE_AOD"
     const val EXTRA_EPOCH = "epoch"
     const val EXTRA_NAME = "name"
     const val EXTRA_MUTED = "muted"
     /** SharedPreferences key (in MihrabLiveActivityModule.PREFS_NAME) holding the
      *  epoch of the prayer whose next adhan is muted, or -1 when none. */
     const val KEY_MUTED_EPOCH = "muted_next_epoch"
+    /** SharedPreferences key: true when the user hid the Live Activity from the
+     *  lock screen / always-on display (it stays visible in the shade). */
+    const val KEY_AOD_HIDDEN = "aod_hidden"
   }
 }
 

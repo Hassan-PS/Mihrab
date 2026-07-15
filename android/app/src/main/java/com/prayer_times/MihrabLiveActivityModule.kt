@@ -531,6 +531,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val prefs = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val muteEpoch = prefs.getLong(MihrabLiveActivityActionReceiver.KEY_MUTED_EPOCH, -1L)
         val isMutedNext = muteEpoch == nextEpochMs
+        // User-toggled: when hidden, keep the card in the shade but drop it off
+        // the lock screen / always-on display (VISIBILITY_SECRET) and skip the
+        // status-bar chip promotion below. Independent of the master on/off.
+        val aodHidden = prefs.getBoolean(MihrabLiveActivityActionReceiver.KEY_AOD_HIDDEN, false)
 
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
@@ -540,7 +544,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setOnlyAlertOnce(true)
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
-          .setVisibility(Notification.VISIBILITY_PUBLIC)
+          .setVisibility(
+            if (aodHidden) Notification.VISIBILITY_SECRET
+            else Notification.VISIBILITY_PUBLIC,
+          )
           .setShowWhen(false)
           .setContentIntent(contentIntent)
 
@@ -634,9 +641,33 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           }
         }
 
+        // Second action: hide/show the card on the lock screen / AOD. Native-
+        // only toggle — the notification stays in the shade; only its
+        // lock-screen visibility (and the chip) flips. Independent of the
+        // master on/off setting and of the mute action above.
+        if (p.optBoolean("aodActionEnabled", false)) {
+          runCatching {
+            val aodLabel =
+              if (aodHidden) p.optString("aodShowLabel", "Show on lock screen")
+              else p.optString("aodHideLabel", "Hide on lock screen")
+            val aodIntent = Intent(ctx, MihrabLiveActivityActionReceiver::class.java).apply {
+              action = MihrabLiveActivityActionReceiver.ACTION_TOGGLE_AOD
+            }
+            val aodPi = PendingIntent.getBroadcast(
+              ctx, 0x414F, aodIntent,
+              PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            val aodIcon = Icon.createWithResource(ctx, R.drawable.ic_stat_prayer)
+            builder.addAction(
+              Notification.Action.Builder(aodIcon, aodLabel, aodPi).build(),
+            )
+          }
+        }
+
         // Promotion to the status-bar chip / AOD. Reflective (tryRequest…) so
-        // this compiles against compileSdk 36 for the F-Droid build too.
-        tryRequestPromotedOngoing(builder)
+        // this compiles against compileSdk 36 for the F-Droid build too. Skip it
+        // when the user has hidden the card from the lock screen / AOD.
+        if (!aodHidden) tryRequestPromotedOngoing(builder)
         return builder.build()
       } catch (t: Throwable) {
         Log.w(NAME, "Android 17 path failed, falling back to Android 16 path", t)

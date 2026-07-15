@@ -1040,7 +1040,9 @@
     "unmuteNext": "अगली अज़ान चालू करें",
     "inWord": "में",
     "atWord": "पर",
-    "sinceWord": "से"
+    "sinceWord": "से",
+    "hideOnLock": "लॉक स्क्रीन पर छिपाएँ",
+    "showOnLock": "लॉक स्क्रीन पर दिखाएँ"
   },
   "hijri": {
     "month_1": "मुहर्रम",

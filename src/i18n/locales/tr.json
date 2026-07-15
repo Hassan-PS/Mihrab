@@ -1040,7 +1040,9 @@
     "unmuteNext": "Sonraki ezanı aç",
     "inWord": "Kalan",
     "atWord": "Saat",
-    "sinceWord": "Geçen"
+    "sinceWord": "Geçen",
+    "hideOnLock": "Kilit ekranında gizle",
+    "showOnLock": "Kilit ekranında göster"
   },
   "hijri": {
     "month_1": "Muharrem",

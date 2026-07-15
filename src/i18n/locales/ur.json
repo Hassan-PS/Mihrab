@@ -1040,7 +1040,9 @@
     "unmuteNext": "اگلی اذان آن کریں",
     "inWord": "میں",
     "atWord": "بجے",
-    "sinceWord": "سے"
+    "sinceWord": "سے",
+    "hideOnLock": "لاک اسکرین پر چھپائیں",
+    "showOnLock": "لاک اسکرین پر دکھائیں"
   },
   "hijri": {
     "month_1": "محرم",

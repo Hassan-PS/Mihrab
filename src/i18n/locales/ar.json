@@ -1040,7 +1040,9 @@
     "unmuteNext": "تشغيل الأذان التالي",
     "inWord": "خلال",
     "atWord": "عند",
-    "sinceWord": "منذ"
+    "sinceWord": "منذ",
+    "hideOnLock": "إخفاء على شاشة القفل",
+    "showOnLock": "إظهار على شاشة القفل"
   },
   "hijri": {
     "month_1": "محرم",
