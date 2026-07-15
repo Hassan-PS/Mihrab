@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [2.7.36] — 2026-07-09
+## [2.7.37] — 2026-07-15
 
 ### Added
 - **Mihrab is now a real iPad app — and runs on Mac.** The whole app adapts to the window size: on a wide iPad (or a resizable window on Apple Silicon Macs) the Home screen becomes a two-column dashboard, reading content stays centred and comfortably measured instead of stretching, and the tools grid, Settings, and month schedule reflow to fill the space; narrow it and everything gracefully returns to the single-column phone layout.
