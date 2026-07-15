@@ -339,7 +339,9 @@
     "atPrayer": "Namaz vakti",
     "prePrayer": "{{count}} dk. içinde başlıyor",
     "adhanStopAction": "Ezanı durdur",
-    "adhanDisableAction": "Ezan'ı devre dışı bırak"
+    "adhanDisableAction": "Ezan'ı devre dışı bırak",
+    "snoozeAction": "Ertele",
+    "snoozeMinutes": "Dakika"
   },
   "support": {
     "section": "Yayıncıyı destekleyin",

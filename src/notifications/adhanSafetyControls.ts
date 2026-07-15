@@ -7,10 +7,23 @@ import { Platform } from 'react-native';
 import i18n from '../i18n';
 import { loadSettings, saveSettings } from '../settings/storage';
 import { AdhanPlayer } from '../native/AdhanPlayer';
+import {
+  ADHAN_CONTROLS_CATEGORY_ID,
+  ADHAN_ACTION_STOP,
+  ADHAN_ACTION_DISABLE,
+  ADHAN_ACTION_SNOOZE,
+} from './adhanActionIds';
+import {
+  parseSnoozeMinutes,
+  snoozePrayerNotification,
+} from './notificationActions';
 
-export const ADHAN_CONTROLS_CATEGORY_ID = 'adhan_controls';
-export const ADHAN_ACTION_STOP = 'adhan_stop';
-export const ADHAN_ACTION_DISABLE = 'adhan_disable';
+// Re-exported for back-compat with existing importers.
+export {
+  ADHAN_CONTROLS_CATEGORY_ID,
+  ADHAN_ACTION_STOP,
+  ADHAN_ACTION_DISABLE,
+};
 
 function isAdhanPrayerNotification(notification?: Notification): boolean {
   const data = notification?.data ?? {};
@@ -30,6 +43,23 @@ async function disableAdhanAndClose(notificationId?: string) {
 async function handleAdhanAction(event: Event, foreground: boolean) {
   const { type, detail } = event;
   const notification = detail.notification;
+
+  // Snooze works for ANY prayer alert (adhan or plain), so it's handled before
+  // the adhan-only guard below. Read the minutes from the action's text input
+  // (Android RemoteInput / iOS text-input action); clamp + default inside.
+  if (
+    type === EventType.ACTION_PRESS &&
+    detail.pressAction?.id === ADHAN_ACTION_SNOOZE
+  ) {
+    const minutes = parseSnoozeMinutes(detail.input);
+    void AdhanPlayer.stop();
+    if (notification?.id) {
+      await notifee.cancelNotification(notification.id).catch(() => {});
+    }
+    await snoozePrayerNotification(notification, minutes);
+    return;
+  }
+
   if (!isAdhanPrayerNotification(notification)) {
     return;
   }
@@ -96,6 +126,17 @@ export function registerAdhanSafetyControls() {
             id: ADHAN_ACTION_STOP,
             title: i18n.t('alertCopy.adhanStopAction'),
             foreground: false,
+          },
+          {
+            // Text-input action: iOS shows an inline field so the user can type
+            // any number of minutes (there are no quick chips on iOS).
+            id: ADHAN_ACTION_SNOOZE,
+            title: i18n.t('alertCopy.snoozeAction', 'Snooze'),
+            foreground: false,
+            input: {
+              buttonText: i18n.t('alertCopy.snoozeAction', 'Snooze'),
+              placeholderText: i18n.t('alertCopy.snoozeMinutes', 'Minutes'),
+            },
           },
         ],
       },

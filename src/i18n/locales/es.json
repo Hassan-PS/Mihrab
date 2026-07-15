@@ -339,7 +339,9 @@
     "atPrayer": "tiempo de oración",
     "prePrayer": "Comienza en {{count}} minutos",
     "adhanStopAction": "detener adhan",
-    "adhanDisableAction": "Desactivar adhan"
+    "adhanDisableAction": "Desactivar adhan",
+    "snoozeAction": "Posponer",
+    "snoozeMinutes": "Minutos"
   },
   "support": {
     "section": "Apoya al editor",

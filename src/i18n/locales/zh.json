@@ -339,7 +339,9 @@
     "atPrayer": "祈祷时间",
     "prePrayer": "{{count}} 分钟后开始",
     "adhanStopAction": "停止宣礼",
-    "adhanDisableAction": "禁用宣礼"
+    "adhanDisableAction": "禁用宣礼",
+    "snoozeAction": "稍后提醒",
+    "snoozeMinutes": "分钟"
   },
   "support": {
     "section": "支持发布者",

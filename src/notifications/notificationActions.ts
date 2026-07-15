@@ -1,88 +1,135 @@
 /**
- * Adhan notification action handlers — task #24.
+ * Snooze rescheduling for the adhan / prayer alerts.
  *
- * Notifee renders the adhan notification with three inline actions:
- *   • SNOOZE_5 — re-schedules the same notification 5 minutes later.
- *   • SILENT_NEXT — suppresses audio for the NEXT prayer only (one-shot).
- *   • DISMISS — standard dismiss (no handler needed; OS clears the banner).
+ * A prayer notification carries a "Snooze" action (Android RemoteInput with
+ * quick choices + free-form typing; iOS text-input category action). When the
+ * user snoozes, the press is caught in `adhanSafetyControls` and routed here to
+ * re-fire the SAME prayer alert after the chosen number of minutes.
  *
- * The handlers here encode the side-effect logic. Wiring lives in
- * `index.js`'s top-level `notifee.onBackgroundEvent` registration (which is
- * already required by notifee for actions to fire reliably).
+ * Self-contained on purpose (its own AlarmManager trigger + action rebuild) so
+ * it never imports `prayerNotifications` / `adhanSafetyControls` — that keeps
+ * the module graph acyclic (see `adhanActionIds.ts`).
  */
-
-import notifee, { TriggerType } from '@notifee/react-native';
+import notifee, {
+  AlarmType,
+  AndroidStyle,
+  TriggerType,
+  type Notification,
+} from '@notifee/react-native';
+import { Platform } from 'react-native';
+import i18n from '../i18n';
 import {
-  ADHAN_ACTION_DISABLE,
   ADHAN_ACTION_STOP,
+  ADHAN_ACTION_SNOOZE,
   ADHAN_CONTROLS_CATEGORY_ID,
-} from './adhanSafetyControls';
+} from './adhanActionIds';
 
-export const ACTION_SNOOZE_5 = 'adhan.snooze.5';
-export const ACTION_SILENT_NEXT = 'adhan.silentNext';
+/** Ids of snoozed re-fires — deliberately NOT the `pt-` prefix used by the
+ *  scheduled day, so a full resync (which cancels obsolete `pt-` triggers)
+ *  never wipes a pending snooze. */
+const SNOOZE_ID_PREFIX = 'adhan-snooze-';
 
-/** Re-export existing actions for callers that wire actions in one place. */
-export { ADHAN_ACTION_STOP, ADHAN_ACTION_DISABLE, ADHAN_CONTROLS_CATEGORY_ID };
-
-const SILENT_FLAG_KEY_PREFIX = '__silent_next_';
+/** Quick-choice minute presets offered on the snooze action. */
+export const SNOOZE_PRESETS = ['5', '10', '15', '30'];
+/** Used when the user snoozes without typing/choosing a value. */
+const SNOOZE_DEFAULT_MIN = 10;
+/** Hard clamp so a fat-fingered "9999" can't schedule days out. */
+const SNOOZE_MAX_MIN = 180;
 
 /**
- * In-memory flag for the "silence next adhan" toggle. Persists for the
- * lifetime of the JS runtime — long enough to survive between the user
- * tapping "Silent next" and the next prayer firing on Android. iOS
- * notifications don't re-enter the JS runtime, so this is best-effort.
+ * Parse the minute count from a notification action's text input (Android
+ * RemoteInput or iOS text-input action). Falls back to a sane default and
+ * clamps to [1, 180]. Accepts "10", " 10 ", "10 min" → 10.
  */
-const silentFlags: Record<string, boolean> = {};
-
-export function markSilentForPrayer(prayerName: string): void {
-  silentFlags[`${SILENT_FLAG_KEY_PREFIX}${prayerName}`] = true;
+export function parseSnoozeMinutes(
+  input: unknown,
+  fallback: number = SNOOZE_DEFAULT_MIN,
+): number {
+  if (typeof input !== 'string') return fallback;
+  const n = parseInt(input.trim(), 10);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.min(n, SNOOZE_MAX_MIN);
 }
 
-export function consumeSilentForPrayer(prayerName: string): boolean {
-  const key = `${SILENT_FLAG_KEY_PREFIX}${prayerName}`;
-  if (silentFlags[key]) {
-    delete silentFlags[key];
-    return true;
+/** Android snooze RemoteInput: quick chips + free-form typing. */
+function androidSnoozeInput() {
+  return {
+    allowFreeFormInput: true,
+    choices: SNOOZE_PRESETS,
+    placeholder: i18n.t('alertCopy.snoozeMinutes', 'Minutes'),
+  };
+}
+
+/** AlarmManager-backed timestamp trigger so the snooze is punctual even under
+ *  aggressive OEM battery managers (mirrors prayerNotifications). */
+function snoozeTrigger(timestamp: number) {
+  const trigger: {
+    type: typeof TriggerType.TIMESTAMP;
+    timestamp: number;
+    alarmManager?: { type: AlarmType };
+  } = { type: TriggerType.TIMESTAMP, timestamp };
+  if (Platform.OS === 'android') {
+    trigger.alarmManager = { type: AlarmType.SET_AND_ALLOW_WHILE_IDLE };
   }
-  return false;
+  return trigger;
 }
 
 /**
- * Schedule a snooze: same notification 5 minutes later, same channel/sound.
- * Re-uses the original notification's id with a `+snooze` suffix so multiple
- * snoozes don't pile up.
+ * Re-fire a prayer alert `minutes` from now, reusing the original's title,
+ * body, channel/sound and data. The re-fire itself carries the Snooze (and,
+ * for adhan prayers, Stop) actions so it can be snoozed again.
  */
-export async function snoozeAdhan(
-  notificationId: string,
-  prayerName: string,
-  minutesLater: number = 5,
+export async function snoozePrayerNotification(
+  notification: Notification | undefined,
+  minutes: number,
 ): Promise<void> {
-  const triggerAt = Date.now() + minutesLater * 60_000;
+  if (!notification) return;
+  const at = Date.now() + minutes * 60_000;
+  const title = notification.title ?? '';
+  const body = notification.body ?? i18n.t('alertCopy.atPrayer', 'Prayer time');
+  const data = (notification.data ?? {}) as Record<string, string>;
+  const usesAdhan = data.usesAdhan === '1';
+  const channelId = notification.android?.channelId ?? 'prayer-times-default';
+  const iosSound = notification.ios?.sound;
+
+  const actions: Array<{
+    title: string;
+    pressAction: { id: string };
+    input?: ReturnType<typeof androidSnoozeInput>;
+  }> = [];
+  if (usesAdhan) {
+    actions.push({
+      title: i18n.t('alertCopy.adhanStopAction', 'Stop adhan'),
+      pressAction: { id: ADHAN_ACTION_STOP },
+    });
+  }
+  actions.push({
+    title: i18n.t('alertCopy.snoozeAction', 'Snooze'),
+    pressAction: { id: ADHAN_ACTION_SNOOZE },
+    input: androidSnoozeInput(),
+  });
+
   await notifee.createTriggerNotification(
     {
-      id: `${notificationId}+snooze`,
-      title: prayerName,
-      body: '',
-      android: { channelId: 'prayer_default', smallIcon: 'ic_stat_prayer' },
+      id: `${SNOOZE_ID_PREFIX}${at}`,
+      title,
+      body,
+      data,
+      ios: {
+        ...(iosSound ? { sound: iosSound } : {}),
+        // Real prayers carry the Stop + Snooze category; harmless on plain ones.
+        categoryId: ADHAN_CONTROLS_CATEGORY_ID,
+      },
+      android: {
+        channelId,
+        smallIcon: 'ic_stat_prayer',
+        pressAction: { id: 'default' },
+        style: { type: AndroidStyle.BIGTEXT, text: body },
+        actions,
+        // A snoozed alert shouldn't linger for hours if the user ignores it.
+        timeoutAfter: 60 * 60_000,
+      },
     },
-    { type: TriggerType.TIMESTAMP, timestamp: triggerAt },
+    snoozeTrigger(at),
   );
-}
-
-/** Top-level action dispatcher used by `notifee.onBackgroundEvent`. */
-export async function handleNotificationAction(
-  actionId: string,
-  notificationId: string,
-  prayerName: string,
-): Promise<void> {
-  if (actionId === ACTION_SNOOZE_5) {
-    await snoozeAdhan(notificationId, prayerName, 5);
-    return;
-  }
-  if (actionId === ACTION_SILENT_NEXT) {
-    markSilentForPrayer(prayerName);
-    return;
-  }
-  // STOP / DISABLE actions are handled by the existing adhanSafetyControls
-  // module; this dispatcher just surfaces the action identifiers in one place.
 }

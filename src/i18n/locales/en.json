@@ -339,7 +339,9 @@
     "atPrayer": "Prayer time",
     "prePrayer": "Starts in {{count}} min",
     "adhanStopAction": "Stop adhan",
-    "adhanDisableAction": "Disable adhan"
+    "adhanDisableAction": "Disable adhan",
+    "snoozeAction": "Snooze",
+    "snoozeMinutes": "Minutes"
   },
   "support": {
     "section": "Support the publisher",

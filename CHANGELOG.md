@@ -9,6 +9,7 @@ All notable changes to this project are documented here. The format is inspired 
 - **Dual-page Quran (mushaf) in landscape.** When the window is wide enough, the mushaf shows two facing pages side by side like a printed copy; in portrait or on a phone it stays single-page.
 - **Tafsir selector in Settings.** Pick your tafsir edition in Settings, or from any verse on the Quran page — the two stay in sync.
 - **Hide the Live Activity from the lock screen (Android).** The prayer-countdown Live Activity now has a second action, next to "Mute next adhan," that hides or shows it on the lock screen / always-on display while keeping it in the notification shade. It's separate from the on/off setting.
+- **Snooze a prayer alert.** Prayer notifications now have a Snooze action — tap it to be reminded again in 5, 10, 15 or 30 minutes, or type any number of minutes right in the notification (Android). iOS offers the same via an inline text field.
 
 ### Fixed
 - **Your tafsir choice now sticks.** Choosing a tafsir edition used to revert to the default every time you reopened a verse; the selection now persists across the app.

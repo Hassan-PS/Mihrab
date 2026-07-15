@@ -35,10 +35,7 @@ import {
   coercePrayerOffsets,
   MAX_OFFSET_MAGNITUDE,
 } from '../src/settings/prayerOffsets';
-import {
-  consumeSilentForPrayer,
-  markSilentForPrayer,
-} from '../src/notifications/notificationActions';
+import { parseSnoozeMinutes } from '../src/notifications/notificationActions';
 import { buildLockScreenPayload, isFridayBeforeMaghrib } from '../src/widget/lockScreenPayload';
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -367,12 +364,27 @@ describe('prayer offsets', () => {
 // ─────────────────────────────────────────────────────────────────────────
 // #24 Notification actions
 // ─────────────────────────────────────────────────────────────────────────
-describe('notification actions', () => {
-  test('markSilentForPrayer + consumeSilentForPrayer are one-shot', () => {
-    markSilentForPrayer('Fajr');
-    expect(consumeSilentForPrayer('Fajr')).toBe(true);
-    expect(consumeSilentForPrayer('Fajr')).toBe(false); // already consumed
-    expect(consumeSilentForPrayer('Dhuhr')).toBe(false); // unrelated
+describe('notification actions — snooze minutes parsing', () => {
+  test('accepts plain numbers, presets, and padded/suffixed input', () => {
+    expect(parseSnoozeMinutes('5')).toBe(5);
+    expect(parseSnoozeMinutes('10')).toBe(10);
+    expect(parseSnoozeMinutes(' 22 ')).toBe(22);
+    expect(parseSnoozeMinutes('15 min')).toBe(15);
+  });
+  test('falls back to the default for empty / non-numeric / non-string input', () => {
+    expect(parseSnoozeMinutes('')).toBe(10);
+    expect(parseSnoozeMinutes('abc')).toBe(10);
+    expect(parseSnoozeMinutes(undefined)).toBe(10);
+    expect(parseSnoozeMinutes(null)).toBe(10);
+    expect(parseSnoozeMinutes('0')).toBe(10);
+    expect(parseSnoozeMinutes('-4')).toBe(10);
+    expect(parseSnoozeMinutes('7', 5)).toBe(7); // custom fallback unused when valid
+    expect(parseSnoozeMinutes('', 5)).toBe(5); // custom fallback used
+  });
+  test('clamps absurdly large values to 180', () => {
+    expect(parseSnoozeMinutes('9999')).toBe(180);
+    expect(parseSnoozeMinutes('181')).toBe(180);
+    expect(parseSnoozeMinutes('180')).toBe(180);
   });
 });
 

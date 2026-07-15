@@ -339,7 +339,9 @@
     "atPrayer": "Waktunya sholat",
     "prePrayer": "Dimulai dalam {{count}} menit",
     "adhanStopAction": "Hentikan adzan",
-    "adhanDisableAction": "Nonaktifkan adzan"
+    "adhanDisableAction": "Nonaktifkan adzan",
+    "snoozeAction": "Tunda",
+    "snoozeMinutes": "Menit"
   },
   "support": {
     "section": "Dukung penerbitnya",

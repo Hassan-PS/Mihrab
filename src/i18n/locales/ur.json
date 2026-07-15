@@ -339,7 +339,9 @@
     "atPrayer": "نماز کا وقت",
     "prePrayer": "{{count}} منٹ میں شروع ہوتا ہے۔",
     "adhanStopAction": "اذان بند کرو",
-    "adhanDisableAction": "اذان کو غیر فعال کریں۔"
+    "adhanDisableAction": "اذان کو غیر فعال کریں۔",
+    "snoozeAction": "موخر کریں",
+    "snoozeMinutes": "منٹ"
   },
   "support": {
     "section": "پبلشر کی حمایت کریں۔",

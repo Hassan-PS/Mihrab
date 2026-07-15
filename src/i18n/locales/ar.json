@@ -339,7 +339,9 @@
     "atPrayer": "وقت الصلاة",
     "prePrayer": "تبدأ خلال {{count}} د",
     "adhanStopAction": "إيقاف الأذان",
-    "adhanDisableAction": "تعطيل الأذان"
+    "adhanDisableAction": "تعطيل الأذان",
+    "snoozeAction": "تأجيل",
+    "snoozeMinutes": "دقائق"
   },
   "support": {
     "section": "دعم الناشر",

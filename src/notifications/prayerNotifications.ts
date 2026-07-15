@@ -15,8 +15,10 @@ import {
 } from './notificationSounds';
 import {
   ADHAN_ACTION_STOP,
+  ADHAN_ACTION_SNOOZE,
   ADHAN_CONTROLS_CATEGORY_ID,
-} from './adhanSafetyControls';
+} from './adhanActionIds';
+import { SNOOZE_PRESETS } from './notificationActions';
 import { AdhanPlayer } from '../native/AdhanPlayer';
 import { getMutedNextAdhan } from './adhanMute';
 import type { TimingsMap } from '../types/prayer';
@@ -409,7 +411,10 @@ export async function syncPrayerNotifications(params: {
         },
         ios: {
           sound: eventSound.iosSound,
-          ...(usesAdhan ? { categoryId: ADHAN_CONTROLS_CATEGORY_ID } : {}),
+          // Every real prayer (adhan or plain) carries the Stop + Snooze
+          // category so both actions are available; non-prayer events (Sunrise,
+          // night times) get no actions.
+          ...(isNonPrayer ? {} : { categoryId: ADHAN_CONTROLS_CATEGORY_ID }),
         },
         android: {
           channelId: eventSound.androidChannelId,
@@ -425,14 +430,36 @@ export async function syncPrayerNotifications(params: {
           // word (reported in v2.0.13 with Arabic locale).
           style: { type: AndroidStyle.BIGTEXT, text: atPrayerBody },
           actions: (() => {
-            const actions: { title: string; pressAction: { id: string } }[] = [];
-            // Log Prayer is present for the five daily prayers — a useful
-            // affordance that doesn't take a slot the user could instead use
-            // for something more important (Android shows max 3 actions and we
-            // only ever schedule 2: Log prayer + Stop adhan). The non-prayer
-            // events (Sunrise, Islamic Midnight, Last Third) get no journal
-            // action — there is no prayer row to log them against.
+            // Android shows at most 3 actions. Priority order for a real
+            // prayer: Stop adhan (silence now) · Snooze (remind me in N min) ·
+            // Log prayer. Non-prayer events (Sunrise, night times) get none.
+            const actions: {
+              title: string;
+              pressAction: { id: string };
+              input?: {
+                allowFreeFormInput: boolean;
+                choices: string[];
+                placeholder: string;
+              };
+            }[] = [];
+            if (usesAdhan) {
+              actions.push({
+                title: i18n.t('alertCopy.adhanStopAction'),
+                pressAction: { id: ADHAN_ACTION_STOP },
+              });
+            }
             if (!isNonPrayer) {
+              // Snooze: quick-choice minute chips + a free-form field so the
+              // user can type any number of minutes right in the notification.
+              actions.push({
+                title: i18n.t('alertCopy.snoozeAction', 'Snooze'),
+                pressAction: { id: ADHAN_ACTION_SNOOZE },
+                input: {
+                  allowFreeFormInput: true,
+                  choices: SNOOZE_PRESETS,
+                  placeholder: i18n.t('alertCopy.snoozeMinutes', 'Minutes'),
+                },
+              });
               actions.push({
                 title: i18n.t('journal.logActionTitle', 'Log prayer'),
                 pressAction: {
@@ -440,12 +467,6 @@ export async function syncPrayerNotifications(params: {
                   // foreground handler can route to the right row.
                   id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
                 },
-              });
-            }
-            if (usesAdhan) {
-              actions.push({
-                title: i18n.t('alertCopy.adhanStopAction'),
-                pressAction: { id: ADHAN_ACTION_STOP },
               });
             }
             return actions;

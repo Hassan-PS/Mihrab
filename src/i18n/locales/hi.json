@@ -339,7 +339,9 @@
     "atPrayer": "प्रार्थना का समय",
     "prePrayer": "{{count}} मिनट में शुरू होता है",
     "adhanStopAction": "अज़ान बंद करो",
-    "adhanDisableAction": "अज़ान अक्षम करें"
+    "adhanDisableAction": "अज़ान अक्षम करें",
+    "snoozeAction": "स्नूज़",
+    "snoozeMinutes": "मिनट"
   },
   "support": {
     "section": "प्रकाशक का समर्थन करें",

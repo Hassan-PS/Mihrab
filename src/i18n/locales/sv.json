@@ -339,7 +339,9 @@
     "atPrayer": "Bönetid",
     "prePrayer": "Börjar om {{count}} min",
     "adhanStopAction": "Stoppa adhan",
-    "adhanDisableAction": "Inaktivera adhan"
+    "adhanDisableAction": "Inaktivera adhan",
+    "snoozeAction": "Snooza",
+    "snoozeMinutes": "Minuter"
   },
   "support": {
     "section": "Stöd utgivaren",

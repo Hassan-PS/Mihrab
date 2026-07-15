@@ -339,7 +339,9 @@
     "atPrayer": "নামাজের সময়",
     "prePrayer": "{{count}} মিনিটে শুরু হয়",
     "adhanStopAction": "আযান বন্ধ কর",
-    "adhanDisableAction": "আযান বন্ধ করুন"
+    "adhanDisableAction": "আযান বন্ধ করুন",
+    "snoozeAction": "স্নুজ",
+    "snoozeMinutes": "মিনিট"
   },
   "support": {
     "section": "প্রকাশককে সমর্থন করুন",

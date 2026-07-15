@@ -339,7 +339,9 @@
     "atPrayer": "Время молитвы",
     "prePrayer": "Начало через {{count}} мин.",
     "adhanStopAction": "Остановить азан",
-    "adhanDisableAction": "Отключить азан"
+    "adhanDisableAction": "Отключить азан",
+    "snoozeAction": "Отложить",
+    "snoozeMinutes": "Минуты"
   },
   "support": {
     "section": "Поддержите издателя",

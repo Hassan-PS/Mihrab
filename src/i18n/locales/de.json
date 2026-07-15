@@ -339,7 +339,9 @@
     "atPrayer": "Gebetszeit",
     "prePrayer": "Beginnt in {{count}} Min",
     "adhanStopAction": "Hör auf, Adhan",
-    "adhanDisableAction": "Adhan deaktivieren"
+    "adhanDisableAction": "Adhan deaktivieren",
+    "snoozeAction": "Erinnern",
+    "snoozeMinutes": "Minuten"
   },
   "support": {
     "section": "Unterstützen Sie den Verlag",
