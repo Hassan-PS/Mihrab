@@ -24,21 +24,29 @@ target 'PrayerApp' do
   )
 
   post_install do |installer|
+    # Mac Catalyst (Path B, v2.7.38) is OPT-IN via MIHRAB_CATALYST=1 —
+    # scripts/build-catalyst.sh sets it before its own `pod install`.
+    # It must NOT be on by default: with it enabled, hermes-engine's
+    # framework layout changes and the plain iOS DEVICE ARCHIVE dies on
+    # Xcode Cloud with "hermesvm.xcframework/ios-arm64: No such file"
+    # (build 422, 2026-07-16). Local sim + Catalyst builds don't hit the
+    # archive path, which is why this slipped through.
+    mihrab_catalyst = ENV['MIHRAB_CATALYST'] == '1'
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      # Mac Catalyst (Path B, v2.7.38): the same iPad app built as a real
-      # macOS .app so it can ship outside the App Store (Homebrew cask).
-      :mac_catalyst_enabled => true,
+      :mac_catalyst_enabled => mihrab_catalyst,
       # :ccache_enabled => true
     )
 
-    # Every third-party pod must also opt into Catalyst — the RN helper
-    # above only covers the React pods. Harmless for pure-iOS builds.
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        config.build_settings['SUPPORTS_MACCATALYST'] = 'YES'
-        config.build_settings['DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER'] = 'YES'
+    if mihrab_catalyst
+      # Every third-party pod must also opt into Catalyst — the RN helper
+      # above only covers the React pods.
+      installer.pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['SUPPORTS_MACCATALYST'] = 'YES'
+          config.build_settings['DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER'] = 'YES'
+        end
       end
     end
 

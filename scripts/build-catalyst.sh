@@ -25,6 +25,13 @@ DIST=ios/build/catalyst-dist
 APP="$DIST/Mihrab.app"
 ZIP="$DIST/Mihrab-macOS-$VERSION.zip"
 
+echo "▸ Preparing pods with Catalyst support (MIHRAB_CATALYST=1)…"
+# Catalyst pod settings are opt-in: enabling them globally broke the
+# plain iOS device archive on Xcode Cloud (hermes-engine framework
+# layout). This regenerates the Pods project with Catalyst on; the next
+# plain `pod install` (or Xcode Cloud's clean checkout) reverts it.
+(cd ios && MIHRAB_CATALYST=1 pod install --silent)
+
 echo "▸ Building Mihrab $VERSION for Mac Catalyst (Release)…"
 # Build UNSIGNED (a global signing override would also apply to the
 # iOS-only widget target and trip its provisioning check), then sign
