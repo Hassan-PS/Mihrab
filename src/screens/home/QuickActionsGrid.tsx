@@ -70,15 +70,17 @@ function QuickActionsGridImpl() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    // Auto-flowing grid. Phone: minItemWidth 88 keeps the historical 3
-    // columns. Wide windows (iPad/Mac): larger minimum + a 4-column cap —
-    // 5–6 cramped columns with an orphan tile read as clutter in the
-    // dashboard sidebar (Mac audit 2026-07-16, plan v2 §B2); 132pt tiles
-    // flow 3-per-row in the sidebar and 4-per-row in the single column.
+    // Auto-flowing grid. Phone: HARD 3-column cap — minItemWidth 88 with
+    // maxColumns 6 crammed FOUR ~89dp tiles per row on common 411dp
+    // phones (reported as "messed up margins", 2026-07-16); the design
+    // is 3 comfortable columns, 2 on very narrow devices. Wide windows
+    // (iPad/Mac): larger minimum + a 4-column cap — 5–6 cramped columns
+    // with an orphan tile read as clutter in the dashboard sidebar
+    // (Mac audit 2026-07-16, plan v2 §B2).
     <AdaptiveGrid
-      minItemWidth={bp === 'compact' ? 88 : 132}
+      minItemWidth={bp === 'compact' ? 104 : 132}
       gutter={SPACING.sm}
-      maxColumns={bp === 'compact' ? 6 : 4}>
+      maxColumns={bp === 'compact' ? 3 : 4}>
       {TOOLS.map(tool => (
         <Pressable
           key={tool.id}
