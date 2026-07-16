@@ -90,7 +90,17 @@ export function HomeScreen() {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   // Cap the day-card width to the centered content column so the carousel
   // doesn't overflow the capped column on iPad/Mac windows.
-  const cardWidth = contentColumnWidth(screenWidth) - HOME_SCREEN_PADDING * 2;
+  // Must equal the width the SIBLING cards actually render at — i.e. the
+  // CenteredColumn inner width. The old `contentColumnWidth(w) - padding`
+  // subtracted the screen padding AFTER the 720pt cap, so in the regular
+  // band (window ≥ ~750pt) the day table came out 32pt narrower than the
+  // hero/shortcut cards above and below it ("weird margins", Mac
+  // 2026-07-16). The screen padding only eats into the column while the
+  // window is narrower than cap + padding.
+  const cardWidth = Math.min(
+    contentColumnWidth(screenWidth),
+    screenWidth - HOME_SCREEN_PADDING * 2,
+  );
   // Expanded (wide iPad landscape / Mac window): lay Home out as a two-column
   // dashboard — a fixed "today" main column beside a flexible tools sidebar —
   // so the cards fill the window and fit without scrolling. The day carousel
