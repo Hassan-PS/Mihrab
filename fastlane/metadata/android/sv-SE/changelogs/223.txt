@@ -1,0 +1,3 @@
+• Fix för överlappande kort/prickar på hemskärmen (alla enheter)
+• Verktygsrutnätet åter 3 bekväma kolumner på mobiler
+• Mindre appstorlek

@@ -1,0 +1,3 @@
+• Fixed overlapping cards/dots on the Home screen (all devices)
+• Tools grid back to 3 comfortable columns on phones
+• Smaller app: unused resources stripped from the Play build

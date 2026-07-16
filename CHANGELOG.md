@@ -2,7 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.7.39] — 2026-07-16
+
+### Fixed
+- **Home spacing regression (all platforms, since 2.7.36)**: the centering wrapper collapsed the Home cards into one container, disabling the 12pt inter-card gap — most visibly the day-carousel page dots overlapping the day table and the "Open the Quran" button. Rhythm restored on phones, iPad (portrait + landscape), and Mac.
+- **Tools grid on phones back to 3 columns** — the auto-flow grid crammed four undersized tiles per row on common phone widths.
 
 ### Changed
 - **Play Console recommendations (Android)**: the widget configure screen no longer locks to portrait (Android 16 ignores such locks on large screens); resource shrinking enabled for the Play flavor (AAB ~2.7 MB smaller) with ABI splits gated off during bundling to dodge AGP's shrunk-resources bundling bug. The remaining flagged items (edge-to-edge Window color APIs, Fresco decode paths) live inside React Native/Fresco internals and await upstream releases.
