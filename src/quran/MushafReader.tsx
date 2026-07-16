@@ -238,7 +238,17 @@ export function MushafReader({
   // `dualPage` is false and every value below collapses to the original
   // single-page math (pageW === screenWidth), so that path is unchanged.
   const isLandscape = windowWidth > windowHeight;
-  const dualPage = isLandscape && windowWidth >= 900;
+  // ≥960 (was 900): per-page columns below ~480pt render cramped spreads
+  // on smaller Mac windows (plan v2 §C3/M4).
+  const dualPage = isLandscape && windowWidth >= 960;
+  // Pointer environments (iPad with trackpad, Mac "Designed for iPad"):
+  // trackpad/mouse users have NO page-turn affordance — wheel scroll
+  // doesn't drive a pagingEnabled ScrollView. Show edge chevrons on
+  // iPad-idiom devices; they brighten on hover (plan v2 §C2/M2).
+  const showPagerChevrons =
+    Platform.OS === 'ios' &&
+    ((Platform as unknown as { isPad?: boolean }).isPad === true ||
+      windowWidth >= 900);
   const pageW = dualPage ? windowWidth / 2 : windowWidth;
   const [currentPage, setCurrentPage] = useState(initialPage);
   // Measured height of the page viewport (imageWrap), tagged with the
@@ -374,6 +384,30 @@ export function MushafReader({
     commitPage(clamped, clamped); // record position; not a sequential turn
     setJumpVisible(false);
     setJumpText('');
+  };
+
+  /** Chevron/pointer page turn (plan v2 §C2). `dir` is READING direction:
+   *  +1 = next page (visually the LEFT neighbour — the mushaf advances
+   *  right-to-left), -1 = previous. Steps a whole spread in dual mode. */
+  const turnPage = (dir: 1 | -1) => {
+    const step = dualPage ? 2 : 1;
+    const target = Math.max(
+      1,
+      Math.min(MUSHAF_TOTAL_PAGES, currentPage + dir * step),
+    );
+    if (target === currentPage) return;
+    // Pointer navigation takes over from recitation follow, same as a swipe.
+    followRef.current = false;
+    setTimeout(() => {
+      followRef.current = true;
+    }, 30_000);
+    commitPage(target, currentPage);
+    setCurrentPage(target);
+    scrollRef.current?.scrollTo({
+      x: scrollXForPage(target),
+      y: 0,
+      animated: true,
+    });
   };
 
   // ── Reader layout ───────────────────────────────────────────────────
@@ -643,40 +677,59 @@ export function MushafReader({
         }}>
         {/* Header + footer stay in fullscreen (v2.7.29): surah name
             replaces the Juz label there (the nav header is hidden), and
-            the night toggle + page number remain reachable. */}
-        <View style={[styles.pageHeader, { marginTop: navOverlayPad }]}>
-            <Text
-              numberOfLines={1}
-              style={[styles.pageHeaderText, { color: ornament }]}>
-              {isFullscreen
-                ? MUSHAF_SURAHS.find(s => s.number === meta.start.surah)
-                    ?.englishName ?? ''
-                : t('quran.juzLabel', {
-                    defaultValue: 'Juz {{juz}}',
-                    juz: easternNumerals(meta.juz),
-                  })}
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                nightMode
-                  ? t('quran.switchToLight', 'Switch to light page')
-                  : t('quran.switchToNight', 'Switch to night page')
-              }
-              hitSlop={8}
-              onPress={() =>
-                setQuranPrefs({ mushafNightMode: !nightMode })
-              }
-              style={[styles.nightPill, { borderColor: ornament }]}>
-              <Text style={[styles.nightPillText, { color: ornament }]}>
-                {nightMode
-                  ? // U+FE0E variation selectors force the monochrome text
-                    // glyphs — Android otherwise renders the sun as a
-                    // colored emoji, which shouts against the quiet page.
-                    `☀︎ ${t('quran.lightShort', 'Light')}`
-                  : `☾︎ ${t('quran.nightShort', 'Night')}`}
+            the night toggle + page number remain reachable.
+
+            Dual-page (plan v2 §C1): ONE chrome set per SPREAD, not per
+            page — the odd (visually right) page carries the Juz/surah
+            label at the spread's outer right corner and the even (left)
+            page carries the night pill at the outer left corner. Both
+            columns keep the header row so the page boxes stay equal. */}
+        <View
+          style={[
+            styles.pageHeader,
+            { marginTop: navOverlayPad },
+            // Label lives at the spread's OUTER right corner (the row is
+            // physically LTR — the app drives RTL via text, not
+            // I18nManager); the pill's default start position is already
+            // the outer left corner of the left page.
+            dualPage && page % 2 === 1 && styles.pageHeaderLabelEnd,
+          ]}>
+            {!dualPage || page % 2 === 1 ? (
+              <Text
+                numberOfLines={1}
+                style={[styles.pageHeaderText, { color: ornament }]}>
+                {isFullscreen
+                  ? MUSHAF_SURAHS.find(s => s.number === meta.start.surah)
+                      ?.englishName ?? ''
+                  : t('quran.juzLabel', {
+                      defaultValue: 'Juz {{juz}}',
+                      juz: easternNumerals(meta.juz),
+                    })}
               </Text>
-            </Pressable>
+            ) : null}
+            {!dualPage || page % 2 === 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  nightMode
+                    ? t('quran.switchToLight', 'Switch to light page')
+                    : t('quran.switchToNight', 'Switch to night page')
+                }
+                hitSlop={8}
+                onPress={() =>
+                  setQuranPrefs({ mushafNightMode: !nightMode })
+                }
+                style={[styles.nightPill, { borderColor: ornament }]}>
+                <Text style={[styles.nightPillText, { color: ornament }]}>
+                  {nightMode
+                    ? // U+FE0E variation selectors force the monochrome text
+                      // glyphs — Android otherwise renders the sun as a
+                      // colored emoji, which shouts against the quiet page.
+                      `☀︎ ${t('quran.lightShort', 'Light')}`
+                    : `☾︎ ${t('quran.nightShort', 'Night')}`}
+                </Text>
+              </Pressable>
+            ) : null}
         </View>
         <View
           style={styles.imageWrap}
@@ -839,6 +892,49 @@ export function MushafReader({
         {mountedPages.map(renderPage)}
       </ScrollView>
 
+      {/* Pointer page-turn chevrons (plan v2 §C2). The mushaf advances
+          right-to-left, so the LEFT chevron is NEXT and the right one is
+          PREVIOUS. Faint at rest, solid on hover (Mac/iPad-trackpad).
+          Purely additive — swipe/drag behavior is untouched. */}
+      {showPagerChevrons ? (
+        <>
+          {currentPage < MUSHAF_TOTAL_PAGES ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.nextPage', 'Next page')}
+              hitSlop={8}
+              onPress={() => turnPage(1)}
+              style={({ hovered }: { pressed: boolean; hovered?: boolean }) => [
+                styles.chevron,
+                styles.chevronLeft,
+                {
+                  backgroundColor: nightMode ? '#1d1d1d' : '#f4efe4',
+                  opacity: hovered ? 0.95 : 0.4,
+                },
+              ]}>
+              <Text style={[styles.chevronGlyph, { color: ornament }]}>‹</Text>
+            </Pressable>
+          ) : null}
+          {currentPage > 1 ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.prevPage', 'Previous page')}
+              hitSlop={8}
+              onPress={() => turnPage(-1)}
+              style={({ hovered }: { pressed: boolean; hovered?: boolean }) => [
+                styles.chevron,
+                styles.chevronRight,
+                {
+                  backgroundColor: nightMode ? '#1d1d1d' : '#f4efe4',
+                  opacity: hovered ? 0.95 : 0.4,
+                },
+              ]}>
+              <Text style={[styles.chevronGlyph, { color: ornament }]}>›</Text>
+            </Pressable>
+          ) : null}
+        </>
+      ) : null}
+
       <MiniPlayer />
 
       {selected ? (
@@ -954,6 +1050,23 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     fontVariant: ['tabular-nums'],
   },
+  // Dual-page: the odd (right) page shows only the label — push it to
+  // the spread's outer right corner (§C1).
+  pageHeaderLabelEnd: { justifyContent: 'flex-end' },
+  // Pointer page-turn chevrons (§C2).
+  chevron: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -24,
+    width: 40,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chevronLeft: { left: 8 },
+  chevronRight: { right: 8 },
+  chevronGlyph: { fontSize: 30, fontWeight: '600', lineHeight: 34 },
   nightPill: {
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 12,

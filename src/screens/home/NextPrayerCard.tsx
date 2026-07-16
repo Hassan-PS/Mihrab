@@ -34,10 +34,17 @@ type NextPrayerCardProps = {
    *  the provider and how many days are cached on-device. Null hides
    *  the row (status not loaded yet). */
   dataStatus?: { lastFetchedAt: Date | null; totalDaysCached: number } | null;
+  /** Dashboard (wide iPad/Mac) treatment: the hero scales up so it
+   *  anchors the two-column layout instead of staying phone-sized. */
+  expanded?: boolean;
 };
 
-function NextPrayerCardImpl({ nextInfo, dataStatus }: NextPrayerCardProps) {
-  const { t } = useTranslation();
+function NextPrayerCardImpl({
+  nextInfo,
+  dataStatus,
+  expanded = false,
+}: NextPrayerCardProps) {
+  const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const [now, setNow] = useState(() => new Date());
 
@@ -116,6 +123,8 @@ function NextPrayerCardImpl({ nextInfo, dataStatus }: NextPrayerCardProps) {
           padding: HOME_CARD_PADDING,
           ...cardEdgeStyle(palette),
         },
+        // Dashboard hero (§B1): more presence on a wide window.
+        expanded && styles.cardExpanded,
       ]}>
       <View
         pointerEvents="none"
@@ -125,12 +134,21 @@ function NextPrayerCardImpl({ nextInfo, dataStatus }: NextPrayerCardProps) {
         {t('home.nextPrayer')}
       </Text>
       <Text
-        style={[styles.name, { color: palette.text }]}
+        style={[
+          styles.name,
+          expanded && styles.nameExpanded,
+          { color: palette.text },
+        ]}
         numberOfLines={1}>
         {t(`prayer.${nextInfo.name}`)}
       </Text>
       <Text
-        style={[styles.time, tabularNumeralStyle, { color: palette.accent }]}
+        style={[
+          styles.time,
+          expanded && styles.timeExpanded,
+          tabularNumeralStyle,
+          { color: palette.accent },
+        ]}
         numberOfLines={1}
         // Note: do NOT use `adjustsFontSizeToFit` here — combined with the
         // tabular-nums fontVariant, iOS in some locales (Arabic in particular)
@@ -170,16 +188,24 @@ function NextPrayerCardImpl({ nextInfo, dataStatus }: NextPrayerCardProps) {
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
           {(dataStatus.lastFetchedAt
             ? t('home.updatedAt', {
-                when:
+                // U+2066/U+2069 (FSI…PDI-style LTR isolate): the clock/date
+                // is a Latin-digit run inside a possibly-RTL sentence —
+                // without isolation the Arabic line scrambled to
+                // "آخر تحديث 485 · Jul 9 يومًا…" (Mac audit, §A3). The date
+                // also follows the APP locale now, not the device's.
+                when: `⁦${
                   dataStatus.lastFetchedAt.toDateString() === now.toDateString()
                     ? formatLocalTime(dataStatus.lastFetchedAt)
-                    : dataStatus.lastFetchedAt.toLocaleDateString(undefined, {
-                        day: 'numeric',
-                        month: 'short',
-                      }),
+                    : dataStatus.lastFetchedAt.toLocaleDateString(
+                        i18n.language,
+                        { day: 'numeric', month: 'short' },
+                      )
+                }⁩`,
               }) + ' · '
             : '') +
-            t('home.daysStored', { count: dataStatus.totalDaysCached })}
+            t('home.daysStored', {
+              count: dataStatus.totalDaysCached,
+            })}
         </Text>
       ) : null}
     </GlassSurface>
@@ -235,4 +261,8 @@ const styles = StyleSheet.create({
   countdownPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   countdown: { fontSize: 14, fontWeight: '500' },
   dataStatus: { marginTop: 10, fontSize: 11, fontWeight: '500' },
+  // Dashboard treatment (§B1): the hero anchors a two-column layout.
+  cardExpanded: { paddingVertical: 40 },
+  nameExpanded: { fontSize: 26 },
+  timeExpanded: { fontSize: 88 },
 });

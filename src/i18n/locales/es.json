@@ -861,7 +861,9 @@
     "khatmahStartCta": "Comenzar",
     "showMore": "Mostrar más",
     "showLess": "Mostrar menos",
-    "tafsirEditionHelp": "El comentario que se muestra debajo de cada versículo. También se puede cambiar desde cualquier versículo en la página del Corán."
+    "tafsirEditionHelp": "El comentario que se muestra debajo de cada versículo. También se puede cambiar desde cualquier versículo en la página del Corán.",
+    "nextPage": "Página siguiente",
+    "prevPage": "Página anterior"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

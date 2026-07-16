@@ -4,7 +4,12 @@ All notable changes to this project are documented here. The format is inspired 
 
 ## [Unreleased]
 
+### Changed
+- **iPad/Mac layout, round 2** (docs/adaptive-layout-v2-plan.md). Home dashboard: content now vertically centers in the window (no more dead bottom half), the hero scales up to anchor the two columns, the tools grid flows in balanced larger tiles instead of 5-across with an orphan, and the two-column form only engages at ≥1180pt. Mushaf: the dual-page spread carries ONE chrome set (single Juz label at the outer right, single night pill at the outer left — they were duplicated per page), hover/click chevrons at the screen edges turn pages for trackpad and mouse users (there was no pointer affordance at all), and the spread threshold rises so facing pages never render cramped.
+
 ### Fixed
+- **Quran index no longer pins to the right edge of wide windows (RTL).** The width cap moved from the list's content container (where it's ignored and pinned to the flow edge) onto the header and rows themselves, so the column truly centers in any language.
+- **Home data-freshness line no longer scrambles in Arabic.** The embedded time/date is bidi-isolated and formatted in the app language.
 - **Adhan/Sunrise alerts no longer fire 1–2 minutes off (with a duplicate at the real time).** If a notification sync ran shortly after midnight while the app still held the previous day's times in memory (e.g. a brief phone wake before the day-change refetch landed), yesterday's clock times were pinned onto today's date — the alert fired at yesterday's minute, and the next resync scheduled a second alert at the correct time. The schedule is now anchored to the calendar day the times were fetched for, so a stale map lands on its own (past) day and the "tomorrow" map correctly covers the actual today. A sync whose data is entirely stale now keeps the existing alarms instead of wiping them.
 
 ## [2.7.37] — 2026-07-15

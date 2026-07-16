@@ -861,7 +861,9 @@
     "khatmahStartCta": "Starten",
     "showMore": "Mehr anzeigen",
     "showLess": "Weniger anzeigen",
-    "tafsirEditionHelp": "Der Kommentar, der unter jedem Vers angezeigt wird. Auch bei jedem Vers auf der Koran-Seite änderbar."
+    "tafsirEditionHelp": "Der Kommentar, der unter jedem Vers angezeigt wird. Auch bei jedem Vers auf der Koran-Seite änderbar.",
+    "nextPage": "Nächste Seite",
+    "prevPage": "Vorherige Seite"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

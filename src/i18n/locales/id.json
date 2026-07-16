@@ -861,7 +861,9 @@
     "khatmahStartCta": "Mulai",
     "showMore": "Tampilkan selengkapnya",
     "showLess": "Tampilkan lebih sedikit",
-    "tafsirEditionHelp": "Tafsir yang ditampilkan di bawah setiap ayat. Juga dapat diubah dari ayat mana pun di halaman Al-Qur’an."
+    "tafsirEditionHelp": "Tafsir yang ditampilkan di bawah setiap ayat. Juga dapat diubah dari ayat mana pun di halaman Al-Qur’an.",
+    "nextPage": "Halaman berikutnya",
+    "prevPage": "Halaman sebelumnya"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

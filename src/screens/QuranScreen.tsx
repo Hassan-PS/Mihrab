@@ -177,7 +177,7 @@ export function QuranScreen() {
   const today = plan ? khatmahToday(plan) : null;
 
   const header = (
-    <View style={styles.headerWrap}>
+    <View style={[styles.headerWrap, listCap]}>
       {/* Continue reading (QR-10) */}
       {quran.lastRead ? (
         <Pressable
@@ -540,6 +540,7 @@ export function QuranScreen() {
         onPress={() => openSurah(item.number)}
         style={[
           styles.row,
+          listCap,
           { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
         ]}>
         <View style={[styles.numberBadge, { backgroundColor: palette.accentBg }]}>
@@ -578,6 +579,7 @@ export function QuranScreen() {
       }
       style={[
         styles.row,
+        listCap,
         { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
       ]}>
       <View style={[styles.numberBadge, { backgroundColor: palette.accentBg }]}>
@@ -621,7 +623,7 @@ export function QuranScreen() {
   const bookmarksEmpty = bookmarks.length === 0 && starredRefs.length === 0;
 
   const renderBookmarks = () => (
-    <View style={{ gap: 8 }}>
+    <View style={[{ gap: 8 }, listCap]}>
       {bookmarksEmpty ? (
         <View
           style={[
@@ -714,7 +716,7 @@ export function QuranScreen() {
         <FlatList<SurahIndex>
           data={[...filteredSurahs]}
           keyExtractor={s => String(s.number)}
-          contentContainerStyle={[styles.list, listCap]}
+          contentContainerStyle={styles.list}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           initialNumToRender={12}
@@ -725,7 +727,7 @@ export function QuranScreen() {
         <FlatList<JuzRow>
           data={juzRows}
           keyExtractor={j => String(j.juz)}
-          contentContainerStyle={[styles.list, listCap]}
+          contentContainerStyle={styles.list}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           renderItem={renderJuzRow}
@@ -734,7 +736,7 @@ export function QuranScreen() {
         <FlatList
           data={[0]}
           keyExtractor={() => 'bookmarks'}
-          contentContainerStyle={[styles.list, listCap]}
+          contentContainerStyle={styles.list}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           renderItem={renderBookmarks}
@@ -895,7 +897,12 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   list: { padding: 16, gap: 8 },
   // Center + cap the index column on iPad/Mac so surah rows stay readable.
-  listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' },
+  // Cap+center applied to the header and to EVERY row — NOT to the
+  // FlatList contentContainerStyle. `alignSelf`/`maxWidth` on the content
+  // container are ignored/pin to the flow-start edge, which under RTL
+  // shoved the whole 720pt column against the RIGHT edge of a wide
+  // window and left the other half empty (Mac audit, 2026-07-16).
+  listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: 10, marginBottom: 8 },
   resumeCard: {
     flexDirection: 'row',

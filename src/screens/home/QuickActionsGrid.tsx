@@ -8,6 +8,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { AdaptiveGrid } from '../../responsive/AdaptiveGrid';
+import { useBreakpoint } from '../../responsive/breakpoints';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import {
@@ -65,14 +66,19 @@ const TOOLS: Tool[] = [
 function QuickActionsGridImpl() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const bp = useBreakpoint();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    // Auto-flowing grid: 3 columns on a phone, filling to more as the window
-    // widens (iPad / Mac) so the tools spread across the available space
-    // instead of staying a narrow 3-wide strip. minItemWidth 88 keeps 3
-    // columns on the smallest supported phones.
-    <AdaptiveGrid minItemWidth={88} gutter={SPACING.sm} maxColumns={6}>
+    // Auto-flowing grid. Phone: minItemWidth 88 keeps the historical 3
+    // columns. Wide windows (iPad/Mac): larger minimum + a 4-column cap —
+    // 5–6 cramped columns with an orphan tile read as clutter in the
+    // dashboard sidebar (Mac audit 2026-07-16, plan v2 §B2); 132pt tiles
+    // flow 3-per-row in the sidebar and 4-per-row in the single column.
+    <AdaptiveGrid
+      minItemWidth={bp === 'compact' ? 88 : 132}
+      gutter={SPACING.sm}
+      maxColumns={bp === 'compact' ? 6 : 4}>
       {TOOLS.map(tool => (
         <Pressable
           key={tool.id}

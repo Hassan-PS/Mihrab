@@ -861,7 +861,9 @@
     "khatmahStartCta": "Starta",
     "showMore": "Visa mer",
     "showLess": "Visa mindre",
-    "tafsirEditionHelp": "Kommentaren som visas under varje vers. Kan även ändras från valfri vers på Koran-sidan."
+    "tafsirEditionHelp": "Kommentaren som visas under varje vers. Kan även ändras från valfri vers på Koran-sidan.",
+    "nextPage": "Nästa sida",
+    "prevPage": "Föregående sida"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

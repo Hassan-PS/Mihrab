@@ -861,7 +861,9 @@
     "khatmahStartCta": "Başla",
     "showMore": "Daha fazla göster",
     "showLess": "Daha az göster",
-    "tafsirEditionHelp": "Her ayetin altında gösterilen tefsir. Kur’an sayfasındaki herhangi bir ayetten de değiştirilebilir."
+    "tafsirEditionHelp": "Her ayetin altında gösterilen tefsir. Kur’an sayfasındaki herhangi bir ayetten de değiştirilebilir.",
+    "nextPage": "Sonraki sayfa",
+    "prevPage": "Önceki sayfa"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

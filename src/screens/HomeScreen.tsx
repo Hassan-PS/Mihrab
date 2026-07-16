@@ -44,7 +44,7 @@ import { DataStatsPanel } from './home/DataStatsPanel';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { QuickActionsGrid } from './home/QuickActionsGrid';
 import { CenteredColumn } from '../responsive/CenteredColumn';
-import { classifyWidth, contentColumnWidth } from '../responsive/breakpoints';
+import { contentColumnWidth } from '../responsive/breakpoints';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
@@ -95,7 +95,10 @@ export function HomeScreen() {
   // dashboard — a fixed "today" main column beside a flexible tools sidebar —
   // so the cards fill the window and fit without scrolling. The day carousel
   // is sized to the fixed main column so its pages stay crisp and aligned.
-  const isDashboard = classifyWidth(screenWidth) === 'expanded';
+  // 1180 (not the 1100 'expanded' edge): below that the sidebar drops
+  // under ~440pt and the tools grid crams — the centered single column
+  // reads far better in that band (Mac audit 2026-07-16, plan v2 §B4).
+  const isDashboard = screenWidth >= 1180;
   const HOME_MAIN_COL = 620;
   const carouselCardWidth = isDashboard
     ? HOME_MAIN_COL - HOME_SCREEN_PADDING * 2
@@ -601,6 +604,10 @@ export function HomeScreen() {
       contentContainerStyle={[
         styles.scrollContent,
         { paddingBottom: insets.bottom + 28 },
+        // Fill the viewport on the dashboard: when the two columns are
+        // shorter than the window, center them vertically instead of
+        // leaving the bottom half of a Mac/iPad window empty (§B1).
+        isDashboard && styles.scrollContentDash,
       ]}
       contentInsetAdjustmentBehavior="automatic">
       <CenteredColumn maxWidth={isDashboard ? 1180 : undefined}>
@@ -617,7 +624,11 @@ export function HomeScreen() {
 
       {(() => {
         const heroCard = (
-          <NextPrayerCard nextInfo={nextInfo} dataStatus={dataStatus} />
+          <NextPrayerCard
+            nextInfo={nextInfo}
+            dataStatus={dataStatus}
+            expanded={isDashboard}
+          />
         );
         const dayTable = (
           <DayCarousel
@@ -705,7 +716,9 @@ const styles = StyleSheet.create({
   // sidebar, so Home fills a wide window and fits without scrolling.
   dashRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    // Stretch (not flex-start): the sidebar's last card can breathe to
+    // the main column's height, so the two columns read as one piece.
+    alignItems: 'stretch',
     gap: 20,
   },
   dashSide: {
@@ -717,5 +730,11 @@ const styles = StyleSheet.create({
     padding: HOME_SCREEN_PADDING,
     paddingBottom: 36,
     gap: 12,
+  },
+  // Dashboard: let the content grow to the viewport and center it
+  // vertically when shorter (§B1 — kills the dead bottom half).
+  scrollContentDash: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
 });
