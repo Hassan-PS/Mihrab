@@ -85,10 +85,13 @@
           android:resource="@xml/prayer_widget_large_info" />
       </receiver>
 
+      <!-- No screenOrientation lock: Android 16 ignores orientation
+           restrictions on large screens and Play flags them (console
+           recommendation, 2026-07-16). The configure layout is a simple
+           scrollable list and works in any orientation. -->
       <activity
         android:name=".PrayerWidgetConfigureActivity"
         android:exported="true"
-        android:screenOrientation="portrait"
         android:theme="@style/WidgetConfigureTheme"
         android:windowSoftInputMode="adjustResize">
         <intent-filter>

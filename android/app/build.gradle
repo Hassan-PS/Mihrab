@@ -160,6 +160,11 @@ android {
                 signingConfig signingConfigs.debug
             }
             minifyEnabled enableProguardInReleaseBuilds
+            // Resource shrinking (Play Console "Teknisk kvalitet"
+            // recommendation, 2026-07-16). Guarded by the same flag so
+            // the F-Droid flavor (minify off — CI OOM) stays untouched;
+            // shrinkResources requires minifyEnabled.
+            shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             buildConfigField "boolean", "IS_BETA", "false"
         }
@@ -198,10 +203,14 @@ android {
     }
 
     // Per-ABI APK splits: only for the `play` flavor so F-Droid still produces
-    // a single universal APK (required by their build recipe).
+    // a single universal APK (required by their build recipe). Splits must
+    // also be OFF for bundle* tasks — the AAB already delivers per-ABI, and
+    // shrinkResources + splits + bundling trips AGP's "Multiple
+    // shrunk-resources files found" bug (issuetracker.google.com/402800800).
+    def isBundling = gradle.startParameter.taskNames.any { it.toLowerCase().contains("bundle") }
     splits {
         abi {
-            enable wantsPlayRelease
+            enable wantsPlayRelease && !isBundling
             reset()
             include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
             universalApk false

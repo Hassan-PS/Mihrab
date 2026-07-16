@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **Play Console recommendations (Android)**: the widget configure screen no longer locks to portrait (Android 16 ignores such locks on large screens); resource shrinking enabled for the Play flavor (AAB ~2.7 MB smaller) with ABI splits gated off during bundling to dodge AGP's shrunk-resources bundling bug. The remaining flagged items (edge-to-edge Window color APIs, Fresco decode paths) live inside React Native/Fresco internals and await upstream releases.
+
 ## [2.7.38] — 2026-07-16
 
 ### Added
