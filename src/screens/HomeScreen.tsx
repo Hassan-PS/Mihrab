@@ -87,7 +87,7 @@ export function HomeScreen() {
   usePrefetchSavedLocations();
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   // Cap the day-card width to the centered content column so the carousel
   // doesn't overflow the capped column on iPad/Mac windows.
   const cardWidth = contentColumnWidth(screenWidth) - HOME_SCREEN_PADDING * 2;
@@ -106,6 +106,21 @@ export function HomeScreen() {
   const HOME_MAIN_COL = isDashboard
     ? Math.max(620, Math.min(740, Math.round(dashCap * 0.54)))
     : 620;
+  // Desktop zoom (Mac feedback 2026-07-16, "still a lot of empty
+  // space"): past the width cap, ADAPT BY SCALING — the whole dashboard
+  // zooms uniformly to the window, bounded by both axes and capped at
+  // 1.45× so type never turns cartoonish. A pure width cap left the
+  // dashboard floating tiny in a 2560×1440 fullscreen window.
+  const DASH_BASE_HEIGHT = 940; // hero + day table + shortcut + padding
+  const dashScale = isDashboard
+    ? Math.min(
+        1.45,
+        Math.max(
+          1,
+          Math.min((screenWidth - 64) / dashCap, screenHeight / DASH_BASE_HEIGHT),
+        ),
+      )
+    : 1;
   const carouselCardWidth = isDashboard
     ? HOME_MAIN_COL - HOME_SCREEN_PADDING * 2
     : cardWidth;
@@ -672,7 +687,14 @@ export function HomeScreen() {
 
         if (isDashboard) {
           return (
-            <View style={styles.dashRow}>
+            // transform-scale zoom: layout stays at the capped size (so
+            // the carousel paging math is untouched); the rendered
+            // result grows around the centered box to fill the window.
+            <View
+              style={[
+                styles.dashRow,
+                dashScale > 1 && { transform: [{ scale: dashScale }] },
+              ]}>
               {/* gap:12 — without it the carousel's page dots sat flush
                   against the Quran shortcut (reported 2026-07-16). */}
               <View style={{ width: HOME_MAIN_COL, gap: 12 }}>
