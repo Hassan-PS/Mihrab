@@ -1,0 +1,3 @@
+• Adhan fires exactly on time — fixed a rare 1–2 min early alert with a duplicate
+• Big iPad/Mac layout polish: filled dashboard, dual-page Quran chrome, page-turn buttons
+• Quran index centers correctly on wide screens (RTL fix)

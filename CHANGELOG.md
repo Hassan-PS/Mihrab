@@ -2,12 +2,13 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.7.38] — 2026-07-16
 
 ### Added
 - **Mihrab for Mac via Homebrew** (`brew install --cask hassan-ps/tap/mihrab`). The iPad app now also builds as a real macOS app with Mac Catalyst — same feature set as the App Store "Designed for iPad" experience (widgets/Live Activity stay iOS-only on both). Every release now ships a `Mihrab-macOS-<version>.zip` built by `scripts/build-catalyst.sh`; the cask lives in the `Hassan-PS/homebrew-tap` repo. Ad-hoc signed until Developer ID signing + notarization are wired in (first launch may need right-click → Open).
 
 ### Changed
+- **Desktop zoom & alignment**: past the width cap the Home dashboard scales uniformly to the window (capped 1.45×) instead of floating small in a fullscreen Mac window; the day table's width now matches its sibling cards exactly at every window size; native chrome (the header location chip) follows the app's resolved theme on Mac.
 - **iPad/Mac layout, round 2** (docs/adaptive-layout-v2-plan.md). Home dashboard: content now vertically centers in the window (no more dead bottom half), the hero scales up to anchor the two columns, the tools grid flows in balanced larger tiles instead of 5-across with an orphan, and the two-column form only engages at ≥1180pt. Mushaf: the dual-page spread carries ONE chrome set (single Juz label at the outer right, single night pill at the outer left — they were duplicated per page), hover/click chevrons at the screen edges turn pages for trackpad and mouse users (there was no pointer affordance at all), and the spread threshold rises so facing pages never render cramped.
 
 ### Fixed

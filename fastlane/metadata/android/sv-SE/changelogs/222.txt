@@ -1,0 +1,3 @@
+• Adhan exakt i tid — fix för notis 1–2 min för tidigt med dubblett
+• Stor layoutputs för iPad/Mac
+• Koranindexet centreras korrekt på breda skärmar
