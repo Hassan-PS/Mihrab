@@ -641,7 +641,14 @@ export function HomeScreen() {
         isDashboard && styles.scrollContentDash,
       ]}
       contentInsetAdjustmentBehavior="automatic">
-      <CenteredColumn maxWidth={isDashboard ? dashCap : undefined}>
+      {/* gap must live INSIDE CenteredColumn: the wrapper collapses all
+          cards into one child of the scroll container, so the container's
+          own gap:12 stopped separating them (2.7.36 regression — the
+          carousel dots overlapped the day table and the Quran button). */}
+      <CenteredColumn
+        maxWidth={isDashboard ? dashCap : undefined}
+        style={styles.homeColumn}
+        innerStyle={styles.homeColumn}>
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
         exactAlarmDenied={exactAlarmDenied}
@@ -766,6 +773,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   scroll: { flex: 1 },
+  // Inter-card rhythm for BOTH CenteredColumn variants (compact uses the
+  // outer `style`, wide uses the capped inner column).
+  homeColumn: { gap: 12 },
   scrollContent: {
     padding: HOME_SCREEN_PADDING,
     paddingBottom: 36,
