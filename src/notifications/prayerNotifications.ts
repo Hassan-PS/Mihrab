@@ -307,6 +307,9 @@ export async function syncPrayerNotifications(params: {
   notificationSound: NotificationSoundId;
   today: TimingsMap;
   tomorrow?: TimingsMap;
+  /** The local calendar day `today` was fetched for — see
+   *  buildUpcomingSalahEvents. Pass whenever available. */
+  baseDate?: Date;
   /** When true, the prayer-time alert gets a "Log prayer" action — task #99. */
   journalLogActionEnabled?: boolean;
 }): Promise<SyncPrayerNotificationsResult> {
@@ -334,6 +337,7 @@ export async function syncPrayerNotifications(params: {
     params.today,
     params.tomorrow,
     now,
+    params.baseDate ?? now,
   );
   const reminderMinutes = clampPrePrayerReminderMinutes(
     params.prePrayerReminderMinutes,
@@ -342,6 +346,19 @@ export async function syncPrayerNotifications(params: {
     reminderMinutes > 0
       ? buildPrePrayerReminderEvents(salahEvents, reminderMinutes, now)
       : [];
+
+  // Nothing schedulable — the data is entirely in the past (e.g. a sync
+  // fired with state fetched 2+ days ago, before the refetch landed).
+  // Keep whatever is already scheduled rather than wiping the pending
+  // alarms and leaving the user with NO alerts until the next good sync.
+  if (salahEvents.length === 0 && reminderEvents.length === 0) {
+    return {
+      status: 'scheduled',
+      scheduledCount: 0,
+      exactAlarms,
+      reminderMinutes,
+    };
+  }
 
   // Compute desired ID set BEFORE cancelling, so we know which existing
   // notifications to keep. createTriggerNotification with the same ID

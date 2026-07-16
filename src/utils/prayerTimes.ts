@@ -115,8 +115,19 @@ export function buildUpcomingSalahEvents(
   today: TimingsMap,
   tomorrow: TimingsMap | undefined,
   now: Date,
+  /**
+   * The LOCAL calendar day the `today` map was fetched for (v2.7.38).
+   * Defaults to `now`'s day for backward compatibility, but callers that
+   * can hold stale state across midnight (the notification scheduler)
+   * MUST pass it: anchoring a yesterday-fetched map to "now" pins
+   * yesterday's clock times onto today's date — the schedule then fires
+   * 1–2 min off and a later resync adds a second alert at the true time.
+   * With the anchor, a stale `today` map yields correctly-dated (past,
+   * filtered) events and the `tomorrow` map covers the actual today.
+   */
+  baseDay: Date = now,
 ): { name: string; at: Date }[] {
-  const dayStart = startOfLocalDay(now);
+  const dayStart = startOfLocalDay(baseDay);
   const events: { name: string; at: Date }[] = [];
   for (const name of NEXT_SALAH_ORDER) {
     const raw = today[name];

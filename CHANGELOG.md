@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+- **Adhan/Sunrise alerts no longer fire 1–2 minutes off (with a duplicate at the real time).** If a notification sync ran shortly after midnight while the app still held the previous day's times in memory (e.g. a brief phone wake before the day-change refetch landed), yesterday's clock times were pinned onto today's date — the alert fired at yesterday's minute, and the next resync scheduled a second alert at the correct time. The schedule is now anchored to the calendar day the times were fetched for, so a stale map lands on its own (past) day and the "tomorrow" map correctly covers the actual today. A sync whose data is entirely stale now keeps the existing alarms instead of wiping them.
+
 ## [2.7.37] — 2026-07-15
 
 ### Added

@@ -16,7 +16,7 @@ import { computeLocalAdhanTimes } from '../providers/localAdhan';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
-import { addDays } from '../utils/prayerTimes';
+import { addDays, startOfLocalDay } from '../utils/prayerTimes';
 
 /** How many consecutive days (today + N-1 more) to fetch and expose. */
 const WEEK_DAYS = 7;
@@ -43,6 +43,15 @@ export type PrayerDayState =
        *  Undefined in manual mode or before geocoding resolves. Surfaced on
        *  the location chip so automatic mode names the city. */
       cityName?: string;
+      /**
+       * Start of the LOCAL calendar day `week[0]` was fetched for (v2.7.38).
+       * Consumers that place the HH:MM timings on absolute dates (the
+       * notification scheduler above all) MUST anchor to this — not to
+       * "now" — or a sync that runs after midnight with stale state pins
+       * yesterday's clock times onto today's date (the 1–2 min-early
+       * adhan + duplicate-alert bug).
+       */
+      baseDate: Date;
       /** Convenience alias for week[0]. */
       today: TimingsMap;
       /** Convenience alias for week[1] (may be undefined). */
@@ -212,6 +221,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           // Preserve a previously-resolved city name if this refresh didn't
           // carry one (e.g. the instant cached re-render before geocoding).
           cityName: label ?? (prev.phase === 'ready' ? prev.cityName : undefined),
+          baseDate: startOfLocalDay(now),
           today: offsettedWeek[0],
           tomorrow: offsettedWeek[1],
           week: offsettedWeek,
@@ -283,6 +293,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             longitude,
             cityName:
               label ?? (prev.phase === 'ready' ? prev.cityName : undefined),
+            baseDate: startOfLocalDay(now),
             today: offsettedLocalWeek[0],
             tomorrow: offsettedLocalWeek[1],
             week: offsettedLocalWeek,

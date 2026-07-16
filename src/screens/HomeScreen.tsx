@@ -222,6 +222,10 @@ export function HomeScreen() {
       notificationSound: settings.notificationSound,
       today: view.table.today,
       tomorrow: view.table.tomorrow,
+      // Anchor the schedule to the day the maps were FETCHED for — if this
+      // sync fires with stale state just after midnight, yesterday's map
+      // must not be pinned onto today's date (early-adhan bug, v2.7.38).
+      baseDate: state.baseDate,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
   }, [
@@ -253,6 +257,7 @@ export function HomeScreen() {
         notificationSound: settings.notificationSound,
         today: view.table.today,
         tomorrow: view.table.tomorrow,
+        baseDate: state.baseDate,
       }).catch(e => console.warn('syncPrayerNotifications (focus):', e));
       {
         const t = computeSeasonalTreatment(
