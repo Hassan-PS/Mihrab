@@ -72,6 +72,7 @@
 | Platform | Link |
 |---|---|
 | **iOS** | [App Store](https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256) |
+| **macOS (Homebrew)** | `brew install --cask hassan-ps/tap/mihrab` — native Mac Catalyst build from [GitHub Releases](https://github.com/Hassan-PS/Mihrab/releases) |
 | **Android APK** | [GitHub Releases](https://github.com/Hassan-PS/Mihrab/releases) → `app-fdroid-release.apk` (arm64) |
 | **Android (Obtainium)** | [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/Mihrab) — auto-updates directly from GitHub Releases |
 | **Google Play** | [Google Play](https://play.google.com/store/apps/details?id=com.prayer_times) |
