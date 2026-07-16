@@ -4,6 +4,9 @@ All notable changes to this project are documented here. The format is inspired 
 
 ## [Unreleased]
 
+### Added
+- **Mihrab for Mac via Homebrew** (`brew install --cask hassan-ps/tap/mihrab`). The iPad app now also builds as a real macOS app with Mac Catalyst — same feature set as the App Store "Designed for iPad" experience (widgets/Live Activity stay iOS-only on both). Every release now ships a `Mihrab-macOS-<version>.zip` built by `scripts/build-catalyst.sh`; the cask lives in the `Hassan-PS/homebrew-tap` repo. Ad-hoc signed until Developer ID signing + notarization are wired in (first launch may need right-click → Open).
+
 ### Changed
 - **iPad/Mac layout, round 2** (docs/adaptive-layout-v2-plan.md). Home dashboard: content now vertically centers in the window (no more dead bottom half), the hero scales up to anchor the two columns, the tools grid flows in balanced larger tiles instead of 5-across with an orphan, and the two-column form only engages at ≥1180pt. Mushaf: the dual-page spread carries ONE chrome set (single Juz label at the outer right, single night pill at the outer left — they were duplicated per page), hover/click chevrons at the screen edges turn pages for trackpad and mouse users (there was no pointer affordance at all), and the spread threshold rises so facing pages never render cramped.
 

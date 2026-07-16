@@ -25,7 +25,7 @@
 import Foundation
 import React
 import BackgroundTasks
-#if canImport(ActivityKit)
+#if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
 import ActivityKit
 #endif
 
@@ -53,7 +53,7 @@ final class PrayerLiveActivity: NSObject {
     resolver resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     if #available(iOS 16.1, *) {
       // Coalesce rapid concurrent calls: if a start is already in flight,
       // resolve immediately. The in-flight call will apply the same (or
@@ -156,7 +156,7 @@ final class PrayerLiveActivity: NSObject {
     resolver resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     if #available(iOS 16.1, *) {
       guard let data = json.data(using: .utf8) else {
         reject("BAD_JSON", "ContentState JSON could not be encoded as UTF-8", nil)
@@ -193,7 +193,7 @@ final class PrayerLiveActivity: NSObject {
 
   // MARK: - staleDate helper
 
-  #if canImport(ActivityKit)
+  #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
   /// Just after the next prayer instant, or nil when there is no valid future
   /// target (so we don't mark fresh content immediately stale).
   @available(iOS 16.1, *)
@@ -215,7 +215,7 @@ final class PrayerLiveActivity: NSObject {
     // Feature turned off — forget the cached content so `reassert()` won't
     // revive the card.
     Self.cachedStateJSON = nil
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     if #available(iOS 16.1, *) {
       LiveActivityRefresher.cancelScheduledRefresh()
       Task {
@@ -244,7 +244,7 @@ final class PrayerLiveActivity: NSObject {
     _ resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     if #available(iOS 16.2, *) {
       guard let json = Self.cachedStateJSON,
             let data = json.data(using: .utf8),
@@ -296,7 +296,7 @@ final class PrayerLiveActivity: NSObject {
     _ resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     if #available(iOS 16.1, *) {
       resolve(ActivityAuthorizationInfo().areActivitiesEnabled)
       return
@@ -341,7 +341,7 @@ enum LiveActivityRefresher {
   /// Queue the next background refresh (no-op when no activity is running).
   /// earliestBeginDate is the next prayer instant when known, else +15 min.
   static func scheduleRefresh() {
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     if #available(iOS 16.2, *) {
       guard !Activity<PrayerLiveActivityAttributes>.activities.isEmpty else { return }
       let earliest = soonestNextPrayerDate() ?? Date().addingTimeInterval(15 * 60)
@@ -363,7 +363,7 @@ enum LiveActivityRefresher {
   private static func handle(_ task: BGAppRefreshTask) {
     // Reschedule first so the chain continues even if the work below is cut off.
     scheduleRefresh()
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     if #available(iOS 16.2, *) {
       let work = Task {
         await refreshRunningActivities()
@@ -376,7 +376,7 @@ enum LiveActivityRefresher {
     task.setTaskCompleted(success: true)
   }
 
-  #if canImport(ActivityKit)
+  #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
   @available(iOS 16.2, *)
   private static func refreshRunningActivities() async {
     let now = Date()

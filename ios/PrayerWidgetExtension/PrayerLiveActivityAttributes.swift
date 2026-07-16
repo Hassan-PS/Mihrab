@@ -16,7 +16,7 @@
 // hand-written init.
 
 import Foundation
-#if canImport(ActivityKit)
+#if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
 import ActivityKit
 
 @available(iOS 16.1, *)

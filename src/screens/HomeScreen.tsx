@@ -99,7 +99,13 @@ export function HomeScreen() {
   // under ~440pt and the tools grid crams — the centered single column
   // reads far better in that band (Mac audit 2026-07-16, plan v2 §B4).
   const isDashboard = screenWidth >= 1180;
-  const HOME_MAIN_COL = 620;
+  // Adapt to the window instead of a fixed cap: up to 1360pt of content
+  // on big Mac windows, with the main column taking a proportional share
+  // (clamped so the day table keeps a comfortable measure).
+  const dashCap = Math.min(1360, screenWidth - 48);
+  const HOME_MAIN_COL = isDashboard
+    ? Math.max(620, Math.min(740, Math.round(dashCap * 0.54)))
+    : 620;
   const carouselCardWidth = isDashboard
     ? HOME_MAIN_COL - HOME_SCREEN_PADDING * 2
     : cardWidth;
@@ -610,7 +616,7 @@ export function HomeScreen() {
         isDashboard && styles.scrollContentDash,
       ]}
       contentInsetAdjustmentBehavior="automatic">
-      <CenteredColumn maxWidth={isDashboard ? 1180 : undefined}>
+      <CenteredColumn maxWidth={isDashboard ? dashCap : undefined}>
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
         exactAlarmDenied={exactAlarmDenied}
@@ -667,7 +673,9 @@ export function HomeScreen() {
         if (isDashboard) {
           return (
             <View style={styles.dashRow}>
-              <View style={{ width: HOME_MAIN_COL }}>
+              {/* gap:12 — without it the carousel's page dots sat flush
+                  against the Quran shortcut (reported 2026-07-16). */}
+              <View style={{ width: HOME_MAIN_COL, gap: 12 }}>
                 {heroCard}
                 {dayTable}
                 {quranShortcut}

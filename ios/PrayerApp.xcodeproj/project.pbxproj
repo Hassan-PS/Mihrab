@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FA11B0071AB0000000000001 /* Amiri-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000001 /* Amiri-Regular.ttf */; };
-		FA11B0071AB0000000000002 /* AmiriQuran.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000002 /* AmiriQuran.ttf */; };
 		08E4CD4EC9CFDE3F2B1D21A7 /* adhan_naghshbandi.caf in Resources */ = {isa = PBXBuildFile; fileRef = 48AAC76E10CD18CD2ADE11BD /* adhan_naghshbandi.caf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-PrayerApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-PrayerApp.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -18,7 +16,6 @@
 		2A6B7C8D9E0F1A2B3C4D5E61 /* adhan_madina.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2A6B7C8D9E0F1A2B3C4D5E51 /* adhan_madina.caf */; };
 		2A6B7C8D9E0F1A2B3C4D5E62 /* adhan_aqsa.caf in Resources */ = {isa = PBXBuildFile; fileRef = 2A6B7C8D9E0F1A2B3C4D5E52 /* adhan_aqsa.caf */; };
 		2A9B8C7D6E5F4A3B2C1D0E9F /* AppVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A9B8C7D6E5F4A3B2C1D0E9E /* AppVersion.m */; };
-		FA11B0071AC0000000000002 /* RateApp.m in Sources */ = {isa = PBXBuildFile; fileRef = FA11B0071AC0000000000001 /* RateApp.m */; };
 		437AD791C98039C8EE2B87EF /* adhan_egypt.caf in Resources */ = {isa = PBXBuildFile; fileRef = C27195F19393889CFB4B2553 /* adhan_egypt.caf */; };
 		443F2CB14D90FCE3B9A43123 /* adhan_bakir_bash.caf in Resources */ = {isa = PBXBuildFile; fileRef = B7714F32B411231108636A8C /* adhan_bakir_bash.caf */; };
 		6F702A22F070F0CB015C3788 /* adhan_abdul_ghaffar.caf in Resources */ = {isa = PBXBuildFile; fileRef = 8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */; };
@@ -51,12 +48,10 @@
 		AFCC85C860A9E992FFA3E2C9 /* adhan_yusuf_islam.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */; };
 		B5C72EE49F32E58EDF1BC8CA /* adhan_abdul_basit.caf in Resources */ = {isa = PBXBuildFile; fileRef = D5FC0C5A1FDA3B8C9843426D /* adhan_abdul_basit.caf */; };
 		BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */; };
-		FA22B0071AD0000000000004 /* MushafPageScaler.m in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000002 /* MushafPageScaler.m */; };
 		CE1E4BEE25F612B8320B7886 /* adhan_hafiz_murad.caf in Resources */ = {isa = PBXBuildFile; fileRef = 91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */; };
 		DF5D2FB480E49268AC15485E /* CompassModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62E49C8F92272DF77C323AA /* CompassModule.swift */; };
-		FA22B0071AD0000000000003 /* MushafPageScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000001 /* MushafPageScaler.swift */; };
 		E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */; };
-		E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E1D2C3B4A5968778695A4B3D5 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */; };
 		EA6B2A6659A3E2683A2EC666 /* adhan_minshawi.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */; };
 		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
@@ -66,6 +61,11 @@
 		F1A20000A001B001C001D005 /* PrayerLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */; };
 		F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */; };
 		F1A20000A001B001C001D009 /* PrayerLiveActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D008 /* PrayerLiveActivity.m */; };
+		FA11B0071AB0000000000001 /* Amiri-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000001 /* Amiri-Regular.ttf */; };
+		FA11B0071AB0000000000002 /* AmiriQuran.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000002 /* AmiriQuran.ttf */; };
+		FA11B0071AC0000000000002 /* RateApp.m in Sources */ = {isa = PBXBuildFile; fileRef = FA11B0071AC0000000000001 /* RateApp.m */; };
+		FA22B0071AD0000000000003 /* MushafPageScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000001 /* MushafPageScaler.swift */; };
+		FA22B0071AD0000000000004 /* MushafPageScaler.m in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000002 /* MushafPageScaler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -93,8 +93,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		FA11B0071AA0000000000001 /* Amiri-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Amiri-Regular.ttf"; path = "PrayerApp/Resources/fonts/Amiri-Regular.ttf"; sourceTree = "<group>"; };
-		FA11B0071AA0000000000002 /* AmiriQuran.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "AmiriQuran.ttf"; path = "PrayerApp/Resources/fonts/AmiriQuran.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* PrayerApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrayerApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = PrayerApp/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = PrayerApp/Info.plist; sourceTree = "<group>"; };
@@ -103,7 +101,6 @@
 		2A6B7C8D9E0F1A2B3C4D5E51 /* adhan_madina.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_madina.caf; path = PrayerApp/adhan_madina.caf; sourceTree = "<group>"; };
 		2A6B7C8D9E0F1A2B3C4D5E52 /* adhan_aqsa.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_aqsa.caf; path = PrayerApp/adhan_aqsa.caf; sourceTree = "<group>"; };
 		2A9B8C7D6E5F4A3B2C1D0E9E /* AppVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppVersion.m; path = PrayerApp/AppVersion.m; sourceTree = "<group>"; };
-		FA11B0071AC0000000000001 /* RateApp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RateApp.m; path = PrayerApp/RateApp.m; sourceTree = "<group>"; };
 		3677D65A9EE39814B1FF01A4 /* adhan_halab.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_halab.caf; path = PrayerApp/adhan_halab.caf; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-PrayerApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrayerApp.debug.xcconfig"; path = "Target Support Files/Pods-PrayerApp/Pods-PrayerApp.debug.xcconfig"; sourceTree = "<group>"; };
 		4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_yusuf_islam.caf; path = PrayerApp/adhan_yusuf_islam.caf; sourceTree = "<group>"; };
@@ -117,7 +114,6 @@
 		8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_ghaffar.caf; path = PrayerApp/adhan_abdul_ghaffar.caf; sourceTree = "<group>"; };
 		91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_hafiz_murad.caf; path = PrayerApp/adhan_hafiz_murad.caf; sourceTree = "<group>"; };
 		A62E49C8F92272DF77C323AA /* CompassModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CompassModule.swift; path = PrayerApp/CompassModule.swift; sourceTree = "<group>"; };
-		FA22B0071AD0000000000001 /* MushafPageScaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MushafPageScaler.swift; path = PrayerApp/MushafPageScaler.swift; sourceTree = "<group>"; };
 		ADFR0000000000 /* adhan_abdul_basit.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = PrayerApp/adhan_abdul_basit.mp3; sourceTree = "<group>"; };
 		ADFR0000000001 /* adhan_abdul_ghaffar.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = PrayerApp/adhan_abdul_ghaffar.mp3; sourceTree = "<group>"; };
 		ADFR0000000002 /* adhan_abdul_hakam.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = PrayerApp/adhan_abdul_hakam.mp3; sourceTree = "<group>"; };
@@ -158,6 +154,10 @@
 		F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrayerLiveActivity.swift; path = PrayerApp/PrayerLiveActivity.swift; sourceTree = "<group>"; };
 		F1A20000A001B001C001D008 /* PrayerLiveActivity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerLiveActivity.m; path = PrayerApp/PrayerLiveActivity.m; sourceTree = "<group>"; };
 		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
+		FA11B0071AA0000000000001 /* Amiri-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Amiri-Regular.ttf"; path = "PrayerApp/Resources/fonts/Amiri-Regular.ttf"; sourceTree = "<group>"; };
+		FA11B0071AA0000000000002 /* AmiriQuran.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = AmiriQuran.ttf; path = PrayerApp/Resources/fonts/AmiriQuran.ttf; sourceTree = "<group>"; };
+		FA11B0071AC0000000000001 /* RateApp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RateApp.m; path = PrayerApp/RateApp.m; sourceTree = "<group>"; };
+		FA22B0071AD0000000000001 /* MushafPageScaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MushafPageScaler.swift; path = PrayerApp/MushafPageScaler.swift; sourceTree = "<group>"; };
 		FA22B0071AD0000000000002 /* MushafPageScaler.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MushafPageScaler.m; path = PrayerApp/MushafPageScaler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -551,6 +551,7 @@
 /* Begin PBXTargetDependency section */
 		E1D2C3B4A5968778695A4B3CD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */;
 			targetProxy = E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */;
 		};
@@ -567,15 +568,21 @@
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 221;
+				DEAD_CODE_STRIPPING = YES;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
-				TARGETED_DEVICE_FAMILY = "1,2";
 				INFOPLIST_KEY_CFBundleDisplayName = Mihrab;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
 				);
 				MARKETING_VERSION = 2.7.37;
 				OTHER_LDFLAGS = (
@@ -583,11 +590,14 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp;
 				PRODUCT_NAME = PrayerApp;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -602,14 +612,20 @@
 				CODE_SIGN_ENTITLEMENTS = PrayerApp/PrayerApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 221;
+				DEAD_CODE_STRIPPING = YES;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				INFOPLIST_FILE = PrayerApp/Info.plist;
-				TARGETED_DEVICE_FAMILY = "1,2";
 				INFOPLIST_KEY_CFBundleDisplayName = Mihrab;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
 				);
 				MARKETING_VERSION = 2.7.37;
 				OTHER_LDFLAGS = (
@@ -617,10 +633,13 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp;
 				PRODUCT_NAME = PrayerApp;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -779,6 +798,7 @@
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 221;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -789,10 +809,17 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
 				MARKETING_VERSION = 2.7.37;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
@@ -809,6 +836,7 @@
 				CODE_SIGN_ENTITLEMENTS = PrayerWidgetExtension/PrayerWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 221;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -819,10 +847,17 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
 				MARKETING_VERSION = 2.7.37;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;

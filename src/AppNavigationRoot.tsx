@@ -21,6 +21,7 @@ import {
 import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
 import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
+import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
 import { rescheduleFastingReminders } from './notifications/fastingReminders';
 import { rescheduleKhatmahReminder } from './notifications/khatmahReminder';
@@ -133,17 +134,31 @@ export function AppNavigationRoot() {
   // overrideUserInterfaceStyle; 'system' clears the override. iOS-only: Android
   // theming already flows through the palette + native nav-bar style + the
   // dynamic-colour restart path above, and an override there would fight it.
-  useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-    Appearance.setColorScheme(
-      settings.appearance === 'system' ? 'unspecified' : settings.appearance,
-    );
-  }, [settings.appearance]);
-
   const isDark = useMemo(
     () => resolveEffectiveDark(settings.appearance, systemScheme),
     [settings.appearance, systemScheme],
   );
+
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    if (settings.appearance === 'system' && !isMacCatalyst) {
+      Appearance.setColorScheme('unspecified');
+      return;
+    }
+    // Explicit light/dark — and ALWAYS on Mac (Catalyst / iPad-on-Mac):
+    // pin the native chrome to the app's RESOLVED theme. On Mac the
+    // window trait (which the header's glass chip material follows) and
+    // RN's detected scheme can disagree, leaving a dark chip on a light
+    // app (reported 2026-07-16). Freezing the override to the resolved
+    // value keeps every native surface in step with the app theme.
+    Appearance.setColorScheme(
+      settings.appearance === 'system'
+        ? isDark
+          ? 'dark'
+          : 'light'
+        : settings.appearance,
+    );
+  }, [settings.appearance, isDark]);
 
   const palette = useMemo(
     () =>
