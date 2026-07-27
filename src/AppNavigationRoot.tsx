@@ -25,6 +25,11 @@ import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
 import { rescheduleFastingReminders } from './notifications/fastingReminders';
 import { rescheduleKhatmahReminder } from './notifications/khatmahReminder';
+import {
+  getQuranState,
+  hydrateQuranState,
+  subscribeQuranState,
+} from './quran/quranState';
 
 export function AppNavigationRoot() {
   const { settings, hydrated } = usePrayerSettings();
@@ -46,12 +51,20 @@ export function AppNavigationRoot() {
       const now = Date.now();
       if (!force && now - lastDailySyncRef.current < 60 * 60 * 1000) return;
       lastDailySyncRef.current = now;
-      void rescheduleAyahOfDay({
-        enabled: settings.ayahOfDayEnabled,
-        hour: settings.ayahOfDayHour,
-        minute: settings.ayahOfDayMinute,
-        quranTranslationEdition: settings.quranTranslationEdition,
-        language: settings.language,
+      // Companion mode + tafsir edition live in the quran blob, not the
+      // settings context — hydrate (idempotent) then read non-reactively so
+      // page-turn writes don't re-render the navigation root (v2.7.40).
+      void hydrateQuranState().then(() => {
+        const prefs = getQuranState().prefs;
+        void rescheduleAyahOfDay({
+          enabled: settings.ayahOfDayEnabled,
+          hour: settings.ayahOfDayHour,
+          minute: settings.ayahOfDayMinute,
+          quranTranslationEdition: settings.quranTranslationEdition,
+          language: settings.language,
+          companionMode: prefs.companionMode,
+          tafsirEditionId: prefs.tafsirEditionId,
+        });
       });
       void rescheduleKhatmahReminder({
         enabled: settings.khatmahReminderEnabled,
@@ -67,7 +80,27 @@ export function AppNavigationRoot() {
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') sync(false);
     });
-    return () => sub.remove();
+    // Re-sync when the companion choice itself changes (mode or tafsir
+    // edition) so tomorrow's daily-ayah body reflects the new pick. Guarded
+    // by a field comparison — the quran blob also changes on every page
+    // turn/bookmark, which must NOT trigger a resync.
+    let lastCompanion = '';
+    const unsubQuran = subscribeQuranState(() => {
+      const p = getQuranState().prefs;
+      const key = `${p.companionMode}|${p.tafsirEditionId}`;
+      if (lastCompanion === '') {
+        lastCompanion = key;
+        return;
+      }
+      if (key !== lastCompanion) {
+        lastCompanion = key;
+        sync(true);
+      }
+    });
+    return () => {
+      sub.remove();
+      unsubQuran();
+    };
   }, [
     hydrated,
     settings.ayahOfDayEnabled,

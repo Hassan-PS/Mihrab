@@ -101,7 +101,9 @@ export function AyahActionSheet({
     if (!visible) return;
     let cancelled = false;
     setArabic('');
-    setTafsirOpen(false);
+    // When the app-wide companion mode is tafsir (v2.7.40), the section the
+    // user chose opens pre-expanded — the sheet leads with their preference.
+    setTafsirOpen(state.prefs.companionMode === 'tafsir');
     setTafsirText(null);
     void loadSurah(surah).then(loaded => {
       if (cancelled || !loaded) return;
@@ -110,6 +112,8 @@ export function AyahActionSheet({
     return () => {
       cancelled = true;
     };
+    // state.prefs.companionMode intentionally read once per open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, surah, ayah]);
 
   // Scroll to the recitation section when opened from the header button.

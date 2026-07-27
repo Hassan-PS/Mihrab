@@ -89,8 +89,20 @@ export type QuranPrefs = {
   /** Memorization masking in translation view. */
   hideMode: 'none' | 'arabic' | 'translation';
   repeat: RepeatSettings;
-  /** Second row of the Verse-of-the-day card (v2.7.31, additive). */
+  /** Second row of the Verse-of-the-day card (v2.7.31, additive).
+   *  LEGACY as of v2.7.40 — superseded by `companionMode`, kept only so a
+   *  downgrade still finds a sensible value. Writers keep it in sync. */
   votdMode: 'translation' | 'tafsir';
+  /**
+   * THE app-wide companion-text mode (v2.7.40, additive): what renders
+   * beneath each ayah everywhere — the translation reader rows, the verse
+   * of the day, the mushaf ayah sheet's expanded section, and the daily
+   * ayah notification. Seeded from the legacy `votdMode` on first load so
+   * an existing "tafsir" choice carries over. Editions per mode:
+   * translation → settings.quranTranslationEdition (useActiveEdition),
+   * tafsir → `tafsirEditionId` below.
+   */
+  companionMode: 'translation' | 'tafsir';
   /**
    * Chosen tafsir edition id (v2.8, additive). Empty string = "use the
    * locale default". Persisted here so the pick sticks across ayah-sheet
@@ -126,6 +138,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
     votdMode: 'translation',
+    companionMode: 'translation',
     tafsirEditionId: '',
   },
 };
@@ -160,6 +173,13 @@ function mergeStored(raw: unknown): QuranState {
         ...DEFAULT_QURAN_STATE.prefs.repeat,
         ...(r.prefs?.repeat ?? {}),
       },
+      // Migration (v2.7.40): blobs written before `companionMode` existed
+      // seed it from the legacy votd-only toggle so a "tafsir" choice on
+      // the verse-of-the-day card carries over to the app-wide mode.
+      companionMode:
+        r.prefs?.companionMode ??
+        r.prefs?.votdMode ??
+        DEFAULT_QURAN_STATE.prefs.companionMode,
     },
   };
 }

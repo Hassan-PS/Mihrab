@@ -18,9 +18,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   FlatList,
-  Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -31,11 +29,13 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { findSurah, loadSurah } from '../quran/quran';
-import {
-  getSurahTranslation,
-  QURAN_TRANSLATIONS,
-} from '../quran/translations';
+import { getSurahTranslation } from '../quran/translations';
 import { useActiveEdition } from '../quran/useActiveEdition';
+import { loadTafsir, resolveTafsirEdition } from '../quran/tafsir';
+import {
+  CompanionTextSheet,
+  useCompanionChoice,
+} from '../quran/CompanionTextControls';
 import { MushafReader } from '../quran/MushafReader';
 import { findPageForAyah } from '../quran/pages';
 import {
@@ -82,6 +82,8 @@ export function QuranSurahScreen() {
   playbackRef.current = playback;
   const activeWord = useActiveWordIndex();
   const edition = useActiveEdition();
+  // Current companion choice caption (mode + edition) for the header row.
+  const companionChoice = useCompanionChoice();
 
   useEffect(() => {
     void hydrateQuranState();
@@ -293,6 +295,12 @@ export function QuranSurahScreen() {
 
   // ── Translation mode ────────────────────────────────────────────────
   const hideMode = quran.prefs.hideMode;
+  // App-wide companion mode (v2.7.40): translation ⇄ tafsir under each ayah.
+  const companionMode = quran.prefs.companionMode;
+  const tafsirEdition = resolveTafsirEdition(
+    quran.prefs.tafsirEditionId,
+    settings.language,
+  );
 
   const renderAyah = ({ item }: { item: AyahRow }) => {
     const { ayah, arabic } = item;
@@ -381,7 +389,20 @@ export function QuranSurahScreen() {
               : arabic}
           </Text>
         )}
-        {translations == null ? (
+        {companionMode === 'tafsir' ? (
+          maskTranslation ? (
+            <Text style={[styles.masked, { color: palette.muted }]}>
+              {t('quran.tapToReveal', 'Tap to reveal')}
+            </Text>
+          ) : (
+            <TafsirRowText
+              surah={surahNumber}
+              ayah={ayah}
+              editionId={tafsirEdition.id}
+              rtl={tafsirEdition.rtl}
+            />
+          )
+        ) : translations == null ? (
           <View
             style={[styles.skeleton, { backgroundColor: palette.accentBg }]}
           />
@@ -418,17 +439,17 @@ export function QuranSurahScreen() {
       </Text>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t('quran.translationEdition', 'Translation: {{label}}', {
-          label:
-            QURAN_TRANSLATIONS.find(e => e.id === edition)?.label ?? edition,
-        })}
+        accessibilityLabel={t('quran.companionTitle', 'Under each verse')}
         onPress={() => setEditionPickerVisible(true)}
         style={styles.editionRow}>
         <Text style={[styles.editionLabel, { color: palette.muted }]}>
-          {t('quran.translationEdition', 'Translation: {{label}}', {
-            label:
-              QURAN_TRANSLATIONS.find(e => e.id === edition)?.label ?? edition,
-          })}
+          {/* Mode + edition, e.g. "Tafsir: Ibn Kathir (abridged)" — the
+              app-wide companion choice (v2.7.40). */}
+          {`${
+            companionChoice.mode === 'tafsir'
+              ? t('quran.tafsir', 'Tafsir')
+              : t('quran.viewToggleTranslation', 'Translation')
+          }: ${companionChoice.editionLabel}`}
         </Text>
         <Text style={[styles.editionHint, { color: palette.accent }]}>
           {t('quran.tapToPick', 'choose')}
@@ -505,100 +526,100 @@ export function QuranSurahScreen() {
         />
       ) : null}
 
-      {/* Translation-edition picker (task #124) */}
-      <Modal
+      {/* App-wide companion-text picker (v2.7.40, replaces the
+          translation-only picker from task #124): mode + edition, shared
+          with the Quran index page and Settings. */}
+      <CompanionTextSheet
         visible={editionPickerVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setEditionPickerVisible(false)}>
-        <Pressable
-          style={[pickerStyles.backdrop, { backgroundColor: palette.overlay }]}
-          accessibilityLabel={t('common.close', 'Close')}
-          onPress={() => setEditionPickerVisible(false)}
-        />
-        <View style={[pickerStyles.sheet, { backgroundColor: palette.card }]}>
-          <Text style={[pickerStyles.title, { color: palette.text }]}>
-            {t('quran.pickTranslation', 'Choose translation')}
-          </Text>
-          <ScrollView style={pickerStyles.list}>
-            {QURAN_TRANSLATIONS.map(ed => {
-              const selected = ed.id === edition;
-              return (
-                <Pressable
-                  key={ed.id}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  onPress={() => {
-                    updateSettings({ quranTranslationEdition: ed.id });
-                    setEditionPickerVisible(false);
-                  }}
-                  style={[
-                    pickerStyles.row,
-                    {
-                      backgroundColor: selected
-                        ? palette.accentBg
-                        : 'transparent',
-                    },
-                  ]}>
-                  <View style={pickerStyles.rowText}>
-                    <Text style={[pickerStyles.rowLabel, { color: palette.text }]}>
-                      {ed.label}
-                    </Text>
-                    <Text style={[pickerStyles.rowSub, { color: palette.muted }]}>
-                      {ed.language}
-                    </Text>
-                  </View>
-                  {selected ? (
-                    <Text style={[pickerStyles.check, { color: palette.accent }]}>
-                      ✓
-                    </Text>
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      </Modal>
+        onClose={() => setEditionPickerVisible(false)}
+      />
     </View>
   );
 }
 
-const pickerStyles = StyleSheet.create({
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  sheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    maxHeight: '80%',
-    borderTopStartRadius: 18,
-    borderTopEndRadius: 18,
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 28,
-  },
-  title: { fontSize: 17, fontWeight: '700', marginBottom: 12 },
-  list: { maxHeight: 480 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    gap: 12,
-    marginVertical: 2,
-  },
-  rowText: { flex: 1 },
-  rowLabel: { fontSize: 16, fontWeight: '600' },
-  rowSub: { fontSize: 12, marginTop: 2 },
-  check: { fontSize: 18, fontWeight: '700' },
-});
+/**
+ * Per-row tafsir text (v2.7.40) — lazy: fetched (or read from the offline
+ * cache) when the row mounts, so long surahs only load what scrolls into
+ * view. Long tafsir collapses to a few lines with a Show-more expand.
+ */
+function TafsirRowText({
+  surah,
+  ayah,
+  editionId,
+  rtl,
+}: {
+  surah: number;
+  ayah: number;
+  editionId: string;
+  rtl: boolean;
+}) {
+  const { t } = useTranslation();
+  const { palette } = useAppPalette();
+  // undefined = loading, null = unavailable (offline + uncached).
+  const [text, setText] = useState<string | null | undefined>(undefined);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    setText(undefined);
+    setExpanded(false);
+    void loadTafsir(editionId, surah, ayah).then(loaded => {
+      if (!cancelled) setText(loaded);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [editionId, surah, ayah]);
+
+  if (text === undefined) {
+    return (
+      <View style={[styles.skeleton, { backgroundColor: palette.accentBg }]} />
+    );
+  }
+  if (text === null) {
+    return (
+      <Text style={[styles.ayahTranslation, { color: palette.muted }]}>
+        {t(
+          'quran.tafsirUnavailable',
+          'Tafsir unavailable — connect to the internet once to download it.',
+        )}
+      </Text>
+    );
+  }
+  const long = text.length > 420;
+  return (
+    <>
+      <Text
+        numberOfLines={expanded ? undefined : 6}
+        style={[
+          styles.ayahTranslation,
+          { color: palette.muted },
+          rtl && { writingDirection: 'rtl', textAlign: 'right' },
+        ]}>
+        {text}
+      </Text>
+      {long ? (
+        // Own Pressable — claims the touch so the row's action-sheet press
+        // doesn't also fire when expanding the tafsir.
+        <Pressable
+          hitSlop={6}
+          accessibilityRole="button"
+          onPress={() => setExpanded(v => !v)}>
+          <Text
+            style={{
+              color: palette.accentSolid,
+              fontSize: 12,
+              fontWeight: '700',
+              marginTop: 4,
+            }}>
+            {expanded
+              ? t('quran.showLess', 'Show less')
+              : t('quran.showMore', 'Show more')}
+          </Text>
+        </Pressable>
+      ) : null}
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },

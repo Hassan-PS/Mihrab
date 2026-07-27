@@ -47,7 +47,11 @@ import {
   BOOKMARK_COLORS,
   KHATMAH_TOTAL_PAGES,
 } from '../quran/quranState';
-import { loadTafsir, tafsirEditionsForLocale } from '../quran/tafsir';
+import { loadTafsir, resolveTafsirEdition } from '../quran/tafsir';
+import {
+  CompanionTextSheet,
+  useCompanionChoice,
+} from '../quran/CompanionTextControls';
 import {
   searchQuran,
   verseOfTheDayRef,
@@ -117,24 +121,32 @@ export function QuranScreen() {
   }, [votdRef]);
   const votdTranslation = getAyahTranslation(edition, votdRef.surah, votdRef.ayah);
   const votdSurah = findSurah(votdRef.surah);
-  // Second row of the card: translation or real tafsir — the user picks
-  // via the small toggle on the card (persisted, v2.7.31).
-  const votdMode = quran.prefs.votdMode;
+  // Second row of the card follows the app-wide companion mode (v2.7.40) —
+  // the toggle here IS the global switch, and the edition caption below
+  // opens the shared companion-text sheet.
+  const votdMode = quran.prefs.companionMode;
+  const companionChoice = useCompanionChoice();
+  const [companionSheetVisible, setCompanionSheetVisible] = useState(false);
   const [votdTafsir, setVotdTafsir] = useState<string | null>(null);
   // Tafsir can be long — show a few lines by default with a "Show more" expand.
   const [votdExpanded, setVotdExpanded] = useState(false);
   useEffect(() => {
     if (votdMode !== 'tafsir') return;
     let cancelled = false;
-    const ed = tafsirEditionsForLocale((i18n.language || 'en').slice(0, 2))[0];
+    // The user's chosen tafsir edition — not the locale default (v2.7.40).
+    const ed = resolveTafsirEdition(
+      quran.prefs.tafsirEditionId,
+      (i18n.language || 'en').slice(0, 2),
+    );
     if (!ed) return;
+    setVotdTafsir(null);
     void loadTafsir(ed.id, votdRef.surah, votdRef.ayah).then(text => {
       if (!cancelled) setVotdTafsir(text);
     });
     return () => {
       cancelled = true;
     };
-  }, [votdMode, votdRef, i18n.language]);
+  }, [votdMode, votdRef, i18n.language, quran.prefs.tafsirEditionId]);
 
   const openSurah = (surahNumber: number, scrollToAyah?: number, page?: number) => {
     navigation.navigate('QuranSurah', {
@@ -363,7 +375,9 @@ export function QuranScreen() {
                     hitSlop={6}
                     onPress={() => {
                       setVotdExpanded(false);
-                      setQuranPrefs({ votdMode: mode });
+                      // THE app-wide companion-mode switch (v2.7.40).
+                      // votdMode kept in sync for downgrade safety.
+                      setQuranPrefs({ companionMode: mode, votdMode: mode });
                     }}
                     style={[
                       styles.votdToggleSeg,
@@ -421,9 +435,32 @@ export function QuranScreen() {
               {votdTranslation}
             </Text>
           ) : null}
-          <Text style={[styles.votdRef, { color: palette.accentSolid }]}>
-            {`${votdSurah?.romanized ?? ''} ${votdRef.surah}:${votdRef.ayah}`}
-          </Text>
+          <View style={styles.votdFooterRow}>
+            <Text style={[styles.votdRef, { color: palette.accentSolid }]}>
+              {`${votdSurah?.romanized ?? ''} ${votdRef.surah}:${votdRef.ayah}`}
+            </Text>
+            {/* Active edition selector — a clear button-style pill that opens
+                the app-wide companion-text sheet (mode + edition list,
+                v2.7.40). Own Pressable so the card press doesn't fire. */}
+            <Pressable
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.companionTitle', 'Under each verse')}
+              onPress={() => setCompanionSheetVisible(true)}
+              style={[styles.votdEditionPill, { borderColor: palette.border }]}>
+              <Text style={[styles.votdEdition, { color: palette.text }]}>
+                {companionChoice.editionLabel}
+              </Text>
+              <Text
+                style={{
+                  color: palette.accentSolid,
+                  fontSize: 11,
+                  fontWeight: '700',
+                }}>
+                {' ▾'}
+              </Text>
+            </Pressable>
+          </View>
         </Pressable>
       ) : null}
 
@@ -889,6 +926,12 @@ export function QuranScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* App-wide companion-text picker (v2.7.40): mode + edition. */}
+      <CompanionTextSheet
+        visible={companionSheetVisible}
+        onClose={() => setCompanionSheetVisible(false)}
+      />
     </View>
   );
 }
@@ -948,6 +991,22 @@ const styles = StyleSheet.create({
   votdTranslation: { fontSize: 13, lineHeight: 19 },
   votdShowMore: { fontSize: 12, fontWeight: '700', marginTop: 4 },
   votdRef: { fontSize: 12, fontWeight: '700' },
+  votdFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginTop: 2,
+  },
+  votdEdition: { fontSize: 11, fontWeight: '600' },
+  votdEditionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
   votdHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -29,6 +29,7 @@ import {
   getAyahTranslation,
   type QuranTranslationId,
 } from '../quran/translations';
+import { loadTafsir, resolveTafsirEdition } from '../quran/tafsir';
 
 const AYAH_DAY_ID_PREFIX = 'ayah-day-';
 const AYAH_DAY_CHANNEL_ID = 'prayer_app_ayah_of_day';
@@ -133,6 +134,12 @@ export async function rescheduleAyahOfDay(opts: {
   /** Raw settings value; resolved against `language` internally. */
   quranTranslationEdition: string;
   language: string;
+  /** App-wide companion mode (v2.7.40) — 'tafsir' swaps the second body
+   *  paragraph for a tafsir excerpt in the chosen edition, falling back to
+   *  the translation when the text isn't cached and can't be fetched. */
+  companionMode?: 'translation' | 'tafsir';
+  /** Raw stored tafsir edition id; resolved against `language` internally. */
+  tafsirEditionId?: string;
   now?: Date;
 }): Promise<void> {
   await cancelAllAyahOfDay();
@@ -145,6 +152,10 @@ export async function rescheduleAyahOfDay(opts: {
     opts.quranTranslationEdition,
     opts.language,
   );
+  const wantsTafsir = opts.companionMode === 'tafsir';
+  const tafsirEdition = wantsTafsir
+    ? resolveTafsirEdition(opts.tafsirEditionId ?? '', opts.language)
+    : null;
 
   try {
     await notifee.createChannel({
@@ -165,10 +176,22 @@ export async function rescheduleAyahOfDay(opts: {
     const { ref, arabic, translation } = await drawNotifiableAyah(edition);
     const surahMeta = findSurah(ref.surah);
 
+    // Companion paragraph follows the app-wide mode (v2.7.40): tafsir when
+    // chosen (network/cache — falls back to the translation on failure).
+    let companion = translation;
+    if (wantsTafsir && tafsirEdition) {
+      try {
+        const tafsir = await loadTafsir(tafsirEdition.id, ref.surah, ref.ayah);
+        if (tafsir) companion = tafsir;
+      } catch {
+        // Keep the translation fallback.
+      }
+    }
+
     const refLabel = `${surahMeta?.romanized ?? ''} ${ref.surah}:${ref.ayah}`;
     // BigTextStyle renders the whole thing on expand (like a long chat message),
     // so keep the caps generous; a blank line separates Arabic from translation.
-    const body = [clip(arabic, 400), clip(translation, 500)]
+    const body = [clip(arabic, 400), clip(companion, 500)]
       .filter(Boolean)
       .join('\n\n');
 
