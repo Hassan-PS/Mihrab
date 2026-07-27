@@ -94,9 +94,9 @@ export function CompanionTextControls({
     </Text>
   );
 
-  // Group editions by language, ordered: the app language's group first,
-  // then English (the lingua-franca fallback), then the rest A→Z — so the
-  // options the user most likely wants sit at the top of each section.
+  // Group editions by language. Order: Arabic first (the Quran's own
+  // language), English second (the lingua-franca fallback), then the app
+  // language's group, then the rest A→Z.
   const groupByLanguage = <T extends { language: string; locale: string }>(
     list: ReadonlyArray<T>,
   ): Array<[string, T[]]> => {
@@ -107,11 +107,13 @@ export function CompanionTextControls({
       groups.set(e.language, arr);
     }
     const rank = (g: [string, T[]]) =>
-      g[1].some(e => e.locale === settings.language)
+      g[0] === 'Arabic'
         ? 0
         : g[0] === 'English'
           ? 1
-          : 2;
+          : g[1].some(e => e.locale === settings.language)
+            ? 2
+            : 3;
     return [...groups.entries()].sort((a, b) => {
       const ra = rank(a);
       const rb = rank(b);
