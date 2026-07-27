@@ -62,3 +62,9 @@ already in place.
 `patch-package` sweeps `node_modules/<pkg>/android/build/` gradle
 artifacts (binary .dex!) into the patch if the library was built in
 place. Delete that dir before regenerating a patch.
+
+Round-2 outcome: pipeline #2709129320 ALL NINE JOBS GREEN — fdroid build
+passed in 13 min WITHOUT the heap cap (R8-off + arm64-only removed the
+pressure; the org.gradle.* appends are confirmed unnecessary). The minimal
+recipe (gradleprops only, no MaintainerNotes) is the reviewed, working
+state. contrib copy matches the fork.
