@@ -24,8 +24,6 @@ Builds:
     prebuild:
       - sed -i 's/SdkVersion = 37/SdkVersion = 36/' ../build.gradle
       - sed -i 's/"37.0.0"/"36.0.0"/' ../build.gradle
-      - echo 'org.gradle.jvmargs=-Xmx1536m' >> ../gradle.properties
-      - echo 'org.gradle.daemon=false' >> ../gradle.properties
       - cd ../..
       - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
       - npm i --no-save --ignore-scripts --loglevel=error patch-package
@@ -56,61 +54,6 @@ Builds:
     ndk: 27.1.12297006
     gradleprops:
       - reactNativeArchitectures=arm64-v8a
-
-MaintainerNotes: |
-  React Native 0.83 app. `npm ci` runs from the repo root; Gradle runs in
-  `android/` with the `fdroid` product flavor (no Play Billing / no Google Play
-  Services). The build uses the build server's default JDK (RN's
-  `@react-native/gradle-plugin` requests `jvmToolchain(17)`; the `find … sed`
-  line strips that request so the running JDK is used regardless of its version).
-
-  Build configuration lives in the repo, not the recipe: `gradle.properties`
-  carries the RN/Kotlin build-compat flags, and `app/build.gradle` turns R8 and
-  release lint off for the `fdroid` flavor only (they OOM the CI runner when run
-  in parallel) while keeping them on for the upstream Play release. The few
-  remaining prebuild lines are the only settings that genuinely cannot live in
-  the repo without breaking the upstream Play build or the CI budget:
-  - `reactNativeArchitectures=arm64-v8a` (passed via `gradleprops`) — the repo
-    default is all four ABIs for the Play release; two ABIs push
-    react-native-svg's C++ codegen past the 1 h CI timeout, so the F-Droid
-    build is arm64-only (covers virtually all active devices).
-  - `org.gradle.jvmargs=-Xmx1536m` + `org.gradle.daemon=false` stay as
-    gradle.properties appends in prebuild rather than `gradleprops`, because
-    Gradle only honours `org.gradle.*` launcher settings from properties files
-    — as `-P` command-line project properties they are inert. The repo default
-    is 2 GB for local dev; on the CI runner that starves the parallel C++
-    workers and the Metro/Hermes Node process (hermesc exit 5), so the heap is
-    capped.
-  - `npm ci --ignore-scripts` skips slow postinstall native compilation; the
-    `patches/` are then re-applied explicitly via `patch-package` (the Location
-    patch strips `play-services-location` from
-    `@react-native-community/geolocation` so no proprietary `com.google.android.gms`
-    classes ship).
-
-  node_modules handling (per templates/build-react-native.yml). `npm ci` +
-  patch-package run in `prebuild`; patch-package strips `play-services-location`
-  so no proprietary `com.google.android.gms` classes ship. `scandelete:
-  node_modules` then removes RN's inherent (non-proprietary) generated artefacts
-  from the scanned/archived source — the bundled i18n binary packs
-  (`react-native/React/I18n/strings/*/fbt_language_pack.bin`), prebuilt host
-  binaries (other-platform hermesc, fb-dotslash), and stray per-module
-  gradle-wrapper.jars. `scanignore` lists the few generated files the gradle
-  build genuinely needs so the scan leaves them in place: each autolinked native
-  module's `android/build.gradle` (they declare local-path Maven repos pointing at
-  `node_modules/react-native/android`), `react-native/ReactAndroid/publish.gradle`,
-  and the linux `hermes-compiler` hermesc binary used to compile the Hermes
-  bytecode bundle.
-
-  notifee ships its `core` engine as a prebuilt AAR in a flatDir Maven repo at
-  `node_modules/@notifee/react-native/android/libs`, scanignored above so the scan
-  leaves it in place. (A from-source build of notifee-core was attempted but the
-  available community core fork is binary-incompatible with notifee 9.1.8's RN
-  wrapper at runtime — `InitProvider.onCreate` LinkageError on launch — so the
-  published `core` AAR is used until a 9.1.8-compatible source is available.)
-
-  Single universal fdroidRelease APK (no ABI splits). Listing text + screenshots
-  come from upstream Fastlane: `fastlane/metadata/android/en-US/`. Reproducible
-  builds not requested yet (RN/Hermes); APK is F-Droid-signed.
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
