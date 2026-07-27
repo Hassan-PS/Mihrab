@@ -60,8 +60,14 @@ export function useCompanionChoice(): {
   };
 }
 
-/** Inline mode toggle + edition list for the active mode. */
-export function CompanionTextControls() {
+/** Inline mode toggle + both edition lists.
+ *  `onPick` fires after an EDITION is chosen (not on mode toggles) — the
+ *  sheet uses it to auto-close; the inline Settings card passes nothing. */
+export function CompanionTextControls({
+  onPick,
+}: {
+  onPick?: () => void;
+} = {}) {
   const { t } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
@@ -141,6 +147,7 @@ export function CompanionTextControls() {
             onPress={() => {
               updateSettings({ quranTranslationEdition: ed.id });
               setMode('translation');
+              onPick?.();
             }}
             style={[
               styles.row,
@@ -186,6 +193,7 @@ export function CompanionTextControls() {
                 companionMode: 'tafsir',
                 votdMode: 'tafsir',
               });
+              onPick?.();
             }}
             style={[
               styles.row,
@@ -249,7 +257,8 @@ export function CompanionTextSheet({
           {t('quran.companionTitle', 'Under each verse')}
         </Text>
         <ScrollView style={styles.list}>
-          <CompanionTextControls />
+          {/* Picking an edition applies AND closes — no extra Done press. */}
+          <CompanionTextControls onPick={onClose} />
         </ScrollView>
         <Pressable
           accessibilityRole="button"
