@@ -30,33 +30,42 @@ export function AdaptiveGrid({
   const [w, setW] = useState(0);
   const items = Children.toArray(children).filter(isValidElement);
   const cols = w > 0 ? columnsFor(w, minItemWidth, gutter, maxColumns) : 1;
+  // Floor to a whole dp so `cols` items + gutters can NEVER exceed the row.
+  // Fractional widths (e.g. a 392.7dp window at 440dpi) used to round up by
+  // a subpixel and wrap the last column — leaving 2 narrow tiles and an
+  // empty right half on some devices while emulators looked fine.
   const itemWidth =
-    w > 0 && cols > 0 ? (w - gutter * (cols - 1)) / cols : undefined;
+    w > 0 && cols > 0
+      ? Math.floor((w - gutter * (cols - 1)) / cols)
+      : undefined;
 
   const onLayout = (e: LayoutChangeEvent) => {
-    const next = Math.round(e.nativeEvent.layout.width);
+    // Floor, never round: assuming even half a pixel more width than the row
+    // really has causes the overflow-wrap above.
+    const next = Math.floor(e.nativeEvent.layout.width);
     if (next !== w) setW(next);
   };
 
   return (
     <View
       onLayout={onLayout}
-      style={[{ flexDirection: 'row', flexWrap: 'wrap' }, style]}>
-      {items.map((child, i) => {
-        const lastInRow = (i + 1) % cols === 0;
-        return (
-          <View
-            // eslint-disable-next-line react/no-array-index-key
-            key={i}
-            style={{
-              width: itemWidth ?? '100%',
-              marginEnd: lastInRow ? 0 : gutter,
-              marginBottom: gutter,
-            }}>
-            {child}
-          </View>
-        );
-      })}
+      style={[
+        // `columnGap` replaces per-item marginEnd: no last-in-row bookkeeping,
+        // and the engine guarantees the spacing never pushes a column out.
+        { flexDirection: 'row', flexWrap: 'wrap', columnGap: gutter },
+        style,
+      ]}>
+      {items.map((child, i) => (
+        <View
+          // eslint-disable-next-line react/no-array-index-key
+          key={i}
+          style={{
+            width: itemWidth ?? '100%',
+            marginBottom: gutter,
+          }}>
+          {child}
+        </View>
+      ))}
     </View>
   );
 }
