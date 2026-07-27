@@ -1,8 +1,9 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import {
+  AppState,
   Modal,
   PermissionsAndroid,
   Platform,
@@ -45,6 +46,32 @@ function NotificationsCardImpl({
   const [timeTarget, setTimeTarget] = useState<'ayah' | 'khatmah' | null>(
     null,
   );
+  // Android: battery optimization defers/drops the AlarmManager alarms the
+  // adhan rides on once nothing (e.g. the Live Activity's foreground service)
+  // keeps the app exempt — "adhan never fires" on aggressive shells (v2.7.40).
+  // Surface a fix-it row while the app is still optimized. Re-checked on
+  // foreground so the row disappears right after the user excludes the app.
+  const [batteryOptimized, setBatteryOptimized] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    let alive = true;
+    const check = () => {
+      notifee
+        .isBatteryOptimizationEnabled()
+        .then(v => {
+          if (alive) setBatteryOptimized(v);
+        })
+        .catch(() => {});
+    };
+    check();
+    const sub = AppState.addEventListener('change', st => {
+      if (st === 'active') check();
+    });
+    return () => {
+      alive = false;
+      sub.remove();
+    };
+  }, []);
 
   /** Platform notification permission (subset of the master toggle flow). */
   const ensureNotifPermission = async (): Promise<boolean> => {
@@ -180,6 +207,37 @@ function NotificationsCardImpl({
           onValueChange={onToggle}
         />
       </View>
+
+      {settings.notificationsEnabled &&
+        Platform.OS === 'android' &&
+        batteryOptimized && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('settings.batteryWarning')}
+            style={[
+              s.card,
+              s.rowPress,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}
+            onPress={() => {
+              notifee.openBatteryOptimizationSettings().catch(() => {});
+            }}>
+            <View style={s.switchCopy}>
+              <Text style={[s.valueText, { color: palette.text }]}>
+                {t('settings.batteryWarning', 'Alerts may be unreliable')}
+              </Text>
+              <Text style={[s.help, { color: palette.muted }]}>
+                {t(
+                  'settings.batteryWarningHelp',
+                  'Battery optimization can delay or silence adhan alerts while the app is closed. Tap to exclude Mihrab.',
+                )}
+              </Text>
+            </View>
+            <Text style={[s.changeLink, { color: palette.accent }]}>
+              {t('common.change')}
+            </Text>
+          </Pressable>
+        )}
 
       {settings.notificationsEnabled && (
         <Pressable

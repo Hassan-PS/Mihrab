@@ -126,26 +126,35 @@ export function buildUpcomingSalahEvents(
    * filtered) events and the `tomorrow` map covers the actual today.
    */
   baseDay: Date = now,
+  /**
+   * Cached days AFTER tomorrow (i.e. `week[2..]`), scheduled at day offsets
+   * 2, 3, … from `baseDay` (v2.7.40). Extends alert coverage so the adhan
+   * still fires when the app hasn't been opened for a couple of days —
+   * previously coverage was exactly today+tomorrow, so 2 days without an
+   * app open meant every alert silently lapsed. (The Live Activity's
+   * foreground service used to mask this by keeping the app alive; users
+   * who turned it off hit the gap directly.)
+   */
+  extraDays: TimingsMap[] = [],
 ): { name: string; at: Date }[] {
   const dayStart = startOfLocalDay(baseDay);
   const events: { name: string; at: Date }[] = [];
-  for (const name of NEXT_SALAH_ORDER) {
-    const raw = today[name];
-    if (raw) {
-      events.push({ name, at: combineLocalDateAndTime(dayStart, raw) });
-    }
-  }
-  if (tomorrow) {
-    const nextDayStart = addDays(dayStart, 1);
+  const pushDay = (timings: TimingsMap, dayOffset: number) => {
+    const base = dayOffset === 0 ? dayStart : addDays(dayStart, dayOffset);
     for (const name of NEXT_SALAH_ORDER) {
-      const raw = tomorrow[name];
+      const raw = timings[name];
       if (raw) {
-        events.push({ name, at: combineLocalDateAndTime(nextDayStart, raw) });
+        events.push({ name, at: combineLocalDateAndTime(base, raw) });
       }
     }
-  }
+  };
+  pushDay(today, 0);
+  if (tomorrow) pushDay(tomorrow, 1);
+  extraDays.forEach((t, i) => pushDay(t, 2 + i));
   const cutoff = now.getTime() + NOTIFICATION_BUFFER_MS;
-  return events.filter(e => e.at.getTime() > cutoff);
+  return events
+    .filter(e => e.at.getTime() > cutoff)
+    .sort((a, b) => a.at.getTime() - b.at.getTime());
 }
 
 /**

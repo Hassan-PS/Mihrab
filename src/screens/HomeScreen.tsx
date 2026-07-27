@@ -260,6 +260,9 @@ export function HomeScreen() {
       // sync fires with stale state just after midnight, yesterday's map
       // must not be pinned onto today's date (early-adhan bug, v2.7.38).
       baseDate: state.baseDate,
+      // Extra cached days extend coverage past tomorrow so alerts keep
+      // firing when the app isn't opened for a couple of days (v2.7.40).
+      week: view.table.week,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
   }, [
@@ -292,6 +295,7 @@ export function HomeScreen() {
         today: view.table.today,
         tomorrow: view.table.tomorrow,
         baseDate: state.baseDate,
+        week: view.table.week,
       }).catch(e => console.warn('syncPrayerNotifications (focus):', e));
       {
         const t = computeSeasonalTreatment(

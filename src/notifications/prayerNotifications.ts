@@ -310,6 +310,10 @@ export async function syncPrayerNotifications(params: {
   /** The local calendar day `today` was fetched for — see
    *  buildUpcomingSalahEvents. Pass whenever available. */
   baseDate?: Date;
+  /** Consecutive cached days starting today (`week[0]` = today). Days beyond
+   *  tomorrow extend alert coverage so alerts keep firing when the app isn't
+   *  opened for a couple of days (v2.7.40) — capped internally. */
+  week?: TimingsMap[];
   /** When true, the prayer-time alert gets a "Log prayer" action — task #99. */
   journalLogActionEnabled?: boolean;
 }): Promise<SyncPrayerNotificationsResult> {
@@ -338,6 +342,10 @@ export async function syncPrayerNotifications(params: {
     params.tomorrow,
     now,
     params.baseDate ?? now,
+    // Two extra cached days beyond tomorrow (4 days of coverage total).
+    // Capped so a sync stays a few dozen AlarmManager registrations, well
+    // under the per-app alarm limit and quick enough for an on-focus sync.
+    params.week?.slice(2, 4) ?? [],
   );
   const reminderMinutes = clampPrePrayerReminderMinutes(
     params.prePrayerReminderMinutes,
