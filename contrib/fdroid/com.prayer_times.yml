@@ -24,7 +24,6 @@ Builds:
     prebuild:
       - sed -i 's/SdkVersion = 37/SdkVersion = 36/' ../build.gradle
       - sed -i 's/"37.0.0"/"36.0.0"/' ../build.gradle
-      - echo 'reactNativeArchitectures=arm64-v8a' >> ../gradle.properties
       - echo 'org.gradle.jvmargs=-Xmx1536m' >> ../gradle.properties
       - echo 'org.gradle.daemon=false' >> ../gradle.properties
       - cd ../..
@@ -55,6 +54,8 @@ Builds:
     scandelete:
       - node_modules
     ndk: 27.1.12297006
+    gradleprops:
+      - reactNativeArchitectures=arm64-v8a
 
 MaintainerNotes: |
   React Native 0.83 app. `npm ci` runs from the repo root; Gradle runs in
@@ -69,13 +70,17 @@ MaintainerNotes: |
   in parallel) while keeping them on for the upstream Play release. The few
   remaining prebuild lines are the only settings that genuinely cannot live in
   the repo without breaking the upstream Play build or the CI budget:
-  - `reactNativeArchitectures=arm64-v8a` — the repo default is all four ABIs for
-    the Play release; two ABIs push react-native-svg's C++ codegen past the 1 h
-    CI timeout, so the F-Droid build is arm64-only (covers virtually all active
-    devices).
-  - `org.gradle.jvmargs=-Xmx1536m` + `org.gradle.daemon=false` — the repo default
-    is 2 GB for local dev; on the CI runner that starves the parallel C++ workers
-    and the Metro/Hermes Node process (hermesc exit 5), so the heap is capped.
+  - `reactNativeArchitectures=arm64-v8a` (passed via `gradleprops`) — the repo
+    default is all four ABIs for the Play release; two ABIs push
+    react-native-svg's C++ codegen past the 1 h CI timeout, so the F-Droid
+    build is arm64-only (covers virtually all active devices).
+  - `org.gradle.jvmargs=-Xmx1536m` + `org.gradle.daemon=false` stay as
+    gradle.properties appends in prebuild rather than `gradleprops`, because
+    Gradle only honours `org.gradle.*` launcher settings from properties files
+    — as `-P` command-line project properties they are inert. The repo default
+    is 2 GB for local dev; on the CI runner that starves the parallel C++
+    workers and the Metro/Hermes Node process (hermesc exit 5), so the heap is
+    capped.
   - `npm ci --ignore-scripts` skips slow postinstall native compilation; the
     `patches/` are then re-applied explicitly via `patch-package` (the Location
     patch strips `play-services-location` from
