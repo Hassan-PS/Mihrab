@@ -400,75 +400,85 @@ export function QuranScreen() {
               {votdTranslation}
             </Text>
           ) : null}
-          {/* ONE connected control (v2.7.40): mode segments + the edition
-              selector share a single bordered bar, so "pick translation or
-              tafsir, then which edition" reads as one thing. Each part is its
-              own Pressable so the card's open-in-reader press doesn't fire. */}
-          <View style={styles.votdControlRow}>
-            <View
-              style={[styles.votdCompanionBar, { borderColor: palette.border }]}>
-              {(
-                [
-                  ['translation', t('quran.viewToggleTranslation', 'Translation')],
-                  ['tafsir', t('quran.tafsir', 'Tafsir')],
-                ] as Array<['translation' | 'tafsir', string]>
-              ).map(([mode, label]) => {
-                const selected = votdMode === mode;
-                return (
-                  <Pressable
-                    key={mode}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={label}
-                    hitSlop={6}
-                    onPress={() => {
-                      setVotdExpanded(false);
-                      // THE app-wide companion-mode switch (v2.7.40).
-                      // votdMode kept in sync for downgrade safety.
-                      setQuranPrefs({ companionMode: mode, votdMode: mode });
-                    }}
-                    style={[
-                      styles.votdToggleSeg,
-                      selected && { backgroundColor: palette.accentBg },
-                    ]}>
-                    <Text
-                      style={{
-                        color: selected ? palette.accentSolid : palette.muted,
-                        fontWeight: '700',
-                        fontSize: 11,
-                      }}>
-                      {label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-              <View
-                style={[styles.votdBarDivider, { backgroundColor: palette.border }]}
-              />
-              <Pressable
-                hitSlop={6}
-                accessibilityRole="button"
-                accessibilityLabel={t('quran.companionTitle', 'Under each verse')}
-                onPress={() => setCompanionSheetVisible(true)}
-                style={styles.votdEditionSeg}>
-                <Text
-                  numberOfLines={1}
-                  style={[styles.votdEdition, { color: palette.text }]}>
-                  {companionChoice.editionLabel}
-                </Text>
-                <Text
-                  style={{
-                    color: palette.accentSolid,
-                    fontSize: 11,
-                    fontWeight: '700',
-                  }}>
-                  {' ▾'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
         </Pressable>
       ) : null}
+
+      {/* Companion-text control (v2.7.40) — its OWN card so it reads as a
+          proper setting, not a footnote of the verse card: the app-wide
+          Translation⇄Tafsir mode plus the edition for the active mode
+          (tap the edition to open the full picker sheet). */}
+      <View
+        style={[
+          styles.companionCard,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <Text style={[styles.votdLabel, { color: palette.muted }]}>
+          {t('quran.companionTitle', 'Under each verse')}
+        </Text>
+        <View style={styles.companionCardRow}>
+          <View
+            style={[styles.votdCompanionBar, { borderColor: palette.border }]}>
+            {(
+              [
+                ['translation', t('quran.viewToggleTranslation', 'Translation')],
+                ['tafsir', t('quran.tafsir', 'Tafsir')],
+              ] as Array<['translation' | 'tafsir', string]>
+            ).map(([mode, label]) => {
+              const selected = votdMode === mode;
+              return (
+                <Pressable
+                  key={mode}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={label}
+                  hitSlop={6}
+                  onPress={() => {
+                    setVotdExpanded(false);
+                    // THE app-wide companion-mode switch (v2.7.40).
+                    // votdMode kept in sync for downgrade safety.
+                    setQuranPrefs({ companionMode: mode, votdMode: mode });
+                  }}
+                  style={[
+                    styles.votdToggleSeg,
+                    selected && { backgroundColor: palette.accentBg },
+                  ]}>
+                  <Text
+                    style={{
+                      color: selected ? palette.accentSolid : palette.muted,
+                      fontWeight: '700',
+                      fontSize: 12,
+                    }}>
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+            <View
+              style={[styles.votdBarDivider, { backgroundColor: palette.border }]}
+            />
+            <Pressable
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.companionTitle', 'Under each verse')}
+              onPress={() => setCompanionSheetVisible(true)}
+              style={styles.votdEditionSeg}>
+              <Text
+                numberOfLines={1}
+                style={[styles.votdEdition, { color: palette.text }]}>
+                {companionChoice.editionLabel}
+              </Text>
+              <Text
+                style={{
+                  color: palette.accentSolid,
+                  fontSize: 12,
+                  fontWeight: '700',
+                }}>
+                {' ▾'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
 
       {/* Search (QR-22) */}
       <TextInput
@@ -997,12 +1007,11 @@ const styles = StyleSheet.create({
   votdTranslation: { fontSize: 13, lineHeight: 19 },
   votdShowMore: { fontSize: 12, fontWeight: '700', marginTop: 4 },
   votdRef: { fontSize: 12, fontWeight: '700' },
-  votdControlRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 8,
+  companionCard: {
+    padding: 14,
+    borderRadius: 12,
+  },
+  companionCardRow: {
     marginTop: 8,
   },
   votdEdition: { fontSize: 11, fontWeight: '600', flexShrink: 1 },
