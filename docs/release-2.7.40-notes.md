@@ -22,19 +22,23 @@ Play Console policy: Billing Library >= 8.0.0 required by 2026-08-31.
   compiles clean. F-Droid/iOS unaffected (react-native-iap is play-only).
 - Commit `f4755c7` on main.
 
-## ⚠️ Cleanup owed to a Desktop Commander outage mid-release
+## ⚠️ One item still pending
 
-The MCP shell died after the AAB rebuild; commit `f4755c7` was made
-through the sandbox mount, which cannot unlink git temp files. On the
-next host shell in `~/git/PrayerApp`:
+`git push origin main` — commits `f4755c7` (Billing 8) and `84d3428`+
+(docs) are local-only; the sandbox has no GitHub credentials. Run the
+push from the next session with a working host shell (Desktop Commander)
+or any terminal. (The stale `.git` lock files from the outage were
+already cleaned up.)
 
-```sh
-rm -f .git/HEAD.lock .git/objects/*/tmp_obj_*   # stale sandbox locks
-git push origin main                            # f4755c7 is unpushed
-```
+## F-Droid MR 36312 (2026-07-27)
 
-(Until `HEAD.lock` is removed, host-side `git commit`/`checkout` will fail
-with "File exists".)
+The "waiting-on-response" label traced to Licaon_Kter's checklist ask:
+the MR-description checkboxes were never ticked. All 7 applicable boxes
+are now checked (via Hassan's GitLab session), and a status comment was
+posted citing pipeline 2708744413 green on 2.7.40 and @-mentioning
+@linsui + @licaon-kter asking what, if anything, still blocks the merge.
+Upstream fastlane icon/screenshots and single-version recipe were
+already in place.
 
 ## Gotcha learned
 
