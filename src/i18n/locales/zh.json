@@ -232,7 +232,9 @@
     "khatmahReminder": "每日完读提醒",
     "khatmahReminderHelp": "完读计划进行期间，提示今日份额及继续位置。",
     "resetApp": "重置应用数据",
-    "resetAppHelp": "清除所有设置和数据。无法撤销。"
+    "resetAppHelp": "清除所有设置和数据。无法撤销。",
+    "batteryWarning": "提醒可能不可靠",
+    "batteryWarningHelp": "电池优化可能在应用关闭时延迟或静音宣礼提醒。点按以将 Mihrab 排除在外。"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -863,7 +865,9 @@
     "showLess": "显示更少",
     "tafsirEditionHelp": "显示在每节经文下方的经注。也可在《古兰经》页面的任意经文处更改。",
     "nextPage": "下一页",
-    "prevPage": "上一页"
+    "prevPage": "上一页",
+    "companionTitle": "每节经文下方",
+    "companionHelp": "适用于显示经文的所有位置——阅读器、每日经文和每日经文通知。也可在古兰经页面更改。"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

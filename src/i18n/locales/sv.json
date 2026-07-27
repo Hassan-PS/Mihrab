@@ -232,7 +232,9 @@
     "khatmahReminder": "Daglig khatmah-påminnelse",
     "khatmahReminderHelp": "Dagens portion och var du ska fortsätta, medan en khatmah är aktiv.",
     "resetApp": "Återställ appdata",
-    "resetAppHelp": "Raderar alla inställningar och data. Kan inte ångras."
+    "resetAppHelp": "Raderar alla inställningar och data. Kan inte ångras.",
+    "batteryWarning": "Aviseringar kan vara opålitliga",
+    "batteryWarningHelp": "Batterioptimering kan fördröja eller tysta adhan-aviseringar när appen är stängd. Tryck för att undanta Mihrab."
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -863,7 +865,9 @@
     "showLess": "Visa mindre",
     "tafsirEditionHelp": "Kommentaren som visas under varje vers. Kan även ändras från valfri vers på Koran-sidan.",
     "nextPage": "Nästa sida",
-    "prevPage": "Föregående sida"
+    "prevPage": "Föregående sida",
+    "companionTitle": "Under varje vers",
+    "companionHelp": "Gäller överallt där en vers visas — läsaren, dagens vers och den dagliga ayah-aviseringen. Kan även ändras från Koran-sidan."
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

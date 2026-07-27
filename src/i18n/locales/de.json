@@ -232,7 +232,9 @@
     "khatmahReminder": "Tägliche Khatmah-Erinnerung",
     "khatmahReminderHelp": "Heutige Portion und wo es weitergeht, solange eine Khatmah aktiv ist.",
     "resetApp": "App-Daten zurücksetzen",
-    "resetAppHelp": "Löscht alle Einstellungen und Daten. Nicht rückgängig machbar."
+    "resetAppHelp": "Löscht alle Einstellungen und Daten. Nicht rückgängig machbar.",
+    "batteryWarning": "Benachrichtigungen könnten unzuverlässig sein",
+    "batteryWarningHelp": "Die Akku-Optimierung kann Adhan-Benachrichtigungen verzögern oder stummschalten, wenn die App geschlossen ist. Tippen, um Mihrab auszunehmen."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -863,7 +865,9 @@
     "showLess": "Weniger anzeigen",
     "tafsirEditionHelp": "Der Kommentar, der unter jedem Vers angezeigt wird. Auch bei jedem Vers auf der Koran-Seite änderbar.",
     "nextPage": "Nächste Seite",
-    "prevPage": "Vorherige Seite"
+    "prevPage": "Vorherige Seite",
+    "companionTitle": "Unter jedem Vers",
+    "companionHelp": "Gilt überall, wo ein Vers angezeigt wird — im Reader, beim Vers des Tages und in der täglichen Ayah-Benachrichtigung. Auch über die Koran-Seite änderbar."
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

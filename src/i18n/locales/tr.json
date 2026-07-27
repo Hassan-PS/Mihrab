@@ -232,7 +232,9 @@
     "khatmahReminder": "Günlük hatim hatırlatıcısı",
     "khatmahReminderHelp": "Hatim aktifken bugünkü bölüm ve nereden devam edileceği.",
     "resetApp": "Uygulama verilerini sıfırla",
-    "resetAppHelp": "Tüm ayarları ve verileri siler. Geri alınamaz."
+    "resetAppHelp": "Tüm ayarları ve verileri siler. Geri alınamaz.",
+    "batteryWarning": "Bildirimler güvenilir olmayabilir",
+    "batteryWarningHelp": "Pil optimizasyonu, uygulama kapalıyken ezan bildirimlerini geciktirebilir veya sessize alabilir. Mihrab'ı hariç tutmak için dokunun."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -863,7 +865,9 @@
     "showLess": "Daha az göster",
     "tafsirEditionHelp": "Her ayetin altında gösterilen tefsir. Kur’an sayfasındaki herhangi bir ayetten de değiştirilebilir.",
     "nextPage": "Sonraki sayfa",
-    "prevPage": "Önceki sayfa"
+    "prevPage": "Önceki sayfa",
+    "companionTitle": "Her ayetin altında",
+    "companionHelp": "Ayetin gösterildiği her yerde geçerli — okuyucu, günün ayeti ve günlük ayet bildirimi. Kur'an sayfasından da değiştirilebilir."
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

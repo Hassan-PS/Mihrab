@@ -232,7 +232,9 @@
     "khatmahReminder": "Khatmah daily reminder",
     "khatmahReminderHelp": "Today's portion and where to continue, while a khatmah is active.",
     "resetApp": "Reset app data",
-    "resetAppHelp": "Erase all settings and data. Cannot be undone."
+    "resetAppHelp": "Erase all settings and data. Cannot be undone.",
+    "batteryWarning": "Alerts may be unreliable",
+    "batteryWarningHelp": "Battery optimization can delay or silence adhan alerts while the app is closed. Tap to exclude Mihrab."
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -863,7 +865,9 @@
     "showLess": "Show less",
     "tafsirEditionHelp": "The commentary shown under each verse. Also changeable from any verse on the Quran page.",
     "nextPage": "Next page",
-    "prevPage": "Previous page"
+    "prevPage": "Previous page",
+    "companionTitle": "Under each verse",
+    "companionHelp": "Applies everywhere a verse is shown — the reader, the verse of the day, and the daily-ayah notification. Also changeable from the Quran page."
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

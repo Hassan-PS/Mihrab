@@ -232,7 +232,9 @@
     "khatmahReminder": "Rappel quotidien de khatma",
     "khatmahReminderHelp": "La portion du jour et où continuer, tant qu'une khatma est active.",
     "resetApp": "Réinitialiser les données de l'app",
-    "resetAppHelp": "Efface tous les réglages et données. Irréversible."
+    "resetAppHelp": "Efface tous les réglages et données. Irréversible.",
+    "batteryWarning": "Les alertes peuvent être peu fiables",
+    "batteryWarningHelp": "L'optimisation de la batterie peut retarder ou couper les alertes d'adhan quand l'app est fermée. Touchez pour exclure Mihrab."
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -863,7 +865,9 @@
     "showLess": "Afficher moins",
     "tafsirEditionHelp": "Le commentaire affiché sous chaque verset. Modifiable aussi depuis n’importe quel verset sur la page du Coran.",
     "nextPage": "Page suivante",
-    "prevPage": "Page précédente"
+    "prevPage": "Page précédente",
+    "companionTitle": "Sous chaque verset",
+    "companionHelp": "S'applique partout où un verset s'affiche — le lecteur, le verset du jour et la notification quotidienne. Modifiable aussi depuis la page Coran."
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",
