@@ -30,6 +30,23 @@ push from the next session with a working host shell (Desktop Commander)
 or any terminal. (The stale `.git` lock files from the outage were
 already cleaned up.)
 
+## F-Droid MR 36312 — review round 2 (2026-07-27, later)
+
+linsui reviewed within the hour: ① `reactNativeArchitectures` echo →
+`gradleprops:` field, ② delete both `org.gradle.*` gradle.properties
+appends (empty suggestion), ③ remove MaintainerNotes. All applied in
+fork commit `a4b7826c` (pushed via the GitLab web Replace-file flow —
+Desktop Commander was down; the sandbox's pip-installed `fdroidserver`
+validated `rewritemeta` no-diff + lint BEFORE pushing, and CI's
+rewritemeta job then passed). `contrib/fdroid/com.prayer_times.yml`
+matches the fork (local commit 612ea6a, unpushed). All three threads
+auto-resolved by the push; summary comment posted tagging @linsui with
+the heap-cap history caveat. NOTE: `gradleprops` = command-line `-P`
+props — valid for reactNativeArchitectures, INERT for `org.gradle.*`
+(launcher reads those only from properties files); if the no-cap build
+OOMs (hermesc exit 5), that's the argument to restore the appends.
+Pipeline to watch: #2709129320.
+
 ## F-Droid MR 36312 (2026-07-27)
 
 The "waiting-on-response" label traced to Licaon_Kter's checklist ask:
