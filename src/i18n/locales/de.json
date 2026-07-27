@@ -867,7 +867,8 @@
     "nextPage": "Nächste Seite",
     "prevPage": "Vorherige Seite",
     "companionTitle": "Unter jedem Vers",
-    "companionHelp": "Gilt überall, wo ein Vers angezeigt wird — im Reader, beim Vers des Tages und in der täglichen Ayah-Benachrichtigung. Auch über die Koran-Seite änderbar."
+    "companionHelp": "Gilt überall, wo ein Vers angezeigt wird — im Reader, beim Vers des Tages und in der täglichen Ayah-Benachrichtigung. Auch über die Koran-Seite änderbar.",
+    "companionActive": "aktiv"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

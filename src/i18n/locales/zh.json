@@ -867,7 +867,8 @@
     "nextPage": "下一页",
     "prevPage": "上一页",
     "companionTitle": "每节经文下方",
-    "companionHelp": "适用于显示经文的所有位置——阅读器、每日经文和每日经文通知。也可在古兰经页面更改。"
+    "companionHelp": "适用于显示经文的所有位置——阅读器、每日经文和每日经文通知。也可在古兰经页面更改。",
+    "companionActive": "当前使用"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

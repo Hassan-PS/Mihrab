@@ -43,8 +43,16 @@ describe('resolveEditionForNotification', () => {
     );
   });
 
-  it('falls back to the locale default when the edition mismatches', () => {
+  it('honors an explicit cross-language pick (v2.7.40 — no silent revert)', () => {
     expect(resolveEditionForNotification('en.pickthall', 'sv')).toBe(
+      'en.pickthall',
+    );
+  });
+
+  it('falls back to the locale default for unknown ids', () => {
+    // 'ar.muyassar' was removed from the translation registry (it is a
+    // tafsir, not a translation) — stored picks of it fall back.
+    expect(resolveEditionForNotification('ar.muyassar', 'sv')).toBe(
       'sv.bernstrom',
     );
   });

@@ -867,7 +867,8 @@
     "nextPage": "Next page",
     "prevPage": "Previous page",
     "companionTitle": "Under each verse",
-    "companionHelp": "Applies everywhere a verse is shown — the reader, the verse of the day, and the daily-ayah notification. Also changeable from the Quran page."
+    "companionHelp": "Applies everywhere a verse is shown — the reader, the verse of the day, and the daily-ayah notification. Also changeable from the Quran page.",
+    "companionActive": "active"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

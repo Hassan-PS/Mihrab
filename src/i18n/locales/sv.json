@@ -867,7 +867,8 @@
     "nextPage": "Nästa sida",
     "prevPage": "Föregående sida",
     "companionTitle": "Under varje vers",
-    "companionHelp": "Gäller överallt där en vers visas — läsaren, dagens vers och den dagliga ayah-aviseringen. Kan även ändras från Koran-sidan."
+    "companionHelp": "Gäller överallt där en vers visas — läsaren, dagens vers och den dagliga ayah-aviseringen. Kan även ändras från Koran-sidan.",
+    "companionActive": "aktiv"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

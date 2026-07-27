@@ -30,7 +30,11 @@ export type QuranTranslationEdition = {
 export const QURAN_TRANSLATIONS: ReadonlyArray<QuranTranslationEdition> = [
   { id: 'en.sahih', label: 'Sahih International', language: 'English', locale: 'en' },
   { id: 'en.pickthall', label: 'Pickthall', language: 'English', locale: 'en' },
-  { id: 'ar.muyassar', label: 'Tafsir al-Muyassar', language: 'Arabic', locale: 'ar' },
+  // NOTE (v2.7.40): 'ar.muyassar' (al-Tafsir al-Muyassar) was removed from
+  // this registry — it is an Arabic TAFSIR, not a translation (the Quran is
+  // Arabic; Tanzil ships it in the translation corpus slot, which is how it
+  // snuck in). It remains available as 'ar-tafsir-muyassar' in the tafsir
+  // registry. A stored 'ar.muyassar' pick falls back to the locale default.
   { id: 'sv.bernstrom', label: 'Bernström', language: 'Swedish', locale: 'sv' },
   { id: 'bn.bengali', label: 'Mujibur Rahman', language: 'Bengali', locale: 'bn' },
   { id: 'ur.jalandhry', label: 'Fateh Muhammad Jalandhry', language: 'Urdu', locale: 'ur' },
@@ -54,23 +58,28 @@ export function defaultEditionForLocale(locale: string): QuranTranslationId {
 }
 
 /**
- * Is this saved edition still appropriate for the current app language?
- * Returns false when:
- *   - the id isn't in our registry (data shape changed), or
- *   - the saved edition belongs to a different locale than the active app
- *     language (user switched languages after picking).
+ * Is this saved edition id one we still ship? (v2.7.40)
  *
- * Used by QuranSurahScreen so a stale `en.sahih` choice doesn't override
- * the locale-appropriate default after the user changes the app language.
+ * An EXPLICIT user pick is honoured regardless of the app language — the
+ * selector deliberately lists every edition (a German speaker may want the
+ * English Sahih text), so reverting cross-language picks silently was a
+ * bug, not a feature. The app-locale default only applies when nothing
+ * valid is stored (fresh installs, removed editions like 'ar.muyassar').
  */
+export function isKnownEdition(
+  edition: string | undefined | null,
+): edition is QuranTranslationId {
+  if (!edition) return false;
+  return QURAN_TRANSLATIONS.some(e => e.id === edition);
+}
+
+/** Back-compat shim for older call sites: "usable" now simply means the
+ *  edition exists — explicit picks survive app-language changes. */
 export function editionMatchesLocale(
   edition: string | undefined | null,
-  locale: string,
+  _locale: string,
 ): boolean {
-  if (!edition) return false;
-  const found = QURAN_TRANSLATIONS.find(e => e.id === edition);
-  if (!found) return false;
-  return found.locale === locale;
+  return isKnownEdition(edition);
 }
 
 type ChapterMap = { [chapter: string]: { [ayah: string]: string } };
@@ -89,9 +98,6 @@ export function loadTranslation(edition: QuranTranslationId): ChapterMap {
     case 'en.pickthall':
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       return require('./data/translations/en.pickthall.json');
-    case 'ar.muyassar':
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      return require('./data/translations/ar.muyassar.json');
     case 'sv.bernstrom':
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       return require('./data/translations/sv.bernstrom.json');

@@ -29,7 +29,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useQuranState, setQuranPrefs } from './quranState';
 import { QURAN_TRANSLATIONS } from './translations';
 import { useActiveEdition } from './useActiveEdition';
-import { tafsirEditionsForLocale, resolveTafsirEdition } from './tafsir';
+import { TAFSIR_EDITIONS, resolveTafsirEdition } from './tafsir';
 
 export type CompanionMode = 'translation' | 'tafsir';
 
@@ -68,7 +68,6 @@ export function CompanionTextControls() {
   const state = useQuranState();
   const mode = state.prefs.companionMode;
   const translationEdition = useActiveEdition();
-  const tafsirEditions = tafsirEditionsForLocale(settings.language);
   const activeTafsir = resolveTafsirEdition(
     state.prefs.tafsirEditionId,
     settings.language,
@@ -77,6 +76,17 @@ export function CompanionTextControls() {
   const setMode = (m: CompanionMode) =>
     // votdMode kept in sync purely for downgrade safety (legacy field).
     setQuranPrefs({ companionMode: m, votdMode: m });
+
+  const sectionHeader = (label: string, active: boolean) => (
+    <Text
+      style={[
+        styles.sectionHeader,
+        { color: active ? palette.accentSolid : palette.muted },
+      ]}>
+      {label}
+      {active ? `  ·  ${t('quran.companionActive', 'active')}` : ''}
+    </Text>
+  );
 
   return (
     <View>
@@ -113,80 +123,102 @@ export function CompanionTextControls() {
         })}
       </View>
 
-      {/* Edition list for the active mode */}
-      {mode === 'translation'
-        ? QURAN_TRANSLATIONS.map((ed, i) => {
-            const selected = ed.id === translationEdition;
-            return (
-              <Pressable
-                key={ed.id}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                accessibilityLabel={ed.label}
-                onPress={() =>
-                  updateSettings({ quranTranslationEdition: ed.id })
-                }
+      {/* BOTH edition lists, always visible (v2.7.40) — picking an edition
+          from either section also ACTIVATES that section's mode, so one tap
+          does the whole job (no separate toggle step). */}
+      {sectionHeader(
+        t('quran.viewToggleTranslation', 'Translation'),
+        mode === 'translation',
+      )}
+      {QURAN_TRANSLATIONS.map((ed, i) => {
+        const selected = mode === 'translation' && ed.id === translationEdition;
+        return (
+          <Pressable
+            key={ed.id}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+            accessibilityLabel={ed.label}
+            onPress={() => {
+              updateSettings({ quranTranslationEdition: ed.id });
+              setMode('translation');
+            }}
+            style={[
+              styles.row,
+              i > 0 && {
+                borderTopWidth: StyleSheet.hairlineWidth,
+                borderTopColor: palette.border,
+              },
+            ]}>
+            <View style={styles.rowText}>
+              <Text
                 style={[
-                  styles.row,
-                  i > 0 && {
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: palette.border,
-                  },
+                  styles.rowLabel,
+                  { color: palette.text },
+                  selected && { fontWeight: '700' },
                 ]}>
-                <View style={styles.rowText}>
-                  <Text
-                    style={[
-                      styles.rowLabel,
-                      { color: palette.text },
-                      selected && { fontWeight: '700' },
-                    ]}>
-                    {ed.label}
-                  </Text>
-                  <Text style={[styles.rowSub, { color: palette.muted }]}>
-                    {ed.language}
-                  </Text>
-                </View>
-                {selected ? (
-                  <Text style={[styles.check, { color: palette.accent }]}>
-                    ✓
-                  </Text>
-                ) : null}
-              </Pressable>
-            );
-          })
-        : tafsirEditions.map((ed, i) => {
-            const selected = ed.id === activeTafsir.id;
-            return (
-              <Pressable
-                key={ed.id}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                accessibilityLabel={ed.label}
-                onPress={() => setQuranPrefs({ tafsirEditionId: ed.id })}
+                {ed.label}
+              </Text>
+              <Text style={[styles.rowSub, { color: palette.muted }]}>
+                {ed.language}
+              </Text>
+            </View>
+            {selected ? (
+              <Text style={[styles.check, { color: palette.accent }]}>✓</Text>
+            ) : null}
+          </Pressable>
+        );
+      })}
+
+      {sectionHeader(t('quran.tafsir', 'Tafsir'), mode === 'tafsir')}
+      {/* ALL shipped tafsir editions — not just the app locale's: the
+          language of study need not match the UI language. */}
+      {TAFSIR_EDITIONS.map((ed, i) => {
+        const selected = mode === 'tafsir' && ed.id === activeTafsir.id;
+        return (
+          <Pressable
+            key={ed.id}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+            accessibilityLabel={ed.label}
+            onPress={() => {
+              setQuranPrefs({
+                tafsirEditionId: ed.id,
+                companionMode: 'tafsir',
+                votdMode: 'tafsir',
+              });
+            }}
+            style={[
+              styles.row,
+              i > 0 && {
+                borderTopWidth: StyleSheet.hairlineWidth,
+                borderTopColor: palette.border,
+              },
+            ]}>
+            <View style={styles.rowText}>
+              <Text
                 style={[
-                  styles.row,
-                  i > 0 && {
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: palette.border,
-                  },
+                  styles.rowLabel,
+                  { color: palette.text },
+                  ed.rtl && styles.rtl,
+                  selected && { fontWeight: '700' },
                 ]}>
-                <Text
-                  style={[
-                    styles.rowLabel,
-                    { color: palette.text },
-                    ed.rtl && styles.rtl,
-                    selected && { fontWeight: '700' },
-                  ]}>
-                  {ed.label}
-                </Text>
-                {selected ? (
-                  <Text style={[styles.check, { color: palette.accent }]}>
-                    ✓
-                  </Text>
-                ) : null}
-              </Pressable>
-            );
-          })}
+                {ed.label}
+              </Text>
+              <Text
+                style={[
+                  styles.rowSub,
+                  { color: palette.muted },
+                  ed.rtl && styles.rtl,
+                ]}>
+                {ed.language}
+              </Text>
+            </View>
+            {selected ? (
+              <Text style={[styles.check, { color: palette.accent }]}>✓</Text>
+            ) : null}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -243,6 +275,14 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 9,
     alignItems: 'center',
+  },
+  sectionHeader: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginTop: 14,
+    marginBottom: 2,
   },
   row: {
     flexDirection: 'row',

@@ -867,7 +867,8 @@
     "nextPage": "Page suivante",
     "prevPage": "Page précédente",
     "companionTitle": "Sous chaque verset",
-    "companionHelp": "S'applique partout où un verset s'affiche — le lecteur, le verset du jour et la notification quotidienne. Modifiable aussi depuis la page Coran."
+    "companionHelp": "S'applique partout où un verset s'affiche — le lecteur, le verset du jour et la notification quotidienne. Modifiable aussi depuis la page Coran.",
+    "companionActive": "actif"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

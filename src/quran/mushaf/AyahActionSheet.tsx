@@ -44,8 +44,8 @@ import {
 } from '../quranState';
 import {
   loadTafsir,
-  tafsirEditionsForLocale,
   resolveTafsirEdition,
+  TAFSIR_EDITIONS,
 } from '../tafsir';
 import { playFromAyah, playRange } from '../audio/playback';
 import { RecitationControls } from '../audio/RecitationControls';
@@ -83,7 +83,9 @@ export function AyahActionSheet({
   // across sheet reopens and stays in sync with the Settings selector — it
   // used to live in ephemeral component state, which reverted to the default
   // on every remount.
-  const tafsirEditions = tafsirEditionsForLocale(settings.language);
+  // ALL shipped tafsir editions (v2.7.40) — matches the companion-text
+  // selector so a pick made anywhere is offered everywhere.
+  const tafsirEditions = TAFSIR_EDITIONS;
   const [tafsirOpen, setTafsirOpen] = useState(false);
   const tafsirEdition = resolveTafsirEdition(
     state.prefs.tafsirEditionId,

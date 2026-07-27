@@ -867,7 +867,8 @@
     "nextPage": "Sonraki sayfa",
     "prevPage": "Önceki sayfa",
     "companionTitle": "Her ayetin altında",
-    "companionHelp": "Ayetin gösterildiği her yerde geçerli — okuyucu, günün ayeti ve günlük ayet bildirimi. Kur'an sayfasından da değiştirilebilir."
+    "companionHelp": "Ayetin gösterildiği her yerde geçerli — okuyucu, günün ayeti ve günlük ayet bildirimi. Kur'an sayfasından da değiştirilebilir.",
+    "companionActive": "etkin"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

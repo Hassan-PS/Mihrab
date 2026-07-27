@@ -867,7 +867,8 @@
     "nextPage": "Página siguiente",
     "prevPage": "Página anterior",
     "companionTitle": "Debajo de cada versículo",
-    "companionHelp": "Se aplica dondequiera que se muestre un versículo: el lector, el versículo del día y la notificación diaria. También se puede cambiar desde la página del Corán."
+    "companionHelp": "Se aplica dondequiera que se muestre un versículo: el lector, el versículo del día y la notificación diaria. También se puede cambiar desde la página del Corán.",
+    "companionActive": "activo"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

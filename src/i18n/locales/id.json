@@ -867,7 +867,8 @@
     "nextPage": "Halaman berikutnya",
     "prevPage": "Halaman sebelumnya",
     "companionTitle": "Di bawah setiap ayat",
-    "companionHelp": "Berlaku di mana pun ayat ditampilkan — pembaca, ayat hari ini, dan notifikasi ayat harian. Juga dapat diubah dari halaman Al-Qur'an."
+    "companionHelp": "Berlaku di mana pun ayat ditampilkan — pembaca, ayat hari ini, dan notifikasi ayat harian. Juga dapat diubah dari halaman Al-Qur'an.",
+    "companionActive": "aktif"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

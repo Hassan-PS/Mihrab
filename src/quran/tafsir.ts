@@ -23,6 +23,8 @@ export type TafsirEdition = {
   locale: string;
   /** RTL text? */
   rtl: boolean;
+  /** Display name of the edition's language (for the selector subtitle). */
+  language: string;
 };
 
 /**
@@ -35,36 +37,42 @@ export const TAFSIR_EDITIONS: ReadonlyArray<TafsirEdition> = [
     label: 'Ibn Kathir (abridged)',
     locale: 'en',
     rtl: false,
+    language: 'English',
   },
   {
     id: 'en-tafsir-maarif-ul-quran',
     label: 'Maarif-ul-Quran',
     locale: 'en',
     rtl: false,
+    language: 'English',
   },
   {
     id: 'ar-tafsir-muyassar',
     label: 'التفسير الميسر',
     locale: 'ar',
     rtl: true,
+    language: 'Arabic',
   },
   {
     id: 'ar-tafsir-ibn-kathir',
     label: 'تفسير ابن كثير',
     locale: 'ar',
     rtl: true,
+    language: 'Arabic',
   },
   {
     id: 'ur-tafseer-ibn-e-kaseer',
     label: 'تفسیر ابن کثیر (اردو)',
     locale: 'ur',
     rtl: true,
+    language: 'Urdu',
   },
   {
     id: 'bn-tafseer-ibn-e-kaseer',
     label: 'তাফসীর ইবনে কাসীর',
     locale: 'bn',
     rtl: false,
+    language: 'Bengali',
   },
 ] as const;
 
@@ -81,17 +89,19 @@ export function findTafsirEdition(id: string): TafsirEdition | undefined {
 
 /**
  * Resolve the tafsir edition to show for a stored preference + app locale.
- * Honours the stored id when it is offered for the current locale; otherwise
- * falls back to the locale's first edition. This keeps the Quran-page picker
- * and the Settings selector in agreement and guarantees a valid edition even
- * after a language change or an unknown/blank stored id.
+ * An EXPLICIT stored pick is honoured for ANY edition we ship — the
+ * selector lists all of them (v2.7.40), so a cross-language pick must not
+ * silently revert. The locale only chooses the DEFAULT when nothing valid
+ * is stored (fresh installs, unknown/blank ids).
  */
 export function resolveTafsirEdition(
   storedId: string,
   locale: string,
 ): TafsirEdition {
-  const offered = tafsirEditionsForLocale(locale);
-  return offered.find(e => e.id === storedId) ?? offered[0];
+  return (
+    TAFSIR_EDITIONS.find(e => e.id === storedId) ??
+    tafsirEditionsForLocale(locale)[0]
+  );
 }
 
 function tafsirUrl(edition: string, surah: number, ayah: number): string {
