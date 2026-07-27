@@ -53,3 +53,6 @@ One global "companion text" preference consumed EVERYWHERE:
   and translation view modes; votd card; a triggered ayah-of-day notification.
 
 Then cut a release (routine incl. verify-release.sh gate).
+
+## Resolution (2026-07-27)
+All three shipped on main (commits b7aec9d..8cb1f93+): (1) AdaptiveGrid floor+columnGap — repro was fractional-dp widths (440dpi), verified 440/456/420dpi + iPhone/iPad; (2) adhan-after-LA-off = FGS was masking a today+tomorrow-only alert window + OEM battery kills — now 4 cached days of triggers + battery-optimization fix-it row in Settings; (3) app-wide companion-text pref (companionMode, seeded from votdMode) with its own card on the Quran page, grouped-by-language selector (Arabic+English pinned), one-tap pick-activates-and-closes, applied to reader/votd/ayah sheet/daily notification; al-Muyassar reclassified tafsir-only; cross-language picks honored. 631 tests green.
