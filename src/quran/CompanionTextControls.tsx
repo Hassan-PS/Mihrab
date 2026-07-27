@@ -94,6 +94,34 @@ export function CompanionTextControls({
     </Text>
   );
 
+  // Group editions by language, ordered: the app language's group first,
+  // then English (the lingua-franca fallback), then the rest A→Z — so the
+  // options the user most likely wants sit at the top of each section.
+  const groupByLanguage = <T extends { language: string; locale: string }>(
+    list: ReadonlyArray<T>,
+  ): Array<[string, T[]]> => {
+    const groups = new Map<string, T[]>();
+    for (const e of list) {
+      const arr = groups.get(e.language) ?? [];
+      arr.push(e);
+      groups.set(e.language, arr);
+    }
+    const rank = (g: [string, T[]]) =>
+      g[1].some(e => e.locale === settings.language)
+        ? 0
+        : g[0] === 'English'
+          ? 1
+          : 2;
+    return [...groups.entries()].sort((a, b) => {
+      const ra = rank(a);
+      const rb = rank(b);
+      if (ra !== rb) return ra - rb;
+      return a[0].localeCompare(b[0]);
+    });
+  };
+  const translationGroups = groupByLanguage(QURAN_TRANSLATIONS);
+  const tafsirGroups = groupByLanguage(TAFSIR_EDITIONS);
+
   return (
     <View>
       {/* Mode segmented toggle */}
@@ -136,97 +164,89 @@ export function CompanionTextControls({
         t('quran.viewToggleTranslation', 'Translation'),
         mode === 'translation',
       )}
-      {QURAN_TRANSLATIONS.map((ed, i) => {
-        const selected = mode === 'translation' && ed.id === translationEdition;
-        return (
-          <Pressable
-            key={ed.id}
-            accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            accessibilityLabel={ed.label}
-            onPress={() => {
-              updateSettings({ quranTranslationEdition: ed.id });
-              setMode('translation');
-              onPick?.();
-            }}
-            style={[
-              styles.row,
-              i > 0 && {
-                borderTopWidth: StyleSheet.hairlineWidth,
-                borderTopColor: palette.border,
-              },
-            ]}>
-            <View style={styles.rowText}>
-              <Text
-                style={[
-                  styles.rowLabel,
-                  { color: palette.text },
-                  selected && { fontWeight: '700' },
-                ]}>
-                {ed.label}
-              </Text>
-              <Text style={[styles.rowSub, { color: palette.muted }]}>
-                {ed.language}
-              </Text>
-            </View>
-            {selected ? (
-              <Text style={[styles.check, { color: palette.accent }]}>✓</Text>
-            ) : null}
-          </Pressable>
-        );
-      })}
+      {translationGroups.map(([language, editions]) => (
+        <View key={language}>
+          <Text style={[styles.langHeader, { color: palette.muted }]}>
+            {language}
+          </Text>
+          {editions.map(ed => {
+            const selected =
+              mode === 'translation' && ed.id === translationEdition;
+            return (
+              <Pressable
+                key={ed.id}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                accessibilityLabel={ed.label}
+                onPress={() => {
+                  updateSettings({ quranTranslationEdition: ed.id });
+                  setMode('translation');
+                  onPick?.();
+                }}
+                style={styles.row}>
+                <Text
+                  style={[
+                    styles.rowLabel,
+                    { color: palette.text },
+                    selected && { fontWeight: '700' },
+                  ]}>
+                  {ed.label}
+                </Text>
+                {selected ? (
+                  <Text style={[styles.check, { color: palette.accent }]}>
+                    ✓
+                  </Text>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
 
       {sectionHeader(t('quran.tafsir', 'Tafsir'), mode === 'tafsir')}
       {/* ALL shipped tafsir editions — not just the app locale's: the
           language of study need not match the UI language. */}
-      {TAFSIR_EDITIONS.map((ed, i) => {
-        const selected = mode === 'tafsir' && ed.id === activeTafsir.id;
-        return (
-          <Pressable
-            key={ed.id}
-            accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            accessibilityLabel={ed.label}
-            onPress={() => {
-              setQuranPrefs({
-                tafsirEditionId: ed.id,
-                companionMode: 'tafsir',
-                votdMode: 'tafsir',
-              });
-              onPick?.();
-            }}
-            style={[
-              styles.row,
-              i > 0 && {
-                borderTopWidth: StyleSheet.hairlineWidth,
-                borderTopColor: palette.border,
-              },
-            ]}>
-            <View style={styles.rowText}>
-              <Text
-                style={[
-                  styles.rowLabel,
-                  { color: palette.text },
-                  ed.rtl && styles.rtl,
-                  selected && { fontWeight: '700' },
-                ]}>
-                {ed.label}
-              </Text>
-              <Text
-                style={[
-                  styles.rowSub,
-                  { color: palette.muted },
-                  ed.rtl && styles.rtl,
-                ]}>
-                {ed.language}
-              </Text>
-            </View>
-            {selected ? (
-              <Text style={[styles.check, { color: palette.accent }]}>✓</Text>
-            ) : null}
-          </Pressable>
-        );
-      })}
+      {tafsirGroups.map(([language, editions]) => (
+        <View key={language}>
+          <Text style={[styles.langHeader, { color: palette.muted }]}>
+            {language}
+          </Text>
+          {editions.map(ed => {
+            const selected = mode === 'tafsir' && ed.id === activeTafsir.id;
+            return (
+              <Pressable
+                key={ed.id}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                accessibilityLabel={ed.label}
+                onPress={() => {
+                  setQuranPrefs({
+                    tafsirEditionId: ed.id,
+                    companionMode: 'tafsir',
+                    votdMode: 'tafsir',
+                  });
+                  onPick?.();
+                }}
+                style={styles.row}>
+                <Text
+                  style={[
+                    styles.rowLabel,
+                    { color: palette.text },
+                    ed.rtl && styles.rtl,
+                    selected && { fontWeight: '700' },
+                  ]}>
+                  {ed.label}
+                </Text>
+                {selected ? (
+                  <Text style={[styles.check, { color: palette.accent }]}>
+                    ✓
+                  </Text>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
     </View>
   );
 }
@@ -293,15 +313,19 @@ const styles = StyleSheet.create({
     marginTop: 14,
     marginBottom: 2,
   },
+  langHeader: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 8,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 10,
+    paddingStart: 10,
   },
-  rowText: { flex: 1, paddingEnd: 12 },
-  rowLabel: { fontSize: 16 },
-  rowSub: { fontSize: 12, marginTop: 1 },
+  rowLabel: { fontSize: 16, flexShrink: 1, paddingEnd: 12 },
   rtl: { writingDirection: 'rtl', textAlign: 'right' },
   check: { fontSize: 18, fontWeight: '700' },
   backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
