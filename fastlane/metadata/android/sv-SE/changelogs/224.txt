@@ -1,0 +1,3 @@
+• Ett val för det som visas under varje vers: välj översättning eller tafsir och utgåva en gång — gäller läsaren, dagens vers och den dagliga ayah-aviseringen. Ny väljare på Koran-sidan och i Inställningar.
+• Adhan-aviseringar täcker nu 4 dagar och fortsätter även om appen inte öppnas dagligen; plus en åtgärdsrad för batterioptimering.
+• Fixat att verktygsrutnätet föll ihop till två smala kolumner på vissa telefoner.

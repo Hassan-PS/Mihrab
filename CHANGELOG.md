@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.40] — 2026-07-27
+
+### Added
+- **One choice for what appears under each verse.** Translation and tafsir are now a single app-wide preference: pick the mode (translation ⇄ tafsir) and the edition once, and it applies everywhere a verse is shown — the reader (both view modes, including tafsir under each ayah in the translation view), the verse of the day, the verse action sheet, and the daily-ayah notification. The selector lives in a new "Under each verse" card on the Quran page, in the reader header, and in Settings — all in sync. Editions are grouped by language (Arabic and English first), every shipped translation and tafsir is offered regardless of app language, and picking one applies it in a single tap.
+- **Battery-optimization warning (Android).** When Android's battery optimization is restricting Mihrab — which can delay or silence adhan alerts, especially after turning the Live Activity off — Settings → Notifications shows a fix-it row that jumps straight to the system exclusion screen.
+
+### Fixed
+- **Adhan alerts no longer stop after a couple of days without opening the app.** Alerts were only scheduled for today and tomorrow, so if the app wasn't opened for 2+ days every alarm silently lapsed — the Live Activity's background service used to mask this by keeping the app active, which is why turning it off could "kill" the adhan. Alerts now cover four cached days.
+- **Tools grid no longer collapses to two narrow columns on some phones.** On devices whose screen width lands on a fractional dp value (e.g. 440 dpi), a sub-pixel rounding overflow wrapped the third tile; the grid now rounds down and uses native gutters, so rows always fill.
+- **al-Muyassar is a tafsir, not a translation.** It no longer appears in the translation list (it remains available as a tafsir); an old stored pick falls back cleanly.
+- **Cross-language edition picks now stick.** Choosing a translation or tafsir in a different language than the app UI no longer silently reverts to the default.
+
 ## [2.7.39] — 2026-07-16
 
 ### Fixed

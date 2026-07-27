@@ -1,0 +1,3 @@
+• One choice for what's under each verse: pick translation or tafsir and the edition once — applies to the reader, verse of the day, and daily-ayah notification. New selector on the Quran page and in Settings.
+• Adhan alerts now cover 4 days, so they keep firing even if the app isn't opened daily; plus a battery-optimization fix-it row.
+• Fixed the tools grid collapsing to two narrow columns on some phones.
