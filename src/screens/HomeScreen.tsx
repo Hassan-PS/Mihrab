@@ -14,6 +14,7 @@ import notifee, {
   AuthorizationStatus,
 } from '@notifee/react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -44,7 +45,8 @@ import { DataStatsPanel } from './home/DataStatsPanel';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { QuickActionsGrid } from './home/QuickActionsGrid';
 import { CenteredColumn } from '../responsive/CenteredColumn';
-import { contentColumnWidth } from '../responsive/breakpoints';
+import { contentColumnWidth, isMacCatalyst } from '../responsive/breakpoints';
+import { HomeHeaderControls } from '../navigation/HomeHeaderControls';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
@@ -87,6 +89,9 @@ export function HomeScreen() {
   usePrefetchSavedLocations();
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
+  // Native header height — anchors the Mac Catalyst pinned controls
+  // overlay just below the (transparent) title bar.
+  const headerHeight = useHeaderHeight();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   // Cap the day-card width to the centered content column so the carousel
   // doesn't overflow the capped column on iPad/Mac windows.
@@ -634,6 +639,7 @@ export function HomeScreen() {
   const carouselResetKey = `${state.latitude}-${state.longitude}`;
 
   return (
+    <View style={styles.homeRoot}>
     <ScrollView
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
@@ -759,6 +765,19 @@ export function HomeScreen() {
         onClose={() => setTourVisible(false)}
       />
     </ScrollView>
+    {/* Mac Catalyst: the location chip + Settings gear render as a PINNED
+        overlay under the native title bar instead of inside it — the
+        transparent navigation bar sits in the window's title-bar DRAG
+        REGION, where clicks were intermittently swallowed as window drags
+        ("the settings gear sometimes works, sometimes doesn't"). An
+        absolute overlay outside the scroll flow also keeps it above the
+        scale-transformed dashboard, which paints over in-flow siblings. */}
+    {isMacCatalyst ? (
+      <View style={[styles.macHeaderControls, { top: headerHeight + 6 }]}>
+        <HomeHeaderControls />
+      </View>
+    ) : null}
+    </View>
   );
 }
 
@@ -775,6 +794,17 @@ const styles = StyleSheet.create({
   dashSide: {
     flex: 1,
     gap: 12,
+  },
+  homeRoot: { flex: 1 },
+  // Mac Catalyst pinned header controls (see comment at the render site):
+  // absolute top-right overlay just below the native title bar, above the
+  // (scale-transformed) dashboard content.
+  macHeaderControls: {
+    position: 'absolute',
+    right: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 10,
   },
   scroll: { flex: 1 },
   // Inter-card rhythm for BOTH CenteredColumn variants (compact uses the

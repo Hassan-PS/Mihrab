@@ -32,16 +32,30 @@ describe('HomeScreen integration (tasks #45–#47)', () => {
     expect(HOME).toMatch(/<RamadanCountdownCard\s+today=/);
   });
 
-  test('LocationChip is mounted in the navigation header (moved out of HomeScreen body)', () => {
+  test('LocationChip is mounted via HomeHeaderControls (header on phones, content row on Catalyst)', () => {
     // #47 follow-up: the chip was relocated from the HomeScreen body into the
-    // navigation header (next to Settings) so the top-row controls live
-    // together. Assert it's wired into RootNavigator, not HomeScreen.
+    // navigation header (next to Settings). v2.7.41: the row lives in its own
+    // module (HomeHeaderControls) so Mac Catalyst can render it as content
+    // instead — the transparent nav bar sits in the window drag region,
+    // where clicks were intermittently swallowed as window drags.
+    const CONTROLS = fs.readFileSync(
+      path.join(
+        __dirname,
+        '..',
+        'src',
+        'navigation',
+        'HomeHeaderControls.tsx',
+      ),
+      'utf-8',
+    );
+    expect(CONTROLS).toMatch(/from '\.\.\/screens\/home\/LocationChip'/);
+    expect(CONTROLS).toMatch(/<LocationChip\b/);
     const NAV = fs.readFileSync(
       path.join(__dirname, '..', 'src', 'navigation', 'RootNavigator.tsx'),
       'utf-8',
     );
-    expect(NAV).toMatch(/from '\.\.\/screens\/home\/LocationChip'/);
-    expect(NAV).toMatch(/<LocationChip\b/);
+    expect(NAV).toMatch(/<HomeHeaderControls\b/);
+    expect(HOME).toMatch(/<HomeHeaderControls\b/);
   });
 });
 

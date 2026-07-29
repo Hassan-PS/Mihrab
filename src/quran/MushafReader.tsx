@@ -30,9 +30,11 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type ReactNode,
 } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   Image,
   PixelRatio,
   Platform,
@@ -238,15 +240,30 @@ export function MushafReader({
   // `dualPage` is false and every value below collapses to the original
   // single-page math (pageW === screenWidth), so that path is unchanged.
   const isLandscape = windowWidth > windowHeight;
+  // Phone-class DEVICE check (not window): tall phones can exceed 960pt of
+  // window width in landscape (e.g. ~1020dp on a 1165×2600 display), which
+  // used to trigger the iPad/Mac dual-page spread on a screen far too short
+  // for it. Gate on the physical screen's shorter dimension — the classic
+  // 600dp phone/tablet split — so a short-but-wide Mac window still gets
+  // the spread while phones never do.
+  const screenDims = Dimensions.get('screen');
+  const isPhoneDevice = Math.min(screenDims.width, screenDims.height) < 600;
+  // Phone landscape = a reading-zoom mode: ONE page, fit to the full
+  // window width (so the calligraphy is actually legible), scrolled
+  // vertically; every gesture (tap = fullscreen, long-press = ayah
+  // actions) is preserved because the page Pressable is unchanged — it
+  // just lives inside a vertical ScrollView.
+  const phoneLandscape = isPhoneDevice && isLandscape;
   // ≥960 (was 900): per-page columns below ~480pt render cramped spreads
   // on smaller Mac windows (plan v2 §C3/M4).
-  const dualPage = isLandscape && windowWidth >= 960;
+  const dualPage = isLandscape && windowWidth >= 960 && !isPhoneDevice;
   // Pointer environments (iPad with trackpad, Mac "Designed for iPad"):
   // trackpad/mouse users have NO page-turn affordance — wheel scroll
   // doesn't drive a pagingEnabled ScrollView. Show edge chevrons on
   // iPad-idiom devices; they brighten on hover (plan v2 §C2/M2).
   const showPagerChevrons =
     Platform.OS === 'ios' &&
+    !isPhoneDevice &&
     ((Platform as unknown as { isPad?: boolean }).isPad === true ||
       windowWidth >= 900);
   const pageW = dualPage ? windowWidth / 2 : windowWidth;
@@ -260,21 +277,60 @@ export function MushafReader({
   const scrollRef = useRef<ScrollView>(null);
   const didInitialScrollRef = useRef(false);
 
+  // Pages mounted around the current one. Computed here (before the
+  // offset helpers) because the phone-landscape path lays them out in a
+  // WINDOWED strip whose coordinates are relative to this list.
+  const mountedPages = (
+    dualPage
+      ? [
+          currentPage - 2,
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          currentPage + 2,
+          currentPage + 3,
+        ]
+      : [currentPage - 1, currentPage, currentPage + 1]
+  ).filter(p => p >= 1 && p <= MUSHAF_TOTAL_PAGES);
+  /**
+   * Phone-landscape reading-zoom uses a WINDOWED strip (v2.7.41).
+   *
+   * The normal pager lays all 604 pages out absolutely across one giant
+   * content box (604 × pageW). In phone landscape `pageW` is the full
+   * landscape width (~1280dp ≈ 2.4 k px), which puts a mid-mushaf page's
+   * left edge past ~1.3 M px — beyond what Android will rasterise, so the
+   * page rendered BLANK. Here the strip spans only the mounted pages and
+   * offsets are relative to the highest mounted page (RTL: highest page
+   * sits leftmost), keeping every coordinate under ~4 k px.
+   */
+  const windowMaxPage = mountedPages.length
+    ? Math.max(...mountedPages)
+    : currentPage;
+
   // Left edge of a single page's own column (in `pageW` units).
   const pageToOffsetX = useCallback(
-    (page: number) => pageOffsetX(page, pageW, MUSHAF_TOTAL_PAGES),
-    [pageW],
+    (page: number) =>
+      phoneLandscape
+        ? (windowMaxPage - page) * pageW
+        : pageOffsetX(page, pageW, MUSHAF_TOTAL_PAGES),
+    [pageW, phoneLandscape, windowMaxPage],
   );
 
   // The scroll offset that brings the SPREAD containing `page` flush to the
   // viewport's left edge (see mushafSpread.ts for the RTL pairing model).
   const scrollXForPage = useCallback(
-    (page: number) => scrollXForPageMath(page, pageW, MUSHAF_TOTAL_PAGES, dualPage),
-    [dualPage, pageW],
+    (page: number) =>
+      phoneLandscape
+        ? (windowMaxPage - page) * pageW
+        : scrollXForPageMath(page, pageW, MUSHAF_TOTAL_PAGES, dualPage),
+    [dualPage, pageW, phoneLandscape, windowMaxPage],
   );
 
   // Re-anchor the scroll position when width changes (rotation, QR-4) —
   // offsets are width-dependent, so without this the visible page drifts.
+  // In the windowed (phone-landscape) strip this also RE-CENTERS after a
+  // page turn: the window slides with `currentPage`, so the same page has
+  // a new offset in the new window.
   useEffect(() => {
     if (!didInitialScrollRef.current) return;
     scrollRef.current?.scrollTo({
@@ -283,7 +339,7 @@ export function MushafReader({
       animated: false,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screenWidth, dualPage]);
+  }, [screenWidth, dualPage, phoneLandscape, phoneLandscape ? currentPage : 0]);
 
   const onScrollViewLayout = () => {
     if (didInitialScrollRef.current) return;
@@ -443,7 +499,10 @@ export function MushafReader({
       : estMaxHeight;
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / IMAGE_ASPECT;
-  if (imageHeight > maxHeight) {
+  // Phone landscape reading-zoom: the page keeps its full width-fit size
+  // and the viewport scrolls vertically instead of shrinking the page to
+  // the (short) window height.
+  if (!phoneLandscape && imageHeight > maxHeight) {
     imageHeight = maxHeight;
     imageWidth = imageHeight * IMAGE_ASPECT;
   }
@@ -477,14 +536,18 @@ export function MushafReader({
     const cropAspect = (crop.w * 2600) / (crop.h * 4206);
     let dispW = maxWidth;
     let dispH = dispW / cropAspect;
-    if (dispH > maxHeight) {
-      dispH = maxHeight;
-      dispW = dispH * cropAspect;
-    } else if (page > 2) {
-      // Stretch the text vertically into the free space (full-text
-      // pages only — 1–2 are decorative plates that must keep their
-      // true proportions even though they also carry a crop).
-      dispH = Math.min(maxHeight, dispH * MAX_VERTICAL_STRETCH);
+    // Phone landscape reading-zoom: width-fit, uncapped and unstretched —
+    // the vertical ScrollView provides the height.
+    if (!phoneLandscape) {
+      if (dispH > maxHeight) {
+        dispH = maxHeight;
+        dispW = dispH * cropAspect;
+      } else if (page > 2) {
+        // Stretch the text vertically into the free space (full-text
+        // pages only — 1–2 are decorative plates that must keep their
+        // true proportions even though they also carry a crop).
+        dispH = Math.min(maxHeight, dispH * MAX_VERTICAL_STRETCH);
+      }
     }
     const fullW = dispW / crop.w;
     const fullH = dispH / crop.h;
@@ -731,10 +794,9 @@ export function MushafReader({
               </Pressable>
             ) : null}
         </View>
-        <View
-          style={styles.imageWrap}
-          onLayout={e => {
-            const h = e.nativeEvent.layout.height;
+        <PageViewport
+          phoneLandscape={phoneLandscape}
+          onMeasured={h => {
             setWrapBox(prev =>
               Math.abs(prev.h - h) > 1 || prev.fs !== isFullscreen
                 ? { h, fs: isFullscreen }
@@ -816,7 +878,7 @@ export function MushafReader({
               />
             </View>
           </Pressable>
-        </View>
+        </PageViewport>
         <View style={styles.pageFooter}>
           <Pressable
             accessibilityRole="button"
@@ -835,19 +897,6 @@ export function MushafReader({
   // Single mode mounts the current page + one on each side. Dual mode mounts
   // the current spread plus the neighbouring spread on each side (six pages)
   // so a swipe reveals the next facing pair without a blank frame.
-  const mountedPages = (
-    dualPage
-      ? [
-          currentPage - 2,
-          currentPage - 1,
-          currentPage,
-          currentPage + 1,
-          currentPage + 2,
-          currentPage + 3,
-        ]
-      : [currentPage - 1, currentPage, currentPage + 1]
-  ).filter(p => p >= 1 && p <= MUSHAF_TOTAL_PAGES);
-
   return (
     <View
       style={[
@@ -866,7 +915,18 @@ export function MushafReader({
           // The viewport frame is always screenWidth (= one page in single
           // mode, one spread in dual mode). In dual mode each snap step is two
           // pages; we land on the spread's right-hand (odd) page as "current".
-          const clamped = pageFromScroll(
+          // Windowed (phone-landscape) strip: the slot index counts DOWN from
+          // the highest mounted page (RTL), and the re-anchor effect recenters
+          // the window afterwards.
+          const clamped = phoneLandscape
+            ? Math.max(
+                1,
+                Math.min(
+                  MUSHAF_TOTAL_PAGES,
+                  windowMaxPage - Math.round(x / screenWidth),
+                ),
+              )
+            : pageFromScroll(
             x,
             screenWidth,
             MUSHAF_TOTAL_PAGES,
@@ -886,7 +946,11 @@ export function MushafReader({
         }}
         onLayout={onScrollViewLayout}
         contentContainerStyle={{
-          width: pageW * MUSHAF_TOTAL_PAGES,
+          // Windowed strip in phone landscape (see windowMaxPage) — the
+          // full 604-page box would exceed Android's rasterisable width.
+          width: phoneLandscape
+            ? pageW * mountedPages.length
+            : pageW * MUSHAF_TOTAL_PAGES,
           height: '100%',
         }}>
         {mountedPages.map(renderPage)}
@@ -1007,6 +1071,43 @@ export function MushafReader({
   );
 }
 
+/**
+ * The page's viewport box (v2.7.41). Normally a centered flex box that the
+ * page is fitted INTO; in phone-landscape reading-zoom it becomes a
+ * vertical ScrollView so the width-fitted (taller-than-window) page can be
+ * read by scrolling. The page Pressable child is identical in both modes,
+ * so tap-to-fullscreen and long-press-for-ayah keep working — a stationary
+ * long-press is delivered through a ScrollView untouched.
+ */
+function PageViewport({
+  phoneLandscape,
+  onMeasured,
+  children,
+}: {
+  phoneLandscape: boolean;
+  onMeasured: (h: number) => void;
+  children: ReactNode;
+}) {
+  if (phoneLandscape) {
+    return (
+      <ScrollView
+        style={styles.imageWrapScroll}
+        contentContainerStyle={styles.imageWrapScrollContent}
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled>
+        {children}
+      </ScrollView>
+    );
+  }
+  return (
+    <View
+      style={styles.imageWrap}
+      onLayout={e => onMeasured(e.nativeEvent.layout.height)}>
+      {children}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   gate: {
@@ -1079,6 +1180,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Phone-landscape reading-zoom viewport (see PageViewport).
+  imageWrapScroll: { flex: 1 },
+  imageWrapScrollContent: { alignItems: 'center' },
   pageFooter: { alignItems: 'center', paddingTop: 6, paddingBottom: 10 },
   pageNumberFrame: {
     minWidth: 38,

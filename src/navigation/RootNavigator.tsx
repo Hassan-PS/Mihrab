@@ -5,9 +5,9 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HeaderToolbarIcons } from '../components/HeaderToolbarIcons';
-import { LocationChip } from '../screens/home/LocationChip';
 import { View } from 'react-native';
+import { HomeHeaderControls } from './HomeHeaderControls';
+import { isMacCatalyst } from '../responsive/breakpoints';
 import { MihrabLogoIcon } from '../theme/icons';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -57,51 +57,10 @@ function MihrabHeaderTitle() {
   );
 }
 
-function HomeHeaderRight() {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { t } = useTranslation();
-  const { palette } = useAppPalette();
-  return (
-    // The location pin sits left of the Settings gear in the header, so
-    // both top-level controls live in the same row. The pin renders for
-    // users on manual location (with or without saved presets) and shows
-    // the current location label; tapping it opens the preset switcher
-    // when presets exist, otherwise Settings. GPS/automatic-mode users get
-    // a clean single-icon header (no static location label to show).
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <LocationChip
-        compactHeader
-        onAddLocation={() =>
-          navigation.navigate('Settings', { highlight: 'savedLocations' })
-        }
-      />
-      <HeaderToolbarIcons
-        // Use palette.accentSolid (the user's chosen accent color from
-        // settings, resolved through the SystemTheme native module on
-        // Material You devices) instead of theme.colors.primary which
-        // is React Navigation's static "primary" and doesn't track the
-        // accent picker. This makes the Settings gear match the
-        // location-pin tint and every other accent-tinted glyph in
-        // the app.
-        tintColor={palette.accentSolid}
-        onMonth={() => navigation.navigate('MonthTimes')}
-        onCompass={() => navigation.navigate('Compass')}
-        onSettings={() => navigation.navigate('Settings')}
-        monthA11yLabel={t('a11y.openMonth')}
-        compassA11yLabel={t('a11y.openCompass')}
-        settingsA11yLabel={t('a11y.openSettings')}
-        // Calendar (month) and Compass already exist on the home screen
-        // body — Calendar via the "Prayer times for the whole month" link
-        // under the prayer table, Compass as a tile in QuickActionsGrid.
-        // Surfacing them in the header too is duplication; only Settings
-        // has no body-row equivalent, so keep that one.
-        showMonth={false}
-        showCompass={false}
-      />
-    </View>
-  );
-}
+// Home header controls now live in ../navigation/HomeHeaderControls so the
+// HomeScreen can render the same row as content on Mac Catalyst, where the
+// transparent navigation bar sits in the window's title-bar drag region and
+// clicks on header buttons were intermittently swallowed as window drags.
 
 /**
  * Auto-routes to Onboarding on first run when `onboardingComplete` is
@@ -198,7 +157,12 @@ export function RootNavigator() {
           // iOS large-title API does not support custom components.
           headerTitle: () => <MihrabHeaderTitle />,
           headerLargeTitle: false,
-          headerRight: () => <HomeHeaderRight />,
+          // Mac Catalyst: no native headerRight — the same controls render
+          // as the first row of Home content instead (drag-region fix, see
+          // HomeHeaderControls).
+          ...(isMacCatalyst
+            ? {}
+            : { headerRight: () => <HomeHeaderControls /> }),
         }}
       />
       <Stack.Screen

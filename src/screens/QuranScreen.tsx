@@ -616,8 +616,19 @@ export function QuranScreen() {
             {t('quran.pageLabel', { page: startPage })}
           </Text>
         </View>
-        <Text style={[styles.arabic, { color: palette.text }]}>
-          {item.arabic}
+        <Text
+          // Multi-word names ("آل عمران") were wrapping at the space on
+          // narrow rows and the second word vanished (reported:
+          // Aal-i-Imran showing only "آل"). A no-break space makes the
+          // name unwrappable, so Yoga measures the full single-line width
+          // and the flexible left column shrinks instead. numberOfLines +
+          // adjustsFontSizeToFit stay as a graceful-degradation net for
+          // extreme font-scale settings.
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}
+          style={[styles.arabic, { color: palette.text }]}>
+          {item.arabic.replace(/ /g, '\u00A0')}
         </Text>
       </Pressable>
     );
@@ -648,8 +659,12 @@ export function QuranScreen() {
           {`${item.startSurah?.romanized ?? ''} · ${t('quran.pageLabel', { page: item.page })}`}
         </Text>
       </View>
-      <Text style={[styles.arabic, { color: palette.text }]}>
-        {item.startSurah?.arabic ?? ''}
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+        style={[styles.arabic, { color: palette.text }]}>
+        {(item.startSurah?.arabic ?? '').replace(/ /g, '\u00A0')}
       </Text>
     </Pressable>
   );
@@ -1112,7 +1127,9 @@ const styles = StyleSheet.create({
   romanized: { fontSize: 16, fontWeight: '600' },
   english: { fontSize: 12, marginTop: 2 },
   pageHint: { fontSize: 11, marginTop: 2, fontVariant: ['tabular-nums'] },
-  arabic: { fontSize: 22, lineHeight: 42, ...arabicTextStyle('body') },
+  // flexShrink: 0 — the name keeps its intrinsic single-line width (made
+  // unwrappable via NBSP); the flexible left column yields instead.
+  arabic: { fontSize: 22, lineHeight: 42, flexShrink: 0, ...arabicTextStyle('body') },
   bookmarkDot: { width: 14, height: 14, borderRadius: 7 },
   deleteBtn: { paddingHorizontal: 6, paddingVertical: 6 },
   deleteGlyph: { fontSize: 14, fontWeight: '700' },
