@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.41] — 2026-07-29
+
+### Fixed
+- **Landscape reading on phones.** Turning a phone sideways in the mushaf no longer opens a cramped iPad-style two-page spread (tall phones are wide enough in landscape to have triggered it) — and on some phones that spread failed to draw at all, leaving a blank page. Landscape now shows ONE page zoomed to the full width and scrolled vertically, with every gesture intact: tap for fullscreen, long-press an ayah for the actions sheet, swipe to turn the page.
+- **Full Arabic surah names in the Quran list.** Two-word names ("آل عمران") were wrapping at the space on narrow rows and losing the second word — Aal-i-Imran showed only "آل".
+- **Settings gear on macOS.** The location chip and Settings button sat inside the window's title-bar drag region, so clicks were sometimes swallowed as window drags ("works sometimes, sometimes doesn't"). They now sit just below it and respond every time.
+
 ## [2.7.40] — 2026-07-27
 
 ### Added

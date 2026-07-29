@@ -1,0 +1,3 @@
+• Landscape reading on phones: one page zoomed to the full width and scrolled vertically, instead of a cramped (and sometimes blank) two-page spread. Tap for fullscreen, long-press an ayah, swipe to turn — all unchanged.
+• Fixed two-word Arabic surah names losing their second word in the Quran list (Aal-i-Imran showed only "آل").
+• Fixed the Settings button on macOS not always responding.

@@ -65,6 +65,7 @@ import { findPageForAyah, MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
 import {
   pageOffsetX,
   pageFromScroll,
+  mushafLayoutMode,
   scrollXForPage as scrollXForPageMath,
 } from './mushafSpread';
 import {
@@ -240,23 +241,17 @@ export function MushafReader({
   // `dualPage` is false and every value below collapses to the original
   // single-page math (pageW === screenWidth), so that path is unchanged.
   const isLandscape = windowWidth > windowHeight;
-  // Phone-class DEVICE check (not window): tall phones can exceed 960pt of
-  // window width in landscape (e.g. ~1020dp on a 1165×2600 display), which
-  // used to trigger the iPad/Mac dual-page spread on a screen far too short
-  // for it. Gate on the physical screen's shorter dimension — the classic
-  // 600dp phone/tablet split — so a short-but-wide Mac window still gets
-  // the spread while phones never do.
+  // Layout decision lives in mushafSpread.mushafLayoutMode (unit-tested):
+  // dual-page spreads are tablet/desktop-only (≥960pt wide AND a
+  // non-phone screen — see the note there about tall phones in
+  // landscape), phones get the single-page reading zoom instead.
   const screenDims = Dimensions.get('screen');
   const isPhoneDevice = Math.min(screenDims.width, screenDims.height) < 600;
-  // Phone landscape = a reading-zoom mode: ONE page, fit to the full
-  // window width (so the calligraphy is actually legible), scrolled
-  // vertically; every gesture (tap = fullscreen, long-press = ayah
-  // actions) is preserved because the page Pressable is unchanged — it
-  // just lives inside a vertical ScrollView.
-  const phoneLandscape = isPhoneDevice && isLandscape;
-  // ≥960 (was 900): per-page columns below ~480pt render cramped spreads
-  // on smaller Mac windows (plan v2 §C3/M4).
-  const dualPage = isLandscape && windowWidth >= 960 && !isPhoneDevice;
+  const { dualPage, phoneLandscape } = mushafLayoutMode({
+    windowWidth,
+    windowHeight,
+    screenShortSide: Math.min(screenDims.width, screenDims.height),
+  });
   // Pointer environments (iPad with trackpad, Mac "Designed for iPad"):
   // trackpad/mouse users have NO page-turn affordance — wheel scroll
   // doesn't drive a pagingEnabled ScrollView. Show edge chevrons on

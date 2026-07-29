@@ -1,0 +1,3 @@
+• Liggande läsning på telefoner: en sida zoomad till full bredd med vertikal skrollning, i stället för ett trångt (ibland tomt) uppslag med två sidor. Tryck för helskärm, håll in en vers och svep för att bläddra fungerar som förut.
+• Fixat att tvåordiga arabiska surahnamn tappade sitt andra ord i listan (Aal-i-Imran visade bara "آل").
+• Fixat att inställningsknappen på macOS inte alltid svarade.

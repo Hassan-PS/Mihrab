@@ -62,3 +62,33 @@ export function pageFromScroll(
 function clampPage(page: number, total: number): number {
   return Math.max(1, Math.min(total, page));
 }
+
+/**
+ * Reading-layout decision for the mushaf (v2.7.41).
+ *
+ * Two independent facts drive it:
+ *  • DEVICE class — the physical screen's shorter side (<600dp = phone,
+ *    the classic Android phone/tablet split). A tall phone in landscape
+ *    can be ~1280dp WIDE, which used to satisfy the old width-only
+ *    dual-page rule and opened an iPad-style spread on a 576dp-tall
+ *    screen (and on some phones the doubled page column pushed the
+ *    604-page strip past what the platform can rasterise, so the page
+ *    rendered BLANK).
+ *  • WINDOW shape — landscape and wide enough for two legible columns.
+ *
+ * Phones in landscape instead get `phoneLandscape`: ONE page, fitted to
+ * the full window width and scrolled vertically (reading zoom).
+ */
+export function mushafLayoutMode(dims: {
+  windowWidth: number;
+  windowHeight: number;
+  /** Shorter side of the physical screen, in dp. */
+  screenShortSide: number;
+}): { dualPage: boolean; phoneLandscape: boolean } {
+  const isLandscape = dims.windowWidth > dims.windowHeight;
+  const isPhoneDevice = dims.screenShortSide < 600;
+  return {
+    dualPage: isLandscape && dims.windowWidth >= 960 && !isPhoneDevice,
+    phoneLandscape: isLandscape && isPhoneDevice,
+  };
+}
