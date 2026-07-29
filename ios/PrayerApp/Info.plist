@@ -14,8 +14,13 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<!-- Literal "Mihrab", NOT $(PRODUCT_NAME) (= "PrayerApp", the Xcode
+	     target name). macOS reads CFBundleName for the menu-bar app title
+	     and the About/Quit menu items, so on Mac Catalyst the menu bar
+	     read "PrayerApp". CFBundleDisplayName above only covers the iOS
+	     home screen. -->
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>Mihrab</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
