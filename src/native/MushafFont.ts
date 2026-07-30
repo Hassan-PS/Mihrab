@@ -33,7 +33,7 @@ const native = (NativeModules as { MushafFont?: MushafFontNative }).MushafFont;
 /** Whether the platform module is present (false in tests / old builds). */
 export const mushafFontAvailable = native != null;
 
-export const FONT_SLOT_COUNT = 24;
+export const FONT_SLOT_COUNT = 23;
 
 const slotFamily = (slot: number): string => `MihrabMushaf${slot}`;
 
@@ -106,8 +106,8 @@ export async function acquirePageFont(
 
   const slot = pickSlot();
   if (slot == null) {
-    // Every slot pinned — impossible with 24 slots and a 5-page window, but
-    // never block rendering on it.
+    // Every slot pinned — impossible while the pool comfortably exceeds the
+    // pager's mounted window, but never block rendering on it.
     console.warn('mushafFont: no free slot for page', page);
     return Promise.resolve(null);
   }

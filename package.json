@@ -2,7 +2,7 @@
   "name": "prayerapp",
   "version": "1.5.50",
   "private": true,
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "android": "node scripts/run-android-phone.js",
     "android:rn": "react-native run-android",

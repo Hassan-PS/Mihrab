@@ -25,7 +25,7 @@ const FONT_RELEASE = 'mushaf-fonts-v2';
 const STORE_VERSION = 'v2';
 
 /** Smallest plausible page font; anything under this is a failed download. */
-const MIN_FONT_BYTES = 8_000;
+const MIN_FONT_BYTES = 8_192;
 
 function storeDir(): string {
   return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/fonts/${STORE_VERSION}`;

@@ -63,7 +63,7 @@
 - **Your data survives reinstalls** — Settings, journal, bookmarks and khatmah ride Android Auto Backup and device-to-device transfer; large re-downloadable content stays out of your backup quota, and a Manage-downloads screen shows exactly what's on disk.
 - **Real Arabic typography** — Amiri Quran for ayah text with correct stacked diacritics, Amiri Naskh for duas, on both platforms.
 - **13 languages** — English, Arabic, Swedish, Bengali, Urdu, Hindi, French, Spanish, German, Turkish, Indonesian, Russian, and Chinese — every screen, every notification, every dua title. Arabic and Urdu are fully RTL.
-- **Open source** — Apache-2.0. The F-Droid flavor ships without Play Billing or Google Play Services.
+- **Open source** — AGPL-3.0-or-later. Anyone who ships a fork, or runs it as a service, must publish their source too. The F-Droid flavor ships without Play Billing or Google Play Services.
 
 ---
 
@@ -135,4 +135,4 @@ Religious content is sourced and attributed (also listed in-app under Settings �
 
 ## License
 
-[Apache-2.0](LICENSE)
+[AGPL-3.0-or-later](LICENSE)

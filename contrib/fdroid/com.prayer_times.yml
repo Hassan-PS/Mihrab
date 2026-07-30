@@ -3,7 +3,7 @@ AntiFeatures:
     en-US: Optional features rely on fixed services (AlAdhan, Nominatim).
 Categories:
   - Religion
-License: Apache-2.0
+License: AGPL-3.0-or-later
 AuthorName: Mihrab contributors
 SourceCode: https://github.com/Hassan-PS/Mihrab
 IssueTracker: https://github.com/Hassan-PS/Mihrab/issues

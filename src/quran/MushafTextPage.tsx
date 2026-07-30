@@ -43,7 +43,7 @@ import { FONTS } from '../theme/typography';
  * the text block of a regular page is 2540 × 4157 px, i.e. 1.636 as tall as it
  * is wide, over 15 lines of a ~15.75 em measure.
  */
-export const MUSHAF_LINE_HEIGHT_EM = 1.72;
+export const MUSHAF_LINE_HEIGHT_EM = 1.7183;
 
 /** Ratio of page height to text width, used to size the page container. */
 export function mushafPageAspect(page: number, lineCount: number): number {
