@@ -1,0 +1,1 @@
+• Rotating the mushaf on a phone is fast and stable again. Landscape reading used far more memory than it needed to, which made rotation slow and could crash the app on tighter devices. The page you read is just as large on screen — it simply costs a fraction of the memory now.

@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.43] — 2026-07-30
+
+### Fixed
+- **Rotating the mushaf on a phone is fast and stable again.** The landscape reading zoom sized every page it kept in memory to the full screen width, which pushed the page images past the size where the app keeps its sharpened copies — so each rotation decoded three full-resolution pages at once (~130 MB). That made rotating slow and, on tighter devices, crashed the app. Now only the page you're reading is zoomed (the ones queued either side stay at portrait size), the zoom is capped to what the sharpening cache can serve, and rotation reuses the copy from the previous orientation instead of falling back to the full-resolution original. Same zoom on screen, a fraction of the memory.
+
 ## [2.7.42] — 2026-07-30
 
 ### Changed
