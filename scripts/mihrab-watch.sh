@@ -41,15 +41,37 @@ read -r forks network stars watchers <<< "$meta"
 
 fork_list=$(gh api "repos/$REPO/forks" --jq '.[].full_name' 2>/dev/null | sort | tr '\n' ',' )
 
-clones=$(gh api "repos/$REPO/traffic/clones" --jq '.uniques' 2>/dev/null || echo 0)
+# Traffic needs push access. A workflow's default GITHUB_TOKEN does NOT have
+# it and returns 403 with a JSON body on stdout, so validate rather than
+# trust: an error string reaching the arithmetic below aborts the check.
+clones=$(gh api "repos/$REPO/traffic/clones" --jq '.uniques' 2>/dev/null)
+case "$clones" in
+  ''|*[!0-9]*) clones=-1 ;; # -1 means "could not read"
+esac
 
 hits=""
+search_ok=0
 for n in "${NEEDLES[@]}"; do
-  found=$(gh search code "$n" --limit 20 --json repository \
-            --jq '.[].repository.nameWithOwner' 2>/dev/null \
-          | sort -u | grep -v "^$REPO$" | tr '\n' ' ')
+  raw=$(gh search code "$n" --limit 20 --json repository 2>/dev/null)
+  # An empty result and a refused request look identical once jq has run, so
+  # check the call itself: code search rejects some token types outright, and
+  # a monitor that silently stops searching is worse than no monitor.
+  [ -n "$raw" ] && search_ok=1
+  found=$(printf '%s' "$raw" | python3 -c "
+import json,sys
+try: d=json.load(sys.stdin)
+except Exception: sys.exit()
+print(' '.join(sorted({r['repository']['nameWithOwner'] for r in d} - {'$REPO'})))
+" 2>/dev/null)
   [ -n "$found" ] && hits="$hits\n  \"$n\" → $found"
 done
+
+# Which checks actually ran. Reported when it changes, so a capability that
+# quietly disappears (an expired token, a revoked scope) surfaces instead of
+# turning into a permanently silent "all clear".
+caps="forks"
+[ "$clones" -ge 0 ] && caps="$caps,traffic"
+[ "$search_ok" = "1" ] && caps="$caps,codesearch"
 
 # ---- compare ----------------------------------------------------------------
 old_forks=$(json_get forks 0)
@@ -81,20 +103,30 @@ fi
 # every push, tag and retry, so the normal weekly figure is already dozens. An
 # absolute threshold would fire every single week and train you to ignore this
 # report. Only a jump well past the established level is worth a word.
+old_caps=$(json_get caps "")
+if [ -n "$old_caps" ] && [ "$caps" != "$old_caps" ]; then
+  changed=1
+  report="$report\n• CHECK COVERAGE changed: was [$old_caps], now [$caps]."
+  report="$report\n  A check that stopped running leaves a blind spot. Traffic and code"
+  report="$report\n  search need a PAT in the MIHRAB_WATCH_TOKEN secret; the default"
+  report="$report\n  GITHUB_TOKEN cannot read either."
+fi
+
 old_clones=$(json_get clones 0)
-if [ "$clones" -gt 40 ] && [ "$clones" -gt $((old_clones * 2)) ]; then
+case "$old_clones" in ''|*[!0-9]*) old_clones=0 ;; esac
+if [ "$clones" -ge 0 ] && [ "$clones" -gt 40 ] && [ "$clones" -gt $((old_clones * 2)) ]; then
   changed=1
   report="$report\n• CLONE TRAFFIC: $clones unique cloners in 14 days, up from $old_clones."
   report="$report\n  CI (F-Droid + Xcode Cloud) explains a rise around a release; worth a"
   report="$report\n  look if you didn't ship anything."
 fi
 
-python3 - "$forks" "$network" "$stars" "$watchers" "$fork_list" "$hits" "$clones" <<PY
+python3 - "$forks" "$network" "$stars" "$watchers" "$fork_list" "$hits" "$clones" "$caps" <<PY
 import json, sys
 json.dump({
     "forks": sys.argv[1], "network": sys.argv[2], "stars": sys.argv[3],
     "watchers": sys.argv[4], "fork_list": sys.argv[5], "hits": sys.argv[6],
-    "clones": sys.argv[7],
+    "clones": sys.argv[7], "caps": sys.argv[8],
     "checked": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
 }, open("$BASELINE", "w"), indent=1)
 PY
@@ -105,6 +137,7 @@ if [ "$FULL" = "--full" ]; then
   echo "  forks $forks · network $network · stars $stars · watchers $watchers"
   echo "  unique cloners (14d): $clones"
   echo -e "  code-search hits:${hits:- none}"
+  echo "  checks that ran: $caps"
 fi
 
 if [ "$changed" = "1" ]; then
