@@ -1,0 +1,88 @@
+name: Reuse check
+
+# Weekly look for forks, copies or republications of this codebase.
+# Runs on GitHub so it does not depend on any machine being switched on.
+# Opens an issue when something changes; stays silent otherwise.
+
+on:
+  schedule:
+    - cron: '0 7 * * 1' # Mondays, 07:00 UTC
+  workflow_dispatch: # allow a manual run from the Actions tab
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The baseline is what makes this report only CHANGES. Without it every
+      # run would restate the same numbers and the report would stop being
+      # read. The rolling restore-key picks up the most recent previous run.
+      - name: Restore previous baseline
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.mihrab-watch-baseline.json
+          key: mihrab-watch-${{ github.run_id }}
+          restore-keys: mihrab-watch-
+
+      - name: Run the check
+        id: check
+        env:
+          # A PAT in MIHRAB_WATCH_TOKEN gets a working code search; the default
+          # GITHUB_TOKEN cannot always use the code-search API. The script
+          # degrades gracefully either way, so this secret is optional.
+          GH_TOKEN: ${{ secrets.MIHRAB_WATCH_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          OUT=$(bash scripts/mihrab-watch.sh 2>&1)
+          echo "$OUT"
+          {
+            echo 'report<<REPORT_EOF'
+            echo "$OUT"
+            echo 'REPORT_EOF'
+          } >> "$GITHUB_OUTPUT"
+          if echo "$OUT" | grep -q 'no change'; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save baseline
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.mihrab-watch-baseline.json
+          key: mihrab-watch-${{ github.run_id }}
+
+      - name: Open an issue if something changed
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT: ${{ steps.check.outputs.report }}
+        run: |
+          BODY=$(cat <<'INTRO'
+The weekly reuse check found a change. Most changes are harmless — an F-Droid
+index mirror, a package-name dataset used in security research, or an
+unrelated app that happens to share the `com.prayer_times` package id have all
+turned up before. Copied source is not harmless.
+
+INTRO
+          )
+          BODY="$BODY
+$REPORT
+
+---
+If it is a real copy: the name and icon are not licensed (see TRADEMARK.md),
+which makes a branding complaint to Google Play or the App Store the fastest
+route — no licence argument required."
+          gh issue create \
+            --title "Reuse check: something changed ($(date -u +%Y-%m-%d))" \
+            --body "$BODY" \
+            --label "reuse-check" 2>/dev/null \
+          || gh issue create \
+            --title "Reuse check: something changed ($(date -u +%Y-%m-%d))" \
+            --body "$BODY"

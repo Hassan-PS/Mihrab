@@ -41,7 +41,7 @@
 
 ### Quran
 
-- **Interactive Madinah mushaf** — All 604 pages, rendered pixel-perfect at your screen's exact resolution. Tap to go fullscreen; long-press any ayah for actions. Word-accurate page geometry, night mode, and a go-to-page jump.
+- **Interactive Madinah mushaf** — All 604 pages, drawn as *text* from the official KFGQPC page fonts rather than as page images: sharp at any zoom, instant to rotate, and a fraction of the memory. Pages arrive as you read (~300 KB each), so the reader opens straight away. Tap to go fullscreen; long-press any word for its ayah. Night mode and a go-to-page jump.
 - **Everything in one panel** — Long-press an ayah for its translation, real **tafsir** (Ibn Kathir, Maarif-ul-Quran, al-Muyassar and more — cached for offline), colored bookmarks, star, share as text or a rendered image card, and the full recitation controls.
 - **21 reciters** — Al-Husary, Alafasy, Abdul Basit, Al-Minshawi, As-Sudais, Ash-Shatri, Yasser Ad-Dossari, Maher Al-Muaiqly, Saad Al-Ghamdi and more, streamed per-ayah or downloaded per-surah for offline listening. Word-level highlight follows the recitation for nine of them; prefetching keeps long sessions gapless.
 - **Memorization (hifz) tools** — Repeat each ayah ×N, repeat a range ×M, pause-between-repeats for recite-back, and hide-and-reveal masking of Arabic or translation.
@@ -112,7 +112,7 @@ Archive and upload via Xcode Organizer for App Store / TestFlight.
 ### Tests
 
 ```sh
-npx jest        # 570+ unit tests
+npx jest        # 670+ unit tests
 npm run e2e     # Maestro end-to-end flows (needs a running emulator/simulator)
 ```
 
@@ -123,8 +123,8 @@ npm run e2e     # Maestro end-to-end flows (needs a running emulator/simulator)
 Religious content is sourced and attributed (also listed in-app under Settings → About):
 
 - Quran Uthmani text — [Tanzil.net](https://tanzil.net/) (CC BY 3.0)
-- Madinah mushaf page images — KFGQPC fonts via [quran/quran.com-images](https://github.com/quran/quran.com-images)
-- Ayah position data — [quran.com / Quran for Android](https://github.com/quran/quran_android)
+- Madinah mushaf — KFGQPC QPC v2 page fonts, mirrored at [nuqayah/qpc-fonts](https://github.com/nuqayah/qpc-fonts) ([KFGQPC terms](https://dm.qurancomplex.gov.sa/copyright-2/)); page layout built from the [quran.com API](https://api-docs.quran.com/)
+- Ayah and word positions — [quran.com / Quran for Android](https://github.com/quran/quran_android)
 - Recitation audio — [EveryAyah.com](https://everyayah.com/); word timings from [cpfair/quran-align](https://github.com/cpfair/quran-align) (CC BY 4.0)
 - Tafsir texts — [spa5k/tafsir_api](https://github.com/spa5k/tafsir_api) mirror of the Quran.com tafsir corpus
 - Translations — [alquran.cloud](https://alquran.cloud/) (Tanzil-derived, CC BY 3.0)
