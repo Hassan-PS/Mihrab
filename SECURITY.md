@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report security issues privately so we can address them before public disclosure. Open a **private security advisory** on GitHub for this repository, or contact the maintainers through GitHub if that is not available.
+Please report security issues privately so we can address them before public disclosure. Open a **private security advisory** on GitHub for this repository, or email **mihrab@elghamri.se** if that is not available.
 
 ## What must not be committed
 

@@ -61,6 +61,10 @@ without anyone needing to go to court.
 
 ## Asking
 
-Open an issue at <https://github.com/Hassan-PS/Mihrab/issues> or contact the
-maintainer. Permission for reasonable uses is usually easy to get; the point
-of this page is to stop passing-off, not to stop people building things.
+Email **mihrab@elghamri.se**, or open an issue at
+<https://github.com/Hassan-PS/Mihrab/issues> if the matter is not private.
+Permission for reasonable uses is usually easy to get; the point of this page
+is to stop passing-off, not to stop people building things.
+
+The marks described here are held by **Hassan El Ghamri**, the author and
+copyright holder of Mihrab.
