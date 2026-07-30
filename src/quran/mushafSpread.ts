@@ -63,6 +63,40 @@ function clampPage(page: number, total: number): number {
   return Math.max(1, Math.min(total, page));
 }
 
+// ── Spread-as-item pairing (MushafSpreadReader) ──────────────────────
+
+export type MushafSpread = {
+  /** 0-based spread index — the FlatList index in the spread pager. */
+  index: number;
+  /** The odd, right-hand page (RTL: read first). */
+  right: number;
+  /** The even, left-hand page, or null past the end of the mushaf. */
+  left: number | null;
+};
+
+/**
+ * The spread containing `page`, as the spread pager's item model. Follows
+ * the pairing convention established above (see `spreadLeftPage` and the
+ * module doc): spreads are (1,2), (3,4), … — odd page on the right, even
+ * page on the left, matching the printed Madinah mushaf whose pages 1 and
+ * 2 form the decorative opening spread. With the item BEING the pair, a
+ * page-skip cannot be expressed: the FlatList index IS the spread index.
+ */
+export function spreadForPage(page: number, total: number): MushafSpread {
+  const p = clampPage(page, total);
+  const right = p % 2 === 0 ? p - 1 : p;
+  return {
+    index: (right - 1) / 2,
+    right,
+    left: right + 1 <= total ? right + 1 : null,
+  };
+}
+
+/** Number of spreads in a mushaf of `total` pages. */
+export function spreadCount(total: number): number {
+  return Math.ceil(total / 2);
+}
+
 /**
  * Reading-layout decision for the mushaf (v2.7.41).
  *

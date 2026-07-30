@@ -83,7 +83,9 @@ import {
 } from './mushafDownload';
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import MushafTextPageSurface from './MushafTextPageSurface';
-import MushafPhoneLandscape from './MushafPhoneLandscape';
+import { DEVICE_CLASS } from '../responsive/deviceClass';
+import { MushafPhoneReader } from './MushafPhoneReader';
+import { MushafSpreadReader } from './MushafSpreadReader';
 import {
   ensureScaledPage,
   getRenderCacheVersion,
@@ -636,6 +638,27 @@ export function MushafReader({
     }
   });
 
+  // ── Text mode routes to the split readers (mushaf-reader-split plan) ─
+  // The device question is answered ONCE, at module scope: phones get the
+  // one-component portrait+landscape pager, large screens the spread-as-
+  // item pager. Image mode keeps the legacy paths below untouched until it
+  // retires (plan step 4).
+  if (textMode) {
+    const readerProps = {
+      surahNumber,
+      initialPage: initialPageProp,
+      isFullscreen,
+      onToggleFullscreen,
+      audioSheetSignal,
+      onTitleChange,
+    };
+    return DEVICE_CLASS === 'phone' ? (
+      <MushafPhoneReader {...readerProps} />
+    ) : (
+      <MushafSpreadReader {...readerProps} />
+    );
+  }
+
   // ── Gate screens ────────────────────────────────────────────────────
   if (downloadStatus === 'checking') {
     return (
@@ -958,50 +981,6 @@ export function MushafReader({
   // Single mode mounts the current page + one on each side. Dual mode mounts
   // the current spread plus the neighbouring spread on each side (six pages)
   // so a swipe reveals the next facing pair without a blank frame.
-  // A phone in landscape gets its own view (v2.8.0). Everything below this
-  // point — the zoom clamp, the windowed strip, the spread pairing — exists
-  // to make ONE component serve phones, tablets and desktop in both
-  // orientations, and that generality is what made landscape skip pages. The
-  // landscape view knows it is a phone and computes none of it.
-  if (phoneLandscape && textMode) {
-    return (
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: pageBg, paddingTop: isFullscreen ? insets.top : 0 },
-        ]}>
-        <StatusBar hidden={isFullscreen} animated />
-        <MushafPhoneLandscape
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          nightMode={nightMode}
-          accentColor={palette.accentSolid}
-          pageBg={pageBg}
-          ornament={ornament}
-          selected={sheetVisible ? selected : null}
-          playing={playback.active && playback.playing ? playback.active : null}
-          onToggleFullscreen={onToggleFullscreen}
-          onAyahLongPress={(ref, page) => {
-            setSelected({ ...ref, page });
-            setSheetScrollAudio(false);
-            setSheetVisible(true);
-          }}
-        />
-        {selected ? (
-          <AyahActionSheet
-            visible={sheetVisible}
-            onClose={() => setSheetVisible(false)}
-            surah={selected.surah}
-            ayah={selected.ayah}
-            page={selected.page}
-            scrollToAudio={sheetScrollAudio}
-          />
-        ) : null}
-        {playback.active ? <MiniPlayer /> : null}
-      </View>
-    );
-  }
-
   return (
     <View
       style={[
