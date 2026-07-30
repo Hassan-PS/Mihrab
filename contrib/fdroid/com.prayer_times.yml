@@ -1,3 +1,6 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: Optional features rely on fixed services (AlAdhan, Nominatim).
 Categories:
   - Religion
 License: Apache-2.0
@@ -12,9 +15,9 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/Mihrab
 
 Builds:
-  - versionName: 2.7.41
-    versionCode: 225
-    commit: b78bab6376ec9377983ad2e6cab8a6b1d9c84977
+  - versionName: 2.7.42
+    versionCode: 226
+    commit: 3465e314b44ca0dc784d114538c68101770a123b
     subdir: android/app
     sudo:
       - apt-get update
@@ -57,5 +60,5 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.7.41
-CurrentVersionCode: 225
+CurrentVersion: 2.7.42
+CurrentVersionCode: 226
