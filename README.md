@@ -145,4 +145,6 @@ grant is irrevocable and still covers those versions.
 The **name "Mihrab" and the app icon are not covered by the licence** —
 no free-software licence grants trademark rights. Unmodified builds may
 carry the name freely (F-Droid, Play, the App Store and any mirror);
-a fork needs its own name and icon. See [TRADEMARK.md](TRADEMARK.md).
+a fork that changes what the app does needs its own name and icon. Build and
+packaging patches (F-Droid's included) keep the name. See
+[TRADEMARK.md](TRADEMARK.md).
