@@ -40,6 +40,12 @@ import type { AyahRef } from './MushafTextPage';
 /** Breathing room either side of the page inside its column. */
 const H_PADDING = 10;
 
+/**
+ * How much bigger the text is than in portrait. The landscape screen's short
+ * side IS the portrait page width, so this is a direct multiple of it.
+ */
+const LANDSCAPE_ZOOM = 1.6;
+
 export type MushafPhoneLandscapeProps = {
   currentPage: number;
   onPageChange: (page: number) => void;
@@ -115,7 +121,13 @@ export default function MushafPhoneLandscape({
     ({ item: page }: { item: number }) => {
       const layout = getPageLayout(page);
       const lineCount = layout?.lines.length ?? 15;
-      const textWidth = width - H_PADDING * 2;
+      // Landscape is a READING zoom, not "fill the width". A landscape phone
+      // is about twice as wide as it is tall, so sizing the page to the full
+      // width doubles the text against portrait — two lines on screen and
+      // eight screens of scrolling for one page. The short side (here the
+      // height) is the portrait page width, so this is a fixed 1.6× of what
+      // portrait shows: bigger, still a page you can read down.
+      const textWidth = Math.min(width - H_PADDING * 2, height * LANDSCAPE_ZOOM);
       // Height follows the text: font size is the width over the page's
       // measure, and a line is a fixed multiple of that. No fitting, no
       // stretching, no letterboxing — the column scrolls if it overflows.
@@ -133,7 +145,10 @@ export default function MushafPhoneLandscape({
             contentContainerStyle={styles.columnContent}
             showsVerticalScrollIndicator={false}
           >
-            <Pressable onPress={onToggleFullscreen} style={{ width }}>
+            <Pressable
+              onPress={onToggleFullscreen}
+              style={[styles.pageWrap, { width }]}
+            >
               <MushafTextPageSurface
                 page={page}
                 width={textWidth}
@@ -200,6 +215,7 @@ export default function MushafPhoneLandscape({
 
 const styles = StyleSheet.create({
   column: { flex: 1 },
+  pageWrap: { alignItems: 'center' },
   columnContent: { paddingBottom: 24 },
   footer: { alignItems: 'center', paddingTop: 6 },
   pageNumber: { fontSize: 13, fontVariant: ['tabular-nums'] },
