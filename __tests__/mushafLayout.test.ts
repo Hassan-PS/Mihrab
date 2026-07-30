@@ -40,9 +40,16 @@ describe('mushaf layout data', () => {
       const layout = getPageLayout(page)!;
       expect(layout.lines.length).toBeGreaterThan(0);
       expect(layout.lines.length).toBeLessThan(MUSHAF_LINES_PER_PAGE);
-      // Every line of the plate is centred — nothing is stretched.
-      for (const line of layout.lines) {
-        if (line.kind === 'ayah') expect(line.centered).toBe(true);
+      // The plate's lines are stretched across it like any other line — they
+      // hold few words (page 1's basmalah is 6.7 em against a 12 em plate),
+      // so setting them at their natural width crowds the words together.
+      const ayahLines = layout.lines.filter(l => l.kind === 'ayah');
+      const centered = ayahLines.filter(l => l.kind === 'ayah' && l.centered);
+      // Only a line that ends a surah is centred: page 1 finishes
+      // Al-Fatihah, page 2 runs on into Al-Baqarah.
+      expect(centered).toHaveLength(page === 1 ? 1 : 0);
+      if (centered.length) {
+        expect(centered[0]).toBe(ayahLines[ayahLines.length - 1]);
       }
     }
   });

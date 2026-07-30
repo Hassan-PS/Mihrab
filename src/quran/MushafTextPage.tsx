@@ -86,6 +86,21 @@ export type MushafTextPageProps = {
 
 const BASMALAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
 
+/**
+ * Words that QPC draws with more than one glyph must keep the order the font
+ * put them in. The glyphs live in the Arabic Presentation Forms block, so the
+ * bidi algorithm classifies them as right-to-left and reverses the run —
+ * which silently swaps the halves of every multi-glyph word (the basmalah on
+ * page 1 was the visible one). The glyphs already sit in visual order, so we
+ * override bidi for the token and let the row's `row-reverse` place the words.
+ */
+const LRO = '‭';
+const PDF = '‬';
+
+function orderedToken(text: string): string {
+  return text.length > 1 ? `${LRO}${text}${PDF}` : text;
+}
+
 function sameAyah(a: AyahRef | null | undefined, w: MushafWord): boolean {
   return a != null && a.surah === w.surah && a.ayah === w.ayah;
 }
@@ -280,7 +295,7 @@ const LineView = React.memo(function LineView({
                 },
               ]}
             >
-              {word.text}
+              {orderedToken(word.text)}
             </Text>
           </Pressable>
         );

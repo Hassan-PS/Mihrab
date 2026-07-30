@@ -286,15 +286,16 @@ def apply_centering(
     """Centre the lines the print does not stretch.
 
     A justified mushaf line is stretched to the full measure; the line that
-    closes a surah stops where the text stops and sits centred. Pages 1–2 are
-    ornamental plates whose every line is centred.
+    closes a surah stops where the text stops and sits centred.
+
+    This applies to the plate pages (1–2) too. Their lines carry far fewer
+    words — page 1's basmalah measures 6.7 em against a 12 em plate — so
+    setting them at their natural width crowds the words into each other,
+    while the print spaces them right across the plate.
     """
     for page, lines in pages.items():
         for line in lines:
             if line.kind != "ayah":
-                continue
-            if page in FRAMED_PAGES:
-                line.centered = True
                 continue
             tail = line.segments[-1]
             line.centered = tail.has_end and tail.ayah == last_ayah.get(tail.surah, -1)
