@@ -143,8 +143,8 @@ Releases up to and including 2.7.43 were published under Apache-2.0; that
 grant is irrevocable and still covers those versions.
 
 The **name "Mihrab" and the app icon are not covered by the licence** —
-no free-software licence grants trademark rights. Unmodified builds may
-carry the name freely (F-Droid, Play, the App Store and any mirror);
-a fork that changes what the app does needs its own name and icon. Build and
-packaging patches (F-Droid's included) keep the name. See
-[TRADEMARK.md](TRADEMARK.md).
+no free-software licence grants trademark rights. Builds of this project
+carry the name freely, whoever distributes them — build and packaging
+patches, security backports and translations included, so F-Droid's recipe
+is fine. A fork that changes what the app *does* needs its own name and
+icon. See [TRADEMARK.md](TRADEMARK.md).
