@@ -66,6 +66,7 @@ import {
   pageOffsetX,
   pageFromScroll,
   mushafLayoutMode,
+  landscapePageWidthDp,
   scrollXForPage as scrollXForPageMath,
 } from './mushafSpread';
 import {
@@ -84,7 +85,7 @@ import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import {
   ensureScaledPage,
   getRenderCacheVersion,
-  scaledPagePathIfReady,
+  nearestScaledPagePath,
   subscribeRenderCache,
 } from './mushafRenderCache';
 import {
@@ -492,11 +493,25 @@ export function MushafReader({
     wrapBox.h > 0 && wrapBox.fs === isFullscreen
       ? Math.max(120, wrapBox.h - playerReserve - 6)
       : estMaxHeight;
+  /**
+   * Phone-landscape reading-zoom width (v2.7.43 — rotation stability).
+   * See `landscapePageWidthDp`: the VISIBLE page is zoomed ~1.6× portrait
+   * and clamped so the render cache still serves it; the mounted
+   * neighbours stay portrait-sized because they're offscreen. Zooming all
+   * three (and past the cache line) is what allocated ~130 MB of bitmap
+   * per rotation and made it crawl, then OOM.
+   */
+  const landscapeWidth = (cropW: number, isCurrentPage: boolean) =>
+    landscapePageWidthDp({
+      availableWidthDp: maxWidth,
+      shortSideDp: Math.min(windowWidth, windowHeight) - horizontalPadding * 2,
+      cropW,
+      pixelRatio: PixelRatio.get(),
+      isCurrentPage,
+    });
+
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / IMAGE_ASPECT;
-  // Phone landscape reading-zoom: the page keeps its full width-fit size
-  // and the viewport scrolls vertically instead of shrinking the page to
-  // the (short) window height.
   if (!phoneLandscape && imageHeight > maxHeight) {
     imageHeight = maxHeight;
     imageWidth = imageHeight * IMAGE_ASPECT;
@@ -518,21 +533,21 @@ export function MushafReader({
    */
   const pageDims = (page: number) => {
     const crop = mushafPageCrop(page);
+    // Only the page being read gets the landscape zoom — see
+    // landscapeWidth / landscapePageWidthDp.
+    const isCurrentPage = page === currentPage;
     if (!crop) {
-      return {
-        dispW: imageWidth,
-        dispH: imageHeight,
-        fullW: imageWidth,
-        fullH: imageHeight,
-        offX: 0,
-        offY: 0,
-      };
+      const w = phoneLandscape ? landscapeWidth(1, isCurrentPage) : imageWidth;
+      const h = phoneLandscape ? w / IMAGE_ASPECT : imageHeight;
+      return { dispW: w, dispH: h, fullW: w, fullH: h, offX: 0, offY: 0 };
     }
     const cropAspect = (crop.w * 2600) / (crop.h * 4206);
-    let dispW = maxWidth;
+    // Phone landscape reading-zoom: zoomed width, unstretched — the
+    // vertical ScrollView provides the height.
+    let dispW = phoneLandscape
+      ? landscapeWidth(crop.w, isCurrentPage)
+      : maxWidth;
     let dispH = dispW / cropAspect;
-    // Phone landscape reading-zoom: width-fit, uncapped and unstretched —
-    // the vertical ScrollView provides the height.
     if (!phoneLandscape) {
       if (dispH > maxHeight) {
         dispH = maxHeight;
@@ -717,7 +732,10 @@ export function MushafReader({
     // Prefer the exact-display-size copy (sharpness fix, v2.7.28);
     // fall back to the original file / stream while it generates.
     const scaledPath = useLocalFiles
-      ? scaledPagePathIfReady(page, cachePxWidth(dims))
+      ? // Nearest ready copy, not just the exact bucket: on rotation the
+        // exact one doesn't exist yet, and falling back to the 2600 px
+        // original meant a ~44 MB decode per mounted page mid-rotation.
+        nearestScaledPagePath(page, cachePxWidth(dims))
       : null;
     const imageSource = scaledPath
       ? { uri: `file://${scaledPath}` }

@@ -92,3 +92,78 @@ export function mushafLayoutMode(dims: {
     phoneLandscape: isLandscape && isPhoneDevice,
   };
 }
+
+/** Width of the source mushaf PNGs, in pixels. */
+export const MUSHAF_SOURCE_PX = 2600;
+
+/**
+ * `ensureScaledPage` skips generating a display-size copy once the request
+ * reaches 90 % of the source width — at that point it isn't a downscale
+ * worth making. Past this line the reader decodes the full 2600×4206 PNG
+ * (~44 MB of bitmap) for EVERY mounted page.
+ */
+export const RENDER_CACHE_SKIP_PX = MUSHAF_SOURCE_PX * 0.9;
+
+/**
+ * Physical pixels the reader asks the render cache for, given a page's
+ * display width. Mirrors `cachePxWidth` in MushafReader: the full-image
+ * width implied by drawing the crop region `cropW` wide at `dispWDp`.
+ */
+export function renderRequestPx(
+  dispWDp: number,
+  cropW: number,
+  pixelRatio: number,
+): number {
+  return (dispWDp * pixelRatio) / cropW;
+}
+
+/**
+ * How wide to draw a page in phone-landscape reading zoom, in dp.
+ *
+ * Three forces, balanced here (v2.7.43):
+ *  • ZOOM — the point of the mode. Target ~1.6× the portrait page width,
+ *    which is `shortSideDp` (a phone's portrait width IS its landscape
+ *    height).
+ *  • MEMORY — only the visible page gets the zoom. The pager mounts the
+ *    neighbours either side for swipe; those are offscreen, so they stay
+ *    portrait-sized. Zooming all three is what produced ~130 MB of bitmap
+ *    and made rotation crawl and then OOM.
+ *  • THE RENDER CACHE — the result must keep `renderRequestPx` under
+ *    `RENDER_CACHE_SKIP_PX`, or `ensureScaledPage` declines to make a
+ *    copy and the reader decodes the full 2600 px source per page.
+ *
+ * A fixed pixel budget alone doesn't work: it's spent in real pixels, so
+ * on a 3.5× screen it left almost no zoom over portrait. Hence the
+ * zoom-relative target, clamped by the cache line.
+ */
+export function landscapePageWidthDp(opts: {
+  /** Page-area width in dp (window width minus horizontal padding). */
+  availableWidthDp: number;
+  /** Portrait page width in dp — the window's short side. */
+  shortSideDp: number;
+  cropW: number;
+  pixelRatio: number;
+  /** Offscreen neighbours stay portrait-sized. */
+  isCurrentPage: boolean;
+  targetZoom?: number;
+  minBudgetPx?: number;
+}): number {
+  const {
+    availableWidthDp,
+    shortSideDp,
+    cropW,
+    pixelRatio,
+    isCurrentPage,
+    targetZoom = 1.6,
+    minBudgetPx = 1700,
+  } = opts;
+  if (!isCurrentPage) return Math.min(availableWidthDp, shortSideDp);
+  const target = Math.max(
+    shortSideDp * targetZoom,
+    (minBudgetPx * cropW) / pixelRatio,
+  );
+  // 0.98 keeps a margin below the skip line so bucket rounding can't tip
+  // the request over it.
+  const cacheCeiling = (RENDER_CACHE_SKIP_PX * 0.98 * cropW) / pixelRatio;
+  return Math.min(availableWidthDp, target, cacheCeiling);
+}

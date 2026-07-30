@@ -98,6 +98,47 @@ export function scaledPagePathIfReady(
 }
 
 /**
+ * The closest already-generated copy for `page` — exact bucket if it
+ * exists, otherwise the nearest one (preferring smaller). v2.7.43.
+ *
+ * WHY: rotation changes the display width, so it asks for a bucket that
+ * has never been generated. Without this the reader fell back to the
+ * ORIGINAL 2600 px page while the new copy was produced — three ~44 MB
+ * bitmap decodes in the middle of an orientation change, which is what
+ * made rotating slow (and, stacked, killed the app). Reusing the other
+ * orientation's copy paints instantly at a slightly wrong scale; the
+ * exact-size copy swaps in a moment later via the version bump.
+ */
+export function nearestScaledPagePath(
+  page: number,
+  targetPxWidth: number,
+): string | null {
+  const target = widthBucket(targetPxWidth);
+  const exact = ready.get(`${target}/${page}`);
+  if (exact) return exact;
+  let bestBucket = -1;
+  let bestPath: string | null = null;
+  for (const [key, path] of ready) {
+    const slash = key.indexOf('/');
+    if (Number(key.slice(slash + 1)) !== page) continue;
+    const bucket = Number(key.slice(0, slash));
+    // Prefer the largest bucket at or below the target (upscaling a
+    // slightly smaller copy is cheap and looks fine for one frame);
+    // fall back to the smallest bucket above it.
+    const better =
+      bestBucket < 0 ||
+      (bucket <= target
+        ? bestBucket > target || bucket > bestBucket
+        : bestBucket > target && bucket < bestBucket);
+    if (better) {
+      bestBucket = bucket;
+      bestPath = path;
+    }
+  }
+  return bestPath;
+}
+
+/**
  * Ensure a display-size copy exists for `page`. Only meaningful when
  * the page's original file is on disk and the target is an actual
  * downscale (>10% smaller) — otherwise the original is already optimal.
