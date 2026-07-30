@@ -50,7 +50,14 @@ export const MUSHAF_LINE_HEIGHT_EM = 1.7183;
  * justified and is centred instead — the difference between a line that fills
  * its measure and a line that has been pulled apart to pretend it does.
  */
-export const MAX_WORD_GAP_EM = 0.3;
+/**
+ * Word space, in ems. The page fonts carry no space glyph and their advances
+ * stop at the ink, so words rendered back to back collide — بِسْمِ runs into
+ * ٱللَّهِ. The print sets a space between words and so does every other QPC
+ * renderer; the character falls back to the system font at about this width,
+ * which is why the build script budgets the same figure per internal space.
+ */
+export const WORD_SPACE_EM = 0.25;
 
 /** Ratio of page height to text width, used to size the page container. */
 export function mushafPageAspect(page: number, lineCount: number): number {
@@ -256,71 +263,85 @@ const LineView = React.memo(function LineView({
     );
   }
 
-  // Ayah line. `row-reverse` places the first word on the right without
-  // depending on the app's RTL flag, which follows the UI language, not the
-  // script — the mushaf is right-to-left in every locale.
+  // Ayah line — ONE text run, not a view per word.
   //
-  // Spacing: a full line falls ~2% short of the measure, and spreading that
-  // across its gaps reproduces the print exactly. A SHORT line must not be
-  // treated the same way — page 1's basmalah is 6.7 em on a 12 em plate, and
-  // stretching it to fit pulls the words halfway across the page. So the gap
-  // is capped: lines close to the measure justify, lines well short of it are
-  // centred at a normal word space.
-  const gaps = Math.max(1, line.words.length - 1);
-  const slackEm = (measure - line.natural) / gaps;
-  const justify = !line.centered && slackEm <= MAX_WORD_GAP_EM;
-  const wordGap = justify ? 0 : fontSize * MAX_WORD_GAP_EM;
+  // Several QPC glyphs draw ink far wider than their advance so they
+  // interlock with their neighbours: page 1's ٱلرَّحْمَٰنِ advances 1.29 em and
+  // inks 2.86 em. Laying such a word out in its own box, at its own advance,
+  // puts that ink on top of the word beside it — and no amount of gap fixes
+  // it, because the gap moves the neighbour out of the interlock the font was
+  // drawn for. Handing the whole line to the font as a single run is the only
+  // way it lands right, so word taps are resolved from the advances instead.
+  const space = WORD_SPACE_EM * fontSize;
+  const lineWidth =
+    line.natural * fontSize + space * Math.max(0, line.words.length - 1);
+
+  const wordAt = (xFromRight: number): MushafWord | null => {
+    let cursor = 0;
+    for (const word of line.words) {
+      cursor += word.advance * fontSize + space;
+      if (xFromRight <= cursor) return word;
+    }
+    return line.words[line.words.length - 1] ?? null;
+  };
+
+  // Highlighting a single ayah inside one run needs the run split at the ayah
+  // boundary — nested <Text> keeps it a single shaped run, so the glyphs still
+  // interlock across the boundary.
+  const highlight = selected ?? playing ?? null;
+  const parts: Array<{ text: string; on: boolean }> = [];
+  for (const word of line.words) {
+    const on = sameAyah(highlight, word);
+    const last = parts[parts.length - 1];
+    const token = orderedToken(word.text);
+    if (last && last.on === on) last.text += ` ${token}`;
+    else parts.push({ text: parts.length ? ` ${token}` : token, on });
+  }
+
   return (
-    <View
-      style={[
-        styles.line,
-        {
-          width,
-          height: lineHeight,
-          justifyContent: justify ? 'space-between' : 'center',
-          columnGap: wordGap,
-        },
-      ]}
-    >
-      {line.words.map((word, i) => {
-        const isSelected = sameAyah(selected, word) || sameAyah(playing, word);
-        const isActive =
-          activeWord != null &&
-          activeWord.surah === word.surah &&
-          activeWord.ayah === word.ayah &&
-          activeWord.position === word.position;
-        return (
-          <Pressable
-            key={`${word.surah}:${word.ayah}:${word.position}:${i}`}
-            onPress={() => onPress(word)}
-            onLongPress={() => onLongPress(word)}
-            delayLongPress={280}
-            // The glyphs already carry the printed side bearings; extra hit
-            // padding would overlap neighbours and mis-target taps.
-            hitSlop={{ top: lineHeight * 0.12, bottom: lineHeight * 0.12 }}
-            style={[
-              isSelected && { backgroundColor: colors.selection },
-              isActive && { backgroundColor: colors.selection },
-            ]}
-          >
-            <Text
-              allowFontScaling={false}
-              // Keep bidi out of it: each token is a single standalone glyph.
-              style={[
-                styles.word,
-                {
-                  fontFamily: fontFamily ?? undefined,
-                  fontSize,
-                  lineHeight,
-                  color: word.isEnd ? colors.accent : colors.text,
-                },
-              ]}
-            >
-              {orderedToken(word.text)}
-            </Text>
-          </Pressable>
-        );
-      })}
+    <View style={[styles.line, { width, height: lineHeight }]}>
+      <Pressable
+        onPress={e => {
+          const w = wordAt(lineWidth - e.nativeEvent.locationX);
+          if (w) onPress(w);
+        }}
+        onLongPress={e => {
+          const w = wordAt(lineWidth - e.nativeEvent.locationX);
+          if (w) onLongPress(w);
+        }}
+        delayLongPress={280}
+        style={{ width: lineWidth, height: lineHeight }}
+      >
+        <Text
+          allowFontScaling={false}
+          numberOfLines={1}
+          // Clip, never ellipsize. The measured advance total and what the
+          // platform actually lays out differ by a hair, and with a fixed
+          // width that hair turns every line into "…".
+          ellipsizeMode="clip"
+          style={[
+            styles.word,
+            {
+              fontFamily: fontFamily ?? undefined,
+              fontSize,
+              lineHeight,
+              color: colors.text,
+              // A little slack over the measured width for the same reason.
+              width: lineWidth * 1.06,
+            },
+          ]}
+        >
+          {parts.map((part, i) =>
+            part.on ? (
+              <Text key={i} style={{ backgroundColor: colors.selection }}>
+                {part.text}
+              </Text>
+            ) : (
+              part.text
+            ),
+          )}
+        </Text>
+      </Pressable>
     </View>
   );
 });
@@ -332,12 +353,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   line: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  wordFlexible: {
-    // Words keep their natural width; only the gaps between them stretch.
-    flexShrink: 0,
+    justifyContent: 'center',
   },
   word: {
     textAlign: 'center',

@@ -32,6 +32,8 @@ type RawLine = {
   w?: RawSegment[];
   /** Ayah lines: natural width in ems. */
   n?: number;
+  /** Ayah lines: each word's advance width, in ems. */
+  a?: number[];
   /** Ayah lines: 1 when the line closes a surah and must not be stretched. */
   c?: 1;
   /** Surah/basmalah lines: which surah. */
@@ -49,6 +51,14 @@ export type MushafWord = {
   position: number;
   /** True for the ayah-number medallion, which QPC treats as a word. */
   isEnd: boolean;
+  /**
+   * The word's advance width in ems — how far the pen moves, which is NOT
+   * how wide the word looks. Several QPC glyphs draw ink far past their
+   * advance so they interlock with their neighbours (page 1's basmalah is
+   * the clearest). That is why a line is drawn as one text run and taps are
+   * resolved against these advances instead of per-word views.
+   */
+  advance: number;
 };
 
 export type MushafLine =
@@ -100,6 +110,7 @@ function decodeLine(line: RawLine): MushafLine | null {
     };
   }
   const tokens = (line.x ?? '').split('|').filter(Boolean);
+  const advances = line.a ?? [];
   const words: MushafWord[] = [];
   let i = 0;
   for (const seg of line.w ?? []) {
@@ -109,6 +120,7 @@ function decodeLine(line: RawLine): MushafLine | null {
       if (text == null) break;
       words.push({
         text,
+        advance: advances[i - 1] ?? 0,
         surah,
         ayah,
         position: first + k,

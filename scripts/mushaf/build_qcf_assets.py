@@ -301,7 +301,9 @@ def apply_centering(
             line.centered = tail.has_end and tail.ayah == last_ayah.get(tail.surah, -1)
 
 
-def measure_lines(page: int, lines: list[Line], raw_dir: str) -> list[float]:
+def measure_lines(
+    page: int, lines: list[Line], raw_dir: str
+) -> tuple[list[float], list[list[float]]]:
     """Natural width of each ayah line, in ems of the page's own font.
 
     This is what lets the reader size the text like the print instead of like a
@@ -323,33 +325,45 @@ def measure_lines(page: int, lines: list[Line], raw_dir: str) -> list[float]:
     hmtx = font["hmtx"]
     cmap = font.getBestCmap()
     widths: list[float] = []
+    advances: list[list[float]] = []
     for line in lines:
         if line.kind != "ayah":
             widths.append(0.0)
+            advances.append([])
             continue
         total = 0.0
+        per_word: list[float] = []
         for token in line.tokens:
+            word_adv = 0.0
             for ch in token:
                 if ch == " ":
                     # ~200 words across the mushaf carry a hizb/sajdah symbol
                     # as a second glyph, separated by a space the page fonts
                     # have no glyph for. It falls back to the system space;
                     # budget a nominal quarter-em for it here.
-                    total += INTERNAL_SPACE_EM * upem
+                    word_adv += INTERNAL_SPACE_EM * upem
                     continue
                 glyph = cmap.get(ord(ch))
                 if glyph is None:
                     raise RuntimeError(f"page {page}: {hex(ord(ch))} missing from {name}")
-                total += hmtx[glyph][0]
+                word_adv += hmtx[glyph][0]
+            total += word_adv
+            per_word.append(round(word_adv / upem, 4))
         widths.append(round(total / upem, 4))
+        advances.append(per_word)
     font.close()
-    return widths
+    return widths, advances
 
 
-def encode_page(page: int, lines: list[Line], widths: list[float]) -> dict:
+def encode_page(
+    page: int,
+    lines: list[Line],
+    widths: list[float],
+    advances: list[list[float]],
+) -> dict:
     """Compact JSON for one page (see docs/mushaf-font-rendering-plan.md)."""
     out_lines = []
-    for line, width in zip(lines, widths):
+    for line, width, adv in zip(lines, widths, advances):
         if line.kind in ("surah", "basmalah"):
             out_lines.append({"t": line.kind[0], "s": line.surah})
             continue
@@ -359,7 +373,17 @@ def encode_page(page: int, lines: list[Line], widths: list[float]) -> dict:
         ]
         # Words are separated by "|" because a word's own glyphs are sometimes
         # separated by a space (see INTERNAL_SPACE_EM).
-        entry: dict = {"t": "a", "x": "|".join(line.tokens), "w": segs, "n": width}
+        # `a` is each word's advance in ems. The reader draws a line as ONE
+        # text run so the font can position its own glyphs — several QPC
+        # glyphs have ink far wider than their advance and are designed to
+        # interlock — so it needs these to know where a tapped word starts.
+        entry: dict = {
+            "t": "a",
+            "x": "|".join(line.tokens),
+            "w": segs,
+            "n": width,
+            "a": adv,
+        }
         if line.centered:
             entry["c"] = 1
         out_lines.append(entry)
@@ -484,7 +508,10 @@ def main() -> int:
         measured = list(
             pool.map(lambda p: measure_lines(p, page_lines[p], raw_dir), pages)
         )
-    layouts = {p: encode_page(p, page_lines[p], w) for p, w in zip(pages, measured)}
+    layouts = {
+        p: encode_page(p, page_lines[p], m[0], m[1])
+        for p, m in zip(pages, measured)
+    }
 
     layout_path = os.path.join(out, "mushaf-layout-v2.json")
     with open(layout_path, "w", encoding="utf-8") as fh:
