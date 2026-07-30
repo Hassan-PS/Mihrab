@@ -82,6 +82,7 @@ import {
   type MushafDownloadProgress,
 } from './mushafDownload';
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
+import MushafTextPageSurface from './MushafTextPageSurface';
 import {
   ensureScaledPage,
   getRenderCacheVersion,
@@ -151,6 +152,14 @@ export function MushafReader({
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
   const nightMode = quran.prefs.mushafNightMode;
+  /**
+   * Font-rendered pages (v2.8.0). Each page draws from its own QPC v2 font
+   * instead of a 2600 px PNG: sharp at any zoom, ~1 MB instead of ~44 MB per
+   * mounted page, and instant on rotation. It also removes the download gate —
+   * a page needs only its own ~300 KB font, so the reader opens straight away
+   * and fetches as you read. `image` stays available for one release.
+   */
+  const textMode = quran.prefs.mushafRenderer !== 'image';
   const pageBg = nightMode ? '#101010' : '#ffffff';
   const ornament = nightMode ? '#c9b47a' : '#7a5e1f';
 
@@ -197,6 +206,14 @@ export function MushafReader({
 
   useEffect(() => {
     let cancelled = false;
+    if (textMode) {
+      // Nothing to gate on: pages carry their own fonts, fetched per page.
+      setUseLocalFiles(false);
+      setDownloadStatus('ready');
+      return () => {
+        cancelled = true;
+      };
+    }
     void isMushafDownloaded().then(yes => {
       if (cancelled) return;
       setUseLocalFiles(yes);
@@ -206,7 +223,7 @@ export function MushafReader({
       cancelled = true;
       downloadHandleRef.current?.cancel();
     };
-  }, []);
+  }, [textMode]);
 
   const startDownload = () => {
     if (downloadStatus === 'downloading') return;
@@ -502,13 +519,19 @@ export function MushafReader({
    * per rotation and made it crawl, then OOM.
    */
   const landscapeWidth = (cropW: number, isCurrentPage: boolean) =>
-    landscapePageWidthDp({
-      availableWidthDp: maxWidth,
-      shortSideDp: Math.min(windowWidth, windowHeight) - horizontalPadding * 2,
-      cropW,
-      pixelRatio: PixelRatio.get(),
-      isCurrentPage,
-    });
+    // Text pages have no bitmap and no render cache, so none of that applies:
+    // the page is simply set at the full width and the viewport scrolls it.
+    // Re-laying out text on rotation costs nothing, which is the whole point.
+    textMode
+      ? maxWidth
+      : landscapePageWidthDp({
+          availableWidthDp: maxWidth,
+          shortSideDp:
+            Math.min(windowWidth, windowHeight) - horizontalPadding * 2,
+          cropW,
+          pixelRatio: PixelRatio.get(),
+          isCurrentPage,
+        });
 
   let imageWidth = maxWidth;
   let imageHeight = imageWidth / IMAGE_ASPECT;
@@ -839,8 +862,31 @@ export function MushafReader({
               height: dims.dispH,
               overflow: 'hidden',
             }}>
-            {/* Inner surface at virtual full-image size; cropped pages
-                shift it so the content window fills the pressable. */}
+            {textMode ? (
+              <MushafTextPageSurface
+                page={page}
+                width={dims.dispW}
+                height={dims.dispH}
+                nightMode={nightMode}
+                accentColor={palette.accentSolid}
+                selected={
+                  sheetVisible && selected?.page === page ? selected : null
+                }
+                playing={
+                  playback.active && playback.playing ? playback.active : null
+                }
+                // Only the page being read warms its neighbours' fonts.
+                prefetchRadius={page === currentPage ? 2 : 0}
+                onWordPress={onToggleFullscreen}
+                onWordLongPress={ref => {
+                  setSelected({ ...ref, page });
+                  setSheetScrollAudio(false);
+                  setSheetVisible(true);
+                }}
+              />
+            ) : (
+            /* Inner surface at virtual full-image size; cropped pages
+                shift it so the content window fills the pressable. */
             <View
               pointerEvents="none"
               style={{
@@ -890,6 +936,7 @@ export function MushafReader({
                 nightMode={nightMode}
               />
             </View>
+            )}
           </Pressable>
         </PageViewport>
         <View style={styles.pageFooter}>

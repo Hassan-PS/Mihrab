@@ -22,6 +22,7 @@ class MainApplication : Application(), ReactApplication {
           add(SystemThemePackage())
           add(MihrabLiveActivityPackage())
           add(MushafPageScalerPackage())
+          add(MushafFontPackage())
           if (BuildConfig.IAP_ENABLED) {
             addIapPackageIfPresent(this)
           }

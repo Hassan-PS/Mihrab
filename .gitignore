@@ -100,3 +100,5 @@ src/quran/data/source/
 branding/tools/__pycache__/
 .ipadshots/
 outputs/triage/
+build/shots/
+build/qcf*/
