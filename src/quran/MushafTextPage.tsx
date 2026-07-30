@@ -21,7 +21,6 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import {
-  I18nManager,
   Pressable,
   StyleSheet,
   Text,
@@ -373,7 +372,12 @@ const styles = StyleSheet.create({
   },
   word: {
     textAlign: 'center',
-    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+    // ALWAYS rtl — never I18nManager.isRTL. That flag follows the UI
+    // language, and the mushaf is right-to-left in every locale. With an
+    // English UI it resolved to 'ltr', which iOS honours: the line laid out
+    // left-to-right, putting the first word on the left and reversing the
+    // whole line. Android's bidi happened to recover; iOS did not.
+    writingDirection: 'rtl',
     includeFontPadding: false,
   },
   plate: {
