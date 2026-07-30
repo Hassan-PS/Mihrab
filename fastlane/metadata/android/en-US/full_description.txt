@@ -19,4 +19,4 @@ Privacy and network use:
 - Optional online features, used only when you choose them: prayer-time providers (AlAdhan, or the Islamic Association in Sweden), place search via OpenStreetMap Nominatim, and downloading the Quran pages, translations, tafsir and recitation audio
 - Your coordinates are stored only on your device
 
-The app is open source under Apache-2.0.
+The app is open source under AGPL-3.0-or-later.
