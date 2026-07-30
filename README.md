@@ -139,9 +139,6 @@ Religious content is sourced and attributed (also listed in-app under Settings �
 distribute a modified version, or run one as a network service, you must
 publish your source under the same terms.
 
-Releases up to and including 2.7.43 were published under Apache-2.0; that
-grant is irrevocable and still covers those versions.
-
 The **name "Mihrab" and the app icon are not covered by the licence** —
 no free-software licence grants trademark rights. Builds of this project
 carry the name freely, whoever distributes them — build and packaging
