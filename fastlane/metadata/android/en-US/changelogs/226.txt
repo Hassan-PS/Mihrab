@@ -1,0 +1,3 @@
+• Removed two permissions the app never needed: storage read/write came in from a library's manifest, but Mihrab only writes to its own private app storage.
+• Rewrote the store listing to match the app today, including a clear note on which features are optional and online.
+• macOS: the menu bar now says "Mihrab".

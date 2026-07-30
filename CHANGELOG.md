@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.42] — 2026-07-30
+
+### Changed
+- **Two unused permissions removed (Android).** `WRITE_EXTERNAL_STORAGE` and `READ_EXTERNAL_STORAGE` came in from a networking library's manifest; Mihrab only ever writes to its own app-private storage (mushaf pages, caches, recitation audio), so both are now stripped from the merged manifest. Raised in the F-Droid review.
+- **Store listing rewritten** to match the app as it is today — including an explicit note on what is optional and online (prayer-time providers, OpenStreetMap Nominatim place search, Quran downloads) and what stays on device.
+
+### Fixed
+- **macOS menu bar says "Mihrab"**, not "PrayerApp" — macOS reads a different bundle key than the iOS home screen, and that one still carried the Xcode target name.
+
 ## [2.7.41] — 2026-07-29
 
 ### Fixed

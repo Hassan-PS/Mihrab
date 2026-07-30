@@ -1,0 +1,3 @@
+• Tog bort två behörigheter appen aldrig behövde: läs/skriv till lagring kom från ett biblioteks manifest, men Mihrab skriver bara till sitt eget privata utrymme.
+• Skrev om butiksbeskrivningen så att den matchar appen i dag, med en tydlig notis om vilka funktioner som är valfria och kräver nätverk.
+• macOS: menyraden visar nu "Mihrab".

@@ -1,15 +1,22 @@
-Prayer Times helps you keep track of the five daily prayers with a clear home screen, optional reminders, a full-month planner, and a Qibla compass.
+Mihrab keeps the five daily prayers close at hand: a calm home screen with the next prayer and a live countdown, optional adhan reminders, a full-month planner, and a home-screen widget.
 
 Key features:
-- Prayer times for today with quick, readable layout
-- Optional notifications for the five daily prayers
-- Monthly overview for planning ahead
-- Qibla direction using device sensors
-- GPS location or manual coordinates
-- Place search where supported
-- Multiple calculation sources
-- English, Swedish, and Arabic (RTL)
-- Light, dark, and system theme options
-- Android home-screen widget
+- Prayer times for today, the week ahead, and a full-month overview
+- Optional notifications for the five daily prayers, with adhan sounds, pre-prayer reminders, and snooze
+- Pinned prayer countdown (Live Activity) on the lock screen and in the notification shade
+- Home-screen widgets in several sizes
+- Quran reader: the Madinah mushaf, 14 translations and classical tafsir, recitation audio, bookmarks, and khatmah plans
+- Duas (Hisnul Muslim), tasbih counter, fasting tracker, prayer journal, and nearby mosques
+- Hijri calendar with Ramadan, Eid and Jumu'ah treatments
+- GPS location, place search, or manual coordinates
+- Several prayer-time sources, or fully on-device calculation
+- 13 languages, including Arabic and Urdu with right-to-left layout
+- Light, dark, and system themes
+
+Privacy and network use:
+- No analytics, no trackers, no advertising, no account
+- Prayer times can be calculated entirely on your device once a location is set
+- Optional online features, used only when you choose them: prayer-time providers (AlAdhan, or the Islamic Association in Sweden), place search via OpenStreetMap Nominatim, and downloading the Quran pages, translations, tafsir and recitation audio
+- Your coordinates are stored only on your device
 
 The app is open source under Apache-2.0.
