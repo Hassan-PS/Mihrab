@@ -2,10 +2,14 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.8.0] — 2026-07-31
 
 ### Changed
-- **The mushaf is now drawn as text, not as page pictures.** Each page renders from its own official KFGQPC page font — one glyph per word — instead of a 2600-pixel image of the page. It is sharp at any zoom (there is no resolution to run out of), a page on screen costs a fraction of the memory, and rotating is a text re-layout rather than a re-decode. The reader also opens straight away now: a page needs only its own ~300 KB font, so the 120 MB up-front download is no longer a gate — pages arrive as you read and the ones either side are fetched ahead of you. Long-pressing a word selects its ayah directly, so ayah targeting no longer depends on measured coordinates. The old page-image reader is still selectable for one release.
+- **The mushaf is drawn as text now, not as pictures of pages.** Every page renders from its own official KFGQPC page font — one glyph per word — instead of a 2600-pixel image. It is sharp at any zoom because there is no resolution to run out of, a page on screen costs a fraction of the memory, and rotating is a re-layout rather than a re-decode. The reader also opens straight away: a page needs only its own ~300 KB font, so the 120 MB up-front download is no longer a gate — pages arrive as you read, and the ones either side are fetched ahead of you. Page-for-page and line-for-line identical to the printed Madinah mushaf, as before. The old page-image reader stays selectable for one release.
+- **The reader is split by device.** Phones get one view that serves portrait and landscape without remounting between them, so rotating keeps your page and repaints immediately. iPads and Macs get a facing-page spread where the pair itself is the unit that turns.
+
+### Fixed
+- **Turning pages in landscape no longer skips one.** Landscape used a page strip whose offsets were measured from a moving anchor, so a turn could land a page off.
 
 ## [2.7.43] — 2026-07-30
 

@@ -1,0 +1,3 @@
+• Koranen ritas som text med Medinas officiella sidtypsnitt i stället för sidbilder: skarp vid all zoom, mindre minne och direkt rotation. Läsaren öppnas genast — varje sida hämtas medan du läser i stället för en stor nedladdning. Sida för sida och rad för rad som den tryckta mushafen.
+• Telefon och surfplatta får varsin läsare: en sida på telefonen, uppslag på iPad.
+• Bläddring i liggande läge hoppar inte över en sida.

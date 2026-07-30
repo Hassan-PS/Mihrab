@@ -1,0 +1,3 @@
+• The Quran is drawn as text now, using the official Madinah page fonts instead of page images. It stays sharp at any zoom, uses far less memory, and rotates instantly. The reader opens right away too — each page is fetched as you read instead of waiting on one large download. Page-for-page and line-for-line as the printed mushaf.
+• Phones and tablets each get a reader built for them: one page on a phone, facing pages on an iPad.
+• Turning pages in landscape no longer skips one.
