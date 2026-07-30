@@ -83,6 +83,7 @@ import {
 } from './mushafDownload';
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import MushafTextPageSurface from './MushafTextPageSurface';
+import MushafPhoneLandscape from './MushafPhoneLandscape';
 import {
   ensureScaledPage,
   getRenderCacheVersion,
@@ -957,6 +958,50 @@ export function MushafReader({
   // Single mode mounts the current page + one on each side. Dual mode mounts
   // the current spread plus the neighbouring spread on each side (six pages)
   // so a swipe reveals the next facing pair without a blank frame.
+  // A phone in landscape gets its own view (v2.8.0). Everything below this
+  // point — the zoom clamp, the windowed strip, the spread pairing — exists
+  // to make ONE component serve phones, tablets and desktop in both
+  // orientations, and that generality is what made landscape skip pages. The
+  // landscape view knows it is a phone and computes none of it.
+  if (phoneLandscape && textMode) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: pageBg, paddingTop: isFullscreen ? insets.top : 0 },
+        ]}>
+        <StatusBar hidden={isFullscreen} animated />
+        <MushafPhoneLandscape
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          nightMode={nightMode}
+          accentColor={palette.accentSolid}
+          pageBg={pageBg}
+          ornament={ornament}
+          selected={sheetVisible ? selected : null}
+          playing={playback.active && playback.playing ? playback.active : null}
+          onToggleFullscreen={onToggleFullscreen}
+          onAyahLongPress={(ref, page) => {
+            setSelected({ ...ref, page });
+            setSheetScrollAudio(false);
+            setSheetVisible(true);
+          }}
+        />
+        {selected ? (
+          <AyahActionSheet
+            visible={sheetVisible}
+            onClose={() => setSheetVisible(false)}
+            surah={selected.surah}
+            ayah={selected.ayah}
+            page={selected.page}
+            scrollToAudio={sheetScrollAudio}
+          />
+        ) : null}
+        {playback.active ? <MiniPlayer /> : null}
+      </View>
+    );
+  }
+
   return (
     <View
       style={[
