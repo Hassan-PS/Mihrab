@@ -64,25 +64,20 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPORT: ${{ steps.check.outputs.report }}
         run: |
-          BODY=$(cat <<'INTRO'
-The weekly reuse check found a change. Most changes are harmless — an F-Droid
-index mirror, a package-name dataset used in security research, or an
-unrelated app that happens to share the `com.prayer_times` package id have all
-turned up before. Copied source is not harmless.
-
-INTRO
-          )
-          BODY="$BODY
-$REPORT
-
----
-If it is a real copy: the name and icon are not licensed (see TRADEMARK.md),
-which makes a branding complaint to Google Play or the App Store the fastest
-route — no licence argument required."
+          # Built with printf, not a heredoc: a heredoc body has to start at
+          # column 0, which ends the YAML block scalar and makes the whole
+          # workflow unparseable.
+          {
+            printf 'The weekly reuse check found a change. Most changes are harmless — an\n'
+            printf 'F-Droid index mirror, a package-name dataset used in security research,\n'
+            printf 'or an unrelated app that happens to share the `com.prayer_times` package\n'
+            printf 'id have all turned up before. Copied source is not harmless.\n\n'
+            printf '%s\n\n' "$REPORT"
+            printf -- '---\n'
+            printf 'If it is a real copy: the name and icon are not licensed (see\n'
+            printf 'TRADEMARK.md), which makes a branding complaint to Google Play or the\n'
+            printf 'App Store the fastest route — no licence argument required.\n'
+          } > issue-body.md
           gh issue create \
             --title "Reuse check: something changed ($(date -u +%Y-%m-%d))" \
-            --body "$BODY" \
-            --label "reuse-check" 2>/dev/null \
-          || gh issue create \
-            --title "Reuse check: something changed ($(date -u +%Y-%m-%d))" \
-            --body "$BODY"
+            --body-file issue-body.md
