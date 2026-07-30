@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **The mushaf is now drawn as text, not as page pictures.** Each page renders from its own official KFGQPC page font — one glyph per word — instead of a 2600-pixel image of the page. It is sharp at any zoom (there is no resolution to run out of), a page on screen costs a fraction of the memory, and rotating is a text re-layout rather than a re-decode. The reader also opens straight away now: a page needs only its own ~300 KB font, so the 120 MB up-front download is no longer a gate — pages arrive as you read and the ones either side are fetched ahead of you. Long-pressing a word selects its ayah directly, so ayah targeting no longer depends on measured coordinates. The old page-image reader is still selectable for one release.
+
 ## [2.7.43] — 2026-07-30
 
 ### Fixed

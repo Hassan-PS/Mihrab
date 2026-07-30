@@ -64,6 +64,8 @@
 		FA11B0071AB0000000000001 /* Amiri-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000001 /* Amiri-Regular.ttf */; };
 		FA11B0071AB0000000000002 /* AmiriQuran.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000002 /* AmiriQuran.ttf */; };
 		FA11B0071AC0000000000002 /* RateApp.m in Sources */ = {isa = PBXBuildFile; fileRef = FA11B0071AC0000000000001 /* RateApp.m */; };
+		FA22B0071AD0000000000013 /* MushafFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000011 /* MushafFont.swift */; };
+		FA22B0071AD0000000000014 /* MushafFont.m in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000012 /* MushafFont.m */; };
 		FA22B0071AD0000000000003 /* MushafPageScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000001 /* MushafPageScaler.swift */; };
 		FA22B0071AD0000000000004 /* MushafPageScaler.m in Sources */ = {isa = PBXBuildFile; fileRef = FA22B0071AD0000000000002 /* MushafPageScaler.m */; };
 /* End PBXBuildFile section */
@@ -157,6 +159,8 @@
 		FA11B0071AA0000000000001 /* Amiri-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Amiri-Regular.ttf"; path = "PrayerApp/Resources/fonts/Amiri-Regular.ttf"; sourceTree = "<group>"; };
 		FA11B0071AA0000000000002 /* AmiriQuran.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = AmiriQuran.ttf; path = PrayerApp/Resources/fonts/AmiriQuran.ttf; sourceTree = "<group>"; };
 		FA11B0071AC0000000000001 /* RateApp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RateApp.m; path = PrayerApp/RateApp.m; sourceTree = "<group>"; };
+		FA22B0071AD0000000000011 /* MushafFont.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MushafFont.swift; path = PrayerApp/MushafFont.swift; sourceTree = "<group>"; };
+		FA22B0071AD0000000000012 /* MushafFont.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MushafFont.m; path = PrayerApp/MushafFont.m; sourceTree = "<group>"; };
 		FA22B0071AD0000000000001 /* MushafPageScaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MushafPageScaler.swift; path = PrayerApp/MushafPageScaler.swift; sourceTree = "<group>"; };
 		FA22B0071AD0000000000002 /* MushafPageScaler.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MushafPageScaler.m; path = PrayerApp/MushafPageScaler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -230,6 +234,8 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 				A62E49C8F92272DF77C323AA /* CompassModule.swift */,
+				FA22B0071AD0000000000011 /* MushafFont.swift */,
+				FA22B0071AD0000000000012 /* MushafFont.m */,
 				FA22B0071AD0000000000001 /* MushafPageScaler.swift */,
 				ADPF0000000000 /* AdhanPlayer.swift */,
 				ADPF0000000001 /* AdhanPlayer.m */,
@@ -525,6 +531,8 @@
 				F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */,
 				F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */,
 				DF5D2FB480E49268AC15485E /* CompassModule.swift in Sources */,
+				FA22B0071AD0000000000013 /* MushafFont.swift in Sources */,
+				FA22B0071AD0000000000014 /* MushafFont.m in Sources */,
 				FA22B0071AD0000000000003 /* MushafPageScaler.swift in Sources */,
 				ADPB0000000000 /* AdhanPlayer.swift in Sources */,
 				ADPB0000000001 /* AdhanPlayer.m in Sources */,
