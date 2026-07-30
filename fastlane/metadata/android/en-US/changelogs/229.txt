@@ -1,0 +1,2 @@
+• Mushaf lines now run to a single, consistent width, so the page has the straight margin the print does instead of a ragged one. The fit is small enough that the letterforms look unchanged; a line that would have to stretch further is left as it is.
+• The opening pages are bigger. Pages 1 and 2 hold only seven or eight lines in the space a normal page gives fifteen, so they now use a wider block and larger text.

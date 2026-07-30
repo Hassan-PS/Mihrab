@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.1] — 2026-07-31
+
+### Changed
+- **Mushaf lines run edge to edge again.** Each line was drawn at its natural width, so the page ended with a ragged margin where the print has a straight one. Lines are now fitted to a single, consistent measure — by a margin small enough that the letterforms are unchanged to the eye. A line that would have to stretch further than that is left as it is rather than distorted, and the last line of a surah still stops where the text stops.
+- **The opening pages are bigger.** Pages 1 and 2 carry only seven or eight lines in the space a normal page gives fifteen, so they now use a wider block and the text is correspondingly larger.
+
 ## [2.8.0] — 2026-07-31
 
 ### Changed
