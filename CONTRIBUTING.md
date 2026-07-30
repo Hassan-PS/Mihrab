@@ -85,6 +85,15 @@ These are **non-negotiable**. The `reviewer` subagent in `.claude/agents/reviewe
 - **Security issues** — read [SECURITY.md](SECURITY.md) first; do not file public issues.
 - **Anything else** — open a GitHub issue with the device + OS version + build number (`com.prayer_times` → About → Build).
 
+## Licensing of contributions
+
+By opening a pull request you agree that your contribution is licensed under
+**AGPL-3.0-or-later**, the same terms as the rest of the project. No copyright
+assignment is asked for — you keep ownership of what you write.
+
+The project name and icon are handled separately; see
+[TRADEMARK.md](TRADEMARK.md).
+
 ## When in doubt
 
 Choose the calmer, quieter option. The app shouldn't shout.

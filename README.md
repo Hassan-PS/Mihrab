@@ -135,4 +135,14 @@ Religious content is sourced and attributed (also listed in-app under Settings �
 
 ## License
 
-[AGPL-3.0-or-later](LICENSE)
+[AGPL-3.0-or-later](LICENSE) — use it, study it, change it, share it. If you
+distribute a modified version, or run one as a network service, you must
+publish your source under the same terms.
+
+Releases up to and including 2.7.43 were published under Apache-2.0; that
+grant is irrevocable and still covers those versions.
+
+The **name "Mihrab" and the app icon are not covered by the licence** —
+no free-software licence grants trademark rights. Unmodified builds may
+carry the name freely (F-Droid, Play, the App Store and any mirror);
+a fork needs its own name and icon. See [TRADEMARK.md](TRADEMARK.md).
