@@ -45,6 +45,13 @@ import { FONTS } from '../theme/typography';
  */
 export const MUSHAF_LINE_HEIGHT_EM = 1.7183;
 
+/**
+ * Widest gap allowed between words, in ems. Beyond this a line stops being
+ * justified and is centred instead — the difference between a line that fills
+ * its measure and a line that has been pulled apart to pretend it does.
+ */
+export const MAX_WORD_GAP_EM = 0.3;
+
 /** Ratio of page height to text width, used to size the page container. */
 export function mushafPageAspect(page: number, lineCount: number): number {
   // Framed plates (1–2) hold fewer, larger lines but the same proportions.
@@ -152,6 +159,7 @@ export default function MushafTextPage({
         <LineView
           key={index}
           line={line}
+          measure={layout.measure}
           width={width}
           fontSize={fontSize}
           lineHeight={lineHeight}
@@ -170,6 +178,8 @@ export default function MushafTextPage({
 
 type LineViewProps = {
   line: MushafLine;
+  /** The page's widest line, in ems — what the font size was derived from. */
+  measure: number;
   width: number;
   fontSize: number;
   lineHeight: number;
@@ -184,6 +194,7 @@ type LineViewProps = {
 
 const LineView = React.memo(function LineView({
   line,
+  measure,
   width,
   fontSize,
   lineHeight,
@@ -248,7 +259,17 @@ const LineView = React.memo(function LineView({
   // Ayah line. `row-reverse` places the first word on the right without
   // depending on the app's RTL flag, which follows the UI language, not the
   // script — the mushaf is right-to-left in every locale.
-  const stretched = !line.centered;
+  //
+  // Spacing: a full line falls ~2% short of the measure, and spreading that
+  // across its gaps reproduces the print exactly. A SHORT line must not be
+  // treated the same way — page 1's basmalah is 6.7 em on a 12 em plate, and
+  // stretching it to fit pulls the words halfway across the page. So the gap
+  // is capped: lines close to the measure justify, lines well short of it are
+  // centred at a normal word space.
+  const gaps = Math.max(1, line.words.length - 1);
+  const slackEm = (measure - line.natural) / gaps;
+  const justify = !line.centered && slackEm <= MAX_WORD_GAP_EM;
+  const wordGap = justify ? 0 : fontSize * MAX_WORD_GAP_EM;
   return (
     <View
       style={[
@@ -256,7 +277,8 @@ const LineView = React.memo(function LineView({
         {
           width,
           height: lineHeight,
-          justifyContent: stretched ? 'space-between' : 'center',
+          justifyContent: justify ? 'space-between' : 'center',
+          columnGap: wordGap,
         },
       ]}
     >
@@ -278,7 +300,6 @@ const LineView = React.memo(function LineView({
             hitSlop={{ top: lineHeight * 0.12, bottom: lineHeight * 0.12 }}
             style={[
               isSelected && { backgroundColor: colors.selection },
-              !line.centered && styles.wordFlexible,
               isActive && { backgroundColor: colors.selection },
             ]}
           >
