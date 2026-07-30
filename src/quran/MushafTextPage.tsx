@@ -58,6 +58,13 @@ export const MUSHAF_LINE_HEIGHT_EM = 1.7183;
  */
 export const WORD_SPACE_EM = 0.25;
 
+/**
+ * Multiplier applied to the word space when SIZING a page (not when drawing).
+ * The fallback space is measured by the platform, not by us, so the box has
+ * to assume the wider case.
+ */
+const SPACE_SAFETY = 1.35;
+
 /** Ratio of page height to text width, used to size the page container. */
 export function mushafPageAspect(page: number, lineCount: number): number {
   // Framed plates (1–2) hold fewer, larger lines but the same proportions.
@@ -142,8 +149,16 @@ export default function MushafTextPage({
     let widest = layout.measure;
     for (const line of layout.lines) {
       if (line.kind !== 'ayah') continue;
+      // Size against a GENEROUS space, not the nominal one. The page fonts
+      // have no space glyph, so the real width of that character comes from
+      // whichever system font the platform falls back to — and it differs
+      // between iOS and Android. Under-estimating it makes the drawn line
+      // wider than its box, and an RTL run that overflows gets clipped at
+      // the right edge, where the line starts. Over-estimating costs a hair
+      // of font size and clips nothing.
       const drawn =
-        line.natural + WORD_SPACE_EM * Math.max(0, line.words.length - 1);
+        line.natural +
+        WORD_SPACE_EM * SPACE_SAFETY * Math.max(0, line.words.length - 1);
       if (drawn > widest) widest = drawn;
     }
     return width / widest;
