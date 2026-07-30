@@ -65,6 +65,20 @@ export const WORD_SPACE_EM = 0.25;
  */
 const SPACE_SAFETY = 1.35;
 
+/**
+ * How far a line may be scaled horizontally to reach the measure.
+ *
+ * A full line comes out within a few percent of the measure, and leaving that
+ * few percent unclosed is what makes a page look ragged and unfinished — the
+ * print has a straight left margin. We cannot justify by widening the spaces
+ * (the line is one text run, which is what keeps the interlocking glyphs
+ * correct), so the run is scaled instead. At these magnitudes the distortion
+ * is not perceptible; past them it would be, so a line that would need more
+ * is left alone rather than stretched into something that is not the mushaf.
+ */
+const LINE_SCALE_MIN = 0.97;
+const LINE_SCALE_MAX = 1.08;
+
 /** Ratio of page height to text width, used to size the page container. */
 export function mushafPageAspect(page: number, lineCount: number): number {
   // Framed plates (1–2) hold fewer, larger lines but the same proportions.
@@ -297,6 +311,7 @@ const LineView = React.memo(function LineView({
   // it, because the gap moves the neighbour out of the interlock the font was
   // drawn for. Handing the whole line to the font as a single run is the only
   // way it lands right, so word taps are resolved from the advances instead.
+  const [drawnWidth, setDrawnWidth] = React.useState(0);
   const space = WORD_SPACE_EM * fontSize;
   const lineWidth =
     line.natural * fontSize + space * Math.max(0, line.words.length - 1);
@@ -323,6 +338,14 @@ const LineView = React.memo(function LineView({
     else parts.push({ text: parts.length ? ` ${token}` : token, on });
   }
 
+  // Justify by scaling the measured run to the page measure. Only lines that
+  // are meant to fill the width — a line that closes a surah stops where the
+  // text stops, as in the print.
+  const scaleX =
+    line.centered || drawnWidth <= 0
+      ? 1
+      : Math.min(LINE_SCALE_MAX, Math.max(LINE_SCALE_MIN, width / drawnWidth));
+
   return (
     <View style={[styles.line, { width, height: lineHeight }]}>
       <Pressable
@@ -340,6 +363,10 @@ const LineView = React.memo(function LineView({
         <Text
           allowFontScaling={false}
           numberOfLines={1}
+          onTextLayout={e => {
+            const w = e.nativeEvent.lines[0]?.width ?? 0;
+            if (w > 0 && Math.abs(w - drawnWidth) > 0.5) setDrawnWidth(w);
+          }}
           // Clip, never ellipsize. The measured advance total and what the
           // platform actually lays out differ by a hair, and with a fixed
           // width that hair turns every line into "…".
@@ -351,6 +378,7 @@ const LineView = React.memo(function LineView({
               fontSize,
               lineHeight,
               color: colors.text,
+              transform: [{ scaleX }],
               // Slack over the measured width so a hair of rounding cannot
               // trigger a clip — but ABSOLUTE, not a percentage. 6% of a
               // full-measure line is wide enough to push the ink past the

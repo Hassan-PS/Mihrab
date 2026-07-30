@@ -77,7 +77,10 @@ export default function MushafTextPageSurface({
   // Framed pages need more room: the text block sits inside a drawn double
   // rule, so its inset has to clear the rule AND its padding, not just the
   // screen edge.
-  const inset = framed ? width * 0.13 : width * 0.035;
+  // The plate pages hold 7-8 lines in the space a normal page gives 15, so
+  // they have vertical room to spare. Spending some of it on a wider text
+  // block makes the opening pages read at a size that matches their weight.
+  const inset = framed ? width * 0.08 : width * 0.035;
   const textWidth = width - inset * 2;
 
   if (!layout || !family) {
