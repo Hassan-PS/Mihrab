@@ -74,7 +74,10 @@ export default function MushafTextPageSurface({
   // A justified line spans the measure exactly, so without an inset the
   // outermost glyph would sit hard against the edge of the screen. The print
   // keeps a margin; 3% of the block reads the same at any size.
-  const inset = framed ? width * 0.1 : width * 0.03;
+  // Framed pages need more room: the text block sits inside a drawn double
+  // rule, so its inset has to clear the rule AND its padding, not just the
+  // screen edge.
+  const inset = framed ? width * 0.13 : width * 0.035;
   const textWidth = width - inset * 2;
 
   if (!layout || !family) {

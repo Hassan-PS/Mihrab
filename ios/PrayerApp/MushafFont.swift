@@ -1,5 +1,8 @@
 import CoreText
 import Foundation
+// RCTPromiseResolveBlock/RejectBlock live here — without it the module
+// compiles nowhere and the app silently keeps its previous binary.
+import React
 import UIKit
 
 /**

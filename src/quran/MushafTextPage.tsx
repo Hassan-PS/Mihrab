@@ -136,7 +136,18 @@ export default function MushafTextPage({
 
   const fontSize = useMemo(() => {
     if (!layout || layout.measure <= 0) return 0;
-    return width / layout.measure;
+    // `measure` is the sum of glyph ADVANCES, but a line is drawn with a word
+    // space between every pair of words. Sizing from the advances alone makes
+    // every full line render ~10-15% wider than the box it was sized for, so
+    // the text runs off both edges. Size from what is actually drawn.
+    let widest = layout.measure;
+    for (const line of layout.lines) {
+      if (line.kind !== 'ayah') continue;
+      const drawn =
+        line.natural + WORD_SPACE_EM * Math.max(0, line.words.length - 1);
+      if (drawn > widest) widest = drawn;
+    }
+    return width / widest;
   }, [layout, width]);
 
   const handlePress = useCallback(
@@ -326,8 +337,11 @@ const LineView = React.memo(function LineView({
               fontSize,
               lineHeight,
               color: colors.text,
-              // A little slack over the measured width for the same reason.
-              width: lineWidth * 1.06,
+              // Slack over the measured width so a hair of rounding cannot
+              // trigger a clip — but ABSOLUTE, not a percentage. 6% of a
+              // full-measure line is wide enough to push the ink past the
+              // page block and across the frame rule.
+              width: lineWidth + fontSize * 0.08,
             },
           ]}
         >
