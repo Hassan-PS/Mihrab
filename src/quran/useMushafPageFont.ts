@@ -44,10 +44,23 @@ export function useMushafPageFont(
     }
 
     let alive = true;
+    // Exactly ONE pin per mount, released by exactly one unpin in the
+    // cleanup. Both branches below can run for the same mount (the font is
+    // already resident AND the async path completes), and pinning twice
+    // leaked a pin per revisit — after ~FONT_SLOT_COUNT visits every slot
+    // was permanently pinned, `pickSlot()` returned null, and pages stopped
+    // rendering until the app was restarted.
+    let pinned = false;
+    const pinOnce = () => {
+      if (pinned) return;
+      pinned = true;
+      pinPageFont(page);
+    };
+
     const ready = loadedPageFont(page);
     if (ready) {
       setState({ family: ready, failed: false });
-      pinPageFont(page);
+      pinOnce();
     } else {
       setState({ family: null, failed: false });
     }
@@ -65,7 +78,7 @@ export function useMushafPageFont(
         setState({ family: null, failed: true });
         return;
       }
-      pinPageFont(page);
+      pinOnce();
       setState({ family, failed: false });
     })();
 
@@ -73,7 +86,7 @@ export function useMushafPageFont(
 
     return () => {
       alive = false;
-      unpinPageFont(page);
+      if (pinned) unpinPageFont(page);
     };
   }, [page, enabled, prefetchRadius]);
 

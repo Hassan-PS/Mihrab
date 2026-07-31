@@ -37,6 +37,7 @@ import {
   useCompanionChoice,
 } from '../quran/CompanionTextControls';
 import { MushafReader } from '../quran/MushafReader';
+import { useOverlayDismissGuard } from '../quran/mushafReaderCore';
 import { findPageForAyah } from '../quran/pages';
 import {
   findBookmark,
@@ -140,6 +141,12 @@ export function QuranSurahScreen() {
   // ── Mode toggle + header controls ───────────────────────────────────
   const isMushaf = settings.quranReadingMode === 'mushaf';
   const toggleMushaf = useCallback(() => {
+    // The toggle swaps the ENTIRE subtree (mushaf reader ⇄ translation
+    // list), which would take any open <Modal> down with it while it is
+    // still presented — an orphaned activity-window dialog that eats every
+    // touch app-wide. Close the sheets first, then switch.
+    setSheetVisible(false);
+    setEditionPickerVisible(false);
     updateSettings({
       quranReadingMode: isMushaf ? 'withTranslation' : 'mushaf',
     });
@@ -147,16 +154,61 @@ export function QuranSurahScreen() {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  /**
+   * Header title for mushaf mode — the surah the visible PAGE starts with,
+   * which drifts away from the route's surah as the reader is paged.
+   *
+   * Held as state (rather than the reader calling `navigation.setOptions`
+   * directly) so this screen stays the single writer of the title. With
+   * two writers the header effect below — which re-runs on fullscreen
+   * toggles, palette and night-mode changes — kept clobbering the reader's
+   * value with the route's static `surah.romanized`.
+   */
+  const [readerTitle, setReaderTitle] = useState<string | null>(null);
+  const handleReaderTitleChange = useCallback((title: string) => {
+    setReaderTitle(title);
+  }, []);
+  // A different surah means the reader's page title no longer applies.
+  useEffect(() => {
+    setReaderTitle(null);
+  }, [surahNumber]);
+
   useEffect(() => {
     if (!surah) return;
+    /**
+     * Screen container inset (v2.8.2). The navigator pads every screen's
+     * content by the bottom safe area in the THEME background colour
+     * (RootNavigator `contentStyle`). Under the mushaf, whose page is white
+     * (or near-black at night), that pad reads as a strip of app background
+     * along the screen edge where the page should reach it. The reader
+     * paints its own page colour edge to edge and applies the safe-area
+     * insets — cutout included — itself, so here it just gets the window.
+     *
+     * Only the FONT-rendered readers do that. The legacy image reader has no
+     * inset handling of its own, so it keeps the navigator's padding.
+     */
+    const ownsItsInsets =
+      isMushaf && quran.prefs.mushafRenderer !== 'image';
+    const contentStyle = ownsItsInsets
+      ? {
+          backgroundColor: quran.prefs.mushafNightMode ? '#101010' : '#ffffff',
+        }
+      : { paddingBottom: insets.bottom, backgroundColor: palette.bg };
     if (isFullscreen) {
-      navigation.setOptions({ headerShown: false, orientation: 'all' });
+      navigation.setOptions({
+        headerShown: false,
+        orientation: 'all',
+        contentStyle,
+      });
       return;
     }
     navigation.setOptions({
       headerShown: true,
       orientation: 'portrait',
-      title: surah.romanized,
+      contentStyle,
+      // Mushaf mode: the reader's page-derived surah wins once it has
+      // reported one. Translation mode always shows the route's surah.
+      title: (isMushaf && readerTitle) || surah.romanized,
       headerRight: () => (
         <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
           <Pressable
@@ -229,13 +281,38 @@ export function QuranSurahScreen() {
       ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, surah, isMushaf, isFullscreen, palette.accentSolid, t, toggleMushaf]);
+  }, [
+    navigation,
+    surah,
+    isMushaf,
+    isFullscreen,
+    readerTitle,
+    palette.accentSolid,
+    palette.bg,
+    insets.bottom,
+    quran.prefs.mushafNightMode,
+    quran.prefs.mushafRenderer,
+    t,
+    toggleMushaf,
+  ]);
 
   useEffect(() => {
     return () => {
       navigation.setOptions({ headerShown: true, orientation: 'portrait' });
     };
   }, [navigation]);
+
+  // Translation mode owns its own two <Modal>s (ayah sheet + companion-text
+  // sheet). Same rule as the reader's: they must be dismissed before the
+  // screen is popped, never with it — see `useOverlayDismissGuard`.
+  const closeSheets = useCallback(() => {
+    setSheetVisible(false);
+    setEditionPickerVisible(false);
+  }, []);
+  useOverlayDismissGuard(
+    !isMushaf && (sheetVisible || editionPickerVisible),
+    closeSheets,
+  );
 
   // ── Last-read for translation mode (QR-10) ──────────────────────────
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 });
@@ -288,7 +365,7 @@ export function QuranSurahScreen() {
         isFullscreen={isFullscreen}
         onToggleFullscreen={() => setIsFullscreen(f => !f)}
         audioSheetSignal={audioSheetSignal}
-        onTitleChange={title => navigation.setOptions({ title })}
+        onTitleChange={handleReaderTitleChange}
       />
     );
   }

@@ -35,7 +35,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { useAppPalette } from '../hooks/useAppPalette';
 import MushafTextPageSurface from './MushafTextPageSurface';
 import { MUSHAF_TOTAL_PAGES } from './mushafImages';
-import { getPageLayout } from './mushafLayout';
+import { getPageLayout, pageMeasureEm } from './mushafLayout';
 import { MUSHAF_LINE_HEIGHT_EM } from './MushafTextPage';
 import {
   MushafJumpModal,
@@ -87,6 +87,25 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   const [listH, setListH] = useState(0);
 
   const isLandscape = width > height;
+  /**
+   * Display cutout / rounded corners (v2.8.2). `insets.left` and
+   * `insets.right` are PHYSICAL edges — unlike padding they never flip with
+   * the UI language — and the page must stay centred, so the reader reserves
+   * the LARGER of the two on BOTH sides. The block only narrows; it never
+   * shifts off centre, and no word moves line (docs/mushaf-fidelity-rules.md).
+   *
+   * The inset lives on the reader container, which is painted `pageBg`, so
+   * the page colour still bleeds to the physical screen edge — an inset on
+   * the navigator's theme-coloured content view is what left a strip of app
+   * background beside the page.
+   */
+  const sideInset = Math.max(insets.left, insets.right);
+  /**
+   * One pager item = the list viewport. Everything that pages by a frame —
+   * `getItemLayout`, the momentum-end index, the page column — measures in
+   * this, never the raw window width, or the snap drifts off the page.
+   */
+  const pageWidth = width - sideInset * 2;
   // iOS floats a translucent nav header over the content; keep the page
   // chrome below it (0 on Android's opaque header, 0 in fullscreen).
   const navPad = !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
@@ -99,11 +118,11 @@ export function MushafPhoneReader(props: MushafReaderProps) {
 
   const getItemLayout = useCallback(
     (_: unknown, index: number) => ({
-      length: width,
-      offset: width * index,
+      length: pageWidth,
+      offset: pageWidth * index,
       index,
     }),
-    [width],
+    [pageWidth],
   );
 
   // Follow an outside change (jump-to-page, khatmah, recitation follow).
@@ -125,11 +144,11 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       index: settled.current - 1,
       animated: false,
     });
-  }, [width]);
+  }, [pageWidth]);
 
   const onMomentumEnd = useCallback(
     (e: { nativeEvent: { contentOffset: { x: number } } }) => {
-      const index = Math.round(e.nativeEvent.contentOffset.x / width);
+      const index = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
       const page = Math.min(MUSHAF_TOTAL_PAGES, Math.max(1, index + 1));
       if (page === settled.current) return;
       const prev = settled.current;
@@ -137,7 +156,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       core.commitPageTurn(page, prev);
       setCurrentPage(page);
     },
-    [core, setCurrentPage, width],
+    [core, pageWidth, setCurrentPage],
   );
 
   const renderItem = useCallback(
@@ -152,14 +171,17 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       const chromeH = navPad + HEADER_RESERVE + FOOTER_RESERVE;
       const viewportH = (listH || height) - chromeH;
       const textWidth = isLandscape
-        ? Math.min(width - H_PADDING * 2, height * LANDSCAPE_ZOOM)
-        : width - H_PADDING * 2;
+        ? Math.min(pageWidth - H_PADDING * 2, height * LANDSCAPE_ZOOM)
+        : pageWidth - H_PADDING * 2;
       let pageBoxH: number;
       if (isLandscape) {
         // Height follows the text: font size is the width over the page's
         // measure, and a line is a fixed multiple of that. The column
-        // scrolls whatever overflows.
-        const fontSize = layout ? textWidth / layout.measure : 0;
+        // scrolls whatever overflows. The measure has to be the DRAWN one
+        // — `layout.measure` is advances only, and sizing against it makes
+        // the column ~14% taller than the text that lands in it, leaving a
+        // dead band under the last line.
+        const fontSize = layout ? textWidth / pageMeasureEm(layout) : 0;
         pageBoxH = Math.max(
           viewportH,
           fontSize * MUSHAF_LINE_HEIGHT_EM * lineCount,
@@ -169,7 +191,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       }
 
       return (
-        <View style={[styles.item, { width, backgroundColor: pageBg }]}>
+        <View style={[styles.item, { width: pageWidth, backgroundColor: pageBg }]}>
           <View style={{ paddingTop: navPad }}>
             <MushafPageHeader
               page={page}
@@ -185,7 +207,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
             nestedScrollEnabled>
             <Pressable
               onPress={onToggleFullscreen}
-              style={[styles.pageWrap, { width }]}>
+              style={[styles.pageWrap, { width: pageWidth }]}>
               <MushafTextPageSurface
                 page={page}
                 width={textWidth}
@@ -227,11 +249,11 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       onToggleFullscreen,
       ornament,
       pageBg,
+      pageWidth,
       palette.accentSolid,
       playback.active,
       playback.playing,
       playerReserve,
-      width,
     ],
   );
 
@@ -239,7 +261,15 @@ export function MushafPhoneReader(props: MushafReaderProps) {
     <View
       style={[
         styles.container,
-        { backgroundColor: pageBg, paddingTop: isFullscreen ? insets.top : 0 },
+        {
+          backgroundColor: pageBg,
+          paddingTop: isFullscreen ? insets.top : 0,
+          // Cutout on both sides (symmetric — see `sideInset`) and the
+          // system navigation bar below. The container is the page colour,
+          // so this clears the obstruction without opening a seam.
+          paddingHorizontal: sideInset,
+          paddingBottom: insets.bottom,
+        },
       ]}>
       <StatusBar hidden={isFullscreen} animated />
       <View

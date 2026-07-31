@@ -9,7 +9,7 @@
  * else stays quiet (design principle 4). A hairline progress track along
  * the top edge follows the current ayah.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useProgress } from 'react-native-track-player';
@@ -34,7 +34,24 @@ export function MiniPlayer() {
   const { position, duration } = useProgress(500);
   const [pickerVisible, setPickerVisible] = useState(false);
 
-  if (!active) return null;
+  // Stopping playback unmounts this card. The reciter picker is an RN
+  // <Modal> — an activity-window dialog, not an in-tree view — so it must
+  // be hidden BEFORE it is unmounted, or the dismissed-but-never-dropped
+  // window keeps swallowing every touch in the app.
+  useEffect(() => {
+    if (!active) setPickerVisible(false);
+  }, [active]);
+
+  if (!active) {
+    // One last render with the sheet explicitly hidden, so RN dismisses it
+    // the ordinary way; the effect above then drops it on the next commit.
+    return pickerVisible ? (
+      <ReciterPickerSheet
+        visible={false}
+        onClose={() => setPickerVisible(false)}
+      />
+    ) : null;
+  }
 
   const meta = findSurah(active.surah);
   const reciter = findReciter(reciterId);

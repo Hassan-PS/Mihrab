@@ -21,6 +21,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import {
   activateKeepAwake,
@@ -65,6 +66,55 @@ export type AyahSelection = AyahRef & { page: number };
 export function pageStartAyah(page: number): { surah: number; ayah: number } {
   const meta = MUSHAF_PAGES.find(p => p.page === page);
   return meta ? { ...meta.start } : { surah: 1, ayah: 1 };
+}
+
+/**
+ * Never let a presented `<Modal>` be torn down by navigation.
+ *
+ * An RN `<Modal>` is NOT part of the screen's view tree: it is an Android
+ * `Dialog` / an iOS presented view controller attached to the ACTIVITY
+ * WINDOW, which sits above the whole navigator. When React unmounts the
+ * modal host while `visible` is still true, the host view is dropped
+ * without ever transitioning to hidden — and the orphaned window stays on
+ * top of the app, swallowing every touch on every screen, two levels up
+ * the stack included. Only an app restart clears it. (`Modal.js` renders
+ * `null` the moment `visible` goes false, so a hide-then-unmount is safe;
+ * an unmount-while-visible is not.)
+ *
+ * So while the reader has an overlay open, a pop is intercepted, the
+ * overlay is closed, and the SAME navigation action is re-dispatched once
+ * the overlay has actually gone — by which time the modal was dismissed
+ * the ordinary way. `usePreventRemove` (not a bare `beforeRemove`
+ * listener) because native-stack also has to block the iOS swipe-back
+ * gesture and the Android system back, which it does via
+ * `preventNativeDismiss` / `nativeBackButtonDismissalEnabled`.
+ */
+export function useOverlayDismissGuard(
+  overlayOpen: boolean,
+  closeOverlays: () => void,
+): void {
+  const navigation = useNavigation();
+  const closeRef = useRef(closeOverlays);
+  closeRef.current = closeOverlays;
+  const pendingRef = useRef<Parameters<typeof navigation.dispatch>[0] | null>(
+    null,
+  );
+
+  usePreventRemove(overlayOpen, ({ data }) => {
+    pendingRef.current = data.action;
+    closeRef.current();
+  });
+
+  useEffect(() => {
+    if (overlayOpen) return;
+    const action = pendingRef.current;
+    if (!action) return;
+    pendingRef.current = null;
+    // One turn of the loop so the modal's `visible={false}` commit reaches
+    // native (and its dismissal starts) before the screen goes away.
+    const timer = setTimeout(() => navigation.dispatch(action), 0);
+    return () => clearTimeout(timer);
+  }, [overlayOpen, navigation]);
 }
 
 export type MushafReaderCore = {
@@ -214,6 +264,16 @@ export function useMushafReaderCore({
     },
     [commitPageTurn],
   );
+
+  // Leaving the reader must never tear down a presented overlay — see
+  // `useOverlayDismissGuard`. The ayah sheet is an RN <Modal>; the jump
+  // card is in-tree but is closed here too so "back" always means "close
+  // what is open first", on both platforms.
+  const closeOverlays = useCallback(() => {
+    setSheetVisible(false);
+    setJumpVisible(false);
+  }, []);
+  useOverlayDismissGuard(sheetVisible || jumpVisible, closeOverlays);
 
   return {
     quran,

@@ -100,6 +100,7 @@ import {
   useQuranState,
 } from './quranState';
 import { usePlaybackStatus } from './audio/playback';
+import { useOverlayDismissGuard } from './mushafReaderCore';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageOverlay } from './mushaf/MushafPageOverlay';
 import { MiniPlayer } from './audio/MiniPlayer';
@@ -370,15 +371,26 @@ export function MushafReader({
   };
 
   // Header title follows the visible page's starting surah.
+  //
+  // ONLY for the legacy image reader. In text mode this component renders
+  // nothing itself — it returns <MushafPhoneReader>/<MushafSpreadReader>
+  // below, and those own the page state via `useMushafReaderCore`, which
+  // runs the identical effect. `currentPage` here is the image reader's
+  // own state and is frozen at `initialPage` for the whole text-mode
+  // mount, so leaving this effect live made it a SECOND writer to the
+  // header title that always reported the page the reader opened on.
+  // Child effects flush before parent effects, so on every page turn the
+  // split reader wrote the correct surah and this one immediately
+  // overwrote it with the stale one (header stuck on the opening surah).
   useEffect(() => {
-    if (!onTitleChange) return;
+    if (textMode || !onTitleChange) return;
     const visiblePage = MUSHAF_PAGES.find(p => p.page === currentPage);
     if (!visiblePage) return;
     const surah = MUSHAF_SURAHS.find(
       s => s.number === visiblePage.start.surah,
     );
     if (surah) onTitleChange(surah.englishName);
-  }, [currentPage, onTitleChange]);
+  }, [currentPage, onTitleChange, textMode]);
 
   // ── Last-read + khatmah on page turns (QR-10/21) ────────────────────
   const commitPage = useCallback(
@@ -445,6 +457,16 @@ export function MushafReader({
   // ── Jump-to-page (QR-11) ────────────────────────────────────────────
   const [jumpVisible, setJumpVisible] = useState(false);
   const [jumpText, setJumpText] = useState('');
+
+  // Same guarantee as the split readers: the ayah sheet is an RN <Modal>
+  // living in the activity window, so it must be dismissed BEFORE the
+  // screen is popped, never together with it (see useOverlayDismissGuard).
+  const closeOverlays = useCallback(() => {
+    setSheetVisible(false);
+    setJumpVisible(false);
+  }, []);
+  useOverlayDismissGuard(sheetVisible || jumpVisible, closeOverlays);
+
   const jumpToPage = (page: number) => {
     const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
     setCurrentPage(clamped);

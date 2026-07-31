@@ -72,6 +72,18 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     setCurrentPage,
   } = core;
 
+  /**
+   * Display cutout / rounded corners (v2.8.2). `insets.left`/`insets.right`
+   * are PHYSICAL edges — they never flip with the UI language — and a spread
+   * must stay centred, so the reader reserves the LARGER of the two on BOTH
+   * sides: the pages only narrow, they never shift off centre
+   * (docs/mushaf-fidelity-rules.md). The inset sits on the container, which
+   * is painted `pageBg`, so the page colour still reaches the screen edge.
+   */
+  const sideInset = Math.max(insets.left, insets.right);
+  /** One pager item = the list viewport, after the cutout inset. */
+  const pageWidth = width - sideInset * 2;
+
   // The one internal branch: portrait window → single centred page per
   // item; landscape → a facing pair per item.
   const paired = width > height;
@@ -104,11 +116,11 @@ export function MushafSpreadReader(props: MushafReaderProps) {
 
   const getItemLayout = useCallback(
     (_: unknown, index: number) => ({
-      length: width,
-      offset: width * index,
+      length: pageWidth,
+      offset: pageWidth * index,
       index,
     }),
-    [width],
+    [pageWidth],
   );
 
   // Follow an outside change (jump, khatmah, recitation follow). Within a
@@ -129,13 +141,16 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     const idx = indexForPage(settledPage.current);
     settledIndex.current = idx;
     listRef.current?.scrollToIndex({ index: idx, animated: false });
-  }, [width, indexForPage]);
+  }, [pageWidth, indexForPage]);
 
   const onMomentumEnd = useCallback(
     (e: { nativeEvent: { contentOffset: { x: number } } }) => {
       const idx = Math.max(
         0,
-        Math.min(itemCount - 1, Math.round(e.nativeEvent.contentOffset.x / width)),
+        Math.min(
+          itemCount - 1,
+          Math.round(e.nativeEvent.contentOffset.x / pageWidth),
+        ),
       );
       if (idx === settledIndex.current) return;
       const prevPage = settledPage.current;
@@ -145,7 +160,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       core.commitPageTurn(page, prevPage);
       setCurrentPage(page);
     },
-    [core, itemCount, pageForIndex, setCurrentPage, width],
+    [core, itemCount, pageForIndex, pageWidth, setCurrentPage],
   );
 
   /** Chevron/pointer page turn. `dir` is READING direction: +1 = next
@@ -255,8 +270,8 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       if (!paired) {
         // Portrait: one centred page fills the item.
         return (
-          <View style={[styles.item, { width, backgroundColor: pageBg }]}>
-            {renderColumn(index + 1, width, 'both')}
+          <View style={[styles.item, { width: pageWidth, backgroundColor: pageBg }]}>
+            {renderColumn(index + 1, pageWidth, 'both')}
           </View>
         );
       }
@@ -266,13 +281,18 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       // Chrome splits across the spread's outer corners — label at the
       // outer right, night pill at the outer left.
       return (
-        <View style={[styles.item, styles.spreadRow, { width, backgroundColor: pageBg }]}>
-          {renderColumn(spread.left, width / 2, 'pill')}
-          {renderColumn(spread.right, width / 2, 'label')}
+        <View
+          style={[
+            styles.item,
+            styles.spreadRow,
+            { width: pageWidth, backgroundColor: pageBg },
+          ]}>
+          {renderColumn(spread.left, pageWidth / 2, 'pill')}
+          {renderColumn(spread.right, pageWidth / 2, 'label')}
         </View>
       );
     },
-    [pageBg, paired, renderColumn, width],
+    [pageBg, pageWidth, paired, renderColumn],
   );
 
   // Pointer environments (iPad trackpad, Catalyst): wheel scroll doesn't
@@ -285,7 +305,15 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     <View
       style={[
         styles.container,
-        { backgroundColor: pageBg, paddingTop: isFullscreen ? insets.top : 0 },
+        {
+          backgroundColor: pageBg,
+          paddingTop: isFullscreen ? insets.top : 0,
+          // Cutout on both sides (symmetric — see `sideInset`) and the
+          // system navigation bar below. The container is the page colour,
+          // so this clears the obstruction without opening a seam.
+          paddingHorizontal: sideInset,
+          paddingBottom: insets.bottom,
+        },
       ]}>
       <StatusBar hidden={isFullscreen} animated />
       <View

@@ -118,6 +118,15 @@ export function AyahActionSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, surah, ayah]);
 
+  // The share card is a <Modal> NESTED inside this sheet's <Modal>. If the
+  // sheet is hidden (or torn down) while the card is still flagged visible,
+  // the inner modal window is orphaned above the app and eats every touch —
+  // the same failure the reader's dismiss guard exists to prevent. Latch it
+  // off as soon as the sheet stops being shown.
+  useEffect(() => {
+    if (!visible) setShareCardVisible(false);
+  }, [visible]);
+
   // Scroll to the recitation section when opened from the header button.
   useEffect(() => {
     if (!visible || !scrollToAudio) return;
