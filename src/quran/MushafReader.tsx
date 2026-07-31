@@ -247,9 +247,32 @@ export function MushafReader({
     };
   }, [textMode]);
 
+  /**
+   * Re-render the progress bar when the whole percent changes, not on every
+   * one of 604 files. The extra ~500 renders land on the same JS thread the
+   * downloads are being driven from, and the bar cannot show them anyway: it
+   * is 300 dp wide, so a file is a third of a pixel.
+   */
+  const lastPctRef = useRef(-1);
+  // Always current, whether or not the render was published — the completion
+  // handler reads the failure count off it.
+  const progressRef = useRef<MushafDownloadProgress>({
+    done: 0,
+    total: MUSHAF_TOTAL_PAGES,
+    failed: 0,
+  });
+  const publishProgress = useCallback((p: MushafDownloadProgress) => {
+    progressRef.current = p;
+    const pct = p.total > 0 ? Math.floor((p.done / p.total) * 100) : 0;
+    if (pct === lastPctRef.current && p.done !== p.total) return;
+    lastPctRef.current = pct;
+    setProgress(p);
+  }, []);
+
   const startDownload = () => {
     if (downloadStatus === 'downloading') return;
     setDownloadStatus('downloading');
+    lastPctRef.current = -1;
     setProgress({ done: 0, total: MUSHAF_TOTAL_PAGES, failed: 0 });
 
     if (textMode) {
@@ -260,10 +283,7 @@ export function MushafReader({
       void deleteLegacyImageStore().then(freed => {
         if (freed > 0) setStaleImageBytes(0);
       });
-      const fontHandle = downloadAllPageFonts({
-        concurrency: 8,
-        onProgress: setProgress,
-      });
+      const fontHandle = downloadAllPageFonts({ onProgress: publishProgress });
       downloadHandleRef.current = fontHandle;
       void fontHandle.promise.then(complete => {
         downloadHandleRef.current = null;
@@ -278,7 +298,10 @@ export function MushafReader({
     // so ~8 parallel workers roughly triples throughput; the per-page retry +
     // RN-fetch fallback in fetchPage() already absorbs the occasional HTTP/2
     // stream reset that higher concurrency provokes.
-    const handle = downloadMushafAssets({ concurrency: 8, onProgress: setProgress });
+    const handle = downloadMushafAssets({
+      concurrency: 8,
+      onProgress: publishProgress,
+    });
     downloadHandleRef.current = handle;
     void handle.promise.then(complete => {
       downloadHandleRef.current = null;
@@ -287,8 +310,6 @@ export function MushafReader({
       setDownloadStatus(complete ? 'ready' : 'needs_download');
     });
   };
-  const progressRef = useRef(progress);
-  progressRef.current = progress;
 
   // ── Page state (unchanged core from #153) ───────────────────────────
   const screenWidth = windowWidth;

@@ -87,6 +87,49 @@ async function fetchFontViaRNFetch(page: number, dest: string): Promise<void> {
 const inFlight = new Map<number, Promise<string | null>>();
 
 /**
+ * The store directory only has to be created once per launch. `mkdirDeep`
+ * creates each path segment in turn, so calling it per page meant several
+ * bridge round-trips × 604 competing with the downloads themselves.
+ */
+let storeDirReady = false;
+async function ensureStoreDir(): Promise<void> {
+  if (storeDirReady) return;
+  await mkdirDeep(storeDir());
+  storeDirReady = true;
+}
+
+/**
+ * Which transport works here, learned from the first file that tries.
+ *
+ * `ReactNativeBlobUtil`'s streaming downloader is the one to want — it writes
+ * the response straight to disk. On some networks it fails instantly with
+ * "Download interrupted" for every request, and there is a slower fallback
+ * (RN's own fetch, through a blob and base64) for exactly that case.
+ *
+ * What it must not do is rediscover that 604 times. Measured on an emulator
+ * where the streaming path is broken: two doomed requests and 0.9 s of backoff
+ * per file, which is 1,208 pointless requests and nine minutes of sleeping —
+ * the whole reason the download crawled and appeared to freeze in blocks.
+ * One failure now condemns the transport for the rest of the session, and the
+ * next launch gives it another chance in case the network has changed.
+ */
+let streamingDownloadWorks = true;
+
+/** Rate-limited download telemetry, so a slow run can be diagnosed from a log. */
+const stats = { retries: 0, failures: 0, bytes: 0, lastLog: 0, startedAt: 0 };
+
+function noteProgress(done: number, total: number, now: number): void {
+  if (stats.startedAt === 0) stats.startedAt = now;
+  if (now - stats.lastLog < 5000) return;
+  stats.lastLog = now;
+  const secs = Math.max(0.001, (now - stats.startedAt) / 1000);
+  console.log(
+    `[mushafFonts] ${done}/${total} · ${(done / secs).toFixed(1)} files/s · ` +
+      `${(stats.bytes / 1048576 / secs).toFixed(2)} MB/s · retries=${stats.retries} · failed=${stats.failures}`,
+  );
+}
+
+/**
  * Ensure page's font file is on disk and return its path (null on failure).
  * Concurrent callers for the same page share one download.
  */
@@ -98,14 +141,20 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
     const path = fontFilePath(page);
     try {
       if (await fileOk(path)) return path;
-      await mkdirDeep(storeDir());
+      await ensureStoreDir();
       const tmp = `${path}.part`;
       let lastError: unknown = null;
       let landed = false;
       for (let attempt = 1; attempt <= 3 && !landed; attempt++) {
         try {
-          await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
-          if (attempt === 3) {
+          // Only on a retry: on the first attempt there is nothing to clean,
+          // and unlinking a file that isn't there costs a bridge round-trip
+          // and a thrown exception, 604 times over.
+          if (attempt > 1) {
+            stats.retries += 1;
+            await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
+          }
+          if (attempt === 3 || !streamingDownloadWorks) {
             await fetchFontViaRNFetch(page, path);
             landed = true;
             break;
@@ -121,11 +170,22 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
           if (status !== 200 || !stat || Number(stat.size) < MIN_FONT_BYTES) {
             throw new Error(`font ${page}: HTTP ${status}`);
           }
+          stats.bytes += Number(stat.size);
           await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
           await ReactNativeBlobUtil.fs.mv(tmp, path);
           landed = true;
         } catch (e) {
           lastError = e;
+          if (streamingDownloadWorks) {
+            // First failure of the run: take the hint and stop offering the
+            // streaming path to the other 603 files.
+            streamingDownloadWorks = false;
+            console.log(
+              `[mushafFonts] streaming download unavailable (${String(
+                (e as Error)?.message ?? e,
+              )}) — using the fallback transport for this session`,
+            );
+          }
           await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
           if (attempt < 3) {
             await new Promise<void>(r => setTimeout(r, 300 * attempt));
@@ -137,6 +197,8 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
       }
       // A truncated-but-large file would register as a font with no glyphs and
       // render an empty page, which looks like a bug rather than a bad file.
+      // Measured on an emulator: 1.4 ms per file, so this is not what makes a
+      // bulk download slow — the transfer is.
       if (!(await isValidFontFile(path))) {
         await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
         throw new Error(`font ${page}: not a usable font`);
@@ -170,9 +232,19 @@ export type FontDownloadHandle = {
   cancel: () => void;
 };
 
-/** Fetch every page font (the offline option in Manage downloads). */
+/**
+ * Fetch every page font — the gate on opening the reader, and the offline
+ * option in Manage downloads.
+ *
+ * Four workers, not eight. Eight was inherited from the page-image store,
+ * where it roughly tripled throughput — but that was tuned against a desktop
+ * connection, and eight parallel TLS streams on a phone radio queue behind
+ * each other, stall, and time out into the retry path instead. Fewer, steadier
+ * connections finish sooner and, just as importantly, keep the progress moving
+ * rather than freezing in blocks while a worker waits out a stall.
+ */
 export function downloadAllPageFonts({
-  concurrency = 6,
+  concurrency = 4,
   onProgress,
 }: {
   concurrency?: number;
@@ -183,7 +255,12 @@ export function downloadAllPageFonts({
   let failed = 0;
 
   const run = async (): Promise<boolean> => {
-    await mkdirDeep(storeDir());
+    await ensureStoreDir();
+    stats.retries = 0;
+    stats.failures = 0;
+    stats.bytes = 0;
+    stats.startedAt = 0;
+    stats.lastLog = 0;
     const queue: number[] = [];
     for (let i = 1; i <= MUSHAF_TOTAL_PAGES; i++) queue.push(i);
 
@@ -192,9 +269,13 @@ export function downloadAllPageFonts({
         const page = queue.shift();
         if (page == null) return;
         const path = await ensurePageFontFile(page);
-        if (path == null) failed += 1;
+        if (path == null) {
+          failed += 1;
+          stats.failures += 1;
+        }
         done += 1;
         onProgress?.({ done, total: MUSHAF_TOTAL_PAGES, failed });
+        noteProgress(done, MUSHAF_TOTAL_PAGES, Date.now());
       }
     };
 
