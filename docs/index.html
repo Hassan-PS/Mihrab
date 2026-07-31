@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mihrab — prayer times, the Madinah mushaf, dua and tasbih</title>
+<meta name="description" content="Mihrab keeps the five daily prayers close at hand: next-prayer countdown, adhan reminders, widgets, and the full Madinah mushaf. Open source, AGPL-3.0. No ads, no analytics, no tracking.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://hassan-ps.github.io/Mihrab/">
+<link rel="icon" href="assets/img/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mihrab">
+<meta property="og:title" content="Mihrab — prayer times, the Madinah mushaf, dua and tasbih">
+<meta property="og:description" content="A calm, private, offline-first companion for the day’s prayers. Open source under AGPL-3.0. No ads, no analytics, no tracking.">
+<meta property="og:url" content="https://hassan-ps.github.io/Mihrab/">
+<meta property="og:image" content="https://hassan-ps.github.io/Mihrab/assets/img/og-hero.png">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="900">
+<meta property="og:image:alt" content="Mihrab — prayer times, the Madinah mushaf, duas, tasbih and a fasting log, on iOS and Android">
+<meta property="og:locale" content="en">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mihrab — prayer times, the Madinah mushaf, dua and tasbih">
+<meta name="twitter:description" content="A calm, private, offline-first companion for the day’s prayers. Open source under AGPL-3.0. No ads, no analytics, no tracking.">
+<meta name="twitter:image" content="https://hassan-ps.github.io/Mihrab/assets/img/og-hero.png">
+<style>
+:root {
+  --emerald: #1F5F4A;
+  --emerald-deep: #123A2D;
+  --cream: #EEE4D4;
+  --paper: #FBF8F2;
+  --surface: #FFFFFF;
+  --surface-2: #F4EEE3;
+  --ink: #14231D;
+  --ink-soft: #4A5C54;
+  --line: #E3DACB;
+  --accent: #1F5F4A;
+  --accent-ink: #EEE4D4;
+  --frame: #E8E0D2;
+  --shadow: 0 1px 2px rgba(18,58,45,.06), 0 12px 32px -12px rgba(18,58,45,.18);
+  --radius: 14px;
+  --measure: 68ch;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0E1815;
+    --surface: #16241F;
+    --surface-2: #1B2C25;
+    --ink: #EDE6DA;
+    --ink-soft: #A9BAB1;
+    --line: #26372F;
+    --accent: #7FD3B4;
+    --accent-ink: #EEE4D4;
+    --frame: #22332C;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -14px rgba(0,0,0,.7);
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font); font-size: 17px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.015em; margin: 0; font-weight: 650; }
+p { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+img { max-width: 100%; display: block; }
+code {
+  font-family: var(--mono); font-size: .875em; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 6px; padding: .12em .4em;
+  overflow-wrap: anywhere;
+}
+:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px;
+}
+.wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+.skip {
+  position: absolute; left: -9999px; top: 0; background: var(--emerald);
+  color: var(--cream); padding: 12px 18px; border-radius: 0 0 10px 0; z-index: 20;
+}
+.skip:focus { left: 0; }
+section { padding: 72px 0; border-top: 1px solid var(--line); }
+section:first-of-type { border-top: 0; }
+.eyebrow {
+  font-size: 13px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-soft); margin: 0 0 10px;
+}
+h2 { font-size: clamp(26px, 4vw, 34px); }
+.lede { color: var(--ink-soft); max-width: var(--measure); margin-top: 12px; }
+/* ---- hero ---- */
+.hero {
+  position: relative; overflow: hidden; border-top: 0;
+  background: linear-gradient(170deg, #1F5F4A 0%, #1A4E3D 52%, #123A2D 100%);
+  color: var(--cream); padding: 0;
+}
+.hero .wrap { position: relative; z-index: 2; padding-top: 84px; padding-bottom: 88px; }
+.hero-art {
+  position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%;
+  pointer-events: none; color: var(--cream);
+}
+.brandline { display: flex; align-items: center; gap: 16px; }
+.brandline img {
+  width: 62px; height: 62px; border-radius: 15px; flex: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 14px 30px -10px rgba(0,0,0,.55);
+  background: rgba(238,228,212,.08);
+}
+.wordmark {
+  font-size: clamp(38px, 7vw, 54px); font-weight: 700; letter-spacing: -0.025em;
+  color: var(--cream);
+}
+.hero h1 {
+  font-size: clamp(23px, 3.5vw, 31px); font-weight: 600; letter-spacing: -0.02em;
+  margin: 26px 0 0; max-width: 22ch; color: var(--cream);
+}
+.hero .sub { margin: 14px 0 0; max-width: 56ch; color: rgba(238,228,212,.88); }
+.hero .meta {
+  margin: 26px 0 0; font-size: 14.5px; color: rgba(238,228,212,.86);
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+}
+.hero .meta a { color: rgba(238,228,212,.92); text-decoration-color: rgba(238,228,212,.45); }
+.hero .meta a:hover { color: #fff; }
+.hero :focus-visible { outline-color: var(--cream); }
+.dot { opacity: .45; }
+/* ---- install ---- */
+.install { background: var(--surface); }
+.channels {
+  list-style: none; margin: 28px 0 0; padding: 0;
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(258px, 100%), 1fr));
+}
+.channel {
+  display: flex; gap: 14px; align-items: flex-start;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--paper); padding: 16px 18px; min-height: 100%;
+}
+.channel .glyph { flex: none; margin-top: 2px; color: var(--emerald); }
+@media (prefers-color-scheme: dark) { .channel .glyph { color: var(--accent); } }
+.channel b { display: block; font-weight: 650; font-size: 16px; letter-spacing: -0.01em; }
+.channel span { display: block; font-size: 14.5px; color: var(--ink-soft); margin-top: 3px; }
+.channel a { font-weight: 600; }
+.channel code { font-size: 13px; }
+.channel.pending { border-style: dashed; }
+.channel.pending .glyph { color: var(--ink-soft); }
+.note {
+  margin-top: 22px; font-size: 14.5px; color: var(--ink-soft); max-width: var(--measure);
+}
+/* ---- features ---- */
+.groups {
+  margin-top: 34px; display: grid; gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(390px, 100%), 1fr));
+}
+.group {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); padding: 24px 24px 26px; box-shadow: var(--shadow);
+}
+.group h3 {
+  font-size: 19px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.group h3 .glyph { color: var(--emerald); flex: none; }
+@media (prefers-color-scheme: dark) { .group h3 .glyph { color: var(--accent); } }
+.group ul { margin: 0; padding: 0; list-style: none; }
+.group li { position: relative; padding: 0 0 0 20px; margin-bottom: 12px; font-size: 15.5px; }
+.group li:last-child { margin-bottom: 0; }
+.group li::before {
+  content: ""; position: absolute; left: 0; top: .58em; width: 7px; height: 7px;
+  background: var(--emerald); opacity: .55;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+}
+@media (prefers-color-scheme: dark) { .group li::before { background: var(--accent); opacity: .7; } }
+.group li b { font-weight: 650; }
+.group li span { color: var(--ink-soft); }
+/* ---- screenshots ---- */
+.shots { background: var(--surface); }
+.gallery {
+  margin: 32px 0 0; padding: 0; list-style: none;
+  display: grid; gap: 26px 20px; grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.gallery figure { margin: 0; }
+.gallery img, .spread img {
+  width: 100%; height: auto; border: 1px solid var(--frame);
+  background: var(--surface-2); color: var(--ink-soft); font-size: 13px;
+  box-shadow: var(--shadow); object-fit: cover;
+}
+.gallery img { aspect-ratio: 9 / 20; border-radius: 16px; }
+.gallery figcaption, .spread figcaption {
+  margin-top: 10px; font-size: 14px; color: var(--ink-soft); line-height: 1.45;
+}
+.spread { margin: 34px 0 0; }
+.spread img { aspect-ratio: 59 / 41; border-radius: 12px; }
+@media (max-width: 860px) { .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 620px) {
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
+  .gallery figcaption, .spread figcaption { font-size: 13.5px; }
+}
+/* ---- privacy ---- */
+.privacy .cols {
+  margin-top: 32px; display: grid; gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+}
+.card {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); padding: 22px 24px;
+}
+.card h3 { font-size: 17px; margin-bottom: 10px; }
+.card p, .card li { font-size: 15.5px; color: var(--ink-soft); }
+.card ul { margin: 0; padding-left: 18px; }
+.card li { margin-bottom: 8px; }
+.card li:last-child { margin-bottom: 0; }
+.card strong { color: var(--ink); font-weight: 600; }
+/* ---- footer ---- */
+footer {
+  border-top: 1px solid var(--line); background: var(--surface-2);
+  padding: 46px 0 56px; font-size: 15px; color: var(--ink-soft);
+}
+footer h2 { font-size: 17px; color: var(--ink); margin-bottom: 12px; }
+footer p { max-width: var(--measure); }
+footer .foot-grid {
+  display: grid; gap: 26px 40px;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+footer ul { list-style: none; margin: 0; padding: 0; }
+footer li { margin-bottom: 7px; }
+footer .colophon {
+  margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 14px;
+}
+@media (max-width: 620px) {
+  body { font-size: 16.5px; }
+  section { padding: 56px 0; }
+  .wrap { padding: 0 20px; }
+  .hero .wrap { padding-top: 60px; padding-bottom: 64px; }
+  .brandline img { width: 54px; height: 54px; border-radius: 13px; }
+  .hero .meta { gap: 4px 16px; }
+  .hero .meta .dot { display: none; }
+}
+@media print { .hero { background: none; color: #000; } .hero-art { display: none; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+    <g fill="currentColor" opacity=".07">
+      <g transform="translate(1010 450)">
+        <rect x="-148" y="-148" width="296" height="296" rx="6"/>
+        <rect x="-148" y="-148" width="296" height="296" rx="6" transform="rotate(45)"/>
+      </g>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="2" opacity=".16">
+      <path d="M745 600 V335 Q745 152 905 88 Q1065 152 1065 335 V600"/>
+      <path d="M779 600 V344 Q779 186 905 132 Q1031 186 1031 344 V600"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="brandline">
+      <img src="assets/img/icon.png" width="62" height="62" alt="Mihrab app icon">
+      <span class="wordmark">Mihrab</span>
+    </div>
+    <h1>Prayer times, adhan reminders, and the full Madinah mushaf.</h1>
+    <p class="sub">Mihrab keeps the five daily prayers close at hand: a calm home screen with the next
+      prayer and a live countdown, optional adhan reminders, a full-month planner, and a home-screen
+      widget. It works offline, and it does not track you.</p>
+    <p class="meta">
+      <span>Version 2.8.2 (230)</span> <span class="dot" aria-hidden="true">•</span>
+      <span>iOS, Android, macOS</span> <span class="dot" aria-hidden="true">•</span>
+      <span>AGPL-3.0-or-later</span> <span class="dot" aria-hidden="true">•</span>
+      <a href="https://github.com/Hassan-PS/Mihrab">Source on GitHub</a>
+    </p>
+  </div>
+</header>
+
+<main id="main">
+<section class="install" id="install">
+  <div class="wrap">
+    <p class="eyebrow">Install</p>
+    <h2>Get Mihrab</h2>
+    <p class="lede">Same app on every channel, built from the same <code>main</code> branch. The
+      F-Droid build ships without Play Billing or Google Play Services.</p>
+    <ul class="channels">
+      <li class="channel">
+        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+        <div>
+          <b>iPhone &amp; iPad</b>
+          <span><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256">App Store</a>
+            — “Mihrab: The Muslim Companion”, with the Lock Screen Live Activity and home-screen
+            widgets.</span>
+        </div>
+      </li>
+      <li class="channel">
+        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 10l3 2-3 2"/><path d="M13.5 14.5H17"/></svg>
+        <div>
+          <b>Mac</b>
+          <span><code>brew install --cask hassan-ps/tap/mihrab</code> — a Mac Catalyst build, cask in the
+            <a href="https://github.com/Hassan-PS/homebrew-tap">Hassan-PS/homebrew-tap</a> repo. Ad-hoc
+            signed for now, so the first launch may need right-click → Open.</span>
+        </div>
+      </li>
+      <li class="channel">
+        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+        <div>
+          <b>Android</b>
+          <span><a href="https://play.google.com/store/apps/details?id=com.prayer_times">Google Play</a>
+            — package <code>com.prayer_times</code>.</span>
+        </div>
+      </li>
+      <li class="channel">
+        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8.2v7.6L12 21l-9-5.2V8.2L12 3z"/><path d="M3 8.2l9 5.2 9-5.2"/><path d="M12 13.4V21"/></svg>
+        <div>
+          <b>Android APK</b>
+          <span><a href="https://github.com/Hassan-PS/Mihrab/releases/latest">GitHub Releases</a> —
+            every tag ships <code>app-fdroid-release.apk</code>, the same recipe F-Droid builds.</span>
+        </div>
+      </li>
+      <li class="channel">
+        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5v5h-5"/></svg>
+        <div>
+          <b>Obtainium</b>
+          <span><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/Mihrab">Add
+            to Obtainium</a> to auto-update straight from GitHub Releases.</span>
+        </div>
+      </li>
+      <li class="channel pending">
+        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg>
+        <div>
+          <b>F-Droid — pending</b>
+          <span>The recipe for <code>com.prayer_times</code> is merged; the listing is not live on
+            f-droid.org yet. Track
+            <a href="https://gitlab.com/fdroid/fdroiddata/-/merge_requests/36312">fdroiddata MR #36312</a>,
+            or take the APK above in the meantime.</span>
+        </div>
+      </li>
+    </ul>
+    <p class="note">Prefer to build it yourself? <code>npm install &amp;&amp; npm run
+      android:assembleFdroidRelease</code> — the full release path is written up in
+      <a href="https://github.com/Hassan-PS/Mihrab/blob/main/docs/DISTRIBUTION.md">DISTRIBUTION.md</a>.</p>
+  </div>
+</section>
+<section class="features" id="features">
+  <div class="wrap">
+    <p class="eyebrow">What it does</p>
+    <h2>The day’s worship, in one app</h2>
+    <p class="lede">Everything below works on iOS, Android and Mac, in 13 languages — Arabic and Urdu
+      fully right-to-left, on every screen and every notification.</p>
+    <div class="groups">
+      <article class="group">
+        <h3><svg class="glyph" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V11a7 7 0 0 1 14 0v10"/><path d="M3 21h18"/><path d="M12 8v3"/></svg>Prayer</h3>
+        <ul>
+          <li><b>Times for today, the week, and a full month</b> <span>— up to a year ahead, cached on
+            device so the app opens instantly without a connection.</span></li>
+          <li><b>Adhan and reminders</b> <span>— built-in adhan sounds, a pre-prayer reminder window,
+            snooze, and exact-alarm scheduling so the call lands on time even under aggressive battery
+            managers.</span></li>
+          <li><b>A pinned countdown</b> <span>— Live Activity on the iOS Lock Screen and Dynamic Island;
+            a status-bar chip and always-on notification on Android 16+.</span></li>
+          <li><b>Home-screen widgets</b> <span>— several sizes, per-prayer accents, dynamic colour.</span></li>
+          <li><b>Your choice of source</b> <span>— AlAdhan, PrayerTimes.dev, Islamiska Förbundet
+            (Sweden), or calculation entirely on the device.</span></li>
+        </ul>
+      </article>
+      <article class="group">
+        <h3><svg class="glyph" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M9 8h6"/></svg>Quran</h3>
+        <ul>
+          <li><b>The Madinah mushaf, drawn as text</b> <span>— all 604 pages render from the official
+            KFGQPC page fonts, one glyph per word, page-for-page and line-for-line with the print. Sharp
+            at any zoom, and a page costs a fraction of what an image would. Pages arrive as you read,
+            about 300 KB each, so the reader opens straight away.</span></li>
+          <li><b>A facing-page spread on iPad and Mac</b> <span>— the pair of pages is the thing that
+            turns.</span></li>
+          <li><b>Translation or tafsir under each verse</b> <span>— 14 translations plus Ibn Kathir,
+            Maarif-ul-Quran, al-Muyassar and others, cached for offline reading.</span></li>
+          <li><b>21 reciters</b> <span>— streamed per ayah or downloaded per surah; word-level highlight
+            follows the recitation for nine of them.</span></li>
+          <li><b>Memorisation tools</b> <span>— repeat an ayah or a range, pause between repeats, hide
+            and reveal the Arabic or the translation.</span></li>
+          <li><b>Khatmah plans</b> <span>— 30, 60 or 90 days with automatic page tracking and an optional
+            daily reminder carrying the day’s portion.</span></li>
+        </ul>
+      </article>
+      <article class="group">
+        <h3><svg class="glyph" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5l2.6 6.9 6.9 2.6-6.9 2.6-2.6 6.9-2.6-6.9L2.5 12l6.9-2.6z"/></svg>Daily worship</h3>
+        <ul>
+          <li><b>Dua library</b> <span>— 100+ duas across 19 categories with Arabic, transliteration,
+            translation, and Hisn al-Muslim sources.</span></li>
+          <li><b>Tasbih counter</b> <span>— the post-prayer dhikr plus open-ended istighfar and salah on
+            the Prophet ﷺ, with tabular numerals so the digits don’t shimmer on tick.</span></li>
+          <li><b>Fasting log</b> <span>— Ramadan and the Sunnah fasts (Mondays, Thursdays, Ayyam al-Bidh,
+            Arafah, Ashura, Six of Shawwal), with day-before reminders.</span></li>
+          <li><b>Prayer journal</b> <span>— on time, late, missed or qadha, with private notes and streak
+            stats, loggable straight from the notification.</span></li>
+          <li><b>Hijri calendar</b> <span>— with Ramadan, Eid and Jumu'ah treatments.</span></li>
+          <li><b>Nearby mosques</b> <span>— one tap to your maps app, centred where you are.</span></li>
+        </ul>
+      </article>
+      <article class="group">
+        <h3><svg class="glyph" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h7"/><path d="M15 7h5"/><path d="M4 17h5"/><path d="M13 17h7"/><circle cx="13" cy="7" r="2"/><circle cx="11" cy="17" r="2"/></svg>The app itself</h3>
+        <ul>
+          <li><b>13 languages</b> <span>— English, Arabic, Swedish, Bengali, Urdu, Hindi, French,
+            Spanish, German, Turkish, Indonesian, Russian and Chinese.</span></li>
+          <li><b>Real Arabic typography</b> <span>— Amiri Quran for ayah text with correctly stacked
+            diacritics, Amiri Naskh for duas, on both platforms.</span></li>
+          <li><b>Light, dark and system themes</b> <span>— night mode in the reader for the hours you
+            actually read in.</span></li>
+          <li><b>Your data survives a reinstall</b> <span>— settings, journal, bookmarks and khatmah ride
+            Android Auto Backup and device-to-device transfer; large re-downloadable content stays out of
+            your backup quota, and a Manage-downloads screen shows what is on disk.</span></li>
+          <li><b>Open source</b> <span>— AGPL-3.0-or-later. The F-Droid flavour ships without Play
+            Billing or Google Play Services.</span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+<section class="shots" id="screenshots">
+  <div class="wrap">
+    <p class="eyebrow">Screenshots</p>
+    <h2>What it looks like</h2>
+    <p class="lede">Light and dark, phone and tablet. The mushaf is the printed Madinah page, not a
+      picture of one.</p>
+    <ul class="gallery">
+      <li><figure>
+        <img src="assets/img/shot-home.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="Home screen: the next prayer with a live countdown above the day’s five times.">
+        <figcaption>Home — next prayer and countdown</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-home-dark.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="The same home screen in dark theme.">
+        <figcaption>Home, dark</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-mushaf.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="The Quran reader showing a page of the Madinah mushaf.">
+        <figcaption>Mushaf — the printed page</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-mushaf-dark.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="The same mushaf page in the reader's night mode.">
+        <figcaption>Mushaf, night mode</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-month.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="Month view: a full month of prayer times in a table.">
+        <figcaption>A full month at once</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-duas.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="Dua library entry with Arabic, transliteration, translation and its source.">
+        <figcaption>Duas, with sources</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-tasbih.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="Tasbih counter showing a dhikr count.">
+        <figcaption>Tasbih counter</figcaption>
+      </figure></li>
+    </ul>
+    <figure class="spread">
+      <img src="assets/img/shot-ipad-spread.png" width="1600" height="1103" loading="lazy" decoding="async"
+        alt="Mihrab on iPad: two facing mushaf pages side by side, as in the printed copy.">
+      <figcaption>On iPad and Mac the mushaf opens as a facing-page spread — the pair of pages is what
+        turns, exactly as it does in print.</figcaption>
+    </figure>
+  </div>
+</section>
+<section class="privacy" id="privacy">
+  <div class="wrap">
+    <p class="eyebrow">Private by design</p>
+    <h2>Nothing leaves your phone that you didn’t ask to send</h2>
+    <p class="lede">There is no account to make, and this codebase carries no analytics panel, no ad
+      network and no crash-reporting service. Once a location is set, prayer times can be calculated
+      entirely on your device — the app works with the network switched off.</p>
+    <div class="cols">
+      <article class="card">
+        <h3>Stays on the device</h3>
+        <ul>
+          <li>Language, appearance, chosen provider, calculation options and notification settings.</li>
+          <li>Saved coordinates and place names, <strong>encrypted at rest</strong> through the iOS
+            Keychain and Android EncryptedSharedPreferences.</li>
+          <li>Your prayer journal and fasting log — there is no central database to hold them.</li>
+          <li>Notifications are scheduled locally; what you log is never sent anywhere as an event
+            stream.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Goes over the network, when you choose it</h3>
+        <ul>
+          <li>Prayer times from the provider you pick — AlAdhan, PrayerTimes.dev, or Islamiska
+            Förbundet — which receives the coordinates and dates it needs to answer.</li>
+          <li>Place search through <strong>OpenStreetMap Nominatim</strong>: your search text goes to
+            them under their terms.</li>
+          <li>Downloads of mushaf pages, translations, tafsir and recitation audio.</li>
+          <li>Those services can see ordinary technical data — IP address, time, requested URL — under
+            their own policies. Skip the features and the requests never happen.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Not present at all</h3>
+        <ul>
+          <li>No ads, no trackers, no analytics SDK, no crash reporter.</li>
+          <li>No account, no sign-in, no profile.</li>
+          <li>On Android, <code>allowBackup</code> is off in the manifest, and the F-Droid build ships
+            without Google Play Services or Play Billing.</li>
+          <li>This page is one hand-written HTML file: no scripts, no webfonts, no third-party
+            requests.</li>
+        </ul>
+      </article>
+    </div>
+    <p class="note">The full text, including the GDPR basis and children’s-data section, is in
+      <a href="https://github.com/Hassan-PS/Mihrab/blob/main/PRIVACY_POLICY.md">PRIVACY_POLICY.md</a>
+      (English and Swedish). Questions belong in
+      <a href="https://github.com/Hassan-PS/Mihrab/issues">the issue tracker</a>, in the open.</p>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h2>Licence</h2>
+        <p><a href="https://github.com/Hassan-PS/Mihrab/blob/main/LICENSE">AGPL-3.0-or-later</a> — use
+          it, study it, change it, share it. If you distribute a modified version, or run one as a
+          network service, you must publish your source under the same terms.</p>
+      </div>
+      <div>
+        <h2>Name and icon</h2>
+        <p>The name “Mihrab” and the app icon are <strong>not</strong> covered by that licence — no
+          free-software licence grants trademark rights. Builds of this project carry the name freely,
+          whoever distributes them; a fork that changes what the app <em>does</em> needs its own name and
+          icon. See <a href="https://github.com/Hassan-PS/Mihrab/blob/main/TRADEMARK.md">TRADEMARK.md</a>.</p>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="https://github.com/Hassan-PS/Mihrab">Source on GitHub</a></li>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest">Releases and changelog</a></li>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/issues">Issues and questions</a></li>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/blob/main/PRIVACY_POLICY.md">Privacy policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="colophon">Mihrab 2.8.2 (230), built by Hassan El Ghamri
+      (<a href="https://github.com/Hassan-PS">@Hassan-PS</a>). Quran text from Tanzil.net, the Madinah
+      mushaf from the KFGQPC page fonts, duas from Hisn al-Muslim, recitation from EveryAyah — full
+      attributions in the <a href="https://github.com/Hassan-PS/Mihrab#content-sources--thanks">repository
+      README</a> and in the app under Settings → About.</p>
+  </div>
+</footer>
+</body>
+</html>

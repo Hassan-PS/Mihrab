@@ -1,7 +1,9 @@
 <div align="center">
-  <img src="branding/github-hero.png" alt="Mihrab — prayer times, Quran, dua, tasbih, qibla, fasting log on iOS and Android">
+  <img src="branding/github-hero.png" alt="Mihrab — prayer times, the Madinah mushaf, dua, tasbih and a fasting log, on iOS and Android">
 
-  A calm, private, offline-first companion for the day's intentions. Prayer times, a full interactive Quran with recitation and tafsir, dua and tasbih, Qibla, fasting + prayer journal, and home-screen widgets — no ads, no analytics, no tracking.
+  A calm, private, offline-first companion for the day's intentions. Prayer times, a full interactive Quran with recitation and tafsir, dua and tasbih, fasting + prayer journal, and home-screen widgets — no ads, no analytics, no tracking.
+
+  **[mihrab website →](https://hassan-ps.github.io/Mihrab/)**
 
   <br>
 
@@ -20,9 +22,9 @@
 
 <div align="center">
 
-<img src="branding/readme/01_home.png" width="32%" alt="Home — next prayer countdown and the day's times">&nbsp;<img src="branding/readme/02_quran.png" width="32%" alt="Madinah mushaf reader — Surah Al-Mulk">&nbsp;<img src="branding/readme/03_duas.png" width="32%" alt="Duas — Ayat al-Kursi with transliteration and source">
+<img src="branding/readme/01_home.png" width="32%" alt="Home — next prayer countdown and the day's times">&nbsp;<img src="branding/readme/02_quran.png" width="32%" alt="Madinah mushaf reader — Al-Baqarah, page 49">&nbsp;<img src="branding/readme/03_duas.png" width="32%" alt="Duas — Ayat al-Kursi with transliteration and source">
 
-<img src="branding/readme/04_tasbih.png" width="32%" alt="Tasbih counter — dhikr with tabular digits">&nbsp;<img src="branding/readme/05_fasting.png" width="32%" alt="Fasting tracker — Ramadan and Sunnah fasts">&nbsp;<img src="branding/readme/06_qibla.png" width="32%" alt="Qibla compass">
+<img src="branding/readme/04_tasbih.png" width="32%" alt="Tasbih counter — dhikr with tabular digits">&nbsp;<img src="branding/readme/05_fasting.png" width="32%" alt="Fasting tracker — Ramadan and Sunnah fasts">&nbsp;<img src="branding/readme/06_journal.png" width="32%" alt="Prayer journal — log each prayer on time, late, missed or qadha">
 
 </div>
 
@@ -36,7 +38,6 @@
 - **Adhan & reminders** — Notifications with built-in Adhan sounds, a pre-prayer reminder window, and exact-alarm scheduling so the adhan lands on time even under aggressive battery managers.
 - **Live Activity** — A pinned countdown to the next prayer: Android 16+ status-bar chip + Always-On-Display notification with three selectable designs, iOS Lock Screen + Dynamic Island via ActivityKit.
 - **Home-screen widgets** — Customisable iOS and Android widgets showing the next prayer at a glance, with per-prayer accents and dynamic color support.
-- **Qibla compass** — Direction to the Ka'bah using your device's sensors.
 - **Multiple providers** — AlAdhan, PrayerTimes.dev, Islamiska Förbundet (Sweden), or on-device calculation (Adhan JS) — pick the source that matches your community.
 
 ### Quran

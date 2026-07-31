@@ -1,28 +1,80 @@
 # iPad App Store screenshots (Path A — iPad + "Designed for iPad" on Mac)
 
-Resolution: **2732 × 2048** (landscape) — accepted by App Store Connect for the
-iPad 12.9"/13" slots. App Store Connect requires at least one iPad screenshot
-before it will let you enable iPad (and therefore Mac) availability.
+Upload the **`*_framed.png`** files: **2732 × 2048** landscape, the size App
+Store Connect accepts for the iPad 12.9"/13" slots. App Store Connect requires
+at least one iPad screenshot before it will let you enable iPad (and therefore
+Mac) availability.
+
+Captured 2026-07-31 from a **Release** simulator build (bundled `main.jsbundle`,
+no dev overlays) on **iPad Pro 11" (M5), iOS 26.5**, status bar overridden to
+9:41 / full battery / 3 wifi bars.
 
 | File | What it is |
 |---|---|
-| `01_home_framed.png` | Marketing panel: the adaptive two-column iPad/Mac Home dashboard, captioned, on the app's cream background. Upload this. |
-| `01_home_raw.png` | The same screen, raw (un-framed), if you prefer plain screenshots. |
+| `01_mushaf_spread_framed.png` | **Landscape** two-page mushaf spread — Aal-i-Imran, pages ٤٩ and ٥٠ facing each other. The iPad hero shot; lead with this one. |
+| `02_home_framed.png` | Landscape Home dashboard — the adaptive two-column iPad/Mac layout. |
+| `03_month_framed.png` | Landscape Month view — the full July 2026 table, scrolled to day 1. |
+| `04_mushaf_page_framed.png` | **Portrait** mushaf, single centred page (٥٠). |
+| `05_duas_framed.png` | **Portrait** Duas — Morning category, Ayat al-Kursi with transliteration and translation. |
 
-These were rendered from a **Release** simulator build (bundled JS, no dev
-overlays) via the compositor at `/tmp/composit_ipad.py`.
+Each screen also has a `*_raw.png`: the un-framed screenshot at the device's
+native resolution (2420 × 1668 landscape, 1668 × 2420 portrait). These are for
+reference only — they are **not** an App Store-accepted size. Only the framed
+panels are.
 
-## Adding more screens
+Raw sources live in `branding/screenshots-source/2026-07-ipad/`.
 
-The iOS Simulator's synthetic tap does not reliably trigger React Native
-navigation on this machine, so only the Home screen could be captured
-automatically. To add Month / Quran / Duas / Tasbih / Settings panels, capture
-them on a **real iPad** (or the TestFlight build, where touch works), then re-run
-the compositor:
+## How these were captured
+
+The old note here claimed only Home was reachable because synthetic taps did not
+work. **That is no longer true** — both of the following drive the app fine on
+this machine:
+
+- **`idb ui tap --udid <udid> <x> <y>`** (device *points*, i.e. pixels ÷ 2)
+  reliably triggers React Native navigation. This needs no GUI at all.
+- **Clicking inside the Simulator window** with computer-use also works.
+
+The genuinely hard part is **rotation**: neither `simctl` nor `idb` has a rotate
+verb. The only reliable way is the Simulator app's own shortcut — focus the
+**iPad** device window (check the title bar; the iPhone window is usually open
+too) and press `cmd+left` / `cmd+right`. That means rotation requires the Mac's
+display to be awake and the Simulator GUI reachable.
+
+Two traps worth knowing:
+
+1. A raw `simctl io <udid> screenshot` of a device held in **landscape** comes
+   back as a *portrait* framebuffer with the content rotated 90° CCW. It has to
+   be rotated upright before compositing. A genuine portrait shot must not be.
+   The compositor therefore takes an explicit flag rather than guessing.
+2. **Never `killall Simulator`** to recover a lost window — it shuts down every
+   booted device (and boots a stray default one). Re-boot by UDID afterwards if
+   you do.
+
+## Regenerating
 
 ```sh
-python3 /tmp/composit_ipad.py <out.png> "<caption>" <raw_screenshot.png>
+python3 scripts/store/composit_ipad.py <out.png> "<caption>" <shot.png> [--no-rotate]
 ```
 
-The compositor rotates a simulator landscape capture upright, rounds the corners,
-adds a shadow and caption, and outputs at 2732 × 2048.
+The compositor rounds the screenshot's corners, drops a soft shadow, centres a
+caption in brand green on the app's own cream background, and outputs at
+2732 × 2048. Pass `--no-rotate` when the source is already the right way up —
+which is the case for everything in `branding/screenshots-source/2026-07-ipad/`.
+The caption font auto-shrinks to fit the canvas.
+
+Example, exactly as the current set was built:
+
+```sh
+SRC=branding/screenshots-source/2026-07-ipad
+python3 scripts/store/composit_ipad.py \
+  fastlane/ipad-screenshots/01_mushaf_spread_framed.png \
+  "The mushaf, as it falls open" $SRC/1_mushaf_spread.png --no-rotate
+```
+
+## Not captured
+
+Qibla was not shot: it is not one of the Home tiles (Tasbih / Duas / Month /
+Journal / Mosques / Fasting) and the Mac's display went to sleep before it could
+be found, which ends GUI access and therefore rotation. Panels 4 and 5 are
+portrait for the same reason — the device could not be rotated back to landscape
+after the portrait mushaf shot.
