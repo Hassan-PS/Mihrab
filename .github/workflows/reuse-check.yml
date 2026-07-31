@@ -2,7 +2,11 @@ name: Reuse check
 
 # Weekly look for forks, copies or republications of this codebase.
 # Runs on GitHub so it does not depend on any machine being switched on.
-# Opens an issue when something changes; stays silent otherwise.
+# Opens an issue AND emails when something changes; stays silent otherwise.
+#
+# Email uses the same secrets as the IFiS dataset job (MAIL_SERVER, MAIL_PORT,
+# MAIL_USERNAME, MAIL_PASSWORD). If they are unset the job still runs and still
+# opens the issue; only the mail step is skipped.
 
 on:
   schedule:
@@ -12,6 +16,13 @@ on:
 permissions:
   contents: read
   issues: write
+# NOTE: clone traffic and code search cannot be unlocked here. Traffic is an
+# Administration-read endpoint and `administration` is not one of the keys the
+# permissions block accepts (GitHub rejects the workflow outright if you try);
+# code search refuses GITHUB_TOKEN whatever its permissions. Both need a real
+# PAT in the MIHRAB_WATCH_TOKEN secret. Until that secret exists this job
+# watches forks only — and now says so, loudly, instead of reporting "no
+# change" and reading as an all-clear.
 
 jobs:
   check:
@@ -81,3 +92,63 @@ jobs:
           gh issue create \
             --title "Reuse check: something changed ($(date -u +%Y-%m-%d))" \
             --body-file issue-body.md
+
+      # Same channel the IFiS dataset job uses, so alerts from this repo all
+      # arrive the same way. The issue is the durable record; this is the nudge
+      # that makes it get read.
+      - name: Email if something changed
+        if: steps.check.outputs.changed == 'true' && env.MAIL_SERVER != ''
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Mihrab Reuse Watch <${{ secrets.MAIL_USERNAME }}>
+          to: mihrab@elghamri.se
+          subject: '[Mihrab] Reuse check: something changed'
+          body: |
+            The weekly reuse check found a change since the last run.
+
+            Most changes are harmless — an F-Droid index mirror, a package-name
+            dataset used in security research, or an unrelated app that happens
+            to share the com.prayer_times package id have all turned up before.
+            Copied source is not harmless.
+
+            ${{ steps.check.outputs.report }}
+
+            If it is a real copy: the name and icon are not licensed (see
+            TRADEMARK.md), which makes a branding complaint to Google Play or
+            the App Store the fastest route — no licence argument required.
+            ~/.mihrab-provenance.md holds the markers that prove origin.
+
+            Issue + full log:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # A monitor that dies quietly is worse than no monitor: the silence reads
+      # as "nothing found". This makes a broken check as loud as a finding.
+      - name: Email if the check itself failed
+        if: failure() && env.MAIL_SERVER != ''
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Mihrab Reuse Watch <${{ secrets.MAIL_USERNAME }}>
+          to: mihrab@elghamri.se
+          subject: '[Mihrab] Reuse check FAILED'
+          body: |
+            The weekly reuse check did not complete, so this week nothing was
+            actually checked. Treat it as "unknown", not as "all clear".
+
+            Usual causes:
+              • the GitHub API refused a call (token scope or rate limit), or
+              • the baseline cache could not be read or written, or
+              • gh is no longer authenticated in the runner.
+
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

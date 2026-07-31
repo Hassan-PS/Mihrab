@@ -103,13 +103,20 @@ fi
 # every push, tag and retry, so the normal weekly figure is already dozens. An
 # absolute threshold would fire every single week and train you to ignore this
 # report. Only a jump well past the established level is worth a word.
-old_caps=$(json_get caps "")
-if [ -n "$old_caps" ] && [ "$caps" != "$old_caps" ]; then
+# Default to the FULL set, not to empty. With an empty default a first run
+# that can only see forks compares "forks" against "" and — because the old
+# value is blank — says nothing, so a monitor that is two-thirds blind reports
+# "no change" forever and reads as an all-clear. Comparing against the full set
+# instead means any missing capability is announced the first time it is
+# missing, which is the only moment it is still news.
+old_caps=$(json_get caps "forks,traffic,codesearch")
+if [ "$caps" != "$old_caps" ]; then
   changed=1
   report="$report\n• CHECK COVERAGE changed: was [$old_caps], now [$caps]."
-  report="$report\n  A check that stopped running leaves a blind spot. Traffic and code"
-  report="$report\n  search need a PAT in the MIHRAB_WATCH_TOKEN secret; the default"
-  report="$report\n  GITHUB_TOKEN cannot read either."
+  report="$report\n  A check that stopped running leaves a blind spot. Both 'traffic' and"
+  report="$report\n  'codesearch' need a PAT in the MIHRAB_WATCH_TOKEN secret: traffic is an"
+  report="$report\n  Administration-read endpoint that the permissions block cannot grant, and"
+  report="$report\n  code search refuses GITHUB_TOKEN whatever its permissions."
 fi
 
 old_clones=$(json_get clones 0)
@@ -145,7 +152,7 @@ if [ "$changed" = "1" ]; then
   echo -e "$report"
   echo
   echo "If it looks like a real copy: TRADEMARK.md covers the name and icon,"
-  echo "and build/mihrab-provenance.md (kept outside the repo) has the markers"
+  echo "and ~/.mihrab-provenance.md (kept outside the repo) has the markers"
   echo "that prove origin."
 elif [ "$FULL" != "--full" ]; then
   echo "Mihrab reuse check: no change."
