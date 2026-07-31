@@ -8,16 +8,36 @@
  * word resolves an ayah directly instead of going through hand-measured
  * coordinate boxes.
  *
- * ## How a page is sized
+ * ## How a page is sized, and how a line is justified
  *
- * The layout data gives each page a `measure` — its widest line, in ems of
- * its own font. Setting `fontSize = textWidth / measure` makes that line span
- * the page exactly, so every page comes out the same physical width even
- * though the 604 fonts are drawn at different design sizes. Lines are then
- * laid out as flex rows: a normal line is `space-between` (the ~2% it falls
- * short of the measure disappears into the word gaps, exactly as the print
- * closes its lines), while a line that ends a surah is centred and left at
- * its natural width.
+ * `pageMeasureEm()` gives the page's measure: its widest line as DRAWN — the
+ * glyph advances plus a nominal space per gap — in ems of its own font.
+ * Setting `fontSize = textWidth / measureEm` makes that line span the page
+ * exactly, so every page comes out the same physical width even though the
+ * 604 fonts are drawn at different design sizes.
+ *
+ * Every other line is then justified by SOLVING for its space: the gap that
+ * makes `natural + gaps × space` equal the measure, held inside the band in
+ * `docs/mushaf-fidelity-rules.md`. A line that would need more than the band
+ * allows — and the line that closes a surah, which the print never stretches
+ * — is set at the nominal space and centred.
+ *
+ * That only works because the gap is drawn in a font we ship, at a size
+ * derived from that font's own space advance (`MUSHAF_SPACE_ADVANCE_EM`). The
+ * QPC page fonts carry no space glyph, so a plain space falls back to whatever
+ * face the platform picks, at a width we never measured and that differs
+ * between iOS and Android. When that width came out wider than the box the
+ * line was given, every line of page 49 lost its last word.
+ *
+ * The other half of that lesson is `MUSHAF_LINE_BOX_SLACK_EM`, reserved out
+ * of the page block: Android lays a single line out by BREAKING it, and when
+ * nothing in the line is breakable it breaks between glyphs — and a QPC glyph
+ * is a whole word. A line one sub-pixel over its box therefore does not clip,
+ * it loses a word. The line must simply never be wider than its box.
+ *
+ * There are no bidi control characters in the paragraph. QPC numbers its
+ * glyphs in reading order, so a right-to-left paragraph of bare tokens is
+ * already correct; see `lineTokenStream`.
  */
 import React, { useCallback, useMemo } from 'react';
 import {
@@ -29,8 +49,16 @@ import {
   type ViewStyle,
 } from 'react-native';
 import {
+  MUSHAF_LINE_BOX_SLACK_EM,
+  MUSHAF_SPACE_ADVANCE_EM,
+  WORD_SPACE_EM,
   getPageLayout,
   isFramedPage,
+  lineGapCount,
+  lineSpaceEm,
+  lineTokenStream,
+  pageBlockEm,
+  pageMeasureEm,
   type MushafLine,
   type MushafWord,
 } from './mushafLayout';
@@ -45,39 +73,16 @@ import { FONTS } from '../theme/typography';
 export const MUSHAF_LINE_HEIGHT_EM = 1.7183;
 
 /**
- * Widest gap allowed between words, in ems. Beyond this a line stops being
- * justified and is centred instead — the difference between a line that fills
- * its measure and a line that has been pulled apart to pretend it does.
+ * The gap character: a no-break space, so a line has no ordinary break
+ * opportunity in it. That is worth having, but do not mistake it for the
+ * defence against losing a word — it is not. Measured on a Pixel: when a line
+ * overflows its box with nothing breakable in it, Android breaks between
+ * glyphs anyway, and a QPC glyph is a whole word, so the line still loses its
+ * last one. Only `MUSHAF_LINE_BOX_SLACK_EM` prevents that, by making sure the
+ * line never overflows in the first place. U+00A0's advance in AmiriQuran is
+ * the same as the space's, so it costs nothing to use.
  */
-/**
- * Word space, in ems. The page fonts carry no space glyph and their advances
- * stop at the ink, so words rendered back to back collide — بِسْمِ runs into
- * ٱللَّهِ. The print sets a space between words and so does every other QPC
- * renderer; the character falls back to the system font at about this width,
- * which is why the build script budgets the same figure per internal space.
- */
-export const WORD_SPACE_EM = 0.25;
-
-/**
- * Multiplier applied to the word space when SIZING a page (not when drawing).
- * The fallback space is measured by the platform, not by us, so the box has
- * to assume the wider case.
- */
-const SPACE_SAFETY = 1.35;
-
-/**
- * How far a line may be scaled horizontally to reach the measure.
- *
- * A full line comes out within a few percent of the measure, and leaving that
- * few percent unclosed is what makes a page look ragged and unfinished — the
- * print has a straight left margin. We cannot justify by widening the spaces
- * (the line is one text run, which is what keeps the interlocking glyphs
- * correct), so the run is scaled instead. At these magnitudes the distortion
- * is not perceptible; past them it would be, so a line that would need more
- * is left alone rather than stretched into something that is not the mushaf.
- */
-const LINE_SCALE_MIN = 0.97;
-const LINE_SCALE_MAX = 1.08;
+const GAP = '\u00A0';
 
 /** Ratio of page height to text width, used to size the page container. */
 export function mushafPageAspect(page: number, lineCount: number): number {
@@ -120,21 +125,6 @@ export type MushafTextPageProps = {
 
 const BASMALAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
 
-/**
- * Words that QPC draws with more than one glyph must keep the order the font
- * put them in. The glyphs live in the Arabic Presentation Forms block, so the
- * bidi algorithm classifies them as right-to-left and reverses the run —
- * which silently swaps the halves of every multi-glyph word (the basmalah on
- * page 1 was the visible one). The glyphs already sit in visual order, so we
- * override bidi for the token and let the row's `row-reverse` place the words.
- */
-const LRO = '‭';
-const PDF = '‬';
-
-function orderedToken(text: string): string {
-  return text.length > 1 ? `${LRO}${text}${PDF}` : text;
-}
-
 function sameAyah(a: AyahRef | null | undefined, w: MushafWord): boolean {
   return a != null && a.surah === w.surah && a.ayah === w.ayah;
 }
@@ -154,29 +144,18 @@ export default function MushafTextPage({
 }: MushafTextPageProps) {
   const layout = useMemo(() => getPageLayout(page), [page]);
 
-  const fontSize = useMemo(() => {
-    if (!layout || layout.measure <= 0) return 0;
-    // `measure` is the sum of glyph ADVANCES, but a line is drawn with a word
-    // space between every pair of words. Sizing from the advances alone makes
-    // every full line render ~10-15% wider than the box it was sized for, so
-    // the text runs off both edges. Size from what is actually drawn.
-    let widest = layout.measure;
-    for (const line of layout.lines) {
-      if (line.kind !== 'ayah') continue;
-      // Size against a GENEROUS space, not the nominal one. The page fonts
-      // have no space glyph, so the real width of that character comes from
-      // whichever system font the platform falls back to — and it differs
-      // between iOS and Android. Under-estimating it makes the drawn line
-      // wider than its box, and an RTL run that overflows gets clipped at
-      // the right edge, where the line starts. Over-estimating costs a hair
-      // of font size and clips nothing.
-      const drawn =
-        line.natural +
-        WORD_SPACE_EM * SPACE_SAFETY * Math.max(0, line.words.length - 1);
-      if (drawn > widest) widest = drawn;
-    }
-    return width / widest;
-  }, [layout, width]);
+  // The page's measure as DRAWN — advances plus a nominal space per gap. The
+  // widest line then spans the block exactly and no line can exceed it, so
+  // nothing has to be shrunk by a safety factor and pages stop rendering
+  // smaller than they need to be.
+  const measureEm = useMemo(
+    () => (layout ? pageMeasureEm(layout) : 0),
+    [layout],
+  );
+  // Size from the BLOCK, not the measure: the block is the measure plus the
+  // slack every line's box carries, so the widest line spans the measure and
+  // its box still stops exactly at the edge of the page block.
+  const fontSize = layout && measureEm > 0 ? width / pageBlockEm(layout) : 0;
 
   const handlePress = useCallback(
     (word: MushafWord) => {
@@ -205,7 +184,7 @@ export default function MushafTextPage({
         <LineView
           key={index}
           line={line}
-          measure={layout.measure}
+          measureEm={measureEm}
           width={width}
           fontSize={fontSize}
           lineHeight={lineHeight}
@@ -224,8 +203,8 @@ export default function MushafTextPage({
 
 type LineViewProps = {
   line: MushafLine;
-  /** The page's widest line, in ems — what the font size was derived from. */
-  measure: number;
+  /** The page's measure as drawn, in ems — what the font size derives from. */
+  measureEm: number;
   width: number;
   fontSize: number;
   lineHeight: number;
@@ -240,7 +219,7 @@ type LineViewProps = {
 
 const LineView = React.memo(function LineView({
   line,
-  measure,
+  measureEm,
   width,
   fontSize,
   lineHeight,
@@ -302,19 +281,26 @@ const LineView = React.memo(function LineView({
     );
   }
 
-  // Ayah line — ONE text run, not a view per word.
+  // Ayah line — ONE paragraph, not a view per word.
   //
   // Several QPC glyphs draw ink far wider than their advance so they
   // interlock with their neighbours: page 1's ٱلرَّحْمَٰنِ advances 1.29 em and
   // inks 2.86 em. Laying such a word out in its own box, at its own advance,
   // puts that ink on top of the word beside it — and no amount of gap fixes
   // it, because the gap moves the neighbour out of the interlock the font was
-  // drawn for. Handing the whole line to the font as a single run is the only
+  // drawn for. Handing the whole line to the font as one paragraph is the only
   // way it lands right, so word taps are resolved from the advances instead.
-  const [drawnWidth, setDrawnWidth] = React.useState(0);
-  const space = WORD_SPACE_EM * fontSize;
-  const lineWidth =
-    line.natural * fontSize + space * Math.max(0, line.words.length - 1);
+  // The gaps are nested <Text> nodes inside that paragraph, which is not a new
+  // break in the run: the page font has no space glyph, so every gap was
+  // already a fallback run of its own — this one just has a width we know.
+  const spaceEm = lineSpaceEm(line, measureEm);
+  const space = spaceEm * fontSize;
+  const lineWidth = line.natural * fontSize + space * lineGapCount(line);
+  // The box the line is drawn in. The slack was reserved out of the page
+  // block when the font size was chosen, so this is never wider than `width`
+  // — nothing overflows its parent, on either platform.
+  const boxWidth = lineWidth + fontSize * MUSHAF_LINE_BOX_SLACK_EM;
+  const runRightEdge = (boxWidth - lineWidth) / 2 + lineWidth;
 
   const wordAt = (xFromRight: number): MushafWord | null => {
     let cursor = 0;
@@ -325,51 +311,81 @@ const LineView = React.memo(function LineView({
     return line.words[line.words.length - 1] ?? null;
   };
 
-  // Highlighting a single ayah inside one run needs the run split at the ayah
-  // boundary — nested <Text> keeps it a single shaped run, so the glyphs still
-  // interlock across the boundary.
-  const highlight = selected ?? playing ?? null;
-  const parts: Array<{ text: string; on: boolean }> = [];
-  for (const word of line.words) {
-    const on = sameAyah(highlight, word);
-    const last = parts[parts.length - 1];
-    const token = orderedToken(word.text);
-    if (last && last.on === on) last.text += ` ${token}`;
-    else parts.push({ text: parts.length ? ` ${token}` : token, on });
-  }
+  // A gap is drawn in a font we ship, so its advance is known: AmiriQuran's
+  // space is MUSHAF_SPACE_ADVANCE_EM wide, and letter spacing makes up the
+  // difference between that and the space this line was solved for. Scaling
+  // the gap's font size would do the same thing, but a gap set at 2.5x the
+  // page size would drag the line box's height with it.
+  const gapStyle = {
+    fontFamily: FONTS.arabicQuran,
+    fontSize,
+    letterSpacing: (spaceEm - MUSHAF_SPACE_ADVANCE_EM) * fontSize,
+  };
+  // A gap inside a token — the space before a hizb or sajdah symbol — is
+  // budgeted by the build script at the nominal width, so draw it there.
+  const innerGapStyle = {
+    fontFamily: FONTS.arabicQuran,
+    fontSize,
+    letterSpacing: (WORD_SPACE_EM - MUSHAF_SPACE_ADVANCE_EM) * fontSize,
+  };
+  const selectionStyle = { backgroundColor: colors.selection };
 
-  // Justify by scaling the measured run to the page measure. Only lines that
-  // are meant to fill the width — a line that closes a surah stops where the
-  // text stops, as in the print.
-  const scaleX =
-    line.centered || drawnWidth <= 0
-      ? 1
-      : Math.min(LINE_SCALE_MAX, Math.max(LINE_SCALE_MIN, width / drawnWidth));
+  // Highlighting a single ayah inside one paragraph needs the paragraph split
+  // at the ayah boundary — nested <Text> keeps the text one shaped stream, so
+  // the glyphs still interlock across the boundary.
+  const highlight = selected ?? playing ?? null;
+  const nodes: React.ReactNode[] = [];
+  lineTokenStream(line).forEach((piece, i) => {
+    if (piece.kind === 'gap') {
+      const word = line.words[piece.index];
+      const previous = line.words[piece.index - 1];
+      // A gap carries the highlight when both sides of it do, so the band
+      // behind a selected ayah reads as one unbroken run. An inner gap always
+      // has the same word on both sides.
+      const on =
+        sameAyah(highlight, word) &&
+        (piece.inner || (previous != null && sameAyah(highlight, previous)));
+      const base = piece.inner ? innerGapStyle : gapStyle;
+      nodes.push(
+        <Text key={i} style={on ? [base, selectionStyle] : base}>
+          {GAP}
+        </Text>,
+      );
+      return;
+    }
+    nodes.push(
+      sameAyah(highlight, piece.word) ? (
+        <Text key={i} style={selectionStyle}>
+          {piece.text}
+        </Text>
+      ) : (
+        piece.text
+      ),
+    );
+  });
 
   return (
     <View style={[styles.line, { width, height: lineHeight }]}>
       <Pressable
         onPress={e => {
-          const w = wordAt(lineWidth - e.nativeEvent.locationX);
+          const w = wordAt(runRightEdge - e.nativeEvent.locationX);
           if (w) onPress(w);
         }}
         onLongPress={e => {
-          const w = wordAt(lineWidth - e.nativeEvent.locationX);
+          const w = wordAt(runRightEdge - e.nativeEvent.locationX);
           if (w) onLongPress(w);
         }}
         delayLongPress={280}
-        style={{ width: lineWidth, height: lineHeight }}
+        style={{ width: boxWidth, height: lineHeight }}
       >
         <Text
           allowFontScaling={false}
+          // The line can never wrap — there is no break opportunity in it —
+          // but say so anyway: it is the invariant, not an optimisation.
           numberOfLines={1}
-          onTextLayout={e => {
-            const w = e.nativeEvent.lines[0]?.width ?? 0;
-            if (w > 0 && Math.abs(w - drawnWidth) > 0.5) setDrawnWidth(w);
-          }}
-          // Clip, never ellipsize. The measured advance total and what the
-          // platform actually lays out differ by a hair, and with a fixed
-          // width that hair turns every line into "…".
+          // Clip, never ellipsize. The computed width and what the platform
+          // lays out differ by a hair, and with a fixed width that hair would
+          // turn every line into "…".
           ellipsizeMode="clip"
           style={[
             styles.word,
@@ -378,24 +394,11 @@ const LineView = React.memo(function LineView({
               fontSize,
               lineHeight,
               color: colors.text,
-              transform: [{ scaleX }],
-              // Slack over the measured width so a hair of rounding cannot
-              // trigger a clip — but ABSOLUTE, not a percentage. 6% of a
-              // full-measure line is wide enough to push the ink past the
-              // page block and across the frame rule.
-              width: lineWidth + fontSize * 0.08,
+              width: boxWidth,
             },
           ]}
         >
-          {parts.map((part, i) =>
-            part.on ? (
-              <Text key={i} style={{ backgroundColor: colors.selection }}>
-                {part.text}
-              </Text>
-            ) : (
-              part.text
-            ),
-          )}
+          {nodes}
         </Text>
       </Pressable>
     </View>
@@ -414,6 +417,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   word: {
+    // Centres the run inside its box, which is LINE_BOX_SLACK_EM wider than
+    // the run — so the slack is spent evenly on both margins rather than
+    // shifting the line off the print's right edge.
     textAlign: 'center',
     // ALWAYS rtl — never I18nManager.isRTL. That flag follows the UI
     // language, and the mushaf is right-to-left in every locale. With an

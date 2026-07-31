@@ -66,13 +66,19 @@ F-Droid MR 36312 — the same question applies before and after.
 `MushafTextPage` draws 15 flex rows. Sizing follows the print rather than the
 web:
 
-- `fontSize = textWidth / page.measure`, where the measure is the page's
-  widest line in ems. Every page then comes out the same physical width even
-  though the 604 fonts are drawn at different design sizes.
-- A full line is within ~2% of the measure (the QPC advances already carry the
-  printed word spacing), so `justify-content: space-between` closes it
-  invisibly. A line that **ends a surah** is centred and left at its natural
-  width, as in the print.
+- `fontSize = textWidth / pageMeasureEm(page)`, where the measure is the
+  page's widest line **as drawn** — its glyph advances plus a nominal space
+  per gap. Every page then comes out the same physical width even though the
+  604 fonts are drawn at different design sizes. (`page.measure` in the data
+  is the advances alone; sizing from it makes every full line ~15% wider than
+  its box.)
+- Every other line is justified by solving for its space — the gap that makes
+  `natural + gaps × space` equal the measure — held inside the band in
+  `docs/mushaf-fidelity-rules.md`. The gap is drawn as a no-break space in the
+  bundled AmiriQuran, at a size derived from that font's own space advance, so
+  a line's drawn width is the width we computed on both platforms. A line that
+  **ends a surah**, or that cannot reach the measure inside the band, is
+  centred at its natural width, as in the print.
 - Pages 1–2 keep their plate proportions inside a drawn double rule.
 - Night mode is a repaint, not an image inversion.
 

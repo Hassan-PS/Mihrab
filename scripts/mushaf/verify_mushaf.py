@@ -18,7 +18,15 @@ Two classes of fault can reach a reader, and they need different checks:
    literal string "None" in 20 places where a glyph should be, and it drops
    the ayah-1 medallion of Al-Baqarah. Those are ITS faults, not ours.
 
-2. **Wrong rendering** — words colliding on screen. NOTE: the bbox check
+2. **Wrong spacing** — a line drawn wider than the box it was given. This one
+   does not look like a rendering fault at all: the platform lays a single
+   line out by breaking it, so an overflowing line loses the whole word after
+   the last gap that fits, and the page reads as a page of the Quran with a
+   word missing from every line (page 49, 2026-07-30). `check_spacing` replays
+   the reader's own justification over all 604 pages, and `check_gap_font`
+   ties the constant the reader sizes its gaps from to the font we ship.
+
+3. **Wrong rendering** — words colliding on screen. NOTE: the bbox check
    below over-reports. QPC calligraphy interlocks on purpose — a kashida
    sweeping under the next word overlaps its box without touching a
    letterform — so treat hits as candidates for a human look, not failures.
@@ -41,9 +49,21 @@ import json
 import os
 import sys
 
-# Must match WORD_SPACE_EM in MushafTextPage.tsx — the check is only
-# meaningful if it replays what the reader actually draws.
+# Must match src/quran/mushafLayout.ts — these checks are only meaningful if
+# they replay what the reader actually draws.
 WORD_SPACE_EM = 0.25
+WORD_SPACE_MIN_EM = 0.2
+WORD_SPACE_MAX_EM = 0.75
+# Reserved out of the page block so a line's box always fits inside it. A line
+# wider than its box does not clip on Android, it loses its last word.
+MUSHAF_LINE_BOX_SLACK_EM = 0.5
+MUSHAF_SPACE_ADVANCE_EM = 0.292
+
+# The font the reader draws the gap between two words in. The QPC page fonts
+# have no space glyph, so the gap is whatever face the platform falls back to
+# unless we supply one — and an unmeasured gap is how every line of page 49
+# came to lose its last word.
+GAP_FONT = "android/app/src/main/assets/fonts/AmiriQuran.ttf"
 
 # Ink may overlap a neighbour by this much of an em before it looks wrong.
 # QPC calligraphy interlocks on purpose (a kashida sweeping under the next
@@ -100,6 +120,99 @@ def check_content(pages: list[dict], txt_path: str) -> list[str]:
     return problems
 
 
+def line_space_em(natural: float, gaps: int, centered: bool, measure: float) -> float:
+    """The space the reader sets this line at — `lineSpaceEm` in TypeScript."""
+    if gaps == 0 or centered:
+        return WORD_SPACE_EM
+    required = (measure - natural) / gaps
+    if required > WORD_SPACE_MAX_EM:
+        return WORD_SPACE_EM
+    return max(required, WORD_SPACE_MIN_EM)
+
+
+def page_measure_em(page: dict) -> float:
+    """The page's measure as DRAWN — `pageMeasureEm` in TypeScript."""
+    widest = 0.0
+    for ln in page["l"]:
+        if ln["t"] != "a":
+            continue
+        gaps = len(ln["x"].split("|")) - 1
+        widest = max(widest, ln["n"] + WORD_SPACE_EM * gaps)
+    return widest
+
+
+def check_spacing(pages: list[dict]) -> list[str]:
+    """Replay the reader's justification over all 604 pages.
+
+    Two things must hold on every line, and the first one is the whole reason
+    this check exists: a line drawn wider than the measure does not overflow
+    the margin, it silently loses the word after the last gap that fits. The
+    second keeps the fidelity rules honest — the space may only move inside
+    the documented band, and a line that cannot reach the measure inside it is
+    left at the nominal space to be centred, not stretched further.
+    """
+    problems: list[str] = []
+    for page in pages:
+        measure = page_measure_em(page)
+        if measure <= 0:
+            continue
+        flush = False
+        for line_no, ln in enumerate(page["l"], 1):
+            if ln["t"] != "a":
+                continue
+            gaps = len(ln["x"].split("|")) - 1
+            space = line_space_em(ln["n"], gaps, ln.get("c") == 1, measure)
+            width = ln["n"] + space * gaps
+            if width > measure + 1e-9:
+                problems.append(
+                    f"page {page['p']} line {line_no}: drawn {width:.4f} em into "
+                    f"a {measure:.4f} em measure — its last word would be dropped"
+                )
+            if abs(width - measure) < 1e-9:
+                flush = True
+            box = width + MUSHAF_LINE_BOX_SLACK_EM
+            if box > measure + MUSHAF_LINE_BOX_SLACK_EM + 1e-9:
+                problems.append(
+                    f"page {page['p']} line {line_no}: box {box:.4f} em overflows "
+                    f"the page block"
+                )
+            in_band = WORD_SPACE_MIN_EM - 1e-9 <= space <= WORD_SPACE_MAX_EM + 1e-9
+            if not in_band and space != WORD_SPACE_EM:
+                problems.append(
+                    f"page {page['p']} line {line_no}: word space {space:.4f} em "
+                    "is neither inside the band nor the nominal space"
+                )
+        if not flush:
+            problems.append(f"page {page['p']}: no line reaches the measure")
+    return problems
+
+
+def check_gap_font(path: str) -> list[str]:
+    """The constant the reader sizes its gaps from must match the shipped font."""
+    from fontTools.ttLib import TTFont
+
+    if not os.path.exists(path):
+        return [f"gap font missing at {path}"]
+    problems: list[str] = []
+    font = TTFont(path, lazy=True)
+    upem = font["head"].unitsPerEm
+    cmap = font.getBestCmap()
+    hmtx = font["hmtx"]
+    for name, codepoint in (("space", 0x20), ("no-break space", 0xA0)):
+        glyph = cmap.get(codepoint)
+        if glyph is None:
+            problems.append(f"{path}: no {name} glyph")
+            continue
+        advance = hmtx[glyph][0] / upem
+        if abs(advance - MUSHAF_SPACE_ADVANCE_EM) > 1e-6:
+            problems.append(
+                f"{path}: {name} advances {advance:.4f} em, but "
+                f"MUSHAF_SPACE_ADVANCE_EM says {MUSHAF_SPACE_ADVANCE_EM}"
+            )
+    font.close()
+    return problems
+
+
 def check_rendering(pages: list[dict], font_dir: str) -> list[str]:
     """Replay the reader's layout and find words whose ink collides."""
     from fontTools.pens.boundsPen import BoundsPen
@@ -143,10 +256,15 @@ def check_rendering(pages: list[dict], font_dir: str) -> list[str]:
                 lo = hi = 0.0
             return (adv / upem, lo / upem, hi / upem)
 
+        measure = page_measure_em(page)
         for line_no, ln in enumerate(page["l"], 1):
             if ln["t"] != "a":
                 continue
             tokens = ln["x"].split("|")
+            # The gap the reader will actually set this line at — a justified
+            # line is spaced wider than the nominal, which only ever pulls
+            # neighbouring ink further apart.
+            space = line_space_em(ln["n"], len(tokens) - 1, ln.get("c") == 1, measure)
             pen = 0.0
             previous_end = None
             for i, tok in enumerate(tokens):
@@ -160,7 +278,7 @@ def check_rendering(pages: list[dict], font_dir: str) -> list[str]:
                             f"overlap by {overlap:.2f} em"
                         )
                 previous_end = end
-                pen += adv + WORD_SPACE_EM
+                pen += adv + space
         font.close()
     return problems
 
@@ -170,6 +288,7 @@ def main() -> int:
     ap.add_argument("--layout", default=LAYOUT)
     ap.add_argument("--fonts", default="/tmp/qcfbuild/raw-fonts")
     ap.add_argument("--source-txt", default="/tmp/qcf/mushaf-v2.txt")
+    ap.add_argument("--gap-font", default=GAP_FONT)
     ap.add_argument("--skip-render", action="store_true")
     args = ap.parse_args()
 
@@ -188,6 +307,18 @@ def main() -> int:
         print(f"\n!! no independent source at {args.source_txt} — content NOT verified")
         print(f"   fetch it: curl -o {args.source_txt} {SOURCE_TXT}")
         failures += 1
+
+    problems = check_spacing(pages)
+    print(f"\nspacing (line fits the measure, space in band): {len(problems)} problems")
+    for p in problems[:30]:
+        print("  ", p)
+    failures += len(problems)
+
+    problems = check_gap_font(args.gap_font)
+    print(f"\ngap font advance: {len(problems)} problems")
+    for p in problems[:30]:
+        print("  ", p)
+    failures += len(problems)
 
     if not args.skip_render:
         problems = check_rendering(pages, args.fonts)

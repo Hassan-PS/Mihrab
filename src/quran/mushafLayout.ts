@@ -85,6 +85,168 @@ export type MushafPageLayout = {
 /** Lines on a standard page. Pages 1–2 are ornamental plates with fewer. */
 export const MUSHAF_LINES_PER_PAGE = 15;
 
+// ---------------------------------------------------------------------------
+// Line spacing
+//
+// `natural` is the sum of the glyph ADVANCES only — the QPC page fonts carry
+// no space glyph, so the gap between two words is entirely the renderer's to
+// supply. Everything below is the model for that gap, kept here (and free of
+// React Native) so a test can replay exactly what the reader draws.
+// ---------------------------------------------------------------------------
+
+/**
+ * Nominal word space, in ems. The print's own space is not recorded anywhere
+ * in the data, so we take the page's tightest line — the one with the most
+ * ink per gap — to be set at this space, which fixes the width of the printed
+ * text block and therefore the space every other line needs.
+ */
+export const WORD_SPACE_EM = 0.25;
+
+/**
+ * The band the word space may move inside (`docs/mushaf-fidelity-rules.md`).
+ * Below the minimum the QPC letterforms, which interlock by design, start to
+ * touch. Above the maximum a line stops looking like a line of the mushaf and
+ * starts looking like justified web text pulled apart, so it is centred at its
+ * natural width instead — short lines are meant to be short.
+ */
+export const WORD_SPACE_MIN_EM = 0.2;
+export const WORD_SPACE_MAX_EM = 0.75;
+
+/**
+ * Advance of `space` (U+0020) and no-break space (U+00A0) in the bundled
+ * `AmiriQuran.ttf`, in ems — read out of the shipped binary, which is byte
+ * identical on both platforms:
+ *
+ *     hmtx['space'] / head.unitsPerEm  ==  292 / 1000
+ *
+ * The renderer draws every gap in that font, at a size it derives from this
+ * number, so the drawn width of a line is the width we computed rather than
+ * whatever the platform's fallback face happens to use. `verify_mushaf.py`
+ * re-reads the font and fails if this drifts.
+ */
+export const MUSHAF_SPACE_ADVANCE_EM = 0.292;
+
+/**
+ * Slack carried by the box a line is drawn in, in ems, reserved out of the
+ * page block so a line's box can never be wider than the block it sits in.
+ *
+ * This is not a fudge factor, it is the difference between a correct page and
+ * a page with a word missing from every line. Android lays a single line out
+ * by BREAKING it, and when nothing else will fit it breaks between glyphs —
+ * and in QPC a glyph is a whole word. So a line that comes out one sub-pixel
+ * wider than its box does not clip a hair of ink, it silently loses its last
+ * word (page 49, every line, verified on a Pixel). Measured on device, the
+ * drawn width tracks the computed width to within ~0.05 em; half an em of
+ * reserve is twenty times that, and also gives the ink QPC glyphs throw past
+ * their advance somewhere to land at the margins.
+ */
+export const MUSHAF_LINE_BOX_SLACK_EM = 0.5;
+
+/** Gaps between the words of a line (0 for plate and basmalah lines). */
+export function lineGapCount(line: MushafLine): number {
+  return line.kind === 'ayah' ? Math.max(0, line.words.length - 1) : 0;
+}
+
+/**
+ * The page's measure — the width of its text block, in ems of its own font,
+ * as the renderer draws it.
+ *
+ * NOT `layout.measure`: that is the widest line's advances alone, and a line
+ * is drawn with a space between every pair of words. Sizing a page from the
+ * advances makes every full line render ~15% wider than the box it was sized
+ * for. The measure is the widest line as DRAWN at the nominal space.
+ */
+export function pageMeasureEm(layout: MushafPageLayout): number {
+  let widest = 0;
+  for (const line of layout.lines) {
+    if (line.kind !== 'ayah') continue;
+    const drawn = line.natural + WORD_SPACE_EM * lineGapCount(line);
+    if (drawn > widest) widest = drawn;
+  }
+  return widest > 0 ? widest : layout.measure;
+}
+
+/**
+ * The width of the page's text block, in ems — the measure plus the slack
+ * every line's box carries. `fontSize = textWidth / pageBlockEm(layout)`, so
+ * the widest line spans the measure and its box still ends exactly at the
+ * edge of the block. Nothing the renderer draws ever overflows its parent.
+ */
+export function pageBlockEm(layout: MushafPageLayout): number {
+  return pageMeasureEm(layout) + MUSHAF_LINE_BOX_SLACK_EM;
+}
+
+/**
+ * The space this line is set at, in ems — solved so the line spans the
+ * measure exactly, then held inside the band.
+ *
+ * A line that would need more than the band allows is returned at the nominal
+ * space and comes out short; the renderer centres it, which is what the print
+ * does with the line that closes a surah and what the fidelity rules mandate
+ * for anything else that cannot reach the measure honestly.
+ */
+export function lineSpaceEm(line: MushafLine, measureEm: number): number {
+  if (line.kind !== 'ayah') return WORD_SPACE_EM;
+  const gaps = lineGapCount(line);
+  if (gaps === 0 || line.centered) return WORD_SPACE_EM;
+  const required = (measureEm - line.natural) / gaps;
+  if (required > WORD_SPACE_MAX_EM) return WORD_SPACE_EM;
+  return required < WORD_SPACE_MIN_EM ? WORD_SPACE_MIN_EM : required;
+}
+
+/**
+ * Width of a line as drawn, in ems. Never more than the measure — that is the
+ * invariant the renderer depends on, since a line wider than its box loses its
+ * last word to the platform's single-line truncation.
+ */
+export function lineWidthEm(line: MushafLine, measureEm: number): number {
+  if (line.kind !== 'ayah') return 0;
+  return line.natural + lineSpaceEm(line, measureEm) * lineGapCount(line);
+}
+
+/**
+ * One piece of a drawn line: a run of glyphs, or a gap.
+ *
+ * A gap is `inner` when it separates the two glyphs of a single token — ~200
+ * words across the mushaf carry a hizb or sajdah symbol that way — and the
+ * build script budgets those at the nominal space, so the renderer draws them
+ * at the nominal space rather than at the line's justified one.
+ */
+export type MushafLinePiece =
+  | { kind: 'glyphs'; text: string; word: MushafWord; index: number }
+  | { kind: 'gap'; inner: boolean; index: number };
+
+/**
+ * A line, decomposed into what the renderer actually draws.
+ *
+ * **Every token is treated identically, whatever its glyph count.** That is
+ * the whole point of this function existing, because the renderer used to
+ * treat them differently: it wrapped multi-glyph tokens in a bidi override
+ * (U+202D/U+202C) and left single-glyph tokens bare. QPC numbers its glyphs
+ * in reading order, so the bare tokens were already right and it was the
+ * override that was wrong — it laid its token out left to right inside a
+ * right-to-left line. With the two kinds mixed in one paragraph the bidi
+ * algorithm reordered the overridden tokens against their neighbours, and the
+ * text of the Quran came out in the wrong order: page 49's rub-el-hizb landed
+ * after `وَإِن` instead of before it, and 2:2 read `لَا ۛ فِيهِ ۛ رَيْبَ`.
+ *
+ * There is no bidi control character in the stream now. The glyphs are in
+ * logical order, the paragraph is right-to-left, and the algorithm has one
+ * uniform kind of run to lay out — which is the case it gets right.
+ */
+export function lineTokenStream(line: MushafLine): MushafLinePiece[] {
+  if (line.kind !== 'ayah') return [];
+  const pieces: MushafLinePiece[] = [];
+  line.words.forEach((word, i) => {
+    if (i > 0) pieces.push({ kind: 'gap', inner: false, index: i });
+    word.text.split(' ').forEach((text, k) => {
+      if (k > 0) pieces.push({ kind: 'gap', inner: true, index: i });
+      pieces.push({ kind: 'glyphs', text, word, index: i });
+    });
+  });
+  return pieces;
+}
+
 /** Pages 1–2 are framed plates: centred lines, larger text, own proportions. */
 export function isFramedPage(page: number): boolean {
   return page === 1 || page === 2;

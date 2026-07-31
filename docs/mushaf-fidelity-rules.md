@@ -17,14 +17,50 @@ This is already enforced structurally — `MushafTextPage` draws each line as
 one run of exactly the words the data lists, with `numberOfLines={1}`. There
 is no code path that could wrap.
 
+**Not wrapping is not the same as not losing a word.** A single line is laid
+out by BREAKING it and drawing only the first line, so a run even a hair wider
+than its box loses everything after the last break — not a sliver of ink, a
+whole word, with no error anywhere. Page 49 shipped like that: all fifteen
+lines ended one word early. Two things keep it from recurring:
+
+- The gap between two words is drawn in a font we ship (`AmiriQuran`) at a
+  size derived from that font's own space advance, so the drawn width of a
+  line is the width we computed rather than whatever face the platform falls
+  back to — the QPC page fonts carry no space glyph at all, and the fallback
+  differs between iOS and Android.
+- **A line is never allowed to be wider than its box.** `MUSHAF_LINE_BOX_SLACK_EM`
+  is reserved out of the page block for exactly this, and it is load-bearing:
+  measured on a Pixel, removing it brought the missing words straight back.
+
+A no-break gap character (U+00A0) is worth having and we use it, but it is
+*not* what saves the line, and it is worth knowing why. Android has nowhere to
+break such a line, so it breaks between glyphs instead — and in QPC a glyph is
+a whole word, so the line loses its last one anyway. Nothing but fitting the
+box prevents that.
+
+### Token order
+
+The glyphs of a line are drawn in the order QPC numbers them, in a
+right-to-left paragraph, with **no bidi control characters at all**.
+
+The renderer used to wrap a token in an LTR override (U+202D…U+202C) when it
+had more than one glyph, and leave single-glyph tokens bare. That put two
+kinds of run in one paragraph, and the bidi algorithm reordered the overridden
+ones against their neighbours: page 49 drew `وَإِن ۞ كُنتُمْ` where the print
+puts the rub-el-hizb first, and 2:2 drew `لَا ۛ فِيهِ ۛ رَيْبَ` for
+`لَا رَيْبَ ۛ فِيهِ ۛ`. Uniform bare tokens render correctly on both platforms
+— including every multi-glyph word of pages 1 and 2, the case the override was
+added for in the first place.
+
 ## What may adapt to the screen
 
 Only two things, and both are bounded:
 
 ### 1. Word spacing, within a band
 
-A line is spaced to fill the measure, but the space between words may only
-move inside `WORD_SPACE_MIN_EM … WORD_SPACE_MAX_EM`.
+A line is spaced to fill the measure. The space is SOLVED for — the gap that
+makes `natural + gaps × space` equal the measure — and may only move inside
+`WORD_SPACE_MIN_EM … WORD_SPACE_MAX_EM`.
 
 - Below the minimum, letterforms of adjacent words start to touch — the QPC
   calligraphy interlocks by design and needs room to read.
@@ -39,8 +75,9 @@ a surah, the plate pages — are meant to be short.
 
 ### 2. Overall scale
 
-The font size comes from the page's widest line so that line spans the
-measure exactly. Every page then renders at the same physical width, which is
+The font size comes from the page's widest line **as drawn** — its advances
+plus a nominal space per gap, which is `pageMeasureEm()`, not the advance-only
+`measure` in the data — so that line spans the measure exactly. Every page then renders at the same physical width, which is
 why the text does not jump size as you turn pages, even though the 604 fonts
 are drawn at different design sizes.
 
@@ -77,7 +114,11 @@ margin instead of scale.
 
 ## Where these live
 
-- `WORD_SPACE_MIN_EM` / `WORD_SPACE_MAX_EM` — `MushafTextPage.tsx`
+- `WORD_SPACE_MIN_EM` / `WORD_SPACE_MAX_EM`, `WORD_SPACE_EM`,
+  `MUSHAF_SPACE_ADVANCE_EM`, `MUSHAF_LINE_BOX_SLACK_EM`, and the
+  `pageMeasureEm` / `pageBlockEm` / `lineSpaceEm` / `lineWidthEm` /
+  `lineTokenStream` model — `mushafLayout.ts`, kept free of React Native so
+  the tests replay exactly what the renderer draws
 - `MIN_DUAL_PAGE_DP` / `MAX_SINGLE_PAGE_DP` — `mushafSpread.ts`, used by
   `MushafSpreadReader`
 - Phone landscape zoom (`LANDSCAPE_ZOOM`) — `MushafPhoneReader`, bounded by
@@ -85,9 +126,11 @@ margin instead of scale.
 
 ## How to check it
 
-`scripts/mushaf/verify_mushaf.py` already proves the content invariant: every
-glyph of all 604 pages matches an independent copy of the QPC data. What it
-does not yet check is the spacing band — a useful addition is to compute, for
-every line of every page, the word space the renderer would use at a given
-measure, and assert it lands inside the band. That turns "within reason" into
-something a build can fail on.
+`scripts/mushaf/verify_mushaf.py` proves the content invariant: every glyph of
+all 604 pages matches an independent copy of the QPC data. It also replays the
+renderer's justification over every line of every page (`check_spacing`) and
+ties `MUSHAF_SPACE_ADVANCE_EM` to the font binary we ship (`check_gap_font`).
+
+`__tests__/mushafLayout.test.ts` runs the same two checks on every build, so a
+line that would be drawn wider than its measure fails CI rather than reaching
+a reader.
