@@ -76,12 +76,19 @@ function MushafTextPageSurface({
         ? {
             text: '#E8E4DA',
             accent: accentColor,
+            // The surah's name, inside the band. On a night page the accent
+            // is too close to the ground to read at a glance, so the name
+            // takes the page's own ink and the band keeps the accent —
+            // which is also how the print does it: the frame is worked, the
+            // name is written.
+            heading: '#F2EFE6',
             selection: 'rgba(255,255,255,0.10)',
             muted: 'rgba(232,228,218,0.72)',
           }
         : {
             text: '#1A1A18',
             accent: accentColor,
+            heading: accentColor,
             selection: 'rgba(0,0,0,0.06)',
             muted: 'rgba(26,26,24,0.66)',
           },

@@ -63,6 +63,11 @@ import {
   type MushafWord,
 } from './mushafLayout';
 import { findSurah } from './quran';
+import {
+  BasmalahFlourish,
+  SurahBand,
+  surahBandTextInset,
+} from './mushafOrnaments';
 import { FONTS } from '../theme/typography';
 
 /**
@@ -98,8 +103,10 @@ export type MushafTextPageProps = {
   width: number;
   colors: {
     text: string;
-    /** Ayah medallions and surah plate strokes. */
+    /** Ayah medallions and surah band strokes. */
     accent: string;
+    /** The surah's name inside its band — see the surface's night palette. */
+    heading: string;
     /** Background behind the selected ayah. */
     selection: string;
     /** Surah plate / basmalah colour. */
@@ -242,50 +249,75 @@ const LineView = React.memo(function LineView({
 }: LineViewProps) {
   if (line.kind === 'surah') {
     const surah = findSurah(line.surah);
+    // The band takes the full measure, as it does in the print, where a surah
+    // opens across the whole text block rather than in a plate the width of
+    // its own name.
+    const bandH = lineHeight * 0.88;
     return (
       <View style={[styles.row, { height: lineHeight }]}>
-        <View
-          style={[
-            styles.plate,
-            {
-              borderColor: colors.accent,
-              paddingHorizontal: fontSize * 0.6,
-              height: lineHeight * 0.86,
-              borderRadius: lineHeight * 0.2,
-            },
-          ]}
-        >
-          <Text
-            allowFontScaling={false}
-            style={{
-              fontFamily: FONTS.arabicQuran,
-              fontSize: fontSize * 0.72,
-              color: colors.accent,
-              // Amiri's tall ascenders need the room or the name clips.
-              lineHeight: lineHeight * 0.8,
-            }}
+        <View style={{ width, height: bandH }}>
+          <View style={StyleSheet.absoluteFill}>
+            <SurahBand width={width} height={bandH} color={colors.accent} />
+          </View>
+          <View
+            style={[
+              styles.bandLabel,
+              { paddingHorizontal: surahBandTextInset(bandH) },
+            ]}
           >
-            {`سورة ${surah?.arabic ?? ''}`}
-          </Text>
+            <Text
+              allowFontScaling={false}
+              numberOfLines={1}
+              style={{
+                fontFamily: FONTS.arabicQuran,
+                fontSize: fontSize * 0.86,
+                color: colors.heading,
+                // Amiri's tall ascenders need the room or the name clips.
+                lineHeight: bandH * 0.86,
+              }}
+            >
+              {`سورة ${surah?.arabic ?? ''}`}
+            </Text>
+          </View>
         </View>
       </View>
     );
   }
 
   if (line.kind === 'basmalah') {
+    // Set at the page's own size and in the page's own ink rather than small
+    // and grey: in the print the basmalah is a line of the mushaf, not a
+    // caption above one.
+    const flourishW = width * 0.17;
+    const flourishH = lineHeight * 0.5;
     return (
       <View style={[styles.row, { height: lineHeight }]}>
-        <Text
-          allowFontScaling={false}
-          style={{
-            fontFamily: FONTS.arabicQuran,
-            fontSize: fontSize * 0.66,
-            color: colors.muted,
-            lineHeight: lineHeight * 0.9,
-          }}
-        >
-          {BASMALAH}
-        </Text>
+        <View style={styles.basmalahRow}>
+          <BasmalahFlourish
+            width={flourishW}
+            height={flourishH}
+            color={colors.accent}
+          />
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: FONTS.arabicQuran,
+              fontSize: fontSize * 0.84,
+              color: colors.text,
+              lineHeight: lineHeight * 0.94,
+            }}
+          >
+            {BASMALAH}
+          </Text>
+          {/* Mirrored, so the pair reads the same from either end. */}
+          <View style={styles.flourishMirror}>
+            <BasmalahFlourish
+              width={flourishW}
+              height={flourishH}
+              color={colors.accent}
+            />
+          </View>
+        </View>
       </View>
     );
   }
@@ -438,10 +470,18 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
     includeFontPadding: false,
   },
-  plate: {
-    borderWidth: StyleSheet.hairlineWidth * 2,
+  bandLabel: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
   },
+  basmalahRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  // The flourish is drawn pointing one way; the far side is the same drawing
+  // reflected, so the two are guaranteed to match.
+  flourishMirror: { transform: [{ scaleX: -1 }] },
 });
