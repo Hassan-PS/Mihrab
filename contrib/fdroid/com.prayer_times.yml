@@ -1,7 +1,6 @@
 AntiFeatures:
   NonFreeNet:
-    en-US: Prayer times from AlAdhan (api.aladhan.com), whose server-side source
-      is not published.
+    en-US: Prayer times from AlAdhan, whose server code is not published.
   TetheredNet:
     en-US: Optional features rely on fixed services (AlAdhan, Nominatim).
 Categories:
