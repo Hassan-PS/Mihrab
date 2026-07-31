@@ -467,6 +467,20 @@ export function MushafReader({
   }, []);
   useOverlayDismissGuard(sheetVisible || jumpVisible, closeOverlays);
 
+  // One stable callback for the whole list. Binding the page inside
+  // `renderPage` handed every text page a fresh function on every render of
+  // the reader, which defeated the memo on the page and on all fifteen of its
+  // lines. Declared up here with the other hooks — `renderPage` sits after
+  // several early returns.
+  const handleWordLongPress = useCallback(
+    (ref: { surah: number; ayah: number }, page: number) => {
+      setSelected({ ...ref, page });
+      setSheetScrollAudio(false);
+      setSheetVisible(true);
+    },
+    [],
+  );
+
   const jumpToPage = (page: number) => {
     const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
     setCurrentPage(clamped);
@@ -924,11 +938,7 @@ export function MushafReader({
                 // Only the page being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
                 onWordPress={onToggleFullscreen}
-                onWordLongPress={ref => {
-                  setSelected({ ...ref, page });
-                  setSheetScrollAudio(false);
-                  setSheetVisible(true);
-                }}
+                onWordLongPress={handleWordLongPress}
               />
             ) : (
             /* Inner surface at virtual full-image size; cropped pages

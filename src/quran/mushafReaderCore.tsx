@@ -305,6 +305,40 @@ export function useMushafReaderCore({
   };
 }
 
+/**
+ * A measured dimension that only reaches the page once it has stopped moving.
+ *
+ * Toggling fullscreen is not one layout, it is a burst of them: the nav header
+ * goes, the status bar goes, the safe-area insets change, and the list
+ * re-measures after each. Every one of those published a new page-box height,
+ * and a mushaf page — 15 justified lines, ~260 drawn pieces — was laid out at
+ * each. Measured on an emulator, one toggle produced line heights of 87.1,
+ * 84.1, 86.1 and finally 97.1 dp over 184 ms: four full text layouts of every
+ * mounted page, three of them thrown away before a frame was ever shown at
+ * that size.
+ *
+ * Memoization cannot help with this — the props genuinely differ each time.
+ * The fix is to stop asking the page to lay out at sizes that are on their way
+ * somewhere else. The first measurement is taken immediately, since there is
+ * nothing on screen yet to protect; after that a change has to hold still for
+ * `quietMs` before it is published. The window is comfortably inside the
+ * chrome's own transition, so the page resizes once, when the chrome settles.
+ */
+export function useSettledMeasure(value: number, quietMs = 100): number {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    if (value === settled) return;
+    // First real measurement, or a reset to "unmeasured" — no reason to wait.
+    if (settled === 0 || value === 0) {
+      setSettled(value);
+      return;
+    }
+    const id = setTimeout(() => setSettled(value), quietMs);
+    return () => clearTimeout(id);
+  }, [value, settled, quietMs]);
+  return settled;
+}
+
 // ── Chrome ────────────────────────────────────────────────────────────
 
 /**

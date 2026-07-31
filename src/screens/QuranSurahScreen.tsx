@@ -158,6 +158,15 @@ export function QuranSurahScreen() {
   }, [isMushaf, updateSettings]);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  /**
+   * Stable. This one function reaches every mushaf page — a tap anywhere on
+   * the page toggles fullscreen — so when it was an inline arrow it changed
+   * identity on every render of this screen, and with it the callback each
+   * page hands to each of its fifteen lines. That is what defeated the memo
+   * the whole way down: a page laid itself out again for a screen re-render
+   * that had nothing to do with it.
+   */
+  const toggleFullscreen = useCallback(() => setIsFullscreen(f => !f), []);
 
   /**
    * Header title for mushaf mode — the surah the visible PAGE starts with,
@@ -412,7 +421,7 @@ export function QuranSurahScreen() {
         surahNumber={surahNumber}
         initialPage={initialPage}
         isFullscreen={isFullscreen}
-        onToggleFullscreen={() => setIsFullscreen(f => !f)}
+        onToggleFullscreen={toggleFullscreen}
         audioSheetSignal={audioSheetSignal}
         onTitleChange={handleReaderTitleChange}
       />

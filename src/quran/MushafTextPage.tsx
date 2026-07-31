@@ -129,7 +129,14 @@ function sameAyah(a: AyahRef | null | undefined, w: MushafWord): boolean {
   return a != null && a.surah === w.surah && a.ayah === w.ayah;
 }
 
-export default function MushafTextPage({
+/**
+ * Memoized: a page is ~260 drawn pieces, and the reader re-renders for reasons
+ * that have nothing to do with the page — a page turn, an ayah change during
+ * recitation, the chrome coming and going. Without this the whole tree was
+ * rebuilt each time, and because the callbacks below feed `LineView`'s own
+ * memo, every line went with it.
+ */
+function MushafTextPage({
   page,
   width,
   colors,
@@ -200,6 +207,8 @@ export default function MushafTextPage({
     </View>
   );
 }
+
+export default React.memo(MushafTextPage);
 
 type LineViewProps = {
   line: MushafLine;

@@ -159,7 +159,7 @@ export default function MushafPhoneLandscape({
                 playing={playing}
                 prefetchRadius={page === currentPage ? 2 : 0}
                 onWordPress={onToggleFullscreen}
-                onWordLongPress={ref => onAyahLongPress(ref, page)}
+                onWordLongPress={onAyahLongPress}
               />
             </Pressable>
             <View style={styles.footer}>

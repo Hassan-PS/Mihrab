@@ -43,6 +43,7 @@ import {
   MushafPageHeader,
   useMushafReaderCore,
   type MushafReaderProps,
+  useSettledMeasure,
 } from './mushafReaderCore';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MiniPlayer } from './audio/MiniPlayer';
@@ -84,7 +85,10 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   const settled = useRef(currentPage);
   // Measured list viewport (excludes the fullscreen top inset padding);
   // window height is a fine estimate for the first frame.
-  const [listH, setListH] = useState(0);
+  const [listHRaw, setListH] = useState(0);
+  // Settled, so a fullscreen toggle lays the page out once instead of at every
+  // intermediate height the chrome passes through on its way out.
+  const listH = useSettledMeasure(listHRaw);
 
   const isLandscape = width > height;
   /**
@@ -169,7 +173,11 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       // zoom (1.6× the portrait width), so the page is taller than the
       // window and its column scrolls vertically.
       const chromeH = navPad + HEADER_RESERVE + FOOTER_RESERVE;
-      const viewportH = (listH || height) - chromeH;
+      // Whole dp. The measured viewport is a float, and a sub-pixel wobble in
+      // it is enough to give the page a different box, which re-lays out all
+      // fifteen lines to produce a page nobody could tell apart from the one
+      // already on screen.
+      const viewportH = Math.round((listH || height) - chromeH);
       const textWidth = isLandscape
         ? Math.min(pageWidth - H_PADDING * 2, height * LANDSCAPE_ZOOM)
         : pageWidth - H_PADDING * 2;
@@ -225,7 +233,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
                 // Only the page being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
                 onWordPress={onToggleFullscreen}
-                onWordLongPress={ref => core.openSelection(ref, page)}
+                onWordLongPress={core.openSelection}
               />
             </Pressable>
             <MushafPageFooter

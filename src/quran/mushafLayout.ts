@@ -148,6 +148,19 @@ export function lineGapCount(line: MushafLine): number {
 }
 
 /**
+ * Per-layout and per-line memo tables.
+ *
+ * Everything they hold is size-independent: the measure a page is set to, the
+ * pieces a line decomposes into. None of it involves the font size, the screen
+ * width or the orientation — yet it was all recomputed on every render of
+ * every line, which on a fullscreen toggle meant several thousand rebuilds of
+ * results that could not have changed. Keyed weakly on the decoded objects,
+ * which the decode cache owns, so entries go when a page is evicted.
+ */
+const measureCache = new WeakMap<MushafPageLayout, number>();
+const tokenStreamCache = new WeakMap<MushafLine, MushafLinePiece[]>();
+
+/**
  * The page's measure — the width of its text block, in ems of its own font,
  * as the renderer draws it.
  *
@@ -157,6 +170,14 @@ export function lineGapCount(line: MushafLine): number {
  * for. The measure is the widest line as DRAWN at the nominal space.
  */
 export function pageMeasureEm(layout: MushafPageLayout): number {
+  const memo = measureCache.get(layout);
+  if (memo !== undefined) return memo;
+  const value = computePageMeasureEm(layout);
+  measureCache.set(layout, value);
+  return value;
+}
+
+function computePageMeasureEm(layout: MushafPageLayout): number {
   let widest = 0;
   for (const line of layout.lines) {
     if (line.kind !== 'ayah') continue;
@@ -235,6 +256,14 @@ export type MushafLinePiece =
  * uniform kind of run to lay out — which is the case it gets right.
  */
 export function lineTokenStream(line: MushafLine): MushafLinePiece[] {
+  const memo = tokenStreamCache.get(line);
+  if (memo !== undefined) return memo;
+  const value = computeLineTokenStream(line);
+  tokenStreamCache.set(line, value);
+  return value;
+}
+
+function computeLineTokenStream(line: MushafLine): MushafLinePiece[] {
   if (line.kind !== 'ayah') return [];
   const pieces: MushafLinePiece[] = [];
   line.words.forEach((word, i) => {

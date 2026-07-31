@@ -24,13 +24,21 @@ export type MushafTextPageSurfaceProps = {
   playing?: AyahRef | null;
   /** Called once when this page's font cannot be loaded. */
   onUnavailable?: (page: number) => void;
-  onWordPress?: () => void;
-  onWordLongPress?: (ref: AyahRef) => void;
+  /**
+   * Both handlers take the page, so the reader can pass ONE stable callback
+   * for the whole list instead of closing over the page per item. A fresh
+   * closure per render is what used to defeat the memo on every line: it
+   * changed identity, so `MushafTextPage`'s `useCallback` changed with it, so
+   * `LineView`'s memo compared unequal and all fifteen lines rebuilt — on
+   * every page turn and every fullscreen toggle.
+   */
+  onWordPress?: (page: number) => void;
+  onWordLongPress?: (ref: AyahRef, page: number) => void;
   /** Prefetch radius in pages; only the visible page should pass > 0. */
   prefetchRadius?: number;
 };
 
-export default function MushafTextPageSurface({
+function MushafTextPageSurface({
   page,
   width,
   height,
@@ -49,6 +57,18 @@ export default function MushafTextPageSurface({
   useEffect(() => {
     if (failed) onUnavailable?.(page);
   }, [failed, onUnavailable, page]);
+
+  // Bound to the page here, once, rather than in the reader's renderItem —
+  // which runs on every reader render and would hand a new function down each
+  // time.
+  const handleWordPress = React.useCallback(
+    () => onWordPress?.(page),
+    [onWordPress, page],
+  );
+  const handleWordLongPress = React.useCallback(
+    (ref: AyahRef) => onWordLongPress?.(ref, page),
+    [onWordLongPress, page],
+  );
 
   const colors = React.useMemo(
     () =>
@@ -102,8 +122,8 @@ export default function MushafTextPageSurface({
       colors={colors}
       selected={selected}
       playing={playing}
-      onWordPress={() => onWordPress?.()}
-      onWordLongPress={ref => onWordLongPress?.(ref)}
+      onWordPress={handleWordPress}
+      onWordLongPress={handleWordLongPress}
     />
   );
 
@@ -147,6 +167,8 @@ export default function MushafTextPageSurface({
     </View>
   );
 }
+
+export default React.memo(MushafTextPageSurface);
 
 const styles = StyleSheet.create({
   placeholder: {

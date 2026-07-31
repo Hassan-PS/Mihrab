@@ -39,6 +39,7 @@ import {
   MushafPageHeader,
   useMushafReaderCore,
   type MushafReaderProps,
+  useSettledMeasure,
 } from './mushafReaderCore';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MiniPlayer } from './audio/MiniPlayer';
@@ -104,7 +105,9 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   const listRef = useRef<FlatList<number>>(null);
   const settledPage = useRef(currentPage);
   const settledIndex = useRef(indexForPage(currentPage));
-  const [listH, setListH] = useState(0);
+  const [listHRaw, setListH] = useState(0);
+  // Settled — see `useSettledMeasure`.
+  const listH = useSettledMeasure(listHRaw);
 
   const navPad = !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
   const playerReserve = playback.active ? PLAYER_RESERVE : 0;
@@ -191,13 +194,17 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       if (page == null || page < 1 || page > MUSHAF_TOTAL_PAGES) {
         return <View style={{ width: colW }} />;
       }
-      const availH = Math.max(
-        120,
-        (listH || height) -
-          navPad -
-          HEADER_RESERVE -
-          FOOTER_RESERVE -
-          playerReserve,
+      // Whole dp — a sub-pixel wobble in the measured viewport must not fork
+      // the page's layout. See the same rounding in MushafPhoneReader.
+      const availH = Math.round(
+        Math.max(
+          120,
+          (listH || height) -
+            navPad -
+            HEADER_RESERVE -
+            FOOTER_RESERVE -
+            playerReserve,
+        ),
       );
       // Width-fit, height-capped, centred — no zoom concept.
       let pageW = colW - H_PADDING * 2;
@@ -236,7 +243,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 // Only the spread being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
                 onWordPress={onToggleFullscreen}
-                onWordLongPress={ref => core.openSelection(ref, page)}
+                onWordLongPress={core.openSelection}
               />
             </Pressable>
           </View>
