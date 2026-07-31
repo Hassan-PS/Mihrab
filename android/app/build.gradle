@@ -151,6 +151,11 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            // Installs beside the stable app instead of replacing it. A debug
+            // build is signed with a different key, so without this, putting
+            // one on a real phone means uninstalling the release first and
+            // taking the user's bookmarks, khatmah and journal with it.
+            applicationIdSuffix ".debug"
             buildConfigField "boolean", "IS_BETA", "false"
         }
         release {

@@ -1,0 +1,114 @@
+diff --git a/node_modules/react-native-screens/android/src/fabric/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt b/node_modules/react-native-screens/android/src/fabric/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt
+index a15ed76..0c4f7f6 100644
+--- a/node_modules/react-native-screens/android/src/fabric/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt
++++ b/node_modules/react-native-screens/android/src/fabric/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt
+@@ -22,6 +22,27 @@ abstract class FabricEnabledViewGroup(
+         mStateWrapper = wrapper
+     }
+ 
++    /**
++     * Drops the memo of the last state we pushed to the shadow tree.
++     *
++     * `RNSScreenShadowNodeCommitHook` resets every screen's `frameSize` to (0, 0) whenever the root
++     * changes size (rotation, split screen, resize). Screens that are not currently laid out - the
++     * background screens of a native stack - never run `onLayout` again afterwards, and even when
++     * they do the memo below swallows the update because the numbers did not change. The shadow node
++     * is then stuck in its "no frame yet" mode, where it falls back to the dummy-measured header
++     * height and applies a frame origin correction that no longer matches the native layout, so
++     * `Pressability`'s measured press rect sits one header height too low and every touch that moves
++     * even a pixel is reported outside the component.
++     *
++     * Clearing the memo lets the next layout push the real frame back into the shadow tree.
++     */
++    @UiThread
++    fun invalidateStateMemo() {
++        lastWidth = 0f
++        lastHeight = 0f
++        lastHeaderHeight = 0f
++    }
++
+     protected fun updateScreenSizeFabric(
+         width: Int,
+         height: Int,
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
+index c99ca36..517d29a 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
+@@ -122,6 +122,32 @@ class Screen(
+     private val isNativeStackScreen: Boolean
+         get() = container is ScreenStack
+ 
++    /**
++     * Set by the container when the root changed size, to force the next layout to push a frame into
++     * the shadow tree even if the frame itself did not change. See [invalidateShadowState].
++     */
++    private var needsShadowStateDispatch = false
++
++    /**
++     * Called by [ScreenContainer] when the container changed size, for every screen it holds -
++     * including the ones that are currently detached.
++     *
++     * A root size change makes `RNSScreenShadowNodeCommitHook` reset every screen's `frameSize` to
++     * (0, 0). A detached screen never lays out while it is in the background, so it never pushes a
++     * frame back, and once it is attached again its bounds are unchanged, so neither `onLayout`'s
++     * `changed` flag nor the memo in [FabricEnabledViewGroup.updateState] lets the update through.
++     * The shadow node is then stuck in its "no frame yet" mode, applying a frame origin correction
++     * based on the dummy-measured header height, which shifts everything the screen renders one
++     * header height down in the shadow tree. `Pressability` measures its press rect from that shadow
++     * tree, so every touch that moves at all lands outside the rect and the component stops
++     * responding to real fingers (injected zero-movement taps still work, which is what makes this
++     * so easy to miss).
++     */
++    internal fun invalidateShadowState() {
++        invalidateStateMemo()
++        needsShadowStateDispatch = true
++    }
++
+     init {
+         // we set layout params as WindowManager.LayoutParams to workaround the issue with TextInputs
+         // not displaying modal menus (e.g., copy/paste or selection). The missing menus are due to the
+@@ -354,7 +380,8 @@ class Screen(
+     ) {
+         // In case of form sheet we get layout notification a bit later, in `onBottomSheetBehaviorDidLayout`
+         // after the attached behaviour laid out this view.
+-        if (changed && isNativeStackScreen && !usesFormSheetPresentation()) {
++        if ((changed || needsShadowStateDispatch) && isNativeStackScreen && !usesFormSheetPresentation()) {
++            needsShadowStateDispatch = false
+             val width = r - l
+             val height = b - t
+ 
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt
+index 7055a0d..8eff4b7 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt
+@@ -51,6 +51,17 @@ open class ScreenContainer(
+         r: Int,
+         b: Int,
+     ) {
++        if (changed) {
++            // The container changed size, which means the root did too (rotation, split screen,
++            // window resize). `RNSScreenShadowNodeCommitHook` has just reset the frame state of every
++            // screen in the tree, so every screen we hold - including the ones detached in the
++            // background, which will not lay out on their own - has to push a fresh frame on its next
++            // layout. See `Screen.invalidateShadowState`.
++            for (wrapper in screenWrappers) {
++                wrapper.screen.invalidateShadowState()
++            }
++        }
++
+         var i = 0
+         val size = childCount
+         while (i < size) {
+diff --git a/node_modules/react-native-screens/android/src/paper/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt b/node_modules/react-native-screens/android/src/paper/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt
+index d575094..17c242a 100644
+--- a/node_modules/react-native-screens/android/src/paper/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt
++++ b/node_modules/react-native-screens/android/src/paper/java/com/swmansion/rnscreens/FabricEnabledViewGroup.kt
+@@ -9,6 +9,8 @@ abstract class FabricEnabledViewGroup(
+ ) : ViewGroup(context) {
+     fun setStateWrapper(wrapper: StateWrapper?) = Unit
+ 
++    fun invalidateStateMemo() = Unit
++
+     protected fun updateScreenSizeFabric(
+         width: Int,
+         height: Int,
