@@ -12,12 +12,13 @@
  * Translation text loads asynchronously after first paint (QR-2) — the
  * 1–2 MB edition JSON no longer blocks the navigation transition.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -56,6 +57,8 @@ import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
 import { cardEdgeStyle } from '../theme/chrome';
 import { arabicTextStyle } from '../theme/typography';
+
+const isIOS = Platform.OS === 'ios';
 
 type AyahRow = {
   ayah: number; // 1-based
@@ -206,6 +209,37 @@ export function QuranSurahScreen() {
               : '#ffffff',
         }
       : { paddingBottom: insets.bottom, backgroundColor: palette.bg };
+    /**
+     * Header colours follow the PAGE, not the app theme.
+     *
+     * On iOS the header is transparent and blurred over whatever is beneath
+     * it, and its title is painted in the theme's text colour. Mushaf night
+     * mode is independent of the app theme, so a light theme reading a night
+     * page put near-black title text over a near-black page — there, but only
+     * if you already knew where to look. The mirror case (dark theme, light
+     * page) is the same mistake the other way round.
+     */
+    const pageChrome =
+      isIOS && ownsItsInsets && quranHydrated
+        ? {
+            headerBlurEffect: (quran.prefs.mushafNightMode
+              ? 'dark'
+              : 'light') as 'dark' | 'light',
+            headerTintColor: quran.prefs.mushafNightMode ? '#f2f2f2' : '#1a1a1a',
+            headerTitleStyle: {
+              color: quran.prefs.mushafNightMode ? '#f2f2f2' : '#1a1a1a',
+              writingDirection: isArabic ? 'rtl' : 'ltr',
+              // writingDirection is a valid TextStyle prop, but react-navigation
+              // types the title style as a narrower Pick<> that omits it.
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            headerLargeTitleStyle: {
+              color: quran.prefs.mushafNightMode ? '#f2f2f2' : '#1a1a1a',
+              writingDirection: isArabic ? 'rtl' : 'ltr',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          }
+        : null;
     if (isFullscreen) {
       navigation.setOptions({
         headerShown: false,
@@ -218,6 +252,7 @@ export function QuranSurahScreen() {
       headerShown: true,
       orientation: 'portrait',
       contentStyle,
+      ...(pageChrome ?? {}),
       // Mushaf mode: the reader's page-derived surah wins once it has
       // reported one. Translation mode always shows the route's surah.
       title: (isMushaf && readerTitle) || surah.romanized,
@@ -296,6 +331,7 @@ export function QuranSurahScreen() {
   }, [
     navigation,
     surah,
+    isArabic,
     isMushaf,
     isFullscreen,
     readerTitle,

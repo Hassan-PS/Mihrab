@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format is inspired 
 
 ### Fixed
 - **The Quran's buttons work again after reading in fullscreen landscape.** Leave the reader after it had been fullscreen and turned, and the surah list and the button that opens the Quran looked completely normal and did nothing at all. 2.8.2 claimed this was fixed; it was not — that release closed a leftover menu window, which was a real problem but not this one. The cause was underneath the app: when the screen turns, every screen in the stack is asked to report its position again, but the ones sitting in the background behind the reader are not on screen to answer, and nothing asked them again afterwards. They went on being drawn in the right place while the part of the app that decides whether a touch is a press believed they sat a header's height lower. A perfectly still touch is never re-checked against that position and still worked, which is why a test tap always succeeded and a finger — which always moves a little — never did. Background screens now report their position again once the screen has turned.
+- **The reader's title is readable on a night page on iPhone and iPad.** The header there is transparent and sits over the page, and its title was painted in the app theme's text colour — so a light app theme reading a night page put near-black lettering over a near-black page. The title, the back arrow and the blur now follow the colour of the page rather than the theme.
 
 ## [2.8.2] — 2026-07-31
 
