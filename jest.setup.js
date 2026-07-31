@@ -1,5 +1,13 @@
 /* eslint-env jest */
 
+// NetInfo touches its native module at import time, which is null under Jest.
+// The library ships a mock for exactly this; register it globally so any test
+// that renders the app (which watches for Wi-Fi to warm the mushaf font store)
+// doesn't have to know NetInfo is down there.
+jest.mock('@react-native-community/netinfo', () =>
+  require('@react-native-community/netinfo/jest/netinfo-mock.js'),
+);
+
 // react-native-gesture-handler uses TurboModuleRegistry.getEnforcing at import
 // time, which throws in Jest because native modules aren't registered.  Mock the
 // entire package before any module loads so the native call never executes.

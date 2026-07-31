@@ -20,8 +20,11 @@ import { MUSHAF_TOTAL_PAGES } from './mushafImages';
 import { mkdirDeep } from './mushafDownload';
 import { isValidFontFile } from '../native/MushafFont';
 
-/** Release tag holding the 604 subset page fonts. */
-const FONT_RELEASE = 'mushaf-fonts-v2';
+/**
+ * Release tag holding the 604 subset page fonts. Exported because the silent
+ * warm-up records which release it finished, so bumping this re-fetches.
+ */
+export const FONT_RELEASE = 'mushaf-fonts-v2';
 const STORE_VERSION = 'v2';
 
 /** Smallest plausible page font; anything under this is a failed download. */
@@ -229,4 +232,8 @@ export async function fontStoreStats(): Promise<{ pages: number; bytes: number }
 
 export async function deletePageFonts(): Promise<void> {
   await ReactNativeBlobUtil.fs.unlink(storeDir()).catch(() => undefined);
+  // Required, not tidiness: the warm-up trusts its marker over the disk, so
+  // leaving it behind would mean the store could never refill.
+  const { clearFontWarmupMarker } = await import('./mushafFontWarmup');
+  await clearFontWarmupMarker();
 }

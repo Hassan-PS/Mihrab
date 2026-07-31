@@ -30,12 +30,23 @@ import {
   hydrateQuranState,
   subscribeQuranState,
 } from './quran/quranState';
+import { startFontWarmup } from './quran/mushafFontWarmup';
 
 export function AppNavigationRoot() {
   const { settings, hydrated } = usePrayerSettings();
   const systemScheme = useSystemColorScheme();
 
   useSyncWidgetUiHints();
+
+  // Fill the mushaf page-font store in the background, on Wi-Fi, once. A page
+  // used to fetch its own ~300 KB font the first time you turned to it, so
+  // reading through the mushaf meant 604 separate waits. See
+  // `mushafFontWarmup` for why this is Wi-Fi only and how it resumes.
+  useEffect(() => {
+    if (!hydrated) return;
+    const warmup = startFontWarmup();
+    return () => warmup.stop();
+  }, [hydrated]);
 
   // Daily-notification resync — ayah of the day, khatmah reminder, and
   // fasting reminders keep their rolling trigger windows fresh here.
