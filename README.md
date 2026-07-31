@@ -1,4 +1,8 @@
 <div align="center">
+  <a href="https://github.com/Safouene1/support-palestine-banner/blob/master/Markdown-pages/Support.md"><img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/banner-support.svg" alt="Stand with Palestine — ways to help" width="100%"></a>
+</div>
+
+<div align="center">
   <img src="branding/github-hero.png" alt="Mihrab — prayer times, the Madinah mushaf, dua, tasbih and a fasting log, on iOS and Android">
 
   A calm, private, offline-first companion for the day's intentions. Prayer times, a full interactive Quran with recitation and tafsir, dua and tasbih, fasting + prayer journal, and home-screen widgets — no ads, no analytics, no tracking.

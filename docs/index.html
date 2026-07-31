@@ -275,11 +275,51 @@ footer .colophon {
   .hero .meta { gap: 4px 16px; }
   .hero .meta .dot { display: none; }
 }
+/* Solidarity banner — the first thing on the page, above the hero.
+   Drawn inline rather than hotlinked from the banner project's repository:
+   this site makes no third-party requests at all, and adding one for a
+   decorative image would quietly break that. The link is the same page the
+   README's banner points to. */
+.solidarity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: #101010;
+  color: #F2EFE8;
+  font-size: 14.5px;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  border-bottom: 2px solid #007A3D;
+}
+.solidarity:hover, .solidarity:focus-visible { background: #1c1c1c; color: #FFFFFF; }
+.solidarity .flag { flex: none; border-radius: 2px; }
+.solidarity b { font-weight: 650; }
+.solidarity .go { flex: none; opacity: .75; }
+@media (max-width: 620px) {
+  .solidarity { font-size: 13.5px; padding: 9px 14px; gap: 8px; }
+  .solidarity .wide { display: none; }
+}
+@media print { .solidarity { display: none; } }
 @media print { .hero { background: none; color: #000; } .hero-art { display: none; } }
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
+
+<a class="solidarity" href="https://github.com/Safouene1/support-palestine-banner/blob/master/Markdown-pages/Support.md">
+  <svg class="flag" width="27" height="18" viewBox="0 0 30 20" aria-hidden="true" focusable="false">
+    <rect width="30" height="20" fill="#FFFFFF"/>
+    <rect width="30" height="6.67" fill="#000000"/>
+    <rect y="13.33" width="30" height="6.67" fill="#007A3D"/>
+    <path d="M0 0 L13 10 L0 20 Z" fill="#CE1126"/>
+  </svg>
+  <span><b>Stand with Palestine.</b><span class="wide"> Where to donate, what to boycott, and how to
+    keep informed.</span></span>
+  <span class="go" aria-hidden="true">&rarr;</span>
+</a>
 
 <header class="hero">
   <svg class="hero-art" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
