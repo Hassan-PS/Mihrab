@@ -1,0 +1,7 @@
+Koranens knappar fungerar igen efter läsning i helskärm och liggande läge. Att lämna läsaren brukade lämna surahlistan, och Koran-knappen på startskärmen, till synes normala men helt döda för tryck.
+
+En surah inleds nu med en ornerad ram som i trycket, och bismillah sätts i sidans egen storlek.
+
+Mushaf frågar innan den laddas ner, går fem gånger snabbare och pausar sedan aldrig för en sida. En äldre kopia från en tidigare version tas bort först.
+
+Läsaren är lättare in och ut ur helskärm.

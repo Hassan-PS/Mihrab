@@ -1,0 +1,7 @@
+The Quran's buttons work again after reading in fullscreen landscape. Leaving the reader used to leave the surah list, and the home screen's Quran button, looking normal and doing nothing.
+
+A surah now opens with an illuminated band, and the bismillah is set at the page's own size.
+
+The mushaf asks before downloading, is five times faster, then never pauses for a page again. An older copy from a previous version is removed first.
+
+The reader is lighter in and out of fullscreen.
