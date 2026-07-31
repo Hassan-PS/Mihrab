@@ -1,0 +1,9 @@
+Mushaf fixes.
+
+Every line was losing its last word — the gap between words was drawn by a system typeface at a width the app never measured, so lines ran wider than their box. The gap now comes from a font the app ships, and lines justify to the measure as the print does.
+
+Ayah 2:2 and the rub-el-hizb marks read in the printed order again.
+
+Leaving the Quran no longer leaves the app deaf to taps.
+
+The page reaches all four screen edges and clears the camera cut-out.

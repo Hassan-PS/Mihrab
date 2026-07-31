@@ -1,0 +1,11 @@
+Rättningar i mushaf-läsaren.
+
+Varje rad tappade sitt sista ord — mellanrummet mellan orden ritades av ett systemtypsnitt med en bredd appen aldrig mätt, så raderna blev bredare än sin ruta. Mellanrummet kommer nu från ett typsnitt appen levererar, och raderna justeras mot måttet som i trycket.
+
+Vers 2:2 och hizb-markeringarna står i tryckets ordning igen.
+
+Att lämna Koranen gör inte längre appen okänslig för tryck.
+
+Sidan når alla fyra skärmkanter.
+
+Rubriken följer sidan du är på.

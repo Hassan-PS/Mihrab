@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.2] — 2026-07-31
+
+### Fixed
+- **The mushaf's lines are the print's lines again.** Every line was losing its last word. The page fonts carry no space character, so the gap between two words was being drawn by whichever system typeface the phone happened to fall back on — at a width the app had never measured, and a different one on Android than on iPhone. Lines came out wider than the box they were sized for, and the word that no longer fitted was simply dropped: `مَّقْبُوضَةٌۭ` off the first line of page 49, `ٱلسَّمَٰوَٰتِ` off the fourth. The gap is now drawn in a typeface the app ships and whose measurements it knows, so a line is exactly as wide as it was planned to be, on every device. Justification then works the way the print does — the space between words opens or closes to fill the measure, within a fixed band, and a line that cannot reach the measure honestly is centred rather than pulled apart. The previous release's attempt at this could not have worked: it scaled each line after the layout was already decided, which cannot recover a word the layout had thrown away.
+- **A word in the wrong place in ayah 2:2.** The verse rendered as `لَا ۛ فِيهِ ۛ رَيْبَ` instead of `لَا رَيْبَ ۛ فِيهِ ۛ`, and the ۞ marks throughout the mushaf sat one word later than they should. Direction-override marks had been placed around words of more than one glyph but not around single glyphs, which left the single ones to be reordered. The page data is already in reading order, so the overrides were the error — they are gone, and the text reads as it is printed.
+- **Leaving the Quran no longer stops the rest of the app responding.** Closing the reader while the ayah menu was open tore that menu down without ever hiding it, and the leftover window went on absorbing every tap — the surah list stopped responding, and so did the button that opens the Quran on the home screen. Nothing short of restarting the app recovered it. Anything open is now closed before the screen goes.
+- **The page reaches the edge of the screen.** A strip of the app's background showed along the edge of the mushaf, and nothing allowed for the camera cut-out on the side where it sits. The page now runs to all four edges, and its text keeps clear of the cut-out without moving off centre.
+- **The reader's title follows the page you are on.** It kept naming the surah you opened at, however far you read past it.
+- **Revisiting the Quran no longer wears the reader out.** Each visit held on to one of a limited set of font slots without giving it back; after roughly two dozen visits every page rendered blank until the app was restarted.
+
 ## [2.8.1] — 2026-07-31
 
 ### Changed
