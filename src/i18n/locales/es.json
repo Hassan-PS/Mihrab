@@ -765,8 +765,8 @@
     "enterFullscreen": "Pantalla completa",
     "exitFullscreen": "Salir de pantalla completa",
     "mushafDownloadTitle": "Descargar el mushaf",
-    "mushafDownloadBody": "El mushaf de Medina ocupa unos 120 MB. No está incluido en la app — descárgalo una vez y las páginas quedan guardadas.",
-    "mushafDownloadCta": "Descargar mushaf (~120 MB)",
+    "mushafDownloadBody": "El mushaf de Medina ocupa unos {{size}} MB. No está incluido en la app — descárgalo una vez y las páginas quedan guardadas.",
+    "mushafDownloadCta": "Descargar mushaf (~{{size}} MB)",
     "mushafDownloading": "Descargando mushaf…",
     "mushafDownloadProgress": "{{done}} / {{total}} páginas · {{pct}}%",
     "juzLabel": "Juz {{juz}}",
@@ -868,7 +868,8 @@
     "prevPage": "Página anterior",
     "companionTitle": "Debajo de cada versículo",
     "companionHelp": "Se aplica dondequiera que se muestre un versículo: el lector, el versículo del día y la notificación diaria. También se puede cambiar desde la página del Corán.",
-    "companionActive": "activo"
+    "companionActive": "activo",
+    "mushafReplaceOldBody": "En tu dispositivo queda una copia antigua del mushaf ({{size}} MB) de una versión anterior. Se eliminará primero: nada de lo que hayas guardado se verá afectado."
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

@@ -765,8 +765,8 @@
     "enterFullscreen": "فل اسکرین",
     "exitFullscreen": "فل اسکرین سے باہر",
     "mushafDownloadTitle": "مصحف ڈاؤن لوڈ کریں",
-    "mushafDownloadBody": "مدینہ مصحف تقریباً 120 ایم بی کا ہے۔ ایپ میں شامل نہیں ہے — ایک بار ڈاؤن لوڈ کریں اور صفحات آپ کے آلے پر محفوظ رہیں گے۔",
-    "mushafDownloadCta": "مصحف ڈاؤن لوڈ کریں (~120 ایم بی)",
+    "mushafDownloadBody": "مدینہ مصحف تقریباً {{size}} ایم بی کا ہے۔ ایپ میں شامل نہیں ہے — ایک بار ڈاؤن لوڈ کریں اور صفحات آپ کے آلے پر محفوظ رہیں گے۔",
+    "mushafDownloadCta": "مصحف ڈاؤن لوڈ کریں (~{{size}} ایم بی)",
     "mushafDownloading": "Downloading mushaf…",
     "mushafDownloadProgress": "{{done}} / {{total}} صفحات · {{pct}}%",
     "juzLabel": "پارہ {{juz}}",
@@ -868,7 +868,8 @@
     "prevPage": "پچھلا صفحہ",
     "companionTitle": "ہر آیت کے نیچے",
     "companionHelp": "جہاں بھی آیت دکھائی جاتی ہے وہاں لاگو — ریڈر، آج کی آیت اور روزانہ آیت کی اطلاع۔ قرآن صفحے سے بھی تبدیل کیا جا سکتا ہے۔",
-    "companionActive": "فعال"
+    "companionActive": "فعال",
+    "mushafReplaceOldBody": "پچھلے ورژن کا مصحف کا ایک پرانا نسخہ ({{size}} ایم بی) اب بھی آپ کے آلے پر موجود ہے۔ اسے پہلے ہٹا دیا جائے گا — آپ کی محفوظ کردہ کوئی چیز متاثر نہیں ہوگی۔"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

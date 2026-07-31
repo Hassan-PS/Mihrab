@@ -152,6 +152,52 @@ export async function deleteMushaf(): Promise<void> {
   }
 }
 
+/**
+ * Everything the retired page-IMAGE mushaf left behind: the 604 source PNGs,
+ * their manifest, and the display-size render cache beside them.
+ *
+ * The font-rendered reader replaced all of it in 2.8.0, but an app that has
+ * been updated rather than freshly installed is still carrying it — several
+ * hundred megabytes that nothing will ever read again. `deleteMushaf` only
+ * removes the versioned page directory; the render cache is a sibling of it,
+ * so sweeping the parent is what actually reclaims the space.
+ */
+function imageStoreRoot(): string {
+  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/mushaf`;
+}
+
+/** Bytes the retired image store is occupying, 0 when it is already gone. */
+export async function legacyImageStoreBytes(): Promise<number> {
+  const walk = async (dir: string): Promise<number> => {
+    let total = 0;
+    let entries: Array<{ path: string; size: string | number; type: string }>;
+    try {
+      entries = (await ReactNativeBlobUtil.fs.lstat(dir)) as typeof entries;
+    } catch {
+      return 0;
+    }
+    for (const entry of entries) {
+      if (entry.type === 'directory') total += await walk(entry.path);
+      else total += Number(entry.size) || 0;
+    }
+    return total;
+  };
+  try {
+    if (!(await ReactNativeBlobUtil.fs.exists(imageStoreRoot()))) return 0;
+    return await walk(imageStoreRoot());
+  } catch {
+    return 0;
+  }
+}
+
+/** Delete the retired image store outright. Returns the bytes reclaimed. */
+export async function deleteLegacyImageStore(): Promise<number> {
+  const bytes = await legacyImageStoreBytes();
+  if (bytes === 0) return 0;
+  await ReactNativeBlobUtil.fs.unlink(imageStoreRoot()).catch(() => undefined);
+  return bytes;
+}
+
 export type MushafDownloadProgress = {
   done: number;
   total: number;

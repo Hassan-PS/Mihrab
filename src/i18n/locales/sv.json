@@ -765,8 +765,8 @@
     "enterFullscreen": "Helskärmsläge",
     "exitFullscreen": "Stäng helskärm",
     "mushafDownloadTitle": "Ladda ner mushafen",
-    "mushafDownloadBody": "Madinah-mushafen är cirka 120 MB. Den ingår inte i appen — ladda ner den en gång så stannar sidorna på din enhet.",
-    "mushafDownloadCta": "Ladda ner mushafen (~120 MB)",
+    "mushafDownloadBody": "Madinah-mushafen är cirka {{size}} MB. Den ingår inte i appen — ladda ner den en gång så stannar sidorna på din enhet.",
+    "mushafDownloadCta": "Ladda ner mushafen (~{{size}} MB)",
     "mushafDownloading": "Laddar ner mushafen…",
     "mushafDownloadProgress": "{{done}} / {{total}} sidor · {{pct}}%",
     "juzLabel": "Juz {{juz}}",
@@ -868,7 +868,8 @@
     "prevPage": "Föregående sida",
     "companionTitle": "Under varje vers",
     "companionHelp": "Gäller överallt där en vers visas — läsaren, dagens vers och den dagliga ayah-aviseringen. Kan även ändras från Koran-sidan.",
-    "companionActive": "aktiv"
+    "companionActive": "aktiv",
+    "mushafReplaceOldBody": "En äldre kopia av mushafen ({{size}} MB) finns kvar på enheten sedan en tidigare version. Den tas bort först — inget du har sparat påverkas."
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

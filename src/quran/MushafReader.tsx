@@ -75,12 +75,15 @@ import {
   MUSHAF_TOTAL_PAGES,
 } from './mushafImages';
 import {
+  deleteLegacyImageStore,
   downloadMushafAssets,
   isMushafDownloaded,
+  legacyImageStoreBytes,
   pageFilePath,
   type MushafDownloadHandle,
   type MushafDownloadProgress,
 } from './mushafDownload';
+import { downloadAllPageFonts, fontStoreStats } from './mushafFontStore';
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import MushafTextPageSurface from './MushafTextPageSurface';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
@@ -208,14 +211,29 @@ export function MushafReader({
   // reports ready we switch every mounted Image to its file:// path.
   const [useLocalFiles, setUseLocalFiles] = useState(false);
 
+  /** Bytes the retired page-image store is still occupying, if any. */
+  const [staleImageBytes, setStaleImageBytes] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
     if (textMode) {
-      // Nothing to gate on: pages carry their own fonts, fetched per page.
+      // The font-rendered mushaf is gated exactly like the image one was.
+      // Fetching each page's font on arrival made the reader feel like it was
+      // permanently loading, and the complete set is 180 MB — far too much to
+      // pull without being asked. So: ask, once, and then never wait again.
       setUseLocalFiles(false);
-      setDownloadStatus('ready');
+      void Promise.all([fontStoreStats(), legacyImageStoreBytes()]).then(
+        ([stats, stale]) => {
+          if (cancelled) return;
+          setStaleImageBytes(stale);
+          setDownloadStatus(
+            stats.pages >= MUSHAF_TOTAL_PAGES ? 'ready' : 'needs_download',
+          );
+        },
+      );
       return () => {
         cancelled = true;
+        downloadHandleRef.current?.cancel();
       };
     }
     void isMushafDownloaded().then(yes => {
@@ -233,6 +251,28 @@ export function MushafReader({
     if (downloadStatus === 'downloading') return;
     setDownloadStatus('downloading');
     setProgress({ done: 0, total: MUSHAF_TOTAL_PAGES, failed: 0 });
+
+    if (textMode) {
+      // Out with the old first. An updated app is still carrying the page
+      // images the font reader replaced — nothing will ever read them again,
+      // and they are larger than what we are about to fetch. Do it before the
+      // download rather than after, so the peak disk use is never both.
+      void deleteLegacyImageStore().then(freed => {
+        if (freed > 0) setStaleImageBytes(0);
+      });
+      const fontHandle = downloadAllPageFonts({
+        concurrency: 8,
+        onProgress: setProgress,
+      });
+      downloadHandleRef.current = fontHandle;
+      void fontHandle.promise.then(complete => {
+        downloadHandleRef.current = null;
+        setLastRunFailed(complete ? 0 : progressRef.current.failed);
+        setDownloadStatus(complete ? 'ready' : 'needs_download');
+      });
+      return;
+    }
+
     // Concurrency 8 (was 3): the 604-page first-time download is the slow
     // part of the Quran reader. GitHub's asset CDN serves these over HTTP/2,
     // so ~8 parallel workers roughly triples throughput; the per-page retry +
@@ -674,28 +714,22 @@ export function MushafReader({
     }
   });
 
-  // ── Text mode routes to the split readers (mushaf-reader-split plan) ─
-  // The device question is answered ONCE, at module scope: phones get the
-  // one-component portrait+landscape pager, large screens the spread-as-
-  // item pager. Image mode keeps the legacy paths below untouched until it
-  // retires (plan step 4).
-  if (textMode) {
-    const readerProps = {
-      surahNumber,
-      initialPage: initialPageProp,
-      isFullscreen,
-      onToggleFullscreen,
-      audioSheetSignal,
-      onTitleChange,
-    };
-    return DEVICE_CLASS === 'phone' ? (
-      <MushafPhoneReader {...readerProps} />
-    ) : (
-      <MushafSpreadReader {...readerProps} />
-    );
-  }
-
   // ── Gate screens ────────────────────────────────────────────────────
+  // Ahead of the reader itself, and of both renderers: nothing opens until
+  // the mushaf is on the device.
+  //
+  // The font-rendered mushaf is larger than the image one it replaced (604
+  // typefaces, ~180 MB, against ~120 MB of pages) — worth saying out loud on
+  // the button rather than leaving someone to discover it.
+  const gateSizeMb = textMode ? 180 : 120;
+  const gateCta =
+    lastRunFailed > 0
+      ? t('quran.mushafDownloadRetryCta', 'Retry missing pages')
+      : t('quran.mushafDownloadCta', {
+          defaultValue: 'Download mushaf (~{{size}} MB)',
+          size: gateSizeMb,
+        });
+
   if (downloadStatus === 'checking') {
     return (
       <View style={[styles.gate, { backgroundColor: palette.bg }]}>
@@ -716,25 +750,27 @@ export function MushafReader({
                   '{{count}} pages did not download. Retry to fetch the missing pages — everything already downloaded is kept.',
                 count: lastRunFailed,
               })
-            : t(
-                'quran.mushafDownloadBody',
-                'The Madinah mushaf is around 120 MB. It is not bundled in the app — download it once and the pages stay on your device.',
-              )}
+            : t('quran.mushafDownloadBody', {
+                defaultValue:
+                  'The Madinah mushaf is around {{size}} MB. It is not bundled in the app — download it once and it stays on your device.',
+                size: gateSizeMb,
+              })}
         </Text>
+        {staleImageBytes > 0 ? (
+          <Text style={[styles.gateBody, { color: palette.muted }]}>
+            {t('quran.mushafReplaceOldBody', {
+              defaultValue:
+                'An older copy of the mushaf ({{size}} MB) is still on your device from a previous version. It will be removed first — nothing you have saved is affected.',
+              size: Math.round(staleImageBytes / 1_048_576),
+            })}
+          </Text>
+        ) : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
-            lastRunFailed > 0
-              ? t('quran.mushafDownloadRetryCta', 'Retry missing pages')
-              : t('quran.mushafDownloadCta', 'Download mushaf (~120 MB)')
-          }
+          accessibilityLabel={gateCta}
           onPress={startDownload}
           style={[styles.cta, { backgroundColor: palette.accentSolid }]}>
-          <Text style={styles.ctaLabel}>
-            {lastRunFailed > 0
-              ? t('quran.mushafDownloadRetryCta', 'Retry missing pages')
-              : t('quran.mushafDownloadCta', 'Download mushaf (~120 MB)')}
-          </Text>
+          <Text style={styles.ctaLabel}>{gateCta}</Text>
         </Pressable>
       </View>
     );
@@ -774,6 +810,27 @@ export function MushafReader({
           </Text>
         </Pressable>
       </View>
+    );
+  }
+
+  // ── Text mode routes to the split readers (mushaf-reader-split plan) ─
+  // The device question is answered ONCE, at module scope: phones get the
+  // one-component portrait+landscape pager, large screens the spread-as-
+  // item pager. Image mode keeps the legacy paths below untouched until it
+  // retires (plan step 4).
+  if (textMode) {
+    const readerProps = {
+      surahNumber,
+      initialPage: initialPageProp,
+      isFullscreen,
+      onToggleFullscreen,
+      audioSheetSignal,
+      onTitleChange,
+    };
+    return DEVICE_CLASS === 'phone' ? (
+      <MushafPhoneReader {...readerProps} />
+    ) : (
+      <MushafSpreadReader {...readerProps} />
     );
   }
 

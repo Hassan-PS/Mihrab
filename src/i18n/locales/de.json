@@ -765,8 +765,8 @@
     "enterFullscreen": "Vollbild",
     "exitFullscreen": "Vollbild verlassen",
     "mushafDownloadTitle": "Mushaf herunterladen",
-    "mushafDownloadBody": "Der Madinah-Mushaf ist etwa 120 MB groß. Er ist nicht in der App enthalten — einmal laden, dann bleibt er auf dem Gerät.",
-    "mushafDownloadCta": "Mushaf herunterladen (~120 MB)",
+    "mushafDownloadBody": "Der Madinah-Mushaf ist etwa {{size}} MB groß. Er ist nicht in der App enthalten — einmal laden, dann bleibt er auf dem Gerät.",
+    "mushafDownloadCta": "Mushaf herunterladen (~{{size}} MB)",
     "mushafDownloading": "Mushaf wird heruntergeladen…",
     "mushafDownloadProgress": "{{done}} / {{total}} Seiten · {{pct}}%",
     "juzLabel": "Juz {{juz}}",
@@ -868,7 +868,8 @@
     "prevPage": "Vorherige Seite",
     "companionTitle": "Unter jedem Vers",
     "companionHelp": "Gilt überall, wo ein Vers angezeigt wird — im Reader, beim Vers des Tages und in der täglichen Ayah-Benachrichtigung. Auch über die Koran-Seite änderbar.",
-    "companionActive": "aktiv"
+    "companionActive": "aktiv",
+    "mushafReplaceOldBody": "Eine ältere Kopie des Mushafs ({{size}} MB) liegt noch aus einer früheren Version auf deinem Gerät. Sie wird zuerst entfernt — nichts von dem, was du gespeichert hast, ist betroffen."
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

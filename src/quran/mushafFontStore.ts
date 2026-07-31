@@ -232,8 +232,4 @@ export async function fontStoreStats(): Promise<{ pages: number; bytes: number }
 
 export async function deletePageFonts(): Promise<void> {
   await ReactNativeBlobUtil.fs.unlink(storeDir()).catch(() => undefined);
-  // Required, not tidiness: the warm-up trusts its marker over the disk, so
-  // leaving it behind would mean the store could never refill.
-  const { clearFontWarmupMarker } = await import('./mushafFontWarmup');
-  await clearFontWarmupMarker();
 }

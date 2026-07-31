@@ -765,8 +765,8 @@
     "enterFullscreen": "Tam ekran",
     "exitFullscreen": "Tam ekrandan çık",
     "mushafDownloadTitle": "Mushaf'ı indir",
-    "mushafDownloadBody": "Medine mushafı yaklaşık 120 MB’dir. Uygulamaya dahil değildir — bir kez indirin, sayfalar cihazınızda kalır.",
-    "mushafDownloadCta": "Mushafı indir (~120 MB)",
+    "mushafDownloadBody": "Medine mushafı yaklaşık {{size}} MB’dir. Uygulamaya dahil değildir — bir kez indirin, sayfalar cihazınızda kalır.",
+    "mushafDownloadCta": "Mushafı indir (~{{size}} MB)",
     "mushafDownloading": "Downloading mushaf…",
     "mushafDownloadProgress": "{{done}} / {{total}} sayfa · {{pct}}%",
     "juzLabel": "{{juz}}. Cüz",
@@ -868,7 +868,8 @@
     "prevPage": "Önceki sayfa",
     "companionTitle": "Her ayetin altında",
     "companionHelp": "Ayetin gösterildiği her yerde geçerli — okuyucu, günün ayeti ve günlük ayet bildirimi. Kur'an sayfasından da değiştirilebilir.",
-    "companionActive": "etkin"
+    "companionActive": "etkin",
+    "mushafReplaceOldBody": "Önceki bir sürümden kalan eski bir mushaf kopyası ({{size}} MB) hâlâ cihazınızda. Önce o silinecek — kaydettiğiniz hiçbir şey etkilenmez."
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

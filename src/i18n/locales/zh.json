@@ -765,8 +765,8 @@
     "enterFullscreen": "全屏",
     "exitFullscreen": "退出全屏",
     "mushafDownloadTitle": "下载穆斯哈夫",
-    "mushafDownloadBody": "麦地那经文约 120 MB，不随应用打包。下载一次后页面将缓存在设备上。",
-    "mushafDownloadCta": "下载经文 (~120 MB)",
+    "mushafDownloadBody": "麦地那经文约 {{size}} MB，不随应用打包。下载一次后页面将缓存在设备上。",
+    "mushafDownloadCta": "下载经文 (~{{size}} MB)",
     "mushafDownloading": "Downloading mushaf…",
     "mushafDownloadProgress": "{{done}} / {{total}} 页 · {{pct}}%",
     "juzLabel": "第 {{juz}} 卷",
@@ -868,7 +868,8 @@
     "prevPage": "上一页",
     "companionTitle": "每节经文下方",
     "companionHelp": "适用于显示经文的所有位置——阅读器、每日经文和每日经文通知。也可在古兰经页面更改。",
-    "companionActive": "当前使用"
+    "companionActive": "当前使用",
+    "mushafReplaceOldBody": "设备上仍保留着旧版本的经文副本（{{size}} MB）。它会先被删除——你保存的任何内容都不受影响。"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

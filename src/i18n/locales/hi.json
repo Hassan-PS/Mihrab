@@ -765,8 +765,8 @@
     "enterFullscreen": "पूर्ण स्क्रीन",
     "exitFullscreen": "पूर्ण स्क्रीन छोड़ें",
     "mushafDownloadTitle": "मुसहफ़ डाउनलोड करें",
-    "mushafDownloadBody": "मदीना मसहफ़ लगभग 120 एमबी का है। ऐप में शामिल नहीं है — एक बार डाउनलोड करें, पृष्ठ डिवाइस पर सहेजे रहेंगे।",
-    "mushafDownloadCta": "मसहफ़ डाउनलोड करें (~120 एमबी)",
+    "mushafDownloadBody": "मदीना मसहफ़ लगभग {{size}} एमबी का है। ऐप में शामिल नहीं है — एक बार डाउनलोड करें, पृष्ठ डिवाइस पर सहेजे रहेंगे।",
+    "mushafDownloadCta": "मसहफ़ डाउनलोड करें (~{{size}} एमबी)",
     "mushafDownloading": "Downloading mushaf…",
     "mushafDownloadProgress": "{{done}} / {{total}} पृष्ठ · {{pct}}%",
     "juzLabel": "पारा {{juz}}",
@@ -868,7 +868,8 @@
     "prevPage": "पिछला पृष्ठ",
     "companionTitle": "हर आयत के नीचे",
     "companionHelp": "जहाँ भी आयत दिखाई जाती है वहाँ लागू — रीडर, आज की आयत और दैनिक आयत सूचना। क़ुरआन पेज से भी बदला जा सकता है।",
-    "companionActive": "सक्रिय"
+    "companionActive": "सक्रिय",
+    "mushafReplaceOldBody": "पिछले संस्करण की मुसहफ़ की एक पुरानी प्रति ({{size}} एमबी) अब भी आपके डिवाइस पर है। उसे पहले हटा दिया जाएगा — आपका सहेजा हुआ कुछ भी प्रभावित नहीं होगा।"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",
