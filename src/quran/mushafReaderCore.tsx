@@ -40,6 +40,7 @@ import {
   setLastRead,
   setQuranPrefs,
   useQuranState,
+  useQuranHydrated,
   type QuranState,
 } from './quranState';
 import { usePlaybackStatus, type PlaybackStatus } from './audio/playback';
@@ -157,7 +158,14 @@ export function useMushafReaderCore({
   const playback = usePlaybackStatus();
 
   const nightMode = quran.prefs.mushafNightMode;
-  const pageBg = nightMode ? '#101010' : '#ffffff';
+  // Until the stored preference has actually been read, `nightMode` is the
+  // default `false` and painting on it would put a pure-white page on screen
+  // for as long as the read takes, then swap it for near-black. Staying
+  // transparent lets the screen's own background show through instead, so the
+  // page colour appears once — when it is known to be right. The window is
+  // 5K on a Mac, which is where guessing wrong is impossible to miss.
+  const hydrated = useQuranHydrated();
+  const pageBg = !hydrated ? 'transparent' : nightMode ? '#101010' : '#ffffff';
   const ornament = nightMode ? '#c9b47a' : '#7a5e1f';
 
   const initial = useMemo(

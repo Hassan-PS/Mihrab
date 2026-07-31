@@ -245,6 +245,29 @@ export function useQuranState(): QuranState {
   return useSyncExternalStore(subscribeQuranState, getQuranState, getQuranState);
 }
 
+/**
+ * Whether the stored blob has been read yet.
+ *
+ * Until it has, every reader of this store is being served DEFAULTS, and the
+ * one that shows is `mushafNightMode: false` — so a reader opened before the
+ * read completes paints its page pure white and then flips to #101010 once the
+ * real preference lands. On a phone that is a frame nobody sees; on a 5K Mac
+ * window it is a full-screen white flash, which is what this exists to let the
+ * reader avoid. Anything whose colour depends on a stored preference should
+ * wait for this rather than render a default it is about to contradict.
+ */
+export function isQuranHydrated(): boolean {
+  return hydrated;
+}
+
+export function useQuranHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeQuranState,
+    isQuranHydrated,
+    isQuranHydrated,
+  );
+}
+
 // ── Convenience mutations ────────────────────────────────────────────
 
 export function setLastRead(pos: Omit<LastRead, 'updatedAt'>): void {

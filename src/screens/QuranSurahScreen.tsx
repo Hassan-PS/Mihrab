@@ -45,6 +45,7 @@ import {
   isStarred,
   setLastRead,
   useQuranState,
+  useQuranHydrated,
   BOOKMARK_COLORS,
 } from '../quran/quranState';
 import { usePlaybackStatus } from '../quran/audio/playback';
@@ -76,6 +77,7 @@ export function QuranSurahScreen() {
 
   const surah = findSurah(surahNumber);
   const quran = useQuranState();
+  const quranHydrated = useQuranHydrated();
   const playback = usePlaybackStatus();
   // Header closures read playback via a ref so the nav header doesn't
   // rebuild on every ayah change.
@@ -189,9 +191,19 @@ export function QuranSurahScreen() {
      */
     const ownsItsInsets =
       isMushaf && quran.prefs.mushafRenderer !== 'image';
+    // Before the stored blob is read, `mushafNightMode` is its default of
+    // false, so this would paint the screen pure white and then flip to
+    // #101010 a moment later when the real preference arrives. Hold the app's
+    // own background until we actually know — it is the colour already on
+    // screen, so waiting shows as nothing at all, where guessing shows as a
+    // full-window white flash on a large Mac Catalyst window.
     const contentStyle = ownsItsInsets
       ? {
-          backgroundColor: quran.prefs.mushafNightMode ? '#101010' : '#ffffff',
+          backgroundColor: !quranHydrated
+            ? palette.bg
+            : quran.prefs.mushafNightMode
+              ? '#101010'
+              : '#ffffff',
         }
       : { paddingBottom: insets.bottom, backgroundColor: palette.bg };
     if (isFullscreen) {
@@ -292,6 +304,7 @@ export function QuranSurahScreen() {
     insets.bottom,
     quran.prefs.mushafNightMode,
     quran.prefs.mushafRenderer,
+    quranHydrated,
     t,
     toggleMushaf,
   ]);
