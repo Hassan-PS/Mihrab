@@ -52,11 +52,23 @@ esac
 hits=""
 search_ok=0
 for n in "${NEEDLES[@]}"; do
-  raw=$(gh search code "$n" --limit 20 --json repository 2>/dev/null)
+  # Code search is rate-limited hard (roughly 10 requests/minute, plus a
+  # secondary limit that blocks in bursts), and five needles back to back is
+  # enough to trip it: one observed run searched fine, the very next had all
+  # five refused. Retry with a widening pause instead of treating a throttle
+  # as "this token cannot search" — that misreading is what made the capability
+  # set flap between runs, and a monitor that cries wolf weekly stops being read.
+  raw=""
+  for attempt in 1 2 3; do
+    raw=$(gh search code "$n" --limit 20 --json repository 2>/dev/null)
+    [ -n "$raw" ] && break
+    sleep $((attempt * 5))
+  done
   # An empty result and a refused request look identical once jq has run, so
-  # check the call itself: code search rejects some token types outright, and
-  # a monitor that silently stops searching is worse than no monitor.
+  # check the call itself: a monitor that silently stops searching is worse
+  # than no monitor.
   [ -n "$raw" ] && search_ok=1
+  sleep 2 # stay under the per-minute ceiling for the next needle
   found=$(printf '%s' "$raw" | python3 -c "
 import json,sys
 try: d=json.load(sys.stdin)
@@ -109,8 +121,19 @@ fi
 # "no change" forever and reads as an all-clear. Comparing against the full set
 # instead means any missing capability is announced the first time it is
 # missing, which is the only moment it is still news.
+#
+# Two fields, not one: `caps` is what we have ACCEPTED as the current coverage,
+# `caps_seen` is the raw reading from the previous run. A change is only
+# announced once the same reading has come back twice running. Retries above
+# should stop the throttle flapping in the first place; this makes sure that
+# even if something else turns intermittent, one bad reading cannot generate an
+# alert on its own. The cost is that a genuine loss is reported a week late,
+# which is the right trade for a report that only fires when it means something.
 old_caps=$(json_get caps "forks,traffic,codesearch")
-if [ "$caps" != "$old_caps" ]; then
+old_seen=$(json_get caps_seen "")
+caps_confirmed="$old_caps"
+if [ "$caps" = "$old_seen" ] && [ "$caps" != "$old_caps" ]; then
+  caps_confirmed="$caps"
   changed=1
   report="$report\n• CHECK COVERAGE changed: was [$old_caps], now [$caps]."
   report="$report\n  A check that stopped running leaves a blind spot. 'traffic' needs a PAT"
@@ -128,12 +151,14 @@ if [ "$clones" -ge 0 ] && [ "$clones" -gt 40 ] && [ "$clones" -gt $((old_clones 
   report="$report\n  look if you didn't ship anything."
 fi
 
-python3 - "$forks" "$network" "$stars" "$watchers" "$fork_list" "$hits" "$clones" "$caps" <<PY
+python3 - "$forks" "$network" "$stars" "$watchers" "$fork_list" "$hits" "$clones" "$caps_confirmed" "$caps" <<PY
 import json, sys
 json.dump({
     "forks": sys.argv[1], "network": sys.argv[2], "stars": sys.argv[3],
     "watchers": sys.argv[4], "fork_list": sys.argv[5], "hits": sys.argv[6],
-    "clones": sys.argv[7], "caps": sys.argv[8],
+    # caps = accepted coverage (only moves once a reading repeats);
+    # caps_seen = this run's raw reading, for next run to compare against.
+    "clones": sys.argv[7], "caps": sys.argv[8], "caps_seen": sys.argv[9],
     "checked": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
 }, open("$BASELINE", "w"), indent=1)
 PY
