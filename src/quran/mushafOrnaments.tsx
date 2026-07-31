@@ -45,6 +45,26 @@ function diamondPath(cx: number, cy: number, r: number): string {
   )}L${cx.toFixed(2)},${(cy + r).toFixed(2)}L${(cx - r).toFixed(2)},${cy.toFixed(2)}Z`;
 }
 
+/**
+ * The band's two rules and the ornament course between them, as fractions of
+ * its height. Exported because the name that sits inside has to be sized from
+ * what is left over — see `surahBandFieldHeight`.
+ */
+const BAND_STROKE = 0.028;
+const BAND_COURSE = 0.12;
+
+/**
+ * The clear height inside both rules — all the room the surah's name has.
+ *
+ * Arabic in Amiri drops a long way below the baseline (the tail of ق, ر, ن,
+ * the ة), and a name sized against the band's *outer* height put those tails
+ * straight through the inner rule. Size the name from this instead: it is the
+ * only measurement that describes the space actually available.
+ */
+export function surahBandFieldHeight(height: number): number {
+  return height * (1 - 2 * (BAND_STROKE + BAND_COURSE));
+}
+
 export type SurahBandProps = {
   width: number;
   height: number;
@@ -65,13 +85,13 @@ export function surahBandTextInset(height: number): number {
 export function SurahBand({ width, height, color }: SurahBandProps) {
   if (width <= 0 || height <= 0) return null;
 
-  const stroke = Math.max(1, height * 0.028);
+  const stroke = Math.max(1, height * BAND_STROKE);
   const hair = Math.max(0.5, height * 0.016);
 
   // Outer rule, then the inner one a course inside it. The gap between the
   // two is where the ornament goes — exactly as the print lays it out.
   const outerInset = stroke;
-  const course = height * 0.14;
+  const course = height * BAND_COURSE;
   const innerInset = outerInset + course;
 
   const outer = {

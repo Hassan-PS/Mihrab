@@ -66,6 +66,7 @@ import { findSurah } from './quran';
 import {
   BasmalahFlourish,
   SurahBand,
+  surahBandFieldHeight,
   surahBandTextInset,
 } from './mushafOrnaments';
 import { FONTS } from '../theme/typography';
@@ -252,7 +253,15 @@ const LineView = React.memo(function LineView({
     // The band takes the full measure, as it does in the print, where a surah
     // opens across the whole text block rather than in a plate the width of
     // its own name.
-    const bandH = lineHeight * 0.88;
+    // Nearly the whole line: the band is the surah's opening, and every dp of
+    // height here is height the name can use.
+    const bandH = lineHeight * 0.94;
+    // The name is sized from the clear space INSIDE both rules, not from the
+    // band — Amiri's descenders (the tails of ق, ر, ن and the ة) were running
+    // through the inner rule when it was sized against the outer height.
+    // 0.62 of the field leaves room for the full ascender-to-descender box.
+    const fieldH = surahBandFieldHeight(bandH);
+    const nameSize = Math.min(fontSize * 0.78, fieldH * 0.62);
     return (
       <View style={[styles.row, { height: lineHeight }]}>
         <View style={{ width, height: bandH }}>
@@ -270,10 +279,11 @@ const LineView = React.memo(function LineView({
               numberOfLines={1}
               style={{
                 fontFamily: FONTS.arabicQuran,
-                fontSize: fontSize * 0.86,
+                fontSize: nameSize,
                 color: colors.heading,
-                // Amiri's tall ascenders need the room or the name clips.
-                lineHeight: bandH * 0.86,
+                // The glyph box is centred in the full field, so the ascenders
+                // and descenders share the clearance evenly.
+                lineHeight: fieldH,
               }}
             >
               {`سورة ${surah?.arabic ?? ''}`}
