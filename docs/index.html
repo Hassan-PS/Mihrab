@@ -130,18 +130,20 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 .dot { opacity: .45; }
 /* ---- install ---- */
 .install { background: var(--surface); }
-/* Store badges. All four files share one canvas geometry — 646x250 with the
-   ink 168 tall, centred — so a single height makes their artwork match
-   optically. Sizing them by the canvas instead of the ink is what squashed
-   the old README row: the same height box left Apple's tight badge full size
-   and everyone else's at two thirds, because theirs carry a third of their
-   height as required clear space. Height is set here and width left to the
-   aspect ratio; the width/height attributes on the img are only there to
-   reserve the box before the image loads. */
+/* Store badges. The four files are cropped to their ink, so a single height
+   makes them genuinely the same size. Shipped uncropped they are not: Apple's
+   is drawn tight to its box, while the Google Play, GitHub and Obtainium files
+   are 646x250 canvases holding only 564x168 of artwork, a third of their
+   height being the clear space their brand guidelines ask for. Sized to a
+   common box, three of the four therefore rendered noticeably smaller than
+   Apple's with dead space around them. That clear space is a layout
+   requirement rather than something the file has to carry, so it lives in the
+   flex gap below instead. Only the height is set here; width follows the
+   aspect ratio, and the img attributes just reserve the box before load. */
 .badges {
   list-style: none; margin: 26px 0 0; padding: 0;
   display: flex; flex-wrap: wrap; align-items: center;
-  gap: 2px 6px;
+  gap: 14px 16px;
 }
 .badges li { margin: 0; }
 .badges a {
@@ -319,16 +321,16 @@ footer .colophon {
       F-Droid build ships without Play Billing or Google Play Services.</p>
     <ul class="badges">
       <li><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256">
-        <img src="assets/img/badges/appstore.png" width="646" height="250"
+        <img src="assets/img/badges/appstore.png" width="503" height="168"
           alt="Download Mihrab on the App Store"></a></li>
       <li><a href="https://play.google.com/store/apps/details?id=com.prayer_times">
-        <img src="assets/img/badges/googleplay.png" width="646" height="250"
+        <img src="assets/img/badges/googleplay.png" width="564" height="168"
           alt="Get Mihrab on Google Play"></a></li>
       <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest">
-        <img src="assets/img/badges/github.png" width="646" height="250"
+        <img src="assets/img/badges/github.png" width="564" height="168"
           alt="Get the Mihrab APK on GitHub"></a></li>
       <li><a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.prayer_times%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FHassan-PS%2FMihrab%22%2C%22author%22%3A%22Hassan-PS%22%2C%22name%22%3A%22Mihrab%22%7D">
-        <img src="assets/img/badges/obtainium.png" width="646" height="250"
+        <img src="assets/img/badges/obtainium.png" width="564" height="168"
           alt="Add Mihrab to Obtainium"></a></li>
     </ul>
     <ul class="channels">
