@@ -113,10 +113,10 @@ old_caps=$(json_get caps "forks,traffic,codesearch")
 if [ "$caps" != "$old_caps" ]; then
   changed=1
   report="$report\n• CHECK COVERAGE changed: was [$old_caps], now [$caps]."
-  report="$report\n  A check that stopped running leaves a blind spot. Both 'traffic' and"
-  report="$report\n  'codesearch' need a PAT in the MIHRAB_WATCH_TOKEN secret: traffic is an"
-  report="$report\n  Administration-read endpoint that the permissions block cannot grant, and"
-  report="$report\n  code search refuses GITHUB_TOKEN whatever its permissions."
+  report="$report\n  A check that stopped running leaves a blind spot. 'traffic' needs a PAT"
+  report="$report\n  in the MIHRAB_WATCH_TOKEN secret — it is an Administration-read endpoint,"
+  report="$report\n  and 'administration' is not a key the workflow permissions block accepts."
+  report="$report\n  'codesearch' and 'forks' do work on the default GITHUB_TOKEN."
 fi
 
 old_clones=$(json_get clones 0)
