@@ -34,10 +34,9 @@ Builds:
       - npm ci --omit=optional --omit=dev --ignore-scripts --loglevel=error
       - npm i --no-save --ignore-scripts --loglevel=error patch-package
       - node node_modules/.bin/patch-package
-      - RNG=node_modules/@react-native/gradle-plugin
-      - find $RNG -name build.gradle.kts -exec sed -i '/jvmToolchain/d' {} \;
-      - IAP=node_modules/react-native-iap/android/build.gradle
-      - sed -i '/billing\|play-services\|amazon-appstore/d' $IAP
+      - find node_modules/@react-native/gradle-plugin -name build.gradle.kts -exec
+        sed -i '/jvmToolchain/d' {} \;
+      - sed -i '/billing\|play-services\|amazon-appstore/d' node_modules/react-native-iap/android/build.gradle
     scanignore:
       - node_modules/@notifee/react-native/android/build.gradle
       - node_modules/@notifee/react-native/android/libs
