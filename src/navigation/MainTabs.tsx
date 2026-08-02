@@ -109,10 +109,13 @@ export function MainTabs() {
                * content peeking under it, so the pill stays in flow and
                * the page stops above it.
                *
-               * `marginBottom` is a CORRECTION to the inset the navigator
-               * already reserves beneath the bar, not an addition: a
-               * positive value stacks on it and strands the bar in the
-               * middle of nothing.
+               * `marginBottom` is the WHOLE gap under the bar. Setting
+               * `height` below makes `getTabBarHeight` return that number
+               * verbatim, so the navigator reserves no safe area at all
+               * and there is nothing here to correct — see
+               * `useTabBarBottom`. It was written as a correction (and so
+               * came out negative), which hung the pill off the bottom of
+               * the window and cut the labels off entirely.
                */
               marginHorizontal: TAB_BAR_SIDE_INSET,
               marginBottom: barBottom,

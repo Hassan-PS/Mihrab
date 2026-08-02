@@ -23,20 +23,49 @@ export const TAB_BAR_HEIGHT = desktopSize(60);
 /** Side inset, and therefore the width the pill is short of the window. */
 export const TAB_BAR_SIDE_INSET = 14;
 
+/** The smallest gap between the pill and the window's bottom edge. */
+export const TAB_BAR_EDGE_GAP = 12;
+
 /**
- * How far the pill sits above the bottom edge.
- *
- * A gesture-navigation inset (iPhone 34, iPad 20, Android ~24) is the
- * home-indicator strip: the pill only has to clear the handle itself,
- * which is a ~5pt bar about 8pt up. A BUTTON navigation bar (Android's
- * 48) is a real bar and has to be cleared entirely.
+ * Above this, `insets.bottom` is a real navigation BAR, not a handle.
+ * iPhone 34, Android gesture ~24, iPad 20 are all strips; Android's
+ * three-button bar is ~48.
  */
+const GESTURE_INSET_MAX = 34;
+
+/**
+ * How far the pill's bottom edge sits above the window's bottom edge.
+ *
+ * An ADDITION, not a correction — this is the whole gap, and nothing
+ * else contributes to it.
+ *
+ * `getTabBarHeight` in @react-navigation/bottom-tabs returns a custom
+ * numeric `height` VERBATIM; it only folds in `insets.bottom` when it is
+ * computing the DEFAULT height. So the moment the pill sets
+ * `height: TAB_BAR_HEIGHT` the navigator stops reserving the safe area
+ * altogether, and the pill's own `paddingBottom` overrides the
+ * `paddingBottom: insets.bottom` the bar would otherwise carry.
+ *
+ * Reading it as a correction — and therefore returning a NEGATIVE number
+ * — hung the pill 10–20pt off the bottom of the window and cut the
+ * labels clean off: no labels at all on iPhone (inset 34 → −20), labels
+ * sitting on the gesture handle on Android (inset 24 → −10). Reported
+ * 2026-08-02 with screenshots of all three targets.
+ *
+ * A gesture inset is a home-INDICATOR strip: a ~5pt handle about 8pt up,
+ * which the pill only has to clear rather than vacate — hence sitting
+ * inside the strip is fine and looks tighter. A BUTTON navigation bar is
+ * real chrome and has to be cleared completely.
+ */
+export function tabBarBottomFor(insetBottom: number): number {
+  if (insetBottom > GESTURE_INSET_MAX) {
+    return insetBottom + TAB_BAR_EDGE_GAP;
+  }
+  return Math.max(TAB_BAR_EDGE_GAP, insetBottom - 10);
+}
+
 export function useTabBarBottom(): number {
-  const insets = useSafeAreaInsets();
-  // A correction, not an addition — the navigator has already reserved
-  // `insets.bottom` under the bar. Asking for 14 and getting 48 is what
-  // stranded the pill in the middle of nothing the first time.
-  return Math.max(-insets.bottom, 14 - insets.bottom);
+  return tabBarBottomFor(useSafeAreaInsets().bottom);
 }
 
 /**

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, type RouteProp } from '@react-navigation/native';
 import type { MainTabParamList } from '../navigation/types';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
@@ -48,7 +47,6 @@ export function SettingsScreen() {
   const isExpanded = useBreakpoint() === 'expanded';
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
-  const insets = useSafeAreaInsets();
 
   // Deep-link highlight: when arriving from the home location selector's
   // "Add new location" action, scroll to and briefly flash the Saved
@@ -124,7 +122,10 @@ export function SettingsScreen() {
         style={[styles.scroll, { backgroundColor: palette.bg }]}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 24 + tabBarInset },
+          // No `insets.bottom`: the tab bar is in flow and already spends
+          // it, so adding it here doubled the dead air at the foot of the
+          // list (see HomeScreen's scroll content).
+          { paddingBottom: 24 + tabBarInset },
         ]}
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled">

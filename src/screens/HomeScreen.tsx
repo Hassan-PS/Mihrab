@@ -13,7 +13,6 @@ import notifee, {
   AndroidNotificationSetting,
   AuthorizationStatus,
 } from '@notifee/react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -90,7 +89,6 @@ export function HomeScreen() {
   // home render.
   usePrefetchSavedLocations();
   const { palette } = useAppPalette();
-  const insets = useSafeAreaInsets();
   // Native header height — anchors the Mac Catalyst pinned controls
   // overlay just below the (transparent) title bar.
   const headerHeight = useHeaderHeight();
@@ -689,9 +687,13 @@ export function HomeScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.scrollContent,
-        // Room for the floating tab bar, which no longer reserves
-        // any: without this the last card sits under it for good.
-        { paddingBottom: insets.bottom + 28 + tabBarInset },
+        // Breathing room under the last card — and NOTHING for the tab
+        // bar or the safe area. The bar is in flow, so the scroll view
+        // already ends above it, and the bar's own bottom margin already
+        // spends `insets.bottom`. Adding it here as well cost ~54pt of
+        // dead air at the foot of the page, which on iPad was most of
+        // the reason the dashboard overflowed and had to scroll at all.
+        { paddingBottom: 24 + tabBarInset },
         // Fill the viewport on the dashboard: when the two columns are
         // shorter than the window, center them vertically instead of
         // leaving the bottom half of a Mac/iPad window empty (§B1).
@@ -770,13 +772,23 @@ export function HomeScreen() {
                 styles.dashRow,
                 dashScale > 1 && { transform: [{ scale: dashScale }] },
               ]}>
-              {/* gap:12 — without it the carousel's page dots sat flush
-                  against the Quran shortcut (reported 2026-07-16). */}
-              <View style={{ width: HOME_MAIN_COL, gap: 12 }}>
-                {dayTable}
-                {quranShortcut}
-              </View>
+              {/* The main column carries the day table AND NOTHING ELSE.
+                  It is the tallest thing on the screen by a wide margin —
+                  hero, day strip, six rows and the month link — and on an
+                  11" iPad in landscape it uses essentially the whole
+                  window on its own. Anything stacked under it therefore
+                  falls off the bottom, which is exactly what happened to
+                  the Quran card: the one card on Home you are meant to
+                  ACT on was the one card you had to scroll to find
+                  (reported 2026-08-02).
+
+                  So the Quran card moves across to the side column, and
+                  goes FIRST in it — the side column was half empty, and
+                  a shortcut outranks a read-only summary. Home now fits
+                  the window on iPad with nothing to scroll to. */}
+              <View style={{ width: HOME_MAIN_COL, gap: 12 }}>{dayTable}</View>
               <View style={styles.dashSide}>
+                {quranShortcut}
                 {toolsGrid}
                 {ramadanCard}
                 {providerFooter}

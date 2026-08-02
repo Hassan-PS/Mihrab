@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.6] — 2026-08-02
+
+Two things the 2.8.5 design pass got wrong on real devices.
+
+### Fixed
+- **The tab bar's labels were cut off the bottom of the screen.** On an iPhone they were gone entirely; on Android they sat on the gesture handle. The bar sets its own height, and a tab navigator that is given a height returns exactly that — it stops reserving the safe area underneath, which the pill's bottom offset had been written to subtract from. Subtracting an inset nobody reserved hung the bar ten to twenty points off the bottom edge. The offset is now the whole gap and nothing is taken away from it: the pill tucks inside a home-indicator strip, which is a handle it only has to clear, and sits fully above a three-button navigation bar, which is real chrome. A test pins it, because this is a fault that no build log reports and every screenshot of the top of the app hides.
+- **Home fits an iPad without scrolling.** The day card — countdown, week strip, six times, month link — is the tallest thing on the screen and uses almost the whole window on its own, so the Quran card stacked beneath it fell off the bottom: the one card on Home you are meant to act on was the one you had to go looking for. It now sits at the top of the side column, which was half empty. The foot of the page also carried a safe-area inset a second time, under a bar that had already spent it, and that dead air is gone everywhere.
+
 ## [2.8.5] — 2026-08-02
 
 A design pass over the whole app, and the mushaf finally works in Arabic.
