@@ -104,6 +104,7 @@ import {
 } from './quranState';
 import { usePlaybackStatus } from './audio/playback';
 import { useOverlayDismissGuard } from './mushafReaderCore';
+import { mushafSurahName } from './surahName';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageOverlay } from './mushaf/MushafPageOverlay';
 import { MiniPlayer } from './audio/MiniPlayer';
@@ -148,7 +149,10 @@ export function MushafReader({
   audioSheetSignal,
   onTitleChange,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n: i18nInstance } = useTranslation();
+  // The header title is pushed to the navigator imperatively, so it needs the
+  // language as an explicit dependency to follow a language change.
+  const language = i18nInstance.language;
   const insets = useSafeAreaInsets();
   // iOS native-stack headers float translucently over the content; pad
   // our in-page chrome below them (0 on Android's opaque header).
@@ -450,8 +454,8 @@ export function MushafReader({
     const surah = MUSHAF_SURAHS.find(
       s => s.number === visiblePage.start.surah,
     );
-    if (surah) onTitleChange(surah.englishName);
-  }, [currentPage, onTitleChange, textMode]);
+    if (surah) onTitleChange(mushafSurahName(surah, language));
+  }, [currentPage, onTitleChange, textMode, language]);
 
   // ── Last-read + khatmah on page turns (QR-10/21) ────────────────────
   const commitPage = useCallback(
@@ -936,8 +940,12 @@ export function MushafReader({
                 numberOfLines={1}
                 style={[styles.pageHeaderText, { color: ornament }]}>
                 {isFullscreen
-                  ? MUSHAF_SURAHS.find(s => s.number === meta.start.surah)
-                      ?.englishName ?? ''
+                  ? (() => {
+                      const s = MUSHAF_SURAHS.find(
+                        x => x.number === meta.start.surah,
+                      );
+                      return s ? mushafSurahName(s) : '';
+                    })()
                   : t('quran.juzLabel', {
                       defaultValue: 'Juz {{juz}}',
                       juz: easternNumerals(meta.juz),
@@ -1015,7 +1023,10 @@ export function MushafReader({
                 }
                 // Only the page being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
-                onWordPress={onToggleFullscreen}
+                // Single tap anywhere on the page → fullscreen toggle (the
+                // same gesture the enclosing Pressable gives the margins);
+                // long press on an ayah → the ayah panel (tafsir, audio).
+                onWordPress={() => onToggleFullscreen()}
                 onWordLongPress={handleWordLongPress}
               />
             ) : (
@@ -1104,6 +1115,14 @@ export function MushafReader({
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
+        // `direction: 'ltr'` — the app tree is RTL in Arabic, and a
+        // horizontal ScrollView under RTL measures its content offset from
+        // the RIGHT, which parks this pager past the end of its content and
+        // leaves the reader blank. Every offset here (`pageFromScroll`, the
+        // scroll-to-page effect, the windowed strip) is a left-to-right
+        // multiple of the page width; the mushaf's right-to-left page order
+        // is expressed in those offsets, not by the UI language.
+        style={styles.pagerLtr}
         onMomentumScrollEnd={e => {
           const x = e.nativeEvent.contentOffset.x;
           // The viewport frame is always screenWidth (= one page in single
@@ -1304,6 +1323,8 @@ function PageViewport({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  /** See the pager's `style` — the page strip is measured left-to-right. */
+  pagerLtr: { direction: 'ltr' },
   gate: {
     flex: 1,
     alignItems: 'center',

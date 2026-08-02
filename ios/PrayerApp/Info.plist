@@ -72,9 +72,18 @@
 	<array>
 		<string>arm64</string>
 	</array>
+	<!-- iPhone: portrait plus both landscapes. This list is the CEILING UIKit
+	     will ever grant — a screen that asks for landscape via
+	     react-native-screens' `orientation` option cannot get it if the app
+	     itself never declared it, which is why rotating the mushaf did
+	     nothing on iPhone while it worked on iPad and Android. Every screen
+	     still declares its own lock (`orientation: 'portrait'` app-wide in
+	     RootNavigator), so only the readers that opt in actually rotate. -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -84,8 +93,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<!-- Mac Catalyst / iPad: the window is freely resizable, so all
-	     orientations are supported and layouts reflow via useBreakpoint.
-	     iPhone stays portrait-only (the key above). -->
+	     orientations are supported and layouts reflow via useBreakpoint. -->
 	<key>UIRequiresFullScreen</key>
 	<false/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>

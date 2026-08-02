@@ -12,10 +12,10 @@
     "tasbih": "Tasbih",
     "duas": "Duas",
     "quran": "Koran",
-    "mosques": "Moscheen",
     "journal": "Gebetstagebuch",
     "backup": "Sicherung",
-    "fasting": "Fasten"
+    "fasting": "Fasten",
+    "today": "Heute"
   },
   "a11y": {
     "openSettings": "Einstellungen öffnen",
@@ -60,7 +60,27 @@
     "backToToday": "Zu heute",
     "updatedAt": "Aktualisiert {{when}}",
     "daysStored": "{{count}} Tage gespeichert",
-    "quranShortcut": "Koran öffnen"
+    "quranShortcut": "Koran öffnen",
+    "dayStrip": "Tag wählen",
+    "nextPrayerIn": "{{prayer}} in",
+    "firstPrayer": "Erstes Gebet {{prayer}} · {{time}}",
+    "todaySummary": "Heute",
+    "prayersLogged": "{{count}} von {{total}} Gebeten erfasst",
+    "noFastToday": "Kein Fasten erfasst",
+    "dhikrSets": "{{count}} Dhikr-Runden abgeschlossen",
+    "fastKept": {
+      "ramadan": "Ramadan-Fasten gehalten",
+      "voluntary": "Sunna-Fasten gehalten",
+      "qadha": "Nachhol-Fasten gehalten"
+    },
+    "readItIn": "In {{surah}} lesen",
+    "continueAt": "Weiterlesen · {{surah}} {{ref}}",
+    "khatmahDay": "Khatma Tag {{day}} von {{total}}",
+    "khatmahDaysToGo": "noch {{count}} Tage",
+    "pagesLeftToday": "heute noch {{count}} Seiten",
+    "pageNumber": "Seite {{page}}",
+    "readingDone": "Heutige Lesung erledigt",
+    "readOn": "Weiterlesen"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",
@@ -234,7 +254,21 @@
     "resetApp": "App-Daten zurücksetzen",
     "resetAppHelp": "Löscht alle Einstellungen und Daten. Nicht rückgängig machbar.",
     "batteryWarning": "Benachrichtigungen könnten unzuverlässig sein",
-    "batteryWarningHelp": "Die Akku-Optimierung kann Adhan-Benachrichtigungen verzögern oder stummschalten, wenn die App geschlossen ist. Tippen, um Mihrab auszunehmen."
+    "batteryWarningHelp": "Die Akku-Optimierung kann Adhan-Benachrichtigungen verzögern oder stummschalten, wenn die App geschlossen ist. Tippen, um Mihrab auszunehmen.",
+    "themeRestartManualTitle": "App neu öffnen",
+    "themeRestartManualBody": "iOS erlaubt Apps keinen Neustart. Beende Mihrab vollständig und öffne es erneut, damit das neue Design greift.",
+    "liquidGlass": "Liquid Glass",
+    "liquidGlassHelp": "Übernimmt iOS-Systemfarben und durchscheinendes Glas-Chrom. Folgt automatisch Hell/Dunkel.",
+    "themeRestartTitle": "Neustart erforderlich",
+    "themeRestartBody": "Ein Wechsel der Systemfarben erfordert einen Neustart, damit jeder Bildschirm das Design übernimmt. Jetzt neu starten?",
+    "themeRestartConfirm": "Neu starten",
+    "laSecondMetricLabel": "Zweiter Wert",
+    "resetTitle": "App zurücksetzen?",
+    "resetBody": "Das löscht alle Einstellungen, gespeicherten Orte, Protokolleinträge, Fastentage und den Tasbih-Stand und bringt dich zurück zum Einstieg. Nicht rückgängig zu machen.",
+    "resetConfirm": "Alles zurücksetzen",
+    "prayerOffsetsCount": "{{count}} angepasst",
+    "endOfDayLog": "Erinnerung am Tagesende",
+    "endOfDayLogHelp": "Zehn Minuten nach dem Isha fragt sie, ob die fünf Gebete des Tages eingetragen werden sollen. Auch eine Antwort am nächsten Morgen trägt den richtigen Tag ein."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "Vorheriger Ort"
+    "previousLocation": "Vorheriger Ort",
+    "invalidCoordsTitle": "Ungültige Koordinaten",
+    "invalidCoordsBody": "Breitengrad muss zwischen -90 und 90 liegen, Längengrad zwischen -180 und 180.",
+    "pickAPlace": "Suche zuerst eine Stadt oder gib Koordinaten ein.",
+    "duplicateTitle": "Bereits gespeichert",
+    "duplicateBody": "Ein Ort mit diesen Koordinaten ist bereits als „{{name}}“ gespeichert."
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "Zurücksetzen",
     "salahonprophet": "Salah auf den Propheten ﷺ",
     "prev": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "meaning": {
+      "subhanallah": "Gepriesen sei Allah",
+      "alhamdulillah": "Alles Lob gebührt Allah",
+      "lailaha": "Es gibt keinen Gott außer Allah",
+      "allahuakbar": "Allah ist der Größte",
+      "astaghfirullah": "Ich bitte Allah um Vergebung",
+      "salahonprophet": "O Allah, segne unseren Meister Muhammad"
+    },
+    "setPosition": "Satz {{index}} von {{total}}",
+    "ofTarget": "von {{target}}",
+    "tapAnywhere": "Irgendwo tippen",
+    "upNext": "Als Nächstes",
+    "resetSet": "Satz zurücksetzen",
+    "skip": "Überspringen"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "Um Schutz vor Irreleitung"
-    }
+    },
+    "tapToCount": "Zum Zählen tippen"
   },
   "quran": {
     "meccan": "Mekkanisch",
@@ -869,7 +923,17 @@
     "companionTitle": "Unter jedem Vers",
     "companionHelp": "Gilt überall, wo ein Vers angezeigt wird — im Reader, beim Vers des Tages und in der täglichen Ayah-Benachrichtigung. Auch über die Koran-Seite änderbar.",
     "companionActive": "aktiv",
-    "mushafReplaceOldBody": "Eine ältere Kopie des Mushafs ({{size}} MB) liegt noch aus einer früheren Version auf deinem Gerät. Sie wird zuerst entfernt — nichts von dem, was du gespeichert hast, ist betroffen."
+    "mushafReplaceOldBody": "Eine ältere Kopie des Mushafs ({{size}} MB) liegt noch aus einer früheren Version auf deinem Gerät. Sie wird zuerst entfernt — nichts von dem, was du gespeichert hast, ist betroffen.",
+    "shareAsText": "Text teilen",
+    "shareChoiceA11y": "Teilen — Text oder Bildkarte",
+    "recitation": "Rezitation",
+    "downloadSurahAudioSized": "Diese Sure laden · {{size}}",
+    "tapToPick": "wählen",
+    "tabMarks": "Marken",
+    "searchSurahOrPage": "Sure oder Seite suchen",
+    "reading": "wird gelesen",
+    "pageScrubber": "Zur Seite",
+    "goCta": "Los"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "Tagebuch-Aktion in Gebetsbenachrichtigungen aktivieren",
     "notePlaceholder": "Private Notiz (nur auf diesem Gerät)",
     "saveNote": "Notiz speichern",
-    "logActionTitle": "Gebet protokollieren"
+    "logActionTitle": "Gebet protokollieren",
+    "loadFailedTitle": "Protokoll konnte nicht geladen werden",
+    "loadFailedBody": "Deine Daten sind auf dem Gerät sicher, konnten aber gerade nicht gelesen werden. Öffne das Protokoll erneut.",
+    "saveFailedTitle": "Konnte nicht gespeichert werden",
+    "saveFailedBody": "Bitte erneut versuchen.",
+    "noteLabel": "Persönliche Notiz (privat, verschlüsselt)"
   },
   "events": {
     "islamicNewYear": "Islamisches Neujahr",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "Friede sei mit dir, und Allahs Barmherzigkeit und Sein Segen."
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "Alle protokollierten Fasten",
     "noLogsYet": "Die Tage, die du einhältst, erscheinen hier.",
     "typeRamadan": "Ramadan",
-    "typeVoluntary": "Freiwillig / Sunnah"
+    "typeVoluntary": "Freiwillig / Sunnah",
+    "reminderChannelName": "Fasten-Erinnerungen",
+    "reminderTitle": "Fasten-Erinnerung"
   },
   "methods": {
     "0": "Schia — Ithna Ashari",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim Bittgebete",
     "quranGeometry": "Ayah-Positionsdaten (quran.com / Quran-for-Android-Projekt)",
-    "recitation": "Rezitationsaudio (21 Rezitatoren): EveryAyah.com · Wort-Timings: quran-align (CC BY 4.0)",
+    "recitation": "Rezitationsaudio (42 Rezitatoren): EveryAyah.com · Wort-Timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-Texte: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "Datenstatistik aktiviert",
     "unlockedBody": "Unten auf dem Startbildschirm erscheint nun eine Statistikkarte. Sie können sie jederzeit unten deaktivieren.",
     "serverCoverage": "Server-Abdeckung"
+  },
+  "log": {
+    "last13Weeks": "Letzte 13 Wochen",
+    "legendPrayers": "0 → 5 Gebete",
+    "fasted": "gefastet",
+    "dayA11y": "{{date}}: {{prayers}} Gebete erfasst{{fast}}",
+    "streakCaption": "{{count}}-Tage-Serie",
+    "fastsCaption": "{{count}} Fastentage",
+    "markAllOnTime": "Alle als pünktlich",
+    "fastingToday": "Fasten heute",
+    "iftarAt": "Iftar {{time}}",
+    "allUpcoming": "Alle kommenden",
+    "title": "Protokoll"
+  },
+  "endOfDay": {
+    "title": "Heutige Gebete eintragen?",
+    "body": "Alle fünf als pünktlich gebetet eintragen oder das Protokoll öffnen und einzeln ausfüllen.",
+    "action": "Alle als erledigt eintragen",
+    "channelName": "Tagesabschluss-Protokoll"
   }
 }

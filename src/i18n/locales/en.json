@@ -12,10 +12,10 @@
     "tasbih": "Tasbih",
     "duas": "Duas",
     "quran": "Quran",
-    "mosques": "Mosques",
     "journal": "Journal",
     "backup": "Backup",
-    "fasting": "Fasting"
+    "fasting": "Fasting",
+    "today": "Today"
   },
   "a11y": {
     "openSettings": "Open settings",
@@ -60,7 +60,27 @@
     "backToToday": "Back to today",
     "updatedAt": "Updated {{when}}",
     "daysStored": "{{count}} days stored",
-    "quranShortcut": "Open the Quran"
+    "quranShortcut": "Open the Quran",
+    "dayStrip": "Choose a day",
+    "nextPrayerIn": "{{prayer}} in",
+    "firstPrayer": "First prayer {{prayer}} · {{time}}",
+    "todaySummary": "Today",
+    "prayersLogged": "{{count}} of {{total}} prayers logged",
+    "noFastToday": "No fast recorded",
+    "dhikrSets": "{{count}} dhikr sets completed",
+    "fastKept": {
+      "ramadan": "Ramadan fast kept",
+      "voluntary": "Sunnah fast kept",
+      "qadha": "Make-up fast kept"
+    },
+    "readItIn": "Read it in {{surah}}",
+    "continueAt": "Continue · {{surah}} {{ref}}",
+    "khatmahDay": "Khatmah day {{day}} of {{total}}",
+    "khatmahDaysToGo": "{{count}} days to go",
+    "pagesLeftToday": "{{count}} pages left today",
+    "pageNumber": "page {{page}}",
+    "readingDone": "Today's reading done",
+    "readOn": "Read on"
   },
   "errors": {
     "locationNeededTitle": "Location needed",
@@ -234,7 +254,21 @@
     "resetApp": "Reset app data",
     "resetAppHelp": "Erase all settings and data. Cannot be undone.",
     "batteryWarning": "Alerts may be unreliable",
-    "batteryWarningHelp": "Battery optimization can delay or silence adhan alerts while the app is closed. Tap to exclude Mihrab."
+    "batteryWarningHelp": "Battery optimization can delay or silence adhan alerts while the app is closed. Tap to exclude Mihrab.",
+    "themeRestartManualTitle": "Reopen the app",
+    "themeRestartManualBody": "iOS does not allow apps to restart themselves. Please force-quit Prayer Times and reopen it for the new theme to take effect.",
+    "liquidGlass": "Liquid Glass",
+    "liquidGlassHelp": "Adopt iOS system colours and translucent glass chrome. Follows Light/Dark automatically.",
+    "themeRestartTitle": "Restart required",
+    "themeRestartBody": "Switching system colors needs the app to restart so every screen picks up the new theme. Restart now?",
+    "themeRestartConfirm": "Restart",
+    "laSecondMetricLabel": "Second metric",
+    "resetTitle": "Reset the app?",
+    "resetBody": "This wipes all settings, saved locations, journal entries, fasting log, and tasbih state, then takes you back to the onboarding flow. This cannot be undone.",
+    "resetConfirm": "Reset everything",
+    "prayerOffsetsCount": "{{count}} adjusted",
+    "endOfDayLog": "End-of-day log reminder",
+    "endOfDayLogHelp": "Ten minutes after Isha, asks whether to log the day’s five prayers. Answering it the next morning still logs the right day."
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "Previous location"
+    "previousLocation": "Previous location",
+    "invalidCoordsTitle": "Invalid coordinates",
+    "invalidCoordsBody": "Latitude must be between -90 and 90, longitude between -180 and 180.",
+    "pickAPlace": "Search for a city or enter coordinates first.",
+    "duplicateTitle": "Already saved",
+    "duplicateBody": "A location at these coordinates is already saved as \"{{name}}\"."
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "Reset",
     "salahonprophet": "Salah on the Prophet ﷺ",
     "prev": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "meaning": {
+      "subhanallah": "Glory be to Allah",
+      "alhamdulillah": "All praise is due to Allah",
+      "lailaha": "There is no god but Allah",
+      "allahuakbar": "Allah is the greatest",
+      "astaghfirullah": "I seek forgiveness from Allah",
+      "salahonprophet": "O Allah, send blessings upon our master Muhammad"
+    },
+    "setPosition": "Set {{index}} of {{total}}",
+    "ofTarget": "of {{target}}",
+    "tapAnywhere": "Tap anywhere",
+    "upNext": "Next",
+    "resetSet": "Reset set",
+    "skip": "Skip"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "For protection against being misled"
-    }
+    },
+    "tapToCount": "Tap to count"
   },
   "quran": {
     "meccan": "Meccan",
@@ -869,7 +923,17 @@
     "companionTitle": "Under each verse",
     "companionHelp": "Applies everywhere a verse is shown — the reader, the verse of the day, and the daily-ayah notification. Also changeable from the Quran page.",
     "companionActive": "active",
-    "mushafReplaceOldBody": "An older copy of the mushaf ({{size}} MB) is still on your device from a previous version. It will be removed first — nothing you have saved is affected."
+    "mushafReplaceOldBody": "An older copy of the mushaf ({{size}} MB) is still on your device from a previous version. It will be removed first — nothing you have saved is affected.",
+    "shareAsText": "Share the text",
+    "shareChoiceA11y": "Share — opens a choice of text or image card",
+    "recitation": "Recitation",
+    "downloadSurahAudioSized": "Download this surah · {{size}}",
+    "tapToPick": "choose",
+    "tabMarks": "Marks",
+    "searchSurahOrPage": "Search surah or page",
+    "reading": "reading",
+    "pageScrubber": "Go to page",
+    "goCta": "Go"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "Enable journal log action on prayer notifications",
     "notePlaceholder": "Private note (only on this device)",
     "saveNote": "Save note",
-    "logActionTitle": "Log prayer"
+    "logActionTitle": "Log prayer",
+    "loadFailedTitle": "Could not load journal",
+    "loadFailedBody": "Your data is safe on disk but could not be read right now. Please try opening the journal again.",
+    "saveFailedTitle": "Could not save",
+    "saveFailedBody": "Please try again.",
+    "noteLabel": "Personal note (private, encrypted)"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "Peace be upon you, and the mercy of Allah and His blessings."
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "All logged fasts",
     "noLogsYet": "Days you keep will appear here.",
     "typeRamadan": "Ramadan",
-    "typeVoluntary": "Voluntary / Sunnah"
+    "typeVoluntary": "Voluntary / Sunnah",
+    "reminderChannelName": "Fasting reminders",
+    "reminderTitle": "Fasting reminder"
   },
   "methods": {
     "0": "Shia — Ithna Ashari",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisnul Muslim duas",
     "quranGeometry": "Ayah position data (quran.com / Quran for Android project)",
-    "recitation": "Recitation audio (21 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)",
+    "recitation": "Recitation audio (42 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "Data statistics enabled",
     "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below.",
     "serverCoverage": "Server coverage"
+  },
+  "log": {
+    "last13Weeks": "Last 13 weeks",
+    "legendPrayers": "0 → 5 prayers",
+    "fasted": "fasted",
+    "dayA11y": "{{date}}: {{prayers}} prayers logged{{fast}}",
+    "streakCaption": "{{count}}-day streak",
+    "fastsCaption": "{{count}} fasts",
+    "markAllOnTime": "Mark all on time",
+    "fastingToday": "Fasting today",
+    "iftarAt": "Iftar {{time}}",
+    "allUpcoming": "All upcoming",
+    "title": "Log"
+  },
+  "endOfDay": {
+    "title": "Log today’s prayers?",
+    "body": "Mark all five as prayed on time, or open the Log to fill them in one by one.",
+    "action": "Log all as complete",
+    "channelName": "End-of-day log"
   }
 }

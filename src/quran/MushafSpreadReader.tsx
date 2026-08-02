@@ -42,6 +42,8 @@ import {
   useSettledMeasure,
 } from './mushafReaderCore';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
+import { MushafIndexSidebar, SIDEBAR_WIDTH } from './MushafIndexSidebar';
+import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
 
 /** KFGQPC source page ratio — the printed page's width over height. */
@@ -82,8 +84,23 @@ export function MushafSpreadReader(props: MushafReaderProps) {
    * is painted `pageBg`, so the page colour still reaches the screen edge.
    */
   const sideInset = Math.max(insets.left, insets.right);
-  /** One pager item = the list viewport, after the cutout inset. */
-  const pageWidth = width - sideInset * 2;
+  /**
+   * The index is what the extra width is FOR (design review 2d) — but only
+   * when there is width to spare and the reader is not in fullscreen,
+   * which means "the page, nothing else". Portrait collapses it away: an
+   * iPad portrait cannot hold a spread and a sidebar at a readable size.
+   */
+  const showSidebar = !isFullscreen && width >= SIDEBAR_WIDTH + 620;
+  /**
+   * One pager item = the list viewport, after the cutout inset AND after
+   * the sidebar (v2.8.5). The sidebar is a SIBLING in the row, so it takes
+   * its width out of the reader — an item sized to the whole window is
+   * that much too wide, and since the list is `inverted` the overflow
+   * lands on the leading edge: the left-hand page of every spread ran
+   * under the sidebar and was clipped mid-line.
+   */
+  const pageWidth =
+    width - sideInset * 2 - (showSidebar ? SIDEBAR_WIDTH : 0);
 
   // The one internal branch: portrait window → single centred page per
   // item; landscape → a facing pair per item.
@@ -242,7 +259,10 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 }
                 // Only the spread being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
-                onWordPress={onToggleFullscreen}
+                // Single tap anywhere on the page — word included — toggles
+                // fullscreen; the ayah panel (tafsir, "play from here") is
+                // a long press on the ayah.
+                onWordPress={() => onToggleFullscreen()}
                 onWordLongPress={core.openSelection}
               />
             </Pressable>
@@ -323,6 +343,22 @@ export function MushafSpreadReader(props: MushafReaderProps) {
         },
       ]}>
       <StatusBar hidden={isFullscreen} animated />
+      <View style={styles.body}>
+      {showSidebar ? (
+        <MushafIndexSidebar
+          currentPage={currentPage}
+          onSelectPage={core.jumpToPage}
+          // The navigation bar floats over the reader on iOS, and on Mac
+          // Catalyst the window's traffic lights sit in the title-bar drag
+          // region above it. The page columns already clear both with
+          // `navPad`; without the same inset the sidebar's tab row started
+          // underneath them — the Surah/Juz/Marks chips sat behind the
+          // close/minimise/zoom buttons on Mac and behind the floating
+          // back pill on iPad.
+          topInset={Math.max(navPad, insets.top)}
+        />
+      ) : null}
+      <View style={styles.reader}>
       <View
         style={styles.listWrap}
         onLayout={e => setListH(e.nativeEvent.layout.height)}>
@@ -386,6 +422,18 @@ export function MushafSpreadReader(props: MushafReaderProps) {
         </>
       ) : null}
 
+      {/* 604 pages is too many for ‹ ›. A rail states where you are and
+          takes you anywhere in one drag. */}
+      {showSidebar ? (
+        <MushafPageScrubber
+          page={currentPage}
+          onSelectPage={core.jumpToPage}
+          onOpenJump={core.openJump}
+        />
+      ) : null}
+      </View>
+      </View>
+
       {core.selected ? (
         <AyahActionSheet
           visible={core.sheetVisible}
@@ -410,7 +458,28 @@ export function MushafSpreadReader(props: MushafReaderProps) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  listWrap: { flex: 1 },
+  // Sidebar beside the reader; both fill the height.
+  body: { flex: 1, flexDirection: 'row' },
+  reader: { flex: 1 },
+  /**
+   * The pager is laid out LTR even when the app is (v2.8.4).
+   *
+   * `AppNavigationRoot` puts `direction: 'rtl'` on the whole tree for Arabic.
+   * A horizontal ScrollView under RTL measures its content offset from the
+   * RIGHT — so this list, whose `getItemLayout`, `initialScrollIndex` and
+   * momentum-end index are all plain left-to-right multiples of the page
+   * width, opened parked at x = contentSize (604 pages past the end). The
+   * page, the juz label and the page medallion were all laid out correctly
+   * and painted where nobody could see them: the mushaf was simply BLANK in
+   * Arabic, and no amount of swiping brought it back.
+   *
+   * Right-to-left page turning is already handled — by `inverted`, which is
+   * the mushaf's own reading order and has nothing to do with the UI
+   * language. Two flips are one too many. The direction is pinned on the
+   * pager only, so the ayah sheet and the mini player below still lay out
+   * in the app's own direction.
+   */
+  listWrap: { flex: 1, direction: 'ltr' },
   item: { height: '100%' },
   spreadRow: { flexDirection: 'row' },
   column: { height: '100%' },

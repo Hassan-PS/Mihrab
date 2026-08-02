@@ -30,6 +30,50 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 type IconProps = { size?: number; color?: string };
 
+/**
+ * Settings gear — the ONE gear in the app (v2.8.5).
+ *
+ * There used to be two: this cog in the Home header toolbar, and a
+ * sun-burst approximation drawn inline for the Settings tab. Side by side
+ * in the same app they read as two different destinations, and the burst
+ * reads as brightness before it reads as settings. The header gear is now
+ * the shared one; the tab uses it too.
+ *
+ * Lucide's cog outline — a toothed ring, not a flower, which survives
+ * being drawn at 22pt on a tab bar.
+ */
+export function SettingsGearIcon({
+  size = 24,
+  color = '#000',
+  strokeWidth = 2,
+}: IconProps & { strokeWidth?: number }) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      accessibilityElementsHidden
+      importantForAccessibility="no">
+      <Path
+        d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 /** Open mushaf — the Quran shortcut's hero icon (v2.7.30). An open book
  *  with soft text-line hints on each page and a rehl-style base notch so
  *  it reads as a mushaf, not a generic book. Stroked, single-color, per

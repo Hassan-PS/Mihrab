@@ -192,6 +192,20 @@ export type PrayerAppSettings = {
    */
   journalNotificationActionsEnabled: boolean;
   /**
+   * End-of-day "log all as complete" reminder — v2.8.5.
+   *
+   * Fires ten minutes after Isha and offers a single action that marks
+   * the whole day's five prayers on-time. It exists because the day's
+   * logging is otherwise five separate acts of bookkeeping performed
+   * while you are trying to pray, and most days the honest answer is
+   * "all five, yes".
+   *
+   * The notification carries the DATE IT WAS FOR in its payload, so a
+   * reminder answered the next morning still logs the night it belongs
+   * to — a 10pm prompt is one people sleep through.
+   */
+  endOfDayLogReminderEnabled: boolean;
+  /**
    * App accent color id — task #127. Drives the in-app accent and (when
    * `useSystemDynamicTheme` is off) also the widget highlight via the
    * sync logic in `syncWidgetUiHints.ts`. When `useSystemDynamicTheme`
@@ -318,6 +332,9 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // the user notices before sleeping.
   fastingReminderHour: 20,
   journalNotificationActionsEnabled: false,
+  // Off until asked for: an unsolicited nightly notification is the kind
+  // of thing people uninstall an app over.
+  endOfDayLogReminderEnabled: false,
   // App accent defaults to brand green (matches the historical hardcoded
   // accent so users on existing installs see no visual diff after the
   // upgrade).

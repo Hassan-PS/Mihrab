@@ -12,10 +12,10 @@
     "tasbih": "Tesbih",
     "duas": "Dualar",
     "quran": "Kur’an",
-    "mosques": "Camiler",
     "journal": "Namaz Günlüğü",
     "backup": "Yedekleme",
-    "fasting": "Oruç"
+    "fasting": "Oruç",
+    "today": "Bugün"
   },
   "a11y": {
     "openSettings": "Ayarları aç",
@@ -60,7 +60,27 @@
     "backToToday": "Bugüne dön",
     "updatedAt": "Güncellendi: {{when}}",
     "daysStored": "{{count}} gün kayıtlı",
-    "quranShortcut": "Kur'an'ı aç"
+    "quranShortcut": "Kur'an'ı aç",
+    "dayStrip": "Bir gün seçin",
+    "nextPrayerIn": "{{prayer}} kaldı",
+    "firstPrayer": "İlk namaz {{prayer}} · {{time}}",
+    "todaySummary": "Bugün",
+    "prayersLogged": "{{total}} namazdan {{count}} tanesi kaydedildi",
+    "noFastToday": "Oruç kaydı yok",
+    "dhikrSets": "{{count}} zikir seti tamamlandı",
+    "fastKept": {
+      "ramadan": "Ramazan orucu tutuldu",
+      "voluntary": "Sünnet orucu tutuldu",
+      "qadha": "Kaza orucu tutuldu"
+    },
+    "readItIn": "{{surah}} içinde oku",
+    "continueAt": "Devam · {{surah}} {{ref}}",
+    "khatmahDay": "Hatim {{total}} günün {{day}}. günü",
+    "khatmahDaysToGo": "{{count}} gün kaldı",
+    "pagesLeftToday": "bugün {{count}} sayfa kaldı",
+    "pageNumber": "sayfa {{page}}",
+    "readingDone": "Bugünün okuması tamam",
+    "readOn": "Okumaya devam"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",
@@ -234,7 +254,21 @@
     "resetApp": "Uygulama verilerini sıfırla",
     "resetAppHelp": "Tüm ayarları ve verileri siler. Geri alınamaz.",
     "batteryWarning": "Bildirimler güvenilir olmayabilir",
-    "batteryWarningHelp": "Pil optimizasyonu, uygulama kapalıyken ezan bildirimlerini geciktirebilir veya sessize alabilir. Mihrab'ı hariç tutmak için dokunun."
+    "batteryWarningHelp": "Pil optimizasyonu, uygulama kapalıyken ezan bildirimlerini geciktirebilir veya sessize alabilir. Mihrab'ı hariç tutmak için dokunun.",
+    "themeRestartManualTitle": "Uygulamayı yeniden aç",
+    "themeRestartManualBody": "iOS uygulamaların kendini yeniden başlatmasına izin vermez. Yeni tema için Mihrab’ı tamamen kapatıp yeniden açın.",
+    "liquidGlass": "Liquid Glass",
+    "liquidGlassHelp": "iOS sistem renklerini ve yarı saydam cam yüzeyleri kullanır. Açık/koyu moda otomatik uyar.",
+    "themeRestartTitle": "Yeniden başlatma gerekli",
+    "themeRestartBody": "Sistem renklerini değiştirmek, her ekranın yeni temayı alması için yeniden başlatma gerektirir. Şimdi yapılsın mı?",
+    "themeRestartConfirm": "Yeniden başlat",
+    "laSecondMetricLabel": "İkinci gösterge",
+    "resetTitle": "Uygulama sıfırlansın mı?",
+    "resetBody": "Bu; tüm ayarları, kayıtlı konumları, kayıt girdilerini, oruç kaydını ve tesbih durumunu siler ve sizi başlangıca döndürür. Geri alınamaz.",
+    "resetConfirm": "Her şeyi sıfırla",
+    "prayerOffsetsCount": "{{count}} ayarlandı",
+    "endOfDayLog": "Gün sonu kayıt hatırlatması",
+    "endOfDayLogHelp": "Yatsıdan on dakika sonra günün beş vaktinin kaydedilip kaydedilmeyeceğini sorar. Ertesi sabah yanıtlasanız da doğru gün kaydedilir."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "Önceki konum"
+    "previousLocation": "Önceki konum",
+    "invalidCoordsTitle": "Geçersiz koordinatlar",
+    "invalidCoordsBody": "Enlem -90 ile 90, boylam -180 ile 180 arasında olmalıdır.",
+    "pickAPlace": "Önce bir şehir arayın veya koordinat girin.",
+    "duplicateTitle": "Zaten kayıtlı",
+    "duplicateBody": "Bu koordinatlardaki bir konum zaten \"{{name}}\" olarak kayıtlı."
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "Sıfırla",
     "salahonprophet": "Peygamber’e ﷺ Salavat",
     "prev": "Önceki",
-    "next": "Sonraki"
+    "next": "Sonraki",
+    "meaning": {
+      "subhanallah": "Allah her türlü noksanlıktan uzaktır",
+      "alhamdulillah": "Hamd Allah’a mahsustur",
+      "lailaha": "Allah’tan başka ilah yoktur",
+      "allahuakbar": "Allah en büyüktür",
+      "astaghfirullah": "Allah’tan bağışlanma dilerim",
+      "salahonprophet": "Allah’ım, efendimiz Muhammed’e salât et"
+    },
+    "setPosition": "{{total}} setten {{index}}.",
+    "ofTarget": "/ {{target}}",
+    "tapAnywhere": "Herhangi bir yere dokun",
+    "upNext": "Sırada",
+    "resetSet": "Seti sıfırla",
+    "skip": "Atla"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "Sapıklıktan korunma için"
-    }
+    },
+    "tapToCount": "Saymak için dokun"
   },
   "quran": {
     "meccan": "Mekki",
@@ -869,7 +923,17 @@
     "companionTitle": "Her ayetin altında",
     "companionHelp": "Ayetin gösterildiği her yerde geçerli — okuyucu, günün ayeti ve günlük ayet bildirimi. Kur'an sayfasından da değiştirilebilir.",
     "companionActive": "etkin",
-    "mushafReplaceOldBody": "Önceki bir sürümden kalan eski bir mushaf kopyası ({{size}} MB) hâlâ cihazınızda. Önce o silinecek — kaydettiğiniz hiçbir şey etkilenmez."
+    "mushafReplaceOldBody": "Önceki bir sürümden kalan eski bir mushaf kopyası ({{size}} MB) hâlâ cihazınızda. Önce o silinecek — kaydettiğiniz hiçbir şey etkilenmez.",
+    "shareAsText": "Metni paylaş",
+    "shareChoiceA11y": "Paylaş — metin veya görsel kart",
+    "recitation": "Tilavet",
+    "downloadSurahAudioSized": "Bu sureyi indir · {{size}}",
+    "tapToPick": "seç",
+    "tabMarks": "İşaretler",
+    "searchSurahOrPage": "Sure veya sayfa ara",
+    "reading": "okunuyor",
+    "pageScrubber": "Sayfaya git",
+    "goCta": "Git"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "Namaz bildirimlerinde günlük kaydı eylemini aç",
     "notePlaceholder": "Özel not (yalnızca bu cihazda)",
     "saveNote": "Notu kaydet",
-    "logActionTitle": "Namazı kaydet"
+    "logActionTitle": "Namazı kaydet",
+    "loadFailedTitle": "Kayıt yüklenemedi",
+    "loadFailedBody": "Verileriniz cihazda güvende ama şu anda okunamadı. Kaydı tekrar açmayı deneyin.",
+    "saveFailedTitle": "Kaydedilemedi",
+    "saveFailedBody": "Lütfen tekrar deneyin.",
+    "noteLabel": "Kişisel not (özel, şifreli)"
   },
   "events": {
     "islamicNewYear": "Hicri yılbaşı",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "Selam üzerinize olsun, Allah’ın rahmeti ve bereketi de."
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "Kayıtlı tüm oruçlar",
     "noLogsYet": "Tuttuğun günler burada görünür.",
     "typeRamadan": "Ramazan",
-    "typeVoluntary": "Nafile / Sünnet"
+    "typeVoluntary": "Nafile / Sünnet",
+    "reminderChannelName": "Oruç hatırlatmaları",
+    "reminderTitle": "Oruç hatırlatması"
   },
   "methods": {
     "0": "Şii — İsnâaşeriyye",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim duaları",
     "quranGeometry": "Ayet konum verileri (quran.com / Quran for Android projesi)",
-    "recitation": "Tilavet sesi (21 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)",
+    "recitation": "Tilavet sesi (42 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)",
     "tafsir": "Tefsir metinleri: İbn Kesir, Maarif-ul-Kuran, el-Müyesser"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "Veri istatistikleri etkin",
     "unlockedBody": "Artık ana ekranın altında bir istatistik kartı görünür. Aşağıdan istediğiniz zaman kapatabilirsiniz.",
     "serverCoverage": "Sunucu kapsamı"
+  },
+  "log": {
+    "last13Weeks": "Son 13 hafta",
+    "legendPrayers": "0 → 5 namaz",
+    "fasted": "oruç",
+    "dayA11y": "{{date}}: {{prayers}} namaz kaydedildi{{fast}}",
+    "streakCaption": "{{count}} günlük seri",
+    "fastsCaption": "{{count}} oruç",
+    "markAllOnTime": "Hepsini vaktinde işaretle",
+    "fastingToday": "Bugün oruç",
+    "iftarAt": "İftar {{time}}",
+    "allUpcoming": "Yaklaşan tümü",
+    "title": "Kayıt"
+  },
+  "endOfDay": {
+    "title": "Bugünün namazları kaydedilsin mi?",
+    "body": "Beşini de vaktinde kılındı olarak işaretleyin ya da kaydı açıp tek tek girin.",
+    "action": "Tümünü tamamlandı olarak kaydet",
+    "channelName": "Gün sonu kaydı"
   }
 }

@@ -5,9 +5,15 @@
  * soft shadow in light themes, border in dark) pinned above the bottom
  * edge whenever recitation is active. One row: ayah reference + tappable
  * reciter name (opens the reciter picker), prev / play-pause / next /
- * stop. The play button is the single accent-filled circle — everything
+ * stop. The play button is the single accent-filled control — everything
  * else stays quiet (design principle 4). A hairline progress track along
  * the top edge follows the current ayah.
+ *
+ * v2.8.4 (design review 2f): speed and repeat report themselves as two
+ * small chips beside the reciter, stop is a filled square set apart from
+ * the transport glyphs it used to sit flush against, and the play button
+ * is a squircle in the sheet's radius family rather than the one perfectly
+ * round control in the reader.
  */
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -18,6 +24,7 @@ import { cardEdgeStyle } from '../../theme/chrome';
 import { findSurah } from '../quran';
 import { findReciter } from './reciters';
 import { ReciterPickerSheet } from './ReciterPickerSheet';
+import { useQuranState } from '../quranState';
 import {
   pausePlayback,
   resumePlayback,
@@ -31,6 +38,7 @@ export function MiniPlayer() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const { active, playing, loading, reciterId } = usePlaybackStatus();
+  const { prefs } = useQuranState();
   const { position, duration } = useProgress(500);
   const [pickerVisible, setPickerVisible] = useState(false);
 
@@ -95,17 +103,37 @@ export function MiniPlayer() {
             style={[styles.title, { color: palette.text }]}>
             {`${meta?.romanized ?? ''} ${active.surah}:${active.ayah}`}
           </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.chooseReciter', 'Choose reciter')}
-            hitSlop={6}
-            onPress={() => setPickerVisible(true)}>
-            <Text
-              numberOfLines={1}
-              style={[styles.sub, { color: palette.accentSolid }]}>
-              {loading ? t('quran.buffering', 'Buffering…') : reciter.name}
-            </Text>
-          </Pressable>
+          <View style={styles.subRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.chooseReciter', 'Choose reciter')}
+              hitSlop={6}
+              onPress={() => setPickerVisible(true)}>
+              <Text
+                numberOfLines={1}
+                style={[styles.sub, { color: palette.accentSolid }]}>
+                {loading ? t('quran.buffering', 'Buffering…') : reciter.name}
+              </Text>
+            </Pressable>
+            {/* Speed and repeat are set in the sheet and were then invisible:
+                you could be at 1.5× with 3× repeats and nothing on screen
+                said so. They are the two settings most likely to be left on
+                by accident, so they report themselves here. */}
+            {prefs.playbackRate !== 1 ? (
+              <View style={[styles.stateChip, { backgroundColor: palette.controlBg }]}>
+                <Text style={[styles.stateChipLabel, { color: palette.text }]}>
+                  {`${prefs.playbackRate}×`}
+                </Text>
+              </View>
+            ) : null}
+            {prefs.repeat.eachAyah > 1 ? (
+              <View style={[styles.stateChip, { backgroundColor: palette.controlBg }]}>
+                <Text style={[styles.stateChipLabel, { color: palette.text }]}>
+                  {`↻ ${prefs.repeat.eachAyah}`}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </View>
 
         {sideBtn('⏮︎', t('quran.previousAyah', 'Previous ayah'), () => {
@@ -135,7 +163,9 @@ export function MiniPlayer() {
           onPress={() => {
             void stopPlayback();
           }}
-          style={styles.sideBtn}>
+          // Stop is destructive and sat flush against two harmless transport
+          // glyphs. A filled square separates it from them.
+          style={[styles.stopBtn, { backgroundColor: palette.controlBg }]}>
           <Text style={[styles.closeGlyph, { color: palette.muted }]}>✕</Text>
         </Pressable>
       </View>
@@ -165,15 +195,32 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   info: { flex: 1, marginEnd: 8 },
+  subRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 1 },
+  stateChip: { paddingHorizontal: 6, paddingVertical: 1, borderRadius: 7 },
+  stateChipLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  stopBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginStart: 6,
+  },
   title: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  sub: { fontSize: 11, marginTop: 1, fontWeight: '600' },
+  sub: { fontSize: 11, fontWeight: '600' },
   sideBtn: { paddingHorizontal: 7, paddingVertical: 6 },
   sideGlyph: { fontSize: 17, fontWeight: '700' },
   closeGlyph: { fontSize: 15, fontWeight: '700' },
   playBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    // A squircle at the sheet's radius family, not the reader's only
+    // perfectly round control.
+    width: 40,
+    height: 40,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 4,

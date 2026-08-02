@@ -2,6 +2,33 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.5] — 2026-08-02
+
+A design pass over the whole app, and the mushaf finally works in Arabic.
+
+### Added
+- **Six tabs across the bottom.** Today, Quran, Tasbih, Duas, Log, Settings. "More" is gone — a More tab is an admission the deciding was never finished, and with Find a masjid removed and Month folded into Settings there was nothing left for it to hold. Tasbih and Duas are separate now: one is a counter you tap fifty times, the other is a library you read, and bundling them saved a tab at the cost of ever finding either. On a phone the bar is a floating pill and the page runs underneath it, so a list that would otherwise stop dead at a solid edge tells you there is more below.
+- **A page rail in the mushaf, on every device.** Six hundred and four pages is too many for a pair of chevrons — reaching juz 20 by tapping ‹ three hundred times is not navigation. Drag the rail and it ticks once per surah, not once per page: pages are two-per-pixel on a phone and would be a continuous buzz carrying nothing, while surahs are what people actually navigate by, and their uneven spacing is the signal. Al-Baqarah is forty-eight pages of silence; the last juz is a tick every few millimetres. Drag slowly and each boundary lands firmly enough to stop on; sweep and the ticks go light, because a firm knock twenty times a second is just a vibration. The surah under your thumb is named while you drag. Next to the rail, and on the Quran screen itself, a button to type a page number.
+- **An end-of-day reminder that logs the day in one tap.** Ten minutes after Isha, optionally, a notification asks whether the day's five prayers went as planned; one button answers it without opening the app. It carries the date it was scheduled for, so the prompt you slept through and answered the next morning still logs the right night — which is the entire point, given Isha in a Swedish summer lands near midnight. It only fills prayers you haven't already recorded: a day where you marked Asr as missed keeps that record. Off by default; the switch is on the Log screen and in Settings.
+- **The mushaf on iPad and Mac gets an index beside the page.** Surahs, juz and bookmarks in a sidebar, searchable by name or page number, with the page you are reading marked and the khatmah pinned at the foot. Facing pages are paired the way the print pairs them.
+- **Al-Ajmi, and thirty more reciters.** Ahmed Al-Ajmi was in the catalogue all along, but the picker matched on a raw substring — so "alajami", the spelling most people type, found nothing and he read as missing. Search now folds case, punctuation, the al-/el- article and Arabic harakat, and checks a list of alternate spellings per reciter. The list is alphabetical.
+
+### Changed
+- **The Today screen is one card instead of four.** It used to be a hero, a table, a Quran bar and a tile row — four shadowed slabs on warm paper, so nothing grouped "today" apart from "tools" and the eye re-entered four times. The countdown is now the headline it should always have been (you roughly know when Dhuhr is; what you opened the app for is how long you have got), the seven-day strip is visible rather than hidden behind six-pixel dots, and the Quran card states where you actually are — continue reading, khatmah progress, or today's ayah — instead of a button labelled "Open the Quran" carrying no information at all.
+- **Tasbih answers back.** The counter was a four-hundred-point white void with a number in it: no hint that it was the tap target, and nothing given back when you tapped. The count now sits inside a ring that fills, the ring is the tap target and says so, and the dhikr's meaning sits under the Arabic instead of a second Latin spelling of the same words. Reset is a text link rather than a third identical button, one of which destroyed your count. "Set 2 of 6" and a peek at what comes next turn six disconnected screens into one sequence.
+- **Prayers, fasting and the practice graph share one screen.** The Log tab: thirteen weeks of history, the day's five prayers with a private note each, and the fast.
+- **A single tap in the mushaf clears the chrome.** It used to open the ayah panel if the tap happened to land on a word, which is most of the page — so a reader trying to get the chrome out of the way was interrupted by a sheet instead. Tafsir, "play from here", repeat and share are a long press on the ayah now.
+- **Sizes on the Mac follow the Mac.** Catalyst scales the whole canvas down for a desktop, and type designed for a tablet held at thirty centimetres was arriving on a display sitting at seventy. The tab bar, the navigation title and the Quran sidebar are sized for the distance they are read from.
+
+### Fixed
+- **The mushaf was blank in Arabic.** Only in Arabic — Swedish and English were fine, which is what made it look like a rendering fault rather than a layout one. An app running right-to-left measures a horizontal pager's scroll offset from the right, and the pager's own arithmetic counted from the left, so it opened parked six hundred pages past the end. Every page was laid out correctly and painted where nobody could see it. Right-to-left page turning was never the pager's job in the first place — that is the mushaf's own reading order, and it was already handled.
+- **The mushaf can be read in landscape, and no longer disappears upside down.** Rotation is allowed in the reader; the accidental fourth orientation, which drew nothing at all, is not.
+- **The Arabic weekday initials were unreadable.** Cutting each name to three letters gave الأحد and الأربعاء the same stub.
+- **Twenty-seven strings showed English to everyone but English readers** — including "CHOOSE" in the middle of an Arabic screen. They are translated into all thirteen languages, and a test now fails if a new one appears.
+- **Today's ayah is the same ayah everywhere.** The Quran screen and the notification each drew their own.
+- **The Quran sidebar no longer sits under the window controls, or over the page.** On the Mac its tabs were behind the close/minimise/zoom buttons; on iPad the pages were sized to the whole window while the sidebar took a fifth of it, so the left-hand page of every spread ran underneath and was clipped mid-line.
+- **The Duas screen wasted a header's worth of space at the top.** It reserved room for a transparent navigation bar it stopped having when it became a tab, so the header was counted twice. Tasbih had the same.
+
 ## [2.8.3] — 2026-07-31
 
 ### Changed

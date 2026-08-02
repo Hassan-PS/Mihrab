@@ -17,6 +17,7 @@ import {
   parseSnoozeMinutes,
   snoozePrayerNotification,
 } from './notificationActions';
+import { handleEndOfDayLogEvent } from './endOfDayLog';
 
 // Re-exported for back-compat with existing importers.
 export {
@@ -143,11 +144,19 @@ export function registerAdhanSafetyControls() {
     ]);
   }
 
+  // notifee allows ONE background handler per app, so every feature that
+  // needs to act on a notification press has to be dispatched from here.
+  // The end-of-day reminder's action must work with the app closed — that
+  // is the entire point of it — so it is answered first and short-circuits
+  // when it owns the event.
   notifee.onForegroundEvent(event => {
-    void handleAdhanAction(event, true);
+    void handleEndOfDayLogEvent(event).then(handled => {
+      if (!handled) void handleAdhanAction(event, true);
+    });
   });
 
   notifee.onBackgroundEvent(async event => {
+    if (await handleEndOfDayLogEvent(event)) return;
     await handleAdhanAction(event, false);
   });
 }

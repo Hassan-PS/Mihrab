@@ -1,14 +1,20 @@
 /**
  * Ayah of the day — v2.7.27.
  *
- * A daily notification at the user's chosen time carrying one randomly
- * drawn ayah (uniform over all 6,236) with its translation in the active
- * edition — the same "default tafsir" resolution the reader uses.
+ * A daily notification at the user's chosen time carrying THE SAME ayah the
+ * Quran screen shows that day, with its translation in the active edition —
+ * the same "default tafsir" resolution the reader uses.
+ *
+ * The two used to disagree, which was the whole point of the feature going
+ * wrong: the card drew from `verseOfTheDayRef` (date-seeded, so everyone
+ * sees the same verse on the same day) while the notification drew a fresh
+ * uniform random ayah per day. Open the app after reading the notification
+ * and you were looking at a different verse. Both now come from
+ * `verseOfTheDayRef`, seeded by the day the notification fires.
  *
  * Strategy mirrors `fastingReminders.ts`:
  *   • Schedule the next 14 days as individual TIMESTAMP triggers with
- *     stable ids (`ayah-day-YYYY-MM-DD`), each day's ayah drawn at
- *     scheduling time so every day is a fresh random pick.
+ *     stable ids (`ayah-day-YYYY-MM-DD`), each carrying that DAY's verse.
  *   • Re-sync (cancel + schedule) whenever the toggle/time/edition/
  *     language changes and on app foreground (see `useAyahOfDaySync`),
  *     so the 14-day window keeps rolling forward.
@@ -23,6 +29,7 @@ import notifee, {
 } from '@notifee/react-native';
 import i18n from '../i18n';
 import { findSurah, loadSurah, SURAHS } from '../quran/quran';
+import { verseOfTheDayRef } from '../quran/search';
 import {
   defaultEditionForLocale,
   editionMatchesLocale,
@@ -49,7 +56,13 @@ export function resolveEditionForNotification(
   return defaultEditionForLocale(language);
 }
 
-/** Uniform random ayah reference over all 6,236 ayahs. */
+/**
+ * Uniform random ayah reference over all 6,236 ayahs.
+ *
+ * No longer used for the daily notification — that follows the app's own
+ * date-seeded verse of the day now — but kept (and tested) as the corpus
+ * index→reference mapping.
+ */
 export function randomAyahRef(
   rand: () => number = Math.random,
 ): { surah: number; ayah: number } {
@@ -75,39 +88,32 @@ function clip(text: string, max: number): string {
 }
 
 /**
- * Skip verses whose Arabic runs past this — a handful of very long ayahs
- * (e.g. 2:282, the "debt verse") span most of a page and never render sensibly
- * in a notification even with BigTextStyle. We re-draw a few times to avoid
- * them; the daily ayah stays a normal, readable length.
+ * The verse for one day, with its text — the SAME reference the Quran
+ * screen's card shows on that date.
+ *
+ * A handful of ayahs (2:282, the "debt verse") run most of a page and can
+ * never render whole in a notification. They are clipped in the body rather
+ * than swapped for a shorter verse: a notification that quietly showed a
+ * different ayah than the app is the bug this function exists to close.
  */
-const MAX_AYAH_ARABIC_CHARS = 400;
-
-/** Draw a random ayah short enough to render as a notification. */
-async function drawNotifiableAyah(edition: QuranTranslationId): Promise<{
+async function ayahForDay(
+  day: Date,
+  edition: QuranTranslationId,
+): Promise<{
   ref: { surah: number; ayah: number };
   arabic: string;
   translation: string;
 }> {
-  let last: { ref: { surah: number; ayah: number }; arabic: string; translation: string } = {
-    ref: { surah: 1, ayah: 1 },
-    arabic: '',
-    translation: '',
-  };
-  for (let attempt = 0; attempt < 6; attempt++) {
-    const ref = randomAyahRef();
-    let arabic = '';
-    try {
-      const loaded = await loadSurah(ref.surah);
-      arabic = loaded?.arabic[ref.ayah - 1] ?? '';
-    } catch {
-      // Arabic text unavailable — translation-only body still works.
-    }
-    const translation = getAyahTranslation(edition, ref.surah, ref.ayah) ?? '';
-    last = { ref, arabic, translation };
-    // Accept anything within the cap; if Arabic couldn't load, don't loop forever.
-    if (arabic.length <= MAX_AYAH_ARABIC_CHARS) return last;
+  const ref = verseOfTheDayRef(day);
+  let arabic = '';
+  try {
+    const loaded = await loadSurah(ref.surah);
+    arabic = loaded?.arabic[ref.ayah - 1] ?? '';
+  } catch {
+    // Arabic text unavailable — translation-only body still works.
   }
-  return last; // gave up after 6 tries — use the last pick
+  const translation = getAyahTranslation(edition, ref.surah, ref.ayah) ?? '';
+  return { ref, arabic, translation };
 }
 
 /** Cancel every scheduled ayah-of-the-day notification. */
@@ -173,7 +179,7 @@ export async function rescheduleAyahOfDay(opts: {
     fireAt.setHours(hour, minute, 0, 0);
     if (fireAt.getTime() <= now.getTime()) continue;
 
-    const { ref, arabic, translation } = await drawNotifiableAyah(edition);
+    const { ref, arabic, translation } = await ayahForDay(fireAt, edition);
     const surahMeta = findSurah(ref.surah);
 
     // Companion paragraph follows the app-wide mode (v2.7.40): tafsir when

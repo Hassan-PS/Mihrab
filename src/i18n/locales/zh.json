@@ -12,10 +12,10 @@
     "tasbih": "念珠",
     "duas": "祈祷文",
     "quran": "《古兰经》",
-    "mosques": "清真寺",
     "journal": "礼拜日记",
     "backup": "备份",
-    "fasting": "斋戒"
+    "fasting": "斋戒",
+    "today": "今天"
   },
   "a11y": {
     "openSettings": "打开设置",
@@ -60,7 +60,27 @@
     "backToToday": "回到今天",
     "updatedAt": "更新于 {{when}}",
     "daysStored": "已存储 {{count}} 天",
-    "quranShortcut": "打开古兰经"
+    "quranShortcut": "打开古兰经",
+    "dayStrip": "选择日期",
+    "nextPrayerIn": "距{{prayer}}还有",
+    "firstPrayer": "第一次礼拜 {{prayer}} · {{time}}",
+    "todaySummary": "今天",
+    "prayersLogged": "已记录 {{count}}/{{total}} 次礼拜",
+    "noFastToday": "未记录斋戒",
+    "dhikrSets": "已完成 {{count}} 组迪克尔",
+    "fastKept": {
+      "ramadan": "已守斋月斋戒",
+      "voluntary": "已守圣行斋戒",
+      "qadha": "已守补斋"
+    },
+    "readItIn": "在{{surah}}中阅读",
+    "continueAt": "继续 · {{surah}} {{ref}}",
+    "khatmahDay": "通读第 {{day}}/{{total}} 天",
+    "khatmahDaysToGo": "还剩 {{count}} 天",
+    "pagesLeftToday": "今天还剩 {{count}} 页",
+    "pageNumber": "第 {{page}} 页",
+    "readingDone": "今日阅读已完成",
+    "readOn": "继续阅读"
   },
   "errors": {
     "locationNeededTitle": "需要位置",
@@ -234,7 +254,21 @@
     "resetApp": "重置应用数据",
     "resetAppHelp": "清除所有设置和数据。无法撤销。",
     "batteryWarning": "提醒可能不可靠",
-    "batteryWarningHelp": "电池优化可能在应用关闭时延迟或静音宣礼提醒。点按以将 Mihrab 排除在外。"
+    "batteryWarningHelp": "电池优化可能在应用关闭时延迟或静音宣礼提醒。点按以将 Mihrab 排除在外。",
+    "themeRestartManualTitle": "请重新打开应用",
+    "themeRestartManualBody": "iOS 不允许应用自行重启。请彻底退出 Mihrab 再重新打开，新主题才会生效。",
+    "liquidGlass": "流体玻璃",
+    "liquidGlassHelp": "采用 iOS 系统配色与半透明玻璃界面，自动跟随浅色/深色模式。",
+    "themeRestartTitle": "需要重启",
+    "themeRestartBody": "切换系统配色需要重启应用，所有界面才会应用新主题。现在重启吗？",
+    "themeRestartConfirm": "重启",
+    "laSecondMetricLabel": "第二项信息",
+    "resetTitle": "重置应用？",
+    "resetBody": "这将清除所有设置、已保存地点、记录条目、斋戒记录与念珠状态，并回到初始引导。此操作无法撤销。",
+    "resetConfirm": "全部重置",
+    "prayerOffsetsCount": "已调整 {{count}} 项",
+    "endOfDayLog": "一天结束时的记录提醒",
+    "endOfDayLogHelp": "宵礼后十分钟询问是否记录当天的五番拜功。第二天早上回应，仍会记入正确的日期。"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "上一个位置"
+    "previousLocation": "上一个位置",
+    "invalidCoordsTitle": "坐标无效",
+    "invalidCoordsBody": "纬度须在 -90 到 90 之间，经度在 -180 到 180 之间。",
+    "pickAPlace": "请先搜索城市或输入坐标。",
+    "duplicateTitle": "已保存",
+    "duplicateBody": "该坐标的地点已保存为“{{name}}”。"
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "重置",
     "salahonprophet": "对先知 ﷺ 的祝福",
     "prev": "上一个",
-    "next": "下一个"
+    "next": "下一个",
+    "meaning": {
+      "subhanallah": "赞主清净",
+      "alhamdulillah": "一切赞颂全归真主",
+      "lailaha": "万物非主，唯有真主",
+      "allahuakbar": "真主至大",
+      "astaghfirullah": "我向真主求恕",
+      "salahonprophet": "主啊，求你赐福我们的先知穆罕默德"
+    },
+    "setPosition": "第 {{index}} 组 / 共 {{total}} 组",
+    "ofTarget": "/ {{target}}",
+    "tapAnywhere": "点按任意位置",
+    "upNext": "接下来",
+    "resetSet": "重置本组",
+    "skip": "跳过"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "为免于迷失之祷"
-    }
+    },
+    "tapToCount": "点击计数"
   },
   "quran": {
     "meccan": "麦加",
@@ -869,7 +923,17 @@
     "companionTitle": "每节经文下方",
     "companionHelp": "适用于显示经文的所有位置——阅读器、每日经文和每日经文通知。也可在古兰经页面更改。",
     "companionActive": "当前使用",
-    "mushafReplaceOldBody": "设备上仍保留着旧版本的经文副本（{{size}} MB）。它会先被删除——你保存的任何内容都不受影响。"
+    "mushafReplaceOldBody": "设备上仍保留着旧版本的经文副本（{{size}} MB）。它会先被删除——你保存的任何内容都不受影响。",
+    "shareAsText": "分享文本",
+    "shareChoiceA11y": "分享 — 选择文本或图片卡片",
+    "recitation": "诵读",
+    "downloadSurahAudioSized": "下载本章 · {{size}}",
+    "tapToPick": "选择",
+    "tabMarks": "标记",
+    "searchSurahOrPage": "搜索章或页码",
+    "reading": "正在阅读",
+    "pageScrubber": "跳转页面",
+    "goCta": "前往"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "在礼拜通知中启用记录操作",
     "notePlaceholder": "私密备注（仅在本设备）",
     "saveNote": "保存备注",
-    "logActionTitle": "记录礼拜"
+    "logActionTitle": "记录礼拜",
+    "loadFailedTitle": "无法加载记录",
+    "loadFailedBody": "你的数据在设备上是安全的，但此刻无法读取。请重新打开记录。",
+    "saveFailedTitle": "无法保存",
+    "saveFailedBody": "请重试。",
+    "noteLabel": "私人笔记（私密、已加密）"
   },
   "events": {
     "islamicNewYear": "伊斯兰新年",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "愿平安、真主的慈悯与祝福与你同在。"
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "全部已记录的斋戒",
     "noLogsYet": "你坚持的斋戒日将显示在此处。",
     "typeRamadan": "斋月",
-    "typeVoluntary": "自愿 / 圣行"
+    "typeVoluntary": "自愿 / 圣行",
+    "reminderChannelName": "斋戒提醒",
+    "reminderTitle": "斋戒提醒"
   },
   "methods": {
     "0": "什叶派 — 十二伊玛目",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "《穆斯林堡垒》中的祷词",
     "quranGeometry": "经文位置数据（quran.com / Quran for Android 项目）",
-    "recitation": "诵读音频（21位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）",
+    "recitation": "诵读音频（42位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）",
     "tafsir": "经注文本：伊本·凯西尔、Maarif-ul-Quran、简明经注"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "已启用数据统计",
     "unlockedBody": "现在主屏幕底部会显示一张统计卡片。可随时在下方关闭。",
     "serverCoverage": "服务器覆盖天数"
+  },
+  "log": {
+    "last13Weeks": "最近 13 周",
+    "legendPrayers": "0 → 5 次礼拜",
+    "fasted": "已斋戒",
+    "dayA11y": "{{date}}：已记录 {{prayers}} 次礼拜{{fast}}",
+    "streakCaption": "连续 {{count}} 天",
+    "fastsCaption": "{{count}} 次斋戒",
+    "markAllOnTime": "全部标记为准时",
+    "fastingToday": "今日斋戒",
+    "iftarAt": "开斋 {{time}}",
+    "allUpcoming": "全部即将到来",
+    "title": "记录"
+  },
+  "endOfDay": {
+    "title": "记录今天的拜功吗？",
+    "body": "将五番全部标记为按时礼拜，或打开记录逐一填写。",
+    "action": "全部记为已完成",
+    "channelName": "一天结束记录"
   }
 }

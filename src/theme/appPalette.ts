@@ -40,6 +40,19 @@ export type AppPalette = {
    */
   accentSolid: string;
   /**
+   * Filled control surface — the design review's one caveat (2f).
+   *
+   * Chips, steppers and secondary row actions are FILLED, not outlined: a
+   * selected chip used to carry a tinted background AND a coloured border
+   * AND coloured text — three signals for one bit — and
+   * `StyleSheet.hairlineWidth` borders disappear outright at some Android
+   * densities. A fill never does. Two tokens, defined once here, so the
+   * pair does not get re-derived in six files.
+   */
+  controlBg: ColorValue;
+  /** Text/glyph colour that sits on `accentSolid` (a filled control). */
+  onAccent: string;
+  /**
    * Effective dark-mode flag baked into the palette so style helpers
    * (e.g. `cardEdgeStyle`'s light-only shadow) can branch without every
    * caller threading `isDark` through separately.
@@ -85,7 +98,7 @@ export function shouldUseDynamicSystemColors(
 // the base palette objects below don't (and shouldn't) declare it.
 type PaletteBase = Omit<
   AppPalette,
-  'accent' | 'accentBg' | 'accentSolid' | 'isDark'
+  'accent' | 'accentBg' | 'accentSolid' | 'isDark' | 'onAccent'
 >;
 
 /**
@@ -169,6 +182,31 @@ function brandAccents(
   return { accent: sw.light, accentBg: sw.lightBg, accentSolid: sw.light };
 }
 
+/**
+ * Black or white, whichever the eye can actually read on a filled control.
+ *
+ * Every accent but amber is dark enough for white; amber (#b45309 light,
+ * #fbbf24 dark) is not, and a Material You wallpaper accent can be any
+ * lightness at all — so this is computed, not assumed. sRGB relative
+ * luminance, the same rule WCAG contrast uses.
+ */
+export function readableOn(hex: string): string {
+  const m = /^#([0-9a-fA-F]{6})$/.exec(hex.trim());
+  if (!m) return '#FFFFFF';
+  const n = parseInt(m[1], 16);
+  const channel = (c: number) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const luminance =
+    0.2126 * channel((n >> 16) & 255) +
+    0.7152 * channel((n >> 8) & 255) +
+    0.0722 * channel(n & 255);
+  // 0.45 rather than the midpoint: white-on-mid-tone reads better than
+  // black-on-mid-tone at the small weights these controls use.
+  return luminance > 0.45 ? '#1A1814' : '#FFFFFF';
+}
+
 function withBrandAccents(
   base: PaletteBase,
   isDark: boolean,
@@ -180,7 +218,14 @@ function withBrandAccents(
     accentId,
     customHex,
   );
-  return { ...base, accent, accentBg, accentSolid, isDark };
+  return {
+    ...base,
+    accent,
+    accentBg,
+    accentSolid,
+    isDark,
+    onAccent: readableOn(accentSolid),
+  };
 }
 
 /**
@@ -200,6 +245,7 @@ const DARK_BASE: PaletteBase = {
   overlay: 'rgba(0,0,0,0.6)',
   flatChrome: false,
   glass: false,
+  controlBg: '#1F2530',
 };
 
 const DARK_PURE_BLACK_BASE: PaletteBase = {
@@ -212,6 +258,7 @@ const DARK_PURE_BLACK_BASE: PaletteBase = {
   overlay: 'rgba(0,0,0,0.75)',
   flatChrome: false,
   glass: false,
+  controlBg: '#171C24',
 };
 
 /**
@@ -231,6 +278,7 @@ const LIGHT_BASE: PaletteBase = {
   overlay: 'rgba(26,24,20,0.45)',
   flatChrome: false,
   glass: false,
+  controlBg: '#F4F0E9',
 };
 
 function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette {
@@ -256,6 +304,10 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
     flatChrome: true,
     glass: true,
     isDark,
+    // Filled controls follow the system's grouped-surface hierarchy here,
+    // so they still read as controls under Liquid Glass.
+    controlBg: PlatformColor('tertiarySystemGroupedBackground'),
+    onAccent: '#FFFFFF',
     // iOS systemBlue is the typical tintColor when no override; matches
     // the live PlatformColor tint closely enough for SVG icons.
     accentSolid: isDark ? '#0A84FF' : '#007AFF',
@@ -283,7 +335,14 @@ function androidDynamicPalette(
   // Soft tinted accent background, matching how the standard 'custom' accent
   // derives its highlight (light: mix toward white, dark: toward black).
   const accentBg = isDark ? shiftHex(hex, -0.7) : shiftHex(hex, 0.82);
-  return { ...base, accent: hex, accentBg, accentSolid: hex, isDark };
+  return {
+    ...base,
+    accent: hex,
+    accentBg,
+    accentSolid: hex,
+    isDark,
+    onAccent: readableOn(hex),
+  };
 }
 
 function buildDynamicSystemPalette(

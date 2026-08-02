@@ -35,21 +35,22 @@ import {
 import { filterOptionalTimes } from '../utils/nightTimes';
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
-import { DayCarousel } from './home/DayCarousel';
+import { TodayCard } from './home/TodayCard';
 import { formatHijriLabel } from '../hijri/formatHijriLabel';
-import { QuranShortcut } from './home/QuranShortcut';
-import { NextPrayerCard } from './home/NextPrayerCard';
+import { QuranCard } from './home/QuranCard';
 import { PermissionBanners } from './home/PermissionBanners';
 import { ProviderFooter } from './home/ProviderFooter';
 import { DataStatsPanel } from './home/DataStatsPanel';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { QuickActionsGrid } from './home/QuickActionsGrid';
+import { TodaySummary } from './home/TodaySummary';
 import { CenteredColumn } from '../responsive/CenteredColumn';
-import { contentColumnWidth, isMacCatalyst } from '../responsive/breakpoints';
+import { isMacCatalyst } from '../responsive/breakpoints';
 import { HomeHeaderControls } from '../navigation/HomeHeaderControls';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
+import { useTabBarInset } from '../navigation/tabBarInset';
+import { rescheduleEndOfDayLogReminders } from '../notifications/endOfDayLog';
 import {
   FeatureTourModal,
   hasSeenFeatureTour,
@@ -61,16 +62,17 @@ import {
  * Owns hooks, effects, and orchestration; delegates rendering to children
  * under `src/screens/home/`. Two big perf wins land here:
  *
- *  1. The 30-second clock tick lives inside `NextPrayerCard` (the only
+ *  1. The 30-second clock tick lives inside `TodayCard`'s hero (the only
  *     component that displays the countdown). Previously the tick triggered
  *     `setNow(...)` in this file, forcing an 800-line tree to re-render every
- *     30 seconds. Now only the hero card re-renders.
+ *     30 seconds. Now only the countdown re-renders — not even the day strip
+ *     or the eight prayer rows beside it.
  *
  *  2. `nextInfo` (the next prayer's name + Date) is recomputed only when a
  *     prayer actually passes — not every tick. The local "watchdog" effect
  *     polls every 30s but only calls `setNextInfo(...)` when the result has
- *     genuinely changed, so DayCarousel re-renders only when the highlighted
- *     row should move.
+ *     genuinely changed, so the day table re-renders only when the
+ *     highlighted row should move.
  *
  * Anything else this file does (notification sync, widget sync, last-fetched
  * coord persistence, locale-aware day labels) is unchanged behavior — same
@@ -102,10 +104,6 @@ export function HomeScreen() {
   // hero/shortcut cards above and below it ("weird margins", Mac
   // 2026-07-16). The screen padding only eats into the column while the
   // window is narrower than cap + padding.
-  const cardWidth = Math.min(
-    contentColumnWidth(screenWidth),
-    screenWidth - HOME_SCREEN_PADDING * 2,
-  );
   // Expanded (wide iPad landscape / Mac window): lay Home out as a two-column
   // dashboard — a fixed "today" main column beside a flexible tools sidebar —
   // so the cards fill the window and fit without scrolling. The day carousel
@@ -136,10 +134,6 @@ export function HomeScreen() {
         ),
       )
     : 1;
-  const carouselCardWidth = isDashboard
-    ? HOME_MAIN_COL - HOME_SCREEN_PADDING * 2
-    : cardWidth;
-
   const [providerPickerOpen, setProviderPickerOpen] = useState(false);
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
   const [notifPermDenied, setNotifPermDenied] = useState(false);
@@ -150,6 +144,7 @@ export function HomeScreen() {
   // First-run feature walkthrough: shown once after onboarding completes.
   // Focus-scoped (not mount-scoped) so the Settings "Show the app tour"
   // replay — which clears the flag and pops back here — re-triggers it.
+  const tabBarInset = useTabBarInset();
   const [tourVisible, setTourVisible] = useState(false);
   useFocusEffect(
     useCallback(() => {
@@ -219,7 +214,7 @@ export function HomeScreen() {
 
   // Watchdog interval: detects day/tz change and recomputes nextInfo only when
   // the next prayer has actually changed. Crucially, this effect does NOT
-  // schedule any per-tick state update — `now` lives inside NextPrayerCard.
+  // schedule any per-tick state update — `now` lives inside TodayCard's hero.
   useEffect(() => {
     function tick() {
       if (state.phase !== 'ready') return;
@@ -270,12 +265,22 @@ export function HomeScreen() {
       week: view.table.week,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
+    // The end-of-day prompt is scheduled from the same data and the same
+    // moment as the prayer alerts: it needs Isha for every day it covers,
+    // and this is the one place in the app that holds a week of times
+    // anchored to the day they were fetched for.
+    rescheduleEndOfDayLogReminders({
+      enabled: settings.endOfDayLogReminderEnabled,
+      week: view.table.week,
+      baseDate: state.baseDate,
+    }).catch(e => console.warn('rescheduleEndOfDayLogReminders:', e));
   }, [
     hydrated,
     settings.notificationsEnabled,
     settings.prePrayerReminderMinutes,
     settings.notificationSound,
     settings.journalNotificationActionsEnabled,
+    settings.endOfDayLogReminderEnabled,
     state,
     view,
   ]);
@@ -550,6 +555,30 @@ export function HomeScreen() {
       }),
     [i18n.language],
   );
+  /**
+   * Short weekday for a strip chip.
+   *
+   * Whatever the locale's own "short" form is, and no truncation on top of
+   * it: cutting to three characters turned the Arabic week into الس/الأ/الا/
+   * الث/الأ/الخ/الج — where الأحد (Sunday) and الأربعاء (Wednesday) both
+   * became "الأ". Scripts that do not abbreviate keep their whole word, and
+   * the strip scrolls if the week is wider than the card.
+   */
+  const getDayShort = useCallback(
+    (dayOffset: number): string =>
+      addDays(new Date(), dayOffset)
+        .toLocaleDateString(i18n.language, { weekday: 'short' })
+        .replace(/[.,]\s*$/, ''),
+    [i18n.language],
+  );
+  /** Day of month for a strip chip, in the app language's numerals. */
+  const getDayNumber = useCallback(
+    (dayOffset: number): string =>
+      addDays(new Date(), dayOffset).toLocaleDateString(i18n.language, {
+        day: 'numeric',
+      }),
+    [i18n.language],
+  );
   const getHijriDate = useCallback(
     (dayOffset: number): string => formatHijriLabel(addDays(new Date(), dayOffset)),
     // i18n.language drives the localised Hijri month name inside the formatter.
@@ -577,7 +606,23 @@ export function HomeScreen() {
     [navigation],
   );
   const handleOpenQuran = useCallback(
-    () => navigation.navigate('Quran' as never),
+    // The Quran is a TAB now, not a pushed page — jump to it rather than
+    // stacking a second copy on top of Today (design review 2e).
+    () => navigation.navigate('QuranTab' as never),
+    [navigation],
+  );
+  /** Continue reading exactly where the card says — surah, page, ayah. */
+  const handleOpenQuranAt = useCallback(
+    (surahNumber: number, page?: number, ayah?: number) =>
+      navigation.navigate('QuranSurah', {
+        surahNumber,
+        initialPage: page,
+        scrollToAyah: ayah,
+      }),
+    [navigation],
+  );
+  const handleOpenLog = useCallback(
+    () => navigation.navigate('LogTab' as never),
     [navigation],
   );
 
@@ -644,7 +689,9 @@ export function HomeScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingBottom: insets.bottom + 28 },
+        // Room for the floating tab bar, which no longer reserves
+        // any: without this the last card sits under it for good.
+        { paddingBottom: insets.bottom + 28 + tabBarInset },
         // Fill the viewport on the dashboard: when the two columns are
         // shorter than the window, center them vertically instead of
         // leaving the bottom half of a Mac/iPad window empty (§B1).
@@ -671,30 +718,31 @@ export function HomeScreen() {
           RootNavigator.HomeHeaderRight. */}
 
       {(() => {
-        const heroCard = (
-          <NextPrayerCard
-            nextInfo={nextInfo}
-            dataStatus={dataStatus}
-            expanded={isDashboard}
-          />
-        );
+        // One card: countdown → day strip → times → month link (2a). The
+        // hero and the table were the same data at two sizes, and the day
+        // switcher was six invisible dots between them.
         const dayTable = (
-          <DayCarousel
+          <TodayCard
             week={view.table.week}
-            cardWidth={carouselCardWidth}
-            nextPrayerName={nextInfo?.name ?? null}
+            nextInfo={nextInfo}
             resetKey={carouselResetKey}
             getDayLabel={getDayLabel}
             getDayDate={getDayDate}
             getHijriDate={getHijriDate}
+            getDayShort={getDayShort}
+            getDayNumber={getDayNumber}
             onOpenMonth={handleOpenMonth}
+            dataStatus={dataStatus}
+            expanded={isDashboard}
           />
         );
         const ramadanCard = (
           <RamadanCountdownCard today={state.today} tomorrow={state.tomorrow} />
         );
-        const quranShortcut = <QuranShortcut onPress={handleOpenQuran} />;
-        const toolsGrid = <QuickActionsGrid />;
+        const quranShortcut = (
+          <QuranCard onOpenAt={handleOpenQuranAt} onOpenQuran={handleOpenQuran} />
+        );
+        const toolsGrid = <TodaySummary onOpenLog={handleOpenLog} />;
         const providerFooter = (
           <ProviderFooter
             effectiveProvider={effectiveProvider}
@@ -725,7 +773,6 @@ export function HomeScreen() {
               {/* gap:12 — without it the carousel's page dots sat flush
                   against the Quran shortcut (reported 2026-07-16). */}
               <View style={{ width: HOME_MAIN_COL, gap: 12 }}>
-                {heroCard}
                 {dayTable}
                 {quranShortcut}
               </View>
@@ -740,7 +787,6 @@ export function HomeScreen() {
         }
         return (
           <>
-            {heroCard}
             {dayTable}
             {ramadanCard}
             {quranShortcut}

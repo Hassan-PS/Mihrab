@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, type RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../navigation/types';
+import type { MainTabParamList } from '../navigation/types';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -16,6 +16,7 @@ import { DataSourceCard } from './settings/DataSourceCard';
 import { LanguageCard } from './settings/LanguageCard';
 import { LanguageModal } from './settings/LanguageModal';
 import { LocationCard } from './settings/LocationCard';
+import { MonthTimesCard } from './settings/MonthTimesCard';
 import { MethodModal } from './settings/MethodModal';
 import { NotificationsCard } from './settings/NotificationsCard';
 import { QuranCard } from './settings/QuranCard';
@@ -26,6 +27,7 @@ import { SavedLocationsCard } from './settings/SavedLocationsCard';
 import { SoundPickerModal } from './settings/SoundPickerModal';
 import { WidgetCard } from './settings/WidgetCard';
 import type { NotificationSoundId } from '../notifications/notificationSounds';
+import { useTabBarInset } from '../navigation/tabBarInset';
 
 /**
  * SettingsScreen orchestrator — task #9 split.
@@ -51,7 +53,7 @@ export function SettingsScreen() {
   // Deep-link highlight: when arriving from the home location selector's
   // "Add new location" action, scroll to and briefly flash the Saved
   // Locations section so the user knows where to add a location.
-  const route = useRoute<RouteProp<RootStackParamList, 'Settings'>>();
+  const route = useRoute<RouteProp<MainTabParamList, 'SettingsTab'>>();
   const scrollRef = useRef<ScrollView>(null);
   const savedLocationsYRef = useRef(0);
   const [savedHighlightSignal, setSavedHighlightSignal] = useState(0);
@@ -112,6 +114,7 @@ export function SettingsScreen() {
     [],
   );
   const openProvider = useCallback(() => setProviderModal(true), []);
+  const tabBarInset = useTabBarInset();
   const openLanguage = useCallback(() => setLanguageModal(true), []);
 
   return (
@@ -121,7 +124,7 @@ export function SettingsScreen() {
         style={[styles.scroll, { backgroundColor: palette.bg }]}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + 24 },
+          { paddingBottom: insets.bottom + 24 + tabBarInset },
         ]}
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled">
@@ -156,6 +159,7 @@ export function SettingsScreen() {
             />
           );
           const liveActivity = <LiveActivityCard />;
+          const monthTimes = <MonthTimesCard />;
           const quran = <QuranCard />;
           const about = <AboutCard />;
 
@@ -177,6 +181,7 @@ export function SettingsScreen() {
                     {location}
                     {savedLocations}
                     {notifications}
+                    {monthTimes}
                     {quran}
                     {about}
                   </View>
@@ -196,6 +201,7 @@ export function SettingsScreen() {
               {calculation}
               {notifications}
               {liveActivity}
+              {monthTimes}
               {quran}
               {about}
             </CenteredColumn>

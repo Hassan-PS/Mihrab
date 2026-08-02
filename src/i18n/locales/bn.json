@@ -12,10 +12,10 @@
     "tasbih": "তাসবীহ",
     "duas": "দোয়াসমূহ",
     "quran": "কুরআন",
-    "mosques": "মসজিদ",
     "journal": "নামাজ ডায়েরি",
     "backup": "ব্যাকআপ",
-    "fasting": "রোজা"
+    "fasting": "রোজা",
+    "today": "আজ"
   },
   "a11y": {
     "openSettings": "সেটিংস খুলুন",
@@ -60,7 +60,27 @@
     "backToToday": "আজে ফিরুন",
     "updatedAt": "আপডেট {{when}}",
     "daysStored": "{{count}} দিনের ডেটা সংরক্ষিত",
-    "quranShortcut": "কুরআন খুলুন"
+    "quranShortcut": "কুরআন খুলুন",
+    "dayStrip": "একটি দিন বেছে নিন",
+    "nextPrayerIn": "{{prayer}} বাকি",
+    "firstPrayer": "প্রথম নামাজ {{prayer}} · {{time}}",
+    "todaySummary": "আজ",
+    "prayersLogged": "{{total}} এর মধ্যে {{count}} নামাজ লেখা হয়েছে",
+    "noFastToday": "কোনো রোজা লেখা হয়নি",
+    "dhikrSets": "{{count}} বার জিকির সম্পন্ন",
+    "fastKept": {
+      "ramadan": "রমজানের রোজা রাখা হয়েছে",
+      "voluntary": "সুন্নত রোজা রাখা হয়েছে",
+      "qadha": "কাজা রোজা রাখা হয়েছে"
+    },
+    "readItIn": "{{surah}} এ পড়ুন",
+    "continueAt": "চালিয়ে যান · {{surah}} {{ref}}",
+    "khatmahDay": "খতম দিন {{day}} / {{total}}",
+    "khatmahDaysToGo": "আরও {{count}} দিন",
+    "pagesLeftToday": "আজ আরও {{count}} পৃষ্ঠা",
+    "pageNumber": "পৃষ্ঠা {{page}}",
+    "readingDone": "আজকের পড়া শেষ",
+    "readOn": "পড়া চালিয়ে যান"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",
@@ -234,7 +254,21 @@
     "resetApp": "অ্যাপের ডেটা রিসেট করুন",
     "resetAppHelp": "সব সেটিংস ও ডেটা মুছে দেয়। ফেরানো যাবে না।",
     "batteryWarning": "সতর্কতা অনির্ভরযোগ্য হতে পারে",
-    "batteryWarningHelp": "ব্যাটারি অপ্টিমাইজেশন অ্যাপ বন্ধ থাকলে আযান সতর্কতা বিলম্বিত বা নীরব করতে পারে। Mihrab বাদ দিতে ট্যাপ করুন।"
+    "batteryWarningHelp": "ব্যাটারি অপ্টিমাইজেশন অ্যাপ বন্ধ থাকলে আযান সতর্কতা বিলম্বিত বা নীরব করতে পারে। Mihrab বাদ দিতে ট্যাপ করুন।",
+    "themeRestartManualTitle": "অ্যাপটি আবার খুলুন",
+    "themeRestartManualBody": "iOS অ্যাপকে নিজে থেকে রিস্টার্ট করতে দেয় না। নতুন থিম কার্যকর করতে অ্যাপটি সম্পূর্ণ বন্ধ করে আবার খুলুন।",
+    "liquidGlass": "লিকুইড গ্লাস",
+    "liquidGlassHelp": "iOS সিস্টেম রঙ ও স্বচ্ছ গ্লাস ক্রোম ব্যবহার করুন। লাইট/ডার্ক স্বয়ংক্রিয়ভাবে অনুসরণ করে।",
+    "themeRestartTitle": "রিস্টার্ট প্রয়োজন",
+    "themeRestartBody": "সিস্টেম রঙ বদলাতে অ্যাপ রিস্টার্ট করতে হয় যাতে সব স্ক্রিন নতুন থিম নেয়। এখনই রিস্টার্ট করবেন?",
+    "themeRestartConfirm": "রিস্টার্ট",
+    "laSecondMetricLabel": "দ্বিতীয় তথ্য",
+    "resetTitle": "অ্যাপ রিসেট করবেন?",
+    "resetBody": "এটি সব সেটিংস, সংরক্ষিত অবস্থান, লগ, রোজার রেকর্ড ও তাসবিহ অবস্থা মুছে দেবে এবং আপনাকে শুরুর ধাপে ফিরিয়ে নেবে। এটি ফেরানো যাবে না।",
+    "resetConfirm": "সবকিছু রিসেট করুন",
+    "prayerOffsetsCount": "{{count}}টি সমন্বয় করা",
+    "endOfDayLog": "দিনশেষে লগ করার অনুস্মারক",
+    "endOfDayLogHelp": "ইশার দশ মিনিট পরে দিনের পাঁচ ওয়াক্ত লগ করবেন কি না জিজ্ঞাসা করে। পরদিন সকালে উত্তর দিলেও সঠিক দিনেই লেখা হয়।"
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "পূর্বের অবস্থান"
+    "previousLocation": "পূর্বের অবস্থান",
+    "invalidCoordsTitle": "অবৈধ স্থানাঙ্ক",
+    "invalidCoordsBody": "অক্ষাংশ -৯০ থেকে ৯০ এবং দ্রাঘিমাংশ -১৮০ থেকে ১৮০ এর মধ্যে হতে হবে।",
+    "pickAPlace": "প্রথমে একটি শহর খুঁজুন বা স্থানাঙ্ক লিখুন।",
+    "duplicateTitle": "ইতিমধ্যে সংরক্ষিত",
+    "duplicateBody": "এই স্থানাঙ্কে একটি অবস্থান ইতিমধ্যে \"{{name}}\" নামে সংরক্ষিত আছে।"
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "রিসেট",
     "salahonprophet": "নবীর উপর দরুদ ﷺ",
     "prev": "পূর্ববর্তী",
-    "next": "পরবর্তী"
+    "next": "পরবর্তী",
+    "meaning": {
+      "subhanallah": "আল্লাহ পবিত্র ও মহান",
+      "alhamdulillah": "সমস্ত প্রশংসা আল্লাহর",
+      "lailaha": "আল্লাহ ছাড়া কোনো ইলাহ নেই",
+      "allahuakbar": "আল্লাহ সর্বশ্রেষ্ঠ",
+      "astaghfirullah": "আমি আল্লাহর কাছে ক্ষমা প্রার্থনা করি",
+      "salahonprophet": "হে আল্লাহ, আমাদের নবী মুহাম্মদের উপর রহমত বর্ষণ করুন"
+    },
+    "setPosition": "সেট {{index}} / {{total}}",
+    "ofTarget": "/ {{target}}",
+    "tapAnywhere": "যেকোনো জায়গায় ট্যাপ করুন",
+    "upNext": "পরবর্তী",
+    "resetSet": "সেট রিসেট করুন",
+    "skip": "এড়িয়ে যান"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "বিভ্রান্তি থেকে রক্ষার দু‘আ"
-    }
+    },
+    "tapToCount": "গুনতে ট্যাপ করুন"
   },
   "quran": {
     "meccan": "মাক্কী",
@@ -869,7 +923,17 @@
     "companionTitle": "প্রতিটি আয়াতের নিচে",
     "companionHelp": "যেখানেই আয়াত দেখানো হয় সেখানে প্রযোজ্য — রিডার, দিনের আয়াত এবং দৈনিক আয়াত বিজ্ঞপ্তি। কুরআন পৃষ্ঠা থেকেও পরিবর্তন করা যায়।",
     "companionActive": "সক্রিয়",
-    "mushafReplaceOldBody": "আগের সংস্করণ থেকে মুসহাফের একটি পুরোনো কপি ({{size}} এমবি) এখনও আপনার ডিভাইসে রয়েছে। সেটি আগে মুছে ফেলা হবে — আপনার সংরক্ষণ করা কিছুই প্রভাবিত হবে না।"
+    "mushafReplaceOldBody": "আগের সংস্করণ থেকে মুসহাফের একটি পুরোনো কপি ({{size}} এমবি) এখনও আপনার ডিভাইসে রয়েছে। সেটি আগে মুছে ফেলা হবে — আপনার সংরক্ষণ করা কিছুই প্রভাবিত হবে না।",
+    "shareAsText": "লেখা শেয়ার করুন",
+    "shareChoiceA11y": "শেয়ার — লেখা বা ছবি কার্ড বেছে নিন",
+    "recitation": "তিলাওয়াত",
+    "downloadSurahAudioSized": "এই সূরা ডাউনলোড · {{size}}",
+    "tapToPick": "বেছে নিন",
+    "tabMarks": "চিহ্ন",
+    "searchSurahOrPage": "সূরা বা পৃষ্ঠা খুঁজুন",
+    "reading": "পড়ছেন",
+    "pageScrubber": "পৃষ্ঠায় যান",
+    "goCta": "যান"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "নামাজ বিজ্ঞপ্তিতে জার্নাল লগ অ্যাকশন চালু করুন",
     "notePlaceholder": "ব্যক্তিগত নোট (শুধু এই ডিভাইসে)",
     "saveNote": "নোট সংরক্ষণ করুন",
-    "logActionTitle": "নামাজ লগ করুন"
+    "logActionTitle": "নামাজ লগ করুন",
+    "loadFailedTitle": "লগ লোড করা যায়নি",
+    "loadFailedBody": "আপনার তথ্য ডিভাইসে নিরাপদ আছে, কিন্তু এখন পড়া যায়নি। আবার লগ খুলে দেখুন।",
+    "saveFailedTitle": "সংরক্ষণ করা যায়নি",
+    "saveFailedBody": "আবার চেষ্টা করুন।",
+    "noteLabel": "ব্যক্তিগত নোট (গোপন, এনক্রিপ্টেড)"
   },
   "events": {
     "islamicNewYear": "ইসলামি নববর্ষ",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "আপনার উপর শান্তি বর্ষিত হোক, আল্লাহর রহমত ও বরকত।"
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "সব নথিভুক্ত রোজা",
     "noLogsYet": "আপনি যেদিন রোজা রাখবেন সেই দিনগুলো এখানে দেখা যাবে।",
     "typeRamadan": "রমজান",
-    "typeVoluntary": "নফল / সুন্নাহ"
+    "typeVoluntary": "নফল / সুন্নাহ",
+    "reminderChannelName": "রোজার অনুস্মারক",
+    "reminderTitle": "রোজার অনুস্মারক"
   },
   "methods": {
     "0": "শিয়া — ইসনা আশারিয়া",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "হিসনুল মুসলিম-এর দোআ",
     "quranGeometry": "আয়াতের অবস্থানের ডেটা (quran.com / Quran for Android প্রকল্প)",
-    "recitation": "তিলাওয়াতের অডিও (২১ জন ক্বারী): EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)",
+    "recitation": "তিলাওয়াতের অডিও (৪২ জন ক্বারী): EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)",
     "tafsir": "তাফসীর: ইবনে কাসীর, মাআরিফুল কুরআন, আল-মুয়াসসার"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "ডেটা পরিসংখ্যান চালু হয়েছে",
     "unlockedBody": "এখন হোম স্ক্রিনের নিচে একটি পরিসংখ্যান কার্ড দেখা যাবে। নিচে যেকোনো সময় এটি বন্ধ করুন।",
     "serverCoverage": "সার্ভার কভারেজ"
+  },
+  "log": {
+    "last13Weeks": "গত ১৩ সপ্তাহ",
+    "legendPrayers": "০ → ৫ নামাজ",
+    "fasted": "রোজা",
+    "dayA11y": "{{date}}: {{prayers}} নামাজ লেখা{{fast}}",
+    "streakCaption": "{{count}} দিনের ধারা",
+    "fastsCaption": "{{count}} রোজা",
+    "markAllOnTime": "সব সময়মতো চিহ্নিত করুন",
+    "fastingToday": "আজকের রোজা",
+    "iftarAt": "ইফতার {{time}}",
+    "allUpcoming": "সব আসন্ন",
+    "title": "লগ"
+  },
+  "endOfDay": {
+    "title": "আজকের নামাজ লগ করবেন?",
+    "body": "পাঁচ ওয়াক্তই সময়মতো আদায় হিসেবে চিহ্নিত করুন, অথবা লগ খুলে একে একে পূরণ করুন।",
+    "action": "সবগুলো সম্পন্ন হিসেবে লগ করুন",
+    "channelName": "দিনশেষের লগ"
   }
 }

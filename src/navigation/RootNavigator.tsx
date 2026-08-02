@@ -3,59 +3,25 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Text } from 'react-native';
+import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View } from 'react-native';
-import { HomeHeaderControls } from './HomeHeaderControls';
-import { isMacCatalyst } from '../responsive/breakpoints';
-import { MihrabLogoIcon } from '../theme/icons';
-import { useAppPalette } from '../hooks/useAppPalette';
+import { MainTabs } from './MainTabs';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
-import { DuasScreen } from '../screens/DuasScreen';
-import { HomeScreen } from '../screens/HomeScreen';
-import { JournalScreen } from '../screens/JournalScreen';
 import { MonthTimesScreen } from '../screens/MonthTimesScreen';
-import { MosquesScreen } from '../screens/MosquesScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
-import { QuranScreen } from '../screens/QuranScreen';
 import { QuranSurahScreen } from '../screens/QuranSurahScreen';
 import { QuranDownloadsScreen } from '../screens/QuranDownloadsScreen';
-import { SettingsScreen } from '../screens/SettingsScreen';
 import { ShareMonthScreen } from '../screens/ShareMonthScreen';
-import { TasbihScreen } from '../screens/TasbihScreen';
 import { BackupScreen } from '../screens/BackupScreen';
 import { FastingScreen } from '../screens/FastingScreen';
 import type { RootStackParamList } from './types';
+import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const isIOS = Platform.OS === 'ios';
 
-/**
- * Home screen header title — always renders "Mihrab" in English regardless of
- * the user's selected language, because "Mihrab" is the app's proper name, not
- * a translated label. The outline logo icon sits left of the text; its interior
- * is transparent so the navigation bar background (light or dark theme) shows
- * through it.
- */
-function MihrabHeaderTitle() {
-  const { colors } = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-      <MihrabLogoIcon size={20} color={colors.text} />
-      <Text
-        style={{
-          color: colors.text,
-          fontSize: isIOS ? 17 : 20,
-          fontWeight: isIOS ? '600' : '700',
-          letterSpacing: isIOS ? -0.3 : 0,
-        }}>
-        Mihrab
-      </Text>
-    </View>
-  );
-}
 
 // Home header controls now live in ../navigation/HomeHeaderControls so the
 // HomeScreen can render the same row as content on Mac Catalyst, where the
@@ -82,12 +48,12 @@ function useOnboardingAutoRoute() {
   }, [hydrated, navigation, settings.onboardingComplete]);
 }
 
-function HomeScreenWrapper() {
-  // Wraps HomeScreen so the onboarding auto-route effect lives on the
-  // landing route — it has access to the navigation prop without pulling
-  // a one-shot effect into AppNavigationRoot's tree.
+function TabsRoot() {
+  // The onboarding auto-route effect lives on the landing route so it has a
+  // navigation prop without pulling a one-shot effect into
+  // AppNavigationRoot's tree. The landing route is the tab navigator now.
   useOnboardingAutoRoute();
-  return <HomeScreen />;
+  return <MainTabs />;
 }
 
 export function RootNavigator() {
@@ -136,10 +102,22 @@ export function RootNavigator() {
         // title fix) but react-navigation types the title style as a narrower
         // Pick<TextStyle, …> that omits it; cast past the type to keep the
         // runtime behavior.
+        // `fontSize` on Catalyst only: UIKit sizes the navigation bar for a
+        // tablet held at arm's length, and Catalyst then scales the whole
+        // canvas down ~23% for the Mac. The compounded result is a 13pt
+        // title on a desktop display. See responsive/desktop.ts.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        headerTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection } as any,
+        headerTitleStyle: {
+          color: theme.colors.text,
+          writingDirection: titleWritingDirection,
+          ...(IS_MAC_CATALYST ? { fontSize: desktopSize(17) } : null),
+        } as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        headerLargeTitleStyle: { color: theme.colors.text, writingDirection: titleWritingDirection } as any,
+        headerLargeTitleStyle: {
+          color: theme.colors.text,
+          writingDirection: titleWritingDirection,
+          ...(IS_MAC_CATALYST ? { fontSize: desktopSize(34) } : null),
+        } as any,
         // Default portrait everywhere; the Quran mushaf-fullscreen mode
         // overrides this to 'all' via navigation.setOptions so the user
         // can rotate the phone for landscape reading. The activity's
@@ -147,28 +125,21 @@ export function RootNavigator() {
         // takes effect.
         orientation: 'portrait',
       }}>
+      {/* The six tabs are the app (design review 2e). Everything below is
+          pushed ON TOP of them: sub-pages, readers and one-off flows. */}
       <Stack.Screen
         name="Home"
-        component={HomeScreenWrapper}
+        component={TabsRoot}
         options={{
-          // Always "Mihrab" — the app's proper name, not a translated label.
-          // The custom headerTitle renders the arch logo icon alongside the text.
-          // headerLargeTitle is disabled here so the icon is always visible; the
-          // iOS large-title API does not support custom components.
-          headerTitle: () => <MihrabHeaderTitle />,
-          headerLargeTitle: false,
-          // Mac Catalyst: no native headerRight — the same controls render
-          // as the first row of Home content instead (drag-region fix, see
-          // HomeHeaderControls).
-          ...(isMacCatalyst
-            ? {}
-            : { headerRight: () => <HomeHeaderControls /> }),
+          headerShown: false,
+          // The stack's default `contentStyle` reserves the bottom safe
+          // area for PUSHED pages, which have nothing else down there.
+          // The tabs do: the tab bar reserves that inset itself, so
+          // inheriting it as well left the bar floating a safe-area's
+          // worth above the bottom edge with a band of dead background
+          // beneath it (visible on iPad, where the inset is 20pt).
+          contentStyle: { backgroundColor: theme.colors.background },
         }}
-      />
-      <Stack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{ title: t('nav.settings') }}
       />
       {/* Subpages: inherit screenOptions defaults (transparent header on
           iOS for the blur effect, opaque on Android via headerStyle), only
@@ -192,21 +163,6 @@ export function RootNavigator() {
         options={{ title: t('nav.compass'), headerLargeTitle: false }}
       />
       <Stack.Screen
-        name="Tasbih"
-        component={TasbihScreen}
-        options={{ title: t('nav.tasbih'), headerLargeTitle: false }}
-      />
-      <Stack.Screen
-        name="Duas"
-        component={DuasScreen}
-        options={{ title: t('nav.duas'), headerLargeTitle: false }}
-      />
-      <Stack.Screen
-        name="Quran"
-        component={QuranScreen}
-        options={{ title: t('nav.quran'), headerLargeTitle: false }}
-      />
-      <Stack.Screen
         name="QuranSurah"
         component={QuranSurahScreen}
         options={{ title: '', headerLargeTitle: false }}
@@ -219,16 +175,9 @@ export function RootNavigator() {
           headerLargeTitle: false,
         }}
       />
-      <Stack.Screen
-        name="Mosques"
-        component={MosquesScreen}
-        options={{ title: t('nav.mosques'), headerLargeTitle: false }}
-      />
-      <Stack.Screen
-        name="Journal"
-        component={JournalScreen}
-        options={{ title: t('nav.journal'), headerLargeTitle: false }}
-      />
+      {/* The Log: prayers and fasting on one screen (design review 2c).
+          The route keeps its old name so the "Log prayer" notification
+          action and every existing deep link still land somewhere. */}
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
@@ -239,6 +188,9 @@ export function RootNavigator() {
         component={BackupScreen}
         options={{ title: t('nav.backup'), headerLargeTitle: false }}
       />
+      {/* The sunnah calendar, the day-before reminder and the full history —
+          reference material, reached from the Log's fasting card rather
+          than owning a destination of its own. */}
       <Stack.Screen
         name="Fasting"
         component={FastingScreen}

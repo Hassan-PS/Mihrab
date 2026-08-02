@@ -44,6 +44,7 @@ import {
   type QuranState,
 } from './quranState';
 import { usePlaybackStatus, type PlaybackStatus } from './audio/playback';
+import { mushafSurahName } from './surahName';
 import type { AyahRef } from './MushafTextPage';
 
 /** The props contract every mushaf reader implements (see MushafReader). */
@@ -184,13 +185,18 @@ export function useMushafReaderCore({
   }, [quran.prefs.keepAwake]);
 
   // ── Header title follows the visible page's starting surah ──────────
+  // …and the app language: an Arabic UI gets الفاتحة, not "Al-Fatihah".
+  // `language` is a dependency because the title is pushed to the navigator
+  // imperatively, so nothing else would re-run this after a language change.
+  const { i18n: i18nInstance } = useTranslation();
+  const language = i18nInstance.language;
   useEffect(() => {
     if (!onTitleChange) return;
     const visiblePage = MUSHAF_PAGES.find(p => p.page === currentPage);
     if (!visiblePage) return;
     const surah = MUSHAF_SURAHS.find(s => s.number === visiblePage.start.surah);
-    if (surah) onTitleChange(surah.englishName);
-  }, [currentPage, onTitleChange]);
+    if (surah) onTitleChange(mushafSurahName(surah, language));
+  }, [currentPage, onTitleChange, language]);
 
   // ── Last-read + khatmah on page turns (QR-10/21) ────────────────────
   const commitPageTurn = useCallback((newPage: number, prevPage: number) => {
@@ -373,8 +379,12 @@ export function MushafPageHeader({
           numberOfLines={1}
           style={[styles.pageHeaderText, { color: ornament }]}>
           {isFullscreen
-            ? MUSHAF_SURAHS.find(s => s.number === meta.start.surah)
-                ?.englishName ?? ''
+            ? (() => {
+                const surah = MUSHAF_SURAHS.find(
+                  s => s.number === meta.start.surah,
+                );
+                return surah ? mushafSurahName(surah) : '';
+              })()
             : t('quran.juzLabel', {
                 defaultValue: 'Juz {{juz}}',
                 juz: easternNumerals(meta.juz),

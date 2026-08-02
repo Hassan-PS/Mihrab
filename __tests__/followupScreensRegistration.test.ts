@@ -49,12 +49,16 @@ describe('follow-up screen registration', () => {
     expect(settings).toMatch(/PrayerOffsetsModal/);
   });
 
-  test('QuickActionsGrid surfaces the Fasting tile', () => {
-    const grid = fs.readFileSync(
-      path.join(REPO, 'src/screens/home/QuickActionsGrid.tsx'),
+  test("Home's Today summary reads the practice store", () => {
+    // The tool tiles (with their Fasting entry) were replaced by a summary
+    // that reports the day rather than routing away from it — design
+    // review 2a. What must hold is that the summary is driven by recorded
+    // practice, not by a hardcoded list of destinations.
+    const summary = fs.readFileSync(
+      path.join(REPO, 'src/screens/home/TodaySummary.tsx'),
       'utf-8',
     );
-    expect(grid).toMatch(/'Fasting'/);
+    expect(summary).toMatch(/usePracticeToday/);
   });
 });
 

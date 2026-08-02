@@ -28,6 +28,7 @@ import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
 import { findPageForAyah, MUSHAF_PAGES } from '../quran/pages';
+import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
 import { findSurah, loadSurah, SURAHS, type SurahIndex } from '../quran/quran';
 import { getAyahTranslation } from '../quran/translations';
 import { useActiveEdition } from '../quran/useActiveEdition';
@@ -52,13 +53,11 @@ import {
   CompanionTextSheet,
   useCompanionChoice,
 } from '../quran/CompanionTextControls';
-import {
-  searchQuran,
-  verseOfTheDayRef,
-  type QuranSearchResult,
-} from '../quran/search';
+import { searchQuran, type QuranSearchResult } from '../quran/search';
+import { useVerseOfTheDay } from '../quran/useVerseOfTheDay';
 import { cardEdgeStyle } from '../theme/chrome';
 import { arabicTextStyle } from '../theme/typography';
+import { useTabBarInset } from '../navigation/tabBarInset';
 
 type Tab = 'surah' | 'juz' | 'bookmarks';
 
@@ -88,6 +87,10 @@ export function QuranScreen() {
   const [customDaysText, setCustomDaysText] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<QuranSearchResult[] | null>(null);
+  // Go-to-page (v2.8.5) — a page number typed here opens the mushaf there.
+  const tabBarInset = useTabBarInset();
+  const [pageJumpVisible, setPageJumpVisible] = useState(false);
+  const [pageJumpText, setPageJumpText] = useState('');
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounced full-text search (QR-22).
@@ -106,8 +109,10 @@ export function QuranScreen() {
     };
   }, [query, edition]);
 
-  // Verse of the day (QR-23).
-  const votdRef = useMemo(() => verseOfTheDayRef(), []);
+  // Verse of the day (QR-23). The hook re-reads the date at midnight and on
+  // resume, so the card and the daily notification — which now schedules the
+  // same date-seeded verse — never show different ayahs.
+  const votdRef = useVerseOfTheDay();
   const [votdArabic, setVotdArabic] = useState('');
   useEffect(() => {
     let cancelled = false;
@@ -154,6 +159,21 @@ export function QuranScreen() {
       scrollToAyah,
       initialPage: page,
     });
+  };
+
+  /**
+   * Open the mushaf at a typed page. The reader is addressed by surah, so
+   * the page has to name the surah it starts inside — otherwise the header
+   * and the khatmah bookkeeping would be talking about a different place
+   * than the page on screen.
+   */
+  const goToPage = (text: string) => {
+    const n = Number(text.trim());
+    if (!Number.isFinite(n)) return;
+    const page = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, Math.round(n)));
+    const surah = MUSHAF_PAGES.find(p => p.page === page)?.start.surah ?? 1;
+    setPageJumpVisible(false);
+    openSurah(surah, undefined, page);
   };
 
   // ── Surah tab data (name filter applies instantly) ──────────────────
@@ -480,23 +500,45 @@ export function QuranScreen() {
         </View>
       </View>
 
-      {/* Search (QR-22) */}
-      <TextInput
-        value={query}
-        onChangeText={setQuery}
-        placeholder={t('quran.searchPlaceholder', 'Search surahs, ayahs, translation…')}
-        placeholderTextColor={String(palette.muted)}
-        accessibilityLabel={t('quran.searchPlaceholder', 'Search surahs, ayahs, translation…')}
-        clearButtonMode="while-editing"
-        style={[
-          styles.search,
-          {
-            color: palette.text,
-            backgroundColor: palette.card,
-            ...cardEdgeStyle(palette),
-          },
-        ]}
-      />
+      {/* Search (QR-22) + go-to-page (v2.8.5).
+          Someone who knows they want page 440 had to open a surah first and
+          find the jump control inside the reader. The mushaf is paginated;
+          the page number is a first-class address and belongs on the screen
+          that lists everything else you can address. */}
+      <View style={styles.searchRow}>
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder={t('quran.searchPlaceholder', 'Search surahs, ayahs, translation…')}
+          placeholderTextColor={String(palette.muted)}
+          accessibilityLabel={t('quran.searchPlaceholder', 'Search surahs, ayahs, translation…')}
+          clearButtonMode="while-editing"
+          style={[
+            styles.search,
+            styles.searchGrow,
+            {
+              color: palette.text,
+              backgroundColor: palette.card,
+              ...cardEdgeStyle(palette),
+            },
+          ]}
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+          onPress={() => {
+            setPageJumpText('');
+            setPageJumpVisible(true);
+          }}
+          style={[
+            styles.pageJumpBtn,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <Text style={[styles.pageJumpGlyph, { color: palette.accentSolid }]}>
+            ⌗
+          </Text>
+        </Pressable>
+      </View>
 
       {/* Tabs (QR-11) */}
       <View style={[styles.tabs, { backgroundColor: palette.card, ...cardEdgeStyle(palette) }]}>
@@ -784,7 +826,7 @@ export function QuranScreen() {
         <FlatList<SurahIndex>
           data={[...filteredSurahs]}
           keyExtractor={s => String(s.number)}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           initialNumToRender={12}
@@ -795,7 +837,7 @@ export function QuranScreen() {
         <FlatList<JuzRow>
           data={juzRows}
           keyExtractor={j => String(j.juz)}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           renderItem={renderJuzRow}
@@ -804,7 +846,7 @@ export function QuranScreen() {
         <FlatList
           data={[0]}
           keyExtractor={() => 'bookmarks'}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           renderItem={renderBookmarks}
@@ -958,6 +1000,60 @@ export function QuranScreen() {
         </View>
       </Modal>
 
+      {/* Go to page (v2.8.5) — same shape as the reader's own jump sheet,
+          reached from the index instead of from inside a surah. */}
+      <Modal
+        visible={pageJumpVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPageJumpVisible(false)}>
+        <Pressable
+          style={[styles.menuBackdrop, { backgroundColor: palette.overlay }]}
+          accessibilityLabel={t('common.close', 'Close')}
+          onPress={() => setPageJumpVisible(false)}
+        />
+        <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
+          <Text style={[styles.menuTitle, { color: palette.text }]}>
+            {t('quran.jumpToPage', 'Go to page')}
+          </Text>
+          <TextInput
+            value={pageJumpText}
+            onChangeText={setPageJumpText}
+            keyboardType="number-pad"
+            autoFocus
+            maxLength={3}
+            accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+            placeholder="1–604"
+            placeholderTextColor={String(palette.muted)}
+            style={[
+              styles.customDaysInput,
+              { color: palette.text, borderColor: palette.border },
+            ]}
+            onSubmitEditing={() => goToPage(pageJumpText)}
+          />
+          <View style={styles.customDaysRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel', 'Cancel')}
+              onPress={() => setPageJumpVisible(false)}
+              style={styles.menuCancel}>
+              <Text style={{ color: palette.muted, fontWeight: '600' }}>
+                {t('common.cancel', 'Cancel')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+              onPress={() => goToPage(pageJumpText)}
+              style={styles.menuCancel}>
+              <Text style={{ color: palette.accentSolid, fontWeight: '700' }}>
+                {t('quran.goCta', 'Go')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
       {/* App-wide companion-text picker (v2.7.40): mode + edition. */}
       <CompanionTextSheet
         visible={companionSheetVisible}
@@ -1084,6 +1180,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 15,
   },
+  searchRow: { flexDirection: 'row', alignItems: 'stretch', gap: 8 },
+  searchGrow: { flex: 1 },
+  pageJumpBtn: {
+    width: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pageJumpGlyph: { fontSize: 20, fontWeight: '700' },
   tabs: {
     flexDirection: 'row',
     borderRadius: 12,

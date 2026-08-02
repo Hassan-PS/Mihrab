@@ -108,6 +108,15 @@ function NotificationsCardImpl({
     updateSettings({ ayahOfDayEnabled: true });
   };
 
+  const onToggleEndOfDayLog = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ endOfDayLogReminderEnabled: false });
+      return;
+    }
+    if (!(await ensureNotifPermission())) return;
+    updateSettings({ endOfDayLogReminderEnabled: true });
+  };
+
   const onToggleKhatmahReminder = async (value: boolean) => {
     if (!value) {
       updateSettings({ khatmahReminderEnabled: false });
@@ -369,6 +378,30 @@ function NotificationsCardImpl({
           trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
           thumbColor={'#ffffff'}
           onValueChange={v => updateSettings({ lastThirdEnabled: v })}
+        />
+      </View>
+
+      {/* End-of-day log prompt (v2.8.5). The same switch lives on the Log
+          screen, where the thing it affects is visible. */}
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.endOfDayLog')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t('settings.endOfDayLogHelp')}
+          </Text>
+        </View>
+        <Switch
+          value={settings.endOfDayLogReminderEnabled}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={onToggleEndOfDayLog}
         />
       </View>
 

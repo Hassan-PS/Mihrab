@@ -12,10 +12,10 @@
     "tasbih": "تسبیح",
     "duas": "دعائیں",
     "quran": "قرآن",
-    "mosques": "مساجد",
     "journal": "نماز ڈائری",
     "backup": "بیک اپ",
-    "fasting": "روزہ"
+    "fasting": "روزہ",
+    "today": "آج"
   },
   "a11y": {
     "openSettings": "ترتیبات کھولیں۔",
@@ -60,7 +60,27 @@
     "backToToday": "آج پر واپس",
     "updatedAt": "اپ ڈیٹ {{when}}",
     "daysStored": "{{count}} دن محفوظ",
-    "quranShortcut": "قرآن کھولیں"
+    "quranShortcut": "قرآن کھولیں",
+    "dayStrip": "دن منتخب کریں",
+    "nextPrayerIn": "{{prayer}} میں",
+    "firstPrayer": "پہلی نماز {{prayer}} · {{time}}",
+    "todaySummary": "آج",
+    "prayersLogged": "{{total}} میں سے {{count}} نمازیں درج",
+    "noFastToday": "کوئی روزہ درج نہیں",
+    "dhikrSets": "{{count}} اذکار کے دور مکمل",
+    "fastKept": {
+      "ramadan": "رمضان کا روزہ رکھا",
+      "voluntary": "سنت روزہ رکھا",
+      "qadha": "قضا روزہ رکھا"
+    },
+    "readItIn": "{{surah}} میں پڑھیں",
+    "continueAt": "جاری رکھیں · {{surah}} {{ref}}",
+    "khatmahDay": "ختم دن {{day}} از {{total}}",
+    "khatmahDaysToGo": "{{count}} دن باقی",
+    "pagesLeftToday": "آج {{count}} صفحات باقی",
+    "pageNumber": "صفحہ {{page}}",
+    "readingDone": "آج کی قراءت مکمل",
+    "readOn": "پڑھتے رہیں"
   },
   "errors": {
     "locationNeededTitle": "مقام درکار ہے۔",
@@ -234,7 +254,21 @@
     "resetApp": "ایپ ڈیٹا ری سیٹ کریں",
     "resetAppHelp": "تمام ترتیبات اور ڈیٹا مٹا دیتا ہے۔ واپس نہیں ہو سکتا۔",
     "batteryWarning": "اطلاعات غیر معتبر ہو سکتی ہیں",
-    "batteryWarningHelp": "بیٹری آپٹیمائزیشن ایپ بند ہونے پر اذان کی اطلاعات میں تاخیر یا خاموشی کا باعث بن سکتی ہے۔ Mihrab کو مستثنیٰ کرنے کے لیے تھپتھپائیں۔"
+    "batteryWarningHelp": "بیٹری آپٹیمائزیشن ایپ بند ہونے پر اذان کی اطلاعات میں تاخیر یا خاموشی کا باعث بن سکتی ہے۔ Mihrab کو مستثنیٰ کرنے کے لیے تھپتھپائیں۔",
+    "themeRestartManualTitle": "ایپ دوبارہ کھولیں",
+    "themeRestartManualBody": "iOS ایپس کو خود دوبارہ چلنے نہیں دیتا۔ نئی تھیم لاگو کرنے کے لیے ایپ مکمل بند کر کے دوبارہ کھولیں۔",
+    "liquidGlass": "لیکوئڈ گلاس",
+    "liquidGlassHelp": "iOS سسٹم رنگ اور شفاف گلاس کروم اپنائیں۔ لائٹ/ڈارک خودکار طور پر پیروی کرتا ہے۔",
+    "themeRestartTitle": "دوبارہ چلانا ضروری",
+    "themeRestartBody": "سسٹم رنگ بدلنے کے لیے ایپ کو دوبارہ چلانا ہوگا تاکہ ہر اسکرین نئی تھیم لے۔ ابھی دوبارہ چلائیں؟",
+    "themeRestartConfirm": "دوبارہ چلائیں",
+    "laSecondMetricLabel": "دوسرا اشاریہ",
+    "resetTitle": "ایپ ری سیٹ کریں؟",
+    "resetBody": "یہ تمام ترتیبات، محفوظ مقامات، نمازوں کا ریکارڈ، روزوں کا ریکارڈ اور تسبیح کی حالت مٹا دے گا اور آپ کو ابتدائی مراحل پر لے جائے گا۔ واپسی ممکن نہیں۔",
+    "resetConfirm": "سب کچھ ری سیٹ کریں",
+    "prayerOffsetsCount": "{{count}} ایڈجسٹ کیے گئے",
+    "endOfDayLog": "دن کے اختتام پر ریکارڈ یاد دہانی",
+    "endOfDayLogHelp": "عشاء کے دس منٹ بعد پوچھتا ہے کہ دن کی پانچ نمازیں درج کی جائیں۔ اگلی صبح جواب دینے پر بھی درست دن درج ہوگا۔"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "پچھلا مقام"
+    "previousLocation": "پچھلا مقام",
+    "invalidCoordsTitle": "غلط کوآرڈینیٹس",
+    "invalidCoordsBody": "عرض بلد -90 اور 90 کے درمیان اور طول بلد -180 اور 180 کے درمیان ہونا چاہیے۔",
+    "pickAPlace": "پہلے کوئی شہر تلاش کریں یا کوآرڈینیٹس درج کریں۔",
+    "duplicateTitle": "پہلے سے محفوظ",
+    "duplicateBody": "ان کوآرڈینیٹس پر ایک مقام پہلے ہی \"{{name}}\" کے نام سے محفوظ ہے۔"
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "ری سیٹ",
     "salahonprophet": "نبی ﷺ پر درود",
     "prev": "پچھلا",
-    "next": "اگلا"
+    "next": "اگلا",
+    "meaning": {
+      "subhanallah": "اللہ پاک ہے",
+      "alhamdulillah": "تمام تعریفیں اللہ کے لیے ہیں",
+      "lailaha": "اللہ کے سوا کوئی معبود نہیں",
+      "allahuakbar": "اللہ سب سے بڑا ہے",
+      "astaghfirullah": "میں اللہ سے بخشش مانگتا ہوں",
+      "salahonprophet": "اے اللہ، ہمارے آقا محمد پر درود بھیج"
+    },
+    "setPosition": "سیٹ {{index}} از {{total}}",
+    "ofTarget": "از {{target}}",
+    "tapAnywhere": "کہیں بھی ٹیپ کریں",
+    "upNext": "اگلا",
+    "resetSet": "سیٹ ری سیٹ کریں",
+    "skip": "چھوڑیں"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "گمراہی سے بچاؤ کی دعا"
-    }
+    },
+    "tapToCount": "گننے کے لیے دبائیں"
   },
   "quran": {
     "meccan": "مکی",
@@ -869,7 +923,17 @@
     "companionTitle": "ہر آیت کے نیچے",
     "companionHelp": "جہاں بھی آیت دکھائی جاتی ہے وہاں لاگو — ریڈر، آج کی آیت اور روزانہ آیت کی اطلاع۔ قرآن صفحے سے بھی تبدیل کیا جا سکتا ہے۔",
     "companionActive": "فعال",
-    "mushafReplaceOldBody": "پچھلے ورژن کا مصحف کا ایک پرانا نسخہ ({{size}} ایم بی) اب بھی آپ کے آلے پر موجود ہے۔ اسے پہلے ہٹا دیا جائے گا — آپ کی محفوظ کردہ کوئی چیز متاثر نہیں ہوگی۔"
+    "mushafReplaceOldBody": "پچھلے ورژن کا مصحف کا ایک پرانا نسخہ ({{size}} ایم بی) اب بھی آپ کے آلے پر موجود ہے۔ اسے پہلے ہٹا دیا جائے گا — آپ کی محفوظ کردہ کوئی چیز متاثر نہیں ہوگی۔",
+    "shareAsText": "متن شیئر کریں",
+    "shareChoiceA11y": "شیئر — متن یا تصویری کارڈ منتخب کریں",
+    "recitation": "تلاوت",
+    "downloadSurahAudioSized": "یہ سورت ڈاؤن لوڈ کریں · {{size}}",
+    "tapToPick": "منتخب کریں",
+    "tabMarks": "نشانات",
+    "searchSurahOrPage": "سورت یا صفحہ تلاش کریں",
+    "reading": "زیرِ مطالعہ",
+    "pageScrubber": "صفحہ پر جائیں",
+    "goCta": "جائیں"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "نماز کی اطلاعات میں ڈائری ایکشن فعال کریں",
     "notePlaceholder": "نجی نوٹ (صرف اس آلے پر)",
     "saveNote": "نوٹ محفوظ کریں",
-    "logActionTitle": "نماز درج کریں"
+    "logActionTitle": "نماز درج کریں",
+    "loadFailedTitle": "ریکارڈ لوڈ نہیں ہو سکا",
+    "loadFailedBody": "آپ کا ڈیٹا آلے پر محفوظ ہے مگر ابھی پڑھا نہیں جا سکا۔ ریکارڈ دوبارہ کھولیں۔",
+    "saveFailedTitle": "محفوظ نہیں ہو سکا",
+    "saveFailedBody": "دوبارہ کوشش کریں۔",
+    "noteLabel": "ذاتی نوٹ (نجی، خفیہ کردہ)"
   },
   "events": {
     "islamicNewYear": "اسلامی نیا سال",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "آپ پر سلامتی ہو، اللہ کی رحمت اور اس کی برکتیں۔"
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "تمام درج کردہ روزے",
     "noLogsYet": "جو دن آپ روزہ رکھیں گے وہ یہاں ظاہر ہوں گے۔",
     "typeRamadan": "رمضان",
-    "typeVoluntary": "نفلی / سنت"
+    "typeVoluntary": "نفلی / سنت",
+    "reminderChannelName": "روزے کی یاد دہانیاں",
+    "reminderTitle": "روزے کی یاد دہانی"
   },
   "methods": {
     "0": "شیعہ — اثنا عشری",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "حصنُ المسلم کی دعائیں",
     "quranGeometry": "آیات کی پوزیشن کا ڈیٹا (quran.com / Quran for Android پروجیکٹ)",
-    "recitation": "تلاوت کی آڈیو (21 قاری): EveryAyah.com · الفاظ کی ٹائمنگ: quran-align (CC BY 4.0)",
+    "recitation": "تلاوت کی آڈیو (42 قاری): EveryAyah.com · الفاظ کی ٹائمنگ: quran-align (CC BY 4.0)",
     "tafsir": "تفسیری متون: ابن کثیر، معارف القرآن، المیسر"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "ڈیٹا شماریات فعال",
     "unlockedBody": "اب مرکزی اسکرین کے نیچے ایک شماریات کارڈ ظاہر ہوتا ہے۔ اسے نیچے سے کسی بھی وقت بند کریں۔",
     "serverCoverage": "سرور کوریج"
+  },
+  "log": {
+    "last13Weeks": "گزشتہ 13 ہفتے",
+    "legendPrayers": "0 ← 5 نمازیں",
+    "fasted": "روزہ",
+    "dayA11y": "{{date}}: {{prayers}} نمازیں درج{{fast}}",
+    "streakCaption": "{{count}} دن کا سلسلہ",
+    "fastsCaption": "{{count}} روزے",
+    "markAllOnTime": "سب کو وقت پر نشان زد کریں",
+    "fastingToday": "آج کا روزہ",
+    "iftarAt": "افطار {{time}}",
+    "allUpcoming": "تمام آئندہ",
+    "title": "ریکارڈ"
+  },
+  "endOfDay": {
+    "title": "آج کی نمازیں درج کریں؟",
+    "body": "پانچوں نمازیں وقت پر ادا کے طور پر نشان زد کریں، یا ریکارڈ کھول کر ایک ایک کر کے درج کریں۔",
+    "action": "سب کو مکمل درج کریں",
+    "channelName": "دن کے اختتام کا ریکارڈ"
   }
 }

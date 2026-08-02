@@ -5,11 +5,12 @@
  * download, speed, memorization repeats, hide/reveal masking, and the
  * explicit range player.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { findSurah } from '../quran';
+import { surahName } from '../surahName';
 import { findReciter } from './reciters';
 import { ReciterPickerSheet } from './ReciterPickerSheet';
 import {
@@ -19,6 +20,7 @@ import {
 } from './audioStore';
 import { playRange, setPlaybackRate } from './playback';
 import { setQuranPrefs, useQuranState } from '../quranState';
+import { Chip, RowAction, SectionHead, Stepper } from '../../components/controls';
 
 type Props = {
   /** Surah context for the range player + offline download. */
@@ -31,16 +33,31 @@ const RATES = [0.75, 1, 1.25, 1.5, 2];
 const PAUSE_FACTORS = [0, 0.5, 1, 2];
 
 export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const { prefs } = useQuranState();
   const meta = findSurah(surahNumber);
+  const surahLabel = meta ? surahName(meta, i18n.language) : '';
 
   const [reciterPickerVisible, setReciterPickerVisible] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [dlProgress, setDlProgress] = useState({ done: 0, total: 0 });
   const dlHandle = useRef<AudioDownloadHandle | null>(null);
+
+  /**
+   * Rough download size for this surah, stated before the tap.
+   *
+   * EveryAyah files are per-ayah MP3s at the reciter's bitrate; ~9 seconds
+   * is a fair average ayah. This is deliberately an estimate — what matters
+   * is whether the answer is "2 MB" or "40 MB" on a cellular connection,
+   * and the row previously withheld even that.
+   */
+  const estimatedSize = useMemo(() => {
+    const kbps = Number(/(\d+)kbps/.exec(findReciter(prefs.reciterId).folder)?.[1] ?? 128);
+    const mb = ((meta?.ayahCount ?? 0) * 9 * kbps) / 8 / 1024;
+    return mb >= 10 ? `${Math.round(mb)} MB` : `${mb.toFixed(1)} MB`;
+  }, [meta?.ayahCount, prefs.reciterId]);
 
   const [fromText, setFromText] = useState('1');
   const [toText, setToText] = useState(String(meta?.ayahCount ?? 1));
@@ -84,26 +101,15 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
   ) => (
     <View style={styles.row}>
       <Text style={[styles.rowLabel, { color: palette.text }]}>{label}</Text>
-      <View style={styles.stepper}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${label} −`}
-          hitSlop={8}
-          onPress={() => onChange(Math.max(min, value - 1))}
-          style={[styles.stepBtn, { borderColor: palette.border }]}>
-          <Text style={[styles.stepGlyph, { color: palette.accentSolid }]}>−</Text>
-        </Pressable>
-        <Text
-          style={[styles.stepValue, { color: palette.text }]}>{`${value}×`}</Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${label} +`}
-          hitSlop={8}
-          onPress={() => onChange(Math.min(max, value + 1))}
-          style={[styles.stepBtn, { borderColor: palette.border }]}>
-          <Text style={[styles.stepGlyph, { color: palette.accentSolid }]}>+</Text>
-        </Pressable>
-      </View>
+      <Stepper
+        value={`${value}×`}
+        onDecrement={() => onChange(Math.max(min, value - 1))}
+        onIncrement={() => onChange(Math.min(max, value + 1))}
+        decrementLabel={`${label} −`}
+        incrementLabel={`${label} +`}
+        atMin={value <= min}
+        atMax={value >= max}
+      />
     </View>
   );
 
@@ -114,42 +120,21 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
     format: (v: T) => string,
   ) => (
     <View style={styles.chips}>
-      {values.map(v => {
-        const isSel = v === selected;
-        return (
-          <Pressable
-            key={String(v)}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: isSel }}
-            onPress={() => onSelect(v)}
-            style={[
-              styles.chip,
-              {
-                backgroundColor: isSel ? palette.accentBg : 'transparent',
-                borderColor: isSel ? palette.accentSolid : palette.border,
-              },
-            ]}>
-            <Text
-              style={{
-                color: isSel ? palette.accentSolid : palette.muted,
-                fontWeight: '600',
-                fontSize: 13,
-                fontVariant: ['tabular-nums'],
-              }}>
-              {format(v)}
-            </Text>
-          </Pressable>
-        );
-      })}
+      {values.map(v => (
+        <Chip
+          key={String(v)}
+          label={format(v)}
+          selected={v === selected}
+          onPress={() => onSelect(v)}
+        />
+      ))}
     </View>
   );
 
   return (
     <View>
       {/* Reciter — compact row; tap opens the searchable picker. */}
-      <Text style={[styles.section, { color: palette.muted }]}>
-        {t('quran.reciter', 'Reciter')}
-      </Text>
+      <SectionHead label={t('quran.reciter', 'Reciter')} first />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('quran.chooseReciter', 'Choose reciter')}
@@ -173,47 +158,43 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
         </Text>
       </Pressable>
 
-      {/* Offline download for this surah */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('quran.downloadSurahAudio', {
-          defaultValue: 'Download audio for {{surah}}',
-          surah: meta?.romanized ?? '',
-        })}
-        disabled={downloaded || downloading}
-        onPress={startDownload}
-        style={[styles.dlRow, { borderColor: palette.border }]}>
-        <Text
-          style={{
-            color: downloaded ? palette.muted : palette.accentSolid,
-            fontWeight: '600',
-            fontSize: 13,
-          }}>
-          {downloaded
-            ? t('quran.surahAudioDownloaded', 'Audio downloaded for offline use')
-            : downloading
-              ? t('quran.downloadingAudio', {
-                  defaultValue: 'Downloading… {{done}}/{{total}}',
-                  done: dlProgress.done,
-                  total: dlProgress.total,
-                })
-              : t('quran.downloadSurahAudioShort', 'Download this surah for offline listening')}
-        </Text>
-      </Pressable>
+      {/* Offline download for this surah. The size is stated up front: the
+          decision to spend 12 MB of cellular data depends on the number the
+          row used to withhold. */}
+      <View style={styles.dlWrap}>
+        <RowAction
+          label={
+            downloaded
+              ? t('quran.surahAudioDownloaded', 'Audio downloaded for offline use')
+              : downloading
+                ? t('quran.downloadingAudio', {
+                    defaultValue: 'Downloading… {{done}}/{{total}}',
+                    done: dlProgress.done,
+                    total: dlProgress.total,
+                  })
+                : t('quran.downloadSurahAudioSized', {
+                    defaultValue: 'Download this surah · {{size}}',
+                    size: estimatedSize,
+                  })
+          }
+          onPress={startDownload}
+          disabled={downloaded || downloading}
+          accessibilityLabel={t('quran.downloadSurahAudio', {
+            defaultValue: 'Download audio for {{surah}}',
+            surah: surahLabel,
+          })}
+        />
+      </View>
 
       {/* Speed */}
-      <Text style={[styles.section, { color: palette.muted }]}>
-        {t('quran.speed', 'Speed')}
-      </Text>
+      <SectionHead label={t('quran.speed', 'Speed')} />
       {chipRow(RATES, prefs.playbackRate, v => {
         setQuranPrefs({ playbackRate: v });
         void setPlaybackRate(v);
       }, v => `${v}×`)}
 
       {/* Memorization */}
-      <Text style={[styles.section, { color: palette.muted }]}>
-        {t('quran.memorization', 'Memorization')}
-      </Text>
+      <SectionHead label={t('quran.memorization', 'Memorization')} />
       {stepper(
         t('quran.repeatEachAyah', 'Repeat each ayah'),
         prefs.repeat.eachAyah,
@@ -252,12 +233,12 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
       )}
 
       {/* Range player */}
-      <Text style={[styles.section, { color: palette.muted }]}>
-        {t('quran.playRangeTitle', {
+      <SectionHead
+        label={t('quran.playRangeTitle', {
           defaultValue: 'Play a range of {{surah}}',
-          surah: meta?.romanized ?? '',
+          surah: surahLabel,
         })}
-      </Text>
+      />
       <View style={styles.rangeRow}>
         <TextInput
           value={fromText}
@@ -276,24 +257,23 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
           accessibilityLabel={t('quran.toAyah', 'To ayah')}
           style={[styles.rangeInput, { color: palette.text, borderColor: palette.border }]}
         />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('quran.playRange', 'Play range')}
-          onPress={() => {
-            const max = meta?.ayahCount ?? 1;
-            const from = Math.max(1, Math.min(max, Number(fromText) || 1));
-            const to = Math.max(from, Math.min(max, Number(toText) || max));
-            onStartPlayback?.();
-            void playRange(
-              { surah: surahNumber, ayah: from },
-              { surah: surahNumber, ayah: to },
-            );
-          }}
-          style={[styles.playRangeBtn, { backgroundColor: palette.accentSolid }]}>
-          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
-            {t('quran.playRange', 'Play range')}
-          </Text>
-        </Pressable>
+        <View style={styles.playRangeWrap}>
+          <RowAction
+            label={t('quran.playRange', 'Play range')}
+            emphasized
+            glyph="▶"
+            onPress={() => {
+              const max = meta?.ayahCount ?? 1;
+              const from = Math.max(1, Math.min(max, Number(fromText) || 1));
+              const to = Math.max(from, Math.min(max, Number(toText) || max));
+              onStartPlayback?.();
+              void playRange(
+                { surah: surahNumber, ayah: from },
+                { surah: surahNumber, ayah: to },
+              );
+            }}
+          />
+        </View>
       </View>
 
       <ReciterPickerSheet
@@ -355,6 +335,8 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
+  dlWrap: { marginTop: 8 },
+  playRangeWrap: { marginStart: 'auto' },
   chip: {
     paddingHorizontal: 12,
     paddingVertical: 7,

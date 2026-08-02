@@ -158,7 +158,9 @@ export default function MushafPhoneLandscape({
                 selected={selected?.page === page ? selected : null}
                 playing={playing}
                 prefetchRadius={page === currentPage ? 2 : 0}
-                onWordPress={onToggleFullscreen}
+                // Single tap anywhere on the page → fullscreen toggle;
+                // long press on an ayah → the ayah panel (tafsir, audio).
+                onWordPress={() => onToggleFullscreen()}
                 onWordLongPress={onAyahLongPress}
               />
             </Pressable>
@@ -208,7 +210,11 @@ export default function MushafPhoneLandscape({
       maxToRenderPerBatch={2}
       initialNumToRender={1}
       removeClippedSubviews
-      style={{ backgroundColor: pageBg }}
+      // `direction: 'ltr'` — the app tree is RTL in Arabic, and a horizontal
+      // list under RTL measures its offset from the right, which parks this
+      // one past the end of 604 pages and shows a blank page. Right-to-left
+      // page turning comes from `inverted`, not from the UI language.
+      style={{ backgroundColor: pageBg, direction: 'ltr' }}
     />
   );
 }

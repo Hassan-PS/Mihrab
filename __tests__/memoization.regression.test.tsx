@@ -23,7 +23,8 @@ import {
   HeaderToolbarIcons,
 } from '../src/components/HeaderToolbarIcons';
 import { PrayerRow } from '../src/screens/home/PrayerRow';
-import { NextPrayerCard } from '../src/screens/home/NextPrayerCard';
+import { TodayCard } from '../src/screens/home/TodayCard';
+import { DayStrip } from '../src/screens/home/DayStrip';
 
 // Track how many times a renderspy notes a render. Used by parent harnesses.
 function makeRenderSpy() {
@@ -108,16 +109,22 @@ describe('HeaderToolbarIcons memoization', () => {
 });
 
 describe('home leaf components are memo-wrapped', () => {
-  // These are spot-checks: if any of these stops being memo'd, screens with
-  // many of them (the day carousel renders 6 PrayerRows × 7 days) start
-  // re-rendering needlessly when nothing about an individual row changed.
+  // These are spot-checks: if any of these stops being memo'd, Home starts
+  // re-rendering eight prayer rows and a seven-chip strip every time the
+  // 30-second countdown ticks — the containment the split was built for.
   test('PrayerRow is memo-wrapped', () => {
     expect((PrayerRow as unknown as { $$typeof: symbol }).$$typeof).toBeDefined();
   });
 
-  test('NextPrayerCard is memo-wrapped', () => {
+  test('TodayCard is memo-wrapped', () => {
     expect(
-      (NextPrayerCard as unknown as { $$typeof: symbol }).$$typeof,
+      (TodayCard as unknown as { $$typeof: symbol }).$$typeof,
+    ).toBeDefined();
+  });
+
+  test('DayStrip is memo-wrapped', () => {
+    expect(
+      (DayStrip as unknown as { $$typeof: symbol }).$$typeof,
     ).toBeDefined();
   });
 });

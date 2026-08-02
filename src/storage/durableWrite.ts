@@ -16,7 +16,7 @@
  *
  * Storage keys to protect (and the screens that own them):
  *   • `prayerapp.location.v1`  — secureStorage.ts
- *   • `prayerapp.journal.v1`   — JournalScreen.tsx
+ *   • `prayerapp.journal.v1`   — LogScreen.tsx
  *   • `prayerapp.fasting.v1`   — FastingScreen.tsx
  */
 

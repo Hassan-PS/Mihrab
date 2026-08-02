@@ -1,15 +1,23 @@
+/**
+ * The six tabs (design review 2e). They are the app; the stack below is
+ * everything pushed on top of them.
+ */
+export type MainTabParamList = {
+  TodayTab: undefined;
+  QuranTab: undefined;
+  TasbihTab: undefined;
+  DuasTab: undefined;
+  LogTab: undefined;
+  /** `highlight` flashes a section after a deep link from Home. */
+  SettingsTab: { highlight?: 'savedLocations' } | undefined;
+};
+
 export type RootStackParamList = {
+  /** The tab navigator. */
   Home: undefined;
-  // `highlight` lets a caller (the home location selector's "Add new
-  // location" action) deep-link into Settings and briefly flash a section
-  // so the user knows where to act.
-  Settings: { highlight?: 'savedLocations' } | undefined;
   MonthTimes: undefined;
   ShareMonth: { year: number; month: number };
   Compass: undefined;
-  Tasbih: undefined;
-  Duas: undefined;
-  Quran: undefined;
   QuranSurah: {
     surahNumber: number;
     /** Mushaf mode: open at this exact page (Juz/Page/Bookmark deep links). */
@@ -19,8 +27,6 @@ export type RootStackParamList = {
   };
   /** Manage downloads: mushaf pages, recitation audio, tafsir cache. */
   QuranDownloads: undefined;
-  Mosques: undefined;
-  Journal: undefined;
   Onboarding: undefined;
   Backup: undefined;
   Fasting: undefined;

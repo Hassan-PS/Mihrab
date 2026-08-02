@@ -25,6 +25,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { desktopSize } from '../responsive/desktop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -40,6 +41,7 @@ import {
 import { MushafReader } from '../quran/MushafReader';
 import { useOverlayDismissGuard } from '../quran/mushafReaderCore';
 import { findPageForAyah } from '../quran/pages';
+import { surahName } from '../quran/surahName';
 import {
   findBookmark,
   hydrateQuranState,
@@ -252,21 +254,44 @@ export function QuranSurahScreen() {
     if (isFullscreen) {
       navigation.setOptions({
         headerShown: false,
-        orientation: 'all',
+        // 'default', not 'all'. react-native-screens maps 'all' to Android's
+        // SCREEN_ORIENTATION_FULL_SENSOR, which includes UPSIDE-DOWN
+        // portrait — and the pager renders nothing at 180° (verified on the
+        // emulator: header intact, not a single list cell laid out, and it
+        // does not recover on rotating back). 'default' leaves the activity
+        // UNSPECIFIED, so the platform's own policy applies: landscape yes,
+        // upside-down no. On iOS 'default' means the Info.plist list, which
+        // is portrait + both landscapes on iPhone.
+        orientation: 'default',
         contentStyle,
       });
       return;
     }
     navigation.setOptions({
       headerShown: true,
-      orientation: 'portrait',
+      // The mushaf rotates with the device whether or not the chrome is
+      // hidden — the phone reader has a landscape layout of its own (a 1.6×
+      // reading zoom in a scrolling column), and having to enter fullscreen
+      // first to use it was not something anyone would guess. Everything
+      // else in the app stays portrait.
+      orientation: isMushaf ? 'default' : 'portrait',
       contentStyle,
       ...(pageChrome ?? {}),
       // Mushaf mode: the reader's page-derived surah wins once it has
       // reported one. Translation mode always shows the route's surah.
-      title: (isMushaf && readerTitle) || surah.romanized,
+      // Either way the NAME follows the app language — an Arabic UI over a
+      // page of Arabic script should not be titled "Al-Fatihah".
+      title: (isMushaf && readerTitle) || surahName(surah),
       headerRight: () => (
-        <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
+        // Wider gaps on the Mac: these are pointer targets on a desktop,
+        // not thumb targets on a tablet, and Catalyst has already scaled
+        // the whole row down (responsive/desktop.ts).
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: desktopSize(14),
+            alignItems: 'center',
+          }}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('quran.playbackSettings', 'Recitation')}
@@ -289,7 +314,7 @@ export function QuranSurahScreen() {
             <Text
               style={{
                 color: palette.accentSolid,
-                fontSize: 15,
+                fontSize: desktopSize(15),
                 fontWeight: '700',
               }}>
               {`♪ ${t('quran.audioButton', 'Audio')}`}
@@ -308,7 +333,7 @@ export function QuranSurahScreen() {
             <Text
               style={{
                 color: palette.accentSolid,
-                fontSize: 15,
+                fontSize: desktopSize(15),
                 fontWeight: '700',
               }}>
               {isMushaf
@@ -326,7 +351,7 @@ export function QuranSurahScreen() {
               <Text
                 style={{
                   color: palette.accentSolid,
-                  fontSize: 18,
+                  fontSize: desktopSize(18),
                   fontWeight: '700',
                 }}>
                 ⛶

@@ -1,4 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
+import { layoutDirectionFor } from './i18n/layoutDirection';
 import { useEffect, useMemo, useRef } from 'react';
 import {
   Appearance,
@@ -75,6 +76,7 @@ export function AppNavigationRoot() {
         enabled: settings.fastingRemindersEnabled,
         hour: settings.fastingReminderHour,
       });
+
     };
     sync(true);
     const sub = AppState.addEventListener('change', state => {
@@ -231,7 +233,10 @@ export function AppNavigationRoot() {
     return () => sub.remove();
   }, [isDark]);
 
-  const layoutDir = settings.language === 'ar' ? 'rtl' : 'ltr';
+  // Every right-to-left language we ship, not just Arabic — Urdu was
+  // getting an LTR layout with RTL text in it. One rule, one place:
+  // see `layoutDirection.ts` for why that matters.
+  const layoutDir = layoutDirectionFor(settings.language);
 
   return (
     <View style={{ flex: 1, direction: layoutDir }}>

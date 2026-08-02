@@ -18,6 +18,7 @@ import {
   getNextRamadanStart,
   getUpcomingFastingEvents,
 } from '../hijri/upcomingEvents';
+import { notifyPracticeChanged } from '../practice/practiceStore';
 import {
   coerceFastEntries,
   computeFastStats,
@@ -36,7 +37,7 @@ import {
  *   • iOS — Keychain Services with kSecClassGenericPassword.
  *   • Android — EncryptedSharedPreferences (Android Keystore-backed).
  *
- * Mirrors the pattern from JournalScreen so both PII collections share
+ * Mirrors the pattern from LogScreen so both PII collections share
  * the same trust boundary.
  */
 const FASTING_KEY = 'prayerapp.fasting.v1';
@@ -130,12 +131,15 @@ export function FastingScreen() {
       // this effect fires.
       return;
     }
-    durableEncryptedSet(FASTING_KEY, JSON.stringify(entries)).catch(e =>
+    durableEncryptedSet(FASTING_KEY, JSON.stringify(entries))
+      // Home's Today summary reads the same store.
+      .then(notifyPracticeChanged)
+      .catch(e =>
       // Retry-exhausted failure. The user's optimistic update remains in
       // memory; next change will trigger another retry round. This logs
       // for diagnostics rather than ever silently dropping.
-      console.warn('FastingScreen: persist failed after retries', e),
-    );
+        console.warn('FastingScreen: persist failed after retries', e),
+      );
   }, [entries, hydrated]);
 
   const now = useMemo(() => new Date(), []);

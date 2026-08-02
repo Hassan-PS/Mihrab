@@ -51,6 +51,14 @@ import { playFromAyah, playRange } from '../audio/playback';
 import { RecitationControls } from '../audio/RecitationControls';
 import { ShareAyahModal } from './ShareAyahModal';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
+import { RowAction, SectionHead } from '../../components/controls';
+import { ActionSheetIOS, Alert, Platform } from 'react-native';
+
+/** Clamp heights, and the text lengths past which a toggle is worth showing. */
+const TRANSLATION_CLAMP_LINES = 5;
+const TAFSIR_CLAMP_LINES = 8;
+const LONG_TRANSLATION = 260;
+const LONG_TAFSIR = 420;
 
 type Props = {
   visible: boolean;
@@ -95,6 +103,19 @@ export function AyahActionSheet({
     setQuranPrefs({ tafsirEditionId: ed.id });
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [tafsirLoading, setTafsirLoading] = useState(false);
+  /**
+   * "Show more" state for the two long-form texts in the sheet (v2.8.4).
+   *
+   * A tafsir entry runs to several hundred words. Rendered whole it pushed
+   * the recitation controls — reciter, speed, the range player — off the
+   * bottom of the sheet, so the panel read as a tafsir reader with the audio
+   * section buried. Both texts are clamped to a few lines with an expand
+   * toggle, and BOTH toggles reset on every open: an expansion is a decision
+   * about the ayah in front of you, not a mode to be inherited by the next
+   * one.
+   */
+  const [tafsirExpanded, setTafsirExpanded] = useState(false);
+  const [translationExpanded, setTranslationExpanded] = useState(false);
 
   const scrollRef = useRef<ScrollView>(null);
   const audioSectionY = useRef(0);
@@ -107,6 +128,8 @@ export function AyahActionSheet({
     // user chose opens pre-expanded — the sheet leads with their preference.
     setTafsirOpen(state.prefs.companionMode === 'tafsir');
     setTafsirText(null);
+    setTafsirExpanded(false);
+    setTranslationExpanded(false);
     void loadSurah(surah).then(loaded => {
       if (cancelled || !loaded) return;
       setArabic(loaded.arabic[ayah - 1] ?? '');
@@ -141,6 +164,7 @@ export function AyahActionSheet({
     let cancelled = false;
     setTafsirLoading(true);
     setTafsirText(null);
+    setTafsirExpanded(false);
     void loadTafsir(tafsirEdition.id, surah, ayah).then(text => {
       if (cancelled) return;
       setTafsirLoading(false);
@@ -160,6 +184,38 @@ export function AyahActionSheet({
     plan?.position?.surah === surah && plan?.position?.ayah === ayah;
   const reference = `${meta?.romanized ?? ''} ${surah}:${ayah}`;
 
+  /**
+   * Share is ONE action with two formats, not two actions.
+   *
+   * "Share" and "Share as image" sat as equal siblings, so a row of four
+   * read as four choices when it was really three plus a format. The
+   * format question is asked only once the user has said they want to
+   * share — on iOS through the system action sheet, on Android through
+   * the same two-button alert pattern the app already uses.
+   */
+  const share = () => {
+    const asText = t('quran.shareAsText', 'Share the text');
+    const asImage = t('quran.shareAsImage', 'Share as image');
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: [asText, asImage, t('common.cancel', 'Cancel')],
+          cancelButtonIndex: 2,
+        },
+        index => {
+          if (index === 0) void shareText();
+          if (index === 1) setShareCardVisible(true);
+        },
+      );
+      return;
+    }
+    Alert.alert(t('common.share', 'Share'), undefined, [
+      { text: asText, onPress: () => void shareText() },
+      { text: asImage, onPress: () => setShareCardVisible(true) },
+      { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+    ]);
+  };
+
   const shareText = async () => {
     const body = `${arabic}\n\n${translation}\n\n— ${reference}`;
     try {
@@ -169,29 +225,17 @@ export function AyahActionSheet({
     }
   };
 
-  const actionBtn = (
-    label: string,
-    onPress: () => void,
-    emphasized = false,
-  ) => (
+  /** "Show more / Show less" link under a clamped block. */
+  const moreToggle = (expanded: boolean, onToggle: () => void) => (
     <Pressable
-      key={label}
       accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={[
-        styles.action,
-        {
-          backgroundColor: emphasized ? palette.accentBg : 'transparent',
-          borderColor: palette.border,
-        },
-      ]}>
-      <Text
-        style={[
-          styles.actionLabel,
-          { color: emphasized ? palette.accentSolid : palette.text },
-        ]}>
-        {label}
+      accessibilityState={{ expanded }}
+      hitSlop={6}
+      onPress={onToggle}>
+      <Text style={[styles.moreLink, { color: palette.accentSolid }]}>
+        {expanded
+          ? t('quran.showLess', 'Show less')
+          : t('quran.showMore', 'Show more')}
       </Text>
     </Pressable>
   );
@@ -238,9 +282,20 @@ export function AyahActionSheet({
             </Text>
           ) : null}
           {translation ? (
-            <Text style={[styles.translation, { color: palette.muted }]}>
-              {translation}
-            </Text>
+            <>
+              <Text
+                numberOfLines={
+                  translationExpanded ? undefined : TRANSLATION_CLAMP_LINES
+                }
+                style={[styles.translation, { color: palette.muted }]}>
+                {translation}
+              </Text>
+              {translation.length > LONG_TRANSLATION
+                ? moreToggle(translationExpanded, () =>
+                    setTranslationExpanded(v => !v),
+                  )
+                : null}
+            </>
           ) : null}
 
           {/* Tafsir (v2.7.28) */}
@@ -297,14 +352,24 @@ export function AyahActionSheet({
                   {t('quran.loading', 'Loading…')}
                 </Text>
               ) : tafsirText ? (
-                <Text
-                  style={[
-                    styles.tafsirText,
-                    { color: palette.text },
-                    tafsirEdition.rtl && styles.tafsirRtl,
-                  ]}>
-                  {tafsirText}
-                </Text>
+                <>
+                  <Text
+                    numberOfLines={
+                      tafsirExpanded ? undefined : TAFSIR_CLAMP_LINES
+                    }
+                    style={[
+                      styles.tafsirText,
+                      { color: palette.text },
+                      tafsirEdition.rtl && styles.tafsirRtl,
+                    ]}>
+                    {tafsirText}
+                  </Text>
+                  {tafsirText.length > LONG_TAFSIR
+                    ? moreToggle(tafsirExpanded, () =>
+                        setTafsirExpanded(v => !v),
+                      )
+                    : null}
+                </>
               ) : (
                 <Text style={[styles.tafsirMeta, { color: palette.muted }]}>
                   {t(
@@ -382,26 +447,42 @@ export function AyahActionSheet({
           ) : null}
 
           <View style={styles.actionsRow}>
-            {actionBtn(
-              t('quran.playFromHere', 'Play from here'),
-              () => {
+            {/* Read → act → organise → tune. Play is the single emerald
+                button; repeat sits beside it; share is one action that
+                asks for a format afterwards. */}
+            <View style={styles.actionsPrimary}>
+              <RowAction
+                label={t('quran.playFromHere', 'Play from here')}
+                glyph="▶"
+                emphasized
+                onPress={() => {
+                  onClose();
+                  void playFromAyah(surah, ayah);
+                }}
+              />
+            </View>
+            <RowAction
+              label={t('quran.repeatAyah', 'Repeat this ayah')}
+              glyph="↻"
+              onPress={() => {
                 onClose();
-                void playFromAyah(surah, ayah);
-              },
-              true,
-            )}
-            {actionBtn(t('quran.repeatAyah', 'Repeat this ayah'), () => {
-              onClose();
-              void playRange({ surah, ayah }, { surah, ayah });
-            })}
-            {actionBtn(t('common.share', 'Share'), () => {
-              void shareText();
-            })}
-            {actionBtn(t('quran.shareAsImage', 'Share as image'), () => {
-              setShareCardVisible(true);
-            })}
+                void playRange({ surah, ayah }, { surah, ayah });
+              }}
+            />
+            <RowAction
+              label={t('common.share', 'Share')}
+              glyph="⇪"
+              accessibilityLabel={t(
+                'quran.shareChoiceA11y',
+                'Share — opens a choice of text or image card',
+              )}
+              onPress={share}
+            />
           </View>
 
+          {/* Recitation is a different job from marking an ayah, so it
+              gets its own rule and heading (2f). */}
+          <SectionHead label={t('quran.recitation', 'Recitation')} />
           {/* Recitation controls — the header button lands here. */}
           <View
             onLayout={e => {
@@ -482,6 +563,7 @@ const styles = StyleSheet.create({
   tafsirMeta: { fontSize: 13, fontStyle: 'italic' },
   tafsirText: { fontSize: 14, lineHeight: 22 },
   tafsirRtl: { textAlign: 'right', writingDirection: 'rtl' },
+  moreLink: { fontSize: 12, fontWeight: '700', marginTop: 4 },
   bookmarkRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -507,17 +589,13 @@ const styles = StyleSheet.create({
   },
   khatmahDot: { width: 12, height: 12, borderRadius: 6 },
   khatmahPinLabel: { fontSize: 13, fontWeight: '600', flex: 1 },
+  // The emerald button takes the row's full width; repeat and share share
+  // the line below it, so the ranking is visible before it is read.
+  actionsPrimary: { width: '100%' },
   actionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
     marginTop: 14,
   },
-  action: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  actionLabel: { fontSize: 14, fontWeight: '600' },
 });

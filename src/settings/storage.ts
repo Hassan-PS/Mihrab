@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { resolveDeviceLanguage } from '../i18n/deviceLanguage';
 import { coerceNotificationSoundId } from '../notifications/notificationSounds';
 import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
 import {
@@ -34,6 +35,18 @@ function coerceLanguage(value: unknown): AppLanguage {
     return value as AppLanguage;
   }
   return DEFAULT_SETTINGS.language;
+}
+
+/**
+ * The language a FIRST run should open in (v2.8.4).
+ *
+ * Only ever called when the stored blob carries no `language` key at all —
+ * i.e. this install has never had one. Once a value is written, that value
+ * is authoritative and the device is never consulted again, so changing the
+ * phone's language does not silently move an app the user has already set.
+ */
+function firstRunLanguage(): AppLanguage {
+  return resolveDeviceLanguage(LANGUAGES, DEFAULT_SETTINGS.language);
 }
 
 function coerceWidgetHighlightId(value: unknown): WidgetHighlightId {
@@ -93,7 +106,8 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (!plaintextRaw) {
     // First-ever launch (no plaintext blob). Encrypted store may still
     // hold coordinates from a partially-completed prior session — merge.
-    return { ...DEFAULT_SETTINGS, ...secure };
+    // The UI language follows the device here, not the 'en' default.
+    return { ...DEFAULT_SETTINGS, language: firstRunLanguage(), ...secure };
   }
 
   let parsed: Partial<PrayerAppSettings> & Record<string, unknown>;
@@ -101,7 +115,7 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     parsed = JSON.parse(plaintextRaw) as Partial<PrayerAppSettings> &
       Record<string, unknown>;
   } catch {
-    return { ...DEFAULT_SETTINGS, ...secure };
+    return { ...DEFAULT_SETTINGS, language: firstRunLanguage(), ...secure };
   }
 
   // Migration: if the plaintext blob still has coordinate fields, this is a
@@ -130,7 +144,8 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     ...parsed,
     ...secure,
   };
-  merged.language = coerceLanguage(parsed.language);
+  merged.language =
+    'language' in parsed ? coerceLanguage(parsed.language) : firstRunLanguage();
   if (!('locationOnboardingComplete' in parsed)) {
     merged.locationOnboardingComplete = true;
   }

@@ -46,6 +46,7 @@ import {
   useSettledMeasure,
 } from './mushafReaderCore';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
+import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
 
 /** Breathing room either side of the page inside its column. */
@@ -232,7 +233,13 @@ export function MushafPhoneReader(props: MushafReaderProps) {
                 }
                 // Only the page being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
-                onWordPress={onToggleFullscreen}
+                // A SINGLE TAP anywhere on the page — word, margin or the
+                // gap between lines — toggles fullscreen. Reading is the
+                // common act; opening a panel is the rare one, and a reader
+                // who taps to clear the chrome should not be interrupted by
+                // a sheet because the tap landed on a word. The ayah panel
+                // (tafsir, "play from here") is a LONG PRESS on the ayah.
+                onWordPress={() => onToggleFullscreen()}
                 onWordLongPress={core.openSelection}
               />
             </Pressable>
@@ -306,6 +313,19 @@ export function MushafPhoneReader(props: MushafReaderProps) {
         />
       </View>
 
+      {/* The rail was iPad/Mac-only (design review 2d) on the theory that a
+          phone has the swipe. But swiping is a page at a time: getting from
+          juz 1 to juz 20 is three hundred swipes, and the reader who wants
+          Yaseen has no way to ask for it. The rail costs 32pt and answers
+          both — and it retires with the rest of the chrome in fullscreen. */}
+      {!isFullscreen ? (
+        <MushafPageScrubber
+          page={currentPage}
+          onSelectPage={core.jumpToPage}
+          onOpenJump={core.openJump}
+        />
+      ) : null}
+
       {core.selected ? (
         <AyahActionSheet
           visible={core.sheetVisible}
@@ -330,7 +350,25 @@ export function MushafPhoneReader(props: MushafReaderProps) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  listWrap: { flex: 1 },
+  /**
+   * The pager is laid out LTR even when the app is (v2.8.4).
+   *
+   * `AppNavigationRoot` puts `direction: 'rtl'` on the whole tree for Arabic.
+   * A horizontal ScrollView under RTL measures its content offset from the
+   * RIGHT — so this list, whose `getItemLayout`, `initialScrollIndex` and
+   * momentum-end index are all plain left-to-right multiples of the page
+   * width, opened parked at x = contentSize (604 pages past the end). The
+   * page, the juz label and the page medallion were all laid out correctly
+   * and painted where nobody could see them: the mushaf was simply BLANK in
+   * Arabic, and no amount of swiping brought it back.
+   *
+   * Right-to-left page turning is already handled — by `inverted`, which is
+   * the mushaf's own reading order and has nothing to do with the UI
+   * language. Two flips are one too many. The direction is pinned on the
+   * pager only, so the ayah sheet and the mini player below still lay out
+   * in the app's own direction.
+   */
+  listWrap: { flex: 1, direction: 'ltr' },
   item: { height: '100%' },
   column: { flex: 1 },
   columnContent: { paddingBottom: 24 },

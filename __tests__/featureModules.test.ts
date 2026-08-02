@@ -1,6 +1,6 @@
 /**
  * Pure-logic tests for tasks #19–#28 — covers tasbih, hijri events,
- * Ramadan countdown, journal stats, dua/quran indexes, mosque parsing,
+ * Ramadan countdown, journal stats, dua/quran indexes,
  * prayer offsets, and notification action dispatch.
  *
  * These are the algorithmic guarantees each MVP makes — UI flows are tested
@@ -24,11 +24,6 @@ import {
 } from '../src/journal/journal';
 import { duasByCategory, findDua, DUAS } from '../src/duas/duas';
 import { findSurah, getSurahAyahs, SURAHS } from '../src/quran/quran';
-import {
-  buildOverpassQuery,
-  haversineMeters,
-  parseMosqueResponse,
-} from '../src/mosques/overpass';
 import {
   applyOffsets,
   clampOffset,
@@ -270,52 +265,6 @@ describe('quran', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────
-// #28 Mosques (Overpass)
-// ─────────────────────────────────────────────────────────────────────────
-describe('mosques (overpass)', () => {
-  test('haversineMeters returns ~1.1 km for 0.01° lat shift at equator', () => {
-    const m = haversineMeters(0, 0, 0.01, 0);
-    expect(m).toBeGreaterThan(1100);
-    expect(m).toBeLessThan(1120);
-  });
-
-  test('buildOverpassQuery escapes radius and includes religion=muslim', () => {
-    const q = buildOverpassQuery(59.33, 18.07, 5000);
-    expect(q).toContain('religion');
-    expect(q).toContain('muslim');
-    expect(q).toContain('around:5000');
-  });
-
-  test('buildOverpassQuery clamps absurd radius', () => {
-    const q = buildOverpassQuery(0, 0, 9_999_999);
-    expect(q).toContain('around:30000');
-  });
-
-  test('parseMosqueResponse picks lat/lon from node OR center, sorts by distance', () => {
-    const mosques = parseMosqueResponse(
-      {
-        elements: [
-          { type: 'node', id: 1, lat: 59.33, lon: 18.07, tags: { name: 'Far' } },
-          { type: 'way', id: 2, center: { lat: 59.331, lon: 18.071 }, tags: { name: 'Near' } },
-        ],
-      },
-      59.33,
-      18.07,
-    );
-    expect(mosques).toHaveLength(2);
-    expect(mosques[0].name).toBe('Far'); // distance 0
-    expect(mosques[1].name).toBe('Near');
-  });
-
-  test('parseMosqueResponse drops elements without coordinates', () => {
-    const mosques = parseMosqueResponse(
-      { elements: [{ type: 'relation', id: 1, tags: { name: 'NoCoord' } }] },
-      0,
-      0,
-    );
-    expect(mosques).toHaveLength(0);
-  });
-});
 
 // ─────────────────────────────────────────────────────────────────────────
 // #22 Prayer offsets

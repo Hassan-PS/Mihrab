@@ -12,10 +12,10 @@
     "tasbih": "Tasbih",
     "duas": "Invocations",
     "quran": "Coran",
-    "mosques": "Mosquées",
     "journal": "Journal de prière",
     "backup": "Sauvegarde",
-    "fasting": "Jeûne"
+    "fasting": "Jeûne",
+    "today": "Aujourd'hui"
   },
   "a11y": {
     "openSettings": "Ouvrir les paramètres",
@@ -60,7 +60,27 @@
     "backToToday": "Revenir à aujourd'hui",
     "updatedAt": "Mis à jour {{when}}",
     "daysStored": "{{count}} jours enregistrés",
-    "quranShortcut": "Ouvrir le Coran"
+    "quranShortcut": "Ouvrir le Coran",
+    "dayStrip": "Choisir un jour",
+    "nextPrayerIn": "{{prayer}} dans",
+    "firstPrayer": "Première prière {{prayer}} · {{time}}",
+    "todaySummary": "Aujourd'hui",
+    "prayersLogged": "{{count}} prières sur {{total}} enregistrées",
+    "noFastToday": "Aucun jeûne enregistré",
+    "dhikrSets": "{{count}} séries de dhikr terminées",
+    "fastKept": {
+      "ramadan": "Jeûne du Ramadan observé",
+      "voluntary": "Jeûne surérogatoire observé",
+      "qadha": "Jeûne de rattrapage observé"
+    },
+    "readItIn": "Lire dans {{surah}}",
+    "continueAt": "Continuer · {{surah}} {{ref}}",
+    "khatmahDay": "Khatma jour {{day}} sur {{total}}",
+    "khatmahDaysToGo": "{{count}} jours restants",
+    "pagesLeftToday": "{{count}} pages restantes aujourd'hui",
+    "pageNumber": "page {{page}}",
+    "readingDone": "Lecture du jour terminée",
+    "readOn": "Continuer"
   },
   "errors": {
     "locationNeededTitle": "Emplacement nécessaire",
@@ -234,7 +254,21 @@
     "resetApp": "Réinitialiser les données de l'app",
     "resetAppHelp": "Efface tous les réglages et données. Irréversible.",
     "batteryWarning": "Les alertes peuvent être peu fiables",
-    "batteryWarningHelp": "L'optimisation de la batterie peut retarder ou couper les alertes d'adhan quand l'app est fermée. Touchez pour exclure Mihrab."
+    "batteryWarningHelp": "L'optimisation de la batterie peut retarder ou couper les alertes d'adhan quand l'app est fermée. Touchez pour exclure Mihrab.",
+    "themeRestartManualTitle": "Rouvrir l’application",
+    "themeRestartManualBody": "iOS n’autorise pas une application à se relancer. Fermez complètement Mihrab puis rouvrez-la pour appliquer le nouveau thème.",
+    "liquidGlass": "Liquid Glass",
+    "liquidGlassHelp": "Adopte les couleurs système iOS et le chrome de verre translucide. Suit clair/sombre automatiquement.",
+    "themeRestartTitle": "Redémarrage requis",
+    "themeRestartBody": "Changer les couleurs système nécessite un redémarrage pour que chaque écran adopte le thème. Redémarrer maintenant ?",
+    "themeRestartConfirm": "Redémarrer",
+    "laSecondMetricLabel": "Seconde information",
+    "resetTitle": "Réinitialiser l’application ?",
+    "resetBody": "Cela efface tous les réglages, lieux enregistrés, entrées du journal, jeûnes et l’état du tasbih, puis vous ramène à l’introduction. Irréversible.",
+    "resetConfirm": "Tout réinitialiser",
+    "prayerOffsetsCount": "{{count}} ajustées",
+    "endOfDayLog": "Rappel de fin de journée",
+    "endOfDayLogHelp": "Dix minutes après l’Isha, demande s’il faut consigner les cinq prières du jour. Y répondre le lendemain matin consigne quand même le bon jour."
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "Lieu précédent"
+    "previousLocation": "Lieu précédent",
+    "invalidCoordsTitle": "Coordonnées invalides",
+    "invalidCoordsBody": "La latitude doit être entre -90 et 90, la longitude entre -180 et 180.",
+    "pickAPlace": "Recherchez d’abord une ville ou saisissez des coordonnées.",
+    "duplicateTitle": "Déjà enregistré",
+    "duplicateBody": "Un lieu à ces coordonnées est déjà enregistré sous « {{name}} »."
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "Réinitialiser",
     "salahonprophet": "Salât sur le Prophète ﷺ",
     "prev": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "meaning": {
+      "subhanallah": "Gloire à Allah",
+      "alhamdulillah": "Toute louange est à Allah",
+      "lailaha": "Il n’y a de divinité qu’Allah",
+      "allahuakbar": "Allah est le plus grand",
+      "astaghfirullah": "Je demande pardon à Allah",
+      "salahonprophet": "Ô Allah, prie sur notre maître Muhammad"
+    },
+    "setPosition": "Série {{index}} sur {{total}}",
+    "ofTarget": "sur {{target}}",
+    "tapAnywhere": "Touchez n’importe où",
+    "upNext": "Ensuite",
+    "resetSet": "Réinitialiser la série",
+    "skip": "Passer"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "Pour se prémunir de l'égarement"
-    }
+    },
+    "tapToCount": "Toucher pour compter"
   },
   "quran": {
     "meccan": "Mecquoise",
@@ -869,7 +923,17 @@
     "companionTitle": "Sous chaque verset",
     "companionHelp": "S'applique partout où un verset s'affiche — le lecteur, le verset du jour et la notification quotidienne. Modifiable aussi depuis la page Coran.",
     "companionActive": "actif",
-    "mushafReplaceOldBody": "Une ancienne copie du mushaf ({{size}} Mo) est encore sur votre appareil, héritée d'une version précédente. Elle sera supprimée d'abord — rien de ce que vous avez enregistré n'est affecté."
+    "mushafReplaceOldBody": "Une ancienne copie du mushaf ({{size}} Mo) est encore sur votre appareil, héritée d'une version précédente. Elle sera supprimée d'abord — rien de ce que vous avez enregistré n'est affecté.",
+    "shareAsText": "Partager le texte",
+    "shareChoiceA11y": "Partager — texte ou carte image",
+    "recitation": "Récitation",
+    "downloadSurahAudioSized": "Télécharger cette sourate · {{size}}",
+    "tapToPick": "choisir",
+    "tabMarks": "Repères",
+    "searchSurahOrPage": "Rechercher une sourate ou une page",
+    "reading": "en lecture",
+    "pageScrubber": "Aller à la page",
+    "goCta": "Aller"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "Activer l'action de journalisation dans les notifications de prière",
     "notePlaceholder": "Note privée (uniquement sur cet appareil)",
     "saveNote": "Enregistrer la note",
-    "logActionTitle": "Enregistrer la prière"
+    "logActionTitle": "Enregistrer la prière",
+    "loadFailedTitle": "Impossible de charger le journal",
+    "loadFailedBody": "Vos données sont intactes sur l’appareil mais illisibles pour le moment. Rouvrez le journal.",
+    "saveFailedTitle": "Impossible d’enregistrer",
+    "saveFailedBody": "Veuillez réessayer.",
+    "noteLabel": "Note personnelle (privée, chiffrée)"
   },
   "events": {
     "islamicNewYear": "Nouvel an hijri",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "Que la paix soit sur vous, ainsi que la miséricorde d’Allah et Ses bénédictions."
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "Tous les jeûnes enregistrés",
     "noLogsYet": "Les jours que vous observerez s’afficheront ici.",
     "typeRamadan": "Ramadan",
-    "typeVoluntary": "Volontaire / Sunna"
+    "typeVoluntary": "Volontaire / Sunna",
+    "reminderChannelName": "Rappels de jeûne",
+    "reminderTitle": "Rappel de jeûne"
   },
   "methods": {
     "0": "Chiisme — Ithna Ashari",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Invocations de Hisn al-Muslim",
     "quranGeometry": "Données de position des versets (quran.com / projet Quran for Android)",
-    "recitation": "Audio de récitation (21 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)",
+    "recitation": "Audio de récitation (42 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)",
     "tafsir": "Textes de tafsir : Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "Statistiques des données activées",
     "unlockedBody": "Une carte de statistiques apparaît maintenant en bas de l'écran d'accueil. Désactivez-la à tout moment ci-dessous.",
     "serverCoverage": "Couverture serveur"
+  },
+  "log": {
+    "last13Weeks": "13 dernières semaines",
+    "legendPrayers": "0 → 5 prières",
+    "fasted": "jeûné",
+    "dayA11y": "{{date}} : {{prayers}} prières enregistrées{{fast}}",
+    "streakCaption": "série de {{count}} jours",
+    "fastsCaption": "{{count}} jeûnes",
+    "markAllOnTime": "Tout marquer à l'heure",
+    "fastingToday": "Jeûne aujourd'hui",
+    "iftarAt": "Iftar {{time}}",
+    "allUpcoming": "Tout à venir",
+    "title": "Journal"
+  },
+  "endOfDay": {
+    "title": "Consigner les prières du jour ?",
+    "body": "Marquer les cinq comme accomplies à l’heure, ou ouvrir le journal pour les saisir une à une.",
+    "action": "Tout consigner comme accompli",
+    "channelName": "Journal de fin de journée"
   }
 }

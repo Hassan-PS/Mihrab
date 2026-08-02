@@ -32,7 +32,7 @@ export type MushafTextPageSurfaceProps = {
    * `LineView`'s memo compared unequal and all fifteen lines rebuilt — on
    * every page turn and every fullscreen toggle.
    */
-  onWordPress?: (page: number) => void;
+  onWordPress?: (ref: AyahRef, page: number) => void;
   onWordLongPress?: (ref: AyahRef, page: number) => void;
   /** Prefetch radius in pages; only the visible page should pass > 0. */
   prefetchRadius?: number;
@@ -62,7 +62,7 @@ function MushafTextPageSurface({
   // which runs on every reader render and would hand a new function down each
   // time.
   const handleWordPress = React.useCallback(
-    () => onWordPress?.(page),
+    (ref: AyahRef) => onWordPress?.(ref, page),
     [onWordPress, page],
   );
   const handleWordLongPress = React.useCallback(

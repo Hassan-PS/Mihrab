@@ -12,10 +12,10 @@
     "tasbih": "Tasbih",
     "duas": "Duor",
     "quran": "Koranen",
-    "mosques": "Moskéer",
     "journal": "Bönedagbok",
     "backup": "Säkerhetskopiering",
-    "fasting": "Fasta"
+    "fasting": "Fasta",
+    "today": "Idag"
   },
   "a11y": {
     "openSettings": "Öppna inställningar",
@@ -60,7 +60,27 @@
     "backToToday": "Till idag",
     "updatedAt": "Uppdaterad {{when}}",
     "daysStored": "{{count}} dagar sparade",
-    "quranShortcut": "Öppna Koranen"
+    "quranShortcut": "Öppna Koranen",
+    "dayStrip": "Välj en dag",
+    "nextPrayerIn": "{{prayer}} om",
+    "firstPrayer": "Första bönen {{prayer}} · {{time}}",
+    "todaySummary": "Idag",
+    "prayersLogged": "{{count}} av {{total}} böner loggade",
+    "noFastToday": "Ingen fasta registrerad",
+    "dhikrSets": "{{count}} dhikr-omgångar klara",
+    "fastKept": {
+      "ramadan": "Ramadanfasta hållen",
+      "voluntary": "Sunnafasta hållen",
+      "qadha": "Igenfasta hållen"
+    },
+    "readItIn": "Läs den i {{surah}}",
+    "continueAt": "Fortsätt · {{surah}} {{ref}}",
+    "khatmahDay": "Khatmah dag {{day}} av {{total}}",
+    "khatmahDaysToGo": "{{count}} dagar kvar",
+    "pagesLeftToday": "{{count}} sidor kvar idag",
+    "pageNumber": "sida {{page}}",
+    "readingDone": "Dagens läsning klar",
+    "readOn": "Läs vidare"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",
@@ -234,7 +254,21 @@
     "resetApp": "Återställ appdata",
     "resetAppHelp": "Raderar alla inställningar och data. Kan inte ångras.",
     "batteryWarning": "Aviseringar kan vara opålitliga",
-    "batteryWarningHelp": "Batterioptimering kan fördröja eller tysta adhan-aviseringar när appen är stängd. Tryck för att undanta Mihrab."
+    "batteryWarningHelp": "Batterioptimering kan fördröja eller tysta adhan-aviseringar när appen är stängd. Tryck för att undanta Mihrab.",
+    "themeRestartManualTitle": "Öppna appen igen",
+    "themeRestartManualBody": "iOS tillåter inte att appar startar om sig själva. Tvångsavsluta Mihrab och öppna appen igen för att det nya temat ska gälla.",
+    "liquidGlass": "Liquid Glass",
+    "liquidGlassHelp": "Använd iOS systemfärger och genomskinlig glaskrom. Följer ljust/mörkt automatiskt.",
+    "themeRestartTitle": "Omstart krävs",
+    "themeRestartBody": "Byte av systemfärger kräver omstart så att alla skärmar får det nya temat. Starta om nu?",
+    "themeRestartConfirm": "Starta om",
+    "laSecondMetricLabel": "Andra värdet",
+    "resetTitle": "Återställ appen?",
+    "resetBody": "Detta raderar alla inställningar, sparade platser, loggposter, fasteloggen och tasbih-läget och tar dig tillbaka till introduktionen. Kan inte ångras.",
+    "resetConfirm": "Återställ allt",
+    "prayerOffsetsCount": "{{count}} justerade",
+    "endOfDayLog": "Påminnelse i slutet av dagen",
+    "endOfDayLogHelp": "Tio minuter efter isha frågar den om dagens fem böner ska loggas. Svarar du nästa morgon loggas ändå rätt dag."
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -367,7 +401,12 @@
     "use": "Använd",
     "delete": "Ta bort",
     "limitReached": "Max {{max}} sparade platser har nåtts.",
-    "previousLocation": "Tidigare plats"
+    "previousLocation": "Tidigare plats",
+    "invalidCoordsTitle": "Ogiltiga koordinater",
+    "invalidCoordsBody": "Latitud måste vara mellan -90 och 90, longitud mellan -180 och 180.",
+    "pickAPlace": "Sök efter en stad eller ange koordinater först.",
+    "duplicateTitle": "Redan sparad",
+    "duplicateBody": "En plats med dessa koordinater är redan sparad som ”{{name}}”."
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "Återställ",
     "salahonprophet": "Salawat över Profeten ﷺ",
     "prev": "Föregående",
-    "next": "Nästa"
+    "next": "Nästa",
+    "meaning": {
+      "subhanallah": "Ära vare Allah",
+      "alhamdulillah": "All lov tillkommer Allah",
+      "lailaha": "Det finns ingen gud utom Allah",
+      "allahuakbar": "Allah är störst",
+      "astaghfirullah": "Jag söker Allahs förlåtelse",
+      "salahonprophet": "O Allah, sänd välsignelser över vår mästare Muhammad"
+    },
+    "setPosition": "Omgång {{index}} av {{total}}",
+    "ofTarget": "av {{target}}",
+    "tapAnywhere": "Tryck var som helst",
+    "upNext": "Härnäst",
+    "resetSet": "Nollställ omgång",
+    "skip": "Hoppa över"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "För skydd mot vilseledande"
-    }
+    },
+    "tapToCount": "Tryck för att räkna"
   },
   "quran": {
     "meccan": "Meckansk",
@@ -869,7 +923,17 @@
     "companionTitle": "Under varje vers",
     "companionHelp": "Gäller överallt där en vers visas — läsaren, dagens vers och den dagliga ayah-aviseringen. Kan även ändras från Koran-sidan.",
     "companionActive": "aktiv",
-    "mushafReplaceOldBody": "En äldre kopia av mushafen ({{size}} MB) finns kvar på enheten sedan en tidigare version. Den tas bort först — inget du har sparat påverkas."
+    "mushafReplaceOldBody": "En äldre kopia av mushafen ({{size}} MB) finns kvar på enheten sedan en tidigare version. Den tas bort först — inget du har sparat påverkas.",
+    "shareAsText": "Dela texten",
+    "shareChoiceA11y": "Dela — välj text eller bildkort",
+    "recitation": "Recitation",
+    "downloadSurahAudioSized": "Ladda ner denna sura · {{size}}",
+    "tapToPick": "välj",
+    "tabMarks": "Märken",
+    "searchSurahOrPage": "Sök sura eller sida",
+    "reading": "läser",
+    "pageScrubber": "Gå till sida",
+    "goCta": "Gå"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "Aktivera loggåtgärd i bönenotiser",
     "notePlaceholder": "Privat anteckning (endast på denna enhet)",
     "saveNote": "Spara anteckning",
-    "logActionTitle": "Logga bön"
+    "logActionTitle": "Logga bön",
+    "loadFailedTitle": "Kunde inte läsa loggen",
+    "loadFailedBody": "Dina data finns kvar på enheten men kunde inte läsas just nu. Försök öppna loggen igen.",
+    "saveFailedTitle": "Kunde inte spara",
+    "saveFailedBody": "Försök igen.",
+    "noteLabel": "Personlig anteckning (privat, krypterad)"
   },
   "events": {
     "islamicNewYear": "Islamiskt nyår",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "Frid vare med dig, och Allahs nåd och Hans välsignelser."
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "Alla loggade fastor",
     "noLogsYet": "Dagar du fastar visas här.",
     "typeRamadan": "Ramadan",
-    "typeVoluntary": "Frivillig / Sunnah"
+    "typeVoluntary": "Frivillig / Sunnah",
+    "reminderChannelName": "Fastepåminnelser",
+    "reminderTitle": "Fastepåminnelse"
   },
   "methods": {
     "0": "Shia — Ithna Ashari",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim-duor",
     "quranGeometry": "Data för ayah-positioner (quran.com / projektet Quran for Android)",
-    "recitation": "Recitationsljud (21 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)",
+    "recitation": "Recitationsljud (42 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-texter: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "Datastatistik aktiverad",
     "unlockedBody": "Ett statistikkort visas nu längst ned på startskärmen. Stäng av det när som helst nedan.",
     "serverCoverage": "Servertäckning"
+  },
+  "log": {
+    "last13Weeks": "Senaste 13 veckorna",
+    "legendPrayers": "0 → 5 böner",
+    "fasted": "fastade",
+    "dayA11y": "{{date}}: {{prayers}} böner loggade{{fast}}",
+    "streakCaption": "{{count}} dagar i rad",
+    "fastsCaption": "{{count}} fastor",
+    "markAllOnTime": "Markera alla i tid",
+    "fastingToday": "Fasta idag",
+    "iftarAt": "Iftar {{time}}",
+    "allUpcoming": "Alla kommande",
+    "title": "Logg"
+  },
+  "endOfDay": {
+    "title": "Logga dagens böner?",
+    "body": "Markera alla fem som bedda i tid, eller öppna loggen och fyll i dem en och en.",
+    "action": "Logga alla som utförda",
+    "channelName": "Slut på dagen-logg"
   }
 }

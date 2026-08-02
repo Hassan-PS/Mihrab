@@ -32,6 +32,13 @@ export type TasbihPreset = {
   arabic: string;
   /** Hyphenated Latin pronunciation guide displayed under the Arabic. */
   pronunciation: string;
+  /**
+   * i18n key for what the dhikr MEANS. The Latin label ("SUBHANALLAH") is
+   * a spelling, not a translation — it tells a non-Arabic speaker how to
+   * say the words but not what they are saying, which for a phrase you are
+   * about to repeat thirty-three times is the part that matters.
+   */
+  meaningKey: string;
   /** Conventional target count for one round. */
   defaultTarget: number;
   /**
@@ -51,6 +58,7 @@ export const TASBIH_PRESETS: ReadonlyArray<TasbihPreset> = [
   {
     id: 'subhanallah',
     labelKey: 'tasbih.subhanallah',
+    meaningKey: 'tasbih.meaning.subhanallah',
     arabic: 'سُبْحَانَ ٱللَّٰهِ',
     pronunciation: 'Sub-haa-na ll-Laah',
     defaultTarget: 33,
@@ -58,6 +66,7 @@ export const TASBIH_PRESETS: ReadonlyArray<TasbihPreset> = [
   {
     id: 'alhamdulillah',
     labelKey: 'tasbih.alhamdulillah',
+    meaningKey: 'tasbih.meaning.alhamdulillah',
     arabic: 'ٱلْحَمْدُ لِلَّٰهِ',
     pronunciation: 'Al-ham-du li-l-Laah',
     defaultTarget: 33,
@@ -65,6 +74,7 @@ export const TASBIH_PRESETS: ReadonlyArray<TasbihPreset> = [
   {
     id: 'lailaha',
     labelKey: 'tasbih.lailaha',
+    meaningKey: 'tasbih.meaning.lailaha',
     arabic: 'لَا إِلَٰهَ إِلَّا ٱللَّٰهُ',
     pronunciation: 'Laa i-laa-ha il-la l-Laah',
     defaultTarget: 33,
@@ -72,6 +82,7 @@ export const TASBIH_PRESETS: ReadonlyArray<TasbihPreset> = [
   {
     id: 'allahuakbar',
     labelKey: 'tasbih.allahuakbar',
+    meaningKey: 'tasbih.meaning.allahuakbar',
     arabic: 'ٱللَّٰهُ أَكْبَرُ',
     pronunciation: 'Al-laa-hu Ak-bar',
     defaultTarget: 33,
@@ -79,6 +90,7 @@ export const TASBIH_PRESETS: ReadonlyArray<TasbihPreset> = [
   {
     id: 'astaghfirullah',
     labelKey: 'tasbih.astaghfirullah',
+    meaningKey: 'tasbih.meaning.astaghfirullah',
     arabic: 'أَسْتَغْفِرُ ٱللَّٰهَ',
     pronunciation: 'As-tagh-fi-ru l-Laah',
     defaultTarget: 100,
@@ -87,6 +99,7 @@ export const TASBIH_PRESETS: ReadonlyArray<TasbihPreset> = [
   {
     id: 'salahonprophet',
     labelKey: 'tasbih.salahonprophet',
+    meaningKey: 'tasbih.meaning.salahonprophet',
     arabic: 'ٱللَّٰهُمَّ صَلِّ عَلَىٰ سَيِّدِنَا مُحَمَّدٍ',
     pronunciation: "Al-laa-hum-ma sal-li 'a-laa Say-yi-di-naa Mu-ham-mad",
     defaultTarget: 100,

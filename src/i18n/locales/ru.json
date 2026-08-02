@@ -12,10 +12,10 @@
     "tasbih": "Тасбих",
     "duas": "Ду‘а",
     "quran": "Коран",
-    "mosques": "Мечети",
     "journal": "Дневник намаза",
     "backup": "Резервная копия",
-    "fasting": "Пост"
+    "fasting": "Пост",
+    "today": "Сегодня"
   },
   "a11y": {
     "openSettings": "Открыть настройки",
@@ -60,7 +60,27 @@
     "backToToday": "К сегодня",
     "updatedAt": "Обновлено {{when}}",
     "daysStored": "Сохранено дней: {{count}}",
-    "quranShortcut": "Открыть Коран"
+    "quranShortcut": "Открыть Коран",
+    "dayStrip": "Выберите день",
+    "nextPrayerIn": "{{prayer}} через",
+    "firstPrayer": "Первая молитва {{prayer}} · {{time}}",
+    "todaySummary": "Сегодня",
+    "prayersLogged": "Отмечено {{count}} из {{total}} молитв",
+    "noFastToday": "Пост не отмечен",
+    "dhikrSets": "Завершено кругов зикра: {{count}}",
+    "fastKept": {
+      "ramadan": "Соблюдён пост Рамадана",
+      "voluntary": "Соблюдён добровольный пост",
+      "qadha": "Соблюдён восполняющий пост"
+    },
+    "readItIn": "Читать в {{surah}}",
+    "continueAt": "Продолжить · {{surah}} {{ref}}",
+    "khatmahDay": "Хатм: день {{day}} из {{total}}",
+    "khatmahDaysToGo": "осталось дней: {{count}}",
+    "pagesLeftToday": "сегодня осталось страниц: {{count}}",
+    "pageNumber": "страница {{page}}",
+    "readingDone": "Чтение на сегодня завершено",
+    "readOn": "Читать дальше"
   },
   "errors": {
     "locationNeededTitle": "Требуется местоположение",
@@ -234,7 +254,21 @@
     "resetApp": "Сбросить данные приложения",
     "resetAppHelp": "Стирает все настройки и данные. Необратимо.",
     "batteryWarning": "Уведомления могут работать ненадёжно",
-    "batteryWarningHelp": "Оптимизация батареи может задерживать или отключать оповещения азана, когда приложение закрыто. Нажмите, чтобы исключить Mihrab."
+    "batteryWarningHelp": "Оптимизация батареи может задерживать или отключать оповещения азана, когда приложение закрыто. Нажмите, чтобы исключить Mihrab.",
+    "themeRestartManualTitle": "Откройте приложение заново",
+    "themeRestartManualBody": "iOS не позволяет приложениям перезапускать себя. Полностью закройте Mihrab и откройте снова, чтобы применить тему.",
+    "liquidGlass": "Liquid Glass",
+    "liquidGlassHelp": "Использовать системные цвета iOS и полупрозрачное «стекло». Автоматически следует светлой/тёмной теме.",
+    "themeRestartTitle": "Требуется перезапуск",
+    "themeRestartBody": "Смена системных цветов требует перезапуска, чтобы тема применилась на всех экранах. Перезапустить сейчас?",
+    "themeRestartConfirm": "Перезапустить",
+    "laSecondMetricLabel": "Второй показатель",
+    "resetTitle": "Сбросить приложение?",
+    "resetBody": "Это удалит все настройки, сохранённые места, записи журнала, дни поста и состояние тасбиха и вернёт вас к началу. Отменить нельзя.",
+    "resetConfirm": "Сбросить всё",
+    "prayerOffsetsCount": "изменено: {{count}}",
+    "endOfDayLog": "Напоминание в конце дня",
+    "endOfDayLogHelp": "Через десять минут после иша спрашивает, отметить ли пять молитв этого дня. Ответ на следующее утро всё равно запишется в нужный день."
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "Прежнее место"
+    "previousLocation": "Прежнее место",
+    "invalidCoordsTitle": "Неверные координаты",
+    "invalidCoordsBody": "Широта должна быть от -90 до 90, долгота — от -180 до 180.",
+    "pickAPlace": "Сначала найдите город или введите координаты.",
+    "duplicateTitle": "Уже сохранено",
+    "duplicateBody": "Место с этими координатами уже сохранено как «{{name}}»."
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "Сброс",
     "salahonprophet": "Салават Пророку ﷺ",
     "prev": "Назад",
-    "next": "Далее"
+    "next": "Далее",
+    "meaning": {
+      "subhanallah": "Пречист Аллах",
+      "alhamdulillah": "Хвала Аллаху",
+      "lailaha": "Нет божества, кроме Аллаха",
+      "allahuakbar": "Аллах велик",
+      "astaghfirullah": "Прошу прощения у Аллаха",
+      "salahonprophet": "О Аллах, благослови нашего господина Мухаммада"
+    },
+    "setPosition": "Подход {{index}} из {{total}}",
+    "ofTarget": "из {{target}}",
+    "tapAnywhere": "Нажмите в любом месте",
+    "upNext": "Далее",
+    "resetSet": "Сбросить подход",
+    "skip": "Пропустить"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "О защите от заблуждения"
-    }
+    },
+    "tapToCount": "Нажмите для счёта"
   },
   "quran": {
     "meccan": "Мекканская",
@@ -869,7 +923,17 @@
     "companionTitle": "Под каждым аятом",
     "companionHelp": "Применяется везде, где показывается аят — в читалке, аяте дня и ежедневном уведомлении. Также можно изменить на странице Корана.",
     "companionActive": "активно",
-    "mushafReplaceOldBody": "На устройстве осталась старая копия мусхафа ({{size}} МБ) от предыдущей версии. Она будет удалена в первую очередь — ничего из сохранённого вами не пострадает."
+    "mushafReplaceOldBody": "На устройстве осталась старая копия мусхафа ({{size}} МБ) от предыдущей версии. Она будет удалена в первую очередь — ничего из сохранённого вами не пострадает.",
+    "shareAsText": "Поделиться текстом",
+    "shareChoiceA11y": "Поделиться — текстом или карточкой",
+    "recitation": "Чтение",
+    "downloadSurahAudioSized": "Скачать эту суру · {{size}}",
+    "tapToPick": "выбрать",
+    "tabMarks": "Метки",
+    "searchSurahOrPage": "Найти суру или страницу",
+    "reading": "читается",
+    "pageScrubber": "Перейти к странице",
+    "goCta": "Перейти"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "Включить запись в дневник из уведомлений о молитве",
     "notePlaceholder": "Личная заметка (только на этом устройстве)",
     "saveNote": "Сохранить заметку",
-    "logActionTitle": "Записать молитву"
+    "logActionTitle": "Записать молитву",
+    "loadFailedTitle": "Не удалось загрузить журнал",
+    "loadFailedBody": "Ваши данные на устройстве в порядке, но сейчас их не удалось прочитать. Откройте журнал ещё раз.",
+    "saveFailedTitle": "Не удалось сохранить",
+    "saveFailedBody": "Попробуйте ещё раз.",
+    "noteLabel": "Личная заметка (приватная, зашифрованная)"
   },
   "events": {
     "islamicNewYear": "Исламский новый год",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "Мир вам, милость Аллаха и Его благословение."
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "Все записанные посты",
     "noLogsYet": "Дни, которые вы держите пост, появятся здесь.",
     "typeRamadan": "Рамадан",
-    "typeVoluntary": "Добровольный / Сунна"
+    "typeVoluntary": "Добровольный / Сунна",
+    "reminderChannelName": "Напоминания о посте",
+    "reminderTitle": "Напоминание о посте"
   },
   "methods": {
     "0": "Шииты — Иснаашария",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Дуа из Хисн аль-Муслим",
     "quranGeometry": "Данные о положении аятов (quran.com / проект Quran for Android)",
-    "recitation": "Аудио чтения (21 чтец): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)",
+    "recitation": "Аудио чтения (42 чтеца): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)",
     "tafsir": "Тафсиры: Ибн Касир, Маариф-уль-Куран, аль-Муяссар"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "Статистика данных включена",
     "unlockedBody": "Карточка статистики теперь отображается внизу главного экрана. Отключить её можно в любой момент ниже.",
     "serverCoverage": "Покрытие сервера"
+  },
+  "log": {
+    "last13Weeks": "Последние 13 недель",
+    "legendPrayers": "0 → 5 молитв",
+    "fasted": "пост",
+    "dayA11y": "{{date}}: отмечено молитв: {{prayers}}{{fast}}",
+    "streakCaption": "серия {{count}} дней",
+    "fastsCaption": "постов: {{count}}",
+    "markAllOnTime": "Отметить все вовремя",
+    "fastingToday": "Пост сегодня",
+    "iftarAt": "Ифтар {{time}}",
+    "allUpcoming": "Все предстоящие",
+    "title": "Журнал"
+  },
+  "endOfDay": {
+    "title": "Отметить сегодняшние молитвы?",
+    "body": "Отметьте все пять как совершённые вовремя или откройте журнал и заполните по одной.",
+    "action": "Отметить все выполненными",
+    "channelName": "Журнал конца дня"
   }
 }

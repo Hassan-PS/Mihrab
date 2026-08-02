@@ -12,10 +12,10 @@
     "tasbih": "التسبيح",
     "duas": "الأدعية",
     "quran": "القرآن",
-    "mosques": "المساجد",
     "journal": "يوميات الصلاة",
     "backup": "نسخ احتياطي",
-    "fasting": "الصيام"
+    "fasting": "الصيام",
+    "today": "اليوم"
   },
   "a11y": {
     "openSettings": "فتح الإعدادات",
@@ -60,7 +60,27 @@
     "backToToday": "العودة إلى اليوم",
     "updatedAt": "آخر تحديث {{when}}",
     "daysStored": "{{count}} يومًا مخزّنة",
-    "quranShortcut": "افتح المصحف"
+    "quranShortcut": "افتح المصحف",
+    "dayStrip": "اختر يومًا",
+    "nextPrayerIn": "{{prayer}} خلال",
+    "firstPrayer": "أول صلاة {{prayer}} · {{time}}",
+    "todaySummary": "اليوم",
+    "prayersLogged": "{{count}} من {{total}} صلوات مسجلة",
+    "noFastToday": "لم يُسجَّل صيام",
+    "dhikrSets": "{{count}} جولة ذكر مكتملة",
+    "fastKept": {
+      "ramadan": "صيام رمضان",
+      "voluntary": "صيام سنة",
+      "qadha": "صيام قضاء"
+    },
+    "readItIn": "اقرأها في {{surah}}",
+    "continueAt": "متابعة · {{surah}} {{ref}}",
+    "khatmahDay": "الختمة اليوم {{day}} من {{total}}",
+    "khatmahDaysToGo": "بقي {{count}} يومًا",
+    "pagesLeftToday": "بقي {{count}} صفحة اليوم",
+    "pageNumber": "صفحة {{page}}",
+    "readingDone": "انتهت قراءة اليوم",
+    "readOn": "تابع القراءة"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",
@@ -234,7 +254,21 @@
     "resetApp": "إعادة ضبط بيانات التطبيق",
     "resetAppHelp": "يمحو جميع الإعدادات والبيانات. لا يمكن التراجع.",
     "batteryWarning": "قد تكون التنبيهات غير موثوقة",
-    "batteryWarningHelp": "قد يؤدي تحسين البطارية إلى تأخير تنبيهات الأذان أو كتمها عندما يكون التطبيق مغلقًا. اضغط لاستثناء التطبيق."
+    "batteryWarningHelp": "قد يؤدي تحسين البطارية إلى تأخير تنبيهات الأذان أو كتمها عندما يكون التطبيق مغلقًا. اضغط لاستثناء التطبيق.",
+    "themeRestartManualTitle": "أعد فتح التطبيق",
+    "themeRestartManualBody": "لا يسمح iOS للتطبيقات بإعادة تشغيل نفسها. أغلق مِحراب تمامًا ثم أعد فتحه ليسري المظهر الجديد.",
+    "liquidGlass": "الزجاج السائل",
+    "liquidGlassHelp": "استخدام ألوان نظام iOS والواجهة الزجاجية الشفافة. يتبع الوضع الفاتح/الداكن تلقائيًا.",
+    "themeRestartTitle": "يلزم إعادة التشغيل",
+    "themeRestartBody": "يتطلب تبديل ألوان النظام إعادة تشغيل التطبيق ليأخذ كل شاشة المظهر الجديد. إعادة التشغيل الآن؟",
+    "themeRestartConfirm": "إعادة التشغيل",
+    "laSecondMetricLabel": "المؤشر الثاني",
+    "resetTitle": "إعادة تعيين التطبيق؟",
+    "resetBody": "سيؤدي هذا إلى مسح جميع الإعدادات والمواقع المحفوظة وسجل الصلوات وسجل الصيام وحالة التسبيح، ثم يعيدك إلى خطوات البدء. لا يمكن التراجع.",
+    "resetConfirm": "إعادة تعيين كل شيء",
+    "prayerOffsetsCount": "{{count}} معدّلة",
+    "endOfDayLog": "تذكير تسجيل نهاية اليوم",
+    "endOfDayLogHelp": "بعد العشاء بعشر دقائق يسأل إن كنت تريد تسجيل صلوات اليوم الخمس. لو أجبت في الصباح التالي فسيُسجَّل اليوم الصحيح."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -367,7 +401,12 @@
     "use": "Use",
     "delete": "Delete",
     "limitReached": "Maximum {{max}} saved locations reached.",
-    "previousLocation": "الموقع السابق"
+    "previousLocation": "الموقع السابق",
+    "invalidCoordsTitle": "إحداثيات غير صالحة",
+    "invalidCoordsBody": "يجب أن يكون خط العرض بين -90 و90، وخط الطول بين -180 و180.",
+    "pickAPlace": "ابحث عن مدينة أو أدخل الإحداثيات أولًا.",
+    "duplicateTitle": "محفوظ مسبقًا",
+    "duplicateBody": "هناك موقع بهذه الإحداثيات محفوظ بالفعل باسم «{{name}}»."
   },
   "tasbih": {
     "subhanallah": "SubhanAllah",
@@ -380,7 +419,21 @@
     "reset": "إعادة تعيين",
     "salahonprophet": "الصلاة على النبي ﷺ",
     "prev": "السابق",
-    "next": "التالي"
+    "next": "التالي",
+    "meaning": {
+      "subhanallah": "تنزيه الله عن كل نقص",
+      "alhamdulillah": "الحمد كله لله",
+      "lailaha": "لا معبود بحق إلا الله",
+      "allahuakbar": "الله أكبر من كل شيء",
+      "astaghfirullah": "أطلب المغفرة من الله",
+      "salahonprophet": "اللهم صل على سيدنا محمد"
+    },
+    "setPosition": "المجموعة {{index}} من {{total}}",
+    "ofTarget": "من {{target}}",
+    "tapAnywhere": "انقر في أي مكان",
+    "upNext": "التالي",
+    "resetSet": "إعادة المجموعة",
+    "skip": "تخطي"
   },
   "duas": {
     "cat": {
@@ -749,7 +802,8 @@
     },
     "guidance_against_being_misled": {
       "title": "الاستعاذة من الضلالة"
-    }
+    },
+    "tapToCount": "اضغط للعد"
   },
   "quran": {
     "meccan": "مكية",
@@ -869,7 +923,17 @@
     "companionTitle": "أسفل كل آية",
     "companionHelp": "يُطبَّق أينما تُعرض آية — القارئ وآية اليوم وإشعار الآية اليومي. يمكن تغييره أيضًا من صفحة القرآن.",
     "companionActive": "مفعّل",
-    "mushafReplaceOldBody": "لا تزال نسخة قديمة من المصحف ({{size}} ميجابايت) على جهازك من إصدار سابق. ستُحذف أولاً — ولن يتأثر أي شيء قمت بحفظه."
+    "mushafReplaceOldBody": "لا تزال نسخة قديمة من المصحف ({{size}} ميجابايت) على جهازك من إصدار سابق. ستُحذف أولاً — ولن يتأثر أي شيء قمت بحفظه.",
+    "shareAsText": "مشاركة النص",
+    "shareChoiceA11y": "مشاركة — اختر نصًا أو بطاقة صورة",
+    "recitation": "التلاوة",
+    "downloadSurahAudioSized": "تنزيل هذه السورة · {{size}}",
+    "tapToPick": "اختر",
+    "tabMarks": "الإشارات",
+    "searchSurahOrPage": "ابحث عن سورة أو صفحة",
+    "reading": "قيد القراءة",
+    "pageScrubber": "انتقل إلى صفحة",
+    "goCta": "انتقال"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",
@@ -908,7 +972,12 @@
     "notificationToggleA11y": "تفعيل إجراء التسجيل في إشعارات الصلاة",
     "notePlaceholder": "ملاحظة خاصة (على هذا الجهاز فقط)",
     "saveNote": "حفظ الملاحظة",
-    "logActionTitle": "سجِّل الصلاة"
+    "logActionTitle": "سجِّل الصلاة",
+    "loadFailedTitle": "تعذّر تحميل السجل",
+    "loadFailedBody": "بياناتك محفوظة على الجهاز لكن تعذّرت قراءتها الآن. حاول فتح السجل مرة أخرى.",
+    "saveFailedTitle": "تعذّر الحفظ",
+    "saveFailedBody": "يرجى المحاولة مرة أخرى.",
+    "noteLabel": "ملاحظة شخصية (خاصة ومشفّرة)"
   },
   "events": {
     "islamicNewYear": "رأس السنة الهجرية",
@@ -938,7 +1007,8 @@
     "stepLabel": "Step {{current}} of {{total}}",
     "welcome": {
       "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers."
+      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
+      "salam": "السلام عليكم ورحمة الله وبركاته."
     },
     "location": {
       "title": "Your location",
@@ -1004,7 +1074,9 @@
     "monthViewLabel": "كل الصيام المسجَّل",
     "noLogsYet": "الأيام التي تصومها ستظهر هنا.",
     "typeRamadan": "رمضان",
-    "typeVoluntary": "تطوعي / سنة"
+    "typeVoluntary": "تطوعي / سنة",
+    "reminderChannelName": "تذكيرات الصيام",
+    "reminderTitle": "تذكير بالصيام"
   },
   "methods": {
     "0": "الشيعة — الاثنا عشرية",
@@ -1035,7 +1107,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "أدعية حصن المسلم",
     "quranGeometry": "بيانات مواضع الآيات (quran.com / مشروع Quran for Android)",
-    "recitation": "صوت التلاوة (21 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)",
+    "recitation": "صوت التلاوة (42 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)",
     "tafsir": "نصوص التفسير: ابن كثير، معارف القرآن، الميسر"
   },
   "liveActivity": {
@@ -1117,5 +1189,24 @@
     "unlockedTitle": "تم تفعيل إحصائيات البيانات",
     "unlockedBody": "تظهر الآن بطاقة إحصائيات أسفل الشاشة الرئيسية. يمكنك إيقافها في أي وقت من الأسفل.",
     "serverCoverage": "تغطية الخادم"
+  },
+  "log": {
+    "last13Weeks": "آخر 13 أسبوعًا",
+    "legendPrayers": "0 ← 5 صلوات",
+    "fasted": "صام",
+    "dayA11y": "{{date}}: {{prayers}} صلوات مسجلة{{fast}}",
+    "streakCaption": "سلسلة {{count}} يومًا",
+    "fastsCaption": "{{count}} صيامًا",
+    "markAllOnTime": "تسجيل الكل في وقتها",
+    "fastingToday": "صيام اليوم",
+    "iftarAt": "الإفطار {{time}}",
+    "allUpcoming": "كل القادم",
+    "title": "السجل"
+  },
+  "endOfDay": {
+    "title": "تسجيل صلوات اليوم؟",
+    "body": "سجّل الصلوات الخمس كلّها في وقتها، أو افتح السجل لإدخالها واحدة واحدة.",
+    "action": "تسجيل الكل كمكتمل",
+    "channelName": "سجل نهاية اليوم"
   }
 }

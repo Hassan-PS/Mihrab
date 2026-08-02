@@ -2,9 +2,7 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo, useCallback, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, Vibration, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useHeaderHeight } from '@react-navigation/elements';
+import { Pressable, ScrollView, StyleSheet, Text, Vibration, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -18,6 +16,7 @@ import {
 import { cardEdgeStyle } from '../theme/chrome';
 import { arabicTextStyle } from '../theme/typography';
 import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
+import { useTabBarInset } from '../navigation/tabBarInset';
 
 /**
  * Dua library screen — task #26.
@@ -32,6 +31,7 @@ export function DuasScreen() {
   useBreakpoint();
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
+  const tabBarInset = useTabBarInset();
   // Arabic readers don't need a Latin pronunciation guide or an English
   // meaning — they read the Arabic directly. Hide both supplementary
   // lines when the app language is Arabic so the row stays clean and
@@ -58,19 +58,18 @@ export function DuasScreen() {
     setCounts(prev => ({ ...prev, [id]: 0 }));
   }, []);
 
-  // Safe-area / nav-bar offset — task #145 (iOS).
+  // No manual header offset (v2.8.5).
   //
-  // The global navigator uses `headerTransparent: true` on iOS so the blur
-  // effect can extend behind content. That means the screen content starts
-  // at y=0 of the window and the category chips ended up rendering BEHIND
-  // the transparent header — invisible to the user. Push the tabs row down
-  // by the navigation header height so the chips appear just below the
-  // title bar like the user expects. Android has an opaque header so
-  // header height == 0 from this hook (the header sits above the content),
-  // and we don't need extra padding.
-  const headerHeight = useHeaderHeight();
-  const insets = useSafeAreaInsets();
-  const topOffset = Platform.OS === 'ios' ? headerHeight : insets.top;
+  // This screen used to add the navigation header's own height to the top
+  // of the chips row. That was correct when Duas was a page pushed onto the
+  // root stack, whose header is `headerTransparent` on iOS so the blur can
+  // extend behind content: without the padding the chips rendered behind
+  // the title bar and were invisible.
+  //
+  // Duas is a TAB now (design review 2e), and the tab navigator's header is
+  // opaque — it already sits above the content rather than over it. The
+  // padding therefore counted the header twice and left a header's worth of
+  // empty band under the title on every platform.
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
       {/* Tabs are wrapped in a fixed-height row pinned just under the
@@ -78,7 +77,7 @@ export function DuasScreen() {
           duas the chips stay at the top instead of vertically centering
           (#101 follow-up). The dua list ScrollView fills the rest of
           the screen and starts at a predictable y-offset. */}
-      <View style={[styles.tabsRow, { paddingTop: topOffset }]}>
+      <View style={styles.tabsRow}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -115,7 +114,7 @@ export function DuasScreen() {
 
       <ScrollView
         style={styles.listScroll}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
         contentInsetAdjustmentBehavior="automatic">
         <CenteredColumn>
         {duasByCategory(selected).map(dua => (

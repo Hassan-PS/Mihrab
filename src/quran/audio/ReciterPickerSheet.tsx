@@ -1,7 +1,7 @@
 /**
  * Reciter picker — v2.7.27.
  *
- * With 21 reciters the old inline radio list stopped scaling, so
+ * With 42 reciters the old inline radio list stopped scaling, so
  * switching now lives in its own searchable bottom sheet: type-ahead
  * filter (Latin or Arabic), the active reciter pinned visually via
  * check + accent, and a small "word highlight" badge on reciters with
@@ -22,7 +22,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { setQuranPrefs, useQuranState } from '../quranState';
-import { RECITERS, type Reciter } from './reciters';
+import { searchReciters, type Reciter } from './reciters';
 
 type Props = {
   visible: boolean;
@@ -35,16 +35,11 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
   const { prefs } = useQuranState();
   const [query, setQuery] = useState('');
 
-  const data = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [...RECITERS];
-    return RECITERS.filter(
-      r =>
-        r.name.toLowerCase().includes(q) ||
-        r.arabicName.includes(query.trim()) ||
-        r.id.includes(q),
-    );
-  }, [query]);
+  // Transliteration-tolerant (v2.8.4): "alajami", "Al-Ajmi" and "ajmy" all
+  // reach أحمد العجمي. The old exact-substring filter returned nothing for
+  // any spelling but the one stored, which reads as "that reciter isn't in
+  // the app" — see `searchReciters`.
+  const data = useMemo(() => searchReciters(query), [query]);
 
   const renderRow = ({ item }: { item: Reciter }) => {
     const selected = item.id === prefs.reciterId;

@@ -1,8 +1,9 @@
 /**
  * Smoke-tests for the HomeScreen integration follow-ups (tasks #45–#47):
  *
- *   #45 — QuickActionsGrid is mounted on HomeScreen so the new tools
- *         (Tasbih, Duas, Quran, Mosques, Journal, Compass) are reachable
+ *   #45 — the Today summary is mounted on HomeScreen (it replaced the tool
+ *         tiles in design review 2a — Home reports rather than routes)
+ *         (Tasbih, Duas, Quran, Log, Compass) are reachable
  *         without going through Settings.
  *   #46 — RamadanCountdownCard exists and is gated by the seasonal
  *         treatment (returns null outside Ramadan / when Imsak is missing).
@@ -22,9 +23,9 @@ const SRC = path.join(__dirname, '..', 'src', 'screens');
 const HOME = fs.readFileSync(path.join(SRC, 'HomeScreen.tsx'), 'utf-8');
 
 describe('HomeScreen integration (tasks #45–#47)', () => {
-  test('imports QuickActionsGrid', () => {
-    expect(HOME).toMatch(/from '\.\/home\/QuickActionsGrid'/);
-    expect(HOME).toMatch(/<QuickActionsGrid\s*\/?>/);
+  test('imports the Today summary', () => {
+    expect(HOME).toMatch(/from '\.\/home\/TodaySummary'/);
+    expect(HOME).toMatch(/<TodaySummary\b/);
   });
 
   test('imports RamadanCountdownCard with today + tomorrow props', () => {
@@ -50,11 +51,14 @@ describe('HomeScreen integration (tasks #45–#47)', () => {
     );
     expect(CONTROLS).toMatch(/from '\.\.\/screens\/home\/LocationChip'/);
     expect(CONTROLS).toMatch(/<LocationChip\b/);
-    const NAV = fs.readFileSync(
-      path.join(__dirname, '..', 'src', 'navigation', 'RootNavigator.tsx'),
+    // The Today tab owns the header row now that the six tabs are the app
+    // (design review 2e) — RootNavigator only carries what is pushed above
+    // them.
+    const TABS = fs.readFileSync(
+      path.join(__dirname, '..', 'src', 'navigation', 'MainTabs.tsx'),
       'utf-8',
     );
-    expect(NAV).toMatch(/<HomeHeaderControls\b/);
+    expect(TABS).toMatch(/<HomeHeaderControls\b/);
     expect(HOME).toMatch(/<HomeHeaderControls\b/);
   });
 });
@@ -79,12 +83,12 @@ describe('home/LocationChip module surface', () => {
   });
 });
 
-describe('home/QuickActionsGrid module surface', () => {
-  test('exports the QuickActionsGrid component', () => {
+describe('home/TodaySummary module surface', () => {
+  test('exports the TodaySummary component', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require('../src/screens/home/QuickActionsGrid');
-    expect(mod).toHaveProperty('QuickActionsGrid');
-    expect(mod.QuickActionsGrid).toBeTruthy();
+    const mod = require('../src/screens/home/TodaySummary');
+    expect(mod).toHaveProperty('TodaySummary');
+    expect(mod.TodaySummary).toBeTruthy();
   });
 });
 
