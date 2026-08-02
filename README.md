@@ -24,7 +24,7 @@
 
 <div align="center">
 
-<img src="branding/readme/01_home.png" width="32%" alt="Home — next prayer countdown and the day's times">&nbsp;<img src="branding/readme/02_quran.png" width="32%" alt="Madinah mushaf reader — Al-Baqarah, page 49">&nbsp;<img src="branding/readme/03_duas.png" width="32%" alt="Duas — Ayat al-Kursi with transliteration and source">
+<img src="branding/readme/01_home.png" width="32%" alt="Home — next prayer countdown and the day's times">&nbsp;<img src="branding/readme/02_quran.png" width="32%" alt="Quran — khatmah plans, verse of the day and the surah list">&nbsp;<img src="branding/readme/03_duas.png" width="32%" alt="Duas — Ayat al-Kursi with transliteration and source">
 
 <img src="branding/readme/04_tasbih.png" width="32%" alt="Tasbih counter — dhikr with tabular digits">&nbsp;<img src="branding/readme/05_fasting.png" width="32%" alt="Fasting tracker — Ramadan and Sunnah fasts">&nbsp;<img src="branding/readme/06_journal.png" width="32%" alt="Prayer journal — log each prayer on time, late, missed or qadha">
 
