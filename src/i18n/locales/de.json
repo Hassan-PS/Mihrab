@@ -1207,7 +1207,9 @@
     "fastingTitle": "Fasten",
     "noFastLogged": "Kein Fasten erfasst.",
     "markFasted": "Als gefastet markieren",
-    "unmarkFasted": "Markierung entfernen"
+    "unmarkFasted": "Markierung entfernen",
+    "showOnHome": "Diagramm auf der Startseite zeigen",
+    "showOnHomeHelp": "Fügt deine Quadrate zum Heute-Bildschirm hinzu. Standardmäßig aus."
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

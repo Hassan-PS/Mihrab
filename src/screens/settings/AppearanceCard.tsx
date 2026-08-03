@@ -378,6 +378,30 @@ function AppearanceCardImpl() {
         </View>
       ) : null}
 
+      {/* Also on the Log tab, next to the graph it governs — this is where
+          someone looking for it in Settings would go. */}
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('log.showOnHome')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t('log.showOnHomeHelp')}
+          </Text>
+        </View>
+        <Switch
+          value={settings.showPracticeOnHome}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={v => updateSettings({ showPracticeOnHome: v })}
+        />
+      </View>
+
       <ConfirmModal
         visible={pendingDynamic !== null}
         title={t('settings.themeRestartTitle', 'Restart required')}

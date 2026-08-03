@@ -49,6 +49,10 @@ export type AppearanceSlice = Pick<
   | 'language'
   | 'appAccentId'
   | 'appAccentCustomHex'
+  // Not a colour, but it is the "what Home looks like" switch and it is
+  // rendered by AppearanceCard, so it rides in this slice rather than
+  // making the card subscribe to a second one.
+  | 'showPracticeOnHome'
 >;
 
 export type LocationSlice = Pick<
@@ -183,6 +187,7 @@ export function PrayerSettingsProvider({
       language: settings.language,
       appAccentId: settings.appAccentId,
       appAccentCustomHex: settings.appAccentCustomHex,
+      showPracticeOnHome: settings.showPracticeOnHome,
     }),
     [
       settings.appearance,
@@ -191,6 +196,7 @@ export function PrayerSettingsProvider({
       settings.language,
       settings.appAccentId,
       settings.appAccentCustomHex,
+      settings.showPracticeOnHome,
     ],
   );
 

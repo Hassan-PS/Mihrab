@@ -35,6 +35,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
+import type { DayScore } from '../journal/journal';
 import { dayKey } from './practiceStore';
 
 /**
@@ -55,8 +56,10 @@ const FAST_RING_DARK = '#FBBF24';
 
 export type HeatmapDay = {
   key: string;
-  /** 0…5 prayers logged. */
-  prayers: number;
+  /** 0…5, weighted by status — see `STATUS_WEIGHT`. Drives the fill depth. */
+  kept: number;
+  /** How many of the five carry any entry, whatever it says. */
+  logged: number;
   fasted: boolean;
   /** Days after today inside the trailing week — drawn as blanks. */
   future: boolean;
@@ -110,7 +113,7 @@ export function weeksToCover(
  * fourth rows rather than being split across a boundary.
  */
 export function buildHeatmap(
-  prayersByDay: Map<string, number>,
+  scoreByDay: Map<string, DayScore>,
   fastedDays: Set<string>,
   now: Date = new Date(),
   weeks: number = HEATMAP_WEEKS,
@@ -127,9 +130,11 @@ export function buildHeatmap(
       const d = new Date(start);
       d.setDate(start.getDate() + week * 7 + weekday);
       const key = dayKey(d);
+      const score = scoreByDay.get(key);
       row.push({
         key,
-        prayers: prayersByDay.get(key) ?? 0,
+        kept: score?.kept ?? 0,
+        logged: score?.logged ?? 0,
         fasted: fastedDays.has(key),
         future: d.getTime() > today.getTime(),
       });
@@ -180,6 +185,14 @@ type Props = {
   selectedKey?: string;
   /** Tapping a square opens that day. Omit to keep the graph read-only. */
   onSelectDay?: (key: string) => void;
+  /**
+   * The view has reached the oldest column drawn. The owner answers by
+   * handing back more weeks; the graph keeps the dates under the viewport
+   * where they were, so the user carries on dragging into the new ones.
+   */
+  onReachOldest?: () => void;
+  /** Hides the legend and the caption, for the small copy on Home. */
+  compact?: boolean;
 };
 
 function PracticeHeatmapImpl({
@@ -188,6 +201,8 @@ function PracticeHeatmapImpl({
   caption,
   selectedKey,
   onSelectDay,
+  onReachOldest,
+  compact,
 }: Props) {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
@@ -195,6 +210,28 @@ function PracticeHeatmapImpl({
   const accent = palette.accentSolid;
 
   const legend = useMemo(() => [0, 1, 3, 5], []);
+
+  /**
+   * What a square is filled with.
+   *
+   *   nothing recorded  → warm paper, as before
+   *   recorded, none kept → the danger tone at a low alpha
+   *   otherwise → the green ramp, by WEIGHTED score
+   *
+   * The middle case is the whole point of the change. Depth used to come
+   * from the number of entries, so five prayers marked missed drew the
+   * darkest green on the graph — the app congratulating someone for a day
+   * they had just told it went badly. A missed day is not blank either:
+   * the user did the work of recording it, and blanking it would lose the
+   * difference between a day that went wrong and a day nobody opened the
+   * app on. It is a mark, in a colour that is not the colour of success.
+   */
+  const fillFor = (day: HeatmapDay) => {
+    if (day.future) return 'transparent';
+    if (day.kept > 0) return withAlpha(accent, 0.2 + 0.8 * (day.kept / 5));
+    if (day.logged > 0) return withAlpha(String(palette.danger), 0.3);
+    return palette.controlBg;
+  };
   const weeks = rows[0]?.length ?? 0;
   const months = useMemo(
     () => monthLabelsFor(rows, i18n.language),
@@ -211,15 +248,44 @@ function PracticeHeatmapImpl({
    * anything.
    */
   const scrollRef = useRef<ScrollView>(null);
-  const parkedFor = useRef(0);
-  const parkOnToday = () => {
-    if (weeks === 0 || parkedFor.current === weeks) return;
-    parkedFor.current = weeks;
-    scrollRef.current?.scrollToEnd({ animated: false });
+  const parked = useRef(false);
+  const drawnWeeks = useRef(0);
+  const offset = useRef(0);
+  const asking = useRef(false);
+
+  const onSized = () => {
+    if (weeks === 0) return;
+    if (!parked.current) {
+      parked.current = true;
+      drawnWeeks.current = weeks;
+      scrollRef.current?.scrollToEnd({ animated: false });
+      return;
+    }
+    if (weeks > drawnWeeks.current) {
+      /**
+       * Columns were added at the OLD end, which is the left. Left-hand
+       * growth pushes everything the user was looking at to the right by
+       * exactly that many columns, so without this the view lurches
+       * forwards in time the moment it loads more of the past — the one
+       * thing the user was dragging away from. Push the offset by the same
+       * amount and the dates under the thumb do not move.
+       */
+      const added = weeks - drawnWeeks.current;
+      drawnWeeks.current = weeks;
+      scrollRef.current?.scrollTo({
+        x: offset.current + added * COL,
+        animated: false,
+      });
+      asking.current = false;
+    }
   };
-  // Both paths are needed: on a cold mount the content has no width yet, and
-  // on a later week-count change the size may not change at all.
-  useEffect(parkOnToday, [weeks]);
+  useEffect(() => {
+    if (parked.current) return;
+    onSized();
+    // Cold mount: the content has no width yet when the effect first runs,
+    // so `onContentSizeChange` is the path that usually wins.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weeks]);
 
   return (
     <View>
@@ -245,7 +311,19 @@ function PracticeHeatmapImpl({
           ref={scrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
-          onContentSizeChange={parkOnToday}
+          onContentSizeChange={onSized}
+          scrollEventThrottle={64}
+          onScroll={e => {
+            offset.current = e.nativeEvent.contentOffset.x;
+            // Two columns of slack, so the request goes out while there is
+            // still something under the thumb to drag.
+            if (offset.current > COL * 2 || !onReachOldest) {
+              return;
+            }
+            if (asking.current) return;
+            asking.current = true;
+            onReachOldest();
+          }}
           contentContainerStyle={styles.scrollBody}>
           <View>
             <View style={styles.monthRow}>
@@ -282,20 +360,14 @@ function PracticeHeatmapImpl({
                           defaultValue:
                             '{{date}}: {{prayers}} prayers logged{{fast}}',
                           date: day.key,
-                          prayers: day.prayers,
+                          prayers: day.logged,
                           fast: day.fasted
                             ? `, ${t('log.fasted', 'fasted')}`
                             : '',
                         })}
                         style={[
                           styles.square,
-                          {
-                            backgroundColor: day.future
-                              ? 'transparent'
-                              : day.prayers > 0
-                                ? withAlpha(accent, 0.2 + 0.8 * (day.prayers / 5))
-                                : palette.controlBg,
-                          },
+                          { backgroundColor: fillFor(day) },
                           // Selection lifts the square AND outlines it in
                           // the text colour. The lift alone was invisible on
                           // an empty day, which is most of them and exactly
@@ -320,40 +392,66 @@ function PracticeHeatmapImpl({
         </ScrollView>
       </View>
 
-      <View style={styles.legendRow}>
-        <Text
-          style={[styles.legendText, { color: palette.muted }]}
-          numberOfLines={1}>
-          {t('log.legendPrayers', '0 → 5 prayers')}
-        </Text>
-        <View style={styles.legendSquares}>
-          {legend.map(n => (
+      {compact ? null : (
+        <>
+          <View style={styles.legendRow}>
+            <Text
+              style={[styles.legendText, { color: palette.muted }]}
+              numberOfLines={1}>
+              {t('log.legendPrayers', '0 → 5 prayers')}
+            </Text>
+            <View style={styles.legendSquares}>
+              {legend.map(n => (
+                <View
+                  key={n}
+                  style={[
+                    styles.legendSquare,
+                    {
+                      backgroundColor:
+                        n > 0
+                          ? withAlpha(accent, 0.2 + 0.8 * (n / 5))
+                          : palette.controlBg,
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+          {/* The two categorical marks get their own line. Squeezed onto the
+              ramp's row they read as another rung of it, which is the exact
+              confusion the ramp change was made to end. */}
+          <View style={styles.legendRow}>
             <View
-              key={n}
+              style={[
+                styles.legendSquare,
+                { backgroundColor: withAlpha(String(palette.danger), 0.3) },
+              ]}
+            />
+            <Text
+              style={[styles.legendText, { color: palette.muted }]}
+              numberOfLines={1}>
+              {t('journal.status.missed')}
+            </Text>
+            <View
               style={[
                 styles.legendSquare,
                 {
-                  backgroundColor:
-                    n > 0 ? withAlpha(accent, 0.2 + 0.8 * (n / 5)) : palette.controlBg,
+                  borderWidth: 2,
+                  borderColor: ring,
+                  backgroundColor: 'transparent',
                 },
               ]}
             />
-          ))}
-          <View
-            style={[
-              styles.legendSquare,
-              { borderWidth: 2, borderColor: ring, backgroundColor: 'transparent' },
-            ]}
-          />
-        </View>
-        <Text
-          style={[styles.legendText, { color: palette.muted }]}
-          numberOfLines={1}>
-          {t('log.fasted', 'fasted')}
-        </Text>
-      </View>
+            <Text
+              style={[styles.legendText, { color: palette.muted }]}
+              numberOfLines={1}>
+              {t('log.fasted', 'fasted')}
+            </Text>
+          </View>
+        </>
+      )}
 
-      {caption ? (
+      {caption && !compact ? (
         <Text
           style={[styles.caption, { color: palette.muted }]}
           numberOfLines={1}

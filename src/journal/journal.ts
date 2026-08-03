@@ -229,3 +229,46 @@ export function computeCurrentStreak(
   }
   return streak;
 }
+
+/**
+ * What each status is worth when the graph colours a day.
+ *
+ * The square used to darken by the NUMBER of entries, which meant a day
+ * marked missed five times looked exactly like a day prayed five times on
+ * time — the graph said "you logged" when the user read it as "you prayed",
+ * which is worse than saying nothing at all.
+ *
+ * A missed prayer is worth nothing, so it darkens nothing. Late and qadha
+ * are worth less than on time but far more than nothing: both mean the
+ * prayer was prayed, and a graph that flattened them to zero would tell a
+ * traveller making up Dhuhr on the road that the day was a write-off.
+ */
+export const STATUS_WEIGHT: Record<JournalStatus, number> = {
+  'on-time': 1,
+  late: 0.7,
+  qadha: 0.45,
+  missed: 0,
+};
+
+export type DayScore = {
+  /** 0…5, weighted by status — what the fill depth is drawn from. */
+  kept: number;
+  /** How many of the five have any entry at all, whatever it says. */
+  logged: number;
+};
+
+/**
+ * Every logged day, scored. `logged` is kept separately from `kept` so the
+ * graph can tell "nothing recorded" (blank paper) from "recorded, and none
+ * of them kept" (a mark, because the user did the work of logging it).
+ */
+export function scoreByDay(entries: JournalEntry[]): Map<string, DayScore> {
+  const out = new Map<string, DayScore>();
+  for (const e of entries) {
+    const cur = out.get(e.date) ?? { kept: 0, logged: 0 };
+    cur.kept += STATUS_WEIGHT[e.status] ?? 0;
+    cur.logged += 1;
+    out.set(e.date, cur);
+  }
+  return out;
+}

@@ -1207,7 +1207,9 @@
     "fastingTitle": "Fasting",
     "noFastLogged": "No fast recorded.",
     "markFasted": "Mark as fasted",
-    "unmarkFasted": "Unmark"
+    "unmarkFasted": "Unmark",
+    "showOnHome": "Show the graph on Home",
+    "showOnHomeHelp": "Adds your practice squares to the Today screen. Off by default."
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

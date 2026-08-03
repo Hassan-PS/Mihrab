@@ -1207,7 +1207,9 @@
     "fastingTitle": "Oruç",
     "noFastLogged": "Oruç kaydı yok.",
     "markFasted": "Oruçlu olarak işaretle",
-    "unmarkFasted": "İşareti kaldır"
+    "unmarkFasted": "İşareti kaldır",
+    "showOnHome": "Grafiği ana ekranda göster",
+    "showOnHomeHelp": "Karelerinizi Bugün ekranına ekler. Varsayılan olarak kapalı."
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

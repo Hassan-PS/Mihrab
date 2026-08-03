@@ -34,6 +34,7 @@ jest.mock('../src/hooks/useAppPalette', () => ({
       muted: '#6B7280',
       controlBg: '#F3EFE7',
       text: '#111111',
+      danger: '#B91C1C',
     },
   }),
 }));
@@ -135,6 +136,32 @@ describe('PracticeHeatmap', () => {
     expect(
       squareFor(tree, rows[0][0].key)!.props.accessibilityState.disabled,
     ).toBe(false);
+  });
+
+  it('draws a recorded-but-missed day differently from every other state', async () => {
+    // The reported bug: "despite what I enter it still gives the same
+    // colour". Three days, three states, three fills — and the missed one
+    // must not be blank paper either, or a day that went badly and a day
+    // nobody opened the app on would look identical.
+    const monday = dayKey(new Date(2026, 4, 11));
+    const tuesday = dayKey(new Date(2026, 4, 12));
+    const scores = new Map([
+      [monday, { kept: 0, logged: 5 }],
+      [tuesday, { kept: 5, logged: 5 }],
+    ]);
+    const rows = buildHeatmap(scores, new Set(), NOW, 13);
+    let tree!: Renderer;
+    await act(async () => {
+      tree = create(<PracticeHeatmap rows={rows} weekdayLabels={LABELS} />);
+    });
+    const fill = (key: string) => {
+      const style = squares(tree).find(n => n.props.testID === key)!.props.style;
+      return [style].flat(3).find(s => s && s.backgroundColor)?.backgroundColor;
+    };
+    const empty = fill(dayKey(new Date(2026, 4, 13)));
+    expect(fill(monday)).not.toBe(empty);
+    expect(fill(monday)).not.toBe(fill(tuesday));
+    expect(fill(tuesday)).not.toBe(empty);
   });
 
   it('is read-only when no handler is passed', async () => {

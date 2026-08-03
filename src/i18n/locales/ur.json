@@ -1207,7 +1207,9 @@
     "fastingTitle": "روزہ",
     "noFastLogged": "کوئی روزہ درج نہیں۔",
     "markFasted": "روزہ درج کریں",
-    "unmarkFasted": "نشان ہٹائیں"
+    "unmarkFasted": "نشان ہٹائیں",
+    "showOnHome": "ہوم پر گراف دکھائیں",
+    "showOnHomeHelp": "آپ کے مربع آج کی اسکرین پر شامل کرتا ہے۔ بطور طے شدہ بند۔"
   },
   "endOfDay": {
     "title": "آج کی نمازیں درج کریں؟",

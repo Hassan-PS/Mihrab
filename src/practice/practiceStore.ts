@@ -108,6 +108,24 @@ export function notifyPracticeChanged(): void {
   listeners.forEach(fn => fn());
 }
 
+/**
+ * Publish a value the writer already holds, without going back to disk.
+ *
+ * `notifyPracticeChanged` drops the cache and every subscriber re-reads —
+ * which is correct, and which means nothing can be published until the
+ * encrypted write has landed. On a journal with a year in it that is long
+ * enough to watch: you tap "On time", and the graph sits there. Worse, a
+ * caller that notified BEFORE its write would republish the stale blob.
+ *
+ * So the writer hands over the new value directly. Subscribers see it on
+ * the same frame as the tap, the disk write carries on behind them, and a
+ * failed write calls this again with the old value to put it back.
+ */
+export function primePractice(patch: Partial<PracticeData>): void {
+  cache = { ...(cache ?? EMPTY), ...patch };
+  listeners.forEach(fn => fn());
+}
+
 /** Record one completed dhikr set for today (the counter reached its target). */
 export async function recordDhikrSet(when: Date = new Date()): Promise<void> {
   const data = await loadPractice();
@@ -169,4 +187,39 @@ export function usePracticeToday(): PracticeToday {
     fastType: fast?.type ?? null,
     dhikrSets: d.dhikr[today] ?? 0,
   };
+}
+
+/**
+ * The whole history — for anything that draws the practice graph.
+ *
+ * `usePracticeToday` answers three questions about one day; the graph needs
+ * every day there has ever been. Both ride the same cache and the same
+ * change notification, so a prayer logged on the Log tab lands on Home's
+ * graph without either screen knowing about the other.
+ */
+export function usePracticeHistory(): {
+  hydrated: boolean;
+  journal: JournalEntry[];
+  fasts: FastEntry[];
+} {
+  const [data, setData] = useState<PracticeData | null>(cache);
+
+  useEffect(() => {
+    let cancelled = false;
+    const read = () => {
+      void loadPractice().then(d => {
+        if (!cancelled) setData(d);
+      });
+    };
+    read();
+    const listener = () => read();
+    listeners.add(listener);
+    return () => {
+      cancelled = true;
+      listeners.delete(listener);
+    };
+  }, []);
+
+  const d = data ?? EMPTY;
+  return { hydrated: data != null, journal: d.journal, fasts: d.fasts };
 }

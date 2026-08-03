@@ -1207,7 +1207,9 @@
     "fastingTitle": "रोज़ा",
     "noFastLogged": "कोई रोज़ा दर्ज नहीं।",
     "markFasted": "रोज़ा दर्ज करें",
-    "unmarkFasted": "हटाएँ"
+    "unmarkFasted": "हटाएँ",
+    "showOnHome": "होम पर ग्राफ़ दिखाएँ",
+    "showOnHomeHelp": "आपके अभ्यास के वर्ग आज की स्क्रीन पर जोड़ता है। डिफ़ॉल्ट रूप से बंद।"
   },
   "endOfDay": {
     "title": "आज की नमाज़ें दर्ज करें?",

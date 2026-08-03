@@ -50,7 +50,8 @@ import {
   FASTING_KEY,
   JOURNAL_KEY,
   dayKey,
-  notifyPracticeChanged,
+  primePractice,
+  usePracticeHistory,
 } from '../practice/practiceStore';
 import {
   buildHeatmap,
@@ -67,12 +68,14 @@ import {
   computeCurrentStreak,
   getEntryStatus,
   removeEntry,
+  scoreByDay,
   setEntryNote,
   upsertEntry,
   type JournalEntry,
   type JournalPrayer,
   type JournalStatus,
 } from '../journal/journal';
+import { upcomingPrayers } from '../journal/upcoming';
 import {
   coerceFastEntries,
   computeFastStats,
@@ -129,6 +132,17 @@ export function LogScreen() {
    */
   const [selected, setSelected] = useState(today);
   const isToday = selected === today;
+  /**
+   * Ticks once a minute, only while today is on screen. It exists so a row
+   * greyed out as "not yet" opens itself the minute the adhan time passes,
+   * instead of the user tapping a dead chip and wondering what is broken.
+   */
+  const [minuteTick, setMinuteTick] = useState(0);
+  useEffect(() => {
+    if (!isToday) return;
+    const id = setInterval(() => setMinuteTick(n => n + 1), 60000);
+    return () => clearInterval(id);
+  }, [isToday]);
   const selectedDate = useMemo(() => dateFromKey(selected), [selected]);
   /** Forward is barred past today — see the header comment. */
   const canGoForward = selected < today;
@@ -194,16 +208,35 @@ export function LogScreen() {
     };
   }, [t]);
 
+  /**
+   * Anything that writes practice data from OUTSIDE this screen — the
+   * end-of-day notification's "log the day" button, most of all — lands
+   * here without a reload. The screen keeps its own copy as the thing it
+   * renders and writes; this only pulls in changes it did not make.
+   */
+  const store = usePracticeHistory();
+  useEffect(() => {
+    if (!hydrated || !store.hydrated) return;
+    setEntries(cur => (cur === store.journal ? cur : store.journal));
+    setFasts(cur => (cur === store.fasts ? cur : store.fasts));
+  }, [hydrated, store.hydrated, store.journal, store.fasts]);
+
   const persistJournal = useCallback(
     async (next: JournalEntry[]) => {
       const prev = entries;
       setEntries(next);
+      // Published before the write, not after it. Encrypting and writing a
+      // journal with a year in it is long enough to watch, and every other
+      // surface — Home's graph, the Today summary — used to sit on the old
+      // value until it finished. `primePractice` hands over the value we
+      // already have rather than sending everyone back to disk for it.
+      primePractice({ journal: next });
       try {
         await durableEncryptedSet(JOURNAL_KEY, JSON.stringify(next));
-        notifyPracticeChanged();
       } catch (e) {
         console.warn('LogScreen journal persist failed', e);
         setEntries(prev);
+        primePractice({ journal: prev });
         Alert.alert(
           t('journal.saveFailedTitle', 'Could not save'),
           t('journal.saveFailedBody', 'Please try again.'),
@@ -217,12 +250,13 @@ export function LogScreen() {
     async (next: FastEntry[]) => {
       const prev = fasts;
       setFasts(next);
+      primePractice({ fasts: next });
       try {
         await durableEncryptedSet(FASTING_KEY, JSON.stringify(next));
-        notifyPracticeChanged();
       } catch (e) {
         console.warn('LogScreen fasting persist failed', e);
         setFasts(prev);
+        primePractice({ fasts: prev });
       }
     },
     [fasts],
@@ -269,16 +303,6 @@ export function LogScreen() {
     [draftNotes, entries, selected, persistJournal],
   );
 
-  const markAllOnTime = useCallback(() => {
-    let next = entries;
-    for (const p of PRAYERS) {
-      if (!getEntryStatus(next, selected, p)) {
-        next = upsertEntry(next, selected, p, 'on-time');
-      }
-    }
-    if (next !== entries) void persistJournal(next);
-  }, [entries, selected, persistJournal]);
-
   const dayFast = findFastEntry(fasts, selected);
   const toggleFast = useCallback(() => {
     if (dayFast) {
@@ -314,19 +338,24 @@ export function LogScreen() {
     return earliest;
   }, [entries, fasts]);
 
+  /**
+   * How far back the graph is drawn.
+   *
+   * Three inputs, because the graph has to cover everything the user can
+   * reach by any route: their first entry, the day they have currently
+   * open (the arrows walk into months with nothing logged in them, and a
+   * graph that stopped at the first entry left the open day off its own
+   * chart), and whatever they have asked for by dragging the grid back.
+   */
+  const [extraWeeks, setExtraWeeks] = useState(0);
+  const spanWeeks =
+    Math.max(weeksToCover(earliestLogged), weeksToCover(selected)) + extraWeeks;
+  const showMore = useCallback(() => setExtraWeeks(w => w + 26), []);
+
   const heatmapRows = useMemo(() => {
-    const byDay = new Map<string, number>();
-    for (const e of entries) {
-      byDay.set(e.date, (byDay.get(e.date) ?? 0) + 1);
-    }
     const fasted = new Set(fasts.filter(f => f.completed).map(f => f.date));
-    return buildHeatmap(
-      byDay,
-      fasted,
-      new Date(),
-      weeksToCover(earliestLogged),
-    );
-  }, [entries, fasts, earliestLogged]);
+    return buildHeatmap(scoreByDay(entries), fasted, new Date(), spanWeeks);
+  }, [entries, fasts, spanWeeks]);
 
   const weekdayLabels = useMemo(() => {
     // Monday-first initials in the app language.
@@ -417,6 +446,46 @@ export function LogScreen() {
   const isSunnahDay = isRecommendedVoluntaryFastDay(selectedDate);
   const ramadanDay = ramadanDayNumber(selectedDate);
 
+  /**
+   * Prayers that have not happened yet, and so cannot be logged.
+   *
+   * Only ever non-empty on today: a past day happened in full, and there is
+   * no future day to be on. It is deliberately keyed on the CLOCK, not on
+   * "is this the current prayer" — the honest question is whether the time
+   * has come, and the honest answer at 14:00 is that Isha has not.
+   *
+   * A day whose times we do not have (older than the cache, or logged in
+   * another city) greys out nothing. Refusing to record a prayer because
+   * the app has misplaced its timetable would be the app's problem charged
+   * to the user.
+   */
+  const upcoming = useMemo(
+    () => upcomingPrayers(PRAYERS, dayTimes, new Date(), isToday),
+    // `minuteTick` re-runs this as the clock passes each prayer, so a row
+    // un-greys itself while the screen is open rather than on next launch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isToday, dayTimes, minuteTick],
+  );
+
+  /**
+   * "Mark all on time" fills the prayers that HAVE HAPPENED and no others.
+   *
+   * It cannot be the loophole around the greyed-out chips. A button that
+   * quietly wrote "on time" against an Isha four hours away would put a
+   * claim in the user's own record that they never made, and that record is
+   * the entire product here.
+   */
+  const markAllOnTime = useCallback(() => {
+    let next = entries;
+    for (const p of PRAYERS) {
+      if (upcoming.has(p)) continue;
+      if (!getEntryStatus(next, selected, p)) {
+        next = upsertEntry(next, selected, p, 'on-time');
+      }
+    }
+    if (next !== entries) void persistJournal(next);
+  }, [entries, selected, persistJournal, upcoming]);
+
   /** "Sunday 2 August" — the day's own name, not a raw key. */
   const selectedLabel = useMemo(
     () =>
@@ -453,6 +522,7 @@ export function LogScreen() {
             weekdayLabels={weekdayLabels}
             selectedKey={selected}
             onSelectDay={setSelected}
+            onReachOldest={showMore}
             caption={`${t('log.streakCaption', {
               defaultValue: '{{count}}-day streak',
               count: streak,
@@ -548,6 +618,31 @@ export function LogScreen() {
           />
         </View>
 
+        {/* The same switch is in Settings. It lives here too because this is
+            where you are looking at the graph and deciding you want it in
+            front of you every time you open the app. */}
+        <View
+          style={[
+            styles.card,
+            styles.reminderRow,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <View style={styles.reminderCopy}>
+            <Text style={[styles.reminderTitle, { color: palette.text }]}>
+              {t('log.showOnHome')}
+            </Text>
+            <Text style={[styles.reminderHelp, { color: palette.muted }]}>
+              {t('log.showOnHomeHelp')}
+            </Text>
+          </View>
+          <Switch
+            value={settings.showPracticeOnHome}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor="#ffffff"
+            onValueChange={v => updateSettings({ showPracticeOnHome: v })}
+          />
+        </View>
+
         <View
           style={[
             styles.card,
@@ -561,6 +656,14 @@ export function LogScreen() {
             )?.note;
             const draftDirty = (savedNote ?? '') !== draft;
             const time = dayTimes?.[prayer];
+            /**
+             * Greyed out only while there is nothing to correct. The rule
+             * exists to stop a NEW claim being made about a prayer that
+             * has not happened; it must not trap one that somehow already
+             * exists — from an older build, or a mis-tap before the clock
+             * moved — behind four dead chips with no way to clear it.
+             */
+            const notYet = upcoming.has(prayer) && !current;
             return (
               <View
                 key={prayer}
@@ -616,7 +719,14 @@ export function LogScreen() {
                         key={s}
                         accessibilityRole="radio"
                         accessibilityLabel={t(`journal.status.${s}`)}
-                        accessibilityState={{ selected: isSel }}
+                        accessibilityState={{
+                          selected: isSel,
+                          disabled: notYet,
+                        }}
+                        // A prayer whose time has not come cannot be
+                        // recorded — in either direction. The chips are the
+                        // rule; "Mark all on time" obeys the same one.
+                        disabled={notYet}
                         onPress={() => onMark(prayer, s)}
                         style={[
                           styles.statusChip,
@@ -624,6 +734,7 @@ export function LogScreen() {
                             backgroundColor: isSel
                               ? palette.accentSolid
                               : palette.controlBg,
+                            opacity: notYet ? 0.4 : 1,
                           },
                         ]}>
                         <Text

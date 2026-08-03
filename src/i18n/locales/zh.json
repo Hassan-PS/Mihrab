@@ -1207,7 +1207,9 @@
     "fastingTitle": "斋戒",
     "noFastLogged": "未记录斋戒。",
     "markFasted": "标记为已斋戒",
-    "unmarkFasted": "取消标记"
+    "unmarkFasted": "取消标记",
+    "showOnHome": "在主页显示图表",
+    "showOnHomeHelp": "在“今天”页面显示你的功修方格。默认关闭。"
   },
   "endOfDay": {
     "title": "记录今天的拜功吗？",

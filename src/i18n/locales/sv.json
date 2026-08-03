@@ -1207,7 +1207,9 @@
     "fastingTitle": "Fasta",
     "noFastLogged": "Ingen fasta registrerad.",
     "markFasted": "Markera som fastad",
-    "unmarkFasted": "Avmarkera"
+    "unmarkFasted": "Avmarkera",
+    "showOnHome": "Visa grafen på startsidan",
+    "showOnHomeHelp": "Lägger till dina rutor på Idag-skärmen. Av som standard."
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

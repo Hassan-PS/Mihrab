@@ -40,6 +40,7 @@ import { QuranCard } from './home/QuranCard';
 import { PermissionBanners } from './home/PermissionBanners';
 import { ProviderFooter } from './home/ProviderFooter';
 import { DataStatsPanel } from './home/DataStatsPanel';
+import { PracticeCard } from './home/PracticeCard';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { TodaySummary } from './home/TodaySummary';
 import { CenteredColumn } from '../responsive/CenteredColumn';
@@ -756,6 +757,11 @@ export function HomeScreen() {
             onPress={handleOpenProviderPicker}
           />
         );
+        const practiceCard = settings.showPracticeOnHome ? (
+          <ErrorBoundary label="PracticeCard">
+            <PracticeCard />
+          </ErrorBoundary>
+        ) : null;
         const statsPanel = settings.showDataStats ? (
           <ErrorBoundary label="DataStatsPanel">
             <DataStatsPanel />
@@ -790,6 +796,7 @@ export function HomeScreen() {
               <View style={styles.dashSide}>
                 {quranShortcut}
                 {toolsGrid}
+                {practiceCard}
                 {ramadanCard}
                 {providerFooter}
                 {statsPanel}
@@ -803,6 +810,7 @@ export function HomeScreen() {
             {ramadanCard}
             {quranShortcut}
             {toolsGrid}
+            {practiceCard}
             {providerFooter}
             {statsPanel}
           </>

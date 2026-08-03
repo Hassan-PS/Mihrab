@@ -88,6 +88,12 @@ export type PrayerAppSettings = {
   /** Show the data-statistics card at the bottom of Home (source, coverage,
    *  refresh timing, last server-run status). Diagnostic; default off. */
   showDataStats: boolean;
+  /**
+   * Put the practice graph on Home as well as the Log tab. Off by default:
+   * Home is the screen you open to find out when to pray, and a record of
+   * how the last three months went is not that question.
+   */
+  showPracticeOnHome: boolean;
   calculationMethod: number | 'auto';
   school: number;
   locationMode: LocationMode;
@@ -296,6 +302,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   dataProviderAuto: true,
   dataStatsUnlocked: false,
   showDataStats: false,
+  showPracticeOnHome: false,
   calculationMethod: 'auto',
   school: 0,
   // Default to GPS so first-run users in Sweden (or anywhere) don't get

@@ -1207,7 +1207,9 @@
     "fastingTitle": "Puasa",
     "noFastLogged": "Tidak ada puasa tercatat.",
     "markFasted": "Tandai sudah berpuasa",
-    "unmarkFasted": "Batalkan tanda"
+    "unmarkFasted": "Batalkan tanda",
+    "showOnHome": "Tampilkan grafik di Beranda",
+    "showOnHomeHelp": "Menambahkan kotak praktik Anda ke layar Hari Ini. Mati secara bawaan."
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

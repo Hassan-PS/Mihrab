@@ -39,15 +39,16 @@ describe('buildHeatmap', () => {
     expect(rows[3][HEATMAP_WEEKS - 1].future).toBe(false);
   });
 
-  it('carries the prayer count and the fast independently', () => {
+  it('carries the day score and the fast independently', () => {
     const today = dayKey(NOW);
     const rows = buildHeatmap(
-      new Map([[today, 4]]),
+      new Map([[today, { kept: 4, logged: 4 }]]),
       new Set([today]),
       NOW,
     );
     const cell = rows[3][HEATMAP_WEEKS - 1];
-    expect(cell.prayers).toBe(4);
+    expect(cell.kept).toBe(4);
+    expect(cell.logged).toBe(4);
     expect(cell.fasted).toBe(true);
   });
 
@@ -57,7 +58,8 @@ describe('buildHeatmap', () => {
     const monday = dayKey(new Date(2026, 7, 3));
     const rows = buildHeatmap(new Map(), new Set([monday]), NOW);
     const cell = rows[0][HEATMAP_WEEKS - 1];
-    expect(cell.prayers).toBe(0);
+    expect(cell.kept).toBe(0);
+    expect(cell.logged).toBe(0);
     expect(cell.fasted).toBe(true);
   });
 

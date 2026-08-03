@@ -1207,7 +1207,9 @@
     "fastingTitle": "الصيام",
     "noFastLogged": "لم يُسجَّل صيام.",
     "markFasted": "تسجيل الصيام",
-    "unmarkFasted": "إلغاء التسجيل"
+    "unmarkFasted": "إلغاء التسجيل",
+    "showOnHome": "إظهار الرسم في الصفحة الرئيسية",
+    "showOnHomeHelp": "يضيف مربعات مواظبتك إلى شاشة اليوم. معطّل افتراضيًا."
   },
   "endOfDay": {
     "title": "تسجيل صلوات اليوم؟",

@@ -1207,7 +1207,9 @@
     "fastingTitle": "Ayuno",
     "noFastLogged": "Ningún ayuno registrado.",
     "markFasted": "Marcar como ayunado",
-    "unmarkFasted": "Quitar marca"
+    "unmarkFasted": "Quitar marca",
+    "showOnHome": "Mostrar el gráfico en Inicio",
+    "showOnHomeHelp": "Añade tus casillas a la pantalla de Hoy. Desactivado por defecto."
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",

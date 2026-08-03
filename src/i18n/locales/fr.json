@@ -1207,7 +1207,9 @@
     "fastingTitle": "Jeûne",
     "noFastLogged": "Aucun jeûne enregistré.",
     "markFasted": "Marquer comme jeûné",
-    "unmarkFasted": "Retirer"
+    "unmarkFasted": "Retirer",
+    "showOnHome": "Afficher le graphique sur l’accueil",
+    "showOnHomeHelp": "Ajoute vos carrés à l’écran Aujourd’hui. Désactivé par défaut."
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",
