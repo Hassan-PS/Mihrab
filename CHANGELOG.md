@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.8.7] — 2026-08-03
 
 ### Added
 - **The Log opens any day you have ever logged, not just today.** Arrows either side of the date step a day at a time, and every square in the practice graph is now a button that opens the day behind it — so a day months back is one tap, not a hundred. Everything on the screen follows: the four statuses, the private note, the fast, "Mark all on time". It writes to the day you are looking at, and it stops at today, because a log of the future is a plan. The prayer times shown next to each name are that day's, read back out of the local cache and put through your own per-prayer offsets; a day older than the cache simply shows no times rather than the wrong ones. A fast back-filled inside Ramadan is still recorded as a Ramadan fast, not a voluntary one.
