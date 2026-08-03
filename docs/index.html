@@ -182,8 +182,6 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 .channel span { display: block; font-size: 14.5px; color: var(--ink-soft); margin-top: 3px; }
 .channel a { font-weight: 600; }
 .channel code { font-size: 13px; }
-.channel.pending { border-style: dashed; }
-.channel.pending .glyph { color: var(--ink-soft); }
 .note {
   margin-top: 22px; font-size: 14.5px; color: var(--ink-soft); max-width: var(--measure);
 }
@@ -366,6 +364,9 @@ footer .colophon {
       <li><a href="https://play.google.com/store/apps/details?id=com.prayer_times">
         <img src="assets/img/badges/googleplay.png" width="564" height="168"
           alt="Get Mihrab on Google Play"></a></li>
+      <li><a href="https://f-droid.org/packages/com.prayer_times/">
+        <img src="assets/img/badges/fdroid.png" width="564" height="168"
+          alt="Get Mihrab on F-Droid"></a></li>
       <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest">
         <img src="assets/img/badges/github.png" width="564" height="168"
           alt="Get the Mihrab APK on GitHub"></a></li>
@@ -416,14 +417,13 @@ footer .colophon {
             to Obtainium</a> to auto-update straight from GitHub Releases.</span>
         </div>
       </li>
-      <li class="channel pending">
-        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg>
+      <li class="channel">
+        <svg class="glyph" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 5.5 7 3"/><path d="M15.5 5.5 17 3"/><rect x="4" y="5.5" width="16" height="14" rx="4.5"/><circle cx="9.5" cy="11.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="14.5" cy="11.5" r="1.2" fill="currentColor" stroke="none"/></svg>
         <div>
-          <b>F-Droid — pending</b>
-          <span>The recipe for <code>com.prayer_times</code> is merged; the listing is not live on
-            f-droid.org yet. Track
-            <a href="https://gitlab.com/fdroid/fdroiddata/-/merge_requests/36312">fdroiddata MR #36312</a>,
-            or take the APK above in the meantime.</span>
+          <b>F-Droid</b>
+          <span><a href="https://f-droid.org/packages/com.prayer_times/">f-droid.org/packages/com.prayer_times</a>
+            — built and signed by F-Droid from the recipe in this repo, with no Play Services
+            and nothing proprietary in the tree.</span>
         </div>
       </li>
     </ul>

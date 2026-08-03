@@ -3,15 +3,24 @@
  *
  * They were two screens with two visual languages recording the same act:
  * what you did today. Merged, they share one graph — green depth for
- * prayers, an amber ring for the fast — and one "today" column. The stats
+ * prayers, an amber ring for the fast — and one day column. The stats
  * trio and the two "all logged days" lists are gone: the graph already
- * shows the streak, so the number only has to name it, and thirteen weeks
- * of squares says more than a scrolling list of dates ever did.
+ * shows the streak, so the number only has to name it, and a wall of
+ * squares says more than a scrolling list of dates ever did.
  *
  * Everything either screen could DO is still here: the four statuses, the
  * private note per prayer, marking and unmarking a fast, the day-before
  * reminder and the sunnah calendar (behind "All upcoming", since a calendar
  * is reference, not a daily action).
+ *
+ * THE SCREEN SHOWS A DAY, not today. It used to be welded to `dayKey()`,
+ * which meant the journal could only ever be written forward: a prayer you
+ * forgot to mark last night was unreachable the next morning, and a record
+ * you cannot correct is one you stop trusting. Any day back to the first
+ * one you ever logged can be opened — with the arrows, or by tapping its
+ * square in the graph — and every control on the screen writes to whichever
+ * day is open. Forward stops at today, because a log of the future is a
+ * plan, and this screen is not for plans.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -46,7 +55,13 @@ import {
 import {
   buildHeatmap,
   PracticeHeatmap,
+  weeksToCover,
 } from '../practice/PracticeHeatmap';
+import { getCachedPrayerTimes } from '../prayer/prayerStorage';
+import { getEffectiveDataProvider } from '../settings/effectiveProvider';
+import { applyOffsets } from '../settings/prayerOffsets';
+import { injectNightTimes } from '../utils/nightTimes';
+import type { TimingsMap } from '../types/prayer';
 import {
   coerceJournalEntries,
   computeCurrentStreak,
@@ -76,6 +91,20 @@ import { useTabBarInset } from '../navigation/tabBarInset';
 const PRAYERS: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const STATUSES: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
 
+/**
+ * A `YYYY-MM-DD` key back into a local Date, anchored at noon.
+ *
+ * Noon and not midnight: adding or subtracting a day around a DST boundary
+ * can land on an hour that does not exist locally, and the resulting Date
+ * rolls into the neighbouring day. The log would then skip 30 March or
+ * repeat 26 October once a year, in exactly the countries that would never
+ * think to report it.
+ */
+function dateFromKey(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1, 12, 0, 0, 0);
+}
+
 export function LogScreen() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
@@ -94,6 +123,27 @@ export function LogScreen() {
   const [actionTargetPrayer, setActionTargetPrayer] =
     useState<JournalPrayer | null>(null);
   const today = dayKey();
+  /**
+   * The day being shown and written to. Defaults to today, and every write
+   * on this screen goes here rather than to `today`.
+   */
+  const [selected, setSelected] = useState(today);
+  const isToday = selected === today;
+  const selectedDate = useMemo(() => dateFromKey(selected), [selected]);
+  /** Forward is barred past today — see the header comment. */
+  const canGoForward = selected < today;
+
+  const stepDay = useCallback(
+    (delta: number) => {
+      setSelected(cur => {
+        const d = dateFromKey(cur);
+        d.setDate(d.getDate() + delta);
+        const next = dayKey(d);
+        return next > today ? cur : next;
+      });
+    },
+    [today],
+  );
 
   // Deep link from a prayer notification's "Log prayer" action: highlight
   // the row it names for a few seconds so the tap lands somewhere obvious.
@@ -104,6 +154,10 @@ export function LogScreen() {
       if (!id.startsWith(`${JOURNAL_LOG_ACTION_ID}:`)) return;
       const name = id.slice(JOURNAL_LOG_ACTION_ID.length + 1) as JournalPrayer;
       if (PRAYERS.includes(name)) {
+        // The notification is about today's prayer, so it also snaps the
+        // screen back to today — otherwise the highlight would land on a
+        // row belonging to whichever old day was left open.
+        setSelected(dayKey());
         setActionTargetPrayer(name);
         setTimeout(() => setActionTargetPrayer(null), 4000);
       }
@@ -174,75 +228,105 @@ export function LogScreen() {
     [fasts],
   );
 
-  // Hydrate note drafts once the store has been read.
+  /**
+   * Note drafts belong to the day on screen, so they are re-read whenever
+   * the day changes — not once on hydrate. Getting this wrong would carry
+   * one day's private note onto another and save it there.
+   */
   useEffect(() => {
     if (!hydrated) return;
     const next: Record<string, string> = {};
     for (const p of PRAYERS) {
-      const e = entries.find(x => x.date === today && x.prayer === p);
-      if (e?.note) next[p] = e.note;
+      const e = entries.find(x => x.date === selected && x.prayer === p);
+      next[p] = e?.note ?? '';
     }
-    setDraftNotes(prev => ({ ...next, ...prev }));
-    // First ready only — later edits to drafts must survive.
+    setDraftNotes(next);
+    setOpenNote(null);
+    // Deliberately not keyed on `entries`: re-running on every save would
+    // wipe whatever the user has typed since.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated]);
+  }, [hydrated, selected]);
 
   const onMark = useCallback(
     (prayer: JournalPrayer, status: JournalStatus) => {
       // Tapping the selected status again clears it — the only way to undo
       // a mis-tap.
-      if (getEntryStatus(entries, today, prayer) === status) {
-        void persistJournal(removeEntry(entries, today, prayer));
+      if (getEntryStatus(entries, selected, prayer) === status) {
+        void persistJournal(removeEntry(entries, selected, prayer));
         return;
       }
-      void persistJournal(upsertEntry(entries, today, prayer, status));
+      void persistJournal(upsertEntry(entries, selected, prayer, status));
     },
-    [entries, today, persistJournal],
+    [entries, selected, persistJournal],
   );
 
   const onSaveNote = useCallback(
     (prayer: JournalPrayer) => {
       void persistJournal(
-        setEntryNote(entries, today, prayer, draftNotes[prayer] ?? ''),
+        setEntryNote(entries, selected, prayer, draftNotes[prayer] ?? ''),
       );
     },
-    [draftNotes, entries, today, persistJournal],
+    [draftNotes, entries, selected, persistJournal],
   );
 
   const markAllOnTime = useCallback(() => {
     let next = entries;
     for (const p of PRAYERS) {
-      if (!getEntryStatus(next, today, p)) {
-        next = upsertEntry(next, today, p, 'on-time');
+      if (!getEntryStatus(next, selected, p)) {
+        next = upsertEntry(next, selected, p, 'on-time');
       }
     }
     if (next !== entries) void persistJournal(next);
-  }, [entries, today, persistJournal]);
+  }, [entries, selected, persistJournal]);
 
-  const todayFast = findFastEntry(fasts, today);
+  const dayFast = findFastEntry(fasts, selected);
   const toggleFast = useCallback(() => {
-    if (todayFast) {
-      void persistFasts(deleteFastEntry(fasts, today));
+    if (dayFast) {
+      void persistFasts(deleteFastEntry(fasts, selected));
       return;
     }
-    const ramadanDay = ramadanDayNumber(new Date());
+    // Ramadan is a property of the DAY being logged, not of the day the
+    // logging happens on — back-filling a fast in Ramadan from the week
+    // after must still record it as a Ramadan fast.
+    const ramadanDay = ramadanDayNumber(dateFromKey(selected));
     void persistFasts(
-      upsertFastEntry(fasts, today, {
+      upsertFastEntry(fasts, selected, {
         type: ramadanDay != null ? 'ramadan' : 'voluntary',
         completed: true,
       }),
     );
-  }, [fasts, today, todayFast, persistFasts]);
+  }, [fasts, selected, dayFast, persistFasts]);
 
   // ── The graph ────────────────────────────────────────────────────────
+  /**
+   * The oldest day with anything on it, across both stores — the graph is
+   * drawn back to this and no further. Fasts count as well as prayers: a
+   * Ramadan logged before the journal was ever used is still history.
+   */
+  const earliestLogged = useMemo(() => {
+    let earliest: string | null = null;
+    for (const e of entries) {
+      if (earliest === null || e.date < earliest) earliest = e.date;
+    }
+    for (const f of fasts) {
+      if (earliest === null || f.date < earliest) earliest = f.date;
+    }
+    return earliest;
+  }, [entries, fasts]);
+
   const heatmapRows = useMemo(() => {
     const byDay = new Map<string, number>();
     for (const e of entries) {
       byDay.set(e.date, (byDay.get(e.date) ?? 0) + 1);
     }
     const fasted = new Set(fasts.filter(f => f.completed).map(f => f.date));
-    return buildHeatmap(byDay, fasted);
-  }, [entries, fasts]);
+    return buildHeatmap(
+      byDay,
+      fasted,
+      new Date(),
+      weeksToCover(earliestLogged),
+    );
+  }, [entries, fasts, earliestLogged]);
 
   const weekdayLabels = useMemo(() => {
     // Monday-first initials in the app language.
@@ -259,9 +343,95 @@ export function LogScreen() {
   const streak = computeCurrentStreak(entries);
   const fastStats = computeFastStats(fasts);
 
-  const maghrib = state.phase === 'ready' ? state.today?.Maghrib : undefined;
-  const isSunnahDay = isRecommendedVoluntaryFastDay(new Date());
-  const ramadanDay = ramadanDayNumber(new Date());
+  /**
+   * The selected day's prayer times, for the row labels and the iftar line.
+   *
+   * Today comes straight from `usePrayerDay`, which is already loaded and
+   * already carries the user's per-prayer offsets. An older day is read
+   * from the local cache and put through the same two transforms, so the
+   * time next to "Asr" here is the one the rest of the app would have
+   * shown that day rather than a raw provider value four minutes off.
+   *
+   * A miss is normal and silent: the cache holds about a year, and a day
+   * older than that — or one logged in another city — simply shows no
+   * times. Nothing on this screen depends on them.
+   */
+  const [pastTimes, setPastTimes] = useState<TimingsMap | null>(null);
+  const coords =
+    state.phase === 'ready'
+      ? { latitude: state.latitude, longitude: state.longitude }
+      : null;
+  const lat = coords?.latitude;
+  const lon = coords?.longitude;
+  useEffect(() => {
+    if (isToday || lat === undefined || lon === undefined) {
+      setPastTimes(null);
+      return;
+    }
+    let cancelled = false;
+    void getCachedPrayerTimes({
+      provider: getEffectiveDataProvider(
+        settings.dataProviderAuto,
+        settings.dataProvider,
+        { latitude: lat, longitude: lon },
+      ),
+      latitude: lat,
+      longitude: lon,
+      date: dateFromKey(selected),
+      calculationMethod: settings.calculationMethod,
+      school: settings.school,
+    })
+      .then(raw => {
+        if (cancelled) return;
+        setPastTimes(
+          raw
+            ? injectNightTimes([applyOffsets(raw, settings.prayerOffsets)])[0]
+            : null,
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setPastTimes(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isToday,
+    selected,
+    lat,
+    lon,
+    settings.dataProviderAuto,
+    settings.dataProvider,
+    settings.calculationMethod,
+    settings.school,
+    settings.prayerOffsets,
+  ]);
+
+  const dayTimes = isToday
+    ? state.phase === 'ready'
+      ? state.today
+      : undefined
+    : (pastTimes ?? undefined);
+
+  const maghrib = dayTimes?.Maghrib;
+  const isSunnahDay = isRecommendedVoluntaryFastDay(selectedDate);
+  const ramadanDay = ramadanDayNumber(selectedDate);
+
+  /** "Sunday 2 August" — the day's own name, not a raw key. */
+  const selectedLabel = useMemo(
+    () =>
+      selectedDate.toLocaleDateString(i18n.language, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        // The year only when it is not the current one — it is noise for
+        // the ninety percent of visits that land in the last few months.
+        ...(selectedDate.getFullYear() === new Date().getFullYear()
+          ? {}
+          : { year: 'numeric' }),
+      }),
+    [selectedDate, i18n.language],
+  );
 
   return (
     <ScrollView
@@ -276,11 +446,13 @@ export function LogScreen() {
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <Text style={[styles.sectionTitle, { color: palette.muted }]}>
-            {t('log.last13Weeks', 'Last 13 weeks')}
+            {t('log.practiceTitle')}
           </Text>
           <PracticeHeatmap
             rows={heatmapRows}
             weekdayLabels={weekdayLabels}
+            selectedKey={selected}
+            onSelectDay={setSelected}
             caption={`${t('log.streakCaption', {
               defaultValue: '{{count}}-day streak',
               count: streak,
@@ -291,11 +463,53 @@ export function LogScreen() {
           />
         </View>
 
-        {/* ── Today ─────────────────────────────────────────────────── */}
+        {/* ── The day being logged ──────────────────────────────────── */}
+        <View style={styles.dayBar}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('log.previousDay')}
+            onPress={() => stepDay(-1)}
+            hitSlop={10}
+            style={[styles.dayArrow, { backgroundColor: palette.controlBg }]}>
+            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>‹</Text>
+          </Pressable>
+          <View style={styles.dayNameWrap}>
+            <Text
+              style={[styles.dayName, { color: palette.text }]}
+              numberOfLines={1}>
+              {isToday ? t('journal.todayLabel') : selectedLabel}
+            </Text>
+            {isToday ? null : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('log.backToToday')}
+                onPress={() => setSelected(today)}
+                hitSlop={6}>
+                <Text style={[styles.backToToday, { color: palette.accent }]}>
+                  {t('log.backToToday')}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('log.nextDay')}
+            // Tomorrow is not a thing you can have prayed.
+            disabled={!canGoForward}
+            onPress={() => stepDay(1)}
+            hitSlop={10}
+            style={[
+              styles.dayArrow,
+              {
+                backgroundColor: palette.controlBg,
+                opacity: canGoForward ? 1 : 0.35,
+              },
+            ]}>
+            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>›</Text>
+          </Pressable>
+        </View>
         <View style={styles.todayHeader}>
-          <Text style={[styles.sectionTitle, { color: palette.muted }]}>
-            {t('journal.todayLabel')}
-          </Text>
+          <View style={{ flex: 1 }} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('log.markAllOnTime', 'Mark all on time')}
@@ -340,14 +554,13 @@ export function LogScreen() {
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           {PRAYERS.map((prayer, index) => {
-            const current = getEntryStatus(entries, today, prayer);
+            const current = getEntryStatus(entries, selected, prayer);
             const draft = draftNotes[prayer] ?? '';
             const savedNote = entries.find(
-              e => e.date === today && e.prayer === prayer,
+              e => e.date === selected && e.prayer === prayer,
             )?.note;
             const draftDirty = (savedNote ?? '') !== draft;
-            const time =
-              state.phase === 'ready' ? state.today?.[prayer] : undefined;
+            const time = dayTimes?.[prayer];
             return (
               <View
                 key={prayer}
@@ -480,18 +693,18 @@ export function LogScreen() {
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
           <Text style={[styles.sectionTitle, { color: palette.muted }]}>
-            {t('log.fastingToday', 'Fasting today')}
+            {t('log.fastingTitle')}
           </Text>
           <View style={styles.fastRow}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.fastState, { color: palette.text }]}>
-                {todayFast
+                {dayFast
                   ? t('fasting.statusKept')
                   : ramadanDay != null
                     ? t('fasting.ramadanDayLabel', { day: ramadanDay })
                     : isSunnahDay
                       ? t('fasting.statusRecommended')
-                      : t('fasting.statusOptional')}
+                      : t('log.noFastLogged')}
               </Text>
               {maghrib ? (
                 <Text
@@ -504,16 +717,18 @@ export function LogScreen() {
                 </Text>
               ) : null}
             </View>
+            {/* Neutral wording in both states: "Mark TODAY as fasted" was
+                a lie on every day but one, now that older days open here. */}
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={
-                todayFast ? t('fasting.unmarkCta') : t('fasting.markCta')
+                dayFast ? t('log.unmarkFasted') : t('log.markFasted')
               }
               onPress={toggleFast}
               style={[
                 styles.fastCta,
                 {
-                  backgroundColor: todayFast
+                  backgroundColor: dayFast
                     ? palette.controlBg
                     : palette.accentSolid,
                 },
@@ -521,9 +736,9 @@ export function LogScreen() {
               <Text
                 style={[
                   styles.fastCtaLabel,
-                  { color: todayFast ? palette.text : palette.onAccent },
+                  { color: dayFast ? palette.text : palette.onAccent },
                 ]}>
-                {todayFast ? t('fasting.unmarkCta') : t('fasting.markCta')}
+                {dayFast ? t('log.unmarkFasted') : t('log.markFasted')}
               </Text>
             </Pressable>
           </View>
@@ -568,6 +783,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 4,
   },
+  dayBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 8,
+  },
+  dayArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayArrowGlyph: { fontSize: 20, fontWeight: '700', lineHeight: 22 },
+  dayNameWrap: { flex: 1, alignItems: 'center' },
+  dayName: { fontSize: 16, fontWeight: '700' },
+  backToToday: { fontSize: 12, fontWeight: '700', marginTop: 1 },
   ghostBtn: {
     paddingHorizontal: 11,
     paddingVertical: 6,

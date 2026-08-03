@@ -1191,17 +1191,23 @@
     "serverCoverage": "Покрытие сервера"
   },
   "log": {
-    "last13Weeks": "Последние 13 недель",
     "legendPrayers": "0 → 5 молитв",
     "fasted": "пост",
     "dayA11y": "{{date}}: отмечено молитв: {{prayers}}{{fast}}",
     "streakCaption": "серия {{count}} дней",
     "fastsCaption": "постов: {{count}}",
     "markAllOnTime": "Отметить все вовремя",
-    "fastingToday": "Пост сегодня",
     "iftarAt": "Ифтар {{time}}",
     "allUpcoming": "Все предстоящие",
-    "title": "Журнал"
+    "title": "Журнал",
+    "practiceTitle": "Практика",
+    "previousDay": "Предыдущий день",
+    "nextDay": "Следующий день",
+    "backToToday": "Вернуться к сегодня",
+    "fastingTitle": "Пост",
+    "noFastLogged": "Пост не отмечен.",
+    "markFasted": "Отметить пост",
+    "unmarkFasted": "Снять отметку"
   },
   "endOfDay": {
     "title": "Отметить сегодняшние молитвы?",

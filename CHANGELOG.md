@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **The Log opens any day you have ever logged, not just today.** Arrows either side of the date step a day at a time, and every square in the practice graph is now a button that opens the day behind it — so a day months back is one tap, not a hundred. Everything on the screen follows: the four statuses, the private note, the fast, "Mark all on time". It writes to the day you are looking at, and it stops at today, because a log of the future is a plan. The prayer times shown next to each name are that day's, read back out of the local cache and put through your own per-prayer offsets; a day older than the cache simply shows no times rather than the wrong ones. A fast back-filled inside Ramadan is still recorded as a Ramadan fast, not a voluntary one.
+- **The practice graph reaches the first day you ever logged, and scrolls.** It was thirteen fixed weeks, defended at the time on the grounds that a hard month should scroll out of view rather than stand as a monument — which protected you from your own record and took the record with it. A year in, every square earned before April was simply gone. The grid now runs from the Monday of your earliest entry to this week, with a month name over each column that opens one (and the year on every January), and it opens parked on today so the default view is still the recent one. Fasts count towards the span as well as prayers, so a Ramadan logged before you ever used the journal still pulls the graph back to itself.
+
+### Changed
+- **F-Droid.** Mihrab is in the F-Droid repository — the recipe merged upstream on 1 August. The website and the README carry a "Get it on F-Droid" button pointing at the listing, and the merge-request link they used to track is gone from both.
+
 ## [2.8.6] — 2026-08-02
 
 Two things the 2.8.5 design pass got wrong on real devices.

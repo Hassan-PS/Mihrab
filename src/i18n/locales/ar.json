@@ -1191,17 +1191,23 @@
     "serverCoverage": "تغطية الخادم"
   },
   "log": {
-    "last13Weeks": "آخر 13 أسبوعًا",
     "legendPrayers": "0 ← 5 صلوات",
     "fasted": "صام",
     "dayA11y": "{{date}}: {{prayers}} صلوات مسجلة{{fast}}",
     "streakCaption": "سلسلة {{count}} يومًا",
     "fastsCaption": "{{count}} صيامًا",
     "markAllOnTime": "تسجيل الكل في وقتها",
-    "fastingToday": "صيام اليوم",
     "iftarAt": "الإفطار {{time}}",
     "allUpcoming": "كل القادم",
-    "title": "السجل"
+    "title": "السجل",
+    "practiceTitle": "سجل العبادة",
+    "previousDay": "اليوم السابق",
+    "nextDay": "اليوم التالي",
+    "backToToday": "العودة إلى اليوم",
+    "fastingTitle": "الصيام",
+    "noFastLogged": "لم يُسجَّل صيام.",
+    "markFasted": "تسجيل الصيام",
+    "unmarkFasted": "إلغاء التسجيل"
   },
   "endOfDay": {
     "title": "تسجيل صلوات اليوم؟",

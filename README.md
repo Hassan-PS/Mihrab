@@ -13,6 +13,7 @@
 
   <a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="branding/badges/appstore.png" alt="Download on the App Store" height="70"></a>
   <a href="https://play.google.com/store/apps/details?id=com.prayer_times"><img src="branding/badges/googleplay.png" alt="Get it on Google Play" height="70"></a>
+  <a href="https://f-droid.org/packages/com.prayer_times/"><img src="branding/badges/fdroid.png" alt="Get it on F-Droid" height="70"></a>
   <a href="https://github.com/Hassan-PS/Mihrab/releases"><img src="branding/badges/github.png" alt="Get it on GitHub" height="70"></a>
   <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.prayer_times%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FHassan-PS%2FMihrab%22%2C%22author%22%3A%22Hassan-PS%22%2C%22name%22%3A%22Mihrab%22%7D"><img src="branding/badges/obtainium.png" alt="Add to Obtainium" height="70"></a>
 
@@ -79,7 +80,7 @@
 | **Android APK** | [GitHub Releases](https://github.com/Hassan-PS/Mihrab/releases) → `app-fdroid-release.apk` (arm64) |
 | **Android (Obtainium)** | [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/Mihrab) — auto-updates directly from GitHub Releases |
 | **Google Play** | [Google Play](https://play.google.com/store/apps/details?id=com.prayer_times) |
-| **F-Droid** | Coming soon ([MR #36312](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/36312)) |
+| **F-Droid** | [f-droid.org/packages/com.prayer_times](https://f-droid.org/packages/com.prayer_times/) |
 
 ---
 

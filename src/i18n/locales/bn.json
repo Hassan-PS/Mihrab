@@ -1191,17 +1191,23 @@
     "serverCoverage": "সার্ভার কভারেজ"
   },
   "log": {
-    "last13Weeks": "গত ১৩ সপ্তাহ",
     "legendPrayers": "০ → ৫ নামাজ",
     "fasted": "রোজা",
     "dayA11y": "{{date}}: {{prayers}} নামাজ লেখা{{fast}}",
     "streakCaption": "{{count}} দিনের ধারা",
     "fastsCaption": "{{count}} রোজা",
     "markAllOnTime": "সব সময়মতো চিহ্নিত করুন",
-    "fastingToday": "আজকের রোজা",
     "iftarAt": "ইফতার {{time}}",
     "allUpcoming": "সব আসন্ন",
-    "title": "লগ"
+    "title": "লগ",
+    "practiceTitle": "অনুশীলন",
+    "previousDay": "আগের দিন",
+    "nextDay": "পরের দিন",
+    "backToToday": "আজকে ফিরে যান",
+    "fastingTitle": "রোজা",
+    "noFastLogged": "কোনো রোজা রেকর্ড করা হয়নি।",
+    "markFasted": "রোজা হিসেবে চিহ্নিত করুন",
+    "unmarkFasted": "চিহ্ন সরান"
   },
   "endOfDay": {
     "title": "আজকের নামাজ লগ করবেন?",

@@ -1191,17 +1191,23 @@
     "serverCoverage": "Sunucu kapsamı"
   },
   "log": {
-    "last13Weeks": "Son 13 hafta",
     "legendPrayers": "0 → 5 namaz",
     "fasted": "oruç",
     "dayA11y": "{{date}}: {{prayers}} namaz kaydedildi{{fast}}",
     "streakCaption": "{{count}} günlük seri",
     "fastsCaption": "{{count}} oruç",
     "markAllOnTime": "Hepsini vaktinde işaretle",
-    "fastingToday": "Bugün oruç",
     "iftarAt": "İftar {{time}}",
     "allUpcoming": "Yaklaşan tümü",
-    "title": "Kayıt"
+    "title": "Kayıt",
+    "practiceTitle": "İbadet geçmişi",
+    "previousDay": "Önceki gün",
+    "nextDay": "Sonraki gün",
+    "backToToday": "Bugüne dön",
+    "fastingTitle": "Oruç",
+    "noFastLogged": "Oruç kaydı yok.",
+    "markFasted": "Oruçlu olarak işaretle",
+    "unmarkFasted": "İşareti kaldır"
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

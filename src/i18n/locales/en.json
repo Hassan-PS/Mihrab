@@ -1191,17 +1191,23 @@
     "serverCoverage": "Server coverage"
   },
   "log": {
-    "last13Weeks": "Last 13 weeks",
     "legendPrayers": "0 → 5 prayers",
     "fasted": "fasted",
     "dayA11y": "{{date}}: {{prayers}} prayers logged{{fast}}",
     "streakCaption": "{{count}}-day streak",
     "fastsCaption": "{{count}} fasts",
     "markAllOnTime": "Mark all on time",
-    "fastingToday": "Fasting today",
     "iftarAt": "Iftar {{time}}",
     "allUpcoming": "All upcoming",
-    "title": "Log"
+    "title": "Log",
+    "practiceTitle": "Practice",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "backToToday": "Back to today",
+    "fastingTitle": "Fasting",
+    "noFastLogged": "No fast recorded.",
+    "markFasted": "Mark as fasted",
+    "unmarkFasted": "Unmark"
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

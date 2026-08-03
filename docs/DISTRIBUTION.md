@@ -40,7 +40,7 @@ Every production release does these once, in order:
 4. **Tag the commit** `vX.Y.Z` (or `vX.Y.Z-beta.N` for prereleases) and push the tag.
 5. **Build the Android binaries locally** (next sections).
 6. **Create a GitHub release** with the F-Droid APK attached.
-7. **Mirror the F-Droid recipe** + push the fdroiddata fork branch (auto-updates MR 36312).
+7. **Nothing for F-Droid** — the recipe is merged and set to auto-update from tags. See §2.
 8. **Upload the Play AAB** to the Play Console.
 
 For beta tags, swap the Gradle commands for `assembleFdroidBeta` / `bundlePlayBeta` and mark the GitHub release as **prerelease**.
@@ -56,13 +56,26 @@ F-Droid builds the APK themselves on their CI from a public tag. We don't ship a
 | Path | Role |
 |---|---|
 | `contrib/fdroid/com.prayer_times.yml` | **Local copy of the recipe**, source of truth in this repo. |
-| `~/git/fdroiddata/metadata/com.prayer_times.yml` | **Upstream copy**, lives in the Hassan-PS/fdroiddata fork. We mirror after every bump. |
-| https://gitlab.com/fdroid/fdroiddata/-/merge_requests/36312 | **The MR**, branch `add-com.prayer_times`. Pushes to the fork auto-update the MR. |
+| `~/git/fdroiddata/metadata/com.prayer_times.yml` | **Upstream copy**, now merged into `fdroid/fdroiddata` master. |
+| https://f-droid.org/packages/com.prayer_times/ | **The listing.** Live once F-Droid's builder has run against a tag. |
 | `contrib/fdroid/README.md` | The submission-kit README. Outside contributors read this. |
 | `contrib/fdroid/PRE_MERGE_CHECKLIST.md` | Local sanity checks before pushing. |
 | `contrib/fdroid/MERGE_REQUEST.md` | Suggested MR title / description for GitLab. |
 
 ### Per-release flow
+
+**Since the MR merged (1 Aug 2026) there is nothing to do per release.** The
+recipe carries `AutoUpdateMode: Version` + `UpdateCheckMode: Tags`, so
+F-Droid's own checkupdates bot adds each new version from the git tag. Two
+consequences worth holding on to:
+
+- **Do not delete or move a pushed tag.** The bot may already have written a
+  build entry pointing at it, and F-Droid's build then fails on a missing ref.
+- Only file an MR by hand if the *recipe* itself has to change — a new NDK, a
+  new gradle prop, a new source dependency — not for a version bump.
+
+The manual flow below is kept for that case, and for anyone forking this
+setup from scratch.
 
 1. Bump versions (step 1 of the shared flow).
 2. Tag the release `v2.x.y` and push the tag. **The recipe references tag refs, not commit hashes** — F-Droid CI enforces this.

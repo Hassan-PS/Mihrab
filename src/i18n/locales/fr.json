@@ -1191,17 +1191,23 @@
     "serverCoverage": "Couverture serveur"
   },
   "log": {
-    "last13Weeks": "13 dernières semaines",
     "legendPrayers": "0 → 5 prières",
     "fasted": "jeûné",
     "dayA11y": "{{date}} : {{prayers}} prières enregistrées{{fast}}",
     "streakCaption": "série de {{count}} jours",
     "fastsCaption": "{{count}} jeûnes",
     "markAllOnTime": "Tout marquer à l'heure",
-    "fastingToday": "Jeûne aujourd'hui",
     "iftarAt": "Iftar {{time}}",
     "allUpcoming": "Tout à venir",
-    "title": "Journal"
+    "title": "Journal",
+    "practiceTitle": "Pratique",
+    "previousDay": "Jour précédent",
+    "nextDay": "Jour suivant",
+    "backToToday": "Revenir à aujourd’hui",
+    "fastingTitle": "Jeûne",
+    "noFastLogged": "Aucun jeûne enregistré.",
+    "markFasted": "Marquer comme jeûné",
+    "unmarkFasted": "Retirer"
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",

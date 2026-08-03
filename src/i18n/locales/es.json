@@ -1191,17 +1191,23 @@
     "serverCoverage": "Cobertura del servidor"
   },
   "log": {
-    "last13Weeks": "Últimas 13 semanas",
     "legendPrayers": "0 → 5 oraciones",
     "fasted": "ayunó",
     "dayA11y": "{{date}}: {{prayers}} oraciones registradas{{fast}}",
     "streakCaption": "racha de {{count}} días",
     "fastsCaption": "{{count}} ayunos",
     "markAllOnTime": "Marcar todas a tiempo",
-    "fastingToday": "Ayuno de hoy",
     "iftarAt": "Iftar {{time}}",
     "allUpcoming": "Todos los próximos",
-    "title": "Registro"
+    "title": "Registro",
+    "practiceTitle": "Práctica",
+    "previousDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "backToToday": "Volver a hoy",
+    "fastingTitle": "Ayuno",
+    "noFastLogged": "Ningún ayuno registrado.",
+    "markFasted": "Marcar como ayunado",
+    "unmarkFasted": "Quitar marca"
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",

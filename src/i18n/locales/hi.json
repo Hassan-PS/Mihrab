@@ -1191,17 +1191,23 @@
     "serverCoverage": "सर्वर कवरेज"
   },
   "log": {
-    "last13Weeks": "पिछले 13 सप्ताह",
     "legendPrayers": "0 → 5 नमाज़ें",
     "fasted": "रोज़ा",
     "dayA11y": "{{date}}: {{prayers}} नमाज़ें दर्ज{{fast}}",
     "streakCaption": "{{count}} दिन की लय",
     "fastsCaption": "{{count}} रोज़े",
     "markAllOnTime": "सभी समय पर चिह्नित करें",
-    "fastingToday": "आज का रोज़ा",
     "iftarAt": "इफ़्तार {{time}}",
     "allUpcoming": "सभी आगामी",
-    "title": "लॉग"
+    "title": "लॉग",
+    "practiceTitle": "अभ्यास",
+    "previousDay": "पिछला दिन",
+    "nextDay": "अगला दिन",
+    "backToToday": "आज पर लौटें",
+    "fastingTitle": "रोज़ा",
+    "noFastLogged": "कोई रोज़ा दर्ज नहीं।",
+    "markFasted": "रोज़ा दर्ज करें",
+    "unmarkFasted": "हटाएँ"
   },
   "endOfDay": {
     "title": "आज की नमाज़ें दर्ज करें?",

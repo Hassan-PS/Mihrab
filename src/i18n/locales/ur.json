@@ -1191,17 +1191,23 @@
     "serverCoverage": "سرور کوریج"
   },
   "log": {
-    "last13Weeks": "گزشتہ 13 ہفتے",
     "legendPrayers": "0 ← 5 نمازیں",
     "fasted": "روزہ",
     "dayA11y": "{{date}}: {{prayers}} نمازیں درج{{fast}}",
     "streakCaption": "{{count}} دن کا سلسلہ",
     "fastsCaption": "{{count}} روزے",
     "markAllOnTime": "سب کو وقت پر نشان زد کریں",
-    "fastingToday": "آج کا روزہ",
     "iftarAt": "افطار {{time}}",
     "allUpcoming": "تمام آئندہ",
-    "title": "ریکارڈ"
+    "title": "ریکارڈ",
+    "practiceTitle": "عمل",
+    "previousDay": "پچھلا دن",
+    "nextDay": "اگلا دن",
+    "backToToday": "آج پر واپس",
+    "fastingTitle": "روزہ",
+    "noFastLogged": "کوئی روزہ درج نہیں۔",
+    "markFasted": "روزہ درج کریں",
+    "unmarkFasted": "نشان ہٹائیں"
   },
   "endOfDay": {
     "title": "آج کی نمازیں درج کریں؟",

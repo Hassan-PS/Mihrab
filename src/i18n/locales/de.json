@@ -1191,17 +1191,23 @@
     "serverCoverage": "Server-Abdeckung"
   },
   "log": {
-    "last13Weeks": "Letzte 13 Wochen",
     "legendPrayers": "0 → 5 Gebete",
     "fasted": "gefastet",
     "dayA11y": "{{date}}: {{prayers}} Gebete erfasst{{fast}}",
     "streakCaption": "{{count}}-Tage-Serie",
     "fastsCaption": "{{count}} Fastentage",
     "markAllOnTime": "Alle als pünktlich",
-    "fastingToday": "Fasten heute",
     "iftarAt": "Iftar {{time}}",
     "allUpcoming": "Alle kommenden",
-    "title": "Protokoll"
+    "title": "Protokoll",
+    "practiceTitle": "Verlauf",
+    "previousDay": "Vorheriger Tag",
+    "nextDay": "Nächster Tag",
+    "backToToday": "Zurück zu heute",
+    "fastingTitle": "Fasten",
+    "noFastLogged": "Kein Fasten erfasst.",
+    "markFasted": "Als gefastet markieren",
+    "unmarkFasted": "Markierung entfernen"
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

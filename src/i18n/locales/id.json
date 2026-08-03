@@ -1191,17 +1191,23 @@
     "serverCoverage": "Cakupan server"
   },
   "log": {
-    "last13Weeks": "13 pekan terakhir",
     "legendPrayers": "0 → 5 salat",
     "fasted": "puasa",
     "dayA11y": "{{date}}: {{prayers}} salat dicatat{{fast}}",
     "streakCaption": "{{count}} hari berturut",
     "fastsCaption": "{{count}} puasa",
     "markAllOnTime": "Tandai semua tepat waktu",
-    "fastingToday": "Puasa hari ini",
     "iftarAt": "Buka puasa {{time}}",
     "allUpcoming": "Semua mendatang",
-    "title": "Catatan"
+    "title": "Catatan",
+    "practiceTitle": "Praktik",
+    "previousDay": "Hari sebelumnya",
+    "nextDay": "Hari berikutnya",
+    "backToToday": "Kembali ke hari ini",
+    "fastingTitle": "Puasa",
+    "noFastLogged": "Tidak ada puasa tercatat.",
+    "markFasted": "Tandai sudah berpuasa",
+    "unmarkFasted": "Batalkan tanda"
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

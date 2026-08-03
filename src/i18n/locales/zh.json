@@ -1191,17 +1191,23 @@
     "serverCoverage": "服务器覆盖天数"
   },
   "log": {
-    "last13Weeks": "最近 13 周",
     "legendPrayers": "0 → 5 次礼拜",
     "fasted": "已斋戒",
     "dayA11y": "{{date}}：已记录 {{prayers}} 次礼拜{{fast}}",
     "streakCaption": "连续 {{count}} 天",
     "fastsCaption": "{{count}} 次斋戒",
     "markAllOnTime": "全部标记为准时",
-    "fastingToday": "今日斋戒",
     "iftarAt": "开斋 {{time}}",
     "allUpcoming": "全部即将到来",
-    "title": "记录"
+    "title": "记录",
+    "practiceTitle": "功修记录",
+    "previousDay": "前一天",
+    "nextDay": "后一天",
+    "backToToday": "回到今天",
+    "fastingTitle": "斋戒",
+    "noFastLogged": "未记录斋戒。",
+    "markFasted": "标记为已斋戒",
+    "unmarkFasted": "取消标记"
   },
   "endOfDay": {
     "title": "记录今天的拜功吗？",

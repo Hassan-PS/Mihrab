@@ -1191,17 +1191,23 @@
     "serverCoverage": "Servertäckning"
   },
   "log": {
-    "last13Weeks": "Senaste 13 veckorna",
     "legendPrayers": "0 → 5 böner",
     "fasted": "fastade",
     "dayA11y": "{{date}}: {{prayers}} böner loggade{{fast}}",
     "streakCaption": "{{count}} dagar i rad",
     "fastsCaption": "{{count}} fastor",
     "markAllOnTime": "Markera alla i tid",
-    "fastingToday": "Fasta idag",
     "iftarAt": "Iftar {{time}}",
     "allUpcoming": "Alla kommande",
-    "title": "Logg"
+    "title": "Logg",
+    "practiceTitle": "Utövande",
+    "previousDay": "Föregående dag",
+    "nextDay": "Nästa dag",
+    "backToToday": "Tillbaka till idag",
+    "fastingTitle": "Fasta",
+    "noFastLogged": "Ingen fasta registrerad.",
+    "markFasted": "Markera som fastad",
+    "unmarkFasted": "Avmarkera"
   },
   "endOfDay": {
     "title": "Logga dagens böner?",
