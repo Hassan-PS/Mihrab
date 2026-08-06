@@ -111,13 +111,30 @@ else
   fail "docs/index.html does not name $VERSION — run: node scripts/sync-version.js"
 fi
 
-LIVE="$(curl -fsS --max-time 20 https://mihrab.elghamri.se/ 2>/dev/null || true)"
+LIVE="$(curl -fsS --max-time 20 "https://mihrab.elghamri.se/?bust=$$" 2>/dev/null || true)"
 if [ -z "$LIVE" ]; then
   fail "could not fetch the live site to check its version"
 elif printf '%s' "$LIVE" | grep -q "Version $VERSION ("; then
   pass "live site serves $VERSION"
 else
-  fail "live site is NOT serving $VERSION yet (Pages build may still be running)"
+  # Say WHICH of the two failures this is, or the next person re-reads the
+  # stamping script looking for a bug that is not there. If the committed
+  # file is right (checked just above) and the served copy is old, the
+  # deploy has not happened — that is GitHub's side, not ours.
+  fail "live site is NOT serving $VERSION"
+  SERVED=$(printf '%s' "$LIVE" | grep -oE 'Version [0-9.]+ \([0-9]+\)' | head -1)
+  MOD=$(curl -sI "https://mihrab.elghamri.se/?bust=$$" | sed -n 's/^[Ll]ast-[Mm]odified: //p' | tr -d '\r')
+  BUILD=$(gh api "repos/$REPO/pages/builds/latest" --jq '.status' 2>/dev/null || echo "unknown")
+  PAGES=$(curl -s --max-time 10 https://www.githubstatus.com/api/v2/components.json 2>/dev/null \
+    | python3 -c 'import json,sys;print(next((c["status"] for c in json.load(sys.stdin)["components"] if c["name"]=="Pages"),"unknown"))' 2>/dev/null || echo "unknown")
+  echo "    served: ${SERVED:-none}   last-modified: ${MOD:-unknown}"
+  echo "    latest Pages build: $BUILD   |   GitHub Pages status: $PAGES"
+  if [ "$PAGES" != "operational" ]; then
+    echo "    → Pages is not operational. The repo is right; the deploy is stuck on GitHub."
+    echo "      Once it recovers: gh api -X POST repos/$REPO/pages/builds"
+  else
+    echo "    → Ask for a rebuild: gh api -X POST repos/$REPO/pages/builds"
+  fi
 fi
 
 # ── 7. Store release notes exist for this versionCode ───────────────────
