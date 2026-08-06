@@ -1,0 +1,7 @@
+Loggen visar det du faktiskt fyllt i.
+
+• Grafen färgas efter status, inte efter antal ifyllda rutor. I tid räknas fullt, sent och igen räknas mindre, missad räknas inte alls — en missad dag markeras, den lämnas inte tom.
+• Öppna vilken tidigare dag som helst: pilarna vid datumet, eller tryck på rutan.
+• Grafen når din första loggade dag och fortsätter bakåt.
+• En bön vars tid inte är inne kan inte loggas, och "Markera alla i tid" följer samma regel.
+• Valfritt: visa grafen på Idag-skärmen.

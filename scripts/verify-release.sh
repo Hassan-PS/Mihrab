@@ -100,6 +100,39 @@ else
   fail "F-Droid recipe CurrentVersion != $VERSION"
 fi
 
+# ── 6. The website names this version ───────────────────────────────────
+# Checked twice on purpose: in the repo (what we committed) and on the live
+# page (what a visitor actually reads). The site advertised an old release
+# for three versions because nothing looked at either.
+SITE="$(dirname "$0")/../docs/index.html"
+if grep -q "Version $VERSION (" "$SITE" && grep -q "Mihrab $VERSION (" "$SITE"; then
+  pass "docs/index.html names $VERSION"
+else
+  fail "docs/index.html does not name $VERSION — run: node scripts/sync-version.js"
+fi
+
+LIVE="$(curl -fsS --max-time 20 https://mihrab.elghamri.se/ 2>/dev/null || true)"
+if [ -z "$LIVE" ]; then
+  fail "could not fetch the live site to check its version"
+elif printf '%s' "$LIVE" | grep -q "Version $VERSION ("; then
+  pass "live site serves $VERSION"
+else
+  fail "live site is NOT serving $VERSION yet (Pages build may still be running)"
+fi
+
+# ── 7. Store release notes exist for this versionCode ───────────────────
+CODE="$(grep -m1 'versionCode' "$(dirname "$0")/../android/app/build.gradle" | tr -dc '0-9')"
+for LOCALE in en-US sv-SE ar; do
+  NOTE="$(dirname "$0")/../fastlane/metadata/android/$LOCALE/changelogs/$CODE.txt"
+  if [ ! -f "$NOTE" ]; then
+    fail "missing Play release notes: $LOCALE/changelogs/$CODE.txt"
+  elif [ "$(wc -m < "$NOTE" | tr -d ' ')" -gt 500 ]; then
+    fail "$LOCALE/changelogs/$CODE.txt is over Play's 500-character limit"
+  else
+    pass "Play release notes present for $LOCALE ($CODE)"
+  fi
+done
+
 echo
 if [ "$FAILED" = "0" ]; then
   echo "── ALL CHECKS PASSED — release $TAG is live on every channel ──"

@@ -36,6 +36,7 @@ Every production release does these once, in order:
      ios/PrayerApp.xcodeproj/project.pbxproj
    ```
 2. **Update `CHANGELOG.md`** under a new `## [X.Y.Z] — YYYY-MM-DD` heading. Group as `Added`, `Changed`, `Fixed`, `Removed`.
+2b. **Stamp the website:** `node scripts/sync-version.js`. It reads the version out of `android/app/build.gradle` and rewrites the two places `docs/index.html` names it. Do not retype either by hand — they drifted from the app *and from each other* for three releases before this existed. `npm test` fails on a stale site (`__tests__/siteVersion.test.ts`), and `verify-release.sh` checks both the committed file and the live page.
 3. **Commit and push `main`** — this triggers Xcode Cloud's Beta workflow.
 4. **Tag the commit** `vX.Y.Z` (or `vX.Y.Z-beta.N` for prereleases) and push the tag.
 5. **Build the Android binaries locally** (next sections).
