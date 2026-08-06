@@ -18,9 +18,14 @@ RepoType: git
 Repo: https://github.com/Hassan-PS/Mihrab
 
 Builds:
-  - versionName: 2.8.5
-    versionCode: 232
-    commit: v2.8.5
+  # 2.8.5 was withdrawn — its tag was deleted before F-Droid's bot had seen
+  # it, and a build entry pointing at a missing ref fails the F-Droid build.
+  # Since the MR merged (1 Aug 2026) the bot adds each version from the tag
+  # on its own; this file is the mirror we keep in the app repo, not the
+  # thing F-Droid reads.
+  - versionName: 2.8.7
+    versionCode: 234
+    commit: v2.8.7
     subdir: android/app
     sudo:
       - apt-get update
@@ -63,5 +68,5 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 2.8.5
-CurrentVersionCode: 232
+CurrentVersion: 2.8.7
+CurrentVersionCode: 234

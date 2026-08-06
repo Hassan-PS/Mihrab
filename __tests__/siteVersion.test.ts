@@ -24,6 +24,28 @@ const gradle = fs.readFileSync(
 const versionName = /versionName\s+"([^"]+)"/.exec(gradle)?.[1];
 const versionCode = /versionCode\s+(\d+)/.exec(gradle)?.[1];
 
+describe('F-Droid recipe mirror', () => {
+  // Not what F-Droid reads any more — their bot adds versions from the tag
+  // — but it IS what verify-release.sh reads, and it had gone three
+  // versions stale while still naming a tag that had been deleted.
+  const recipe = fs.readFileSync(
+    path.join(ROOT, 'contrib', 'fdroid', 'com.prayer_times.yml'),
+    'utf-8',
+  );
+
+  it('names the shipped version', () => {
+    expect(recipe).toContain(`CurrentVersion: ${versionName}`);
+    expect(recipe).toContain(`CurrentVersionCode: ${versionCode}`);
+  });
+
+  it('has a build entry for it', () => {
+    expect(recipe).toMatch(
+      new RegExp(`versionName: ${versionName.replace(/\./g, '\\.')}\\b`),
+    );
+    expect(recipe).toMatch(new RegExp(`versionCode: ${versionCode}\\b`));
+  });
+});
+
 describe('website version', () => {
   it('reads a version out of the Android build', () => {
     // The source of truth is the file that cannot lie: it is what ends up

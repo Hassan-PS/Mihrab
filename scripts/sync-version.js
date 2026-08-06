@@ -25,6 +25,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const GRADLE = path.join(ROOT, 'android', 'app', 'build.gradle');
 const SITE = path.join(ROOT, 'docs', 'index.html');
+const RECIPE = path.join(ROOT, 'contrib', 'fdroid', 'com.prayer_times.yml');
 
 /** The version the app actually ships, straight out of the Android build. */
 function shippedVersion() {
@@ -48,27 +49,48 @@ function shippedVersion() {
 function rules({ versionName, versionCode }) {
   return [
     {
-      what: 'hero version line',
+      file: SITE,
+      what: 'site: hero version line',
       find: /<span>Version [\d.]+ \(\d+\)<\/span>/,
       replace: `<span>Version ${versionName} (${versionCode})</span>`,
     },
     {
-      what: 'footer colophon',
+      file: SITE,
+      what: 'site: footer colophon',
       find: /Mihrab [\d.]+ \(\d+\), built by/,
       replace: `Mihrab ${versionName} (${versionCode}), built by`,
+    },
+    // The F-Droid mirror. Since the recipe merged upstream their bot adds
+    // each version from the tag, so this copy is documentation — but it is
+    // what `verify-release.sh` reads, and it had gone three versions stale
+    // while still naming a tag that no longer exists.
+    {
+      file: RECIPE,
+      what: 'fdroid recipe: CurrentVersion',
+      find: /CurrentVersion: [\d.]+/,
+      replace: `CurrentVersion: ${versionName}`,
+    },
+    {
+      file: RECIPE,
+      what: 'fdroid recipe: CurrentVersionCode',
+      find: /CurrentVersionCode: \d+/,
+      replace: `CurrentVersionCode: ${versionCode}`,
     },
   ];
 }
 
-function run(check) {
+function run() {
   const version = shippedVersion();
-  const before = fs.readFileSync(SITE, 'utf-8');
-  let after = before;
+  const contents = new Map();
   const stale = [];
   const broken = [];
 
   for (const rule of rules(version)) {
-    const found = after.match(new RegExp(rule.find, 'g'));
+    if (!contents.has(rule.file)) {
+      contents.set(rule.file, fs.readFileSync(rule.file, 'utf-8'));
+    }
+    const text = contents.get(rule.file);
+    const found = text.match(new RegExp(rule.find, 'g'));
     if (!found) {
       broken.push(rule.what);
       continue;
@@ -79,36 +101,36 @@ function run(check) {
     }
     if (found[0] !== rule.replace) {
       stale.push(`${rule.what}: "${found[0]}" → "${rule.replace}"`);
-      after = after.replace(rule.find, rule.replace);
+      contents.set(rule.file, text.replace(rule.find, rule.replace));
     }
   }
 
-  return { version, before, after, stale, broken, changed: after !== before, check };
+  return { version, contents, stale, broken, changed: stale.length > 0 };
 }
 
 if (require.main === module) {
   const check = process.argv.includes('--check');
-  const r = run(check);
+  const r = run();
   const label = `${r.version.versionName} (${r.version.versionCode})`;
 
   if (r.broken.length) {
-    console.error(`✗ site markup no longer matches: ${r.broken.join(', ')}`);
+    console.error(`✗ markup no longer matches: ${r.broken.join(', ')}`);
     console.error('  Update the rules in scripts/sync-version.js.');
     process.exit(1);
   }
   if (!r.changed) {
-    console.log(`✓ docs/index.html already says ${label}`);
+    console.log(`✓ everything already says ${label}`);
     process.exit(0);
   }
   if (check) {
-    console.error(`✗ docs/index.html is stale — should say ${label}`);
+    console.error(`✗ stale — the shipped version is ${label}`);
     for (const s of r.stale) console.error(`  ${s}`);
     console.error('  Fix with: node scripts/sync-version.js');
     process.exit(1);
   }
-  fs.writeFileSync(SITE, r.after);
-  console.log(`✓ docs/index.html stamped to ${label}`);
+  for (const [file, text] of r.contents) fs.writeFileSync(file, text);
+  console.log(`✓ stamped to ${label}`);
   for (const s of r.stale) console.log(`  ${s}`);
 }
 
-module.exports = { shippedVersion, rules };
+module.exports = { shippedVersion, rules, SITE, RECIPE };

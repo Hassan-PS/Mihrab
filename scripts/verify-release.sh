@@ -39,7 +39,7 @@ else
   else
     fail "release is a DRAFT — assets 404 publicly. Fix: gh release edit $TAG -R $REPO --draft=false --latest"
   fi
-  for asset in "app-fdroid-release.apk" "Mihrab-macOS-$VERSION.zip"; do
+  for asset in "Mihrab-v$VERSION-fdroid.apk" "Mihrab-macOS-$VERSION.zip"; do
     if echo "$REL_JSON" | grep -q "\"$asset\""; then
       pass "asset present: $asset"
     else
@@ -50,7 +50,7 @@ fi
 
 # ── 3. Asset URLs actually resolve (public, follows redirects) ──────────
 ZIP_URL="https://github.com/$REPO/releases/download/$TAG/Mihrab-macOS-$VERSION.zip"
-APK_URL="https://github.com/$REPO/releases/download/$TAG/app-fdroid-release.apk"
+APK_URL="https://github.com/$REPO/releases/download/$TAG/Mihrab-v$VERSION-fdroid.apk"
 for url in "$ZIP_URL" "$APK_URL"; do
   code=$(curl -sIL -o /dev/null -w "%{http_code}" "$url")
   if [ "$code" = "200" ]; then
