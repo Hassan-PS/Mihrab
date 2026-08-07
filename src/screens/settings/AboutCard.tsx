@@ -18,6 +18,7 @@ import { DEFAULT_SETTINGS } from '../../settings/types';
 import { rateApp } from '../../polish/rateApp';
 import { resetFeatureTour } from '../../polish/FeatureTourModal';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { MIHRAB_WEBSITE, MIHRAB_WEBSITE_LABEL } from '../../config/links';
 
 function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
   if (!showDonationsUi()) return null;
@@ -274,14 +275,18 @@ function AboutCardImpl() {
           style={[styles.versionText, { color: palette.muted }]}>
           {t('settings.versionInstalled', { version: versionLabel })}
         </Text>
+        {/* The website, not the repo. Someone who has scrolled to the foot
+            of Settings wants to know about the app; the source tree is a
+            different question, and it is still one tap away from the site
+            and from the attributions below. */}
         <Text
           accessibilityRole="link"
-          accessibilityLabel="github.com/Hassan-PS/Mihrab"
+          accessibilityLabel={MIHRAB_WEBSITE_LABEL}
           style={[styles.versionLink, { color: palette.accent }]}
           onPress={() => {
-            void Linking.openURL('https://github.com/Hassan-PS/Mihrab');
+            void Linking.openURL(MIHRAB_WEBSITE);
           }}>
-          github.com/Hassan-PS/Mihrab
+          {MIHRAB_WEBSITE_LABEL}
         </Text>
       </View>
       <Attributions palette={palette} />

@@ -40,7 +40,7 @@ describe('F-Droid recipe mirror', () => {
 
   it('has a build entry for it', () => {
     expect(recipe).toMatch(
-      new RegExp(`versionName: ${versionName.replace(/\./g, '\\.')}\\b`),
+      new RegExp(`versionName: ${String(versionName).replace(/\./g, '\\.')}\\b`),
     );
     expect(recipe).toMatch(new RegExp(`versionCode: ${versionCode}\\b`));
   });

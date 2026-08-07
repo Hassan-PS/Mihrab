@@ -4,6 +4,7 @@
 import { memo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { MIHRAB_WEBSITE_LABEL } from '../../config/links';
 
 /**
  * Top banner of the share-image composite — task #64 split.
@@ -31,7 +32,11 @@ function ShareBannerImpl({
       <View style={[styles.bannerTop, { flexDirection: 'row' }]}>
         <View style={[styles.bannerLeft, { alignItems: 'flex-start' }]}>
           <Text style={styles.appName}>{t('app.name')}</Text>
-          <Text style={styles.githubLink}>github.com/Hassan-PS/Mihrab</Text>
+          {/* The website, not the repo. This image is the one artefact that
+              leaves the phone and lands in front of people who do not have
+              the app — handing them a source tree is answering a question
+              they did not ask. The QR beside it goes to the same place. */}
+          <Text style={styles.siteLink}>{MIHRAB_WEBSITE_LABEL}</Text>
         </View>
         <View style={styles.bannerRight}>
           <Image
@@ -68,7 +73,7 @@ const styles = StyleSheet.create({
   qrCode: { width: 60, height: 60 },
   bannerBottom: { marginTop: 10, gap: 2 },
   appName: { color: '#ffffff', fontSize: 18, fontWeight: '700' },
-  githubLink: { color: '#dcfce7', fontSize: 11 },
+  siteLink: { color: '#dcfce7', fontSize: 11 },
   islamicMonth: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
   gregorianMonth: { color: '#dcfce7', fontSize: 12 },
   locationText: { color: '#dcfce7', fontSize: 11 },
