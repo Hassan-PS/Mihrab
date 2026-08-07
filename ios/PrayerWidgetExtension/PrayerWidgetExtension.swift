@@ -728,8 +728,14 @@ struct PrayerWidgetExtensionBundle: WidgetBundle {
     // ActivityKit only exists on iOS 16.1+. The widget is wrapped in an
     // availability check so the extension itself still compiles for the
     // 16.0 deployment target.
+    //
+    // And not at all on Mac Catalyst, which has neither a Lock Screen nor a
+    // Dynamic Island for a Live Activity to live on — the whole type is
+    // compiled out there, so referencing it would not build.
+    #if !targetEnvironment(macCatalyst)
     if #available(iOSApplicationExtension 16.1, *) {
       PrayerLiveActivityWidget()
     }
+    #endif
   }
 }

@@ -76,6 +76,25 @@ find "$APP/Contents/Frameworks" -maxdepth 1 \( -name '*.framework' -o -name '*.d
   while IFS= read -r -d '' fw; do
     codesign --force "${RUNTIME_OPTS[@]+"${RUNTIME_OPTS[@]}"}" -s "$SIGN_IDENTITY" "$fw"
   done
+# Nested extensions, before the app that contains them. Signing the app first
+# fails outright — "code object is not signed at all, in subcomponent
+# …/PlugIns/PrayerWidgetExtension.appex" — because the outer signature has to
+# cover an already-sealed inner one. Inside-out, always.
+find "$APP/Contents/PlugIns" -maxdepth 1 -name '*.appex' -print0 2>/dev/null |
+  while IFS= read -r -d '' ext; do
+    # `|| true`, because an extension with no Frameworks directory makes
+    # `find` exit non-zero — and under `set -e` + `pipefail` that killed the
+    # script silently, after the frameworks and before the extension, with
+    # nothing in the log to say why.
+    if [ -d "$ext/Contents/Frameworks" ]; then
+      find "$ext/Contents/Frameworks" -maxdepth 1 \( -name '*.framework' -o -name '*.dylib' \) -print0 2>/dev/null |
+        while IFS= read -r -d '' efw; do
+          codesign --force "${RUNTIME_OPTS[@]+"${RUNTIME_OPTS[@]}"}" -s "$SIGN_IDENTITY" "$efw"
+        done
+    fi
+    echo "  ▸ signing extension: $(basename "$ext")"
+    codesign --force "${RUNTIME_OPTS[@]+"${RUNTIME_OPTS[@]}"}" -s "$SIGN_IDENTITY" "$ext"
+  done
 codesign --force "${RUNTIME_OPTS[@]+"${RUNTIME_OPTS[@]}"}" -s "$SIGN_IDENTITY" "$APP"
 codesign --verify --strict "$APP" && echo "▸ Signature verifies ($SIGN_IDENTITY)."
 

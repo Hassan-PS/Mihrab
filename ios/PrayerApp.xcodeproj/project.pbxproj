@@ -53,7 +53,7 @@
 		D80631DB29913BA3BE3917AB /* Haptics.m in Sources */ = {isa = PBXBuildFile; fileRef = BFF6595003A4C5C972D2B78B /* Haptics.m */; };
 		DF5D2FB480E49268AC15485E /* CompassModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62E49C8F92272DF77C323AA /* CompassModule.swift */; };
 		E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */; };
-		E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */; platformFilters = (ios, maccatalyst, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E1D2C3B4A5968778695A4B3D5 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */; };
 		EA6B2A6659A3E2683A2EC666 /* adhan_minshawi.caf in Resources */ = {isa = PBXBuildFile; fileRef = B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */; };
 		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
@@ -567,7 +567,10 @@
 /* Begin PBXTargetDependency section */
 		E1D2C3B4A5968778695A4B3CD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilter = ios;
+			platformFilters = (
+				ios,
+				maccatalyst,
+			);
 			target = E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */;
 			targetProxy = E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */;
 		};
@@ -815,6 +818,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 234;
 				DEAD_CODE_STRIPPING = YES;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -835,7 +839,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
@@ -853,6 +857,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 234;
 				DEAD_CODE_STRIPPING = YES;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = GAW23HT439;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
@@ -873,7 +878,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.PrayerWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
