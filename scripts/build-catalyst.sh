@@ -167,9 +167,12 @@ GROUP_DOMAIN="$HOME/Library/Group Containers/$GROUP_NAME/Library/Preferences/$GR
 if [ "$SIGN_IDENTITY" != "-" ]; then
   defaults delete "$GROUP_DOMAIN" prayer_widget_payload_v1 2>/dev/null || true
 fi
-"$APP/Contents/MacOS/PrayerApp" > "$LAUNCH_LOG" 2>&1 &
-LAUNCH_PID=$!
+# `open -g -j`: launch in the background and hidden. Running the executable
+# directly works too, but it throws a window onto whatever the person is doing,
+# once per build — which is rude when the launch is only a self-check.
+open -g -j "$APP" 2>>"$LAUNCH_LOG" || true
 sleep 15
+LAUNCH_PID=$(pgrep -f "$APP/Contents/MacOS/PrayerApp" | head -1)
 if ! kill -0 "$LAUNCH_PID" 2>/dev/null; then
   echo "  ✗ the app died on launch — see $LAUNCH_LOG" >&2
   tail -20 "$LAUNCH_LOG" >&2

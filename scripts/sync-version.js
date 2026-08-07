@@ -76,6 +76,33 @@ function rules({ versionName, versionCode }) {
       find: /CurrentVersionCode: \d+/,
       replace: `CurrentVersionCode: ${versionCode}`,
     },
+    // The build entry as well as the Current* pair. Stamping only the latter
+    // left the recipe describing one version and building another, and the
+    // suite caught it mid-release rather than the script preventing it.
+    // One entry is kept here, always the shipping one; upstream's bot keeps
+    // the full history.
+    {
+      file: RECIPE,
+      what: 'fdroid recipe: build versionName',
+      find: /- versionName: [\d.]+/,
+      replace: `- versionName: ${versionName}`,
+    },
+    {
+      file: RECIPE,
+      what: 'fdroid recipe: build versionCode',
+      // Anchored on the newline rather than `^` with the `m` flag: the
+      // duplicate-match check rebuilds this as `new RegExp(find, 'g')`,
+      // which throws the original flags away — so a rule that needs `m`
+      // silently stops matching and reports the markup as broken.
+      find: /\n {4}versionCode: \d+/,
+      replace: `\n    versionCode: ${versionCode}`,
+    },
+    {
+      file: RECIPE,
+      what: 'fdroid recipe: build commit tag',
+      find: /commit: v[\d.]+/,
+      replace: `commit: v${versionName}`,
+    },
   ];
 }
 

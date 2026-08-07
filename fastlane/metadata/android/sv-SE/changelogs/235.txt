@@ -1,0 +1,3 @@
+Ingenting förändras på Android i den här versionen.
+
+Arbetet har gått till Mac-appen som installeras med Homebrew, som nu har widgeten med bönetider i Notiscenter — samma widget som iPhone redan haft. Android är orört och finns med här bara för att plattformarna delar versionsnummer.

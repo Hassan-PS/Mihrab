@@ -1,0 +1,3 @@
+Nothing changes on Android in this release.
+
+The work went into the Mac app installed with Homebrew, which now has the prayer-times widget for Notification Centre — the same widget the iPhone has had. Android is untouched and is only here because the two platforms share a version number.

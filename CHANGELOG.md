@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.8] — 2026-08-07
+
+A Mac-only release. Nothing on Android or iOS changes.
+
+### Added
+- **The Mac app installed with Homebrew has the widget.** The prayer-times widget can be placed in Notification Centre, showing the same day's times as the iPhone one — small, medium and large. It reads the times the app has already worked out, so it costs nothing and keeps working offline; open the app once after installing and the widget fills in. Live Activities stay iOS-only, because macOS has nothing to show them on.
+
+### Fixed
+- **The Homebrew build no longer claims a Keychain group it cannot use.** Claiming it did not degrade quietly — macOS refused to start the app at all, before any of its own code ran. On this channel the journal, the fasting log and your coordinates continue to be stored the way they were before, which is the same as every previous Homebrew build; the App Store and Play builds are unaffected and still use the Keychain.
+
 ## [2.8.7] — 2026-08-03
 
 ### Added
