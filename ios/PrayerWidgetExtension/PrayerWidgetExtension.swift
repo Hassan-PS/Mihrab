@@ -2,7 +2,25 @@ import SwiftUI
 import WidgetKit
 import AppIntents
 
+/// Which App Group to read through. Must stay in lockstep with
+/// MihrabAppGroup.m, which is the same rule on the app's side of the group —
+/// if these two ever disagree, the widget quietly renders an empty card.
+///
+/// iOS keeps the plain identifier it has always used. Mac Catalyst takes the
+/// Team-ID-prefixed form: with the plain one this extension faulted on every
+/// preferences read under chronod, and with the prefixed one it does not.
+/// MihrabAppGroup.m carries the evidence, and is honest about the part of it
+/// that is still unexplained.
+///
+/// Worth remembering if this ever regresses: `UserDefaults(suiteName:)`
+/// returns a live-looking object for a group the process is not entitled to
+/// and silently drops every write, so nil is not the test — round-tripping a
+/// value is.
+#if targetEnvironment(macCatalyst)
+private let kSuite = "GAW23HT439.group.com.prayerapp"
+#else
 private let kSuite = "group.com.prayerapp"
+#endif
 private let kKey = "prayer_widget_payload_v1"
 private let kHighlightDynamicKey = "widget_highlight_dynamic"
 private let kHighlightIdKey = "widget_highlight_id"
@@ -728,8 +746,14 @@ struct PrayerWidgetExtensionBundle: WidgetBundle {
     // ActivityKit only exists on iOS 16.1+. The widget is wrapped in an
     // availability check so the extension itself still compiles for the
     // 16.0 deployment target.
+    //
+    // And not at all on Mac Catalyst, which has neither a Lock Screen nor a
+    // Dynamic Island for a Live Activity to live on — the whole type is
+    // compiled out there, so referencing it would not build.
+    #if !targetEnvironment(macCatalyst)
     if #available(iOSApplicationExtension 16.1, *) {
       PrayerLiveActivityWidget()
     }
+    #endif
   }
 }

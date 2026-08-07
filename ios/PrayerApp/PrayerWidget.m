@@ -1,6 +1,7 @@
 #import <React/RCTBridgeModule.h>
 
 #import "PrayerApp-Swift.h"
+#import "MihrabAppGroup.h"
 
 @interface PrayerWidget : NSObject <RCTBridgeModule>
 @end
@@ -20,7 +21,7 @@ RCT_EXPORT_METHOD(setData
                   : (RCTPromiseRejectBlock)reject)
 {
   NSUserDefaults *group =
-      [[NSUserDefaults alloc] initWithSuiteName:@"group.com.prayerapp"];
+      MihrabAppGroupDefaults();
   if (group != nil) {
     [group setObject:json forKey:@"prayer_widget_payload_v1"];
   } else {
@@ -37,7 +38,7 @@ RCT_EXPORT_METHOD(setUiHints:(NSString *)style
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   NSUserDefaults *group =
-      [[NSUserDefaults alloc] initWithSuiteName:@"group.com.prayerapp"];
+      MihrabAppGroupDefaults();
   NSUserDefaults *target = group != nil ? group : [NSUserDefaults standardUserDefaults];
   [target setObject:(style != nil ? style : @"fixed") forKey:@"widget_ui_style"];
   [target setBool:oled forKey:@"widget_oled"];
@@ -51,7 +52,7 @@ RCT_EXPORT_METHOD(setWidgetHighlightDynamic:(BOOL)enabled
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   NSUserDefaults *group =
-      [[NSUserDefaults alloc] initWithSuiteName:@"group.com.prayerapp"];
+      MihrabAppGroupDefaults();
   NSUserDefaults *target = group != nil ? group : [NSUserDefaults standardUserDefaults];
   [target setBool:enabled forKey:@"widget_highlight_dynamic"];
   [target synchronize];
@@ -66,7 +67,7 @@ RCT_EXPORT_METHOD(setIosWidgetHighlightAppearance:(NSString *)highlightId
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   NSUserDefaults *group =
-      [[NSUserDefaults alloc] initWithSuiteName:@"group.com.prayerapp"];
+      MihrabAppGroupDefaults();
   NSUserDefaults *target = group != nil ? group : [NSUserDefaults standardUserDefaults];
   NSString *hid =
       (highlightId != nil && highlightId.length > 0) ? highlightId : @"green";

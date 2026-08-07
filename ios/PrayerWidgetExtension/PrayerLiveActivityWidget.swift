@@ -23,7 +23,11 @@ import Foundation
 import SwiftUI
 import UIKit
 import WidgetKit
-#if canImport(ActivityKit)
+// `canImport` alone is not enough: ActivityKit resolves on Mac Catalyst but
+// none of it is usable there, and the attributes this file needs are already
+// compiled out by the same guard in PrayerLiveActivityAttributes.swift. A Mac
+// has no Lock Screen and no Dynamic Island, so there is nothing to render.
+#if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
 import ActivityKit
 
 @available(iOS 16.1, *)
