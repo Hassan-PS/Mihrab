@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements for the WIDGET EXTENSION in the Developer ID (Homebrew) Mac
+  Catalyst build. Separate from the app's Catalyst.entitlements because the
+  two need different things, and the difference is not cosmetic.
+
+  app-sandbox is mandatory HERE and absent there. macOS refuses to host an
+  unsandboxed app extension at all: the bundle installs, pluginkit registers
+  it, the widget shows up in the gallery, and then chronod fails every single
+  timeline query with
+
+    Failed to create extensionProcess … Code=16
+      "Extension must have `com.apple.security.app-sandbox` entitlement."
+
+  which leaves a widget that exists and never draws. Nothing before that point
+  complains: the signature verifies, notarization is accepted, the App Group
+  round-trips from the app side. Only chronod's log says why (2026-08-07).
+
+  The host app is deliberately NOT sandboxed. It is a Developer ID app that
+  reads and writes outside a container, and sandboxing it would need a much
+  larger set of entitlements for no gain. An extension may be sandboxed while
+  its host is not; the App Group is what bridges them.
+
+  application-groups has to be repeated here. This is the READING side of the
+  widget payload, and a sandboxed process reaches the Group Container only if
+  it claims the group itself. Entitle just the app and the widget renders an
+  empty card.
+
+  And the identifier is the team-ID-prefixed one, not the plain iOS
+  `group.com.prayerapp`: with the plain name this extension faulted on every
+  read under chronod. MihrabAppGroup.m has the evidence and its limits.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>GAW23HT439.group.com.prayerapp</string>
+	</array>
+</dict>
+</plist>

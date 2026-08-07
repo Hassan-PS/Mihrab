@@ -24,6 +24,7 @@
 		82792D28789AD3A9AD8EA294 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		8335EB755F07A4493C0BCA72 /* adhan_saber.caf in Resources */ = {isa = PBXBuildFile; fileRef = CE9E49272B22B1425383AC48 /* adhan_saber.caf */; };
 		83D5A0830BF1AEF2D5F9C666 /* adhan_halab.caf in Resources */ = {isa = PBXBuildFile; fileRef = 3677D65A9EE39814B1FF01A4 /* adhan_halab.caf */; };
+		9381D9BABC745CEEC09EF47C /* MihrabAppGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 5690D5BC679A6B773737566F /* MihrabAppGroup.m */; };
 		9E69A27015C7ED4DEE6162C9 /* adhan_hafez.caf in Resources */ = {isa = PBXBuildFile; fileRef = CB4D857AA2ED576723B598E1 /* adhan_hafez.caf */; };
 		AA0385239A1984202E9F4870 /* adhan_abdul_hakam.caf in Resources */ = {isa = PBXBuildFile; fileRef = B8EC02874B0A8F91C2E75CCD /* adhan_abdul_hakam.caf */; };
 		ADBF0000000000 /* adhan_abdul_basit.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = ADFR0000000000 /* adhan_abdul_basit.mp3 */; };
@@ -109,12 +110,14 @@
 		3B4392A12AC88292D35C810B /* Pods-PrayerApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrayerApp.debug.xcconfig"; path = "Target Support Files/Pods-PrayerApp/Pods-PrayerApp.debug.xcconfig"; sourceTree = "<group>"; };
 		4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_yusuf_islam.caf; path = PrayerApp/adhan_yusuf_islam.caf; sourceTree = "<group>"; };
 		48AAC76E10CD18CD2ADE11BD /* adhan_naghshbandi.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_naghshbandi.caf; path = PrayerApp/adhan_naghshbandi.caf; sourceTree = "<group>"; };
+		5690D5BC679A6B773737566F /* MihrabAppGroup.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MihrabAppGroup.m; path = PrayerApp/MihrabAppGroup.m; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-PrayerApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrayerApp.release.xcconfig"; path = "Target Support Files/Pods-PrayerApp/Pods-PrayerApp.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-PrayerApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PrayerApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		60668681401DD7256458E168 /* Haptics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Haptics.swift; path = PrayerApp/Haptics.swift; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = PrayerApp/AppDelegate.swift; sourceTree = "<group>"; };
 		7B489EDC7485CD1BDA638DC8 /* adhan_sharif_doman.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_sharif_doman.caf; path = PrayerApp/adhan_sharif_doman.caf; sourceTree = "<group>"; };
 		7BB6BBBA364576409D299287 /* adhan_al_hussaini.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_al_hussaini.caf; path = PrayerApp/adhan_al_hussaini.caf; sourceTree = "<group>"; };
+		7BBC47479F739320A66C8F1A /* MihrabAppGroup.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MihrabAppGroup.h; path = PrayerApp/MihrabAppGroup.h; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = PrayerApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8A1A56F1FEF3275970746B0F /* adhan_abdul_ghaffar.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_ghaffar.caf; path = PrayerApp/adhan_abdul_ghaffar.caf; sourceTree = "<group>"; };
 		91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_hafiz_murad.caf; path = PrayerApp/adhan_hafiz_murad.caf; sourceTree = "<group>"; };
@@ -250,6 +253,8 @@
 				F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */,
 				60668681401DD7256458E168 /* Haptics.swift */,
 				BFF6595003A4C5C972D2B78B /* Haptics.m */,
+				7BBC47479F739320A66C8F1A /* MihrabAppGroup.h */,
+				5690D5BC679A6B773737566F /* MihrabAppGroup.m */,
 			);
 			name = PrayerApp;
 			sourceTree = "<group>";
@@ -549,6 +554,7 @@
 				F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources */,
 				CA37C7F81236A5CF8F759E97 /* Haptics.swift in Sources */,
 				D80631DB29913BA3BE3917AB /* Haptics.m in Sources */,
+				9381D9BABC745CEEC09EF47C /* MihrabAppGroup.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

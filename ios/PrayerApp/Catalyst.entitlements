@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements for the Developer ID (Homebrew) Mac Catalyst build.
+
+  A SEPARATE FILE from PrayerApp.entitlements on purpose. That one is applied
+  by Xcode at build time and uses $(AppIdentifierPrefix) / $(CFBundleIdentifier),
+  which only expand during a build; this one is handed straight to `codesign`
+  after the fact by scripts/build-catalyst.sh, so every value has to be
+  literal. It also has to name the Catalyst bundle identifier
+  (maccatalyst.com.hassan.prayerapp), which is not the identifier the iOS
+  build uses.
+
+  On the app group identifier, which is NOT the plain iOS one: Apple's own
+  guidance contradicts itself here. DTS says Catalyst keeps the iOS-style
+  `group.` identifier and warns that Xcode wrongly prefixes it with the Team
+  ID; macOS logs that "Group containers identifiers should be prefixed by
+  requestor's team ID to allow access on this platform". Settled by experiment
+  on 2026-08-07, and the answer is that both are true of different processes.
+
+  This app is not sandboxed, and with `group.com.prayerapp` it wrote the whole
+  payload to ~/Library/Group Containers/group.com.prayerapp — from this side
+  everything looked finished. The widget extension is the other side, and it
+  must be sandboxed (macOS refuses to host an extension that isn't). Under
+  that name it launched, rendered, and faulted on every read:
+
+    Couldn't read values in CFPrefsPlistSource (Domain: group.com.prayerapp,
+    Container: (null)): accessing preferences outside an application's
+    container requires user-preference-read or file-read-data sandbox access
+
+  i.e. a widget that draws an empty card. Under `GAW23HT439.group.com.prayerapp`
+  that fault does not appear, so that is the name this channel uses.
+
+  Being careful about what that does and does not establish: a probe binary
+  signed with the extension's exact entitlements, plain group and all, read
+  the plain container perfectly well from a shell. So this is not the blanket
+  "sandboxed processes need the prefix" rule it looks like; something narrower
+  about ExtensionKit's hosting is involved and is not yet understood. The
+  prefixed name is the one that has never failed. MihrabAppGroup.m repeats
+  this for anyone reading the code rather than the entitlements.
+
+  Mind the shape: team ID FIRST, then `group.`. An earlier attempt spelled it
+  `group.GAW23HT439.com.prayerapp`, which macOS does not recognise as prefixed
+  at all — it produced no container, and that dead end is what first made the
+  prefix rule look like a myth.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>GAW23HT439.group.com.prayerapp</string>
+	</array>
+	<!--
+	  NO keychain-access-groups here, however much this build would like one.
+	  It is a RESTRICTED entitlement: macOS will only honour it if the bundle
+	  embeds a provisioning profile that authorises it, and a Developer ID
+	  build signed outside Xcode carries no profile. Claiming it anyway does
+	  not degrade — it makes the app unlaunchable. Tried on 2026-08-07 and
+	  the app was SIGKILLed before main(), with amfid logging:
+
+	    maccatalyst.com.hassan.prayerapp: Unsatisfied entitlements:
+	      keychain-access-groups
+	    Restricted entitlements not validated, bailing out.
+	      Error … Code=-413 "No matching profile found"
+	    AMFI: bailing out because of restricted entitlements.
+
+	  `codesign` verification passes and notarization is ACCEPTED either way,
+	  so neither catches this — only launching the built app does. (Careful
+	  editing this comment: an XML comment may not contain a double hyphen,
+	  so command flags have to be spelled out in prose. AMFI rejects the
+	  whole file with "AMFIUnserializeXML: syntax error" if you slip.)
+
+	  application-groups above is NOT restricted and needs no profile, which
+	  is why the widget works at all: the same launch that failed with the
+	  Keychain group succeeded without it and wrote prayer_widget_payload_v1
+	  into the group container.
+
+	  The cost is that react-native-encrypted-storage cannot reach a shared
+	  Keychain group, so the journal, the fasting log and the coordinates
+	  fall back to AsyncStorage on this channel — exactly as they did before
+	  the app was signed at all, so no regression. Fixing it properly means
+	  generating a Developer ID provisioning profile for the Catalyst App ID
+	  with Keychain Sharing enabled and embedding it as
+	  Contents/embedded.provisionprofile before signing.
+	-->
+</dict>
+</plist>
