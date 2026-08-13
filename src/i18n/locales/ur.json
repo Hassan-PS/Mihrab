@@ -1209,7 +1209,14 @@
     "markFasted": "روزہ درج کریں",
     "unmarkFasted": "نشان ہٹائیں",
     "showOnHome": "ہوم پر گراف دکھائیں",
-    "showOnHomeHelp": "آپ کے مربع آج کی اسکرین پر شامل کرتا ہے۔ بطور طے شدہ بند۔"
+    "showOnHomeHelp": "آپ کے مربع آج کی اسکرین پر شامل کرتا ہے۔ بطور طے شدہ بند۔",
+    "backfillAction": "پچھلے دن بھریں",
+    "backfillTitle": "پچھلے دن بھر دیے جائیں؟",
+    "backfillBody": "اس سے {{days}} دنوں ({{range}}) کی {{prayers}} نمازیں وقت پر ادا شدہ کے طور پر درج ہوں گی۔ جو دن آپ پہلے درج کر چکے ہیں وہ ویسے ہی رہیں گے، اور آج کا دن نہیں بدلے گا۔",
+    "backfillConfirm": "بھر دیں",
+    "backfillNothingTitle": "بھرنے کو کچھ نہیں",
+    "backfillNothingBody": "آج سے پہلے کا ہر دن پہلے ہی درج ہے۔",
+    "openLogFromHome": "لاگ کھولیں"
   },
   "endOfDay": {
     "title": "آج کی نمازیں درج کریں؟",

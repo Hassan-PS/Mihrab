@@ -18,13 +18,10 @@ import {
   snoozePrayerNotification,
 } from './notificationActions';
 import { handleEndOfDayLogEvent } from './endOfDayLog';
+import { JOURNAL_LOG_ACTION_ID, handlePrayerLogEvent } from './prayerLogAction';
 
 // Re-exported for back-compat with existing importers.
-export {
-  ADHAN_CONTROLS_CATEGORY_ID,
-  ADHAN_ACTION_STOP,
-  ADHAN_ACTION_DISABLE,
-};
+export { ADHAN_CONTROLS_CATEGORY_ID, ADHAN_ACTION_STOP, ADHAN_ACTION_DISABLE };
 
 function isAdhanPrayerNotification(notification?: Notification): boolean {
   const data = notification?.data ?? {};
@@ -139,6 +136,16 @@ export function registerAdhanSafetyControls() {
               placeholderText: i18n.t('alertCopy.snoozeMinutes', 'Minutes'),
             },
           },
+          {
+            // Same button Android has. The id is bare — a category's actions
+            // are declared once for every notification that uses it, so the
+            // prayer cannot be encoded here and is read from the payload
+            // instead (see prayerForPress). `foreground: false` because the
+            // whole point is to record it without opening the app.
+            id: JOURNAL_LOG_ACTION_ID,
+            title: i18n.t('journal.logActionTitle', 'Log prayer'),
+            foreground: false,
+          },
         ],
       },
     ]);
@@ -146,17 +153,28 @@ export function registerAdhanSafetyControls() {
 
   // notifee allows ONE background handler per app, so every feature that
   // needs to act on a notification press has to be dispatched from here.
-  // The end-of-day reminder's action must work with the app closed — that
-  // is the entire point of it — so it is answered first and short-circuits
-  // when it owns the event.
+  // The two journal actions must work with the app closed — that is the
+  // entire point of a button on a notification — so they are answered first
+  // and short-circuit when they own the event.
+  //
+  // Both handlers are registered on the FOREGROUND path as well. A press
+  // that arrives while the app is open would otherwise fall through to the
+  // adhan handler and be dropped, which is how "Log prayer" came to do
+  // nothing but flash a row: the only code listening for it lived in the
+  // Log screen, and the Log screen is not what you are looking at when you
+  // press a button on a notification.
+  const handleJournalActions = async (event: Event): Promise<boolean> =>
+    (await handleEndOfDayLogEvent(event)) ||
+    (await handlePrayerLogEvent(event));
+
   notifee.onForegroundEvent(event => {
-    void handleEndOfDayLogEvent(event).then(handled => {
+    void handleJournalActions(event).then(handled => {
       if (!handled) void handleAdhanAction(event, true);
     });
   });
 
   notifee.onBackgroundEvent(async event => {
-    if (await handleEndOfDayLogEvent(event)) return;
+    if (await handleJournalActions(event)) return;
     await handleAdhanAction(event, false);
   });
 }

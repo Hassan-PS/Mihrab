@@ -1209,7 +1209,14 @@
     "markFasted": "تسجيل الصيام",
     "unmarkFasted": "إلغاء التسجيل",
     "showOnHome": "إظهار الرسم في الصفحة الرئيسية",
-    "showOnHomeHelp": "يضيف مربعات مواظبتك إلى شاشة اليوم. معطّل افتراضيًا."
+    "showOnHomeHelp": "يضيف مربعات مواظبتك إلى شاشة اليوم. معطّل افتراضيًا.",
+    "backfillAction": "املأ الأيام السابقة",
+    "backfillTitle": "ملء الأيام السابقة؟",
+    "backfillBody": "سيسجّل هذا {{prayers}} صلاة عبر {{days}} يومًا ({{range}}) على أنها أُدّيت في وقتها. الأيام التي سجّلتها من قبل تبقى كما هي، ولا يُمسّ يومك الحالي.",
+    "backfillConfirm": "املأها",
+    "backfillNothingTitle": "لا شيء لملئه",
+    "backfillNothingBody": "كل يوم قبل اليوم مسجَّل بالفعل.",
+    "openLogFromHome": "افتح السجل"
   },
   "endOfDay": {
     "title": "تسجيل صلوات اليوم؟",

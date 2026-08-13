@@ -19,6 +19,15 @@
  * Only unlogged prayers are filled in: a day where Asr was already marked
  * `missed` keeps that record. The button means "the rest went fine", not
  * "overwrite what I told you".
+ *
+ * ── And it does not ask a question already answered ───────────────────
+ *
+ * A day whose five prayers are all recorded gets no prompt. Being asked to
+ * log a day you have just finished logging is the app failing to notice its
+ * own record, and the fix is not to ask more quietly — it is not to ask.
+ * The prompt is retired the moment the day completes (every journal write
+ * calls `syncEndOfDayReminderForDay`) and restored if an entry is later
+ * removed, because then the day genuinely is unfinished again.
  */
 import notifee, {
   AndroidImportance,
@@ -127,6 +136,52 @@ export async function cancelEndOfDayLogReminders(): Promise<void> {
   if (mine.length) await notifee.cancelTriggerNotifications(mine);
 }
 
+/** Every one of the five recorded — whatever the statuses are. A day of
+ *  five `missed` is still a day that has been accounted for, and asking
+ *  about it would be asking someone to re-live it. */
+export function dayIsFullyLogged(
+  entries: JournalEntry[],
+  date: string,
+): boolean {
+  return PRAYERS.every(p => Boolean(getEntryStatus(entries, date, p)));
+}
+
+/**
+ * Retire the prompt for `date` once its day is complete.
+ *
+ * Called from every journal write, so the prompt disappears the moment the
+ * fifth prayer goes in rather than at the next sync — the window between
+ * "I have logged everything" and "Log today's prayers?" is exactly where
+ * the annoyance lives.
+ *
+ * Cancel-only by design. Restoring a prompt needs that day's Isha time,
+ * which lives in the prayer-times cache and is not this module's business;
+ * un-logging a prayer therefore brings the prompt back at the next resync,
+ * which happens when the app next comes to the foreground — and the user
+ * who just un-logged something is, definitionally, in the app.
+ */
+export async function syncEndOfDayReminderForDay(
+  date: string,
+  entries: JournalEntry[],
+): Promise<void> {
+  if (!dayIsFullyLogged(entries, date)) return;
+  await notifee
+    .cancelTriggerNotification(`${ID_PREFIX}${date}`)
+    .catch(() => {});
+  await notifee.cancelNotification(`${ID_PREFIX}${date}`).catch(() => {});
+}
+
+/** The journal as stored, or [] when there is none / it is unreadable. */
+async function storedEntries(): Promise<JournalEntry[]> {
+  const raw = await durableEncryptedGet(JOURNAL_KEY).catch(() => null);
+  if (!raw) return [];
+  try {
+    return coerceJournalEntries(JSON.parse(raw));
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Rebuild the rolling window of reminders.
  *
@@ -141,6 +196,10 @@ export async function rescheduleEndOfDayLogReminders(params: {
   /** The local calendar day `week[0]` was fetched for. */
   baseDate?: Date;
   now?: Date;
+  /** The journal, when the caller already has it in hand. Read from
+   *  encrypted storage otherwise — a day that is fully logged gets no
+   *  prompt, so this is needed either way. */
+  entries?: JournalEntry[];
 }): Promise<void> {
   await cancelEndOfDayLogReminders();
   if (!params.enabled) return;
@@ -151,6 +210,9 @@ export async function rescheduleEndOfDayLogReminders(params: {
   const base = params.baseDate ?? now;
   const channelId = await ensureChannel();
   await ensureIosCategory();
+  // Read once, outside the loop: the journal is encrypted and this runs on
+  // every foreground resync.
+  const entries = params.entries ?? (await storedEntries());
 
   for (let i = 0; i < Math.min(week.length, DAYS_AHEAD); i++) {
     const day = new Date(base);
@@ -158,6 +220,11 @@ export async function rescheduleEndOfDayLogReminders(params: {
     const at = ishaTriggerAt(day, week[i]);
     if (!at || at.getTime() <= now.getTime()) continue;
     const target = ymd(day);
+    // Today may already be fully logged by the time this runs — someone who
+    // logs each prayer as they pray it has answered the question before it
+    // is asked. Tomorrow and later can be complete too, if the day was
+    // filled in ahead by the backfill button.
+    if (dayIsFullyLogged(entries, target)) continue;
     await notifee
       .createTriggerNotification(
         {
@@ -247,15 +314,16 @@ export async function handleEndOfDayLogEvent(event: Event): Promise<boolean> {
   // The id carries the same date, so a payload lost to a cold start (or an
   // OS that drops `data`) still resolves to the right day.
   const fromId =
-    typeof notification?.id === 'string' && notification.id.startsWith(ID_PREFIX)
+    typeof notification?.id === 'string' &&
+    notification.id.startsWith(ID_PREFIX)
       ? notification.id.slice(ID_PREFIX.length)
       : null;
   const target =
     typeof fromData === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fromData)
       ? fromData
       : fromId && /^\d{4}-\d{2}-\d{2}$/.test(fromId)
-        ? fromId
-        : null;
+      ? fromId
+      : null;
   if (!target) return true;
 
   await logAllPrayersOnTime(target).catch(() => false);

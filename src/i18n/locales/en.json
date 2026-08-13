@@ -1209,7 +1209,14 @@
     "markFasted": "Mark as fasted",
     "unmarkFasted": "Unmark",
     "showOnHome": "Show the graph on Home",
-    "showOnHomeHelp": "Adds your practice squares to the Today screen. Off by default."
+    "showOnHomeHelp": "Adds your practice squares to the Today screen. Off by default.",
+    "backfillAction": "Fill in earlier days",
+    "backfillTitle": "Fill in earlier days?",
+    "backfillBody": "This records {{prayers}} prayers across {{days}} days ({{range}}) as prayed on time. Days you have already logged are left alone, and today is not touched.",
+    "backfillConfirm": "Fill them in",
+    "backfillNothingTitle": "Nothing to fill in",
+    "backfillNothingBody": "Every day before today is already recorded.",
+    "openLogFromHome": "Open the Log"
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

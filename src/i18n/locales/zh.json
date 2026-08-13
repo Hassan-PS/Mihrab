@@ -1209,7 +1209,14 @@
     "markFasted": "标记为已斋戒",
     "unmarkFasted": "取消标记",
     "showOnHome": "在主页显示图表",
-    "showOnHomeHelp": "在“今天”页面显示你的功修方格。默认关闭。"
+    "showOnHomeHelp": "在“今天”页面显示你的功修方格。默认关闭。",
+    "backfillAction": "补录之前的日子",
+    "backfillTitle": "补录之前的日子？",
+    "backfillBody": "这会把 {{days}} 天（{{range}}）内的 {{prayers}} 次礼拜记录为按时完成。你已经记录过的日子保持不变，今天不会被改动。",
+    "backfillConfirm": "补录",
+    "backfillNothingTitle": "没有需要补录的",
+    "backfillNothingBody": "今天之前的每一天都已记录。",
+    "openLogFromHome": "打开记录"
   },
   "endOfDay": {
     "title": "记录今天的拜功吗？",

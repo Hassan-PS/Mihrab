@@ -8,15 +8,17 @@
  * the squares on the screen they open twenty times a day is the entire
  * point of keeping the record at all.
  *
- * Read-only here: no day selection, no legend, no caption. Tapping a square
- * would have to open the Log tab on that day, which is a navigation the
- * card cannot honestly promise from inside Home's scroll view, and a legend
- * repeated on two screens is furniture. The Log tab remains the place where
- * the graph is a control rather than a picture.
+ * The squares themselves are not controls — no day selection, no legend, no
+ * caption; a legend repeated on two screens is furniture, and per-square
+ * selection here would mean two graphs behaving differently. But the card as
+ * a whole opens the Log, because a picture of your record that does nothing
+ * when you press it reads as broken: people press it precisely because they
+ * want the thing it is a picture OF.
  */
 import { memo, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { scoreByDay } from '../../journal/journal';
@@ -31,11 +33,13 @@ import { HOME_TABLE_RADIUS } from './tokens';
 function PracticeCardImpl() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
+  const navigation = useNavigation();
   const { journal, fasts } = usePracticeHistory();
 
   const earliest = useMemo(() => {
     let first: string | null = null;
-    for (const e of journal) if (first === null || e.date < first) first = e.date;
+    for (const e of journal)
+      if (first === null || e.date < first) first = e.date;
     for (const f of fasts) if (first === null || f.date < first) first = f.date;
     return first;
   }, [journal, fasts]);
@@ -63,20 +67,28 @@ function PracticeCardImpl() {
   }, [i18n.language]);
 
   return (
-    <View
-      style={[
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('log.openLogFromHome', 'Open the Log')}
+      // The whole card, not the squares: the graph scrolls horizontally
+      // inside itself, and a press target on each square would fight that
+      // scroll for every gesture.
+      onPress={() => navigation.navigate('LogTab' as never)}
+      style={({ pressed }) => [
         styles.card,
         {
           backgroundColor: palette.card,
           borderRadius: HOME_TABLE_RADIUS,
           ...cardEdgeStyle(palette),
         },
-      ]}>
+        pressed && { opacity: 0.85 },
+      ]}
+    >
       <Text style={[styles.title, { color: palette.muted }]}>
         {t('log.practiceTitle')}
       </Text>
       <PracticeHeatmap rows={rows} weekdayLabels={weekdayLabels} compact />
-    </View>
+    </Pressable>
   );
 }
 

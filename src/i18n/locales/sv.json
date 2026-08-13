@@ -1209,7 +1209,14 @@
     "markFasted": "Markera som fastad",
     "unmarkFasted": "Avmarkera",
     "showOnHome": "Visa grafen på startsidan",
-    "showOnHomeHelp": "Lägger till dina rutor på Idag-skärmen. Av som standard."
+    "showOnHomeHelp": "Lägger till dina rutor på Idag-skärmen. Av som standard.",
+    "backfillAction": "Fyll i tidigare dagar",
+    "backfillTitle": "Fyll i tidigare dagar?",
+    "backfillBody": "Detta registrerar {{prayers}} böner under {{days}} dagar ({{range}}) som bedda i tid. Dagar du redan loggat lämnas orörda, och dagens datum påverkas inte.",
+    "backfillConfirm": "Fyll i dem",
+    "backfillNothingTitle": "Inget att fylla i",
+    "backfillNothingBody": "Alla dagar före i dag är redan registrerade.",
+    "openLogFromHome": "Öppna loggen"
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

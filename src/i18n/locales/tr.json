@@ -1209,7 +1209,14 @@
     "markFasted": "Oruçlu olarak işaretle",
     "unmarkFasted": "İşareti kaldır",
     "showOnHome": "Grafiği ana ekranda göster",
-    "showOnHomeHelp": "Karelerinizi Bugün ekranına ekler. Varsayılan olarak kapalı."
+    "showOnHomeHelp": "Karelerinizi Bugün ekranına ekler. Varsayılan olarak kapalı.",
+    "backfillAction": "Önceki günleri doldur",
+    "backfillTitle": "Önceki günler doldurulsun mu?",
+    "backfillBody": "Bu, {{days}} gün boyunca ({{range}}) {{prayers}} namazı vaktinde kılınmış olarak kaydeder. Daha önce kaydettiğin günlere dokunulmaz, bugün de değişmez.",
+    "backfillConfirm": "Doldur",
+    "backfillNothingTitle": "Doldurulacak bir şey yok",
+    "backfillNothingBody": "Bugünden önceki bütün günler zaten kayıtlı.",
+    "openLogFromHome": "Kaydı aç"
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

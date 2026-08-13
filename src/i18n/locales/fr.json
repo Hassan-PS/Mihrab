@@ -1209,7 +1209,14 @@
     "markFasted": "Marquer comme jeûné",
     "unmarkFasted": "Retirer",
     "showOnHome": "Afficher le graphique sur l’accueil",
-    "showOnHomeHelp": "Ajoute vos carrés à l’écran Aujourd’hui. Désactivé par défaut."
+    "showOnHomeHelp": "Ajoute vos carrés à l’écran Aujourd’hui. Désactivé par défaut.",
+    "backfillAction": "Compléter les jours précédents",
+    "backfillTitle": "Compléter les jours précédents ?",
+    "backfillBody": "Cela enregistre {{prayers}} prières sur {{days}} jours ({{range}}) comme accomplies à l’heure. Les jours déjà enregistrés ne sont pas modifiés, et aujourd’hui n’est pas touché.",
+    "backfillConfirm": "Les compléter",
+    "backfillNothingTitle": "Rien à compléter",
+    "backfillNothingBody": "Tous les jours avant aujourd’hui sont déjà enregistrés.",
+    "openLogFromHome": "Ouvrir le journal"
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",

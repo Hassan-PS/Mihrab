@@ -1209,7 +1209,14 @@
     "markFasted": "Tandai sudah berpuasa",
     "unmarkFasted": "Batalkan tanda",
     "showOnHome": "Tampilkan grafik di Beranda",
-    "showOnHomeHelp": "Menambahkan kotak praktik Anda ke layar Hari Ini. Mati secara bawaan."
+    "showOnHomeHelp": "Menambahkan kotak praktik Anda ke layar Hari Ini. Mati secara bawaan.",
+    "backfillAction": "Isi hari-hari sebelumnya",
+    "backfillTitle": "Isi hari-hari sebelumnya?",
+    "backfillBody": "Ini mencatat {{prayers}} salat selama {{days}} hari ({{range}}) sebagai dikerjakan tepat waktu. Hari yang sudah kamu catat dibiarkan apa adanya, dan hari ini tidak diubah.",
+    "backfillConfirm": "Isi semuanya",
+    "backfillNothingTitle": "Tidak ada yang perlu diisi",
+    "backfillNothingBody": "Semua hari sebelum hari ini sudah tercatat.",
+    "openLogFromHome": "Buka catatan"
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

@@ -1209,7 +1209,14 @@
     "markFasted": "Als gefastet markieren",
     "unmarkFasted": "Markierung entfernen",
     "showOnHome": "Diagramm auf der Startseite zeigen",
-    "showOnHomeHelp": "Fügt deine Quadrate zum Heute-Bildschirm hinzu. Standardmäßig aus."
+    "showOnHomeHelp": "Fügt deine Quadrate zum Heute-Bildschirm hinzu. Standardmäßig aus.",
+    "backfillAction": "Frühere Tage ausfüllen",
+    "backfillTitle": "Frühere Tage ausfüllen?",
+    "backfillBody": "Damit werden {{prayers}} Gebete an {{days}} Tagen ({{range}}) als pünktlich gebetet erfasst. Bereits erfasste Tage bleiben unverändert, und der heutige Tag wird nicht angetastet.",
+    "backfillConfirm": "Ausfüllen",
+    "backfillNothingTitle": "Nichts auszufüllen",
+    "backfillNothingBody": "Jeder Tag vor heute ist bereits erfasst.",
+    "openLogFromHome": "Log öffnen"
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

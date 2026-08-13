@@ -19,6 +19,7 @@ import {
   ADHAN_CONTROLS_CATEGORY_ID,
 } from './adhanActionIds';
 import { SNOOZE_PRESETS } from './notificationActions';
+import { JOURNAL_LOG_ACTION_ID } from './prayerLogAction';
 import { AdhanPlayer } from '../native/AdhanPlayer';
 import { getMutedNextAdhan } from './adhanMute';
 import type { TimingsMap } from '../types/prayer';
@@ -55,7 +56,9 @@ function prayerNotificationTime(id: string): number | null {
  * isn't"). Going forward `timeoutAfter` auto-dismisses each one when the next
  * prayer arrives; this pass also cleans up ones delivered before that fix.
  */
-async function clearStaleDisplayedPrayerNotifications(now: number): Promise<void> {
+async function clearStaleDisplayedPrayerNotifications(
+  now: number,
+): Promise<void> {
   if (Platform.OS !== 'android') return; // iOS delivered list isn't reliably enumerable
   let displayed;
   try {
@@ -65,7 +68,10 @@ async function clearStaleDisplayedPrayerNotifications(now: number): Promise<void
   }
   for (const d of displayed) {
     const id = d.notification?.id;
-    if (typeof id !== 'string' || !id.startsWith(PRAYER_NOTIFICATION_ID_PREFIX)) {
+    if (
+      typeof id !== 'string' ||
+      !id.startsWith(PRAYER_NOTIFICATION_ID_PREFIX)
+    ) {
       continue;
     }
     const t = prayerNotificationTime(id);
@@ -203,7 +209,9 @@ export function clampPrePrayerReminderMinutes(value: unknown): number {
  * obsolete IDs and lets `createTriggerNotification` replace existing IDs
  * atomically (notifee's documented behavior).
  */
-async function cancelOwnedPrayerNotifications(keepIds: string[]): Promise<void> {
+async function cancelOwnedPrayerNotifications(
+  keepIds: string[],
+): Promise<void> {
   const keep = new Set(keepIds);
   let existing;
   try {
@@ -294,12 +302,21 @@ export type SyncPrayerNotificationsResult =
 /**
  * Stable id for the "Log prayer in journal" notification action — task #99.
  *
- * When `journalNotificationActionsEnabled` is true, every prayer-time
- * notification gets this action attached. Tapping it opens the app
- * with a deep-link payload identifying the prayer; the journal screen
- * picks that up and pre-targets the row.
+ * Every prayer-time notification carries this action. Pressing it RECORDS
+ * the prayer — see `prayerLogAction`, which owns the write and works with
+ * the app closed. It used only to hand a deep-link to the Log screen, which
+ * meant it did nothing at all unless that screen happened to be open;
+ * fixed 2026-08-07.
  */
-export const JOURNAL_LOG_ACTION_ID = 'journal-log-prayer';
+export { JOURNAL_LOG_ACTION_ID };
+
+/** Local ISO day key for the day an alert belongs to. Local, not UTC: the
+ *  journal is keyed on the day the user is living in. */
+function ymdLocal(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
 
 export async function syncPrayerNotifications(params: {
   enabled: boolean;
@@ -373,7 +390,9 @@ export async function syncPrayerNotifications(params: {
   // replaces atomically (no cancel/recreate gap).
   const desiredIds = new Set<string>();
   for (const e of salahEvents) {
-    desiredIds.add(`${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`);
+    desiredIds.add(
+      `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`,
+    );
   }
   for (const e of reminderEvents) {
     desiredIds.add(
@@ -388,7 +407,9 @@ export async function syncPrayerNotifications(params: {
 
   for (let i = 0; i < salahEvents.length; i++) {
     const e = salahEvents[i];
-    const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`;
+    const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${
+      e.name
+    }`;
     // Sunrise, Islamic Midnight and the Last Third are NOT prayers, so they
     // must never play the adhan even when one is selected for the five daily
     // prayers. They fall back to the plain default notification sound; every
@@ -428,6 +449,14 @@ export async function syncPrayerNotifications(params: {
         data: {
           kind: 'prayer_time',
           usesAdhan: usesAdhan ? '1' : '0',
+          // The day this alert is FOR. The "Log prayer" action writes to it
+          // rather than to whatever day it is when the button is pressed:
+          // Isha fires at 23:40 in a Swedish winter and gets answered after
+          // midnight, and crediting the wrong day is the one thing a record
+          // must not do. `prayerLogAction` reads this, falling back to the
+          // timestamp in the notification id.
+          targetDate: ymdLocal(e.at),
+          prayer: e.name,
           // The selected adhan's id doubles as the bundled audio base name
           // (e.g. 'adhan_makkah' → adhan_makkah.mp3). The iOS foreground handler
           // uses it to play the FULL adhan on tap / when the app is open, since
@@ -503,7 +532,9 @@ export async function syncPrayerNotifications(params: {
   }
 
   for (const e of reminderEvents) {
-    const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}pre-${e.at.getTime()}-${e.name}`;
+    const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}pre-${e.at.getTime()}-${
+      e.name
+    }`;
     const preBody = i18n.t('alertCopy.prePrayer', { count: reminderMinutes });
     await notifee.createTriggerNotification(
       {

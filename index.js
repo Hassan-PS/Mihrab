@@ -40,6 +40,19 @@ try {
   console.error('[mihrab] registerAdhanSafetyControls failed:', e);
 }
 
+// Stamp the first day this build ran, once. The Log's "fill in earlier
+// days" button uses it as the earliest day it may offer to fill: without
+// it, on a platform whose OS will not say when the app was installed, the
+// button would have to either guess or refuse. It writes only if nothing
+// is stored, so it records a first launch and never a later one.
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { recordFirstSeen } = require('./src/journal/installDate');
+  void recordFirstSeen();
+} catch (e) {
+  console.error('[mihrab] recordFirstSeen failed:', e);
+}
+
 AppRegistry.registerComponent(APP_REGISTRY_NAME, () => App);
 
 // Quran recitation playback service (lock-screen / notification remote

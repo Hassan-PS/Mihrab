@@ -22,9 +22,12 @@
  * day is open. Forward stops at today, because a log of the future is a
  * plan, and this screen is not for plans.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
+  I18nManager,
+  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -76,6 +79,10 @@ import {
   type JournalStatus,
 } from '../journal/journal';
 import { upcomingPrayers } from '../journal/upcoming';
+import { dragTranslation, swipeDayDelta } from '../journal/daySwipe';
+import { applyBackfill, planBackfill } from '../journal/backfill';
+import { installedOnDay } from '../journal/installDate';
+import { syncEndOfDayReminderForDay } from '../notifications/endOfDayLog';
 import {
   coerceFastEntries,
   computeFastStats,
@@ -113,8 +120,11 @@ export function LogScreen() {
   const { palette } = useAppPalette();
   const tabBarInset = useTabBarInset();
   const navigation = useNavigation();
-  const { settings, hydrated: settingsHydrated, updateSettings } =
-    usePrayerSettings();
+  const {
+    settings,
+    hydrated: settingsHydrated,
+    updateSettings,
+  } = usePrayerSettings();
   const { state } = usePrayerDay(settings, settingsHydrated);
   useAndroidSubScreenBack();
 
@@ -132,6 +142,11 @@ export function LogScreen() {
    */
   const [selected, setSelected] = useState(today);
   const isToday = selected === today;
+  /** The day, readable from callbacks that must not be rebuilt when it
+   *  changes — the pan responder, above all: rebuilding it mid-gesture
+   *  drops the drag. */
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
   /**
    * Ticks once a minute, only while today is on screen. It exists so a row
    * greyed out as "not yet" opens itself the minute the adhan time passes,
@@ -159,22 +174,125 @@ export function LogScreen() {
     [today],
   );
 
-  // Deep link from a prayer notification's "Log prayer" action: highlight
-  // the row it names for a few seconds so the tap lands somewhere obvious.
+  /**
+   * ── The day panel is a page you can throw sideways ──────────────────
+   *
+   * The arrows are precise and slow: reaching last month is thirty taps,
+   * and the graph above already shows the square you want. Dragging the
+   * panel is how anyone expects to move between days, and both remain —
+   * the arrows for one day at a time, the drag for the habit.
+   *
+   * PanResponder rather than a paged ScrollView because this lives INSIDE
+   * a vertical ScrollView: the responder only claims the gesture once it
+   * is decisively horizontal, so scrolling the page still works with a
+   * finger anywhere on the panel, including on top of it.
+   *
+   * The decision itself is `swipeDayDelta`, kept out of here and unit
+   * tested — a gesture cannot be tested in Jest, an intent can.
+   */
+  const panX = useRef(new Animated.Value(0)).current;
+  const panWidth = useRef(0);
+  const canGoForwardRef = useRef(false);
+  canGoForwardRef.current = canGoForward;
+  const settle = useCallback(
+    (delta: -1 | 0 | 1) => {
+      if (delta === 0) {
+        Animated.spring(panX, {
+          toValue: 0,
+          useNativeDriver: true,
+          bounciness: 0,
+          speed: 18,
+        }).start();
+        return;
+      }
+      // Out, swap the day, then in from the other side: the day being
+      // replaced leaves the way the finger sent it, which is what makes it
+      // read as a page rather than a redraw.
+      const width = panWidth.current || 320;
+      const rtl = I18nManager.isRTL;
+      const outward = (delta === -1 ? 1 : -1) * (rtl ? -1 : 1) * width;
+      Animated.timing(panX, {
+        toValue: outward,
+        duration: 120,
+        useNativeDriver: true,
+      }).start(() => {
+        stepDay(delta);
+        panX.setValue(-outward);
+        Animated.spring(panX, {
+          toValue: 0,
+          useNativeDriver: true,
+          bounciness: 0,
+          speed: 18,
+        }).start();
+      });
+    },
+    [panX, stepDay],
+  );
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        // Never on touch-down: a tap on a status chip must reach the chip.
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_e, g) =>
+          Math.abs(g.dx) > 14 && Math.abs(g.dx) > Math.abs(g.dy) * 1.6,
+        onPanResponderMove: (_e, g) => {
+          panX.setValue(
+            dragTranslation({
+              dx: g.dx,
+              canGoForward: canGoForwardRef.current,
+              rtl: I18nManager.isRTL,
+            }),
+          );
+        },
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderRelease: (_e, g) => {
+          settle(
+            swipeDayDelta({
+              dx: g.dx,
+              vx: g.vx,
+              width: panWidth.current || 320,
+              canGoForward: canGoForwardRef.current,
+              rtl: I18nManager.isRTL,
+            }),
+          );
+        },
+        onPanResponderTerminate: () => settle(0),
+      }),
+    [panX, settle],
+  );
+
+  /**
+   * A press on the notification's "Log prayer" writes the entry itself —
+   * `prayerLogAction` owns that, and it works with the app closed, which is
+   * the only way a button on a notification is any use. This handler is the
+   * cosmetic half: if the Log happens to be open, jump to the day it landed
+   * on and flash the row, so the record visibly gains what was just claimed
+   * rather than changing behind the user's back.
+   */
   useEffect(() => {
     const sub = notifee.onForegroundEvent(({ type, detail }) => {
       if (type !== EventType.ACTION_PRESS) return;
       const id = detail.pressAction?.id ?? '';
-      if (!id.startsWith(`${JOURNAL_LOG_ACTION_ID}:`)) return;
-      const name = id.slice(JOURNAL_LOG_ACTION_ID.length + 1) as JournalPrayer;
-      if (PRAYERS.includes(name)) {
-        // The notification is about today's prayer, so it also snaps the
-        // screen back to today — otherwise the highlight would land on a
-        // row belonging to whichever old day was left open.
-        setSelected(dayKey());
-        setActionTargetPrayer(name);
-        setTimeout(() => setActionTargetPrayer(null), 4000);
-      }
+      if (!id.startsWith(JOURNAL_LOG_ACTION_ID)) return;
+      const data = detail.notification?.data as
+        | Record<string, unknown>
+        | undefined;
+      const fromId = id.startsWith(`${JOURNAL_LOG_ACTION_ID}:`)
+        ? id.slice(JOURNAL_LOG_ACTION_ID.length + 1)
+        : null;
+      const name = (fromId ?? data?.prayer) as JournalPrayer;
+      if (!PRAYERS.includes(name)) return;
+      // The day the ALERT was for, which after midnight is not today — the
+      // write lands there, so the screen must follow it there.
+      const date = data?.targetDate;
+      setSelected(
+        typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)
+          ? date
+          : dayKey(),
+      );
+      setActionTargetPrayer(name);
+      setTimeout(() => setActionTargetPrayer(null), 4000);
     });
     return sub;
   }, []);
@@ -222,7 +340,9 @@ export function LogScreen() {
   }, [hydrated, store.hydrated, store.journal, store.fasts]);
 
   const persistJournal = useCallback(
-    async (next: JournalEntry[]) => {
+    /** `dates` names the days this write touched — one, normally; every
+     *  backfilled day when the button below is used. */
+    async (next: JournalEntry[], dates: string[] = [selectedRef.current]) => {
       const prev = entries;
       setEntries(next);
       // Published before the write, not after it. Encrypting and writing a
@@ -233,6 +353,12 @@ export function LogScreen() {
       primePractice({ journal: next });
       try {
         await durableEncryptedSet(JOURNAL_KEY, JSON.stringify(next));
+        // A day that is now fully recorded has answered the evening's
+        // "log today's prayers?" prompt before it was asked, so the prompt
+        // is retired here rather than left to fire at us tonight.
+        for (const date of dates) {
+          void syncEndOfDayReminderForDay(date, next);
+        }
       } catch (e) {
         console.warn('LogScreen journal persist failed', e);
         setEntries(prev);
@@ -440,7 +566,7 @@ export function LogScreen() {
     ? state.phase === 'ready'
       ? state.today
       : undefined
-    : (pastTimes ?? undefined);
+    : pastTimes ?? undefined;
 
   const maghrib = dayTimes?.Maghrib;
   const isSunnahDay = isRecommendedVoluntaryFastDay(selectedDate);
@@ -486,6 +612,88 @@ export function LogScreen() {
     if (next !== entries) void persistJournal(next);
   }, [entries, selected, persistJournal, upcoming]);
 
+  /**
+   * ── Filling in the days before you started logging ──────────────────
+   *
+   * Someone who has prayed for months and installed the app on Tuesday
+   * opens this screen to a wall of empty squares that says, wrongly, that
+   * they have done nothing. One button fills every day from the install
+   * back-stop up to yesterday.
+   *
+   * It asks first, and the question names the exact number of days and the
+   * exact range, because "fill in 214 days" and "fill in 3 days" deserve
+   * different answers and only the user knows which this is. Today is
+   * excluded — it still has prayers in it that have not happened — and
+   * anything already recorded is left exactly as it was.
+   */
+  const [backfilling, setBackfilling] = useState(false);
+  const earliestEntry = useMemo(() => {
+    let first: string | null = null;
+    for (const e of entries)
+      if (first === null || e.date < first) first = e.date;
+    return first;
+  }, [entries]);
+
+  const runBackfill = useCallback(async () => {
+    if (backfilling) return;
+    setBackfilling(true);
+    try {
+      const installedOn = await installedOnDay(earliestEntry);
+      const plan = planBackfill(entries, installedOn);
+      if (!plan.from || !plan.to) {
+        Alert.alert(
+          t('log.backfillNothingTitle', 'Nothing to fill in'),
+          t(
+            'log.backfillNothingBody',
+            'Every day before today is already recorded.',
+          ),
+        );
+        return;
+      }
+      const range = `${dateFromKey(plan.from).toLocaleDateString(
+        i18n.language,
+        { day: 'numeric', month: 'long' },
+      )} – ${dateFromKey(plan.to).toLocaleDateString(i18n.language, {
+        day: 'numeric',
+        month: 'long',
+      })}`;
+      Alert.alert(
+        t('log.backfillTitle', 'Fill in earlier days?'),
+        t('log.backfillBody', {
+          // `days`, not `count`: i18next treats `count` as a plural selector
+          // and would then want six forms of this sentence in Arabic alone,
+          // for a number that is always shown as a numeral anyway.
+          defaultValue:
+            'This records {{prayers}} prayers across {{days}} days ({{range}}) as prayed on time. Days you have already logged are left alone, and today is not touched.',
+          days: plan.days,
+          prayers: plan.prayers,
+          range,
+        }),
+        [
+          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+          {
+            text: t('log.backfillConfirm', 'Fill them in'),
+            onPress: () => {
+              const next = applyBackfill(entries, installedOn);
+              if (next !== entries) {
+                void persistJournal(
+                  next,
+                  // Every filled day is now complete, so each one's evening
+                  // prompt is retired with it.
+                  next
+                    .map(e => e.date)
+                    .filter((d, idx, all) => all.indexOf(d) === idx),
+                );
+              }
+            },
+          },
+        ],
+      );
+    } finally {
+      setBackfilling(false);
+    }
+  }, [backfilling, earliestEntry, entries, i18n.language, persistJournal, t]);
+
   /** "Sunday 2 August" — the day's own name, not a raw key. */
   const selectedLabel = useMemo(
     () =>
@@ -506,14 +714,16 @@ export function LogScreen() {
     <ScrollView
       style={{ backgroundColor: palette.bg }}
       contentContainerStyle={[styles.scroll, { paddingBottom: tabBarInset }]}
-      contentInsetAdjustmentBehavior="automatic">
+      contentInsetAdjustmentBehavior="automatic"
+    >
       <CenteredColumn>
         {/* ── The graph ─────────────────────────────────────────────── */}
         <View
           style={[
             styles.card,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
+          ]}
+        >
           <Text style={[styles.sectionTitle, { color: palette.muted }]}>
             {t('log.practiceTitle')}
           </Text>
@@ -531,6 +741,27 @@ export function LogScreen() {
               count: fastStats.total,
             })}`}
           />
+          {/* Under the graph, because the graph is what makes the case for
+              it: a wall of empty squares behind someone who has been
+              praying for months is the app being wrong about them. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('log.backfillAction', 'Fill in earlier days')}
+            onPress={runBackfill}
+            disabled={backfilling}
+            style={[
+              styles.backfillRow,
+              { borderTopColor: palette.border ?? palette.muted },
+            ]}
+          >
+            <Text
+              style={[styles.backfillLabel, { color: palette.accent }]}
+              numberOfLines={1}
+            >
+              {t('log.backfillAction', 'Fill in earlier days')}
+            </Text>
+            <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
+          </Pressable>
         </View>
 
         {/* ── The day being logged ──────────────────────────────────── */}
@@ -540,13 +771,17 @@ export function LogScreen() {
             accessibilityLabel={t('log.previousDay')}
             onPress={() => stepDay(-1)}
             hitSlop={10}
-            style={[styles.dayArrow, { backgroundColor: palette.controlBg }]}>
-            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>‹</Text>
+            style={[styles.dayArrow, { backgroundColor: palette.controlBg }]}
+          >
+            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>
+              ‹
+            </Text>
           </Pressable>
           <View style={styles.dayNameWrap}>
             <Text
               style={[styles.dayName, { color: palette.text }]}
-              numberOfLines={1}>
+              numberOfLines={1}
+            >
               {isToday ? t('journal.todayLabel') : selectedLabel}
             </Text>
             {isToday ? null : (
@@ -554,7 +789,8 @@ export function LogScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={t('log.backToToday')}
                 onPress={() => setSelected(today)}
-                hitSlop={6}>
+                hitSlop={6}
+              >
                 <Text style={[styles.backToToday, { color: palette.accent }]}>
                   {t('log.backToToday')}
                 </Text>
@@ -574,299 +810,338 @@ export function LogScreen() {
                 backgroundColor: palette.controlBg,
                 opacity: canGoForward ? 1 : 0.35,
               },
-            ]}>
-            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>›</Text>
-          </Pressable>
-        </View>
-        <View style={styles.todayHeader}>
-          <View style={{ flex: 1 }} />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('log.markAllOnTime', 'Mark all on time')}
-            onPress={markAllOnTime}
-            style={[styles.ghostBtn, { backgroundColor: palette.controlBg }]}>
-            <Text style={[styles.ghostLabel, { color: palette.accent }]}>
-              {t('log.markAllOnTime', 'Mark all on time')}
+            ]}
+          >
+            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>
+              ›
             </Text>
           </Pressable>
         </View>
+        {/* Everything below the arrows moves as one page — see the pan
+            responder above. `onLayout` gives the gesture the width it needs
+            to decide what counts as a swipe. */}
+        <Animated.View
+          onLayout={e => {
+            panWidth.current = e.nativeEvent.layout.width;
+          }}
+          style={[styles.dayPanel, { transform: [{ translateX: panX }] }]}
+          {...panResponder.panHandlers}
+        >
+          <View style={styles.todayHeader}>
+            <View style={{ flex: 1 }} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('log.markAllOnTime', 'Mark all on time')}
+              onPress={markAllOnTime}
+              style={[styles.ghostBtn, { backgroundColor: palette.controlBg }]}
+            >
+              <Text style={[styles.ghostLabel, { color: palette.accent }]}>
+                {t('log.markAllOnTime', 'Mark all on time')}
+              </Text>
+            </Pressable>
+          </View>
 
-        {/* The nightly prompt is the same act as the button above, offered
+          {/* The nightly prompt is the same act as the button above, offered
             when the day is actually over — so the switch for it belongs
             here, next to the thing it fills in, as well as in Settings. */}
-        <View
-          style={[
-            styles.card,
-            styles.reminderRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <View style={styles.reminderCopy}>
-            <Text style={[styles.reminderTitle, { color: palette.text }]}>
-              {t('settings.endOfDayLog')}
-            </Text>
-            <Text style={[styles.reminderHelp, { color: palette.muted }]}>
-              {t('settings.endOfDayLogHelp')}
-            </Text>
+          <View
+            style={[
+              styles.card,
+              styles.reminderRow,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}
+          >
+            <View style={styles.reminderCopy}>
+              <Text style={[styles.reminderTitle, { color: palette.text }]}>
+                {t('settings.endOfDayLog')}
+              </Text>
+              <Text style={[styles.reminderHelp, { color: palette.muted }]}>
+                {t('settings.endOfDayLogHelp')}
+              </Text>
+            </View>
+            <Switch
+              value={settings.endOfDayLogReminderEnabled}
+              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+              thumbColor="#ffffff"
+              onValueChange={v =>
+                updateSettings({ endOfDayLogReminderEnabled: v })
+              }
+            />
           </View>
-          <Switch
-            value={settings.endOfDayLogReminderEnabled}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-            thumbColor="#ffffff"
-            onValueChange={v =>
-              updateSettings({ endOfDayLogReminderEnabled: v })
-            }
-          />
-        </View>
 
-        {/* The same switch is in Settings. It lives here too because this is
+          {/* The same switch is in Settings. It lives here too because this is
             where you are looking at the graph and deciding you want it in
             front of you every time you open the app. */}
-        <View
-          style={[
-            styles.card,
-            styles.reminderRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <View style={styles.reminderCopy}>
-            <Text style={[styles.reminderTitle, { color: palette.text }]}>
-              {t('log.showOnHome')}
-            </Text>
-            <Text style={[styles.reminderHelp, { color: palette.muted }]}>
-              {t('log.showOnHomeHelp')}
-            </Text>
+          <View
+            style={[
+              styles.card,
+              styles.reminderRow,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}
+          >
+            <View style={styles.reminderCopy}>
+              <Text style={[styles.reminderTitle, { color: palette.text }]}>
+                {t('log.showOnHome')}
+              </Text>
+              <Text style={[styles.reminderHelp, { color: palette.muted }]}>
+                {t('log.showOnHomeHelp')}
+              </Text>
+            </View>
+            <Switch
+              value={settings.showPracticeOnHome}
+              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+              thumbColor="#ffffff"
+              onValueChange={v => updateSettings({ showPracticeOnHome: v })}
+            />
           </View>
-          <Switch
-            value={settings.showPracticeOnHome}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-            thumbColor="#ffffff"
-            onValueChange={v => updateSettings({ showPracticeOnHome: v })}
-          />
-        </View>
 
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          {PRAYERS.map((prayer, index) => {
-            const current = getEntryStatus(entries, selected, prayer);
-            const draft = draftNotes[prayer] ?? '';
-            const savedNote = entries.find(
-              e => e.date === selected && e.prayer === prayer,
-            )?.note;
-            const draftDirty = (savedNote ?? '') !== draft;
-            const time = dayTimes?.[prayer];
-            /**
-             * Greyed out only while there is nothing to correct. The rule
-             * exists to stop a NEW claim being made about a prayer that
-             * has not happened; it must not trap one that somehow already
-             * exists — from an older build, or a mis-tap before the clock
-             * moved — behind four dead chips with no way to clear it.
-             */
-            const notYet = upcoming.has(prayer) && !current;
-            return (
-              <View
-                key={prayer}
-                style={[
-                  styles.prayerRow,
-                  index > 0 && {
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: palette.border ?? palette.muted,
-                  },
-                  actionTargetPrayer === prayer && {
-                    backgroundColor: palette.accentBg,
-                  },
-                ]}>
-                <View style={styles.prayerHead}>
-                  <Text style={[styles.prayerName, { color: palette.text }]}>
-                    {t(`prayer.${prayer}`)}
-                  </Text>
-                  {time ? (
-                    <Text
-                      style={[
-                        styles.prayerTime,
-                        tabularNumeralStyle,
-                        { color: palette.muted },
-                      ]}>
-                      {formatDisplayTime(time)}
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}
+          >
+            {PRAYERS.map((prayer, index) => {
+              const current = getEntryStatus(entries, selected, prayer);
+              const draft = draftNotes[prayer] ?? '';
+              const savedNote = entries.find(
+                e => e.date === selected && e.prayer === prayer,
+              )?.note;
+              const draftDirty = (savedNote ?? '') !== draft;
+              const time = dayTimes?.[prayer];
+              /**
+               * Greyed out only while there is nothing to correct. The rule
+               * exists to stop a NEW claim being made about a prayer that
+               * has not happened; it must not trap one that somehow already
+               * exists — from an older build, or a mis-tap before the clock
+               * moved — behind four dead chips with no way to clear it.
+               */
+              const notYet = upcoming.has(prayer) && !current;
+              return (
+                <View
+                  key={prayer}
+                  style={[
+                    styles.prayerRow,
+                    index > 0 && {
+                      borderTopWidth: StyleSheet.hairlineWidth,
+                      borderTopColor: palette.border ?? palette.muted,
+                    },
+                    actionTargetPrayer === prayer && {
+                      backgroundColor: palette.accentBg,
+                    },
+                  ]}
+                >
+                  <View style={styles.prayerHead}>
+                    <Text style={[styles.prayerName, { color: palette.text }]}>
+                      {t(`prayer.${prayer}`)}
                     </Text>
-                  ) : null}
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t(
-                      'journal.noteLabel',
-                      'Personal note (private, encrypted)',
-                    )}
-                    onPress={() =>
-                      setOpenNote(cur => (cur === prayer ? null : prayer))
-                    }
-                    hitSlop={8}
-                    style={styles.noteToggle}>
-                    <Text
-                      style={{
-                        color: savedNote ? palette.accent : palette.muted,
-                        fontSize: 15,
-                      }}>
-                      ✎
-                    </Text>
-                  </Pressable>
-                </View>
-                <View style={styles.statusRow}>
-                  {STATUSES.map(s => {
-                    const isSel = current === s;
-                    return (
-                      <Pressable
-                        key={s}
-                        accessibilityRole="radio"
-                        accessibilityLabel={t(`journal.status.${s}`)}
-                        accessibilityState={{
-                          selected: isSel,
-                          disabled: notYet,
-                        }}
-                        // A prayer whose time has not come cannot be
-                        // recorded — in either direction. The chips are the
-                        // rule; "Mark all on time" obeys the same one.
-                        disabled={notYet}
-                        onPress={() => onMark(prayer, s)}
+                    {time ? (
+                      <Text
                         style={[
-                          styles.statusChip,
-                          {
-                            backgroundColor: isSel
-                              ? palette.accentSolid
-                              : palette.controlBg,
-                            opacity: notYet ? 0.4 : 1,
-                          },
-                        ]}>
-                        <Text
-                          style={[
-                            styles.statusLabel,
-                            { color: isSel ? palette.onAccent : palette.text },
-                          ]}
-                          numberOfLines={1}>
-                          {t(`journal.statusShort.${s}`)}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                {openNote === prayer ? (
-                  <View style={styles.noteRow}>
-                    <TextInput
+                          styles.prayerTime,
+                          tabularNumeralStyle,
+                          { color: palette.muted },
+                        ]}
+                      >
+                        {formatDisplayTime(time)}
+                      </Text>
+                    ) : null}
+                    <Pressable
+                      accessibilityRole="button"
                       accessibilityLabel={t(
                         'journal.noteLabel',
                         'Personal note (private, encrypted)',
                       )}
-                      value={draft}
-                      onChangeText={txt =>
-                        setDraftNotes(prev => ({ ...prev, [prayer]: txt }))
+                      onPress={() =>
+                        setOpenNote(cur => (cur === prayer ? null : prayer))
                       }
-                      onBlur={() => {
-                        if (draftDirty) onSaveNote(prayer);
-                      }}
-                      placeholder={t(
-                        'journal.notePlaceholder',
-                        'Private note (only on this device)',
-                      )}
-                      placeholderTextColor={String(palette.muted)}
-                      multiline
-                      style={[
-                        styles.noteInput,
-                        inputChromeStyle(palette),
-                        { color: palette.text, backgroundColor: palette.bg },
-                      ]}
-                    />
-                    {draftDirty ? (
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={t('journal.saveNote', 'Save note')}
-                        onPress={() => onSaveNote(prayer)}
-                        style={[
-                          styles.saveNoteBtn,
-                          { backgroundColor: palette.accentSolid },
-                        ]}>
-                        <Text
-                          style={[styles.saveNoteLabel, { color: palette.onAccent }]}>
-                          {t('journal.saveNote', 'Save')}
-                        </Text>
-                      </Pressable>
-                    ) : null}
+                      hitSlop={8}
+                      style={styles.noteToggle}
+                    >
+                      <Text
+                        style={{
+                          color: savedNote ? palette.accent : palette.muted,
+                          fontSize: 15,
+                        }}
+                      >
+                        ✎
+                      </Text>
+                    </Pressable>
                   </View>
-                ) : null}
-              </View>
-            );
-          })}
-        </View>
+                  <View style={styles.statusRow}>
+                    {STATUSES.map(s => {
+                      const isSel = current === s;
+                      return (
+                        <Pressable
+                          key={s}
+                          accessibilityRole="radio"
+                          accessibilityLabel={t(`journal.status.${s}`)}
+                          accessibilityState={{
+                            selected: isSel,
+                            disabled: notYet,
+                          }}
+                          // A prayer whose time has not come cannot be
+                          // recorded — in either direction. The chips are the
+                          // rule; "Mark all on time" obeys the same one.
+                          disabled={notYet}
+                          onPress={() => onMark(prayer, s)}
+                          style={[
+                            styles.statusChip,
+                            {
+                              backgroundColor: isSel
+                                ? palette.accentSolid
+                                : palette.controlBg,
+                              opacity: notYet ? 0.4 : 1,
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusLabel,
+                              {
+                                color: isSel ? palette.onAccent : palette.text,
+                              },
+                            ]}
+                            numberOfLines={1}
+                          >
+                            {t(`journal.statusShort.${s}`)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  {openNote === prayer ? (
+                    <View style={styles.noteRow}>
+                      <TextInput
+                        accessibilityLabel={t(
+                          'journal.noteLabel',
+                          'Personal note (private, encrypted)',
+                        )}
+                        value={draft}
+                        onChangeText={txt =>
+                          setDraftNotes(prev => ({ ...prev, [prayer]: txt }))
+                        }
+                        onBlur={() => {
+                          if (draftDirty) onSaveNote(prayer);
+                        }}
+                        placeholder={t(
+                          'journal.notePlaceholder',
+                          'Private note (only on this device)',
+                        )}
+                        placeholderTextColor={String(palette.muted)}
+                        multiline
+                        style={[
+                          styles.noteInput,
+                          inputChromeStyle(palette),
+                          { color: palette.text, backgroundColor: palette.bg },
+                        ]}
+                      />
+                      {draftDirty ? (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t(
+                            'journal.saveNote',
+                            'Save note',
+                          )}
+                          onPress={() => onSaveNote(prayer)}
+                          style={[
+                            styles.saveNoteBtn,
+                            { backgroundColor: palette.accentSolid },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.saveNoteLabel,
+                              { color: palette.onAccent },
+                            ]}
+                          >
+                            {t('journal.saveNote', 'Save')}
+                          </Text>
+                        </Pressable>
+                      ) : null}
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
 
-        {/* ── Fasting: one card, not a screen ───────────────────────── */}
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <Text style={[styles.sectionTitle, { color: palette.muted }]}>
-            {t('log.fastingTitle')}
-          </Text>
-          <View style={styles.fastRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.fastState, { color: palette.text }]}>
-                {dayFast
-                  ? t('fasting.statusKept')
-                  : ramadanDay != null
+          {/* ── Fasting: one card, not a screen ───────────────────────── */}
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}
+          >
+            <Text style={[styles.sectionTitle, { color: palette.muted }]}>
+              {t('log.fastingTitle')}
+            </Text>
+            <View style={styles.fastRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.fastState, { color: palette.text }]}>
+                  {dayFast
+                    ? t('fasting.statusKept')
+                    : ramadanDay != null
                     ? t('fasting.ramadanDayLabel', { day: ramadanDay })
                     : isSunnahDay
-                      ? t('fasting.statusRecommended')
-                      : t('log.noFastLogged')}
-              </Text>
-              {maghrib ? (
-                <Text
-                  style={[styles.fastMeta, { color: palette.muted }]}
-                  numberOfLines={1}>
-                  {t('log.iftarAt', {
-                    defaultValue: 'Iftar {{time}}',
-                    time: formatDisplayTime(maghrib),
-                  })}
+                    ? t('fasting.statusRecommended')
+                    : t('log.noFastLogged')}
                 </Text>
-              ) : null}
-            </View>
-            {/* Neutral wording in both states: "Mark TODAY as fasted" was
+                {maghrib ? (
+                  <Text
+                    style={[styles.fastMeta, { color: palette.muted }]}
+                    numberOfLines={1}
+                  >
+                    {t('log.iftarAt', {
+                      defaultValue: 'Iftar {{time}}',
+                      time: formatDisplayTime(maghrib),
+                    })}
+                  </Text>
+                ) : null}
+              </View>
+              {/* Neutral wording in both states: "Mark TODAY as fasted" was
                 a lie on every day but one, now that older days open here. */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  dayFast ? t('log.unmarkFasted') : t('log.markFasted')
+                }
+                onPress={toggleFast}
+                style={[
+                  styles.fastCta,
+                  {
+                    backgroundColor: dayFast
+                      ? palette.controlBg
+                      : palette.accentSolid,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.fastCtaLabel,
+                    { color: dayFast ? palette.text : palette.onAccent },
+                  ]}
+                >
+                  {dayFast ? t('log.unmarkFasted') : t('log.markFasted')}
+                </Text>
+              </Pressable>
+            </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={
-                dayFast ? t('log.unmarkFasted') : t('log.markFasted')
-              }
-              onPress={toggleFast}
+              accessibilityLabel={t('log.allUpcoming', 'All upcoming')}
+              onPress={() => navigation.navigate('Fasting' as never)}
               style={[
-                styles.fastCta,
-                {
-                  backgroundColor: dayFast
-                    ? palette.controlBg
-                    : palette.accentSolid,
-                },
-              ]}>
-              <Text
-                style={[
-                  styles.fastCtaLabel,
-                  { color: dayFast ? palette.text : palette.onAccent },
-                ]}>
-                {dayFast ? t('log.unmarkFasted') : t('log.markFasted')}
+                styles.upcomingRow,
+                { borderTopColor: palette.border ?? palette.muted },
+              ]}
+            >
+              <Text style={[styles.upcomingLabel, { color: palette.accent }]}>
+                {t('log.allUpcoming', 'All upcoming')}
               </Text>
+              <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
             </Pressable>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('log.allUpcoming', 'All upcoming')}
-            onPress={() => navigation.navigate('Fasting' as never)}
-            style={[
-              styles.upcomingRow,
-              { borderTopColor: palette.border ?? palette.muted },
-            ]}>
-            <Text style={[styles.upcomingLabel, { color: palette.accent }]}>
-              {t('log.allUpcoming', 'All upcoming')}
-            </Text>
-            <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
-          </Pressable>
-        </View>
+        </Animated.View>
 
         {!hydrated ? (
           <Text style={[styles.hint, { color: palette.muted }]}>
@@ -940,7 +1215,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusLabel: { fontSize: 12, fontWeight: '600' },
-  noteRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 8 },
+  noteRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginTop: 8,
+  },
   noteInput: {
     flex: 1,
     minHeight: 40,
@@ -965,5 +1245,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   upcomingLabel: { fontSize: 13.5, fontWeight: '600' },
+  /** The swipeable day page. `gap` reproduces the spacing the cards had
+   *  when they were direct children of the scroll's content container. */
+  dayPanel: { gap: 12 },
+  backfillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: 11,
+    marginTop: 12,
+  },
+  backfillLabel: { fontSize: 13.5, fontWeight: '600' },
   hint: { fontSize: 13, textAlign: 'center', marginTop: 8 },
 });

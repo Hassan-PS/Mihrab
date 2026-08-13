@@ -1209,7 +1209,14 @@
     "markFasted": "Marcar como ayunado",
     "unmarkFasted": "Quitar marca",
     "showOnHome": "Mostrar el gráfico en Inicio",
-    "showOnHomeHelp": "Añade tus casillas a la pantalla de Hoy. Desactivado por defecto."
+    "showOnHomeHelp": "Añade tus casillas a la pantalla de Hoy. Desactivado por defecto.",
+    "backfillAction": "Rellenar días anteriores",
+    "backfillTitle": "¿Rellenar días anteriores?",
+    "backfillBody": "Esto registra {{prayers}} oraciones en {{days}} días ({{range}}) como rezadas a tiempo. Los días que ya has registrado no se tocan, y hoy tampoco.",
+    "backfillConfirm": "Rellenarlos",
+    "backfillNothingTitle": "Nada que rellenar",
+    "backfillNothingBody": "Todos los días anteriores a hoy ya están registrados.",
+    "openLogFromHome": "Abrir el registro"
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",
