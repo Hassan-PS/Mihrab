@@ -10,7 +10,11 @@
  *    not come, and "Mark all on time" has to obey the same rule instead of
  *    being the loophole around it.
  */
-import { scoreByDay, STATUS_WEIGHT, type JournalEntry } from '../src/journal/journal';
+import {
+  scoreByDay,
+  STATUS_WEIGHT,
+  type JournalEntry,
+} from '../src/journal/journal';
 import { minutesOfDay, upcomingPrayers } from '../src/journal/upcoming';
 
 const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
@@ -29,7 +33,7 @@ describe('scoreByDay', () => {
       entry('2026-08-01', 'Fajr', 'missed'),
       entry('2026-08-01', 'Dhuhr', 'missed'),
     ]).get('2026-08-01');
-    expect(day).toEqual({ kept: 0, logged: 2 });
+    expect(day).toEqual({ kept: 0, logged: 2, missed: 2 });
   });
 
   it('separates "recorded" from "kept", so a bad day is not a blank one', () => {
@@ -61,7 +65,11 @@ describe('scoreByDay', () => {
 
   it('a full day on time is the top of the ramp', () => {
     const all = PRAYERS.map(p => entry('2026-08-01', p, 'on-time'));
-    expect(scoreByDay(all).get('2026-08-01')).toEqual({ kept: 5, logged: 5 });
+    expect(scoreByDay(all).get('2026-08-01')).toEqual({
+      kept: 5,
+      logged: 5,
+      missed: 0,
+    });
   });
 
   it('never mixes two days together', () => {

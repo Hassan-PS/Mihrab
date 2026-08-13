@@ -146,8 +146,8 @@ describe('PracticeHeatmap', () => {
     const monday = dayKey(new Date(2026, 4, 11));
     const tuesday = dayKey(new Date(2026, 4, 12));
     const scores = new Map([
-      [monday, { kept: 0, logged: 5 }],
-      [tuesday, { kept: 5, logged: 5 }],
+      [monday, { kept: 0, logged: 5, missed: 5 }],
+      [tuesday, { kept: 5, logged: 5, missed: 0 }],
     ]);
     const rows = buildHeatmap(scores, new Set(), NOW, 13);
     let tree!: Renderer;

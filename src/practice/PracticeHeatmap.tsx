@@ -60,6 +60,8 @@ export type HeatmapDay = {
   kept: number;
   /** How many of the five carry any entry, whatever it says. */
   logged: number;
+  /** How many were marked `missed` — drives the corner mark. */
+  missed: number;
   fasted: boolean;
   /** Days after today inside the trailing week — drawn as blanks. */
   future: boolean;
@@ -136,6 +138,7 @@ export function buildHeatmap(
         key,
         kept: score?.kept ?? 0,
         logged: score?.logged ?? 0,
+        missed: score?.missed ?? 0,
         fasted: fastedDays.has(key),
         future: d.getTime() > today.getTime(),
       });
@@ -391,7 +394,7 @@ function PracticeHeatmapImpl({
                         onPress={() => onSelectDay?.(day.key)}
                         accessibilityRole={onSelectDay ? 'button' : 'image'}
                         accessibilityState={{ selected }}
-                        accessibilityLabel={t('log.dayA11y', {
+                        accessibilityLabel={`${t('log.dayA11y', {
                           defaultValue:
                             '{{date}}: {{prayers}} prayers logged{{fast}}',
                           date: day.key,
@@ -399,7 +402,14 @@ function PracticeHeatmapImpl({
                           fast: day.fasted
                             ? `, ${t('log.fasted', 'fasted')}`
                             : '',
-                        })}
+                          // A mark that only exists visually is a mark half
+                          // the point of which — finding the day again —
+                          // does not work with a screen reader.
+                        })}${
+                          !day.future && day.missed > 0
+                            ? `, ${t('journal.status.missed')}`
+                            : ''
+                        }`}
                         style={[
                           styles.square,
                           { backgroundColor: fillFor(day) },
@@ -420,7 +430,25 @@ function PracticeHeatmapImpl({
                             borderColor: ring,
                           },
                         ]}
-                      />
+                      >
+                        {/* A day carrying a missed prayer gets a mark, even
+                            when the rest of it went well. `missed` is how
+                            people note that a prayer is owed and will be
+                            made up later, so the day has to be findable
+                            afterwards — and four on-time plus one missed is
+                            a strong green square in which the one thing
+                            being looked for is invisible. The corner is the
+                            only channel left: depth is the score, the ring
+                            is the fast, the outline is the selection. */}
+                        {!day.future && day.missed > 0 ? (
+                          <View
+                            style={[
+                              styles.missedMark,
+                              { backgroundColor: String(palette.danger) },
+                            ]}
+                          />
+                        ) : null}
+                      </Pressable>
                     );
                   })}
                 </View>
@@ -460,12 +488,23 @@ function PracticeHeatmapImpl({
               ramp's row they read as another rung of it, which is the exact
               confusion the ramp change was made to end. */}
           <View style={styles.legendRow}>
+            {/* The swatch carries the mark itself, not just the tint: the
+                tint only ever appears on a day where NOTHING was kept,
+                while the mark appears on any day holding a missed prayer,
+                which is the thing worth finding. */}
             <View
               style={[
                 styles.legendSquare,
                 { backgroundColor: withAlpha(String(palette.danger), 0.3) },
               ]}
-            />
+            >
+              <View
+                style={[
+                  styles.legendMissedMark,
+                  { backgroundColor: String(palette.danger) },
+                ]}
+              />
+            </View>
             <Text
               style={[styles.legendText, { color: palette.muted }]}
               numberOfLines={1}
@@ -538,6 +577,24 @@ const styles = StyleSheet.create({
   weeks: { gap: GAP },
   week: { flexDirection: 'row', gap: GAP },
   square: { width: SQUARE, height: SQUARE, borderRadius: 3.5 },
+  /**
+   * The owed-prayer mark: a dot in the corner the writing direction starts
+   * from, so it lands where the eye already goes.
+   *
+   * A dot rather than another border or another colour ramp — both of those
+   * channels are taken (the fast ring, the score depth), and a third
+   * competing for the same edges would make a day that is fasted, selected
+   * and missed unreadable. Small enough not to shout on a good month,
+   * distinct enough to find a single one in a year of squares.
+   */
+  missedMark: {
+    position: 'absolute',
+    top: 1.5,
+    insetInlineEnd: 1.5,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
   squareSelected: { transform: [{ scale: 1.4 }], zIndex: 2 },
   legendRow: {
     flexDirection: 'row',
@@ -547,6 +604,14 @@ const styles = StyleSheet.create({
   },
   legendSquares: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   legendSquare: { width: 11, height: 11, borderRadius: 2.5 },
+  legendMissedMark: {
+    position: 'absolute',
+    top: 1,
+    insetInlineEnd: 1,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
   legendText: { fontSize: 10.5, fontWeight: '600' },
   caption: { fontSize: 12, marginTop: 8 },
 });

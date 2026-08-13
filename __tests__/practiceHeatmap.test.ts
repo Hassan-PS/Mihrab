@@ -42,7 +42,7 @@ describe('buildHeatmap', () => {
   it('carries the day score and the fast independently', () => {
     const today = dayKey(NOW);
     const rows = buildHeatmap(
-      new Map([[today, { kept: 4, logged: 4 }]]),
+      new Map([[today, { kept: 4, logged: 4, missed: 0 }]]),
       new Set([today]),
       NOW,
     );

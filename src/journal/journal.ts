@@ -32,14 +32,29 @@ export type JournalEntry = {
 export function coerceJournalEntries(input: unknown): JournalEntry[] {
   if (!Array.isArray(input)) return [];
   const VALID_STATUS: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
-  const VALID_PRAYER: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const VALID_PRAYER: JournalPrayer[] = [
+    'Fajr',
+    'Dhuhr',
+    'Asr',
+    'Maghrib',
+    'Isha',
+  ];
   const out: JournalEntry[] = [];
   for (const item of input) {
     if (!item || typeof item !== 'object') continue;
     const r = item as Record<string, unknown>;
-    if (typeof r.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(r.date)) continue;
-    if (typeof r.prayer !== 'string' || !VALID_PRAYER.includes(r.prayer as JournalPrayer)) continue;
-    if (typeof r.status !== 'string' || !VALID_STATUS.includes(r.status as JournalStatus)) continue;
+    if (typeof r.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(r.date))
+      continue;
+    if (
+      typeof r.prayer !== 'string' ||
+      !VALID_PRAYER.includes(r.prayer as JournalPrayer)
+    )
+      continue;
+    if (
+      typeof r.status !== 'string' ||
+      !VALID_STATUS.includes(r.status as JournalStatus)
+    )
+      continue;
     if (typeof r.loggedAt !== 'string') continue;
     const note = typeof r.note === 'string' ? r.note : undefined;
     out.push({
@@ -67,9 +82,7 @@ export function setEntryNote(
   now: Date = new Date(),
 ): JournalEntry[] {
   const trimmed = note.trim();
-  const idx = entries.findIndex(
-    e => e.date === date && e.prayer === prayer,
-  );
+  const idx = entries.findIndex(e => e.date === date && e.prayer === prayer);
   if (idx < 0) {
     // No entry yet — create one with a neutral default status. The
     // user can change the status later via the row buttons.
@@ -123,10 +136,7 @@ export function upsertEntry(
   const filtered = entries.filter(
     e => !(e.date === date && e.prayer === prayer),
   );
-  return [
-    ...filtered,
-    { date, prayer, status, loggedAt: now.toISOString() },
-  ];
+  return [...filtered, { date, prayer, status, loggedAt: now.toISOString() }];
 }
 
 /**
@@ -167,7 +177,10 @@ export type JournalStats = {
 
 /** Aggregate stats over the entire journal (or a filtered subset passed in). */
 export function computeStats(entries: JournalEntry[]): JournalStats {
-  let onTime = 0, late = 0, missed = 0, qadha = 0;
+  let onTime = 0,
+    late = 0,
+    missed = 0,
+    qadha = 0;
   for (const e of entries) {
     if (e.status === 'on-time') onTime += 1;
     else if (e.status === 'late') late += 1;
@@ -176,7 +189,11 @@ export function computeStats(entries: JournalEntry[]): JournalStats {
   }
   const total = onTime + late + missed + qadha;
   return {
-    onTime, late, missed, qadha, total,
+    onTime,
+    late,
+    missed,
+    qadha,
+    total,
     onTimeRatio: total === 0 ? Number.NaN : onTime / total,
   };
 }
@@ -190,7 +207,13 @@ export function computeCurrentStreak(
   entries: JournalEntry[],
   now: Date = new Date(),
 ): number {
-  const ALL_PRAYERS: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const ALL_PRAYERS: JournalPrayer[] = [
+    'Fajr',
+    'Dhuhr',
+    'Asr',
+    'Maghrib',
+    'Isha',
+  ];
   // Index by date for O(1) day lookup.
   const byDate = new Map<string, Map<JournalPrayer, JournalStatus>>();
   for (const e of entries) {
@@ -255,6 +278,17 @@ export type DayScore = {
   kept: number;
   /** How many of the five have any entry at all, whatever it says. */
   logged: number;
+  /**
+   * How many were marked `missed`.
+   *
+   * Tracked separately from the score because it is not a quantity of
+   * anything — it is a flag on the day. People use `missed` as a note to
+   * themselves that a prayer is owed and will be made up, so the day needs
+   * to be findable later; a day of four on-time and one missed is a strong
+   * green square and the one thing the user is looking for in it is
+   * invisible in the depth. The graph draws a mark from this.
+   */
+  missed: number;
 };
 
 /**
@@ -265,9 +299,10 @@ export type DayScore = {
 export function scoreByDay(entries: JournalEntry[]): Map<string, DayScore> {
   const out = new Map<string, DayScore>();
   for (const e of entries) {
-    const cur = out.get(e.date) ?? { kept: 0, logged: 0 };
+    const cur = out.get(e.date) ?? { kept: 0, logged: 0, missed: 0 };
     cur.kept += STATUS_WEIGHT[e.status] ?? 0;
     cur.logged += 1;
+    if (e.status === 'missed') cur.missed += 1;
     out.set(e.date, cur);
   }
   return out;
