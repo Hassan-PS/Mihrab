@@ -103,7 +103,8 @@ export function weeksToCover(
   if (!first) return HEATMAP_WEEKS;
   const from = mondayOf(first);
   const to = mondayOf(now);
-  const weeks = Math.round((to.getTime() - from.getTime()) / (7 * 86400000)) + 1;
+  const weeks =
+    Math.round((to.getTime() - from.getTime()) / (7 * 86400000)) + 1;
   return Math.max(HEATMAP_WEEKS, weeks);
 }
 
@@ -261,23 +262,40 @@ function PracticeHeatmapImpl({
       scrollRef.current?.scrollToEnd({ animated: false });
       return;
     }
-    if (weeks > drawnWeeks.current) {
+    if (weeks === drawnWeeks.current) return;
+    const added = weeks - drawnWeeks.current;
+    drawnWeeks.current = weeks;
+    if (added > 0 && asking.current) {
       /**
-       * Columns were added at the OLD end, which is the left. Left-hand
-       * growth pushes everything the user was looking at to the right by
-       * exactly that many columns, so without this the view lurches
-       * forwards in time the moment it loads more of the past — the one
-       * thing the user was dragging away from. Push the offset by the same
-       * amount and the dates under the thumb do not move.
+       * Columns were added at the OLD end, which is the left, BECAUSE THE
+       * USER DRAGGED THERE. Left-hand growth pushes everything they were
+       * looking at to the right by exactly that many columns, so without
+       * this the view lurches forwards in time the moment it loads more of
+       * the past — the one thing they were dragging away from. Push the
+       * offset by the same amount and the dates under the thumb hold still.
        */
-      const added = weeks - drawnWeeks.current;
-      drawnWeeks.current = weeks;
       scrollRef.current?.scrollTo({
         x: offset.current + added * COL,
         animated: false,
       });
       asking.current = false;
+      return;
     }
+    /**
+     * The grid changed size for a reason that was NOT a load-more: the
+     * encrypted journal finished hydrating and the history turned out to be
+     * longer than the thirteen-week default, or a day was logged outside
+     * the drawn span.
+     *
+     * This used to take the branch above and shove the view sideways by the
+     * difference. Hydration lands a beat after the screen appears — which
+     * is exactly when the user's first drag arrives — so the first attempt
+     * to scroll got yanked out from under the thumb, felt like lag, and
+     * often ended somewhere the user did not ask for. Re-park instead:
+     * nobody has scrolled anywhere yet, so today is still the right place
+     * to be.
+     */
+    scrollRef.current?.scrollToEnd({ animated: false });
   };
   useEffect(() => {
     if (parked.current) return;
@@ -300,7 +318,8 @@ function PracticeHeatmapImpl({
                 <Text
                   style={[styles.labelText, { color: palette.muted }]}
                   numberOfLines={1}
-                  maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+                  maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
+                >
                   {label}
                 </Text>
               ) : null}
@@ -313,8 +332,22 @@ function PracticeHeatmapImpl({
           showsHorizontalScrollIndicator={false}
           onContentSizeChange={onSized}
           scrollEventThrottle={64}
+          // Diagonal drags belong to the page, not to the graph. Without
+          // this a mostly-vertical swipe that starts on the grid drags the
+          // weeks a few pixels sideways and stutters the page scroll, which
+          // is most of what "the first attempt is laggy" was.
+          directionalLockEnabled
+          // Android: let this scroll inside the page's scroll rather than
+          // making the parent fight it for every gesture.
+          nestedScrollEnabled
           onScroll={e => {
             offset.current = e.nativeEvent.contentOffset.x;
+            // Nothing is asked for until the initial park has happened. The
+            // offset before that is 0, which looks exactly like "the user
+            // has dragged to the oldest week" and used to fire a load-more
+            // during mount — twenty-six more columns arriving underneath
+            // the first drag.
+            if (!parked.current) return;
             // Two columns of slack, so the request goes out while there is
             // still something under the thumb to drag.
             if (offset.current > COL * 2 || !onReachOldest) {
@@ -324,7 +357,8 @@ function PracticeHeatmapImpl({
             asking.current = true;
             onReachOldest();
           }}
-          contentContainerStyle={styles.scrollBody}>
+          contentContainerStyle={styles.scrollBody}
+        >
           <View>
             <View style={styles.monthRow}>
               {months.map((label, i) => (
@@ -332,7 +366,8 @@ function PracticeHeatmapImpl({
                   {label ? (
                     <Text
                       style={[styles.monthText, { color: palette.muted }]}
-                      numberOfLines={1}>
+                      numberOfLines={1}
+                    >
                       {label}
                     </Text>
                   ) : null}
@@ -373,7 +408,10 @@ function PracticeHeatmapImpl({
                           // an empty day, which is most of them and exactly
                           // the ones you open in order to fill in.
                           selected && styles.squareSelected,
-                          selected && { borderWidth: 2, borderColor: palette.text },
+                          selected && {
+                            borderWidth: 2,
+                            borderColor: palette.text,
+                          },
                           // Amber last, so it wins the outline on a day that
                           // is both selected and fasted: the ring carries
                           // data, the lift only carries where you are.
@@ -397,7 +435,8 @@ function PracticeHeatmapImpl({
           <View style={styles.legendRow}>
             <Text
               style={[styles.legendText, { color: palette.muted }]}
-              numberOfLines={1}>
+              numberOfLines={1}
+            >
               {t('log.legendPrayers', '0 → 5 prayers')}
             </Text>
             <View style={styles.legendSquares}>
@@ -429,7 +468,8 @@ function PracticeHeatmapImpl({
             />
             <Text
               style={[styles.legendText, { color: palette.muted }]}
-              numberOfLines={1}>
+              numberOfLines={1}
+            >
               {t('journal.status.missed')}
             </Text>
             <View
@@ -444,7 +484,8 @@ function PracticeHeatmapImpl({
             />
             <Text
               style={[styles.legendText, { color: palette.muted }]}
-              numberOfLines={1}>
+              numberOfLines={1}
+            >
               {t('log.fasted', 'fasted')}
             </Text>
           </View>
@@ -455,7 +496,8 @@ function PracticeHeatmapImpl({
         <Text
           style={[styles.caption, { color: palette.muted }]}
           numberOfLines={1}
-          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
+        >
           {caption}
         </Text>
       ) : null}
@@ -481,7 +523,18 @@ const styles = StyleSheet.create({
   // `paddingEnd`, not `paddingRight`: in Arabic and Urdu the grid runs the
   // other way and the breathing room has to follow it (the repo's RTL audit
   // catches exactly this).
-  scrollBody: { paddingEnd: 2 },
+  /**
+   * Pinned to the END — the side today is on.
+   *
+   * When the grid is narrower than the space it has (a new install, a wide
+   * phone, an iPad), the columns used to sit at the start, so the record
+   * hugged the left edge with a gap after it and today floated in the
+   * middle of nowhere. Pinned to the end, today is always at the edge you
+   * scroll away from and the visible width is filled with as much past as
+   * there is. `flex-end` follows the writing direction, so RTL gets the
+   * mirror of this rather than a special case.
+   */
+  scrollBody: { paddingEnd: 2, flexGrow: 1, justifyContent: 'flex-end' },
   weeks: { gap: GAP },
   week: { flexDirection: 'row', gap: GAP },
   square: { width: SQUARE, height: SQUARE, borderRadius: 3.5 },
