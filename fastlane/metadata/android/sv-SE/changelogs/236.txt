@@ -1,0 +1,8 @@
+Loggen, så som du redan försökte använda den.
+
+• Knappen "Logga bön" i aviseringen registrerar nu faktiskt bönen – även med appen stängd, och på den dag aviseringen gällde.
+• Svep dagpanelen i sidled för att byta dag; pilarna fungerar fortfarande.
+• Fyll i tidigare dagar, eller de senaste tre månaderna. Båda frågar först och rör aldrig en dag du redan loggat.
+• En dag med en missad bön markeras i grafen, så att en bön du tänker ta igen går att hitta.
+• Kvällspåminnelsen frågar inte längre om en dag du redan loggat färdigt.
+• Grafen går att skrolla på första försöket, och på startskärmen över huvud taget.

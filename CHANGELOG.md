@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.9] — 2026-08-14
+
+The Log, made to work the way people were already trying to use it.
+
+### Added
+- **The Log opens by swiping, not only by the arrows.** The day panel is one card you can throw sideways; the arrows stay for one day at a time. Forward still stops at today — the card rubber-bands rather than refusing silently, so the gesture is visibly received and visibly declined. Arabic and the other right-to-left languages mirror it, as the arrows either side of the date already do.
+- **"Fill in earlier days" and "Fill the past three months".** Someone who has prayed for years and installed the app on Tuesday met a wall of empty squares that was wrong about them. The first button fills from the day the app was installed up to yesterday; the second reaches further back, and pays for that reach by only ever writing to days holding nothing at all — no status, no note, no fast. Both ask first, and the question shows the exact number of days, the exact range, and how many days are being left untouched. Today is never filled: it still holds prayers that have not happened.
+- **A day that owes a prayer is marked on the graph.** `missed` is how people note that a prayer will be made up later, which makes the day a to-do — and a to-do you cannot find is not one. A day of four on time and one missed used to draw a strong green square with no sign of the missed one in it. It now carries a dot in the corner, and screen readers are told as well.
+
+### Fixed
+- **The "Log prayer" button on a prayer notification actually logs the prayer.** It had been on every alert for three versions and wrote nothing: the only code listening for it lived on the Log screen, and someone pressing a button on a notification is not looking at the Log screen. With the app closed it did nothing at all. It now records the prayer from the background, and the alert carries the day it is for — so an Isha answered after midnight credits the evening it belonged to instead of blanking it. Pressing it twice cannot overwrite a status you set deliberately.
+- **The evening prompt no longer asks about a day you have already finished logging.** It is retired the moment the fifth prayer goes in, and days already complete are skipped when the week is scheduled.
+- **The graph scrolls on the first try, and on the Today screen at all.** The first drag used to be yanked sideways by the journal finishing loading underneath it. On Home the graph could not be scrolled at all — the card had become one large button, and a press target wrapped around a scrolling grid fights it for every gesture. The button is now a row at the foot of the card, and that graph reaches back through your history like the one on the Log.
+- **The graph fills the width with history.** When it is narrower than the space it has, the weeks used to hug one edge with a gap after them; they now sit against the edge today is on, so the visible width carries as much past as exists.
+- **The Today screen lists only what you have actually logged.** It used to read "0 of 5 prayers logged · No fast recorded · 0 dhikr sets completed" at seven in the morning — a list of the day's failures compiled before the day had begun.
+
+### Changed
+- The two switches on the Log moved below the prayers they are about, rather than sitting between the date and the day's rows. The cards on that page have space between them again.
+
 ## [2.8.8] — 2026-08-07
 
 A Mac-only release. Nothing on Android or iOS changes.
