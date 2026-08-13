@@ -7,37 +7,50 @@
  *
  * Three sources, best first:
  *
- * 1. Android's package manager, which knows the real first-install time
- *    even for someone who has had the app for a year and is only now
- *    updating to the version with this button.
- * 2. A stamp this module writes on first run. Exact for anyone installing
- *    from here on; on iOS and on existing Android installs it is the day
- *    they first opened THIS version, which under-reaches rather than
- *    over-reaches.
+ * 1. The platform's own install date. Android reads it from the package
+ *    manager's `firstInstallTime`; iOS from the creation date of the app
+ *    container's Documents directory, which is made once and survives every
+ *    update. Both are the FIRST install, never the last update — an update
+ *    date would offer a year-old user a single day to fill, which is this
+ *    feature failing exactly the people it is for.
+ * 2. A stamp this module writes on first run, for the case where the
+ *    platform will not say.
  * 3. The earliest day already in the journal, when that is older still —
- *    restoring a backup onto a new phone makes the package's install date
- *    younger than the record it contains.
+ *    restoring a backup onto a new phone makes the container younger than
+ *    the record it holds.
  *
- * Under-reaching is the deliberate direction of every fallback here. A
- * button that offers to fill fewer days than it might is a small
- * disappointment; one that invents months the user never had the app is a
- * false record, and this app's whole claim is that the record is theirs.
+ * ── The stamp is a floor, not a date ──────────────────────────────────
+ *
+ * Source 2 is worth being careful about, because for anyone who already
+ * had the app it records the day they UPDATED to this version, and that is
+ * exactly the wrong answer. It is therefore only consulted when the
+ * platform gave nothing, and even then it can only make the range smaller,
+ * never larger — the maximum of nothing is still nothing.
+ *
+ * Under-reaching is the deliberate direction of every fallback. A button
+ * that offers fewer days than it might is a small disappointment; one that
+ * invents months the user never had the app is a false record, and this
+ * app's whole claim is that the record is theirs.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeModules, Platform } from 'react-native';
-import { dayKeyOf } from './backfill';
+import { dayKeyOf, isDayKey } from './backfill';
 
 /** AsyncStorage key holding the ISO day this build first ran. */
 export const FIRST_SEEN_KEY = 'mihrab.first_seen_day';
 
 type BuildInfoNative = { firstInstallTime?: number };
 
-/** Android only: the package manager's first-install time, in ms. */
+/** The platform's own first-install time in ms, or null when it will not
+ *  say. Both platforms expose it through the same native module name. */
 function nativeInstallMs(): number | null {
-  if (Platform.OS !== 'android') return null;
+  if (Platform.OS !== 'android' && Platform.OS !== 'ios') return null;
   const mod = NativeModules.PrayerBuildInfo as BuildInfoNative | undefined;
   const ms = mod?.firstInstallTime;
-  return typeof ms === 'number' && ms > 0 ? ms : null;
+  // A future timestamp means a wrong clock, not a future install. Refuse it
+  // rather than let it decide how far back this app may claim anything.
+  if (typeof ms !== 'number' || !Number.isFinite(ms) || ms <= 0) return null;
+  return ms > Date.now() ? null : ms;
 }
 
 /**
@@ -75,14 +88,28 @@ export function earliestKnownDay(params: {
   earliestEntry?: string | null;
   now?: Date;
 }): string {
+  const now = params.now ?? new Date();
+  const today = dayKeyOf(now);
   const candidates: string[] = [];
-  if (params.nativeInstallMs) {
+
+  // The platform's install date, when it gave one.
+  if (params.nativeInstallMs && params.nativeInstallMs <= now.getTime()) {
     candidates.push(dayKeyOf(new Date(params.nativeInstallMs)));
   }
-  if (params.firstSeen) candidates.push(params.firstSeen);
-  if (params.earliestEntry) candidates.push(params.earliestEntry);
-  if (!candidates.length) return dayKeyOf(params.now ?? new Date());
-  return candidates.reduce((a, b) => (a < b ? a : b));
+  // The first-run stamp. Only when the platform said nothing: for an
+  // existing user this is the day they updated, and preferring it over a
+  // real install date is the bug this ordering exists to prevent.
+  if (!candidates.length && isDayKey(params.firstSeen)) {
+    candidates.push(params.firstSeen);
+  }
+  // A record older than either means the journal was restored from a
+  // backup. It is evidence of the user's own making, so it counts.
+  if (isDayKey(params.earliestEntry)) candidates.push(params.earliestEntry);
+
+  if (!candidates.length) return today;
+  const earliest = candidates.reduce((a, b) => (a < b ? a : b));
+  // Never past today, whatever a wrong clock or a corrupt value says.
+  return earliest > today ? today : earliest;
 }
 
 /**

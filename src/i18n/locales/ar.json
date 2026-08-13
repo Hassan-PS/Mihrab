@@ -1216,7 +1216,11 @@
     "backfillConfirm": "املأها",
     "backfillNothingTitle": "لا شيء لملئه",
     "backfillNothingBody": "كل يوم قبل اليوم مسجَّل بالفعل.",
-    "openLogFromHome": "افتح السجل"
+    "openLogFromHome": "افتح السجل",
+    "swipeHint": "اسحب لتغيير اليوم",
+    "backfillUnreadable": "تعذّرت قراءة سجلّك الآن، فلم يُغيَّر شيء. حاول مرة أخرى.",
+    "backfillRefusedTitle": "لم يُغيَّر شيء",
+    "backfillRefusedBody": "كان ملء تلك الأيام سيغيّر شيئًا سجّلته من قبل، فتوقّفت العملية. سجلّك كما هو."
   },
   "endOfDay": {
     "title": "تسجيل صلوات اليوم؟",

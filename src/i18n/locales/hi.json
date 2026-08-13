@@ -1216,7 +1216,11 @@
     "backfillConfirm": "भर दें",
     "backfillNothingTitle": "भरने के लिए कुछ नहीं",
     "backfillNothingBody": "आज से पहले का हर दिन पहले से दर्ज है।",
-    "openLogFromHome": "लॉग खोलें"
+    "openLogFromHome": "लॉग खोलें",
+    "swipeHint": "दिन बदलने के लिए स्वाइप करें",
+    "backfillUnreadable": "आपका लॉग अभी पढ़ा नहीं जा सका, इसलिए कुछ भी नहीं बदला। कृपया फिर कोशिश करें।",
+    "backfillRefusedTitle": "कुछ नहीं बदला",
+    "backfillRefusedBody": "उन दिनों को भरने से वह बदल जाता जो आप पहले दर्ज कर चुके थे, इसलिए इसे रोक दिया गया। आपका लॉग जस का तस है।"
   },
   "endOfDay": {
     "title": "आज की नमाज़ें दर्ज करें?",

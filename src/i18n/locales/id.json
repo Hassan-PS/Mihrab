@@ -1216,7 +1216,11 @@
     "backfillConfirm": "Isi semuanya",
     "backfillNothingTitle": "Tidak ada yang perlu diisi",
     "backfillNothingBody": "Semua hari sebelum hari ini sudah tercatat.",
-    "openLogFromHome": "Buka catatan"
+    "openLogFromHome": "Buka catatan",
+    "swipeHint": "Geser untuk mengganti hari",
+    "backfillUnreadable": "Catatanmu tidak bisa dibaca saat ini, jadi tidak ada yang diubah. Silakan coba lagi.",
+    "backfillRefusedTitle": "Tidak ada yang diubah",
+    "backfillRefusedBody": "Mengisi hari-hari itu akan mengubah sesuatu yang sudah kamu catat, jadi dihentikan. Catatanmu tetap utuh."
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

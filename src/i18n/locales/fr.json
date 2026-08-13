@@ -1216,7 +1216,11 @@
     "backfillConfirm": "Les compléter",
     "backfillNothingTitle": "Rien à compléter",
     "backfillNothingBody": "Tous les jours avant aujourd’hui sont déjà enregistrés.",
-    "openLogFromHome": "Ouvrir le journal"
+    "openLogFromHome": "Ouvrir le journal",
+    "swipeHint": "Balayez pour changer de jour",
+    "backfillUnreadable": "Votre journal n’a pas pu être lu pour l’instant, rien n’a donc été modifié. Réessayez.",
+    "backfillRefusedTitle": "Rien n’a été modifié",
+    "backfillRefusedBody": "Compléter ces jours aurait modifié quelque chose que vous aviez déjà enregistré ; l’opération a été arrêtée. Votre journal est intact."
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",

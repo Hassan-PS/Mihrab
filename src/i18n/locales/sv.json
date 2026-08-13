@@ -1216,7 +1216,11 @@
     "backfillConfirm": "Fyll i dem",
     "backfillNothingTitle": "Inget att fylla i",
     "backfillNothingBody": "Alla dagar före i dag är redan registrerade.",
-    "openLogFromHome": "Öppna loggen"
+    "openLogFromHome": "Öppna loggen",
+    "swipeHint": "Svep för att byta dag",
+    "backfillUnreadable": "Din logg kunde inte läsas just nu, så ingenting ändrades. Försök igen.",
+    "backfillRefusedTitle": "Ingenting ändrades",
+    "backfillRefusedBody": "Att fylla i de dagarna skulle ha ändrat något du redan loggat, så det stoppades. Din logg är orörd."
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

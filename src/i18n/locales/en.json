@@ -1216,7 +1216,11 @@
     "backfillConfirm": "Fill them in",
     "backfillNothingTitle": "Nothing to fill in",
     "backfillNothingBody": "Every day before today is already recorded.",
-    "openLogFromHome": "Open the Log"
+    "openLogFromHome": "Open the Log",
+    "swipeHint": "Swipe to change day",
+    "backfillUnreadable": "Your journal could not be read just now, so nothing was changed. Please try again.",
+    "backfillRefusedTitle": "Nothing was changed",
+    "backfillRefusedBody": "Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched."
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

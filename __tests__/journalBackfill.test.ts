@@ -102,6 +102,7 @@ describe('planBackfill', () => {
       to: null,
       days: 0,
       prayers: 0,
+      capped: false,
     });
   });
 

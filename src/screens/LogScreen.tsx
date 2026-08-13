@@ -115,6 +115,13 @@ function dateFromKey(key: string): Date {
   return new Date(y, (m ?? 1) - 1, d ?? 1, 12, 0, 0, 0);
 }
 
+/** Oldest day with anything recorded, or null for an empty journal. */
+function earliestEntryOf(entries: JournalEntry[]): string | null {
+  let first: string | null = null;
+  for (const e of entries) if (first === null || e.date < first) first = e.date;
+  return first;
+}
+
 export function LogScreen() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
@@ -627,19 +634,42 @@ export function LogScreen() {
    * anything already recorded is left exactly as it was.
    */
   const [backfilling, setBackfilling] = useState(false);
-  const earliestEntry = useMemo(() => {
-    let first: string | null = null;
-    for (const e of entries)
-      if (first === null || e.date < first) first = e.date;
-    return first;
-  }, [entries]);
+  const earliestEntry = useMemo(() => earliestEntryOf(entries), [entries]);
 
   const runBackfill = useCallback(async () => {
     if (backfilling) return;
+    // Never from an unhydrated screen. `entries` starts as [] and fills in a
+    // beat later; backfilling against that empty array and writing the
+    // result would replace the user's whole journal with the days this
+    // button invented. The button is disabled until hydration, and this is
+    // the second lock on the same door.
+    if (!hydrated) return;
     setBackfilling(true);
     try {
-      const installedOn = await installedOnDay(earliestEntry);
-      const plan = planBackfill(entries, installedOn);
+      // Read from DISK, not from the screen's copy. The screen's copy is a
+      // render value: correct in every case anyone thought of, and this is
+      // the one write in the app where being wrong loses a year of someone's
+      // record. If the read fails we abort — a journal we could not read is
+      // not one we may overwrite.
+      let stored: JournalEntry[];
+      try {
+        const raw = await durableEncryptedGet(JOURNAL_KEY);
+        stored = raw ? coerceJournalEntries(JSON.parse(raw)) : [];
+      } catch (e) {
+        console.warn('LogScreen backfill: journal unreadable', e);
+        Alert.alert(
+          t('journal.loadFailedTitle', 'Could not load journal'),
+          t('log.backfillUnreadable', {
+            defaultValue:
+              'Your journal could not be read just now, so nothing was changed. Please try again.',
+          }),
+        );
+        return;
+      }
+      const installedOn = await installedOnDay(
+        earliestEntryOf(stored) ?? earliestEntry,
+      );
+      const plan = planBackfill(stored, installedOn);
       if (!plan.from || !plan.to) {
         Alert.alert(
           t('log.backfillNothingTitle', 'Nothing to fill in'),
@@ -674,8 +704,12 @@ export function LogScreen() {
           {
             text: t('log.backfillConfirm', 'Fill them in'),
             onPress: () => {
-              const next = applyBackfill(entries, installedOn);
-              if (next !== entries) {
+              try {
+                // Against `stored`, the copy that was read from disk and
+                // planned against — not against the screen's state, which
+                // may have moved on while the dialog was open.
+                const next = applyBackfill(stored, installedOn);
+                if (next === stored) return;
                 void persistJournal(
                   next,
                   // Every filled day is now complete, so each one's evening
@@ -683,6 +717,18 @@ export function LogScreen() {
                   next
                     .map(e => e.date)
                     .filter((d, idx, all) => all.indexOf(d) === idx),
+                );
+              } catch (e) {
+                // applyBackfill's own no-data-loss assertion failed. That
+                // is a bug in this app, and the only safe response to it is
+                // to write nothing at all.
+                console.error('LogScreen backfill refused', e);
+                Alert.alert(
+                  t('log.backfillRefusedTitle', 'Nothing was changed'),
+                  t('log.backfillRefusedBody', {
+                    defaultValue:
+                      'Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched.',
+                  }),
                 );
               }
             },
@@ -692,7 +738,7 @@ export function LogScreen() {
     } finally {
       setBackfilling(false);
     }
-  }, [backfilling, earliestEntry, entries, i18n.language, persistJournal, t]);
+  }, [backfilling, earliestEntry, hydrated, i18n.language, persistJournal, t]);
 
   /** "Sunday 2 August" — the day's own name, not a raw key. */
   const selectedLabel = useMemo(
@@ -748,7 +794,9 @@ export function LogScreen() {
             accessibilityRole="button"
             accessibilityLabel={t('log.backfillAction', 'Fill in earlier days')}
             onPress={runBackfill}
-            disabled={backfilling}
+            // Disabled until the journal has been read: a press before that
+            // would plan against an empty array.
+            disabled={backfilling || !hydrated}
             style={[
               styles.backfillRow,
               { borderTopColor: palette.border ?? palette.muted },
@@ -817,16 +865,41 @@ export function LogScreen() {
             </Text>
           </Pressable>
         </View>
-        {/* Everything below the arrows moves as one page — see the pan
-            responder above. `onLayout` gives the gesture the width it needs
+        {/* ── The day, as one card you can throw sideways ───────────────
+            One surface, not a stack of loose cards: the whole thing is a
+            single day, it moves as a single thing, and it should look like
+            a single thing. The grabber at the top is the only part of this
+            that is decoration, and it earns its place — a panel that moves
+            when dragged but gives no sign it can be is a gesture nobody
+            discovers. `onLayout` gives the pan responder the width it needs
             to decide what counts as a swipe. */}
         <Animated.View
           onLayout={e => {
             panWidth.current = e.nativeEvent.layout.width;
           }}
-          style={[styles.dayPanel, { transform: [{ translateX: panX }] }]}
+          style={[
+            styles.dayPanel,
+            {
+              backgroundColor: palette.card,
+              ...cardEdgeStyle(palette),
+              transform: [{ translateX: panX }],
+            },
+          ]}
           {...panResponder.panHandlers}
         >
+          <View
+            accessibilityRole="adjustable"
+            accessibilityLabel={t('log.swipeHint', 'Swipe to change day')}
+            style={styles.grabberWrap}
+          >
+            <View
+              style={[
+                styles.grabber,
+                { backgroundColor: palette.border ?? palette.muted },
+              ]}
+            />
+          </View>
+
           <View style={styles.todayHeader}>
             <View style={{ flex: 1 }} />
             <Pressable
@@ -841,66 +914,7 @@ export function LogScreen() {
             </Pressable>
           </View>
 
-          {/* The nightly prompt is the same act as the button above, offered
-            when the day is actually over — so the switch for it belongs
-            here, next to the thing it fills in, as well as in Settings. */}
-          <View
-            style={[
-              styles.card,
-              styles.reminderRow,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}
-          >
-            <View style={styles.reminderCopy}>
-              <Text style={[styles.reminderTitle, { color: palette.text }]}>
-                {t('settings.endOfDayLog')}
-              </Text>
-              <Text style={[styles.reminderHelp, { color: palette.muted }]}>
-                {t('settings.endOfDayLogHelp')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.endOfDayLogReminderEnabled}
-              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor="#ffffff"
-              onValueChange={v =>
-                updateSettings({ endOfDayLogReminderEnabled: v })
-              }
-            />
-          </View>
-
-          {/* The same switch is in Settings. It lives here too because this is
-            where you are looking at the graph and deciding you want it in
-            front of you every time you open the app. */}
-          <View
-            style={[
-              styles.card,
-              styles.reminderRow,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}
-          >
-            <View style={styles.reminderCopy}>
-              <Text style={[styles.reminderTitle, { color: palette.text }]}>
-                {t('log.showOnHome')}
-              </Text>
-              <Text style={[styles.reminderHelp, { color: palette.muted }]}>
-                {t('log.showOnHomeHelp')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.showPracticeOnHome}
-              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor="#ffffff"
-              onValueChange={v => updateSettings({ showPracticeOnHome: v })}
-            />
-          </View>
-
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}
-          >
+          <View style={styles.panelSection}>
             {PRAYERS.map((prayer, index) => {
               const current = getEntryStatus(entries, selected, prayer);
               const draft = draftNotes[prayer] ?? '';
@@ -1066,11 +1080,12 @@ export function LogScreen() {
             })}
           </View>
 
-          {/* ── Fasting: one card, not a screen ───────────────────────── */}
+          {/* ── Fasting: a section of the day, not a card of its own ──── */}
           <View
             style={[
-              styles.card,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+              styles.panelSection,
+              styles.panelDivider,
+              { borderTopColor: palette.border ?? palette.muted },
             ]}
           >
             <Text style={[styles.sectionTitle, { color: palette.muted }]}>
@@ -1143,6 +1158,61 @@ export function LogScreen() {
           </View>
         </Animated.View>
 
+        {/* ── The two switches, after the day they act on ───────────────
+            They used to sit between the date and the prayers, which put two
+            settings in the middle of the thing you came here to do. They
+            are about the day rather than part of it, so they follow it. */}
+        <View
+          style={[
+            styles.card,
+            styles.reminderRow,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}
+        >
+          <View style={styles.reminderCopy}>
+            <Text style={[styles.reminderTitle, { color: palette.text }]}>
+              {t('settings.endOfDayLog')}
+            </Text>
+            <Text style={[styles.reminderHelp, { color: palette.muted }]}>
+              {t('settings.endOfDayLogHelp')}
+            </Text>
+          </View>
+          <Switch
+            value={settings.endOfDayLogReminderEnabled}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor="#ffffff"
+            onValueChange={v =>
+              updateSettings({ endOfDayLogReminderEnabled: v })
+            }
+          />
+        </View>
+
+        {/* The same switch is in Settings. It lives here too because this is
+            where you are looking at the graph and deciding you want it in
+            front of you every time you open the app. */}
+        <View
+          style={[
+            styles.card,
+            styles.reminderRow,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}
+        >
+          <View style={styles.reminderCopy}>
+            <Text style={[styles.reminderTitle, { color: palette.text }]}>
+              {t('log.showOnHome')}
+            </Text>
+            <Text style={[styles.reminderHelp, { color: palette.muted }]}>
+              {t('log.showOnHomeHelp')}
+            </Text>
+          </View>
+          <Switch
+            value={settings.showPracticeOnHome}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor="#ffffff"
+            onValueChange={v => updateSettings({ showPracticeOnHome: v })}
+          />
+        </View>
+
         {!hydrated ? (
           <Text style={[styles.hint, { color: palette.muted }]}>
             {t('common.loading')}
@@ -1167,7 +1237,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 4,
+    // Inside the day card now, so it carries the card's own side padding
+    // rather than sitting flush against the screen's.
+    paddingHorizontal: 14,
+    paddingTop: 2,
   },
   dayBar: {
     flexDirection: 'row',
@@ -1245,9 +1318,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   upcomingLabel: { fontSize: 13.5, fontWeight: '600' },
-  /** The swipeable day page. `gap` reproduces the spacing the cards had
-   *  when they were direct children of the scroll's content container. */
-  dayPanel: { gap: 12 },
+  /** The swipeable day page: one card surface holding the whole day. */
+  dayPanel: { borderRadius: 18, overflow: 'hidden', paddingBottom: 4 },
+  /** Sections inside that card carry the padding the old separate cards
+   *  did, so nothing shifted visually except the seams between them. */
+  panelSection: { paddingHorizontal: 14, paddingVertical: 12 },
+  panelDivider: { borderTopWidth: StyleSheet.hairlineWidth },
+  grabberWrap: { alignItems: 'center', paddingTop: 9, paddingBottom: 2 },
+  /** The sheet-style handle. Small, dim, and the only thing on the screen
+   *  that says this panel is draggable — without it the gesture is
+   *  undiscoverable, and a feature nobody finds is not a feature. */
+  grabber: { width: 38, height: 4, borderRadius: 2, opacity: 0.7 },
   backfillRow: {
     flexDirection: 'row',
     alignItems: 'center',

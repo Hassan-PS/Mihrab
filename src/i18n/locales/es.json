@@ -1216,7 +1216,11 @@
     "backfillConfirm": "Rellenarlos",
     "backfillNothingTitle": "Nada que rellenar",
     "backfillNothingBody": "Todos los días anteriores a hoy ya están registrados.",
-    "openLogFromHome": "Abrir el registro"
+    "openLogFromHome": "Abrir el registro",
+    "swipeHint": "Desliza para cambiar de día",
+    "backfillUnreadable": "No se ha podido leer tu registro ahora mismo, así que no se ha cambiado nada. Inténtalo de nuevo.",
+    "backfillRefusedTitle": "No se ha cambiado nada",
+    "backfillRefusedBody": "Rellenar esos días habría alterado algo que ya habías registrado, así que se detuvo. Tu registro está intacto."
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",

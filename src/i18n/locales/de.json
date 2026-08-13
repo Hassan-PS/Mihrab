@@ -1216,7 +1216,11 @@
     "backfillConfirm": "Ausfüllen",
     "backfillNothingTitle": "Nichts auszufüllen",
     "backfillNothingBody": "Jeder Tag vor heute ist bereits erfasst.",
-    "openLogFromHome": "Log öffnen"
+    "openLogFromHome": "Log öffnen",
+    "swipeHint": "Wischen, um den Tag zu wechseln",
+    "backfillUnreadable": "Dein Log konnte gerade nicht gelesen werden, daher wurde nichts geändert. Bitte versuche es erneut.",
+    "backfillRefusedTitle": "Nichts wurde geändert",
+    "backfillRefusedBody": "Das Ausfüllen dieser Tage hätte etwas verändert, das du bereits erfasst hattest, und wurde deshalb gestoppt. Dein Log ist unberührt."
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

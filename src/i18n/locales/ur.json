@@ -1216,7 +1216,11 @@
     "backfillConfirm": "بھر دیں",
     "backfillNothingTitle": "بھرنے کو کچھ نہیں",
     "backfillNothingBody": "آج سے پہلے کا ہر دن پہلے ہی درج ہے۔",
-    "openLogFromHome": "لاگ کھولیں"
+    "openLogFromHome": "لاگ کھولیں",
+    "swipeHint": "دن بدلنے کے لیے سوائپ کریں",
+    "backfillUnreadable": "ابھی آپ کا ریکارڈ پڑھا نہیں جا سکا، اس لیے کچھ تبدیل نہیں ہوا۔ دوبارہ کوشش کریں۔",
+    "backfillRefusedTitle": "کچھ تبدیل نہیں ہوا",
+    "backfillRefusedBody": "ان دنوں کو بھرنے سے وہ چیز بدل جاتی جو آپ پہلے درج کر چکے تھے، اس لیے یہ روک دیا گیا۔ آپ کا ریکارڈ جوں کا توں ہے۔"
   },
   "endOfDay": {
     "title": "آج کی نمازیں درج کریں؟",

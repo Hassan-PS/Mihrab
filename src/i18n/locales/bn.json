@@ -1216,7 +1216,11 @@
     "backfillConfirm": "পূরণ করুন",
     "backfillNothingTitle": "পূরণ করার কিছু নেই",
     "backfillNothingBody": "আজকের আগের প্রতিটি দিন ইতিমধ্যেই লেখা আছে।",
-    "openLogFromHome": "লগ খুলুন"
+    "openLogFromHome": "লগ খুলুন",
+    "swipeHint": "দিন বদলাতে সোয়াইপ করুন",
+    "backfillUnreadable": "আপনার লগ এখন পড়া গেল না, তাই কিছুই বদলায়নি। আবার চেষ্টা করুন।",
+    "backfillRefusedTitle": "কিছুই বদলায়নি",
+    "backfillRefusedBody": "ওই দিনগুলো পূরণ করলে আপনার আগে লেখা কিছু বদলে যেত, তাই থামিয়ে দেওয়া হয়েছে। আপনার লগ অক্ষত আছে।"
   },
   "endOfDay": {
     "title": "আজকের নামাজ লগ করবেন?",

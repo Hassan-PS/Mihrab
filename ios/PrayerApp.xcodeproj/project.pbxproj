@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		08E4CD4EC9CFDE3F2B1D21A7 /* adhan_naghshbandi.caf in Resources */ = {isa = PBXBuildFile; fileRef = 48AAC76E10CD18CD2ADE11BD /* adhan_naghshbandi.caf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-PrayerApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-PrayerApp.a */; };
+		0CBF4D0ECDD2AF725FD1CA55 /* PrayerBuildInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 69FB66EF55272B1AA6A61A69 /* PrayerBuildInfo.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		21C5696033EE08B870466B16 /* adhan_al_hussaini.caf in Resources */ = {isa = PBXBuildFile; fileRef = 7BB6BBBA364576409D299287 /* adhan_al_hussaini.caf */; };
 		29B211ACA24869F8CDC46EF4 /* adhan_sharif_doman.caf in Resources */ = {isa = PBXBuildFile; fileRef = 7B489EDC7485CD1BDA638DC8 /* adhan_sharif_doman.caf */; };
@@ -114,6 +115,7 @@
 		5709B34CF0A7D63546082F79 /* Pods-PrayerApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrayerApp.release.xcconfig"; path = "Target Support Files/Pods-PrayerApp/Pods-PrayerApp.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-PrayerApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PrayerApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		60668681401DD7256458E168 /* Haptics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Haptics.swift; path = PrayerApp/Haptics.swift; sourceTree = "<group>"; };
+		69FB66EF55272B1AA6A61A69 /* PrayerBuildInfo.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = PrayerBuildInfo.m; path = PrayerApp/PrayerBuildInfo.m; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = PrayerApp/AppDelegate.swift; sourceTree = "<group>"; };
 		7B489EDC7485CD1BDA638DC8 /* adhan_sharif_doman.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_sharif_doman.caf; path = PrayerApp/adhan_sharif_doman.caf; sourceTree = "<group>"; };
 		7BB6BBBA364576409D299287 /* adhan_al_hussaini.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_al_hussaini.caf; path = PrayerApp/adhan_al_hussaini.caf; sourceTree = "<group>"; };
@@ -255,6 +257,7 @@
 				BFF6595003A4C5C972D2B78B /* Haptics.m */,
 				7BBC47479F739320A66C8F1A /* MihrabAppGroup.h */,
 				5690D5BC679A6B773737566F /* MihrabAppGroup.m */,
+				69FB66EF55272B1AA6A61A69 /* PrayerBuildInfo.m */,
 			);
 			name = PrayerApp;
 			sourceTree = "<group>";
@@ -555,6 +558,7 @@
 				CA37C7F81236A5CF8F759E97 /* Haptics.swift in Sources */,
 				D80631DB29913BA3BE3917AB /* Haptics.m in Sources */,
 				9381D9BABC745CEEC09EF47C /* MihrabAppGroup.m in Sources */,
+				0CBF4D0ECDD2AF725FD1CA55 /* PrayerBuildInfo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1216,7 +1216,11 @@
     "backfillConfirm": "Doldur",
     "backfillNothingTitle": "Doldurulacak bir şey yok",
     "backfillNothingBody": "Bugünden önceki bütün günler zaten kayıtlı.",
-    "openLogFromHome": "Kaydı aç"
+    "openLogFromHome": "Kaydı aç",
+    "swipeHint": "Günü değiştirmek için kaydır",
+    "backfillUnreadable": "Kaydın şu anda okunamadı, bu yüzden hiçbir şey değişmedi. Lütfen tekrar dene.",
+    "backfillRefusedTitle": "Hiçbir şey değişmedi",
+    "backfillRefusedBody": "O günleri doldurmak daha önce kaydettiğin bir şeyi değiştirecekti, bu yüzden durduruldu. Kaydın olduğu gibi duruyor."
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",
