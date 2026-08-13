@@ -1,8 +1,8 @@
-The Log, made to work the way you were already using it.
+The Log, as you were already trying to use it.
 
-• The notification's "Log prayer" button now actually records the prayer — including with the app closed, and on the day the alert was for.
-• Swipe the day panel sideways to move between days; the arrows still work.
-• Fill in earlier days, or the past three months. Both ask first and never touch a day you have already logged.
-• A day with a missed prayer is marked on the graph, so a prayer you plan to make up can be found again.
-• The evening prompt stops asking about a day you have already finished logging.
-• The graph scrolls on the first try, and on the Today screen at all.
+• The notification's "Log prayer" button now really records it — even with the app closed, on the day the alert was for.
+• Swipe the day panel to change day; the arrows still work.
+• Fill in earlier days, or the past three months. Both ask first and never touch a day you have logged.
+• A day with a missed prayer is marked on the graph.
+• The evening prompt stops asking about a finished day.
+• The graph scrolls on the first try, and on Today.
