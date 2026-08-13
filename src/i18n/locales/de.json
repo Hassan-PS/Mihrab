@@ -1224,7 +1224,12 @@
     "fillMonthsAction": "Die letzten drei Monate ausfüllen",
     "fillMonthsTitle": "Die letzten drei Monate ausfüllen?",
     "fillMonthsBody": "Damit werden {{prayers}} Gebete an {{days}} leeren Tagen ({{range}}) als pünktlich gebetet erfasst. {{skipped}} Tage bleiben unberührt, weil sie bereits etwas enthalten – einen Status, eine Notiz oder ein Fasten. Der heutige Tag wird nicht angetastet.",
-    "fillMonthsNothingBody": "Jeder Tag der letzten drei Monate enthält bereits etwas."
+    "fillMonthsNothingBody": "Jeder Tag der letzten drei Monate enthält bereits etwas.",
+    "fillSummaryDays": "Tage",
+    "fillSummaryPrayers": "Gebete",
+    "backfillPreserved": "Bereits erfasste Tage bleiben unverändert, und der heutige Tag wird nicht angetastet.",
+    "fillMonthsPreserved": "Tage, die bereits einen Status, eine Notiz oder ein Fasten enthalten, bleiben genau so, wie sie sind. Der heutige Tag wird nicht angetastet.",
+    "fillSummaryLeftAlone": "Unberührt"
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

@@ -1224,7 +1224,12 @@
     "fillMonthsAction": "Fill the past three months",
     "fillMonthsTitle": "Fill the past three months?",
     "fillMonthsBody": "This records {{prayers}} prayers across {{days}} empty days ({{range}}) as prayed on time. {{skipped}} days are left alone because they already hold something — a status, a note or a fast. Today is not touched.",
-    "fillMonthsNothingBody": "Every day in the past three months already has something logged."
+    "fillMonthsNothingBody": "Every day in the past three months already has something logged.",
+    "fillSummaryDays": "Days",
+    "fillSummaryPrayers": "Prayers",
+    "backfillPreserved": "Days you have already logged are left alone, and today is not touched.",
+    "fillMonthsPreserved": "Days already holding a status, a note or a fast are left exactly as they are. Today is not touched.",
+    "fillSummaryLeftAlone": "Left alone"
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

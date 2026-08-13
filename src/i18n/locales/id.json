@@ -1224,7 +1224,12 @@
     "fillMonthsAction": "Isi tiga bulan terakhir",
     "fillMonthsTitle": "Isi tiga bulan terakhir?",
     "fillMonthsBody": "Ini mencatat {{prayers}} salat pada {{days}} hari kosong ({{range}}) sebagai dikerjakan tepat waktu. {{skipped}} hari dibiarkan karena sudah berisi sesuatu — status, catatan, atau puasa. Hari ini tidak diubah.",
-    "fillMonthsNothingBody": "Setiap hari dalam tiga bulan terakhir sudah berisi sesuatu."
+    "fillMonthsNothingBody": "Setiap hari dalam tiga bulan terakhir sudah berisi sesuatu.",
+    "fillSummaryDays": "Hari",
+    "fillSummaryPrayers": "Salat",
+    "backfillPreserved": "Hari yang sudah kamu catat dibiarkan apa adanya, dan hari ini tidak diubah.",
+    "fillMonthsPreserved": "Hari yang sudah berisi status, catatan, atau puasa dibiarkan persis seperti adanya. Hari ini tidak diubah.",
+    "fillSummaryLeftAlone": "Dibiarkan"
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

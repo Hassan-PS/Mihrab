@@ -1224,7 +1224,12 @@
     "fillMonthsAction": "补录过去三个月",
     "fillMonthsTitle": "补录过去三个月？",
     "fillMonthsBody": "这会把 {{days}} 个空白日子（{{range}}）内的 {{prayers}} 次礼拜记录为按时完成。{{skipped}} 天保持不变，因为它们已经有内容——状态、备注或斋戒。今天不会被改动。",
-    "fillMonthsNothingBody": "过去三个月的每一天都已经有记录。"
+    "fillMonthsNothingBody": "过去三个月的每一天都已经有记录。",
+    "fillSummaryDays": "天",
+    "fillSummaryPrayers": "次礼拜",
+    "backfillPreserved": "你已经记录过的日子保持不变，今天不会被改动。",
+    "fillMonthsPreserved": "已经有状态、备注或斋戒的日子会原样保留。今天不会被改动。",
+    "fillSummaryLeftAlone": "保持不变"
   },
   "endOfDay": {
     "title": "记录今天的拜功吗？",

@@ -1224,7 +1224,12 @@
     "fillMonthsAction": "Compléter les trois derniers mois",
     "fillMonthsTitle": "Compléter les trois derniers mois ?",
     "fillMonthsBody": "Cela enregistre {{prayers}} prières sur {{days}} jours vides ({{range}}) comme accomplies à l’heure. {{skipped}} jours restent intacts car ils contiennent déjà quelque chose — un statut, une note ou un jeûne. Aujourd’hui n’est pas touché.",
-    "fillMonthsNothingBody": "Chaque jour des trois derniers mois contient déjà quelque chose."
+    "fillMonthsNothingBody": "Chaque jour des trois derniers mois contient déjà quelque chose.",
+    "fillSummaryDays": "Jours",
+    "fillSummaryPrayers": "Prières",
+    "backfillPreserved": "Les jours déjà enregistrés ne sont pas modifiés, et aujourd’hui n’est pas touché.",
+    "fillMonthsPreserved": "Les jours contenant déjà un statut, une note ou un jeûne restent exactement tels quels. Aujourd’hui n’est pas touché.",
+    "fillSummaryLeftAlone": "Intacts"
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",

@@ -41,6 +41,8 @@ import { useNavigation } from '@react-navigation/native';
 import notifee, { EventType } from '@notifee/react-native';
 import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { FillSummary } from '../components/FillSummary';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -636,6 +638,70 @@ export function LogScreen() {
    */
   const [backfilling, setBackfilling] = useState(false);
   const earliestEntry = useMemo(() => earliestEntryOf(entries), [entries]);
+  /**
+   * The pending fill, held open while the user decides.
+   *
+   * `apply` closes over the journal AS READ FROM DISK when the button was
+   * pressed, not over the screen's state: the dialog is on screen for as
+   * long as the user takes to read it, and what gets written must be what
+   * was described to them.
+   */
+  const [pendingFill, setPendingFill] = useState<{
+    title: string;
+    days: number;
+    prayers: number;
+    range: string;
+    preserved: string;
+    /** Days deliberately not touched — shown as a figure, not a sentence. */
+    skipped?: number;
+    apply: () => void;
+  } | null>(null);
+  /** A dialog that reports rather than asks — nothing to fill, or refused. */
+  const [notice, setNotice] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
+
+  /** "13 May – 7 August", in the user's own language. */
+  const formatRange = useCallback(
+    (from: string, to: string) => {
+      const fmt = (key: string) =>
+        dateFromKey(key).toLocaleDateString(i18n.language, {
+          day: 'numeric',
+          month: 'long',
+        });
+      return from === to ? fmt(from) : `${fmt(from)} – ${fmt(to)}`;
+    },
+    [i18n.language],
+  );
+
+  /** The write half, shared by both buttons: persist, or refuse loudly. */
+  const commitFill = useCallback(
+    (build: () => JournalEntry[], previous: JournalEntry[]) => {
+      try {
+        const next = build();
+        if (next === previous) return;
+        void persistJournal(
+          next,
+          // Every filled day is now complete, so each one's evening prompt
+          // is retired with it.
+          next.map(e => e.date).filter((d, idx, all) => all.indexOf(d) === idx),
+        );
+      } catch (e) {
+        // The no-data-loss assertion failed, which means a bug in this app.
+        // The only safe response is to write nothing at all and say so.
+        console.error('LogScreen fill refused', e);
+        setNotice({
+          title: t('log.backfillRefusedTitle', 'Nothing was changed'),
+          message: t('log.backfillRefusedBody', {
+            defaultValue:
+              'Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched.',
+          }),
+        });
+      }
+    },
+    [persistJournal, t],
+  );
 
   const runBackfill = useCallback(async () => {
     if (backfilling) return;
@@ -658,13 +724,13 @@ export function LogScreen() {
         stored = raw ? coerceJournalEntries(JSON.parse(raw)) : [];
       } catch (e) {
         console.warn('LogScreen backfill: journal unreadable', e);
-        Alert.alert(
-          t('journal.loadFailedTitle', 'Could not load journal'),
-          t('log.backfillUnreadable', {
+        setNotice({
+          title: t('journal.loadFailedTitle', 'Could not load journal'),
+          message: t('log.backfillUnreadable', {
             defaultValue:
               'Your journal could not be read just now, so nothing was changed. Please try again.',
           }),
-        );
+        });
         return;
       }
       const installedOn = await installedOnDay(
@@ -672,74 +738,34 @@ export function LogScreen() {
       );
       const plan = planBackfill(stored, installedOn);
       if (!plan.from || !plan.to) {
-        Alert.alert(
-          t('log.backfillNothingTitle', 'Nothing to fill in'),
-          t(
+        setNotice({
+          title: t('log.backfillNothingTitle', 'Nothing to fill in'),
+          message: t(
             'log.backfillNothingBody',
             'Every day before today is already recorded.',
           ),
-        );
+        });
         return;
       }
-      const range = `${dateFromKey(plan.from).toLocaleDateString(
-        i18n.language,
-        { day: 'numeric', month: 'long' },
-      )} – ${dateFromKey(plan.to).toLocaleDateString(i18n.language, {
-        day: 'numeric',
-        month: 'long',
-      })}`;
-      Alert.alert(
-        t('log.backfillTitle', 'Fill in earlier days?'),
-        t('log.backfillBody', {
-          // `days`, not `count`: i18next treats `count` as a plural selector
-          // and would then want six forms of this sentence in Arabic alone,
-          // for a number that is always shown as a numeral anyway.
+      setPendingFill({
+        title: t('log.backfillTitle', 'Fill in earlier days?'),
+        days: plan.days,
+        prayers: plan.prayers,
+        range: formatRange(plan.from, plan.to),
+        preserved: t('log.backfillPreserved', {
           defaultValue:
-            'This records {{prayers}} prayers across {{days}} days ({{range}}) as prayed on time. Days you have already logged are left alone, and today is not touched.',
-          days: plan.days,
-          prayers: plan.prayers,
-          range,
+            'Days you have already logged are left alone, and today is not touched.',
         }),
-        [
-          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-          {
-            text: t('log.backfillConfirm', 'Fill them in'),
-            onPress: () => {
-              try {
-                // Against `stored`, the copy that was read from disk and
-                // planned against — not against the screen's state, which
-                // may have moved on while the dialog was open.
-                const next = applyBackfill(stored, installedOn);
-                if (next === stored) return;
-                void persistJournal(
-                  next,
-                  // Every filled day is now complete, so each one's evening
-                  // prompt is retired with it.
-                  next
-                    .map(e => e.date)
-                    .filter((d, idx, all) => all.indexOf(d) === idx),
-                );
-              } catch (e) {
-                // applyBackfill's own no-data-loss assertion failed. That
-                // is a bug in this app, and the only safe response to it is
-                // to write nothing at all.
-                console.error('LogScreen backfill refused', e);
-                Alert.alert(
-                  t('log.backfillRefusedTitle', 'Nothing was changed'),
-                  t('log.backfillRefusedBody', {
-                    defaultValue:
-                      'Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched.',
-                  }),
-                );
-              }
-            },
-          },
-        ],
-      );
+        // Against `stored`, the copy read from disk and planned against —
+        // not the screen's state, which may have moved on while the dialog
+        // was open.
+        apply: () =>
+          commitFill(() => applyBackfill(stored, installedOn), stored),
+      });
     } finally {
       setBackfilling(false);
     }
-  }, [backfilling, earliestEntry, hydrated, i18n.language, persistJournal, t]);
+  }, [backfilling, commitFill, earliestEntry, formatRange, hydrated, t]);
 
   /**
    * ── Filling three months, for a practice older than the app ─────────
@@ -772,74 +798,50 @@ export function LogScreen() {
         storedFasts = f ? coerceFastEntries(JSON.parse(f)) : [];
       } catch (e) {
         console.warn('LogScreen month fill: stores unreadable', e);
-        Alert.alert(
-          t('journal.loadFailedTitle', 'Could not load journal'),
-          t('log.backfillUnreadable', {
+        setNotice({
+          title: t('journal.loadFailedTitle', 'Could not load journal'),
+          message: t('log.backfillUnreadable', {
             defaultValue:
               'Your journal could not be read just now, so nothing was changed. Please try again.',
           }),
-        );
+        });
         return;
       }
 
       const plan = planMonthFill(storedJournal, storedFasts);
       if (!plan.from || !plan.to) {
-        Alert.alert(
-          t('log.backfillNothingTitle', 'Nothing to fill in'),
-          t('log.fillMonthsNothingBody', {
+        setNotice({
+          title: t('log.backfillNothingTitle', 'Nothing to fill in'),
+          message: t('log.fillMonthsNothingBody', {
             defaultValue:
               'Every day in the past three months already has something logged.',
           }),
-        );
+        });
         return;
       }
-      const fmt = (key: string) =>
-        dateFromKey(key).toLocaleDateString(i18n.language, {
-          day: 'numeric',
-          month: 'long',
-        });
-      Alert.alert(
-        t('log.fillMonthsTitle', 'Fill the past three months?'),
-        t('log.fillMonthsBody', {
+      setPendingFill({
+        title: t('log.fillMonthsTitle', 'Fill the past three months?'),
+        days: plan.days,
+        prayers: plan.prayers,
+        range: formatRange(plan.from, plan.to),
+        // The reassurance this button most needs, and the reason it is
+        // safe. The COUNT of untouched days rides in the figures block, so
+        // this sentence names no numbers and needs no plural forms.
+        skipped: plan.skipped,
+        preserved: t('log.fillMonthsPreserved', {
           defaultValue:
-            'This records {{prayers}} prayers across {{days}} empty days ({{range}}) as prayed on time. {{skipped}} days are left alone because they already hold something — a status, a note or a fast. Today is not touched.',
-          days: plan.days,
-          prayers: plan.prayers,
-          skipped: plan.skipped,
-          range: `${fmt(plan.from)} – ${fmt(plan.to)}`,
+            'Days already holding a status, a note or a fast are left exactly as they are. Today is not touched.',
         }),
-        [
-          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-          {
-            text: t('log.backfillConfirm', 'Fill them in'),
-            onPress: () => {
-              try {
-                const next = applyMonthFill(storedJournal, storedFasts);
-                if (next === storedJournal) return;
-                void persistJournal(
-                  next,
-                  next
-                    .map(e => e.date)
-                    .filter((d, idx, all) => all.indexOf(d) === idx),
-                );
-              } catch (e) {
-                console.error('LogScreen month fill refused', e);
-                Alert.alert(
-                  t('log.backfillRefusedTitle', 'Nothing was changed'),
-                  t('log.backfillRefusedBody', {
-                    defaultValue:
-                      'Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched.',
-                  }),
-                );
-              }
-            },
-          },
-        ],
-      );
+        apply: () =>
+          commitFill(
+            () => applyMonthFill(storedJournal, storedFasts),
+            storedJournal,
+          ),
+      });
     } finally {
       setBackfilling(false);
     }
-  }, [backfilling, hydrated, i18n.language, persistJournal, t]);
+  }, [backfilling, commitFill, formatRange, hydrated, t]);
 
   /** "Sunday 2 August" — the day's own name, not a raw key. */
   const selectedLabel = useMemo(
@@ -1348,6 +1350,46 @@ export function LogScreen() {
             {t('common.loading')}
           </Text>
         ) : null}
+
+        {/* Themed, in-app, and the same dialog the theme-restart prompt
+            uses — a stock Alert cannot show the figures, and these are the
+            two prompts in the app whose figures are the whole point. */}
+        <ConfirmModal
+          visible={pendingFill !== null}
+          title={pendingFill?.title ?? ''}
+          confirmLabel={t('log.backfillConfirm', 'Fill them in')}
+          cancelLabel={t('common.cancel', 'Cancel')}
+          onCancel={() => setPendingFill(null)}
+          onConfirm={() => {
+            const pending = pendingFill;
+            setPendingFill(null);
+            pending?.apply();
+          }}
+        >
+          {pendingFill ? (
+            <FillSummary
+              days={pendingFill.days}
+              daysLabel={t('log.fillSummaryDays', 'Days')}
+              prayers={pendingFill.prayers}
+              prayersLabel={t('log.fillSummaryPrayers', 'Prayers')}
+              range={pendingFill.range}
+              preservedCount={pendingFill.skipped}
+              preservedLabel={t('log.fillSummaryLeftAlone', 'Left alone')}
+              preserved={pendingFill.preserved}
+            />
+          ) : null}
+        </ConfirmModal>
+
+        <ConfirmModal
+          visible={notice !== null}
+          title={notice?.title ?? ''}
+          message={notice?.message}
+          confirmLabel={t('common.ok', 'OK')}
+          cancelLabel={t('common.cancel', 'Cancel')}
+          hideCancel
+          onCancel={() => setNotice(null)}
+          onConfirm={() => setNotice(null)}
+        />
       </CenteredColumn>
     </ScrollView>
   );

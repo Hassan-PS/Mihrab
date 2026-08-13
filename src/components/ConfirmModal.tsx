@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { cardEdgeStyle } from '../theme/chrome';
@@ -18,6 +19,18 @@ type ConfirmModalProps = {
   cancelLabel: string;
   /** Tints the confirm button with the danger colour for risky actions. */
   destructive?: boolean;
+  /**
+   * Extra body, under `message`. For prompts whose substance is figures
+   * rather than a sentence — "how many days, which days, how many are
+   * being left alone" reads far better as a small table than as a
+   * paragraph the user has to parse before agreeing to it.
+   */
+  children?: ReactNode;
+  /**
+   * One button instead of two, for a dialog that reports rather than asks.
+   * There is nothing to cancel when the answer is "nothing happened".
+   */
+  hideCancel?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -29,6 +42,8 @@ export function ConfirmModal({
   confirmLabel,
   cancelLabel,
   destructive = false,
+  children,
+  hideCancel = false,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
@@ -41,37 +56,53 @@ export function ConfirmModal({
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onCancel}>
+      onRequestClose={onCancel}
+    >
       <Pressable
         style={[styles.scrim, { backgroundColor: palette.overlay }]}
-        onPress={onCancel}>
+        onPress={onCancel}
+      >
         {/* Inner press is swallowed so taps on the sheet don't dismiss. */}
         <Pressable
           style={[
             styles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}
-          onPress={() => {}}>
+          onPress={() => {}}
+        >
           <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
           {message ? (
-            <Text style={[styles.message, { color: palette.muted }]}>
+            <Text
+              style={[
+                styles.message,
+                { color: palette.muted },
+                // The body below carries its own top spacing; without this
+                // the message and the figures sit twice as far apart as
+                // either does from anything else.
+                children ? styles.messageWithBody : null,
+              ]}
+            >
               {message}
             </Text>
           ) : null}
+          {children}
           <View style={styles.buttonRow}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={cancelLabel}
-              onPress={onCancel}
-              style={({ pressed }) => [
-                styles.btn,
-                styles.cancelBtn,
-                pressed && { opacity: 0.6 },
-              ]}>
-              <Text style={[styles.cancelLabel, { color: palette.muted }]}>
-                {cancelLabel}
-              </Text>
-            </Pressable>
+            {hideCancel ? null : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={cancelLabel}
+                onPress={onCancel}
+                style={({ pressed }) => [
+                  styles.btn,
+                  styles.cancelBtn,
+                  pressed && { opacity: 0.6 },
+                ]}
+              >
+                <Text style={[styles.cancelLabel, { color: palette.muted }]}>
+                  {cancelLabel}
+                </Text>
+              </Pressable>
+            )}
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={confirmLabel}
@@ -81,7 +112,8 @@ export function ConfirmModal({
                 styles.confirmBtn,
                 { backgroundColor: confirmBg },
                 pressed && { opacity: 0.85 },
-              ]}>
+              ]}
+            >
               <Text style={styles.confirmLabel}>{confirmLabel}</Text>
             </Pressable>
           </View>
@@ -116,6 +148,7 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginBottom: 18,
   },
+  messageWithBody: { marginBottom: 12 },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
