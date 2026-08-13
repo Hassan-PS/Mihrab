@@ -81,6 +81,7 @@ import {
 import { upcomingPrayers } from '../journal/upcoming';
 import { dragTranslation, swipeDayDelta } from '../journal/daySwipe';
 import { applyBackfill, planBackfill } from '../journal/backfill';
+import { applyMonthFill, planMonthFill } from '../journal/fillMonths';
 import { installedOnDay } from '../journal/installDate';
 import { syncEndOfDayReminderForDay } from '../notifications/endOfDayLog';
 import {
@@ -740,6 +741,106 @@ export function LogScreen() {
     }
   }, [backfilling, earliestEntry, hydrated, i18n.language, persistJournal, t]);
 
+  /**
+   * ── Filling three months, for a practice older than the app ─────────
+   *
+   * The button above stops where the app's own history stops. This one
+   * reaches past it, because someone who has prayed for years did not
+   * start doing so when they installed this.
+   *
+   * What pays for that reach is the strictness: it only writes to days
+   * holding NOTHING — no status, no note, no fast. A half-described day is
+   * left exactly as it was, in full, rather than having four claims added
+   * next to the one the user actually made. `fillMonths` has the whole
+   * argument; this is the half that asks first.
+   */
+  const runMonthFill = useCallback(async () => {
+    if (backfilling || !hydrated) return;
+    setBackfilling(true);
+    try {
+      let storedJournal: JournalEntry[];
+      let storedFasts: FastEntry[];
+      try {
+        // From disk, both stores, for the same reason as the button above:
+        // planning against a stale render value is how a fill becomes a
+        // replacement.
+        const [j, f] = await Promise.all([
+          durableEncryptedGet(JOURNAL_KEY),
+          durableEncryptedGet(FASTING_KEY),
+        ]);
+        storedJournal = j ? coerceJournalEntries(JSON.parse(j)) : [];
+        storedFasts = f ? coerceFastEntries(JSON.parse(f)) : [];
+      } catch (e) {
+        console.warn('LogScreen month fill: stores unreadable', e);
+        Alert.alert(
+          t('journal.loadFailedTitle', 'Could not load journal'),
+          t('log.backfillUnreadable', {
+            defaultValue:
+              'Your journal could not be read just now, so nothing was changed. Please try again.',
+          }),
+        );
+        return;
+      }
+
+      const plan = planMonthFill(storedJournal, storedFasts);
+      if (!plan.from || !plan.to) {
+        Alert.alert(
+          t('log.backfillNothingTitle', 'Nothing to fill in'),
+          t('log.fillMonthsNothingBody', {
+            defaultValue:
+              'Every day in the past three months already has something logged.',
+          }),
+        );
+        return;
+      }
+      const fmt = (key: string) =>
+        dateFromKey(key).toLocaleDateString(i18n.language, {
+          day: 'numeric',
+          month: 'long',
+        });
+      Alert.alert(
+        t('log.fillMonthsTitle', 'Fill the past three months?'),
+        t('log.fillMonthsBody', {
+          defaultValue:
+            'This records {{prayers}} prayers across {{days}} empty days ({{range}}) as prayed on time. {{skipped}} days are left alone because they already hold something — a status, a note or a fast. Today is not touched.',
+          days: plan.days,
+          prayers: plan.prayers,
+          skipped: plan.skipped,
+          range: `${fmt(plan.from)} – ${fmt(plan.to)}`,
+        }),
+        [
+          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+          {
+            text: t('log.backfillConfirm', 'Fill them in'),
+            onPress: () => {
+              try {
+                const next = applyMonthFill(storedJournal, storedFasts);
+                if (next === storedJournal) return;
+                void persistJournal(
+                  next,
+                  next
+                    .map(e => e.date)
+                    .filter((d, idx, all) => all.indexOf(d) === idx),
+                );
+              } catch (e) {
+                console.error('LogScreen month fill refused', e);
+                Alert.alert(
+                  t('log.backfillRefusedTitle', 'Nothing was changed'),
+                  t('log.backfillRefusedBody', {
+                    defaultValue:
+                      'Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched.',
+                  }),
+                );
+              }
+            },
+          },
+        ],
+      );
+    } finally {
+      setBackfilling(false);
+    }
+  }, [backfilling, hydrated, i18n.language, persistJournal, t]);
+
   /** "Sunday 2 August" — the day's own name, not a raw key. */
   const selectedLabel = useMemo(
     () =>
@@ -762,7 +863,13 @@ export function LogScreen() {
       contentContainerStyle={[styles.scroll, { paddingBottom: tabBarInset }]}
       contentInsetAdjustmentBehavior="automatic"
     >
-      <CenteredColumn>
+      {/* The gap lives HERE, not on the ScrollView's content container.
+          `contentContainerStyle`'s gap applies to the ScrollView's direct
+          children, and there is exactly one — this column — so it separated
+          nothing at all and every card on this page sat flush against the
+          next. The stack is the thing whose children need spacing, so the
+          spacing belongs on the stack. */}
+      <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         {/* ── The graph ─────────────────────────────────────────────── */}
         <View
           style={[
@@ -807,6 +914,29 @@ export function LogScreen() {
               numberOfLines={1}
             >
               {t('log.backfillAction', 'Fill in earlier days')}
+            </Text>
+            <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
+          </Pressable>
+          {/* The longer reach, and the stricter rule: only days holding
+              nothing at all. Second because it is the bigger claim. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t(
+              'log.fillMonthsAction',
+              'Fill the past three months',
+            )}
+            onPress={runMonthFill}
+            disabled={backfilling || !hydrated}
+            style={[
+              styles.backfillRow,
+              { borderTopColor: palette.border ?? palette.muted },
+            ]}
+          >
+            <Text
+              style={[styles.backfillLabel, { color: palette.accent }]}
+              numberOfLines={1}
+            >
+              {t('log.fillMonthsAction', 'Fill the past three months')}
             </Text>
             <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
           </Pressable>
@@ -1224,7 +1354,11 @@ export function LogScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { padding: 16, gap: 12, paddingBottom: 36 },
+  scroll: { padding: 16, paddingBottom: 36 },
+  /** Space between every card on the page. 14 rather than 12: the day panel
+   *  is now one tall card between two smaller ones, and at 12 the seams
+   *  read as a rendering artefact rather than a deliberate gap. */
+  stack: { gap: 14 },
   card: { borderRadius: 18, padding: 14 },
   sectionTitle: {
     fontSize: 11.5,

@@ -1220,7 +1220,11 @@
     "swipeHint": "Balayez pour changer de jour",
     "backfillUnreadable": "Votre journal n’a pas pu être lu pour l’instant, rien n’a donc été modifié. Réessayez.",
     "backfillRefusedTitle": "Rien n’a été modifié",
-    "backfillRefusedBody": "Compléter ces jours aurait modifié quelque chose que vous aviez déjà enregistré ; l’opération a été arrêtée. Votre journal est intact."
+    "backfillRefusedBody": "Compléter ces jours aurait modifié quelque chose que vous aviez déjà enregistré ; l’opération a été arrêtée. Votre journal est intact.",
+    "fillMonthsAction": "Compléter les trois derniers mois",
+    "fillMonthsTitle": "Compléter les trois derniers mois ?",
+    "fillMonthsBody": "Cela enregistre {{prayers}} prières sur {{days}} jours vides ({{range}}) comme accomplies à l’heure. {{skipped}} jours restent intacts car ils contiennent déjà quelque chose — un statut, une note ou un jeûne. Aujourd’hui n’est pas touché.",
+    "fillMonthsNothingBody": "Chaque jour des trois derniers mois contient déjà quelque chose."
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",

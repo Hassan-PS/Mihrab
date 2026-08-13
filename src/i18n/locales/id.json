@@ -1220,7 +1220,11 @@
     "swipeHint": "Geser untuk mengganti hari",
     "backfillUnreadable": "Catatanmu tidak bisa dibaca saat ini, jadi tidak ada yang diubah. Silakan coba lagi.",
     "backfillRefusedTitle": "Tidak ada yang diubah",
-    "backfillRefusedBody": "Mengisi hari-hari itu akan mengubah sesuatu yang sudah kamu catat, jadi dihentikan. Catatanmu tetap utuh."
+    "backfillRefusedBody": "Mengisi hari-hari itu akan mengubah sesuatu yang sudah kamu catat, jadi dihentikan. Catatanmu tetap utuh.",
+    "fillMonthsAction": "Isi tiga bulan terakhir",
+    "fillMonthsTitle": "Isi tiga bulan terakhir?",
+    "fillMonthsBody": "Ini mencatat {{prayers}} salat pada {{days}} hari kosong ({{range}}) sebagai dikerjakan tepat waktu. {{skipped}} hari dibiarkan karena sudah berisi sesuatu — status, catatan, atau puasa. Hari ini tidak diubah.",
+    "fillMonthsNothingBody": "Setiap hari dalam tiga bulan terakhir sudah berisi sesuatu."
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

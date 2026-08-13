@@ -1220,7 +1220,11 @@
     "swipeHint": "Svep för att byta dag",
     "backfillUnreadable": "Din logg kunde inte läsas just nu, så ingenting ändrades. Försök igen.",
     "backfillRefusedTitle": "Ingenting ändrades",
-    "backfillRefusedBody": "Att fylla i de dagarna skulle ha ändrat något du redan loggat, så det stoppades. Din logg är orörd."
+    "backfillRefusedBody": "Att fylla i de dagarna skulle ha ändrat något du redan loggat, så det stoppades. Din logg är orörd.",
+    "fillMonthsAction": "Fyll de senaste tre månaderna",
+    "fillMonthsTitle": "Fyll de senaste tre månaderna?",
+    "fillMonthsBody": "Detta registrerar {{prayers}} böner under {{days}} tomma dagar ({{range}}) som bedda i tid. {{skipped}} dagar lämnas orörda eftersom de redan innehåller något – en status, en anteckning eller en fasta. Dagens datum påverkas inte.",
+    "fillMonthsNothingBody": "Varje dag de senaste tre månaderna har redan något loggat."
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

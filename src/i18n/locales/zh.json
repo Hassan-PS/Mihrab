@@ -1220,7 +1220,11 @@
     "swipeHint": "滑动以切换日期",
     "backfillUnreadable": "此刻无法读取你的记录，因此没有做任何改动。请再试一次。",
     "backfillRefusedTitle": "没有做任何改动",
-    "backfillRefusedBody": "补录这些日子会改动你已经记录过的内容，因此已停止。你的记录未受影响。"
+    "backfillRefusedBody": "补录这些日子会改动你已经记录过的内容，因此已停止。你的记录未受影响。",
+    "fillMonthsAction": "补录过去三个月",
+    "fillMonthsTitle": "补录过去三个月？",
+    "fillMonthsBody": "这会把 {{days}} 个空白日子（{{range}}）内的 {{prayers}} 次礼拜记录为按时完成。{{skipped}} 天保持不变，因为它们已经有内容——状态、备注或斋戒。今天不会被改动。",
+    "fillMonthsNothingBody": "过去三个月的每一天都已经有记录。"
   },
   "endOfDay": {
     "title": "记录今天的拜功吗？",

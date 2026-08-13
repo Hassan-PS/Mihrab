@@ -1220,7 +1220,11 @@
     "swipeHint": "Wischen, um den Tag zu wechseln",
     "backfillUnreadable": "Dein Log konnte gerade nicht gelesen werden, daher wurde nichts geändert. Bitte versuche es erneut.",
     "backfillRefusedTitle": "Nichts wurde geändert",
-    "backfillRefusedBody": "Das Ausfüllen dieser Tage hätte etwas verändert, das du bereits erfasst hattest, und wurde deshalb gestoppt. Dein Log ist unberührt."
+    "backfillRefusedBody": "Das Ausfüllen dieser Tage hätte etwas verändert, das du bereits erfasst hattest, und wurde deshalb gestoppt. Dein Log ist unberührt.",
+    "fillMonthsAction": "Die letzten drei Monate ausfüllen",
+    "fillMonthsTitle": "Die letzten drei Monate ausfüllen?",
+    "fillMonthsBody": "Damit werden {{prayers}} Gebete an {{days}} leeren Tagen ({{range}}) als pünktlich gebetet erfasst. {{skipped}} Tage bleiben unberührt, weil sie bereits etwas enthalten – einen Status, eine Notiz oder ein Fasten. Der heutige Tag wird nicht angetastet.",
+    "fillMonthsNothingBody": "Jeder Tag der letzten drei Monate enthält bereits etwas."
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

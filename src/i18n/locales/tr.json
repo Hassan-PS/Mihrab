@@ -1220,7 +1220,11 @@
     "swipeHint": "Günü değiştirmek için kaydır",
     "backfillUnreadable": "Kaydın şu anda okunamadı, bu yüzden hiçbir şey değişmedi. Lütfen tekrar dene.",
     "backfillRefusedTitle": "Hiçbir şey değişmedi",
-    "backfillRefusedBody": "O günleri doldurmak daha önce kaydettiğin bir şeyi değiştirecekti, bu yüzden durduruldu. Kaydın olduğu gibi duruyor."
+    "backfillRefusedBody": "O günleri doldurmak daha önce kaydettiğin bir şeyi değiştirecekti, bu yüzden durduruldu. Kaydın olduğu gibi duruyor.",
+    "fillMonthsAction": "Son üç ayı doldur",
+    "fillMonthsTitle": "Son üç ay doldurulsun mu?",
+    "fillMonthsBody": "Bu, {{days}} boş günde ({{range}}) {{prayers}} namazı vaktinde kılınmış olarak kaydeder. {{skipped}} güne dokunulmaz, çünkü onlarda zaten bir şey var — bir durum, bir not ya da bir oruç. Bugün değişmez.",
+    "fillMonthsNothingBody": "Son üç aydaki her günde zaten bir şey kayıtlı."
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

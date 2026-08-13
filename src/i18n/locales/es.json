@@ -1220,7 +1220,11 @@
     "swipeHint": "Desliza para cambiar de día",
     "backfillUnreadable": "No se ha podido leer tu registro ahora mismo, así que no se ha cambiado nada. Inténtalo de nuevo.",
     "backfillRefusedTitle": "No se ha cambiado nada",
-    "backfillRefusedBody": "Rellenar esos días habría alterado algo que ya habías registrado, así que se detuvo. Tu registro está intacto."
+    "backfillRefusedBody": "Rellenar esos días habría alterado algo que ya habías registrado, así que se detuvo. Tu registro está intacto.",
+    "fillMonthsAction": "Rellenar los últimos tres meses",
+    "fillMonthsTitle": "¿Rellenar los últimos tres meses?",
+    "fillMonthsBody": "Esto registra {{prayers}} oraciones en {{days}} días vacíos ({{range}}) como rezadas a tiempo. {{skipped}} días se dejan intactos porque ya contienen algo: un estado, una nota o un ayuno. Hoy no se toca.",
+    "fillMonthsNothingBody": "Todos los días de los últimos tres meses ya tienen algo registrado."
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",

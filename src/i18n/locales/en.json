@@ -1220,7 +1220,11 @@
     "swipeHint": "Swipe to change day",
     "backfillUnreadable": "Your journal could not be read just now, so nothing was changed. Please try again.",
     "backfillRefusedTitle": "Nothing was changed",
-    "backfillRefusedBody": "Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched."
+    "backfillRefusedBody": "Filling in those days would have altered something you had already logged, so it was stopped. Your journal is untouched.",
+    "fillMonthsAction": "Fill the past three months",
+    "fillMonthsTitle": "Fill the past three months?",
+    "fillMonthsBody": "This records {{prayers}} prayers across {{days}} empty days ({{range}}) as prayed on time. {{skipped}} days are left alone because they already hold something — a status, a note or a fast. Today is not touched.",
+    "fillMonthsNothingBody": "Every day in the past three months already has something logged."
   },
   "endOfDay": {
     "title": "Log today’s prayers?",
