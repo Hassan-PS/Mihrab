@@ -31,12 +31,25 @@
  * religious practice.
  */
 import { memo, useEffect, useMemo, useRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  I18nManager,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import type { DayScore } from '../journal/journal';
 import { dayKey } from './practiceStore';
+import {
+  maxOffset,
+  offsetAfterGrowth,
+  shouldLoadOlder,
+  todayOffset,
+} from './heatmapScroll';
 
 /**
  * The SHORTEST the graph is ever drawn. Thirteen ≈ a quarter and fits the
@@ -256,13 +269,36 @@ function PracticeHeatmapImpl({
   const drawnWeeks = useRef(0);
   const offset = useRef(0);
   const asking = useRef(false);
+  /**
+   * The two numbers the direction logic needs, kept from the last layout and
+   * content measurement. `onScroll` carries its own copies, so these only
+   * have to be good enough to park with.
+   */
+  const contentWidth = useRef(0);
+  const viewportWidth = useRef(0);
+  const rtl = I18nManager.isRTL;
+
+  /**
+   * Park on today. NOT `scrollToEnd` — the end of the content is the end of
+   * the writing direction only in Latin; in Arabic it is the oldest week the
+   * user has, which is where the graph used to open.
+   */
+  const parkOnToday = () => {
+    const max = maxOffset(contentWidth.current, viewportWidth.current);
+    scrollRef.current?.scrollTo({ x: todayOffset(rtl, max), animated: false });
+  };
 
   const onSized = () => {
     if (weeks === 0) return;
     if (!parked.current) {
+      // Nothing to park against until the row has been measured, and
+      // parking against a width of zero would claim the graph is settled
+      // while it is still standing on week one. The content-size callback
+      // comes back for us.
+      if (contentWidth.current <= 0) return;
       parked.current = true;
       drawnWeeks.current = weeks;
-      scrollRef.current?.scrollToEnd({ animated: false });
+      parkOnToday();
       return;
     }
     if (weeks === drawnWeeks.current) return;
@@ -270,15 +306,16 @@ function PracticeHeatmapImpl({
     drawnWeeks.current = weeks;
     if (added > 0 && asking.current) {
       /**
-       * Columns were added at the OLD end, which is the left, BECAUSE THE
-       * USER DRAGGED THERE. Left-hand growth pushes everything they were
-       * looking at to the right by exactly that many columns, so without
-       * this the view lurches forwards in time the moment it loads more of
-       * the past — the one thing they were dragging away from. Push the
-       * offset by the same amount and the dates under the thumb hold still.
+       * Columns were added at the OLD end BECAUSE THE USER DRAGGED THERE.
+       * In Latin that end is the left, so the growth pushes everything they
+       * were looking at to the right by exactly that many columns and the
+       * view lurches forwards in time — the one thing they were dragging
+       * away from. `offsetAfterGrowth` puts the dates back under the thumb,
+       * and knows that in Arabic the past is the other way and the answer is
+       * to hold still.
        */
       scrollRef.current?.scrollTo({
-        x: offset.current + added * COL,
+        x: offsetAfterGrowth(rtl, offset.current, added, COL),
         animated: false,
       });
       asking.current = false;
@@ -298,7 +335,7 @@ function PracticeHeatmapImpl({
      * nobody has scrolled anywhere yet, so today is still the right place
      * to be.
      */
-    scrollRef.current?.scrollToEnd({ animated: false });
+    parkOnToday();
   };
   useEffect(() => {
     if (parked.current) return;
@@ -333,7 +370,16 @@ function PracticeHeatmapImpl({
           ref={scrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
-          onContentSizeChange={onSized}
+          onContentSizeChange={w => {
+            contentWidth.current = w;
+            onSized();
+          }}
+          // The viewport width is half of what tells the graph which end of
+          // the content it is standing at, and in Arabic that is the half
+          // that decides whether "here" is today or two years ago.
+          onLayout={e => {
+            viewportWidth.current = e.nativeEvent.layout.width;
+          }}
           scrollEventThrottle={64}
           // Diagonal drags belong to the page, not to the graph. Without
           // this a mostly-vertical swipe that starts on the grid drags the
@@ -344,16 +390,28 @@ function PracticeHeatmapImpl({
           // making the parent fight it for every gesture.
           nestedScrollEnabled
           onScroll={e => {
-            offset.current = e.nativeEvent.contentOffset.x;
+            const { contentOffset, contentSize, layoutMeasurement } =
+              e.nativeEvent;
+            offset.current = contentOffset.x;
+            contentWidth.current = contentSize.width;
+            viewportWidth.current = layoutMeasurement.width;
             // Nothing is asked for until the initial park has happened. The
             // offset before that is 0, which looks exactly like "the user
             // has dragged to the oldest week" and used to fire a load-more
             // during mount — twenty-six more columns arriving underneath
             // the first drag.
-            if (!parked.current) return;
-            // Two columns of slack, so the request goes out while there is
-            // still something under the thumb to drag.
-            if (offset.current > COL * 2 || !onReachOldest) {
+            if (!parked.current || !onReachOldest) return;
+            // Which end of the content the oldest week is on is the whole
+            // question in Arabic, where it is the far one rather than 0.
+            if (
+              !shouldLoadOlder({
+                rtl,
+                offset: contentOffset.x,
+                contentWidth: contentSize.width,
+                viewportWidth: layoutMeasurement.width,
+                columnWidth: COL,
+              })
+            ) {
               return;
             }
             if (asking.current) return;
