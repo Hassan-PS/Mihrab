@@ -31,12 +31,30 @@ import {
   hydrateQuranState,
   subscribeQuranState,
 } from './quran/quranState';
+import { reconcileMushafAssets } from './quran/mushafAssets';
 
 export function AppNavigationRoot() {
   const { settings, hydrated } = usePrayerSettings();
   const systemScheme = useSystemColorScheme();
 
   useSyncWidgetUiHints();
+
+  /**
+   * Bring the Quran files on disk in line with the ones this build reads —
+   * once, at launch, off the critical path.
+   *
+   * Here rather than in the reader because the files an update has left
+   * behind are the reader's business only if the reader is opened, and the
+   * whole problem is the installs where it isn't: the retired page images
+   * were swept only by starting a download, so anyone who declined that once
+   * kept the lot. Fonts from a superseded release are worse — nothing about
+   * them looks wrong from inside the app, so nobody would ever go looking.
+   */
+  useEffect(() => {
+    void reconcileMushafAssets().catch(e =>
+      console.warn('mushafAssets: reconciliation failed', e),
+    );
+  }, []);
 
   // Daily-notification resync — ayah of the day, khatmah reminder, and
   // fasting reminders keep their rolling trigger windows fresh here.

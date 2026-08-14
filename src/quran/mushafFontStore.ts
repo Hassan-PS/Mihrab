@@ -30,8 +30,17 @@ const STORE_VERSION = 'v2';
 /** Smallest plausible page font; anything under this is a failed download. */
 const MIN_FONT_BYTES = 8_192;
 
-function storeDir(): string {
+/**
+ * Where the page fonts live. Exported so the asset reconciliation can stamp
+ * the release they came from beside them — a store with no record of which
+ * release filled it cannot be told from one that is out of date.
+ */
+export function fontStoreDir(): string {
   return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/fonts/${STORE_VERSION}`;
+}
+
+function storeDir(): string {
+  return fontStoreDir();
 }
 
 export function fontFileName(page: number): string {
