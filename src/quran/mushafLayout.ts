@@ -142,6 +142,47 @@ export const MUSHAF_SPACE_ADVANCE_EM = 0.292;
  */
 export const MUSHAF_LINE_BOX_SLACK_EM = 0.5;
 
+/**
+ * How to draw one gap: the size to set the space glyph at, and the letter
+ * spacing to add to it. **The letter spacing is never negative.**
+ *
+ * The gap is a no-break space in AmiriQuran, whose advance is
+ * MUSHAF_SPACE_ADVANCE_EM. A line solved for a WIDER space adds the
+ * difference as letter spacing, which is what this always did.
+ *
+ * A line solved for a TIGHTER one used to subtract it — and a third of the
+ * mushaf's lines are solved tighter than 0.292 em, because that is what
+ * justifying a full line of QPC to the measure asks for. Negative letter
+ * spacing is where the missing words came from (issue #6): on the reporter's
+ * device the gaps came out at the glyph's own width whatever we asked for, so
+ * the line was drawn wider than it was measured for, and Android — which lays
+ * a single line out by BREAKING it, between glyphs when nothing else will fit
+ * — dropped the last word of it. Every line it happened to was a line asking
+ * for a tighter-than-0.292 gap, and no line that asked for a wider one lost
+ * anything.
+ *
+ * So don't ask. Shrink the space glyph instead, and let the letter spacing
+ * make up whatever is left, which is then zero or positive by construction.
+ * The advance is identical either way, so nothing about the page moves.
+ * Scaling DOWN cannot disturb the line box the way scaling up would (a gap
+ * set at 2.5x the page size would drag the box's height with it) — and the
+ * line height is pinned on the paragraph regardless.
+ */
+export type MushafGapMetrics = { fontSize: number; letterSpacing: number };
+
+export function gapMetrics(spaceEm: number, fontSize: number): MushafGapMetrics {
+  const target = Math.max(0, spaceEm) * fontSize;
+  const scale = Math.min(1, Math.max(0, spaceEm) / MUSHAF_SPACE_ADVANCE_EM);
+  const gapFontSize = fontSize * scale;
+  return {
+    fontSize: gapFontSize,
+    // Zero when the glyph was shrunk to fit exactly; the surplus when the
+    // line wants a gap wider than the glyph. Clamped because a float that
+    // lands at -1e-15 is still a negative letter spacing.
+    letterSpacing: Math.max(0, target - MUSHAF_SPACE_ADVANCE_EM * gapFontSize),
+  };
+}
+
 /** Gaps between the words of a line (0 for plate and basmalah lines). */
 export function lineGapCount(line: MushafLine): number {
   return line.kind === 'ayah' ? Math.max(0, line.words.length - 1) : 0;

@@ -50,8 +50,8 @@ import {
 } from 'react-native';
 import {
   MUSHAF_LINE_BOX_SLACK_EM,
-  MUSHAF_SPACE_ADVANCE_EM,
   WORD_SPACE_EM,
+  gapMetrics,
   getPageLayout,
   isFramedPage,
   lineGapCount,
@@ -363,21 +363,16 @@ const LineView = React.memo(function LineView({
   };
 
   // A gap is drawn in a font we ship, so its advance is known: AmiriQuran's
-  // space is MUSHAF_SPACE_ADVANCE_EM wide, and letter spacing makes up the
-  // difference between that and the space this line was solved for. Scaling
-  // the gap's font size would do the same thing, but a gap set at 2.5x the
-  // page size would drag the line box's height with it.
-  const gapStyle = {
-    fontFamily: FONTS.arabicQuran,
-    fontSize,
-    letterSpacing: (spaceEm - MUSHAF_SPACE_ADVANCE_EM) * fontSize,
-  };
+  // space is MUSHAF_SPACE_ADVANCE_EM wide, and `gapMetrics` splits the space
+  // this line was solved for into a size for that glyph and a letter spacing
+  // that is NEVER NEGATIVE — see the comment on it, and issue #6, which is
+  // the missing words that negative spacing cost.
+  const gapStyle = { fontFamily: FONTS.arabicQuran, ...gapMetrics(spaceEm, fontSize) };
   // A gap inside a token — the space before a hizb or sajdah symbol — is
   // budgeted by the build script at the nominal width, so draw it there.
   const innerGapStyle = {
     fontFamily: FONTS.arabicQuran,
-    fontSize,
-    letterSpacing: (WORD_SPACE_EM - MUSHAF_SPACE_ADVANCE_EM) * fontSize,
+    ...gapMetrics(WORD_SPACE_EM, fontSize),
   };
   const selectionStyle = { backgroundColor: colors.selection };
 
