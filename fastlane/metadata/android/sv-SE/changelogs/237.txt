@@ -1,0 +1,5 @@
+Ord försvann ur mushaf. De är tillbaka.
+
+• Vissa rader i Koranen tappade sitt sista ord — ungefär var åttonde rad, på nästan varje sida. Texten och typsnitten var alltid rätt; felet låg i uppritningen. Åtgärdat, och kontrolleras nu på alla 604 sidor.
+• Grafen rullar åt rätt håll på arabiska, urdu, persiska och hebreiska.
+• Koranfiler som en äldre version lämnat kvar rensas bort.

@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.10] — 2026-08-14
+
+Words were going missing from the mushaf. They are back.
+
+### Fixed
+- **The mushaf was dropping the last word of some lines.** A reader wrote in about Surat An-Nisa and was right, and it was not only An-Nisa: about one line in eight, on nearly every page. The text and the fonts were never wrong — the renderer asked the phone to set those lines a little tighter than the space character it draws the gaps with, and on some devices the request was ignored, so the line came out wider than the page it had been measured for and the phone quietly cut the last word off the end of it. The gap is now made narrow instead of asked to shrink, which no device can decline. Every line of all 604 pages is checked against this on every build.
+- **The graph scrolls the right way round in Arabic, Urdu, Persian and Hebrew.** It opened parked on the oldest week you have instead of on today, dragging towards this week was read as reaching for more history, and the history that arrived shoved the view sideways. Right-to-left now gets the mirror of the left-to-right behaviour rather than the reverse of it.
+- **Quran files left behind by an update are cleared out.** Up to 120 MB of page images from the reader replaced in 2.8.0 could sit on the phone indefinitely if you had ever opened the reader and declined the download. They are swept at launch now. The page fonts also record which release they came from, so a corrected font reaches everyone instead of only new installs.
+
 ## [2.8.9] — 2026-08-14
 
 The Log, made to work the way people were already trying to use it.

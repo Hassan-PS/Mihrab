@@ -1,0 +1,5 @@
+Words were going missing from the mushaf. They are back.
+
+• Some lines of the Quran were losing their last word — roughly one line in eight, on nearly every page. The text and the fonts were always right; the renderer was asking phones for something they could quietly refuse. Fixed, and now checked on all 604 pages.
+• The graph scrolls the right way round in Arabic, Urdu, Persian and Hebrew.
+• Quran files left behind by an older version are cleared out.
