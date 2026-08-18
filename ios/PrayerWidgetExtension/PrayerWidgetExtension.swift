@@ -264,6 +264,44 @@ struct Provider: TimelineProvider {
     }
     dayInfos.sort { $0.date < $1.date }
 
+    // The window has a HORIZON, and past it this data is not merely old, it is
+    // wrong. The app writes a handful of days and can only rewrite them when
+    // someone opens it — there is no background refresh for this payload on
+    // any platform. On a phone that is invisible, because the app is opened
+    // constantly. A Mac app installed from Homebrew can sit unopened for
+    // weeks, which is exactly where this was reported.
+    //
+    // What the provider did once the last day had passed was the bug.
+    // `activeDay(at:)` pins to the newest day it holds, which by then is in
+    // the past; `nextPrayer(after:)` finds nothing after now and returns nil.
+    // So the card drew its "NEXT" heading with no prayer name under it, no
+    // time, and a days-old date — a blank box, in other words — and it never
+    // recovered, because the policy below re-ran it every two hours against
+    // the same dead JSON.
+    //
+    // A schedule that has run out is worth no more than no schedule at all, so
+    // it should say the same thing. `payload: nil` is what the views already
+    // treat as empty, and their empty state — "Open Prayer Times" — happens to
+    // name the only action that fixes it. Retry hourly rather than in two
+    // hours: the moment the app is opened it rewrites the payload and reloads
+    // the timeline itself, so this is only the floor for the case where the
+    // reload notification is missed.
+    if let lastDay = dayInfos.last?.date,
+       let windowEnd = cal.date(byAdding: .day, value: 1, to: lastDay),
+       now >= windowEnd {
+      let e = Entry(
+        date: now,
+        payload: nil,
+        dynamicNextKey: nil,
+        dynamicNextName: nil,
+        dynamicNextTime: nil
+      )
+      let refresh = cal.date(byAdding: .hour, value: 1, to: now)
+        ?? now.addingTimeInterval(3600)
+      completion(Timeline(entries: [e], policy: .after(refresh)))
+      return
+    }
+
     // Flatten the five salāh of every day into one chronological list of
     // absolutely-dated prayer events. Sunrise is intentionally excluded from
     // the "next prayer" target set, matching the single-day behaviour.

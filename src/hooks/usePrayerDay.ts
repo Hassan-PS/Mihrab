@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 import { requestAndroidLocationPermission } from '../utils/locationPermission';
 import {
+  getCachedPrayerTimes,
   getOrFetchPrayerTimes,
   getCacheStatus,
   refreshPrayerDataCache,
@@ -20,6 +21,23 @@ import { addDays, startOfLocalDay } from '../utils/prayerTimes';
 
 /** How many consecutive days (today + N-1 more) to fetch and expose. */
 const WEEK_DAYS = 7;
+
+/**
+ * How many consecutive days the WIDGET's copy of the schedule covers.
+ *
+ * This number is how long the widget survives an app nobody opens, because
+ * its payload is only ever rewritten from the foreground — there is no
+ * background refresh for it on any platform. Seven days is invisible on a
+ * phone, which gets opened most days. It was the whole bug on a Mac, where an
+ * app installed from Homebrew can sit closed for weeks: the window ran out and
+ * the widget had nothing true left to show.
+ *
+ * Thirty is nearly free. These extra days are READ FROM THE CACHE that is
+ * already on disk — the app stores up to a year — and never trigger a fetch,
+ * so this costs disk reads and no network. Whatever is not cached simply is
+ * not appended, which leaves the widget exactly where it was before.
+ */
+const WIDGET_WINDOW_DAYS = 30;
 
 export type PrayerDayState =
   | { phase: 'idle' }
@@ -62,6 +80,17 @@ export type PrayerDayState =
        * fetched so callers can rely on the array being gapless.
        */
       week: TimingsMap[];
+      /**
+       * The same schedule, reaching `WIDGET_WINDOW_DAYS` ahead instead of
+       * `WEEK_DAYS`, for the widget alone.
+       *
+       * Separate from `week` because the two are answering different
+       * questions. `week` is what the day carousel can swipe through, and
+       * seven is a deliberate size there. The widget's copy has to outlast
+       * the gaps between app launches, which on a desktop can be weeks, so it
+       * takes everything the cache can give it. Never shorter than `week`.
+       */
+      widgetWeek: TimingsMap[];
       /** True when showing on-device fallback times because the network/provider failed. */
       usingLocalFallback?: boolean;
       /**
@@ -96,6 +125,40 @@ function applyOffsetsToWeek(
 ): TimingsMap[] {
   if (!offsets || Object.keys(offsets).length === 0) return week;
   return week.map(t => applyOffsets(t, offsets));
+}
+
+/**
+ * Days `from`…`WIDGET_WINDOW_DAYS` read STRICTLY FROM CACHE, stopping at the
+ * first day that isn't there.
+ *
+ * Cache-only on purpose. The point of the longer window is to cost nothing —
+ * if this ever fetched, opening the app would fire off weeks of requests to
+ * feed a widget. Stopping at the first miss keeps the array gapless, which is
+ * the invariant every consumer of these arrays relies on.
+ */
+async function cachedDaysFrom(
+  from: number,
+  params: {
+    provider: Parameters<typeof getCachedPrayerTimes>[0]['provider'];
+    latitude: number;
+    longitude: number;
+    calculationMethod: PrayerAppSettings['calculationMethod'];
+    school: PrayerAppSettings['school'];
+  },
+  now: Date,
+): Promise<TimingsMap[]> {
+  const extra: TimingsMap[] = [];
+  for (let i = from; i < WIDGET_WINDOW_DAYS; i++) {
+    let day: TimingsMap | null = null;
+    try {
+      day = await getCachedPrayerTimes({ ...params, date: addDays(now, i) });
+    } catch {
+      break;
+    }
+    if (!day) break;
+    extra.push(day);
+  }
+  return extra;
 }
 
 export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
@@ -212,6 +275,31 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           // Cache status check failing is non-critical; we just won't fill.
         }
 
+        // The widget's longer window, taken from whatever the cache already
+        // holds past the fetched week. Built from the RAW days and put through
+        // the same offset + night-time pipeline as `week`, because deriving it
+        // from the already-offset week would apply the user's adjustment twice.
+        const widgetExtra = await cachedDaysFrom(
+          weekTimings.length,
+          {
+            provider,
+            latitude,
+            longitude,
+            calculationMethod: settings.calculationMethod,
+            school: settings.school,
+          },
+          now,
+        );
+        const offsettedWidgetWeek =
+          widgetExtra.length > 0
+            ? injectNightTimes(
+                applyOffsetsToWeek(
+                  weekTimings.concat(widgetExtra),
+                  settings.prayerOffsets,
+                ),
+              )
+            : offsettedWeek;
+
         if (gen !== loadGenerationRef.current) return;
 
         setState(prev => ({
@@ -225,6 +313,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           today: offsettedWeek[0],
           tomorrow: offsettedWeek[1],
           week: offsettedWeek,
+          widgetWeek: offsettedWidgetWeek,
           backgroundRefreshing: needsCacheFill,
         }));
 
@@ -260,7 +349,11 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         try {
           const now = new Date();
           const localWeek: TimingsMap[] = [];
-          for (let i = 0; i < WEEK_DAYS; i++) {
+          // Offline, the widget's longer window costs even less than it does
+          // online: on-device calculation needs neither the network nor the
+          // cache, so compute the whole window and hand the app its first
+          // `WEEK_DAYS` out of it.
+          for (let i = 0; i < WIDGET_WINDOW_DAYS; i++) {
             try {
               const local = computeLocalAdhanTimes({
                 latitude,
@@ -283,9 +376,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
 
           // Apply per-prayer offsets to the local-adhan fallback too —
           // the user's adjustment must be honored even when offline.
-          const offsettedLocalWeek = injectNightTimes(
+          const offsettedLocalWindow = injectNightTimes(
             applyOffsetsToWeek(localWeek, settings.prayerOffsets),
           );
+          const offsettedLocalWeek = offsettedLocalWindow.slice(0, WEEK_DAYS);
 
           setState(prev => ({
             phase: 'ready',
@@ -297,6 +391,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             today: offsettedLocalWeek[0],
             tomorrow: offsettedLocalWeek[1],
             week: offsettedLocalWeek,
+            widgetWeek: offsettedLocalWindow,
             usingLocalFallback: true,
             backgroundRefreshing: false,
           }));

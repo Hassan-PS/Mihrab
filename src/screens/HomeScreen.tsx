@@ -186,7 +186,18 @@ export function HomeScreen() {
         Midnight: settings.islamicMidnightEnabled,
         Lastthird: settings.lastThirdEnabled,
       }),
-      widget: mk({ Sunrise: true, Midnight: false, Lastthird: false }),
+      // The widget gets the LONG window, not the carousel's week — its copy
+      // has to stay true across however long the app goes unopened.
+      widget: {
+        ...mk({ Sunrise: true, Midnight: false, Lastthird: false }),
+        week: (state.widgetWeek ?? week).map(d =>
+          filterOptionalTimes(d, {
+            Sunrise: true,
+            Midnight: false,
+            Lastthird: false,
+          }),
+        ),
+      },
     };
   }, [
     state,
