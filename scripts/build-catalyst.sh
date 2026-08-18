@@ -194,9 +194,26 @@ echo "  ▸ alive after 15s."
 #
 # Only with a real identity: an ad-hoc signature carries no Team ID, so no
 # container is ever created and there is nothing to check.
+#
+# POLL, don't take one reading. The 15 s above is enough for the app to be
+# alive, and on a warm launch it is enough for the payload too — but a cold
+# launch straight off a full rebuild has to page in the whole binary, start
+# Hermes, hydrate the encrypted store and resolve a location before it can
+# compute anything, and that has been measured past 30 s on this Mac. A
+# single read at 15 s failed a build whose app turned out to be perfectly
+# healthy; waiting the worst case every time would tax every build for the
+# sake of the slowest. So ask repeatedly and stop as soon as it lands.
 if [ "$SIGN_IDENTITY" != "-" ]; then
-  if defaults read "$GROUP_DOMAIN" prayer_widget_payload_v1 2>/dev/null |
-      grep -q "$(date +%Y-%m-%d)"; then
+  PAYLOAD_OK=0
+  for _ in $(seq 1 12); do
+    if defaults read "$GROUP_DOMAIN" prayer_widget_payload_v1 2>/dev/null |
+        grep -q "$(date +%Y-%m-%d)"; then
+      PAYLOAD_OK=1
+      break
+    fi
+    sleep 5
+  done
+  if [ "$PAYLOAD_OK" = "1" ]; then
     echo "  ▸ App Group holds today's payload — the widget will have data."
   else
     echo "  ✗ $GROUP_NAME has no payload for today." >&2
