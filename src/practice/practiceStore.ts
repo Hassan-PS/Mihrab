@@ -21,10 +21,12 @@ import {
 } from '../storage/durableWrite';
 import { coerceJournalEntries, type JournalEntry } from '../journal/journal';
 import { coerceFastEntries, type FastEntry } from '../fasting/fasting';
+import { coerceSunnahLog, type SunnahLog } from '../journal/sunnah';
 
 export const JOURNAL_KEY = 'prayerapp.journal.v1';
 export const FASTING_KEY = 'prayerapp.fasting.v1';
 export const DHIKR_KEY = 'prayerapp.dhikr.v1';
+export const SUNNAH_KEY = 'prayerapp.sunnah.v1';
 
 /** The five salāh a day can log. */
 export const LOGGABLE_PRAYERS = 5;
@@ -36,9 +38,11 @@ export type PracticeData = {
   fasts: FastEntry[];
   /** ISO date (YYYY-MM-DD) → completed dhikr sets that day. */
   dhikr: DhikrLog;
+  /** ISO date (YYYY-MM-DD) → that day's sunnah prayers. */
+  sunnah: SunnahLog;
 };
 
-const EMPTY: PracticeData = { journal: [], fasts: [], dhikr: {} };
+const EMPTY: PracticeData = { journal: [], fasts: [], dhikr: {}, sunnah: {} };
 
 let cache: PracticeData | null = null;
 let inFlight: Promise<PracticeData> | null = null;
@@ -70,15 +74,19 @@ function parseOr<T>(raw: string | null, coerce: (v: unknown) => T, fallback: T):
 }
 
 async function readAll(): Promise<PracticeData> {
-  const [journalRaw, fastRaw, dhikrRaw] = await Promise.all([
+  const [journalRaw, fastRaw, dhikrRaw, sunnahRaw] = await Promise.all([
     durableEncryptedGet(JOURNAL_KEY).catch(() => null),
     durableEncryptedGet(FASTING_KEY).catch(() => null),
     durableEncryptedGet(DHIKR_KEY).catch(() => null),
+    durableEncryptedGet(SUNNAH_KEY).catch(() => null),
   ]);
   return {
     journal: parseOr(journalRaw, coerceJournalEntries, [] as JournalEntry[]),
     fasts: parseOr(fastRaw, coerceFastEntries, [] as FastEntry[]),
     dhikr: parseOr(dhikrRaw, coerceDhikr, {} as DhikrLog),
+    // Absent on every install that predates this feature, which reads as an
+    // empty log rather than as a failure — that is the whole migration.
+    sunnah: parseOr(sunnahRaw, coerceSunnahLog, {} as SunnahLog),
   };
 }
 
@@ -201,6 +209,7 @@ export function usePracticeHistory(): {
   hydrated: boolean;
   journal: JournalEntry[];
   fasts: FastEntry[];
+  sunnah: SunnahLog;
 } {
   const [data, setData] = useState<PracticeData | null>(cache);
 
@@ -221,5 +230,10 @@ export function usePracticeHistory(): {
   }, []);
 
   const d = data ?? EMPTY;
-  return { hydrated: data != null, journal: d.journal, fasts: d.fasts };
+  return {
+    hydrated: data != null,
+    journal: d.journal,
+    fasts: d.fasts,
+    sunnah: d.sunnah,
+  };
 }
