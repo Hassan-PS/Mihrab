@@ -1236,5 +1236,26 @@
     "body": "将五番全部标记为按时礼拜，或打开记录逐一填写。",
     "action": "全部记为已完成",
     "channelName": "一天结束记录"
+  },
+  "sunnah": {
+    "none": "无",
+    "short": "圣行拜",
+    "ofTotal": "{{total}} 中的 {{done}}",
+    "a11yNone": "{{prayer}}：无圣行拜",
+    "a11yCount": "{{prayer}} 圣行拜：已记录 {{total}} 中的 {{done}}",
+    "afterIsha": "宵礼之后",
+    "witr": "威特尔拜",
+    "prayed": "已礼",
+    "logIt": "记录",
+    "qiyam": "夜间拜",
+    "qiyamNote": "不计入连续天数",
+    "resetQiyam": "重置夜间拜",
+    "reset": "重置",
+    "addQiyam": "记录一次夜间拜",
+    "qiyamCountA11y": "已记录的夜间拜",
+    "streakCaption": "{{count}} 天圣行拜",
+    "legend": "圣行拜",
+    "qiyamLegend": "夜间拜",
+    "a11yAll": "全部圣行拜"
   }
 }

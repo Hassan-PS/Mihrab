@@ -260,7 +260,7 @@ describe('coerceSunnahLog', () => {
     // inside 0…1 for every one of them, because it drives a drawn ring.
     let seed = 20260818;
     const rand = (n: number) => {
-      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      seed = (seed * 1103515245 + 12345) % 2147483648;
       return seed % n;
     };
     for (let i = 0; i < 200; i++) {

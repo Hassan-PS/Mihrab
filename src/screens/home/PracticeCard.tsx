@@ -41,7 +41,7 @@ function PracticeCardImpl() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const navigation = useNavigation();
-  const { journal, fasts } = usePracticeHistory();
+  const { journal, fasts, sunnah } = usePracticeHistory();
 
   const earliest = useMemo(() => {
     let first: string | null = null;
@@ -71,8 +71,9 @@ function PracticeCardImpl() {
         new Set(fasts.filter(f => f.completed).map(f => f.date)),
         new Date(),
         weeksToCover(earliest) + extraWeeks,
+        sunnah,
       ),
-    [journal, fasts, earliest, extraWeeks],
+    [journal, fasts, sunnah, earliest, extraWeeks],
   );
 
   const weekdayLabels = useMemo(() => {

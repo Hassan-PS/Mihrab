@@ -1236,5 +1236,26 @@
     "body": "Mark all five as prayed on time, or open the Log to fill them in one by one.",
     "action": "Log all as complete",
     "channelName": "End-of-day log"
+  },
+  "sunnah": {
+    "none": "None",
+    "short": "Sunnah",
+    "ofTotal": "{{done}} of {{total}}",
+    "a11yNone": "{{prayer}}: no sunnah prayer",
+    "a11yCount": "{{prayer}} sunnah: {{done}} of {{total}} logged",
+    "afterIsha": "After Isha",
+    "witr": "Witr",
+    "prayed": "Prayed",
+    "logIt": "Log",
+    "qiyam": "Qiyam al-Layl",
+    "qiyamNote": "Not counted toward the streak",
+    "resetQiyam": "Reset Qiyam al-Layl",
+    "reset": "Reset",
+    "addQiyam": "Log one Qiyam al-Layl",
+    "qiyamCountA11y": "Qiyam al-Layl logged",
+    "streakCaption": "{{count}}-day sunnah",
+    "legend": "sunnah",
+    "qiyamLegend": "night prayer",
+    "a11yAll": "all sunnah"
   }
 }

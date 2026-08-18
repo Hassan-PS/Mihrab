@@ -43,6 +43,8 @@ import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { FillSummary } from '../components/FillSummary';
+import { SunnahTile } from './log/SunnahTile';
+import { IshaExtras } from './log/IshaExtras';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -54,6 +56,7 @@ import {
 import {
   FASTING_KEY,
   JOURNAL_KEY,
+  SUNNAH_KEY,
   dayKey,
   primePractice,
   usePracticeHistory,
@@ -80,6 +83,16 @@ import {
   type JournalPrayer,
   type JournalStatus,
 } from '../journal/journal';
+import {
+  SUNNAH_UNITS,
+  coerceSunnahLog,
+  computeSunnahStreak,
+  cycleSunnah,
+  dayAt,
+  fieldFor,
+  setSunnah,
+  type SunnahLog,
+} from '../journal/sunnah';
 import { upcomingPrayers } from '../journal/upcoming';
 import { dragTranslation, swipeDayDelta } from '../journal/daySwipe';
 import { applyBackfill, planBackfill } from '../journal/backfill';
@@ -140,6 +153,7 @@ export function LogScreen() {
 
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [fasts, setFasts] = useState<FastEntry[]>([]);
+  const [sunnah, setSunnahLog] = useState<SunnahLog>({});
   const [hydrated, setHydrated] = useState(false);
   const [draftNotes, setDraftNotes] = useState<Record<string, string>>({});
   const [openNote, setOpenNote] = useState<JournalPrayer | null>(null);
@@ -312,11 +326,13 @@ export function LogScreen() {
     void Promise.all([
       durableEncryptedGet(JOURNAL_KEY).catch(() => null),
       durableEncryptedGet(FASTING_KEY).catch(() => null),
+      durableEncryptedGet(SUNNAH_KEY).catch(() => null),
     ])
-      .then(([j, f]) => {
+      .then(([j, f, s]) => {
         if (cancelled) return;
         if (j) setEntries(coerceJournalEntries(JSON.parse(j)));
         if (f) setFasts(coerceFastEntries(JSON.parse(f)));
+        if (s) setSunnahLog(coerceSunnahLog(JSON.parse(s)));
       })
       .catch(e => {
         console.warn('LogScreen load failed:', e);
@@ -347,7 +363,8 @@ export function LogScreen() {
     if (!hydrated || !store.hydrated) return;
     setEntries(cur => (cur === store.journal ? cur : store.journal));
     setFasts(cur => (cur === store.fasts ? cur : store.fasts));
-  }, [hydrated, store.hydrated, store.journal, store.fasts]);
+    setSunnahLog(cur => (cur === store.sunnah ? cur : store.sunnah));
+  }, [hydrated, store.hydrated, store.journal, store.fasts, store.sunnah]);
 
   const persistJournal = useCallback(
     /** `dates` names the days this write touched — one, normally; every
@@ -397,6 +414,61 @@ export function LogScreen() {
     },
     [fasts],
   );
+
+  const persistSunnah = useCallback(
+    async (next: SunnahLog) => {
+      const prev = sunnah;
+      setSunnahLog(next);
+      primePractice({ sunnah: next });
+      try {
+        await durableEncryptedSet(SUNNAH_KEY, JSON.stringify(next));
+      } catch (e) {
+        console.warn('LogScreen sunnah persist failed', e);
+        setSunnahLog(prev);
+        primePractice({ sunnah: prev });
+      }
+    },
+    [sunnah],
+  );
+
+  /** The day on screen, as sunnah counts. Never undefined. */
+  const sunnahToday = dayAt(sunnah, selected);
+
+  /**
+   * One tile per prayer, cycling. The count is the tile's whole state, so
+   * tapping past the last one returns to nothing rather than needing a
+   * second control to undo it — the row already carries four buttons.
+   */
+  const onSunnahTap = useCallback(
+    (prayer: JournalPrayer) => {
+      const field = fieldFor(prayer);
+      // Asr, whose tile is not pressable. Belt and braces.
+      if (!field) return;
+      const max = SUNNAH_UNITS[prayer];
+      const current = sunnahToday[field] as number;
+      void persistSunnah(
+        setSunnah(sunnah, selected, { [field]: cycleSunnah(current, max) }),
+      );
+    },
+    [sunnah, selected, sunnahToday, persistSunnah],
+  );
+
+  const onToggleWitr = useCallback(() => {
+    void persistSunnah(
+      setSunnah(sunnah, selected, { witr: !sunnahToday.witr }),
+    );
+  }, [sunnah, selected, sunnahToday.witr, persistSunnah]);
+
+  const onAddQiyam = useCallback(() => {
+    void persistSunnah(
+      setSunnah(sunnah, selected, { qiyam: sunnahToday.qiyam + 1 }),
+    );
+  }, [sunnah, selected, sunnahToday.qiyam, persistSunnah]);
+
+  const onResetQiyam = useCallback(() => {
+    if (sunnahToday.qiyam === 0) return;
+    void persistSunnah(setSunnah(sunnah, selected, { qiyam: 0 }));
+  }, [sunnah, selected, sunnahToday.qiyam, persistSunnah]);
 
   /**
    * Note drafts belong to the day on screen, so they are re-read whenever
@@ -490,8 +562,14 @@ export function LogScreen() {
 
   const heatmapRows = useMemo(() => {
     const fasted = new Set(fasts.filter(f => f.completed).map(f => f.date));
-    return buildHeatmap(scoreByDay(entries), fasted, new Date(), spanWeeks);
-  }, [entries, fasts, spanWeeks]);
+    return buildHeatmap(
+      scoreByDay(entries),
+      fasted,
+      new Date(),
+      spanWeeks,
+      sunnah,
+    );
+  }, [entries, fasts, sunnah, spanWeeks]);
 
   const weekdayLabels = useMemo(() => {
     // Monday-first initials in the app language.
@@ -506,6 +584,7 @@ export function LogScreen() {
   }, [i18n.language]);
 
   const streak = computeCurrentStreak(entries);
+  const sunnahStreak = computeSunnahStreak(sunnah);
   const fastStats = computeFastStats(fasts);
 
   /**
@@ -891,6 +970,9 @@ export function LogScreen() {
             caption={`${t('log.streakCaption', {
               defaultValue: '{{count}}-day streak',
               count: streak,
+            })} · ${t('sunnah.streakCaption', {
+              defaultValue: '{{count}}-day sunnah',
+              count: sunnahStreak,
             })} · ${t('log.fastsCaption', {
               defaultValue: '{{count}} fasts',
               count: fastStats.total,
@@ -1155,7 +1237,40 @@ export function LogScreen() {
                         </Pressable>
                       );
                     })}
+                    {/* The sunnah tile is FIXED WIDTH behind a divider, not a
+                        fifth flex child: the four chips above are `flex: 1`
+                        inside a 14pt-padded panel, and a fifth would squeeze
+                        all of them past legibility on a 320pt phone. */}
+                    <View
+                      style={[
+                        styles.sunnahDivider,
+                        { backgroundColor: palette.border ?? palette.muted },
+                      ]}
+                    />
+                    <SunnahTile
+                      prayer={prayer}
+                      count={
+                        (fieldFor(prayer)
+                          ? (sunnahToday[fieldFor(prayer)!] as number)
+                          : 0) || 0
+                      }
+                      palette={palette}
+                      onPress={() => onSunnahTap(prayer)}
+                    />
                   </View>
+                  {/* Witr and Qiyam hang off Isha because that is when they
+                      are prayed — not in a section of their own, where they
+                      would read as unrelated to the night. */}
+                  {prayer === 'Isha' ? (
+                    <IshaExtras
+                      witr={sunnahToday.witr}
+                      qiyam={sunnahToday.qiyam}
+                      palette={palette}
+                      onToggleWitr={onToggleWitr}
+                      onAddQiyam={onAddQiyam}
+                      onResetQiyam={onResetQiyam}
+                    />
+                  ) : null}
                   {openNote === prayer ? (
                     <View style={styles.noteRow}>
                       <TextInput
@@ -1456,7 +1571,9 @@ const styles = StyleSheet.create({
   prayerName: { fontSize: 15, fontWeight: '600' },
   prayerTime: { flex: 1, fontSize: 13 },
   noteToggle: { padding: 4 },
-  statusRow: { flexDirection: 'row', gap: 6, marginTop: 8 },
+  statusRow: { flexDirection: 'row', gap: 6, marginTop: 8, alignItems: 'stretch' },
+  /** Separates the four fard statuses from the sunnah tile beside them. */
+  sunnahDivider: { width: StyleSheet.hairlineWidth, marginVertical: 2 },
   statusChip: {
     flex: 1,
     paddingVertical: 7,

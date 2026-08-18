@@ -43,6 +43,13 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import type { DayScore } from '../journal/journal';
+import {
+  SUNNAH_RING_STEPS,
+  dayAt,
+  sunnahRingStep,
+  type SunnahLog,
+} from '../journal/sunnah';
+import { QIYAM_MARK, sunnahGold } from './sunnahTheme';
 import { dayKey } from './practiceStore';
 import {
   maxOffset,
@@ -57,7 +64,15 @@ import {
  * history still sees a graph rather than a stub. Past that it grows.
  */
 export const HEATMAP_WEEKS = 13;
-const SQUARE = 15;
+/**
+ * 18, not 15. The square was carrying four signals — fill depth for prayers
+ * kept, a 2pt border for fasting, a red corner dot for a missed prayer, and a
+ * second border for selection — and sunnah logging adds a gold ring and a
+ * qiyam mark. At 15pt, with the fast border eating 2pt off every edge, six
+ * signals is an unreadable speck. The graph scrolls, so width is the cheapest
+ * thing here; three points buys the ring somewhere to live.
+ */
+const SQUARE = 18;
 const GAP = 4;
 /** One week column, including the gap that follows it. */
 const COL = SQUARE + GAP;
@@ -76,6 +91,10 @@ export type HeatmapDay = {
   /** How many were marked `missed` — drives the corner mark. */
   missed: number;
   fasted: boolean;
+  /** 0…SUNNAH_RING_STEPS — how far the gold ring closes. 0 draws none. */
+  sunnahStep: number;
+  /** Any Qiyam al-Layl that night — drives the mark in the corner. */
+  qiyam: boolean;
   /** Days after today inside the trailing week — drawn as blanks. */
   future: boolean;
 };
@@ -133,6 +152,11 @@ export function buildHeatmap(
   fastedDays: Set<string>,
   now: Date = new Date(),
   weeks: number = HEATMAP_WEEKS,
+  /**
+   * Optional so the existing callers and every test that predates sunnah
+   * logging keep working unchanged — an absent log simply draws no gold.
+   */
+  sunnahLog: SunnahLog = {},
 ): HeatmapDay[][] {
   const today = atNoon(now);
   const span = Math.max(1, Math.floor(weeks));
@@ -147,12 +171,15 @@ export function buildHeatmap(
       d.setDate(start.getDate() + week * 7 + weekday);
       const key = dayKey(d);
       const score = scoreByDay.get(key);
+      const sun = dayAt(sunnahLog, key);
       row.push({
         key,
         kept: score?.kept ?? 0,
         logged: score?.logged ?? 0,
         missed: score?.missed ?? 0,
         fasted: fastedDays.has(key),
+        sunnahStep: sunnahRingStep(sun),
+        qiyam: sun.qiyam > 0,
         future: d.getTime() > today.getTime(),
       });
     }
@@ -224,6 +251,7 @@ function PracticeHeatmapImpl({
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const ring = palette.isDark ? FAST_RING_DARK : FAST_RING_LIGHT;
+  const gold = sunnahGold(palette.isDark);
   const accent = palette.accentSolid;
 
   const legend = useMemo(() => [0, 1, 3, 5], []);
@@ -467,6 +495,15 @@ function PracticeHeatmapImpl({
                           !day.future && day.missed > 0
                             ? `, ${t('journal.status.missed')}`
                             : ''
+                        }${
+                          // A mark that exists only visually is half a mark.
+                          !day.future && day.sunnahStep >= SUNNAH_RING_STEPS
+                            ? `, ${t('sunnah.a11yAll', 'all sunnah')}`
+                            : ''
+                        }${
+                          !day.future && day.qiyam
+                            ? `, ${t('sunnah.qiyam', 'Qiyam al-Layl')}`
+                            : ''
                         }`}
                         style={[
                           styles.square,
@@ -498,6 +535,38 @@ function PracticeHeatmapImpl({
                             being looked for is invisible. The corner is the
                             only channel left: depth is the score, the ring
                             is the fast, the outline is the selection. */}
+                        {/* The sunnah ring, INSET inside the fast border so
+                            the two never merge into one thick edge. Four
+                            steps of width and opacity rather than a real arc:
+                            an arc needs react-native-svg, and this grid draws
+                            every square of every week at once across years of
+                            history on a surface that already cost a release
+                            to make scroll smoothly. */}
+                        {!day.future && day.sunnahStep > 0 ? (
+                          <View
+                            pointerEvents="none"
+                            style={[
+                              styles.sunnahRing,
+                              {
+                                borderColor: gold,
+                                borderWidth:
+                                  0.75 + 0.75 * (day.sunnahStep - 1),
+                                opacity:
+                                  0.45 +
+                                  (0.55 * day.sunnahStep) / SUNNAH_RING_STEPS,
+                              },
+                            ]}
+                          />
+                        ) : null}
+                        {!day.future && day.qiyam ? (
+                          <View
+                            pointerEvents="none"
+                            style={[
+                              styles.qiyamMark,
+                              { backgroundColor: QIYAM_MARK },
+                            ]}
+                          />
+                        ) : null}
                         {!day.future && day.missed > 0 ? (
                           <View
                             style={[
@@ -585,6 +654,37 @@ function PracticeHeatmapImpl({
             >
               {t('log.fasted', 'fasted')}
             </Text>
+            {/* Gold and the fast amber are near-neighbours, so the legend
+                puts them on the same line — seen side by side they are two
+                colours; met one at a time they are both "yellowish". */}
+            <View
+              style={[
+                styles.legendSquare,
+                { borderWidth: 2, borderColor: gold, backgroundColor: 'transparent' },
+              ]}
+            />
+            <Text
+              style={[styles.legendText, { color: palette.muted }]}
+              numberOfLines={1}
+            >
+              {t('sunnah.legend', 'sunnah')}
+            </Text>
+            <View
+              style={[
+                styles.legendSquare,
+                { backgroundColor: palette.controlBg },
+              ]}
+            >
+              <View
+                style={[styles.legendQiyamMark, { backgroundColor: QIYAM_MARK }]}
+              />
+            </View>
+            <Text
+              style={[styles.legendText, { color: palette.muted }]}
+              numberOfLines={1}
+            >
+              {t('sunnah.qiyamLegend', 'night prayer')}
+            </Text>
           </View>
         </>
       )}
@@ -653,6 +753,31 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
   },
+  /**
+   * Inset by 2.5 so it clears the fasting border entirely — the two are
+   * neighbouring hues and a gold ring sharing an edge with an amber one
+   * reads as a single fat rim rather than two facts.
+   */
+  sunnahRing: {
+    position: 'absolute',
+    top: 2.5,
+    left: 2.5,
+    right: 2.5,
+    bottom: 2.5,
+    borderRadius: (SQUARE - 5) / 2,
+  },
+  /**
+   * The corner opposite the missed mark, so a night that held both is still
+   * two readable marks rather than one smudge.
+   */
+  qiyamMark: {
+    position: 'absolute',
+    bottom: 1.5,
+    insetInlineStart: 1.5,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
   squareSelected: { transform: [{ scale: 1.4 }], zIndex: 2 },
   legendRow: {
     flexDirection: 'row',
@@ -662,6 +787,14 @@ const styles = StyleSheet.create({
   },
   legendSquares: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   legendSquare: { width: 11, height: 11, borderRadius: 2.5 },
+  legendQiyamMark: {
+    position: 'absolute',
+    bottom: 1,
+    insetInlineStart: 1,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
   legendMissedMark: {
     position: 'absolute',
     top: 1,

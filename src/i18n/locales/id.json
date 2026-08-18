@@ -1236,5 +1236,26 @@
     "body": "Tandai kelimanya sebagai tepat waktu, atau buka Catatan untuk mengisinya satu per satu.",
     "action": "Catat semua sebagai selesai",
     "channelName": "Catatan akhir hari"
+  },
+  "sunnah": {
+    "none": "Tidak ada",
+    "short": "Sunnah",
+    "ofTotal": "{{done}} dari {{total}}",
+    "a11yNone": "{{prayer}}: tidak ada salat sunnah",
+    "a11yCount": "Sunnah {{prayer}}: {{done}} dari {{total}} dicatat",
+    "afterIsha": "Setelah Isya",
+    "witr": "Witir",
+    "prayed": "Dikerjakan",
+    "logIt": "Catat",
+    "qiyam": "Qiyam al-Lail",
+    "qiyamNote": "Tidak dihitung dalam rentetan",
+    "resetQiyam": "Setel ulang Qiyam al-Lail",
+    "reset": "Setel ulang",
+    "addQiyam": "Catat satu Qiyam al-Lail",
+    "qiyamCountA11y": "Qiyam al-Lail tercatat",
+    "streakCaption": "Sunnah {{count}} hari",
+    "legend": "sunnah",
+    "qiyamLegend": "salat malam",
+    "a11yAll": "semua sunnah"
   }
 }

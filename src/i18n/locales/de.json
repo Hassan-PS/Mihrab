@@ -1236,5 +1236,26 @@
     "body": "Alle fünf als pünktlich gebetet eintragen oder das Protokoll öffnen und einzeln ausfüllen.",
     "action": "Alle als erledigt eintragen",
     "channelName": "Tagesabschluss-Protokoll"
+  },
+  "sunnah": {
+    "none": "Keine",
+    "short": "Sunnah",
+    "ofTotal": "{{done}} von {{total}}",
+    "a11yNone": "{{prayer}}: kein Sunnah-Gebet",
+    "a11yCount": "{{prayer}} Sunnah: {{done}} von {{total}} erfasst",
+    "afterIsha": "Nach Isha",
+    "witr": "Witr",
+    "prayed": "Gebetet",
+    "logIt": "Erfassen",
+    "qiyam": "Qiyam al-Layl",
+    "qiyamNote": "Zählt nicht für die Serie",
+    "resetQiyam": "Qiyam al-Layl zurücksetzen",
+    "reset": "Zurücksetzen",
+    "addQiyam": "Ein Qiyam al-Layl erfassen",
+    "qiyamCountA11y": "Erfasste Qiyam al-Layl",
+    "streakCaption": "{{count}} Tage Sunnah",
+    "legend": "Sunnah",
+    "qiyamLegend": "Nachtgebet",
+    "a11yAll": "alle Sunnah"
   }
 }

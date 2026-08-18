@@ -1236,5 +1236,26 @@
     "body": "Markera alla fem som bedda i tid, eller öppna loggen och fyll i dem en och en.",
     "action": "Logga alla som utförda",
     "channelName": "Slut på dagen-logg"
+  },
+  "sunnah": {
+    "none": "Ingen",
+    "short": "Sunnah",
+    "ofTotal": "{{done}} av {{total}}",
+    "a11yNone": "{{prayer}}: ingen sunnahbön",
+    "a11yCount": "{{prayer}} sunnah: {{done}} av {{total}} loggade",
+    "afterIsha": "Efter Isha",
+    "witr": "Witr",
+    "prayed": "Bedd",
+    "logIt": "Logga",
+    "qiyam": "Qiyam al-Layl",
+    "qiyamNote": "Räknas inte in i sviten",
+    "resetQiyam": "Nollställ Qiyam al-Layl",
+    "reset": "Nollställ",
+    "addQiyam": "Logga en Qiyam al-Layl",
+    "qiyamCountA11y": "Loggade Qiyam al-Layl",
+    "streakCaption": "{{count}} dagar sunnah",
+    "legend": "sunnah",
+    "qiyamLegend": "nattbön",
+    "a11yAll": "alla sunnah"
   }
 }

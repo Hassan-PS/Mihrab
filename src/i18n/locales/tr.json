@@ -1236,5 +1236,26 @@
     "body": "Beşini de vaktinde kılındı olarak işaretleyin ya da kaydı açıp tek tek girin.",
     "action": "Tümünü tamamlandı olarak kaydet",
     "channelName": "Gün sonu kaydı"
+  },
+  "sunnah": {
+    "none": "Yok",
+    "short": "Sünnet",
+    "ofTotal": "{{total}} içinden {{done}}",
+    "a11yNone": "{{prayer}}: sünnet namazı yok",
+    "a11yCount": "{{prayer}} sünneti: {{total}} içinden {{done}} kaydedildi",
+    "afterIsha": "Yatsıdan sonra",
+    "witr": "Vitir",
+    "prayed": "Kılındı",
+    "logIt": "Kaydet",
+    "qiyam": "Kıyamü'l-Leyl",
+    "qiyamNote": "Seriye dahil edilmez",
+    "resetQiyam": "Kıyamü'l-Leyl'i sıfırla",
+    "reset": "Sıfırla",
+    "addQiyam": "Bir Kıyamü'l-Leyl kaydet",
+    "qiyamCountA11y": "Kaydedilen Kıyamü'l-Leyl",
+    "streakCaption": "{{count}} gün sünnet",
+    "legend": "sünnet",
+    "qiyamLegend": "gece namazı",
+    "a11yAll": "tüm sünnetler"
   }
 }

@@ -1236,5 +1236,26 @@
     "body": "Marca las cinco como rezadas a tiempo, o abre el registro para completarlas una a una.",
     "action": "Registrar todas como completas",
     "channelName": "Registro de fin de día"
+  },
+  "sunnah": {
+    "none": "Ninguna",
+    "short": "Sunnah",
+    "ofTotal": "{{done}} de {{total}}",
+    "a11yNone": "{{prayer}}: sin oración sunnah",
+    "a11yCount": "{{prayer}} sunnah: {{done}} de {{total}} registradas",
+    "afterIsha": "Después del Isha",
+    "witr": "Witr",
+    "prayed": "Rezada",
+    "logIt": "Registrar",
+    "qiyam": "Qiyam al-Layl",
+    "qiyamNote": "No cuenta para la racha",
+    "resetQiyam": "Restablecer Qiyam al-Layl",
+    "reset": "Restablecer",
+    "addQiyam": "Registrar un Qiyam al-Layl",
+    "qiyamCountA11y": "Qiyam al-Layl registrados",
+    "streakCaption": "{{count}} días de sunnah",
+    "legend": "sunnah",
+    "qiyamLegend": "oración nocturna",
+    "a11yAll": "toda la sunnah"
   }
 }

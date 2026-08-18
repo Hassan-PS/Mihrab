@@ -1236,5 +1236,26 @@
     "body": "Marquer les cinq comme accomplies à l’heure, ou ouvrir le journal pour les saisir une à une.",
     "action": "Tout consigner comme accompli",
     "channelName": "Journal de fin de journée"
+  },
+  "sunnah": {
+    "none": "Aucune",
+    "short": "Sunnah",
+    "ofTotal": "{{done}} sur {{total}}",
+    "a11yNone": "{{prayer}} : aucune prière sunnah",
+    "a11yCount": "{{prayer}} sunnah : {{done}} sur {{total}} enregistrées",
+    "afterIsha": "Après l'Isha",
+    "witr": "Witr",
+    "prayed": "Priée",
+    "logIt": "Enregistrer",
+    "qiyam": "Qiyam al-Layl",
+    "qiyamNote": "Non compté dans la série",
+    "resetQiyam": "Réinitialiser Qiyam al-Layl",
+    "reset": "Réinitialiser",
+    "addQiyam": "Enregistrer un Qiyam al-Layl",
+    "qiyamCountA11y": "Qiyam al-Layl enregistrés",
+    "streakCaption": "{{count}} jours de sunnah",
+    "legend": "sunnah",
+    "qiyamLegend": "prière de nuit",
+    "a11yAll": "toute la sunnah"
   }
 }
