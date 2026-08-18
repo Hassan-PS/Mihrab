@@ -225,6 +225,28 @@ Local builds use "Sign to Run Locally" / "Personal Team" signing — they won't 
 
 Every `vX.Y.Z` tag must have a matching `CURRENT_PROJECT_VERSION` in `project.pbxproj`. Xcode Cloud reads this directly when archiving; if the build number is the same as a previous TestFlight build, App Store Connect rejects the upload.
 
+**This is why the Default workflow does not build data-only pushes.** The
+dataset bot (`.github/workflows/ifis-dataset.yml`) commits refreshed prayer
+times to `main` without touching app code, so the version is unchanged from
+the release before it — and every one of those pushes started a nine-minute
+archive that could only ever die at "Preparing build for App Store Connect
+failed", a duplicate build number (build 517, 2026-08-17). The failure is
+noise, but it is noise that looks exactly like a broken release.
+
+The fix is a start condition, set on the workflow itself rather than in this
+repo, so it is written down here instead:
+
+```
+Xcode Cloud → Default → Edit Workflow → Start Conditions → Branch Changes
+  Files and Folders: Do not start if all files match → directory "data"
+```
+
+Equivalently, on `ciWorkflows/{id}`, `branchStartCondition.filesAndFoldersRule`
+= `{mode: "DO_NOT_START_IF_ALL_FILES_MATCH", matchers: [{directory: "data"}]}`.
+A push that touches app code still builds, including one that touches app code
+AND data — the rule only skips pushes where *every* changed file is under
+`data/`. Setting it back to `null` restores the old behaviour.
+
 ```sh
 # Bump build N → N+1, marketing version X.Y.Z → X.Y.(Z+1)
 sed -i '' \
