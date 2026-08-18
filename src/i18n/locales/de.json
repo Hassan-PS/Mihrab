@@ -1195,6 +1195,7 @@
     "fasted": "gefastet",
     "dayA11y": "{{date}}: {{prayers}} Gebete erfasst{{fast}}",
     "streakCaption": "{{count}}-Tage-Serie",
+    "streakBest": "(Bestwert {{best}})",
     "fastsCaption": "{{count}} Fastentage",
     "markAllOnTime": "Alle als pünktlich",
     "iftarAt": "Iftar {{time}}",

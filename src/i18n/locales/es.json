@@ -1195,6 +1195,7 @@
     "fasted": "ayunó",
     "dayA11y": "{{date}}: {{prayers}} oraciones registradas{{fast}}",
     "streakCaption": "racha de {{count}} días",
+    "streakBest": "(mejor {{best}})",
     "fastsCaption": "{{count}} ayunos",
     "markAllOnTime": "Marcar todas a tiempo",
     "iftarAt": "Iftar {{time}}",

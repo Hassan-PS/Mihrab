@@ -1195,6 +1195,7 @@
     "fasted": "روزہ",
     "dayA11y": "{{date}}: {{prayers}} نمازیں درج{{fast}}",
     "streakCaption": "{{count}} دن کا سلسلہ",
+    "streakBest": "(بہترین {{best}})",
     "fastsCaption": "{{count}} روزے",
     "markAllOnTime": "سب کو وقت پر نشان زد کریں",
     "iftarAt": "افطار {{time}}",

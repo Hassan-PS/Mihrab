@@ -1195,6 +1195,7 @@
     "fasted": "fastade",
     "dayA11y": "{{date}}: {{prayers}} böner loggade{{fast}}",
     "streakCaption": "{{count}} dagar i rad",
+    "streakBest": "(bäst {{best}})",
     "fastsCaption": "{{count}} fastor",
     "markAllOnTime": "Markera alla i tid",
     "iftarAt": "Iftar {{time}}",

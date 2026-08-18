@@ -1195,6 +1195,7 @@
     "fasted": "puasa",
     "dayA11y": "{{date}}: {{prayers}} salat dicatat{{fast}}",
     "streakCaption": "{{count}} hari berturut",
+    "streakBest": "(terbaik {{best}})",
     "fastsCaption": "{{count}} puasa",
     "markAllOnTime": "Tandai semua tepat waktu",
     "iftarAt": "Buka puasa {{time}}",

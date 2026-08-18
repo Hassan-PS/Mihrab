@@ -1195,6 +1195,7 @@
     "fasted": "صام",
     "dayA11y": "{{date}}: {{prayers}} صلوات مسجلة{{fast}}",
     "streakCaption": "سلسلة {{count}} يومًا",
+    "streakBest": "(الأفضل {{best}})",
     "fastsCaption": "{{count}} صيامًا",
     "markAllOnTime": "تسجيل الكل في وقتها",
     "iftarAt": "الإفطار {{time}}",

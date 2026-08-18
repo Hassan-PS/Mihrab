@@ -1195,6 +1195,7 @@
     "fasted": "রোজা",
     "dayA11y": "{{date}}: {{prayers}} নামাজ লেখা{{fast}}",
     "streakCaption": "{{count}} দিনের ধারা",
+    "streakBest": "(সেরা {{best}})",
     "fastsCaption": "{{count}} রোজা",
     "markAllOnTime": "সব সময়মতো চিহ্নিত করুন",
     "iftarAt": "ইফতার {{time}}",

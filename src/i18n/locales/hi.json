@@ -1195,6 +1195,7 @@
     "fasted": "रोज़ा",
     "dayA11y": "{{date}}: {{prayers}} नमाज़ें दर्ज{{fast}}",
     "streakCaption": "{{count}} दिन की लय",
+    "streakBest": "(सर्वाधिक {{best}})",
     "fastsCaption": "{{count}} रोज़े",
     "markAllOnTime": "सभी समय पर चिह्नित करें",
     "iftarAt": "इफ़्तार {{time}}",

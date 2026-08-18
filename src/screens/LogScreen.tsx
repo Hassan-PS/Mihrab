@@ -74,6 +74,7 @@ import type { TimingsMap } from '../types/prayer';
 import {
   coerceJournalEntries,
   computeCurrentStreak,
+  computeLongestStreak,
   getEntryStatus,
   removeEntry,
   scoreByDay,
@@ -584,6 +585,7 @@ export function LogScreen() {
   }, [i18n.language]);
 
   const streak = computeCurrentStreak(entries);
+  const longestStreak = computeLongestStreak(entries);
   const sunnahStreak = computeSunnahStreak(sunnah);
   const fastStats = computeFastStats(fasts);
 
@@ -970,7 +972,19 @@ export function LogScreen() {
             caption={`${t('log.streakCaption', {
               defaultValue: '{{count}}-day streak',
               count: streak,
-            })} · ${t('sunnah.streakCaption', {
+            })}${
+              // The personal best sits against the number it is a best of,
+              // because the comparison IS the point — "3" means nothing until
+              // you know whether 3 is good. Hidden until there is a record
+              // worth having: on a new install "(best 0)" beside a streak of
+              // 0 is two ways of saying nothing, and the caption is one line.
+              longestStreak > 0
+                ? ` ${t('log.streakBest', {
+                    defaultValue: '(best {{best}})',
+                    best: longestStreak,
+                  })}`
+                : ''
+            } · ${t('sunnah.streakCaption', {
               defaultValue: '{{count}}-day sunnah',
               count: sunnahStreak,
             })} · ${t('log.fastsCaption', {

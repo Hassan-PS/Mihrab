@@ -848,7 +848,11 @@ function PracticeHeatmapImpl({
       {caption && !compact ? (
         <Text
           style={[styles.caption, { color: palette.muted }]}
-          numberOfLines={1}
+          // Two, not one. The caption gained the personal best beside the
+          // streak, and four figures no longer fit one line on a 320pt phone
+          // — least of all in a language that spells its numbers out. It
+          // wraps rather than being clipped mid-word.
+          numberOfLines={2}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
         >
           {caption}
@@ -920,5 +924,5 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   legendText: { fontSize: 10.5, fontWeight: '600' },
-  caption: { fontSize: 12, marginTop: 8 },
+  caption: { fontSize: 12, lineHeight: 17, marginTop: 8 },
 });

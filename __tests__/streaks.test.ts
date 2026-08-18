@@ -13,7 +13,10 @@
  * Where they still differ is deliberate and tested below: a fard prayer can
  * be marked missed, which spoils today for good, and a sunnah cannot.
  */
-import { computeCurrentStreak } from '../src/journal/journal';
+import {
+  computeCurrentStreak,
+  computeLongestStreak,
+} from '../src/journal/journal';
 import type { JournalEntry, JournalStatus } from '../src/journal/journal';
 import {
   computeSunnahStreak,
@@ -173,4 +176,142 @@ describe('the streak is bounded', () => {
     expect(streak).toBeLessThanOrEqual(366);
     expect(streak).toBeGreaterThan(360);
   });
+});
+
+/** `n` consecutive dates ending at `end` (inclusive), oldest first. */
+function run(end: string, n: number): string[] {
+  const d = new Date(
+    Number(end.slice(0, 4)),
+    Number(end.slice(5, 7)) - 1,
+    Number(end.slice(8, 10)),
+    12,
+  );
+  const out: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    out.unshift(`${y}-${m}-${dd}`);
+    d.setDate(d.getDate() - 1);
+  }
+  return out;
+}
+
+describe('the longest streak', () => {
+  it('is nothing on an empty journal', () => {
+    expect(computeLongestStreak([])).toBe(0);
+  });
+
+  it('is nothing when no day was ever complete', () => {
+    const entries = PRAYERS.slice(0, 4).map(prayer => ({
+      date: '2026-08-17',
+      prayer,
+      status: 'on-time' as const,
+      loggedAt: '',
+    }));
+    expect(computeLongestStreak(entries)).toBe(0);
+  });
+
+  it('is one for a single perfect day', () => {
+    expect(computeLongestStreak(day('2026-08-17'))).toBe(1);
+  });
+
+  it('measures an unbroken run', () => {
+    expect(computeLongestStreak(perfectRun(run('2026-08-17', 9)))).toBe(9);
+  });
+
+  it('takes the best of several runs, not the latest or the first', () => {
+    const entries = [
+      ...perfectRun(run('2026-03-10', 3)),
+      ...perfectRun(run('2026-05-20', 11)),
+      ...perfectRun(run('2026-08-17', 4)),
+    ];
+    expect(computeLongestStreak(entries)).toBe(11);
+  });
+
+  it('is broken by one late prayer in the middle of a run', () => {
+    const dates = run('2026-08-17', 9);
+    const entries = [
+      ...perfectRun(dates.filter(d => d !== dates[4])),
+      ...day(dates[4], 'late'),
+    ];
+    // Four days each side of the spoiled one.
+    expect(computeLongestStreak(entries)).toBe(4);
+  });
+
+  it('is broken by a missing day, not just a spoiled one', () => {
+    const dates = run('2026-08-17', 9);
+    const entries = perfectRun(dates.filter(d => d !== dates[6]));
+    expect(computeLongestStreak(entries)).toBe(6);
+  });
+
+  it('counts across a month and a year boundary', () => {
+    // 28 Dec 2025 to 4 Jan 2026 — eight days over both.
+    expect(computeLongestStreak(perfectRun(run('2026-01-04', 8)))).toBe(8);
+  });
+
+  it('counts across a leap day', () => {
+    expect(computeLongestStreak(perfectRun(run('2028-03-02', 6)))).toBe(6);
+  });
+
+  it('counts across the DST boundary in both directions', () => {
+    // Europe springs forward 29 Mar 2026 and falls back 25 Oct 2026.
+    expect(computeLongestStreak(perfectRun(run('2026-04-01', 10)))).toBe(10);
+    expect(computeLongestStreak(perfectRun(run('2026-10-28', 10)))).toBe(10);
+  });
+
+  it('does not care what order the entries arrive in', () => {
+    const forwards = perfectRun(run('2026-08-17', 7));
+    const shuffled = [...forwards].reverse();
+    expect(computeLongestStreak(shuffled)).toBe(
+      computeLongestStreak(forwards),
+    );
+  });
+
+  it('is not inflated by a day logged twice', () => {
+    const entries = [...perfectRun(run('2026-08-17', 3)), ...day('2026-08-16')];
+    expect(computeLongestStreak(entries)).toBe(3);
+  });
+
+  it('includes today when today is already perfect', () => {
+    const entries = perfectRun(run('2026-08-18', 5));
+    expect(computeLongestStreak(entries)).toBe(5);
+    expect(computeCurrentStreak(entries, MORNING)).toBe(5);
+  });
+});
+
+describe('the best is never smaller than the streak standing in it', () => {
+  // The one invariant a user would actually notice being wrong: a caption
+  // reading "12-day streak (best 9)" is nonsense. Both must measure a day
+  // with the same ruler, which is why `isPerfect` is shared rather than
+  // written twice.
+  const cases: Array<[string, JournalEntry[]]> = [
+    ['empty', []],
+    ['one perfect day today', day('2026-08-18')],
+    ['a run ending yesterday', perfectRun(run('2026-08-17', 6))],
+    ['a run ending today', perfectRun(run('2026-08-18', 6))],
+    [
+      'a long past run and a short current one',
+      [...perfectRun(run('2026-05-01', 20)), ...perfectRun(run('2026-08-17', 2))],
+    ],
+    [
+      'a short past run and a long current one',
+      [...perfectRun(run('2026-05-01', 2)), ...perfectRun(run('2026-08-17', 20))],
+    ],
+    [
+      'today spoiled after a long run',
+      [
+        ...perfectRun(run('2026-08-17', 30)),
+        { date: '2026-08-18', prayer: 'Fajr' as const, status: 'missed' as const, loggedAt: '' },
+      ],
+    ],
+  ];
+
+  for (const [name, entries] of cases) {
+    it(`holds for ${name}`, () => {
+      const current = computeCurrentStreak(entries, MORNING);
+      const longest = computeLongestStreak(entries);
+      expect(longest).toBeGreaterThanOrEqual(current);
+    });
+  }
 });

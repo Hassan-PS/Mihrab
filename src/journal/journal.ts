@@ -198,6 +198,123 @@ export function computeStats(entries: JournalEntry[]): JournalStats {
   };
 }
 
+const ALL_PRAYERS: JournalPrayer[] = [
+  'Fajr',
+  'Dhuhr',
+  'Asr',
+  'Maghrib',
+  'Isha',
+];
+
+/** `YYYY-MM-DD` in local time — the same shape the entries are keyed by. */
+function fmt(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+/** date -> prayer -> status, for O(1) day lookup. */
+function indexByDate(
+  entries: JournalEntry[],
+): Map<string, Map<JournalPrayer, JournalStatus>> {
+  const byDate = new Map<string, Map<JournalPrayer, JournalStatus>>();
+  for (const e of entries) {
+    let day = byDate.get(e.date);
+    if (!day) {
+      day = new Map();
+      byDate.set(e.date, day);
+    }
+    day.set(e.prayer, e.status);
+  }
+  return byDate;
+}
+
+/**
+ * All five present and all five on time.
+ *
+ * Shared by both streaks on purpose: the longest must be measured with the
+ * same ruler as the current one, or a user can be shown a "best" smaller
+ * than the streak they are standing in.
+ */
+function isPerfect(
+  day: Map<JournalPrayer, JournalStatus> | undefined,
+): boolean {
+  if (!day) return false;
+  return ALL_PRAYERS.every(p => day.get(p) === 'on-time');
+}
+
+/** Something is already recorded that no later prayer can take back. */
+function isSpoiled(
+  day: Map<JournalPrayer, JournalStatus> | undefined,
+): boolean {
+  if (!day) return false;
+  for (const status of day.values()) {
+    if (status !== 'on-time') return true;
+  }
+  return false;
+}
+
+/**
+ * The longest run of perfect days anywhere in the journal — the personal
+ * best the current streak is measured against.
+ *
+ * RECOMPUTED, NOT REMEMBERED. Storing a high-water mark would mean a number
+ * that cannot be corrected: the Log screen lets any past day be edited and
+ * "Fill in earlier days" writes whole weeks at once, so a stored best would
+ * drift away from the record it claims to describe and there would be no way
+ * back. Deriving it costs one pass over a journal that is at most a few
+ * thousand entries, and it is only ever recomputed when that journal changes.
+ *
+ * Unlike the current streak this asks nothing about today. Today is either
+ * already perfect, in which case it is part of a run like any other day, or
+ * it is not, in which case it belongs to no run yet. There is no third state
+ * to be careful about, because a best is a fact about finished days.
+ */
+export function computeLongestStreak(entries: JournalEntry[]): number {
+  const byDate = indexByDate(entries);
+
+  const perfect = new Set<string>();
+  for (const [date, day] of byDate) {
+    if (isPerfect(day)) perfect.add(date);
+  }
+  if (perfect.size === 0) return 0;
+
+  /** The day before `key`, via a noon-anchored Date so DST cannot shift it. */
+  function dayBefore(key: string): string | null {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(key);
+    if (!m) return null;
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0, 0);
+    if (Number.isNaN(d.getTime())) return null;
+    d.setDate(d.getDate() - 1);
+    return fmt(d);
+  }
+
+  let longest = 0;
+  for (const start of perfect) {
+    // Only walk forward from the START of a run, so each run is measured
+    // once however long it is — the whole thing stays O(days).
+    const before = dayBefore(start);
+    if (before !== null && perfect.has(before)) continue;
+
+    let run = 0;
+    let cursor: string | null = start;
+    while (cursor !== null && perfect.has(cursor)) {
+      run += 1;
+      const next = new Date(
+        Number(cursor.slice(0, 4)),
+        Number(cursor.slice(5, 7)) - 1,
+        Number(cursor.slice(8, 10)),
+        12,
+      );
+      next.setDate(next.getDate() + 1);
+      cursor = fmt(next);
+    }
+    if (run > longest) longest = run;
+  }
+  return longest;
+}
+
 /**
  * Consecutive days on which all five prayers were logged on time, ending
  * today or yesterday.
@@ -229,45 +346,7 @@ export function computeCurrentStreak(
   entries: JournalEntry[],
   now: Date = new Date(),
 ): number {
-  const ALL_PRAYERS: JournalPrayer[] = [
-    'Fajr',
-    'Dhuhr',
-    'Asr',
-    'Maghrib',
-    'Isha',
-  ];
-  // Index by date for O(1) day lookup.
-  const byDate = new Map<string, Map<JournalPrayer, JournalStatus>>();
-  for (const e of entries) {
-    let day = byDate.get(e.date);
-    if (!day) {
-      day = new Map();
-      byDate.set(e.date, day);
-    }
-    day.set(e.prayer, e.status);
-  }
-
-  function fmt(d: Date): string {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${dd}`;
-  }
-
-  /** All five present and all five on time. */
-  function isPerfect(day: Map<JournalPrayer, JournalStatus> | undefined) {
-    if (!day) return false;
-    return ALL_PRAYERS.every(p => day.get(p) === 'on-time');
-  }
-
-  /** Something is already recorded that no later prayer can take back. */
-  function isSpoiled(day: Map<JournalPrayer, JournalStatus> | undefined) {
-    if (!day) return false;
-    for (const status of day.values()) {
-      if (status !== 'on-time') return true;
-    }
-    return false;
-  }
+  const byDate = indexByDate(entries);
 
   // Noon, so that adding and subtracting days never lands on an hour that
   // does not exist — the same anchor `computeSunnahStreak` and

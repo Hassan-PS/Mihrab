@@ -1195,6 +1195,7 @@
     "fasted": "oruç",
     "dayA11y": "{{date}}: {{prayers}} namaz kaydedildi{{fast}}",
     "streakCaption": "{{count}} günlük seri",
+    "streakBest": "(en iyi {{best}})",
     "fastsCaption": "{{count}} oruç",
     "markAllOnTime": "Hepsini vaktinde işaretle",
     "iftarAt": "İftar {{time}}",
