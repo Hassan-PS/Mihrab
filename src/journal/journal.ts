@@ -199,9 +199,31 @@ export function computeStats(entries: JournalEntry[]): JournalStats {
 }
 
 /**
- * Compute the user's current "on-time streak" — the longest unbroken run
- * of consecutive days where ALL 5 prayers were logged on-time, ending on
- * `now` (or its day). Returns 0 if today's run is broken.
+ * Consecutive days on which all five prayers were logged on time, ending
+ * today or yesterday.
+ *
+ * TODAY IS NOT OVER, AND THE STREAK MUST NOT PRETEND IT IS. This used to
+ * start counting at today and stop the instant today was not already five
+ * from five, so someone who had prayed every prayer on time for three months
+ * was told "0 days" over breakfast, every single morning, until Isha went
+ * in. The comment above the loop even described the right rule; the code
+ * never implemented it. A streak is a claim about the past.
+ *
+ * So today is in one of three states:
+ *
+ *   - all five on time      -> it counts, and the walk starts here
+ *   - nothing wrong with it -> undecided; the walk starts at yesterday, and
+ *                              an untouched morning shows the run intact
+ *   - already spoiled       -> a late, missed or qadha prayer is a fact that
+ *                              today can no longer undo, so the streak ends
+ *                              now rather than at midnight
+ *
+ * That last case is where this deliberately parts company with
+ * `computeSunnahStreak`, which has no way to be spoiled early: every sunnah
+ * is optional, so an unfinished sunnah day is only ever unfinished. A fard
+ * prayer marked missed is a different kind of fact, and carrying yesterday's
+ * number for another twelve hours after the user has recorded one would be
+ * flattery rather than a record.
  */
 export function computeCurrentStreak(
   entries: JournalEntry[],
@@ -232,21 +254,41 @@ export function computeCurrentStreak(
     return `${y}-${m}-${dd}`;
   }
 
-  let streak = 0;
-  // Walk back from yesterday (today is incomplete until Isha is done).
-  // Start from today only if all 5 are already logged on-time.
-  const cur = new Date(now);
-  for (let i = 0; i < 366; i++) {
-    const day = byDate.get(fmt(cur));
-    if (!day) break;
-    let allOnTime = true;
-    for (const p of ALL_PRAYERS) {
-      if (day.get(p) !== 'on-time') {
-        allOnTime = false;
-        break;
-      }
+  /** All five present and all five on time. */
+  function isPerfect(day: Map<JournalPrayer, JournalStatus> | undefined) {
+    if (!day) return false;
+    return ALL_PRAYERS.every(p => day.get(p) === 'on-time');
+  }
+
+  /** Something is already recorded that no later prayer can take back. */
+  function isSpoiled(day: Map<JournalPrayer, JournalStatus> | undefined) {
+    if (!day) return false;
+    for (const status of day.values()) {
+      if (status !== 'on-time') return true;
     }
-    if (!allOnTime) break;
+    return false;
+  }
+
+  // Noon, so that adding and subtracting days never lands on an hour that
+  // does not exist — the same anchor `computeSunnahStreak` and
+  // `computeFastStats` use. A cursor left on the wall-clock time of `now`
+  // is one DST boundary away from counting a day twice or skipping one.
+  const cur = new Date(now);
+  cur.setHours(12, 0, 0, 0);
+
+  const today = byDate.get(fmt(cur));
+  if (!isPerfect(today)) {
+    // A spoiled today ends the run here and now; an unfinished one is simply
+    // not part of the record yet, so the question moves to yesterday.
+    if (isSpoiled(today)) return 0;
+    cur.setDate(cur.getDate() - 1);
+  }
+
+  let streak = 0;
+  // A year and a day bounds the loop against a corrupt clock; no streak
+  // anyone can hold needs more.
+  for (let i = 0; i < 366; i++) {
+    if (!isPerfect(byDate.get(fmt(cur)))) break;
     streak += 1;
     cur.setDate(cur.getDate() - 1);
   }
