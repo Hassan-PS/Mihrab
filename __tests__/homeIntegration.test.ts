@@ -61,6 +61,34 @@ describe('HomeScreen integration (tasks #45–#47)', () => {
     expect(TABS).toMatch(/<HomeHeaderControls\b/);
     expect(HOME).toMatch(/<HomeHeaderControls\b/);
   });
+
+  test('the Catalyst chip is a row in the content column, not an overlay', () => {
+    // It was pinned to `right: 14` of the WINDOW while every card is centred
+    // inside a width-capped column. Those two agree only while the window is
+    // wide enough for the cards to be narrower than it — which is why this
+    // looked fine for weeks and then, in an ordinary small Mac window, put
+    // the chip on top of the hero card and past its right edge.
+    //
+    // So: no absolute positioning on this row, and no `right`/`left` offsets
+    // that would re-anchor it to the window instead of the column.
+    const row = HOME.match(/macHeaderRow:\s*\{[^}]*\}/);
+    expect(row).not.toBeNull();
+    expect(row?.[0]).not.toMatch(/position:\s*'absolute'/);
+    expect(row?.[0]).not.toMatch(/\b(right|left):/);
+    // `flex-end`, never `right` — the mirror of this is what RTL should get.
+    expect(row?.[0]).toMatch(/justifyContent:\s*'flex-end'/);
+    // And the old overlay is gone rather than merely unused.
+    expect(HOME).not.toMatch(/macHeaderControls/);
+
+    // It has to be INSIDE the CenteredColumn to inherit the cards' width cap;
+    // outside it, right-alignment is alignment to the window again.
+    const column = HOME.indexOf('<CenteredColumn');
+    const columnEnd = HOME.indexOf('</CenteredColumn>');
+    const chip = HOME.indexOf('<HomeHeaderControls');
+    expect(column).toBeGreaterThan(-1);
+    expect(chip).toBeGreaterThan(column);
+    expect(chip).toBeLessThan(columnEnd);
+  });
 });
 
 describe('home/RamadanCountdownCard module surface', () => {

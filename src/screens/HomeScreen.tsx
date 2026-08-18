@@ -13,7 +13,6 @@ import notifee, {
   AndroidNotificationSetting,
   AuthorizationStatus,
 } from '@notifee/react-native';
-import { useHeaderHeight } from '@react-navigation/elements';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -90,9 +89,6 @@ export function HomeScreen() {
   // home render.
   usePrefetchSavedLocations();
   const { palette } = useAppPalette();
-  // Native header height — anchors the Mac Catalyst pinned controls
-  // overlay just below the (transparent) title bar.
-  const headerHeight = useHeaderHeight();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   // Cap the day-card width to the centered content column so the carousel
   // doesn't overflow the capped column on iPad/Mac windows.
@@ -716,9 +712,31 @@ export function HomeScreen() {
         onRetryFetch={retry}
       />
 
-      {/* LocationChip moved into the navigation header (next to Settings)
-          so the top-of-screen controls all live in the same row. See
-          RootNavigator.HomeHeaderRight. */}
+      {/* Mac Catalyst: the location chip is the first ROW OF CONTENT, not a
+          pinned overlay and not the navigation header.
+
+          Not the header, because on Catalyst the transparent navigation bar
+          sits inside the window's title-bar DRAG REGION and clicks on it were
+          intermittently swallowed as window drags. That is why it moved out.
+
+          Not an overlay either, which is where it went instead: pinned to
+          `right: 14` of the WINDOW while every card is centred inside a
+          width-capped column. On a wide window the cards are narrower than
+          the window, so the chip landed in the empty margin and looked
+          deliberate. Narrow the window until the cards fill it — a small Mac
+          window is the ordinary case, not an edge one — and the same chip is
+          suddenly sitting on top of the hero card and hanging past its right
+          edge (reported with a screenshot, 2026-08-18).
+
+          In the column it is right-aligned to the same edge as the cards at
+          every width, by construction rather than by coincidence, and it
+          still clears the drag region and still sits outside the scale
+          transform on `dashRow` that would otherwise paint over it. */}
+      {isMacCatalyst ? (
+        <View style={styles.macHeaderRow}>
+          <HomeHeaderControls />
+        </View>
+      ) : null}
 
       {(() => {
         // One card: countdown → day strip → times → month link (2a). The
@@ -831,18 +849,6 @@ export function HomeScreen() {
         onClose={() => setTourVisible(false)}
       />
     </ScrollView>
-    {/* Mac Catalyst: the location chip + Settings gear render as a PINNED
-        overlay under the native title bar instead of inside it — the
-        transparent navigation bar sits in the window's title-bar DRAG
-        REGION, where clicks were intermittently swallowed as window drags
-        ("the settings gear sometimes works, sometimes doesn't"). An
-        absolute overlay outside the scroll flow also keeps it above the
-        scale-transformed dashboard, which paints over in-flow siblings. */}
-    {isMacCatalyst ? (
-      <View style={[styles.macHeaderControls, { top: headerHeight + 6 }]}>
-        <HomeHeaderControls />
-      </View>
-    ) : null}
     </View>
   );
 }
@@ -862,15 +868,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   homeRoot: { flex: 1 },
-  // Mac Catalyst pinned header controls (see comment at the render site):
-  // absolute top-right overlay just below the native title bar, above the
-  // (scale-transformed) dashboard content.
-  macHeaderControls: {
-    position: 'absolute',
-    right: 14,
+  // Mac Catalyst header controls, in the flow (see the render site).
+  // `flex-end` rather than `right`, so Arabic and the other right-to-left
+  // languages get the mirror of this and not the same corner.
+  macHeaderRow: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    zIndex: 10,
   },
   scroll: { flex: 1 },
   // Inter-card rhythm for BOTH CenteredColumn variants (compact uses the
