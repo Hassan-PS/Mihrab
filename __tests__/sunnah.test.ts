@@ -7,7 +7,6 @@
  */
 import {
   EMPTY_DAY,
-  SUNNAH_RING_STEPS,
   SUNNAH_TOTAL,
   SUNNAH_UNITS,
   coerceSunnahLog,
@@ -17,10 +16,10 @@ import {
   fieldFor,
   isSunnahComplete,
   qiyamDays,
+  ringSegments,
   setSunnah,
   sunnahCount,
   sunnahFraction,
-  sunnahRingStep,
   type SunnahDay,
   type SunnahLog,
 } from '../src/journal/sunnah';
@@ -121,43 +120,38 @@ describe('counting a day', () => {
   });
 });
 
-describe('the ring', () => {
+/** How much of the whole line is drawn, as one number. */
+const drawn = (f: number) => ringSegments(f).reduce((a, b) => a + b, 0) / 4;
+
+describe('the line round the square', () => {
   it('draws nothing on an untouched day', () => {
-    expect(sunnahRingStep(EMPTY_DAY)).toBe(0);
+    expect(ringSegments(0)).toEqual([0, 0, 0, 0]);
   });
 
   it('closes only on a complete day', () => {
-    expect(sunnahRingStep(full)).toBe(SUNNAH_RING_STEPS);
-    // One short is visibly not closed.
-    expect(sunnahRingStep({ ...full, witr: false })).toBeLessThan(
-      SUNNAH_RING_STEPS,
-    );
+    expect(ringSegments(sunnahFraction(full))).toEqual([1, 1, 1, 1]);
+    // One short leaves the last side unfinished, so the gap is visible.
+    const short = ringSegments(sunnahFraction({ ...full, witr: false }));
+    expect(short[3]).toBeLessThan(1);
   });
 
-  it('never skips to full, and never sits at zero, in between', () => {
-    for (let n = 1; n < SUNNAH_TOTAL; n++) {
-      const day: SunnahDay = { ...EMPTY_DAY };
-      let left = n;
-      const fields: Array<['fajr' | 'dhuhr' | 'maghrib' | 'isha', number]> = [
-        ['fajr', 1],
-        ['dhuhr', 2],
-        ['maghrib', 1],
-        ['isha', 2],
-      ];
-      for (const [field, max] of fields) {
-        const take = Math.min(left, max);
-        day[field] = take;
-        left -= take;
-      }
-      if (left > 0) day.witr = true;
-      const step = sunnahRingStep(day);
-      expect(step).toBeGreaterThanOrEqual(1);
-      expect(step).toBeLessThan(SUNNAH_RING_STEPS);
+  it('fills one side at a time, in order, leaving the rest empty', () => {
+    // An eighth of the way round is an eighth of the FIRST side only —
+    // that is what makes it read as a quantity rather than a fade.
+    expect(ringSegments(0.125)).toEqual([0.5, 0, 0, 0]);
+    // Half way round is the first two sides whole and the last two blank.
+    expect(ringSegments(0.5)).toEqual([1, 1, 0, 0]);
+    expect(ringSegments(0.75)).toEqual([1, 1, 1, 0]);
+  });
+
+  it('draws exactly the fraction it is given, all the way round', () => {
+    for (let n = 0; n <= SUNNAH_TOTAL; n++) {
+      expect(drawn(n / SUNNAH_TOTAL)).toBeCloseTo(n / SUNNAH_TOTAL, 10);
     }
   });
 
   it('never goes backwards as the day fills up', () => {
-    let previous = 0;
+    let previous = -1;
     const day: SunnahDay = { ...EMPTY_DAY };
     const order: Array<() => void> = [
       () => { day.fajr = 1; },
@@ -170,11 +164,24 @@ describe('the ring', () => {
     ];
     for (const step of order) {
       step();
-      const now = sunnahRingStep(day);
-      expect(now).toBeGreaterThanOrEqual(previous);
+      const now = drawn(sunnahFraction(day));
+      // Strictly forward: every single sunnah logged has to move the line,
+      // or the control gives no feedback for the tap that was just made.
+      expect(now).toBeGreaterThan(previous);
       previous = now;
     }
-    expect(previous).toBe(SUNNAH_RING_STEPS);
+    expect(previous).toBe(1);
+  });
+
+  it('clamps rather than overshooting on nonsense input', () => {
+    // Belt and braces against a corrupt store: no segment may exceed a full
+    // side, or it would draw past the corner and over the dots.
+    expect(ringSegments(4)).toEqual([1, 1, 1, 1]);
+    expect(ringSegments(-1)).toEqual([0, 0, 0, 0]);
+    // A non-finite fraction is not a big day, it is a broken read — draw
+    // nothing rather than claiming a complete one.
+    expect(ringSegments(Number.NaN)).toEqual([0, 0, 0, 0]);
+    expect(ringSegments(Number.POSITIVE_INFINITY)).toEqual([0, 0, 0, 0]);
   });
 });
 
@@ -278,8 +285,10 @@ describe('coerceSunnahLog', () => {
       const f = sunnahFraction(day);
       expect(f).toBeGreaterThanOrEqual(0);
       expect(f).toBeLessThanOrEqual(1);
-      expect(sunnahRingStep(day)).toBeLessThanOrEqual(SUNNAH_RING_STEPS);
-      expect(sunnahRingStep(day)).toBeGreaterThanOrEqual(0);
+      for (const side of ringSegments(f)) {
+        expect(side).toBeGreaterThanOrEqual(0);
+        expect(side).toBeLessThanOrEqual(1);
+      }
     }
   });
 });

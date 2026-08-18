@@ -11,6 +11,12 @@
  * uncounted number sitting beside a counted one will otherwise be assumed to
  * count, and the first time the streak fails to move the app looks broken
  * rather than deliberate.
+ *
+ * DIMMED UNTIL ISHA HAS COME IN, like every other control in the row above.
+ * Both of these are night prayers; offering them at noon invites a claim that
+ * cannot have been true. It stays a dimmed panel rather than disappearing —
+ * a section that comes and goes with the clock reads as a bug, and anything
+ * already logged has to remain reachable to be undone.
  */
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -23,6 +29,8 @@ type Props = {
   witr: boolean;
   qiyam: number;
   palette: AppPalette;
+  /** Isha has not come in. Dimmed and inert, like the chips above. */
+  notYet?: boolean;
   onToggleWitr: () => void;
   onAddQiyam: () => void;
   onResetQiyam: () => void;
@@ -32,15 +40,23 @@ function IshaExtrasImpl({
   witr,
   qiyam,
   palette,
+  notYet,
   onToggleWitr,
   onAddQiyam,
   onResetQiyam,
 }: Props) {
   const { t } = useTranslation();
   const gold = sunnahGold(palette.isDark);
+  const dead = notYet === true;
 
   return (
-    <View style={[styles.wrap, { backgroundColor: palette.accentBg }]}>
+    <View
+      style={[
+        styles.wrap,
+        { backgroundColor: palette.accentBg },
+        dead && styles.wrapNotYet,
+      ]}
+    >
       <Text style={[styles.head, { color: palette.muted }]} numberOfLines={1}>
         {t('sunnah.afterIsha', 'After Isha')}
       </Text>
@@ -51,8 +67,9 @@ function IshaExtrasImpl({
         </Text>
         <Pressable
           accessibilityRole="switch"
-          accessibilityState={{ checked: witr }}
+          accessibilityState={{ checked: witr, disabled: dead }}
           accessibilityLabel={t('sunnah.witr', 'Witr')}
+          disabled={dead}
           onPress={onToggleWitr}
           hitSlop={6}
           style={[
@@ -89,6 +106,8 @@ function IshaExtrasImpl({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('sunnah.resetQiyam', 'Reset Qiyam al-Layl')}
+              accessibilityState={{ disabled: dead }}
+              disabled={dead}
               onPress={onResetQiyam}
               hitSlop={6}
             >
@@ -106,6 +125,8 @@ function IshaExtrasImpl({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('sunnah.addQiyam', 'Log one Qiyam al-Layl')}
+            accessibilityState={{ disabled: dead }}
+            disabled={dead}
             onPress={onAddQiyam}
             hitSlop={6}
             style={[styles.step, { backgroundColor: palette.card }]}
@@ -130,6 +151,9 @@ const styles = StyleSheet.create({
     // a marginBottom on the heading alone left Witr and Qiyam touching.
     gap: 8,
   },
+  // The same 0.4 the status chips and the sunnah tile use, so the whole Isha
+  // row dims as one piece rather than three shades of grey.
+  wrapNotYet: { opacity: 0.4 },
   head: {
     fontSize: 10,
     fontWeight: '700',

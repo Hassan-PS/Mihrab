@@ -38,15 +38,16 @@ import {
   StyleSheet,
   Text,
   View,
+  type ViewStyle,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import type { DayScore } from '../journal/journal';
 import {
-  SUNNAH_RING_STEPS,
   dayAt,
-  sunnahRingStep,
+  ringSegments,
+  sunnahFraction,
   type SunnahLog,
 } from '../journal/sunnah';
 import { QIYAM_MARK, sunnahGold } from './sunnahTheme';
@@ -82,6 +83,79 @@ const MONTH_ROW = 15;
 const FAST_RING_LIGHT = '#B45309';
 const FAST_RING_DARK = '#FBBF24';
 
+/**
+ * The sunnah line: same idea as the fasting ring, one step inside it.
+ *
+ * `INSET` clears the fasting border (2pt, drawn inside the square by RN) with
+ * half a point to spare, so the two never touch and never read as one thick
+ * rim. `LINE` is thinner than the fast ring's 2pt on purpose — the outer ring
+ * is a yes/no and should stay the louder of the two; this one is a quantity.
+ */
+const SUNNAH_INSET = 2.5;
+const SUNNAH_LINE = 1.5;
+/** The length of one side of the inset square the line travels round. */
+const SUNNAH_SIDE = SQUARE - SUNNAH_INSET * 2;
+
+/**
+ * The corner dots, and how far in they sit.
+ *
+ * Far enough to clear BOTH rings: the fasting border ends at 2, the sunnah
+ * line at `SUNNAH_INSET + SUNNAH_LINE` = 4. Half a point past that keeps a
+ * dot on clean fill on any day, however many marks it carries.
+ */
+const DOT = 4;
+const DOT_INSET = SUNNAH_INSET + SUNNAH_LINE + 0.5;
+
+/**
+ * One drawn side of that line: `i` is 0…3 clockwise from the top-left, `len`
+ * is how much of that side is covered (0…1).
+ *
+ * Lengths are computed in points rather than percentages because a percentage
+ * would resolve against the SQUARE, not against the inset box the line
+ * actually travels round, and every segment would overshoot by the inset.
+ *
+ * Geometric `left`/`right` rather than `insetInlineStart`/`End`: this is a
+ * clock hand, and a clock does not run backwards in Arabic.
+ */
+function sunnahSegment(i: number, len: number): ViewStyle {
+  const run = Math.max(0, Math.min(1, len)) * SUNNAH_SIDE;
+  const base = { position: 'absolute' as const };
+  switch (i) {
+    case 0: // top, left → right
+      return {
+        ...base,
+        top: SUNNAH_INSET,
+        left: SUNNAH_INSET,
+        width: run,
+        height: SUNNAH_LINE,
+      };
+    case 1: // right, top → bottom
+      return {
+        ...base,
+        top: SUNNAH_INSET,
+        right: SUNNAH_INSET,
+        width: SUNNAH_LINE,
+        height: run,
+      };
+    case 2: // bottom, right → left
+      return {
+        ...base,
+        bottom: SUNNAH_INSET,
+        right: SUNNAH_INSET,
+        width: run,
+        height: SUNNAH_LINE,
+      };
+    default: // left, bottom → top
+      return {
+        ...base,
+        bottom: SUNNAH_INSET,
+        left: SUNNAH_INSET,
+        width: SUNNAH_LINE,
+        height: run,
+      };
+  }
+}
+
 export type HeatmapDay = {
   key: string;
   /** 0…5, weighted by status — see `STATUS_WEIGHT`. Drives the fill depth. */
@@ -91,8 +165,8 @@ export type HeatmapDay = {
   /** How many were marked `missed` — drives the corner mark. */
   missed: number;
   fasted: boolean;
-  /** 0…SUNNAH_RING_STEPS — how far the gold ring closes. 0 draws none. */
-  sunnahStep: number;
+  /** 0…1 — how far the gold line has travelled round the square. */
+  sunnah: number;
   /** Any Qiyam al-Layl that night — drives the mark in the corner. */
   qiyam: boolean;
   /** Days after today inside the trailing week — drawn as blanks. */
@@ -178,7 +252,7 @@ export function buildHeatmap(
         logged: score?.logged ?? 0,
         missed: score?.missed ?? 0,
         fasted: fastedDays.has(key),
-        sunnahStep: sunnahRingStep(sun),
+        sunnah: sunnahFraction(sun),
         qiyam: sun.qiyam > 0,
         future: d.getTime() > today.getTime(),
       });
@@ -497,7 +571,7 @@ function PracticeHeatmapImpl({
                             : ''
                         }${
                           // A mark that exists only visually is half a mark.
-                          !day.future && day.sunnahStep >= SUNNAH_RING_STEPS
+                          !day.future && day.sunnah >= 1
                             ? `, ${t('sunnah.a11yAll', 'all sunnah')}`
                             : ''
                         }${
@@ -535,28 +609,42 @@ function PracticeHeatmapImpl({
                             being looked for is invisible. The corner is the
                             only channel left: depth is the score, the ring
                             is the fast, the outline is the selection. */}
-                        {/* The sunnah ring, INSET inside the fast border so
-                            the two never merge into one thick edge. Four
-                            steps of width and opacity rather than a real arc:
-                            an arc needs react-native-svg, and this grid draws
-                            every square of every week at once across years of
+                        {/* The sunnah line, INSET inside the fast border so
+                            the two never merge into one thick edge. It is
+                            DRAWN ROUND the square as the day fills — four
+                            straight segments, clockwise from the top-left —
+                            rather than a faint full ring going solid, so how
+                            far round it has gone reads as a quantity at a
+                            glance instead of asking the eye to judge
+                            opacity against six other shades of fill.
+                            Straight sides rather than an arc because an arc
+                            needs react-native-svg, and this grid draws every
+                            square of every week at once across years of
                             history on a surface that already cost a release
                             to make scroll smoothly. */}
-                        {!day.future && day.sunnahStep > 0 ? (
-                          <View
-                            pointerEvents="none"
-                            style={[
-                              styles.sunnahRing,
-                              {
-                                borderColor: gold,
-                                borderWidth:
-                                  0.75 + 0.75 * (day.sunnahStep - 1),
-                                opacity:
-                                  0.45 +
-                                  (0.55 * day.sunnahStep) / SUNNAH_RING_STEPS,
-                              },
-                            ]}
-                          />
+                        {!day.future && day.sunnah > 0 ? (
+                          day.sunnah >= 1 ? (
+                            // A complete day is one closed line, not four
+                            // segments that happen to meet — one View instead
+                            // of four, on the days a committed user has most.
+                            <View
+                              pointerEvents="none"
+                              style={[styles.sunnahRing, { borderColor: gold }]}
+                            />
+                          ) : (
+                            ringSegments(day.sunnah).map((len, i) =>
+                              len <= 0 ? null : (
+                                <View
+                                  key={i}
+                                  pointerEvents="none"
+                                  style={[
+                                    sunnahSegment(i, len),
+                                    { backgroundColor: gold },
+                                  ]}
+                                />
+                              ),
+                            )
+                          )
                         ) : null}
                         {!day.future && day.qiyam ? (
                           <View
@@ -736,35 +824,40 @@ const styles = StyleSheet.create({
   week: { flexDirection: 'row', gap: GAP },
   square: { width: SQUARE, height: SQUARE, borderRadius: 3.5 },
   /**
-   * The owed-prayer mark: a dot in the corner the writing direction starts
-   * from, so it lands where the eye already goes.
+   * The owed-prayer mark, and the night-prayer mark opposite it: a dot each,
+   * rather than another border or another colour ramp. Both of those channels
+   * are spent — the fast ring, the sunnah line, the score depth — and a
+   * fourth competing for the same edges would make a day that is fasted,
+   * missed and prayed through unreadable.
    *
-   * A dot rather than another border or another colour ramp — both of those
-   * channels are taken (the fast ring, the score depth), and a third
-   * competing for the same edges would make a day that is fasted, selected
-   * and missed unreadable. Small enough not to shout on a good month,
-   * distinct enough to find a single one in a year of squares.
+   * BOTH DOTS SIT INSIDE BOTH LINES.
+   *
+   * They used to be inset 1.5, which put them under the fasting border and
+   * across the sunnah line — three marks fighting for the same few points of
+   * edge, so on a day carrying all of them you could not tell which was
+   * which. `DOT_INSET` clears the fasting ring and the sunnah line together,
+   * so a dot is always drawn on clean fill whatever else the day holds. The
+   * dots shrank to pay for it.
    */
   missedMark: {
     position: 'absolute',
-    top: 1.5,
-    insetInlineEnd: 1.5,
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    top: DOT_INSET,
+    insetInlineEnd: DOT_INSET,
+    width: DOT,
+    height: DOT,
+    borderRadius: DOT / 2,
   },
   /**
-   * Inset by 2.5 so it clears the fasting border entirely — the two are
-   * neighbouring hues and a gold ring sharing an edge with an amber one
-   * reads as a single fat rim rather than two facts.
+   * A complete day's line, closed. Same inset and thickness as the segments
+   * it replaces, so nothing shifts as the last sunnah goes in.
    */
   sunnahRing: {
     position: 'absolute',
-    top: 2.5,
-    left: 2.5,
-    right: 2.5,
-    bottom: 2.5,
-    borderRadius: (SQUARE - 5) / 2,
+    top: SUNNAH_INSET,
+    left: SUNNAH_INSET,
+    right: SUNNAH_INSET,
+    bottom: SUNNAH_INSET,
+    borderWidth: SUNNAH_LINE,
   },
   /**
    * The corner opposite the missed mark, so a night that held both is still
@@ -772,11 +865,11 @@ const styles = StyleSheet.create({
    */
   qiyamMark: {
     position: 'absolute',
-    bottom: 1.5,
-    insetInlineStart: 1.5,
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    bottom: DOT_INSET,
+    insetInlineStart: DOT_INSET,
+    width: DOT,
+    height: DOT,
+    borderRadius: DOT / 2,
   },
   squareSelected: { transform: [{ scale: 1.4 }], zIndex: 2 },
   legendRow: {

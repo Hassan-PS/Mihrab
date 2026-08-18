@@ -1145,6 +1145,16 @@ export function LogScreen() {
                * moved — behind four dead chips with no way to clear it.
                */
               const notYet = upcoming.has(prayer) && !current;
+              const sunnahField = fieldFor(prayer);
+              const sunnahDone = sunnahField
+                ? (sunnahToday[sunnahField] as number)
+                : 0;
+              // The same rule as `notYet`, asked of the sunnah rather than of
+              // the fard: a prayer whose time has not come cannot have had
+              // its sunnah prayed either. Keyed on the sunnah's own count, so
+              // logging the fard does not quietly unlock it — and so anything
+              // already logged stays editable.
+              const sunnahNotYet = upcoming.has(prayer) && sunnahDone === 0;
               return (
                 <View
                   key={prayer}
@@ -1249,12 +1259,15 @@ export function LogScreen() {
                     />
                     <SunnahTile
                       prayer={prayer}
-                      count={
-                        (fieldFor(prayer)
-                          ? (sunnahToday[fieldFor(prayer)!] as number)
-                          : 0) || 0
-                      }
+                      count={sunnahDone}
                       palette={palette}
+                      // Greyed out until the prayer it belongs to has come
+                      // in, exactly as the four statuses beside it are — a
+                      // sunnah is prayed around its fard, so offering it
+                      // hours early invites a claim the user cannot have
+                      // made. Same rule, not a similar one: already logged
+                      // stays editable, so a mistake is still undoable.
+                      notYet={sunnahNotYet}
                       onPress={() => onSunnahTap(prayer)}
                     />
                   </View>
@@ -1266,6 +1279,15 @@ export function LogScreen() {
                       witr={sunnahToday.witr}
                       qiyam={sunnahToday.qiyam}
                       palette={palette}
+                      // Both are night prayers, so they follow Isha's clock.
+                      // Anything already recorded keeps the panel live, for
+                      // the same reason the chips do: a mis-tap has to be
+                      // undoable even before the prayer's time arrives.
+                      notYet={
+                        upcoming.has('Isha') &&
+                        !sunnahToday.witr &&
+                        sunnahToday.qiyam === 0
+                      }
                       onToggleWitr={onToggleWitr}
                       onAddQiyam={onAddQiyam}
                       onResetQiyam={onResetQiyam}

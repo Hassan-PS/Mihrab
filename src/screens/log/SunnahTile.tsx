@@ -12,6 +12,12 @@
  * gap where the other rows have a control reads as a bug. A dimmed tile
  * saying "None" answers the question instead of raising it, and screen
  * readers are told the same thing rather than meeting an unlabelled blank.
+ *
+ * TWO REASONS TO BE DEAD, AND THEY SAY DIFFERENT THINGS. `none` is permanent
+ * — Asr will never carry a sunnah, so the tile says "None" forever. `notYet`
+ * is the clock — the prayer has not come in yet, exactly the rule the four
+ * status chips beside it follow, so the tile dims and keeps its own caption
+ * rather than claiming there is nothing to pray.
  */
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -25,14 +31,17 @@ type Props = {
   prayer: JournalPrayer;
   count: number;
   palette: AppPalette;
+  /** The prayer's time has not come. Dimmed and inert, like the chips. */
+  notYet?: boolean;
   onPress: () => void;
 };
 
-function SunnahTileImpl({ prayer, count, palette, onPress }: Props) {
+function SunnahTileImpl({ prayer, count, palette, notYet, onPress }: Props) {
   const { t } = useTranslation();
   const max = SUNNAH_UNITS[prayer];
   const gold = sunnahGold(palette.isDark);
   const none = max === 0;
+  const dead = none || notYet === true;
   const complete = !none && count >= max;
 
   const label = none
@@ -47,7 +56,7 @@ function SunnahTileImpl({ prayer, count, palette, onPress }: Props) {
   return (
     <Pressable
       accessibilityRole="button"
-      disabled={none}
+      disabled={dead}
       onPress={onPress}
       hitSlop={4}
       accessibilityLabel={
@@ -65,11 +74,14 @@ function SunnahTileImpl({ prayer, count, palette, onPress }: Props) {
               },
             )
       }
-      accessibilityState={{ disabled: none }}
+      accessibilityState={{ disabled: dead }}
       style={[
         styles.tile,
         { backgroundColor: palette.controlBg },
+        // 0.38 for Asr, 0.4 for not-yet: the latter matches the four status
+        // chips beside it exactly, so a whole row dims as one thing.
         none && styles.tileNone,
+        !none && notYet === true && styles.tileNotYet,
         complete && { borderColor: gold },
       ]}
     >
@@ -117,6 +129,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   tileNone: { opacity: 0.38 },
+  tileNotYet: { opacity: 0.4 },
   pips: { flexDirection: 'row', gap: 4 },
   pip: { width: 8, height: 8, borderRadius: 4, borderWidth: 1.5 },
   label: {

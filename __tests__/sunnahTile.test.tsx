@@ -46,7 +46,11 @@ const palette = {
 
 type Renderer = ReturnType<typeof create>;
 
-async function render(prayer: 'Fajr' | 'Dhuhr' | 'Asr' | 'Isha', count: number) {
+async function render(
+  prayer: 'Fajr' | 'Dhuhr' | 'Asr' | 'Isha',
+  count: number,
+  notYet?: boolean,
+) {
   const onPress = jest.fn();
   let tree!: Renderer;
   await act(async () => {
@@ -55,11 +59,19 @@ async function render(prayer: 'Fajr' | 'Dhuhr' | 'Asr' | 'Isha', count: number) 
         prayer={prayer}
         count={count}
         palette={palette}
+        notYet={notYet}
         onPress={onPress}
       />,
     );
   });
   return { tree, onPress };
+}
+
+/** The tile itself — the one node carrying an accessibility state. */
+function control(tree: Renderer) {
+  return tree.root.find(
+    n => typeof n.type === 'string' && n.props?.accessibilityState != null,
+  );
 }
 
 /** Every pip — the little circles that carry the count. */
@@ -133,13 +145,42 @@ describe('Asr', () => {
   });
 });
 
+describe('a prayer whose time has not come', () => {
+  it('is inert, exactly as the status chips beside it are', async () => {
+    // `disabled` is consumed by Pressable and never reaches the host node,
+    // so the accessibility state is what there is to assert on — which is
+    // also the half of it a screen-reader user actually meets.
+    const { tree } = await render('Dhuhr', 0, true);
+    expect(control(tree).props.accessibilityState.disabled).toBe(true);
+  });
+
+  it('is dimmed, but still says what it is rather than "None"', async () => {
+    // The Asr wording is a permanent fact about Asr. A prayer that simply
+    // has not happened yet must not borrow it — nothing is being claimed
+    // about whether it carries a sunnah, only about the clock.
+    const { tree } = await render('Dhuhr', 0, true);
+    expect(text(tree)).toContain('0 of 2');
+    expect(text(tree)).not.toContain('None');
+    expect(JSON.stringify(control(tree).props.style)).toContain('"opacity":0.4');
+  });
+
+  it('stays live once something is already logged against it', async () => {
+    // The screen only passes `notYet` while the count is zero, so this is
+    // the state a mis-tap leaves behind: it has to remain undoable.
+    const { tree } = await render('Dhuhr', 1, false);
+    expect(control(tree).props.accessibilityState.disabled).toBe(false);
+  });
+
+  it('cannot resurrect Asr, which has no sunnah at any hour', async () => {
+    const { tree } = await render('Asr', 0, false);
+    expect(control(tree).props.accessibilityState.disabled).toBe(true);
+  });
+});
+
 describe('accessibility', () => {
   it('reads the count out, not just the prayer name', async () => {
     const { tree } = await render('Dhuhr', 1);
-    const pressable = tree.root.find(
-      n => typeof n.type === 'string' && n.props?.accessibilityState != null,
-    );
-    const label = String(pressable.props.accessibilityLabel);
+    const label = String(control(tree).props.accessibilityLabel);
     expect(label).toContain('1');
     expect(label).toContain('2');
   });

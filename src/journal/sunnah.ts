@@ -177,27 +177,32 @@ export function isSunnahComplete(day: SunnahDay): boolean {
 }
 
 /**
- * How many gold steps the ring is drawn at.
+ * How much of each side of the square the gold line covers, as fractions of
+ * that side's length: `[top, right, bottom, left]`.
  *
- * Four steps rather than a true arc: React Native cannot draw an arc without
- * `react-native-svg`, and the graph renders every square of every week at
- * once — years of them — on a scroll surface that has already cost one
- * release to make smooth. Steps are a plain bordered View and cost nothing.
+ * The line is DRAWN ROUND THE SQUARE rather than faded in place. Opacity says
+ * "some sunnah"; a line that has travelled two sides of four says "about
+ * half", and can be read against its neighbours without a legend. It also
+ * matches the fasting ring it sits inside, so the two read as the same kind
+ * of mark rather than two unrelated ideas.
  *
- * Step 0 is "nothing logged" and draws no ring at all, so an untouched day
- * stays the warm blank it is today. Step 4 is only ever a complete day: the
- * ring closing has to mean something exact, or it means nothing.
+ * Clockwise from the top-left corner, because that is where a reader's eye
+ * starts and the direction a clock hand travels — the one convention for
+ * "progress round a shape" that needs no explaining.
+ *
+ * A real arc would need `react-native-svg` on every square of every week
+ * across years of history, on a scroll surface that already cost a release to
+ * make smooth. Four straight segments are four plain Views, and a complete
+ * day collapses to a single bordered one.
  */
-export const SUNNAH_RING_STEPS = 4;
-
-export function sunnahRingStep(day: SunnahDay): number {
-  const n = sunnahCount(day);
-  if (n <= 0) return 0;
-  if (n >= SUNNAH_TOTAL) return SUNNAH_RING_STEPS;
-  // 1…SUNNAH_RING_STEPS-1 for everything in between, so a day with one
-  // sunnah is visibly different from a day with six.
-  const inner = Math.ceil((n / SUNNAH_TOTAL) * (SUNNAH_RING_STEPS - 1));
-  return Math.min(SUNNAH_RING_STEPS - 1, Math.max(1, inner));
+export function ringSegments(
+  fraction: number,
+): [number, number, number, number] {
+  const f = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0;
+  const travelled = f * 4;
+  return [0, 1, 2, 3].map(side =>
+    Math.min(1, Math.max(0, travelled - side)),
+  ) as [number, number, number, number];
 }
 
 /**
