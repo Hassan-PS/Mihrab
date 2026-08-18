@@ -82,6 +82,19 @@ const MONTH_ROW = 15;
 /** Amber, for the fast ring — the app's own amber accent swatch. */
 const FAST_RING_LIGHT = '#B45309';
 const FAST_RING_DARK = '#FBBF24';
+/**
+ * The border a square carries when it is fasted or selected.
+ *
+ * One constant because both are the same width and only one is ever drawn —
+ * and because everything drawn INSIDE the square has to know about it. An
+ * absolutely-positioned child is laid out against its parent's PADDING box,
+ * not its border box, so a bordered square silently moves its own origin
+ * inward by this much: a mark at `top: 2.5` lands 4.5 from the outer edge on
+ * a fasted day and 2.5 on an ordinary one, and a 13pt side that fits an 18pt
+ * square runs off the end of a 14pt one. Every inset below is written as the
+ * distance from the OUTER edge and corrected by `insetFor`.
+ */
+const SQUARE_BORDER = 2;
 
 /**
  * The sunnah line: same idea as the fasting ring, one step inside it.
@@ -107,6 +120,67 @@ const DOT = 4;
 const DOT_INSET = SUNNAH_INSET + SUNNAH_LINE + 0.5;
 
 /**
+ * An inset measured from the square's outer edge, expressed in the
+ * coordinates its children are actually laid out in. See `SQUARE_BORDER`.
+ */
+function insetFor(outer: number, border: number): number {
+  return outer - border;
+}
+
+/**
+ * The ring and the two dots, for a square with a border and one without.
+ *
+ * Precomputed rather than built per square: those are the only two cases
+ * there are, and the grid draws every square of every week at once — years
+ * of them — so allocating three style objects per day is a cost with nothing
+ * to show for it.
+ */
+function markStyles(border: number) {
+  const ring = insetFor(SUNNAH_INSET, border);
+  const dot = insetFor(DOT_INSET, border);
+  const mark = {
+    position: 'absolute' as const,
+    width: DOT,
+    height: DOT,
+    borderRadius: DOT / 2,
+  };
+  return {
+    /**
+     * A complete day's line, closed. Same inset and thickness as the
+     * segments it replaces, so nothing shifts as the last sunnah goes in.
+     */
+    ring: {
+      position: 'absolute' as const,
+      top: ring,
+      left: ring,
+      right: ring,
+      bottom: ring,
+      borderWidth: SUNNAH_LINE,
+    },
+    /**
+     * The owed-prayer mark, and the night-prayer mark opposite it: a dot
+     * each, rather than another border or another colour ramp. Both of those
+     * channels are spent — the fast ring, the sunnah line, the score depth —
+     * and a fourth competing for the same edges would make a day that is
+     * fasted, missed and prayed through unreadable.
+     *
+     * BOTH DOTS SIT INSIDE BOTH LINES. They used to be inset 1.5, which put
+     * them under the fasting border and across the sunnah line — three marks
+     * fighting for the same few points of edge, so on a day carrying all of
+     * them you could not tell which was which. `DOT_INSET` clears the
+     * fasting ring and the sunnah line together, so a dot is always drawn on
+     * clean fill whatever else the day holds. The dots shrank to pay for it.
+     */
+    missed: { ...mark, top: dot, insetInlineEnd: dot },
+    /** The corner opposite, so a night holding both is two marks not one. */
+    qiyam: { ...mark, bottom: dot, insetInlineStart: dot },
+  };
+}
+
+const MARKS_PLAIN = markStyles(0);
+const MARKS_BORDERED = markStyles(SQUARE_BORDER);
+
+/**
  * One drawn side of that line: `i` is 0…3 clockwise from the top-left, `len`
  * is how much of that side is covered (0…1).
  *
@@ -117,39 +191,28 @@ const DOT_INSET = SUNNAH_INSET + SUNNAH_LINE + 0.5;
  * Geometric `left`/`right` rather than `insetInlineStart`/`End`: this is a
  * clock hand, and a clock does not run backwards in Arabic.
  */
-function sunnahSegment(i: number, len: number): ViewStyle {
+function sunnahSegment(i: number, len: number, border: number): ViewStyle {
   const run = Math.max(0, Math.min(1, len)) * SUNNAH_SIDE;
+  const at = insetFor(SUNNAH_INSET, border);
   const base = { position: 'absolute' as const };
   switch (i) {
     case 0: // top, left → right
-      return {
-        ...base,
-        top: SUNNAH_INSET,
-        left: SUNNAH_INSET,
-        width: run,
-        height: SUNNAH_LINE,
-      };
+      return { ...base, top: at, left: at, width: run, height: SUNNAH_LINE };
     case 1: // right, top → bottom
-      return {
-        ...base,
-        top: SUNNAH_INSET,
-        right: SUNNAH_INSET,
-        width: SUNNAH_LINE,
-        height: run,
-      };
+      return { ...base, top: at, right: at, width: SUNNAH_LINE, height: run };
     case 2: // bottom, right → left
       return {
         ...base,
-        bottom: SUNNAH_INSET,
-        right: SUNNAH_INSET,
+        bottom: at,
+        right: at,
         width: run,
         height: SUNNAH_LINE,
       };
     default: // left, bottom → top
       return {
         ...base,
-        bottom: SUNNAH_INSET,
-        left: SUNNAH_INSET,
+        bottom: at,
+        left: at,
         width: SUNNAH_LINE,
         height: run,
       };
@@ -542,6 +605,11 @@ function PracticeHeatmapImpl({
                 <View key={r} style={styles.week}>
                   {row.map(day => {
                     const selected = !day.future && day.key === selectedKey;
+                    // A bordered square lays its children out 2pt further
+                    // in than a bare one, so every mark drawn inside has to
+                    // know which it is. See `SQUARE_BORDER`.
+                    const border = selected || day.fasted ? SQUARE_BORDER : 0;
+                    const marks = border ? MARKS_BORDERED : MARKS_PLAIN;
                     return (
                       <Pressable
                         key={day.key}
@@ -588,14 +656,14 @@ function PracticeHeatmapImpl({
                           // the ones you open in order to fill in.
                           selected && styles.squareSelected,
                           selected && {
-                            borderWidth: 2,
+                            borderWidth: SQUARE_BORDER,
                             borderColor: palette.text,
                           },
                           // Amber last, so it wins the outline on a day that
                           // is both selected and fasted: the ring carries
                           // data, the lift only carries where you are.
                           day.fasted && {
-                            borderWidth: 2,
+                            borderWidth: SQUARE_BORDER,
                             borderColor: ring,
                           },
                         ]}
@@ -629,7 +697,7 @@ function PracticeHeatmapImpl({
                             // of four, on the days a committed user has most.
                             <View
                               pointerEvents="none"
-                              style={[styles.sunnahRing, { borderColor: gold }]}
+                              style={[marks.ring, { borderColor: gold }]}
                             />
                           ) : (
                             ringSegments(day.sunnah).map((len, i) =>
@@ -638,7 +706,7 @@ function PracticeHeatmapImpl({
                                   key={i}
                                   pointerEvents="none"
                                   style={[
-                                    sunnahSegment(i, len),
+                                    sunnahSegment(i, len, border),
                                     { backgroundColor: gold },
                                   ]}
                                 />
@@ -650,7 +718,7 @@ function PracticeHeatmapImpl({
                           <View
                             pointerEvents="none"
                             style={[
-                              styles.qiyamMark,
+                              marks.qiyam,
                               { backgroundColor: QIYAM_MARK },
                             ]}
                           />
@@ -658,7 +726,7 @@ function PracticeHeatmapImpl({
                         {!day.future && day.missed > 0 ? (
                           <View
                             style={[
-                              styles.missedMark,
+                              marks.missed,
                               { backgroundColor: String(palette.danger) },
                             ]}
                           />
@@ -823,54 +891,9 @@ const styles = StyleSheet.create({
   weeks: { gap: GAP },
   week: { flexDirection: 'row', gap: GAP },
   square: { width: SQUARE, height: SQUARE, borderRadius: 3.5 },
-  /**
-   * The owed-prayer mark, and the night-prayer mark opposite it: a dot each,
-   * rather than another border or another colour ramp. Both of those channels
-   * are spent — the fast ring, the sunnah line, the score depth — and a
-   * fourth competing for the same edges would make a day that is fasted,
-   * missed and prayed through unreadable.
-   *
-   * BOTH DOTS SIT INSIDE BOTH LINES.
-   *
-   * They used to be inset 1.5, which put them under the fasting border and
-   * across the sunnah line — three marks fighting for the same few points of
-   * edge, so on a day carrying all of them you could not tell which was
-   * which. `DOT_INSET` clears the fasting ring and the sunnah line together,
-   * so a dot is always drawn on clean fill whatever else the day holds. The
-   * dots shrank to pay for it.
-   */
-  missedMark: {
-    position: 'absolute',
-    top: DOT_INSET,
-    insetInlineEnd: DOT_INSET,
-    width: DOT,
-    height: DOT,
-    borderRadius: DOT / 2,
-  },
-  /**
-   * A complete day's line, closed. Same inset and thickness as the segments
-   * it replaces, so nothing shifts as the last sunnah goes in.
-   */
-  sunnahRing: {
-    position: 'absolute',
-    top: SUNNAH_INSET,
-    left: SUNNAH_INSET,
-    right: SUNNAH_INSET,
-    bottom: SUNNAH_INSET,
-    borderWidth: SUNNAH_LINE,
-  },
-  /**
-   * The corner opposite the missed mark, so a night that held both is still
-   * two readable marks rather than one smudge.
-   */
-  qiyamMark: {
-    position: 'absolute',
-    bottom: DOT_INSET,
-    insetInlineStart: DOT_INSET,
-    width: DOT,
-    height: DOT,
-    borderRadius: DOT / 2,
-  },
+  // The ring and the two dots live in `markStyles`, not here: their insets
+  // depend on whether the square carries a border, which a static stylesheet
+  // cannot express.
   squareSelected: { transform: [{ scale: 1.4 }], zIndex: 2 },
   legendRow: {
     flexDirection: 'row',

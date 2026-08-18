@@ -15,6 +15,14 @@
  *   3. Both corner dots clear BOTH lines. They used to sit under the fast
  *      border and across the gold, which on a day carrying all three marks
  *      made it impossible to tell which was which.
+ *
+ * EVERY ASSERTION HERE IS ABOUT THE DISTANCE FROM THE SQUARE'S OUTER EDGE,
+ * never about the raw style number. Those are not the same thing: an
+ * absolutely-positioned child is laid out against its parent's padding box,
+ * so on a bordered square `top: 2.5` puts the mark 4.5 from the edge and a
+ * 13pt side runs off the end of a 14pt box. The first version of this file
+ * asserted the raw numbers, passed, and shipped a line that overflowed every
+ * fasted and every selected day. `edge()` below adds the border back.
  */
 import * as React from 'react';
 import { create } from 'react-test-renderer';
@@ -78,14 +86,38 @@ async function render(
   return tree;
 }
 
-/** Flattened styles of every child drawn inside the square for `DAY`. */
-function marks(tree: Renderer): Array<Record<string, number | string>> {
-  const square = tree.root.findAll(
+/** The one square under test, as the host node the Pressable renders. */
+function squareOf(tree: Renderer) {
+  return tree.root.findAll(
     n =>
       typeof n.type === 'string' &&
       n.props?.testID === DAY &&
       typeof n.props?.accessibilityState?.selected === 'boolean',
   )[0];
+}
+
+/** The border the square is actually carrying — 0, or 2 if fasted/selected. */
+function borderOf(tree: Renderer): number {
+  const style = Object.assign(
+    {},
+    ...[squareOf(tree).props.style].flat(3).filter(Boolean),
+  );
+  return Number(style.borderWidth ?? 0);
+}
+
+/**
+ * How far a mark's edge really is from the square's OUTER edge.
+ *
+ * The whole point of this file: the style says one thing, the parent's border
+ * shifts it, and only the sum of the two is what a user sees.
+ */
+function edge(tree: Renderer, value: unknown): number {
+  return Number(value) + borderOf(tree);
+}
+
+/** Flattened styles of every child drawn inside the square for `DAY`. */
+function marks(tree: Renderer): Array<Record<string, number | string>> {
+  const square = squareOf(tree);
   return (square.props.children as unknown[])
     .flat(3)
     .filter(
@@ -140,47 +172,77 @@ describe('the sunnah line is drawn round the square, not faded in', () => {
 });
 
 describe('the line stays inside the fasting ring', () => {
-  it('never overlaps the fast border, however full the day is', async () => {
-    const tree = await render(full, { fasted: true });
-    const ring = marks(tree).filter(s => s.borderColor === '#9A7B1F')[0];
-    // The fast border occupies 0…2 on every edge. The gold starts past it.
-    for (const edge of ['top', 'left', 'right', 'bottom'] as const) {
-      expect(Number(ring[edge])).toBeGreaterThan(FAST_BORDER);
-    }
-  });
-
   it('is thinner than the fast ring, so the yes/no stays the louder mark', async () => {
     const drawn = segments(await render({ fajr: 1 }));
     expect(drawn[0].height).toBeLessThan(FAST_BORDER);
   });
+
+  // The bug this file exists for. A bordered square lays its children out
+  // against its padding box, so the SAME style number means two different
+  // distances depending on whether the day was fasted or selected. Every
+  // case below is asserted at the same distance from the OUTER edge.
+  for (const [name, opts] of [
+    ['a plain day', {}],
+    ['a fasted day', { fasted: true }],
+  ] as const) {
+    it(`starts the line 2.5pt from the outer edge on ${name}`, async () => {
+      const tree = await render({ fajr: 1 }, opts);
+      const seg = segments(tree)[0];
+      expect(edge(tree, seg.top)).toBeCloseTo(2.5);
+      expect(edge(tree, seg.left)).toBeCloseTo(2.5);
+      // Clear of the fast border, which occupies 0…2 on every edge.
+      expect(edge(tree, seg.top)).toBeGreaterThan(FAST_BORDER);
+    });
+
+    it(`closes the ring 2.5pt from the outer edge on ${name}`, async () => {
+      const tree = await render(full, opts);
+      const ring = marks(tree).filter(s => s.borderColor === '#9A7B1F')[0];
+      for (const side of ['top', 'left', 'right', 'bottom'] as const) {
+        expect(edge(tree, ring[side])).toBeCloseTo(2.5);
+      }
+    });
+
+    it(`fits the whole 13pt side inside the square on ${name}`, async () => {
+      // The overflow that shipped: 13pt starting 4.5 in runs to 17.5 of a
+      // square whose children only have 14pt to live in.
+      const tree = await render({ fajr: 1, dhuhr: 2, maghrib: 1 }, opts);
+      const top = segments(tree).find(s => Number(s.height) === 1.5)!;
+      const inset = edge(tree, top.top);
+      expect(inset + Number(top.width)).toBeLessThanOrEqual(SQUARE - inset);
+    });
+  }
 });
 
 describe('the dots sit clear of both lines', () => {
-  it('keeps the night-prayer dot off the gold and off the fast border', async () => {
-    const tree = await render({ ...full, qiyam: 3 }, { fasted: true });
-    const dot = marks(tree).filter(s => s.backgroundColor === '#FFFFFF')[0];
-    expect(dot).toBeDefined();
-    // Inside the gold line, which ends at 2.5 + 1.5 = 4.
-    expect(Number(dot.bottom)).toBeGreaterThanOrEqual(4);
-    expect(Number(dot.insetInlineStart)).toBeGreaterThanOrEqual(4);
-    // And small enough that the far side of it does not reach the middle.
-    expect(Number(dot.width) + Number(dot.bottom)).toBeLessThan(SQUARE / 2);
-  });
-
-  it('keeps the missed dot off them too, in the opposite corner', async () => {
-    const tree = await render(
-      { ...full, qiyam: 3 },
-      { fasted: true, missed: 2 },
-    );
-    const dot = marks(tree).filter(s => s.backgroundColor === '#B91C1C')[0];
-    expect(dot).toBeDefined();
-    expect(Number(dot.top)).toBeGreaterThanOrEqual(4);
-    expect(Number(dot.insetInlineEnd)).toBeGreaterThanOrEqual(4);
-    // Opposite corners, so a day holding both is two marks not one smudge.
-    const white = marks(tree).filter(s => s.backgroundColor === '#FFFFFF');
-    for (const w of white) {
-      expect(w.bottom).toBeDefined();
-      expect(w.top).toBeUndefined();
-    }
-  });
+  for (const [name, opts] of [
+    ['a plain day', { missed: 2 }],
+    ['a fasted day', { fasted: true, missed: 2 }],
+  ] as const) {
+    it(`keeps both dots off the gold and off the fast border on ${name}`, async () => {
+      const tree = await render({ ...full, qiyam: 3 }, opts);
+      const night = marks(tree).filter(s => s.backgroundColor === '#FFFFFF')[0];
+      const owed = marks(tree).filter(s => s.backgroundColor === '#B91C1C')[0];
+      expect(night).toBeDefined();
+      expect(owed).toBeDefined();
+      // The gold ends at 2.5 + 1.5 = 4 from the outer edge. Both dots start
+      // past it, so neither is ever drawn over a line.
+      for (const [dot, sides] of [
+        [night, ['bottom', 'insetInlineStart']],
+        [owed, ['top', 'insetInlineEnd']],
+      ] as const) {
+        for (const side of sides) {
+          expect(edge(tree, dot[side])).toBeGreaterThanOrEqual(4);
+        }
+      }
+      // Opposite corners, so a day holding both is two marks not one smudge.
+      expect(night.bottom).toBeDefined();
+      expect(night.top).toBeUndefined();
+      expect(owed.top).toBeDefined();
+      expect(owed.bottom).toBeUndefined();
+      // And small enough that neither reaches the middle.
+      expect(edge(tree, night.bottom) + Number(night.width)).toBeLessThan(
+        SQUARE / 2,
+      );
+    });
+  }
 });
