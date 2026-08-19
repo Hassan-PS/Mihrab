@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The one directory the FileProvider is allowed to hand out.
+
+  Scoped to `custom_adhan/` inside the app's private files directory rather
+  than to the whole of it: the provider exists so the system can read one
+  imported adhan, and nothing else in there is anyone else's business.
+-->
+<paths>
+    <files-path name="custom_adhan" path="custom_adhan/" />
+</paths>

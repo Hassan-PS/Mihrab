@@ -11,8 +11,14 @@ import i18n from '../i18n';
 import {
   getNotificationSoundOption,
   NOTIFICATION_SOUND_OPTIONS,
+  registerCustomAdhan,
+  resolveSoundTargets,
   type NotificationSoundId,
 } from './notificationSounds';
+import {
+  ensureCustomAdhanChannel,
+  syncCustomAdhan,
+} from '../native/CustomAdhan';
 import { ADHAN_CONTROLS_CATEGORY_ID } from './adhanActionIds';
 import { prayerAlertActions } from './prayerAlertActions';
 import { JOURNAL_LOG_ACTION_ID } from './prayerLogAction';
@@ -87,6 +93,18 @@ const PREVIEW_NOTIFICATION_ID = 'adhan_preview';
 let _previewCancelTimeout: ReturnType<typeof setTimeout> | null = null;
 
 async function ensureChannel(selectedSound: NotificationSoundId) {
+  // BEFORE the Android-only part, because iOS needs this too: what it
+  // registers is the converted clip's filename, which is how the notification
+  // addresses the user's recording there.
+  if (selectedSound === 'custom') {
+    const imported = await syncCustomAdhan();
+    if (imported) {
+      const channelId = await ensureCustomAdhanChannel(
+        `Prayer times (${imported.name})`,
+      );
+      registerCustomAdhan({ ...imported, channelId: channelId ?? undefined });
+    }
+  }
   if (Platform.OS !== 'android') {
     return;
   }
@@ -100,11 +118,22 @@ async function ensureChannel(selectedSound: NotificationSoundId) {
   // surplus so existing users' settings get cleaned up too. (Channel sound is
   // immutable after creation, which is why each sound still needs its own
   // channel rather than mutating one.)
+  //
+  // The user's own recording is handled above and is deliberately absent from
+  // the loop below: its channel is built natively, around a token derived from
+  // the file, because Notifee's channel `sound` only ever resolves a `res/raw`
+  // resource. If its file has gone — a reinstall drops it while the setting
+  // that selects it survives — `resolveSoundTargets` has already fallen back
+  // to the default channel, which is what gets created here.
   const needed = new Set([
     defaultOption.androidChannelId,
-    selected.androidChannelId,
+    resolveSoundTargets(selectedSound).androidChannelId,
   ]);
   for (const option of NOTIFICATION_SOUND_OPTIONS) {
+    // Notifee neither created nor owns the custom channel, and this entry's
+    // ids are placeholders — deleting by them would take out the default
+    // channel. The native module prunes its own stale channels on import.
+    if (option.id === 'custom') continue;
     if (needed.has(option.androidChannelId)) {
       await notifee.createChannel({
         id: option.androidChannelId,
@@ -244,20 +273,28 @@ export async function previewAdhanSound(
   // via a notification would only play a 29s clip — playing the bundled full
   // recording lets the user actually hear the complete adhan they're choosing.
   if (Platform.OS === 'ios' && soundId !== 'default') {
+    if (soundId === 'custom') {
+      // Not a bundle resource, so it is played by path — and by the FULL
+      // original rather than the 29s clip the notification would get, which is
+      // the whole reason the original is kept alongside it.
+      const imported = await syncCustomAdhan();
+      if (imported?.path) void AdhanPlayer.playPath(imported.path);
+      return;
+    }
     void AdhanPlayer.play(soundId);
     return;
   }
 
   await ensureChannel(soundId);
-  const option = getNotificationSoundOption(soundId);
+  const targets = resolveSoundTargets(soundId);
 
   await notifee.displayNotification({
     id: PREVIEW_NOTIFICATION_ID,
     title: i18n.t('settings.adhanPreviewTitle'),
     body: i18n.t('settings.adhanPreviewBody', { defaultValue: '' }),
-    ios: { sound: option.iosSound },
+    ios: { sound: targets.iosSound },
     android: {
-      channelId: option.androidChannelId,
+      channelId: targets.androidChannelId,
       smallIcon: 'ic_stat_prayer',
       pressAction: { id: 'default' },
     },
@@ -414,6 +451,7 @@ export async function syncPrayerNotifications(params: {
     const isMutedNext = mutedNextAdhan === `${e.at.getTime()}-${e.name}`;
     const eventSound =
       isNonPrayer || isMutedNext ? reminderSound : prayerTimeSound;
+    const eventTargets = resolveSoundTargets(eventSound.id);
     const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
     // A prayer alert says "Prayer time"; Sunrise / the night times are NOT
@@ -460,14 +498,14 @@ export async function syncPrayerNotifications(params: {
           adhanSound: eventSound.id,
         },
         ios: {
-          sound: eventSound.iosSound,
+          sound: eventTargets.iosSound,
           // Every real prayer (adhan or plain) carries the Stop + Snooze
           // category so both actions are available; non-prayer events (Sunrise,
           // night times) get no actions.
           ...(isNonPrayer ? {} : { categoryId: ADHAN_CONTROLS_CATEGORY_ID }),
         },
         android: {
-          channelId: eventSound.androidChannelId,
+          channelId: eventTargets.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           pressAction: { id: 'default' },
           // Self-clear when the next prayer arrives (see timeoutAfterMs above).

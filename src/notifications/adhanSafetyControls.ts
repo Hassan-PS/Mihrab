@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 import i18n from '../i18n';
 import { loadSettings, saveSettings } from '../settings/storage';
 import { AdhanPlayer } from '../native/AdhanPlayer';
+import { syncCustomAdhan } from '../native/CustomAdhan';
 import {
   ADHAN_CONTROLS_CATEGORY_ID,
   ADHAN_ACTION_STOP,
@@ -73,7 +74,16 @@ async function handleAdhanAction(event: Event, foreground: boolean) {
   ) {
     const soundId = notification?.data?.adhanSound;
     if (typeof soundId === 'string' && soundId !== 'default') {
-      void AdhanPlayer.play(soundId);
+      if (soundId === 'custom') {
+        // The user's own recording is not a bundle resource, so it plays by
+        // path — and the full-length original, not the 29s clip the
+        // notification itself was limited to.
+        void syncCustomAdhan().then(imported => {
+          if (imported?.path) void AdhanPlayer.playPath(imported.path);
+        });
+      } else {
+        void AdhanPlayer.play(soundId);
+      }
     }
     return;
   }

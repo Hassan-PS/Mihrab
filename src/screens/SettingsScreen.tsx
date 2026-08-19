@@ -25,7 +25,15 @@ import { PreReminderModal } from './settings/PreReminderModal';
 import { SavedLocationsCard } from './settings/SavedLocationsCard';
 import { SoundPickerModal } from './settings/SoundPickerModal';
 import { WidgetCard } from './settings/WidgetCard';
-import type { NotificationSoundId } from '../notifications/notificationSounds';
+import type {
+  CustomAdhanSound,
+  NotificationSoundId,
+} from '../notifications/notificationSounds';
+import {
+  pickCustomAdhan,
+  removeCustomAdhan,
+  syncCustomAdhan,
+} from '../native/CustomAdhan';
 import { useTabBarInset } from '../navigation/tabBarInset';
 
 /**
@@ -81,6 +89,46 @@ export function SettingsScreen() {
   const [previewingId, setPreviewingId] = useState<NotificationSoundId | null>(
     null,
   );
+  const [customAdhan, setCustomAdhan] = useState<CustomAdhanSound | null>(null);
+  const [importingCustom, setImportingCustom] = useState(false);
+
+  // Read from disk rather than from the saved setting: the setting says which
+  // sound is chosen, the filesystem says whether the recording is still there.
+  // A reinstall drops the file and keeps the setting.
+  useEffect(() => {
+    let cancelled = false;
+    void syncCustomAdhan().then(sound => {
+      if (!cancelled) setCustomAdhan(sound);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleImportCustom = useCallback(() => {
+    setImportingCustom(true);
+    void pickCustomAdhan()
+      .then(sound => {
+        setCustomAdhan(sound);
+        // Selecting it is the point of having imported it; leaving the user to
+        // tap the row again would be a step that never has another answer.
+        if (sound) updateSettings({ notificationSound: 'custom' });
+      })
+      .catch(() => {
+        // The import failed — the row stays a placeholder, which is honest.
+        setCustomAdhan(null);
+      })
+      .finally(() => setImportingCustom(false));
+  }, [updateSettings]);
+
+  const handleRemoveCustom = useCallback(() => {
+    void removeCustomAdhan().then(() => {
+      void syncCustomAdhan().then(setCustomAdhan);
+      // Leaving 'custom' selected with nothing behind it would schedule
+      // silent prayers, so the choice goes back to the default sound.
+      updateSettings({ notificationSound: 'default' });
+    });
+  }, [updateSettings]);
 
   // Hardware-back on Android: when any modal is open, swallow the back press
   // (so it dismisses the modal) instead of popping the screen.
@@ -128,20 +176,20 @@ export function SettingsScreen() {
           { paddingBottom: 24 + tabBarInset },
         ]}
         contentInsetAdjustmentBehavior="automatic"
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+      >
         {(() => {
           const savedLocations = (
             <View
               onLayout={e => {
                 savedLocationsYRef.current = e.nativeEvent.layout.y;
-              }}>
+              }}
+            >
               <SavedLocationsCard highlightSignal={savedHighlightSignal} />
             </View>
           );
           const appearance = <AppearanceCard />;
-          const language = (
-            <LanguageCard onOpenLanguagePicker={openLanguage} />
-          );
+          const language = <LanguageCard onOpenLanguagePicker={openLanguage} />;
           const widget = <WidgetCard />;
           const dataSource = (
             <DataSourceCard onOpenProviderPicker={openProvider} />
@@ -246,6 +294,10 @@ export function SettingsScreen() {
         onSelect={id => updateSettings({ notificationSound: id })}
         onSetPreviewingId={setPreviewingId}
         onClose={closeSoundPicker}
+        customAdhan={customAdhan}
+        importingCustom={importingCustom}
+        onImportCustom={handleImportCustom}
+        onRemoveCustom={handleRemoveCustom}
       />
 
       <LanguageModal

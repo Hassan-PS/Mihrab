@@ -47,6 +47,8 @@
 		ADBF0000000016 /* adhan_yusuf_islam.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = ADFR0000000016 /* adhan_yusuf_islam.mp3 */; };
 		ADPB0000000000 /* AdhanPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADPF0000000000 /* AdhanPlayer.swift */; };
 		ADPB0000000001 /* AdhanPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = ADPF0000000001 /* AdhanPlayer.m */; };
+		ADPB0000000002 /* CustomAdhan.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADPF0000000002 /* CustomAdhan.swift */; };
+		ADPB0000000003 /* CustomAdhan.m in Sources */ = {isa = PBXBuildFile; fileRef = ADPF0000000003 /* CustomAdhan.m */; };
 		AFCC85C860A9E992FFA3E2C9 /* adhan_yusuf_islam.caf in Resources */ = {isa = PBXBuildFile; fileRef = 4357D33E0399B5C3770B7AA2 /* adhan_yusuf_islam.caf */; };
 		B5C72EE49F32E58EDF1BC8CA /* adhan_abdul_basit.caf in Resources */ = {isa = PBXBuildFile; fileRef = D5FC0C5A1FDA3B8C9843426D /* adhan_abdul_basit.caf */; };
 		BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */; };
@@ -143,6 +145,8 @@
 		ADFR0000000016 /* adhan_yusuf_islam.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = PrayerApp/adhan_yusuf_islam.mp3; sourceTree = "<group>"; };
 		ADPF0000000000 /* AdhanPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerApp/AdhanPlayer.swift; sourceTree = "<group>"; };
 		ADPF0000000001 /* AdhanPlayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrayerApp/AdhanPlayer.m; sourceTree = "<group>"; };
+		ADPF0000000002 /* CustomAdhan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerApp/CustomAdhan.swift; sourceTree = "<group>"; };
+		ADPF0000000003 /* CustomAdhan.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrayerApp/CustomAdhan.m; sourceTree = "<group>"; };
 		B1E83AFAF9D33B8EC1391857 /* adhan_minshawi.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_minshawi.caf; path = PrayerApp/adhan_minshawi.caf; sourceTree = "<group>"; };
 		B7714F32B411231108636A8C /* adhan_bakir_bash.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_bakir_bash.caf; path = PrayerApp/adhan_bakir_bash.caf; sourceTree = "<group>"; };
 		B8EC02874B0A8F91C2E75CCD /* adhan_abdul_hakam.caf */ = {isa = PBXFileReference; lastKnownFileType = "audio.x-caf"; name = adhan_abdul_hakam.caf; path = PrayerApp/adhan_abdul_hakam.caf; sourceTree = "<group>"; };
@@ -248,6 +252,8 @@
 				FA22B0071AD0000000000001 /* MushafPageScaler.swift */,
 				ADPF0000000000 /* AdhanPlayer.swift */,
 				ADPF0000000001 /* AdhanPlayer.m */,
+				ADPF0000000002 /* CustomAdhan.swift */,
+				ADPF0000000003 /* CustomAdhan.m */,
 				F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */,
 				FA22B0071AD0000000000002 /* MushafPageScaler.m */,
 				F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */,
@@ -550,6 +556,8 @@
 				FA22B0071AD0000000000003 /* MushafPageScaler.swift in Sources */,
 				ADPB0000000000 /* AdhanPlayer.swift in Sources */,
 				ADPB0000000001 /* AdhanPlayer.m in Sources */,
+				ADPB0000000002 /* CustomAdhan.swift in Sources */,
+				ADPB0000000003 /* CustomAdhan.m in Sources */,
 				BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */,
 				FA22B0071AD0000000000004 /* MushafPageScaler.m in Sources */,
 				F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */,

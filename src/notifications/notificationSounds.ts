@@ -1,5 +1,6 @@
 export type NotificationSoundId =
   | 'default'
+  | 'custom'
   | 'adhan_abdul_basit'
   | 'adhan_abdul_ghaffar'
   | 'adhan_abdul_hakam'
@@ -171,7 +172,97 @@ export const NOTIFICATION_SOUND_OPTIONS: NotificationSoundOption[] = [
     androidSound: 'adhan_yusuf_islam',
     iosSound: 'adhan_yusuf_islam.caf',
   },
+  {
+    id: 'custom',
+    labelKey: 'settings.notificationSoundCustom',
+    helpKey: 'settings.notificationSoundCustomHelp',
+    // BOTH OF THESE ARE PLACEHOLDERS, and nothing should ever schedule
+    // against them. The real channel and the real sound file depend on which
+    // recording the user imported, so they arrive at runtime through
+    // `registerCustomAdhan` and are read back through `resolveSoundTargets`.
+    // They are the default option's values so that a caller which reaches for
+    // the raw fields anyway gets a working notification rather than a silent
+    // one.
+    androidChannelId: 'prayer-times-default',
+    iosSound: 'default',
+  },
 ];
+
+/**
+ * The adhan the user imported, as the notification layer needs to address it.
+ *
+ * Everything here is decided by the file itself, which is why none of it can
+ * live in the table above. On Android the channel id carries a token derived
+ * from the file's bytes, because a channel's sound cannot be changed after it
+ * is created — a fixed id would mean importing a second adhan and going on
+ * hearing the first. On iOS the same token names the converted clip in
+ * `Library/Sounds`, for the same reason.
+ */
+export type CustomAdhanSound = {
+  /** What to show the user — the original file's name. */
+  name: string;
+  /** Derived from the file's contents; identifies this exact recording. */
+  token: string;
+  /** Android: the channel built around this file. */
+  channelId?: string;
+  /** iOS: the converted clip's filename inside `Library/Sounds`. */
+  soundName?: string;
+  /** iOS: absolute path to the full-length original, for foreground playback. */
+  path?: string;
+  durationMs: number;
+  /** iOS trims to fit the 30s notification-sound ceiling; Android does not. */
+  trimmed: boolean;
+};
+
+let registeredCustom: CustomAdhanSound | null = null;
+
+/**
+ * Tell the notification layer which recording is currently imported, or null
+ * when there is none.
+ *
+ * A setter rather than a native call so this module stays importable — and
+ * testable — without a native module behind it.
+ */
+export function registerCustomAdhan(sound: CustomAdhanSound | null): void {
+  registeredCustom = sound;
+}
+
+export function getRegisteredCustomAdhan(): CustomAdhanSound | null {
+  return registeredCustom;
+}
+
+/**
+ * Where a notification should actually point, for a given choice.
+ *
+ * FALLS BACK TO THE DEFAULT SOUND WHEN 'custom' IS SELECTED BUT NOTHING IS
+ * IMPORTED, which is not a hypothetical: the setting persists, the file does
+ * not survive a reinstall, and the user can delete the recording from the
+ * picker while it is still the selected sound. Scheduling against a channel
+ * that was never created is a notification that arrives silently, which reads
+ * as a missed prayer rather than as a missing file.
+ */
+export function resolveSoundTargets(id: NotificationSoundId): {
+  androidChannelId: string;
+  iosSound: string;
+} {
+  const option = getNotificationSoundOption(id);
+  if (id !== 'custom') {
+    return {
+      androidChannelId: option.androidChannelId,
+      iosSound: option.iosSound,
+    };
+  }
+  const fallback = getNotificationSoundOption('default');
+  return {
+    androidChannelId: registeredCustom?.channelId ?? fallback.androidChannelId,
+    iosSound: registeredCustom?.soundName ?? fallback.iosSound,
+  };
+}
+
+/** Is 'custom' currently a choice the user can actually hear? */
+export function isCustomAdhanReady(): boolean {
+  return Boolean(registeredCustom?.channelId ?? registeredCustom?.soundName);
+}
 
 export function coerceNotificationSoundId(value: unknown): NotificationSoundId {
   if (

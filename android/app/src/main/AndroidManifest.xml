@@ -174,5 +174,20 @@
           android:value="prayerCountdown" />
       </service>
 
+      <!-- Serves the user's imported adhan to whoever plays notification
+           sounds. The file lives in this app's private storage, so a file://
+           URI would be unreadable outside the process; this turns it into a
+           content:// URI that CustomAdhanModule grants read access to. Not
+           exported, and scoped to the one directory in adhan_paths.xml. -->
+      <provider
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="${applicationId}.adhan"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+          android:name="android.support.FILE_PROVIDER_PATHS"
+          android:resource="@xml/adhan_paths" />
+      </provider>
+
     </application>
 </manifest>

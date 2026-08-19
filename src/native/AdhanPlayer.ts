@@ -13,6 +13,7 @@ import { NativeModules, Platform } from 'react-native';
  */
 type AdhanPlayerNative = {
   play(name: string): Promise<boolean>;
+  playPath(path: string): Promise<boolean>;
   stop(): Promise<boolean>;
   isPlaying(): Promise<boolean>;
 };
@@ -27,6 +28,17 @@ export const AdhanPlayer = {
   play(name: string): Promise<boolean> {
     if (!native) return Promise.resolve(false);
     return native.play(name).catch(() => false);
+  },
+  /**
+   * Play a full adhan from an absolute path.
+   *
+   * The user's imported recording is not a bundle resource, and the clip the
+   * notification plays is capped at 30s, so the foreground playback goes
+   * through the original file instead.
+   */
+  playPath(path: string): Promise<boolean> {
+    if (!native) return Promise.resolve(false);
+    return native.playPath(path).catch(() => false);
   },
   /** Stop the currently-playing full adhan. */
   stop(): Promise<boolean> {

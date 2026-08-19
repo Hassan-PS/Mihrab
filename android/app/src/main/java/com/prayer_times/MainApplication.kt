@@ -23,6 +23,7 @@ class MainApplication : Application(), ReactApplication {
           add(MihrabLiveActivityPackage())
           add(MushafPageScalerPackage())
           add(MushafFontPackage())
+          add(CustomAdhanPackage())
         },
     )
   }

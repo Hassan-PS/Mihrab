@@ -46,7 +46,10 @@ import {
   type MihrabLiveActivityPayload,
 } from '../native/MihrabLiveActivity';
 import { loadSettings } from '../settings/storage';
-import { getNotificationSoundOption } from './notificationSounds';
+import {
+  getNotificationSoundOption,
+  resolveSoundTargets,
+} from './notificationSounds';
 import { OPTIONAL_TIME_KEYS } from '../types/prayer';
 import { formatHijriLabel } from '../hijri/formatHijriLabel';
 
@@ -58,7 +61,8 @@ function hijriLabelForDateKey(dateKey: string): string {
 }
 
 /** Stable notifee id — fixed so updates replace in place, not stack. */
-export const LIVE_ACTIVITY_NOTIFICATION_ID = 'mihrab.live_activity.prayer_countdown';
+export const LIVE_ACTIVITY_NOTIFICATION_ID =
+  'mihrab.live_activity.prayer_countdown';
 
 /** Dedicated channel for the Live Activity.
  *   v1 — IMPORTANCE_LOW → Silent section.
@@ -241,7 +245,9 @@ function computePrevPrayerEpoch(
     'Isha',
   ];
   const times: string[] = todayTimings
-    ? SALAH_KEYS.map(k => todayTimings[k]).filter((v): v is string => typeof v === 'string' && /^\d{1,2}:\d{2}$/.test(v))
+    ? SALAH_KEYS.map(k => todayTimings[k]).filter(
+        (v): v is string => typeof v === 'string' && /^\d{1,2}:\d{2}$/.test(v),
+      )
     : (() => {
         const ordered = [...payload.rows];
         if (payload.sunriseRow) {
@@ -339,7 +345,11 @@ export async function startOrUpdateLiveActivity(
     // The native foreground service uses prevEpochMs / nextEpochMs to
     // recompute progress on every minute tick — that's what makes the
     // bar advance without the app being open.
-    const prevEpochMs = computePrevPrayerEpoch(input.payload, nowMs, input.todayTimings);
+    const prevEpochMs = computePrevPrayerEpoch(
+      input.payload,
+      nowMs,
+      input.todayTimings,
+    );
     // Project rows to the shape the native module expects (key/name/time).
     // We send the localised long names so the expanded list isn't reading
     // as widget abbrevs ("Magh") — the widget payload uses short forms,
@@ -401,7 +411,10 @@ export async function startOrUpdateLiveActivity(
       const s = await loadSettings();
       secondMetric = s.liveActivitySecondMetric ?? 'off';
       const soundOpt = getNotificationSoundOption(s.notificationSound);
-      adhanChannelId = soundOpt.androidChannelId;
+      // Resolved rather than read off the table: the user's own recording has
+      // no fixed channel, and if its file has gone this lands on the default
+      // one instead of a channel that does not exist.
+      adhanChannelId = resolveSoundTargets(soundOpt.id).androidChannelId;
       adhanSoundId = soundOpt.id;
       const nextKey = input.payload.nextKey ?? '';
       const nextIsRealPrayer = !(

@@ -45,6 +45,37 @@ final class AdhanPlayer: NSObject {
     }
   }
 
+  /// Play a full adhan from an absolute path rather than from the bundle.
+  ///
+  /// The user's imported adhan is not a bundle resource, and the clip the
+  /// notification plays is capped at 30s — so when the app is in the
+  /// foreground this plays the whole of the file they actually chose.
+  @objc(playPath:resolver:rejecter:)
+  func playPath(_ path: NSString,
+                resolver resolve: @escaping RCTPromiseResolveBlock,
+                rejecter reject: @escaping RCTPromiseRejectBlock) {
+    let url = URL(fileURLWithPath: path as String)
+    DispatchQueue.main.async {
+      guard FileManager.default.fileExists(atPath: url.path) else {
+        NSLog("AdhanPlayer: \(url.path) does not exist")
+        resolve(false)
+        return
+      }
+      do {
+        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+        try AVAudioSession.sharedInstance().setActive(true)
+        self.player?.stop()
+        let p = try AVAudioPlayer(contentsOf: url)
+        p.prepareToPlay()
+        p.play()
+        self.player = p
+        resolve(true)
+      } catch {
+        reject("adhan_play_error", error.localizedDescription, error)
+      }
+    }
+  }
+
   /// Stop the currently-playing full adhan.
   @objc(stop:rejecter:)
   func stop(_ resolve: @escaping RCTPromiseResolveBlock,
