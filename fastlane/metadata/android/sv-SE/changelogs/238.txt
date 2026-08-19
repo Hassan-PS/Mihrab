@@ -1,0 +1,9 @@
+Sunnahböner, din egen adhan, och en app som når skärmens kanter.
+
+• Logga sunnahbönerna bredvid varje fard; grafen ritar dem runt dagen.
+• Din egen adhan — välj vilken ljudfil som helst på telefonen.
+• Exportera och importera hela ditt register, inte bara inställningarna.
+• Din bästa svit står nu bredvid den nuvarande.
+• Rättat: sviten visade noll varje morgon.
+• Rättat: sista raden i inställningarnas listor låg under navigeringsfältet.
+• 871 texter översatta.
