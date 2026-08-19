@@ -97,6 +97,17 @@ const FAST_RING_DARK = '#FBBF24';
 const SQUARE_BORDER = 2;
 
 /**
+ * The empty day: the palest step of the SAME hue as the rest of the ramp.
+ *
+ * Low enough to read as "nothing here", high enough to sit in the same
+ * sequential scale as the five above it. It gets a hairline ring as well —
+ * no tint this pale clears the 2:1 contrast floor against a white card, and
+ * a grid whose empty cells vanish in sunlight is a grid with no shape.
+ */
+const EMPTY_TINT = 0.1;
+const EMPTY_RING_TINT = 0.22;
+
+/**
  * The sunnah line: same idea as the fasting ring, one step inside it.
  *
  * `INSET` clears the fasting border (2pt, drawn inside the square by RN) with
@@ -408,11 +419,31 @@ function PracticeHeatmapImpl({
    * difference between a day that went wrong and a day nobody opened the
    * app on. It is a mark, in a colour that is not the colour of success.
    */
+  /**
+   * The depth ramp, measured rather than judged.
+   *
+   * Two things were wrong, and a contrast/CVD validator found both:
+   *
+   * THE EMPTY DAY WAS THE WRONG HUE. It used `controlBg`, a warm cream, while
+   * every other step is green — so across the whole ramp the hue swung 83°,
+   * which is not a sequential scale at all but a hue jump followed by one.
+   * An empty day is the ZERO of this scale, not a different kind of thing, so
+   * it is now the palest step of the same green. Hue spread: 10°.
+   *
+   * THE FIRST STEP WAS BELOW THE CONTRAST FLOOR. A one-prayer day sat at
+   * 1.93:1 against the card — under the 2:1 minimum, which is the difference
+   * between "a faint square" and "no square" in sunlight. Starting the ramp
+   * at 0.42 instead of 0.36 alpha puts it at 2.15:1.
+   *
+   * An empty cell cannot clear 2:1 against a white card at any lightness that
+   * still reads as empty, so it takes a hairline ring instead — secondary
+   * encoding, which is also what makes the grid survive a bright screen.
+   */
   const fillFor = (day: HeatmapDay) => {
     if (day.future) return 'transparent';
-    if (day.kept > 0) return withAlpha(accent, 0.2 + 0.8 * (day.kept / 5));
+    if (day.kept > 0) return withAlpha(accent, 0.42 + 0.58 * (day.kept / 5));
     if (day.logged > 0) return withAlpha(String(palette.danger), 0.3);
-    return palette.controlBg;
+    return withAlpha(accent, EMPTY_TINT);
   };
   const weeks = rows[0]?.length ?? 0;
   const months = useMemo(
@@ -609,6 +640,21 @@ function PracticeHeatmapImpl({
                     // in than a bare one, so every mark drawn inside has to
                     // know which it is. See `SQUARE_BORDER`.
                     const border = selected || day.fasted ? SQUARE_BORDER : 0;
+                    /**
+                     * A day carrying nothing at all — no prayers, no sunnah,
+                     * no fast, no qiyam. Only these get the empty-cell edge:
+                     * a border shifts every absolutely-positioned mark
+                     * inside the square, so a day with a mark must not have
+                     * one added underneath it.
+                     */
+                    const bare =
+                      !day.future &&
+                      day.logged === 0 &&
+                      day.kept === 0 &&
+                      day.missed === 0 &&
+                      day.sunnah === 0 &&
+                      !day.fasted &&
+                      !day.qiyam;
                     const marks = border ? MARKS_BORDERED : MARKS_PLAIN;
                     return (
                       <Pressable
@@ -650,6 +696,18 @@ function PracticeHeatmapImpl({
                         style={[
                           styles.square,
                           { backgroundColor: fillFor(day) },
+                          // See EMPTY_TINT: the palest step needs an edge to
+                          // survive a bright screen. ONLY on a day that
+                          // carries nothing at all — a border changes the
+                          // box the ring, the line and the dots are laid out
+                          // against, so a day with any mark on it must not
+                          // gain one here. (The geometry tests caught this.)
+                          bare
+                            ? [
+                                styles.emptyEdge,
+                                { borderColor: withAlpha(accent, EMPTY_RING_TINT) },
+                              ]
+                            : null,
                           // Selection lifts the square AND outlines it in
                           // the text colour. The lift alone was invisible on
                           // an empty day, which is most of them and exactly
@@ -895,6 +953,8 @@ const styles = StyleSheet.create({
   weeks: { gap: GAP },
   week: { flexDirection: 'row', gap: GAP },
   square: { width: SQUARE, height: SQUARE, borderRadius: 3.5 },
+  /** See EMPTY_TINT — applied only to a day with nothing drawn on it. */
+  emptyEdge: { borderWidth: StyleSheet.hairlineWidth },
   // The ring and the two dots live in `markStyles`, not here: their insets
   // depend on whether the square carries a border, which a static stylesheet
   // cannot express.
