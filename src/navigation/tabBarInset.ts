@@ -64,6 +64,23 @@ export function tabBarBottomFor(insetBottom: number): number {
   return Math.max(TAB_BAR_EDGE_GAP, insetBottom - 10);
 }
 
+/**
+ * KNOWN WRONG ON ANDROID 14 AND BELOW WITH THREE-BUTTON NAVIGATION.
+ *
+ * Measured 2026-08-19 on API 34 (nav mode 0, after a full reboot) and API
+ * 36, same build, same emulator profile: API 36 reports `bottom = 48` and
+ * the pill clears the buttons; API 34 reports `bottom = 24` — the GESTURE
+ * strip value — for a 48dp button bar, so `tabBarBottomFor` takes the
+ * strip branch and the system's back/home/recents buttons are drawn over
+ * the pill's labels.
+ *
+ * It is not the edge-to-edge flag: the numbers and the screenshots are
+ * identical with it on and off. It is `react-native-safe-area-context`
+ * under-reporting the navigation bar on API < 35, and no arithmetic here
+ * can correct a value that does not say a bar is present. Fixing it needs
+ * the real inset from the platform — a small native module in the shape of
+ * `SystemThemeModule` — which is its own change.
+ */
 export function useTabBarBottom(): number {
   return tabBarBottomFor(useSafeAreaInsets().bottom);
 }
