@@ -11,6 +11,7 @@ import {
 import { usePrayerSettings } from './context/PrayerSettingsContext';
 import { useSystemColorScheme } from './hooks/useSystemColorScheme';
 import { RootNavigator } from './navigation/RootNavigator';
+import { SystemNavigationScrim } from './navigation/SystemNavigationScrim';
 import {
   restartApp as nativeRestartApp,
   setNavigationBarStyle,
@@ -262,6 +263,7 @@ export function AppNavigationRoot() {
       <NavigationContainer theme={navTheme}>
         <RootNavigator />
       </NavigationContainer>
+      <SystemNavigationScrim palette={palette} />
     </View>
   );
 }

@@ -82,6 +82,17 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
         WindowCompat.setDecorFitsSystemWindows(window, false)
         @Suppress("DEPRECATION")
         window.navigationBarColor = Color.TRANSPARENT
+        /**
+         * Left at `false`, and asking for the scrim instead does NOT work.
+         *
+         * Three-button navigation on Android 14 leaves back, home and
+         * recents sitting directly on whatever has scrolled under them, so
+         * the obvious fix is to stop suppressing the system's contrast
+         * scrim in exactly that case. Tried: `isNavigationBarContrastEnforced
+         * = isButtonNavigation()`, rebuilt, and the bottom of the screenshot
+         * came back byte-identical to the run before it. The app draws its
+         * own band instead — see `SystemNavigationScrim`.
+         */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
           @Suppress("DEPRECATION")
           window.isNavigationBarContrastEnforced = false
@@ -193,6 +204,44 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * How tall the button navigation bar actually DRAWS, in dp — which is not
+   * what it reports as an inset.
+   *
+   * Android 14, three-button navigation, measured on the emulator after a
+   * clean reboot: the `NavigationBar0` window is `fillx126` — 126px, 48dp —
+   * and it hands apps `navigationBars insetsSize bottom=63`, 24dp. Half the
+   * bar it paints. The back/home/recents glyphs are centred in the window it
+   * paints, so they run from 43px to 85px above the window's bottom edge:
+   * the lower half sits in the inset, and the upper half is drawn over
+   * whatever the app put there. That is the "buttons cutting into the app"
+   * report, and no arithmetic on the inset can reach it, because the inset
+   * is not wrong — it is deliberately smaller than the bar.
+   *
+   * The height it paints comes from the platform's own dimension, verified
+   * against `framework-res.apk` on that image: `navigation_bar_frame_height`
+   * → `navigation_bar_height` → 48dp → 126px at density 2.625, exactly the
+   * window size. So read that.
+   *
+   * Zero when the system is NOT on button navigation, or when the resource
+   * cannot be resolved. Deliberately zero for gestures even though the
+   * gesture window is the same 48dp: a slim handle floating over a live page
+   * is the point of edge-to-edge, and it has no glyphs to protect.
+   */
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun buttonNavigationHeight(): Double {
+    if (isButtonNavigation() != true) return 0.0
+    val res = reactContext.resources ?: return 0.0
+    var id = res.getIdentifier(NAV_BAR_FRAME_HEIGHT, "dimen", "android")
+    if (id == 0) id = res.getIdentifier(NAV_BAR_HEIGHT, "dimen", "android")
+    if (id == 0) return 0.0
+    val px = res.getDimensionPixelSize(id)
+    if (px <= 0) return 0.0
+    val density = res.displayMetrics?.density ?: return 0.0
+    if (density <= 0f) return 0.0
+    return px / density.toDouble()
+  }
+
   companion object {
     const val NAME = "SystemTheme"
     private const val DEFAULT_ACCENT = "#22c55e"
@@ -202,6 +251,15 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
      * Android 10 and what the system itself reads.
      */
     private const val NAVIGATION_MODE = "navigation_mode"
+
+    /**
+     * Platform dimensions, resolved by name because they are not public
+     * API. `navigation_bar_frame_height` is the window the bar paints into;
+     * `navigation_bar_height` is what it points at on every image checked,
+     * and the fallback if the first name ever goes away.
+     */
+    private const val NAV_BAR_FRAME_HEIGHT = "navigation_bar_frame_height"
+    private const val NAV_BAR_HEIGHT = "navigation_bar_height"
 
     /**
      * The `uiMode` from the most recent `onConfigurationChanged`, which is

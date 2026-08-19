@@ -99,6 +99,7 @@ src/quran/data/source/
 .qr-data/
 branding/tools/__pycache__/
 .ipadshots/
+.shots/
 outputs/triage/
 build/shots/
 build/qcf*/

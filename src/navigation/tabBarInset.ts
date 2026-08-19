@@ -16,7 +16,10 @@
 import { useEffect, useState } from 'react';
 import { AppState, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { isButtonNavigation } from '../native/SystemTheme';
+import {
+  buttonNavigationHeight,
+  isButtonNavigation,
+} from '../native/SystemTheme';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
 
@@ -35,6 +38,20 @@ export const TAB_BAR_EDGE_GAP = 12;
  * three-button bar is ~48.
  */
 const GESTURE_INSET_MAX = 34;
+
+/**
+ * How far the pill is allowed to sit INSIDE a gesture strip.
+ *
+ * The strip is mostly empty: a ~5pt handle around 8pt up from the bottom
+ * edge, so the pill can overlap the strip's outer part and still leave the
+ * handle clear — which reads tighter than vacating the whole strip.
+ *
+ * Six rather than ten. At ten the pill's lower edge came down to about the
+ * top of the handle and the two read as touching, with no daylight between
+ * the app's chrome and the system's. Four points of it is enough to tell
+ * them apart and still not waste the strip.
+ */
+const GESTURE_OVERLAP = 6;
 
 /**
  * How far the pill's bottom edge sits above the window's bottom edge.
@@ -80,11 +97,48 @@ export function tabBarBottomFor(
    * is.
    */
   buttonNavigation?: boolean,
+  /**
+   * How tall the button bar DRAWS, when that is more than it reports. Zero
+   * for gestures and wherever nobody can say. See `systemNavigationBand`.
+   */
+  buttonBarHeight = 0,
 ): number {
+  const band = systemNavigationBand(
+    insetBottom,
+    buttonNavigation,
+    buttonBarHeight,
+  );
   if (buttonNavigation || insetBottom > GESTURE_INSET_MAX) {
-    return insetBottom + TAB_BAR_EDGE_GAP;
+    return Math.max(insetBottom, band) + TAB_BAR_EDGE_GAP;
   }
-  return Math.max(TAB_BAR_EDGE_GAP, insetBottom - 10);
+  return Math.max(TAB_BAR_EDGE_GAP, insetBottom - GESTURE_OVERLAP);
+}
+
+/**
+ * The strip along the bottom of the window that the system's navigation
+ * occupies — as DRAWN, which behind buttons is not what it is reported as.
+ *
+ * Android 14 hands out a 24dp `navigationBars` inset for a bar it paints
+ * 48dp tall, so back/home/recents are half inside the inset and half on top
+ * of the app. Reported as the buttons cutting into the app, and it is
+ * literally that: the platform reserved half of what it drew.
+ *
+ * Both the things that care take the larger number — the pill, so it clears
+ * the glyphs, and `SystemNavigationScrim`, so its band reaches the top of
+ * them. Same function so the two can never disagree about where the bar
+ * ends.
+ *
+ * ZERO WHEN THERE ARE NO BUTTONS, gestures included — the handle is meant
+ * to float over a live page, and a band painted behind it would just be a
+ * stripe across the bottom of every screen.
+ */
+export function systemNavigationBand(
+  insetBottom: number,
+  buttonNavigation?: boolean,
+  buttonBarHeight = 0,
+): number {
+  if (!buttonNavigation) return 0;
+  return Math.max(insetBottom, buttonBarHeight);
 }
 
 /**
@@ -95,12 +149,15 @@ export function tabBarBottomFor(
  * in the inset and would never re-render on its own. Foreground and window
  * resize are the two moments it can differ from what we last asked.
  */
-function useButtonNavigation(): boolean | undefined {
-  const [buttonNav, setButtonNav] = useState(isButtonNavigation);
+function useButtonNavigation(): {
+  buttons: boolean | undefined;
+  barHeight: number;
+} {
+  const [nav, setNav] = useState(read);
 
   useEffect(() => {
     if (Platform.OS !== 'android') return;
-    const reread = () => setButtonNav(isButtonNavigation());
+    const reread = () => setNav(read());
     reread();
     const appState = AppState.addEventListener('change', s => {
       if (s === 'active') reread();
@@ -112,11 +169,26 @@ function useButtonNavigation(): boolean | undefined {
     };
   }, []);
 
-  return buttonNav;
+  return nav;
+}
+
+function read(): { buttons: boolean | undefined; barHeight: number } {
+  return { buttons: isButtonNavigation(), barHeight: buttonNavigationHeight() };
 }
 
 export function useTabBarBottom(): number {
-  return tabBarBottomFor(useSafeAreaInsets().bottom, useButtonNavigation());
+  const { buttons, barHeight } = useButtonNavigation();
+  return tabBarBottomFor(useSafeAreaInsets().bottom, buttons, barHeight);
+}
+
+/**
+ * How much of the window's bottom edge the system navigation is drawing
+ * over, for whoever needs to paint behind it. Zero unless the system is on
+ * buttons — see `systemNavigationBand`.
+ */
+export function useSystemNavigationBand(): number {
+  const { buttons, barHeight } = useButtonNavigation();
+  return systemNavigationBand(useSafeAreaInsets().bottom, buttons, barHeight);
 }
 
 /**

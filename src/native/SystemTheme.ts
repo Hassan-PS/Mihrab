@@ -25,6 +25,7 @@ type SystemThemeNative = {
   setNavigationBarStyle?: (isDark: boolean) => void;
   getColorScheme?: () => string | null;
   isButtonNavigation?: () => boolean | null;
+  buttonNavigationHeight?: () => number;
 };
 
 const native: SystemThemeNative | undefined = (
@@ -87,12 +88,33 @@ export function getNativeColorScheme(): 'light' | 'dark' | null {
  * apart and the floating tab bar tucked itself under the buttons.
  */
 export function isButtonNavigation(): boolean | undefined {
-  if (Platform.OS !== 'android' || !native?.isButtonNavigation) return undefined;
+  if (Platform.OS !== 'android' || !native?.isButtonNavigation)
+    return undefined;
   try {
     const v = native.isButtonNavigation();
     return typeof v === 'boolean' ? v : undefined;
   } catch {
     return undefined;
+  }
+}
+
+/**
+ * How tall the button navigation bar DRAWS, in dp — zero when the system is
+ * on gestures, on iOS, or on a build without the module.
+ *
+ * Not the same number as the inset, and that is the whole reason it exists.
+ * See `SystemThemeModule.buttonNavigationHeight`: Android 14 paints a 48dp
+ * three-button bar and reports a 24dp inset, so the upper half of
+ * back/home/recents lands on top of the app. Callers take the larger of this
+ * and the inset.
+ */
+export function buttonNavigationHeight(): number {
+  if (Platform.OS !== 'android' || !native?.buttonNavigationHeight) return 0;
+  try {
+    const dp = native.buttonNavigationHeight();
+    return typeof dp === 'number' && Number.isFinite(dp) && dp > 0 ? dp : 0;
+  } catch {
+    return 0;
   }
 }
 
