@@ -27,8 +27,9 @@
  */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
-import { Platform, StyleSheet, type ColorValue } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { translucentSurface } from '../theme/chrome';
 import { CARD_SHADOW } from '../theme/tokens';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 import {
@@ -57,29 +58,6 @@ import {
 import type { MainTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
-
-/**
- * The pill's surface, with the page allowed to show through it.
- *
- * ONLY FOR A PLAIN HEX. Under the system/dynamic themes `palette.card` is a
- * `PlatformColor`, an opaque object with no channels to reach into — the
- * same reason the colours below are passed through as `ColorValue` and never
- * stringified. Those themes keep the solid surface, which is the right
- * default for them anyway: Material You and Liquid Glass both supply their
- * own material.
- *
- * 0.88 rather than something dramatic: this bar carries six labels at 10.5pt
- * and they have to stay readable over whatever scrolls beneath them.
- */
-function translucent(card: ColorValue): ColorValue {
-  if (typeof card !== 'string') return card;
-  const hex = /^#([0-9a-f]{6})$/i.exec(card);
-  if (!hex) return card;
-  const a = Math.round(0.88 * 255)
-    .toString(16)
-    .padStart(2, '0');
-  return `#${hex[1]}${a}`;
-}
 
 export function MainTabs() {
   const { t } = useTranslation();
@@ -116,7 +94,7 @@ export function MainTabs() {
          */
         tabBarStyle: FLOATS_OVER_CONTENT
           ? {
-              backgroundColor: translucent(palette.card),
+              backgroundColor: translucentSurface(palette.card),
               position: 'absolute',
               /**
                * ABSOLUTE AGAIN — and this time the tabs still work.
@@ -186,7 +164,8 @@ export function MainTabs() {
         // The bar is the app's own chrome; on iOS the blur belongs to the
         // system, so leave the default there.
         tabBarHideOnKeyboard: Platform.OS === 'android',
-      }}>
+      }}
+    >
       <Tab.Screen
         name="TodayTab"
         component={HomeScreen}
@@ -214,7 +193,9 @@ export function MainTabs() {
           // Mac Catalyst renders these as the first row of Home content
           // instead: the transparent navigation bar sits in the window's
           // title-bar drag region, where clicks get swallowed.
-          ...(isMacCatalyst ? {} : { headerRight: () => <HomeHeaderControls /> }),
+          ...(isMacCatalyst
+            ? {}
+            : { headerRight: () => <HomeHeaderControls /> }),
         }}
       />
       <Tab.Screen

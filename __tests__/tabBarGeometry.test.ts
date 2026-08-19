@@ -36,13 +36,13 @@ describe('tabBarBottomFor', () => {
   it('tucks into a gesture strip rather than clearing it', () => {
     // iPhone home indicator: 34pt of inset, a ~5pt handle ~8pt up. The
     // pill sits inside the strip and still leaves daylight above the
-    // handle — at the previous 10pt of overlap the two edges read as
-    // touching.
-    expect(tabBarBottomFor(34)).toBe(28);
+    // handle — at the original 10pt of overlap the two edges read as
+    // touching, and 6pt was reported as still too tight.
+    expect(tabBarBottomFor(34)).toBe(32);
     // Android gesture bar.
-    expect(tabBarBottomFor(24)).toBe(18);
+    expect(tabBarBottomFor(24)).toBe(22);
     // iPad.
-    expect(tabBarBottomFor(20)).toBe(14);
+    expect(tabBarBottomFor(20)).toBe(18);
   });
 
   it('leaves the handle itself clear on every strip', () => {
@@ -88,8 +88,8 @@ describe('tabBarBottomFor', () => {
   it('ignores a drawn height that gestures reported', () => {
     // The gesture window is the same 48dp, and tucking the pill above all
     // of it would throw away the strip the design deliberately overlaps.
-    expect(tabBarBottomFor(24, false, 48)).toBe(18);
-    expect(tabBarBottomFor(24, undefined, 48)).toBe(18);
+    expect(tabBarBottomFor(24, false, 48)).toBe(22);
+    expect(tabBarBottomFor(24, undefined, 48)).toBe(22);
   });
 });
 

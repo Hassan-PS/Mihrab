@@ -46,12 +46,15 @@ const GESTURE_INSET_MAX = 34;
  * edge, so the pill can overlap the strip's outer part and still leave the
  * handle clear — which reads tighter than vacating the whole strip.
  *
- * Six rather than ten. At ten the pill's lower edge came down to about the
+ * Two rather than ten. At ten the pill's lower edge came down to about the
  * top of the handle and the two read as touching, with no daylight between
- * the app's chrome and the system's. Four points of it is enough to tell
- * them apart and still not waste the strip.
+ * the app's chrome and the system's. Six was better and still too tight —
+ * reported a second time — so this is now most of a 24dp strip's clearance:
+ * the pill's bottom lands about 9pt above the handle instead of 5pt, while
+ * still sitting inside the strip rather than vacating it, which is the whole
+ * reason the pill is detached.
  */
-const GESTURE_OVERLAP = 6;
+const GESTURE_OVERLAP = 2;
 
 /**
  * How far the pill's bottom edge sits above the window's bottom edge.
@@ -189,6 +192,22 @@ export function useTabBarBottom(): number {
 export function useSystemNavigationBand(): number {
   const { buttons, barHeight } = useButtonNavigation();
   return systemNavigationBand(useSafeAreaInsets().bottom, buttons, barHeight);
+}
+
+/**
+ * What anything anchored to the bottom of the window has to keep clear.
+ *
+ * The inset alone is not enough behind buttons — Android 14 reports 24dp for a
+ * bar it paints 48dp tall — and the band alone is zero under gestures, where
+ * the handle still needs its strip. The larger of the two is the answer for
+ * both, and it is what a bottom sheet needs: the sound picker's last row was
+ * half-under the navigation bar, so the newest entry in the list was the one
+ * you could not tap.
+ */
+export function useSystemNavigationReserve(): number {
+  const { buttons, barHeight } = useButtonNavigation();
+  const inset = useSafeAreaInsets().bottom;
+  return Math.max(inset, systemNavigationBand(inset, buttons, barHeight));
 }
 
 /**

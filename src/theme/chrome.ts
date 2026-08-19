@@ -1,6 +1,34 @@
-import { StyleSheet, type ViewStyle } from 'react-native';
+import { StyleSheet, type ColorValue, type ViewStyle } from 'react-native';
 import type { AppPalette } from './appPalette';
 import { CARD_SHADOW } from './tokens';
+
+/**
+ * A surface the page is allowed to show through — the material the floating
+ * tab bar is made of, and the band behind the system's navigation buttons on
+ * the Android versions that draw no material of their own.
+ *
+ * ONE DEFINITION FOR BOTH, because they sit directly on top of one another at
+ * the bottom of the screen: two independently-chosen alphas there would read
+ * as a seam, and the whole point is that the app's chrome and the system's
+ * look like one piece.
+ *
+ * ONLY FOR A PLAIN HEX. Under the system/dynamic themes `palette.card` is a
+ * `PlatformColor` — an opaque object with no channels to reach into. Those
+ * themes keep the solid surface, which is the right default for them anyway:
+ * Material You and Liquid Glass both supply their own material.
+ *
+ * 0.88 rather than something dramatic: the tab bar carries six labels at
+ * 10.5pt and they have to stay readable over whatever scrolls beneath them.
+ */
+export function translucentSurface(card: ColorValue): ColorValue {
+  if (typeof card !== 'string') return card;
+  const hex = /^#([0-9a-f]{6})$/i.exec(card);
+  if (!hex) return card;
+  const a = Math.round(0.88 * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `#${hex[1]}${a}`;
+}
 
 type ChromePalette = Pick<
   AppPalette,

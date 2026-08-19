@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { cardEdgeStyle, rowDividerStyle } from '../../theme/chrome';
 import type { AppPalette } from '../../theme/appPalette';
 import type { AppLanguage } from '../../settings/types';
+import { useSystemNavigationReserve } from '../../navigation/tabBarInset';
 import { modalStyles } from './modalStyles';
 
 const LANGUAGES: { id: AppLanguage; label: string }[] = [
@@ -41,12 +42,14 @@ export const LanguageModal = memo(function LanguageModal({
   onClose,
 }: Props) {
   const { t } = useTranslation();
+  const navigationReserve = useSystemNavigationReserve();
   return (
     <Modal
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View style={modalStyles.root}>
         <Pressable
           accessibilityRole="button"
@@ -60,7 +63,13 @@ export const LanguageModal = memo(function LanguageModal({
           style={[
             modalStyles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
+            // The sheet sits on the window's bottom edge, which under
+            // edge-to-edge is behind the system's navigation. Without this the
+            // last row of the list is under the navigation bar and cannot be
+            // tapped.
+            { paddingBottom: navigationReserve },
+          ]}
+        >
           <Text style={[modalStyles.title, { color: palette.text }]}>
             {t('settings.language')}
           </Text>
@@ -81,7 +90,8 @@ export const LanguageModal = memo(function LanguageModal({
                 onPress={() => {
                   onSelect(item.id);
                   onClose();
-                }}>
+                }}
+              >
                 <Text style={[modalStyles.rowLabel, { color: palette.text }]}>
                   {item.label}
                 </Text>

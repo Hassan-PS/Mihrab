@@ -2,7 +2,14 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo, useCallback } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { AppPalette } from '../../theme/appPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
@@ -17,6 +24,7 @@ import {
 } from '../../theme/textScale';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { typeStyle } from '../../theme/typography';
+import { useSystemNavigationReserve } from '../../navigation/tabBarInset';
 import { modalStyles } from './modalStyles';
 
 /**
@@ -57,6 +65,7 @@ export const PrayerOffsetsModal = memo(function PrayerOffsetsModal({
   onClose,
 }: Props) {
   const { t } = useTranslation();
+  const navigationReserve = useSystemNavigationReserve();
 
   const setOffset = useCallback(
     (key: keyof PrayerOffsetMinutes, delta: number) => {
@@ -79,7 +88,8 @@ export const PrayerOffsetsModal = memo(function PrayerOffsetsModal({
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View style={modalStyles.root}>
         <Pressable
           accessibilityRole="button"
@@ -91,7 +101,13 @@ export const PrayerOffsetsModal = memo(function PrayerOffsetsModal({
           style={[
             modalStyles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
+            // The sheet sits on the window's bottom edge, which under
+            // edge-to-edge is behind the system's navigation. Without this the
+            // last row of the list is under the navigation bar and cannot be
+            // tapped.
+            { paddingBottom: navigationReserve },
+          ]}
+        >
           <Text style={[modalStyles.title, { color: palette.text }]}>
             {t('settings.prayerOffsetsTitle')}
           </Text>
@@ -100,7 +116,8 @@ export const PrayerOffsetsModal = memo(function PrayerOffsetsModal({
               style={[
                 styles.help,
                 { color: palette.muted, paddingHorizontal: 16 },
-              ]}>
+              ]}
+            >
               {t('settings.prayerOffsetsHelp', {
                 max: MAX_OFFSET_MAGNITUDE,
               })}
@@ -128,7 +145,8 @@ export const PrayerOffsetsModal = memo(function PrayerOffsetsModal({
                         tabularNumeralStyle,
                         { color: palette.accent },
                       ]}
-                      maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+                      maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
+                    >
                       {value > 0 ? `+${value}` : value}
                     </Text>
                     <StepperButton
@@ -148,10 +166,18 @@ export const PrayerOffsetsModal = memo(function PrayerOffsetsModal({
               accessibilityRole="button"
               accessibilityLabel={t('settings.prayerOffsetsReset')}
               onPress={reset}
-              style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+              style={({
+                pressed,
+                hovered,
+              }: {
+                pressed: boolean;
+                hovered?: boolean;
+              }) => [
                 styles.reset,
-                pressed && { opacity: 0.6 }, hovered && { opacity: 0.92 },
-              ]}>
+                pressed && { opacity: 0.6 },
+                hovered && { opacity: 0.92 },
+              ]}
+            >
               <Text style={[styles.resetLabel, { color: palette.danger }]}>
                 {t('settings.prayerOffsetsReset')}
               </Text>
@@ -183,15 +209,23 @@ function StepperButton({
       onPress={onPress}
       disabled={disabled}
       hitSlop={8}
-      style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+      style={({
+        pressed,
+        hovered,
+      }: {
+        pressed: boolean;
+        hovered?: boolean;
+      }) => [
         styles.stepBtn,
         {
           backgroundColor: palette.accentBg,
           borderColor: palette.border,
         },
-        pressed && { opacity: 0.7 }, hovered && { opacity: 0.92 },
+        pressed && { opacity: 0.7 },
+        hovered && { opacity: 0.92 },
         disabled && { opacity: 0.35 },
-      ]}>
+      ]}
+    >
       <Text style={[styles.stepBtnLabel, { color: palette.accent }]}>
         {label}
       </Text>
@@ -216,7 +250,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   stepBtn: {
-    width: 36,           // 36pt circular tap target
+    width: 36, // 36pt circular tap target
     height: 36,
     borderRadius: RADIUS.full,
     borderWidth: 1,

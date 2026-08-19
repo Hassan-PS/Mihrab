@@ -19,6 +19,7 @@ import type {
   PrayerAppSettings,
   PrayerDataProviderId,
 } from '../settings/types';
+import { useSystemNavigationReserve } from '../navigation/tabBarInset';
 import { cardEdgeStyle, rowDividerStyle } from '../theme/chrome';
 
 type Palette = {
@@ -62,6 +63,7 @@ function ProviderPickerModalImpl({
   palette,
 }: Props) {
   const { t } = useTranslation();
+  const navigationReserve = useSystemNavigationReserve();
   const listData = useMemo<ListItem[]>(
     () => [
       { kind: 'auto' },
@@ -118,7 +120,8 @@ function ProviderPickerModalImpl({
             onPress={() => {
               updateSettings({ dataProviderAuto: true });
               onClose();
-            }}>
+            }}
+          >
             <Text style={[styles.rowTitle, { color: palette.text }]}>
               {t('provider.autoTitle')}
             </Text>
@@ -149,13 +152,10 @@ function ProviderPickerModalImpl({
               dataProviderAuto: false,
             });
             onClose();
-          }}>
-          <Text style={[styles.rowTitle, { color: palette.text }]}>
-            {name}
-          </Text>
-          <Text style={[styles.rowSub, { color: palette.muted }]}>
-            {desc}
-          </Text>
+          }}
+        >
+          <Text style={[styles.rowTitle, { color: palette.text }]}>{name}</Text>
+          <Text style={[styles.rowSub, { color: palette.muted }]}>{desc}</Text>
         </Pressable>
       );
     },
@@ -174,7 +174,8 @@ function ProviderPickerModalImpl({
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View style={styles.modalRoot}>
         <Pressable
           accessibilityRole="button"
@@ -186,7 +187,13 @@ function ProviderPickerModalImpl({
           style={[
             styles.modalSheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
+            // The sheet sits on the window's bottom edge, which under
+            // edge-to-edge is behind the system's navigation. Without this the
+            // last row of the list is under the navigation bar and cannot be
+            // tapped.
+            { paddingBottom: navigationReserve },
+          ]}
+        >
           <Text style={[styles.modalTitle, { color: palette.text }]}>
             {t('provider.modalTitle')}
           </Text>

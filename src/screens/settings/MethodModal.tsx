@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { cardEdgeStyle, rowDividerStyle } from '../../theme/chrome';
 import type { AppPalette } from '../../theme/appPalette';
 import { CALCULATION_METHODS } from '../../settings/methods';
+import { useSystemNavigationReserve } from '../../navigation/tabBarInset';
 import { modalStyles } from './modalStyles';
 
 type Props = {
@@ -25,12 +26,14 @@ export const MethodModal = memo(function MethodModal({
   onClose,
 }: Props) {
   const { t } = useTranslation();
+  const navigationReserve = useSystemNavigationReserve();
   return (
     <Modal
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View style={modalStyles.root}>
         <Pressable
           accessibilityRole="button"
@@ -44,7 +47,13 @@ export const MethodModal = memo(function MethodModal({
           style={[
             modalStyles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
+            // The sheet sits on the window's bottom edge, which under
+            // edge-to-edge is behind the system's navigation. Without this the
+            // last row of the list is under the navigation bar and cannot be
+            // tapped.
+            { paddingBottom: navigationReserve },
+          ]}
+        >
           <Text style={[modalStyles.title, { color: palette.text }]}>
             {t('settings.methodModalTitle')}
           </Text>
@@ -61,12 +70,15 @@ export const MethodModal = memo(function MethodModal({
                   style={[
                     modalStyles.row,
                     rowDividerStyle(palette),
-                    currentMethod === item.id && { backgroundColor: palette.bg },
+                    currentMethod === item.id && {
+                      backgroundColor: palette.bg,
+                    },
                   ]}
                   onPress={() => {
                     onSelect(item.id);
                     onClose();
-                  }}>
+                  }}
+                >
                   <Text style={[modalStyles.rowLabel, { color: palette.text }]}>
                     {label}
                   </Text>
