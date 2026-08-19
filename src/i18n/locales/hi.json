@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " दिन",
+    "streakLabel": "समय पर लगातार",
+    "best": "सर्वश्रेष्ठ {{best}}",
+    "sunnahLabel": "सुन्नत अदा",
+    "thisMonth": "इस माह",
+    "fastedLabel": "रोज़े",
+    "owedLabel": "क़ज़ा नमाज़ें",
+    "nothingOwed": "कोई क़ज़ा नहीं",
+    "owedShow": "देखने के लिए टैप करें",
+    "owedHide": "दिखाया जा रहा ✕",
+    "owedHint": "क़ज़ा अदा करने के लिए दिन पर टैप करें",
+    "owedMore": "+{{more}} और",
+    "owedA11y": "{{owed}} क़ज़ा नमाज़ें, दिखाएँ",
+    "nothingOwedA11y": "कोई क़ज़ा नहीं"
   }
 }

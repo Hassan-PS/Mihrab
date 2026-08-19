@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " 天",
+    "streakLabel": "准时连续",
+    "best": "最佳 {{best}}",
+    "sunnahLabel": "已做圣行",
+    "thisMonth": "本月",
+    "fastedLabel": "封斋",
+    "owedLabel": "待补拜功",
+    "nothingOwed": "无待补",
+    "owedShow": "点按查看",
+    "owedHide": "显示中 ✕",
+    "owedHint": "点按某天进行补拜",
+    "owedMore": "+{{more}} 更多",
+    "owedA11y": "{{owed}} 项待补拜功，显示",
+    "nothingOwedA11y": "无待补"
   }
 }

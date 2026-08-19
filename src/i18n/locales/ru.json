@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " дн.",
+    "streakLabel": "Серия вовремя",
+    "best": "рекорд {{best}}",
+    "sunnahLabel": "Сунна совершена",
+    "thisMonth": "в этом месяце",
+    "fastedLabel": "Пост",
+    "owedLabel": "Пропущенные молитвы",
+    "nothingOwed": "Нет пропущенных",
+    "owedShow": "нажмите, чтобы увидеть",
+    "owedHide": "показаны ✕",
+    "owedHint": "Нажмите на день, чтобы восполнить",
+    "owedMore": "+{{more}} ещё",
+    "owedA11y": "{{owed}} пропущенных молитв, показать",
+    "nothingOwedA11y": "Нет пропущенных"
   }
 }

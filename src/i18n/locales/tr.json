@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " gün",
+    "streakLabel": "Vaktinde seri",
+    "best": "en iyi {{best}}",
+    "sunnahLabel": "Kılınan sünnet",
+    "thisMonth": "bu ay",
+    "fastedLabel": "Oruç",
+    "owedLabel": "Kaza namazı",
+    "nothingOwed": "Kaza yok",
+    "owedShow": "görmek için dokun",
+    "owedHide": "gösteriliyor ✕",
+    "owedHint": "Kaza etmek için bir güne dokunun",
+    "owedMore": "+{{more}} daha",
+    "owedA11y": "{{owed}} kaza namazı, göster",
+    "nothingOwedA11y": "Kaza yok"
   }
 }

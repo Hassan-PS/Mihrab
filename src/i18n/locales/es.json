@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " días",
+    "streakLabel": "Racha a tiempo",
+    "best": "mejor {{best}}",
+    "sunnahLabel": "Sunnah rezada",
+    "thisMonth": "este mes",
+    "fastedLabel": "Ayunado",
+    "owedLabel": "Rezos pendientes",
+    "nothingOwed": "Nada pendiente",
+    "owedShow": "toca para ver",
+    "owedHide": "mostrando ✕",
+    "owedHint": "Toca un día para recuperarlo",
+    "owedMore": "+{{more}} más",
+    "owedA11y": "{{owed}} rezos pendientes, mostrarlos",
+    "nothingOwedA11y": "Nada pendiente"
   }
 }

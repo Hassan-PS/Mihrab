@@ -375,6 +375,13 @@ type Props = {
   caption?: string;
   /** The day the Log is currently showing, drawn lifted out of the grid. */
   selectedKey?: string;
+  /**
+   * When set, only these days are drawn at full strength — everything else
+   * drops back. Emphasis rather than a seventh permanent encoding: the
+   * missed dot is 4pt on an 18pt square, and a day that went four-of-five is
+   * a strong green square that camouflages it. This is how you FIND them.
+   */
+  emphasise?: Set<string>;
   /** Tapping a square opens that day. Omit to keep the graph read-only. */
   onSelectDay?: (key: string) => void;
   /**
@@ -390,6 +397,7 @@ type Props = {
 function PracticeHeatmapImpl({
   rows,
   weekdayLabels,
+  emphasise,
   caption,
   selectedKey,
   onSelectDay,
@@ -647,6 +655,22 @@ function PracticeHeatmapImpl({
                      * inside the square, so a day with a mark must not have
                      * one added underneath it.
                      */
+                    /**
+                     * Emphasis: dim everything that is not being looked for.
+                     *
+                     * Two exemptions, and both are about what the mark MEANS
+                     * rather than how loud it is. A future day is not a day
+                     * that failed the filter, it is a day that has not
+                     * happened. And the selected square is not data at all —
+                     * it is where you are — so dimming it takes away the one
+                     * fixed point on the grid at exactly the moment the rest
+                     * of it has gone quiet.
+                     */
+                    const muted =
+                      emphasise !== undefined &&
+                      !emphasise.has(day.key) &&
+                      !day.future &&
+                      !selected;
                     const bare =
                       !day.future &&
                       day.logged === 0 &&
@@ -702,6 +726,7 @@ function PracticeHeatmapImpl({
                           // box the ring, the line and the dots are laid out
                           // against, so a day with any mark on it must not
                           // gain one here. (The geometry tests caught this.)
+                          muted && styles.squareMuted,
                           bare
                             ? [
                                 styles.emptyEdge,
@@ -955,6 +980,15 @@ const styles = StyleSheet.create({
   square: { width: SQUARE, height: SQUARE, borderRadius: 3.5 },
   /** See EMPTY_TINT — applied only to a day with nothing drawn on it. */
   emptyEdge: { borderWidth: StyleSheet.hairlineWidth },
+  /**
+   * The de-emphasised state, while the grid is showing only owed days.
+   *
+   * 0.16 rather than hiding them: the shape of the record is what makes the
+   * marked days legible as "three days out of all this", and a grid that
+   * emptied itself would lose the very context that makes the answer mean
+   * something.
+   */
+  squareMuted: { opacity: 0.16 },
   // The ring and the two dots live in `markStyles`, not here: their insets
   // depend on whether the square carries a border, which a static stylesheet
   // cannot express.

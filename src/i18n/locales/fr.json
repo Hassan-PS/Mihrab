@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " jours",
+    "streakLabel": "Série à l'heure",
+    "best": "record {{best}}",
+    "sunnahLabel": "Sunna accomplie",
+    "thisMonth": "ce mois-ci",
+    "fastedLabel": "Jeûné",
+    "owedLabel": "Prières dues",
+    "nothingOwed": "Rien à rattraper",
+    "owedShow": "appuyer pour voir",
+    "owedHide": "affichées ✕",
+    "owedHint": "Touchez un jour pour le rattraper",
+    "owedMore": "+{{more}} autres",
+    "owedA11y": "{{owed}} prières dues, les afficher",
+    "nothingOwedA11y": "Rien à rattraper"
   }
 }

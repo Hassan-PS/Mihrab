@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " hari",
+    "streakLabel": "Rentetan tepat waktu",
+    "best": "terbaik {{best}}",
+    "sunnahLabel": "Sunah ditunaikan",
+    "thisMonth": "bulan ini",
+    "fastedLabel": "Berpuasa",
+    "owedLabel": "Salat qadha",
+    "nothingOwed": "Tidak ada qadha",
+    "owedShow": "ketuk untuk lihat",
+    "owedHide": "ditampilkan ✕",
+    "owedHint": "Ketuk hari untuk mengqadhanya",
+    "owedMore": "+{{more}} lagi",
+    "owedA11y": "{{owed}} salat qadha, tampilkan",
+    "nothingOwedA11y": "Tidak ada qadha"
   }
 }

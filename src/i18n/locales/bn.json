@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " দিন",
+    "streakLabel": "সময়মতো ধারা",
+    "best": "সেরা {{best}}",
+    "sunnahLabel": "সুন্নাহ আদায়",
+    "thisMonth": "এই মাসে",
+    "fastedLabel": "রোজা",
+    "owedLabel": "কাজা নামাজ",
+    "nothingOwed": "কোনো কাজা নেই",
+    "owedShow": "দেখতে চাপুন",
+    "owedHide": "দেখানো হচ্ছে ✕",
+    "owedHint": "কাজা আদায় করতে দিনে চাপুন",
+    "owedMore": "+{{more}} আরও",
+    "owedA11y": "{{owed}}টি কাজা নামাজ, দেখান",
+    "nothingOwedA11y": "কোনো কাজা নেই"
   }
 }

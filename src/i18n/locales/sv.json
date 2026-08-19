@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " dagar",
+    "streakLabel": "Svit i tid",
+    "best": "bäst {{best}}",
+    "sunnahLabel": "Sunnah utförd",
+    "thisMonth": "denna månad",
+    "fastedLabel": "Fastat",
+    "owedLabel": "Böner att ta igen",
+    "nothingOwed": "Inget att ta igen",
+    "owedShow": "tryck för att se",
+    "owedHide": "visas ✕",
+    "owedHint": "Tryck på en dag för att ta igen den",
+    "owedMore": "+{{more}} till",
+    "owedA11y": "{{owed}} böner att ta igen, visa dem",
+    "nothingOwedA11y": "Inget att ta igen"
   }
 }

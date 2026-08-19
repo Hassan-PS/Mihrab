@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " days",
+    "streakLabel": "On-time streak",
+    "best": "best {{best}}",
+    "sunnahLabel": "Sunnah kept",
+    "thisMonth": "this month",
+    "fastedLabel": "Fasted",
+    "owedLabel": "Prayers owed",
+    "nothingOwed": "Nothing owed",
+    "owedShow": "tap to see",
+    "owedHide": "showing ✕",
+    "owedHint": "Tap a day to make it up",
+    "owedMore": "+{{more}} more",
+    "owedA11y": "{{owed}} prayers owed, show them",
+    "nothingOwedA11y": "Nothing owed"
   }
 }

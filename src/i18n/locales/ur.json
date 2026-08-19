@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " دن",
+    "streakLabel": "وقت پر تسلسل",
+    "best": "بہترین {{best}}",
+    "sunnahLabel": "سنت ادا",
+    "thisMonth": "اس ماہ",
+    "fastedLabel": "روزے",
+    "owedLabel": "قضا نمازیں",
+    "nothingOwed": "کوئی قضا نہیں",
+    "owedShow": "دیکھنے کے لیے دبائیں",
+    "owedHide": "دکھائی جا رہی ✕",
+    "owedHint": "قضا کرنے کے لیے دن پر دبائیں",
+    "owedMore": "+{{more}} مزید",
+    "owedA11y": "{{owed}} قضا نمازیں، دکھائیں",
+    "nothingOwedA11y": "کوئی قضا نہیں"
   }
 }

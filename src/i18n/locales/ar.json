@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " يوم",
+    "streakLabel": "تتابع في الوقت",
+    "best": "الأفضل {{best}}",
+    "sunnahLabel": "السنن المؤداة",
+    "thisMonth": "هذا الشهر",
+    "fastedLabel": "صمت",
+    "owedLabel": "صلوات فائتة",
+    "nothingOwed": "لا شيء فائت",
+    "owedShow": "اضغط للعرض",
+    "owedHide": "معروضة ✕",
+    "owedHint": "اضغط على يوم لقضائه",
+    "owedMore": "+{{more}} أخرى",
+    "owedA11y": "{{owed}} صلوات فائتة، اعرضها",
+    "nothingOwedA11y": "لا شيء فائت"
   }
 }

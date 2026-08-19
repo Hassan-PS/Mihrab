@@ -44,6 +44,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { FillSummary } from '../components/FillSummary';
 import { SunnahChip } from './log/SunnahChip';
+import { PracticeStatsRow } from './log/PracticeStatsRow';
 import { IshaExtras } from './log/IshaExtras';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
@@ -66,6 +67,7 @@ import {
   PracticeHeatmap,
   weeksToCover,
 } from '../practice/PracticeHeatmap';
+import { computePracticeStats, owedDays } from '../practice/practiceStats';
 import { getCachedPrayerTimes } from '../prayer/prayerStorage';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import { applyOffsets } from '../settings/prayerOffsets';
@@ -87,7 +89,6 @@ import {
 import {
   SUNNAH_UNITS,
   coerceSunnahLog,
-  computeSunnahStreak,
   cycleSunnah,
   dayAt,
   fieldFor,
@@ -102,7 +103,6 @@ import { installedOnDay } from '../journal/installDate';
 import { syncEndOfDayReminderForDay } from '../notifications/endOfDayLog';
 import {
   coerceFastEntries,
-  computeFastStats,
   findFastEntry,
   isRecommendedVoluntaryFastDay,
   ramadanDayNumber,
@@ -130,6 +130,23 @@ const STATUSES: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
 function dateFromKey(key: string): Date {
   const [y, m, d] = key.split('-').map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1, 12, 0, 0, 0);
+}
+
+/**
+ * How many owed prayers get a chip of their own under the grid.
+ *
+ * Six fills about two rows on a narrow phone. Past that the shortcut turns
+ * back into the scrolling wall of dates this screen deleted in review 2c —
+ * the rest are still in the graph, and the counter says how many.
+ */
+const OWED_CHIP_LIMIT = 6;
+
+/** "2 Aug" — short enough for a chip, unambiguous inside a year. */
+function formatOwedDate(key: string, locale: string): string {
+  return dateFromKey(key).toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'short',
+  });
 }
 
 /** Oldest day with anything recorded, or null for an empty journal. */
@@ -586,8 +603,48 @@ export function LogScreen() {
 
   const streak = computeCurrentStreak(entries);
   const longestStreak = computeLongestStreak(entries);
-  const sunnahStreak = computeSunnahStreak(sunnah);
-  const fastStats = computeFastStats(fasts);
+
+  /**
+   * The four headline numbers, and the owed list behind the fourth.
+   *
+   * `now` is left to default rather than pinned: the only thing it decides
+   * is which calendar month the sunnah rate and the fast count belong to,
+   * this recomputes on every write, and a pinned clock would go stale at
+   * midnight on the 1st for anyone who left the screen open.
+   */
+  const stats = useMemo(
+    () =>
+      computePracticeStats({
+        entries,
+        fasts,
+        sunnah,
+        streak,
+        bestStreak: longestStreak,
+      }),
+    [entries, fasts, sunnah, streak, longestStreak],
+  );
+
+  /**
+   * Owed mode — the fourth tile's answer to "which days".
+   *
+   * A count of three is only half a feature if finding those three means
+   * hunting 4pt dots across ninety-one squares. Turning it on dims every
+   * day that owes nothing, so the ones that do are the only thing left
+   * lit, and names them as chips underneath for anyone who would rather
+   * read than scan.
+   */
+  const [showOwed, setShowOwed] = useState(false);
+  const owedDaySet = useMemo(() => owedDays(stats.owed), [stats.owed]);
+  /**
+   * Choosing a day leaves owed mode. The dimming has done its job the
+   * moment it is acted on, and a grid still greyed out behind the day you
+   * just opened reads as a stuck filter rather than a hint.
+   */
+  const onSelectDayFromGrid = useCallback((key: string) => {
+    setShowOwed(false);
+    setSelected(key);
+  }, []);
+  const toggleOwed = useCallback(() => setShowOwed(v => !v), []);
 
   /**
    * The selected day's prayer times, for the row labels and the iftar line.
@@ -963,35 +1020,73 @@ export function LogScreen() {
           <Text style={[styles.sectionTitle, { color: palette.muted }]}>
             {t('log.practiceTitle')}
           </Text>
+          {/* The caption this replaces read "5-day streak (best 12) · 0-day
+              sunnah · 1 fasts" — three statistics in prose under a chart,
+              with the middle one a puzzle. See PracticeStatsRow. */}
+          <PracticeStatsRow
+            stats={stats}
+            palette={palette}
+            showingOwed={showOwed}
+            onToggleOwed={toggleOwed}
+          />
           <PracticeHeatmap
             rows={heatmapRows}
             weekdayLabels={weekdayLabels}
             selectedKey={selected}
-            onSelectDay={setSelected}
+            emphasise={showOwed ? owedDaySet : undefined}
+            onSelectDay={onSelectDayFromGrid}
             onReachOldest={showMore}
-            caption={`${t('log.streakCaption', {
-              defaultValue: '{{count}}-day streak',
-              count: streak,
-            })}${
-              // The personal best sits against the number it is a best of,
-              // because the comparison IS the point — "3" means nothing until
-              // you know whether 3 is good. Hidden until there is a record
-              // worth having: on a new install "(best 0)" beside a streak of
-              // 0 is two ways of saying nothing, and the caption is one line.
-              longestStreak > 0
-                ? ` ${t('log.streakBest', {
-                    defaultValue: '(best {{best}})',
-                    best: longestStreak,
-                  })}`
-                : ''
-            } · ${t('sunnah.streakCaption', {
-              defaultValue: '{{count}}-day sunnah',
-              count: sunnahStreak,
-            })} · ${t('log.fastsCaption', {
-              defaultValue: '{{count}} fasts',
-              count: fastStats.total,
-            })}`}
           />
+          {showOwed ? (
+            <View
+              style={[
+                styles.owedBar,
+                {
+                  backgroundColor: palette.isDark ? '#3A1E1B' : '#FBEDEB',
+                },
+              ]}
+            >
+              <Text style={[styles.owedHint, { color: String(palette.danger) }]}>
+                {t('stats.owedHint', 'Tap a day to make it up')}
+              </Text>
+              <View style={styles.owedChips}>
+                {/* Named, not hunted. Even with the grid dimmed, finding
+                    three squares among ninety-one is work the app can do. */}
+                {stats.owed.slice(0, OWED_CHIP_LIMIT).map(o => (
+                  <Pressable
+                    key={`${o.date}-${o.prayer}`}
+                    accessibilityRole="button"
+                    onPress={() => onSelectDayFromGrid(o.date)}
+                    style={[
+                      styles.owedChip,
+                      {
+                        backgroundColor: palette.card,
+                        borderColor: String(palette.danger),
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.owedChipText, { color: palette.text }]}
+                      numberOfLines={1}
+                    >
+                      {formatOwedDate(o.date, i18n.language)} ·{' '}
+                      {t(`prayer.${o.prayer}`)}
+                    </Text>
+                  </Pressable>
+                ))}
+                {stats.owed.length > OWED_CHIP_LIMIT ? (
+                  <Text style={[styles.owedMore, { color: palette.muted }]}>
+                    {/* `{{more}}`, not `{{count}}` — i18next reads `count`
+                        as a plural selector, and Arabic then needs six
+                        forms of a string that is one glyph and a number. */}
+                    {t('stats.owedMore', '+{{more}} more', {
+                      more: stats.owed.length - OWED_CHIP_LIMIT,
+                    })}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
           {/* Under the graph, because the graph is what makes the case for
               it: a wall of empty squares behind someone who has been
               praying for months is the app being wrong about them. */}
@@ -1550,6 +1645,31 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 10,
   },
+  /**
+   * The owed drawer, between the grid and "Fill in earlier days".
+   *
+   * It carries the same tint as the owed tile that opened it, so the two
+   * read as one control that grew rather than two red things on a card,
+   * and it sits UNDER the graph because its chips are shortcuts into the
+   * days the graph is at that moment pointing at.
+   */
+  owedBar: {
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    marginTop: 8,
+    gap: 7,
+  },
+  owedHint: { fontSize: 11, fontWeight: '700' },
+  owedChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
+  owedChip: {
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  owedChipText: { fontSize: 11.5, fontWeight: '600' },
+  owedMore: { fontSize: 11, alignSelf: 'center' },
   todayHeader: {
     flexDirection: 'row',
     alignItems: 'center',

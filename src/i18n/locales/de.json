@@ -1307,5 +1307,21 @@
       "bookmarks": "Bookmarks",
       "khatmah": "Khatmah plans"
     }
+  },
+  "stats": {
+    "daysUnit": " Tage",
+    "streakLabel": "Serie pünktlich",
+    "best": "Rekord {{best}}",
+    "sunnahLabel": "Sunnah erfüllt",
+    "thisMonth": "diesen Monat",
+    "fastedLabel": "Gefastet",
+    "owedLabel": "Offene Gebete",
+    "nothingOwed": "Nichts offen",
+    "owedShow": "tippen zum Ansehen",
+    "owedHide": "wird gezeigt ✕",
+    "owedHint": "Tippe auf einen Tag zum Nachholen",
+    "owedMore": "+{{more}} weitere",
+    "owedA11y": "{{owed}} offene Gebete, anzeigen",
+    "nothingOwedA11y": "Nichts offen"
   }
 }
