@@ -23,7 +23,7 @@ These are **non-negotiable**. The `reviewer` subagent in `.claude/agents/reviewe
 
 ### F-Droid compatibility
 
-- The app ships in two flavors: `fdroid` (no Google Play Services, no IAP) and `play` (with `react-native-iap` for the tip jar).
+- The app ships in two flavors: `fdroid` (no Google Play Services) and `play`. Neither has in-app purchases — the tip jar and its billing dependency were removed.
 - **Every new dependency must be FOSS-compatible.** Anything that transitively pulls Google Play Services or proprietary code breaks the F-Droid build.
 - Bundled fonts, icon libraries, and any other assets must be OFL / MIT / Apache-2.0 or similar.
 

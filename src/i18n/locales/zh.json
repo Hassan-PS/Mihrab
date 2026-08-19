@@ -380,17 +380,6 @@
     "snoozeChoice": "延后 {{minutes}} 分钟",
     "snoozeMinutes": "分钟"
   },
-  "support": {
-    "section": "支持发布者",
-    "title": "给开发者小费",
-    "help": "可选的一次性小费。付款由您的应用程序商店处理并发送给应用程序发布者。您可以随时再次给小费。",
-    "thankYou": "感谢您的支持。",
-    "dismiss": "解雇",
-    "loadingPrice": "加载价格...",
-    "unavailable": "提示尚无法购买（请检查您的商店连接或产品设置）。",
-    "tipWithPrice": "提示{{price}}",
-    "tip": "提示"
-  },
   "locations": {
     "title": "已保存的地点",
     "empty": "添加常用地点，方便在它们之间快速切换。",

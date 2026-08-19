@@ -107,7 +107,7 @@ Then attach that APK to the GitHub release so users who want F-Droid binaries be
 
 ### What the `fdroid` flavor does differently
 
-- **No `react-native-iap`** — the dep is registered as `playImplementation` in `app/build.gradle`, so the F-Droid flavor never pulls it in.
+- **No billing dependency anywhere** — the tip jar and `react-native-iap` were removed from the project, so no flavor pulls one in.
 - **No Google Play Services** — guarded by the `patch-package` patch on `@react-native-community/geolocation` that strips `play-services-location` and uses AOSP `LocationManager` only.
 - **No ABI splits** — split APKs are only enabled for `playRelease` (guarded by `wantsPlayRelease` in `app/build.gradle`). The F-Droid build is a single universal APK, which is what their CI recipe expects.
 
@@ -183,7 +183,7 @@ The Play Console reads from these. F-Droid optionally reuses them but our `com.p
 
 ### Flavor specifics
 
-- **`play` flavor**: includes `react-native-iap` (the tip-jar IAP). The `PrayerBuildInfo` native module exposes the flavor to JS so the AboutCard hides the tip jar entirely on F-Droid.
+- **`play` flavor**: Google Play Services for location. The `PrayerBuildInfo` native module still exposes the flavor to JS, now only so `rateApp` knows whether there is a Play Store to open.
 - **ABI splits**: per-ABI APKs (`armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`) for the Play upload, `universalApk = false`. Cuts download size ~3-4× per device.
 - **R8 minification**: on (`enableProguardInReleaseBuilds = true`). Rules in `android/app/proguard-rules.pro` — keep `com.prayer_times.**` and any new RN-bridged native modules.
 

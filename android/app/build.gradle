@@ -121,15 +121,18 @@ android {
     }
     flavorDimensions += "distribution"
     productFlavors {
+        /**
+         * The split is no longer about billing — the tip jar and its
+         * `react-native-iap` dependency are gone. What is left is the reason
+         * the F-Droid build exists at all: no Google Play Services, which
+         * `patch-package` strips from the location library, and no Play Store
+         * for `rateApp` to open.
+         */
         play {
             dimension "distribution"
-            buildConfigField "boolean", "IAP_ENABLED", "true"
-            // react-native-iap publishes `play` and `amazon` flavors; pick Play for store builds.
-            missingDimensionStrategy "store", "play"
         }
         fdroid {
             dimension "distribution"
-            buildConfigField "boolean", "IAP_ENABLED", "false"
         }
     }
     signingConfigs {
@@ -227,8 +230,6 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation("com.google.android.material:material:1.12.0")
-    // Linked manually (see react-native.config.js); omitted on `fdroid` for F-Droid.
-    playImplementation project(path: ":react-native-iap")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

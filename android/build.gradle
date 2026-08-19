@@ -9,12 +9,6 @@ buildscript {
         targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.1.20"
-        // Google Play policy: all apps must use Play Billing Library >= 8.0.0
-        // by 2026-08-31. react-native-iap (play flavor only — the tip jar)
-        // defaults to 7.0.0 but honours this rootProject override; its
-        // 12.16.x native code already uses the modern ProductDetails APIs, so
-        // it compiles and runs against 8.x unchanged.
-        playBillingSdkVersion = "8.0.0"
     }
     repositories {
         google()

@@ -23,9 +23,6 @@ class MainApplication : Application(), ReactApplication {
           add(MihrabLiveActivityPackage())
           add(MushafPageScalerPackage())
           add(MushafFontPackage())
-          if (BuildConfig.IAP_ENABLED) {
-            addIapPackageIfPresent(this)
-          }
         },
     )
   }
@@ -34,16 +31,5 @@ class MainApplication : Application(), ReactApplication {
     super.onCreate()
     DynamicColors.applyToActivitiesIfAvailable(this)
     loadReactNative(this)
-  }
-
-  private fun addIapPackageIfPresent(packages: MutableList<ReactPackage>) {
-    try {
-      val clazz = Class.forName("com.dooboolab.rniap.RNIapPackage")
-      val ctor = clazz.getConstructor()
-      val pkg = ctor.newInstance() as ReactPackage
-      packages.add(pkg)
-    } catch (_: Throwable) {
-      // F-Droid and other builds omit the IAP native module.
-    }
   }
 }

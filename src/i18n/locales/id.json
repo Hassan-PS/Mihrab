@@ -380,17 +380,6 @@
     "snoozeChoice": "Tunda {{minutes}} mnt",
     "snoozeMinutes": "Menit"
   },
-  "support": {
-    "section": "Dukung penerbitnya",
-    "title": "Tip pengembang",
-    "help": "Tip satu kali opsional. Pembayaran diproses oleh toko aplikasi Anda dan masuk ke penerbit aplikasi. Anda dapat memberi tip lagi kapan saja.",
-    "thankYou": "Terima kasih atas dukungan Anda.",
-    "dismiss": "Membubarkan",
-    "loadingPrice": "Memuat harga…",
-    "unavailable": "Pembelian tip belum tersedia (periksa koneksi toko Anda atau pengaturan produk).",
-    "tipWithPrice": "Kiat {{price}}",
-    "tip": "Tip"
-  },
   "locations": {
     "title": "Lokasi tersimpan",
     "empty": "Tambahkan lokasi tersimpan agar Anda bisa berpindah di antaranya dengan cepat.",

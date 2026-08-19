@@ -380,17 +380,6 @@
     "snoozeChoice": "Snooza {{minutes}} min",
     "snoozeMinutes": "Minuter"
   },
-  "support": {
-    "section": "Stöd utgivaren",
-    "title": "Dricks till utvecklaren",
-    "help": "Valfri engångsdricks. Betalningen hanteras av appbutiken på din enhet och går till appens utgivare. Du kan dricksa igen när som helst.",
-    "thankYou": "Tack för ditt stöd.",
-    "dismiss": "Stäng",
-    "loadingPrice": "Laddar pris…",
-    "unavailable": "Dricks är inte tillgänglig än (kontrollera butikskoppling eller produktinställningar).",
-    "tipWithPrice": "Dricks {{price}}",
-    "tip": "Dricks"
-  },
   "locations": {
     "title": "Sparade platser",
     "empty": "Lägg till sparade platser så kan du växla snabbt mellan dem.",

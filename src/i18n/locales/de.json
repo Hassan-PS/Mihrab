@@ -380,17 +380,6 @@
     "snoozeChoice": "{{minutes}} Min. später",
     "snoozeMinutes": "Minuten"
   },
-  "support": {
-    "section": "Unterstützen Sie den Verlag",
-    "title": "Geben Sie dem Entwickler ein Trinkgeld",
-    "help": "Optionales einmaliges Trinkgeld. Die Zahlung wird von Ihrem App Store verarbeitet und geht an den App-Herausgeber. Sie können jederzeit erneut Trinkgeld geben.",
-    "thankYou": "Vielen Dank für Ihre Unterstützung.",
-    "dismiss": "Zurückweisen",
-    "loadingPrice": "Preis wird geladen…",
-    "unavailable": "Trinkgeldkäufe sind noch nicht verfügbar (überprüfen Sie Ihre Shop-Verbindung oder Produkteinrichtung).",
-    "tipWithPrice": "Tipp {{price}}",
-    "tip": "Tipp"
-  },
   "locations": {
     "title": "Gespeicherte Orte",
     "empty": "Speichere Orte, um schnell zwischen ihnen zu wechseln.",

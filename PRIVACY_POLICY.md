@@ -26,7 +26,7 @@ Appen utvecklas som öppen källkod. För frågor om denna policy, använd proje
 
 ## Syfte och rättslig grund (GDPR)
 
-Behandling sker för att **tillhandahålla appens kärnfunktioner** (bön­tider, platsbaserade beräkningar, notiser du aktiverar, widget där sådan finns). För frivilliga köp (donation/tips via appbutiken) gäller **Google Play** eller **Apple** som betalvärd.
+Behandling sker för att **tillhandahålla appens kärnfunktioner** (bön­tider, platsbaserade beräkningar, notiser du aktiverar, widget där sådan finns). Appen har **inga köp i appen**.
 
 ## Tredje parter (leverantörer av innehåll och tjänster)
 
@@ -43,7 +43,7 @@ Om du aktiverar notiser schemaläggs de på enheten (lokalt). Innehållet basera
 
 ## Köp i appen
 
-Donationer/tips hanteras av **Google Play** eller **Apple**. Vi får inte dina fullständiga betalningskortsuppgifter. Se respektive butiks integritetspolicy för köpdata.
+Det finns inga. Appen säljer ingenting, har inga prenumerationer och tar inte emot betalningar — därför behandlas inga betalningsuppgifter alls.
 
 ## Lagring och säkerhet
 
@@ -54,7 +54,7 @@ Donationer/tips hanteras av **Google Play** eller **Apple**. Vi får inte dina f
 
 ## Dina rättigheter (EU/EEA)
 
-Du kan när som helst **ändra eller återkalla** platsbehörigheter i enhetens inställningar, **ställa in manuell plats** i appen eller **avinstallera** appen. För rättigheter kopplade till köp, kontakta **Google** eller **Apple** enligt deras processer.
+Du kan när som helst **ändra eller återkalla** platsbehörigheter i enhetens inställningar, **ställa in manuell plats** i appen eller **avinstallera** appen. Eftersom appen inte säljer något finns inga köp att hantera.
 
 ## Barn
 
@@ -91,7 +91,7 @@ The app is developed as open source. For questions about this policy, use the pr
 
 ## Purpose (GDPR)
 
-Processing is for **providing core app functionality** (prayer times, location-based calculations, optional notifications, widgets where applicable). Optional tips/donations use **Google Play** or **Apple** as the payment platform.
+Processing is for **providing core app functionality** (prayer times, location-based calculations, optional notifications, widgets where applicable). The app has **no in-app purchases**.
 
 ## Third-party services
 
@@ -108,7 +108,7 @@ If enabled, notifications are scheduled **on the device**. Content is derived fr
 
 ## In-app purchases
 
-Tips/donations are processed by **Google Play** or **Apple**. We do not receive your full card details. See the store’s privacy policy for purchase-related data.
+There are none. The app sells nothing, has no subscriptions and takes no payments, so no payment data is processed at all.
 
 ## Storage and security
 
@@ -118,7 +118,7 @@ Tips/donations are processed by **Google Play** or **Apple**. We do not receive 
 
 ## Your rights (EU/EEA)
 
-You may **change or revoke** location permissions in system settings, use **manual location** in the app, or **uninstall** the app. For purchase-related rights, use **Google** or **Apple**’s processes.
+You may **change or revoke** location permissions in system settings, use **manual location** in the app, or **uninstall** the app. Since the app sells nothing, there are no purchases to handle.
 
 ## Children
 

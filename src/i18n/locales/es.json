@@ -380,17 +380,6 @@
     "snoozeChoice": "Posponer {{minutes}} min",
     "snoozeMinutes": "Minutos"
   },
-  "support": {
-    "section": "Apoya al editor",
-    "title": "Dar propina al desarrollador",
-    "help": "Propina única opcional. El pago lo procesa su tienda de aplicaciones y se envía al editor de la aplicación. Puedes volver a dar propina en cualquier momento.",
-    "thankYou": "Gracias por su apoyo.",
-    "dismiss": "Despedir",
-    "loadingPrice": "Cargando precio…",
-    "unavailable": "Las compras de propinas aún no están disponibles (verifique la conexión de su tienda o la configuración del producto).",
-    "tipWithPrice": "Consejo {{price}}",
-    "tip": "Consejo"
-  },
   "locations": {
     "title": "Ubicaciones guardadas",
     "empty": "Añade ubicaciones para poder cambiar rápidamente entre ellas.",

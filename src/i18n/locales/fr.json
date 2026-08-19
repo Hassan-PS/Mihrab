@@ -380,17 +380,6 @@
     "snoozeChoice": "Reporter {{minutes}} min",
     "snoozeMinutes": "Minutes"
   },
-  "support": {
-    "section": "Soutenir l'éditeur",
-    "title": "Pourboire au développeur",
-    "help": "Pourboire unique facultatif. Le paiement est traité par votre boutique d'applications et est transmis à l'éditeur de l'application. Vous pouvez donner un nouveau pourboire à tout moment.",
-    "thankYou": "Merci pour votre soutien.",
-    "dismiss": "Rejeter",
-    "loadingPrice": "Prix ​​de chargement…",
-    "unavailable": "Les achats de pourboires ne sont pas encore disponibles (vérifiez la connexion de votre boutique ou la configuration du produit).",
-    "tipWithPrice": "Conseil {{price}}",
-    "tip": "Conseil"
-  },
   "locations": {
     "title": "Lieux enregistrés",
     "empty": "Ajoutez des lieux pour pouvoir basculer rapidement entre eux.",

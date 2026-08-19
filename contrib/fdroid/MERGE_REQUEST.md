@@ -23,7 +23,7 @@ Add com.prayer_times (Prayer Times)
 
 - React Native **0.83**, **Node 20.19.0** (official linux-x64 tarball, SHA256 verified in `sudo:`).
 - `subdir: android`, `init`: `cd .. && npm ci --no-audit`.
-- Gradle flavor **`fdroid`** → `assembleFdroidRelease` (no Google Play Billing; see upstream `react-native.config.js` + `playImplementation` only on `play` flavor).
+- Gradle flavor **`fdroid`** → `assembleFdroidRelease` (no Google Play Services). The project has no billing dependency in any flavor.
 
 ### Checklist (submitter)
 

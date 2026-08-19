@@ -16,9 +16,10 @@ export function getAndroidDistribution(): 'play' | 'fdroid' {
 }
 
 /**
- * Optional tips (IAP) — **Android Play flavor only**.
- * iOS build omits this UI so review does not require IAP products until they are configured in App Store Connect.
+ * There is no `showDonationsUi` any more.
+ *
+ * The tip jar is gone — the in-app purchase, the About-card section, the
+ * `react-native-iap` dependency and the Play Billing override with it. What
+ * remains of the flavor split is the thing it was always really for: F-Droid
+ * ships without Google Play Services, so `rateApp` has no Play Store to open.
  */
-export function showDonationsUi(): boolean {
-  return Platform.OS === 'android' && getAndroidDistribution() !== 'fdroid';
-}

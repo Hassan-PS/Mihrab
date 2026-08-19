@@ -75,8 +75,6 @@ A grounded, prioritized list of fixes, polish, new features, and Claude Code wor
 
 **HTTP UA review.** Confirm `httpIdentity.ts` doesn't include device-identifying info; it currently looks clean but pin it down.
 
-**IAP receipt validation.** `react-native-iap` purchases on Play Store can be validated with a simple Cloud Function or a public-key check on-device — even a token check is better than nothing for tip products.
-
 ### 1.6 Testing gaps (high-value additions)
 
 The existing 9 tests are good. Add:

@@ -10,7 +10,6 @@ import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import type { AppPalette } from '../../theme/appPalette';
-import { showDonationsUi } from '../../distribution';
 import { getInstalledAppVersionLabel } from '../../appVersion';
 import type { RootStackParamList } from '../../navigation/types';
 import { resetAppData } from '../../settings/storage';
@@ -20,17 +19,13 @@ import { resetFeatureTour } from '../../polish/FeatureTourModal';
 import { sharedSettingsStyles as s } from './sharedStyles';
 import { MIHRAB_WEBSITE, MIHRAB_WEBSITE_LABEL } from '../../config/links';
 
-function MaybeSupportDeveloperSection({ palette }: { palette: AppPalette }) {
-  if (!showDonationsUi()) return null;
-  // Lazy require so the donations module is excluded from F-Droid builds via
-  // the Babel `__DEV_DONATIONS__` flag (matches existing distribution wiring).
-  const { SupportDeveloperSection } = require('../../donations/SupportDeveloperSection');
-  return <SupportDeveloperSection palette={palette} />;
-}
-
 /**
- * About card: optional donations section (Play flavor only) plus the
- * installed-version label and GitHub link.
+ * About card: the installed-version label and the GitHub link.
+ *
+ * The tip jar that used to head this card is gone. It was Play-flavour only,
+ * which meant a section of the About screen that existed for some builds and
+ * not others, an in-app purchase to maintain in two consoles, and a billing
+ * dependency carried by every Play build for one optional button.
  */
 function AboutCardImpl() {
   const { t } = useTranslation();
@@ -113,7 +108,6 @@ function AboutCardImpl() {
 
   return (
     <>
-      <MaybeSupportDeveloperSection palette={palette} />
       <Text style={[s.sectionTitle, { color: palette.muted }]}>
         {t('settings.dataAndPrivacy')}
       </Text>

@@ -380,17 +380,6 @@
     "snoozeChoice": "Snooze {{minutes}} min",
     "snoozeMinutes": "Minutes"
   },
-  "support": {
-    "section": "Support the publisher",
-    "title": "Tip the developer",
-    "help": "Optional one-time tip. Payment is processed by your app store and goes to the app publisher. You can tip again anytime.",
-    "thankYou": "Thank you for your support.",
-    "dismiss": "Dismiss",
-    "loadingPrice": "Loading price…",
-    "unavailable": "Tip purchases are not available yet (check your store connection or product setup).",
-    "tipWithPrice": "Tip {{price}}",
-    "tip": "Tip"
-  },
   "locations": {
     "title": "Saved locations",
     "empty": "Add saved locations so you can switch between them quickly.",

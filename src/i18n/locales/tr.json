@@ -380,17 +380,6 @@
     "snoozeChoice": "{{minutes}} dk ertele",
     "snoozeMinutes": "Dakika"
   },
-  "support": {
-    "section": "Yayıncıyı destekleyin",
-    "title": "Geliştiriciye ipucu verin",
-    "help": "İsteğe bağlı tek seferlik bahşiş. Ödeme, uygulama mağazanız tarafından işlenir ve uygulama yayıncısına gider. İstediğiniz zaman tekrar bahşiş verebilirsiniz.",
-    "thankYou": "Desteğiniz için teşekkür ederiz.",
-    "dismiss": "Azletmek",
-    "loadingPrice": "Fiyat yükleniyor…",
-    "unavailable": "Bahşiş satın alımları henüz mevcut değil (mağaza bağlantınızı veya ürün kurulumunuzu kontrol edin).",
-    "tipWithPrice": "İpucu {{price}}",
-    "tip": "Uç"
-  },
   "locations": {
     "title": "Kayıtlı konumlar",
     "empty": "Aralarında hızlıca geçiş yapabilmek için kayıtlı konumlar ekleyin.",

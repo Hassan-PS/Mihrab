@@ -6,25 +6,6 @@ import React, { act } from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import App from '../App';
 
-jest.mock('react-native-iap', () => ({
-  initConnection: jest.fn(() => Promise.resolve(true)),
-  endConnection: jest.fn(() => Promise.resolve(true)),
-  getProducts: jest.fn(() => Promise.resolve([])),
-  requestPurchase: jest.fn(() => Promise.resolve(undefined)),
-  finishTransaction: jest.fn(() => Promise.resolve(true)),
-  flushFailedPurchasesCachedAsPendingAndroid: jest.fn(() =>
-    Promise.resolve(true),
-  ),
-  purchaseUpdatedListener: jest.fn(() => ({ remove: jest.fn() })),
-  purchaseErrorListener: jest.fn(() => ({ remove: jest.fn() })),
-  ErrorCode: {
-    E_USER_CANCELLED: 'E_USER_CANCELLED',
-    E_ITEM_UNAVAILABLE: 'E_ITEM_UNAVAILABLE',
-    E_NETWORK_ERROR: 'E_NETWORK_ERROR',
-    E_IAP_NOT_AVAILABLE: 'E_IAP_NOT_AVAILABLE',
-  },
-}));
-
 jest.mock('../src/context/PrayerSettingsContext', () => {
   const actual = jest.requireActual('../src/context/PrayerSettingsContext');
   const { DEFAULT_SETTINGS } = jest.requireActual('../src/settings/types');

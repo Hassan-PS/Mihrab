@@ -40,7 +40,6 @@
     "react-native-color-matrix-image-filters": "^8.0.2",
     "react-native-encrypted-storage": "^4.0.3",
     "react-native-gesture-handler": "^2.31.1",
-    "react-native-iap": "^12.16.2",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.24.0",
     "react-native-sensors": "^7.3.6",
