@@ -517,42 +517,55 @@ function PracticeHeatmapImpl({
   const touched = useRef(false);
 
   /**
-   * Park on today. NOT `scrollToEnd` — the end of the content is the end of
-   * the writing direction only in Latin; in Arabic it is the oldest week the
-   * user has, which is where the graph used to open.
+   * Where an untouched graph belongs — today, and NOT `scrollToEnd`. The end
+   * of the content is the end of the writing direction only in Latin; in
+   * Arabic it is the oldest week the user has, which is where the graph used
+   * to open.
    */
-  const repark = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const restingOffset = (
+    content = contentWidth.current,
+    view = viewportWidth.current,
+  ) => todayOffset(rtl, maxOffset(content, view));
+
+  /**
+   * Put the view on today, and keep putting it there.
+   *
+   * A SINGLE `scrollTo` IS NOT ENOUGH, AND THAT IS THE WHOLE PROBLEM.
+   * Android re-anchors a right-to-left scroll view to the start of its own
+   * reading direction as part of APPLYING a new content size — which lands
+   * after the `onContentSizeChange` that told us the size had changed. So
+   * the park is made, the native layout pass lands on top of it, and the
+   * graph ends up on some month nobody asked for. It is a race, which is
+   * why it was intermittent: sometimes the park won, sometimes the layout
+   * did, and the user's half of that coin flip was scrolling back to today
+   * by hand every single time they opened the screen.
+   *
+   * A race is not won by trying harder at one moment, so this does not try:
+   * it re-asserts on the next tick and on the following frame, and
+   * `onScroll` below puts the view back whenever it finds it somewhere it
+   * was not put. Until a finger has moved this graph, its position is not
+   * negotiable.
+   */
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const parkOnToday = () => {
     const apply = () => {
-      const max = maxOffset(contentWidth.current, viewportWidth.current);
-      scrollRef.current?.scrollTo({ x: todayOffset(rtl, max), animated: false });
+      scrollRef.current?.scrollTo({ x: restingOffset(), animated: false });
     };
     apply();
-    /**
-     * ...and again on the next tick, because the first one does not always
-     * survive the frame it was made in.
-     *
-     * Android re-anchors a right-to-left scroll view to the start of its own
-     * reading direction as part of APPLYING a new content size — which is
-     * after the `onContentSizeChange` that told us the size had changed. So
-     * the park lands, the layout pass lands on top of it, and the graph ends
-     * up on the oldest week it has. On the Log that showed as opening in
-     * 2025 with every square empty; on Home, where the card asks for no
-     * history and so cannot even scroll back, it showed as a card that was
-     * simply about the wrong months.
-     *
-     * Saying it twice is inelegant and is the thing that holds.
-     */
-    if (repark.current !== null) clearTimeout(repark.current);
-    repark.current = setTimeout(() => {
-      repark.current = null;
-      // A finger beats us to it and keeps what it took.
-      if (!touched.current) apply();
-    }, 0);
+    // 0ms catches the layout pass in the same frame; 120ms catches the one
+    // that arrives with the next batch of decrypted journal entries.
+    for (const delay of [0, 120]) {
+      timers.current.push(
+        setTimeout(() => {
+          if (!touched.current) apply();
+        }, delay),
+      );
+    }
   };
   useEffect(
     () => () => {
-      if (repark.current !== null) clearTimeout(repark.current);
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
     },
     [],
   );
@@ -713,6 +726,32 @@ function PracticeHeatmapImpl({
             offset.current = contentOffset.x;
             contentWidth.current = contentSize.width;
             viewportWidth.current = layoutMeasurement.width;
+            /**
+             * A GRAPH NOBODY HAS TOUCHED IS ON TODAY. If it is somewhere
+             * else, something moved it that was not the user, and the only
+             * honest response is to move it back.
+             *
+             * This is the fix for "it keeps opening on some unrelated month
+             * and I have to scroll back every time". The park itself races
+             * Android's re-anchoring of a right-to-left scroll view, and a
+             * race cannot be won by scheduling — but every one of those
+             * re-anchors arrives here, carrying the very numbers needed to
+             * undo it. So the correction lives where the damage is reported.
+             *
+             * The window is a column wide: sub-pixel rounding between the
+             * native offset and ours must not start a correcting loop, and
+             * anything smaller than one week is not a month nobody asked for.
+             */
+            if (parked.current && !touched.current) {
+              const want = restingOffset(
+                contentSize.width,
+                layoutMeasurement.width,
+              );
+              if (Math.abs(contentOffset.x - want) > COL) {
+                scrollRef.current?.scrollTo({ x: want, animated: false });
+                return;
+              }
+            }
             // Nothing is asked for until the initial park has happened. The
             // offset before that is 0, which looks exactly like "the user
             // has dragged to the oldest week" and used to fire a load-more

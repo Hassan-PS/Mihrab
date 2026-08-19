@@ -177,6 +177,80 @@ describe('the graph asks for more history', () => {
   });
 });
 
+/**
+ * "It keeps opening on some unrelated month and I have to scroll back."
+ *
+ * The park is a `scrollTo` racing Android's re-anchoring of a right-to-left
+ * scroll view, and a race is intermittent by nature — which is exactly how
+ * this was reported. Scheduling the park harder cannot win it. What DOES win
+ * it is that every one of those re-anchors is reported to `onScroll`, with
+ * the numbers needed to undo it, so the correction lives there.
+ */
+describe('an untouched graph is on today, and stays there', () => {
+  /**
+   * Let the mount's scheduled re-parks fire and fall silent.
+   *
+   * They call `scrollTo` with the same offset the correction would, so
+   * without this every assertion below would pass whether or not the
+   * correction exists — which is the shape of test that let this bug ship.
+   */
+  async function settle() {
+    await act(async () => {
+      await new Promise(r => setTimeout(r, 200));
+    });
+  }
+
+  it('puts itself back when something moves it in Arabic', async () => {
+    const { scroller, scrollTo, restore } = await mountAndMeasure(true);
+    await settle();
+    scrollTo.mockClear();
+
+    // Where Android's re-anchor leaves it: the far end, which in a mirrored
+    // grid is the oldest week drawn.
+    await act(async () => scroller.props.onScroll(scrollEvent(MAX)));
+    expect(scrollTo).toHaveBeenCalledWith({ x: 0, animated: false });
+    restore();
+  });
+
+  it('puts itself back in Latin too — this is not an RTL courtesy', async () => {
+    const { scroller, scrollTo, restore } = await mountAndMeasure(false);
+    await settle();
+    scrollTo.mockClear();
+
+    await act(async () => scroller.props.onScroll(scrollEvent(0)));
+    expect(scrollTo).toHaveBeenCalledWith({ x: MAX, animated: false });
+    restore();
+  });
+
+  it('lets go the moment a finger takes it', async () => {
+    const { scroller, scrollTo, restore } = await mountAndMeasure(true);
+    await settle();
+    scrollTo.mockClear();
+
+    await act(async () => {
+      scroller.props.onScrollBeginDrag();
+      scroller.props.onScroll(scrollEvent(MAX));
+    });
+    // The user asked to be here. Yanking them back would be the same bug
+    // wearing the other hat.
+    expect(scrollTo).not.toHaveBeenCalled();
+    restore();
+  });
+
+  it('ignores drift narrower than a week, so it cannot chase itself', async () => {
+    // A correcting scroll reports its own new offset, and sub-pixel
+    // disagreement between the native value and ours must not read as
+    // "moved" — or the graph corrects the correction, for ever.
+    const { scroller, scrollTo, restore } = await mountAndMeasure(true);
+    await settle();
+    scrollTo.mockClear();
+
+    await act(async () => scroller.props.onScroll(scrollEvent(0.5)));
+    expect(scrollTo).not.toHaveBeenCalled();
+    restore();
+  });
+});
+
 describe('a graph that fits its card grows until it can be dragged', () => {
   /** Same harness, but with content narrower than the viewport. */
   async function mountFitting(onReachOldest: jest.Mock) {
