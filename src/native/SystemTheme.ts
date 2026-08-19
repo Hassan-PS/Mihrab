@@ -23,6 +23,7 @@ type SystemThemeNative = {
   restartApp?: () => void;
   resolveAccentHex?: () => string;
   setNavigationBarStyle?: (isDark: boolean) => void;
+  getColorScheme?: () => string | null;
 };
 
 const native: SystemThemeNative | undefined = (
@@ -51,6 +52,27 @@ export function setNavigationBarStyle(isDark: boolean): void {
     native.setNavigationBarStyle(isDark);
   } catch {
     // best-effort cosmetic; ignore
+  }
+}
+
+/**
+ * The system light/dark scheme, read closer to the source than React
+ * Native reads it — or null when there is nothing better to offer.
+ *
+ * See `SystemThemeModule.getColorScheme`: RN resolves
+ * `Appearance.getColorScheme()` through the APPLICATION context's
+ * configuration, and this app declares `android:configChanges="uiMode"`, so
+ * a theme change reaches the Activity without any guarantee the
+ * application's copy follows. Null on iOS and on any build without the
+ * module, where RN's own answer is the right one.
+ */
+export function getNativeColorScheme(): 'light' | 'dark' | null {
+  if (Platform.OS !== 'android' || !native?.getColorScheme) return null;
+  try {
+    const scheme = native.getColorScheme();
+    return scheme === 'dark' || scheme === 'light' ? scheme : null;
+  } catch {
+    return null;
   }
 }
 

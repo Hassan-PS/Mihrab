@@ -1,6 +1,7 @@
 package com.prayer_times
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Process
@@ -85,6 +86,21 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
           window.isNavigationBarContrastEnforced = false
         }
       }
+      /**
+       * ON API 35+ THE SCRIM IS NOT OURS TO REMOVE, and it was worth
+       * checking rather than assuming.
+       *
+       * Behind three-button navigation the system paints a contrast band
+       * over the app's background, which is why the bar reads as a slab
+       * rather than the page continuing underneath it. React Native's
+       * `enableEdgeToEdge` asks for it (`isNavigationBarContrastEnforced =
+       * true`), so the obvious move is to set it back to false above 35 as
+       * well. Tried, on API 36 with three-button navigation: the band
+       * measured rgb(30,32,37) against app content of rgb(13,14,18) both
+       * before and after. The setter is a genuine no-op once the app targets
+       * SDK 35 — the platform owns that band now. Gesture navigation has no
+       * scrim to begin with.
+       */
       // Icon appearance (light/dark nav-bar glyphs) is NOT deprecated and is
       // the only lever under enforced edge-to-edge — always apply it.
       val controller = WindowCompat.getInsetsController(window, window.decorView)
@@ -118,8 +134,49 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
     return String.format("#%02X%02X%02X", r, g, b)
   }
 
+  /**
+   * The system light/dark scheme, from the closest source that has it.
+   *
+   * React Native's own `Appearance.getColorScheme()` reads the configuration
+   * off the APPLICATION context. This app declares
+   * `android:configChanges="uiMode"`, so a theme change is delivered to the
+   * Activity and nothing recreates it — there is no guarantee the
+   * application's configuration is refreshed in step, and a scheduled
+   * dark-theme flip that lands while the app is backgrounded can leave it
+   * reporting yesterday's answer indefinitely. That is an app stuck in dark
+   * on a light phone, with no way back short of killing it.
+   *
+   * So prefer, in order: the night bit Android handed to
+   * `onConfigurationChanged` (the one value it guarantees is current — see
+   * `MainActivity`), then the current Activity's configuration, then the
+   * React context's. `null` means we genuinely have nothing better than
+   * React Native's own answer, and the JS side falls back to it.
+   */
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun getColorScheme(): String? {
+    val night = lastKnownNightMode
+        ?: getCurrentActivity()?.resources?.configuration?.uiMode
+        ?: reactContext.resources?.configuration?.uiMode
+        ?: return null
+    return when (night and Configuration.UI_MODE_NIGHT_MASK) {
+      Configuration.UI_MODE_NIGHT_YES -> "dark"
+      Configuration.UI_MODE_NIGHT_NO -> "light"
+      else -> null
+    }
+  }
+
   companion object {
     const val NAME = "SystemTheme"
     private const val DEFAULT_ACCENT = "#22c55e"
+
+    /**
+     * The `uiMode` from the most recent `onConfigurationChanged`, which is
+     * the freshest value in the process. Written by `MainActivity`; null
+     * until the first theme change of this launch, at which point the
+     * Activity's own configuration is the next best thing.
+     */
+    @Volatile
+    @JvmStatic
+    var lastKnownNightMode: Int? = null
   }
 }

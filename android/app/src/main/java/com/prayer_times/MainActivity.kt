@@ -38,6 +38,12 @@ class MainActivity : ReactActivity() {
    * Android guarantees is up-to-date — and force-emitting the correct scheme to JS.
    */
   override fun onConfigurationChanged(newConfig: Configuration) {
+    // Record the night bit BEFORE anything else can read a staler copy.
+    // `newConfig` is the only value Android guarantees is current here, and
+    // `SystemThemeModule.getColorScheme()` hands it to JS so the app's
+    // "System" theme cannot be left behind by a scheduled dark-mode flip.
+    SystemThemeModule.lastKnownNightMode = newConfig.uiMode
+
     // Standard RN chain: updates resources, calls AppearanceModule (may use stale config
     // on some devices), and — if DynamicColors are active — invalidates PlatformColor cache.
     super.onConfigurationChanged(newConfig)
