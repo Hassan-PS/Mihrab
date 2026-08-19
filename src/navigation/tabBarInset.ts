@@ -13,7 +13,10 @@
  * the bar and the six screens read the same numbers, and changing the
  * bar's height cannot leave a screen behind.
  */
+import { useEffect, useState } from 'react';
+import { AppState, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isButtonNavigation } from '../native/SystemTheme';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
 
@@ -57,32 +60,63 @@ const GESTURE_INSET_MAX = 34;
  * inside the strip is fine and looks tighter. A BUTTON navigation bar is
  * real chrome and has to be cleared completely.
  */
-export function tabBarBottomFor(insetBottom: number): number {
-  if (insetBottom > GESTURE_INSET_MAX) {
+export function tabBarBottomFor(
+  insetBottom: number,
+  /**
+   * True when the system is using BUTTON navigation, whatever its height.
+   *
+   * The height test below is a proxy for "is this chrome or a handle", and
+   * it is only a proxy. Measured on Android 14 in three-button mode: the
+   * navigation bar is **24dp**, not the 48 this assumed — and the platform's
+   * own `navigationBars()` inset agrees, so it was not safe-area-context
+   * getting it wrong, as first suspected. Twenty-four is also exactly what a
+   * gesture strip reports, so at that height no arithmetic can tell a row of
+   * tappable buttons from a home indicator, and the pill tucked into the
+   * strip as designed — straight underneath the back/home/recents glyphs.
+   *
+   * The system knows which it is, so ask it: `Settings.Secure`'s
+   * `navigation_mode`. Undefined means nobody could say (iOS, or the native
+   * module missing), and then the height proxy is still the best guess there
+   * is.
+   */
+  buttonNavigation?: boolean,
+): number {
+  if (buttonNavigation || insetBottom > GESTURE_INSET_MAX) {
     return insetBottom + TAB_BAR_EDGE_GAP;
   }
   return Math.max(TAB_BAR_EDGE_GAP, insetBottom - 10);
 }
 
 /**
- * KNOWN WRONG ON ANDROID 14 AND BELOW WITH THREE-BUTTON NAVIGATION.
+ * Whether the system is on button navigation, re-read when it can change.
  *
- * Measured 2026-08-19 on API 34 (nav mode 0, after a full reboot) and API
- * 36, same build, same emulator profile: API 36 reports `bottom = 48` and
- * the pill clears the buttons; API 34 reports `bottom = 24` — the GESTURE
- * strip value — for a 48dp button bar, so `tabBarBottomFor` takes the
- * strip branch and the system's back/home/recents buttons are drawn over
- * the pill's labels.
- *
- * It is not the edge-to-edge flag: the numbers and the screenshots are
- * identical with it on and off. It is `react-native-safe-area-context`
- * under-reporting the navigation bar on API < 35, and no arithmetic here
- * can correct a value that does not say a bar is present. Fixing it needs
- * the real inset from the platform — a small native module in the shape of
- * `SystemThemeModule` — which is its own change.
+ * Not derivable from the safe-area inset: on Android 14 both button and
+ * gesture navigation report 24dp, so a change between them is not a change
+ * in the inset and would never re-render on its own. Foreground and window
+ * resize are the two moments it can differ from what we last asked.
  */
+function useButtonNavigation(): boolean | undefined {
+  const [buttonNav, setButtonNav] = useState(isButtonNavigation);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const reread = () => setButtonNav(isButtonNavigation());
+    reread();
+    const appState = AppState.addEventListener('change', s => {
+      if (s === 'active') reread();
+    });
+    const dims = Dimensions.addEventListener('change', reread);
+    return () => {
+      appState.remove();
+      dims.remove();
+    };
+  }, []);
+
+  return buttonNav;
+}
+
 export function useTabBarBottom(): number {
-  return tabBarBottomFor(useSafeAreaInsets().bottom);
+  return tabBarBottomFor(useSafeAreaInsets().bottom, useButtonNavigation());
 }
 
 /**

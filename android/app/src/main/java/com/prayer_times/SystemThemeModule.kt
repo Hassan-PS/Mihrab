@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Process
+import android.provider.Settings
 import android.util.TypedValue
 import androidx.core.view.WindowCompat
 import com.facebook.react.bridge.ReactApplicationContext
@@ -165,9 +166,42 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * Is the system using BUTTON navigation rather than gestures?
+   *
+   * The floating tab bar needs to know the difference, and it cannot get it
+   * from the inset. Measured on Android 14 in three-button mode: the
+   * navigation bar is **24dp** — the platform's own `navigationBars()` inset
+   * says so too, so this is not `react-native-safe-area-context` getting it
+   * wrong, which was the first suspicion. Twenty-four dp is also exactly
+   * what a gesture strip reports, so at that height the height is not
+   * information: the bar tucked itself into what it took for a home
+   * indicator and landed underneath the back/home/recents glyphs.
+   *
+   * `Settings.Secure.navigation_mode` is the system's own answer: 0 is
+   * three-button, 1 the old two-button, 2 gestures. `null` means the setting
+   * was unreadable, and the caller falls back to judging by height.
+   */
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun isButtonNavigation(): Boolean? {
+    val resolver = reactContext.contentResolver ?: return null
+    val mode = Settings.Secure.getInt(resolver, NAVIGATION_MODE, -1)
+    return when (mode) {
+      0, 1 -> true
+      2 -> false
+      else -> null
+    }
+  }
+
   companion object {
     const val NAME = "SystemTheme"
     private const val DEFAULT_ACCENT = "#22c55e"
+
+    /**
+     * Not in the public `Settings.Secure` constants, but stable since
+     * Android 10 and what the system itself reads.
+     */
+    private const val NAVIGATION_MODE = "navigation_mode"
 
     /**
      * The `uiMode` from the most recent `onConfigurationChanged`, which is

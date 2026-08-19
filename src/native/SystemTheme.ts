@@ -24,6 +24,7 @@ type SystemThemeNative = {
   resolveAccentHex?: () => string;
   setNavigationBarStyle?: (isDark: boolean) => void;
   getColorScheme?: () => string | null;
+  isButtonNavigation?: () => boolean | null;
 };
 
 const native: SystemThemeNative | undefined = (
@@ -73,6 +74,25 @@ export function getNativeColorScheme(): 'light' | 'dark' | null {
     return scheme === 'dark' || scheme === 'light' ? scheme : null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Is the system on button navigation rather than gestures? `undefined` when
+ * nobody can say — iOS, or a build without the module — and the caller then
+ * falls back to judging by the inset's height.
+ *
+ * See `SystemThemeModule.isButtonNavigation`: on Android 14 a three-button
+ * bar and a gesture strip both report 24dp, so height alone cannot tell them
+ * apart and the floating tab bar tucked itself under the buttons.
+ */
+export function isButtonNavigation(): boolean | undefined {
+  if (Platform.OS !== 'android' || !native?.isButtonNavigation) return undefined;
+  try {
+    const v = native.isButtonNavigation();
+    return typeof v === 'boolean' ? v : undefined;
+  } catch {
+    return undefined;
   }
 }
 
