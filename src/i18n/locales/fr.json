@@ -1260,5 +1260,51 @@
     "legend": "sunnah",
     "qiyamLegend": "prière de nuit",
     "a11yAll": "toute la sunnah"
+  },
+  "sync": {
+    "exportSection": "Exporter",
+    "importSection": "Importer",
+    "exportHelp": "Save everything you have recorded to a file you keep — to move to a new phone, or just so it exists somewhere else.",
+    "exportCta": "Exporter vers un fichier",
+    "exportFailedTitle": "Export failed",
+    "importHelp": "Open the backup file, copy all of it, and paste it here. Nothing already on this device is deleted — the two records are merged.",
+    "importPastePlaceholder": "Collez le fichier de sauvegarde",
+    "importPreviewCta": "Vérifier le fichier",
+    "importApplyCta": "Importer sur cet appareil",
+    "importFound": "Made on {{date}}. Choose what to take from it:",
+    "importDoneTitle": "Importé",
+    "importNothingNew": "Everything in that file was already here.",
+    "importEmptyTitle": "Nothing to import",
+    "importFailedTitle": "Import failed",
+    "importUnreadableTitle": "Couldn’t read that",
+    "importUnreadableBody": "That doesn’t look like a Mihrab backup. Paste the whole contents of the .json file.",
+    "importedLine": "{{label}}: {{before}} → {{after}}",
+    "privacyNote": "The file is plain text and is not password-protected — it is as private as wherever you save it. Nothing is ever uploaded.",
+    "category": {
+      "prayers": "Journal des prières",
+      "sunnah": "Prières sunnah",
+      "fasting": "Jeûne",
+      "dhikr": "Dhikr",
+      "quran": "Coran",
+      "settings": "Réglages",
+      "location": "Position"
+    },
+    "categoryHint": {
+      "prayers": "Every prayer you have logged, and your notes",
+      "sunnah": "Sunnah, Witr and Qiyam al-Layl",
+      "fasting": "Days fasted and their intentions",
+      "dhikr": "Completed tasbih sets",
+      "quran": "Bookmarks, starred ayat, khatmah plans, last read, reciter and tafsir",
+      "settings": "Appearance, calculation method, notifications and widgets",
+      "location": "Saved places and coordinates"
+    },
+    "count": {
+      "prayers": "Prayers",
+      "fasting": "Fasts",
+      "dhikr": "Dhikr days",
+      "sunnah": "Sunnah days",
+      "bookmarks": "Bookmarks",
+      "khatmah": "Khatmah plans"
+    }
   }
 }

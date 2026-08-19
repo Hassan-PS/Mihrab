@@ -1260,5 +1260,51 @@
     "legend": "圣行拜",
     "qiyamLegend": "夜间拜",
     "a11yAll": "全部圣行拜"
+  },
+  "sync": {
+    "exportSection": "导出",
+    "importSection": "导入",
+    "exportHelp": "Save everything you have recorded to a file you keep — to move to a new phone, or just so it exists somewhere else.",
+    "exportCta": "导出为文件",
+    "exportFailedTitle": "Export failed",
+    "importHelp": "Open the backup file, copy all of it, and paste it here. Nothing already on this device is deleted — the two records are merged.",
+    "importPastePlaceholder": "粘贴备份文件",
+    "importPreviewCta": "检查文件",
+    "importApplyCta": "导入到本设备",
+    "importFound": "Made on {{date}}. Choose what to take from it:",
+    "importDoneTitle": "已导入",
+    "importNothingNew": "Everything in that file was already here.",
+    "importEmptyTitle": "Nothing to import",
+    "importFailedTitle": "Import failed",
+    "importUnreadableTitle": "Couldn’t read that",
+    "importUnreadableBody": "That doesn’t look like a Mihrab backup. Paste the whole contents of the .json file.",
+    "importedLine": "{{label}}: {{before}} → {{after}}",
+    "privacyNote": "The file is plain text and is not password-protected — it is as private as wherever you save it. Nothing is ever uploaded.",
+    "category": {
+      "prayers": "礼拜记录",
+      "sunnah": "圣行拜",
+      "fasting": "斋戒",
+      "dhikr": "赞念",
+      "quran": "古兰经",
+      "settings": "设置",
+      "location": "位置"
+    },
+    "categoryHint": {
+      "prayers": "Every prayer you have logged, and your notes",
+      "sunnah": "Sunnah, Witr and Qiyam al-Layl",
+      "fasting": "Days fasted and their intentions",
+      "dhikr": "Completed tasbih sets",
+      "quran": "Bookmarks, starred ayat, khatmah plans, last read, reciter and tafsir",
+      "settings": "Appearance, calculation method, notifications and widgets",
+      "location": "Saved places and coordinates"
+    },
+    "count": {
+      "prayers": "Prayers",
+      "fasting": "Fasts",
+      "dhikr": "Dhikr days",
+      "sunnah": "Sunnah days",
+      "bookmarks": "Bookmarks",
+      "khatmah": "Khatmah plans"
+    }
   }
 }
