@@ -122,15 +122,19 @@ export function useTabBarBottom(): number {
 /**
  * What a scrolling tab screen must add to the bottom of its content.
  *
- * Zero, everywhere: the bar is in flow on every platform now, so the
- * navigator reserves its own space and a screen that added this as well
- * would end with a bar's worth of dead air under it. Kept as a hook
- * rather than deleted because the six tab screens call it, and a single
- * place to change is the point — if the bar ever floats over content
- * again, this is what has to move with it.
+ * The pill floats over the page again, so the navigator reserves nothing
+ * and every scrolling screen has to reserve the bar's whole footprint
+ * itself — height plus the gap beneath it — or its last row is permanently
+ * hidden behind the bar. Zero on iPad and Mac, where the plain full-width
+ * bar is in flow and the navigator handles it.
+ *
+ * This is exactly the "single place to change" the module was written for:
+ * the six tab screens all call it, so putting the bar back over the content
+ * was one line here rather than six edits and an omission.
  */
 export function useTabBarInset(): number {
-  return 0;
+  const bottom = useTabBarBottom();
+  return FLOATS_OVER_CONTENT ? TAB_BAR_HEIGHT + bottom : 0;
 }
 
 /**
@@ -140,8 +144,9 @@ export function useTabBarInset(): number {
  * Phones get the pill. iPad and Mac get the plain bar — the pill was
  * tried on both and rejected.
  *
- * (The name is historical: the pill also used to float OVER the content.
- * It cannot — an absolutely positioned tab bar in this navigator paints
- * correctly and receives no touches at all.)
+ * The name is accurate again: the pill floats OVER the content. It spent a
+ * while in flow because an absolutely positioned tab bar in this navigator
+ * used to paint correctly and receive no touches at all; re-tested on the
+ * current version by tapping all six tabs, that is fixed.
  */
 export const FLOATS_OVER_CONTENT = !IS_MAC_CATALYST && DEVICE_CLASS === 'phone';

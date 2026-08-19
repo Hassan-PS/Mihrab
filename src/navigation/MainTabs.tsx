@@ -27,7 +27,7 @@
  */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, type ColorValue } from 'react-native';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { CARD_SHADOW } from '../theme/tokens';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
@@ -57,6 +57,29 @@ import {
 import type { MainTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+
+/**
+ * The pill's surface, with the page allowed to show through it.
+ *
+ * ONLY FOR A PLAIN HEX. Under the system/dynamic themes `palette.card` is a
+ * `PlatformColor`, an opaque object with no channels to reach into — the
+ * same reason the colours below are passed through as `ColorValue` and never
+ * stringified. Those themes keep the solid surface, which is the right
+ * default for them anyway: Material You and Liquid Glass both supply their
+ * own material.
+ *
+ * 0.88 rather than something dramatic: this bar carries six labels at 10.5pt
+ * and they have to stay readable over whatever scrolls beneath them.
+ */
+function translucent(card: ColorValue): ColorValue {
+  if (typeof card !== 'string') return card;
+  const hex = /^#([0-9a-f]{6})$/i.exec(card);
+  if (!hex) return card;
+  const a = Math.round(0.88 * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `#${hex[1]}${a}`;
+}
 
 export function MainTabs() {
   const { t } = useTranslation();
@@ -93,26 +116,30 @@ export function MainTabs() {
          */
         tabBarStyle: FLOATS_OVER_CONTENT
           ? {
-              backgroundColor: palette.card,
+              backgroundColor: translucent(palette.card),
+              position: 'absolute',
               /**
-               * IN FLOW, not absolute.
+               * ABSOLUTE AGAIN — and this time the tabs still work.
                *
-               * Absolute is how you let the page run underneath a bar, and
-               * it is what this bar had — but an absolutely positioned tab
-               * bar in this navigator paints in the right place and
-               * receives touches nowhere. Every tab was dead: the bar
-               * looked exactly right in a screenshot and the app could not
-               * be navigated. Tried with `alignSelf` + `width` and with
-               * `left`/`right`; both the same.
+               * It was in flow for a while because an earlier attempt at
+               * `position: 'absolute'` produced a bar that painted in the
+               * right place and received touches nowhere: every tab dead,
+               * the screenshot perfect. That is no longer true. Re-tested
+               * on the current navigator by tapping all six in turn and
+               * reading the header each time — Today, Quran, Tasbih, Duas,
+               * Log, Settings all switch. Whatever it was has been fixed
+               * upstream, and being in flow was costing the thing the pill
+               * exists for: a page that stops dead at a solid bar looks
+               * finished, and the reader cannot tell there is more below.
                *
-               * A tab bar you cannot tap is not a trade worth making for
-               * content peeking under it, so the pill stays in flow and
-               * the page stops above it.
+               * The price is that the navigator reserves nothing, so every
+               * scrolling screen has to add the bar's height itself — that
+               * is `useTabBarInset`, which the six tab screens already
+               * call, and which is why this was one line to change back.
                *
                * `marginBottom` is the WHOLE gap under the bar. Setting
                * `height` below makes `getTabBarHeight` return that number
-               * verbatim, so the navigator reserves no safe area at all
-               * and there is nothing here to correct — see
+               * verbatim, so there is nothing here to correct — see
                * `useTabBarBottom`. It was written as a correction (and so
                * came out negative), which hung the pill off the bottom of
                * the window and cut the labels off entirely.
