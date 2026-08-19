@@ -18,7 +18,9 @@
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const STORAGE_KEY = 'mihrab.quran.v1';
+/** The Quran blob's key. Exported so the snapshot layer names it once. */
+export const QURAN_STORAGE_KEY = 'mihrab.quran.v1';
+const STORAGE_KEY = QURAN_STORAGE_KEY;
 
 export type BookmarkColor = 'emerald' | 'sapphire' | 'amber' | 'rose' | 'violet';
 
@@ -166,16 +168,137 @@ function emit(): void {
   for (const l of listeners) l();
 }
 
+const VALID_BOOKMARK_COLORS = new Set<string>(Object.keys(BOOKMARK_COLORS));
+
+function int(v: unknown, min: number, max: number): number | null {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null;
+  const n = Math.floor(v);
+  return n >= min && n <= max ? n : null;
+}
+
+function coerceBookmark(v: unknown): QuranBookmark | null {
+  if (!v || typeof v !== 'object') return null;
+  const r = v as Record<string, unknown>;
+  const surah = int(r.surah, 1, 114);
+  const ayah = int(r.ayah, 1, 286);
+  const page = int(r.page, 1, 604);
+  if (surah === null || ayah === null || page === null) return null;
+  if (typeof r.id !== 'string' || !r.id) return null;
+  const color =
+    typeof r.color === 'string' && VALID_BOOKMARK_COLORS.has(r.color)
+      ? (r.color as BookmarkColor)
+      : 'emerald';
+  const createdAt =
+    typeof r.createdAt === 'number' && Number.isFinite(r.createdAt)
+      ? r.createdAt
+      : 0;
+  return { id: r.id, surah, ayah, page, color, createdAt };
+}
+
+function coerceKhatmah(v: unknown): KhatmahPlan | null {
+  if (!v || typeof v !== 'object') return null;
+  const r = v as Record<string, unknown>;
+  if (typeof r.id !== 'string' || !r.id) return null;
+  const startedAt =
+    typeof r.startedAt === 'number' && Number.isFinite(r.startedAt)
+      ? r.startedAt
+      : 0;
+  const targetDays = int(r.targetDays, 1, 3650) ?? 30;
+  // CLAMPED, not rejected. `pagesRead` is a high-water mark of someone's
+  // reading; an out-of-range value is a bad number, but resetting it to 0
+  // would throw away the progress it was reporting. 604 is the mushaf.
+  const pagesRead =
+    typeof r.pagesRead === 'number' && Number.isFinite(r.pagesRead)
+      ? Math.min(604, Math.max(0, Math.floor(r.pagesRead)))
+      : 0;
+  const completedAt =
+    typeof r.completedAt === 'number' && Number.isFinite(r.completedAt)
+      ? r.completedAt
+      : null;
+  const out: KhatmahPlan = {
+    id: r.id,
+    startedAt,
+    targetDays,
+    pagesRead,
+    completedAt,
+  };
+  const p = r.position;
+  if (p && typeof p === 'object') {
+    const surah = int((p as Record<string, unknown>).surah, 1, 114);
+    const ayah = int((p as Record<string, unknown>).ayah, 1, 286);
+    const page = int((p as Record<string, unknown>).page, 1, 604);
+    if (surah !== null && ayah !== null && page !== null) {
+      out.position = { surah, ayah, page };
+    }
+  }
+  const dsp = int(r.dayStartPagesRead, 0, 604);
+  if (dsp !== null) out.dayStartPagesRead = dsp;
+  if (typeof r.dayStartDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.dayStartDate)) {
+    out.dayStartDate = r.dayStartDate;
+  }
+  return out;
+}
+
+function coerceLastRead(v: unknown): LastRead | null {
+  if (!v || typeof v !== 'object') return null;
+  const r = v as Record<string, unknown>;
+  const surah = int(r.surah, 1, 114);
+  const ayah = int(r.ayah, 1, 286);
+  const page = int(r.page, 1, 604);
+  if (surah === null || ayah === null || page === null) return null;
+  return {
+    surah,
+    ayah,
+    page,
+    mode: r.mode === 'mushaf' ? 'mushaf' : 'withTranslation',
+    updatedAt:
+      typeof r.updatedAt === 'number' && Number.isFinite(r.updatedAt)
+        ? r.updatedAt
+        : 0,
+  };
+}
+
+/**
+ * Validate a Quran blob item by item.
+ *
+ * This used to be a shallow merge that trusted any array it found, which was
+ * defensible while the only writer was this app's own store. It is not
+ * defensible now that the same shape arrives from an exported file or
+ * another device: a bookmark pointing at page 9000, or a khatmah claiming
+ * 700 pages read, would be written straight back to disk and then drawn.
+ * Every field is range-checked against the mushaf it has to index into, and
+ * an item that cannot be repaired is dropped rather than kept as a
+ * half-object nothing downstream expects.
+ */
+export function coerceQuranState(raw: unknown): QuranState {
+  return mergeStored(raw);
+}
+
 /** Merge a possibly-older stored blob over the defaults (additive schema). */
 function mergeStored(raw: unknown): QuranState {
   if (!raw || typeof raw !== 'object') return DEFAULT_QURAN_STATE;
   const r = raw as Partial<QuranState>;
   return {
     version: 1,
-    lastRead: r.lastRead ?? null,
-    bookmarks: Array.isArray(r.bookmarks) ? r.bookmarks : [],
-    starred: Array.isArray(r.starred) ? r.starred : [],
-    khatmah: Array.isArray(r.khatmah) ? r.khatmah : [],
+    lastRead: coerceLastRead(r.lastRead),
+    bookmarks: Array.isArray(r.bookmarks)
+      ? r.bookmarks
+          .map(coerceBookmark)
+          .filter((b): b is QuranBookmark => b !== null)
+      : [],
+    starred: Array.isArray(r.starred)
+      ? [
+          ...new Set(
+            r.starred.filter(
+              (s): s is string =>
+                typeof s === 'string' && /^\d{1,3}:\d{1,3}$/.test(s),
+            ),
+          ),
+        ]
+      : [],
+    khatmah: Array.isArray(r.khatmah)
+      ? r.khatmah.map(coerceKhatmah).filter((k): k is KhatmahPlan => k !== null)
+      : [],
     prefs: {
       ...DEFAULT_QURAN_STATE.prefs,
       ...(r.prefs ?? {}),

@@ -55,14 +55,28 @@ export function dayKey(d: Date = new Date()): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
-function coerceDhikr(v: unknown): DhikrLog {
-  if (!v || typeof v !== 'object') return {};
+/**
+ * Read a dhikr blob back, keeping only day → positive count.
+ *
+ * Exported now that it also guards data arriving from ANOTHER DEVICE or an
+ * exported file rather than only from this app's own disk — so the key has
+ * to be checked too. A blob whose keys are not dates would otherwise put
+ * junk on the graph forever, and unlike a bad number it would never be
+ * noticed: nothing renders a day that does not exist.
+ */
+export function coerceDhikrLog(v: unknown): DhikrLog {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
   const out: DhikrLog = {};
   for (const [k, n] of Object.entries(v as Record<string, unknown>)) {
-    if (typeof n === 'number' && Number.isFinite(n) && n > 0) out[k] = n;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+    if (typeof n === 'number' && Number.isFinite(n) && n > 0) {
+      out[k] = Math.floor(n);
+    }
   }
   return out;
 }
+
+const coerceDhikr = coerceDhikrLog;
 
 function parseOr<T>(raw: string | null, coerce: (v: unknown) => T, fallback: T): T {
   if (!raw) return fallback;
