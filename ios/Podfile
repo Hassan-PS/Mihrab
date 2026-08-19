@@ -14,6 +14,10 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+# The app's own minimum, mirrored from PrayerApp.xcodeproj. Pods that pin
+# something older are raised to it in post_install.
+app_min_ios = '15.1'
+
 target 'PrayerApp' do
   config = use_native_modules!
 
@@ -99,6 +103,15 @@ INS
           defs = defs.is_a?(Array) ? defs : ['$(inherited)']
           defs << 'FMT_USE_CONSTEVAL=0' unless defs.any? { |d| d.to_s.include?('FMT_USE_CONSTEVAL') }
           cfg.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
+        end
+        # A pod that pins an older minimum than the app warns on every build
+        # ("deployment target 11.0, but the range of supported versions is
+        # 12.0 to 26.5.99" — react-native-blob-util's privacy-info target).
+        # The app is 15.1, nothing can run below that, and a pod claiming
+        # otherwise only produces warnings — so raise anything that is lower.
+        pod_min = cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_s
+        if !pod_min.empty? && Gem::Version.new(pod_min) < Gem::Version.new(app_min_ios)
+          cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = app_min_ios
         end
       end
     end

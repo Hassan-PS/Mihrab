@@ -98,6 +98,35 @@ def wantsPlayRelease = requestedTasks.any { t ->
 // True when this invocation builds the F-Droid flavor. Used to trim R8 + release
 // lint for the F-Droid build only (keeps the Play build fully minified + linted).
 def wantsFdroid = requestedTasks.any { it.contains("fdroid") }
+def wantsPlayAny = requestedTasks.any { t -> t.contains("play") && !t.contains("fdroid") }
+/**
+ * ONE INVOCATION CANNOT SERVE BOTH FLAVOURS, AND SILENTLY PICKING ONE SHIPPED
+ * AN UNOPTIMIZED APP TO PLAY.
+ *
+ * `minifyEnabled` is a property of the release BUILD TYPE, so it is decided
+ * once per Gradle invocation — it cannot differ between `playRelease` and
+ * `fdroidRelease` in the same run. The flag below turned R8 off whenever any
+ * requested task mentioned fdroid, and `android:releaseAll` requested
+ * `assemblePlayRelease assembleFdroidRelease bundlePlayRelease` together. So
+ * the one command that builds everything for a release produced a Play bundle
+ * with no R8 at all, quietly, and Play Console noticed before we did:
+ * "improve your app's memory and performance with R8 optimisation" against
+ * 2.8.10.
+ *
+ * F-Droid's builder runs `assembleFdroidRelease` alone and still gets minify
+ * off, which is what it needs (their CI runs out of memory otherwise). A run
+ * that asks for both now stops rather than guessing: `android:releaseAll`
+ * issues two separate Gradle invocations instead.
+ */
+if (wantsFdroid && wantsPlayAny) {
+    throw new GradleException(
+        "Refusing to build the play and fdroid flavors in one Gradle invocation: " +
+        "minifyEnabled is per build type, so one of the two would silently get the " +
+        "other's R8 setting — which is how an unminified bundle reached Play. " +
+        "Run them separately, e.g. `./gradlew assemblePlayRelease bundlePlayRelease` " +
+        "then `./gradlew assembleFdroidRelease`."
+    )
+}
 def enableProguardInReleaseBuilds = !wantsFdroid
 if (wantsPlayRelease && !hasReleaseSigningConfig) {
     throw new GradleException(
@@ -229,6 +258,16 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    /**
+     * Stays at 1.12.0. 1.13.0 was tried for the Android 15 edge-to-edge
+     * deprecations Play Console flags and does not fix them: its
+     * `EdgeToEdgeUtils.applyEdgeToEdge` still calls `setStatusBarColor` and
+     * `setNavigationBarColor` unconditionally — checked in the 1.13.0 AAR's
+     * own bytecode, not assumed from the release notes. Two of the three
+     * Material call sites Play named (`BottomSheetDialog`, `SheetDialog`)
+     * are gone anyway now that R8 runs again: nothing in the app uses them,
+     * so R8 strips them.
+     */
     implementation("com.google.android.material:material:1.12.0")
 
     if (hermesEnabled.toBoolean()) {

@@ -10,7 +10,7 @@
     "android:assembleFdroidRelease": "cd android && ./gradlew assembleFdroidRelease",
     "android:assemblePlayRelease": "cd android && ./gradlew assemblePlayRelease",
     "android:bundlePlayRelease": "cd android && ./gradlew bundlePlayRelease",
-    "android:releaseAll": "cd android && ./gradlew assemblePlayRelease assembleFdroidRelease bundlePlayRelease",
+    "android:releaseAll": "cd android && ./gradlew assemblePlayRelease bundlePlayRelease && ./gradlew assembleFdroidRelease",
     "ios": "react-native run-ios --target PrayerApp",
     "lint": "eslint .",
     "postinstall": "patch-package",

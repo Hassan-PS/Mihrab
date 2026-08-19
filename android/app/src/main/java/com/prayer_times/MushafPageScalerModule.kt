@@ -44,7 +44,35 @@ class MushafPageScalerModule(reactContext: ReactApplicationContext) :
     executor.execute {
       try {
         if (targetWidth <= 0) throw IllegalArgumentException("bad targetWidth")
-        var bmp = BitmapFactory.decodeFile(srcPath)
+        /**
+         * DECODE SMALL, THEN REFINE — do not decode 2600×4206 and throw
+         * most of it away.
+         *
+         * The old line was a bare `decodeFile`, which allocates the full
+         * page: 2600 × 4206 × 4 bytes ≈ 42 MB of ARGB_8888 for something
+         * about to be scaled to phone width. Play Console flags exactly
+         * this ("improve performance with bitmap downsampling"), and on a
+         * low-memory device it is the difference between a scaled page and
+         * an OutOfMemoryError.
+         *
+         * `inSampleSize` is not a quality compromise here, which is the
+         * only reason this is safe: at a power of two it is a clean box
+         * average — the same operation the halving loop below was written
+         * to get, done by the decoder for free. So take the largest power
+         * of two that still leaves the bitmap AT OR ABOVE `targetWidth`,
+         * and let the existing progressive chain do the rest. Nothing is
+         * ever decoded below the size it will be displayed at, so the
+         * sharpness this module exists for is untouched.
+         */
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(srcPath, bounds)
+        val opts = BitmapFactory.Options()
+        if (bounds.outWidth > 0) {
+          var sample = 1
+          while (bounds.outWidth / (sample * 2) >= targetWidth) sample *= 2
+          opts.inSampleSize = sample
+        }
+        var bmp = BitmapFactory.decodeFile(srcPath, opts)
           ?: throw IllegalStateException("decode failed: $srcPath")
         // Progressive downscale (v2.7.30): repeated bilinear steps of
         // ≈0.71 per step. A SINGLE bilinear step with a factor in the
