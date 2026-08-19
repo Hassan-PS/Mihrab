@@ -32,7 +32,6 @@
  */
 import { memo, useEffect, useMemo, useRef } from 'react';
 import {
-  I18nManager,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -42,6 +41,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useLayoutRtl } from '../i18n/useLayoutRtl';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import type { DayScore } from '../journal/journal';
 import {
@@ -79,6 +79,13 @@ const GAP = 4;
 const COL = SQUARE + GAP;
 /** Height of the month-label strip above the grid. */
 const MONTH_ROW = 15;
+/**
+ * How many times the graph may ask for more weeks purely because its
+ * content still fits the card. Each ask is 26 weeks, so three covers a
+ * tablet in landscape with room to spare; the cap is a backstop against a
+ * measurement that never settles, not a budget anyone should reach.
+ */
+const GROWTH_ASKS = 3;
 /** Amber, for the fast ring — the app's own amber accent swatch. */
 const FAST_RING_LIGHT = '#B45309';
 const FAST_RING_DARK = '#FBBF24';
@@ -480,16 +487,104 @@ function PracticeHeatmapImpl({
    */
   const contentWidth = useRef(0);
   const viewportWidth = useRef(0);
-  const rtl = I18nManager.isRTL;
+  /**
+   * NOT `I18nManager.isRTL`. That flag follows the DEVICE locale, and this
+   * app mirrors itself with a Yoga `direction` on the root view rather than
+   * `forceRTL` — so on an English phone with the app in Arabic it reads
+   * `false` while every row on screen is mirrored, and this component then
+   * parks on the oldest week and asks for more history at the end it is
+   * already standing on. See `useLayoutRtl`.
+   */
+  const layoutRtl = useLayoutRtl();
+  const rtl = layoutRtl;
+  /**
+   * Has a FINGER moved this graph yet?
+   *
+   * History is only ever loaded on the user's say-so, and this is what says
+   * it was the user. Android re-anchors a right-to-left scroll view to its
+   * own edge every time the content changes size — which, on a screen whose
+   * journal decrypts a beat after it appears, is several times during mount.
+   * Each of those re-anchors arrives as a perfectly ordinary `onScroll` at
+   * the oldest column, which read as "the user has dragged into the past",
+   * which loaded twenty-six more weeks, which changed the content size,
+   * which re-anchored again.
+   *
+   * That loop is why the Arabic graph opened somewhere in 2025 with every
+   * square empty: not a wrong direction — the direction arithmetic was
+   * fine — but a scroll the user never performed, repeated until it ran out
+   * of history. Gate on a real drag and the loop has no first step.
+   */
+  const touched = useRef(false);
 
   /**
    * Park on today. NOT `scrollToEnd` — the end of the content is the end of
    * the writing direction only in Latin; in Arabic it is the oldest week the
    * user has, which is where the graph used to open.
    */
+  const repark = useRef<ReturnType<typeof setTimeout> | null>(null);
   const parkOnToday = () => {
-    const max = maxOffset(contentWidth.current, viewportWidth.current);
-    scrollRef.current?.scrollTo({ x: todayOffset(rtl, max), animated: false });
+    const apply = () => {
+      const max = maxOffset(contentWidth.current, viewportWidth.current);
+      scrollRef.current?.scrollTo({ x: todayOffset(rtl, max), animated: false });
+    };
+    apply();
+    /**
+     * ...and again on the next tick, because the first one does not always
+     * survive the frame it was made in.
+     *
+     * Android re-anchors a right-to-left scroll view to the start of its own
+     * reading direction as part of APPLYING a new content size — which is
+     * after the `onContentSizeChange` that told us the size had changed. So
+     * the park lands, the layout pass lands on top of it, and the graph ends
+     * up on the oldest week it has. On the Log that showed as opening in
+     * 2025 with every square empty; on Home, where the card asks for no
+     * history and so cannot even scroll back, it showed as a card that was
+     * simply about the wrong months.
+     *
+     * Saying it twice is inelegant and is the thing that holds.
+     */
+    if (repark.current !== null) clearTimeout(repark.current);
+    repark.current = setTimeout(() => {
+      repark.current = null;
+      // A finger beats us to it and keeps what it took.
+      if (!touched.current) apply();
+    }, 0);
+  };
+  useEffect(
+    () => () => {
+      if (repark.current !== null) clearTimeout(repark.current);
+    },
+    [],
+  );
+
+  /**
+   * A graph that FITS its card cannot be dragged.
+   *
+   * The load-more threshold is measured in scroll offset, so it can only
+   * fire once there is something to scroll — deliberately, so a fresh
+   * install does not ask for two years of empty weeks. But that leaves a
+   * hole: thirteen weeks fit inside the card on a phone with room to spare,
+   * so a user whose history is shorter than the viewport can never reach the
+   * oldest column, can never trigger the request, and the graph is simply
+   * inert. Dragging it does nothing at all, in every language.
+   *
+   * So the fit is a reason to grow rather than a reason to stop. Ask once
+   * per measurement while the content still fits, and the graph settles at
+   * the first span that overflows — which is the first span you can drag.
+   * Bounded twice over: the owner stops handing back weeks when it runs out
+   * of them, and `GROWTH_ASKS` caps it regardless, so a card wider than any
+   * span cannot spin.
+   */
+  const growthAsks = useRef(0);
+  const growIfItFits = () => {
+    if (!onReachOldest || asking.current) return;
+    if (growthAsks.current >= GROWTH_ASKS) return;
+    if (viewportWidth.current <= 0 || contentWidth.current <= 0) return;
+    // One column of slack: content the same width as the card is a graph
+    // with a single pixel of travel, which is no better than none.
+    if (contentWidth.current > viewportWidth.current + COL) return;
+    growthAsks.current += 1;
+    onReachOldest();
   };
 
   const onSized = () => {
@@ -503,9 +598,23 @@ function PracticeHeatmapImpl({
       parked.current = true;
       drawnWeeks.current = weeks;
       parkOnToday();
+      growIfItFits();
       return;
     }
-    if (weeks === drawnWeeks.current) return;
+    if (weeks === drawnWeeks.current) {
+      // Re-measured at the same span: the card changed size under it — a
+      // rotation, a font-scale change, a tablet's split view — and a graph
+      // that used to overflow may now fit.
+      //
+      // Until a finger has moved this graph its position is ours to assert,
+      // so take it back. This is the other half of the RTL re-anchor fix:
+      // Android moves the view on a content change and tells nobody, and
+      // the honest answer to "where should an untouched graph be" is always
+      // the same one.
+      if (!touched.current) parkOnToday();
+      growIfItFits();
+      return;
+    }
     const added = weeks - drawnWeeks.current;
     drawnWeeks.current = weeks;
     if (added > 0 && asking.current) {
@@ -540,6 +649,7 @@ function PracticeHeatmapImpl({
      * to be.
      */
     parkOnToday();
+    growIfItFits();
   };
   useEffect(() => {
     if (parked.current) return;
@@ -585,6 +695,10 @@ function PracticeHeatmapImpl({
             viewportWidth.current = e.nativeEvent.layout.width;
           }}
           scrollEventThrottle={64}
+          // The one event that only a finger can raise.
+          onScrollBeginDrag={() => {
+            touched.current = true;
+          }}
           // Diagonal drags belong to the page, not to the graph. Without
           // this a mostly-vertical swipe that starts on the grid drags the
           // weeks a few pixels sideways and stutters the page scroll, which
@@ -604,7 +718,13 @@ function PracticeHeatmapImpl({
             // has dragged to the oldest week" and used to fire a load-more
             // during mount — twenty-six more columns arriving underneath
             // the first drag.
-            if (!parked.current || !onReachOldest) return;
+            //
+            // And nothing is asked for on a scroll the user did not make:
+            // see `touched`. Parking, re-parking after growth, and Android's
+            // own RTL re-anchoring all arrive here as scroll events, and any
+            // of them landing on the oldest column would otherwise load more
+            // history — which changes the content size, which re-anchors.
+            if (!parked.current || !onReachOldest || !touched.current) return;
             // Which end of the content the oldest week is on is the whole
             // question in Arabic, where it is the far one rather than 0.
             if (

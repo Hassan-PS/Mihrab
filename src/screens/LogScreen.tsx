@@ -26,7 +26,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
-  I18nManager,
   PanResponder,
   Pressable,
   ScrollView,
@@ -45,6 +44,7 @@ import { ConfirmModal } from '../components/ConfirmModal';
 import { FillSummary } from '../components/FillSummary';
 import { SunnahChip } from './log/SunnahChip';
 import { PracticeStatsRow } from './log/PracticeStatsRow';
+import { useLayoutRtl } from '../i18n/useLayoutRtl';
 import { IshaExtras } from './log/IshaExtras';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
@@ -236,6 +236,22 @@ export function LogScreen() {
   const panWidth = useRef(0);
   const canGoForwardRef = useRef(false);
   canGoForwardRef.current = canGoForward;
+  /**
+   * Which way a swipe runs — from the app's language, NOT `I18nManager`.
+   *
+   * The app mirrors itself with a Yoga `direction` rather than `forceRTL`,
+   * so `I18nManager.isRTL` follows the phone, not the app: an English phone
+   * with the app in Arabic reported `false` while the arrows either side of
+   * the date were mirrored. The gesture then ran opposite to the buttons
+   * doing the same job six points away. See `useLayoutRtl`.
+   *
+   * Held in a ref because the pan responder must NOT be rebuilt when the
+   * language changes mid-gesture, and read at gesture time so a language
+   * switch still takes effect on the next swipe.
+   */
+  const rtlLayout = useLayoutRtl();
+  const rtlRef = useRef(rtlLayout);
+  rtlRef.current = rtlLayout;
   const settle = useCallback(
     (delta: -1 | 0 | 1) => {
       if (delta === 0) {
@@ -251,7 +267,7 @@ export function LogScreen() {
       // replaced leaves the way the finger sent it, which is what makes it
       // read as a page rather than a redraw.
       const width = panWidth.current || 320;
-      const rtl = I18nManager.isRTL;
+      const rtl = rtlRef.current;
       const outward = (delta === -1 ? 1 : -1) * (rtl ? -1 : 1) * width;
       Animated.timing(panX, {
         toValue: outward,
@@ -283,7 +299,7 @@ export function LogScreen() {
             dragTranslation({
               dx: g.dx,
               canGoForward: canGoForwardRef.current,
-              rtl: I18nManager.isRTL,
+              rtl: rtlRef.current,
             }),
           );
         },
@@ -295,7 +311,7 @@ export function LogScreen() {
               vx: g.vx,
               width: panWidth.current || 320,
               canGoForward: canGoForwardRef.current,
-              rtl: I18nManager.isRTL,
+              rtl: rtlRef.current,
             }),
           );
         },
