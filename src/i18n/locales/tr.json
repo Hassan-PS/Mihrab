@@ -377,6 +377,7 @@
     "adhanStopAction": "Ezanı durdur",
     "adhanDisableAction": "Ezan'ı devre dışı bırak",
     "snoozeAction": "Ertele",
+    "snoozeChoice": "{{minutes}} dk ertele",
     "snoozeMinutes": "Dakika"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Özel not (yalnızca bu cihazda)",
     "saveNote": "Notu kaydet",
     "logActionTitle": "Namazı kaydet",
+    "logSunnahActionTitle": "Sünnetle kaydet",
     "loadFailedTitle": "Kayıt yüklenemedi",
     "loadFailedBody": "Verileriniz cihazda güvende ama şu anda okunamadı. Kaydı tekrar açmayı deneyin.",
     "saveFailedTitle": "Kaydedilemedi",

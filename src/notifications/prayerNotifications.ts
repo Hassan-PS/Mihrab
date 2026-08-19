@@ -13,12 +13,8 @@ import {
   NOTIFICATION_SOUND_OPTIONS,
   type NotificationSoundId,
 } from './notificationSounds';
-import {
-  ADHAN_ACTION_STOP,
-  ADHAN_ACTION_SNOOZE,
-  ADHAN_CONTROLS_CATEGORY_ID,
-} from './adhanActionIds';
-import { SNOOZE_PRESETS } from './notificationActions';
+import { ADHAN_CONTROLS_CATEGORY_ID } from './adhanActionIds';
+import { prayerAlertActions } from './prayerAlertActions';
 import { JOURNAL_LOG_ACTION_ID } from './prayerLogAction';
 import { AdhanPlayer } from '../native/AdhanPlayer';
 import { getMutedNextAdhan } from './adhanMute';
@@ -483,48 +479,11 @@ export async function syncPrayerNotifications(params: {
           // longer prayer-name title squeezed the body to a single ellipsised
           // word (reported in v2.0.13 with Arabic locale).
           style: { type: AndroidStyle.BIGTEXT, text: atPrayerBody },
-          actions: (() => {
-            // Android shows at most 3 actions. Priority order for a real
-            // prayer: Stop adhan (silence now) · Snooze (remind me in N min) ·
-            // Log prayer. Non-prayer events (Sunrise, night times) get none.
-            const actions: {
-              title: string;
-              pressAction: { id: string };
-              input?: {
-                allowFreeFormInput: boolean;
-                choices: string[];
-                placeholder: string;
-              };
-            }[] = [];
-            if (usesAdhan) {
-              actions.push({
-                title: i18n.t('alertCopy.adhanStopAction'),
-                pressAction: { id: ADHAN_ACTION_STOP },
-              });
-            }
-            if (!isNonPrayer) {
-              // Snooze: quick-choice minute chips + a free-form field so the
-              // user can type any number of minutes right in the notification.
-              actions.push({
-                title: i18n.t('alertCopy.snoozeAction', 'Snooze'),
-                pressAction: { id: ADHAN_ACTION_SNOOZE },
-                input: {
-                  allowFreeFormInput: true,
-                  choices: SNOOZE_PRESETS,
-                  placeholder: i18n.t('alertCopy.snoozeMinutes', 'Minutes'),
-                },
-              });
-              actions.push({
-                title: i18n.t('journal.logActionTitle', 'Log prayer'),
-                pressAction: {
-                  // Encode the prayer name in the action id so the
-                  // foreground handler can route to the right row.
-                  id: `${JOURNAL_LOG_ACTION_ID}:${e.name}`,
-                },
-              });
-            }
-            return actions;
-          })(),
+          // Built in prayerAlertActions so the alert and the copy a snooze
+          // re-fires can never drift apart again. Non-prayer events
+          // (Sunrise, the night times) carry none: there is nothing to log
+          // and nothing to be late for.
+          actions: isNonPrayer ? [] : prayerAlertActions(e.name),
         },
       },
       buildTimestampTrigger(e.at.getTime(), exactAlarms),

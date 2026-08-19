@@ -18,47 +18,23 @@ import notifee, {
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
 import i18n from '../i18n';
-import {
-  ADHAN_ACTION_STOP,
-  ADHAN_ACTION_SNOOZE,
-  ADHAN_CONTROLS_CATEGORY_ID,
-} from './adhanActionIds';
+import { ADHAN_CONTROLS_CATEGORY_ID } from './adhanActionIds';
+import { prayerAlertActions } from './prayerAlertActions';
 
 /** Ids of snoozed re-fires — deliberately NOT the `pt-` prefix used by the
  *  scheduled day, so a full resync (which cancels obsolete `pt-` triggers)
  *  never wipes a pending snooze. */
 const SNOOZE_ID_PREFIX = 'adhan-snooze-';
 
-/** Quick-choice minute presets offered on the snooze action. */
-export const SNOOZE_PRESETS = ['5', '10', '15', '30'];
-/** Used when the user snoozes without typing/choosing a value. */
-const SNOOZE_DEFAULT_MIN = 10;
-/** Hard clamp so a fat-fingered "9999" can't schedule days out. */
-const SNOOZE_MAX_MIN = 180;
-
-/**
- * Parse the minute count from a notification action's text input (Android
- * RemoteInput or iOS text-input action). Falls back to a sane default and
- * clamps to [1, 180]. Accepts "10", " 10 ", "10 min" → 10.
- */
-export function parseSnoozeMinutes(
-  input: unknown,
-  fallback: number = SNOOZE_DEFAULT_MIN,
-): number {
-  if (typeof input !== 'string') return fallback;
-  const n = parseInt(input.trim(), 10);
-  if (!Number.isFinite(n) || n <= 0) return fallback;
-  return Math.min(n, SNOOZE_MAX_MIN);
-}
-
-/** Android snooze RemoteInput: quick chips + free-form typing. */
-function androidSnoozeInput() {
-  return {
-    allowFreeFormInput: true,
-    choices: SNOOZE_PRESETS,
-    placeholder: i18n.t('alertCopy.snoozeMinutes', 'Minutes'),
-  };
-}
+// The presets, the chip labels and the parser all live in
+// `prayerAlertActions` now, beside the buttons they describe. Re-exported
+// here because `adhanSafetyControls` has imported the parser from this
+// module since before that file existed.
+export {
+  SNOOZE_PRESETS,
+  parseSnoozeMinutes,
+  snoozeChoiceLabel,
+} from './prayerAlertActions';
 
 /** AlarmManager-backed timestamp trigger so the snooze is punctual even under
  *  aggressive OEM battery managers (mirrors prayerNotifications). */
@@ -76,8 +52,13 @@ function snoozeTrigger(timestamp: number) {
 
 /**
  * Re-fire a prayer alert `minutes` from now, reusing the original's title,
- * body, channel/sound and data. The re-fire itself carries the Snooze (and,
- * for adhan prayers, Stop) actions so it can be snoozed again.
+ * body, channel/sound and data.
+ *
+ * The re-fire carries the SAME buttons as the alert it replaces. It used to
+ * build its own shorter set and lose the log actions, so snoozing a prayer
+ * quietly cost you the ability to log it from the notification — the one
+ * thing a person who has just asked to be reminded is most likely to want
+ * when the reminder arrives.
  */
 export async function snoozePrayerNotification(
   notification: Notification | undefined,
@@ -88,26 +69,12 @@ export async function snoozePrayerNotification(
   const title = notification.title ?? '';
   const body = notification.body ?? i18n.t('alertCopy.atPrayer', 'Prayer time');
   const data = (notification.data ?? {}) as Record<string, string>;
-  const usesAdhan = data.usesAdhan === '1';
   const channelId = notification.android?.channelId ?? 'prayer-times-default';
   const iosSound = notification.ios?.sound;
-
-  const actions: Array<{
-    title: string;
-    pressAction: { id: string };
-    input?: ReturnType<typeof androidSnoozeInput>;
-  }> = [];
-  if (usesAdhan) {
-    actions.push({
-      title: i18n.t('alertCopy.adhanStopAction', 'Stop adhan'),
-      pressAction: { id: ADHAN_ACTION_STOP },
-    });
-  }
-  actions.push({
-    title: i18n.t('alertCopy.snoozeAction', 'Snooze'),
-    pressAction: { id: ADHAN_ACTION_SNOOZE },
-    input: androidSnoozeInput(),
-  });
+  // The prayer name travels in the payload; without it there is nothing to
+  // log, so the re-fire falls back to a snooze-only button.
+  const prayer = typeof data.prayer === 'string' ? data.prayer : '';
+  const actions = prayerAlertActions(prayer);
 
   await notifee.createTriggerNotification(
     {

@@ -41,7 +41,19 @@ import {
   type JournalEntry,
   type JournalPrayer,
 } from '../journal/journal';
-import { JOURNAL_KEY, notifyPracticeChanged } from '../practice/practiceStore';
+import {
+  coerceSunnahLog,
+  dayAt,
+  fieldFor,
+  setSunnah,
+  SUNNAH_UNITS,
+  type SunnahLog,
+} from '../journal/sunnah';
+import {
+  JOURNAL_KEY,
+  SUNNAH_KEY,
+  notifyPracticeChanged,
+} from '../practice/practiceStore';
 import { syncEndOfDayReminderForDay } from './endOfDayLog';
 
 /**
@@ -52,6 +64,22 @@ import { syncEndOfDayReminderForDay } from './endOfDayLog';
  */
 export const JOURNAL_LOG_ACTION_ID = 'journal-log-prayer';
 const LOG_ACTION_ID = JOURNAL_LOG_ACTION_ID;
+
+/**
+ * "Log with sunnah" — the same write plus that prayer's sunnah prayers.
+ *
+ * A separate id rather than a flag on the payload, because the payload is the
+ * part a notification relay is free to drop: a watch that strips `data` still
+ * sends the id, and the id alone has to say both which prayer and which of
+ * the two buttons was pressed.
+ *
+ * It fills ONLY that prayer's own sunnah — Fajr 1, Dhuhr 2, Maghrib 1,
+ * Isha 2. Witr and Qiyam al-Layl are left alone even on Isha: they are
+ * prayed later in the night, and a button pressed as Isha comes in cannot
+ * honestly claim them.
+ */
+export const JOURNAL_LOG_SUNNAH_ACTION_ID = 'journal-log-sunnah';
+const LOG_SUNNAH_ACTION_ID = JOURNAL_LOG_SUNNAH_ACTION_ID;
 
 /** Must match PRAYER_NOTIFICATION_ID_PREFIX in prayerNotifications.ts. */
 const PRAYER_ID_PREFIX = 'pt-';
@@ -79,16 +107,32 @@ export function prayerFromActionId(
   id: string | undefined,
 ): JournalPrayer | null {
   if (typeof id !== 'string') return null;
-  if (!id.startsWith(`${LOG_ACTION_ID}:`)) return null;
-  const name = id.slice(LOG_ACTION_ID.length + 1);
+  const prefix = id.startsWith(`${LOG_SUNNAH_ACTION_ID}:`)
+    ? LOG_SUNNAH_ACTION_ID
+    : id.startsWith(`${LOG_ACTION_ID}:`)
+      ? LOG_ACTION_ID
+      : null;
+  if (!prefix) return null;
+  const name = id.slice(prefix.length + 1);
   return (PRAYERS as string[]).includes(name) ? (name as JournalPrayer) : null;
 }
 
-/** Does this action id belong to the "Log prayer" button at all? */
+/** Does this action id belong to either of the two log buttons? */
 export function isLogActionId(id: string | undefined): boolean {
+  if (typeof id !== 'string') return false;
   return (
-    typeof id === 'string' &&
-    (id === LOG_ACTION_ID || id.startsWith(`${LOG_ACTION_ID}:`))
+    id === LOG_ACTION_ID ||
+    id.startsWith(`${LOG_ACTION_ID}:`) ||
+    id === LOG_SUNNAH_ACTION_ID ||
+    id.startsWith(`${LOG_SUNNAH_ACTION_ID}:`)
+  );
+}
+
+/** Is this the "Log with sunnah" button rather than the plain one? */
+export function isSunnahLogActionId(id: string | undefined): boolean {
+  if (typeof id !== 'string') return false;
+  return (
+    id === LOG_SUNNAH_ACTION_ID || id.startsWith(`${LOG_SUNNAH_ACTION_ID}:`)
   );
 }
 
@@ -160,7 +204,39 @@ export async function logPrayerOnTime(
 }
 
 /**
- * Handle a press on a prayer notification's "Log prayer" action. Returns
+ * Fill `prayer`'s own sunnah for `date`.
+ *
+ * Additive, like the fard write beside it: a count already recorded is left
+ * alone rather than raised to the maximum, so pressing the button after
+ * logging one of Dhuhr's two by hand cannot silently claim the second.
+ * Witr and Qiyam are not touched — see JOURNAL_LOG_SUNNAH_ACTION_ID.
+ */
+export async function logSunnahFor(
+  date: string,
+  prayer: JournalPrayer,
+): Promise<boolean> {
+  const max = SUNNAH_UNITS[prayer] ?? 0;
+  const field = fieldFor(prayer);
+  if (max <= 0 || !field) return false;
+  const raw = await durableEncryptedGet(SUNNAH_KEY).catch(() => null);
+  let log: SunnahLog = {};
+  if (raw) {
+    try {
+      log = coerceSunnahLog(JSON.parse(raw));
+    } catch {
+      log = {};
+    }
+  }
+  const already = dayAt(log, date)[field] as number;
+  if (already >= max) return false;
+  const next = setSunnah(log, date, { [field]: max });
+  await durableEncryptedSet(SUNNAH_KEY, JSON.stringify(next));
+  notifyPracticeChanged();
+  return true;
+}
+
+/**
+ * Handle a press on either of a prayer notification's log actions. Returns
  * true when the event belonged to this feature, so the caller stops looking.
  */
 export async function handlePrayerLogEvent(event: Event): Promise<boolean> {
@@ -181,6 +257,11 @@ export async function handlePrayerLogEvent(event: Event): Promise<boolean> {
     typeof notification?.id === 'string' ? notification.id : undefined,
   );
   await logPrayerOnTime(date, prayer).catch(() => false);
+  // The sunnah AFTER the fard, and in its own store: the fard is the entry
+  // that matters, and it must land even if this half throws.
+  if (isSunnahLogActionId(actionId)) {
+    await logSunnahFor(date, prayer).catch(() => false);
+  }
   // Clear the alert: the question it asked has been answered.
   if (notification?.id) {
     await notifee.cancelNotification(notification.id).catch(() => {});

@@ -377,6 +377,7 @@
     "adhanStopAction": "إيقاف الأذان",
     "adhanDisableAction": "تعطيل الأذان",
     "snoozeAction": "تأجيل",
+    "snoozeChoice": "تأجيل {{minutes}} د",
     "snoozeMinutes": "دقائق"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "ملاحظة خاصة (على هذا الجهاز فقط)",
     "saveNote": "حفظ الملاحظة",
     "logActionTitle": "سجِّل الصلاة",
+    "logSunnahActionTitle": "تسجيل مع السنة",
     "loadFailedTitle": "تعذّر تحميل السجل",
     "loadFailedBody": "بياناتك محفوظة على الجهاز لكن تعذّرت قراءتها الآن. حاول فتح السجل مرة أخرى.",
     "saveFailedTitle": "تعذّر الحفظ",

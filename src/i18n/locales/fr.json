@@ -377,6 +377,7 @@
     "adhanStopAction": "Arrêtez Adhan",
     "adhanDisableAction": "Désactiver Adhan",
     "snoozeAction": "Rappeler",
+    "snoozeChoice": "Reporter {{minutes}} min",
     "snoozeMinutes": "Minutes"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Note privée (uniquement sur cet appareil)",
     "saveNote": "Enregistrer la note",
     "logActionTitle": "Enregistrer la prière",
+    "logSunnahActionTitle": "Noter avec la sunnah",
     "loadFailedTitle": "Impossible de charger le journal",
     "loadFailedBody": "Vos données sont intactes sur l’appareil mais illisibles pour le moment. Rouvrez le journal.",
     "saveFailedTitle": "Impossible d’enregistrer",

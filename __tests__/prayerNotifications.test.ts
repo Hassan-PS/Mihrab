@@ -381,11 +381,9 @@ describe('syncPrayerNotifications: Sunrise never plays the adhan', () => {
     // No adhan category (iOS) and no usesAdhan flag.
     expect(sunrise.ios.categoryId).toBeUndefined();
     expect(sunrise.data.usesAdhan).toBe('0');
-    // No "Stop adhan" action — only the Log prayer action remains.
-    const sunriseActionIds = (sunrise.android.actions ?? []).map(
-      (a: { pressAction: { id: string } }) => a.pressAction.id,
-    );
-    expect(sunriseActionIds).not.toContain('adhan_stop');
+    // Sunrise is not a prayer, so it carries no buttons at all: nothing to
+    // log, nothing to be late for, and no adhan to stop.
+    expect(sunrise.android.actions ?? []).toEqual([]);
   });
 
   test('with an adhan selected, the five daily prayers still play the adhan', async () => {
@@ -403,9 +401,56 @@ describe('syncPrayerNotifications: Sunrise never plays the adhan', () => {
     expect(dhuhr.ios.sound).toBe('adhan_makkah.caf');
     expect(dhuhr.ios.categoryId).toBe('adhan_controls');
     expect(dhuhr.data.usesAdhan).toBe('1');
+    // The adhan is the CHANNEL's sound on Android, so what makes this an
+    // adhan prayer is the channel and the payload flag above — not a "Stop
+    // adhan" button. That button used to sit here spending one of Android's
+    // three action slots on something a swipe already does: `AdhanPlayer` is
+    // an iOS module and every method of it is a no-op on Android.
     const dhuhrActionIds = (dhuhr.android.actions ?? []).map(
       (a: { pressAction: { id: string } }) => a.pressAction.id,
     );
-    expect(dhuhrActionIds).toContain('adhan_stop');
+    expect(dhuhrActionIds).toEqual([
+      'adhan_snooze',
+      'journal-log-prayer:Dhuhr',
+      'journal-log-sunnah:Dhuhr',
+    ]);
+    // iOS keeps its Stop action, declared on the category, where it does
+    // real work against the full-length foreground player.
+    expect(dhuhr.ios.categoryId).toBe('adhan_controls');
+  });
+
+  test('Asr offers no "log with sunnah", because it has no sunnah', async () => {
+    await syncPrayerNotifications({
+      enabled: true,
+      prePrayerReminderMinutes: 0,
+      notificationSound: 'adhan_makkah',
+      today,
+      tomorrow: today,
+    });
+    const asr = findSalahCall('Asr');
+    expect(asr).toBeDefined();
+    const ids = (asr.android.actions ?? []).map(
+      (a: { pressAction: { id: string } }) => a.pressAction.id,
+    );
+    // A button promising to log a sunnah that does not exist would either
+    // lie about what it wrote or duplicate the button beside it.
+    expect(ids).toEqual(['adhan_snooze', 'journal-log-prayer:Asr']);
+  });
+
+  test('every prayer alert fits Android’s three-action limit', async () => {
+    await syncPrayerNotifications({
+      enabled: true,
+      prePrayerReminderMinutes: 0,
+      notificationSound: 'adhan_makkah',
+      today,
+      tomorrow: today,
+    });
+    for (const name of ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']) {
+      const call = findSalahCall(name);
+      expect(call).toBeDefined();
+      // Android silently drops the fourth. A button nobody can see is worse
+      // than one that was never offered.
+      expect((call.android.actions ?? []).length).toBeLessThanOrEqual(3);
+    }
   });
 });

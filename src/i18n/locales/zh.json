@@ -377,6 +377,7 @@
     "adhanStopAction": "停止宣礼",
     "adhanDisableAction": "禁用宣礼",
     "snoozeAction": "稍后提醒",
+    "snoozeChoice": "延后 {{minutes}} 分钟",
     "snoozeMinutes": "分钟"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "私密备注（仅在本设备）",
     "saveNote": "保存备注",
     "logActionTitle": "记录礼拜",
+    "logSunnahActionTitle": "记录含圣行",
     "loadFailedTitle": "无法加载记录",
     "loadFailedBody": "你的数据在设备上是安全的，但此刻无法读取。请重新打开记录。",
     "saveFailedTitle": "无法保存",

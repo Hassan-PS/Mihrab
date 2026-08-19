@@ -377,6 +377,7 @@
     "adhanStopAction": "আযান বন্ধ কর",
     "adhanDisableAction": "আযান বন্ধ করুন",
     "snoozeAction": "স্নুজ",
+    "snoozeChoice": "{{minutes}} মিনিট পরে",
     "snoozeMinutes": "মিনিট"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "ব্যক্তিগত নোট (শুধু এই ডিভাইসে)",
     "saveNote": "নোট সংরক্ষণ করুন",
     "logActionTitle": "নামাজ লগ করুন",
+    "logSunnahActionTitle": "সুন্নাহসহ লিখুন",
     "loadFailedTitle": "লগ লোড করা যায়নি",
     "loadFailedBody": "আপনার তথ্য ডিভাইসে নিরাপদ আছে, কিন্তু এখন পড়া যায়নি। আবার লগ খুলে দেখুন।",
     "saveFailedTitle": "সংরক্ষণ করা যায়নি",

@@ -377,6 +377,7 @@
     "adhanStopAction": "Остановить азан",
     "adhanDisableAction": "Отключить азан",
     "snoozeAction": "Отложить",
+    "snoozeChoice": "Отложить на {{minutes}} мин",
     "snoozeMinutes": "Минуты"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Личная заметка (только на этом устройстве)",
     "saveNote": "Сохранить заметку",
     "logActionTitle": "Записать молитву",
+    "logSunnahActionTitle": "Отметить с сунной",
     "loadFailedTitle": "Не удалось загрузить журнал",
     "loadFailedBody": "Ваши данные на устройстве в порядке, но сейчас их не удалось прочитать. Откройте журнал ещё раз.",
     "saveFailedTitle": "Не удалось сохранить",

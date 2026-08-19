@@ -40,9 +40,10 @@ jest.mock('@notifee/react-native', () => ({
   TriggerType: { TIMESTAMP: 0 },
 }));
 
-import { JOURNAL_KEY } from '../src/practice/practiceStore';
+import { JOURNAL_KEY, SUNNAH_KEY } from '../src/practice/practiceStore';
 import { handlePrayerLogEvent } from '../src/notifications/prayerLogAction';
 import { coerceJournalEntries, getEntryStatus } from '../src/journal/journal';
+import { coerceSunnahLog, dayAt } from '../src/journal/sunnah';
 
 function journal() {
   const raw = store.get(JOURNAL_KEY);
@@ -140,5 +141,127 @@ describe('handlePrayerLogEvent', () => {
     const firedAt = new Date(2026, 7, 9, 23, 50, 0).getTime();
     await press('journal-log-prayer:Isha', { id: `pt-${firedAt}-Isha` });
     expect(getEntryStatus(journal(), '2026-08-09', 'Isha')).toBe('on-time');
+  });
+});
+
+/**
+ * "Log with sunnah" — the second button, added when the first turned out to
+ * be the only thing on a prayer alert that wrote anything at all.
+ *
+ * It fills the fard AND that prayer's own sunnah in one press, because the
+ * common case on a notification is "I prayed it, all of it" and making that
+ * two trips into the app is why the Log tab exists at all.
+ */
+describe('handlePrayerLogEvent — log with sunnah', () => {
+  const sunnahLog = () => {
+    const raw = store.get(SUNNAH_KEY);
+    return raw ? coerceSunnahLog(JSON.parse(raw)) : {};
+  };
+
+  test('writes the fard AND that prayer’s sunnah', async () => {
+    const handled = await press('journal-log-sunnah:Dhuhr', {
+      id: 'pt-1-Dhuhr',
+      data: { targetDate: '2026-08-09', prayer: 'Dhuhr' },
+    });
+    expect(handled).toBe(true);
+    expect(getEntryStatus(journal(), '2026-08-09', 'Dhuhr')).toBe('on-time');
+    // Dhuhr carries two; a press claims both or it is not "with sunnah".
+    expect(dayAt(sunnahLog(), '2026-08-09').dhuhr).toBe(2);
+  });
+
+  test('fills each prayer to its own count, not to a fixed number', async () => {
+    for (const [prayer, field, want] of [
+      ['Fajr', 'fajr', 1],
+      ['Dhuhr', 'dhuhr', 2],
+      ['Maghrib', 'maghrib', 1],
+      ['Isha', 'isha', 2],
+    ] as const) {
+      store.clear();
+      await press(`journal-log-sunnah:${prayer}`, {
+        id: `pt-1-${prayer}`,
+        data: { targetDate: '2026-08-09', prayer },
+      });
+      expect(dayAt(sunnahLog(), '2026-08-09')[field]).toBe(want);
+    }
+  });
+
+  test('leaves Witr and Qiyam alone, even on Isha', async () => {
+    // They are prayed later in the night. A button pressed as Isha comes in
+    // cannot honestly claim them.
+    await press('journal-log-sunnah:Isha', {
+      id: 'pt-1-Isha',
+      data: { targetDate: '2026-08-09', prayer: 'Isha' },
+    });
+    const day = dayAt(sunnahLog(), '2026-08-09');
+    expect(day.isha).toBe(2);
+    expect(day.witr).toBe(false);
+    expect(day.qiyam).toBe(0);
+  });
+
+  test('writes nothing extra for Asr, which carries no sunnah', async () => {
+    // The button is not offered on Asr, but the id can still arrive from an
+    // older notification sitting in the shade across an update.
+    const handled = await press('journal-log-sunnah:Asr', {
+      id: 'pt-1-Asr',
+      data: { targetDate: '2026-08-09', prayer: 'Asr' },
+    });
+    expect(handled).toBe(true);
+    expect(getEntryStatus(journal(), '2026-08-09', 'Asr')).toBe('on-time');
+    expect(sunnahLog()['2026-08-09']).toBeUndefined();
+  });
+
+  test('the plain button still writes no sunnah at all', async () => {
+    await press('journal-log-prayer:Dhuhr', {
+      id: 'pt-1-Dhuhr',
+      data: { targetDate: '2026-08-09', prayer: 'Dhuhr' },
+    });
+    expect(getEntryStatus(journal(), '2026-08-09', 'Dhuhr')).toBe('on-time');
+    expect(sunnahLog()['2026-08-09']).toBeUndefined();
+  });
+
+  test('resolves the prayer from the id when a relay drops the payload', async () => {
+    // A watch bridge is free to strip `data`; the id is all that survives.
+    const handled = await press('journal-log-sunnah:Maghrib', {
+      id: 'pt-1754697600000-Maghrib',
+    });
+    expect(handled).toBe(true);
+    const date = Object.keys(sunnahLog())[0];
+    expect(date).toBeDefined();
+    expect(dayAt(sunnahLog(), date).maghrib).toBe(1);
+    expect(getEntryStatus(journal(), date, 'Maghrib')).toBe('on-time');
+  });
+
+  test('does not raise a count the user set by hand', async () => {
+    // One of Dhuhr's two logged deliberately; the press must not claim the
+    // second on their behalf.
+    store.set(
+      SUNNAH_KEY,
+      JSON.stringify({
+        '2026-08-09': {
+          fajr: 0, dhuhr: 1, maghrib: 0, isha: 0, witr: false, qiyam: 0,
+        },
+      }),
+    );
+    await press('journal-log-sunnah:Dhuhr', {
+      id: 'pt-1-Dhuhr',
+      data: { targetDate: '2026-08-09', prayer: 'Dhuhr' },
+    });
+    expect(dayAt(sunnahLog(), '2026-08-09').dhuhr).toBe(2);
+  });
+
+  test('is idempotent — a double press changes nothing the second time', async () => {
+    const one = { id: 'pt-1-Fajr', data: { targetDate: '2026-08-09', prayer: 'Fajr' } };
+    await press('journal-log-sunnah:Fajr', one);
+    const after = JSON.stringify(sunnahLog());
+    await press('journal-log-sunnah:Fajr', one);
+    expect(JSON.stringify(sunnahLog())).toBe(after);
+  });
+
+  test('clears the alert once it has been answered', async () => {
+    await press('journal-log-sunnah:Fajr', {
+      id: 'pt-1-Fajr',
+      data: { targetDate: '2026-08-09', prayer: 'Fajr' },
+    });
+    expect(cancelNotification).toHaveBeenCalledWith('pt-1-Fajr');
   });
 });

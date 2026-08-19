@@ -377,6 +377,7 @@
     "adhanStopAction": "Hentikan adzan",
     "adhanDisableAction": "Nonaktifkan adzan",
     "snoozeAction": "Tunda",
+    "snoozeChoice": "Tunda {{minutes}} mnt",
     "snoozeMinutes": "Menit"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Catatan pribadi (hanya di perangkat ini)",
     "saveNote": "Simpan catatan",
     "logActionTitle": "Catat salat",
+    "logSunnahActionTitle": "Catat dengan sunah",
     "loadFailedTitle": "Tidak dapat memuat catatan",
     "loadFailedBody": "Data Anda aman di perangkat tetapi tidak dapat dibaca sekarang. Coba buka catatan lagi.",
     "saveFailedTitle": "Tidak dapat menyimpan",

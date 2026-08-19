@@ -377,6 +377,7 @@
     "adhanStopAction": "اذان بند کرو",
     "adhanDisableAction": "اذان کو غیر فعال کریں۔",
     "snoozeAction": "موخر کریں",
+    "snoozeChoice": "{{minutes}} منٹ بعد",
     "snoozeMinutes": "منٹ"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "نجی نوٹ (صرف اس آلے پر)",
     "saveNote": "نوٹ محفوظ کریں",
     "logActionTitle": "نماز درج کریں",
+    "logSunnahActionTitle": "سنت کے ساتھ درج کریں",
     "loadFailedTitle": "ریکارڈ لوڈ نہیں ہو سکا",
     "loadFailedBody": "آپ کا ڈیٹا آلے پر محفوظ ہے مگر ابھی پڑھا نہیں جا سکا۔ ریکارڈ دوبارہ کھولیں۔",
     "saveFailedTitle": "محفوظ نہیں ہو سکا",

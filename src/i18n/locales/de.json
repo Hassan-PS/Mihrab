@@ -377,6 +377,7 @@
     "adhanStopAction": "Hör auf, Adhan",
     "adhanDisableAction": "Adhan deaktivieren",
     "snoozeAction": "Erinnern",
+    "snoozeChoice": "{{minutes}} Min. später",
     "snoozeMinutes": "Minuten"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Private Notiz (nur auf diesem Gerät)",
     "saveNote": "Notiz speichern",
     "logActionTitle": "Gebet protokollieren",
+    "logSunnahActionTitle": "Mit Sunnah buchen",
     "loadFailedTitle": "Protokoll konnte nicht geladen werden",
     "loadFailedBody": "Deine Daten sind auf dem Gerät sicher, konnten aber gerade nicht gelesen werden. Öffne das Protokoll erneut.",
     "saveFailedTitle": "Konnte nicht gespeichert werden",

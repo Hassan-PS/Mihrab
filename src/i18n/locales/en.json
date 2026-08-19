@@ -377,6 +377,7 @@
     "adhanStopAction": "Stop adhan",
     "adhanDisableAction": "Disable adhan",
     "snoozeAction": "Snooze",
+    "snoozeChoice": "Snooze {{minutes}} min",
     "snoozeMinutes": "Minutes"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Private note (only on this device)",
     "saveNote": "Save note",
     "logActionTitle": "Log prayer",
+    "logSunnahActionTitle": "Log with sunnah",
     "loadFailedTitle": "Could not load journal",
     "loadFailedBody": "Your data is safe on disk but could not be read right now. Please try opening the journal again.",
     "saveFailedTitle": "Could not save",

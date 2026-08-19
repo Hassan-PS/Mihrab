@@ -377,6 +377,7 @@
     "adhanStopAction": "detener adhan",
     "adhanDisableAction": "Desactivar adhan",
     "snoozeAction": "Posponer",
+    "snoozeChoice": "Posponer {{minutes}} min",
     "snoozeMinutes": "Minutos"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Nota privada (solo en este dispositivo)",
     "saveNote": "Guardar nota",
     "logActionTitle": "Registrar oración",
+    "logSunnahActionTitle": "Registrar con sunnah",
     "loadFailedTitle": "No se pudo cargar el registro",
     "loadFailedBody": "Tus datos están a salvo en el dispositivo pero no se pudieron leer ahora. Abre el registro de nuevo.",
     "saveFailedTitle": "No se pudo guardar",

@@ -377,6 +377,7 @@
     "adhanStopAction": "Stoppa adhan",
     "adhanDisableAction": "Inaktivera adhan",
     "snoozeAction": "Snooza",
+    "snoozeChoice": "Snooza {{minutes}} min",
     "snoozeMinutes": "Minuter"
   },
   "support": {
@@ -973,6 +974,7 @@
     "notePlaceholder": "Privat anteckning (endast på denna enhet)",
     "saveNote": "Spara anteckning",
     "logActionTitle": "Logga bön",
+    "logSunnahActionTitle": "Logga med sunnah",
     "loadFailedTitle": "Kunde inte läsa loggen",
     "loadFailedBody": "Dina data finns kvar på enheten men kunde inte läsas just nu. Försök öppna loggen igen.",
     "saveFailedTitle": "Kunde inte spara",
