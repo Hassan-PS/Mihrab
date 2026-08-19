@@ -959,10 +959,10 @@
       "qadha": "Восполнено (қадха)"
     },
     "statusShort": {
-      "on-time": "Вовр.",
-      "late": "Опозд.",
-      "missed": "Проп.",
-      "qadha": "Қад."
+      "on-time": "Вовремя",
+      "late": "С опозданием",
+      "missed": "Пропущено",
+      "qadha": "Восполнено"
     },
     "encourageEmpty": "Отметьте первую молитву сегодняшнего дня, чтобы начать дневник.",
     "encourageActive": "Каждая записанная молитва — шаг вперёд.",
@@ -1244,6 +1244,7 @@
     "none": "Нет",
     "short": "Сунна",
     "ofTotal": "{{done}} из {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: нет сунны",
     "a11yCount": "Сунна {{prayer}}: отмечено {{done}} из {{total}}",
     "afterIsha": "После Иши",

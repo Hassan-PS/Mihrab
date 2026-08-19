@@ -959,10 +959,10 @@
       "qadha": "Recuperada (qadha)"
     },
     "statusShort": {
-      "on-time": "A t.",
+      "on-time": "A tiempo",
       "late": "Tarde",
-      "missed": "Perd.",
-      "qadha": "Qad"
+      "missed": "Perdida",
+      "qadha": "Recuperada"
     },
     "encourageEmpty": "Marca la primera oración de hoy para comenzar tu diario.",
     "encourageActive": "Cada oración registrada es un paso adelante.",
@@ -1244,6 +1244,7 @@
     "none": "Ninguna",
     "short": "Sunnah",
     "ofTotal": "{{done}} de {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: sin oración sunnah",
     "a11yCount": "{{prayer}} sunnah: {{done}} de {{total}} registradas",
     "afterIsha": "Después del Isha",

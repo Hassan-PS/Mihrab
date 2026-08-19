@@ -959,10 +959,10 @@
       "qadha": "Make-up (Qadha)"
     },
     "statusShort": {
-      "on-time": "On",
+      "on-time": "On time",
       "late": "Late",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "missed": "Missed",
+      "qadha": "Make-up"
     },
     "encourageEmpty": "Mark today's first prayer to begin your journal.",
     "encourageActive": "Every prayer logged is a step forward.",
@@ -1244,6 +1244,7 @@
     "none": "None",
     "short": "Sunnah",
     "ofTotal": "{{done}} of {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: no sunnah prayer",
     "a11yCount": "{{prayer}} sunnah: {{done}} of {{total}} logged",
     "afterIsha": "After Isha",

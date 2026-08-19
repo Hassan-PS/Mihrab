@@ -959,10 +959,10 @@
       "qadha": "Rattrapée (qadha)"
     },
     "statusShort": {
-      "on-time": "À l’h.",
-      "late": "Retard",
-      "missed": "Manq.",
-      "qadha": "Qad"
+      "on-time": "À l’heure",
+      "late": "En retard",
+      "missed": "Manquée",
+      "qadha": "Rattrapée"
     },
     "encourageEmpty": "Cochez la première prière du jour pour commencer votre journal.",
     "encourageActive": "Chaque prière enregistrée est un pas en avant.",
@@ -1244,6 +1244,7 @@
     "none": "Aucune",
     "short": "Sunnah",
     "ofTotal": "{{done}} sur {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}} : aucune prière sunnah",
     "a11yCount": "{{prayer}} sunnah : {{done}} sur {{total}} enregistrées",
     "afterIsha": "Après l'Isha",

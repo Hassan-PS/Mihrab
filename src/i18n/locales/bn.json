@@ -959,8 +959,8 @@
       "qadha": "কাযা"
     },
     "statusShort": {
-      "on-time": "সময়",
-      "late": "দেরি",
+      "on-time": "সময়মতো",
+      "late": "দেরিতে",
       "missed": "মিস",
       "qadha": "কাযা"
     },
@@ -1244,6 +1244,7 @@
     "none": "নেই",
     "short": "সুন্নত",
     "ofTotal": "{{total}}-এর {{done}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: কোনো সুন্নত নেই",
     "a11yCount": "{{prayer}} সুন্নত: {{total}}-এর {{done}} লগ করা হয়েছে",
     "afterIsha": "ইশার পরে",

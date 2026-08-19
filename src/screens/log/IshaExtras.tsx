@@ -50,18 +50,17 @@ function IshaExtrasImpl({
   const dead = notYet === true;
 
   return (
-    <View
-      style={[
-        styles.wrap,
-        { backgroundColor: palette.accentBg },
-        dead && styles.wrapNotYet,
-      ]}
-    >
+    <View style={[styles.wrap, dead && styles.wrapNotYet]}>
       <Text style={[styles.head, { color: palette.muted }]} numberOfLines={1}>
         {t('sunnah.afterIsha', 'After Isha')}
       </Text>
 
-      <View style={styles.row}>
+      <View
+        style={[
+          styles.row,
+          { borderTopColor: palette.border ?? palette.muted },
+        ]}
+      >
         <Text style={[styles.name, { color: palette.text }]} numberOfLines={1}>
           {t('sunnah.witr', 'Witr')}
         </Text>
@@ -89,7 +88,12 @@ function IshaExtrasImpl({
         </Pressable>
       </View>
 
-      <View style={styles.row}>
+      <View
+        style={[
+          styles.row,
+          { borderTopColor: palette.border ?? palette.muted },
+        ]}
+      >
         <View style={styles.nameCol}>
           <Text style={[styles.name, { color: palette.text }]} numberOfLines={1}>
             {t('sunnah.qiyam', 'Qiyam al-Layl')}
@@ -142,25 +146,36 @@ function IshaExtrasImpl({
 export const IshaExtras = memo(IshaExtrasImpl);
 
 const styles = StyleSheet.create({
+  /**
+   * A flat continuation of the prayer list, not a panel inside a row.
+   *
+   * It was a tinted block nested inside Isha's row — a third level of
+   * containment on a screen that already goes card → row, and the only
+   * background colour in the list. Witr and Qiyam are two more things you
+   * log, on the same rhythm as everything above them, so they get the same
+   * hairline rule and the same left edge instead of a box of their own.
+   */
   wrap: {
-    marginTop: 10,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    // On the container so the two rows are separated as well as the heading;
-    // a marginBottom on the heading alone left Witr and Qiyam touching.
-    gap: 8,
+    marginTop: 6,
+    gap: 2,
   },
   // The same 0.4 the status chips and the sunnah tile use, so the whole Isha
   // row dims as one piece rather than three shades of grey.
   wrapNotYet: { opacity: 0.4 },
   head: {
+    marginTop: 4,
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 9,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
   nameCol: { flex: 1 },
   name: { flex: 1, fontSize: 13.5, fontWeight: '600' },
   sub: { fontSize: 11, marginTop: 1 },

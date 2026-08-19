@@ -959,10 +959,10 @@
       "qadha": "Nachgeholt (Qadha)"
     },
     "statusShort": {
-      "on-time": "Pkt.",
-      "late": "Spät",
-      "missed": "Versp.",
-      "qadha": "Qad"
+      "on-time": "Pünktlich",
+      "late": "Verspätet",
+      "missed": "Verpasst",
+      "qadha": "Nachgeholt"
     },
     "encourageEmpty": "Markiere heute das erste Gebet, um dein Tagebuch zu beginnen.",
     "encourageActive": "Jedes festgehaltene Gebet ist ein Schritt vorwärts.",
@@ -1244,6 +1244,7 @@
     "none": "Keine",
     "short": "Sunnah",
     "ofTotal": "{{done}} von {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: kein Sunnah-Gebet",
     "a11yCount": "{{prayer}} Sunnah: {{done}} von {{total}} erfasst",
     "afterIsha": "Nach Isha",

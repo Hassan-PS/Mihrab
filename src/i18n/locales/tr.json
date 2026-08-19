@@ -959,9 +959,9 @@
       "qadha": "Kaza"
     },
     "statusShort": {
-      "on-time": "V.",
+      "on-time": "Vaktinde",
       "late": "Geç",
-      "missed": "Kaçt",
+      "missed": "Kaçırılmış",
       "qadha": "Kaza"
     },
     "encourageEmpty": "Günlüğünü başlatmak için bugünün ilk namazını işaretle.",
@@ -1244,6 +1244,7 @@
     "none": "Yok",
     "short": "Sünnet",
     "ofTotal": "{{total}} içinden {{done}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: sünnet namazı yok",
     "a11yCount": "{{prayer}} sünneti: {{total}} içinden {{done}} kaydedildi",
     "afterIsha": "Yatsıdan sonra",

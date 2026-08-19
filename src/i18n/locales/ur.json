@@ -960,8 +960,8 @@
     },
     "statusShort": {
       "on-time": "بروقت",
-      "late": "دیر",
-      "missed": "چھوٹا",
+      "late": "دیر سے",
+      "missed": "چھوٹ گئی",
       "qadha": "قضا"
     },
     "encourageEmpty": "اپنی ڈائری شروع کرنے کے لیے آج کی پہلی نماز نشان زد کریں۔",
@@ -1244,6 +1244,7 @@
     "none": "کوئی نہیں",
     "short": "سنت",
     "ofTotal": "{{total}} میں سے {{done}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: کوئی سنت نہیں",
     "a11yCount": "{{prayer}} سنت: {{total}} میں سے {{done}} درج",
     "afterIsha": "عشاء کے بعد",

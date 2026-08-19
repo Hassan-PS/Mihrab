@@ -1244,6 +1244,7 @@
     "none": "لا يوجد",
     "short": "سنة",
     "ofTotal": "{{done}} من {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: لا توجد سنة",
     "a11yCount": "سنة {{prayer}}: سُجِّل {{done}} من {{total}}",
     "afterIsha": "بعد العشاء",

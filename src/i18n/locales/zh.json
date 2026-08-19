@@ -959,10 +959,10 @@
       "qadha": "补做 (qadha)"
     },
     "statusShort": {
-      "on-time": "准",
-      "late": "迟",
-      "missed": "错",
-      "qadha": "补"
+      "on-time": "准时",
+      "late": "迟到",
+      "missed": "错过",
+      "qadha": "补做"
     },
     "encourageEmpty": "标记今天的第一次礼拜以开始你的记录。",
     "encourageActive": "每一次记录的礼拜都是向前的一步。",
@@ -1244,6 +1244,7 @@
     "none": "无",
     "short": "圣行拜",
     "ofTotal": "{{total}} 中的 {{done}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}：无圣行拜",
     "a11yCount": "{{prayer}} 圣行拜：已记录 {{total}} 中的 {{done}}",
     "afterIsha": "宵礼之后",

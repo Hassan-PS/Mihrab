@@ -961,8 +961,8 @@
     "statusShort": {
       "on-time": "I tid",
       "late": "Sent",
-      "missed": "Miss",
-      "qadha": "Qad"
+      "missed": "Missad",
+      "qadha": "Tagen igen"
     },
     "encourageEmpty": "Markera dagens första bön för att börja journalen.",
     "encourageActive": "Varje bön du loggar är ett steg framåt.",
@@ -1244,6 +1244,7 @@
     "none": "Ingen",
     "short": "Sunnah",
     "ofTotal": "{{done}} av {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: ingen sunnahbön",
     "a11yCount": "{{prayer}} sunnah: {{done}} av {{total}} loggade",
     "afterIsha": "Efter Isha",

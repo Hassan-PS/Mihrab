@@ -1,15 +1,18 @@
 /**
- * The sunnah tile, as a control rather than as arithmetic.
+ * The sunnah chip, as a control rather than as arithmetic.
  *
- * `sunnah.test.ts` proves the cycle. This proves the two things the cycle
- * cannot: that the tile SHOWS where it is — a button that goes 0→1→2→0 with
- * nothing on it is a guessing game — and that Asr, which carries no sunnah, is
- * drawn and inert rather than missing.
+ * `sunnah.test.ts` proves the cycle. This proves what the cycle cannot: that
+ * the chip SHOWS where it is — a button that goes 0→1→2→0 with nothing on it
+ * is a guessing game — and that Asr, which carries no sunnah, renders NOTHING.
+ *
+ * That last one is the change from the tile it replaces. The tile stayed on
+ * Asr's row and said "None": a control whose entire content is a reason it
+ * does nothing, which is worse than an absence. Every other row carrying a
+ * gold chip makes Asr's silence self-explanatory.
  */
-// i18n is not initialised under jest, so the real `t` hands back the
-// default string with its {{placeholders}} intact — which would let the
-// assertions below pass on a label that never actually names a number.
-// Interpolate here so "1 of 2" has to be really produced.
+// i18n is not initialised under jest, so the real `t` hands back the default
+// string with its {{placeholders}} intact — which would let the assertions
+// below pass on a label that never actually names a number.
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (_key: string, second?: unknown, third?: unknown) => {
@@ -32,7 +35,7 @@ jest.mock('react-i18next', () => ({
 import * as React from 'react';
 import { create } from 'react-test-renderer';
 import { act } from 'react';
-import { SunnahTile } from '../src/screens/log/SunnahTile';
+import { SunnahChip } from '../src/screens/log/SunnahChip';
 import type { AppPalette } from '../src/theme/appPalette';
 
 const palette = {
@@ -47,7 +50,7 @@ const palette = {
 type Renderer = ReturnType<typeof create>;
 
 async function render(
-  prayer: 'Fajr' | 'Dhuhr' | 'Asr' | 'Isha',
+  prayer: 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha',
   count: number,
   notYet?: boolean,
 ) {
@@ -55,7 +58,7 @@ async function render(
   let tree!: Renderer;
   await act(async () => {
     tree = create(
-      <SunnahTile
+      <SunnahChip
         prayer={prayer}
         count={count}
         palette={palette}
@@ -67,7 +70,7 @@ async function render(
   return { tree, onPress };
 }
 
-/** The tile itself — the one node carrying an accessibility state. */
+/** The chip itself — the one node carrying an accessibility state. */
 function control(tree: Renderer) {
   return tree.root.find(
     n => typeof n.type === 'string' && n.props?.accessibilityState != null,
@@ -80,7 +83,8 @@ function pips(tree: Renderer) {
     n =>
       typeof n.type === 'string' &&
       Array.isArray(n.props?.style) &&
-      JSON.stringify(n.props.style).includes('"width":8'),
+      JSON.stringify(n.props.style).includes('"borderRadius":99') &&
+      JSON.stringify(n.props.style).includes('"width":7'),
   );
 }
 
@@ -93,12 +97,14 @@ function filled(tree: Renderer) {
 
 function text(tree: Renderer): string {
   return tree.root
-    .findAll(n => typeof n.type === 'string' && typeof n.props?.children === 'string')
+    .findAll(
+      n => typeof n.type === 'string' && typeof n.props?.children === 'string',
+    )
     .map(n => String(n.props.children))
     .join(' ');
 }
 
-describe('the tile shows its own state', () => {
+describe('the chip shows its own state', () => {
   it('draws one pip for Fajr and fills it when logged', async () => {
     const empty = await render('Fajr', 0);
     expect(pips(empty.tree)).toHaveLength(1);
@@ -120,47 +126,38 @@ describe('the tile shows its own state', () => {
     }
   });
 
-  it('says how far along it is, so the next tap is predictable', async () => {
-    const { tree } = await render('Isha', 1);
-    expect(text(tree)).toContain('1 of 2');
+  it('names the prayer for a one-unit sunnah, and counts for a two', async () => {
+    // "Sunnah" says everything there is to say when there is only one of
+    // them; with two, which of the two is the whole question.
+    expect(text((await render('Maghrib', 0)).tree)).toContain('Sunnah');
+    expect(text((await render('Isha', 1)).tree)).toContain('1/2');
+    expect(text((await render('Isha', 2)).tree)).toContain('2/2');
   });
 });
 
 describe('Asr', () => {
-  it('is drawn rather than left as a hole in the row', async () => {
+  it('renders nothing at all — no dead control to explain', async () => {
     const { tree } = await render('Asr', 0);
-    expect(pips(tree)).toHaveLength(1);
-    expect(text(tree)).toContain('None');
+    expect(tree.toJSON()).toBeNull();
   });
 
-  it('is not pressable, and says why to a screen reader', async () => {
-    const { tree, onPress } = await render('Asr', 0);
-    const pressable = tree.root.find(
-      n => typeof n.type === 'string' && n.props?.accessibilityState != null,
-    );
-    expect(pressable.props.accessibilityState.disabled).toBe(true);
-    expect(String(pressable.props.accessibilityLabel)).toContain('no sunnah');
-    // Even if something did fire it, the handler must not be reachable.
-    expect(onPress).not.toHaveBeenCalled();
+  it('renders nothing even if a count somehow reached it', async () => {
+    // Defence in depth: a corrupt store or an old blob cannot conjure a
+    // control onto a prayer that carries no sunnah.
+    const { tree } = await render('Asr', 2);
+    expect(tree.toJSON()).toBeNull();
   });
 });
 
 describe('a prayer whose time has not come', () => {
   it('is inert, exactly as the status chips beside it are', async () => {
-    // `disabled` is consumed by Pressable and never reaches the host node,
-    // so the accessibility state is what there is to assert on — which is
-    // also the half of it a screen-reader user actually meets.
     const { tree } = await render('Dhuhr', 0, true);
     expect(control(tree).props.accessibilityState.disabled).toBe(true);
   });
 
-  it('is dimmed, but still says what it is rather than "None"', async () => {
-    // The Asr wording is a permanent fact about Asr. A prayer that simply
-    // has not happened yet must not borrow it — nothing is being claimed
-    // about whether it carries a sunnah, only about the clock.
+  it('is dimmed, and still says what it is', async () => {
     const { tree } = await render('Dhuhr', 0, true);
-    expect(text(tree)).toContain('0 of 2');
-    expect(text(tree)).not.toContain('None');
+    expect(text(tree)).toContain('0/2');
     expect(JSON.stringify(control(tree).props.style)).toContain('"opacity":0.4');
   });
 
@@ -169,11 +166,6 @@ describe('a prayer whose time has not come', () => {
     // the state a mis-tap leaves behind: it has to remain undoable.
     const { tree } = await render('Dhuhr', 1, false);
     expect(control(tree).props.accessibilityState.disabled).toBe(false);
-  });
-
-  it('cannot resurrect Asr, which has no sunnah at any hour', async () => {
-    const { tree } = await render('Asr', 0, false);
-    expect(control(tree).props.accessibilityState.disabled).toBe(true);
   });
 });
 

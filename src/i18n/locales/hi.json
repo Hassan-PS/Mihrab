@@ -959,9 +959,9 @@
       "qadha": "क़ज़ा"
     },
     "statusShort": {
-      "on-time": "समय",
-      "late": "देर",
-      "missed": "छूट",
+      "on-time": "समय पर",
+      "late": "देर से",
+      "missed": "छूटी",
       "qadha": "क़ज़ा"
     },
     "encourageEmpty": "अपनी डायरी शुरू करने के लिए आज की पहली नमाज़ चिह्नित करें।",
@@ -1244,6 +1244,7 @@
     "none": "कोई नहीं",
     "short": "सुन्नत",
     "ofTotal": "{{total}} में से {{done}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: कोई सुन्नत नहीं",
     "a11yCount": "{{prayer}} सुन्नत: {{total}} में से {{done}} दर्ज",
     "afterIsha": "इशा के बाद",

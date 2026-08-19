@@ -43,7 +43,7 @@ import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { FillSummary } from '../components/FillSummary';
-import { SunnahTile } from './log/SunnahTile';
+import { SunnahChip } from './log/SunnahChip';
 import { IshaExtras } from './log/IshaExtras';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
@@ -1198,6 +1198,19 @@ export function LogScreen() {
                         {formatDisplayTime(time)}
                       </Text>
                     ) : null}
+                    <View style={styles.headSpacer} />
+                    {/* The sunnah sits with the TIME, not with the statuses:
+                        it is a count, not a choice, and mixing the two
+                        grammars in one row is what made this screen read as
+                        controls rather than as a prayer. Asr renders nothing
+                        — see SunnahChip. */}
+                    <SunnahChip
+                      prayer={prayer}
+                      count={sunnahDone}
+                      palette={palette}
+                      notYet={sunnahNotYet}
+                      onPress={() => onSunnahTap(prayer)}
+                    />
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={t(
@@ -1254,36 +1267,13 @@ export function LogScreen() {
                                 color: isSel ? palette.onAccent : palette.text,
                               },
                             ]}
-                            numberOfLines={1}
+                            numberOfLines={2}
                           >
                             {t(`journal.statusShort.${s}`)}
                           </Text>
                         </Pressable>
                       );
                     })}
-                    {/* The sunnah tile is FIXED WIDTH behind a divider, not a
-                        fifth flex child: the four chips above are `flex: 1`
-                        inside a 14pt-padded panel, and a fifth would squeeze
-                        all of them past legibility on a 320pt phone. */}
-                    <View
-                      style={[
-                        styles.sunnahDivider,
-                        { backgroundColor: palette.border ?? palette.muted },
-                      ]}
-                    />
-                    <SunnahTile
-                      prayer={prayer}
-                      count={sunnahDone}
-                      palette={palette}
-                      // Greyed out until the prayer it belongs to has come
-                      // in, exactly as the four statuses beside it are — a
-                      // sunnah is prayed around its fard, so offering it
-                      // hours early invites a claim the user cannot have
-                      // made. Same rule, not a similar one: already logged
-                      // stays editable, so a mistake is still undoable.
-                      notYet={sunnahNotYet}
-                      onPress={() => onSunnahTap(prayer)}
-                    />
                   </View>
                   {/* Witr and Qiyam hang off Isha because that is when they
                       are prayed — not in a section of their own, where they
@@ -1605,18 +1595,30 @@ const styles = StyleSheet.create({
   prayerRow: { paddingVertical: 10 },
   prayerHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   prayerName: { fontSize: 15, fontWeight: '600' },
-  prayerTime: { flex: 1, fontSize: 13 },
+  prayerTime: { fontSize: 13 },
+  /** Pushes the sunnah chip and the note toggle to the end of the header. */
+  headSpacer: { flex: 1 },
   noteToggle: { padding: 4 },
   statusRow: { flexDirection: 'row', gap: 6, marginTop: 8, alignItems: 'stretch' },
-  /** Separates the four fard statuses from the sunnah tile beside them. */
-  sunnahDivider: { width: StyleSheet.hairlineWidth, marginVertical: 2 },
   statusChip: {
     flex: 1,
     paddingVertical: 7,
+    paddingHorizontal: 2,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  statusLabel: { fontSize: 12, fontWeight: '600' },
+  /**
+   * Two lines rather than an ellipsis.
+   *
+   * The chips say the whole word now that the sunnah tile is not taking 62pt
+   * of the row, and the whole word is "С опозданием" in Russian and
+   * "Kaçırılmış" in Turkish. A status truncated to "С опоз…" is worse than
+   * one that wraps, and the row is `alignItems: 'stretch'` so a chip that
+   * takes two lines lifts the other three with it rather than stepping out
+   * of line.
+   */
+  statusLabel: { fontSize: 11.5, fontWeight: '600', textAlign: 'center' },
   noteRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',

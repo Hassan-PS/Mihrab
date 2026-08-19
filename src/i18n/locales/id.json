@@ -959,10 +959,10 @@
       "qadha": "Qadha"
     },
     "statusShort": {
-      "on-time": "Tepat",
-      "late": "Lmbt",
-      "missed": "Lewat",
-      "qadha": "Qad"
+      "on-time": "Tepat waktu",
+      "late": "Terlambat",
+      "missed": "Terlewat",
+      "qadha": "Qadha"
     },
     "encourageEmpty": "Tandai salat pertama hari ini untuk memulai jurnalmu.",
     "encourageActive": "Setiap salat yang tercatat adalah langkah maju.",
@@ -1244,6 +1244,7 @@
     "none": "Tidak ada",
     "short": "Sunnah",
     "ofTotal": "{{done}} dari {{total}}",
+    "ofTotalShort": "{{done}}/{{total}}",
     "a11yNone": "{{prayer}}: tidak ada salat sunnah",
     "a11yCount": "Sunnah {{prayer}}: {{done}} dari {{total}} dicatat",
     "afterIsha": "Setelah Isya",
