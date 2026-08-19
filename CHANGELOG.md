@@ -2,6 +2,33 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.9.0] — 2026-08-19
+
+Sunnah prayers, your own adhan, and an app that finally reaches the edges of the screen.
+
+### Added
+- **The sunnah prayers.** The rawatib around each fard, logged beside it rather than instead of it: a prayer row now carries the fard and the sunnah that belongs with it, and the graph draws the sunnah as a line around the day's square instead of spending another colour on it. Only the ones whose time has actually come are offered, so Isha's sunnah is not asking to be logged at noon. "Log with sunnah" is on the notification too, for the times you answer the alert instead of the app.
+- **Your own adhan.** Pick any audio file on the phone and every prayer alert plays it. On iPhone the notification plays the first thirty seconds — Apple's limit, not ours — and the full recording plays when the app is open. The seventeen bundled adhans are all still there; this is an eighteenth row in the same list, with the file's name under it so you can see which one you chose.
+- **Export and import your whole record.** The old export carried settings only, which meant a new phone got your calculation method and none of your prayers. It is now the journal, the streaks, the fasts and the notes as well, in one file you can keep or move.
+- **The best streak, beside the current one.** A number that only ever goes down is discouraging by construction; the record you have already set stays on the screen next to it.
+- **Four stat tiles above the graph,** and a mode inside it that shows only what you owe — the days carrying a prayer you meant to make up later, which were previously buried in a green square.
+
+### Changed
+- **The app draws to the edges of the screen.** Android has been enforcing this on new phones for a while and will stop offering the opt-out entirely; the app now does it everywhere, on purpose, instead of behaving one way on new devices and another on old ones. The tab bar floats over the page again, slightly see-through, so a list sliding underneath it tells you there is more to read without spending a line saying so.
+- **The system navigation bar and the app's own bar are one piece.** Behind the three-button navigation the band now matches the tab bar's material rather than being a solid slab, and on older Android it looks like it does on new Android.
+- **Every prayer row speaks one language.** The controls on a row had drifted into three different ways of saying the same thing depending on where you tapped.
+- **The practice graph's colours are a real scale.** The five shades were picked by eye and two of them were nearly the same; they are now an even ramp, so four prayers and five look as different as one and two.
+- The tip jar is gone, everywhere.
+
+### Fixed
+- **The streak no longer reads zero every morning.** It counted today as a broken day from midnight until the first prayer went in, so the number you woke up to was wrong every single day.
+- **The graph opens on today, in every language.** In Arabic, Urdu, Persian and Hebrew it could open on an unrelated month and make you scroll back — and dragging towards this week was read as reaching for more history, which then shoved the view sideways.
+- **Nothing sits under the navigation bar any more.** The last row of every picker in Settings — the language list, the alert sounds, the calculation methods — was half under the system navigation bar and could not be tapped. On Android the buttons were being drawn over the app, because the bar reports itself as half the height it actually paints.
+- **"System" appearance follows the system.** The app asked a copy of the setting that can lag behind, and a light/dark switch that happened while the app was in the background could leave it on yesterday's answer.
+- **The widget stops going blank** when its schedule runs out — it now carries a month of prayer times instead of a few days.
+- **871 strings that were still English** in the other twelve languages are translated.
+- On Mac, the location chip sits in the column with the cards instead of floating over them.
+
 ## [2.8.10] — 2026-08-14
 
 Words were going missing from the mushaf. They are back.

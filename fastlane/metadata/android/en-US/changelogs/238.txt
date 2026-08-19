@@ -1,0 +1,12 @@
+Sunnah prayers, your own adhan, and an app that reaches the edges of the screen.
+
+• The sunnah prayers. Logged beside each fard rather than instead of it, offered only once their time has come, and drawn as a line around the day on the graph.
+• Your own adhan. Pick any audio file on the phone and every prayer alert plays it. The seventeen bundled ones are still there.
+• Export and import your whole record — the journal, streaks, fasts and notes, not just the settings.
+• Your best streak now sits beside the current one, and the Log has four stat tiles and a view of only what you owe.
+• The app draws to the edges of the screen, and the tab bar floats over the page again so a list sliding under it shows there is more to read.
+• Fixed: the streak read zero every morning until the first prayer went in.
+• Fixed: the last row of every Settings picker was under the navigation bar and could not be tapped.
+• Fixed: "System" appearance could stay on yesterday's answer after a light/dark switch.
+• Fixed: the widget going blank when its schedule ran out — it now carries a month.
+• 871 strings that were still English are translated into the other twelve languages.
