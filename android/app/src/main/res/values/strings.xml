@@ -134,4 +134,14 @@
     <string name="widget_countdown_format">in %1$s</string>
     <!-- The plan's 4x3 mock carries this under the location. -->
     <string name="widget_logged_line">%1$d of %2$d logged today</string>
+    <!-- ── Hijri Date ────────────────────────────────────────────────── -->
+    <string name="widget_name_hijri">Mihrab · Hijri date</string>
+    <string name="widget_description_hijri">Today\'s Hijri date, and how far off the next month is. 2×1, resizable.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">NEXT</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dd</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · tomorrow</string>
+    <string name="widget_hijri_begins_today">%1$s · today</string>
+    <string name="widget_preview_hijri_date">25 Safar</string>
+    <string name="widget_preview_hijri_next">Rabi I · 5d</string>
 </resources>

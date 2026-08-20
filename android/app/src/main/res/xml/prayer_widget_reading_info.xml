@@ -2,9 +2,12 @@
 <!--
   Continue Reading.
 
-  4x2. The two columns need the width: a surah name and a portion counter
-  side by side in 2x2 would leave neither readable, and stacking them makes
-  the card taller than the thing it is trying to be — a glance.
+  4x2 by default, resizable down to 2x2. The two columns need the width — a
+  surah name and a portion counter side by side in half of it leaves neither
+  readable — so below about four cells the provider drops the side column
+  and the left one carries on answering the question the widget exists for:
+  where was I. Both sizes are in the plan; that is what makes the small one
+  honest rather than cramped.
 
   updatePeriodMillis is 0. A reading position moves when a page is turned
   and the app pushes then; what changes unattended is the day, which
@@ -18,7 +21,7 @@
     android:previewImage="@mipmap/ic_launcher"
     android:previewLayout="@layout/prayer_widget_reading_preview"
     android:resizeMode="horizontal|vertical"
-    android:minResizeWidth="250dp"
+    android:minResizeWidth="110dp"
     android:minResizeHeight="90dp"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"

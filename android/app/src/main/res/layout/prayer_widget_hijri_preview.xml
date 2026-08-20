@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The picker preview — static, because the picker never runs the provider and
+  the real layout starts with its content `gone`.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="#E01C1C1E"
+    android:orientation="horizontal"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_hijri_date"
+            android:textColor="#E8EAED"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1448"
+            android:textColor="#9AA0A6"
+            android:textSize="13sp"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="end">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_hijri_next"
+            android:textColor="#9AA0A6"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.08"
+            android:gravity="end" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_hijri_next"
+            android:textColor="#9AA0A6"
+            android:textSize="12sp"
+            android:gravity="end" />
+    </LinearLayout>
+</LinearLayout>

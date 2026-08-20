@@ -41,7 +41,22 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     appWidgetManager: AppWidgetManager,
     appWidgetIds: IntArray,
   ) {
-    for (id in appWidgetIds) appWidgetManager.updateAppWidget(id, buildViews(context))
+    for (id in appWidgetIds) {
+      appWidgetManager.updateAppWidget(id, buildViews(context, widthDp(appWidgetManager, id)))
+    }
+  }
+
+  override fun onAppWidgetOptionsChanged(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetId: Int,
+    newOptions: android.os.Bundle,
+  ) {
+    super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+    appWidgetManager.updateAppWidget(
+      appWidgetId,
+      buildViews(context, widthDp(appWidgetManager, appWidgetId)),
+    )
   }
 
   companion object {
@@ -49,8 +64,22 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetReadingProvider::class.java))
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context))
+      for (id in ids) mgr.updateAppWidget(id, buildViews(context, widthDp(mgr, id)))
     }
+
+    /** The launcher's own measurement, or 0 when it has not measured yet. */
+    private fun widthDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
+      mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
+    } catch (_: Exception) {
+      0
+    }
+
+    /**
+     * Below this the two columns cannot both be read, so the side one goes.
+     * Four launcher cells is roughly 250dp; 200 leaves slack for launchers
+     * that report their cells a little short.
+     */
+    private const val SIDE_COLUMN_MIN_WIDTH_DP = 200
 
     private fun reading(context: Context): JSONObject? {
       val raw = context
@@ -63,7 +92,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
       }
     }
 
-    fun buildViews(context: Context): RemoteViews {
+    fun buildViews(context: Context, widthDp: Int = 0): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_reading)
       val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
       views.setInt(R.id.widget_root, "setBackgroundColor", background)
@@ -180,6 +209,17 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
           },
         )
         views.setTextColor(R.id.reading_side_note, android.graphics.Color.parseColor("#9AA0A6"))
+      }
+
+      // At 2x2 the side column is the first thing to go: a surah name and a
+      // portion counter side by side in half the width leaves neither
+      // readable, and the left column alone still answers the question the
+      // widget exists for — where was I. The plan lists both sizes; this is
+      // what makes the small one honest rather than cramped.
+      if (widthDp in 1 until SIDE_COLUMN_MIN_WIDTH_DP) {
+        views.setViewVisibility(R.id.reading_side, View.GONE)
+      } else {
+        views.setViewVisibility(R.id.reading_side, View.VISIBLE)
       }
 
       views.setOnClickPendingIntent(R.id.widget_root, readingIntent(context, r))

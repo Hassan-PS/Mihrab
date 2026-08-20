@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Hijri Date. 2x1, resizable up.
+
+  No `android:configure`: there is nothing to configure. The date is the
+  date, and putting a settings screen between the tap that adds it and the
+  first glance that uses it is a worse first run for no gain.
+
+  updatePeriodMillis is 0 — this changes once a day and the provider arms its
+  own midnight rollover along with the prayer widgets. A 30-minute poll would
+  wake the device to redraw a number that moves at 00:00.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_description_hijri"
+    android:initialLayout="@layout/prayer_widget_hijri"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/prayer_widget_hijri_preview"
+    android:resizeMode="horizontal|vertical"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:maxResizeWidth="500dp"
+    android:maxResizeHeight="120dp" />

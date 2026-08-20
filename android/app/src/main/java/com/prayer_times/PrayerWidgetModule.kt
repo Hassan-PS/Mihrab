@@ -91,6 +91,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
       PrayerWidgetStreakProvider.requestUpdate(reactContext)
       PrayerWidgetReadingProvider.requestUpdate(reactContext)
       PrayerWidgetTasbihProvider.requestUpdate(reactContext)
+      PrayerWidgetHijriProvider.requestUpdate(reactContext)
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("E_WIDGET", e.message, e)

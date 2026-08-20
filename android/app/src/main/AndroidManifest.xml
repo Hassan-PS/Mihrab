@@ -175,6 +175,30 @@
           android:resource="@xml/prayer_widget_tasbih_info" />
       </receiver>
 
+      <!--
+        Hijri Date. DATE_CHANGED and TIMEZONE_CHANGED are here and nowhere
+        else in this file for a reason: this is the only widget whose entire
+        content turns over at midnight, so it is the only one for which the
+        system's own date broadcast is the right signal.
+      -->
+      <receiver
+        android:name=".PrayerWidgetHijriProvider"
+        android:exported="true"
+        android:label="@string/widget_name_hijri">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.SCREEN_ON" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="android.intent.action.DATE_CHANGED" />
+          <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+          <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_hijri_info" />
+      </receiver>
+
       <!-- No screenOrientation lock: Android 16 ignores orientation
            restrictions on large screens and Play flags them (console
            recommendation, 2026-07-16). The configure layout is a simple
