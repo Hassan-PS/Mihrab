@@ -232,9 +232,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      */
     private const val ROWS_MIN_HEIGHT_DP = 100
 
-    /** Below this even the strip does not fit and only the compact
-     *  next-prayer line does. */
-    private const val STRIP_MIN_HEIGHT_DP = 70
+    /**
+     * Below this the strip does not fit and only the compact next-prayer
+     * line does.
+     *
+     * The strip is three stacked sections — location, six two-line columns,
+     * and the next-prayer footer. Squeezed into a single launcher row it
+     * clipped the times off the columns entirely and left a row of labels
+     * above a half-cut highlight pill, which is worse than not showing the
+     * day at all. Measured on a 1080x2400 emulator: it needs about 90dp.
+     */
+    private const val STRIP_MIN_HEIGHT_DP = 88
 
     /**
      * Which layout to draw.
@@ -264,7 +272,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       val preferred = when (providerName) {
         PrayerWidgetSmallProvider::class.java.name -> R.layout.prayer_widget_small
         PrayerWidgetLargeProvider::class.java.name -> R.layout.prayer_widget
-        else -> R.layout.prayer_widget_horizontal
+        // "Day at a glance" — the six-column strip. It used to render
+        // `prayer_widget_horizontal`, which is the same two-column
+        // next-prayer-plus-list as the large one at a smaller font size, so
+        // the two picker entries showed the same design and the strip the
+        // entry's own name promises did not exist.
+        else -> R.layout.prayer_widget_strip
       }
       if (preferred == R.layout.prayer_widget_small) return preferred
 
@@ -284,7 +297,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       return when {
         height < STRIP_MIN_HEIGHT_DP -> R.layout.prayer_widget_small
         height < ROWS_MIN_HEIGHT_DP && preferred == R.layout.prayer_widget ->
-          R.layout.prayer_widget_horizontal
+          R.layout.prayer_widget_strip
         else -> preferred
       }
     }
@@ -325,8 +338,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         showMessageOnly(views, context.getString(R.string.widget_placeholder_day), isError = false, style)
       } else {
         try {
-          val isHorizontal = layoutId == R.layout.prayer_widget_horizontal
-          applyJson(views, json, style, context, isHorizontal)
+          applyJson(views, json, style, context)
         } catch (_: Exception) {
           showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
         }
@@ -400,7 +412,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       am.set(android.app.AlarmManager.RTC, midnight.timeInMillis, pi)
     }
 
-    private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context, isHorizontal: Boolean) {
+    /**
+     * Bind the payload into whichever layout was chosen.
+     *
+     * Layout-agnostic by design: every layout it can be handed declares the
+     * same ids, so this never needs to know which one it is filling. It used
+     * to take an `isHorizontal` flag that nothing in the body read — a
+     * parameter that looks like a branch and is not.
+     */
+    private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context) {
       val o = JSONObject(json)
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)

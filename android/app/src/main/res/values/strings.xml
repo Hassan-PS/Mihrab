@@ -9,8 +9,8 @@
     <string name="widget_name_large">Mihrab · All prayer times</string>
     <string name="widget_description">Today\'s times in one row, next prayer highlighted</string>
     <string name="widget_description_small">Just the next prayer and its time. 2×1, resizable.</string>
-    <string name="widget_description_medium">All six times side by side in one wide row, next prayer highlighted. 4×1, resizable.</string>
-    <string name="widget_description_large">All six times as a list, next prayer highlighted. 4×3 — shrink it and it becomes the single-row layout.</string>
+    <string name="widget_description_medium">All six times as columns across one wide row, next prayer highlighted. 4×2, resizable.</string>
+    <string name="widget_description_large">All six times as a list beside the next prayer. 4×3 — shrink it below three rows and it becomes the one-row strip.</string>
     <string name="widget_name_log">Mihrab · Log today</string>
     <string name="widget_description_log">Tap a prayer to log it on time. 4×2, resizable.</string>
     <string name="widget_log_today">Today</string>

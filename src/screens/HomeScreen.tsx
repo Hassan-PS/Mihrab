@@ -296,11 +296,26 @@ export function HomeScreen() {
     view,
   ]);
 
+  /**
+   * What the widget and Live Activity call this place.
+   *
+   * The reverse-geocoded city comes FIRST. It used to be absent entirely, so
+   * every user on automatic location had `59.3293°, 18.0686°` sitting on
+   * their home screen — coordinates to four decimal places, which is about
+   * eleven metres, readable by anyone who glances at the phone. The app's own
+   * header has said "Stockholm" the whole time; it just never told the widget.
+   *
+   * Coordinates remain the last resort rather than being dropped: before
+   * geocoding resolves, a widget that says where it thinks you are is more
+   * useful than one that says nothing, and a wrong city is worse than a
+   * blunt number.
+   */
   const locationLabel = useMemo(() => {
     if (settings.locationMode === 'manual' && settings.manualLocationLabel) {
       return settings.manualLocationLabel;
     }
     if (state.phase === 'ready') {
+      if (state.cityName) return state.cityName;
       return `${state.latitude.toFixed(4)}°, ${state.longitude.toFixed(4)}°`;
     }
     return '';
