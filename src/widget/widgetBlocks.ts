@@ -176,8 +176,11 @@ export type WidgetTasbihBlock = {
   /** Every preset's count, in preset order — this is what makes it visible
    *  that stepping to the next dhikr keeps the one you were on. */
   counts: number[];
-  /** Sum across all presets in the current session-day. */
+  /** Beads counted TODAY, across every preset. Not the sum of `counts` —
+   *  those persist across midnight and this deliberately does not. */
   todayTotal: number;
+  /** Rounds completed today. */
+  todayRounds: number;
 };
 
 /**
@@ -447,6 +450,9 @@ export function buildTasbihBlock(input: {
   counts: Record<string, number>;
   /** Per-preset target override; falls back to the preset's own. */
   targets?: Record<string, number>;
+  /** Beads counted today, from the store. Omitted only by tests. */
+  todayTotal?: number;
+  todayRounds?: number;
 }): WidgetTasbihBlock {
   const preset = findPreset(input.activeId);
   const index = Math.max(
@@ -465,6 +471,7 @@ export function buildTasbihBlock(input: {
     index,
     total: TASBIH_PRESETS.length,
     counts,
-    todayTotal: counts.reduce((a, b) => a + b, 0),
+    todayTotal: input.todayTotal ?? counts.reduce((a, b) => a + b, 0),
+    todayRounds: input.todayRounds ?? 0,
   };
 }

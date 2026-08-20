@@ -21,6 +21,8 @@ import { getCacheStatus } from '../prayer/prayerStorage';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { syncPrayerWidget } from '../widget/syncPrayerWidget';
+import { collectWidgetExtras } from '../widget/collectWidgetExtras';
+import { useWidgetDataRevision } from '../widget/useWidgetDataRevision';
 import { syncLiveActivity } from '../liveActivity/syncLiveActivity';
 import {
   getEffectiveDataProvider,
@@ -83,8 +85,11 @@ export function HomeScreen() {
   const { t, i18n } = useTranslation();
   const { settings, hydrated, updateSettings } = usePrayerSettings();
   const { state, retry } = usePrayerDay(settings, hydrated);
+  // Moves when a prayer is logged, a page is turned or a bead is counted —
+  // none of which changes a prayer time, all of which change the widget.
+  const widgetRevision = useWidgetDataRevision();
   // Background prefetch of 12 months for every saved location preset, so
-  // switching presets is instant and doesn'\''t wipe the previously-cached
+  // switching presets is instant and doesn't wipe the previously-cached
   // months — task #145. Runs serially in the background, never blocks the
   // home render.
   usePrefetchSavedLocations();
@@ -319,15 +324,20 @@ export function HomeScreen() {
           view.table.tomorrow,
           new Date(),
         );
-        syncPrayerWidget(
-          view.widget.today,
-          view.widget.tomorrow,
-          new Date(),
-          locationLabel,
-          { lat: state.latitude, lng: state.longitude },
-          { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
-          view.widget.week,
-        ).catch(e => console.warn('syncPrayerWidget (focus):', e));
+        collectWidgetExtras({ timings: view.widget.today, now: new Date() })
+          .then(extras =>
+            syncPrayerWidget(
+              view.widget.today,
+              view.widget.tomorrow,
+              new Date(),
+              locationLabel,
+              { lat: state.latitude, lng: state.longitude },
+              { jumuah: t.jumuah, ramadan: t.ramadan, eid: t.eid },
+              view.widget.week,
+              extras,
+            ),
+          )
+          .catch(e => console.warn('syncPrayerWidget (focus):', e));
         // Live activity — task #128. Same cadence as the widget so the
         // notification stays in sync with what's on the home screen.
         syncLiveActivity({
@@ -408,20 +418,33 @@ export function HomeScreen() {
       view.table.tomorrow,
       new Date(),
     );
-    syncPrayerWidget(
-      view.widget.today,
-      view.widget.tomorrow,
-      new Date(),
-      locationLabel,
-      { lat: state.latitude, lng: state.longitude },
-      { jumuah: seasonal.jumuah, ramadan: seasonal.ramadan, eid: seasonal.eid },
-      view.widget.week,
-    ).catch(e => console.warn('syncPrayerWidget (effect):', e));
+    collectWidgetExtras({ timings: view.widget.today, now: new Date() })
+      .then(extras =>
+        syncPrayerWidget(
+          view.widget.today,
+          view.widget.tomorrow,
+          new Date(),
+          locationLabel,
+          { lat: state.latitude, lng: state.longitude },
+          {
+            jumuah: seasonal.jumuah,
+            ramadan: seasonal.ramadan,
+            eid: seasonal.eid,
+          },
+          view.widget.week,
+          extras,
+        ),
+      )
+      .catch(e => console.warn('syncPrayerWidget (effect):', e));
   }, [
     hydrated,
     state,
     view,
     locationLabel,
+    // A prayer logged, a page turned or a bead counted changes what the
+    // widget should say without changing any prayer time — so the payload
+    // has to be rebuilt on those too, not only on `view`.
+    widgetRevision,
   ]);
 
   // Live Activity sync — runs whenever prayer data changes OR whenever the

@@ -121,6 +121,20 @@ export async function loadPractice(): Promise<PracticeData> {
 }
 
 /**
+ * Subscribe to the same change signal the hooks below ride on.
+ *
+ * Exported for readers that are not React components — the widget payload
+ * has to be rebuilt when a prayer is logged, and it is built by a plain
+ * async function rather than by a hook.
+ */
+export function subscribePractice(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/**
  * Something wrote to one of the three stores. Drops the cache and tells
  * every mounted subscriber to read again — call this from whichever screen
  * did the writing.
