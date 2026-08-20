@@ -1385,5 +1385,6 @@ struct PrayerWidgetExtensionBundle: WidgetBundle {
     HijriDateWidget()
     StreakWidget()
     ReadingWidget()
+    LogTodayWidget()
   }
 }

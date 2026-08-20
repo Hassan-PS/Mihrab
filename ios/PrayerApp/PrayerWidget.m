@@ -32,6 +32,29 @@ RCT_EXPORT_METHOD(setData
   resolve(nil);
 }
 
+/**
+ * Hand over the Log Today widget's queued taps and clear them, in one step.
+ *
+ * One step because the app is about to write these to the journal, and a
+ * read-then-clear that is interrupted between the two either loses taps or
+ * writes them twice. The rules that decide what is IN the queue live in
+ * WidgetLogQueue.swift (widget side) and widgetLogQueue.ts (app side); this
+ * only moves the string across.
+ */
+RCT_EXPORT_METHOD(takeLogQueue
+                  : (RCTPromiseResolveBlock)resolve rejecter
+                  : (RCTPromiseRejectBlock)reject)
+{
+  NSUserDefaults *group = MihrabAppGroupDefaults();
+  NSUserDefaults *target = group != nil ? group : [NSUserDefaults standardUserDefaults];
+  NSString *json = [target stringForKey:@"widget_log_queue"];
+  if (json != nil) {
+    [target removeObjectForKey:@"widget_log_queue"];
+    [target synchronize];
+  }
+  resolve(json);
+}
+
 RCT_EXPORT_METHOD(setUiHints:(NSString *)style
                   oledBackground:(BOOL)oled
                   resolver:(RCTPromiseResolveBlock)resolve

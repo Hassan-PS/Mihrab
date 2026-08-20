@@ -30,8 +30,11 @@ const EMPTY: DrainResult = { written: 0, skipped: 0, dropped: 0, failed: 0 };
 export async function syncWidgetLogQueue(
   now: number = Date.now(),
 ): Promise<DrainResult> {
-  // iOS has no queue: its widget writes through an AppIntent in-process.
-  if (Platform.OS !== 'android') return EMPTY;
+  // Both platforms queue, for the same reason: the journal is encrypted and
+  // its one writer is here. Android's widget is a PendingIntent to a
+  // receiver, iOS 17's is an AppIntent in the extension — and neither of
+  // those processes can, or should, write the blob.
+  if (Platform.OS !== 'android' && Platform.OS !== 'ios') return EMPTY;
 
   const mod = getPrayerWidgetModule();
   // `takeLogQueue` is absent on any build older than this one, which is the

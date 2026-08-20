@@ -35,14 +35,17 @@ export interface PrayerWidgetInterface {
   /** Legacy iOS API. */
   setUiHints?(style: string, oledBackground: boolean): Promise<void>;
 
-  // ── Android: the Log Today widget's tap queue ─────────────────────────────
+  // ── The Log Today widget's tap queue ──────────────────────────────────────
   /**
    * Hand over every tap queued by the Log Today widget and clear it.
    *
    * A JSON string, not a bridge array, so the JS side runs it through
    * `coerceLogQueue` like anything else that crosses a process boundary —
-   * these end up in the journal. Android only; absent on iOS, where the
-   * widget writes through an AppIntent instead.
+   * these end up in the journal. Both platforms — Android's widget posts a
+   * PendingIntent to a receiver and iOS 17's runs an AppIntent, and neither
+   * of those processes can write an encrypted blob whose key lives here.
+   * Absent on any build older than the one that added it, which is the
+   * normal state during a staged rollout rather than an error.
    */
   takeLogQueue?(): Promise<string>;
 }

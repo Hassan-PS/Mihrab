@@ -164,7 +164,7 @@ export function AppNavigationRoot() {
   // widget, opens the app later, and the Log already agrees with what the
   // widget was showing. Runs on mount too, for a cold start from the widget.
   useEffect(() => {
-    if (Platform.OS !== 'android') return;
+    if (Platform.OS !== 'android' && Platform.OS !== 'ios') return;
     const drain = () => {
       void syncWidgetLogQueue();
     };
