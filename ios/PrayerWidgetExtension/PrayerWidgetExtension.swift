@@ -820,13 +820,33 @@ struct PrayerWidgetEntryView: View {
               .minimumScaleFactor(0.7)
           }
 
+          // The countdown the small family already has. Same reasoning:
+          // without it this column states a time and nothing about how far
+          // away it is, which is the question being asked.
+          CountdownLabel(
+            target: PrayerInterval.around(entry.date, rows: p.rows, calendar: .current)?.end,
+            fallback: nil
+          )
+          .padding(.top, 1)
+
           Spacer()
 
-          // Day label at bottom
-          Text(p.dayLabel)
-            .font(.system(size: 9))
-            .foregroundStyle(widgetMuted)
-            .lineLimit(1)
+          // Day label at the bottom, with the Hijri date under it when the
+          // app has sent one. This column used to end at the date and leave
+          // a gap below it.
+          VStack(alignment: .leading, spacing: 1) {
+            Text(p.dayLabel)
+              .font(.system(size: 9))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+            if let h = p.hijri {
+              Text(verbatim: "\(h.day) \(h.monthName) \(h.year)")
+                .font(.system(size: 9))
+                .foregroundStyle(widgetMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            }
+          }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
 
@@ -992,6 +1012,202 @@ struct PrayerWidgetEntryView: View {
     }
   }
 
+  // MARK: - Large widget
+
+  /// systemLarge is NOT the medium layout stretched.
+  ///
+  /// It was, and on a real device the left column had roughly 150pt of
+  /// nothing between the countdown and the date — the two-column split has
+  /// only ever had one column's worth of content, and at four cells tall the
+  /// spacers holding it apart become a void you can see across a room.
+  ///
+  /// Single column instead: the rows go full width, which makes them bigger
+  /// and more legible rather than merely wider, and they fill the height by
+  /// construction instead of by padding. The practice strip then has a real
+  /// section to sit under rather than being tacked below a gap.
+  @ViewBuilder
+  private var largeContent: some View {
+    if let p = entry.payload {
+      let currentNextKey = entry.dynamicNextKey ?? p.nextKey
+      let name = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey
+      let time = entry.dynamicNextTime ?? p.nextPrayerTime
+
+      VStack(alignment: .leading, spacing: 0) {
+        HStack(alignment: .firstTextBaseline) {
+          Text(verbatim: headerLine(p))
+            .kerning(0.4)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(widgetMuted)
+            .lineLimit(1)
+          Spacer(minLength: 6)
+          if let h = p.hijri {
+            Text(verbatim: "\(h.day) \(h.monthName) \(h.year)")
+              .font(.system(size: 10, weight: .semibold))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+          }
+        }
+        // The refresh button lives in the enclosing ZStack's top-trailing
+        // corner, over this row. Without the reserve the Hijri year runs
+        // underneath it and reads as "1448⟳".
+        .padding(.trailing, 20)
+
+        // The countdown gets its OWN line, with "in" inline beside it.
+        //
+        // It was in a trailing column opposite the prayer name, and the word
+        // "in" ended up alone in the top-right corner of the card with the
+        // number nowhere near it. The cause is that `Text(_, style: .relative)`
+        // reserves a frame wide enough for the longest string it might ever
+        // render — far wider than "3 hr, 50 min" draws — so right-aligning
+        // the column right-aligned the RESERVED box, not the glyphs. Putting
+        // the label and the number in one HStack means the reserved slack can
+        // only ever trail off to the right of a phrase that already reads.
+        VStack(alignment: .leading, spacing: 0) {
+          Text("NEXT")
+            .kerning(1.0)
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(widgetMuted)
+          HStack(alignment: .firstTextBaseline, spacing: 8) {
+            if let name, !name.isEmpty {
+              Text(name)
+                .font(.system(size: 26, weight: .semibold))
+                .foregroundStyle(widgetText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            }
+            if let time, !time.isEmpty {
+              Text(time)
+                .font(.system(size: 20, weight: .regular))
+                .foregroundStyle(resolvedWidgetHighlightColor())
+                .lineLimit(1)
+            }
+          }
+          HStack(alignment: .firstTextBaseline, spacing: 5) {
+            Text("in")
+              .font(.system(size: 11))
+              .foregroundStyle(widgetMuted)
+            CountdownLabel(
+              target: PrayerInterval.around(entry.date, rows: p.rows, calendar: .current)?.end,
+              fallback: nil
+            )
+          }
+          .padding(.top, 1)
+        }
+        .padding(.top, 8)
+
+        VStack(spacing: 0) {
+          ForEach(Array(p.displayRows.enumerated()), id: \.offset) { _, r in
+            largeRow(r, highlight: currentNextKey == r.key)
+          }
+        }
+        .padding(.top, 8)
+
+        practiceStrip
+          .padding(.top, 8)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    } else {
+      Text("Open Mihrab")
+        .font(.caption)
+        .foregroundStyle(widgetMuted)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+  }
+
+  /// "Thu, Aug 20 · Stockholm" — one line, because two muted lines stacked
+  /// at the top of a card read as a paragraph nobody asked for.
+  private func headerLine(_ p: WidgetPayload) -> String {
+    let loc = (p.locationName ?? "").trimmingCharacters(in: .whitespaces)
+    return loc.isEmpty ? p.dayLabel : "\(p.dayLabel) · \(loc)"
+  }
+
+  @ViewBuilder
+  private func largeRow(_ r: WidgetPayload.Row, highlight: Bool) -> some View {
+    let isSunrise = r.key == "Sunrise"
+    let col = rowColor(highlight: highlight, isSunrise: isSunrise)
+    ZStack(alignment: .leading) {
+      if highlight {
+        RoundedRectangle(cornerRadius: 7, style: .continuous)
+          .fill(resolvedWidgetHighlightColor().opacity(0.15))
+        Rectangle()
+          .fill(resolvedWidgetHighlightColor())
+          .frame(width: 3)
+          .cornerRadius(1.5)
+      }
+      HStack(spacing: 0) {
+        Text(isSunrise ? (r.abbr ?? r.key) : r.key)
+          .font(.system(size: 14, weight: highlight ? .semibold : .regular))
+          .foregroundStyle(col)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .lineLimit(1)
+          .padding(.leading, highlight ? 9 : 6)
+        Text(r.time)
+          .font(.system(size: 14, weight: highlight ? .semibold : .medium))
+          .monospacedDigit()
+          .foregroundStyle(col)
+          .padding(.trailing, 6)
+      }
+    }
+    .frame(maxHeight: .infinity)
+  }
+
+  /// The practice strip, drawn under the prayer table at systemLarge.
+  ///
+  /// This is the merge: at four cells tall there is room for the whole day
+  /// AND the record of it, which is the pair people check together — what is
+  /// next, and whether this week has held. It is the same widget kind with
+  /// one more section, not a tenth entry in the picker.
+  ///
+  /// Drawn only when the app has actually sent a `practice` block. An absent
+  /// block is not a zero streak: those look identical on a home screen and
+  /// mean opposite things.
+  @ViewBuilder
+  private var practiceStrip: some View {
+    if let pr = entry.payload?.practice {
+      VStack(spacing: 6) {
+        Rectangle()
+          .fill(Color.white.opacity(0.12))
+          .frame(height: 1)
+
+        HStack(alignment: .bottom, spacing: 10) {
+          VStack(alignment: .leading, spacing: 1) {
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+              Text(verbatim: "\(pr.streak)")
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(widgetText)
+              Text("day streak")
+                .font(.system(size: 11))
+                .foregroundStyle(widgetMuted)
+            }
+            Text(verbatim: practiceFooter(pr))
+              .font(.system(size: 10))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+              .minimumScaleFactor(0.8)
+          }
+          Spacer(minLength: 4)
+          PracticeGrid(
+            days: pr.days,
+            weeks: 10,
+            cell: 6,
+            spacing: 2,
+            accent: resolvedWidgetHighlightColor()
+          )
+        }
+      }
+    }
+  }
+
+  /// "Best 31 · 2 of 5 logged", dropping the parts there is nothing to say
+  /// about — a best of 0 is not a personal best worth printing.
+  private func practiceFooter(_ pr: WidgetPayload.Practice) -> String {
+    var parts: [String] = []
+    if pr.bestStreak > 0 { parts.append("Best \(pr.bestStreak)") }
+    parts.append("\(pr.loggedToday) of 5 logged")
+    if pr.owed > 0 { parts.append("\(pr.owed) owed") }
+    return parts.joined(separator: " · ")
+  }
+
   var body: some View {
     ZStack(alignment: .topTrailing) {
       if #available(iOSApplicationExtension 16.0, *) {
@@ -1004,6 +1220,18 @@ struct PrayerWidgetEntryView: View {
           rectangularWidgetContent
         case .systemSmall:
           smallWidgetContent
+        case .systemLarge:
+          largeContent
+            .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14))
+          if #available(iOS 17.0, *) {
+            Button(intent: RefreshIntent()) {
+              Image(systemName: "arrow.clockwise")
+                .font(.system(size: 9, weight: .medium))
+                .foregroundColor(widgetMuted)
+                .padding(8)
+            }
+            .buttonStyle(.plain)
+          }
         default:
           mediumLargeContent
             .padding(EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 12))
