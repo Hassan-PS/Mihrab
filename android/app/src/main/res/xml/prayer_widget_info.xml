@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Prayer times — THE prayer-times entry, after the phase 0 merge.
+
+  It used to be "Day at a glance" and sat next to "All prayer times", which
+  were two picker entries for one idea: the same six times, the same payload,
+  a different stylesheet. `selectLayout` already chose the layout from
+  measured size rather than from the provider class, which is what made one
+  entry possible — drag this narrow and it is the strip, drag it tall and it
+  is the list with the night times, drag it to four rows and the practice
+  graph comes with it.
+
+  So the range is deliberately wide: 4x2 up to 4x4, and it means something
+  different at each end. `targetCellHeight` is 2 because that is the honest
+  default — the strip is what most people want and the taller layouts are
+  something you opt into by resizing.
+-->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
-    android:description="@string/widget_description_medium"
+    android:description="@string/widget_description_prayer_times"
     android:initialLayout="@layout/prayer_widget_strip"
     android:minWidth="250dp"
     android:minHeight="100dp"
@@ -16,4 +32,4 @@
     android:targetCellWidth="4"
     android:targetCellHeight="2"
     android:maxResizeWidth="500dp"
-    android:maxResizeHeight="300dp" />
+    android:maxResizeHeight="400dp" />

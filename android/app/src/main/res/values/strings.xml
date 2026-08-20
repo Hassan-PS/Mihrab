@@ -5,11 +5,17 @@
          claiming the same 4x2 footprint, so the only way to find out which
          one you wanted was to place one and look. -->
     <string name="widget_name_small">Mihrab · Next prayer</string>
-    <string name="widget_name_medium">Mihrab · Day at a glance</string>
-    <string name="widget_name_large">Mihrab · All prayer times</string>
+    <!-- After the phase 0 merge this is the one prayer-times entry: strip at
+         4x2, list at 4x3, list plus the practice graph at 4x4. -->
+    <string name="widget_name_medium">Mihrab · Prayer times</string>
+    <!-- Retired from the picker, kept registered so nobody's placed widget
+         vanishes. See prayer_widget_large_info.xml. -->
+    <string name="widget_name_large">Mihrab · Prayer times (old)</string>
     <string name="widget_description">Today\'s times in one row, next prayer highlighted</string>
     <string name="widget_description_small">Just the next prayer and its time. 2×1, resizable.</string>
     <string name="widget_description_medium">All six times as columns across one wide row, next prayer highlighted. 4×2, resizable.</string>
+    <string name="widget_description_prayer_times">Today\'s six times. Narrow it for the one-row strip, make it taller for the list and the night times, taller again for the practice graph. 4×2 to 4×4.</string>
+    <string name="widget_description_large_retired">The earlier prayer-times widget. It now draws the same design as the current one; there is no reason to place a new one.</string>
     <string name="widget_description_large">All six times as a list beside the next prayer. 4×3 — shrink it below three rows and it becomes the one-row strip.</string>
     <string name="widget_name_log">Mihrab · Log today</string>
     <string name="widget_description_log">Tap a prayer to log it on time. 4×2, resizable.</string>
@@ -123,4 +129,9 @@
     <string name="widget_preview_tasbih_label">SubhanAllah</string>
     <string name="widget_preview_tasbih_of">of 33</string>
     <string name="widget_preview_tasbih_today">Today 231 · 2 rounds</string>
+    <!-- The Chronometer's format. "%1$s" is the ticking duration; the word
+         around it is what stops "2:58:00" being read as a clock time. -->
+    <string name="widget_countdown_format">in %1$s</string>
+    <!-- The plan's 4x3 mock carries this under the location. -->
+    <string name="widget_logged_line">%1$d of %2$d logged today</string>
 </resources>

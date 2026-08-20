@@ -44,13 +44,16 @@ enum WidgetTasbihQueue {
     return decoded.filter { actions.contains($0.a) && $0.t > 0 }
   }
 
+  /// See WidgetLogQueue.tap for why `synchronize()` is here.
   static func append(_ action: String, now: Double = Date().timeIntervalSince1970 * 1000) {
     guard actions.contains(action) else { return }
     let next = read() + [Entry(a: action, t: now)]
     guard let data = try? JSONEncoder().encode(next),
-          let s = String(data: data, encoding: .utf8)
+          let s = String(data: data, encoding: .utf8),
+          let store = defaults()
     else { return }
-    defaults()?.set(s, forKey: key)
+    store.set(s, forKey: key)
+    store.synchronize()
   }
 }
 

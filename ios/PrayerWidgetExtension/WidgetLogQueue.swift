@@ -87,9 +87,30 @@ enum WidgetLogQueue {
   }
 
   /// Record a tap and persist it.
-  static func tap(date: String, prayer: String, now: Double = Date().timeIntervalSince1970 * 1000) {
+  ///
+  /// `synchronize()` is nominally unnecessary on modern OS versions and is
+  /// here anyway, because this is the first code in the app to WRITE to the
+  /// App Group from an extension rather than read from it — and the app's own
+  /// bridge does the same thing for the same reason (see PrayerWidget.m).
+  /// The failure this guards against is not theoretical: on Catalyst a
+  /// UserDefaults for a group the process is not entitled to looks alive and
+  /// silently drops every write. Cheap insurance against a dead button.
+  ///
+  /// Returns whether the write can be read back. Nothing acts on it today —
+  /// the widget's tick comes from the same read, so a dropped write shows as
+  /// a button that does nothing rather than a lie — but a caller that wants
+  /// to say something about it now can.
+  @discardableResult
+  static func tap(
+    date: String,
+    prayer: String,
+    now: Double = Date().timeIntervalSince1970 * 1000
+  ) -> Bool {
     let next = applyTap(read(), date: date, prayer: prayer, now: now)
-    defaults()?.set(serialize(next), forKey: key)
+    guard let store = defaults() else { return false }
+    store.set(serialize(next), forKey: key)
+    store.synchronize()
+    return read() == next
   }
 
   /// Which prayers are queued for `date` — what the widget draws as ticked.

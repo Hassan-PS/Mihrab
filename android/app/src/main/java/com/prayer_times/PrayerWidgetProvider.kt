@@ -425,6 +425,38 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /**
+     * "2 of 5 logged today", plan §2's layout rule: at three cells of height
+     * the list gains the night times AND a logged line.
+     *
+     * Only on the list layout — the strip has no room and says so by not
+     * declaring the id. Hidden when the app has sent no `today` block,
+     * because five unlogged prayers is a claim and an absent block is not
+     * evidence for it.
+     */
+    private fun bindLoggedLine(
+      views: RemoteViews,
+      payload: org.json.JSONObject,
+      context: Context,
+      layoutId: Int,
+    ) {
+      if (layoutId != R.layout.prayer_widget) return
+      val today = payload.optJSONObject("today")
+      if (today == null) {
+        views.setViewVisibility(R.id.widget_logged, View.GONE)
+        return
+      }
+      views.setViewVisibility(R.id.widget_logged, View.VISIBLE)
+      views.setTextViewText(
+        R.id.widget_logged,
+        context.getString(
+          R.string.widget_logged_line,
+          today.optInt("logged", 0),
+          today.optInt("loggable", 5),
+        ),
+      )
+    }
+
+    /**
      * The practice merge, plan §2b: at four cells tall there is room for the
      * whole day AND the record of it, which is the pair people check
      * together — what is next, and whether this week has held.
@@ -488,6 +520,32 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           accent,
         ),
       )
+    }
+
+    /** Islamic Midnight / the Last Third: on the card, never the headline. */
+    private fun isNightKey(key: String): Boolean =
+      key.equals("Midnight", ignoreCase = true) || key.equals("Lastthird", ignoreCase = true)
+
+    /**
+     * Minutes-since-midnight of the earliest salāh (or Sunrise) on display,
+     * for the after-Isha wrap. Sunrise counts — whatever comes first
+     * tomorrow is what the countdown is for.
+     */
+    private fun firstRowMinutes(displayRows: List<org.json.JSONObject>): Int? {
+      var earliest: Int? = null
+      for (row in displayRows) {
+        // Excluded here too, or the countdown aims at the Last Third while
+        // the headline beside it says Fajr — the widget contradicting itself
+        // on the same frame. Seen on an emulator at 23:56 before this line.
+        if (isNightKey(row.optString("key"))) continue
+        val parts = row.optString("time").split(":")
+        if (parts.size != 2) continue
+        val h = parts[0].toIntOrNull() ?: continue
+        val m = parts[1].toIntOrNull() ?: continue
+        val mins = h * 60 + m
+        if (earliest == null || mins < earliest!!) earliest = mins
+      }
+      return earliest
     }
 
     /** The launcher's own measurement, or 0 when it has not measured yet. */
@@ -572,6 +630,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       var nextUpdateMinutes = -1
 
       for (row in displayRows) {
+        // Islamic Midnight and the Last Third are rows, never the headline —
+        // the same rule `nightCanBeNext: false` applies on the JS side, and
+        // this is where it has to be applied again, because `displayRows`
+        // now contains them. Without this the left column reads "Islamic
+        // Midnight" between Isha and midnight on any phone with the toggle
+        // on, and the widget's own name is "next prayer".
+        if (isNightKey(row.optString("key"))) continue
         val timeStr = row.getString("time")
         val parts = timeStr.split(":")
         if (parts.size == 2) {
@@ -622,23 +687,55 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setTextColor(R.id.widget_next_time, highlightColor)
       views.setTextColor(R.id.widget_location, Color.parseColor(NEUTRAL_MUTED))
 
-      // Remaining-until-next caption (e.g. "1h 54m"). The widget can't tick, but
-      // it refreshes on screen-on and at each prayer transition, so this is
-      // fresh whenever the user looks. Hidden once no event remains today
-      // (post-Isha) until the midnight rollover picks up tomorrow's Fajr.
-      val remainingText = if (nextUpdateMinutes != -1 && nextUpdateMinutes >= currentMinutes) {
-        val rem = nextUpdateMinutes - currentMinutes
-        val rh = rem / 60
-        val rm = rem % 60
-        if (rh > 0) "${rh}h ${rm}m" else "${rm}m"
-      } else {
-        ""
+      // The countdown to the next event, ticked by the system.
+      //
+      // This used to be a string computed right here — "1h 54m" — which the
+      // comment above it defended as "fresh whenever the user looks",
+      // because the widget redraws on screen-on and at each prayer
+      // transition. That is true and it was never badly wrong; it was also
+      // frozen for anyone who looked at it for longer than a moment, and the
+      // plan asks for a countdown "ticked by the system, not by us".
+      //
+      // A Chronometer is that, at zero refresh cost: hand it the moment the
+      // next event lands and the view counts itself down. Chronometer is a
+      // TextView, so the colour and visibility actions below are unchanged.
+      //
+      // `setChronometerCountDown` is API 24 and minSdk is 24.
+      // Wraps past midnight. After Isha there is no row left today, and the
+      // widget used to show no countdown at all until the small hours — six
+      // silent hours, which is precisely the stretch where a home screen most
+      // needs to say "Fajr, in six hours". The rows on display are already
+      // tomorrow's by then (`selectTodayDay` rolls the day over), so the
+      // first of them is the right target; it is just on the other side of
+      // midnight. The same wrap the iOS ring does, for the same reason.
+      val minutesLeft = when {
+        nextUpdateMinutes != -1 && nextUpdateMinutes >= currentMinutes ->
+          nextUpdateMinutes - currentMinutes
+        else -> firstRowMinutes(displayRows)?.let { it + 24 * 60 - currentMinutes } ?: -1
       }
-      views.setTextViewText(R.id.widget_remaining, remainingText)
-      views.setViewVisibility(
-        R.id.widget_remaining,
-        if (remainingText.isEmpty()) View.GONE else View.VISIBLE,
-      )
+      if (minutesLeft >= 0) {
+        // Base is on the elapsedRealtime clock, and the seconds of the
+        // current minute have to come off it or the countdown is up to 59
+        // seconds early — which is exactly long enough to show 00:00 while
+        // the prayer has not arrived.
+        val secondsIntoMinute = java.util.Calendar.getInstance().get(java.util.Calendar.SECOND)
+        val base = android.os.SystemClock.elapsedRealtime() +
+          minutesLeft * 60_000L - secondsIntoMinute * 1000L
+        views.setChronometerCountDown(R.id.widget_remaining, true)
+        views.setChronometer(
+          R.id.widget_remaining,
+          base,
+          context.getString(R.string.widget_countdown_format),
+          true,
+        )
+        views.setViewVisibility(R.id.widget_remaining, View.VISIBLE)
+      } else {
+        // Only reachable with no usable rows at all. Stopped as well as
+        // hidden: a running Chronometer inside a hidden view is still a view
+        // being invalidated once a second.
+        views.setChronometer(R.id.widget_remaining, 0L, null, false)
+        views.setViewVisibility(R.id.widget_remaining, View.GONE)
+      }
       views.setTextColor(R.id.widget_remaining, Color.parseColor(NEUTRAL_MUTED))
 
       views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
@@ -654,8 +751,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         val label = row.optString("name", "").trim()
           .ifEmpty { row.optString("abbr", "").trim() }
           .ifEmpty { key }
-        val isNight =
-          key.equals("Midnight", ignoreCase = true) || key.equals("Lastthird", ignoreCase = true)
+        val isNight = isNightKey(key)
         // A night row is never the headline. The payload will not name one as
         // `nextKey` for the widget (see nightCanBeNext on the JS side), and
         // this is the second guard: a widget called "next prayer" should not
@@ -683,6 +779,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
       }
 
+      bindLoggedLine(views, o, context, layoutId)
       bindPracticeStrip(views, o, style, context, layoutId, heightDp)
 
       // Schedule next update using AlarmManager — targets all widget providers.

@@ -73,7 +73,26 @@
                     android:autoSizeMinTextSize="28sp"
                     android:autoSizeMaxTextSize="56sp" />
 
-                <TextView
+                <!--
+                    A Chronometer, not a TextView.
+                
+                    The plan asks for a countdown "ticked by the system, not by us", and
+                    this is that: a base and setChronometerCountDown, and the view counts
+                    itself down for free. The TextView it replaces held a string computed
+                    at bind time, so it was only ever true at the moment the widget was
+                    drawn — right whenever the screen came on, and frozen for anyone who
+                    looked at it for a minute.
+                
+                    Chronometer IS a TextView, so every colour and visibility action the
+                    provider already sends to this id keeps working unchanged.
+                
+                    The format string carries the word "in" deliberately. A bare "2:58:00"
+                    under a clock time of "16:57" reads as a second clock time — the exact
+                    confusion that cost the iOS small widget a redesign, where
+                    Text(timerInterval:) was dropped for the relative style for this
+                    reason. "in" cannot be misread.
+                -->
+                <Chronometer
                     android:id="@+id/widget_remaining"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -92,6 +111,25 @@
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:layout_marginTop="8dp" />
+
+                <!--
+                    "2 of 5 logged today" — the plan's rule is that at three
+                    cells of height the list gains the night times AND a
+                    logged line. Hidden when the app has sent no `today`
+                    block: five unlogged prayers is a claim, and an absent
+                    block is not evidence for it.
+                -->
+                <TextView
+                    android:id="@+id/widget_logged"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_marginTop="3dp"
+                    android:visibility="gone" />
 
                 <!-- The practice merge, plan 2b. Hidden below 4x4 and hidden
                      when the app has sent no practice block: an absent block
