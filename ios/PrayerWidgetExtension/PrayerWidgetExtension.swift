@@ -1200,11 +1200,16 @@ struct PrayerWidgetEntryView: View {
 
   /// "Best 31 · 2 of 5 logged", dropping the parts there is nothing to say
   /// about — a best of 0 is not a personal best worth printing.
+  ///
+  /// `owed` is the whole journal's unmade-up prayers, not today's, while the
+  /// segment beside it counts today — so "2 owed" next to "2 of 5 logged"
+  /// reads as two owed TODAY, which it is not. The Log screen calls the same
+  /// number a thing you tap a day to make up, so the widget says that too.
   private func practiceFooter(_ pr: WidgetPayload.Practice) -> String {
     var parts: [String] = []
     if pr.bestStreak > 0 { parts.append("Best \(pr.bestStreak)") }
     parts.append("\(pr.loggedToday) of 5 logged")
-    if pr.owed > 0 { parts.append("\(pr.owed) owed") }
+    if pr.owed > 0 { parts.append("\(pr.owed) to make up") }
     return parts.joined(separator: " · ")
   }
 

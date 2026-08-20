@@ -8,6 +8,7 @@ import type {
   WidgetTasbihBlock,
   WidgetTodayBlock,
 } from './widgetBlocks';
+import { shortPlaceLabel } from './shortPlaceLabel';
 import {
   addDays,
   combineLocalDateAndTime,
@@ -304,7 +305,9 @@ export function buildWidgetPayload(
     nextKey,
     nextPrayerName: next ? i18n.t(`prayer.${next.name}`) : undefined,
     nextPrayerTime: next ? formatLocalTime(next.at) : undefined,
-    locationName,
+    // A saved location's label is a full postal address on every geocoder the
+    // app reads; the widget header has room for a city. See shortPlaceLabel.
+    locationName: shortPlaceLabel(locationName),
     ...(tomorrowEstimated ? { tomorrowEstimated: true } : {}),
     ...(seasonal ? { seasonal } : {}),
     days,
