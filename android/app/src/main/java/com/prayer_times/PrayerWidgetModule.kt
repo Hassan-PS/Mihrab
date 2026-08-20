@@ -31,6 +31,29 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * Hand over every tap the Log Today widget has queued, and clear it.
+   *
+   * Returns a JSON string rather than a WritableArray so the JS side can run
+   * it through the same `coerceLogQueue` it uses on anything else that
+   * crosses a process boundary — a bridge array would arrive pre-shaped and
+   * skip the validation, which is the wrong direction for something whose
+   * contents end up in the journal.
+   */
+  @ReactMethod
+  fun takeLogQueue(promise: Promise) {
+    try {
+      val entries = WidgetLogQueue.take(reactContext)
+      promise.resolve(WidgetLogQueue.serialize(entries))
+      // The ticks were being drawn from the queue; now the app owns them, so
+      // the widget has to re-read or it would show them twice — once from
+      // its own queue and once from the payload the app is about to push.
+      PrayerWidgetProvider.requestUpdate(reactContext)
+    } catch (e: Exception) {
+      promise.reject("E_WIDGET_LOG_QUEUE", e.message, e)
+    }
+  }
+
   @ReactMethod
   fun setData(json: String, promise: Promise) {
     try {

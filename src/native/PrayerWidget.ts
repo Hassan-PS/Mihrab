@@ -34,6 +34,17 @@ export interface PrayerWidgetInterface {
   setWidgetHighlightDynamic?(enabled: boolean): Promise<void>;
   /** Legacy iOS API. */
   setUiHints?(style: string, oledBackground: boolean): Promise<void>;
+
+  // ── Android: the Log Today widget's tap queue ─────────────────────────────
+  /**
+   * Hand over every tap queued by the Log Today widget and clear it.
+   *
+   * A JSON string, not a bridge array, so the JS side runs it through
+   * `coerceLogQueue` like anything else that crosses a process boundary —
+   * these end up in the journal. Android only; absent on iOS, where the
+   * widget writes through an AppIntent instead.
+   */
+  takeLogQueue?(): Promise<string>;
 }
 
 /**

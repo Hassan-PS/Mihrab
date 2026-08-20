@@ -22,6 +22,7 @@ import {
 } from './theme/appPalette';
 import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
+import { syncWidgetLogQueue } from './widget/syncWidgetLogQueue';
 import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
@@ -150,6 +151,25 @@ export function AppNavigationRoot() {
     reassert();
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') reassert();
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Write anything tapped on the Log Today widget into the journal.
+  //
+  // The widget queues taps rather than writing them, because the journal is
+  // encrypted and its one writer lives here in JS — see widgetLogQueue.ts.
+  // On foreground is where the queue almost always drains: the user taps the
+  // widget, opens the app later, and the Log already agrees with what the
+  // widget was showing. Runs on mount too, for a cold start from the widget.
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const drain = () => {
+      void syncWidgetLogQueue();
+    };
+    drain();
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') drain();
     });
     return () => sub.remove();
   }, []);

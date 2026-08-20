@@ -20,6 +20,7 @@ import {
 } from './notificationActions';
 import { handleEndOfDayLogEvent } from './endOfDayLog';
 import { JOURNAL_LOG_ACTION_ID, handlePrayerLogEvent } from './prayerLogAction';
+import { syncWidgetLogQueue } from '../widget/syncWidgetLogQueue';
 
 // Re-exported for back-compat with existing importers.
 export { ADHAN_CONTROLS_CATEGORY_ID, ADHAN_ACTION_STOP, ADHAN_ACTION_DISABLE };
@@ -184,6 +185,12 @@ export function registerAdhanSafetyControls() {
   });
 
   notifee.onBackgroundEvent(async event => {
+    // Any notification interaction already has the JS runtime up, headless,
+    // so draining the Log Today widget's queue here is free — and it means
+    // the queue empties for someone who answers prayer notifications for
+    // days without ever opening the app. Deliberately not awaited before
+    // the handlers below: the press the user just made comes first.
+    void syncWidgetLogQueue();
     if (await handleJournalActions(event)) return;
     await handleAdhanAction(event, false);
   });
