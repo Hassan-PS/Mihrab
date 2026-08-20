@@ -1,0 +1,405 @@
+// Continue Reading — the shortest path back into the habit.
+//
+// The app knows the last page read and, when a khatmah is running, whether
+// today's portion is done. Everything here is one of those two states:
+//
+//   • a plan is running  → the plan's page, and today's portion as a fraction
+//   • no plan            → the last page read, and when that was
+//
+// Which reader a tap opens is decided by the APP, not here: `reading.mode` is
+// already resolved against both what the user last had open and whether the
+// ~180 MB mushaf is on disk. A widget that sent someone to a download wall
+// would be worse than one that opened the wrong reader.
+
+import SwiftUI
+import WidgetKit
+
+struct ReadingEntry: TimelineEntry {
+  let date: Date
+  let reading: WidgetPayload.Reading?
+}
+
+struct ReadingProvider: TimelineProvider {
+  func placeholder(in context: Context) -> ReadingEntry {
+    ReadingEntry(date: Date(), reading: Self.sample)
+  }
+
+  func getSnapshot(in context: Context, completion: @escaping (ReadingEntry) -> Void) {
+    completion(ReadingEntry(date: Date(), reading: loadReading() ?? Self.sample))
+  }
+
+  /// One entry, until just after midnight.
+  ///
+  /// A reading position moves when a page is turned, and every page turn
+  /// already reloads the timelines. What changes unattended is the day: a
+  /// khatmah's "today's portion" resets, and "2 days ago" becomes 3.
+  func getTimeline(in context: Context, completion: @escaping (Timeline<ReadingEntry>) -> Void) {
+    let now = Date()
+    let cal = Calendar.current
+    let nextMidnight =
+      cal.nextDate(after: now, matching: DateComponents(hour: 0, minute: 1), matchingPolicy: .nextTime)
+      ?? now.addingTimeInterval(3600)
+    completion(Timeline(
+      entries: [ReadingEntry(date: now, reading: loadReading())],
+      policy: .after(nextMidnight)
+    ))
+  }
+
+  private func loadReading() -> WidgetPayload.Reading? {
+    guard let json = UserDefaults(suiteName: kSuite)?.string(forKey: kKey),
+          let data = json.data(using: .utf8),
+          let p = try? JSONDecoder().decode(WidgetPayload.self, from: data)
+    else { return nil }
+    return p.reading
+  }
+
+  static let sample = WidgetPayload.Reading(
+    surah: 2, surahName: "Al-Baqarah", ayah: 1, page: 3, juz: 1,
+    pagesRead: 47, totalPages: 604, bookmarks: 3,
+    lastReadAt: nil, mode: "mushaf",
+    khatmah: .init(day: 14, targetDays: 30, pagesToday: 7, doneToday: 4, behindBy: 0, daysLeft: 16)
+  )
+}
+
+struct ReadingEntryView: View {
+  var entry: ReadingEntry
+  @Environment(\.widgetFamily) var family
+
+  var body: some View {
+    switch family {
+    case .accessoryInline:
+      Text(verbatim: entry.reading.map { "Page \($0.page) · \($0.surahName)" } ?? "Mihrab")
+    case .accessoryRectangular:
+      rectangularBody
+    case .systemMedium:
+      mediumBody
+    default:
+      smallBody
+    }
+  }
+
+  // MARK: - systemSmall
+
+  @ViewBuilder
+  private var smallBody: some View {
+    if let r = entry.reading {
+      VStack(alignment: .leading, spacing: 0) {
+        Text(headerLabel(r))
+          .kerning(0.8)
+          .font(.system(size: 9, weight: .semibold))
+          .foregroundStyle(widgetMuted)
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
+
+        Spacer(minLength: 4)
+
+        Text(r.surahName)
+          .font(.system(size: 20, weight: .bold))
+          .foregroundStyle(widgetText)
+          .lineLimit(1)
+          .minimumScaleFactor(0.6)
+        Text(verbatim: "Page \(r.page) · Juz \(r.juz)")
+          .font(.system(size: 12))
+          .foregroundStyle(widgetMuted)
+          .lineLimit(1)
+
+        Spacer(minLength: 4)
+
+        progressBar(r)
+          .padding(.bottom, 4)
+        Text(verbatim: progressLine(r))
+          .font(.system(size: 10))
+          .foregroundStyle(widgetMuted)
+          .lineLimit(1)
+          .minimumScaleFactor(0.8)
+
+        Spacer(minLength: 4)
+
+        footer(r)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+      .padding(14)
+      .widgetURL(readingURL(r))
+    } else {
+      emptyBody
+    }
+  }
+
+  // MARK: - systemMedium
+
+  /// Same facts, side by side: where you are on the left, how the plan is
+  /// going on the right. Without a plan the right column is the bookmark
+  /// count and when this was last touched — which is all there is to say.
+  @ViewBuilder
+  private var mediumBody: some View {
+    if let r = entry.reading {
+      HStack(alignment: .top, spacing: 14) {
+        VStack(alignment: .leading, spacing: 0) {
+          Text(headerLabel(r))
+            .kerning(0.8)
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(widgetMuted)
+            .lineLimit(1)
+          Spacer(minLength: 4)
+          Text(r.surahName)
+            .font(.system(size: 22, weight: .bold))
+            .foregroundStyle(widgetText)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+          Text(verbatim: "Page \(r.page) · Juz \(r.juz)")
+            .font(.system(size: 12))
+            .foregroundStyle(widgetMuted)
+          Spacer(minLength: 8)
+          progressBar(r)
+            .padding(.bottom, 4)
+          Text(verbatim: progressLine(r))
+            .font(.system(size: 10))
+            .foregroundStyle(widgetMuted)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+          // With a plan running the right column has taken "today", so the
+          // last-read line has nowhere else to be — and without it this
+          // column stops a third of the way up a card that is taller than
+          // its content. Information rather than air.
+          if r.khatmah != nil, let tail = lastReadTail(r) {
+            Text(verbatim: tail)
+              .font(.system(size: 10))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+              .minimumScaleFactor(0.8)
+              .padding(.top, 2)
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+
+        VStack(alignment: .leading, spacing: 2) {
+          if let k = r.khatmah {
+            Text("TODAY'S PORTION")
+              .kerning(0.8)
+              .font(.system(size: 9, weight: .semibold))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+              .minimumScaleFactor(0.8)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+              Text(verbatim: "\(k.doneToday)")
+                .font(.system(size: 30, weight: .bold))
+                .foregroundStyle(widgetText)
+              Text(verbatim: "/ \(k.pagesToday)")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(widgetMuted)
+            }
+            // Two short complete lines rather than one long one wrapping
+            // mid-phrase: this column is 110pt and "On track · 21 pages left"
+            // breaks after "21", which reads as a layout accident.
+            ForEach(Array(planStatusLines(k).enumerated()), id: \.offset) { _, line in
+              Text(verbatim: line)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(k.behindBy > 0 ? behindColor : resolvedWidgetHighlightColor())
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+            }
+            Spacer(minLength: 0)
+          } else {
+            Text("LAST READ")
+              .kerning(0.8)
+              .font(.system(size: 9, weight: .semibold))
+              .foregroundStyle(widgetMuted)
+            Text(verbatim: lastReadPhrase(r) ?? "—")
+              .font(.system(size: 15, weight: .semibold))
+              .foregroundStyle(widgetText)
+              .lineLimit(1)
+              .minimumScaleFactor(0.7)
+            if r.bookmarks > 0 {
+              Text(verbatim: "\(r.bookmarks) \(r.bookmarks == 1 ? "bookmark" : "bookmarks")")
+                .font(.system(size: 11))
+                .foregroundStyle(widgetMuted)
+                .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+          }
+        }
+        .frame(width: 118, alignment: .leading)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+      .padding(14)
+      .widgetURL(readingURL(r))
+    } else {
+      emptyBody
+    }
+  }
+
+  // MARK: - accessoryRectangular
+
+  @ViewBuilder
+  private var rectangularBody: some View {
+    if let r = entry.reading {
+      VStack(alignment: .leading, spacing: 1) {
+        Text(headerLabel(r))
+          .kerning(0.8)
+          .font(.system(size: 10, weight: .semibold))
+          .lineLimit(1)
+        Text(r.surahName)
+          .font(.system(size: 16, weight: .semibold))
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
+        Text(verbatim: r.khatmah.map { "Page \(r.page) · \($0.doneToday)/\($0.pagesToday) today" }
+          ?? "Page \(r.page) · Juz \(r.juz)")
+          .font(.system(size: 11))
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
+      }
+    } else {
+      Text("Open Mihrab").font(.system(size: 12))
+    }
+  }
+
+  // MARK: - Shared
+
+  /// The bottom two lines of the small card: what the plan asks of today, or
+  /// — with no plan — when this was last touched and how many bookmarks are
+  /// waiting. Two lines either way, so the card does not change height.
+  @ViewBuilder
+  private func footer(_ r: WidgetPayload.Reading) -> some View {
+    if let k = r.khatmah {
+      HStack(alignment: .firstTextBaseline, spacing: 3) {
+        Text("Today")
+          .font(.system(size: 10))
+          .foregroundStyle(widgetMuted)
+        Text(verbatim: "\(k.doneToday)/\(k.pagesToday)")
+          .font(.system(size: 14, weight: .bold))
+          .foregroundStyle(widgetText)
+      }
+      Text(verbatim: planStatus(k))
+        .font(.system(size: 10, weight: .medium))
+        .foregroundStyle(k.behindBy > 0 ? behindColor : resolvedWidgetHighlightColor())
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
+    } else {
+      if let phrase = lastReadPhrase(r) {
+        Text(verbatim: phrase)
+          .font(.system(size: 13, weight: .semibold))
+          .foregroundStyle(widgetText)
+          .lineLimit(1)
+      }
+      Text(verbatim: r.bookmarks > 0
+        ? "\(r.bookmarks) \(r.bookmarks == 1 ? "bookmark" : "bookmarks")"
+        : "No bookmarks yet")
+        .font(.system(size: 10))
+        .foregroundStyle(widgetMuted)
+        .lineLimit(1)
+    }
+  }
+
+  /// "KHATMAH · DAY 14/30" with a plan, "CONTINUE" without one.
+  private func headerLabel(_ r: WidgetPayload.Reading) -> String {
+    guard let k = r.khatmah else { return "CONTINUE" }
+    return "KHATMAH · DAY \(k.day)/\(k.targetDays)"
+  }
+
+  /// "47 of 604 · 8% read".
+  private func progressLine(_ r: WidgetPayload.Reading) -> String {
+    let pct = r.totalPages > 0 ? Int((Double(r.pagesRead) / Double(r.totalPages) * 100).rounded()) : 0
+    return "\(r.pagesRead) of \(r.totalPages) · \(pct)% read"
+  }
+
+  /// A hairline of progress. Two pages out of 604 is 0.3% — too thin to be a
+  /// rectangle at all — so the fill has a floor: the bar's job is to say
+  /// "you have started", and a bar with nothing in it says the opposite.
+  @ViewBuilder
+  private func progressBar(_ r: WidgetPayload.Reading) -> some View {
+    let raw = r.totalPages > 0 ? Double(r.pagesRead) / Double(r.totalPages) : 0
+    let shown = r.pagesRead > 0 ? max(0.03, min(1, raw)) : 0
+    GeometryReader { geo in
+      ZStack(alignment: .leading) {
+        Capsule()
+          .fill(widgetMuted.opacity(0.25))
+        Capsule()
+          .fill(resolvedWidgetHighlightColor())
+          .frame(width: geo.size.width * shown)
+      }
+    }
+    .frame(height: 3)
+  }
+
+  /// "On track · 3 pages left", or how far behind the plan has slipped.
+  private func planStatus(_ k: WidgetPayload.Khatmah) -> String {
+    planStatusLines(k).joined(separator: " · ")
+  }
+
+  /// The same thing as separate lines, for the narrow column.
+  private func planStatusLines(_ k: WidgetPayload.Khatmah) -> [String] {
+    let left = max(0, k.pagesToday - k.doneToday)
+    if k.behindBy > 0 {
+      return ["\(k.behindBy) \(k.behindBy == 1 ? "page" : "pages") behind"]
+    }
+    if left == 0 { return ["Done for today"] }
+    return ["On track", "\(left) \(left == 1 ? "page" : "pages") left"]
+  }
+
+  /// "Last read today · 3 bookmarks", dropping whichever half is unknown.
+  private func lastReadTail(_ r: WidgetPayload.Reading) -> String? {
+    var parts: [String] = []
+    if let phrase = lastReadPhrase(r) {
+      parts.append("Last read \(phrase.lowercased())")
+    }
+    if r.bookmarks > 0 {
+      parts.append("\(r.bookmarks) \(r.bookmarks == 1 ? "bookmark" : "bookmarks")")
+    }
+    return parts.isEmpty ? nil : parts.joined(separator: " · ")
+  }
+
+  /// "today" / "yesterday" / "4 days ago". Never "0 days ago".
+  private func lastReadPhrase(_ r: WidgetPayload.Reading) -> String? {
+    guard let ms = r.lastReadAt else { return nil }
+    let then = Date(timeIntervalSince1970: ms / 1000)
+    let cal = Calendar.current
+    let days = cal.dateComponents([.day], from: cal.startOfDay(for: then), to: cal.startOfDay(for: entry.date)).day ?? 0
+    switch days {
+    case ..<1: return "Today"
+    case 1: return "Yesterday"
+    default: return "\(days) days ago"
+    }
+  }
+
+  /// mihrab://read/2?initialPage=3 or ?scrollToAyah=1 — the surah screen
+  /// picks its reader from which of the two it is given, which is why the
+  /// app resolves `mode` rather than this side guessing.
+  private func readingURL(_ r: WidgetPayload.Reading) -> URL? {
+    let position = r.mode == "mushaf" ? "initialPage=\(r.page)" : "scrollToAyah=\(r.ayah)"
+    return URL(string: "mihrab://read/\(r.surah)?\(position)")
+  }
+
+  /// The same amber the Log screen marks a slipping plan with.
+  private var behindColor: Color {
+    Color(red: 217 / 255, green: 119 / 255, blue: 6 / 255)
+  }
+
+  private var emptyBody: some View {
+    VStack(spacing: 2) {
+      Text("Open Mihrab")
+        .font(.caption)
+        .foregroundStyle(widgetMuted)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
+
+struct ReadingWidget: Widget {
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: "MihrabReading", provider: ReadingProvider()) { entry in
+      ReadingEntryView(entry: entry)
+        .modifier(WidgetBackgroundCompatModifier())
+    }
+    .configurationDisplayName("Continue Reading")
+    .description("Where you left off, and what today's khatmah portion asks.")
+    .supportedFamilies(readingFamilies())
+  }
+
+  private func readingFamilies() -> [WidgetFamily] {
+    #if targetEnvironment(macCatalyst)
+    return [.systemSmall, .systemMedium]
+    #else
+    return [.systemSmall, .systemMedium, .accessoryInline, .accessoryRectangular]
+    #endif
+  }
+}

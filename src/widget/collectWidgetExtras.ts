@@ -16,6 +16,7 @@ import {
   computeLongestStreak,
 } from '../journal/journal';
 import { loadPractice } from '../practice/practiceStore';
+import { isMushafDownloaded } from '../quran/mushafDownload';
 import {
   activeKhatmah,
   getQuranState,
@@ -82,12 +83,22 @@ export async function collectWidgetExtras(input: {
   try {
     await hydrateQuranState();
     const quran = getQuranState();
+    // Checked here rather than in the builder so the builder stays pure, and
+    // guarded separately so a filesystem hiccup costs the mushaf deep link
+    // rather than the whole reading block.
+    let mushafDownloaded = false;
+    try {
+      mushafDownloaded = await isMushafDownloaded();
+    } catch {
+      /* treat as absent — the translation reader always works */
+    }
     const reading = buildReadingBlock({
       lastRead: quran.lastRead,
       bookmarks: quran.bookmarks,
       khatmah: activeKhatmah(quran) ?? null,
       language,
       now,
+      mushafDownloaded,
     });
     if (reading) extras.reading = reading;
   } catch {

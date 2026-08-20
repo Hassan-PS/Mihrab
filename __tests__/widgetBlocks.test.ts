@@ -172,6 +172,43 @@ describe('reading', () => {
     ).toBeNull();
   });
 
+  describe('which reader a tap opens', () => {
+    const call = (mushafDownloaded?: boolean) =>
+      buildReadingBlock({
+        lastRead: LAST_READ, // mode: 'mushaf'
+        bookmarks: [],
+        khatmah: null,
+        now: NOW,
+        mushafDownloaded,
+      });
+
+    it('opens the mushaf when that is what they were in and it is on disk', () => {
+      expect(call(true)?.mode).toBe('mushaf');
+    });
+
+    it('does not send them to a download wall', () => {
+      // They were last in the mushaf, but the ~180 MB of pages is not there.
+      // The translation reader always works; the download prompt is not a
+      // place to land from a widget that says "continue".
+      expect(call(false)?.mode).toBe('translation');
+    });
+
+    it('treats an unknown mushaf state as absent', () => {
+      expect(call(undefined)?.mode).toBe('translation');
+    });
+
+    it('keeps the translation reader when that is what they were in', () => {
+      const block = buildReadingBlock({
+        lastRead: { ...LAST_READ, mode: 'withTranslation' },
+        bookmarks: [],
+        khatmah: null,
+        now: NOW,
+        mushafDownloaded: true,
+      });
+      expect(block?.mode).toBe('translation');
+    });
+  });
+
   it('reports the bookmark position when there is no plan', () => {
     const block = buildReadingBlock({
       lastRead: LAST_READ,

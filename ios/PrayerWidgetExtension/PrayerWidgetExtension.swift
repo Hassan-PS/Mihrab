@@ -214,6 +214,11 @@ struct WidgetPayload: Codable {
     let totalPages: Int
     let bookmarks: Int
     let lastReadAt: Double?
+    /// "mushaf" or "translation" — which reader a tap opens. Resolved by the
+    /// app, which is the only side that knows both what the user last had
+    /// open and whether the mushaf is actually on disk. Optional because a
+    /// payload written by an older build does not carry it.
+    var mode: String? = nil
     let khatmah: Khatmah?
   }
 
@@ -1379,5 +1384,6 @@ struct PrayerWidgetExtensionBundle: WidgetBundle {
     PrayerTimesHomeWidget()
     HijriDateWidget()
     StreakWidget()
+    ReadingWidget()
   }
 }

@@ -144,6 +144,15 @@ export type WidgetReadingBlock = {
   bookmarks: number;
   /** Epoch ms of the last page turn, or null when nothing has been read. */
   lastReadAt: number | null;
+  /**
+   * Which reader a tap should open — resolved here, not on the widget.
+   *
+   * "The one they last used" is the honest answer, and only this side knows
+   * both halves of it: what the user last had open AND whether the ~180 MB
+   * mushaf is actually on disk. A widget that sent someone straight to a
+   * download wall would be worse than one that opened the wrong reader.
+   */
+  mode: 'mushaf' | 'translation';
   khatmah?: WidgetKhatmah;
 };
 
@@ -331,6 +340,13 @@ export function buildReadingBlock(input: {
   khatmah: KhatmahPlan | null;
   language?: string;
   now?: Date;
+  /**
+   * Whether the mushaf pages are on disk. Passed in rather than read here so
+   * this stays a pure function — the caller does the async filesystem check.
+   * Absent is treated as "not downloaded", which is the safe way to be
+   * wrong: the translation reader always works.
+   */
+  mushafDownloaded?: boolean;
 }): WidgetReadingBlock | null {
   const now = (input.now ?? new Date()).getTime();
   const plan = input.khatmah;
@@ -377,6 +393,10 @@ export function buildReadingBlock(input: {
     totalPages: KHATMAH_TOTAL_PAGES,
     bookmarks: input.bookmarks.length,
     lastReadAt: last?.updatedAt ?? null,
+    mode:
+      last?.mode === 'mushaf' && input.mushafDownloaded === true
+        ? 'mushaf'
+        : 'translation',
     ...(khatmah ? { khatmah } : {}),
   };
 }
