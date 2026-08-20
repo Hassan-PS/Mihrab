@@ -203,6 +203,71 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       }
     }
 
+    /**
+     * Below this the vertical six-row layout is squashed past legibility and
+     * the horizontal strip is the honest rendering. Three launcher rows is
+     * roughly 110dp; 100 leaves a little slack for launchers that report
+     * their cells slightly short.
+     */
+    private const val ROWS_MIN_HEIGHT_DP = 100
+
+    /** Below this even the strip does not fit and only the compact
+     *  next-prayer line does. */
+    private const val STRIP_MIN_HEIGHT_DP = 70
+
+    /**
+     * Which layout to draw.
+     *
+     * This used to be decided purely by WHICH PROVIDER CLASS the instance
+     * belonged to, which meant a widget was frozen to whatever the user
+     * happened to pick out of the picker. Drag the "large" one down to a
+     * single row and it still tried to draw six vertical rows into it, and
+     * the result was six unreadable slivers.
+     *
+     * So size gets a veto. The provider class still expresses the user's
+     * INTENT — it is why they picked that entry — and is honoured whenever
+     * the widget is big enough to honour it. It is only overridden downward,
+     * when the space genuinely cannot hold what the class asks for. Nothing
+     * gets promoted: a small widget stretched wide stays the compact line
+     * rather than surprising someone with a layout they never chose.
+     *
+     * The useful side effect is that the three providers are now
+     * interchangeable at render time, which is what any future collapse of
+     * them into one picker entry needs.
+     */
+    private fun selectLayout(
+      appWidgetManager: AppWidgetManager,
+      appWidgetId: Int,
+      providerName: String?,
+    ): Int {
+      val preferred = when (providerName) {
+        PrayerWidgetSmallProvider::class.java.name -> R.layout.prayer_widget_small
+        PrayerWidgetLargeProvider::class.java.name -> R.layout.prayer_widget
+        else -> R.layout.prayer_widget_horizontal
+      }
+      if (preferred == R.layout.prayer_widget_small) return preferred
+
+      // getAppWidgetOptions never returns null in practice, but a launcher
+      // that has not measured the widget yet reports 0 — which must read as
+      // "no opinion", not as "zero high", or every widget would collapse to
+      // the compact line on first draw.
+      val height = try {
+        appWidgetManager
+          .getAppWidgetOptions(appWidgetId)
+          .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+      } catch (_: Exception) {
+        0
+      }
+      if (height <= 0) return preferred
+
+      return when {
+        height < STRIP_MIN_HEIGHT_DP -> R.layout.prayer_widget_small
+        height < ROWS_MIN_HEIGHT_DP && preferred == R.layout.prayer_widget ->
+          R.layout.prayer_widget_horizontal
+        else -> preferred
+      }
+    }
+
     private fun buildViews(
       context: Context,
       appWidgetManager: AppWidgetManager,
@@ -211,16 +276,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       style: WidgetStyle,
     ): RemoteViews {
       val providerName = appWidgetManager.getAppWidgetInfo(appWidgetId)?.provider?.className
-      val isSmall = providerName == PrayerWidgetSmallProvider::class.java.name
-      val isLarge = providerName == PrayerWidgetLargeProvider::class.java.name
-      
-      val layoutId = if (isSmall) {
-        R.layout.prayer_widget_small
-      } else if (isLarge) {
-        R.layout.prayer_widget
-      } else {
-        R.layout.prayer_widget_horizontal
-      }
+      val layoutId = selectLayout(appWidgetManager, appWidgetId, providerName)
 
       val views = RemoteViews(context.packageName, layoutId)
 

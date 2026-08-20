@@ -1,12 +1,16 @@
 <resources>
     <string name="app_name">Mihrab</string>
-    <string name="widget_name_small">Mihrab (Small)</string>
-    <string name="widget_name_medium">Mihrab (Medium)</string>
-    <string name="widget_name_large">Mihrab (Large)</string>
+    <!-- Picker entries are named for WHAT THEY SHOW, not for how big they
+         are. "Mihrab (Medium)" and "Mihrab (Large)" sat next to each other
+         claiming the same 4x2 footprint, so the only way to find out which
+         one you wanted was to place one and look. -->
+    <string name="widget_name_small">Mihrab · Next prayer</string>
+    <string name="widget_name_medium">Mihrab · Day at a glance</string>
+    <string name="widget_name_large">Mihrab · All prayer times</string>
     <string name="widget_description">Today\'s times in one row, next prayer highlighted</string>
-    <string name="widget_description_small">A compact resizable widget showing the next prayer time</string>
-    <string name="widget_description_medium">A horizontal resizable widget showing the next prayer time</string>
-    <string name="widget_description_large">A large resizable widget showing all prayer times</string>
+    <string name="widget_description_small">Just the next prayer and its time. 2×1, resizable.</string>
+    <string name="widget_description_medium">All six times side by side in one wide row, next prayer highlighted. 4×1, resizable.</string>
+    <string name="widget_description_large">All six times as a list, next prayer highlighted. 4×3 — shrink it and it becomes the single-row layout.</string>
     <string name="widget_placeholder_day">Open Mihrab to load times</string>
     <string name="widget_error">Could not load widget data</string>
     <string name="widget_configure_title">Prayer widget</string>
