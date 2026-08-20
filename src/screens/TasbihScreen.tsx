@@ -1,7 +1,7 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -16,10 +16,16 @@ import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
   adjacentPresetId,
   findPreset,
-  increment,
   TASBIH_PRESETS,
-  type TasbihPresetId,
 } from '../tasbih/tasbih';
+import {
+  countFor,
+  hydrateTasbihState,
+  incrementTasbih,
+  resetTasbih,
+  setActiveTasbih,
+  useTasbihState,
+} from '../tasbih/tasbihStore';
 import { TasbihRing } from '../tasbih/TasbihRing';
 import { recordDhikrSet } from '../practice/practiceStore';
 import { hapticCelebrate, hapticTick } from '../polish/haptics';
@@ -70,20 +76,18 @@ export function TasbihScreen() {
   // content itself, so reserving its height here counted it twice.
   const tabBarInset = useTabBarInset();
 
-  const [presetId, setPresetId] = useState<TasbihPresetId>(
-    TASBIH_PRESETS[0].id,
-  );
-  // Per-preset count map — survives prev/next navigation within this
-  // screen but resets when the screen unmounts. Initial counts default
-  // to 0 for every preset.
-  const [counts, setCounts] = useState<Record<string, number>>(() =>
-    Object.fromEntries(TASBIH_PRESETS.map(p => [p.id, 0])),
-  );
+  // The count now outlives this screen — it is the same store the home-screen
+  // widget reads, so unmounting must not zero it and a reboot must not either.
+  useEffect(() => {
+    void hydrateTasbihState();
+  }, []);
+  const tasbih = useTasbihState();
+  const presetId = tasbih.activeId;
 
   const preset = findPreset(presetId);
   const index = TASBIH_PRESETS.findIndex(p => p.id === presetId);
-  const nextPreset = findPreset(adjacentPresetId(presetId, 'next'));
-  const count = counts[presetId] ?? 0;
+  const nextPreset = findPreset(adjacentPresetId(preset.id, 'next'));
+  const count = countFor(tasbih, presetId);
   const target = preset.defaultTarget;
   const targetReached = target > 0 && count >= target;
   const showCap =
@@ -101,34 +105,29 @@ export function TasbihScreen() {
   );
 
   const onIncrement = useCallback(() => {
-    setCounts(prev => {
-      const cur = prev[presetId] ?? 0;
-      const { count: next, reachedTarget } = increment(cur, target);
-      if (reachedTarget) {
-        void hapticCelebrate();
-        // A completed set is the one thing about dhikr worth remembering
-        // past this screen: Home's Today summary can then state it instead
-        // of showing a checkbox for something the app never observed. The
-        // count itself stays where it was — in memory, for this sitting.
-        void recordDhikrSet();
-      } else {
-        void hapticTick();
-      }
-      return { ...prev, [presetId]: next };
-    });
-  }, [presetId, target]);
+    const { reachedTarget } = incrementTasbih();
+    if (reachedTarget) {
+      void hapticCelebrate();
+      // A completed set is the one thing about dhikr worth remembering past
+      // this screen: Home's Today summary can then state it instead of
+      // showing a checkbox for something the app never observed.
+      void recordDhikrSet();
+    } else {
+      void hapticTick();
+    }
+  }, []);
 
   const onResetCurrent = useCallback(() => {
-    setCounts(prev => ({ ...prev, [presetId]: 0 }));
-  }, [presetId]);
+    resetTasbih();
+  }, []);
 
   const onPrev = useCallback(() => {
-    setPresetId(cur => adjacentPresetId(cur, 'prev'));
-  }, []);
+    setActiveTasbih(adjacentPresetId(presetId, 'prev'));
+  }, [presetId]);
 
   const onNext = useCallback(() => {
-    setPresetId(cur => adjacentPresetId(cur, 'next'));
-  }, []);
+    setActiveTasbih(adjacentPresetId(presetId, 'next'));
+  }, [presetId]);
 
   /** "Sub-ḥāna llāh · Glory be to Allah" — one line, not three. */
   const subtitle = showPronunciation

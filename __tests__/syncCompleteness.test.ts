@@ -78,6 +78,12 @@ const STAYS: Record<string, string> = {
     'day it may offer, so importing another device’s would let this one ' +
     'claim days it never saw',
   'mihrab.muted_next_adhan': 'describes this phone — a one-off alert flag',
+  'mihrab.tasbih.v1':
+    'a sitting, not a record — it holds which dhikr is on screen and how ' +
+    'far into the current round you are, and a sitting ends rather than ' +
+    'migrating. The part that IS a record, the completed sets per day, is ' +
+    'prayerapp.dhikr.v1 and that does travel, so nothing about someone’s ' +
+    'dhikr history is lost by leaving this behind',
   'mihrab.featureTour.v1': 'describes this phone — whether the tour was seen',
   'mushaf.assets.v3.complete': 'derived — a download completion marker',
   'mushaf.assets.v2.complete': 'derived — legacy download marker',

@@ -6,6 +6,7 @@ import {
   type WidgetSeasonalFlags,
 } from './buildWidgetPayload';
 import { getPrayerWidgetModule } from '../native/PrayerWidget';
+import type { WidgetExtras } from './widgetBlocks';
 
 /**
  * Updates home-screen widget data (Android + iOS when native module is linked).
@@ -24,6 +25,8 @@ export async function syncPrayerWidget(
   seasonal?: WidgetSeasonalFlags,
   /** Consecutive days starting today — drives the multi-day rollover. */
   week?: TimingsMap[],
+  /** Practice / today / reading / hijri / tasbih blocks. */
+  extras?: WidgetExtras,
 ): Promise<void> {
   if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
     return;
@@ -40,6 +43,7 @@ export async function syncPrayerWidget(
     coords,
     seasonal,
     week,
+    extras,
   );
   try {
     await mod.setData(JSON.stringify(payload));

@@ -1,5 +1,13 @@
 import type { TimingsMap } from '../types/prayer';
 import i18n from '../i18n';
+import type {
+  WidgetExtras,
+  WidgetHijriBlock,
+  WidgetPracticeBlock,
+  WidgetReadingBlock,
+  WidgetTasbihBlock,
+  WidgetTodayBlock,
+} from './widgetBlocks';
 import {
   addDays,
   combineLocalDateAndTime,
@@ -103,6 +111,20 @@ export type WidgetPrayerPayload = {
    * (+ tomorrow when supplied) so the field is always at least a short window.
    */
   days?: WidgetDay[];
+  /**
+   * Practice history — streak, the grid, this month's sunnah and fasts.
+   * Absent when the app has not supplied it; renderers must treat absent as
+   * "do not draw the section", never as zero.
+   */
+  practice?: WidgetPracticeBlock;
+  /** Today's five with their journal status — the Log Today widget. */
+  today?: WidgetTodayBlock;
+  /** Where the reader left off, and what the khatmah asks of today. */
+  reading?: WidgetReadingBlock;
+  /** Today's Hijri date and the month after it. */
+  hijri?: WidgetHijriBlock;
+  /** The dhikr counter, for the interactive Tasbih widget. */
+  tasbih?: WidgetTasbihBlock;
 };
 
 /** Seasonal flags consumed by the iOS widget extension to tint the
@@ -207,6 +229,13 @@ export function buildWidgetPayload(
    * Falls back to `[today, tomorrow]` when omitted.
    */
   week?: TimingsMap[],
+  /**
+   * The non-prayer-times blocks (practice, today, reading, hijri, tasbih).
+   * A bag rather than five more positional parameters — this signature is
+   * already seven deep, and the next reader of a call site should not have
+   * to count commas to find out which `undefined` is which.
+   */
+  extras?: WidgetExtras,
 ): WidgetPrayerPayload {
   if (coords && coords.lat === 0 && coords.lng === 0) {
     throw new Error(
@@ -279,5 +308,15 @@ export function buildWidgetPayload(
     ...(tomorrowEstimated ? { tomorrowEstimated: true } : {}),
     ...(seasonal ? { seasonal } : {}),
     days,
+    // Spread one key at a time rather than `...extras`: an extras object
+    // carrying an explicit `practice: undefined` would otherwise put the key
+    // on the payload, and `JSON.stringify` drops it again — so the wire format
+    // stays honest either way, but the in-memory object would not, and the
+    // tests compare the object.
+    ...(extras?.practice ? { practice: extras.practice } : {}),
+    ...(extras?.today ? { today: extras.today } : {}),
+    ...(extras?.reading ? { reading: extras.reading } : {}),
+    ...(extras?.hijri ? { hijri: extras.hijri } : {}),
+    ...(extras?.tasbih ? { tasbih: extras.tasbih } : {}),
   };
 }
