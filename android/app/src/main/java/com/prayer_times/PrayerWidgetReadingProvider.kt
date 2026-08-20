@@ -86,7 +86,11 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
         .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
         .getString(PrayerWidgetProvider.PREFS_KEY, null) ?: return null
       return try {
-        JSONObject(raw).optJSONObject("reading")
+        val root = JSONObject(raw)
+        // Least wrong of the four when stale — "last read 40 days ago" is
+        // true — but a khatmah's "today's portion" is not. Same rule.
+        if (PrayerWidgetProvider.payloadHasExpired(root)) null
+        else root.optJSONObject("reading")
       } catch (_: Exception) {
         null
       }

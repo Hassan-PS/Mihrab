@@ -122,6 +122,12 @@ struct LogTodayProvider: TimelineProvider {
           let data = json.data(using: .utf8),
           let p = try? JSONDecoder().decode(WidgetPayload.self, from: data)
     else { return nil }
+    // The most important of the four. A payload whose schedule has run out
+    // still carries a `today` block, dated whenever the app was last opened
+    // — so a stale one would offer a month-old day's prayers as today's, and
+    // a tap would queue a log against THAT date. Not a cosmetic bug: it puts
+    // a status on a day the user never touched. See payloadHasExpired.
+    guard !payloadHasExpired(p) else { return nil }
     return p
   }
 

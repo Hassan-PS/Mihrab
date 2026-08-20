@@ -110,6 +110,10 @@ struct HijriProvider: TimelineProvider {
           let data = json.data(using: .utf8),
           let p = try? JSONDecoder().decode(WidgetPayload.self, from: data)
     else { return nil }
+    // Stating the wrong date is the only way this widget can be wrong, and a
+    // payload whose schedule has run out states exactly that. See
+    // payloadHasExpired.
+    guard !payloadHasExpired(p) else { return nil }
     return p
   }
 

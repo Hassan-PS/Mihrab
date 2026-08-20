@@ -32,9 +32,21 @@ object PracticeGridBitmap {
   private const val OWED_COLOR = "#F87171"
 
   /**
+   * A RemoteViews carrying bitmaps has to cross a Binder transaction, and
+   * the AppWidget host applies its own ceiling on top of that — OEMs vary,
+   * and the failure is the whole widget refusing to draw rather than a
+   * warning. Ten weeks of 7dp cells is ~150 KB at 2.75x and ~300 KB at 4x,
+   * and there are two of these in a 4x4. Clamping the cell keeps the pair
+   * comfortably inside the budget on any density, at the cost of a grid
+   * that stops growing on the very densest screens — where it is already
+   * more pixels than the eye is using.
+   */
+  private const val MAX_CELL_PX = 14
+
+  /**
    * @param days   the payload's `practice.days` array, oldest first
    * @param weeks  how many columns to draw
-   * @param cellPx square size in pixels
+   * @param cellPx square size in pixels, clamped to MAX_CELL_PX
    * @param gapPx  space between squares
    */
   fun render(
@@ -44,6 +56,8 @@ object PracticeGridBitmap {
     gapPx: Int,
     accent: Int,
   ): Bitmap {
+    @Suppress("NAME_SHADOWING") val cellPx = cellPx.coerceIn(3, MAX_CELL_PX)
+    @Suppress("NAME_SHADOWING") val gapPx = gapPx.coerceIn(1, 4)
     val width = weeks * cellPx + (weeks - 1) * gapPx
     val height = ROWS * cellPx + (ROWS - 1) * gapPx
     val bmp = Bitmap.createBitmap(

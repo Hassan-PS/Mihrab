@@ -63,7 +63,11 @@ class PrayerWidgetHijriProvider : AppWidgetProvider() {
         .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
         .getString(PrayerWidgetProvider.PREFS_KEY, null) ?: return null
       return try {
-        JSONObject(raw).optJSONObject("hijri")
+        val root = JSONObject(raw)
+        // Stating the wrong date is the only way this widget can be wrong,
+        // and an expired payload states exactly that. Same rule.
+        if (PrayerWidgetProvider.payloadHasExpired(root)) null
+        else root.optJSONObject("hijri")
       } catch (_: Exception) {
         null
       }

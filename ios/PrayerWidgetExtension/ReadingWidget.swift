@@ -50,6 +50,10 @@ struct ReadingProvider: TimelineProvider {
           let data = json.data(using: .utf8),
           let p = try? JSONDecoder().decode(WidgetPayload.self, from: data)
     else { return nil }
+    // This one is the least wrong when stale — "last read 40 days ago" is
+    // true — but a khatmah's "today's portion" is not, and the deep link
+    // would still be right. Held to the same rule as the rest.
+    guard !payloadHasExpired(p) else { return nil }
     return p.reading
   }
 

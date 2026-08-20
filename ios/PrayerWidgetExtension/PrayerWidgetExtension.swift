@@ -27,6 +27,38 @@ let kSuite = "GAW23HT439.group.com.prayerapp"
 let kSuite = "group.com.prayerapp"
 #endif
 let kKey = "prayer_widget_payload_v1"
+
+/// Has this payload's schedule run out?
+///
+/// The payload is only ever written from the foreground — there is no
+/// background refresh on any platform — so it describes a window that
+/// eventually ends. On a phone that is invisible; a Mac app installed from
+/// Homebrew can sit unopened for weeks, which is where the blank-widget bug
+/// was reported (see the long note in the Prayer Times timeline).
+///
+/// Every widget kind in this extension needs this, and for different reasons:
+/// Log Today would otherwise offer a month-old day's prayers as today's and
+/// queue a write against that date; Hijri Date would state the wrong date,
+/// which is the only way that widget can be wrong; Streak would claim a
+/// streak that stopped weeks ago; and Tasbih's "Today" would be some other
+/// day's total. A schedule that has run out is worth no more than no
+/// schedule, and the empty state names the one thing that fixes it.
+///
+/// True when there is no `days[]` at all, because a payload from a build
+/// older than the multi-day window cannot be checked and is by now certainly
+/// older than this problem.
+func payloadHasExpired(_ p: WidgetPayload, now: Date = Date(), calendar: Calendar = .current) -> Bool {
+  guard let days = p.days, !days.isEmpty else { return true }
+  let fmt = DateFormatter()
+  fmt.calendar = calendar
+  fmt.locale = Locale(identifier: "en_US_POSIX")
+  fmt.timeZone = calendar.timeZone
+  fmt.dateFormat = "yyyy-MM-dd"
+  let today = fmt.string(from: now)
+  // Lexicographic works on yyyy-MM-dd and avoids parsing 30 dates to answer
+  // "is any of them today or later".
+  return !days.contains { $0.dateKey >= today }
+}
 private let kHighlightDynamicKey = "widget_highlight_dynamic"
 private let kHighlightIdKey = "widget_highlight_id"
 private let kHighlightHexKey = "widget_highlight_hex"

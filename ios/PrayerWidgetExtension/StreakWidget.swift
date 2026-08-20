@@ -51,6 +51,9 @@ struct StreakProvider: TimelineProvider {
           let data = json.data(using: .utf8),
           let p = try? JSONDecoder().decode(WidgetPayload.self, from: data)
     else { return nil }
+    // A streak from a payload whose schedule ran out is a claim about weeks
+    // the app has not seen. See payloadHasExpired.
+    guard !payloadHasExpired(p) else { return nil }
     return p.practice
   }
 

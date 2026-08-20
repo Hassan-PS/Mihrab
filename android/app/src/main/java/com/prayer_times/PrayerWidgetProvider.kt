@@ -386,8 +386,38 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       )
     }
 
-    /** Find the entry in the multi-day `days[]` schedule that applies to the
-     *  current local date, or null when there is no `days[]` / no match. */
+    /**
+     * Has this payload's schedule run out?
+     *
+     * The payload is only ever written from the foreground — there is no
+     * background refresh on any platform — so it describes a window that
+     * ends. This was reported on the Mac build, where an app installed from
+     * Homebrew can sit unopened for weeks; a phone gets opened, so it is
+     * rarer here, but "rarer" is not "never" and the consequences differ per
+     * widget. Log Today is the one that matters: a stale payload still
+     * carries a `today` block dated whenever the app was last opened, so it
+     * would offer that day's prayers as today's AND queue a write against
+     * that date. Putting a status on a day the user never touched is not a
+     * cosmetic bug.
+     *
+     * True when there is no `days[]` at all: a payload from a build older
+     * than the multi-day window cannot be checked and is by now certainly
+     * older than this problem.
+     */
+    fun payloadHasExpired(o: JSONObject): Boolean {
+      val days = o.optJSONArray("days") ?: return true
+      if (days.length() == 0) return true
+      val todayKey = todayDateKey()
+      for (i in 0 until days.length()) {
+        val key = days.optJSONObject(i)?.optString("dateKey") ?: continue
+        // Lexicographic works on yyyy-MM-dd and avoids parsing 30 dates.
+        if (key >= todayKey) return false
+      }
+      return true
+    }
+
+    /** The entry in `days[]` that applies to the current local date, or null
+     *  when there is no `days[]` / no match. */
     private fun selectTodayDay(o: JSONObject): JSONObject? {
       val days = o.optJSONArray("days") ?: return null
       if (days.length() == 0) return null

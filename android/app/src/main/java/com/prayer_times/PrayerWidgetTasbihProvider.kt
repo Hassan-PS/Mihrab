@@ -81,7 +81,11 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
         .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
         .getString(PrayerWidgetProvider.PREFS_KEY, null) ?: return null
       return try {
-        JSONObject(raw).optJSONObject("tasbih")
+        val root = JSONObject(raw)
+        // The counts survive, but "Today 231" from a payload written weeks
+        // ago is some other day's total. Same rule.
+        if (PrayerWidgetProvider.payloadHasExpired(root)) null
+        else root.optJSONObject("tasbih")
       } catch (_: Exception) {
         null
       }

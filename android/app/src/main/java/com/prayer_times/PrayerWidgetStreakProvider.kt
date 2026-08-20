@@ -72,7 +72,11 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
         .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
         .getString(PrayerWidgetProvider.PREFS_KEY, null) ?: return null
       return try {
-        JSONObject(raw).optJSONObject("practice")
+        val root = JSONObject(raw)
+        // A streak from a payload written weeks ago is a claim about weeks
+        // the app has not seen. See PrayerWidgetProvider.payloadHasExpired.
+        if (PrayerWidgetProvider.payloadHasExpired(root)) null
+        else root.optJSONObject("practice")
       } catch (_: Exception) {
         null
       }
