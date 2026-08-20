@@ -752,46 +752,45 @@ struct PrayerTimesHomeWidget: Widget {
     .supportedFamilies(supportedFamilies())
   }
 
-  /// iOS 16+ adds the Lock Screen accessory families. Fall back to the
-  /// home-screen-only set on older deployments.
-  ///
   /// Mac Catalyst: the Lock Screen accessory families (`accessoryInline`,
   /// `accessoryCircular`, `accessoryRectangular`) do not exist on macOS — the
   /// Mac has no Lock Screen. WidgetKit still surfaces the `system*` families in
   /// Notification Center / on the desktop, so we compile only those into the
   /// Catalyst binary. The guard is compile-time, so the iOS/iPadOS build keeps
   /// the full accessory set unchanged.
+  ///
+  /// The `#available(16.0)` check this used to carry is gone: the target now
+  /// deploys to iOS 17, so it was a branch the compiler could prove could not
+  /// be taken, which reads as a supported configuration to the next person.
   private func supportedFamilies() -> [WidgetFamily] {
     #if targetEnvironment(macCatalyst)
     return [.systemSmall, .systemMedium, .systemLarge]
     #else
-    if #available(iOSApplicationExtension 16.0, *) {
-      return [
-        .systemSmall, .systemMedium, .systemLarge,
-        .accessoryInline, .accessoryCircular, .accessoryRectangular,
-      ]
-    }
-    return [.systemSmall, .systemMedium, .systemLarge]
+    return [
+      .systemSmall, .systemMedium, .systemLarge,
+      .accessoryInline, .accessoryCircular, .accessoryRectangular,
+    ]
     #endif
   }
 }
 
+/// This bundle vends the home-screen and Lock-Screen-accessory widgets, and
+/// nothing else.
+///
+/// The Live Activity used to be here too, behind an `#available(16.1)` check,
+/// because one extension had to serve both. It now has its own target —
+/// `MihrabLiveActivity` — so that this one can deploy to iOS 17 and use
+/// `Button(intent:)` without guarding every interactive control.
+///
+/// THIS BUNDLE IDENTIFIER MUST NOT CHANGE. WidgetKit ties a widget a user has
+/// placed to the extension that vends it, so renaming this target or its
+/// bundle id turns every already-placed Mihrab widget into a dead
+/// placeholder. That is the reason the Live Activity moved out rather than
+/// the widgets: nobody places a Live Activity by hand.
 @main
 struct PrayerWidgetExtensionBundle: WidgetBundle {
   @WidgetBundleBuilder
   var body: some Widget {
     PrayerTimesHomeWidget()
-    // ActivityKit only exists on iOS 16.1+. The widget is wrapped in an
-    // availability check so the extension itself still compiles for the
-    // 16.0 deployment target.
-    //
-    // And not at all on Mac Catalyst, which has neither a Lock Screen nor a
-    // Dynamic Island for a Live Activity to live on — the whole type is
-    // compiled out there, so referencing it would not build.
-    #if !targetEnvironment(macCatalyst)
-    if #available(iOSApplicationExtension 16.1, *) {
-      PrayerLiveActivityWidget()
-    }
-    #endif
   }
 }

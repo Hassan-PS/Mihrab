@@ -63,10 +63,13 @@
 		F1A100003294A1A2E3B4C5D8 /* PrayerWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A100001294A1A2E3B4C5D6 /* PrayerWidget.m */; };
 		F1A10000C294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A10000B294A1A2E3B4C5E0 /* WidgetTimelineReloader.swift */; };
 		F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
-		F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
-		F1A20000A001B001C001D005 /* PrayerLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */; };
 		F1A20000A001B001C001D007 /* PrayerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */; };
 		F1A20000A001B001C001D009 /* PrayerLiveActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D008 /* PrayerLiveActivity.m */; };
+		F2A1000000000006 /* MihrabLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A1000000000005 /* MihrabLiveActivityBundle.swift */; };
+		F2A1000000000007 /* PrayerLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */; };
+		F2A1000000000008 /* PrayerLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
+		F2A1000000000012 /* MihrabLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F2A1000000000001 /* MihrabLiveActivity.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F2A1000000000014 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F2A1000000000013 /* PrivacyInfo.xcprivacy */; };
 		FA11B0071AB0000000000001 /* Amiri-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000001 /* Amiri-Regular.ttf */; };
 		FA11B0071AB0000000000002 /* AmiriQuran.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000002 /* AmiriQuran.ttf */; };
 		FA11B0071AC0000000000002 /* RateApp.m in Sources */ = {isa = PBXBuildFile; fileRef = FA11B0071AC0000000000001 /* RateApp.m */; };
@@ -84,6 +87,13 @@
 			remoteGlobalIDString = E1D2C3B4A5968778695A4B3CA;
 			remoteInfo = PrayerWidgetExtension;
 		};
+		F2A1000000000010 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F2A100000000000C;
+			remoteInfo = MihrabLiveActivity;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -94,6 +104,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				E1D2C3B4A5968778695A4B3C6 /* PrayerWidgetExtension.appex in Embed Foundation Extensions */,
+				F2A1000000000012 /* MihrabLiveActivity.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -168,6 +179,11 @@
 		F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLiveActivityWidget.swift; sourceTree = "<group>"; };
 		F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrayerLiveActivity.swift; path = PrayerApp/PrayerLiveActivity.swift; sourceTree = "<group>"; };
 		F1A20000A001B001C001D008 /* PrayerLiveActivity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrayerLiveActivity.m; path = PrayerApp/PrayerLiveActivity.m; sourceTree = "<group>"; };
+		F2A1000000000001 /* MihrabLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MihrabLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2A1000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F2A1000000000004 /* MihrabLiveActivity.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MihrabLiveActivity.entitlements; sourceTree = "<group>"; };
+		F2A1000000000005 /* MihrabLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MihrabLiveActivityBundle.swift; sourceTree = "<group>"; };
+		F2A1000000000013 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
 		FA11B0071AA0000000000001 /* Amiri-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Amiri-Regular.ttf"; path = "PrayerApp/Resources/fonts/Amiri-Regular.ttf"; sourceTree = "<group>"; };
 		FA11B0071AA0000000000002 /* AmiriQuran.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = AmiriQuran.ttf; path = PrayerApp/Resources/fonts/AmiriQuran.ttf; sourceTree = "<group>"; };
@@ -188,6 +204,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E1D2C3B4A5968778695A4B3C8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F2A100000000000A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -258,7 +281,6 @@
 				FA22B0071AD0000000000002 /* MushafPageScaler.m */,
 				F1A20000A001B001C001D006 /* PrayerLiveActivity.swift */,
 				F1A20000A001B001C001D008 /* PrayerLiveActivity.m */,
-				F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */,
 				60668681401DD7256458E168 /* Haptics.swift */,
 				BFF6595003A4C5C972D2B78B /* Haptics.m */,
 				7BBC47479F739320A66C8F1A /* MihrabAppGroup.h */,
@@ -289,6 +311,7 @@
 			children = (
 				13B07FAE1A68108700A75B9A /* PrayerApp */,
 				E1D2C3B4A5968778695A4B3D1 /* PrayerWidgetExtension */,
+				F2A1000000000002 /* MihrabLiveActivity */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
@@ -304,6 +327,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* PrayerApp.app */,
 				E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */,
+				F2A1000000000001 /* MihrabLiveActivity.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -321,13 +345,24 @@
 			isa = PBXGroup;
 			children = (
 				E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */,
-				F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */,
-				F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */,
 				E1D2C3B4A5968778695A4B3C3 /* Info.plist */,
 				E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */,
 				E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */,
 			);
 			path = PrayerWidgetExtension;
+			sourceTree = "<group>";
+		};
+		F2A1000000000002 /* MihrabLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				F2A1000000000005 /* MihrabLiveActivityBundle.swift */,
+				F1A20000A001B001C001D004 /* PrayerLiveActivityWidget.swift */,
+				F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */,
+				F2A1000000000003 /* Info.plist */,
+				F2A1000000000004 /* MihrabLiveActivity.entitlements */,
+				F2A1000000000013 /* PrivacyInfo.xcprivacy */,
+			);
+			path = MihrabLiveActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -350,6 +385,7 @@
 			);
 			dependencies = (
 				E1D2C3B4A5968778695A4B3CD /* PBXTargetDependency */,
+				F2A1000000000011 /* PBXTargetDependency */,
 			);
 			name = PrayerApp;
 			productName = PrayerApp;
@@ -373,6 +409,23 @@
 			productReference = E1D2C3B4A5968778695A4B3C1 /* PrayerWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		F2A100000000000C /* MihrabLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F2A100000000000F /* Build configuration list for PBXNativeTarget "MihrabLiveActivity" */;
+			buildPhases = (
+				F2A1000000000009 /* Sources */,
+				F2A100000000000A /* Frameworks */,
+				F2A100000000000B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MihrabLiveActivity;
+			productName = MihrabLiveActivity;
+			productReference = F2A1000000000001 /* MihrabLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -385,6 +438,9 @@
 						LastSwiftMigration = 1120;
 					};
 					E1D2C3B4A5968778695A4B3CA = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					F2A100000000000C = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
@@ -404,6 +460,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* PrayerApp */,
 				E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */,
+				F2A100000000000C /* MihrabLiveActivity */,
 			);
 		};
 /* End PBXProject section */
@@ -460,6 +517,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1D2C3B4A5968778695A4B3D5 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F2A100000000000B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F2A1000000000014 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -575,8 +640,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */,
-				F1A20000A001B001C001D005 /* PrayerLiveActivityWidget.swift in Sources */,
-				F1A20000A001B001C001D003 /* PrayerLiveActivityAttributes.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F2A1000000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F2A1000000000006 /* MihrabLiveActivityBundle.swift in Sources */,
+				F2A1000000000007 /* PrayerLiveActivityWidget.swift in Sources */,
+				F2A1000000000008 /* PrayerLiveActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -591,6 +664,14 @@
 			);
 			target = E1D2C3B4A5968778695A4B3CA /* PrayerWidgetExtension */;
 			targetProxy = E1D2C3B4A5968778695A4B3CC /* PBXContainerItemProxy */;
+		};
+		F2A1000000000011 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilters = (
+				ios,
+			);
+			target = F2A100000000000C /* MihrabLiveActivity */;
+			targetProxy = F2A1000000000010 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -618,6 +699,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
@@ -665,6 +747,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
@@ -851,7 +934,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mihrab;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -859,6 +942,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
@@ -894,7 +978,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PrayerWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Mihrab;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -902,6 +986,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
 				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
@@ -915,6 +1000,84 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		F2A100000000000D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
+				CODE_SIGN_ENTITLEMENTS = MihrabLiveActivity/MihrabLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 238;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = GAW23HT439;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MihrabLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Mihrab;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
+				MARKETING_VERSION = 2.9.0;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.MihrabLiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		F2A100000000000E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
+				CODE_SIGN_ENTITLEMENTS = MihrabLiveActivity/MihrabLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 238;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = GAW23HT439;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MihrabLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Mihrab;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
+				MARKETING_VERSION = 2.9.0;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hassan.prayerapp.MihrabLiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
@@ -949,6 +1112,15 @@
 			buildConfigurations = (
 				E1D2C3B4A5968778695A4B3CE /* Debug */,
 				E1D2C3B4A5968778695A4B3CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F2A100000000000F /* Build configuration list for PBXNativeTarget "MihrabLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F2A100000000000D /* Debug */,
+				F2A100000000000E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
