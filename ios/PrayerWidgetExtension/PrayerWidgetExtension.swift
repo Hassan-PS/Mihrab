@@ -16,20 +16,27 @@ import AppIntents
 /// returns a live-looking object for a group the process is not entitled to
 /// and silently drops every write, so nil is not the test — round-tripping a
 /// value is.
+///
+/// Module-internal rather than file-private: there is more than one widget
+/// kind in this extension now, and every one of them reads the same payload
+/// out of the same group. Two copies of an App Group identifier is exactly
+/// the bug this file's own comment warns about.
 #if targetEnvironment(macCatalyst)
-private let kSuite = "GAW23HT439.group.com.prayerapp"
+let kSuite = "GAW23HT439.group.com.prayerapp"
 #else
-private let kSuite = "group.com.prayerapp"
+let kSuite = "group.com.prayerapp"
 #endif
-private let kKey = "prayer_widget_payload_v1"
+let kKey = "prayer_widget_payload_v1"
 private let kHighlightDynamicKey = "widget_highlight_dynamic"
 private let kHighlightIdKey = "widget_highlight_id"
 private let kHighlightHexKey = "widget_highlight_hex"
 
-private let widgetBg = Color(red: 28 / 255, green: 28 / 255, blue: 30 / 255).opacity(0.88)
-private let widgetText = Color(red: 232 / 255, green: 234 / 255, blue: 237 / 255)
-private let widgetMuted = Color(red: 154 / 255, green: 160 / 255, blue: 166 / 255)
-private let widgetHighlightDefault = Color(red: 107 / 255, green: 201 / 255, blue: 138 / 255)
+// The extension's palette. Module-internal for the same reason as the App
+// Group keys above — every widget kind in here has to look like the same app.
+let widgetBg = Color(red: 28 / 255, green: 28 / 255, blue: 30 / 255).opacity(0.88)
+let widgetText = Color(red: 232 / 255, green: 234 / 255, blue: 237 / 255)
+let widgetMuted = Color(red: 154 / 255, green: 160 / 255, blue: 166 / 255)
+let widgetHighlightDefault = Color(red: 107 / 255, green: 201 / 255, blue: 138 / 255)
 
 private extension Color {
   init?(hexRGB: String) {
@@ -53,7 +60,7 @@ private func presetHighlightColor(_ id: String) -> Color {
   }
 }
 
-private func resolvedWidgetHighlightColor() -> Color {
+func resolvedWidgetHighlightColor() -> Color {
   let def = UserDefaults(suiteName: kSuite)
   if def?.bool(forKey: kHighlightDynamicKey) == true { return Color.accentColor }
   let id = def?.string(forKey: kHighlightIdKey) ?? "green"
@@ -126,6 +133,111 @@ struct WidgetPayload: Codable {
     let jumuah: Bool
     let ramadan: Bool
     let eid: String?
+  }
+
+  // ── The blocks beyond prayer times ─────────────────────────────────
+  //
+  // Every one of these is OPTIONAL, and absent has to mean "the app has
+  // not told us" — never zero. A `practice` block missing and a practice
+  // block full of zeroes look identical on a home screen and mean
+  // opposite things: one is "we don't know yet", the other is "you have
+  // prayed nothing". Views draw the section only when the block is there.
+  //
+  // They also arrive absent from any app version older than this one, so
+  // the same rule is what makes the payload backward-compatible.
+
+  let practice: Practice?
+  let today: Today?
+  let reading: Reading?
+  let hijri: Hijri?
+  let tasbih: Tasbih?
+
+  struct Practice: Codable {
+    let streak: Int
+    let bestStreak: Int
+    let loggedToday: Int
+    let owed: Int
+    let sunnahRate: Double?
+    let fastsThisMonth: Int
+    let days: [PracticeDay]
+  }
+
+  /// Deliberately short keys — this is 98 of them and the whole payload
+  /// is read on the main thread of a process with milliseconds to live.
+  struct PracticeDay: Codable {
+    /// yyyy-MM-dd
+    let d: String
+    /// Salāh kept, 0…5.
+    let k: Int
+    /// Something was missed and not made up.
+    let m: Bool?
+    /// A completed fast.
+    let f: Bool?
+    /// Sunnah units kept.
+    let s: Int?
+  }
+
+  struct Today: Codable {
+    let dateKey: String
+    let logged: Int
+    let loggable: Int
+    let owed: Int
+    let prayers: [TodayPrayer]
+  }
+
+  struct TodayPrayer: Codable {
+    let key: String
+    let name: String
+    let time: String
+    /// on-time / late / missed / qadha, or nil when nothing is recorded.
+    let status: String?
+    let due: Bool
+  }
+
+  struct Reading: Codable {
+    let surah: Int
+    let surahName: String
+    let ayah: Int
+    let page: Int
+    let juz: Int
+    let pagesRead: Int
+    let totalPages: Int
+    let bookmarks: Int
+    let lastReadAt: Double?
+    let khatmah: Khatmah?
+  }
+
+  struct Khatmah: Codable {
+    let day: Int
+    let targetDays: Int
+    let pagesToday: Int
+    let doneToday: Int
+    let behindBy: Int
+    let daysLeft: Int
+  }
+
+  struct Hijri: Codable {
+    let day: Int
+    let month: Int
+    let year: Int
+    let monthName: String
+    let label: String
+    let nextMonthName: String
+    let nextMonthInDays: Int
+  }
+
+  struct Tasbih: Codable {
+    let presetId: String
+    let label: String
+    let arabic: String
+    let count: Int
+    let target: Int
+    let unbounded: Bool
+    let index: Int
+    let total: Int
+    let counts: [Int]
+    let todayTotal: Int
+    let todayRounds: Int
   }
 
   /// Display-ordered rows: [Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha]
@@ -324,7 +436,19 @@ struct Provider: TimelineProvider {
       for info in dayInfos where info.date <= t { chosen = info }
       return chosen
     }
-    func perDayPayload(_ info: DayInfo, _ np: PrayerEvent?) -> WidgetPayload {
+    /// One timeline entry's payload.
+    ///
+    /// `isToday` decides which of the extra blocks come along. Two of them
+    /// are stamped with the day they describe — `today` carries a `dateKey`
+    /// and `hijri` is one specific Hijri date — so forwarding them onto a
+    /// future entry would draw today's logged ticks and today's Hijri date
+    /// underneath tomorrow's prayer times. Absent is the honest answer
+    /// there; the app pushes a fresh payload the next time it is opened.
+    ///
+    /// The rest are not date-stamped in a way that can go wrong: the
+    /// practice grid carries an explicit date per day, reading is a
+    /// position in the mushaf, and the tasbih count is a count.
+    func perDayPayload(_ info: DayInfo, _ np: PrayerEvent?, isToday: Bool) -> WidgetPayload {
       WidgetPayload(
         dayLabel: info.day.dayLabel,
         rows: info.day.rows,
@@ -334,7 +458,12 @@ struct Provider: TimelineProvider {
         nextPrayerTime: np?.time,
         locationName: payload.locationName,
         seasonal: payload.seasonal,
-        days: nil
+        days: nil,
+        practice: payload.practice,
+        today: isToday ? payload.today : nil,
+        reading: payload.reading,
+        hijri: isToday ? payload.hijri : nil,
+        tasbih: payload.tasbih
       )
     }
 
@@ -347,13 +476,14 @@ struct Provider: TimelineProvider {
     // WidgetKit tolerates large timelines, but keep it bounded.
     if boundaries.count > 60 { boundaries = Array(boundaries.prefix(60)) }
 
+    let todayInfo = activeDay(at: now)
     var entries: [Entry] = []
     for b in boundaries {
       let info = activeDay(at: b)
       let np = nextPrayer(after: b)
       entries.append(Entry(
         date: b,
-        payload: perDayPayload(info, np),
+        payload: perDayPayload(info, np, isToday: info.day.dateKey == todayInfo.day.dateKey),
         dynamicNextKey: np?.key,
         dynamicNextName: np?.name,
         dynamicNextTime: np?.time
@@ -390,7 +520,22 @@ struct Provider: TimelineProvider {
     nextKey: "Dhuhr", nextPrayerName: "Dhuhr", nextPrayerTime: "12:10",
     locationName: "London",
     seasonal: nil,
-    days: nil
+    days: nil,
+    // The gallery preview deliberately shows the extra blocks: a widget
+    // whose preview is emptier than the real thing is a widget people
+    // scroll past.
+    practice: .init(
+      streak: 12, bestStreak: 31, loggedToday: 2, owed: 1,
+      sunnahRate: 0.68, fastsThisMonth: 6,
+      days: []
+    ),
+    today: nil,
+    reading: nil,
+    hijri: .init(
+      day: 25, month: 2, year: 1448, monthName: "Safar",
+      label: "25 Safar 1448", nextMonthName: "Rabi I", nextMonthInDays: 5
+    ),
+    tasbih: nil
   )
 }
 
@@ -410,6 +555,122 @@ struct RefreshIntent: AppIntent {
   func perform() async throws -> some IntentResult { .result() }
 }
 
+/// The stretch of time the user is currently inside: the prayer just past,
+/// and the one coming up.
+///
+/// Built from the payload's `HH:mm` strings against a REFERENCE DATE rather
+/// than against `Date()`. The difference matters: WidgetKit renders an entry
+/// at a moment of its choosing, sometimes hours after the provider built it
+/// and sometimes on the other side of midnight, and an interval anchored to
+/// "now" would then measure from the wrong day and draw a ring that is
+/// complete, empty, or negative.
+struct PrayerInterval {
+  let start: Date
+  let end: Date
+
+  /// Fraction elapsed at `date`, clamped. A zero-length or inverted
+  /// interval reports 0 rather than dividing by it.
+  func fraction(at date: Date) -> Double {
+    let total = end.timeIntervalSince(start)
+    guard total > 0 else { return 0 }
+    return min(1, max(0, date.timeIntervalSince(start) / total))
+  }
+
+  /// Resolve `HH:mm` against the calendar day containing `reference`.
+  private static func date(_ hhmm: String, on reference: Date, _ cal: Calendar) -> Date? {
+    let parts = hhmm.split(separator: ":")
+    guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) else { return nil }
+    return cal.date(bySettingHour: h, minute: m, second: 0, of: reference)
+  }
+
+  /// The interval surrounding `reference`.
+  ///
+  /// Before the day's first prayer the interval runs from yesterday's LAST
+  /// prayer; after the day's last it runs to tomorrow's first. Both wrap
+  /// cases matter — without them the ring sits empty all night, which is
+  /// exactly when someone is most likely to be waiting for Fajr.
+  static func around(_ reference: Date, rows: [WidgetPayload.Row], calendar cal: Calendar) -> PrayerInterval? {
+    let times = rows.compactMap { date($0.time, on: reference, cal) }.sorted()
+    guard let first = times.first, let last = times.last else { return nil }
+
+    if reference < first {
+      guard let prevDay = cal.date(byAdding: .day, value: -1, to: last) else { return nil }
+      return PrayerInterval(start: prevDay, end: first)
+    }
+    if reference >= last {
+      guard let nextDay = cal.date(byAdding: .day, value: 1, to: first) else { return nil }
+      return PrayerInterval(start: last, end: nextDay)
+    }
+    var start = first
+    for t in times {
+      if t <= reference { start = t } else { return PrayerInterval(start: start, end: t) }
+    }
+    return nil
+  }
+}
+
+/// Live countdown to the next prayer.
+///
+/// The system ticks this on-device, so the number keeps moving without the
+/// extension being woken — which is the only way a widget can show a
+/// countdown at all, since WidgetKit will not re-render one per minute.
+///
+/// `.relative` rather than `Text(timerInterval:)`, and that is not a style
+/// preference. `timerInterval` renders a bare `20:54`, which sits directly
+/// under the prayer's clock time `12:51` in the same column — two
+/// colon-separated numbers stacked, one a time of day and one a duration,
+/// with nothing to tell them apart. Seen on a simulator it reads as a
+/// second clock time. `.relative` says "20 min", which cannot be misread.
+///
+/// Past the target the label would start counting up ("2 min ago"), so it
+/// falls back to the clock time until the next timeline entry takes over.
+private struct CountdownLabel: View {
+  let target: Date?
+  let fallback: String?
+
+  var body: some View {
+    Group {
+      if let target, target > Date() {
+        Text(target, style: .relative)
+      } else if let fallback, !fallback.isEmpty {
+        Text(fallback)
+      }
+    }
+    .font(.system(size: 17, weight: .semibold))
+    .monospacedDigit()
+    .foregroundStyle(widgetText)
+    .lineLimit(1)
+    .minimumScaleFactor(0.5)
+  }
+}
+
+/// How far through the current interval we are, as a ring.
+///
+/// Evaluated once per entry rather than animated: WidgetKit does not run a
+/// render loop, so a ring that claimed to sweep would simply be wrong
+/// between entries. It is redrawn at every prayer boundary, which is when
+/// the number it shows actually jumps.
+private struct IntervalRing: View {
+  let interval: PrayerInterval
+  let tint: Color
+
+  var body: some View {
+    let f = interval.fraction(at: Date())
+    ZStack {
+      Circle()
+        .stroke(widgetMuted.opacity(0.25), lineWidth: 4)
+      Circle()
+        .trim(from: 0, to: max(0.01, f))
+        .stroke(tint, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+        .rotationEffect(.degrees(-90))
+      Text(verbatim: "\(Int((f * 100).rounded()))%")
+        .font(.system(size: 10, weight: .semibold))
+        .foregroundStyle(widgetText)
+        .minimumScaleFactor(0.7)
+    }
+  }
+}
+
 struct PrayerWidgetEntryView: View {
   var entry: Entry
   @Environment(\.widgetFamily) var widgetFamily
@@ -419,55 +680,99 @@ struct PrayerWidgetEntryView: View {
     return isSunrise ? widgetMuted : widgetText
   }
 
-  // MARK: - Small widget
+  // MARK: - Small widget — Next Prayer
 
+  /// The small family answers one question — when is the next prayer — and
+  /// it used to answer it with a static clock time, so the widget looked
+  /// identical at 05:11 and at 12:09. Two things fix that without asking
+  /// WidgetKit to re-render every minute, which it will not do:
+  ///
+  ///   • `Text(timerInterval:)` ticks on-device for free. The countdown is
+  ///     live even though the entry behind it is hours old.
+  ///   • A ring showing how much of the CURRENT interval has elapsed, so
+  ///     there is something to read at a glance from across a room.
+  ///
+  /// Both need real `Date`s, and the payload carries clock strings. They
+  /// are resolved against the entry's own day rather than "today", so an
+  /// entry the system renders after midnight does not measure to yesterday.
   @ViewBuilder
   private var smallWidgetContent: some View {
     if let p = entry.payload {
+      let name = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey
+      let time = entry.dynamicNextTime ?? p.nextPrayerTime
+      let interval = currentInterval(p)
+
       VStack(alignment: .leading, spacing: 0) {
-        // Location + date at top
-        if let loc = p.locationName, !loc.isEmpty {
-          Text(loc.uppercased())
-            .kerning(0.5)
+        HStack(alignment: .top) {
+          Text("NEXT")
+            .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
-            .lineLimit(1)
+          Spacer(minLength: 4)
+          if let loc = p.locationName, !loc.isEmpty {
+            Text(loc.uppercased())
+              .kerning(0.5)
+              .font(.system(size: 9, weight: .semibold))
+              .foregroundStyle(widgetMuted)
+              .lineLimit(1)
+              .truncationMode(.tail)
+          }
         }
-        Spacer()
-        // Label
-        Text("NEXT")
-          .kerning(1.0)
-          .font(.system(size: 9, weight: .semibold))
-          .foregroundStyle(widgetMuted)
-        // Prayer name
-        if let name = entry.dynamicNextName ?? p.nextPrayerName, !name.isEmpty {
-          Text(name)
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(widgetText)
-            .lineLimit(1)
+
+        Spacer(minLength: 6)
+
+        // The ring sits beside the name rather than beside the countdown.
+        // Putting it next to the countdown left that label about 70pt of
+        // width, and "18 min, 32 sec" truncated to "18 min…" — a countdown
+        // with an ellipsis where the seconds should be reads as broken.
+        HStack(alignment: .center, spacing: 8) {
+          VStack(alignment: .leading, spacing: 0) {
+            if let name, !name.isEmpty {
+              Text(name)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(widgetText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+            }
+            if let time, !time.isEmpty {
+              Text(time)
+                .font(.system(size: 22, weight: .regular))
+                .foregroundStyle(resolvedWidgetHighlightColor())
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            }
+          }
+          Spacer(minLength: 0)
+          if let interval {
+            IntervalRing(interval: interval, tint: resolvedWidgetHighlightColor())
+              .frame(width: 38, height: 38)
+          }
         }
-        // Time — large, light weight for elegance
-        if let time = entry.dynamicNextTime ?? p.nextPrayerTime, !time.isEmpty {
-          Text(time)
-            .font(.system(size: 34, weight: .light))
-            .foregroundStyle(resolvedWidgetHighlightColor())
-            .minimumScaleFactor(0.6)
-            .lineLimit(1)
+
+        Spacer(minLength: 6)
+
+        // Full width, so the countdown never has to be abbreviated.
+        VStack(alignment: .leading, spacing: 0) {
+          Text("in")
+            .font(.system(size: 11))
+            .foregroundStyle(widgetMuted)
+          CountdownLabel(target: interval?.end, fallback: time)
         }
-        Spacer()
-        Text(p.dayLabel)
-          .font(.system(size: 9))
-          .foregroundStyle(widgetMuted)
-          .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
       .padding(14)
     } else {
-      Text("Open Prayer Times")
+      Text("Open Mihrab")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+  }
+
+  /// Previous → next prayer around the entry's moment, as real dates.
+  private func currentInterval(_ p: WidgetPayload) -> PrayerInterval? {
+    PrayerInterval.around(entry.date, rows: p.rows, calendar: .current)
   }
 
   // MARK: - Medium / Large widget
@@ -725,7 +1030,7 @@ struct PrayerWidgetEntryView: View {
   }
 }
 
-private struct WidgetBackgroundCompatModifier: ViewModifier {
+struct WidgetBackgroundCompatModifier: ViewModifier {
   @ViewBuilder
   func body(content: Content) -> some View {
     if #available(iOSApplicationExtension 17.0, *) {
@@ -792,5 +1097,6 @@ struct PrayerWidgetExtensionBundle: WidgetBundle {
   @WidgetBundleBuilder
   var body: some Widget {
     PrayerTimesHomeWidget()
+    HijriDateWidget()
   }
 }

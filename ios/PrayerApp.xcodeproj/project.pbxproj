@@ -70,6 +70,7 @@
 		F2A1000000000008 /* PrayerLiveActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A20000A001B001C001D001 /* PrayerLiveActivityAttributes.swift */; };
 		F2A1000000000012 /* MihrabLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F2A1000000000001 /* MihrabLiveActivity.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F2A1000000000014 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F2A1000000000013 /* PrivacyInfo.xcprivacy */; };
+		F2A1000000000021 /* HijriWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A1000000000020 /* HijriWidget.swift */; };
 		FA11B0071AB0000000000001 /* Amiri-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000001 /* Amiri-Regular.ttf */; };
 		FA11B0071AB0000000000002 /* AmiriQuran.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA11B0071AA0000000000002 /* AmiriQuran.ttf */; };
 		FA11B0071AC0000000000002 /* RateApp.m in Sources */ = {isa = PBXBuildFile; fileRef = FA11B0071AC0000000000001 /* RateApp.m */; };
@@ -184,6 +185,7 @@
 		F2A1000000000004 /* MihrabLiveActivity.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MihrabLiveActivity.entitlements; sourceTree = "<group>"; };
 		F2A1000000000005 /* MihrabLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MihrabLiveActivityBundle.swift; sourceTree = "<group>"; };
 		F2A1000000000013 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F2A1000000000020 /* HijriWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HijriWidget.swift; sourceTree = "<group>"; };
 		F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CompassModule.m; path = PrayerApp/CompassModule.m; sourceTree = "<group>"; };
 		FA11B0071AA0000000000001 /* Amiri-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Amiri-Regular.ttf"; path = "PrayerApp/Resources/fonts/Amiri-Regular.ttf"; sourceTree = "<group>"; };
 		FA11B0071AA0000000000002 /* AmiriQuran.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = AmiriQuran.ttf; path = PrayerApp/Resources/fonts/AmiriQuran.ttf; sourceTree = "<group>"; };
@@ -345,6 +347,7 @@
 			isa = PBXGroup;
 			children = (
 				E1D2C3B4A5968778695A4B3C2 /* PrayerWidgetExtension.swift */,
+				F2A1000000000020 /* HijriWidget.swift */,
 				E1D2C3B4A5968778695A4B3C3 /* Info.plist */,
 				E1D2C3B4A5968778695A4B3C4 /* PrayerWidgetExtension.entitlements */,
 				E1D2C3B4A5968778695A4B3D4 /* PrivacyInfo.xcprivacy */,
@@ -640,6 +643,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1D2C3B4A5968778695A4B3C5 /* PrayerWidgetExtension.swift in Sources */,
+				F2A1000000000021 /* HijriWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
