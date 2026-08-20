@@ -103,6 +103,9 @@ struct WidgetPayload: Codable {
   /// slot 1 (between Fajr and Dhuhr) so the visible order matches
   /// Android's [Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha].
   let sunriseRow: Row?
+  /// Islamic Midnight / the Last Third for the day being shown. Absent
+  /// unless the user turned them on; they are rows, never the headline.
+  var extraRows: [Row]? = nil
   let nextKey: String?
   let nextPrayerName: String?
   let nextPrayerTime: String?
@@ -121,6 +124,10 @@ struct WidgetPayload: Codable {
     let key: String
     let time: String
     let abbr: String?
+    /// The full localized label ("Islamic Midnight"). Only the night rows
+    /// use it — a five-letter abbreviation is right in a six-column strip
+    /// and wrong on a full-width row that has the space to say the thing.
+    var name: String? = nil
   }
   struct Day: Codable {
     /// Local calendar date these times apply to (yyyy-MM-dd).
@@ -128,6 +135,9 @@ struct WidgetPayload: Codable {
     let dayLabel: String
     let rows: [Row]
     let sunriseRow: Row?
+    /// Islamic Midnight / the Last Third, when the user has turned them on.
+    /// Never a "next prayer" target — see `nightCanBeNext` on the JS side.
+    var extraRows: [Row]? = nil
   }
   struct SeasonalFlags: Codable {
     let jumuah: Bool
@@ -424,7 +434,10 @@ struct Provider: TimelineProvider {
         let parts = r.time.split(separator: ":")
         if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
            let pd = cal.date(bySettingHour: h, minute: m, second: 0, of: info.date) {
-          prayers.append(PrayerEvent(date: pd, key: r.key, name: r.abbr ?? r.key, time: r.time))
+          // Full name first. `abbr` exists so six prayers fit across an
+          // Android strip; the headline of a widget has room to say
+          // "Maghrib", and "Magh" up there reads as a truncation bug.
+          prayers.append(PrayerEvent(date: pd, key: r.key, name: r.name ?? r.key, time: r.time))
         }
       }
     }
@@ -453,6 +466,7 @@ struct Provider: TimelineProvider {
         dayLabel: info.day.dayLabel,
         rows: info.day.rows,
         sunriseRow: info.day.sunriseRow,
+        extraRows: info.day.extraRows,
         nextKey: np?.key,
         nextPrayerName: np?.name,
         nextPrayerTime: np?.time,
@@ -517,6 +531,10 @@ struct Provider: TimelineProvider {
       .init(key: "Isha",    time: "19:30", abbr: "Isha"),
     ],
     sunriseRow: .init(key: "Sunrise", time: "06:30", abbr: "Sun"),
+    extraRows: [
+      .init(key: "Midnight",  time: "00:34", abbr: "Mid",   name: "Islamic Midnight"),
+      .init(key: "Lastthird", time: "02:22", abbr: "Qiyam", name: "Last Third"),
+    ],
     nextKey: "Dhuhr", nextPrayerName: "Dhuhr", nextPrayerTime: "12:10",
     locationName: "London",
     seasonal: nil,
@@ -624,9 +642,15 @@ struct PrayerInterval {
 ///
 /// Past the target the label would start counting up ("2 min ago"), so it
 /// falls back to the clock time until the next timeline entry takes over.
-private struct CountdownLabel: View {
+struct CountdownLabel: View {
   let target: Date?
   let fallback: String?
+  var size: CGFloat = 17
+  var weight: Font.Weight = .semibold
+  /// Lock Screen accessory views are rendered monochrome by the system and
+  /// must inherit its foreground style. Forcing `widgetText` there paints a
+  /// colour chosen for a home-screen card onto a vibrancy-tinted overlay.
+  var inheritsForeground: Bool = false
 
   var body: some View {
     Group {
@@ -636,9 +660,9 @@ private struct CountdownLabel: View {
         Text(fallback)
       }
     }
-    .font(.system(size: 17, weight: .semibold))
+    .font(.system(size: size, weight: weight))
     .monospacedDigit()
-    .foregroundStyle(widgetText)
+    .foregroundStyle(inheritsForeground ? AnyShapeStyle(.foreground) : AnyShapeStyle(widgetText))
     .lineLimit(1)
     .minimumScaleFactor(0.5)
   }
@@ -675,9 +699,11 @@ struct PrayerWidgetEntryView: View {
   var entry: Entry
   @Environment(\.widgetFamily) var widgetFamily
 
-  private func rowColor(highlight: Bool, isSunrise: Bool) -> Color {
+  /// `secondary` is the treatment for a row that belongs on the card but is
+  /// not a salāh — Sunrise, Islamic Midnight, the Last Third.
+  private func rowColor(highlight: Bool, secondary: Bool) -> Color {
     if highlight { return resolvedWidgetHighlightColor() }
-    return isSunrise ? widgetMuted : widgetText
+    return secondary ? widgetMuted : widgetText
   }
 
   // MARK: - Small widget — Next Prayer
@@ -867,7 +893,7 @@ struct PrayerWidgetEntryView: View {
             let label = r.abbr ?? r.key
             let currentNextKey = entry.dynamicNextKey ?? p.nextKey
             let highlight = currentNextKey == r.key
-            let col = rowColor(highlight: highlight, isSunrise: isSunrise)
+            let col = rowColor(highlight: highlight, secondary: isSunrise)
 
             ZStack(alignment: .leading) {
               // Highlight background
@@ -1099,6 +1125,12 @@ struct PrayerWidgetEntryView: View {
           ForEach(Array(p.displayRows.enumerated()), id: \.offset) { _, r in
             largeRow(r, highlight: currentNextKey == r.key)
           }
+          // Islamic Midnight and the Last Third, when the user has asked
+          // for them. Never highlighted: they are on this card because the
+          // night matters, not because either is what comes next.
+          ForEach(Array((p.extraRows ?? []).enumerated()), id: \.offset) { _, r in
+            largeRow(r, highlight: false, secondary: true)
+          }
         }
         .padding(.top, 8)
 
@@ -1121,10 +1153,20 @@ struct PrayerWidgetEntryView: View {
     return loc.isEmpty ? p.dayLabel : "\(p.dayLabel) · \(loc)"
   }
 
+  /// One full-width row of the large widget's table.
+  ///
+  /// `secondary` is what Sunrise has always been — a line that belongs on the
+  /// card without competing with the salāh — and it is what the two night
+  /// rows are too, so they share the treatment rather than inventing a third.
   @ViewBuilder
-  private func largeRow(_ r: WidgetPayload.Row, highlight: Bool) -> some View {
+  private func largeRow(
+    _ r: WidgetPayload.Row,
+    highlight: Bool,
+    secondary: Bool = false
+  ) -> some View {
     let isSunrise = r.key == "Sunrise"
-    let col = rowColor(highlight: highlight, isSunrise: isSunrise)
+    let muted = isSunrise || secondary
+    let col = rowColor(highlight: highlight, secondary: muted)
     ZStack(alignment: .leading) {
       if highlight {
         RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -1135,14 +1177,19 @@ struct PrayerWidgetEntryView: View {
           .cornerRadius(1.5)
       }
       HStack(spacing: 0) {
-        Text(isSunrise ? (r.abbr ?? r.key) : r.key)
-          .font(.system(size: 14, weight: highlight ? .semibold : .regular))
+        // Sunrise keeps its abbreviation ("Sun") because it sits inside the
+        // salāh list and a long word there breaks the rhythm. The night rows
+        // sit under it with a full-width line to themselves, so they get the
+        // real name — "Qiyam" alone would not tell you what it is the time of.
+        Text(isSunrise ? (r.abbr ?? r.key) : (secondary ? (r.name ?? r.key) : r.key))
+          .font(.system(size: secondary ? 12 : 14, weight: highlight ? .semibold : .regular))
           .foregroundStyle(col)
           .frame(maxWidth: .infinity, alignment: .leading)
           .lineLimit(1)
+          .minimumScaleFactor(0.85)
           .padding(.leading, highlight ? 9 : 6)
         Text(r.time)
-          .font(.system(size: 14, weight: highlight ? .semibold : .medium))
+          .font(.system(size: secondary ? 12 : 14, weight: highlight ? .semibold : .medium))
           .monospacedDigit()
           .foregroundStyle(col)
           .padding(.trailing, 6)

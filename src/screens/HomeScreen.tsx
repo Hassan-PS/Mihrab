@@ -166,8 +166,11 @@ export function HomeScreen() {
   //   • table / notifications / Live Activity → respect all three toggles
   //     (Sunrise + the two night times). The LA counts down to Islamic Midnight
   //     and the Last Third when they're the next event.
-  //   • home-screen widget → unchanged from before: Sunrise always shown, the
-  //     night times never shown.
+  //   • home-screen widget → Sunrise always shown, and since the widget plan's
+  //     systemLarge / 4×4 mocks carry them, the night times now follow their
+  //     toggles here too. They are rows only: `syncPrayerWidget` passes
+  //     `nightCanBeNext: false`, so nothing counts down to Islamic Midnight on
+  //     a home screen.
   const view = useMemo(() => {
     if (state.phase !== 'ready') return null;
     const { today, tomorrow, week } = state;
@@ -194,12 +197,16 @@ export function HomeScreen() {
       // The widget gets the LONG window, not the carousel's week — its copy
       // has to stay true across however long the app goes unopened.
       widget: {
-        ...mk({ Sunrise: true, Midnight: false, Lastthird: false }),
+        ...mk({
+          Sunrise: true,
+          Midnight: settings.islamicMidnightEnabled,
+          Lastthird: settings.lastThirdEnabled,
+        }),
         week: (state.widgetWeek ?? week).map(d =>
           filterOptionalTimes(d, {
             Sunrise: true,
-            Midnight: false,
-            Lastthird: false,
+            Midnight: settings.islamicMidnightEnabled,
+            Lastthird: settings.lastThirdEnabled,
           }),
         ),
       },
