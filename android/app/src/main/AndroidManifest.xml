@@ -158,6 +158,26 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <!--
+          mihrab:// — how a widget says WHERE it wants to be opened.
+
+          Until this existed every widget tap landed on whatever screen the
+          app happened to be on, which is fine for a prayer table and useless
+          for a widget whose promise is "carry on from page 3". The scheme is
+          app-private: nothing outside this app is expected to send it, and
+          nothing here acts on a link beyond choosing a tab or a page. See
+          src/navigation/linking.ts for the route table.
+
+          singleTask above means a link arriving while the app is already
+          running reaches the existing task through onNewIntent rather than
+          stacking a second copy of the app behind it.
+        -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="mihrab" />
+        </intent-filter>
       </activity>
 
       <!-- Revives the Live Activity after an app update or device reboot.

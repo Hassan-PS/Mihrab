@@ -116,5 +116,25 @@
 		<string>Amiri-Regular.ttf</string>
 		<string>AmiriQuran.ttf</string>
 	</array>
+	<!--
+	mihrab:// — how a widget says WHERE it wants to be opened.
+
+	Until this existed a widget tap landed on whatever screen the app was
+	last on, which is fine for a prayer table and useless for a widget whose
+	promise is "carry on from page 3". The scheme is app-private: nothing
+	outside this app is expected to send it, and nothing here acts on a link
+	beyond choosing a tab or a page. Route table: src/navigation/linking.ts.
+	-->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>mihrab</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { usePrayerSettings } from './context/PrayerSettingsContext';
 import { useSystemColorScheme } from './hooks/useSystemColorScheme';
+import { linking } from './navigation/linking';
 import { RootNavigator } from './navigation/RootNavigator';
 import { SystemNavigationScrim } from './navigation/SystemNavigationScrim';
 import {
@@ -280,7 +281,7 @@ export function AppNavigationRoot() {
   return (
     <View style={{ flex: 1, direction: layoutDir }}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <NavigationContainer theme={navTheme}>
+      <NavigationContainer theme={navTheme} linking={linking}>
         <RootNavigator />
       </NavigationContainer>
       <SystemNavigationScrim palette={palette} />

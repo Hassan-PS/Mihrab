@@ -36,6 +36,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 
+  /// Hand `mihrab://…` to React Native's Linking module.
+  ///
+  /// Without this the URL is accepted by the system — the scheme is
+  /// registered in Info.plist — the app comes to the front, and the link is
+  /// silently dropped, which looks exactly like a widget that opens the app
+  /// on the wrong screen. RCTLinkingManager is what turns it into the `url`
+  /// event React Navigation's linking config is listening for.
+  func application(
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    RCTLinkingManager.application(app, open: url, options: options)
+  }
+
   func applicationDidEnterBackground(_ application: UIApplication) {
     // Queue the next Live Activity refresh as we background, so iOS has a
     // pending task to run while suspended (no-op when no activity is running).

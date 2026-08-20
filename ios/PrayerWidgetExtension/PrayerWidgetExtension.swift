@@ -1378,5 +1378,6 @@ struct PrayerWidgetExtensionBundle: WidgetBundle {
   var body: some Widget {
     PrayerTimesHomeWidget()
     HijriDateWidget()
+    StreakWidget()
   }
 }
