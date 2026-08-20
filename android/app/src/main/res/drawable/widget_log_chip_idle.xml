@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A prayer whose time has not arrived yet.
+
+  Faint and outline-only on purpose: it is not a control. Logging Isha at
+  noon is not something anyone means to do, and a chip that looks pressable
+  and then records a claim the user did not make is worse than one that
+  plainly is not ready.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="14dp" />
+    <solid android:color="#0DFFFFFF" />
+    <stroke android:width="1dp" android:color="#1AFFFFFF" />
+</shape>

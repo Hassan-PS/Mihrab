@@ -11,6 +11,14 @@
     <string name="widget_description_small">Just the next prayer and its time. 2×1, resizable.</string>
     <string name="widget_description_medium">All six times side by side in one wide row, next prayer highlighted. 4×1, resizable.</string>
     <string name="widget_description_large">All six times as a list, next prayer highlighted. 4×3 — shrink it and it becomes the single-row layout.</string>
+    <string name="widget_name_log">Mihrab · Log today</string>
+    <string name="widget_description_log">Tap a prayer to log it on time. 4×2, resizable.</string>
+    <string name="widget_log_today">Today</string>
+    <!-- "2 of 5" — logged out of loggable. -->
+    <string name="widget_log_count">%1$d of %2$d</string>
+    <string name="widget_log_waiting">%1$s not logged yet</string>
+    <string name="widget_log_up_to_date">Today is up to date</string>
+    <string name="widget_log_owed">%1$d owed</string>
     <string name="widget_placeholder_day">Open Mihrab to load times</string>
     <string name="widget_error">Could not load widget data</string>
     <string name="widget_configure_title">Prayer widget</string>

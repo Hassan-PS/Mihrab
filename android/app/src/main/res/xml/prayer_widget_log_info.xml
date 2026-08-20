@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Log Today.
+
+  No `android:configure`: the other widgets open the configure screen when
+  placed, which is fine for something you place once and read. This one is
+  placed to be PRESSED, and putting a settings screen between the tap that
+  adds it and the first tap that uses it is a worse first run. It picks up
+  the same appearance preferences the configure screen writes.
+
+  updatePeriodMillis is 0 — this widget is pushed, never polled. It redraws
+  when the payload changes, when a chip is tapped, and at each prayer
+  boundary via ACTION_PRAYER_TIME_ELAPSED. A 30-minute poll would wake the
+  device to redraw something that had not changed.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_description_log"
+    android:initialLayout="@layout/prayer_widget_log"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/prayer_widget_log_preview"
+    android:resizeMode="horizontal|vertical"
+    android:minResizeWidth="250dp"
+    android:minResizeHeight="90dp"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="500dp"
+    android:maxResizeHeight="200dp" />

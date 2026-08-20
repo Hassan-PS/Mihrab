@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A prayer whose time has arrived and which is not yet logged: the one thing
+  on this widget that is actually asking to be pressed. Outlined rather than
+  filled, so it reads as an empty box waiting for a tick rather than as one
+  already ticked. The stroke colour is replaced at bind time with the user's
+  accent — see PrayerWidgetLogProvider.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="14dp" />
+    <solid android:color="#00000000" />
+    <stroke android:width="1.5dp" android:color="#6BC98A" />
+</shape>

@@ -177,6 +177,21 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_5_time,
       )
 
+    /**
+     * The background and accent colours the user has configured, for widgets
+     * declared in other files.
+     *
+     * Exposed rather than duplicated: the configure screen writes one set of
+     * preferences and every widget this app draws has to look like the same
+     * app. A second reader that fell behind on, say, the dynamic-accent flag
+     * would show one widget in Material You and the one beside it in green.
+     */
+    fun resolvedColors(context: Context): Pair<Int, Int> {
+      val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+      val style = readWidgetStyle(prefs)
+      return Pair(style.backgroundArgb(), style.highlightColorInt(context))
+    }
+
     /** Directly push updated RemoteViews to the given widget IDs — no broadcast. */
     fun refreshAll(context: Context, appWidgetManager: AppWidgetManager, ids: IntArray) {
       val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -201,6 +216,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         val ids = mgr.getAppWidgetIds(cn)
         if (ids.isNotEmpty()) refreshAll(context, mgr, ids)
       }
+      // Log Today draws from the same payload but with its own layout and
+      // its own tap queue, so it cannot go through refreshAll. It still has
+      // to redraw on the same signal: a new payload changes which prayers
+      // are due, and a chip that stays un-tappable past its time is the one
+      // failure this widget cannot afford.
+      PrayerWidgetLogProvider.requestUpdate(context)
     }
 
     /**

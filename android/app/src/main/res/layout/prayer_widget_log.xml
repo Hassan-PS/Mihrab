@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Log Today.
+
+  Five cells, one per salāh, each a tap target that records the prayer. The
+  cells are equal-weight columns rather than a grid so that the row stays
+  readable when the widget is resized narrow — six of anything on a phone
+  home screen is already tight, five with a name under each is the limit.
+
+  RemoteViews has a fixed view vocabulary, so everything here is
+  LinearLayout / FrameLayout / TextView with swapped background drawables.
+  No custom views, no Compose: the F-Droid variant has to build this with
+  nothing extra on the classpath.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E01C1C1E"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/widget_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="#9AA0A6"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:baselineAligned="false"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <TextView
+                android:id="@+id/widget_log_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/widget_log_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_log_row"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <LinearLayout android:id="@+id/log_cell_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
+                <TextView android:id="@+id/log_chip_0" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/log_cell_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
+                <TextView android:id="@+id/log_chip_1" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/log_cell_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
+                <TextView android:id="@+id/log_chip_2" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/log_cell_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
+                <TextView android:id="@+id/log_chip_3" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/log_cell_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
+                <TextView android:id="@+id/log_chip_4" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1FFFFFFF"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp" />
+
+        <LinearLayout
+            android:id="@+id/widget_log_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <TextView
+                android:id="@+id/widget_log_foot_left"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/widget_log_foot_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

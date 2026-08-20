@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Recorded as missed and not yet made up.
+
+  A DIFFERENT kind of day, not a weaker version of a kept one, so it gets its
+  own colour rather than a lower alpha of the accent. The widget shows it and
+  does nothing else with it: making a prayer up is a decision with a date
+  attached, and it belongs in the app where the user can see what they are
+  changing.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="14dp" />
+    <solid android:color="#26F87171" />
+    <stroke android:width="1dp" android:color="#66F87171" />
+</shape>

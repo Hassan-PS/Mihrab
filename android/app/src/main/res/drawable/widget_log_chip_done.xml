@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Logged. Filled, because this is the state the whole widget exists to
+  produce and it should be readable at arm's length without counting.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="14dp" />
+    <solid android:color="#1F5F4A" />
+</shape>

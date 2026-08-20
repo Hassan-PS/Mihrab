@@ -97,6 +97,25 @@
           android:resource="@xml/prayer_widget_large_info" />
       </receiver>
 
+      <!-- Log Today. Also listens for its own tap action, which is what a
+           chip's PendingIntent broadcasts — see PrayerWidgetLogProvider. -->
+      <receiver
+        android:name=".PrayerWidgetLogProvider"
+        android:exported="true"
+        android:label="@string/widget_name_log">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.SCREEN_ON" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
+          <action android:name="com.prayer_times.ACTION_WIDGET_LOG_TAP" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_log_info" />
+      </receiver>
+
       <!-- No screenOrientation lock: Android 16 ignores orientation
            restrictions on large screens and Play flags them (console
            recommendation, 2026-07-16). The configure layout is a simple
