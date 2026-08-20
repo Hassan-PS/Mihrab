@@ -125,7 +125,11 @@ struct TasbihProvider: TimelineProvider {
       switch e.a {
       case "inc":
         let current = index < counts.count ? counts[index] : 0
-        if !t.unbounded, t.target > 0, current >= t.target { break }
+        // The rules that apply are the CURRENT index's, which Next may have
+        // moved inside this very loop — see the arrays on the payload.
+        let target = t.targets?[safe: index] ?? t.target
+        let unbounded = t.unboundedFlags?[safe: index] ?? t.unbounded
+        if !unbounded, target > 0, current >= target { break }
         if index < counts.count { counts[index] = current + 1 }
         todayTotal += 1
       case "reset":
@@ -157,9 +161,21 @@ struct TasbihProvider: TimelineProvider {
     index: 0,
     total: 6,
     counts: [27, 0, 0, 0, 0, 0],
+    labels: ["SubhanAllah", "Alhamdulillah", "Allahu Akbar", "La ilaha illa Allah", "Astaghfirullah", "Salawat"],
+    targets: [33, 33, 34, 100, 100, 0],
+    unboundedFlags: [false, false, false, false, false, true],
     todayTotal: 231,
     todayRounds: 2
   )
+}
+
+/// Bounds-checked subscript. The arrays come from another process and a
+/// mismatched length must render as "fall back", not as a crash on a home
+/// screen where there is nothing to report the crash to.
+extension Array {
+  subscript(safe index: Int) -> Element? {
+    indices.contains(index) ? self[index] : nil
+  }
 }
 
 // MARK: - View
@@ -173,9 +189,22 @@ struct TasbihEntryView: View {
     entry.index < entry.counts.count ? entry.counts[entry.index] : (entry.tasbih?.count ?? 0)
   }
 
+  /// The dhikr the widget is STANDING ON, which after a queued Next is not
+  /// the one the payload calls active.
+  private var label: String {
+    entry.tasbih?.labels?[safe: entry.index] ?? entry.tasbih?.label ?? ""
+  }
+
+  private var target: Int {
+    entry.tasbih?.targets?[safe: entry.index] ?? entry.tasbih?.target ?? 0
+  }
+
+  private var unbounded: Bool {
+    entry.tasbih?.unboundedFlags?[safe: entry.index] ?? entry.tasbih?.unbounded ?? false
+  }
+
   private var complete: Bool {
-    guard let t = entry.tasbih, t.target > 0 else { return false }
-    return count >= t.target
+    target > 0 && count >= target
   }
 
   var body: some View {
@@ -198,7 +227,7 @@ struct TasbihEntryView: View {
   @ViewBuilder
   private func countColumn(_ t: WidgetPayload.Tasbih) -> some View {
     VStack(alignment: .leading, spacing: 0) {
-      Text(t.label)
+      Text(label)
         .font(.system(size: 12, weight: .semibold))
         .foregroundStyle(widgetMuted)
         .lineLimit(1)
@@ -209,13 +238,13 @@ struct TasbihEntryView: View {
           .foregroundStyle(widgetText)
           .lineLimit(1)
           .minimumScaleFactor(0.5)
-        Text(verbatim: t.target > 0 ? "of \(t.target)" : "")
+        Text(verbatim: target > 0 ? "of \(target)" : "")
           .font(.system(size: 13, weight: .medium))
           .foregroundStyle(complete ? resolvedWidgetHighlightColor() : widgetMuted)
           .lineLimit(1)
       }
       if complete {
-        Text(t.unbounded ? "target reached · keep going" : "complete")
+        Text(unbounded ? "target reached · keep going" : "complete")
           .font(.system(size: 10, weight: .medium))
           .foregroundStyle(resolvedWidgetHighlightColor())
           .lineLimit(1)
@@ -250,7 +279,7 @@ struct TasbihEntryView: View {
         label: "+1",
         action: "inc",
         prominent: true,
-        enabled: !(complete && !t.unbounded)
+        enabled: !(complete && !unbounded)
       )
       HStack(spacing: 6) {
         control(label: "Reset", action: "reset", prominent: false, enabled: true)

@@ -104,10 +104,16 @@ export function projectTasbih(
     total: number;
     /** Per-preset counts, indexed as `counts[index]`. */
     counts: number[];
-    /** Target of the ACTIVE preset. 0 means no target. */
-    target: number;
-    /** Whether the active preset keeps counting past its target. */
-    unbounded: boolean;
+    /**
+     * Every preset's target and unbounded flag, in the same order.
+     *
+     * Per-preset rather than "the active one", because Next moves the index
+     * inside this very function — after one press the rules that apply are
+     * the NEW preset's, and using the old one's target would let a bounded
+     * dhikr count past its own or stop short of it.
+     */
+    targets: number[];
+    unboundedFlags: boolean[];
     todayTotal: number;
   },
   queue: WidgetTasbihEntry[],
@@ -120,10 +126,12 @@ export function projectTasbih(
     switch (e.a) {
       case 'inc': {
         const current = counts[index] ?? 0;
+        const target = base.targets[index] ?? 0;
+        const unbounded = base.unboundedFlags[index] === true;
         // A bounded preset stops at its target. Counting past it on the
         // widget and not in the app is the one way these two can disagree
         // about a number the user is watching.
-        if (!base.unbounded && base.target > 0 && current >= base.target) break;
+        if (!unbounded && target > 0 && current >= target) break;
         counts[index] = current + 1;
         todayTotal += 1;
         break;

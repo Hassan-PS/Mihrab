@@ -251,6 +251,16 @@ struct WidgetPayload: Codable {
     let index: Int
     let total: Int
     let counts: [Int]
+    /// Every preset's label, target and unbounded flag, in the same order.
+    ///
+    /// Needed because the widget's own Next moves through the cycle in THIS
+    /// process, before the app has run — so after one press the widget is
+    /// standing on a preset the singular fields above know nothing about.
+    /// Optional: a payload written by an older build does not carry them,
+    /// and the views fall back to the singular fields.
+    var labels: [String]? = nil
+    var targets: [Int]? = nil
+    var unboundedFlags: [Bool]? = nil
     let todayTotal: Int
     let todayRounds: Int
   }

@@ -93,8 +93,8 @@ object WidgetTasbihQueue {
     index: Int,
     total: Int,
     counts: List<Int>,
-    target: Int,
-    unbounded: Boolean,
+    targets: List<Int>,
+    unboundedFlags: List<Boolean>,
     todayTotal: Int,
     queue: List<Entry>,
   ): Projection {
@@ -105,6 +105,10 @@ object WidgetTasbihQueue {
       when (e.action) {
         ACTION_INC -> {
           val current = out.getOrElse(idx) { 0 }
+          // The rules that apply are the CURRENT index's, which Next may
+          // have moved inside this very loop.
+          val target = targets.getOrElse(idx) { 0 }
+          val unbounded = unboundedFlags.getOrElse(idx) { false }
           if (!unbounded && target > 0 && current >= target) continue
           if (idx in out.indices) out[idx] = current + 1
           today += 1

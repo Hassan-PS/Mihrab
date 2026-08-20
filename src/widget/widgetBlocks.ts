@@ -185,6 +185,20 @@ export type WidgetTasbihBlock = {
   /** Every preset's count, in preset order — this is what makes it visible
    *  that stepping to the next dhikr keeps the one you were on. */
   counts: number[];
+  /**
+   * Every preset's label, target and unbounded flag, in the same order.
+   *
+   * Not redundant with the three singular fields above. The widget's Next
+   * button moves through the cycle in ITS OWN process — the tap is queued
+   * and the app has not run yet — so after one press the widget is showing a
+   * preset the payload knows nothing about. Without these it kept the
+   * previous dhikr's name over the new one's count, and its target with it:
+   * "SubhanAllah / 0 of 33" while standing on Alhamdulillah. Seen on an
+   * emulator; it is not a subtle failure once you press Next twice.
+   */
+  labels: string[];
+  targets: number[];
+  unboundedFlags: boolean[];
   /** Beads counted TODAY, across every preset. Not the sum of `counts` —
    *  those persist across midnight and this deliberately does not. */
   todayTotal: number;
@@ -491,6 +505,11 @@ export function buildTasbihBlock(input: {
     index,
     total: TASBIH_PRESETS.length,
     counts,
+    // The whole cycle, so the widget's own Next button has something to
+    // rename itself with before the app has run. See the type.
+    labels: TASBIH_PRESETS.map(p => i18n.t(p.labelKey)),
+    targets: TASBIH_PRESETS.map(p => input.targets?.[p.id] ?? p.defaultTarget),
+    unboundedFlags: TASBIH_PRESETS.map(p => p.unboundedAfterTarget === true),
     todayTotal: input.todayTotal ?? counts.reduce((a, b) => a + b, 0),
     todayRounds: input.todayRounds ?? 0,
   };

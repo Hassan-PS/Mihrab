@@ -109,23 +109,38 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
 
       val countsArr = t.optJSONArray("counts")
       val counts = (0 until (countsArr?.length() ?: 0)).map { countsArr!!.optInt(it, 0) }
-      val target = t.optInt("target", 0)
-      val unbounded = t.optBoolean("unbounded", false)
       val total = t.optInt("total", counts.size.coerceAtLeast(1))
+
+      // The whole cycle's labels, targets and flags. Next moves the index in
+      // THIS process, before the app runs, so without these the widget kept
+      // the previous dhikr's name and target over the new one's count.
+      // Absent on a payload written by an older build — fall back to the
+      // singular fields, which are right until the first Next.
+      val labelsArr = t.optJSONArray("labels")
+      val labels = (0 until (labelsArr?.length() ?: 0)).map { labelsArr!!.optString(it) }
+      val targetsArr = t.optJSONArray("targets")
+      val targets = (0 until (targetsArr?.length() ?: 0)).map { targetsArr!!.optInt(it, 0) }
+      val flagsArr = t.optJSONArray("unboundedFlags")
+      val unboundedFlags = (0 until (flagsArr?.length() ?: 0)).map { flagsArr!!.optBoolean(it, false) }
 
       val projected = WidgetTasbihQueue.project(
         index = t.optInt("index", 0),
         total = total,
         counts = counts,
-        target = target,
-        unbounded = unbounded,
+        targets = targets.ifEmpty { List(total) { t.optInt("target", 0) } },
+        unboundedFlags = unboundedFlags.ifEmpty { List(total) { t.optBoolean("unbounded", false) } },
         todayTotal = t.optInt("todayTotal", 0),
         queue = WidgetTasbihQueue.read(context),
       )
       val count = projected.counts.getOrElse(projected.index) { t.optInt("count", 0) }
+      val target = targets.getOrElse(projected.index) { t.optInt("target", 0) }
+      val unbounded = unboundedFlags.getOrElse(projected.index) { t.optBoolean("unbounded", false) }
       val complete = target > 0 && count >= target
 
-      views.setTextViewText(R.id.tasbih_label, t.optString("label"))
+      views.setTextViewText(
+        R.id.tasbih_label,
+        labels.getOrElse(projected.index) { t.optString("label") },
+      )
       views.setTextViewText(R.id.tasbih_count, count.toString())
       views.setTextViewText(
         R.id.tasbih_target,

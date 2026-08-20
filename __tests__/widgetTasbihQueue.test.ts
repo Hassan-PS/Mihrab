@@ -18,8 +18,8 @@ const base = (over: Partial<Parameters<typeof projectTasbih>[0]> = {}) => ({
   index: 0,
   total: 6,
   counts: [0, 0, 0, 0, 0, 0],
-  target: 33,
-  unbounded: false,
+  targets: [33, 33, 34, 100, 0, 0],
+  unboundedFlags: [false, false, false, false, false, false],
   todayTotal: 0,
   ...over,
 });
@@ -81,14 +81,14 @@ describe('projectTasbih', () => {
 
   it('lets an unbounded preset carry on past it', () => {
     const out = projectTasbih(
-      base({ counts: [33, 0, 0, 0, 0, 0], unbounded: true, todayTotal: 33 }),
+      base({ counts: [33, 0, 0, 0, 0, 0], unboundedFlags: [true, false, false, false, false, false], todayTotal: 33 }),
       [{ a: 'inc', t: NOW }],
     );
     expect(out.counts[0]).toBe(34);
   });
 
   it('treats target 0 as no target', () => {
-    const out = projectTasbih(base({ target: 0, counts: [99, 0, 0, 0, 0, 0] }), [
+    const out = projectTasbih(base({ targets: [0, 33, 34, 100, 0, 0], counts: [99, 0, 0, 0, 0, 0] }), [
       { a: 'inc', t: NOW },
     ]);
     expect(out.counts[0]).toBe(100);
@@ -108,6 +108,22 @@ describe('projectTasbih', () => {
       { a: 'reset', t: NOW },
     ]);
     expect(out.todayTotal).toBe(10);
+  });
+
+  it('applies the NEW preset\'s target after Next', () => {
+    // The widget's own Next moves the index in this process, before the app
+    // has run — so the rules that apply from that point are the new dhikr's.
+    // Preset 2 has a target of 34 here; stopping at 33 would be the old
+    // one's rule following the user across.
+    const out = projectTasbih(
+      base({ index: 1, counts: [0, 0, 33, 0, 0, 0] }),
+      [
+        { a: 'next', t: NOW },
+        { a: 'inc', t: NOW },
+      ],
+    );
+    expect(out.index).toBe(2);
+    expect(out.counts[2]).toBe(34);
   });
 
   it('next wraps and keeps every count', () => {
