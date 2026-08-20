@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  +1 — the control people actually press, so it is the one that is filled.
+  A tinted fill rather than a solid accent block: the widget sits on an
+  unknown wallpaper and a saturated slab of colour there fights everything
+  around it, where a tint reads as a button without shouting.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="12dp" />
+    <solid android:color="#2E6BC98A" />
+    <stroke android:width="1dp" android:color="#736BC98A" />
+</shape>

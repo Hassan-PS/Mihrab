@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  +1 on a bounded preset that has reached its target.
+
+  Still drawn, still in the same place. A control that disappears mid-round
+  moves the other two under a thumb that was already on its way down, and
+  the user resets a count they meant to keep.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="12dp" />
+    <solid android:color="#14FFFFFF" />
+    <stroke android:width="1dp" android:color="#26FFFFFF" />
+</shape>

@@ -116,6 +116,65 @@
           android:resource="@xml/prayer_widget_log_info" />
       </receiver>
 
+      <!--
+        Streak & Practice. A separate receiver, not a size of the prayer
+        widget: someone who wants only the streak should not have to put a
+        prayer table on their home screen to get it.
+      -->
+      <receiver
+        android:name=".PrayerWidgetStreakProvider"
+        android:exported="true"
+        android:label="@string/widget_name_streak">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.SCREEN_ON" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_streak_info" />
+      </receiver>
+
+      <!-- Continue Reading. -->
+      <receiver
+        android:name=".PrayerWidgetReadingProvider"
+        android:exported="true"
+        android:label="@string/widget_name_reading">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.SCREEN_ON" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_reading_info" />
+      </receiver>
+
+      <!--
+        Tasbih. ACTION_WIDGET_TASBIH_TAP is how the three controls reach the
+        provider; the same receiver handles it and the ordinary update
+        broadcasts, exactly as the Log Today one does.
+      -->
+      <receiver
+        android:name=".PrayerWidgetTasbihProvider"
+        android:exported="true"
+        android:label="@string/widget_name_tasbih">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.SCREEN_ON" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="com.prayer_times.ACTION_WIDGET_TASBIH_TAP" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_tasbih_info" />
+      </receiver>
+
       <!-- No screenOrientation lock: Android 16 ignores orientation
            restrictions on large screens and Play flags them (console
            recommendation, 2026-07-16). The configure layout is a simple

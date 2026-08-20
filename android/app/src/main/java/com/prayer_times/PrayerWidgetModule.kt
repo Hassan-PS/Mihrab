@@ -54,6 +54,28 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * The same hand-over for the Tasbih widget's queue.
+   *
+   * A separate call rather than one queue with a `kind` field: the two have
+   * different rules — a log tap is a set member and a dhikr tap is a
+   * sequence — and one string that two sets of rules both parse is a string
+   * that will eventually be parsed by the wrong one.
+   */
+  @ReactMethod
+  fun takeTasbihQueue(promise: Promise) {
+    try {
+      val entries = WidgetTasbihQueue.take(reactContext)
+      promise.resolve(WidgetTasbihQueue.serialize(entries))
+      // The count was being drawn by projecting the queue over the payload;
+      // now the app owns those taps, so the widget has to re-read or it
+      // would count them twice.
+      PrayerWidgetTasbihProvider.requestUpdate(reactContext)
+    } catch (e: Exception) {
+      promise.reject("E_WIDGET_TASBIH_QUEUE", e.message, e)
+    }
+  }
+
   @ReactMethod
   fun setData(json: String, promise: Promise) {
     try {
@@ -62,7 +84,13 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
         .edit()
         .putString(PrayerWidgetProvider.PREFS_KEY, json)
         .apply()
+      // Every widget kind reads the same payload, so every one of them has
+      // to be told. A provider left out here is one that keeps yesterday's
+      // numbers until something else happens to wake it.
       PrayerWidgetProvider.requestUpdate(reactContext)
+      PrayerWidgetStreakProvider.requestUpdate(reactContext)
+      PrayerWidgetReadingProvider.requestUpdate(reactContext)
+      PrayerWidgetTasbihProvider.requestUpdate(reactContext)
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("E_WIDGET", e.message, e)

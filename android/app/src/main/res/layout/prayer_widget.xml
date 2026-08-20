@@ -93,6 +93,54 @@
                     android:ellipsize="end"
                     android:layout_marginTop="8dp" />
 
+                <!-- The practice merge, plan 2b. Hidden below 4x4 and hidden
+                     when the app has sent no practice block: an absent block
+                     is not a zero streak, and on a home screen those two look
+                     identical and mean opposite things. -->
+                <LinearLayout
+                    android:id="@+id/widget_practice_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/widget_practice_streak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#E8EAED"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1" />
+
+                        <TextView
+                            android:id="@+id/widget_practice_second"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#9AA0A6"
+                            android:textSize="10sp"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/widget_practice_grid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="6dp"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/widget_streak_grid_description" />
+                </LinearLayout>
+
             </LinearLayout>
         </FrameLayout>
 
@@ -149,6 +197,28 @@
                 <TextView android:id="@+id/widget_col_5_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:maxLines="1" android:ellipsize="end" android:gravity="center_vertical" />
                 <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" />
                 <TextView android:id="@+id/widget_col_5_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:gravity="center_vertical" />
+            </LinearLayout>
+
+            <!-- Islamic Midnight and the Last Third. Hidden unless the user
+                 has turned them on: the plan's 4x3/4x4 mocks carry them, and
+                 until now the app honoured those toggles everywhere except
+                 the one surface that draws a whole day. Never highlighted —
+                 they are on the card because the night matters, not because
+                 either is what comes next. -->
+            <LinearLayout android:id="@+id/widget_col_6" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp" android:visibility="gone">
+                <TextView android:id="@+id/widget_col_6_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" android:gravity="center_vertical" />
+                <TextView android:id="@+id/widget_col_6_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:gravity="center_vertical" />
+            </LinearLayout>
+
+            <!-- Islamic Midnight and the Last Third. Hidden unless the user
+                 has turned them on: the plan's 4x3/4x4 mocks carry them, and
+                 until now the app honoured those toggles everywhere except
+                 the one surface that draws a whole day. Never highlighted —
+                 they are on the card because the night matters, not because
+                 either is what comes next. -->
+            <LinearLayout android:id="@+id/widget_col_7" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="8dp" android:visibility="gone">
+                <TextView android:id="@+id/widget_col_7_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" android:gravity="center_vertical" />
+                <TextView android:id="@+id/widget_col_7_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:gravity="center_vertical" />
             </LinearLayout>
 
         </LinearLayout>

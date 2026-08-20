@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tasbih.
+
+  4x2, and not resizable down to 2x2: three tap targets in a 2x2 are about
+  20dp each, and a control you have to aim at is not a control. The plan
+  allowed a 2x2 with +1 alone; that is a different widget and can be one
+  later if anyone asks for it.
+
+  No `android:configure` — like Log Today, this is placed to be pressed, and
+  a settings screen between the tap that adds it and the first tap that uses
+  it is a worse first run.
+
+  updatePeriodMillis is 0: nothing about a counter changes on its own.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_description_tasbih"
+    android:initialLayout="@layout/prayer_widget_tasbih"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/prayer_widget_tasbih_preview"
+    android:resizeMode="horizontal|vertical"
+    android:minResizeWidth="250dp"
+    android:minResizeHeight="100dp"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="500dp"
+    android:maxResizeHeight="200dp" />

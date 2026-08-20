@@ -48,6 +48,16 @@ export interface PrayerWidgetInterface {
    * normal state during a staged rollout rather than an error.
    */
   takeLogQueue?(): Promise<string>;
+
+  /**
+   * The same hand-over for the Tasbih widget's queue.
+   *
+   * A separate call rather than one queue with a `kind` field: the two have
+   * different rules — a log tap is a set member and a dhikr tap is a
+   * sequence — and one string that two sets of rules both parse is a string
+   * that will eventually be parsed by the wrong one.
+   */
+  takeTasbihQueue?(): Promise<string>;
 }
 
 /**

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Streak & Practice.
+
+  2x2 to 4x2. The provider measures the placed width and draws five weeks of
+  the graph or ten — a grid sized for the wide case and squeezed into the
+  narrow one is what makes cells 4px and the record a texture.
+
+  updatePeriodMillis is 0: a streak moves when a prayer is logged, and every
+  path that logs one already pushes an update. The only unattended change is
+  the date rolling over, which ACTION_PRAYER_TIME_ELAPSED covers.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_description_streak"
+    android:initialLayout="@layout/prayer_widget_streak"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/prayer_widget_streak_preview"
+    android:resizeMode="horizontal|vertical"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="90dp"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="500dp"
+    android:maxResizeHeight="200dp" />

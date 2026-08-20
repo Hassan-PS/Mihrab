@@ -157,6 +157,10 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_3,
         R.id.widget_col_4,
         R.id.widget_col_5,
+        // Islamic Midnight and the Last Third — drawn only when the
+        // user has turned them on, and never highlighted.
+        R.id.widget_col_6,
+        R.id.widget_col_7,
       )
     private val COL_LABELS =
       intArrayOf(
@@ -166,6 +170,10 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_3_label,
         R.id.widget_col_4_label,
         R.id.widget_col_5_label,
+        // Islamic Midnight and the Last Third — drawn only when the
+        // user has turned them on, and never highlighted.
+        R.id.widget_col_6_label,
+        R.id.widget_col_7_label,
       )
     private val COL_TIMES =
       intArrayOf(
@@ -175,6 +183,10 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_3_time,
         R.id.widget_col_4_time,
         R.id.widget_col_5_time,
+        // Islamic Midnight and the Last Third — drawn only when the
+        // user has turned them on, and never highlighted.
+        R.id.widget_col_6_time,
+        R.id.widget_col_7_time,
       )
 
     /**
@@ -338,7 +350,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         showMessageOnly(views, context.getString(R.string.widget_placeholder_day), isError = false, style)
       } else {
         try {
-          applyJson(views, json, style, context)
+          applyJson(views, json, style, context, layoutId, measuredHeightDp(appWidgetManager, appWidgetId))
         } catch (_: Exception) {
           showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
         }
@@ -413,14 +425,100 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /**
+     * The practice merge, plan §2b: at four cells tall there is room for the
+     * whole day AND the record of it, which is the pair people check
+     * together — what is next, and whether this week has held.
+     *
+     * Only on the list layout, only when the launcher says there is room, and
+     * only when the app has actually sent a practice block. An absent block
+     * is NOT a zero streak: on a home screen those look identical and mean
+     * opposite things, so absent draws nothing at all.
+     *
+     * `widget_practice_row` exists only in prayer_widget.xml. RemoteViews
+     * actions against an id the current layout does not contain are quiet
+     * no-ops, so the layout check below is for readers rather than for
+     * safety — but a reader who does not know that would be right to worry.
+     */
+    private fun bindPracticeStrip(
+      views: RemoteViews,
+      payload: org.json.JSONObject,
+      style: WidgetStyle,
+      context: Context,
+      layoutId: Int,
+      heightDp: Int,
+    ) {
+      if (layoutId != R.layout.prayer_widget) return
+      val practice = payload.optJSONObject("practice")
+      if (practice == null || (heightDp in 1 until PRACTICE_MIN_HEIGHT_DP)) {
+        views.setViewVisibility(R.id.widget_practice_row, View.GONE)
+        return
+      }
+      views.setViewVisibility(R.id.widget_practice_row, View.VISIBLE)
+
+      val accent = style.highlightColorInt(context)
+      val streak = practice.optInt("streak", 0)
+      views.setTextViewText(
+        R.id.widget_practice_streak,
+        "$streak " + context.resources.getQuantityString(
+          R.plurals.widget_streak_days, streak, streak,
+        ),
+      )
+      views.setTextColor(R.id.widget_practice_streak, accent)
+
+      val parts = mutableListOf<String>()
+      val best = practice.optInt("bestStreak", 0)
+      if (best > 0) parts.add(context.getString(R.string.widget_streak_best, best))
+      parts.add(context.getString(R.string.widget_streak_logged, practice.optInt("loggedToday", 0)))
+      val owed = practice.optInt("owed", 0)
+      if (owed > 0) {
+        parts.add(
+          context.resources.getQuantityString(R.plurals.widget_streak_make_up, owed, owed),
+        )
+      }
+      views.setTextViewText(R.id.widget_practice_second, parts.joinToString(" · "))
+
+      val density = context.resources.displayMetrics.density
+      views.setImageViewBitmap(
+        R.id.widget_practice_grid,
+        PracticeGridBitmap.render(
+          practice.optJSONArray("days"),
+          10,
+          (5 * density).toInt().coerceAtLeast(3),
+          (1.5f * density).toInt().coerceAtLeast(1),
+          accent,
+        ),
+      )
+    }
+
+    /** The launcher's own measurement, or 0 when it has not measured yet. */
+    private fun measuredHeightDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
+      mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+    } catch (_: Exception) {
+      0
+    }
+
+    /**
+     * Four launcher rows. Below this the practice strip would eat the space
+     * the prayer times need, and the times are why the widget is there.
+     */
+    private const val PRACTICE_MIN_HEIGHT_DP = 200
+
+    /**
      * Bind the payload into whichever layout was chosen.
      *
      * Layout-agnostic by design: every layout it can be handed declares the
-     * same ids, so this never needs to know which one it is filling. It used
-     * to take an `isHorizontal` flag that nothing in the body read — a
-     * parameter that looks like a branch and is not.
+     * same ids, so this never needs to know which one it is filling — with
+     * one exception now, the practice strip, which exists only in the list
+     * layout and is passed `layoutId` rather than guessing.
      */
-    private fun applyJson(views: RemoteViews, json: String, style: WidgetStyle, context: Context) {
+    private fun applyJson(
+      views: RemoteViews,
+      json: String,
+      style: WidgetStyle,
+      context: Context,
+      layoutId: Int = R.layout.prayer_widget,
+      heightDp: Int = 0,
+    ) {
       val o = JSONObject(json)
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
@@ -454,6 +552,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       if (rows.length() > 0) displayRows.add(rows.getJSONObject(0)) // Fajr at slot 0
       sunriseRowObj?.let { displayRows.add(it) }                     // Sunrise at slot 1
       for (i in 1 until rows.length()) displayRows.add(rows.getJSONObject(i)) // rest of salāh
+      // ...then the night rows, after Isha. Absent entirely unless the user
+      // turned them on — the payload only carries them when they are enabled,
+      // so there is nothing to gate on here.
+      val nightRows = todayDay?.optJSONArray("extraRows") ?: o.optJSONArray("extraRows")
+      if (nightRows != null) {
+        for (i in 0 until nightRows.length()) {
+          nightRows.optJSONObject(i)?.let { displayRows.add(it) }
+        }
+      }
 
       // Dynamically calculate next event (prayer or sunrise) based on current time
       val cal = java.util.Calendar.getInstance()
@@ -547,11 +654,19 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         val label = row.optString("name", "").trim()
           .ifEmpty { row.optString("abbr", "").trim() }
           .ifEmpty { key }
-        val highlight = effectiveNextKey != null && effectiveNextKey == key
+        val isNight =
+          key.equals("Midnight", ignoreCase = true) || key.equals("Lastthird", ignoreCase = true)
+        // A night row is never the headline. The payload will not name one as
+        // `nextKey` for the widget (see nightCanBeNext on the JS side), and
+        // this is the second guard: a widget called "next prayer" should not
+        // count down to Islamic Midnight even if a stale payload says so.
+        val highlight = !isNight && effectiveNextKey != null && effectiveNextKey == key
         val isSunrise = key.equals("Sunrise", ignoreCase = true)
         val col = when {
           highlight -> highlightColor
-          isSunrise -> Color.parseColor(NEUTRAL_MUTED)
+          // Secondary is what Sunrise has always been — on the card without
+          // competing with the salāh — and it is what the night rows are too.
+          isSunrise || isNight -> Color.parseColor(NEUTRAL_MUTED)
           else -> normalColor
         }
 
@@ -567,6 +682,8 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
         }
       }
+
+      bindPracticeStrip(views, o, style, context, layoutId, heightDp)
 
       // Schedule next update using AlarmManager — targets all widget providers.
       if (nextUpdateMinutes != -1) {

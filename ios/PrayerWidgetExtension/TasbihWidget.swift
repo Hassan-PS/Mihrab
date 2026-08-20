@@ -1,0 +1,325 @@
+// Tasbih — the best possible fit for an interactive widget.
+//
+// One target, one number, no navigation. Count on the left, controls on the
+// right; grown to systemMedium because three 20pt tap targets do not fit in a
+// small and a control you have to aim at is not a control.
+//
+// THE QUEUE IS AN ORDERED LOG, not a set. Tapping Fajr twice on Log Today
+// means Fajr; tapping +1 twice here means two. So the rules differ from that
+// widget's in one way that matters: nothing is de-duplicated and order is the
+// answer. `+1 +1 next +1` is two beads on one dhikr and one on the next.
+//
+// Rules mirrored from `src/widget/widgetTasbihQueue.ts`, whose tests decide
+// what they are. Two behaviours are worth naming because they are easy to get
+// wrong and invisible when you do:
+//
+//   • a bounded preset stops at its target. The preset's own
+//     `unboundedAfterTarget` says which are which, and the payload carries it.
+//   • Next keeps a part-finished count. Moving on must not discard it — that
+//     is what the screen does, and a widget quietly throwing away 27 beads is
+//     the worse surprise.
+
+import AppIntents
+import SwiftUI
+import WidgetKit
+
+// MARK: - Queue
+
+enum WidgetTasbihQueue {
+  static let key = "widget_tasbih_queue"
+  static let actions = ["inc", "reset", "next"]
+
+  struct Entry: Codable, Equatable {
+    let a: String
+    let t: Double
+  }
+
+  private static func defaults() -> UserDefaults? { UserDefaults(suiteName: kSuite) }
+
+  static func read() -> [Entry] {
+    guard let raw = defaults()?.string(forKey: key),
+          let data = raw.data(using: .utf8),
+          let decoded = try? JSONDecoder().decode([Entry].self, from: data)
+    else { return [] }
+    return decoded.filter { actions.contains($0.a) && $0.t > 0 }
+  }
+
+  static func append(_ action: String, now: Double = Date().timeIntervalSince1970 * 1000) {
+    guard actions.contains(action) else { return }
+    let next = read() + [Entry(a: action, t: now)]
+    guard let data = try? JSONEncoder().encode(next),
+          let s = String(data: data, encoding: .utf8)
+    else { return }
+    defaults()?.set(s, forKey: key)
+  }
+}
+
+// MARK: - Intents
+
+@available(iOS 17.0, *)
+struct TasbihActionIntent: AppIntent {
+  static var title: LocalizedStringResource = "Tasbih"
+  static var isDiscoverable: Bool = false
+
+  @Parameter(title: "Action")
+  var action: String
+
+  init() {}
+  init(action: String) { self.action = action }
+
+  func perform() async throws -> some IntentResult {
+    WidgetTasbihQueue.append(action)
+    WidgetCenter.shared.reloadTimelines(ofKind: "MihrabTasbih")
+    return .result()
+  }
+}
+
+// MARK: - Timeline
+
+struct TasbihEntry: TimelineEntry {
+  let date: Date
+  let tasbih: WidgetPayload.Tasbih?
+  /// The payload with this device's queued taps replayed over it.
+  let index: Int
+  let counts: [Int]
+  let todayTotal: Int
+}
+
+struct TasbihProvider: TimelineProvider {
+  func placeholder(in context: Context) -> TasbihEntry { entry(fallback: true) }
+
+  func getSnapshot(in context: Context, completion: @escaping (TasbihEntry) -> Void) {
+    completion(entry(fallback: true))
+  }
+
+  /// One entry. A counter changes when it is tapped, and a tap reloads the
+  /// timeline; nothing about it moves on its own.
+  func getTimeline(in context: Context, completion: @escaping (Timeline<TasbihEntry>) -> Void) {
+    completion(Timeline(entries: [entry(fallback: false)], policy: .never))
+  }
+
+  private func entry(fallback: Bool) -> TasbihEntry {
+    let t = loadTasbih() ?? (fallback ? Self.sample : nil)
+    guard let t else {
+      return TasbihEntry(date: Date(), tasbih: nil, index: 0, counts: [], todayTotal: 0)
+    }
+    let projected = Self.project(t, WidgetTasbihQueue.read())
+    return TasbihEntry(
+      date: Date(),
+      tasbih: t,
+      index: projected.index,
+      counts: projected.counts,
+      todayTotal: projected.todayTotal
+    )
+  }
+
+  /// Mirrors `projectTasbih` in widgetTasbihQueue.ts. See that file's tests.
+  static func project(
+    _ t: WidgetPayload.Tasbih,
+    _ queue: [WidgetTasbihQueue.Entry]
+  ) -> (index: Int, counts: [Int], todayTotal: Int) {
+    var index = t.index
+    var counts = t.counts
+    var todayTotal = t.todayTotal
+    for e in queue {
+      switch e.a {
+      case "inc":
+        let current = index < counts.count ? counts[index] : 0
+        if !t.unbounded, t.target > 0, current >= t.target { break }
+        if index < counts.count { counts[index] = current + 1 }
+        todayTotal += 1
+      case "reset":
+        if index < counts.count { counts[index] = 0 }
+      case "next":
+        index = t.total > 0 ? (index + 1) % t.total : index
+      default:
+        break
+      }
+    }
+    return (index, counts, todayTotal)
+  }
+
+  private func loadTasbih() -> WidgetPayload.Tasbih? {
+    guard let json = UserDefaults(suiteName: kSuite)?.string(forKey: kKey),
+          let data = json.data(using: .utf8),
+          let p = try? JSONDecoder().decode(WidgetPayload.self, from: data)
+    else { return nil }
+    return p.tasbih
+  }
+
+  static let sample = WidgetPayload.Tasbih(
+    presetId: "subhanallah",
+    label: "SubhanAllah",
+    arabic: "سُبْحَانَ ٱللَّٰهِ",
+    count: 27,
+    target: 33,
+    unbounded: false,
+    index: 0,
+    total: 6,
+    counts: [27, 0, 0, 0, 0, 0],
+    todayTotal: 231,
+    todayRounds: 2
+  )
+}
+
+// MARK: - View
+
+struct TasbihEntryView: View {
+  var entry: TasbihEntry
+
+  /// The active count after the queue, not the payload's — the number has to
+  /// move on the same frame as the tap.
+  private var count: Int {
+    entry.index < entry.counts.count ? entry.counts[entry.index] : (entry.tasbih?.count ?? 0)
+  }
+
+  private var complete: Bool {
+    guard let t = entry.tasbih, t.target > 0 else { return false }
+    return count >= t.target
+  }
+
+  var body: some View {
+    if let t = entry.tasbih {
+      HStack(alignment: .center, spacing: 12) {
+        countColumn(t)
+        controlColumn(t)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+      .padding(12)
+      .widgetURL(URL(string: "mihrab://tasbih"))
+    } else {
+      Text("Open Mihrab")
+        .font(.caption)
+        .foregroundStyle(widgetMuted)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+  }
+
+  @ViewBuilder
+  private func countColumn(_ t: WidgetPayload.Tasbih) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+      Text(t.label)
+        .font(.system(size: 12, weight: .semibold))
+        .foregroundStyle(widgetMuted)
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+      HStack(alignment: .firstTextBaseline, spacing: 4) {
+        Text(verbatim: "\(count)")
+          .font(.system(size: 40, weight: .bold))
+          .foregroundStyle(widgetText)
+          .lineLimit(1)
+          .minimumScaleFactor(0.5)
+        Text(verbatim: t.target > 0 ? "of \(t.target)" : "")
+          .font(.system(size: 13, weight: .medium))
+          .foregroundStyle(complete ? resolvedWidgetHighlightColor() : widgetMuted)
+          .lineLimit(1)
+      }
+      if complete {
+        Text(t.unbounded ? "target reached · keep going" : "complete")
+          .font(.system(size: 10, weight: .medium))
+          .foregroundStyle(resolvedWidgetHighlightColor())
+          .lineLimit(1)
+          .minimumScaleFactor(0.8)
+      }
+      Spacer(minLength: 4)
+      Text(verbatim: footerLine(t))
+        .font(.system(size: 10))
+        .foregroundStyle(widgetMuted)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+      // Position in the cycle, so Next has somewhere visible to move.
+      HStack(spacing: 3) {
+        ForEach(0..<max(1, t.total), id: \.self) { i in
+          Circle()
+            .fill(i == entry.index ? resolvedWidgetHighlightColor() : widgetMuted.opacity(0.35))
+            .frame(width: 4, height: 4)
+        }
+      }
+      .padding(.top, 3)
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  @ViewBuilder
+  private func controlColumn(_ t: WidgetPayload.Tasbih) -> some View {
+    VStack(spacing: 6) {
+      // +1 is the one people press, so it is the one that is big. Disabled
+      // rather than hidden when a bounded preset is finished: a control that
+      // vanishes mid-round moves the other two under your thumb.
+      control(
+        label: "+1",
+        action: "inc",
+        prominent: true,
+        enabled: !(complete && !t.unbounded)
+      )
+      HStack(spacing: 6) {
+        control(label: "Reset", action: "reset", prominent: false, enabled: true)
+        control(label: "Next ›", action: "next", prominent: false, enabled: true)
+      }
+    }
+    .frame(width: 132)
+  }
+
+  @ViewBuilder
+  private func control(label: String, action: String, prominent: Bool, enabled: Bool) -> some View {
+    if #available(iOSApplicationExtension 17.0, *), enabled {
+      Button(intent: TasbihActionIntent(action: action)) {
+        controlBody(label, prominent: prominent, enabled: true)
+      }
+      .buttonStyle(.plain)
+    } else {
+      // iOS 16 has no Button(intent:). The card still deep-links to the
+      // Tasbih screen, which is where counting works.
+      controlBody(label, prominent: prominent, enabled: enabled)
+    }
+  }
+
+  @ViewBuilder
+  private func controlBody(_ label: String, prominent: Bool, enabled: Bool) -> some View {
+    Text(label)
+      .font(.system(size: prominent ? 20 : 12, weight: .semibold))
+      .foregroundStyle(
+        !enabled ? widgetMuted.opacity(0.5)
+          : prominent ? resolvedWidgetHighlightColor() : widgetText
+      )
+      .frame(maxWidth: .infinity)
+      .padding(.vertical, prominent ? 12 : 7)
+      .background(
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+          .fill(prominent
+                ? resolvedWidgetHighlightColor().opacity(enabled ? 0.18 : 0.07)
+                : widgetMuted.opacity(0.16))
+      )
+      .overlay(
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+          .strokeBorder(
+            prominent
+              ? resolvedWidgetHighlightColor().opacity(enabled ? 0.45 : 0.18)
+              : widgetMuted.opacity(0.3),
+            lineWidth: 1
+          )
+      )
+  }
+
+  /// "Today 231 · round 3 of 3" — the two facts the screen keeps that a
+  /// single count cannot say on its own.
+  private func footerLine(_ t: WidgetPayload.Tasbih) -> String {
+    var parts = ["Today \(entry.todayTotal)"]
+    if t.todayRounds > 0 {
+      parts.append("\(t.todayRounds) \(t.todayRounds == 1 ? "round" : "rounds")")
+    }
+    return parts.joined(separator: " · ")
+  }
+}
+
+struct TasbihWidget: Widget {
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: "MihrabTasbih", provider: TasbihProvider()) { entry in
+      TasbihEntryView(entry: entry)
+        .modifier(WidgetBackgroundCompatModifier())
+    }
+    .configurationDisplayName("Tasbih")
+    .description("Count dhikr without opening the app.")
+    .supportedFamilies([.systemMedium])
+  }
+}

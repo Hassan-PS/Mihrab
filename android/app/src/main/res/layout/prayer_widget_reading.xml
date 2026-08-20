@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Continue Reading.
+
+  Where the reader left off on the left; what the khatmah asks of today on
+  the right. The right column is `wrap_content` with a fixed minimum so it
+  does not collapse when the surah name is long — a portion counter that
+  reflows to two digits and back between refreshes is worse than one that
+  keeps its own column.
+
+  The progress line is a ProgressBar in horizontal style, which is one of
+  the few widgets RemoteViews will accept; a two-view fake bar would need a
+  measured width this side cannot know.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E01C1C1E"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/widget_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="#9AA0A6"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/reading_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.06"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/reading_surah"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="#E8EAED"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/reading_position"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <ProgressBar
+                android:id="@+id/reading_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginTop="7dp"
+                android:max="100" />
+
+            <TextView
+                android:id="@+id/reading_progress_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="#9AA0A6"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/reading_tail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/reading_side"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="96dp"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/reading_side_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.06"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/reading_side_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="#E8EAED"
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/reading_side_note"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9AA0A6"
+                android:textSize="10sp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,255 @@
+package com.prayer_times
+
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.view.View
+import android.widget.RemoteViews
+import org.json.JSONObject
+
+/**
+ * Continue Reading — the shortest path back into the habit.
+ *
+ * Two states and the card is only ever one of them: a khatmah is running, so
+ * the headline is the plan's page and the side column is today's portion as
+ * a fraction; or there is no plan, so it is the last page read and when.
+ *
+ * WHICH READER A TAP OPENS IS DECIDED BY THE APP. The payload's `mode` is
+ * already resolved against both what the user last had open and whether the
+ * ~180 MB mushaf is actually on disk — see buildReadingBlock. A widget that
+ * promised "carry on from page 3" and delivered a download prompt would be
+ * worse than one that opened the wrong reader.
+ */
+class PrayerWidgetReadingProvider : AppWidgetProvider() {
+
+  override fun onReceive(context: Context, intent: Intent) {
+    super.onReceive(context, intent)
+    when (intent.action) {
+      Intent.ACTION_USER_PRESENT,
+      Intent.ACTION_SCREEN_ON,
+      Intent.ACTION_BOOT_COMPLETED,
+      PrayerWidgetProvider.ACTION_PRAYER_TIME_ELAPSED -> requestUpdate(context)
+    }
+  }
+
+  override fun onUpdate(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetIds: IntArray,
+  ) {
+    for (id in appWidgetIds) appWidgetManager.updateAppWidget(id, buildViews(context))
+  }
+
+  companion object {
+
+    fun requestUpdate(context: Context) {
+      val mgr = AppWidgetManager.getInstance(context)
+      val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetReadingProvider::class.java))
+      for (id in ids) mgr.updateAppWidget(id, buildViews(context))
+    }
+
+    private fun reading(context: Context): JSONObject? {
+      val raw = context
+        .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+        .getString(PrayerWidgetProvider.PREFS_KEY, null) ?: return null
+      return try {
+        JSONObject(raw).optJSONObject("reading")
+      } catch (_: Exception) {
+        null
+      }
+    }
+
+    fun buildViews(context: Context): RemoteViews {
+      val views = RemoteViews(context.packageName, R.layout.prayer_widget_reading)
+      val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
+      views.setInt(R.id.widget_root, "setBackgroundColor", background)
+
+      val r = reading(context)
+      if (r == null) {
+        views.setViewVisibility(R.id.widget_content, View.GONE)
+        views.setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
+        views.setTextViewText(
+          R.id.widget_placeholder,
+          context.getString(R.string.widget_placeholder_open_app),
+        )
+        views.setOnClickPendingIntent(R.id.widget_root, openQuranIntent(context))
+        return views
+      }
+
+      views.setViewVisibility(R.id.widget_placeholder, View.GONE)
+      views.setViewVisibility(R.id.widget_content, View.VISIBLE)
+
+      val khatmah = r.optJSONObject("khatmah")
+      views.setTextViewText(
+        R.id.reading_header,
+        if (khatmah != null) {
+          context.getString(
+            R.string.widget_reading_khatmah_day,
+            khatmah.optInt("day", 1),
+            khatmah.optInt("targetDays", 30),
+          )
+        } else {
+          context.getString(R.string.widget_reading_continue)
+        },
+      )
+      views.setTextViewText(R.id.reading_surah, r.optString("surahName"))
+      views.setTextViewText(
+        R.id.reading_position,
+        context.getString(R.string.widget_reading_position, r.optInt("page", 1), r.optInt("juz", 1)),
+      )
+
+      val pagesRead = r.optInt("pagesRead", 0)
+      val totalPages = r.optInt("totalPages", 604).coerceAtLeast(1)
+      val pct = Math.round(pagesRead * 100.0 / totalPages).toInt()
+      // A floor of 1%, for the same reason the iOS bar has one: two pages of
+      // 604 is 0.3% and draws as nothing, and a bar with nothing in it says
+      // "you have not started" to someone who has.
+      views.setProgressBar(
+        R.id.reading_progress,
+        100,
+        if (pagesRead > 0) pct.coerceAtLeast(1) else 0,
+        false,
+      )
+      views.setTextViewText(
+        R.id.reading_progress_label,
+        context.getString(R.string.widget_reading_progress, pagesRead, totalPages, pct),
+      )
+
+      if (khatmah != null) {
+        views.setTextViewText(
+          R.id.reading_side_title,
+          context.getString(R.string.widget_reading_today_portion),
+        )
+        views.setTextViewText(
+          R.id.reading_side_value,
+          context.getString(
+            R.string.widget_reading_portion_value,
+            khatmah.optInt("doneToday", 0),
+            khatmah.optInt("pagesToday", 0),
+          ),
+        )
+        val behind = khatmah.optInt("behindBy", 0)
+        val left = (khatmah.optInt("pagesToday", 0) - khatmah.optInt("doneToday", 0)).coerceAtLeast(0)
+        views.setTextViewText(
+          R.id.reading_side_note,
+          when {
+            behind > 0 ->
+              context.resources.getQuantityString(R.plurals.widget_reading_behind, behind, behind)
+            left == 0 -> context.getString(R.string.widget_reading_done_today)
+            else ->
+              context.resources.getQuantityString(R.plurals.widget_reading_left, left, left)
+          },
+        )
+        views.setTextColor(
+          R.id.reading_side_note,
+          if (behind > 0) android.graphics.Color.parseColor("#F87171") else accent,
+        )
+        // With a plan the side column has taken "today", so the last-read
+        // line has nowhere else to be — and the column is taller than its
+        // content without it.
+        val tail = lastReadTail(context, r)
+        if (tail != null) {
+          views.setViewVisibility(R.id.reading_tail, View.VISIBLE)
+          views.setTextViewText(R.id.reading_tail, tail)
+        } else {
+          views.setViewVisibility(R.id.reading_tail, View.GONE)
+        }
+      } else {
+        views.setViewVisibility(R.id.reading_tail, View.GONE)
+        views.setTextViewText(
+          R.id.reading_side_title,
+          context.getString(R.string.widget_reading_last_read),
+        )
+        views.setTextViewText(
+          R.id.reading_side_value,
+          lastReadPhrase(context, r) ?: "—",
+        )
+        val bookmarks = r.optInt("bookmarks", 0)
+        views.setTextViewText(
+          R.id.reading_side_note,
+          if (bookmarks > 0) {
+            context.resources.getQuantityString(
+              R.plurals.widget_reading_bookmarks, bookmarks, bookmarks,
+            )
+          } else {
+            ""
+          },
+        )
+        views.setTextColor(R.id.reading_side_note, android.graphics.Color.parseColor("#9AA0A6"))
+      }
+
+      views.setOnClickPendingIntent(R.id.widget_root, readingIntent(context, r))
+      return views
+    }
+
+    /** "Last read today · 3 bookmarks", dropping whichever half is unknown. */
+    private fun lastReadTail(context: Context, r: JSONObject): String? {
+      val parts = mutableListOf<String>()
+      lastReadPhrase(context, r)?.let {
+        parts.add(context.getString(R.string.widget_reading_last_read_prefix, it.lowercase()))
+      }
+      val bookmarks = r.optInt("bookmarks", 0)
+      if (bookmarks > 0) {
+        parts.add(
+          context.resources.getQuantityString(
+            R.plurals.widget_reading_bookmarks, bookmarks, bookmarks,
+          ),
+        )
+      }
+      return if (parts.isEmpty()) null else parts.joinToString(" · ")
+    }
+
+    /** "Today" / "Yesterday" / "4 days ago". Never "0 days ago". */
+    private fun lastReadPhrase(context: Context, r: JSONObject): String? {
+      val ms = r.optDouble("lastReadAt", 0.0)
+      if (ms <= 0) return null
+      val days = ((System.currentTimeMillis() - ms) / 86_400_000L).toInt()
+      return when {
+        days < 1 -> context.getString(R.string.widget_reading_today)
+        days == 1 -> context.getString(R.string.widget_reading_yesterday)
+        else -> context.resources.getQuantityString(R.plurals.widget_reading_days_ago, days, days)
+      }
+    }
+
+    /**
+     * mihrab://read/2?initialPage=3 or ?scrollToAyah=1 — the surah screen
+     * picks its reader from which of the two it is given, which is why the
+     * app resolves `mode` rather than this side guessing.
+     */
+    private fun readingIntent(context: Context, r: JSONObject): PendingIntent {
+      val surah = r.optInt("surah", 1)
+      val position = if (r.optString("mode") == "mushaf") {
+        "initialPage=${r.optInt("page", 1)}"
+      } else {
+        "scrollToAyah=${r.optInt("ayah", 1)}"
+      }
+      val intent = Intent(Intent.ACTION_VIEW, Uri.parse("mihrab://read/$surah?$position")).apply {
+        setPackage(context.packageName)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      }
+      return PendingIntent.getActivity(
+        context,
+        3200,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+    }
+
+    private fun openQuranIntent(context: Context): PendingIntent {
+      val intent = Intent(Intent.ACTION_VIEW, Uri.parse("mihrab://quran")).apply {
+        setPackage(context.packageName)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      }
+      return PendingIntent.getActivity(
+        context,
+        3201,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+    }
+  }
+}

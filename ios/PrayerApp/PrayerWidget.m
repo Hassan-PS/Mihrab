@@ -55,6 +55,28 @@ RCT_EXPORT_METHOD(takeLogQueue
   resolve(json);
 }
 
+/**
+ * The same hand-over for the Tasbih widget's queue.
+ *
+ * A separate key rather than one queue with a `kind` field: the two have
+ * different rules — a log tap is a set member and a dhikr tap is a sequence —
+ * and one string that two sets of rules both parse is a string that will
+ * eventually be parsed by the wrong one.
+ */
+RCT_EXPORT_METHOD(takeTasbihQueue
+                  : (RCTPromiseResolveBlock)resolve rejecter
+                  : (RCTPromiseRejectBlock)reject)
+{
+  NSUserDefaults *group = MihrabAppGroupDefaults();
+  NSUserDefaults *target = group != nil ? group : [NSUserDefaults standardUserDefaults];
+  NSString *json = [target stringForKey:@"widget_tasbih_queue"];
+  if (json != nil) {
+    [target removeObjectForKey:@"widget_tasbih_queue"];
+    [target synchronize];
+  }
+  resolve(json);
+}
+
 RCT_EXPORT_METHOD(setUiHints:(NSString *)style
                   oledBackground:(BOOL)oled
                   resolver:(RCTPromiseResolveBlock)resolve

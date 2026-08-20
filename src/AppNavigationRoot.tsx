@@ -24,6 +24,7 @@ import {
 import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
 import { syncWidgetLogQueue } from './widget/syncWidgetLogQueue';
+import { syncWidgetTasbihQueue } from './widget/syncWidgetTasbihQueue';
 import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
@@ -167,6 +168,7 @@ export function AppNavigationRoot() {
     if (Platform.OS !== 'android' && Platform.OS !== 'ios') return;
     const drain = () => {
       void syncWidgetLogQueue();
+      void syncWidgetTasbihQueue();
     };
     drain();
     const sub = AppState.addEventListener('change', state => {
