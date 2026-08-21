@@ -39,6 +39,22 @@ small still gets the Next Prayer design.
 If you want the split, it needs a release where the old kind keeps vending
 systemSmall as a deprecated alias.
 
+## Drawn to the plan's mocks
+
+Checked side by side against the rendered mocks, not from memory:
+
+- **iOS systemLarge** — header with the Hijri date opposite, NEXT, the prayer
+  and its time, `in` over the duration right-aligned, the six times, the two
+  night rows muted beneath them, a rule, then the streak block with the grid
+  beside it.
+- **Android 4×2** — header, the six-column strip, a rule, `Dhuhr in 2:29:17`
+  opposite `2 of 5 logged`, and the night pair under that.
+- **Android 4×4** — the same, plus a rule, `12 day streak · Best 31 · …`, the
+  practice grid across the full width, and `Sunnah 68% this month` opposite
+  `6 fasts`.
+- **Android narrow-and-tall** — mirrors the systemLarge layout rather than the
+  two-column split it used to draw.
+
 ## What was verified, and how
 
 Every widget was placed and driven, not just built.
