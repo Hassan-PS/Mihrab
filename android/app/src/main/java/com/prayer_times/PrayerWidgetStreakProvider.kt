@@ -82,6 +82,13 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       }
     }
 
+    /**
+     * One row has height for the number and one line under it, and the word
+     * STREAK above them is the first thing that can go: "12 days" beside a
+     * practice graph is not ambiguous about what it is counting.
+     */
+    private const val TITLE_MIN_HEIGHT_DP = 80
+
     /** Two launcher rows: room for a fourth line under the streak. */
     private const val OWED_MIN_HEIGHT_DP = 100
 
@@ -109,6 +116,18 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
 
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
+
+      val heightForTitle = try {
+        mgr.getAppWidgetOptions(appWidgetId)
+          .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+      } catch (_: Exception) {
+        0
+      }
+      views.setViewVisibility(
+        R.id.streak_title,
+        if (heightForTitle <= 0 || heightForTitle >= TITLE_MIN_HEIGHT_DP) View.VISIBLE
+        else View.GONE,
+      )
 
       val streak = pr.optInt("streak", 0)
       views.setTextViewText(R.id.streak_title, context.getString(R.string.widget_streak_title))
