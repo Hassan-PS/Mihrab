@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 import { requestAndroidLocationPermission } from '../utils/locationPermission';
 import {
-  getCachedPrayerTimes,
   getOrFetchPrayerTimes,
   getCacheStatus,
   refreshPrayerDataCache,
