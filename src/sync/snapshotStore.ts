@@ -32,7 +32,12 @@ import {
   SUNNAH_KEY,
   notifyPracticeChanged,
 } from '../practice/practiceStore';
-import { coerceQuranState, QURAN_STORAGE_KEY } from '../quran/quranState';
+import {
+  coerceQuranState,
+  primeQuranState,
+  QURAN_STORAGE_KEY,
+} from '../quran/quranState';
+import { republishWidgetPayload } from '../widget/republishWidgetPayload';
 import { emptyData, type SnapshotData, type SyncSelection } from './snapshot';
 import { mergeData, summarise, type MergeSummary } from './merge';
 import type { Snapshot } from './snapshot';
@@ -117,6 +122,7 @@ export async function writeData(
       AsyncStorage.setItem(QURAN_STORAGE_KEY, JSON.stringify(next.quran)),
     );
   }
+  // ...and see below: the Quran store has to be told, not just the disk.
   if (touched.settings) {
     jobs.push(
       AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(next.settings)),
@@ -126,7 +132,28 @@ export async function writeData(
     jobs.push(durableEncryptedSet(LOCATION_KEY, JSON.stringify(next.location)));
   }
   await Promise.all(jobs);
+
+  // Tell the stores, not only the disk.
+  //
+  // Every write above goes straight to a key. The practice stores are fine
+  // with that — `notifyPracticeChanged` drops their cache and everyone
+  // re-reads. The Quran store is not: it holds its state in memory and its
+  // hydrate is idempotent, so once the app has started, nothing short of a
+  // restart would have picked this up. A restore that visibly did nothing to
+  // the reading position until the app was killed is indistinguishable from
+  // a restore that failed.
+  if (touched.quran) {
+    try {
+      primeQuranState(next.quran);
+    } catch (e) {
+      console.warn('snapshotStore: could not adopt the restored Quran state', e);
+    }
+  }
   notifyPracticeChanged();
+
+  // The widget is a reader of every one of these and has no way to notice a
+  // restore on its own.
+  void republishWidgetPayload('queue-drain');
 }
 
 export type ApplyResult = {

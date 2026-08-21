@@ -335,6 +335,26 @@ export function hydrateQuranState(): Promise<void> {
   return hydrating;
 }
 
+/**
+ * Adopt a blob the caller has just written to disk itself.
+ *
+ * Backup restore writes `mihrab.quran.v1` straight to AsyncStorage, because
+ * it is merging whole categories rather than making one edit. That left this
+ * module holding the pre-restore state with `hydrated` already true — so
+ * `hydrateQuranState()` no-opped, every reader kept the old value, and the
+ * widget's reading block described a position the user had just replaced.
+ * It corrected itself on the next process start, which is not a thing a
+ * restore should require.
+ *
+ * Deliberately does NOT persist: the caller wrote it, and writing it back
+ * would race their write with ours over the same key.
+ */
+export function primeQuranState(raw: unknown): void {
+  state = mergeStored(raw);
+  hydrated = true;
+  emit();
+}
+
 function persist(): void {
   const snapshot = state;
   writeMutex = writeMutex

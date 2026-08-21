@@ -13,6 +13,7 @@
 import { Platform } from 'react-native';
 
 import { getPrayerWidgetModule } from '../native/PrayerWidget';
+import { recordDhikrSet } from '../practice/practiceStore';
 import { adjacentPresetId, type TasbihPresetId } from '../tasbih/tasbih';
 import {
   getTasbihState,
@@ -42,6 +43,9 @@ export async function syncWidgetTasbihQueue(
     // The store has to be readable before `next` can ask what follows the
     // current preset.
     await hydrateTasbihState();
+    // Rounds finished on the widget, so they can be written to the practice
+    // log after the drain — see below.
+    let rounds = 0;
     const result = await drainWidgetTasbihQueue({
       take: async () => {
         const json = await mod.takeTasbihQueue!();
@@ -49,7 +53,8 @@ export async function syncWidgetTasbihQueue(
         return JSON.parse(json) as unknown;
       },
       increment: () => {
-        incrementTasbih();
+        const { reachedTarget } = incrementTasbih();
+        if (reachedTarget) rounds += 1;
       },
       reset: () => {
         resetTasbih();
@@ -64,6 +69,18 @@ export async function syncWidgetTasbihQueue(
       console.warn(
         `syncWidgetTasbihQueue: ${result.failed} queued tap(s) could not be applied`,
       );
+    }
+    // A round completed ON THE WIDGET is still a round completed.
+    //
+    // The screen writes one to the practice log the moment the target is
+    // reached (TasbihScreen.onIncrement); the widget's taps replayed through
+    // here did not, so the counter agreed with the widget while Home's Today
+    // summary and the practice graph quietly disagreed with both — a set
+    // recorded nowhere, for the one part of dhikr worth remembering past the
+    // screen. Sequentially, because each one is a read-modify-write of the
+    // encrypted store.
+    for (let i = 0; i < rounds; i++) {
+      await recordDhikrSet();
     }
     return result;
   } catch (e) {

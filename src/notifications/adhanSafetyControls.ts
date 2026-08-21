@@ -21,6 +21,8 @@ import {
 import { handleEndOfDayLogEvent } from './endOfDayLog';
 import { JOURNAL_LOG_ACTION_ID, handlePrayerLogEvent } from './prayerLogAction';
 import { syncWidgetLogQueue } from '../widget/syncWidgetLogQueue';
+import { syncWidgetTasbihQueue } from '../widget/syncWidgetTasbihQueue';
+import { republishWidgetPayload } from '../widget/republishWidgetPayload';
 
 // Re-exported for back-compat with existing importers.
 export { ADHAN_CONTROLS_CATEGORY_ID, ADHAN_ACTION_STOP, ADHAN_ACTION_DISABLE };
@@ -186,11 +188,23 @@ export function registerAdhanSafetyControls() {
 
   notifee.onBackgroundEvent(async event => {
     // Any notification interaction already has the JS runtime up, headless,
-    // so draining the Log Today widget's queue here is free — and it means
-    // the queue empties for someone who answers prayer notifications for
-    // days without ever opening the app. Deliberately not awaited before
-    // the handlers below: the press the user just made comes first.
+    // so draining the widget queues here is free — and it means they empty
+    // for someone who answers prayer notifications for days without ever
+    // opening the app. Deliberately not awaited before the handlers below:
+    // the press the user just made comes first.
+    //
+    // BOTH queues. Only the log one was drained here, so a bead counted on
+    // the Tasbih widget had exactly one way home — the app being opened —
+    // and the entries expire after fourteen days. Someone who counts on the
+    // widget and reads their prayer notifications, which is the whole point
+    // of having both, could lose a fortnight of dhikr without ever seeing an
+    // error, because the widget kept projecting the queue and looked right
+    // the entire time.
     void syncWidgetLogQueue();
+    void syncWidgetTasbihQueue();
+    // Republish afterwards: the drains change what the widgets should say,
+    // and out here there is no screen mounted to notice.
+    void republishWidgetPayload('queue-drain');
     if (await handleJournalActions(event)) return;
     await handleAdhanAction(event, false);
   });
