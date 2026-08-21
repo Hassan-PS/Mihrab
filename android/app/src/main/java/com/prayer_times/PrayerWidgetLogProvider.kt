@@ -237,8 +237,17 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
             views.setTextColor(CHIPS[i], Color.parseColor("#F87171"))
           }
           due -> {
+            // A hollow tick, not a plus.
+            //
+            // The plus said "add something" and left it to the reader to work
+            // out what — on a widget where the whole verb is "log this
+            // prayer". A tick says what tapping produces, and the chip it
+            // becomes is the same tick filled in, so the empty and the done
+            // states are one glyph in two weights rather than two unrelated
+            // symbols. Outline versus fill carries "not yet" versus "done",
+            // which is the distinction that actually matters here.
             views.setInt(CHIPS[i], "setBackgroundResource", R.drawable.widget_log_chip_due)
-            views.setTextViewText(CHIPS[i], "+")
+            views.setTextViewText(CHIPS[i], "✓")
             views.setTextColor(CHIPS[i], accent)
           }
           else -> {
