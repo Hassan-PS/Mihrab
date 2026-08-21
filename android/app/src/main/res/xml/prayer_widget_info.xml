@@ -14,6 +14,25 @@
   different at each end. `targetCellHeight` is 2 because that is the honest
   default — the strip is what most people want and the taller layouts are
   something you opt into by resizing.
+
+  `maxResizeHeight` is 600dp, not the 400 it was, because 400 was smaller
+  than a size this widget actually reaches. 400 reads like four rows times
+  the nominal 100dp a row, but a launcher row is not 100dp of widget — the
+  gaps between rows belong to the widget too, and a row is only 100dp at
+  one particular density. On a 1080x2400 emulator at 420dpi the card
+  measures 99dp at one row, 210 at two, 321 at three and 432 at four; drop
+  the same device to 300dpi, which is what a user with a large display size
+  gets, and three rows alone is 488dp. Declaring a 400dp maximum for a card
+  the launcher is already drawing at 488 is just false, and it is the
+  practice footer — the band that opens at 375dp — that a low ceiling
+  strands. 600dp covers four rows at every cell height a phone or tablet is
+  likely to hand us.
+
+  Worth knowing before touching the band constants: at 420dpi a Pixel-style
+  4x6 grid tops this widget out at three rows, so 321dp is all it ever gets
+  there and the footer only appears on roomier configurations. Both bands
+  were rendered and checked, the 265-375 one at 420dpi and the 375-up one at
+  300dpi; neither clips.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
@@ -32,4 +51,5 @@
     android:targetCellWidth="4"
     android:targetCellHeight="2"
     android:maxResizeWidth="500dp"
-    android:maxResizeHeight="400dp" />
+    android:maxResizeHeight="600dp" />
+
