@@ -59,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.06"
                 android:maxLines="1"
@@ -71,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textColor="#E8EAED"
-                android:textSize="18sp"
+                android:textSize="23sp"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1"
                 android:ellipsize="end" />
@@ -81,7 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
-                android:textSize="11sp"
+                android:textSize="13sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
                 android:textColor="#9AA0A6"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -108,7 +108,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:visibility="gone" />
@@ -130,7 +130,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.06"
                 android:maxLines="1" />
@@ -141,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
                 android:textColor="#E8EAED"
-                android:textSize="22sp"
+                android:textSize="27sp"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1" />
 
@@ -150,7 +150,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#9AA0A6"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:maxLines="2"
                 android:ellipsize="end" />
         </LinearLayout>
