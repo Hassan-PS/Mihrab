@@ -325,6 +325,65 @@ struct WidgetPayload: Codable {
   }
 }
 
+// MARK: - Decoding that fails one block at a time
+
+/// One malformed field used to blank every widget at once.
+///
+/// `WidgetPayload` is a single `Codable`, and the synthesized decoder is
+/// all-or-nothing: `decodeIfPresent` THROWS when a key is present but its
+/// value will not decode, so a `practice.streak` that arrived as a string —
+/// or any future field this build has never seen — took the whole payload
+/// down. `loadPayload` returned nil and all six iOS widgets showed "Open
+/// Mihrab" together, including the prayer times, which were perfectly fine.
+/// Android never had this: its `optJSONObject` reads mean a bad block costs
+/// that block.
+///
+/// So the prayer times stay strict — a payload without them has nothing this
+/// app exists to draw, and failing there is exactly what makes the card ask
+/// to be opened. Everything else degrades to absent, which every view
+/// already handles, because absent has always had to mean "the app has not
+/// told us".
+extension WidgetPayload {
+  enum CodingKeys: String, CodingKey {
+    case dayLabel, rows, sunriseRow, extraRows
+    case nextKey, nextPrayerName, nextPrayerTime, locationName
+    case seasonal, days
+    case practice, today, reading, hijri, tasbih
+  }
+
+  init(from decoder: Decoder) throws {
+    let c = try decoder.container(keyedBy: CodingKeys.self)
+
+    // Strict: without these there is no widget.
+    dayLabel = try c.decode(String.self, forKey: .dayLabel)
+    rows = try c.decode([Row].self, forKey: .rows)
+
+    // Lenient: `try?` collapses both "absent" and "present but unreadable"
+    // to nil. The double-optional flattening is deliberate — decodeIfPresent
+    // returns T?, and try? wraps it again.
+    sunriseRow = (try? c.decodeIfPresent(Row.self, forKey: .sunriseRow)) ?? nil
+    extraRows = (try? c.decodeIfPresent([Row].self, forKey: .extraRows)) ?? nil
+    nextKey = (try? c.decodeIfPresent(String.self, forKey: .nextKey)) ?? nil
+    nextPrayerName = (try? c.decodeIfPresent(String.self, forKey: .nextPrayerName)) ?? nil
+    nextPrayerTime = (try? c.decodeIfPresent(String.self, forKey: .nextPrayerTime)) ?? nil
+    locationName = (try? c.decodeIfPresent(String.self, forKey: .locationName)) ?? nil
+    seasonal = (try? c.decodeIfPresent(SeasonalFlags.self, forKey: .seasonal)) ?? nil
+
+    // All or nothing on purpose. Every consumer of `days` indexes it as
+    // today + i, so half a schedule is worse than none: dropping one bad
+    // entry would silently shift every day after it. Losing the array falls
+    // back to the single-day timeline, which is correct, just shorter.
+    days = (try? c.decodeIfPresent([Day].self, forKey: .days)) ?? nil
+
+    practice = (try? c.decodeIfPresent(Practice.self, forKey: .practice)) ?? nil
+    today = (try? c.decodeIfPresent(Today.self, forKey: .today)) ?? nil
+    reading = (try? c.decodeIfPresent(Reading.self, forKey: .reading)) ?? nil
+    hijri = (try? c.decodeIfPresent(Hijri.self, forKey: .hijri)) ?? nil
+    tasbih = (try? c.decodeIfPresent(Tasbih.self, forKey: .tasbih)) ?? nil
+  }
+}
+
+
 struct Provider: TimelineProvider {
   func placeholder(in context: Context) -> Entry {
     Entry(date: Date(), payload: Self.sample, dynamicNextKey: "Dhuhr", dynamicNextName: "Dhuhr", dynamicNextTime: "12:10")
