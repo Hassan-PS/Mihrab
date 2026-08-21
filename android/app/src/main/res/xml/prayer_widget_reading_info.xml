@@ -2,7 +2,14 @@
 <!--
   Continue Reading.
 
-  4x2 by default, resizable down to 2x2. The two columns need the width — a
+  4x1 by default. One row is the honest size: the answer is a surah and a
+  page, and a card twice as tall as its own content is a void with a border
+  round it. Resizable up for anyone who wants the progress bar and the
+  khatmah portion with it, and down to 2x2 where the side column drops.
+
+  Was 4x2, and every attempt to make that height look deliberate — centring
+  the block, enlarging the type, pinning the header to one edge — only moved
+  the emptiness around. Sizing the widget to what it says is the fix. The two columns need the width — a
   surah name and a portion counter side by side in half of it leaves neither
   readable — so below about four cells the provider drops the side column
   and the left one carries on answering the question the widget exists for:
@@ -17,15 +24,15 @@
     android:description="@string/widget_description_reading"
     android:initialLayout="@layout/prayer_widget_reading"
     android:minWidth="250dp"
-    android:minHeight="90dp"
+    android:minHeight="50dp"
     android:previewImage="@mipmap/ic_launcher"
     android:previewLayout="@layout/prayer_widget_reading_preview"
     android:resizeMode="horizontal|vertical"
     android:minResizeWidth="110dp"
-    android:minResizeHeight="60dp"
+    android:minResizeHeight="40dp"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
     android:targetCellWidth="4"
-    android:targetCellHeight="2"
+    android:targetCellHeight="1"
     android:maxResizeWidth="500dp"
     android:maxResizeHeight="200dp" />

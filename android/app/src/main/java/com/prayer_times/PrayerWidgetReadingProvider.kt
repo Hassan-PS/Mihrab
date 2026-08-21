@@ -42,7 +42,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     appWidgetIds: IntArray,
   ) {
     for (id in appWidgetIds) {
-      appWidgetManager.updateAppWidget(id, buildViews(context, widthDp(appWidgetManager, id)))
+      appWidgetManager.updateAppWidget(id, buildViews(context, widthDp(appWidgetManager, id), heightDp(appWidgetManager, id)))
     }
   }
 
@@ -55,7 +55,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
     appWidgetManager.updateAppWidget(
       appWidgetId,
-      buildViews(context, widthDp(appWidgetManager, appWidgetId)),
+      buildViews(context, widthDp(appWidgetManager, appWidgetId), heightDp(appWidgetManager, appWidgetId)),
     )
   }
 
@@ -64,10 +64,16 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetReadingProvider::class.java))
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context, widthDp(mgr, id)))
+      for (id in ids) mgr.updateAppWidget(id, buildViews(context, widthDp(mgr, id), heightDp(mgr, id)))
     }
 
     /** The launcher's own measurement, or 0 when it has not measured yet. */
+    private fun heightDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
+      mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+    } catch (_: Exception) {
+      0
+    }
+
     private fun widthDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
       mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
     } catch (_: Exception) {
@@ -96,7 +102,10 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
       }
     }
 
-    fun buildViews(context: Context, widthDp: Int = 0): RemoteViews {
+    /** Two launcher rows: room for the bar and the lines under it. */
+    private const val PROGRESS_MIN_HEIGHT_DP = 100
+
+    fun buildViews(context: Context, widthDp: Int = 0, heightDp: Int = 0): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_reading)
       val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
       views.setInt(R.id.widget_root, "setBackgroundColor", background)
@@ -166,9 +175,14 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
         return views
       }
       views.setViewVisibility(R.id.reading_side, View.VISIBLE)
-      views.setViewVisibility(R.id.reading_progress, View.VISIBLE)
-      views.setViewVisibility(R.id.reading_progress_label, View.VISIBLE)
-      views.setViewVisibility(R.id.reading_tail, View.VISIBLE)
+      // At one row there is height for the header and one line under it, and
+      // the progress bar belongs to the taller sizes. Hiding it is not a
+      // loss: the page number above says the same thing, and a 4dp bar
+      // squeezed against a card edge says it worse.
+      val tall = heightDp <= 0 || heightDp >= PROGRESS_MIN_HEIGHT_DP
+      views.setViewVisibility(R.id.reading_progress, if (tall) View.VISIBLE else View.GONE)
+      views.setViewVisibility(R.id.reading_progress_label, if (tall) View.VISIBLE else View.GONE)
+      views.setViewVisibility(R.id.reading_tail, if (tall) View.VISIBLE else View.GONE)
 
       val khatmah = r.optJSONObject("khatmah")
       views.setTextViewText(
