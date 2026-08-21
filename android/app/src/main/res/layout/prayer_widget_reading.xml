@@ -29,6 +29,13 @@
         android:textSize="12sp"
         android:visibility="gone" />
 
+        <!--
+            Centred, not top-anchored. A widget is only ever exactly as tall
+            as its content at one size; at every other size the slack has to
+            go somewhere, and pooling it under the last line reads as a card
+            that ran out of things to say. Balanced above and below it reads
+            as breathing room.
+        -->
     <LinearLayout
         android:id="@+id/widget_content"
         android:layout_width="match_parent"
@@ -36,11 +43,15 @@
         android:orientation="horizontal"
         android:baselineAligned="false"
         android:visibility="gone">
+        android:gravity="center_vertical"
 
+        <!-- Centred inside the full-height column: this is where the slack
+             actually is, not on the row above it. -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:orientation="vertical">
 
             <TextView

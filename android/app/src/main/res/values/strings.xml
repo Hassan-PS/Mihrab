@@ -164,4 +164,8 @@
     </plurals>
     <string name="widget_next_label">NEXT</string>
     <string name="widget_in_label">in</string>
+    <!-- The Continue Reading widget before anything has been read. -->
+    <string name="widget_reading_header_start">THE QURAN</string>
+    <string name="widget_reading_start_title">Start reading</string>
+    <string name="widget_reading_start_note">Pick up where you like, or begin a khatmah.</string>
 </resources>

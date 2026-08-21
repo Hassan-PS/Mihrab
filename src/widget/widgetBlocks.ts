@@ -154,6 +154,17 @@ export type WidgetReadingBlock = {
    */
   mode: 'mushaf' | 'translation';
   khatmah?: WidgetKhatmah;
+  /**
+   * False when the Quran has never been opened — no last position, no
+   * bookmarks, no plan.
+   *
+   * The block used to be omitted entirely in that case, which left the
+   * Continue Reading widget on its "Open Mihrab" placeholder forever: the
+   * one widget whose whole job is to get someone back into the habit, dead
+   * for exactly the person who has not started one. A widget with nothing to
+   * continue still has something to say.
+   */
+  started: boolean;
 };
 
 export type WidgetHijriBlock = {
@@ -365,7 +376,23 @@ export function buildReadingBlock(input: {
   const now = (input.now ?? new Date()).getTime();
   const plan = input.khatmah;
   const last = input.lastRead;
-  if (!last && !plan) return null;
+  if (!last && !plan) {
+    // Nothing read, no plan. Still a block: the widget renders an invitation
+    // rather than a placeholder telling someone to go and open the app.
+    return {
+      surah: 1,
+      surahName: '',
+      ayah: 1,
+      page: 1,
+      juz: 1,
+      pagesRead: 0,
+      totalPages: KHATMAH_TOTAL_PAGES,
+      bookmarks: input.bookmarks.length,
+      lastReadAt: null,
+      mode: 'translation',
+      started: false,
+    };
+  }
 
   // With a plan running, the plan's own page is the one to continue from —
   // the user may have browsed elsewhere since, and the widget's job is the
@@ -407,6 +434,7 @@ export function buildReadingBlock(input: {
     totalPages: KHATMAH_TOTAL_PAGES,
     bookmarks: input.bookmarks.length,
     lastReadAt: last?.updatedAt ?? null,
+    started: true,
     mode:
       last?.mode === 'mushaf' && input.mushafDownloaded === true
         ? 'mushaf'

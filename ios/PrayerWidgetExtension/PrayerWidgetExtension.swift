@@ -251,6 +251,10 @@ struct WidgetPayload: Codable {
     /// open and whether the mushaf is actually on disk. Optional because a
     /// payload written by an older build does not carry it.
     var mode: String? = nil
+    /// False when the Quran has never been opened. Optional and defaulting to
+    /// true so a payload from an older build still reads as "started" — the
+    /// block only ever existed then when something HAD been read.
+    var started: Bool? = nil
     let khatmah: Khatmah?
   }
 

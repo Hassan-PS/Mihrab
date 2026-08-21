@@ -40,10 +40,20 @@
         android:baselineAligned="false"
         android:visibility="gone">
 
+        <!--
+            The count column centres rather than stacking at the top.
+
+            Its children are all wrap_content inside a full-height column, so
+            they used to pile up under the label and leave the bottom half of
+            the card empty next to buttons that fill it — the two sides of
+            one widget disagreeing about how tall it is. Centring costs
+            nothing and the number lands opposite the button that changes it.
+        -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:orientation="vertical">
 
             <TextView

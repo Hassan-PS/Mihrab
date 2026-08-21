@@ -166,10 +166,30 @@ describe('reading', () => {
     updatedAt: NOW.getTime() - 2 * 86_400_000,
   };
 
-  it('is null when nothing has ever been read and no plan runs', () => {
-    expect(
-      buildReadingBlock({ lastRead: null, bookmarks: [], khatmah: null }),
-    ).toBeNull();
+  it('still returns a block when nothing has been read and no plan runs', () => {
+    // It used to be null, which left the Continue Reading widget on its
+    // "Open Mihrab" placeholder for exactly the person the widget exists to
+    // get started. `started: false` is what the widget renders an invitation
+    // from.
+    const block = buildReadingBlock({
+      lastRead: null,
+      bookmarks: [],
+      khatmah: null,
+    });
+    expect(block).not.toBeNull();
+    expect(block?.started).toBe(false);
+    expect(block?.khatmah).toBeUndefined();
+    expect(block?.lastReadAt).toBeNull();
+  });
+
+  it('marks a block with a real position as started', () => {
+    const block = buildReadingBlock({
+      lastRead: LAST_READ,
+      bookmarks: [],
+      khatmah: null,
+      now: NOW,
+    });
+    expect(block?.started).toBe(true);
   });
 
   describe('which reader a tap opens', () => {

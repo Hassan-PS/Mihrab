@@ -116,6 +116,34 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
+      // Never opened the Quran. This widget's whole job is getting someone
+      // back into the habit, and it used to be a dead card saying "Open
+      // Mihrab" for exactly the person who has not started one. An invitation
+      // costs the same space and asks for the tap the widget wants anyway.
+      if (!r.optBoolean("started", true)) {
+        views.setTextViewText(
+          R.id.reading_header,
+          context.getString(R.string.widget_reading_header_start),
+        )
+        views.setTextViewText(
+          R.id.reading_surah,
+          context.getString(R.string.widget_reading_start_title),
+        )
+        views.setTextViewText(
+          R.id.reading_position,
+          context.getString(R.string.widget_reading_start_note),
+        )
+        views.setViewVisibility(R.id.reading_progress, View.GONE)
+        views.setViewVisibility(R.id.reading_progress_label, View.GONE)
+        views.setViewVisibility(R.id.reading_tail, View.GONE)
+        views.setViewVisibility(R.id.reading_side, View.GONE)
+        views.setOnClickPendingIntent(R.id.widget_root, openQuranIntent(context))
+        return views
+      }
+      views.setViewVisibility(R.id.reading_progress, View.VISIBLE)
+      views.setViewVisibility(R.id.reading_progress_label, View.VISIBLE)
+      views.setViewVisibility(R.id.reading_tail, View.VISIBLE)
+
       val khatmah = r.optJSONObject("khatmah")
       views.setTextViewText(
         R.id.reading_header,

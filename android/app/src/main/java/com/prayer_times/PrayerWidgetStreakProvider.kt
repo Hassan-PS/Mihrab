@@ -82,6 +82,14 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       }
     }
 
+    /** Two launcher rows: room for a fourth line under the streak. */
+    private const val OWED_MIN_HEIGHT_DP = 100
+
+    /** Enough for a fifth. Below it the month's fasts are the first to go —
+     *  a make-up count is something to act on, a fast count is a pat on the
+     *  back. */
+    private const val FASTS_MIN_HEIGHT_DP = 130
+
     fun buildViews(context: Context, appWidgetId: Int, mgr: AppWidgetManager): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_streak)
       val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
@@ -112,8 +120,26 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       )
       views.setTextViewText(R.id.streak_second, secondLine(context, pr))
 
+      // How many lines the card can actually hold.
+      //
+      // These stacked one after another regardless of height, so at 2x1 the
+      // make-up line was drawn half inside the card and half past its bottom
+      // edge — text cut through the middle, which reads as a rendering fault
+      // rather than as a widget with more to say than room to say it. Each
+      // optional line now has to earn its place from the measured height.
+      val heightDp = try {
+        mgr.getAppWidgetOptions(appWidgetId)
+          .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+      } catch (_: Exception) {
+        0
+      }
+      // 0 means the launcher has not measured yet — no opinion, not "no
+      // room", or a first draw would hide everything.
+      val roomForOwed = heightDp <= 0 || heightDp >= OWED_MIN_HEIGHT_DP
+      val roomForFasts = heightDp <= 0 || heightDp >= FASTS_MIN_HEIGHT_DP
+
       val owed = pr.optInt("owed", 0)
-      if (owed > 0) {
+      if (owed > 0 && roomForOwed) {
         views.setViewVisibility(R.id.streak_owed, View.VISIBLE)
         views.setTextViewText(
           R.id.streak_owed,
@@ -124,7 +150,7 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       }
 
       val fasts = pr.optInt("fastsThisMonth", 0)
-      if (fasts > 0) {
+      if (fasts > 0 && roomForFasts) {
         views.setViewVisibility(R.id.streak_fasts, View.VISIBLE)
         views.setTextViewText(
           R.id.streak_fasts,

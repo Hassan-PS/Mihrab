@@ -69,17 +69,55 @@ struct ReadingEntryView: View {
   var entry: ReadingEntry
   @Environment(\.widgetFamily) var family
 
+  /// Nothing has ever been read: no position, no bookmarks, no plan.
+  ///
+  /// The block used to be omitted entirely in that case and every family fell
+  /// through to "Open Mihrab" — this widget dead for exactly the person whose
+  /// habit it exists to restart. It says something now instead.
+  private var notStarted: Bool {
+    guard let r = entry.reading else { return false }
+    return r.started == false
+  }
+
   var body: some View {
     switch family {
     case .accessoryInline:
-      Text(verbatim: entry.reading.map { "Page \($0.page) · \($0.surahName)" } ?? "Mihrab")
+      Text(notStarted ? "Read Qur'an" : (entry.reading.map { "Page \($0.page) · \($0.surahName)" } ?? "Mihrab"))
     case .accessoryRectangular:
-      rectangularBody
+      if notStarted { startBody } else { rectangularBody }
     case .systemMedium:
-      mediumBody
+      if notStarted { startBody } else { mediumBody }
     default:
-      smallBody
+      if notStarted { startBody } else { smallBody }
     }
+  }
+
+  /// The invitation. Deliberately not a progress view of zero: a bar with
+  /// nothing in it reads as failure, and there is nothing here to have
+  /// failed at yet.
+  @ViewBuilder
+  private var startBody: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      Text("THE QUR'AN")
+        .kerning(0.8)
+        .font(.system(size: 9, weight: .semibold))
+        .foregroundStyle(widgetMuted)
+        .lineLimit(1)
+      Spacer(minLength: 4)
+      Text("Start reading")
+        .font(.system(size: 20, weight: .semibold))
+        .foregroundStyle(widgetText)
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
+      Text("Pick up where you like, or begin a khatmah.")
+        .font(.system(size: 11))
+        .foregroundStyle(widgetMuted)
+        .lineLimit(2)
+        .minimumScaleFactor(0.8)
+        .padding(.top, 2)
+      Spacer(minLength: 0)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
   }
 
   // MARK: - systemSmall
