@@ -228,6 +228,16 @@ declaring them made the refresh story look far better covered than it was.
   a key is present but unreadable, so one malformed `practice` field blanked
   all six cards at once, prayer times included. Prayer times stay strict;
   every other block degrades to absent.
+
+  The hand-written `init(from:)` that replaces the synthesized one is the
+  riskiest edit in this whole batch — a single wrong key name would silently
+  nil a field rather than fail, and it would compile. So it was run, not
+  reasoned about: the extension's sources were compiled for macOS against a
+  real 30-day / 94-practice-day payload lifted out of the simulator's App
+  Group, and every field of every block was asserted. All sixteen checks
+  pass. A `practice.streak` corrupted to a string costs `practice` and
+  nothing else — prayer times, `days` and `tasbih` all survive — and a
+  payload with no `rows` is still refused outright.
 - **Android redraws each widget behind its own guard**, so one card cannot
   take down the other seven.
 - **Tap queues** discard entries older than fourteen days at drain, are
