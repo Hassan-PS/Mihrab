@@ -26,13 +26,17 @@ import org.json.JSONObject
  */
 class PrayerWidgetReadingProvider : AppWidgetProvider() {
 
+  // Every branch goes through PrayerWidgetProvider.requestUpdate rather than
+  // this provider's own: one signal has to redraw every widget and re-arm the
+  // alarm chain, or a home screen holding only this one stops moving. See the
+  // comment on requestUpdate.
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
     when (intent.action) {
       Intent.ACTION_USER_PRESENT,
-      Intent.ACTION_SCREEN_ON,
       Intent.ACTION_BOOT_COMPLETED,
-      PrayerWidgetProvider.ACTION_PRAYER_TIME_ELAPSED -> requestUpdate(context)
+      PrayerWidgetProvider.ACTION_PRAYER_TIME_ELAPSED ->
+        PrayerWidgetProvider.requestUpdate(context)
     }
   }
 

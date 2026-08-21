@@ -53,8 +53,6 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
-          <action android:name="android.intent.action.WALLPAPER_CHANGED" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -70,8 +68,6 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
-          <action android:name="android.intent.action.WALLPAPER_CHANGED" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -87,8 +83,6 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
-          <action android:name="android.intent.action.WALLPAPER_CHANGED" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -106,7 +100,6 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
           <action android:name="com.prayer_times.ACTION_WIDGET_LOG_TAP" />
@@ -128,7 +121,6 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -145,7 +137,6 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -166,9 +157,9 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_WIDGET_TASBIH_TAP" />
+          <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
         <meta-data
           android:name="android.appwidget.provider"
@@ -188,7 +179,6 @@
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
-          <action android:name="android.intent.action.SCREEN_ON" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="android.intent.action.DATE_CHANGED" />
           <action android:name="android.intent.action.TIMEZONE_CHANGED" />
