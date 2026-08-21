@@ -40,8 +40,8 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:baselineAligned="false"
-        android:visibility="gone">
         android:gravity="center_vertical"
+        android:visibility="gone">
 
         <!-- Centred inside the full-height column: this is where the slack
              actually is, not on the row above it. -->
@@ -119,18 +119,34 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- fitEnd, and a height that follows the card rather than the
-             bitmap. At one row the graph is taller than the space it has and
-             was drawing past the card's edge; scaling it to fit is the
-             difference between a graph and a clipped one. -->
+        <!--
+            centerInside, and NO adjustViewBounds.
+
+            The graph is drawn at the pixel size it wants (see
+            PracticeGridBitmap) and must never be stretched to something else:
+            an upscaled bitmap of 14px squares is a soft grey mush, and the
+            squares stop reading as squares.
+
+            `match_parent` height with `adjustViewBounds` is what made that
+            happen — with an EXACTLY height spec, adjustViewBounds recomputes
+            the WIDTH from the aspect ratio, so the view grew to the full
+            height of the card and fitEnd blew the bitmap up to match. Height
+            still follows the card, because that is what centres the graph
+            against the text beside it, but centerInside only ever scales
+            DOWN: crisp at every size the card is tall enough for, and shrunk
+            rather than clipped when it is not.
+
+            Staying at its natural height also keeps the graph clear of the
+            launcher's rounded corners, which at one row cut well inside the
+            card's own 10dp padding.
+        -->
         <ImageView
             android:id="@+id/streak_grid"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitEnd"
+            android:scaleType="centerInside"
             android:contentDescription="@string/widget_streak_grid_description" />
     </LinearLayout>
 </FrameLayout>

@@ -5,6 +5,12 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.content.res.Configuration
+import android.graphics.Paint
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.util.TypedValue
 import android.content.Intent
 import android.net.Uri
 import android.view.View
@@ -29,13 +35,17 @@ import org.json.JSONObject
  */
 class PrayerWidgetStreakProvider : AppWidgetProvider() {
 
+  // Every branch goes through PrayerWidgetProvider.requestUpdate rather than
+  // this provider's own: one signal has to redraw every widget and re-arm the
+  // alarm chain, or a home screen holding only this one stops moving. See the
+  // comment on requestUpdate.
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
     when (intent.action) {
       Intent.ACTION_USER_PRESENT,
-      Intent.ACTION_SCREEN_ON,
       Intent.ACTION_BOOT_COMPLETED,
-      PrayerWidgetProvider.ACTION_PRAYER_TIME_ELAPSED -> requestUpdate(context)
+      PrayerWidgetProvider.ACTION_PRAYER_TIME_ELAPSED ->
+        PrayerWidgetProvider.requestUpdate(context)
     }
   }
 
@@ -83,19 +93,89 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
     }
 
     /**
-     * One row has height for the number and one line under it, and the word
-     * STREAK above them is the first thing that can go: "12 days" beside a
-     * practice graph is not ambiguous about what it is counting.
+     * The widget's size IN THE ORIENTATION IT IS BEING DRAWN IN.
+     *
+     * `OPTION_APPWIDGET_MIN_HEIGHT` is not "the height". The options bundle
+     * carries a size for each orientation, and the pairing is only what the
+     * names suggest for width: MIN/MAX_WIDTH are portrait and landscape,
+     * but MIN/MAX_HEIGHT are LANDSCAPE and PORTRAIT — a widget is shorter
+     * lying down than standing up, so the smaller height is the landscape
+     * one. Reading MIN_HEIGHT on a phone held upright answers a question
+     * nobody asked: how tall this card would be if the phone were turned
+     * sideways.
+     *
+     * That is why STREAK vanished from a one-row card with room to spare.
+     * The launcher reports minH=52 / maxH=99 for the 4x1 placement on a
+     * 420dpi phone; the label was measured against 52, found wanting, and
+     * only came back when the card was dragged tall enough that even the
+     * landscape figure cleared the bar — which is exactly the "expand it and
+     * the missing part appears" symptom.
+     *
+     * Ask the configuration which way up we are and read the matching pair.
+     * Either number is 0 when the launcher has not measured yet.
      */
-    private const val TITLE_MIN_HEIGHT_DP = 80
+    private fun sizeDp(
+      context: Context,
+      mgr: AppWidgetManager,
+      appWidgetId: Int,
+    ): Pair<Int, Int> {
+      val opts = try {
+        mgr.getAppWidgetOptions(appWidgetId)
+      } catch (_: Exception) {
+        null
+      } ?: return Pair(0, 0)
+      val landscape =
+        context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+      val width = opts.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
+        else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+        0,
+      )
+      val height = opts.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
+        else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+        0,
+      )
+      // A launcher that fills only the one pair still deserves an answer.
+      return Pair(
+        if (width > 0) width else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0),
+        if (height > 0) height else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0),
+      )
+    }
 
-    /** Two launcher rows: room for a fourth line under the streak. */
-    private const val OWED_MIN_HEIGHT_DP = 100
+    /** 10dp top + 10dp bottom, from the layout's own padding. */
+    private const val PADDING_DP = 20f
 
-    /** Enough for a fifth. Below it the month's fasts are the first to go —
-     *  a make-up count is something to act on, a fast count is a pat on the
-     *  back. */
-    private const val FASTS_MIN_HEIGHT_DP = 130
+    /** A card exactly as tall as its text is a card with its text against
+     *  both edges. Ask for a little more than the arithmetic. */
+    private const val BREATHING_DP = 8f
+
+    /** The 10sp label, plus the 2dp between it and the number. */
+    private const val TITLE_LINE_DP = 15f
+
+    /** The 30sp streak number. */
+    private const val VALUE_LINE_DP = 36f
+
+    /** One 11sp line, plus the 1dp above it. */
+    private const val BODY_LINE_DP = 14f
+
+    /**
+     * How tall the card has to be to hold the number, `bodyLines` lines of
+     * 11sp under it, and the title above if `title`.
+     *
+     * Computed rather than tabulated, because the text scales. The three
+     * constants this replaced were each written for one font size, so at
+     * 1.3x accessibility text the same card that was judged to fit three
+     * lines fitted two, and the third was drawn through the card's edge.
+     * Scaling the requirement is the only form of this that is right at
+     * both ends of the range.
+     */
+    private fun requiredHeightDp(context: Context, title: Boolean, bodyLines: Int): Int {
+      val scale = context.resources.configuration.fontScale.coerceIn(0.85f, 2f)
+      val text = (if (title) TITLE_LINE_DP else 0f) +
+        VALUE_LINE_DP + BODY_LINE_DP * bodyLines
+      return Math.ceil((PADDING_DP + BREATHING_DP + text * scale).toDouble()).toInt()
+    }
 
     fun buildViews(context: Context, appWidgetId: Int, mgr: AppWidgetManager): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_streak)
@@ -117,16 +197,29 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
-      val heightForTitle = try {
-        mgr.getAppWidgetOptions(appWidgetId)
-          .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
-      } catch (_: Exception) {
-        0
-      }
+      val (widthDp, heightDp) = sizeDp(context, mgr, appWidgetId)
+
+      // How many lines the card can actually hold.
+      //
+      // These used to stack one after another regardless of height, so at
+      // 2x1 the make-up line was drawn half inside the card and half past
+      // its bottom edge — text cut through the middle, which reads as a
+      // rendering fault rather than as a widget with more to say than room
+      // to say it. Each optional line has to earn its place from the
+      // measured height.
+      //
+      // 0 means the launcher has not measured yet. Draw the card's own
+      // design — title, number, one line — and nothing optional: that is
+      // what the layout is sized for, so it cannot overflow, and the first
+      // onAppWidgetOptionsChanged corrects it.
+      val measured = heightDp > 0
+      val showTitle = !measured || heightDp >= requiredHeightDp(context, true, 1)
+      val roomForOwed = measured && heightDp >= requiredHeightDp(context, showTitle, 2)
+      val roomForFasts = measured && heightDp >= requiredHeightDp(context, showTitle, 3)
+
       views.setViewVisibility(
         R.id.streak_title,
-        if (heightForTitle <= 0 || heightForTitle >= TITLE_MIN_HEIGHT_DP) View.VISIBLE
-        else View.GONE,
+        if (showTitle) View.VISIBLE else View.GONE,
       )
 
       val streak = pr.optInt("streak", 0)
@@ -137,27 +230,45 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
         R.id.streak_unit,
         context.resources.getQuantityString(R.plurals.widget_streak_days, streak, streak),
       )
-      views.setTextViewText(R.id.streak_second, secondLine(context, pr))
-
-      // How many lines the card can actually hold.
-      //
-      // These stacked one after another regardless of height, so at 2x1 the
-      // make-up line was drawn half inside the card and half past its bottom
-      // edge — text cut through the middle, which reads as a rendering fault
-      // rather than as a widget with more to say than room to say it. Each
-      // optional line now has to earn its place from the measured height.
-      val heightDp = try {
-        mgr.getAppWidgetOptions(appWidgetId)
-          .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
-      } catch (_: Exception) {
-        0
-      }
-      // 0 means the launcher has not measured yet — no opinion, not "no
-      // room", or a first draw would hide everything.
-      val roomForOwed = heightDp <= 0 || heightDp >= OWED_MIN_HEIGHT_DP
-      val roomForFasts = heightDp <= 0 || heightDp >= FASTS_MIN_HEIGHT_DP
+      // Ten weeks at 4x2, five at 2x2 — measured, not assumed. A grid sized
+      // for the wide case and drawn into the narrow one is what makes cells
+      // 4px and the whole thing a texture rather than a record.
+      val weeks = if (widthDp >= 220) 10 else 5
+      val density = context.resources.displayMetrics.density
+      val cell = (7 * density).toInt().coerceAtLeast(3)
+      val gap = (2 * density).toInt().coerceAtLeast(1)
 
       val owed = pr.optInt("owed", 0)
+      val fasts = pr.optInt("fastsThisMonth", 0)
+
+      // A make-up count is never simply dropped.
+      //
+      // At one row — the size this widget ships at — the card holds the
+      // title, the number and ONE line beneath it, and a fifth line was
+      // drawn through the card's bottom edge. The response to that was to
+      // hide the make-up count, which is the wrong thing to lose: it is the
+      // only line on the card that asks the reader to do something, and a
+      // widget that quietly stops mentioning three owed prayers is worse
+      // than one that never mentioned them.
+      //
+      // So when it cannot have a line of its own it joins the summary line,
+      // first and in the danger colour, and the softer facts give way to it
+      // in turn. The line is measured against the column it has to fit in
+      // rather than guessed at, because the parts are localized and their
+      // widths are not knowable from here.
+      val inlineOwed = owed > 0 && !roomForOwed
+      val inlineFasts = fasts > 0 && !roomForFasts
+      views.setTextViewText(
+        R.id.streak_second,
+        summaryLine(
+          context = context,
+          pr = pr,
+          owed = if (inlineOwed) owed else 0,
+          fasts = if (inlineFasts) fasts else 0,
+          widthPx = summaryWidthPx(context, widthDp, weeks, cell, gap),
+        ),
+      )
+
       if (owed > 0 && roomForOwed) {
         views.setViewVisibility(R.id.streak_owed, View.VISIBLE)
         views.setTextViewText(
@@ -168,7 +279,6 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
         views.setViewVisibility(R.id.streak_owed, View.GONE)
       }
 
-      val fasts = pr.optInt("fastsThisMonth", 0)
       if (fasts > 0 && roomForFasts) {
         views.setViewVisibility(R.id.streak_fasts, View.VISIBLE)
         views.setTextViewText(
@@ -178,16 +288,6 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       } else {
         views.setViewVisibility(R.id.streak_fasts, View.GONE)
       }
-
-      // Ten weeks at 4x2, five at 2x2 — measured, not assumed. A grid sized
-      // for the wide case and drawn into the narrow one is what makes cells
-      // 4px and the whole thing a texture rather than a record.
-      val widthDp = mgr.getAppWidgetOptions(appWidgetId)
-        .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
-      val weeks = if (widthDp >= 220) 10 else 5
-      val density = context.resources.displayMetrics.density
-      val cell = (7 * density).toInt().coerceAtLeast(3)
-      val gap = (2 * density).toInt().coerceAtLeast(1)
       views.setImageViewBitmap(
         R.id.streak_grid,
         PracticeGridBitmap.render(pr.optJSONArray("days"), weeks, cell, gap, accent),
@@ -197,9 +297,67 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       return views
     }
 
-    /** "Best 31 · 2 of 5 today · Sunnah 68%", dropping the empty halves. */
-    private fun secondLine(context: Context, pr: JSONObject): String {
-      val parts = mutableListOf<String>()
+    private const val SEPARATOR = " · "
+
+    /** The danger colour the make-up line carries when it has one. */
+    private const val OWED_COLOR = "#F87171"
+
+    /**
+     * The width the summary line has to live in: the card, less its padding,
+     * less the graph and the gap before it.
+     *
+     * The graph is measured from the bitmap that is about to be drawn rather
+     * than from a nominal size, so the two can never disagree about how much
+     * room is left.
+     */
+    private fun summaryWidthPx(
+      context: Context,
+      widthDp: Int,
+      weeks: Int,
+      cell: Int,
+      gap: Int,
+    ): Float {
+      if (widthDp <= 0) return 0f
+      val density = context.resources.displayMetrics.density
+      val gridPx = weeks * cell + (weeks - 1) * gap
+      // 10dp padding either side, and the 8dp margin before the graph.
+      return widthDp * density - 28 * density - gridPx
+    }
+
+    /**
+     * "3 to make up · Best 31 · 2 of 5 today · Sunnah 68%", dropping the
+     * empty halves — and, when the line is wider than the column it has,
+     * dropping the softest fact still in it until the rest fits.
+     *
+     * Order is priority order. The make-up count leads because it is the
+     * one part that must survive the trimming; the month's fasts trail
+     * because a pat on the back is what a crowded card can most afford to
+     * lose. `widthPx` of 0 means the launcher has not measured the card
+     * yet — nothing is trimmed, and `ellipsize="end"` on the view is the
+     * backstop until it has.
+     */
+    private fun summaryLine(
+      context: Context,
+      pr: JSONObject,
+      owed: Int,
+      fasts: Int,
+      widthPx: Float,
+    ): CharSequence {
+      val parts = mutableListOf<CharSequence>()
+      if (owed > 0) {
+        val text = context.resources
+          .getQuantityString(R.plurals.widget_streak_make_up, owed, owed)
+        parts.add(
+          SpannableStringBuilder(text).apply {
+            setSpan(
+              ForegroundColorSpan(android.graphics.Color.parseColor(OWED_COLOR)),
+              0,
+              length,
+              Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+          },
+        )
+      }
       val best = pr.optInt("bestStreak", 0)
       if (best > 0) parts.add(context.getString(R.string.widget_streak_best, best))
       parts.add(context.getString(R.string.widget_streak_logged, pr.optInt("loggedToday", 0)))
@@ -207,7 +365,36 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       if (rate > 0) {
         parts.add(context.getString(R.string.widget_streak_sunnah, Math.round(rate * 100).toInt()))
       }
-      return parts.joinToString(" · ")
+      if (fasts > 0) {
+        parts.add(context.resources.getQuantityString(R.plurals.widget_streak_fasts, fasts, fasts))
+      }
+
+      if (widthPx > 0) {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+          textSize = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP,
+            11f,
+            context.resources.displayMetrics,
+          )
+        }
+        // Never below two: the make-up count and whatever follows it still
+        // read as a sentence, and one part alone on a card this wide looks
+        // like something failed rather than something was omitted.
+        while (parts.size > 2 && paint.measureText(join(parts).toString()) > widthPx) {
+          parts.removeAt(parts.size - 1)
+        }
+      }
+      return join(parts)
+    }
+
+    /** `joinToString` on CharSequences would flatten the spans to text. */
+    private fun join(parts: List<CharSequence>): CharSequence {
+      val out = SpannableStringBuilder()
+      for ((i, part) in parts.withIndex()) {
+        if (i > 0) out.append(SEPARATOR)
+        out.append(part)
+      }
+      return out
     }
 
     /**
