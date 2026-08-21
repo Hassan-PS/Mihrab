@@ -46,7 +46,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     appWidgetIds: IntArray,
   ) {
     for (id in appWidgetIds) {
-      appWidgetManager.updateAppWidget(id, buildViews(context, widthDp(appWidgetManager, id), heightDp(appWidgetManager, id)))
+      appWidgetManager.updateAppWidget(id, buildViews(context, widthDp(context, appWidgetManager, id), heightDp(context, appWidgetManager, id)))
     }
   }
 
@@ -59,7 +59,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
     appWidgetManager.updateAppWidget(
       appWidgetId,
-      buildViews(context, widthDp(appWidgetManager, appWidgetId), heightDp(appWidgetManager, appWidgetId)),
+      buildViews(context, widthDp(context, appWidgetManager, appWidgetId), heightDp(context, appWidgetManager, appWidgetId)),
     )
   }
 
@@ -68,21 +68,15 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetReadingProvider::class.java))
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context, widthDp(mgr, id), heightDp(mgr, id)))
+      for (id in ids) mgr.updateAppWidget(id, buildViews(context, widthDp(context, mgr, id), heightDp(context, mgr, id)))
     }
 
-    /** The launcher's own measurement, or 0 when it has not measured yet. */
-    private fun heightDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
-      mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
-    } catch (_: Exception) {
-      0
-    }
+    /** The card's real size, or 0 when the launcher has not measured yet. */
+    private fun heightDp(context: Context, mgr: AppWidgetManager, appWidgetId: Int): Int =
+      PrayerWidgetProvider.sizeDp(context, mgr, appWidgetId).second
 
-    private fun widthDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
-      mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
-    } catch (_: Exception) {
-      0
-    }
+    private fun widthDp(context: Context, mgr: AppWidgetManager, appWidgetId: Int): Int =
+      PrayerWidgetProvider.sizeDp(context, mgr, appWidgetId).first
 
     /**
      * Below this the two columns cannot both be read, so the side one goes.
@@ -107,7 +101,9 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     }
 
     /** Two launcher rows: room for the bar and the lines under it. */
-    private const val PROGRESS_MIN_HEIGHT_DP = 100
+    // 150dp, not 100 — the same landscape-vs-portrait correction as the
+    // prayer widget's thresholds. See PrayerWidgetProvider.sizeDp.
+    private const val PROGRESS_MIN_HEIGHT_DP = 150
 
     fun buildViews(context: Context, widthDp: Int = 0, heightDp: Int = 0): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_reading)

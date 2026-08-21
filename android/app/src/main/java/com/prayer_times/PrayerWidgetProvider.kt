@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -263,6 +264,57 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * after a payload write, from the alarm, from boot, and from an app
      * update.
      */
+    /**
+     * The widget's size IN THE ORIENTATION IT IS BEING DRAWN IN.
+     *
+     * `OPTION_APPWIDGET_MIN_HEIGHT` is not "the height". The options bundle
+     * carries a size for each orientation, and the pairing is only what the
+     * names suggest for width: MIN/MAX_WIDTH are portrait and landscape,
+     * but MIN/MAX_HEIGHT are LANDSCAPE and PORTRAIT — a widget is shorter
+     * lying down than standing up, so the smaller height is the landscape
+     * one. Reading MIN_HEIGHT on a phone held upright answers a question
+     * nobody asked: how tall this card would be if the phone were turned
+     * sideways.
+     *
+     * That is why STREAK vanished from a one-row card with room to spare.
+     * The launcher reports minH=52 / maxH=99 for the 4x1 placement on a
+     * 420dpi phone; the label was measured against 52, found wanting, and
+     * only came back when the card was dragged tall enough that even the
+     * landscape figure cleared the bar — which is exactly the "expand it and
+     * the missing part appears" symptom.
+     *
+     * Ask the configuration which way up we are and read the matching pair.
+     * Either number is 0 when the launcher has not measured yet.
+     */
+    fun sizeDp(
+      context: Context,
+      mgr: AppWidgetManager,
+      appWidgetId: Int,
+    ): Pair<Int, Int> {
+      val opts = try {
+        mgr.getAppWidgetOptions(appWidgetId)
+      } catch (_: Exception) {
+        null
+      } ?: return Pair(0, 0)
+      val landscape =
+        context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+      val width = opts.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
+        else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+        0,
+      )
+      val height = opts.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
+        else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+        0,
+      )
+      // A launcher that fills only the one pair still deserves an answer.
+      return Pair(
+        if (width > 0) width else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0),
+        if (height > 0) height else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0),
+      )
+    }
+
     /** Where the "which device wrote these" marker lives. */
     private const val INSTALL_KEY = "widget_install_id"
 
@@ -444,7 +496,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * roughly 110dp; 100 leaves a little slack for launchers that report
      * their cells slightly short.
      */
-    private const val ROWS_MIN_HEIGHT_DP = 100
+    // 165dp, not 100. Every number in this block used to be compared against
+    // the LANDSCAPE height, so they read like the card was half the size it
+    // is: on a 420dpi phone the launcher reports 52dp for a one-row card that
+    // is 99dp tall, and 116dp for a two-row card that is 210dp tall. The
+    // constants were tuned by eye against those halved figures, so they
+    // happened to land on the right row on the device they were tuned on and
+    // on no promise at all anywhere else. Re-expressed as the real height,
+    // measured at the same boundaries: one row 99, two 210, three 321,
+    // four 432. Each threshold now sits mid-band.
+    private const val ROWS_MIN_HEIGHT_DP = 165
 
     /**
      * Below this the strip does not fit and only the compact next-prayer
@@ -456,7 +517,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * above a half-cut highlight pill, which is worse than not showing the
      * day at all. Measured on a 1080x2400 emulator: it needs about 90dp.
      */
-    private const val STRIP_MIN_HEIGHT_DP = 88
+    private const val STRIP_MIN_HEIGHT_DP = 145
 
     /**
      * Three launcher cells of width. Below this the six-column strip gives
@@ -486,6 +547,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * them into one picker entry needs.
      */
     private fun selectLayout(
+      context: Context,
       appWidgetManager: AppWidgetManager,
       appWidgetId: Int,
       providerName: String?,
@@ -514,8 +576,21 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       } catch (_: Exception) {
         null
       }
-      val height = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
-      val width = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
+      val landscape =
+        context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+      // MIN_HEIGHT is the LANDSCAPE height — see sizeDp. Every threshold
+      // below is a real card height in dp now, which is a number that means
+      // the same thing on a launcher whose cells are a different shape.
+      val height = opts?.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
+        else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+        0,
+      ) ?: 0
+      val width = opts?.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
+        else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+        0,
+      ) ?: 0
       if (height <= 0) return preferred
 
       return when {
@@ -535,7 +610,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       style: WidgetStyle,
     ): RemoteViews {
       val providerName = appWidgetManager.getAppWidgetInfo(appWidgetId)?.provider?.className
-      val layoutId = selectLayout(appWidgetManager, appWidgetId, providerName)
+      val layoutId = selectLayout(context, appWidgetManager, appWidgetId, providerName)
 
       val views = RemoteViews(context.packageName, layoutId)
 
@@ -585,7 +660,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
               style,
             )
           } else {
-            applyJson(views, root, style, context, layoutId, measuredHeightDp(appWidgetManager, appWidgetId))
+            applyJson(views, root, style, context, layoutId, measuredHeightDp(context, appWidgetManager, appWidgetId))
           }
         } catch (_: Exception) {
           showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
@@ -930,17 +1005,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /** The launcher's own measurement, or 0 when it has not measured yet. */
-    private fun measuredHeightDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
-      mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
-    } catch (_: Exception) {
-      0
-    }
+    private fun measuredHeightDp(
+      context: Context,
+      mgr: AppWidgetManager,
+      appWidgetId: Int,
+    ): Int = sizeDp(context, mgr, appWidgetId).second
 
     /**
      * Four launcher rows. Below this the practice strip would eat the space
      * the prayer times need, and the times are why the widget is there.
      */
-    private const val PRACTICE_MIN_HEIGHT_DP = 200
+    private const val PRACTICE_MIN_HEIGHT_DP = 375
 
     /**
      * Where the streak line and the practice graph start appearing.
@@ -951,7 +1026,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * bottom third of the card. Three launcher rows is enough to draw a
      * graph; it is not enough to draw a graph AND two more lines under it.
      */
-    private const val GRID_MIN_HEIGHT_DP = 140
+    private const val GRID_MIN_HEIGHT_DP = 265
 
     /**
      * Bind the payload into whichever layout was chosen.

@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Paint
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -92,57 +91,6 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       }
     }
 
-    /**
-     * The widget's size IN THE ORIENTATION IT IS BEING DRAWN IN.
-     *
-     * `OPTION_APPWIDGET_MIN_HEIGHT` is not "the height". The options bundle
-     * carries a size for each orientation, and the pairing is only what the
-     * names suggest for width: MIN/MAX_WIDTH are portrait and landscape,
-     * but MIN/MAX_HEIGHT are LANDSCAPE and PORTRAIT — a widget is shorter
-     * lying down than standing up, so the smaller height is the landscape
-     * one. Reading MIN_HEIGHT on a phone held upright answers a question
-     * nobody asked: how tall this card would be if the phone were turned
-     * sideways.
-     *
-     * That is why STREAK vanished from a one-row card with room to spare.
-     * The launcher reports minH=52 / maxH=99 for the 4x1 placement on a
-     * 420dpi phone; the label was measured against 52, found wanting, and
-     * only came back when the card was dragged tall enough that even the
-     * landscape figure cleared the bar — which is exactly the "expand it and
-     * the missing part appears" symptom.
-     *
-     * Ask the configuration which way up we are and read the matching pair.
-     * Either number is 0 when the launcher has not measured yet.
-     */
-    private fun sizeDp(
-      context: Context,
-      mgr: AppWidgetManager,
-      appWidgetId: Int,
-    ): Pair<Int, Int> {
-      val opts = try {
-        mgr.getAppWidgetOptions(appWidgetId)
-      } catch (_: Exception) {
-        null
-      } ?: return Pair(0, 0)
-      val landscape =
-        context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-      val width = opts.getInt(
-        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
-        else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-        0,
-      )
-      val height = opts.getInt(
-        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
-        else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-        0,
-      )
-      // A launcher that fills only the one pair still deserves an answer.
-      return Pair(
-        if (width > 0) width else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0),
-        if (height > 0) height else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0),
-      )
-    }
-
     /** 10dp top + 10dp bottom, from the layout's own padding. */
     private const val PADDING_DP = 20f
 
@@ -197,7 +145,7 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
-      val (widthDp, heightDp) = sizeDp(context, mgr, appWidgetId)
+      val (widthDp, heightDp) = PrayerWidgetProvider.sizeDp(context, mgr, appWidgetId)
 
       // How many lines the card can actually hold.
       //
