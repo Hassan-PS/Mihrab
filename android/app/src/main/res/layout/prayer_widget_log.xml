@@ -80,36 +80,36 @@
             android:orientation="horizontal"
             android:baselineAligned="false"
             android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="6dp">
 
             <LinearLayout android:id="@+id/log_cell_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
-                <TextView android:id="@+id/log_chip_0" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
-                <TextView android:id="@+id/log_name_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/log_time_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/log_chip_0" android:layout_width="52dp" android:layout_height="38dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
             </LinearLayout>
 
             <LinearLayout android:id="@+id/log_cell_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
-                <TextView android:id="@+id/log_chip_1" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
-                <TextView android:id="@+id/log_name_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/log_time_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/log_chip_1" android:layout_width="52dp" android:layout_height="38dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
             </LinearLayout>
 
             <LinearLayout android:id="@+id/log_cell_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
-                <TextView android:id="@+id/log_chip_2" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
-                <TextView android:id="@+id/log_name_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/log_time_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/log_chip_2" android:layout_width="52dp" android:layout_height="38dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
             </LinearLayout>
 
             <LinearLayout android:id="@+id/log_cell_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
-                <TextView android:id="@+id/log_chip_3" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
-                <TextView android:id="@+id/log_name_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/log_time_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/log_chip_3" android:layout_width="52dp" android:layout_height="38dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
             </LinearLayout>
 
             <LinearLayout android:id="@+id/log_cell_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="2dp" android:paddingEnd="2dp">
-                <TextView android:id="@+id/log_chip_4" android:layout_width="42dp" android:layout_height="30dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
-                <TextView android:id="@+id/log_name_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:id="@+id/log_time_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
+                <TextView android:id="@+id/log_chip_4" android:layout_width="52dp" android:layout_height="38dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_idle" />
+                <TextView android:id="@+id/log_name_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/log_time_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
             </LinearLayout>
         </LinearLayout>
 

@@ -290,7 +290,16 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
         val key = o.optString("key")
         val status = o.optString("status").takeIf { it.isNotEmpty() && it != "null" }
         if (o.optBoolean("due", false) && status == null && !pending.contains(key)) {
-          return context.getString(R.string.widget_log_waiting, o.optString("name").ifEmpty { key })
+          // Says what the + DOES, not what the chips already show.
+          //
+          // "Fajr not logged yet" restated the empty chip directly above it
+          // and left the only interactive thing on the widget unexplained —
+          // a plus sign in a circle is an affordance nobody is born knowing.
+          // The footer is the one line with room for a verb.
+          return context.getString(
+            R.string.widget_log_tap_to_log,
+            o.optString("name").ifEmpty { key },
+          )
         }
       }
       return context.getString(R.string.widget_log_up_to_date)
