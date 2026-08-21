@@ -82,6 +82,26 @@ Every widget was placed and driven, not just built.
 - **Catalyst** — builds and signs with Developer ID. The build script's own
   gates pass: extension sandboxed, both sides sharing
   `GAW23HT439.group.com.prayerapp`, and the App Group holding today's payload.
+- **Every size band of the Android prayer-times card, drawn and read.** The
+  band mapping had been proved by probe but not looked at since the
+  height-axis correction, so all three were rendered on a placed instance.
+  Two rows (210dp): header, six-column strip, next-prayer line — no graph,
+  nothing clipped. Three rows (321dp): the streak line and the ten-week
+  graph join, still inside the card, Monday-first, future days drawn dim.
+  The footer band (375dp and up) needs more height than a 420dpi Pixel grid
+  will give, so it was reached by dropping the same emulator to 300dpi,
+  where three rows measures 488dp: "Sunnah 0% this month" joins the graph
+  and nothing is pushed out. That exercise is also what found the 400dp
+  `maxResizeHeight` ceiling (075450a) — a declared maximum smaller than a
+  size the launcher was already drawing.
+- **All six iOS widget kinds, placed and read on a live home screen.** Prayer
+  Times in all three sizes (small ring counting down, medium with the full
+  list and Isha highlighted, large adding Islamic Midnight, Last Third and
+  the streak footer), Hijri Date, Streak & Practice, Continue Reading, Log
+  Today and Tasbih. Every one drew real payload data, not placeholder text.
+  They were then put through a `chronod` and SpringBoard restart and came
+  back drawing the same data with the countdown advanced — the ring moved
+  21% → 39% across the session without the app being opened.
 
 ## The one check I could not do
 
@@ -115,9 +135,14 @@ shipped dead.
 ## Gates, all green at 2.9.0
 
 - `npx tsc --noEmit` — clean
-- `NODE_ENV=test npx jest` — **1328 tests, 116 suites**
-- `npx eslint src/ __tests__/` — 358 problems, all pre-existing; the same
-  count before and after this work
+- `NODE_ENV=test npx jest` — **1341 tests, 118 suites**. The `NODE_ENV=test`
+  is not decoration: with `NODE_ENV=production` exported in the shell, `react`
+  resolves to its production build, `React.act` is not exported, and every
+  `.tsx` render suite fails with `(0, _react.act) is not a function` — 87
+  failures that are nothing to do with the code.
+- `npx eslint .` — 375 problems, 18 of them errors, all pre-existing; the same
+  count before and after this work, and none in a file this branch touched
+- `node scripts/audit-locales.js` — 0 key mismatches
 - `:app:bundlePlayRelease` and `:app:assembleFdroidRelease` — both succeed, as
   **separate invocations**
 - iOS simulator build — succeeds
@@ -147,6 +172,17 @@ started:
   `shots/` folder of verification screenshots inside it. Yours to delete.
 - **Android's Next Prayer has no elapsed ring.** The plan's iOS mock has one;
   its Android mock does not, so this matches the plan as drawn.
+- **On a 420dpi Pixel-style 4x6 grid the prayer-times card tops out at three
+  rows**, whatever `maxResizeHeight` says — the launcher simply refuses to
+  grow it further, before and after the 400→600dp change and across a
+  reboot. Three rows there is 321dp, which is inside the graph band and
+  below the 375dp footer band, so those users get the graph and never the
+  month footer. Nothing is broken by it: every size the widget can actually
+  take renders correctly. But it does mean `PRACTICE_MIN_HEIGHT_DP` is dead
+  weight on the most common Android configuration, and if you ever want the
+  footer visible there it has to come from making the three-row layout
+  hold one more line, not from raising a ceiling. There is no room for that
+  line today — at 321dp the graph already reaches the bottom of the card.
 
 ## Answered: how a widget stays true
 
