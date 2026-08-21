@@ -147,3 +147,36 @@ started:
   `shots/` folder of verification screenshots inside it. Yours to delete.
 - **Android's Next Prayer has no elapsed ring.** The plan's iOS mock has one;
   its Android mock does not, so this matches the plan as drawn.
+
+## Open: does every widget see a change the moment it happens?
+
+Reported after the 4×1 work and not fully chased down. What is known:
+
+**The push path looks right.** `useWidgetDataRevision` subscribes to the
+practice, Quran and tasbih stores; a change bumps a revision, and
+HomeScreen's payload effect lists that revision in its deps. It is a plain
+`useEffect`, not `useFocusEffect`, so it does not require Home to be the
+visible tab — only for HomeScreen to be mounted, which a tab navigator keeps
+it after first visit. `PrayerWidgetModule.setData` then calls `requestUpdate`
+on all six Android providers, so one push refreshes every kind.
+
+**Two things that would defeat it, neither confirmed:**
+
+1. `useWidgetDataRevision` coalesces on a 1500 ms trailing debounce. A change
+   watched for less than that reads as "not refreshing".
+2. If HomeScreen is ever unmounted — a cold start straight into another tab,
+   or a navigator config change — nothing rebuilds the payload at all until
+   Home is visited. The sync living inside a screen is the structural
+   weakness here; it belongs at app level, next to the stores it watches.
+
+**Worth ruling out first:** the screenshot that prompted this showed
+"0 days · 1 of 5 today", which is what a correct partial day looks like — a
+streak needs all five, so it stays 0 until the day is complete. That the
+"1 of 5" moved at all says a push DID happen. Before treating this as a sync
+bug, log a prayer and watch whether the *logged count* moves within a couple
+of seconds; if it does, the payload is arriving and the question is what the
+streak should say, not whether it updated.
+
+**If it is real**, the fix is to move the payload build out of HomeScreen and
+into a module that subscribes to the same stores directly, so no screen has
+to be mounted for a widget to be true.
