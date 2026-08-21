@@ -238,13 +238,29 @@ declaring them made the refresh story look far better covered than it was.
 
 ### What is still worth watching
 
-- **Three and four rows on Android are unverified** after the height-axis
-  correction. `OPTION_APPWIDGET_MIN_HEIGHT` is the landscape height, and
-  every threshold in `PrayerWidgetProvider` and `PrayerWidgetReadingProvider`
-  had been tuned against it; they were re-expressed against the real card
-  height (99 / 210 / 321 / 432 for one to four rows on a 420dpi phone) and
-  checked at one and two rows only. The practice grid and the month footer
-  are what that band gates.
+- **Three and four rows on Android have not been LOOKED at** after the
+  height-axis correction. `OPTION_APPWIDGET_MIN_HEIGHT` is the landscape
+  height, and every threshold in `PrayerWidgetProvider` and
+  `PrayerWidgetReadingProvider` had been tuned against it; they are
+  re-expressed against the real card height, whose measured boundaries on a
+  420dpi phone are 99 / 210 / 321 / 432 for one to four rows.
+
+  The band mapping itself was proved on device — a temporary probe printed
+  the decision for each of those four heights, and it comes out identical to
+  what the old constants selected:
+
+  | rows | dp | strip | rows layout | practice grid | month footer |
+  |---|---|---|---|---|---|
+  | 1 | 99 | – | – | – | – |
+  | 2 | 210 | yes | yes | – | – |
+  | 3 | 321 | yes | yes | yes | – |
+  | 4 | 432 | yes | yes | yes | yes |
+
+  One and two rows were also checked by eye. What is missing is a rendered
+  three- and four-row card, which needs a widget placed and dragged — the
+  picker's drag-to-place does not automate (neither `input swipe`,
+  `motionevent` nor `draganddrop` produce a drag Launcher3 accepts), so it
+  wants ten seconds of a human hand.
 - **Nothing rebuilds the payload while the app has never been opened.** The
   window is 30 days of cached schedule, which is what carries an unopened
   app; past that every card asks to be opened, which is correct but is still
