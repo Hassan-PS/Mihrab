@@ -51,7 +51,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_vertical"
             android:orientation="vertical">
 
             <TextView
@@ -64,6 +63,20 @@
                 android:letterSpacing="0.06"
                 android:maxLines="1"
                 android:ellipsize="end" />
+
+
+            <!-- A weighted spacer, not padding. This is what makes every
+                 state fill the card: the header pins to the top, the footer
+                 to the bottom, and whatever height is left is divided evenly
+                 between the two gaps. A four-line state and a six-line one
+                 both reach both edges — the shorter one simply breathes more,
+                 which reads as typography rather than as a card that ran out
+                 of things to say. Centring the block instead only moved the
+                 emptiness from under the text to above AND below it. -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/reading_surah"
@@ -84,6 +97,20 @@
                 android:textSize="13sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
+
+
+            <!-- A weighted spacer, not padding. This is what makes every
+                 state fill the card: the header pins to the top, the footer
+                 to the bottom, and whatever height is left is divided evenly
+                 between the two gaps. A four-line state and a six-line one
+                 both reach both edges — the shorter one simply breathes more,
+                 which reads as typography rather than as a card that ran out
+                 of things to say. Centring the block instead only moved the
+                 emptiness from under the text to above AND below it. -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <ProgressBar
                 android:id="@+id/reading_progress"
@@ -122,7 +149,6 @@
             android:layout_height="match_parent"
             android:minWidth="96dp"
             android:layout_marginStart="10dp"
-            android:gravity="center_vertical"
             android:orientation="vertical">
 
             <TextView
@@ -135,6 +161,12 @@
                 android:letterSpacing="0.06"
                 android:maxLines="1" />
 
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
             <TextView
                 android:id="@+id/reading_side_value"
                 android:layout_width="wrap_content"
@@ -144,6 +176,12 @@
                 android:textSize="27sp"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/reading_side_note"
