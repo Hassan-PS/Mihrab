@@ -30,12 +30,17 @@ import org.json.JSONObject
  */
 class PrayerWidgetTasbihProvider : AppWidgetProvider() {
 
+  // Every branch goes through PrayerWidgetProvider.requestUpdate rather than
+  // this provider's own: one signal has to redraw every widget and re-arm the
+  // alarm chain, or a home screen holding only this one stops moving. See the
+  // comment on requestUpdate.
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
     when (intent.action) {
       Intent.ACTION_USER_PRESENT,
-      Intent.ACTION_SCREEN_ON,
-      Intent.ACTION_BOOT_COMPLETED -> requestUpdate(context)
+      Intent.ACTION_BOOT_COMPLETED,
+      PrayerWidgetProvider.ACTION_PRAYER_TIME_ELAPSED ->
+        PrayerWidgetProvider.requestUpdate(context)
       ACTION_TASBIH_TAP -> handleTap(context, intent)
     }
   }

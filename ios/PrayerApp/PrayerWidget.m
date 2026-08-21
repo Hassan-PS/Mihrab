@@ -51,6 +51,12 @@ RCT_EXPORT_METHOD(takeLogQueue
   if (json != nil) {
     [target removeObjectForKey:@"widget_log_queue"];
     [target synchronize];
+    // The widget draws the queue OVER the payload, so a card that has just
+    // been drained is still showing its taps twice — once as queued, once as
+    // whatever the payload said. Android reloads here; this side did not,
+    // and the card kept its doubled state until some later setData happened
+    // to correct it. Ask for a redraw at the moment the queue empties.
+    [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   }
   resolve(json);
 }
@@ -73,6 +79,7 @@ RCT_EXPORT_METHOD(takeTasbihQueue
   if (json != nil) {
     [target removeObjectForKey:@"widget_tasbih_queue"];
     [target synchronize];
+    [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   }
   resolve(json);
 }

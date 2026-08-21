@@ -62,10 +62,25 @@ object WidgetTasbihQueue {
     return arr.toString()
   }
 
+  /**
+   * The most taps this queue will hold before it starts forgetting the
+   * oldest.
+   *
+   * Unlike the Log queue, whose ceiling is five prayers a day, this one grows
+   * a bead at a time — a single round is thirty-three. Someone who counts on
+   * the widget and does not open the app for a fortnight can put tens of
+   * thousands of entries in here, and every one of them is re-serialized on
+   * the next tap and carried across a Binder transaction on every read. The
+   * drain discards anything older than fourteen days anyway, so entries past
+   * this point were never going to be written; dropping them at the front
+   * costs nothing and keeps a tap O(a home screen) rather than O(a fortnight).
+   */
+  private const val MAX_ENTRIES = 4000
+
   /** Append one action. There is no de-duplication: see the header. */
   fun append(context: Context, action: String, now: Long = System.currentTimeMillis()) {
     if (!ACTIONS.contains(action)) return
-    val next = read(context) + Entry(action, now)
+    val next = (read(context) + Entry(action, now)).takeLast(MAX_ENTRIES)
     prefs(context).edit().putString(PREFS_QUEUE_KEY, serialize(next)).apply()
   }
 

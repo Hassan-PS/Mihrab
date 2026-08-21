@@ -25,6 +25,10 @@ import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
 import { syncWidgetLogQueue } from './widget/syncWidgetLogQueue';
 import { syncWidgetTasbihQueue } from './widget/syncWidgetTasbihQueue';
+import {
+  republishWidgetPayload,
+  startWidgetPayloadSync,
+} from './widget/republishWidgetPayload';
 import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
@@ -157,6 +161,14 @@ export function AppNavigationRoot() {
     return () => sub.remove();
   }, []);
 
+  // Keep the widget payload in step with the app, from the ROOT.
+  //
+  // This used to live in HomeScreen, which the lazy tab navigator only mounts
+  // once Today has been focused — so every deep link the widgets themselves
+  // fire opened the app on a screen that could not refresh them. Here it runs
+  // for the whole life of the app whichever screen the user landed on.
+  useEffect(() => startWidgetPayloadSync(), []);
+
   // Write anything tapped on the Log Today widget into the journal.
   //
   // The widget queues taps rather than writing them, because the journal is
@@ -166,9 +178,19 @@ export function AppNavigationRoot() {
   // widget was showing. Runs on mount too, for a cold start from the widget.
   useEffect(() => {
     if (Platform.OS !== 'android' && Platform.OS !== 'ios') return;
+    // Republish AFTER the drain, not alongside it.
+    //
+    // Both drains write to the journal and the tasbih counter, and both are
+    // async. Started fire-and-forget they reliably finished after the first
+    // payload push of a cold start, so a tap made on the widget landed in the
+    // journal and the payload that was supposed to reflect it had already been
+    // written from the pre-drain values — with nothing scheduled to correct
+    // it. Awaiting them costs nothing here and closes the race.
     const drain = () => {
-      void syncWidgetLogQueue();
-      void syncWidgetTasbihQueue();
+      void Promise.allSettled([
+        syncWidgetLogQueue(),
+        syncWidgetTasbihQueue(),
+      ]).then(() => republishWidgetPayload('queue-drain'));
     };
     drain();
     const sub = AppState.addEventListener('change', state => {

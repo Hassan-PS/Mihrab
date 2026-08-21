@@ -18,7 +18,10 @@ import {
   getNextRamadanStart,
   getUpcomingFastingEvents,
 } from '../hijri/upcomingEvents';
-import { notifyPracticeChanged } from '../practice/practiceStore';
+import {
+  notifyPracticeChanged,
+  primePractice,
+} from '../practice/practiceStore';
 import {
   coerceFastEntries,
   computeFastStats,
@@ -131,15 +134,22 @@ export function FastingScreen() {
       // this effect fires.
       return;
     }
-    durableEncryptedSet(FASTING_KEY, JSON.stringify(entries))
-      // Home's Today summary reads the same store.
-      .then(notifyPracticeChanged)
-      .catch(e =>
-      // Retry-exhausted failure. The user's optimistic update remains in
-      // memory; next change will trigger another retry round. This logs
-      // for diagnostics rather than ever silently dropping.
-        console.warn('FastingScreen: persist failed after retries', e),
-      );
+    // Published BEFORE the write, the way the Log screen publishes its own.
+    //
+    // Notifying only on success meant every other surface — Home's Today
+    // summary, the practice graph, the widget — sat on the old value for as
+    // long as the encrypted write took, and on failure sat on it forever
+    // while this screen showed the new one. Priming hands over the value we
+    // already have, so they agree on the same frame as the tap.
+    primePractice({ fasts: entries });
+    durableEncryptedSet(FASTING_KEY, JSON.stringify(entries)).catch(e => {
+      // Retry-exhausted failure. The screen's optimistic state stands and
+      // the next change triggers another round, but the shared store must
+      // not keep quoting a value that never reached disk: drop the cache so
+      // everyone re-reads the truth.
+      console.warn('FastingScreen: persist failed after retries', e);
+      notifyPracticeChanged();
+    });
   }, [entries, hydrated]);
 
   const now = useMemo(() => new Date(), []);

@@ -45,14 +45,22 @@ struct PracticeGrid: View {
     }
   }
 
-  /// Weeks as columns, each column a Sunday-first run of seven day keys.
+  /// Weeks as columns, each column a MONDAY-first run of seven day keys.
+  ///
+  /// Monday rather than the locale's own first weekday, and rather than the
+  /// Sunday this used to hard-code: the in-app heatmap starts its weeks on
+  /// Monday deliberately, so the two sunnah fast days land in the first and
+  /// fourth rows instead of straddling a column boundary. A widget whose
+  /// columns are offset by a day or two from the Log screen's draws the same
+  /// record as a different shape, which is the one thing this grid must not
+  /// do.
   ///
   /// `nil` marks a day past today — the current week is usually partial,
   /// and drawing its remaining days as "nothing recorded" would claim the
   /// user has already missed days that have not happened yet.
   private func buildColumns() -> [[String?]] {
     var cal = Calendar.current
-    cal.firstWeekday = 1
+    cal.firstWeekday = 2
     let today = Date()
     guard let thisWeekStart = cal.dateInterval(of: .weekOfYear, for: today)?.start
     else { return [] }

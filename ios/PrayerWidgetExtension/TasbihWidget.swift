@@ -44,10 +44,20 @@ enum WidgetTasbihQueue {
     return decoded.filter { actions.contains($0.a) && $0.t > 0 }
   }
 
+  /// The most taps this queue holds before it starts forgetting the oldest.
+  ///
+  /// This one grows a bead at a time — a round is thirty-three — so a
+  /// fortnight of counting on the widget without opening the app is tens of
+  /// thousands of entries, every one of them re-encoded on the next tap
+  /// inside a widget extension that is given milliseconds to live. The drain
+  /// discards anything older than fourteen days regardless, so entries past
+  /// this point were never going to be written down.
+  static let maxEntries = 4000
+
   /// See WidgetLogQueue.tap for why `synchronize()` is here.
   static func append(_ action: String, now: Double = Date().timeIntervalSince1970 * 1000) {
     guard actions.contains(action) else { return }
-    let next = read() + [Entry(a: action, t: now)]
+    let next = (read() + [Entry(a: action, t: now)]).suffix(maxEntries).map { $0 }
     guard let data = try? JSONEncoder().encode(next),
           let s = String(data: data, encoding: .utf8),
           let store = defaults()
@@ -98,7 +108,17 @@ struct TasbihProvider: TimelineProvider {
   /// One entry. A counter changes when it is tapped, and a tap reloads the
   /// timeline; nothing about it moves on its own.
   func getTimeline(in context: Context, completion: @escaping (Timeline<TasbihEntry>) -> Void) {
-    completion(Timeline(entries: [entry(fallback: false)], policy: .never))
+    // `.never` meant exactly that: once the payload behind this card expired,
+    // nothing on the system would ever run this provider again, and the
+    // widget sat on a dead entry until the user tapped it or opened the app.
+    // Every other widget here rolls itself forward; this one has to as well.
+    // An hour is generous for a bead counter — nothing about it changes
+    // faster than the user's own taps, which reload directly — and it is what
+    // brings the card to the "Open Mihrab" state on its own once the schedule
+    // it is drawn beside has run out.
+    let refresh = Calendar.current.date(byAdding: .hour, value: 1, to: Date())
+      ?? Date().addingTimeInterval(3600)
+    completion(Timeline(entries: [entry(fallback: false)], policy: .after(refresh)))
   }
 
   private func entry(fallback: Bool) -> TasbihEntry {

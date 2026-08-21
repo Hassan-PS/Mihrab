@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 import { requestAndroidLocationPermission } from '../utils/locationPermission';
 import {
-  getCachedPrayerTimes,
   getOrFetchPrayerTimes,
   getCacheStatus,
   refreshPrayerDataCache,
@@ -18,26 +17,14 @@ import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { addDays, startOfLocalDay } from '../utils/prayerTimes';
+import {
+  WIDGET_WINDOW_DAYS,
+  cachedDaysFrom,
+} from '../prayer/widgetDayWindow';
 
 /** How many consecutive days (today + N-1 more) to fetch and expose. */
 const WEEK_DAYS = 7;
 
-/**
- * How many consecutive days the WIDGET's copy of the schedule covers.
- *
- * This number is how long the widget survives an app nobody opens, because
- * its payload is only ever rewritten from the foreground — there is no
- * background refresh for it on any platform. Seven days is invisible on a
- * phone, which gets opened most days. It was the whole bug on a Mac, where an
- * app installed from Homebrew can sit closed for weeks: the window ran out and
- * the widget had nothing true left to show.
- *
- * Thirty is nearly free. These extra days are READ FROM THE CACHE that is
- * already on disk — the app stores up to a year — and never trigger a fetch,
- * so this costs disk reads and no network. Whatever is not cached simply is
- * not appended, which leaves the widget exactly where it was before.
- */
-const WIDGET_WINDOW_DAYS = 30;
 
 export type PrayerDayState =
   | { phase: 'idle' }
@@ -125,40 +112,6 @@ function applyOffsetsToWeek(
 ): TimingsMap[] {
   if (!offsets || Object.keys(offsets).length === 0) return week;
   return week.map(t => applyOffsets(t, offsets));
-}
-
-/**
- * Days `from`…`WIDGET_WINDOW_DAYS` read STRICTLY FROM CACHE, stopping at the
- * first day that isn't there.
- *
- * Cache-only on purpose. The point of the longer window is to cost nothing —
- * if this ever fetched, opening the app would fire off weeks of requests to
- * feed a widget. Stopping at the first miss keeps the array gapless, which is
- * the invariant every consumer of these arrays relies on.
- */
-async function cachedDaysFrom(
-  from: number,
-  params: {
-    provider: Parameters<typeof getCachedPrayerTimes>[0]['provider'];
-    latitude: number;
-    longitude: number;
-    calculationMethod: PrayerAppSettings['calculationMethod'];
-    school: PrayerAppSettings['school'];
-  },
-  now: Date,
-): Promise<TimingsMap[]> {
-  const extra: TimingsMap[] = [];
-  for (let i = from; i < WIDGET_WINDOW_DAYS; i++) {
-    let day: TimingsMap | null = null;
-    try {
-      day = await getCachedPrayerTimes({ ...params, date: addDays(now, i) });
-    } catch {
-      break;
-    }
-    if (!day) break;
-    extra.push(day);
-  }
-  return extra;
 }
 
 export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {

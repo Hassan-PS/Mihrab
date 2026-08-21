@@ -7,9 +7,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.RemoteViews
@@ -107,10 +109,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
   override fun onReceive(context: Context, intent: Intent) {
     super.onReceive(context, intent)
+    // SCREEN_ON and WALLPAPER_CHANGED used to be listed here and in the
+    // manifest. Neither can arrive: SCREEN_ON is documented as deliverable
+    // only to a receiver registered with registerReceiver, and
+    // WALLPAPER_CHANGED has been dead since API 16. Declaring them made the
+    // refresh story look far better covered than it was, which is how four
+    // widgets ended up with no working unattended refresh at all while the
+    // manifest suggested six triggers each.
     when (intent.action) {
       Intent.ACTION_USER_PRESENT,
-      Intent.ACTION_SCREEN_ON,
-      Intent.ACTION_WALLPAPER_CHANGED,
       Intent.ACTION_BOOT_COMPLETED,
       ACTION_PRAYER_TIME_ELAPSED -> requestUpdate(context)
     }
@@ -135,6 +142,8 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
   }
 
   companion object {
+    private const val TAG = "MihrabWidget"
+
     const val PREFS_NAME = "prayer_widget"
     const val PREFS_KEY = "payload_v1"
     const val PREFS_UI_STYLE_KEY = "widget_ui_style"
@@ -237,25 +246,248 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       }
     }
 
-    /** Called from RN native module after writing new payload to SharedPreferences. */
+    /**
+     * Redraw EVERY widget this app draws, and re-arm the clock that will ask
+     * again.
+     *
+     * It used to reach three providers and Log Today. Streak, Continue
+     * Reading, Hijri and Tasbih were left out — and because the alarm below
+     * is an explicit intent, their manifest `ACTION_PRAYER_TIME_ELAPSED`
+     * filters never fired either. All four also carry
+     * `updatePeriodMillis="0"`, on the reasoning that they change only when
+     * the app changes them. That reasoning assumed the app's own pushes
+     * reached them, and nothing did: a Streak widget alone on a home screen
+     * had no unattended refresh of any kind, so its graph did not roll onto
+     * a new day until something else woke the app.
+     *
+     * One entry point, every provider, every time. Called from the RN module
+     * after a payload write, from the alarm, from boot, and from an app
+     * update.
+     */
+    /**
+     * The widget's size IN THE ORIENTATION IT IS BEING DRAWN IN.
+     *
+     * `OPTION_APPWIDGET_MIN_HEIGHT` is not "the height". The options bundle
+     * carries a size for each orientation, and the pairing is only what the
+     * names suggest for width: MIN/MAX_WIDTH are portrait and landscape,
+     * but MIN/MAX_HEIGHT are LANDSCAPE and PORTRAIT — a widget is shorter
+     * lying down than standing up, so the smaller height is the landscape
+     * one. Reading MIN_HEIGHT on a phone held upright answers a question
+     * nobody asked: how tall this card would be if the phone were turned
+     * sideways.
+     *
+     * That is why STREAK vanished from a one-row card with room to spare.
+     * The launcher reports minH=52 / maxH=99 for the 4x1 placement on a
+     * 420dpi phone; the label was measured against 52, found wanting, and
+     * only came back when the card was dragged tall enough that even the
+     * landscape figure cleared the bar — which is exactly the "expand it and
+     * the missing part appears" symptom.
+     *
+     * Ask the configuration which way up we are and read the matching pair.
+     * Either number is 0 when the launcher has not measured yet.
+     */
+    fun sizeDp(
+      context: Context,
+      mgr: AppWidgetManager,
+      appWidgetId: Int,
+    ): Pair<Int, Int> {
+      val opts = try {
+        mgr.getAppWidgetOptions(appWidgetId)
+      } catch (_: Exception) {
+        null
+      } ?: return Pair(0, 0)
+      val landscape =
+        context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+      val width = opts.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
+        else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+        0,
+      )
+      val height = opts.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
+        else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+        0,
+      )
+      // A launcher that fills only the one pair still deserves an answer.
+      return Pair(
+        if (width > 0) width else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0),
+        if (height > 0) height else opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0),
+      )
+    }
+
+    /** Where the "which device wrote these" marker lives. */
+    private const val INSTALL_KEY = "widget_install_id"
+
+    /**
+     * Throw away taps that were queued on a DIFFERENT device.
+     *
+     * `prayer_widget.xml` is inside the `sharedpref` include in both backup
+     * rule files, so a cloud restore or a device-to-device transfer carries
+     * the widget's tap queues across with everything else. The log queue
+     * survives that honestly enough — its entries name the date they belong
+     * to, and the same person's prayers on the same days are the same facts.
+     * The tasbih queue does not: its entries are counts, so a queue that had
+     * already been drained on the old phone is counted a second time on the
+     * new one, and the user's dhikr total quietly gains a few hundred beads
+     * they never told anyone about.
+     *
+     * The payload itself is left alone deliberately: a restored one that has
+     * gone stale is caught by `payloadHasExpired`, and one that has not is
+     * still true.
+     */
+    fun dropQueuesFromAnotherDevice(context: Context) {
+      val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+      val current = try {
+        android.provider.Settings.Secure.getString(
+          context.contentResolver,
+          android.provider.Settings.Secure.ANDROID_ID,
+        )
+      } catch (_: Exception) {
+        null
+      } ?: return
+      val seen = prefs.getString(INSTALL_KEY, null)
+      if (seen == current) return
+      // First run on this device — including the very first run ever, where
+      // there is nothing to drop and this only writes the marker.
+      prefs.edit()
+        .remove(WidgetTasbihQueue.PREFS_QUEUE_KEY)
+        .putString(INSTALL_KEY, current)
+        .apply()
+      if (seen != null) {
+        Log.i(TAG, "Restored from another device — dropped the queued tasbih taps")
+      }
+    }
+
     fun requestUpdate(context: Context) {
+      // FIRST, and outside everything that can fail. The chain that will ask
+      // again must not be contingent on this round of drawing succeeding —
+      // that contingency is exactly what used to make one bad payload
+      // permanent.
+      try {
+        dropQueuesFromAnotherDevice(context)
+      } catch (t: Throwable) {
+        Log.w(TAG, "Could not check the restore marker", t)
+      }
+      try {
+        armWidgetAlarms(context)
+      } catch (t: Throwable) {
+        Log.w(TAG, "Could not arm the widget alarms", t)
+      }
+
       val mgr = AppWidgetManager.getInstance(context)
       val classes = arrayOf(
         PrayerWidgetProvider::class.java,
         PrayerWidgetSmallProvider::class.java,
         PrayerWidgetLargeProvider::class.java
       )
+      // Each widget is drawn behind its own guard. They share a payload, and
+      // a field one of them cannot cope with must cost that one card rather
+      // than take the other five down with it — the failure iOS still has,
+      // where a single Codable means one bad field blanks the lot.
       for (cls in classes) {
-        val cn = ComponentName(context, cls)
-        val ids = mgr.getAppWidgetIds(cn)
-        if (ids.isNotEmpty()) refreshAll(context, mgr, ids)
+        draw(context) {
+          val ids = mgr.getAppWidgetIds(ComponentName(context, cls))
+          if (ids.isNotEmpty()) refreshAll(context, mgr, ids)
+        }
       }
-      // Log Today draws from the same payload but with its own layout and
-      // its own tap queue, so it cannot go through refreshAll. It still has
-      // to redraw on the same signal: a new payload changes which prayers
-      // are due, and a chip that stays un-tappable past its time is the one
-      // failure this widget cannot afford.
-      PrayerWidgetLogProvider.requestUpdate(context)
+      // These draw from the same payload with their own layouts, their own
+      // size rules and, for two of them, their own tap queue — so none can
+      // go through refreshAll. Each is a no-op when none is placed.
+      draw(context) { PrayerWidgetLogProvider.requestUpdate(context) }
+      draw(context) { PrayerWidgetStreakProvider.requestUpdate(context) }
+      draw(context) { PrayerWidgetReadingProvider.requestUpdate(context) }
+      draw(context) { PrayerWidgetHijriProvider.requestUpdate(context) }
+      draw(context) { PrayerWidgetTasbihProvider.requestUpdate(context) }
+    }
+
+    /** One widget's redraw, contained. */
+    private inline fun draw(context: Context, block: () -> Unit) {
+      try {
+        block()
+      } catch (t: Throwable) {
+        Log.w(TAG, "A widget failed to redraw", t)
+      }
+    }
+
+    /**
+     * Arm the next-boundary and midnight alarms, from the payload alone.
+     *
+     * This used to sit at the bottom of `applyJson`, which made the whole
+     * chain contingent on a prayer-times widget being placed AND on its
+     * render succeeding. Neither is safe to assume. Someone whose home
+     * screen holds only a Streak widget never armed a single alarm, so
+     * nothing on their phone ever moved the widget onto a new day. And
+     * because `buildViews` catches a throwing `applyJson` and falls back to
+     * the error card, one bad payload killed the chain permanently — the
+     * card could not refresh, and nothing was scheduled to ask it to.
+     *
+     * Arming from the payload instead means it runs whatever is placed and
+     * whatever went wrong, and re-arms on every signal that reaches us.
+     */
+    fun armWidgetAlarms(context: Context) {
+      scheduleMidnightRollover(context)
+
+      val json = context
+        .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        .getString(PREFS_KEY, null) ?: return
+      val next = try {
+        nextBoundaryMillis(JSONObject(json))
+      } catch (_: Exception) {
+        null
+      } ?: return
+
+      val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
+        action = ACTION_PRAYER_TIME_ELAPSED
+      }
+      val pi = PendingIntent.getBroadcast(
+        context, 1001, intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+      val am = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && am.canScheduleExactAlarms()) {
+        am.setExact(android.app.AlarmManager.RTC, next, pi)
+      } else {
+        am.set(android.app.AlarmManager.RTC, next, pi)
+      }
+    }
+
+    /**
+     * When the card next says something different: the first prayer or
+     * sunrise still ahead of us today, as epoch millis, or null when the day
+     * has none left.
+     *
+     * Night rows are skipped for the same reason they are never the
+     * headline — the widget is called Next Prayer, and Islamic Midnight is
+     * not one.
+     */
+    private fun nextBoundaryMillis(o: JSONObject): Long? {
+      val day = selectTodayDay(o)
+      val rows = day?.optJSONArray("rows") ?: o.optJSONArray("rows") ?: return null
+      val candidates = mutableListOf<org.json.JSONObject>()
+      for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { candidates.add(it) }
+      (day?.optJSONObject("sunriseRow") ?: o.optJSONObject("sunriseRow"))
+        ?.let { candidates.add(it) }
+
+      val cal = java.util.Calendar.getInstance()
+      val nowMinutes =
+        cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
+      var best: Int? = null
+      for (row in candidates) {
+        if (isNightKey(row.optString("key"))) continue
+        val parts = row.optString("time").split(":")
+        if (parts.size != 2) continue
+        val h = parts[0].toIntOrNull() ?: continue
+        val m = parts[1].toIntOrNull() ?: continue
+        val mins = h * 60 + m
+        if (mins > nowMinutes && (best == null || mins < best!!)) best = mins
+      }
+      val minutes = best ?: return null
+      return (cal.clone() as java.util.Calendar).apply {
+        set(java.util.Calendar.HOUR_OF_DAY, minutes / 60)
+        set(java.util.Calendar.MINUTE, minutes % 60)
+        set(java.util.Calendar.SECOND, 0)
+        set(java.util.Calendar.MILLISECOND, 0)
+      }.timeInMillis
     }
 
     /**
@@ -264,7 +496,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * roughly 110dp; 100 leaves a little slack for launchers that report
      * their cells slightly short.
      */
-    private const val ROWS_MIN_HEIGHT_DP = 100
+    // 165dp, not 100. Every number in this block used to be compared against
+    // the LANDSCAPE height, so they read like the card was half the size it
+    // is: on a 420dpi phone the launcher reports 52dp for a one-row card that
+    // is 99dp tall, and 116dp for a two-row card that is 210dp tall. The
+    // constants were tuned by eye against those halved figures, so they
+    // happened to land on the right row on the device they were tuned on and
+    // on no promise at all anywhere else. Re-expressed as the real height,
+    // measured at the same boundaries: one row 99, two 210, three 321,
+    // four 432. Each threshold now sits mid-band.
+    private const val ROWS_MIN_HEIGHT_DP = 165
 
     /**
      * Below this the strip does not fit and only the compact next-prayer
@@ -276,7 +517,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * above a half-cut highlight pill, which is worse than not showing the
      * day at all. Measured on a 1080x2400 emulator: it needs about 90dp.
      */
-    private const val STRIP_MIN_HEIGHT_DP = 88
+    private const val STRIP_MIN_HEIGHT_DP = 145
 
     /**
      * Three launcher cells of width. Below this the six-column strip gives
@@ -306,6 +547,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * them into one picker entry needs.
      */
     private fun selectLayout(
+      context: Context,
       appWidgetManager: AppWidgetManager,
       appWidgetId: Int,
       providerName: String?,
@@ -334,8 +576,21 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       } catch (_: Exception) {
         null
       }
-      val height = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
-      val width = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
+      val landscape =
+        context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+      // MIN_HEIGHT is the LANDSCAPE height — see sizeDp. Every threshold
+      // below is a real card height in dp now, which is a number that means
+      // the same thing on a launcher whose cells are a different shape.
+      val height = opts?.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
+        else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+        0,
+      ) ?: 0
+      val width = opts?.getInt(
+        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
+        else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+        0,
+      ) ?: 0
       if (height <= 0) return preferred
 
       return when {
@@ -355,7 +610,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       style: WidgetStyle,
     ): RemoteViews {
       val providerName = appWidgetManager.getAppWidgetInfo(appWidgetId)?.provider?.className
-      val layoutId = selectLayout(appWidgetManager, appWidgetId, providerName)
+      val layoutId = selectLayout(context, appWidgetManager, appWidgetId, providerName)
 
       val views = RemoteViews(context.packageName, layoutId)
 
@@ -383,7 +638,30 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         showMessageOnly(views, context.getString(R.string.widget_placeholder_day), isError = false, style)
       } else {
         try {
-          applyJson(views, json, style, context, layoutId, measuredHeightDp(appWidgetManager, appWidgetId))
+          val root = JSONObject(json)
+          if (payloadHasExpired(root)) {
+            // ASK, DON'T GUESS.
+            //
+            // Every other widget this app draws — on both platforms — refuses
+            // to render a payload whose schedule no longer reaches today. This
+            // one did not, and the failure was the worst kind available: past
+            // the window `selectTodayDay` returns null, the code fell back to
+            // the top-level single-day `rows`, and the card rendered whatever
+            // day the app was last opened on AS TODAY, complete with a
+            // live-ticking countdown computed against the current clock. Times
+            // stated with that much confidence are worse than no times, and a
+            // widget standing beside a Streak widget that correctly says "Open
+            // Mihrab" while itself claiming a Fajr from three weeks ago is not
+            // a widget anyone should trust with a prayer.
+            showMessageOnly(
+              views,
+              context.getString(R.string.widget_placeholder_day),
+              isError = false,
+              style,
+            )
+          } else {
+            applyJson(views, root, style, context, layoutId, measuredHeightDp(context, appWidgetManager, appWidgetId))
+          }
         } catch (_: Exception) {
           showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
         }
@@ -447,6 +725,28 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         if (key >= todayKey) return false
       }
       return true
+    }
+
+    /**
+     * Does this payload's SINGLE-DAY content still describe today?
+     *
+     * `days[]` rolls; `today`, `hijri` and `dayLabel` do not — they are
+     * stamped once, when the app last wrote the payload. `payloadHasExpired`
+     * does not catch this, because it only asks whether the schedule still
+     * reaches today, and a payload written three weeks ago with a thirty-day
+     * window passes that test easily while every one of its single-day blocks
+     * is three weeks old.
+     *
+     * Prefer the `today` block's own `dateKey`, which is exactly the day it
+     * claims to be about. Fall back to the first `days[]` entry for payloads
+     * that carry no `today` block at all.
+     */
+    private fun payloadDescribesToday(o: JSONObject): Boolean {
+      val todayKey = todayDateKey()
+      val stamped = o.optJSONObject("today")?.optString("dateKey")?.takeIf { it.isNotEmpty() }
+      if (stamped != null) return stamped == todayKey
+      val first = o.optJSONArray("days")?.optJSONObject(0)?.optString("dateKey")
+      return first == todayKey
     }
 
     /** The entry in `days[]` that applies to the current local date, or null
@@ -535,9 +835,10 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       payload: org.json.JSONObject,
       context: Context,
       layoutId: Int,
+      describesToday: Boolean,
     ) {
       if (layoutId == R.layout.prayer_widget_small) return
-      val today = payload.optJSONObject("today")
+      val today = if (describesToday) payload.optJSONObject("today") else null
       if (today == null) {
         views.setViewVisibility(R.id.widget_logged, View.GONE)
         return
@@ -704,17 +1005,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /** The launcher's own measurement, or 0 when it has not measured yet. */
-    private fun measuredHeightDp(mgr: AppWidgetManager, appWidgetId: Int): Int = try {
-      mgr.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
-    } catch (_: Exception) {
-      0
-    }
+    private fun measuredHeightDp(
+      context: Context,
+      mgr: AppWidgetManager,
+      appWidgetId: Int,
+    ): Int = sizeDp(context, mgr, appWidgetId).second
 
     /**
      * Four launcher rows. Below this the practice strip would eat the space
      * the prayer times need, and the times are why the widget is there.
      */
-    private const val PRACTICE_MIN_HEIGHT_DP = 200
+    private const val PRACTICE_MIN_HEIGHT_DP = 375
 
     /**
      * Where the streak line and the practice graph start appearing.
@@ -725,7 +1026,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * bottom third of the card. Three launcher rows is enough to draw a
      * graph; it is not enough to draw a graph AND two more lines under it.
      */
-    private const val GRID_MIN_HEIGHT_DP = 140
+    private const val GRID_MIN_HEIGHT_DP = 265
 
     /**
      * Bind the payload into whichever layout was chosen.
@@ -737,13 +1038,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      */
     private fun applyJson(
       views: RemoteViews,
-      json: String,
+      o: JSONObject,
       style: WidgetStyle,
       context: Context,
       layoutId: Int = R.layout.prayer_widget,
       heightDp: Int = 0,
     ) {
-      val o = JSONObject(json)
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
@@ -850,7 +1150,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // the plan draws it ("Wed, 19 Aug · Makkah"), and the Hijri date sits
       // opposite. The list keeps the bare location it has always had.
       val headerText = if (layoutId == R.layout.prayer_widget_strip) {
-        val day = o.optString("dayLabel", "").trim()
+        // The DAY'S OWN label, not the payload's.
+        //
+        // The times below this line roll with `days[]`; the top-level
+        // `dayLabel` is stamped when the payload is written and never moves.
+        // Read together, from day two onward the card stated one date above a
+        // different day's times — the single most misleading thing a prayer
+        // widget can do. Each entry in `days[]` already carries its own label;
+        // it was simply never used.
+        val day = (todayDay?.optString("dayLabel")?.trim().takeUnless { it.isNullOrEmpty() }
+          ?: o.optString("dayLabel", "").trim())
         when {
           day.isEmpty() -> locationName
           locationName.isEmpty() -> day
@@ -862,7 +1171,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setTextViewText(R.id.widget_location, headerText)
       views.setViewVisibility(R.id.widget_location, if (headerText.isEmpty()) View.GONE else View.VISIBLE)
 
-      val hijriLabel = o.optJSONObject("hijri")?.optString("label", "")?.trim().orEmpty()
+      // Both the Hijri date and "2 of 5 logged" describe the day the payload
+      // was WRITTEN, and neither rolls the way `days[]` does. Once the card
+      // has moved onto a later day they are simply someone else's facts, so
+      // they go rather than mislead — the same call iOS makes in
+      // `perDayPayload(isToday:)`. The dedicated Hijri and Log Today widgets
+      // have their own, correctly gated, copies of both.
+      val describesToday = payloadDescribesToday(o)
+      val hijriLabel = if (!describesToday) "" else
+        o.optJSONObject("hijri")?.optString("label", "")?.trim().orEmpty()
       views.setTextViewText(R.id.widget_hijri, hijriLabel)
       views.setViewVisibility(R.id.widget_hijri, if (hijriLabel.isEmpty()) View.GONE else View.VISIBLE)
 
@@ -963,31 +1280,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       }
 
       bindNightRow(views, displayRows, layoutId)
-      bindLoggedLine(views, o, context, layoutId)
+      bindLoggedLine(views, o, context, layoutId, describesToday)
       bindPracticeStrip(views, o, style, context, layoutId, heightDp)
 
-      // Schedule next update using AlarmManager — targets all widget providers.
-      if (nextUpdateMinutes != -1) {
-        val updateTime = java.util.Calendar.getInstance().apply {
-          set(java.util.Calendar.HOUR_OF_DAY, nextUpdateMinutes / 60)
-          set(java.util.Calendar.MINUTE, nextUpdateMinutes % 60)
-          set(java.util.Calendar.SECOND, 0)
-        }
-        val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
-          action = ACTION_PRAYER_TIME_ELAPSED
-        }
-        val pi = PendingIntent.getBroadcast(context, 1001, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-          alarmManager.setExact(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
-        } else {
-          alarmManager.set(android.app.AlarmManager.RTC, updateTime.timeInMillis, pi)
-        }
-      }
-
-      // Always arm the next-midnight rollover so the widget advances to the
-      // next day's times even when no more prayers remain today (post-Isha).
-      scheduleMidnightRollover(context)
+      // The alarms are NOT armed here any more — see `armWidgetAlarms`. A
+      // render is the wrong place to schedule from: it only happens when a
+      // prayer-times widget is placed, and only when it succeeds.
     }
   }
 }

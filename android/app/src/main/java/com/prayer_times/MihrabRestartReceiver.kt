@@ -37,6 +37,22 @@ class MihrabRestartReceiver : BroadcastReceiver() {
     if (action != Intent.ACTION_MY_PACKAGE_REPLACED &&
         action != Intent.ACTION_BOOT_COMPLETED) return
 
+    // The widgets first, and unconditionally.
+    //
+    // An app update kills the old process and leaves every placed widget
+    // showing whatever RemoteViews the launcher last received — drawn by the
+    // code that was just replaced, from a payload that may since have
+    // expired. Nothing else redraws them until the user opens the app.
+    //
+    // Above the early return, because that return is about whether a Live
+    // Activity was running, which has nothing to do with whether there are
+    // widgets on the home screen.
+    try {
+      PrayerWidgetProvider.requestUpdate(context)
+    } catch (t: Throwable) {
+      Log.w(TAG, "Failed to refresh widgets after $action", t)
+    }
+
     val payload = MihrabLiveActivityModule.loadPayload(context)
     if (payload.isNullOrEmpty()) {
       Log.i(TAG, "$action — no persisted payload, skipping restart")

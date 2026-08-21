@@ -12,10 +12,21 @@
   Static sample values, deliberately mid-day: two logged, one waiting to be
   tapped, two not yet due. That is what the widget is FOR, and a preview
   showing an empty or a finished day would not show it.
+
+  HEIGHT IS match_parent, NOT A NUMBER.
+
+  Both previews used to declare 110dp. The picker lays a previewLayout out in
+  a box derived from `targetCellWidth`/`targetCellHeight`, so the number was
+  answering a question the launcher had already answered — and answering it
+  wrong in both directions. Streak targets one row, which is shorter than
+  110dp, so its last line was pushed onto the padding and clipped. Log Today
+  targets two, which is taller, so its chips were laid out in 110dp and the
+  prayer names and times underneath them were sliced in half by the divider —
+  the one widget in the picker that shows what it DOES, showing it broken.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="110dp"
+    android:layout_height="match_parent"
     android:background="#E01C1C1E"
     android:padding="10dp">
 

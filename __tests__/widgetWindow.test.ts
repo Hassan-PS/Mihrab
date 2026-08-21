@@ -14,6 +14,7 @@
  * PrayerWidgetExtension.swift and is out of jest's reach.
  */
 import { buildWidgetPayload } from '../src/widget/buildWidgetPayload';
+import { WIDGET_WINDOW_DAYS } from '../src/prayer/widgetDayWindow';
 import type { TimingsMap } from '../src/types/prayer';
 
 /** A day whose times drift a minute per day, so days are distinguishable. */
@@ -78,14 +79,37 @@ describe('the widget window', () => {
   it('the widget window is longer than the carousel week', () => {
     // The two numbers are deliberately different and easy to accidentally
     // re-unify; if they ever match again the Mac bug is back.
+    //
+    // They now live in two files: the carousel's week is a rendering concern
+    // and stayed in the hook, while the widget's window moved to
+    // prayer/widgetDayWindow.ts so the headless republish can share one
+    // definition with it rather than keep a second copy in step by hand.
     const hook = require('fs').readFileSync(
       require('path').join(__dirname, '..', 'src', 'hooks', 'usePrayerDay.ts'),
       'utf-8',
     );
     const weekDays = Number(/const WEEK_DAYS = (\d+)/.exec(hook)?.[1]);
-    const windowDays = Number(/const WIDGET_WINDOW_DAYS = (\d+)/.exec(hook)?.[1]);
     expect(weekDays).toBeGreaterThan(0);
-    expect(windowDays).toBeGreaterThan(weekDays);
+    expect(WIDGET_WINDOW_DAYS).toBeGreaterThan(weekDays);
+  });
+
+  it('every day in the window carries its own label', () => {
+    // The Android provider reads `days[i].dayLabel` for the header now,
+    // because the top-level one is stamped when the payload is written and
+    // never rolls — so from day two the card stated one date above a
+    // different day's times. That fix depends on this field existing on
+    // every entry, which makes it a contract rather than a convenience.
+    const week = Array.from({ length: 30 }, (_, i) => day(i));
+    const p = buildWidgetPayload(week[0], week[1], NOW, 'Stockholm', undefined, undefined, week);
+    for (const d of p.days ?? []) {
+      expect(typeof d.dayLabel).toBe('string');
+      expect(d.dayLabel.length).toBeGreaterThan(0);
+      expect(d.dateKey).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+    // ...and they are distinct and in order, so the provider can match on one.
+    const keys = (p.days ?? []).map(d => d.dateKey);
+    expect(new Set(keys).size).toBe(keys.length);
+    expect([...keys].sort()).toEqual(keys);
   });
 
   it('the widget is fed the long window, not the carousel week', () => {

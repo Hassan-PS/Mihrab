@@ -10,12 +10,28 @@
   The grid is an ImageView the provider fills with a Bitmap, and the picker
   has no provider, so the preview draws the shape of the thing in text
   instead of pretending to a graph it cannot render.
+
+  HEIGHT IS match_parent, NOT A NUMBER.
+
+  Both previews used to declare 110dp. The picker lays a previewLayout out in
+  a box derived from `targetCellWidth`/`targetCellHeight`, so the number was
+  answering a question the launcher had already answered — and answering it
+  wrong in both directions. Streak targets one row, which is shorter than
+  110dp, so its last line was pushed onto the padding and clipped. Log Today
+  targets two, which is taller, so its chips were laid out in 110dp and the
+  prayer names and times underneath them were sliced in half by the divider —
+  the one widget in the picker that shows what it DOES, showing it broken.
+
+  Three lines, because three is what the card shows at the size it ships at:
+  the label, the number, and the one summary line beneath it. The fourth line
+  this used to carry was the overflow.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="110dp"
+    android:layout_height="match_parent"
     android:background="#E01C1C1E"
     android:orientation="vertical"
+    android:gravity="center_vertical"
     android:padding="10dp">
 
     <TextView
@@ -60,12 +76,4 @@
         android:maxLines="1"
         android:ellipsize="end" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/widget_preview_streak_grid"
-        android:textColor="#6BC98A"
-        android:textSize="11sp"
-        android:maxLines="1"
-        android:ellipsize="end" />
 </LinearLayout>
