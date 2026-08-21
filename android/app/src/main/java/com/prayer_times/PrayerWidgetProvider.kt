@@ -162,6 +162,28 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_6,
         R.id.widget_col_7,
       )
+    /**
+     * The inner box each column's highlight is painted on.
+     *
+     * Not the column itself. The column fills the row's height so the strip
+     * can absorb slack, and painting the pill there stretched it into a tall
+     * rounded slab behind two lines of centred text. The box wraps its
+     * contents, which is the shape the highlight is meant to be.
+     *
+     * Slots 6 and 7 are the night rows, which are never highlighted; their
+     * ids are here only to keep the arrays the same length.
+     */
+    private val COL_BOXES =
+      intArrayOf(
+        R.id.widget_col_0_box,
+        R.id.widget_col_1_box,
+        R.id.widget_col_2_box,
+        R.id.widget_col_3_box,
+        R.id.widget_col_4_box,
+        R.id.widget_col_5_box,
+        R.id.widget_col_6_box,
+        R.id.widget_col_7_box,
+      )
     private val COL_LABELS =
       intArrayOf(
         R.id.widget_col_0_label,
@@ -560,15 +582,21 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     ) {
       if (layoutId == R.layout.prayer_widget_small) return
       val practice = payload.optJSONObject("practice")
-      val show = practice != null && !(heightDp in 1 until PRACTICE_MIN_HEIGHT_DP)
+      // Two tiers rather than one. The graph earns its place from three
+      // launcher rows up; the month footer needs a fourth. Gating both on the
+      // taller number is what left a third of a 4x3 empty.
+      val show = practice != null && !(heightDp in 1 until GRID_MIN_HEIGHT_DP)
+      val showFoot = show && !(heightDp in 1 until PRACTICE_MIN_HEIGHT_DP)
       val vis = if (show) View.VISIBLE else View.GONE
-      // The whole block goes together — divider, streak line, grid and the
-      // month footer. Turning the grid off but leaving its divider behind is
-      // how a widget ends up with a rule across an empty gap.
+      // The divider goes with the block it separates. Leaving it behind is
+      // how a widget ends up with a rule drawn across an empty gap.
       views.setViewVisibility(R.id.widget_practice_divider, vis)
       views.setViewVisibility(R.id.widget_practice_row, vis)
       views.setViewVisibility(R.id.widget_practice_grid, vis)
-      views.setViewVisibility(R.id.widget_practice_foot, vis)
+      views.setViewVisibility(
+        R.id.widget_practice_foot,
+        if (showFoot) View.VISIBLE else View.GONE,
+      )
       if (!show || practice == null) return
 
       val accent = style.highlightColorInt(context)
@@ -687,6 +715,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * the prayer times need, and the times are why the widget is there.
      */
     private const val PRACTICE_MIN_HEIGHT_DP = 200
+
+    /**
+     * Where the streak line and the practice graph start appearing.
+     *
+     * Lower than PRACTICE_MIN_HEIGHT_DP, which now gates only the month
+     * footer, because there was a whole band between them — a 4x3 — that
+     * showed the strip, the two footer lines, and then nothing at all for the
+     * bottom third of the card. Three launcher rows is enough to draw a
+     * graph; it is not enough to draw a graph AND two more lines under it.
+     */
+    private const val GRID_MIN_HEIGHT_DP = 140
 
     /**
      * Bind the payload into whichever layout was chosen.
@@ -917,9 +956,9 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         views.setTextColor(COL_TIMES[i], col)
 
         if (highlight) {
-          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", R.drawable.widget_row_highlight)
+          views.setInt(COL_BOXES[i], "setBackgroundResource", R.drawable.widget_row_highlight)
         } else {
-          views.setInt(COL_WRAPPERS[i], "setBackgroundResource", 0)
+          views.setInt(COL_BOXES[i], "setBackgroundResource", 0)
         }
       }
 

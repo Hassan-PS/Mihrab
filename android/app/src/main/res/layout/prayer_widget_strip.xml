@@ -84,50 +84,63 @@
         </LinearLayout>
 
         <!-- The strip: six columns, label over time, the next one boxed. -->
+        <!--
+            Weighted, not wrap_content.
+
+            Every child here used to size to its content, so at any height
+            between "the strip fits" and "the practice block fits" the card
+            drew its three sections at the top and left the rest of itself
+            empty — a third of a 4x3 was blank. Slack has to belong to
+            somebody: the strip takes it when the practice block is off, and
+            shares it with the grid when it is on. There is no height at
+            which nothing claims it.
+        -->
         <LinearLayout
             android:id="@+id/widget_times_row"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="horizontal"
             android:baselineAligned="false"
+            android:gravity="center_vertical"
             android:layout_marginTop="8dp">
 
-            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
                 <LinearLayout android:id="@+id/widget_col_0_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
                     <TextView android:id="@+id/widget_col_0_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
                     <TextView android:id="@+id/widget_col_0_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
                 <LinearLayout android:id="@+id/widget_col_1_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
                     <TextView android:id="@+id/widget_col_1_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
                     <TextView android:id="@+id/widget_col_1_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
                 <LinearLayout android:id="@+id/widget_col_2_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
                     <TextView android:id="@+id/widget_col_2_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
                     <TextView android:id="@+id/widget_col_2_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
                 <LinearLayout android:id="@+id/widget_col_3_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
                     <TextView android:id="@+id/widget_col_3_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
                     <TextView android:id="@+id/widget_col_3_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
                 <LinearLayout android:id="@+id/widget_col_4_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
                     <TextView android:id="@+id/widget_col_4_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
                     <TextView android:id="@+id/widget_col_4_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
                 <LinearLayout android:id="@+id/widget_col_5_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
                     <TextView android:id="@+id/widget_col_5_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
                     <TextView android:id="@+id/widget_col_5_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
@@ -263,7 +276,7 @@
             android:id="@+id/widget_practice_grid"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:layout_marginTop="8dp"
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
