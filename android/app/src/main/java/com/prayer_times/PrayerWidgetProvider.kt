@@ -257,6 +257,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     private const val STRIP_MIN_HEIGHT_DP = 88
 
     /**
+     * Three launcher cells of width. Below this the six-column strip gives
+     * each column under 40dp, which is where the times start eliding, so a
+     * tall-and-narrow widget stacks them into the list instead.
+     */
+    private const val STRIP_MIN_WIDTH_DP = 200
+
+    /**
      * Which layout to draw.
      *
      * This used to be decided purely by WHICH PROVIDER CLASS the instance
@@ -283,12 +290,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     ): Int {
       val preferred = when (providerName) {
         PrayerWidgetSmallProvider::class.java.name -> R.layout.prayer_widget_small
-        PrayerWidgetLargeProvider::class.java.name -> R.layout.prayer_widget
-        // "Day at a glance" — the six-column strip. It used to render
-        // `prayer_widget_horizontal`, which is the same two-column
-        // next-prayer-plus-list as the large one at a smaller font size, so
-        // the two picker entries showed the same design and the strip the
-        // entry's own name promises did not exist.
+        // The strip is the wide design at EVERY height now, per plan §2b:
+        // 4x2 is header + strip + footer, 4x4 is the same with the practice
+        // block underneath. It used to switch to the vertical two-column list
+        // once it got tall, which is a different design from the one the plan
+        // draws and left a void where the header belongs.
+        //
+        // The list survives for the narrow case only — under three cells wide
+        // there is no room for six columns, and that is the one place the
+        // plan's own layout rule asks for a list.
         else -> R.layout.prayer_widget_strip
       }
       if (preferred == R.layout.prayer_widget_small) return preferred
@@ -297,19 +307,20 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // that has not measured the widget yet reports 0 — which must read as
       // "no opinion", not as "zero high", or every widget would collapse to
       // the compact line on first draw.
-      val height = try {
-        appWidgetManager
-          .getAppWidgetOptions(appWidgetId)
-          .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+      val opts = try {
+        appWidgetManager.getAppWidgetOptions(appWidgetId)
       } catch (_: Exception) {
-        0
+        null
       }
+      val height = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
+      val width = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
       if (height <= 0) return preferred
 
       return when {
         height < STRIP_MIN_HEIGHT_DP -> R.layout.prayer_widget_small
-        height < ROWS_MIN_HEIGHT_DP && preferred == R.layout.prayer_widget ->
-          R.layout.prayer_widget_strip
+        // Narrow and tall: six columns will not fit across, so stack them.
+        width in 1 until STRIP_MIN_WIDTH_DP && height >= ROWS_MIN_HEIGHT_DP ->
+          R.layout.prayer_widget
         else -> preferred
       }
     }
@@ -455,13 +466,47 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /**
+     * Islamic Midnight and the Last Third as a pair on one line, plan §2b's
+     * "Midnight 00:34 … Last third 02:22".
+     *
+     * On the strip they cannot be columns: eight across four launcher cells
+     * is about 5pt type, which is the same argument the plan uses against a
+     * monthly widget. On the list they ARE rows, drawn by the column binder
+     * at slots 6 and 7, so this does nothing there.
+     */
+    private fun bindNightRow(
+      views: RemoteViews,
+      displayRows: List<org.json.JSONObject>,
+      layoutId: Int,
+    ) {
+      if (layoutId != R.layout.prayer_widget_strip) return
+      val night = displayRows.filter { isNightKey(it.optString("key")) }
+      if (night.isEmpty()) {
+        views.setViewVisibility(R.id.widget_night_row, View.GONE)
+        return
+      }
+      views.setViewVisibility(R.id.widget_night_row, View.VISIBLE)
+      fun label(o: org.json.JSONObject): String {
+        val name = o.optString("name", "").trim().ifEmpty { o.optString("key") }
+        return "$name ${o.optString("time")}"
+      }
+      views.setTextViewText(R.id.widget_night_left, label(night[0]))
+      views.setTextViewText(
+        R.id.widget_night_right,
+        if (night.size > 1) label(night[1]) else "",
+      )
+      views.setViewVisibility(
+        R.id.widget_night_right,
+        if (night.size > 1) View.VISIBLE else View.GONE,
+      )
+    }
+
+    /**
      * "2 of 5 logged today", plan §2's layout rule: at three cells of height
      * the list gains the night times AND a logged line.
      *
-     * Only on the list layout — the strip has no room and says so by not
-     * declaring the id. Hidden when the app has sent no `today` block,
-     * because five unlogged prayers is a claim and an absent block is not
-     * evidence for it.
+     * Hidden when the app has sent no `today` block, because five unlogged
+     * prayers is a claim and an absent block is not evidence for it.
      */
     private fun bindLoggedLine(
       views: RemoteViews,
@@ -469,20 +514,24 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       context: Context,
       layoutId: Int,
     ) {
-      if (layoutId != R.layout.prayer_widget) return
+      if (layoutId == R.layout.prayer_widget_small) return
       val today = payload.optJSONObject("today")
       if (today == null) {
         views.setViewVisibility(R.id.widget_logged, View.GONE)
         return
       }
       views.setViewVisibility(R.id.widget_logged, View.VISIBLE)
+      // The strip's line sits opposite the countdown on one row, where the
+      // plan reads "2 of 5 logged"; the list has it under the location with
+      // room to say which day it means.
+      val res = if (layoutId == R.layout.prayer_widget_strip) {
+        R.string.widget_logged_short
+      } else {
+        R.string.widget_logged_line
+      }
       views.setTextViewText(
         R.id.widget_logged,
-        context.getString(
-          R.string.widget_logged_line,
-          today.optInt("logged", 0),
-          today.optInt("loggable", 5),
-        ),
+        context.getString(res, today.optInt("logged", 0), today.optInt("loggable", 5)),
       )
     }
 
@@ -509,25 +558,41 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       layoutId: Int,
       heightDp: Int,
     ) {
-      if (layoutId != R.layout.prayer_widget) return
+      if (layoutId == R.layout.prayer_widget_small) return
       val practice = payload.optJSONObject("practice")
-      if (practice == null || (heightDp in 1 until PRACTICE_MIN_HEIGHT_DP)) {
-        views.setViewVisibility(R.id.widget_practice_row, View.GONE)
-        return
-      }
-      views.setViewVisibility(R.id.widget_practice_row, View.VISIBLE)
+      val show = practice != null && !(heightDp in 1 until PRACTICE_MIN_HEIGHT_DP)
+      val vis = if (show) View.VISIBLE else View.GONE
+      // The whole block goes together — divider, streak line, grid and the
+      // month footer. Turning the grid off but leaving its divider behind is
+      // how a widget ends up with a rule across an empty gap.
+      views.setViewVisibility(R.id.widget_practice_divider, vis)
+      views.setViewVisibility(R.id.widget_practice_row, vis)
+      views.setViewVisibility(R.id.widget_practice_grid, vis)
+      views.setViewVisibility(R.id.widget_practice_foot, vis)
+      if (!show || practice == null) return
 
       val accent = style.highlightColorInt(context)
       val streak = practice.optInt("streak", 0)
-      views.setTextViewText(
+      // The plan draws "12  day streak · best 31": the number carries the
+      // size and nothing else, and the words beside it stay muted. Putting
+      // the unit in the big view too ("0 days") makes the eye read a phrase
+      // where it should be reading one figure.
+      views.setTextViewText(R.id.widget_practice_streak, streak.toString())
+      views.setTextColor(
         R.id.widget_practice_streak,
-        "$streak " + context.resources.getQuantityString(
-          R.plurals.widget_streak_days, streak, streak,
-        ),
+        if (layoutId == R.layout.prayer_widget_strip) Color.parseColor(NEUTRAL_TEXT) else accent,
       )
-      views.setTextColor(R.id.widget_practice_streak, accent)
+
+      // The strip runs the unit inline with the rest ("12  day streak · Best
+      // 31 · …"); the tall layout has a line of its own for it, next to the
+      // number, the way the systemLarge mock sets it.
+      val unit = context.resources.getQuantityString(
+        R.plurals.widget_streak_day_label, streak, streak,
+      )
+      views.setTextViewText(R.id.widget_practice_unit, unit)
 
       val parts = mutableListOf<String>()
+      if (layoutId == R.layout.prayer_widget_strip) parts.add(unit)
       val best = practice.optInt("bestStreak", 0)
       if (best > 0) parts.add(context.getString(R.string.widget_streak_best, best))
       parts.add(context.getString(R.string.widget_streak_logged, practice.optInt("loggedToday", 0)))
@@ -539,16 +604,48 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       }
       views.setTextViewText(R.id.widget_practice_second, parts.joinToString(" · "))
 
+      // The plan's 4x4 draws fourteen weeks across the full width, not ten
+      // squeezed beside the streak number.
+      // The strip gives the grid the full width, so it gets fourteen weeks;
+      // the tall layout sets it beside the streak number, where fourteen
+      // columns would be slivers.
       val density = context.resources.displayMetrics.density
+      val wide = layoutId == R.layout.prayer_widget_strip
       views.setImageViewBitmap(
         R.id.widget_practice_grid,
         PracticeGridBitmap.render(
           practice.optJSONArray("days"),
-          10,
-          (5 * density).toInt().coerceAtLeast(3),
-          (1.5f * density).toInt().coerceAtLeast(1),
+          if (wide) 14 else 11,
+          ((if (wide) 7 else 6) * density).toInt().coerceAtLeast(3),
+          (2f * density).toInt().coerceAtLeast(1),
           accent,
         ),
+      )
+
+      // "Sunnah 68% this month" opposite "6 fasts" — the two facts the plan
+      // puts at the foot of the 4x4, and the only place either appears on a
+      // home screen. Each is dropped rather than zeroed when the payload has
+      // nothing to say: "Sunnah 0%" reads as a judgement, and an absent
+      // figure reads as nothing at all, which is what it is.
+      val sunnah = practice.optDouble("sunnahRate", Double.NaN)
+      val sunnahText = if (sunnah.isNaN()) "" else context.getString(
+        R.string.widget_practice_sunnah_month,
+        Math.round(sunnah * 100).toInt(),
+      )
+      views.setTextViewText(R.id.widget_practice_sunnah, sunnahText)
+      views.setViewVisibility(
+        R.id.widget_practice_sunnah,
+        if (sunnahText.isEmpty()) View.INVISIBLE else View.VISIBLE,
+      )
+
+      val fasts = practice.optInt("fastsThisMonth", 0)
+      val fastsText = if (fasts <= 0) "" else context.resources.getQuantityString(
+        R.plurals.widget_practice_fasts, fasts, fasts,
+      )
+      views.setTextViewText(R.id.widget_practice_fasts, fastsText)
+      views.setViewVisibility(
+        R.id.widget_practice_fasts,
+        if (fastsText.isEmpty()) View.GONE else View.VISIBLE,
       )
     }
 
@@ -710,8 +807,25 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setTextViewText(R.id.widget_next_time, nextPrayerTime)
       views.setViewVisibility(R.id.widget_next_time, if (nextPrayerTime.isEmpty()) View.GONE else View.VISIBLE)
 
-      views.setTextViewText(R.id.widget_location, locationName)
-      views.setViewVisibility(R.id.widget_location, if (locationName.isEmpty()) View.GONE else View.VISIBLE)
+      // On the strip the location shares a header line with the day, the way
+      // the plan draws it ("Wed, 19 Aug · Makkah"), and the Hijri date sits
+      // opposite. The list keeps the bare location it has always had.
+      val headerText = if (layoutId == R.layout.prayer_widget_strip) {
+        val day = o.optString("dayLabel", "").trim()
+        when {
+          day.isEmpty() -> locationName
+          locationName.isEmpty() -> day
+          else -> "$day · $locationName"
+        }
+      } else {
+        locationName
+      }
+      views.setTextViewText(R.id.widget_location, headerText)
+      views.setViewVisibility(R.id.widget_location, if (headerText.isEmpty()) View.GONE else View.VISIBLE)
+
+      val hijriLabel = o.optJSONObject("hijri")?.optString("label", "")?.trim().orEmpty()
+      views.setTextViewText(R.id.widget_hijri, hijriLabel)
+      views.setViewVisibility(R.id.widget_hijri, if (hijriLabel.isEmpty()) View.GONE else View.VISIBLE)
 
       views.setTextColor(R.id.widget_next_name, normalColor)
       views.setTextColor(R.id.widget_next_time, highlightColor)
@@ -809,6 +923,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
       }
 
+      bindNightRow(views, displayRows, layoutId)
       bindLoggedLine(views, o, context, layoutId)
       bindPracticeStrip(views, o, style, context, layoutId, heightDp)
 

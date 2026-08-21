@@ -144,4 +144,24 @@
     <string name="widget_hijri_begins_today">%1$s · today</string>
     <string name="widget_preview_hijri_date">25 Safar</string>
     <string name="widget_preview_hijri_next">Rabi I · 5d</string>
+    <!-- Strip footer: sits opposite the countdown, so it has no room to say
+         "today" and no need to — the whole card is today. -->
+    <string name="widget_logged_short">%1$d of %2$d logged</string>
+    <string name="widget_practice_sunnah_month">Sunnah %1$d%% this month</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="one">%1$d fast</item>
+        <item quantity="other">%1$d fasts</item>
+    </plurals>
+    <!-- Sample content for the picker preview, matching the plan's mock. -->
+    <string name="widget_preview_header">WED, 19 AUG · MAKKAH</string>
+    <string name="widget_preview_hijri_full">25 SAFAR</string>
+    <string name="widget_preview_in_37">in 37 min</string>
+    <string name="widget_preview_logged">2 of 5 logged</string>
+    <!-- The words next to the streak number: "day streak" / "day streak". -->
+    <plurals name="widget_streak_day_label">
+        <item quantity="one">day streak</item>
+        <item quantity="other">day streak</item>
+    </plurals>
+    <string name="widget_next_label">NEXT</string>
+    <string name="widget_in_label">in</string>
 </resources>

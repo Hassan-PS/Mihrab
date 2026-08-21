@@ -1,82 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Picker preview for the strip. Static values, and the SAME shape as the
-  real thing — the previous preview showed a two-column layout the widget
-  had stopped rendering, which is how the picker came to advertise a design
-  that did not exist.
+  The picker preview.
+
+  Static, and it has to be: the picker never runs the provider, and the real
+  layout starts with its content `gone`, so pointing `previewLayout` at it
+  gives a blank rectangle. This is a hand-built copy of what the widget draws
+  at 4x2 — header, strip, footer pair — with the plan's own sample times in
+  it so the entry shows the design rather than describing it.
+
+  Keep it in step with prayer_widget_strip.xml by hand. There is no way to
+  generate one from the other, and a preview that has drifted from the real
+  thing is a promise the widget then breaks.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="104dp"
+    android:layout_height="110dp"
     android:background="#E01C1C1E"
-    android:padding="10dp">
+    android:orientation="vertical"
+    android:baselineAligned="false"
+    android:padding="14dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:baselineAligned="false">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:gravity="center_vertical">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Stockholm"
+            android:layout_weight="1"
+            android:text="@string/widget_preview_header"
             android:textColor="#9AA0A6"
             android:textSize="10sp"
             android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.06"
             android:maxLines="1" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:layout_marginTop="4dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_hijri_full"
+            android:textColor="#9AA0A6"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.06"
+            android:maxLines="1" />
+    </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Fajr" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="03:22" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
-            </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:layout_marginTop="8dp">
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Sunrise" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="05:09" android:textColor="#9AA0A6" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
-            </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Fajr" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="05:10" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
+        </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Dhuhr" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="12:56" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
-            </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Shurūq" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="06:28" android:textColor="#9AA0A6" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
+        </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="@drawable/widget_row_highlight" android:paddingTop="4dp" android:paddingBottom="4dp">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Asr" android:textColor="#6BC98A" android:textSize="10sp" android:maxLines="1" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="16:55" android:textColor="#6BC98A" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
-            </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Dhuhr" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="13:12" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
+        </LinearLayout>
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Maghrib" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" android:ellipsize="end" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="20:33" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
-            </LinearLayout>
-
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Isha" android:textColor="#9AA0A6" android:textSize="10sp" android:maxLines="1" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="22:09" android:textColor="#E8EAED" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp" android:background="@drawable/widget_row_highlight">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Asr" android:textColor="#6BC98A" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="16:57" android:textColor="#6BC98A" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:layout_marginTop="4dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Maghrib" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="19:56" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
+        </LinearLayout>
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Asr" android:textColor="#E8EAED" android:textSize="11sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingStart="5dp" android:text="16:55" android:textColor="#E8EAED" android:textSize="11sp" android:maxLines="1" />
-            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2h 58m" android:textColor="#9AA0A6" android:textSize="11sp" android:maxLines="1" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Isha" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="21:13" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
         </LinearLayout>
     </LinearLayout>
-</FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#26FFFFFF"
+        android:layout_marginTop="9dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="true"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Asr"
+            android:textColor="#9AA0A6"
+            android:textSize="12sp"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:text="@string/widget_preview_in_37"
+            android:textColor="#6BC98A"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_logged"
+            android:textColor="#9AA0A6"
+            android:textSize="12sp"
+            android:maxLines="1" />
+    </LinearLayout>
+</LinearLayout>
