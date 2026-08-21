@@ -182,6 +182,65 @@ describe('reading', () => {
     expect(block?.lastReadAt).toBeNull();
   });
 
+  it('reports the download state on the not-started block', () => {
+    // The invitation reads it: someone with no mushaf on disk is a tap away
+    // from the translation, and telling them to pick a page is how a widget
+    // sends someone to a download wall.
+    expect(
+      buildReadingBlock({
+        lastRead: null,
+        bookmarks: [],
+        khatmah: null,
+        mushafDownloaded: false,
+      })?.downloaded,
+    ).toBe(false);
+    expect(
+      buildReadingBlock({
+        lastRead: null,
+        bookmarks: [],
+        khatmah: null,
+        mushafDownloaded: true,
+      })?.downloaded,
+    ).toBe(true);
+  });
+
+  it('covers the four states the widget draws', () => {
+    const cold = buildReadingBlock({ lastRead: null, bookmarks: [], khatmah: null });
+    expect([cold?.started, cold?.downloaded, cold?.khatmah]).toEqual([false, false, undefined]);
+
+    const warm = buildReadingBlock({
+      lastRead: null,
+      bookmarks: [],
+      khatmah: null,
+      mushafDownloaded: true,
+    });
+    expect([warm?.started, warm?.downloaded]).toEqual([false, true]);
+
+    const carryOn = buildReadingBlock({
+      lastRead: LAST_READ,
+      bookmarks: [],
+      khatmah: null,
+      now: NOW,
+    });
+    expect(carryOn?.started).toBe(true);
+    expect(carryOn?.khatmah).toBeUndefined();
+
+    const planned = buildReadingBlock({
+      lastRead: LAST_READ,
+      bookmarks: [],
+      khatmah: {
+        id: 'k',
+        startedAt: NOW.getTime() - 13 * 86_400_000,
+        targetDays: 30,
+        pagesRead: 46,
+        completedAt: null,
+      },
+      now: NOW,
+    });
+    expect(planned?.started).toBe(true);
+    expect(planned?.khatmah).toBeDefined();
+  });
+
   it('marks a block with a real position as started', () => {
     const block = buildReadingBlock({
       lastRead: LAST_READ,

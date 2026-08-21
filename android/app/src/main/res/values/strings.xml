@@ -168,4 +168,8 @@
     <string name="widget_reading_header_start">THE QURAN</string>
     <string name="widget_reading_start_title">Start reading</string>
     <string name="widget_reading_start_note">Pick up where you like, or begin a khatmah.</string>
+    <string name="widget_reading_start_note_undownloaded">The translation is ready to read now.</string>
+    <string name="widget_reading_start_tail">No plan needed \u2014 open it and begin.</string>
+    <string name="widget_reading_start_side_title">PAGES</string>
+    <string name="widget_reading_start_side_note">in the whole Qur\'an</string>
 </resources>

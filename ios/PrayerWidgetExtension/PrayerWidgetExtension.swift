@@ -255,6 +255,11 @@ struct WidgetPayload: Codable {
     /// true so a payload from an older build still reads as "started" — the
     /// block only ever existed then when something HAD been read.
     var started: Bool? = nil
+    /// Whether the mushaf pages are on disk. Only the invitation reads it:
+    /// someone with no download is a tap away from the translation, which
+    /// needs none, and promising them a page is how a widget sends someone
+    /// to a download wall.
+    var downloaded: Bool? = nil
     let khatmah: Khatmah?
   }
 

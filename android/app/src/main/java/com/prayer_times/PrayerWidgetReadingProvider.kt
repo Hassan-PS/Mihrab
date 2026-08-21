@@ -121,6 +121,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
       // Mihrab" for exactly the person who has not started one. An invitation
       // costs the same space and asks for the tap the widget wants anyway.
       if (!r.optBoolean("started", true)) {
+        val downloaded = r.optBoolean("downloaded", false)
         views.setTextViewText(
           R.id.reading_header,
           context.getString(R.string.widget_reading_header_start),
@@ -129,17 +130,42 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
           R.id.reading_surah,
           context.getString(R.string.widget_reading_start_title),
         )
+        // Two different people. One has the mushaf on disk and is a tap away
+        // from a page; the other has nothing downloaded and is a tap away
+        // from the translation, which needs no download and always works.
+        // Promising the mushaf to the second is how a widget sends someone
+        // to a download wall.
         views.setTextViewText(
           R.id.reading_position,
-          context.getString(R.string.widget_reading_start_note),
+          context.getString(
+            if (downloaded) R.string.widget_reading_start_note
+            else R.string.widget_reading_start_note_undownloaded,
+          ),
+        )
+        // The invitation is three short lines in a card built for six, so
+        // the tail carries the one fact that makes it concrete rather than
+        // leaving the bottom half of the widget empty.
+        views.setViewVisibility(R.id.reading_tail, View.VISIBLE)
+        views.setTextViewText(
+          R.id.reading_tail,
+          context.getString(R.string.widget_reading_start_tail),
         )
         views.setViewVisibility(R.id.reading_progress, View.GONE)
         views.setViewVisibility(R.id.reading_progress_label, View.GONE)
-        views.setViewVisibility(R.id.reading_tail, View.GONE)
-        views.setViewVisibility(R.id.reading_side, View.GONE)
+        views.setViewVisibility(R.id.reading_side, View.VISIBLE)
+        views.setTextViewText(
+          R.id.reading_side_title,
+          context.getString(R.string.widget_reading_start_side_title),
+        )
+        views.setTextViewText(R.id.reading_side_value, "604")
+        views.setTextViewText(
+          R.id.reading_side_note,
+          context.getString(R.string.widget_reading_start_side_note),
+        )
         views.setOnClickPendingIntent(R.id.widget_root, openQuranIntent(context))
         return views
       }
+      views.setViewVisibility(R.id.reading_side, View.VISIBLE)
       views.setViewVisibility(R.id.reading_progress, View.VISIBLE)
       views.setViewVisibility(R.id.reading_progress_label, View.VISIBLE)
       views.setViewVisibility(R.id.reading_tail, View.VISIBLE)

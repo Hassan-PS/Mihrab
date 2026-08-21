@@ -109,15 +109,23 @@ struct ReadingEntryView: View {
         .foregroundStyle(widgetText)
         .lineLimit(1)
         .minimumScaleFactor(0.6)
-      Text("Pick up where you like, or begin a khatmah.")
+      Text(entry.reading?.downloaded == true
+           ? "Pick up where you like, or begin a khatmah."
+           : "The translation is ready to read now.")
         .font(.system(size: 11))
         .foregroundStyle(widgetMuted)
         .lineLimit(2)
         .minimumScaleFactor(0.8)
         .padding(.top, 2)
+      Text("No plan needed — open it and begin.")
+        .font(.system(size: 10))
+        .foregroundStyle(widgetMuted)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .padding(.top, 1)
       Spacer(minLength: 0)
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
   }
 
   // MARK: - systemSmall

@@ -165,6 +165,16 @@ export type WidgetReadingBlock = {
    * continue still has something to say.
    */
   started: boolean;
+  /**
+   * Whether the mushaf page images are on disk.
+   *
+   * Separate from `mode` because `mode` answers "which reader does a tap
+   * open" and this answers "what can this person actually read right now" —
+   * and before anything has been read those are different questions. Someone
+   * with no download and no history is being invited into the translation
+   * reader; someone who has the mushaf is being invited back to a page.
+   */
+  downloaded: boolean;
 };
 
 export type WidgetHijriBlock = {
@@ -391,6 +401,7 @@ export function buildReadingBlock(input: {
       lastReadAt: null,
       mode: 'translation',
       started: false,
+      downloaded: input.mushafDownloaded === true,
     };
   }
 
@@ -435,6 +446,7 @@ export function buildReadingBlock(input: {
     bookmarks: input.bookmarks.length,
     lastReadAt: last?.updatedAt ?? null,
     started: true,
+    downloaded: input.mushafDownloaded === true,
     mode:
       last?.mode === 'mushaf' && input.mushafDownloaded === true
         ? 'mushaf'

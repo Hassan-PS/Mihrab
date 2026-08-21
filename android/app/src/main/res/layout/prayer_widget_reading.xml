@@ -114,12 +114,15 @@
                 android:visibility="gone" />
         </LinearLayout>
 
+        <!-- Centred like the column opposite. Two full-height columns with
+             different gravities read as two widgets pushed together. -->
         <LinearLayout
             android:id="@+id/reading_side"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:minWidth="96dp"
             android:layout_marginStart="10dp"
+            android:gravity="center_vertical"
             android:orientation="vertical">
 
             <TextView

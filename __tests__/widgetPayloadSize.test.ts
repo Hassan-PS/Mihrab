@@ -139,7 +139,14 @@ describe('payload size', () => {
       'utf8',
     );
     // Everything except the history is small enough to be uninteresting.
-    expect(withoutPractice).toBeLessThan(6 * 1024);
+    //
+    // Raised from 6 KiB when `started` and `downloaded` joined the reading
+    // block — two booleans that stop the Continue Reading widget rendering a
+    // dead "Open Mihrab" card for anyone who has not read yet. The point of
+    // this bound is that the non-history part stays boring, not that it never
+    // moves; it is the assertion below, that the grid dominates, that is
+    // actually load-bearing.
+    expect(withoutPractice).toBeLessThan(7 * 1024);
     expect(whole).toBeGreaterThan(withoutPractice);
   });
 });
