@@ -698,6 +698,15 @@ struct CountdownLabel: View {
   /// must inherit its foreground style. Forcing `widgetText` there paints a
   /// colour chosen for a home-screen card onto a vibrancy-tinted overlay.
   var inheritsForeground: Bool = false
+  /// Right-align the glyphs inside the frame.
+  ///
+  /// `Text(_, style: .relative)` reserves a frame wide enough for the longest
+  /// string it might ever render, which is far wider than "37 min" draws. So
+  /// placing it at a trailing edge trails the RESERVED BOX, and the digits
+  /// float somewhere in the middle of it — which is how the word "in" ended
+  /// up orphaned in a corner with its number nowhere near it. Aligning the
+  /// text inside its own box is what actually moves the glyphs.
+  var trailing: Bool = false
 
   var body: some View {
     Group {
@@ -712,6 +721,8 @@ struct CountdownLabel: View {
     .foregroundStyle(inheritsForeground ? AnyShapeStyle(.foreground) : AnyShapeStyle(widgetText))
     .lineLimit(1)
     .minimumScaleFactor(0.5)
+    .multilineTextAlignment(trailing ? .trailing : .leading)
+    .frame(alignment: trailing ? .trailing : .leading)
   }
 }
 
@@ -1125,22 +1136,21 @@ struct PrayerWidgetEntryView: View {
         // underneath it and reads as "1448⟳".
         .padding(.trailing, 20)
 
-        // The countdown gets its OWN line, with "in" inline beside it.
+        // The countdown sits opposite the prayer name, "in" stacked over the
+        // number and both right-aligned — the plan's systemLarge mock.
         //
-        // It was in a trailing column opposite the prayer name, and the word
-        // "in" ended up alone in the top-right corner of the card with the
-        // number nowhere near it. The cause is that `Text(_, style: .relative)`
-        // reserves a frame wide enough for the longest string it might ever
-        // render — far wider than "3 hr, 50 min" draws — so right-aligning
-        // the column right-aligned the RESERVED box, not the glyphs. Putting
-        // the label and the number in one HStack means the reserved slack can
-        // only ever trail off to the right of a phrase that already reads.
+        // It was on its own line below, because a first attempt at this put
+        // "in" alone in the top-right corner with the digits nowhere near
+        // it. The cause was never the layout: `Text(_, style: .relative)`
+        // reserves a frame far wider than it draws, so trailing-aligning the
+        // column aligned the reserved box. `CountdownLabel(trailing:)` aligns
+        // the glyphs inside that box, which is what actually moves them.
         VStack(alignment: .leading, spacing: 0) {
           Text("NEXT")
             .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
-          HStack(alignment: .firstTextBaseline, spacing: 8) {
+          HStack(alignment: .bottom, spacing: 8) {
             if let name, !name.isEmpty {
               Text(name)
                 .font(.system(size: 26, weight: .semibold))
@@ -1153,18 +1163,20 @@ struct PrayerWidgetEntryView: View {
                 .font(.system(size: 20, weight: .regular))
                 .foregroundStyle(resolvedWidgetHighlightColor())
                 .lineLimit(1)
+                .padding(.bottom, 2)
+            }
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 0) {
+              Text("in")
+                .font(.system(size: 11))
+                .foregroundStyle(widgetMuted)
+              CountdownLabel(
+                target: PrayerInterval.around(entry.date, rows: p.rows, calendar: .current)?.end,
+                fallback: nil,
+                trailing: true
+              )
             }
           }
-          HStack(alignment: .firstTextBaseline, spacing: 5) {
-            Text("in")
-              .font(.system(size: 11))
-              .foregroundStyle(widgetMuted)
-            CountdownLabel(
-              target: PrayerInterval.around(entry.date, rows: p.rows, calendar: .current)?.end,
-              fallback: nil
-            )
-          }
-          .padding(.top, 1)
         }
         .padding(.top, 8)
 
