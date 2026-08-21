@@ -122,7 +122,6 @@
          preview layout can show. Representative, not live. -->
     <string name="widget_preview_days">days</string>
     <string name="widget_preview_streak_second">Best 31 · 2 of 5 today · Sunnah 68%</string>
-    <string name="widget_preview_streak_grid">last 10 weeks</string>
     <string name="widget_preview_reading_header">KHATMAH · DAY 14/30</string>
     <string name="widget_preview_reading_surah">Al-Baqarah</string>
     <string name="widget_preview_reading_position">Page 3 · Juz 1</string>
