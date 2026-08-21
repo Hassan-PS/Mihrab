@@ -1,0 +1,7 @@
+The widgets tell the truth again — including while the app is closed.
+
+• Widgets now update whatever screen you are on, and when the app is closed.
+• A widget with nothing left to show asks you to open the app instead of redrawing yesterday.
+• The graph in the widget is the app's calendar: weeks start on Monday, gaps stay put, future days are empty.
+• Nothing is drawn outside the card, and "to make up" fits at every size.
+• The picker shows each widget at the size it will be.

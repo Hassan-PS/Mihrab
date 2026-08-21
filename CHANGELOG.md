@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.9.1] — 2026-08-21
+
+The widgets tell the truth again — including while the app is closed.
+
+### Fixed
+- **Widgets update without the app open.** The home-screen cards were only ever written while a particular screen was on the phone, so a prayer logged from a notification, a tasbih counted on the widget itself, or simply a new day arriving could leave every card sitting on old numbers until you next opened the app on that screen. The cards are now written from the app's own records, whatever you happen to be looking at, and every one of them is refreshed together.
+- **A widget with nothing left to show asks to be opened instead of pretending.** When a card ran past the end of the times it was carrying it kept redrawing the last day it knew under today's date. It now says so plainly and asks you to open the app, which is the one thing that fixes it.
+- **The practice graph in the widget is the same calendar as the one in the app.** It was filling squares in the order the days arrived rather than by their date, so a gap in your record shifted everything after it by a day. Weeks start on Monday now, in the widget and on the Mac, exactly as they do in the app, and days that have not happened yet are drawn as empty rather than as missed.
+- **Nothing is drawn outside the card any more.** The streak widget's graph spilled over the edge of its own background at some sizes, and the count of prayers left to make up was pushed off the end of the line at the size most people use. Both are measured against the space the card actually has.
+- **On iPhone and iPad, one unfamiliar value no longer empties every widget.** All six cards shared a single reader that gave up entirely the moment it met something it did not expect; a card now keeps everything it could read and only leaves out the part it could not.
+- **The widget picker shows each widget at the size it will be**, rather than two of them cropped to a box that was the wrong shape.
+- **Widgets survive a restore to a new phone.** A backup could carry another device's pending taps and a stale set of times across with it; those are now left behind where they belong.
+
 ## [2.9.0] — 2026-08-19
 
 Sunnah prayers, your own adhan, and an app that finally reaches the edges of the screen.

@@ -1,0 +1,7 @@
+Widgetarna säger sanningen igen — även när appen är stängd.
+
+• Widgetarna uppdateras oavsett vilken skärm du är på, och när appen är stängd.
+• En widget utan något kvar att visa ber dig öppna appen i stället för att rita om gårdagen.
+• Grafen i widgeten är appens kalender: veckan börjar på måndag, luckorna ligger rätt, kommande dagar är tomma.
+• Inget ritas utanför kortet, och "att ta igen" får plats i alla storlekar.
+• Väljaren visar varje widget i den storlek den faktiskt får.
