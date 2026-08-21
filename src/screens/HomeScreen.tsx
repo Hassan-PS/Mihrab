@@ -467,6 +467,11 @@ export function HomeScreen() {
     // widget should say without changing any prayer time — so the payload
     // has to be rebuilt on those too, not only on `view`.
     widgetRevision,
+    // Every name in the payload is localized — the prayers, the surah, the
+    // dhikr. The Live Activity effect has always listed this and the widget
+    // effect did not, so a language change left the widget in the old one
+    // until something unrelated moved.
+    i18n.language,
   ]);
 
   // Live Activity sync — runs whenever prayer data changes OR whenever the
