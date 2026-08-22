@@ -172,6 +172,17 @@ started:
   `shots/` folder of verification screenshots inside it. Yours to delete.
 - **Android's Next Prayer has no elapsed ring.** The plan's iOS mock has one;
   its Android mock does not, so this matches the plan as drawn.
+- **Splitting the iOS extension left an unregistered App ID behind.** `Widgets
+  phase 0` gave the Live Activity its own target,
+  `com.hassan.prayerapp.MihrabLiveActivity`, and nobody registered that bundle
+  identifier with Apple. Local archives export fine, so it stayed invisible
+  until the 2.9.1 cut, when Xcode Cloud build 520 archived successfully and
+  then died at the export step with `Automatic signing cannot register bundle
+  identifier`. Registered now, with App Groups on, mirroring the widget
+  extension's App ID. The general rule and the API calls are written into
+  CLAUDE.md §10: **a commit that adds an extension target has to register its
+  App ID before the next release**, and `xcode-cloud.py why` will not show you
+  the reason — the message only exists inside the run's LOG_BUNDLE artifact.
 - **On a 420dpi Pixel-style 4x6 grid the prayer-times card tops out at three
   rows**, whatever `maxResizeHeight` says — the launcher simply refuses to
   grow it further, before and after the 400→600dp change and across a
