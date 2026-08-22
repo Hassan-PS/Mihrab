@@ -1,8 +1,7 @@
-Sunnah prayers, your own adhan, and widgets that tell the truth.
-
-• Log the sunnah prayers beside each fard.
-• Your own adhan — any audio file on your phone.
-• Export and import your whole record, not just settings.
-• Your best streak, beside the current one.
-• Widgets now update with the app closed.
-• The widget graph matches the one in the app.
+• Sunnah prayers can be logged beside each fard.
+• Any audio file on the phone can be used as the adhan.
+• Export and import now cover the full record, not only settings.
+• The best streak is shown next to the current one.
+• Widgets update while the app is closed.
+• The widget graph now matches the one in the app.
+• Fixed: the streak showed zero each morning.

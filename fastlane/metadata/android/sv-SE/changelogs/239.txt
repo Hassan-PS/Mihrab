@@ -1,8 +1,7 @@
-Sunnahböner, din egen adhan, och widgetar som säger sanningen.
-
-• Logga sunnahbönerna bredvid varje fard.
-• Din egen adhan — vilken ljudfil som helst.
-• Exportera och importera hela ditt register, inte bara inställningarna.
-• Din bästa svit, bredvid den nuvarande.
-• Widgetarna uppdateras med appen stängd.
-• Grafen i widgeten stämmer med appens.
+• Sunnahböner kan loggas bredvid varje fard.
+• Vilken ljudfil som helst på telefonen kan användas som adhan.
+• Export och import omfattar nu hela registret, inte bara inställningarna.
+• Bästa sviten visas bredvid den nuvarande.
+• Widgetarna uppdateras medan appen är stängd.
+• Grafen i widgeten stämmer nu med appens.
+• Rättat: sviten visade noll varje morgon.
