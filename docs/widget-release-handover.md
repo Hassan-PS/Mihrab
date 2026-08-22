@@ -172,17 +172,26 @@ started:
   `shots/` folder of verification screenshots inside it. Yours to delete.
 - **Android's Next Prayer has no elapsed ring.** The plan's iOS mock has one;
   its Android mock does not, so this matches the plan as drawn.
-- **Splitting the iOS extension left an unregistered App ID behind.** `Widgets
-  phase 0` gave the Live Activity its own target,
-  `com.hassan.prayerapp.MihrabLiveActivity`, and nobody registered that bundle
-  identifier with Apple. Local archives export fine, so it stayed invisible
-  until the 2.9.1 cut, when Xcode Cloud build 520 archived successfully and
-  then died at the export step with `Automatic signing cannot register bundle
-  identifier`. Registered now, with App Groups on, mirroring the widget
-  extension's App ID. The general rule and the API calls are written into
-  CLAUDE.md §10: **a commit that adds an extension target has to register its
-  App ID before the next release**, and `xcode-cloud.py why` will not show you
-  the reason — the message only exists inside the run's LOG_BUNDLE artifact.
+- **Splitting the iOS extension left an entitlement nobody needed, and it
+  broke every cloud build.** `Widgets phase 0` gave the Live Activity its own
+  target and copied `PrayerWidgetExtension.entitlements` across with it,
+  App Group and all. A Live Activity does not read shared storage — ActivityKit
+  hands it its attributes and content state — so the group was never used, but
+  claiming it meant the App ID `com.hassan.prayerapp.MihrabLiveActivity` had to
+  exist and had to carry the App Groups capability, and automatic signing on
+  Xcode Cloud will do neither for you. Builds 520 to 522 all archived cleanly
+  and died at export: first `Automatic signing cannot register bundle
+  identifier`, then, once the App ID was registered by hand, `cannot update`
+  it, because attaching an App Group is portal-only work that the App Store
+  Connect API does not expose at all. Local archives never noticed, because
+  they export against a profile that already exists on the machine.
+
+  Fixed by asking for nothing: the entitlements file is empty, the capability
+  is off the App ID, and there is nothing left for automatic signing to
+  reconcile. Two rules fall out of it, both in CLAUDE.md §10 — **an extension
+  target's entitlements are a signing contract, not boilerplate to copy**, and
+  `xcode-cloud.py why` will not tell you any of this: the real message only
+  exists inside the run's LOG_BUNDLE artifact.
 - **On a 420dpi Pixel-style 4x6 grid the prayer-times card tops out at three
   rows**, whatever `maxResizeHeight` says — the launcher simply refuses to
   grow it further, before and after the 400→600dp change and across a
