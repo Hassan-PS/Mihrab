@@ -1,10 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Deliberately empty.
+
+  This file was copied wholesale from PrayerWidgetExtension when phase 0 split
+  the two extensions apart, and it arrived carrying an App Group it has never
+  needed. A Live Activity is not a widget that reads shared storage: ActivityKit
+  hands the extension its ActivityAttributes and ContentState, the app pushes
+  every update through that channel, and nothing in this target opens
+  UserDefaults, a group container, or a file. Grep it: PrayerLiveActivityWidget
+  and PrayerLiveActivityAttributes import ActivityKit, SwiftUI, WidgetKit,
+  UIKit and Foundation, and touch no storage at all.
+
+  Claiming group.com.prayerapp anyway was not free. An entitlement has to be
+  authorised by a provisioning profile, the profile is generated from the App
+  ID's capabilities, and automatic signing on Xcode Cloud will not create or
+  reconfigure an App ID for you. So the export step failed on every build from
+  phase 0 onward, first with
+
+    Automatic signing cannot register bundle identifier
+    "com.hassan.prayerapp.MihrabLiveActivity"
+
+  and then, once the App ID was registered by hand, with "cannot update" it,
+  because the App Group still had to be attached to it and that is portal-only.
+  Local archives never noticed, because they export against a profile that
+  already exists on the machine. The 2.9.1 cut is what surfaced it.
+
+  Asking for nothing is both the honest description of this target and the
+  thing that makes it sign itself: no capabilities to reconcile, so automatic
+  signing has an App ID it can use as-is. If a future Live Activity genuinely
+  needs shared storage, add the group back here AND enable App Groups on the
+  App ID in the developer portal, in that order, and expect the first cloud
+  build after the change to be the one that tells you if you forgot.
+-->
 <plist version="1.0">
 <dict>
-	<key>com.apple.security.application-groups</key>
-	<array>
-		<string>group.com.prayerapp</string>
-	</array>
 </dict>
 </plist>
