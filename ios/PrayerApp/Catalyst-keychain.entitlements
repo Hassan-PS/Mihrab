@@ -19,11 +19,36 @@
   keeping its plaintext copy — see the fallback note there for what this
   is worth.
 
-  The group is spelled literally. `$(AppIdentifierPrefix)` and
+  Every value is spelled literally. `$(AppIdentifierPrefix)` and
   `$(CFBundleIdentifier)` are build-time expansions and this file is fed
-  straight to codesign, so nothing expands. It is the Catalyst bundle
-  identifier, which carries the maccatalyst prefix that
-  DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER adds — not the iOS one.
+  straight to codesign, so nothing expands. The identifier carries the
+  maccatalyst prefix that DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER
+  adds — it is not the iOS one.
+
+  These are not guesses. They are what the Catalyst profile Xcode had
+  already made on this machine actually authorises:
+
+    application-identifier              GAW23HT439.maccatalyst.com.hassan.prayerapp
+    com.apple.application-identifier    the same
+    com.apple.developer.team-identifier GAW23HT439
+    keychain-access-groups              GAW23HT439.* and com.apple.token
+    application-groups                  group.com.prayerapp
+
+  Two things follow. The Keychain group below is covered by that
+  wildcard, so it needs no capability enabled anywhere — which is why
+  there is no Keychain Sharing checkbox to hunt for in the developer
+  portal, and why trying to register the App ID by hand fails: Xcode
+  registered it long ago, so the portal reports the identifier as taken.
+
+  And the profile names the app group WITHOUT the team prefix while this
+  file keeps it, because the prefixed spelling is the one arrived at by
+  experiment and it has never failed; see Catalyst.entitlements. macOS
+  reads them as the same group. If a build ever refuses to launch, that
+  difference is the first thing to suspect and the profile's spelling is
+  the thing to try.
+
+  com.apple.application-identifier is here because on macOS that is what
+  the data-protection Keychain uses as an app's default access group.
 -->
 <plist version="1.0">
 <dict>
@@ -31,6 +56,10 @@
 	<array>
 		<string>GAW23HT439.group.com.prayerapp</string>
 	</array>
+	<key>com.apple.application-identifier</key>
+	<string>GAW23HT439.maccatalyst.com.hassan.prayerapp</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>GAW23HT439</string>
 	<key>keychain-access-groups</key>
 	<array>
 		<string>GAW23HT439.maccatalyst.com.hassan.prayerapp</string>
