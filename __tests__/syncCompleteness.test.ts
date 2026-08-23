@@ -109,6 +109,14 @@ const STAYS: Record<string, string> = {
     'the set without re-keying all of them — and the whole point of a ' +
     'per-device keypair is that losing one costs one. The PUBLIC half ' +
     'travels, by hand, as the pairing code',
+  'prayerapp.sync.peers.v1':
+    'the paired-device list, and it must not travel for a reason separate ' +
+    'from the secret key: carrying it would make pairing transitive. ' +
+    'Snapshots get exported to files and files get sent to people, so a ' +
+    'friend who imported your export to look at the format would join your ' +
+    'device set, and the next sync would seal your journal to their key. ' +
+    'Pairing is a decision someone makes by carrying a code, once, per ' +
+    'device — nothing else may create it',
   MHRB: 'the pairing code prefix, not a store',
 };
 
