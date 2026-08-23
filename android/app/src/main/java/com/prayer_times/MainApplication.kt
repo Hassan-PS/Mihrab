@@ -25,6 +25,7 @@ class MainApplication : Application(), ReactApplication {
           add(MushafFontPackage())
           add(CustomAdhanPackage())
           add(SecureRandomPackage())
+          add(MihrabClipboardPackage())
         },
     )
   }

@@ -54,6 +54,8 @@
 		BBF3C3E5E6C4DE8AF0C2C7A6 /* CompassModule.m in Sources */ = {isa = PBXBuildFile; fileRef = F4D4DB9CBD682D1BF5562CC3 /* CompassModule.m */; };
 		953C80C94E0CFB27986DBE4E /* SecureRandom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AE7C8075017FD04A3E8F05C /* SecureRandom.swift */; };
 		0834E80FAAC8D33455C439C0 /* SecureRandom.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C888314F79203C561BB4CF4 /* SecureRandom.m */; };
+		B1C2D3E40001AAAA0001BEEF /* MihrabClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E40003AAAA0003BEEF /* MihrabClipboard.swift */; };
+		B1C2D3E40002AAAA0002BEEF /* MihrabClipboard.m in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E40004AAAA0004BEEF /* MihrabClipboard.m */; };
 		CA37C7F81236A5CF8F759E97 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60668681401DD7256458E168 /* Haptics.swift */; };
 		CE1E4BEE25F612B8320B7886 /* adhan_hafiz_murad.caf in Resources */ = {isa = PBXBuildFile; fileRef = 91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */; };
 		D80631DB29913BA3BE3917AB /* Haptics.m in Sources */ = {isa = PBXBuildFile; fileRef = BFF6595003A4C5C972D2B78B /* Haptics.m */; };
@@ -138,6 +140,8 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-PrayerApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PrayerApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AE7C8075017FD04A3E8F05C /* SecureRandom.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureRandom.swift; path = PrayerApp/SecureRandom.swift; sourceTree = "<group>"; };
 		8C888314F79203C561BB4CF4 /* SecureRandom.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SecureRandom.m; path = PrayerApp/SecureRandom.m; sourceTree = "<group>"; };
+		B1C2D3E40003AAAA0003BEEF /* MihrabClipboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MihrabClipboard.swift; path = PrayerApp/MihrabClipboard.swift; sourceTree = "<group>"; };
+		B1C2D3E40004AAAA0004BEEF /* MihrabClipboard.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MihrabClipboard.m; path = PrayerApp/MihrabClipboard.m; sourceTree = "<group>"; };
 		60668681401DD7256458E168 /* Haptics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Haptics.swift; path = PrayerApp/Haptics.swift; sourceTree = "<group>"; };
 		69FB66EF55272B1AA6A61A69 /* PrayerBuildInfo.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = PrayerBuildInfo.m; path = PrayerApp/PrayerBuildInfo.m; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = PrayerApp/AppDelegate.swift; sourceTree = "<group>"; };
@@ -301,6 +305,8 @@
 				F1A20000A001B001C001D008 /* PrayerLiveActivity.m */,
 				0AE7C8075017FD04A3E8F05C /* SecureRandom.swift */,
 				8C888314F79203C561BB4CF4 /* SecureRandom.m */,
+				B1C2D3E40003AAAA0003BEEF /* MihrabClipboard.swift */,
+				B1C2D3E40004AAAA0004BEEF /* MihrabClipboard.m */,
 				60668681401DD7256458E168 /* Haptics.swift */,
 				BFF6595003A4C5C972D2B78B /* Haptics.m */,
 				7BBC47479F739320A66C8F1A /* MihrabAppGroup.h */,
@@ -657,6 +663,8 @@
 				F1A20000A001B001C001D002 /* PrayerLiveActivityAttributes.swift in Sources */,
 				953C80C94E0CFB27986DBE4E /* SecureRandom.swift in Sources */,
 				0834E80FAAC8D33455C439C0 /* SecureRandom.m in Sources */,
+				B1C2D3E40001AAAA0001BEEF /* MihrabClipboard.swift in Sources */,
+				B1C2D3E40002AAAA0002BEEF /* MihrabClipboard.m in Sources */,
 				CA37C7F81236A5CF8F759E97 /* Haptics.swift in Sources */,
 				D80631DB29913BA3BE3917AB /* Haptics.m in Sources */,
 				9381D9BABC745CEEC09EF47C /* MihrabAppGroup.m in Sources */,
