@@ -582,6 +582,19 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     private const val STRIP_HEADER_MIN_HEIGHT_DP = 145
 
     /**
+     * Below this the header row goes entirely, not just its padding.
+     *
+     * A one-launcher-row card measures 99dp here. The times row wants 48 of
+     * that and the next-prayer line another 24; the header is only 13dp of
+     * text but carries a 14sp refresh glyph, and 19dp is exactly what pushed
+     * the total past the card and cut the next-prayer line in half along its
+     * middle. Between this and STRIP_HEADER_MIN_HEIGHT_DP the header stays
+     * and only the padding and the rule give way — that band is the 4x2
+     * card, which has the room for it.
+     */
+    private const val STRIP_HEADER_DROP_DP = 110
+
+    /**
      * What the strip spends before the practice grid gets a say, in dp:
      * padding, the header line, the next-prayer footer, the divider and the
      * streak line above the graph. The times row and the grid share what is
@@ -973,7 +986,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       heightDp: Int,
     ) {
       if (layoutId != R.layout.prayer_widget_strip) return
-      views.setViewVisibility(R.id.widget_header_row, View.VISIBLE)
+      // An unmeasured card (0) keeps the header: the times and the next line
+      // survive being crowded, and a widget whose first draw silently loses
+      // its date and city looks broken rather than tight.
+      val oneRow = heightDp in 1 until STRIP_HEADER_DROP_DP
+      views.setViewVisibility(
+        R.id.widget_header_row,
+        if (oneRow) View.GONE else View.VISIBLE,
+      )
       val tight = heightDp in 1 until STRIP_HEADER_MIN_HEIGHT_DP
       val density = context.resources.displayMetrics.density
       val side = (14 * density).toInt()
