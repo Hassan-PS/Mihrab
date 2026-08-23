@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  The API 31+ copy, and the one that actually runs on any phone this decade.
+
+  IT IS EASY TO FORGET, AND IT WAS. Every size on the base file was changed
+  — one row by default, a 600dp ceiling so the practice graph can be reached
+  — and none of it moved, because a device on 31 or later reads this file
+  instead and this one still said two rows and 300dp. If you change one of
+  these files, change both: the base copy is what an older phone gets, and
+  the difference between them should only ever be the attributes that did
+  not exist before 31.
+-->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
-    android:description="@string/widget_description_medium"
+    android:description="@string/widget_description_prayer_times"
     android:initialLayout="@layout/prayer_widget_strip"
     android:minWidth="250dp"
-    android:minHeight="100dp"
+    android:minHeight="60dp"
     android:previewImage="@mipmap/ic_launcher"
     android:previewLayout="@layout/prayer_widget_strip_preview"
     android:resizeMode="horizontal|vertical"
@@ -14,6 +25,6 @@
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen"
     android:targetCellWidth="4"
-    android:targetCellHeight="2"
+    android:targetCellHeight="1"
     android:maxResizeWidth="500dp"
-    android:maxResizeHeight="300dp" />
+    android:maxResizeHeight="600dp" />

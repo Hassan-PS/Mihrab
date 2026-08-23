@@ -1,57 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  The picker preview for "Next prayer".
+
+  Static, and it has to be: the picker never runs the provider, and the real
+  layout starts with its content `gone`, so pointing `previewLayout` at it
+  gives a blank rectangle.
+
+  IT USED TO SHOW A DIFFERENT WIDGET. The card is two columns — the prayer
+  and its time on the left, the countdown and the city right-aligned
+  opposite — and the preview drew one centred stack: a bold uppercase label
+  over a 44sp time over the city, none of which is what gets placed. Someone
+  choosing from the picker was choosing a design they would never see.
+
+  This is the real layout with sample values in it, at the same sizes,
+  weights and colours. Keep it in step with prayer_widget_small.xml by hand;
+  there is no way to generate one from the other.
+
+  HEIGHT IS match_parent, NOT A NUMBER: the picker lays the preview out in a
+  box derived from targetCellWidth/Height, and a declared height either
+  clips the content or floats it in a box the wrong size.
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E01C1C1E"
-    android:padding="14dp">
+    android:padding="10dp">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:padding="4dp"
-            android:text="↻"
-            android:textColor="#80FFFFFF"
-            android:textSize="16sp" />
-
+        <!-- Left: the next prayer and when it is. -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:paddingEnd="6dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:text="DHUHR"
-                android:maxLines="1" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#E8EAED"
-                android:textSize="44sp"
-                
-                android:includeFontPadding="false"
-                android:text="12:10"
-                android:layout_marginTop="2dp"
-                android:maxLines="1" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:text="Asr"
                 android:textColor="#9AA0A6"
                 android:textSize="12sp"
-                android:text="Stockholm"
-                android:maxLines="1"
-                android:layout_marginTop="4dp" />
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="16:57"
+                android:textColor="#E8EAED"
+                android:textSize="36sp"
+                android:fontFamily="sans-serif-light"
+                android:includeFontPadding="false"
+                android:gravity="start"
+                android:maxLines="1" />
         </LinearLayout>
-    </FrameLayout>
+
+        <!-- Right: how long that is, and where. -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_preview_in_37"
+                android:textColor="#9AA0A6"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="end"
+                android:maxLines="1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Makkah"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:gravity="end"
+                android:maxLines="2"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>

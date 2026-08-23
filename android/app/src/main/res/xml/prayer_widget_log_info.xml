@@ -18,6 +18,12 @@
   puts that entry there. Both are API 31; below that Android falls back to
   prompting on placement, the same as the prayer widgets have always done.
 
+  ONE ROW BY DEFAULT, not two. The card at one row is the same card with
+  its header and its rule dropped and its chips shrunk — the five prayers,
+  their times, and the countdown to the next, which is everything it is for.
+  Two rows adds the date line back; three adds the practice graph. Every row
+  buys something.
+
   maxResizeHeight is 600dp, not the 200dp it was. 200 stopped this widget
   at two launcher rows, which is where it was designed to live — but a card
   that cannot be dragged taller cannot show the practice graph, and the
@@ -36,15 +42,15 @@
     android:description="@string/widget_description_log"
     android:initialLayout="@layout/prayer_widget_log"
     android:minWidth="250dp"
-    android:minHeight="96dp"
+    android:minHeight="60dp"
     android:previewImage="@mipmap/ic_launcher"
     android:previewLayout="@layout/prayer_widget_log_preview"
     android:resizeMode="horizontal|vertical"
     android:minResizeWidth="250dp"
-    android:minResizeHeight="80dp"
+    android:minResizeHeight="60dp"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
     android:targetCellWidth="4"
-    android:targetCellHeight="2"
+    android:targetCellHeight="1"
     android:maxResizeWidth="500dp"
     android:maxResizeHeight="600dp" />

@@ -5,8 +5,19 @@
   Static, and it has to be: the picker never runs the provider, and the real
   layout starts with its content `gone`, so pointing `previewLayout` at it
   gives a blank rectangle. This is a hand-built copy of what the widget draws
-  at 4x2 — header, strip, footer pair — with the plan's own sample times in
-  it so the entry shows the design rather than describing it.
+  AT THE SIZE IT IS PLACED AT — one launcher row: header, strip, next-prayer
+  line — with the plan's own sample times in it so the entry shows the design
+  rather than describing it.
+
+  HEIGHT IS match_parent, NOT A NUMBER. It declared 110dp, which was the old
+  two-row card's height and is taller than the box the picker lays this out
+  in now — so the footer pair was pushed into the padding and clipped, and
+  the entry advertised a widget with its last line cut off. The picker sizes
+  the box from targetCellWidth/Height; the preview's job is to fill it.
+
+  The padding matches what the real card uses at one row: 6dp top and bottom
+  rather than 14, which is exactly what makes the three sections fit. See
+  bindStripHeader.
 
   Keep it in step with prayer_widget_strip.xml by hand. There is no way to
   generate one from the other, and a preview that has drifted from the real
@@ -14,11 +25,14 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="110dp"
+    android:layout_height="match_parent"
     android:background="#E01C1C1E"
     android:orientation="vertical"
     android:baselineAligned="false"
-    android:padding="14dp">
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -89,11 +103,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#26FFFFFF"
-        android:layout_marginTop="9dp" />
+    
 
     <LinearLayout
         android:layout_width="match_parent"

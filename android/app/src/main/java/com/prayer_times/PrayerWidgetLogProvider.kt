@@ -142,6 +142,13 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
     private const val GRID_MIN_HEIGHT_DP = 265
 
     /**
+     * Below this the card drops its date line and its rule and shrinks its
+     * chips. Two launcher rows is 210dp and one is 99, so the threshold
+     * sits between them.
+     */
+    private const val COMPACT_MAX_HEIGHT_DP = 145
+
+    /**
      * What the card spends above and below the grid, in dp: 10 of padding
      * top and bottom, the header line, the chips row at its natural height,
      * the divider above the footer with its margins, the footer, the streak
@@ -189,7 +196,46 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
         accent,
       )
       bindGrid(context, views, appWidgetId, accent)
+      bindCompact(context, views, appWidgetId)
       return views
+    }
+
+    /**
+     * One launcher row, and everything that matters still on it.
+     *
+     * The card is the five chips, their times and the countdown; the date
+     * line and the rule above the footer are what a short card can do
+     * without. The chips shrink with it — the tap target is the whole
+     * column, not the chip, so a smaller chip costs nothing to hit — and
+     * the card's own padding halves, which is the last few points needed to
+     * fit 99dp.
+     *
+     * `setViewLayoutHeight` is API 31. Below that the chips keep their full
+     * height and a one-row card is simply tight; every phone this decade is
+     * on 31 or later, and the alternative is a second layout file kept in
+     * step by hand.
+     */
+    private fun bindCompact(context: Context, views: RemoteViews, appWidgetId: Int) {
+      val (_, heightDp) = PrayerWidgetProvider.sizeDp(
+        context,
+        AppWidgetManager.getInstance(context),
+        appWidgetId,
+      )
+      // 0 is a launcher that has not measured yet: the roomy card is the
+      // safer guess, because the tight one on a tall card looks like a bug
+      // while the reverse only looks tight for one frame.
+      val tight = heightDp in 1 until COMPACT_MAX_HEIGHT_DP
+      val vis = if (tight) View.GONE else View.VISIBLE
+      views.setViewVisibility(R.id.widget_log_header_row, vis)
+      views.setViewVisibility(R.id.widget_log_divider, vis)
+      val density = context.resources.displayMetrics.density
+      val pad = ((if (tight) 6 else 10) * density).toInt()
+      views.setViewPadding(R.id.widget_root, pad, pad, pad, pad)
+      if (android.os.Build.VERSION.SDK_INT < 31) return
+      val chip = (if (tight) 30 else 38).toFloat()
+      for (id in CHIPS) {
+        views.setViewLayoutHeight(id, chip, android.util.TypedValue.COMPLEX_UNIT_DIP)
+      }
     }
 
     /**

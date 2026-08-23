@@ -528,17 +528,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     private const val STRIP_MIN_HEIGHT_DP = 92
 
     /**
-     * Below this the strip drops its header — the city, the Hijri date and
-     * the refresh glyph.
+     * Below this the strip tightens its padding to fit one launcher row.
      *
-     * A one-row card is 99dp of real height on a 420dpi phone, and about
-     * 75 of that survives the padding. The columns need 42 and the
-     * next-prayer line 28: the header's 16 is exactly what does not fit,
-     * and it is also the least of the three. Nobody places a prayer-times
-     * widget to be told which city they are in.
-     *
-     * Two rows is 210dp, so this threshold sits mid-band and the header
-     * comes back the moment the card is dragged taller.
+     * A one-row card is 99dp of real height on a 420dpi phone, and the
+     * content measures about 78 — so it fits, but not with 14dp of card
+     * padding at each end. Two rows is 210dp, so this threshold sits
+     * mid-band and the roomier padding comes back the moment the card is
+     * dragged taller.
      */
     private const val STRIP_HEADER_MIN_HEIGHT_DP = 145
 
@@ -913,20 +909,39 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * safety — but a reader who does not know that would be right to worry.
      */
     /**
-     * The header, on a card with room for it. See STRIP_HEADER_MIN_HEIGHT_DP.
+     * A one-row card draws everything a two-row card did, in less padding.
      *
-     * Only the strip has this row; the list layout puts the same facts
-     * somewhere else and is never drawn short enough for the question to
-     * arise. A height of 0 is a launcher that has not measured yet, which
-     * must not be read as "short" — the header would flicker away on every
-     * first draw.
+     * The strip's content — the header, the six columns, the next-prayer
+     * line — measures about 78dp, and a launcher row is 99. What did not
+     * fit was the card's own 14dp of padding at each end, so that is what
+     * gives: 6dp above and below, and nothing has to be dropped. The
+     * header was hidden here for one build, which was the wrong thing to
+     * take away — the widget is placed at one row now, so one row has to
+     * be the whole card rather than a reduced version of it.
+     *
+     * A height of 0 is a launcher that has not measured yet and keeps the
+     * roomy padding: the alternative is every first draw being tight and
+     * then relaxing, which reads as a bug.
      */
-    private fun bindStripHeader(views: RemoteViews, layoutId: Int, heightDp: Int) {
+    private fun bindStripHeader(
+      context: Context,
+      views: RemoteViews,
+      layoutId: Int,
+      heightDp: Int,
+    ) {
       if (layoutId != R.layout.prayer_widget_strip) return
-      val show = !(heightDp in 1 until STRIP_HEADER_MIN_HEIGHT_DP)
+      views.setViewVisibility(R.id.widget_header_row, View.VISIBLE)
+      val tight = heightDp in 1 until STRIP_HEADER_MIN_HEIGHT_DP
+      val density = context.resources.displayMetrics.density
+      val side = (14 * density).toInt()
+      val ends = ((if (tight) 6 else 14) * density).toInt()
+      views.setViewPadding(R.id.widget_root, side, ends, side, ends)
+      // The rule above the next-prayer line is the other thing that does
+      // not fit: it costs ten points with its margin, and the line it
+      // separates is legible without it on a card this short.
       views.setViewVisibility(
-        R.id.widget_header_row,
-        if (show) View.VISIBLE else View.GONE,
+        R.id.widget_strip_divider,
+        if (tight) View.GONE else View.VISIBLE,
       )
     }
 
@@ -1104,8 +1119,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * showed the strip, the two footer lines, and then nothing at all for the
      * bottom third of the card. Three launcher rows is enough to draw a
      * graph; it is not enough to draw a graph AND two more lines under it.
+     *
+     * 180, not 265. A 4x2 is 210dp and drew the six times with a hand's
+     * width of nothing under them: the times row is weighted, so all of the
+     * card's slack pooled around six lines of text. Two launcher rows is
+     * enough for the graph — the grid takes as many weeks as fit the box it
+     * is given, so a shorter box is a denser graph rather than a squeezed
+     * one. One row stays as it was: at 99dp there is nothing to give.
      */
-    private const val GRID_MIN_HEIGHT_DP = 265
+    private const val GRID_MIN_HEIGHT_DP = 180
 
     /**
      * Bind the payload into whichever layout was chosen.
@@ -1361,7 +1383,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
       bindNightRow(views, displayRows, layoutId)
       bindLoggedLine(views, o, context, layoutId, describesToday)
-      bindStripHeader(views, layoutId, heightDp)
+      bindStripHeader(context, views, layoutId, heightDp)
       bindPracticeStrip(views, o, style, context, layoutId, heightDp, widthDp)
 
       // The alarms are NOT armed here any more — see `armWidgetAlarms`. A
