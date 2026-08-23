@@ -26,6 +26,7 @@ class MainApplication : Application(), ReactApplication {
           add(CustomAdhanPackage())
           add(SecureRandomPackage())
           add(MihrabClipboardPackage())
+          add(SyncFolderPackage())
         },
     )
   }

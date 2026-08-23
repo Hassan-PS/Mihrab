@@ -121,7 +121,14 @@ const STAYS: Record<string, string> = {
     'describes this phone — the label it shows to other devices. Carrying ' +
     'it would rename every device in the set to whatever the last import ' +
     'came from',
+  'prayerapp.sync.settings.v1':
+    'describes this phone — the folder handle is a Storage Access Framework ' +
+    'URI or an iOS security-scoped bookmark, and both are meaningless on ' +
+    'any other device. Carrying it would point a phone at a directory it ' +
+    'has no permission for, or at somebody else’s',
   MHRB: 'the pairing code prefix, not a store',
+  'mihrab-': 'the sync filename prefix, not a store',
+
 };
 
 describe('every store is either carried or deliberately left', () => {
