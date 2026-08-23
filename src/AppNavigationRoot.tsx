@@ -40,6 +40,7 @@ import {
   subscribeQuranState,
 } from './quran/quranState';
 import { reconcileMushafAssets } from './quran/mushafAssets';
+import { startAutoSync } from './sync/autoSync';
 
 export function AppNavigationRoot() {
   const { settings, hydrated } = usePrayerSettings();
@@ -168,6 +169,12 @@ export function AppNavigationRoot() {
   // fire opened the app on a screen that could not refresh them. Here it runs
   // for the whole life of the app whichever screen the user landed on.
   useEffect(() => startWidgetPayloadSync(), []);
+
+  // Pull in whatever the other devices wrote, from the ROOT and for the same
+  // reason: sync should already have happened by the time the user reaches
+  // the screen that shows the data, whichever screen that is. Throttled and
+  // silent — see autoSync.ts.
+  useEffect(() => startAutoSync(), []);
 
   // Write anything tapped on the Log Today widget into the journal.
   //

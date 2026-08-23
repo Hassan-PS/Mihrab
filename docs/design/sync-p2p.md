@@ -1,6 +1,29 @@
 # Peer-to-peer sync — the options, and what they cost
 
-Status: **design, nothing built.** Written 2026-08-23.
+Status: **stages 1–3 built, not yet run on a device.** Written 2026-08-23,
+updated the same day.
+
+## What exists now
+
+| | Where | Tested by |
+|---|---|---|
+| Pairing code | `src/sync/pairingCode.ts` | `pairingCode.test.ts` |
+| Device identity | `src/sync/deviceIdentity.ts`, native `SecureRandom` | `deviceIdentity.test.ts` |
+| Sealed envelope | `src/sync/envelope.ts` | `envelope.test.ts` |
+| Paired-device list | `src/sync/peers.ts` | `peers.test.ts` |
+| QR encoder | `src/sync/qr.ts` | `qr.test.ts`, against `qrcode` npm |
+| Clipboard | native `MihrabClipboard` | — |
+| The Sync screen | `src/screens/SyncScreen.tsx` | `syncScreenRender.test.tsx` |
+| One sync round | `src/sync/folderSync.ts` | `folderSync.test.ts` — two devices |
+| The folder | native `SyncFolder` (SAF / bookmark) | — |
+| Settings, running, auto | `syncSettings.ts`, `runSync.ts`, `autoSync.ts` | `runSync.test.ts`, `autoSync.test.ts` |
+
+**What has not been proved yet.** The two native modules have never been
+compiled — they were written in a session with no Xcode and no Android SDK —
+so the first device build is their first check. Nobody has pointed a camera
+at a generated QR. And no two real devices have yet been put in the same
+folder; what is proved is that two simulated ones converge, which is the
+algorithm and not the plumbing.
 
 ## Decisions taken
 
@@ -250,7 +273,7 @@ so "is this still my tablet?" has an answer a year later.
 Folder transport, per-device keypairs, one code in two representations. Each
 stage is useful on its own and none of them strands the next.
 
-### Stage 1 — device identity
+### Stage 1 — device identity ✅ built
 
 An X25519 keypair generated on first run, private half stored beside the
 existing secure values and never exported. A stable device id and a
@@ -260,7 +283,7 @@ fingerprints is not a list anyone can act on.
 Ships invisibly. Nothing in the UI changes. No dependency beyond `tweetnacl`,
 which is pure JS.
 
-### Stage 2 — the code, and the trust list
+### Stage 2 — the code, and the trust list ✅ built
 
 `Settings → Sync`. This device's code, shown as text and as a QR, with a copy
 button, permanently. A field to paste another device's code into. A list of
@@ -269,7 +292,7 @@ paired devices with names and fingerprints, and a way to remove one.
 Still no transport — this stage is just "these devices know each other." It is
 independently testable and it is where the pairing format earns its checksum.
 
-### Stage 3 — folder sync *(the release where the feature exists)*
+### Stage 3 — folder sync ✅ built, unverified on hardware *(the release where the feature exists)*
 
 Pick a folder. On open and on demand: write `mihrab-<deviceId>.json.enc`,
 read every *other* `.enc` in the folder, decrypt whichever were sealed for us,
