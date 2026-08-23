@@ -345,14 +345,25 @@ by name, and the native module can build a document id directly when the
 listing comes up empty. Enumeration is now needed for exactly one thing:
 meeting a device we have never heard of.
 
-**What is still not covered.** The announcement — B introducing itself to A
-after the user carries one code — has no name A could guess, because the
-whole point is that A does not know B yet. On a provider that will not list,
-a pair therefore cannot form from one code, and the user has to carry the
-second code back by hand. The fix, if this turns out to matter on real
-hardware, is an invite file named after the RECIPIENT: B writes
-`mihrab-<A-id>.invite.json`, which A can ask for by name because it is A's
-own id. Not built — one emulator is not evidence that real devices need it.
+**The announcement needed its own answer**, and now has one. B introducing
+itself to A has no name A could guess, because not knowing B is exactly the
+problem being solved — so on a provider that will not list, a pair could
+never form from one code and the user had to carry a second code back by
+hand. That is what testing found, in those words.
+
+The fix is an invite file named after the **recipient**: B writes
+`mihrab-<A-id>.invite.json`, and A asks for it by name every round because
+A knows its own id. Listing is now needed for nothing at all.
+
+It stops by itself. An invite is written only for a peer this device has
+never heard back from, and hearing back is proof they know us — they sealed
+a file to our key. Two devices inviting A at once collide on the filename
+and one overwrites the other; nothing is lost, because the loser rewrites
+its invite on the next round.
+
+Confirmed on hardware, 2026-08-23: one code carried Android → iPhone, and
+Android's paired list gained *"iPhone · added from that device"* on its
+next sync, on the very provider whose listing returns nothing.
 
 ## Deliberately out of scope
 

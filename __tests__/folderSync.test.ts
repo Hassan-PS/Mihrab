@@ -59,6 +59,7 @@ import {
 import { forgetCachedDeviceName, setDeviceName } from '../src/sync/deviceName';
 import { addPeerByCode, forgetCachedPeers, listPeers } from '../src/sync/peers';
 import {
+  inviteFileNameFor,
   isSyncFileName,
   syncFileNameFor,
   syncWithFolder,
@@ -356,12 +357,11 @@ describe('a folder that will not list itself', () => {
     expect(journalOf('A')).toHaveLength(1);
   });
 
-  it('cannot introduce an unknown device without a listing, and that is the limit', async () => {
-    // The announcement is the one thing that genuinely needs enumeration:
-    // A has never heard of B, so there is no name for it to ask for. A
-    // provider that will not list can still sync devices that know each
-    // other; it cannot introduce them. The honest fix is a differently
-    // named invite file — noted in docs/design/sync-p2p.md, not built.
+  it('still introduces an unknown device, through an invite named after us', async () => {
+    // The case that has no name to guess: A has never heard of B, so it
+    // cannot ask for B's file. B therefore leaves one named after A, and A
+    // knows its own id. This is what makes one code enough on a provider
+    // that will not enumerate anything.
     const folder = memoryFolder();
     await pairBFromA();
     await as('B', () => syncWithFolder(folder));
@@ -369,8 +369,39 @@ describe('a folder that will not list itself', () => {
     const blind: SyncFolder = { ...folder, list: async () => [] };
     const round = await as('A', () => syncWithFolder(blind));
 
-    expect(round.learned).toBe(0);
-    expect(await as('A', () => listPeers())).toEqual([]);
+    expect(round.learned).toBe(1);
+    const peers = await as('A', () => listPeers());
+    expect(peers).toHaveLength(1);
+    expect(peers[0].via).toBe('announced');
+    expect(peers[0].name).toBe('Tablet');
+  });
+
+  it('writes the invite under the recipient’s own id', async () => {
+    const folder = memoryFolder();
+    await pairBFromA();
+    await as('B', () => syncWithFolder(folder));
+
+    // Named for A, because A is the one who has to find it without a
+    // listing. Naming it for B would be useless: A cannot guess B.
+    expect([...folder.files.keys()]).toContain(
+      inviteFileNameFor(await publicKeyOf('A')),
+    );
+  });
+
+  it('stops inviting once the other device has answered', async () => {
+    const folder = memoryFolder();
+    await pairBFromA();
+    await as('B', () => syncWithFolder(folder));
+    await as('A', () => syncWithFolder(folder));
+
+    // A has now written a file sealed to B, so when B reads it B knows for
+    // certain that A knows B — and there is nothing left to introduce.
+    folder.files.delete(inviteFileNameFor(await publicKeyOf('A')));
+    await as('B', () => syncWithFolder(folder));
+
+    expect([...folder.files.keys()]).not.toContain(
+      inviteFileNameFor(await publicKeyOf('A')),
+    );
   });
 
   it('does not report a paired device that has never written as a problem', async () => {

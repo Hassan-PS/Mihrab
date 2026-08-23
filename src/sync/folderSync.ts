@@ -57,7 +57,7 @@ import {
 import { applySnapshot, collectData } from './snapshotStore';
 import type { MergeSummary } from './merge';
 import { encode, KEY_BYTES } from './pairingCode';
-import { fromBase64 } from './secureRandom';
+import { fromBase64, toBase64 } from './secureRandom';
 import { getDeviceIdentity } from './deviceIdentity';
 import { getDeviceName } from './deviceName';
 import { listPeers, notePeerSeen, recipientKeys } from './peers';
@@ -109,6 +109,41 @@ export function isSyncFileName(name: string): boolean {
   return name.startsWith(SYNC_FILE_PREFIX) && name.endsWith(SYNC_FILE_SUFFIX);
 }
 
+/**
+ * `mihrab-XXXXXXXXXXXX.invite.json` — named after the RECIPIENT, not the
+ * sender, and that is the whole point.
+ *
+ * ── WHY AN INVITE FILE EXISTS AT ALL ──────────────────────────────────
+ *
+ * Pairing is one-directional: the user carries A's code to B, so B knows A
+ * and A has never heard of B. B announces itself by leaving a file, and A
+ * used to find that file by listing the folder — which works right up until
+ * it doesn't. An Android 16 emulator returns an empty cursor for a directory
+ * holding seven files, and on such a provider the pair could never form: A
+ * has no name to ask for, because not knowing B's key is exactly the problem
+ * being solved.
+ *
+ * Naming the invite after A fixes that. A knows its OWN id, so it can ask
+ * for `mihrab-<A>.invite.json` by name, every round, without enumerating
+ * anything. Listing is now needed for nothing at all.
+ *
+ * ── THE COLLISION, AND WHY IT HEALS ───────────────────────────────────
+ *
+ * Two devices inviting A at the same time write the same filename and one
+ * overwrites the other. Nothing is lost: an invite is rewritten every round
+ * until the sender has actually heard back from A, so the loser's invite
+ * reappears on the next pass and is picked up then.
+ */
+export const INVITE_FILE_SUFFIX = '.invite.json';
+
+export function inviteFileNameFor(publicKey: Uint8Array): string {
+  if (publicKey.length !== KEY_BYTES) {
+    throw new Error('inviteFileNameFor needs a 32-byte public key');
+  }
+  const flat = encode(publicKey).replace(/-/g, '').slice(4, 16);
+  return `${SYNC_FILE_PREFIX}${flat}${INVITE_FILE_SUFFIX}`;
+}
+
 export type SyncSkipped = {
   /** Not one of ours: a stray file, or something half-written. */
   notOurs: number;
@@ -148,6 +183,17 @@ export async function syncWithFolder(
   let read = 0;
   let learned = 0;
   let merged: MergeSummary | null = null;
+  /**
+   * Senders already heard from this round.
+   *
+   * A device can leave two readable files: its own, and an invite addressed
+   * to us while it is still waiting to be acknowledged. Both carry the same
+   * snapshot, so merging the second is harmless — the merge is idempotent —
+   * but it is a second decrypt and a second pass over every store for
+   * nothing, and it would report two files read where the user has one
+   * other device.
+   */
+  const heard = new Set<string>();
 
   const listed = (await folder.list()).filter(
     name => isSyncFileName(name) && name !== mine,
@@ -164,6 +210,15 @@ export async function syncWithFolder(
   const derived = known
     .map(peer => syncFileNameFor(fromBase64(peer.pk)))
     .filter(name => name !== mine && !listed.includes(name));
+
+  // The one file addressed to us by name rather than by ours: a device we
+  // have never heard of, introducing itself. Read on every round, because
+  // that is the only way a pair forms from a single code — see
+  // `inviteFileNameFor`.
+  const invite = inviteFileNameFor(me.publicKey);
+  if (!listed.includes(invite) && !derived.includes(invite)) {
+    derived.push(invite);
+  }
 
   for (const name of [...listed, ...derived]) {
     // A derived name is a guess: the device may never have written yet, and
@@ -191,6 +246,10 @@ export async function syncWithFolder(
       else skipped.notOurs++;
       continue;
     }
+
+    const from = toBase64(result.senderPublicKey);
+    if (heard.has(from)) continue;
+    heard.add(from);
 
     // The announcement. A device we already know gets its last-seen and its
     // name; one we do not is added, which is how a pairing made in one
@@ -245,7 +304,28 @@ export async function syncWithFolder(
     recipients,
     now,
   });
-  await folder.write(mine, JSON.stringify(envelope));
+  const body = JSON.stringify(envelope);
+  await folder.write(mine, body);
+
+  // AND AN INVITE FOR ANYONE WHO HAS NEVER ANSWERED.
+  //
+  // A peer with no `lastSeenAt` has never had a file of theirs opened here,
+  // which means either they have not synced yet or they do not know about
+  // this device at all. The second is the case that needs help, and the
+  // first costs one extra write of a file that is already in hand.
+  //
+  // It stops by itself: the moment a file from that peer is opened, they
+  // demonstrably know us — they sealed it to our key — and `lastSeenAt` is
+  // set, so no further invite is written.
+  const strangers = (await listPeers()).filter(peer => !peer.lastSeenAt);
+  for (const stranger of strangers) {
+    try {
+      await folder.write(inviteFileNameFor(fromBase64(stranger.pk)), body);
+    } catch {
+      // An invite that cannot be written costs the automatic introduction,
+      // not the sync. The user can still carry the second code by hand.
+    }
+  }
 
   return { wrote: mine, read, learned, merged, skipped };
 }
