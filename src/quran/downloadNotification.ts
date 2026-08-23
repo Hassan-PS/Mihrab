@@ -22,7 +22,10 @@
  * saying nothing.
  */
 import { Platform } from 'react-native';
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee, {
+  AndroidForegroundServiceType,
+  AndroidImportance,
+} from '@notifee/react-native';
 import i18n from '../i18n';
 
 const NOTIFICATION_ID = 'mihrab.quran.download';
@@ -95,6 +98,23 @@ export async function publishDownloadProgress(input: {
         // background; without it Android is free to freeze the process the
         // moment the user switches away.
         asForegroundService: true,
+        // Named here as well as declared in the manifest.
+        //
+        // The manifest says which types this service MAY take; a
+        // startForeground call says which one it IS taking, and Android has
+        // been tightening the difference since 14. Downloading a book is
+        // dataSync by any reading of Google's list.
+        //
+        // Honest about what this does today: on the notifee build in this
+        // tree the platform still logs the service as untyped, so the
+        // manifest entry is what actually authorises it and the download
+        // does survive being backgrounded — watched, on a real run, from
+        // Isha until it finished. This is the call-site half of the same
+        // statement, which is what the platform will eventually want and
+        // what the next notifee that forwards it will pass through.
+        foregroundServiceTypes: [
+          AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
+        ],
         progress: { max: total, current: done },
         pressAction: { id: 'default', launchActivity: 'default' },
       },
