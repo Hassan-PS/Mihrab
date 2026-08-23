@@ -117,6 +117,10 @@ const STAYS: Record<string, string> = {
     'device set, and the next sync would seal your journal to their key. ' +
     'Pairing is a decision someone makes by carrying a code, once, per ' +
     'device — nothing else may create it',
+  'mihrab.sync.deviceName.v1':
+    'describes this phone — the label it shows to other devices. Carrying ' +
+    'it would rename every device in the set to whatever the last import ' +
+    'came from',
   MHRB: 'the pairing code prefix, not a store',
 };
 

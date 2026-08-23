@@ -58,6 +58,7 @@ function AboutCardImpl() {
   };
 
   const goToBackup = () => navigation.navigate('Backup');
+  const goToSync = () => navigation.navigate('Sync');
 
   // v2.7.28: replaying onboarding no longer wipes anything — it simply
   // reruns the welcome flow over the existing data. The destructive
@@ -126,6 +127,25 @@ function AboutCardImpl() {
           </Text>
           <Text style={[s.valueText, { color: palette.text }]}>
             {t('backup.exportSection')}
+          </Text>
+        </View>
+        <Text style={[s.changeLink, { color: palette.accent }]}>›</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('nav.sync')}
+        style={[
+          s.card,
+          s.rowPress,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}
+        onPress={goToSync}>
+        <View>
+          <Text style={[s.label, { color: palette.muted }]}>
+            {t('nav.sync')}
+          </Text>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('sync.settingsRowHint')}
           </Text>
         </View>
         <Text style={[s.changeLink, { color: palette.accent }]}>›</Text>

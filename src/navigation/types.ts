@@ -29,5 +29,6 @@ export type RootStackParamList = {
   QuranDownloads: undefined;
   Onboarding: undefined;
   Backup: undefined;
+  Sync: undefined;
   Fasting: undefined;
 };

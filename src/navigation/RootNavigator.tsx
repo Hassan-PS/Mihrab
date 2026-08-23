@@ -14,6 +14,7 @@ import { QuranSurahScreen } from '../screens/QuranSurahScreen';
 import { QuranDownloadsScreen } from '../screens/QuranDownloadsScreen';
 import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import { BackupScreen } from '../screens/BackupScreen';
+import { SyncScreen } from '../screens/SyncScreen';
 import { FastingScreen } from '../screens/FastingScreen';
 import type { RootStackParamList } from './types';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
@@ -187,6 +188,15 @@ export function RootNavigator() {
         name="Backup"
         component={BackupScreen}
         options={{ title: t('nav.backup'), headerLargeTitle: false }}
+      />
+      {/* Pairing lives next to Backup because it is the same question asked
+          twice — where does my record live, and how do I get it somewhere
+          else. Its own destination rather than a card inside Backup, since
+          the paired list is something people come back to. */}
+      <Stack.Screen
+        name="Sync"
+        component={SyncScreen}
+        options={{ title: t('nav.sync'), headerLargeTitle: false }}
       />
       {/* The sunnah calendar, the day-before reminder and the full history —
           reference material, reached from the Log's fasting card rather
