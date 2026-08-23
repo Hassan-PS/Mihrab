@@ -69,6 +69,10 @@ import {
   myPairingCode,
 } from '../src/sync/deviceIdentity';
 import { forgetCachedPeers, listPeers } from '../src/sync/peers';
+import {
+  forgetCachedSyncSettings,
+  getSyncSettings,
+} from '../src/sync/syncSettings';
 import { isValid } from '../src/sync/pairingCode';
 
 /**
@@ -97,6 +101,7 @@ beforeEach(() => {
   mockSecure.clear();
   forgetCachedIdentity();
   forgetCachedPeers();
+  forgetCachedSyncSettings();
   jest.restoreAllMocks();
 });
 
@@ -206,6 +211,37 @@ describe('pairing', () => {
     expect(refused.visible).toBe(true);
     expect(refused.message).toBe('sync.errorThisDevice');
     expect(await listPeers()).toEqual([]);
+  });
+});
+
+describe('how often it syncs', () => {
+  it('offers the four cadences and stores the one that is tapped', async () => {
+    const tree = await render();
+    const chips = tree.root
+      .findAllByProps({ accessibilityRole: 'radio' })
+      .filter(n => typeof n.props.accessibilityLabel === 'string');
+    const labels = chips.map(n => n.props.accessibilityLabel);
+    expect(labels).toEqual(
+      expect.arrayContaining([
+        'sync.freqOpen',
+        'sync.freqHourly',
+        'sync.freqDaily',
+        'sync.freqOff',
+      ]),
+    );
+
+    // Nothing is chosen for the user beyond the default, and the default is
+    // the one that needs no explaining.
+    expect((await getSyncSettings()).autoFrequency).toBe('open');
+
+    const daily = chips.find(
+      n => n.props.accessibilityLabel === 'sync.freqDaily',
+    );
+    await act(async () => {
+      daily?.props.onPress();
+    });
+    await act(async () => {});
+    expect((await getSyncSettings()).autoFrequency).toBe('daily');
   });
 });
 

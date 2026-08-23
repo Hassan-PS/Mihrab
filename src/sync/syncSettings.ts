@@ -37,6 +37,52 @@ import {
 
 const SYNC_SETTINGS_KEY = 'prayerapp.sync.settings.v1';
 
+/**
+ * How often a round may start on its own.
+ *
+ * Not a schedule — nothing wakes this app up. Sync runs when the app is
+ * in front of the user, so what this really sets is the shortest gap
+ * between two automatic rounds; the app opening is what makes one due.
+ * Someone who opens the app four times an hour and picked `hourly` gets
+ * one round, not four.
+ *
+ * `off` is not "sync is broken". Pairing, the folder and Sync now all
+ * still work — it just never happens without being asked, which is what
+ * someone syncing over a folder they carry on a stick actually wants.
+ */
+export const SYNC_FREQUENCIES = ['open', 'hourly', 'daily', 'off'] as const;
+export type SyncFrequency = (typeof SYNC_FREQUENCIES)[number];
+
+/** Infinity for `off`, so one finite check covers "never". */
+export function syncFrequencyGapMs(frequency: SyncFrequency): number {
+  switch (frequency) {
+    // Zero, not two minutes: the throttle in autoSync is the floor for
+    // every frequency, and duplicating it here would make one of the two
+    // wrong the first time either changes.
+    case 'open':
+      return 0;
+    case 'hourly':
+      return 60 * 60 * 1000;
+    case 'daily':
+      return 24 * 60 * 60 * 1000;
+    case 'off':
+      return Number.POSITIVE_INFINITY;
+  }
+}
+
+function coerceFrequency(value: unknown, legacy: unknown): SyncFrequency {
+  if (
+    typeof value === 'string' &&
+    (SYNC_FREQUENCIES as readonly string[]).includes(value)
+  ) {
+    return value as SyncFrequency;
+  }
+  // Written by builds that only had a switch. Someone who turned it off
+  // must not find it back on because the field was renamed.
+  if (legacy === false) return 'off';
+  return 'open';
+}
+
 /** How this device gets back to the folder the user chose. */
 export type FolderHandle = {
   /**
@@ -58,8 +104,8 @@ export type FolderHandle = {
 export type SyncSettings = {
   folder: FolderHandle | null;
   selection: SyncSelection;
-  /** Run a round when the app comes to the foreground. */
-  autoOnOpen: boolean;
+  /** How often a round may start on its own. See SYNC_FREQUENCIES. */
+  autoFrequency: SyncFrequency;
   lastSyncAt: string | null;
   /** Set when the last round failed, so the screen can say what happened. */
   lastError: string | null;
@@ -82,7 +128,7 @@ export function defaultSyncSettings(): SyncSettings {
   return {
     folder: null,
     selection: defaultSyncSelection(),
-    autoOnOpen: true,
+    autoFrequency: 'open',
     lastSyncAt: null,
     lastError: null,
   };
@@ -114,7 +160,7 @@ export function coerceSyncSettings(value: unknown): SyncSettings {
     selection: r.selection
       ? mergeSelection(base.selection, coerceSelection(r.selection), r.selection)
       : base.selection,
-    autoOnOpen: typeof r.autoOnOpen === 'boolean' ? r.autoOnOpen : true,
+    autoFrequency: coerceFrequency(r.autoFrequency, r.autoOnOpen),
     lastSyncAt: typeof r.lastSyncAt === 'string' ? r.lastSyncAt : null,
     lastError: typeof r.lastError === 'string' ? r.lastError : null,
   };

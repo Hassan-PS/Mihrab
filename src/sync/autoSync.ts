@@ -1,7 +1,7 @@
 /**
- * Sync when the app opens, and not more often than that means.
+ * Sync when the app opens — or once an hour, or once a day, or never.
  *
- * ── WHY "ON OPEN" IS THE RIGHT CADENCE ────────────────────────────────
+ * ── WHY "ON OPEN" IS THE DEFAULT ──────────────────────────────────────
  *
  * The merge is idempotent and order-independent, so there is nothing to
  * gain from being live and quite a lot to lose: a folder watched
@@ -20,16 +20,37 @@
  * minutes is far below the rate anyone's data changes and far above the
  * rate the event fires.
  *
+ * The other frequencies are the same mechanism with a longer gap, checked
+ * against the STORED stamp so that killing the app is not a way to make
+ * "once a day" mean "every launch". None of them is a schedule: nothing
+ * wakes this app, so a phone left untouched for a week syncs when it is
+ * next picked up, whatever is chosen here.
+ *
  * A round is skipped entirely, and silently, when there is no folder or no
  * peer. Auto-sync is not the place to nag: the Sync screen says what is
  * missing, and it says it where the user can act on it.
  */
 import { AppState, type AppStateStatus } from 'react-native';
 import { ensureSyncFolder, runSyncNow, type SyncRunResult } from './runSync';
-import { getSyncSettings } from './syncSettings';
+import { getSyncSettings, syncFrequencyGapMs } from './syncSettings';
 
 /** Below the rate anyone's record changes, above the rate `active` fires. */
 export const AUTO_SYNC_MIN_GAP_MS = 2 * 60 * 1000;
+
+/**
+ * How often the app checks whether a timed round has come due while it
+ * sits open.
+ *
+ * Only `hourly` and `daily` need this at all: `open` is answered by the
+ * `active` event and `off` by never running. Five minutes is coarse
+ * against an hour and free against a day, and the check itself is a cached
+ * read and a subtraction — the round is what costs, and the gap decides
+ * whether there is one.
+ */
+export const AUTO_SYNC_TICK_MS = 5 * 60 * 1000;
+
+/** What made this call: the app coming forward, or the timer. */
+export type AutoSyncTrigger = 'open' | 'tick';
 
 let lastRunAt = 0;
 let running = false;
@@ -39,9 +60,10 @@ let running = false;
  * sync. Returns what happened, or null if it declined to run.
  */
 export async function maybeAutoSync(
-  options: { now?: number } = {},
+  options: { now?: number; trigger?: AutoSyncTrigger } = {},
 ): Promise<SyncRunResult | null> {
   const now = options.now ?? Date.now();
+  const trigger = options.trigger ?? 'open';
   if (running) return null;
   if (now - lastRunAt < AUTO_SYNC_MIN_GAP_MS) return null;
 
@@ -51,7 +73,19 @@ export async function maybeAutoSync(
   running = true;
   try {
     const settings = await getSyncSettings();
-    if (!settings.autoOnOpen) return null;
+    const gap = syncFrequencyGapMs(settings.autoFrequency);
+    if (!Number.isFinite(gap)) return null;
+    // The timer exists for the timed frequencies. "When the app opens"
+    // must mean that and not "every few minutes for as long as it is
+    // open", which is what a shared tick would quietly turn it into.
+    if (trigger === 'tick' && settings.autoFrequency === 'open') return null;
+    // Measured against the stored stamp rather than the in-memory one, so
+    // "once a day" survives the app being killed — otherwise every cold
+    // start would be a fresh day.
+    const last = settings.lastSyncAt ? Date.parse(settings.lastSyncAt) : NaN;
+    // `last <= now` lets a clock moved backwards make a round due instead
+    // of due in a year.
+    if (Number.isFinite(last) && last <= now && now - last < gap) return null;
     // Adopt the platform's default folder here too, not only when the Sync
     // screen is opened. On iOS the app has a folder of its own and nothing
     // is asked of the user — but if the default were only adopted by that
@@ -81,14 +115,25 @@ export async function maybeAutoSync(
  * `active` event does not fire for it.
  */
 export function startAutoSync(): () => void {
-  void maybeAutoSync();
+  void maybeAutoSync({ trigger: 'open' });
   const subscription = AppState.addEventListener(
     'change',
     (state: AppStateStatus) => {
-      if (state === 'active') void maybeAutoSync();
+      if (state === 'active') void maybeAutoSync({ trigger: 'open' });
     },
   );
-  return () => subscription.remove();
+  // Backgrounded timers are throttled on one platform and not the other,
+  // and a round behind someone's back is not what any of these settings
+  // offered. The `active` path covers coming back.
+  const timer = setInterval(() => {
+    if (AppState.currentState === 'active') {
+      void maybeAutoSync({ trigger: 'tick' });
+    }
+  }, AUTO_SYNC_TICK_MS);
+  return () => {
+    subscription.remove();
+    clearInterval(timer);
+  };
 }
 
 /** For tests. */

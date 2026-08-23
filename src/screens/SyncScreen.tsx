@@ -71,12 +71,26 @@ import { hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
 import { ensureSyncFolder, runSyncNow } from '../sync/runSync';
 import {
   getSyncSettings,
+  SYNC_FREQUENCIES,
   updateSyncSettings,
+  type SyncFrequency,
   type SyncSettings,
 } from '../sync/syncSettings';
+import { Chip } from '../components/controls';
 import { SYNC_CATEGORIES, type SyncCategory } from '../sync/snapshot';
 
 type Palette = ReturnType<typeof useAppPalette>['palette'];
+
+/**
+ * Spelled out rather than built from the value, so every string this
+ * screen shows can be found by searching for it.
+ */
+const FREQUENCY_LABELS: Record<SyncFrequency, string> = {
+  open: 'sync.freqOpen',
+  hourly: 'sync.freqHourly',
+  daily: 'sync.freqDaily',
+  off: 'sync.freqOff',
+};
 
 function PeerRow({
   peer,
@@ -401,9 +415,9 @@ export function SyncScreen() {
     [settings],
   );
 
-  const onToggleAuto = useCallback((next: boolean) => {
+  const onChooseFrequency = useCallback((next: SyncFrequency) => {
     void (async () => {
-      setSettings(await updateSyncSettings({ autoOnOpen: next }));
+      setSettings(await updateSyncSettings({ autoFrequency: next }));
     })();
   }, []);
 
@@ -524,18 +538,35 @@ export function SyncScreen() {
                 })
               : t('sync.neverSynced')}
           </Text>
-          <View style={styles.peerRow}>
-            <Text
-              style={[typeStyle('body'), styles.peerText, { color: palette.text }]}
-            >
-              {t('sync.autoOnOpen')}
-            </Text>
-            <Switch
-              accessibilityLabel={t('sync.autoOnOpen')}
-              value={settings?.autoOnOpen ?? true}
-              onValueChange={onToggleAuto}
-            />
+          <Text
+            style={[
+              typeStyle('body'),
+              styles.frequencyLabel,
+              { color: palette.text },
+            ]}
+          >
+            {t('sync.autoTitle')}
+          </Text>
+          {/* Four chips rather than a switch and a picker behind it: the
+              whole choice is four words wide, and a setting you can read
+              without opening it is one you can trust. */}
+          <View
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('sync.autoTitle')}
+            style={styles.chipRow}
+          >
+            {SYNC_FREQUENCIES.map(frequency => (
+              <Chip
+                key={frequency}
+                label={t(FREQUENCY_LABELS[frequency])}
+                selected={(settings?.autoFrequency ?? 'open') === frequency}
+                onPress={() => onChooseFrequency(frequency)}
+              />
+            ))}
           </View>
+          <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
+            {t('sync.autoHelp')}
+          </Text>
         </View>
 
         <Text
@@ -798,6 +829,8 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.45 },
+  frequencyLabel: { marginTop: SPACING.xs },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs },
   peerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',

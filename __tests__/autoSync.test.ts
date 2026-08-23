@@ -44,7 +44,7 @@ import {
 
 const READY = {
   folder: { handle: 'content://tree/1', label: 'Sync', kind: 'picked' as const },
-  autoOnOpen: true,
+  autoFrequency: 'open' as const,
 };
 
 beforeEach(() => {
@@ -62,7 +62,7 @@ describe('declining, quietly', () => {
   });
 
   it('does nothing when the user turned it off', async () => {
-    await updateSyncSettings({ ...READY, autoOnOpen: false });
+    await updateSyncSettings({ ...READY, autoFrequency: 'off' });
     expect(await maybeAutoSync()).toBeNull();
     expect(mockRun).not.toHaveBeenCalled();
   });
@@ -73,6 +73,61 @@ describe('declining, quietly', () => {
     // Nobody asked for this round; an unhandled rejection would be the app
     // shouting about work the user did not request.
     await expect(maybeAutoSync()).resolves.toBeNull();
+  });
+});
+
+describe('how often', () => {
+  // The mocked runSyncNow does not stamp anything, so the stored time is
+  // set here — which is also how a cold start sees it.
+  const at = (ms: number) => ({ ...READY, lastSyncAt: new Date(ms).toISOString() });
+  const start = 1_756_000_000_000;
+  const HOUR = 60 * 60 * 1000;
+
+  it('holds an hourly round back until the hour is up', async () => {
+    await updateSyncSettings({ ...at(start - 30 * 60 * 1000), autoFrequency: 'hourly' });
+    expect(await maybeAutoSync({ now: start })).toBeNull();
+
+    forgetCachedSyncSettings();
+    resetAutoSyncThrottle();
+    await updateSyncSettings({ ...at(start - HOUR - 1000), autoFrequency: 'hourly' });
+    expect(await maybeAutoSync({ now: start })).not.toBeNull();
+  });
+
+  it('measures a daily round against the stored time, not the launch', async () => {
+    // The throttle is fresh, as it is on every cold start. If the gap were
+    // measured against memory, killing the app would be a way to make
+    // "once a day" mean "every time you open it".
+    await updateSyncSettings({ ...at(start - 3 * HOUR), autoFrequency: 'daily' });
+    expect(await maybeAutoSync({ now: start })).toBeNull();
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('lets the timer run a due round while the app sits open', async () => {
+    await updateSyncSettings({ ...at(start - 2 * HOUR), autoFrequency: 'hourly' });
+    expect(await maybeAutoSync({ now: start, trigger: 'tick' })).not.toBeNull();
+  });
+
+  it('does not let the timer turn "on open" into every few minutes', async () => {
+    await updateSyncSettings({ ...at(start - 2 * HOUR), autoFrequency: 'open' });
+    expect(await maybeAutoSync({ now: start, trigger: 'tick' })).toBeNull();
+    expect(await maybeAutoSync({ now: start, trigger: 'open' })).not.toBeNull();
+  });
+
+  it('treats a clock moved backwards as due rather than as due next year', async () => {
+    await updateSyncSettings({ ...at(start + 30 * 24 * HOUR), autoFrequency: 'daily' });
+    expect(await maybeAutoSync({ now: start })).not.toBeNull();
+  });
+
+  it('reads a switch stored by an earlier build', async () => {
+    // The field used to be a boolean. Someone who turned it off must not
+    // find it back on because it was renamed.
+    mockStore.set(
+      'prayerapp.sync.settings.v1',
+      JSON.stringify({ ...READY, autoOnOpen: false, autoFrequency: undefined }),
+    );
+    forgetCachedSyncSettings();
+    expect(await maybeAutoSync({ now: start })).toBeNull();
+    expect(mockRun).not.toHaveBeenCalled();
   });
 });
 

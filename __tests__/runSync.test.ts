@@ -160,7 +160,7 @@ describe('running', () => {
 
 describe('the stored settings', () => {
   it('defaults to the record and not to the device', async () => {
-    const { selection, autoOnOpen, folder } = await getSyncSettings();
+    const { selection, autoFrequency, folder } = await getSyncSettings();
     expect(selection).toEqual({
       prayers: true,
       fasting: true,
@@ -170,7 +170,7 @@ describe('the stored settings', () => {
       settings: false,
       location: false,
     });
-    expect(autoOnOpen).toBe(true);
+    expect(autoFrequency).toBe('open');
     expect(folder).toBeNull();
   });
 
