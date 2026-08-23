@@ -2,6 +2,33 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.10.0] — 2026-08-24
+
+Your record on every device you own, without an account and without anyone else holding it.
+
+### Added
+- **Sync between your own devices.** Pair two devices by scanning a code — or by copying it, if the camera is not convenient — and from then on your journal, streaks, fasts, notes and settings stay in step. There is no account, no server of ours, and nothing to sign up for: the devices write sealed files into a folder you already keep in sync (Syncthing, a Nextcloud folder, whatever you use), and each one holds a key that never leaves it, so what passes through that folder is unreadable to everything but the devices you paired. Choose how often it runs — when the app opens, every fifteen minutes, hourly, daily, or not at all.
+- **The Log Today widget grows up.** At its tallest it now carries the practice graph and a countdown to the next prayer, not just today's tally, and there is a picker entry for that size instead of leaving you to resize it and hope.
+- **The prayer times widget in three sizes,** from a single row up. The one-row card drops its header rather than its times, so the thing you put it there for is the thing that survives.
+- **Widgets speak the app's language.** All thirteen, on both platforms — and they follow the language *you* chose in the app, not the one the phone is set to, which is the whole point of choosing.
+- **Seconds on the Home countdown, and a countdown you can aim.** Tap a prayer to count down to that one instead of the next.
+- **Days you never filled in are marked as such** on the graph, instead of being drawn the same as days you deliberately left empty.
+
+### Changed
+- **The Quran download belongs to the app, not to the screen you started it from.** It keeps going when you leave the page or put the phone down, with a progress notification you can watch, and finishes on its own.
+- **The app starts in the phone's language** until you pick one yourself. Previously it started in English and waited to be told.
+- **On the Mac, the wordmark and the location share one bar** at the top of the window instead of taking a row each.
+
+### Fixed
+- **Manage downloads shows what is actually on the device.** It was reading the store the Quran reader stopped using in 2.8.0, so a device holding the entire mushaf — 179 MB of it — was told it had nothing downloaded and given no way to reclaim the space. Both stores are listed now, the current one and whatever an upgrade left behind.
+- **The Fajr countdown is back in the Android widgets.** After the last prayer of the day the countdown had nothing left to count to, so it showed nothing at all — through the whole evening, which is when it was most likely to be looked at.
+- **The widget picker previews are the cards you will actually get,** at every size, rather than a drawing that stopped matching them several releases ago.
+- **The practice graph appears at the size that has room for it** and nowhere else; the smaller cards fill their space with what fits instead.
+- **The practice grid in the widget scores a day the way the app does.** It had its own rules, so the same day could be a darker square in the widget than in the app.
+- **Five of the Android widgets ignored the appearance settings** — the accent, the OLED background, the highlight — and had no way to reach them.
+- **Four languages were naming prayers after meals or after strangers.** Those names are now the ones people actually use.
+- **On the Mac, sync works on the Homebrew build.** Secure storage had nowhere to keep the device's identity, so it could not stay paired; it has a Keychain now. And the Mac introduced itself to every other device as "iPad", because that is what macOS answers when a Catalyst app asks for the device name.
+
 ## [2.9.1] — 2026-08-21
 
 The widgets tell the truth again — including while the app is closed.

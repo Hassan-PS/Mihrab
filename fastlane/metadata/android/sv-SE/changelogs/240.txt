@@ -1,0 +1,9 @@
+• Synka ditt register mellan dina egna enheter — utan konto, utan server, krypterat.
+• Parkoppla med en kod, och välj hur ofta synkningen sker.
+• Widgeten Logga i dag får graf och nedräkning i största formatet.
+• Bönetidswidgeten i tre storlekar.
+• Widgetarna talar språket du valt i appen.
+• Sekunder i nedräkningen, riktad mot valfri bön.
+• Koranhämtningen fortsätter i bakgrunden.
+• Rättat: Hantera nedladdningar visade inget.
+• Rättat: nedräkningen till fajr saknades i widgetarna.

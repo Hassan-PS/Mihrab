@@ -1,0 +1,9 @@
+• Sync your record between your own devices — no account, no server, encrypted.
+• Pair by scanning a code, and choose how often it syncs.
+• The Log Today widget gains a graph and a countdown at its tallest size.
+• Prayer times widget in three sizes.
+• Widgets speak the language you chose in the app.
+• Seconds on the countdown, aimed at any prayer.
+• The Quran download continues in the background.
+• Fixed: Manage downloads said nothing was downloaded.
+• Fixed: the Fajr countdown was missing.
