@@ -931,7 +931,16 @@
     "searchSurahOrPage": "Buscar sura o página",
     "reading": "leyendo",
     "pageScrubber": "Ir a la página",
-    "goCta": "Ir"
+    "goCta": "Ir",
+    "downloadChannelName": "Descarga del Corán",
+    "downloadChannelDesc": "Progreso mientras se descarga el Corán.",
+    "downloadingPages": "Descargando el Corán",
+    "downloadingFonts": "Descargando el texto del Corán",
+    "downloadProgress": "{{done}} de {{total}} páginas",
+    "downloadDoneTitle": "El Corán está listo",
+    "downloadDoneBody": "Todas las páginas están en este dispositivo. Ya se lee sin conexión.",
+    "downloadIncompleteTitle": "La descarga no terminó",
+    "downloadIncompleteBody": "Faltan {{count}} páginas. Abre el Corán para seguir donde se detuvo."
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

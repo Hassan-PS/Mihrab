@@ -931,7 +931,16 @@
     "searchSurahOrPage": "সূরা বা পৃষ্ঠা খুঁজুন",
     "reading": "পড়ছেন",
     "pageScrubber": "পৃষ্ঠায় যান",
-    "goCta": "যান"
+    "goCta": "যান",
+    "downloadChannelName": "কুরআন ডাউনলোড",
+    "downloadChannelDesc": "কুরআন ডাউনলোডের অগ্রগতি।",
+    "downloadingPages": "কুরআন ডাউনলোড হচ্ছে",
+    "downloadingFonts": "কুরআনের লেখা ডাউনলোড হচ্ছে",
+    "downloadProgress": "{{total}}-এর মধ্যে {{done}} পৃষ্ঠা",
+    "downloadDoneTitle": "কুরআন প্রস্তুত",
+    "downloadDoneBody": "সব পৃষ্ঠা এই ডিভাইসে আছে। এখন ইন্টারনেট ছাড়াই পড়া যাবে।",
+    "downloadIncompleteTitle": "ডাউনলোড শেষ হয়নি",
+    "downloadIncompleteBody": "{{count}}টি পৃষ্ঠা এখনও বাকি। যেখানে থেমেছিল সেখান থেকে চালাতে কুরআন খুলুন।"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

@@ -931,7 +931,16 @@
     "searchSurahOrPage": "ابحث عن سورة أو صفحة",
     "reading": "قيد القراءة",
     "pageScrubber": "انتقل إلى صفحة",
-    "goCta": "انتقال"
+    "goCta": "انتقال",
+    "downloadChannelName": "تنزيل القرآن",
+    "downloadChannelDesc": "تقدّم تنزيل القرآن.",
+    "downloadingPages": "جارٍ تنزيل القرآن",
+    "downloadingFonts": "جارٍ تنزيل نص القرآن",
+    "downloadProgress": "{{done}} من {{total}} صفحة",
+    "downloadDoneTitle": "القرآن جاهز",
+    "downloadDoneBody": "كل الصفحات على هذا الجهاز، ويمكن القراءة دون اتصال.",
+    "downloadIncompleteTitle": "لم يكتمل التنزيل",
+    "downloadIncompleteBody": "ما زالت {{count}} صفحة ناقصة. افتح القرآن لمتابعة التنزيل من حيث توقف."
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

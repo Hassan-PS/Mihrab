@@ -931,7 +931,16 @@
     "searchSurahOrPage": "Sök sura eller sida",
     "reading": "läser",
     "pageScrubber": "Gå till sida",
-    "goCta": "Gå"
+    "goCta": "Gå",
+    "downloadChannelName": "Nedladdning av Koranen",
+    "downloadChannelDesc": "Förlopp medan Koranen laddas ned.",
+    "downloadingPages": "Laddar ned Koranen",
+    "downloadingFonts": "Laddar ned Koranens text",
+    "downloadProgress": "{{done}} av {{total}} sidor",
+    "downloadDoneTitle": "Koranen är klar",
+    "downloadDoneBody": "Alla sidor finns på den här enheten. Den går att läsa utan uppkoppling nu.",
+    "downloadIncompleteTitle": "Nedladdningen blev inte klar",
+    "downloadIncompleteBody": "{{count}} sidor saknas fortfarande. Öppna Koranen för att fortsätta där den stannade."
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

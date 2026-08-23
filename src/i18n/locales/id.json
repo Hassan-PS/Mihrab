@@ -931,7 +931,16 @@
     "searchSurahOrPage": "Cari surah atau halaman",
     "reading": "sedang dibaca",
     "pageScrubber": "Ke halaman",
-    "goCta": "Buka"
+    "goCta": "Buka",
+    "downloadChannelName": "Unduhan Al-Qur'an",
+    "downloadChannelDesc": "Kemajuan saat Al-Qur'an diunduh.",
+    "downloadingPages": "Mengunduh Al-Qur'an",
+    "downloadingFonts": "Mengunduh teks Al-Qur'an",
+    "downloadProgress": "{{done}} dari {{total}} halaman",
+    "downloadDoneTitle": "Al-Qur'an siap",
+    "downloadDoneBody": "Semua halaman ada di perangkat ini. Kini bisa dibaca tanpa sambungan.",
+    "downloadIncompleteTitle": "Unduhan belum selesai",
+    "downloadIncompleteBody": "{{count}} halaman masih kurang. Buka Al-Qur'an untuk melanjutkan dari tempat berhenti."
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

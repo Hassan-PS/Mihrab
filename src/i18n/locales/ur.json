@@ -931,7 +931,16 @@
     "searchSurahOrPage": "سورت یا صفحہ تلاش کریں",
     "reading": "زیرِ مطالعہ",
     "pageScrubber": "صفحہ پر جائیں",
-    "goCta": "جائیں"
+    "goCta": "جائیں",
+    "downloadChannelName": "قرآن ڈاؤن لوڈ",
+    "downloadChannelDesc": "قرآن ڈاؤن لوڈ ہونے کی پیش رفت۔",
+    "downloadingPages": "قرآن ڈاؤن لوڈ ہو رہا ہے",
+    "downloadingFonts": "قرآن کا متن ڈاؤن لوڈ ہو رہا ہے",
+    "downloadProgress": "{{total}} میں سے {{done}} صفحات",
+    "downloadDoneTitle": "قرآن تیار ہے",
+    "downloadDoneBody": "تمام صفحات اس آلے پر موجود ہیں۔ اب انٹرنیٹ کے بغیر پڑھا جا سکتا ہے۔",
+    "downloadIncompleteTitle": "ڈاؤن لوڈ مکمل نہیں ہوا",
+    "downloadIncompleteBody": "{{count}} صفحات اب بھی باقی ہیں۔ جہاں رکا تھا وہیں سے جاری رکھنے کے لیے قرآن کھولیں۔"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

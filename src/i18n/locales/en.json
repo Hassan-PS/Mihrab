@@ -931,7 +931,16 @@
     "searchSurahOrPage": "Search surah or page",
     "reading": "reading",
     "pageScrubber": "Go to page",
-    "goCta": "Go"
+    "goCta": "Go",
+    "downloadChannelName": "Quran download",
+    "downloadChannelDesc": "Progress while the Quran is downloading.",
+    "downloadingPages": "Downloading the Quran",
+    "downloadingFonts": "Downloading the Quran text",
+    "downloadProgress": "{{done}} of {{total}} pages",
+    "downloadDoneTitle": "The Quran is ready",
+    "downloadDoneBody": "Every page is on this device. It reads without a connection now.",
+    "downloadIncompleteTitle": "The download did not finish",
+    "downloadIncompleteBody": "{{count}} pages are still missing. Open the Quran to pick up where it stopped."
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

@@ -931,7 +931,16 @@
     "searchSurahOrPage": "Rechercher une sourate ou une page",
     "reading": "en lecture",
     "pageScrubber": "Aller à la page",
-    "goCta": "Aller"
+    "goCta": "Aller",
+    "downloadChannelName": "Téléchargement du Coran",
+    "downloadChannelDesc": "Progression du téléchargement du Coran.",
+    "downloadingPages": "Téléchargement du Coran",
+    "downloadingFonts": "Téléchargement du texte du Coran",
+    "downloadProgress": "{{done}} sur {{total}} pages",
+    "downloadDoneTitle": "Le Coran est prêt",
+    "downloadDoneBody": "Toutes les pages sont sur cet appareil. Il se lit désormais sans connexion.",
+    "downloadIncompleteTitle": "Le téléchargement n’est pas terminé",
+    "downloadIncompleteBody": "Il manque encore {{count}} pages. Ouvrez le Coran pour reprendre où il s’est arrêté."
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

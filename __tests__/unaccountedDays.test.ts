@@ -26,8 +26,8 @@ function entry(date: string, prayer: string): JournalEntry {
     date,
     prayer: prayer as JournalEntry['prayer'],
     status: 'on-time',
-    at: `${date}T05:00:00.000Z`,
-  } as JournalEntry;
+    loggedAt: `${date}T05:00:00.000Z`,
+  };
 }
 
 /** A full day, so it is accounted for. */
@@ -105,7 +105,14 @@ describe('what the widget is told', () => {
   it('sends no start day when nothing has been logged', () => {
     const block = buildPracticeBlock({
       journal: [],
-      fasts: [{ date: '2024-03-11', completed: true }],
+      fasts: [
+        {
+          date: '2024-03-11',
+          completed: true,
+          type: 'voluntary',
+          loggedAt: '2024-03-11T18:00:00.000Z',
+        },
+      ],
       sunnah: {},
       streak: 0,
       bestStreak: 0,

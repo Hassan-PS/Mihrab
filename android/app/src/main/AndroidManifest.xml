@@ -19,6 +19,11 @@
          must auto-tick without the app being open). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- The Quran download. dataSync is the type Android 14+ asks for when
+         a service exists to move a file the user asked for: six hundred
+         pages, or a hundred and eighty megabytes of fonts, which nobody
+         should have to sit and watch. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <!-- Android 16 (API 36) Live Update chip (status-bar "promoted ongoing"
          pill). Protection level is normal|appop — automatically granted at
          install time when declared, no runtime prompt needed.
@@ -223,6 +228,15 @@
            that needs to keep ticking when the app isn't in foreground.
            The `property` element explains the use so Play Store / Play
            Protect doesn't flag the manifest. -->
+      <!-- Notifee's own foreground service, which the Quran download runs
+           in. It is declared in notifee's manifest without a type; Android
+           14+ refuses to start an untyped one, so the type is merged in
+           here rather than forked into a service of our own. -->
+      <service
+        android:name="app.notifee.core.ForegroundService"
+        android:foregroundServiceType="dataSync"
+        tools:replace="android:foregroundServiceType" />
+
       <service
         android:name=".MihrabLiveActivityService"
         android:exported="false"

@@ -931,7 +931,16 @@
     "searchSurahOrPage": "Найти суру или страницу",
     "reading": "читается",
     "pageScrubber": "Перейти к странице",
-    "goCta": "Перейти"
+    "goCta": "Перейти",
+    "downloadChannelName": "Загрузка Корана",
+    "downloadChannelDesc": "Ход загрузки Корана.",
+    "downloadingPages": "Коран загружается",
+    "downloadingFonts": "Загружается текст Корана",
+    "downloadProgress": "{{done}} из {{total}} страниц",
+    "downloadDoneTitle": "Коран готов",
+    "downloadDoneBody": "Все страницы на этом устройстве. Теперь он читается без сети.",
+    "downloadIncompleteTitle": "Загрузка не завершилась",
+    "downloadIncompleteBody": "Не хватает {{count}} страниц. Откройте Коран, чтобы продолжить с места остановки."
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

@@ -931,7 +931,16 @@
     "searchSurahOrPage": "搜索章或页码",
     "reading": "正在阅读",
     "pageScrubber": "跳转页面",
-    "goCta": "前往"
+    "goCta": "前往",
+    "downloadChannelName": "古兰经下载",
+    "downloadChannelDesc": "古兰经下载进度。",
+    "downloadingPages": "正在下载古兰经",
+    "downloadingFonts": "正在下载古兰经文本",
+    "downloadProgress": "{{total}} 页中的 {{done}} 页",
+    "downloadDoneTitle": "古兰经已就绪",
+    "downloadDoneBody": "所有页面都已在本机，现在无需联网即可阅读。",
+    "downloadIncompleteTitle": "下载未完成",
+    "downloadIncompleteBody": "仍缺 {{count}} 页。打开古兰经即可从中断处继续。"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

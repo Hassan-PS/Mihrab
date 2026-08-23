@@ -76,14 +76,18 @@ import {
 } from './mushafImages';
 import {
   deleteLegacyImageStore,
-  downloadMushafAssets,
   isMushafDownloaded,
   legacyImageStoreBytes,
   pageFilePath,
-  type MushafDownloadHandle,
   type MushafDownloadProgress,
 } from './mushafDownload';
-import { downloadAllPageFonts, fontStoreStats } from './mushafFontStore';
+import { fontStoreStats } from './mushafFontStore';
+import {
+  cancelMushafDownload,
+  mushafDownloadState,
+  startMushafDownload,
+  subscribeMushafDownload,
+} from './mushafDownloadManager';
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import MushafTextPageSurface from './MushafTextPageSurface';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
@@ -210,7 +214,6 @@ export function MushafReader({
     failed: 0,
   });
   const [lastRunFailed, setLastRunFailed] = useState(0);
-  const downloadHandleRef = useRef<MushafDownloadHandle | null>(null);
   // While not fully downloaded, pages stream remotely; after the store
   // reports ready we switch every mounted Image to its file:// path.
   const [useLocalFiles, setUseLocalFiles] = useState(false);
@@ -237,7 +240,6 @@ export function MushafReader({
       );
       return () => {
         cancelled = true;
-        downloadHandleRef.current?.cancel();
       };
     }
     void isMushafDownloaded().then(yes => {
@@ -247,9 +249,36 @@ export function MushafReader({
     });
     return () => {
       cancelled = true;
-      downloadHandleRef.current?.cancel();
     };
   }, [textMode]);
+
+  /**
+   * Follow the download wherever it was started from.
+   *
+   * The download outlives this screen now — see mushafDownloadManager — so
+   * what a mount does is ASK what is happening rather than start or stop
+   * anything. Coming back to a reader that is halfway through six hundred
+   * pages shows the bar where it actually is, and a run that finished while
+   * the user was elsewhere is reported the moment they return.
+   */
+  useEffect(() => {
+    const apply = (s: ReturnType<typeof mushafDownloadState>) => {
+      if (s.running) {
+        setDownloadStatus('downloading');
+        if (s.progress.total > 0) publishProgress(s.progress);
+        return;
+      }
+      if (!s.last) return;
+      setLastRunFailed(s.last.complete ? 0 : s.last.failed);
+      if (s.last.kind === 'images' && s.last.complete) setUseLocalFiles(true);
+      setDownloadStatus(s.last.complete ? 'ready' : 'needs_download');
+    };
+    apply(mushafDownloadState());
+    return subscribeMushafDownload(apply);
+    // `publishProgress` is a stable useCallback; listing it would re-subscribe
+    // on every render for no gain.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Re-render the progress bar when the whole percent changes, not on every
@@ -287,32 +316,11 @@ export function MushafReader({
       void deleteLegacyImageStore().then(freed => {
         if (freed > 0) setStaleImageBytes(0);
       });
-      const fontHandle = downloadAllPageFonts({ onProgress: publishProgress });
-      downloadHandleRef.current = fontHandle;
-      void fontHandle.promise.then(complete => {
-        downloadHandleRef.current = null;
-        setLastRunFailed(complete ? 0 : progressRef.current.failed);
-        setDownloadStatus(complete ? 'ready' : 'needs_download');
-      });
-      return;
     }
-
-    // Concurrency 8 (was 3): the 604-page first-time download is the slow
-    // part of the Quran reader. GitHub's asset CDN serves these over HTTP/2,
-    // so ~8 parallel workers roughly triples throughput; the per-page retry +
-    // RN-fetch fallback in fetchPage() already absorbs the occasional HTTP/2
-    // stream reset that higher concurrency provokes.
-    const handle = downloadMushafAssets({
-      concurrency: 8,
-      onProgress: publishProgress,
-    });
-    downloadHandleRef.current = handle;
-    void handle.promise.then(complete => {
-      downloadHandleRef.current = null;
-      setLastRunFailed(complete ? 0 : progressRef.current.failed);
-      setUseLocalFiles(true); // whatever landed on disk is usable
-      setDownloadStatus(complete ? 'ready' : 'needs_download');
-    });
+    // The manager owns it from here: it keeps running when this screen goes
+    // away, posts the progress notification, and tells whoever is listening
+    // how it ended. The subscription above is what updates this screen.
+    startMushafDownload(textMode ? 'fonts' : 'images');
   };
 
   // ── Page state (unchanged core from #153) ───────────────────────────
@@ -828,7 +836,7 @@ export function MushafReader({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('common.cancel', 'Cancel')}
-          onPress={() => downloadHandleRef.current?.cancel()}
+          onPress={() => cancelMushafDownload()}
           style={styles.cancelBtn}>
           <Text style={[styles.cancelLabel, { color: palette.accentSolid }]}>
             {t('common.cancel', 'Cancel')}

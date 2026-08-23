@@ -53,6 +53,24 @@ try {
   console.error('[mihrab] recordFirstSeen failed:', e);
 }
 
+// The Quran download's foreground service.
+//
+// Notifee requires the task to be registered before any notification asks
+// to be one, and it has to be registered at the top level of the bundle
+// rather than from a screen — the process can be started by the system
+// with no UI at all. The task itself does nothing but stay pending: the
+// download is driven from JS, and resolving this is how the service is
+// told it may stop. See src/quran/downloadNotification.ts.
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const notifee = require('@notifee/react-native').default;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { foregroundServiceTask } = require('./src/quran/downloadNotification');
+  notifee.registerForegroundService(() => foregroundServiceTask());
+} catch (e) {
+  console.error('[mihrab] registerForegroundService failed:', e);
+}
+
 AppRegistry.registerComponent(APP_REGISTRY_NAME, () => App);
 
 // Quran recitation playback service (lock-screen / notification remote
