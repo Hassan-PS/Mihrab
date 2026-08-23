@@ -61,7 +61,8 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-import { Alert, Text, TextInput } from 'react-native';
+import { Text, TextInput } from 'react-native';
+import { ConfirmModal } from '../src/components/ConfirmModal';
 import { SyncScreen } from '../src/screens/SyncScreen';
 import {
   forgetCachedIdentity,
@@ -69,6 +70,18 @@ import {
 } from '../src/sync/deviceIdentity';
 import { forgetCachedPeers, listPeers } from '../src/sync/peers';
 import { isValid } from '../src/sync/pairingCode';
+
+/**
+ * What the screen is currently saying.
+ *
+ * The dialog is the app's own `ConfirmModal`, not `Alert.alert` — the
+ * stock one drew a Material box in the middle of a screen that has none of
+ * that. Read through its props rather than its markup, so a change to how
+ * the sheet is drawn does not fail a test about what it says.
+ */
+function dialogOf(tree: ReactTestRenderer) {
+  return tree.root.findByType(ConfirmModal).props;
+}
 
 async function render(): Promise<ReactTestRenderer> {
   let tree!: ReactTestRenderer;
@@ -120,7 +133,6 @@ describe('the screen', () => {
 
 describe('pairing', () => {
   it('refuses a code that does not decode, without asking to confirm', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const tree = await render();
 
     const input = tree.root.findByProps({ testID: 'sync-code-input' });
@@ -131,16 +143,17 @@ describe('pairing', () => {
       tree.root.findByProps({ testID: 'sync-pair' }).props.onPress();
     });
 
-    // One alert, and it is the error rather than the confirmation — the
-    // difference between telling the user and asking them to approve
-    // something that cannot work.
-    expect(alert).toHaveBeenCalledTimes(1);
-    expect(alert.mock.calls[0][0]).toBe('sync.errorBadCodeTitle');
+    // It tells rather than asks — the difference between informing the user
+    // and inviting them to approve something that cannot work. `hideCancel`
+    // is how that difference reaches the screen.
+    const shown = dialogOf(tree);
+    expect(shown.visible).toBe(true);
+    expect(shown.title).toBe('sync.errorBadCodeTitle');
+    expect(shown.hideCancel).toBe(true);
     expect(await listPeers()).toEqual([]);
   });
 
   it('asks before pairing, and names the fingerprint it is about to trust', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const tree = await render();
 
     // Another device's code. Any valid one will do; what matters is that the
@@ -156,14 +169,16 @@ describe('pairing', () => {
       tree.root.findByProps({ testID: 'sync-pair' }).props.onPress();
     });
 
-    expect(alert).toHaveBeenCalledTimes(1);
-    expect(String(alert.mock.calls[0][0])).toMatch(/^sync\.pairWarnTitle:\d{6}$/);
+    const shown = dialogOf(tree);
+    expect(shown.visible).toBe(true);
+    expect(String(shown.title)).toMatch(/^sync\.pairWarnTitle:\d{6}$/);
+    // A question, so it keeps its second button.
+    expect(shown.hideCancel).toBe(false);
     // Nothing is written until the user says yes.
     expect(await listPeers()).toEqual([]);
   });
 
   it('refuses this device’s own code with its own message', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const tree = await render();
     const mine = tree.root.findByProps({ testID: 'sync-code' }).props
       .children as string;
@@ -179,15 +194,17 @@ describe('pairing', () => {
 
     // The code is well-formed, so the screen asks first — and the refusal
     // comes from the store, which is the layer that knows who we are.
-    const confirm = alert.mock.calls[0][2]?.[1];
-    expect(confirm?.text).toBe('sync.pairConfirm');
+    const asked = dialogOf(tree);
+    expect(asked.confirmLabel).toBe('sync.pairConfirm');
     await act(async () => {
-      confirm?.onPress?.();
+      asked.onConfirm();
     });
     await act(async () => {});
 
-    expect(alert).toHaveBeenCalledTimes(2);
-    expect(alert.mock.calls[1][1]).toBe('sync.errorThisDevice');
+    // The second dialog replaced the first rather than stacking on it.
+    const refused = dialogOf(tree);
+    expect(refused.visible).toBe(true);
+    expect(refused.message).toBe('sync.errorThisDevice');
     expect(await listPeers()).toEqual([]);
   });
 });

@@ -28,7 +28,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -44,6 +43,7 @@ import { cardEdgeStyle } from '../theme/chrome';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { typeStyle } from '../theme/typography';
 import { PairingQr } from './sync/PairingQr';
+import { useSyncDialog } from './sync/useSyncDialog';
 import { copyToClipboard, readClipboard } from '../sync/clipboard';
 import { fingerprintOf, myPairingCode } from '../sync/deviceIdentity';
 import {
@@ -149,6 +149,8 @@ export function SyncScreen() {
   const [syncing, setSyncing] = useState(false);
   /** Whether to offer Scan: a build with the module AND a camera to use. */
   const [canScan, setCanScan] = useState(false);
+  // The app's own dialog rather than the platform's — see useSyncDialog.
+  const { ask, tell, dialog } = useSyncDialog();
 
   useEffect(() => {
     let alive = true;
@@ -195,12 +197,12 @@ export function SyncScreen() {
     if (!code) return;
     const result = await copyToClipboard(code);
     if (result === 'failed') {
-      Alert.alert(t('sync.copyFailed'));
+      tell(t('sync.copyFailed'));
       return;
     }
     // Android 13 and up shows its own confirmation; a second one is noise.
-    if (result === 'copied-quietly') Alert.alert(t('sync.copied'));
-  }, [code, t]);
+    if (result === 'copied-quietly') tell(t('sync.copied'));
+  }, [code, t, tell]);
 
   const onPaste = useCallback(async () => {
     const text = await readClipboard();
@@ -217,80 +219,74 @@ export function SyncScreen() {
     [],
   );
 
-  const pairWith = useCallback((raw: string) => {
-    const text = raw.trim();
-    if (!text || busy) return;
-    const parsed = decode(text);
-    if (!parsed.ok) {
-      Alert.alert(t('sync.errorBadCodeTitle'), t('sync.errorBadCode'));
-      return;
-    }
-    const fingerprint = fingerprintOf(parsed.key);
+  const pairWith = useCallback(
+    (raw: string) => {
+      const text = raw.trim();
+      if (!text || busy) return;
+      const parsed = decode(text);
+      if (!parsed.ok) {
+        tell(t('sync.errorBadCodeTitle'), t('sync.errorBadCode'));
+        return;
+      }
+      const fingerprint = fingerprintOf(parsed.key);
 
-    Alert.alert(
-      t('sync.pairWarnTitle', { value: fingerprint }),
-      t('sync.pairWarnBody'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('sync.pairConfirm'),
-          onPress: () => {
-            void (async () => {
-              setBusy(true);
-              try {
-                const result = await addPeerByCode(text);
-                if (!result.ok) {
-                  Alert.alert(
-                    t('sync.errorBadCodeTitle'),
-                    result.reason === 'this-device'
-                      ? t('sync.errorThisDevice')
-                      : result.reason === 'too-many'
-                        ? t('sync.errorTooMany', { max: MAX_PEERS })
-                        : t('sync.errorBadCode'),
-                  );
-                  return;
-                }
-                setEntered('');
-                await refreshPeers();
-
-                // ANNOUNCE AT ONCE, not on the next app open.
-                //
-                // Pairing is one-directional: this device now knows the
-                // other, and the other has never heard of this one. It
-                // finds out by reading a file with our key in it, so the
-                // sooner that file exists the sooner the pair is real.
-                // Waiting for the next foreground meant the user had to
-                // carry a second code back by hand, which is what this is
-                // here to stop.
-                const current = await getSyncSettings();
-                if (!current.folder) {
-                  // No folder is no channel, so promising two-way sync
-                  // here would be a lie the user finds out about later.
-                  Alert.alert(
-                    t('sync.pairedTitle'),
-                    t('sync.pairedNeedsFolder'),
-                  );
-                  return;
-                }
-                setSyncing(true);
-                try {
-                  await runSyncNow();
-                } finally {
-                  setSyncing(false);
-                }
-                setSettings(await getSyncSettings());
-                Alert.alert(t('sync.pairedTitle'), t('sync.pairedBody'));
-              } catch {
-                Alert.alert(t('sync.errorSaveTitle'), t('sync.errorSaveBody'));
-              } finally {
-                setBusy(false);
+      ask({
+        title: t('sync.pairWarnTitle', { value: fingerprint }),
+        message: t('sync.pairWarnBody'),
+        confirmLabel: t('sync.pairConfirm'),
+        onConfirm: () => {
+          void (async () => {
+            setBusy(true);
+            try {
+              const result = await addPeerByCode(text);
+              if (!result.ok) {
+                tell(
+                  t('sync.errorBadCodeTitle'),
+                  result.reason === 'this-device'
+                    ? t('sync.errorThisDevice')
+                    : result.reason === 'too-many'
+                      ? t('sync.errorTooMany', { max: MAX_PEERS })
+                      : t('sync.errorBadCode'),
+                );
+                return;
               }
-            })();
-          },
+              setEntered('');
+              await refreshPeers();
+
+              // ANNOUNCE AT ONCE, not on the next app open.
+              //
+              // Pairing is one-directional: this device now knows the
+              // other, and the other has never heard of this one. It finds
+              // out by reading a file with our key in it, so the sooner
+              // that file exists the sooner the pair is real. Waiting for
+              // the next foreground meant the user had to carry a second
+              // code back by hand, which is what this is here to stop.
+              const current = await getSyncSettings();
+              if (!current.folder) {
+                // No folder is no channel, so promising two-way sync here
+                // would be a lie the user finds out about later.
+                tell(t('sync.pairedTitle'), t('sync.pairedNeedsFolder'));
+                return;
+              }
+              setSyncing(true);
+              try {
+                await runSyncNow();
+              } finally {
+                setSyncing(false);
+              }
+              setSettings(await getSyncSettings());
+              tell(t('sync.pairedTitle'), t('sync.pairedBody'));
+            } catch {
+              tell(t('sync.errorSaveTitle'), t('sync.errorSaveBody'));
+            } finally {
+              setBusy(false);
+            }
+          })();
         },
-      ],
-    );
-  }, [busy, refreshPeers, t]);
+      });
+    },
+    [ask, busy, refreshPeers, t, tell],
+  );
 
   const onAdd = useCallback(() => pairWith(entered), [entered, pairWith]);
 
@@ -317,24 +313,24 @@ export function SyncScreen() {
       // A cancel is a decision, and the app should say nothing about it.
       if (result.reason === 'cancelled') return;
       if (result.reason === 'denied') {
-        Alert.alert(t('sync.scanDeniedTitle'), t('sync.scanDeniedBody'));
+        tell(t('sync.scanDeniedTitle'), t('sync.scanDeniedBody'));
         return;
       }
       if (result.reason === 'no-camera') {
-        Alert.alert(t('sync.scanNoCameraTitle'), t('sync.scanNoCameraBody'));
+        tell(t('sync.scanNoCameraTitle'), t('sync.scanNoCameraBody'));
         return;
       }
-      Alert.alert(
+      tell(
         t('sync.syncFailedTitle'),
         t('sync.syncFailedBody', { detail: result.detail ?? '' }),
       );
     })();
-  }, [busy, pairWith, t]);
+  }, [busy, pairWith, t, tell]);
 
   const onChooseFolder = useCallback(() => {
     void (async () => {
       if (!hasFolderPicker()) {
-        Alert.alert(t('sync.errorUnsupported'));
+        tell(t('sync.errorUnsupported'));
         return;
       }
       try {
@@ -344,10 +340,10 @@ export function SyncScreen() {
         if (!picked) return;
         setSettings(await updateSyncSettings({ folder: picked, lastError: null }));
       } catch (e) {
-        Alert.alert(t('sync.syncFailedTitle'), String(e));
+        tell(t('sync.syncFailedTitle'), String(e));
       }
     })();
-  }, [t]);
+  }, [t, tell]);
 
   const onSyncNow = useCallback(() => {
     if (syncing) return;
@@ -359,7 +355,7 @@ export function SyncScreen() {
         if (result.ok) {
           await refreshPeers();
           if (result.outcome.read > 0) {
-            Alert.alert(t('sync.syncDoneTitle'), t('sync.syncDoneBody'));
+            tell(t('sync.syncDoneTitle'), t('sync.syncDoneBody'));
             return;
           }
           // "Synced" is the wrong word for a round that exchanged nothing,
@@ -369,13 +365,13 @@ export function SyncScreen() {
           // which is invisible from either screen, so it has to be said.
           const known = await listPeers();
           const neverAnyone = known.length > 0 && known.every(p => !p.lastSeenAt);
-          Alert.alert(
+          tell(
             t('sync.syncQuietTitle'),
             neverAnyone ? t('sync.syncNothingArrived') : t('sync.syncNothing'),
           );
           return;
         }
-        Alert.alert(
+        tell(
           t('sync.syncFailedTitle'),
           result.reason === 'folder-gone'
             ? t('sync.errorFolderGone')
@@ -389,7 +385,7 @@ export function SyncScreen() {
         setSyncing(false);
       }
     })();
-  }, [refreshPeers, syncing, t]);
+  }, [refreshPeers, syncing, t, tell]);
 
   const onToggleCategory = useCallback(
     (category: SyncCategory, next: boolean) => {
@@ -413,27 +409,22 @@ export function SyncScreen() {
 
   const onRemove = useCallback(
     (peer: Peer) => {
-      Alert.alert(
-        t('sync.removeTitle', {
+      ask({
+        title: t('sync.removeTitle', {
           value: peer.name || t('sync.unnamedDevice'),
         }),
-        t('sync.removeBody'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('sync.remove'),
-            style: 'destructive',
-            onPress: () => {
-              void (async () => {
-                await forgetPeer(peer.pk);
-                await refreshPeers();
-              })();
-            },
-          },
-        ],
-      );
+        message: t('sync.removeBody'),
+        confirmLabel: t('sync.remove'),
+        destructive: true,
+        onConfirm: () => {
+          void (async () => {
+            await forgetPeer(peer.pk);
+            await refreshPeers();
+          })();
+        },
+      });
     },
-    [refreshPeers, t],
+    [ask, refreshPeers, t],
   );
 
   const card = {
@@ -758,6 +749,7 @@ export function SyncScreen() {
           {t('sync.privacyNoteP2p')}
         </Text>
       </CenteredColumn>
+      {dialog}
     </ScrollView>
   );
 }

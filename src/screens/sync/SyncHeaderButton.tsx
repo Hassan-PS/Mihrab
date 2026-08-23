@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path } from 'react-native-svg';
@@ -7,6 +7,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { SPACING } from '../../theme/tokens';
 import { listPeers } from '../../sync/peers';
 import { runSyncNow, syncIsReady } from '../../sync/runSync';
+import { useSyncDialog } from './useSyncDialog';
 
 /**
  * Sync, from the screen showing the data that would travel.
@@ -69,6 +70,8 @@ function SyncIcon({ color }: { color: string }) {
 export function SyncHeaderButton() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  // The app's own sheet, not the platform's. See useSyncDialog.
+  const { tell, dialog } = useSyncDialog();
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -95,7 +98,7 @@ export function SyncHeaderButton() {
       try {
         const result = await runSyncNow();
         if (!result.ok) {
-          Alert.alert(
+          tell(
             t('sync.syncFailedTitle'),
             result.reason === 'folder-gone'
               ? t('sync.errorFolderGone')
@@ -109,12 +112,12 @@ export function SyncHeaderButton() {
           return;
         }
         if (result.outcome.read > 0) {
-          Alert.alert(t('sync.syncDoneTitle'), t('sync.syncDoneBody'));
+          tell(t('sync.syncDoneTitle'), t('sync.syncDoneBody'));
           return;
         }
         const known = await listPeers();
         const neverAnyone = known.length > 0 && known.every(p => !p.lastSeenAt);
-        Alert.alert(
+        tell(
           t('sync.syncQuietTitle'),
           neverAnyone ? t('sync.syncNothingArrived') : t('sync.syncNothing'),
         );
@@ -122,28 +125,33 @@ export function SyncHeaderButton() {
         setBusy(false);
       }
     })();
-  }, [busy, t]);
+  }, [busy, t, tell]);
 
   if (!ready) return null;
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={t('sync.syncNow')}
-      accessibilityState={{ disabled: busy, busy }}
-      testID="sync-header-button"
-      onPress={onPress}
-      disabled={busy}
-      // Generous around a 22pt glyph in a crowded bar.
-      hitSlop={SPACING.sm}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-    >
-      {busy ? (
-        <ActivityIndicator size="small" color={String(palette.accentSolid)} />
-      ) : (
-        <SyncIcon color={String(palette.accentSolid)} />
-      )}
-    </Pressable>
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('sync.syncNow')}
+        accessibilityState={{ disabled: busy, busy }}
+        testID="sync-header-button"
+        onPress={onPress}
+        disabled={busy}
+        // Generous around a 22pt glyph in a crowded bar.
+        hitSlop={SPACING.sm}
+        style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      >
+        {busy ? (
+          <ActivityIndicator size="small" color={String(palette.accentSolid)} />
+        ) : (
+          <SyncIcon color={String(palette.accentSolid)} />
+        )}
+      </Pressable>
+      {/* Lives beside the button because a header slot can hold a fragment;
+          the modal draws over the whole screen either way. */}
+      {dialog}
+    </>
   );
 }
 
