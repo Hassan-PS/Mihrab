@@ -54,6 +54,11 @@ import {
 } from '../sync/deviceName';
 import { decode } from '../sync/pairingCode';
 import {
+  cameraIsAvailable,
+  hasQrScanner,
+  scanQrCode,
+} from '../sync/qrScanner';
+import {
   addPeerByCode,
   forgetPeer,
   listPeers,
@@ -142,6 +147,8 @@ export function SyncScreen() {
   const [ready, setReady] = useState<boolean | null>(null);
   const [settings, setSettings] = useState<SyncSettings | null>(null);
   const [syncing, setSyncing] = useState(false);
+  /** Whether to offer Scan: a build with the module AND a camera to use. */
+  const [canScan, setCanScan] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -155,6 +162,10 @@ export function SyncScreen() {
         // so a first visit shows a folder already in place rather than a
         // button — on iOS there is nothing for the user to decide.
         await ensureSyncFolder();
+        if (hasQrScanner()) {
+          const camera = await cameraIsAvailable();
+          if (alive) setCanScan(camera);
+        }
         const [mine, name, list, stored] = await Promise.all([
           myPairingCode(),
           getDeviceName(),
@@ -206,8 +217,8 @@ export function SyncScreen() {
     [],
   );
 
-  const onAdd = useCallback(() => {
-    const text = entered.trim();
+  const pairWith = useCallback((raw: string) => {
+    const text = raw.trim();
     if (!text || busy) return;
     const parsed = decode(text);
     if (!parsed.ok) {
@@ -279,7 +290,46 @@ export function SyncScreen() {
         },
       ],
     );
-  }, [busy, entered, refreshPeers, t]);
+  }, [busy, refreshPeers, t]);
+
+  const onAdd = useCallback(() => pairWith(entered), [entered, pairWith]);
+
+  /**
+   * Scan, then go straight to the same confirmation a typed code gets.
+   *
+   * Not into the text field first: the user pointed a camera at a code and
+   * watched it be read, so asking them to look at the same string again and
+   * press another button is ceremony. The fingerprint in the dialog is the
+   * check that matters, and they still get that.
+   */
+  const onScan = useCallback(() => {
+    if (busy) return;
+    void (async () => {
+      const result = await scanQrCode({
+        hint: t('sync.scanHint'),
+        cancel: t('common.cancel'),
+      });
+      if (result.ok) {
+        setEntered(result.text);
+        pairWith(result.text);
+        return;
+      }
+      // A cancel is a decision, and the app should say nothing about it.
+      if (result.reason === 'cancelled') return;
+      if (result.reason === 'denied') {
+        Alert.alert(t('sync.scanDeniedTitle'), t('sync.scanDeniedBody'));
+        return;
+      }
+      if (result.reason === 'no-camera') {
+        Alert.alert(t('sync.scanNoCameraTitle'), t('sync.scanNoCameraBody'));
+        return;
+      }
+      Alert.alert(
+        t('sync.syncFailedTitle'),
+        t('sync.syncFailedBody', { detail: result.detail ?? '' }),
+      );
+    })();
+  }, [busy, pairWith, t]);
 
   const onChooseFolder = useCallback(() => {
     void (async () => {
@@ -588,6 +638,23 @@ export function SyncScreen() {
             ]}
           />
           <View style={styles.buttonRow}>
+            {canScan ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('sync.scanCode')}
+                testID="sync-scan"
+                onPress={onScan}
+                style={({ pressed }) => [
+                  styles.secondary,
+                  { borderColor: palette.border, borderRadius: RADIUS.sm },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={[typeStyle('headline'), { color: palette.text }]}>
+                  {t('sync.scanCode')}
+                </Text>
+              </Pressable>
+            ) : null}
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('sync.pasteCode')}

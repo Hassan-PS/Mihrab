@@ -181,6 +181,42 @@ describe('the announcement, which is how one code syncs both ways', () => {
     expect((await listPeers())[0].name).toBe("Hassan's iPad");
   });
 
+  it('takes the name of a device that was added by typing its code', async () => {
+    const other = otherDevice();
+    // The side that did the pairing used to show "Unnamed device" for ever
+    // while the other side showed the real name — because the name was only
+    // accepted from a peer that had announced itself. How the pairing was
+    // made says nothing about whose word the name is.
+    await addPeerByCode(other.code);
+    expect((await listPeers())[0].name).toBeUndefined();
+
+    await notePeerSeen({ publicKey: other.publicKey, name: 'Hassan’s iPhone' });
+    expect((await listPeers())[0].name).toBe('Hassan’s iPhone');
+  });
+
+  it('lets a device rename itself later, until the user overrules it', async () => {
+    const other = otherDevice();
+    await addPeerByCode(other.code);
+    await notePeerSeen({ publicKey: other.publicKey, name: 'Old name' });
+    await notePeerSeen({ publicKey: other.publicKey, name: 'New name' });
+    expect((await listPeers())[0].name).toBe('New name');
+
+    await renamePeer(toBase64(other.publicKey), 'Mine');
+    await notePeerSeen({ publicKey: other.publicKey, name: 'Theirs' });
+    expect((await listPeers())[0].name).toBe('Mine');
+  });
+
+  it('hands the peer back its own name when the user clears theirs', async () => {
+    const other = otherDevice();
+    await addPeerByCode(other.code, { name: 'Mine' });
+    const pk = toBase64(other.publicKey);
+
+    await renamePeer(pk, '   ');
+    await notePeerSeen({ publicKey: other.publicKey, name: 'Theirs' });
+    // Clearing is not "call it nothing for ever" — it is "I have no opinion".
+    expect((await listPeers())[0].name).toBe('Theirs');
+  });
+
   it('ignores an envelope that names this very device', async () => {
     const me = await getDeviceIdentity();
     expect(await notePeerSeen({ publicKey: me.publicKey })).toBeNull();

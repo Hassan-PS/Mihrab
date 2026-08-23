@@ -1,5 +1,7 @@
 package com.prayer_times
 
+import android.os.Build
+import android.provider.Settings
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 
@@ -23,7 +25,34 @@ class PrayerBuildInfoModule(reactContext: ReactApplicationContext) :
     mapOf(
       "distribution" to BuildConfig.FLAVOR,
       "firstInstallTime" to firstInstallTime(),
+      "deviceName" to deviceName(),
     )
+
+  /**
+   * What this device calls itself, for the paired list on someone else's
+   * phone.
+   *
+   * `Settings.Global.DEVICE_NAME` is the name the user typed in Settings —
+   * "Hassan's Pixel" rather than "Pixel 9" — and is the one worth showing.
+   * It is empty on plenty of devices, so the Bluetooth name is tried next
+   * (it is usually the same string) and the model last, which at least
+   * distinguishes two phones in a household.
+   *
+   * A label only. The public key is the identity, and nothing keys off this.
+   */
+  private fun deviceName(): String {
+    val resolver = reactApplicationContext.contentResolver
+    val candidates = listOfNotNull(
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+        runCatching { Settings.Global.getString(resolver, Settings.Global.DEVICE_NAME) }.getOrNull()
+      } else {
+        null
+      },
+      runCatching { Settings.Secure.getString(resolver, "bluetooth_name") }.getOrNull(),
+      Build.MODEL,
+    )
+    return candidates.firstOrNull { !it.isNullOrBlank() }?.trim() ?: "Android phone"
+  }
 
   /** Epoch ms of the first install, or 0 when it cannot be read. Doubles as
    *  "unknown" on the JS side, which then uses its own stamp. */

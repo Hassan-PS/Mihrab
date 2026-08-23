@@ -11,9 +11,8 @@ import { RADIUS, SPACING } from '../../theme/tokens';
 import { typeStyle } from '../../theme/typography';
 import type { RootStackParamList } from '../../navigation/types';
 import { hasFolderPicker } from '../../sync/folderAccess';
-import { listPeers } from '../../sync/peers';
+import { syncIsReady } from '../../sync/runSync';
 import { hasSecureRandom } from '../../sync/secureRandom';
-import { getSyncSettings } from '../../sync/syncSettings';
 
 /**
  * "Your record can live on more than one device" — said once, where it is
@@ -77,8 +76,9 @@ export async function shouldShowSyncHint(
 ): Promise<boolean> {
   if (!hasSecureRandom() || !hasFolderPicker()) return false;
   if ((await dismissedPlaces()).includes(place)) return false;
-  const [settings, peers] = await Promise.all([getSyncSettings(), listPeers()]);
-  return !(settings.folder && peers.length > 0);
+  // The hint and the header button are two halves of one question, so it is
+  // asked in one place — see `syncIsReady`.
+  return !(await syncIsReady());
 }
 
 export async function dismissSyncHint(place: SyncHintPlace): Promise<void> {

@@ -1369,7 +1369,13 @@
     "pairedNeedsFolder": "Välj en mapp först. Det är via mappen de två enheterna når varandra, och utan en kan ingenting utbytas.",
     "folderAppHint": "Mihrab har skapat en egen mapp som heter {{value}}. Du hittar den i Filer, under På min iPhone — peka din synkapp mot den för att nå dina andra enheter.",
     "syncQuietTitle": "Ingenting kom fram",
-    "syncNothingArrived": "Din fil ligger i mappen, men ingenting från dina andra enheter har dykt upp där. Båda enheterna måste peka mot samma mapp, och det som håller mappen i takt mellan dem måste vara igång."
+    "syncNothingArrived": "Din fil ligger i mappen, men ingenting från dina andra enheter har dykt upp där. Båda enheterna måste peka mot samma mapp, och det som håller mappen i takt mellan dem måste vara igång.",
+    "scanCode": "Skanna",
+    "scanHint": "Rikta kameran mot koden på din andra enhet",
+    "scanDeniedTitle": "Kameran är inte tillåten",
+    "scanDeniedBody": "Mihrab behöver kameran för att läsa koden. Du kan tillåta det i enhetens inställningar, eller skriva in koden i stället.",
+    "scanNoCameraTitle": "Ingen kamera",
+    "scanNoCameraBody": "Den här enheten har ingen kamera att skanna med. Skriv eller klistra in koden i stället."
   },
   "stats": {
     "daysUnit": " dagar",

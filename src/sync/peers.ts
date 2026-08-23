@@ -61,6 +61,17 @@ export type Peer = {
   fingerprint: string;
   /** What the device called itself, or what the user renamed it to. */
   name?: string;
+  /**
+   * The name came from the user on THIS device, not from the peer.
+   *
+   * Kept apart from `via` because they answer different questions. `via`
+   * says how the pairing was made; this says whose word the name is. They
+   * were conflated at first, and the result was that a device you paired
+   * with by typing its code stayed "Unnamed device" for ever — its own name
+   * arrived in every file it sent and was thrown away, because it had been
+   * added by code rather than by announcement.
+   */
+  renamedHere?: boolean;
   addedAt: string;
   /** When a file from it was last opened. Absent until it has sent one. */
   lastSeenAt?: string;
@@ -105,6 +116,7 @@ function coerce(value: unknown): Peer[] {
           ? r.fingerprint
           : fingerprintOf(fromBase64(r.pk)),
       ...(typeof r.name === 'string' && r.name ? { name: r.name } : {}),
+      ...(r.renamedHere === true ? { renamedHere: true } : {}),
       addedAt:
         typeof r.addedAt === 'string' ? r.addedAt : new Date(0).toISOString(),
       ...(typeof r.lastSeenAt === 'string' ? { lastSeenAt: r.lastSeenAt } : {}),
@@ -194,7 +206,7 @@ export async function addPeerByCode(
       const upgraded: Peer = {
         ...existing,
         via: 'code',
-        ...(options.name ? { name: options.name } : {}),
+        ...(options.name ? { name: options.name, renamedHere: true } : {}),
       };
       return {
         peers: peers.map(p => (p.pk === pk ? upgraded : p)),
@@ -207,7 +219,7 @@ export async function addPeerByCode(
     const peer: Peer = {
       pk,
       fingerprint: fingerprintOf(parsed.key),
-      ...(options.name ? { name: options.name } : {}),
+      ...(options.name ? { name: options.name, renamedHere: true } : {}),
       addedAt: (options.now ?? new Date()).toISOString(),
       via: 'code',
     };
@@ -244,12 +256,14 @@ export async function notePeerSeen(input: {
       const updated: Peer = {
         ...existing,
         lastSeenAt: at,
-        // A device that renames itself should show its new name; a name the
-        // user set on THIS device is theirs and is not overwritten, which
-        // is why rename below marks the peer as named here.
-        ...(input.name && existing.via === 'announced'
-          ? { name: input.name }
-          : {}),
+        // A device's own name wins unless the user has renamed it here.
+        //
+        // This used to test `via === 'announced'`, which meant a device
+        // added by typing its code never took the name it sent — so the
+        // side that did the pairing showed "Unnamed device" while the other
+        // side showed the real one. How a pairing was made says nothing
+        // about whose word the name is.
+        ...(input.name && !existing.renamedHere ? { name: input.name } : {}),
       };
       return {
         peers: peers.map(p => (p.pk === pk ? updated : p)),
@@ -282,7 +296,10 @@ export function renamePeer(pk: string, name: string): Promise<boolean> {
         // and `"name": undefined` and no name at all are the same on disk
         // but not the same when compared in a test or a render.
         delete rest.name;
-        return trimmed ? { ...rest, name: trimmed } : rest;
+        delete rest.renamedHere;
+        // Clearing the name hands the peer back its own: with nothing set
+        // here, the next file it sends supplies one again.
+        return trimmed ? { ...rest, name: trimmed, renamedHere: true } : rest;
       }),
       result: true,
     };

@@ -270,6 +270,25 @@ dependencies {
      */
     implementation("com.google.android.material:material:1.12.0")
 
+    /**
+     * Scanning a pairing code off another phone's screen.
+     *
+     * CameraX for the plumbing and ZXing for the decoding, and neither is a
+     * casual choice for an app that ships on F-Droid. ML Kit would be one
+     * line and would drag in Google Play Services, which the F-Droid build
+     * exists to be free of. `zxing:core` is pure Java under Apache 2.0 with
+     * no services of any kind, and androidx.camera is the platform's own
+     * camera stack. Both build from source on Maven Central like every
+     * other gradle dependency here.
+     *
+     * `zxing:core` only, not `zxing-android-embedded`: the latter brings an
+     * activity, a view, and its own UI to argue with.
+     */
+    implementation("androidx.camera:camera-camera2:1.4.1")
+    implementation("androidx.camera:camera-lifecycle:1.4.1")
+    implementation("androidx.camera:camera-view:1.4.1")
+    implementation("com.google.zxing:core:3.5.3")
+
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {

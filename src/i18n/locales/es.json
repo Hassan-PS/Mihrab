@@ -1369,7 +1369,13 @@
     "pairedNeedsFolder": "Elige primero una carpeta. Es por donde los dos dispositivos se alcanzan, y sin ella no se puede intercambiar nada.",
     "folderAppHint": "Mihrab ha creado una carpeta llamada {{value}} para sí mismo. La encontrarás en Archivos, en En mi iPhone; apunta ahí tu app de sincronización para llegar a tus otros dispositivos.",
     "syncQuietTitle": "No llegó nada",
-    "syncNothingArrived": "Tu archivo está en la carpeta, pero no ha aparecido nada de tus otros dispositivos. Ambos tienen que apuntar a la misma carpeta, y lo que la mantiene al día entre ellos tiene que estar funcionando."
+    "syncNothingArrived": "Tu archivo está en la carpeta, pero no ha aparecido nada de tus otros dispositivos. Ambos tienen que apuntar a la misma carpeta, y lo que la mantiene al día entre ellos tiene que estar funcionando.",
+    "scanCode": "Escanear",
+    "scanHint": "Apunta la cámara al código de tu otro dispositivo",
+    "scanDeniedTitle": "Cámara no permitida",
+    "scanDeniedBody": "Mihrab necesita la cámara para leer el código. Puedes permitirlo en los ajustes del dispositivo, o escribir el código.",
+    "scanNoCameraTitle": "Sin cámara",
+    "scanNoCameraBody": "Este dispositivo no tiene cámara para escanear. Escribe o pega el código."
   },
   "stats": {
     "daysUnit": " días",

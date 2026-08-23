@@ -1369,7 +1369,13 @@
     "pairedNeedsFolder": "Wähle zuerst einen Ordner. Über ihn erreichen sich die beiden Geräte, und ohne einen kann nichts ausgetauscht werden.",
     "folderAppHint": "Mihrab hat sich einen Ordner namens {{value}} angelegt. Du findest ihn in \"Dateien\" unter \"Auf meinem iPhone\" — richte deine Sync-App darauf, um deine anderen Geräte zu erreichen.",
     "syncQuietTitle": "Nichts angekommen",
-    "syncNothingArrived": "Deine Datei liegt im Ordner, aber von deinen anderen Geräten ist dort nichts aufgetaucht. Beide Geräte müssen auf denselben Ordner zeigen, und was diesen Ordner zwischen ihnen abgleicht, muss laufen."
+    "syncNothingArrived": "Deine Datei liegt im Ordner, aber von deinen anderen Geräten ist dort nichts aufgetaucht. Beide Geräte müssen auf denselben Ordner zeigen, und was diesen Ordner zwischen ihnen abgleicht, muss laufen.",
+    "scanCode": "Scannen",
+    "scanHint": "Richte die Kamera auf den Code auf deinem anderen Gerät",
+    "scanDeniedTitle": "Kamera nicht erlaubt",
+    "scanDeniedBody": "Mihrab braucht die Kamera, um den Code zu lesen. Du kannst sie in den Geräteeinstellungen erlauben oder den Code eintippen.",
+    "scanNoCameraTitle": "Keine Kamera",
+    "scanNoCameraBody": "Dieses Gerät hat keine Kamera zum Scannen. Tippe den Code ein oder füge ihn ein."
   },
   "stats": {
     "daysUnit": " Tage",

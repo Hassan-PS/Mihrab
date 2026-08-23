@@ -27,6 +27,7 @@ class MainApplication : Application(), ReactApplication {
           add(SecureRandomPackage())
           add(MihrabClipboardPackage())
           add(SyncFolderPackage())
+          add(ScanQrPackage())
         },
     )
   }

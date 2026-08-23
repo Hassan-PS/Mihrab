@@ -10,6 +10,8 @@
 	     lets other apps work on the files where they are rather than on
 	     copies, which is what a sync client needs. Without both, the folder
 	     exists and nothing else can see it. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Mihrab uses the camera only to read the pairing code shown on your other device. Nothing is recorded or sent anywhere.</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>

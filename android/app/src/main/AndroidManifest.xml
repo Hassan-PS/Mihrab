@@ -2,6 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Reading a pairing code off another device's screen, and nothing
+         else. Optional hardware: a tablet without a camera still pairs by
+         typing the code, and must not be filtered out of the store. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -193,6 +199,13 @@
            restrictions on large screens and Play flags them (console
            recommendation, 2026-07-16). The configure layout is a simple
            scrollable list and works in any orientation. -->
+      <!-- The QR scanner. Not exported: it is opened by this app only, and
+           it hands a decoded string straight back to the module. -->
+      <activity
+        android:name=".ScanQrActivity"
+        android:exported="false"
+        android:screenOrientation="portrait"
+        android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
       <activity
         android:name=".PrayerWidgetConfigureActivity"
         android:exported="true"

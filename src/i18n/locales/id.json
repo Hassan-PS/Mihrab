@@ -1369,7 +1369,13 @@
     "pairedNeedsFolder": "Pilih folder dulu. Lewat folder itulah kedua perangkat saling menjangkau, dan tanpa folder tidak ada yang bisa dipertukarkan.",
     "folderAppHint": "Mihrab membuat folder bernama {{value}} untuk dirinya sendiri. Cari di app Files, di bawah Di iPhone Saya, lalu arahkan aplikasi sinkronisasi Anda ke sana untuk menjangkau perangkat lain.",
     "syncQuietTitle": "Tidak ada yang datang",
-    "syncNothingArrived": "Berkas Anda ada di folder, tetapi tidak ada apa pun dari perangkat lain yang muncul di sana. Kedua perangkat harus menunjuk ke folder yang sama, dan yang menjaga folder itu tetap sama di antara keduanya harus sedang berjalan."
+    "syncNothingArrived": "Berkas Anda ada di folder, tetapi tidak ada apa pun dari perangkat lain yang muncul di sana. Kedua perangkat harus menunjuk ke folder yang sama, dan yang menjaga folder itu tetap sama di antara keduanya harus sedang berjalan.",
+    "scanCode": "Pindai",
+    "scanHint": "Arahkan kamera ke kode di perangkat Anda yang lain",
+    "scanDeniedTitle": "Kamera tidak diizinkan",
+    "scanDeniedBody": "Mihrab perlu kamera untuk membaca kode. Anda bisa mengizinkannya di pengaturan perangkat, atau ketik kodenya saja.",
+    "scanNoCameraTitle": "Tidak ada kamera",
+    "scanNoCameraBody": "Perangkat ini tidak punya kamera untuk memindai. Ketik atau tempel kodenya."
   },
   "stats": {
     "daysUnit": " hari",

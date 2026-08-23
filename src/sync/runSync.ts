@@ -31,6 +31,7 @@ import {
   type FolderHandle,
 } from './syncSettings';
 import { hasSecureRandom } from './secureRandom';
+import { listPeers } from './peers';
 
 export type SyncRunResult =
   | { ok: true; outcome: SyncOutcome; at: string }
@@ -54,6 +55,22 @@ export type SyncRunError =
  * `folder` is injectable for the same reason it is in `folderSync` — so the
  * decision logic here can be tested without a phone.
  */
+/**
+ * Whether a round would actually do anything.
+ *
+ * Both halves are needed and neither is enough: a folder with no paired
+ * device has nobody to write for, and a paired device with no folder has
+ * nowhere to write. It is also the question two other places ask — the
+ * pointer on the Quran and Log screens shows while this is false, and the
+ * sync button in their header shows while it is true — so it lives here
+ * rather than being worked out twice and drifting.
+ */
+export async function syncIsReady(): Promise<boolean> {
+  if (!hasSecureRandom() || !hasFolderPicker()) return false;
+  const [settings, peers] = await Promise.all([getSyncSettings(), listPeers()]);
+  return Boolean(settings.folder) && peers.length > 0;
+}
+
 /**
  * The folder to sync through, adopting the platform's default the first
  * time if the user has not chosen one.

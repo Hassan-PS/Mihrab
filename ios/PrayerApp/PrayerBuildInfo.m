@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <React/RCTBridgeModule.h>
+#import <UIKit/UIKit.h>
 
 /**
  * When this app was first installed on this device.
@@ -37,7 +38,28 @@ RCT_EXPORT_MODULE();
     // has one channel, and JS defaults sensibly if it is missing.
     @"distribution" : @"appstore",
     @"firstInstallTime" : @([self firstInstallTimeMs]),
+    @"deviceName" : [self deviceName],
   };
+}
+
+/**
+ * What this device calls itself, for the paired list on someone else's
+ * phone.
+ *
+ * Worth being clear about the limit: since iOS 16, `UIDevice.name` returns
+ * the MODEL name — "iPhone" — to any app without the user-assigned device
+ * name entitlement, which is granted by request and not for something as
+ * small as this. So on modern iOS this is "iPhone" or "iPad", and the user
+ * can type something better on the Sync screen. Android has the name its
+ * owner actually set, and gets it.
+ */
+- (NSString *)deviceName
+{
+  NSString *name = UIDevice.currentDevice.name;
+  if (name.length == 0) {
+    return @"iPhone";
+  }
+  return name;
 }
 
 - (double)firstInstallTimeMs

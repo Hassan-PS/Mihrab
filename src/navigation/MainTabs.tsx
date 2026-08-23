@@ -45,6 +45,7 @@ import { DuasScreen } from '../screens/DuasScreen';
 import { LogScreen } from '../screens/LogScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { HomeHeaderControls } from './HomeHeaderControls';
+import { SyncHeaderButton } from '../screens/sync/SyncHeaderButton';
 import { MihrabHeaderTitle } from './MihrabHeaderTitle';
 import { isMacCatalyst } from '../responsive/breakpoints';
 import {
@@ -205,6 +206,9 @@ export function MainTabs() {
           title: t('nav.quran'),
           tabBarIcon: TabBookIcon,
           headerShown: true,
+          // Only these two tabs carry it, and only once sync is set up: this
+          // is the screen whose data the user just changed. See SyncHeaderButton.
+          headerRight: () => <SyncHeaderButton />,
         }}
       />
       <Tab.Screen
@@ -232,6 +236,7 @@ export function MainTabs() {
           title: t('log.title', 'Log'),
           tabBarIcon: TabLogIcon,
           headerShown: true,
+          headerRight: () => <SyncHeaderButton />,
         }}
       />
       <Tab.Screen

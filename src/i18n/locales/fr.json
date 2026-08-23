@@ -1369,7 +1369,13 @@
     "pairedNeedsFolder": "Choisissez d’abord un dossier. C’est par lui que les deux appareils se joignent, et sans dossier rien ne peut être échangé.",
     "folderAppHint": "Mihrab a créé un dossier nommé {{value}} pour lui-même. Vous le trouverez dans Fichiers, sous Sur mon iPhone : pointez-y votre app de synchronisation pour joindre vos autres appareils.",
     "syncQuietTitle": "Rien n’est arrivé",
-    "syncNothingArrived": "Votre fichier est dans le dossier, mais rien de vos autres appareils n’y est apparu. Les deux appareils doivent viser le même dossier, et ce qui le garde à jour entre eux doit être en marche."
+    "syncNothingArrived": "Votre fichier est dans le dossier, mais rien de vos autres appareils n’y est apparu. Les deux appareils doivent viser le même dossier, et ce qui le garde à jour entre eux doit être en marche.",
+    "scanCode": "Scanner",
+    "scanHint": "Dirigez la caméra vers le code affiché sur votre autre appareil",
+    "scanDeniedTitle": "Caméra non autorisée",
+    "scanDeniedBody": "Mihrab a besoin de la caméra pour lire le code. Vous pouvez l’autoriser dans les réglages de l’appareil, ou saisir le code à la place.",
+    "scanNoCameraTitle": "Pas de caméra",
+    "scanNoCameraBody": "Cet appareil n’a pas de caméra pour scanner. Saisissez ou collez le code à la place."
   },
   "stats": {
     "daysUnit": " jours",

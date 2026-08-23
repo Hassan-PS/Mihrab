@@ -58,6 +58,8 @@
 		B1C2D3E40002AAAA0002BEEF /* MihrabClipboard.m in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E40004AAAA0004BEEF /* MihrabClipboard.m */; };
 		B1C2D3E40005AAAA0005BEEF /* SyncFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E40007AAAA0007BEEF /* SyncFolder.swift */; };
 		B1C2D3E40006AAAA0006BEEF /* SyncFolder.m in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E40008AAAA0008BEEF /* SyncFolder.m */; };
+		B1C2D3E40009AAAA0009BEEF /* ScanQr.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4000BAAAA000BBEEF /* ScanQr.swift */; };
+		B1C2D3E4000AAAAA000ABEEF /* ScanQr.m in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4000CAAAA000CBEEF /* ScanQr.m */; };
 		CA37C7F81236A5CF8F759E97 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60668681401DD7256458E168 /* Haptics.swift */; };
 		CE1E4BEE25F612B8320B7886 /* adhan_hafiz_murad.caf in Resources */ = {isa = PBXBuildFile; fileRef = 91E97289B5BBE23C693F9B59 /* adhan_hafiz_murad.caf */; };
 		D80631DB29913BA3BE3917AB /* Haptics.m in Sources */ = {isa = PBXBuildFile; fileRef = BFF6595003A4C5C972D2B78B /* Haptics.m */; };
@@ -146,6 +148,8 @@
 		B1C2D3E40004AAAA0004BEEF /* MihrabClipboard.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MihrabClipboard.m; path = PrayerApp/MihrabClipboard.m; sourceTree = "<group>"; };
 		B1C2D3E40007AAAA0007BEEF /* SyncFolder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SyncFolder.swift; path = PrayerApp/SyncFolder.swift; sourceTree = "<group>"; };
 		B1C2D3E40008AAAA0008BEEF /* SyncFolder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SyncFolder.m; path = PrayerApp/SyncFolder.m; sourceTree = "<group>"; };
+		B1C2D3E4000BAAAA000BBEEF /* ScanQr.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ScanQr.swift; path = PrayerApp/ScanQr.swift; sourceTree = "<group>"; };
+		B1C2D3E4000CAAAA000CBEEF /* ScanQr.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = ScanQr.m; path = PrayerApp/ScanQr.m; sourceTree = "<group>"; };
 		60668681401DD7256458E168 /* Haptics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Haptics.swift; path = PrayerApp/Haptics.swift; sourceTree = "<group>"; };
 		69FB66EF55272B1AA6A61A69 /* PrayerBuildInfo.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = PrayerBuildInfo.m; path = PrayerApp/PrayerBuildInfo.m; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = PrayerApp/AppDelegate.swift; sourceTree = "<group>"; };
@@ -313,6 +317,8 @@
 				B1C2D3E40004AAAA0004BEEF /* MihrabClipboard.m */,
 				B1C2D3E40007AAAA0007BEEF /* SyncFolder.swift */,
 				B1C2D3E40008AAAA0008BEEF /* SyncFolder.m */,
+				B1C2D3E4000BAAAA000BBEEF /* ScanQr.swift */,
+				B1C2D3E4000CAAAA000CBEEF /* ScanQr.m */,
 				60668681401DD7256458E168 /* Haptics.swift */,
 				BFF6595003A4C5C972D2B78B /* Haptics.m */,
 				7BBC47479F739320A66C8F1A /* MihrabAppGroup.h */,
@@ -673,6 +679,8 @@
 				B1C2D3E40002AAAA0002BEEF /* MihrabClipboard.m in Sources */,
 				B1C2D3E40005AAAA0005BEEF /* SyncFolder.swift in Sources */,
 				B1C2D3E40006AAAA0006BEEF /* SyncFolder.m in Sources */,
+				B1C2D3E40009AAAA0009BEEF /* ScanQr.swift in Sources */,
+				B1C2D3E4000AAAAA000ABEEF /* ScanQr.m in Sources */,
 				CA37C7F81236A5CF8F759E97 /* Haptics.swift in Sources */,
 				D80631DB29913BA3BE3917AB /* Haptics.m in Sources */,
 				9381D9BABC745CEEC09EF47C /* MihrabAppGroup.m in Sources */,

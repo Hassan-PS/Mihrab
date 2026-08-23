@@ -16,7 +16,7 @@
  * worse one than what its owner would have typed — which is why the field
  * exists.
  */
-import { Platform } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
@@ -33,13 +33,25 @@ const DEVICE_NAME_KEY = 'mihrab.sync.deviceName.v1';
 export const MAX_DEVICE_NAME = 40;
 
 /**
- * What the platform would call this, before the user says otherwise.
+ * What this device calls itself, before the user says otherwise.
  *
- * Deliberately coarse. `Platform.constants` can offer a model string on
- * Android, but "SM-G991B" is not a name a person recognises and asking for
- * it costs a bridge read at startup for something the user will overwrite.
+ * Asked of the OS rather than guessed from the platform: "Hassan's Pixel"
+ * is a name someone recognises in a list on another phone, and "Android
+ * phone" is not. It arrives as a constant, so there is no bridge round trip.
+ *
+ * iOS gives less than it looks like it does — since iOS 16, `UIDevice.name`
+ * returns the model name to any app without the user-assigned device name
+ * entitlement, so this is usually just "iPhone" there. That is still no
+ * worse than the guess it replaces, and the field is one tap away.
  */
 export function defaultDeviceName(): string {
+  const native = NativeModules.PrayerBuildInfo as
+    | { deviceName?: string }
+    | undefined;
+  const given = native?.deviceName?.trim();
+  if (given) return given.slice(0, MAX_DEVICE_NAME);
+  // Nothing from the platform: an older build of the native module, or a
+  // device that has no name set anywhere.
   if (Platform.OS === 'ios') {
     // Catalyst reports 'ios' with `isMacCatalyst` set — the Homebrew build
     // pairs like any other device and should not claim to be an iPad.
