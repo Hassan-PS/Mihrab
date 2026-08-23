@@ -114,8 +114,38 @@ object PracticeGridBitmap {
         val rect = RectF(left, top, left + cellPx, top + cellPx)
         // A date key is YYYY-MM-DD, so string order IS date order.
         val future = key > todayKey
-        paint.color = colorFor(if (future) null else byDate[key], future, accent)
-        canvas.drawRoundRect(rect, radius, radius, paint)
+        if (!future) {
+          val day = byDate[key]
+          paint.style = Paint.Style.FILL
+          paint.color = colorFor(day, accent)
+          canvas.drawRoundRect(rect, radius, radius, paint)
+          // The hairline the app gives an empty square, for the same reason
+          // it gives it one: an empty cell cannot carry enough contrast to
+          // be seen at a lightness that still reads as empty, so the ring
+          // carries it instead. Without this the last few days of a partly
+          // logged week are indistinguishable from the card behind them.
+          if (day == null || (weightOf(day) <= 0 && loggedOf(day) <= 0)) {
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = (cellPx * 0.09f).coerceAtLeast(1f)
+            paint.color = withAlpha(accent, 0.22f)
+            canvas.drawRoundRect(rect, radius, radius, paint)
+          }
+        }
+        // Today gets a ring, as it does on the Log screen. A grid whose most
+        // recent squares are empty gives no clue where "now" is without it.
+        if (key == todayKey) {
+          paint.style = Paint.Style.STROKE
+          paint.strokeWidth = (cellPx * 0.14f).coerceAtLeast(1.5f)
+          paint.color = withAlpha(accent, 0.85f)
+          val inset = paint.strokeWidth / 2f
+          canvas.drawRoundRect(
+            RectF(rect.left - inset, rect.top - inset, rect.right + inset, rect.bottom + inset),
+            radius,
+            radius,
+            paint,
+          )
+        }
+        paint.style = Paint.Style.FILL
         cursor.add(Calendar.DAY_OF_YEAR, 1)
       }
     }
@@ -149,25 +179,51 @@ object PracticeGridBitmap {
   )
 
   /**
-   * Four states and nothing else: a day with prayers kept, a day that owes
-   * one, a day with nothing recorded, and a day that has not happened. A
-   * future day is drawn FAINTER than an empty past one rather than the same,
-   * because "you did not pray on Sunday" is a claim the record cannot make
-   * about a Sunday that is still two days away.
+   * The fill, and it is the Log screen's `fillFor` with the names changed.
+   *
+   * Kept deliberately in the same order and with the same thresholds,
+   * because the one thing this grid must not do is describe a week
+   * differently from the screen the user checks it against. A future day is
+   * not here at all — it is skipped before this is called, and drawn as
+   * nothing, which is what the app does with it. It used to be a grey
+   * square, which read as a day already lost.
    */
-  private fun colorFor(day: JSONObject?, future: Boolean, accent: Int): Int {
-    if (future) return withAlpha(Color.parseColor(FUTURE_COLOR), 0.08f)
+  private fun colorFor(day: JSONObject?, accent: Int): Int {
     // The empty square is the palest step of the SAME ramp, not grey — the
     // app's heatmap makes the same choice, and for the same reason: grey
     // reads as a failed day, and this graph does not grade anyone.
     if (day == null) return withAlpha(accent, 0.10f)
-    if (day.optBoolean("m", false)) {
-      return withAlpha(Color.parseColor(OWED_COLOR), 0.30f)
-    }
-    val kept = day.optInt("k", 0).coerceIn(0, 5)
-    if (kept <= 0) return withAlpha(accent, 0.10f)
-    val alpha = 0.42f + 0.58f * (kept / 5f)
-    return withAlpha(accent, alpha)
+    // ORDER MATTERS, and it used to be wrong. `m` was tested first, so a day
+    // of four prayers on time and one marked missed — the ordinary shape of
+    // a day that is still in progress — drew as a red square here and as a
+    // strong green one on the Log screen. The app treats `missed` as a MARK
+    // on a day, not as the day's colour: red is only what a day looks like
+    // when something was recorded and NONE of it was kept.
+    val weight = weightOf(day)
+    if (weight > 0) return withAlpha(accent, 0.42f + 0.58f * (weight / 500f))
+    if (loggedOf(day) > 0) return withAlpha(Color.parseColor(OWED_COLOR), 0.30f)
+    return withAlpha(accent, 0.10f)
+  }
+
+  /**
+   * The day's weighted score, 0..500, as the Log screen computes it.
+   *
+   * `kw` is the field the app now sends. `k` is the older count and is the
+   * fallback for a payload written before this change — it over-credits a
+   * late prayer and ignores a made-up one, which is exactly why it stopped
+   * being the number the fill is drawn from.
+   */
+  private fun weightOf(day: JSONObject): Int {
+    if (day.has("kw")) return day.optInt("kw", 0).coerceIn(0, 500)
+    return day.optInt("k", 0).coerceIn(0, 5) * 100
+  }
+
+  /** Entries recorded that day, whatever they say. Absent on old payloads. */
+  private fun loggedOf(day: JSONObject): Int {
+    if (day.has("l")) return day.optInt("l", 0).coerceAtLeast(0)
+    // Before `l` existed the only signal that something was recorded on a
+    // day with nothing kept was the missed flag.
+    return if (day.optBoolean("m", false)) 1 else 0
   }
 
   private fun withAlpha(color: Int, alpha: Float): Int =

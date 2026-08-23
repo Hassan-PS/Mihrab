@@ -13,6 +13,7 @@ import {
   PRACTICE_WINDOW_DAYS,
 } from '../src/widget/widgetBlocks';
 import { TASBIH_PRESETS } from '../src/tasbih/tasbih';
+import { scoreByDay } from '../src/journal/journal';
 import type { JournalEntry } from '../src/journal/journal';
 
 const NOW = new Date(2026, 7, 20, 14, 30); // Thu 20 Aug 2026, local
@@ -419,5 +420,79 @@ describe('tasbih', () => {
     const block = buildTasbihBlock({ activeId: open!.id, counts: {} });
     expect(block.unbounded).toBe(true);
     expect(block.target).toBe(open!.defaultTarget);
+  });
+});
+
+/**
+ * The widget grid and the Log screen draw the same record, so they have to
+ * be drawn from the same numbers. Nothing checked that before: the payload
+ * carried its own count of "on-time or late", the graph carried the app's
+ * weighted score, and the two disagreed on every day containing a late
+ * prayer, a made-up one, or a mix of kept and missed — which is most recent
+ * days. These tests tie the payload to `scoreByDay` so it cannot drift again.
+ */
+describe('the practice payload agrees with the Log screen', () => {
+  const cases: Array<{ name: string; statuses: JournalEntry['status'][] }> = [
+    { name: 'all on time', statuses: ['on-time', 'on-time', 'on-time', 'on-time', 'on-time'] },
+    { name: 'all late', statuses: ['late', 'late', 'late', 'late', 'late'] },
+    { name: 'made up, nothing on time', statuses: ['qadha', 'qadha', 'qadha'] },
+    { name: 'four kept and one missed', statuses: ['on-time', 'on-time', 'on-time', 'on-time', 'missed'] },
+    { name: 'recorded and none kept', statuses: ['missed', 'missed'] },
+    { name: 'a single late prayer', statuses: ['late'] },
+  ];
+
+  const PRAYERS: JournalEntry['prayer'][] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+  it.each(cases)('$name scores the same on both sides', ({ statuses }) => {
+    const journal = statuses.map((s, i) => entry(day(-1), PRAYERS[i], s));
+    const block = buildPracticeBlock({
+      journal,
+      fasts: [],
+      sunnah: {},
+      streak: 0,
+      bestStreak: 0,
+      now: NOW,
+    });
+    const drawn = block.days.find(d => d.d === day(-1));
+    const score = scoreByDay(journal).get(day(-1));
+
+    expect(drawn).toBeDefined();
+    expect(score).toBeDefined();
+    // The fill depth, to the hundredth of a prayer.
+    expect(drawn?.kw ?? 0).toBe(Math.round(Math.min(score!.kept, 5) * 100));
+    // And the thing that separates blank paper from a mark.
+    expect(drawn?.l ?? 0).toBe(score!.logged);
+  });
+
+  it('sends a day that carries only made-up prayers', () => {
+    // It used to drop them: `qadha` counted as neither kept nor missed, so
+    // the day fell out of the payload and the square went blank — the graph
+    // erasing exactly the work someone had just done.
+    const block = buildPracticeBlock({
+      journal: [entry(day(-2), 'Fajr', 'qadha'), entry(day(-2), 'Asr', 'qadha')],
+      fasts: [],
+      sunnah: {},
+      streak: 0,
+      bestStreak: 0,
+      now: NOW,
+    });
+    const drawn = block.days.find(d => d.d === day(-2));
+    expect(drawn).toBeDefined();
+    expect(drawn?.kw).toBe(90);
+    expect(drawn?.l).toBe(2);
+  });
+
+  it('keeps the old count alongside, for widgets that have not reloaded yet', () => {
+    const block = buildPracticeBlock({
+      journal: [entry(day(-3), 'Fajr', 'on-time'), entry(day(-3), 'Dhuhr', 'late')],
+      fasts: [],
+      sunnah: {},
+      streak: 0,
+      bestStreak: 0,
+      now: NOW,
+    });
+    const drawn = block.days.find(d => d.d === day(-3));
+    expect(drawn?.k).toBe(2);
+    expect(drawn?.kw).toBe(170);
   });
 });

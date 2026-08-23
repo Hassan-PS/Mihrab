@@ -36,8 +36,27 @@ struct PracticeGrid: View {
       ForEach(Array(columns.enumerated()), id: \.offset) { _, week in
         VStack(spacing: spacing) {
           ForEach(Array(week.enumerated()), id: \.offset) { _, key in
+            let day = key.flatMap { byDate[$0] }
             RoundedRectangle(cornerRadius: cell * 0.28, style: .continuous)
-              .fill(color(for: key.flatMap { byDate[$0] }, isFuture: key == nil))
+              .fill(key == nil ? Color.clear : color(for: day))
+              .overlay {
+                // The hairline the Log screen gives an empty square. An empty
+                // cell cannot carry enough contrast at a lightness that still
+                // reads as empty, so the ring carries it — without it the
+                // untouched end of the current week is invisible.
+                if key != nil, weight(of: day) <= 0, logged(of: day) <= 0 {
+                  RoundedRectangle(cornerRadius: cell * 0.28, style: .continuous)
+                    .strokeBorder(accent.opacity(0.22), lineWidth: max(1, cell * 0.09))
+                }
+              }
+              .overlay {
+                // Today, ringed, as the app rings it. A grid whose last
+                // squares are empty says nothing about where now is.
+                if let key, key == todayKey {
+                  RoundedRectangle(cornerRadius: cell * 0.28, style: .continuous)
+                    .strokeBorder(accent.opacity(0.85), lineWidth: max(1.5, cell * 0.14))
+                }
+              }
               .frame(width: cell, height: cell)
           }
         }
@@ -87,12 +106,44 @@ struct PracticeGrid: View {
     return String(format: "%04d-%02d-%02d", c.year ?? 0, c.month ?? 0, c.day ?? 0)
   }
 
-  private func color(for day: WidgetPayload.PracticeDay?, isFuture: Bool) -> Color {
-    if isFuture { return widgetMuted.opacity(0.08) }
+  /// Today's key, in the same shape the payload uses.
+  private var todayKey: String {
+    var cal = Calendar.current
+    cal.firstWeekday = 2
+    return key(Date(), cal)
+  }
+
+  /// The Log screen's `fillFor`, with the names changed.
+  ///
+  /// ORDER MATTERS, and it used to be wrong here: `m` was tested first, so a
+  /// day of four prayers on time and one marked missed — the ordinary shape
+  /// of a day still in progress — drew red on the home screen and strong
+  /// green in the app. The app treats `missed` as a MARK on a day, not as
+  /// the day's colour; red is what a day looks like when something was
+  /// recorded and none of it was kept.
+  private func color(for day: WidgetPayload.PracticeDay?) -> Color {
     guard let day else { return accent.opacity(0.10) }
-    if day.m == true { return owedColor.opacity(0.30) }
-    if day.k <= 0 { return accent.opacity(0.10) }
-    let fraction = min(1, Double(day.k) / 5.0)
-    return accent.opacity(0.42 + 0.58 * fraction)
+    let w = weight(of: day)
+    if w > 0 { return accent.opacity(0.42 + 0.58 * (Double(w) / 500.0)) }
+    if logged(of: day) > 0 { return owedColor.opacity(0.30) }
+    return accent.opacity(0.10)
+  }
+
+  /// The day's weighted score, 0…500, as the Log screen computes it: on-time
+  /// 100, late 70, qadha 45, missed 0. `k` is the older count and only a
+  /// fallback — it credits a late prayer in full and a made-up one not at
+  /// all, which is why it stopped being what the fill is drawn from.
+  private func weight(of day: WidgetPayload.PracticeDay?) -> Int {
+    guard let day else { return 0 }
+    if let kw = day.kw { return min(max(kw, 0), 500) }
+    return min(max(day.k, 0), 5) * 100
+  }
+
+  /// Entries recorded that day, whatever they say. Absent on old payloads,
+  /// where the missed flag was the only sign anything had been recorded.
+  private func logged(of day: WidgetPayload.PracticeDay?) -> Int {
+    guard let day else { return 0 }
+    if let l = day.l { return max(l, 0) }
+    return day.m == true ? 1 : 0
   }
 }

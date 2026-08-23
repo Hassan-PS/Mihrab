@@ -16,6 +16,7 @@
  * section" rather than as zero — a streak of 0 and an unknown streak look
  * identical on screen and mean opposite things.
  */
+import { STATUS_WEIGHT } from '../journal/journal';
 import type { JournalEntry, JournalPrayer } from '../journal/journal';
 import type { FastEntry } from '../fasting/fasting';
 import type { TimingsMap } from '../types/prayer';
@@ -65,8 +66,29 @@ export const PRACTICE_WINDOW_DAYS = 98;
 export type WidgetPracticeDay = {
   /** Local YYYY-MM-DD. */
   d: string;
-  /** Salāh prayed on time or late — the fill depth, 0..5. */
+  /**
+   * Salāh prayed on time or late, 0..5.
+   *
+   * KEPT ONLY FOR WIDGET BINARIES OLDER THAN THIS PAYLOAD. It was the fill
+   * depth, and it was the wrong quantity: it counts `late` as worth a whole
+   * prayer and does not count `qadha` at all, so a day of make-ups scored
+   * zero and drew as if nobody had opened the app. `kw` is what a renderer
+   * should read; this stays so a widget process that has not been reloaded
+   * since the update keeps drawing something reasonable.
+   */
   k: number;
+  /**
+   * The app's own weighted score for the day, ×100 — on-time 100, late 70,
+   * qadha 45, missed 0, summed over the five and capped at 500.
+   *
+   * Scaled to an integer rather than sent as a fraction because the iOS
+   * decoder types this field as `Int`: a payload carrying 3.5 would fail to
+   * decode on any build that has not been replaced yet, and the practice
+   * grid would blank rather than degrade.
+   */
+  kw?: number;
+  /** How many of the five carry any entry at all, whatever it says. */
+  l?: number;
   /** At least one prayer recorded missed and not yet made up. */
   m?: true;
   /** A completed fast. */
@@ -268,9 +290,21 @@ export function buildPracticeBlock(input: {
 
   // One pass over the journal rather than a filter per day: a three-year
   // journal is ~5000 entries and the naive form is 98 x 5000.
+  //
+  // Three tallies, because the graph asks three different questions of a
+  // day and they are not derivable from one another. `weighted` is what the
+  // fill depth comes from and is the SAME scoring the Log screen uses
+  // (STATUS_WEIGHT) — anything else and the two draw the same week
+  // differently. `logged` separates "nothing recorded" from "recorded, and
+  // none of it kept", which is the difference between blank paper and a
+  // mark. `kept` is the old count, still sent for older widget binaries.
   const kept = new Map<string, number>();
+  const weighted = new Map<string, number>();
+  const logged = new Map<string, number>();
   const missed = new Set<string>();
   for (const e of input.journal) {
+    weighted.set(e.date, (weighted.get(e.date) ?? 0) + (STATUS_WEIGHT[e.status] ?? 0));
+    logged.set(e.date, (logged.get(e.date) ?? 0) + 1);
     if (e.status === 'on-time' || e.status === 'late') {
       kept.set(e.date, (kept.get(e.date) ?? 0) + 1);
     } else if (e.status === 'missed') {
@@ -286,13 +320,22 @@ export function buildPracticeBlock(input: {
   for (let i = 0; i < windowDays; i++) {
     const key = dayKeyOf(cursor);
     const k = kept.get(key) ?? 0;
+    const l = logged.get(key) ?? 0;
+    const kw = Math.round(
+      Math.min(weighted.get(key) ?? 0, WIDGET_LOGGABLE.length) * 100,
+    );
     const s = sunnahCount(dayAt(input.sunnah, key));
     const m = missed.has(key);
     const f = fasted.has(key);
-    if (k > 0 || s > 0 || m || f) {
+    // `l > 0` rather than `k > 0`: a day of nothing but qadha scored zero on
+    // the old count and was dropped from the payload entirely, so making up
+    // yesterday's prayers made the square disappear instead of filling it.
+    if (l > 0 || s > 0 || f) {
       days.push({
         d: key,
         k: Math.min(k, WIDGET_LOGGABLE.length),
+        ...(kw > 0 ? { kw } : {}),
+        ...(l > 0 ? { l } : {}),
         ...(m ? { m: true as const } : {}),
         ...(f ? { f: true as const } : {}),
         ...(s > 0 ? { s } : {}),

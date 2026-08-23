@@ -209,8 +209,16 @@ struct WidgetPayload: Codable {
   struct PracticeDay: Codable {
     /// yyyy-MM-dd
     let d: String
-    /// Salāh kept, 0…5.
+    /// Salāh prayed on time or late, 0…5. Superseded by `kw`; still decoded
+    /// so a payload written before that field existed still draws.
     let k: Int
+    /// The app's weighted score for the day, ×100 — on-time 100, late 70,
+    /// qadha 45, missed 0. Optional: absent on older payloads. Scaled to an
+    /// integer on purpose, because this field is not optional-typed on
+    /// builds already in the field and a fraction would fail to decode.
+    let kw: Int?
+    /// Entries recorded that day, whatever they say.
+    let l: Int?
     /// Something was missed and not made up.
     let m: Bool?
     /// A completed fast.
