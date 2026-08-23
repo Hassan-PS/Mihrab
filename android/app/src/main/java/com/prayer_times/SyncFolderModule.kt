@@ -77,7 +77,10 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
    */
   @ReactMethod
   fun pick(promise: Promise) {
-    val activity = currentActivity
+    // `getCurrentActivity()` on the module base class is deprecated as of
+    // RN 0.80 and is a function rather than a property, so it cannot be
+    // reached by shorthand. The context is where it lives now.
+    val activity = reactContext.currentActivity
     if (activity == null) {
       promise.reject("no_activity", "there is no activity to show the picker over")
       return
@@ -103,7 +106,7 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
   }
 
   override fun onActivityResult(
-    activity: Activity?,
+    activity: Activity,
     requestCode: Int,
     resultCode: Int,
     data: Intent?,
@@ -135,7 +138,7 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
     promise.resolve(out)
   }
 
-  override fun onNewIntent(intent: Intent?) = Unit
+  override fun onNewIntent(intent: Intent) = Unit
 
   /** Whether a folder chosen earlier is still ours to read and write. */
   @ReactMethod

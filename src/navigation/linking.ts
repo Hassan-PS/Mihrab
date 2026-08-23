@@ -58,6 +58,15 @@ export const linking: LinkingOptions<RootStackParamList> = {
           scrollToAyah: positiveInt as (v: string) => number,
         },
       },
+      /**
+       * mihrab://sync
+       *
+       * Pairing is the one settings destination worth reaching directly:
+       * it is what a "sync could not finish" notice would link to, and it
+       * is the screen someone is sent to when they are standing next to
+       * the other device with its code on screen.
+       */
+      Sync: 'sync',
       MonthTimes: 'month',
       Compass: 'qibla',
       Fasting: 'fasting',
