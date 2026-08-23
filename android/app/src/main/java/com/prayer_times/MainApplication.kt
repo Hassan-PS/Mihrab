@@ -24,6 +24,7 @@ class MainApplication : Application(), ReactApplication {
           add(MushafPageScalerPackage())
           add(MushafFontPackage())
           add(CustomAdhanPackage())
+          add(SecureRandomPackage())
         },
     )
   }

@@ -102,6 +102,14 @@ const STAYS: Record<string, string> = {
   'fast-rem-': 'a notification id prefix, not a store',
   'khatmah-rem-': 'a notification id prefix, not a store',
   'mihrab.snapshot': 'the export format tag, not a store',
+  'prayerapp.sync.secret.v1':
+    'this device’s X25519 secret half, and the one key in the app that ' +
+    'must NEVER travel. Carrying it would give every paired device the ' +
+    'same identity, so a phone that was lost could not be removed from ' +
+    'the set without re-keying all of them — and the whole point of a ' +
+    'per-device keypair is that losing one costs one. The PUBLIC half ' +
+    'travels, by hand, as the pairing code',
+  MHRB: 'the pairing code prefix, not a store',
 };
 
 describe('every store is either carried or deliberately left', () => {
