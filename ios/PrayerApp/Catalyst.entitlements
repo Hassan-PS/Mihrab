@@ -76,12 +76,23 @@
 	  into the group container.
 
 	  The cost is that react-native-encrypted-storage cannot reach a shared
-	  Keychain group, so the journal, the fasting log and the coordinates
-	  fall back to AsyncStorage on this channel — exactly as they did before
-	  the app was signed at all, so no regression. Fixing it properly means
-	  generating a Developer ID provisioning profile for the Catalyst App ID
-	  with Keychain Sharing enabled and embedding it as
-	  Contents/embedded.provisionprofile before signing.
+	  Keychain group, so everything that wants one falls back to plaintext
+	  AsyncStorage on this channel.
+
+	  That sentence used to say the journal, the fasting log and the
+	  coordinates already did fall back, and only the last of the three
+	  actually did — secureStorage.ts had its own. Everything going through
+	  durableWrite.ts retried three times and threw, so a logged prayer on
+	  this build had nowhere to go and sync could not start at all, having
+	  no way to keep an identity. durableWrite.ts has the fallback now, and
+	  a franker note about what it costs.
+
+	  Fixing it properly is a release-process job, and the build script now
+	  does its half: put a Developer ID provisioning profile for the
+	  Catalyst App ID, with Keychain Sharing enabled, at
+	  ios/PrayerApp/embedded.provisionprofile and build-catalyst.sh embeds
+	  it, signs against Catalyst-keychain.entitlements instead of this file,
+	  and asserts afterwards that the group really sealed in.
 	-->
 </dict>
 </plist>

@@ -59,6 +59,23 @@ echo "▸ Signing ($SIGN_IDENTITY)…"
 # signatures don't have — the app then dies at launch with a dyld
 # "Library not loaded: hermesvm" (seen 2026-07-16). Notarization needs
 # the hardened runtime, so Developer ID builds keep it.
+#
+# A Developer ID PROVISIONING PROFILE, if one has been put here, is what
+# lets this build have a Keychain at all. keychain-access-groups is a
+# restricted entitlement: macOS validates it against a profile embedded in
+# the bundle and SIGKILLs an app that claims it without one. So the
+# entitlements file is chosen by whether the profile is present, and the
+# profile is copied in BEFORE codesign runs — codesign seals it, and a
+# profile added afterwards invalidates the signature.
+#
+# To get one: developer.apple.com → Certificates, Identifiers & Profiles.
+# Register the App ID `maccatalyst.com.hassan.prayerapp` with Keychain
+# Sharing and App Groups enabled, then Profiles → + → macOS → Developer ID
+# → that App ID → your Developer ID Application certificate. Download it
+# and save it as the path below. It is account-specific rather than
+# secret, but it is not source, so it is gitignored.
+PROFILE=ios/PrayerApp/embedded.provisionprofile
+
 RUNTIME_OPTS=()
 ENTITLEMENT_OPTS=()
 EXT_ENTITLEMENT_OPTS=()
@@ -71,7 +88,17 @@ if [ "$SIGN_IDENTITY" != "-" ]; then
   # Entitlements ONLY with a real identity. An ad-hoc signature carries no
   # Team ID, so the App Group container is never created — claiming it would
   # produce an app that looks entitled and silently is not.
-  ENTITLEMENT_OPTS=(--entitlements ios/PrayerApp/Catalyst.entitlements)
+  if [ -f "$PROFILE" ]; then
+    echo "▸ Embedding $PROFILE — this build gets a Keychain."
+    cp "$PROFILE" "$APP/Contents/embedded.provisionprofile"
+    ENTITLEMENT_OPTS=(--entitlements ios/PrayerApp/Catalyst-keychain.entitlements)
+  else
+    echo "▸ No $PROFILE — signing without a Keychain group."
+    echo "  The journal, the fasting log and the sync identity will use the"
+    echo "  plaintext fallback in src/storage/durableWrite.ts. See the"
+    echo "  comment above PROFILE for how to fix that properly."
+    ENTITLEMENT_OPTS=(--entitlements ios/PrayerApp/Catalyst.entitlements)
+  fi
 fi
 # hermesvm.framework ships with a proper Versions/ tree PLUS a stray
 # real binary at the framework root — codesign then can't classify the
@@ -130,6 +157,21 @@ if [ "$SIGN_IDENTITY" != "-" ]; then
     echo "    macOS will refuse to host it: chronod fails every timeline query" >&2
     echo "    with \"Extension must have com.apple.security.app-sandbox\"." >&2
     exit 1
+  fi
+  # The Keychain group, when a profile said it was allowed. Worth asserting
+  # for the same reason as the other two: the failure is invisible until the
+  # app is running, and here it is a silent downgrade to plaintext rather
+  # than a visible break.
+  if [ -f "$PROFILE" ]; then
+    if ! grep -q 'keychain-access-groups' <<< "$APP_ENTS"; then
+      echo "  ✗ a profile was embedded but no Keychain group was sealed in." >&2
+      exit 1
+    fi
+    if [ ! -f "$APP/Contents/embedded.provisionprofile" ]; then
+      echo "  ✗ the embedded profile is missing from the signed bundle." >&2
+      exit 1
+    fi
+    echo "  ✓ Keychain group sealed in, profile embedded."
   fi
   APP_GROUP=$(grep -A2 'application-groups' <<< "$APP_ENTS" | grep '=> "' | head -1)
   EXT_GROUP=$(grep -A2 'application-groups' <<< "$EXT_ENTS" | grep '=> "' | head -1)

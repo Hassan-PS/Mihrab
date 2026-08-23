@@ -103,3 +103,7 @@ branding/tools/__pycache__/
 outputs/triage/
 build/shots/
 build/qcf*/
+
+# Developer ID profile for the Catalyst build — account-specific, not source.
+# See the PROFILE note in scripts/build-catalyst.sh.
+ios/PrayerApp/embedded.provisionprofile
