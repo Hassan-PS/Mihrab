@@ -231,35 +231,30 @@ object PracticeGridBitmap {
   }
 
   /**
-   * How many columns are worth drawing, given when the record starts.
+   * How many columns fill a box of this shape at full-size squares.
    *
-   * Drawing the full window regardless leaves a block of empty squares to
-   * the left of a young journal — the calendar before the user arrived —
-   * which reads as a hole in the graph rather than as history nobody has.
-   * The in-app heatmap already starts at the first entry; this is the same
-   * rule for the same reason.
+   * Seven rows is fixed, so a box three times wider than it is tall needs
+   * about twenty-one columns to reach the far edge — and the only
+   * alternatives are a graph that stops short of it or squares stretched
+   * into bricks. The payload carries twenty-six weeks so there is always
+   * more available than the widest card asks for.
    *
-   * Never fewer than eight, so a brand-new journal still draws something
-   * shaped like a graph, and never more than the caller asked for.
+   * `boxWidthDp` and `boxHeightDp` are the space the grid actually gets,
+   * not the card: the caller subtracts its own chrome. A zero or negative
+   * box is a launcher that has not measured yet, which gets the default
+   * rather than a grid one column wide.
    */
   @JvmStatic
-  fun weeksToDraw(since: String?, max: Int, now: Calendar = Calendar.getInstance()): Int {
-    if (since.isNullOrBlank() || since.length != 10) return max
-    val first = (now.clone() as Calendar).apply {
-      set(Calendar.YEAR, since.substring(0, 4).toIntOrNull() ?: return max)
-      set(Calendar.MONTH, (since.substring(5, 7).toIntOrNull() ?: return max) - 1)
-      set(Calendar.DAY_OF_MONTH, since.substring(8, 10).toIntOrNull() ?: return max)
-      set(Calendar.HOUR_OF_DAY, 12)
-      set(Calendar.MINUTE, 0)
-      set(Calendar.SECOND, 0)
-      set(Calendar.MILLISECOND, 0)
-    }
-    val days = ((now.timeInMillis - first.timeInMillis) / 86_400_000L).toInt()
-    if (days < 0) return max
-    // +1 for the part-week the record starts in, +1 for the part-week we
-    // are living through.
-    return (days / 7 + 2).coerceIn(8, max)
+  fun weeksForBox(boxWidthDp: Int, boxHeightDp: Int, max: Int): Int {
+    if (boxWidthDp <= 0 || boxHeightDp <= 0) return max
+    val cell = (boxHeightDp - 6f * GAP_DP) / ROWS
+    if (cell < 4f) return max
+    val fit = ((boxWidthDp + GAP_DP) / (cell + GAP_DP)).toInt()
+    return fit.coerceIn(8, max)
   }
+
+  /** The space between squares, in dp, on both axes. */
+  private const val GAP_DP = 2f
 
   /**
    * The sunnah line: four straight sides, clockwise from the top-left,

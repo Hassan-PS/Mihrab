@@ -236,7 +236,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:scaleType="fitXY"
+            android:scaleType="fitStart"
             android:contentDescription="@string/widget_streak_grid_description"
             android:visibility="gone" />
     </LinearLayout>

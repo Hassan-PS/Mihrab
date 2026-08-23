@@ -141,6 +141,18 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
      */
     private const val GRID_MIN_HEIGHT_DP = 265
 
+    /**
+     * What the card spends above and below the grid, in dp: 10 of padding
+     * top and bottom, the header line, the chips row at its natural height,
+     * the divider above the footer with its margins, the footer, the streak
+     * line, and the divider above the grid.
+     */
+    private const val LOG_CHROME_DP = 206
+    private const val CARD_PADDING_DP = 20
+
+    /** As many weeks as the payload carries. See PRACTICE_WINDOW_DAYS. */
+    private const val MAX_GRID_WEEKS = 26
+
     private fun buildViews(context: Context, appWidgetId: Int): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_log)
       val (bg, accent) = PrayerWidgetProvider.resolvedColors(context)
@@ -200,7 +212,7 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
     ) {
       val practice = payloadRoot(context)?.optJSONObject("practice")
       val since = practice?.optString("since")?.ifEmpty { null }
-      val (_, heightDp) = PrayerWidgetProvider.sizeDp(
+      val (widthDp, heightDp) = PrayerWidgetProvider.sizeDp(
         context,
         AppWidgetManager.getInstance(context),
         appWidgetId,
@@ -245,16 +257,18 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
       }
       views.setTextViewText(R.id.widget_log_practice_second, parts.joinToString(" · "))
       val density = context.resources.displayMetrics.density
+      // Everything the card spends before the grid gets a say: the padding,
+      // the header, the chips row at its natural height, the two dividers
+      // with their margins, the footer and the streak line. Measured on the
+      // layout rather than guessed, and the grid gets the rest — which is
+      // the box the column count is chosen for.
+      val boxHeight = heightDp - LOG_CHROME_DP
+      val boxWidth = widthDp - CARD_PADDING_DP
       views.setImageViewBitmap(
         R.id.widget_log_grid,
         PracticeGridBitmap.render(
           practice.optJSONArray("days"),
-          // Twenty columns, because seven rows of fourteen is a 2:1 shape
-          // in a box three times as wide as it is tall — the graph sat in
-          // the left two thirds with the right third empty. Twenty is what
-          // the payload now carries, and it fills the card. Fewer when the
-          // journal is younger than that: see weeksToDraw.
-          PracticeGridBitmap.weeksToDraw(since, 20),
+          PracticeGridBitmap.weeksForBox(boxWidth, boxHeight, MAX_GRID_WEEKS),
           (7 * density).toInt().coerceAtLeast(3),
           (2f * density).toInt().coerceAtLeast(1),
           accent,

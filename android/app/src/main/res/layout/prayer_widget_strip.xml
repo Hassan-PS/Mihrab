@@ -279,10 +279,8 @@
                 android:ellipsize="end" />
         </LinearLayout>
 
-        <!-- Stretched to the box. The grid draws as many weeks as the
-             journal has, so its shape comes from the data while the box's
-             comes from the card; preserving the aspect leaves a gap on one
-             edge or on both. Slightly wide squares fill it. See the same
+        <!-- The column count is chosen to fit the box, so the squares stay
+             square and the graph still reaches the far edge. See the same
              note in prayer_widget_log.xml. -->
         <ImageView
             android:id="@+id/widget_practice_grid"
@@ -290,7 +288,7 @@
             android:layout_height="0dp"
             android:layout_weight="2"
             android:layout_marginTop="8dp"
-            android:scaleType="fitXY"
+            android:scaleType="fitStart"
             android:contentDescription="@string/widget_streak_grid_description"
             android:visibility="gone" />
 

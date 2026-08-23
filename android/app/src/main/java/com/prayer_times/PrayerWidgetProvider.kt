@@ -543,6 +543,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     private const val STRIP_HEADER_MIN_HEIGHT_DP = 145
 
     /**
+     * What the strip spends before the practice grid gets a say, in dp:
+     * padding, the header line, the next-prayer footer, the divider and the
+     * streak line above the graph. The times row and the grid share what is
+     * left, weighted 1:2, which is where the two thirds below comes from.
+     */
+    private const val STRIP_CHROME_DP = 150
+
+    /**
      * Three launcher cells of width. Below this the six-column strip gives
      * each column under 40dp, which is where the times start eliding, so a
      * tall-and-narrow widget stacks them into the list instead.
@@ -683,7 +691,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
               style,
             )
           } else {
-            applyJson(views, root, style, context, layoutId, measuredHeightDp(context, appWidgetManager, appWidgetId))
+            applyJson(
+              views,
+              root,
+              style,
+              context,
+              layoutId,
+              measuredHeightDp(context, appWidgetManager, appWidgetId),
+              measuredWidthDp(context, appWidgetManager, appWidgetId),
+            )
           }
         } catch (_: Exception) {
           showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
@@ -921,6 +937,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       context: Context,
       layoutId: Int,
       heightDp: Int,
+      widthDp: Int,
     ) {
       if (layoutId == R.layout.prayer_widget_small) return
       val practice = payload.optJSONObject("practice")
@@ -990,9 +1007,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           // carries twenty, and fourteen left the right third of a 4x4
           // empty — seven rows of fourteen is a 2:1 shape in a box nearer
           // 3:1, and columns are the only axis that can give.
-          PracticeGridBitmap.weeksToDraw(
-            practice.optString("since").ifEmpty { null },
-            if (wide) 20 else 11,
+          // As many weeks as fill the box at full-size squares. The wide
+          // layout gives the grid the card's width and roughly two thirds
+          // of what is left below the strip; the tall one sets it beside
+          // the streak number, in half the width.
+          PracticeGridBitmap.weeksForBox(
+            (if (wide) widthDp - 20 else (widthDp - 20) / 2),
+            ((heightDp - STRIP_CHROME_DP) * 2) / 3,
+            if (wide) 26 else 14,
           ),
           ((if (wide) 7 else 6) * density).toInt().coerceAtLeast(3),
           (2f * density).toInt().coerceAtLeast(1),
@@ -1061,6 +1083,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       appWidgetId: Int,
     ): Int = sizeDp(context, mgr, appWidgetId).second
 
+    /** The same, across. The grid needs both to know how many weeks fit. */
+    private fun measuredWidthDp(
+      context: Context,
+      mgr: AppWidgetManager,
+      appWidgetId: Int,
+    ): Int = sizeDp(context, mgr, appWidgetId).first
+
     /**
      * Four launcher rows. Below this the practice strip would eat the space
      * the prayer times need, and the times are why the widget is there.
@@ -1093,6 +1122,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       context: Context,
       layoutId: Int = R.layout.prayer_widget,
       heightDp: Int = 0,
+      widthDp: Int = 0,
     ) {
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
@@ -1332,7 +1362,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       bindNightRow(views, displayRows, layoutId)
       bindLoggedLine(views, o, context, layoutId, describesToday)
       bindStripHeader(views, layoutId, heightDp)
-      bindPracticeStrip(views, o, style, context, layoutId, heightDp)
+      bindPracticeStrip(views, o, style, context, layoutId, heightDp, widthDp)
 
       // The alarms are NOT armed here any more — see `armWidgetAlarms`. A
       // render is the wrong place to schedule from: it only happens when a

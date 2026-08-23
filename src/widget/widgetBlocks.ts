@@ -54,19 +54,21 @@ export const WIDGET_LOGGABLE: ReadonlyArray<JournalPrayer> = [
 /**
  * How many days of practice history travel with the payload.
  *
- * TWENTY weeks, up from fourteen. Fourteen was what the widest grid in the
+ * TWENTY-SIX weeks, up from fourteen. Fourteen was what the widest grid in the
  * design drew, and it was the right number until the Log widget put a grid
  * across the full width of a 4x3: seven rows of fourteen columns is a 2:1
  * shape in a box three times as wide as it is tall, so the graph sat in the
  * left two thirds and the right third was empty. Columns are the only axis
- * that can give — a week is seven days — so the window grew to fill it.
+ * that can give — a week is seven days — so the window grew until there are
+ * always more weeks available than the widest card can show, and the card
+ * takes as many as fit at full size rather than stretching what it has.
  *
  * A day costs about forty bytes and only days with something recorded are
  * sent, so the block is still a few KB: the number that matters is that
  * this rides in a SharedPreferences string and an App Group plist, both
  * read on the main thread of a process that has milliseconds to live.
  */
-export const PRACTICE_WINDOW_DAYS = 140;
+export const PRACTICE_WINDOW_DAYS = 182;
 
 /** One day's marks on the practice grid. */
 export type WidgetPracticeDay = {
