@@ -1392,7 +1392,8 @@
     "scanDeniedTitle": "Kameran är inte tillåten",
     "scanDeniedBody": "Mihrab behöver kameran för att läsa koden. Du kan tillåta det i enhetens inställningar, eller skriva in koden i stället.",
     "scanNoCameraTitle": "Ingen kamera",
-    "scanNoCameraBody": "Den här enheten har ingen kamera att skanna med. Skriv eller klistra in koden i stället."
+    "scanNoCameraBody": "Den här enheten har ingen kamera att skanna med. Skriv eller klistra in koden i stället.",
+    "freq15Min": "Var 15:e min"
   },
   "stats": {
     "daysUnit": " dagar",

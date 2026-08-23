@@ -1392,7 +1392,8 @@
     "scanDeniedTitle": "Cámara no permitida",
     "scanDeniedBody": "Mihrab necesita la cámara para leer el código. Puedes permitirlo en los ajustes del dispositivo, o escribir el código.",
     "scanNoCameraTitle": "Sin cámara",
-    "scanNoCameraBody": "Este dispositivo no tiene cámara para escanear. Escribe o pega el código."
+    "scanNoCameraBody": "Este dispositivo no tiene cámara para escanear. Escribe o pega el código.",
+    "freq15Min": "Cada 15 min"
   },
   "stats": {
     "daysUnit": " días",

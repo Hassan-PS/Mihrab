@@ -1392,7 +1392,8 @@
     "scanDeniedTitle": "Kameraya izin verilmedi",
     "scanDeniedBody": "Mihrab kodu okumak için kameraya ihtiyaç duyar. Cihaz ayarlarından izin verebilir ya da kodu elle yazabilirsiniz.",
     "scanNoCameraTitle": "Kamera yok",
-    "scanNoCameraBody": "Bu cihazda tarama yapacak kamera yok. Kodu yazın veya yapıştırın."
+    "scanNoCameraBody": "Bu cihazda tarama yapacak kamera yok. Kodu yazın veya yapıştırın.",
+    "freq15Min": "15 dk'da bir"
   },
   "stats": {
     "daysUnit": " gün",

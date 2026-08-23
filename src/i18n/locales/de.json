@@ -1392,7 +1392,8 @@
     "scanDeniedTitle": "Kamera nicht erlaubt",
     "scanDeniedBody": "Mihrab braucht die Kamera, um den Code zu lesen. Du kannst sie in den Geräteeinstellungen erlauben oder den Code eintippen.",
     "scanNoCameraTitle": "Keine Kamera",
-    "scanNoCameraBody": "Dieses Gerät hat keine Kamera zum Scannen. Tippe den Code ein oder füge ihn ein."
+    "scanNoCameraBody": "Dieses Gerät hat keine Kamera zum Scannen. Tippe den Code ein oder füge ihn ein.",
+    "freq15Min": "Alle 15 Min"
   },
   "stats": {
     "daysUnit": " Tage",

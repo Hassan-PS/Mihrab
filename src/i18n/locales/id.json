@@ -1392,7 +1392,8 @@
     "scanDeniedTitle": "Kamera tidak diizinkan",
     "scanDeniedBody": "Mihrab perlu kamera untuk membaca kode. Anda bisa mengizinkannya di pengaturan perangkat, atau ketik kodenya saja.",
     "scanNoCameraTitle": "Tidak ada kamera",
-    "scanNoCameraBody": "Perangkat ini tidak punya kamera untuk memindai. Ketik atau tempel kodenya."
+    "scanNoCameraBody": "Perangkat ini tidak punya kamera untuk memindai. Ketik atau tempel kodenya.",
+    "freq15Min": "Tiap 15 mnt"
   },
   "stats": {
     "daysUnit": " hari",

@@ -41,13 +41,20 @@ export const AUTO_SYNC_MIN_GAP_MS = 2 * 60 * 1000;
  * How often the app checks whether a timed round has come due while it
  * sits open.
  *
- * Only `hourly` and `daily` need this at all: `open` is answered by the
- * `active` event and `off` by never running. Five minutes is coarse
- * against an hour and free against a day, and the check itself is a cached
+ * Only the timed frequencies need this at all: `open` is answered by the
+ * `active` event and `off` by never running. The check itself is a cached
  * read and a subtraction — the round is what costs, and the gap decides
- * whether there is one.
+ * whether there is one — and it only runs while the app is in front of
+ * someone, so the cost of checking often is close to nothing.
+ *
+ * Two minutes, which is AUTO_SYNC_MIN_GAP_MS. Nothing can run more often
+ * than that floor however fine this is, so it is the finest interval that
+ * can ever change an outcome. It was five, which was coarse against an
+ * hour and free against a day but a third of the way through the
+ * fifteen-minute setting — long enough that "every 15 minutes" would have
+ * meant "every 15 to 20".
  */
-export const AUTO_SYNC_TICK_MS = 5 * 60 * 1000;
+export const AUTO_SYNC_TICK_MS = 2 * 60 * 1000;
 
 /** What made this call: the app coming forward, or the timer. */
 export type AutoSyncTrigger = 'open' | 'tick';

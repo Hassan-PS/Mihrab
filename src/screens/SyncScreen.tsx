@@ -87,6 +87,7 @@ type Palette = ReturnType<typeof useAppPalette>['palette'];
  */
 const FREQUENCY_LABELS: Record<SyncFrequency, string> = {
   open: 'sync.freqOpen',
+  '15min': 'sync.freq15Min',
   hourly: 'sync.freqHourly',
   daily: 'sync.freqDaily',
   off: 'sync.freqOff',

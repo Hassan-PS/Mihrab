@@ -50,7 +50,13 @@ const SYNC_SETTINGS_KEY = 'prayerapp.sync.settings.v1';
  * still work — it just never happens without being asked, which is what
  * someone syncing over a folder they carry on a stick actually wants.
  */
-export const SYNC_FREQUENCIES = ['open', 'hourly', 'daily', 'off'] as const;
+export const SYNC_FREQUENCIES = [
+  'open',
+  '15min',
+  'hourly',
+  'daily',
+  'off',
+] as const;
 export type SyncFrequency = (typeof SYNC_FREQUENCIES)[number];
 
 /** Infinity for `off`, so one finite check covers "never". */
@@ -61,6 +67,11 @@ export function syncFrequencyGapMs(frequency: SyncFrequency): number {
     // wrong the first time either changes.
     case 'open':
       return 0;
+    // The shortest gap on offer, and the only one where the tick rather
+    // than the app coming forward is usually what starts the round. See
+    // AUTO_SYNC_TICK_MS, which has to be finer than this to honour it.
+    case '15min':
+      return 15 * 60 * 1000;
     case 'hourly':
       return 60 * 60 * 1000;
     case 'daily':

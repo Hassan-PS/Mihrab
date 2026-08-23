@@ -34,11 +34,13 @@ jest.mock('../src/sync/runSync', () => ({
 
 import {
   AUTO_SYNC_MIN_GAP_MS,
+  AUTO_SYNC_TICK_MS,
   maybeAutoSync,
   resetAutoSyncThrottle,
 } from '../src/sync/autoSync';
 import {
   forgetCachedSyncSettings,
+  syncFrequencyGapMs,
   updateSyncSettings,
 } from '../src/sync/syncSettings';
 
@@ -91,6 +93,29 @@ describe('how often', () => {
     resetAutoSyncThrottle();
     await updateSyncSettings({ ...at(start - HOUR - 1000), autoFrequency: 'hourly' });
     expect(await maybeAutoSync({ now: start })).not.toBeNull();
+  });
+
+  it('holds a quarter-hourly round back until the quarter hour is up', async () => {
+    // The shortest gap on offer, and the one the tick has to be finer than:
+    // nothing brings the app forward every fifteen minutes, so this setting
+    // is kept by the timer or not at all. See AUTO_SYNC_TICK_MS.
+    const QUARTER = 15 * 60 * 1000;
+    await updateSyncSettings({ ...at(start - 10 * 60 * 1000), autoFrequency: '15min' });
+    expect(await maybeAutoSync({ now: start, trigger: 'tick' })).toBeNull();
+
+    forgetCachedSyncSettings();
+    resetAutoSyncThrottle();
+    await updateSyncSettings({ ...at(start - QUARTER - 1000), autoFrequency: '15min' });
+    expect(await maybeAutoSync({ now: start, trigger: 'tick' })).not.toBeNull();
+  });
+
+  it('checks often enough to keep the quarter-hour honest', async () => {
+    // A tick coarser than the gap would round the setting up: at five
+    // minutes, "every 15" would have meant "every 15 to 20".
+    expect(AUTO_SYNC_TICK_MS).toBeLessThanOrEqual(15 * 60 * 1000);
+    expect(syncFrequencyGapMs('15min')).toBe(15 * 60 * 1000);
+    expect(syncFrequencyGapMs('15min')).toBeGreaterThan(syncFrequencyGapMs('open'));
+    expect(syncFrequencyGapMs('15min')).toBeLessThan(syncFrequencyGapMs('hourly'));
   });
 
   it('measures a daily round against the stored time, not the launch', async () => {
