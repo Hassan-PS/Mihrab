@@ -132,6 +132,13 @@ const STAYS: Record<string, string> = {
     'has no permission for, or at somebody else’s',
   MHRB: 'the pairing code prefix, not a store',
   'mihrab-': 'the sync filename prefix, not a store',
+  'prayerapp.unprotected.':
+    'a prefix, not a store — it namespaces the plaintext copy durableWrite ' +
+    'falls back to on a build with no Keychain. Whatever sits under it is ' +
+    'the same value as the real key, so the decision that matters was ' +
+    'already made against that key. Carrying the prefix itself would mean ' +
+    'sending another device a copy of a secret the Keychain exists to keep ' +
+    'off the wire',
 
 };
 
