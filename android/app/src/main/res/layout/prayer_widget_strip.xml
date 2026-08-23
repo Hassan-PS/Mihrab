@@ -91,21 +91,28 @@
 
         <!-- The strip: six columns, label over time, the next one boxed. -->
         <!--
-            Weighted, not wrap_content.
+            wrap_content, and it was weighted for one release.
 
-            Every child here used to size to its content, so at any height
-            between "the strip fits" and "the practice block fits" the card
-            drew its three sections at the top and left the rest of itself
-            empty — a third of a 4x3 was blank. Slack has to belong to
-            somebody: the strip takes it when the practice block is off, and
-            shares it with the grid when it is on. There is no height at
-            which nothing claims it.
+            The argument for the weight was that slack has to belong to
+            somebody, and with the practice block off the strip is the only
+            candidate. True, but it cost more than it bought: a weighted row
+            gets a share of the card rather than what it needs, and once the
+            graph appeared and claimed two thirds of that slack the share
+            fell below the height of a label over a time — so the card drew
+            six prayer NAMES with nothing underneath them, which is the one
+            thing a prayer-times widget must not do.
+
+            The row takes its own height now, and the slack goes to the
+            graph. `widget_content` must NOT carry a gravity for that to
+            work: with one weighted child the column fills the card and the
+            graph gets everything left over, and a centring gravity on top
+            of that leaves the ImageView a sliver — which drew the graph at
+            a fifth of its size in the corner of the card.
         -->
         <LinearLayout
             android:id="@+id/widget_times_row"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:baselineAligned="false"
             android:gravity="center_vertical"

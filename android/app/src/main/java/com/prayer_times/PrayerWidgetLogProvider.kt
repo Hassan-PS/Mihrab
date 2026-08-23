@@ -263,10 +263,11 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
         AppWidgetManager.getInstance(context),
         appWidgetId,
       )
-      // `heightDp == 0` is a launcher that has not measured yet, not a
-      // short card: showing the graph is the better guess, because the only
-      // way to be here at all is a widget the user has placed.
-      val show = practice != null && !(heightDp in 1 until GRID_MIN_HEIGHT_DP)
+      // An unmeasured card (0) draws no graph. The other way round — the
+      // launcher has not measured, so assume there is room — puts a graph
+      // on a card that may be one row tall, and it takes the space out of
+      // the chips above it.
+      val show = practice != null && heightDp >= GRID_MIN_HEIGHT_DP
       val vis = if (show) View.VISIBLE else View.GONE
       views.setViewVisibility(R.id.widget_log_grid_divider, vis)
       views.setViewVisibility(R.id.widget_log_practice_row, vis)

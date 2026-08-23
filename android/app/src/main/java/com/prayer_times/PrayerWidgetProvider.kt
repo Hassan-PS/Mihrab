@@ -959,8 +959,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // Two tiers rather than one. The graph earns its place from three
       // launcher rows up; the month footer needs a fourth. Gating both on the
       // taller number is what left a third of a 4x3 empty.
-      val show = practice != null && !(heightDp in 1 until GRID_MIN_HEIGHT_DP)
-      val showFoot = show && !(heightDp in 1 until PRACTICE_MIN_HEIGHT_DP)
+      // An unmeasured card (0) draws NO graph, where the rest of the
+      // sizing treats 0 as "roomy". The two defaults point opposite ways on
+      // purpose: dropping a line from a card that turns out to be tall
+      // costs a line, while drawing a graph on a card that turns out to be
+      // short takes the space from the row above it — and that row is the
+      // prayer times, which came out as six names with nothing under them.
+      val show = practice != null && heightDp >= GRID_MIN_HEIGHT_DP
+      val showFoot = show && heightDp >= PRACTICE_MIN_HEIGHT_DP
       val vis = if (show) View.VISIBLE else View.GONE
       // The divider goes with the block it separates. Leaving it behind is
       // how a widget ends up with a rule drawn across an empty gap.
