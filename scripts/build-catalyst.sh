@@ -20,6 +20,23 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
+
+# Is the identity we are signing with actually inside this profile?
+# Walks the profile's DeveloperCertificates and compares common names.
+openssl_has_signer() {
+  local profile="$1" identity="$2" tmp count i subject
+  tmp=$(mktemp -d)
+  security cms -D -i "$profile" > "$tmp/p.plist" 2>/dev/null || { rm -rf "$tmp"; return 1; }
+  count=$(plutil -extract DeveloperCertificates raw -o - "$tmp/p.plist" 2>/dev/null || echo 0)
+  for ((i = 0; i < count; i++)); do
+    plutil -extract "DeveloperCertificates.$i" raw -o - "$tmp/p.plist" 2>/dev/null |
+      base64 --decode > "$tmp/c.der" 2>/dev/null || continue
+    subject=$(openssl x509 -inform DER -in "$tmp/c.der" -noout -subject 2>/dev/null)
+    if [[ "$subject" == *"$identity"* ]]; then rm -rf "$tmp"; return 0; fi
+  done
+  rm -rf "$tmp"
+  return 1
+}
 VERSION=$(sed -n 's/.*MARKETING_VERSION = \([0-9.]*\);.*/\1/p' ios/PrayerApp.xcodeproj/project.pbxproj | head -1)
 DIST=ios/build/catalyst-dist
 APP="$DIST/Mihrab.app"
@@ -89,6 +106,42 @@ if [ "$SIGN_IDENTITY" != "-" ]; then
   # Team ID, so the App Group container is never created — claiming it would
   # produce an app that looks entitled and silently is not.
   if [ -f "$PROFILE" ]; then
+    # THE PROFILE HAS TO NAME THE CERTIFICATE WE ARE ABOUT TO SIGN WITH.
+    #
+    # AMFI checks that the signing certificate is one of the profile's
+    # DeveloperCertificates, and kills the app when it is not: SIGKILL
+    # before main(), exit 137, an empty stderr and nothing in the log to
+    # say why. codesign verifies the bundle happily, and so does the
+    # notary service. It is the same silent death as claiming a restricted
+    # entitlement with no profile at all, from a completely different
+    # cause, which is what makes it worth its own check.
+    #
+    # It is an easy mistake because Xcode leaves a perfectly good Mac
+    # Catalyst profile lying in ~/Library/Developer/Xcode/UserData — and
+    # that one is a DEVELOPMENT profile, carrying the Apple Development
+    # certificate. Reaching for it and signing with Developer ID looks
+    # exactly right and cannot work. A Developer ID build needs a
+    # Developer ID profile, made in the portal against the same identity.
+    PROFILE_CERTS=$(security cms -D -i "$PROFILE" 2>/dev/null |
+      plutil -extract DeveloperCertificates xml1 -o - - 2>/dev/null |
+      grep -c '<data>' || echo 0)
+    SIGNER_CN=${SIGN_IDENTITY%% (*}
+    if ! security cms -D -i "$PROFILE" 2>/dev/null |
+        plutil -p - 2>/dev/null | grep -q .; then
+      echo "  ✗ $PROFILE is not a readable provisioning profile." >&2
+      exit 1
+    fi
+    if ! openssl_has_signer "$PROFILE" "$SIGN_IDENTITY"; then
+      echo "  ✗ the profile does not carry the certificate being signed with." >&2
+      echo "      signing as: $SIGN_IDENTITY" >&2
+      echo "      profile holds $PROFILE_CERTS certificate(s), none of them that one." >&2
+      echo "    AMFI will SIGKILL the app before main() and say nothing." >&2
+      echo "    A Developer ID build needs a Developer ID profile: portal →" >&2
+      echo "    Profiles → + → Developer ID → maccatalyst.com.hassan.prayerapp." >&2
+      echo "    Xcode's own Mac Catalyst profile is a DEVELOPMENT one and only" >&2
+      echo "    works with the Apple Development identity." >&2
+      exit 1
+    fi
     echo "▸ Embedding $PROFILE — this build gets a Keychain."
     cp "$PROFILE" "$APP/Contents/embedded.provisionprofile"
     ENTITLEMENT_OPTS=(--entitlements ios/PrayerApp/Catalyst-keychain.entitlements)
