@@ -62,32 +62,74 @@ describe('HomeScreen integration (tasks #45–#47)', () => {
     expect(HOME).toMatch(/<HomeHeaderControls\b/);
   });
 
-  test('the Catalyst chip is a row in the content column, not an overlay', () => {
-    // It was pinned to `right: 14` of the WINDOW while every card is centred
-    // inside a width-capped column. Those two agree only while the window is
-    // wide enough for the cards to be narrower than it — which is why this
-    // looked fine for weeks and then, in an ordinary small Mac window, put
-    // the chip on top of the hero card and past its right edge.
+  test('the Catalyst top bar is chrome above the scroll view, not content', () => {
+    // Three placements failed before this one, each only at some window
+    // sizes, which is what made them so hard to see:
     //
-    // So: no absolute positioning on this row, and no `right`/`left` offsets
-    // that would re-anchor it to the window instead of the column.
-    const row = HOME.match(/macHeaderRow:\s*\{[^}]*\}/);
+    //  • navigation bar — inside the title-bar drag region, clicks swallowed;
+    //  • absolute overlay pinned to `right: 14` of the WINDOW — fine while the
+    //    cards were narrower than the window, on top of the hero card as soon
+    //    as they were not (2026-08-18);
+    //  • a row of scroll CONTENT — painted over by the dashboard's centred
+    //    `transform: scale`, and dragged to the middle of the window by the
+    //    same content's vertical centring (2026-08-24).
+    //
+    // So: no absolute positioning, no window offsets, and above the
+    // ScrollView rather than inside it.
+    const row = HOME.match(/macTopBar:\s*\{[^}]*\}/);
     expect(row).not.toBeNull();
     expect(row?.[0]).not.toMatch(/position:\s*'absolute'/);
     expect(row?.[0]).not.toMatch(/\b(right|left):/);
-    // `flex-end`, never `right` — the mirror of this is what RTL should get.
-    expect(row?.[0]).toMatch(/justifyContent:\s*'flex-end'/);
+    // `space-between`, never fixed corners — the wordmark takes the leading
+    // edge and the chip the trailing one, so RTL gets the mirror of this.
+    expect(row?.[0]).toMatch(/justifyContent:\s*'space-between'/);
     // And the old overlay is gone rather than merely unused.
     expect(HOME).not.toMatch(/macHeaderControls/);
 
-    // It has to be INSIDE the CenteredColumn to inherit the cards' width cap;
-    // outside it, right-alignment is alignment to the window again.
-    const column = HOME.indexOf('<CenteredColumn');
-    const columnEnd = HOME.indexOf('</CenteredColumn>');
+    // And held clear of the window's own title bar, or it draws behind the
+    // traffic lights — the Catalyst scene starts above them, not below.
+    expect(HOME).toMatch(/paddingTop:\s*macTopBarInset/);
+    expect(HOME).toMatch(/Math\.max\(insets\.top, 36\)/);
+
+    // Above the ScrollView: inside it, the dashboard's zoom and its vertical
+    // centring both get a say in where the app's chrome sits.
+    const bar = HOME.indexOf('styles.macTopBar');
+    const scroll = HOME.indexOf('<ScrollView');
+    expect(bar).toBeGreaterThan(-1);
+    expect(bar).toBeLessThan(scroll);
+    // ...and outside the width-capped card column, because a bar that stops
+    // where the cards stop is a row, not chrome.
+    expect(bar).toBeLessThan(HOME.indexOf('<CenteredColumn'));
+  });
+
+  test('the scaled dashboard reserves what it paints outside its box', () => {
+    // `transform: scale` leaves layout alone: the box keeps its unscaled
+    // height and the extra paints over the neighbours, half above and half
+    // below. At 1.16× that is ~55pt over the row above — which on the Mac
+    // is the top bar, so the wordmark and chip disappeared on wide windows
+    // and only there. The margin is what makes the box match the paint.
+    expect(HOME).toMatch(/marginVertical:\s*dashOverflow/);
+    expect(HOME).toMatch(/onLayout=\{onDashRowLayout\}/);
+    // Half of the growth per side — the whole growth would double-count.
+    expect(HOME).toMatch(/\(\(dashScale - 1\) \* dashRowH\) \/ 2/);
+  });
+
+  test('Catalyst has ONE top bar: the wordmark is in the row, the header is off', () => {
+    // The Mac used to show two: a navigation bar holding nothing but the
+    // wordmark, and a content row holding nothing but the location chip.
+    // They are one row now, which only works if the navigation bar is
+    // actually hidden on Catalyst — otherwise the wordmark renders twice.
+    const TABS = fs.readFileSync(
+      path.join(__dirname, '..', 'src', 'navigation', 'MainTabs.tsx'),
+      'utf-8',
+    );
+    expect(TABS).toMatch(/headerShown:\s*!isMacCatalyst/);
+
+    const wordmark = HOME.indexOf('<MihrabHeaderTitle');
     const chip = HOME.indexOf('<HomeHeaderControls');
-    expect(column).toBeGreaterThan(-1);
-    expect(chip).toBeGreaterThan(column);
-    expect(chip).toBeLessThan(columnEnd);
+    expect(wordmark).toBeGreaterThan(-1);
+    // Leading edge first in source order; `space-between` does the rest.
+    expect(wordmark).toBeLessThan(chip);
   });
 });
 

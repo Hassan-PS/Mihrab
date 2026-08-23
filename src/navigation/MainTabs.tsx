@@ -173,7 +173,9 @@ export function MainTabs() {
         options={{
           title: t('nav.today', 'Today'),
           tabBarIcon: TabHomeIcon,
-          headerShown: true,
+          // Everywhere but Catalyst, where Home draws its own top bar —
+          // see the Catalyst branch at the end of these options.
+          headerShown: !isMacCatalyst,
           // Always "Mihrab" — a proper name, not a translated label.
           headerTitle: () => <MihrabHeaderTitle />,
           /**
@@ -191,9 +193,21 @@ export function MainTabs() {
            * the same row on both.
            */
           headerTitleAlign: 'left',
-          // Mac Catalyst renders these as the first row of Home content
-          // instead: the transparent navigation bar sits in the window's
-          // title-bar drag region, where clicks get swallowed.
+          /**
+           * Mac Catalyst builds this row itself, in content (v2.9.2).
+           *
+           * The navigation bar cannot hold the location chip there: it is
+           * transparent and sits inside the window's title-bar DRAG
+           * REGION, so clicks on it get swallowed as window drags — which
+           * is what sent the chip into the body in the first place. But
+           * leaving the bar up with only the wordmark in it spent a whole
+           * row on a word, and pushed the chip onto a SECOND row below it:
+           * two bars where the Mac has one.
+           *
+           * So the bar goes, and Home renders wordmark and chip as one
+           * row of content — same line, opposite ends, entirely below the
+           * drag region. See HomeScreen's `macHeaderRow`.
+           */
           ...(isMacCatalyst
             ? {}
             : { headerRight: () => <HomeHeaderControls /> }),

@@ -1,4 +1,5 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -8,6 +9,7 @@ import {
   StyleSheet,
   useWindowDimensions,
   View,
+  type LayoutChangeEvent,
 } from 'react-native';
 import notifee, {
   AndroidNotificationSetting,
@@ -47,6 +49,7 @@ import { TodaySummary } from './home/TodaySummary';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { isMacCatalyst } from '../responsive/breakpoints';
 import { HomeHeaderControls } from '../navigation/HomeHeaderControls';
+import { MihrabHeaderTitle } from '../navigation/MihrabHeaderTitle';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
@@ -134,6 +137,46 @@ export function HomeScreen() {
         ),
       )
     : 1;
+  /**
+   * How far the Mac top bar has to start below the window's own top.
+   *
+   * The Catalyst scene extends UNDER the window's title bar — the band the
+   * red/yellow/green buttons live in. The navigation bar knew that and laid
+   * its contents out below it; a plain view of ours does not, so the first
+   * attempt drew the wordmark behind the traffic lights, with the window's
+   * "Mihrab" title showing through it (reported 2026-08-24).
+   *
+   * The safe-area inset is the honest measure of that band, with a floor
+   * under it: a scene that reports no top inset would put us straight back
+   * behind the buttons, and a title bar is never shorter than this. 28
+   * AppKit points over Catalyst's 0.77 canvas scale ≈ 36.
+   */
+  const insets = useSafeAreaInsets();
+  const macTopBarInset = isMacCatalyst ? Math.max(insets.top, 36) + 6 : 0;
+  /**
+   * The scaled dashboard's real height, so the row above it survives.
+   *
+   * `transform: scale` does not change layout: the box still occupies its
+   * UNSCALED height and the extra paints outside it, half above and half
+   * below, over whatever is there. At 1.16× a ~700pt dashboard reaches
+   * 55pt past its own top — straight over the Mac top bar, which is why
+   * the wordmark and location chip vanished on wide windows and stayed
+   * put on narrow ones (reported 2026-08-24).
+   *
+   * Measuring the row and spending the overflow as margin puts the box
+   * back around what is actually painted: nothing overlaps, the vertical
+   * centring is centring the real thing, and the bottom edge stops
+   * running under the tab bar for the same reason.
+   */
+  const [dashRowH, setDashRowH] = useState(0);
+  const dashOverflow =
+    dashScale > 1 && dashRowH > 0 ? ((dashScale - 1) * dashRowH) / 2 : 0;
+  const onDashRowLayout = useCallback((e: LayoutChangeEvent) => {
+    const h = e.nativeEvent.layout.height;
+    // Sub-pixel jitter would re-render forever; a whole point is finer
+    // than anything this margin needs to be right about.
+    setDashRowH(prev => (Math.abs(prev - h) > 1 ? h : prev));
+  }, []);
   const [providerPickerOpen, setProviderPickerOpen] = useState(false);
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
   const [notifPermDenied, setNotifPermDenied] = useState(false);
@@ -741,6 +784,33 @@ export function HomeScreen() {
 
   return (
     <View style={styles.homeRoot}>
+      {/* Mac Catalyst: the app's top bar — wordmark leading, location chip
+          trailing — ABOVE the scroll view, not inside it.
+
+          Not the navigation bar, which is what a Mac would normally use: on
+          Catalyst it is transparent and sits inside the window's title-bar
+          DRAG REGION, where clicks were intermittently swallowed as window
+          drags. That is why the chip left the header in the first place.
+
+          Not a row of content either, which is where it went instead. Two
+          things went wrong there, both only at some window sizes, which is
+          what made them look like ghosts. The dashboard zooms itself with a
+          centred `transform: scale`, and a transform does not change layout
+          — so past ~1.1x the cards painted straight over the row above them
+          and the bar disappeared. And the dashboard's content is CENTRED
+          vertically to fill the window, which carried the bar down with it:
+          a title bar sitting two thirds of the way down the window
+          (reported 2026-08-24, both).
+
+          Above the ScrollView it is chrome: pinned to the top, spanning the
+          window rather than the card column, and unaffected by any zoom —
+          held clear of the window's own title bar by `macTopBarInset`. */}
+      {isMacCatalyst ? (
+        <View style={[styles.macTopBar, { paddingTop: macTopBarInset }]}>
+          <MihrabHeaderTitle />
+          <HomeHeaderControls />
+        </View>
+      ) : null}
     <ScrollView
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
@@ -773,31 +843,6 @@ export function HomeScreen() {
         onRetryFetch={retry}
       />
 
-      {/* Mac Catalyst: the location chip is the first ROW OF CONTENT, not a
-          pinned overlay and not the navigation header.
-
-          Not the header, because on Catalyst the transparent navigation bar
-          sits inside the window's title-bar DRAG REGION and clicks on it were
-          intermittently swallowed as window drags. That is why it moved out.
-
-          Not an overlay either, which is where it went instead: pinned to
-          `right: 14` of the WINDOW while every card is centred inside a
-          width-capped column. On a wide window the cards are narrower than
-          the window, so the chip landed in the empty margin and looked
-          deliberate. Narrow the window until the cards fill it — a small Mac
-          window is the ordinary case, not an edge one — and the same chip is
-          suddenly sitting on top of the hero card and hanging past its right
-          edge (reported with a screenshot, 2026-08-18).
-
-          In the column it is right-aligned to the same edge as the cards at
-          every width, by construction rather than by coincidence, and it
-          still clears the drag region and still sits outside the scale
-          transform on `dashRow` that would otherwise paint over it. */}
-      {isMacCatalyst ? (
-        <View style={styles.macHeaderRow}>
-          <HomeHeaderControls />
-        </View>
-      ) : null}
 
       {(() => {
         // One card: countdown → day strip → times → month link (2a). The
@@ -853,9 +898,14 @@ export function HomeScreen() {
             // the carousel paging math is untouched); the rendered
             // result grows around the centered box to fill the window.
             <View
+              onLayout={onDashRowLayout}
               style={[
                 styles.dashRow,
-                dashScale > 1 && { transform: [{ scale: dashScale }] },
+                dashScale > 1 && {
+                  transform: [{ scale: dashScale }],
+                  // What the scale paints outside the box — see dashOverflow.
+                  marginVertical: dashOverflow,
+                },
               ]}>
               {/* The main column carries the day table AND NOTHING ELSE.
                   It is the tallest thing on the screen by a wide margin —
@@ -929,13 +979,24 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   homeRoot: { flex: 1 },
-  // Mac Catalyst header controls, in the flow (see the render site).
-  // `flex-end` rather than `right`, so Arabic and the other right-to-left
-  // languages get the mirror of this and not the same corner.
-  macHeaderRow: {
+  // Mac Catalyst top bar (see the render site). `row` + `space-between`
+  // rather than fixed corners, so Arabic and the other right-to-left
+  // languages get the mirror of this and not the same arrangement: the
+  // wordmark takes the leading edge either way.
+  //
+  // It spans the WINDOW, not the card column: this is the navigation bar's
+  // job, and a bar that stops where the cards stop is a row, not chrome.
+  // Padded to the screen's own gutter so the wordmark lines up with the
+  // left edge of the cards underneath it at the widths where they meet it.
+  macTopBar: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: HOME_SCREEN_PADDING,
+    // paddingTop is `macTopBarInset`, applied at the render site: it depends
+    // on the window's title-bar band, which is not a constant.
+    paddingBottom: 6,
+    minHeight: 34,
   },
   scroll: { flex: 1 },
   // Inter-card rhythm for BOTH CenteredColumn variants (compact uses the
