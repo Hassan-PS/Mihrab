@@ -15,7 +15,7 @@ import com.facebook.react.bridge.ReactMethod
  *
  * The labels are passed in rather than lived in strings.xml, because the
  * app ships in thirteen languages and the one place that knows which is
- * running is the JS side.
+ * running is the JS side. The accent travels for the same reason.
  *
  * Every outcome is named. "Nothing was scanned" covers three different
  * situations — the user backed out, they refused the camera, or the device
@@ -45,7 +45,7 @@ class ScanQrModule(private val reactContext: ReactApplicationContext) :
    * out, and rejects only when the camera itself is unavailable or refused.
    */
   @ReactMethod
-  fun scan(hint: String, cancel: String, promise: Promise) {
+  fun scan(hint: String, cancel: String, accent: String, promise: Promise) {
     val activity = reactContext.currentActivity
     if (activity == null) {
       promise.reject("no_activity", "there is no activity to show the scanner over")
@@ -59,6 +59,9 @@ class ScanQrModule(private val reactContext: ReactApplicationContext) :
     val intent = Intent(activity, ScanQrActivity::class.java).apply {
       putExtra(ScanQrActivity.EXTRA_HINT, hint)
       putExtra(ScanQrActivity.EXTRA_CANCEL, cancel)
+      // The accent the user chose, so the viewfinder is not the one screen
+      // in the app drawn in a colour they did not pick.
+      putExtra(ScanQrActivity.EXTRA_ACCENT, accent)
     }
     try {
       activity.startActivityForResult(intent, REQUEST_CODE)

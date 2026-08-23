@@ -54,10 +54,11 @@ class ScanQr: NSObject {
    situations that read as "nothing was scanned" and need different things
    said about them.
    */
-  @objc(scan:cancel:resolver:rejecter:)
+  @objc(scan:cancel:accent:resolver:rejecter:)
   func scan(
     _ hint: NSString,
     cancel: NSString,
+    accent: NSString,
     resolver resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
@@ -78,7 +79,8 @@ class ScanQr: NSObject {
       }
       let controller = ScannerViewController(
         hint: hint as String,
-        cancelTitle: cancel as String
+        cancelTitle: cancel as String,
+        accent: UIColor(hex: accent as String) ?? Self.defaultAccent
       )
       controller.onFinish = { [weak self] text in
         self?.presented = nil
@@ -116,6 +118,11 @@ class ScanQr: NSObject {
     }
   }
 
+  /// Mihrab's green, for when JS sends nothing usable.
+  private static let defaultAccent = UIColor(
+    red: 0x0F / 255, green: 0x51 / 255, blue: 0x32 / 255, alpha: 1
+  )
+
   private static func topViewController() -> UIViewController? {
     let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
     let window = scenes
@@ -141,12 +148,17 @@ private final class ScannerViewController: UIViewController,
   private var previewLayer: AVCaptureVideoPreviewLayer?
   private let hintText: String
   private let cancelTitle: String
+  private let accent: UIColor
+  /// Redrawn on rotation; see `layoutViewfinder`.
+  private let scrimLayer = CAShapeLayer()
+  private let bracketLayer = CAShapeLayer()
   /// A QR fills many frames; without this the promise resolves repeatedly.
   private var finished = false
 
-  init(hint: String, cancelTitle: String) {
+  init(hint: String, cancelTitle: String, accent: UIColor) {
     self.hintText = hint
     self.cancelTitle = cancelTitle
+    self.accent = accent
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -167,33 +179,138 @@ private final class ScannerViewController: UIViewController,
     view.layer.addSublayer(layer)
     previewLayer = layer
 
+    // The frame is not decoration. A camera filling the screen gives no
+    // clue how close to hold it or what part is being read, and people
+    // answer that by waving the phone around until something happens. A
+    // window with the rest dimmed says both things before they are asked.
+    scrimLayer.fillRule = .evenOdd
+    scrimLayer.fillColor = UIColor.black.withAlphaComponent(0.65).cgColor
+    view.layer.addSublayer(scrimLayer)
+
+    bracketLayer.fillColor = nil
+    bracketLayer.strokeColor = accent.cgColor
+    bracketLayer.lineWidth = 4
+    bracketLayer.lineCap = .round
+    bracketLayer.lineJoin = .round
+    view.layer.addSublayer(bracketLayer)
+
     let label = UILabel()
     label.text = hintText
     label.textColor = .white
     label.textAlignment = .center
     label.numberOfLines = 0
-    label.font = .systemFont(ofSize: 16)
+    label.font = .systemFont(ofSize: 16, weight: .medium)
+    // White on an unknown scene: the shadow is what keeps it readable
+    // against a bright wall without putting a plate behind it.
+    label.layer.shadowColor = UIColor.black.cgColor
+    label.layer.shadowOpacity = 0.8
+    label.layer.shadowRadius = 6
+    label.layer.shadowOffset = CGSize(width: 0, height: 1)
     label.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(label)
 
-    let button = UIButton(type: .system)
+    // A pill, not a bare word on a camera. Translucent white rather than
+    // the accent, because backing out is not the thing being encouraged —
+    // but it is still a real target.
+    let button = UIButton(type: .custom)
     button.setTitle(cancelTitle, for: .normal)
     button.setTitleColor(.white, for: .normal)
     button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+    button.backgroundColor = UIColor.white.withAlphaComponent(0.22)
+    button.layer.cornerRadius = 26
+    button.layer.borderWidth = 1
+    button.layer.borderColor = UIColor.white.withAlphaComponent(0.4).cgColor
     button.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
     button.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(button)
 
     NSLayoutConstraint.activate([
-      label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-      label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-      label.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -16),
+      label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 28),
+      label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -28),
+      label.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -20),
       button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+      // Sized by constraint rather than by content insets, which are
+      // deprecated from iOS 15 and would warn on every build.
+      button.heightAnchor.constraint(equalToConstant: 52),
+      button.widthAnchor.constraint(greaterThanOrEqualToConstant: 180),
       button.bottomAnchor.constraint(
         equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-        constant: -32
+        constant: -40
       ),
     ])
+  }
+
+  /**
+   The dimmed screen with a window in it, and four accent corners.
+
+   The window sits ABOVE centre, at 42% of the height. Centred looks
+   balanced in a mockup and wrong in the hand: the bottom third of a phone
+   held up is where the fingers and the button are, and a code framed there
+   is a code held at an angle.
+   */
+  private func layoutViewfinder() {
+    let bounds = view.bounds
+    guard bounds.width > 0, bounds.height > 0 else { return }
+    let side = min(bounds.width, bounds.height) * 0.68
+    let window = CGRect(
+      x: bounds.midX - side / 2,
+      y: bounds.height * 0.42 - side / 2,
+      width: side,
+      height: side
+    )
+    let radius: CGFloat = 22
+
+    let scrim = UIBezierPath(rect: bounds)
+    scrim.append(UIBezierPath(roundedRect: window, cornerRadius: radius))
+    scrimLayer.frame = bounds
+    scrimLayer.path = scrim.cgPath
+
+    bracketLayer.frame = bounds
+    bracketLayer.path = Self.corners(of: window, radius: radius, arm: side * 0.16)
+  }
+
+  /// Four rounded Ls, one per corner, as a single path.
+  private static func corners(
+    of window: CGRect,
+    radius r: CGFloat,
+    arm: CGFloat
+  ) -> CGPath {
+    let path = UIBezierPath()
+    let l = window.minX, t = window.minY, rt = window.maxX, b = window.maxY
+
+    path.move(to: CGPoint(x: l + r + arm, y: t))
+    path.addLine(to: CGPoint(x: l + r, y: t))
+    path.addArc(
+      withCenter: CGPoint(x: l + r, y: t + r), radius: r,
+      startAngle: -.pi / 2, endAngle: .pi, clockwise: false
+    )
+    path.addLine(to: CGPoint(x: l, y: t + r + arm))
+
+    path.move(to: CGPoint(x: rt - r - arm, y: t))
+    path.addLine(to: CGPoint(x: rt - r, y: t))
+    path.addArc(
+      withCenter: CGPoint(x: rt - r, y: t + r), radius: r,
+      startAngle: -.pi / 2, endAngle: 0, clockwise: true
+    )
+    path.addLine(to: CGPoint(x: rt, y: t + r + arm))
+
+    path.move(to: CGPoint(x: rt, y: b - r - arm))
+    path.addLine(to: CGPoint(x: rt, y: b - r))
+    path.addArc(
+      withCenter: CGPoint(x: rt - r, y: b - r), radius: r,
+      startAngle: 0, endAngle: .pi / 2, clockwise: true
+    )
+    path.addLine(to: CGPoint(x: rt - r - arm, y: b))
+
+    path.move(to: CGPoint(x: l + r + arm, y: b))
+    path.addLine(to: CGPoint(x: l + r, y: b))
+    path.addArc(
+      withCenter: CGPoint(x: l + r, y: b - r), radius: r,
+      startAngle: .pi / 2, endAngle: .pi, clockwise: false
+    )
+    path.addLine(to: CGPoint(x: l, y: b - r - arm))
+
+    return path.cgPath
   }
 
   private func configureSession() -> Bool {
@@ -225,6 +342,12 @@ private final class ScannerViewController: UIViewController,
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     previewLayer?.frame = view.bounds
+    // No implicit animation: on rotation the scrim would otherwise slide
+    // its hole across the screen for a quarter of a second.
+    CATransaction.begin()
+    CATransaction.setDisableActions(true)
+    layoutViewfinder()
+    CATransaction.commit()
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -267,5 +390,26 @@ private final class ScannerViewController: UIViewController,
     guard !finished else { return }
     finished = true
     onFinish?(text)
+  }
+}
+
+private extension UIColor {
+  /**
+   `#RRGGBB` as sent by the JS side.
+
+   Nil for anything else rather than a guess: a colour that failed to parse
+   should fall back to the app's own green, not to whatever `0` happens to
+   mean.
+   */
+  convenience init?(hex: String) {
+    var text = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+    if text.hasPrefix("#") { text.removeFirst() }
+    guard text.count == 6, let value = UInt32(text, radix: 16) else { return nil }
+    self.init(
+      red: CGFloat((value >> 16) & 0xFF) / 255,
+      green: CGFloat((value >> 8) & 0xFF) / 255,
+      blue: CGFloat(value & 0xFF) / 255,
+      alpha: 1
+    )
   }
 }

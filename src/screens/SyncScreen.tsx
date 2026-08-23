@@ -318,6 +318,10 @@ export function SyncScreen() {
       const result = await scanQrCode({
         hint: t('sync.scanHint'),
         cancel: t('common.cancel'),
+        // The viewfinder is drawn in the accent the user chose, so the one
+        // full-screen native surface in the app is not the one that looks
+        // like somebody else's.
+        accent: String(palette.accentSolid),
       });
       if (result.ok) {
         setEntered(result.text);
@@ -339,7 +343,7 @@ export function SyncScreen() {
         t('sync.syncFailedBody', { detail: result.detail ?? '' }),
       );
     })();
-  }, [busy, pairWith, t, tell]);
+  }, [busy, pairWith, palette.accentSolid, t, tell]);
 
   const onChooseFolder = useCallback(() => {
     void (async () => {

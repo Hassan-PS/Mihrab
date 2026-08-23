@@ -7,6 +7,7 @@ RCT_EXTERN_METHOD(isAvailable:(RCTPromiseResolveBlock)resolve
 
 RCT_EXTERN_METHOD(scan:(nonnull NSString *)hint
                   cancel:(nonnull NSString *)cancel
+                  accent:(nonnull NSString *)accent
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

@@ -22,6 +22,7 @@ const Native = NativeModules.ScanQr as
       scan(
         hint: string,
         cancel: string,
+        accent: string,
       ): Promise<{ text?: string; cancelled?: boolean }>;
     }
   | undefined;
@@ -60,16 +61,31 @@ export async function cameraIsAvailable(): Promise<boolean> {
 /**
  * Open the scanner and wait.
  *
- * `hint` and `cancel` are passed in rather than living in the native side's
- * own resources, because the app ships in thirteen languages and the only
- * part that knows which one is running is here.
+ * ── WHY THE WORDS AND THE COLOUR COME FROM HERE ───────────────────────
+ *
+ * The labels are passed in rather than living in the native side's own
+ * resources because the app ships in thirteen languages and the only part
+ * that knows which one is running is here. `accent` travels for the same
+ * reason: the user picks a colour in Appearance, that choice lives in JS,
+ * and a scanner drawn in some other green would be the one screen in the
+ * app that ignored it.
+ *
+ * `#RRGGBB`. Both platforms parse it themselves and fall back to their own
+ * green if it is anything else, so a bad string costs a colour rather than
+ * a crash.
  */
-export async function scanQrCode(
-  labels: { hint: string; cancel: string },
-): Promise<ScanResult> {
+export async function scanQrCode(labels: {
+  hint: string;
+  cancel: string;
+  accent: string;
+}): Promise<ScanResult> {
   if (!Native?.scan) return { ok: false, reason: 'no-camera' };
   try {
-    const result = await Native.scan(labels.hint, labels.cancel);
+    const result = await Native.scan(
+      labels.hint,
+      labels.cancel,
+      labels.accent,
+    );
     if (result?.text) return { ok: true, text: result.text };
     return { ok: false, reason: 'cancelled' };
   } catch (e) {
