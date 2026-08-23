@@ -256,8 +256,23 @@ LAUNCH_LOG=$(mktemp -t mihrab-catalyst-launch)
 GROUP_NAME=$(sed -n 's/.*<string>\(.*group.*\)<\/string>.*/\1/p' \
   ios/PrayerApp/Catalyst.entitlements | head -1)
 GROUP_DOMAIN="$HOME/Library/Group Containers/$GROUP_NAME/Library/Preferences/$GROUP_NAME"
-# Clear the payload first so the check below cannot be satisfied by a value
-# some earlier build left behind. The app rewrites it within a few seconds of
+# Quit any copy that is already running first. It has the same bundle
+# identifier, so `open` below hands the launch straight to IT and the binary
+# this build just signed never runs at all — and since the running instance
+# has no reason to rewrite the payload key we are about to delete, the check
+# fails on an app that is perfectly healthy. Three builds in a row failed
+# that way on 2026-08-24, every one of them with a window left open from
+# testing; a properly cold launch writes the payload in about five seconds.
+#
+# Match on the executable PATH, not the app's name: the process is called
+# PrayerApp, not Mihrab, so `pkill -x Mihrab` quietly matches nothing (which
+# is how the first attempt at this changed nothing at all). The pattern also
+# catches a copy running from /Applications, which is the same bundle
+# identifier and would hijack the launch just as effectively.
+pkill -f "Mihrab.app/Contents/MacOS/PrayerApp" 2>/dev/null || true
+sleep 3
+# Clear the payload so the check below cannot be satisfied by a value some
+# earlier build left behind. The app rewrites it within a few seconds of
 # launch, so this costs the local widget a blink and nothing else.
 if [ "$SIGN_IDENTITY" != "-" ]; then
   defaults delete "$GROUP_DOMAIN" prayer_widget_payload_v1 2>/dev/null || true
