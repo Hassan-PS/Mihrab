@@ -595,6 +595,27 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     private const val STRIP_HEADER_DROP_DP = 110
 
     /**
+     * What the strip occupies when it is drawing no graph, in dp: 28 of root
+     * padding, the header row at 19 with its refresh glyph, the six columns
+     * at 48, the rule and its margin at 10, and the next-prayer line at 24.
+     *
+     * Only used to work out how much of a two-row card is left over. It does
+     * not have to be exact — half of a few points either way is invisible —
+     * but it does have to be an over-estimate rather than under, because the
+     * slack it computes is spent on padding and padding that overshoots
+     * pushes the footer off the bottom.
+     */
+    private const val STRIP_NO_GRID_CONTENT_DP = 132
+
+    /**
+     * The most the times row will grow to absorb a card's slack.
+     *
+     * A guard on arithmetic, not a design number: heightDp comes from the
+     * launcher and a wrong one has already cost this widget its footer once.
+     */
+    private const val STRIP_SLACK_CAP_DP = 64
+
+    /**
      * What the strip spends before the practice grid gets a say, in dp:
      * padding, the header line, the next-prayer footer, the divider and the
      * streak line above the graph. The times row and the grid share what is
@@ -1006,6 +1027,24 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_strip_divider,
         if (tight) View.GONE else View.VISIBLE,
       )
+
+      // Two rows, and no graph to spend the second one on.
+      //
+      // The times row takes its own height, which is what stopped the graph
+      // stealing the space the six times need — but it also means a card
+      // taller than the content just ends early, and a 4x2 drew its three
+      // lines against the top with a third of the card blank underneath.
+      // The row grows into the gap instead: the header stays at the top, the
+      // next-prayer line lands on the bottom, and the times sit in the middle
+      // of the card rather than crowded against its lid.
+      //
+      // Nothing to do at one row, where there is no slack, or from three up,
+      // where the graph is the thing that fills it.
+      val slack =
+        if (oneRow || heightDp >= GRID_MIN_HEIGHT_DP) 0
+        else ((heightDp - STRIP_NO_GRID_CONTENT_DP) / 2).coerceIn(0, STRIP_SLACK_CAP_DP)
+      val slackPx = (slack * density).toInt()
+      views.setViewPadding(R.id.widget_times_row, 0, slackPx, 0, slackPx)
     }
 
     private fun bindPracticeStrip(
@@ -1189,14 +1228,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * bottom third of the card. Three launcher rows is enough to draw a
      * graph; it is not enough to draw a graph AND two more lines under it.
      *
-     * 180, not 265. A 4x2 is 210dp and drew the six times with a hand's
-     * width of nothing under them: the times row is weighted, so all of the
-     * card's slack pooled around six lines of text. Two launcher rows is
-     * enough for the graph — the grid takes as many weeks as fit the box it
-     * is given, so a shorter box is a denser graph rather than a squeezed
-     * one. One row stays as it was: at 99dp there is nothing to give.
+     * 265, which is where the Log Today widget has always drawn the same
+     * bitmap: two launcher rows is 210dp and three is 321dp on a 420dpi
+     * phone, so this sits in the gap between them and the graph is what the
+     * third row buys. It was briefly 180 to stop a 4x2 drawing six times
+     * with a hand's width of nothing under them — but that emptiness came
+     * from a weighted times row pooling the card's slack around six lines of
+     * text, and the row takes its own height now. The fix belonged in the
+     * layout, and putting it here bought a 4x2 a graph nobody had asked that
+     * size for.
      */
-    private const val GRID_MIN_HEIGHT_DP = 180
+    private const val GRID_MIN_HEIGHT_DP = 265
 
     /**
      * Bind the payload into whichever layout was chosen.

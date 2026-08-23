@@ -56,6 +56,28 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
     }
   }
 
+  /**
+   * Redraw when the card is resized.
+   *
+   * Everything this widget decides — whether the header row and its rule are
+   * there, how tall the chips are, whether the practice graph appears at all
+   * — it decides from the measured height. Without this the launcher changes
+   * the height and never tells us, so a card dragged from one row to three
+   * kept drawing the one-row card in a three-row box: the date line missing,
+   * the countdown missing, and a third of the card blank where the graph was
+   * supposed to be. It looked like the size thresholds were wrong. They were
+   * never being asked.
+   */
+  override fun onAppWidgetOptionsChanged(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetId: Int,
+    newOptions: android.os.Bundle,
+  ) {
+    super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+    appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, appWidgetId))
+  }
+
   companion object {
     const val ACTION_LOG_TAP = "com.prayer_times.ACTION_WIDGET_LOG_TAP"
     const val EXTRA_PRAYER = "prayer"
@@ -149,6 +171,20 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
     private const val COMPACT_MAX_HEIGHT_DP = 145
 
     /**
+     * What the card occupies with its header on and no graph, in dp: 20 of
+     * root padding, the date line at 16, the chips row at 78 (a 38dp chip
+     * over the name and the time, plus the margin between them), the rule and
+     * its margins at 12, and the footer at 18.
+     *
+     * Deliberately a little generous: the leftover is spent on padding, and
+     * padding that overshoots pushes the footer off the bottom of the card.
+     */
+    private const val LOG_NO_GRID_CONTENT_DP = 148
+
+    /** A guard on arithmetic done with a number the launcher supplies. */
+    private const val LOG_SLACK_CAP_DP = 56
+
+    /**
      * What the card spends above and below the grid, in dp: 10 of padding
      * top and bottom, the header line, the chips row at its natural height,
      * the divider above the footer with its margins, the footer, the streak
@@ -235,6 +271,22 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
       val density = context.resources.displayMetrics.density
       val pad = ((if (tight) 6 else 10) * density).toInt()
       views.setViewPadding(R.id.widget_root, pad, pad, pad, pad)
+
+      // Two rows, and no graph to spend the second one on.
+      //
+      // The chips row takes its own height, so a card taller than the content
+      // simply ended early: at 4x2 the five prayers sat against the top with
+      // a quarter of the card blank underneath. The row grows into the gap
+      // instead — the date line stays at the top, the footer lands on the
+      // bottom, and the chips sit in the middle of the card. Nothing to do at
+      // one row, where there is no slack, or from three up, where the graph
+      // is what fills it.
+      val slack =
+        if (tight || heightDp >= GRID_MIN_HEIGHT_DP) 0
+        else ((heightDp - LOG_NO_GRID_CONTENT_DP) / 2).coerceIn(0, LOG_SLACK_CAP_DP)
+      val slackPx = (slack * density).toInt()
+      views.setViewPadding(R.id.widget_log_row, 0, slackPx, 0, slackPx)
+
       if (android.os.Build.VERSION.SDK_INT < 31) return
       val chip = (if (tight) 30 else 38).toFloat()
       for (id in CHIPS) {
