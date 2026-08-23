@@ -125,7 +125,11 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       return Math.ceil((PADDING_DP + BREATHING_DP + text * scale).toDouble()).toInt()
     }
 
-    fun buildViews(context: Context, appWidgetId: Int, mgr: AppWidgetManager): RemoteViews {
+    fun buildViews(base: Context, appWidgetId: Int, mgr: AppWidgetManager): RemoteViews {
+      // Every label below comes out of the string table, so the context has to
+      // be the one that speaks Mihrab's language before anything is read from
+      // it. See PrayerWidgetProvider.localized.
+      val context = PrayerWidgetProvider.localized(base)
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_streak)
       val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
       views.setInt(R.id.widget_root, "setBackgroundColor", background)

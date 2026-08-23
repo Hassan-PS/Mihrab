@@ -79,10 +79,21 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun setData(json: String, promise: Promise) {
     try {
+      // The language travels beside the payload rather than being dug back out
+      // of it on every redraw: seven providers read this, several of them more
+      // than once per update, and re-parsing the whole payload to find one
+      // string is work the widget can least afford.
+      val language =
+        try {
+          org.json.JSONObject(json).optString("language", "").trim()
+        } catch (e: Exception) {
+          ""
+        }
       reactContext
         .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
         .edit()
         .putString(PrayerWidgetProvider.PREFS_KEY, json)
+        .putString(PrayerWidgetProvider.PREFS_LANGUAGE, language)
         .apply()
       // Every widget kind reads the same payload, so every one of them has
       // to be told. A provider left out here is one that keeps yesterday's

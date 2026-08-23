@@ -152,8 +152,47 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_WIDGET_HIGHLIGHT_ID = "widget_highlight_id"
     const val PREFS_WIDGET_HIGHLIGHT_HEX = "widget_highlight_hex"
     const val PREFS_WIDGET_HIGHLIGHT_DYNAMIC = "widget_highlight_dynamic"
+    /**
+     * The language tag Mihrab itself is running in, copied out of the payload
+     * when JS saves it. See `localized`.
+     */
+    const val PREFS_LANGUAGE = "widget_language"
     /** Internal broadcast fired by AlarmManager at each prayer time transition. */
     const val ACTION_PRAYER_TIME_ELAPSED = "com.prayer_times.ACTION_PRAYER_TIME_ELAPSED"
+
+    /**
+     * A context whose resources speak the language *Mihrab* is set to, rather
+     * than the one the phone is set to.
+     *
+     * The two are usually the same — the app now defaults to the system
+     * language — but a user who picked a different one in Settings would
+     * otherwise get a widget in two languages at once: the rows and prayer
+     * names come from the payload, which JS localizes before it sends, while
+     * every label the provider draws itself came from the phone's string
+     * table. Only the picker's own entry (the receiver's `android:label`) is
+     * still out of reach; the launcher reads that without ever calling us.
+     *
+     * Returns the context unchanged when no language has been recorded yet,
+     * which is the case until the app has run once.
+     */
+    fun localized(context: Context): Context {
+      val tag =
+        context
+          .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+          .getString(PREFS_LANGUAGE, null)
+          ?.trim()
+          .orEmpty()
+      if (tag.isEmpty()) return context
+      val locale = java.util.Locale.forLanguageTag(tag)
+      if (locale.language.isEmpty()) return context
+      // Already speaking it — createConfigurationContext is not free, and this
+      // runs on every widget redraw.
+      val current = context.resources.configuration.locales
+      if (!current.isEmpty && current[0].language == locale.language) return context
+      val config = android.content.res.Configuration(context.resources.configuration)
+      config.setLocale(locale)
+      return context.createConfigurationContext(config)
+    }
 
     private const val NEUTRAL_TEXT = "#E8EAED"
     private const val NEUTRAL_MUTED = "#9AA0A6"
@@ -236,7 +275,11 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /** Directly push updated RemoteViews to the given widget IDs — no broadcast. */
-    fun refreshAll(context: Context, appWidgetManager: AppWidgetManager, ids: IntArray) {
+    fun refreshAll(base: Context, appWidgetManager: AppWidgetManager, ids: IntArray) {
+      // Every label below comes out of the string table, so the context has to
+      // be the one that speaks Mihrab's language before anything is read from
+      // it. See PrayerWidgetProvider.localized.
+      val context = localized(base)
       val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
       val json = prefs.getString(PREFS_KEY, null)
       val style = readWidgetStyle(prefs)

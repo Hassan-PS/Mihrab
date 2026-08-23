@@ -160,7 +160,11 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
     /** As many weeks as the payload carries. See PRACTICE_WINDOW_DAYS. */
     private const val MAX_GRID_WEEKS = 26
 
-    private fun buildViews(context: Context, appWidgetId: Int): RemoteViews {
+    private fun buildViews(base: Context, appWidgetId: Int): RemoteViews {
+      // Every label below comes out of the string table, so the context has to
+      // be the one that speaks Mihrab's language before anything is read from
+      // it. See PrayerWidgetProvider.localized.
+      val context = PrayerWidgetProvider.localized(base)
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_log)
       val (bg, accent) = PrayerWidgetProvider.resolvedColors(context)
       views.setInt(R.id.widget_root, "setBackgroundColor", bg)

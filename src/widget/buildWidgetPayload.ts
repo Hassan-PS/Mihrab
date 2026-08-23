@@ -102,6 +102,18 @@ export type WidgetPrayerPayload = {
   /** Location name */
   locationName?: string;
   /**
+   * The language Mihrab is running in (an i18n tag such as `sv` or `ar`).
+   *
+   * The block contents are already localized here in JS, but the widget's own
+   * chrome — "NEXT", "day streak", "Tap to log" — is drawn natively from each
+   * platform's string table, which follows the *phone's* language. Without
+   * this the two halves of one widget can disagree: a user whose phone is in
+   * English but who set Mihrab to Swedish gets Swedish prayer names under an
+   * English heading. Native reads this and resolves its own strings against
+   * it, so the whole widget speaks whatever the app speaks.
+   */
+  language?: string;
+  /**
    * True when after-Isha and no `tomorrow` data was available — the next-day
    * times are estimated by re-applying today's strings to tomorrow's calendar
    * date. The widget can render a subtle indicator (e.g., a soft dot or italic
@@ -204,7 +216,7 @@ function buildDays(week: TimingsMap[], now: Date): WidgetDay[] {
     const { rows, sunriseRow, extraRows } = buildDayRows(timings);
     return {
       dateKey: localDateKey(date),
-      dayLabel: date.toLocaleDateString(undefined, {
+      dayLabel: date.toLocaleDateString(i18n.language, {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -276,7 +288,7 @@ export function buildWidgetPayload(
   const timings = useTomorrow ? (tomorrow as TimingsMap) : today;
 
   const dayAnchor = useTomorrow || tomorrowEstimated ? addDays(now, 1) : now;
-  const dayLabel = startOfLocalDay(dayAnchor).toLocaleDateString(undefined, {
+  const dayLabel = startOfLocalDay(dayAnchor).toLocaleDateString(i18n.language, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -343,6 +355,7 @@ export function buildWidgetPayload(
     // A saved location's label is a full postal address on every geocoder the
     // app reads; the widget header has room for a city. See shortPlaceLabel.
     locationName: shortPlaceLabel(locationName),
+    language: i18n.language,
     ...(tomorrowEstimated ? { tomorrowEstimated: true } : {}),
     ...(seasonal ? { seasonal } : {}),
     days,
@@ -358,3 +371,4 @@ export function buildWidgetPayload(
     ...(extras?.tasbih ? { tasbih: extras.tasbih } : {}),
   };
 }
+

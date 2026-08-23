@@ -105,7 +105,11 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     // prayer widget's thresholds. See PrayerWidgetProvider.sizeDp.
     private const val PROGRESS_MIN_HEIGHT_DP = 150
 
-    fun buildViews(context: Context, widthDp: Int = 0, heightDp: Int = 0): RemoteViews {
+    fun buildViews(base: Context, widthDp: Int = 0, heightDp: Int = 0): RemoteViews {
+      // Every label below comes out of the string table, so the context has to
+      // be the one that speaks Mihrab's language before anything is read from
+      // it. See PrayerWidgetProvider.localized.
+      val context = PrayerWidgetProvider.localized(base)
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_reading)
       val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
       views.setInt(R.id.widget_root, "setBackgroundColor", background)

@@ -68,7 +68,7 @@ export function FastingScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const { settings, updateSettings } = usePrayerSettings();
 
@@ -435,7 +435,7 @@ export function FastingScreen() {
                 {t(`events.${event.id}`, event.englishLabel)}
               </Text>
               <Text style={[styles.upcomingDate, { color: palette.muted }]}>
-                {gregorianDate.toLocaleDateString(undefined, {
+                {gregorianDate.toLocaleDateString(i18n.language, {
                   weekday: 'short',
                   month: 'short',
                   day: 'numeric',
