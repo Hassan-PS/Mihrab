@@ -31,7 +31,7 @@ import WidgetKit
 /// the queue over the payload, not because anything has been persisted yet.
 @available(iOS 17.0, *)
 struct LogPrayerIntent: AppIntent {
-  static var title: LocalizedStringResource = "Log Prayer"
+  static var title: LocalizedStringResource = "widget_intent_log_prayer"
   static var isDiscoverable: Bool = false
 
   @Parameter(title: "Date")
@@ -186,7 +186,7 @@ struct LogTodayEntryView: View {
       // which is the right place for "open the full row".
       .widgetURL(URL(string: "mihrab://log"))
     } else {
-      Text("Open Mihrab")
+      Text("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -196,12 +196,18 @@ struct LogTodayEntryView: View {
   @ViewBuilder
   private func header(_ t: WidgetPayload.Today) -> some View {
     HStack(alignment: .firstTextBaseline) {
-      Text("TODAY")
+      // The shared string is "Today"; this heading has always been an
+      // all-caps eyebrow. Uppercasing here rather than in the table keeps one
+      // entry for one word — and does it per-locale, which matters for the
+      // languages that have no upper case at all and for Turkish, whose
+      // capital i is not the one a naive uppercase would produce.
+      Text("widget_log_today")
+        .textCase(.uppercase)
         .kerning(1.0)
         .font(.system(size: 9, weight: .semibold))
         .foregroundStyle(widgetMuted)
       Spacer(minLength: 6)
-      Text(verbatim: "\(loggedCount(t)) of \(t.loggable)")
+      Text(verbatim: widgetString("widget_log_count", loggedCount(t), t.loggable))
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(widgetMuted)
     }
@@ -218,14 +224,14 @@ struct LogTodayEntryView: View {
           .foregroundStyle(widgetMuted)
           .lineLimit(1)
       } else if t.owed > 0 {
-        Text(verbatim: "\(t.owed) missed today")
+        Text(verbatim: widgetString("widget_log_owed", t.owed))
           .font(.system(size: 11))
           .foregroundStyle(dangerColor)
           .lineLimit(1)
       }
       Spacer(minLength: 4)
       if let streak = entry.streak, streak > 0 {
-        Text(verbatim: "Streak \(streak)")
+        Text(verbatim: widgetString("widget_streak_inline", streak))
           .font(.system(size: 11, weight: .medium))
           .foregroundStyle(widgetMuted)
           .lineLimit(1)
@@ -356,9 +362,12 @@ struct LogTodayWidget: Widget {
     StaticConfiguration(kind: "MihrabLogToday", provider: LogTodayProvider()) { entry in
       LogTodayEntryView(entry: entry)
         .modifier(WidgetBackgroundCompatModifier())
+        // The app has its own language setting; this is what makes the
+        // labels below follow it rather than the phone. See mihrabLocale().
+        .environment(\.locale, mihrabLocale())
     }
-    .configurationDisplayName("Log today")
-    .description("Tap a prayer to log it on time. Tap again within a minute to undo.")
+    .configurationDisplayName(widgetGalleryName("widget_name_log"))
+    .description(widgetString("widget_ios_description_log"))
     .supportedFamilies([.systemMedium])
   }
 }

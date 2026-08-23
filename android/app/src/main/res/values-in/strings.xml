@@ -142,4 +142,26 @@
     <string name="widget_reading_start_tail">Tidak perlu rencana — buka dan mulai.</string>
     <string name="widget_reading_start_side_title">HALAMAN</string>
     <string name="widget_reading_start_side_note">dari seluruh Al-Quran</string>
+    <string name="widget_hijri_title">HIJRIAH</string>
+    <string name="widget_title_prayer_times">Waktu salat</string>
+    <string name="widget_practice_weeks_title">PRAKTIK \u00b7 %1$d MINGGU TERAKHIR</string>
+    <string name="widget_seasonal_eid">HARI RAYA</string>
+    <string name="widget_seasonal_jumuah">JUMAT</string>
+    <string name="widget_seasonal_ramadan">RAMADAN</string>
+    <string name="widget_tasbih_complete">selesai</string>
+    <string name="widget_tasbih_keep_going">target tercapai \u00b7 lanjutkan</string>
+    <string name="widget_reading_page_surah">Halaman %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Baca Al-Quran</string>
+    <string name="widget_intent_log_prayer">Catat salat</string>
+    <string name="widget_intent_refresh">Segarkan widget</string>
+    <string name="widget_intent_tasbih">Hitung zikir</string>
+    <string name="widget_ios_description_prayer_times">Waktu salat hari ini, termasuk matahari terbit. Setelah Isya, menampilkan waktu besok.</string>
+    <string name="widget_ios_description_hijri">Tanggal Hijriah hari ini. Di layar kunci, bersama salat berikutnya.</string>
+    <string name="widget_ios_description_log">Ketuk salat untuk mencatatnya tepat waktu. Ketuk lagi dalam satu menit untuk membatalkannya.</string>
+    <string name="widget_ios_description_reading">Tempat terakhir Anda berhenti, dan porsi khatam hari ini.</string>
+    <string name="widget_ios_description_streak">Rentetan salat tepat waktu Anda dan sepuluh minggu terakhir grafik.</string>
+    <string name="widget_ios_description_tasbih">Hitung zikir tanpa membuka aplikasi.</string>
+    <string name="widget_reading_no_bookmarks">Belum ada penanda</string>
+    <string name="widget_reading_page_today">Halaman %1$d \u00b7 %2$d/%3$d hari ini</string>
+    <string name="widget_streak_inline">Rentetan %1$dh</string>
 </resources>

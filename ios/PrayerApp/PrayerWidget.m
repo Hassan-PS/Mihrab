@@ -20,13 +20,34 @@ RCT_EXPORT_METHOD(setData
                   : (RCTPromiseResolveBlock)resolve rejecter
                   : (RCTPromiseRejectBlock)reject)
 {
+  // The language travels beside the payload rather than being dug back out of
+  // it on every draw. Six widget kinds read it, and re-decoding a hundred
+  // kilobytes of JSON to find one string is work a widget cannot afford —
+  // see mihrabLocalizationTag() in the extension.
+  NSString *language = nil;
+  NSError *parseError = nil;
+  id parsed = [NSJSONSerialization
+      JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding]
+                 options:0
+                   error:&parseError];
+  if ([parsed isKindOfClass:[NSDictionary class]]) {
+    id value = parsed[@"language"];
+    if ([value isKindOfClass:[NSString class]]) {
+      language = value;
+    }
+  }
+
   NSUserDefaults *group =
       MihrabAppGroupDefaults();
-  if (group != nil) {
-    [group setObject:json forKey:@"prayer_widget_payload_v1"];
+  NSUserDefaults *store = group != nil ? group : [NSUserDefaults standardUserDefaults];
+  [store setObject:json forKey:@"prayer_widget_payload_v1"];
+  // Cleared rather than left behind when a payload arrives without one: an
+  // older app writing to a newer extension should give the phone's language
+  // back, not keep whatever was last set.
+  if (language.length > 0) {
+    [store setObject:language forKey:@"prayer_widget_language"];
   } else {
-    [[NSUserDefaults standardUserDefaults] setObject:json
-                                                forKey:@"prayer_widget_payload_v1"];
+    [store removeObjectForKey:@"prayer_widget_language"];
   }
   [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);

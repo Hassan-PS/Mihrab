@@ -142,4 +142,26 @@
     <string name="widget_reading_start_tail">Plana gerek yok — açın ve başlayın.</string>
     <string name="widget_reading_start_side_title">SAYFALAR</string>
     <string name="widget_reading_start_side_note">tüm Kur\'an\'da</string>
+    <string name="widget_hijri_title">HİCRİ</string>
+    <string name="widget_title_prayer_times">Namaz vakitleri</string>
+    <string name="widget_practice_weeks_title">İBADET \u00b7 SON %1$d HAFTA</string>
+    <string name="widget_seasonal_eid">BAYRAM</string>
+    <string name="widget_seasonal_jumuah">CUMA</string>
+    <string name="widget_seasonal_ramadan">RAMAZAN</string>
+    <string name="widget_tasbih_complete">Tamamlandı</string>
+    <string name="widget_tasbih_keep_going">Hedefe ulaşıldı \u00b7 devam et</string>
+    <string name="widget_reading_page_surah">Sayfa %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Kur\'an oku</string>
+    <string name="widget_intent_log_prayer">Namazı kaydet</string>
+    <string name="widget_intent_refresh">Widget\'ı yenile</string>
+    <string name="widget_intent_tasbih">Zikir sayın</string>
+    <string name="widget_ios_description_prayer_times">Bugünün namaz vakitleri, gündoğumu dahil. Yatsıdan sonra yarının vakitlerini gösterir.</string>
+    <string name="widget_ios_description_hijri">Bugünün hicri tarihi. Kilit ekranında, sıradaki namazla birlikte.</string>
+    <string name="widget_ios_description_log">Bir namazı vaktinde kaydetmek için dokunun. Geri almak için bir dakika içinde tekrar dokunun.</string>
+    <string name="widget_ios_description_reading">Kaldığınız yer ve bugünün vird miktarı.</string>
+    <string name="widget_ios_description_streak">Vaktinde kılma seriniz ve ibadet grafiğinin son on haftası.</string>
+    <string name="widget_ios_description_tasbih">Uygulamayı açmadan zikir sayın.</string>
+    <string name="widget_reading_no_bookmarks">Henüz yer imi yok</string>
+    <string name="widget_reading_page_today">Sayfa %1$d \u00b7 bugün %2$d/%3$d</string>
+    <string name="widget_streak_inline">Seri %1$dg</string>
 </resources>

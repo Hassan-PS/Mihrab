@@ -147,4 +147,26 @@
     <string name="widget_reading_start_tail">কোনো পরিকল্পনার দরকার নেই — এটি খুলুন এবং শুরু করুন।</string>
     <string name="widget_reading_start_side_title">পৃষ্ঠা</string>
     <string name="widget_reading_start_side_note">পুরো কুরআনে</string>
+    <string name="widget_hijri_title">হিজরি</string>
+    <string name="widget_title_prayer_times">নামাযের সময়</string>
+    <string name="widget_practice_weeks_title">চর্চা \u00b7 সর্বশেষ %1$d সপ্তাহ</string>
+    <string name="widget_seasonal_eid">ঈদ</string>
+    <string name="widget_seasonal_jumuah">জুমা</string>
+    <string name="widget_seasonal_ramadan">রমজান</string>
+    <string name="widget_tasbih_complete">সম্পন্ন</string>
+    <string name="widget_tasbih_keep_going">লক্ষ্য পূরণ \u00b7 চালিয়ে যান</string>
+    <string name="widget_reading_page_surah">পৃষ্ঠা %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">কুরআন পড়ুন</string>
+    <string name="widget_intent_log_prayer">নামায লগ করুন</string>
+    <string name="widget_intent_refresh">উইজেট রিফ্রেশ করুন</string>
+    <string name="widget_intent_tasbih">জিকির গণনা করুন</string>
+    <string name="widget_ios_description_prayer_times">আজকের নামাযের সময়, সূর্যোদয়সহ। ইশার পরে, আগামীকালের সময় দেখায়।</string>
+    <string name="widget_ios_description_hijri">আজকের হিজরি তারিখ। লক স্ক্রিনে, পরবর্তী নামাযসহ।</string>
+    <string name="widget_ios_description_log">সময়মতো লগ করতে একটি নামাযে ট্যাপ করুন। পূর্বাবস্থায় ফেরাতে এক মিনিটের মধ্যে আবার ট্যাপ করুন।</string>
+    <string name="widget_ios_description_reading">আপনি যেখানে থেমেছিলেন, এবং আজকের খতমের অংশ কী চায়।</string>
+    <string name="widget_ios_description_streak">আপনার সময়মতো নামাযের ধারাবাহিকতা এবং চর্চার গ্রাফের শেষ দশ সপ্তাহ।</string>
+    <string name="widget_ios_description_tasbih">অ্যাপ না খুলে জিকির গণনা করুন।</string>
+    <string name="widget_reading_no_bookmarks">এখনও কোনো বুকমার্ক নেই</string>
+    <string name="widget_reading_page_today">পৃষ্ঠা %1$d \u00b7 আজ %2$d/%3$d</string>
+    <string name="widget_streak_inline">ধারাবাহিকতা %1$dদি</string>
 </resources>

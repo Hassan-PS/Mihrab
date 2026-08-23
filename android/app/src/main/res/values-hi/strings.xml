@@ -146,4 +146,26 @@
     <string name="widget_reading_start_tail">किसी योजना की ज़रूरत नहीं — इसे खोलें और शुरू करें।</string>
     <string name="widget_reading_start_side_title">पृष्ठ</string>
     <string name="widget_reading_start_side_note">पूरे क़ुरआन में</string>
+    <string name="widget_hijri_title">हिजरी</string>
+    <string name="widget_title_prayer_times">नमाज़ के समय</string>
+    <string name="widget_practice_weeks_title">अभ्यास \u00b7 पिछले %1$d हफ़्ते</string>
+    <string name="widget_seasonal_eid">ईद</string>
+    <string name="widget_seasonal_jumuah">जुमा</string>
+    <string name="widget_seasonal_ramadan">रमज़ान</string>
+    <string name="widget_tasbih_complete">पूर्ण</string>
+    <string name="widget_tasbih_keep_going">लक्ष्य पूरा \u00b7 जारी रखें</string>
+    <string name="widget_reading_page_surah">पृष्ठ %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">क़ुरआन पढ़ें</string>
+    <string name="widget_intent_log_prayer">नमाज़ दर्ज करें</string>
+    <string name="widget_intent_refresh">विजेट रीफ़्रेश करें</string>
+    <string name="widget_intent_tasbih">ज़िक्र गिनें</string>
+    <string name="widget_ios_description_prayer_times">आज के नमाज़ के समय, सूर्योदय सहित। इशा के बाद यह कल के समय दिखाता है।</string>
+    <string name="widget_ios_description_hijri">आज की हिजरी तारीख़। लॉक स्क्रीन पर, अगली नमाज़ के साथ।</string>
+    <string name="widget_ios_description_log">नमाज़ को समय पर दर्ज करने के लिए उस पर टैप करें। पूर्ववत करने के लिए एक मिनट के भीतर फिर से टैप करें।</string>
+    <string name="widget_ios_description_reading">जहाँ आपने छोड़ा था, और आज के ख़त्म हिस्से में क्या है।</string>
+    <string name="widget_ios_description_streak">आपकी समय पर स्ट्रीक और ग्राफ़ के पिछले दस हफ़्ते।</string>
+    <string name="widget_ios_description_tasbih">ऐप खोले बिना ज़िक्र गिनें।</string>
+    <string name="widget_reading_no_bookmarks">अभी कोई बुकमार्क नहीं</string>
+    <string name="widget_reading_page_today">पृष्ठ %1$d \u00b7 आज %2$d/%3$d</string>
+    <string name="widget_streak_inline">स्ट्रीक %1$dदि</string>
 </resources>

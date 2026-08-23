@@ -147,4 +147,26 @@
     <string name="widget_reading_start_tail">کسی منصوبے کی ضرورت نہیں — اسے کھولیں اور شروع کریں۔</string>
     <string name="widget_reading_start_side_title">صفحات</string>
     <string name="widget_reading_start_side_note">پورے قرآن میں</string>
+    <string name="widget_hijri_title">ہجری</string>
+    <string name="widget_title_prayer_times">اوقاتِ نماز</string>
+    <string name="widget_practice_weeks_title">عمل \u00b7 آخری %1$d ہفتے</string>
+    <string name="widget_seasonal_eid">عید</string>
+    <string name="widget_seasonal_jumuah">جمعہ</string>
+    <string name="widget_seasonal_ramadan">رمضان</string>
+    <string name="widget_tasbih_complete">مکمل</string>
+    <string name="widget_tasbih_keep_going">ہدف مکمل \u00b7 جاری رکھیں</string>
+    <string name="widget_reading_page_surah">صفحہ %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">قرآن پڑھیں</string>
+    <string name="widget_intent_log_prayer">نماز درج کریں</string>
+    <string name="widget_intent_refresh">ویجٹ تازہ کریں</string>
+    <string name="widget_intent_tasbih">ذکر شمار کریں</string>
+    <string name="widget_ios_description_prayer_times">آج کی نماز کے اوقات، طلوع آفتاب سمیت۔ عشاء کے بعد، کل کے اوقات دکھاتا ہے۔</string>
+    <string name="widget_ios_description_hijri">آج کی ہجری تاریخ۔ لاک اسکرین پر، اگلی نماز کے ساتھ۔</string>
+    <string name="widget_ios_description_log">کسی نماز کو وقت پر درج کرنے کے لیے تھپتھپائیں۔ اسے منسوخ کرنے کے لیے ایک منٹ کے اندر دوبارہ تھپتھپائیں۔</string>
+    <string name="widget_ios_description_reading">جہاں آپ نے چھوڑا تھا، اور آج کے ختم کا حصہ کیا مانگتا ہے۔</string>
+    <string name="widget_ios_description_streak">آپ کی بروقت نماز کا تسلسل اور عمل کے گراف کے آخری دس ہفتے۔</string>
+    <string name="widget_ios_description_tasbih">ایپ کھولے بغیر ذکر شمار کریں۔</string>
+    <string name="widget_reading_no_bookmarks">ابھی کوئی نشان نہیں</string>
+    <string name="widget_reading_page_today">صفحہ %1$d \u00b7 آج %2$d/%3$d</string>
+    <string name="widget_streak_inline">تسلسل %1$d دن</string>
 </resources>

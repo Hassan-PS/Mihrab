@@ -132,4 +132,26 @@
     <string name="widget_reading_start_tail">无需计划——打开即可开始。</string>
     <string name="widget_reading_start_side_title">页数</string>
     <string name="widget_reading_start_side_note">在整部古兰经中</string>
+    <string name="widget_hijri_title">希吉来历</string>
+    <string name="widget_title_prayer_times">礼拜时间</string>
+    <string name="widget_practice_weeks_title">功修 \u00b7 近 %1$d 周</string>
+    <string name="widget_seasonal_eid">开斋节</string>
+    <string name="widget_seasonal_jumuah">主麻</string>
+    <string name="widget_seasonal_ramadan">斋月</string>
+    <string name="widget_tasbih_complete">已完成</string>
+    <string name="widget_tasbih_keep_going">已达标 \u00b7 继续</string>
+    <string name="widget_reading_page_surah">第 %1$d 页 \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">阅读古兰经</string>
+    <string name="widget_intent_log_prayer">记录礼拜</string>
+    <string name="widget_intent_refresh">刷新小部件</string>
+    <string name="widget_intent_tasbih">记数记主</string>
+    <string name="widget_ios_description_prayer_times">今日礼拜时间，包含日出。宵礼后将显示明天的时间。</string>
+    <string name="widget_ios_description_hijri">今日希吉来历日期。锁屏上与下一次礼拜一同显示。</string>
+    <string name="widget_ios_description_log">点击某次礼拜即可按时记录。一分钟内再次点击可撤销。</string>
+    <string name="widget_ios_description_reading">显示您上次阅读到的位置，以及今日通读计划的诵读任务。</string>
+    <string name="widget_ios_description_streak">显示您的按时礼拜连续天数，以及最近十周的功修记录图。</string>
+    <string name="widget_ios_description_tasbih">无需打开应用即可记数记主。</string>
+    <string name="widget_reading_no_bookmarks">尚无书签</string>
+    <string name="widget_reading_page_today">第 %1$d 页 \u00b7 今日 %2$d/%3$d</string>
+    <string name="widget_streak_inline">连续 %1$d天</string>
 </resources>

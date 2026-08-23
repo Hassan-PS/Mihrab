@@ -187,4 +187,26 @@
     <string name="widget_reading_start_tail">لا حاجة لخطة — افتحه وابدأ.</string>
     <string name="widget_reading_start_side_title">الصفحات</string>
     <string name="widget_reading_start_side_note">في القرآن الكريم بأكمله</string>
+    <string name="widget_hijri_title">هجري</string>
+    <string name="widget_title_prayer_times">أوقات الصلاة</string>
+    <string name="widget_practice_weeks_title">الالتزام \u00b7 آخر %1$d أسابيع</string>
+    <string name="widget_seasonal_eid">العيد</string>
+    <string name="widget_seasonal_jumuah">الجمعة</string>
+    <string name="widget_seasonal_ramadan">رمضان</string>
+    <string name="widget_tasbih_complete">تم</string>
+    <string name="widget_tasbih_keep_going">تحقق الهدف \u00b7 استمر</string>
+    <string name="widget_reading_page_surah">صفحة %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">قراءة القرآن</string>
+    <string name="widget_intent_log_prayer">سجّل الصلاة</string>
+    <string name="widget_intent_refresh">تحديث الودجة</string>
+    <string name="widget_intent_tasbih">عدّ الذكر</string>
+    <string name="widget_ios_description_prayer_times">أوقات الصلاة اليوم، بما فيها الشروق. بعد العشاء، يعرض أوقات الغد.</string>
+    <string name="widget_ios_description_hijri">التاريخ الهجري لليوم. على شاشة القفل، مع الصلاة التالية.</string>
+    <string name="widget_ios_description_log">اضغط على صلاة لتسجيلها في وقتها. اضغط مرة أخرى خلال دقيقة للتراجع.</string>
+    <string name="widget_ios_description_reading">من حيث توقفت، ومقدار وِرد الختمة لليوم.</string>
+    <string name="widget_ios_description_streak">تتابعك في الالتزام بالوقت، وآخر عشرة أسابيع من الرسم البياني للالتزام.</string>
+    <string name="widget_ios_description_tasbih">عدّ الذكر دون فتح التطبيق.</string>
+    <string name="widget_reading_no_bookmarks">لا إشارات مرجعية بعد</string>
+    <string name="widget_reading_page_today">صفحة %1$d \u00b7 %2$d/%3$d اليوم</string>
+    <string name="widget_streak_inline">التتابع %1$dي</string>
 </resources>

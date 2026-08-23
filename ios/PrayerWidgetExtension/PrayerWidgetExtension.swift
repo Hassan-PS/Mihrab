@@ -28,6 +28,84 @@ let kSuite = "group.com.prayerapp"
 #endif
 let kKey = "prayer_widget_payload_v1"
 
+/// The language Mihrab itself is set to, written beside the payload.
+///
+/// Not read out of the payload: the JSON runs to a hundred kilobytes and
+/// every widget kind would decode all of it to find one string, on every
+/// timeline entry. The app writes this key at the same moment it writes the
+/// payload, so the two can never disagree.
+let kLanguageKey = "prayer_widget_language"
+
+/// Which `.lproj` in this bundle that language wants.
+///
+/// The app's own tags are the short ISO ones — `sv`, `ar`, `zh` — because
+/// that is what i18next hands out. Two need translating: a regional tag like
+/// `sv-SE` is trimmed to its language, and `zh` becomes `zh-Hans`, which is
+/// what iOS calls the script the app actually ships. Returns nil when nothing
+/// has been written yet, which is every widget placed before the app has run
+/// once, and means "use the phone's".
+private func mihrabLocalizationTag() -> String? {
+  guard let raw = UserDefaults(suiteName: kSuite)?.string(forKey: kLanguageKey)?
+          .trimmingCharacters(in: .whitespacesAndNewlines),
+        !raw.isEmpty
+  else { return nil }
+  if raw.hasPrefix("zh") { return "zh-Hans" }
+  let language = raw.split(separator: "-").first.map(String.init) ?? raw
+  return language.isEmpty ? nil : language
+}
+
+/// The locale the widget's text should be resolved in.
+///
+/// This is the app's language, not the phone's, and the difference is the
+/// whole point: Mihrab has its own language setting, and the moment someone
+/// uses it the payload arrives in one language while every label the widget
+/// draws itself would come out in another. One card, two languages. Set it
+/// once per widget configuration with `.environment(\.locale, ...)` and every
+/// `Text("some_key")` below resolves against it.
+func mihrabLocale() -> Locale {
+  guard let tag = mihrabLocalizationTag() else { return Locale.current }
+  return Locale(identifier: tag)
+}
+
+/// The string table for that language.
+///
+/// Falls back to the main bundle — and so to the phone's language, and then
+/// to English — whenever the tag names a localization this build does not
+/// carry. A widget in the wrong language is a disappointment; a widget
+/// showing `widget_next_label` is a bug report.
+private func mihrabStringsBundle() -> Bundle {
+  guard let tag = mihrabLocalizationTag(),
+        let path = Bundle.main.path(forResource: tag, ofType: "lproj"),
+        let bundle = Bundle(path: path)
+  else { return .main }
+  return bundle
+}
+
+/// A localized string for the lines SwiftUI cannot look up on its own.
+///
+/// `Text("key")` resolves through `LocalizedStringKey` and needs nothing from
+/// here. This is for the rest: text that is built before it is displayed, and
+/// the plurals, whose `.stringsdict` entries only resolve once a count has
+/// been substituted in.
+func widgetString(_ key: String, _ args: CVarArg...) -> String {
+  let format = mihrabStringsBundle().localizedString(forKey: key, value: nil, table: nil)
+  if args.isEmpty { return format }
+  return String(format: format, locale: mihrabLocale(), arguments: args)
+}
+
+/// A widget's name for the iOS gallery.
+///
+/// The shared names read "Mihrab · Prayer times" because Android's picker
+/// lists every app's widgets in one flat list and a widget there has to say
+/// whose it is. iOS groups them under the app already, so the prefix would be
+/// said twice on the same screen. Everything after the separator is the name
+/// this platform wants.
+func widgetGalleryName(_ key: String) -> String {
+  let full = widgetString(key)
+  guard let separator = full.range(of: " · ") else { return full }
+  return String(full[separator.upperBound...])
+}
+
 /// Has this payload's schedule run out?
 ///
 /// The payload is only ever written from the foreground — there is no
@@ -703,7 +781,7 @@ struct Entry: TimelineEntry {
 // AppIntent requires iOS 16+; the widget extension minimum deployment target is 16.0.
 // Button(intent:) requires iOS 17+, so the button itself is still guarded below.
 struct RefreshIntent: AppIntent {
-  static var title: LocalizedStringResource = "Refresh Widget"
+  static var title: LocalizedStringResource = "widget_intent_refresh"
   static var isDiscoverable: Bool = false
   func perform() async throws -> some IntentResult { .result() }
 }
@@ -876,7 +954,7 @@ struct PrayerWidgetEntryView: View {
 
       VStack(alignment: .leading, spacing: 0) {
         HStack(alignment: .top) {
-          Text("NEXT")
+          Text("widget_next_label")
             .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
@@ -925,7 +1003,7 @@ struct PrayerWidgetEntryView: View {
 
         // Full width, so the countdown never has to be abbreviated.
         VStack(alignment: .leading, spacing: 0) {
-          Text("in")
+          Text("widget_in_label")
             .font(.system(size: 11))
             .foregroundStyle(widgetMuted)
           CountdownLabel(target: interval?.end, fallback: time)
@@ -935,7 +1013,7 @@ struct PrayerWidgetEntryView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
       .padding(14)
     } else {
-      Text("Open Mihrab")
+      Text("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -968,7 +1046,7 @@ struct PrayerWidgetEntryView: View {
           Spacer()
 
           // "NEXT" micro-label
-          Text("NEXT")
+          Text("widget_next_label")
             .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
@@ -1077,7 +1155,7 @@ struct PrayerWidgetEntryView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     } else {
       VStack {
-        Text("Open Prayer Times")
+        Text("widget_placeholder_open_app")
           .font(.caption)
           .foregroundStyle(widgetMuted)
       }
@@ -1105,9 +1183,9 @@ struct PrayerWidgetEntryView: View {
       // Inline family is rendered by the system inside the lock-screen
       // status row — single line, system styling. Pre-format as
       // "Fajr · 05:12" so the system can lay it out compactly.
-      Text("\(name) · \(time)")
+      Text(verbatim: "\(name) · \(time)")
     } else {
-      Text("Prayer Times")
+      Text("widget_title_prayer_times")
     }
   }
 
@@ -1145,15 +1223,15 @@ struct PrayerWidgetEntryView: View {
         // distinction within the tint.
         if let s = p.seasonal {
           if s.eid != nil {
-            Text("✦ EID")
+            Text("✦ \(Text("widget_seasonal_eid"))")
               .font(.system(size: 9, weight: .semibold))
               .lineLimit(1)
           } else if s.jumuah {
-            Text("◇ JUMU'AH")
+            Text("◇ \(Text("widget_seasonal_jumuah"))")
               .font(.system(size: 9, weight: .semibold))
               .lineLimit(1)
           } else if s.ramadan {
-            Text("☾ RAMADAN")
+            Text("☾ \(Text("widget_seasonal_ramadan"))")
               .font(.system(size: 9, weight: .semibold))
               .lineLimit(1)
           } else if let loc = p.locationName, !loc.isEmpty {
@@ -1180,7 +1258,7 @@ struct PrayerWidgetEntryView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     } else {
-      Text("Prayer Times")
+      Text("widget_title_prayer_times")
     }
   }
 
@@ -1234,7 +1312,7 @@ struct PrayerWidgetEntryView: View {
         // column aligned the reserved box. `CountdownLabel(trailing:)` aligns
         // the glyphs inside that box, which is what actually moves them.
         VStack(alignment: .leading, spacing: 0) {
-          Text("NEXT")
+          Text("widget_next_label")
             .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
@@ -1255,7 +1333,7 @@ struct PrayerWidgetEntryView: View {
             }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 0) {
-              Text("in")
+              Text("widget_in_label")
                 .font(.system(size: 11))
                 .foregroundStyle(widgetMuted)
               CountdownLabel(
@@ -1286,7 +1364,7 @@ struct PrayerWidgetEntryView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     } else {
-      Text("Open Mihrab")
+      Text("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -1369,7 +1447,7 @@ struct PrayerWidgetEntryView: View {
               Text(verbatim: "\(pr.streak)")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(widgetText)
-              Text("day streak")
+              Text(widgetString("widget_streak_day_label", pr.streak))
                 .font(.system(size: 11))
                 .foregroundStyle(widgetMuted)
             }
@@ -1402,9 +1480,9 @@ struct PrayerWidgetEntryView: View {
   /// number a thing you tap a day to make up, so the widget says that too.
   private func practiceFooter(_ pr: WidgetPayload.Practice) -> String {
     var parts: [String] = []
-    if pr.bestStreak > 0 { parts.append("Best \(pr.bestStreak)") }
-    parts.append("\(pr.loggedToday) of 5 logged")
-    if pr.owed > 0 { parts.append("\(pr.owed) to make up") }
+    if pr.bestStreak > 0 { parts.append(widgetString("widget_streak_best", pr.bestStreak)) }
+    parts.append(widgetString("widget_streak_logged", pr.loggedToday))
+    if pr.owed > 0 { parts.append(widgetString("widget_streak_make_up", pr.owed)) }
     return parts.joined(separator: " · ")
   }
 
@@ -1479,9 +1557,12 @@ struct PrayerTimesHomeWidget: Widget {
     StaticConfiguration(kind: "PrayerTimesWidget", provider: Provider()) { entry in
       PrayerWidgetEntryView(entry: entry)
         .modifier(WidgetBackgroundCompatModifier())
+        // The app has its own language setting; this is what makes the
+        // labels below follow it rather than the phone. See mihrabLocale().
+        .environment(\.locale, mihrabLocale())
     }
-    .configurationDisplayName("Prayer Times")
-    .description("Today's prayer times including Sunrise. After Isha, shows tomorrow.")
+    .configurationDisplayName(widgetGalleryName("widget_name_medium"))
+    .description(widgetString("widget_ios_description_prayer_times"))
     .supportedFamilies(supportedFamilies())
   }
 

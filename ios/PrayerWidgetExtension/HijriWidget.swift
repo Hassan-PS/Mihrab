@@ -173,7 +173,7 @@ struct HijriEntryView: View {
           .lineLimit(1)
           .minimumScaleFactor(0.7)
         HStack(spacing: 4) {
-          Text("in")
+          Text("widget_in_label")
             .font(.system(size: 11))
           CountdownLabel(
             target: PrayerInterval.around(entry.date, rows: entry.rows, calendar: .current)?.end,
@@ -184,7 +184,7 @@ struct HijriEntryView: View {
           )
         }
       } else if entry.hijri == nil {
-        Text("Open Mihrab").font(.system(size: 12))
+        Text("widget_placeholder_open_app").font(.system(size: 12))
       }
     }
   }
@@ -193,7 +193,7 @@ struct HijriEntryView: View {
   private var smallBody: some View {
     if let h = entry.hijri {
       VStack(alignment: .leading, spacing: 0) {
-        Text("HIJRI")
+        Text("widget_hijri_title")
           .kerning(1.0)
           .font(.system(size: 9, weight: .semibold))
           .foregroundStyle(widgetMuted)
@@ -240,7 +240,7 @@ struct HijriEntryView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
       .padding(14)
     } else {
-      Text("Open Mihrab")
+      Text("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -262,9 +262,12 @@ struct HijriDateWidget: Widget {
     StaticConfiguration(kind: "MihrabHijriDate", provider: HijriProvider()) { entry in
       HijriEntryView(entry: entry)
         .modifier(WidgetBackgroundCompatModifier())
+        // The app has its own language setting; this is what makes the
+        // labels below follow it rather than the phone. See mihrabLocale().
+        .environment(\.locale, mihrabLocale())
     }
-    .configurationDisplayName("Hijri Date")
-    .description("Today's Hijri date. On the Lock Screen, with the next prayer.")
+    .configurationDisplayName(widgetGalleryName("widget_name_hijri"))
+    .description(widgetString("widget_ios_description_hijri"))
     .supportedFamilies(hijriFamilies())
   }
 

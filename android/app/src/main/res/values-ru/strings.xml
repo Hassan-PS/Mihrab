@@ -182,4 +182,26 @@
     <string name="widget_reading_start_tail">План не нужен — открой и начни.</string>
     <string name="widget_reading_start_side_title">СТРАНИЦЫ</string>
     <string name="widget_reading_start_side_note">во всём Коране</string>
+    <string name="widget_hijri_title">ХИДЖРА</string>
+    <string name="widget_title_prayer_times">Время намазов</string>
+    <string name="widget_practice_weeks_title">ПРАКТИКА \u00b7 ЗА %1$d НЕДЕЛЬ</string>
+    <string name="widget_seasonal_eid">ИД</string>
+    <string name="widget_seasonal_jumuah">ДЖУМА</string>
+    <string name="widget_seasonal_ramadan">РАМАДАН</string>
+    <string name="widget_tasbih_complete">готово</string>
+    <string name="widget_tasbih_keep_going">цель достигнута \u00b7 вперёд</string>
+    <string name="widget_reading_page_surah">Стр. %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Читать Коран</string>
+    <string name="widget_intent_log_prayer">Отметить намаз</string>
+    <string name="widget_intent_refresh">Обновить виджет</string>
+    <string name="widget_intent_tasbih">Считать зикр</string>
+    <string name="widget_ios_description_prayer_times">Сегодняшние времена намазов, включая Восход. После Иши показывает завтрашние.</string>
+    <string name="widget_ios_description_hijri">Сегодняшняя дата хиджры. На экране блокировки, вместе со следующим намазом.</string>
+    <string name="widget_ios_description_log">Нажмите на намаз, чтобы отметить его вовремя. Нажмите ещё раз в течение минуты, чтобы отменить.</string>
+    <string name="widget_ios_description_reading">Где вы остановились и какой отрывок хатма назначен на сегодня.</string>
+    <string name="widget_ios_description_streak">Ваша серия намазов вовремя и график за последние десять недель.</string>
+    <string name="widget_ios_description_tasbih">Считайте зикр, не открывая приложение.</string>
+    <string name="widget_reading_no_bookmarks">Ещё нет закладок</string>
+    <string name="widget_reading_page_today">Стр. %1$d \u00b7 %2$d/%3$d сегодня</string>
+    <string name="widget_streak_inline">Серия %1$dд</string>
 </resources>

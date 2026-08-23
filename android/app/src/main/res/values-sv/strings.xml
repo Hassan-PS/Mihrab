@@ -162,4 +162,26 @@
     <string name="widget_reading_start_tail">Ingen plan behövs — öppna och börja.</string>
     <string name="widget_reading_start_side_title">SIDOR</string>
     <string name="widget_reading_start_side_note">i hela Koranen</string>
+    <string name="widget_hijri_title">HIJRI</string>
+    <string name="widget_title_prayer_times">Bönetider</string>
+    <string name="widget_practice_weeks_title">AKTIVITET \u00b7 SENASTE %1$d VECKORNA</string>
+    <string name="widget_seasonal_eid">EID</string>
+    <string name="widget_seasonal_jumuah">JUMUA</string>
+    <string name="widget_seasonal_ramadan">RAMADAN</string>
+    <string name="widget_tasbih_complete">klart</string>
+    <string name="widget_tasbih_keep_going">mål nått \u00b7 fortsätt</string>
+    <string name="widget_reading_page_surah">Sida %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Läs Koranen</string>
+    <string name="widget_intent_log_prayer">Logga bön</string>
+    <string name="widget_intent_refresh">Uppdatera widgeten</string>
+    <string name="widget_intent_tasbih">Räkna dhikr</string>
+    <string name="widget_ios_description_prayer_times">Dagens tider, inklusive soluppgång. Efter Isha visas morgondagens tider.</string>
+    <string name="widget_ios_description_hijri">Dagens hijridatum. På låsskärmen, tillsammans med nästa bön.</string>
+    <string name="widget_ios_description_log">Tryck på en bön för att logga den i tid. Tryck igen inom en minut för att ångra.</string>
+    <string name="widget_ios_description_reading">Var du slutade, och vad dagens khatma-portion kräver.</string>
+    <string name="widget_ios_description_streak">Din räcka i tid och de senaste tio veckorna i aktivitetsgrafen.</string>
+    <string name="widget_ios_description_tasbih">Räkna dhikr utan att öppna appen.</string>
+    <string name="widget_reading_no_bookmarks">Inga bokmärken än</string>
+    <string name="widget_reading_page_today">Sida %1$d \u00b7 %2$d/%3$d idag</string>
+    <string name="widget_streak_inline">Räcka %1$dd</string>
 </resources>

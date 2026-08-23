@@ -174,4 +174,26 @@
     <string name="widget_reading_start_tail">Aucun plan nécessaire — ouvrez-le et commencez.</string>
     <string name="widget_reading_start_side_title">PAGES</string>
     <string name="widget_reading_start_side_note">dans tout le Coran</string>
+    <string name="widget_hijri_title">HÉGIRE</string>
+    <string name="widget_title_prayer_times">Heures de prière</string>
+    <string name="widget_practice_weeks_title">PRATIQUE \u00b7 %1$d DERNIÈRES SEMAINES</string>
+    <string name="widget_seasonal_eid">AÏD</string>
+    <string name="widget_seasonal_jumuah">DJOUMOUA</string>
+    <string name="widget_seasonal_ramadan">RAMADAN</string>
+    <string name="widget_tasbih_complete">terminé</string>
+    <string name="widget_tasbih_keep_going">objectif atteint \u00b7 continuez</string>
+    <string name="widget_reading_page_surah">Page %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Lire le Coran</string>
+    <string name="widget_intent_log_prayer">Noter la prière</string>
+    <string name="widget_intent_refresh">Actualiser le widget</string>
+    <string name="widget_intent_tasbih">Compter le dhikr</string>
+    <string name="widget_ios_description_prayer_times">Les heures de prière d\'aujourd\'hui, y compris le Lever du soleil. Après l\'Isha, affiche celles de demain.</string>
+    <string name="widget_ios_description_hijri">La date hégirienne du jour. Sur l\'écran verrouillé, avec la prochaine prière.</string>
+    <string name="widget_ios_description_log">Touchez une prière pour la noter à l\'heure. Touchez de nouveau dans la minute pour annuler.</string>
+    <string name="widget_ios_description_reading">Où vous en étiez, et ce que demande la portion du khatmah d\'aujourd\'hui.</string>
+    <string name="widget_ios_description_streak">Votre série de prières à l\'heure et les dix dernières semaines du graphique.</string>
+    <string name="widget_ios_description_tasbih">Comptez le dhikr sans ouvrir l\'application.</string>
+    <string name="widget_reading_no_bookmarks">Pas encore de signet</string>
+    <string name="widget_reading_page_today">Page %1$d \u00b7 %2$d/%3$d aujourd\'hui</string>
+    <string name="widget_streak_inline">Série %1$dj</string>
 </resources>

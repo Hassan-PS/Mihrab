@@ -71,7 +71,9 @@ struct StreakEntryView: View {
   var body: some View {
     switch family {
     case .accessoryInline:
-      Text(verbatim: entry.practice.map { "Streak \($0.streak)d" } ?? "Mihrab")
+      Text(verbatim: entry.practice
+        .map { widgetString("widget_streak_inline", $0.streak) }
+        ?? widgetString("app_name"))
     case .accessoryRectangular:
       rectangularBody
     case .systemMedium:
@@ -89,7 +91,7 @@ struct StreakEntryView: View {
   private var smallBody: some View {
     if let pr = entry.practice {
       VStack(alignment: .leading, spacing: 0) {
-        Text("STREAK")
+        Text("widget_streak_title")
           .kerning(1.0)
           .font(.system(size: 9, weight: .semibold))
           .foregroundStyle(widgetMuted)
@@ -104,14 +106,14 @@ struct StreakEntryView: View {
           .foregroundStyle(widgetText)
           .lineLimit(1)
           .minimumScaleFactor(0.5)
-        Text(pr.streak == 1 ? "day" : "days")
+        Text(widgetString("widget_streak_days", pr.streak))
           .font(.system(size: 15, weight: .semibold))
           .foregroundStyle(widgetMuted)
 
         Spacer(minLength: 4)
 
         if pr.bestStreak > 0 {
-          Text(verbatim: "Best \(pr.bestStreak)")
+          Text(verbatim: widgetString("widget_streak_best", pr.bestStreak))
             .font(.system(size: 12))
             .foregroundStyle(widgetMuted)
             .lineLimit(1)
@@ -143,7 +145,7 @@ struct StreakEntryView: View {
   private var mediumBody: some View {
     if let pr = entry.practice {
       VStack(alignment: .leading, spacing: 0) {
-        Text("PRACTICE · LAST 10 WEEKS")
+        Text(widgetString("widget_practice_weeks_title", 10))
           .kerning(0.8)
           .font(.system(size: 9, weight: .semibold))
           .foregroundStyle(widgetMuted)
@@ -159,7 +161,7 @@ struct StreakEntryView: View {
                 .foregroundStyle(widgetText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-              Text(pr.streak == 1 ? "day streak" : "day streak")
+              Text(widgetString("widget_streak_day_label", pr.streak))
                 .font(.system(size: 12))
                 .foregroundStyle(widgetMuted)
             }
@@ -176,7 +178,7 @@ struct StreakEntryView: View {
                 .minimumScaleFactor(0.8)
             }
             if pr.fastsThisMonth > 0 {
-              Text(verbatim: "\(pr.fastsThisMonth) \(pr.fastsThisMonth == 1 ? "fast" : "fasts") this month")
+              Text(verbatim: widgetString("widget_streak_fasts", pr.fastsThisMonth))
                 .font(.system(size: 11))
                 .foregroundStyle(widgetMuted)
                 .lineLimit(1)
@@ -210,10 +212,10 @@ struct StreakEntryView: View {
   private var rectangularBody: some View {
     if let pr = entry.practice {
       VStack(alignment: .leading, spacing: 1) {
-        Text("STREAK")
+        Text("widget_streak_title")
           .kerning(0.8)
           .font(.system(size: 10, weight: .semibold))
-        Text(verbatim: "\(pr.streak) \(pr.streak == 1 ? "day" : "days")")
+        Text(verbatim: "\(pr.streak) \(widgetString("widget_streak_days", pr.streak))")
           .font(.system(size: 17, weight: .semibold))
           .lineLimit(1)
           .minimumScaleFactor(0.7)
@@ -223,7 +225,7 @@ struct StreakEntryView: View {
           .minimumScaleFactor(0.7)
       }
     } else {
-      Text("Open Mihrab").font(.system(size: 12))
+      Text("widget_placeholder_open_app").font(.system(size: 12))
     }
   }
 
@@ -254,7 +256,7 @@ struct StreakEntryView: View {
 
   private var emptyBody: some View {
     VStack(spacing: 4) {
-      Text("Open Mihrab")
+      Text("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
     }
@@ -267,9 +269,12 @@ struct StreakWidget: Widget {
     StaticConfiguration(kind: "MihrabStreak", provider: StreakProvider()) { entry in
       StreakEntryView(entry: entry)
         .modifier(WidgetBackgroundCompatModifier())
+        // The app has its own language setting; this is what makes the
+        // labels below follow it rather than the phone. See mihrabLocale().
+        .environment(\.locale, mihrabLocale())
     }
-    .configurationDisplayName("Streak & Practice")
-    .description("Your on-time streak and the last ten weeks of the graph.")
+    .configurationDisplayName(widgetGalleryName("widget_name_streak"))
+    .description(widgetString("widget_ios_description_streak"))
     .supportedFamilies(streakFamilies())
   }
 

@@ -82,7 +82,10 @@ struct ReadingEntryView: View {
   var body: some View {
     switch family {
     case .accessoryInline:
-      Text(notStarted ? "Read Qur'an" : (entry.reading.map { "Page \($0.page) · \($0.surahName)" } ?? "Mihrab"))
+      Text(verbatim: notStarted
+        ? widgetString("widget_reading_read_quran")
+        : (entry.reading.map { widgetString("widget_reading_page_surah", $0.page, $0.surahName) }
+           ?? widgetString("app_name")))
     case .accessoryRectangular:
       if notStarted { startBody } else { rectangularBody }
     case .systemMedium:
@@ -98,26 +101,26 @@ struct ReadingEntryView: View {
   @ViewBuilder
   private var startBody: some View {
     VStack(alignment: .leading, spacing: 0) {
-      Text("THE QUR'AN")
+      Text("widget_reading_header_start")
         .kerning(0.8)
         .font(.system(size: 9, weight: .semibold))
         .foregroundStyle(widgetMuted)
         .lineLimit(1)
       Spacer(minLength: 4)
-      Text("Start reading")
+      Text("widget_reading_start_title")
         .font(.system(size: 20, weight: .semibold))
         .foregroundStyle(widgetText)
         .lineLimit(1)
         .minimumScaleFactor(0.6)
       Text(entry.reading?.downloaded == true
-           ? "Pick up where you like, or begin a khatmah."
-           : "The translation is ready to read now.")
+           ? "widget_reading_start_note"
+           : "widget_reading_start_note_undownloaded")
         .font(.system(size: 11))
         .foregroundStyle(widgetMuted)
         .lineLimit(2)
         .minimumScaleFactor(0.8)
         .padding(.top, 2)
-      Text("No plan needed — open it and begin.")
+      Text("widget_reading_start_tail")
         .font(.system(size: 10))
         .foregroundStyle(widgetMuted)
         .lineLimit(1)
@@ -148,7 +151,7 @@ struct ReadingEntryView: View {
           .foregroundStyle(widgetText)
           .lineLimit(1)
           .minimumScaleFactor(0.6)
-        Text(verbatim: "Page \(r.page) · Juz \(r.juz)")
+        Text(verbatim: widgetString("widget_reading_position", r.page, r.juz))
           .font(.system(size: 12))
           .foregroundStyle(widgetMuted)
           .lineLimit(1)
@@ -196,7 +199,7 @@ struct ReadingEntryView: View {
             .foregroundStyle(widgetText)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
-          Text(verbatim: "Page \(r.page) · Juz \(r.juz)")
+          Text(verbatim: widgetString("widget_reading_position", r.page, r.juz))
             .font(.system(size: 12))
             .foregroundStyle(widgetMuted)
           Spacer(minLength: 8)
@@ -224,7 +227,7 @@ struct ReadingEntryView: View {
 
         VStack(alignment: .leading, spacing: 2) {
           if let k = r.khatmah {
-            Text("TODAY'S PORTION")
+            Text("widget_reading_today_portion")
               .kerning(0.8)
               .font(.system(size: 9, weight: .semibold))
               .foregroundStyle(widgetMuted)
@@ -250,7 +253,7 @@ struct ReadingEntryView: View {
             }
             Spacer(minLength: 0)
           } else {
-            Text("LAST READ")
+            Text("widget_reading_last_read")
               .kerning(0.8)
               .font(.system(size: 9, weight: .semibold))
               .foregroundStyle(widgetMuted)
@@ -260,7 +263,7 @@ struct ReadingEntryView: View {
               .lineLimit(1)
               .minimumScaleFactor(0.7)
             if r.bookmarks > 0 {
-              Text(verbatim: "\(r.bookmarks) \(r.bookmarks == 1 ? "bookmark" : "bookmarks")")
+              Text(verbatim: widgetString("widget_reading_bookmarks", r.bookmarks))
                 .font(.system(size: 11))
                 .foregroundStyle(widgetMuted)
                 .lineLimit(1)
@@ -292,14 +295,15 @@ struct ReadingEntryView: View {
           .font(.system(size: 16, weight: .semibold))
           .lineLimit(1)
           .minimumScaleFactor(0.7)
-        Text(verbatim: r.khatmah.map { "Page \(r.page) · \($0.doneToday)/\($0.pagesToday) today" }
-          ?? "Page \(r.page) · Juz \(r.juz)")
+        Text(verbatim: r.khatmah
+          .map { widgetString("widget_reading_page_today", r.page, $0.doneToday, $0.pagesToday) }
+          ?? widgetString("widget_reading_position", r.page, r.juz))
           .font(.system(size: 11))
           .lineLimit(1)
           .minimumScaleFactor(0.7)
       }
     } else {
-      Text("Open Mihrab").font(.system(size: 12))
+      Text("widget_placeholder_open_app").font(.system(size: 12))
     }
   }
 
@@ -312,7 +316,7 @@ struct ReadingEntryView: View {
   private func footer(_ r: WidgetPayload.Reading) -> some View {
     if let k = r.khatmah {
       HStack(alignment: .firstTextBaseline, spacing: 3) {
-        Text("Today")
+        Text("widget_reading_today")
           .font(.system(size: 10))
           .foregroundStyle(widgetMuted)
         Text(verbatim: "\(k.doneToday)/\(k.pagesToday)")
@@ -332,8 +336,8 @@ struct ReadingEntryView: View {
           .lineLimit(1)
       }
       Text(verbatim: r.bookmarks > 0
-        ? "\(r.bookmarks) \(r.bookmarks == 1 ? "bookmark" : "bookmarks")"
-        : "No bookmarks yet")
+        ? widgetString("widget_reading_bookmarks", r.bookmarks)
+        : widgetString("widget_reading_no_bookmarks"))
         .font(.system(size: 10))
         .foregroundStyle(widgetMuted)
         .lineLimit(1)
@@ -342,14 +346,14 @@ struct ReadingEntryView: View {
 
   /// "KHATMAH · DAY 14/30" with a plan, "CONTINUE" without one.
   private func headerLabel(_ r: WidgetPayload.Reading) -> String {
-    guard let k = r.khatmah else { return "CONTINUE" }
-    return "KHATMAH · DAY \(k.day)/\(k.targetDays)"
+    guard let k = r.khatmah else { return widgetString("widget_reading_continue") }
+    return widgetString("widget_reading_khatmah_day", k.day, k.targetDays)
   }
 
   /// "47 of 604 · 8% read".
   private func progressLine(_ r: WidgetPayload.Reading) -> String {
     let pct = r.totalPages > 0 ? Int((Double(r.pagesRead) / Double(r.totalPages) * 100).rounded()) : 0
-    return "\(r.pagesRead) of \(r.totalPages) · \(pct)% read"
+    return widgetString("widget_reading_progress", r.pagesRead, r.totalPages, pct)
   }
 
   /// A hairline of progress. Two pages out of 604 is 0.3% — too thin to be a
@@ -380,20 +384,20 @@ struct ReadingEntryView: View {
   private func planStatusLines(_ k: WidgetPayload.Khatmah) -> [String] {
     let left = max(0, k.pagesToday - k.doneToday)
     if k.behindBy > 0 {
-      return ["\(k.behindBy) \(k.behindBy == 1 ? "page" : "pages") behind"]
+      return [widgetString("widget_reading_behind", k.behindBy)]
     }
     if left == 0 { return ["Done for today"] }
-    return ["On track", "\(left) \(left == 1 ? "page" : "pages") left"]
+    return [widgetString("widget_reading_left", left)]
   }
 
   /// "Last read today · 3 bookmarks", dropping whichever half is unknown.
   private func lastReadTail(_ r: WidgetPayload.Reading) -> String? {
     var parts: [String] = []
     if let phrase = lastReadPhrase(r) {
-      parts.append("Last read \(phrase.lowercased())")
+      parts.append(widgetString("widget_reading_last_read_prefix", phrase.lowercased()))
     }
     if r.bookmarks > 0 {
-      parts.append("\(r.bookmarks) \(r.bookmarks == 1 ? "bookmark" : "bookmarks")")
+      parts.append(widgetString("widget_reading_bookmarks", r.bookmarks))
     }
     return parts.isEmpty ? nil : parts.joined(separator: " · ")
   }
@@ -405,9 +409,9 @@ struct ReadingEntryView: View {
     let cal = Calendar.current
     let days = cal.dateComponents([.day], from: cal.startOfDay(for: then), to: cal.startOfDay(for: entry.date)).day ?? 0
     switch days {
-    case ..<1: return "Today"
-    case 1: return "Yesterday"
-    default: return "\(days) days ago"
+    case ..<1: return widgetString("widget_reading_today")
+    case 1: return widgetString("widget_reading_yesterday")
+    default: return widgetString("widget_reading_days_ago", days)
     }
   }
 
@@ -426,7 +430,7 @@ struct ReadingEntryView: View {
 
   private var emptyBody: some View {
     VStack(spacing: 2) {
-      Text("Open Mihrab")
+      Text("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
     }
@@ -439,9 +443,12 @@ struct ReadingWidget: Widget {
     StaticConfiguration(kind: "MihrabReading", provider: ReadingProvider()) { entry in
       ReadingEntryView(entry: entry)
         .modifier(WidgetBackgroundCompatModifier())
+        // The app has its own language setting; this is what makes the
+        // labels below follow it rather than the phone. See mihrabLocale().
+        .environment(\.locale, mihrabLocale())
     }
-    .configurationDisplayName("Continue Reading")
-    .description("Where you left off, and what today's khatmah portion asks.")
+    .configurationDisplayName(widgetGalleryName("widget_name_reading"))
+    .description(widgetString("widget_ios_description_reading"))
     .supportedFamilies(readingFamilies())
   }
 

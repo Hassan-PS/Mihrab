@@ -152,4 +152,26 @@
     <string name="widget_reading_start_tail">Kein Plan nötig — einfach öffnen und loslegen.</string>
     <string name="widget_reading_start_side_title">SEITEN</string>
     <string name="widget_reading_start_side_note">im gesamten Koran</string>
+    <string name="widget_hijri_title">HIJRI</string>
+    <string name="widget_title_prayer_times">Gebetszeiten</string>
+    <string name="widget_practice_weeks_title">PRAXIS \u00b7 LETZTE %1$d WOCHEN</string>
+    <string name="widget_seasonal_eid">EID</string>
+    <string name="widget_seasonal_jumuah">DSCHUMUA</string>
+    <string name="widget_seasonal_ramadan">RAMADAN</string>
+    <string name="widget_tasbih_complete">Fertig</string>
+    <string name="widget_tasbih_keep_going">Ziel erreicht \u00b7 weiter so</string>
+    <string name="widget_reading_page_surah">Seite %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Koran lesen</string>
+    <string name="widget_intent_log_prayer">Gebet eintragen</string>
+    <string name="widget_intent_refresh">Widget aktualisieren</string>
+    <string name="widget_intent_tasbih">Dhikr zählen</string>
+    <string name="widget_ios_description_prayer_times">Die heutigen Gebetszeiten, einschließlich Sonnenaufgang. Nach Isha zeigt es die Zeiten von morgen.</string>
+    <string name="widget_ios_description_hijri">Das heutige Hijri-Datum. Auf dem Sperrbildschirm, mit dem nächsten Gebet.</string>
+    <string name="widget_ios_description_log">Gebet antippen, um es pünktlich einzutragen. Innerhalb einer Minute erneut antippen, um es rückgängig zu machen.</string>
+    <string name="widget_ios_description_reading">Wo du aufgehört hast, und was das heutige Khatmah-Pensum vorsieht.</string>
+    <string name="widget_ios_description_streak">Deine pünktliche Serie und die letzten zehn Wochen des Praxisdiagramms.</string>
+    <string name="widget_ios_description_tasbih">Dhikr zählen, ohne die App zu öffnen.</string>
+    <string name="widget_reading_no_bookmarks">Noch keine Lesezeichen</string>
+    <string name="widget_reading_page_today">Seite %1$d \u00b7 %2$d/%3$d heute</string>
+    <string name="widget_streak_inline">Serie %1$dT</string>
 </resources>

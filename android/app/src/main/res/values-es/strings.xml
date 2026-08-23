@@ -152,4 +152,26 @@
     <string name="widget_reading_start_tail">No hace falta un plan \u2014 ábrelo y empieza.</string>
     <string name="widget_reading_start_side_title">PÁGINAS</string>
     <string name="widget_reading_start_side_note">en todo el Corán</string>
+    <string name="widget_hijri_title">HIJRI</string>
+    <string name="widget_title_prayer_times">Horarios de oración</string>
+    <string name="widget_practice_weeks_title">PRÁCTICA \u00b7 ÚLTIMAS %1$d SEMANAS</string>
+    <string name="widget_seasonal_eid">EID</string>
+    <string name="widget_seasonal_jumuah">YUMU\'AH</string>
+    <string name="widget_seasonal_ramadan">RAMADÁN</string>
+    <string name="widget_tasbih_complete">completado</string>
+    <string name="widget_tasbih_keep_going">meta alcanzada \u00b7 continúa</string>
+    <string name="widget_reading_page_surah">Página %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Leer Corán</string>
+    <string name="widget_intent_log_prayer">Registrar oración</string>
+    <string name="widget_intent_refresh">Actualizar widget</string>
+    <string name="widget_intent_tasbih">Contar dhikr</string>
+    <string name="widget_ios_description_prayer_times">Los horarios de hoy, incluido el amanecer. Después del Isha, muestra los de mañana.</string>
+    <string name="widget_ios_description_hijri">La fecha hijri de hoy. En la pantalla de bloqueo, con la próxima oración.</string>
+    <string name="widget_ios_description_log">Toca una oración para registrarla a tiempo. Tócala de nuevo dentro de un minuto para deshacerlo.</string>
+    <string name="widget_ios_description_reading">Dónde lo dejaste y qué pide la porción del khatmah de hoy.</string>
+    <string name="widget_ios_description_streak">Tu racha de oraciones a tiempo y las últimas diez semanas del gráfico de práctica.</string>
+    <string name="widget_ios_description_tasbih">Cuenta dhikr sin abrir la app.</string>
+    <string name="widget_reading_no_bookmarks">Aún sin marcadores</string>
+    <string name="widget_reading_page_today">Página %1$d \u00b7 %2$d/%3$d hoy</string>
+    <string name="widget_streak_inline">Racha %1$dd</string>
 </resources>

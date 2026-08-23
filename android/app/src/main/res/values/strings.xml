@@ -173,4 +173,42 @@
     <string name="widget_reading_start_tail">No plan needed \u2014 open it and begin.</string>
     <string name="widget_reading_start_side_title">PAGES</string>
     <string name="widget_reading_start_side_note">in the whole Qur\'an</string>
+
+    <!-- Labels the iOS widgets draw and Android has no place for: the Lock
+         Screen accessories, the seasonal eyebrows on them, and the titles
+         the system shows for the interactive intents. They live here because
+         the two platforms share one native widget vocabulary — ios/*.lproj
+         is generated from this file — and a phrase translated twice is a
+         phrase that drifts. -->
+    <string name="widget_hijri_title">HIJRI</string>
+    <string name="widget_title_prayer_times">Prayer times</string>
+    <string name="widget_practice_weeks_title">PRACTICE \u00b7 LAST %1$d WEEKS</string>
+    <string name="widget_seasonal_eid">EID</string>
+    <string name="widget_seasonal_jumuah">JUMU\'AH</string>
+    <string name="widget_seasonal_ramadan">RAMADAN</string>
+    <string name="widget_tasbih_complete">complete</string>
+    <string name="widget_tasbih_keep_going">target reached \u00b7 keep going</string>
+    <string name="widget_reading_page_surah">Page %1$d \u00b7 %2$s</string>
+    <string name="widget_reading_read_quran">Read Qur\'an</string>
+    <!-- Shown by the system when someone long-presses a widget button, and
+         in Shortcuts. Verb phrases, not headings. -->
+    <string name="widget_intent_log_prayer">Log prayer</string>
+    <string name="widget_intent_refresh">Refresh widget</string>
+    <string name="widget_intent_tasbih">Count dhikr</string>
+    <!-- The picker blurbs, iOS's own. Android's say "4×2, resizable" because
+         that is what a launcher grid is; iOS has families, not cells, and a
+         widget that offers to be resized on a phone that cannot resize it is
+         worse than a widget that says nothing. Everything else in this file is
+         shared between the two platforms. -->
+    <string name="widget_ios_description_prayer_times">Today\'s prayer times including Sunrise. After Isha, shows tomorrow.</string>
+    <string name="widget_ios_description_hijri">Today\'s Hijri date. On the Lock Screen, with the next prayer.</string>
+    <string name="widget_ios_description_log">Tap a prayer to log it on time. Tap again within a minute to undo.</string>
+    <string name="widget_ios_description_reading">Where you left off, and what today\'s khatmah portion asks.</string>
+    <string name="widget_ios_description_streak">Your on-time streak and the last ten weeks of the graph.</string>
+    <string name="widget_ios_description_tasbih">Count dhikr without opening the app.</string>
+    <string name="widget_reading_no_bookmarks">No bookmarks yet</string>
+    <string name="widget_reading_page_today">Page %1$d \u00b7 %2$d/%3$d today</string>
+    <!-- The Lock Screen's one-line accessory, where the whole widget is a
+         handful of characters: "Streak 12d". -->
+    <string name="widget_streak_inline">Streak %1$dd</string>
 </resources>

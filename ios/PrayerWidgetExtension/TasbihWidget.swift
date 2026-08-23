@@ -71,7 +71,7 @@ enum WidgetTasbihQueue {
 
 @available(iOS 17.0, *)
 struct TasbihActionIntent: AppIntent {
-  static var title: LocalizedStringResource = "Tasbih"
+  static var title: LocalizedStringResource = "widget_intent_tasbih"
   static var isDiscoverable: Bool = false
 
   @Parameter(title: "Action")
@@ -243,7 +243,7 @@ struct TasbihEntryView: View {
       .padding(12)
       .widgetURL(URL(string: "mihrab://tasbih"))
     } else {
-      Text("Open Mihrab")
+      Text("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -264,13 +264,13 @@ struct TasbihEntryView: View {
           .foregroundStyle(widgetText)
           .lineLimit(1)
           .minimumScaleFactor(0.5)
-        Text(verbatim: target > 0 ? "of \(target)" : "")
+        Text(verbatim: target > 0 ? widgetString("widget_tasbih_of", target) : "")
           .font(.system(size: 13, weight: .medium))
           .foregroundStyle(complete ? resolvedWidgetHighlightColor() : widgetMuted)
           .lineLimit(1)
       }
       if complete {
-        Text(unbounded ? "target reached · keep going" : "complete")
+        Text(unbounded ? "widget_tasbih_keep_going" : "widget_tasbih_complete")
           .font(.system(size: 10, weight: .medium))
           .foregroundStyle(resolvedWidgetHighlightColor())
           .lineLimit(1)
@@ -372,9 +372,12 @@ struct TasbihWidget: Widget {
     StaticConfiguration(kind: "MihrabTasbih", provider: TasbihProvider()) { entry in
       TasbihEntryView(entry: entry)
         .modifier(WidgetBackgroundCompatModifier())
+        // The app has its own language setting; this is what makes the
+        // labels below follow it rather than the phone. See mihrabLocale().
+        .environment(\.locale, mihrabLocale())
     }
-    .configurationDisplayName("Tasbih")
-    .description("Count dhikr without opening the app.")
+    .configurationDisplayName(widgetGalleryName("widget_name_tasbih"))
+    .description(widgetString("widget_ios_description_tasbih"))
     .supportedFamilies([.systemMedium])
   }
 }
