@@ -42,8 +42,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:baselineAligned="false"
-        android:visibility="gone">
         android:gravity="center_vertical"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -137,6 +137,11 @@
                 android:maxLines="1"
                 android:ellipsize="end" />
 
+            <!-- The next prayer's name, and the countdown to it. Two views
+                 rather than one string because the second is a Chronometer:
+                 the system ticks it, so the card counts down without this
+                 process being woken to redraw it. The strip widget does the
+                 same thing with the same pair of ids. -->
             <TextView
                 android:id="@+id/widget_log_foot_right"
                 android:layout_width="wrap_content"
@@ -144,6 +149,55 @@
                 android:textColor="#9AA0A6"
                 android:textSize="11sp"
                 android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/widget_log_remaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                android:textColor="#9AA0A6"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:visibility="gone" />
         </LinearLayout>
+
+        <!--
+            The practice graph, on a card tall enough to earn it.
+
+            Both hidden by default and shown by the provider at a height
+            where they are not a squeeze — the prayer-times widget does the
+            same thing with the same bitmap, so a 4x3 of either draws the
+            same weeks the same way. Below that height the widget is
+            unchanged: the graph is the reward for making it taller, not a
+            thing that shrinks until it is unreadable.
+        -->
+        <FrameLayout
+            android:id="@+id/widget_log_grid_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1FFFFFFF"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
+
+        <!--
+            Weighted, NOT wrap_content — the same shape the strip's grid
+            has, and for a reason learned the hard way here: an ImageView
+            that is match_parent wide, wrap_content tall and
+            adjustViewBounds scales the bitmap UP to the card's width and
+            takes whatever height that implies. A 120dp-wide grid became
+            170dp tall, ate the row above it, and clipped the times off the
+            chips. Bounded by weight it scales inside its box instead.
+        -->
+        <ImageView
+            android:id="@+id/widget_log_grid"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:scaleType="fitStart"
+            android:contentDescription="@string/widget_streak_grid_description"
+            android:visibility="gone" />
     </LinearLayout>
 </FrameLayout>

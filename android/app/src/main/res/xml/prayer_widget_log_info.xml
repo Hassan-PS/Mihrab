@@ -18,6 +18,13 @@
   puts that entry there. Both are API 31; below that Android falls back to
   prompting on placement, the same as the prayer widgets have always done.
 
+  maxResizeHeight is 600dp, not the 200dp it was. 200 stopped this widget
+  at two launcher rows, which is where it was designed to live — but a card
+  that cannot be dragged taller cannot show the practice graph, and the
+  graph is the one thing people wanted from it that the prayer-times widget
+  already had. Four rows is 432dp on a 420dpi phone; 600 covers the tallest
+  cell a tablet is likely to report.
+
   updatePeriodMillis is 0 — this widget is pushed, never polled. It redraws
   when the payload changes, when a chip is tapped, and at each prayer
   boundary via ACTION_PRAYER_TIME_ELAPSED. A 30-minute poll would wake the
@@ -40,4 +47,4 @@
     android:targetCellWidth="4"
     android:targetCellHeight="2"
     android:maxResizeWidth="500dp"
-    android:maxResizeHeight="200dp" />
+    android:maxResizeHeight="600dp" />

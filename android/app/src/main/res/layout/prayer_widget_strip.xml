@@ -39,8 +39,14 @@
 
         <!-- Header: the day and where, with the Hijri date opposite. One
              line, because two muted lines stacked at the top of a card read
-             as a paragraph nobody asked for. -->
+             as a paragraph nobody asked for.
+
+             It has an id because it is the first thing to go on a one-row
+             card: at that height the six times and what is next are the
+             whole point, and the city is the line you can most afford to
+             lose. See STRIP_HEADER_MIN_HEIGHT_DP. -->
         <LinearLayout
+            android:id="@+id/widget_header_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -160,6 +166,7 @@
 
         <!-- "Asr in 37 min" opposite "2 of 5 logged". -->
         <LinearLayout
+            android:id="@+id/widget_next_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"

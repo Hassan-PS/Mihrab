@@ -10,10 +10,15 @@
   is the list with the night times, drag it to four rows and the practice
   graph comes with it.
 
-  So the range is deliberately wide: 4x2 up to 4x4, and it means something
-  different at each end. `targetCellHeight` is 2 because that is the honest
-  default — the strip is what most people want and the taller layouts are
-  something you opt into by resizing.
+  So the range is deliberately wide: 4x1 up to 4x4, and it means something
+  different at each end. `targetCellHeight` is 1 because that is what the
+  content actually needs: the six times are one row of columns, and the
+  header the second row was paying for is the city — the line you can most
+  afford to lose. Placed at one row it draws the times and what is next;
+  drag it to two and the location and the Hijri date come back; three
+  brings the practice graph and four the month footer. Every row you give
+  it buys something, which is not true of a widget that starts at the size
+  it ends at.
 
   `maxResizeHeight` is 600dp, not the 400 it was, because 400 was smaller
   than a size this widget actually reaches. 400 reads like four rows times
@@ -39,7 +44,7 @@
     android:description="@string/widget_description_prayer_times"
     android:initialLayout="@layout/prayer_widget_strip"
     android:minWidth="250dp"
-    android:minHeight="100dp"
+    android:minHeight="60dp"
     android:previewImage="@mipmap/ic_launcher"
     android:previewLayout="@layout/prayer_widget_strip_preview"
     android:resizeMode="horizontal|vertical"
@@ -49,7 +54,7 @@
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen"
     android:targetCellWidth="4"
-    android:targetCellHeight="2"
+    android:targetCellHeight="1"
     android:maxResizeWidth="500dp"
     android:maxResizeHeight="600dp" />
 

@@ -130,6 +130,17 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
     private fun payloadToday(context: Context): JSONObject? =
       payloadRoot(context)?.optJSONObject("today")
 
+    /**
+     * The height at which the practice graph appears.
+     *
+     * The same number the prayer-times widget uses for the same bitmap: two
+     * launcher rows is 210dp and three is 321dp on a 420dpi phone, so 265
+     * sits in the middle of that gap. A 4x2 — where this widget was
+     * designed to live — is unchanged; drag it to 4x3 and the graph is
+     * what the extra row is for.
+     */
+    private const val GRID_MIN_HEIGHT_DP = 265
+
     private fun buildViews(context: Context, appWidgetId: Int): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_log)
       val (bg, accent) = PrayerWidgetProvider.resolvedColors(context)
@@ -165,7 +176,58 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
         payloadRoot(context)?.optString("dayLabel").orEmpty(),
         accent,
       )
+      bindGrid(context, views, appWidgetId, accent)
       return views
+    }
+
+    /**
+     * The practice graph, on a card tall enough to hold it.
+     *
+     * Drawn by the same renderer the prayer-times and streak widgets use,
+     * so the three describe the same weeks identically — a graph that
+     * disagreed with itself across two home-screen cards would be worse
+     * than one card having none.
+     *
+     * Absent practice data hides it rather than drawing an empty grid: the
+     * app has simply not pushed a block yet, and an empty graph is a claim
+     * that nothing was ever logged.
+     */
+    private fun bindGrid(
+      context: Context,
+      views: RemoteViews,
+      appWidgetId: Int,
+      accent: Int,
+    ) {
+      val practice = payloadRoot(context)?.optJSONObject("practice")
+      val (_, heightDp) = PrayerWidgetProvider.sizeDp(
+        context,
+        AppWidgetManager.getInstance(context),
+        appWidgetId,
+      )
+      // `heightDp == 0` is a launcher that has not measured yet, not a
+      // short card: showing the graph is the better guess, because the only
+      // way to be here at all is a widget the user has placed.
+      val show = practice != null && !(heightDp in 1 until GRID_MIN_HEIGHT_DP)
+      val vis = if (show) View.VISIBLE else View.GONE
+      views.setViewVisibility(R.id.widget_log_grid_divider, vis)
+      views.setViewVisibility(R.id.widget_log_grid, vis)
+      if (!show || practice == null) return
+      val density = context.resources.displayMetrics.density
+      views.setImageViewBitmap(
+        R.id.widget_log_grid,
+        PracticeGridBitmap.render(
+          practice.optJSONArray("days"),
+          // Twenty columns, because seven rows of fourteen is a 2:1 shape
+          // in a box three times as wide as it is tall — the graph sat in
+          // the left two thirds with the right third empty. Twenty is what
+          // the payload now carries, and it fills the card.
+          20,
+          (7 * density).toInt().coerceAtLeast(3),
+          (2f * density).toInt().coerceAtLeast(1),
+          accent,
+          practice.optString("since").ifEmpty { null },
+        ),
+      )
     }
 
     private fun bindToday(
@@ -272,12 +334,12 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
         }
       }
 
-      views.setTextViewText(R.id.widget_log_foot_left, footerLeft(context, prayers, pending))
       val owed = today.optInt("owed", 0)
       views.setTextViewText(
-        R.id.widget_log_foot_right,
-        if (owed > 0) context.getString(R.string.widget_log_owed, owed) else "",
+        R.id.widget_log_foot_left,
+        footerLeft(context, prayers, pending, owed),
       )
+      bindCountdown(context, views, prayers)
     }
 
     private fun statusOfPrayer(prayers: org.json.JSONArray?, key: String): String? {
@@ -296,6 +358,7 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
       context: Context,
       prayers: org.json.JSONArray?,
       pending: Set<String>,
+      owed: Int,
     ): String {
       val n = prayers?.length() ?: 0
       for (i in 0 until n) {
@@ -315,7 +378,85 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
           )
         }
       }
+      // "Today is up to date" while a prayer is owed is the card
+      // contradicting itself. Nothing is DUE, which is what the loop above
+      // answers, but something is outstanding — and that is the more
+      // useful of the two things to say.
+      if (owed > 0) return context.getString(R.string.widget_log_owed, owed)
       return context.getString(R.string.widget_log_up_to_date)
+    }
+
+    /**
+     * The next prayer whose time has not arrived, or null after the last.
+     *
+     * `due` is computed by the app when it writes the payload, so the first
+     * row that is NOT due is the next one — the same reading iOS's footer
+     * takes.
+     */
+    private fun nextPrayer(prayers: org.json.JSONArray?): JSONObject? {
+      val n = prayers?.length() ?: 0
+      for (i in 0 until n) {
+        val o = prayers?.optJSONObject(i) ?: continue
+        if (!o.optBoolean("due", false)) return o
+      }
+      return null
+    }
+
+    /**
+     * "Maghrib · in 2:12:04", ticked by the system.
+     *
+     * A Chronometer rather than a string this process computes: the widget
+     * redraws when the payload changes and at each prayer boundary, so a
+     * computed "in 2h 12m" would be right when drawn and frozen for the
+     * hour after. Handing the view the moment the prayer lands costs
+     * nothing and counts itself down.
+     *
+     * Nothing is shown after the last prayer of the day. Tomorrow's Fajr
+     * would need tomorrow's schedule, and this widget is about today — the
+     * footer already says the day is done.
+     */
+    private fun bindCountdown(
+      context: Context,
+      views: RemoteViews,
+      prayers: org.json.JSONArray?,
+    ) {
+      val next = nextPrayer(prayers)
+      val at = next?.optString("time").orEmpty()
+      val parts = at.split(":")
+      val minutesAt = if (parts.size == 2) {
+        (parts[0].toIntOrNull() ?: -1) * 60 + (parts[1].toIntOrNull() ?: -1)
+      } else {
+        -1
+      }
+      val now = java.util.Calendar.getInstance()
+      val currentMinutes =
+        now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
+      val minutesLeft = minutesAt - currentMinutes
+      if (next == null || minutesAt < 0 || minutesLeft < 0) {
+        views.setTextViewText(R.id.widget_log_foot_right, "")
+        // Stopped as well as hidden: a running Chronometer inside a hidden
+        // view is still a view being invalidated once a second.
+        views.setChronometer(R.id.widget_log_remaining, 0L, null, false)
+        views.setViewVisibility(R.id.widget_log_remaining, View.GONE)
+        return
+      }
+      views.setTextViewText(
+        R.id.widget_log_foot_right,
+        next.optString("name").ifEmpty { next.optString("key") },
+      )
+      // The seconds of the current minute have to come off the base or the
+      // countdown is up to 59 seconds early — long enough to show 00:00
+      // while the prayer has not arrived.
+      val base = android.os.SystemClock.elapsedRealtime() +
+        minutesLeft * 60_000L - now.get(java.util.Calendar.SECOND) * 1000L
+      views.setChronometerCountDown(R.id.widget_log_remaining, true)
+      views.setChronometer(
+        R.id.widget_log_remaining,
+        base,
+        context.getString(R.string.widget_countdown_format),
+        true,
+      )
+      views.setViewVisibility(R.id.widget_log_remaining, View.VISIBLE)
     }
 
     /**

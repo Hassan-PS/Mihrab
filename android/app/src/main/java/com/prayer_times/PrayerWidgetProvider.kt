@@ -516,8 +516,31 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * clipped the times off the columns entirely and left a row of labels
      * above a half-cut highlight pill, which is worse than not showing the
      * day at all. Measured on a 1080x2400 emulator: it needs about 90dp.
+     *
+     * 92, not the 145 it was. 145 sat mid-way between one launcher row and
+     * two, which put a one-row card below the bar — so the widget that
+     * opened at 4x1 drew the compact line and the six times only appeared
+     * when it was dragged taller. The measurement above says the columns
+     * and the next-prayer line fit in a row; what does not fit is the
+     * header, and that is now its own threshold rather than a reason to
+     * abandon the whole strip.
      */
-    private const val STRIP_MIN_HEIGHT_DP = 145
+    private const val STRIP_MIN_HEIGHT_DP = 92
+
+    /**
+     * Below this the strip drops its header — the city, the Hijri date and
+     * the refresh glyph.
+     *
+     * A one-row card is 99dp of real height on a 420dpi phone, and about
+     * 75 of that survives the padding. The columns need 42 and the
+     * next-prayer line 28: the header's 16 is exactly what does not fit,
+     * and it is also the least of the three. Nobody places a prayer-times
+     * widget to be told which city they are in.
+     *
+     * Two rows is 210dp, so this threshold sits mid-band and the header
+     * comes back the moment the card is dragged taller.
+     */
+    private const val STRIP_HEADER_MIN_HEIGHT_DP = 145
 
     /**
      * Three launcher cells of width. Below this the six-column strip gives
@@ -873,6 +896,24 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * no-ops, so the layout check below is for readers rather than for
      * safety — but a reader who does not know that would be right to worry.
      */
+    /**
+     * The header, on a card with room for it. See STRIP_HEADER_MIN_HEIGHT_DP.
+     *
+     * Only the strip has this row; the list layout puts the same facts
+     * somewhere else and is never drawn short enough for the question to
+     * arise. A height of 0 is a launcher that has not measured yet, which
+     * must not be read as "short" — the header would flicker away on every
+     * first draw.
+     */
+    private fun bindStripHeader(views: RemoteViews, layoutId: Int, heightDp: Int) {
+      if (layoutId != R.layout.prayer_widget_strip) return
+      val show = !(heightDp in 1 until STRIP_HEADER_MIN_HEIGHT_DP)
+      views.setViewVisibility(
+        R.id.widget_header_row,
+        if (show) View.VISIBLE else View.GONE,
+      )
+    }
+
     private fun bindPracticeStrip(
       views: RemoteViews,
       payload: org.json.JSONObject,
@@ -1282,6 +1323,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
       bindNightRow(views, displayRows, layoutId)
       bindLoggedLine(views, o, context, layoutId, describesToday)
+      bindStripHeader(views, layoutId, heightDp)
       bindPracticeStrip(views, o, style, context, layoutId, heightDp)
 
       // The alarms are NOT armed here any more — see `armWidgetAlarms`. A
