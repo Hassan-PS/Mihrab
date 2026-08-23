@@ -4,6 +4,16 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- The sync folder is the app's own Documents directory, and these two
+	     keys are what make it reachable. UIFileSharingEnabled puts it in the
+	     Files app as "On My iPhone > Mihrab"; LSSupportsOpeningDocumentsInPlace
+	     lets other apps work on the files where they are rather than on
+	     copies, which is what a sync client needs. Without both, the folder
+	     exists and nothing else can see it. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

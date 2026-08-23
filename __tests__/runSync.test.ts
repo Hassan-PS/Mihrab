@@ -9,6 +9,7 @@
 const mockStore = new Map<string, string>();
 let mockHasPicker = true;
 let mockReachable = true;
+let mockDefaultFolder: unknown = null;
 let mockHasRandom = true;
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -27,6 +28,9 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 jest.mock('../src/sync/folderAccess', () => ({
   hasFolderPicker: () => mockHasPicker,
   folderStillReachable: async () => mockReachable,
+  // Android has no default folder; iOS hands back its own. Null here is the
+  // Android case, which is what "no folder chosen" has to keep meaning.
+  defaultSyncFolder: async () => mockDefaultFolder,
   folderAt: () => {
     throw new Error('folderAt should not be reached when a folder is injected');
   },
@@ -66,6 +70,7 @@ beforeEach(() => {
   mockStore.clear();
   mockHasPicker = true;
   mockReachable = true;
+  mockDefaultFolder = null;
   mockHasRandom = true;
   mockSync.mockReset();
   mockSync.mockResolvedValue(OUTCOME);
@@ -90,7 +95,7 @@ describe('refusing, with the reason named', () => {
 
   it('says so when the folder has gone away, and remembers that', async () => {
     await updateSyncSettings({
-      folder: { handle: 'content://tree/1', label: 'Sync' },
+      folder: { handle: 'content://tree/1', label: 'Sync', kind: 'picked' as const },
     });
     mockReachable = false;
 

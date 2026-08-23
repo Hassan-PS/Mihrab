@@ -57,6 +57,7 @@ import {
 import { applySnapshot, collectData } from './snapshotStore';
 import type { MergeSummary } from './merge';
 import { encode, KEY_BYTES } from './pairingCode';
+import { fromBase64 } from './secureRandom';
 import { getDeviceIdentity } from './deviceIdentity';
 import { getDeviceName } from './deviceName';
 import { listPeers, notePeerSeen, recipientKeys } from './peers';
@@ -142,16 +143,32 @@ export async function syncWithFolder(
 ): Promise<SyncOutcome> {
   const me = await getDeviceIdentity();
   const mine = syncFileNameFor(me.publicKey);
+  const known = await listPeers();
   const skipped: SyncSkipped = { notOurs: 0, notForUs: 0, unreadable: 0 };
   let read = 0;
   let learned = 0;
   let merged: MergeSummary | null = null;
 
-  const names = (await folder.list()).filter(
+  const listed = (await folder.list()).filter(
     name => isSyncFileName(name) && name !== mine,
   );
 
-  for (const name of names) {
+  // ASK FOR KNOWN DEVICES BY NAME, don't only take what the listing gives.
+  //
+  // Every device's filename is derived from its public key, so for a device
+  // already paired we know exactly what to ask for. That matters because
+  // directory listing is the one part of the Storage Access Framework a
+  // provider is allowed to be useless at: one Android build returns an empty
+  // cursor for a folder it will happily create and open files in. Enumerating
+  // is then only needed for devices we have NOT met — the announcement case.
+  const derived = known
+    .map(peer => syncFileNameFor(fromBase64(peer.pk)))
+    .filter(name => name !== mine && !listed.includes(name));
+
+  for (const name of [...listed, ...derived]) {
+    // A derived name is a guess: the device may never have written yet, and
+    // its absence is the normal case rather than something to report.
+    const guessed = !listed.includes(name);
     let parsed: unknown;
     try {
       parsed = JSON.parse(await folder.read(name));
@@ -159,7 +176,7 @@ export async function syncWithFolder(
       // Unreadable or half-written. The writer will finish and we will see
       // it next round; there is nothing useful to do now and nothing to
       // tell the user, who did not put this file here by hand.
-      skipped.notOurs++;
+      if (!guessed) skipped.notOurs++;
       continue;
     }
 

@@ -2,6 +2,9 @@
 
 @interface RCT_EXTERN_MODULE(SyncFolder, NSObject)
 
+RCT_EXTERN_METHOD(defaultFolder:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(pick:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

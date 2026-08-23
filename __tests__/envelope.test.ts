@@ -97,6 +97,32 @@ describe('the round trip', () => {
     expect(result.ok && result.senderName).toBeUndefined();
   });
 
+  it('carries a payload that is not ASCII', async () => {
+    const a = device();
+    const b = device();
+    // The journal has notes, and the app ships in thirteen languages. This
+    // is the case that broke on a real device: Hermes has no TextDecoder,
+    // and node does, so the round trip passed here and threw there.
+    const arabic = JSON.stringify({
+      note: 'صلاة الفجر في المسجد 🕌',
+      surah: '晨礼',
+      city: 'Göteborg',
+    });
+    const envelope = await seal({
+      json: arabic,
+      senderSecretKey: a.secretKey,
+      senderPublicKey: a.publicKey,
+      recipients: [b.publicKey],
+    });
+
+    const result = open({
+      envelope: throughDisk(envelope),
+      mySecretKey: b.secretKey,
+      myPublicKey: b.publicKey,
+    });
+    expect(result.ok && result.json).toBe(arabic);
+  });
+
   it('never repeats a nonce, so sealing the same data twice differs', async () => {
     const a = device();
     const b = device();

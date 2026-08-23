@@ -63,7 +63,7 @@ import {
 } from '../sync/peers';
 import { hasSecureRandom } from '../sync/secureRandom';
 import { hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
-import { runSyncNow } from '../sync/runSync';
+import { ensureSyncFolder, runSyncNow } from '../sync/runSync';
 import {
   getSyncSettings,
   updateSyncSettings,
@@ -151,6 +151,10 @@ export function SyncScreen() {
         return;
       }
       try {
+        // Adopt the platform's default folder before reading the settings,
+        // so a first visit shows a folder already in place rather than a
+        // button — on iOS there is nothing for the user to decide.
+        await ensureSyncFolder();
         const [mine, name, list, stored] = await Promise.all([
           myPairingCode(),
           getDeviceName(),
@@ -237,6 +241,33 @@ export function SyncScreen() {
                 }
                 setEntered('');
                 await refreshPeers();
+
+                // ANNOUNCE AT ONCE, not on the next app open.
+                //
+                // Pairing is one-directional: this device now knows the
+                // other, and the other has never heard of this one. It
+                // finds out by reading a file with our key in it, so the
+                // sooner that file exists the sooner the pair is real.
+                // Waiting for the next foreground meant the user had to
+                // carry a second code back by hand, which is what this is
+                // here to stop.
+                const current = await getSyncSettings();
+                if (!current.folder) {
+                  // No folder is no channel, so promising two-way sync
+                  // here would be a lie the user finds out about later.
+                  Alert.alert(
+                    t('sync.pairedTitle'),
+                    t('sync.pairedNeedsFolder'),
+                  );
+                  return;
+                }
+                setSyncing(true);
+                try {
+                  await runSyncNow();
+                } finally {
+                  setSyncing(false);
+                }
+                setSettings(await getSyncSettings());
                 Alert.alert(t('sync.pairedTitle'), t('sync.pairedBody'));
               } catch {
                 Alert.alert(t('sync.errorSaveTitle'), t('sync.errorSaveBody'));
@@ -277,11 +308,20 @@ export function SyncScreen() {
         setSettings(await getSyncSettings());
         if (result.ok) {
           await refreshPeers();
+          if (result.outcome.read > 0) {
+            Alert.alert(t('sync.syncDoneTitle'), t('sync.syncDoneBody'));
+            return;
+          }
+          // "Synced" is the wrong word for a round that exchanged nothing,
+          // and the difference between the two quiet cases is the whole
+          // diagnosis. A paired device that has NEVER been seen almost
+          // always means the two devices are looking at different folders —
+          // which is invisible from either screen, so it has to be said.
+          const known = await listPeers();
+          const neverAnyone = known.length > 0 && known.every(p => !p.lastSeenAt);
           Alert.alert(
-            t('sync.syncDoneTitle'),
-            result.outcome.read > 0
-              ? t('sync.syncDoneBody')
-              : t('sync.syncNothing'),
+            t('sync.syncQuietTitle'),
+            neverAnyone ? t('sync.syncNothingArrived') : t('sync.syncNothing'),
           );
           return;
         }
@@ -372,6 +412,90 @@ export function SyncScreen() {
         <Text style={[typeStyle('body'), { color: palette.text }]}>
           {t('sync.pairIntro')}
         </Text>
+
+        <Text
+          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+        >
+          {t('sync.folderSection')}
+        </Text>
+        <View style={[styles.card, card]}>
+          <Text style={[typeStyle('body'), { color: palette.text }]}>
+            {t('sync.folderHelp')}
+          </Text>
+          {settings?.folder ? (
+            <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
+              {settings.folder.kind === 'app'
+                ? t('sync.folderAppHint', { value: settings.folder.label })
+                : t('sync.folderChosen', { value: settings.folder.label })}
+            </Text>
+          ) : null}
+          <View style={styles.buttonRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                settings?.folder
+                  ? t('sync.changeFolder')
+                  : t('sync.chooseFolder')
+              }
+              testID="sync-choose-folder"
+              onPress={onChooseFolder}
+              style={({ pressed }) => [
+                styles.secondary,
+                styles.grow,
+                { borderColor: palette.border, borderRadius: RADIUS.sm },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[typeStyle('headline'), { color: palette.text }]}>
+                {settings?.folder
+                  ? t('sync.changeFolder')
+                  : t('sync.chooseFolder')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sync.syncNow')}
+              accessibilityState={{ disabled: syncing || !settings?.folder }}
+              testID="sync-now"
+              onPress={onSyncNow}
+              disabled={syncing || !settings?.folder}
+              style={({ pressed }) => [
+                styles.primary,
+                styles.grow,
+                { backgroundColor: palette.accent, borderRadius: RADIUS.sm },
+                pressed && styles.pressed,
+                (syncing || !settings?.folder) && styles.disabled,
+              ]}
+            >
+              {syncing ? (
+                <ActivityIndicator color={String(palette.bg)} />
+              ) : (
+                <Text style={[typeStyle('headline'), { color: palette.bg }]}>
+                  {t('sync.syncNow')}
+                </Text>
+              )}
+            </Pressable>
+          </View>
+          <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
+            {settings?.lastSyncAt
+              ? t('sync.lastSyncedAt', {
+                  when: new Date(settings.lastSyncAt).toLocaleString(),
+                })
+              : t('sync.neverSynced')}
+          </Text>
+          <View style={styles.peerRow}>
+            <Text
+              style={[typeStyle('body'), styles.peerText, { color: palette.text }]}
+            >
+              {t('sync.autoOnOpen')}
+            </Text>
+            <Switch
+              accessibilityLabel={t('sync.autoOnOpen')}
+              value={settings?.autoOnOpen ?? true}
+              onValueChange={onToggleAuto}
+            />
+          </View>
+        </View>
 
         <Text
           style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
@@ -532,87 +656,6 @@ export function SyncScreen() {
           )}
         </View>
 
-        <Text
-          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
-        >
-          {t('sync.folderSection')}
-        </Text>
-        <View style={[styles.card, card]}>
-          <Text style={[typeStyle('body'), { color: palette.text }]}>
-            {t('sync.folderHelp')}
-          </Text>
-          {settings?.folder ? (
-            <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
-              {t('sync.folderChosen', { value: settings.folder.label })}
-            </Text>
-          ) : null}
-          <View style={styles.buttonRow}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                settings?.folder
-                  ? t('sync.changeFolder')
-                  : t('sync.chooseFolder')
-              }
-              testID="sync-choose-folder"
-              onPress={onChooseFolder}
-              style={({ pressed }) => [
-                styles.secondary,
-                styles.grow,
-                { borderColor: palette.border, borderRadius: RADIUS.sm },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={[typeStyle('headline'), { color: palette.text }]}>
-                {settings?.folder
-                  ? t('sync.changeFolder')
-                  : t('sync.chooseFolder')}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('sync.syncNow')}
-              accessibilityState={{ disabled: syncing || !settings?.folder }}
-              testID="sync-now"
-              onPress={onSyncNow}
-              disabled={syncing || !settings?.folder}
-              style={({ pressed }) => [
-                styles.primary,
-                styles.grow,
-                { backgroundColor: palette.accent, borderRadius: RADIUS.sm },
-                pressed && styles.pressed,
-                (syncing || !settings?.folder) && styles.disabled,
-              ]}
-            >
-              {syncing ? (
-                <ActivityIndicator color={String(palette.bg)} />
-              ) : (
-                <Text style={[typeStyle('headline'), { color: palette.bg }]}>
-                  {t('sync.syncNow')}
-                </Text>
-              )}
-            </Pressable>
-          </View>
-          <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
-            {settings?.lastSyncAt
-              ? t('sync.lastSyncedAt', {
-                  when: new Date(settings.lastSyncAt).toLocaleString(),
-                })
-              : t('sync.neverSynced')}
-          </Text>
-          <View style={styles.peerRow}>
-            <Text
-              style={[typeStyle('body'), styles.peerText, { color: palette.text }]}
-            >
-              {t('sync.autoOnOpen')}
-            </Text>
-            <Switch
-              accessibilityLabel={t('sync.autoOnOpen')}
-              value={settings?.autoOnOpen ?? true}
-              onValueChange={onToggleAuto}
-            />
-          </View>
-        </View>
 
         <Text
           style={[typeStyle('caption'), styles.section, { color: palette.muted }]}

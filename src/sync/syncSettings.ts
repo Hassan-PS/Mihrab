@@ -40,12 +40,19 @@ const SYNC_SETTINGS_KEY = 'prayerapp.sync.settings.v1';
 /** How this device gets back to the folder the user chose. */
 export type FolderHandle = {
   /**
-   * Android: the tree URI, `content://…`. iOS: base64 bookmark data.
-   * Opaque here on purpose — only the native module interprets it.
+   * Android: the tree URI, `content://…`. iOS: base64 bookmark data, or the
+   * `app:documents` sentinel. Opaque here on purpose — only the native
+   * module interprets it.
    */
   handle: string;
   /** What to show the user. Best effort; providers vary. */
   label: string;
+  /**
+   * `app` is the folder the app made for itself and can always reach;
+   * `picked` is one the user chose and granted. The screen says something
+   * different about each — where to find it, versus what it is called.
+   */
+  kind: 'app' | 'picked';
 };
 
 export type SyncSettings = {
@@ -88,6 +95,10 @@ function coerceFolder(value: unknown): FolderHandle | null {
   return {
     handle: r.handle,
     label: typeof r.label === 'string' && r.label ? r.label : r.handle,
+    // Anything not explicitly ours is treated as picked, because a wrongly
+    // remembered `app` would skip the access check that a granted folder
+    // needs.
+    kind: r.kind === 'app' ? 'app' : 'picked',
   };
 }
 

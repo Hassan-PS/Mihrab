@@ -25,7 +25,7 @@
  * missing, and it says it where the user can act on it.
  */
 import { AppState, type AppStateStatus } from 'react-native';
-import { runSyncNow, type SyncRunResult } from './runSync';
+import { ensureSyncFolder, runSyncNow, type SyncRunResult } from './runSync';
 import { getSyncSettings } from './syncSettings';
 
 /** Below the rate anyone's record changes, above the rate `active` fires. */
@@ -51,7 +51,13 @@ export async function maybeAutoSync(
   running = true;
   try {
     const settings = await getSyncSettings();
-    if (!settings.autoOnOpen || !settings.folder) return null;
+    if (!settings.autoOnOpen) return null;
+    // Adopt the platform's default folder here too, not only when the Sync
+    // screen is opened. On iOS the app has a folder of its own and nothing
+    // is asked of the user — but if the default were only adopted by that
+    // screen, sync would do nothing at all until they went looking for it,
+    // which is the opposite of the point.
+    if (!(await ensureSyncFolder())) return null;
     // Stamped before the round rather than after, so a slow or hanging one
     // cannot let the next event queue up behind it. Only stamped when a
     // round actually starts: a decline must not make the app sit idle for

@@ -1320,7 +1320,7 @@
     "pairWarnBody": "Allt som finns registrerat på den enheten dyker upp här, och allt som finns här dyker upp där. Sammanfogningen tar aldrig bort något: där de två skiljer sig behålls den senaste posten.",
     "pairConfirm": "Parkoppla",
     "pairedTitle": "Parkopplad",
-    "pairedBody": "Båda enheterna synkar från och med nu. Öppna Mihrab på den andra för att slutföra det första utbytet.",
+    "pairedBody": "Den här enheten har skrivit sin nyckel till mappen. Öppna Mihrab på den andra enheten — så fort den läser mappen är båda parkopplade och synkar.",
     "errorBadCodeTitle": "Koden fungerade inte",
     "errorBadCode": "Kontrollera koden och försök igen. Den är grupperad i sexor, och ett enda fel tecken räcker för att den ska avvisas.",
     "errorThisDevice": "Det är den här enhetens egen kod. Du behöver den som visas på den andra enheten.",
@@ -1365,7 +1365,11 @@
       "logBody": "Ställ in synk så att dina uppgifter är likadana överallt. Ingenting laddas upp.",
       "dismiss": "Dölj det här",
       "openHint": "Öppnar synkinställningarna"
-    }
+    },
+    "pairedNeedsFolder": "Välj en mapp först. Det är via mappen de två enheterna når varandra, och utan en kan ingenting utbytas.",
+    "folderAppHint": "Mihrab har skapat en egen mapp som heter {{value}}. Du hittar den i Filer, under På min iPhone — peka din synkapp mot den för att nå dina andra enheter.",
+    "syncQuietTitle": "Ingenting kom fram",
+    "syncNothingArrived": "Din fil ligger i mappen, men ingenting från dina andra enheter har dykt upp där. Båda enheterna måste peka mot samma mapp, och det som håller mappen i takt mellan dem måste vara igång."
   },
   "stats": {
     "daysUnit": " dagar",

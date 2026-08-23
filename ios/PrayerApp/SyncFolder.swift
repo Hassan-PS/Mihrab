@@ -11,6 +11,20 @@ import UniformTypeIdentifiers
  one directory and knows nothing about envelopes, peers or merging —
  `folderSync.ts` does the rest.
 
+ ── THE DEFAULT FOLDER IS OURS, AND NEEDS NO PICKER ──────────────────────
+
+ `defaultFolder` returns the app's own Documents directory. `Info.plist`
+ declares `UIFileSharingEnabled` and `LSSupportsOpeningDocumentsInPlace`, so
+ that directory shows up in the Files app as "On My iPhone > Mihrab" and
+ other apps can work on the files in place rather than on copies. That is
+ what lets someone point a sync client at it.
+
+ It costs nothing to reach: no picker, no bookmark, no security scope. The
+ handle is the sentinel `app:documents`, and every operation below checks
+ for it first. Picking a different folder still works and still goes
+ through the bookmark path — someone whose sync client watches one specific
+ directory wants to name it.
+
  ── WHY A BOOKMARK AND NOT A PATH ────────────────────────────────────────
 
  The whole point of this folder is that something else already syncs it: a
@@ -48,6 +62,44 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
   @objc var methodQueue: DispatchQueue { DispatchQueue.main }
 
   private var pending: (resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock)?
+
+  /// Handle for "the app's own Documents directory".
+  private static let appFolderHandle = "app:documents"
+
+  private static func appFolder() -> URL? {
+    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+  }
+
+  /**
+   The folder to use when the user has not chosen one.
+
+   Created on demand rather than at launch, so a build where sync is never
+   opened never makes a directory.
+   */
+  @objc(defaultFolder:rejecter:)
+  func defaultFolder(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    rejecter reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard let url = Self.appFolder() else {
+      resolve(nil)
+      return
+    }
+    do {
+      try FileManager.default.createDirectory(
+        at: url,
+        withIntermediateDirectories: true
+      )
+    } catch {
+      resolve(nil)
+      return
+    }
+    resolve([
+      "handle": Self.appFolderHandle,
+      "label": "Mihrab",
+      "kind": "app",
+    ])
+  }
 
   // ── Choosing ───────────────────────────────────────────────────────────
 
@@ -95,6 +147,7 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
       waiting.resolve([
         "handle": data.base64EncodedString(),
         "label": url.lastPathComponent,
+        "kind": "picked",
       ])
     } catch {
       // Without a bookmark the folder works until the app is killed, which
@@ -117,6 +170,19 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
     resolver resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
+    if handle as String == Self.appFolderHandle {
+      // Ours, and it cannot be revoked. It can be missing if it has never
+      // been created, so this makes it rather than reporting no access.
+      guard let url = Self.appFolder(),
+            (try? FileManager.default.createDirectory(
+              at: url, withIntermediateDirectories: true)) != nil
+      else {
+        resolve(false)
+        return
+      }
+      resolve(true)
+      return
+    }
     guard let url = try? Self.resolveBookmark(handle as String) else {
       resolve(false)
       return
@@ -237,6 +303,20 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
     _ reject: @escaping RCTPromiseRejectBlock,
     _ body: (URL) -> Void
   ) {
+    if handle as String == Self.appFolderHandle {
+      guard let url = Self.appFolder() else {
+        reject("no_folder", "there is no documents directory", nil)
+        return
+      }
+      // Ours: no bookmark to resolve and no scope to start. Created here
+      // because the first thing anyone does with it is write.
+      try? FileManager.default.createDirectory(
+        at: url,
+        withIntermediateDirectories: true
+      )
+      body(url)
+      return
+    }
     let url: URL
     do {
       url = try Self.resolveBookmark(handle as String)

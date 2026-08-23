@@ -1320,7 +1320,7 @@
     "pairWarnBody": "Tout ce qui est enregistré sur cet appareil apparaîtra ici, et tout ce qui est ici apparaîtra là-bas. La fusion ne supprime jamais rien : en cas de désaccord, l’entrée la plus récente est conservée.",
     "pairConfirm": "Associer",
     "pairedTitle": "Associé",
-    "pairedBody": "Les deux appareils se synchroniseront désormais. Ouvrez Mihrab sur l’autre pour terminer le premier échange.",
+    "pairedBody": "Cet appareil a écrit sa clé dans le dossier. Ouvrez Mihrab sur l’autre appareil : dès qu’il lit le dossier, les deux sont associés et se synchronisent.",
     "errorBadCodeTitle": "Ce code n’a pas fonctionné",
     "errorBadCode": "Vérifiez le code et réessayez. Il est écrit par groupes de six, et un seul caractère erroné suffit à le rejeter.",
     "errorThisDevice": "C’est le code de cet appareil-ci. Il vous faut celui affiché sur l’autre.",
@@ -1365,7 +1365,11 @@
       "logBody": "Activez la synchronisation pour garder vos données identiques partout. Rien n’est envoyé en ligne.",
       "dismiss": "Masquer",
       "openHint": "Ouvre les réglages de synchronisation"
-    }
+    },
+    "pairedNeedsFolder": "Choisissez d’abord un dossier. C’est par lui que les deux appareils se joignent, et sans dossier rien ne peut être échangé.",
+    "folderAppHint": "Mihrab a créé un dossier nommé {{value}} pour lui-même. Vous le trouverez dans Fichiers, sous Sur mon iPhone : pointez-y votre app de synchronisation pour joindre vos autres appareils.",
+    "syncQuietTitle": "Rien n’est arrivé",
+    "syncNothingArrived": "Votre fichier est dans le dossier, mais rien de vos autres appareils n’y est apparu. Les deux appareils doivent viser le même dossier, et ce qui le garde à jour entre eux doit être en marche."
   },
   "stats": {
     "daysUnit": " jours",

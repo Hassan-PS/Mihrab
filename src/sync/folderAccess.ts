@@ -15,9 +15,13 @@ import { NativeModules } from 'react-native';
 import type { SyncFolder } from './folderSync';
 import type { FolderHandle } from './syncSettings';
 
+/** What the native side returns for a folder. */
+type FolderPick = { handle: string; label: string; kind?: string };
+
 const Native = NativeModules.SyncFolder as
   | {
-      pick(): Promise<{ handle: string; label: string } | null>;
+      defaultFolder(): Promise<FolderPick | null>;
+      pick(): Promise<FolderPick | null>;
       hasAccess(handle: string): Promise<boolean>;
       forget(handle: string): Promise<boolean>;
       list(handle: string): Promise<string[]>;
@@ -39,6 +43,31 @@ export class NoFolderPicker extends Error {
 }
 
 /**
+ * The folder to use when the user has not picked one, or null if this
+ * platform has none.
+ *
+ * iOS has one: the app's own Documents directory, which `Info.plist` makes
+ * visible in Files, so there is nothing for the user to do. Android does
+ * not — an app's own directory is invisible to other apps from Android 11,
+ * so a folder a sync client can also see has to be granted. The difference
+ * is a platform fact and the screen shows it rather than hiding it.
+ */
+export async function defaultSyncFolder(): Promise<FolderHandle | null> {
+  if (!Native?.defaultFolder) return null;
+  try {
+    const found = await Native.defaultFolder();
+    if (!found?.handle) return null;
+    return {
+      handle: found.handle,
+      label: found.label || found.handle,
+      kind: found.kind === 'app' ? 'app' : 'picked',
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Ask the user to choose a folder.
  *
  * Resolves `null` when they back out. Both native modules treat a cancel as
@@ -49,7 +78,11 @@ export async function pickSyncFolder(): Promise<FolderHandle | null> {
   if (!Native?.pick) throw new NoFolderPicker();
   const picked = await Native.pick();
   if (!picked?.handle) return null;
-  return { handle: picked.handle, label: picked.label || picked.handle };
+  return {
+    handle: picked.handle,
+    label: picked.label || picked.handle,
+    kind: 'picked',
+  };
 }
 
 /**

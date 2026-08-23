@@ -46,7 +46,7 @@ import {
   updateSyncSettings,
 } from '../src/sync/syncSettings';
 
-const FOLDER = { handle: 'content://tree/1', label: 'Sync' };
+const FOLDER = { handle: 'content://tree/1', label: 'Sync', kind: 'picked' as const };
 const A_PEER = [{ pk: 'AAAA' }];
 
 beforeEach(async () => {

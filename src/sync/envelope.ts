@@ -34,7 +34,13 @@
  * accept on A rather than a notice.
  */
 import nacl from 'tweetnacl';
-import { fromBase64, randomBytes, toBase64 } from './secureRandom';
+import {
+  fromBase64,
+  randomBytes,
+  toBase64,
+  utf8Decode,
+  utf8Encode,
+} from './secureRandom';
 
 export const ENVELOPE_FORMAT = 'mihrab.envelope';
 export const ENVELOPE_VERSION = 1;
@@ -77,9 +83,6 @@ export type OpenError =
   | 'undecryptable'
   | 'from-ourselves';
 
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
-
 /**
  * Seal `json` for every recipient, from `me`.
  *
@@ -98,7 +101,7 @@ export async function seal(input: {
   const contentKey = await randomBytes(nacl.secretbox.keyLength);
   const bodyNonce = await randomBytes(nacl.secretbox.nonceLength);
   const body = nacl.secretbox(
-    encoder.encode(input.json),
+    utf8Encode(input.json),
     bodyNonce,
     contentKey,
   );
@@ -193,6 +196,6 @@ export function open(input: {
     ok: true,
     senderPublicKey,
     senderName: e.sender.name,
-    json: decoder.decode(plain),
+    json: utf8Decode(plain),
   };
 }

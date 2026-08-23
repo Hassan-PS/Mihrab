@@ -24,6 +24,12 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 jest.mock('../src/sync/runSync', () => ({
   runSyncNow: (...args: unknown[]) => mockRun(...args),
+  // The real one adopts the platform's default folder; here there is no
+  // platform, so the answer is whatever the test stored.
+  ensureSyncFolder: async () => {
+    const raw = mockStore.get('prayerapp.sync.settings.v1');
+    return raw ? (JSON.parse(raw).folder ?? null) : null;
+  },
 }));
 
 import {
@@ -37,7 +43,7 @@ import {
 } from '../src/sync/syncSettings';
 
 const READY = {
-  folder: { handle: 'content://tree/1', label: 'Sync' },
+  folder: { handle: 'content://tree/1', label: 'Sync', kind: 'picked' as const },
   autoOnOpen: true,
 };
 
@@ -112,7 +118,14 @@ describe('the throttle', () => {
     const second = await maybeAutoSync({ now: 9_000_000 });
     expect(second).toBeNull();
 
-    gate.release?.();
+    // Let the first round actually reach runSyncNow before releasing it.
+    // How many microtask ticks that takes depends on how much the round
+    // awaits on the way in, and a fixed number of `await`s here would make
+    // this test fail every time that changes.
+    while (!gate.release) {
+      await new Promise(resolve => setImmediate(resolve));
+    }
+    gate.release();
     await first;
     expect(mockRun).toHaveBeenCalledTimes(1);
   });

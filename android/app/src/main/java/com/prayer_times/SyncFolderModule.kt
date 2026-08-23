@@ -3,7 +3,9 @@ package com.prayer_times
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.DocumentsContract
+import java.io.FileOutputStream
 import com.facebook.react.bridge.ActivityEventListener
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
@@ -41,6 +43,19 @@ import com.facebook.react.bridge.WritableArray
  * F-Droid. `DocumentsContract` is in the framework, present since API 21,
  * and the whole of what is needed here is four queries.
  *
+ * ── ONE TAP, AND THE FOLDER MAKES ITSELF ─────────────────────────────
+ *
+ * The picker opens already inside Downloads, and whatever the user grants,
+ * this creates and then reuses a `Mihrab` directory inside it. So the whole
+ * job is "tap Use this folder" — no navigating, and nothing to create by
+ * hand first, which is what it cost before.
+ *
+ * The handle stored afterwards is the DOCUMENT uri of that subdirectory,
+ * not the tree uri of the grant. Every operation below therefore asks for
+ * the parent document id rather than assuming the tree root — which also
+ * means a handle saved by an older build, when it was the tree itself,
+ * still works.
+ *
  * ── NAMES, AND WHY WRITING LOOKS FOR THE STEM ─────────────────────────
  *
  * `createDocument` is allowed to rename: a provider may add an extension,
@@ -65,6 +80,27 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
 
   private val resolver
     get() = reactContext.contentResolver
+
+  /**
+   * The folder to use when the user has not chosen one — and on Android
+   * there isn't one.
+   *
+   * iOS can hand the app its own Documents directory and have the Files app
+   * show it to everything else. Android has no equivalent: an app's own
+   * external files directory is invisible to other apps from Android 11, so
+   * a sync client could never see what we wrote there, and shared storage
+   * cannot be written by path any more. `ACTION_OPEN_DOCUMENT_TREE` is the
+   * supported way to get a directory two apps can both use, and it costs
+   * one confirmation.
+   *
+   * Resolving null rather than throwing: "there is no default here" is an
+   * answer, not a failure, and the screen turns it into a Choose a folder
+   * button.
+   */
+  @ReactMethod
+  fun defaultFolder(promise: Promise) {
+    promise.resolve(null)
+  }
 
   // ── Choosing ──────────────────────────────────────────────────────────
 
@@ -95,6 +131,15 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
           Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
           Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION,
       )
+      // Open inside Downloads rather than at the root of nothing. A hint,
+      // not a restriction: someone whose sync client watches a particular
+      // directory can still navigate to it.
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        putExtra(
+          DocumentsContract.EXTRA_INITIAL_URI,
+          DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_AUTHORITY, "primary:Download"),
+        )
+      }
     }
     pending = promise
     try {
@@ -132,9 +177,16 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
       promise.reject("not_persistable", "could not keep access to that folder", t)
       return
     }
+    val folder = try {
+      subfolderIn(uri)
+    } catch (t: Throwable) {
+      promise.reject("unwritable", "could not create a folder in there", t)
+      return
+    }
     val out = Arguments.createMap()
-    out.putString("handle", uri.toString())
-    out.putString("label", labelFor(uri))
+    out.putString("handle", folder.toString())
+    out.putString("label", "${labelFor(uri)}/$FOLDER_NAME")
+    out.putString("kind", "picked")
     promise.resolve(out)
   }
 
@@ -143,9 +195,18 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
   /** Whether a folder chosen earlier is still ours to read and write. */
   @ReactMethod
   fun hasAccess(handle: String, promise: Promise) {
+    // The grant is on the TREE; the handle may be a subdirectory inside it.
+    // Comparing the handle itself would report no access for every folder
+    // this build creates.
+    val tree = try {
+      treeOf(Uri.parse(handle)).toString()
+    } catch (t: Throwable) {
+      promise.resolve(false)
+      return
+    }
     promise.resolve(
       resolver.persistedUriPermissions.any {
-        it.uri.toString() == handle && it.isReadPermission && it.isWritePermission
+        it.uri.toString() == tree && it.isReadPermission && it.isWritePermission
       },
     )
   }
@@ -155,7 +216,7 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
   fun forget(handle: String, promise: Promise) {
     try {
       resolver.releasePersistableUriPermission(
-        Uri.parse(handle),
+        treeOf(Uri.parse(handle)),
         Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
       )
     } catch (t: Throwable) {
@@ -187,7 +248,7 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
         promise.reject("not_found", "no file called $name in that folder")
         return
       }
-      val uri = DocumentsContract.buildDocumentUriUsingTree(tree, documentId)
+      val uri = DocumentsContract.buildDocumentUriUsingTree(treeOf(tree), documentId)
       val text = resolver.openInputStream(uri)?.use { stream ->
         stream.bufferedReader(Charsets.UTF_8).readText()
       }
@@ -204,32 +265,51 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun write(handle: String, name: String, contents: String, promise: Promise) {
     try {
-      val tree = Uri.parse(handle)
+      val folder = Uri.parse(handle)
       val bytes = contents.toByteArray(Charsets.UTF_8)
-      val existing = childId(tree, name) ?: childIdByStem(tree, stemOf(name))
 
-      if (existing != null) {
-        val uri = DocumentsContract.buildDocumentUriUsingTree(tree, existing)
-        if (tryWrite(uri, bytes)) {
-          promise.resolve(true)
+      // Everything this device has ever written here, newest name first.
+      // There is normally one; there can be more because a provider is
+      // allowed to rename on create, and an earlier build then made a fresh
+      // file every round instead of finding the one it already had.
+      val ours = childrenWithStem(folder, stemOf(name), name)
+
+      if (ours.isNotEmpty()) {
+        val target = DocumentsContract.buildDocumentUriUsingTree(
+          treeOf(folder),
+          ours.first(),
+        )
+        if (!tryWrite(target, bytes)) {
+          // NOT followed by a create. Creating one here is what filled the
+          // folder with "mihrab-… (1).json", "(2)", "(3)" — a failure to
+          // overwrite has to be a failure, or every round leaves litter.
+          promise.reject("unwritable", "could not overwrite $name")
           return
         }
-        // The provider would not truncate. Replacing is the only way left,
-        // and it is done ONLY to this device's own file — every other file
-        // in the folder belongs to another device and is never touched.
-        try {
-          DocumentsContract.deleteDocument(resolver, uri)
-        } catch (t: Throwable) {
-          promise.reject("unwritable", "could not replace $name", t)
-          return
+        // Tidy up any duplicates left by that. Only ever files whose name
+        // begins with THIS device's own id — no other device's file is
+        // touched, here or anywhere else in this module.
+        for (stale in ours.drop(1)) {
+          try {
+            DocumentsContract.deleteDocument(
+              resolver,
+              DocumentsContract.buildDocumentUriUsingTree(treeOf(folder), stale),
+            )
+          } catch (t: Throwable) {
+            // Leaving a stale copy is untidy and harmless: the reader skips
+            // files this device wrote. Failing the sync over it would not be.
+          }
         }
+        promise.resolve(true)
+        return
       }
 
-      val treeDoc = DocumentsContract.buildDocumentUriUsingTree(
-        tree,
-        DocumentsContract.getTreeDocumentId(tree),
+      val created = DocumentsContract.createDocument(
+        resolver,
+        documentOf(folder),
+        MIME,
+        name,
       )
-      val created = DocumentsContract.createDocument(resolver, treeDoc, MIME, name)
       if (created == null) {
         promise.reject("unwritable", "could not create $name")
         return
@@ -247,69 +327,191 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
   /**
    * Replace a file's contents, or say it could not be done.
    *
-   * "wt" truncates, which is the point: without it a shorter envelope would
-   * leave the tail of the previous one behind and the file would not parse.
-   * Providers are not obliged to honour the flag, so the caller has a
-   * fallback rather than this having a silent one.
+   * Truncation is the point: without it a shorter envelope leaves the tail
+   * of the previous one behind and the file no longer parses. Two ways of
+   * asking, because providers differ in which they honour — "rwt" through a
+   * file descriptor is the one that works most widely, and truncating the
+   * channel by hand covers the rest.
    */
   private fun tryWrite(uri: Uri, bytes: ByteArray): Boolean {
-    return try {
-      val stream = resolver.openOutputStream(uri, "wt") ?: return false
-      stream.use { it.write(bytes) }
-      true
+    try {
+      resolver.openFileDescriptor(uri, "rwt")?.use { pfd ->
+        FileOutputStream(pfd.fileDescriptor).use { it.write(bytes) }
+        return true
+      }
     } catch (t: Throwable) {
-      false
+      // Fall through and try the other way.
     }
+    try {
+      resolver.openFileDescriptor(uri, "rw")?.use { pfd ->
+        FileOutputStream(pfd.fileDescriptor).use { out ->
+          out.channel.truncate(0)
+          out.write(bytes)
+        }
+        return true
+      }
+    } catch (t: Throwable) {
+      return false
+    }
+    return false
   }
 
   // ── Walking the tree ──────────────────────────────────────────────────
 
-  private fun forEachChild(tree: Uri, each: (id: String, name: String) -> Unit) {
-    val children = DocumentsContract.buildChildDocumentsUriUsingTree(
-      tree,
-      DocumentsContract.getTreeDocumentId(tree),
+  /**
+   * The tree the grant was made on, whatever the handle points at.
+   *
+   * A handle is either the tree itself (older builds) or a document inside
+   * it (this one). Permissions live on the tree, so anything that talks
+   * about access has to come back here first.
+   */
+  private fun treeOf(folder: Uri): Uri =
+    DocumentsContract.buildTreeDocumentUri(
+      folder.authority,
+      DocumentsContract.getTreeDocumentId(folder),
     )
-    resolver.query(
-      children,
-      arrayOf(
-        DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-      ),
-      null,
-      null,
-      null,
-    )?.use { cursor ->
-      while (cursor.moveToNext()) {
-        val id = cursor.getString(0) ?: continue
-        val name = cursor.getString(1) ?: continue
-        each(id, name)
+
+  /** The document id to list and create children under. */
+  private fun parentIdOf(folder: Uri): String =
+    if (DocumentsContract.isDocumentUri(reactContext, folder)) {
+      DocumentsContract.getDocumentId(folder)
+    } else {
+      DocumentsContract.getTreeDocumentId(folder)
+    }
+
+  /** The folder itself as a document, for creating things inside it. */
+  private fun documentOf(folder: Uri): Uri =
+    DocumentsContract.buildDocumentUriUsingTree(treeOf(folder), parentIdOf(folder))
+
+  /**
+   * `Mihrab` inside `tree`, made if it is not there yet.
+   *
+   * Reused rather than duplicated: a provider that already has one returns
+   * it, so choosing the same parent twice does not leave the user with
+   * `Mihrab` and `Mihrab (1)` and half their files in each.
+   */
+  private fun subfolderIn(tree: Uri): Uri {
+    var existing: String? = null
+    forEachChild(tree) { id, name ->
+      if (existing == null && name == FOLDER_NAME) existing = id
+    }
+    // Without this a provider that will not list makes a fresh `Mihrab (1)`,
+    // `Mihrab (2)` every time the folder is opened.
+    val id = (existing ?: documentIdFor(tree, FOLDER_NAME)) ?: run {
+      val created = DocumentsContract.createDocument(
+        resolver,
+        documentOf(tree),
+        DocumentsContract.Document.MIME_TYPE_DIR,
+        FOLDER_NAME,
+      ) ?: throw IllegalStateException("provider would not create $FOLDER_NAME")
+      DocumentsContract.getDocumentId(created)
+    }
+    return DocumentsContract.buildDocumentUriUsingTree(treeOf(tree), id)
+  }
+
+  private fun forEachChild(folder: Uri, each: (id: String, name: String) -> Unit) {
+    val children = DocumentsContract.buildChildDocumentsUriUsingTree(
+      treeOf(folder),
+      parentIdOf(folder),
+    )
+    try {
+      resolver.query(
+        children,
+        arrayOf(
+          DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+          DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+        ),
+        null,
+        null,
+        null,
+      )?.use { cursor ->
+        while (cursor.moveToNext()) {
+          val id = cursor.getString(0) ?: continue
+          val name = cursor.getString(1) ?: continue
+          each(id, name)
+        }
       }
+    } catch (t: Throwable) {
+      // A provider that will not enumerate is not a provider that cannot
+      // be used — see `documentIdFor`. Callers treat "no children" and "no
+      // listing" the same, and both have a way through.
     }
   }
 
-  private fun childId(tree: Uri, name: String): String? {
+  /**
+   * The document id for a named child, WITHOUT enumerating the folder.
+   *
+   * Directory listing is the one part of the Storage Access Framework that
+   * is allowed to be useless: a provider may return an empty cursor for a
+   * directory it will happily create and open files in, and one does — an
+   * Android 16 emulator returns zero children for a folder holding seven
+   * files, with the read and write grants both held. Every round then
+   * failed to find the file it wrote last time and made another.
+   *
+   * Document ids are opaque BY CONTRACT, so composing one is not something
+   * to do lightly. It is done here only as a fallback, only after listing
+   * has come up empty, and the result is verified with a real query before
+   * it is used — so on a provider whose ids are not paths this simply finds
+   * nothing, which is exactly where it started.
+   */
+  private fun documentIdFor(folder: Uri, name: String): String? {
+    val guess = "${parentIdOf(folder)}/$name"
+    val uri = DocumentsContract.buildDocumentUriUsingTree(treeOf(folder), guess)
+    return try {
+      resolver.query(
+        uri,
+        arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+        null,
+        null,
+        null,
+      )?.use { cursor ->
+        if (cursor.moveToFirst()) cursor.getString(0) else null
+      }
+    } catch (t: Throwable) {
+      null
+    }
+  }
+
+  private fun childId(folder: Uri, name: String): String? {
     var found: String? = null
-    forEachChild(tree) { id, childName -> if (found == null && childName == name) found = id }
-    return found
+    forEachChild(folder) { id, childName ->
+      if (found == null && childName == name) found = id
+    }
+    return found ?: documentIdFor(folder, name)
   }
 
   /** `mihrab-XXXXXXXXXXXX` — this device's own id, and unique to it. */
   private fun stemOf(name: String): String = name.substringBefore('.')
 
-  private fun childIdByStem(tree: Uri, stem: String): String? {
-    if (stem.isEmpty()) return null
-    var found: String? = null
-    forEachChild(tree) { id, childName ->
-      if (found == null && childName.startsWith(stem)) found = id
+  /**
+   * Every child whose name begins with `stem`, with an exact match for
+   * `exact` first if there is one.
+   *
+   * The stem is this device's own id, so this can only ever match files
+   * this device wrote. That is what makes it safe for the caller to
+   * overwrite the first and delete the rest.
+   */
+  private fun childrenWithStem(
+    folder: Uri,
+    stem: String,
+    exact: String,
+  ): List<String> {
+    if (stem.isEmpty()) return emptyList()
+    val matches = mutableListOf<String>()
+    var exactId: String? = null
+    forEachChild(folder) { id, childName ->
+      if (childName == exact) {
+        exactId = id
+      } else if (childName.startsWith(stem)) {
+        matches.add(id)
+      }
     }
-    return found
+    val first = exactId ?: documentIdFor(folder, exact)
+    return if (first != null) listOf(first) + matches else matches
   }
 
   private fun labelFor(tree: Uri): String {
-    val doc = DocumentsContract.buildDocumentUriUsingTree(
-      tree,
-      DocumentsContract.getTreeDocumentId(tree),
-    )
+    val doc = documentOf(tree)
     try {
       resolver.query(
         doc,
@@ -337,5 +539,11 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
 
     /** What the file is. Providers may still choose their own extension. */
     private const val MIME = "application/json"
+
+    /** Made inside whatever the user grants, so nothing has to exist first. */
+    private const val FOLDER_NAME = "Mihrab"
+
+    /** The provider behind "Internal storage" on every Android build. */
+    private const val EXTERNAL_STORAGE_AUTHORITY = "com.android.externalstorage.documents"
   }
 }

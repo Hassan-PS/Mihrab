@@ -1320,7 +1320,7 @@
     "pairWarnBody": "Everything recorded on that device will appear here, and everything here will appear there. Merging never deletes: where the two disagree, the more recent entry is kept.",
     "pairConfirm": "Pair",
     "pairedTitle": "Paired",
-    "pairedBody": "Both devices will sync from now on. Open Mihrab on the other one to finish the first exchange.",
+    "pairedBody": "This device has written its key to the folder. Open Mihrab on the other device — as soon as it reads the folder, both are paired and syncing.",
     "errorBadCodeTitle": "That code didn’t work",
     "errorBadCode": "Check the code and try again. It is grouped in sixes, and a single wrong character is enough to reject it.",
     "errorThisDevice": "That is this device’s own code. You need the one shown on the other device.",
@@ -1365,7 +1365,11 @@
       "logBody": "Set up sync to keep your record the same everywhere. Nothing is uploaded.",
       "dismiss": "Hide this",
       "openHint": "Opens the sync settings"
-    }
+    },
+    "pairedNeedsFolder": "Choose a folder first. That folder is how the two devices reach each other, and until there is one, nothing can be exchanged.",
+    "folderAppHint": "Mihrab made a folder called {{value}} for itself. Find it in Files, under On My iPhone, and point your sync app at it to reach your other devices.",
+    "syncQuietTitle": "Nothing arrived",
+    "syncNothingArrived": "Your file is in the folder, but nothing from your other devices has appeared there. Both devices have to be pointing at the same folder, and whatever keeps that folder in step between them has to be running."
   },
   "stats": {
     "daysUnit": " days",

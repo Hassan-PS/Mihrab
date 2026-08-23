@@ -1320,7 +1320,7 @@
     "pairWarnBody": "Semua yang tercatat di perangkat itu akan muncul di sini, dan semua yang di sini akan muncul di sana. Penggabungan tidak pernah menghapus: bila keduanya berbeda, entri yang lebih baru yang disimpan.",
     "pairConfirm": "Sandingkan",
     "pairedTitle": "Tersanding",
-    "pairedBody": "Mulai sekarang kedua perangkat akan tersinkron. Buka Mihrab di perangkat satunya untuk menuntaskan pertukaran pertama.",
+    "pairedBody": "Perangkat ini sudah menulis kuncinya ke folder. Buka Mihrab di perangkat satunya — begitu ia membaca folder itu, keduanya tersanding dan tersinkron.",
     "errorBadCodeTitle": "Kode itu tidak berhasil",
     "errorBadCode": "Periksa kodenya dan coba lagi. Kode ditulis dalam kelompok enam, dan satu karakter salah saja sudah cukup untuk ditolak.",
     "errorThisDevice": "Itu kode milik perangkat ini sendiri. Anda perlu kode yang tampil di perangkat satunya.",
@@ -1365,7 +1365,11 @@
       "logBody": "Siapkan sinkronisasi agar catatan Anda sama di mana pun. Tidak ada yang diunggah.",
       "dismiss": "Sembunyikan ini",
       "openHint": "Membuka pengaturan sinkronisasi"
-    }
+    },
+    "pairedNeedsFolder": "Pilih folder dulu. Lewat folder itulah kedua perangkat saling menjangkau, dan tanpa folder tidak ada yang bisa dipertukarkan.",
+    "folderAppHint": "Mihrab membuat folder bernama {{value}} untuk dirinya sendiri. Cari di app Files, di bawah Di iPhone Saya, lalu arahkan aplikasi sinkronisasi Anda ke sana untuk menjangkau perangkat lain.",
+    "syncQuietTitle": "Tidak ada yang datang",
+    "syncNothingArrived": "Berkas Anda ada di folder, tetapi tidak ada apa pun dari perangkat lain yang muncul di sana. Kedua perangkat harus menunjuk ke folder yang sama, dan yang menjaga folder itu tetap sama di antara keduanya harus sedang berjalan."
   },
   "stats": {
     "daysUnit": " hari",

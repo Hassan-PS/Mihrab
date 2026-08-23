@@ -322,6 +322,38 @@ instead of a folder — so this is additive rather than a rewrite.
 Only if the cross-network case turns out to matter in practice. Ciphertext
 only, opt-in, and a separate conversation about F-Droid's `TetheredNet`.
 
+## A provider that will not list
+
+Found on hardware, 2026-08-23, and worth writing down because it changed the
+design.
+
+An Android 16 emulator returns an **empty cursor** for `queryChildDocuments`
+on a directory holding seven files — with read and write grants both held,
+with a canonical tree URI, and while happily *creating* and *opening* files
+in that same directory. A `probe.txt` dropped in from the shell was equally
+invisible, so it is the provider's listing rather than anything about who
+wrote the files.
+
+Two failures fell out of that one bug: the device never found its peers'
+files, and it never found its own previous file either, so every round left
+another `mihrab-… (1).json` behind.
+
+The fix removes listing from the common path rather than working around it.
+**A filename is derived from a public key**, so for a device already paired
+there is nothing to enumerate — `folderSync` asks for each known peer's file
+by name, and the native module can build a document id directly when the
+listing comes up empty. Enumeration is now needed for exactly one thing:
+meeting a device we have never heard of.
+
+**What is still not covered.** The announcement — B introducing itself to A
+after the user carries one code — has no name A could guess, because the
+whole point is that A does not know B yet. On a provider that will not list,
+a pair therefore cannot form from one code, and the user has to carry the
+second code back by hand. The fix, if this turns out to matter on real
+hardware, is an invite file named after the RECIPIENT: B writes
+`mihrab-<A-id>.invite.json`, which A can ask for by name because it is A's
+own id. Not built — one emulator is not evidence that real devices need it.
+
 ## Deliberately out of scope
 
 - **Deletions.** `merge.ts` already argues this: a bookmark removed on one

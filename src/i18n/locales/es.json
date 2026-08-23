@@ -1320,7 +1320,7 @@
     "pairWarnBody": "Todo lo registrado en ese dispositivo aparecerá aquí, y todo lo de aquí aparecerá allí. La fusión nunca borra: cuando los dos difieren, se conserva la entrada más reciente.",
     "pairConfirm": "Vincular",
     "pairedTitle": "Vinculado",
-    "pairedBody": "A partir de ahora ambos dispositivos se sincronizarán. Abre Mihrab en el otro para completar el primer intercambio.",
+    "pairedBody": "Este dispositivo ha escrito su clave en la carpeta. Abre Mihrab en el otro dispositivo: en cuanto lea la carpeta, ambos quedan vinculados y sincronizando.",
     "errorBadCodeTitle": "Ese código no funcionó",
     "errorBadCode": "Revisa el código e inténtalo de nuevo. Va en grupos de seis, y un solo carácter equivocado basta para rechazarlo.",
     "errorThisDevice": "Ese es el código de este mismo dispositivo. Necesitas el que aparece en el otro.",
@@ -1365,7 +1365,11 @@
       "logBody": "Activa la sincronización para que tu registro sea igual en todas partes. No se sube nada.",
       "dismiss": "Ocultar esto",
       "openHint": "Abre los ajustes de sincronización"
-    }
+    },
+    "pairedNeedsFolder": "Elige primero una carpeta. Es por donde los dos dispositivos se alcanzan, y sin ella no se puede intercambiar nada.",
+    "folderAppHint": "Mihrab ha creado una carpeta llamada {{value}} para sí mismo. La encontrarás en Archivos, en En mi iPhone; apunta ahí tu app de sincronización para llegar a tus otros dispositivos.",
+    "syncQuietTitle": "No llegó nada",
+    "syncNothingArrived": "Tu archivo está en la carpeta, pero no ha aparecido nada de tus otros dispositivos. Ambos tienen que apuntar a la misma carpeta, y lo que la mantiene al día entre ellos tiene que estar funcionando."
   },
   "stats": {
     "daysUnit": " días",

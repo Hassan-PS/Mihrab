@@ -142,6 +142,20 @@ async function pairBFromA(): Promise<void> {
   await as('A', () => setDeviceName('Phone'));
 }
 
+/** Both codes carried, as someone does when they set two devices up. */
+async function pairBothWays(): Promise<void> {
+  const codeOfA = await as('A', () => myPairingCode());
+  const codeOfB = await as('B', () => myPairingCode());
+  await as('B', async () => {
+    await setDeviceName('Tablet');
+    expect((await addPeerByCode(codeOfA)).ok).toBe(true);
+  });
+  await as('A', async () => {
+    await setDeviceName('Phone');
+    expect((await addPeerByCode(codeOfB)).ok).toBe(true);
+  });
+}
+
 describe('one code, carried once, in one direction', () => {
   it('leaves A knowing B as well, without a second code', async () => {
     const folder = memoryFolder();
@@ -309,6 +323,65 @@ describe('where you left off in the Quran', () => {
       expect(khatmah[0].pagesRead).toBe(96);
       expect(khatmah[0].position).toEqual({ surah: 5, ayah: 12, page: 96 });
     }
+  });
+});
+
+describe('a folder that will not list itself', () => {
+  it('still reads a paired device, by asking for its file by name', async () => {
+    // Not hypothetical: an Android 16 emulator returns an empty cursor for a
+    // directory holding seven files, with both grants held, while happily
+    // creating and opening files in it. Every device's filename comes from
+    // its public key, so for a device we have already paired with there is
+    // nothing to enumerate — we know what to ask for.
+    const folder = memoryFolder();
+    await pairBothWays();
+    mockDevices.B.secure.set(
+      JOURNAL_KEY,
+      JSON.stringify([
+        {
+          date: '2026-08-21',
+          prayer: 'Isha',
+          status: 'on-time',
+          loggedAt: '2026-08-21T19:40:00.000Z',
+        },
+      ]),
+    );
+    await as('B', () => syncWithFolder(folder));
+
+    // The folder now has B's file and refuses to admit it exists.
+    const blind: SyncFolder = { ...folder, list: async () => [] };
+    const round = await as('A', () => syncWithFolder(blind));
+
+    expect(round.read).toBe(1);
+    expect(journalOf('A')).toHaveLength(1);
+  });
+
+  it('cannot introduce an unknown device without a listing, and that is the limit', async () => {
+    // The announcement is the one thing that genuinely needs enumeration:
+    // A has never heard of B, so there is no name for it to ask for. A
+    // provider that will not list can still sync devices that know each
+    // other; it cannot introduce them. The honest fix is a differently
+    // named invite file — noted in docs/design/sync-p2p.md, not built.
+    const folder = memoryFolder();
+    await pairBFromA();
+    await as('B', () => syncWithFolder(folder));
+
+    const blind: SyncFolder = { ...folder, list: async () => [] };
+    const round = await as('A', () => syncWithFolder(blind));
+
+    expect(round.learned).toBe(0);
+    expect(await as('A', () => listPeers())).toEqual([]);
+  });
+
+  it('does not report a paired device that has never written as a problem', async () => {
+    const folder = memoryFolder();
+    await pairBothWays();
+    // B is paired and has written nothing. Asking for its file and being
+    // told there is none is the normal first round, not a fault.
+    const round = await as('A', () => syncWithFolder(folder));
+
+    expect(round.read).toBe(0);
+    expect(round.skipped).toEqual({ notOurs: 0, notForUs: 0, unreadable: 0 });
   });
 });
 

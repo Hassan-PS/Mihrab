@@ -20,11 +20,16 @@ import {
   type SyncOutcome,
 } from './folderSync';
 import {
+  defaultSyncFolder,
   folderAt,
   folderStillReachable,
   hasFolderPicker,
 } from './folderAccess';
-import { getSyncSettings, updateSyncSettings } from './syncSettings';
+import {
+  getSyncSettings,
+  updateSyncSettings,
+  type FolderHandle,
+} from './syncSettings';
 import { hasSecureRandom } from './secureRandom';
 
 export type SyncRunResult =
@@ -49,6 +54,26 @@ export type SyncRunError =
  * `folder` is injectable for the same reason it is in `folderSync` — so the
  * decision logic here can be tested without a phone.
  */
+/**
+ * The folder to sync through, adopting the platform's default the first
+ * time if the user has not chosen one.
+ *
+ * On iOS that is the app's own Documents directory, which needs no picker
+ * and no permission, so sync works with nothing asked of the user. On
+ * Android there is no such folder and this returns null, which the screen
+ * turns into a Choose a folder button.
+ *
+ * Idempotent, and safe to call from anywhere: once a folder is stored it is
+ * returned unchanged, so this never overrides a folder someone picked.
+ */
+export async function ensureSyncFolder(): Promise<FolderHandle | null> {
+  const settings = await getSyncSettings();
+  if (settings.folder) return settings.folder;
+  const fallback = await defaultSyncFolder();
+  if (!fallback) return null;
+  return (await updateSyncSettings({ folder: fallback })).folder;
+}
+
 export async function runSyncNow(
   options: { folder?: SyncFolder; now?: Date } = {},
 ): Promise<SyncRunResult> {
@@ -59,12 +84,13 @@ export async function runSyncNow(
 
   if (!folder) {
     if (!hasFolderPicker()) return { ok: false, reason: 'unsupported' };
-    if (!settings.folder) return { ok: false, reason: 'no-folder' };
-    if (!(await folderStillReachable(settings.folder.handle))) {
+    const chosen = await ensureSyncFolder();
+    if (!chosen) return { ok: false, reason: 'no-folder' };
+    if (!(await folderStillReachable(chosen.handle))) {
       await updateSyncSettings({ lastError: 'folder-gone' });
       return { ok: false, reason: 'folder-gone' };
     }
-    folder = folderAt(settings.folder.handle);
+    folder = folderAt(chosen.handle);
   }
 
   try {
