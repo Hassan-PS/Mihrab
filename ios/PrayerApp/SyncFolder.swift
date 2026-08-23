@@ -165,7 +165,7 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
           thrown = error
         }
       }
-      if let error = failure ?? (thrown as NSError?) {
+      if let error = failure ?? (thrown as? NSError) {
         reject("unreadable", "could not list that folder", error)
         return
       }
@@ -193,7 +193,7 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
         }
       }
       guard let contents = text else {
-        reject("unreadable", "could not read \(name)", failure ?? (thrown as NSError?))
+        reject("unreadable", "could not read \(name)", failure ?? (thrown as? NSError))
         return
       }
       resolve(contents)
@@ -221,7 +221,7 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
           thrown = error
         }
       }
-      if let error = failure ?? (thrown as NSError?) {
+      if let error = failure ?? (thrown as? NSError) {
         reject("unwritable", "could not write \(name)", error)
         return
       }
