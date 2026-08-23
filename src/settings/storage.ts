@@ -38,15 +38,32 @@ function coerceLanguage(value: unknown): AppLanguage {
 }
 
 /**
- * The language a FIRST run should open in (v2.8.4).
+ * The language to open in when the user has never chosen one.
  *
- * Only ever called when the stored blob carries no `language` key at all —
- * i.e. this install has never had one. Once a value is written, that value
- * is authoritative and the device is never consulted again, so changing the
- * phone's language does not silently move an app the user has already set.
+ * Consulted on every load rather than once, so a phone switched to Arabic
+ * brings the app with it — right up until the moment someone picks a
+ * language in Settings, after which their choice is the only thing that
+ * decides.
  */
-function firstRunLanguage(): AppLanguage {
+function deviceLanguage(): AppLanguage {
   return resolveDeviceLanguage(LANGUAGES, DEFAULT_SETTINGS.language);
+}
+
+/**
+ * Whether a stored blob represents a language the user actually chose.
+ *
+ * v2.8.4 and earlier had no way to record the difference: the default was
+ * 'en' and the picker wrote the same field. So for a blob from before this
+ * flag existed, anything other than 'en' can only have come from the
+ * picker, and 'en' is indistinguishable from never having been asked —
+ * which is exactly the install that should have been following the phone
+ * all along.
+ */
+function coerceLanguagePicked(
+  parsed: Record<string, unknown>,
+): boolean {
+  if (typeof parsed.languagePicked === 'boolean') return parsed.languagePicked;
+  return 'language' in parsed && coerceLanguage(parsed.language) !== 'en';
 }
 
 function coerceWidgetHighlightId(value: unknown): WidgetHighlightId {
@@ -107,7 +124,7 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     // First-ever launch (no plaintext blob). Encrypted store may still
     // hold coordinates from a partially-completed prior session — merge.
     // The UI language follows the device here, not the 'en' default.
-    return { ...DEFAULT_SETTINGS, language: firstRunLanguage(), ...secure };
+    return { ...DEFAULT_SETTINGS, language: deviceLanguage(), ...secure };
   }
 
   let parsed: Partial<PrayerAppSettings> & Record<string, unknown>;
@@ -115,7 +132,7 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     parsed = JSON.parse(plaintextRaw) as Partial<PrayerAppSettings> &
       Record<string, unknown>;
   } catch {
-    return { ...DEFAULT_SETTINGS, language: firstRunLanguage(), ...secure };
+    return { ...DEFAULT_SETTINGS, language: deviceLanguage(), ...secure };
   }
 
   // Migration: if the plaintext blob still has coordinate fields, this is a
@@ -144,8 +161,10 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     ...parsed,
     ...secure,
   };
-  merged.language =
-    'language' in parsed ? coerceLanguage(parsed.language) : firstRunLanguage();
+  merged.languagePicked = coerceLanguagePicked(parsed);
+  merged.language = merged.languagePicked
+    ? coerceLanguage(parsed.language)
+    : deviceLanguage();
   if (!('locationOnboardingComplete' in parsed)) {
     merged.locationOnboardingComplete = true;
   }

@@ -304,7 +304,9 @@ export function SettingsScreen() {
         visible={languageModal}
         current={settings.language}
         palette={palette}
-        onSelect={lang => updateSettings({ language: lang })}
+        // `languagePicked` is what stops the app following the phone from
+        // here on: see settings/storage.ts.
+        onSelect={lang => updateSettings({ language: lang, languagePicked: true })}
         onClose={closeLanguage}
       />
 

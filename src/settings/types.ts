@@ -105,6 +105,15 @@ export type PrayerAppSettings = {
   locationOnboardingComplete: boolean;
   /** UI language (English, Swedish, Arabic). */
   language: AppLanguage;
+  /**
+   * True once the user has chosen a language themselves.
+   *
+   * The difference matters: an app that has never been told which language
+   * to speak should follow the phone, and one that has been told should not
+   * change its mind because the phone did. Without this flag the two cases
+   * are the same stored string.
+   */
+  languagePicked: boolean;
   /** Last coordinates used for API/GPS (for month view when GPS). */
   lastFetchedLatitude?: number;
   lastFetchedLongitude?: number;
@@ -318,6 +327,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   manualLongitude: 0,
   locationOnboardingComplete: false,
   language: 'en',
+  languagePicked: false,
   notificationsEnabled: false,
   prePrayerReminderMinutes: 0,
   notificationSound: 'default',
