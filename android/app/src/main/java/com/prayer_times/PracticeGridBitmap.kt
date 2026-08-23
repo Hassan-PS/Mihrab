@@ -32,6 +32,13 @@ import org.json.JSONObject
  * The eye reads a week as a vertical stripe in the app and in the widget, so a
  * habit is the same shape in both.
  *
+ * FOUR CHANNELS, the same four the Log screen uses: fill depth for the
+ * prayers, an outer amber ring for a completed fast, an inset gold line for
+ * how much sunnah the day held, and a grey corner dot for a day inside the
+ * record that was never filled in. Anything the app draws in a fifth
+ * channel — the qiyam mark, the selection — is left out: a home screen has
+ * no legend and no tap, and a mark nobody can decode is noise.
+ *
  * The ramp is the same one SwiftUI's PracticeGrid uses:
  * `alpha = 0.42 + 0.58 * (kept / 5)` on the accent, so one prayer is faintly
  * there rather than invisible and five is solid. A missed day is the danger
@@ -49,6 +56,26 @@ object PracticeGridBitmap {
 
   /** The five salāh — what a complete day accounts for. */
   private const val SALAH_PER_DAY = 5
+
+  /**
+   * The fasting ring and the sunnah line, in the app's own two colours.
+   *
+   * Separated by LIGHTNESS rather than hue, because they are neighbours on
+   * the wheel and sit inside each other on a square smaller than a grain of
+   * rice — see sunnahTheme.ts, which is where these values come from. The
+   * dark variants, because every widget card is dark.
+   */
+  private const val FAST_RING_COLOR = "#FBBF24"
+  private const val SUNNAH_GOLD = "#E8CE7A"
+
+  /**
+   * Everything a complete day of sunnah holds — the five prayers' sunnah
+   * plus Witr, which is 7. It is `SUNNAH_TOTAL` in src/journal/sunnah.ts;
+   * the payload sends the raw count and the denominator has to live
+   * somewhere, so it lives here with this note. A day that somehow reports
+   * more is clamped rather than drawn as more than a full ring.
+   */
+  private const val SUNNAH_TOTAL = 7
 
   /**
    * A RemoteViews carrying bitmaps has to cross a Binder transaction, and
@@ -139,6 +166,34 @@ object PracticeGridBitmap {
             paint.color = withAlpha(accent, 0.22f)
             canvas.drawRoundRect(rect, radius, radius, paint)
           }
+          // The fast, as the outer ring — the same channel the Log screen
+          // gives it, so a Ramadan reads as the same band of outlined
+          // squares in both places.
+          if (day != null && day.optBoolean("f", false)) {
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = (cellPx * 0.12f).coerceAtLeast(1f)
+            paint.color = Color.parseColor(FAST_RING_COLOR)
+            val half = paint.strokeWidth / 2f
+            canvas.drawRoundRect(
+              RectF(
+                rect.left + half,
+                rect.top + half,
+                rect.right - half,
+                rect.bottom - half,
+              ),
+              radius,
+              radius,
+              paint,
+            )
+          }
+          // The sunnah, as a line travelling round INSIDE the fast ring —
+          // again the app's own channel. How far round it has gone is the
+          // quantity, which reads at a glance in a way that six shades of
+          // one colour never did.
+          val sunnah = (day?.optInt("s", 0) ?: 0).coerceIn(0, SUNNAH_TOTAL)
+          if (sunnah > 0) {
+            drawSunnah(canvas, rect, sunnah / SUNNAH_TOTAL.toFloat(), cellPx, paint)
+          }
           // The unaccounted mark: a day inside the record that never got
           // all five filled in. FILLED here where the app draws it hollow —
           // a 1px ring inside a 7px cell is mush on a home screen, and
@@ -173,6 +228,49 @@ object PracticeGridBitmap {
       }
     }
     return bmp
+  }
+
+  /**
+   * The sunnah line: four straight sides, clockwise from the top-left,
+   * drawn as far round as the day got.
+   *
+   * Straight sides rather than an arc for the same reason the in-app graph
+   * uses them — the shape is read as "how far round", and four `drawLine`
+   * calls cost nothing on a bitmap that holds a hundred and forty squares.
+   */
+  private fun drawSunnah(
+    canvas: Canvas,
+    rect: RectF,
+    fraction: Float,
+    cellPx: Int,
+    paint: Paint,
+  ) {
+    val inset = (cellPx * 0.22f).coerceAtLeast(1.5f)
+    val l = rect.left + inset
+    val t = rect.top + inset
+    val r = rect.right - inset
+    val b = rect.bottom - inset
+    val side = r - l
+    if (side <= 0f) return
+    paint.style = Paint.Style.STROKE
+    paint.strokeWidth = (cellPx * 0.09f).coerceAtLeast(1f)
+    paint.color = Color.parseColor(SUNNAH_GOLD)
+    var left = fraction.coerceIn(0f, 1f) * side * 4f
+    if (left <= 0f) return
+    var d = minOf(left, side)
+    canvas.drawLine(l, t, l + d, t, paint)
+    left -= d
+    if (left <= 0f) return
+    d = minOf(left, side)
+    canvas.drawLine(r, t, r, t + d, paint)
+    left -= d
+    if (left <= 0f) return
+    d = minOf(left, side)
+    canvas.drawLine(r, b, r - d, b, paint)
+    left -= d
+    if (left <= 0f) return
+    d = minOf(left, side)
+    canvas.drawLine(l, b, l, b - d, paint)
   }
 
   /**

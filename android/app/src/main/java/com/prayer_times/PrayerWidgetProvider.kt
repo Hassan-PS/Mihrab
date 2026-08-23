@@ -985,7 +985,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_practice_grid,
         PracticeGridBitmap.render(
           practice.optJSONArray("days"),
-          if (wide) 14 else 11,
+          // Twenty across the full width, eleven beside the streak number.
+          // Fourteen used to be the widest the payload carried; it now
+          // carries twenty, and fourteen left the right third of a 4x4
+          // empty — seven rows of fourteen is a 2:1 shape in a box nearer
+          // 3:1, and columns are the only axis that can give.
+          if (wide) 20 else 11,
           ((if (wide) 7 else 6) * density).toInt().coerceAtLeast(3),
           (2f * density).toInt().coerceAtLeast(1),
           accent,

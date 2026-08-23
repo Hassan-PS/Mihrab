@@ -2,10 +2,12 @@
 //
 // The in-app heatmap encodes six things on an 18pt square — fill depth,
 // fasting, sunnah, missed, qiyam, selection — which needed a two-row legend
-// to read. A widget has no legend and no tap, so it gets THREE states and
-// nothing more: how many of the five were kept, whether something is still
-// owed, and nothing recorded. Anything past that is a mark nobody can
-// decode from a home screen.
+// to read. The widget carries FOUR: fill depth for the prayers, an outer
+// amber ring for a completed fast, an inset gold line for how much sunnah
+// the day held, and a grey corner dot for a day inside the record that was
+// never filled in. The qiyam mark and the selection are left behind — a
+// home screen has no legend and no tap, and a mark nobody can decode is
+// noise.
 //
 // The ramp is the app's own — alpha = 0.42 + 0.58 × (kept/5) on the accent
 // — so the widget and the Log screen describe the same week the same way.
@@ -38,6 +40,19 @@ struct PracticeGrid: View {
   /// The five salāh — what a complete day accounts for.
   private let salahPerDay = 5
 
+  /// The fasting ring and the sunnah line, in the app's own two colours —
+  /// separated by lightness rather than hue, because they are neighbours on
+  /// the wheel and sit inside each other on a square smaller than a grain
+  /// of rice. See sunnahTheme.ts; these are the dark variants, because
+  /// every widget card is dark.
+  private let fastRing = Color(red: 251 / 255, green: 191 / 255, blue: 36 / 255)
+  private let sunnahGold = Color(red: 232 / 255, green: 206 / 255, blue: 122 / 255)
+
+  /// Everything a complete day of sunnah holds — the five prayers' sunnah
+  /// plus Witr. `SUNNAH_TOTAL` in src/journal/sunnah.ts; the payload sends
+  /// the raw count, so the denominator has to live somewhere.
+  private let sunnahTotal = 7
+
   var body: some View {
     let byDate = Dictionary(days.map { ($0.d, $0) }, uniquingKeysWith: { a, _ in a })
     let columns = buildColumns()
@@ -57,6 +72,28 @@ struct PracticeGrid: View {
                 if key != nil, weight(of: day) <= 0, logged(of: day) <= 0 {
                   RoundedRectangle(cornerRadius: cell * 0.28, style: .continuous)
                     .strokeBorder(accent.opacity(0.22), lineWidth: max(1, cell * 0.09))
+                }
+              }
+              .overlay {
+                // The fast, as the outer ring — the same channel the Log
+                // screen gives it, so a Ramadan reads as the same band of
+                // outlined squares in both places.
+                if key != nil, day?.f == true {
+                  RoundedRectangle(cornerRadius: cell * 0.28, style: .continuous)
+                    .strokeBorder(fastRing, lineWidth: max(1, cell * 0.12))
+                }
+              }
+              .overlay {
+                // The sunnah, as a line travelling round INSIDE the fast
+                // ring. How far round it has gone is the quantity, which
+                // reads at a glance in a way six shades of one colour did
+                // not.
+                let kept = min(max(day?.s ?? 0, 0), sunnahTotal)
+                if key != nil, kept > 0 {
+                  RoundedRectangle(cornerRadius: cell * 0.18, style: .continuous)
+                    .trim(from: 0, to: CGFloat(kept) / CGFloat(sunnahTotal))
+                    .stroke(sunnahGold, lineWidth: max(1, cell * 0.09))
+                    .padding(cell * 0.22)
                 }
               }
               .overlay(alignment: .topLeading) {

@@ -172,6 +172,40 @@
             unchanged: the graph is the reward for making it taller, not a
             thing that shrinks until it is unreadable.
         -->
+        <!-- The streak line, the same one the prayer-times card carries: a
+             number at size with the rest muted beside it. Shown with the
+             graph and hidden with it, because the two are one block. -->
+        <LinearLayout
+            android:id="@+id/widget_log_practice_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="true"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/widget_log_streak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#E8EAED"
+                android:textSize="26sp"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/widget_log_practice_second"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="7dp"
+                android:textColor="#9AA0A6"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+
         <FrameLayout
             android:id="@+id/widget_log_grid_divider"
             android:layout_width="match_parent"

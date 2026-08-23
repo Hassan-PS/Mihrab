@@ -210,8 +210,39 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
       val show = practice != null && !(heightDp in 1 until GRID_MIN_HEIGHT_DP)
       val vis = if (show) View.VISIBLE else View.GONE
       views.setViewVisibility(R.id.widget_log_grid_divider, vis)
+      views.setViewVisibility(R.id.widget_log_practice_row, vis)
       views.setViewVisibility(R.id.widget_log_grid, vis)
       if (!show || practice == null) return
+
+      // The same line the prayer-times card draws, from the same block and
+      // in the same words: "0  day streak · Best 92 · 3 of 5 today · 1 to
+      // make up". Two cards on one home screen describing the same practice
+      // differently is worse than one of them not describing it at all.
+      val streak = practice.optInt("streak", 0)
+      views.setTextViewText(R.id.widget_log_streak, streak.toString())
+      val parts = mutableListOf(
+        context.resources.getQuantityString(
+          R.plurals.widget_streak_day_label,
+          streak,
+          streak,
+        ),
+      )
+      val best = practice.optInt("bestStreak", 0)
+      if (best > 0) parts.add(context.getString(R.string.widget_streak_best, best))
+      parts.add(
+        context.getString(R.string.widget_streak_logged, practice.optInt("loggedToday", 0)),
+      )
+      val owedAllTime = practice.optInt("owed", 0)
+      if (owedAllTime > 0) {
+        parts.add(
+          context.resources.getQuantityString(
+            R.plurals.widget_streak_make_up,
+            owedAllTime,
+            owedAllTime,
+          ),
+        )
+      }
+      views.setTextViewText(R.id.widget_log_practice_second, parts.joinToString(" · "))
       val density = context.resources.displayMetrics.density
       views.setImageViewBitmap(
         R.id.widget_log_grid,
