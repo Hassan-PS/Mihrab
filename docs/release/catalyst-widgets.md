@@ -11,6 +11,10 @@ Build it with:
     SIGN_IDENTITY="Developer ID Application: Hassan El Ghamri (GAW23HT439)" \
       ./scripts/build-catalyst.sh
 
+The Keychain half of the same build — the other restricted entitlement, the
+provisioning profile it needs and the trap that costs a build — is in
+`catalyst-keychain.md`.
+
 ## The four things that were wrong, in the order they were found
 
 **1. The extension was not embedded at all.** `SUPPORTS_MACCATALYST = YES` on

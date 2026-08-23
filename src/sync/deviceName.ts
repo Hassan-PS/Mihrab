@@ -44,18 +44,36 @@ export const MAX_DEVICE_NAME = 40;
  * entitlement, so this is usually just "iPhone" there. That is still no
  * worse than the guess it replaces, and the field is one tap away.
  */
+/**
+ * The words iOS hands back when it is naming a model rather than a device.
+ *
+ * Useless on a Mac, and worse than useless: `UIDevice.name` on Catalyst
+ * answers "iPad", so the Homebrew build introduced itself to every device it
+ * paired with as an iPad. The Catalyst branch below was written for this and
+ * never ran, because a native answer arrived first and looked real.
+ */
+const IOS_MODEL_WORDS = new Set(['ipad', 'iphone', 'ipod touch', 'ipod']);
+
 export function defaultDeviceName(): string {
   const native = NativeModules.PrayerBuildInfo as
     | { deviceName?: string }
     | undefined;
   const given = native?.deviceName?.trim();
-  if (given) return given.slice(0, MAX_DEVICE_NAME);
-  // Nothing from the platform: an older build of the native module, or a
-  // device that has no name set anywhere.
+  const modelWord = given ? IOS_MODEL_WORDS.has(given.toLowerCase()) : false;
+  // `isMacCatalyst` only exists on the iOS Platform type, so the OS check
+  // has to come first for TypeScript as well as for correctness.
+  const catalyst = Platform.OS === 'ios' && Platform.isMacCatalyst === true;
+  // A real name wins. A model word does not, on the one platform where the
+  // model is a different kind of computer from the one in front of you.
+  if (given && !(catalyst && modelWord)) {
+    return given.slice(0, MAX_DEVICE_NAME);
+  }
+  // Nothing usable from the platform: an older build of the native module, a
+  // device with no name set anywhere, or a Mac being called an iPad.
   if (Platform.OS === 'ios') {
     // Catalyst reports 'ios' with `isMacCatalyst` set — the Homebrew build
     // pairs like any other device and should not claim to be an iPad.
-    if (Platform.isMacCatalyst) return 'Mac';
+    if (catalyst) return 'Mac';
     if (Platform.isPad) return 'iPad';
     return 'iPhone';
   }
