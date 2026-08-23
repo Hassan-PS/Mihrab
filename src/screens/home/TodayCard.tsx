@@ -30,6 +30,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useIsFocused } from '@react-navigation/native';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
@@ -42,7 +43,7 @@ import { DISPLAY_ORDER, OPTIONAL_TIME_KEYS } from '../../types/prayer';
 import type { TimingsMap } from '../../types/prayer';
 import {
   combineLocalDateAndTime,
-  formatCountdown,
+  countdownParts,
   formatDisplayTime,
   formatLocalTime,
 } from '../../utils/prayerTimes';
@@ -75,32 +76,60 @@ export type TodayCardProps = {
 };
 
 /**
- * The countdown half of the hero, isolated so the 30-second clock tick
- * re-renders one small component instead of the strip and eight rows with
- * it — the same containment `NextPrayerCard` was built for.
+ * The countdown half of the hero, isolated so the clock tick re-renders one
+ * small component instead of the strip and eight rows with it — the same
+ * containment `NextPrayerCard` was built for.
+ *
+ * ── WHY IT TICKS EVERY SECOND, AND ONLY WHEN LOOKED AT ────────────────
+ *
+ * It used to tick every thirty, which is all minutes need. Seconds are
+ * shown now, so the interval has to match them — and a second-by-second
+ * setState on a tab nobody is looking at is a wake-up per second for
+ * nothing. The interval exists only while this screen has focus, and the
+ * clock is re-read on the way back in so the number is never stale for a
+ * frame.
  */
 const HeroToday = memo(function HeroToday({
-  nextInfo,
+  target,
+  chosen,
+  onExpire,
   today,
   expanded,
 }: {
-  nextInfo: { name: string; at: Date };
+  /** What the countdown is aimed at: the next prayer, or the user's pick. */
+  target: { name: string; at: Date };
+  /** True when the user aimed it rather than it simply being next. */
+  chosen: boolean;
+  /** Called when a chosen prayer's time arrives, to hand the hero back. */
+  onExpire: () => void;
   today: TimingsMap;
   expanded: boolean;
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const focused = useIsFocused();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000);
+    if (!focused) return undefined;
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [focused]);
 
   const remainingSeconds = Math.max(
     0,
-    Math.floor((nextInfo.at.getTime() - now.getTime()) / 1000),
+    Math.floor((target.at.getTime() - now.getTime()) / 1000),
   );
+
+  // A choice that has come and gone is not a choice any more. Handing the
+  // hero back is better than counting down to zero forever, or than showing
+  // a prayer that is now in the past.
+  useEffect(() => {
+    if (chosen && remainingSeconds <= 0) onExpire();
+  }, [chosen, remainingSeconds, onExpire]);
+
+  const parts = countdownParts(remainingSeconds);
 
   /**
    * The rail measures the CURRENT interval — from the prayer that has most
@@ -119,14 +148,14 @@ const HeroToday = memo(function HeroToday({
       .filter(e => e.at.getTime() <= now.getTime());
     const from = passed[passed.length - 1];
     if (!from) return null;
-    const span = nextInfo.at.getTime() - from.at.getTime();
+    const span = target.at.getTime() - from.at.getTime();
     if (span <= 0) return null;
     const pct = Math.max(
       0,
       Math.min(1, (now.getTime() - from.at.getTime()) / span),
     );
     return { from, pct };
-  }, [today, now, nextInfo.at]);
+  }, [today, now, target.at]);
 
   return (
     <View style={[styles.hero, expanded && styles.heroExpanded]}>
@@ -136,7 +165,7 @@ const HeroToday = memo(function HeroToday({
         maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
         {t('home.nextPrayerIn', {
           defaultValue: '{{prayer}} in',
-          prayer: t(`prayer.${nextInfo.name}`),
+          prayer: t(`prayer.${target.name}`),
         })}
       </Text>
       <View style={styles.heroCountdownRow}>
@@ -152,14 +181,26 @@ const HeroToday = memo(function HeroToday({
           // Clock runs are a Latin-style left-to-right unit whatever the app
           // language; iOS bidi otherwise collapses the line in Arabic.
           accessibilityLanguage="en-US">
-          {formatCountdown(remainingSeconds)}
+          {parts.main}
+        </Text>
+        <Text
+          style={[
+            styles.heroSeconds,
+            expanded && styles.heroSecondsExpanded,
+            tabularNumeralStyle,
+            { color: palette.muted },
+          ]}
+          numberOfLines={1}
+          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
+          accessibilityLanguage="en-US">
+          {parts.seconds}s
         </Text>
         <Text
           style={[styles.heroAt, tabularNumeralStyle, { color: palette.muted }]}
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
           accessibilityLanguage="en-US">
-          {formatLocalTime(nextInfo.at)}
+          {formatLocalTime(target.at)}
         </Text>
       </View>
       {rail ? (
@@ -186,7 +227,7 @@ const HeroToday = memo(function HeroToday({
               style={[styles.railLabel, tabularNumeralStyle, { color: palette.muted }]}
               numberOfLines={1}
               maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-              {t(`prayer.${nextInfo.name}`)}
+              {t(`prayer.${target.name}`)}
             </Text>
           </View>
         </View>
@@ -266,10 +307,20 @@ function TodayCardImpl({
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const [selected, setSelected] = useState(0);
+  /**
+   * The prayer the user aimed the countdown at, or null for "whatever is
+   * next".
+   *
+   * Null is not the same as pointing it at the next prayer: the next prayer
+   * moves on its own, and someone who never chose should keep getting the
+   * one that moves.
+   */
+  const [chosenKey, setChosenKey] = useState<string | null>(null);
   const rtl = isRtlLanguage(i18n.language);
 
   // A new city (or a fresh week of data) puts the strip back on today.
   useEffect(() => setSelected(0), [resetKey]);
+  useEffect(() => setChosenKey(null), [resetKey]);
   // Never leave the selection pointing past the end of a shorter week.
   useEffect(() => {
     setSelected(s => (s < week.length ? s : 0));
@@ -318,10 +369,60 @@ function TodayCardImpl({
     [],
   );
 
-  const timings = week[selected] ?? week[0] ?? {};
+  // Memoised because the aim-and-countdown memos below depend on it, and a
+  // fresh object every render would make them run every render.
+  const timings = useMemo(
+    () => week[selected] ?? week[0] ?? {},
+    [week, selected],
+  );
   const isToday = selected === 0;
-  const visibleRows = DISPLAY_ORDER.filter(key => timings[key]);
+  const visibleRows = useMemo(
+    () => DISPLAY_ORDER.filter(key => timings[key]),
+    [timings],
+  );
   const handleSelect = useCallback((offset: number) => setSelected(offset), []);
+
+  /**
+   * What the hero counts down to, and which rows can be aimed at.
+   *
+   * Only today has either. A row is aimable only while it is still ahead —
+   * counting down to a time that has passed is a negative number dressed up
+   * as information — and the set is recomputed whenever the next prayer
+   * changes, which is the moment one of them stops being ahead.
+   */
+  const now = nextInfo ? new Date() : null;
+  const aimable = useMemo(() => {
+    const out = new Set<string>();
+    if (!isToday || !now) return out;
+    for (const key of visibleRows) {
+      const raw = timings[key];
+      if (!raw) continue;
+      if (combineLocalDateAndTime(now, raw).getTime() > now.getTime()) {
+        out.add(key);
+      }
+    }
+    return out;
+    // `now` is deliberately not a dependency: it is re-read on every render
+    // this memo would run for anyway, and adding it would defeat the memo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isToday, timings, visibleRows.join(','), nextInfo?.name]);
+
+  const target = useMemo(() => {
+    if (!isToday || !nextInfo) return null;
+    if (!chosenKey) return nextInfo;
+    const raw = timings[chosenKey];
+    if (!raw) return nextInfo;
+    return {
+      name: chosenKey,
+      at: combineLocalDateAndTime(new Date(), raw),
+    };
+  }, [isToday, nextInfo, chosenKey, timings]);
+
+  const clearChosen = useCallback(() => setChosenKey(null), []);
+  const aimAt = useCallback(
+    (key: string) => setChosenKey(current => (current === key ? null : key)),
+    [],
+  );
 
   return (
     <GlassSurface
@@ -337,8 +438,14 @@ function TodayCardImpl({
             backgroundColor: isToday ? palette.accentBg : 'transparent',
           },
         ]}>
-        {isToday && nextInfo ? (
-          <HeroToday nextInfo={nextInfo} today={timings} expanded={expanded} />
+        {isToday && target ? (
+          <HeroToday
+            target={target}
+            chosen={chosenKey !== null}
+            onExpire={clearChosen}
+            today={timings}
+            expanded={expanded}
+          />
         ) : (
           <HeroOtherDay
             label={getDayLabel(selected)}
@@ -371,9 +478,12 @@ function TodayCardImpl({
           key={key}
           prayerKey={key}
           rawTime={timings[key]}
-          // Only today can have a "next" — on Thursday nothing is next, and
-          // an emphasis that means nothing is just decoration.
-          isNext={isToday && nextInfo?.name === key}
+          // Only today can have one — on Thursday nothing is next, and an
+          // emphasis that means nothing is just decoration. It follows the
+          // hero rather than the clock: see PrayerRow.
+          isNext={isToday && target?.name === key}
+          isChosen={chosenKey === key}
+          onSelect={aimable.has(key) ? () => aimAt(key) : undefined}
           isSecondary={(OPTIONAL_TIME_KEYS as readonly string[]).includes(key)}
           isLast={rowIndex === visibleRows.length - 1}
         />
@@ -426,6 +536,10 @@ const styles = StyleSheet.create({
   // The question the app is opened to answer, at the size that says so.
   heroCountdown: { fontSize: 54, fontWeight: '700' },
   heroCountdownExpanded: { fontSize: 78 },
+  // Two thirds of the "at" line's weight and a third of the countdown's
+  // size: present, readable, and never the thing the eye lands on first.
+  heroSeconds: { fontSize: 20, fontWeight: '600', marginStart: -3 },
+  heroSecondsExpanded: { fontSize: 28 },
   heroAt: { fontSize: 17, fontWeight: '600' },
   heroDate: { fontSize: 34, fontWeight: '700', marginTop: 2 },
   heroHijri: { fontSize: 14, marginTop: 2 },

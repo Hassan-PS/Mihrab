@@ -77,6 +77,31 @@ export function formatCountdown(totalSeconds: number): string {
   return `${m}m`;
 }
 
+/**
+ * The same countdown, split so the seconds can be drawn differently.
+ *
+ * Seconds belong in a quieter colour at a smaller size: they are the part
+ * that moves, and at the size of the hours they would pull the eye away
+ * from the number the screen exists to show. Kept zero-padded so the line
+ * does not jump a pixel every ten seconds.
+ */
+export type CountdownParts = {
+  /** Hours and minutes, exactly as `formatCountdown` writes them. */
+  main: string;
+  /** Two digits, no unit. */
+  seconds: string;
+};
+
+export function countdownParts(totalSeconds: number): CountdownParts {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(safe / 3600);
+  const m = Math.floor((safe % 3600) / 60);
+  return {
+    main: h > 0 ? `${h}h ${m}m` : `${m}m`,
+    seconds: String(safe % 60).padStart(2, '0'),
+  };
+}
+
 export function getNextPrayerDisplay(
   today: TimingsMap,
   tomorrow: TimingsMap | undefined,

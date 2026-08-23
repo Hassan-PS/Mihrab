@@ -22,7 +22,9 @@
     "openSettings": "Öppna inställningar",
     "openMonth": "Öppna månadsvy",
     "openCompass": "Öppna kiblakompass",
-    "openTimesSource": "Byt källa för bönetider"
+    "openTimesSource": "Byt källa för bönetider",
+    "countdownTo": "Räkna ner till denna bön",
+    "countdownHere": "Nedräkningen är satt till denna bön. Tryck för att gå tillbaka till nästa."
   },
   "common": {
     "change": "Ändra",

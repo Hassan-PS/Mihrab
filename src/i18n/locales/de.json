@@ -22,7 +22,9 @@
     "openSettings": "Einstellungen öffnen",
     "openMonth": "Monatsansicht öffnen",
     "openCompass": "Öffnen Sie den Qibla-Kompass",
-    "openTimesSource": "Ändern Sie die Quelle der Gebetszeiten"
+    "openTimesSource": "Ändern Sie die Quelle der Gebetszeiten",
+    "countdownTo": "Countdown auf dieses Gebet stellen",
+    "countdownHere": "Der Countdown steht auf diesem Gebet. Tippen, um zum nächsten zurückzukehren."
   },
   "common": {
     "change": "Ändern",

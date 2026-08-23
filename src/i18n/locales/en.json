@@ -22,7 +22,9 @@
     "openSettings": "Open settings",
     "openMonth": "Open month view",
     "openCompass": "Open Qibla compass",
-    "openTimesSource": "Change prayer times source"
+    "openTimesSource": "Change prayer times source",
+    "countdownTo": "Count down to this prayer",
+    "countdownHere": "The countdown is set to this prayer. Tap to go back to the next one."
   },
   "common": {
     "change": "Change",

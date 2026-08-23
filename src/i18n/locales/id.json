@@ -22,7 +22,9 @@
     "openSettings": "Buka pengaturan",
     "openMonth": "Buka tampilan bulan",
     "openCompass": "Buka kompas kiblat",
-    "openTimesSource": "Ubah sumber waktu sholat"
+    "openTimesSource": "Ubah sumber waktu sholat",
+    "countdownTo": "Hitung mundur ke salat ini",
+    "countdownHere": "Hitung mundur tertuju ke salat ini. Ketuk untuk kembali ke yang berikutnya."
   },
   "common": {
     "change": "Mengubah",

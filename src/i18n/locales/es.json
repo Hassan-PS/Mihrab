@@ -22,7 +22,9 @@
     "openSettings": "Abrir configuración",
     "openMonth": "Vista de mes abierto",
     "openCompass": "Brújula Qibla abierta",
-    "openTimesSource": "Cambiar fuente de tiempos de oración"
+    "openTimesSource": "Cambiar fuente de tiempos de oración",
+    "countdownTo": "Contar atrás hasta esta oración",
+    "countdownHere": "La cuenta atrás apunta a esta oración. Toca para volver a la siguiente."
   },
   "common": {
     "change": "Cambiar",

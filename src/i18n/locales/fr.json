@@ -22,7 +22,9 @@
     "openSettings": "Ouvrir les paramètres",
     "openMonth": "Ouvrir la vue mensuelle",
     "openCompass": "Boussole Qibla ouverte",
-    "openTimesSource": "Changer la source des heures de prière"
+    "openTimesSource": "Changer la source des heures de prière",
+    "countdownTo": "Compter jusqu’à cette prière",
+    "countdownHere": "Le compte à rebours vise cette prière. Touchez pour revenir à la suivante."
   },
   "common": {
     "change": "Changement",

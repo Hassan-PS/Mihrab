@@ -22,7 +22,9 @@
     "openSettings": "打开设置",
     "openMonth": "打开月视图",
     "openCompass": "打开朝拜指南针",
-    "openTimesSource": "更改祈祷时间来源"
+    "openTimesSource": "更改祈祷时间来源",
+    "countdownTo": "倒计时改为这次礼拜",
+    "countdownHere": "倒计时正指向这次礼拜。点按可回到下一次。"
   },
   "common": {
     "change": "改变",

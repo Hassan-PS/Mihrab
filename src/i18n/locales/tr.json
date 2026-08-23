@@ -22,7 +22,9 @@
     "openSettings": "Ayarları aç",
     "openMonth": "Ay görünümünü aç",
     "openCompass": "Kıble pusulasını aç",
-    "openTimesSource": "Namaz vakitleri kaynağını değiştir"
+    "openTimesSource": "Namaz vakitleri kaynağını değiştir",
+    "countdownTo": "Bu namaza geri sayım yap",
+    "countdownHere": "Geri sayım bu namaza ayarlı. Sonrakine dönmek için dokunun."
   },
   "common": {
     "change": "Değiştirmek",
