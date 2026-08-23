@@ -1357,7 +1357,15 @@
     "syncDoneBody": "Alles von deinen anderen Geräten ist jetzt hier, und was hier ist, ist dort.",
     "syncNothing": "Nichts Neues. Deine anderen Geräte haben seit der letzten Prüfung nichts geschrieben.",
     "syncFailedTitle": "Synchronisierung nicht abgeschlossen",
-    "syncFailedBody": "Etwas ging schief: {{detail}}"
+    "syncFailedBody": "Etwas ging schief: {{detail}}",
+    "hint": {
+      "quranTitle": "Liest du auf mehr als einem Gerät?",
+      "quranBody": "Richte die Synchronisierung ein, dann folgen dir deine Stelle, deine Lesezeichen und deine Khatmah von Gerät zu Gerät.",
+      "logTitle": "Auf einem Gerät eintragen, auf allen sehen",
+      "logBody": "Richte die Synchronisierung ein, damit deine Aufzeichnungen überall gleich sind. Nichts wird hochgeladen.",
+      "dismiss": "Ausblenden",
+      "openHint": "Öffnet die Synchronisierungseinstellungen"
+    }
   },
   "stats": {
     "daysUnit": " Tage",

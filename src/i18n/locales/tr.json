@@ -1357,7 +1357,15 @@
     "syncDoneBody": "Diğer cihazlarınızdaki her şey artık burada, buradakiler de orada.",
     "syncNothing": "Yeni bir şey yok. Diğer cihazlarınız son denetimden beri bir şey yazmadı.",
     "syncFailedTitle": "Eşitleme tamamlanmadı",
-    "syncFailedBody": "Bir şeyler ters gitti: {{detail}}"
+    "syncFailedBody": "Bir şeyler ters gitti: {{detail}}",
+    "hint": {
+      "quranTitle": "Birden çok cihazda mı okuyorsunuz?",
+      "quranBody": "Eşitlemeyi kurun; kaldığınız yer, yer imleriniz ve hatminiz cihazlar arasında sizinle gelsin.",
+      "logTitle": "Bir cihazda işleyin, hepsinde görün",
+      "logBody": "Kaydınızın her yerde aynı kalması için eşitlemeyi kurun. Hiçbir şey yüklenmez.",
+      "dismiss": "Bunu gizle",
+      "openHint": "Eşitleme ayarlarını açar"
+    }
   },
   "stats": {
     "daysUnit": " gün",

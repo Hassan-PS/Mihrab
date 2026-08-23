@@ -1357,7 +1357,15 @@
     "syncDoneBody": "Everything your other devices had is here now, and what is here is there.",
     "syncNothing": "Nothing new. Your other devices haven’t written anything since the last check.",
     "syncFailedTitle": "Sync didn’t finish",
-    "syncFailedBody": "Something went wrong: {{detail}}"
+    "syncFailedBody": "Something went wrong: {{detail}}",
+    "hint": {
+      "quranTitle": "Reading on more than one device?",
+      "quranBody": "Set up sync and your place, bookmarks and khatmah follow you between them.",
+      "logTitle": "Log on one device, see it on all of them",
+      "logBody": "Set up sync to keep your record the same everywhere. Nothing is uploaded.",
+      "dismiss": "Hide this",
+      "openHint": "Opens the sync settings"
+    }
   },
   "stats": {
     "daysUnit": " days",

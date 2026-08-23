@@ -1357,7 +1357,15 @@
     "syncDoneBody": "Tout ce qu’avaient vos autres appareils est ici, et ce qui est ici est là-bas.",
     "syncNothing": "Rien de nouveau. Vos autres appareils n’ont rien écrit depuis la dernière vérification.",
     "syncFailedTitle": "Synchronisation inachevée",
-    "syncFailedBody": "Un problème est survenu : {{detail}}"
+    "syncFailedBody": "Un problème est survenu : {{detail}}",
+    "hint": {
+      "quranTitle": "Vous lisez sur plusieurs appareils ?",
+      "quranBody": "Activez la synchronisation : votre place, vos marque-pages et votre khatma vous suivent d’un appareil à l’autre.",
+      "logTitle": "Notez sur un appareil, retrouvez-le sur tous",
+      "logBody": "Activez la synchronisation pour garder vos données identiques partout. Rien n’est envoyé en ligne.",
+      "dismiss": "Masquer",
+      "openHint": "Ouvre les réglages de synchronisation"
+    }
   },
   "stats": {
     "daysUnit": " jours",

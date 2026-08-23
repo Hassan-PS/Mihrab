@@ -85,6 +85,10 @@ const STAYS: Record<string, string> = {
     'prayerapp.dhikr.v1 and that does travel, so nothing about someone’s ' +
     'dhikr history is lost by leaving this behind',
   'mihrab.featureTour.v1': 'describes this phone — whether the tour was seen',
+  'mihrab.syncHint.dismissed.v1':
+    'describes this phone — which one-off pointers the user has waved away, ' +
+    'the same kind of thing as the feature tour flag',
+
   'mushaf.assets.v3.complete': 'derived — a download completion marker',
   'mushaf.assets.v2.complete': 'derived — legacy download marker',
   'mushaf.assets.v1.complete': 'derived — legacy download marker',

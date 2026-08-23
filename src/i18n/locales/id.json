@@ -1357,7 +1357,15 @@
     "syncDoneBody": "Semua yang ada di perangkat Anda yang lain kini ada di sini, dan yang di sini ada di sana.",
     "syncNothing": "Tidak ada yang baru. Perangkat Anda yang lain belum menulis apa pun sejak pemeriksaan terakhir.",
     "syncFailedTitle": "Sinkronisasi tidak selesai",
-    "syncFailedBody": "Ada yang salah: {{detail}}"
+    "syncFailedBody": "Ada yang salah: {{detail}}",
+    "hint": {
+      "quranTitle": "Membaca di lebih dari satu perangkat?",
+      "quranBody": "Siapkan sinkronisasi agar posisi bacaan, markah, dan khatam Anda ikut berpindah.",
+      "logTitle": "Catat di satu perangkat, lihat di semuanya",
+      "logBody": "Siapkan sinkronisasi agar catatan Anda sama di mana pun. Tidak ada yang diunggah.",
+      "dismiss": "Sembunyikan ini",
+      "openHint": "Membuka pengaturan sinkronisasi"
+    }
   },
   "stats": {
     "daysUnit": " hari",

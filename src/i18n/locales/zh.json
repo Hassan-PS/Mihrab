@@ -1357,7 +1357,15 @@
     "syncDoneBody": "你其他设备上的内容现在都在这里，这里的内容也在那边。",
     "syncNothing": "没有新内容。自上次检查以来，你的其他设备没有写入任何东西。",
     "syncFailedTitle": "同步未完成",
-    "syncFailedBody": "出了点问题：{{detail}}"
+    "syncFailedBody": "出了点问题：{{detail}}",
+    "hint": {
+      "quranTitle": "在不止一台设备上阅读？",
+      "quranBody": "设置同步，你读到的位置、书签和通读计划都会跟着你在设备之间移动。",
+      "logTitle": "在一台设备上记录，在所有设备上看到",
+      "logBody": "设置同步，让你的记录在各处保持一致。不会上传任何内容。",
+      "dismiss": "隐藏",
+      "openHint": "打开同步设置"
+    }
   },
   "stats": {
     "daysUnit": " 天",

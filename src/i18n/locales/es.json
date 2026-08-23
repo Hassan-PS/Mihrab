@@ -1357,7 +1357,15 @@
     "syncDoneBody": "Todo lo que tenían tus otros dispositivos está aquí, y lo de aquí está allí.",
     "syncNothing": "Nada nuevo. Tus otros dispositivos no han escrito nada desde la última comprobación.",
     "syncFailedTitle": "La sincronización no terminó",
-    "syncFailedBody": "Algo salió mal: {{detail}}"
+    "syncFailedBody": "Algo salió mal: {{detail}}",
+    "hint": {
+      "quranTitle": "¿Lees en más de un dispositivo?",
+      "quranBody": "Activa la sincronización y tu punto de lectura, tus marcadores y tu jatma te acompañarán entre ellos.",
+      "logTitle": "Regístralo en uno, míralo en todos",
+      "logBody": "Activa la sincronización para que tu registro sea igual en todas partes. No se sube nada.",
+      "dismiss": "Ocultar esto",
+      "openHint": "Abre los ajustes de sincronización"
+    }
   },
   "stats": {
     "daysUnit": " días",

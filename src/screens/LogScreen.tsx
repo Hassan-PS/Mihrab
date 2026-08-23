@@ -41,6 +41,7 @@ import notifee, { EventType } from '@notifee/react-native';
 import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { SyncHint } from './sync/SyncHint';
 import { FillSummary } from '../components/FillSummary';
 import { SunnahChip } from './log/SunnahChip';
 import { PracticeStatsRow } from './log/PracticeStatsRow';
@@ -1602,6 +1603,11 @@ export function LogScreen() {
             {t('common.loading')}
           </Text>
         ) : null}
+
+        {/* Below the record rather than above it: the log is what the user
+            came for, and this is an aside about where it can also live.
+            Shows only until sync works or they wave it away — see SyncHint. */}
+        <SyncHint place="log" />
 
         {/* Themed, in-app, and the same dialog the theme-restart prompt
             uses — a stock Alert cannot show the figures, and these are the

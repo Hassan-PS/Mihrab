@@ -55,6 +55,7 @@ import {
 } from '../quran/CompanionTextControls';
 import { searchQuran, type QuranSearchResult } from '../quran/search';
 import { useVerseOfTheDay } from '../quran/useVerseOfTheDay';
+import { SyncHint } from './sync/SyncHint';
 import { cardEdgeStyle } from '../theme/chrome';
 import { arabicTextStyle } from '../theme/typography';
 import { useTabBarInset } from '../navigation/tabBarInset';
@@ -239,6 +240,11 @@ export function QuranScreen() {
           <Text style={{ color: palette.accentSolid, fontSize: 18 }}>→</Text>
         </Pressable>
       ) : null}
+
+      {/* Said where it lands: this card is the user's place in the mushaf,
+          and the whole point of sync is that the place follows them. Shows
+          only until sync works or they wave it away — see SyncHint. */}
+      <SyncHint place="quran" />
 
       {/* Khatmah (QR-21) */}
       <View

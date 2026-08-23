@@ -1357,7 +1357,15 @@
     "syncDoneBody": "Allt som fanns på dina andra enheter finns nu här, och det som finns här finns där.",
     "syncNothing": "Inget nytt. Dina andra enheter har inte skrivit något sedan förra kontrollen.",
     "syncFailedTitle": "Synken blev inte klar",
-    "syncFailedBody": "Något gick fel: {{detail}}"
+    "syncFailedBody": "Något gick fel: {{detail}}",
+    "hint": {
+      "quranTitle": "Läser du på mer än en enhet?",
+      "quranBody": "Ställ in synk så följer din plats, dina bokmärken och din khatmah med mellan dem.",
+      "logTitle": "Logga på en enhet, se det på alla",
+      "logBody": "Ställ in synk så att dina uppgifter är likadana överallt. Ingenting laddas upp.",
+      "dismiss": "Dölj det här",
+      "openHint": "Öppnar synkinställningarna"
+    }
   },
   "stats": {
     "daysUnit": " dagar",
