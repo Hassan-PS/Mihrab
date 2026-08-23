@@ -990,7 +990,10 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           // carries twenty, and fourteen left the right third of a 4x4
           // empty — seven rows of fourteen is a 2:1 shape in a box nearer
           // 3:1, and columns are the only axis that can give.
-          if (wide) 20 else 11,
+          PracticeGridBitmap.weeksToDraw(
+            practice.optString("since").ifEmpty { null },
+            if (wide) 20 else 11,
+          ),
           ((if (wide) 7 else 6) * density).toInt().coerceAtLeast(3),
           (2f * density).toInt().coerceAtLeast(1),
           accent,

@@ -199,6 +199,7 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
       accent: Int,
     ) {
       val practice = payloadRoot(context)?.optJSONObject("practice")
+      val since = practice?.optString("since")?.ifEmpty { null }
       val (_, heightDp) = PrayerWidgetProvider.sizeDp(
         context,
         AppWidgetManager.getInstance(context),
@@ -251,12 +252,13 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
           // Twenty columns, because seven rows of fourteen is a 2:1 shape
           // in a box three times as wide as it is tall — the graph sat in
           // the left two thirds with the right third empty. Twenty is what
-          // the payload now carries, and it fills the card.
-          20,
+          // the payload now carries, and it fills the card. Fewer when the
+          // journal is younger than that: see weeksToDraw.
+          PracticeGridBitmap.weeksToDraw(since, 20),
           (7 * density).toInt().coerceAtLeast(3),
           (2f * density).toInt().coerceAtLeast(1),
           accent,
-          practice.optString("since").ifEmpty { null },
+          since,
         ),
       )
     }

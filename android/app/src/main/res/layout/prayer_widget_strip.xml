@@ -279,14 +279,19 @@
                 android:ellipsize="end" />
         </LinearLayout>
 
+        <!-- Centred, and only as wide as it needs to be: the grid draws as
+             many weeks as the journal has, so a young one is narrower than
+             the card. Left-aligned that read as a graph with a hole beside
+             it; centred it reads as a graph. -->
         <ImageView
             android:id="@+id/widget_practice_grid"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_height="0dp"
             android:layout_weight="2"
             android:layout_marginTop="8dp"
             android:adjustViewBounds="true"
-            android:scaleType="fitStart"
+            android:scaleType="fitCenter"
             android:contentDescription="@string/widget_streak_grid_description"
             android:visibility="gone" />
 

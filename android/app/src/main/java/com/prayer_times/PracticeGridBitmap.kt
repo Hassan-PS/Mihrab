@@ -231,6 +231,37 @@ object PracticeGridBitmap {
   }
 
   /**
+   * How many columns are worth drawing, given when the record starts.
+   *
+   * Drawing the full window regardless leaves a block of empty squares to
+   * the left of a young journal — the calendar before the user arrived —
+   * which reads as a hole in the graph rather than as history nobody has.
+   * The in-app heatmap already starts at the first entry; this is the same
+   * rule for the same reason.
+   *
+   * Never fewer than eight, so a brand-new journal still draws something
+   * shaped like a graph, and never more than the caller asked for.
+   */
+  @JvmStatic
+  fun weeksToDraw(since: String?, max: Int, now: Calendar = Calendar.getInstance()): Int {
+    if (since.isNullOrBlank() || since.length != 10) return max
+    val first = (now.clone() as Calendar).apply {
+      set(Calendar.YEAR, since.substring(0, 4).toIntOrNull() ?: return max)
+      set(Calendar.MONTH, (since.substring(5, 7).toIntOrNull() ?: return max) - 1)
+      set(Calendar.DAY_OF_MONTH, since.substring(8, 10).toIntOrNull() ?: return max)
+      set(Calendar.HOUR_OF_DAY, 12)
+      set(Calendar.MINUTE, 0)
+      set(Calendar.SECOND, 0)
+      set(Calendar.MILLISECOND, 0)
+    }
+    val days = ((now.timeInMillis - first.timeInMillis) / 86_400_000L).toInt()
+    if (days < 0) return max
+    // +1 for the part-week the record starts in, +1 for the part-week we
+    // are living through.
+    return (days / 7 + 2).coerceIn(8, max)
+  }
+
+  /**
    * The sunnah line: four straight sides, clockwise from the top-left,
    * drawn as far round as the day got.
    *
