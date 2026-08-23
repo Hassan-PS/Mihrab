@@ -1,8 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Mihrab</string>
+    <string name="widget_name_small">Mihrab · अगली नमाज़</string>
+    <string name="widget_name_medium">Mihrab · नमाज़ के समय</string>
+    <string name="widget_name_large">Mihrab · नमाज़ के समय (पुराना)</string>
+    <string name="widget_description">आज के समय एक पंक्ति में, अगली नमाज़ को हाइलाइट किया गया</string>
+    <string name="widget_description_small">सिर्फ़ अगली नमाज़ और उसका समय। 2×1, आकार बदलने योग्य।</string>
+    <string name="widget_description_medium">सभी छह समय एक चौड़ी पंक्ति में कॉलम के रूप में, अगली नमाज़ हाइलाइट की गई। 4×2, आकार बदलने योग्य।</string>
+    <string name="widget_description_prayer_times">आज के छह समय एक पंक्ति में। शहर और हिजरी तारीख़ के लिए इसे ऊँचा करें, अभ्यास ग्राफ़ के लिए फिर से ऊँचा करें। 4×1 से 4×4 तक।</string>
+    <string name="widget_description_large_retired">पहले वाला नमाज़-समय विजेट। यह अब मौजूदा विजेट जैसा ही डिज़ाइन दिखाता है; नया विजेट लगाने की कोई ज़रूरत नहीं है।</string>
+    <string name="widget_description_large">अगली नमाज़ के साथ सभी छह समय सूची के रूप में। 4×3 — इसे तीन पंक्तियों से छोटा करें तो यह एक-पंक्ति पट्टी बन जाता है।</string>
+    <string name="widget_name_log">Mihrab · आज दर्ज करें</string>
+    <string name="widget_description_log">नमाज़ को समय पर दर्ज करने के लिए उस पर टैप करें, साथ ही अगली नमाज़ की उलटी गिनती। अभ्यास ग्राफ़ के लिए इसे ऊँचा करें। 4×2 से 4×4 तक।</string>
+    <string name="widget_log_today">आज</string>
+    <string name="widget_log_count">%2$d में से %1$d</string>
+    <string name="widget_log_waiting">%1$s अभी दर्ज नहीं हुई</string>
+    <string name="widget_log_tap_to_log">%1$s को समय पर दर्ज करने के लिए ✓ पर टैप करें</string>
+    <string name="widget_log_up_to_date">आज पूरी तरह अद्यतन है</string>
+    <string name="widget_log_owed">%1$d बकाया</string>
+    <string name="widget_placeholder_day">समय लोड करने के लिए Mihrab खोलें</string>
+    <string name="widget_error">विजेट डेटा लोड नहीं हो सका</string>
+    <string name="widget_configure_title">नमाज़ विजेट</string>
+    <string name="widget_configure_background">पृष्ठभूमि की तीव्रता</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">अगली नमाज़ हाइलाइट</string>
+    <string name="widget_configure_highlight_dynamic">डायनामिक (फ़ोन एक्सेंट)</string>
+    <string name="widget_configure_highlight_green">हरा</string>
+    <string name="widget_configure_highlight_teal">टील</string>
+    <string name="widget_configure_highlight_blue">नीला</string>
+    <string name="widget_configure_highlight_amber">एम्बर</string>
+    <string name="widget_configure_highlight_custom">कस्टम रंग</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">अपने फ़ोन के एक्सेंट रंग को हाइलाइट के तौर पर उपयोग करने के लिए डायनामिक चुनें।</string>
+    <string name="widget_configure_save">सहेजें</string>
     <string name="live_activity_channel_name">नमाज़ की उलटी गिनती</string>
     <string name="live_activity_channel_desc">अगली नमाज़ के लिए पिन की गई उलटी गिनती।</string>
     <string name="live_activity_fgs_channel_name">नमाज़ की उलटी गिनती (सिस्टम)</string>
     <string name="live_activity_fgs_channel_desc">नमाज़ की उलटी गिनती के लिए आंतरिक सेवा चैनल। उपयोगकर्ता-सामना नहीं।</string>
     <string name="live_activity_countdown_active">नमाज़ की उलटी गिनती सक्रिय</string>
+
+    <string name="widget_name_streak">Mihrab · स्ट्रीक</string>
+    <string name="widget_description_streak">आपकी समय पर स्ट्रीक और अभ्यास ग्राफ़ के पिछले हफ़्ते। 2×2 से 4×2 तक।</string>
+    <string name="widget_streak_title">स्ट्रीक</string>
+    <string name="widget_streak_best">सर्वश्रेष्ठ %1$d</string>
+    <string name="widget_streak_logged">आज 5 में से %1$d</string>
+    <string name="widget_streak_sunnah">सुन्नत %1$d%%</string>
+    <string name="widget_streak_grid_description">अभ्यास ग्राफ़</string>
+    <string name="widget_placeholder_open_app">Mihrab खोलें</string>
+    <plurals name="widget_streak_days">
+        <item quantity="one">दिन</item>
+        <item quantity="other">दिन</item>
+    </plurals>
+    <plurals name="widget_streak_make_up">
+        <item quantity="one">%1$d क़ज़ा बाक़ी</item>
+        <item quantity="other">%1$d क़ज़ा बाक़ी</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="one">इस महीने %1$d रोज़ा</item>
+        <item quantity="other">इस महीने %1$d रोज़े</item>
+    </plurals>
+
+    <string name="widget_name_reading">Mihrab · पढ़ना जारी रखें</string>
+    <string name="widget_description_reading">जहाँ आपने छोड़ा था, और आज के ख़त्म हिस्से में क्या है। 4×1, आकार बदलने योग्य।</string>
+    <string name="widget_reading_continue">जारी रखें</string>
+    <string name="widget_reading_khatmah_day">ख़त्म · दिन %1$d/%2$d</string>
+    <string name="widget_reading_position">पृष्ठ %1$d · पारा %2$d</string>
+    <string name="widget_reading_progress">%2$d में से %1$d · %3$d%% पढ़ा गया</string>
+    <string name="widget_reading_today_portion">आज का हिस्सा</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">आज के लिए पूरा</string>
+    <string name="widget_reading_last_read">आख़िरी बार पढ़ा</string>
+    <string name="widget_reading_last_read_prefix">आख़िरी बार %1$s पढ़ा</string>
+    <string name="widget_reading_today">आज</string>
+    <string name="widget_reading_yesterday">कल</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="one">%1$d दिन पहले</item>
+        <item quantity="other">%1$d दिन पहले</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="one">पटरी पर · %1$d पृष्ठ बाक़ी</item>
+        <item quantity="other">पटरी पर · %1$d पृष्ठ बाक़ी</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="one">%1$d पृष्ठ पीछे</item>
+        <item quantity="other">%1$d पृष्ठ पीछे</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="one">%1$d बुकमार्क</item>
+        <item quantity="other">%1$d बुकमार्क</item>
+    </plurals>
+
+    <string name="widget_name_tasbih">Mihrab · तस्बीह</string>
+    <string name="widget_description_tasbih">ऐप खोले बिना ज़िक्र गिनें। 4×2।</string>
+    <string name="widget_tasbih_of">%1$d में से</string>
+    <string name="widget_tasbih_today">आज %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">रीसेट</string>
+    <string name="widget_tasbih_next">अगला ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="one">%1$d चक्र</item>
+        <item quantity="other">%1$d चक्र</item>
+    </plurals>
+
+    <string name="widget_preview_days">दिन</string>
+    <string name="widget_preview_streak_second">सर्वश्रेष्ठ 31 · आज 5 में से 2 · सुन्नत 68%</string>
+    <string name="widget_preview_reading_header">ख़त्म · दिन 14/30</string>
+    <string name="widget_preview_reading_surah">अल-बक़रा</string>
+    <string name="widget_preview_reading_position">पृष्ठ 3 · पारा 1</string>
+    <string name="widget_preview_reading_progress">604 में से 47 · 8% पढ़ा गया</string>
+    <string name="widget_preview_reading_note">पटरी पर · 3 पृष्ठ बाक़ी</string>
+    <string name="widget_preview_tasbih_label">सुब्हान अल्लाह</string>
+    <string name="widget_preview_tasbih_of">33 में से</string>
+    <string name="widget_preview_tasbih_today">आज 231 · 2 चक्र</string>
+    <string name="widget_countdown_format">%1$s में</string>
+    <string name="widget_logged_line">आज %2$d में से %1$d दर्ज</string>
+    <string name="widget_name_hijri">Mihrab · हिजरी तारीख़</string>
+    <string name="widget_description_hijri">आज की हिजरी तारीख़, और अगला महीना कितनी दूर है। 2×1, आकार बदलने योग्य।</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">अगला</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dd</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · कल</string>
+    <string name="widget_hijri_begins_today">%1$s · आज</string>
+    <string name="widget_preview_hijri_date">25 सफ़र</string>
+    <string name="widget_preview_hijri_next">रबी-उल-अव्वल · 5d</string>
+    <string name="widget_logged_short">%2$d में से %1$d दर्ज</string>
+    <string name="widget_practice_sunnah_month">इस महीने सुन्नत %1$d%%</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="one">%1$d रोज़ा</item>
+        <item quantity="other">%1$d रोज़े</item>
+    </plurals>
+    <string name="widget_preview_header">बुध, 19 अगस्त · मक्का</string>
+    <string name="widget_preview_hijri_full">25 सफ़र</string>
+    <string name="widget_preview_in_37">37 मिनट में</string>
+    <string name="widget_preview_logged">5 में से 2 दर्ज</string>
+    <plurals name="widget_streak_day_label">
+        <item quantity="one">दिन की स्ट्रीक</item>
+        <item quantity="other">दिन की स्ट्रीक</item>
+    </plurals>
+    <string name="widget_next_label">अगला</string>
+    <string name="widget_in_label">में</string>
+    <string name="widget_reading_header_start">क़ुरआन</string>
+    <string name="widget_reading_start_title">पढ़ना शुरू करें</string>
+    <string name="widget_reading_start_note">जहाँ चाहें वहाँ से शुरू करें, या एक ख़त्म शुरू करें।</string>
+    <string name="widget_reading_start_note_undownloaded">अनुवाद अब पढ़ने के लिए तैयार है।</string>
+    <string name="widget_reading_start_tail">किसी योजना की ज़रूरत नहीं — इसे खोलें और शुरू करें।</string>
+    <string name="widget_reading_start_side_title">पृष्ठ</string>
+    <string name="widget_reading_start_side_note">पूरे क़ुरआन में</string>
 </resources>

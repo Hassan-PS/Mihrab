@@ -1,12 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Mihrab</string>
+    <string name="widget_name_small">Mihrab · Nästa bön</string>
+    <string name="widget_name_medium">Mihrab · Bönetider</string>
+    <string name="widget_name_large">Mihrab · Bönetider (gammal)</string>
     <string name="widget_description">Dagens tider på en rad, nästa bön markerad</string>
+    <string name="widget_description_small">Bara nästa bön och dess tid. 2×1, storleken kan ändras.</string>
+    <string name="widget_description_medium">Alla sex tider som kolumner i en bred rad, nästa bön markerad. 4×2, storleken kan ändras.</string>
+    <string name="widget_description_prayer_times">Dagens sex tider på en rad. Gör den högre för stad och hijridatum, högre igen för aktivitetsgrafen. 4×1 till 4×4.</string>
+    <string name="widget_description_large_retired">Den tidigare widgeten för bönetider. Den visar nu samma design som den aktuella; det finns ingen anledning att lägga till en ny.</string>
+    <string name="widget_description_large">Alla sex tider som en lista bredvid nästa bön. 4×3 — krymp den under tre rader så blir den enradsremsan.</string>
+    <string name="widget_name_log">Mihrab · Logga idag</string>
+    <string name="widget_description_log">Tryck på en bön för att logga den i tid, med nedräkning till nästa. Gör den högre för aktivitetsgrafen. 4×2 till 4×4.</string>
+    <string name="widget_log_today">Idag</string>
+    <string name="widget_log_count">%1$d av %2$d</string>
+    <string name="widget_log_waiting">%1$s inte loggad än</string>
+    <string name="widget_log_tap_to_log">Tryck ✓ för att logga %1$s i tid</string>
+    <string name="widget_log_up_to_date">Allt loggat för idag</string>
+    <string name="widget_log_owed">%1$d att ta igen</string>
     <string name="widget_placeholder_day">Öppna Mihrab för att ladda tider</string>
     <string name="widget_error">Kunde inte ladda widgetdata</string>
+    <string name="widget_configure_title">Bönewidget</string>
+    <string name="widget_configure_background">Bakgrundsstyrka</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">Markering för nästa bön</string>
+    <string name="widget_configure_highlight_dynamic">Dynamisk (telefonens accentfärg)</string>
+    <string name="widget_configure_highlight_green">Grön</string>
+    <string name="widget_configure_highlight_teal">Turkos</string>
+    <string name="widget_configure_highlight_blue">Blå</string>
+    <string name="widget_configure_highlight_amber">Bärnsten</string>
+    <string name="widget_configure_highlight_custom">Anpassad färg</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">Välj Dynamisk för att följa telefonens accentfärg för markeringen.</string>
+    <string name="widget_configure_save">Spara</string>
+    <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Bönnedräkning</string>
     <string name="live_activity_channel_desc">Fastnålad nedräkning till nästa bön.</string>
     <string name="live_activity_fgs_channel_name">Bönnedräkning (system)</string>
     <string name="live_activity_fgs_channel_desc">Intern tjänstekanal för bönnedräkning. Inte användarsynlig.</string>
     <string name="live_activity_countdown_active">Bönnedräkning aktiv</string>
+
+    <!-- ── Streak &amp; Practice ────────────────────────────────────────── -->
+    <string name="widget_name_streak">Mihrab · Räcka</string>
+    <string name="widget_description_streak">Din räcka i tid och de senaste veckorna i aktivitetsgrafen. 2×2 till 4×2.</string>
+    <string name="widget_streak_title">RÄCKA</string>
+    <string name="widget_streak_best">Bäst %1$d</string>
+    <string name="widget_streak_logged">%1$d av 5 idag</string>
+    <string name="widget_streak_sunnah">Sunnah %1$d%%</string>
+    <string name="widget_streak_grid_description">Aktivitetsgraf</string>
+    <string name="widget_placeholder_open_app">Öppna Mihrab</string>
+    <plurals name="widget_streak_days">
+        <item quantity="one">dag</item>
+        <item quantity="other">dagar</item>
+    </plurals>
+    <plurals name="widget_streak_make_up">
+        <item quantity="one">%1$d att ta igen</item>
+        <item quantity="other">%1$d att ta igen</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="one">%1$d fastedag denna månad</item>
+        <item quantity="other">%1$d fastedagar denna månad</item>
+    </plurals>
+
+    <!-- ── Continue Reading ─────────────────────────────────────────── -->
+    <string name="widget_name_reading">Mihrab · Fortsätt läsa</string>
+    <string name="widget_description_reading">Var du slutade, och vad dagens khatma-portion kräver. 4×1, storleken kan ändras.</string>
+    <string name="widget_reading_continue">FORTSÄTT</string>
+    <string name="widget_reading_khatmah_day">KHATMA · DAG %1$d/%2$d</string>
+    <string name="widget_reading_position">Sida %1$d · Juz %2$d</string>
+    <string name="widget_reading_progress">%1$d av %2$d · %3$d%% läst</string>
+    <string name="widget_reading_today_portion">DAGENS PORTION</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">Klar för idag</string>
+    <string name="widget_reading_last_read">SENAST LÄST</string>
+    <string name="widget_reading_last_read_prefix">Senast läst %1$s</string>
+    <string name="widget_reading_today">Idag</string>
+    <string name="widget_reading_yesterday">Igår</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="one">%1$d dag sedan</item>
+        <item quantity="other">%1$d dagar sedan</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="one">I fas · %1$d sida kvar</item>
+        <item quantity="other">I fas · %1$d sidor kvar</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="one">%1$d sida efter</item>
+        <item quantity="other">%1$d sidor efter</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="one">%1$d bokmärke</item>
+        <item quantity="other">%1$d bokmärken</item>
+    </plurals>
+
+    <!-- ── Tasbih ────────────────────────────────────────────────────── -->
+    <string name="widget_name_tasbih">Mihrab · Tasbih</string>
+    <string name="widget_description_tasbih">Räkna dhikr utan att öppna appen. 4×2.</string>
+    <string name="widget_tasbih_of">av %1$d</string>
+    <string name="widget_tasbih_today">Idag %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">Återställ</string>
+    <string name="widget_tasbih_next">Nästa ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="one">%1$d varv</item>
+        <item quantity="other">%1$d varv</item>
+    </plurals>
+
+    <!-- ── Picker previews ───────────────────────────────────────────────
+         The picker never runs a provider, so these are the only words a
+         preview layout can show. Representative, not live. -->
+    <string name="widget_preview_days">dagar</string>
+    <string name="widget_preview_streak_second">Bäst 31 · 2 av 5 idag · Sunnah 68%</string>
+    <string name="widget_preview_reading_header">KHATMA · DAG 14/30</string>
+    <string name="widget_preview_reading_surah">Al-Baqarah</string>
+    <string name="widget_preview_reading_position">Sida 3 · Juz 1</string>
+    <string name="widget_preview_reading_progress">47 av 604 · 8% läst</string>
+    <string name="widget_preview_reading_note">I fas · 3 sidor kvar</string>
+    <string name="widget_preview_tasbih_label">SubhanAllah</string>
+    <string name="widget_preview_tasbih_of">av 33</string>
+    <string name="widget_preview_tasbih_today">Idag 231 · 2 varv</string>
+    <!-- The Chronometer's format. "%1$s" is the ticking duration; the word
+         around it is what stops "2:58:00" being read as a clock time. -->
+    <string name="widget_countdown_format">om %1$s</string>
+    <!-- The plan's 4x3 mock carries this under the location. -->
+    <string name="widget_logged_line">%1$d av %2$d loggade idag</string>
+    <!-- ── Hijri Date ────────────────────────────────────────────────── -->
+    <string name="widget_name_hijri">Mihrab · Hijridatum</string>
+    <string name="widget_description_hijri">Dagens hijridatum, och hur långt bort nästa månad är. 2×1, storleken kan ändras.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">NÄSTA</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dd</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · imorgon</string>
+    <string name="widget_hijri_begins_today">%1$s · idag</string>
+    <string name="widget_preview_hijri_date">25 Safar</string>
+    <string name="widget_preview_hijri_next">Rabi I · 5d</string>
+    <!-- Strip footer: sits opposite the countdown, so it has no room to say
+         "today" and no need to — the whole card is today. -->
+    <string name="widget_logged_short">%1$d av %2$d loggade</string>
+    <string name="widget_practice_sunnah_month">Sunnah %1$d%% denna månad</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="one">%1$d fastedag</item>
+        <item quantity="other">%1$d fastedagar</item>
+    </plurals>
+    <!-- Sample content for the picker preview, matching the plan's mock. -->
+    <string name="widget_preview_header">ONS, 19 AUG · MAKKAH</string>
+    <string name="widget_preview_hijri_full">25 SAFAR</string>
+    <string name="widget_preview_in_37">om 37 min</string>
+    <string name="widget_preview_logged">2 av 5 loggade</string>
+    <!-- The words next to the streak number: "day streak" / "day streak". -->
+    <plurals name="widget_streak_day_label">
+        <item quantity="one">dagars räcka</item>
+        <item quantity="other">dagars räcka</item>
+    </plurals>
+    <string name="widget_next_label">NÄSTA</string>
+    <string name="widget_in_label">om</string>
+    <!-- The Continue Reading widget before anything has been read. -->
+    <string name="widget_reading_header_start">KORANEN</string>
+    <string name="widget_reading_start_title">Börja läsa</string>
+    <string name="widget_reading_start_note">Börja var du vill, eller påbörja en khatma.</string>
+    <string name="widget_reading_start_note_undownloaded">Översättningen är redo att läsas nu.</string>
+    <string name="widget_reading_start_tail">Ingen plan behövs — öppna och börja.</string>
+    <string name="widget_reading_start_side_title">SIDOR</string>
+    <string name="widget_reading_start_side_note">i hela Koranen</string>
 </resources>

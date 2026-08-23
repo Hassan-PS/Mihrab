@@ -1,8 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Mihrab</string>
+    <string name="widget_name_small">Mihrab · Salat berikutnya</string>
+    <string name="widget_name_medium">Mihrab · Waktu salat</string>
+    <string name="widget_name_large">Mihrab · Waktu salat (lama)</string>
+    <string name="widget_description">Waktu hari ini dalam satu baris, salat berikutnya disorot</string>
+    <string name="widget_description_small">Hanya salat berikutnya dan waktunya. 2×1, dapat diubah ukuran.</string>
+    <string name="widget_description_medium">Keenam waktu sebagai kolom dalam satu baris lebar, salat berikutnya disorot. 4×2, dapat diubah ukuran.</string>
+    <string name="widget_description_prayer_times">Keenam waktu salat hari ini dalam satu baris. Perbesar tingginya untuk menampilkan kota dan tanggal Hijriah, perbesar lagi untuk grafik praktik. 4×1 hingga 4×4.</string>
+    <string name="widget_description_large_retired">Widget waktu salat versi sebelumnya. Kini tampilannya sama dengan yang saat ini; tidak ada alasan untuk memasang yang baru.</string>
+    <string name="widget_description_large">Keenam waktu sebagai daftar di samping salat berikutnya. 4×3 — perkecil di bawah tiga baris dan akan menjadi strip satu baris.</string>
+    <string name="widget_name_log">Mihrab · Catat hari ini</string>
+    <string name="widget_description_log">Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya. Perbesar tingginya untuk grafik praktik. 4×2 hingga 4×4.</string>
+    <string name="widget_log_today">Hari ini</string>
+    <string name="widget_log_count">%1$d dari %2$d</string>
+    <string name="widget_log_waiting">%1$s belum dicatat</string>
+    <string name="widget_log_tap_to_log">Ketuk ✓ untuk mencatat %1$s tepat waktu</string>
+    <string name="widget_log_up_to_date">Hari ini sudah lengkap</string>
+    <string name="widget_log_owed">%1$d terutang</string>
+    <string name="widget_placeholder_day">Buka Mihrab untuk memuat waktu salat</string>
+    <string name="widget_error">Tidak dapat memuat data widget</string>
+    <string name="widget_configure_title">Widget salat</string>
+    <string name="widget_configure_background">Intensitas latar belakang</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">Sorotan salat berikutnya</string>
+    <string name="widget_configure_highlight_dynamic">Dinamis (aksen ponsel)</string>
+    <string name="widget_configure_highlight_green">Hijau</string>
+    <string name="widget_configure_highlight_teal">Toska</string>
+    <string name="widget_configure_highlight_blue">Biru</string>
+    <string name="widget_configure_highlight_amber">Amber</string>
+    <string name="widget_configure_highlight_custom">Warna kustom</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">Pilih Dinamis agar sorotan mengikuti warna aksen ponsel Anda.</string>
+    <string name="widget_configure_save">Simpan</string>
+    <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Hitungan mundur salat</string>
     <string name="live_activity_channel_desc">Hitungan mundur tersemat ke salat berikutnya.</string>
     <string name="live_activity_fgs_channel_name">Hitungan mundur salat (sistem)</string>
     <string name="live_activity_fgs_channel_desc">Saluran layanan internal untuk hitungan mundur salat. Tidak terlihat pengguna.</string>
     <string name="live_activity_countdown_active">Hitungan mundur salat aktif</string>
+
+    <!-- ── Rentetan dan Praktik ─────────────────────────────────────── -->
+    <string name="widget_name_streak">Mihrab · Rentetan</string>
+    <string name="widget_description_streak">Rentetan salat tepat waktu Anda dan beberapa minggu terakhir grafik praktik. 2×2 hingga 4×2.</string>
+    <string name="widget_streak_title">RENTETAN</string>
+    <string name="widget_streak_best">Terbaik %1$d</string>
+    <string name="widget_streak_logged">%1$d dari 5 hari ini</string>
+    <string name="widget_streak_sunnah">Sunah %1$d%%</string>
+    <string name="widget_streak_grid_description">Grafik praktik</string>
+    <string name="widget_placeholder_open_app">Buka Mihrab</string>
+    <plurals name="widget_streak_days">
+        <item quantity="other">hari</item>
+    </plurals>
+    <plurals name="widget_streak_make_up">
+        <item quantity="other">%1$d untuk diqadha</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="other">%1$d puasa bulan ini</item>
+    </plurals>
+
+    <!-- ── Lanjutkan Membaca ────────────────────────────────────────── -->
+    <string name="widget_name_reading">Mihrab · Lanjutkan membaca</string>
+    <string name="widget_description_reading">Tempat terakhir Anda berhenti, dan porsi khatam hari ini. 4×1, dapat diubah ukuran.</string>
+    <string name="widget_reading_continue">LANJUTKAN</string>
+    <string name="widget_reading_khatmah_day">KHATAM · HARI %1$d/%2$d</string>
+    <string name="widget_reading_position">Halaman %1$d · Juz %2$d</string>
+    <string name="widget_reading_progress">%1$d dari %2$d · %3$d%% dibaca</string>
+    <string name="widget_reading_today_portion">PORSI HARI INI</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">Selesai untuk hari ini</string>
+    <string name="widget_reading_last_read">TERAKHIR DIBACA</string>
+    <string name="widget_reading_last_read_prefix">Terakhir dibaca %1$s</string>
+    <string name="widget_reading_today">Hari ini</string>
+    <string name="widget_reading_yesterday">Kemarin</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="other">%1$d hari yang lalu</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="other">Sesuai target · %1$d halaman lagi</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="other">%1$d halaman tertinggal</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="other">%1$d penanda</item>
+    </plurals>
+
+    <!-- ── Tasbih ───────────────────────────────────────────────────── -->
+    <string name="widget_name_tasbih">Mihrab · Tasbih</string>
+    <string name="widget_description_tasbih">Hitung zikir tanpa membuka aplikasi. 4×2.</string>
+    <string name="widget_tasbih_of">dari %1$d</string>
+    <string name="widget_tasbih_today">Hari ini %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">Atur Ulang</string>
+    <string name="widget_tasbih_next">Berikutnya ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="other">%1$d putaran</item>
+    </plurals>
+
+    <!-- ── Pratinjau pemilih widget ─────────────────────────────────── -->
+    <string name="widget_preview_days">hari</string>
+    <string name="widget_preview_streak_second">Terbaik 31 · 2 dari 5 hari ini · Sunah 68%</string>
+    <string name="widget_preview_reading_header">KHATAM · HARI 14/30</string>
+    <string name="widget_preview_reading_surah">Al-Baqarah</string>
+    <string name="widget_preview_reading_position">Halaman 3 · Juz 1</string>
+    <string name="widget_preview_reading_progress">47 dari 604 · 8% dibaca</string>
+    <string name="widget_preview_reading_note">Sesuai target · 3 halaman lagi</string>
+    <string name="widget_preview_tasbih_label">SubhanAllah</string>
+    <string name="widget_preview_tasbih_of">dari 33</string>
+    <string name="widget_preview_tasbih_today">Hari ini 231 · 2 putaran</string>
+    <string name="widget_countdown_format">dalam %1$s</string>
+    <string name="widget_logged_line">%1$d dari %2$d tercatat hari ini</string>
+    <!-- ── Tanggal Hijriah ──────────────────────────────────────────── -->
+    <string name="widget_name_hijri">Mihrab · Tanggal Hijriah</string>
+    <string name="widget_description_hijri">Tanggal Hijriah hari ini, dan berapa lama lagi menuju bulan berikutnya. 2×1, dapat diubah ukuran.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">BERIKUTNYA</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dh</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · besok</string>
+    <string name="widget_hijri_begins_today">%1$s · hari ini</string>
+    <string name="widget_preview_hijri_date">25 Safar</string>
+    <string name="widget_preview_hijri_next">Rabi I · 5h</string>
+    <string name="widget_logged_short">%1$d dari %2$d tercatat</string>
+    <string name="widget_practice_sunnah_month">Sunah %1$d%% bulan ini</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="other">%1$d puasa</item>
+    </plurals>
+    <string name="widget_preview_header">RAB, 19 AGU · MAKKAH</string>
+    <string name="widget_preview_hijri_full">25 SAFAR</string>
+    <string name="widget_preview_in_37">dalam 37 mnt</string>
+    <string name="widget_preview_logged">2 dari 5 tercatat</string>
+    <plurals name="widget_streak_day_label">
+        <item quantity="other">hari beruntun</item>
+    </plurals>
+    <string name="widget_next_label">BERIKUTNYA</string>
+    <string name="widget_in_label">dalam</string>
+    <string name="widget_reading_header_start">AL-QURAN</string>
+    <string name="widget_reading_start_title">Mulai membaca</string>
+    <string name="widget_reading_start_note">Mulai dari mana saja sesuka Anda, atau mulai sebuah khatam.</string>
+    <string name="widget_reading_start_note_undownloaded">Terjemahannya sudah siap dibaca sekarang.</string>
+    <string name="widget_reading_start_tail">Tidak perlu rencana — buka dan mulai.</string>
+    <string name="widget_reading_start_side_title">HALAMAN</string>
+    <string name="widget_reading_start_side_note">dari seluruh Al-Quran</string>
 </resources>

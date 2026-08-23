@@ -1,12 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">محراب</string>
+    <string name="widget_name_small">محراب · الصلاة التالية</string>
+    <string name="widget_name_medium">محراب · أوقات الصلاة</string>
+    <string name="widget_name_large">محراب · أوقات الصلاة (القديم)</string>
     <string name="widget_description">أوقات اليوم في صف واحد، الصلاة التالية مميزة</string>
+    <string name="widget_description_small">الصلاة التالية ووقتها فقط. 2×1، قابل لتغيير الحجم.</string>
+    <string name="widget_description_medium">الأوقات الستة جميعها كأعمدة في صف عريض واحد، مع تمييز الصلاة التالية. 4×2، قابل لتغيير الحجم.</string>
+    <string name="widget_description_prayer_times">أوقات اليوم الستة في صف واحد. كبّره ليظهر المدينة والتاريخ الهجري، وكبّره أكثر ليظهر الرسم البياني للالتزام. 4×1 إلى 4×4.</string>
+    <string name="widget_description_large_retired">ودجة أوقات الصلاة السابقة. أصبحت الآن تعرض نفس تصميم الودجة الحالية؛ فلا داعٍ لإضافة واحدة جديدة.</string>
+    <string name="widget_description_large">الأوقات الستة جميعها كقائمة إلى جانب الصلاة التالية. 4×3 — قلّصها إلى أقل من ثلاثة صفوف لتصبح الشريط ذا الصف الواحد.</string>
+    <string name="widget_name_log">محراب · سجل اليوم</string>
+    <string name="widget_description_log">اضغط على صلاة لتسجيلها في وقتها، مع العد التنازلي للصلاة التالية. كبّره ليظهر الرسم البياني للالتزام. 4×2 إلى 4×4.</string>
+    <string name="widget_log_today">اليوم</string>
+    <string name="widget_log_count">%1$d من %2$d</string>
+    <string name="widget_log_waiting">لم يُسجَّل %1$s بعد</string>
+    <string name="widget_log_tap_to_log">اضغط ✓ لتسجيل %1$s في وقتها</string>
+    <string name="widget_log_up_to_date">اليوم مكتمل</string>
+    <string name="widget_log_owed">%1$d للقضاء</string>
     <string name="widget_placeholder_day">افتح محراب لتحميل الأوقات</string>
     <string name="widget_error">تعذّر تحميل بيانات الودجة</string>
+    <string name="widget_configure_title">ودجة الصلاة</string>
+    <string name="widget_configure_background">قوة الخلفية</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">تمييز الصلاة التالية</string>
+    <string name="widget_configure_highlight_dynamic">ديناميكي (لون الهاتف المميز)</string>
+    <string name="widget_configure_highlight_green">أخضر</string>
+    <string name="widget_configure_highlight_teal">فيروزي</string>
+    <string name="widget_configure_highlight_blue">أزرق</string>
+    <string name="widget_configure_highlight_amber">كهرماني</string>
+    <string name="widget_configure_highlight_custom">لون مخصص</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">اختر ديناميكي ليتبع التمييز لون هاتفك المميز.</string>
+    <string name="widget_configure_save">حفظ</string>
+    <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">العد التنازلي للصلاة</string>
     <string name="live_activity_channel_desc">عداد تنازلي مثبت للصلاة التالية.</string>
     <string name="live_activity_fgs_channel_name">العد التنازلي للصلاة (النظام)</string>
     <string name="live_activity_fgs_channel_desc">قناة خدمة داخلية للعد التنازلي للصلاة. غير مرئية للمستخدم.</string>
     <string name="live_activity_countdown_active">العد التنازلي للصلاة نشط</string>
+
+    <string name="widget_name_streak">محراب · التتابع</string>
+    <string name="widget_description_streak">تتابعك في الالتزام بالوقت، والأسابيع الأخيرة من الرسم البياني للالتزام. 2×2 إلى 4×2.</string>
+    <string name="widget_streak_title">التتابع</string>
+    <string name="widget_streak_best">الأفضل %1$d</string>
+    <string name="widget_streak_logged">%1$d من 5 اليوم</string>
+    <string name="widget_streak_sunnah">السنن %1$d%%</string>
+    <string name="widget_streak_grid_description">الرسم البياني للالتزام</string>
+    <string name="widget_placeholder_open_app">افتح محراب</string>
+    <plurals name="widget_streak_days">
+        <item quantity="zero">أيام</item>
+        <item quantity="one">يوم</item>
+        <item quantity="two">يومان</item>
+        <item quantity="few">أيام</item>
+        <item quantity="many">يومًا</item>
+        <item quantity="other">يوم</item>
+    </plurals>
+    <plurals name="widget_streak_make_up">
+        <item quantity="zero">%1$d للقضاء</item>
+        <item quantity="one">%1$d للقضاء</item>
+        <item quantity="two">%1$d للقضاء</item>
+        <item quantity="few">%1$d للقضاء</item>
+        <item quantity="many">%1$d للقضاء</item>
+        <item quantity="other">%1$d للقضاء</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="zero">%1$d يوم صيام هذا الشهر</item>
+        <item quantity="one">%1$d يوم صيام هذا الشهر</item>
+        <item quantity="two">%1$d يومي صيام هذا الشهر</item>
+        <item quantity="few">%1$d أيام صيام هذا الشهر</item>
+        <item quantity="many">%1$d يومًا من الصيام هذا الشهر</item>
+        <item quantity="other">%1$d يوم صيام هذا الشهر</item>
+    </plurals>
+
+    <string name="widget_name_reading">محراب · متابعة القراءة</string>
+    <string name="widget_description_reading">من حيث توقفت، ومقدار وِرد الختمة لليوم. 4×1، قابل لتغيير الحجم.</string>
+    <string name="widget_reading_continue">متابعة</string>
+    <string name="widget_reading_khatmah_day">الختمة · اليوم %1$d/%2$d</string>
+    <string name="widget_reading_position">صفحة %1$d · جزء %2$d</string>
+    <string name="widget_reading_progress">%1$d من %2$d · %3$d%% مقروءة</string>
+    <string name="widget_reading_today_portion">وِرد اليوم</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">اكتمل اليوم</string>
+    <string name="widget_reading_last_read">آخر قراءة</string>
+    <string name="widget_reading_last_read_prefix">آخر قراءة %1$s</string>
+    <string name="widget_reading_today">اليوم</string>
+    <string name="widget_reading_yesterday">أمس</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="zero">منذ %1$d يوم</item>
+        <item quantity="one">منذ %1$d يوم</item>
+        <item quantity="two">منذ %1$d يومين</item>
+        <item quantity="few">منذ %1$d أيام</item>
+        <item quantity="many">منذ %1$d يومًا</item>
+        <item quantity="other">منذ %1$d يوم</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="zero">ضمن الخطة · %1$d صفحة متبقية</item>
+        <item quantity="one">ضمن الخطة · %1$d صفحة متبقية</item>
+        <item quantity="two">ضمن الخطة · %1$d صفحتين متبقيتين</item>
+        <item quantity="few">ضمن الخطة · %1$d صفحات متبقية</item>
+        <item quantity="many">ضمن الخطة · %1$d صفحةً متبقية</item>
+        <item quantity="other">ضمن الخطة · %1$d صفحة متبقية</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="zero">متأخر %1$d صفحة</item>
+        <item quantity="one">متأخر %1$d صفحة</item>
+        <item quantity="two">متأخر %1$d صفحتين</item>
+        <item quantity="few">متأخر %1$d صفحات</item>
+        <item quantity="many">متأخر %1$d صفحةً</item>
+        <item quantity="other">متأخر %1$d صفحة</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="zero">%1$d إشارة مرجعية</item>
+        <item quantity="one">%1$d إشارة مرجعية</item>
+        <item quantity="two">%1$d إشارتين مرجعيتين</item>
+        <item quantity="few">%1$d إشارات مرجعية</item>
+        <item quantity="many">%1$d إشارةً مرجعية</item>
+        <item quantity="other">%1$d إشارة مرجعية</item>
+    </plurals>
+
+    <string name="widget_name_tasbih">محراب · التسبيح</string>
+    <string name="widget_description_tasbih">عدّ الذكر دون فتح التطبيق. 4×2.</string>
+    <string name="widget_tasbih_of">من %1$d</string>
+    <string name="widget_tasbih_today">اليوم %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">إعادة تعيين</string>
+    <string name="widget_tasbih_next">التالي ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="zero">%1$d جولة</item>
+        <item quantity="one">%1$d جولة</item>
+        <item quantity="two">%1$d جولتين</item>
+        <item quantity="few">%1$d جولات</item>
+        <item quantity="many">%1$d جولةً</item>
+        <item quantity="other">%1$d جولة</item>
+    </plurals>
+
+    <string name="widget_preview_days">أيام</string>
+    <string name="widget_preview_streak_second">الأفضل 31 · 2 من 5 اليوم · السنن 68%</string>
+    <string name="widget_preview_reading_header">الختمة · اليوم 14/30</string>
+    <string name="widget_preview_reading_surah">البقرة</string>
+    <string name="widget_preview_reading_position">صفحة 3 · جزء 1</string>
+    <string name="widget_preview_reading_progress">47 من 604 · 8% مقروءة</string>
+    <string name="widget_preview_reading_note">ضمن الخطة · 3 صفحات متبقية</string>
+    <string name="widget_preview_tasbih_label">سبحان الله</string>
+    <string name="widget_preview_tasbih_of">من 33</string>
+    <string name="widget_preview_tasbih_today">اليوم 231 · جولتان</string>
+    <string name="widget_countdown_format">بعد %1$s</string>
+    <string name="widget_logged_line">%1$d من %2$d مسجلة اليوم</string>
+    <string name="widget_name_hijri">محراب · التاريخ الهجري</string>
+    <string name="widget_description_hijri">التاريخ الهجري لليوم، والمدة المتبقية حتى الشهر القادم. 2×1، قابل لتغيير الحجم.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">القادم</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dي</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · غدًا</string>
+    <string name="widget_hijri_begins_today">%1$s · اليوم</string>
+    <string name="widget_preview_hijri_date">25 صفر</string>
+    <string name="widget_preview_hijri_next">ربيع الأول · 5ي</string>
+    <string name="widget_logged_short">%1$d من %2$d مسجلة</string>
+    <string name="widget_practice_sunnah_month">السنن %1$d%% هذا الشهر</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="zero">%1$d يوم صيام</item>
+        <item quantity="one">%1$d يوم صيام</item>
+        <item quantity="two">%1$d يومي صيام</item>
+        <item quantity="few">%1$d أيام صيام</item>
+        <item quantity="many">%1$d يومًا من الصيام</item>
+        <item quantity="other">%1$d يوم صيام</item>
+    </plurals>
+    <string name="widget_preview_header">الأربعاء، 19 أغسطس · مكة المكرمة</string>
+    <string name="widget_preview_hijri_full">25 صفر</string>
+    <string name="widget_preview_in_37">بعد 37 دقيقة</string>
+    <string name="widget_preview_logged">2 من 5 مسجلة</string>
+    <plurals name="widget_streak_day_label">
+        <item quantity="zero">أيام متتالية</item>
+        <item quantity="one">يوم متتالٍ</item>
+        <item quantity="two">يومان متتاليان</item>
+        <item quantity="few">أيام متتالية</item>
+        <item quantity="many">يومًا متتاليًا</item>
+        <item quantity="other">يوم متتالٍ</item>
+    </plurals>
+    <string name="widget_next_label">التالي</string>
+    <string name="widget_in_label">بعد</string>
+    <string name="widget_reading_header_start">القرآن الكريم</string>
+    <string name="widget_reading_start_title">ابدأ القراءة</string>
+    <string name="widget_reading_start_note">تابع من حيث تشاء، أو ابدأ ختمة جديدة.</string>
+    <string name="widget_reading_start_note_undownloaded">الترجمة جاهزة للقراءة الآن.</string>
+    <string name="widget_reading_start_tail">لا حاجة لخطة — افتحه وابدأ.</string>
+    <string name="widget_reading_start_side_title">الصفحات</string>
+    <string name="widget_reading_start_side_note">في القرآن الكريم بأكمله</string>
 </resources>

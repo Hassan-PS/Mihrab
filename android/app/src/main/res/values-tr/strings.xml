@@ -1,8 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Mihrab</string>
+    <string name="widget_name_small">Mihrab · Sıradaki namaz</string>
+    <string name="widget_name_medium">Mihrab · Namaz vakitleri</string>
+    <string name="widget_name_large">Mihrab · Namaz vakitleri (eski)</string>
+    <string name="widget_description">Bugünün vakitleri tek satırda, sıradaki namaz vurgulanır</string>
+    <string name="widget_description_small">Sadece sıradaki namaz ve vakti. 2×1, yeniden boyutlandırılabilir.</string>
+    <string name="widget_description_medium">Altı vaktin tümü geniş tek satırda sütunlar halinde, sıradaki namaz vurgulanır. 4×2, yeniden boyutlandırılabilir.</string>
+    <string name="widget_description_prayer_times">Bugünün altı vakti tek satırda. Şehir ve hicri tarih için yükseltin, ibadet grafiği için tekrar yükseltin. 4×1 ile 4×4 arası.</string>
+    <string name="widget_description_large_retired">Önceki namaz vakitleri widget\'ı. Artık güncel widget\'la aynı tasarımı kullanıyor; yenisini eklemenin bir anlamı yok.</string>
+    <string name="widget_description_large">Altı vaktin tümü sıradaki namazın yanında liste halinde. 4×3 — üç satırın altına küçültüldüğünde tek satırlık şeride dönüşür.</string>
+    <string name="widget_name_log">Mihrab · Bugünü kaydet</string>
+    <string name="widget_description_log">Bir namazı vaktinde kıldığınızı kaydetmek için dokunun, sıradakine geri sayımla birlikte. İbadet grafiği için yükseltin. 4×2 ile 4×4 arası.</string>
+    <string name="widget_log_today">Bugün</string>
+    <string name="widget_log_count">%2$d üzerinden %1$d</string>
+    <string name="widget_log_waiting">%1$s henüz kaydedilmedi</string>
+    <string name="widget_log_tap_to_log">%1$s namazını vaktinde kaydetmek için ✓\'a dokunun</string>
+    <string name="widget_log_up_to_date">Bugün güncel</string>
+    <string name="widget_log_owed">%1$d kaza</string>
+    <string name="widget_placeholder_day">Vakitleri yüklemek için Mihrab\'ı açın</string>
+    <string name="widget_error">Widget verileri yüklenemedi</string>
+    <string name="widget_configure_title">Namaz widget\'ı</string>
+    <string name="widget_configure_background">Arka plan yoğunluğu</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">Sıradaki namaz vurgusu</string>
+    <string name="widget_configure_highlight_dynamic">Dinamik (telefon vurgu rengi)</string>
+    <string name="widget_configure_highlight_green">Yeşil</string>
+    <string name="widget_configure_highlight_teal">Turkuaz</string>
+    <string name="widget_configure_highlight_blue">Mavi</string>
+    <string name="widget_configure_highlight_amber">Kehribar</string>
+    <string name="widget_configure_highlight_custom">Özel renk</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">Vurgu için telefonunuzun vurgu rengini kullanmak üzere Dinamik\'i seçin.</string>
+    <string name="widget_configure_save">Kaydet</string>
     <string name="live_activity_channel_name">Namaz geri sayımı</string>
     <string name="live_activity_channel_desc">Sıradaki namaza sabitlenmiş geri sayım.</string>
     <string name="live_activity_fgs_channel_name">Namaz geri sayımı (sistem)</string>
     <string name="live_activity_fgs_channel_desc">Namaz geri sayımı için dahili hizmet kanalı. Kullanıcıya görünmez.</string>
     <string name="live_activity_countdown_active">Namaz geri sayımı etkin</string>
+    <string name="widget_name_streak">Mihrab · Seri</string>
+    <string name="widget_description_streak">Vaktinde kılma seriniz ve ibadet grafiğinin son haftaları. 2×2 ile 4×2 arası.</string>
+    <string name="widget_streak_title">SERİ</string>
+    <string name="widget_streak_best">En iyi %1$d</string>
+    <string name="widget_streak_logged">Bugün 5 üzerinden %1$d</string>
+    <string name="widget_streak_sunnah">Sünnet %1$d%%</string>
+    <string name="widget_streak_grid_description">İbadet grafiği</string>
+    <string name="widget_placeholder_open_app">Mihrab\'ı aç</string>
+    <plurals name="widget_streak_days">
+        <item quantity="one">gün</item>
+        <item quantity="other">gün</item>
+    </plurals>
+    <plurals name="widget_streak_make_up">
+        <item quantity="one">%1$d kaza</item>
+        <item quantity="other">%1$d kaza</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="one">Bu ay %1$d oruç</item>
+        <item quantity="other">Bu ay %1$d oruç</item>
+    </plurals>
+    <string name="widget_name_reading">Mihrab · Okumaya devam et</string>
+    <string name="widget_description_reading">Kaldığınız yer ve bugünün vird miktarı. 4×1, yeniden boyutlandırılabilir.</string>
+    <string name="widget_reading_continue">DEVAM ET</string>
+    <string name="widget_reading_khatmah_day">HATİM · GÜN %1$d/%2$d</string>
+    <string name="widget_reading_position">Sayfa %1$d · Cüz %2$d</string>
+    <string name="widget_reading_progress">%2$d üzerinden %1$d · %3$d%% okundu</string>
+    <string name="widget_reading_today_portion">BUGÜNÜN VİRDİ</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">Bugünlük tamam</string>
+    <string name="widget_reading_last_read">SON OKUNAN</string>
+    <string name="widget_reading_last_read_prefix">Son okuma %1$s</string>
+    <string name="widget_reading_today">Bugün</string>
+    <string name="widget_reading_yesterday">Dün</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="one">%1$d gün önce</item>
+        <item quantity="other">%1$d gün önce</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="one">Plana uygun · %1$d sayfa kaldı</item>
+        <item quantity="other">Plana uygun · %1$d sayfa kaldı</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="one">%1$d sayfa geride</item>
+        <item quantity="other">%1$d sayfa geride</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="one">%1$d yer imi</item>
+        <item quantity="other">%1$d yer imi</item>
+    </plurals>
+    <string name="widget_name_tasbih">Mihrab · Tesbih</string>
+    <string name="widget_description_tasbih">Uygulamayı açmadan zikir sayın. 4×2.</string>
+    <string name="widget_tasbih_of">%1$d üzerinden</string>
+    <string name="widget_tasbih_today">Bugün %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">Sıfırla</string>
+    <string name="widget_tasbih_next">Sıradaki ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="one">%1$d tur</item>
+        <item quantity="other">%1$d tur</item>
+    </plurals>
+    <string name="widget_preview_days">gün</string>
+    <string name="widget_preview_streak_second">En iyi 31 · Bugün 5 üzerinden 2 · Sünnet %68</string>
+    <string name="widget_preview_reading_header">HATİM · GÜN 14/30</string>
+    <string name="widget_preview_reading_surah">Bakara</string>
+    <string name="widget_preview_reading_position">Sayfa 3 · Cüz 1</string>
+    <string name="widget_preview_reading_progress">604 üzerinden 47 · %8 okundu</string>
+    <string name="widget_preview_reading_note">Plana uygun · 3 sayfa kaldı</string>
+    <string name="widget_preview_tasbih_label">Sübhanallah</string>
+    <string name="widget_preview_tasbih_of">33 üzerinden</string>
+    <string name="widget_preview_tasbih_today">Bugün 231 · 2 tur</string>
+    <string name="widget_countdown_format">%1$s kaldı</string>
+    <string name="widget_logged_line">Bugün %2$d üzerinden %1$d kaydedildi</string>
+    <string name="widget_name_hijri">Mihrab · Hicri tarih</string>
+    <string name="widget_description_hijri">Bugünün hicri tarihi ve sıradaki aya ne kadar kaldığı. 2×1, yeniden boyutlandırılabilir.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">SIRADAKİ</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dg</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · yarın</string>
+    <string name="widget_hijri_begins_today">%1$s · bugün</string>
+    <string name="widget_preview_hijri_date">25 Safer</string>
+    <string name="widget_preview_hijri_next">Rebiülevvel · 5g</string>
+    <string name="widget_logged_short">%2$d üzerinden %1$d kaydedildi</string>
+    <string name="widget_practice_sunnah_month">Bu ay sünnet %1$d%%</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="one">%1$d oruç</item>
+        <item quantity="other">%1$d oruç</item>
+    </plurals>
+    <string name="widget_preview_header">ÇAR, 19 AĞU · MEKKE</string>
+    <string name="widget_preview_hijri_full">25 SAFER</string>
+    <string name="widget_preview_in_37">37 dakika kaldı</string>
+    <string name="widget_preview_logged">5 üzerinden 2 kaydedildi</string>
+    <plurals name="widget_streak_day_label">
+        <item quantity="one">gün serisi</item>
+        <item quantity="other">gün serisi</item>
+    </plurals>
+    <string name="widget_next_label">SIRADAKİ</string>
+    <string name="widget_in_label">kalan</string>
+    <string name="widget_reading_header_start">KUR\'AN</string>
+    <string name="widget_reading_start_title">Okumaya başla</string>
+    <string name="widget_reading_start_note">İstediğiniz yerden devam edin ya da bir hatme başlayın.</string>
+    <string name="widget_reading_start_note_undownloaded">Meal şimdi okunmaya hazır.</string>
+    <string name="widget_reading_start_tail">Plana gerek yok — açın ve başlayın.</string>
+    <string name="widget_reading_start_side_title">SAYFALAR</string>
+    <string name="widget_reading_start_side_note">tüm Kur\'an\'da</string>
 </resources>

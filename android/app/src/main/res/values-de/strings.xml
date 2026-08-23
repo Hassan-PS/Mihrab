@@ -1,8 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Mihrab</string>
+    <string name="widget_name_small">Mihrab · Nächstes Gebet</string>
+    <string name="widget_name_medium">Mihrab · Gebetszeiten</string>
+    <string name="widget_name_large">Mihrab · Gebetszeiten (alt)</string>
+    <string name="widget_description">Die heutigen Zeiten in einer Zeile, nächstes Gebet hervorgehoben</string>
+    <string name="widget_description_small">Nur das nächste Gebet und seine Zeit. 2×1, skalierbar.</string>
+    <string name="widget_description_medium">Alle sechs Zeiten als Spalten in einer breiten Zeile, nächstes Gebet hervorgehoben. 4×2, skalierbar.</string>
+    <string name="widget_description_prayer_times">Die sechs heutigen Zeiten in einer Zeile. Höher für Stadt und Hijri-Datum, noch höher für das Praxisdiagramm. 4×1 bis 4×4.</string>
+    <string name="widget_description_large_retired">Das frühere Gebetszeiten-Widget. Es zeigt jetzt dasselbe Design wie das aktuelle; es gibt keinen Grund, ein neues zu platzieren.</string>
+    <string name="widget_description_large">Alle sechs Zeiten als Liste neben dem nächsten Gebet. 4×3 — unter drei Zeilen wird daraus der einzeilige Streifen.</string>
+    <string name="widget_name_log">Mihrab · Heute eintragen</string>
+    <string name="widget_description_log">Gebet antippen, um es pünktlich einzutragen, mit Countdown zum nächsten. Höher für das Praxisdiagramm. 4×2 bis 4×4.</string>
+    <string name="widget_log_today">Heute</string>
+    <string name="widget_log_count">%1$d von %2$d</string>
+    <string name="widget_log_waiting">%1$s noch nicht eingetragen</string>
+    <string name="widget_log_tap_to_log">✓ tippen, um %1$s pünktlich einzutragen</string>
+    <string name="widget_log_up_to_date">Heute ist aktuell</string>
+    <string name="widget_log_owed">%1$d offen</string>
+    <string name="widget_placeholder_day">Mihrab öffnen, um Zeiten zu laden</string>
+    <string name="widget_error">Widget-Daten konnten nicht geladen werden</string>
+    <string name="widget_configure_title">Gebets-Widget</string>
+    <string name="widget_configure_background">Hintergrundstärke</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">Hervorhebung nächstes Gebet</string>
+    <string name="widget_configure_highlight_dynamic">Dynamisch (Telefon-Akzent)</string>
+    <string name="widget_configure_highlight_green">Grün</string>
+    <string name="widget_configure_highlight_teal">Türkis</string>
+    <string name="widget_configure_highlight_blue">Blau</string>
+    <string name="widget_configure_highlight_amber">Bernstein</string>
+    <string name="widget_configure_highlight_custom">Eigene Farbe</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">Wähle Dynamisch, um die Akzentfarbe deines Telefons für die Hervorhebung zu übernehmen.</string>
+    <string name="widget_configure_save">Speichern</string>
+    <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Gebets-Countdown</string>
     <string name="live_activity_channel_desc">Angehefteter Countdown zum nächsten Gebet.</string>
     <string name="live_activity_fgs_channel_name">Gebets-Countdown (System)</string>
     <string name="live_activity_fgs_channel_desc">Interner Dienstkanal für den Gebets-Countdown. Nicht für Benutzer sichtbar.</string>
     <string name="live_activity_countdown_active">Gebets-Countdown aktiv</string>
+
+    <!-- ── Streak &amp; Practice ────────────────────────────────────────── -->
+    <string name="widget_name_streak">Mihrab · Serie</string>
+    <string name="widget_description_streak">Deine pünktliche Serie und die letzten Wochen des Praxisdiagramms. 2×2 bis 4×2.</string>
+    <string name="widget_streak_title">SERIE</string>
+    <string name="widget_streak_best">Beste %1$d</string>
+    <string name="widget_streak_logged">%1$d von 5 heute</string>
+    <string name="widget_streak_sunnah">Sunnah %1$d%%</string>
+    <string name="widget_streak_grid_description">Praxisdiagramm</string>
+    <string name="widget_placeholder_open_app">Mihrab öffnen</string>
+    <plurals name="widget_streak_days">
+        <item quantity="one">Tag</item>
+        <item quantity="other">Tage</item>
+    </plurals>
+    <plurals name="widget_streak_make_up">
+        <item quantity="one">%1$d nachzuholen</item>
+        <item quantity="other">%1$d nachzuholen</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="one">%1$d Fastentag diesen Monat</item>
+        <item quantity="other">%1$d Fastentage diesen Monat</item>
+    </plurals>
+
+    <!-- ── Continue Reading ──────────────────────────────────────────── -->
+    <string name="widget_name_reading">Mihrab · Weiterlesen</string>
+    <string name="widget_description_reading">Wo du aufgehört hast, und was das heutige Khatmah-Pensum vorsieht. 4×1, skalierbar.</string>
+    <string name="widget_reading_continue">WEITER</string>
+    <string name="widget_reading_khatmah_day">KHATMAH · TAG %1$d/%2$d</string>
+    <string name="widget_reading_position">Seite %1$d · Juz %2$d</string>
+    <string name="widget_reading_progress">%1$d von %2$d · %3$d%% gelesen</string>
+    <string name="widget_reading_today_portion">HEUTIGES PENSUM</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">Für heute erledigt</string>
+    <string name="widget_reading_last_read">ZULETZT GELESEN</string>
+    <string name="widget_reading_last_read_prefix">Zuletzt gelesen %1$s</string>
+    <string name="widget_reading_today">Heute</string>
+    <string name="widget_reading_yesterday">Gestern</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="one">vor %1$d Tag</item>
+        <item quantity="other">vor %1$d Tagen</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="one">Im Plan · %1$d Seite übrig</item>
+        <item quantity="other">Im Plan · %1$d Seiten übrig</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="one">%1$d Seite im Rückstand</item>
+        <item quantity="other">%1$d Seiten im Rückstand</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="one">%1$d Lesezeichen</item>
+        <item quantity="other">%1$d Lesezeichen</item>
+    </plurals>
+
+    <!-- ── Tasbih ────────────────────────────────────────────────────── -->
+    <string name="widget_name_tasbih">Mihrab · Tasbih</string>
+    <string name="widget_description_tasbih">Dhikr zählen, ohne die App zu öffnen. 4×2.</string>
+    <string name="widget_tasbih_of">von %1$d</string>
+    <string name="widget_tasbih_today">Heute %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">Zurücksetzen</string>
+    <string name="widget_tasbih_next">Weiter ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="one">%1$d Runde</item>
+        <item quantity="other">%1$d Runden</item>
+    </plurals>
+
+    <!-- ── Picker previews ─────────────────────────────────────────────── -->
+    <string name="widget_preview_days">Tage</string>
+    <string name="widget_preview_streak_second">Beste 31 · 2 von 5 heute · Sunnah 68%</string>
+    <string name="widget_preview_reading_header">KHATMAH · TAG 14/30</string>
+    <string name="widget_preview_reading_surah">Al-Baqara</string>
+    <string name="widget_preview_reading_position">Seite 3 · Juz 1</string>
+    <string name="widget_preview_reading_progress">47 von 604 · 8% gelesen</string>
+    <string name="widget_preview_reading_note">Im Plan · 3 Seiten übrig</string>
+    <string name="widget_preview_tasbih_label">SubhanAllah</string>
+    <string name="widget_preview_tasbih_of">von 33</string>
+    <string name="widget_preview_tasbih_today">Heute 231 · 2 Runden</string>
+    <string name="widget_countdown_format">in %1$s</string>
+    <string name="widget_logged_line">%1$d von %2$d heute eingetragen</string>
+    <!-- ── Hijri Date ────────────────────────────────────────────────── -->
+    <string name="widget_name_hijri">Mihrab · Hijri-Datum</string>
+    <string name="widget_description_hijri">Das heutige Hijri-Datum und wie weit der nächste Monat entfernt ist. 2×1, skalierbar.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">NÄCHSTE</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dT</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · morgen</string>
+    <string name="widget_hijri_begins_today">%1$s · heute</string>
+    <string name="widget_preview_hijri_date">25 Safar</string>
+    <string name="widget_preview_hijri_next">Rabi I · 5T</string>
+    <string name="widget_logged_short">%1$d von %2$d eingetragen</string>
+    <string name="widget_practice_sunnah_month">Sunnah %1$d%% diesen Monat</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="one">%1$d Fastentag</item>
+        <item quantity="other">%1$d Fastentage</item>
+    </plurals>
+    <string name="widget_preview_header">MI, 19 AUG · MEKKA</string>
+    <string name="widget_preview_hijri_full">25 SAFAR</string>
+    <string name="widget_preview_in_37">in 37 min</string>
+    <string name="widget_preview_logged">2 von 5 eingetragen</string>
+    <plurals name="widget_streak_day_label">
+        <item quantity="one">Tage-Serie</item>
+        <item quantity="other">Tage-Serie</item>
+    </plurals>
+    <string name="widget_next_label">NÄCHSTE</string>
+    <string name="widget_in_label">in</string>
+    <string name="widget_reading_header_start">DER KORAN</string>
+    <string name="widget_reading_start_title">Lesen beginnen</string>
+    <string name="widget_reading_start_note">Steige ein, wo du möchtest, oder beginne eine Khatmah.</string>
+    <string name="widget_reading_start_note_undownloaded">Die Übersetzung ist jetzt zum Lesen bereit.</string>
+    <string name="widget_reading_start_tail">Kein Plan nötig — einfach öffnen und loslegen.</string>
+    <string name="widget_reading_start_side_title">SEITEN</string>
+    <string name="widget_reading_start_side_note">im gesamten Koran</string>
 </resources>

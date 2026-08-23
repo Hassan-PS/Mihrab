@@ -1,8 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Mihrab</string>
+    <string name="widget_name_small">Mihrab · Следующий намаз</string>
+    <string name="widget_name_medium">Mihrab · Время намазов</string>
+    <string name="widget_name_large">Mihrab · Время намазов (старое)</string>
+    <string name="widget_description">Сегодняшние времена намаза в одну строку, следующий намаз выделен</string>
+    <string name="widget_description_small">Только следующий намаз и его время. 2×1, изменяемый размер.</string>
+    <string name="widget_description_medium">Все шесть времён намаза колонками в одной широкой строке, следующий намаз выделен. 4×2, изменяемый размер.</string>
+    <string name="widget_description_prayer_times">Шесть времён намаза сегодня в одной строке. Увеличьте высоту, чтобы увидеть город и дату хиджры, ещё выше — график практики. От 4×1 до 4×4.</string>
+    <string name="widget_description_large_retired">Более ранний виджет времён намаза. Теперь он выглядит так же, как текущий; смысла добавлять новый нет.</string>
+    <string name="widget_description_large">Все шесть времён намаза списком, рядом — следующий намаз. 4×3 — уменьшите меньше трёх строк, и он станет полосой в одну строку.</string>
+    <string name="widget_name_log">Mihrab · Отметить намазы</string>
+    <string name="widget_description_log">Нажмите на намаз, чтобы отметить его вовремя, рядом отсчёт до следующего. Увеличьте высоту для графика практики. От 4×2 до 4×4.</string>
+    <string name="widget_log_today">Сегодня</string>
+    <string name="widget_log_count">%1$d из %2$d</string>
+    <string name="widget_log_waiting">%1$s ещё не отмечен</string>
+    <string name="widget_log_tap_to_log">Нажмите ✓, чтобы отметить %1$s вовремя</string>
+    <string name="widget_log_up_to_date">Сегодня всё отмечено</string>
+    <string name="widget_log_owed">%1$d в долгу</string>
+    <string name="widget_placeholder_day">Откройте Mihrab, чтобы загрузить время намазов</string>
+    <string name="widget_error">Не удалось загрузить данные виджета</string>
+    <string name="widget_configure_title">Виджет намаза</string>
+    <string name="widget_configure_background">Непрозрачность фона</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">Выделение следующего намаза</string>
+    <string name="widget_configure_highlight_dynamic">Динамический (акцент телефона)</string>
+    <string name="widget_configure_highlight_green">Зелёный</string>
+    <string name="widget_configure_highlight_teal">Бирюзовый</string>
+    <string name="widget_configure_highlight_blue">Синий</string>
+    <string name="widget_configure_highlight_amber">Янтарный</string>
+    <string name="widget_configure_highlight_custom">Свой цвет</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">Выберите «Динамический», чтобы цвет выделения повторял акцентный цвет телефона.</string>
+    <string name="widget_configure_save">Сохранить</string>
+    <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Отсчёт молитвы</string>
     <string name="live_activity_channel_desc">Закреплённый обратный отсчёт до следующей молитвы.</string>
     <string name="live_activity_fgs_channel_name">Отсчёт молитвы (система)</string>
     <string name="live_activity_fgs_channel_desc">Внутренний служебный канал для обратного отсчёта молитвы. Не отображается пользователю.</string>
     <string name="live_activity_countdown_active">Отсчёт молитвы активен</string>
+
+    <!-- ── Streak &amp; Practice ────────────────────────────────────────── -->
+    <string name="widget_name_streak">Mihrab · Серия</string>
+    <string name="widget_description_streak">Ваша серия намазов вовремя и график практики за последние недели. От 2×2 до 4×2.</string>
+    <string name="widget_streak_title">СЕРИЯ</string>
+    <string name="widget_streak_best">Лучшая %1$d</string>
+    <string name="widget_streak_logged">%1$d из 5 сегодня</string>
+    <string name="widget_streak_sunnah">Сунна %1$d%%</string>
+    <string name="widget_streak_grid_description">График практики</string>
+    <string name="widget_placeholder_open_app">Открыть Mihrab</string>
+    <plurals name="widget_streak_days">
+        <item quantity="one">день</item>
+        <item quantity="few">дня</item>
+        <item quantity="many">дней</item>
+        <item quantity="other">дня</item>
+    </plurals>
+    <plurals name="widget_streak_make_up">
+        <item quantity="one">%1$d к восполнению</item>
+        <item quantity="few">%1$d к восполнению</item>
+        <item quantity="many">%1$d к восполнению</item>
+        <item quantity="other">%1$d к восполнению</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="one">%1$d пост в этом месяце</item>
+        <item quantity="few">%1$d поста в этом месяце</item>
+        <item quantity="many">%1$d постов в этом месяце</item>
+        <item quantity="other">%1$d поста в этом месяце</item>
+    </plurals>
+
+    <!-- ── Continue Reading ──────────────────────────────────────────── -->
+    <string name="widget_name_reading">Mihrab · Продолжить чтение</string>
+    <string name="widget_description_reading">Где вы остановились и какой отрывок хатма назначен на сегодня. 4×1, изменяемый размер.</string>
+    <string name="widget_reading_continue">ПРОДОЛЖИТЬ</string>
+    <string name="widget_reading_khatmah_day">ХАТМ · ДЕНЬ %1$d/%2$d</string>
+    <string name="widget_reading_position">Стр. %1$d · Джуз %2$d</string>
+    <string name="widget_reading_progress">%1$d из %2$d · %3$d%% прочитано</string>
+    <string name="widget_reading_today_portion">ПОРЦИЯ ДНЯ</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">На сегодня готово</string>
+    <string name="widget_reading_last_read">ПОСЛЕДНЕЕ ЧТЕНИЕ</string>
+    <string name="widget_reading_last_read_prefix">Читали %1$s</string>
+    <string name="widget_reading_today">Сегодня</string>
+    <string name="widget_reading_yesterday">Вчера</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="one">%1$d день назад</item>
+        <item quantity="few">%1$d дня назад</item>
+        <item quantity="many">%1$d дней назад</item>
+        <item quantity="other">%1$d дня назад</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="one">По графику · осталась %1$d страница</item>
+        <item quantity="few">По графику · осталось %1$d страницы</item>
+        <item quantity="many">По графику · осталось %1$d страниц</item>
+        <item quantity="other">По графику · осталось %1$d страницы</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="one">Отставание на %1$d страницу</item>
+        <item quantity="few">Отставание на %1$d страницы</item>
+        <item quantity="many">Отставание на %1$d страниц</item>
+        <item quantity="other">Отставание на %1$d страницы</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="one">%1$d закладка</item>
+        <item quantity="few">%1$d закладки</item>
+        <item quantity="many">%1$d закладок</item>
+        <item quantity="other">%1$d закладки</item>
+    </plurals>
+
+    <!-- ── Tasbih ────────────────────────────────────────────────────── -->
+    <string name="widget_name_tasbih">Mihrab · Тасбих</string>
+    <string name="widget_description_tasbih">Считайте зикр, не открывая приложение. 4×2.</string>
+    <string name="widget_tasbih_of">из %1$d</string>
+    <string name="widget_tasbih_today">Сегодня %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">Сброс</string>
+    <string name="widget_tasbih_next">Далее ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="one">%1$d круг</item>
+        <item quantity="few">%1$d круга</item>
+        <item quantity="many">%1$d кругов</item>
+        <item quantity="other">%1$d круга</item>
+    </plurals>
+
+    <!-- ── Picker previews ───────────────────────────────────────────────
+         The picker never runs a provider, so these are the only words a
+         preview layout can show. Representative, not live. -->
+    <string name="widget_preview_days">дней</string>
+    <string name="widget_preview_streak_second">Лучшая 31 · 2 из 5 сегодня · Сунна 68%</string>
+    <string name="widget_preview_reading_header">ХАТМ · ДЕНЬ 14/30</string>
+    <string name="widget_preview_reading_surah">Аль-Бакара</string>
+    <string name="widget_preview_reading_position">Стр. 3 · Джуз 1</string>
+    <string name="widget_preview_reading_progress">47 из 604 · 8% прочитано</string>
+    <string name="widget_preview_reading_note">По графику · осталось 3 страницы</string>
+    <string name="widget_preview_tasbih_label">СубханАллах</string>
+    <string name="widget_preview_tasbih_of">из 33</string>
+    <string name="widget_preview_tasbih_today">Сегодня 231 · 2 круга</string>
+    <!-- The Chronometer's format. "%1$s" is the ticking duration; the word
+         around it is what stops "2:58:00" being read as a clock time. -->
+    <string name="widget_countdown_format">через %1$s</string>
+    <!-- The plan's 4x3 mock carries this under the location. -->
+    <string name="widget_logged_line">%1$d из %2$d отмечено сегодня</string>
+    <!-- ── Hijri Date ────────────────────────────────────────────────── -->
+    <string name="widget_name_hijri">Mihrab · Дата хиджры</string>
+    <string name="widget_description_hijri">Сегодняшняя дата хиджры и сколько осталось до следующего месяца. 2×1, изменяемый размер.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">ДАЛЕЕ</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dд</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · завтра</string>
+    <string name="widget_hijri_begins_today">%1$s · сегодня</string>
+    <string name="widget_preview_hijri_date">25 сафара</string>
+    <string name="widget_preview_hijri_next">Раби I · 5д</string>
+    <!-- Strip footer: sits opposite the countdown, so it has no room to say
+         "today" and no need to — the whole card is today. -->
+    <string name="widget_logged_short">%1$d из %2$d отмечено</string>
+    <string name="widget_practice_sunnah_month">Сунна %1$d%% за месяц</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="one">%1$d пост</item>
+        <item quantity="few">%1$d поста</item>
+        <item quantity="many">%1$d постов</item>
+        <item quantity="other">%1$d поста</item>
+    </plurals>
+    <!-- Sample content for the picker preview, matching the plan's mock. -->
+    <string name="widget_preview_header">СР, 19 АВГ · МЕККА</string>
+    <string name="widget_preview_hijri_full">25 САФАР</string>
+    <string name="widget_preview_in_37">через 37 мин</string>
+    <string name="widget_preview_logged">2 из 5 отмечено</string>
+    <!-- The words next to the streak number: "day streak" / "day streak". -->
+    <plurals name="widget_streak_day_label">
+        <item quantity="one">день подряд</item>
+        <item quantity="few">дня подряд</item>
+        <item quantity="many">дней подряд</item>
+        <item quantity="other">дня подряд</item>
+    </plurals>
+    <string name="widget_next_label">ДАЛЕЕ</string>
+    <string name="widget_in_label">через</string>
+    <!-- The Continue Reading widget before anything has been read. -->
+    <string name="widget_reading_header_start">КОРАН</string>
+    <string name="widget_reading_start_title">Начать чтение</string>
+    <string name="widget_reading_start_note">Начните с любого места или запустите хатм.</string>
+    <string name="widget_reading_start_note_undownloaded">Перевод уже готов для чтения.</string>
+    <string name="widget_reading_start_tail">План не нужен — открой и начни.</string>
+    <string name="widget_reading_start_side_title">СТРАНИЦЫ</string>
+    <string name="widget_reading_start_side_note">во всём Коране</string>
 </resources>

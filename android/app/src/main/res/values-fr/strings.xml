@@ -1,8 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Mihrab</string>
+    <!-- Picker entries are named for WHAT THEY SHOW, not for how big they
+         are. "Mihrab (Medium)" and "Mihrab (Large)" sat next to each other
+         claiming the same 4x2 footprint, so the only way to find out which
+         one you wanted was to place one and look. -->
+    <string name="widget_name_small">Mihrab · Prochaine prière</string>
+    <!-- After the phase 0 merge this is the one prayer-times entry: strip at
+         4x2, list at 4x3, list plus the practice graph at 4x4. -->
+    <string name="widget_name_medium">Mihrab · Heures de prière</string>
+    <!-- Retired from the picker, kept registered so nobody's placed widget
+         vanishes. See prayer_widget_large_info.xml. -->
+    <string name="widget_name_large">Mihrab · Heures de prière (ancien)</string>
+    <string name="widget_description">Les heures du jour sur une ligne, prochaine prière en surbrillance</string>
+    <string name="widget_description_small">Juste la prochaine prière et son heure. 2×1, redimensionnable.</string>
+    <string name="widget_description_medium">Les six heures en colonnes sur une large ligne, prochaine prière en surbrillance. 4×2, redimensionnable.</string>
+    <string name="widget_description_prayer_times">Les six heures du jour sur une ligne. Agrandissez pour la ville et la date hégirienne, encore plus pour le graphique de pratique. 4×1 à 4×4.</string>
+    <string name="widget_description_large_retired">L\'ancien widget des heures de prière. Il affiche désormais le même modèle que l\'actuel ; inutile d\'en placer un nouveau.</string>
+    <string name="widget_description_large">Les six heures en liste à côté de la prochaine prière. 4×3 — réduisez sous trois lignes pour obtenir la bande à une ligne.</string>
+    <string name="widget_name_log">Mihrab · Journal du jour</string>
+    <string name="widget_description_log">Touchez une prière pour la noter à l\'heure, avec le compte à rebours de la suivante. Agrandissez pour le graphique de pratique. 4×2 à 4×4.</string>
+    <string name="widget_log_today">Aujourd\'hui</string>
+    <!-- "2 of 5" — logged out of loggable. -->
+    <string name="widget_log_count">%1$d sur %2$d</string>
+    <string name="widget_log_waiting">%1$s pas encore noté</string>
+    <!-- Explains the + rather than restating the chip above it. -->
+    <string name="widget_log_tap_to_log">Touchez ✓ pour noter %1$s à l\'heure</string>
+    <string name="widget_log_up_to_date">Aujourd\'hui est à jour</string>
+    <string name="widget_log_owed">%1$d en retard</string>
+    <string name="widget_placeholder_day">Ouvrez Mihrab pour charger les heures</string>
+    <string name="widget_error">Impossible de charger les données du widget</string>
+    <string name="widget_configure_title">Widget de prière</string>
+    <string name="widget_configure_background">Intensité du fond</string>
+    <string name="widget_configure_opacity_percent">%1$d%%</string>
+    <string name="widget_configure_highlight">Surbrillance de la prochaine prière</string>
+    <string name="widget_configure_highlight_dynamic">Dynamique (accent du téléphone)</string>
+    <string name="widget_configure_highlight_green">Vert</string>
+    <string name="widget_configure_highlight_teal">Sarcelle</string>
+    <string name="widget_configure_highlight_blue">Bleu</string>
+    <string name="widget_configure_highlight_amber">Ambre</string>
+    <string name="widget_configure_highlight_custom">Couleur personnalisée</string>
+    <string name="widget_configure_hex_hint">#RRGGBB</string>
+    <string name="widget_configure_theme_accent_hint">Choisissez Dynamique pour suivre la couleur d\'accent de votre téléphone pour la surbrillance.</string>
+    <string name="widget_configure_save">Enregistrer</string>
+    <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Compte à rebours de la prière</string>
     <string name="live_activity_channel_desc">Compte à rebours épinglé jusqu\'à la prochaine prière.</string>
     <string name="live_activity_fgs_channel_name">Compte à rebours de la prière (système)</string>
     <string name="live_activity_fgs_channel_desc">Canal de service interne pour le compte à rebours de la prière. Non visible par l\'utilisateur.</string>
     <string name="live_activity_countdown_active">Compte à rebours de la prière actif</string>
+
+    <!-- ── Streak and Practice ────────────────────────────────────────── -->
+    <string name="widget_name_streak">Mihrab · Série</string>
+    <string name="widget_description_streak">Votre série de prières à l\'heure et les dernières semaines du graphique de pratique. 2×2 à 4×2.</string>
+    <string name="widget_streak_title">SÉRIE</string>
+    <string name="widget_streak_best">Meilleure %1$d</string>
+    <string name="widget_streak_logged">%1$d sur 5 aujourd\'hui</string>
+    <string name="widget_streak_sunnah">Sunnah %1$d%%</string>
+    <string name="widget_streak_grid_description">Graphique de pratique</string>
+    <string name="widget_placeholder_open_app">Ouvrir Mihrab</string>
+    <plurals name="widget_streak_days">
+        <item quantity="one">jour</item>
+        <item quantity="other">jours</item>
+    </plurals>
+    <!-- Deliberately not "owed": this is the whole journal's count, and beside
+         a line about today the word "owed" claims it is today's. -->
+    <plurals name="widget_streak_make_up">
+        <item quantity="one">%1$d à rattraper</item>
+        <item quantity="other">%1$d à rattraper</item>
+    </plurals>
+    <plurals name="widget_streak_fasts">
+        <item quantity="one">%1$d jeûne ce mois-ci</item>
+        <item quantity="other">%1$d jeûnes ce mois-ci</item>
+    </plurals>
+
+    <!-- ── Continue Reading ──────────────────────────────────────────── -->
+    <string name="widget_name_reading">Mihrab · Continuer la lecture</string>
+    <string name="widget_description_reading">Où vous en étiez, et ce que demande la portion du khatmah d\'aujourd\'hui. 4×1, redimensionnable.</string>
+    <string name="widget_reading_continue">CONTINUER</string>
+    <string name="widget_reading_khatmah_day">KHATMAH · JOUR %1$d/%2$d</string>
+    <string name="widget_reading_position">Page %1$d · Juz %2$d</string>
+    <string name="widget_reading_progress">%1$d sur %2$d · %3$d%% lu</string>
+    <string name="widget_reading_today_portion">PORTION DU JOUR</string>
+    <string name="widget_reading_portion_value">%1$d / %2$d</string>
+    <string name="widget_reading_done_today">Terminé pour aujourd\'hui</string>
+    <string name="widget_reading_last_read">DERNIÈRE LECTURE</string>
+    <string name="widget_reading_last_read_prefix">Dernière lecture %1$s</string>
+    <string name="widget_reading_today">Aujourd\'hui</string>
+    <string name="widget_reading_yesterday">Hier</string>
+    <plurals name="widget_reading_days_ago">
+        <item quantity="one">il y a %1$d jour</item>
+        <item quantity="other">il y a %1$d jours</item>
+    </plurals>
+    <plurals name="widget_reading_left">
+        <item quantity="one">À jour · %1$d page restante</item>
+        <item quantity="other">À jour · %1$d pages restantes</item>
+    </plurals>
+    <plurals name="widget_reading_behind">
+        <item quantity="one">%1$d page de retard</item>
+        <item quantity="other">%1$d pages de retard</item>
+    </plurals>
+    <plurals name="widget_reading_bookmarks">
+        <item quantity="one">%1$d signet</item>
+        <item quantity="other">%1$d signets</item>
+    </plurals>
+
+    <!-- ── Tasbih ────────────────────────────────────────────────────── -->
+    <string name="widget_name_tasbih">Mihrab · Tasbih</string>
+    <string name="widget_description_tasbih">Comptez le dhikr sans ouvrir l\'application. 4×2.</string>
+    <string name="widget_tasbih_of">sur %1$d</string>
+    <string name="widget_tasbih_today">Aujourd\'hui %1$d</string>
+    <string name="widget_tasbih_inc">+1</string>
+    <string name="widget_tasbih_reset">Réinitialiser</string>
+    <string name="widget_tasbih_next">Suivant ›</string>
+    <plurals name="widget_tasbih_rounds">
+        <item quantity="one">%1$d tour</item>
+        <item quantity="other">%1$d tours</item>
+    </plurals>
+
+    <!-- ── Picker previews ───────────────────────────────────────────────
+         The picker never runs a provider, so these are the only words a
+         preview layout can show. Representative, not live. -->
+    <string name="widget_preview_days">jours</string>
+    <string name="widget_preview_streak_second">Meilleure 31 · 2 sur 5 aujourd\'hui · Sunnah 68 %</string>
+    <string name="widget_preview_reading_header">KHATMAH · JOUR 14/30</string>
+    <string name="widget_preview_reading_surah">Al-Baqarah</string>
+    <string name="widget_preview_reading_position">Page 3 · Juz 1</string>
+    <string name="widget_preview_reading_progress">47 sur 604 · 8 % lu</string>
+    <string name="widget_preview_reading_note">À jour · 3 pages restantes</string>
+    <string name="widget_preview_tasbih_label">SubhanAllah</string>
+    <string name="widget_preview_tasbih_of">sur 33</string>
+    <string name="widget_preview_tasbih_today">Aujourd\'hui 231 · 2 tours</string>
+    <!-- The Chronometer's format. "%1$s" is the ticking duration; the word
+         around it is what stops "2:58:00" being read as a clock time. -->
+    <string name="widget_countdown_format">dans %1$s</string>
+    <!-- The plan's 4x3 mock carries this under the location. -->
+    <string name="widget_logged_line">%1$d sur %2$d noté aujourd\'hui</string>
+    <!-- ── Hijri Date ────────────────────────────────────────────────── -->
+    <string name="widget_name_hijri">Mihrab · Date hégirienne</string>
+    <string name="widget_description_hijri">La date hégirienne du jour, et la distance jusqu\'au mois prochain. 2×1, redimensionnable.</string>
+    <string name="widget_hijri_day_month">%1$d %2$s</string>
+    <string name="widget_hijri_next">SUIVANT</string>
+    <string name="widget_hijri_in_days">%1$s · %2$dj</string>
+    <string name="widget_hijri_begins_tomorrow">%1$s · demain</string>
+    <string name="widget_hijri_begins_today">%1$s · aujourd\'hui</string>
+    <string name="widget_preview_hijri_date">25 Safar</string>
+    <string name="widget_preview_hijri_next">Rabi I · 5j</string>
+    <!-- Strip footer: sits opposite the countdown, so it has no room to say
+         "today" and no need to — the whole card is today. -->
+    <string name="widget_logged_short">%1$d sur %2$d noté</string>
+    <string name="widget_practice_sunnah_month">Sunnah %1$d%% ce mois-ci</string>
+    <plurals name="widget_practice_fasts">
+        <item quantity="one">%1$d jeûne</item>
+        <item quantity="other">%1$d jeûnes</item>
+    </plurals>
+    <!-- Sample content for the picker preview, matching the plan's mock. -->
+    <string name="widget_preview_header">MER, 19 AOÛT · LA MECQUE</string>
+    <string name="widget_preview_hijri_full">25 SAFAR</string>
+    <string name="widget_preview_in_37">dans 37 min</string>
+    <string name="widget_preview_logged">2 sur 5 noté</string>
+    <!-- The words next to the streak number: "day streak" / "day streak". -->
+    <plurals name="widget_streak_day_label">
+        <item quantity="one">jour de série</item>
+        <item quantity="other">jours de série</item>
+    </plurals>
+    <string name="widget_next_label">SUIVANT</string>
+    <string name="widget_in_label">dans</string>
+    <!-- The Continue Reading widget before anything has been read. -->
+    <string name="widget_reading_header_start">LE CORAN</string>
+    <string name="widget_reading_start_title">Commencer la lecture</string>
+    <string name="widget_reading_start_note">Reprenez où vous voulez, ou commencez un khatmah.</string>
+    <string name="widget_reading_start_note_undownloaded">La traduction est prête à être lue dès maintenant.</string>
+    <string name="widget_reading_start_tail">Aucun plan nécessaire — ouvrez-le et commencez.</string>
+    <string name="widget_reading_start_side_title">PAGES</string>
+    <string name="widget_reading_start_side_note">dans tout le Coran</string>
 </resources>
