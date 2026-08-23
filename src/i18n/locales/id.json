@@ -1171,7 +1171,10 @@
     "mushafSub": "604 halaman Madinah",
     "audioSub": "Audio tilawah",
     "tafsirSub": "Teks tafsir tersimpan",
-    "empty": "Belum ada unduhan. Halaman mushaf, audio, dan tafsir yang diunduh akan muncul di sini."
+    "empty": "Belum ada unduhan. Halaman mushaf, audio, dan tafsir yang diunduh akan muncul di sini.",
+    "mushafPages": "{{pages}} dari {{total}} halaman",
+    "legacyMushaf": "Halaman mushaf lama",
+    "legacyMushafSub": "Sisa dari pembaca sebelumnya. Tidak ada lagi yang membukanya."
   },
   "dataStats": {
     "title": "Statistik data",

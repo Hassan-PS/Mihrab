@@ -1171,7 +1171,10 @@
     "mushafSub": "604 Madinah-sidor",
     "audioSub": "Recitationsljud",
     "tafsirSub": "Cachade tafsir-texter",
-    "empty": "Inget nedladdat ännu. Mushaf-sidor, recitationsljud och tafsir du hämtar visas här."
+    "empty": "Inget nedladdat ännu. Mushaf-sidor, recitationsljud och tafsir du hämtar visas här.",
+    "mushafPages": "{{pages}} av {{total}} sidor",
+    "legacyMushaf": "Äldre mushaf-sidor",
+    "legacyMushafSub": "Kvar från den tidigare läsaren. Inget öppnar dem längre."
   },
   "dataStats": {
     "title": "Datastatistik",

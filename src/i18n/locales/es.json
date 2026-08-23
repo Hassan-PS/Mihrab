@@ -1171,7 +1171,10 @@
     "mushafSub": "604 páginas de Medina",
     "audioSub": "Audio de recitación",
     "tafsirSub": "Textos de tafsir en caché",
-    "empty": "Aún no hay descargas. Las páginas del mushaf, el audio y el tafsir descargados aparecerán aquí."
+    "empty": "Aún no hay descargas. Las páginas del mushaf, el audio y el tafsir descargados aparecerán aquí.",
+    "mushafPages": "{{pages}} de {{total}} páginas",
+    "legacyMushaf": "Páginas antiguas del mushaf",
+    "legacyMushafSub": "Restos del lector anterior. Ya nada las abre."
   },
   "dataStats": {
     "title": "Estadísticas de datos",

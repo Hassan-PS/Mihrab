@@ -5,6 +5,23 @@
  * the mushaf page store, per-reciter recitation audio, and the tafsir
  * cache. Reachable from Settings (Data & privacy) and the Quran screen.
  * Everything here is re-downloadable, so deletes are safe.
+ *
+ * ── IT USED TO REPORT AN EMPTY DEVICE ─────────────────────────────────
+ *
+ * The mushaf row read `mushafDiskUsage`, which sums the manifest of the
+ * page-IMAGE store at quran/mushaf. Version 2.8.0 replaced that reader
+ * with the font-rendered one, which stores 604 typefaces at quran/fonts
+ * — and nothing here was ever pointed at the new directory. So a device
+ * with the whole mushaf downloaded, a hundred and eighty megabytes of it,
+ * opened this screen and was told "Nothing downloaded yet". Confirmed on
+ * an emulator holding all 604 fonts.
+ *
+ * Both stores are listed now. The old one is a separate row rather than
+ * folded into the new: it is dead weight from an upgrade, several hundred
+ * megabytes that nothing will ever read again, and someone deleting it
+ * should be able to see that is what they are deleting. Its size is
+ * walked rather than read from the manifest, so a store whose manifest
+ * went missing still shows up as the space it is really taking.
  */
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -22,9 +39,14 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { cardEdgeStyle } from '../theme/chrome';
 import {
   clearMushafDownloadFlag,
-  deleteMushaf,
-  mushafDiskUsage,
+  deleteLegacyImageStore,
+  legacyImageStoreBytes,
 } from '../quran/mushafDownload';
+import {
+  deletePageFonts,
+  fontStoreStats,
+} from '../quran/mushafFontStore';
+import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
 import { deleteReciterAudio } from '../quran/audio/audioStore';
 import { findReciter } from '../quran/audio/reciters';
 import { deleteTafsirCache, tafsirDiskUsage } from '../quran/tafsir';
@@ -44,6 +66,8 @@ export function QuranDownloadsScreen() {
   const { palette } = useAppPalette();
 
   const [mushafBytes, setMushafBytes] = useState(0);
+  const [mushafPages, setMushafPages] = useState(0);
+  const [legacyBytes, setLegacyBytes] = useState(0);
   const [tafsirBytes, setTafsirBytes] = useState(0);
   const [audio, setAudio] = useState<ReciterUsage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,11 +75,14 @@ export function QuranDownloadsScreen() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [mushaf, tafsir] = await Promise.all([
-        mushafDiskUsage(),
+      const [fonts, legacy, tafsir] = await Promise.all([
+        fontStoreStats(),
+        legacyImageStoreBytes(),
         tafsirDiskUsage(),
       ]);
-      setMushafBytes(mushaf);
+      setMushafBytes(fonts.bytes);
+      setMushafPages(fonts.pages);
+      setLegacyBytes(legacy);
       setTafsirBytes(tafsir);
       const base = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/audio`;
       const out: ReciterUsage[] = [];
@@ -136,7 +163,10 @@ export function QuranDownloadsScreen() {
   );
 
   const total =
-    mushafBytes + tafsirBytes + audio.reduce((s, a) => s + a.bytes, 0);
+    mushafBytes +
+    legacyBytes +
+    tafsirBytes +
+    audio.reduce((s, a) => s + a.bytes, 0);
 
   return (
     <ScrollView
@@ -157,13 +187,39 @@ export function QuranDownloadsScreen() {
         ? row(
             'mushaf',
             t('downloads.mushaf', 'Mushaf pages'),
-            t('downloads.mushafSub', '604 Madinah pages'),
+            // The count, not a flat "604": a run that was cancelled or that
+            // lost pages leaves a store this screen should describe honestly
+            // rather than round up to complete.
+            t('downloads.mushafPages', {
+              defaultValue: '{{pages}} of {{total}} pages',
+              pages: mushafPages,
+              total: MUSHAF_TOTAL_PAGES,
+            }),
             mushafBytes,
             () =>
               confirmDelete(t('downloads.mushaf', 'Mushaf pages'), async () => {
-                await deleteMushaf();
+                await deletePageFonts();
                 await clearMushafDownloadFlag();
               }),
+          )
+        : null}
+
+      {legacyBytes > 0
+        ? row(
+            'mushaf-legacy',
+            t('downloads.legacyMushaf', 'Older mushaf pages'),
+            t(
+              'downloads.legacyMushafSub',
+              'Left by the previous reader. Nothing opens these now.',
+            ),
+            legacyBytes,
+            () =>
+              confirmDelete(
+                t('downloads.legacyMushaf', 'Older mushaf pages'),
+                async () => {
+                  await deleteLegacyImageStore();
+                },
+              ),
           )
         : null}
 

@@ -1171,7 +1171,10 @@
     "mushafSub": "604 pages de Médine",
     "audioSub": "Audio de récitation",
     "tafsirSub": "Textes de tafsir en cache",
-    "empty": "Rien de téléchargé pour le moment. Les pages du mushaf, l'audio et le tafsir téléchargés apparaîtront ici."
+    "empty": "Rien de téléchargé pour le moment. Les pages du mushaf, l'audio et le tafsir téléchargés apparaîtront ici.",
+    "mushafPages": "{{pages}} sur {{total}} pages",
+    "legacyMushaf": "Anciennes pages du mushaf",
+    "legacyMushafSub": "Restes de l'ancien lecteur. Plus rien ne les ouvre."
   },
   "dataStats": {
     "title": "Statistiques des données",

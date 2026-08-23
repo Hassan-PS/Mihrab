@@ -1171,7 +1171,10 @@
     "mushafSub": "604 Medine sayfası",
     "audioSub": "Tilavet sesi",
     "tafsirSub": "Önbelleğe alınmış tefsirler",
-    "empty": "Henüz bir şey indirilmedi. İndirilen mushaf sayfaları, ses ve tefsir burada görünür."
+    "empty": "Henüz bir şey indirilmedi. İndirilen mushaf sayfaları, ses ve tefsir burada görünür.",
+    "mushafPages": "{{total}} sayfadan {{pages}} tanesi",
+    "legacyMushaf": "Eski mushaf sayfaları",
+    "legacyMushafSub": "Önceki okuyucudan kalma. Artık bunları hiçbir şey açmıyor."
   },
   "dataStats": {
     "title": "Veri istatistikleri",

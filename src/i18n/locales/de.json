@@ -1171,7 +1171,10 @@
     "mushafSub": "604 Madinah-Seiten",
     "audioSub": "Rezitationsaudio",
     "tafsirSub": "Zwischengespeicherte Tafsir-Texte",
-    "empty": "Noch nichts heruntergeladen. Geladene Mushaf-Seiten, Audio und Tafsir erscheinen hier."
+    "empty": "Noch nichts heruntergeladen. Geladene Mushaf-Seiten, Audio und Tafsir erscheinen hier.",
+    "mushafPages": "{{pages}} von {{total}} Seiten",
+    "legacyMushaf": "Ältere Mushaf-Seiten",
+    "legacyMushafSub": "Vom vorherigen Reader übrig. Nichts öffnet sie mehr."
   },
   "dataStats": {
     "title": "Datenstatistik",

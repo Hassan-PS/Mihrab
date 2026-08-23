@@ -1171,7 +1171,10 @@
     "mushafSub": "604 Madinah pages",
     "audioSub": "Recitation audio",
     "tafsirSub": "Cached tafsir texts",
-    "empty": "Nothing downloaded yet. Mushaf pages, recitation audio and tafsir you download appear here."
+    "empty": "Nothing downloaded yet. Mushaf pages, recitation audio and tafsir you download appear here.",
+    "mushafPages": "{{pages}} of {{total}} pages",
+    "legacyMushaf": "Older mushaf pages",
+    "legacyMushafSub": "Left by the previous reader. Nothing opens these now."
   },
   "dataStats": {
     "title": "Data statistics",

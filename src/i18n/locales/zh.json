@@ -1171,7 +1171,10 @@
     "mushafSub": "604 页麦地那版",
     "audioSub": "诵读音频",
     "tafsirSub": "已缓存的经注",
-    "empty": "尚无下载。下载的穆斯哈夫页面、音频与经注会显示在这里。"
+    "empty": "尚无下载。下载的穆斯哈夫页面、音频与经注会显示在这里。",
+    "mushafPages": "{{total}} 页中的 {{pages}} 页",
+    "legacyMushaf": "旧版穆斯哈夫页面",
+    "legacyMushafSub": "旧版阅读器遗留。现在没有任何功能会打开它们。"
   },
   "dataStats": {
     "title": "数据统计",
