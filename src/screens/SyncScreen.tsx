@@ -14,6 +14,12 @@
  * before pairing states plainly that both devices will sync afterwards, and
  * that merging never deletes.
  *
+ * THE FOLDER IS SOMEBODY ELSE'S JOB, AND THE COPY SAYS SO. Mihrab does not
+ * move the file between devices; it writes one into a folder and reads what
+ * it finds. Which folder, and what keeps it in step, is the user's choice —
+ * Syncthing, Nextcloud, a shared drive. Explaining that up front is what
+ * makes "nothing arrived" a thing they can debug rather than a mystery.
+ *
  * REMOVING IS ONE-SIDED, AND SO DOES THAT. This device can stop talking to
  * a peer; it cannot reach into that peer and remove itself. The dialog says
  * to do it on both, because the alternative is a phone that keeps writing
@@ -26,6 +32,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -55,6 +62,14 @@ import {
   type Peer,
 } from '../sync/peers';
 import { hasSecureRandom } from '../sync/secureRandom';
+import { hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
+import { runSyncNow } from '../sync/runSync';
+import {
+  getSyncSettings,
+  updateSyncSettings,
+  type SyncSettings,
+} from '../sync/syncSettings';
+import { SYNC_CATEGORIES, type SyncCategory } from '../sync/snapshot';
 
 type Palette = ReturnType<typeof useAppPalette>['palette'];
 
@@ -125,6 +140,8 @@ export function SyncScreen() {
   const [entered, setEntered] = useState('');
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState<boolean | null>(null);
+  const [settings, setSettings] = useState<SyncSettings | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -134,15 +151,17 @@ export function SyncScreen() {
         return;
       }
       try {
-        const [mine, name, list] = await Promise.all([
+        const [mine, name, list, stored] = await Promise.all([
           myPairingCode(),
           getDeviceName(),
           listPeers(),
+          getSyncSettings(),
         ]);
         if (!alive) return;
         setCode(mine);
         setName(name);
         setPeers(list);
+        setSettings(stored);
         setReady(true);
       } catch {
         if (alive) setReady(false);
@@ -230,6 +249,77 @@ export function SyncScreen() {
       ],
     );
   }, [busy, entered, refreshPeers, t]);
+
+  const onChooseFolder = useCallback(() => {
+    void (async () => {
+      if (!hasFolderPicker()) {
+        Alert.alert(t('sync.errorUnsupported'));
+        return;
+      }
+      try {
+        const picked = await pickSyncFolder();
+        // Null is a cancel, not a failure. Saying nothing is the correct
+        // response to someone deciding not to.
+        if (!picked) return;
+        setSettings(await updateSyncSettings({ folder: picked, lastError: null }));
+      } catch (e) {
+        Alert.alert(t('sync.syncFailedTitle'), String(e));
+      }
+    })();
+  }, [t]);
+
+  const onSyncNow = useCallback(() => {
+    if (syncing) return;
+    void (async () => {
+      setSyncing(true);
+      try {
+        const result = await runSyncNow();
+        setSettings(await getSyncSettings());
+        if (result.ok) {
+          await refreshPeers();
+          Alert.alert(
+            t('sync.syncDoneTitle'),
+            result.outcome.read > 0
+              ? t('sync.syncDoneBody')
+              : t('sync.syncNothing'),
+          );
+          return;
+        }
+        Alert.alert(
+          t('sync.syncFailedTitle'),
+          result.reason === 'folder-gone'
+            ? t('sync.errorFolderGone')
+            : result.reason === 'no-folder'
+              ? t('sync.folderHelp')
+              : result.reason === 'unsupported' || result.reason === 'no-identity'
+                ? t('sync.errorUnsupported')
+                : t('sync.syncFailedBody', { detail: result.detail ?? '' }),
+        );
+      } finally {
+        setSyncing(false);
+      }
+    })();
+  }, [refreshPeers, syncing, t]);
+
+  const onToggleCategory = useCallback(
+    (category: SyncCategory, next: boolean) => {
+      void (async () => {
+        const current = settings ?? (await getSyncSettings());
+        setSettings(
+          await updateSyncSettings({
+            selection: { ...current.selection, [category]: next },
+          }),
+        );
+      })();
+    },
+    [settings],
+  );
+
+  const onToggleAuto = useCallback((next: boolean) => {
+    void (async () => {
+      setSettings(await updateSyncSettings({ autoOnOpen: next }));
+    })();
+  }, []);
 
   const onRemove = useCallback(
     (peer: Peer) => {
@@ -440,6 +530,113 @@ export function SyncScreen() {
               />
             ))
           )}
+        </View>
+
+        <Text
+          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+        >
+          {t('sync.folderSection')}
+        </Text>
+        <View style={[styles.card, card]}>
+          <Text style={[typeStyle('body'), { color: palette.text }]}>
+            {t('sync.folderHelp')}
+          </Text>
+          {settings?.folder ? (
+            <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
+              {t('sync.folderChosen', { value: settings.folder.label })}
+            </Text>
+          ) : null}
+          <View style={styles.buttonRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                settings?.folder
+                  ? t('sync.changeFolder')
+                  : t('sync.chooseFolder')
+              }
+              testID="sync-choose-folder"
+              onPress={onChooseFolder}
+              style={({ pressed }) => [
+                styles.secondary,
+                styles.grow,
+                { borderColor: palette.border, borderRadius: RADIUS.sm },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[typeStyle('headline'), { color: palette.text }]}>
+                {settings?.folder
+                  ? t('sync.changeFolder')
+                  : t('sync.chooseFolder')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sync.syncNow')}
+              accessibilityState={{ disabled: syncing || !settings?.folder }}
+              testID="sync-now"
+              onPress={onSyncNow}
+              disabled={syncing || !settings?.folder}
+              style={({ pressed }) => [
+                styles.primary,
+                styles.grow,
+                { backgroundColor: palette.accent, borderRadius: RADIUS.sm },
+                pressed && styles.pressed,
+                (syncing || !settings?.folder) && styles.disabled,
+              ]}
+            >
+              {syncing ? (
+                <ActivityIndicator color={String(palette.bg)} />
+              ) : (
+                <Text style={[typeStyle('headline'), { color: palette.bg }]}>
+                  {t('sync.syncNow')}
+                </Text>
+              )}
+            </Pressable>
+          </View>
+          <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
+            {settings?.lastSyncAt
+              ? t('sync.lastSyncedAt', {
+                  when: new Date(settings.lastSyncAt).toLocaleString(),
+                })
+              : t('sync.neverSynced')}
+          </Text>
+          <View style={styles.peerRow}>
+            <Text
+              style={[typeStyle('body'), styles.peerText, { color: palette.text }]}
+            >
+              {t('sync.autoOnOpen')}
+            </Text>
+            <Switch
+              accessibilityLabel={t('sync.autoOnOpen')}
+              value={settings?.autoOnOpen ?? true}
+              onValueChange={onToggleAuto}
+            />
+          </View>
+        </View>
+
+        <Text
+          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+        >
+          {t('sync.whatSyncs')}
+        </Text>
+        <View style={[styles.card, card]}>
+          {SYNC_CATEGORIES.map(category => (
+            <View key={category} style={styles.peerRow}>
+              <View style={styles.peerText}>
+                <Text style={[typeStyle('body'), { color: palette.text }]}>
+                  {t(`sync.category.${category}`)}
+                </Text>
+                <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
+                  {t(`sync.categoryHint.${category}`)}
+                </Text>
+              </View>
+              <Switch
+                accessibilityLabel={t(`sync.category.${category}`)}
+                value={settings?.selection[category] ?? false}
+                onValueChange={next => onToggleCategory(category, next)}
+              />
+            </View>
+          ))}
         </View>
 
         <Text

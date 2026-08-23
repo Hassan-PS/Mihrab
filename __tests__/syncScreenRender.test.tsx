@@ -48,6 +48,10 @@ jest.mock('../src/hooks/useAppPalette', () => ({
 }));
 
 jest.mock('react-i18next', () => ({
+  // Spread the real module: the screen now reaches i18n transitively through
+  // the sync stack, and a mock that replaces the whole module leaves
+  // `initReactI18next` undefined at import time.
+  ...jest.requireActual('react-i18next'),
   useTranslation: () => ({
     // Enough to tell strings apart without pulling in the locale bundles.
     t: (key: string, vars?: Record<string, unknown>) =>
