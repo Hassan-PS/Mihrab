@@ -349,9 +349,9 @@
     "a11ySignal_very_weak": "Pusula sinyali: çok zayıf. Doğruluk sınırlı olabilir."
   },
   "prayer": {
-    "Fajr": "sabah",
+    "Fajr": "Sabah",
     "Sunrise": "Gündoğumu",
-    "Dhuhr": "Öğle yemeği",
+    "Dhuhr": "Öğle",
     "Asr": "İkindi",
     "Maghrib": "Akşam",
     "Isha": "Yatsı",
