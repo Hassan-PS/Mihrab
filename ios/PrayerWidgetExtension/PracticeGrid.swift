@@ -16,6 +16,13 @@ import WidgetKit
 
 struct PracticeGrid: View {
   let days: [WidgetPayload.PracticeDay]
+  /// The first day the user ever logged a prayer, or nil.
+  ///
+  /// From it onwards a day that does not account for all five carries the
+  /// unaccounted dot. Before it, nothing: there was no record yet, and a
+  /// grid that opened with years of marks would be reproaching someone for
+  /// the time before they installed the app.
+  var since: String?
   /// Weeks to draw, newest last.
   let weeks: Int
   let cell: CGFloat
@@ -27,6 +34,9 @@ struct PracticeGrid: View {
   /// weaker version of a kept one, and encoding it as less-of-the-same is
   /// how the in-app version became unreadable.
   private let owedColor = Color(red: 248 / 255, green: 113 / 255, blue: 113 / 255)
+
+  /// The five salāh — what a complete day accounts for.
+  private let salahPerDay = 5
 
   var body: some View {
     let byDate = Dictionary(days.map { ($0.d, $0) }, uniquingKeysWith: { a, _ in a })
@@ -47,6 +57,21 @@ struct PracticeGrid: View {
                 if key != nil, weight(of: day) <= 0, logged(of: day) <= 0 {
                   RoundedRectangle(cornerRadius: cell * 0.28, style: .continuous)
                     .strokeBorder(accent.opacity(0.22), lineWidth: max(1, cell * 0.09))
+                }
+              }
+              .overlay(alignment: .topLeading) {
+                // The unaccounted mark: a day inside the record that never
+                // got all five filled in. FILLED here where the app draws
+                // it hollow — a one-point ring inside a six-point cell is
+                // mush on a home screen, and being visible is the whole
+                // reason the mark is carried into the widget. Grey and in
+                // the corner, so it cannot be read as part of the ramp.
+                if let key, let since, key >= since, key != todayKey,
+                   logged(of: day) < salahPerDay {
+                  Circle()
+                    .fill(Color.secondary.opacity(0.85))
+                    .frame(width: max(2.4, cell * 0.32), height: max(2.4, cell * 0.32))
+                    .padding(1)
                 }
               }
               .overlay {

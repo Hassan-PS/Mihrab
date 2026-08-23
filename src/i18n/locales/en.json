@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "Prayers",
     "backfillPreserved": "Days you have already logged are left alone, and today is not touched.",
     "fillMonthsPreserved": "Days already holding a status, a note or a fast are left exactly as they are. Today is not touched.",
-    "fillSummaryLeftAlone": "Left alone"
+    "fillSummaryLeftAlone": "Left alone",
+    "unlogged": "not filled in"
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

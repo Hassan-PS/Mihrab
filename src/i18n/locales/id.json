@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "Salat",
     "backfillPreserved": "Hari yang sudah kamu catat dibiarkan apa adanya, dan hari ini tidak diubah.",
     "fillMonthsPreserved": "Hari yang sudah berisi status, catatan, atau puasa dibiarkan persis seperti adanya. Hari ini tidak diubah.",
-    "fillSummaryLeftAlone": "Dibiarkan"
+    "fillSummaryLeftAlone": "Dibiarkan",
+    "unlogged": "belum diisi"
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

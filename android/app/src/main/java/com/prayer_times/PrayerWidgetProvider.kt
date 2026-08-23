@@ -948,6 +948,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           ((if (wide) 7 else 6) * density).toInt().coerceAtLeast(3),
           (2f * density).toInt().coerceAtLeast(1),
           accent,
+          practice.optString("since").ifEmpty { null },
         ),
       )
 

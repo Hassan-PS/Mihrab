@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "Namaz",
     "backfillPreserved": "Daha önce kaydettiğin günlere dokunulmaz, bugün de değişmez.",
     "fillMonthsPreserved": "Zaten bir durum, bir not ya da bir oruç içeren günler olduğu gibi bırakılır. Bugün değişmez.",
-    "fillSummaryLeftAlone": "Dokunulmayan"
+    "fillSummaryLeftAlone": "Dokunulmayan",
+    "unlogged": "girilmedi"
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

@@ -47,6 +47,9 @@ object PracticeGridBitmap {
   /** The muted grey, for days that have not happened yet. */
   private const val FUTURE_COLOR = "#9AA0A6"
 
+  /** The five salāh — what a complete day accounts for. */
+  private const val SALAH_PER_DAY = 5
+
   /**
    * A RemoteViews carrying bitmaps has to cross a Binder transaction, and
    * the AppWidget host applies its own ceiling on top of that — OEMs vary,
@@ -66,6 +69,11 @@ object PracticeGridBitmap {
    *               today
    * @param cellPx square size in pixels, clamped to MAX_CELL_PX
    * @param gapPx  space between squares
+   * @param since  the payload's `practice.since` — the first day the user
+   *               ever logged a prayer, or null. Days from it onwards that
+   *               do not account for all five carry the unaccounted dot;
+   *               days before it carry nothing, because there was nothing
+   *               to record yet.
    * @param now    the moment the grid describes — injectable so the shape can
    *               be asserted against a fixed date
    */
@@ -76,6 +84,7 @@ object PracticeGridBitmap {
     cellPx: Int,
     gapPx: Int,
     accent: Int,
+    since: String? = null,
     now: Calendar = Calendar.getInstance(),
   ): Bitmap {
     @Suppress("NAME_SHADOWING") val cellPx = cellPx.coerceIn(3, MAX_CELL_PX)
@@ -129,6 +138,20 @@ object PracticeGridBitmap {
             paint.strokeWidth = (cellPx * 0.09f).coerceAtLeast(1f)
             paint.color = withAlpha(accent, 0.22f)
             canvas.drawRoundRect(rect, radius, radius, paint)
+          }
+          // The unaccounted mark: a day inside the record that never got
+          // all five filled in. FILLED here where the app draws it hollow —
+          // a 1px ring inside a 7px cell is mush on a home screen, and
+          // being visible is the entire point of carrying the mark into the
+          // widget. Grey, and in the corner, so it cannot be read as part
+          // of the green ramp.
+          if (since != null && key >= since && key < todayKey &&
+            (day == null || loggedOf(day) < SALAH_PER_DAY)
+          ) {
+            paint.style = Paint.Style.FILL
+            paint.color = withAlpha(Color.parseColor(FUTURE_COLOR), 0.85f)
+            val r = (cellPx * 0.16f).coerceAtLeast(1.2f)
+            canvas.drawCircle(rect.left + r + 1f, rect.top + r + 1f, r, paint)
           }
         }
         // Today gets a ring, as it does on the Log screen. A grid whose most

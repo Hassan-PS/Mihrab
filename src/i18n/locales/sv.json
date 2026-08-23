@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "Böner",
     "backfillPreserved": "Dagar du redan loggat lämnas orörda, och dagens datum påverkas inte.",
     "fillMonthsPreserved": "Dagar som redan har en status, en anteckning eller en fasta lämnas precis som de är. Dagens datum påverkas inte.",
-    "fillSummaryLeftAlone": "Orörda"
+    "fillSummaryLeftAlone": "Orörda",
+    "unlogged": "ej ifyllt"
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

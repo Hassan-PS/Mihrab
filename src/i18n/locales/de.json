@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "Gebete",
     "backfillPreserved": "Bereits erfasste Tage bleiben unverändert, und der heutige Tag wird nicht angetastet.",
     "fillMonthsPreserved": "Tage, die bereits einen Status, eine Notiz oder ein Fasten enthalten, bleiben genau so, wie sie sind. Der heutige Tag wird nicht angetastet.",
-    "fillSummaryLeftAlone": "Unberührt"
+    "fillSummaryLeftAlone": "Unberührt",
+    "unlogged": "nicht eingetragen"
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

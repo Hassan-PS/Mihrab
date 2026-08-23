@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "الصلوات",
     "backfillPreserved": "الأيام التي سجّلتها من قبل تبقى كما هي، ولا يُمسّ يومك الحالي.",
     "fillMonthsPreserved": "الأيام التي فيها حالة أو ملاحظة أو صيام تبقى كما هي تمامًا. ولا يُمسّ يومك الحالي.",
-    "fillSummaryLeftAlone": "مُبقاة"
+    "fillSummaryLeftAlone": "مُبقاة",
+    "unlogged": "لم تُسجَّل"
   },
   "endOfDay": {
     "title": "تسجيل صلوات اليوم؟",

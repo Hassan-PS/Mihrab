@@ -52,6 +52,19 @@ function PracticeCardImpl() {
   }, [journal, fasts]);
 
   /**
+   * Where the unaccounted marks start: the first PRAYER logged, not the
+   * first anything. See the same note in LogScreen — a fast logged during a
+   * Ramadan two years ago must not turn the two years since into a wall of
+   * marks.
+   */
+  const firstPrayerLogged = useMemo(() => {
+    let first: string | null = null;
+    for (const e of journal)
+      if (first === null || e.date < first) first = e.date;
+    return first;
+  }, [journal]);
+
+  /**
    * The same reach-back the Log has.
    *
    * Without it this graph drew exactly the weeks it had data for — thirteen
@@ -72,8 +85,9 @@ function PracticeCardImpl() {
         new Date(),
         weeksToCover(earliest) + extraWeeks,
         sunnah,
+        firstPrayerLogged,
       ),
-    [journal, fasts, sunnah, earliest, extraWeeks],
+    [journal, fasts, sunnah, earliest, extraWeeks, firstPrayerLogged],
   );
 
   const weekdayLabels = useMemo(() => {

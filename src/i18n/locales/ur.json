@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "نمازیں",
     "backfillPreserved": "جو دن آپ پہلے درج کر چکے ہیں وہ ویسے ہی رہیں گے، اور آج کا دن نہیں بدلے گا۔",
     "fillMonthsPreserved": "جن دنوں میں پہلے سے حالت، نوٹ یا روزہ درج ہے وہ بالکل ویسے ہی رہتے ہیں۔ آج کا دن نہیں بدلے گا۔",
-    "fillSummaryLeftAlone": "غیر متاثر"
+    "fillSummaryLeftAlone": "غیر متاثر",
+    "unlogged": "درج نہیں"
   },
   "endOfDay": {
     "title": "آج کی نمازیں درج کریں؟",

@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "Oraciones",
     "backfillPreserved": "Los días que ya has registrado no se tocan, y hoy tampoco.",
     "fillMonthsPreserved": "Los días que ya tienen un estado, una nota o un ayuno se dejan exactamente como están. Hoy no se toca.",
-    "fillSummaryLeftAlone": "Intactos"
+    "fillSummaryLeftAlone": "Intactos",
+    "unlogged": "sin registrar"
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",

@@ -138,6 +138,20 @@ const DOT = 4;
 const DOT_INSET = SUNNAH_INSET + SUNNAH_LINE + 0.5;
 
 /**
+ * The unaccounted mark: hollow, and a point bigger than the solid dots.
+ *
+ * Bigger because an outline reads smaller than a fill at the same size, and
+ * hollow because that is the whole meaning — the day has a hole in it. It
+ * must not be mistaken for the missed dot at a glance, so it differs in
+ * three ways at once: the opposite corner, an outline instead of a fill,
+ * and the muted colour instead of the danger one. Any one of those alone
+ * would fail somebody: colour for the colour-blind, corner for the hurried,
+ * fill for the small-screened.
+ */
+const OPEN_DOT = 5;
+const OPEN_LINE = 1.2;
+
+/**
  * An inset measured from the square's outer edge, expressed in the
  * coordinates its children are actually laid out in. See `SQUARE_BORDER`.
  */
@@ -192,11 +206,37 @@ function markStyles(border: number) {
     missed: { ...mark, top: dot, insetInlineEnd: dot },
     /** The corner opposite, so a night holding both is two marks not one. */
     qiyam: { ...mark, bottom: dot, insetInlineStart: dot },
+    /**
+     * The fourth corner, for a day inside the logging era that never got
+     * filled in. See OPEN_DOT — and note it can share a square with the
+     * missed dot: four on time, one missed, none of the others recorded is
+     * a real day, and it carries both marks.
+     */
+    unaccounted: {
+      position: 'absolute' as const,
+      width: OPEN_DOT,
+      height: OPEN_DOT,
+      borderRadius: OPEN_DOT / 2,
+      borderWidth: OPEN_LINE,
+      top: insetFor(DOT_INSET - 0.5, border),
+      insetInlineStart: insetFor(DOT_INSET - 0.5, border),
+    },
   };
 }
 
 const MARKS_PLAIN = markStyles(0);
 const MARKS_BORDERED = markStyles(SQUARE_BORDER);
+/**
+ * The third case, and it only exists because of the unaccounted mark.
+ *
+ * An empty day carries a hairline edge so the palest tint does not vanish
+ * in sunlight, and until now no empty day carried a mark, so nothing had to
+ * be laid out against that edge. An unaccounted day is empty by definition
+ * and now carries one — and a border shifts its children's origin, so
+ * without this the dot would sit half a point deeper on exactly the days it
+ * appears on most.
+ */
+const MARKS_EMPTY_EDGE = markStyles(StyleSheet.hairlineWidth);
 
 /**
  * One drawn side of that line: `i` is 0…3 clockwise from the top-left, `len`
@@ -250,9 +290,23 @@ export type HeatmapDay = {
   sunnah: number;
   /** Any Qiyam al-Layl that night — drives the mark in the corner. */
   qiyam: boolean;
+  /**
+   * A finished day, at or after the first day this journal has an entry
+   * for, that does not account for all five prayers.
+   *
+   * Not the same as "empty": before someone started logging there is
+   * nothing to be missing, and the graph must not open with a wall of
+   * marks reproaching a new user for the years before they installed the
+   * app. And not the same as "missed" either — missed is a decision the
+   * user recorded, this is the absence of one.
+   */
+  unaccounted: boolean;
   /** Days after today inside the trailing week — drawn as blanks. */
   future: boolean;
 };
+
+/** The five salāh — what a complete day accounts for. */
+const SALAH_PER_DAY = 5;
 
 /** Noon-anchored, so adding days never lands on a DST hour that doesn't exist. */
 function atNoon(d: Date): Date {
@@ -312,8 +366,15 @@ export function buildHeatmap(
    * logging keep working unchanged — an absent log simply draws no gold.
    */
   sunnahLog: SunnahLog = {},
+  /**
+   * The first day this journal has any entry for — the day the record
+   * starts. Days before it are simply days before the user arrived, and
+   * carry no mark however empty they are.
+   */
+  since: string | null = null,
 ): HeatmapDay[][] {
   const today = atNoon(now);
+  const from = since ? parseDayKey(since) : null;
   const span = Math.max(1, Math.floor(weeks));
   const start = mondayOf(today);
   start.setDate(start.getDate() - (span - 1) * 7);
@@ -336,6 +397,14 @@ export function buildHeatmap(
         sunnah: sunnahFraction(sun),
         qiyam: sun.qiyam > 0,
         future: d.getTime() > today.getTime(),
+        // Today is excluded on purpose: it is still being lived, and a
+        // mark that appears at Fajr for the Isha you have not prayed yet
+        // is nagging rather than record-keeping.
+        unaccounted:
+          from !== null &&
+          d.getTime() >= from.getTime() &&
+          d.getTime() < today.getTime() &&
+          (score?.logged ?? 0) < SALAH_PER_DAY,
       });
     }
     rows.push(row);
@@ -838,7 +907,11 @@ function PracticeHeatmapImpl({
                       day.sunnah === 0 &&
                       !day.fasted &&
                       !day.qiyam;
-                    const marks = border ? MARKS_BORDERED : MARKS_PLAIN;
+                    const marks = border
+                      ? MARKS_BORDERED
+                      : bare
+                        ? MARKS_EMPTY_EDGE
+                        : MARKS_PLAIN;
                     return (
                       <Pressable
                         key={day.key}
@@ -875,6 +948,8 @@ function PracticeHeatmapImpl({
                           !day.future && day.qiyam
                             ? `, ${t('sunnah.qiyam', 'Qiyam al-Layl')}`
                             : ''
+                        }${
+                          day.unaccounted ? `, ${t('log.unlogged')}` : ''
                         }`}
                         style={[
                           styles.square,
@@ -973,6 +1048,21 @@ function PracticeHeatmapImpl({
                             ]}
                           />
                         ) : null}
+                        {/* A day inside the record that never got filled
+                            in. Hollow, muted, and in the corner the other
+                            three marks left free — see OPEN_DOT. It is a
+                            question, not an accusation: the prayer may have
+                            been prayed and never logged, and the point is
+                            only that the day is worth a second look. */}
+                        {day.unaccounted ? (
+                          <View
+                            pointerEvents="none"
+                            style={[
+                              marks.unaccounted,
+                              { borderColor: String(palette.muted) },
+                            ]}
+                          />
+                        ) : null}
                       </Pressable>
                     );
                   })}
@@ -1066,6 +1156,29 @@ function PracticeHeatmapImpl({
               numberOfLines={1}
             >
               {t('sunnah.legend', 'sunnah')}
+            </Text>
+            {/* The unaccounted mark earns a legend entry more than any of
+                the others: it is the only one that appears on a day the
+                user did nothing on, so without a key it reads as the app
+                having marked something at random. */}
+            <View
+              style={[
+                styles.legendSquare,
+                { backgroundColor: palette.controlBg },
+              ]}
+            >
+              <View
+                style={[
+                  styles.legendUnloggedMark,
+                  { borderColor: String(palette.muted) },
+                ]}
+              />
+            </View>
+            <Text
+              style={[styles.legendText, { color: palette.muted }]}
+              numberOfLines={1}
+            >
+              {t('log.unlogged')}
             </Text>
             <View
               style={[
@@ -1175,6 +1288,16 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
+  },
+  /** The hollow one, in the corner it occupies on a real square. */
+  legendUnloggedMark: {
+    position: 'absolute',
+    top: 1,
+    insetInlineStart: 1,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    borderWidth: 1.2,
   },
   legendText: { fontSize: 10.5, fontWeight: '600' },
   caption: { fontSize: 12, lineHeight: 17, marginTop: 8 },

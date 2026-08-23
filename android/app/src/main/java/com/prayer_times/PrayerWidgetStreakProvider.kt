@@ -238,7 +238,14 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       }
       views.setImageViewBitmap(
         R.id.streak_grid,
-        PracticeGridBitmap.render(pr.optJSONArray("days"), weeks, cell, gap, accent),
+        PracticeGridBitmap.render(
+          pr.optJSONArray("days"),
+          weeks,
+          cell,
+          gap,
+          accent,
+          pr.optString("since").ifEmpty { null },
+        ),
       )
 
       views.setOnClickPendingIntent(R.id.widget_root, openLogIntent(context))

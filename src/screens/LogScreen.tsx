@@ -582,6 +582,22 @@ export function LogScreen() {
   }, [entries, fasts]);
 
   /**
+   * The first day with a PRAYER entry — where the unaccounted marks begin.
+   *
+   * Deliberately not `earliestLogged`, which counts fasts as well so the
+   * grid can reach back to a Ramadan logged before the journal was used.
+   * Marking every day since that Ramadan as "not filled in" would be the
+   * app inventing an obligation the user never took on.
+   */
+  const firstPrayerLogged = useMemo(() => {
+    let first: string | null = null;
+    for (const e of entries) {
+      if (first === null || e.date < first) first = e.date;
+    }
+    return first;
+  }, [entries]);
+
+  /**
    * How far back the graph is drawn.
    *
    * Three inputs, because the graph has to cover everything the user can
@@ -603,8 +619,9 @@ export function LogScreen() {
       new Date(),
       spanWeeks,
       sunnah,
+      firstPrayerLogged,
     );
-  }, [entries, fasts, sunnah, spanWeeks]);
+  }, [entries, fasts, sunnah, spanWeeks, firstPrayerLogged]);
 
   const weekdayLabels = useMemo(() => {
     // Monday-first initials in the app language.

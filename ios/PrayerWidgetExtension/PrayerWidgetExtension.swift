@@ -202,6 +202,18 @@ struct WidgetPayload: Codable {
     let sunnahRate: Double?
     let fastsThisMonth: Int
     let days: [PracticeDay]
+    /// The first day the journal has a prayer entry for, yyyy-MM-dd.
+    ///
+    /// The grid needs it and cannot derive it: days with nothing recorded
+    /// are omitted from `days`, so an absent square is either "before this
+    /// user started logging" or "started, and never filled in" — opposite
+    /// meanings, identical payload. Absent on older payloads, which simply
+    /// draw no unaccounted marks.
+    ///
+    /// `var` with a default so the sample payloads the previews build keep
+    /// their memberwise initialiser — they have no journal behind them and
+    /// nothing to say about when one started.
+    var since: String? = nil
   }
 
   /// Deliberately short keys — this is 98 of them and the whole payload
@@ -1370,6 +1382,7 @@ struct PrayerWidgetEntryView: View {
           Spacer(minLength: 4)
           PracticeGrid(
             days: pr.days,
+            since: pr.since,
             weeks: 10,
             cell: 6,
             spacing: 2,

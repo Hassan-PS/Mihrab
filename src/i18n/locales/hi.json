@@ -1229,7 +1229,8 @@
     "fillSummaryPrayers": "नमाज़ें",
     "backfillPreserved": "जो दिन आपने पहले दर्ज किए हैं वे वैसे ही रहेंगे, और आज का दिन नहीं बदलेगा।",
     "fillMonthsPreserved": "जिन दिनों में पहले से स्थिति, नोट या रोज़ा दर्ज है वे बिल्कुल वैसे ही रहते हैं। आज का दिन नहीं बदलेगा।",
-    "fillSummaryLeftAlone": "अछूते"
+    "fillSummaryLeftAlone": "अछूते",
+    "unlogged": "दर्ज नहीं"
   },
   "endOfDay": {
     "title": "आज की नमाज़ें दर्ज करें?",

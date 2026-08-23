@@ -111,6 +111,20 @@ export type WidgetPracticeBlock = {
   /** Oldest first, ending today. Days with nothing recorded are omitted —
    *  the renderer fills the calendar, so an absent day is an empty square. */
   days: WidgetPracticeDay[];
+  /**
+   * The first day this journal has a prayer entry for, YYYY-MM-DD.
+   *
+   * The renderer needs it to draw the unaccounted mark, and it cannot
+   * derive it: days with nothing recorded are omitted from `days`, so an
+   * absent square is either "before this user started" or "started and
+   * never filled in" — opposite meanings, identical payload. Absent when
+   * the journal is empty, which is also when there is nothing to mark.
+   *
+   * Note it is the first PRAYER, not the first anything: a fast logged
+   * during a Ramadan two years ago must not turn the two years since into
+   * a wall of marks.
+   */
+  since?: string;
 };
 
 /** One prayer as the Log Today widget needs it. */
@@ -302,7 +316,9 @@ export function buildPracticeBlock(input: {
   const weighted = new Map<string, number>();
   const logged = new Map<string, number>();
   const missed = new Set<string>();
+  let since: string | null = null;
   for (const e of input.journal) {
+    if (since === null || e.date < since) since = e.date;
     weighted.set(e.date, (weighted.get(e.date) ?? 0) + (STATUS_WEIGHT[e.status] ?? 0));
     logged.set(e.date, (logged.get(e.date) ?? 0) + 1);
     if (e.status === 'on-time' || e.status === 'late') {
@@ -354,6 +370,7 @@ export function buildPracticeBlock(input: {
       f => f.completed && f.date.slice(0, 7) === today.slice(0, 7),
     ).length,
     days,
+    ...(since ? { since } : {}),
   };
 }
 
