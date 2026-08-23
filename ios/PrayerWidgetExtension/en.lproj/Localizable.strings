@@ -12,7 +12,7 @@
 "widget_description_large_retired" = "The earlier prayer-times widget. It now draws the same design as the current one; there is no reason to place a new one.";
 "widget_description_large" = "All six times as a list beside the next prayer. 4×3 — shrink it below three rows and it becomes the one-row strip.";
 "widget_name_log" = "Mihrab · Log today";
-"widget_description_log" = "Tap a prayer to log it on time, with the countdown to the next. Make it taller for the practice graph. 4×2 to 4×4.";
+"widget_description_log" = "Tap a prayer to log it on time, with the countdown to the next. Make it taller for the practice graph. 4×1 to 4×4.";
 "widget_log_today" = "Today";
 "widget_log_count" = "%1$d of %2$d";
 "widget_log_waiting" = "%1$@ not logged yet";
@@ -107,3 +107,9 @@
 "widget_reading_no_bookmarks" = "No bookmarks yet";
 "widget_reading_page_today" = "Page %1$d · %2$d/%3$d today";
 "widget_streak_inline" = "Streak %1$dd";
+"widget_preview_tap_to_log" = "Tap ✓ to log Asr on time";
+"widget_preview_practice_second" = "day streak · Best 31 · 2 of 5 today";
+"widget_name_tall" = "Mihrab · Prayer times (tall)";
+"widget_description_tall" = "The same six times with the city, the Hijri date and the practice graph. 4×3 — shrink it and it becomes the one-row strip.";
+"widget_name_log_tall" = "Mihrab · Log today (tall)";
+"widget_description_log_tall" = "Tap a prayer to log it on time, with the countdown to the next and the practice graph. 4×3 — shrink it and it becomes the one-row card.";

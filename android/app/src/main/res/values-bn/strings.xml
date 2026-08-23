@@ -11,7 +11,7 @@
     <string name="widget_description_large_retired">নামাযের সময়ের পুরনো উইজেট। এটি এখন বর্তমান উইজেটের মতোই দেখায়; নতুন করে এটি বসানোর কোনো কারণ নেই।</string>
     <string name="widget_description_large">ছয়টি সময়ই পরবর্তী নামাযের পাশে তালিকা আকারে। 4×3 — তিন সারির নিচে ছোট করলে এটি এক-সারির স্ট্রিপ হয়ে যায়।</string>
     <string name="widget_name_log">Mihrab · আজকের লগ</string>
-    <string name="widget_description_log">সময়মতো লগ করতে একটি নামাযে ট্যাপ করুন, সাথে পরবর্তীটির কাউন্টডাউন। চর্চার গ্রাফের জন্য এটি উঁচু করুন। 4×2 থেকে 4×4।</string>
+    <string name="widget_description_log">সময়মতো লগ করতে একটি নামাযে ট্যাপ করুন, সাথে পরবর্তীটির কাউন্টডাউন। চর্চার গ্রাফের জন্য এটি উঁচু করুন। 4×1 থেকে 4×4।</string>
     <string name="widget_log_today">আজ</string>
     <string name="widget_log_count">%2$d-এর মধ্যে %1$d</string>
     <string name="widget_log_waiting">%1$s এখনও লগ করা হয়নি</string>
@@ -169,4 +169,10 @@
     <string name="widget_reading_no_bookmarks">এখনও কোনো বুকমার্ক নেই</string>
     <string name="widget_reading_page_today">পৃষ্ঠা %1$d \u00b7 আজ %2$d/%3$d</string>
     <string name="widget_streak_inline">ধারাবাহিকতা %1$dদি</string>
+    <string name="widget_preview_tap_to_log">সময়মতো আসর লগ করতে \u2713-এ ট্যাপ করুন</string>
+    <string name="widget_preview_practice_second">দিনের ধারাবাহিকতা \u00b7 সেরা 31 \u00b7 আজ 5-এর মধ্যে 2</string>
+    <string name="widget_name_tall">Mihrab \u00b7 নামাযের সময় (উঁচু)</string>
+    <string name="widget_description_tall">শহর, হিজরি তারিখ ও চর্চার গ্রাফসহ একই ছয়টি সময়। 4\u00d73 \u2014 এটি ছোট করলে এটি এক-সারির স্ট্রিপ হয়ে যায়।</string>
+    <string name="widget_name_log_tall">Mihrab \u00b7 আজকের লগ (উঁচু)</string>
+    <string name="widget_description_log_tall">সময়মতো লগ করতে একটি নামাযে ট্যাপ করুন, সাথে পরবর্তীটির কাউন্টডাউন ও চর্চার গ্রাফ। 4\u00d73 \u2014 এটি ছোট করলে এটি এক-সারির কার্ড হয়ে যায়।</string>
 </resources>

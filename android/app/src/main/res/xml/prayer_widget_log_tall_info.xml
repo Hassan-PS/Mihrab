@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Log Today, tall — the second picker entry for the same widget.
+
+  `PrayerWidgetLogLargeProvider` is `PrayerWidgetLogProvider` under another
+  name; every layout decision this widget makes it makes from the measured
+  height, so an instance placed from here is the same card, three rows tall
+  from the start. See prayer_widget_tall_info.xml for why one widget needs
+  two entries.
+
+  Three rows, not four: three is where the graph appears (GRID_MIN_HEIGHT_DP
+  is 265 and three rows is 321dp on a 420dpi phone), and the graph is what
+  someone choosing this entry over the short one is choosing.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
+    android:widgetFeatures="reconfigurable|configuration_optional"
+    android:description="@string/widget_description_log_tall"
+    android:initialLayout="@layout/prayer_widget_log"
+    android:minWidth="250dp"
+    android:minHeight="60dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/prayer_widget_log_tall_preview"
+    android:resizeMode="horizontal|vertical"
+    android:minResizeWidth="250dp"
+    android:minResizeHeight="60dp"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="4"
+    android:targetCellHeight="3"
+    android:maxResizeWidth="500dp"
+    android:maxResizeHeight="600dp" />

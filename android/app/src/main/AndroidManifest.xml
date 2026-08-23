@@ -90,7 +90,7 @@
       <receiver
         android:name=".PrayerWidgetLargeProvider"
         android:exported="true"
-        android:label="@string/widget_name_large">
+        android:label="@string/widget_name_tall">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
           <action android:name="android.intent.action.USER_PRESENT" />
@@ -99,7 +99,7 @@
         </intent-filter>
         <meta-data
           android:name="android.appwidget.provider"
-          android:resource="@xml/prayer_widget_large_info" />
+          android:resource="@xml/prayer_widget_tall_info" />
       </receiver>
 
       <!-- Log Today. Also listens for its own tap action, which is what a
@@ -118,6 +118,25 @@
         <meta-data
           android:name="android.appwidget.provider"
           android:resource="@xml/prayer_widget_log_info" />
+      </receiver>
+      <!--
+        Log Today at three rows. A second entry for the same widget, not a
+        second widget: see prayer_widget_log_tall_info.xml.
+      -->
+<receiver
+        android:name=".PrayerWidgetLogLargeProvider"
+        android:exported="true"
+        android:label="@string/widget_name_log_tall">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.USER_PRESENT" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
+          <action android:name="com.prayer_times.ACTION_WIDGET_LOG_TAP" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_log_tall_info" />
       </receiver>
 
       <!--

@@ -12,7 +12,7 @@
 "widget_description_large_retired" = "Widget waktu salat versi sebelumnya. Kini tampilannya sama dengan yang saat ini; tidak ada alasan untuk memasang yang baru.";
 "widget_description_large" = "Keenam waktu sebagai daftar di samping salat berikutnya. 4×3 — perkecil di bawah tiga baris dan akan menjadi strip satu baris.";
 "widget_name_log" = "Mihrab · Catat hari ini";
-"widget_description_log" = "Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya. Perbesar tingginya untuk grafik praktik. 4×2 hingga 4×4.";
+"widget_description_log" = "Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya. Perbesar tingginya untuk grafik praktik. 4×1 hingga 4×4.";
 "widget_log_today" = "Hari ini";
 "widget_log_count" = "%1$d dari %2$d";
 "widget_log_waiting" = "%1$@ belum dicatat";
@@ -107,3 +107,9 @@
 "widget_reading_no_bookmarks" = "Belum ada penanda";
 "widget_reading_page_today" = "Halaman %1$d · %2$d/%3$d hari ini";
 "widget_streak_inline" = "Rentetan %1$dh";
+"widget_preview_tap_to_log" = "Ketuk ✓ untuk mencatat Asr tepat waktu";
+"widget_preview_practice_second" = "hari beruntun · Terbaik 31 · 2 dari 5 hari ini";
+"widget_name_tall" = "Mihrab · Waktu salat (tinggi)";
+"widget_description_tall" = "Keenam waktu yang sama dengan kota, tanggal Hijriah, dan grafik praktik. 4×3 — perkecil dan akan menjadi strip satu baris.";
+"widget_name_log_tall" = "Mihrab · Catat hari ini (tinggi)";
+"widget_description_log_tall" = "Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya dan grafik praktik. 4×3 — perkecil dan akan menjadi kartu satu baris.";

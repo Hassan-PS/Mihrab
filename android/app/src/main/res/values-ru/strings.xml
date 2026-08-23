@@ -11,7 +11,7 @@
     <string name="widget_description_large_retired">Более ранний виджет времён намаза. Теперь он выглядит так же, как текущий; смысла добавлять новый нет.</string>
     <string name="widget_description_large">Все шесть времён намаза списком, рядом — следующий намаз. 4×3 — уменьшите меньше трёх строк, и он станет полосой в одну строку.</string>
     <string name="widget_name_log">Mihrab · Отметить намазы</string>
-    <string name="widget_description_log">Нажмите на намаз, чтобы отметить его вовремя, рядом отсчёт до следующего. Увеличьте высоту для графика практики. От 4×2 до 4×4.</string>
+    <string name="widget_description_log">Нажмите на намаз, чтобы отметить его вовремя, рядом отсчёт до следующего. Увеличьте высоту для графика практики. От 4×1 до 4×4.</string>
     <string name="widget_log_today">Сегодня</string>
     <string name="widget_log_count">%1$d из %2$d</string>
     <string name="widget_log_waiting">%1$s ещё не отмечен</string>
@@ -204,4 +204,10 @@
     <string name="widget_reading_no_bookmarks">Ещё нет закладок</string>
     <string name="widget_reading_page_today">Стр. %1$d \u00b7 %2$d/%3$d сегодня</string>
     <string name="widget_streak_inline">Серия %1$dд</string>
+    <string name="widget_preview_tap_to_log">Нажмите \u2713, чтобы отметить Asr вовремя</string>
+    <string name="widget_preview_practice_second">дня подряд \u00b7 Лучшая 31 \u00b7 2 из 5 сегодня</string>
+    <string name="widget_name_tall">Mihrab \u00b7 Время намазов (высокое)</string>
+    <string name="widget_description_tall">Те же шесть времён намаза с городом, датой хиджры и графиком практики. 4\u00d73 \u2014 уменьшите, и он станет полосой в одну строку.</string>
+    <string name="widget_name_log_tall">Mihrab \u00b7 Отметить намазы (высокое)</string>
+    <string name="widget_description_log_tall">Нажмите на намаз, чтобы отметить его вовремя, рядом отсчёт до следующего и график практики. 4\u00d73 \u2014 уменьшите, и он станет карточкой в одну строку.</string>
 </resources>

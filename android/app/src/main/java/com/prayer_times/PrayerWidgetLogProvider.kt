@@ -29,7 +29,7 @@ import org.json.JSONObject
  * instead of on the next app launch. See widgetLogQueue.ts for why the tap
  * cannot write the journal directly.
  */
-class PrayerWidgetLogProvider : AppWidgetProvider() {
+open class PrayerWidgetLogProvider : AppWidgetProvider() {
 
   // Every branch goes through PrayerWidgetProvider.requestUpdate rather than
   // this provider's own: one signal has to redraw every widget and re-arm the
@@ -100,9 +100,17 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
 
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
-      val cn = ComponentName(context, PrayerWidgetLogProvider::class.java)
-      val ids = mgr.getAppWidgetIds(cn)
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context, id))
+      // Both classes. The tall picker entry is this provider under a second
+      // name — a name the launcher keeps its own instance list under, so a
+      // fan-out that names only one of them leaves the other showing
+      // yesterday until something else happens to wake it.
+      for (cls in arrayOf(
+        PrayerWidgetLogProvider::class.java,
+        PrayerWidgetLogLargeProvider::class.java,
+      )) {
+        val ids = mgr.getAppWidgetIds(ComponentName(context, cls))
+        for (id in ids) mgr.updateAppWidget(id, buildViews(context, id))
+      }
     }
 
     /**
@@ -228,12 +236,14 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
       }
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
+      val root = payloadRoot(context)
       bindToday(
         context,
         views,
         today,
-        payloadRoot(context)?.optString("dayLabel").orEmpty(),
+        root?.optString("dayLabel").orEmpty(),
         accent,
+        root,
       )
       bindGrid(context, views, appWidgetId, accent)
       bindCompact(context, views, appWidgetId)
@@ -386,6 +396,7 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
       today: JSONObject,
       dayLabel: String,
       accent: Int,
+      root: JSONObject?,
     ) {
       val dateKey = today.optString("dateKey")
       val prayers = today.optJSONArray("prayers")
@@ -489,7 +500,7 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
         R.id.widget_log_foot_left,
         footerLeft(context, prayers, pending, owed),
       )
-      bindCountdown(context, views, prayers)
+      bindCountdown(context, views, prayers, root, dateKey)
     }
 
     private fun statusOfPrayer(prayers: org.json.JSONArray?, key: String): String? {
@@ -543,6 +554,38 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
      * row that is NOT due is the next one — the same reading iOS's footer
      * takes.
      */
+    /** "05:12" to 312, or -1 for anything that is not a time. */
+    private fun minutesOfDay(at: String?): Int {
+      val parts = (at ?: "").split(":")
+      if (parts.size != 2) return -1
+      val h = parts[0].toIntOrNull() ?: return -1
+      val m = parts[1].toIntOrNull() ?: return -1
+      if (h < 0 || m < 0) return -1
+      return h * 60 + m
+    }
+
+    /**
+     * The first prayer of the day after `todayKey`, from the payload's
+     * multi-day window.
+     *
+     * Found by walking to today's entry and taking the one after it rather
+     * than by trusting index 1: the window starts at today in every payload
+     * this app has written, but a widget that has not been redrawn since
+     * before midnight is holding one where it does not, and off-by-one here
+     * would count down to a Fajr two days out without ever looking wrong.
+     */
+    private fun tomorrowFirstPrayer(root: JSONObject?, todayKey: String): JSONObject? {
+      val days = root?.optJSONArray("days") ?: return null
+      if (todayKey.isEmpty()) return null
+      var afterToday = false
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        if (afterToday) return day.optJSONArray("rows")?.optJSONObject(0)
+        if (day.optString("dateKey") == todayKey) afterToday = true
+      }
+      return null
+    }
+
     private fun nextPrayer(prayers: org.json.JSONArray?): JSONObject? {
       val n = prayers?.length() ?: 0
       for (i in 0 until n) {
@@ -561,27 +604,51 @@ class PrayerWidgetLogProvider : AppWidgetProvider() {
      * hour after. Handing the view the moment the prayer lands costs
      * nothing and counts itself down.
      *
-     * Nothing is shown after the last prayer of the day. Tomorrow's Fajr
-     * would need tomorrow's schedule, and this widget is about today — the
-     * footer already says the day is done.
+     * WRAPS PAST MIDNIGHT, and for six hours a night it did not.
+     *
+     * The arithmetic here is minutes-since-midnight, and the guard threw
+     * away anything that came out negative. Every prayer but one is later
+     * today than now, so the guard only ever caught the one that is not:
+     * once Isha has passed, what comes next is tomorrow's Fajr, at 03:25
+     * against a clock reading 22:27 — a negative number, and the countdown
+     * hid itself. The card lost its countdown every night between Isha and
+     * dawn, which is a stretch of hours a home screen most needs it. The
+     * prayer-times strip has wrapped for a while; this is the same wrap.
+     *
+     * Tomorrow's Fajr comes from the multi-day window in the payload, which
+     * this widget did not used to read — the older comment here said
+     * tomorrow's schedule was not available, and it has been for a while.
+     * When it is missing, today's own first prayer stands in: it is a minute
+     * or two out at worst, and a countdown a minute out is worth more than
+     * no countdown at all.
      */
     private fun bindCountdown(
       context: Context,
       views: RemoteViews,
       prayers: org.json.JSONArray?,
+      root: JSONObject?,
+      todayKey: String,
     ) {
-      val next = nextPrayer(prayers)
-      val at = next?.optString("time").orEmpty()
-      val parts = at.split(":")
-      val minutesAt = if (parts.size == 2) {
-        (parts[0].toIntOrNull() ?: -1) * 60 + (parts[1].toIntOrNull() ?: -1)
-      } else {
-        -1
-      }
       val now = java.util.Calendar.getInstance()
       val currentMinutes =
         now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
-      val minutesLeft = minutesAt - currentMinutes
+
+      var next = nextPrayer(prayers)
+      var minutesAt = minutesOfDay(next?.optString("time"))
+      var minutesLeft = if (minutesAt < 0) -1 else minutesAt - currentMinutes
+
+      if (next == null || minutesLeft < 0) {
+        // The day is done. What is next is on the other side of midnight.
+        val fajr = tomorrowFirstPrayer(root, todayKey)
+          ?: prayers?.optJSONObject(0)
+        val fajrMinutes = minutesOfDay(fajr?.optString("time"))
+        if (fajr != null && fajrMinutes >= 0) {
+          next = fajr
+          minutesAt = fajrMinutes
+          minutesLeft = fajrMinutes + 24 * 60 - currentMinutes
+        }
+      }
+
       if (next == null || minutesAt < 0 || minutesLeft < 0) {
         views.setTextViewText(R.id.widget_log_foot_right, "")
         // Stopped as well as hidden: a running Chronometer inside a hidden

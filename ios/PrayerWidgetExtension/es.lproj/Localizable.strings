@@ -12,7 +12,7 @@
 "widget_description_large_retired" = "El widget de horarios de oración anterior. Ahora usa el mismo diseño que el actual; no hay motivo para colocar uno nuevo.";
 "widget_description_large" = "Los seis horarios en lista junto a la próxima oración. 4×3 — redúcelo a menos de tres filas y se convierte en la franja de una fila.";
 "widget_name_log" = "Mihrab · Registrar hoy";
-"widget_description_log" = "Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente. Auméntalo para ver el gráfico de práctica. 4×2 a 4×4.";
+"widget_description_log" = "Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente. Auméntalo para ver el gráfico de práctica. 4×1 a 4×4.";
 "widget_log_today" = "Hoy";
 "widget_log_count" = "%1$d de %2$d";
 "widget_log_waiting" = "%1$@ aún sin registrar";
@@ -107,3 +107,9 @@
 "widget_reading_no_bookmarks" = "Aún sin marcadores";
 "widget_reading_page_today" = "Página %1$d · %2$d/%3$d hoy";
 "widget_streak_inline" = "Racha %1$dd";
+"widget_preview_tap_to_log" = "Toca ✓ para registrar Asr a tiempo";
+"widget_preview_practice_second" = "días de racha · Mejor 31 · 2 de 5 hoy";
+"widget_name_tall" = "Mihrab · Horarios de oración (alto)";
+"widget_description_tall" = "Los mismos seis horarios con la ciudad, la fecha hijri y el gráfico de práctica. 4×3 — redúcelo y se convierte en la franja de una fila.";
+"widget_name_log_tall" = "Mihrab · Registrar hoy (alto)";
+"widget_description_log_tall" = "Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente y el gráfico de práctica. 4×3 — redúcelo y se convierte en la tarjeta de una fila.";

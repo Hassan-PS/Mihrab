@@ -11,7 +11,7 @@
     <string name="widget_description_large_retired">Widget waktu salat versi sebelumnya. Kini tampilannya sama dengan yang saat ini; tidak ada alasan untuk memasang yang baru.</string>
     <string name="widget_description_large">Keenam waktu sebagai daftar di samping salat berikutnya. 4×3 — perkecil di bawah tiga baris dan akan menjadi strip satu baris.</string>
     <string name="widget_name_log">Mihrab · Catat hari ini</string>
-    <string name="widget_description_log">Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya. Perbesar tingginya untuk grafik praktik. 4×2 hingga 4×4.</string>
+    <string name="widget_description_log">Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya. Perbesar tingginya untuk grafik praktik. 4×1 hingga 4×4.</string>
     <string name="widget_log_today">Hari ini</string>
     <string name="widget_log_count">%1$d dari %2$d</string>
     <string name="widget_log_waiting">%1$s belum dicatat</string>
@@ -164,4 +164,10 @@
     <string name="widget_reading_no_bookmarks">Belum ada penanda</string>
     <string name="widget_reading_page_today">Halaman %1$d \u00b7 %2$d/%3$d hari ini</string>
     <string name="widget_streak_inline">Rentetan %1$dh</string>
+    <string name="widget_preview_tap_to_log">Ketuk \u2713 untuk mencatat Asr tepat waktu</string>
+    <string name="widget_preview_practice_second">hari beruntun \u00b7 Terbaik 31 \u00b7 2 dari 5 hari ini</string>
+    <string name="widget_name_tall">Mihrab \u00b7 Waktu salat (tinggi)</string>
+    <string name="widget_description_tall">Keenam waktu yang sama dengan kota, tanggal Hijriah, dan grafik praktik. 4\u00d73 \u2014 perkecil dan akan menjadi strip satu baris.</string>
+    <string name="widget_name_log_tall">Mihrab \u00b7 Catat hari ini (tinggi)</string>
+    <string name="widget_description_log_tall">Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya dan grafik praktik. 4\u00d73 \u2014 perkecil dan akan menjadi kartu satu baris.</string>
 </resources>

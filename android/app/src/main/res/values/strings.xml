@@ -18,7 +18,7 @@
     <string name="widget_description_large_retired">The earlier prayer-times widget. It now draws the same design as the current one; there is no reason to place a new one.</string>
     <string name="widget_description_large">All six times as a list beside the next prayer. 4×3 — shrink it below three rows and it becomes the one-row strip.</string>
     <string name="widget_name_log">Mihrab · Log today</string>
-    <string name="widget_description_log">Tap a prayer to log it on time, with the countdown to the next. Make it taller for the practice graph. 4×2 to 4×4.</string>
+    <string name="widget_description_log">Tap a prayer to log it on time, with the countdown to the next. Make it taller for the practice graph. 4×1 to 4×4.</string>
     <string name="widget_log_today">Today</string>
     <!-- "2 of 5" — logged out of loggable. -->
     <string name="widget_log_count">%1$d of %2$d</string>
@@ -211,4 +211,16 @@
     <!-- The Lock Screen's one-line accessory, where the whole widget is a
          handful of characters: "Streak 12d". -->
     <string name="widget_streak_inline">Streak %1$dd</string>
+    <!-- Sample lines for the picker previews. The previews are static XML —
+         the picker never runs a provider — so anything the real card composes
+         at runtime has to exist here as a finished sentence. -->
+    <string name="widget_preview_tap_to_log">Tap \u2713 to log Asr on time</string>
+    <string name="widget_preview_practice_second">day streak \u00b7 Best 31 \u00b7 2 of 5 today</string>
+    <!-- The tall picker entries. Android's picker lists one preview per
+         provider at one size, so a widget that means something different at
+         one row and at three needs two entries to say so. -->
+    <string name="widget_name_tall">Mihrab \u00b7 Prayer times (tall)</string>
+    <string name="widget_description_tall">The same six times with the city, the Hijri date and the practice graph. 4\u00d73 \u2014 shrink it and it becomes the one-row strip.</string>
+    <string name="widget_name_log_tall">Mihrab \u00b7 Log today (tall)</string>
+    <string name="widget_description_log_tall">Tap a prayer to log it on time, with the countdown to the next and the practice graph. 4\u00d73 \u2014 shrink it and it becomes the one-row card.</string>
 </resources>

@@ -11,7 +11,7 @@
     <string name="widget_description_large_retired">پہلے والا اوقاتِ نماز ویجٹ۔ یہ اب موجودہ ویجٹ جیسا ہی ڈیزائن دکھاتا ہے؛ نیا لگانے کی کوئی وجہ نہیں۔</string>
     <string name="widget_description_large">تمام چھ اوقات فہرست کی صورت میں اگلی نماز کے ساتھ۔ 4×3 — اسے تین قطاروں سے کم کریں تو یہ ایک قطار والی پٹی بن جاتا ہے۔</string>
     <string name="widget_name_log">Mihrab · آج کا اندراج</string>
-    <string name="widget_description_log">کسی نماز کو وقت پر درج کرنے کے لیے تھپتھپائیں، ساتھ ہی اگلی نماز کی الٹی گنتی۔ عمل کے گراف کے لیے اسے اونچا کریں۔ 4×2 سے 4×4 تک۔</string>
+    <string name="widget_description_log">کسی نماز کو وقت پر درج کرنے کے لیے تھپتھپائیں، ساتھ ہی اگلی نماز کی الٹی گنتی۔ عمل کے گراف کے لیے اسے اونچا کریں۔ 4×1 سے 4×4 تک۔</string>
     <string name="widget_log_today">آج</string>
     <string name="widget_log_count">%2$d میں سے %1$d</string>
     <string name="widget_log_waiting">%1$s ابھی درج نہیں ہوئی</string>
@@ -169,4 +169,10 @@
     <string name="widget_reading_no_bookmarks">ابھی کوئی نشان نہیں</string>
     <string name="widget_reading_page_today">صفحہ %1$d \u00b7 آج %2$d/%3$d</string>
     <string name="widget_streak_inline">تسلسل %1$d دن</string>
+    <string name="widget_preview_tap_to_log">Asr کو وقت پر درج کرنے کے لیے \u2713 تھپتھپائیں</string>
+    <string name="widget_preview_practice_second">دن کا تسلسل \u00b7 بہترین 31 \u00b7 آج 5 میں سے 2</string>
+    <string name="widget_name_tall">محراب \u00b7 اوقاتِ نماز (اونچا)</string>
+    <string name="widget_description_tall">وہی چھ اوقات، شہر، ہجری تاریخ اور عمل کے گراف کے ساتھ۔ 4\u00d73 \u2014 اسے کم کریں تو یہ ایک قطار والی پٹی بن جاتا ہے۔</string>
+    <string name="widget_name_log_tall">محراب \u00b7 آج کا اندراج (اونچا)</string>
+    <string name="widget_description_log_tall">کسی نماز کو وقت پر درج کرنے کے لیے تھپتھپائیں، ساتھ ہی اگلی نماز کی الٹی گنتی اور عمل کا گراف۔ 4\u00d73 \u2014 اسے کم کریں تو یہ ایک قطار والا کارڈ بن جاتا ہے۔</string>
 </resources>

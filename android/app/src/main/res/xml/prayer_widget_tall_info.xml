@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Prayer times, tall — the second picker entry for the same widget.
+
+  Not a second widget. `PrayerWidgetLargeProvider` is `PrayerWidgetProvider`
+  with a different name, and `selectLayout` has always chosen the card from
+  the measured size rather than from the provider class, so an instance
+  placed from here is the same card the other entry places, three rows tall
+  from the start.
+
+  Two entries because Android's picker shows ONE preview per provider, at the
+  size `targetCell*` names. This widget means something different at one row
+  and at three — at one it is the six times and what is next; at three the
+  city, the Hijri date and the practice graph come with it — and a single
+  entry has to pick one of those to show and be wrong about the other. A
+  person scrolling the picker should be able to see the version they want.
+
+  This file replaces the retirement. The entry used to be
+  `widget_description_large_retired` on `widgetCategory="keyguard"`, which is
+  a category the home-screen picker does not list — so the provider existed,
+  rendered correctly, and had no way in. Retiring it made sense when it drew
+  a genuinely different and worse layout; it draws the current one now.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
+    android:description="@string/widget_description_tall"
+    android:initialLayout="@layout/prayer_widget_strip"
+    android:minWidth="250dp"
+    android:minHeight="60dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/prayer_widget_tall_preview"
+    android:resizeMode="horizontal|vertical"
+    android:widgetFeatures="reconfigurable"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="60dp"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="4"
+    android:targetCellHeight="3"
+    android:maxResizeWidth="500dp"
+    android:maxResizeHeight="600dp" />
