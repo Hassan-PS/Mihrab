@@ -2,15 +2,29 @@
 <!--
   Hijri Date. 2x1, resizable up.
 
-  No `android:configure`: there is nothing to configure. The date is the
-  date, and putting a settings screen between the tap that adds it and the
-  first glance that uses it is a worse first run for no gain.
+  On `android:configure`, which this file used to refuse. The refusal was
+  half right: a settings screen between the tap that places a widget and the
+  first tap that uses it IS a worse first run, and that is what the comment
+  here defended. But the screen sets background strength and accent colour,
+  which every card honours — this one already draws through
+  `PrayerWidgetProvider.resolvedColors` — so leaving the attribute off did
+  not remove a prompt, it removed the only way in. Placed widgets had no
+  settings at all while the three prayer-times entries did, which is what a
+  user reported.
+
+  `configuration_optional` is the flag that wanted using: the launcher
+  places the widget immediately and the screen becomes an entry in the
+  long-press menu instead of a gate in front of it. `reconfigurable` is what
+  puts that entry there. Both are API 31; below that Android falls back to
+  prompting on placement, the same as the prayer widgets have always done.
 
   updatePeriodMillis is 0 — this changes once a day and the provider arms its
   own midnight rollover along with the prayer widgets. A 30-minute poll would
   wake the device to redraw a number that moves at 00:00.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
+    android:widgetFeatures="reconfigurable|configuration_optional"
     android:description="@string/widget_description_hijri"
     android:initialLayout="@layout/prayer_widget_hijri"
     android:minWidth="110dp"

@@ -19,8 +19,26 @@
   updatePeriodMillis is 0. A reading position moves when a page is turned
   and the app pushes then; what changes unattended is the day, which
   ACTION_PRAYER_TIME_ELAPSED already brings round.
+
+  On `android:configure`, which this file used to refuse. The refusal was
+  half right: a settings screen between the tap that places a widget and the
+  first tap that uses it IS a worse first run, and that is what the comment
+  here defended. But the screen sets background strength and accent colour,
+  which every card honours — this one already draws through
+  `PrayerWidgetProvider.resolvedColors` — so leaving the attribute off did
+  not remove a prompt, it removed the only way in. Placed widgets had no
+  settings at all while the three prayer-times entries did, which is what a
+  user reported.
+
+  `configuration_optional` is the flag that wanted using: the launcher
+  places the widget immediately and the screen becomes an entry in the
+  long-press menu instead of a gate in front of it. `reconfigurable` is what
+  puts that entry there. Both are API 31; below that Android falls back to
+  prompting on placement, the same as the prayer widgets have always done.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
+    android:widgetFeatures="reconfigurable|configuration_optional"
     android:description="@string/widget_description_reading"
     android:initialLayout="@layout/prayer_widget_reading"
     android:minWidth="250dp"

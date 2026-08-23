@@ -174,12 +174,21 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
         )
         .apply()
 
-      val mgr = AppWidgetManager.getInstance(this)
-      val cn = android.content.ComponentName(this, PrayerWidgetProvider::class.java)
-      val allIds = mgr.getAppWidgetIds(cn)
-      // Include the widget being configured (may not be in allIds yet on some launchers)
-      val idsToUpdate = (allIds.toSet() + appWidgetId).toIntArray()
-      PrayerWidgetProvider.refreshAll(this, mgr, idsToUpdate)
+      // Every card honours these two settings, so every card has to be
+      // redrawn — not just the prayer-times ones.
+      //
+      // This used to collect PrayerWidgetProvider's ids, ADD the id it was
+      // launched for, and hand the lot to refreshAll. That was wrong twice
+      // over. It left the Streak, Log, Reading, Tasbih and Hijri cards
+      // showing the old colours until something unrelated redrew them. And
+      // refreshAll pushes `buildViews` — the PRAYER-TIMES layout — into
+      // every id it is given, so the moment those five could reach this
+      // screen, saving from a Hijri widget would have drawn a prayer-times
+      // card into it. The line that added `appWidgetId` was defending
+      // against a launcher that had not registered the new widget yet; the
+      // fan-out below re-reads the ids itself, which covers that case
+      // without assuming the widget belongs to any particular provider.
+      PrayerWidgetProvider.requestUpdate(this)
 
       setResult(
         RESULT_OK,
