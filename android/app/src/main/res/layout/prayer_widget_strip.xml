@@ -279,19 +279,18 @@
                 android:ellipsize="end" />
         </LinearLayout>
 
-        <!-- Centred, and only as wide as it needs to be: the grid draws as
-             many weeks as the journal has, so a young one is narrower than
-             the card. Left-aligned that read as a graph with a hole beside
-             it; centred it reads as a graph. -->
+        <!-- Stretched to the box. The grid draws as many weeks as the
+             journal has, so its shape comes from the data while the box's
+             comes from the card; preserving the aspect leaves a gap on one
+             edge or on both. Slightly wide squares fill it. See the same
+             note in prayer_widget_log.xml. -->
         <ImageView
             android:id="@+id/widget_practice_grid"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="2"
             android:layout_marginTop="8dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
+            android:scaleType="fitXY"
             android:contentDescription="@string/widget_streak_grid_description"
             android:visibility="gone" />
 
