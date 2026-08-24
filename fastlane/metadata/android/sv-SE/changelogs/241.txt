@@ -1,0 +1,3 @@
+• Rättat: att välja en Nextcloud-mapp — eller någon mapp vars leverantör inte kan skapa undermappar — misslyckades med ett fel.
+• Rättat: en mapp du redan kallat Mihrab fick ännu en Mihrab inuti sig, så synkningen skrev dit din synkklient inte tittade.
+• En mapp som verkligen inte går att använda säger nu det med ord i stället för ett Java-fel.

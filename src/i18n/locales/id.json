@@ -1396,7 +1396,9 @@
     "scanDeniedBody": "Mihrab perlu kamera untuk membaca kode. Anda bisa mengizinkannya di pengaturan perangkat, atau ketik kodenya saja.",
     "scanNoCameraTitle": "Tidak ada kamera",
     "scanNoCameraBody": "Perangkat ini tidak punya kamera untuk memindai. Ketik atau tempel kodenya.",
-    "freq15Min": "Tiap 15 mnt"
+    "freq15Min": "Tiap 15 mnt",
+    "errorFolderUnwritable": "Folder itu tidak bisa ditulisi. Pilih yang lain — folder yang Anda buat sendiri di Dokumen atau Unduhan paling cocok.",
+    "errorFolderTitle": "Folder itu tidak berhasil"
   },
   "stats": {
     "daysUnit": " hari",

@@ -1396,7 +1396,9 @@
     "scanDeniedBody": "Mihrab braucht die Kamera, um den Code zu lesen. Du kannst sie in den Geräteeinstellungen erlauben oder den Code eintippen.",
     "scanNoCameraTitle": "Keine Kamera",
     "scanNoCameraBody": "Dieses Gerät hat keine Kamera zum Scannen. Tippe den Code ein oder füge ihn ein.",
-    "freq15Min": "Alle 15 Min"
+    "freq15Min": "Alle 15 Min",
+    "errorFolderUnwritable": "In diesen Ordner lässt sich nicht schreiben. Wähle einen anderen — ein selbst angelegter Ordner in Dokumente oder Downloads eignet sich am besten.",
+    "errorFolderTitle": "Dieser Ordner hat nicht funktioniert"
   },
   "stats": {
     "daysUnit": " Tage",

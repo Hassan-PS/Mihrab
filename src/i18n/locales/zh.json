@@ -1396,7 +1396,9 @@
     "scanDeniedBody": "米哈拉布需要摄像头来读取配对码。你可以在设备设置中允许，或者直接输入配对码。",
     "scanNoCameraTitle": "没有摄像头",
     "scanNoCameraBody": "本设备没有可用于扫码的摄像头。请输入或粘贴配对码。",
-    "freq15Min": "每15分钟"
+    "freq15Min": "每15分钟",
+    "errorFolderUnwritable": "无法写入该文件夹。请另选一个——你自己在「文档」或「下载」中新建的文件夹最合适。",
+    "errorFolderTitle": "这个文件夹不行"
   },
   "stats": {
     "daysUnit": " 天",

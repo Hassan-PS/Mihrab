@@ -1396,7 +1396,9 @@
     "scanDeniedBody": "Mihrab behöver kameran för att läsa koden. Du kan tillåta det i enhetens inställningar, eller skriva in koden i stället.",
     "scanNoCameraTitle": "Ingen kamera",
     "scanNoCameraBody": "Den här enheten har ingen kamera att skanna med. Skriv eller klistra in koden i stället.",
-    "freq15Min": "Var 15:e min"
+    "freq15Min": "Var 15:e min",
+    "errorFolderUnwritable": "Det går inte att skriva i den mappen. Välj en annan — en mapp du själv skapat i Dokument eller Nedladdningar fungerar bäst.",
+    "errorFolderTitle": "Den mappen fungerade inte"
   },
   "stats": {
     "daysUnit": " dagar",

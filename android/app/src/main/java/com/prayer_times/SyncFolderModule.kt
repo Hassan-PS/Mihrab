@@ -177,15 +177,29 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
       promise.reject("not_persistable", "could not keep access to that folder", t)
       return
     }
-    val folder = try {
-      subfolderIn(uri)
-    } catch (t: Throwable) {
-      promise.reject("unwritable", "could not create a folder in there", t)
+    // A `Mihrab` folder inside what they picked is a courtesy, not a
+    // requirement: it keeps our files out of the way of theirs. Plenty of
+    // providers will not make a directory on request — the Downloads root
+    // is the common one, and it throws FileNotFoundException rather than
+    // saying so — and refusing the whole folder over that told the user
+    // their choice was invalid when it was perfectly usable (reported on a
+    // Pixel, 2026-08-24). So fall back to the folder itself, and only give
+    // up when even that cannot hold a file.
+    //
+    // And not when they have already made one: someone who creates a folder
+    // called Mihrab creates it FOR this, and nesting a second inside it
+    // leaves their sync client watching Documents/Mihrab while the app
+    // writes to Documents/Mihrab/Mihrab — which looks like sync silently
+    // doing nothing, from a folder whose name says it should be working.
+    val label = labelFor(uri)
+    val sub = if (label == FOLDER_NAME) null else subfolderIn(uri)
+    if (sub == null && !canCreateIn(uri)) {
+      promise.reject("unwritable", "nothing can be written to that folder")
       return
     }
     val out = Arguments.createMap()
-    out.putString("handle", folder.toString())
-    out.putString("label", "${labelFor(uri)}/$FOLDER_NAME")
+    out.putString("handle", (sub ?: documentOf(uri)).toString())
+    out.putString("label", if (sub != null) "$label/$FOLDER_NAME" else label)
     out.putString("kind", "picked")
     promise.resolve(out)
   }
@@ -384,29 +398,89 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
     DocumentsContract.buildDocumentUriUsingTree(treeOf(folder), parentIdOf(folder))
 
   /**
-   * `Mihrab` inside `tree`, made if it is not there yet.
+   * `Mihrab` inside `tree`, made if it is not there yet — or null if this
+   * provider will not make one.
    *
    * Reused rather than duplicated: a provider that already has one returns
    * it, so choosing the same parent twice does not leave the user with
    * `Mihrab` and `Mihrab (1)` and half their files in each.
+   *
+   * Null rather than an exception, because "no subfolder" is not the end of
+   * the road: the caller writes into the picked folder instead. Providers
+   * differ on directory creation more than the contract suggests — the
+   * Downloads root will happily hold files and refuses to hold a folder,
+   * and it refuses by throwing FileNotFoundException from a method whose
+   * documented failure is a null return.
    */
-  private fun subfolderIn(tree: Uri): Uri {
+  private fun subfolderIn(tree: Uri): Uri? {
     var existing: String? = null
     forEachChild(tree) { id, name ->
       if (existing == null && name == FOLDER_NAME) existing = id
     }
-    // Without this a provider that will not list makes a fresh `Mihrab (1)`,
-    // `Mihrab (2)` every time the folder is opened.
-    val id = (existing ?: documentIdFor(tree, FOLDER_NAME)) ?: run {
-      val created = DocumentsContract.createDocument(
-        resolver,
-        documentOf(tree),
-        DocumentsContract.Document.MIME_TYPE_DIR,
-        FOLDER_NAME,
-      ) ?: throw IllegalStateException("provider would not create $FOLDER_NAME")
-      DocumentsContract.getDocumentId(created)
+    // Without the middle branch a provider that will not list makes a fresh
+    // `Mihrab (1)`, `Mihrab (2)` every time the folder is opened.
+    val id = existing
+      ?: documentIdFor(tree, FOLDER_NAME)
+      ?: try {
+        DocumentsContract.createDocument(
+          resolver,
+          documentOf(tree),
+          DocumentsContract.Document.MIME_TYPE_DIR,
+          FOLDER_NAME,
+        )?.let { DocumentsContract.getDocumentId(it) }
+      } catch (t: Throwable) {
+        null
+      }
+    return id?.let { DocumentsContract.buildDocumentUriUsingTree(treeOf(tree), it) }
+  }
+
+  /**
+   * Whether this folder will accept a new file at all.
+   *
+   * Asked only when the subfolder could not be made, to tell "this provider
+   * does not do directories" — fine, we write beside their files — from
+   * "this is read-only", which is the one case worth stopping the user for.
+   *
+   * Two answers, because the first one lies. `FLAG_DIR_SUPPORTS_CREATE` is
+   * the provider's own claim, and a provider that backs a remote service
+   * (Nextcloud, and the reported case is exactly that) may not set it on a
+   * folder it will happily accept a file into. Refusing on the flag alone
+   * would tell someone their Nextcloud folder is unusable when it is the
+   * whole reason they wanted sync. So if the flag says no, ASK by writing:
+   * one empty file, deleted immediately, in a folder the user has just
+   * nominated for our files anyway.
+   */
+  private fun canCreateIn(folder: Uri): Boolean {
+    val claimed = try {
+      resolver.query(
+        documentOf(folder),
+        arrayOf(DocumentsContract.Document.COLUMN_FLAGS),
+        null,
+        null,
+        null,
+      )?.use { cursor ->
+        cursor.moveToFirst() &&
+          (cursor.getInt(0) and DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE) != 0
+      } ?: false
+    } catch (t: Throwable) {
+      false
     }
-    return DocumentsContract.buildDocumentUriUsingTree(treeOf(tree), id)
+    if (claimed) return true
+
+    val probe = try {
+      DocumentsContract.createDocument(resolver, documentOf(folder), MIME, PROBE_NAME)
+    } catch (t: Throwable) {
+      null
+    } ?: return false
+    try {
+      DocumentsContract.deleteDocument(resolver, probe)
+    } catch (t: Throwable) {
+      // Named so that a provider which will not delete leaves something
+      // recognisable rather than a mystery, and one file rather than one
+      // per attempt: the next probe finds the same name taken and the
+      // provider either reuses or renames it.
+    }
+    return true
   }
 
   private fun forEachChild(folder: Uri, each: (id: String, name: String) -> Unit) {
@@ -542,6 +616,13 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
 
     /** Made inside whatever the user grants, so nothing has to exist first. */
     private const val FOLDER_NAME = "Mihrab"
+
+    /**
+     * Written and deleted once, only to find out whether a folder that
+     * refused a subdirectory will still take a file. Named to explain
+     * itself if a provider will not delete it again.
+     */
+    private const val PROBE_NAME = "mihrab-write-test.json"
 
     /** The provider behind "Internal storage" on every Android build. */
     private const val EXTERNAL_STORAGE_AUTHORITY = "com.android.externalstorage.documents"

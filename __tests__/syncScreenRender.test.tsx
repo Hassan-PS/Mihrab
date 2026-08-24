@@ -61,6 +61,14 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
+// The picker is native, so in a test it is simply absent — and a screen that
+// asks `hasFolderPicker()` first would never reach the code under test.
+jest.mock('../src/sync/folderAccess', () => ({
+  ...jest.requireActual('../src/sync/folderAccess'),
+  hasFolderPicker: () => true,
+  pickSyncFolder: jest.fn(),
+}));
+
 import { Text, TextInput } from 'react-native';
 import { ConfirmModal } from '../src/components/ConfirmModal';
 import { SyncScreen } from '../src/screens/SyncScreen';
@@ -74,6 +82,7 @@ import {
   getSyncSettings,
 } from '../src/sync/syncSettings';
 import { isValid } from '../src/sync/pairingCode';
+import { pickSyncFolder } from '../src/sync/folderAccess';
 
 /**
  * What the screen is currently saying.
@@ -254,5 +263,45 @@ describe('the device name', () => {
     expect(named).toBeDefined();
     expect(typeof named?.props.value).toBe('string');
     expect(named?.props.value.length).toBeGreaterThan(0);
+  });
+});
+
+describe('choosing a folder', () => {
+  it('explains a folder it cannot use, rather than quoting Java at the user', async () => {
+    // What shipped in 2.10.0 put "java.io.FileNotFoundException: could not
+    // create a folder in there" in front of someone whose Nextcloud folder
+    // was perfectly good — `String(e)` on a native rejection. The native
+    // side answers with a code; the screen owes the user a sentence.
+    const failure = Object.assign(new Error('could not create a folder'), {
+      code: 'unwritable',
+    });
+    (pickSyncFolder as jest.Mock).mockRejectedValueOnce(failure);
+
+    const tree = await render();
+    await act(async () => {
+      tree.root.findByProps({ testID: 'sync-choose-folder' }).props.onPress();
+    });
+    await act(async () => {});
+
+    const shown = dialogOf(tree);
+    expect(shown.visible).toBe(true);
+    expect(shown.title).toBe('sync.errorFolderTitle');
+    expect(shown.message).toBe('sync.errorFolderUnwritable');
+    // Nothing about the exception, its class, or its stack.
+    expect(String(shown.message)).not.toMatch(/java\.|Error|Exception/);
+  });
+
+  it('says nothing at all when the picker is dismissed', async () => {
+    // A cancel is a decision. The screen used to be right about this and it
+    // has to stay right about it: null is not an error.
+    (pickSyncFolder as jest.Mock).mockResolvedValueOnce(null);
+
+    const tree = await render();
+    await act(async () => {
+      tree.root.findByProps({ testID: 'sync-choose-folder' }).props.onPress();
+    });
+    await act(async () => {});
+
+    expect(dialogOf(tree).visible).toBe(false);
   });
 });

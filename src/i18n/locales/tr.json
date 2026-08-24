@@ -1396,7 +1396,9 @@
     "scanDeniedBody": "Mihrab kodu okumak için kameraya ihtiyaç duyar. Cihaz ayarlarından izin verebilir ya da kodu elle yazabilirsiniz.",
     "scanNoCameraTitle": "Kamera yok",
     "scanNoCameraBody": "Bu cihazda tarama yapacak kamera yok. Kodu yazın veya yapıştırın.",
-    "freq15Min": "15 dk'da bir"
+    "freq15Min": "15 dk'da bir",
+    "errorFolderUnwritable": "O klasöre yazılamıyor. Başka birini seçin — Belgeler ya da İndirilenler içinde kendi oluşturduğunuz bir klasör en iyi sonucu verir.",
+    "errorFolderTitle": "O klasör işe yaramadı"
   },
   "stats": {
     "daysUnit": " gün",

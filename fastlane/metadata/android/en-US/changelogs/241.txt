@@ -1,0 +1,3 @@
+• Fixed: choosing a Nextcloud folder — or any folder whose provider will not make a subfolder — failed with an error.
+• Fixed: a folder you already called Mihrab had another Mihrab made inside it, so sync wrote where your sync client was not looking.
+• A folder that really cannot be used now says so in words instead of quoting a Java exception.

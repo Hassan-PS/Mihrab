@@ -359,7 +359,18 @@ export function SyncScreen() {
         if (!picked) return;
         setSettings(await updateSyncSettings({ folder: picked, lastError: null }));
       } catch (e) {
-        tell(t('sync.syncFailedTitle'), String(e));
+        // Never `String(e)` here. What the user saw was
+        // "java.io.FileNotFoundException: could not create a folder in
+        // there" (Pixel, 2026-08-24) — the name of a Java class and an
+        // instruction to nobody. The native side answers with a code, and
+        // every code it can answer with has a sentence someone can act on.
+        const code = (e as { code?: string } | null)?.code;
+        tell(
+          t('sync.errorFolderTitle'),
+          code === 'no_picker' || code === 'no_activity'
+            ? t('sync.errorUnsupported')
+            : t('sync.errorFolderUnwritable'),
+        );
       }
     })();
   }, [t, tell]);

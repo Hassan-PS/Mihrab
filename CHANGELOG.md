@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.10.1] — 2026-08-24
+
+Sync could not accept the folder people were most likely to pick.
+
+### Fixed
+- **Choosing a Nextcloud folder — or any folder whose provider will not make a subfolder — no longer fails.** Mihrab asks for a `Mihrab` directory inside whatever you choose, purely to keep its file out of the way of yours. Plenty of providers refuse that while being perfectly happy to hold a file, and refusing the whole folder over it turned the most obvious choice — the synced folder you made for exactly this — into an error. It now writes into the folder you picked instead, and only stops you when nothing can be written there at all.
+- **A folder you already named `Mihrab` is used as it is.** Choosing one made a `Mihrab` inside your `Mihrab`, so your sync client watched one folder while the app wrote to another one inside it — sync doing nothing, from a folder whose name said it should be working.
+- **A folder that genuinely cannot be used says so in words.** The screen was showing the underlying failure verbatim: `java.io.FileNotFoundException: could not create a folder in there`, which names a Java class and tells nobody what to do. It now says which folders work.
+
 ## [2.10.0] — 2026-08-24
 
 Your record on every device you own, without an account and without anyone else holding it.
