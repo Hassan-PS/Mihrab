@@ -227,8 +227,14 @@ export async function logSunnahFor(
       log = {};
     }
   }
+  // Anything the user already recorded by hand is theirs. The comment above
+  // has always said so; the code said `>= max`, which left one of Dhuhr's
+  // two rak'ah looking like an empty slot for this button to fill — and
+  // worse, it re-filled a sunnah the user had deliberately UN-logged
+  // earlier the same day, so clearing it from the Log screen appeared not
+  // to stick (reported 2026-08-26).
   const already = dayAt(log, date)[field] as number;
-  if (already >= max) return false;
+  if (already > 0) return false;
   const next = setSunnah(log, date, { [field]: max });
   await durableEncryptedSet(SUNNAH_KEY, JSON.stringify(next));
   notifyPracticeChanged();

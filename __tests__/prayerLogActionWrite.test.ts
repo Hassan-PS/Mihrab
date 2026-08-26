@@ -246,7 +246,32 @@ describe('handlePrayerLogEvent — log with sunnah', () => {
       id: 'pt-1-Dhuhr',
       data: { targetDate: '2026-08-09', prayer: 'Dhuhr' },
     });
-    expect(dayAt(sunnahLog(), '2026-08-09').dhuhr).toBe(2);
+    // Was `toBe(2)`: the test's name said one thing and its expectation
+    // pinned the opposite, so the button quietly claimed the second rak'ah —
+    // and re-filled a sunnah the user had un-logged. One left alone is one.
+    expect(dayAt(sunnahLog(), '2026-08-09').dhuhr).toBe(1);
+  });
+
+  test('leaves a sunnah the user deliberately cleared cleared', async () => {
+    // The Log screen writes an all-zero day as a tombstone rather than
+    // deleting it. This button must read that as "they said no", not as an
+    // empty slot to fill.
+    store.set(
+      SUNNAH_KEY,
+      JSON.stringify({
+        '2026-08-09': {
+          fajr: 0, dhuhr: 0, maghrib: 0, isha: 0, witr: false, qiyam: 0,
+          at: Date.now(),
+        },
+      }),
+    );
+    await press('journal-log-sunnah:Fajr', {
+      id: 'pt-1-Fajr',
+      data: { targetDate: '2026-08-09', prayer: 'Fajr' },
+    });
+    // Fajr was never logged, so this one IS an empty slot and gets filled
+    // (Fajr's sunnah is one unit, so full is 1).
+    expect(dayAt(sunnahLog(), '2026-08-09').fajr).toBe(1);
   });
 
   test('is idempotent — a double press changes nothing the second time', async () => {

@@ -9,11 +9,13 @@ import {
   EMPTY_DAY,
   SUNNAH_TOTAL,
   SUNNAH_UNITS,
+  TOMBSTONE_TTL_DAYS,
   coerceSunnahLog,
   computeSunnahStreak,
   cycleSunnah,
   dayAt,
   fieldFor,
+  isEmptyDay,
   isSunnahComplete,
   qiyamDays,
   ringSegments,
@@ -190,20 +192,49 @@ describe('setSunnah', () => {
     // The journal's own upsert rebuilds its object and loses the note on it.
     // This must not repeat that.
     const log = setSunnah({}, '2026-08-18', { qiyam: 4 });
-    const next = setSunnah(log, '2026-08-18', { fajr: 1 });
+    const next = setSunnah(log, '2026-08-18', { fajr: 1 }, 1_700_000_000_000);
     expect(next['2026-08-18']).toEqual({
       ...EMPTY_DAY,
       fajr: 1,
       qiyam: 4,
+      at: 1_700_000_000_000,
     });
   });
 
-  it('drops a day that has emptied out, rather than storing zeros forever', () => {
-    const log = setSunnah({}, '2026-08-18', { fajr: 1 });
+  it('keeps an emptied day as a dated tombstone, so clearing can be synced', () => {
+    // This used to DELETE the day, and that is what made un-logging fail on
+    // a paired device: the removal reached the merge as an absence, absence
+    // read as "no opinion", and the peer's stale count won. A cleared day is
+    // a fact and now says when it happened (reported 2026-08-26).
+    const log = setSunnah({}, '2026-08-18', { fajr: 1 }, 1_000);
     expect(Object.keys(log)).toEqual(['2026-08-18']);
-    const cleared = setSunnah(log, '2026-08-18', { fajr: 0 });
-    expect(cleared['2026-08-18']).toBeUndefined();
-    expect(Object.keys(cleared)).toEqual([]);
+
+    const cleared = setSunnah(log, '2026-08-18', { fajr: 0 }, 2_000);
+    expect(Object.keys(cleared)).toEqual(['2026-08-18']);
+    expect(cleared['2026-08-18']).toEqual({ ...EMPTY_DAY, at: 2_000 });
+    // And it still reads as empty everywhere that asks.
+    expect(isEmptyDay(cleared['2026-08-18'])).toBe(true);
+    expect(sunnahCount(cleared['2026-08-18'])).toBe(0);
+  });
+
+  it('drops an emptied day that carries no timestamp, and expired tombstones', () => {
+    // A zero day with no `at` says nothing at all — that is the old shape,
+    // and storing it forever is what the original test rightly objected to.
+    expect(
+      coerceSunnahLog({ '2026-08-18': { ...EMPTY_DAY } })['2026-08-18'],
+    ).toBeUndefined();
+
+    // A tombstone is remembered for TOMBSTONE_TTL_DAYS and then pruned, so
+    // the blob cannot grow without bound.
+    const old = Date.now() - (TOMBSTONE_TTL_DAYS + 1) * 24 * 60 * 60 * 1000;
+    expect(
+      coerceSunnahLog({ '2026-08-18': { ...EMPTY_DAY, at: old } })['2026-08-18'],
+    ).toBeUndefined();
+
+    const fresh = Date.now() - 60 * 1000;
+    expect(
+      coerceSunnahLog({ '2026-08-18': { ...EMPTY_DAY, at: fresh } })['2026-08-18'],
+    ).toEqual({ ...EMPTY_DAY, at: fresh });
   });
 
   it('never mutates the log it was given', () => {
@@ -372,5 +403,71 @@ describe('qiyamDays', () => {
     log = setSunnah(log, '2026-08-17', { qiyam: 1 });
     log = setSunnah(log, '2026-08-18', { fajr: 1 });
     expect(qiyamDays(log)).toEqual(new Set(['2026-08-17']));
+  });
+});
+
+describe('un-logging survives a paired device', () => {
+  // The reported bug, at the layer it actually happened. Everything below
+  // the merge was already correct and already tested; the merge was where a
+  // removal turned back into a count.
+  //
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { mergeSunnah } = require('../src/sync/merge');
+
+  it('a cleared day is not resurrected by a peer that still remembers it', () => {
+    const day = '2026-08-18';
+    // The peer synced while it was logged, and still holds that.
+    const peer: SunnahLog = { [day]: { ...EMPTY_DAY, fajr: 1, at: 1_000 } };
+    // This device logged it, then cleared it a minute later.
+    const local = setSunnah(
+      setSunnah({}, day, { fajr: 1 }, 1_000),
+      day,
+      { fajr: 0 },
+      2_000,
+    );
+
+    const merged = mergeSunnah(local, peer);
+    expect(merged[day].fajr).toBe(0);
+    expect(isEmptyDay(merged[day])).toBe(true);
+  });
+
+  it('and the merge is stable, so the next round does not undo it either', () => {
+    // Sync runs on every foreground. A fix that only holds for one round is
+    // not a fix — this is the shape of the original complaint, where it came
+    // back "some time later".
+    const day = '2026-08-18';
+    const peer: SunnahLog = { [day]: { ...EMPTY_DAY, fajr: 1, at: 1_000 } };
+    let local = setSunnah({}, day, { fajr: 0 }, 2_000);
+    for (let round = 0; round < 5; round++) {
+      local = mergeSunnah(local, peer);
+    }
+    expect(local[day].fajr).toBe(0);
+  });
+
+  it('a peer that logged it AFTER the clearing still wins', () => {
+    // Newest fact wins in both directions — this is last-write-wins, not
+    // "removal always beats everything", which would lose a real later log.
+    const day = '2026-08-18';
+    const local = setSunnah({}, day, { fajr: 0 }, 2_000);
+    const peer: SunnahLog = { [day]: { ...EMPTY_DAY, fajr: 1, at: 3_000 } };
+    expect(mergeSunnah(local, peer)[day].fajr).toBe(1);
+  });
+
+  it('falls back to the fuller record when neither side is dated', () => {
+    // Old builds write days with no `at`. Guessing in favour of one of them
+    // could delete a day nobody meant to touch, so the old rule stands.
+    const day = '2026-08-18';
+    const oldLocal: SunnahLog = { [day]: { ...EMPTY_DAY, fajr: 0 } };
+    const oldPeer: SunnahLog = { [day]: { ...EMPTY_DAY, fajr: 1 } };
+    expect(mergeSunnah(oldLocal, oldPeer)[day].fajr).toBe(1);
+  });
+
+  it('a mixed pair keeps the stamp, so the day joins dated merges next time', () => {
+    const day = '2026-08-18';
+    const undated: SunnahLog = { [day]: { ...EMPTY_DAY, dhuhr: 1 } };
+    const dated: SunnahLog = { [day]: { ...EMPTY_DAY, dhuhr: 2, at: 5_000 } };
+    const merged = mergeSunnah(undated, dated);
+    expect(merged[day].dhuhr).toBe(2);
+    expect(merged[day].at).toBe(5_000);
   });
 });

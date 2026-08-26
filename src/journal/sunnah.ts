@@ -65,6 +65,20 @@ export type SunnahDay = {
   witr: boolean;
   /** Voluntary night prayer. Unbounded, uncounted, reset by its own button. */
   qiyam: number;
+  /**
+   * When this day was last changed on some device, ms since epoch.
+   *
+   * THE WHOLE REASON UN-LOGGING WORKS. Without it a day that someone
+   * cleared is indistinguishable from a day they never touched, and the
+   * sync merge treats "absent" as "no opinion" — so a paired phone that
+   * still remembers yesterday's count puts it straight back, on the next
+   * foreground, for ever. With it, clearing is a fact with a time on it and
+   * the newer fact wins.
+   *
+   * Optional because a device running an older build writes days without
+   * one, and those must still merge. See `mergeSunnah`.
+   */
+  at?: number;
 };
 
 /** `YYYY-MM-DD` (local) → that day's counts. Absent day = `EMPTY_DAY`. */
@@ -110,9 +124,15 @@ export function isEmptyDay(day: SunnahDay): boolean {
  *
  * Tolerant in the same way `coerceDhikr` is: a value that is impossible for
  * its field is clamped rather than thrown away, because the alternative is
- * losing a day of someone's record over one bad number. A day whose key is
- * not a date, or which holds nothing at all, is dropped — an empty day and an
- * absent day are the same day, and storing both would grow the blob forever.
+ * losing a day of someone's record over one bad number.
+ *
+ * An empty day is KEPT when it carries a timestamp, because that is a
+ * tombstone: "this was cleared, at this moment". Dropping it is what let a
+ * paired device resurrect a sunnah the user had just un-logged. Empty days
+ * with no timestamp are still dropped — they carry no information at all —
+ * and tombstones older than `TOMBSTONE_TTL_DAYS` are pruned, because past
+ * that the blob would grow for ever and no peer that far behind is going to
+ * argue about it.
  */
 export function coerceSunnahLog(input: unknown): SunnahLog {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return {};
@@ -130,9 +150,19 @@ export function coerceSunnahLog(input: unknown): SunnahLog {
       // No ceiling: someone praying twenty rak'ah of qiyam is not an error.
       qiyam: clampCount(r.qiyam, Number.MAX_SAFE_INTEGER),
     };
+    const at = typeof r.at === 'number' && isFinite(r.at) ? r.at : undefined;
+    if (at !== undefined) day.at = at;
     if (!isEmptyDay(day)) out[key] = day;
+    else if (at !== undefined && !tombstoneExpired(at)) out[key] = day;
   }
   return out;
+}
+
+/** How long a cleared day is remembered as cleared. */
+export const TOMBSTONE_TTL_DAYS = 90;
+
+function tombstoneExpired(at: number, now: number = Date.now()): boolean {
+  return now - at > TOMBSTONE_TTL_DAYS * 24 * 60 * 60 * 1000;
 }
 
 /** The day at `date`, or an all-zero day. Never returns undefined. */
@@ -216,11 +246,15 @@ export function setSunnah(
   log: SunnahLog,
   date: string,
   patch: Partial<SunnahDay>,
+  now: number = Date.now(),
 ): SunnahLog {
-  const next: SunnahDay = { ...dayAt(log, date), ...patch };
+  // Stamped on every write, including the write that empties the day. An
+  // emptied day is KEPT rather than deleted: it is the record that the user
+  // cleared it, and deleting it is what made un-logging fail to stick on a
+  // paired device (see the `at` field, and `mergeSunnah`).
+  const next: SunnahDay = { ...dayAt(log, date), ...patch, at: now };
   const out = { ...log };
-  if (isEmptyDay(next)) delete out[date];
-  else out[date] = next;
+  out[date] = next;
   return out;
 }
 

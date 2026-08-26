@@ -104,13 +104,39 @@ export function mergeDhikr(local: DhikrLog, incoming: DhikrLog): DhikrLog {
   return out;
 }
 
-/** Sunnah: per day, per field, the higher count — and Witr once it is true. */
+/**
+ * Sunnah: the newer record of a day wins — including a cleared one.
+ *
+ * This used to be `Math.max` per field, which cannot express an un-log. A
+ * user who cleared Fajr's sunnah got it back on the next foreground: their
+ * removal reached this function as an ABSENCE, absence read as "no opinion",
+ * and the peer's stale count won. The peer never learned of the removal
+ * either, so it kept re-asserting it for ever. Reported 2026-08-26.
+ *
+ * A day now carries `at`, and an emptied day is kept as a tombstone rather
+ * than deleted, so "cleared at 14:31" is a fact that can beat "two rak'ah,
+ * recorded at 14:02".
+ *
+ * When only ONE side is timestamped the old rule still applies. That side is
+ * not necessarily newer — it is only necessarily running a newer build — and
+ * guessing in favour of it would let an old peer's silence delete a day it
+ * never meant to touch. Max is wrong for deletions and right for everything
+ * else, which is the correct trade while old builds are still out there.
+ */
 export function mergeSunnah(local: SunnahLog, incoming: SunnahLog): SunnahLog {
   const out: SunnahLog = { ...local };
   for (const [day, theirs] of Object.entries(incoming)) {
     const mine = out[day];
     if (!mine) {
       out[day] = theirs;
+      continue;
+    }
+    if (typeof mine.at === 'number' && typeof theirs.at === 'number') {
+      // Both sides can date their record: the newer one is the truth,
+      // wholesale. Taken as a whole day rather than field by field, because
+      // a cleared day is all-zero and merging it field-wise against an older
+      // day would just resurrect it one field at a time.
+      out[day] = theirs.at > mine.at ? theirs : mine;
       continue;
     }
     const merged: SunnahDay = {
@@ -120,6 +146,11 @@ export function mergeSunnah(local: SunnahLog, incoming: SunnahLog): SunnahLog {
       isha: Math.max(mine.isha, theirs.isha),
       witr: mine.witr || theirs.witr,
       qiyam: Math.max(mine.qiyam, theirs.qiyam),
+      // Keep whichever stamp exists so the day can take part in dated
+      // merges from here on, instead of being stuck on the old rule.
+      ...(mine.at !== undefined || theirs.at !== undefined
+        ? { at: Math.max(mine.at ?? 0, theirs.at ?? 0) }
+        : {}),
     };
     out[day] = merged;
   }
