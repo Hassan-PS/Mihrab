@@ -480,15 +480,34 @@ class MihrabLiveActivityService : Service() {
    *  the initial notification. */
   private fun build(payload: String): Notification {
     val o = JSONObject(payload)
-    // Live seconds only while the screen is on (the per-second ticker keeps
-    // them current); H:MM otherwise.
-    o.put("withSeconds", screenOn)
+    // No baked-in seconds, ever. The seconds are drawn by the platform now —
+    // a chronometer counting down to `nextEpochMs` (Android 16) or a
+    // system-ticked TimeDifference metric (Android 17) — so the text this
+    // builds only has to survive until the next tick, and the next tick is a
+    // minute away. See `tickInterval`.
+    o.put("withSeconds", false)
     return MihrabLiveActivityModule.buildNotificationFromPayload(this, o)
   }
 
-  /** Tick cadence: every second while the screen is interactive (so the
-   *  H:MM:SS countdown advances), every minute otherwise. */
-  private fun tickInterval(): Long = if (screenOn) TICK_MS_SCREEN_ON else TICK_MS
+  /**
+   * Tick cadence: once a minute, screen on or off.
+   *
+   * It used to be once a SECOND while the screen was interactive, because
+   * the H:MM:SS countdown was a string this service formatted and the only
+   * way to advance it was to build and post the whole notification again.
+   * That is 3600 posts an hour, each one parsing a thirty-day payload three
+   * times, rebuilding a ProgressStyle and making a binder call into
+   * NotificationManagerService — and it ran whenever the screen was on,
+   * whether or not the app was in front, for as long as the feature was
+   * enabled (audit, docs/design/background-power.md, 2026-08-24).
+   *
+   * The platform will animate a countdown for free. So the seconds are the
+   * platform's job, and this ticker only exists for the things that really
+   * do need rebuilding: the progress bar's position, which crawls across a
+   * multi-hour interval, and the rollover onto the next prayer. A minute is
+   * finer than either needs.
+   */
+  private fun tickInterval(): Long = TICK_MS
 
   /**
    * Schedule an exact, wake-the-device alarm at the next prayer instant. The
@@ -568,10 +587,11 @@ class MihrabLiveActivityService : Service() {
     /** Request code for the deep-sleep wake alarm (distinct from the widget's
      *  alarm request codes in PrayerWidgetProvider). */
     const val ALARM_REQUEST_CODE = 0xA1B4
-    /** Tick cadence while the screen is off / AOD — battery-friendly. */
+    /**
+     * Tick cadence, screen on or off. The seconds are drawn by the platform
+     * (chronometer / TimeDifference metric); this only moves the progress bar
+     * and rolls onto the next prayer. See `tickInterval`.
+     */
     const val TICK_MS = 60_000L
-    /** Tick cadence while the screen is interactive — drives the live
-     *  H:MM:SS countdown (re-posts the notification once per second). */
-    const val TICK_MS_SCREEN_ON = 1_000L
   }
 }

@@ -430,8 +430,22 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setLocalOnly(false)
           .setCategory(Notification.CATEGORY_NAVIGATION)
           .setVisibility(Notification.VISIBILITY_PUBLIC)
-          .setUsesChronometer(false)
-          .setShowWhen(false)
+          // The seconds, drawn by the platform rather than by us.
+          //
+          // A chronometer counting down to `nextEpochMs` advances on its own,
+          // in the header slot, with no app involvement at all. Before this,
+          // `withSeconds` baked H:MM:SS into the title and the service had to
+          // re-post the entire notification once a second to move it — 3600
+          // rebuilds an hour for as long as the screen was on. The text this
+          // builder produces is now minute-resolution and the chronometer
+          // carries the seconds, so a post a minute is enough.
+          //
+          // `setShowWhen(true)` is required with it: without it the header
+          // slot is not drawn and the chronometer has nowhere to render.
+          .setUsesChronometer(true)
+          .setChronometerCountDown(true)
+          .setWhen(nextEpochMs)
+          .setShowWhen(true)
           .setContentIntent(contentIntent)
 
         if (design == "countdown") {
@@ -555,6 +569,12 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val arrivedTitle =
           if (justArrived && arrivedLabel.isNotEmpty()) "$arrivedLabel · $nowWord"
           else null
+        // Whether the PLATFORM is already animating the countdown for this
+        // card. MetricStyle's TimeDifference is system-ticked, so a
+        // chronometer on top of it would show the same number twice. Every
+        // other branch bakes a minute-resolution string and wants the
+        // chronometer to carry the seconds — see the attach below.
+        var systemTicked = false
         if (design == "countdown") {
           // MetricStyle (Android 17) for BOTH screen-on and AOD, so the card
           // looks identical in both states. Built via REFLECTION so the same
@@ -581,6 +601,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
               if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
             }
             builder.setStyle(style)
+            systemTicked = true
           } else {
             builder.setContentTitle(arrivedTitle ?: "$name · $countdown")
             val sub = joinDot(nextTime, hijri)
@@ -614,6 +635,18 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             builder.setProgress(100, progressPct, false)
           }
           tryAttachShortCriticalText(builder, shortText)
+        }
+
+        // The seconds, drawn by the platform. Same reasoning as the Android 16
+        // path: a chronometer counting down to `nextEpochMs` advances on its
+        // own, so the service posts once a minute instead of once a second.
+        // Skipped when MetricStyle already ticks the countdown itself.
+        if (!systemTicked) {
+          builder
+            .setUsesChronometer(true)
+            .setChronometerCountDown(true)
+            .setWhen(nextEpochMs)
+            .setShowWhen(true)
         }
 
         // "Mute next adhan" toggle action — shown when an adhan is selected and
