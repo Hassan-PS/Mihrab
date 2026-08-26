@@ -338,6 +338,40 @@ kill "$LAUNCH_PID" 2>/dev/null || true
 wait "$LAUNCH_PID" 2>/dev/null || true
 rm -f "$LAUNCH_LOG"
 
+# ── Hand the machine back ─────────────────────────────────────────────
+#
+# Launching the app registered THIS copy — the one in ios/build — with
+# LaunchServices, widget extension and all. That registration outlives the
+# build: the bundle gets zipped, deleted, replaced next build, and
+# LaunchServices keeps pointing at a path that no longer holds the bundle it
+# remembers.
+#
+# What that does to the widgets is not obvious and cost an afternoon to find
+# (2026-08-26). chronod launches the extension from the STALE path, the
+# extension answers with a perfectly good timeline, and then the archive is
+# rejected:
+#
+#   WidgetArchiver.ValidationError.bundleStubNotSupported
+#     ("Bundle version did not match; LaunchServices DB may need to be rebuilt")
+#
+# Every widget, every size, gallery previews included, on the copy in
+# /Applications that was never the problem. Nothing in the app is wrong and
+# nothing in the app can fix it.
+#
+# So unregister what we registered. `-u` is scoped to this one path: it does
+# not touch /Applications, and it is not the `-kill -r` sledgehammer that
+# rebuilds the whole database.
+#
+# Users reach the same state without any of this — unzip the release, run it
+# once from Downloads, drag it to Applications, empty the Trash — so the
+# repair is written down in docs/release/catalyst-widgets.md rather than
+# living only here.
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+if [ -x "$LSREGISTER" ]; then
+  "$LSREGISTER" -u "$APP" 2>/dev/null || true
+  echo "  ▸ unregistered the build copy from LaunchServices."
+fi
+
 echo "▸ Zipping…"
 ditto -c -k --keepParent "$APP" "$ZIP"
 shasum -a 256 "$ZIP" | tee "$ZIP.sha256"

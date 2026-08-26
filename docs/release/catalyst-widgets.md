@@ -112,3 +112,76 @@ None of the above proves the widget DRAWS. Place it — Notification Centre →
 Edit Widgets → Mihrab — and look at it. If it shows prayer times, the whole
 chain works. If it shows an empty card, the reader and the writer are looking
 at different containers, and `MihrabAppGroup.m` is where to start.
+
+## Every widget blank on the Mac, including the gallery (2026-08-26)
+
+**Symptom.** All six widgets on macOS render empty — in Notification Centre,
+on the desktop, and in the "Edit Widgets" gallery. Resizing one blanks it
+again. iPhone and iPad are unaffected. The app itself is fine.
+
+**What it is not.** Everything you would reasonably check comes back clean,
+which is what makes this expensive to diagnose:
+
+- the appex has `app-sandbox` and the prefixed App Group
+- the group container holds a current payload with a live `days[]`
+- `pluginkit` lists the extension against `com.apple.widgetkit-extension`
+- app and appex are both `MACCATALYST`, both universal
+- no crash reports, no AMFI kills
+- every widget view has a `default:` family branch, so no size renders nothing
+
+**What it is.** Two copies of Mihrab.app have existed on the machine, and
+LaunchServices is still pointing at the one that is gone. chronod launches
+the extension from the stale path, the extension returns a good timeline —
+the log even says `Request ended … success` — and then the archive is
+rejected on validation:
+
+```
+reload: failed with error WidgetKit.WidgetArchiver.ValidationError.bundleStubNotSupported(
+  underlyingError: SimpleError.message("Bundle version did not match; LaunchServices DB may need to be rebuilt"))
+```
+
+Gallery previews are archived timelines too, which is why even they are
+blank, and why "most widgets are broken" is really "all of them are".
+
+**How the machine gets there.** On a developer's Mac, `build-catalyst.sh`
+smoke-launches the app from `ios/build/catalyst-dist/` on every build; that
+copy is then zipped, deleted or overwritten. The script now unregisters it
+(`lsregister -u`) as its last step, so this should stop happening. On a
+user's Mac the same state arrives by an ordinary route: unzip the release,
+run it once from Downloads, drag it to Applications, delete the download.
+
+**Diagnosis, in one command.** This is the fastest way from "widgets are
+blank" to the actual reason:
+
+```sh
+log show --last 30m --info --debug --style compact \
+  --predicate 'process == "chronod"' \
+  | grep -i prayerapp | grep -iE "reload: (begin|failed)|bundleStub|Reload (fail|succ)"
+```
+
+`Reload success` means the widget host is happy and the problem is elsewhere.
+`bundleStubNotSupported` means this.
+
+Confirm the stale bundle directly:
+
+```sh
+pgrep -fl PrayerWidgetExtension   # is it running from a path you deleted?
+```
+
+**Repair.** Surgical, in this order — no full database rebuild needed:
+
+```sh
+LSR=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+pkill -f "PrayerWidgetExtension"          # drop the stale extension process
+"$LSR" -u /path/to/the/old/Mihrab.app     # and any copy in ~/.Trash
+"$LSR" -f /Applications/Mihrab.app        # re-register the real one
+killall chronod                           # it comes straight back
+open -g /Applications/Mihrab.app          # gives the widgets something to reload
+```
+
+Then re-run the `log show` above: every widget should report `Reload success`.
+
+**Why iOS and iPadOS cannot hit it.** There is no LaunchServices, and an
+installed app exists at exactly one path — there is no second copy for a
+registration to point at, and no way for a user to run one from elsewhere.
+This is a macOS-only failure by construction.
