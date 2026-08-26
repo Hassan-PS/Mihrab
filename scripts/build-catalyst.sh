@@ -358,21 +358,66 @@ rm -f "$LAUNCH_LOG"
 # /Applications that was never the problem. Nothing in the app is wrong and
 # nothing in the app can fix it.
 #
-# So unregister what we registered. `-u` is scoped to this one path: it does
-# not touch /Applications, and it is not the `-kill -r` sledgehammer that
+# So unregister what we registered. `-u` is scoped to one path: it does not
+# touch /Applications, and it is not the `-kill -r` sledgehammer that
 # rebuilds the whole database.
+#
+# THREE PATHS, NOT ONE, AND AFTER THE ZIP RATHER THAN BEFORE IT. The first
+# version of this unregistered only the copy it launched, and only that, and
+# it did not work — checked on 2026-08-26, straight after a clean build:
+#
+#   ios/build/catalyst-dist/Mihrab.app                          ← re-appeared
+#   …/catalyst-release/…/PrayerApp.app                          ← never touched
+#   …/catalyst-release/…/PrayerApp.app/…/PrayerWidgetExtension.appex
+#
+# Two things were wrong. Xcode registers its OWN build product, so the
+# derived-data bundle and its widget extension are registered by the compile
+# whether or not anything is ever launched — and that .appex is precisely
+# the competing widget host. And a bundle that still exists on disk gets
+# rediscovered, so unregistering the dist copy while leaving it sitting
+# there buys minutes.
+#
+# Hence: unregister all four paths, then DELETE the bundle. The zip is the
+# artifact; the .app beside it was only ever the thing we zipped, and it is
+# one `unzip` away for anyone who wants to run it.
+#
+# Then check, and fail if a ghost survived. A build that says it cleaned up
+# and did not is worse than one that says nothing — that is the whole reason
+# this section had to be written twice.
 #
 # Users reach the same state without any of this — unzip the release, run it
 # once from Downloads, drag it to Applications, empty the Trash — so the
 # repair is written down in docs/release/catalyst-widgets.md rather than
 # living only here.
-LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
-if [ -x "$LSREGISTER" ]; then
-  "$LSREGISTER" -u "$APP" 2>/dev/null || true
-  echo "  ▸ unregistered the build copy from LaunchServices."
-fi
-
 echo "▸ Zipping…"
 ditto -c -k --keepParent "$APP" "$ZIP"
 shasum -a 256 "$ZIP" | tee "$ZIP.sha256"
+
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+BUILT=ios/build/catalyst-release/Build/Products/Release-maccatalyst/PrayerApp.app
+if [ -x "$LSREGISTER" ]; then
+  for stale in \
+      "$APP/Contents/PlugIns/PrayerWidgetExtension.appex" \
+      "$APP" \
+      "$BUILT/Contents/PlugIns/PrayerWidgetExtension.appex" \
+      "$BUILT"; do
+    "$LSREGISTER" -u "$stale" 2>/dev/null || true
+  done
+  rm -rf "$APP"
+  sleep 2
+  GHOSTS=$("$LSREGISTER" -dump 2>/dev/null |
+    grep -oE '^path: +/[^ ]*(PrayerApp\.app|Mihrab\.app|PrayerWidgetExtension\.appex)[^ ]*' |
+    sed 's/^path: *//' | sort -u | grep -v '^/Applications/Mihrab\.app' || true)
+  if [ -n "$GHOSTS" ]; then
+    echo "  ✗ LaunchServices still points at a build copy:" >&2
+    printf '      %s\n' $GHOSTS >&2
+    echo "    Every widget on this Mac will go blank — see" >&2
+    echo "    docs/release/catalyst-widgets.md. Clear them with:" >&2
+    echo "      for p in $GHOSTS; do \"$LSREGISTER\" -u \"\$p\"; done" >&2
+    echo "    The zip is built and fine: $ZIP" >&2
+    exit 1
+  fi
+  echo "  ▸ LaunchServices knows only /Applications/Mihrab.app."
+fi
+
 echo "▸ Done: $ZIP"
