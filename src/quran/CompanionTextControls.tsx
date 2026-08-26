@@ -9,10 +9,10 @@
  *   translation ed.   → settings.quranTranslationEdition (useActiveEdition)
  *   tafsir ed.        → quranState.prefs.tafsirEditionId
  *
- * Rendered inline in Settings → Quran, and as a bottom sheet
- * (`CompanionTextSheet`) from the Quran index page and the surah reader —
- * change it anywhere, it applies everywhere (reader rows, verse of the
- * day, ayah sheet, daily-ayah notification).
+ * Reached as a bottom sheet (`CompanionTextSheet`) from the Quran index
+ * page, the surah reader, and the Settings → Quran summary row — change it
+ * anywhere, it applies everywhere (reader rows, verse of the day, ayah
+ * sheet, daily-ayah notification).
  */
 // hover-ok: settings-row pressables — pressed feedback is the right affordance.
 import {
@@ -60,9 +60,10 @@ export function useCompanionChoice(): {
   };
 }
 
-/** Inline mode toggle + both edition lists.
- *  `onPick` fires after an EDITION is chosen (not on mode toggles) — the
- *  sheet uses it to auto-close; the inline Settings card passes nothing. */
+/** Mode toggle + both edition lists — the body of `CompanionTextSheet`.
+ *  `onPick` fires after an EDITION is chosen (not on mode toggles), which
+ *  is what lets the sheet auto-close on a pick. Callers that want the list
+ *  to stay open pass nothing. */
 export function CompanionTextControls({
   onPick,
 }: {
