@@ -16,6 +16,7 @@ import { computeSeasonalTreatment } from '../../seasonal/treatments';
 import type { TimingsMap } from '../../types/prayer';
 import { formatCountdown, formatLocalTime } from '../../utils/prayerTimes';
 import { HOME_CARD_PADDING, HOME_CARD_RADIUS } from './tokens';
+import { useIsActive } from '../../hooks/useIsActive';
 
 /**
  * Suhoor / Iftar countdown — visible only during Ramadan.
@@ -48,12 +49,15 @@ function RamadanCountdownCardImpl({
 }: RamadanCountdownCardProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const active = useIsActive();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
+    if (!active) return undefined;
+    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
-  }, []);
+  }, [active]);
 
   // Gate: only render during Ramadan. We compute the seasonal treatment off the
   // same `now` value so a midnight rollover off Ramadan removes the card.

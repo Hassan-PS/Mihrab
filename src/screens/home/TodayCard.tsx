@@ -30,7 +30,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsActive } from '../../hooks/useIsActive';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
@@ -107,15 +107,20 @@ const HeroToday = memo(function HeroToday({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  const focused = useIsFocused();
+  // Focus AND foreground. `useIsFocused()` on its own kept this ticking once
+  // a second in the user's pocket: backgrounding the app from the Today tab
+  // leaves Today the focused route, so the timer never stopped.
+  const active = useIsActive();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    if (!focused) return undefined;
+    if (!active) return undefined;
+    // Immediately, not on the first interval: coming back from the background
+    // the displayed countdown is as stale as the time spent away.
     setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
-  }, [focused]);
+  }, [active]);
 
   const remainingSeconds = Math.max(
     0,

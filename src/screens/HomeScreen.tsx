@@ -18,6 +18,7 @@ import notifee, {
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useIsActive } from '../hooks/useIsActive';
 import { usePrayerDay } from '../hooks/usePrayerDay';
 import { getCacheStatus } from '../prayer/prayerStorage';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
@@ -188,6 +189,8 @@ export function HomeScreen() {
   // Focus-scoped (not mount-scoped) so the Settings "Show the app tour"
   // replay — which clears the flag and pops back here — re-triggers it.
   const tabBarInset = useTabBarInset();
+  // Focus + foreground; see the watchdog effect below and useIsActive.
+  const homeActive = useIsActive();
   const [tourVisible, setTourVisible] = useState(false);
   useFocusEffect(
     useCallback(() => {
@@ -303,11 +306,21 @@ export function HomeScreen() {
         return next;
       });
     }
-    // Compute immediately so nextInfo is ready on first render after fetch.
+    // Immediately, so nextInfo is ready on the first render after a fetch —
+    // and so that returning from the background catches up in one step
+    // whatever the clock did while the timer was stopped. A day that rolled
+    // over, or a flight that crossed a timezone, is noticed here rather than
+    // up to thirty seconds later.
     tick();
+    // Only while someone is looking. This used to run every thirty seconds
+    // for the life of the process, backgrounded included — and `tick()` can
+    // call `retry()`, which is a GPS fix and a network fetch, so a day
+    // rollover at midnight woke the phone up to do real work nobody asked
+    // for (docs/design/background-power.md).
+    if (!homeActive) return undefined;
     const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
-  }, [state, retry, view]);
+  }, [state, retry, view, homeActive]);
 
   useEffect(() => {
     if (!hydrated || state.phase !== 'ready' || !view) return;

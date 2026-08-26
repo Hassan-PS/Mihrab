@@ -13,6 +13,7 @@ import { SignalIndicator } from './compass/SignalIndicator';
 import { StatusBanners } from './compass/StatusBanners';
 import { useCompassAnnouncer } from './compass/useCompassAnnouncer';
 import { useCompassSensor } from './compass/useCompassSensor';
+import { useIsActive } from '../hooks/useIsActive';
 
 /**
  * CompassScreen orchestrator — task #10 split.
@@ -52,7 +53,17 @@ export function CompassScreen() {
 
   const qibla = useMemo(() => qiblaBearingFrom(lat, lng), [lat, lng]);
 
-  const sensorEnabled = hydrated && !needsGpsPrime;
+  // Focus AND foreground, not just "the screen is set up".
+  //
+  // This used to be `hydrated && !needsGpsPrime`, with no gate on either —
+  // so opening the compass once left the magnetometer subscribed at 10 Hz
+  // and a 600 ms watchdog running for the life of the process: in a pocket,
+  // overnight, on a tab the user had walked away from hours ago. The hook
+  // tears everything down when this goes false and rebuilds it when the user
+  // comes back, which is the same path a cold open already takes
+  // (docs/design/background-power.md).
+  const compassActive = useIsActive();
+  const sensorEnabled = hydrated && !needsGpsPrime && compassActive;
   const { heading, mode, signalStrength, signalQuality, stability } =
     useCompassSensor(sensorEnabled);
 
