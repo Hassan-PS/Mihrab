@@ -5,6 +5,7 @@ import { recordDataSource } from './dataStatus';
 import type { PrayerDataProviderId } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { formatLocalDate } from '../utils/date';
+import { AppState } from 'react-native';
 
 export type StoredPrayerData = {
   provider: PrayerDataProviderId;
@@ -486,6 +487,17 @@ export async function refreshPrayerDataCache(
   params: Omit<StoredPrayerData, 'months'>,
   monthsAhead: number = 12,
   onProgress?: (progress: number, total: number) => void,
+  /**
+   * Asked between batches. Return false and the fill stops early, KEEPING
+   * everything fetched so far — the write below is reached either way, so a
+   * stop costs nothing and the next call picks up the days still missing.
+   *
+   * This exists because a full year is ~90 network rounds at four at a time,
+   * and it used to run to completion whatever the user did: they connect to
+   * Wi-Fi, put the phone down, and it keeps fetching in their pocket
+   * (docs/design/background-power.md).
+   */
+  shouldContinue?: () => boolean,
 ): Promise<void> {
   const now = new Date();
   const datesToFetch: Date[] = [];
@@ -560,6 +572,13 @@ export async function refreshPrayerDataCache(
 
     completed += batch.length;
     if (onProgress) onProgress(completed, datesToFetch.length);
+
+    // Between batches is the only safe place to stop: a batch is four
+    // in-flight requests, and abandoning those would throw away work already
+    // paid for. `break` rather than `return` — the single write below is what
+    // keeps the days fetched so far, so stopping is resumable by
+    // construction and nothing is lost.
+    if (shouldContinue && !shouldContinue()) break;
 
     // Small delay to avoid hammering APIs.
     await new Promise(resolve => setTimeout(() => resolve(undefined), 100));
@@ -643,6 +662,20 @@ const _lastFullSyncAttemptByKey = new Map<string, number>();
  *
  * Returns true if a sync was kicked off.
  */
+/**
+ * Whether the app is in the background right now.
+ *
+ * Read at the moment it is asked rather than subscribed: this file is a
+ * store, not a component, and a listener here would outlive every caller.
+ */
+function isAppBackgrounded(): boolean {
+  try {
+    return AppState.currentState === 'background';
+  } catch {
+    return false;
+  }
+}
+
 export async function maybeFullSyncOnWifi(
   params: Omit<StoredPrayerData, 'months'>,
 ): Promise<boolean> {
@@ -653,8 +686,12 @@ export async function maybeFullSyncOnWifi(
   const status = await getCacheStatus(params);
   if (status.monthsStored >= 12) return false;
   _lastFullSyncAttemptByKey.set(k, now);
-  refreshPrayerDataCache(params, 12).catch(e =>
-    console.warn('WiFi-triggered 12-month sync failed:', e),
+  // Stop when the user leaves. This is opportunistic prefetching — a year of
+  // times they may never scroll to — and it has no business running in
+  // someone's pocket. Whatever it managed is kept, and the next Wi-Fi
+  // connection continues from there.
+  refreshPrayerDataCache(params, 12, undefined, () => !isAppBackgrounded()).catch(
+    e => console.warn('WiFi-triggered 12-month sync failed:', e),
   );
   return true;
 }
