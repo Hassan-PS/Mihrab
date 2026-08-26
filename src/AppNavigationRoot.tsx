@@ -41,6 +41,14 @@ import {
 } from './quran/quranState';
 import { reconcileMushafAssets } from './quran/mushafAssets';
 import { startAutoSync } from './sync/autoSync';
+import {
+  dayTzFingerprint,
+  markResynced,
+  shouldResync,
+} from './utils/resyncGate';
+
+/** Gate key for the daily notification reschedules — see utils/resyncGate. */
+const DAILY_RESYNC_KEY = 'root.dailyReschedules';
 
 export function AppNavigationRoot() {
   const { settings, hydrated } = usePrayerSettings();
@@ -78,20 +86,53 @@ export function AppNavigationRoot() {
     const sync = (force: boolean) => {
       const now = Date.now();
       if (!force && now - lastDailySyncRef.current < 60 * 60 * 1000) return;
+      // The hourly gate above stops it running on every single foreground.
+      // This one stops the runs that DO get through from redoing work whose
+      // inputs are identical — and this rebuild is not cheap: the ayah path
+      // cancels fourteen notifications and recreates them with up to
+      // fourteen sequential surah loads, plus a tafsir fetch each when the
+      // companion is tafsir. Same day, same settings, same fourteen
+      // notifications (docs/design/background-power.md).
+      //
+      // The day is in the fingerprint, so the sliding window still rebuilds
+      // once a day; a settings change still passes `force` and changes the
+      // fingerprint, so nothing a user does waits for anything.
+      // Read before hydration on the first pass, so this may be the default
+      // companion rather than the stored one — worth at most one extra
+      // rebuild at launch, and `subscribeQuranState` below forces a sync the
+      // moment the real value differs.
+      const prefs = getQuranState()?.prefs;
+      const dailyPrint = dayTzFingerprint(
+        new Date(now),
+        String(settings.ayahOfDayEnabled),
+        settings.ayahOfDayHour,
+        settings.ayahOfDayMinute,
+        settings.quranTranslationEdition,
+        settings.language,
+        String(prefs?.companionMode),
+        String(prefs?.tafsirEditionId),
+        String(settings.khatmahReminderEnabled),
+        settings.khatmahReminderHour,
+        settings.khatmahReminderMinute,
+        String(settings.fastingRemindersEnabled),
+        settings.fastingReminderHour,
+      );
+      if (!shouldResync(DAILY_RESYNC_KEY, dailyPrint, now)) return;
+      markResynced(DAILY_RESYNC_KEY, dailyPrint, now);
       lastDailySyncRef.current = now;
       // Companion mode + tafsir edition live in the quran blob, not the
       // settings context — hydrate (idempotent) then read non-reactively so
       // page-turn writes don't re-render the navigation root (v2.7.40).
       void hydrateQuranState().then(() => {
-        const prefs = getQuranState().prefs;
+        const hydrated = getQuranState().prefs;
         void rescheduleAyahOfDay({
           enabled: settings.ayahOfDayEnabled,
           hour: settings.ayahOfDayHour,
           minute: settings.ayahOfDayMinute,
           quranTranslationEdition: settings.quranTranslationEdition,
           language: settings.language,
-          companionMode: prefs.companionMode,
-          tafsirEditionId: prefs.tafsirEditionId,
+          companionMode: hydrated.companionMode,
+          tafsirEditionId: hydrated.tafsirEditionId,
         });
       });
       void rescheduleKhatmahReminder({
