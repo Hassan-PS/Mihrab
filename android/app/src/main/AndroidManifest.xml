@@ -63,6 +63,13 @@
         android:label="@string/widget_name_medium">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <!-- USER_PRESENT is declared HERE ONLY. Every widget receiver used to
+               carry it, and each one forwarded the unlock to the same
+               PrayerWidgetProvider.requestUpdate — so one unlock ran the
+               whole fan-out nine times over: ~18 alarm registrations and
+               ~72 getAppWidgetIds binder calls, for one redraw (audit:
+               docs/design/background-power.md). requestUpdate refreshes
+               every widget class, so once is all it ever needed to be. -->
           <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
@@ -78,7 +85,6 @@
         android:label="@string/widget_name_small">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -93,7 +99,6 @@
         android:label="@string/widget_name_tall">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -110,7 +115,6 @@
         android:label="@string/widget_name_log">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
           <action android:name="com.prayer_times.ACTION_WIDGET_LOG_TAP" />
@@ -129,7 +133,6 @@
         android:label="@string/widget_name_log_tall">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
           <action android:name="com.prayer_times.ACTION_WIDGET_LOG_TAP" />
@@ -150,7 +153,6 @@
         android:label="@string/widget_name_streak">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -166,7 +168,6 @@
         android:label="@string/widget_name_reading">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
         </intent-filter>
@@ -186,7 +187,6 @@
         android:label="@string/widget_name_tasbih">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="com.prayer_times.ACTION_WIDGET_TASBIH_TAP" />
           <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
@@ -208,7 +208,6 @@
         android:label="@string/widget_name_hijri">
         <intent-filter>
           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-          <action android:name="android.intent.action.USER_PRESENT" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
           <action android:name="android.intent.action.DATE_CHANGED" />
           <action android:name="android.intent.action.TIMEZONE_CHANGED" />

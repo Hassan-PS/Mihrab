@@ -401,6 +401,37 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       }
     }
 
+    /**
+     * Every widget class this app ships. Kept in one place because two
+     * different questions ask it: "is anything placed at all" below, and the
+     * drawing fan-out further down.
+     */
+    private val ALL_WIDGET_CLASSES = arrayOf(
+      PrayerWidgetProvider::class.java,
+      PrayerWidgetSmallProvider::class.java,
+      PrayerWidgetLargeProvider::class.java,
+      PrayerWidgetLogProvider::class.java,
+      PrayerWidgetLogLargeProvider::class.java,
+      PrayerWidgetStreakProvider::class.java,
+      PrayerWidgetReadingProvider::class.java,
+      PrayerWidgetHijriProvider::class.java,
+      PrayerWidgetTasbihProvider::class.java,
+    )
+
+    /** Whether the user has any Mihrab widget on a home screen at all. */
+    private fun anyWidgetPlaced(context: Context): Boolean {
+      val mgr = AppWidgetManager.getInstance(context)
+      return ALL_WIDGET_CLASSES.any {
+        try {
+          mgr.getAppWidgetIds(ComponentName(context, it)).isNotEmpty()
+        } catch (t: Throwable) {
+          // A class the launcher cannot resolve is not a placed widget, and
+          // is certainly not a reason to fail the whole check.
+          false
+        }
+      }
+    }
+
     fun requestUpdate(context: Context) {
       // FIRST, and outside everything that can fail. The chain that will ask
       // again must not be contingent on this round of drawing succeeding —
@@ -411,6 +442,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       } catch (t: Throwable) {
         Log.w(TAG, "Could not check the restore marker", t)
       }
+      // Nothing placed means nothing to draw and no boundary worth holding an
+      // alarm for. This used to run regardless: every unlock armed two alarms
+      // and made ~72 binder calls looking for widgets that were not there,
+      // for every user who had never placed one
+      // (docs/design/background-power.md).
+      //
+      // The check is "any widget of ANY class", not "any of this class" — the
+      // alarms below refresh all of them at the prayer boundary, so a single
+      // placed Hijri card still needs the chain armed.
+      if (!anyWidgetPlaced(context)) return
       try {
         armWidgetAlarms(context)
       } catch (t: Throwable) {
