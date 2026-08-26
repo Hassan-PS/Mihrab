@@ -1,0 +1,4 @@
+• The app uses noticeably less battery in the background: Android draws the countdown itself, timers stop when nobody is looking, the compass lets go of the sensor, and the widgets refresh once per unlock instead of nine times.
+• Fixed: the Log refused to un-log a sunnah prayer — and a paired device kept putting it back.
+• Fixed: a crash when Android restored the app from the background.
+• Sync now shows how old your other device's record is, and says so when nothing has arrived.

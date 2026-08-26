@@ -1,0 +1,4 @@
+• Appen drar märkbart mindre batteri i bakgrunden: Android ritar nedräkningen själv, timers stannar när ingen tittar, kompassen släpper sensorn och widgetarna uppdateras en gång per upplåsning i stället för nio.
+• Fixat: loggen vägrade avmarkera en sunnah-bön — och en parad enhet lade tillbaka den.
+• Fixat: en krasch när Android återställde appen från bakgrunden.
+• Synk visar nu hur gammal den andra enhetens data är, och säger till när inget kommit fram.
