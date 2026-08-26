@@ -2,6 +2,7 @@ package com.prayer_times
 
 import android.app.Activity
 import android.content.res.Configuration
+import android.os.Bundle
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -16,6 +17,40 @@ class MainActivity : ReactActivity() {
 
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+
+  /**
+   * `null`, deliberately. Passing the real bundle crashes the app.
+   *
+   * Android saves the FragmentManager's state into `savedInstanceState`, and
+   * react-native-screens puts a `ScreenStackFragment` per screen into that
+   * manager. On restore, Android reinstantiates those fragments by
+   * reflection — and `ScreenFragment.<init>` deliberately throws
+   * `IllegalStateException: Screen fragments should never be restored`,
+   * because a restored fragment has no Screen view to attach to and the
+   * navigation state is JS's to rebuild, not Android's. The throw comes out
+   * of `performLaunchActivity` as a FATAL EXCEPTION before any of our code
+   * runs; there is nothing to catch it.
+   *
+   * Handing `super` a null bundle drops the fragment state, so Android
+   * restores nothing and JS rebuilds the stack from its own persisted
+   * navigation state, which is where it lives anyway. This is the library's
+   * documented requirement (software-mansion/react-native-screens#17) and
+   * is in the React Native template — we lost it somewhere and did not
+   * notice, because the crash needs the activity to be RECREATED FROM
+   * SAVED STATE, which never happens in a debug session:
+   *
+   *   - the process is killed in the background and the user returns to it
+   *     from Recents or the launcher;
+   *   - a configuration change outside the manifest's `configChanges` list
+   *     — system language, font size, display size — recreates the activity;
+   *   - "Don't keep activities" is on in developer options.
+   *
+   * Observed on a Pixel 10 Pro running 2.10.1 on 2026-08-26: relaunching a
+   * live activity took the app down with exactly this stack.
+   */
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(null)
+  }
 
   /**
    * Called when uiMode (dark/light) changes without an Activity restart because we declare
