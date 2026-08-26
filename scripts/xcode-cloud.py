@@ -4,6 +4,7 @@ way to know whether a release is actually building.
 
     ./scripts/xcode-cloud.py runs [n]      # recent build runs, newest first
     ./scripts/xcode-cloud.py start         # start the Default workflow on main
+                                           #   (refuses if one is already running)
     ./scripts/xcode-cloud.py why <run-id>  # non-warning issues of a failed run
 
 WHY THIS EXISTS. A release cut assumed that pushing a tag started an App Store
@@ -111,7 +112,49 @@ def runs(limit: str = "5") -> None:
         )
 
 
-def start() -> None:
+def in_flight() -> list:
+    """Runs App Store Connect still considers live."""
+    data = call(f"/v1/ciProducts/{product()}/buildRuns?limit=5&sort=-number")
+    return [
+        run
+        for run in data["data"]
+        if run["attributes"].get("executionProgress") in ("PENDING", "RUNNING")
+    ]
+
+
+def start(force: str | None = None) -> None:
+    """Start the Default workflow — unless one is already running.
+
+    TWO CONCURRENT RUNS DO NOT RACE, THEY BOTH DIE. On 2026-08-26 a release
+    cut started a run by hand while the push trigger's run was still going,
+    and App Store Connect failed BOTH with
+
+        An update has been initiated by another request and is currently
+        being processed. Please try again later.
+
+    which reads like a transient hiccup and is not — it is the archive step
+    refusing to run twice for one product. The iOS channel came out of that
+    release with two failed runs, and was saved only by a later commit
+    happening to trigger a third.
+
+    Starting by hand is still the habit worth keeping: the push trigger has
+    silently not fired before (2026-08-07), which is the whole reason this
+    script exists. So this does not stop you starting one — it stops you
+    starting a SECOND one, which never helps and reliably kills the first.
+    """
+    live = in_flight()
+    if live and force != "--force":
+        for run in live:
+            a = run["attributes"]
+            commit = (a.get("sourceCommit") or {}).get("commitSha") or ""
+            print(
+                f"already in flight: #{a.get('number')} {a.get('executionProgress')}"
+                f"  {a.get('startReason')}  {commit[:8]}"
+            )
+        print("not starting another — a second run fails both. Watch it with:")
+        print("  ./scripts/xcode-cloud.py runs 3")
+        print("Really want one anyway? ./scripts/xcode-cloud.py start --force")
+        raise SystemExit(1)
     out = call(
         "/v1/ciBuildRuns",
         {
@@ -149,7 +192,7 @@ if __name__ == "__main__":
     if cmd == "runs":
         runs(*sys.argv[2:3])
     elif cmd == "start":
-        start()
+        start(*sys.argv[2:3])
     elif cmd == "why":
         why(sys.argv[2])
     else:
