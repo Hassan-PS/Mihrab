@@ -266,6 +266,65 @@ that needs care and a test. P5 and P6 are cleanup.
 6. **P5** — horizons, ayah caching, `allowWhileIdle` audit
 7. **P6** — cancel the backfill on background
 
+## What measuring actually showed (2026-08-26, Pixel, v2.10.1 vs the fixes)
+
+Measured on hardware with the fixed build installed side by side as
+`com.prayer_times.beta`, CPU read from `/proc/<pid>/stat` so charging does
+not distort it. Two of these corrected the plan.
+
+**The first number was wrong and nearly got reported.** Fixed build 0.22 s
+per 180 s, old build 0.02 s — the fix looking three times worse. It was not
+the timers: the fixed build had just been onboarded and was doing first-run
+work inside the window (the twelve-month backfill, the first notification
+schedule, the first widget writes). A measurement taken during startup
+measures startup.
+
+**A merely backgrounded app costs nothing either way, because the OS already
+stops it.** Re-run settled, 240 s, both builds in parallel: **0.00 s each**.
+Android freezes the cached process, so the old 1 Hz countdown was not running
+either. P1 and P2 buy nothing in that state — which means their value is
+narrower than this document first claimed, and worth stating plainly:
+
+  • they matter when something ELSE holds the process unfrozen — a
+    foreground service (Live Activity, a Quran download, recitation
+    playing), which is exactly when the app is most expensive already;
+  • they matter in the seconds before the freeze lands, on every
+    background;
+  • they matter on OEM builds and older versions that do not freeze as
+    aggressively;
+  • and the compass one matters regardless, because a sensor registration
+    is held by the SYSTEM, not by the frozen app.
+
+**The compass, which is the clearest win.** `dumpsys sensorservice`, same
+phone, same screen, two minutes after leaving the Qibla page:
+
+  • old build — still holding the magnetometer: `Active Duration 00:01:54`,
+    `Suspended Duration 00:00:05`
+  • fixed build — connection gone twenty seconds after leaving
+
+**The Live Activity, which is the big one.** This is the case where the
+foreground service keeps the process alive, so the ticker really does run.
+180 s window, screen on, app backgrounded, Live Activity enabled:
+
+  | build | CPU in 180 s | share of one core |
+  |-------|--------------|-------------------|
+  | old (1 s ticker) | **5.83 s** | ~3.2 % |
+  | fixed (60 s ticker + chronometer) | **0.29 s** | ~0.16 % |
+
+**Twenty times less**, continuously, for as long as the screen is on. And
+the card is unchanged to look at: `Asr · 58m` with the platform chronometer
+ticking `0:58:12` beside it, `PROMOTED_ONGOING` still set so the status-bar
+chip survives.
+
+Functional checks on the fixed build: enabling prayer alerts scheduled 21
+alarms immediately (the gates do not block a settings change), and the Live
+Activity title advanced `Asr · 58m` → `Asr · 57m` across 50 s, so the
+minute ticker still refreshes what the chronometer cannot.
+
+Not verified on device: the widget fan-out with a widget actually placed —
+the no-widget path (nothing armed) was confirmed, the with-widget path is
+code review only.
+
 ## How to get real numbers
 
 The audit is structural; these turn it into evidence. Worth running before P0
