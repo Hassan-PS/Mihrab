@@ -1390,6 +1390,7 @@
     "folderAppHint": "Mihrab made a folder called {{value}} for itself. Find it in Files, under On My iPhone, and point your sync app at it to reach your other devices.",
     "syncQuietTitle": "Nothing arrived",
     "syncNothingArrived": "Your file is in the folder, but nothing from your other devices has appeared there. Both devices have to be pointing at the same folder, and whatever keeps that folder in step between them has to be running.",
+    "syncStale": "Your file is in the folder, but the newest record from {{device}} was written {{when}}. If you have used that device since, whatever keeps the folder in step between you has stopped carrying files.",
     "scanCode": "Scan",
     "scanHint": "Point the camera at the code on your other device",
     "scanDeniedTitle": "Camera not allowed",

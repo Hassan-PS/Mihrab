@@ -251,6 +251,21 @@ export async function syncWithFolder(
     if (heard.has(from)) continue;
     heard.add(from);
 
+    // PARSED BEFORE THE PEER IS RECORDED, for the sake of one field.
+    //
+    // `notePeerSeen` wants the snapshot's `createdAt` so the peer can carry
+    // how old its RECORD is and not merely when we last opened one of its
+    // files — see `dataAt` on `Peer`, and the reason it had to exist. A
+    // payload that will not parse still records the peer, because a device
+    // that sealed to our key is a real device whether or not this build can
+    // read what it sent.
+    let snapshot;
+    try {
+      snapshot = readSnapshot(JSON.parse(result.json));
+    } catch {
+      snapshot = null;
+    }
+
     // The announcement. A device we already know gets its last-seen and its
     // name; one we do not is added, which is how a pairing made in one
     // direction becomes a pair. See `envelope.ts` for what that does and
@@ -260,13 +275,11 @@ export async function syncWithFolder(
       publicKey: result.senderPublicKey,
       name: result.senderName,
       now: options.now,
+      ...(snapshot ? { dataAt: snapshot.createdAt } : {}),
     });
     if ((await listPeers()).length > before) learned++;
 
-    let snapshot;
-    try {
-      snapshot = readSnapshot(JSON.parse(result.json));
-    } catch {
+    if (!snapshot) {
       // Decrypted cleanly and is not a snapshot: a version of the app that
       // writes something else, or a genuinely corrupt payload. Either way
       // this is the case worth counting separately — the sender is a device

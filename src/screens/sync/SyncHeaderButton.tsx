@@ -6,6 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { SPACING } from '../../theme/tokens';
 import { listPeers } from '../../sync/peers';
+import { reportForRound } from '../../sync/roundReport';
 import { runSyncNow, syncIsReady } from '../../sync/runSync';
 import { useSyncDialog } from './useSyncDialog';
 
@@ -97,30 +98,12 @@ export function SyncHeaderButton() {
       setBusy(true);
       try {
         const result = await runSyncNow();
-        if (!result.ok) {
-          tell(
-            t('sync.syncFailedTitle'),
-            result.reason === 'folder-gone'
-              ? t('sync.errorFolderGone')
-              : result.reason === 'no-folder'
-                ? t('sync.folderHelp')
-                : result.reason === 'unsupported' ||
-                    result.reason === 'no-identity'
-                  ? t('sync.errorUnsupported')
-                  : t('sync.syncFailedBody', { detail: result.detail ?? '' }),
-          );
-          return;
-        }
-        if (result.outcome.read > 0) {
-          tell(t('sync.syncDoneTitle'), t('sync.syncDoneBody'));
-          return;
-        }
-        const known = await listPeers();
-        const neverAnyone = known.length > 0 && known.every(p => !p.lastSeenAt);
-        tell(
-          t('sync.syncQuietTitle'),
-          neverAnyone ? t('sync.syncNothingArrived') : t('sync.syncNothing'),
-        );
+        // What to say is worked out in one place for both entry points —
+        // see `roundReport.ts`, and why "Synced" is not automatic.
+        const report = reportForRound(result, await listPeers(), {
+          unnamedDevice: t('sync.unnamedDevice'),
+        });
+        tell(t(report.title), t(report.body, report.vars));
       } finally {
         setBusy(false);
       }

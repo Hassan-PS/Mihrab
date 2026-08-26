@@ -1390,6 +1390,7 @@
     "folderAppHint": "Mihrab a créé un dossier nommé {{value}} pour lui-même. Vous le trouverez dans Fichiers, sous Sur mon iPhone : pointez-y votre app de synchronisation pour joindre vos autres appareils.",
     "syncQuietTitle": "Rien n’est arrivé",
     "syncNothingArrived": "Votre fichier est dans le dossier, mais rien de vos autres appareils n’y est apparu. Les deux appareils doivent viser le même dossier, et ce qui le garde à jour entre eux doit être en marche.",
+    "syncStale": "Votre fichier est dans le dossier, mais le dernier enregistrement de {{device}} a été écrit {{when}}. Si vous avez utilisé cet appareil depuis, ce qui maintient le dossier synchronisé entre vous ne transporte plus les fichiers.",
     "scanCode": "Scanner",
     "scanHint": "Dirigez la caméra vers le code affiché sur votre autre appareil",
     "scanDeniedTitle": "Caméra non autorisée",

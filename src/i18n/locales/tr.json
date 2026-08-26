@@ -1390,6 +1390,7 @@
     "folderAppHint": "Mihrab kendisi için {{value}} adlı bir klasör oluşturdu. Dosyalar uygulamasında iPhone’umda altında bulabilirsiniz; diğer cihazlarınıza ulaşmak için eşitleme uygulamanızı oraya yönlendirin.",
     "syncQuietTitle": "Hiçbir şey gelmedi",
     "syncNothingArrived": "Dosyanız klasörde, ama diğer cihazlarınızdan orada hiçbir şey görünmedi. İki cihazın da aynı klasörü göstermesi ve o klasörü aralarında güncel tutan şeyin çalışıyor olması gerekir.",
+    "syncStale": "Dosyan klasörde, ancak {{device}} cihazından gelen en yeni kayıt {{when}} tarihinde yazılmış. O cihazı bundan sonra kullandıysan, klasörü aranızda eşit tutan şey artık dosya taşımıyor.",
     "scanCode": "Tara",
     "scanHint": "Kamerayı diğer cihazınızdaki koda doğrultun",
     "scanDeniedTitle": "Kameraya izin verilmedi",

@@ -57,7 +57,12 @@ import {
   myPairingCode,
 } from '../src/sync/deviceIdentity';
 import { forgetCachedDeviceName, setDeviceName } from '../src/sync/deviceName';
-import { addPeerByCode, forgetCachedPeers, listPeers } from '../src/sync/peers';
+import {
+  addPeerByCode,
+  forgetCachedPeers,
+  listPeers,
+  peerIsStale,
+} from '../src/sync/peers';
 import {
   inviteFileNameFor,
   isSyncFileName,
@@ -413,6 +418,71 @@ describe('a folder that will not list itself', () => {
 
     expect(round.read).toBe(0);
     expect(round.skipped).toEqual({ notOurs: 0, notForUs: 0, unreadable: 0 });
+  });
+});
+
+describe('a folder that has stopped carrying files', () => {
+  /**
+   * The failure this was written for: a Nextcloud folder between a Mac and
+   * a phone stopped syncing, and neither app noticed. Nothing in the folder
+   * is ever deleted, so the peer's LAST file is still sitting there — still
+   * readable, still mergeable — and every round opened it, counted it, and
+   * reported a successful sync against a snapshot from the day before.
+   *
+   * The distinction that makes it visible: `lastSeenAt` keeps advancing
+   * (we really are opening a file of theirs), `dataAt` does not (they have
+   * not written a new one).
+   */
+  it('freezes the peer’s record age while re-reading its old file', async () => {
+    const folder = memoryFolder();
+    await pairBothWays();
+
+    // A writes once, at a knowable time, and then goes quiet — or rather,
+    // keeps writing somewhere B can no longer see.
+    await as('A', () =>
+      syncWithFolder(folder, { now: new Date('2026-08-25T14:29:59.711Z') }),
+    );
+
+    // B keeps syncing all the next day and keeps finding A's one old file.
+    for (const at of [
+      '2026-08-26T09:00:00.000Z',
+      '2026-08-26T12:00:00.000Z',
+      '2026-08-26T14:45:00.000Z',
+    ]) {
+      const round = await as('B', () =>
+        syncWithFolder(folder, { now: new Date(at) }),
+      );
+      // It genuinely reads it. That is exactly why "read > 0" was not
+      // enough to justify the word "Synced".
+      expect(round.read).toBe(1);
+    }
+
+    const [a] = await as('B', () => listPeers());
+    expect(a.lastSeenAt).toBe('2026-08-26T14:45:00.000Z');
+    expect(a.dataAt).toBe('2026-08-25T14:29:59.711Z');
+    expect(peerIsStale(a, Date.parse('2026-08-26T14:45:00.000Z'))).toBe(true);
+  });
+
+  it('catches the record up the moment the peer writes again', async () => {
+    const folder = memoryFolder();
+    await pairBothWays();
+    await as('A', () =>
+      syncWithFolder(folder, { now: new Date('2026-08-25T14:00:00.000Z') }),
+    );
+    await as('B', () =>
+      syncWithFolder(folder, { now: new Date('2026-08-26T14:00:00.000Z') }),
+    );
+
+    await as('A', () =>
+      syncWithFolder(folder, { now: new Date('2026-08-26T14:30:00.000Z') }),
+    );
+    await as('B', () =>
+      syncWithFolder(folder, { now: new Date('2026-08-26T14:31:00.000Z') }),
+    );
+
+    const [a] = await as('B', () => listPeers());
+    expect(a.dataAt).toBe('2026-08-26T14:30:00.000Z');
+    expect(peerIsStale(a, Date.parse('2026-08-26T14:31:00.000Z'))).toBe(false);
   });
 });
 

@@ -1390,6 +1390,7 @@
     "folderAppHint": "Mihrab har skapat en egen mapp som heter {{value}}. Du hittar den i Filer, under På min iPhone — peka din synkapp mot den för att nå dina andra enheter.",
     "syncQuietTitle": "Ingenting kom fram",
     "syncNothingArrived": "Din fil ligger i mappen, men ingenting från dina andra enheter har dykt upp där. Båda enheterna måste peka mot samma mapp, och det som håller mappen i takt mellan dem måste vara igång.",
+    "syncStale": "Din fil ligger i mappen, men det senaste från {{device}} skrevs {{when}}. Om du har använt den enheten sedan dess har det som håller mappen synkroniserad slutat flytta filer.",
     "scanCode": "Skanna",
     "scanHint": "Rikta kameran mot koden på din andra enhet",
     "scanDeniedTitle": "Kameran är inte tillåten",

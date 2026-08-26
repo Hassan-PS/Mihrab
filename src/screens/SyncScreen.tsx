@@ -68,6 +68,7 @@ import {
 } from '../sync/peers';
 import { hasSecureRandom } from '../sync/secureRandom';
 import { hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
+import { reportForRound } from '../sync/roundReport';
 import { ensureSyncFolder, runSyncNow } from '../sync/runSync';
 import {
   getSyncSettings,
@@ -128,10 +129,19 @@ function PeerRow({
             ? t('sync.viaCode')
             : t('sync.viaAnnounced')}
         </Text>
+        {/* THE PEER'S RECORD, not our last read of its file.
+            `lastSeenAt` says "we opened a file of theirs this round", which
+            is true every two minutes for ever — nothing in the folder is
+            ever deleted — and so read "Last synced a moment ago" for a
+            device that had not reached this one in a day. `dataAt` is when
+            the snapshot was BUILT, which is the thing the label claims.
+            Falls back for a peer paired before the field existed. */}
         <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
-          {peer.lastSeenAt
+          {peer.dataAt ?? peer.lastSeenAt
             ? t('sync.lastSeen', {
-                when: new Date(peer.lastSeenAt).toLocaleString(),
+                when: new Date(
+                  peer.dataAt ?? peer.lastSeenAt ?? 0,
+                ).toLocaleString(),
               })
             : t('sync.neverSeen')}
         </Text>
@@ -382,35 +392,15 @@ export function SyncScreen() {
       try {
         const result = await runSyncNow();
         setSettings(await getSyncSettings());
-        if (result.ok) {
-          await refreshPeers();
-          if (result.outcome.read > 0) {
-            tell(t('sync.syncDoneTitle'), t('sync.syncDoneBody'));
-            return;
-          }
-          // "Synced" is the wrong word for a round that exchanged nothing,
-          // and the difference between the two quiet cases is the whole
-          // diagnosis. A paired device that has NEVER been seen almost
-          // always means the two devices are looking at different folders —
-          // which is invisible from either screen, so it has to be said.
-          const known = await listPeers();
-          const neverAnyone = known.length > 0 && known.every(p => !p.lastSeenAt);
-          tell(
-            t('sync.syncQuietTitle'),
-            neverAnyone ? t('sync.syncNothingArrived') : t('sync.syncNothing'),
-          );
-          return;
-        }
-        tell(
-          t('sync.syncFailedTitle'),
-          result.reason === 'folder-gone'
-            ? t('sync.errorFolderGone')
-            : result.reason === 'no-folder'
-              ? t('sync.folderHelp')
-              : result.reason === 'unsupported' || result.reason === 'no-identity'
-                ? t('sync.errorUnsupported')
-                : t('sync.syncFailedBody', { detail: result.detail ?? '' }),
-        );
+        if (result.ok) await refreshPeers();
+        // "Synced" is the wrong word for a round that exchanged nothing,
+        // and telling the quiet cases apart IS the diagnosis. That ladder
+        // lives in `roundReport.ts` so this screen and the header button
+        // cannot drift apart on it, which they had already begun to.
+        const report = reportForRound(result, await listPeers(), {
+          unnamedDevice: t('sync.unnamedDevice'),
+        });
+        tell(t(report.title), t(report.body, report.vars));
       } finally {
         setSyncing(false);
       }

@@ -73,10 +73,53 @@ export type Peer = {
    */
   renamedHere?: boolean;
   addedAt: string;
-  /** When a file from it was last opened. Absent until it has sent one. */
+  /**
+   * When a file from it was last OPENED — which is not when it was last
+   * written, and the difference is the whole reason `dataAt` exists.
+   *
+   * Nothing in the shared folder is ever deleted, so a peer's file sits
+   * there for ever and is re-read, re-decrypted and re-merged on every
+   * single round. This stamp therefore says "now" for a device that has
+   * been switched off for a month, and for a folder that stopped carrying
+   * files between two devices a day ago. It is honest about what it
+   * measures and useless as an answer to "is my other phone getting this?".
+   *
+   * Kept because the invite logic needs exactly what it measures: a peer
+   * that has never had a file opened here has never demonstrated that it
+   * knows this device, and is the one that still needs an introduction.
+   */
   lastSeenAt?: string;
+  /**
+   * How old the peer's RECORD is — the `createdAt` of the newest snapshot
+   * ever merged from it.
+   *
+   * This is the number a person means by "when did my other device last
+   * sync". It comes from inside the sealed body, so it is the sender's own
+   * account of when it built the file rather than anything the folder or a
+   * passer-by could have written. Absent for a peer paired by an older
+   * build, or one whose payload would not parse.
+   */
+  dataAt?: string;
   via: PeerVia;
 };
+
+/**
+ * Past this, a peer's record is old enough to be worth mentioning.
+ *
+ * A day, because the app's whole subject changes daily and every device in
+ * a household gets picked up within one. Below that, "stale" would fire on
+ * an evening out; above it, a folder that quietly stopped carrying files
+ * gets another day to look like it is working.
+ */
+export const PEER_STALE_MS = 24 * 60 * 60 * 1000;
+
+/** Whether a peer's record is old enough to say something about. */
+export function peerIsStale(peer: Peer, now: number = Date.now()): boolean {
+  if (!peer.dataAt) return false;
+  const at = Date.parse(peer.dataAt);
+  if (!Number.isFinite(at)) return false;
+  return now - at > PEER_STALE_MS;
+}
 
 export type AddPeerError = 'bad-code' | 'this-device' | 'too-many';
 
@@ -120,6 +163,7 @@ function coerce(value: unknown): Peer[] {
       addedAt:
         typeof r.addedAt === 'string' ? r.addedAt : new Date(0).toISOString(),
       ...(typeof r.lastSeenAt === 'string' ? { lastSeenAt: r.lastSeenAt } : {}),
+      ...(typeof r.dataAt === 'string' ? { dataAt: r.dataAt } : {}),
       via: r.via === 'code' ? 'code' : 'announced',
     });
   }
@@ -238,24 +282,51 @@ export async function addPeerByCode(
  * ignoring it, which is the deliberate trade the folder transport makes —
  * write access to the folder is the gate, and `envelope.ts` says why. It is
  * also where an already-known peer gets its `lastSeenAt` and its name.
+ *
+ * `dataAt` is the snapshot's own `createdAt` — pass it and the peer learns
+ * how fresh its record is, which is a different fact from having read a
+ * file of theirs. See the two fields on `Peer`.
  */
 export async function notePeerSeen(input: {
   publicKey: Uint8Array;
   name?: string;
   now?: Date;
+  /** ISO stamp from inside the peer's snapshot. Omit if there wasn't one. */
+  dataAt?: string;
 }): Promise<Peer | null> {
   if (input.publicKey.length !== KEY_BYTES) return null;
   const pk = toBase64(input.publicKey);
   const me = await getDeviceIdentity();
   if (pk === toBase64(me.publicKey)) return null;
-  const at = (input.now ?? new Date()).toISOString();
+  const nowMs = (input.now ?? new Date()).getTime();
+  const at = new Date(nowMs).toISOString();
+
+  /**
+   * The freshest record we can honestly claim for this peer.
+   *
+   * Clamped to now, because the stamp is the SENDER's clock and a phone
+   * running fast must not make its record look like it arrives from the
+   * future. Never moved backwards, because a peer leaves two readable files
+   * — its snapshot and, briefly, an invite — and reading the older of the
+   * two second must not age a record that is actually current.
+   */
+  const freshest = (existing?: string): string | undefined => {
+    const theirs = input.dataAt ? Date.parse(input.dataAt) : NaN;
+    if (!Number.isFinite(theirs)) return existing;
+    const capped = Math.min(theirs, nowMs);
+    const mine = existing ? Date.parse(existing) : NaN;
+    if (Number.isFinite(mine) && mine >= capped) return existing;
+    return new Date(capped).toISOString();
+  };
 
   return mutate(peers => {
     const existing = peers.find(p => p.pk === pk);
     if (existing) {
+      const fresh = freshest(existing.dataAt);
       const updated: Peer = {
         ...existing,
         lastSeenAt: at,
+        ...(fresh ? { dataAt: fresh } : {}),
         // A device's own name wins unless the user has renamed it here.
         //
         // This used to test `via === 'announced'`, which meant a device
@@ -277,6 +348,7 @@ export async function notePeerSeen(input: {
       ...(input.name ? { name: input.name } : {}),
       addedAt: at,
       lastSeenAt: at,
+      ...(freshest(undefined) ? { dataAt: freshest(undefined) } : {}),
       via: 'announced',
     };
     return { peers: [...peers, peer], result: peer };

@@ -1390,6 +1390,7 @@
     "folderAppHint": "Mihrab membuat folder bernama {{value}} untuk dirinya sendiri. Cari di app Files, di bawah Di iPhone Saya, lalu arahkan aplikasi sinkronisasi Anda ke sana untuk menjangkau perangkat lain.",
     "syncQuietTitle": "Tidak ada yang datang",
     "syncNothingArrived": "Berkas Anda ada di folder, tetapi tidak ada apa pun dari perangkat lain yang muncul di sana. Kedua perangkat harus menunjuk ke folder yang sama, dan yang menjaga folder itu tetap sama di antara keduanya harus sedang berjalan.",
+    "syncStale": "File Anda ada di folder, tetapi catatan terbaru dari {{device}} ditulis {{when}}. Jika Anda telah menggunakan perangkat itu sejak saat itu, apa pun yang menjaga folder tetap selaras di antara keduanya sudah berhenti memindahkan file.",
     "scanCode": "Pindai",
     "scanHint": "Arahkan kamera ke kode di perangkat Anda yang lain",
     "scanDeniedTitle": "Kamera tidak diizinkan",
