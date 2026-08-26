@@ -96,6 +96,17 @@ const STAYS: Record<string, string> = {
     'a plaintext mirror of prayerapp.location.v1, written only when the ' +
     'Keychain write fails — exporting both would duplicate the coordinates',
   // Not storage keys, but they match the naming pattern.
+  //
+  // The resync gates (src/utils/resyncGate.ts) are in-memory Map keys naming
+  // a piece of foreground work — "have the inputs to this changed since it
+  // last ran". They are not written anywhere, they are meaningless on
+  // another device, and they are meaningless in this process a second after
+  // it restarts, which is exactly the behaviour wanted: a cold start should
+  // do the work unconditionally.
+  'root.dailyReschedules': 'a resync gate key, not a store',
+  'prayerDay.foreground': 'a resync gate key, not a store',
+  'home.prayerNotifications': 'a resync gate key, not a store',
+  'home.endOfDayReminders': 'a resync gate key, not a store',
   'journal-log-prayer': 'a notification action id, not a store',
   'journal-log-sunnah': 'a notification action id, not a store',
   'log-day-all': 'a notification action id, not a store',

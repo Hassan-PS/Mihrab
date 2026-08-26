@@ -19,6 +19,11 @@ import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useIsActive } from '../hooks/useIsActive';
+import {
+  dayTzFingerprint,
+  markResynced,
+  shouldResync,
+} from '../utils/resyncGate';
 import { usePrayerDay } from '../hooks/usePrayerDay';
 import { getCacheStatus } from '../prayer/prayerStorage';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
@@ -83,6 +88,10 @@ import {
  * coord persistence, locale-aware day labels) is unchanged behavior — same
  * effects, same call shapes, just lifted out of the rendering hot path.
  */
+/** Gate keys — see src/utils/resyncGate.ts. */
+const NOTIF_RESYNC_KEY = 'home.prayerNotifications';
+const EOD_RESYNC_KEY = 'home.endOfDayReminders';
+
 export function HomeScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -343,11 +352,24 @@ export function HomeScreen() {
     // moment as the prayer alerts: it needs Isha for every day it covers,
     // and this is the one place in the app that holds a week of times
     // anchored to the day they were fetched for.
-    rescheduleEndOfDayLogReminders({
-      enabled: settings.endOfDayLogReminderEnabled,
-      week: view.table.week,
-      baseDate: state.baseDate,
-    }).catch(e => console.warn('rescheduleEndOfDayLogReminders:', e));
+    // This one DECRYPTS THE WHOLE JOURNAL on every run — its own comment in
+    // endOfDayLog.ts says "this runs on every foreground resync", and it did.
+    // It depends on the week's Isha times and one setting; when those are the
+    // same, the seven reminders it would write are the seven already there.
+    const eodPrint = dayTzFingerprint(
+      new Date(),
+      String(settings.endOfDayLogReminderEnabled),
+      state.baseDate.getTime(),
+    );
+    if (shouldResync(EOD_RESYNC_KEY, eodPrint)) {
+      rescheduleEndOfDayLogReminders({
+        enabled: settings.endOfDayLogReminderEnabled,
+        week: view.table.week,
+        baseDate: state.baseDate,
+      })
+        .then(() => markResynced(EOD_RESYNC_KEY, eodPrint))
+        .catch(e => console.warn('rescheduleEndOfDayLogReminders:', e));
+    }
   }, [
     hydrated,
     settings.notificationsEnabled,
@@ -387,15 +409,34 @@ export function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       if (!hydrated || state.phase !== 'ready' || !view) return;
-      syncPrayerNotifications({
-        enabled: settings.notificationsEnabled,
-        prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
-        notificationSound: settings.notificationSound,
-        today: view.table.today,
-        tomorrow: view.table.tomorrow,
-        baseDate: state.baseDate,
-        week: view.table.week,
-      }).catch(e => console.warn('syncPrayerNotifications (focus):', e));
+      // Every focus of the Today tab used to tear down and rewrite the whole
+      // ~48-alarm set, plus a `getDisplayedNotifications` round-trip and a
+      // cancel-diff. The schedule is a function of the times, the sound and
+      // the reminder offset — so when none of those changed, neither did the
+      // answer (docs/design/background-power.md).
+      const notifPrint = dayTzFingerprint(
+        new Date(),
+        String(settings.notificationsEnabled),
+        settings.prePrayerReminderMinutes,
+        settings.notificationSound,
+        state.baseDate.getTime(),
+      );
+      if (shouldResync(NOTIF_RESYNC_KEY, notifPrint)) {
+        syncPrayerNotifications({
+          enabled: settings.notificationsEnabled,
+          prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
+          notificationSound: settings.notificationSound,
+          today: view.table.today,
+          tomorrow: view.table.tomorrow,
+          baseDate: state.baseDate,
+          week: view.table.week,
+        })
+          // Marked on success only: a rewrite that threw must not suppress
+          // the next attempt, or one bad round leaves the alarms as they are
+          // for a whole minute of retries that never run.
+          .then(() => markResynced(NOTIF_RESYNC_KEY, notifPrint))
+          .catch(e => console.warn('syncPrayerNotifications (focus):', e));
+      }
       {
         const t = computeSeasonalTreatment(
           view.table.today,

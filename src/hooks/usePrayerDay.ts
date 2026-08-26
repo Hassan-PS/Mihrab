@@ -13,6 +13,11 @@ import { getPositionStaged } from '../utils/getPosition';
 import { recordLocationFix } from '../prayer/cityRegistry';
 import { reverseLocality, type ReverseLocality } from '../geocoding/nominatim';
 import { computeLocalAdhanTimes } from '../providers/localAdhan';
+import {
+  dayTzFingerprint,
+  markResynced,
+  shouldResync,
+} from '../utils/resyncGate';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
@@ -113,6 +118,9 @@ function applyOffsetsToWeek(
   if (!offsets || Object.keys(offsets).length === 0) return week;
   return week.map(t => applyOffsets(t, offsets));
 }
+
+/** Gate key for the foreground refresh. */
+const RESYNC_KEY = 'prayerDay.foreground';
 
 export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
   const [state, setState] = useState<PrayerDayState>({ phase: 'idle' });
@@ -629,15 +637,43 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     requestAndLoad();
 
     const sub = AppState.addEventListener('change', nextState => {
-      if (nextState === 'active') {
-        requestAndLoad(true);
-      }
+      if (nextState !== 'active') return;
+      // Not on every 'active'. That event fires when a share sheet closes,
+      // when a permission dialog dismisses, when the screen unlocks — several
+      // times a minute in ordinary use — and each one cost a GPS fix, a
+      // possible network fetch, and (through `state`) a rewrite of every
+      // prayer alarm and a full journal decrypt downstream.
+      //
+      // A CHANGE always wins: a new day, a new timezone, or a change to the
+      // settings that decide the times refreshes immediately, because those
+      // are the cases where the displayed answer is actually wrong. The gap
+      // only suppresses repeats whose inputs are identical, and anyone who
+      // has been away long enough to have moved has been away longer than it
+      // (docs/design/background-power.md).
+      const fingerprint = dayTzFingerprint(
+        new Date(),
+        settings.locationMode,
+        settings.calculationMethod,
+        settings.school,
+        settings.dataProvider,
+      );
+      if (!shouldResync(RESYNC_KEY, fingerprint)) return;
+      markResynced(RESYNC_KEY, fingerprint);
+      requestAndLoad(true);
     });
 
     return () => {
       sub.remove();
     };
-  }, [hydrated, settings.locationOnboardingComplete, requestAndLoad]);
+  }, [
+    hydrated,
+    settings.locationOnboardingComplete,
+    settings.locationMode,
+    settings.calculationMethod,
+    settings.school,
+    settings.dataProvider,
+    requestAndLoad,
+  ]);
 
   return { state, retry: requestAndLoad };
 }
