@@ -48,6 +48,7 @@ import {
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
+import { useKeyPaging } from './useKeyPaging';
 
 /** Breathing room either side of the page inside its column. */
 const H_PADDING = 10;
@@ -163,6 +164,36 @@ export function MushafPhoneReader(props: MushafReaderProps) {
     },
     [core, pageWidth, setCurrentPage],
   );
+
+  /**
+   * Keyboard page turn. `dir` is READING direction: +1 = next page (the
+   * mushaf advances right-to-left, which the list already lays out; the
+   * index is the page number, so it moves with `dir` either way).
+   *
+   * A phone with a hardware keyboard attached is rare but real, and this
+   * reader is also what an iPhone-idiom window shows — `hasKeyPaging()`
+   * makes the hook inert everywhere the native module is absent.
+   */
+  const turnPage = useCallback(
+    (dir: 1 | -1) => {
+      const page = Math.min(
+        MUSHAF_TOTAL_PAGES,
+        Math.max(1, settled.current + dir),
+      );
+      if (page === settled.current) return;
+      core.suspendFollow();
+      const prev = settled.current;
+      settled.current = page;
+      core.commitPageTurn(page, prev);
+      setCurrentPage(page);
+      listRef.current?.scrollToIndex({ index: page - 1, animated: true });
+    },
+    [core, setCurrentPage],
+  );
+
+  const turnForward = useCallback(() => turnPage(1), [turnPage]);
+  const turnBack = useCallback(() => turnPage(-1), [turnPage]);
+  useKeyPaging(turnForward, turnBack);
 
   const renderItem = useCallback(
     ({ item: page }: { item: number }) => {

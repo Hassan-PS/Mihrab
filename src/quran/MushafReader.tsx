@@ -112,6 +112,7 @@ import { mushafSurahName } from './surahName';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageOverlay } from './mushaf/MushafPageOverlay';
 import { MiniPlayer } from './audio/MiniPlayer';
+import { useKeyPaging } from './useKeyPaging';
 
 type Props = {
   surahNumber: number;
@@ -590,6 +591,21 @@ export function MushafReader({
       animated: true,
     });
   };
+
+  // A keyboard turns pages too, on the platforms that have one. Forward is
+  // the next page of the BOOK, not the left neighbour on screen — see
+  // `useKeyPaging` for why that distinction had to be decided.
+  //
+  // ONLY in image mode. In text mode this component returns into
+  // `MushafSpreadReader`/`MushafPhoneReader` further down, and those bind
+  // the keys against the pager the reader can actually see; a hook cannot
+  // be called conditionally, so without `!textMode` both subscriptions
+  // would be live at once and every press would turn two pages.
+  const turnPageRef = useRef(turnPage);
+  turnPageRef.current = turnPage;
+  const turnForward = useCallback(() => turnPageRef.current(1), []);
+  const turnBack = useCallback(() => turnPageRef.current(-1), []);
+  useKeyPaging(turnForward, turnBack, !textMode);
 
   // ── Reader layout ───────────────────────────────────────────────────
   // (Computed before the gate returns so hooks below can use it.)
