@@ -24,14 +24,12 @@
     <string name="widget_configure_background">पृष्ठभूमि की तीव्रता</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">अगली नमाज़ हाइलाइट</string>
-    <string name="widget_configure_highlight_dynamic">डायनामिक (फ़ोन एक्सेंट)</string>
     <string name="widget_configure_highlight_green">हरा</string>
     <string name="widget_configure_highlight_teal">टील</string>
     <string name="widget_configure_highlight_blue">नीला</string>
     <string name="widget_configure_highlight_amber">एम्बर</string>
     <string name="widget_configure_highlight_custom">कस्टम रंग</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">अपने फ़ोन के एक्सेंट रंग को हाइलाइट के तौर पर उपयोग करने के लिए डायनामिक चुनें।</string>
     <string name="widget_configure_save">सहेजें</string>
     <string name="live_activity_channel_name">नमाज़ की उलटी गिनती</string>
     <string name="live_activity_channel_desc">अगली नमाज़ के लिए पिन की गई उलटी गिनती।</string>

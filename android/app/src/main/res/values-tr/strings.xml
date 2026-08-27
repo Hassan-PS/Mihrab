@@ -24,14 +24,12 @@
     <string name="widget_configure_background">Arka plan yoğunluğu</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">Sıradaki namaz vurgusu</string>
-    <string name="widget_configure_highlight_dynamic">Dinamik (telefon vurgu rengi)</string>
     <string name="widget_configure_highlight_green">Yeşil</string>
     <string name="widget_configure_highlight_teal">Turkuaz</string>
     <string name="widget_configure_highlight_blue">Mavi</string>
     <string name="widget_configure_highlight_amber">Kehribar</string>
     <string name="widget_configure_highlight_custom">Özel renk</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">Vurgu için telefonunuzun vurgu rengini kullanmak üzere Dinamik\'i seçin.</string>
     <string name="widget_configure_save">Kaydet</string>
     <string name="live_activity_channel_name">Namaz geri sayımı</string>
     <string name="live_activity_channel_desc">Sıradaki namaza sabitlenmiş geri sayım.</string>

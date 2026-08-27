@@ -24,14 +24,12 @@
     <string name="widget_configure_background">Bakgrundsstyrka</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">Markering för nästa bön</string>
-    <string name="widget_configure_highlight_dynamic">Dynamisk (telefonens accentfärg)</string>
     <string name="widget_configure_highlight_green">Grön</string>
     <string name="widget_configure_highlight_teal">Turkos</string>
     <string name="widget_configure_highlight_blue">Blå</string>
     <string name="widget_configure_highlight_amber">Bärnsten</string>
     <string name="widget_configure_highlight_custom">Anpassad färg</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">Välj Dynamisk för att följa telefonens accentfärg för markeringen.</string>
     <string name="widget_configure_save">Spara</string>
     <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Bönnedräkning</string>

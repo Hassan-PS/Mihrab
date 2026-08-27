@@ -24,14 +24,12 @@
     <string name="widget_configure_background">Непрозрачность фона</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">Выделение следующего намаза</string>
-    <string name="widget_configure_highlight_dynamic">Динамический (акцент телефона)</string>
     <string name="widget_configure_highlight_green">Зелёный</string>
     <string name="widget_configure_highlight_teal">Бирюзовый</string>
     <string name="widget_configure_highlight_blue">Синий</string>
     <string name="widget_configure_highlight_amber">Янтарный</string>
     <string name="widget_configure_highlight_custom">Свой цвет</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">Выберите «Динамический», чтобы цвет выделения повторял акцентный цвет телефона.</string>
     <string name="widget_configure_save">Сохранить</string>
     <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Отсчёт молитвы</string>

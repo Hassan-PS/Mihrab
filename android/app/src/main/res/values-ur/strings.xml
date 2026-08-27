@@ -24,14 +24,12 @@
     <string name="widget_configure_background">پس منظر کی شدت</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">اگلی نماز کا نمایاں رنگ</string>
-    <string name="widget_configure_highlight_dynamic">متحرک (فون کا تھیم رنگ)</string>
     <string name="widget_configure_highlight_green">سبز</string>
     <string name="widget_configure_highlight_teal">فیروزی</string>
     <string name="widget_configure_highlight_blue">نیلا</string>
     <string name="widget_configure_highlight_amber">عنبری</string>
     <string name="widget_configure_highlight_custom">اپنی پسند کا رنگ</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">نمایاں رنگ کے لیے اپنے فون کے تھیم رنگ کی پیروی کرنے کے لیے متحرک منتخب کریں۔</string>
     <string name="widget_configure_save">محفوظ کریں</string>
     <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">نماز کی گنتی</string>

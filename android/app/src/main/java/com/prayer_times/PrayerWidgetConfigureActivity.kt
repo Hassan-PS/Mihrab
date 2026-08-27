@@ -72,12 +72,12 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
       prefs.getInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, 88).coerceIn(0, 100)
     val highlightRaw =
       prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, "green")?.trim()
-    val dynamicStored =
-      prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
+    // Dynamic (phone accent) is gone (2026-08-27, by request). The stored
+    // flag is not read back into a selection: a widget configured by an
+    // older build opens on the colour it will actually be drawn in, which
+    // for "dynamic" is green — see `readWidgetStyle` in PrayerWidgetProvider.
     val highlightId =
-      if (dynamicStored) {
-        "dynamic"
-      } else if (highlightRaw.isNullOrEmpty()) {
+      if (highlightRaw.isNullOrEmpty() || highlightRaw.lowercase() == "dynamic") {
         "green"
       } else {
         highlightRaw
@@ -117,7 +117,6 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
 
     val radioId =
       when (highlightId.lowercase()) {
-        "dynamic" -> R.id.widget_configure_highlight_dynamic
         "teal" -> R.id.widget_configure_highlight_teal
         "blue" -> R.id.widget_configure_highlight_blue
         "amber" -> R.id.widget_configure_highlight_amber
@@ -144,7 +143,6 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
       val checked = radioGroup.checkedRadioButtonId
       val hid =
         when (checked) {
-          R.id.widget_configure_highlight_dynamic -> "dynamic"
           R.id.widget_configure_highlight_teal -> "teal"
           R.id.widget_configure_highlight_blue -> "blue"
           R.id.widget_configure_highlight_amber -> "amber"
@@ -168,10 +166,11 @@ class PrayerWidgetConfigureActivity : AppCompatActivity() {
         .putInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, seek.progress)
         .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, hid)
         .putString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, hexForStore)
-        .putBoolean(
-          PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC,
-          hid == "dynamic",
-        )
+        // Written as false rather than left alone: saving here is the one
+        // moment we know the user has looked at this screen, and an older
+        // build's stored `true` would otherwise sit in the store for ever,
+        // waiting for a downgrade to honour it.
+        .putBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
         .apply()
 
       // Every card honours these two settings, so every card has to be

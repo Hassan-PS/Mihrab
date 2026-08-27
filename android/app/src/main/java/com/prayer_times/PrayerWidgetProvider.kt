@@ -12,27 +12,29 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat
 import org.json.JSONObject
 
 private data class WidgetStyle(
   val bgOpacityPercent: Int,
   val highlightId: String,
   val highlightHex: String,
-  val useDynamicHighlight: Boolean,
 ) {
   fun backgroundArgb(): Int {
     val a = (bgOpacityPercent.coerceIn(0, 100) * 255 / 100f).toInt().coerceIn(0, 255)
     return Color.argb(a, BASE_BG_R, BASE_BG_G, BASE_BG_B)
   }
 
-  fun highlightColorInt(context: Context): Int {
-    if (useDynamicHighlight) {
-      return resolveDynamicHighlightColor(context)
-    }
+  /**
+   * The colour that was CHOSEN, never the wallpaper's. `context` is kept in
+   * the signature because every caller has one and the swatch table is the
+   * kind of thing that wants a resource lookup again one day; it is
+   * deliberately unused now that Material You is out of the widgets.
+   */
+  fun highlightColorInt(
+    @Suppress("UNUSED_PARAMETER") context: Context,
+  ): Int {
     if (highlightId.equals("custom", ignoreCase = true)) {
       val h = highlightHex.trim()
       if (h.matches(Regex("^#([0-9A-Fa-f]{6})$"))) {
@@ -60,23 +62,15 @@ private data class WidgetStyle(
   }
 }
 
-private fun resolveDynamicHighlightColor(context: Context): Int {
-  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    try {
-      return ContextCompat.getColor(context, android.R.color.system_accent1_600)
-    } catch (_: Exception) {
-      /* fall through */
-    }
-  }
-  val wrapped = ContextThemeWrapper(context.applicationContext, R.style.AppTheme)
-  val fallback = Color.parseColor("#46A081")
-  val ta = wrapped.obtainStyledAttributes(intArrayOf(android.R.attr.colorPrimary))
-  try {
-    return ta.getColor(0, fallback)
-  } finally {
-    ta.recycle()
-  }
-}
+// `resolveDynamicHighlightColor` lived here. It read the platform's
+// wallpaper-derived Material You accent, and it is gone rather than merely
+// unreachable, so that no future branch can find it and switch it back on
+// by accident. The widget's colour comes from `highlightColorInt` and
+// nowhere else.
+//
+// The Live Activity notification still follows Material You when the app's
+// System-colours setting is on. That is a notification, not a widget, and
+// it was not part of what was asked for.
 
 private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
   val opacity = prefs.getInt(PrayerWidgetProvider.PREFS_WIDGET_BG_OPACITY, 88)
@@ -94,11 +88,11 @@ private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
   // now takes the colour the user actually chose — the accent from the
   // widget settings, or green.
   //
-  // Read as a constant rather than deleted from the store: a widget can be
-  // drawn before JS has ever run (boot, a restore, an unlock straight to
-  // the home screen), so ignoring the stored flag HERE is what makes the
-  // change true immediately rather than after the app is next opened. The
-  // key itself is left alone so a downgrade still finds what it wrote.
+  // The stored flag is not read at all: a widget can be drawn before JS has
+  // ever run (boot, a restore, an unlock straight to the home screen), so
+  // ignoring it HERE is what makes the change true immediately rather than
+  // after the app is next opened. The KEY is left in the store so that a
+  // downgrade still finds what it wrote.
   //
   // `hid` of "dynamic" is a value only older builds could have stored; it
   // resolves to green like any other unknown id.
@@ -106,7 +100,6 @@ private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
     opacity.coerceIn(0, 100),
     hid.ifEmpty { "green" },
     hex,
-    false,
   )
 }
 

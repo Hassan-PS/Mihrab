@@ -34,14 +34,12 @@
     <string name="widget_configure_background">Intensité du fond</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">Surbrillance de la prochaine prière</string>
-    <string name="widget_configure_highlight_dynamic">Dynamique (accent du téléphone)</string>
     <string name="widget_configure_highlight_green">Vert</string>
     <string name="widget_configure_highlight_teal">Sarcelle</string>
     <string name="widget_configure_highlight_blue">Bleu</string>
     <string name="widget_configure_highlight_amber">Ambre</string>
     <string name="widget_configure_highlight_custom">Couleur personnalisée</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">Choisissez Dynamique pour suivre la couleur d\'accent de votre téléphone pour la surbrillance.</string>
     <string name="widget_configure_save">Enregistrer</string>
     <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Compte à rebours de la prière</string>

@@ -24,14 +24,12 @@
     <string name="widget_configure_background">ব্যাকগ্রাউন্ডের তীব্রতা</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">পরবর্তী নামায হাইলাইট</string>
-    <string name="widget_configure_highlight_dynamic">ডাইনামিক (ফোনের অ্যাকসেন্ট রঙ)</string>
     <string name="widget_configure_highlight_green">সবুজ</string>
     <string name="widget_configure_highlight_teal">টিল</string>
     <string name="widget_configure_highlight_blue">নীল</string>
     <string name="widget_configure_highlight_amber">অ্যাম্বার</string>
     <string name="widget_configure_highlight_custom">কাস্টম রঙ</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">হাইলাইটের জন্য আপনার ফোনের অ্যাকসেন্ট রঙ অনুসরণ করতে ডাইনামিক বেছে নিন।</string>
     <string name="widget_configure_save">সংরক্ষণ করুন</string>
     <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">নামাযের কাউন্টডাউন</string>

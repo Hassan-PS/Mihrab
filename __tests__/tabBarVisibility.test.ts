@@ -6,6 +6,8 @@
  * every one of them is there to stop a specific kind of flicker and none
  * of them is obvious from the code that calls this.
  */
+import { readFileSync } from 'fs';
+import path from 'path';
 import { nextTabBarState } from '../src/navigation/tabBarVisibility';
 
 const step = (
@@ -86,5 +88,47 @@ describe('the flicker cases', () => {
     expect(down.hidden).toBe(true);
     const up = step(700, step(780, down));
     expect(up.hidden).toBe(false);
+  });
+});
+
+describe('the bar can always be got back', () => {
+  /**
+   * A tab screen is NOT unmounted when you leave it, so the unmount
+   * cleanup inside `useTabBarScroll` never runs on a tab change. Scroll
+   * Today down, open Tasbih — which has no list, and so no way to ask for
+   * the bar back — and the navigation would be hidden with nothing on
+   * screen able to restore it. The navigator's own focus listener is what
+   * makes that impossible, and it is one line that nothing else would
+   * notice going missing.
+   */
+  it('the tab navigator shows the bar on every focus', () => {
+    const src = readFileSync(
+      path.join(__dirname, '..', 'src', 'navigation', 'MainTabs.tsx'),
+      'utf8',
+    );
+    expect(src).toMatch(/screenListeners=\{\{\s*focus:\s*showTabBar\s*\}\}/);
+    expect(src).toMatch(/import \{[^}]*showTabBar[^}]*\} from '\.\/tabBarVisibility'/);
+  });
+
+  it('every tab that scrolls is wired to move it', () => {
+    // Today, Quran, Duas, Log and Settings. Tasbih is deliberately absent:
+    // it is a counter, not a reading surface, and hiding the bar under a
+    // thumb that is tapping is the opposite of what was asked for.
+    for (const screen of [
+      'HomeScreen',
+      'QuranScreen',
+      'DuasScreen',
+      'LogScreen',
+      'SettingsScreen',
+    ]) {
+      const src = readFileSync(
+        path.join(__dirname, '..', 'src', 'screens', `${screen}.tsx`),
+        'utf8',
+      );
+      expect(src).toContain('useTabBarScroll');
+      // Computed AND spread — a hook whose result is dropped is the
+      // failure this whole audit exists to catch.
+      expect(src).toContain('{...tabBarScroll}');
+    }
   });
 });

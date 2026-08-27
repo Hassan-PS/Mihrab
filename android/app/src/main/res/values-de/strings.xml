@@ -24,14 +24,12 @@
     <string name="widget_configure_background">Hintergrundstärke</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">Hervorhebung nächstes Gebet</string>
-    <string name="widget_configure_highlight_dynamic">Dynamisch (Telefon-Akzent)</string>
     <string name="widget_configure_highlight_green">Grün</string>
     <string name="widget_configure_highlight_teal">Türkis</string>
     <string name="widget_configure_highlight_blue">Blau</string>
     <string name="widget_configure_highlight_amber">Bernstein</string>
     <string name="widget_configure_highlight_custom">Eigene Farbe</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">Wähle Dynamisch, um die Akzentfarbe deines Telefons für die Hervorhebung zu übernehmen.</string>
     <string name="widget_configure_save">Speichern</string>
     <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Gebets-Countdown</string>

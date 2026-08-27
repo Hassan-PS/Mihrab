@@ -24,14 +24,12 @@
     <string name="widget_configure_background">Intensitas latar belakang</string>
     <string name="widget_configure_opacity_percent">%1$d%%</string>
     <string name="widget_configure_highlight">Sorotan salat berikutnya</string>
-    <string name="widget_configure_highlight_dynamic">Dinamis (aksen ponsel)</string>
     <string name="widget_configure_highlight_green">Hijau</string>
     <string name="widget_configure_highlight_teal">Toska</string>
     <string name="widget_configure_highlight_blue">Biru</string>
     <string name="widget_configure_highlight_amber">Amber</string>
     <string name="widget_configure_highlight_custom">Warna kustom</string>
     <string name="widget_configure_hex_hint">#RRGGBB</string>
-    <string name="widget_configure_theme_accent_hint">Pilih Dinamis agar sorotan mengikuti warna aksen ponsel Anda.</string>
     <string name="widget_configure_save">Simpan</string>
     <!-- Live Activity notification strings -->
     <string name="live_activity_channel_name">Hitungan mundur salat</string>

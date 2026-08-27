@@ -40,7 +40,7 @@ import {
   TAB_BAR_SIDE_INSET,
   useTabBarBottom,
 } from './tabBarInset';
-import { useTabBarHidden } from './tabBarVisibility';
+import { showTabBar, useTabBarHidden } from './tabBarVisibility';
 import { HomeScreen } from '../screens/HomeScreen';
 import { QuranScreen } from '../screens/QuranScreen';
 import { TasbihScreen } from '../screens/TasbihScreen';
@@ -97,6 +97,17 @@ export function MainTabs() {
 
   return (
     <Tab.Navigator
+      /**
+       * ARRIVING SOMEWHERE ALWAYS SHOWS THE BAR.
+       *
+       * A tab screen is not unmounted when you leave it, so the unmount
+       * cleanup in `useTabBarScroll` does not fire on a tab change. Without
+       * this, scrolling Today down and then opening Tasbih — which has no
+       * list to scroll and therefore no way to ask for the bar back — would
+       * land you on a screen with the navigation hidden and nothing on it
+       * able to restore it.
+       */
+      screenListeners={{ focus: showTabBar }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.accentSolid,
