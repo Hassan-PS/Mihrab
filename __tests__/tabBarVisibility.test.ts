@@ -110,6 +110,22 @@ describe('the bar can always be got back', () => {
     expect(src).toMatch(/import \{[^}]*showTabBar[^}]*\} from '\.\/tabBarVisibility'/);
   });
 
+  it('nothing on Tasbih can hide the bar', () => {
+    // Asked for explicitly: the bar is ALWAYS there on Tasbih, so a
+    // counter screen with no list can never be the place you get stuck.
+    // Two halves make that true — arriving shows it (above), and this
+    // screen has no scroll handler to take it away again. Wiring one in
+    // later would silently break the guarantee, so it is pinned by name.
+    const src = readFileSync(
+      path.join(__dirname, '..', 'src', 'screens', 'TasbihScreen.tsx'),
+      'utf8',
+    );
+    expect(src).not.toContain('useTabBarScroll');
+    // It still RESERVES the bar's height, so the controls stop above it
+    // rather than under it.
+    expect(src).toContain('useTabBarInset');
+  });
+
   it('every tab that scrolls is wired to move it', () => {
     // Today, Quran, Duas, Log and Settings. Tasbih is deliberately absent:
     // it is a counter, not a reading surface, and hiding the bar under a
