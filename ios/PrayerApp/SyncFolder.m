@@ -31,4 +31,9 @@ RCT_EXTERN_METHOD(write:(nonnull NSString *)handle
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(remove:(nonnull NSString *)handle
+                  name:(nonnull NSString *)name
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 @end

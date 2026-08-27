@@ -396,14 +396,26 @@ shasum -a 256 "$ZIP" | tee "$ZIP.sha256"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 BUILT=ios/build/catalyst-release/Build/Products/Release-maccatalyst/PrayerApp.app
 if [ -x "$LSREGISTER" ]; then
-  for stale in \
-      "$APP/Contents/PlugIns/PrayerWidgetExtension.appex" \
-      "$APP" \
-      "$BUILT/Contents/PlugIns/PrayerWidgetExtension.appex" \
-      "$BUILT"; do
+  # THE .appex PATHS ARE DELIBERATELY NOT LISTED HERE.
+  #
+  # `-u` takes a path but the record it drops is keyed by BUNDLE IDENTIFIER,
+  # and every copy of the widget extension — build product, dist copy, the
+  # one inside /Applications — carries the same one. Unregistering the build
+  # tree's `.appex` took the INSTALLED app's plugin registration with it on
+  # 2026-08-27: `pluginkit` stopped listing the extension at all, which is
+  # the same blank-widgets outcome this cleanup exists to prevent, arrived at
+  # from the opposite direction. Unregistering the `.app` is enough; the
+  # plugin inside it goes with it.
+  for stale in "$APP" "$BUILT"; do
     "$LSREGISTER" -u "$stale" 2>/dev/null || true
   done
   rm -rf "$APP"
+  # AND PUT THE REAL ONE BACK. Cheap insurance either way: if the installed
+  # copy survived the above it is re-registered identically, and if it did
+  # not, this is the repair from docs/release/catalyst-widgets.md.
+  if [ -d /Applications/Mihrab.app ]; then
+    "$LSREGISTER" -f /Applications/Mihrab.app 2>/dev/null || true
+  fi
   sleep 2
   GHOSTS=$("$LSREGISTER" -dump 2>/dev/null |
     grep -oE '^path: +/[^ ]*(PrayerApp\.app|Mihrab\.app|PrayerWidgetExtension\.appex)[^ ]*' |

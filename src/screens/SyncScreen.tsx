@@ -66,8 +66,9 @@ import {
   renamePeer,
   type Peer,
 } from '../sync/peers';
-import { hasSecureRandom } from '../sync/secureRandom';
-import { hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
+import { fromBase64, hasSecureRandom } from '../sync/secureRandom';
+import { folderAt, hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
+import { forgetDeparted } from '../sync/folderSync';
 import { reportForRound } from '../sync/roundReport';
 import { ensureSyncFolder, runSyncNow } from '../sync/runSync';
 import {
@@ -439,6 +440,23 @@ export function SyncScreen() {
         onConfirm: () => {
           void (async () => {
             await forgetPeer(peer.pk);
+            // AND ITS FILE. Left in the folder it is a frozen snapshot that
+            // nothing will ever rewrite, and a frozen snapshot keeps
+            // asserting a record that has since moved on — which is how a
+            // replaced Mac spent a day putting a cleared sunnah back on a
+            // phone. See `forgetDeparted`. Best effort: a folder that will
+            // not delete must not turn "forget this device" into an error.
+            const chosen = await getSyncSettings();
+            if (chosen.folder) {
+              try {
+                await forgetDeparted(
+                  folderAt(chosen.folder.handle),
+                  fromBase64(peer.pk),
+                );
+              } catch {
+                // Unreachable folder, revoked grant, older native side.
+              }
+            }
             await refreshPeers();
           })();
         },

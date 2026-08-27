@@ -295,6 +295,45 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
     }
   }
 
+  /// Delete one file. The ONLY deletion in the whole transport, and it
+  /// happens when the user removes a paired device — see `forgetPeer` on the
+  /// Sync screen and the comment at the top of `folderSync.ts`.
+  ///
+  /// A file that is already gone resolves rather than rejects: two devices
+  /// can be told to forget the same third one, and the second to notice
+  /// should not report a failure for work the first one did.
+  @objc(remove:name:resolver:rejecter:)
+  func remove(
+    _ handle: NSString,
+    name: NSString,
+    resolver resolve: @escaping RCTPromiseResolveBlock,
+    rejecter reject: @escaping RCTPromiseRejectBlock
+  ) {
+    withFolder(handle, reject) { folder in
+      let file = folder.appendingPathComponent(name as String)
+      guard FileManager.default.fileExists(atPath: file.path) else {
+        resolve(false)
+        return
+      }
+      var failure: NSError?
+      var thrown: Error?
+      NSFileCoordinator().coordinate(
+        writingItemAt: file, options: .forDeleting, error: &failure
+      ) { url in
+        do {
+          try FileManager.default.removeItem(at: url)
+        } catch {
+          thrown = error
+        }
+      }
+      if let error = failure ?? (thrown as? NSError) {
+        reject("undeletable", "could not delete \(name)", error)
+        return
+      }
+      resolve(true)
+    }
+  }
+
   // ── Plumbing ───────────────────────────────────────────────────────────
 
   /// Resolve the bookmark, start access, run `body`, stop access.

@@ -339,6 +339,49 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
   }
 
   /**
+   * Delete one file — the only deletion in the whole transport.
+   *
+   * The folder module otherwise never removes anything that is not this
+   * device's own litter, because deciding that a quiet device is a gone
+   * device loses data. This is the one case where somebody DID decide: the
+   * user removed a paired device on the Sync screen, and its file is now a
+   * corpse that the merge would keep listening to for ever. See
+   * `forgetPeer` and the comment above `syncWithFolder`.
+   *
+   * `childrenWithStem` rather than one exact name, because a provider is
+   * allowed to rename on create — a departed device can have left
+   * `mihrab-XXXX.sync.json` AND `mihrab-XXXX (1).sync.json`, and clearing
+   * only the first would leave the resurrection running from the second.
+   *
+   * A file that is not there resolves `false` rather than rejecting. Two
+   * devices can be told to forget the same third one, and the second to act
+   * should not report a failure for work the first already did.
+   */
+  @ReactMethod
+  fun remove(handle: String, name: String, promise: Promise) {
+    try {
+      val folder = Uri.parse(handle)
+      val matches = childrenWithStem(folder, stemOf(name), name)
+      if (matches.isEmpty()) {
+        promise.resolve(false)
+        return
+      }
+      var removed = false
+      for (documentId in matches) {
+        val uri = DocumentsContract.buildDocumentUriUsingTree(treeOf(folder), documentId)
+        if (DocumentsContract.deleteDocument(resolver, uri)) removed = true
+      }
+      if (!removed) {
+        promise.reject("undeletable", "could not delete $name")
+        return
+      }
+      promise.resolve(true)
+    } catch (t: Throwable) {
+      promise.reject("undeletable", "could not delete $name", t)
+    }
+  }
+
+  /**
    * Replace a file's contents, or say it could not be done.
    *
    * Truncation is the point: without it a shorter envelope leaves the tail

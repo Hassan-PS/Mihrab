@@ -27,6 +27,8 @@ const Native = NativeModules.SyncFolder as
       list(handle: string): Promise<string[]>;
       read(handle: string, name: string): Promise<string>;
       write(handle: string, name: string, contents: string): Promise<boolean>;
+      /** Added 2.11.1. Absent on an older native side — see `folderAt`. */
+      remove?(handle: string, name: string): Promise<boolean>;
     }
   | undefined;
 
@@ -122,5 +124,16 @@ export function folderAt(handle: string): SyncFolder {
     write: async (name: string, contents: string) => {
       await native.write(handle, name, contents);
     },
+    // Only offered when the native side actually has it. `syncWithFolder`
+    // never calls this — deletion is not part of a round — so a build
+    // without it loses the tidy-up on removing a device and nothing else.
+    ...(native.remove
+      ? {
+          remove: async (name: string) => {
+            const gone = await native.remove?.(handle, name);
+            return Boolean(gone);
+          },
+        }
+      : {}),
   };
 }

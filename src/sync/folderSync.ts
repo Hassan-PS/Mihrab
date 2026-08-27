@@ -79,7 +79,62 @@ export type SyncFolder = {
   list(): Promise<string[]>;
   read(name: string): Promise<string>;
   write(name: string, contents: string): Promise<void>;
+  /**
+   * Delete one file. Optional, and never called by a round.
+   *
+   * A ROUND STILL DELETES NOTHING — see below. This exists for the one
+   * moment when somebody has actually decided a device is gone: the user
+   * removing it on the Sync screen. `forgetDeparted` is the only caller.
+   */
+  remove?(name: string): Promise<boolean>;
 };
+
+/**
+ * Clear a removed device's files out of the folder.
+ *
+ * ── WHY THE "NOTHING IS DELETED" RULE DOES NOT COVER THIS ─────────────
+ *
+ * The rule above is about a round: it must not decide, on its own, that a
+ * quiet device is a gone device, because getting that wrong loses someone's
+ * record. That reasoning does not apply to a person tapping Remove. They
+ * have made exactly the judgement the algorithm must not make.
+ *
+ * And leaving the file costs more than untidiness. Nothing rewrites it, so
+ * it is frozen — and a frozen snapshot is a device that keeps asserting a
+ * day that has since been edited elsewhere. That is not hypothetical: on
+ * 2026-08-27 a Mac whose sync identity had been replaced left
+ * `mihrab-ASWPFJBG07HZ.sync.json` behind, and it spent a day putting a
+ * cleared sunnah back on a phone, several times an hour. `syncWithFolder`
+ * now steps over a snapshot it has already merged, which stops the bleeding
+ * — but the corpse is still there to be read once by every device that has
+ * not met it yet. Removing the device should remove its file.
+ *
+ * Both names, because a peer leaves two: its snapshot and, until it is
+ * acknowledged, an invite addressed to us.
+ *
+ * Never throws. A folder that will not delete — a read-only provider, a
+ * file already gone, an older build with no `remove` — must not turn
+ * "forget this device" into an error, because the pairing IS forgotten
+ * either way. Returns what it managed, so a screen can say so if it wants.
+ */
+export async function forgetDeparted(
+  folder: SyncFolder,
+  publicKey: Uint8Array,
+): Promise<{ removed: string[] }> {
+  if (!folder.remove) return { removed: [] };
+  const removed: string[] = [];
+  for (const name of [
+    syncFileNameFor(publicKey),
+    inviteFileNameFor(publicKey),
+  ]) {
+    try {
+      if (await folder.remove(name)) removed.push(name);
+    } catch {
+      // Untidy, not broken. The peer is gone from the list regardless.
+    }
+  }
+  return { removed };
+}
 
 /**
  * `mihrab-XXXXXXXXXXXX.sync.json`.

@@ -181,6 +181,28 @@ open -g /Applications/Mihrab.app          # gives the widgets something to reloa
 
 Then re-run the `log show` above: every widget should report `Reload success`.
 
+**Do not `lsregister -u` an `.appex` path.** `-u` takes a path, but the
+record it drops is keyed by bundle identifier — and every copy of the widget
+extension, build product and installed app alike, carries the same one.
+Unregistering the build tree's `.appex` on 2026-08-27 took the INSTALLED
+app's plugin registration with it: `pluginkit -m -i
+maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension` returned nothing at
+all, which is the same blank widgets, reached from the opposite direction.
+Unregister the `.app`; the plugin inside it goes with it. `build-catalyst.sh`
+now also re-runs `lsregister -f /Applications/Mihrab.app` afterwards, which
+is the repair above and costs nothing when it was not needed.
+
+The authoritative check is by identifier, not `pluginkit -mA | grep`:
+
+```sh
+pluginkit -m -i maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension -v
+```
+
+It should print one line, at the version you expect, with the path under
+`/Applications`. `-mA` does not reliably list it and is not evidence either
+way — it was `-mA` coming up empty that made the breakage above look worse
+than it was, and then look fixed before it was checked properly.
+
 **Why iOS and iPadOS cannot hit it.** There is no LaunchServices, and an
 installed app exists at exactly one path — there is no second copy for a
 registration to point at, and no way for a user to run one from elsewhere.

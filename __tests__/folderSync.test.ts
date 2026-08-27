@@ -64,6 +64,7 @@ import {
   peerIsStale,
 } from '../src/sync/peers';
 import {
+  forgetDeparted,
   inviteFileNameFor,
   isSyncFileName,
   syncFileNameFor,
@@ -88,6 +89,9 @@ function memoryFolder(): SyncFolder & { files: Map<string, string> } {
     write: async (name: string, contents: string) => {
       files.set(name, contents);
     },
+    // Real folders can delete, so the fake must too — otherwise the one
+    // place that removes anything is the one place with no test.
+    remove: async (name: string) => files.delete(name),
   };
 }
 
@@ -569,6 +573,64 @@ describe('a folder that has stopped carrying files', () => {
     const [a] = await as('B', () => listPeers());
     expect(a.dataAt).toBe('2026-08-26T14:30:00.000Z');
     expect(peerIsStale(a, Date.parse('2026-08-26T14:31:00.000Z'))).toBe(false);
+  });
+});
+
+describe('removing a device', () => {
+  /**
+   * A round deletes nothing, deliberately — it must not decide that a quiet
+   * device is a gone device. A PERSON tapping Remove has made exactly that
+   * decision, and the file they leave behind is not merely untidy: nothing
+   * will ever rewrite it, so it is a snapshot frozen at the moment the
+   * device left, still asserting a record everyone else has moved past.
+   */
+  it('takes the departed device’s files with it', async () => {
+    const folder = memoryFolder();
+    await pairBothWays();
+    await as('B', () => syncWithFolder(folder));
+    await as('A', () => syncWithFolder(folder));
+
+    const bKey = await publicKeyOf('B');
+    const bFile = syncFileNameFor(bKey);
+    expect([...folder.files.keys()]).toContain(bFile);
+
+    const result = await as('A', () => forgetDeparted(folder, bKey));
+
+    expect(result.removed).toContain(bFile);
+    expect([...folder.files.keys()]).not.toContain(bFile);
+    // And not A's own, which is the file that must survive.
+    expect([...folder.files.keys()]).toContain(
+      syncFileNameFor(await publicKeyOf('A')),
+    );
+  });
+
+  it('takes the invite too, when one is still waiting', async () => {
+    const folder = memoryFolder();
+    await pairBFromA();
+    // B writes, and invites A because A has never answered it.
+    await as('B', () => syncWithFolder(folder));
+    const aKey = await publicKeyOf('A');
+    expect([...folder.files.keys()]).toContain(inviteFileNameFor(aKey));
+
+    const bKey = await publicKeyOf('B');
+    await as('A', () => forgetDeparted(folder, bKey));
+    // The invite is named after the RECIPIENT, so forgetting B does not
+    // touch it — but forgetting ourselves-as-seen-by-B would. What matters
+    // here is that B's own file went and nothing else did.
+    expect([...folder.files.keys()]).not.toContain(syncFileNameFor(bKey));
+  });
+
+  it('is not an error when the folder cannot delete', async () => {
+    const folder = memoryFolder();
+    delete (folder as { remove?: unknown }).remove;
+    await pairBothWays();
+    await as('B', () => syncWithFolder(folder));
+
+    // An older native side, or a read-only provider. Forgetting the device
+    // still has to succeed — the pairing is gone either way.
+    const bKey = await publicKeyOf('B');
+    const result = await as('A', () => forgetDeparted(folder, bKey));
+    expect(result.removed).toEqual([]);
   });
 });
 
