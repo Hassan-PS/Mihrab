@@ -151,6 +151,16 @@ export type SyncSkipped = {
   notForUs: number;
   /** Ours by name, addressed to us, and would not open. Worth surfacing. */
   unreadable: number;
+  /**
+   * Opened, understood, and already merged in an earlier round.
+   *
+   * The normal case for a peer that has not written since we last looked —
+   * and the permanent case for one that never will again. Counted rather
+   * than silent because "we read three files and learned nothing from any
+   * of them" is the difference between a healthy quiet folder and a dead
+   * one, and the Sync screen should be able to tell the user which.
+   */
+  alreadySeen: number;
 };
 
 export type SyncOutcome = {
@@ -179,7 +189,12 @@ export async function syncWithFolder(
   const me = await getDeviceIdentity();
   const mine = syncFileNameFor(me.publicKey);
   const known = await listPeers();
-  const skipped: SyncSkipped = { notOurs: 0, notForUs: 0, unreadable: 0 };
+  const skipped: SyncSkipped = {
+    notOurs: 0,
+    notForUs: 0,
+    unreadable: 0,
+    alreadySeen: 0,
+  };
   let read = 0;
   let learned = 0;
   let merged: MergeSummary | null = null;
@@ -266,6 +281,10 @@ export async function syncWithFolder(
       snapshot = null;
     }
 
+    // WHAT WE ALREADY MERGED FROM THIS SENDER, read BEFORE noting them —
+    // `notePeerSeen` is about to move the stamp forward.
+    const knownAt = (await listPeers()).find(p => p.pk === from)?.dataAt;
+
     // The announcement. A device we already know gets its last-seen and its
     // name; one we do not is added, which is how a pairing made in one
     // direction becomes a pair. See `envelope.ts` for what that does and
@@ -285,6 +304,40 @@ export async function syncWithFolder(
       // this is the case worth counting separately — the sender is a device
       // we trust, so silence would hide a real incompatibility.
       skipped.unreadable++;
+      continue;
+    }
+
+    // ── A SNAPSHOT WE HAVE ALREADY MERGED IS NOT MERGED AGAIN ───────────
+    //
+    // Re-merging is harmless in a vacuum — the merge is idempotent against
+    // ITSELF. It is not harmless against a local record that has changed
+    // since, and this is the failure that took two attempts to see.
+    //
+    // Nothing in the shared folder is ever deleted, so a device that stops
+    // writing leaves its last file there for ever. Reported 2026-08-27: a
+    // Mac's sync identity was replaced, orphaning `mihrab-ASWPFJBG07HZ`, a
+    // file frozen at 15:18 the previous day and written by a build old
+    // enough that its sunnah days carried no timestamps. Every round, the
+    // phone opened that corpse, and every round the undated rule in
+    // `mergeSunnah` re-asserted the counts it held — so a sunnah cleared on
+    // the phone came back, for ever, from a device that no longer existed.
+    //
+    // The general statement is the one that matters: a file we have already
+    // read carries NO new information, and no-new-information must never
+    // outrank something the user has since done. So compare the snapshot's
+    // own build time against the newest we have merged from this sender and
+    // step over anything at or behind it. It costs nothing when peers are
+    // healthy — a live device stamps every round it writes — and it makes a
+    // dead device's file inert instead of eternally loud.
+    //
+    // `<=` rather than `===` so an older INVITE, which a peer leaves beside
+    // its snapshot until it is acknowledged, cannot drag the record back
+    // either. The price is a peer whose clock is set backwards: its files
+    // are ignored until the clock passes the stamp we recorded. That is a
+    // machine with a broken clock going quiet, against a dead machine
+    // silently undoing live edits, and it is not a close call.
+    if (knownAt && Date.parse(snapshot.createdAt) <= Date.parse(knownAt)) {
+      skipped.alreadySeen++;
       continue;
     }
 

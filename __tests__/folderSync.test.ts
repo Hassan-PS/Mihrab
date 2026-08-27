@@ -71,7 +71,7 @@ import {
   SYNC_FILE_PREFIX,
   type SyncFolder,
 } from '../src/sync/folderSync';
-import { JOURNAL_KEY } from '../src/practice/practiceStore';
+import { JOURNAL_KEY, SUNNAH_KEY } from '../src/practice/practiceStore';
 import { QURAN_STORAGE_KEY } from '../src/quran/quranState';
 
 /** The shared folder: whatever software the user already trusts to move it. */
@@ -119,6 +119,12 @@ async function publicKeyOf(which: 'A' | 'B'): Promise<Uint8Array> {
 function journalOf(which: 'A' | 'B'): Array<Record<string, unknown>> {
   const raw = mockDevices[which].secure.get(JOURNAL_KEY);
   return raw ? JSON.parse(raw) : [];
+}
+
+function sunnahOf(
+  which: 'A' | 'B',
+): Record<string, Record<string, number | boolean>> {
+  return JSON.parse(mockDevices[which].secure.get(SUNNAH_KEY) ?? '{}');
 }
 
 function quranOf(which: 'A' | 'B'): Record<string, unknown> {
@@ -417,7 +423,12 @@ describe('a folder that will not list itself', () => {
     const round = await as('A', () => syncWithFolder(folder));
 
     expect(round.read).toBe(0);
-    expect(round.skipped).toEqual({ notOurs: 0, notForUs: 0, unreadable: 0 });
+    expect(round.skipped).toEqual({
+      notOurs: 0,
+      notForUs: 0,
+      unreadable: 0,
+      alreadySeen: 0,
+    });
   });
 });
 
@@ -444,23 +455,98 @@ describe('a folder that has stopped carrying files', () => {
     );
 
     // B keeps syncing all the next day and keeps finding A's one old file.
+    // The FIRST round genuinely reads it; every round after that opens the
+    // same snapshot, recognises it, and steps over it — which is what stops
+    // a dead device's file re-asserting itself against B's later edits.
+    const rounds = [];
     for (const at of [
       '2026-08-26T09:00:00.000Z',
       '2026-08-26T12:00:00.000Z',
       '2026-08-26T14:45:00.000Z',
     ]) {
-      const round = await as('B', () =>
-        syncWithFolder(folder, { now: new Date(at) }),
+      rounds.push(
+        await as('B', () => syncWithFolder(folder, { now: new Date(at) })),
       );
-      // It genuinely reads it. That is exactly why "read > 0" was not
-      // enough to justify the word "Synced".
-      expect(round.read).toBe(1);
     }
+
+    expect(rounds.map(r => r.read)).toEqual([1, 0, 0]);
+    expect(rounds.map(r => r.skipped.alreadySeen)).toEqual([0, 1, 1]);
 
     const [a] = await as('B', () => listPeers());
     expect(a.lastSeenAt).toBe('2026-08-26T14:45:00.000Z');
     expect(a.dataAt).toBe('2026-08-25T14:29:59.711Z');
     expect(peerIsStale(a, Date.parse('2026-08-26T14:45:00.000Z'))).toBe(true);
+  });
+
+  /**
+   * THE BUG THIS WAS ALL FOR. Reported twice, 2026-08-26 and again on the
+   * 27th after the first fix: a sunnah cleared in the Log came back.
+   *
+   * The first fix — timestamped tombstones — was right and did not help,
+   * because the thing re-asserting the count was not a live device. A Mac's
+   * sync identity had been replaced, leaving `mihrab-ASWPFJBG07HZ.sync.json`
+   * in the folder: a file nothing would ever rewrite, written by a build old
+   * enough that its sunnah days carry no timestamps. Every round the phone
+   * opened it, `mergeSunnah` fell back to `Math.max` for the undated day, and
+   * the old count won. A device that no longer existed was undoing the user's
+   * edits, several times an hour, indefinitely.
+   */
+  it('does not let a dead device’s file undo a later un-log', async () => {
+    const folder = memoryFolder();
+    await pairBothWays();
+    const day = '2026-08-25';
+
+    // A is on an old build: Fajr's sunnah logged, and NO timestamp on the
+    // day, because that build did not write one.
+    mockDevices.A.secure.set(
+      SUNNAH_KEY,
+      JSON.stringify({
+        [day]: {
+          fajr: 1,
+          dhuhr: 2,
+          maghrib: 0,
+          isha: 0,
+          witr: false,
+          qiyam: 0,
+        },
+      }),
+    );
+    await as('A', () =>
+      syncWithFolder(folder, { now: new Date('2026-08-25T09:00:00.000Z') }),
+    );
+    await as('B', () =>
+      syncWithFolder(folder, { now: new Date('2026-08-25T09:05:00.000Z') }),
+    );
+    expect(sunnahOf('B')[day]).toMatchObject({ fajr: 1, dhuhr: 2 });
+
+    // A is never heard from again — reinstalled, re-identified, thrown in a
+    // drawer. Its file stays in the folder for ever; that is the design.
+
+    // On B, the user clears it. A tombstone, stamped, as 2.11.0 writes them.
+    mockDevices.B.secure.set(
+      SUNNAH_KEY,
+      JSON.stringify({
+        [day]: {
+          fajr: 0,
+          dhuhr: 0,
+          maghrib: 0,
+          isha: 0,
+          witr: false,
+          qiyam: 0,
+          at: Date.parse('2026-08-25T14:31:00.000Z'),
+        },
+      }),
+    );
+
+    // And keeps using the app. Every one of these rounds re-opens A's file.
+    for (const at of [
+      '2026-08-25T14:35:00.000Z',
+      '2026-08-25T16:00:00.000Z',
+      '2026-08-26T08:00:00.000Z',
+    ]) {
+      await as('B', () => syncWithFolder(folder, { now: new Date(at) }));
+      expect(sunnahOf('B')[day]).toMatchObject({ fajr: 0, dhuhr: 0 });
+    }
   });
 
   it('catches the record up the moment the peer writes again', async () => {

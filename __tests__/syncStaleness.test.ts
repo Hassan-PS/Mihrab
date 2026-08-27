@@ -157,7 +157,7 @@ const readOne: SyncRunResult = {
     read: 1,
     learned: 0,
     merged: null,
-    skipped: { notOurs: 0, notForUs: 0, unreadable: 0 },
+    skipped: { notOurs: 0, notForUs: 0, unreadable: 0, alreadySeen: 0 },
   },
 };
 
