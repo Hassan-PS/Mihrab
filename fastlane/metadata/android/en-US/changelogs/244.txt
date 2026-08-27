@@ -1,0 +1,4 @@
+• Sync now runs whenever you change your log — including from a notification or a widget, with the app closed. It used to wait until you next opened the app.
+• The refresh button on a widget syncs before it redraws, instead of showing you the same thing again.
+• Removing a paired device now sticks: its file is deleted, it cannot re-add itself, and your other devices drop it too.
+• Sync setup says plainly that it needs a folder Nextcloud, OneDrive, Dropbox or similar keeps in step.

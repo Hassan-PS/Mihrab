@@ -1,0 +1,4 @@
+• Synk körs nu så fort du ändrar i loggen — även från en avisering eller widget, med appen stängd. Tidigare väntade den tills du öppnade appen.
+• Uppdateringsknappen på en widget synkar innan den ritar om.
+• Att ta bort en parad enhet håller nu: filen raderas, enheten kan inte lägga till sig själv igen, och dina andra enheter tar bort den också.
+• Synkinställningen säger tydligt att den behöver en mapp som Nextcloud, OneDrive eller liknande håller synkroniserad.
