@@ -328,7 +328,17 @@ const styles = StyleSheet.create({
   peekBody: { flex: 1, minWidth: 0, alignItems: 'flex-end' },
   peekMeta: { fontSize: 12, fontWeight: '600' },
   peekArabic: { fontSize: 17, fontWeight: '600', writingDirection: 'rtl' },
-  navRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  navRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+    // Off the tab bar. The row is the last thing in a `flex: 1` column, so
+    // it sits against the bottom of the screen — and the bottom of the
+    // screen is where the navigation bar is. Previous and Skip are big
+    // targets a thumb reaches for without looking, which is exactly the
+    // thumb that was landing on the tab bar instead.
+    marginBottom: 12,
+  },
   navBtn: {
     flex: 1,
     paddingHorizontal: 12,

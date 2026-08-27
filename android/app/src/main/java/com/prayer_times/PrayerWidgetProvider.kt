@@ -86,13 +86,27 @@ private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
   val hex =
     prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, "")?.trim()
       ?: ""
-  val dynamic =
-    prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false)
+  // DYNAMIC COLOUR IS GONE FROM THE WIDGETS (2026-08-27, by request).
+  //
+  // Material You gave the widget whatever hue the wallpaper happened to
+  // produce, which on a lot of wallpapers is nothing like the app and on
+  // some is barely distinguishable from the card it sits on. The widget
+  // now takes the colour the user actually chose — the accent from the
+  // widget settings, or green.
+  //
+  // Read as a constant rather than deleted from the store: a widget can be
+  // drawn before JS has ever run (boot, a restore, an unlock straight to
+  // the home screen), so ignoring the stored flag HERE is what makes the
+  // change true immediately rather than after the app is next opened. The
+  // key itself is left alone so a downgrade still finds what it wrote.
+  //
+  // `hid` of "dynamic" is a value only older builds could have stored; it
+  // resolves to green like any other unknown id.
   return WidgetStyle(
     opacity.coerceIn(0, 100),
     hid.ifEmpty { "green" },
     hex,
-    dynamic,
+    false,
   )
 }
 

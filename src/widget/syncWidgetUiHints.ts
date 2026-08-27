@@ -16,6 +16,17 @@ const VALID_WIDGET_HIGHLIGHT_IDS = new Set<string>([
  * widget gets the same color the user picked for the app.
  */
 function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
+  // ANDROID WIDGETS NEVER FOLLOW MATERIAL YOU (2026-08-27, by request).
+  //
+  // The app may still; the widget may not. A wallpaper-derived accent gave
+  // the card a hue with no relationship to the one the user picked, and on
+  // some wallpapers barely any contrast against the card itself. The
+  // highlight is now whatever the widget settings say, or green.
+  //
+  // The native side ignores the stored flag too, so a widget drawn before
+  // JS has run this time — after a boot or a restore — is already right.
+  // This half stops the app asking for something that will not happen.
+  if (Platform.OS === 'android') return false;
   return (
     settings.useSystemDynamicTheme || settings.widgetHighlightId === 'dynamic'
   );
@@ -32,9 +43,15 @@ function syncNativeWidgetAppearance(
       : null;
 
   if (Platform.OS === 'android' && mod?.setAndroidWidgetAppearance) {
+    // A `widgetHighlightId` of 'dynamic' can only have come from an older
+    // build. Sending it would store an id the drawing code does not know,
+    // which lands on green anyway — so name green here rather than leaving
+    // the widget's colour to a fallback nobody reading this would expect.
     void mod.setAndroidWidgetAppearance(
       settings.androidWidgetBackgroundOpacity,
-      settings.widgetHighlightId,
+      settings.widgetHighlightId === 'dynamic'
+        ? 'green'
+        : settings.widgetHighlightId,
       hex,
       dynamicHl,
     );
@@ -81,7 +98,12 @@ export function useSyncWidgetUiHints(): void {
             if (nativeSettings.opacity !== currentSettings.androidWidgetBackgroundOpacity) {
               updates.androidWidgetBackgroundOpacity = nativeSettings.opacity;
             }
-            const hlId = nativeSettings.highlightDynamic ? 'dynamic' : nativeSettings.highlightId;
+            // The dynamic flag is NOT adopted back any more. This effect is
+            // Android-only, Android widgets no longer have a dynamic mode,
+            // and reading an older build's stored flag into settings would
+            // put 'dynamic' back into the app's own accent state for a
+            // widget that is not going to honour it.
+            const hlId = nativeSettings.highlightId;
             if (hlId !== currentSettings.widgetHighlightId && VALID_WIDGET_HIGHLIGHT_IDS.has(hlId)) {
               updates.widgetHighlightId = hlId as WidgetHighlightId;
             }
