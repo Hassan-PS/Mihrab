@@ -45,7 +45,7 @@ import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafIndexSidebar, SIDEBAR_WIDTH } from './MushafIndexSidebar';
 import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
-import { useKeyPaging } from './useKeyPaging';
+import { useRegisterKeyPaging } from './useKeyPaging';
 
 /** KFGQPC source page ratio — the printed page's width over height. */
 const PAGE_ASPECT = 2600 / 4206;
@@ -205,13 +205,10 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     [core, itemCount, pageForIndex, setCurrentPage],
   );
 
-  // A keyboard turns pages too. THIS is the reader Mac and iPad actually
-  // render in text mode — `MushafReader` returns into it before reaching
-  // its own pager — so binding the keys there and not here would have been
-  // a feature that did nothing on the two platforms it was asked for.
-  const turnForward = useCallback(() => turnPage(1), [turnPage]);
-  const turnBack = useCallback(() => turnPage(-1), [turnPage]);
-  useKeyPaging(turnForward, turnBack);
+  // THIS is the reader Mac and iPad render in text mode — `MushafReader`
+  // returns into it before reaching its own pager. The keyboard is bound
+  // once, up there; this is how the pages it can see say where they are.
+  useRegisterKeyPaging(props.keyTurn, turnPage);
 
   /** One page column: header chrome, centred width-fit height-capped
    *  page, page-number footer. */

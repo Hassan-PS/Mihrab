@@ -16,7 +16,46 @@
  * on iOS never sees an arrow key at all.
  */
 import { useEffect } from 'react';
+import type { MutableRefObject } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
+
+/** Turn a page. `dir` is READING direction: +1 is the next page of the book. */
+export type PageTurner = (dir: 1 | -1) => void;
+
+/**
+ * Where the reader currently on screen publishes its page turn.
+ *
+ * `null` means nobody has: the owner falls back to its own pager, which is
+ * what image mode does.
+ */
+export type KeyPagingTarget = MutableRefObject<PageTurner | null>;
+
+/**
+ * Publish this reader's page turn to the one keyboard binding.
+ *
+ * THE BINDING IS NOT HERE. The Quran reader is `MushafReader`, and that is
+ * where the keys are bound — once. In text mode it returns into
+ * `MushafSpreadReader` (large screens) or `MushafPhoneReader` before it
+ * reaches its own pager, so the pages the reader can see belong to one of
+ * those; this is how they say so. Binding the keys in each of them instead
+ * would mean two live subscriptions in text mode — a hook cannot be called
+ * conditionally — and every press would turn two pages.
+ *
+ * The registration is cleared on unmount only if it is still ours, so a
+ * reader being replaced cannot wipe its successor's.
+ */
+export function useRegisterKeyPaging(
+  target: KeyPagingTarget | undefined,
+  turn: PageTurner,
+): void {
+  useEffect(() => {
+    if (!target) return undefined;
+    target.current = turn;
+    return () => {
+      if (target.current === turn) target.current = null;
+    };
+  }, [target, turn]);
+}
 
 type KeyCommandsModule = Record<string, unknown>;
 

@@ -112,7 +112,7 @@ import { mushafSurahName } from './surahName';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageOverlay } from './mushaf/MushafPageOverlay';
 import { MiniPlayer } from './audio/MiniPlayer';
-import { useKeyPaging } from './useKeyPaging';
+import { useKeyPaging, type PageTurner } from './useKeyPaging';
 
 type Props = {
   surahNumber: number;
@@ -592,20 +592,35 @@ export function MushafReader({
     });
   };
 
-  // A keyboard turns pages too, on the platforms that have one. Forward is
-  // the next page of the BOOK, not the left neighbour on screen — see
-  // `useKeyPaging` for why that distinction had to be decided.
-  //
-  // ONLY in image mode. In text mode this component returns into
-  // `MushafSpreadReader`/`MushafPhoneReader` further down, and those bind
-  // the keys against the pager the reader can actually see; a hook cannot
-  // be called conditionally, so without `!textMode` both subscriptions
-  // would be live at once and every press would turn two pages.
+  /**
+   * A keyboard turns pages too, on the platforms that have one. Forward is
+   * the next page of the BOOK, not the left neighbour on screen — see
+   * `useKeyPaging` for why that distinction had to be decided.
+   *
+   * BOUND ONCE, HERE. This component IS the Quran reader; the split text
+   * readers are how it draws itself on a phone and on a large screen, not
+   * separate features, and in text mode it returns into one of them before
+   * ever reaching its own pager below. So the one binding lives here and
+   * the reader that renders publishes its page turn into `keyTurnRef`
+   * (`useRegisterKeyPaging`). Nothing registered — image mode — falls back
+   * to this component's own pager.
+   *
+   * Binding in each reader instead would put two live subscriptions on
+   * screen in text mode, since a hook cannot be called conditionally, and
+   * every press would turn two pages.
+   */
   const turnPageRef = useRef(turnPage);
   turnPageRef.current = turnPage;
-  const turnForward = useCallback(() => turnPageRef.current(1), []);
-  const turnBack = useCallback(() => turnPageRef.current(-1), []);
-  useKeyPaging(turnForward, turnBack, !textMode);
+  const keyTurnRef = useRef<PageTurner | null>(null);
+  const turnForward = useCallback(
+    () => (keyTurnRef.current ?? turnPageRef.current)(1),
+    [],
+  );
+  const turnBack = useCallback(
+    () => (keyTurnRef.current ?? turnPageRef.current)(-1),
+    [],
+  );
+  useKeyPaging(turnForward, turnBack);
 
   // ── Reader layout ───────────────────────────────────────────────────
   // (Computed before the gate returns so hooks below can use it.)
@@ -875,6 +890,9 @@ export function MushafReader({
       onToggleFullscreen,
       audioSheetSignal,
       onTitleChange,
+      // The keyboard is bound above, once. Whichever of these renders
+      // publishes its own page turn here so that binding drives it.
+      keyTurn: keyTurnRef,
     };
     return DEVICE_CLASS === 'phone' ? (
       <MushafPhoneReader {...readerProps} />

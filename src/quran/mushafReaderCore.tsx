@@ -46,6 +46,7 @@ import {
 import { usePlaybackStatus, type PlaybackStatus } from './audio/playback';
 import { mushafSurahName } from './surahName';
 import type { AyahRef } from './MushafTextPage';
+import type { KeyPagingTarget } from './useKeyPaging';
 
 /** The props contract every mushaf reader implements (see MushafReader). */
 export type MushafReaderProps = {
@@ -59,6 +60,16 @@ export type MushafReaderProps = {
    *  section (the header "Recitation" button). */
   audioSheetSignal?: number;
   onTitleChange?: (title: string) => void;
+  /**
+   * Where the reader on screen publishes its own page turn.
+   *
+   * The keyboard is bound ONCE, in `MushafReader`, because that is the
+   * Quran reader — the split text readers are how it draws itself on a
+   * phone and on a large screen, not separate features. A reader that
+   * renders registers here through `useRegisterKeyPaging`, and the single
+   * binding drives whichever one is actually on screen.
+   */
+  keyTurn?: KeyPagingTarget;
 };
 
 export type AyahSelection = AyahRef & { page: number };

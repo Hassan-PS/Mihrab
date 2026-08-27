@@ -48,7 +48,7 @@ import {
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
-import { useKeyPaging } from './useKeyPaging';
+import { useRegisterKeyPaging } from './useKeyPaging';
 
 /** Breathing room either side of the page inside its column. */
 const H_PADDING = 10;
@@ -166,13 +166,15 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   );
 
   /**
-   * Keyboard page turn. `dir` is READING direction: +1 = next page (the
-   * mushaf advances right-to-left, which the list already lays out; the
-   * index is the page number, so it moves with `dir` either way).
+   * Page turn by something other than a swipe. `dir` is READING direction:
+   * +1 = the next page of the book (the mushaf advances right-to-left,
+   * which the list already lays out; the index here IS the page number, so
+   * it moves with `dir` either way).
    *
    * A phone with a hardware keyboard attached is rare but real, and this
-   * reader is also what an iPhone-idiom window shows — `hasKeyPaging()`
-   * makes the hook inert everywhere the native module is absent.
+   * reader is also what an iPhone-idiom window shows, so it publishes its
+   * turn like the spread reader does. Where there is no keyboard the
+   * native module is absent and the binding never fires.
    */
   const turnPage = useCallback(
     (dir: 1 | -1) => {
@@ -191,9 +193,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
     [core, setCurrentPage],
   );
 
-  const turnForward = useCallback(() => turnPage(1), [turnPage]);
-  const turnBack = useCallback(() => turnPage(-1), [turnPage]);
-  useKeyPaging(turnForward, turnBack);
+  useRegisterKeyPaging(props.keyTurn, turnPage);
 
   const renderItem = useCallback(
     ({ item: page }: { item: number }) => {

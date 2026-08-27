@@ -47,7 +47,20 @@ jest
 
 const keyPaging =
   require('../src/quran/useKeyPaging') as typeof import('../src/quran/useKeyPaging');
-const { useKeyPaging, hasKeyPaging } = keyPaging;
+const { useKeyPaging, hasKeyPaging, useRegisterKeyPaging } = keyPaging;
+type PageTurner = import('../src/quran/useKeyPaging').PageTurner;
+type KeyPagingTarget = import('../src/quran/useKeyPaging').KeyPagingTarget;
+
+function Register({
+  target,
+  turn,
+}: {
+  target: KeyPagingTarget;
+  turn: PageTurner;
+}) {
+  useRegisterKeyPaging(target, turn);
+  return null;
+}
 
 const src = (rel: string) =>
   readFileSync(path.join(__dirname, '..', 'src', 'quran', rel), 'utf8');
@@ -137,20 +150,71 @@ describe('useKeyPaging', () => {
   });
 });
 
-describe('only one reader binds the keys', () => {
-  it('MushafReader gates its binding on image mode', () => {
-    const call = src('MushafReader.tsx').match(/useKeyPaging\(([^;]*?)\);/s);
-    expect(call).not.toBeNull();
-    // Three arguments, and the third is the text-mode gate.
-    expect(call?.[1]).toContain('!textMode');
+describe('the reader publishes its page turn', () => {
+  it('drives whichever reader registered, and its own when none has', () => {
+    const target: { current: PageTurner | null } = { current: null };
+    const own = jest.fn();
+    const forward = () => (target.current ?? own)(1);
+
+    forward();
+    expect(own).toHaveBeenCalledWith(1);
+
+    const text = jest.fn();
+    target.current = text;
+    forward();
+    expect(text).toHaveBeenCalledWith(1);
+    expect(own).toHaveBeenCalledTimes(1);
+  });
+
+  it('a reader registers on mount and clears on unmount', () => {
+    const target: KeyPagingTarget = { current: null };
+    const turn = jest.fn();
+    let tree!: ReactTestRenderer;
+    act(() => {
+      tree = create(<Register target={target} turn={turn} />);
+    });
+    expect(target.current).toBe(turn);
+    act(() => {
+      tree.unmount();
+    });
+    expect(target.current).toBeNull();
+  });
+
+  it('a departing reader cannot wipe its successor', () => {
+    // Two readers overlapping for a frame — the one leaving must not clear
+    // a registration that is no longer its own.
+    const target: KeyPagingTarget = { current: null };
+    const leaving = jest.fn();
+    const arriving = jest.fn();
+    let tree!: ReactTestRenderer;
+    act(() => {
+      tree = create(<Register target={target} turn={leaving} />);
+    });
+    target.current = arriving;
+    act(() => {
+      tree.unmount();
+    });
+    expect(target.current).toBe(arriving);
+  });
+});
+
+describe('the keys are bound in one place', () => {
+  it('MushafReader owns the binding, ungated', () => {
+    const text = src('MushafReader.tsx');
+    expect(text).toMatch(/useKeyPaging\(turnForward,\s*turnBack\)/);
+    // No `enabled` argument: the Quran reader IS MushafReader, in either
+    // render mode, and the split readers publish INTO it.
+    expect(text).not.toMatch(/useKeyPaging\([^)]*textMode/);
+    expect(text).toContain('keyTurn: keyTurnRef');
   });
 
   it.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])(
-    '%s binds the keys to its own pager',
+    '%s registers rather than binding',
     (file) => {
       const text = src(file);
-      expect(text).toMatch(/useKeyPaging\(turnForward,\s*turnBack\)/);
-      expect(text).toContain("from './useKeyPaging'");
+      expect(text).toMatch(/useRegisterKeyPaging\(props\.keyTurn,\s*turnPage\)/);
+      // A second subscription in text mode would turn two pages per press.
+      expect(text).not.toMatch(/\buseKeyPaging\(/);
     },
   );
 });
