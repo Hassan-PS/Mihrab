@@ -50,6 +50,8 @@
  */
 import {
   everything,
+  emptyData,
+  nothing,
   buildSnapshot,
   readSnapshot,
   type SyncSelection,
@@ -60,7 +62,8 @@ import { encode, KEY_BYTES } from './pairingCode';
 import { fromBase64, toBase64 } from './secureRandom';
 import { getDeviceIdentity } from './deviceIdentity';
 import { getDeviceName } from './deviceName';
-import { listPeers, notePeerSeen, recipientKeys } from './peers';
+import { forgetPeer, listPeers, notePeerSeen, recipientKeys } from './peers';
+import { listRemovals } from './removedPeers';
 import { open, seal } from './envelope';
 
 /**
@@ -218,6 +221,33 @@ export type SyncSkipped = {
   alreadySeen: number;
 };
 
+/**
+ * The peer keys a sealed body is announcing as removed.
+ *
+ * Read off the raw JSON rather than through `readSnapshot`, which knows
+ * only about the snapshot and would drop the field — and deliberately not
+ * added to the snapshot type, so `exportFile` cannot ever carry one. See
+ * where it is written for why that separation is the point.
+ *
+ * Anything malformed is no removals. This is the one message in the
+ * protocol that destroys state, so it fails closed.
+ */
+function removalsIn(json: string): string[] {
+  try {
+    const parsed = JSON.parse(json) as { removedPeers?: unknown };
+    if (!Array.isArray(parsed.removedPeers)) return [];
+    return parsed.removedPeers
+      .map(row =>
+        row && typeof row === 'object'
+          ? (row as { pk?: unknown }).pk
+          : undefined,
+      )
+      .filter((pk): pk is string => typeof pk === 'string' && pk.length > 0);
+  } catch {
+    return [];
+  }
+}
+
 export type SyncOutcome = {
   /** The file we left behind, or null if there was no one to write for. */
   wrote: string | null;
@@ -225,6 +255,8 @@ export type SyncOutcome = {
   read: number;
   /** Devices that announced themselves this round and are now paired. */
   learned: number;
+  /** Devices dropped this round because a peer announced their removal. */
+  forgotten: number;
   /** What changed locally, or null if nothing was read. */
   merged: MergeSummary | null;
   skipped: SyncSkipped;
@@ -252,6 +284,7 @@ export async function syncWithFolder(
   };
   let read = 0;
   let learned = 0;
+  let forgotten = 0;
   let merged: MergeSummary | null = null;
   /**
    * Senders already heard from this round.
@@ -318,6 +351,54 @@ export async function syncWithFolder(
     }
 
     const from = toBase64(result.senderPublicKey);
+
+    // ── REMOVALS THE SENDER IS ANNOUNCING ──────────────────────────────
+    //
+    // Acted on BEFORE the sender is recorded, so a file announcing that WE
+    // were removed does not add its sender back on the way past.
+    //
+    // Two cases, and the second is the one the user asked for. A removal of
+    // some third device is carried out here as if the user had pressed
+    // Remove on this device — that is what makes "remove the tablet" mean
+    // the same thing on every phone. A removal of THIS device means we have
+    // been ejected from the set, so the sender is dropped in turn: a device
+    // that keeps writing files nobody will open is the confusing state, not
+    // a safe one.
+    //
+    // Only a device already paired with us can say any of this — the
+    // envelope opened, which means it was sealed to our key by someone
+    // holding our code. Someone with write access to the folder and no
+    // pairing cannot reach this line.
+    const announced = removalsIn(result.json);
+    if (announced.length > 0) {
+      const mineKey = toBase64(me.publicKey);
+      for (const pk of announced) {
+        if (pk === mineKey) {
+          if (await forgetPeer(from)) forgotten++;
+          continue;
+        }
+        if (await forgetPeer(pk)) {
+          forgotten++;
+          try {
+            await forgetDeparted(folder, fromBase64(pk));
+          } catch {
+            // The file stays; the pairing is still gone. `alreadySeen`
+            // keeps it inert either way.
+          }
+        }
+      }
+      // Ejected: nothing this sender says is ours to merge any more.
+      if (announced.includes(mineKey)) continue;
+    }
+
+    // DEDUPED FOR THE MERGE, NOT FOR THE REMOVALS ABOVE.
+    //
+    // A device leaves two readable files — its snapshot and, until it is
+    // acknowledged, a file addressed to us by name — and merging the second
+    // costs a decrypt and a pass over every store for nothing. But an
+    // eviction notice arrives on precisely that second channel, and the
+    // sender's stale snapshot is read first, so checking this any earlier
+    // threw the notice away. That is why the last removal never arrived.
     if (heard.has(from)) continue;
     heard.add(from);
 
@@ -404,21 +485,72 @@ export async function syncWithFolder(
     read++;
   }
 
+  const now = options.now ?? new Date();
+  const removals = await listRemovals(now.getTime());
+
+  // ── EVICTION NOTICES, BEFORE ANYTHING ELSE ──────────────────────────
+  //
+  // A removed device has to be told, and it cannot be told through our own
+  // file: that one is sealed to our PEERS, and it is no longer one. Worse,
+  // removing the only peer leaves nothing to seal to at all, so the round
+  // would return below without writing a byte and the last removal could
+  // never be announced.
+  //
+  // So each removed device gets a file addressed to it by name, on the
+  // channel it already reads every round for exactly this reason — see
+  // `inviteFileNameFor`, which exists because a device that knows nothing
+  // still has to be reachable.
+  //
+  // THE BODY CARRIES NO RECORD. An empty snapshot plus the removal, which
+  // is all the recipient needs and the only thing it is still entitled to.
+  // Sealing our journal to a device the user has just ejected, so that it
+  // can be told it was ejected, would be an odd way to honour the request.
+  for (const removal of removals) {
+    try {
+      const key = fromBase64(removal.pk);
+      const notice = await seal({
+        json: JSON.stringify({
+          ...buildSnapshot(emptyData(), nothing(), now.toISOString()),
+          removedPeers: [removal],
+        }),
+        senderSecretKey: me.secretKey,
+        senderPublicKey: me.publicKey,
+        senderName: await getDeviceName(),
+        recipients: [key],
+        now,
+      });
+      await folder.write(inviteFileNameFor(key), JSON.stringify(notice));
+    } catch {
+      // A notice that cannot be written costs that device the news, not the
+      // sync. It stops being a peer here either way, and the notice is
+      // rewritten every round until the removal expires.
+    }
+  }
+
   // Recipients are read AFTER the merge, so a device that announced itself
   // in this same round is sealed to rather than waiting for the next one.
   const recipients = await recipientKeys();
   if (recipients.length === 0) {
-    return { wrote: null, read, learned, merged, skipped };
+    return { wrote: null, read, learned, forgotten, merged, skipped };
   }
 
-  const now = options.now ?? new Date();
   const snapshot = buildSnapshot(
     await collectData(),
     options.selection ?? everything(),
     now.toISOString(),
   );
+  // REMOVALS RIDE BESIDE THE SNAPSHOT, NOT INSIDE IT.
+  //
+  // `exportFile` builds a plain snapshot, so a backup someone mails to a
+  // friend cannot unpair the friend's phones — which is the same hazard
+  // `peers.ts` refuses to take with the peer list, answered the same way.
+  // Here it is one extra key in the sealed body, read back below by the
+  // devices this file is addressed to and by nobody else.
   const envelope = await seal({
-    json: JSON.stringify(snapshot),
+    json: JSON.stringify({
+      ...snapshot,
+      removedPeers: removals,
+    }),
     senderSecretKey: me.secretKey,
     senderPublicKey: me.publicKey,
     senderName: await getDeviceName(),
@@ -448,7 +580,7 @@ export async function syncWithFolder(
     }
   }
 
-  return { wrote: mine, read, learned, merged, skipped };
+  return { wrote: mine, read, learned, forgotten, merged, skipped };
 }
 
 /**

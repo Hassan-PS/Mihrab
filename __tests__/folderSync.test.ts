@@ -63,9 +63,13 @@ import { forgetCachedDeviceName, setDeviceName } from '../src/sync/deviceName';
 import {
   addPeerByCode,
   forgetCachedPeers,
+  forgetPeer,
   listPeers,
   peerIsStale,
 } from '../src/sync/peers';
+import { forgetCachedRemovals } from '../src/sync/removedPeers';
+import { toBase64 } from '../src/sync/secureRandom';
+import { buildSnapshot, emptyData, everything } from '../src/sync/snapshot';
 import {
   forgetDeparted,
   inviteFileNameFor,
@@ -109,12 +113,14 @@ async function as<T>(which: 'A' | 'B', fn: () => Promise<T>): Promise<T> {
   mockActive = which;
   forgetCachedIdentity();
   forgetCachedPeers();
+  forgetCachedRemovals();
   forgetCachedDeviceName();
   try {
     return await fn();
   } finally {
     forgetCachedIdentity();
     forgetCachedPeers();
+    forgetCachedRemovals();
     forgetCachedDeviceName();
   }
 }
@@ -621,6 +627,68 @@ describe('removing a device', () => {
     // touch it — but forgetting ourselves-as-seen-by-B would. What matters
     // here is that B's own file went and nothing else did.
     expect([...folder.files.keys()]).not.toContain(syncFileNameFor(bKey));
+  });
+
+  /**
+   * Asked for on 2026-08-27: "removing a device from a sync cycle should
+   * delete its corresponding file and remove itself from the other
+   * devices' sync list". The first half landed earlier; this is the half
+   * that makes the button mean the same thing everywhere.
+   */
+  it('stays removed instead of coming back on the next round', async () => {
+    const folder = memoryFolder();
+    await pairBothWays();
+    await as('B', () => syncWithFolder(folder));
+    await as('A', () => syncWithFolder(folder));
+
+    const bKey = await publicKeyOf('B');
+    expect(await as('A', () => listPeers())).toHaveLength(1);
+
+    await as('A', () => forgetPeer(toBase64(bKey)));
+    expect(await as('A', () => listPeers())).toHaveLength(0);
+
+    // B's file is still in the folder, still sealed to A, still opening
+    // cleanly — which is exactly how Remove used to undo itself.
+    folder.files.set(syncFileNameFor(bKey), folder.files.get(
+      syncFileNameFor(bKey),
+    ) as string);
+    await as('A', () => syncWithFolder(folder));
+
+    expect(await as('A', () => listPeers())).toHaveLength(0);
+  });
+
+  it('tells the other devices, and they drop it too', async () => {
+    const folder = memoryFolder();
+    await pairBothWays();
+    await as('B', () => syncWithFolder(folder));
+    const aRound = await as('A', () => syncWithFolder(folder));
+    expect(aRound.wrote).toBeTruthy();
+
+    // A removes B. B reads A's file and learns it is no longer in the set,
+    // so it drops A in turn rather than going on writing files nobody will
+    // open.
+    const bPk = toBase64(await publicKeyOf('B'));
+    await as('A', () => forgetPeer(bPk));
+    await as('A', () => syncWithFolder(folder));
+
+    const round = await as('B', () => syncWithFolder(folder));
+
+    expect(round.forgotten).toBe(1);
+    expect(await as('B', () => listPeers())).toHaveLength(0);
+  });
+
+  it('does not carry removals into an export', async () => {
+    // A backup someone mails to a friend must not unpair the friend's
+    // phones. Removals ride BESIDE the snapshot in a sealed envelope; the
+    // snapshot itself — which is what `exportFile` builds — has no idea
+    // they exist.
+    const snapshot = buildSnapshot(
+      emptyData(),
+      everything(),
+      '2026-08-27T10:00:00.000Z',
+    );
+    expect(Object.keys(snapshot)).not.toContain('removedPeers');
+    expect(JSON.stringify(snapshot)).not.toContain('removedPeers');
   });
 
   it('is not an error when the folder cannot delete', async () => {

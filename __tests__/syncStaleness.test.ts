@@ -159,6 +159,7 @@ const readOne: SyncRunResult = {
     wrote: 'mihrab-AAAA.sync.json',
     read: 1,
     learned: 0,
+    forgotten: 0,
     merged: null,
     skipped: { notOurs: 0, notForUs: 0, unreadable: 0, alreadySeen: 0 },
   },

@@ -132,6 +132,15 @@ const STAYS: Record<string, string> = {
     'device set, and the next sync would seal your journal to their key. ' +
     'Pairing is a decision someone makes by carrying a code, once, per ' +
     'device — nothing else may create it',
+  'prayerapp.sync.removed.v1':
+    'devices the user has removed. It DOES travel — but only in the sealed ' +
+    'body of a sync envelope, put there by folderSync, never in a snapshot ' +
+    'and so never in an export. That distinction is the whole design: a ' +
+    'removal must reach the other devices or "remove this tablet" means ' +
+    'nothing anywhere but here, while a backup mailed to a friend must not ' +
+    'be able to unpair the friend’s phones. The peer LIST cannot travel at ' +
+    'all (see above) because it creates pairings; a removal only destroys ' +
+    'one, and a code makes it again',
   'mihrab.sync.deviceName.v1':
     'describes this phone — the label it shows to other devices. Carrying ' +
     'it would rename every device in the set to whatever the last import ' +

@@ -31,6 +31,7 @@ import {
 } from '../storage/durableWrite';
 import { fingerprintOf, getDeviceIdentity } from './deviceIdentity';
 import { decode, KEY_BYTES } from './pairingCode';
+import { clearRemoval, isRemoved, noteRemoval } from './removedPeers';
 import { fromBase64, toBase64 } from './secureRandom';
 
 /**
@@ -240,6 +241,11 @@ export async function addPeerByCode(
   if (pk === toBase64(me.publicKey)) {
     return { ok: false, reason: 'this-device' };
   }
+  // Typing a code is how a removal is taken back. Without this, re-pairing
+  // a device the user had removed would be undone on the very next round by
+  // this device's own standing announcement — a worse bug than the one the
+  // announcement fixes.
+  await clearRemoval(pk);
 
   return mutate(peers => {
     const existing = peers.find(p => p.pk === pk);
@@ -298,6 +304,14 @@ export async function notePeerSeen(input: {
   const pk = toBase64(input.publicKey);
   const me = await getDeviceIdentity();
   if (pk === toBase64(me.publicKey)) return null;
+  // A DEVICE THE USER REMOVED DOES NOT COME BACK BY WRITING A FILE.
+  //
+  // Nothing in the folder is ever deleted by a round, so a removed device's
+  // file is still sitting there, still sealed to us, still opening cleanly
+  // — and this function's whole job is to add whoever sent one. That is how
+  // "remove" used to undo itself on the next pass. Pairing it again takes a
+  // code, which is the one thing that clears the removal.
+  if (await isRemoved(pk)) return null;
   const nowMs = (input.now ?? new Date()).getTime();
   const at = new Date(nowMs).toISOString();
 
@@ -381,16 +395,26 @@ export function renamePeer(pk: string, name: string): Promise<boolean> {
 /**
  * Stop syncing with a device.
  *
- * Local only, and honest about it: the other device keeps this one's public
- * key and will go on writing files addressed to it. What changes is that
- * this device stops sealing to it and stops opening what it sends. Removing
- * it on both ends is the user's job, and the screen should say so.
+ * Announced, not merely local. This device stops sealing to it and stops
+ * opening what it sends; the removal is written down (`removedPeers.ts`),
+ * carried in this device's next sealed file, and honoured by every other
+ * device that reads it — which is what makes "remove this tablet" mean the
+ * same thing on the phone as it does here.
  */
-export function forgetPeer(pk: string): Promise<boolean> {
-  return mutate(peers => {
+export async function forgetPeer(pk: string): Promise<boolean> {
+  const removed = await mutate(peers => {
     if (!peers.some(p => p.pk === pk)) return { peers, result: false };
     return { peers: peers.filter(p => p.pk !== pk), result: true };
   });
+  // RECORDED, so it survives the next round and reaches the others.
+  //
+  // Forgetting used to be purely local, and it did not survive contact with
+  // the folder: the removed device's file was still there, still sealed to
+  // us, so the next round opened it and `notePeerSeen` added it straight
+  // back. A button that undid itself within two minutes, and that did
+  // nothing at all on any other device. See `removedPeers.ts`.
+  if (removed) await noteRemoval(pk);
+  return removed;
 }
 
 /** Every peer, as keys ready to hand to `seal`. */
