@@ -38,6 +38,7 @@ import {
   QURAN_STORAGE_KEY,
 } from '../quran/quranState';
 import { republishWidgetPayload } from '../widget/republishWidgetPayload';
+import { whileApplyingSnapshot } from './recordChanged';
 import { emptyData, type SnapshotData, type SyncSelection } from './snapshot';
 import { mergeData, summarise, type MergeSummary } from './merge';
 import type { Snapshot } from './snapshot';
@@ -179,6 +180,10 @@ export async function applySnapshot(
   for (const key of Object.keys(accept) as Array<keyof SyncSelection>) {
     applied[key] = accept[key] && snapshot.data[key] !== undefined;
   }
-  await writeData(after, applied);
+  // WITH THE CHANGE SIGNAL OFF. `writeData` writes every store a change
+  // would schedule a sync for, so without this a round would end by asking
+  // for another one — on every paired device, each one's merge waking the
+  // next, indefinitely. A merge is the one write that is not news.
+  await whileApplyingSnapshot(() => writeData(after, applied));
   return { summary: summarise(before, after), applied };
 }

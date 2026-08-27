@@ -55,6 +55,7 @@ import {
   notifyPracticeChanged,
 } from '../practice/practiceStore';
 import { syncEndOfDayReminderForDay } from './endOfDayLog';
+import { flushRecordSync } from '../sync/recordChanged';
 
 /**
  * The action's id. Defined HERE and re-exported to `prayerNotifications`
@@ -272,5 +273,14 @@ export async function handlePrayerLogEvent(event: Event): Promise<boolean> {
   if (notification?.id) {
     await notifee.cancelNotification(notification.id).catch(() => {});
   }
+  // AND SYNC BEFORE THIS PROCESS IS ALLOWED TO DIE.
+  //
+  // The write above scheduled a round on a three-second timer, which is
+  // right when the app is open and useless here: a notification action runs
+  // in a background process that may be torn down the moment this resolves,
+  // taking the timer with it. Logging a prayer from the notification is one
+  // of the two edits most worth carrying to another device, and it was the
+  // one that used to sit on disk until the app was next opened.
+  await flushRecordSync().catch(() => {});
   return true;
 }

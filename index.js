@@ -9,6 +9,9 @@ import App from './App';
 import { registerAdhanSafetyControls } from './src/notifications/adhanSafetyControls';
 import { adhanMuteToggleTask } from './src/notifications/adhanMute';
 import { widgetRefreshTask } from './src/widget/widgetRefreshTask';
+// Side effect: subscribes to durable writes so a change to the record
+// schedules a sync round. See src/sync/recordChanged.ts.
+import './src/sync/recordChanged';
 
 // The React Native module name MUST match what the native side requests
 // in `getMainComponentName()` (Android: MainActivity.kt) and the iOS

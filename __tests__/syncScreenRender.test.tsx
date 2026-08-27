@@ -14,6 +14,9 @@ import { create, type ReactTestRenderer } from 'react-test-renderer';
 const mockSecure = new Map<string, string>();
 
 jest.mock('../src/storage/durableWrite', () => ({
+  // The store announces writes; `recordChanged` subscribes on import.
+  // A mock without it makes every module that saves anything fail to load.
+  onDurableWrite: jest.fn(() => () => {}),
   durableEncryptedGet: jest.fn(async (k: string) => mockSecure.get(k) ?? null),
   durableEncryptedSet: jest.fn(async (k: string, v: string) => {
     mockSecure.set(k, v);

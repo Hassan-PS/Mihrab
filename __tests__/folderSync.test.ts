@@ -21,6 +21,9 @@ const mockDevices: Record<string, Store> = {
 let mockActive = 'A';
 
 jest.mock('../src/storage/durableWrite', () => ({
+  // The store announces writes; `recordChanged` subscribes on import.
+  // A mock without it makes every module that saves anything fail to load.
+  onDurableWrite: jest.fn(() => () => {}),
   durableEncryptedGet: jest.fn(
     async (k: string) => mockDevices[mockActive].secure.get(k) ?? null,
   ),

@@ -52,6 +52,40 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
+/**
+ * Who wants to know that something was written.
+ *
+ * THE STORE ANNOUNCES; IT DOES NOT DECIDE. Sync wants to hear about writes
+ * to the four record stores, and the first version of that had this file
+ * import the sync layer — which made every module that saves anything drag
+ * in the folder transport, the merge, the widget payload and, through it,
+ * i18n and the whole prayer-times stack. A storage helper cannot depend on
+ * the feature that happens to be interested in it, so the dependency points
+ * the other way: `recordChanged.ts` subscribes on import.
+ *
+ * A listener that throws is swallowed. Nothing subscribed here is allowed
+ * to turn a successful write into a failed one.
+ */
+type WriteListener = (key: string) => void;
+const writeListeners = new Set<WriteListener>();
+
+export function onDurableWrite(listener: WriteListener): () => void {
+  writeListeners.add(listener);
+  return () => {
+    writeListeners.delete(listener);
+  };
+}
+
+function announceWrite(key: string): void {
+  for (const listener of writeListeners) {
+    try {
+      listener(key);
+    } catch {
+      /* a listener's problem is not the write's problem */
+    }
+  }
+}
+
 const DEFAULT_ATTEMPTS = 3;
 const BASE_BACKOFF_MS = 120;
 
@@ -109,6 +143,7 @@ export async function durableEncryptedSet(
       } catch {
         /* the copy is stale, not wrong; it loses to the real one on read */
       }
+      announceWrite(key);
       return;
     } catch (e) {
       lastErr = e;
@@ -123,6 +158,10 @@ export async function durableEncryptedSet(
   try {
     await AsyncStorage.setItem(fallbackKey(key), value);
     degraded = true;
+    // The value landed somewhere, so the record HAS changed and the other
+    // devices should hear about it. A degraded store is a reason to sync
+    // harder, not to go quiet.
+    announceWrite(key);
     return;
   } catch {
     /* fall through to the original error — that one is the real story */

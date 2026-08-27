@@ -49,6 +49,7 @@ import {
   type JournalPrayer,
 } from '../journal/journal';
 import { JOURNAL_KEY, notifyPracticeChanged } from '../practice/practiceStore';
+import { flushRecordSync } from '../sync/recordChanged';
 import type { TimingsMap } from '../types/prayer';
 
 /** The action's id — also the iOS category, one action inside it. */
@@ -330,5 +331,10 @@ export async function handleEndOfDayLogEvent(event: Event): Promise<boolean> {
   if (notification?.id) {
     await notifee.cancelNotification(notification.id).catch(() => {});
   }
+  // Five entries at once, from a background process that may be torn down
+  // as soon as this resolves — so the round the write scheduled is run and
+  // waited for here rather than left on a timer that dies with it. Same
+  // reasoning as `prayerLogAction`.
+  await flushRecordSync().catch(() => {});
   return true;
 }

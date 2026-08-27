@@ -9,6 +9,9 @@ let mockRandomCalls = 0;
 let mockRandomFails = false;
 
 jest.mock('../src/storage/durableWrite', () => ({
+  // The store announces writes; `recordChanged` subscribes on import.
+  // A mock without it makes every module that saves anything fail to load.
+  onDurableWrite: jest.fn(() => () => {}),
   durableEncryptedGet: jest.fn(async (k: string) => mockStore.get(k) ?? null),
   durableEncryptedSet: jest.fn(async (k: string, v: string) => {
     mockStore.set(k, v);
