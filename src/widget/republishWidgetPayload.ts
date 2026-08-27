@@ -66,7 +66,9 @@ export type RepublishReason =
   | 'reading'
   | 'tasbih'
   | 'language'
-  | 'queue-drain';
+  | 'queue-drain'
+  /** The refresh glyph on a home-screen widget — see `widgetRefreshTask`. */
+  | 'widget-refresh';
 
 /**
  * Long enough to swallow a tasbih round's tail, short enough to feel live.

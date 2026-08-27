@@ -120,6 +120,39 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       Intent.ACTION_USER_PRESENT,
       Intent.ACTION_BOOT_COMPLETED,
       ACTION_PRAYER_TIME_ELAPSED -> requestUpdate(context)
+      ACTION_WIDGET_REFRESH -> onRefreshPressed(context)
+    }
+  }
+
+  /**
+   * The refresh glyph, pressed.
+   *
+   * REDRAW FIRST, THEN GO AND LOOK. The redraw is instant and uses what is
+   * already on disk, so the card responds to the tap; the sync round behind
+   * it is what makes the press mean anything.
+   *
+   * The button used to broadcast ACTION_APPWIDGET_UPDATE, which redrew the
+   * same stored bytes and nothing else. That is a defensible reading of
+   * "refresh" and not the one anybody has: a person taps it because what
+   * they are looking at is not what they expect, and on a paired phone the
+   * usual reason is that the other device's record has not arrived. It is
+   * also the only way to sync without opening the app — auto-sync runs while
+   * the app is open, and a widget is what people look at INSTEAD of opening
+   * the app.
+   *
+   * Wrapped, because a HeadlessJS service can be refused: the process may be
+   * starting, or the OS may be in a state that forbids it. A refresh that
+   * only redraws is the old behaviour, which is worse than the new one and
+   * much better than a crash inside a broadcast receiver.
+   */
+  private fun onRefreshPressed(context: Context) {
+    requestUpdate(context)
+    try {
+      context.startService(
+        Intent(context, WidgetRefreshHeadlessService::class.java),
+      )
+    } catch (t: Throwable) {
+      Log.w(TAG, "widget refresh: could not start the sync task", t)
     }
   }
 
@@ -159,6 +192,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_LANGUAGE = "widget_language"
     /** Internal broadcast fired by AlarmManager at each prayer time transition. */
     const val ACTION_PRAYER_TIME_ELAPSED = "com.prayer_times.ACTION_PRAYER_TIME_ELAPSED"
+
+    /**
+     * The refresh glyph on the card. Its own action rather than
+     * ACTION_APPWIDGET_UPDATE, so a press is distinguishable from the
+     * system asking for a redraw — only the press should spend a sync
+     * round, and every other update path arrives as APPWIDGET_UPDATE.
+     */
+    const val ACTION_WIDGET_REFRESH = "com.prayer_times.ACTION_WIDGET_REFRESH"
 
     /**
      * A context whose resources speak the language *Mihrab* is set to, rather
@@ -770,7 +811,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setOnClickPendingIntent(R.id.widget_root, pi)
 
       val refreshIntent = Intent(context, PrayerWidgetProvider::class.java).apply {
-        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        action = ACTION_WIDGET_REFRESH
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
       }
       val refreshPi = PendingIntent.getBroadcast(

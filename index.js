@@ -8,6 +8,7 @@ import { AppRegistry } from 'react-native';
 import App from './App';
 import { registerAdhanSafetyControls } from './src/notifications/adhanSafetyControls';
 import { adhanMuteToggleTask } from './src/notifications/adhanMute';
+import { widgetRefreshTask } from './src/widget/widgetRefreshTask';
 
 // The React Native module name MUST match what the native side requests
 // in `getMainComponentName()` (Android: MainActivity.kt) and the iOS
@@ -89,3 +90,8 @@ try {
 // HeadlessJS task for the Live Activity "Mute next adhan" toggle (Android 17+).
 // Dispatched by AdhanMuteHeadlessService; must match its task name.
 AppRegistry.registerHeadlessTask('AdhanMuteToggle', () => adhanMuteToggleTask);
+
+// HeadlessJS task behind the refresh glyph on a home-screen widget: one sync
+// round, then a rebuild of the payload. Dispatched by
+// WidgetRefreshHeadlessService; must match its task name.
+AppRegistry.registerHeadlessTask('WidgetRefresh', () => widgetRefreshTask);

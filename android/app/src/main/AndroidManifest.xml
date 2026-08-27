@@ -331,6 +331,19 @@
           android:value="prayerCountdown" />
       </service>
 
+      <!-- HeadlessJS service behind the refresh glyph on a home-screen
+           widget: one sync round, then a rebuild of the widget payload. The
+           provider redraws the card from what is already stored before this
+           starts, so the tap is instant and this catches up behind it. -->
+      <service
+        android:name=".WidgetRefreshHeadlessService"
+        android:exported="false"
+        android:foregroundServiceType="specialUse">
+        <property
+          android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+          android:value="prayerCountdown" />
+      </service>
+
       <!-- Serves the user's imported adhan to whoever plays notification
            sounds. The file lives in this app's private storage, so a file://
            URI would be unreadable outside the process; this turns it into a
