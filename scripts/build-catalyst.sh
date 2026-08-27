@@ -3,23 +3,63 @@
 # distribution (Path B — docs/release/path-a-ipad-mac.md covers Path A).
 #
 # Usage:
-#   ./scripts/build-catalyst.sh                       # ad-hoc signed
+#   ./scripts/build-catalyst.sh                       # finds your Developer ID
 #   SIGN_IDENTITY="Developer ID Application: …" \
-#     ./scripts/build-catalyst.sh                     # distributable
+#     ./scripts/build-catalyst.sh                     # or name it yourself
+#   SIGN_IDENTITY=- ./scripts/build-catalyst.sh       # ad-hoc, NOT shippable
 #
-# Ad-hoc builds run locally (right-click → Open past Gatekeeper) but are
-# NOT notarized; for the brew cask users' first-run UX, sign with a
-# Developer ID identity and notarize:
+# After a signed build, notarize for the cask users' first-run UX:
 #   xcrun notarytool submit <zip> --keychain-profile mihrab --wait
 #   xcrun stapler staple <app>
-# then re-zip. The cask works either way; notarization only affects
-# Gatekeeper friction.
+# then re-zip.
+#
+# ── AD-HOC IS NOT "THE SAME BUILD WITHOUT NOTARIZATION" ───────────────
+#
+# This file used to default to ad-hoc and say the cask "works either way;
+# notarization only affects Gatekeeper friction". Both halves were wrong,
+# and 2.11.0 shipped to macOS because of it.
+#
+# An ad-hoc signature carries no team identifier, and codesign will not
+# apply entitlements without one. So the app gets NO App Group — which is
+# where the widget payload lives — and cannot host its WidgetKit extension
+# at all. The shipped 2.11.0 had no widgets in the gallery, wrote no
+# payload, and could not read the Keychain items its Developer ID-signed
+# predecessor had created, so it silently generated a NEW sync identity and
+# orphaned the old device's file in everyone's shared folder. One missing
+# environment variable, three separate user-visible failures.
+#
+# The App Group gate below would have caught it. It did not run, because it
+# was written as `if [ "$SIGN_IDENTITY" != "-" ]` — a check that switches
+# itself off in exactly the case that needs it. So: the identity is now
+# found automatically, an ad-hoc build has to be asked for by name, and the
+# entitlements are asserted on the built bundle rather than inferred from
+# what we intended to sign with.
 #
 # Output: ios/build/catalyst-dist/Mihrab-macOS-<version>.zip (+ sha256).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-SIGN_IDENTITY="${SIGN_IDENTITY:--}"
+# Default to whatever Developer ID this Mac holds, rather than to ad-hoc.
+# Naming one explicitly still wins; `SIGN_IDENTITY=-` is the deliberate
+# opt-out and says so out loud.
+if [ -z "${SIGN_IDENTITY:-}" ]; then
+  SIGN_IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null |
+    sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)
+  if [ -z "$SIGN_IDENTITY" ]; then
+    echo "✗ No 'Developer ID Application' identity in the keychain." >&2
+    echo "  A Catalyst build without one gets no team id, so codesign" >&2
+    echo "  drops the entitlements: no App Group, no widgets, and a new" >&2
+    echo "  sync identity every install. That is what shipped as 2.11.0." >&2
+    echo "  Unlock the login keychain, or ask for it deliberately:" >&2
+    echo "      SIGN_IDENTITY=- ./scripts/build-catalyst.sh   # local only" >&2
+    exit 1
+  fi
+  echo "▸ Signing identity found: $SIGN_IDENTITY"
+fi
+if [ "$SIGN_IDENTITY" = "-" ]; then
+  echo "⚠ AD-HOC BUILD. No entitlements, no App Group, no widgets." >&2
+  echo "  Runs locally past Gatekeeper; MUST NOT be published." >&2
+fi
 
 # Is the identity we are signing with actually inside this profile?
 # Walks the profile's DeveloperCertificates and compares common names.
@@ -197,6 +237,19 @@ codesign --verify --strict "$APP" && echo "▸ Signature verifies ($SIGN_IDENTIT
 
 if [ "$SIGN_IDENTITY" != "-" ]; then
   echo "▸ Checking the entitlements that actually got sealed in…"
+  # A TEAM IDENTIFIER FIRST, because without one none of the rest can be
+  # true. codesign cannot scope an App Group to a team it does not have, so
+  # it drops every entitlement and still reports success — which is how
+  # 2.11.0 shipped to macOS with no App Group, no widgets, and no access to
+  # the Keychain items its predecessor had written. The signature verifies
+  # perfectly; it just is not the app.
+  if codesign -dv "$APP" 2>&1 | grep -q "TeamIdentifier=not set"; then
+    echo "  ✗ no TeamIdentifier on the signed app." >&2
+    echo "    Every entitlement below has been silently dropped: no App" >&2
+    echo "    Group, no widgets, and a new sync identity on every install." >&2
+    echo "    The identity did not take — check the login keychain." >&2
+    exit 1
+  fi
   # Both of these are things that produce a widget which installs, registers,
   # renders — and is blank or absent. Neither shows up in signature
   # verification or notarization, and both have happened here, so they are

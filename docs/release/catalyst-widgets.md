@@ -203,6 +203,49 @@ It should print one line, at the version you expect, with the path under
 way — it was `-mA` coming up empty that made the breakage above look worse
 than it was, and then look fixed before it was checked properly.
 
+## No widget in the gallery at all (2026-08-27)
+
+Different symptom, different cause, and the one that actually shipped.
+`bundleStubNotSupported` above is widgets that appear and go blank. This is
+Mihrab not being offered in the widget gallery in the first place, no
+extension process ever starting, and the App Group payload frozen at
+whatever the last good build wrote.
+
+One command settles it:
+
+```sh
+codesign -dv /Applications/Mihrab.app 2>&1 | grep -E "flags|TeamIdentifier"
+#   flags=0x2(adhoc)          ← this
+#   TeamIdentifier=not set    ← and this
+```
+
+An ad-hoc signature has no team identifier, and `codesign` cannot scope an
+App Group to a team that does not exist — so it **drops every entitlement
+and reports success**. `codesign --verify --strict` passes. Notarization is
+not involved. The app simply has no App Group, cannot host its WidgetKit
+extension, and cannot read Keychain items a Developer ID-signed build
+created — so it silently generates a new sync identity too, orphaning the
+old device's file in the shared folder. Three unrelated-looking failures,
+one missing environment variable.
+
+`build-catalyst.sh` used to default to `SIGN_IDENTITY=-`, and the App Group
+gate that would have caught it was written `if [ "$SIGN_IDENTITY" != "-" ]`
+— a check that switches itself off in precisely the case that needs it.
+2.11.0 shipped to macOS that way. The script now finds a Developer ID
+identity itself, fails if there is none, requires `SIGN_IDENTITY=-` to be
+asked for by name, and asserts `TeamIdentifier` on the signed bundle before
+any of the other checks.
+
+**Repair:** rebuild signed and replace the bundle. Then confirm all three:
+
+```sh
+codesign -dv /Applications/Mihrab.app 2>&1 | grep TeamIdentifier   # = GAW23HT439
+pluginkit -m -i maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension -v
+defaults read "$HOME/Library/Group Containers/GAW23HT439.group.com.prayerapp/\
+Library/Preferences/GAW23HT439.group.com.prayerapp" prayer_widget_payload_v1 \
+  | head -c 40            # dayLabel must be TODAY
+```
+
 **Why iOS and iPadOS cannot hit it.** There is no LaunchServices, and an
 installed app exists at exactly one path — there is no second copy for a
 registration to point at, and no way for a user to run one from elsewhere.
