@@ -1318,7 +1318,7 @@
       "khatmah": "Planes de khatmah"
     },
     "settingsRowHint": "Vincular otro dispositivo",
-    "pairIntro": "La sincronización mantiene tu registro igual en todos los dispositivos que uses. No hay servidor: los dispositivos se pasan el archivo entre sí, y lo que viaja va cifrado para que solo tus propios dispositivos puedan leerlo.",
+    "pairIntro": "La sincronización mantiene tu registro igual en todos tus dispositivos. Mihrab nunca mueve nada por sí mismo: necesita una carpeta que Nextcloud, OneDrive, Dropbox, Syncthing o similar ya mantenga sincronizada entre tus dispositivos. Mihrab escribe allí un pequeño archivo cifrado que solo tus propios dispositivos pueden leer.",
     "thisDevice": "Este dispositivo",
     "deviceNameLabel": "Nombre del dispositivo",
     "thisDeviceHelp": "Muestra este código a tu otro dispositivo, o escríbelo allí. No es una contraseña: puedes copiarlo, fotografiarlo o enviártelo sin problema.",
@@ -1357,7 +1357,7 @@
     "notReady": "Este dispositivo no puede configurar la sincronización: no tiene una fuente segura de aleatoriedad, y una clave creada sin ella no sería privada.",
     "privacyNoteP2p": "Tu código es una clave pública, no un secreto. Los datos se cifran solo para tus dispositivos vinculados, y no se sube nada a ningún sitio.",
     "folderSection": "Carpeta",
-    "folderHelp": "La sincronización pasa por una carpeta que otra cosa mantiene al día entre tus dispositivos: Syncthing, Nextcloud, una unidad compartida. Mihrab escribe allí un archivo cifrado pequeño y lee los que dejaron tus otros dispositivos.",
+    "folderHelp": "Elige una carpeta que tu servicio de sincronización ya mantenga al día en todos los dispositivos: una carpeta de Nextcloud, OneDrive, Dropbox o Syncthing. Si nada sincroniza esa carpeta entre tus dispositivos, no llegará nada. Mihrab escribe allí un pequeño archivo cifrado y lee los que dejaron tus otros dispositivos.",
     "chooseFolder": "Elegir una carpeta",
     "changeFolder": "Cambiar de carpeta",
     "folderChosen": "Usando {{value}}",

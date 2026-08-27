@@ -1318,7 +1318,7 @@
       "khatmah": "Plans de khatma"
     },
     "settingsRowHint": "Associer un autre appareil",
-    "pairIntro": "La synchronisation garde vos données identiques sur chaque appareil que vous utilisez. Il n’y a pas de serveur : les appareils se passent le fichier directement, et ce qui circule est chiffré pour que seuls vos appareils puissent le lire.",
+    "pairIntro": "La synchronisation garde votre historique identique sur tous vos appareils. Mihrab ne déplace jamais rien lui-même : il lui faut un dossier que Nextcloud, OneDrive, Dropbox, Syncthing ou équivalent synchronise déjà entre vos appareils. Mihrab y écrit un petit fichier chiffré, que seuls vos propres appareils peuvent lire.",
     "thisDevice": "Cet appareil",
     "deviceNameLabel": "Nom de l’appareil",
     "thisDeviceHelp": "Montrez ce code à votre autre appareil, ou saisissez-le là-bas. Ce n’est pas un mot de passe — vous pouvez le copier, le photographier ou vous l’envoyer sans risque.",
@@ -1357,7 +1357,7 @@
     "notReady": "Cet appareil ne peut pas configurer la synchronisation : il n’a pas de source d’aléa sûre, et une clé créée sans elle ne serait pas privée.",
     "privacyNoteP2p": "Votre code est une clé publique, pas un secret. Les données elles-mêmes sont chiffrées pour vos seuls appareils associés, et rien n’est envoyé nulle part.",
     "folderSection": "Dossier",
-    "folderHelp": "La synchronisation passe par un dossier que quelque chose d’autre garde à jour entre vos appareils — Syncthing, Nextcloud, un disque partagé. Mihrab y écrit un petit fichier chiffré et lit ceux qu’ont laissés vos autres appareils.",
+    "folderHelp": "Choisissez un dossier que votre service de synchronisation garde déjà à jour sur chaque appareil — un dossier Nextcloud, OneDrive, Dropbox ou Syncthing. Si rien ne synchronise ce dossier entre vos appareils, rien ne leur parviendra. Mihrab y écrit un petit fichier chiffré et lit ceux laissés par vos autres appareils.",
     "chooseFolder": "Choisir un dossier",
     "changeFolder": "Changer de dossier",
     "folderChosen": "Utilise {{value}}",

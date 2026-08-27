@@ -1318,7 +1318,7 @@
       "khatmah": "通读计划"
     },
     "settingsRowHint": "配对另一台设备",
-    "pairIntro": "同步让你的记录在每台设备上保持一致。这里没有服务器：设备之间直接把文件交给对方，传输的内容是加密的，只有你自己的设备能读。",
+    "pairIntro": "同步让你的记录在每台设备上保持一致。Mihrab 自己不会传输任何东西：它需要一个已由 Nextcloud、OneDrive、Dropbox、Syncthing 或类似服务在你的设备之间保持同步的文件夹。Mihrab 会在其中写入一个很小的加密文件，只有你自己的设备才能读取。",
     "thisDevice": "本设备",
     "deviceNameLabel": "设备名称",
     "thisDeviceHelp": "把这个码拿给你的另一台设备看，或在那边输入。它不是密码——可以放心复制、拍照或发给自己。",
@@ -1357,7 +1357,7 @@
     "notReady": "本设备无法设置同步：它没有安全的随机源，没有随机源生成的密钥并不私密。",
     "privacyNoteP2p": "你的配对码是公钥，不是秘密。数据本身只为你已配对的设备加密，不会上传到任何地方。",
     "folderSection": "文件夹",
-    "folderHelp": "同步是通过一个由别的程序在你的设备之间保持一致的文件夹进行的——Syncthing、Nextcloud，或一块共享硬盘。米哈拉布在那里写下一个很小的加密文件，并读取你其他设备留下的文件。",
+    "folderHelp": "选择一个你的同步服务已经在每台设备上保持一致的文件夹——Nextcloud、OneDrive、Dropbox 或 Syncthing 的文件夹。如果没有任何服务在你的设备之间同步该文件夹，就什么也传不过去。Mihrab 会在其中写入一个很小的加密文件，并读取其他设备留下的文件。",
     "chooseFolder": "选择文件夹",
     "changeFolder": "更换文件夹",
     "folderChosen": "正在使用 {{value}}",

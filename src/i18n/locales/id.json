@@ -1318,7 +1318,7 @@
       "khatmah": "Rencana khatam"
     },
     "settingsRowHint": "Sandingkan perangkat lain",
-    "pairIntro": "Sinkronisasi menjaga catatan Anda tetap sama di setiap perangkat yang Anda pakai. Tidak ada server: perangkat saling menyerahkan berkasnya, dan yang dikirim terenkripsi sehingga hanya perangkat Anda sendiri yang bisa membacanya.",
+    "pairIntro": "Sinkronisasi menjaga catatan Anda sama di setiap perangkat. Mihrab tidak pernah memindahkan apa pun sendiri: ia memerlukan folder yang sudah disinkronkan Nextcloud, OneDrive, Dropbox, Syncthing atau sejenisnya di antara perangkat Anda. Mihrab menulis satu berkas kecil terenkripsi di sana, dan hanya perangkat Anda sendiri yang dapat membacanya.",
     "thisDevice": "Perangkat ini",
     "deviceNameLabel": "Nama perangkat",
     "thisDeviceHelp": "Tunjukkan kode ini ke perangkat Anda yang lain, atau ketikkan di sana. Ini bukan kata sandi — aman untuk disalin, difoto, atau dikirim ke diri sendiri.",
@@ -1357,7 +1357,7 @@
     "notReady": "Perangkat ini tidak bisa menyiapkan sinkronisasi: tidak ada sumber acak yang aman, dan kunci yang dibuat tanpa itu tidak akan bersifat pribadi.",
     "privacyNoteP2p": "Kode Anda adalah kunci publik, bukan rahasia. Datanya sendiri dienkripsi hanya untuk perangkat yang Anda sandingkan, dan tidak ada yang diunggah ke mana pun.",
     "folderSection": "Folder",
-    "folderHelp": "Sinkronisasi berjalan lewat folder yang dijaga tetap sama oleh program lain di antara perangkat Anda — Syncthing, Nextcloud, drive bersama. Mihrab menulis satu berkas terenkripsi kecil di sana dan membaca yang ditinggalkan perangkat Anda yang lain.",
+    "folderHelp": "Pilih folder yang sudah dijaga tetap selaras oleh layanan sinkronisasi Anda di setiap perangkat — folder Nextcloud, OneDrive, Dropbox, atau Syncthing. Jika tidak ada yang menyinkronkan folder itu di antara perangkat Anda, tidak ada yang akan sampai. Mihrab menulis satu berkas kecil terenkripsi di sana dan membaca berkas yang ditinggalkan perangkat Anda yang lain.",
     "chooseFolder": "Pilih folder",
     "changeFolder": "Ganti folder",
     "folderChosen": "Memakai {{value}}",

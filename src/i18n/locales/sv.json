@@ -1318,7 +1318,7 @@
       "khatmah": "Khatmah-planer"
     },
     "settingsRowHint": "Parkoppla en annan enhet",
-    "pairIntro": "Synk håller dina uppgifter likadana på varje enhet du använder. Det finns ingen server: enheterna lämnar filen till varandra, och det som skickas är krypterat så att bara dina egna enheter kan läsa det.",
+    "pairIntro": "Synk håller din historik likadan på alla enheter du använder. Mihrab flyttar aldrig något själv: appen behöver en mapp som Nextcloud, OneDrive, Dropbox, Syncthing eller liknande redan håller synkroniserad mellan dina enheter. Mihrab skriver en liten krypterad fil där, och bara dina egna enheter kan läsa den.",
     "thisDevice": "Den här enheten",
     "deviceNameLabel": "Enhetens namn",
     "thisDeviceHelp": "Visa den här koden för din andra enhet, eller skriv in den där. Det är inte ett lösenord — den går bra att kopiera, fotografera eller skicka till dig själv.",
@@ -1357,7 +1357,7 @@
     "notReady": "Den här enheten kan inte ställa in synk: den saknar en säker källa till slumptal, och en nyckel som skapas utan en sådan vore inte privat.",
     "privacyNoteP2p": "Din kod är en publik nyckel, inte en hemlighet. Själva uppgifterna krypteras bara för dina parkopplade enheter, och ingenting laddas upp någonstans.",
     "folderSection": "Mapp",
-    "folderHelp": "Synken går via en mapp som något annat håller i takt mellan dina enheter — Syncthing, Nextcloud, en delad disk. Mihrab skriver en liten krypterad fil där och läser dem som dina andra enheter har lämnat.",
+    "folderHelp": "Välj en mapp som din synktjänst redan håller synkroniserad på alla enheter — en mapp i Nextcloud, OneDrive, Dropbox eller Syncthing. Om ingenting synkar den mappen mellan dina enheter når ingenting fram. Mihrab skriver en liten krypterad fil där och läser dem dina andra enheter lämnat.",
     "chooseFolder": "Välj en mapp",
     "changeFolder": "Byt mapp",
     "folderChosen": "Använder {{value}}",

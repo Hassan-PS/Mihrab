@@ -1318,7 +1318,7 @@
       "khatmah": "Khatma-Pläne"
     },
     "settingsRowHint": "Ein weiteres Gerät koppeln",
-    "pairIntro": "Die Synchronisierung hält deine Aufzeichnungen auf jedem Gerät gleich. Es gibt keinen Server: Die Geräte reichen die Datei einander weiter, und was unterwegs ist, ist verschlüsselt — lesen können es nur deine eigenen Geräte.",
+    "pairIntro": "Die Synchronisierung hält deine Aufzeichnungen auf allen Geräten gleich. Mihrab bewegt selbst nichts: Es braucht einen Ordner, den Nextcloud, OneDrive, Dropbox, Syncthing oder Ähnliches bereits zwischen deinen Geräten abgleicht. Mihrab legt dort eine kleine verschlüsselte Datei ab, die nur deine eigenen Geräte lesen können.",
     "thisDevice": "Dieses Gerät",
     "deviceNameLabel": "Gerätename",
     "thisDeviceHelp": "Zeige diesen Code deinem anderen Gerät oder tippe ihn dort ein. Es ist kein Passwort — du kannst ihn bedenkenlos kopieren, fotografieren oder dir selbst schicken.",
@@ -1357,7 +1357,7 @@
     "notReady": "Dieses Gerät kann die Synchronisierung nicht einrichten: Es hat keine sichere Zufallsquelle, und ein ohne sie erzeugter Schlüssel wäre nicht privat.",
     "privacyNoteP2p": "Dein Code ist ein öffentlicher Schlüssel, kein Geheimnis. Die Daten selbst werden nur für deine gekoppelten Geräte verschlüsselt, und nichts wird irgendwohin hochgeladen.",
     "folderSection": "Ordner",
-    "folderHelp": "Die Synchronisierung läuft über einen Ordner, den etwas anderes zwischen deinen Geräten abgleicht — Syncthing, Nextcloud, ein geteiltes Laufwerk. Mihrab legt dort eine kleine verschlüsselte Datei ab und liest die, die deine anderen Geräte hinterlassen haben.",
+    "folderHelp": "Wähle einen Ordner, den dein Sync-Dienst schon auf jedem Gerät abgleicht — einen Ordner in Nextcloud, OneDrive, Dropbox oder Syncthing. Gleicht nichts diesen Ordner zwischen deinen Geräten ab, kommt auch nichts an. Mihrab legt dort eine kleine verschlüsselte Datei ab und liest die deiner anderen Geräte.",
     "chooseFolder": "Ordner wählen",
     "changeFolder": "Ordner wechseln",
     "folderChosen": "Verwendet {{value}}",

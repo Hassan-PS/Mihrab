@@ -1318,7 +1318,7 @@
       "khatmah": "Hatim planları"
     },
     "settingsRowHint": "Başka bir cihaz eşleştir",
-    "pairIntro": "Eşitleme, kaydınızı kullandığınız her cihazda aynı tutar. Sunucu yoktur: cihazlar dosyayı birbirine verir ve yolda giden şey şifrelidir, yalnızca kendi cihazlarınız okuyabilir.",
+    "pairIntro": "Eşitleme kaydını kullandığın her cihazda aynı tutar. Mihrab hiçbir şeyi kendisi taşımaz: Nextcloud, OneDrive, Dropbox, Syncthing veya benzerinin cihazların arasında zaten eşitlediği bir klasöre ihtiyaç duyar. Mihrab oraya küçük ve şifreli bir dosya yazar; onu yalnızca kendi cihazların okuyabilir.",
     "thisDevice": "Bu cihaz",
     "deviceNameLabel": "Cihaz adı",
     "thisDeviceHelp": "Bu kodu diğer cihazınıza gösterin ya da oraya yazın. Bu bir parola değildir — kopyalamanız, fotoğraflamanız veya kendinize göndermeniz sakıncasızdır.",
@@ -1357,7 +1357,7 @@
     "notReady": "Bu cihaz eşitlemeyi kuramıyor: güvenli bir rastgelelik kaynağı yok ve onsuz üretilen bir anahtar gizli olmazdı.",
     "privacyNoteP2p": "Kodunuz bir açık anahtardır, sır değildir. Verinin kendisi yalnızca eşleştirdiğiniz cihazlar için şifrelenir ve hiçbir yere yüklenmez.",
     "folderSection": "Klasör",
-    "folderHelp": "Eşitleme, cihazlarınız arasında başka bir şeyin güncel tuttuğu bir klasör üzerinden yürür — Syncthing, Nextcloud, paylaşılan bir sürücü. Mihrab oraya küçük ve şifreli bir dosya yazar, diğer cihazlarınızın bıraktıklarını okur.",
+    "folderHelp": "Eşitleme hizmetinin her cihazda zaten güncel tuttuğu bir klasör seç — Nextcloud, OneDrive, Dropbox veya Syncthing klasörü. O klasörü cihazlarının arasında hiçbir şey eşitlemiyorsa, hiçbir şey ulaşmaz. Mihrab oraya küçük ve şifreli bir dosya yazar ve diğer cihazlarının bıraktıklarını okur.",
     "chooseFolder": "Klasör seç",
     "changeFolder": "Klasörü değiştir",
     "folderChosen": "{{value}} kullanılıyor",

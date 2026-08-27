@@ -1318,7 +1318,7 @@
       "khatmah": "Khatmah plans"
     },
     "settingsRowHint": "Pair another device",
-    "pairIntro": "Sync keeps your record the same on every device you use. There is no server: the devices hand the file to each other, and what travels is encrypted so only your own devices can read it.",
+    "pairIntro": "Sync keeps your record the same on every device you use. Mihrab never moves anything itself: it needs a folder that Nextcloud, OneDrive, Dropbox, Syncthing or similar already keeps in step between your devices. Mihrab writes one small encrypted file there, and only your own devices can read it.",
     "thisDevice": "This device",
     "deviceNameLabel": "Device name",
     "thisDeviceHelp": "Show this code to your other device, or type it in there. It is not a password — it is safe to copy, photograph or send to yourself.",
@@ -1357,7 +1357,7 @@
     "notReady": "This device can’t set up sync: it has no secure source of randomness, and a key made without one would not be private.",
     "privacyNoteP2p": "Your code is a public key, not a secret. The data itself is encrypted for your paired devices only, and nothing is uploaded anywhere.",
     "folderSection": "Folder",
-    "folderHelp": "Sync happens through a folder that something else keeps in step between your devices — Syncthing, Nextcloud, a shared drive. Mihrab writes one small encrypted file there and reads the ones your other devices left.",
+    "folderHelp": "Choose a folder your sync service already keeps in step on every device — a Nextcloud, OneDrive, Dropbox or Syncthing folder. If nothing is syncing that folder between your devices, nothing will reach them. Mihrab writes one small encrypted file there and reads the ones your other devices left.",
     "chooseFolder": "Choose a folder",
     "changeFolder": "Change folder",
     "folderChosen": "Using {{value}}",
