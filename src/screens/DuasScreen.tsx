@@ -17,6 +17,7 @@ import { cardEdgeStyle } from '../theme/chrome';
 import { arabicTextStyle } from '../theme/typography';
 import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabBarScroll } from '../navigation/tabBarVisibility';
 
 /**
  * Dua library screen — task #26.
@@ -32,6 +33,8 @@ export function DuasScreen() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const tabBarInset = useTabBarInset();
+  // The bar gets out of the way while reading — see tabBarVisibility.ts.
+  const tabBarScroll = useTabBarScroll();
   // Arabic readers don't need a Latin pronunciation guide or an English
   // meaning — they read the Arabic directly. Hide both supplementary
   // lines when the app language is Arabic so the row stays clean and
@@ -113,6 +116,7 @@ export function DuasScreen() {
       </View>
 
       <ScrollView
+        {...tabBarScroll}
         style={styles.listScroll}
         contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
         contentInsetAdjustmentBehavior="automatic">

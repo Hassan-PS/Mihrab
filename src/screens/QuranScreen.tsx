@@ -59,6 +59,7 @@ import { SyncHint } from './sync/SyncHint';
 import { cardEdgeStyle } from '../theme/chrome';
 import { arabicTextStyle } from '../theme/typography';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabBarScroll } from '../navigation/tabBarVisibility';
 
 type Tab = 'surah' | 'juz' | 'bookmarks';
 
@@ -90,6 +91,8 @@ export function QuranScreen() {
   const [results, setResults] = useState<QuranSearchResult[] | null>(null);
   // Go-to-page (v2.8.5) — a page number typed here opens the mushaf there.
   const tabBarInset = useTabBarInset();
+  // The bar gets out of the way while reading — see tabBarVisibility.ts.
+  const tabBarScroll = useTabBarScroll();
   const [pageJumpVisible, setPageJumpVisible] = useState(false);
   const [pageJumpText, setPageJumpText] = useState('');
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -830,6 +833,7 @@ export function QuranScreen() {
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
       {tab === 'surah' ? (
         <FlatList<SurahIndex>
+          {...tabBarScroll}
           data={[...filteredSurahs]}
           keyExtractor={s => String(s.number)}
           contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
@@ -841,6 +845,7 @@ export function QuranScreen() {
         />
       ) : tab === 'juz' ? (
         <FlatList<JuzRow>
+          {...tabBarScroll}
           data={juzRows}
           keyExtractor={j => String(j.juz)}
           contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
@@ -850,6 +855,7 @@ export function QuranScreen() {
         />
       ) : (
         <FlatList
+          {...tabBarScroll}
           data={[0]}
           keyExtractor={() => 'bookmarks'}
           contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}

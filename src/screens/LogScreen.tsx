@@ -115,6 +115,7 @@ import { cardEdgeStyle, inputChromeStyle } from '../theme/chrome';
 import { tabularNumeralStyle } from '../theme/textScale';
 import { formatDisplayTime } from '../utils/prayerTimes';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabBarScroll } from '../navigation/tabBarVisibility';
 
 const PRAYERS: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const STATUSES: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
@@ -161,6 +162,8 @@ export function LogScreen() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const tabBarInset = useTabBarInset();
+  // The bar gets out of the way while reading — see tabBarVisibility.ts.
+  const tabBarScroll = useTabBarScroll();
   const navigation = useNavigation();
   const {
     settings,
@@ -1033,6 +1036,7 @@ export function LogScreen() {
 
   return (
     <ScrollView
+      {...tabBarScroll}
       style={{ backgroundColor: palette.bg }}
       contentContainerStyle={[styles.scroll, { paddingBottom: tabBarInset }]}
       contentInsetAdjustmentBehavior="automatic"

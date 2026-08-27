@@ -27,7 +27,9 @@
  */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
-import { Platform, StyleSheet } from 'react-native';
+import { Animated, Platform, StyleSheet } from 'react-native';
+import type { ViewStyle } from 'react-native';
+import { useEffect, useRef } from 'react';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { translucentSurface } from '../theme/chrome';
 import { CARD_SHADOW } from '../theme/tokens';
@@ -38,6 +40,7 @@ import {
   TAB_BAR_SIDE_INSET,
   useTabBarBottom,
 } from './tabBarInset';
+import { useTabBarHidden } from './tabBarVisibility';
 import { HomeScreen } from '../screens/HomeScreen';
 import { QuranScreen } from '../screens/QuranScreen';
 import { TasbihScreen } from '../screens/TasbihScreen';
@@ -64,6 +67,33 @@ export function MainTabs() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const barBottom = useTabBarBottom();
+
+  /**
+   * Out of the way while reading, back on the way up.
+   *
+   * Driven straight into `tabBarStyle` because the bar IS an
+   * `Animated.View` — the navigator applies that style to one, which is
+   * what makes a native-driver transform legal here and saves wrapping the
+   * bar in a custom `tabBar`. The wrapper route was tried in the design and
+   * rejected: this pill has a history of painting correctly while
+   * receiving no touches, and the least it can be disturbed the better.
+   *
+   * Only where the bar FLOATS. On iPad and Mac it is in flow and the page
+   * ends above it, so sliding it away would reflow the content under the
+   * reader's thumb — a different behaviour, and a worse one.
+   */
+  const hidden = useTabBarHidden();
+  const slide = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(slide, {
+      toValue: hidden ? 1 : 0,
+      // Long enough to read as movement, short enough that a flick up
+      // does not feel like waiting for the bar.
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  }, [hidden, slide]);
+  const hideBy = TAB_BAR_HEIGHT + barBottom + 16;
 
   return (
     <Tab.Navigator
@@ -139,6 +169,17 @@ export function MainTabs() {
               shadowRadius: CARD_SHADOW.shadowRadius,
               shadowOffset: CARD_SHADOW.shadowOffset,
               elevation: CARD_SHADOW.elevation,
+              // Cast because react-navigation types this as a plain
+              // ViewStyle, while the view it lands on is animated. The
+              // value is legal where it is used; only the type is narrow.
+              transform: [
+                {
+                  translateY: slide.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, hideBy],
+                  }),
+                },
+              ] as unknown as ViewStyle['transform'],
             }
           : {
               backgroundColor: palette.card,

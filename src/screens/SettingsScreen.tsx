@@ -35,6 +35,7 @@ import {
   syncCustomAdhan,
 } from '../native/CustomAdhan';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabBarScroll } from '../navigation/tabBarVisibility';
 
 /**
  * SettingsScreen orchestrator — task #9 split.
@@ -161,11 +162,14 @@ export function SettingsScreen() {
   );
   const openProvider = useCallback(() => setProviderModal(true), []);
   const tabBarInset = useTabBarInset();
+  // The bar gets out of the way while reading — see tabBarVisibility.ts.
+  const tabBarScroll = useTabBarScroll();
   const openLanguage = useCallback(() => setLanguageModal(true), []);
 
   return (
     <>
       <ScrollView
+        {...tabBarScroll}
         ref={scrollRef}
         style={[styles.scroll, { backgroundColor: palette.bg }]}
         contentContainerStyle={[

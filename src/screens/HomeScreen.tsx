@@ -60,6 +60,7 @@ import { RamadanCountdownCard } from './home/RamadanCountdownCard';
 import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { rescheduleEndOfDayLogReminders } from '../notifications/endOfDayLog';
 import {
   FeatureTourModal,
@@ -198,6 +199,8 @@ export function HomeScreen() {
   // Focus-scoped (not mount-scoped) so the Settings "Show the app tour"
   // replay — which clears the flag and pops back here — re-triggers it.
   const tabBarInset = useTabBarInset();
+  // The bar gets out of the way while reading — see tabBarVisibility.ts.
+  const tabBarScroll = useTabBarScroll();
   // Focus + foreground; see the watchdog effect below and useIsActive.
   const homeActive = useIsActive();
   const [tourVisible, setTourVisible] = useState(false);
@@ -866,6 +869,7 @@ export function HomeScreen() {
         </View>
       ) : null}
     <ScrollView
+      {...tabBarScroll}
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.scrollContent,
