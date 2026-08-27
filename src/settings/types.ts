@@ -14,9 +14,17 @@ export type AppearancePreference = 'system' | 'light' | 'dark';
 
 export type AppLanguage = 'en' | 'sv' | 'ar' | 'bn' | 'ur' | 'hi' | 'fr' | 'es' | 'de' | 'tr' | 'id' | 'ru' | 'zh';
 
-/** Next-prayer row color on the home screen widget (preset, dynamic, or custom hex). */
+/**
+ * Next-prayer row colour on the home screen widget: a preset or a custom
+ * hex.
+ *
+ * 'dynamic' was removed on 2026-08-27. The Android widget does not follow
+ * Material You any more — the app still may — and no picker on any
+ * platform offered it. A stored 'dynamic' from an older build fails
+ * `coerceWidgetHighlightId` and lands on the default, which is the colour
+ * it was already being drawn in.
+ */
 export type WidgetHighlightId =
-  | 'dynamic'
   | 'green'
   | 'teal'
   | 'blue'

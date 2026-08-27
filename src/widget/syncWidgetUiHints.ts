@@ -4,14 +4,15 @@ import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { PrayerAppSettings, WidgetHighlightId } from '../settings/types';
 import { getPrayerWidgetModule } from '../native/PrayerWidget';
 
+// 'dynamic' is gone (2026-08-27), so a native side still reporting it is
+// not adopted back into settings.
 const VALID_WIDGET_HIGHLIGHT_IDS = new Set<string>([
-  'dynamic', 'green', 'teal', 'blue', 'amber', 'custom',
+  'green', 'teal', 'blue', 'amber', 'custom',
 ]);
 
 /**
- * #127: When the user has the unified dynamic-colors toggle on (Material
- * You / iOS dynamic), the widget always follows the OS palette regardless
- * of the legacy `widgetHighlightId === 'dynamic'` flag. When off, the
+ * #127: When the user has the unified dynamic-colors toggle on (iOS
+ * dynamic), the widget follows the OS palette. When off, the
  * `widgetHighlightId` is kept in sync with the app accent picker, so the
  * widget gets the same color the user picked for the app.
  */
@@ -27,9 +28,7 @@ function useDynamicHighlightForWidget(settings: PrayerAppSettings): boolean {
   // JS has run this time — after a boot or a restore — is already right.
   // This half stops the app asking for something that will not happen.
   if (Platform.OS === 'android') return false;
-  return (
-    settings.useSystemDynamicTheme || settings.widgetHighlightId === 'dynamic'
-  );
+  return settings.useSystemDynamicTheme;
 }
 
 function syncNativeWidgetAppearance(
@@ -43,15 +42,12 @@ function syncNativeWidgetAppearance(
       : null;
 
   if (Platform.OS === 'android' && mod?.setAndroidWidgetAppearance) {
-    // A `widgetHighlightId` of 'dynamic' can only have come from an older
-    // build. Sending it would store an id the drawing code does not know,
-    // which lands on green anyway — so name green here rather than leaving
-    // the widget's colour to a fallback nobody reading this would expect.
+    // No 'dynamic' to translate any more: `coerceWidgetHighlightId` turns
+    // an older build's stored value into the default on load, so what
+    // arrives here is always an id the drawing code knows.
     void mod.setAndroidWidgetAppearance(
       settings.androidWidgetBackgroundOpacity,
-      settings.widgetHighlightId === 'dynamic'
-        ? 'green'
-        : settings.widgetHighlightId,
+      settings.widgetHighlightId,
       hex,
       dynamicHl,
     );

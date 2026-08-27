@@ -21,8 +21,10 @@ const KEY = 'prayerapp.settings.v1';
 
 const LANGUAGES: AppLanguage[] = ['en', 'sv', 'ar', 'bn', 'ur', 'hi', 'fr', 'es', 'de', 'tr', 'id', 'ru', 'zh'];
 
+// No 'dynamic': removed 2026-08-27. A stored 'dynamic' from an older
+// build falls through to the default, which is the colour that build was
+// already drawing — this is the migration, and it needs no other code.
 const WIDGET_HIGHLIGHT_IDS: WidgetHighlightId[] = [
-  'dynamic',
   'green',
   'teal',
   'blue',

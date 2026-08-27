@@ -20,7 +20,11 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { saveSettings } from '../../settings/storage';
-import type { AppAccentId, WidgetHighlightId } from '../../settings/types';
+import type { AppAccentId } from '../../settings/types';
+import {
+  APP_ACCENT_SWATCHES,
+  widgetPatchForAccent,
+} from '../../settings/widgetAccent';
 import { cardEdgeStyle, segmentChromeStyle } from '../../theme/chrome';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
@@ -30,38 +34,10 @@ import { sharedSettingsStyles as s } from './sharedStyles';
  * dark mode. Subscribes only to the appearance slice (task #11) — toggling a
  * widget color or notifications setting will not re-render this card.
  */
-// App accent swatches — kept in sync with `ACCENT_SWATCHES` in
-// src/theme/appPalette.ts. The chosen color drives palette.accent and
-// (when dynamic colors are off) is mirrored into widgetHighlightId so
-// the home-screen widget picks up the same color (#127).
-const APP_ACCENT_SWATCHES: {
-  id: Exclude<AppAccentId, 'custom'>;
-  light: string;
-  dark: string;
-}[] = [
-  // Mirror ACCENT_SWATCHES in src/theme/appPalette.ts so the preview dot
-  // matches the accent that actually gets applied in the current mode
-  // (the green default is now a refined deep/lifted emerald, not neon).
-  { id: 'green', light: '#1F5F4A', dark: '#46A081' },
-  { id: 'teal', light: '#0d9488', dark: '#5eead4' },
-  { id: 'blue', light: '#2563eb', dark: '#7dd3fc' },
-  { id: 'amber', light: '#b45309', dark: '#fbbf24' },
-  { id: 'rose', light: '#9F2D4D', dark: '#E58FA6' },
-  { id: 'violet', light: '#5B4B9E', dark: '#B4A6E8' },
-];
-
-/**
- * Accent ids the NATIVE widget modules understand. Newer app accents
- * (rose, violet) are mirrored to the widget as a custom hex instead, so
- * the widget still matches without touching Kotlin/Swift swatch tables.
- */
-const NATIVE_WIDGET_ACCENT_IDS = new Set([
-  'green',
-  'teal',
-  'blue',
-  'amber',
-  'custom',
-]);
+// The swatches and the app-accent → widget-highlight mapping moved to
+// src/settings/widgetAccent.ts when the Widget card gained a picker of
+// its own: two cards writing the same setting must agree on what each
+// colour is, and a copy in each is how they stop agreeing.
 
 function AppearanceCardImpl() {
   const { t } = useTranslation();
@@ -147,25 +123,12 @@ function AppearanceCardImpl() {
       ...(customHex ? { appAccentCustomHex: customHex } : {}),
     });
     if (!dynamicColorsActive) {
-      if (NATIVE_WIDGET_ACCENT_IDS.has(id)) {
-        const widgetPatch: {
-          widgetHighlightId: WidgetHighlightId;
-          widgetHighlightCustomHex?: string;
-        } = { widgetHighlightId: id as WidgetHighlightId };
-        if (id === 'custom' && customHex) {
-          widgetPatch.widgetHighlightCustomHex = customHex;
-        }
-        updateWidget(widgetPatch);
-      } else {
-        // rose / violet → mirror as a custom hex (light-mode swatch; the
-        // widget renders on wallpaper, where the deeper ink reads best).
-        const sw = APP_ACCENT_SWATCHES.find(s => s.id === id);
-        updateWidget({
-          widgetHighlightId: 'custom',
-          widgetHighlightCustomHex: sw?.light ?? '#1F5F4A',
-        });
-      }
+      updateWidget(widgetPatchForAccent(id, customHex));
     }
+    // When dynamic colours ARE active the widget is not mirrored, because
+    // the widget does not follow Material You any more (2026-08-27) and
+    // this picker is hidden in that mode. The Widget card carries the
+    // colour control for that case — see WidgetCard.
   };
 
   return (
