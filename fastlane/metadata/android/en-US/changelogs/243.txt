@@ -1,0 +1,3 @@
+• Fixed: a sunnah prayer you un-logged came back. A device that had stopped syncing left its last file in the shared folder, and every round read it again and put the old count back — indefinitely. A snapshot already merged is now left alone.
+• Removing a paired device also removes its file from the shared folder.
+• Sync now shows how old your other device's record is, not when this device last read its file.

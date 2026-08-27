@@ -1,0 +1,3 @@
+• Fixat: en sunnah-bön du avmarkerade kom tillbaka. En enhet som slutat synka lämnade kvar sin sista fil i den delade mappen, och varje runda läste den igen och satte tillbaka det gamla värdet — i all oändlighet. En ögonblicksbild som redan slagits samman lämnas nu i fred.
+• Att ta bort en parad enhet tar även bort dess fil ur den delade mappen.
+• Synk visar nu hur gammal den andra enhetens data är, inte när den senast lästes.
