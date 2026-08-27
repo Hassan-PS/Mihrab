@@ -1,0 +1,5 @@
+• Navigeringsfältet går undan medan du läser och kommer tillbaka så fort du skrollar uppåt. På Tasbih är det alltid kvar.
+• Systemets bakåtknapp fungerar nu på alla flikar, ett steg i taget: läsaren går till Koran-fliken, en flik går till Idag, Idag lämnar appen.
+• Widgetar tar färgen du valt åt dem, aldrig bakgrundsbildens. Om appen följer systemfärgerna väljer du widgetens färg under Inställningar → Widget på hemskärmen.
+• Föregående, Nollställ och Hoppa över på Tasbih-sidan ligger inte längre mot navigeringsfältet.
+• På Mac och iPad bläddrar piltangenterna, WASD och vims HJKL i Koranen.

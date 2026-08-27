@@ -1,0 +1,5 @@
+• The navigation bar gets out of the way while you read and comes back the moment you scroll up. It is always there on Tasbih.
+• The system back button now works on every tab, one level at a time: the reader goes back to the Quran tab, a tab goes to Today, Today leaves the app.
+• Widgets take the colour you chose for them, never the wallpaper's. If the app is following your system colours, the widget's own colour is now under Settings → Home screen widget.
+• Previous, Reset and Skip on the Tasbih page no longer sit against the navigation bar.
+• On Mac and iPad, the arrow keys, WASD and vim's HJKL turn pages in the Quran.
