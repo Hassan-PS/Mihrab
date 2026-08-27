@@ -78,6 +78,45 @@ if [ -f "$TAP" ]; then
     else
       fail "cask sha256 ($cask_sha) != published zip ($dl_sha) — re-upload the zip or update the cask"
     fi
+
+    # ── 4b. THE PUBLISHED APP IS ACTUALLY SIGNED WITH THE DEVELOPER ID ──
+    #
+    # Checked on what is SERVED, not on what is sitting in ios/build, because
+    # the two came apart once and nothing noticed. 2.11.0 went out ad-hoc:
+    # `codesign --verify --strict` passed, notarization was never reached,
+    # and the app had no team identifier — so codesign had silently dropped
+    # every entitlement. No App Group, so no widget payload; no widget host,
+    # so nothing in the gallery; no Keychain access, so a brand new sync
+    # identity that orphaned the old device's file in every user's shared
+    # folder. All of it invisible from the release process, which reported
+    # success on every channel.
+    #
+    # A signature is the one property of a macOS build that cannot be
+    # inspected from the repo, so it is checked here, against the artifact
+    # a user would actually download.
+    unz=$(mktemp -d)
+    if ditto -xk "$tmp" "$unz" 2>/dev/null && [ -d "$unz/Mihrab.app" ]; then
+      sig=$(codesign -dv "$unz/Mihrab.app" 2>&1)
+      team=$(printf '%s' "$sig" | sed -n 's/^TeamIdentifier=//p')
+      if printf '%s' "$sig" | grep -q "adhoc"; then
+        fail "the published app is AD-HOC SIGNED — no entitlements, no App Group, no widgets. Rebuild with a Developer ID and re-upload."
+      elif [ -z "$team" ] || [ "$team" = "not set" ]; then
+        fail "the published app has no TeamIdentifier — every entitlement was dropped at signing. Rebuild and re-upload."
+      else
+        pass "published app signed by team $team"
+      fi
+      # The entitlement the widgets live or die by, read off the shipped
+      # bundle rather than the repo's entitlements file.
+      if codesign -d --entitlements - --xml "$unz/Mihrab.app" 2>/dev/null |
+          grep -q "group.com.prayerapp"; then
+        pass "published app carries the App Group"
+      else
+        fail "published app has NO App Group — its widgets will not render"
+      fi
+    else
+      fail "could not unpack the published zip to check its signature"
+    fi
+    rm -rf "$unz"
   else
     fail "could not download the zip to verify sha256"
   fi
