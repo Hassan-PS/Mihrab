@@ -1,3 +1,4 @@
-• Loggwidgeten uppdateras när du loggar en bön. Den var den enda widgeten som ingenting sa till, så den behöll gårdagens siffror.
-• På Mac fastnar widgetar och deras förhandsvisningar inte längre på versionen du uppgraderade från.
-• I Koranen bläddrar tangentbordet åt samma håll som boken: ←, A eller H framåt, →, D eller L bakåt. Upp och ner rullar sidan.
+• Nytt: spela adhan som ett alarm, så den hörs även vid ljudlöst eller vibration (Android, av som standard).
+• Loggwidgeten uppdateras när du loggar en bön. Den var den enda widgeten som ingenting sa till.
+• På Mac fastnar widgetar och förhandsvisningar inte längre på versionen du uppgraderade från.
+• I Koranen bläddrar tangentbordet åt samma håll som boken: ←, A eller H framåt, →, D eller L bakåt.

@@ -1,3 +1,4 @@
-• The Log widget updates when you log a prayer. It was the one widget nothing told, so it kept the previous day's numbers.
+• New: play the adhan as an alarm, so it is heard even on silent or vibrate (Android, off by default).
+• The Log widget updates when you log a prayer. It was the one widget nothing told.
 • On Mac, widgets and their previews no longer freeze at the version you upgraded from.
-• In the Quran, the keyboard turns pages the way the book does: ←, A or H for the next page, →, D or L to go back. Up and down now scroll the page instead.
+• In the Quran the keyboard turns pages the way the book does: ←, A or H forward, →, D or L back.
