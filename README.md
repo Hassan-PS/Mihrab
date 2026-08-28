@@ -122,6 +122,29 @@ npm run e2e     # Maestro end-to-end flows (needs a running emulator/simulator)
 
 ---
 
+## Supporting the project
+
+**Mihrab does not take money.** There is no donation link, no sponsorship, no
+in-app purchase and no tip jar — the billing library was removed from the
+project outright, and no build pulls one back in. Several people have kindly
+offered; the answer is the same to everyone. It is not that kind of project,
+and it is not going to become one.
+
+Three kinds of support are welcome, and they are worth more:
+
+- **Dua** — for me and my parents, and for everyone whose work this is built on.
+- **Constructive feedback** — a prayer time that disagrees with your masjid, a
+  translation that reads wrong, a screen that fights you. Say what you saw and
+  what you expected in [an issue](https://github.com/Hassan-PS/Mihrab/issues);
+  that is how the bugs get found.
+- **Code** — pull requests, translations, and reproducible bug reports. The
+  build instructions are above and the whole thing is AGPL.
+
+If you were going to send something, send it to your local masjid or to relief
+work you trust instead. Nothing needs to come here.
+
+---
+
 ## Content sources & thanks
 
 Religious content is sourced and attributed (also listed in-app under Settings → About):
