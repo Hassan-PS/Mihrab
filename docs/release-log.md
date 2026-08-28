@@ -38,3 +38,20 @@ sits in the middle of it. Everything that can fail has to run before the
 first push, which is now the one rule `release.sh` is built around — and
 the two things this release got wrong are checks in it: the notes limit in
 preflight, and the cask's `chronod` postflight as a release gate.
+
+## 2.13.1 (246) — 2026-08-28
+
+Took 5 aborted attempt(s) before it ran clean:
+
+  - 1 catalyst build failed — /tmp/release-catalyst.log
+  - 1 the last release left its lesson unwritten — fill in the '**Lesson:**' line in docs/release-log.md, commit it, and rerun
+  - 3 working tree has tracked changes — commit or stash them first
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/release.sh`
+  - `scripts/verify-release.sh`
+  - `scripts/xcode-cloud.py`
+
+**Lesson:** _(unfilled)_
