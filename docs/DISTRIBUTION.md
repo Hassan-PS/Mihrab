@@ -70,6 +70,10 @@ finishes:
   before you start; the script refuses to run without them.
 - **App Store** — Xcode Cloud starts on the push to `main`; submit from
   App Store Connect once it succeeds (`./scripts/xcode-cloud.py runs 3`).
+  **Do not push to `main` again until it finishes.** A second push cancels
+  the run, and the build that reaches App Store Connect is then built from
+  the newer commit rather than the tagged one — 2.13.1's own run #550 was
+  cancelled this way, minutes after the tag.
 
 For beta tags, swap the Gradle commands for `assembleFdroidBeta` /
 `bundlePlayBeta` and mark the GitHub release as **prerelease** — the

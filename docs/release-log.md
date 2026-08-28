@@ -64,3 +64,11 @@ by passing; it is proved by each of its verdicts having been seen to
 happen for the right reason. It now sorts, is handed the release commit,
 and tells "Xcode Cloud has not picked this push up yet" apart from "the
 trigger never fired".
+
+**Second lesson, learned by causing it:** pushing that fix to `main` while
+run #550 was building cancelled it. #551 then built the same version from
+the newer commit and reached App Store Connect as build 551, VALID — fine
+here only because the fix touched scripts and tests, nothing in the app.
+The rule is now in `DISTRIBUTION.md`: after a release, `main` stays still
+until Xcode Cloud finishes. What ships on iOS is the commit that survived
+to the end of the run, not the commit the tag names.

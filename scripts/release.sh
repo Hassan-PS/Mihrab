@@ -499,5 +499,7 @@ cat <<EOF
     App Store Xcode Cloud starts on the push to main; when it succeeds the
               build is in App Store Connect to submit.
               ./scripts/xcode-cloud.py runs 3
+              Leave main alone until that run finishes — the next push
+              cancels it, and iOS then ships the newer commit, not the tag.
 
 EOF
