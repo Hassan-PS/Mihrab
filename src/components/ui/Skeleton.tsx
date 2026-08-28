@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Animated, StyleSheet, type ViewStyle } from 'react-native';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { DURATION } from '../../theme/motion';
 import { RADIUS } from '../../theme/tokens';

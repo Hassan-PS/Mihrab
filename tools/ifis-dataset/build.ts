@@ -19,7 +19,7 @@
  *
  * Run: `npx tsx tools/ifis-dataset/build.ts`
  */
-import { mkdir, readFile, writeFile, readdir, appendFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

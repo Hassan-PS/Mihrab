@@ -162,7 +162,7 @@ export function MushafReader({
   // iOS native-stack headers float translucently over the content; pad
   // our in-page chrome below them (0 on Android's opaque header).
   const headerHeight = useHeaderHeight();
-  const { palette, isDark } = useAppPalette();
+  const { palette } = useAppPalette();
   const quran = useQuranState();
   const playback = usePlaybackStatus();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
@@ -336,7 +336,6 @@ export function MushafReader({
   // boundaries with zero extra snapping logic. In portrait / on phones
   // `dualPage` is false and every value below collapses to the original
   // single-page math (pageW === screenWidth), so that path is unchanged.
-  const isLandscape = windowWidth > windowHeight;
   // Layout decision lives in mushafSpread.mushafLayoutMode (unit-tested):
   // dual-page spreads are tablet/desktop-only (≥960pt wide AND a
   // non-phone screen — see the note there about tall phones in

@@ -12,7 +12,7 @@
  * owns the container chrome (backdrop, card, positioning, animation).
  */
 import type { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from './breakpoints';

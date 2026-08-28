@@ -243,11 +243,6 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
     );
   }
 
-  const tableBorderColor = '#d1d5db';
-  const headerBgColor = '#dcfce7';   // brand green tint for header row
-  const headerAccent = '#166534';    // dark green text in header
-  const textColor = '#1f2937';
-
   return (
     <View style={[styles.container, { backgroundColor: palette.bg, paddingTop }]}>
       <ScrollView contentContainerStyle={styles.scrollContent} contentInsetAdjustmentBehavior="never">

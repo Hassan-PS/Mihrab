@@ -6,6 +6,7 @@ way to know whether a release is actually building.
     ./scripts/xcode-cloud.py start         # start the Default workflow on main
                                            #   (refuses if one is already running)
     ./scripts/xcode-cloud.py why <run-id>  # non-warning issues of a failed run
+    ./scripts/xcode-cloud.py shipped X.Y.Z # did that version reach App Store Connect
 
 WHY THIS EXISTS. A release cut assumed that pushing a tag started an App Store
 build. It does not — there is one workflow and it starts on `main` — and on
@@ -187,6 +188,67 @@ def why(run_id: str) -> None:
             url = page.get("links", {}).get("next")
 
 
+def shipped(version: str) -> None:
+    """Did this marketing version actually reach App Store Connect?
+
+    NOTHING USED TO ASK. `verify-release.sh` checked the tag, GitHub, the
+    cask, the F-Droid recipe, the live site and the Play notes — every
+    channel except the one that takes longest and fails most quietly.
+
+    2.13.0 is why this exists. Run #549 archived successfully (** ARCHIVE
+    SUCCEEDED **, a 93 MB archive artifact, not one ERROR-level issue in
+    the API) and then ERRORED eleven minutes later in the step that
+    uploads. `verify-release.sh` passed the release anyway, and iPhone and
+    iPad simply never got 2.13.0. Nobody found out for a day.
+
+    Build NUMBERS here are Xcode Cloud run numbers, not CFBundleVersion —
+    Xcode Cloud rewrites the build number when it manages versioning — so
+    the only honest way to ask "did X.Y.Z ship" is through the build's
+    preReleaseVersion, which carries the marketing version.
+
+    Exit 0 = a build for this version exists. 2 = no build, and no run is
+    working on one. 3 = still building, ask again later.
+    """
+    app = call("/v1/apps?limit=10")["data"]
+    app_id = next((a["id"] for a in app
+                   if a["attributes"].get("bundleId") == "com.hassan.prayerapp"), None)
+    if app_id is None:
+        print("could not find the app in App Store Connect")
+        raise SystemExit(2)
+
+    res = call(
+        f"/v1/builds?filter[app]={app_id}&limit=30&sort=-version"
+        "&include=preReleaseVersion"
+        "&fields[builds]=version,processingState,uploadedDate,preReleaseVersion"
+        "&fields[preReleaseVersions]=version"
+    )
+    pre = {i["id"]: i["attributes"] for i in res.get("included", [])}
+    for b in res["data"]:
+        rel = (b.get("relationships", {}).get("preReleaseVersion", {}) or {}).get("data")
+        mv = pre.get(rel["id"], {}).get("version") if rel else None
+        if mv == version:
+            ba = b["attributes"]
+            print(f"{version} is in App Store Connect: build {ba.get('version')}, "
+                  f"{ba.get('processingState')}, uploaded {ba.get('uploadedDate')}")
+            return
+
+    # Not there. Is something still working on it, or did it fail?
+    recent = call("/v1/ciProducts")["data"]
+    in_flight = False
+    for prod in recent:
+        for r in call(f"/v1/ciProducts/{prod['id']}/buildRuns?limit=3")["data"]:
+            a = r["attributes"]
+            if a.get("executionProgress") in ("PENDING", "RUNNING"):
+                in_flight = True
+    if in_flight:
+        print(f"{version} is not in App Store Connect yet — a run is still going. "
+              f"Ask again in a few minutes.")
+        raise SystemExit(3)
+    print(f"{version} NEVER REACHED App Store Connect, and nothing is building it. "
+          f"Check ./scripts/xcode-cloud.py runs 3")
+    raise SystemExit(2)
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "runs"
     if cmd == "runs":
@@ -195,5 +257,7 @@ if __name__ == "__main__":
         start(*sys.argv[2:3])
     elif cmd == "why":
         why(sys.argv[2])
+    elif cmd == "shipped":
+        shipped(sys.argv[2])
     else:
         sys.exit(__doc__)

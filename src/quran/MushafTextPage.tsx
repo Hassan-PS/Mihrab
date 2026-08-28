@@ -244,7 +244,7 @@ const LineView = React.memo(function LineView({
   colors,
   selected,
   playing,
-  activeWord,
+  activeWord: _activeWord,
   onPress,
   onLongPress,
 }: LineViewProps) {

@@ -212,6 +212,33 @@ for LOCALE in en-US sv-SE ar; do
   fi
 done
 
+# ── 6. THE iOS CHANNEL ACTUALLY SHIPPED ────────────────────────────────
+#
+# The channel this file used to have no opinion about, and the one that
+# fails most quietly. Everything above is fast and visible; an Xcode Cloud
+# run takes half an hour and finishes after you have stopped looking.
+#
+# 2.13.0 is why this is here. Run #549 archived fine — ** ARCHIVE
+# SUCCEEDED **, a 93 MB archive artifact, not a single ERROR-level issue
+# recorded against it — and then ERRORED eleven minutes later in the step
+# that uploads to App Store Connect. This script passed the release, said
+# "live on every channel", and iPhone and iPad never got it.
+#
+# Three outcomes, because "not there yet" and "never going to be there"
+# are different facts: a run still going is not a failure, and a version
+# with nothing building it is.
+XC="$(dirname "$0")/xcode-cloud.py"
+if [ -f "$XC" ]; then
+  xc_out=$(python3 "$XC" shipped "$VERSION" 2>&1); xc_rc=$?
+  case "$xc_rc" in
+    0) pass "iOS: $xc_out" ;;
+    3) pass "iOS: still building — re-run this script when it finishes" ;;
+    *) fail "iOS: $xc_out" ;;
+  esac
+else
+  fail "scripts/xcode-cloud.py is missing — cannot tell whether iOS shipped"
+fi
+
 echo
 if [ "$FAILED" = "0" ]; then
   echo "── ALL CHECKS PASSED — release $TAG is live on every channel ──"

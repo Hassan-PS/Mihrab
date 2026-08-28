@@ -25,7 +25,7 @@
  * enabled, returns instant durations and identity easing.
  */
 
-import { AccessibilityInfo, type EasingFunction } from 'react-native';
+import { AccessibilityInfo } from 'react-native';
 
 /** Cubic-bezier control points. RN's `Easing.bezier(...)` produces an
  *  EasingFunction directly; pre-instantiating here avoids per-render churn. */
