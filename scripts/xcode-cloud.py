@@ -6,7 +6,7 @@ way to know whether a release is actually building.
     ./scripts/xcode-cloud.py start         # start the Default workflow on main
                                            #   (refuses if one is already running)
     ./scripts/xcode-cloud.py why <run-id>  # non-warning issues of a failed run
-    ./scripts/xcode-cloud.py shipped X.Y.Z # did that version reach App Store Connect
+    ./scripts/xcode-cloud.py shipped X.Y.Z [sha]  # did that version reach App Store Connect
 
 WHY THIS EXISTS. A release cut assumed that pushing a tag started an App Store
 build. It does not — there is one workflow and it starts on `main` — and on
@@ -29,6 +29,7 @@ import json
 import os
 import pathlib
 import ssl
+import subprocess
 import sys
 import time
 import urllib.error
@@ -40,6 +41,31 @@ import jwt
 BASE = "https://api.appstoreconnect.apple.com"
 CTX = ssl.create_default_context(cafile=certifi.where())
 CONFIG = pathlib.Path.home() / ".config" / "mihrab" / "asc.json"
+
+# How long Xcode Cloud is allowed to take to notice a push before "no run
+# exists for this commit" stops meaning "not yet" and starts meaning "the
+# trigger never fired". Measured: runs appear one to three minutes after
+# the push; the 2026-08-07 incident had nothing after thirty.
+TRIGGER_GRACE_MINUTES = 15
+
+
+def commit_age_minutes(sha: str) -> int | None:
+    """Minutes since `sha` was committed locally, or None if git cannot say.
+
+    The release commit is made seconds before the push, so this is a fair
+    stand-in for "how long ago did Xcode Cloud get the chance to see it".
+    """
+    root = pathlib.Path(__file__).resolve().parent.parent
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(root), "log", "-1", "--format=%ct", sha],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if out.returncode != 0 or not out.stdout.strip():
+        return None
+    return int((time.time() - int(out.stdout.strip())) // 60)
 
 
 def credentials() -> dict:
@@ -188,7 +214,7 @@ def why(run_id: str) -> None:
             url = page.get("links", {}).get("next")
 
 
-def shipped(version: str) -> None:
+def shipped(version: str, commit: str | None = None) -> None:
     """Did this marketing version actually reach App Store Connect?
 
     NOTHING USED TO ASK. `verify-release.sh` checked the tag, GitHub, the
@@ -205,6 +231,11 @@ def shipped(version: str) -> None:
     Xcode Cloud rewrites the build number when it manages versioning — so
     the only honest way to ask "did X.Y.Z ship" is through the build's
     preReleaseVersion, which carries the marketing version.
+
+    Pass the release commit as the second argument when you have it: with
+    it, "no build and nothing running" splits into "Xcode Cloud has not
+    picked this push up yet" (fine, seconds after a release) and "it never
+    did" (the trigger failed, which is a real fault).
 
     Exit 0 = a build for this version exists. 2 = no build, and no run is
     working on one. 3 = still building, ask again later.
@@ -232,18 +263,44 @@ def shipped(version: str) -> None:
                   f"{ba.get('processingState')}, uploaded {ba.get('uploadedDate')}")
             return
 
-    # Not there. Is something still working on it, or did it fail?
-    recent = call("/v1/ciProducts")["data"]
-    in_flight = False
-    for prod in recent:
-        for r in call(f"/v1/ciProducts/{prod['id']}/buildRuns?limit=3")["data"]:
-            a = r["attributes"]
-            if a.get("executionProgress") in ("PENDING", "RUNNING"):
-                in_flight = True
-    if in_flight:
-        print(f"{version} is not in App Store Connect yet — a run is still going. "
-              f"Ask again in a few minutes.")
+    # Not there. Is something still working on it, has the push simply not
+    # been picked up yet, or did it fail?
+    # sort=-number is not decoration. Without it the API hands back the
+    # OLDEST runs — #436 and friends, all long COMPLETE — so this loop
+    # examined ten runs from months ago, never saw anything in flight, and
+    # could only ever answer "nothing is building it". That is what failed
+    # 2.13.1 while run #550 was RUNNING on the release commit.
+    running, seen = [], set()
+    for r in call(f"/v1/ciProducts/{product()}/buildRuns?limit=10&sort=-number")["data"]:
+        a = r["attributes"]
+        sha = ((a.get("sourceCommit") or {}).get("commitSha") or "")[:8]
+        seen.add(sha)
+        if a.get("executionProgress") in ("PENDING", "RUNNING"):
+            running.append(f"#{a.get('number')} {sha}".strip())
+    if running:
+        print(f"{version} is not in App Store Connect yet — {', '.join(running)} "
+              f"is still going. Ask again in a few minutes.")
         raise SystemExit(3)
+
+    # Nothing running. If the caller told us which commit this release is,
+    # the real question is whether Xcode Cloud has even seen it — it creates
+    # the run a minute or two AFTER the push, and this check runs seconds
+    # after it, which is how 2.13.1 got told "nothing is building it" while
+    # run #550 was about to start on exactly that commit. A gate that cries
+    # wolf on every release is worse than no gate: it is the one thing
+    # standing between a silent iOS failure and shipping nothing.
+    if commit and commit[:8] not in seen:
+        age = commit_age_minutes(commit)
+        if age is None or age < TRIGGER_GRACE_MINUTES:
+            print(f"{version}: Xcode Cloud has not created a run for {commit[:8]} yet"
+                  f"{f' ({age} min after the commit)' if age is not None else ''} — "
+                  f"it normally starts within a few minutes. Re-run this check.")
+            raise SystemExit(3)
+        print(f"{version}: {commit[:8]} is {age} min old and Xcode Cloud never started "
+              f"a run for it — the push trigger did not fire. Start one by hand: "
+              f"./scripts/xcode-cloud.py start")
+        raise SystemExit(2)
+
     print(f"{version} NEVER REACHED App Store Connect, and nothing is building it. "
           f"Check ./scripts/xcode-cloud.py runs 3")
     raise SystemExit(2)
@@ -258,6 +315,6 @@ if __name__ == "__main__":
     elif cmd == "why":
         why(sys.argv[2])
     elif cmd == "shipped":
-        shipped(sys.argv[2])
+        shipped(sys.argv[2], *sys.argv[3:4])
     else:
         sys.exit(__doc__)

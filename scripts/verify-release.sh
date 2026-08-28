@@ -18,6 +18,7 @@ VERSION="${TAG#v}"
 REPO="Hassan-PS/Mihrab"
 TAP="$HOME/git/homebrew-tap/Casks/mihrab.rb"
 FAILED=0
+PENDING=0
 
 pass() { echo "✓ $1"; }
 fail() { echo "✗ $1"; FAILED=1; }
@@ -229,10 +230,16 @@ done
 # with nothing building it is.
 XC="$(dirname "$0")/xcode-cloud.py"
 if [ -f "$XC" ]; then
-  xc_out=$(python3 "$XC" shipped "$VERSION" 2>&1); xc_rc=$?
+  # Hand it the tagged commit. Without it the check cannot tell "Xcode
+  # Cloud has not seen this push yet" — true for the first couple of
+  # minutes, i.e. exactly when release.sh runs this — from "it never
+  # will", and 2.13.1 was reported as an iOS failure while its run was
+  # starting on that very commit.
+  xc_sha=$(git rev-parse "$TAG^{commit}" 2>/dev/null || true)
+  xc_out=$(python3 "$XC" shipped "$VERSION" ${xc_sha:+"$xc_sha"} 2>&1); xc_rc=$?
   case "$xc_rc" in
     0) pass "iOS: $xc_out" ;;
-    3) pass "iOS: still building — re-run this script when it finishes" ;;
+    3) pass "iOS: $xc_out"; PENDING=1 ;;
     *) fail "iOS: $xc_out" ;;
   esac
 else
@@ -240,7 +247,11 @@ else
 fi
 
 echo
-if [ "$FAILED" = "0" ]; then
+if [ "$FAILED" = "0" ] && [ "$PENDING" = "1" ]; then
+  # Not a failure, and not "live on every channel" either. Saying the
+  # second while iOS is mid-build is how 2.13.0 was called finished.
+  echo "── EVERY FINISHED CHANNEL PASSED — iOS is still building, re-run this when it lands ──"
+elif [ "$FAILED" = "0" ]; then
   echo "── ALL CHECKS PASSED — release $TAG is live on every channel ──"
 else
   echo "── RELEASE VERIFICATION FAILED — fix the ✗ items above ──"

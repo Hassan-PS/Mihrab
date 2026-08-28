@@ -54,4 +54,13 @@ Changed the release cycle itself:
   - `scripts/verify-release.sh`
   - `scripts/xcode-cloud.py`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the iOS gate written for 2.13.0 failed this release, and the
+gate was the thing that was wrong: it announced that 2.13.1 had never
+reached App Store Connect while run #550 was building that exact commit.
+`/buildRuns` returns the *oldest* runs unless asked to sort, so the branch
+that reports "still building" had never once been reachable — the check
+had one answer and it was a false alarm. A verification step is not proved
+by passing; it is proved by each of its verdicts having been seen to
+happen for the right reason. It now sorts, is handed the release commit,
+and tells "Xcode Cloud has not picked this push up yet" apart from "the
+trigger never fired".
