@@ -1,0 +1,12 @@
+# The site is the single page at /. Everything else under docs/ is working
+# notes that GitHub Pages happens to serve as raw text — plans, handovers,
+# release logs. They are public, but they are not the site and should not
+# compete with it in search results.
+User-agent: *
+Allow: /$
+Allow: /assets/
+Disallow: /*.md$
+Disallow: /release/
+Disallow: /design/
+
+Sitemap: https://mihrab.elghamri.se/sitemap.xml

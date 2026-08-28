@@ -62,6 +62,12 @@ describe('website version', () => {
     expect(site).toContain(`Mihrab ${versionName} (${versionCode}), built by`);
   });
 
+  it('names the shipped version in the structured data', () => {
+    // Nobody looks at this on the page — search engines do. Stale here is
+    // stale in whatever Google shows about the app.
+    expect(site).toContain(`"softwareVersion": "${versionName}"`);
+  });
+
   it('says the same version everywhere it says one', () => {
     // The two stamps disagreeing is the exact state this was found in.
     const mentioned = new Set(

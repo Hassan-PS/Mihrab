@@ -60,6 +60,14 @@ function rules({ versionName, versionCode }) {
       find: /Mihrab [\d.]+ \(\d+\), built by/,
       replace: `Mihrab ${versionName} (${versionCode}), built by`,
     },
+    {
+      // The structured data search engines read. Invisible on the page,
+      // which is exactly why it would rot unnoticed.
+      file: SITE,
+      what: 'site: structured-data softwareVersion',
+      find: /"softwareVersion": "[\d.]+"/,
+      replace: `"softwareVersion": "${versionName}"`,
+    },
     // The F-Droid mirror. Since the recipe merged upstream their bot adds
     // each version from the tag, so this copy is documentation — but it is
     // what `verify-release.sh` reads, and it had gone three versions stale

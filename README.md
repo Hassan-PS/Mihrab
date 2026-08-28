@@ -7,7 +7,7 @@
 
   A calm, private, offline-first companion for the day's intentions. Prayer times, a full interactive Quran with recitation and tafsir, dua and tasbih, fasting + prayer journal, and home-screen widgets — no ads, no analytics, no tracking.
 
-  **[mihrab website →](https://hassan-ps.github.io/Mihrab/)**
+  **[mihrab website →](https://mihrab.elghamri.se/)**
 
   <br>
 

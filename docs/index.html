@@ -8,15 +8,15 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
-<link rel="canonical" href="https://hassan-ps.github.io/Mihrab/">
+<link rel="canonical" href="https://mihrab.elghamri.se/">
 <link rel="icon" href="assets/img/icon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/img/icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Mihrab">
 <meta property="og:title" content="Mihrab — prayer times, the Madinah mushaf, dua and tasbih">
 <meta property="og:description" content="A calm, private, offline-first companion for the day’s prayers. Open source under AGPL-3.0. No ads, no analytics, no tracking.">
-<meta property="og:url" content="https://hassan-ps.github.io/Mihrab/">
-<meta property="og:image" content="https://hassan-ps.github.io/Mihrab/assets/img/og-hero.png">
+<meta property="og:url" content="https://mihrab.elghamri.se/">
+<meta property="og:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png">
 <meta property="og:image:width" content="1600">
 <meta property="og:image:height" content="900">
 <meta property="og:image:alt" content="Mihrab — prayer times, the Madinah mushaf, duas, tasbih and a fasting log, on iOS and Android">
@@ -24,7 +24,41 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Mihrab — prayer times, the Madinah mushaf, dua and tasbih">
 <meta name="twitter:description" content="A calm, private, offline-first companion for the day’s prayers. Open source under AGPL-3.0. No ads, no analytics, no tracking.">
-<meta name="twitter:image" content="https://hassan-ps.github.io/Mihrab/assets/img/og-hero.png">
+<meta name="twitter:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Mihrab: The Muslim Companion",
+  "alternateName": "Mihrab",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Android, iOS, iPadOS, macOS",
+  "softwareVersion": "2.13.1",
+  "url": "https://mihrab.elghamri.se/",
+  "image": "https://mihrab.elghamri.se/assets/img/og-hero.png",
+  "description": "Prayer times with adhan reminders and home-screen widgets, the full Madinah mushaf with recitation and tafsir, duas, tasbih, and a fasting and prayer journal. Offline-first, no ads, no analytics, no tracking. Open source under AGPL-3.0.",
+  "inLanguage": ["en", "ar", "sv", "bn", "ur", "hi", "fr", "es", "de", "tr", "id", "ru", "zh"],
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+  "author": {
+    "@type": "Person",
+    "name": "Hassan El Ghamri",
+    "url": "https://github.com/Hassan-PS"
+  },
+  "downloadUrl": [
+    "https://play.google.com/store/apps/details?id=com.prayer_times",
+    "https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256",
+    "https://f-droid.org/packages/com.prayer_times/"
+  ],
+  "sameAs": [
+    "https://play.google.com/store/apps/details?id=com.prayer_times",
+    "https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256",
+    "https://f-droid.org/packages/com.prayer_times/",
+    "https://github.com/Hassan-PS/Mihrab"
+  ]
+}
+</script>
 <style>
 :root {
   --emerald: #1F5F4A;
@@ -596,8 +630,9 @@ footer .colophon {
           <li>No account, no sign-in, no profile.</li>
           <li>On Android, <code>allowBackup</code> is off in the manifest, and the F-Droid build ships
             without Google Play Services or Play Billing.</li>
-          <li>This page is one hand-written HTML file: no scripts, no webfonts, no third-party
-            requests.</li>
+          <li>This page is one hand-written HTML file: no JavaScript, no webfonts, no third-party
+            requests. Its single <code>&lt;script&gt;</code> tag is inert JSON describing the app to
+            search engines — nothing in it runs.</li>
         </ul>
       </article>
     </div>
