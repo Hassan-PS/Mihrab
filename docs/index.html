@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mihrab — prayer times, the Madinah mushaf, dua and tasbih</title>
-<meta name="description" content="Mihrab keeps the five daily prayers close at hand: next-prayer countdown, adhan reminders, widgets, and the full Madinah mushaf. Open source, AGPL-3.0. No ads, no analytics, no tracking.">
+<title>Mihrab — open-source prayer times app, no ads, Madinah mushaf</title>
+<meta name="description" content="Mihrab is a free, open-source prayer times app for Android, iPhone, iPad and Mac: adhan reminders, home-screen widgets, the full Madinah mushaf, duas and tasbih. No ads, no analytics, no tracking. On F-Droid, Obtainium and Homebrew.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="assets/img/icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Mihrab">
-<meta property="og:title" content="Mihrab — prayer times, the Madinah mushaf, dua and tasbih">
+<meta property="og:title" content="Mihrab — open-source prayer times app, no ads, Madinah mushaf">
 <meta property="og:description" content="A calm, private, offline-first companion for the day’s prayers. Open source under AGPL-3.0. No ads, no analytics, no tracking.">
 <meta property="og:url" content="https://mihrab.elghamri.se/">
 <meta property="og:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png">
@@ -22,7 +22,7 @@
 <meta property="og:image:alt" content="Mihrab — prayer times, the Madinah mushaf, duas, tasbih and a fasting log, on iOS and Android">
 <meta property="og:locale" content="en">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Mihrab — prayer times, the Madinah mushaf, dua and tasbih">
+<meta name="twitter:title" content="Mihrab — open-source prayer times app, no ads, Madinah mushaf">
 <meta name="twitter:description" content="A calm, private, offline-first companion for the day’s prayers. Open source under AGPL-3.0. No ads, no analytics, no tracking.">
 <meta name="twitter:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png">
 <script type="application/ld+json">
@@ -56,6 +56,62 @@
     "https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256",
     "https://f-droid.org/packages/com.prayer_times/",
     "https://github.com/Hassan-PS/Mihrab"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Mihrab a free and open-source prayer times app?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Mihrab is free software under AGPL-3.0-or-later, and the whole app — Android, iPhone, iPad and Mac — builds from one public repository. Free as in price too: there is nothing to buy, anywhere."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there ads, trackers or a subscription?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "None of the three. No ad network, no analytics SDK, no crash reporter, no account, no subscription and no in-app purchase — the billing library is not in the project at all."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I install the prayer times app on a Mac with Homebrew?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Run brew install --cask hassan-ps/tap/mihrab. It installs the Mac Catalyst build with its Notification Centre widgets; the cask lives in the Hassan-PS/homebrew-tap repository and every release updates it, so brew upgrade keeps you current."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can Obtainium keep Mihrab updated on Android?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, and it is the recommended way to run the APK. Point Obtainium at github.com/Hassan-PS/Mihrab, or use the one-tap Obtainium link on the site. Every tag ships the same APK F-Droid builds from the same recipe."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Mihrab work without Google Play Services?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The F-Droid and APK builds carry no Play Services, no Play Billing and nothing proprietary, which is what lets F-Droid build and sign the app from source."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Mihrab work offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Once a location is set, prayer times are calculated on the device and notifications are scheduled locally, so the day works with the network switched off. Only downloads you ask for — mushaf pages, recitation, tafsir — need a connection."
+      }
+    }
   ]
 }
 </script>
@@ -268,7 +324,7 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
   .gallery figcaption, .spread figcaption { font-size: 13.5px; }
 }
 /* ---- privacy ---- */
-.privacy .cols, .support .cols {
+.privacy .cols, .support .cols, .faq .cols {
   margin-top: 32px; display: grid; gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
 }
@@ -278,6 +334,7 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 }
 .card h3 { font-size: 17px; margin-bottom: 10px; }
 .card p, .card li { font-size: 15.5px; color: var(--ink-soft); }
+.card p:last-child { margin-bottom: 0; }
 .card ul { margin: 0; padding-left: 18px; }
 .card li { margin-bottom: 8px; }
 .card li:last-child { margin-bottom: 0; }
@@ -631,8 +688,8 @@ footer .colophon {
           <li>On Android, <code>allowBackup</code> is off in the manifest, and the F-Droid build ships
             without Google Play Services or Play Billing.</li>
           <li>This page is one hand-written HTML file: no JavaScript, no webfonts, no third-party
-            requests. Its single <code>&lt;script&gt;</code> tag is inert JSON describing the app to
-            search engines — nothing in it runs.</li>
+            requests. Its two <code>&lt;script&gt;</code> tags are inert JSON describing the app and
+            these questions to search engines — nothing in them runs.</li>
         </ul>
       </article>
     </div>
@@ -640,6 +697,58 @@ footer .colophon {
       <a href="https://github.com/Hassan-PS/Mihrab/blob/main/PRIVACY_POLICY.md">PRIVACY_POLICY.md</a>
       (English and Swedish). Questions belong in
       <a href="https://github.com/Hassan-PS/Mihrab/issues">the issue tracker</a>, in the open.</p>
+  </div>
+</section>
+<section class="faq" id="faq">
+  <div class="wrap">
+    <p class="eyebrow">Questions people ask first</p>
+    <h2>Free, open source, and no ads — the short answers</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>Is Mihrab a free and open-source prayer times app?</h3>
+        <p>Yes. Mihrab is free software under
+          <a href="https://github.com/Hassan-PS/Mihrab/blob/main/LICENSE">AGPL-3.0-or-later</a>, and
+          the whole app — Android, iPhone, iPad and Mac — builds from
+          <a href="https://github.com/Hassan-PS/Mihrab">one public repository</a>. Free as in price
+          too: there is nothing to buy, anywhere.</p>
+      </article>
+      <article class="card">
+        <h3>Are there ads, trackers or a subscription?</h3>
+        <p>None of the three. No ad network, no analytics SDK, no crash reporter, no account, no
+          subscription and no in-app purchase — the billing library is not in the project at all.
+          The app is not the product and neither are you.</p>
+      </article>
+      <article class="card">
+        <h3>How do I install the prayer times app on a Mac with Homebrew?</h3>
+        <p>One command:</p>
+        <p><code>brew install --cask hassan-ps/tap/mihrab</code></p>
+        <p>It installs the Mac Catalyst build — the same app as on iPad, with the Notification
+          Centre widgets. The cask lives in
+          <a href="https://github.com/Hassan-PS/homebrew-tap">Hassan-PS/homebrew-tap</a> and every
+          release updates it, so <code>brew upgrade</code> keeps you current.</p>
+      </article>
+      <article class="card">
+        <h3>Can Obtainium keep Mihrab updated on Android?</h3>
+        <p>Yes, and it is the recommended way to run the APK. Point
+          <a href="https://github.com/ImranR98/Obtainium">Obtainium</a> at
+          <code>github.com/Hassan-PS/Mihrab</code>, or use the
+          <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.prayer_times%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FHassan-PS%2FMihrab%22%2C%22author%22%3A%22Hassan-PS%22%2C%22name%22%3A%22Mihrab%22%7D">one-tap
+          Obtainium link</a>. Every tag ships the same APK F-Droid builds from the same recipe.</p>
+      </article>
+      <article class="card">
+        <h3>Does Mihrab work without Google Play Services?</h3>
+        <p>Yes. The F-Droid and APK builds carry no Play Services, no Play Billing and nothing
+          proprietary — that is what lets
+          <a href="https://f-droid.org/packages/com.prayer_times/">F-Droid</a> build and sign it from
+          source. Nothing in the app depends on Google being on the device.</p>
+      </article>
+      <article class="card">
+        <h3>Does Mihrab work offline?</h3>
+        <p>Once a location is set, prayer times are calculated on the device and notifications are
+          scheduled locally, so the day works with the network switched off. Downloads you ask for —
+          mushaf pages, recitation, tafsir — are the only things that need it.</p>
+      </article>
+    </div>
   </div>
 </section>
 <section class="support" id="support">

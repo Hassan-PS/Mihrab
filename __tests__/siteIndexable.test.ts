@@ -96,3 +96,40 @@ describe('the app is an entity, not a word', () => {
     expect(ld.offers.price).toBe('0');
   });
 });
+
+describe('the long-tail answers are on the page, not only in the markup', () => {
+  // The queries this section exists for: "open source prayer times app",
+  // "prayer times no ads", "prayer times homebrew", "prayer times
+  // obtainium". Structured data that promises answers the page does not
+  // visibly contain is the definition of the markup Google discards.
+  const blocks = Array.from(
+    site.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
+    m => JSON.parse(m[1]),
+  );
+  const faq = blocks.find(b => b['@type'] === 'FAQPage');
+
+  it('ships an FAQPage', () => {
+    expect(faq).toBeDefined();
+    expect(faq.mainEntity.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('asks every marked-up question visibly, in a heading', () => {
+    const headings = Array.from(
+      site.matchAll(/<h3>([^<]+)<\/h3>/g),
+      m => m[1].replace(/\s+/g, ' ').trim(),
+    );
+    for (const q of faq.mainEntity) {
+      expect(headings).toContain(q.name);
+    }
+  });
+
+  it.each([
+    ['open source', /open-source prayer times app/i],
+    ['no ads', /no ad network/i],
+    ['homebrew', /brew install --cask hassan-ps\/tap\/mihrab/],
+    ['obtainium', /Obtainium/],
+    ['no play services', /no Play Services/i],
+  ])('says the words someone searching for "%s" would type', (_l, re) => {
+    expect(site).toMatch(re);
+  });
+});
