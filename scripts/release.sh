@@ -57,6 +57,19 @@ PBXPROJ="$ROOT/ios/PrayerApp.xcodeproj/project.pbxproj"
 LOCALES="en-US sv-SE ar"
 JDK="/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home"
 
+# ── grep AFTER capturing, never through a pipe ────────────────────────
+#
+# `set -o pipefail` plus `cmd | grep -q` is a trap, and this script fell
+# into it on its first real run: `grep -q` exits the moment it matches, the
+# producer gets SIGPIPE, and the pipeline reports 141. A correctly signed
+# app was reported as unsigned. Worse were the silent ones — the duplicate
+# tag check and the Xcode Cloud guard would have read "found" as "not
+# found" and waved a bad release through.
+#
+# So: capture, then test. `has <haystack> <needle>` exists to make the
+# right thing shorter than the wrong one.
+has() { case "$1" in *"$2"*) return 0 ;; *) return 1 ;; esac; }
+
 bold() { printf "\033[1m%s\033[0m\n" "$1"; }
 step() { printf "\n\033[1m▸ %s\033[0m\n" "$1"; }
 ok()   { printf "  ✓ %s\n" "$1"; }
@@ -143,7 +156,8 @@ ok "main is not behind origin"
 if git rev-parse "$TAG" >/dev/null 2>&1; then
   die "tag $TAG already exists locally"
 fi
-if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+REMOTE_TAGS="$(git ls-remote --tags origin "refs/tags/$TAG" 2>/dev/null)"
+if has "$REMOTE_TAGS" "$TAG"; then
   die "tag $TAG already exists on origin — pick the next version"
 fi
 ok "$TAG is free"
@@ -166,7 +180,8 @@ done
 # The cask is the only code that runs when a Mac replaces the app, and it
 # is what stops every widget freezing on upgrade. See verify-release.sh 4a.
 if [ -f "$TAP" ]; then
-  grep -q postflight "$TAP" && grep -q chronod "$TAP" \
+  CASK_SRC="$(cat "$TAP")"
+  { has "$CASK_SRC" "postflight" && has "$CASK_SRC" "chronod"; } \
     || die "cask has no chronod postflight — Macs upgrading to $TAG would freeze their widgets"
   ok "cask restarts chronod after install"
 else
@@ -182,7 +197,8 @@ ok "tsc"
 # One workflow, started by a push to main. A second run started while one
 # is live kills both ("An update has been initiated by another request"),
 # which is how 2.12.0's iOS build was lost.
-if python3 "$ROOT/scripts/xcode-cloud.py" runs 1 2>/dev/null | grep -q "PENDING\|RUNNING"; then
+XC_RUNS="$(python3 "$ROOT/scripts/xcode-cloud.py" runs 1 2>/dev/null)"
+if has "$XC_RUNS" "PENDING" || has "$XC_RUNS" "RUNNING"; then
   die "an Xcode Cloud run is already in flight — let it finish, or it and the release build will kill each other"
 fi
 ok "no Xcode Cloud run in flight"
@@ -221,8 +237,8 @@ AAB="$ROOT/android/app/build/outputs/bundle/playRelease/app-play-release.aab"
 AAPT=$(ls "$HOME"/Library/Android/sdk/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1)
 if [ -n "$AAPT" ]; then
   badge=$("$AAPT" dump badging "$APK" 2>/dev/null | head -1)
-  echo "$badge" | grep -q "versionCode='$CODE'" || die "APK reports the wrong versionCode: $badge"
-  echo "$badge" | grep -q "versionName='$VERSION'" || die "APK reports the wrong versionName: $badge"
+  has "$badge" "versionCode='$CODE'"    || die "APK reports the wrong versionCode: $badge"
+  has "$badge" "versionName='$VERSION'" || die "APK reports the wrong versionName: $badge"
   ok "APK badging confirms $VERSION ($CODE)"
 fi
 
@@ -240,10 +256,12 @@ ok "$(basename "$ZIP")"
 UNZIP=$(mktemp -d)
 ditto -x -k "$ZIP" "$UNZIP" || die "cannot unpack $ZIP"
 APP="$UNZIP/Mihrab.app"
-codesign -dv "$APP" 2>&1 | grep -q "TeamIdentifier=GAW23HT439" \
+SIG="$(codesign -dv "$APP" 2>&1)"
+has "$SIG" "TeamIdentifier=GAW23HT439" \
   || die "the app about to be published is not signed by the Developer ID — this is the 2.11.0 failure"
 ok "signed by team GAW23HT439"
-codesign -d --entitlements - --xml "$APP" 2>/dev/null | grep -q "group.com.prayerapp" \
+ENTS="$(codesign -d --entitlements - --xml "$APP" 2>/dev/null)"
+has "$ENTS" "group.com.prayerapp" \
   || die "no App Group entitlement — widgets would have no data"
 ok "App Group sealed in"
 rm -rf "$UNZIP"

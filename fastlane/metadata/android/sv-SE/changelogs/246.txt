@@ -1,0 +1,3 @@
+• Loggwidgeten uppdateras när du loggar en bön. Den var den enda widgeten som ingenting sa till, så den behöll gårdagens siffror.
+• På Mac fastnar widgetar och deras förhandsvisningar inte längre på versionen du uppgraderade från.
+• I Koranen bläddrar tangentbordet åt samma håll som boken: ←, A eller H framåt, →, D eller L bakåt. Upp och ner rullar sidan.
