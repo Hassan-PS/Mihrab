@@ -88,7 +88,10 @@ die() {
 # The files that ARE the release cycle. A release that changes one of
 # these is a release that changed how releasing works, and the next
 # person through deserves to know what it taught you.
-CYCLE_PATHS="scripts/release.sh scripts/verify-release.sh scripts/build-catalyst.sh scripts/sync-version.js scripts/xcode-cloud.py .github/workflows docs/DISTRIBUTION.md fastlane"
+# NOT fastlane/ — those are the release NOTES, which change every time by
+# definition. Flagging them would mark every release as cycle-changing,
+# and a signal that is always on is not a signal.
+CYCLE_PATHS="scripts/release.sh scripts/verify-release.sh scripts/build-catalyst.sh scripts/sync-version.js scripts/xcode-cloud.py .github/workflows docs/DISTRIBUTION.md"
 JOURNAL="$ROOT/docs/release-log.md"
 
 current_version() { grep -o 'versionName "[^"]*"' "$GRADLE_FILE" | head -1 | cut -d'"' -f2; }
