@@ -218,3 +218,51 @@ describe('the keys are bound in one place', () => {
     },
   );
 });
+
+describe('left turns forward, because the mushaf is a right-to-left book', () => {
+  const swift = readFileSync(
+    path.join(__dirname, '..', 'ios', 'PrayerApp', 'KeyCommands.swift'),
+    'utf8',
+  );
+
+  const list = (name: 'forward' | 'back') =>
+    swift.match(new RegExp(`let ${name} = \\[([^\\]]*)\\]`))?.[1] ?? '';
+
+  it('forward is the left arrow, A and H', () => {
+    // The pages advance leftwards, a swipe goes that way, and the "next"
+    // chevron on screen is the left one. A and H are "left" in WASD and in
+    // vim, so all three conventions agree and there is one rule to know.
+    const forward = list('forward');
+    expect(forward).toContain('inputLeftArrow');
+    expect(forward).toContain('"a"');
+    expect(forward).toContain('"h"');
+  });
+
+  it('back is the right arrow, D and L', () => {
+    const back = list('back');
+    expect(back).toContain('inputRightArrow');
+    expect(back).toContain('"d"');
+    expect(back).toContain('"l"');
+  });
+
+  it('no key means forward in one convention and back in another', () => {
+    const forward = list('forward');
+    const back = list('back');
+    for (const key of ['"a"', '"h"', 'inputLeftArrow']) {
+      expect(back).not.toContain(key);
+    }
+    for (const key of ['"d"', '"l"', 'inputRightArrow']) {
+      expect(forward).not.toContain(key);
+    }
+  });
+
+  it('up and down are not bound at all', () => {
+    // A book does not move that way, and leaving them free lets them still
+    // scroll a page taller than the window.
+    expect(swift).not.toContain('inputUpArrow');
+    expect(swift).not.toContain('inputDownArrow');
+    for (const key of ['"w"', '"s"', '"j"', '"k"']) {
+      expect(list('forward') + list('back')).not.toContain(key);
+    }
+  });
+});

@@ -1,9 +1,17 @@
 /**
  * Turn pages with a keyboard, where there is one.
  *
- * Arrows, WASD and vim's HJKL — three sets, because three sets of people
- * reach for three different things and none of them is wrong. Forward is
- * right/down/D/S/L/J; back is left/up/A/W/H/K.
+ * LEFT TURNS FORWARD — the mushaf is a right-to-left book, its pages
+ * advance leftwards, and the "next" chevron on screen is the left one.
+ *
+ *   forward (next page):  ←  A  H
+ *   back    (previous):   →  D  L
+ *
+ * Arrows, WASD and vim's HJKL, all saying the same direction: A and H are
+ * "left" in their own convention, D and L are "right". Up and down are not
+ * bound — a book does not move that way, and leaving them free lets them
+ * scroll a page taller than the window. The mapping itself lives in
+ * KeyCommands.swift; this side only hears "forward" and "back".
  *
  * Mac and iPad only. Android has no equivalent binding and a phone has no
  * keyboard to press, so the native module simply is not there and this

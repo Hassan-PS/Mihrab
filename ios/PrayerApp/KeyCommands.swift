@@ -55,17 +55,24 @@ class MihrabKeyCommands: RCTEventEmitter {
 /**
  The keys themselves.
 
- Three sets, because three sets of people reach for three different things
- and none of them is wrong: the arrows, WASD, and vim's HJKL. Forward is
- right/down/D/S/L/J and back is left/up/A/W/H/K, which is what each of
- those conventions already means on its own terms.
+ LEFT TURNS FORWARD, because the mushaf is a right-to-left book. Its pages
+ advance leftwards — that is what the page images do, what a swipe does,
+ and which chevron is the "next" one: the LEFT one. A keyboard that
+ disagreed with all three would be the odd one out.
 
- NOT bound to the mushaf's visual direction. The page images advance
- leftwards because the book is read right-to-left, and an earlier draft
- mapped the left arrow to "next" for that reason. It is defensible and it
- is wrong for a keyboard: "forward" is the next page of the book, and a
- reader pressing right expects to move forward through what they are
- reading, not leftward across a spread.
+   forward (next page):  ←   A   H
+   back    (previous):   →   D   L
+
+ Three ways to say the same direction, because three sets of people reach
+ for three different things: the arrows, WASD, and vim's HJKL. Note they
+ agree — A and H are both "left" in their own convention, D and L are both
+ "right" — so the rule is one rule, not three mappings to remember.
+
+ UP AND DOWN ARE NOT BOUND. An earlier draft had them, on the theory that
+ a page turn is "next" in the abstract and any forward-ish key would do.
+ A book does not move up and down, and leaving them free means they still
+ scroll a page that is taller than the window, which on a phone in
+ landscape is most of them.
 
  `wantsPriorityOverSystemBehavior` is deliberately NOT set. These are
  plain letters and arrows, and claiming priority would take them from every
@@ -73,14 +80,8 @@ class MihrabKeyCommands: RCTEventEmitter {
  */
 extension AppDelegate {
   override var keyCommands: [UIKeyCommand]? {
-    let forward = [
-      UIKeyCommand.inputRightArrow, UIKeyCommand.inputDownArrow,
-      "d", "s", "l", "j",
-    ]
-    let back = [
-      UIKeyCommand.inputLeftArrow, UIKeyCommand.inputUpArrow,
-      "a", "w", "h", "k",
-    ]
+    let forward = [UIKeyCommand.inputLeftArrow, "a", "h"]
+    let back = [UIKeyCommand.inputRightArrow, "d", "l"]
     return forward.map {
       UIKeyCommand(input: $0, modifierFlags: [], action: #selector(mihrabForward(_:)))
     } + back.map {
