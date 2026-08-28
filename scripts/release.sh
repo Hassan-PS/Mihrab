@@ -94,6 +94,12 @@ die() {
 CYCLE_PATHS="scripts/release.sh scripts/verify-release.sh scripts/build-catalyst.sh scripts/sync-version.js scripts/xcode-cloud.py .github/workflows docs/DISTRIBUTION.md"
 JOURNAL="$ROOT/docs/release-log.md"
 
+# Everything phase 2 writes into the tree, so a run that stops partway can
+# be undone in one line. The JOURNAL belongs in here: it is appended before
+# the release commit, so a rerun after a failed publish would otherwise add
+# a SECOND entry for the same version.
+REVERT="git checkout -- android/app/build.gradle ios/PrayerApp.xcodeproj/project.pbxproj docs/index.html contrib/fdroid/com.prayer_times.yml docs/release-log.md"
+
 current_version() { grep -o 'versionName "[^"]*"' "$GRADLE_FILE" | head -1 | cut -d'"' -f2; }
 current_code()    { grep -o 'versionCode [0-9]*'  "$GRADLE_FILE" | head -1 | awk '{print $2}'; }
 
@@ -342,7 +348,7 @@ if [ "$DRY_RUN" = "1" ]; then
   echo "    $ZIP"
   echo
   echo "  The version bump is in your working tree. Undo it with:"
-  echo "    git checkout -- android/app/build.gradle ios/PrayerApp.xcodeproj/project.pbxproj docs/index.html contrib/fdroid/com.prayer_times.yml"
+  echo "    $REVERT"
   exit 0
 fi
 
@@ -401,25 +407,50 @@ ok "committed"
 # MAIN BEFORE THE TAG, always. A tag pushed while main is still local
 # names a commit nobody else can see, and this project does not move a
 # pushed tag — so the recovery is to merge around it for ever.
-git push -q origin main || die "push to main failed — nothing tagged, nothing published, fix and rerun"
+git push -q origin main || die "push to main failed — nothing tagged, nothing published.
+    Undo the local release commit and the stamps, then rerun:
+      git reset --soft HEAD~1 && $REVERT"
 ok "main pushed"
 
 git tag -a "$TAG" -m "Mihrab $VERSION ($CODE)" || die "tag failed"
 git push -q origin "$TAG" || die "tag push failed — main is pushed, so rerunning after a fix is safe"
 ok "$TAG pushed"
 
+# THE ASSET IS NAMED BY ITS FILENAME, so the file has to be named first.
+#
+# `gh release create file#Label` sets a display LABEL, not the asset name —
+# the asset keeps the basename on disk. Uploading the gradle output
+# directly would publish `app-fdroid-release.apk`, and then every download
+# URL anyone has ever been given 404s: the one in the release notes, the
+# one verify-release.sh checks, and the one F-Droid's recipe resolves.
+# Copy to the published name and upload that.
+STAGE=$(mktemp -d)
+cp "$APK" "$STAGE/Mihrab-v$VERSION-fdroid.apk" || die "cannot stage the APK"
+cp "$ZIP" "$STAGE/" || die "cannot stage the zip"
+
 NOTES="${RELEASE_NOTES:-}"
 if [ -n "$NOTES" ] && [ -f "$NOTES" ]; then
   gh release create "$TAG" -R "$REPO" --title "Mihrab $VERSION" \
-     --notes-file "$NOTES" --latest "$APK#Mihrab-v$VERSION-fdroid.apk" "$ZIP" \
+     --notes-file "$NOTES" --latest \
+     "$STAGE/Mihrab-v$VERSION-fdroid.apk" "$STAGE/Mihrab-macOS-$VERSION.zip" \
      >/dev/null || die "gh release failed"
 else
   gh release create "$TAG" -R "$REPO" --title "Mihrab $VERSION" \
-     --generate-notes --latest "$APK#Mihrab-v$VERSION-fdroid.apk" "$ZIP" \
+     --generate-notes --latest \
+     "$STAGE/Mihrab-v$VERSION-fdroid.apk" "$STAGE/Mihrab-macOS-$VERSION.zip" \
      >/dev/null || die "gh release failed"
   echo "  (generated notes — set RELEASE_NOTES=/path/to/notes.md to write your own)"
 fi
-ok "GitHub release published with both assets"
+rm -rf "$STAGE"
+
+# Ask GitHub what it actually published, rather than assuming the upload
+# meant what we meant.
+PUBLISHED=$(gh release view "$TAG" -R "$REPO" --json assets --jq '.assets[].name' 2>/dev/null)
+has "$PUBLISHED" "Mihrab-v$VERSION-fdroid.apk" \
+  || die "the APK published under the wrong name: $PUBLISHED"
+has "$PUBLISHED" "Mihrab-macOS-$VERSION.zip" \
+  || die "the macOS zip published under the wrong name: $PUBLISHED"
+ok "GitHub release published, both assets named correctly"
 
 # The cask is bumped against the sha of the zip AS PUBLISHED, downloaded
 # back from the release, not against the local file. They came apart once
@@ -432,8 +463,18 @@ curl -sL -o "$TMPZIP" \
 SHA=$(shasum -a 256 "$TMPZIP" | cut -d' ' -f1)
 rm -f "$TMPZIP"
 OLD_SHA=$(grep -o 'sha256 "[a-f0-9]*"' "$TAP" | cut -d'"' -f2)
+[ -n "$OLD_SHA" ] || die "cannot read the cask's current sha256"
 sed -i '' "s/version \"$OLD_VERSION\"/version \"$VERSION\"/" "$TAP"
 sed -i '' "s/$OLD_SHA/$SHA/" "$TAP"
+# The cask's version is whatever SHIPPED last, which is not necessarily
+# this repo's previous version — a release abandoned between the tag and
+# the tap leaves them apart, and then the sed matches nothing and pushes a
+# stale cask that says the old version with the new sha.
+NEW_CASK="$(cat "$TAP")"
+has "$NEW_CASK" "version \"$VERSION\"" \
+  || die "the cask still does not say $VERSION — it was on $OLD_VERSION? edit $TAP by hand"
+has "$NEW_CASK" "sha256 \"$SHA\"" \
+  || die "the cask sha did not update — edit $TAP by hand"
 ( cd "$(dirname "$TAP")/.." \
   && git add Casks/mihrab.rb \
   && git commit -q -m "mihrab $VERSION" \
