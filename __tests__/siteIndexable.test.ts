@@ -61,6 +61,19 @@ describe('crawlers are told what to read', () => {
   it('keeps .nojekyll, or Pages drops the underscore paths', () => {
     expect(existsSync(path.join(DOCS, '.nojekyll'))).toBe(true);
   });
+
+  it('keeps the Search Console verification file', () => {
+    // Deleting it un-verifies the property, silently: Google re-checks and
+    // drops ownership, and with it the sitemap, the coverage reports and
+    // the ability to ask for indexing. It looks like a stray file. It is
+    // not.
+    const token = 'googlea1c6b9fa07ce68a5.html';
+    const file = path.join(DOCS, token);
+    expect(existsSync(file)).toBe(true);
+    expect(readFileSync(file, 'utf-8')).toContain(
+      `google-site-verification: ${token}`,
+    );
+  });
 });
 
 describe('the app is an entity, not a word', () => {
