@@ -219,13 +219,20 @@ fi
 #
 # Clean, uneventful releases record "none needed" automatically and this
 # never fires. It only asks when there was actually something to learn.
+#
+# ANCHORED, and this needed catching: the file explains itself by quoting
+# `_(unfilled)_` in its own header, so a substring test matched the
+# documentation and would have blocked every release for ever. The marker
+# is a whole line, and only a whole line counts.
 if [ -f "$JOURNAL" ]; then
-  JOURNAL_SRC="$(cat "$JOURNAL")"
-  if has "$JOURNAL_SRC" "_(unfilled)_"; then
-    LAST_ENTRY=$(grep -n "_(unfilled)_" "$JOURNAL" | head -1 | cut -d: -f1)
+  UNFILLED=$(grep -n '^\*\*Lesson:\*\* _(unfilled)_$' "$JOURNAL" | tail -1 | cut -d: -f1)
+  if [ -n "$UNFILLED" ]; then
+    # Show the entry it belongs to, from its `## version` heading down.
+    HEAD_LINE=$(awk -v end="$UNFILLED" 'NR<=end && /^## /{n=NR} END{print n+0}' "$JOURNAL")
+    [ "$HEAD_LINE" -lt 1 ] && HEAD_LINE=1
     printf "\n"
-    sed -n "$((LAST_ENTRY > 12 ? LAST_ENTRY - 12 : 1)),${LAST_ENTRY}p" "$JOURNAL" | sed 's/^/    /'
-    die "the last release left its lesson unwritten — fill in the '**Lesson:**' line in docs/release-log.md, commit it, and rerun"
+    sed -n "${HEAD_LINE},${UNFILLED}p" "$JOURNAL" | sed 's/^/    /'
+    die "the last release left its lesson unwritten — fill in that '**Lesson:**' line in docs/release-log.md, commit it, and rerun"
   fi
 fi
 ok "the last release's lesson is written down"
