@@ -111,3 +111,9 @@ ios/PrayerApp/embedded.provisionprofile
 # This machine's account of its own release attempts — evidence for the
 # release log, not a repo fact.
 .release-attempts.log
+
+# Python bytecode caches. One was committed and then rewritten by any
+# tool that imported scripts/xcode-cloud.py, which is a dirty tree the
+# release script correctly refuses to build from.
+__pycache__/
+*.pyc
