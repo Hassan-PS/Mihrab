@@ -107,3 +107,7 @@ build/qcf*/
 # Developer ID profile for the Catalyst build — account-specific, not source.
 # See the PROFILE note in scripts/build-catalyst.sh.
 ios/PrayerApp/embedded.provisionprofile
+
+# This machine's account of its own release attempts — evidence for the
+# release log, not a repo fact.
+.release-attempts.log

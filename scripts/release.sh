@@ -73,7 +73,23 @@ has() { case "$1" in *"$2"*) return 0 ;; *) return 1 ;; esac; }
 bold() { printf "\033[1m%s\033[0m\n" "$1"; }
 step() { printf "\n\033[1m▸ %s\033[0m\n" "$1"; }
 ok()   { printf "  ✓ %s\n" "$1"; }
-die()  { printf "\n  ✗ %s\n\n" "$1" >&2; exit 1; }
+
+# Every abort is recorded. A release cycle only improves from evidence
+# about where it actually stops people, and nobody remembers the third
+# failed attempt from two weeks ago. Gitignored — it is this machine's
+# account of its own attempts, not a repo fact.
+ATTEMPTS="$ROOT/.release-attempts.log"
+die() {
+  printf "%s\t%s\t%s\n" "$(date -u +%FT%TZ)" "${VERSION:-?}" "$1" >>"$ATTEMPTS"
+  printf "\n  ✗ %s\n\n" "$1" >&2
+  exit 1
+}
+
+# The files that ARE the release cycle. A release that changes one of
+# these is a release that changed how releasing works, and the next
+# person through deserves to know what it taught you.
+CYCLE_PATHS="scripts/release.sh scripts/verify-release.sh scripts/build-catalyst.sh scripts/sync-version.js scripts/xcode-cloud.py .github/workflows docs/DISTRIBUTION.md fastlane"
+JOURNAL="$ROOT/docs/release-log.md"
 
 current_version() { grep -o 'versionName "[^"]*"' "$GRADLE_FILE" | head -1 | cut -d'"' -f2; }
 current_code()    { grep -o 'versionCode [0-9]*'  "$GRADLE_FILE" | head -1 | awk '{print $2}'; }
@@ -188,6 +204,32 @@ else
   die "cask not found at $TAP — clone the tap before releasing"
 fi
 
+# ── THE LAST RELEASE'S LESSON MUST BE WRITTEN ─────────────────────────
+#
+# This is the self-improvement step, and it is a gate rather than a
+# reminder because reminders about process are the first thing a hurried
+# release skips.
+#
+# A release that changed the cycle, or that had to be abandoned and
+# restarted, gets an entry in docs/release-log.md with a `**Lesson:**`
+# line left blank. The NEXT release will not start until that line says
+# something. Everything else here is a check that stops a bad release;
+# this is the one that stops a bad *cycle* — the same mistake being paid
+# for twice because nobody wrote down what the first one cost.
+#
+# Clean, uneventful releases record "none needed" automatically and this
+# never fires. It only asks when there was actually something to learn.
+if [ -f "$JOURNAL" ]; then
+  JOURNAL_SRC="$(cat "$JOURNAL")"
+  if has "$JOURNAL_SRC" "_(unfilled)_"; then
+    LAST_ENTRY=$(grep -n "_(unfilled)_" "$JOURNAL" | head -1 | cut -d: -f1)
+    printf "\n"
+    sed -n "$((LAST_ENTRY > 12 ? LAST_ENTRY - 12 : 1)),${LAST_ENTRY}p" "$JOURNAL" | sed 's/^/    /'
+    die "the last release left its lesson unwritten — fill in the '**Lesson:**' line in docs/release-log.md, commit it, and rerun"
+  fi
+fi
+ok "the last release's lesson is written down"
+
 step "Tests"
 NODE_ENV=test npx jest --silent >/dev/null 2>&1 || die "jest failed — run 'NODE_ENV=test npx jest'"
 ok "jest"
@@ -205,6 +247,21 @@ ok "no Xcode Cloud run in flight"
 
 step "What this ships"
 show_unreleased
+
+# Which of the shipping commits touched the cycle itself.
+LAST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null)
+CYCLE_TOUCHED=""
+if [ -n "$LAST_TAG" ]; then
+  # shellcheck disable=SC2086
+  CYCLE_TOUCHED=$(git diff --name-only "$LAST_TAG"..HEAD -- $CYCLE_PATHS 2>/dev/null)
+fi
+if [ -n "$CYCLE_TOUCHED" ]; then
+  printf "\n"
+  bold "  This release CHANGES THE RELEASE CYCLE:"
+  echo "$CYCLE_TOUCHED" | sed 's/^/    /'
+  echo "    → its journal entry will ask what that changed, and the next"
+  echo "      release will not start until you have answered."
+fi
 
 # ══════════════════════════════════════════════════════════════════════
 # PHASE 2 — BUILD.  Writes to the working tree and to ios/build, and
@@ -284,10 +341,49 @@ fi
 # is the whole safety mechanism: each step is only reachable because the
 # one before it succeeded.
 # ══════════════════════════════════════════════════════════════════════
+# ── THE JOURNAL ENTRY, WRITTEN INTO THE RELEASE COMMIT ────────────────
+#
+# In the release commit deliberately, not pushed separately afterwards.
+# A second push to main would start a second Xcode Cloud run, and a newer
+# run CANCELS the one before it — which is exactly how 2.13.0's iOS build
+# was lost. The one thing a retrospective must not do is break the
+# release it is reflecting on.
+#
+# So it records what is known by now: how many attempts this took and
+# where they died, and whether the cycle itself changed. The `Lesson`
+# line is the human's, and the next release is gated on it.
+step "Journal"
+ATTEMPT_LINES=""
+[ -f "$ATTEMPTS" ] && ATTEMPT_LINES=$(grep -c "	$VERSION	" "$ATTEMPTS" 2>/dev/null || echo 0)
+[ -z "$ATTEMPT_LINES" ] && ATTEMPT_LINES=0
+
+{
+  printf '\n## %s (%s) — %s\n\n' "$VERSION" "$CODE" "$(date -u +%F)"
+  if [ "$ATTEMPT_LINES" -gt 0 ]; then
+    printf 'Took %s aborted attempt(s) before it ran clean:\n\n' "$ATTEMPT_LINES"
+    grep "	$VERSION	" "$ATTEMPTS" | cut -f3 | sort | uniq -c \
+      | sed 's/^ */  - /'
+    printf '\n'
+  else
+    printf 'Ran clean on the first attempt.\n\n'
+  fi
+  if [ -n "$CYCLE_TOUCHED" ]; then
+    printf 'Changed the release cycle itself:\n\n'
+    echo "$CYCLE_TOUCHED" | sed 's/^/  - `/;s/$/`/'
+    printf '\n**Lesson:** _(unfilled)_\n'
+  elif [ "$ATTEMPT_LINES" -gt 0 ]; then
+    printf '**Lesson:** _(unfilled)_\n'
+  else
+    printf '**Lesson:** none needed — clean run, no change to the cycle.\n'
+  fi
+} >>"$JOURNAL"
+ok "docs/release-log.md updated"
+
 step "Publishing"
 
 git add "$GRADLE_FILE" "$PBXPROJ" "$ROOT/docs/index.html" \
         "$ROOT/contrib/fdroid/com.prayer_times.yml" \
+        "$JOURNAL" \
         "$ROOT/fastlane/metadata/android" || die "git add failed"
 git commit -q -m "Release $VERSION ($CODE)" || die "commit failed"
 ok "committed"
