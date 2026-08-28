@@ -335,6 +335,9 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 .card h3 { font-size: 17px; margin-bottom: 10px; }
 .card p, .card li { font-size: 15.5px; color: var(--ink-soft); }
 .card p:last-child { margin-bottom: 0; }
+/* A command must not break mid-token; let it scroll inside its own box. */
+.card p.cmd { overflow-x: auto; }
+.card p.cmd code { white-space: nowrap; }
 .card ul { margin: 0; padding-left: 18px; }
 .card li { margin-bottom: 8px; }
 .card li:last-child { margin-bottom: 0; }
@@ -721,7 +724,7 @@ footer .colophon {
       <article class="card">
         <h3>How do I install the prayer times app on a Mac with Homebrew?</h3>
         <p>One command:</p>
-        <p><code>brew install --cask hassan-ps/tap/mihrab</code></p>
+        <p class="cmd"><code>brew install --cask hassan-ps/tap/mihrab</code></p>
         <p>It installs the Mac Catalyst build — the same app as on iPad, with the Notification
           Centre widgets. The cask lives in
           <a href="https://github.com/Hassan-PS/homebrew-tap">Hassan-PS/homebrew-tap</a> and every
