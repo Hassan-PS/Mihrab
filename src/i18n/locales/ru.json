@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "Вы также можете нажать и удерживать виджет → настройки (шестеренка), чтобы настроить те же параметры на Android.",
     "notificationSound": "Звук оповещения",
+    "adhanAlarmStream": "Воспроизводить азан как будильник",
+    "adhanAlarmStreamHelp": "Использует громкость будильника, поэтому азан слышно даже в беззвучном режиме или при вибрации. Не отменяет режим «Не беспокоить».",
     "notificationSoundModalTitle": "Выберите звук оповещения",
     "notificationSoundDefault": "Уведомление по умолчанию",
     "notificationSoundDefaultHelp": "Использует звук уведомлений вашего устройства по умолчанию.",

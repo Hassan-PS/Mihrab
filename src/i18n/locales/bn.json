@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "আপনি অ্যান্ড্রয়েডে একই বিকল্পগুলি সামঞ্জস্য করতে উইজেট → সেটিংস (গিয়ার) স্পর্শ এবং ধরে রাখতে পারেন৷",
     "notificationSound": "সতর্ক শব্দ",
+    "adhanAlarmStream": "আজান অ্যালার্ম হিসেবে বাজান",
+    "adhanAlarmStreamHelp": "অ্যালার্মের ভলিউম ব্যবহার করে, তাই ফোন সাইলেন্ট বা ভাইব্রেশনে থাকলেও আজান শোনা যায়। ‘বিরক্ত করবেন না’ মোড অগ্রাহ্য করে না।",
     "notificationSoundModalTitle": "সতর্কতা শব্দ নির্বাচন করুন",
     "notificationSoundDefault": "ডিফল্ট বিজ্ঞপ্তি",
     "notificationSoundDefaultHelp": "আপনার ডিভাইসের ডিফল্ট বিজ্ঞপ্তি শব্দ ব্যবহার করে।",

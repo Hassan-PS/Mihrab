@@ -194,6 +194,94 @@ class CustomAdhanModule(private val reactContext: ReactApplicationContext) :
     promise.resolve(id)
   }
 
+  /**
+   * A channel whose sound plays through the ALARM stream.
+   *
+   * ── WHY THIS IS NATIVE, AND WHY IT IS A SECOND CHANNEL ───────────────
+   *
+   * Reported as "notification sound not working on silent/vibrate" (#9).
+   * It is not a bug: a notification channel's audio carries
+   * `USAGE_NOTIFICATION`, which Android routes to the notification stream,
+   * and the ringer switch silences that stream. Working as designed, and
+   * useless to someone who silences their phone and still wants to be
+   * called to prayer.
+   *
+   * `USAGE_ALARM` routes to the alarm stream instead, which the ringer does
+   * NOT silence — the same reason an alarm clock still goes off. Notifee's
+   * `createChannel` cannot express audio attributes at all, so this has to
+   * be built here, which is the same reason the imported-file channel above
+   * is native.
+   *
+   * A SEPARATE CHANNEL, not a modified one: a channel's sound and audio
+   * attributes are frozen the moment it is created, and calling
+   * `createNotificationChannel` again with the same id changes nothing.
+   * Toggling the setting therefore has to switch channels, not edit one —
+   * the same constraint that gives every adhan its own channel already.
+   *
+   * DND is deliberately NOT bypassed. `setBypassDnd` needs notification
+   * policy access, which is a separate permission prompt, and Do Not
+   * Disturb is a stronger statement than flicking the ringer off.
+   */
+  @ReactMethod
+  fun ensureAlarmChannel(
+      channelId: String,
+      channelName: String,
+      soundResName: String?,
+      promise: Promise,
+  ) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      promise.reject(
+          "alarm_channel_unsupported",
+          "Alarm-stream channels need Android 8 or newer",
+      )
+      return
+    }
+    val manager = reactContext.getSystemService(NotificationManager::class.java)
+    if (manager == null) {
+      promise.reject("alarm_channel_no_manager", "No NotificationManager")
+      return
+    }
+    val uri =
+        if (soundResName.isNullOrBlank()) {
+          // The imported file, when that is what is selected. Its content
+          // URI needs the same read grant the notification channel above
+          // hands out, because the sound is played by the system UI process.
+          val file = storedFile()
+          if (file == null) {
+            promise.reject("alarm_channel_no_sound", "No sound to attach")
+            return
+          }
+          contentUriFor(file).also { grantReadToSystem(it) }
+        } else {
+          Uri.parse("android.resource://${reactContext.packageName}/raw/$soundResName")
+        }
+    val channel =
+        NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+          enableVibration(true)
+          setSound(
+              uri,
+              AudioAttributes.Builder()
+                  .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                  .setUsage(AudioAttributes.USAGE_ALARM)
+                  .build(),
+          )
+        }
+    manager.createNotificationChannel(channel)
+    promise.resolve(channelId)
+  }
+
+  /** Drop a channel this module made. Used when the setting goes back off,
+   *  so Android's notification settings do not accumulate dead entries. */
+  @ReactMethod
+  fun deleteChannel(channelId: String, promise: Promise) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      reactContext
+          .getSystemService(NotificationManager::class.java)
+          ?.deleteNotificationChannel(channelId)
+    }
+    promise.resolve(null)
+  }
+
   private fun deleteChannelFor(token: String) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
     reactContext

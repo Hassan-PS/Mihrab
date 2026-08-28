@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6बीसी98ए",
     "widgetConfigureHint": "आप एंड्रॉइड पर समान विकल्पों को समायोजित करने के लिए विजेट → सेटिंग्स (गियर) को भी स्पर्श करके रख सकते हैं।",
     "notificationSound": "चेतावनी ध्वनि",
+    "adhanAlarmStream": "अज़ान को अलार्म की तरह बजाएँ",
+    "adhanAlarmStreamHelp": "अलार्म वॉल्यूम का उपयोग करता है, इसलिए फ़ोन साइलेंट या वाइब्रेट पर होने पर भी अज़ान सुनाई देती है। डू नॉट डिस्टर्ब को नहीं हटाता।",
     "notificationSoundModalTitle": "चेतावनी ध्वनि का चयन करें",
     "notificationSoundDefault": "डिफ़ॉल्ट नोटिफिकेशन",
     "notificationSoundDefaultHelp": "आपके डिवाइस की डिफ़ॉल्ट अधिसूचना ध्वनि का उपयोग करता है।",

@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "También puedes tocar y mantener presionado el widget → configuración (engranaje) para ajustar las mismas opciones en Android.",
     "notificationSound": "Sonido de alerta",
+    "adhanAlarmStream": "Reproducir el adhan como una alarma",
+    "adhanAlarmStreamHelp": "Usa el volumen de la alarma, así el adhan se oye aunque el teléfono esté en silencio o vibración. No anula el modo No molestar.",
     "notificationSoundModalTitle": "Seleccionar sonido de alerta",
     "notificationSoundDefault": "Notificación predeterminada",
     "notificationSoundDefaultHelp": "Utiliza el sonido de notificación predeterminado de su dispositivo.",

@@ -340,6 +340,7 @@ export function HomeScreen() {
       enabled: settings.notificationsEnabled,
       prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
       notificationSound: settings.notificationSound,
+      adhanUsesAlarmStream: settings.adhanUsesAlarmStream,
       today: view.table.today,
       tomorrow: view.table.tomorrow,
       // Anchor the schedule to the day the maps were FETCHED for — if this
@@ -378,6 +379,7 @@ export function HomeScreen() {
     settings.notificationsEnabled,
     settings.prePrayerReminderMinutes,
     settings.notificationSound,
+    settings.adhanUsesAlarmStream,
     settings.journalNotificationActionsEnabled,
     settings.endOfDayLogReminderEnabled,
     state,
@@ -422,6 +424,11 @@ export function HomeScreen() {
         String(settings.notificationsEnabled),
         settings.prePrayerReminderMinutes,
         settings.notificationSound,
+        // In the fingerprint because it changes which CHANNEL every prayer
+        // is scheduled against. Left out, flipping the setting would look
+        // like "nothing changed" and the alarms would keep pointing at the
+        // old channel until something else forced a rewrite.
+        String(settings.adhanUsesAlarmStream),
         state.baseDate.getTime(),
       );
       if (shouldResync(NOTIF_RESYNC_KEY, notifPrint)) {
@@ -429,6 +436,7 @@ export function HomeScreen() {
           enabled: settings.notificationsEnabled,
           prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
           notificationSound: settings.notificationSound,
+          adhanUsesAlarmStream: settings.adhanUsesAlarmStream,
           today: view.table.today,
           tomorrow: view.table.tomorrow,
           baseDate: state.baseDate,

@@ -13,10 +13,13 @@ import {
   NOTIFICATION_SOUND_OPTIONS,
   registerCustomAdhan,
   resolveSoundTargets,
+  alarmChannelId,
   type NotificationSoundId,
 } from './notificationSounds';
 import {
   ensureCustomAdhanChannel,
+  ensureAlarmAdhanChannel,
+  deleteAdhanChannel,
   syncCustomAdhan,
 } from '../native/CustomAdhan';
 import { ADHAN_CONTROLS_CATEGORY_ID } from './adhanActionIds';
@@ -92,7 +95,10 @@ const PRAYER_NOTIFICATION_ID_PREFIX = 'pt-';
 const PREVIEW_NOTIFICATION_ID = 'adhan_preview';
 let _previewCancelTimeout: ReturnType<typeof setTimeout> | null = null;
 
-async function ensureChannel(selectedSound: NotificationSoundId) {
+async function ensureChannel(
+  selectedSound: NotificationSoundId,
+  alarmStream = false,
+) {
   // BEFORE the Android-only part, because iOS needs this too: what it
   // registers is the converted clip's filename, which is how the notification
   // addresses the user's recording there.
@@ -149,6 +155,34 @@ async function ensureChannel(selectedSound: NotificationSoundId) {
       // No-op when the channel was never created (e.g. fresh installs).
       await notifee.deleteChannel(option.androidChannelId).catch(() => {});
     }
+  }
+
+  // ── THE ALARM-STREAM TWIN (issue #9) ────────────────────────────────
+  //
+  // Built natively, because Notifee's `createChannel` cannot express audio
+  // attributes and `USAGE_ALARM` is the entire point: it routes the adhan
+  // to the alarm stream, which the ringer switch does not silence.
+  //
+  // Only ever ONE of these exists — the twin of whatever adhan is
+  // selected. The ordinary channels above are still created either way:
+  // the pre-prayer reminder and Sunrise keep using them, because a
+  // reminder that overrides a silenced phone is not what was asked for.
+  //
+  // Turning the setting off deletes it, so Android's notification settings
+  // do not keep an entry that nothing posts to any more.
+  const selectedTargets = resolveSoundTargets(selectedSound);
+  const alarmId = alarmChannelId(selectedTargets.androidChannelId);
+  if (alarmStream) {
+    const option = getNotificationSoundOption(selectedSound);
+    await ensureAlarmAdhanChannel(
+      alarmId,
+      `Prayer times (${i18n.t(option.labelKey)}) — alarm`,
+      // null means "the imported recording", which the native side reads
+      // from disk. Bundled adhans name their res/raw resource.
+      selectedSound === 'custom' ? null : (option.androidSound ?? null),
+    );
+  } else {
+    await deleteAdhanChannel(alarmId);
   }
 }
 
@@ -355,6 +389,9 @@ export async function syncPrayerNotifications(params: {
   enabled: boolean;
   prePrayerReminderMinutes: number;
   notificationSound: NotificationSoundId;
+  /** Android: post the adhan to the alarm-stream channel, so the ringer
+   *  switch does not silence it (issue #9). */
+  adhanUsesAlarmStream?: boolean;
   today: TimingsMap;
   tomorrow?: TimingsMap;
   /** The local calendar day `today` was fetched for — see
@@ -378,7 +415,8 @@ export async function syncPrayerNotifications(params: {
       return { status: 'ios-permission-denied' };
     }
   }
-  await ensureChannel(params.notificationSound);
+  const useAlarmStream = params.adhanUsesAlarmStream === true;
+  await ensureChannel(params.notificationSound, useAlarmStream);
   const prayerTimeSound = getNotificationSoundOption(params.notificationSound);
   const reminderSound = getNotificationSoundOption('default');
   const exactAlarms = await canUseExactAlarms();
@@ -451,7 +489,13 @@ export async function syncPrayerNotifications(params: {
     const isMutedNext = mutedNextAdhan === `${e.at.getTime()}-${e.name}`;
     const eventSound =
       isNonPrayer || isMutedNext ? reminderSound : prayerTimeSound;
-    const eventTargets = resolveSoundTargets(eventSound.id);
+    // The alarm twin is for the CALL TO PRAYER only. Sunrise and the night
+    // times are not prayers, and a muted next adhan has just been silenced
+    // on purpose — neither should override a silenced phone.
+    const eventTargets = resolveSoundTargets(
+      eventSound.id,
+      useAlarmStream && !isNonPrayer && !isMutedNext,
+    );
     const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
     // A prayer alert says "Prayer time"; Sunrise / the night times are NOT

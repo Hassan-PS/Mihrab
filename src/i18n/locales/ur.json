@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "آپ اینڈرائیڈ پر انہی آپشنز کو ایڈجسٹ کرنے کے لیے ویجیٹ → سیٹنگز (گیئر) کو بھی ٹچ اور پکڑ سکتے ہیں۔",
     "notificationSound": "الرٹ آواز",
+    "adhanAlarmStream": "اذان کو الارم کے طور پر چلائیں",
+    "adhanAlarmStreamHelp": "الارم کی آواز استعمال کرتا ہے، اس لیے فون سائلنٹ یا وائبریٹ پر ہو تب بھی اذان سنائی دیتی ہے۔ ڈسٹرب نہ کریں کو نظرانداز نہیں کرتا۔",
     "notificationSoundModalTitle": "انتباہی آواز منتخب کریں۔",
     "notificationSoundDefault": "پہلے سے طے شدہ اطلاع",
     "notificationSoundDefaultHelp": "آپ کے آلے کی ڈیفالٹ اطلاع کی آواز استعمال کرتا ہے۔",

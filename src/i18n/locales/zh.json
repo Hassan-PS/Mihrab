@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "您还可以触摸并按住小部件 → 设置（齿轮）来调整 Android 上的相同选项。",
     "notificationSound": "警报声",
+    "adhanAlarmStream": "以闹钟方式播放宣礼",
+    "adhanAlarmStreamHelp": "使用闹钟音量，因此手机静音或振动时也能听到宣礼。不会覆盖“勿扰”模式。",
     "notificationSoundModalTitle": "选择警报声音",
     "notificationSoundDefault": "默认通知",
     "notificationSoundDefaultHelp": "使用您设备的默认通知声音。",

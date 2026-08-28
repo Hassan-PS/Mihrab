@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "Anda juga dapat menyentuh dan menahan widget → pengaturan (roda gigi) untuk menyesuaikan opsi yang sama di Android.",
     "notificationSound": "Suara peringatan",
+    "adhanAlarmStream": "Putar azan sebagai alarm",
+    "adhanAlarmStreamHelp": "Menggunakan volume alarm, sehingga azan tetap terdengar saat ponsel senyap atau getar. Tidak menimpa mode Jangan Ganggu.",
     "notificationSoundModalTitle": "Pilih suara peringatan",
     "notificationSoundDefault": "Pemberitahuan bawaan",
     "notificationSoundDefaultHelp": "Menggunakan suara notifikasi default perangkat Anda.",

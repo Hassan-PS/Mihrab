@@ -74,6 +74,7 @@ export type NotificationsSlice = Pick<
   | 'notificationsEnabled'
   | 'prePrayerReminderMinutes'
   | 'notificationSound'
+  | 'adhanUsesAlarmStream'
   | 'sunriseEnabled'
   | 'islamicMidnightEnabled'
   | 'lastThirdEnabled'
@@ -232,6 +233,7 @@ export function PrayerSettingsProvider({
       notificationsEnabled: settings.notificationsEnabled,
       prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
       notificationSound: settings.notificationSound,
+      adhanUsesAlarmStream: settings.adhanUsesAlarmStream,
       sunriseEnabled: settings.sunriseEnabled,
       islamicMidnightEnabled: settings.islamicMidnightEnabled,
       lastThirdEnabled: settings.lastThirdEnabled,
@@ -247,6 +249,7 @@ export function PrayerSettingsProvider({
       settings.notificationsEnabled,
       settings.prePrayerReminderMinutes,
       settings.notificationSound,
+      settings.adhanUsesAlarmStream,
       settings.sunriseEnabled,
       settings.islamicMidnightEnabled,
       settings.lastThirdEnabled,

@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "På Android kan du också trycka länge på widgeten → inställningar (kugghjul) för samma val.",
     "notificationSound": "Aviseringsljud",
+    "adhanAlarmStream": "Spela adhan som ett alarm",
+    "adhanAlarmStreamHelp": "Använder alarmvolymen, så att adhan hörs även när telefonen är ljudlös eller på vibration. Åsidosätter inte Stör ej.",
     "notificationSoundModalTitle": "Välj aviseringsljud",
     "notificationSoundDefault": "Standardavisering",
     "notificationSoundDefaultHelp": "Använder enhetens standardljud för aviseringar.",

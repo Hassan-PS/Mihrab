@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "You can also touch and hold the widget → settings (gear) to adjust the same options on Android.",
     "notificationSound": "Alert sound",
+    "adhanAlarmStream": "Play adhan as an alarm",
+    "adhanAlarmStreamHelp": "Uses the alarm volume, so the adhan is heard even when the phone is on silent or vibrate. Does not override Do Not Disturb.",
     "notificationSoundModalTitle": "Select alert sound",
     "notificationSoundDefault": "Default notification",
     "notificationSoundDefaultHelp": "Uses your device default notification sound.",

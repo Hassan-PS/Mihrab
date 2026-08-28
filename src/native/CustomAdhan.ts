@@ -25,6 +25,12 @@ type CustomAdhanNative = {
   current(): Promise<CustomAdhanSound | null>;
   remove(): Promise<boolean>;
   ensureChannel(channelName: string): Promise<string | null>;
+  ensureAlarmChannel(
+    channelId: string,
+    channelName: string,
+    soundResName: string | null,
+  ): Promise<string | null>;
+  deleteChannel(channelId: string): Promise<null>;
 };
 
 const native: CustomAdhanNative | undefined = (
@@ -98,6 +104,38 @@ export async function ensureCustomAdhanChannel(
     // An unsupported platform version or a missing file. The caller falls
     // back to a bundled adhan rather than scheduling something silent.
     return null;
+  }
+}
+
+/**
+ * Make sure the ALARM-stream channel for a sound exists, and return its id.
+ *
+ * `soundResName` is a bundled `res/raw` name, or null to use the imported
+ * recording. Resolves null wherever an alarm channel cannot be made — iOS,
+ * and Android before 8 — and the caller then stays on the ordinary channel
+ * rather than scheduling against one that does not exist.
+ */
+export async function ensureAlarmAdhanChannel(
+  channelId: string,
+  channelName: string,
+  soundResName: string | null,
+): Promise<string | null> {
+  if (!native || Platform.OS !== 'android') return null;
+  try {
+    return await native.ensureAlarmChannel(channelId, channelName, soundResName);
+  } catch {
+    return null;
+  }
+}
+
+/** Drop a channel this module made, so Android's notification settings do
+ *  not accumulate dead entries when the setting goes back off. */
+export async function deleteAdhanChannel(channelId: string): Promise<void> {
+  if (!native || Platform.OS !== 'android') return;
+  try {
+    await native.deleteChannel(channelId);
+  } catch {
+    // Deleting a channel that was never created is not a failure.
   }
 }
 

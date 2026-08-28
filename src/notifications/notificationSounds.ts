@@ -241,22 +241,47 @@ export function getRegisteredCustomAdhan(): CustomAdhanSound | null {
  * that was never created is a notification that arrives silently, which reads
  * as a missed prayer rather than as a missing file.
  */
-export function resolveSoundTargets(id: NotificationSoundId): {
+export function resolveSoundTargets(
+  id: NotificationSoundId,
+  /**
+   * Android only: address the ALARM-stream twin of the channel instead
+   * (`adhanUsesAlarmStream`, issue #9).
+   *
+   * A DIFFERENT CHANNEL, not a flag on the same one. A channel's sound and
+   * audio attributes are frozen at creation, so the ringer-proof variant
+   * has to be its own channel — which is also why this is a suffix on the
+   * id rather than a property of the sound option.
+   *
+   * Pass this only for the adhan itself. The pre-prayer reminder and
+   * Sunrise are reminders, not the call to prayer, and should keep obeying
+   * a silenced phone.
+   */
+  alarmStream = false,
+): {
   androidChannelId: string;
   iosSound: string;
 } {
   const option = getNotificationSoundOption(id);
   if (id !== 'custom') {
     return {
-      androidChannelId: option.androidChannelId,
+      androidChannelId: alarmStream
+        ? alarmChannelId(option.androidChannelId)
+        : option.androidChannelId,
       iosSound: option.iosSound,
     };
   }
   const fallback = getNotificationSoundOption('default');
+  const base = registeredCustom?.channelId ?? fallback.androidChannelId;
   return {
-    androidChannelId: registeredCustom?.channelId ?? fallback.androidChannelId,
+    androidChannelId: alarmStream ? alarmChannelId(base) : base,
     iosSound: registeredCustom?.soundName ?? fallback.iosSound,
   };
+}
+
+/** The alarm-stream twin of a channel id. One place, because the native
+ *  side has to create exactly the id the scheduler will address. */
+export function alarmChannelId(base: string): string {
+  return `${base}-alarm`;
 }
 
 /** Is 'custom' currently a choice the user can actually hear? */

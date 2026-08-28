@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "يمكنك أيضًا على أندرويد المس مع الاستمرار على الودجة ← الإعدادات (ترس) لنفس الخيارات.",
     "notificationSound": "صوت التنبيه",
+    "adhanAlarmStream": "تشغيل الأذان كمنبّه",
+    "adhanAlarmStreamHelp": "يستخدم مستوى صوت المنبّه، فيُسمع الأذان حتى والهاتف صامت أو على الاهتزاز. لا يتجاوز وضع عدم الإزعاج.",
     "notificationSoundModalTitle": "اختر صوت التنبيه",
     "notificationSoundDefault": "تنبيه النظام الافتراضي",
     "notificationSoundDefaultHelp": "يستخدم صوت الإشعار الافتراضي في جهازك.",

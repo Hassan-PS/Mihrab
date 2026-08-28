@@ -137,6 +137,26 @@ export type PrayerAppSettings = {
   prePrayerReminderMinutes: PrePrayerReminderMinutes;
   /** Notification sound profile for prayer alerts/reminders. */
   notificationSound: NotificationSoundId;
+  /**
+   * ANDROID: play the adhan through the alarm stream, so the ringer switch
+   * does not silence it (issue #9).
+   *
+   * A notification channel's audio carries `USAGE_NOTIFICATION`, which
+   * Android routes to the notification stream — the one the ringer
+   * silences. That is correct behaviour and useless to someone who
+   * silences their phone and still wants to be called to prayer.
+   * `USAGE_ALARM` goes to the alarm stream, which the ringer does not
+   * touch, for the same reason an alarm clock still goes off.
+   *
+   * Off by default: it is louder than what the user agreed to when they
+   * turned notifications on, and a prayer alert that ignores a silenced
+   * phone should be asked for rather than assumed.
+   *
+   * Does nothing on iOS. Notification sounds there obey the physical
+   * silent switch and only the Critical Alerts entitlement overrides it,
+   * which Apple grants to health and public-safety apps.
+   */
+  adhanUsesAlarmStream: boolean;
   /** Android: widget background opacity 0–100. */
   androidWidgetBackgroundOpacity: number;
   /** Highlight style for the widget next-prayer row. */
@@ -339,6 +359,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   notificationsEnabled: false,
   prePrayerReminderMinutes: 0,
   notificationSound: 'default',
+  adhanUsesAlarmStream: false,
   androidWidgetBackgroundOpacity: 88,
   widgetHighlightId: 'green',
   widgetHighlightCustomHex: '#6BC98A',

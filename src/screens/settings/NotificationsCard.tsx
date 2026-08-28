@@ -275,6 +275,35 @@ function NotificationsCardImpl({
         </Pressable>
       )}
 
+      {/* ANDROID ONLY, and deliberately so. iOS notification sounds obey the
+          physical silent switch, and only Apple's Critical Alerts entitlement
+          overrides that — it is granted to health and public-safety apps, not
+          to us. A toggle here that did nothing on iPhone would be worse than
+          its absence. See settings/types.ts. */}
+      {settings.notificationsEnabled && Platform.OS === 'android' && (
+        <View
+          style={[
+            s.card,
+            s.switchRow,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <View style={s.switchCopy}>
+            <Text style={[s.valueText, { color: palette.text }]}>
+              {t('settings.adhanAlarmStream')}
+            </Text>
+            <Text style={[s.help, { color: palette.muted }]}>
+              {t('settings.adhanAlarmStreamHelp')}
+            </Text>
+          </View>
+          <Switch
+            value={settings.adhanUsesAlarmStream}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor={'#ffffff'}
+            onValueChange={v => updateSettings({ adhanUsesAlarmStream: v })}
+          />
+        </View>
+      )}
+
       {settings.notificationsEnabled && (
         <Pressable
           accessibilityRole="button"

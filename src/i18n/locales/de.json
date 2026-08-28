@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "Sie können auch das Widget → Einstellungen (Zahnrad) berühren und halten, um dieselben Optionen auf Android anzupassen.",
     "notificationSound": "Alarmton",
+    "adhanAlarmStream": "Adhan als Wecker abspielen",
+    "adhanAlarmStreamHelp": "Nutzt die Wecker-Lautstärke, sodass der Adhan auch bei Stumm oder Vibration hörbar ist. Umgeht „Nicht stören“ nicht.",
     "notificationSoundModalTitle": "Wählen Sie den Alarmton aus",
     "notificationSoundDefault": "Standardbenachrichtigung",
     "notificationSoundDefaultHelp": "Verwendet den Standardbenachrichtigungston Ihres Geräts.",

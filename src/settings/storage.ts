@@ -182,6 +182,13 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (!('useSystemDynamicTheme' in parsed)) {
     merged.useSystemDynamicTheme = false;
   }
+  // A typed guard rather than a presence check: this one decides which
+  // notification channel the adhan is scheduled against, and a non-boolean
+  // that survived the spread would be truthy garbage pointing at a channel
+  // nobody created — a prayer alert that arrives silently.
+  if (typeof merged.adhanUsesAlarmStream !== 'boolean') {
+    merged.adhanUsesAlarmStream = false;
+  }
   // One-time v2.7.27 migration: the mushaf became the default reading
   // mode. Blobs written before the marker existed carry the OLD default
   // ('withTranslation') that virtually no user chose explicitly — apply

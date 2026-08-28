@@ -181,6 +181,8 @@
     "widgetHighlightHexPlaceholder": "#6BC98A",
     "widgetConfigureHint": "Aynı seçenekleri Android'de de ayarlamak için widget → ayarlara (dişli) dokunup basılı tutabilirsiniz.",
     "notificationSound": "Uyarı sesi",
+    "adhanAlarmStream": "Ezanı alarm olarak çal",
+    "adhanAlarmStreamHelp": "Alarm ses seviyesini kullanır, böylece telefon sessiz veya titreşimdeyken de ezan duyulur. Rahatsız Etmeyin modunu geçersiz kılmaz.",
     "notificationSoundModalTitle": "Uyarı sesini seçin",
     "notificationSoundDefault": "Varsayılan bildirim",
     "notificationSoundDefaultHelp": "Cihazınızın varsayılan bildirim sesini kullanır.",
