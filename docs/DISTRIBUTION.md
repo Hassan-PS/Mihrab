@@ -24,27 +24,56 @@ The Android `app/build.gradle` declares two product flavors (`fdroid` / `play`) 
 
 ## 1. Shared release flow (everyone first)
 
-Every production release does these once, in order:
+```sh
+./scripts/release.sh --unreleased    # what is on main and has never shipped
+./scripts/release.sh 2.14.0 --dry-run   # every check, and every build, then stop
+./scripts/release.sh 2.14.0             # the whole thing
+```
 
-1. **Bump versions** — both platforms together.
-   - `android/app/build.gradle` → `versionCode` (+1) and `versionName` (e.g. `"2.1.0"`).
-   - `ios/PrayerApp.xcodeproj/project.pbxproj` → `CURRENT_PROJECT_VERSION` (matches Android's `versionCode`) and `MARKETING_VERSION` (matches Android's `versionName`), 4 occurrences each (main target Debug/Release × widget extension Debug/Release).
-   ```sh
-   sed -i '' \
-     's/CURRENT_PROJECT_VERSION = OLD/CURRENT_PROJECT_VERSION = NEW/g;
-      s/MARKETING_VERSION = X.Y.Z/MARKETING_VERSION = NEW.X.Y/g' \
-     ios/PrayerApp.xcodeproj/project.pbxproj
-   ```
-2. **Update `CHANGELOG.md`** under a new `## [X.Y.Z] — YYYY-MM-DD` heading. Group as `Added`, `Changed`, `Fixed`, `Removed`.
-2b. **Stamp the website:** `node scripts/sync-version.js`. It reads the version out of `android/app/build.gradle` and rewrites the two places `docs/index.html` names it. Do not retype either by hand — they drifted from the app *and from each other* for three releases before this existed. `npm test` fails on a stale site (`__tests__/siteVersion.test.ts`), and `verify-release.sh` checks both the committed file and the live page.
-3. **Commit and push `main`** — this triggers Xcode Cloud's Beta workflow.
-4. **Tag the commit** `vX.Y.Z` (or `vX.Y.Z-beta.N` for prereleases) and push the tag.
-5. **Build the Android binaries locally** (next sections).
-6. **Create a GitHub release** with the F-Droid APK attached.
-7. **Nothing for F-Droid** — the recipe is merged and set to auto-update from tags. See §2.
-8. **Upload the Play AAB** to the Play Console.
+**One command, and it is the only supported way to cut a release.** It
+bumps both platforms, stamps the site and the F-Droid recipe, builds all
+three artifacts, publishes the tag, the GitHub release and the Homebrew
+cask, and then runs `verify-release.sh` against what is live.
 
-For beta tags, swap the Gradle commands for `assembleFdroidBeta` / `bundlePlayBeta` and mark the GitHub release as **prerelease**.
+### Why it is a script and not a list
+
+This section used to be that list, and §6 used to be a thirteen-step
+version of it. Every release incident this project has had came out of
+them — not from carelessness, but because a checklist is the wrong shape
+for a job with an irreversible step in the middle:
+
+| What happened | What the list said about it |
+|---|---|
+| 2.11.0 shipped **ad-hoc signed** — no team identifier, so codesign dropped every entitlement: no App Group, no widget data, no Keychain, and a new sync identity that orphaned every paired device's file | nothing; signing was not a step |
+| A **tag was pushed before `main` landed**, naming a commit nobody could fetch — and a pushed tag is never moved here, so history had to be merged around it | right order, no enforcement |
+| **Play rejected the release notes** at 500+ characters, found *after* the tag and release were public | nothing |
+| **Fixes sat on `main` for days**, released to nobody, because nothing said so out loud | nothing |
+| **Every Mac's widgets froze on upgrade**, fixed only by the cask's `postflight` | the list predates the Mac build |
+
+The script's one rule: **everything that can fail happens before anything
+that cannot be undone.** Tests, the changelog limits, the Xcode Cloud
+in-flight check, the signature and App Group of the *actual* zip about to
+be published — all before the first `git push`. After that the order is
+main → tag → GitHub release → tap, because each is only recoverable by
+the one before it having already succeeded.
+
+`--dry-run` stops at exactly that line, having done all the work and none
+of the publishing.
+
+### What it still cannot do for you
+
+Two things need a human at a console, and the script prints both when it
+finishes:
+
+- **Play** — upload `app-play-release.aab`. The release notes for the new
+  `versionCode` must already be in `fastlane/metadata/android/*/changelogs/`
+  before you start; the script refuses to run without them.
+- **App Store** — Xcode Cloud starts on the push to `main`; submit from
+  App Store Connect once it succeeds (`./scripts/xcode-cloud.py runs 3`).
+
+For beta tags, swap the Gradle commands for `assembleFdroidBeta` /
+`bundlePlayBeta` and mark the GitHub release as **prerelease** — the
+script does production tags only.
 
 ---
 
@@ -305,25 +334,43 @@ For beta tags, add `--prerelease`.
 
 ---
 
-## 6. End-to-end checklist (production tag `vX.Y.Z`)
+## 6. End-to-end release
 
-Run top to bottom:
+`./scripts/release.sh X.Y.Z` — see §1.
 
-1. ☐ Bump `versionCode` + `versionName` in `android/app/build.gradle`.
-2. ☐ Bump `CURRENT_PROJECT_VERSION` + `MARKETING_VERSION` in `ios/PrayerApp.xcodeproj/project.pbxproj` (4 occurrences each).
-3. ☐ Update `CHANGELOG.md` under a new `## [X.Y.Z] — YYYY-MM-DD` heading.
-4. ☐ Update `CLAUDE.md`'s "Current:" line.
-5. ☐ `./android/gradlew -p android assembleFdroidRelease` (local sanity build).
-6. ☐ `./android/gradlew -p android bundlePlayRelease` (Play AAB).
-7. ☐ `git push origin main` (triggers Xcode Cloud Beta workflow).
-8. ☐ `git tag vX.Y.Z && git push origin vX.Y.Z` (triggers Xcode Cloud Release workflow).
-9. ☐ `gh release create vX.Y.Z ... app-fdroid-release.apk` (attach F-Droid APK).
-10. ☐ Bump `contrib/fdroid/com.prayer_times.yml` (`Builds:` entry + `CurrentVersion:` + `CurrentVersionCode:`).
-11. ☐ Mirror to `~/git/fdroiddata/metadata/com.prayer_times.yml` and push the fdroiddata fork branch.
-12. ☐ Upload `app-play-release.aab` to Play Console.
-13. ☐ Submit the App Store build for review.
+There used to be a thirteen-step checklist here, kept in parallel with the
+one in §1. Two copies of the same procedure is how a procedure goes wrong:
+by the time it was replaced this one had no Catalyst build, no Homebrew
+cask, no signing check and no release notes limit, and still asked for a
+`CHANGELOG.md` heading and a `CLAUDE.md` line that nothing reads. Anyone
+following it faithfully would have shipped a broken macOS build.
 
-For beta tags, swap steps 5/6 for `assembleFdroidBeta` / `bundlePlayBeta` and mark step 9's release `--prerelease`.
+### Preparing the release notes
+
+The only thing you must do by hand before running the script, because it
+refuses to start without them:
+
+```sh
+CODE=$(( $(grep -o 'versionCode [0-9]*' android/app/build.gradle | head -1 | awk '{print $2}') + 1 ))
+for l in en-US sv-SE ar; do
+  $EDITOR "fastlane/metadata/android/$l/changelogs/$CODE.txt"
+done
+```
+
+Under 500 **characters** each — `wc -m`, not `wc -c`; Arabic and Swedish
+are well under the limit in characters and can be over it in bytes.
+
+### If something fails partway
+
+- **Before the "Publishing" step** — nothing has left your machine. The
+  version bump is in the working tree; `git checkout --` the four stamped
+  files and start again.
+- **After `main` is pushed but before the tag** — safe to rerun once the
+  cause is fixed; the script refuses a tag that already exists rather than
+  moving one.
+- **After the tag** — do not retag. Fix forward with the next patch
+  version. Retagging silently converts the GitHub release to a draft and
+  every asset URL starts 404ing, which breaks `brew install` (v2.7.39).
 
 ---
 

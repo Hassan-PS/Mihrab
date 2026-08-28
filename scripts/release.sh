@@ -1,0 +1,338 @@
+#!/bin/bash
+# Cut a release, in an order that cannot strand one.
+#
+#   ./scripts/release.sh 2.13.2              # the whole thing
+#   ./scripts/release.sh 2.13.2 --dry-run    # everything up to the first
+#                                            #   irreversible step, then stop
+#   ./scripts/release.sh --unreleased        # what is on main and has never
+#                                            #   shipped
+#
+# ── WHY THIS EXISTS ───────────────────────────────────────────────────
+#
+# It replaces a thirteen-step checklist in docs/DISTRIBUTION.md that was
+# run by hand every time. Every release incident this project has had came
+# from that: not from anyone being careless, but from a list of steps being
+# the wrong tool for a job with an irreversible step in the middle of it.
+#
+#   • 2.11.0 SHIPPED AD-HOC SIGNED. `SIGN_IDENTITY` was not set, a gate
+#     written `!= "-"` let it through, and codesign silently dropped every
+#     entitlement: no App Group so no widget data, no widget host so
+#     nothing in the gallery, no Keychain so a brand-new sync identity that
+#     orphaned the old device's file in every shared folder. Signature
+#     verification passed. Notarization was never reached. The checklist
+#     did not mention signing at all.
+#
+#   • A TAG WAS PUSHED BEFORE `main` LANDED. The push failed, the tag did
+#     not, and a pushed tag must never be moved — so the history had to be
+#     merged around it rather than rebased.
+#
+#   • PLAY REJECTED THE RELEASE NOTES for being over 500 characters, and
+#     that was found by `verify-release.sh` AFTER the tag and the GitHub
+#     release were already public. It is a thing you can know before you
+#     start.
+#
+#   • FIXES SAT ON `main` FOR DAYS, released to nobody, because nothing
+#     ever said so out loud. Hence `--unreleased`, and hence the log this
+#     prints before it asks for anything.
+#
+#   • macOS WIDGETS FROZE ON EVERY UPGRADE and the cask postflight that
+#     fixes it was not in any checklist, because the checklist predates
+#     the Mac build entirely.
+#
+# ── THE ONE RULE ──────────────────────────────────────────────────────
+#
+# Everything that can fail happens BEFORE anything that cannot be undone.
+# Tests, changelog limits, signing, the built artifacts' own version
+# stamps — all of it is checked while the only cost of stopping is your
+# time. `git push`, the tag, the GitHub release and the tap come after,
+# in that order, because each is recoverable only by the one before it
+# having already succeeded.
+set -uo pipefail
+
+REPO="Hassan-PS/Mihrab"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+TAP="$HOME/git/homebrew-tap/Casks/mihrab.rb"
+GRADLE_FILE="$ROOT/android/app/build.gradle"
+PBXPROJ="$ROOT/ios/PrayerApp.xcodeproj/project.pbxproj"
+LOCALES="en-US sv-SE ar"
+JDK="/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home"
+
+bold() { printf "\033[1m%s\033[0m\n" "$1"; }
+step() { printf "\n\033[1m▸ %s\033[0m\n" "$1"; }
+ok()   { printf "  ✓ %s\n" "$1"; }
+die()  { printf "\n  ✗ %s\n\n" "$1" >&2; exit 1; }
+
+current_version() { grep -o 'versionName "[^"]*"' "$GRADLE_FILE" | head -1 | cut -d'"' -f2; }
+current_code()    { grep -o 'versionCode [0-9]*'  "$GRADLE_FILE" | head -1 | awk '{print $2}'; }
+
+# ── --unreleased ──────────────────────────────────────────────────────
+#
+# The question that went unasked for days at a time. A fix that is merged
+# and not shipped is, from the outside, a fix that was never made.
+show_unreleased() {
+  git -C "$ROOT" fetch --quiet --tags origin 2>/dev/null
+  local last
+  last=$(git -C "$ROOT" describe --tags --abbrev=0 --match 'v*' 2>/dev/null)
+  if [ -z "$last" ]; then
+    bold "No release tag found — everything on main is unreleased."
+    return 0
+  fi
+  local n
+  n=$(git -C "$ROOT" rev-list --count "$last"..main 2>/dev/null || echo 0)
+  if [ "$n" = "0" ]; then
+    bold "main is $last. Nothing unreleased."
+    return 0
+  fi
+  bold "$n commit(s) on main since $last — released to nobody:"
+  git -C "$ROOT" log --oneline --no-decorate "$last"..main | sed 's/^/  /'
+  # The version in the tree, NOT the shipped one — they differ exactly when
+  # a bump is sitting uncommitted, which is worth seeing rather than hiding.
+  printf "\nLast tag %s.  Working tree says %s (%s).\n" \
+    "$last" "$(current_version)" "$(current_code)"
+}
+
+if [ "${1:-}" = "--unreleased" ]; then
+  show_unreleased
+  exit 0
+fi
+
+VERSION="${1:-}"
+DRY_RUN=0
+[ "${2:-}" = "--dry-run" ] && DRY_RUN=1
+[ -z "$VERSION" ] && die "usage: release.sh X.Y.Z [--dry-run] | release.sh --unreleased"
+echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' \
+  || die "version must be X.Y.Z, got '$VERSION'"
+
+TAG="v$VERSION"
+OLD_VERSION="$(current_version)"
+OLD_CODE="$(current_code)"
+CODE=$((OLD_CODE + 1))
+
+# ══════════════════════════════════════════════════════════════════════
+# PHASE 1 — PREFLIGHT.  Nothing is written. Everything that can say no
+# says it here, while stopping costs nothing but the time already spent.
+# ══════════════════════════════════════════════════════════════════════
+bold "Releasing $OLD_VERSION ($OLD_CODE) → $VERSION ($CODE)"
+step "Preflight"
+
+for tool in gh git node python3; do
+  command -v "$tool" >/dev/null || die "$tool is not installed"
+done
+ok "tools present"
+
+cd "$ROOT" || die "cannot enter $ROOT"
+
+[ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || die "not on main"
+# Untracked files are the author's business; STAGED or MODIFIED tracked
+# files are not, because the release commit would sweep them up.
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  git status --short --untracked-files=no | sed 's/^/    /'
+  die "working tree has tracked changes — commit or stash them first"
+fi
+ok "on main, tracked files clean"
+
+git fetch --quiet origin || die "cannot reach origin"
+if [ -n "$(git rev-list origin/main..main --not --all 2>/dev/null)" ]; then :; fi
+if [ -n "$(git rev-list main..origin/main 2>/dev/null)" ]; then
+  die "origin/main has commits main does not — pull first"
+fi
+ok "main is not behind origin"
+
+# A pushed tag is never moved in this project, so a tag that already
+# exists is a hard stop rather than something to force past.
+if git rev-parse "$TAG" >/dev/null 2>&1; then
+  die "tag $TAG already exists locally"
+fi
+if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+  die "tag $TAG already exists on origin — pick the next version"
+fi
+ok "$TAG is free"
+
+[ "$VERSION" != "$OLD_VERSION" ] || die "version is already $VERSION"
+ok "version moves $OLD_VERSION → $VERSION"
+
+# Play's limit, checked BEFORE the tag rather than after. 2.13.0 went out
+# with all three locales over it and the gate caught it only once the
+# release was already public.
+for loc in $LOCALES; do
+  note="$ROOT/fastlane/metadata/android/$loc/changelogs/$CODE.txt"
+  [ -f "$note" ] || die "missing release notes: $loc/changelogs/$CODE.txt"
+  chars=$(wc -m < "$note" | tr -d ' ')
+  [ "$chars" -le 500 ] \
+    || die "$loc/changelogs/$CODE.txt is $chars characters — Play's limit is 500"
+  ok "release notes for $loc ($chars chars)"
+done
+
+# The cask is the only code that runs when a Mac replaces the app, and it
+# is what stops every widget freezing on upgrade. See verify-release.sh 4a.
+if [ -f "$TAP" ]; then
+  grep -q postflight "$TAP" && grep -q chronod "$TAP" \
+    || die "cask has no chronod postflight — Macs upgrading to $TAG would freeze their widgets"
+  ok "cask restarts chronod after install"
+else
+  die "cask not found at $TAP — clone the tap before releasing"
+fi
+
+step "Tests"
+NODE_ENV=test npx jest --silent >/dev/null 2>&1 || die "jest failed — run 'NODE_ENV=test npx jest'"
+ok "jest"
+npx tsc --noEmit >/dev/null 2>&1 || die "tsc failed — run 'npx tsc --noEmit'"
+ok "tsc"
+
+# One workflow, started by a push to main. A second run started while one
+# is live kills both ("An update has been initiated by another request"),
+# which is how 2.12.0's iOS build was lost.
+if python3 "$ROOT/scripts/xcode-cloud.py" runs 1 2>/dev/null | grep -q "PENDING\|RUNNING"; then
+  die "an Xcode Cloud run is already in flight — let it finish, or it and the release build will kill each other"
+fi
+ok "no Xcode Cloud run in flight"
+
+step "What this ships"
+show_unreleased
+
+# ══════════════════════════════════════════════════════════════════════
+# PHASE 2 — BUILD.  Writes to the working tree and to ios/build, and
+# nothing else. Everything here is `git checkout` away from undone.
+# ══════════════════════════════════════════════════════════════════════
+step "Stamping $VERSION ($CODE)"
+sed -i '' "s/versionCode $OLD_CODE/versionCode $CODE/" "$GRADLE_FILE"
+sed -i '' "s/versionName \"$OLD_VERSION\"/versionName \"$VERSION\"/" "$GRADLE_FILE"
+sed -i '' "s/CURRENT_PROJECT_VERSION = $OLD_CODE;/CURRENT_PROJECT_VERSION = $CODE;/g" "$PBXPROJ"
+sed -i '' "s/MARKETING_VERSION = $OLD_VERSION;/MARKETING_VERSION = $VERSION;/g" "$PBXPROJ"
+node "$ROOT/scripts/sync-version.js" >/dev/null || die "sync-version failed"
+[ "$(current_code)" = "$CODE" ] || die "gradle stamp did not take"
+grep -q "MARKETING_VERSION = $VERSION;" "$PBXPROJ" || die "pbxproj stamp did not take"
+ok "build.gradle, pbxproj, site and F-Droid recipe all say $VERSION ($CODE)"
+
+step "Android"
+# TWO INVOCATIONS, deliberately. The play and fdroid flavors have
+# different signing config and manifest merges, and building them in one
+# gradle run has produced an APK carrying the other flavor's settings.
+( cd "$ROOT/android" && JAVA_HOME="$JDK" ./gradlew -q assemblePlayRelease bundlePlayRelease ) \
+  || die "play build failed"
+ok "play APK + AAB"
+( cd "$ROOT/android" && JAVA_HOME="$JDK" ./gradlew -q assembleFdroidRelease ) \
+  || die "fdroid build failed"
+ok "fdroid APK"
+
+# Ask the artifact what it thinks it is, rather than trusting the stamp.
+APK="$ROOT/android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk"
+AAB="$ROOT/android/app/build/outputs/bundle/playRelease/app-play-release.aab"
+AAPT=$(ls "$HOME"/Library/Android/sdk/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1)
+if [ -n "$AAPT" ]; then
+  badge=$("$AAPT" dump badging "$APK" 2>/dev/null | head -1)
+  echo "$badge" | grep -q "versionCode='$CODE'" || die "APK reports the wrong versionCode: $badge"
+  echo "$badge" | grep -q "versionName='$VERSION'" || die "APK reports the wrong versionName: $badge"
+  ok "APK badging confirms $VERSION ($CODE)"
+fi
+
+step "macOS (Catalyst)"
+"$ROOT/scripts/build-catalyst.sh" >/tmp/release-catalyst.log 2>&1 \
+  || { tail -20 /tmp/release-catalyst.log; die "catalyst build failed — /tmp/release-catalyst.log"; }
+ZIP="$ROOT/ios/build/catalyst-dist/Mihrab-macOS-$VERSION.zip"
+[ -f "$ZIP" ] || die "catalyst build produced no $ZIP"
+ok "$(basename "$ZIP")"
+
+# The 2.11.0 check, run on what is about to be PUBLISHED rather than on
+# what happens to be in ios/build afterwards. An ad-hoc signature has no
+# team identifier, and without one codesign drops every entitlement —
+# which is invisible to `codesign --verify` and fatal to the widgets.
+UNZIP=$(mktemp -d)
+ditto -x -k "$ZIP" "$UNZIP" || die "cannot unpack $ZIP"
+APP="$UNZIP/Mihrab.app"
+codesign -dv "$APP" 2>&1 | grep -q "TeamIdentifier=GAW23HT439" \
+  || die "the app about to be published is not signed by the Developer ID — this is the 2.11.0 failure"
+ok "signed by team GAW23HT439"
+codesign -d --entitlements - --xml "$APP" 2>/dev/null | grep -q "group.com.prayerapp" \
+  || die "no App Group entitlement — widgets would have no data"
+ok "App Group sealed in"
+rm -rf "$UNZIP"
+
+if [ "$DRY_RUN" = "1" ]; then
+  printf "\n"
+  bold "Dry run. Everything that can fail has passed."
+  echo "  Artifacts:"
+  echo "    $APK"
+  echo "    $AAB"
+  echo "    $ZIP"
+  echo
+  echo "  The version bump is in your working tree. Undo it with:"
+  echo "    git checkout -- android/app/build.gradle ios/PrayerApp.xcodeproj/project.pbxproj docs/index.html contrib/fdroid/com.prayer_times.yml"
+  exit 0
+fi
+
+# ══════════════════════════════════════════════════════════════════════
+# PHASE 3 — PUBLISH.  From here nothing can be taken back, so the order
+# is the whole safety mechanism: each step is only reachable because the
+# one before it succeeded.
+# ══════════════════════════════════════════════════════════════════════
+step "Publishing"
+
+git add "$GRADLE_FILE" "$PBXPROJ" "$ROOT/docs/index.html" \
+        "$ROOT/contrib/fdroid/com.prayer_times.yml" \
+        "$ROOT/fastlane/metadata/android" || die "git add failed"
+git commit -q -m "Release $VERSION ($CODE)" || die "commit failed"
+ok "committed"
+
+# MAIN BEFORE THE TAG, always. A tag pushed while main is still local
+# names a commit nobody else can see, and this project does not move a
+# pushed tag — so the recovery is to merge around it for ever.
+git push -q origin main || die "push to main failed — nothing tagged, nothing published, fix and rerun"
+ok "main pushed"
+
+git tag -a "$TAG" -m "Mihrab $VERSION ($CODE)" || die "tag failed"
+git push -q origin "$TAG" || die "tag push failed — main is pushed, so rerunning after a fix is safe"
+ok "$TAG pushed"
+
+NOTES="${RELEASE_NOTES:-}"
+if [ -n "$NOTES" ] && [ -f "$NOTES" ]; then
+  gh release create "$TAG" -R "$REPO" --title "Mihrab $VERSION" \
+     --notes-file "$NOTES" --latest "$APK#Mihrab-v$VERSION-fdroid.apk" "$ZIP" \
+     >/dev/null || die "gh release failed"
+else
+  gh release create "$TAG" -R "$REPO" --title "Mihrab $VERSION" \
+     --generate-notes --latest "$APK#Mihrab-v$VERSION-fdroid.apk" "$ZIP" \
+     >/dev/null || die "gh release failed"
+  echo "  (generated notes — set RELEASE_NOTES=/path/to/notes.md to write your own)"
+fi
+ok "GitHub release published with both assets"
+
+# The cask is bumped against the sha of the zip AS PUBLISHED, downloaded
+# back from the release, not against the local file. They came apart once
+# and `brew install` served a zip whose checksum the cask rejected.
+step "Homebrew tap"
+TMPZIP=$(mktemp)
+curl -sL -o "$TMPZIP" \
+  "https://github.com/$REPO/releases/download/$TAG/Mihrab-macOS-$VERSION.zip" \
+  || die "cannot download the published zip"
+SHA=$(shasum -a 256 "$TMPZIP" | cut -d' ' -f1)
+rm -f "$TMPZIP"
+OLD_SHA=$(grep -o 'sha256 "[a-f0-9]*"' "$TAP" | cut -d'"' -f2)
+sed -i '' "s/version \"$OLD_VERSION\"/version \"$VERSION\"/" "$TAP"
+sed -i '' "s/$OLD_SHA/$SHA/" "$TAP"
+( cd "$(dirname "$TAP")/.." \
+  && git add Casks/mihrab.rb \
+  && git commit -q -m "mihrab $VERSION" \
+  && git push -q origin HEAD ) || die "tap push failed — run verify-release.sh and fix the cask by hand"
+ok "cask at $VERSION, sha matches the published zip"
+
+# ══════════════════════════════════════════════════════════════════════
+# PHASE 4 — VERIFY.  The same gate as always, against what is now live.
+# ══════════════════════════════════════════════════════════════════════
+step "Verifying"
+"$ROOT/scripts/verify-release.sh" "$TAG" || die "verification failed — see the ✗ lines above"
+
+printf "\n"
+bold "$VERSION ($CODE) is live on GitHub, Homebrew and the F-Droid recipe."
+cat <<EOF
+
+  Still yours to do — both need a human at a console:
+
+    Play      upload $AAB
+              (release notes for this build are already in the repo)
+
+    App Store Xcode Cloud starts on the push to main; when it succeeds the
+              build is in App Store Connect to submit.
+              ./scripts/xcode-cloud.py runs 3
+
+EOF
