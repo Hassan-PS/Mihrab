@@ -49,6 +49,11 @@ RCT_EXPORT_METHOD(setData
   } else {
     [store removeObjectForKey:@"prayer_widget_language"];
   }
+  // Every other writer in this file synchronizes and this one did not — the
+  // one that writes the payload every widget reads. The extension is a
+  // separate process with its own view of the group container, and the
+  // reload below is a race against it: flush first, then ask.
+  [store synchronize];
   [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);
 }
@@ -77,7 +82,7 @@ RCT_EXPORT_METHOD(takeLogQueue
     // whatever the payload said. Android reloads here; this side did not,
     // and the card kept its doubled state until some later setData happened
     // to correct it. Ask for a redraw at the moment the queue empties.
-    [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
+    [WidgetTimelineReloader reloadAllTimelinesNow];
   }
   resolve(json);
 }
@@ -100,7 +105,9 @@ RCT_EXPORT_METHOD(takeTasbihQueue
   if (json != nil) {
     [target removeObjectForKey:@"widget_tasbih_queue"];
     [target synchronize];
-    [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
+    // Uncoalesced, like the log queue above: the card is showing the drained
+    // taps twice until this lands.
+    [WidgetTimelineReloader reloadAllTimelinesNow];
   }
   resolve(json);
 }

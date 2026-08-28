@@ -79,6 +79,29 @@ if [ -f "$TAP" ]; then
       fail "cask sha256 ($cask_sha) != published zip ($dl_sha) — re-upload the zip or update the cask"
     fi
 
+    # ── 4a. THE CASK RESTARTS THE WIDGET DAEMON ────────────────────────
+    #
+    # Replacing the app in place freezes every widget AND every gallery
+    # preview: chronod validates its archived timelines against the bundle
+    # that produced them, and after an upgrade every reload fails with
+    # `bundleStubNotSupported ("Bundle version did not match")`. It does not
+    # recover — measured 2026-08-28, retries pushed out an hour and then a
+    # full day while the cards kept drawing pre-upgrade data.
+    #
+    # Nothing in the app can prevent it: two consecutive builds with no
+    # localized-string keys left in any archived view froze exactly the
+    # same. `lsregister -f -R` does not clear it either. Restarting chronod
+    # does, every time, and the cask's postflight is the only code that runs
+    # at the moment the app is replaced.
+    #
+    # So this is a release gate, not a nicety. Without it every Mac user's
+    # widgets stop at the version they upgraded FROM.
+    if grep -q "postflight" "$TAP" && grep -q "chronod" "$TAP"; then
+      pass "cask restarts chronod after install"
+    else
+      fail "cask has no chronod postflight — every Mac upgrading to $TAG freezes its widgets"
+    fi
+
     # ── 4b. THE PUBLISHED APP IS ACTUALLY SIGNED WITH THE DEVELOPER ID ──
     #
     # Checked on what is SERVED, not on what is sitting in ios/build, because

@@ -96,13 +96,17 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
         .putString(PrayerWidgetProvider.PREFS_LANGUAGE, language)
         .apply()
       // Every widget kind reads the same payload, so every one of them has
-      // to be told. A provider left out here is one that keeps yesterday's
-      // numbers until something else happens to wake it.
+      // to be told — and `requestUpdate` is the ONE place that knows the
+      // full list. It fans out to Log, Streak, Reading, Hijri and Tasbih
+      // itself, each behind its own guard.
+      //
+      // This used to name five of them again here, after the fan-out had
+      // already drawn them: four redrew twice per payload, and the Log
+      // widget — the only kind the list left out — was the one relying
+      // entirely on the fan-out it was written to duplicate. A list of
+      // widget kinds maintained in two places is a list that will be wrong
+      // in one of them, and it already was.
       PrayerWidgetProvider.requestUpdate(reactContext)
-      PrayerWidgetStreakProvider.requestUpdate(reactContext)
-      PrayerWidgetReadingProvider.requestUpdate(reactContext)
-      PrayerWidgetTasbihProvider.requestUpdate(reactContext)
-      PrayerWidgetHijriProvider.requestUpdate(reactContext)
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("E_WIDGET", e.message, e)
