@@ -357,6 +357,13 @@ class MihrabLiveActivityService : Service() {
     }
   }
 
+  /** Sunrise and the two night times — times, not salāh. Mirrors
+   *  OPTIONAL_TIME_KEYS in src/types/prayer.ts. */
+  private fun isNonPrayerKey(key: String): Boolean =
+      key.equals("Sunrise", ignoreCase = true) ||
+          key.equals("Midnight", ignoreCase = true) ||
+          key.equals("Lastthird", ignoreCase = true)
+
   /**
    * If `nextEpochMs` in the cached payload has passed, scan `rows[]` for
    * the next prayer that is in the future and return an updated payload
@@ -419,6 +426,15 @@ class MihrabLiveActivityService : Service() {
           updated.put("nextLabel", row.name)
           updated.put("nextTime", row.time)
           updated.put("title", "${row.name} · ${row.time}")
+          // The mute button belongs to the CALL TO PRAYER, and this walk
+          // steps onto Sunrise deliberately (it is injected above so the
+          // card can count down to it). JS computed `adhanActionEnabled`
+          // for whatever was next at sync time and does not get a say in
+          // this hop, so leaving the flag alone left a button pointed at
+          // Sunrise — and the headless task behind it would have scheduled
+          // Sunrise on the adhan channel. Only ever cleared here: turning
+          // it back on is JS's call, on the next sync.
+          if (isNonPrayerKey(row.key)) updated.put("adhanActionEnabled", false)
           Log.i(TAG, "Auto-advance: $currentKey → ${row.key} @ ${row.time} (epoch=$epochMs)")
           return updated.toString()
         }

@@ -47,3 +47,20 @@ export type NextSalahName = (typeof NEXT_SALAH_ORDER)[number];
  */
 export const OPTIONAL_TIME_KEYS = ['Sunrise', 'Midnight', 'Lastthird'] as const;
 export type OptionalTimeKey = (typeof OPTIONAL_TIME_KEYS)[number];
+
+const NON_PRAYER_EVENTS: ReadonlySet<string> = new Set(OPTIONAL_TIME_KEYS);
+
+/**
+ * Sunrise, Islamic Midnight and the Last Third are times, not prayers.
+ *
+ * They must never carry the adhan, a log action, or anything else that
+ * treats them as salāh. This lives here, next to the list, because it was
+ * asked in two places and only one of them answered correctly: the
+ * scheduler had its own copy of this set, and the "Mute next adhan"
+ * headless task — which re-creates a scheduled alert on the adhan channel
+ * — had no check at all, so an unmute aimed at Sunrise handed it the call
+ * to prayer.
+ */
+export function isNonPrayerEvent(name: string): boolean {
+  return NON_PRAYER_EVENTS.has(name);
+}

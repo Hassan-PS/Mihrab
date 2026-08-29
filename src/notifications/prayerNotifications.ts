@@ -28,15 +28,17 @@ import { JOURNAL_LOG_ACTION_ID } from './prayerLogAction';
 import { AdhanPlayer } from '../native/AdhanPlayer';
 import { getMutedNextAdhan } from './adhanMute';
 import type { TimingsMap } from '../types/prayer';
-import { OPTIONAL_TIME_KEYS } from '../types/prayer';
+import { isNonPrayerEvent } from '../types/prayer';
 import {
   buildPrePrayerReminderEvents,
   buildUpcomingSalahEvents,
   formatLocalTime,
 } from '../utils/prayerTimes';
 
-/** Sunrise + the two night times are not salāh: default sound, no adhan, no journal action. */
-const NON_PRAYER_EVENTS = new Set<string>(OPTIONAL_TIME_KEYS);
+/** Sunrise + the two night times are not salāh: default sound, no adhan, no
+ *  journal action. The predicate lives in types/prayer beside the list, so
+ *  every path that has to ask asks the same question — this file used to own
+ *  the only copy, and the mute task did not have one. */
 
 /** Safety cap for how long a delivered prayer notification lingers before it
  *  auto-dismisses, when the next prayer is unusually far off (e.g. Isha→Fajr). */
@@ -485,7 +487,7 @@ export async function syncPrayerNotifications(params: {
     // must never play the adhan even when one is selected for the five daily
     // prayers. They fall back to the plain default notification sound; every
     // actual prayer uses the user's chosen adhan/sound.
-    const isNonPrayer = NON_PRAYER_EVENTS.has(e.name);
+    const isNonPrayer = isNonPrayerEvent(e.name);
     const isMutedNext = mutedNextAdhan === `${e.at.getTime()}-${e.name}`;
     const eventSound =
       isNonPrayer || isMutedNext ? reminderSound : prayerTimeSound;

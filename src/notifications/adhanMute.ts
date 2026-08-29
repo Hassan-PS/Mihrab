@@ -13,6 +13,7 @@
  */
 import notifee, { AndroidImportance, TriggerType } from '@notifee/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isNonPrayerEvent } from '../types/prayer';
 
 /** AsyncStorage key: "<epochMs>-<PrayerName>" of the muted prayer, or empty. */
 export const MUTED_NEXT_ADHAN_KEY = 'mihrab.muted_next_adhan';
@@ -61,9 +62,25 @@ export async function adhanMuteToggleTask(
     // Past events can't be changed; the marker alone is enough for any resync.
     if (epoch <= Date.now()) return;
 
-    const channelId = muted
-      ? data.defaultChannelId || DEFAULT_CHANNEL
-      : data.adhanChannelId || DEFAULT_CHANNEL;
+    // WHAT THIS TASK IS HANDED IS NOT NECESSARILY A PRAYER.
+    //
+    // The button's own gate (`adhanActionEnabled`) is computed in JS at sync
+    // time, but the Live Activity advances itself natively when a time
+    // passes — and it injects Sunrise into that walk deliberately, so the
+    // card can count down to it. The flag does not get recomputed on that
+    // hop, so after Fajr the still-visible button points at Sunrise, and an
+    // unmute here would schedule Sunrise on the adhan channel with
+    // usesAdhan '1'. That is "the sunrise plays adhan", reached without
+    // anything in the scheduler being wrong.
+    //
+    // Deciding it here rather than only in the caller: this task re-creates
+    // a notification from data that crossed a process boundary, so it is
+    // the last place that can still be sure.
+    const isPrayer = !isNonPrayerEvent(name);
+    const wantsAdhan = !muted && isPrayer;
+    const channelId = wantsAdhan
+      ? data.adhanChannelId || DEFAULT_CHANNEL
+      : data.defaultChannelId || DEFAULT_CHANNEL;
 
     await notifee.createTriggerNotification(
       {
@@ -72,8 +89,8 @@ export async function adhanMuteToggleTask(
         body: data.body || '',
         data: {
           kind: 'prayer_time',
-          usesAdhan: muted ? '0' : '1',
-          adhanSound: muted ? 'default' : data.adhanSoundId || 'default',
+          usesAdhan: wantsAdhan ? '1' : '0',
+          adhanSound: wantsAdhan ? data.adhanSoundId || 'default' : 'default',
         },
         android: {
           channelId,
