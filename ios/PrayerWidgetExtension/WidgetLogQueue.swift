@@ -38,6 +38,41 @@ import os
 /// bug behind the bug: the one process that knew was the one staying quiet.
 let widgetLogLog = Logger(subsystem: "com.hassan.prayerapp.widget", category: "logqueue")
 
+/// The Darwin notification that tells the app a widget queue has changed.
+///
+/// WHY THIS EXISTS. The queue drains on exactly two events — the app
+/// mounting, and `AppState` going `active` — and a widget tap is neither.
+/// On iPhone that is invisible: you cannot see a Home Screen widget while
+/// the app is in front of you, so a tap always happens with the app in the
+/// background, and opening it afterwards fires `active`. On a Mac,
+/// Notification Center opens OVER an app that stays active, which is the
+/// normal way to use the widget and therefore the normal way to strand a
+/// tap. Measured 2026-08-29: two taps sat in the queue with the app open
+/// the whole time, and only a relaunch wrote them.
+///
+/// That is worse than a delay. `MAX_QUEUE_AGE_MS` discards entries after a
+/// fortnight, on the reasoning that a queue undrained for two weeks means
+/// the app has not been opened for two weeks — an assumption that is simply
+/// false on macOS, where the app can be open throughout. Left alone, a
+/// fortnight of prayers logged from the widget would be dropped while the
+/// widget showed the ticks the entire time.
+///
+/// A Darwin notification is the documented channel between an extension and
+/// its container app, and it is the only one available here: the extension
+/// cannot write the journal, and the app cannot observe another process's
+/// UserDefaults reliably. It carries no payload — it only says "look again",
+/// and the app re-reads the queue through the same drain it already had.
+let widgetQueueChangedNotification = "com.hassan.prayerapp.widgetQueueChanged"
+
+/// Tell the app to drain. Safe to call from any queue and from either
+/// widget; posting when nobody is listening is a no-op.
+func postWidgetQueueChanged() {
+  CFNotificationCenterPostNotification(
+    CFNotificationCenterGetDarwinNotifyCenter(),
+    CFNotificationName(widgetQueueChangedNotification as CFString),
+    nil, nil, true)
+}
+
 enum WidgetLogQueue {
   static let key = "widget_log_queue"
 
@@ -140,6 +175,9 @@ enum WidgetLogQueue {
     store.synchronize()
     let ok = read() == next
     if ok {
+      // Only on a write that read back. Waking the app to drain a queue that
+      // did not change is the one way this can be worse than doing nothing.
+      postWidgetQueueChanged()
       widgetLogLog.info(
         "tap \(prayer, privacy: .public) \(date, privacy: .public) \(undoing ? "undone" : "queued", privacy: .public), queue now \(next.count, privacy: .public)")
     } else {

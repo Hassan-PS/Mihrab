@@ -23,6 +23,7 @@ import {
 } from './theme/appPalette';
 import { buildNavigationTheme } from './theme/navigationTheme';
 import { useSyncWidgetUiHints } from './widget/syncWidgetUiHints';
+import { onWidgetQueueChanged } from './native/WidgetQueueWatcher';
 import { syncWidgetLogQueue } from './widget/syncWidgetLogQueue';
 import { syncWidgetTasbihQueue } from './widget/syncWidgetTasbihQueue';
 import {
@@ -244,7 +245,24 @@ export function AppNavigationRoot() {
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') drain();
     });
-    return () => sub.remove();
+    // THE THIRD TRIGGER, and the one a widget tap actually produces.
+    //
+    // Mount and `active` are both about the app changing state, and a widget
+    // tap changes nothing about the app: the intent runs in the extension and
+    // does not bring anything forward. On iPhone that never showed, because
+    // you cannot see a Home Screen widget while the app is in front of you —
+    // the tap happens backgrounded and opening the app fires `active`. On a
+    // Mac, Notification Center opens over an app that stays active, so the
+    // two triggers above can go a whole session without firing. Measured
+    // 2026-08-29: two taps sat in the queue with the app open throughout, and
+    // only a relaunch wrote them, while the widget drew their ticks the whole
+    // time. Entries are discarded after a fortnight, so that is lost data
+    // rather than late data.
+    const unsubscribeQueue = onWidgetQueueChanged(drain);
+    return () => {
+      sub.remove();
+      unsubscribeQueue();
+    };
   }, []);
 
   // Auto-restart on a system dark/light flip when dynamic colors are

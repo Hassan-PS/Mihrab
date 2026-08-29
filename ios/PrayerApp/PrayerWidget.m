@@ -1,4 +1,6 @@
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
+#import <notify.h>
 
 #import "PrayerApp-Swift.h"
 #import "MihrabAppGroup.h"
@@ -161,6 +163,80 @@ RCT_EXPORT_METHOD(setIosWidgetHighlightAppearance:(NSString *)highlightId
   [target synchronize];
   [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);
+}
+
+@end
+
+/**
+ * Tell JS when a widget queue changes, so the drain has a third trigger.
+ *
+ * The drain ran on app mount and on `AppState` going `active`, and a widget
+ * tap is neither. On iPhone that is hidden by circumstance — you cannot see
+ * a Home Screen widget while the app is in front of you, so a tap always
+ * happens with the app backgrounded and opening it fires `active`. On a Mac
+ * Notification Center opens OVER an app that stays active, so the tap is
+ * stranded: measured 2026-08-29, two taps sat unqueued-for with the app open
+ * throughout, and only a relaunch wrote them. Entries older than a fortnight
+ * are then discarded on the reasoning that an undrained queue means an
+ * unopened app — false on macOS, where it means prayers logged on the widget
+ * are silently thrown away while the widget shows their ticks.
+ *
+ * A SEPARATE MODULE rather than making PrayerWidget an RCTEventEmitter.
+ * That class is a plain RCTBridgeModule with a dozen exported methods, and
+ * changing its superclass to gain one event would put every one of them
+ * behind an emitter's lifecycle for no reason.
+ *
+ * `notify_register_dispatch` rather than CFNotificationCenter: it takes the
+ * queue to call back on, so the event reaches the bridge on the main queue
+ * without a hop of its own. Registration is deferred to `startObserving`,
+ * which React Native calls when JS actually subscribes — a Mac that never
+ * mounts the app UI never registers.
+ */
+static NSString *const kMihrabWidgetQueueChangedEvent = @"MihrabWidgetQueueChanged";
+
+@interface WidgetQueueWatcher : RCTEventEmitter <RCTBridgeModule>
+@end
+
+@implementation WidgetQueueWatcher {
+  int _token;
+  BOOL _observing;
+}
+
+RCT_EXPORT_MODULE();
+
++ (BOOL)requiresMainQueueSetup
+{
+  return NO;
+}
+
+- (NSArray<NSString *> *)supportedEvents
+{
+  return @[ kMihrabWidgetQueueChangedEvent ];
+}
+
+- (void)startObserving
+{
+  if (_observing) {
+    return;
+  }
+  _observing = YES;
+  __weak WidgetQueueWatcher *weakSelf = self;
+  notify_register_dispatch(
+      "com.hassan.prayerapp.widgetQueueChanged", &_token, dispatch_get_main_queue(), ^(int token) {
+        // The notification carries nothing on purpose. It says "look
+        // again"; the queue itself is the state, and the drain that reads
+        // it is the one that already existed and is already tested.
+        [weakSelf sendEventWithName:kMihrabWidgetQueueChangedEvent body:@{}];
+      });
+}
+
+- (void)stopObserving
+{
+  if (!_observing) {
+    return;
+  }
+  _observing = NO;
+  notify_cancel(_token);
 }
 
 @end

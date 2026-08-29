@@ -64,6 +64,12 @@ enum WidgetTasbihQueue {
     else { return }
     store.set(s, forKey: key)
     store.synchronize()
+    // Same reason as the log queue: the drain runs on app mount and on
+    // AppState `active`, and a widget tap is neither. On a Mac the app is
+    // usually already active when Notification Center is open, so without
+    // this a bead counted here waits for a relaunch — and the drain discards
+    // anything older than a fortnight. See postWidgetQueueChanged.
+    postWidgetQueueChanged()
   }
 }
 
