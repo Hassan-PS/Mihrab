@@ -51,11 +51,14 @@
             android:maxLines="1" />
     </LinearLayout>
 
+    <!-- Takes the slack of the second row; see the note at the end. -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="horizontal"
         android:baselineAligned="false"
+        android:gravity="center_vertical"
         android:layout_marginTop="8dp">
 
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
@@ -71,7 +74,7 @@
             </LinearLayout>
 
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="52dp" android:layout_height="38dp" android:gravity="center" android:text="+" android:textColor="#6BC98A" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_due" />
+                <TextView android:layout_width="52dp" android:layout_height="38dp" android:gravity="center" android:text="✓" android:textColor="#6BC98A" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_due" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="Asr" android:textColor="#9AA0A6" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="16:55" android:textColor="#E8EAED" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
             </LinearLayout>
@@ -138,10 +141,7 @@
       and two launcher rows is ~210dp. They were here when this entry placed
       three rows. A preview that shows a graph the placed card will not draw
       is worse than a plain one — the person chose this entry FOR the thing
-      in the picture.
+      in the picture. Nothing stands in for them: the chips row takes the
+      space, the way the card's own chips grow into it.
     -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
 </LinearLayout>

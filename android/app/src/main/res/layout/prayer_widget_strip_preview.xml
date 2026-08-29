@@ -53,7 +53,7 @@
         </LinearLayout>
 
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Shurūq" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Sunrise" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="06:28" android:textColor="#9AA0A6" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
         </LinearLayout>
 

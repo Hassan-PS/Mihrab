@@ -63,7 +63,7 @@
             </LinearLayout>
 
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-                <TextView android:layout_width="46dp" android:layout_height="30dp" android:gravity="center" android:text="+" android:textColor="#6BC98A" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_due" />
+                <TextView android:layout_width="46dp" android:layout_height="30dp" android:gravity="center" android:text="✓" android:textColor="#6BC98A" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:background="@drawable/widget_log_chip_due" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="Asr" android:textColor="#9AA0A6" android:textSize="11sp" android:maxLines="1" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="16:55" android:textColor="#E8EAED" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
             </LinearLayout>

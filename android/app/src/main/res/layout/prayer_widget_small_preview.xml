@@ -59,7 +59,11 @@
                 android:fontFamily="sans-serif-light"
                 android:includeFontPadding="false"
                 android:gravity="start"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:ellipsize="none"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="22sp"
+                android:autoSizeMaxTextSize="44sp" />
         </LinearLayout>
 
         <!-- Right: how long that is, and where. -->

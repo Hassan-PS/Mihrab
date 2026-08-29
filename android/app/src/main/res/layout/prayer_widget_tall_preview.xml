@@ -60,11 +60,21 @@
             android:maxLines="1" />
     </LinearLayout>
 
+    <!--
+      The times row takes the slack, rather than a spacer at the bottom
+      taking it. Two rows is 40dp more than this content needs, and parking
+      all of it under the footer left the picture with a dead band across
+      its bottom third — which is exactly what the graph used to fill.
+      The real card spreads instead (STRIP_SLACK_CAP_DP), so the picture
+      spreads too.
+    -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="horizontal"
         android:baselineAligned="false"
+        android:gravity="center_vertical"
         android:layout_marginTop="8dp">
 
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
@@ -73,7 +83,7 @@
         </LinearLayout>
 
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Shurūq" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Sunrise" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="06:28" android:textColor="#9AA0A6" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" />
         </LinearLayout>
 
@@ -151,9 +161,6 @@
       All three hang off GRID_MIN_HEIGHT_DP (265dp) in `bindPractice`, and
       two launcher rows is ~210dp, so a two-row card draws the list and stops
       there. Showing them here would sell a card the placement cannot make.
+      Nothing stands in for them — the times row above takes the space.
     -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
 </LinearLayout>
