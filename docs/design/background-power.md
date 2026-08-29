@@ -32,6 +32,7 @@ Everything that runs without the user looking at the app.
 | 9 | Widget poll | `prayer_widget_info.xml:54` | 30 min, non-wakeup | widget users |
 | 10 | Wi-Fi backfill burst | `usePrayerDay.ts:576` | ≤1/hour, ~90 network rounds | everyone |
 | 11 | autoSync ticker | `autoSync.ts:135` | 2 min timer, work suppressed when not active | everyone |
+| 12 | Widget boundary alarm | `PrayerWidgetProvider.kt:armWidgetAlarms` | ~6/day `RTC_WAKEUP`, idle-allowed | widget users |
 
 Items 9 and 11 are already cheap and are listed only so nobody "optimises"
 them later and breaks something for nothing. See *Leave alone*.
@@ -237,6 +238,21 @@ charger, which is what this kind of opportunistic prefetch is for.
 
 ## Leave alone
 
+- **The widget boundary alarm's wake-up** (item 12,
+  `setExactAndAllowWhileIdle(RTC_WAKEUP)`). It was a plain `RTC` `setExact`,
+  which is the cheap version and also the broken one: `RTC` does not wake the
+  device and Doze holds back even an exact alarm, so the boundary that most
+  needed to land — Fajr, the hour a phone is most reliably asleep — was the
+  one guaranteed not to. Every card wraps its countdown past midnight, so
+  they all sat at zero, still naming a prayer that had already been called,
+  until someone picked the phone up.
+
+  The cost is bounded by design: ONE alarm outstanding at a time, re-armed by
+  the refresh it triggers, so ~6 wake-ups a day — and for anyone with adhan
+  notifications on, those are moments the device is being woken anyway. This
+  is the one place in this document where the answer is more wake-ups, not
+  fewer; a widget whose countdown reaches zero and keeps going is not a
+  power saving, it is a broken widget.
 - **The widget's 30-minute poll** (`updatePeriodMillis="1800000"`). That is the
   platform floor, and AppWidget updates are non-wakeup and batched to the next
   time the device is already awake. Lowering it is impossible; raising it makes

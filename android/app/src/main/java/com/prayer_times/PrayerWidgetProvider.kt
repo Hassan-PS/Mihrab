@@ -575,51 +575,110 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         context, 1001, intent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
       )
+      // RTC_WAKEUP, and idle-allowed. Both matter, and neither used to be
+      // set: a plain RTC alarm does not wake the device, and an exact one
+      // is still held back by Doze. Fajr is the hour of the day a phone is
+      // most reliably asleep, so the one boundary that most needed to land
+      // was the one guaranteed not to — the countdown ran to zero and past
+      // it, and the card kept naming a prayer that had already been called
+      // until someone picked the phone up.
+      //
+      // This is ONE alarm at a time, re-armed by the refresh it triggers:
+      // six wake-ups a day, at moments the adhan notification is usually
+      // waking the device anyway. See docs/design/background-power.md.
       val am = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && am.canScheduleExactAlarms()) {
-        am.setExact(android.app.AlarmManager.RTC, next, pi)
+        am.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, next, pi)
       } else {
-        am.set(android.app.AlarmManager.RTC, next, pi)
+        am.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, next, pi)
       }
     }
 
     /**
      * When the card next says something different: the first prayer or
-     * sunrise still ahead of us today, as epoch millis, or null when the day
-     * has none left.
+     * sunrise still ahead, as epoch millis. WRAPS PAST MIDNIGHT.
      *
      * Night rows are skipped for the same reason they are never the
      * headline — the widget is called Next Prayer, and Islamic Midnight is
      * not one.
+     *
+     * IT USED TO RETURN NULL AFTER THE LAST PRAYER, and that null was the
+     * hole the countdown fell through. Every card already wraps its
+     * countdown to tomorrow's Fajr the moment Isha passes — the display was
+     * fixed long ago — but nothing was scheduled to fire when that
+     * countdown ran out. The only alarm left was the midnight backstop, so
+     * a card counting down to Fajr reached zero and kept going, and the
+     * "next prayer" line still read Fajr, until something else happened to
+     * wake the app. Overnight, on a phone nobody is touching, that is the
+     * whole stretch from Isha to whenever the owner picks it up.
+     *
+     * So: today's remaining boundaries first, and when there are none, the
+     * first prayer of the next day in the window. Built by rolling the
+     * calendar a day and setting the wall clock rather than by adding 24
+     * hours, because on the two nights a year the clocks move, 24 hours and
+     * "tomorrow at 05:12" are an hour apart.
      */
     private fun nextBoundaryMillis(o: JSONObject): Long? {
-      val day = selectTodayDay(o)
-      val rows = day?.optJSONArray("rows") ?: o.optJSONArray("rows") ?: return null
-      val candidates = mutableListOf<org.json.JSONObject>()
-      for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { candidates.add(it) }
-      (day?.optJSONObject("sunriseRow") ?: o.optJSONObject("sunriseRow"))
-        ?.let { candidates.add(it) }
-
       val cal = java.util.Calendar.getInstance()
       val nowMinutes =
         cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + cal.get(java.util.Calendar.MINUTE)
-      var best: Int? = null
+
+      fun at(minutes: Int, daysAhead: Int): Long =
+        (cal.clone() as java.util.Calendar).apply {
+          if (daysAhead != 0) add(java.util.Calendar.DAY_OF_MONTH, daysAhead)
+          set(java.util.Calendar.HOUR_OF_DAY, minutes / 60)
+          set(java.util.Calendar.MINUTE, minutes % 60)
+          set(java.util.Calendar.SECOND, 0)
+          set(java.util.Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+      val today = selectTodayDay(o)
+      val todayNext = boundaryMinutes(today, o).filter { it > nowMinutes }.minOrNull()
+      if (todayNext != null) return at(todayNext, 0)
+
+      // Nothing left today. What the card is counting down to is on the
+      // other side of midnight, so that is what has to be armed.
+      val tomorrow = dayAfter(o, todayDateKey())
+      val first = boundaryMinutes(tomorrow, o).minOrNull()
+        // No window to read: fall back to today's own first row, which is
+        // what the countdown itself falls back to. A minute or two out at
+        // worst, and a wake-up a minute out beats none.
+        ?: boundaryMinutes(today, o).minOrNull()
+        ?: return null
+      return at(first, 1)
+    }
+
+    /** Every non-night boundary in a day, as minutes since local midnight. */
+    private fun boundaryMinutes(day: JSONObject?, root: JSONObject): List<Int> {
+      val rows = day?.optJSONArray("rows") ?: root.optJSONArray("rows") ?: return emptyList()
+      val out = mutableListOf<Int>()
+      val candidates = mutableListOf<org.json.JSONObject>()
+      for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { candidates.add(it) }
+      (day?.optJSONObject("sunriseRow") ?: root.optJSONObject("sunriseRow"))
+        ?.let { candidates.add(it) }
       for (row in candidates) {
         if (isNightKey(row.optString("key"))) continue
         val parts = row.optString("time").split(":")
         if (parts.size != 2) continue
         val h = parts[0].toIntOrNull() ?: continue
         val m = parts[1].toIntOrNull() ?: continue
-        val mins = h * 60 + m
-        if (mins > nowMinutes && (best == null || mins < best!!)) best = mins
+        if (h < 0 || m < 0) continue
+        out.add(h * 60 + m)
       }
-      val minutes = best ?: return null
-      return (cal.clone() as java.util.Calendar).apply {
-        set(java.util.Calendar.HOUR_OF_DAY, minutes / 60)
-        set(java.util.Calendar.MINUTE, minutes % 60)
-        set(java.util.Calendar.SECOND, 0)
-        set(java.util.Calendar.MILLISECOND, 0)
-      }.timeInMillis
+      return out
+    }
+
+    /** The day after `key` in the payload's window, or null past its end. */
+    private fun dayAfter(o: JSONObject, key: String): JSONObject? {
+      val days = o.optJSONArray("days") ?: return null
+      if (key.isEmpty()) return null
+      var found = false
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        if (found) return day
+        if (day.optString("dateKey") == key) found = true
+      }
+      return null
     }
 
     /**
@@ -963,12 +1022,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       return null
     }
 
-    /** Schedule a refresh just after the next local midnight so the widget
-     *  rolls onto the next day's times by itself — even after Isha, when no
-     *  further prayer remains today and the per-prayer alarm is not set.
-     *  Inexact (and independent of the exact-alarm permission); ACTION_SCREEN_ON
-     *  / ACTION_USER_PRESENT also refresh the widget when the user wakes the
-     *  device, so this is a backstop rather than the sole rollover path. */
+    /** Schedule a refresh just after the next local midnight so the date
+     *  line, the Hijri date and the day's rows roll over by themselves.
+     *
+     *  Deliberately the weak one of the two alarms: inexact, no wake-up, and
+     *  independent of the exact-alarm permission. It used to be the only
+     *  thing standing between Isha and morning, which is why the countdown
+     *  could sit at zero for hours; the boundary alarm now wraps past
+     *  midnight and lands on tomorrow's Fajr, so this is what it was always
+     *  described as — a backstop. Nobody is looking at a home screen at
+     *  00:00:30, and anybody who does has just unlocked the phone, which
+     *  refreshes every widget through ACTION_USER_PRESENT. */
     private fun scheduleMidnightRollover(context: Context) {
       val midnight = java.util.Calendar.getInstance().apply {
         add(java.util.Calendar.DAY_OF_MONTH, 1)
