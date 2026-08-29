@@ -48,8 +48,20 @@ struct LogPrayerIntent: AppIntent {
   }
 
   func perform() async throws -> some IntentResult {
-    WidgetLogQueue.tap(date: dateKey, prayer: prayer)
+    // Logged on both sides of the write, because "the tap did nothing" has
+    // two completely different causes and from outside the process they look
+    // identical: the intent never ran, or it ran and the write was dropped.
+    // A user reported the first-tap-does-nothing behaviour on 2026-08-29 and
+    // there was no way to tell which, because this extension logged nothing
+    // at all. See the note at the top of WidgetLogQueue.swift.
+    widgetLogLog.info(
+      "LogPrayerIntent \(prayer, privacy: .public) \(dateKey, privacy: .public) performing")
+    let stored = WidgetLogQueue.tap(date: dateKey, prayer: prayer)
     WidgetCenter.shared.reloadTimelines(ofKind: "MihrabLogToday")
+    if !stored {
+      widgetLogLog.error(
+        "LogPrayerIntent \(prayer, privacy: .public): tap not stored — the tick will not appear and the app has nothing to drain")
+    }
     return .result()
   }
 }

@@ -18,6 +18,25 @@
 // are few enough to state in one place each.
 
 import Foundation
+import os
+
+/// WHY THIS FILE LOGS AT ALL.
+///
+/// On 2026-08-29 a user reported that tapping a prayer on the Mac widget did
+/// nothing, and tapping it twice — the obvious thing to do when a button
+/// appears dead — silently took the log back, because a second tap inside the
+/// undo window is the undo. Reading the App Group afterwards showed why: the
+/// `widget_log_queue` key was not there, and neither was any other key this
+/// extension had ever written. The container held six keys and the app had
+/// written all six. Every write from this process had been dropped.
+///
+/// Nothing could say more than that, because the extension emitted NOTHING to
+/// the unified log — 20 minutes of taps produced zero lines — so from outside
+/// there was no way to tell a failed write from an intent that never ran.
+/// `tap()` has always returned whether the write reads back, and the comment
+/// under it said in as many words that nothing acts on the result. That is the
+/// bug behind the bug: the one process that knew was the one staying quiet.
+let widgetLogLog = Logger(subsystem: "com.hassan.prayerapp.widget", category: "logqueue")
 
 enum WidgetLogQueue {
   static let key = "widget_log_queue"
@@ -106,11 +125,32 @@ enum WidgetLogQueue {
     prayer: String,
     now: Double = Date().timeIntervalSince1970 * 1000
   ) -> Bool {
-    let next = applyTap(read(), date: date, prayer: prayer, now: now)
-    guard let store = defaults() else { return false }
+    let before = read()
+    let next = applyTap(before, date: date, prayer: prayer, now: now)
+    let undoing = next.count < before.count
+    guard let store = defaults() else {
+      // Distinguishable from a refused write on purpose: a nil suite means
+      // this process is not entitled to the group at all, and no amount of
+      // retrying changes that.
+      widgetLogLog.error(
+        "tap \(prayer, privacy: .public) \(date, privacy: .public): no UserDefaults for suite \(kSuite, privacy: .public)")
+      return false
+    }
     store.set(serialize(next), forKey: key)
     store.synchronize()
-    return read() == next
+    let ok = read() == next
+    if ok {
+      widgetLogLog.info(
+        "tap \(prayer, privacy: .public) \(date, privacy: .public) \(undoing ? "undone" : "queued", privacy: .public), queue now \(next.count, privacy: .public)")
+    } else {
+      // The failure the user saw: set() and synchronize() both "succeed" and
+      // the value is not there afterwards. Logged with what was attempted so
+      // the next question — entitlement, container, or sandbox — can be asked
+      // against evidence rather than guessed at.
+      widgetLogLog.error(
+        "tap \(prayer, privacy: .public) \(date, privacy: .public): WRITE DROPPED — suite \(kSuite, privacy: .public) accepted \(next.count, privacy: .public) entr(ies) and read back \(self.read().count, privacy: .public)")
+    }
+    return ok
   }
 
   /// Which prayers are queued for `date` — what the widget draws as ticked.

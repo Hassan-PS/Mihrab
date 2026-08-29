@@ -634,10 +634,18 @@ if [ -x "$LSREGISTER" ]; then
   # which is the path we want to unregister anyway. `sort -u` collapses the
   # duplicate, and the `-v` below keeps the installed copy — anchored there,
   # where the anchor is correct.
-  "$LSREGISTER" -dump 2>/dev/null |
+  # `|| true` ON THE WHOLE PIPELINE, and this is the third time today. When
+  # there are no ghosts — the good case, and the common one — the final
+  # `grep -v` matches nothing and exits 1, `pipefail` promotes that to the
+  # pipeline, and `set -e` ends the build. It ended this one, after the zip
+  # and the sha and before the cleanup, so the build tree stayed registered:
+  # a script whose job is to prevent stale registrations, prevented from
+  # doing it by a grep that found nothing wrong.
+  { "$LSREGISTER" -dump 2>/dev/null |
     grep -oE '^path: +/[^ ]*(PrayerApp|Mihrab)\.app' | sed 's/^path: *//' |
     sort -u | grep -v '^/Applications/Mihrab\.app$' |
     while read -r stale; do "$LSREGISTER" -u "$stale" 2>/dev/null || true; done
+  } || true
   rm -rf "$APP"
   # AND PUT THE REAL ONE BACK. Cheap insurance either way: if the installed
   # copy survived the above it is re-registered identically, and if it did
