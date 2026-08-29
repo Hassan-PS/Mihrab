@@ -341,6 +341,45 @@ ENTS="$(codesign -d --entitlements - --xml "$APP" 2>/dev/null)"
 has "$ENTS" "group.com.prayerapp" \
   || die "no App Group entitlement — widgets would have no data"
 ok "App Group sealed in"
+
+# ── NOTARIZED, AND THE TICKET IS IN THE BUNDLE ────────────────────────
+#
+# 2.11.0 through 2.13.3 all shipped unnotarized — Gatekeeper refused the
+# first launch of every Mac install for eight releases, and nothing said
+# so, because notarization was a comment in build-catalyst.sh asking a
+# human to run notarytool afterwards. It is part of that script now, and
+# this is the check that makes the flag it honours unable to matter:
+# SKIP_NOTARIZE builds a zip, and this refuses to publish it.
+#
+# `stapler validate` AND NOT `spctl`, on this unpacked copy. The ticket is
+# issued by Apple's notary service for one exact cdhash, so a ticket that
+# validates against this bundle is the notarization — and stapling is the
+# half that gets skipped anyway: a notarized-but-unstapled build passes
+# `spctl` on any Mac that can reach Apple and blocks a user who cannot.
+#
+# `spctl -a` here would be worse than redundant. Assessing a bundle in a
+# temp directory hands it to App Translocation and REGISTERS the
+# translocated path, and the .appex record that comes with it takes the
+# installed app's plugin registration down with it — every widget on this
+# Mac goes blank. Measured 2026-08-29. build-catalyst.sh runs the Gatekeeper
+# assessment where it is safe to: on the bundle in ios/build that it
+# already registers and cleans up.
+xcrun stapler validate "$APP" >/dev/null 2>&1 \
+  || die "the app about to be published carries no notarization ticket — Gatekeeper would block its first launch, as it has since 2.11.0"
+ok "notarized, ticket stapled into the bundle"
+
+# UNREGISTER BEFORE REMOVING. Unpacking an .app into a temp directory is by
+# itself enough to put it in the LaunchServices database — no launch, no
+# Gatekeeper call, just the extraction. Measured 2026-08-29: two `ditto -x`
+# calls into mktemp directories left two registered Mihrab.app records
+# behind. This block has been doing that on every release since it was
+# written, and a record pointing at a path that no longer exists is exactly
+# what makes every widget on the release machine go blank.
+#
+# `.app` only — see build-catalyst.sh on why `.appex` paths are never
+# unregistered by hand.
+LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+[ -x "$LSREG" ] && { "$LSREG" -u "$APP" 2>/dev/null || true; }
 rm -rf "$UNZIP"
 
 if [ "$DRY_RUN" = "1" ]; then

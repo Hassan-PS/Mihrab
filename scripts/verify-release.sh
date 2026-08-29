@@ -159,9 +159,42 @@ if [ -f "$TAP" ]; then
       else
         fail "published app has NO App Group — its widgets will not render"
       fi
+
+      # ── AND IT IS NOTARIZED, WITH THE TICKET IN THE BUNDLE ──────────
+      #
+      # Eight releases, 2.11.0 to 2.13.3, went out unnotarized: Gatekeeper
+      # refused the first launch of every Mac install and the cask carried
+      # a caveat apologising for it. The step lived in a comment asking a
+      # human to run notarytool after the build, so it did not happen.
+      #
+      # Checked here on the DOWNLOADED zip, which is the only copy whose
+      # verdict matters — a ticket stapled to the bundle in ios/build says
+      # nothing about the bytes a user gets. The ticket is issued by Apple
+      # for one exact cdhash, so one that validates against this bundle is
+      # the notarization; and stapling is the half that gets skipped, since
+      # notarized-but-unstapled passes on any Mac that can reach Apple and
+      # blocks a user who cannot.
+      #
+      # Deliberately NOT `spctl -a`: assessing a bundle unpacked into a temp
+      # directory hands it to App Translocation, and the translocated
+      # .appex that gets registered takes the installed app's plugin
+      # registration down with it — every widget on the machine running
+      # this script goes blank. Measured 2026-08-29.
+      if xcrun stapler validate "$unz/Mihrab.app" >/dev/null 2>&1; then
+        pass "published app is notarized, ticket stapled"
+      else
+        fail "published app carries NO notarization ticket — macOS blocks its first launch, as it has since 2.11.0"
+      fi
     else
       fail "could not unpack the published zip to check its signature"
     fi
+    # UNREGISTER BEFORE REMOVING. Unpacking an .app into a temp directory is
+    # by itself enough to put it in the LaunchServices database — no launch
+    # and no Gatekeeper call needed — and a record pointing at a path that
+    # no longer exists blanks every widget on this Mac. Measured 2026-08-29;
+    # this block had been leaving one behind on every release.
+    LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+    [ -x "$LSREG" ] && { "$LSREG" -u "$unz/Mihrab.app" 2>/dev/null || true; }
     rm -rf "$unz"
   else
     fail "could not download the zip to verify sha256"

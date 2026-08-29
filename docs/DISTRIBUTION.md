@@ -50,6 +50,7 @@ for a job with an irreversible step in the middle:
 | **Fixes sat on `main` for days**, released to nobody, because nothing said so out loud | nothing |
 | **Every Mac's widgets froze on upgrade**, fixed only by the cask's `postflight` | the list predates the Mac build |
 | **Every Mac's widgets were removed on upgrade** — replacing the app drops the extension's PlugInKit record and nothing re-registers it, so WidgetKit has no provider and discards the placement | same postflight, second failure, found only because a user said so |
+| **Eight releases shipped unnotarized**, 2.11.0 to 2.13.3 — Gatekeeper blocked the first launch of every Mac install and the cask carried a caveat apologising for it | notarization was a comment in `build-catalyst.sh` asking a human to run `notarytool`, and this file never mentioned it at all |
 
 The script's one rule: **everything that can fail happens before anything
 that cannot be undone.** Tests, the changelog limits, the Xcode Cloud

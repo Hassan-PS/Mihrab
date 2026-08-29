@@ -8,10 +8,11 @@
 #     ./scripts/build-catalyst.sh                     # or name it yourself
 #   SIGN_IDENTITY=- ./scripts/build-catalyst.sh       # ad-hoc, NOT shippable
 #
-# After a signed build, notarize for the cask users' first-run UX:
-#   xcrun notarytool submit <zip> --keychain-profile mihrab --wait
-#   xcrun stapler staple <app>
-# then re-zip.
+# Notarization is part of this script, not a note at the top of it. See
+# "NOTARIZE, STAPLE, AND PROVE IT" near the end for why. Credentials come
+# from the `mihrab` notarytool keychain profile, or from
+# ~/.config/mihrab/asc.json; `NOTARY_PROFILE=` names a different one.
+#   SKIP_NOTARIZE=1 ./scripts/build-catalyst.sh   # local only, unshippable
 #
 # ── AD-HOC IS NOT "THE SAME BUILD WITHOUT NOTARIZATION" ───────────────
 #
@@ -444,6 +445,145 @@ rm -f "$LAUNCH_LOG"
 # living only here.
 echo "▸ Zipping…"
 ditto -c -k --keepParent "$APP" "$ZIP"
+
+# ── NOTARIZE, STAPLE, AND PROVE IT ────────────────────────────────────
+#
+# EVERY RELEASE FROM 2.11.0 TO 2.13.3 SHIPPED UNNOTARIZED. Eight of them.
+# The step was four commented-out lines at the top of this file telling a
+# human to run notarytool afterwards, and the notary service's own history
+# shows the last accepted submission was 2.10.1 on 2026-08-24. Measured on
+# the published 2.13.3:
+#
+#   spctl -a -vvv -t exec /Applications/Mihrab.app
+#     → rejected
+#       source=Unnotarized Developer ID
+#   stapler validate /Applications/Mihrab.app
+#     → does not have a ticket stapled to it
+#
+# That is Gatekeeper refusing the first launch of every Mac install, which
+# is why the cask has a caveat apologising for it. A step that lives in a
+# comment is a step that does not happen — the same shape as the ad-hoc
+# failure above, and as the release checklist this project replaced with a
+# script.
+#
+# STAPLING IS THE HALF PEOPLE SKIP. Notarization alone records the verdict
+# on Apple's servers; the stapled ticket is the copy inside the bundle, and
+# it is what a Mac uses when it cannot reach Apple — a plane, a locked-down
+# network, an outage. Notarized-but-unstapled looks fine on the machine
+# that built it and blocks a user who is offline.
+#
+# THE ASSERTIONS ARE ON THE ARTIFACT, not on the fact that the commands
+# ran. Stapling mutates the .app after it was zipped, so the zip has to be
+# rebuilt afterwards — get that order wrong and everything here still
+# "succeeds" while publishing a zip with no ticket in it. So the finished
+# zip is unpacked again and asked what it is.
+if [ "$SIGN_IDENTITY" = "-" ]; then
+  echo "⚠ Ad-hoc build: nothing to notarize. This zip cannot be published." >&2
+elif [ "${SKIP_NOTARIZE:-}" = "1" ]; then
+  echo "⚠ SKIP_NOTARIZE=1 — this zip is NOT notarized and MUST NOT be" >&2
+  echo "  published. release.sh checks the artifact, not this flag, and" >&2
+  echo "  will refuse it." >&2
+else
+  NOTARY_PROFILE=${NOTARY_PROFILE:-mihrab}
+  ASC_JSON="$HOME/.config/mihrab/asc.json"
+  NOTARY_ARGS=()
+  if xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1; then
+    NOTARY_ARGS=(--keychain-profile "$NOTARY_PROFILE")
+    echo "▸ Notarizing (keychain profile: $NOTARY_PROFILE)…"
+  elif [ -f "$ASC_JSON" ]; then
+    # The same App Store Connect key scripts/xcode-cloud.py uses. Reading it
+    # here means one credential for both, rather than a second thing to set
+    # up that is only noticed when it is missing.
+    ASC_KEY=$(plutil -extract keyPath raw -o - "$ASC_JSON" 2>/dev/null || true)
+    ASC_KEY_ID=$(plutil -extract keyId raw -o - "$ASC_JSON" 2>/dev/null || true)
+    ASC_ISSUER=$(plutil -extract issuerId raw -o - "$ASC_JSON" 2>/dev/null || true)
+    if [ -z "$ASC_KEY" ] || [ -z "$ASC_KEY_ID" ] || [ -z "$ASC_ISSUER" ]; then
+      echo "  ✗ $ASC_JSON is missing keyPath, keyId or issuerId." >&2
+      exit 1
+    fi
+    NOTARY_ARGS=(--key "$ASC_KEY" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER")
+    echo "▸ Notarizing (App Store Connect key from $ASC_JSON)…"
+  else
+    echo "  ✗ No notarization credentials." >&2
+    echo "    Gatekeeper blocks the first launch of an unnotarized build," >&2
+    echo "    which is what 2.11.0 through 2.13.3 shipped as. Set one up:" >&2
+    echo "      xcrun notarytool store-credentials mihrab \\" >&2
+    echo "        --key <AuthKey.p8> --key-id <id> --issuer <uuid>" >&2
+    echo "    or put keyPath/keyId/issuerId in $ASC_JSON." >&2
+    echo "    SKIP_NOTARIZE=1 builds a zip that cannot be released." >&2
+    exit 1
+  fi
+
+  NOTARY_LOG=$(mktemp -t mihrab-notarize)
+  if ! xcrun notarytool submit "$ZIP" "${NOTARY_ARGS[@]}" --wait --timeout 30m \
+      2>&1 | tee "$NOTARY_LOG"; then
+    echo "  ✗ notarytool submit failed — see above." >&2
+    exit 1
+  fi
+  # `--wait` exits 0 on Invalid as well as Accepted, so read the verdict.
+  if ! grep -q "status: Accepted" "$NOTARY_LOG"; then
+    SUB_ID=$(sed -n 's/^ *id: \([0-9a-f-]*\) *$/\1/p' "$NOTARY_LOG" | head -1)
+    echo "  ✗ notarization was not accepted." >&2
+    [ -n "$SUB_ID" ] && xcrun notarytool log "$SUB_ID" "${NOTARY_ARGS[@]}" >&2 || true
+    exit 1
+  fi
+  rm -f "$NOTARY_LOG"
+
+  echo "▸ Stapling the ticket into the bundle…"
+  xcrun stapler staple "$APP" || { echo "  ✗ stapler failed." >&2; exit 1; }
+  # The ticket goes in a part of the bundle the seal excludes, so the
+  # signature must still verify. Asserted, because "must" is a claim.
+  codesign --verify --strict "$APP" \
+    || { echo "  ✗ stapling broke the signature." >&2; exit 1; }
+
+  echo "▸ Re-zipping with the ticket…"
+  rm -f "$ZIP"
+  ditto -c -k --keepParent "$APP" "$ZIP"
+
+  # ── AND NOW ASK THE ZIP ──
+  #
+  # Two checks on two copies, deliberately, and NEITHER of them runs
+  # Gatekeeper against the unpacked one.
+  #
+  # `spctl -a` on a bundle sitting in a temp directory hands it to App
+  # Translocation, and the translocated path gets REGISTERED: measured
+  # 2026-08-29, an spctl call on an extracted copy left
+  #
+  #   /private/var/folders/…/T/AppTranslocation/…/d/Mihrab.app
+  #   /private/var/folders/…/T/AppTranslocation/…/d/…/PrayerWidgetExtension.appex
+  #
+  # in the LaunchServices database, and the .appex record took the
+  # INSTALLED app's plugin registration with it — records are keyed by
+  # bundle identifier. Every widget on the machine went blank, from a
+  # verification step whose whole job was to make the build safer.
+  #
+  # So: `stapler validate` on the unpacked copy, which is what proves the
+  # ticket survived into the zip and does not invoke Gatekeeper; and
+  # `spctl` on $APP, which is the bundle the zip was made from and is a
+  # path this script already registers and cleans up below.
+  echo "▸ Checking the notarization that actually got shipped…"
+  NCHECK=$(mktemp -d)
+  ditto -x -k "$ZIP" "$NCHECK" || { echo "  ✗ cannot unpack $ZIP" >&2; exit 1; }
+  if ! xcrun stapler validate "$NCHECK/Mihrab.app" >/dev/null 2>&1; then
+    echo "  ✗ the zip carries no stapled ticket." >&2
+    echo "    An offline Mac will refuse to launch it. The re-zip above" >&2
+    echo "    must happen AFTER the staple." >&2
+    exit 1
+  fi
+  rm -rf "$NCHECK"
+  # Both halves matter. "accepted" alone can come from a Developer ID that
+  # is merely trusted locally; the source line is what says a notarized
+  # ticket was the reason.
+  ASSESS=$(spctl -a -t exec -vv "$APP" 2>&1 || true)
+  if ! grep -q "accepted" <<< "$ASSESS" ||
+     ! grep -q "source=Notarized Developer ID" <<< "$ASSESS"; then
+    echo "  ✗ Gatekeeper does not accept the bundle this zip was made from:" >&2
+    printf '      %s\n' "$ASSESS" >&2
+    exit 1
+  fi
+  echo "  ✓ Gatekeeper accepts it: notarized Developer ID, ticket stapled."
+fi
+
 shasum -a 256 "$ZIP" | tee "$ZIP.sha256"
 
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
@@ -459,15 +599,58 @@ if [ -x "$LSREGISTER" ]; then
   # the same blank-widgets outcome this cleanup exists to prevent, arrived at
   # from the opposite direction. Unregistering the `.app` is enough; the
   # plugin inside it goes with it.
+  # The two known paths, plus WHATEVER ELSE IS REGISTERED. The fixed list
+  # was not enough: notarization brought App Translocation with it, and a
+  # translocated copy lives at a path nobody can predict. Sweeping `.app`
+  # records outside /Applications catches those; `.appex` records are still
+  # never named here, for the reason above, and the assertion below is what
+  # says whether one survived.
   for stale in "$APP" "$BUILT"; do
     "$LSREGISTER" -u "$stale" 2>/dev/null || true
   done
+  # NO `$` ANCHOR ON THE PATH. `lsregister -dump` writes
+  # `path:  /Applications/Mihrab.app (0x42c4)` — a trailing record id — so a
+  # pattern ending in `\.app$` matches nothing at all and the sweep silently
+  # does nothing. It was written that way first and found two ghosts still
+  # sitting in the database after it claimed to have cleaned them.
+  #
+  # Without the anchor, an `.appex` line matches up to its parent `.app`,
+  # which is the path we want to unregister anyway. `sort -u` collapses the
+  # duplicate, and the `-v` below keeps the installed copy — anchored there,
+  # where the anchor is correct.
+  "$LSREGISTER" -dump 2>/dev/null |
+    grep -oE '^path: +/[^ ]*(PrayerApp|Mihrab)\.app' | sed 's/^path: *//' |
+    sort -u | grep -v '^/Applications/Mihrab\.app$' |
+    while read -r stale; do "$LSREGISTER" -u "$stale" 2>/dev/null || true; done
   rm -rf "$APP"
   # AND PUT THE REAL ONE BACK. Cheap insurance either way: if the installed
   # copy survived the above it is re-registered identically, and if it did
   # not, this is the repair from docs/release/catalyst-widgets.md.
+  #
+  # The widget extension needs saying separately. Unregistering any copy of
+  # this app drops the plugin record for ALL of them — same bundle
+  # identifier — so a build can leave the machine with an app that
+  # registers fine and no widget provider at all, which is the 2026-08-29
+  # failure seen from the developer's side rather than the user's.
+  # `lsregister -f` does not restore it and launching the app is the only
+  # other thing that does, so ask PlugInKit directly, and check that it
+  # stayed: a late LaunchServices event can drop it a second later.
   if [ -d /Applications/Mihrab.app ]; then
     "$LSREGISTER" -f /Applications/Mihrab.app 2>/dev/null || true
+    INSTALLED_EXT=/Applications/Mihrab.app/Contents/PlugIns/PrayerWidgetExtension.appex
+    INSTALLED_ID=maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension
+    for _ in 1 2 3 4 5 6; do
+      pluginkit -a "$INSTALLED_EXT" >/dev/null 2>&1 || true
+      sleep 3
+      if pluginkit -m -i "$INSTALLED_ID" 2>/dev/null | grep -q .; then break; fi
+    done
+    if pluginkit -m -i "$INSTALLED_ID" 2>/dev/null | grep -q .; then
+      echo "  ▸ the installed app's widget extension is still registered."
+    else
+      echo "  ⚠ /Applications/Mihrab.app's widget extension is NOT registered." >&2
+      echo "    Its widgets will be blank until it is. See" >&2
+      echo "    docs/release/catalyst-widgets.md; the zip is fine." >&2
+    fi
   fi
   sleep 2
   GHOSTS=$("$LSREGISTER" -dump 2>/dev/null |

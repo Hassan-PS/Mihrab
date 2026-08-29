@@ -338,3 +338,38 @@ disappeared — but it will survive every upgrade after this one.
 **Not the same as the ad-hoc failure above.** That one has no extension to
 register (no team identifier, no entitlements). Check `codesign -dv` first:
 if `TeamIdentifier` is set and `pluginkit` is empty, it is this.
+
+## Unpacking the zip is enough to make a ghost (2026-08-29)
+
+A footnote to the 2026-08-26 section above, and the reason it kept coming
+back. A LaunchServices record does not need a launch, or a Gatekeeper call,
+or anything else deliberate:
+
+```sh
+ditto -x -k Mihrab-macOS-2.13.3.zip "$(mktemp -d)"
+lsregister -dump | grep Mihrab.app     # ← the temp copy is in there
+```
+
+`release.sh` and `verify-release.sh` both unpack the zip to inspect its
+signature, and both had been leaving a registered copy behind on every
+release, at a temp path that is deleted moments later. That is precisely
+the stale record that blanks every widget on the machine. Both now
+unregister the path before removing it.
+
+`spctl -a` on an unpacked copy is worse: Gatekeeper hands it to App
+Translocation and registers *that* path too, `.appex` included — and an
+`.appex` record takes the installed app's plugin registration down with it,
+because the records are keyed by bundle identifier. So the notarization
+checks in those two scripts use `stapler validate`, which does not invoke
+Gatekeeper, and the one Gatekeeper assessment lives in `build-catalyst.sh`
+against the bundle in `ios/build` that it already registers and cleans up.
+
+The sweep that cleans this up also has a trap worth knowing about:
+
+```sh
+lsregister -dump | grep -oE '^path: +/[^ ]*Mihrab\.app$'    # matches NOTHING
+```
+
+`lsregister -dump` writes `path:  /Applications/Mihrab.app (0x42c4)` — the
+trailing record id means a `$` anchor never matches, and the sweep reports
+success having done nothing. Drop the anchor.
