@@ -1,0 +1,1 @@
+• Maintenance build. The fix in this version is for the iPhone, iPad and Mac widgets: logging a prayer from the widget now reaches the app straight away instead of waiting for the app to be reopened. Nothing changes on Android.

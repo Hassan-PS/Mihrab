@@ -184,3 +184,16 @@ reports came from.
 
 **Held back, deliberately:** committed while run #568 was still building
 and pushed only afterwards, per the rule from 2.13.1.
+
+## 2.13.5 (250) — 2026-08-29
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/build-catalyst.sh`
+  - `scripts/release.sh`
+  - `scripts/verify-release.sh`
+
+**Lesson:** _(unfilled)_

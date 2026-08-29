@@ -1,0 +1,1 @@
+• Underhållsversion. Rättningen i den här versionen gäller widgetarna på iPhone, iPad och Mac: att logga en bön från widgeten når nu appen direkt i stället för att vänta på att appen öppnas igen. Ingenting ändras på Android.
