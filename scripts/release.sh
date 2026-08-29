@@ -73,6 +73,9 @@ has() { case "$1" in *"$2"*) return 0 ;; *) return 1 ;; esac; }
 bold() { printf "\033[1m%s\033[0m\n" "$1"; }
 step() { printf "\n\033[1m▸ %s\033[0m\n" "$1"; }
 ok()   { printf "  ✓ %s\n" "$1"; }
+# After PHASE 3 there is nothing left to undo, so a problem found past it
+# cannot be a die — but it must not be a ✓ either.
+warn() { printf "  ⚠ %s\n" "$1" >&2; }
 
 # ── PUT THE MACHINE BACK THE WAY IT WAS FOUND ─────────────────────────
 #
@@ -747,12 +750,74 @@ else
   printf "  ⚠ %s\n" "no brew on this machine — the published cask was not installed, so nothing here has been through a real user install" >&2
 fi
 
+# ══════════════════════════════════════════════════════════════════════
+# PHASE 6 — THE RELEASE COMMIT'S OWN CI.  Waited for, not left to a mail.
+# ══════════════════════════════════════════════════════════════════════
+#
+# PHASE 4 asks this too, but it runs seconds after the tag push, when the
+# run does not exist yet — so the check that was built to catch a red
+# release commit would never once have had an answer during a cycle. That
+# is exactly how five consecutive releases went red unnoticed: the only
+# report was a mail, arriving later, addressed to nobody in particular.
+#
+# So wait. ci.yml is jest and tsc on ubuntu, a couple of minutes, and
+# everything irreversible is already behind us — the cost of waiting is
+# nothing and the cost of not knowing is another release cut on top of a
+# red one.
+step "CI on the release commit"
+CI_REL_SHA="$(git rev-parse HEAD)"
+CI_REL_ROW=""
+# 40 × 15s. Longer than ci.yml has ever taken, short enough that a stuck
+# queue does not hold the console hostage.
+for _ in $(seq 1 40); do
+  CI_TRY="$(gh run list --workflow=ci.yml --commit "$CI_REL_SHA" -R "$REPO" \
+    --limit 1 --json status,conclusion,url \
+    --jq '.[0] // empty | "\(.status)|\(.conclusion)|\(.url)"' 2>/dev/null || true)"
+  if [ -n "$CI_TRY" ] && [ "${CI_TRY%%|*}" = "completed" ]; then
+    CI_REL_ROW="$CI_TRY"
+    break
+  fi
+  sleep 15
+done
+
+CI_REL_STATE=unknown
+CI_REL_URL="https://github.com/$REPO/actions?query=branch%3Amain"
+if [ -z "$CI_REL_ROW" ]; then
+  warn "CI has not finished within ten minutes — read it before cutting anything else:"
+  warn "  gh run list --workflow=ci.yml --commit $CI_REL_SHA"
+else
+  CI_REL_REST="${CI_REL_ROW#*|}"
+  CI_REL_CONCL="${CI_REL_REST%%|*}"
+  CI_REL_URL="${CI_REL_REST##*|}"
+  if [ "$CI_REL_CONCL" = "success" ]; then
+    CI_REL_STATE=green
+    ok "CI is green on the release commit"
+  else
+    CI_REL_STATE=red
+    warn "CI concluded '$CI_REL_CONCL' on the release commit $CI_REL_SHA"
+  fi
+fi
+
 # Last, and after all of it: verification and the install above both touch
 # bundles, and the install is the last thing that rebuilds a registration.
 cleanup_workbench
 
 printf "\n"
-bold "$VERSION ($CODE) is live on GitHub, Homebrew and the F-Droid recipe."
+if [ "$CI_REL_STATE" = "red" ]; then
+  bold "$VERSION ($CODE) is live — and its own commit fails CI."
+  cat <<EOF
+
+  $CI_REL_URL
+
+  Nothing to undo: the tag is public and a pushed tag is never moved here,
+  so $TAG stays red for ever. Fix it forward on main. The next release
+  will refuse to start until you do — that is the preflight gate, and it
+  is the reason this is a ⚠ and not a rollback.
+
+EOF
+else
+  bold "$VERSION ($CODE) is live on GitHub, Homebrew and the F-Droid recipe."
+fi
 cat <<EOF
 
   Still yours to do — both need a human at a console:
@@ -767,3 +832,8 @@ cat <<EOF
               cancels it, and iOS then ships the newer commit, not the tag.
 
 EOF
+
+# A cycle that published a commit failing CI did not finish clean, and the
+# shell should say so — a 0 here is what let five of them pass unremarked.
+[ "$CI_REL_STATE" = "red" ] && exit 1
+exit 0

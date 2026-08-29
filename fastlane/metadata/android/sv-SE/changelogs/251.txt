@@ -1,0 +1,1 @@
+• Att logga en bön från Android-widgeten når nu appen direkt. Tidigare registrerades tryckningen på widgeten men nådde din dagbok först nästa gång du öppnade appen — så widgeten och appen kunde visa olika saker i dagar.

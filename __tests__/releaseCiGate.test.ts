@@ -64,6 +64,47 @@ describe('preflight refuses to release on top of a red main', () => {
   });
 });
 
+describe('the cycle waits for its own release commit to go through CI', () => {
+  // PHASE 4 asks the same question seconds after the tag push, when the
+  // run does not exist yet — so on its own the post-release check would
+  // never once have had an answer during a cycle, which is precisely how
+  // five red releases went unremarked. The only report was a mail.
+  const phase6 = release.slice(release.indexOf("PHASE 6"));
+
+  it('polls until the run completes, and gives up rather than hanging', () => {
+    expect(release).toContain('PHASE 6');
+    expect(phase6).toMatch(/for _ in \$\(seq 1 40\); do/);
+    expect(phase6).toContain('[ "${CI_TRY%%|*}" = "completed" ]');
+    expect(phase6).toContain('sleep 15');
+  });
+
+  it('runs after everything irreversible, so it can never block a publish', () => {
+    expect(release.indexOf('PHASE 6')).toBeGreaterThan(release.indexOf('git push -q origin main'));
+    expect(release.indexOf('PHASE 6')).toBeGreaterThan(release.indexOf('gh release create'));
+  });
+
+  it('does not die on a red result — there is nothing left to undo', () => {
+    // A pushed tag is never moved here, so the tag stays red whatever
+    // this does. The recovery is forward, and the preflight gate is what
+    // enforces it by refusing the next release.
+    expect(phase6).not.toContain('die "CI');
+    expect(phase6).toMatch(/warn "CI concluded/);
+  });
+
+  it('still refuses to exit 0 on a release whose commit failed', () => {
+    // The ✓ that was never earned. A clean exit code is what let five
+    // red releases read as five clean cycles.
+    expect(release).toMatch(/\[ "\$CI_REL_STATE" = "red" \] && exit 1/);
+    const closing = release.slice(release.lastIndexOf('printf "\\n"'));
+    expect(closing).toMatch(/is live — and its own commit fails CI/);
+    expect(closing).toMatch(/next release\s+will refuse to start/);
+  });
+
+  it('has a warn that is neither a pass nor a die', () => {
+    expect(release).toMatch(/^warn\(\) \{ printf "  ⚠ %s\\n" "\$1" >&2; \}$/m);
+  });
+});
+
 describe('verification asks about the commit that was actually released', () => {
   it('queries the tag’s commit, not the branch', () => {
     // main moving on afterwards does not make the tag green, and the tag

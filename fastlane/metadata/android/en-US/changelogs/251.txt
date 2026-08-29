@@ -1,0 +1,1 @@
+• Logging a prayer from the Android widget now reaches the app straight away. Before, the tap was recorded on the widget but only reached your journal the next time you opened the app — so the widget and the app could disagree for days.

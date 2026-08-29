@@ -81,6 +81,16 @@ gates now ask, and they deliberately ask different questions:
   the iOS check: green passes, red fails, and a run that has not finished
   prints `⧗` and holds the summary back, because release verification runs
   seconds after the push and "not finished" is not a verdict.
+- **the last phase of the cut** — the same question, *waited for*.
+  Verification runs seconds after the tag push, when the run does not
+  exist yet, so on its own the second gate would never have had an answer
+  during a cycle — which is exactly how five red releases went unremarked,
+  reported only by a mail arriving later addressed to nobody. `ci.yml` is
+  `jest` and `tsc` on ubuntu and everything irreversible is already done,
+  so the cycle waits up to ten minutes for the verdict. A red one is a `⚠`
+  and a non-zero exit, never a rollback: the tag is public and pushed tags
+  are not moved here, so the recovery is forward and the preflight gate is
+  what enforces it.
 
 `v2.13.5` is the last tag that fails this check, and it cannot be fixed:
 re-running a workflow re-runs the code at that commit, and pushed tags are
