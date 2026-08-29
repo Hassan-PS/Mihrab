@@ -22,6 +22,9 @@ PENDING=0
 
 pass() { echo "✓ $1"; }
 fail() { echo "✗ $1"; FAILED=1; }
+# Neither. A check that has not finished has not passed, and printing a ✓
+# next to "still building" is exactly how 2.13.0 was called done.
+pend() { echo "⧗ $1"; PENDING=1; }
 
 # ── 1. Tag exists on the remote ─────────────────────────────────────────
 if git -C "$(dirname "$0")/.." ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
@@ -315,22 +318,77 @@ if [ -f "$XC" ]; then
   # minutes, i.e. exactly when release.sh runs this — from "it never
   # will", and 2.13.1 was reported as an iOS failure while its run was
   # starting on that very commit.
-  xc_sha=$(git rev-parse "$TAG^{commit}" 2>/dev/null || true)
+  xc_sha=$(git rev-parse -q --verify "$TAG^{commit}" 2>/dev/null || true)
   xc_out=$(python3 "$XC" shipped "$VERSION" ${xc_sha:+"$xc_sha"} 2>&1); xc_rc=$?
   case "$xc_rc" in
     0) pass "iOS: $xc_out" ;;
-    3) pass "iOS: $xc_out"; PENDING=1 ;;
+    3) pend "iOS: $xc_out" ;;
     *) fail "iOS: $xc_out" ;;
   esac
 else
   fail "scripts/xcode-cloud.py is missing — cannot tell whether iOS shipped"
 fi
 
+# ── 8. CI IS GREEN ON THE COMMIT THAT WAS RELEASED ─────────────────────
+#
+# Local jest and tsc are not CI. CI runs on a clean Linux checkout with a
+# fresh npm install, none of this machine's caches and none of its build
+# artefacts, and it is the copy everybody else reads to decide whether the
+# tree is healthy.
+#
+# Nobody was reading it. Every release from 2.13.1 onward went red on
+# GitHub for one reason — release.sh writes `_(unfilled)_` into the
+# journal and a test asserted that marker never appears — and four
+# consecutive failure mails arrived without anyone connecting them to the
+# release that sent them. A permanently red main teaches people to stop
+# opening CI at all, which costs more than the failure it is reporting.
+#
+# The tag's own commit, not main's newest: F-Droid builds from the tag, and
+# main moving on afterwards does not make the tag green. Same three
+# outcomes as iOS above, for the same reason — release.sh calls this
+# seconds after the push, when the run has not started, and "not finished
+# yet" is not a verdict.
+#
+# -q --verify, not a bare rev-parse: on an unknown ref a bare rev-parse
+# prints the argument back and exits 1, so `|| true` hands you the string
+# "v9.9.9^{commit}" as a SHA and the check goes looking for its runs.
+CI_SHA="$(git -C "$(dirname "$0")/.." rev-parse -q --verify "$TAG^{commit}" 2>/dev/null || true)"
+CI_SHORT="${CI_SHA:0:7}"
+if [ -z "$CI_SHA" ]; then
+  fail "CI: cannot resolve $TAG to a commit locally — 'git fetch --tags' first"
+else
+  CI_ROW="$(gh run list --workflow=ci.yml --commit "$CI_SHA" -R "$REPO" --limit 1 \
+    --json status,conclusion,url \
+    --jq '.[0] // empty | "\(.status)|\(.conclusion)|\(.url)"' 2>/dev/null || true)"
+  CI_STATUS="${CI_ROW%%|*}"
+  CI_REST="${CI_ROW#*|}"
+  CI_CONCLUSION="${CI_REST%%|*}"
+  CI_RUN_URL="${CI_REST##*|}"
+  if [ -z "$CI_ROW" ]; then
+    pend "CI: no run on $CI_SHORT yet — re-run once GitHub has picked the push up"
+  elif [ "$CI_STATUS" != "completed" ]; then
+    pend "CI: $CI_STATUS on $CI_SHORT — $CI_RUN_URL"
+  else
+    case "$CI_CONCLUSION" in
+      success)
+        pass "CI: green on $CI_SHORT" ;;
+      failure|timed_out|startup_failure)
+        fail "CI: $CI_CONCLUSION on the released commit $CI_SHORT — $CI_RUN_URL" ;;
+      *)
+        # cancelled, skipped, neutral, action_required: finished without
+        # deciding anything. Reporting that as a pass would be a lie and
+        # as a failure would be a false alarm.
+        pend "CI: $CI_CONCLUSION on $CI_SHORT — no verdict — $CI_RUN_URL" ;;
+    esac
+  fi
+fi
+
 echo
 if [ "$FAILED" = "0" ] && [ "$PENDING" = "1" ]; then
   # Not a failure, and not "live on every channel" either. Saying the
-  # second while iOS is mid-build is how 2.13.0 was called finished.
-  echo "── EVERY FINISHED CHANNEL PASSED — iOS is still building, re-run this when it lands ──"
+  # second while iOS is mid-build is how 2.13.0 was called finished. The
+  # same now goes for CI: a run that has not finished has not passed.
+  echo "── EVERY FINISHED CHECK PASSED — something above is still running (marked ⧗), re-run this when it lands ──"
 elif [ "$FAILED" = "0" ]; then
   echo "── ALL CHECKS PASSED — release $TAG is live on every channel ──"
 else

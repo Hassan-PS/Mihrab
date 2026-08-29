@@ -51,6 +51,7 @@ for a job with an irreversible step in the middle:
 | **Every Mac's widgets froze on upgrade**, fixed only by the cask's `postflight` | the list predates the Mac build |
 | **Every Mac's widgets were removed on upgrade** — replacing the app drops the extension's PlugInKit record and nothing re-registers it, so WidgetKit has no provider and discards the placement | same postflight, second failure, found only because a user said so |
 | **Eight releases shipped unnotarized**, 2.11.0 to 2.13.3 — Gatekeeper blocked the first launch of every Mac install and the cask carried a caveat apologising for it | notarization was a comment in `build-catalyst.sh` asking a human to run `notarytool`, and this file never mentioned it at all |
+| **Five consecutive releases failed CI on GitHub**, 2.13.1 to 2.13.5 — every one of them for the same reason, and four failure mails arrived without anyone connecting them to the release that sent them | nothing; the cycle ran `jest` and `tsc` on the release machine and never once asked GitHub whether the same suite had passed there |
 
 Both of the macOS entries above share a cause, and it is not a missing
 check: **the release machine never installed the release.** It built the
@@ -59,6 +60,31 @@ Mac that *upgrades*. So the cycle now ends by installing what it just
 published, with `brew upgrade`, and asserting the three things only a real
 install can show: the version, a Gatekeeper-accepted stapled ticket, and a
 widget extension registered without the app ever being launched.
+
+The CI row has its own shape of cause. Local `jest` and `tsc` are not CI:
+CI runs on a clean Linux checkout with a fresh install, none of this
+machine's caches and none of its build artefacts, and it is the copy
+everyone else reads to decide whether the tree is healthy. Nothing in the
+cycle mentioned it existed, so a red `main` was invisible from inside the
+only tool anyone ran — and a permanently red `main` teaches people to stop
+opening CI at all, which costs more than the failure it is reporting. Two
+gates now ask, and they deliberately ask different questions:
+
+- **preflight** — the last *completed* `ci.yml` run on `main`. Not the
+  newest, which is usually still in flight on the commit being released
+  from; a gate that blocks for the length of every CI run is a gate people
+  route around. A repo with no completed runs is a fresh clone, not a
+  failure.
+- **`verify-release.sh`** — the **tag's own commit**. `main` going green
+  afterwards does not make the tag green, and the tag is what F-Droid
+  builds from and what anyone bisecting checks out. Three outcomes, like
+  the iOS check: green passes, red fails, and a run that has not finished
+  prints `⧗` and holds the summary back, because release verification runs
+  seconds after the push and "not finished" is not a verdict.
+
+`v2.13.5` is the last tag that fails this check, and it cannot be fixed:
+re-running a workflow re-runs the code at that commit, and pushed tags are
+never moved here.
 
 The script's one rule: **everything that can fail happens before anything
 that cannot be undone.** Tests, the changelog limits, the Xcode Cloud

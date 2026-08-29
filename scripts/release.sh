@@ -354,6 +354,39 @@ if [ -f "$JOURNAL" ]; then
 fi
 ok "the last release's lesson is written down"
 
+# ── CI ON MAIN IS NOT ALREADY RED ─────────────────────────────────────
+#
+# The cycle ran jest and tsc locally and never once asked GitHub whether
+# the same suite had passed there. That is not the same question: CI runs
+# on a clean checkout with a fresh install, on Linux, with no build
+# artefacts and none of this machine's caches — and it is the copy anyone
+# else looks at to decide whether main is healthy.
+#
+# It went unasked long enough to hide four consecutive red builds. Every
+# release that touched the cycle failed CI from 2.13.1 onward, because
+# release.sh writes `_(unfilled)_` into the release commit and a test
+# asserted the marker never appears. Nobody connected the mail to the
+# release that caused it, and a red main teaches people to stop reading
+# CI, which costs more than any single failure.
+#
+# The LAST COMPLETED run, not the newest: the newest is usually still in
+# flight on the commit being released from, and "in progress" is not a
+# verdict. A repo with no runs at all is not an error either — that is a
+# fresh clone, not a broken build.
+CI_ROW="$(gh run list --workflow=ci.yml --branch main --status completed --limit 1 \
+  --json conclusion,displayTitle,url \
+  --jq '.[0] // empty | "\(.conclusion)|\(.displayTitle)|\(.url)"' 2>/dev/null || true)"
+CI_CONCLUSION="${CI_ROW%%|*}"
+CI_REST="${CI_ROW#*|}"
+CI_TITLE="${CI_REST%%|*}"
+CI_URL="${CI_REST##*|}"
+case "$CI_CONCLUSION" in
+  ""|success)
+    ok "CI on main is ${CI_CONCLUSION:-not reporting (no completed runs)}" ;;
+  *)
+    die "CI on main last concluded '$CI_CONCLUSION' on \"$CI_TITLE\" — fix it before releasing on top of it: $CI_URL" ;;
+esac
+
 step "Tests"
 NODE_ENV=test npx jest --silent >/dev/null 2>&1 || die "jest failed — run 'NODE_ENV=test npx jest'"
 ok "jest"

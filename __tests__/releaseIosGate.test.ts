@@ -52,7 +52,10 @@ describe('"nothing is building it" is reachable only when true', () => {
 
 describe('verify-release.sh asks the question properly', () => {
   it('hands over the tagged commit', () => {
-    expect(verify).toMatch(/git rev-parse "\$TAG\^\{commit\}"/);
+    // -q --verify: a bare rev-parse prints the ref back on an unknown
+    // tag and exits 1, so `|| true` would hand "v9.9.9^{commit}" to the
+    // tool as a SHA.
+    expect(verify).toMatch(/git rev-parse -q --verify "\$TAG\^\{commit\}"/);
     expect(verify).toMatch(/shipped "\$VERSION" \$\{xc_sha:\+"\$xc_sha"\}/);
   });
 
@@ -60,7 +63,11 @@ describe('verify-release.sh asks the question properly', () => {
     // "still building" was printed for exit 3 regardless of the reason,
     // hiding which commit — or whether any — was being built.
     expect(verify).not.toContain('still building — re-run this script');
-    expect(verify.match(/pass "iOS: \$xc_out"/g) ?? []).toHaveLength(2);
+    // Both verdicts echo the tool. They print different marks — ✓ for a
+    // finished upload, ⧗ for a run still going — but neither substitutes
+    // a canned line for what the tool actually said.
+    expect(verify).toMatch(/pass "iOS: \$xc_out"/);
+    expect(verify).toMatch(/pend "iOS: \$xc_out"/);
   });
 
   it('still fails the release on a genuine miss', () => {
@@ -73,7 +80,16 @@ describe('the summary line only claims what is true', () => {
     // The exit-3 verdict is a pass, not a completion. Collapsing the two
     // is how 2.13.0 was declared finished with nothing on iPhone or iPad.
     expect(verify).toContain('PENDING=1');
-    expect(verify).toMatch(/iOS is still building, re-run this when it lands/);
+    // The wording is now shared with the CI gate, which pends for the
+    // same reason, so it names no single channel. What must hold is that
+    // the pending branch exists and does not claim completion.
+    const summary = verify.slice(
+      verify.indexOf('if [ "$FAILED" = "0" ] && [ "$PENDING" = "1" ]'),
+    );
+    const branch = summary.slice(0, summary.indexOf('elif'));
+    const printed = branch.match(/^\s*echo "(.*)"$/m)?.[1] ?? '';
+    expect(printed).toMatch(/still running/);
+    expect(printed).not.toMatch(/live on every channel/);
     expect(verify).toMatch(/\$FAILED" = "0" \] && \[ "\$PENDING" = "1"/);
   });
 
