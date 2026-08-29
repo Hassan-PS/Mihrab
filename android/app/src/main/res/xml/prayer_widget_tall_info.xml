@@ -15,13 +15,14 @@
   pick one of those to show and be wrong about the other. A person scrolling
   the picker should be able to see the version they want.
 
-  TWO ROWS, not three. Three is where the practice graph appears
-  (GRID_MIN_HEIGHT_DP is 265dp and three launcher rows is ~321dp on a 420dpi
-  phone), and it was the default here because the graph was the thing this
-  entry was for. Two rows is ~210dp: the whole list, no graph, and a third
-  of a home screen given back. Anyone who wants the graph drags the card one
-  row taller and it appears — the layout has always been chosen from the
-  measured size, so nothing else has to change.
+  TWO ROWS, not three. Three was the default because three rows is ~321dp
+  at 420dpi, past the 265dp where the practice graph appears, and the graph
+  was the thing this entry was for. But a launcher row is not a fixed dp:
+  two rows is ~210dp on that 420dpi grid and ~294dp on a 1080x2400 phone,
+  which is past 265dp — so on the grid most people have, two rows already
+  brings the graph, and it costs a third of a home screen less. Where it
+  does not, the card is one drag from it, and the layout has always been
+  chosen from the measured size, so nothing else has to change.
 
   This file replaces the retirement. The entry used to be
   `widget_description_large_retired` on `widgetCategory="keyguard"`, which is

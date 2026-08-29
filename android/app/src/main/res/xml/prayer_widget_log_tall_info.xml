@@ -8,13 +8,14 @@
   from the start. See prayer_widget_tall_info.xml for why one widget needs
   two entries.
 
-  TWO ROWS, not three. It was three because three is where the practice
-  graph appears — GRID_MIN_HEIGHT_DP is 265dp and three launcher rows is
-  ~321dp on a 420dpi phone — and the graph was taken to be what someone
-  choosing this entry was choosing. Two rows is ~210dp, which is past
-  COMPACT_MAX_HEIGHT_DP: the date line is back and the chips are at full
-  height, which is the difference from the short entry that people actually
-  place it for. The graph is one drag away and appears by itself.
+  TWO ROWS, not three. It was three because three rows is ~321dp at 420dpi,
+  past the 265dp where the practice graph appears, and the graph was taken
+  to be what someone choosing this entry was choosing. Two rows is past
+  COMPACT_MAX_HEIGHT_DP on any grid — the date line is back and the chips
+  are at full height, which is the difference from the short entry — and on
+  a 1080x2400 phone two rows is ~294dp, so the graph comes with them there
+  as well. See prayer_widget_tall_info.xml on why a launcher row is not a
+  fixed number of dp.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.prayer_times.PrayerWidgetConfigureActivity"

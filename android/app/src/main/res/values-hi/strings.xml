@@ -169,7 +169,7 @@
     <string name="widget_preview_tap_to_log">अस्र को समय पर दर्ज करने के लिए \u2713 पर टैप करें</string>
     <string name="widget_preview_practice_second">दिन की स्ट्रीक \u00b7 सर्वश्रेष्ठ 31 \u00b7 आज 5 में से 2</string>
     <string name="widget_name_tall">Mihrab \u00b7 नमाज़ के समय (ऊँचा)</string>
-    <string name="widget_description_tall">शहर और हिजरी तारीख़ के साथ वही छह समय। 4\u00d72 \u2014 एक पंक्ति बड़ा करें तो अभ्यास ग्राफ़ आ जाता है; छोटा करें तो यह एक-पंक्ति पट्टी बन जाता है।</string>
+    <string name="widget_description_tall">शहर, हिजरी तारीख़ और अभ्यास ग्राफ़ के साथ वही छह समय। 4\u00d72 \u2014 इसे छोटा करें तो यह एक-पंक्ति पट्टी बन जाता है।</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 आज दर्ज करें (ऊँचा)</string>
-    <string name="widget_description_log_tall">नमाज़ को समय पर दर्ज करने के लिए उस पर टैप करें, साथ ही अगली नमाज़ की उलटी गिनती। 4\u00d72 \u2014 एक पंक्ति बड़ा करें तो अभ्यास ग्राफ़ आ जाता है; छोटा करें तो यह एक-पंक्ति कार्ड बन जाता है।</string>
+    <string name="widget_description_log_tall">नमाज़ को समय पर दर्ज करने के लिए उस पर टैप करें, साथ ही अगली नमाज़ की उलटी गिनती और अभ्यास ग्राफ़। 4\u00d72 \u2014 इसे छोटा करें तो यह एक-पंक्ति कार्ड बन जाता है।</string>
 </resources>

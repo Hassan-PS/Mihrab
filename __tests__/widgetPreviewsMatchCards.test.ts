@@ -16,8 +16,17 @@
  *      localized name the payload carries — "Sunrise" in English.
  *   3. The 2×1 Next prayer preview clipped its own time to "16:5": the
  *      card autosizes that text and the preview hardcoded 36sp.
- *   4. Both tall previews had a dead band across the bottom third, left
- *      behind when the practice graph came out at 4×2.
+ *   4. Both 4×1 previews drew no header, though the card draws one at that
+ *      size on any ordinary phone: a launcher row is ~147dp on a 1080×2400
+ *      device, past the 145dp where the date and the city come back.
+ *
+ * A fifth was found the other way round — reported from a real phone after
+ * a change made here. The tall previews had lost the practice graph on the
+ * argument that two rows is ~210dp and the graph needs 265dp. Two rows is
+ * ~210dp on a 420dpi emulator grid; it is ~294dp on the phone that reported
+ * it, and the card there draws the graph. A dp figure for "a launcher row"
+ * is a property of the grid, not of the widget, so the previews show what
+ * an ordinary phone renders and let a dense grid drop the graph itself.
  *
  * None of it is reachable from the app, so nothing else can catch it.
  */
@@ -73,13 +82,32 @@ describe('nothing in a preview is clipped by its own font size', () => {
 });
 
 describe('the 4x2 previews fill their box', () => {
-  it.each(TALL_PREVIEWS)('%s gives the slack to a content row', name => {
+  it.each(TALL_PREVIEWS)('%s gives the slack to the practice graph', name => {
     const xml = layout(name);
-    // A weighted row inside the card, not a weighted spacer after the
-    // footer — that spacer is what left the dead band.
-    expect(xml).toMatch(/android:layout_height="0dp"\s*\n\s*android:layout_weight="1"\s*\n\s*android:orientation="horizontal"/);
+    // The card hands its slack to the graph — widget_practice_grid is the
+    // weighted view in prayer_widget_strip.xml and prayer_widget_log.xml —
+    // so the picture does the same, and a grid too dense for the graph
+    // shrinks it rather than clipping the times above it.
+    expect(xml).toMatch(
+      /<ImageView\s*\n\s*android:layout_width="match_parent"\s*\n\s*android:layout_height="0dp"\s*\n\s*android:layout_weight="\d"[\s\S]*?android:src="@drawable\/widget_preview_graph"/,
+    );
+    // A weighted empty TextView after the footer is the dead band that
+    // this test was first written for.
     expect(xml).not.toMatch(/<TextView\s*\n\s*android:layout_width="match_parent"\s*\n\s*android:layout_height="0dp"\s*\n\s*android:layout_weight="1"\s*\/>/);
   });
+});
+
+describe('the 4x1 previews draw the header the card draws', () => {
+  it.each(['prayer_widget_strip_preview', 'prayer_widget_log_preview'])(
+    '%s carries the date line',
+    name => {
+      // STRIP_HEADER_MIN_HEIGHT_DP and COMPACT_MAX_HEIGHT_DP are both
+      // 145dp, and one launcher row is ~147dp on a 1080×2400 phone — so a
+      // real 4×1 draws this line and a preview without it is a card
+      // nobody gets.
+      expect(layout(name)).toMatch(/android:text="@string\/widget_preview_header"/);
+    },
+  );
 });
 
 describe('the mock data in a preview holds together', () => {

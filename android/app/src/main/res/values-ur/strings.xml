@@ -170,7 +170,7 @@
     <string name="widget_preview_tap_to_log">Asr کو وقت پر درج کرنے کے لیے \u2713 تھپتھپائیں</string>
     <string name="widget_preview_practice_second">دن کا تسلسل \u00b7 بہترین 31 \u00b7 آج 5 میں سے 2</string>
     <string name="widget_name_tall">محراب \u00b7 اوقاتِ نماز (اونچا)</string>
-    <string name="widget_description_tall">وہی چھ اوقات، شہر اور ہجری تاریخ کے ساتھ۔ 4\u00d72 \u2014 ایک قطار بڑا کریں تو عمل کا گراف آ جاتا ہے؛ کم کریں تو یہ ایک قطار والی پٹی بن جاتا ہے۔</string>
+    <string name="widget_description_tall">وہی چھ اوقات، شہر، ہجری تاریخ اور عمل کے گراف کے ساتھ۔ 4\u00d72 \u2014 اسے کم کریں تو یہ ایک قطار والی پٹی بن جاتا ہے۔</string>
     <string name="widget_name_log_tall">محراب \u00b7 آج کا اندراج (اونچا)</string>
-    <string name="widget_description_log_tall">کسی نماز کو وقت پر درج کرنے کے لیے تھپتھپائیں، ساتھ ہی اگلی نماز کی الٹی گنتی۔ 4\u00d72 \u2014 ایک قطار بڑا کریں تو عمل کا گراف آ جاتا ہے؛ کم کریں تو یہ ایک قطار والا کارڈ بن جاتا ہے۔</string>
+    <string name="widget_description_log_tall">کسی نماز کو وقت پر درج کرنے کے لیے تھپتھپائیں، ساتھ ہی اگلی نماز کی الٹی گنتی اور عمل کا گراف۔ 4\u00d72 \u2014 اسے کم کریں تو یہ ایک قطار والا کارڈ بن جاتا ہے۔</string>
 </resources>

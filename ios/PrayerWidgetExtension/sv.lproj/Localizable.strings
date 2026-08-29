@@ -110,6 +110,6 @@
 "widget_preview_tap_to_log" = "Tryck ✓ för att logga Asr i tid";
 "widget_preview_practice_second" = "dagars räcka · Bäst 31 · 2 av 5 idag";
 "widget_name_tall" = "Mihrab · Bönetider (hög)";
-"widget_description_tall" = "Samma sex tider med stad och hijridatum. 4×2 — dra den en rad högre för aktivitetsgrafen, krymp den så blir den enradsremsan.";
+"widget_description_tall" = "Samma sex tider med stad, hijridatum och aktivitetsgrafen. 4×2 — krymp den så blir den enradsremsan.";
 "widget_name_log_tall" = "Mihrab · Logga idag (hög)";
-"widget_description_log_tall" = "Tryck på en bön för att logga den i tid, med nedräkning till nästa. 4×2 — dra den en rad högre för aktivitetsgrafen, krymp den så blir den enradskortet.";
+"widget_description_log_tall" = "Tryck på en bön för att logga den i tid, med nedräkning till nästa och aktivitetsgrafen. 4×2 — krymp den så blir den enradskortet.";

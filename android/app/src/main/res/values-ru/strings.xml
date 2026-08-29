@@ -205,7 +205,7 @@
     <string name="widget_preview_tap_to_log">Нажмите \u2713, чтобы отметить Asr вовремя</string>
     <string name="widget_preview_practice_second">дня подряд \u00b7 Лучшая 31 \u00b7 2 из 5 сегодня</string>
     <string name="widget_name_tall">Mihrab \u00b7 Время намазов (высокое)</string>
-    <string name="widget_description_tall">Те же шесть времён намаза с городом и датой хиджры. 4\u00d72 \u2014 растяните на строку выше для графика практики, уменьшите — и он станет полосой в одну строку.</string>
+    <string name="widget_description_tall">Те же шесть времён намаза с городом, датой хиджры и графиком практики. 4\u00d72 \u2014 уменьшите, и он станет полосой в одну строку.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Отметить намазы (высокое)</string>
-    <string name="widget_description_log_tall">Нажмите на намаз, чтобы отметить его вовремя, рядом отсчёт до следующего. 4\u00d72 \u2014 растяните на строку выше для графика практики, уменьшите — и он станет карточкой в одну строку.</string>
+    <string name="widget_description_log_tall">Нажмите на намаз, чтобы отметить его вовремя, рядом отсчёт до следующего и график практики. 4\u00d72 \u2014 уменьшите, и он станет карточкой в одну строку.</string>
 </resources>

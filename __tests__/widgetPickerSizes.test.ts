@@ -9,18 +9,21 @@
  * appears: GRID_MIN_HEIGHT_DP is 265dp and three launcher rows is ~321dp on
  * a 420dpi phone.
  *
- * They now place 4×2 (~210dp). That is still past the thresholds that make
- * them worth a separate entry — the prayer card gets its header and full
- * list at ROWS_MIN_HEIGHT_DP (165dp), the log card its date line and
- * full-height chips past COMPACT_MAX_HEIGHT_DP (145dp) — but it is below
- * the graph's 265dp.
+ * They now place 4×2. That is past the thresholds that make them worth a
+ * separate entry — the prayer card gets its header and full list at
+ * ROWS_MIN_HEIGHT_DP (165dp), the log card its date line and full-height
+ * chips past COMPACT_MAX_HEIGHT_DP (145dp) — and on an ordinary phone it
+ * is past the graph's 265dp too.
  *
- * Which is why the previews are in this test too. A preview showing a graph
- * the placed card will not draw is worse than no second entry at all: the
- * person picked that entry FOR the thing in the picture, and the card they
- * get is missing it with no hint that a drag would bring it back. So the
- * graph came out of both previews, and the picker descriptions stopped
- * promising it and now say where it is.
+ * Which is why the previews are in this test. "Two rows is ~210dp" was
+ * measured on a 420dpi emulator and taken for a fact about the widget; on
+ * a 1080×2400 phone a launcher row is ~147dp, two rows is ~294dp, and the
+ * placed card draws the practice graph. That was reported from a phone
+ * against previews that had just had the graph removed on the 210dp
+ * arithmetic. So both previews carry the graph — it is what the person
+ * choosing this entry gets — and the layouts hand their slack to it, so a
+ * grid dense enough to fall short of 265dp shrinks the graph instead of
+ * clipping the times above it.
  */
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -68,12 +71,22 @@ describe('the previews show what 4×2 actually draws', () => {
   it.each([
     ['prayer times', 'prayer_widget_tall_preview'],
     ['log today', 'prayer_widget_log_tall_preview'],
-  ])('the %s preview has no practice graph in it', (_label, file) => {
+  ])('the %s preview draws the practice graph', (_label, file) => {
     const preview = xml('layout', file);
-    // The drawable is deliberately still in the tree — see the comment in
-    // prayer_widget_tall_preview.xml — but no preview may draw it while the
-    // entries place two rows.
-    expect(preview).not.toMatch(/android:src="@drawable\/widget_preview_graph"/);
+    // Two launcher rows is ~294dp on an ordinary 1080×2400 phone, past
+    // GRID_MIN_HEIGHT_DP, so the placed card draws it. Reported from such
+    // a phone, against a preview that had just dropped it.
+    expect(preview).toMatch(/android:src="@drawable\/widget_preview_graph"/);
+  });
+
+  it.each([
+    ['prayer times', 'prayer_widget_tall_preview'],
+    ['log today', 'prayer_widget_log_tall_preview'],
+  ])('and the %s preview draws the full card above it', (_label, file) => {
+    const preview = xml('layout', file);
+    // The header is the line 4×2 buys over 4×1 — a preview that shows the
+    // graph but not the header is promising the wrong half.
+    expect(preview).toMatch(/android:text="@string\/widget_preview_header"/);
   });
 });
 

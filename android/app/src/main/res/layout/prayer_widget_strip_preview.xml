@@ -41,6 +41,42 @@
     android:paddingTop="5dp"
     android:paddingBottom="5dp">
 
+    <!--
+      The header the card draws at this size, and the preview did not.
+      One launcher row is ~147dp on a 1080x2400 phone, past
+      STRIP_HEADER_MIN_HEIGHT_DP / COMPACT_MAX_HEIGHT_DP (145dp), so a
+      real 4x1 shows this line. The picker renders this layout in a box of
+      the same height, so leaving it out drew a card nobody gets.
+    -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_preview_header"
+            android:textColor="#9AA0A6"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.06"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_hijri_full"
+            android:textColor="#9AA0A6"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.06"
+            android:maxLines="1" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
