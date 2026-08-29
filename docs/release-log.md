@@ -138,3 +138,16 @@ edited: a clean *cut* is not a clean *release*, and this file is the only
 place that distinction gets recorded. A release that publishes something
 broken and reports success is the failure this log exists to catch, so the
 entry has to show both what the script knew and what it could not know.
+
+## 2.13.4 (249) — 2026-08-29
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/build-catalyst.sh`
+  - `scripts/release.sh`
+  - `scripts/verify-release.sh`
+
+**Lesson:** _(unfilled)_

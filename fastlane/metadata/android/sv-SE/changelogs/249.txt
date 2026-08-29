@@ -1,0 +1,2 @@
+• Widgetväljaren visar nu kortet du faktiskt får. Varje förhandsvisning är omritad efter det riktiga kortet: loggknappen är den ihåliga ✓ som kortet ritar, soluppgången heter Soluppgång, enradskorten visar sin datumrad, och 4×2-förhandsvisningarna visar övningsgrafen — för det är vad en 4×2 ritar på en vanlig telefon.
+• På Mac tar en uppdatering inte längre bort dina widgetar.

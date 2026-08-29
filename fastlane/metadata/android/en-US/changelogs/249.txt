@@ -1,0 +1,2 @@
+• The widget picker now shows the card you actually get. Every preview was redrawn from the real thing: the log chip is the hollow ✓ the card draws, sunrise is named Sunrise, the one-row cards show their date line, and the 4×2 previews show the practice graph — because that is what a 4×2 draws on an ordinary phone.
+• On Mac, updating no longer removes your widgets.
