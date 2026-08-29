@@ -112,3 +112,29 @@ and iOS then ships the newer commit rather than the tagged one.
 Ran clean on the first attempt.
 
 **Lesson:** none needed — clean run, no change to the cycle.
+
+**Corrected the same day.** That line was written by the script and left
+alone, and it was wrong within hours. The cut was clean; the *release* was
+not, and neither failure was reachable from anything this cycle checks:
+
+  - Upgrading on macOS REMOVED every placed widget, and had done on every
+    upgrade. Replacing the app drops the extension's PlugInKit record and
+    nothing re-registers it, so WidgetKit discards the placement. Found
+    because a user said "after every update the widgets are removed" — not
+    by a gate, and not by the person cutting the release, whose own Mac
+    looked fine because he launches the app.
+  - This was the eighth consecutive release to ship UNNOTARIZED. Gatekeeper
+    had been blocking the first launch of every Mac install since 2.11.0,
+    and the cask carried a caveat apologising for it. The notary service's
+    history is what says so: last accepted submission, 2.10.1.
+
+Both are now gates (`pluginkit` in the cask; a stapled ticket on the zip,
+checked before publishing and again on what is served), and notarization
+happens inside `build-catalyst.sh` rather than in a comment asking a human
+to run it afterwards.
+
+The reason this note is appended rather than the "none needed" line being
+edited: a clean *cut* is not a clean *release*, and this file is the only
+place that distinction gets recorded. A release that publishes something
+broken and reports success is the failure this log exists to catch, so the
+entry has to show both what the script knew and what it could not know.
