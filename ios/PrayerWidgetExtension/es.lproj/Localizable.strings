@@ -110,6 +110,6 @@
 "widget_preview_tap_to_log" = "Toca ✓ para registrar Asr a tiempo";
 "widget_preview_practice_second" = "días de racha · Mejor 31 · 2 de 5 hoy";
 "widget_name_tall" = "Mihrab · Horarios de oración (alto)";
-"widget_description_tall" = "Los mismos seis horarios con la ciudad, la fecha hijri y el gráfico de práctica. 4×3 — redúcelo y se convierte en la franja de una fila.";
+"widget_description_tall" = "Los mismos seis horarios con la ciudad y la fecha hijri. 4×2 — amplíalo una fila para el gráfico de práctica; redúcelo y se convierte en la franja de una fila.";
 "widget_name_log_tall" = "Mihrab · Registrar hoy (alto)";
-"widget_description_log_tall" = "Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente y el gráfico de práctica. 4×3 — redúcelo y se convierte en la tarjeta de una fila.";
+"widget_description_log_tall" = "Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente. 4×2 — amplíalo una fila para el gráfico de práctica; redúcelo y se convierte en la tarjeta de una fila.";

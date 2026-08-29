@@ -210,7 +210,7 @@
     <string name="widget_preview_tap_to_log">اضغط \u2713 لتسجيل العصر في وقتها</string>
     <string name="widget_preview_practice_second">يومًا متتاليًا \u00b7 الأفضل 31 \u00b7 2 من 5 اليوم</string>
     <string name="widget_name_tall">محراب \u00b7 أوقات الصلاة (الطويل)</string>
-    <string name="widget_description_tall">الأوقات الستة نفسها مع المدينة والتاريخ الهجري والرسم البياني للالتزام. 4\u00d73 \u2014 قلّصها لتصبح الشريط ذا الصف الواحد.</string>
+    <string name="widget_description_tall">الأوقات الستة نفسها مع المدينة والتاريخ الهجري. 4\u00d72 \u2014 مدّها صفًا للرسم البياني للالتزام، أو قلّصها لتصبح الشريط ذا الصف الواحد.</string>
     <string name="widget_name_log_tall">محراب \u00b7 سجل اليوم (الطويل)</string>
-    <string name="widget_description_log_tall">اضغط على صلاة لتسجيلها في وقتها، مع العد التنازلي للصلاة التالية والرسم البياني للالتزام. 4\u00d73 \u2014 قلّصها لتصبح البطاقة ذات الصف الواحد.</string>
+    <string name="widget_description_log_tall">اضغط على صلاة لتسجيلها في وقتها، مع العد التنازلي للصلاة التالية. 4\u00d72 \u2014 مدّها صفًا للرسم البياني للالتزام، أو قلّصها لتصبح البطاقة ذات الصف الواحد.</string>
 </resources>

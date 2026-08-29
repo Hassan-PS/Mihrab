@@ -5,15 +5,23 @@
   Not a second widget. `PrayerWidgetLargeProvider` is `PrayerWidgetProvider`
   with a different name, and `selectLayout` has always chosen the card from
   the measured size rather than from the provider class, so an instance
-  placed from here is the same card the other entry places, three rows tall
+  placed from here is the same card the other entry places, two rows tall
   from the start.
 
   Two entries because Android's picker shows ONE preview per provider, at the
   size `targetCell*` names. This widget means something different at one row
-  and at three — at one it is the six times and what is next; at three the
-  city, the Hijri date and the practice graph come with it — and a single
-  entry has to pick one of those to show and be wrong about the other. A
-  person scrolling the picker should be able to see the version they want.
+  and at two — at one it is the six times and what is next; at two the city,
+  the Hijri date and the full list come with it — and a single entry has to
+  pick one of those to show and be wrong about the other. A person scrolling
+  the picker should be able to see the version they want.
+
+  TWO ROWS, not three. Three is where the practice graph appears
+  (GRID_MIN_HEIGHT_DP is 265dp and three launcher rows is ~321dp on a 420dpi
+  phone), and it was the default here because the graph was the thing this
+  entry was for. Two rows is ~210dp: the whole list, no graph, and a third
+  of a home screen given back. Anyone who wants the graph drags the card one
+  row taller and it appears — the layout has always been chosen from the
+  measured size, so nothing else has to change.
 
   This file replaces the retirement. The entry used to be
   `widget_description_large_retired` on `widgetCategory="keyguard"`, which is
@@ -36,6 +44,6 @@
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen"
     android:targetCellWidth="4"
-    android:targetCellHeight="3"
+    android:targetCellHeight="2"
     android:maxResizeWidth="500dp"
     android:maxResizeHeight="600dp" />

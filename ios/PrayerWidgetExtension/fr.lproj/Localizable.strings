@@ -110,6 +110,6 @@
 "widget_preview_tap_to_log" = "Touchez ✓ pour noter Asr à l'heure";
 "widget_preview_practice_second" = "jours de série · Meilleure 31 · 2 sur 5 aujourd'hui";
 "widget_name_tall" = "Mihrab · Heures de prière (haut)";
-"widget_description_tall" = "Les mêmes six heures avec la ville, la date hégirienne et le graphique de pratique. 4×3 — réduisez-le, et il devient la bande à une ligne.";
+"widget_description_tall" = "Les mêmes six heures avec la ville et la date hégirienne. 4×2 — agrandissez-le d'une ligne pour le graphique de pratique, réduisez-le et il devient la bande à une ligne.";
 "widget_name_log_tall" = "Mihrab · Journal du jour (haut)";
-"widget_description_log_tall" = "Touchez une prière pour la noter à l'heure, avec le compte à rebours de la suivante et le graphique de pratique. 4×3 — réduisez-le, et il devient la carte à une ligne.";
+"widget_description_log_tall" = "Touchez une prière pour la noter à l'heure, avec le compte à rebours de la suivante. 4×2 — agrandissez-le d'une ligne pour le graphique de pratique, réduisez-le et il devient la carte à une ligne.";

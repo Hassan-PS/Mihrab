@@ -175,7 +175,7 @@
     <string name="widget_preview_tap_to_log">Toca \u2713 para registrar Asr a tiempo</string>
     <string name="widget_preview_practice_second">días de racha \u00b7 Mejor 31 \u00b7 2 de 5 hoy</string>
     <string name="widget_name_tall">Mihrab \u00b7 Horarios de oración (alto)</string>
-    <string name="widget_description_tall">Los mismos seis horarios con la ciudad, la fecha hijri y el gráfico de práctica. 4\u00d73 \u2014 redúcelo y se convierte en la franja de una fila.</string>
+    <string name="widget_description_tall">Los mismos seis horarios con la ciudad y la fecha hijri. 4\u00d72 \u2014 amplíalo una fila para el gráfico de práctica; redúcelo y se convierte en la franja de una fila.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Registrar hoy (alto)</string>
-    <string name="widget_description_log_tall">Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente y el gráfico de práctica. 4\u00d73 \u2014 redúcelo y se convierte en la tarjeta de una fila.</string>
+    <string name="widget_description_log_tall">Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente. 4\u00d72 \u2014 amplíalo una fila para el gráfico de práctica; redúcelo y se convierte en la tarjeta de una fila.</string>
 </resources>

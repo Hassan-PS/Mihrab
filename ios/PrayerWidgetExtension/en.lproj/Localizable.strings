@@ -110,6 +110,6 @@
 "widget_preview_tap_to_log" = "Tap ✓ to log Asr on time";
 "widget_preview_practice_second" = "day streak · Best 31 · 2 of 5 today";
 "widget_name_tall" = "Mihrab · Prayer times (tall)";
-"widget_description_tall" = "The same six times with the city, the Hijri date and the practice graph. 4×3 — shrink it and it becomes the one-row strip.";
+"widget_description_tall" = "The same six times with the city and the Hijri date. 4×2 — stretch it a row for the practice graph, shrink it and it becomes the one-row strip.";
 "widget_name_log_tall" = "Mihrab · Log today (tall)";
-"widget_description_log_tall" = "Tap a prayer to log it on time, with the countdown to the next and the practice graph. 4×3 — shrink it and it becomes the one-row card.";
+"widget_description_log_tall" = "Tap a prayer to log it on time, with the countdown to the next. 4×2 — stretch it a row for the practice graph, shrink it and it becomes the one-row card.";

@@ -3,12 +3,14 @@
   The picker preview for the TALL Log Today entry.
 
   The same card as prayer_widget_log_preview.xml at the size its own entry
-  places it: three launcher rows, where the date line comes back, the chips
-  return to full height, and the practice graph appears. The one-row preview
-  shows none of those because the one-row card draws none of them.
+  places it: two launcher rows, where the date line comes back and the chips
+  return to full height. The one-row preview shows neither because the
+  one-row card draws neither.
 
-  The graph is the shared drawable, for the reason given in
-  prayer_widget_tall_preview.xml.
+  It used to show the practice graph as well, when this entry placed three
+  rows. It does not any more, and must not: the graph needs 265dp and two
+  rows is ~210dp, so drawing it here would promise something the placed card
+  cannot deliver.
 
   Keep in step with prayer_widget_log.xml by hand.
 -->
@@ -130,41 +132,16 @@
             android:maxLines="1" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="true"
-        android:layout_marginTop="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="12"
-            android:textColor="#E8EAED"
-            android:textSize="22sp"
-            android:fontFamily="sans-serif-medium"
-            android:includeFontPadding="false"
-            android:maxLines="1" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingStart="7dp"
-            android:text="@string/widget_preview_practice_second"
-            android:textColor="#9AA0A6"
-            android:textSize="12sp"
-            android:maxLines="1"
-            android:ellipsize="end" />
-    </LinearLayout>
-
-    <ImageView
+    <!--
+      No streak line and no graph, because a two-row card draws neither:
+      `bindGrid` gates the whole practice block on GRID_MIN_HEIGHT_DP (265dp)
+      and two launcher rows is ~210dp. They were here when this entry placed
+      three rows. A preview that shows a graph the placed card will not draw
+      is worse than a plain one — the person chose this entry FOR the thing
+      in the picture.
+    -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="8dp"
-        android:scaleType="fitStart"
-        android:contentDescription="@string/widget_streak_grid_description"
-        android:src="@drawable/widget_preview_graph" />
+        android:layout_weight="1" />
 </LinearLayout>

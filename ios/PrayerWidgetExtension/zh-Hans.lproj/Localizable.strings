@@ -110,6 +110,6 @@
 "widget_preview_tap_to_log" = "点击 ✓ 记录 Asr 按时礼拜";
 "widget_preview_practice_second" = "天连续 · 最佳 31 · 今日 2/5";
 "widget_name_tall" = "Mihrab · 礼拜时间（高）";
-"widget_description_tall" = "同样的六个礼拜时间，加上城市、希吉来历日期和功修记录图。4×3——缩小后会变为单行条形。";
+"widget_description_tall" = "同样的六个礼拜时间，加上城市和希吉来历日期。4×2——拉高一行即可显示功修记录图，缩小后会变为单行条形。";
 "widget_name_log_tall" = "Mihrab · 记录今日（高）";
-"widget_description_log_tall" = "点击某次礼拜即可记录按时完成，并显示下一次礼拜的倒计时和功修记录图。4×3——缩小后会变为单行卡片。";
+"widget_description_log_tall" = "点击某次礼拜即可记录按时完成，并显示下一次礼拜的倒计时。4×2——拉高一行即可显示功修记录图，缩小后会变为单行卡片。";

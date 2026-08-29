@@ -110,6 +110,6 @@
 "widget_preview_tap_to_log" = "Ketuk ✓ untuk mencatat Asr tepat waktu";
 "widget_preview_practice_second" = "hari beruntun · Terbaik 31 · 2 dari 5 hari ini";
 "widget_name_tall" = "Mihrab · Waktu salat (tinggi)";
-"widget_description_tall" = "Keenam waktu yang sama dengan kota, tanggal Hijriah, dan grafik praktik. 4×3 — perkecil dan akan menjadi strip satu baris.";
+"widget_description_tall" = "Keenam waktu yang sama dengan kota dan tanggal Hijriah. 4×2 — perbesar satu baris untuk grafik praktik, perkecil dan akan menjadi strip satu baris.";
 "widget_name_log_tall" = "Mihrab · Catat hari ini (tinggi)";
-"widget_description_log_tall" = "Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya dan grafik praktik. 4×3 — perkecil dan akan menjadi kartu satu baris.";
+"widget_description_log_tall" = "Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya. 4×2 — perbesar satu baris untuk grafik praktik, perkecil dan akan menjadi kartu satu baris.";

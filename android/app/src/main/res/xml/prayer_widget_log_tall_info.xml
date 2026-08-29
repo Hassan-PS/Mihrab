@@ -4,13 +4,17 @@
 
   `PrayerWidgetLogLargeProvider` is `PrayerWidgetLogProvider` under another
   name; every layout decision this widget makes it makes from the measured
-  height, so an instance placed from here is the same card, three rows tall
+  height, so an instance placed from here is the same card, two rows tall
   from the start. See prayer_widget_tall_info.xml for why one widget needs
   two entries.
 
-  Three rows, not four: three is where the graph appears (GRID_MIN_HEIGHT_DP
-  is 265 and three rows is 321dp on a 420dpi phone), and the graph is what
-  someone choosing this entry over the short one is choosing.
+  TWO ROWS, not three. It was three because three is where the practice
+  graph appears — GRID_MIN_HEIGHT_DP is 265dp and three launcher rows is
+  ~321dp on a 420dpi phone — and the graph was taken to be what someone
+  choosing this entry was choosing. Two rows is ~210dp, which is past
+  COMPACT_MAX_HEIGHT_DP: the date line is back and the chips are at full
+  height, which is the difference from the short entry that people actually
+  place it for. The graph is one drag away and appears by itself.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
@@ -27,6 +31,6 @@
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
     android:targetCellWidth="4"
-    android:targetCellHeight="3"
+    android:targetCellHeight="2"
     android:maxResizeWidth="500dp"
     android:maxResizeHeight="600dp" />

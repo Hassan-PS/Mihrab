@@ -3,16 +3,20 @@
   The picker preview for the TALL prayer-times entry.
 
   Same card as prayer_widget_strip_preview.xml, drawn at the size its own
-  entry places it: three launcher rows, which is where the header comes back
-  and where the practice graph starts. The one-row preview shows neither,
-  because at 99dp the real card draws neither — two entries, two honest
-  pictures, rather than one picture that is right for one of them.
+  entry places it: two launcher rows, which is where the header and the full
+  list come back. The one-row preview shows neither, because at 99dp the real
+  card draws neither — two entries, two honest pictures, rather than one
+  picture that is right for one of them.
 
-  The graph is a drawable rather than a grid of views. The real one is a
-  Canvas bitmap sized to the box it is given; a preview cannot run that code,
-  and 182 squares of XML would be a second implementation to keep in step.
-  widget_preview_graph.png is drawn from the same ramp and the same three
-  marks — see PracticeGridBitmap and the script note in the commit.
+  The practice graph used to be the bottom third of this picture, when the
+  entry placed three rows. It is gone with the row: the graph needs 265dp and
+  two rows is ~210dp, so it would be a promise the placement breaks.
+
+  `drawable-nodpi/widget_preview_graph.png` is now referenced by nothing —
+  10 KB, kept deliberately. It is not a screenshot: it was generated from the
+  same ramp and the same three marks as PracticeGridBitmap, so it is the one
+  picture of that graph that cannot drift from the real one. If a three-row
+  preview ever comes back, redrawing it is the expensive part.
 
   Keep in step with prayer_widget_strip.xml by hand.
 -->
@@ -142,47 +146,14 @@
             android:maxLines="1" />
     </LinearLayout>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#26FFFFFF"
-        android:layout_marginTop="10dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="true"
-        android:layout_marginTop="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="12"
-            android:textColor="#E8EAED"
-            android:textSize="26sp"
-            android:fontFamily="sans-serif-medium"
-            android:includeFontPadding="false"
-            android:maxLines="1" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingStart="7dp"
-            android:text="@string/widget_preview_practice_second"
-            android:textColor="#9AA0A6"
-            android:textSize="12sp"
-            android:maxLines="1"
-            android:ellipsize="end" />
-    </LinearLayout>
-
-    <ImageView
+    <!--
+      The divider, the streak line and the graph are gone with the third row.
+      All three hang off GRID_MIN_HEIGHT_DP (265dp) in `bindPractice`, and
+      two launcher rows is ~210dp, so a two-row card draws the list and stops
+      there. Showing them here would sell a card the placement cannot make.
+    -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
-        android:layout_marginTop="8dp"
-        android:scaleType="fitStart"
-        android:contentDescription="@string/widget_streak_grid_description"
-        android:src="@drawable/widget_preview_graph" />
+        android:layout_weight="1" />
 </LinearLayout>
