@@ -655,12 +655,20 @@ if [ -x "$LSREGISTER" ]; then
     "$LSREGISTER" -f /Applications/Mihrab.app 2>/dev/null || true
     INSTALLED_EXT=/Applications/Mihrab.app/Contents/PlugIns/PrayerWidgetExtension.appex
     INSTALLED_ID=maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension
-    for _ in 1 2 3 4 5 6; do
+    # CAPTURED, NOT PIPED INTO `grep -q`. grep exits on the first line,
+    # pluginkit takes SIGPIPE, and `pipefail` turns that into 141 — so a
+    # registered extension reads as missing, the loop can never break, and
+    # the warning below fires on a machine that is perfectly healthy. It
+    # only worked here by accident: pluginkit's output is small enough to
+    # fit the pipe buffer and finish writing before grep leaves.
+    SEEN=""
+    for _ in 1 2 3 4 5 6 7 8; do
       pluginkit -a "$INSTALLED_EXT" >/dev/null 2>&1 || true
       sleep 3
-      if pluginkit -m -i "$INSTALLED_ID" 2>/dev/null | grep -q .; then break; fi
+      SEEN="$(pluginkit -m -i "$INSTALLED_ID" 2>/dev/null || true)"
+      if [ -n "$SEEN" ]; then break; fi
     done
-    if pluginkit -m -i "$INSTALLED_ID" 2>/dev/null | grep -q .; then
+    if [ -n "$SEEN" ]; then
       echo "  ▸ the installed app's widget extension is still registered."
     else
       echo "  ⚠ /Applications/Mihrab.app's widget extension is NOT registered." >&2

@@ -117,6 +117,45 @@ reap() {  # <what> <pgrep -f pattern>
   ok "stopped $1 ($pids)"
 }
 
+# ── AND PUT THE INSTALLED WIDGET BACK ─────────────────────────────────
+#
+# `lsregister -u <path>` takes a PATH and drops records by BUNDLE IDENTITY,
+# and it does it LAZILY. Unregistering a temp copy called `Mihrab.app`
+# therefore takes the plugin registration of the copy in /Applications with
+# it — minutes later, so a check run straight afterwards reports everything
+# fine and means nothing.
+#
+# Measured the hard way on 2026-08-29. A throwaway `Mihrab.app` was
+# unregistered, `pluginkit` was checked immediately and listed the
+# installed extension; a few minutes later the user's widgets were blank,
+# and then gone from the gallery entirely. `lsregister -u` is used in three
+# places in this cycle — here, in `verify-release.sh`, and in
+# `build-catalyst.sh` — and each one is a chance to take the widgets down
+# on the machine cutting the release.
+#
+# So: after any unregister, assert the installed extension back, and verify
+# it STAYED rather than that the command returned 0.
+#
+# Captured, not piped, for the third time in this file: `pluginkit -m … |
+# grep -q .` makes grep exit on the first line, pluginkit take SIGPIPE and
+# `pipefail` report 141 — a registered extension read as missing, and a
+# loop that can never break.
+keep_installed_widget_registered() {
+  local app=/Applications/Mihrab.app
+  local ext="$app/Contents/PlugIns/PrayerWidgetExtension.appex"
+  local id=maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension
+  local i seen
+  if [ ! -d "$ext" ]; then return 0; fi
+  for i in 1 2 3 4 5 6 7 8; do
+    pluginkit -a "$ext" >/dev/null 2>&1 || true
+    sleep 3
+    seen="$(pluginkit -m -i "$id" 2>/dev/null || true)"
+    if [ -n "$seen" ]; then return 0; fi
+  done
+  printf "  ⚠ %s\n" "/Applications/Mihrab.app's widget extension is not registered — its widgets will be blank. See docs/release/catalyst-widgets.md." >&2
+  return 0
+}
+
 cleanup_workbench() {
   step "Cleanup"
   reap "the app and widget extension left running from ios/build" \
@@ -133,6 +172,9 @@ cleanup_workbench() {
     stopped="$(JAVA_HOME="$JDK" "$ROOT/android/gradlew" --stop 2>/dev/null || true)"
     has "$stopped" "Daemon" && ok "stopped the Gradle daemon" || true
   fi
+  # Last word on the way out: whatever else this run did to LaunchServices,
+  # the widgets on this Mac work when it finishes.
+  keep_installed_widget_registered
   ok "nothing of this release's is still running"
 }
 
@@ -443,6 +485,10 @@ ok "notarized, ticket stapled into the bundle"
 LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 [ -x "$LSREG" ] && { "$LSREG" -u "$APP" 2>/dev/null || true; }
 rm -rf "$UNZIP"
+# That unregister is by bundle identity and lands late — see
+# keep_installed_widget_registered. Without this the release blanks the
+# widgets on the machine cutting it.
+keep_installed_widget_registered
 
 if [ "$DRY_RUN" = "1" ]; then
   cleanup_workbench

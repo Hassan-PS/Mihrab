@@ -196,6 +196,31 @@ if [ -f "$TAP" ]; then
     LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
     [ -x "$LSREG" ] && { "$LSREG" -u "$unz/Mihrab.app" 2>/dev/null || true; }
     rm -rf "$unz"
+    # AND PUT THE INSTALLED WIDGET BACK. That unregister takes a path but
+    # drops records by BUNDLE IDENTITY, and it lands lazily — so it takes
+    # the plugin registration of /Applications/Mihrab.app with it, minutes
+    # later, long after any check here would have looked. Measured
+    # 2026-08-29: the widgets on this Mac went blank and then vanished from
+    # the gallery, from exactly this shape of command.
+    #
+    # Captured rather than piped into `grep -q`: grep exits on the first
+    # line, pluginkit takes SIGPIPE, and under `pipefail` a registered
+    # extension reads as missing.
+    ext=/Applications/Mihrab.app/Contents/PlugIns/PrayerWidgetExtension.appex
+    extid=maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension
+    if [ -d "$ext" ]; then
+      for _ in 1 2 3 4 5 6 7 8; do
+        pluginkit -a "$ext" >/dev/null 2>&1 || true
+        sleep 3
+        seen="$(pluginkit -m -i "$extid" 2>/dev/null || true)"
+        [ -n "$seen" ] && break
+      done
+      if [ -n "${seen:-}" ]; then
+        pass "this Mac's own Mihrab widget extension is still registered"
+      else
+        fail "this Mac's widget extension is NOT registered — its widgets will be blank. See docs/release/catalyst-widgets.md"
+      fi
+    fi
   else
     fail "could not download the zip to verify sha256"
   fi
