@@ -52,6 +52,14 @@ for a job with an irreversible step in the middle:
 | **Every Mac's widgets were removed on upgrade** — replacing the app drops the extension's PlugInKit record and nothing re-registers it, so WidgetKit has no provider and discards the placement | same postflight, second failure, found only because a user said so |
 | **Eight releases shipped unnotarized**, 2.11.0 to 2.13.3 — Gatekeeper blocked the first launch of every Mac install and the cask carried a caveat apologising for it | notarization was a comment in `build-catalyst.sh` asking a human to run `notarytool`, and this file never mentioned it at all |
 
+Both of the macOS entries above share a cause, and it is not a missing
+check: **the release machine never installed the release.** It built the
+artifact, inspected it, and stopped — while both failures only appear on a
+Mac that *upgrades*. So the cycle now ends by installing what it just
+published, with `brew upgrade`, and asserting the three things only a real
+install can show: the version, a Gatekeeper-accepted stapled ticket, and a
+widget extension registered without the app ever being launched.
+
 The script's one rule: **everything that can fail happens before anything
 that cannot be undone.** Tests, the changelog limits, the Xcode Cloud
 in-flight check, the signature and App Group of the *actual* zip about to

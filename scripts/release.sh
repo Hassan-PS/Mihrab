@@ -639,8 +639,83 @@ ok "cask at $VERSION, sha matches the published zip"
 step "Verifying"
 "$ROOT/scripts/verify-release.sh" "$TAG" || die "verification failed — see the ✗ lines above"
 
-# Last, and after verification rather than before it: verification unpacks
-# the published zip and is the last thing that touches a bundle.
+# ══════════════════════════════════════════════════════════════════════
+# PHASE 5 — BE A USER.  Install what was just published, the way they do.
+# ══════════════════════════════════════════════════════════════════════
+#
+# Every macOS failure this project has shipped was invisible from the
+# release machine for the same reason: the release machine never installs
+# the release. It builds it, inspects the artifact, and stops — while the
+# thing that breaks only happens on the second install, on a Mac that
+# UPGRADES. Read back the lesson under 2.13.4 in docs/release-log.md; this
+# step is that lesson stated as a command instead of a paragraph.
+#
+# What it would have caught, had it existed:
+#
+#   - the widgets being removed on every upgrade, from 2.11.0 to 2.13.3.
+#     The developer's own Mac looked fine because he launches the app,
+#     which is what re-registers an extension. `brew upgrade` here, with
+#     no launch, is exactly the state a user is left in.
+#   - eight releases shipping unnotarized. Homebrew quarantines what it
+#     installs, so a Gatekeeper block shows up here and nowhere else — the
+#     build machine has approved its own bundle already.
+#   - a bad sha256 in the cask, a postflight that no longer runs, a cask
+#     that points at an asset that is not there.
+#
+# It also ends the run with the machine holding the shipped build rather
+# than a build tree, which is the strongest form of the registration
+# repair below: `brew upgrade` deletes and recreates the bundle, so the
+# LaunchServices and PlugInKit records are rebuilt from scratch AFTER
+# everything in this cycle that unregisters a path has finished.
+#
+# `brew update` first because the tap Homebrew reads is its own clone, not
+# $TAP — without it this installs the version before the one just pushed.
+step "Installing it the way a user does"
+if command -v brew >/dev/null 2>&1; then
+  brew update --quiet >/dev/null 2>&1 || true
+  # `brew upgrade` is the user's command, so it goes first. But it EXITS 0
+  # AND DOES NOTHING when the version is already installed — printing
+  # "Not upgrading mihrab, the latest version is already installed" — and
+  # then every assertion below passes on a machine that was already fine,
+  # having installed nothing and run no postflight. That cannot happen on a
+  # real release, where the version is new; it happens the moment anyone
+  # re-runs this, which is exactly when a green tick is most misleading.
+  # Caught by testing this step against an already-current machine.
+  if brew upgrade --cask mihrab >/tmp/release-brew.log 2>&1; then
+    if has "$(cat /tmp/release-brew.log)" "Not upgrading"; then
+      brew reinstall --cask mihrab >>/tmp/release-brew.log 2>&1 \
+        || { tail -20 /tmp/release-brew.log; die "the published cask does not install — see /tmp/release-brew.log"; }
+    fi
+  else
+    tail -20 /tmp/release-brew.log
+    die "the published cask does not install — see /tmp/release-brew.log"
+  fi
+
+  INSTALLED_VER="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" \
+    /Applications/Mihrab.app/Contents/Info.plist 2>/dev/null || true)"
+  [ "$INSTALLED_VER" = "$VERSION" ] \
+    || die "brew installed $INSTALLED_VER, not $VERSION — the cask or the tap is stale"
+  ok "installed $VERSION from the published cask"
+
+  # THE THREE THINGS A USER GETS THAT THE BUILD MACHINE CANNOT SEE.
+  xcrun stapler validate /Applications/Mihrab.app >/dev/null 2>&1 \
+    || die "the installed copy has no notarization ticket — Gatekeeper will block it"
+  ok "Gatekeeper: notarized, ticket stapled"
+
+  # No launch anywhere above. If this is registered, it is because the
+  # cask's postflight did it — which is the whole widget fix, proven on a
+  # real install rather than asserted from the cask's source.
+  INST_ID=maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension
+  INST_SEEN="$(pluginkit -m -i "$INST_ID" 2>/dev/null || true)"
+  [ -n "$INST_SEEN" ] \
+    || die "the widget extension is NOT registered after a real install — the cask postflight did not do its job, and every Mac upgrading to $VERSION loses its widgets"
+  ok "widget extension registered by the cask, with no launch"
+else
+  printf "  ⚠ %s\n" "no brew on this machine — the published cask was not installed, so nothing here has been through a real user install" >&2
+fi
+
+# Last, and after all of it: verification and the install above both touch
+# bundles, and the install is the last thing that rebuilds a registration.
 cleanup_workbench
 
 printf "\n"
