@@ -72,3 +72,17 @@ here only because the fix touched scripts and tests, nothing in the app.
 The rule is now in `DISTRIBUTION.md`: after a release, `main` stays still
 until Xcode Cloud finishes. What ships on iOS is the commit that survived
 to the end of the run, not the commit the tag names.
+
+## 2.13.2 (247) — 2026-08-29
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/release.sh`
+  - `scripts/sync-version.js`
+  - `scripts/verify-release.sh`
+  - `scripts/xcode-cloud.py`
+
+**Lesson:** _(unfilled)_
