@@ -150,4 +150,37 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/verify-release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** both of the failures this release fixes were invisible to the
+cycle for the same reason, and it is not the one that looks obvious.
+
+Neither was a missing check. Notarization *was* written down — four
+commented-out lines at the top of `build-catalyst.sh`, with the exact
+commands. The widget re-registration had no comment, but nothing about it
+was hard either. What both had in common is that the only evidence they
+were needed lived on a machine the release never looks at: a Mac that had
+*upgraded*, some time later. The release process only ever sees a Mac that
+just built the thing, where the app is registered because the build
+launched it and Gatekeeper is quiet because the developer approved the
+bundle himself months ago. Eight releases went out with Gatekeeper blocking
+every install, from a machine on which nothing was blocked.
+
+So the useful generalisation is not "add a gate for notarization". It is
+that a check run on the build machine answers a different question from
+the one users are asking, and for anything that only manifests on a second
+install, the artifact has to be interrogated as a stranger would: unpacked
+somewhere else and asked what it is. That is why the new checks are
+`stapler validate` on the downloaded zip rather than "we ran notarytool",
+and why the cask's registration loop verifies that the record *stayed*
+rather than that the command succeeded.
+
+**It cost something to learn that, too.** The first version of the
+verification unpacked the app and ran `spctl` on it, which handed the
+bundle to App Translocation, registered the translocated path, and took the
+installed app's widget registration down with it — the exact failure the
+release was fixing, caused by the check for it. Both release scripts turned
+out to have been leaving registered copies of unpacked zips behind on every
+run, which is very likely where some of this cycle's earlier blank-widget
+reports came from.
+
+**Held back, deliberately:** committed while run #568 was still building
+and pushed only afterwards, per the rule from 2.13.1.
