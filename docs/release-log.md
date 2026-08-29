@@ -106,3 +106,9 @@ The evidence that they work is this entry being short.
 still building and pushed only afterwards. That is the rule from 2.13.1,
 now followed rather than discovered — a push to `main` mid-run cancels it,
 and iOS then ships the newer commit rather than the tagged one.
+
+## 2.13.3 (248) — 2026-08-29
+
+Ran clean on the first attempt.
+
+**Lesson:** none needed — clean run, no change to the cycle.
