@@ -29,6 +29,8 @@ import {
 const listeners: Record<string, Array<() => void>> = {};
 const removed: string[] = [];
 
+const deviceListeners: Record<string, Array<() => void>> = {};
+
 jest.mock('react-native', () => ({
   Platform: { OS: 'ios' },
   NativeModules: {} as Record<string, unknown>,
@@ -42,11 +44,22 @@ jest.mock('react-native', () => ({
       };
     }
   },
+  DeviceEventEmitter: {
+    addListener(event: string, cb: () => void) {
+      (deviceListeners[event] ||= []).push(cb);
+      return {
+        remove: () => {
+          removed.push(event);
+        },
+      };
+    },
+  },
 }));
 
 describe('onWidgetQueueChanged', () => {
   beforeEach(() => {
     for (const k of Object.keys(listeners)) delete listeners[k];
+    for (const k of Object.keys(deviceListeners)) delete deviceListeners[k];
     removed.length = 0;
     (Platform as { OS: string }).OS = 'ios';
     for (const k of Object.keys(NativeModules)) {
@@ -77,10 +90,32 @@ describe('onWidgetQueueChanged', () => {
     expect(listeners).toEqual({});
   });
 
-  it('is a no-op on android, which has no Darwin notifications', () => {
+  // Android takes the other route on purpose. Its widget tap is a
+  // PendingIntent to a receiver in the app's OWN process, so the change
+  // never crosses a process boundary and there is no module to look up —
+  // the receiver emits straight to RCTDeviceEventEmitter. Asserting the
+  // route, not just that something was subscribed, because subscribing to
+  // the wrong emitter is silent and looks exactly like working.
+  it('uses the device emitter on android, not the native module', () => {
     (Platform as { OS: string }).OS = 'android';
-    (NativeModules as Record<string, unknown>).WidgetQueueWatcher = {};
+    const drain = jest.fn();
+    onWidgetQueueChanged(drain);
+    expect(deviceListeners[WIDGET_QUEUE_CHANGED_EVENT]).toHaveLength(1);
+    expect(listeners).toEqual({});
+    deviceListeners[WIDGET_QUEUE_CHANGED_EVENT][0]();
+    expect(drain).toHaveBeenCalledTimes(1);
+  });
+
+  it('unsubscribes on android too', () => {
+    (Platform as { OS: string }).OS = 'android';
+    onWidgetQueueChanged(jest.fn())();
+    expect(removed).toEqual([WIDGET_QUEUE_CHANGED_EVENT]);
+  });
+
+  it('is a no-op on a platform with neither', () => {
+    (Platform as { OS: string }).OS = 'web';
     expect(() => onWidgetQueueChanged(jest.fn())()).not.toThrow();
     expect(listeners).toEqual({});
+    expect(deviceListeners).toEqual({});
   });
 });

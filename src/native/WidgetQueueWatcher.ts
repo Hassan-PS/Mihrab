@@ -20,7 +20,12 @@
  * payload: the queue is the state, and the drain that reads it is the one
  * that already existed.
  */
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import {
+  DeviceEventEmitter,
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+} from 'react-native';
 
 export const WIDGET_QUEUE_CHANGED_EVENT = 'MihrabWidgetQueueChanged';
 
@@ -29,10 +34,30 @@ export const WIDGET_QUEUE_CHANGED_EVENT = 'MihrabWidgetQueueChanged';
  *
  * Every failure here is silent and returns a no-op unsubscribe, because the
  * caller is an effect in the navigation root and the drain still has its two
- * original triggers. A missing module is the normal state on Android and on
- * any build older than this one, not an error.
+ * original triggers. A missing module is the normal state on a build older
+ * than this one, not an error.
+ *
+ * TWO MECHANISMS, because the two platforms are not in the same position.
+ * The iOS widget runs in a separate extension process, so the change has to
+ * cross a process boundary — a Darwin notification, turned into an event by
+ * the `WidgetQueueWatcher` module. Android's widget tap is a PendingIntent
+ * to a receiver in the app's OWN process, so it can emit straight to JS with
+ * `RCTDeviceEventEmitter` and there is no module to look up.
  */
 export function onWidgetQueueChanged(onChange: () => void): () => void {
+  if (Platform.OS === 'android') {
+    const sub = DeviceEventEmitter.addListener(
+      WIDGET_QUEUE_CHANGED_EVENT,
+      onChange,
+    );
+    return () => {
+      try {
+        sub.remove();
+      } catch {
+        // Nothing to do: the bridge is going away with us.
+      }
+    };
+  }
   if (Platform.OS !== 'ios') return () => {};
   const mod = NativeModules.WidgetQueueWatcher;
   if (!mod) return () => {};

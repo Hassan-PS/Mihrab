@@ -129,6 +129,9 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       val date = payloadToday(context)?.optString("dateKey").orEmpty()
       if (date.isEmpty()) return
       WidgetLogQueue.tap(context, date, prayer)
+      // And tell JS, if it is running. Without this the tap waits for the
+      // next app foreground — see WidgetQueueEvents.
+      WidgetQueueEvents.postChanged(context)
       requestUpdate(context)
     }
 

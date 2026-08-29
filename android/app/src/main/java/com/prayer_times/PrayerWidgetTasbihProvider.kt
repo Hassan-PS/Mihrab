@@ -78,6 +78,10 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
     private fun handleTap(context: Context, intent: Intent) {
       val action = intent.getStringExtra(EXTRA_ACTION) ?: return
       WidgetTasbihQueue.append(context, action)
+      // Same as the log widget: without this the beads wait for the next app
+      // foreground, and the drain discards entries after a fortnight. See
+      // WidgetQueueEvents.
+      WidgetQueueEvents.postChanged(context)
       requestUpdate(context)
     }
 
