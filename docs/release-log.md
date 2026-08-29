@@ -196,4 +196,37 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/verify-release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the two phases added in 2.13.4 both fired for the first time
+here, and both did what they were built for. "Installing it the way a user
+does" installed the published cask, and reported the extension registered
+*with the app never launched* — the exact property whose absence removed
+every Mac user's widgets for three releases, now asserted on a real install
+rather than reasoned about. Cleanup stopped the Gradle daemon and found
+nothing else running. Neither line was reachable a release ago.
+
+What is worth writing down is the shape of the night that produced them.
+The bug that started it — a widget tap never reaching the journal — took
+four wrong diagnoses before the right one, and every wrong one came from
+treating an absence as evidence:
+
+  - `pluginkit` empty ⇒ "the registration is broken". It was, sometimes,
+    but not then.
+  - the App Group missing a key ⇒ "every extension write is dropped". The
+    reading was taken while the widget was frozen and nothing had run.
+  - no log lines from the extension ⇒ "the intent never fires". `log` is a
+    zsh builtin; the command had never run `/usr/bin/log` at all, and
+    `2>/dev/null` hid the error. Hours of reasoning rested on that.
+  - a tap producing nothing ⇒ "the button does not exist". The extension
+    had been idle for seventeen minutes; the test was run against a dead
+    widget.
+
+The one that worked was the one with a control: plant a queue entry and
+withhold the notification, then send it. Still queued at 10s, 20s, 30s;
+drained within 6s. That is the difference between a measurement and an
+observation — a measurement can come out the other way.
+
+So the rule this release earns is narrower than "test more". It is that
+**nothing-happened is not a reading until something-happened has been shown
+on the same instrument.** Three of the four wrong turns above would have
+been caught by one control run costing under a minute.
+
