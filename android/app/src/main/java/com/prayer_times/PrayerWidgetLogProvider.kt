@@ -420,6 +420,13 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
         context.getString(R.string.widget_log_count, logged, today.optInt("loggable", 5)),
       )
 
+      // Dueness is decided here, against the clock, not read off the
+      // payload — see `isDue`. The alarm wakes this provider at every
+      // prayer boundary already; that wake-up did nothing while the card
+      // redrew the same frozen flag.
+      val describesToday = dateKey == PrayerWidgetProvider.todayDateKey()
+      val nowMinutes = nowMinutesOfDay()
+
       val count = prayers?.length() ?: 0
       for (i in CHIPS.indices) {
         val row = if (i < count) prayers?.optJSONObject(i) else null
@@ -430,7 +437,7 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
         views.setViewVisibility(CELLS[i], View.VISIBLE)
         val key = row.optString("key")
         val status = row.optString("status").takeIf { it.isNotEmpty() && it != "null" }
-        val due = row.optBoolean("due", false)
+        val due = isDue(row, describesToday, nowMinutes)
         val queued = pending.contains(key)
 
         views.setTextViewText(NAMES[i], row.optString("name").ifEmpty { key })
@@ -498,9 +505,9 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       val owed = today.optInt("owed", 0)
       views.setTextViewText(
         R.id.widget_log_foot_left,
-        footerLeft(context, prayers, pending, owed),
+        footerLeft(context, prayers, pending, owed, describesToday, nowMinutes),
       )
-      bindCountdown(context, views, prayers, root, dateKey)
+      bindCountdown(context, views, prayers, root, dateKey, describesToday, nowMinutes)
     }
 
     private fun statusOfPrayer(prayers: org.json.JSONArray?, key: String): String? {
@@ -520,13 +527,15 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       prayers: org.json.JSONArray?,
       pending: Set<String>,
       owed: Int,
+      describesToday: Boolean,
+      nowMinutes: Int,
     ): String {
       val n = prayers?.length() ?: 0
       for (i in 0 until n) {
         val o = prayers?.optJSONObject(i) ?: continue
         val key = o.optString("key")
         val status = o.optString("status").takeIf { it.isNotEmpty() && it != "null" }
-        if (o.optBoolean("due", false) && status == null && !pending.contains(key)) {
+        if (isDue(o, describesToday, nowMinutes) && status == null && !pending.contains(key)) {
           // Says what the + DOES, not what the chips already show.
           //
           // "Fajr not logged yet" restated the empty chip directly above it
@@ -550,10 +559,42 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     /**
      * The next prayer whose time has not arrived, or null after the last.
      *
-     * `due` is computed by the app when it writes the payload, so the first
-     * row that is NOT due is the next one — the same reading iOS's footer
-     * takes.
+     * The first row that is not due is the next one — the same reading
+     * iOS's footer takes. What "due" means is the fix: it used to be the
+     * payload's flag, stamped by the app at write time, so this answered
+     * "what was next when the app was last open".
      */
+    /** Minutes since local midnight, right now. */
+    private fun nowMinutesOfDay(): Int {
+      val cal = java.util.Calendar.getInstance()
+      return cal.get(java.util.Calendar.HOUR_OF_DAY) * 60 +
+        cal.get(java.util.Calendar.MINUTE)
+    }
+
+    /**
+     * Has this prayer's time arrived?
+     *
+     * NOT `row.due`. That flag is stamped into the payload by the app at
+     * the moment it writes it, and every renderer on every platform was
+     * reading it as though it tracked the clock. It does not: an adhan that
+     * passed while the phone was in a pocket left its prayer un-offered —
+     * no chip to tap, no countdown moving on — until the app was opened and
+     * a fresh payload written. The alarm already wakes this provider at
+     * each boundary; deciding here is what makes that wake-up mean
+     * something.
+     *
+     * Falls back to the flag when the time is unreadable, or when the block
+     * is not about today: dueness from today's clock is a claim about
+     * today, and asserting it over a stale day would offer prayers for
+     * logging against a date the user never touched.
+     */
+    private fun isDue(row: JSONObject?, describesToday: Boolean, nowMinutes: Int): Boolean {
+      if (row == null) return false
+      val at = minutesOfDay(row.optString("time"))
+      if (!describesToday || at < 0) return row.optBoolean("due", false)
+      return at <= nowMinutes
+    }
+
     /** "05:12" to 312, or -1 for anything that is not a time. */
     private fun minutesOfDay(at: String?): Int {
       val parts = (at ?: "").split(":")
@@ -586,11 +627,15 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       return null
     }
 
-    private fun nextPrayer(prayers: org.json.JSONArray?): JSONObject? {
+    private fun nextPrayer(
+      prayers: org.json.JSONArray?,
+      describesToday: Boolean,
+      nowMinutes: Int,
+    ): JSONObject? {
       val n = prayers?.length() ?: 0
       for (i in 0 until n) {
         val o = prayers?.optJSONObject(i) ?: continue
-        if (!o.optBoolean("due", false)) return o
+        if (!isDue(o, describesToday, nowMinutes)) return o
       }
       return null
     }
@@ -628,12 +673,14 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       prayers: org.json.JSONArray?,
       root: JSONObject?,
       todayKey: String,
+      describesToday: Boolean,
+      nowMinutes: Int,
     ) {
       val now = java.util.Calendar.getInstance()
       val currentMinutes =
         now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
 
-      var next = nextPrayer(prayers)
+      var next = nextPrayer(prayers, describesToday, nowMinutes)
       var minutesAt = minutesOfDay(next?.optString("time"))
       var minutesLeft = if (minutesAt < 0) -1 else minutesAt - currentMinutes
 

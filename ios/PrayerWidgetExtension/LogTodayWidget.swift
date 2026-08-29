@@ -64,6 +64,54 @@ struct LogTodayEntry: TimelineEntry {
   let queued: Set<String>
 }
 
+// MARK: - Whose clock decides
+
+/// Minutes since local midnight for a payload time, or nil.
+///
+/// The payload's `time` is always 24-hour `HH:mm` — `formatDisplayTime`
+/// zero-pads and never localises — so this is a comparison, not a guess at
+/// whatever clock format the device is set to.
+func logMinutesOfDay(_ hhmm: String) -> Int? {
+  let parts = hhmm.split(separator: ":")
+  guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
+        h >= 0, m >= 0 else { return nil }
+  return h * 60 + m
+}
+
+private let logDayKeyFormatter: DateFormatter = {
+  let f = DateFormatter()
+  f.locale = Locale(identifier: "en_US_POSIX")
+  f.dateFormat = "yyyy-MM-dd"
+  return f
+}()
+
+/// Has this prayer's time arrived, as of `when`?
+///
+/// NOT `p.due`. That flag is stamped by the app at the moment it writes the
+/// payload, so it answers a different question — "was this prayer due when
+/// the app was last open" — and the widget was reading it as though it
+/// answered this one. An adhan that passed while the phone sat in a pocket
+/// left the prayer un-offered until the app was opened, on every platform,
+/// because every renderer trusted the same frozen boolean. The widget wakes
+/// at the boundary; it has to decide for itself when it gets there.
+///
+/// Falls back to the flag when the time is unreadable, or when the block
+/// describes some other day: dueness derived from today's clock is a claim
+/// about today, and asserting it over a stale day would offer prayers for
+/// logging against a date the user never touched.
+func logIsDue(
+  _ p: WidgetPayload.TodayPrayer,
+  in today: WidgetPayload.Today,
+  at when: Date,
+  calendar: Calendar = .current
+) -> Bool {
+  guard today.dateKey == logDayKeyFormatter.string(from: when),
+        let at = logMinutesOfDay(p.time)
+  else { return p.due }
+  let c = calendar.dateComponents([.hour, .minute], from: when)
+  return at <= (c.hour ?? 0) * 60 + (c.minute ?? 0)
+}
+
 struct LogTodayProvider: TimelineProvider {
   func placeholder(in context: Context) -> LogTodayEntry {
     LogTodayEntry(date: Date(), today: Self.sample, streak: 12, queued: [])
@@ -218,7 +266,7 @@ struct LogTodayEntryView: View {
   @ViewBuilder
   private func footer(_ t: WidgetPayload.Today) -> some View {
     HStack(spacing: 6) {
-      if let next = t.prayers.first(where: { !$0.due }) {
+      if let next = t.prayers.first(where: { !isDue($0, t) }) {
         Text(verbatim: "\(next.name) \(next.time)")
           .font(.system(size: 11))
           .foregroundStyle(widgetMuted)
@@ -297,8 +345,17 @@ struct LogTodayEntryView: View {
     switch p.status {
     case "on-time", "late", "qadha": return .done
     case "missed": return .missed
-    default: return p.due ? .due : .waiting
+    default: return isDue(p) ? .due : .waiting
     }
+  }
+
+  /// Due as of the moment THIS entry is for, not as of the last payload
+  /// write. WidgetKit renders one entry per prayer boundary, so asking the
+  /// entry's own date is what turns those wake-ups into a card that
+  /// changes.
+  private func isDue(_ p: WidgetPayload.TodayPrayer, _ today: WidgetPayload.Today? = nil) -> Bool {
+    guard let t = today ?? entry.today else { return p.due }
+    return logIsDue(p, in: t, at: entry.date)
   }
 
   /// A tick, a plus, an exclamation, or a dot for "not yet". The plus is the

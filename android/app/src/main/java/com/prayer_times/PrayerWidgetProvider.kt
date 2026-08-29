@@ -887,7 +887,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /** Today's local date as yyyy-MM-dd, matching the JS `dateKey` format. */
-    private fun todayDateKey(): String {
+    fun todayDateKey(): String {
       val cal = java.util.Calendar.getInstance()
       return String.format(
         java.util.Locale.US,
