@@ -103,6 +103,28 @@ if [ -f "$TAP" ]; then
       fail "cask has no chronod postflight — every Mac upgrading to $TAG freezes its widgets"
     fi
 
+    # ── AND IT MUST RE-REGISTER THE WIDGET EXTENSION ──────────────────
+    #
+    # A second failure at the same moment, with a worse outcome. Replacing
+    # the app deletes the bundle the extension lived in, and PlugInKit's
+    # record — keyed by bundle identifier — goes with it. Nothing brings it
+    # back: measured 2026-08-29 after a `brew upgrade` to 2.13.3,
+    # `pluginkit -mAvvv` listed no Mihrab extension and `lsregister -f
+    # /Applications/Mihrab.app` did not change that. With no registered
+    # provider WidgetKit does not draw a stale card, it drops the widget —
+    # so every placed widget was REMOVED from Notification Center and the
+    # app left the gallery, on every single upgrade, until the user
+    # happened to launch the app.
+    #
+    # `pluginkit -a` is the registration a launch would have done. It is a
+    # release gate for the same reason the chronod line is: the cask is the
+    # only code that runs at the moment the app is replaced.
+    if grep -q "pluginkit" "$TAP"; then
+      pass "cask re-registers the widget extension"
+    else
+      fail "cask does not re-register the widget extension — every Mac upgrading to $TAG loses its placed widgets"
+    fi
+
     # ── 4b. THE PUBLISHED APP IS ACTUALLY SIGNED WITH THE DEVELOPER ID ──
     #
     # Checked on what is SERVED, not on what is sitting in ios/build, because

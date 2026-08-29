@@ -203,12 +203,16 @@ for loc in $LOCALES; do
 done
 
 # The cask is the only code that runs when a Mac replaces the app, and it
-# is what stops every widget freezing on upgrade. See verify-release.sh 4a.
+# is what stops the widgets freezing on upgrade — and, since 2026-08-29,
+# what stops them being removed outright. See verify-release.sh 4a.
 if [ -f "$TAP" ]; then
   CASK_SRC="$(cat "$TAP")"
   { has "$CASK_SRC" "postflight" && has "$CASK_SRC" "chronod"; } \
     || die "cask has no chronod postflight — Macs upgrading to $TAG would freeze their widgets"
   ok "cask restarts chronod after install"
+  has "$CASK_SRC" "pluginkit" \
+    || die "cask does not re-register the widget extension — Macs upgrading to $TAG would LOSE their widgets"
+  ok "cask re-registers the widget extension"
 else
   die "cask not found at $TAP — clone the tap before releasing"
 fi

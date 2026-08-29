@@ -49,6 +49,7 @@ for a job with an irreversible step in the middle:
 | **Play rejected the release notes** at 500+ characters, found *after* the tag and release were public | nothing |
 | **Fixes sat on `main` for days**, released to nobody, because nothing said so out loud | nothing |
 | **Every Mac's widgets froze on upgrade**, fixed only by the cask's `postflight` | the list predates the Mac build |
+| **Every Mac's widgets were removed on upgrade** — replacing the app drops the extension's PlugInKit record and nothing re-registers it, so WidgetKit has no provider and discards the placement | same postflight, second failure, found only because a user said so |
 
 The script's one rule: **everything that can fail happens before anything
 that cannot be undone.** Tests, the changelog limits, the Xcode Cloud

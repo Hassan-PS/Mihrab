@@ -250,3 +250,91 @@ Library/Preferences/GAW23HT439.group.com.prayerapp" prayer_widget_payload_v1 \
 installed app exists at exactly one path — there is no second copy for a
 registration to point at, and no way for a user to run one from elsewhere.
 This is a macOS-only failure by construction.
+
+## Every widget removed on every upgrade (2026-08-29)
+
+The third distinct macOS-only failure, and the one users notice hardest.
+Not blank cards, not a missing gallery entry — the placed widgets are
+**gone** from Notification Center after a `brew upgrade`, and have to be
+dragged back one at a time.
+
+One command settles it:
+
+```sh
+pluginkit -mAvvv | grep -i -A6 prayerwidget      # ← nothing at all
+```
+
+Replacing the app deletes the bundle the widget extension lived in, and
+PlugInKit's record goes with it. Records are keyed by bundle identifier, so
+the copy Homebrew stages a moment later is not what comes back, and nothing
+re-registers it. WidgetKit with no registered provider does not draw a
+stale card — it drops the widget, and the app leaves the gallery too.
+
+Measured straight after a `brew upgrade` to 2.13.3, on a Mac whose widgets
+had been working:
+
+```sh
+pluginkit -mAvvv | grep -ci prayerwidget                        # 0
+lsregister -dump | grep -ci PrayerWidgetExtension               # 0
+lsregister -dump | grep -c "/Applications/Mihrab.app"           # present
+mdls -name kMDItemLastUsedDate /Applications/Mihrab.app         # yesterday
+```
+
+So LaunchServices knew the app and PlugInKit did not know its extension.
+Three things that look like they should fix it and do not:
+
+| Tried | Result |
+|---|---|
+| `lsregister -f /Applications/Mihrab.app` | extension still unregistered |
+| `xattr -dr com.apple.quarantine …` then `lsregister -f` | still unregistered |
+| `killall -u "$USER" pkd` | still unregistered |
+
+What does work is `pluginkit -a`, and it works with the quarantine flag
+still on the bundle — which matters, because Homebrew quarantines casks by
+default:
+
+```sh
+pluginkit -a /Applications/Mihrab.app/Contents/PlugIns/PrayerWidgetExtension.appex
+killall chronod
+```
+
+**But not if you run it during the upgrade.** One `pluginkit -a` in the
+cask postflight registers the extension and then loses it a second later.
+Polled once a second across a `brew reinstall`:
+
+```
+13:09:07  registered=1   ← the postflight's pluginkit -a
+13:09:08  registered=0   ← gone
+13:10:23  registered=0   ← still gone 75s later
+```
+
+The uninstall step's delete of the old bundle is processed asynchronously,
+after the postflight has finished, and the record is keyed by bundle
+identifier — so the late event drops the registration that was just made,
+and the new bundle at the same path does not protect it. The postflight
+therefore registers, waits, checks that it *stayed*, and repeats until it
+did. Same measurement with the loop in place:
+
+```
+13:11:43  registered=1   ← second pass
+13:13:30  registered=1   ← still there, app never launched
+```
+
+Launching the app once does the same thing, because launching is what
+registers an app's own extensions — which is why this looked like it
+"fixed itself" for anyone who opened Mihrab after upgrading, and never did
+for anyone who only ever used the widgets.
+
+**The fix is in the cask**, next to the chronod restart and for the same
+reason: the postflight is the only code that runs at the moment the app is
+replaced. `release.sh` and `verify-release.sh` both gate on the cask
+containing it, exactly as they do for `chronod`.
+
+**Repair on a Mac that upgraded before the fix shipped:** run the two
+commands above, then drag the widgets back once. The placement itself
+cannot be restored by anything — WidgetKit discarded it when the provider
+disappeared — but it will survive every upgrade after this one.
+
+**Not the same as the ad-hoc failure above.** That one has no extension to
+register (no team identifier, no entitlements). Check `codesign -dv` first:
+if `TeamIdentifier` is set and `pluginkit` is empty, it is this.
