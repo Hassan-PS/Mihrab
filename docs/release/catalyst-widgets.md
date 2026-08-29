@@ -373,3 +373,30 @@ lsregister -dump | grep -oE '^path: +/[^ ]*Mihrab\.app$'    # matches NOTHING
 `lsregister -dump` writes `path:  /Applications/Mihrab.app (0x42c4)` — the
 trailing record id means a `$` anchor never matches, and the sweep reports
 success having done nothing. Drop the anchor.
+
+## The extension outlives the app, and then the bundle (2026-08-29)
+
+`build-catalyst.sh` smoke-launches the signed app and kills it afterwards.
+Killing the app is not killing the widget: registering that copy is enough
+for chronod to ask it for a timeline, and the `.appex` it starts is a
+separate process with its own lifetime. It survived the app, then survived
+the `rm -rf` of the bundle it lives in — found hours after a release build
+had finished:
+
+```sh
+$ pgrep -alf PrayerWidgetExtension
+57114 …/ios/build/catalyst-dist/Mihrab.app/…/PrayerWidgetExtension
+```
+
+A live widget provider for this bundle identifier, answering from a path
+that no longer exists, beside the installed copy that is supposed to be
+serving the widgets. Same failure as a stale LaunchServices record, in
+process form. `build-catalyst.sh` reaps it after the launch now, and
+`release.sh` has a `Cleanup` step that catches whatever an interrupted
+build left behind — along with the Gradle daemon, orphaned jest workers,
+and a Metro dev server for this repo, all scoped to the repo path.
+
+Worth knowing how little it takes to make one of these. While testing that
+cleanup, a *fake* bundle — a directory named `Mihrab.app` containing one
+shell script, no `Info.plist` — was registered by LaunchServices simply
+because a process was launched from inside it.

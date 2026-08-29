@@ -74,6 +74,68 @@ bold() { printf "\033[1m%s\033[0m\n" "$1"; }
 step() { printf "\n\033[1m▸ %s\033[0m\n" "$1"; }
 ok()   { printf "  ✓ %s\n" "$1"; }
 
+# ── PUT THE MACHINE BACK THE WAY IT WAS FOUND ─────────────────────────
+#
+# A release starts several long-lived things and, until this was written,
+# finished without stopping any of them. Still running hours after the
+# 2.13.4 cut: a Gradle daemon holding 2 GB, seven orphaned `jest-worker`
+# children, a Metro dev server, and — the one that matters —
+#
+#   57114 …/ios/build/catalyst-dist/Mihrab.app/…/PrayerWidgetExtension
+#
+# a widget extension running out of a bundle `build-catalyst.sh` had
+# already deleted. That is not untidiness, it is the same failure as a
+# stale LaunchServices record in process form: a live widget provider for
+# this bundle identifier, answering from a path nothing else agrees with,
+# beside the installed copy that is supposed to be serving the widgets.
+# build-catalyst.sh reaps its own now; this catches what an interrupted or
+# failed build left behind, and the rest is hygiene.
+#
+# EVERYTHING NAMED HERE BELONGS TO THIS REPO. Scoped to "$ROOT" on purpose
+# — no `killall java`, no `pkill node`. A release must not reach into work
+# that has nothing to do with it.
+#
+# `if`, not `[ … ] && return`: under `set -e` an AND-list whose left side
+# fails takes the whole script down, which is the same class of mistake as
+# the pipeline note above and just as quiet.
+reap() {  # <what> <pgrep -f pattern>
+  local pids
+  # `|| true` INSIDE the substitution. `pgrep` exits 1 when it matches
+  # nothing, which is the ordinary case here, and with `pipefail` that 1
+  # becomes the pipeline's and then the assignment's — so `set -e` ends the
+  # release at the first pattern that finds nothing. Caught by running this
+  # function against a decoy: it reaped the decoy, printed its line, and
+  # exited 1 on the next reap. A cleanup step that kills the release it is
+  # tidying up after would have been a fine way to learn this.
+  pids=$(pgrep -f "$2" 2>/dev/null | tr '\n' ' ' | sed 's/ *$//' || true)
+  if [ -z "$pids" ]; then return 0; fi
+  # shellcheck disable=SC2086
+  kill $pids 2>/dev/null || true
+  sleep 1
+  # shellcheck disable=SC2086
+  kill -9 $pids 2>/dev/null || true
+  ok "stopped $1 ($pids)"
+}
+
+cleanup_workbench() {
+  step "Cleanup"
+  reap "the app and widget extension left running from ios/build" \
+       "$ROOT/ios/build/.*Mihrab\.app/Contents"
+  reap "orphaned jest workers" "$ROOT/node_modules/jest-worker"
+  reap "the Metro dev server for this repo" \
+       "$ROOT/node_modules/.bin/react-native start"
+  # Captured, then tested — `… --stop | grep -q Daemon` is the pipeline the
+  # comment above `has()` is about: grep exits on the first match, gradlew
+  # takes SIGPIPE, and `pipefail` reports 141 for a daemon that stopped
+  # perfectly well.
+  if [ -x "$ROOT/android/gradlew" ]; then
+    local stopped
+    stopped="$(JAVA_HOME="$JDK" "$ROOT/android/gradlew" --stop 2>/dev/null || true)"
+    has "$stopped" "Daemon" && ok "stopped the Gradle daemon" || true
+  fi
+  ok "nothing of this release's is still running"
+}
+
 # Every abort is recorded. A release cycle only improves from evidence
 # about where it actually stops people, and nobody remembers the third
 # failed attempt from two weeks ago. Gitignored — it is this machine's
@@ -383,6 +445,7 @@ LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchService
 rm -rf "$UNZIP"
 
 if [ "$DRY_RUN" = "1" ]; then
+  cleanup_workbench
   printf "\n"
   bold "Dry run. Everything that can fail has passed."
   echo "  Artifacts:"
@@ -529,6 +592,10 @@ ok "cask at $VERSION, sha matches the published zip"
 # ══════════════════════════════════════════════════════════════════════
 step "Verifying"
 "$ROOT/scripts/verify-release.sh" "$TAG" || die "verification failed — see the ✗ lines above"
+
+# Last, and after verification rather than before it: verification unpacks
+# the published zip and is the last thing that touches a bundle.
+cleanup_workbench
 
 printf "\n"
 bold "$VERSION ($CODE) is live on GitHub, Homebrew and the F-Droid recipe."

@@ -392,6 +392,22 @@ kill "$LAUNCH_PID" 2>/dev/null || true
 wait "$LAUNCH_PID" 2>/dev/null || true
 rm -f "$LAUNCH_LOG"
 
+# THE EXTENSION THE LAUNCH SPAWNED, TOO. Killing the app is not killing the
+# widget: registering this copy is enough for chronod to ask it for a
+# timeline, and the .appex it starts is a separate process with a separate
+# lifetime. It survives the app, and then it survives the `rm -rf "$APP"`
+# below — leaving a widget extension running out of a bundle that no longer
+# exists. Found 2026-08-29, hours after a release build had finished:
+#
+#   $ pgrep -alf PrayerWidgetExtension
+#   57114 …/ios/build/catalyst-dist/Mihrab.app/…/PrayerWidgetExtension
+#
+# That is the same shape as the stale LaunchServices record the block below
+# exists to prevent, in process form: a live extension for this bundle
+# identifier, answering from a path nothing else agrees with, while the
+# installed copy is the one that is supposed to be serving the widgets.
+pkill -f "$APP/Contents/PlugIns/" 2>/dev/null || true
+
 # ── Hand the machine back ─────────────────────────────────────────────
 #
 # Launching the app registered THIS copy — the one in ios/build — with
