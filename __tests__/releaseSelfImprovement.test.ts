@@ -28,14 +28,37 @@ describe('the lesson gate', () => {
     expect(script).not.toMatch(/has "\$JOURNAL_SRC" "_\(unfilled\)_"/);
   });
 
-  it('the journal that exists today satisfies its own gate', () => {
-    // The same anchored test the script runs. If this fails, no release
-    // can be cut, which is worth knowing from the test suite rather than
-    // from a release attempt.
-    const unfilled = journal
-      .split('\n')
-      .filter(l => l === '**Lesson:** _(unfilled)_');
-    expect(unfilled).toEqual([]);
+  it('leaves an unfilled lesson only on the newest entry', () => {
+    // THIS USED TO ASSERT THERE WERE NONE AT ALL, and that made every
+    // release that touched the cycle fail CI — by construction, not by
+    // accident. `release.sh` WRITES `_(unfilled)_` into the release commit
+    // and the human fills it in the commit after; CI runs on the release
+    // commit, in the window where the marker is supposed to exist. Four red
+    // builds on main before anyone connected them: 2.13.1, 2.13.2, 2.13.4
+    // and 2.13.5 all failed here, and 2.13.3 passed only because it was a
+    // clean run that wrote "none needed" instead.
+    //
+    // Two individually sensible rules — "the release records what it cost"
+    // and "the journal is always ready for the next release" — that cannot
+    // both hold at the same commit. The real invariant is the one the gate
+    // in release.sh actually enforces: a lesson may be owed, but only for
+    // the release that just went out. An unfilled marker anywhere ELSE is a
+    // lesson that was skipped and forgotten, which is the thing worth
+    // failing over.
+    const lines = journal.split('\n');
+    const unfilled = lines
+      .map((l, i) => (l === '**Lesson:** _(unfilled)_' ? i : -1))
+      .filter(i => i >= 0);
+    expect(unfilled.length).toBeLessThanOrEqual(1);
+    if (unfilled.length === 1) {
+      const newestEntry = lines.reduce(
+        (found, l, i) => (/^## /.test(l) ? i : found),
+        -1,
+      );
+      // Below the last `## ` heading, so it belongs to the release that has
+      // only just been cut and not to some entry further up the file.
+      expect(unfilled[0]).toBeGreaterThan(newestEntry);
+    }
   });
 
   it('every entry carries a Lesson line', () => {
