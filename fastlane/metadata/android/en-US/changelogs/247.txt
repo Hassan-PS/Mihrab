@@ -1,0 +1,3 @@
+• Widgets: a prayer can be logged the moment its adhan passes. It used to wait until you next opened the app.
+• The countdown no longer sits at zero before Fajr — the widget now wakes at the moment it runs out.
+• The tall Log and prayer-times widgets are placed two rows high instead of three. Stretch one taller for the practice graph.

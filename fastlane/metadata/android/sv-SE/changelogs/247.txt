@@ -1,0 +1,3 @@
+• Widgetar: en bön går att logga så snart adhan har passerat. Tidigare väntade den tills du öppnade appen igen.
+• Nedräkningen står inte längre kvar på noll före fajr — widgeten vaknar nu i samma stund som den tar slut.
+• De höga widgetarna för logg och bönetider placeras två rader höga i stället för tre. Dra ut en så kommer aktivitetsgrafen.
