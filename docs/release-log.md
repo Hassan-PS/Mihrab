@@ -75,7 +75,7 @@ to the end of the run, not the commit the tag names.
 
 ## 2.13.2 (247) — 2026-08-29
 
-Ran clean on the first attempt.
+Ran clean on the first attempt — the first release that has.
 
 Changed the release cycle itself:
 
@@ -85,4 +85,24 @@ Changed the release cycle itself:
   - `scripts/verify-release.sh`
   - `scripts/xcode-cloud.py`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the two gates written after 2.13.0 and 2.13.1 both fired for
+the first time in this cut, and both were right. The in-flight check
+refused to start the release at all, because pushing the release notes had
+started a run — which is the same collision that lost 2.12.0's iOS build,
+caught this time before anything was tagged; waiting eleven minutes was
+the whole cost. Then verification ended on *"EVERY FINISHED CHANNEL
+PASSED — iOS is still building"* rather than the old "live on every
+channel", naming run #561 by number. Neither of those was reachable a
+release ago: one was dead code behind an unsorted API query, the other was
+a sentence that overclaimed.
+
+So the thing worth writing down is not a new failure. It is that the cost
+of a gate is paid on the release that adds it, and the value arrives one
+or two releases later, on a cut where nothing goes wrong and nothing looks
+like it needed the gate. That asymmetry is exactly why they get deleted.
+The evidence that they work is this entry being short.
+
+**Held back, deliberately:** this lesson was committed while run #561 was
+still building and pushed only afterwards. That is the rule from 2.13.1,
+now followed rather than discovered — a push to `main` mid-run cancels it,
+and iOS then ships the newer commit rather than the tagged one.
