@@ -4,11 +4,17 @@ name: Habous probe
 # back? Nothing else. Run by hand, reports and exits — it commits nothing
 # and it is not scheduled.
 #
-# It exists because habous.gov.ma serves an incomplete certificate chain
-# (SSL Labs: grade B, chainIssues 2). Browsers cope by fetching the missing
-# intermediate; Node and curl do not. That could sink a scraper built on the
-# assumption that a site working in a browser works everywhere, so it gets
-# answered before the pipeline is written rather than after.
+# It was written because habous.gov.ma serves an incomplete certificate chain
+# (SSL Labs: grade B, chainIssues 2) — browsers cope by fetching the missing
+# intermediate, Node and curl do not — and that question is now closed: the
+# intermediate is pinned and the verified fetch works. So the probe no longer
+# leads with a request it knows will fail, which is what made every run go red
+# and send mail. It fails when the ministry is genuinely unreachable, and not
+# otherwise.
+#
+# `discover` hunts for a parameter that selects a different Hijri month. The
+# page takes only a `ville`, which caps the dataset's forward window at
+# "until this month ends".
 
 on:
   workflow_dispatch:
@@ -17,6 +23,11 @@ on:
         description: 'Ministry city id (1 = الرباط / Rabat)'
         required: false
         default: '1'
+      discover:
+        description: 'Hunt for a parameter that selects a different Hijri month'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -34,4 +45,9 @@ jobs:
           node-version: 20
 
       - name: Reach the ministry
-        run: npx --yes tsx@4 tools/habous-dataset/probe.ts "${{ inputs.city_id || '1' }}"
+        run: |
+          if [ "${{ inputs.discover }}" = "true" ]; then
+            npx --yes tsx@4 tools/habous-dataset/probe.ts --discover
+          else
+            npx --yes tsx@4 tools/habous-dataset/probe.ts "${{ inputs.city_id || '1' }}"
+          fi

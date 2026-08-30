@@ -55,6 +55,27 @@ function extraCa(): string[] {
 
 export type MinistryResponse = { status: number; body: string };
 
+/** Any URL on the ministry's host, with the certificate handled and retries. */
+export async function fetchMinistry(
+  url: string,
+  opts: { attempts?: number; timeoutMs?: number; onAttempt?: (n: number, why: string) => void } = {},
+): Promise<MinistryResponse> {
+  const attempts = opts.attempts ?? 3;
+  const timeoutMs = opts.timeoutMs ?? 20_000;
+  let last: Error | null = null;
+  for (let n = 1; n <= attempts; n++) {
+    try {
+      return await once(url, timeoutMs);
+    } catch (e) {
+      last = e as Error;
+      const why = (last as Error & { cause?: { code?: string } }).cause?.code ?? last.message;
+      opts.onAttempt?.(n, why);
+      if (n < attempts) await sleep(n * 1500);
+    }
+  }
+  throw last ?? new Error('unreachable');
+}
+
 function once(url: string, timeoutMs: number): Promise<MinistryResponse> {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
@@ -102,21 +123,7 @@ export async function fetchMinistryCity(
   cityId: number,
   opts: { attempts?: number; timeoutMs?: number; onAttempt?: (n: number, why: string) => void } = {},
 ): Promise<MinistryResponse> {
-  const attempts = opts.attempts ?? 3;
-  const timeoutMs = opts.timeoutMs ?? 20_000;
-  const url = `${MINISTRY_BASE}?ville=${cityId}`;
-  let last: Error | null = null;
-  for (let n = 1; n <= attempts; n++) {
-    try {
-      const res = await once(url, timeoutMs);
-      if (res.status === 200) return res;
-      last = new Error(`HTTP ${res.status}`);
-    } catch (e) {
-      last = e as Error;
-    }
-    const why = (last as Error & { cause?: { code?: string } }).cause?.code ?? last.message;
-    opts.onAttempt?.(n, why);
-    if (n < attempts) await sleep(n * 1500);
-  }
-  throw last ?? new Error('unreachable');
+  const res = await fetchMinistry(`${MINISTRY_BASE}?ville=${cityId}`, opts);
+  if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
+  return res;
 }
