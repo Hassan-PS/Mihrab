@@ -230,3 +230,18 @@ So the rule this release earns is narrower than "test more". It is that
 on the same instrument.** Three of the four wrong turns above would have
 been caught by one control run costing under a minute.
 
+
+## 2.13.6 (251) — 2026-08-30
+
+Took 2 aborted attempt(s) before it ran clean:
+
+  - 1 an Xcode Cloud run is already in flight — let it finish, or it and the release build will kill each other
+  - 1 missing release notes: en-US/changelogs/251.txt
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/release.sh`
+  - `scripts/verify-release.sh`
+
+**Lesson:** _(unfilled)_
