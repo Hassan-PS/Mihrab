@@ -1,5 +1,4 @@
 import type { TimingsMap } from '../types/prayer';
-import { formatLocalDate } from '../utils/date';
 import { fetchWithRetry } from '../utils/fetchWithRetry';
 import {
   ProviderError,
@@ -22,6 +21,28 @@ type AladhanTimingsResponse = {
   };
 };
 
+/**
+ * AlAdhan's path segment is DD-MM-YYYY, and it does not reject anything else.
+ *
+ * The app sent `formatLocalDate` — ISO `YYYY-MM-DD` — for years. AlAdhan
+ * parses that day-first too, so `2026-08-30` was read as day 2026 of month
+ * 08, normalised, and answered for **30-08-2030**: four years out, and for
+ * Morocco an hour out as well, because the wrong year lands on the wrong
+ * side of the country's Ramadan clock change. There is no error in the
+ * response — `code` is 200, the shape validates, the times look plausible —
+ * so nothing downstream could have caught it. Only comparing a stored day
+ * against the ministry's own table made it visible.
+ *
+ * Hence its own function and its own test: the ISO formatter is right for
+ * every OTHER use in this file's neighbourhood (cache keys, dataset lookups),
+ * which is exactly why it got used here.
+ */
+export function formatAladhanDate(d: Date): string {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}-${month}-${d.getFullYear()}`;
+}
+
 export async function fetchAladhanTimes(params: {
   latitude: number;
   longitude: number;
@@ -29,7 +50,7 @@ export async function fetchAladhanTimes(params: {
   method?: number | 'auto';
   school?: number;
 }): Promise<PrayerTimesResult> {
-  const dateStr = formatLocalDate(params.date);
+  const dateStr = formatAladhanDate(params.date);
   const query = new URLSearchParams();
   query.append('latitude', String(params.latitude));
   query.append('longitude', String(params.longitude));
