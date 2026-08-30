@@ -1,5 +1,6 @@
 import {
   CalculationMethod,
+  type CalculationParameters,
   Coordinates,
   Madhab,
   PrayerTimes,
@@ -8,10 +9,69 @@ import type { PrayerTimesResult } from './types';
 import { formatLocalTime } from '../utils/prayerTimes';
 import { computeImsak, DEFAULT_IMSAK_OFFSET_MINUTES } from './imsak';
 
-function parametersForMethod(methodId: number) {
+// ── METHOD IDS ARE ALADHAN'S, AND SO ARE THE ANGLES ───────────────────
+//
+// `calculationMethod` is an AlAdhan method id everywhere in this app: the
+// picker stores it, `aladhan.ts` forwards it verbatim, and this file is
+// what computes with it when the network is gone. So the two must agree,
+// or a user's times change depending on whether they have signal.
+//
+// They did not agree. This switch mapped several named methods onto some
+// OTHER method's angles, silently:
+//
+//   id  method                        was              should be
+//    0  Shia Ithna-Ashari, Qum        Tehran 17.7/14   16/14, Maghrib +16
+//    8  Gulf Region                   Dubai 18.2/18.2  19.5/90-min Isha
+//   12  Union Org. Islamic de France  MWL 18/17        12/12
+//   14  Spiritual Adm. of Russia      Moonsighting     16/15
+//   21  Morocco                       (absent → MWL)   19/17, Dhuhr+5 Maghrib+5
+//
+// Morocco is the one that got reported (issue #10, "prayer times in my
+// location are a bit off by minutes"), and only because AlAdhan already
+// auto-selects Morocco for Moroccan coordinates — so the gap showed only
+// when someone picked a method by hand or dropped to this file offline.
+// The others are the same bug, unreported.
+//
+// Every set of numbers below was checked against AlAdhan's own output for
+// a city that uses it, on 2026-08-30, and they agree to the minute on
+// Fajr, Sunrise, Dhuhr, Maghrib and Isha. `__tests__/calculationMethods.test.ts`
+// keeps those readings.
+//
+// Two things that table does NOT say, and which /methods will not tell
+// you either — both found by comparing real output rather than reading
+// the docs:
+//
+//   • Morocco publishes Dhuhr and Maghrib with a five-minute margin. Set
+//     19/17 alone and those two are five minutes early, which is exactly
+//     the complaint being fixed.
+//   • Shia Ithna-Ashari holds Maghrib until the redness goes, +16 minutes
+//     past sunset.
+//
+// Known residual: adhan.js computes Asr one to two minutes before AlAdhan
+// does, for EVERY method including the presets. It is a shadow-length
+// rounding difference, not a parameter, and it is left alone here rather
+// than papered over per-method.
+
+/** A method adhan.js has no preset for, built from its published angles. */
+function angles(
+  fajrAngle: number,
+  ishaAngle: number,
+  adjustments?: Partial<CalculationParameters['methodAdjustments']>,
+): CalculationParameters {
+  const p = CalculationMethod.Other();
+  p.fajrAngle = fajrAngle;
+  p.ishaAngle = ishaAngle;
+  if (adjustments) {
+    p.methodAdjustments = { ...p.methodAdjustments, ...adjustments };
+  }
+  return p;
+}
+
+function parametersForMethod(methodId: number): CalculationParameters {
   switch (methodId) {
     case 0:
-      return CalculationMethod.Tehran();
+      // Shia Ithna-Ashari, Leva Institute, Qum.
+      return angles(16, 14, { maghrib: 16 });
     case 1:
       return CalculationMethod.Karachi();
     case 2:
@@ -24,8 +84,15 @@ function parametersForMethod(methodId: number) {
       return CalculationMethod.Egyptian();
     case 7:
       return CalculationMethod.Tehran();
-    case 8:
-      return CalculationMethod.Dubai();
+    case 8: {
+      // Gulf Region: 19.5° Fajr, and Isha as a fixed 90 minutes after
+      // Maghrib rather than an angle. `Dubai()` is a different method.
+      const p = CalculationMethod.Other();
+      p.fajrAngle = 19.5;
+      p.ishaAngle = 0;
+      p.ishaInterval = 90;
+      return p;
+    }
     case 9:
       return CalculationMethod.Kuwait();
     case 10:
@@ -33,13 +100,20 @@ function parametersForMethod(methodId: number) {
     case 11:
       return CalculationMethod.Singapore();
     case 12:
-      return CalculationMethod.MuslimWorldLeague();
+      // Union Organization Islamic de France.
+      return angles(12, 12);
     case 13:
       return CalculationMethod.Turkey();
     case 14:
-      return CalculationMethod.MoonsightingCommittee();
+      // Spiritual Administration of Muslims of Russia.
+      return angles(16, 15);
     case 15:
       return CalculationMethod.MoonsightingCommittee();
+    case 21:
+      // Morocco — Ministry of Habous and Islamic Affairs. The offsets are
+      // the ministry's published margin, not a fudge; without them Dhuhr
+      // and Maghrib are five minutes early. See issue #10.
+      return angles(19, 17, { dhuhr: 5, maghrib: 5 });
     default:
       return CalculationMethod.MuslimWorldLeague();
   }

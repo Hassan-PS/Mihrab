@@ -121,6 +121,17 @@ jest.mock('adhan', () => {
   names.forEach(n => {
     CM[n] = mk;
   });
+  // Methods adhan.js has no preset for are built from `Other()` and their
+  // published angles (localAdhan.ts). This stub ignores the parameters like
+  // every other one here — a test that cares about the ARITHMETIC has to
+  // unmock, which __tests__/calculationMethods.test.ts does.
+  CM.Other = () => ({
+    madhab: 'shafi',
+    fajrAngle: 0,
+    ishaAngle: 0,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+  });
   return {
     Coordinates: function Coordinates() {},
     Madhab: { Hanafi: 'hanafi', Shafi: 'shafi' },

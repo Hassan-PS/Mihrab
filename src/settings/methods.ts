@@ -25,6 +25,10 @@ export const CALCULATION_METHODS: CalculationMethodOption[] = [
   { id: 13, name: 'Turkey', nameKey: 'methods.13' },
   { id: 14, name: 'Russia', nameKey: 'methods.14' },
   { id: 15, name: 'Moonsighting Committee Worldwide', nameKey: 'methods.15' },
+  // AlAdhan already auto-selects this for Moroccan coordinates, so the
+  // gap was only ever visible to someone who had picked a method by
+  // hand — there was no right one to pick — or who was offline. Issue #10.
+  { id: 21, name: 'Morocco', nameKey: 'methods.21' },
 ];
 
 /**
