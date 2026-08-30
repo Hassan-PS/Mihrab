@@ -295,3 +295,15 @@ the developer's own widgets went — by hand, the exact failure the last three
 releases were spent eliminating. Four minutes of build time is not worth
 reproducing the bug you are trying to fix. A build that gets installed gets
 notarized, even when it is only being measured.
+
+## 2.13.7 (252) — 2026-08-30
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `.github/workflows/habous-cities.yml`
+  - `.github/workflows/habous-dataset.yml`
+  - `.github/workflows/habous-probe.yml`
+
+**Lesson:** _(unfilled)_
