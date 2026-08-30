@@ -3,6 +3,7 @@ import { fetchAladhanTimes } from './aladhan';
 import { fetchPrayTimesDev } from './praytimesDev';
 import { fetchIslamiskaForbundetTimes } from './islamiskaForbundet';
 import { getIslamiskaForbundetDatasetTimes } from './islamiskaForbundetDataset';
+import { getHabousDatasetTimes } from './habousDataset';
 import { computeLocalAdhanTimes } from './localAdhan';
 import { computeImsak, DEFAULT_IMSAK_OFFSET_MINUTES } from './imsak';
 import { validateTimings } from './validateTimings';
@@ -95,6 +96,34 @@ export async function fetchPrayerTimesUnified(
           throw e;
         }
       }
+      break;
+    }
+    case 'habous': {
+      // The Ministry of Habous's own published tables, from the prepared
+      // dataset. There is no live rung behind it: the ministry serves one
+      // Hijri month at a time and its endpoint is unreliable enough that
+      // scraping it per device would be worse than not, so a miss goes
+      // straight to AlAdhan — which auto-selects the Morocco method — and
+      // then to the caller's on-device last resort, where the Morocco
+      // parameters now sit within a minute of the ministry.
+      try {
+        result = await getHabousDatasetTimes({
+          latitude: p.latitude,
+          longitude: p.longitude,
+          date: p.date,
+        });
+        break;
+      } catch {
+        /* outside coverage, or past the published window */
+      }
+      result = await fetchAladhanTimes({
+        latitude: p.latitude,
+        longitude: p.longitude,
+        date: p.date,
+        method: p.calculationMethod,
+        school: p.school,
+      });
+      result.source = 'aladhan';
       break;
     }
     case 'local_adhan':

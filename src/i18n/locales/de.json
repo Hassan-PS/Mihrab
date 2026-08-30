@@ -313,6 +313,10 @@
     "islamiska_forbundet": {
       "desc": "Gebetszeiten für die aufgeführten schwedischen Städte; dein Standort wird der nächstgelegenen Stadt zugeordnet.",
       "name": "Schweden"
+    },
+    "habous": {
+      "name": "Marokko",
+      "desc": "Die vom Ministerium für Habous und Islamische Angelegenheiten veröffentlichten Zeiten für gelistete marokkanische Städte; dein Standort wird der nächstgelegenen Stadt zugeordnet."
     }
   },
   "compass": {

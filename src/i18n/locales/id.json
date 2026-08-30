@@ -313,6 +313,10 @@
     "islamiska_forbundet": {
       "desc": "Waktu salat untuk kota-kota Swedia yang terdaftar; lokasimu dicocokkan dengan kota terdekat dalam daftar.",
       "name": "Swedia"
+    },
+    "habous": {
+      "name": "Maroko",
+      "desc": "Jadwal yang diterbitkan Kementerian Habous dan Urusan Islam untuk kota-kota Maroko yang terdaftar; lokasi Anda dicocokkan dengan kota terdekat."
     }
   },
   "compass": {

@@ -34,7 +34,10 @@ jobs:
 
       - name: Commit
         run: |
-          if git diff --quiet -- src/providers/data/moroccoCities.json; then
+          # --porcelain, not `git diff --quiet`: a diff reports NO CHANGE for
+          # a file git has never seen, so the first run wrote the geocoded
+          # list and then discarded it.
+          if [ -z "$(git status --porcelain -- src/providers/data/moroccoCities.json)" ]; then
             echo "no change"
             exit 0
           fi

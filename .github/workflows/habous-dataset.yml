@@ -1,0 +1,120 @@
+name: Habous prayer-times dataset
+
+# Rebuilds the Moroccan prayer-times dataset from the Ministry of Habous's
+# own pages, so the app can serve the ministry's published table instead of
+# computing an approximation of it.
+#
+# WEEKLY, and it has to be. The ministry's page takes a city and nothing
+# else, and returns whatever Hijri month it is currently showing — there is
+# no date parameter, so one request buys about thirty days and coverage is
+# built by accumulation. A run that is skipped costs a week of horizon.
+#
+# Runs a day after the IFiS job and in its own concurrency group, so the two
+# datasets never contend for the same push.
+
+on:
+  schedule:
+    - cron: '41 4 * * 2' # Tuesdays, 04:41 UTC
+  workflow_dispatch:
+    inputs:
+      max_cities:
+        description: 'Stop after this many cities (debugging)'
+        required: false
+        default: '250'
+      request_delay_ms:
+        description: 'Pause between city requests'
+        required: false
+        default: '700'
+
+concurrency:
+  group: habous-dataset
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build
+        id: build
+        env:
+          HABOUS_MAX_CITIES: ${{ inputs.max_cities || '250' }}
+          HABOUS_REQUEST_DELAY_MS: ${{ inputs.request_delay_ms || '700' }}
+        run: npx --yes tsx@4 tools/habous-dataset/build.ts
+
+      # `always()`: a run that got most of the way is still worth committing.
+      # The builder writes nothing at all when the origin is down, so anything
+      # on disk here is data it stood behind.
+      - name: Commit
+        if: always()
+        run: |
+          # --porcelain, not `git diff --quiet`: every file here is untracked
+          # on the first run, and a diff would report no change and drop them.
+          if [ -z "$(git status --porcelain -- data/prayer-times/morocco src/providers/data/habousSeed.json)" ]; then
+            echo "no change"
+            exit 0
+          fi
+          git config user.name  'mihrab-dataset-bot'
+          git config user.email 'mihrab-dataset-bot@users.noreply.github.com'
+          git add data/prayer-times/morocco src/providers/data/habousSeed.json
+          git commit -m "Habous dataset: refresh"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: Mail on failure
+        if: failure() && env.MAIL_SERVER != ''
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: 'Mihrab: the Habous dataset build failed'
+          to: mihrab@elghamri.se
+          from: Mihrab dataset bot <${{ secrets.MAIL_USERNAME }}>
+          body: |
+            The Moroccan dataset build failed.
+
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Exit 2 means the ministry was unreachable and nothing was written.
+            Exit 3 means forward coverage fell below the floor — the dataset
+            on disk would have been thinner than the computed fallback.
+
+      - name: Mail on thin coverage
+        if: success() && steps.build.outputs.coverage_warning == 'true' && env.MAIL_SERVER != ''
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: 'Mihrab: Habous dataset coverage is getting thin'
+          to: mihrab@elghamri.se
+          from: Mihrab dataset bot <${{ secrets.MAIL_USERNAME }}>
+          body: |
+            Forward coverage is down to ${{ steps.build.outputs.min_coverage }}
+            days, worst at ${{ steps.build.outputs.min_coverage_city }}.
+
+            The ministry serves one Hijri month at a time, so coverage is
+            rebuilt by accumulation. This usually means runs have been
+            skipped or failing.
+
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

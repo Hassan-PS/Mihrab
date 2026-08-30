@@ -54,6 +54,14 @@ export const REGIONAL_PRAYER_PROVIDERS: ProviderOption[] = [
     nameKey: 'providers.islamiska_forbundet.name',
     descriptionKey: 'providers.islamiska_forbundet.desc',
   },
+  {
+    id: 'habous',
+    name: 'Morocco',
+    description:
+      'The Ministry of Habous and Islamic Affairs’ published times for listed Moroccan cities; your location is matched to the nearest city in the list.',
+    nameKey: 'providers.habous.name',
+    descriptionKey: 'providers.habous.desc',
+  },
 ];
 
 /** Full list for lookups, settings copy, and labels (order: mainstream then regional). */

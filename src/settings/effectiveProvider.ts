@@ -1,4 +1,7 @@
-import { isCoordinateInSweden } from '../utils/swedenRegion';
+import {
+  regionalProviderCovers,
+  regionalProviderForCoords,
+} from './regionalProviders';
 import type { PrayerAppSettings, PrayerDataProviderId } from './types';
 
 /** When automatic mode is on and coordinates are outside Sweden, use this source. */
@@ -68,28 +71,23 @@ export function getEffectiveDataProvider(
   coords: { latitude: number; longitude: number } | null,
 ): PrayerDataProviderId {
   if (dataProviderAuto) {
-    // Automatic: Sweden → the Swedish city source, everywhere else → the
-    // global default. Switches intuitively as the user's location changes.
-    if (coords && isCoordinateInSweden(coords.latitude, coords.longitude)) {
-      return 'islamiska_forbundet';
-    }
-    return AUTO_DEFAULT_OUTSIDE_SWEDEN;
+    // Automatic: a country with its own published tables gets them, and
+    // everywhere else gets the global default. Switches as the user moves.
+    // The countries live in `regionalProviders.ts` — this branch does not
+    // name any of them, which is the point of the table.
+    return regionalProviderForCoords(coords) ?? AUTO_DEFAULT_OUTSIDE_SWEDEN;
   }
 
-  // Manual provider — honour the user's pick, with ONE safety guard:
-  // `islamiska_forbundet` only has data for Swedish cities, so it returns
-  // nonsense for coordinates outside Sweden (it maps to the nearest Swedish
-  // city). When the user has it pinned but has moved outside Sweden, fall
-  // back to the global default for that location so prayer times stay
-  // correct. We only redirect when we KNOW the coordinate is out of region;
-  // with no coords yet we leave the pick untouched and re-resolve once the
-  // location loads. The reverse (forcing the Swedish source while in Sweden)
-  // is left to automatic mode — a deliberate non-Sweden pick is respected.
-  if (
-    dataProvider === 'islamiska_forbundet' &&
-    coords &&
-    !isCoordinateInSweden(coords.latitude, coords.longitude)
-  ) {
+  // Manual provider — honour the user's pick, with ONE safety guard. A
+  // regional source only holds data for its own country and maps anything
+  // else to its nearest listed city, so a user who pinned it and then
+  // travelled would get a neighbouring country's schedule presented as
+  // their own. Redirect only when we KNOW the coordinate is out of region;
+  // with no coords yet the pick stands and is re-resolved once location
+  // loads. The reverse — forcing a regional source on someone inside its
+  // country — is left to automatic mode, because a deliberate pick of
+  // something else is a choice worth respecting.
+  if (!regionalProviderCovers(dataProvider, coords)) {
     return AUTO_DEFAULT_OUTSIDE_SWEDEN;
   }
   return dataProvider;

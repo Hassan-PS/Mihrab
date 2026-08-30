@@ -313,6 +313,10 @@
     "islamiska_forbundet": {
       "desc": "Horaires de prière pour les villes suédoises listées ; votre position est associée à la ville la plus proche.",
       "name": "Suède"
+    },
+    "habous": {
+      "name": "Maroc",
+      "desc": "Les horaires publiés par le ministère des Habous et des Affaires islamiques pour les villes marocaines répertoriées ; votre position est associée à la ville la plus proche."
     }
   },
   "compass": {

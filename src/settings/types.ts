@@ -8,6 +8,7 @@ export type PrayerDataProviderId =
   | 'aladhan'
   | 'prayertimes_dev'
   | 'islamiska_forbundet'
+  | 'habous'
   | 'local_adhan';
 
 export type AppearancePreference = 'system' | 'light' | 'dark';

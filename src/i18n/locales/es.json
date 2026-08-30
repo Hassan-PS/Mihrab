@@ -313,6 +313,10 @@
     "islamiska_forbundet": {
       "desc": "Horarios de oración para las ciudades suecas listadas; tu ubicación se asocia con la ciudad más cercana.",
       "name": "Suecia"
+    },
+    "habous": {
+      "name": "Marruecos",
+      "desc": "Los horarios publicados por el Ministerio de Habices y Asuntos Islámicos para las ciudades marroquíes listadas; tu ubicación se asocia a la ciudad más cercana."
     }
   },
   "compass": {

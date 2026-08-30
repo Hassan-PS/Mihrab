@@ -313,6 +313,10 @@
     "islamiska_forbundet": {
       "desc": "Bönetider för listade svenska städer; din plats matchas med närmaste stad i listan.",
       "name": "Sverige"
+    },
+    "habous": {
+      "name": "Marocko",
+      "desc": "Tiderna som Ministeriet för Habous och islamiska frågor publicerar för listade marockanska städer; din plats matchas mot närmaste stad i listan."
     }
   },
   "compass": {

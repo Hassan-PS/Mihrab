@@ -45,3 +45,27 @@ export function nextServerRunAfter(from: Date = new Date()): Date {
   if (d.getTime() <= from.getTime()) d.setUTCDate(d.getUTCDate() + 7);
   return d;
 }
+
+// ── MOROCCO ───────────────────────────────────────────────────────────
+//
+// Same arrangement, different constraint. The Ministry of Habous's page
+// takes a city and nothing else and returns whatever HIJRI month it is
+// currently showing — there is no date parameter — so the builder cannot
+// walk a horizon the way the Swedish one does. It accumulates: each weekly
+// run merges the month it can see into what is already committed.
+//
+// That makes the forward window shorter and the refresh cadence more
+// important, which is why the poll interval here is tighter than Sweden's.
+
+export const HABOUS_DATASET_BASE_URL =
+  'https://raw.githubusercontent.com/Hassan-PS/Mihrab/main/data/prayer-times/morocco/v1';
+
+/** Fallback refresh when the index poll cannot reach the server. Shorter
+ *  than Sweden's three days because the window itself is shorter. */
+export const HABOUS_DATASET_REFRESH_TTL_MS = 24 * 60 * 60 * 1000; // 1 day
+
+/** How often to re-read the tiny `index.json`. ±25% jitter at the call site. */
+export const HABOUS_INDEX_POLL_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+/** `.github/workflows/habous-dataset.yml` cron `41 4 * * 2`, for display only. */
+export const HABOUS_SERVER_CRON_UTC = { weekday: 2, hour: 4, minute: 41 }; // Tue 04:41 UTC

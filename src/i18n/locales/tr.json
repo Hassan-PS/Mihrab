@@ -313,6 +313,10 @@
     "islamiska_forbundet": {
       "desc": "Listelenen İsveç şehirleri için namaz vakitleri; konumunuz listede en yakın şehirle eşleştirilir.",
       "name": "İsveç"
+    },
+    "habous": {
+      "name": "Fas",
+      "desc": "Habous ve İslami İşler Bakanlığı’nın listelenen Fas şehirleri için yayımladığı vakitler; konumunuz listedeki en yakın şehirle eşleştirilir."
     }
   },
   "compass": {
