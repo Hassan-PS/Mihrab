@@ -34,18 +34,32 @@ export async function loadMonthPrayerTimes(
     const batch = dates.slice(i, i + concurrency);
     const batchResult = await Promise.all(
       batch.map(async date => {
-        const timings = await getOrFetchPrayerTimes({
-          provider: base.provider,
-          latitude: base.latitude,
-          longitude: base.longitude,
-          date,
-          calculationMethod: base.calculationMethod,
-          school: base.school,
-        });
-        return { date, timings };
+        try {
+          const timings = await getOrFetchPrayerTimes({
+            provider: base.provider,
+            latitude: base.latitude,
+            longitude: base.longitude,
+            date,
+            calculationMethod: base.calculationMethod,
+            school: base.school,
+          });
+          return { date, timings };
+        } catch (e) {
+          // One day must not cost the month. `getOrFetchPrayerTimes` now ends
+          // in an on-device computation that cannot fail, so reaching here
+          // means something genuinely unexpected — but a table with 30 rows
+          // and one gap is still a usable table, whereas a rejected
+          // `Promise.all` turns the whole screen into an error message.
+          // That was the visible bug when browsing to a month past a
+          // dataset's published window while offline.
+          console.warn('Month row failed', date, e);
+          return null;
+        }
       }),
     );
-    out.push(...batchResult);
+    for (const item of batchResult) {
+      if (item) out.push(item);
+    }
   }
   return out;
 }

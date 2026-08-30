@@ -158,7 +158,20 @@ describe('the opportunistic year-ahead fill can be stopped', () => {
     expect(src).toMatch(/shouldContinue\?\: \(\) => boolean/);
     // `break`, not `return`: the single write after the loop is what makes a
     // stop resumable. A `return` here would throw away the whole run.
-    expect(src).toMatch(/if \(shouldContinue && !shouldContinue\(\)\) break;/);
+    expect(src).toMatch(
+      /if \(i \+ concurrency >= floorPrefix && shouldContinue && !shouldContinue\(\)\) \{\n\s*break;/,
+    );
+  });
+
+  test('but not before a month is stored — the floor comes first', () => {
+    // The stop used to be able to fire after a single batch, which is how a
+    // freshly-switched location could sit at "2 days stored" while the user
+    // was looking at it. See `__tests__/prayerCacheFloor.test.ts` for the
+    // behavioural proof; this pins the guard itself so it cannot be
+    // simplified back out.
+    expect(src).toMatch(/MIN_GUARANTEED_DAYS = 31/);
+    expect(src).toMatch(/const floorPrefix = forward\.filter/);
+    expect(src).toMatch(/i \+ concurrency >= floorPrefix && shouldContinue/);
   });
 
   test('the Wi-Fi trigger passes the app-state check', () => {

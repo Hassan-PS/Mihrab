@@ -7,8 +7,12 @@
  *      batch resolved first.
  *   2. Respects the `concurrency` cap so we don't fan out 31 simultaneous
  *      fetches against the upstream provider.
- *   3. Throws on the first batch failure (rather than returning partial
- *      results) — caller can surface a "couldn't load month" error.
+ *   3. Skips a day it cannot load rather than failing the month. It used to
+ *      throw, which meant one unreachable day turned the whole table into an
+ *      error screen — the visible symptom when browsing to a month past a
+ *      dataset's published window. `getOrFetchPrayerTimes` now ends in an
+ *      on-device computation that cannot fail, so a gap should be
+ *      unreachable in practice; this is the belt to that's braces.
  */
 
 jest.mock('../src/prayer/prayerStorage', () => ({
@@ -42,6 +46,12 @@ function makeTimings(day: number) {
 
 beforeEach(() => {
   mockFetch.mockReset();
+  // The skip path warns by design; keep the run readable.
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 describe('loadMonthPrayerTimes', () => {
@@ -95,7 +105,7 @@ describe('loadMonthPrayerTimes', () => {
     expect(result).toHaveLength(29);
   });
 
-  test('throws on the first batch failure (no partial results returned)', async () => {
+  test('a failing day is skipped, not fatal to the month', async () => {
     mockFetch.mockImplementation(async (params: { date: Date }) => {
       // Day 5 fails; all others succeed.
       if (params.date.getDate() === 5) {
@@ -104,9 +114,23 @@ describe('loadMonthPrayerTimes', () => {
       return makeTimings(params.date.getDate());
     });
 
-    await expect(loadMonthPrayerTimes(2026, 3, BASE, 4)).rejects.toThrow(
-      /Network unreachable/,
-    );
+    const result = await loadMonthPrayerTimes(2026, 3, BASE, 4);
+
+    expect(result).toHaveLength(29);
+    expect(result.some(r => r.date.getDate() === 5)).toBe(false);
+    // Still chronological, and still complete either side of the gap.
+    expect(result[0].date.getDate()).toBe(1);
+    expect(result[3].date.getDate()).toBe(4);
+    expect(result[4].date.getDate()).toBe(6);
+    expect(result[28].date.getDate()).toBe(30);
+  });
+
+  test('a whole month of failures returns empty rather than throwing', async () => {
+    mockFetch.mockImplementation(async () => {
+      throw new Error('Network unreachable');
+    });
+
+    await expect(loadMonthPrayerTimes(2026, 3, BASE, 4)).resolves.toEqual([]);
   });
 
   test('forwards provider/coords/method/school to every fetch', async () => {

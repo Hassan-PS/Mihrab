@@ -7,6 +7,7 @@ import {
 } from 'adhan';
 import type { PrayerTimesResult } from './types';
 import { formatLocalTime } from '../utils/prayerTimes';
+import { autoMethodForCoords } from './autoMethod';
 import { computeImsak, DEFAULT_IMSAK_OFFSET_MINUTES } from './imsak';
 
 // ── METHOD IDS ARE ALADHAN'S, AND SO ARE THE ANGLES ───────────────────
@@ -156,8 +157,13 @@ export function computeLocalAdhanTimes(params: {
   const dayDate = new Date(y, m, day);
   const coords = new Coordinates(params.latitude, params.longitude);
   
-  // If auto, default to MWL for local calculation (since we can't easily auto-detect)
-  const methodId = params.calculationMethod === 'auto' ? 3 : params.calculationMethod;
+  // "Automatic" is AlAdhan's server-side choice; off the network we make the
+  // same choice ourselves from the coordinates (see `autoMethod.ts`), rather
+  // than falling back to MWL in a country that publishes its own parameters.
+  const methodId =
+    params.calculationMethod === 'auto'
+      ? autoMethodForCoords(params.latitude, params.longitude)
+      : params.calculationMethod;
   const calc = parametersForMethod(methodId);
   
   calc.madhab = params.school === 1 ? Madhab.Hanafi : Madhab.Shafi;

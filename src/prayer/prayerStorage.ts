@@ -1,6 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchPrayerTimesUnified } from '../providers/fetchPrayerTimes';
 import { getIslamiskaForbundetDatasetTimes } from '../providers/islamiskaForbundetDataset';
+import { getHabousDatasetTimes } from '../providers/habousDataset';
+import { computeLocalAdhanTimes } from '../providers/localAdhan';
+import type { PrayerTimesResult } from '../providers/types';
 import { recordDataSource } from './dataStatus';
 import type { PrayerDataProviderId } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
@@ -61,6 +64,15 @@ const STORAGE_KEY_LEGACY = 'prayer_times_cache';
 
 /** Maximum time to hold the write mutex before forcing release. */
 const MUTEX_TIMEOUT_MS = 10_000;
+
+/**
+ * The stored-days floor: however a fill is interrupted, a location keeps at
+ * least this many days from today onwards.
+ *
+ * 31 rather than 30 so "a month" is a month at the long end too — a fill
+ * started on 1 March still covers every day of March.
+ */
+export const MIN_GUARANTEED_DAYS = 31;
 
 // Serialises all cache writes so that concurrent fetches (e.g. month scroll)
 // don't clobber each other.  Each write waits for the previous one to finish
@@ -328,6 +340,59 @@ export async function getCachedPrayerTimes(
   return null;
 }
 
+/**
+ * The provider chain with a rung that cannot fail underneath it.
+ *
+ * Every network provider can miss: offline, rate-limited, or simply past the
+ * horizon a dataset publishes (Morocco's ministry serves one Hijri month at
+ * a time, so "no entry for that date" is ORDINARY there, not a fault). When
+ * that happened the day was simply not stored, which is how a month table
+ * could come back empty and how a location could sit below a month of
+ * coverage indefinitely.
+ *
+ * `computeLocalAdhanTimes` is pure arithmetic on the device — no network, no
+ * failure mode — and for both dataset countries its parameters now sit
+ * within a minute of the published table. So a miss costs a minute of
+ * precision on a far-future day instead of costing the day.
+ *
+ * The entry is still cached, and is still upgraded later: the dataset-first
+ * read at the top of `getOrFetchPrayerTimes` overtakes a cached fallback the
+ * moment the published window reaches that date.
+ */
+async function fetchWithLocalLastResort(
+  params: Omit<StoredPrayerData, 'months'> & { date: Date },
+): Promise<PrayerTimesResult> {
+  try {
+    return await fetchPrayerTimesUnified({
+      provider: params.provider,
+      latitude: params.latitude,
+      longitude: params.longitude,
+      date: params.date,
+      calculationMethod: params.calculationMethod,
+      school: params.school,
+    });
+  } catch (e) {
+    // 'local_adhan' IS the last resort; if it threw, something is wrong with
+    // the inputs and swallowing it would hide a real bug.
+    if (params.provider === 'local_adhan') throw e;
+    console.warn(
+      `Provider "${params.provider}" missed ${formatLocalDate(params.date)} — ` +
+        'computing on device.',
+      e,
+    );
+    return {
+      ...computeLocalAdhanTimes({
+        latitude: params.latitude,
+        longitude: params.longitude,
+        date: params.date,
+        calculationMethod: params.calculationMethod,
+        school: params.school,
+      }),
+      source: 'local',
+    };
+  }
+}
+
 export async function getOrFetchPrayerTimes(
   params: Omit<StoredPrayerData, 'months'> & { date: Date },
 ): Promise<TimingsMap> {
@@ -338,13 +403,29 @@ export async function getOrFetchPrayerTimes(
   // far out) auto-upgrades the moment the server's coverage catches up, with
   // no cache rewrite. A miss (beyond coverage / offline) falls through to the
   // cache and the normal fetch chain, so offline + far-future still work.
-  if (params.provider === 'islamiska_forbundet') {
+  //
+  // Morocco is the same arrangement and gets the same treatment: the
+  // ministry publishes one Hijri month at a time, so a day fetched today
+  // beyond that window necessarily came from a fallback, and the dataset
+  // will cover it in a week or two. Reading the dataset first is what turns
+  // that into an upgrade instead of a stale cache entry.
+  if (
+    params.provider === 'islamiska_forbundet' ||
+    params.provider === 'habous'
+  ) {
     try {
-      const ds = await getIslamiskaForbundetDatasetTimes({
-        latitude: params.latitude,
-        longitude: params.longitude,
-        date: params.date,
-      });
+      const ds =
+        params.provider === 'habous'
+          ? await getHabousDatasetTimes({
+              latitude: params.latitude,
+              longitude: params.longitude,
+              date: params.date,
+            })
+          : await getIslamiskaForbundetDatasetTimes({
+              latitude: params.latitude,
+              longitude: params.longitude,
+              date: params.date,
+            });
       if (ds.source) void recordDataSource(ds.source);
       return ds.timings;
     } catch {
@@ -355,14 +436,7 @@ export async function getOrFetchPrayerTimes(
   const cached = await getCachedPrayerTimes(params);
   if (cached) return cached;
 
-  const res = await fetchPrayerTimesUnified({
-    provider: params.provider,
-    latitude: params.latitude,
-    longitude: params.longitude,
-    date: params.date,
-    calculationMethod: params.calculationMethod,
-    school: params.school,
-  });
+  const res = await fetchWithLocalLastResort(params);
   // Record which source answered (for the Settings → data-stats panel).
   if (res.source) void recordDataSource(res.source);
 
@@ -500,7 +574,6 @@ export async function refreshPrayerDataCache(
   shouldContinue?: () => boolean,
 ): Promise<void> {
   const now = new Date();
-  const datesToFetch: Date[] = [];
 
   const v2 = await loadV2();
   const k = cacheKey(params);
@@ -514,6 +587,24 @@ export async function refreshPrayerDataCache(
     lastAccessedAt: new Date().toISOString(),
   };
 
+  /**
+   * Order: TODAY FORWARD FIRST, then the earlier days of the current month.
+   *
+   * The naive order — day 1 of the current month onwards — spends the first
+   * batches on days that have already been prayed. On the 30th of a month
+   * that is 29 network rounds before the fill reaches tomorrow, and it is
+   * exactly the window in which the user is looking at the "N days stored"
+   * line. Worse, for a dataset provider whose published window starts today
+   * (Morocco: the ministry serves one Hijri month at a time), every one of
+   * those 29 misses the dataset and falls to the network rung, so the slow
+   * part of the fill is also the part nobody will read.
+   *
+   * The past days are still fetched — the month table shows them — just
+   * last.
+   */
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const forward: Date[] = [];
+  const backfill: Date[] = [];
   for (let i = 0; i < monthsAhead; i++) {
     const year = now.getFullYear();
     const month = now.getMonth() + i;
@@ -522,11 +613,27 @@ export async function refreshPrayerDataCache(
       const date = new Date(year, month, d);
       const monthKey = getMonthKey(date);
       const dayKey = getDayKey(date);
-      if (!existing.months[monthKey] || !existing.months[monthKey][dayKey]) {
-        datesToFetch.push(date);
-      }
+      if (existing.months[monthKey]?.[dayKey]) continue;
+      (date < startOfToday ? backfill : forward).push(date);
     }
   }
+  const datesToFetch: Date[] = [...forward, ...backfill];
+
+  /**
+   * The floor: a month of times, always.
+   *
+   * `shouldContinue` exists so an opportunistic year-long fill does not run
+   * in someone's pocket — but it used to be able to stop after a single
+   * batch, which is how a freshly-switched location could sit at "2 days
+   * stored". A month ahead is not opportunistic, it is the app working
+   * offline tomorrow, so the first `MIN_GUARANTEED_DAYS` are not
+   * interruptible. They are a PREFIX of `datesToFetch` by construction
+   * (forward days come first, ascending), so honouring the floor is just a
+   * matter of not asking until we are past it.
+   */
+  const floorEnd = new Date(startOfToday);
+  floorEnd.setDate(floorEnd.getDate() + MIN_GUARANTEED_DAYS - 1);
+  const floorPrefix = forward.filter(d => d <= floorEnd).length;
 
   if (datesToFetch.length === 0) {
     if (onProgress) onProgress(1, 1);
@@ -542,7 +649,7 @@ export async function refreshPrayerDataCache(
     const batchResult = await Promise.all(
       batch.map(async date => {
         try {
-          const res = await fetchPrayerTimesUnified({
+          const res = await fetchWithLocalLastResort({
             provider: params.provider,
             latitude: params.latitude,
             longitude: params.longitude,
@@ -578,7 +685,9 @@ export async function refreshPrayerDataCache(
     // paid for. `break` rather than `return` — the single write below is what
     // keeps the days fetched so far, so stopping is resumable by
     // construction and nothing is lost.
-    if (shouldContinue && !shouldContinue()) break;
+    if (i + concurrency >= floorPrefix && shouldContinue && !shouldContinue()) {
+      break;
+    }
 
     // Small delay to avoid hammering APIs.
     await new Promise(resolve => setTimeout(() => resolve(undefined), 100));
