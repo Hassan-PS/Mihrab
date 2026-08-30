@@ -66,8 +66,29 @@ const REQUEST_DELAY_MS = int('HABOUS_REQUEST_DELAY_MS', 700);
 const DROP_BEFORE_DAYS = int('HABOUS_DROP_BEFORE_DAYS', 3);
 /** How much of the window the app bundles, so a fresh install has something. */
 const SEED_DAYS = int('HABOUS_SEED_DAYS', 30);
-const COVERAGE_WARN_DAYS = int('HABOUS_COVERAGE_WARN_DAYS', 14);
-const COVERAGE_FAIL_DAYS = int('HABOUS_COVERAGE_FAIL_DAYS', 7);
+/**
+ * The gate is STALENESS, not horizon — and that distinction is the whole
+ * lesson of the first build.
+ *
+ * The forward window is capped by something we do not control: the ministry
+ * publishes one Hijri month and offers no way to ask for another. Probed
+ * exhaustively — `mois`, `month`, `m`, `mois_hijri`, `hijri`, `shahr`, `mm`,
+ * `annee`, on the query string and through the page's POST form, plus
+ * horaire_hijri.php and horaire_hijri_fr.php — every one returns the current
+ * month. So coverage runs from about 29 days just after a month turns down
+ * to nearly nothing just before, and no amount of building changes that.
+ *
+ * A gate that failed on a short horizon would therefore fire every single
+ * month, for a condition nobody can fix, and would be muted within two.
+ * That is precisely how five red releases went unread earlier in this
+ * project's life.
+ *
+ * What IS controllable is whether the data is current. Every city should
+ * hold TODAY. A city that does not is a real hole — a failed fetch that
+ * never recovered — and that is worth failing over.
+ */
+const STALE_FAIL_RATIO = 0.1;
+const THIN_WARN_DAYS = int('HABOUS_THIN_WARN_DAYS', 3);
 
 type CityFile = {
   id: number;
@@ -125,7 +146,7 @@ async function main(): Promise<number> {
   let requests = 0;
   let failures = 0;
   const dead: number[] = [];
-  const coverage: Array<{ id: number; name: string; days: number }> = [];
+  const coverage: Array<{ id: number; name: string; days: number; hasToday: boolean }> = [];
 
   for (const city of cities) {
     let body: string;
@@ -177,7 +198,12 @@ async function main(): Promise<number> {
     fs.writeFileSync(file, JSON.stringify(payload), 'utf8');
 
     const ahead = Object.keys(ordered).filter(k => k >= todayKey).length;
-    coverage.push({ id: city.id, name: city.name, days: ahead });
+    coverage.push({
+      id: city.id,
+      name: city.name,
+      days: ahead,
+      hasToday: ordered[todayKey] !== undefined,
+    });
     await sleep(REQUEST_DELAY_MS);
   }
 
@@ -213,6 +239,7 @@ async function main(): Promise<number> {
   const live = coverage.filter(c => c.days > 0);
   const minCoverage = live.length ? Math.min(...live.map(c => c.days)) : 0;
   const worst = live.find(c => c.days === minCoverage);
+  const stale = coverage.filter(c => !c.hasToday);
 
   fs.writeFileSync(
     INDEX_PATH,
@@ -223,7 +250,7 @@ async function main(): Promise<number> {
         timezone: MOROCCO_TIMEZONE,
         seedDays: SEED_DAYS,
         minCoverageDays: minCoverage,
-        coverageFloorDays: COVERAGE_WARN_DAYS,
+        staleCities: stale.length,
         serverStatus: failures === 0 ? 'ok' : 'degraded',
         deadCities: dead,
         cities: coverage.map(c => ({ id: c.id, city: c.name })),
@@ -240,14 +267,19 @@ async function main(): Promise<number> {
       `${minCoverage} days${worst ? ` (${worst.name})` : ''}, ${seconds}s`,
   );
 
-  if (minCoverage < COVERAGE_FAIL_DAYS) {
+  console.log(`cities missing today: ${stale.length}`);
+  if (stale.length > coverage.length * STALE_FAIL_RATIO) {
     console.error(
-      `coverage floor breached: ${minCoverage} < ${COVERAGE_FAIL_DAYS} days ahead. ` +
-        'Shipping this would put people on a dataset thinner than the fallback.',
+      `${stale.length} of ${coverage.length} cities have no entry for ${todayKey}. ` +
+        'That is a hole in the data, not a short horizon: ' +
+        stale.slice(0, 10).map(c => c.name).join(', '),
     );
     return 3;
   }
-  if (minCoverage < COVERAGE_WARN_DAYS) {
+  // Thin is expected near the end of a Hijri month and is not a fault; it is
+  // reported so a run of them, which WOULD mean builds are being missed, is
+  // visible.
+  if (minCoverage < THIN_WARN_DAYS) {
     emitOutput('coverage_warning', 'true');
     emitOutput('min_coverage', String(minCoverage));
     emitOutput('min_coverage_city', worst?.name ?? '');

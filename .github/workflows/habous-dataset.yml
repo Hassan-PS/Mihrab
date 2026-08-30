@@ -4,17 +4,23 @@ name: Habous prayer-times dataset
 # own pages, so the app can serve the ministry's published table instead of
 # computing an approximation of it.
 #
-# WEEKLY, and it has to be. The ministry's page takes a city and nothing
-# else, and returns whatever Hijri month it is currently showing — there is
-# no date parameter, so one request buys about thirty days and coverage is
-# built by accumulation. A run that is skipped costs a week of horizon.
+# DAILY, and it has to be. The ministry's page takes a city and nothing else
+# and returns whatever Hijri month it is currently showing. There is no way
+# to ask for another — probed exhaustively across query string and POST form
+# — so the forward window is simply "until this month ends": about 29 days
+# just after a month turns, and nearly nothing just before.
 #
-# Runs a day after the IFiS job and in its own concurrency group, so the two
-# datasets never contend for the same push.
+# Weekly was the first guess and it was wrong. It would leave the app on a
+# window that could be down to a day or two for most of a week, and would
+# only pick up a new month up to seven days after it appeared. Daily catches
+# the turn the day it happens, which is the only lever there is.
+#
+# Cheap enough to justify: one request per city with a short pause, about
+# five minutes of a runner, and it commits only when something changed.
 
 on:
   schedule:
-    - cron: '41 4 * * 2' # Tuesdays, 04:41 UTC
+    - cron: '41 4 * * *' # every day, 04:41 UTC
   workflow_dispatch:
     inputs:
       max_cities:
@@ -93,8 +99,9 @@ jobs:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
             Exit 2 means the ministry was unreachable and nothing was written.
-            Exit 3 means forward coverage fell below the floor — the dataset
-            on disk would have been thinner than the computed fallback.
+            Exit 3 means cities are missing TODAY — a hole in the data rather
+            than a short horizon. A short horizon near the end of a Hijri
+            month is expected and does not fail the build.
 
       - name: Mail on thin coverage
         if: success() && steps.build.outputs.coverage_warning == 'true' && env.MAIL_SERVER != ''
@@ -113,8 +120,11 @@ jobs:
             Forward coverage is down to ${{ steps.build.outputs.min_coverage }}
             days, worst at ${{ steps.build.outputs.min_coverage_city }}.
 
-            The ministry serves one Hijri month at a time, so coverage is
-            rebuilt by accumulation. This usually means runs have been
-            skipped or failing.
+            A day or two is NORMAL at the end of a Hijri month — the ministry
+            publishes one month at a time and offers no way to ask for the
+            next. It should jump back to about 29 days when the month turns.
+
+            Worth looking at only if it stays thin across a turn, which would
+            mean the daily build is not running.
 
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

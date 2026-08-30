@@ -46,6 +46,32 @@ AIA URI.
 **Never** disable certificate verification here. An app that tells people
 when to pray does not fetch its times over a connection it refuses to check.
 
+## The window is one Hijri month, and that is a hard ceiling
+
+`index.php` takes a `ville` and nothing else. It returns whatever Hijri
+month it is currently showing, and there is no way to ask for another. That
+was probed rather than assumed — `mois`, `month`, `m`, `mois_hijri`,
+`hijri`, `shahr`, `mm`, `annee`, on the query string and through the page's
+own POST form, plus `horaire_hijri.php` and `horaire_hijri_fr.php`. Every
+one returns the current month; `horaire_hijri.php` returns nothing at all.
+
+    npx tsx tools/habous-dataset/probe.ts --discover
+
+So forward coverage is "until this month ends": about 29 days just after a
+month turns, and nearly nothing just before. **The build runs daily** to
+catch each turn on the day it happens, which is the only lever available.
+
+That is fine, and deliberately so. Beyond the window the app computes, and
+since the Morocco method gained the ministry's own margins that computation
+sits within a minute of the published table on every prayer across a month
+(`__tests__/calculationMethods.test.ts`). The dataset buys exactness for the
+near term; the fallback is good, not a cliff.
+
+**The build gate is staleness, not horizon.** A short window is structural
+and would fire a warning every single month for a condition nobody can fix —
+which is how alerts get muted. What is controllable is whether every city
+holds TODAY. A city that does not has a real hole, and that fails the build.
+
 ## The endpoint is not reliably up
 
 Across four probe runs the ministry returned, in order:

@@ -67,5 +67,5 @@ export const HABOUS_DATASET_REFRESH_TTL_MS = 24 * 60 * 60 * 1000; // 1 day
 /** How often to re-read the tiny `index.json`. ±25% jitter at the call site. */
 export const HABOUS_INDEX_POLL_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
-/** `.github/workflows/habous-dataset.yml` cron `41 4 * * 2`, for display only. */
-export const HABOUS_SERVER_CRON_UTC = { weekday: 2, hour: 4, minute: 41 }; // Tue 04:41 UTC
+/** `.github/workflows/habous-dataset.yml` cron `41 4 * * *`, for display only. */
+export const HABOUS_SERVER_CRON_DAILY_UTC = { hour: 4, minute: 41 }; // every day
