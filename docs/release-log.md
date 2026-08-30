@@ -244,4 +244,54 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/verify-release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** both aborted attempts were the cycle refusing to do something
+wrong, and neither gate existed a day earlier. That is the whole return on
+the CI work: a release that stops twice and then runs clean is cheaper than
+one that runs first time and leaves a mess behind it.
+
+The CI gate then did the thing it was built for, in the shape it was built
+for. PHASE 4 could only print `⧗` — verification runs seconds after the tag
+push, when GitHub has not started the run — and PHASE 6 waited and reported
+`CI is green on the release commit`. First release in the project's history
+where the cycle itself knew that.
+
+What is worth writing down is what the release UNCOVERED rather than what it
+cost. The install at 03:32 replaced the extension, chronod rebuilt every
+timeline, and the widget extension burned 16 seconds of CPU and had a
+resource report filed against it. That was the fifth such report on this
+machine, spanning 2.10.1 to 2.13.6, and every one had been read as noise.
+
+Chased the same afternoon, with an instrument and a control — extension
+idle, 0.00s over 10s; launch the app to force one refresh, 10.46s in 13s —
+it turned out to be three defects stacked on one another, none of which was
+the button everyone suspected:
+
+  - `Text("literal")` in a widget is a filesystem read. Every widget sets
+    `.environment(\.locale, mihrabLocale())` so labels follow Mihrab's
+    language rather than the system's, which takes SwiftUI off NSBundle's
+    cached lookup and onto the localization-qualified one — re-reading and
+    re-parsing 13 KB of `.strings`, per label, per render pass, and again
+    per accessibility label.
+  - the timeline built 60 archived entries under the comment "WidgetKit
+    tolerates large timelines, but keep it bounded". It tolerates entries.
+    The archive has a byte cap, and chronod had been saying so in plain
+    words all along: `reload: failed with too large timeline archive
+    11307528`. 11.3 MB, refused. A refused timeline is a card with nothing
+    to draw, which is the blank widget and then the missing one.
+  - `RefreshIntent.perform()` was `{ .result() }`.
+
+The rule this release earns is about attention, not about SwiftUI. **Five
+CPU-resource reports and sixteen "too large timeline archive" errors were
+sitting in the logs the whole time, and the bug was chased for two days
+through screenshots.** The failing subsystem was writing down what was wrong
+with it, in English, unread. Before theorising about a symptom, read what
+the system says about itself — `log show` and `/Library/Logs/Diagnostic-
+Reports` before the first hypothesis, not after the fourth.
+
+Note also the near-miss on the way to fixing it: the first attempt to
+measure built with `SKIP_NOTARIZE=1` and installed that over
+`/Applications`. Gatekeeper rejected it, chronod purged the descriptors, and
+the developer's own widgets went — by hand, the exact failure the last three
+releases were spent eliminating. Four minutes of build time is not worth
+reproducing the bug you are trying to fix. A build that gets installed gets
+notarized, even when it is only being measured.
