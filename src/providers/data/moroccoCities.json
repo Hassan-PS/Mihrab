@@ -1,0 +1,1334 @@
+[
+  {
+    "id": 1,
+    "name": "الرباط",
+    "lat": 34.0218454,
+    "lng": -6.8408929,
+    "source": "nominatim"
+  },
+  {
+    "id": 2,
+    "name": "الخميسات",
+    "lat": 33.830287,
+    "lng": -6.072605,
+    "source": "nominatim"
+  },
+  {
+    "id": 3,
+    "name": "تيفلت",
+    "lat": 33.894009,
+    "lng": -6.31673,
+    "source": "nominatim"
+  },
+  {
+    "id": 4,
+    "name": "الرماني",
+    "lat": 33.528608,
+    "lng": -6.604434,
+    "source": "nominatim"
+  },
+  {
+    "id": 5,
+    "name": "والماس",
+    "lat": 33.425509,
+    "lng": -6.004488,
+    "source": "nominatim"
+  },
+  {
+    "id": 6,
+    "name": "بوزنيقة",
+    "lat": 33.781005,
+    "lng": -7.1610294,
+    "source": "nominatim"
+  },
+  {
+    "id": 7,
+    "name": "القنيطرة",
+    "lat": 34.26457,
+    "lng": -6.570169,
+    "source": "nominatim"
+  },
+  {
+    "id": 8,
+    "name": "سيدي قاسم",
+    "lat": 34.226412,
+    "lng": -5.711434,
+    "source": "nominatim"
+  },
+  {
+    "id": 9,
+    "name": "سيدي يحيى الغرب",
+    "lat": 34.3085169,
+    "lng": -6.2940091,
+    "source": "nominatim"
+  },
+  {
+    "id": 10,
+    "name": "سيدي سليمان",
+    "lat": 34.259878,
+    "lng": -5.927253,
+    "source": "nominatim"
+  },
+  {
+    "id": 11,
+    "name": "سوق أربعاء الغرب",
+    "lat": 34.6859234,
+    "lng": -6.0028666,
+    "source": "nominatim"
+  },
+  {
+    "id": 12,
+    "name": "عرباوة",
+    "lat": 34.9134851,
+    "lng": -5.932567,
+    "source": "nominatim"
+  },
+  {
+    "id": 13,
+    "name": "مولاي بوسلهام",
+    "lat": 34.8753224,
+    "lng": -6.2963318,
+    "source": "nominatim"
+  },
+  {
+    "id": 14,
+    "name": "طنجة",
+    "lat": 35.7696302,
+    "lng": -5.8033522,
+    "source": "nominatim"
+  },
+  {
+    "id": 15,
+    "name": "تطوان",
+    "lat": 35.5697958,
+    "lng": -5.3746918,
+    "source": "nominatim"
+  },
+  {
+    "id": 16,
+    "name": "العرائش",
+    "lat": 35.1952327,
+    "lng": -6.152913,
+    "source": "nominatim"
+  },
+  {
+    "id": 17,
+    "name": "أصيلة",
+    "lat": 35.461928,
+    "lng": -6.036545,
+    "source": "nominatim"
+  },
+  {
+    "id": 18,
+    "name": "شفشاون",
+    "lat": 35.1700832,
+    "lng": -5.2766583,
+    "source": "nominatim"
+  },
+  {
+    "id": 19,
+    "name": "مرتيل",
+    "lat": 35.617441,
+    "lng": -5.274154,
+    "source": "nominatim"
+  },
+  {
+    "id": 20,
+    "name": "المضيق",
+    "lat": 35.6833598,
+    "lng": -5.3232161,
+    "source": "nominatim"
+  },
+  {
+    "id": 21,
+    "name": "القصر الكبير",
+    "lat": 34.999218,
+    "lng": -5.898724,
+    "source": "nominatim"
+  },
+  {
+    "id": 22,
+    "name": "القصر الصغير",
+    "lat": 35.8006285,
+    "lng": -5.626159,
+    "source": "nominatim"
+  },
+  {
+    "id": 23,
+    "name": "الحسيمة",
+    "lat": 35.245114,
+    "lng": -3.930186,
+    "source": "nominatim"
+  },
+  {
+    "id": 24,
+    "name": "سبتة",
+    "lat": 33.5780275,
+    "lng": -7.617571,
+    "source": "nominatim"
+  },
+  {
+    "id": 25,
+    "name": "الفنيدق",
+    "lat": 35.8392089,
+    "lng": -5.3614246,
+    "source": "nominatim"
+  },
+  {
+    "id": 26,
+    "name": "الجبهة",
+    "lat": 31.6411163,
+    "lng": -7.9858899,
+    "source": "nominatim"
+  },
+  {
+    "id": 27,
+    "name": "واد لاو",
+    "lat": 35.450492,
+    "lng": -5.093029,
+    "source": "nominatim"
+  },
+  {
+    "id": 28,
+    "name": "باب برد",
+    "lat": 34.998897,
+    "lng": -4.890298,
+    "source": "nominatim"
+  },
+  {
+    "id": 29,
+    "name": "وزان",
+    "lat": 34.796757,
+    "lng": -5.578493,
+    "source": "nominatim"
+  },
+  {
+    "id": 30,
+    "name": "بوسكور",
+    "lat": 33.456443,
+    "lng": -7.650666,
+    "source": "photon"
+  },
+  {
+    "id": 31,
+    "name": "وجدة",
+    "lat": 34.677874,
+    "lng": -1.929306,
+    "source": "nominatim"
+  },
+  {
+    "id": 32,
+    "name": "بركان",
+    "lat": 34.9266755,
+    "lng": -2.3294087,
+    "source": "nominatim"
+  },
+  {
+    "id": 33,
+    "name": "فكيك",
+    "lat": 32.115048,
+    "lng": -1.230396,
+    "source": "nominatim"
+  },
+  {
+    "id": 34,
+    "name": "بوعرفة",
+    "lat": 32.532903,
+    "lng": -1.963231,
+    "source": "nominatim"
+  },
+  {
+    "id": 35,
+    "name": "كرسيف",
+    "lat": 34.2274367,
+    "lng": -3.3484757,
+    "source": "nominatim"
+  },
+  {
+    "id": 36,
+    "name": "جرادة",
+    "lat": 34.310531,
+    "lng": -2.159979,
+    "source": "nominatim"
+  },
+  {
+    "id": 37,
+    "name": "عين الشعير",
+    "lat": 32.2202009,
+    "lng": -2.4872846,
+    "source": "nominatim"
+  },
+  {
+    "id": 38,
+    "name": "تاوريرت",
+    "lat": 34.413438,
+    "lng": -2.893825,
+    "source": "nominatim"
+  },
+  {
+    "id": 39,
+    "name": "الناظور",
+    "lat": 35.1739922,
+    "lng": -2.9281198,
+    "source": "nominatim"
+  },
+  {
+    "id": 40,
+    "name": "مليلية",
+    "lat": 34.02328,
+    "lng": -6.8310632,
+    "source": "nominatim"
+  },
+  {
+    "id": 41,
+    "name": "دبدو",
+    "lat": 33.986368,
+    "lng": -3.039726,
+    "source": "nominatim"
+  },
+  {
+    "id": 42,
+    "name": "سلوان",
+    "lat": 35.07284,
+    "lng": -2.941719,
+    "source": "nominatim"
+  },
+  {
+    "id": 43,
+    "name": "بني أنصار",
+    "lat": 35.259687,
+    "lng": -2.933644,
+    "source": "nominatim"
+  },
+  {
+    "id": 44,
+    "name": "فرخانة",
+    "lat": 35.286107,
+    "lng": -2.980918,
+    "source": "nominatim"
+  },
+  {
+    "id": 45,
+    "name": "تالسينت",
+    "lat": 32.535512,
+    "lng": -3.439467,
+    "source": "nominatim"
+  },
+  {
+    "id": 46,
+    "name": "تندرارة",
+    "lat": 33.049438,
+    "lng": -2.000089,
+    "source": "nominatim"
+  },
+  {
+    "id": 47,
+    "name": "العيون الشرقية",
+    "lat": 34.584,
+    "lng": -2.507,
+    "source": "nominatim"
+  },
+  {
+    "id": 48,
+    "name": "بني ادرار",
+    "lat": 30.585286,
+    "lng": -8.3698698,
+    "source": "photon"
+  },
+  {
+    "id": 49,
+    "name": "السعيدية",
+    "lat": 35.0822208,
+    "lng": -2.2245756,
+    "source": "nominatim"
+  },
+  {
+    "id": 50,
+    "name": "رأس الماء",
+    "lat": 35.1372835,
+    "lng": -2.4227911,
+    "source": "nominatim"
+  },
+  {
+    "id": 51,
+    "name": "تافوغالت",
+    "lat": 34.8055488,
+    "lng": -2.411397,
+    "source": "nominatim"
+  },
+  {
+    "id": 52,
+    "name": "فزوان",
+    "lat": 34.9163284,
+    "lng": -2.2040608,
+    "source": "nominatim"
+  },
+  {
+    "id": 53,
+    "name": "أحفير",
+    "lat": 34.955281,
+    "lng": -2.100793,
+    "source": "nominatim"
+  },
+  {
+    "id": 54,
+    "name": "زايو",
+    "lat": 34.941906,
+    "lng": -2.734164,
+    "source": "nominatim"
+  },
+  {
+    "id": 55,
+    "name": "دريوش",
+    "lat": 34.97694,
+    "lng": -3.391005,
+    "source": "nominatim"
+  },
+  {
+    "id": 56,
+    "name": "بني تجيت",
+    "lat": 32.1641768,
+    "lng": -2.8760876,
+    "source": "nominatim"
+  },
+  {
+    "id": 57,
+    "name": "بوعنان",
+    "lat": 32.039244,
+    "lng": -3.04928,
+    "source": "nominatim"
+  },
+  {
+    "id": 58,
+    "name": "الدار البيضاء",
+    "lat": 33.5945144,
+    "lng": -7.6200284,
+    "source": "nominatim"
+  },
+  {
+    "id": 59,
+    "name": "المحمدية",
+    "lat": 33.6958383,
+    "lng": -7.3893292,
+    "source": "nominatim"
+  },
+  {
+    "id": 60,
+    "name": "بن سليمان",
+    "lat": 33.6228983,
+    "lng": -7.1267176,
+    "source": "nominatim"
+  },
+  {
+    "id": 61,
+    "name": "سطات",
+    "lat": 33.002397,
+    "lng": -7.619867,
+    "source": "nominatim"
+  },
+  {
+    "id": 62,
+    "name": "الكارة",
+    "lat": 33.277113,
+    "lng": -7.2331554,
+    "source": "nominatim"
+  },
+  {
+    "id": 63,
+    "name": "البروج",
+    "lat": 32.504976,
+    "lng": -7.192731,
+    "source": "nominatim"
+  },
+  {
+    "id": 64,
+    "name": "ابن أحمد",
+    "lat": 33.265795,
+    "lng": -7.5839385,
+    "source": "nominatim"
+  },
+  {
+    "id": 65,
+    "name": "برشيد",
+    "lat": 33.2676746,
+    "lng": -7.5811465,
+    "source": "nominatim"
+  },
+  {
+    "id": 66,
+    "name": "الجديدة",
+    "lat": 33.2293229,
+    "lng": -8.4993567,
+    "source": "nominatim"
+  },
+  {
+    "id": 67,
+    "name": "أزمور",
+    "lat": 33.288141,
+    "lng": -8.343206,
+    "source": "nominatim"
+  },
+  {
+    "id": 68,
+    "name": "سيدي بنور",
+    "lat": 32.6507792,
+    "lng": -8.4242087,
+    "source": "nominatim"
+  },
+  {
+    "id": 69,
+    "name": "خميس الزمامرة",
+    "lat": 32.6276804,
+    "lng": -8.6999912,
+    "source": "photon"
+  },
+  {
+    "id": 70,
+    "name": "خنيفرة",
+    "lat": 32.9357718,
+    "lng": -5.6696504,
+    "source": "nominatim"
+  },
+  {
+    "id": 71,
+    "name": "مولاي بوعزة",
+    "lat": 33.224507,
+    "lng": -6.197919,
+    "source": "nominatim"
+  },
+  {
+    "id": 72,
+    "name": "زاوية أحنصال",
+    "lat": 31.8456029,
+    "lng": -6.0902502,
+    "source": "nominatim"
+  },
+  {
+    "id": 73,
+    "name": "بني ملال",
+    "lat": 32.334193,
+    "lng": -6.353335,
+    "source": "nominatim"
+  },
+  {
+    "id": 74,
+    "name": "أزيلال",
+    "lat": 31.959295,
+    "lng": -6.570991,
+    "source": "nominatim"
+  },
+  {
+    "id": 75,
+    "name": "الفقيه بنصالح",
+    "lat": 32.49694,
+    "lng": -6.6867873,
+    "source": "photon"
+  },
+  {
+    "id": 76,
+    "name": "دمنات",
+    "lat": 31.732224,
+    "lng": -7.002676,
+    "source": "nominatim"
+  },
+  {
+    "id": 77,
+    "name": "القصيبة",
+    "lat": 32.568902,
+    "lng": -6.034093,
+    "source": "nominatim"
+  },
+  {
+    "id": 78,
+    "name": "قصبة تادلة",
+    "lat": 32.602894,
+    "lng": -6.269706,
+    "source": "nominatim"
+  },
+  {
+    "id": 79,
+    "name": "خريبكة",
+    "lat": 32.8856482,
+    "lng": -6.908798,
+    "source": "nominatim"
+  },
+  {
+    "id": 80,
+    "name": "وادي زم",
+    "lat": 32.862504,
+    "lng": -6.571054,
+    "source": "nominatim"
+  },
+  {
+    "id": 81,
+    "name": "فاس",
+    "lat": 34.0346534,
+    "lng": -5.0161926,
+    "source": "nominatim"
+  },
+  {
+    "id": 82,
+    "name": "صفرو",
+    "lat": 33.824898,
+    "lng": -4.833336,
+    "source": "nominatim"
+  },
+  {
+    "id": 83,
+    "name": "مولاي يعقوب",
+    "lat": 34.087468,
+    "lng": -5.179435,
+    "source": "nominatim"
+  },
+  {
+    "id": 84,
+    "name": "بولمان",
+    "lat": 33.3637958,
+    "lng": -4.729575,
+    "source": "nominatim"
+  },
+  {
+    "id": 85,
+    "name": "ميسور",
+    "lat": 33.047057,
+    "lng": -3.992578,
+    "source": "nominatim"
+  },
+  {
+    "id": 86,
+    "name": "رباط الخير",
+    "lat": 33.8154579,
+    "lng": -4.4068912,
+    "source": "nominatim"
+  },
+  {
+    "id": 87,
+    "name": "المنزل بني يازغة",
+    "lat": 33.9676607,
+    "lng": -6.8573001,
+    "source": "photon"
+  },
+  {
+    "id": 88,
+    "name": "إموزار كندر",
+    "lat": 33.7160971,
+    "lng": -5.0180443,
+    "source": "nominatim"
+  },
+  {
+    "id": 89,
+    "name": "تازة",
+    "lat": 34.230155,
+    "lng": -4.010104,
+    "source": "nominatim"
+  },
+  {
+    "id": 90,
+    "name": "تاونات",
+    "lat": 34.538476,
+    "lng": -4.635994,
+    "source": "nominatim"
+  },
+  {
+    "id": 91,
+    "name": "أكنول",
+    "lat": 34.65602,
+    "lng": -3.865259,
+    "source": "nominatim"
+  },
+  {
+    "id": 92,
+    "name": "تيزي وسلي",
+    "lat": 34.7461941,
+    "lng": -3.7277943,
+    "source": "nominatim"
+  },
+  {
+    "id": 93,
+    "name": "بورد",
+    "lat": 34.7445412,
+    "lng": -4.0882028,
+    "source": "nominatim"
+  },
+  {
+    "id": 94,
+    "name": "تاهلة",
+    "lat": 34.050634,
+    "lng": -4.4224,
+    "source": "nominatim"
+  },
+  {
+    "id": 95,
+    "name": "تيسة",
+    "lat": 34.28657,
+    "lng": -4.665632,
+    "source": "nominatim"
+  },
+  {
+    "id": 96,
+    "name": "قرية با محمد",
+    "lat": 34.364056,
+    "lng": -5.214573,
+    "source": "nominatim"
+  },
+  {
+    "id": 97,
+    "name": "كتامة",
+    "lat": 34.8763848,
+    "lng": -4.6195339,
+    "source": "nominatim"
+  },
+  {
+    "id": 98,
+    "name": "واد أمليل",
+    "lat": 34.191562,
+    "lng": -4.267604,
+    "source": "nominatim"
+  },
+  {
+    "id": 99,
+    "name": "مكناس",
+    "lat": 33.8984131,
+    "lng": -5.5321582,
+    "source": "nominatim"
+  },
+  {
+    "id": 100,
+    "name": "يفرن",
+    "lat": null,
+    "lng": null
+  },
+  {
+    "id": 101,
+    "name": "الحاجب",
+    "lat": 33.690156,
+    "lng": -5.371938,
+    "source": "nominatim"
+  },
+  {
+    "id": 102,
+    "name": "زرهون",
+    "lat": 35.0607052,
+    "lng": -5.1749259,
+    "source": "nominatim"
+  },
+  {
+    "id": 103,
+    "name": "آزرو",
+    "lat": 33.4415843,
+    "lng": -5.2269528,
+    "source": "nominatim"
+  },
+  {
+    "id": 104,
+    "name": "مراكش",
+    "lat": 28.3347722,
+    "lng": -10.3713379,
+    "source": "nominatim"
+  },
+  {
+    "id": 105,
+    "name": "قلعة السراغنة",
+    "lat": 32.0538921,
+    "lng": -7.4068642,
+    "source": "nominatim"
+  },
+  {
+    "id": 106,
+    "name": "الصويرة",
+    "lat": 31.5118281,
+    "lng": -9.7620903,
+    "source": "nominatim"
+  },
+  {
+    "id": 107,
+    "name": "شيشاوة",
+    "lat": 31.5463197,
+    "lng": -8.7602644,
+    "source": "nominatim"
+  },
+  {
+    "id": 108,
+    "name": "بنجرير",
+    "lat": 32.235207,
+    "lng": -7.9567681,
+    "source": "nominatim"
+  },
+  {
+    "id": 109,
+    "name": "الرحامنة",
+    "lat": 35.0795654,
+    "lng": -6.1540389,
+    "source": "nominatim"
+  },
+  {
+    "id": 110,
+    "name": "تمنار",
+    "lat": 31.003117,
+    "lng": -9.678242,
+    "source": "nominatim"
+  },
+  {
+    "id": 111,
+    "name": "آسفي",
+    "lat": 32.2650776,
+    "lng": -9.230554,
+    "source": "nominatim"
+  },
+  {
+    "id": 112,
+    "name": "الوليدية",
+    "lat": 32.7097639,
+    "lng": -8.9626018,
+    "source": "nominatim"
+  },
+  {
+    "id": 113,
+    "name": "اليوسفية",
+    "lat": 32.245801,
+    "lng": -8.532439,
+    "source": "nominatim"
+  },
+  {
+    "id": 114,
+    "name": "تسلطانت",
+    "lat": 31.5445753,
+    "lng": -7.9821674,
+    "source": "nominatim"
+  },
+  {
+    "id": 115,
+    "name": "تامصلوحت",
+    "lat": 34.0148306,
+    "lng": -6.831479,
+    "source": "nominatim"
+  },
+  {
+    "id": 116,
+    "name": "قطارة",
+    "lat": 33.4611827,
+    "lng": -7.6519181,
+    "source": "photon"
+  },
+  {
+    "id": 117,
+    "name": "أكادير",
+    "lat": 30.4205162,
+    "lng": -9.5838532,
+    "source": "nominatim"
+  },
+  {
+    "id": 118,
+    "name": "تارودانت",
+    "lat": 30.470651,
+    "lng": -8.877922,
+    "source": "nominatim"
+  },
+  {
+    "id": 119,
+    "name": "تزنيت",
+    "lat": 29.698624,
+    "lng": -9.7312815,
+    "source": "nominatim"
+  },
+  {
+    "id": 120,
+    "name": "إغرم",
+    "lat": 30.089004,
+    "lng": -8.460942,
+    "source": "nominatim"
+  },
+  {
+    "id": 121,
+    "name": "تالوين",
+    "lat": 30.5314629,
+    "lng": -7.9215207,
+    "source": "nominatim"
+  },
+  {
+    "id": 122,
+    "name": "تافراوت",
+    "lat": 29.720472,
+    "lng": -8.9744529,
+    "source": "nominatim"
+  },
+  {
+    "id": 123,
+    "name": "طاطا",
+    "lat": 29.746392,
+    "lng": -7.9696051,
+    "source": "nominatim"
+  },
+  {
+    "id": 124,
+    "name": "أقا",
+    "lat": 29.391861,
+    "lng": -8.256762,
+    "source": "nominatim"
+  },
+  {
+    "id": 125,
+    "name": "فم لحصن",
+    "lat": 35.5489924,
+    "lng": -5.5538971,
+    "source": "photon"
+  },
+  {
+    "id": 126,
+    "name": "بويكرة",
+    "lat": 35.1535035,
+    "lng": -2.9847089,
+    "source": "photon"
+  },
+  {
+    "id": 127,
+    "name": "أولاد تايمة",
+    "lat": 30.3927088,
+    "lng": -9.2132982,
+    "source": "nominatim"
+  },
+  {
+    "id": 128,
+    "name": "الرشيدية",
+    "lat": 31.929089,
+    "lng": -4.4340807,
+    "source": "nominatim"
+  },
+  {
+    "id": 129,
+    "name": "الريصاني",
+    "lat": 31.2618886,
+    "lng": -3.9593135,
+    "source": "nominatim"
+  },
+  {
+    "id": 130,
+    "name": "أرفود",
+    "lat": 31.4324061,
+    "lng": -4.2342572,
+    "source": "nominatim"
+  },
+  {
+    "id": 131,
+    "name": "تنديت",
+    "lat": 35.068573,
+    "lng": -4.854924,
+    "source": "photon"
+  },
+  {
+    "id": 132,
+    "name": "كلميمة",
+    "lat": 31.692627,
+    "lng": -4.953262,
+    "source": "nominatim"
+  },
+  {
+    "id": 133,
+    "name": "إملشيل",
+    "lat": 32.156119,
+    "lng": -5.633585,
+    "source": "nominatim"
+  },
+  {
+    "id": 134,
+    "name": "تنجداد",
+    "lat": 31.510201,
+    "lng": -5.03382,
+    "source": "nominatim"
+  },
+  {
+    "id": 135,
+    "name": "الريش",
+    "lat": 32.25677,
+    "lng": -4.498189,
+    "source": "nominatim"
+  },
+  {
+    "id": 136,
+    "name": "ميدلت",
+    "lat": 32.680347,
+    "lng": -4.739897,
+    "source": "nominatim"
+  },
+  {
+    "id": 137,
+    "name": "زاكورة",
+    "lat": 30.3279053,
+    "lng": -5.8369957,
+    "source": "nominatim"
+  },
+  {
+    "id": 138,
+    "name": "ورزازات",
+    "lat": 30.920193,
+    "lng": -6.910923,
+    "source": "nominatim"
+  },
+  {
+    "id": 139,
+    "name": "تنغير",
+    "lat": 31.52133,
+    "lng": -5.531164,
+    "source": "nominatim"
+  },
+  {
+    "id": 140,
+    "name": "هسكورة",
+    "lat": null,
+    "lng": null
+  },
+  {
+    "id": 141,
+    "name": "قلعة مكونة",
+    "lat": 31.2378612,
+    "lng": -6.1281695,
+    "source": "nominatim"
+  },
+  {
+    "id": 142,
+    "name": "أكدز",
+    "lat": 30.6943155,
+    "lng": -6.4489453,
+    "source": "nominatim"
+  },
+  {
+    "id": 143,
+    "name": "بومالن دادس",
+    "lat": 31.372661,
+    "lng": -5.986644,
+    "source": "nominatim"
+  },
+  {
+    "id": 144,
+    "name": "النيف",
+    "lat": 31.116268,
+    "lng": -5.16687,
+    "source": "nominatim"
+  },
+  {
+    "id": 145,
+    "name": "أسول",
+    "lat": 31.94966,
+    "lng": -5.202998,
+    "source": "nominatim"
+  },
+  {
+    "id": 146,
+    "name": "أمسمرير",
+    "lat": 31.696181,
+    "lng": -5.818733,
+    "source": "nominatim"
+  },
+  {
+    "id": 147,
+    "name": "تازارين",
+    "lat": 30.7830658,
+    "lng": -5.5633956,
+    "source": "nominatim"
+  },
+  {
+    "id": 148,
+    "name": "سيدي إفني",
+    "lat": 29.3791253,
+    "lng": -10.1715632,
+    "source": "nominatim"
+  },
+  {
+    "id": 149,
+    "name": "كلميم",
+    "lat": 28.9863852,
+    "lng": -10.0574351,
+    "source": "nominatim"
+  },
+  {
+    "id": 150,
+    "name": "أسا",
+    "lat": 27.978305,
+    "lng": -9.4935605,
+    "source": "nominatim"
+  },
+  {
+    "id": 151,
+    "name": "الزاك",
+    "lat": 28.022026,
+    "lng": -9.294609,
+    "source": "nominatim"
+  },
+  {
+    "id": 152,
+    "name": "طانطان",
+    "lat": 28.437553,
+    "lng": -11.098664,
+    "source": "nominatim"
+  },
+  {
+    "id": 153,
+    "name": "بويزكارن",
+    "lat": 29.177425,
+    "lng": -9.711408,
+    "source": "nominatim"
+  },
+  {
+    "id": 154,
+    "name": "المحبس",
+    "lat": 27.4137251,
+    "lng": -9.0496748,
+    "source": "nominatim"
+  },
+  {
+    "id": 155,
+    "name": "لمسيد",
+    "lat": 26.1005339,
+    "lng": -13.4813136,
+    "source": "nominatim"
+  },
+  {
+    "id": 156,
+    "name": "العيون",
+    "lat": 27.154512,
+    "lng": -13.1953921,
+    "source": "nominatim"
+  },
+  {
+    "id": 157,
+    "name": "السمارة",
+    "lat": 26.7435827,
+    "lng": -11.6645492,
+    "source": "nominatim"
+  },
+  {
+    "id": 158,
+    "name": "بوجدور",
+    "lat": 26.1263378,
+    "lng": -14.4836537,
+    "source": "nominatim"
+  },
+  {
+    "id": 159,
+    "name": "طرفاية",
+    "lat": 27.9401204,
+    "lng": -12.9249934,
+    "source": "nominatim"
+  },
+  {
+    "id": 160,
+    "name": "تفاريتي",
+    "lat": 27.1551119,
+    "lng": -13.2019237,
+    "source": "nominatim"
+  },
+  {
+    "id": 161,
+    "name": "بوكراع",
+    "lat": 26.3575997,
+    "lng": -12.8443515,
+    "source": "nominatim"
+  },
+  {
+    "id": 162,
+    "name": "كلتة زمور",
+    "lat": 25.148848,
+    "lng": -12.369461,
+    "source": "nominatim"
+  },
+  {
+    "id": 163,
+    "name": "أمكالة",
+    "lat": 26.0752014,
+    "lng": -11.7865321,
+    "source": "nominatim"
+  },
+  {
+    "id": 164,
+    "name": "أخفنير",
+    "lat": 27.9330926,
+    "lng": -11.963037,
+    "source": "nominatim"
+  },
+  {
+    "id": 165,
+    "name": "الداخلة",
+    "lat": 23.6940663,
+    "lng": -15.9431274,
+    "source": "nominatim"
+  },
+  {
+    "id": 166,
+    "name": "الكويرة",
+    "lat": 29.2300089,
+    "lng": -10.2283949,
+    "source": "nominatim"
+  },
+  {
+    "id": 167,
+    "name": "أوسرد",
+    "lat": 22.567,
+    "lng": -14.312906,
+    "source": "nominatim"
+  },
+  {
+    "id": 168,
+    "name": "بئر كندوز",
+    "lat": 21.8352819,
+    "lng": -16.4037424,
+    "source": "nominatim"
+  },
+  {
+    "id": 169,
+    "name": "بئر أنزاران",
+    "lat": 35.1678775,
+    "lng": -5.2664675,
+    "source": "nominatim"
+  },
+  {
+    "id": 301,
+    "name": "خميس سيدي عبد الجليل",
+    "lat": 31.8170508,
+    "lng": -9.2865089,
+    "source": "photon"
+  },
+  {
+    "id": 302,
+    "name": "أولاد عياد",
+    "lat": 34.0839266,
+    "lng": -4.6079255,
+    "source": "nominatim"
+  },
+  {
+    "id": 303,
+    "name": "تاهلة",
+    "lat": 34.050634,
+    "lng": -4.4224,
+    "source": "nominatim"
+  },
+  {
+    "id": 304,
+    "name": "مطماطة",
+    "lat": 34.0983766,
+    "lng": -4.5508579,
+    "source": "nominatim"
+  },
+  {
+    "id": 305,
+    "name": "إيمنتانوت",
+    "lat": 31.1735007,
+    "lng": -8.8519207,
+    "source": "nominatim"
+  },
+  {
+    "id": 306,
+    "name": "سيدي غانم",
+    "lat": 31.2864744,
+    "lng": -9.4676468,
+    "source": "nominatim"
+  },
+  {
+    "id": 307,
+    "name": "تفنتان",
+    "lat": 31.6240762,
+    "lng": -9.2934891,
+    "source": "photon"
+  },
+  {
+    "id": 308,
+    "name": "آيت القاق",
+    "lat": 30.0080602,
+    "lng": -9.3334413,
+    "source": "photon"
+  },
+  {
+    "id": 309,
+    "name": "أكدال أملشيل",
+    "lat": 33.9582551,
+    "lng": -6.8712989,
+    "source": "photon"
+  },
+  {
+    "id": 310,
+    "name": "اكودال املشيل ميدلت",
+    "lat": null,
+    "lng": null
+  },
+  {
+    "id": 311,
+    "name": "أكايوار",
+    "lat": 35.7244627,
+    "lng": -5.8030847,
+    "source": "photon"
+  },
+  {
+    "id": 312,
+    "name": "عين العودة",
+    "lat": 33.803077,
+    "lng": -6.79413,
+    "source": "nominatim"
+  },
+  {
+    "id": 313,
+    "name": "أسكين",
+    "lat": 29.7619186,
+    "lng": -9.0069759,
+    "source": "nominatim"
+  },
+  {
+    "id": 314,
+    "name": "آيت ورير",
+    "lat": 31.563898,
+    "lng": -7.662276,
+    "source": "nominatim"
+  },
+  {
+    "id": 315,
+    "name": "زاوية مولاي ابراهيم",
+    "lat": 31.2858471,
+    "lng": -7.9653431,
+    "source": "photon"
+  },
+  {
+    "id": 316,
+    "name": "تولكولت",
+    "lat": null,
+    "lng": null
+  },
+  {
+    "id": 317,
+    "name": "إيكس",
+    "lat": 33.5850575,
+    "lng": -7.6427795,
+    "source": "photon"
+  },
+  {
+    "id": 318,
+    "name": "كرس",
+    "lat": null,
+    "lng": null
+  },
+  {
+    "id": 319,
+    "name": "تيسنت",
+    "lat": 32.0160751,
+    "lng": -6.7212997,
+    "source": "photon"
+  },
+  {
+    "id": 320,
+    "name": "فم زكيد",
+    "lat": 30.085933,
+    "lng": -6.874903,
+    "source": "nominatim"
+  },
+  {
+    "id": 321,
+    "name": "قصر إيش",
+    "lat": 33.5250657,
+    "lng": -4.5546425,
+    "source": "photon"
+  },
+  {
+    "id": 322,
+    "name": "إيمين ثلاث",
+    "lat": 31.2508235,
+    "lng": -7.6678212,
+    "source": "photon"
+  }
+]
