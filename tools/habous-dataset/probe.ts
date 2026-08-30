@@ -24,6 +24,8 @@
  *
  *   npx tsx tools/habous-dataset/probe.ts [cityId]
  */
+import fs from 'node:fs';
+import path from 'node:path';
 import https from 'node:https';
 import http from 'node:http';
 import tls from 'node:tls';
@@ -237,16 +239,27 @@ async function main(): Promise<number> {
 async function tryWithIntermediate(url: string): Promise<number> {
   const AIA = 'http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt';
   console.log('\n── retrying with the missing intermediate supplied ──');
-  line('  intermediate', AIA);
   let pem: string;
-  try {
-    const der = await getBytes(AIA);
-    line('  fetched bytes', der.length);
-    pem = derToPem(der);
-  } catch (e) {
-    line('  RESULT', 'could not collect the intermediate');
-    line('  error', (e as Error).message);
-    return 1;
+  // The pinned copy first: a build should not depend on Sectigo being up,
+  // and a certificate that is reviewed in a diff is better than one fetched
+  // fresh on every run. The AIA URI is the fallback and the way we would
+  // notice the ministry changing issuer.
+  const pinned = path.join(__dirname, 'intermediate.pem');
+  if (fs.existsSync(pinned)) {
+    pem = fs.readFileSync(pinned, 'utf8');
+    line('  intermediate', 'pinned intermediate.pem');
+    line('  bytes', pem.length);
+  } else {
+    line('  intermediate', AIA);
+    try {
+      const der = await getBytes(AIA);
+      line('  fetched bytes', der.length);
+      pem = derToPem(der);
+    } catch (e) {
+      line('  RESULT', 'could not collect the intermediate');
+      line('  error', (e as Error).message);
+      return 1;
+    }
   }
 
   try {
@@ -260,8 +273,6 @@ async function tryWithIntermediate(url: string): Promise<number> {
     line('  days parsed', month.days.length);
     line('  first day', `${month.days[0].dateKey} ${JSON.stringify(month.days[0].times)}`);
     line('  RESULT', 'OK — verified fetch works once the intermediate is supplied');
-    console.log('\n  The PEM, for pinning as tools/habous-dataset/intermediate.pem:\n');
-    console.log(pem);
     return 0;
   } catch (e) {
     const err = e as Error & { cause?: { code?: string } };
