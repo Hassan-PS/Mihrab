@@ -3,8 +3,8 @@
     "id": 1,
     "name": "الرباط",
     "lat": 34.0218454,
-    "lng": -6.8408929,
-    "source": "nominatim"
+    "lng": -6.8438,
+    "source": "geocode-lat+ministry-lng"
   },
   {
     "id": 2,

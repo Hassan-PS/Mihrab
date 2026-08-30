@@ -90,3 +90,30 @@ Fetches one city, reports the certificate chain, tries the verified request
 with the intermediate, and parses what comes back. Commits nothing, is not
 scheduled. Run it after any change to the ministry's page or this pinned
 certificate.
+
+## Placing the cities
+
+`solveCoords.ts` checks every coordinate against the ministry's own Dhuhr,
+which fixes longitude exactly. Run it after a build that reached cities the
+previous one missed:
+
+    npx tsx tools/habous-dataset/solveCoords.ts
+
+It corrects the longitude and keeps the geocoded latitude **only when the
+two agree**. Where they do not, the geocoder found a different place and its
+latitude is worth no more than its longitude was, so the city is left
+unplaced — it still has a table, it simply cannot be a nearest match.
+
+Latitude cannot be solved from these times. Measured at Casablanca against
+the ministry's August table, 100 km north moves sunrise by 0.65 min and
+sunset by 0.65 min the other way; near the equinox the day is nearly the
+same length everywhere, so latitude is flat in the objective and below the
+resolution of minute-rounded data. An earlier version fitted it anyway and
+produced confident answers 100 km wrong.
+
+**A city left unplaced stays unplaced**, because the script skips anything
+already null rather than re-testing it. To bring one back, put a coordinate
+in the `OVERRIDES` table and re-run — it goes through the same longitude
+gate as everything else, so a bad guess is rejected rather than trusted
+because a human typed it. Ten cities are placed that way today, Marrakech
+among them.
