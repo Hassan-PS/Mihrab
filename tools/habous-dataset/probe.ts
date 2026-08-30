@@ -162,18 +162,31 @@ async function main(): Promise<number> {
   line('node', process.version);
 
   const started = Date.now();
-  // A plain AbortController rather than AbortSignal.timeout: this file is
-  // type-checked against the app's lib, which does not carry it.
-  const abort = new AbortController();
-  const timer = setTimeout(() => abort.abort(), 20_000);
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      headers: { 'user-agent': 'Mihrab-dataset-probe (+https://github.com/Hassan-PS/Mihrab)' },
-      signal: abort.signal,
-    });
-  } catch (e) {
-    const err = e as Error & { cause?: { code?: string; message?: string } };
+  let res: Response | null = null;
+  let lastError: (Error & { cause?: { code?: string } }) | null = null;
+  // Three attempts. The ministry reset the connection on one run and failed
+  // TLS verification on two others, so a single result is not a verdict.
+  for (let attempt = 1; attempt <= 3 && !res; attempt++) {
+    // A plain AbortController rather than AbortSignal.timeout: this file is
+    // type-checked against the app's lib, which does not carry it.
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 20_000);
+    try {
+      res = await fetch(url, {
+        headers: { 'user-agent': 'Mihrab-dataset-probe (+https://github.com/Hassan-PS/Mihrab)' },
+        signal: abort.signal,
+      });
+    } catch (e) {
+      lastError = e as Error & { cause?: { code?: string } };
+      line(`attempt ${attempt}`, `failed: ${lastError.cause?.code ?? lastError.message}`);
+      if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 2000));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  if (!res) {
+    const e = lastError as Error & { cause?: { code?: string } };
+    const err = e;
     const code = err.cause?.code ?? '(none)';
     line('RESULT', 'FETCH FAILED');
     line('error', err.message);
@@ -184,12 +197,13 @@ async function main(): Promise<number> {
           'fetch the intermediate named in the leaf certificate’s AIA extension\n' +
           'and pass it as an extra CA — NOT to disable verification.',
       );
-      await inspectChain(new URL(url).hostname);
-      return await tryWithIntermediate(url);
     }
-    return 1;
-  } finally {
-    clearTimeout(timer);
+    // Whatever went wrong, still exercise the fix — an ECONNRESET on the
+    // plain attempt tells us nothing about whether the intermediate works,
+    // and a probe that learns one fact per run wastes a request on a server
+    // that may be rate-limiting us.
+    await inspectChain(new URL(url).hostname);
+    return await tryWithIntermediate(url);
   }
 
   line('http status', `${res.status} ${res.statusText}`);
