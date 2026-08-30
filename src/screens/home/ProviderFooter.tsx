@@ -10,7 +10,10 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { getMethodLabel } from '../../settings/methods';
-import { providerHidesCalculationMethod } from '../../settings/providerUi';
+import {
+  providerHidesCalculationMethod,
+  providerHidesHanafiAsr,
+} from '../../settings/providerUi';
 import { getProviderLabel } from '../../settings/providersCatalog';
 import type { PrayerDataProviderId } from '../../settings/types';
 import { HOME_TABLE_RADIUS } from './tokens';
@@ -65,7 +68,9 @@ function ProviderFooterImpl({
           {!providerHidesCalculationMethod(effectiveProvider)
             ? ` · ${getMethodLabel(calculationMethod)}`
             : ''}
-          {effectiveProvider !== 'islamiska_forbundet' && school === 1
+          {/* Every regional source that publishes a single schedule, not
+              just Sweden — Morocco's ministry does too. */}
+          {!providerHidesHanafiAsr(effectiveProvider) && school === 1
             ? ` · ${t('home.hanafiSuffix')}`
             : ''}
         </Text>

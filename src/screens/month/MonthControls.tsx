@@ -13,7 +13,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { AppPalette } from '../../theme/appPalette';
 import { getMethodLabel } from '../../settings/methods';
-import { providerHidesCalculationMethod } from '../../settings/providerUi';
+import {
+  providerHidesCalculationMethod,
+  providerHidesHanafiAsr,
+} from '../../settings/providerUi';
 import { getProviderLabel } from '../../settings/providersCatalog';
 import type { PrayerDataProviderId } from '../../settings/types';
 import { RADIUS, SPACING } from '../../theme/tokens';
@@ -162,11 +165,17 @@ function MonthControlsImpl({
         {!providerHidesCalculationMethod(effectiveProvider)
           ? ` · ${getMethodLabel(calculationMethod)}`
           : ''}
-        {effectiveProvider !== 'islamiska_forbundet' && school === 1
+        {/* Not `!== 'islamiska_forbundet'`: Morocco publishes a single
+            schedule too, so a stored Hanafi setting must not caption a
+            table that does not vary by madhab. */}
+        {!providerHidesHanafiAsr(effectiveProvider) && school === 1
           ? ` · ${t('home.hanafiSuffix')}`
           : ''}
+        {/* `month.monthsStored` has been translated into all thirteen
+            languages since the screen was written; the line was printing a
+            hardcoded English "12mo cached" over the top of it. */}
         {cacheStatus && !refreshingCache
-          ? ` · ${cacheStatus.monthsStored}mo cached`
+          ? ` · ${t('month.monthsStored', { count: cacheStatus.monthsStored })}`
           : ''}
       </Text>
 
