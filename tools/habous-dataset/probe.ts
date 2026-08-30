@@ -24,6 +24,7 @@
  *
  *   npx tsx tools/habous-dataset/probe.ts [cityId]
  */
+import tls from 'node:tls';
 import { parseHabousCities, parseHabousMonth } from '../../src/providers/habousParser';
 
 const BASE = 'https://habous.gov.ma/prieres/index.php';
@@ -31,6 +32,58 @@ const cityId = Number(process.argv[2] ?? 1);
 
 function line(label: string, value: unknown): void {
   console.log(`${label.padEnd(22)} ${String(value)}`);
+}
+
+/**
+ * Read the certificate the ministry presents, and report where the missing
+ * intermediate can be collected from.
+ *
+ * `rejectUnauthorized: false` HERE AND ONLY HERE. This connection fetches
+ * nothing and returns nothing but the certificate the server offered; its
+ * entire purpose is to find out why verification fails. The data fetch
+ * below stays fully verified — that separation is the point, and it is why
+ * this is a distinct function rather than an option on the real request.
+ */
+async function inspectChain(host: string): Promise<void> {
+  console.log('\n── certificate chain, as the server presents it ──');
+  await new Promise<void>(resolve => {
+    const socket = tls.connect(
+      { host, port: 443, servername: host, rejectUnauthorized: false },
+      () => {
+        let cert = socket.getPeerCertificate(true) as tls.DetailedPeerCertificate | null;
+        const seen = new Set<string>();
+        let depth = 0;
+        while (cert && cert.subject && !seen.has(cert.fingerprint)) {
+          seen.add(cert.fingerprint);
+          line(`  [${depth}] subject`, cert.subject.CN ?? JSON.stringify(cert.subject));
+          line(`  [${depth}] issuer`, cert.issuer?.CN ?? JSON.stringify(cert.issuer));
+          if (cert.infoAccess) {
+            const issuers = cert.infoAccess['CA Issuers - URI'] ?? [];
+            for (const uri of issuers) line(`  [${depth}] AIA caIssuers`, uri);
+          }
+          const next = cert.issuerCertificate;
+          if (!next || next === cert) break;
+          cert = next;
+          depth++;
+        }
+        line('  chain length', depth + 1);
+        if (depth === 0) {
+          console.log(
+            '\n  Only the leaf was sent — no intermediate, which is the whole\n' +
+              '  problem. Collect the certificate at the AIA caIssuers URI above,\n' +
+              '  commit it as tools/habous-dataset/intermediate.pem, and pass it as\n' +
+              '  an extra CA so the chain completes WITH verification still on.',
+          );
+        }
+        socket.end();
+        resolve();
+      },
+    );
+    socket.on('error', e => {
+      line('  inspect failed', (e as Error).message);
+      resolve();
+    });
+  });
 }
 
 async function main(): Promise<number> {
@@ -61,6 +114,7 @@ async function main(): Promise<number> {
           'fetch the intermediate named in the leaf certificate’s AIA extension\n' +
           'and pass it as an extra CA — NOT to disable verification.',
       );
+      await inspectChain(new URL(url).hostname);
     }
     return 1;
   } finally {
