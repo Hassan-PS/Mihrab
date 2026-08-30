@@ -1,0 +1,37 @@
+name: Habous probe
+
+# Does a runner reach habous.gov.ma, and does our parser read what comes
+# back? Nothing else. Run by hand, reports and exits — it commits nothing
+# and it is not scheduled.
+#
+# It exists because habous.gov.ma serves an incomplete certificate chain
+# (SSL Labs: grade B, chainIssues 2). Browsers cope by fetching the missing
+# intermediate; Node and curl do not. That could sink a scraper built on the
+# assumption that a site working in a browser works everywhere, so it gets
+# answered before the pipeline is written rather than after.
+
+on:
+  workflow_dispatch:
+    inputs:
+      city_id:
+        description: 'Ministry city id (1 = الرباط / Rabat)'
+        required: false
+        default: '1'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Reach the ministry
+        run: npx --yes tsx@4 tools/habous-dataset/probe.ts "${{ inputs.city_id || '1' }}"
