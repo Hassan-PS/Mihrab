@@ -47,7 +47,6 @@ import { fetchWithRetry } from '../utils/fetchWithRetry';
 import { ProviderError } from './errors';
 import { recordServerIndex, type ServerStatus } from '../prayer/dataStatus';
 import type { DataSource, PrayerTimesResult } from './types';
-import seedJson from './data/habousSeed.json';
 
 const PROVIDER = 'habous';
 const DEFAULT_TZ = 'Africa/Casablanca';
@@ -85,7 +84,23 @@ type IndexFile = {
   deadCities?: number[];
 };
 
-const seed = seedJson as unknown as SeedFile;
+/**
+ * The bundled seed, if there is one yet.
+ *
+ * `require` rather than `import` on purpose: the file is written by the
+ * dataset builder, so a checkout that has never run it does not have one.
+ * A missing seed is a provider that always misses and falls through to the
+ * computed chain, which is the correct behaviour — not a build failure.
+ */
+function loadSeed(): SeedFile {
+  try {
+    return require('./data/habousSeed.json') as SeedFile;
+  } catch {
+    return { version: 0, builtAt: '', cities: {} };
+  }
+}
+
+const seed = loadSeed();
 
 const memCity = new Map<number, CityFile | null>();
 const refreshInFlight = new Set<number>();
@@ -118,18 +133,21 @@ async function pollServerIndex(): Promise<IndexFile | null> {
     try {
       const res = await fetchWithRetry(
         `${HABOUS_DATASET_BASE_URL}/index.json`,
-        { headers: { 'user-agent': httpUserAgent() } },
+        { headers: { 'User-Agent': httpUserAgent('Islamic prayer app; dataset') } },
         { maxAttempts: 2, baseDelayMs: 800, timeoutMs: 7000 },
       );
       if (!res.ok) return null;
       const index = (await res.json()) as IndexFile;
-      recordServerIndex({
-        provider: PROVIDER,
-        builtAt: index.builtAt,
-        serverStatus: index.serverStatus,
-        minCoverageDays: index.minCoverageDays,
-        deadCities: index.deadCities?.map(String),
-      });
+      const dueAt = Date.now() + jitter(HABOUS_INDEX_POLL_INTERVAL_MS);
+      await recordServerIndex(
+        {
+          builtAt: index.builtAt ?? null,
+          serverStatus: index.serverStatus,
+          minCoverageDays: index.minCoverageDays ?? null,
+          deadCities: Array.isArray(index.deadCities) ? index.deadCities.length : null,
+        },
+        new Date(dueAt),
+      );
       return index;
     } catch {
       return null;
@@ -147,7 +165,7 @@ async function downloadCity(id: number): Promise<void> {
   try {
     const res = await fetchWithRetry(
       `${HABOUS_DATASET_BASE_URL}/cities/${id}.json`,
-      { headers: { 'user-agent': httpUserAgent() } },
+      { headers: { 'User-Agent': httpUserAgent('Islamic prayer app; dataset') } },
       { maxAttempts: 2, baseDelayMs: 800, timeoutMs: 9000 },
     );
     if (!res.ok) return;

@@ -73,6 +73,8 @@ const STAYS: Record<string, string> = {
   'prayerapp.providerHealth.v1': 'describes this phone — which host failed here',
   'islamiska_forbundet.reverse.v1': 'derived cache, and holds coordinates',
   'ifis.dataset.v1.city.': 'derived — a per-city timetable cache',
+  'habous.dataset.v1.city.':
+    'derived — the ministry’s published timetable for one city, re-downloadable',
   'mihrab.first_seen_day':
     'describes this phone — the Log’s backfill uses it as the earliest ' +
     'day it may offer, so importing another device’s would let this one ' +
