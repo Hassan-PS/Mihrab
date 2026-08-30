@@ -1,15 +1,17 @@
 {
   "version": 1,
-  "builtAt": "2026-08-30T18:47:19.495Z",
+  "builtAt": "2026-08-30T19:20:34.652Z",
   "timezone": "Africa/Casablanca",
   "seedDays": 30,
   "minCoverageDays": 14,
-  "coverageFloorDays": 14,
-  "serverStatus": "degraded",
-  "deadCities": [
-    1
-  ],
+  "staleCities": 0,
+  "serverStatus": "ok",
+  "deadCities": [],
   "cities": [
+    {
+      "id": 1,
+      "city": "الرباط"
+    },
     {
       "id": 2,
       "city": "الخميسات"
