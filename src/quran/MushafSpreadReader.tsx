@@ -173,7 +173,13 @@ export function MushafSpreadReader(props: MushafReaderProps) {
           Math.round(e.nativeEvent.contentOffset.x / pageWidth),
         ),
       );
-      if (idx === settledIndex.current) return;
+      if (idx === settledIndex.current) {
+        // Dragged and came back. Nothing was navigated to, so lift the
+        // suspension armed at drag begin rather than leaving recitation
+        // follow off for thirty seconds after a gesture that did nothing.
+        core.resumeFollow();
+        return;
+      }
       const prevPage = settledPage.current;
       const page = pageForIndex(idx);
       settledIndex.current = idx;

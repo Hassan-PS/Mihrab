@@ -146,6 +146,8 @@ export type MushafReaderCore = {
   commitPageTurn: (newPage: number, prevPage: number) => void;
   /** Manual navigation takes over from recitation follow for 30 s. */
   suspendFollow: () => void;
+  /** Cancel a suspension: the user did something that means "follow again". */
+  resumeFollow: () => void;
   selected: AyahSelection | null;
   sheetVisible: boolean;
   sheetScrollAudio: boolean;
@@ -226,27 +228,65 @@ export function useMushafReaderCore({
   }, []);
 
   // ── Recitation follow (QR-17) ───────────────────────────────────────
-  const followRef = useRef(true);
+  //
+  // Suspension exists so the reader does not yank someone back mid-swipe
+  // when they have deliberately gone to look at another page. That much is
+  // right. What it could not do was tell a deliberate swipe from the
+  // incidental finger travel of a long-press — and a long-press on the page
+  // is exactly how the ayah sheet opens, which is where "play from here"
+  // lives. So the gesture that STARTED playback routinely disabled
+  // following it, for thirty seconds, from the moment it began. Reported as
+  // "the app stays stuck on the same page while the audio continues" (#12).
+  //
+  // Two ways out of a suspension now, besides the timer:
+  //   • starting playback. It is an explicit "follow this" and there is no
+  //     reading of it under which the user wants to be left behind.
+  //   • a drag that ends on the page it started on. Nothing was navigated
+  //     to, so nothing needs protecting from.
+  //
+  // State rather than a ref, deliberately. As a ref the effect could not
+  // re-run when the suspension lifted, so following resumed only at the
+  // NEXT ayah boundary — up to a whole ayah of silence on the wrong page.
+  const [followSuspended, setFollowSuspended] = useState(false);
   const followTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearFollowTimer = () => {
+    if (followTimer.current) {
+      clearTimeout(followTimer.current);
+      followTimer.current = null;
+    }
+  };
   const suspendFollow = useCallback(() => {
-    followRef.current = false;
-    if (followTimer.current) clearTimeout(followTimer.current);
-    followTimer.current = setTimeout(() => {
-      followRef.current = true;
-    }, 30_000);
+    setFollowSuspended(true);
+    clearFollowTimer();
+    followTimer.current = setTimeout(() => setFollowSuspended(false), 30_000);
   }, []);
-  useEffect(
-    () => () => {
-      if (followTimer.current) clearTimeout(followTimer.current);
-    },
-    [],
-  );
+  const resumeFollow = useCallback(() => {
+    clearFollowTimer();
+    setFollowSuspended(false);
+  }, []);
+  useEffect(() => clearFollowTimer, []);
+
+  // A new playback session clears any suspension. Keyed on the transition
+  // into playing, not on `playing` itself, so pausing and resuming does not
+  // override a swipe the user made while it was paused.
+  const wasPlaying = useRef(false);
   useEffect(() => {
-    if (!playback.active || !playback.playing || !followRef.current) return;
+    const nowPlaying = Boolean(playback.active && playback.playing);
+    if (nowPlaying && !wasPlaying.current) resumeFollow();
+    wasPlaying.current = nowPlaying;
+  }, [playback.active, playback.playing, resumeFollow]);
+
+  useEffect(() => {
+    if (!playback.active || !playback.playing || followSuspended) return;
     const page = findPageForAyah(playback.active.surah, playback.active.ayah);
     setCurrentPage(prev => (page !== prev ? page : prev));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playback.active?.surah, playback.active?.ayah, playback.playing]);
+  }, [
+    playback.active?.surah,
+    playback.active?.ayah,
+    playback.playing,
+    followSuspended,
+  ]);
 
   // ── Ayah selection (QR-8) ───────────────────────────────────────────
   const [selected, setSelected] = useState<AyahSelection | null>(null);
@@ -310,6 +350,7 @@ export function useMushafReaderCore({
     setCurrentPage,
     commitPageTurn,
     suspendFollow,
+    resumeFollow,
     selected,
     sheetVisible,
     sheetScrollAudio,

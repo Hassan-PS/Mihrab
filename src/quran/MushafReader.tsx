@@ -194,8 +194,22 @@ export function MushafReader({
   }, [quran.prefs.keepAwake]);
 
   // ── Geometry (QR-7) ─────────────────────────────────────────────────
+  //
+  // Image mode only. `data/ayahGeometry.json` is 2.6 MB of hand-tuned pixel
+  // boxes for the retired image reader, and `geometry.ts` holds the parsed
+  // copy in a module-level variable for the life of the process. This
+  // effect had no condition on it, so every text-mode reader mount — the
+  // default renderer, and the only one most people ever see — parsed and
+  // retained all of it to answer questions nobody would ask. The text
+  // reader's own header says it has "no dependency on the 2.6 MB
+  // image-geometry JSON"; its parent was loading it anyway.
+  //
+  // `geometryReady` guards one thing — the image reader's long-press hit
+  // test, below the `textMode` early return — so in text mode it is read by
+  // nobody and staying false costs nothing.
   const [geometryReady, setGeometryReady] = useState(false);
   useEffect(() => {
+    if (textMode) return;
     let cancelled = false;
     void loadGeometry().then(() => {
       if (!cancelled) setGeometryReady(true);
@@ -203,7 +217,7 @@ export function MushafReader({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [textMode]);
 
   // ── Download gating (QR-5) ──────────────────────────────────────────
   const [downloadStatus, setDownloadStatus] = useState<

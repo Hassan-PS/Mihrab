@@ -156,7 +156,13 @@ export function MushafPhoneReader(props: MushafReaderProps) {
     (e: { nativeEvent: { contentOffset: { x: number } } }) => {
       const index = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
       const page = Math.min(MUSHAF_TOTAL_PAGES, Math.max(1, index + 1));
-      if (page === settled.current) return;
+      if (page === settled.current) {
+        // Dragged and came back. Nothing was navigated to, so lift the
+        // suspension armed at drag begin rather than leaving recitation
+        // follow off for thirty seconds after a gesture that did nothing.
+        core.resumeFollow();
+        return;
+      }
       const prev = settled.current;
       settled.current = page;
       core.commitPageTurn(page, prev);
