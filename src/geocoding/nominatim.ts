@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { APP_SOURCE_REPO_URL, httpUserAgent } from '../config/httpIdentity';
 import { fetchWithRetry } from '../utils/fetchWithRetry';
 
@@ -188,6 +189,50 @@ export type ReverseLocality = {
   countryCode: string;
 };
 
+/**
+ * Which language to ask OpenStreetMap for a place name in.
+ *
+ * Without this Nominatim answers in whatever the object's default `name`
+ * tag holds, and in Morocco that is often several scripts at once —
+ * Casablanca came back as `Casablanca ⵜⵓⵏⵏⵓⵄⵜ ⵜⵖ…`, Latin followed by
+ * Tifinagh, which the home screen then truncated into nonsense. The same
+ * is true anywhere a place is officially multilingual.
+ *
+ * The app's own language comes first, because someone reading Mihrab in
+ * Arabic wants الدار البيضاء and not Casablanca. French follows for the
+ * Maghreb, then English: between them they cover almost every OSM object
+ * that carries a Latin name at all.
+ */
+function localityLanguages(): string {
+  const app = (i18n.language || 'en').split('-')[0];
+  const chain = [app, 'fr', 'en'].filter((v, i, a) => a.indexOf(v) === i);
+  return chain.join(',');
+}
+
+/** Scripts a place name may be padded with, that the app never displays in. */
+const TIFINAGH = /[\u2D30-\u2D7F]/;
+
+/**
+ * Take the one name out of what OSM returned.
+ *
+ * `accept-language` fixes most of this at the source, but some objects
+ * still answer with a compound — `Casablanca / الدار البيضاء`, or a Latin
+ * name with a Tifinagh tail — because the tag itself is written that way.
+ * A label is one place, so keep the first segment and drop any run in a
+ * script the app has no interface language for.
+ */
+export function cleanLocalityName(raw: string): string {
+  let name = raw.split(/\s*[/|–—]\s*/)[0].trim();
+  if (TIFINAGH.test(name)) {
+    name = name
+      .split(/\s+/)
+      .filter(word => !TIFINAGH.test(word))
+      .join(' ')
+      .trim();
+  }
+  return name.replace(/[\s,;·]+$/, '').trim() || raw.trim();
+}
+
 /** Reverse geocode coordinates to a locality (for Sweden IF bönetider, etc.). */
 export async function reverseLocality(
   latitude: number,
@@ -197,13 +242,16 @@ export async function reverseLocality(
     String(latitude),
   )}&lon=${encodeURIComponent(
     String(longitude),
-  )}&format=json&addressdetails=1`;
+  )}&format=json&addressdetails=1&accept-language=${encodeURIComponent(
+    localityLanguages(),
+  )}`;
   const res = await fetchWithRetry(
     url,
     {
       headers: {
         'User-Agent': USER_AGENT,
         Accept: 'application/json',
+        'Accept-Language': localityLanguages(),
       },
     },
     { maxAttempts: 4, baseDelayMs: 1200 },
@@ -238,5 +286,5 @@ export async function reverseLocality(
     throw new Error('Could not determine a city name for this location.');
   }
   const countryCode = (addr.country_code || '').toUpperCase();
-  return { city: city.trim(), countryCode };
+  return { city: cleanLocalityName(city), countryCode };
 }
