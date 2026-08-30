@@ -1,0 +1,5 @@
+• Prayer times were computed for the wrong date: a formatting slip meant every request to the default source asked for a day four years away. In Morocco it also shifted the whole day by an hour.
+• Morocco now uses the Ministry of Habous's own published times.
+• Several calculation methods used the wrong angles on your device.
+• The Quran reader turns to the page the recited verse is on.
+• Prayer widgets could go blank; their stored timeline was far too large.

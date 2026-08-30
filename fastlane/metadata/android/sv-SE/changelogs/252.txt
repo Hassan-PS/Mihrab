@@ -1,0 +1,5 @@
+• Bönetiderna beräknades för fel datum: ett formatfel gjorde att varje förfrågan till standardkällan bad om en dag fyra år bort. I Marocko förskjöts dessutom hela dygnet en timme.
+• Marocko använder nu de tider som ministeriet för Habous själv publicerar.
+• Flera beräkningsmetoder använde fel vinklar på din enhet.
+• Koranläsaren bläddrar till sidan där den upplästa versen står.
+• Bönewidgetar kunde bli tomma; den sparade tidslinjen var alldeles för stor.
