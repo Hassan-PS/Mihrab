@@ -36,6 +36,10 @@ jest.unmock('adhan');
 
 import { computeLocalAdhanTimes } from '../src/providers/localAdhan';
 import { CALCULATION_METHODS } from '../src/settings/methods';
+import {
+  HABOUS_RABAT_RABI_AWWAL_1448,
+  RABAT,
+} from './fixtures/habousRabat';
 
 /**
  * What AlAdhan served for 30 Aug 2026, quoted from its JSON.
@@ -89,18 +93,6 @@ const ALADHAN = [
     times: { Fajr: '03:23', Sunrise: '05:30', Dhuhr: '12:30', Maghrib: '19:29' },
     // Isha at 55.8°N is within a minute; high latitude, left loose.
     asr: '16:17',
-  },
-  {
-    id: 21,
-    method: 'Morocco',
-    city: 'Rabat',
-    latitude: 34.0209,
-    longitude: -6.8416,
-    timeZone: 'Africa/Casablanca',
-    // Dhuhr and Maghrib carry the ministry's five-minute margin. Sunset is
-    // 19:56 for every method at this coordinate; Morocco's Maghrib is 20:01.
-    times: { Fajr: '05:27', Sunrise: '06:59', Dhuhr: '13:33', Maghrib: '20:01', Isha: '21:18' },
-    asr: '17:06',
   },
 ] as const;
 
@@ -212,5 +204,103 @@ describe('a Moroccan user has a method to pick', () => {
       return JSON.stringify(got.timings) === JSON.stringify(mwl.timings);
     });
     expect(collisions.map(m => `${m.id} ${m.name}`)).toEqual([]);
+  });
+});
+
+describe('Morocco is checked against the ministry, not against AlAdhan', () => {
+  /**
+   * AlAdhan's method 21 is a good secondary source and it is what the app
+   * receives online. But it omits the Chourouq margin entirely and uses +5
+   * for Maghrib where the ministry uses +4, so pinning Morocco to it would
+   * pin two known errors. Where a secondary source and the authority a
+   * method is named after disagree, the authority wins.
+   *
+   * The fixture is a whole month of habous.gov.ma's own table for Rabat.
+   * Two readings could not separate a published margin from our city
+   * coordinates being slightly off; thirty days can, and do.
+   */
+  const KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
+
+  /** The ministry's month, re-dated: 14–31 August then 1–12 September 2026. */
+  function walk(): Array<{ date: Date; want: Record<string, string> }> {
+    const out = [];
+    let month = 7;
+    let previous = 0;
+    for (const [day, ...times] of HABOUS_RABAT_RABI_AWWAL_1448) {
+      if (day < previous) month = 8;
+      previous = day;
+      out.push({
+        date: new Date(2026, month, day),
+        want: Object.fromEntries(KEYS.map((k, i) => [k, times[i]])),
+      });
+    }
+    return out;
+  }
+
+  function asRabatClock(hhmm: string): string {
+    const [h, m] = hhmm.split(':').map(Number);
+    return new Date(2026, 7, 30, h, m).toLocaleTimeString('en-GB', {
+      timeZone: RABAT.timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  }
+
+  const days = walk().map(({ date, want }) => {
+    const got = computeLocalAdhanTimes({
+      latitude: RABAT.latitude,
+      longitude: RABAT.longitude,
+      date,
+      calculationMethod: 21,
+      school: 0,
+    });
+    const delta: Record<string, number> = {};
+    for (const k of KEYS) {
+      delta[k] = minutes(asRabatClock(got.timings[k])) - minutes(want[k]);
+    }
+    return { date, delta };
+  });
+
+  it('covers the whole published month', () => {
+    expect(days).toHaveLength(30);
+  });
+
+  it('lands on the ministry’s Dhuhr every single day', () => {
+    // Dhuhr is longitude and nothing else, so this is what proves the
+    // sunrise and Maghrib gaps are the ministry's margins rather than our
+    // coordinates being wrong.
+    expect(days.filter(d => d.delta.Dhuhr !== 0)).toEqual([]);
+  });
+
+  it.each(['Fajr', 'Sunrise', 'Dhuhr', 'Maghrib', 'Isha'] as const)(
+    'is within a minute of the ministry on %s, every day of the month',
+    prayer => {
+      const worst = days
+        .map(d => ({ day: d.date.toDateString(), off: d.delta[prayer] }))
+        .filter(d => Math.abs(d.off) > 1);
+      expect(worst).toEqual([]);
+    },
+  );
+
+  it('keeps Asr inside adhan.js’s known rounding', () => {
+    // Same shadow-length rounding as every other method here: 0–1 minute
+    // early, never late.
+    for (const d of days) {
+      expect(d.delta.Asr).toBeLessThanOrEqual(0);
+      expect(d.delta.Asr).toBeGreaterThanOrEqual(-1);
+    }
+  });
+
+  it('would fail without the ministry’s margins', () => {
+    // The guard on the guard. Chourouq is sunrise −3 and Maghrib is
+    // sunset +4; drop either and this fixture rejects it. Recorded as an
+    // assertion so the numbers cannot be "tidied" back to AlAdhan's.
+    const sunriseOffsets = days.map(d => d.delta.Sunrise);
+    const maghribOffsets = days.map(d => d.delta.Maghrib);
+    // Without sunrise −3 these would sit around +3, and without maghrib +4
+    // rather than +5, around +1.
+    expect(Math.max(...sunriseOffsets)).toBeLessThanOrEqual(0);
+    expect(Math.max(...maghribOffsets)).toBeLessThanOrEqual(1);
   });
 });
