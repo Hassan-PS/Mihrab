@@ -24,6 +24,8 @@
  *
  *   npx tsx tools/habous-dataset/probe.ts [cityId]
  */
+import https from 'node:https';
+import http from 'node:http';
 import tls from 'node:tls';
 import { parseHabousCities, parseHabousMonth } from '../../src/providers/habousParser';
 
@@ -86,6 +88,74 @@ async function inspectChain(host: string): Promise<void> {
   });
 }
 
+
+/** GET a URL as raw bytes, following one redirect. Used for the CA file. */
+function getBytes(url: string, redirects = 2): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https:') ? https : http;
+    const req = client.get(url, { timeout: 15_000 }, res => {
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
+        if (redirects <= 0) return reject(new Error('too many redirects'));
+        return resolve(getBytes(new URL(res.headers.location, url).toString(), redirects - 1));
+      }
+      if (res.statusCode !== 200) {
+        res.resume();
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+      const chunks: Buffer[] = [];
+      res.on('data', c => chunks.push(c as Buffer));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+    });
+    req.on('timeout', () => req.destroy(new Error('timeout')));
+    req.on('error', reject);
+  });
+}
+
+/** DER bytes → PEM text. Sectigo publishes the .crt in DER. */
+function derToPem(der: Buffer): string {
+  const b64 = der.toString('base64').match(/.{1,64}/g)?.join('\n') ?? '';
+  return `-----BEGIN CERTIFICATE-----\n${b64}\n-----END CERTIFICATE-----\n`;
+}
+
+/**
+ * Fetch the ministry WITH the missing intermediate supplied and verification
+ * fully on.
+ *
+ * This is the fix, and the shape the real builder will use. `ca` ADDS to the
+ * trust store rather than replacing it — `tls.rootCertificates` is Node's
+ * own Mozilla set — so the chain still has to reach a real root by real
+ * signatures. A forged intermediate would fail here exactly as it should;
+ * all we have done is hand Node the link the server neglected to send.
+ */
+function fetchVerified(url: string, extraCa: string[]): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request(
+      {
+        host: u.hostname,
+        servername: u.hostname,
+        path: `${u.pathname}${u.search}`,
+        method: 'GET',
+        ca: [...tls.rootCertificates, ...extraCa],
+        rejectUnauthorized: true,
+        timeout: 20_000,
+        headers: { 'user-agent': 'Mihrab-dataset-probe (+https://github.com/Hassan-PS/Mihrab)' },
+      },
+      res => {
+        const chunks: Buffer[] = [];
+        res.on('data', c => chunks.push(c as Buffer));
+        res.on('end', () =>
+          resolve({ status: res.statusCode ?? 0, body: Buffer.concat(chunks).toString('utf8') }),
+        );
+      },
+    );
+    req.on('timeout', () => req.destroy(new Error('timeout')));
+    req.on('error', reject);
+    req.end();
+  });
+}
+
 async function main(): Promise<number> {
   const url = `${BASE}?ville=${cityId}`;
   line('url', url);
@@ -115,6 +185,7 @@ async function main(): Promise<number> {
           'and pass it as an extra CA — NOT to disable verification.',
       );
       await inspectChain(new URL(url).hostname);
+      return await tryWithIntermediate(url);
     }
     return 1;
   } finally {
@@ -142,6 +213,48 @@ async function main(): Promise<number> {
     line('error', (e as Error).message);
     console.log('\nFirst 600 bytes of what came back:\n' + html.slice(0, 600));
     return 2;
+  }
+}
+
+/**
+ * The proposed fix, exercised end to end: collect the intermediate the
+ * server omits, then re-request the page with verification ON.
+ */
+async function tryWithIntermediate(url: string): Promise<number> {
+  const AIA = 'http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt';
+  console.log('\n── retrying with the missing intermediate supplied ──');
+  line('  intermediate', AIA);
+  let pem: string;
+  try {
+    const der = await getBytes(AIA);
+    line('  fetched bytes', der.length);
+    pem = derToPem(der);
+  } catch (e) {
+    line('  RESULT', 'could not collect the intermediate');
+    line('  error', (e as Error).message);
+    return 1;
+  }
+
+  try {
+    const { status, body } = await fetchVerified(url, [pem]);
+    line('  http status', status);
+    line('  bytes', body.length);
+    const cities = parseHabousCities(body);
+    const month = parseHabousMonth(body);
+    line('  cities parsed', cities.length);
+    line('  hijri month', month.hijriLabel);
+    line('  days parsed', month.days.length);
+    line('  first day', `${month.days[0].dateKey} ${JSON.stringify(month.days[0].times)}`);
+    line('  RESULT', 'OK — verified fetch works once the intermediate is supplied');
+    console.log('\n  The PEM, for pinning as tools/habous-dataset/intermediate.pem:\n');
+    console.log(pem);
+    return 0;
+  } catch (e) {
+    const err = e as Error & { cause?: { code?: string } };
+    line('  RESULT', 'STILL FAILING');
+    line('  error', err.message);
+    line('  cause.code', err.cause?.code ?? '(none)');
+    return 1;
   }
 }
 
