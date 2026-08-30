@@ -96,6 +96,7 @@ async function discover(): Promise<number> {
   candidates.push('https://habous.gov.ma/prieres/index.php?ville=1&annee=2027');
 
   const hits: string[] = [];
+  const unparseable: Array<[string, string]> = [];
   for (const url of candidates) {
     try {
       const res = await fetchMinistry(url, { attempts: 1, timeoutMs: 15_000 });
@@ -110,7 +111,9 @@ async function discover(): Promise<number> {
         label = m.hijriLabel;
         window = `${m.days[0].dateKey} → ${m.days[m.days.length - 1].dateKey}`;
       } catch {
-        /* not a month page */
+        // Worth seeing: a 200 that is not a month table might be a
+        // different view onto the same data — a year, a form, a PDF index.
+        unparseable.push([url, res.body.replace(/\s+/g, ' ').slice(0, 400)]);
       }
       const changed = label !== base.hijriLabel && label !== '(unparseable)';
       line(url.replace(MINISTRY_BASE, '…'), `${label} ${window}${changed ? '   ← DIFFERENT' : ''}`);
@@ -119,6 +122,43 @@ async function discover(): Promise<number> {
       line(url.replace(MINISTRY_BASE, '…'), `failed: ${(e as Error).message}`);
     }
     await new Promise(r => setTimeout(r, 800));
+  }
+
+  // The page carries <form method="post">, and the city select only drives
+  // GET. A month field might exist on the POST side.
+  console.log('\nprobing the POST form\n');
+  for (const field of ['mois', 'month', 'mois_hijri', 'hijri_month', 'shahr']) {
+    try {
+      const res = await fetchMinistry(`${MINISTRY_BASE}?ville=1`, {
+        attempts: 1,
+        timeoutMs: 15_000,
+        method: 'POST',
+        form: { ville: '1', [field]: '5' },
+      });
+      let label = '(unparseable)';
+      let window = '';
+      try {
+        const m = parseHabousMonth(res.body);
+        label = m.hijriLabel;
+        window = `${m.days[0].dateKey} → ${m.days[m.days.length - 1].dateKey}`;
+      } catch {
+        /* not a month page */
+      }
+      const changed = label !== base.hijriLabel && label !== '(unparseable)';
+      line(`POST ${field}=5`, `${label} ${window}${changed ? '   ← DIFFERENT' : ''}`);
+      if (changed) hits.push(`POST ${field}`);
+    } catch (e) {
+      line(`POST ${field}=5`, `failed: ${(e as Error).message}`);
+    }
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  if (unparseable.length > 0) {
+    console.log('\nwhat the non-table pages actually returned:\n');
+    for (const [url, head] of unparseable) {
+      console.log(`  ${url}`);
+      console.log(`    ${head}\n`);
+    }
   }
 
   console.log('');

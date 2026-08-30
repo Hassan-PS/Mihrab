@@ -58,14 +58,20 @@ export type MinistryResponse = { status: number; body: string };
 /** Any URL on the ministry's host, with the certificate handled and retries. */
 export async function fetchMinistry(
   url: string,
-  opts: { attempts?: number; timeoutMs?: number; onAttempt?: (n: number, why: string) => void } = {},
+  opts: {
+    attempts?: number;
+    timeoutMs?: number;
+    method?: 'GET' | 'POST';
+    form?: Record<string, string>;
+    onAttempt?: (n: number, why: string) => void;
+  } = {},
 ): Promise<MinistryResponse> {
   const attempts = opts.attempts ?? 3;
   const timeoutMs = opts.timeoutMs ?? 20_000;
   let last: Error | null = null;
   for (let n = 1; n <= attempts; n++) {
     try {
-      return await once(url, timeoutMs);
+      return await once(url, timeoutMs, opts.method === 'POST' ? (opts.form ?? {}) : undefined);
     } catch (e) {
       last = e as Error;
       const why = (last as Error & { cause?: { code?: string } }).cause?.code ?? last.message;
@@ -76,7 +82,12 @@ export async function fetchMinistry(
   throw last ?? new Error('unreachable');
 }
 
-function once(url: string, timeoutMs: number): Promise<MinistryResponse> {
+function once(
+  url: string,
+  timeoutMs: number,
+  post?: Record<string, string>,
+): Promise<MinistryResponse> {
+  const payload = post ? new URLSearchParams(post).toString() : null;
   return new Promise((resolve, reject) => {
     const u = new URL(url);
     const req = https.request(
@@ -84,7 +95,7 @@ function once(url: string, timeoutMs: number): Promise<MinistryResponse> {
         host: u.hostname,
         servername: u.hostname,
         path: `${u.pathname}${u.search}`,
-        method: 'GET',
+        method: payload ? 'POST' : 'GET',
         // ADD to the trust store; never replace it.
         ca: [...tls.rootCertificates, ...extraCa()],
         rejectUnauthorized: true,
@@ -93,6 +104,12 @@ function once(url: string, timeoutMs: number): Promise<MinistryResponse> {
           'user-agent':
             'Mihrab prayer-times dataset (+https://github.com/Hassan-PS/Mihrab)',
           'accept-language': 'ar,fr',
+          ...(payload
+            ? {
+                'content-type': 'application/x-www-form-urlencoded',
+                'content-length': String(Buffer.byteLength(payload)),
+              }
+            : {}),
         },
       },
       res => {
@@ -108,6 +125,7 @@ function once(url: string, timeoutMs: number): Promise<MinistryResponse> {
     );
     req.on('timeout', () => req.destroy(new Error('timeout')));
     req.on('error', reject);
+    if (payload) req.write(payload);
     req.end();
   });
 }
