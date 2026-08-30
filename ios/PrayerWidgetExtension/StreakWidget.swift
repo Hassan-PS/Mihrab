@@ -91,7 +91,7 @@ struct StreakEntryView: View {
   private var smallBody: some View {
     if let pr = entry.practice {
       VStack(alignment: .leading, spacing: 0) {
-        Text("widget_streak_title")
+        widgetText("widget_streak_title")
           .kerning(1.0)
           .font(.system(size: 9, weight: .semibold))
           .foregroundStyle(widgetMuted)
@@ -212,7 +212,7 @@ struct StreakEntryView: View {
   private var rectangularBody: some View {
     if let pr = entry.practice {
       VStack(alignment: .leading, spacing: 1) {
-        Text("widget_streak_title")
+        widgetText("widget_streak_title")
           .kerning(0.8)
           .font(.system(size: 10, weight: .semibold))
         Text(verbatim: "\(pr.streak) \(widgetString("widget_streak_days", pr.streak))")
@@ -225,7 +225,7 @@ struct StreakEntryView: View {
           .minimumScaleFactor(0.7)
       }
     } else {
-      Text("widget_placeholder_open_app").font(.system(size: 12))
+      widgetText("widget_placeholder_open_app").font(.system(size: 12))
     }
   }
 
@@ -256,7 +256,7 @@ struct StreakEntryView: View {
 
   private var emptyBody: some View {
     VStack(spacing: 4) {
-      Text("widget_placeholder_open_app")
+      widgetText("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
     }

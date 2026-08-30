@@ -101,13 +101,13 @@ struct ReadingEntryView: View {
   @ViewBuilder
   private var startBody: some View {
     VStack(alignment: .leading, spacing: 0) {
-      Text("widget_reading_header_start")
+      widgetText("widget_reading_header_start")
         .kerning(0.8)
         .font(.system(size: 9, weight: .semibold))
         .foregroundStyle(widgetMuted)
         .lineLimit(1)
       Spacer(minLength: 4)
-      Text("widget_reading_start_title")
+      widgetText("widget_reading_start_title")
         .font(.system(size: 20, weight: .semibold))
         .foregroundStyle(widgetText)
         .lineLimit(1)
@@ -120,7 +120,7 @@ struct ReadingEntryView: View {
         .lineLimit(2)
         .minimumScaleFactor(0.8)
         .padding(.top, 2)
-      Text("widget_reading_start_tail")
+      widgetText("widget_reading_start_tail")
         .font(.system(size: 10))
         .foregroundStyle(widgetMuted)
         .lineLimit(1)
@@ -227,7 +227,7 @@ struct ReadingEntryView: View {
 
         VStack(alignment: .leading, spacing: 2) {
           if let k = r.khatmah {
-            Text("widget_reading_today_portion")
+            widgetText("widget_reading_today_portion")
               .kerning(0.8)
               .font(.system(size: 9, weight: .semibold))
               .foregroundStyle(widgetMuted)
@@ -253,7 +253,7 @@ struct ReadingEntryView: View {
             }
             Spacer(minLength: 0)
           } else {
-            Text("widget_reading_last_read")
+            widgetText("widget_reading_last_read")
               .kerning(0.8)
               .font(.system(size: 9, weight: .semibold))
               .foregroundStyle(widgetMuted)
@@ -303,7 +303,7 @@ struct ReadingEntryView: View {
           .minimumScaleFactor(0.7)
       }
     } else {
-      Text("widget_placeholder_open_app").font(.system(size: 12))
+      widgetText("widget_placeholder_open_app").font(.system(size: 12))
     }
   }
 
@@ -316,7 +316,7 @@ struct ReadingEntryView: View {
   private func footer(_ r: WidgetPayload.Reading) -> some View {
     if let k = r.khatmah {
       HStack(alignment: .firstTextBaseline, spacing: 3) {
-        Text("widget_reading_today")
+        widgetText("widget_reading_today")
           .font(.system(size: 10))
           .foregroundStyle(widgetMuted)
         Text(verbatim: "\(k.doneToday)/\(k.pagesToday)")
@@ -430,7 +430,7 @@ struct ReadingEntryView: View {
 
   private var emptyBody: some View {
     VStack(spacing: 2) {
-      Text("widget_placeholder_open_app")
+      widgetText("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
     }

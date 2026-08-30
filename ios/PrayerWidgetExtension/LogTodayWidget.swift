@@ -246,7 +246,7 @@ struct LogTodayEntryView: View {
       // which is the right place for "open the full row".
       .widgetURL(URL(string: "mihrab://log"))
     } else {
-      Text("widget_placeholder_open_app")
+      widgetText("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -261,7 +261,7 @@ struct LogTodayEntryView: View {
       // entry for one word — and does it per-locale, which matters for the
       // languages that have no upper case at all and for Turkish, whose
       // capital i is not the one a naive uppercase would produce.
-      Text("widget_log_today")
+      widgetText("widget_log_today")
         .textCase(.uppercase)
         .kerning(1.0)
         .font(.system(size: 9, weight: .semibold))

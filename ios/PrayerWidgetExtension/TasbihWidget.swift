@@ -249,7 +249,7 @@ struct TasbihEntryView: View {
       .padding(12)
       .widgetURL(URL(string: "mihrab://tasbih"))
     } else {
-      Text("widget_placeholder_open_app")
+      widgetText("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

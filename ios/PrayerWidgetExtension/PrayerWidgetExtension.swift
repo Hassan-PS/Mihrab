@@ -81,6 +81,59 @@ private func mihrabStringsBundle() -> Bundle {
   return bundle
 }
 
+// ── WHY EVERY LABEL BELOW IS RESOLVED HERE AND NOT BY SwiftUI ─────────
+//
+// `Text("widget_next_label")` is the obvious spelling and it was costing
+// more than everything else this extension does put together.
+//
+// Measured 2026-08-30 on the shipped 2.13.6 build, launching the app to
+// force one refresh: the extension burned 10.46s of CPU in 13 seconds,
+// against 0.00s over 10s idle. WidgetKit kills an extension that holds
+// 80% for 20 seconds, so a single ordinary refresh sat at four fifths of
+// the way to being killed — and a second render inside that window, which
+// is all a button press is, finished the job. That is the blank widget,
+// and repeated, the widget that disappears. Five CPU-kill reports on this
+// machine, spanning 2.10.1 to 2.13.6, all the same stack.
+//
+// `sample` on the extension mid-burn: 4004 of 4262 samples in
+//
+//   renderUntilStable → AccessibilityNodeAttachment.init
+//     → AccessibilityText.init → Text.resolveAttributedString
+//       → LocalizedStringKey.resolve
+//         → -[NSBundle localizedAttributedStringForKey:value:table:localization:]
+//           → _copyStringTable → _loadStringsFromData → parse 13 KB of plist
+//
+// Note the `localization:` on that selector. Every widget here sets
+// `.environment(\.locale, mihrabLocale())` so labels follow MIHRAB's
+// language rather than the system's — right for someone whose phone is in
+// English and app in Arabic, and the reason the setting exists. But a
+// locale that differs from the bundle's own pushes SwiftUI off NSBundle's
+// cached lookup onto the localization-qualified one, which re-reads and
+// re-parses the .strings file. Per label. Per render pass — and
+// `renderUntilStable` renders until the output stops changing. Then again
+// to build each accessibility label, which is the caller in that stack.
+//
+// So: resolve once, hand SwiftUI a String, and there is nothing left for
+// it to look up. `widgetString` goes through `localizedString(forKey:...)`,
+// which IS the cached path, and the memo below means even that happens
+// once per key per process. The language behaviour is unchanged — same
+// bundle, same tag — only the price is.
+//
+// The rule this earns: in a widget, `Text("literal")` is a filesystem
+// read, not a constant.
+
+/// Resolved strings, keyed by localization tag and key.
+///
+/// Providers run off the main thread and views run on it, so this really
+/// is shared. A lock around a dictionary is the cheap side of the trade by
+/// several orders of magnitude — the alternative is the plist parse above.
+///
+/// Keyed by tag, not just key, because the app's language can change while
+/// this process is still alive and a memo that ignored that would keep
+/// serving the old language until the extension happened to be relaunched.
+private nonisolated(unsafe) var widgetStringMemo: [String: String] = [:]
+private let widgetStringMemoLock = NSLock()
+
 /// A localized string for the lines SwiftUI cannot look up on its own.
 ///
 /// `Text("key")` resolves through `LocalizedStringKey` and needs nothing from
@@ -88,9 +141,31 @@ private func mihrabStringsBundle() -> Bundle {
 /// the plurals, whose `.stringsdict` entries only resolve once a count has
 /// been substituted in.
 func widgetString(_ key: String, _ args: CVarArg...) -> String {
-  let format = mihrabStringsBundle().localizedString(forKey: key, value: nil, table: nil)
-  if args.isEmpty { return format }
-  return String(format: format, locale: mihrabLocale(), arguments: args)
+  guard args.isEmpty else {
+    // Formatted strings are not memoised: the arguments are the point, and
+    // they differ every time. These are few and none of them are on the
+    // render path that the note above is about.
+    let format = mihrabStringsBundle().localizedString(forKey: key, value: nil, table: nil)
+    return String(format: format, locale: mihrabLocale(), arguments: args)
+  }
+  let memoKey = "\(mihrabLocalizationTag() ?? "")\u{0}\(key)"
+  widgetStringMemoLock.lock()
+  defer { widgetStringMemoLock.unlock() }
+  if let hit = widgetStringMemo[memoKey] { return hit }
+  let resolved = mihrabStringsBundle().localizedString(forKey: key, value: nil, table: nil)
+  widgetStringMemo[memoKey] = resolved
+  return resolved
+}
+
+/// A label, resolved here rather than by SwiftUI. See the note above.
+///
+/// `Text(verbatim:)` is what makes it stick: `Text(someString)` would pick
+/// the `StringProtocol` overload and be verbatim anyway, but saying so is
+/// the difference between a property of this call and a property of Swift's
+/// overload resolution, and the next person to edit this line should not
+/// have to know which.
+func widgetText(_ key: String) -> Text {
+  Text(verbatim: widgetString(key))
 }
 
 /// A widget's name for the iOS gallery.
@@ -700,8 +775,47 @@ struct Provider: TimelineProvider {
     for info in dayInfos where info.date > now { boundarySet.insert(info.date) }
     for p in prayers where p.date > now { boundarySet.insert(p.date) }
     var boundaries = boundarySet.sorted()
-    // WidgetKit tolerates large timelines, but keep it bounded.
-    if boundaries.count > 60 { boundaries = Array(boundaries.prefix(60)) }
+
+    // ── THE ARCHIVE HAS A SIZE CAP, AND THIS IS WHERE IT WAS BLOWN ─────
+    //
+    // This said 60, under a comment reading "WidgetKit tolerates large
+    // timelines, but keep it bounded." It tolerates many ENTRIES. What it
+    // does not tolerate is the archive they add up to, and nothing here
+    // was counting bytes.
+    //
+    // Measured 2026-08-30 on the shipped 2.13.6, from chronod's own log:
+    //
+    //   PrayerTimesWidget systemLarge
+    //     reload: failed with too large timeline archive 11307528
+    //     Error Domain=CHSErrorDomain Code=1050 "timelineReloadFailed"
+    //
+    // 11.3 MB, refused. A refused timeline is a card with nothing to draw
+    // — the blank widget, and then the widget that is gone. Every other
+    // kind in this extension logged `reload: succeeded` in the same
+    // second; only this one is big enough to be thrown out. That is why
+    // the bug always looked like it was about the prayer card specifically
+    // and never reproduced on the simple widgets.
+    //
+    // 11307528 / 60 ≈ 188 KB an entry, and each entry is a whole archived
+    // view: the rows, the ring, the countdown, and an accessibility
+    // attachment carrying every label resolved to an attributed string
+    // (see the note by `widgetString` — that resolution is also what made
+    // a render cost ten seconds of CPU).
+    //
+    // Twelve is not a smaller magic number than sixty. It is about two
+    // days of boundaries — five or six prayers and a day start apiece —
+    // and it costs nothing in coverage, because the policy below re-runs
+    // this provider two hours after the last entry and it rebuilds from
+    // the same stored `days[]`. The window the app wrote is still honoured
+    // in full; it is delivered a couple of days at a time instead of all
+    // at once. At ~188 KB that is ~2.3 MB, and the fix to the labels only
+    // moves it further under.
+    //
+    // The rule: a timeline is not bounded by its entry count. It is
+    // bounded by what those entries archive to, and that number is not
+    // visible from here — so leave the margin wide.
+    let maxEntries = 12
+    if boundaries.count > maxEntries { boundaries = Array(boundaries.prefix(maxEntries)) }
 
     let todayInfo = activeDay(at: now)
     var entries: [Entry] = []
@@ -783,7 +897,31 @@ struct Entry: TimelineEntry {
 struct RefreshIntent: AppIntent {
   static var title: LocalizedStringResource = "widget_intent_refresh"
   static var isDiscoverable: Bool = false
-  func perform() async throws -> some IntentResult { .result() }
+
+  /// Rebuild THIS widget's timeline, and only this one.
+  ///
+  /// It used to be `{ .result() }` — a button that ran nothing and relied
+  /// on WidgetKit reloading the widget after any intent. That reload does
+  /// happen, so the button was not quite a lie, but nothing in this file
+  /// said so and the next reader had no way to tell a deliberate no-op
+  /// from an unfinished one. Now the reload is stated where the button is.
+  ///
+  /// `ofKind:` rather than `reloadAllTimelines()`, and that is the whole
+  /// design of this method: a press costs one render, not six. Read the
+  /// note by `widgetString` for why a render used to cost ten seconds of
+  /// CPU and why a button that quietly refreshed every widget on the Mac
+  /// was the fastest way to have WidgetKit kill the extension.
+  ///
+  /// What it cannot do is fetch new prayer times. The payload is written
+  /// by the app, into the App Group, from the foreground; the extension
+  /// only ever reads it. So this redraws from the newest payload there is,
+  /// which is the honest meaning of the button, and an expired payload
+  /// still needs the app opened — which is what the card says when it
+  /// happens.
+  func perform() async throws -> some IntentResult {
+    WidgetCenter.shared.reloadTimelines(ofKind: "PrayerTimesWidget")
+    return .result()
+  }
 }
 
 /// The stretch of time the user is currently inside: the prayer just past,
@@ -954,7 +1092,7 @@ struct PrayerWidgetEntryView: View {
 
       VStack(alignment: .leading, spacing: 0) {
         HStack(alignment: .top) {
-          Text("widget_next_label")
+          widgetText("widget_next_label")
             .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
@@ -1003,7 +1141,7 @@ struct PrayerWidgetEntryView: View {
 
         // Full width, so the countdown never has to be abbreviated.
         VStack(alignment: .leading, spacing: 0) {
-          Text("widget_in_label")
+          widgetText("widget_in_label")
             .font(.system(size: 11))
             .foregroundStyle(widgetMuted)
           CountdownLabel(target: interval?.end, fallback: time)
@@ -1013,7 +1151,7 @@ struct PrayerWidgetEntryView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
       .padding(14)
     } else {
-      Text("widget_placeholder_open_app")
+      widgetText("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -1046,7 +1184,7 @@ struct PrayerWidgetEntryView: View {
           Spacer()
 
           // "NEXT" micro-label
-          Text("widget_next_label")
+          widgetText("widget_next_label")
             .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
@@ -1155,7 +1293,7 @@ struct PrayerWidgetEntryView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     } else {
       VStack {
-        Text("widget_placeholder_open_app")
+        widgetText("widget_placeholder_open_app")
           .font(.caption)
           .foregroundStyle(widgetMuted)
       }
@@ -1185,7 +1323,7 @@ struct PrayerWidgetEntryView: View {
       // "Fajr · 05:12" so the system can lay it out compactly.
       Text(verbatim: "\(name) · \(time)")
     } else {
-      Text("widget_title_prayer_times")
+      widgetText("widget_title_prayer_times")
     }
   }
 
@@ -1223,15 +1361,15 @@ struct PrayerWidgetEntryView: View {
         // distinction within the tint.
         if let s = p.seasonal {
           if s.eid != nil {
-            Text("✦ \(Text("widget_seasonal_eid"))")
+            Text(verbatim: "✦ " + widgetString("widget_seasonal_eid"))
               .font(.system(size: 9, weight: .semibold))
               .lineLimit(1)
           } else if s.jumuah {
-            Text("◇ \(Text("widget_seasonal_jumuah"))")
+            Text(verbatim: "◇ " + widgetString("widget_seasonal_jumuah"))
               .font(.system(size: 9, weight: .semibold))
               .lineLimit(1)
           } else if s.ramadan {
-            Text("☾ \(Text("widget_seasonal_ramadan"))")
+            Text(verbatim: "☾ " + widgetString("widget_seasonal_ramadan"))
               .font(.system(size: 9, weight: .semibold))
               .lineLimit(1)
           } else if let loc = p.locationName, !loc.isEmpty {
@@ -1258,7 +1396,7 @@ struct PrayerWidgetEntryView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     } else {
-      Text("widget_title_prayer_times")
+      widgetText("widget_title_prayer_times")
     }
   }
 
@@ -1312,7 +1450,7 @@ struct PrayerWidgetEntryView: View {
         // column aligned the reserved box. `CountdownLabel(trailing:)` aligns
         // the glyphs inside that box, which is what actually moves them.
         VStack(alignment: .leading, spacing: 0) {
-          Text("widget_next_label")
+          widgetText("widget_next_label")
             .kerning(1.0)
             .font(.system(size: 9, weight: .semibold))
             .foregroundStyle(widgetMuted)
@@ -1333,7 +1471,7 @@ struct PrayerWidgetEntryView: View {
             }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 0) {
-              Text("widget_in_label")
+              widgetText("widget_in_label")
                 .font(.system(size: 11))
                 .foregroundStyle(widgetMuted)
               CountdownLabel(
@@ -1364,7 +1502,7 @@ struct PrayerWidgetEntryView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     } else {
-      Text("widget_placeholder_open_app")
+      widgetText("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

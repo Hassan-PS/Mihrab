@@ -173,7 +173,7 @@ struct HijriEntryView: View {
           .lineLimit(1)
           .minimumScaleFactor(0.7)
         HStack(spacing: 4) {
-          Text("widget_in_label")
+          widgetText("widget_in_label")
             .font(.system(size: 11))
           CountdownLabel(
             target: PrayerInterval.around(entry.date, rows: entry.rows, calendar: .current)?.end,
@@ -184,7 +184,7 @@ struct HijriEntryView: View {
           )
         }
       } else if entry.hijri == nil {
-        Text("widget_placeholder_open_app").font(.system(size: 12))
+        widgetText("widget_placeholder_open_app").font(.system(size: 12))
       }
     }
   }
@@ -193,7 +193,7 @@ struct HijriEntryView: View {
   private var smallBody: some View {
     if let h = entry.hijri {
       VStack(alignment: .leading, spacing: 0) {
-        Text("widget_hijri_title")
+        widgetText("widget_hijri_title")
           .kerning(1.0)
           .font(.system(size: 9, weight: .semibold))
           .foregroundStyle(widgetMuted)
@@ -240,7 +240,7 @@ struct HijriEntryView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
       .padding(14)
     } else {
-      Text("widget_placeholder_open_app")
+      widgetText("widget_placeholder_open_app")
         .font(.caption)
         .foregroundStyle(widgetMuted)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
