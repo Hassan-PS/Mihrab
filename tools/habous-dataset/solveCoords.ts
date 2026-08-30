@@ -1,41 +1,49 @@
 /**
- * Recover each city's coordinates from the ministry's own published times.
+ * Check the geocoded city coordinates against the ministry's own times, and
+ * correct what can be corrected.
  *
- * ── WHY NOT JUST GEOCODE ──────────────────────────────────────────────
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────
  *
- * We did. It placed 186 of 191, and several of them badly wrong in a way no
- * bounding box catches, because the wrong answers were still inside Morocco:
+ * Geocoding placed 186 of 191 cities and got 32 of them wrong by more than
+ * 25 km — several by hundreds. All of them still inside Morocco, so no
+ * bounding box catches it:
  *
- *   مراكش   (Marrakech) → 28.33, -10.37   ~400 km south of Marrakech
- *   سبتة    (Ceuta)     → 33.58,  -7.62   which is Casablanca
- *   مليلية  (Melilla)   → 34.02,  -6.83   which is Rabat
+ *   مراكش   (Marrakech) → 232 km out      سبتة   (Ceuta)   → 210 km
+ *   بويكرة              → 577 km out      الكويرة          → 665 km
+ *   بئر أنزاران         → 838 km out
  *
- * A user in Marrakech would then be matched to whatever city is nearest
- * those coordinates and served its table. Silently. That is the failure
- * this whole dataset exists to prevent.
+ * A user in Marrakech would be matched to whatever city is nearest THOSE
+ * coordinates and served its table, silently. That is the failure the whole
+ * dataset exists to prevent, so a name-lookup alone cannot be trusted.
  *
- * ── WHAT THIS DOES INSTEAD ────────────────────────────────────────────
+ * ── WHAT THE MINISTRY'S TIMES CAN AND CANNOT TELL US ──────────────────
  *
- * The ministry publishes, per city, a month of Fajr / Chourouq / Dhuhr /
- * Asr / Maghrib / Isha. Those times ARE the city's position, encoded:
+ * LONGITUDE, sharply. Dhuhr is solar noon plus their five-minute margin,
+ * and solar noon is longitude and the equation of time and nothing else. A
+ * one-dimensional fit against a month of Dhuhr pins it to a few kilometres.
  *
- *   Dhuhr            fixes longitude — solar noon is longitude and the
- *                    equation of time, nothing else
- *   sunrise, sunset  fix latitude, once longitude is known
+ * LATITUDE, not at all — at this time of year. Measured at Casablanca
+ * against the ministry's own August table: moving 100 km north changes
+ * sunrise by 0.65 min and sunset by 0.65 min the other way. Near the
+ * equinox the day is nearly the same length everywhere, so latitude is
+ * flat in the objective and below the resolution of minute-rounded data.
+ * An earlier version of this file tried to fit both and marched the whole
+ * country into the Mediterranean; the fits it produced looked excellent by
+ * their own residuals and were 100 km wrong. Fitting a parameter the data
+ * does not constrain gives a confident wrong answer, which is worse than
+ * no answer.
  *
- * So instead of asking a gazetteer where a name is, we solve for the point
- * whose computed sunrise, Dhuhr and sunset best reproduce what the ministry
- * published. The answer is not "where Marrakech is" — it is THE MINISTRY'S
- * OWN REFERENCE POINT for Marrakech, which is a better thing to have, and
- * the thing no geocoder could ever return.
+ * ── SO: CORRECT THE LONGITUDE, AND USE IT AS A VERDICT ON THE REST ────
  *
- * A coarse grid then a shrinking local search: the objective is smooth and
- * two-dimensional, the whole country is a few hundred kilometres across,
- * and thirty days of six times each is a lot of signal for two unknowns.
+ * If the ministry's longitude agrees with the geocode, the geocoder found
+ * the right place and its latitude is worth keeping — with the longitude
+ * replaced by the ministry's exact one. If they disagree, the geocoder
+ * found somewhere else entirely and its latitude is worth nothing either,
+ * so the city loses its coordinates.
  *
- * The published margins (Chourouq −3, Dhuhr +5, Maghrib +4 — see
- * `localAdhan.ts`) are removed before fitting, so what is compared is
- * astronomy against astronomy.
+ * A city without coordinates still HAS a table; it simply cannot be the
+ * nearest match until someone fills it in by hand. Coverage lost, silence
+ * kept — and given what a wrong match means here, that is the right trade.
  *
  *   npx tsx tools/habous-dataset/solveCoords.ts
  */
@@ -49,29 +57,65 @@ const CITIES_PATH = path.join(ROOT, 'src/providers/data/moroccoCities.json');
 const CITY_DIR = path.join(ROOT, 'data/prayer-times/morocco/v1/cities');
 const TZ = 'Africa/Casablanca';
 
-/** The ministry's published margins, removed to leave plain astronomy. */
-const SUNRISE_MARGIN = -3;
+/** The ministry publishes Dhuhr five minutes after solar noon. */
 const DHUHR_MARGIN = 5;
+/** Beyond this, the geocoder found a different place, not a nearby one. */
+const DISAGREEMENT_KM = 25;
+
+/**
+ * Hand-supplied coordinates for cities the geocoder placed wrongly and that
+ * are too important to leave unmatched — Marrakech above all.
+ *
+ * These are PROPOSALS, not assertions. Each is put through the same
+ * longitude check as a geocoded one, so a misremembered coordinate is
+ * dropped exactly like a bad geocode rather than being trusted because a
+ * human typed it. That the ministry's own Dhuhr independently confirms
+ * them is the reason they survive.
+ */
+const OVERRIDES: Record<number, { lat: number; lng: number }> = {
+  24: { lat: 35.8894, lng: -5.3213 }, // سبتة — Ceuta
+  26: { lat: 35.2158, lng: -4.6642 }, // الجبهة — Jebha
+  40: { lat: 35.2923, lng: -2.9381 }, // مليلية — Melilla
+  64: { lat: 33.0625, lng: -7.2472 }, // ابن أحمد — Ben Ahmed
+  102: { lat: 34.0547, lng: -5.5236 }, // زرهون — Moulay Idriss Zerhoun
+  104: { lat: 31.6295, lng: -7.9811 }, // مراكش — Marrakech
+  109: { lat: 32.2361, lng: -7.9536 }, // الرحامنة — Rehamna (Benguerir)
+  115: { lat: 31.4833, lng: -8.1 }, // تامصلوحت — Tameslouht
+  129: { lat: 31.2833, lng: -4.2667 }, // الريصاني — Rissani
+  166: { lat: 20.9167, lng: -17.05 }, // الكويرة — Lagouira
+};
 
 type CityFile = { id: number; city: string; days: Record<string, DatasetDayTuple> };
-type Row = { date: Date; sunrise: number; dhuhr: number; maghrib: number };
+type City = {
+  id: number;
+  name: string;
+  lat: number | null;
+  lng: number | null;
+  source?: string;
+};
 
 const minutes = (hhmm: string): number => {
   const [h, m] = hhmm.split(':').map(Number);
   return h * 60 + m;
 };
 
-const wallClock = (d: Date): number => {
-  const s = d.toLocaleTimeString('en-GB', {
-    timeZone: TZ,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
-  const [h, m, sec] = s.split(':').map(Number);
-  return h * 60 + m + sec / 60;
-};
+/** Minutes past midnight, Moroccan wall clock. Offset resolved once per date. */
+const offsetCache = new Map<number, number>();
+function zoneOffsetMinutes(day: Date): number {
+  const key = day.getTime();
+  const hit = offsetCache.get(key);
+  if (hit !== undefined) return hit;
+  const probe = new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate(), 12));
+  const local = probe.toLocaleString('en-US', { timeZone: TZ, hour12: false });
+  const offset = Math.round((Date.parse(`${local} UTC`) - probe.getTime()) / 60000);
+  offsetCache.set(key, offset);
+  return offset;
+}
+
+function wallClock(d: Date, day: Date): number {
+  const utcMinutes = (d.getTime() / 60000) % 1440;
+  return ((((utcMinutes + zoneOffsetMinutes(day)) % 1440) + 1440) % 1440);
+}
 
 function params() {
   const p = CalculationMethod.Other();
@@ -81,109 +125,109 @@ function params() {
   return p;
 }
 
-/** Mean squared error, in minutes, of a candidate point against the month. */
-function cost(lat: number, lng: number, rows: Row[]): number {
+type Noon = { day: Date; solarNoon: number };
+
+/** Mean squared Dhuhr error, in minutes, for a candidate longitude. */
+function noonCost(lng: number, lat: number, rows: Noon[]): number {
+  const p = params();
   let total = 0;
   for (const row of rows) {
-    const t = new PrayerTimes(new Coordinates(lat, lng), row.date, params());
-    total += (wallClock(t.sunrise) - row.sunrise) ** 2;
-    total += (wallClock(t.dhuhr) - row.dhuhr) ** 2;
-    total += (wallClock(t.maghrib) - row.maghrib) ** 2;
+    const t = new PrayerTimes(new Coordinates(lat, lng), row.day, p);
+    total += (wallClock(t.dhuhr, row.day) - row.solarNoon) ** 2;
   }
-  return total / (rows.length * 3);
+  return total / rows.length;
 }
 
-function solve(rows: Row[]): { lat: number; lng: number; rms: number } {
-  let best = { lat: 32, lng: -7, cost: Infinity };
-  // Coarse sweep of the whole country, then refine around the winner.
-  for (let lat = 20.8; lat <= 36.0; lat += 0.5) {
-    for (let lng = -17.0; lng <= -1.0; lng += 0.5) {
-      const c = cost(lat, lng, rows);
-      if (c < best.cost) best = { lat, lng, cost: c };
-    }
+/**
+ * The longitude the ministry's Dhuhr implies. One dimension, so a sweep and
+ * a bisection are plenty — and latitude barely enters solar noon, so an
+ * approximate one is good enough to solve with.
+ */
+function solveLongitude(rows: Noon[], lat: number): { lng: number; rms: number } {
+  let best = { lng: -7, cost: Infinity };
+  for (let lng = -17; lng <= -0.9; lng += 0.25) {
+    const c = noonCost(lng, lat, rows);
+    if (c < best.cost) best = { lng, cost: c };
   }
-  let step = 0.5;
-  while (step > 0.002) {
+  let step = 0.25;
+  while (step > 0.0005) {
     step /= 2;
-    for (const dLat of [-step, 0, step]) {
-      for (const dLng of [-step, 0, step]) {
-        if (dLat === 0 && dLng === 0) continue;
-        const lat = best.lat + dLat;
-        const lng = best.lng + dLng;
-        const c = cost(lat, lng, rows);
-        if (c < best.cost) best = { lat, lng, cost: c };
-      }
+    for (const d of [-step, step]) {
+      const c = noonCost(best.lng + d, lat, rows);
+      if (c < best.cost) best = { lng: best.lng + d, cost: c };
     }
   }
-  return {
-    lat: Number(best.lat.toFixed(4)),
-    lng: Number(best.lng.toFixed(4)),
-    rms: Math.sqrt(best.cost),
-  };
+  return { lng: Number(best.lng.toFixed(4)), rms: Math.sqrt(best.cost) };
 }
 
-function haversineKm(a: [number, number], b: [number, number]): number {
-  const R = 6371;
-  const dLat = ((b[0] - a[0]) * Math.PI) / 180;
-  const dLon = ((b[1] - a[1]) * Math.PI) / 180;
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((a[0] * Math.PI) / 180) * Math.cos((b[0] * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+function kmPerDegreeLongitude(lat: number): number {
+  return 111.32 * Math.cos((lat * Math.PI) / 180);
 }
 
 function main(): number {
-  type City = { id: number; name: string; lat: number | null; lng: number | null; source?: string };
   const cities = JSON.parse(fs.readFileSync(CITIES_PATH, 'utf8')) as City[];
   if (!fs.existsSync(CITY_DIR)) {
     console.error(`no dataset at ${CITY_DIR} — run the builder first.`);
     return 1;
   }
 
-  let solved = 0;
-  let moved = 0;
-  const far: string[] = [];
-  const out = cities.map(city => {
-    const file = path.join(CITY_DIR, `${city.id}.json`);
-    if (!fs.existsSync(file)) return city;
-    const data = JSON.parse(fs.readFileSync(file, 'utf8')) as CityFile;
-    const rows: Row[] = Object.entries(data.days)
-      .map(([key, t]) => {
-        const [y, m, d] = key.split('-').map(Number);
-        return {
-          date: new Date(y, m - 1, d),
-          // Strip the published margins; compare astronomy to astronomy.
-          sunrise: minutes(t[2]) - SUNRISE_MARGIN,
-          dhuhr: minutes(t[3]) - DHUHR_MARGIN,
-          maghrib: minutes(t[5]),
-        };
-      })
-      .slice(0, 30);
-    if (rows.length < 5) return city;
+  let corrected = 0;
+  let overridden = 0;
+  let dropped = 0;
+  let untouched = 0;
+  const rejected: string[] = [];
 
-    const fit = solve(rows);
-    solved++;
-    const before: [number, number] | null =
-      city.lat !== null && city.lng !== null ? [city.lat, city.lng] : null;
-    const shift = before ? haversineKm(before, [fit.lat, fit.lng]) : Infinity;
-    if (before && shift > 25) {
-      moved++;
-      far.push(
-        `  ${String(city.id).padStart(3)} ${city.name}: geocoder was ${Math.round(shift)} km out ` +
-          `(${before[0].toFixed(3)},${before[1].toFixed(3)} → ${fit.lat},${fit.lng})`,
-      );
+  const out = cities.map<City>(city => {
+    const file = path.join(CITY_DIR, `${city.id}.json`);
+    if (!fs.existsSync(file) || city.lat === null || city.lng === null) {
+      untouched++;
+      return city;
     }
-    return { id: city.id, name: city.name, lat: fit.lat, lng: fit.lng, source: 'ministry-times' };
+    const proposed = OVERRIDES[city.id];
+    const startLat = proposed?.lat ?? city.lat;
+    const startLng = proposed?.lng ?? city.lng;
+    const data = JSON.parse(fs.readFileSync(file, 'utf8')) as CityFile;
+    const rows: Noon[] = Object.entries(data.days).map(([key, t]) => {
+      const [y, m, d] = key.split('-').map(Number);
+      return { day: new Date(y, m - 1, d), solarNoon: minutes(t[3]) - DHUHR_MARGIN };
+    });
+    if (rows.length < 5) {
+      untouched++;
+      return city;
+    }
+
+    const fit = solveLongitude(rows, startLat);
+    const km = Math.abs(fit.lng - startLng) * kmPerDegreeLongitude(startLat);
+    if (km > DISAGREEMENT_KM) {
+      // The geocoder found a different place. Its latitude is no more
+      // trustworthy than its longitude was, and a plausible-looking wrong
+      // coordinate is the one outcome worse than a missing one.
+      rejected.push(
+        `  ${String(city.id).padStart(3)} ${city.name}: ` +
+          `${proposed ? 'override' : 'geocoded'} ${startLng.toFixed(3)}, ` +
+          `ministry ${fit.lng.toFixed(3)} — ${Math.round(km)} km apart, coordinates dropped`,
+      );
+      dropped++;
+      return { id: city.id, name: city.name, lat: null, lng: null };
+    }
+    corrected++;
+    if (proposed) overridden++;
+    return {
+      id: city.id,
+      name: city.name,
+      lat: startLat,
+      lng: fit.lng,
+      source: proposed ? 'checked-by-hand+ministry-lng' : 'geocode-lat+ministry-lng',
+    };
   });
 
   fs.writeFileSync(CITIES_PATH, `${JSON.stringify(out, null, 2)}\n`, 'utf8');
-  console.log(`solved ${solved}/${cities.length} from the ministry's own tables`);
-  console.log(`disagreed with the geocoder by more than 25 km in ${moved} cases:`);
-  for (const line of far.slice(0, 40)) console.log(line);
-  if (far.length > 40) console.log(`  … and ${far.length - 40} more`);
-  const missing = out.filter(c => c.lat === null);
-  console.log(`still without coordinates: ${missing.length}`);
-  return solved === 0 ? 1 : 0;
+  console.log(`confirmed and corrected: ${corrected} (${overridden} from the override table)`);
+  console.log(`dropped as wrong:        ${dropped}`);
+  console.log(`left alone (no data):    ${untouched}`);
+  console.log(`\nusable for matching:     ${out.filter(c => c.lat !== null).length}/${out.length}`);
+  for (const line of rejected) console.log(line);
+  return corrected === 0 ? 1 : 0;
 }
 
 process.exit(main());
