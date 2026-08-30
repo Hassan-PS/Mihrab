@@ -1,0 +1,49 @@
+name: Habous city coordinates
+
+# Geocodes the Moroccan ministry's city list and commits the result. Run by
+# hand, rarely — the list changes about never, and Nominatim's usage policy
+# is not something to spend on a schedule.
+#
+# The output picks which city's published table to serve, not the times
+# themselves, so a few kilometres of error costs nothing.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: habous-cities
+  cancel-in-progress: false
+
+jobs:
+  cities:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Geocode
+        run: npx --yes tsx@4 tools/habous-dataset/cities.ts
+
+      - name: Commit
+        run: |
+          if git diff --quiet -- src/providers/data/moroccoCities.json; then
+            echo "no change"
+            exit 0
+          fi
+          git config user.name  'mihrab-dataset-bot'
+          git config user.email 'mihrab-dataset-bot@users.noreply.github.com'
+          git add src/providers/data/moroccoCities.json
+          git commit -m "Habous: refresh the city coordinates"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
