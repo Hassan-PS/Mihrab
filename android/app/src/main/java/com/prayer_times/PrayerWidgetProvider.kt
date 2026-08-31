@@ -938,7 +938,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_content, View.GONE)
       views.setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
       views.setTextViewText(R.id.widget_placeholder, message)
-      views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
+      WidgetCard.paint(views, style.backgroundArgb())
       views.setTextColor(
         R.id.widget_placeholder,
         Color.parseColor(if (isError) "#F87171" else NEUTRAL_MUTED),
@@ -1413,7 +1413,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
-      views.setInt(R.id.widget_root, "setBackgroundColor", style.backgroundArgb())
+      WidgetCard.paint(views, style.backgroundArgb())
 
       val nextKey =
         if (o.isNull("nextKey")) {

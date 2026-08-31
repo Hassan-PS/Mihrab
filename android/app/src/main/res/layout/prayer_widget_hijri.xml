@@ -15,89 +15,110 @@
   only way this widget can be wrong.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root"
+    android:id="@+id/widget_shell"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E01C1C1E"
-    android:padding="10dp">
+    android:padding="@dimen/widget_card_inset">
 
-    <TextView
-        android:id="@+id/widget_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="#9AA0A6"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/widget_content"
+    <!--
+        The card. Inset from the host view so two widgets in adjacent cells
+        cannot touch, and rounded so each reads as its own card rather than
+        part of one slab. Recoloured at runtime — see `widget_card.xml` for
+        why it is an ImageView and not a background.
+    -->
+    <ImageView
+        android:id="@+id/widget_card"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:gravity="center_vertical"
-        android:visibility="gone">
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_card"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
+
+    <FrameLayout
+        android:id="@+id/widget_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/widget_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="#9AA0A6"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingEnd="6dp">
+            android:id="@+id/widget_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:visibility="gone">
 
-            <TextView
-                android:id="@+id/hijri_day_month"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="#E8EAED"
-                android:textSize="20sp"
-                android:fontFamily="sans-serif-medium"
-                android:includeFontPadding="false"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="13sp"
-                android:autoSizeMaxTextSize="22sp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingEnd="6dp">
 
-            <TextView
-                android:id="@+id/hijri_year"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="13sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/hijri_day_month"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#E8EAED"
+                    android:textSize="20sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="13sp"
+                    android:autoSizeMaxTextSize="22sp" />
 
-        <LinearLayout
-            android:id="@+id/hijri_next_column"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="end">
+                <TextView
+                    android:id="@+id/hijri_year"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="13sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/hijri_next_label"
+            <LinearLayout
+                android:id="@+id/hijri_next_column"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.08"
-                android:maxLines="1"
-                android:gravity="end" />
+                android:orientation="vertical"
+                android:gravity="end">
 
-            <TextView
-                android:id="@+id/hijri_next_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="12sp"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:gravity="end" />
+                <TextView
+                    android:id="@+id/hijri_next_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.08"
+                    android:maxLines="1"
+                    android:gravity="end" />
+
+                <TextView
+                    android:id="@+id/hijri_next_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="12sp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:gravity="end" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

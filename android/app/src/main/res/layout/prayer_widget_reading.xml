@@ -13,176 +13,197 @@
   measured width this side cannot know.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root"
+    android:id="@+id/widget_shell"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E01C1C1E"
-    android:padding="10dp">
+    android:padding="@dimen/widget_card_inset">
 
-    <TextView
-        android:id="@+id/widget_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="#9AA0A6"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
-        <!--
-            Centred, not top-anchored. A widget is only ever exactly as tall
-            as its content at one size; at every other size the slack has to
-            go somewhere, and pooling it under the last line reads as a card
-            that ran out of things to say. Balanced above and below it reads
-            as breathing room.
-        -->
-    <LinearLayout
-        android:id="@+id/widget_content"
+    <!--
+        The card. Inset from the host view so two widgets in adjacent cells
+        cannot touch, and rounded so each reads as its own card rather than
+        part of one slab. Recoloured at runtime — see `widget_card.xml` for
+        why it is an ImageView and not a background.
+    -->
+    <ImageView
+        android:id="@+id/widget_card"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:visibility="gone">
-        android:gravity="center_vertical"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_card"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
 
-        <!-- Centred inside the full-height column: this is where the slack
-             actually is, not on the row above it. -->
-        <!--
-            One block, evenly spaced, centred.
+    <FrameLayout
+        android:id="@+id/widget_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
 
-            Three attempts at this. Centring a tight stack left holes above
-            and below; bumping the type made a smaller hole; pinning the
-            header to the top and the body to the bottom filled the card but
-            read as unrelated fragments with the progress bar floating away
-            from the position it describes.
+        <TextView
+            android:id="@+id/widget_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="#9AA0A6"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
-            What works is treating the column as one thing and giving it a
-            rhythm: a consistent step between every line, so the block is
-            tall enough to sit comfortably in the card and close enough to
-            read as a single card rather than a scatter. Lines that belong
-            together stay adjacent, and the whole is centred.
-        -->
+            <!--
+                Centred, not top-anchored. A widget is only ever exactly as tall
+                as its content at one size; at every other size the slack has to
+                go somewhere, and pooling it under the last line reads as a card
+                that ran out of things to say. Balanced above and below it reads
+                as breathing room.
+            -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/widget_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:visibility="gone">
             android:gravity="center_vertical"
-            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/reading_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.06"
-                android:maxLines="1"
-                android:ellipsize="end" />
+            <!-- Centred inside the full-height column: this is where the slack
+                 actually is, not on the row above it. -->
+            <!--
+                One block, evenly spaced, centred.
 
+                Three attempts at this. Centring a tight stack left holes above
+                and below; bumping the type made a smaller hole; pinning the
+                header to the top and the body to the bottom filled the card but
+                read as unrelated fragments with the progress bar floating away
+                from the position it describes.
 
+                What works is treating the column as one thing and giving it a
+                rhythm: a consistent step between every line, so the block is
+                tall enough to sit comfortably in the card and close enough to
+                read as a single card rather than a scatter. Lines that belong
+                together stay adjacent, and the whole is centred.
+            -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
 
-
-
-            <TextView
-                android:id="@+id/reading_surah"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textColor="#E8EAED"
-                android:textSize="23sp"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/reading_position"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:textColor="#9AA0A6"
-                android:textSize="13sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                <TextView
+                    android:id="@+id/reading_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
 
 
-            <ProgressBar
-                android:id="@+id/reading_progress"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:layout_marginTop="10dp"
-                android:max="100" />
 
-            <TextView
-                android:id="@+id/reading_progress_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
 
-            <TextView
-                android:id="@+id/reading_tail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:visibility="gone" />
+                <TextView
+                    android:id="@+id/reading_surah"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="#E8EAED"
+                    android:textSize="23sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/reading_position"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="13sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+
+
+                <ProgressBar
+                    android:id="@+id/reading_progress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:layout_marginTop="10dp"
+                    android:max="100" />
+
+                <TextView
+                    android:id="@+id/reading_progress_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/reading_tail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Centred like the column opposite. Two full-height columns with
+                 different gravities read as two widgets pushed together. -->
+            <LinearLayout
+                android:id="@+id/reading_side"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:minWidth="96dp"
+                android:layout_marginStart="10dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/reading_side_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1" />
+
+
+
+
+
+                <TextView
+                    android:id="@+id/reading_side_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="#E8EAED"
+                    android:textSize="27sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1" />
+
+
+
+                <TextView
+                    android:id="@+id/reading_side_note"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+            </LinearLayout>
         </LinearLayout>
-
-        <!-- Centred like the column opposite. Two full-height columns with
-             different gravities read as two widgets pushed together. -->
-        <LinearLayout
-            android:id="@+id/reading_side"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:minWidth="96dp"
-            android:layout_marginStart="10dp"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/reading_side_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.06"
-                android:maxLines="1" />
-
-
-
-
-
-            <TextView
-                android:id="@+id/reading_side_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textColor="#E8EAED"
-                android:textSize="27sp"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="1" />
-
-
-
-            <TextView
-                android:id="@+id/reading_side_note"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="2"
-                android:ellipsize="end" />
-        </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

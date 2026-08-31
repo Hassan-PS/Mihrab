@@ -13,319 +13,340 @@
   binder untouched.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root"
+    android:id="@+id/widget_shell"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E01C1C1E"
-    android:padding="14dp">
+    android:padding="@dimen/widget_card_inset">
 
-    <TextView
-        android:id="@+id/widget_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="#9AA0A6"
-        android:textSize="13sp"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/widget_content"
+    <!--
+        The card. Inset from the host view so two widgets in adjacent cells
+        cannot touch, and rounded so each reads as its own card rather than
+        part of one slab. Recoloured at runtime — see `widget_card.xml` for
+        why it is an ImageView and not a background.
+    -->
+    <ImageView
+        android:id="@+id/widget_card"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:baselineAligned="false"
-        android:visibility="gone">
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_card"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
 
-        <!-- Header: the day and where, with the Hijri date opposite. One
-             line, because two muted lines stacked at the top of a card read
-             as a paragraph nobody asked for.
+    <FrameLayout
+        android:id="@+id/widget_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="14dp">
 
-             It has an id because it is the first thing to go on a one-row
-             card: at that height the six times and what is next are the
-             whole point, and the city is the line you can most afford to
-             lose. See STRIP_HEADER_MIN_HEIGHT_DP. -->
-        <LinearLayout
-            android:id="@+id/widget_header_row"
+        <TextView
+            android:id="@+id/widget_placeholder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/widget_location"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="#9AA0A6"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.06"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_hijri"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="6dp"
-                android:textColor="#9AA0A6"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.06"
-                android:maxLines="1" />
-
-            <!-- Reserves its own slot rather than floating over the row: the
-                 Hijri year ran underneath it and read as "1448↻". -->
-            <TextView
-                android:id="@+id/widget_refresh_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="8dp"
-                android:text="↻"
-                android:textColor="#80FFFFFF"
-                android:textSize="14sp"
-                android:contentDescription="Refresh" />
-        </LinearLayout>
-
-        <!-- The strip: six columns, label over time, the next one boxed. -->
-        <!--
-            wrap_content, and it was weighted for one release.
-
-            The argument for the weight was that slack has to belong to
-            somebody, and with the practice block off the strip is the only
-            candidate. True, but it cost more than it bought: a weighted row
-            gets a share of the card rather than what it needs, and once the
-            graph appeared and claimed two thirds of that slack the share
-            fell below the height of a label over a time — so the card drew
-            six prayer NAMES with nothing underneath them, which is the one
-            thing a prayer-times widget must not do.
-
-            The row takes its own height now, and the slack goes to the
-            graph. `widget_content` must NOT carry a gravity for that to
-            work: with one weighted child the column fills the card and the
-            graph gets everything left over, and a centring gravity on top
-            of that leaves the ImageView a sliver — which drew the graph at
-            a fifth of its size in the corner of the card.
-        -->
-        <LinearLayout
-            android:id="@+id/widget_times_row"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
-
-            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
-                <LinearLayout android:id="@+id/widget_col_0_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
-                    <TextView android:id="@+id/widget_col_0_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_0_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
-                <LinearLayout android:id="@+id/widget_col_1_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
-                    <TextView android:id="@+id/widget_col_1_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_1_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
-                <LinearLayout android:id="@+id/widget_col_2_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
-                    <TextView android:id="@+id/widget_col_2_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_2_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
-                <LinearLayout android:id="@+id/widget_col_3_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
-                    <TextView android:id="@+id/widget_col_3_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_3_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
-                <LinearLayout android:id="@+id/widget_col_4_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
-                    <TextView android:id="@+id/widget_col_4_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_4_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
-                <LinearLayout android:id="@+id/widget_col_5_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
-                    <TextView android:id="@+id/widget_col_5_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_5_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- A FrameLayout, not a View. RemoteViews has a fixed view
-             vocabulary and android.view.View is not in it: the whole widget
-             fails to inflate with "Class not allowed to be inflated". -->
-        <FrameLayout
-            android:id="@+id/widget_strip_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#26FFFFFF"
-            android:layout_marginTop="9dp" />
-
-        <!-- "Asr in 37 min" opposite "2 of 5 logged". -->
-        <LinearLayout
-            android:id="@+id/widget_next_row"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="true"
-            android:layout_marginTop="8dp">
-
-            <TextView
-                android:id="@+id/widget_next_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="12sp"
-                android:maxLines="1" />
-
-            <Chronometer
-                android:id="@+id/widget_remaining"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="4dp"
-                android:textColor="#6BC98A"
-                android:textSize="12sp"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="1" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/widget_logged"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="6dp"
-                android:textColor="#9AA0A6"
-                android:textSize="12sp"
-                android:maxLines="1" />
-        </LinearLayout>
-
-        <!-- Islamic Midnight and the Last Third, when the user asked for
-             them. A pair on one line rather than two more strip columns:
-             eight columns at this width is 5pt type. -->
-        <LinearLayout
-            android:id="@+id/widget_night_row"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="true"
-            android:layout_marginTop="4dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/widget_night_left"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_night_right"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="6dp"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="1" />
-        </LinearLayout>
-
-        <!-- ── 4x4 only, from here down ─────────────────────────────── -->
-
-        <FrameLayout
-            android:id="@+id/widget_practice_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#26FFFFFF"
-            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="#9AA0A6"
+            android:textSize="13sp"
             android:visibility="gone" />
 
         <LinearLayout
-            android:id="@+id/widget_practice_row"
+            android:id="@+id/widget_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="true"
-            android:layout_marginTop="8dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:baselineAligned="false"
             android:visibility="gone">
 
-            <TextView
-                android:id="@+id/widget_practice_streak"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#E8EAED"
-                android:textSize="26sp"
-                android:fontFamily="sans-serif-medium"
-                android:includeFontPadding="false"
-                android:maxLines="1" />
+            <!-- Header: the day and where, with the Hijri date opposite. One
+                 line, because two muted lines stacked at the top of a card read
+                 as a paragraph nobody asked for.
 
-            <TextView
-                android:id="@+id/widget_practice_second"
-                android:layout_width="0dp"
+                 It has an id because it is the first thing to go on a one-row
+                 card: at that height the six times and what is next are the
+                 whole point, and the city is the line you can most afford to
+                 lose. See STRIP_HEADER_MIN_HEIGHT_DP. -->
+            <LinearLayout
+                android:id="@+id/widget_header_row"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingStart="7dp"
-                android:textColor="#9AA0A6"
-                android:textSize="12sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/widget_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#9AA0A6"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_hijri"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1" />
+
+                <!-- Reserves its own slot rather than floating over the row: the
+                     Hijri year ran underneath it and read as "1448↻". -->
+                <TextView
+                    android:id="@+id/widget_refresh_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:text="↻"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="14sp"
+                    android:contentDescription="Refresh" />
+            </LinearLayout>
+
+            <!-- The strip: six columns, label over time, the next one boxed. -->
+            <!--
+                wrap_content, and it was weighted for one release.
+
+                The argument for the weight was that slack has to belong to
+                somebody, and with the practice block off the strip is the only
+                candidate. True, but it cost more than it bought: a weighted row
+                gets a share of the card rather than what it needs, and once the
+                graph appeared and claimed two thirds of that slack the share
+                fell below the height of a label over a time — so the card drew
+                six prayer NAMES with nothing underneath them, which is the one
+                thing a prayer-times widget must not do.
+
+                The row takes its own height now, and the slack goes to the
+                graph. `widget_content` must NOT carry a gravity for that to
+                work: with one weighted child the column fills the card and the
+                graph gets everything left over, and a centring gravity on top
+                of that leaves the ImageView a sliver — which drew the graph at
+                a fifth of its size in the corner of the card.
+            -->
+            <LinearLayout
+                android:id="@+id/widget_times_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <LinearLayout android:id="@+id/widget_col_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+                    <LinearLayout android:id="@+id/widget_col_0_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
+                        <TextView android:id="@+id/widget_col_0_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_0_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+                    <LinearLayout android:id="@+id/widget_col_1_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
+                        <TextView android:id="@+id/widget_col_1_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_1_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+                    <LinearLayout android:id="@+id/widget_col_2_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
+                        <TextView android:id="@+id/widget_col_2_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_2_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+                    <LinearLayout android:id="@+id/widget_col_3_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
+                        <TextView android:id="@+id/widget_col_3_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_3_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+                    <LinearLayout android:id="@+id/widget_col_4_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
+                        <TextView android:id="@+id/widget_col_4_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_4_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingStart="1dp" android:paddingEnd="1dp">
+                    <LinearLayout android:id="@+id/widget_col_5_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp" android:paddingBottom="4dp">
+                        <TextView android:id="@+id/widget_col_5_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#9AA0A6" android:textSize="9sp" android:fontFamily="sans-serif-medium" android:letterSpacing="0.04" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_5_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textColor="#E8EAED" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="11sp" android:autoSizeMaxTextSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- A FrameLayout, not a View. RemoteViews has a fixed view
+                 vocabulary and android.view.View is not in it: the whole widget
+                 fails to inflate with "Class not allowed to be inflated". -->
+            <FrameLayout
+                android:id="@+id/widget_strip_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#26FFFFFF"
+                android:layout_marginTop="9dp" />
+
+            <!-- "Asr in 37 min" opposite "2 of 5 logged". -->
+            <LinearLayout
+                android:id="@+id/widget_next_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="true"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/widget_next_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="12sp"
+                    android:maxLines="1" />
+
+                <Chronometer
+                    android:id="@+id/widget_remaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="4dp"
+                    android:textColor="#6BC98A"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/widget_logged"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="12sp"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <!-- Islamic Midnight and the Last Third, when the user asked for
+                 them. A pair on one line rather than two more strip columns:
+                 eight columns at this width is 5pt type. -->
+            <LinearLayout
+                android:id="@+id/widget_night_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="true"
+                android:layout_marginTop="4dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/widget_night_left"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_night_right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <!-- ── 4x4 only, from here down ─────────────────────────────── -->
+
+            <FrameLayout
+                android:id="@+id/widget_practice_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#26FFFFFF"
+                android:layout_marginTop="10dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/widget_practice_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="true"
+                android:layout_marginTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/widget_practice_streak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#E8EAED"
+                    android:textSize="26sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/widget_practice_second"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="7dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="12sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <!-- The column count is chosen to fit the box, so the squares stay
+                 square and the graph still reaches the far edge. See the same
+                 note in prayer_widget_log.xml. -->
+            <ImageView
+                android:id="@+id/widget_practice_grid"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:layout_marginTop="8dp"
+                android:scaleType="fitStart"
+                android:contentDescription="@string/widget_streak_grid_description"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/widget_practice_foot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="true"
+                android:layout_marginTop="7dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/widget_practice_sunnah"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_practice_fasts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1" />
+            </LinearLayout>
         </LinearLayout>
-
-        <!-- The column count is chosen to fit the box, so the squares stay
-             square and the graph still reaches the far edge. See the same
-             note in prayer_widget_log.xml. -->
-        <ImageView
-            android:id="@+id/widget_practice_grid"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:layout_marginTop="8dp"
-            android:scaleType="fitStart"
-            android:contentDescription="@string/widget_streak_grid_description"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/widget_practice_foot"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="true"
-            android:layout_marginTop="7dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/widget_practice_sunnah"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_practice_fasts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="6dp"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="1" />
-        </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

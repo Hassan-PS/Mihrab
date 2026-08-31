@@ -112,7 +112,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
       val context = PrayerWidgetProvider.localized(base)
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_reading)
       val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
-      views.setInt(R.id.widget_root, "setBackgroundColor", background)
+      WidgetCard.paint(views, background)
 
       val r = reading(context)
       if (r == null) {

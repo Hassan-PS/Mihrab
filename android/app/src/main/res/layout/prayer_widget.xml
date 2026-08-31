@@ -15,331 +15,352 @@
   record of them.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root"
+    android:id="@+id/widget_shell"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E01C1C1E"
-    android:padding="14dp">
+    android:padding="@dimen/widget_card_inset">
 
-    <TextView
-        android:id="@+id/widget_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="#9AA0A6"
-        android:textSize="14sp"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/widget_content"
+    <!--
+        The card. Inset from the host view so two widgets in adjacent cells
+        cannot touch, and rounded so each reads as its own card rather than
+        part of one slab. Recoloured at runtime — see `widget_card.xml` for
+        why it is an ImageView and not a background.
+    -->
+    <ImageView
+        android:id="@+id/widget_card"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:baselineAligned="false"
-        android:visibility="gone">
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_card"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
 
-        <!-- Header. One line: two muted lines stacked at the top of a card
-             read as a paragraph nobody asked for. -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/widget_location"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="#9AA0A6"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.06"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_hijri"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="6dp"
-                android:textColor="#9AA0A6"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.06"
-                android:maxLines="1" />
-
-            <!-- Reserves its own slot rather than floating over the row: the
-                 Hijri year ran underneath it and read as "1448↻". -->
-            <TextView
-                android:id="@+id/widget_refresh_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="8dp"
-                android:text="↻"
-                android:textColor="#80FFFFFF"
-                android:textSize="14sp"
-                android:contentDescription="Refresh" />
-        </LinearLayout>
+    <FrameLayout
+        android:id="@+id/widget_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="14dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/widget_placeholder"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="@string/widget_next_label"
+            android:layout_gravity="center"
+            android:gravity="center"
             android:textColor="#9AA0A6"
-            android:textSize="9sp"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.12" />
-
-        <!-- The next prayer, with the countdown opposite. "in" sits above the
-             duration rather than beside it so the two right-align as a block
-             instead of the word drifting away from its own number. -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:gravity="bottom">
-
-            <TextView
-                android:id="@+id/widget_next_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#E8EAED"
-                android:textSize="24sp"
-                android:fontFamily="sans-serif-medium"
-                android:includeFontPadding="false"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_next_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="8dp"
-                android:paddingBottom="1dp"
-                android:textColor="#6BC98A"
-                android:textSize="19sp"
-                android:includeFontPadding="false"
-                android:maxLines="1" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/widget_in_label"
-                    android:textColor="#9AA0A6"
-                    android:textSize="10sp"
-                    android:gravity="end" />
-
-                <Chronometer
-                    android:id="@+id/widget_remaining"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#E8EAED"
-                    android:textSize="15sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:includeFontPadding="false"
-                    android:gravity="end"
-                    android:maxLines="1" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- The whole day, full width. Slots 6 and 7 are Islamic Midnight and
-             the Last Third; they stay `gone` unless the user turned them on. -->
-        <LinearLayout
-            android:id="@+id/widget_times_row"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:baselineAligned="false"
-            android:layout_marginTop="6dp">
-
-            <LinearLayout android:id="@+id/widget_col_0" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
-                <LinearLayout android:id="@+id/widget_col_0_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_0_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_0_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
-                <LinearLayout android:id="@+id/widget_col_1_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_1_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_1_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
-                <LinearLayout android:id="@+id/widget_col_2_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_2_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_2_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
-                <LinearLayout android:id="@+id/widget_col_3_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_3_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_3_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_4" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
-                <LinearLayout android:id="@+id/widget_col_4_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_4_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_4_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
-                <LinearLayout android:id="@+id/widget_col_5_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_5_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_5_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_6" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:visibility="gone">
-                <LinearLayout android:id="@+id/widget_col_6_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_6_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_6_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout android:id="@+id/widget_col_7" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:visibility="gone">
-                <LinearLayout android:id="@+id/widget_col_7_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
-                    <TextView android:id="@+id/widget_col_7_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/widget_col_7_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- A FrameLayout, not a View. RemoteViews has a fixed view
-             vocabulary and android.view.View is not in it: the whole widget
-             fails to inflate with "Class not allowed to be inflated". -->
-        <FrameLayout
-            android:id="@+id/widget_practice_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#26FFFFFF"
-            android:layout_marginTop="6dp"
+            android:textSize="14sp"
             android:visibility="gone" />
 
         <LinearLayout
-            android:id="@+id/widget_practice_row"
+            android:id="@+id/widget_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
             android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:layout_marginTop="8dp"
             android:visibility="gone">
 
+            <!-- Header. One line: two muted lines stacked at the top of a card
+                 read as a paragraph nobody asked for. -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/widget_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#9AA0A6"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_hijri"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1" />
+
+                <!-- Reserves its own slot rather than floating over the row: the
+                     Hijri year ran underneath it and read as "1448↻". -->
+                <TextView
+                    android:id="@+id/widget_refresh_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:text="↻"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="14sp"
+                    android:contentDescription="Refresh" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/widget_next_label"
+                android:textColor="#9AA0A6"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.12" />
+
+            <!-- The next prayer, with the countdown opposite. "in" sits above the
+                 duration rather than beside it so the two right-align as a block
+                 instead of the word drifting away from its own number. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:gravity="bottom">
+
+                <TextView
+                    android:id="@+id/widget_next_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#E8EAED"
+                    android:textSize="24sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_next_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:paddingBottom="1dp"
+                    android:textColor="#6BC98A"
+                    android:textSize="19sp"
+                    android:includeFontPadding="false"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:baselineAligned="true">
+                    android:orientation="vertical"
+                    android:gravity="end">
 
                     <TextView
-                        android:id="@+id/widget_practice_streak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/widget_in_label"
+                        android:textColor="#9AA0A6"
+                        android:textSize="10sp"
+                        android:gravity="end" />
+
+                    <Chronometer
+                        android:id="@+id/widget_remaining"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="#E8EAED"
-                        android:textSize="25sp"
+                        android:textSize="15sp"
                         android:fontFamily="sans-serif-medium"
                         android:includeFontPadding="false"
-                        android:maxLines="1" />
-
-                    <TextView
-                        android:id="@+id/widget_practice_unit"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="7dp"
-                        android:textColor="#9AA0A6"
-                        android:textSize="12sp"
+                        android:gravity="end"
                         android:maxLines="1" />
                 </LinearLayout>
+            </LinearLayout>
+
+            <!-- The whole day, full width. Slots 6 and 7 are Islamic Midnight and
+                 the Last Third; they stay `gone` unless the user turned them on. -->
+            <LinearLayout
+                android:id="@+id/widget_times_row"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:baselineAligned="false"
+                android:layout_marginTop="6dp">
+
+                <LinearLayout android:id="@+id/widget_col_0" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
+                    <LinearLayout android:id="@+id/widget_col_0_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_0_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_0_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
+                    <LinearLayout android:id="@+id/widget_col_1_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_1_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_1_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
+                    <LinearLayout android:id="@+id/widget_col_2_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_2_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_2_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
+                    <LinearLayout android:id="@+id/widget_col_3_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_3_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_3_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_4" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
+                    <LinearLayout android:id="@+id/widget_col_4_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_4_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_4_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
+                    <LinearLayout android:id="@+id/widget_col_5_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_5_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_5_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#E8EAED" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_6" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:visibility="gone">
+                    <LinearLayout android:id="@+id/widget_col_6_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_6_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_6_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_7" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:visibility="gone">
+                    <LinearLayout android:id="@+id/widget_col_7_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_7_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_7_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- A FrameLayout, not a View. RemoteViews has a fixed view
+                 vocabulary and android.view.View is not in it: the whole widget
+                 fails to inflate with "Class not allowed to be inflated". -->
+            <FrameLayout
+                android:id="@+id/widget_practice_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#26FFFFFF"
+                android:layout_marginTop="6dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/widget_practice_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="true">
+
+                        <TextView
+                            android:id="@+id/widget_practice_streak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#E8EAED"
+                            android:textSize="25sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:includeFontPadding="false"
+                            android:maxLines="1" />
+
+                        <TextView
+                            android:id="@+id/widget_practice_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="7dp"
+                            android:textColor="#9AA0A6"
+                            android:textSize="12sp"
+                            android:maxLines="1" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/widget_practice_second"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#9AA0A6"
+                        android:textSize="11sp"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/widget_practice_grid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="10dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitEnd"
+                    android:contentDescription="@string/widget_streak_grid_description" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/widget_practice_foot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="true"
+                android:layout_marginTop="6dp"
+                android:visibility="gone">
 
                 <TextView
-                    android:id="@+id/widget_practice_second"
-                    android:layout_width="match_parent"
+                    android:id="@+id/widget_practice_sunnah"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_weight="1"
                     android:textColor="#9AA0A6"
                     android:textSize="11sp"
                     android:maxLines="1"
                     android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_practice_fasts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1" />
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/widget_practice_grid"
+            <!-- Kept for the narrow case, where there is no room for the practice
+                 block and the logged count is the only thing worth saying. -->
+            <TextView
+                android:id="@+id/widget_logged"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="10dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitEnd"
-                android:contentDescription="@string/widget_streak_grid_description" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/widget_practice_foot"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="true"
-            android:layout_marginTop="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/widget_practice_sunnah"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginTop="4dp"
                 android:textColor="#9AA0A6"
                 android:textSize="11sp"
                 android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_practice_fasts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="6dp"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="1" />
+                android:ellipsize="end"
+                android:visibility="gone" />
         </LinearLayout>
-
-        <!-- Kept for the narrow case, where there is no room for the practice
-             block and the logged count is the only thing worth saying. -->
-        <TextView
-            android:id="@+id/widget_logged"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#9AA0A6"
-            android:textSize="11sp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:visibility="gone" />
-    </LinearLayout>
+    </FrameLayout>
 </FrameLayout>

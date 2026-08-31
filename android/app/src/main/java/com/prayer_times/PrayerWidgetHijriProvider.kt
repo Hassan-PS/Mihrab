@@ -84,7 +84,7 @@ class PrayerWidgetHijriProvider : AppWidgetProvider() {
       val context = PrayerWidgetProvider.localized(base)
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_hijri)
       val (background, accent) = PrayerWidgetProvider.resolvedColors(context)
-      views.setInt(R.id.widget_root, "setBackgroundColor", background)
+      WidgetCard.paint(views, background)
       views.setOnClickPendingIntent(R.id.widget_root, openTodayIntent(context))
 
       val h = hijri(context)

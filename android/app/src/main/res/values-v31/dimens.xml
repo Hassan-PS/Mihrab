@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12 gave widgets a platform corner radius and a launcher that
+  enforces it. Deferring to it is the point: a card drawn with a different
+  radius than the mask over it shows as a second corner inside the first.
+
+  The inset is NOT overridden here. Google's guidance is that launchers
+  provide their own widget spacing on API 31+, but the report this fixes
+  came from Android 14 with two widgets touching, so the guidance does not
+  describe every launcher. A gap the widget owns is a gap that is there.
+-->
+<resources>
+    <dimen name="widget_card_radius">@android:dimen/system_app_widget_background_radius</dimen>
+</resources>

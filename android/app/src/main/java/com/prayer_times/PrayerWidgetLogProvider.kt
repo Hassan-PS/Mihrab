@@ -214,7 +214,7 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       val context = PrayerWidgetProvider.localized(base)
       val views = RemoteViews(context.packageName, R.layout.prayer_widget_log)
       val (bg, accent) = PrayerWidgetProvider.resolvedColors(context)
-      views.setInt(R.id.widget_root, "setBackgroundColor", bg)
+      WidgetCard.paint(views, bg)
 
       val open = PendingIntent.getActivity(
         context,

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Widget card geometry.
+
+  ── THE INSET ─────────────────────────────────────────────────────────
+
+  A widget's host view IS its cell: measured on a Pixel launcher, a 4x1
+  Mihrab widget gets [50,966]–[1030,1227] and the next row starts where
+  that one ends. Nothing separates two widgets except what they choose not
+  to paint. These widgets painted edge to edge, so two of them stacked
+  fused into one slab with a seam through it — the report that started
+  this — and because the fill is translucent (88% by default) any pixel of
+  overlap composited twice and drew a dark line.
+
+  So the card is inset. The gap belongs to the widget, not to the
+  launcher, because the launcher is not reliably providing one.
+
+  Kept small deliberately: 6dp on each side of a shared edge reads as 12dp
+  between two cards, which is about the spacing between the app's own
+  cards inside the app, and it costs 12dp of a ~330dp-wide widget.
+
+  ── THE RADIUS ────────────────────────────────────────────────────────
+
+  16dp is the pre-Android-12 house value. On API 31+ `values-v31`
+  overrides it with the platform's own widget radius, which is the number
+  the launcher's corner enforcement uses — matching it means our corners
+  and any mask the launcher applies land on top of each other instead of
+  one showing inside the other.
+-->
+<resources>
+    <dimen name="widget_card_inset">6dp</dimen>
+    <dimen name="widget_card_radius">16dp</dimen>
+</resources>

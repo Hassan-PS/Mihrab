@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The card every widget draws on.
+
+  White on purpose, and never used white: the providers recolour it at
+  runtime with `setColorFilter` and set its opacity with `setImageAlpha`,
+  because the background colour is a user setting (Settings → widget
+  background strength) and a shape drawable's solid colour cannot be
+  changed through RemoteViews. An opaque white source is what makes
+  SRC_ATOP an exact recolour rather than a tint over an existing hue.
+
+  It is an ImageView's `src` rather than a View's `background` for the same
+  reason. `View.setBackgroundColor` — what these widgets used to call —
+  REPLACES the background with a plain ColorDrawable, so any rounding put
+  in the layout was thrown away on the first update. `setColorFilter` and
+  `setImageAlpha` are both remotable ImageView methods available since
+  API 16, so this works down to the app's minSdk with no version branch.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFFFF" />
+    <corners android:radius="@dimen/widget_card_radius" />
+</shape>

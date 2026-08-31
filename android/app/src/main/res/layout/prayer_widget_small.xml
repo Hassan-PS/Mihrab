@@ -1,110 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_root"
+    android:id="@+id/widget_shell"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E01C1C1E"
-    android:padding="10dp">
+    android:padding="@dimen/widget_card_inset">
 
-    <TextView
-        android:id="@+id/widget_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="#9AA0A6"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/widget_content"
+    <!--
+        The card. Inset from the host view so two widgets in adjacent cells
+        cannot touch, and rounded so each reads as its own card rather than
+        part of one slab. Recoloured at runtime — see `widget_card.xml` for
+        why it is an ImageView and not a background.
+    -->
+    <ImageView
+        android:id="@+id/widget_card"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:gravity="center_vertical"
-        android:visibility="gone">
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_card"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
 
-        <!-- Left column: next prayer name + time -->
-        <LinearLayout
-            android:layout_width="0dp"
+    <FrameLayout
+        android:id="@+id/widget_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/widget_placeholder"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingEnd="6dp">
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="#9AA0A6"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/widget_next_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="12sp"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/widget_next_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#E8EAED"
-                android:textSize="36sp"
-                android:fontFamily="sans-serif-light"
-                android:includeFontPadding="false"
-                android:maxLines="1"
-                android:gravity="start"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="22sp"
-                android:autoSizeMaxTextSize="44sp" />
-        </LinearLayout>
-
-        <!-- Right column: remaining + location -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="end">
+            android:id="@+id/widget_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:visibility="gone">
 
-            <!--
-                A Chronometer, not a TextView.
-            
-                The plan asks for a countdown "ticked by the system, not by us", and
-                this is that: a base and setChronometerCountDown, and the view counts
-                itself down for free. The TextView it replaces held a string computed
-                at bind time, so it was only ever true at the moment the widget was
-                drawn — right whenever the screen came on, and frozen for anyone who
-                looked at it for a minute.
-            
-                Chronometer IS a TextView, so every colour and visibility action the
-                provider already sends to this id keeps working unchanged.
-            
-                The format string carries the word "in" deliberately. A bare "2:58:00"
-                under a clock time of "16:57" reads as a second clock time — the exact
-                confusion that cost the iOS small widget a redesign, where
-                Text(timerInterval:) was dropped for the relative style for this
-                reason. "in" cannot be misread.
-            -->
-            <Chronometer
-                android:id="@+id/widget_remaining"
-                android:layout_width="wrap_content"
+            <!-- Left column: next prayer name + time -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="13sp"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
-                android:gravity="end" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingEnd="6dp">
 
-            <TextView
-                android:id="@+id/widget_location"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/widget_next_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_next_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#E8EAED"
+                    android:textSize="36sp"
+                    android:fontFamily="sans-serif-light"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:gravity="start"
+                    android:autoSizeTextType="uniform"
+                    android:autoSizeMinTextSize="22sp"
+                    android:autoSizeMaxTextSize="44sp" />
+            </LinearLayout>
+
+            <!-- Right column: remaining + location -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="#9AA0A6"
-                android:textSize="11sp"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:gravity="end"
-                android:layout_marginTop="2dp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="end">
+
+                <!--
+                    A Chronometer, not a TextView.
+            
+                    The plan asks for a countdown "ticked by the system, not by us", and
+                    this is that: a base and setChronometerCountDown, and the view counts
+                    itself down for free. The TextView it replaces held a string computed
+                    at bind time, so it was only ever true at the moment the widget was
+                    drawn — right whenever the screen came on, and frozen for anyone who
+                    looked at it for a minute.
+            
+                    Chronometer IS a TextView, so every colour and visibility action the
+                    provider already sends to this id keeps working unchanged.
+            
+                    The format string carries the word "in" deliberately. A bare "2:58:00"
+                    under a clock time of "16:57" reads as a second clock time — the exact
+                    confusion that cost the iOS small widget a redesign, where
+                    Text(timerInterval:) was dropped for the relative style for this
+                    reason. "in" cannot be misread.
+                -->
+                <Chronometer
+                    android:id="@+id/widget_remaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:gravity="end" />
+
+                <TextView
+                    android:id="@+id/widget_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 </FrameLayout>
