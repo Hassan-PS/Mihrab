@@ -78,7 +78,43 @@ function unpack(rows: number[][][]): PrintedPage {
     }
     out.push(line);
   }
-  return out;
+  return settle(out);
+}
+
+/**
+ * Nothing of a surah may be set above the band that opens it.
+ *
+ * A muṣḥaf cannot put a surah's words before its own title band and
+ * basmalah, so a span that claims to is an artefact of reducing polygons
+ * to rows and not a line of the print. Three exist in the book —
+ * page 528 (54:1), page 603 (110:1) and page 604 (113:1) — and the last
+ * of them took "qul aʿūdhu" off the front of al-Falaq and set it at the
+ * end of al-Ikhlāṣ, two rows above its own band.
+ *
+ * They are dropped rather than moved down: the row below is already full
+ * to the measure without them, and each ayah's remaining share is enough
+ * to hold all of its words. What is left behind is a genuinely short row —
+ * the line that closes a surah — which is what `AllocatedLine.share` is
+ * for.
+ */
+function settle(rows: PrintedPage): PrintedPage {
+  let i = 0;
+  while (i < rows.length) {
+    if (rows[i].length > 0) {
+      i += 1;
+      continue;
+    }
+    let j = i;
+    while (j < rows.length && rows[j].length === 0) j += 1;
+    const opens = rows[j]?.[0];
+    if (opens && opens.ayah === 1) {
+      for (let k = 0; k < i; k++) {
+        rows[k] = rows[k].filter(span => span.surah !== opens.surah);
+      }
+    }
+    i = j > i ? j : i + 1;
+  }
+  return rows;
 }
 
 /** The printed rows of a page, or null when this riwayah has no table. */
@@ -137,7 +173,25 @@ export type AllocatedLine = {
   ayahs: AllocatedAyah[];
   /** A row of the print with no ayah on it: a band, or a basmalah. */
   empty: boolean;
+  /**
+   * How much of the measure this row fills, 0..1 — almost always 1.
+   *
+   * Every row of the book reaches the margin except the one that closes a
+   * surah, which stops where the surah does and has the band under it. Two
+   * are materially short (page 528 at 0.75, page 604 at 0.80) and a
+   * handful more are a little short; everything else is a full line and is
+   * set as one.
+   */
+  share: number;
 };
+
+/**
+ * The room the medallion takes on the row an ayah ends on, as a fraction
+ * of the measure: 20.17 of the print's 331 units, the figure
+ * `tools/qiraat/lines.py` subtracts when it reduces the polygons to rows.
+ * The table records the WORDS on a row, and this is the rest of it.
+ */
+export const MARKER_SHARE = 20.17 / 331;
 
 /** How much of an ayah is set on the page before this one, and after it. */
 export type PageSpill = { before: number; after: number };
@@ -252,7 +306,25 @@ export function allocate(
         (order.get(`${a.surah}:${a.ayah}`) ?? 0) -
         (order.get(`${b.surah}:${b.ayah}`) ?? 0),
     );
-    return { ayahs, empty: line.length === 0 };
+
+    // ── ONLY A SURAH'S LAST ROW MAY BE SHORT ───────────────────────────
+    //
+    // Read from the table, a row's spans plus the medallions on it come to
+    // the measure on 8,800 of the book's 8,807 rows, so a row is a full
+    // line unless the print itself ended one — which it does under a band
+    // and nowhere else. Taking a row's own share everywhere would also
+    // shorten the four rows that hand an ayah across a page turn, where
+    // the table has left medallion room for a medallion that is not drawn
+    // there; those are full lines and must stay full.
+    const closes = line.length > 0 && rows[index + 1]?.length === 0;
+    const share = closes
+      ? Math.min(
+          1,
+          line.reduce((n, s) => n + s.share, 0) +
+            MARKER_SHARE * ayahs.filter(a => a.ends).length,
+        )
+      : 1;
+    return { ayahs, empty: line.length === 0, share };
   });
 }
 

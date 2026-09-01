@@ -179,6 +179,9 @@ describe('the table that ships, on every page of it', () => {
     for (const [page, rows] of pages) {
       rows.forEach((row, i) => {
         if (row.length === 0) return;
+        // The row a surah ends on is allowed to be short — that is what
+        // `AllocatedLine.share` carries. Every other row is a full line.
+        if (rows[i + 1]?.length === 0) return;
         const share = row.reduce((n, s) => n + s.share, 0);
         const full = share + MARKER_SHARE * (marks.get(`${page}:${i}`) ?? 0);
         worst = Math.max(worst, Math.abs(full - 1));
@@ -199,5 +202,48 @@ describe('the table that ships, on every page of it', () => {
       'page 355 line 14',
     ]);
     expect(worst).toBeLessThan(0.07);
+  });
+
+  it('sets no surah above its own band', () => {
+    // A muṣḥaf cannot put a surah's words before its title band and
+    // basmalah. Three spans in the table did; the worst took "qul aʿūdhu"
+    // off the front of al-Falaq and set it at the end of al-Ikhlāṣ.
+    const wrong: string[] = [];
+    for (const [page, rows] of pages) {
+      let i = 0;
+      while (i < rows.length) {
+        if (rows[i].length > 0) {
+          i += 1;
+          continue;
+        }
+        let j = i;
+        while (j < rows.length && rows[j].length === 0) j += 1;
+        const opens = rows[j]?.[0];
+        if (opens && opens.ayah === 1) {
+          for (let k = 0; k < i; k++) {
+            if (rows[k].some(s => s.surah === opens.surah)) {
+              wrong.push(`page ${page} line ${k}`);
+            }
+          }
+        }
+        i = j > i ? j : i + 1;
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it('leaves al-Ikhlāṣ closing short and al-Falaq opening whole', () => {
+    const rows = printedLinesFor('warsh', 604)!;
+    // The row above al-Falaq's band is al-Ikhlāṣ's last ayah and nothing
+    // else, and it stops at four fifths of the measure.
+    expect(rows[3].map(s => `${s.surah}:${s.ayah}`)).toEqual(['112:4']);
+    const words = Array.from({ length: 5 }, () => word(4));
+    const out = allocate(rows, (s, a) => (s === 113 && a === 1 ? words.join(' ') : word(3)));
+    expect(out![3].share).toBeLessThan(0.85);
+    expect(out![6].share).toBe(1);
+    // Every word of al-Falaq's first ayah is on the first row under the
+    // basmalah, and none of it is anywhere else.
+    expect(out![6].ayahs[0]).toMatchObject({ surah: 113, ayah: 1, ends: true });
+    expect(out![6].ayahs[0].text.split(' ')).toHaveLength(5);
   });
 });

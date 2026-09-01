@@ -876,11 +876,14 @@ function PrintedPageBody({
         const gaps = Math.max(0, tokens.length - 1);
         const em = ems?.[index] ?? 0;
         const natural = Math.max(0, em - WORD_SPACE_EM * gaps);
+        // What the print gives THIS row. A full line on all but the rows
+        // a surah ends on, which stop where the surah does.
+        const rowEm = targetEm * row.share;
         const spaceEm =
           em > 0 && gaps > 0
             ? Math.min(
                 WORD_SPACE_MAX_EM,
-                Math.max(WORD_SPACE_MIN_EM, (targetEm - natural) / gaps),
+                Math.max(WORD_SPACE_MIN_EM, (rowEm - natural) / gaps),
               )
             : WORD_SPACE_EM;
         const justifiedEm = em > 0 ? natural + spaceEm * gaps : 0;
@@ -888,7 +891,7 @@ function PrintedPageBody({
           justifiedEm > 0
             ? Math.max(
                 MIN_PRINTED_SCALE,
-                Math.min(MAX_PRINTED_SCALE, targetEm / justifiedEm),
+                Math.min(MAX_PRINTED_SCALE, rowEm / justifiedEm),
               )
             : 1;
 
