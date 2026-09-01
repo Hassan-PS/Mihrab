@@ -41,7 +41,8 @@
     "close": "Stäng",
     "share": "Dela",
     "done": "Klar",
-    "delete": "Ta bort"
+    "delete": "Ta bort",
+    "cancelled": "Avbruten."
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -902,6 +903,14 @@
     "switchRiwayah": "Byt till läsarten {{name}}",
     "riwayahReflowTitle": "Sidorna stämmer, raderna kanske inte",
     "riwayahReflowBody": "Denna mushaf börjar och slutar varje sida exakt som den tryckta, men raderna sätts av din enhet i stället för att hämtas från trycket, så de bryts inte alltid på samma ställen.",
+    "riwayahNeedsHttps": "Länken måste börja med https://",
+    "riwayahServerSaidNo": "Servern svarade {{status}}.",
+    "riwayahTooLarge": "Filen är mycket större än en mushaf-datamängd. Kontrollera länken.",
+    "riwayahUnreachable": "Kunde inte nå länken. Kontrollera adressen och din anslutning.",
+    "riwayahGotAPage": "Länken gav en webbsida, inte en datafil. Använd länken till JSON-nedladdningen.",
+    "riwayahNotJson": "Filen är inte en datafil.",
+    "riwayahNotAQuran": "Filen är inte en fullständig Koran och installerades inte.",
+    "riwayahCouldNotSave": "Kunde inte spara på den här enheten.",
     "switchToLight": "Byt till ljust läge",
     "ayahOfDayTitle": "Dagens aya",
     "ayahOfDayChannelName": "Dagens aya",
@@ -1189,7 +1198,15 @@
     "empty": "Inget nedladdat ännu. Mushaf-sidor, recitationsljud och tafsir du hämtar visas här.",
     "mushafPages": "{{pages}} av {{total}} sidor",
     "legacyMushaf": "Äldre mushaf-sidor",
-    "legacyMushafSub": "Kvar från den tidigare läsaren. Inget öppnar dem längre."
+    "legacyMushafSub": "Kvar från den tidigare läsaren. Inget öppnar dem längre.",
+    "riwayat": "Läsarter",
+    "riwayatFootnote": "Mihrab innehåller inte och lagrar inte dessa texter. Filen hämtas från utgivaren direkt till den här enheten och kontrolleras här innan något läses ur den.",
+    "riwayahInstalled": "{{pages}} sidor · från {{host}}",
+    "riwayahPublisher": "Utgiven av {{publisher}}. Krediterar {{credits}}.",
+    "riwayahOpenSource": "Öppna källan",
+    "riwayahHowTo": "Öppna sidan ovan, kopiera länken till JSON-nedladdningen och klistra in den här.",
+    "riwayahLink": "Länk till datafilen",
+    "riwayahInstall": "Lägg till denna mushaf"
   },
   "dataStats": {
     "title": "Datastatistik",

@@ -41,7 +41,8 @@
     "close": "关闭",
     "share": "分享",
     "done": "完成",
-    "delete": "删除"
+    "delete": "删除",
+    "cancelled": "已取消。"
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",
@@ -902,6 +903,14 @@
     "switchRiwayah": "切换到{{name}}诵读法",
     "riwayahReflowTitle": "页码一致，行数可能不同",
     "riwayahReflowBody": "本《古兰经》每一页的起止与印刷版完全一致，但行的排布由您的设备完成，而非取自印刷版，因此断行位置不一定相同。",
+    "riwayahNeedsHttps": "链接必须以 https:// 开头",
+    "riwayahServerSaidNo": "服务器返回 {{status}}。",
+    "riwayahTooLarge": "该文件远大于一份抄本数据。请检查链接。",
+    "riwayahUnreachable": "无法访问该链接。请检查地址和网络连接。",
+    "riwayahGotAPage": "该链接返回的是网页，不是数据文件。请使用 JSON 下载链接。",
+    "riwayahNotJson": "该文件不是数据文件。",
+    "riwayahNotAQuran": "该文件不是完整的《古兰经》，因此未安装。",
+    "riwayahCouldNotSave": "无法保存到本设备。",
     "switchToLight": "切换到明亮页面",
     "ayahOfDayTitle": "每日经文",
     "ayahOfDayChannelName": "每日经文",
@@ -1189,7 +1198,15 @@
     "empty": "尚无下载。下载的穆斯哈夫页面、音频与经注会显示在这里。",
     "mushafPages": "{{total}} 页中的 {{pages}} 页",
     "legacyMushaf": "旧版穆斯哈夫页面",
-    "legacyMushafSub": "旧版阅读器遗留。现在没有任何功能会打开它们。"
+    "legacyMushafSub": "旧版阅读器遗留。现在没有任何功能会打开它们。",
+    "riwayat": "诵读传统",
+    "riwayatFootnote": "Mihrab 不包含也不托管这些文本。文件由出版方直接下载到本设备，并在读取任何内容之前先在此校验。",
+    "riwayahInstalled": "{{pages}} 页 · 来自 {{host}}",
+    "riwayahPublisher": "由 {{publisher}} 出版，署名 {{credits}}。",
+    "riwayahOpenSource": "打开来源",
+    "riwayahHowTo": "打开上面的页面，复制 JSON 下载链接，粘贴到这里。",
+    "riwayahLink": "数据文件链接",
+    "riwayahInstall": "添加此《古兰经》抄本"
   },
   "dataStats": {
     "title": "数据统计",

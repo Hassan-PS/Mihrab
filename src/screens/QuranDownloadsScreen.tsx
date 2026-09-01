@@ -50,6 +50,12 @@ import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
 import { deleteReciterAudio } from '../quran/audio/audioStore';
 import { findReciter } from '../quran/audio/reciters';
 import { deleteTafsirCache, tafsirDiskUsage } from '../quran/tafsir';
+import { RiwayahDownloadSection } from '../quran/RiwayahDownloadSection';
+import {
+  hydrateRiwayahData,
+  riwayahProvenance,
+} from '../quran/riwayahData';
+import { RIWAYAT } from '../quran/riwayat';
 
 type ReciterUsage = { reciterId: string; bytes: number };
 
@@ -70,11 +76,22 @@ export function QuranDownloadsScreen() {
   const [legacyBytes, setLegacyBytes] = useState(0);
   const [tafsirBytes, setTafsirBytes] = useState(0);
   const [audio, setAudio] = useState<ReciterUsage[]>([]);
+  const [riwayahBytes, setRiwayahBytes] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
+      // The riwayah store is read from disk once per process; this screen
+      // is often the first thing to need it, and it is what makes the
+      // section below able to answer synchronously while it renders.
+      await hydrateRiwayahData();
+      setRiwayahBytes(
+        RIWAYAT.reduce(
+          (sum, r) => sum + (riwayahProvenance(r.id)?.bytes ?? 0),
+          0,
+        ),
+      );
       const [fonts, legacy, tafsir] = await Promise.all([
         fontStoreStats(),
         legacyImageStoreBytes(),
@@ -166,6 +183,7 @@ export function QuranDownloadsScreen() {
     mushafBytes +
     legacyBytes +
     tafsirBytes +
+    riwayahBytes +
     audio.reduce((s, a) => s + a.bytes, 0);
 
   return (
@@ -246,6 +264,8 @@ export function QuranDownloadsScreen() {
               confirmDelete(t('quran.tafsir', 'Tafsir'), deleteTafsirCache),
           )
         : null}
+
+      <RiwayahDownloadSection onChanged={() => void refresh()} />
 
       {!loading && total === 0 ? (
         <View

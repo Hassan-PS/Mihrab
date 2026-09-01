@@ -28,6 +28,7 @@ import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
 import { findPageForAyah, MUSHAF_PAGES } from '../quran/pages';
+import { hydrateRiwayahData } from '../quran/riwayahData';
 import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
 import { findSurah, loadSurah, SURAHS, type SurahIndex } from '../quran/quran';
 import { getAyahTranslation } from '../quran/translations';
@@ -79,6 +80,7 @@ export function QuranScreen() {
 
   useEffect(() => {
     void hydrateQuranState();
+    void hydrateRiwayahData();
   }, []);
 
   const [tab, setTab] = useState<Tab>('surah');

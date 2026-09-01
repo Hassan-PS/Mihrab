@@ -41,7 +41,8 @@
     "close": "Tutup",
     "share": "Bagikan",
     "done": "Selesai",
-    "delete": "Hapus"
+    "delete": "Hapus",
+    "cancelled": "Dibatalkan."
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -902,6 +903,14 @@
     "switchRiwayah": "Beralih ke riwayat {{name}}",
     "riwayahReflowTitle": "Halaman sama, baris mungkin berbeda",
     "riwayahReflowBody": "Mushaf ini memulai dan mengakhiri setiap halaman persis seperti cetakannya, tetapi barisnya disusun oleh perangkat Anda, bukan diambil dari cetakan, sehingga tidak selalu terputus di tempat yang sama.",
+    "riwayahNeedsHttps": "Tautan harus diawali https://",
+    "riwayahServerSaidNo": "Server menjawab {{status}}.",
+    "riwayahTooLarge": "Berkas itu jauh lebih besar daripada data mushaf. Periksa tautannya.",
+    "riwayahUnreachable": "Tautan itu tidak dapat dijangkau. Periksa alamat dan koneksi Anda.",
+    "riwayahGotAPage": "Tautan itu mengembalikan halaman web, bukan berkas data. Gunakan tautan unduhan JSON.",
+    "riwayahNotJson": "Berkas itu bukan berkas data.",
+    "riwayahNotAQuran": "Berkas itu bukan Al-Qur’an yang utuh, jadi tidak dipasang.",
+    "riwayahCouldNotSave": "Tidak dapat disimpan ke perangkat ini.",
     "switchToLight": "Beralih ke halaman terang",
     "ayahOfDayTitle": "Ayat hari ini",
     "ayahOfDayChannelName": "Ayat hari ini",
@@ -1189,7 +1198,15 @@
     "empty": "Belum ada unduhan. Halaman mushaf, audio, dan tafsir yang diunduh akan muncul di sini.",
     "mushafPages": "{{pages}} dari {{total}} halaman",
     "legacyMushaf": "Halaman mushaf lama",
-    "legacyMushafSub": "Sisa dari pembaca sebelumnya. Tidak ada lagi yang membukanya."
+    "legacyMushafSub": "Sisa dari pembaca sebelumnya. Tidak ada lagi yang membukanya.",
+    "riwayat": "Riwayat bacaan",
+    "riwayatFootnote": "Mihrab tidak menyertakan atau menyimpan teks ini. Berkasnya diambil dari penerbit langsung ke perangkat ini, dan diperiksa di sini sebelum apa pun dibaca darinya.",
+    "riwayahInstalled": "{{pages}} halaman · dari {{host}}",
+    "riwayahPublisher": "Diterbitkan oleh {{publisher}}. Mengkredit {{credits}}.",
+    "riwayahOpenSource": "Buka sumber",
+    "riwayahHowTo": "Buka halaman di atas, salin tautan unduhan JSON, lalu tempel di sini.",
+    "riwayahLink": "Tautan ke berkas data",
+    "riwayahInstall": "Tambahkan mushaf ini"
   },
   "dataStats": {
     "title": "Statistik data",

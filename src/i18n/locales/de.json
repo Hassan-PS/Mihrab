@@ -41,7 +41,8 @@
     "close": "Schließen",
     "share": "Teilen",
     "done": "Fertig",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "cancelled": "Abgebrochen."
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",
@@ -902,6 +903,14 @@
     "switchRiwayah": "Zur Lesart {{name}} wechseln",
     "riwayahReflowTitle": "Seiten stimmen überein, Zeilen nicht unbedingt",
     "riwayahReflowBody": "Dieser Mushaf beginnt und beendet jede Seite genau wie der gedruckte, seine Zeilen setzt jedoch dein Gerät und nicht der Druck — sie brechen daher nicht immer an denselben Stellen um.",
+    "riwayahNeedsHttps": "Der Link muss mit https:// beginnen",
+    "riwayahServerSaidNo": "Der Server antwortete {{status}}.",
+    "riwayahTooLarge": "Diese Datei ist viel größer als ein Mushaf-Datensatz. Prüfe den Link.",
+    "riwayahUnreachable": "Dieser Link war nicht erreichbar. Prüfe die Adresse und deine Verbindung.",
+    "riwayahGotAPage": "Dieser Link lieferte eine Webseite, keine Datendatei. Nimm den JSON-Download-Link.",
+    "riwayahNotJson": "Diese Datei ist keine Datendatei.",
+    "riwayahNotAQuran": "Diese Datei ist kein vollständiger Koran und wurde nicht installiert.",
+    "riwayahCouldNotSave": "Konnte nicht auf diesem Gerät gespeichert werden.",
     "switchToLight": "Zur hellen Ansicht wechseln",
     "ayahOfDayTitle": "Aya des Tages",
     "ayahOfDayChannelName": "Aya des Tages",
@@ -1189,7 +1198,15 @@
     "empty": "Noch nichts heruntergeladen. Geladene Mushaf-Seiten, Audio und Tafsir erscheinen hier.",
     "mushafPages": "{{pages}} von {{total}} Seiten",
     "legacyMushaf": "Ältere Mushaf-Seiten",
-    "legacyMushafSub": "Vom vorherigen Reader übrig. Nichts öffnet sie mehr."
+    "legacyMushafSub": "Vom vorherigen Reader übrig. Nichts öffnet sie mehr.",
+    "riwayat": "Lesarten",
+    "riwayatFootnote": "Mihrab enthält diese Texte nicht und hostet sie nicht. Die Datei wird vom Herausgeber direkt auf dieses Gerät geladen und hier geprüft, bevor irgendetwas daraus gelesen wird.",
+    "riwayahInstalled": "{{pages}} Seiten · von {{host}}",
+    "riwayahPublisher": "Herausgegeben von {{publisher}}. Nennt {{credits}}.",
+    "riwayahOpenSource": "Quelle öffnen",
+    "riwayahHowTo": "Öffne die Seite oben, kopiere den Link des JSON-Downloads und füge ihn hier ein.",
+    "riwayahLink": "Link zur Datendatei",
+    "riwayahInstall": "Diesen Mushaf hinzufügen"
   },
   "dataStats": {
     "title": "Datenstatistik",

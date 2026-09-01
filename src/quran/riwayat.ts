@@ -16,15 +16,48 @@
  * ── WHY `available` IS COMPUTED, NOT DECLARED ─────────────────────────
  *
  * A riwayah's data is a separate artefact with its own provenance, and
- * Warsh's licence is unresolved (`docs/design/riwayat-plan.md`). So the
- * table describes what the app COULD draw and `available` says what this
- * build actually has, by trying to load it. A build without the data
- * offers Hafs and nothing else, with no dead entry in the picker and no
- * flag to remember to turn off.
+ * Mihrab does not ship it — nobody publishes a Warsh text under terms the
+ * app could redistribute under, so the reader obtains it from whoever
+ * does (`riwayahStore.ts`, `docs/design/riwayat-plan.md` §0). The table
+ * therefore describes what the app knows how to DRAW; what this device
+ * actually HAS is a question for `riwayahData.ts`, and it can change
+ * while the app is running.
+ *
+ * That is why there is no `totalPages` here either. A muṣḥaf's page count
+ * is a fact about the print that arrives WITH the data — inheriting the
+ * Madinah Hafs 604 and hoping is exactly how a second riwayah would
+ * silently mis-paginate — so it is derived from the pagination itself
+ * (`totalPagesForRiwayah`) and never declared.
  */
 import { FONTS } from '../theme/typography';
 import type { RiwayahPageTable } from './riwayahData';
 import { loadRiwayahPages } from './riwayahData';
+
+/**
+ * Where a riwayah's muṣḥaf can be obtained, and by whom it is published.
+ *
+ * Shown to the reader, not just recorded: someone about to put scripture
+ * on their device is entitled to know whose edition it is and what the
+ * publisher says about using it, and "the app got it from somewhere" is
+ * not an answer.
+ */
+export type RiwayahSource = {
+  /** Who publishes the dataset. */
+  publisher: string;
+  /** The page a reader goes to in order to get it. */
+  page: string;
+  /**
+   * A direct link, when the publisher offers a stable one.
+   *
+   * QUL's are generated in the browser rather than served at a fixed
+   * path, so there is nothing honest to put here yet — and a URL guessed
+   * from a rendered page is one that breaks silently later. Absent means
+   * the screen asks the reader for the link instead.
+   */
+  direct?: string;
+  /** Whom the publisher credits upstream. */
+  credits: string;
+};
 
 export type RiwayahId = 'hafs' | 'warsh';
 
@@ -49,15 +82,8 @@ export type RiwayahDefinition = {
    * no open Warsh dataset carries line assignments. See the plan.
    */
   render: 'glyph' | 'unicode';
-  /**
-   * Pages in this muṣḥaf.
-   *
-   * Not a constant, and deliberately not defaulted to 604: that number is
-   * a fact about the Madinah Hafs print and inheriting it untested is how
-   * a second riwayah would silently mis-paginate. The importer asserts it
-   * against the data.
-   */
-  totalPages: number;
+  /** Where a `unicode` riwayah's data comes from; Hafs is in the build. */
+  source?: RiwayahSource;
   /** Font family for `unicode` riwayat; the glyph pipeline picks its own. */
   fontFamily?: string;
   /**
@@ -91,17 +117,17 @@ export const RIWAYAT: readonly RiwayahDefinition[] = [
     nameKey: 'quran.riwayahHafs',
     arabic: 'حفص',
     render: 'glyph',
-    totalPages: 604,
   },
   {
     id: 'warsh',
     nameKey: 'quran.riwayahWarsh',
     arabic: 'ورش',
     render: 'unicode',
-    // Asserted against the dataset at import time rather than trusted —
-    // the KFGQPC Warsh print is 604 pages, but that is a claim the data
-    // has to back up before the reader believes it.
-    totalPages: 604,
+    source: {
+      publisher: 'Quranic Universal Library (Tarteel)',
+      page: 'https://qul.tarteel.ai/resources/quran-script/qpc-warsh-script-ayah',
+      credits: 'King Fahd Glorious Quran Printing Complex; text audited by Tanzil',
+    },
     fontFamily: 'UthmanicWarsh',
     fontBundled: false,
   },
@@ -137,10 +163,33 @@ export function riwayahChoiceExists(): boolean {
   return availableRiwayat().length > 1;
 }
 
-/** Falls back to Hafs for a stored id this build cannot draw. */
+/**
+ * Falls back to Hafs for a riwayah this DEVICE cannot draw right now.
+ *
+ * Called where a riwayah is used, never where one is stored — see
+ * `coerceRiwayahId`. The answer changes during a session now: a reader
+ * who adds a muṣḥaf in Manage downloads has not changed their preference,
+ * they have changed what this function is able to honour.
+ */
 export function resolveRiwayah(id: string | null | undefined): RiwayahId {
-  if (id === 'warsh' && riwayahAvailable('warsh')) return 'warsh';
-  return DEFAULT_RIWAYAH;
+  const known = coerceRiwayahId(id);
+  return riwayahAvailable(known) ? known : DEFAULT_RIWAYAH;
+}
+
+/**
+ * The stored form of a riwayah preference: known ids survive, junk does
+ * not, and AVAILABILITY IS NOT CONSULTED.
+ *
+ * This distinction is the whole reason there are two functions. The data
+ * lives on the device and is read asynchronously, so for the first
+ * moments of a cold start nothing is available yet. If loading a stored
+ * `warsh` resolved to `hafs` at that instant, the next write of any
+ * preference would persist `hafs` — and a reader would find their choice
+ * quietly reverted every few launches, by a race they could never see.
+ * Storage keeps the intent; `resolveRiwayah` decides what can be drawn.
+ */
+export function coerceRiwayahId(id: string | null | undefined): RiwayahId {
+  return RIWAYAT.some(r => r.id === id) ? (id as RiwayahId) : DEFAULT_RIWAYAH;
 }
 
 export type { RiwayahPageTable };

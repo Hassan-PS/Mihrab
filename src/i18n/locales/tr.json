@@ -41,7 +41,8 @@
     "close": "Kapat",
     "share": "Paylaş",
     "done": "Bitti",
-    "delete": "Sil"
+    "delete": "Sil",
+    "cancelled": "İptal edildi."
   },
   "home": {
     "loadingPrayer": "Namaz vakitleri yükleniyor…",
@@ -902,6 +903,14 @@
     "switchRiwayah": "{{name}} rivayetine geç",
     "riwayahReflowTitle": "Sayfalar aynı, satırlar farklı olabilir",
     "riwayahReflowBody": "Bu mushaf her sayfayı basılı nüshayla tam olarak aynı yerde başlatıp bitirir; ancak satırları baskıdan alınmaz, cihazınız tarafından dizilir, bu yüzden her zaman aynı yerlerden bölünmez.",
+    "riwayahNeedsHttps": "Bağlantı https:// ile başlamalı",
+    "riwayahServerSaidNo": "Sunucu {{status}} yanıtı verdi.",
+    "riwayahTooLarge": "Bu dosya bir mushaf veri kümesinden çok daha büyük. Bağlantıyı kontrol et.",
+    "riwayahUnreachable": "Bu bağlantıya ulaşılamadı. Adresi ve bağlantını kontrol et.",
+    "riwayahGotAPage": "Bu bağlantı veri dosyası değil, bir web sayfası döndürdü. JSON indirme bağlantısını kullan.",
+    "riwayahNotJson": "Bu dosya bir veri dosyası değil.",
+    "riwayahNotAQuran": "Bu dosya tam bir Kur’an değil, bu yüzden kurulmadı.",
+    "riwayahCouldNotSave": "Bu cihaza kaydedilemedi.",
     "switchToLight": "Aydınlık sayfaya geç",
     "ayahOfDayTitle": "Günün ayeti",
     "ayahOfDayChannelName": "Günün ayeti",
@@ -1189,7 +1198,15 @@
     "empty": "Henüz bir şey indirilmedi. İndirilen mushaf sayfaları, ses ve tefsir burada görünür.",
     "mushafPages": "{{total}} sayfadan {{pages}} tanesi",
     "legacyMushaf": "Eski mushaf sayfaları",
-    "legacyMushafSub": "Önceki okuyucudan kalma. Artık bunları hiçbir şey açmıyor."
+    "legacyMushafSub": "Önceki okuyucudan kalma. Artık bunları hiçbir şey açmıyor.",
+    "riwayat": "Kıraat rivayetleri",
+    "riwayatFootnote": "Mihrab bu metinleri içermez ve barındırmaz. Dosya yayıncıdan doğrudan bu cihaza indirilir ve içinden bir şey okunmadan önce burada denetlenir.",
+    "riwayahInstalled": "{{pages}} sayfa · {{host}} kaynağından",
+    "riwayahPublisher": "Yayıncı: {{publisher}}. Kaynak gösterdiği: {{credits}}.",
+    "riwayahOpenSource": "Kaynağı aç",
+    "riwayahHowTo": "Yukarıdaki sayfayı aç, JSON indirme bağlantısını kopyala ve buraya yapıştır.",
+    "riwayahLink": "Veri dosyasının bağlantısı",
+    "riwayahInstall": "Bu mushafı ekle"
   },
   "dataStats": {
     "title": "Veri istatistikleri",

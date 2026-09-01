@@ -118,19 +118,9 @@ ios/PrayerApp/embedded.provisionprofile
 __pycache__/
 *.pyc
 
-# Riwayah datasets (Warsh and any that follow).
-#
-# `src/quran/data/warsh/` is deliberately NOT ignored: it holds two EMPTY
-# committed placeholders. Metro resolves `require()` at bundle time, so a
-# missing file there is a build failure that `riwayahData.ts`'s try/catch
-# cannot rescue — every checkout has to have something to resolve. Empty is
-# the honest "this build has no Warsh": the loader reads it as absent and
-# the toggle never appears.
-#
-# What must never be committed is the OUTPUT of tools/riwayat/import.ts
-# while the licence question in docs/design/riwayat-plan.md §1 is open.
-# Read src/quran/data/warsh/README.md before you `git add` anything there.
-src/quran/data/qalun/
-src/quran/data/duri/
-src/quran/data/susi/
-src/quran/data/shuba/
+# Riwayah datasets used to live under src/quran/data/<riwayah>/ and be
+# ignored here. They do not live anywhere in the repository now: the app
+# ships no Warsh text at all, because nobody publishes one under terms it
+# could be redistributed under. A reader obtains the muṣḥaf from whoever
+# publishes it and it lands on their device — see src/quran/riwayahStore.ts
+# and docs/design/riwayat-plan.md §0. There is nothing left to ignore.

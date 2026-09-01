@@ -1,19 +1,40 @@
 /**
- * Loading a riwayah's own data, if this build has it.
+ * Which riwayat this DEVICE has, held in memory for the render path.
  *
- * Split from `riwayat.ts` so the registry can describe a riwayah without
- * importing its (potentially large) data, and so the `require` that may
- * legitimately fail sits in exactly one place.
+ * ── WHY A CACHE AND NOT A `require` ───────────────────────────────────
  *
- * `require` rather than `import` on purpose, and wrapped: the Warsh files
- * are produced by `tools/riwayat/` from a dataset that is NOT committed —
- * its licence is unresolved (`docs/design/riwayat-plan.md`) — so a
- * checkout that has never run the importer simply does not have them. A
- * missing riwayah is a build that offers Hafs only, which is the correct
- * behaviour rather than a build failure.
+ * `pages.ts` answers "which page is 2:142 on" from inside a render, and
+ * `MushafUnicodePage` asks for a page's ayahs the same way. Both are
+ * synchronous and neither may become async — a reader that awaited its
+ * own pagination would paint a blank page first and the right one after.
+ *
+ * The data itself is not in the bundle any more (`riwayahStore.ts` has
+ * the reasoning: Mihrab has no right to distribute the Warsh corpus, so
+ * it does not). It is on the device, which means reading it is I/O. So it
+ * is read ONCE, at hydration, into these maps — and everything after that
+ * is a map lookup.
+ *
+ * A build that has never been given a riwayah has empty maps, which is
+ * exactly the old behaviour: Hafs, no toggle, nothing to turn off.
+ *
+ * ── WHY IT NOTIFIES ───────────────────────────────────────────────────
+ *
+ * Availability used to be a build-time fact. Now a reader can add a
+ * muṣḥaf while the app is running, and the toggle that was hidden a
+ * second ago has to appear. `useRiwayahAvailability()` is how the screens
+ * find out; nothing polls.
  */
+import { useSyncExternalStore } from 'react';
 import type { MushafPageRange, SurahMeta } from './pages';
-import type { RiwayahId } from './riwayat';
+import type { RiwayahDataset } from './riwayahImport';
+import {
+  eraseRiwayahDataset,
+  readRiwayahDataset,
+  readRiwayahProvenance,
+  writeRiwayahDataset,
+  type RiwayahProvenance,
+} from './riwayahStore';
+import { RIWAYAT, type RiwayahId } from './riwayat';
 
 /** One riwayah's pagination: the same shape `pages.json` has for Hafs. */
 export type RiwayahPageTable = {
@@ -24,53 +45,149 @@ export type RiwayahPageTable = {
 /** Ayah text for a `unicode` riwayah, keyed `"surah:ayah"`. */
 export type RiwayahTextTable = Record<string, string>;
 
-const pageCache = new Map<RiwayahId, RiwayahPageTable | null>();
-const textCache = new Map<RiwayahId, RiwayahTextTable | null>();
+const pageCache = new Map<RiwayahId, RiwayahPageTable>();
+const textCache = new Map<RiwayahId, RiwayahTextTable>();
+const provenanceCache = new Map<RiwayahId, RiwayahProvenance>();
+
+let hydrated = false;
+let hydrating: Promise<void> | null = null;
+
+const listeners = new Set<() => void>();
+/** Bumped on every change, so `useSyncExternalStore` has a snapshot. */
+let version = 0;
+
+function publish(): void {
+  version += 1;
+  for (const listener of listeners) listener();
+}
+
+/** The riwayat that could be stored — Hafs is drawn from the bundle. */
+function storable(): RiwayahId[] {
+  return RIWAYAT.filter(r => r.render === 'unicode').map(r => r.id);
+}
 
 /**
- * The pagination for a riwayah, or null when this build lacks it.
+ * Read whatever this device has. Safe to call repeatedly; does the work
+ * once.
+ */
+export function hydrateRiwayahData(): Promise<void> {
+  if (hydrated) return Promise.resolve();
+  if (hydrating) return hydrating;
+  hydrating = (async () => {
+    for (const id of storable()) {
+      const dataset = await readRiwayahDataset(id);
+      if (!dataset) continue;
+      const provenance = await readRiwayahProvenance(id);
+      // No provenance means the write did not finish — see
+      // `writeRiwayahDataset`. Treat it as absent rather than draw a
+      // muṣḥaf nobody can account for.
+      if (!provenance) continue;
+      pageCache.set(id, { pages: dataset.pages, surahs: dataset.surahs });
+      textCache.set(id, dataset.text);
+      provenanceCache.set(id, provenance);
+    }
+    hydrated = true;
+    publish();
+  })();
+  return hydrating;
+}
+
+/** Has the store been read yet? Screens use it to avoid flashing "none". */
+export function riwayahDataHydrated(): boolean {
+  return hydrated;
+}
+
+/**
+ * The pagination for a riwayah, or null when this device lacks it.
  *
  * Hafs is not handled here — it has `pages.ts` and always exists.
  */
 export function loadRiwayahPages(id: RiwayahId): RiwayahPageTable | null {
-  if (pageCache.has(id)) return pageCache.get(id) ?? null;
-  let table: RiwayahPageTable | null = null;
-  try {
-    if (id === 'warsh') {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      table = require('./data/warsh/pages.json') as RiwayahPageTable;
-    }
-  } catch {
-    table = null;
-  }
-  // A file that exists but is empty is not a riwayah — treat it as absent
-  // rather than shipping a reader with nothing to read.
-  if (table && (!Array.isArray(table.pages) || table.pages.length === 0)) {
-    table = null;
-  }
-  pageCache.set(id, table);
-  return table;
+  return pageCache.get(id) ?? null;
 }
 
 /** The ayah text for a `unicode` riwayah, or null when absent. */
 export function loadRiwayahText(id: RiwayahId): RiwayahTextTable | null {
-  if (textCache.has(id)) return textCache.get(id) ?? null;
-  let text: RiwayahTextTable | null = null;
-  try {
-    if (id === 'warsh') {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      text = require('./data/warsh/text.json') as RiwayahTextTable;
-    }
-  } catch {
-    text = null;
-  }
-  if (text && Object.keys(text).length === 0) text = null;
-  textCache.set(id, text);
-  return text;
+  return textCache.get(id) ?? null;
+}
+
+/** Where this device's copy came from, or null when it has none. */
+export function riwayahProvenance(id: RiwayahId): RiwayahProvenance | null {
+  return provenanceCache.get(id) ?? null;
+}
+
+/**
+ * Store a VERIFIED dataset and make it live.
+ *
+ * Verified is the caller's job and there is exactly one way to do it —
+ * `verifyRiwayahDataset`. This function does not re-check, because a
+ * second implementation of the checks is how the two drift apart; it
+ * takes the type that only that function can produce.
+ */
+export async function installRiwayahDataset(
+  id: RiwayahId,
+  dataset: RiwayahDataset,
+  from: string,
+): Promise<RiwayahProvenance> {
+  const provenance = await writeRiwayahDataset(id, dataset, from);
+  pageCache.set(id, { pages: dataset.pages, surahs: dataset.surahs });
+  textCache.set(id, dataset.text);
+  provenanceCache.set(id, provenance);
+  publish();
+  return provenance;
+}
+
+/** Remove a riwayah from this device. */
+export async function uninstallRiwayah(id: RiwayahId): Promise<void> {
+  await eraseRiwayahDataset(id);
+  pageCache.delete(id);
+  textCache.delete(id);
+  provenanceCache.delete(id);
+  publish();
+}
+
+/**
+ * Re-render when what this device carries changes.
+ *
+ * Returns the version rather than a list: the list would be a new array
+ * every call and `useSyncExternalStore` would loop. Callers ask
+ * `availableRiwayat()` for the answer once this tells them it moved.
+ */
+export function useRiwayahAvailability(): number {
+  return useSyncExternalStore(
+    listener => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    () => version,
+    () => version,
+  );
 }
 
 /** Tests only — the caches are process-lifetime otherwise. */
 export function _resetRiwayahDataCacheForTests(): void {
   pageCache.clear();
   textCache.clear();
+  provenanceCache.clear();
+  hydrated = false;
+  hydrating = null;
+  version = 0;
+}
+
+/** Tests only — install without touching the filesystem. */
+export function _setRiwayahDataForTests(
+  id: RiwayahId,
+  dataset: RiwayahDataset,
+): void {
+  pageCache.set(id, { pages: dataset.pages, surahs: dataset.surahs });
+  textCache.set(id, dataset.text);
+  provenanceCache.set(id, {
+    from: 'test',
+    at: new Date(0).toISOString(),
+    ayahs: Object.keys(dataset.text).length,
+    pages: dataset.pages.length,
+    bytes: 0,
+  });
+  hydrated = true;
+  publish();
 }

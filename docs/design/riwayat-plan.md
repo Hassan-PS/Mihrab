@@ -4,17 +4,58 @@ Written 2026-09-01, against v2.13.8, for issue #11.
 
 ## Status
 
-**Phases 1–3 are built. Phase 0 is not, and it is the one that decides
-whether any of this ships.**
+**Phases 1–3 are built. Phase 0 was answered by changing the question.**
 
-Done, and in the tree:
+### The sourcing, settled
+
+The plan said the licence was blocking and that the way through it was to
+ask KFGQPC and Tarteel for terms in writing. Two things have changed.
+
+First, the search for a Warsh text that already states its terms was done,
+in September 2026, and it came up empty:
+
+| Source | Warsh text? | Terms? |
+|---|---|---|
+| Tanzil | ❌ Hafs only | ✅ verbatim copying, attribution, link back |
+| alquran.cloud | ❌ no Warsh edition | ✅ reproduce/redistribute with credit |
+| QUL (Tarteel) | ✅ ayah and word-by-word | ❌ resources state none |
+| KFGQPC `nashr.` | ✅ Hafs and Warsh | ❌ a Windows app, no stated terms |
+| DigitalKhatt | ❌ Hafs | ✅ OFL fonts, MIT/AGPL code |
+| ITQAN catalogue | ❌ | ❌ "not stated" on every entry |
+
+Second, and the actual resolution: **the app does not need the right to
+redistribute something it never distributes.** Mihrab ships the reader and
+the checks. The muṣḥaf is obtained by the reader, from whoever publishes
+it, and lands on their device — nothing of ours is in the chain, and no
+permission is needed for a person to fetch a file a publisher offers.
+
+So there is no bundled Warsh data, no `src/quran/data/warsh/`, and no
+`require()` of a file that may not exist. What replaced it:
+
+- `riwayahStore.ts` — `<Documents>/quran/riwayat/v1/<id>/`, holding the
+  pagination, the text and a `source.json` recording where it came from
+  and when. Provenance is written LAST, so an interrupted install reads as
+  absent rather than as a muṣḥaf nobody can account for.
+- `riwayahImport.ts` — the checks, moved out of `tools/` into `src/`,
+  because the file that becomes scripture on a phone is one no maintainer
+  will ever see. The CLI and the device now run the same function.
+- `riwayahDownload.ts` — the boundary between bytes and scripture. Nothing
+  crosses it unverified, and every refusal is a sentence a reader can act
+  on rather than a stack trace.
+- Manage downloads carries the section that adds and removes one, and says
+  in as many words that Mihrab neither includes nor hosts these texts.
+
+Known cost, stated rather than hidden: F-Droid will treat this as a
+non-free network asset, and the metadata should declare it.
+
+### Built
 
 - `ayahIndex.ts` — progress counted in ayahs, so a khatmah means the same
   amount of Qur'an in either muṣḥaf (§5, option 3). Migrated before a
   second riwayah existed, as the plan asked.
-- `riwayat.ts` — the riwayah TABLE, with `available` computed by trying to
-  load the data rather than declared. A build without Warsh offers Hafs
-  and shows no toggle.
+- `riwayat.ts` — the riwayah TABLE, with availability computed from what
+  the DEVICE has, not from what the build has. No `totalPages` field: a
+  page count is a fact that arrives with the data.
 - `pages.ts` — one pagination per riwayah; `MUSHAF_PAGES` and the
   one-argument `findPageForAyah` still mean Hafs, for every caller that
   has not been told about riwayat.
@@ -25,18 +66,13 @@ Done, and in the tree:
   scrubber and the index sidebar all read the riwayah's own table. The
   toggle sits next to Audio and Tafsir, as asked, and only in muṣḥaf mode.
 - Switching keeps your place, by way of the ayah at the page boundary.
-- `tools/riwayat/import.ts` — refuses anything that is not the whole
-  Qur'an; `__tests__/riwayahIntegrity.test.ts` re-checks the committed
-  files, because what ships is the repo's copy, not the importer's run.
 
-Not done:
+### Not done
 
-- **Phase 0 — the licence.** `src/quran/data/warsh/` holds two EMPTY
-  committed placeholders and a README saying why. Until §1 is answered in
-  writing, no Warsh data is committed, and every build offers Hafs only.
-- The QPC Warsh face (`fontBundled: false` in `riwayat.ts`): it is a QUL
-  resource under the same unresolved terms. Until it arrives the Unicode
-  renderer draws in AmiriQuran, which shapes the marks correctly.
+- The QPC Warsh face (`fontBundled: false` in `riwayat.ts`) is a QUL
+  resource like the text, so it is not bundled either. Until a reader can
+  install one the Unicode renderer draws in AmiriQuran, which shapes the
+  marks correctly.
 - Phase 5 — Qālūn, al-Dūrī, al-Sūsī and Shuʿbah are each one dataset and
   one table row away, and nothing in the code counts to two.
 
@@ -120,12 +156,13 @@ QUL's *code* is MIT. Its *resources* carry no stated licence — not on the
 resource pages, not in the repository README. The credits name KFGQPC and
 Tanzil as upstreams, both of which have their own terms.
 
-**This is the blocking question, and it is a question for a human, not a
-build script.** Mihrab is AGPL-3.0-or-later and ships on three stores; it
-cannot bundle scripture data of unclear provenance and hope. Before any
-code: write to Tarteel and to KFGQPC and get the terms in writing. If the
-answer is no, the feature does not ship, and that is a better outcome than
-shipping it and finding out later.
+**This was written as the blocking question. It is not, any more —
+see the Status section at the top.** Mihrab is AGPL-3.0-or-later and ships
+on three stores, so it cannot bundle scripture of unclear provenance and
+hope; what it can do, and now does, is not bundle it at all. The app never
+holds a copy, so it never needs the right to pass one on. Asking for terms
+in writing remains worth doing — it would let the data be bundled, which
+is a better experience — but it is no longer what the feature waits on.
 
 ---
 
@@ -285,7 +322,10 @@ than migrating after.
 
 ## 6. What could still stop this
 
-- **Licence.** Unresolved, and blocking. Everything else is engineering.
+- **Licence.** Unresolved, and no longer blocking: the app does not
+  distribute the data, so it does not need a licence to. What it does need
+  is to keep being true — the moment anything is bundled or mirrored, this
+  becomes the blocking question again.
 - **Text verification.** Someone with the standing to do so should check a
   sample against a printed KFGQPC Warsh muṣḥaf. A checksum proves the file
   did not change in transit; it does not prove the file was right.

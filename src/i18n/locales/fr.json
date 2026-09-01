@@ -41,7 +41,8 @@
     "close": "Fermer",
     "share": "Partager",
     "done": "Terminé",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "cancelled": "Annulé."
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -902,6 +903,14 @@
     "switchRiwayah": "Passer à la lecture {{name}}",
     "riwayahReflowTitle": "Les pages correspondent, pas forcément les lignes",
     "riwayahReflowBody": "Ce mushaf commence et termine chaque page exactement comme l’édition imprimée, mais ses lignes sont composées par votre appareil et non reprises de l’imprimé : elles ne se couperont donc pas toujours aux mêmes endroits.",
+    "riwayahNeedsHttps": "Le lien doit commencer par https://",
+    "riwayahServerSaidNo": "Le serveur a répondu {{status}}.",
+    "riwayahTooLarge": "Ce fichier est bien plus gros qu’un jeu de données de mushaf. Vérifiez le lien.",
+    "riwayahUnreachable": "Impossible d’atteindre ce lien. Vérifiez l’adresse et votre connexion.",
+    "riwayahGotAPage": "Ce lien a renvoyé une page web, pas un fichier de données. Utilisez le lien de téléchargement JSON.",
+    "riwayahNotJson": "Ce fichier n’est pas un fichier de données.",
+    "riwayahNotAQuran": "Ce fichier n’est pas un Coran complet ; il n’a pas été installé.",
+    "riwayahCouldNotSave": "Impossible de l’enregistrer sur cet appareil.",
     "switchToLight": "Passer à la page claire",
     "ayahOfDayTitle": "Verset du jour",
     "ayahOfDayChannelName": "Verset du jour",
@@ -1189,7 +1198,15 @@
     "empty": "Rien de téléchargé pour le moment. Les pages du mushaf, l'audio et le tafsir téléchargés apparaîtront ici.",
     "mushafPages": "{{pages}} sur {{total}} pages",
     "legacyMushaf": "Anciennes pages du mushaf",
-    "legacyMushafSub": "Restes de l'ancien lecteur. Plus rien ne les ouvre."
+    "legacyMushafSub": "Restes de l'ancien lecteur. Plus rien ne les ouvre.",
+    "riwayat": "Traditions de lecture",
+    "riwayatFootnote": "Mihrab n’inclut ni n’héberge ces textes. Le fichier est récupéré chez l’éditeur directement vers cet appareil, et vérifié ici avant qu’on en lise quoi que ce soit.",
+    "riwayahInstalled": "{{pages}} pages · depuis {{host}}",
+    "riwayahPublisher": "Publié par {{publisher}}. Crédite {{credits}}.",
+    "riwayahOpenSource": "Ouvrir la source",
+    "riwayahHowTo": "Ouvrez la page ci-dessus, copiez le lien du téléchargement JSON, et collez-le ici.",
+    "riwayahLink": "Lien vers le fichier de données",
+    "riwayahInstall": "Ajouter ce mushaf"
   },
   "dataStats": {
     "title": "Statistiques des données",

@@ -23,7 +23,7 @@ import {
   firstAyahOfPage,
   totalPagesForRiwayah,
 } from './pages';
-import { DEFAULT_RIWAYAH, resolveRiwayah, type RiwayahId } from './riwayat';
+import { DEFAULT_RIWAYAH, coerceRiwayahId, type RiwayahId } from './riwayat';
 
 /** The Quran blob's key. Exported so the snapshot layer names it once. */
 export const QURAN_STORAGE_KEY = 'mihrab.quran.v1';
@@ -355,10 +355,13 @@ function mergeStored(raw: unknown): QuranState {
     prefs: {
       ...DEFAULT_QURAN_STATE.prefs,
       ...(r.prefs ?? {}),
-      // Resolved rather than trusted: a device that synced `warsh` from a
-      // build that HAS the data to one that does not would otherwise open
-      // a reader with no muṣḥaf behind it.
-      riwayah: resolveRiwayah(
+      // Coerced, NOT resolved. An unknown id becomes Hafs, but a known
+      // one is kept whether or not this device currently has its data —
+      // the muṣḥaf is read from disk asynchronously and may not have
+      // arrived yet, and resolving here would quietly overwrite the
+      // reader's choice with Hafs on the next preference write. See
+      // `coerceRiwayahId`.
+      riwayah: coerceRiwayahId(
         (r.prefs as Record<string, unknown> | undefined)?.riwayah as
           | string
           | undefined,

@@ -44,9 +44,14 @@ import { useOverlayDismissGuard } from '../quran/mushafReaderCore';
 import { findPageForAyah } from '../quran/pages';
 import {
   availableRiwayat,
+  resolveRiwayah,
   riwayahById,
   riwayahChoiceExists,
 } from '../quran/riwayat';
+import {
+  hydrateRiwayahData,
+  useRiwayahAvailability,
+} from '../quran/riwayahData';
 import { surahName } from '../quran/surahName';
 import {
   findBookmark,
@@ -102,6 +107,10 @@ export function QuranSurahScreen() {
 
   useEffect(() => {
     void hydrateQuranState();
+    // The muṣḥaf a reader may have added is on disk, not in the bundle
+    // (`riwayahStore.ts`). Read it here so the toggle and the reader both
+    // know what this device has before the first page is drawn.
+    void hydrateRiwayahData();
   }, []);
 
   // ── Async data: Arabic + translation (QR-2) ─────────────────────────
@@ -175,7 +184,11 @@ export function QuranSurahScreen() {
    * whatever the build actually carries. With two it is a toggle; with
    * four it is still correct.
    */
-  const riwayah = quran.prefs.riwayah;
+  // What this device can draw, which changes when a muṣḥaf is added in
+  // Manage downloads. Without the subscription the toggle would stay
+  // hidden until the screen happened to re-render for some other reason.
+  useRiwayahAvailability();
+  const riwayah = resolveRiwayah(quran.prefs.riwayah);
   const nextRiwayah = (() => {
     const offered = availableRiwayat();
     const here = offered.findIndex(r => r.id === riwayah);

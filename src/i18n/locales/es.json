@@ -41,7 +41,8 @@
     "close": "Cerrar",
     "share": "Compartir",
     "done": "Hecho",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "cancelled": "Cancelado."
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -902,6 +903,14 @@
     "switchRiwayah": "Cambiar a la lectura de {{name}}",
     "riwayahReflowTitle": "Las páginas coinciden; las líneas puede que no",
     "riwayahReflowBody": "Este mushaf empieza y termina cada página exactamente donde lo hace el impreso, pero sus líneas las compone tu dispositivo en lugar de tomarlas de la edición impresa, así que no siempre cortarán en los mismos puntos.",
+    "riwayahNeedsHttps": "El enlace debe empezar por https://",
+    "riwayahServerSaidNo": "El servidor respondió {{status}}.",
+    "riwayahTooLarge": "Ese archivo es mucho más grande que un conjunto de datos de mushaf. Comprueba el enlace.",
+    "riwayahUnreachable": "No se pudo acceder a ese enlace. Comprueba la dirección y tu conexión.",
+    "riwayahGotAPage": "Ese enlace devolvió una página web, no un archivo de datos. Usa el enlace de descarga JSON.",
+    "riwayahNotJson": "Ese archivo no es un archivo de datos.",
+    "riwayahNotAQuran": "Ese archivo no es un Corán completo, así que no se instaló.",
+    "riwayahCouldNotSave": "No se pudo guardar en este dispositivo.",
     "switchToLight": "Cambiar a página clara",
     "ayahOfDayTitle": "Aleya del día",
     "ayahOfDayChannelName": "Aleya del día",
@@ -1189,7 +1198,15 @@
     "empty": "Aún no hay descargas. Las páginas del mushaf, el audio y el tafsir descargados aparecerán aquí.",
     "mushafPages": "{{pages}} de {{total}} páginas",
     "legacyMushaf": "Páginas antiguas del mushaf",
-    "legacyMushafSub": "Restos del lector anterior. Ya nada las abre."
+    "legacyMushafSub": "Restos del lector anterior. Ya nada las abre.",
+    "riwayat": "Tradiciones de lectura",
+    "riwayatFootnote": "Mihrab no incluye ni aloja estos textos. El archivo se descarga del editor directamente a este dispositivo y se comprueba aquí antes de leer nada de él.",
+    "riwayahInstalled": "{{pages}} páginas · de {{host}}",
+    "riwayahPublisher": "Publicado por {{publisher}}. Acredita a {{credits}}.",
+    "riwayahOpenSource": "Abrir la fuente",
+    "riwayahHowTo": "Abre la página de arriba, copia el enlace de la descarga JSON y pégalo aquí.",
+    "riwayahLink": "Enlace al archivo de datos",
+    "riwayahInstall": "Añadir este mushaf"
   },
   "dataStats": {
     "title": "Estadísticas de datos",
