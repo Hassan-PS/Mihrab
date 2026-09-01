@@ -1274,7 +1274,20 @@
     "backfillPreserved": "Daha önce kaydettiğin günlere dokunulmaz, bugün de değişmez.",
     "fillMonthsPreserved": "Zaten bir durum, bir not ya da bir oruç içeren günler olduğu gibi bırakılır. Bugün değişmez.",
     "fillSummaryLeftAlone": "Dokunulmayan",
-    "unlogged": "girilmedi"
+    "unlogged": "girilmedi",
+    "resetAction": "Namaz kaydını sıfırla",
+    "resetTitle": "Namaz kaydını sıfırla",
+    "resetBody": "{{day}} gününe göre ne kadarının silineceğini seç. Oruç, sünnet namazları ve zikir ayrı kayıtlardır ve dokunulmaz.",
+    "resetScopeDay": "Bu gün",
+    "resetScopeMonth": "Bu ay",
+    "resetScopeYear": "Bu yıl",
+    "resetScopeAll": "Her şey",
+    "resetCount": "{{days}} günde {{prayers}} namaz",
+    "resetNothing": "hiçbir şey",
+    "resetConfirmTitle": "Bu namazlar silinsin mi?",
+    "resetConfirm": "Sil",
+    "resetPreserved": "Oruç, sünnet namazları ve zikir dokunulmaz. Bu geri alınamaz.",
+    "resetRangeAll": "kaydın tamamı"
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

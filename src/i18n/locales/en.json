@@ -1274,7 +1274,20 @@
     "backfillPreserved": "Days you have already logged are left alone, and today is not touched.",
     "fillMonthsPreserved": "Days already holding a status, a note or a fast are left exactly as they are. Today is not touched.",
     "fillSummaryLeftAlone": "Left alone",
-    "unlogged": "not filled in"
+    "unlogged": "not filled in",
+    "resetAction": "Reset the prayer log",
+    "resetTitle": "Reset the prayer log",
+    "resetBody": "Choose how much to clear, relative to {{day}}. Fasts, sunnah prayers and dhikr are separate records and are not touched.",
+    "resetScopeDay": "This day",
+    "resetScopeMonth": "This month",
+    "resetScopeYear": "This year",
+    "resetScopeAll": "Everything",
+    "resetCount": "{{prayers}} prayers on {{days}} days",
+    "resetNothing": "nothing",
+    "resetConfirmTitle": "Clear these prayers?",
+    "resetConfirm": "Clear them",
+    "resetPreserved": "Fasts, sunnah prayers and dhikr are not touched. This cannot be undone.",
+    "resetRangeAll": "the whole log"
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

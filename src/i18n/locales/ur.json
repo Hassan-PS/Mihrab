@@ -1274,7 +1274,20 @@
     "backfillPreserved": "جو دن آپ پہلے درج کر چکے ہیں وہ ویسے ہی رہیں گے، اور آج کا دن نہیں بدلے گا۔",
     "fillMonthsPreserved": "جن دنوں میں پہلے سے حالت، نوٹ یا روزہ درج ہے وہ بالکل ویسے ہی رہتے ہیں۔ آج کا دن نہیں بدلے گا۔",
     "fillSummaryLeftAlone": "غیر متاثر",
-    "unlogged": "درج نہیں"
+    "unlogged": "درج نہیں",
+    "resetAction": "نماز کا ریکارڈ ری سیٹ کریں",
+    "resetTitle": "نماز کا ریکارڈ ری سیٹ کریں",
+    "resetBody": "{{day}} کے حوالے سے منتخب کریں کہ کتنا مٹانا ہے۔ روزے، سنت نمازیں اور ذکر الگ ریکارڈ ہیں اور انہیں ہاتھ نہیں لگایا جائے گا۔",
+    "resetScopeDay": "یہ دن",
+    "resetScopeMonth": "یہ مہینہ",
+    "resetScopeYear": "یہ سال",
+    "resetScopeAll": "سب کچھ",
+    "resetCount": "{{days}} دنوں میں {{prayers}} نمازیں",
+    "resetNothing": "کچھ نہیں",
+    "resetConfirmTitle": "یہ نمازیں مٹا دیں؟",
+    "resetConfirm": "مٹا دیں",
+    "resetPreserved": "روزے، سنت نمازیں اور ذکر کو ہاتھ نہیں لگایا جائے گا۔ اسے واپس نہیں لایا جا سکتا۔",
+    "resetRangeAll": "پورا ریکارڈ"
   },
   "endOfDay": {
     "title": "آج کی نمازیں درج کریں؟",

@@ -1274,7 +1274,20 @@
     "backfillPreserved": "Hari yang sudah kamu catat dibiarkan apa adanya, dan hari ini tidak diubah.",
     "fillMonthsPreserved": "Hari yang sudah berisi status, catatan, atau puasa dibiarkan persis seperti adanya. Hari ini tidak diubah.",
     "fillSummaryLeftAlone": "Dibiarkan",
-    "unlogged": "belum diisi"
+    "unlogged": "belum diisi",
+    "resetAction": "Setel ulang catatan salat",
+    "resetTitle": "Setel ulang catatan salat",
+    "resetBody": "Pilih seberapa banyak yang dihapus, relatif terhadap {{day}}. Puasa, salat sunah dan zikir adalah catatan terpisah dan tidak disentuh.",
+    "resetScopeDay": "Hari ini",
+    "resetScopeMonth": "Bulan ini",
+    "resetScopeYear": "Tahun ini",
+    "resetScopeAll": "Semuanya",
+    "resetCount": "{{prayers}} salat pada {{days}} hari",
+    "resetNothing": "tidak ada",
+    "resetConfirmTitle": "Hapus salat ini?",
+    "resetConfirm": "Hapus",
+    "resetPreserved": "Puasa, salat sunah dan zikir tidak disentuh. Ini tidak bisa dibatalkan.",
+    "resetRangeAll": "seluruh catatan"
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

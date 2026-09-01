@@ -1274,7 +1274,20 @@
     "backfillPreserved": "Dagar du redan loggat lämnas orörda, och dagens datum påverkas inte.",
     "fillMonthsPreserved": "Dagar som redan har en status, en anteckning eller en fasta lämnas precis som de är. Dagens datum påverkas inte.",
     "fillSummaryLeftAlone": "Orörda",
-    "unlogged": "ej ifyllt"
+    "unlogged": "ej ifyllt",
+    "resetAction": "Nollställ bönloggen",
+    "resetTitle": "Nollställ bönloggen",
+    "resetBody": "Välj hur mycket som ska rensas, räknat från {{day}}. Fastor, sunnaböner och dhikr är egna register och rörs inte.",
+    "resetScopeDay": "Denna dag",
+    "resetScopeMonth": "Denna månad",
+    "resetScopeYear": "Detta år",
+    "resetScopeAll": "Allt",
+    "resetCount": "{{prayers}} böner på {{days}} dagar",
+    "resetNothing": "ingenting",
+    "resetConfirmTitle": "Rensa dessa böner?",
+    "resetConfirm": "Rensa dem",
+    "resetPreserved": "Fastor, sunnaböner och dhikr rörs inte. Detta går inte att ångra.",
+    "resetRangeAll": "hela loggen"
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

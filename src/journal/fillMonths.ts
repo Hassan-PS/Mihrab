@@ -39,7 +39,12 @@ import {
   isDayKey,
   lastFillableDay,
 } from './backfill';
-import { upsertEntry, type JournalEntry, type JournalPrayer } from './journal';
+import {
+  isLogged,
+  upsertEntry,
+  type JournalEntry,
+  type JournalPrayer,
+} from './journal';
 import type { FastEntry } from '../fasting/fasting';
 
 const PRAYERS: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
@@ -95,7 +100,10 @@ export function dayIsUntouched(
   fasts: FastEntry[],
   date: string,
 ): boolean {
-  for (const e of entries) if (e.date === date) return false;
+  // A day whose entries have all been cleared has nothing recorded on it,
+  // so it is untouched again and the fill may offer it. The reset in issue
+  // #13 exists precisely so a day can go back to having nothing on it.
+  for (const e of entries) if (e.date === date && isLogged(e)) return false;
   for (const f of fasts) if (f.date === date) return false;
   return true;
 }

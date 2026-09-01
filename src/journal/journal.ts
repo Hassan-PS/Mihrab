@@ -10,7 +10,49 @@
  * combination. Re-marking a prayer overwrites the previous status.
  */
 
-export type JournalStatus = 'on-time' | 'late' | 'missed' | 'qadha';
+/**
+ * What the log can say about one prayer.
+ *
+ * ── WHY `cleared` IS A STATUS AND NOT A DELETION ──────────────────────
+ *
+ * Un-logging used to drop the row. That is correct on one device and
+ * wrong the moment there are two: `mergeJournal` is a last-write-wins
+ * register keyed by (date, prayer), so an absent row carries no opinion
+ * and the other device's copy simply wins. Removing a mis-tap on your
+ * phone, then syncing, put it straight back — silently, and by design
+ * (`merge.ts` says in as many words that nothing is ever deleted).
+ *
+ * Issue #13 made that a real cost rather than a theoretical one: someone
+ * back-filled three months by accident and asked for a way out. A reset
+ * that the next sync round undoes is not a way out.
+ *
+ * So a clear is a WRITE, not a deletion — a row with `cleared` and a fresh
+ * `loggedAt`. The merge needs no new rule and none of its three properties
+ * move: it is still newest-wins on the same key, with one more value in
+ * the domain. Nothing accumulates either, because a tombstone REPLACES the
+ * entry it clears rather than sitting beside it.
+ *
+ * Everything that reads the journal must treat it as unlogged. The single
+ * place that guarantees it is `indexByDate`, which every streak and score
+ * goes through; `isLogged` is the check for anywhere else.
+ */
+export type JournalStatus = 'on-time' | 'late' | 'missed' | 'qadha' | 'cleared';
+
+/** A status a prayer can actually be IN — everything but the tombstone. */
+export type LoggedStatus = Exclude<JournalStatus, 'cleared'>;
+
+/** The four a person can choose. `cleared` is what un-choosing writes. */
+export const LOGGABLE_STATUSES: readonly LoggedStatus[] = [
+  'on-time',
+  'late',
+  'missed',
+  'qadha',
+];
+
+/** Is this a prayer the user actually recorded, rather than a tombstone? */
+export function isLogged(entry: JournalEntry): boolean {
+  return entry.status !== 'cleared';
+}
 export type JournalPrayer = 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
 
 export type JournalEntry = {
@@ -31,7 +73,15 @@ export type JournalEntry = {
 /** Parse + sanitize a stored entries array. Drops malformed records. */
 export function coerceJournalEntries(input: unknown): JournalEntry[] {
   if (!Array.isArray(input)) return [];
-  const VALID_STATUS: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
+  // `cleared` included: a tombstone that failed to parse would be dropped,
+  // and the entry it was clearing would come back on the next sync round.
+  const VALID_STATUS: JournalStatus[] = [
+    'on-time',
+    'late',
+    'missed',
+    'qadha',
+    'cleared',
+  ];
   const VALID_PRAYER: JournalPrayer[] = [
     'Fajr',
     'Dhuhr',
@@ -111,13 +161,17 @@ export function entriesForDate(
   entries: JournalEntry[],
   date: string,
 ): JournalEntry[] {
-  return entries.filter(e => e.date === date);
+  return entries.filter(e => e.date === date && isLogged(e));
 }
 
 /** Return all unique dates (YYYY-MM-DD) that have any entry, sorted ascending. */
 export function loggedDates(entries: JournalEntry[]): string[] {
   const seen = new Set<string>();
-  for (const e of entries) seen.add(e.date);
+  // A day whose every entry has been cleared is a day with nothing logged
+  // on it, not a logged day with nothing in it — the difference decides
+  // whether "Fill in earlier days" offers it and whether the graph draws
+  // paper or a mark.
+  for (const e of entries) if (isLogged(e)) seen.add(e.date);
   return Array.from(seen).sort();
 }
 
@@ -140,17 +194,62 @@ export function upsertEntry(
 }
 
 /**
- * Remove the entry for a given (date, prayer). Returns the entries array with
- * any matching entry stripped out. Used by the Journal "tap-to-deselect" UX
- * (#145): tapping the already-active status pill clears the log instead of
- * being a no-op.
+ * Un-log one (date, prayer) — the Journal's tap-to-deselect (#145) and the
+ * single-prayer half of the reset asked for in issue #13.
+ *
+ * Writes a tombstone rather than dropping the row; see `JournalStatus` for
+ * why an absent row is not an opinion and comes back from the other device.
+ * A prayer that was never logged stays absent: there is nothing to say.
  */
-export function removeEntry(
+export function clearEntry(
   entries: JournalEntry[],
   date: string,
   prayer: JournalPrayer,
+  now: Date = new Date(),
 ): JournalEntry[] {
-  return entries.filter(e => !(e.date === date && e.prayer === prayer));
+  const existing = entries.find(e => e.date === date && e.prayer === prayer);
+  if (!existing || !isLogged(existing)) return entries;
+  return entries.map(e =>
+    e.date === date && e.prayer === prayer
+      ? { date, prayer, status: 'cleared' as const, loggedAt: now.toISOString() }
+      : e,
+  );
+}
+
+/**
+ * Un-log everything in a date range, inclusive, or the whole journal when
+ * no range is given.
+ *
+ * One function for a day, a month, a year and everything, because they are
+ * the same operation with different endpoints — and because a second
+ * implementation of "clear these" is a second chance to leave a row behind
+ * that the next sync round then restores over the top of the reset.
+ *
+ * Only rows that are actually logged become tombstones. Clearing a range
+ * that is already clear returns the array unchanged, so a repeated reset
+ * does not keep re-stamping `loggedAt` and does not keep waking sync.
+ */
+export function clearRange(
+  entries: JournalEntry[],
+  from: string | null,
+  to: string | null,
+  now: Date = new Date(),
+): JournalEntry[] {
+  const stamp = now.toISOString();
+  let changed = false;
+  const next = entries.map(e => {
+    if (!isLogged(e)) return e;
+    if (from !== null && e.date < from) return e;
+    if (to !== null && e.date > to) return e;
+    changed = true;
+    return {
+      date: e.date,
+      prayer: e.prayer,
+      status: 'cleared' as const,
+      loggedAt: stamp,
+    };
+  });
+  return changed ? next : entries;
 }
 
 /** Lookup the status of a single (date, prayer) cell, or null if unlogged. */
@@ -158,9 +257,12 @@ export function getEntryStatus(
   entries: JournalEntry[],
   date: string,
   prayer: JournalPrayer,
-): JournalStatus | null {
+): LoggedStatus | null {
   const hit = entries.find(e => e.date === date && e.prayer === prayer);
-  return hit ? hit.status : null;
+  // A tombstone answers "not logged", which is the same answer a prayer
+  // nobody has touched gives — so the caller never has to know the
+  // difference, and none of them do.
+  return hit && isLogged(hit) ? (hit.status as LoggedStatus) : null;
 }
 
 export type JournalStats = {
@@ -220,6 +322,11 @@ function indexByDate(
 ): Map<string, Map<JournalPrayer, JournalStatus>> {
   const byDate = new Map<string, Map<JournalPrayer, JournalStatus>>();
   for (const e of entries) {
+    // THE place tombstones are kept out of. Every streak and every "is this
+    // day perfect / spoiled" question goes through this index, and
+    // `isSpoiled` treats anything that is not on-time as a spoiler — so a
+    // cleared prayer left in here would break a streak the user never broke.
+    if (!isLogged(e)) continue;
     let day = byDate.get(e.date);
     if (!day) {
       day = new Map();
@@ -387,7 +494,7 @@ export function computeCurrentStreak(
  * prayer was prayed, and a graph that flattened them to zero would tell a
  * traveller making up Dhuhr on the road that the day was a write-off.
  */
-export const STATUS_WEIGHT: Record<JournalStatus, number> = {
+export const STATUS_WEIGHT: Record<LoggedStatus, number> = {
   'on-time': 1,
   late: 0.7,
   qadha: 0.45,
@@ -420,8 +527,9 @@ export type DayScore = {
 export function scoreByDay(entries: JournalEntry[]): Map<string, DayScore> {
   const out = new Map<string, DayScore>();
   for (const e of entries) {
+    if (!isLogged(e)) continue;
     const cur = out.get(e.date) ?? { kept: 0, logged: 0, missed: 0 };
-    cur.kept += STATUS_WEIGHT[e.status] ?? 0;
+    cur.kept += STATUS_WEIGHT[e.status as LoggedStatus] ?? 0;
     cur.logged += 1;
     if (e.status === 'missed') cur.missed += 1;
     out.set(e.date, cur);

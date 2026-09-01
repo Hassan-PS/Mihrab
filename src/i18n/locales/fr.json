@@ -1274,7 +1274,20 @@
     "backfillPreserved": "Les jours déjà enregistrés ne sont pas modifiés, et aujourd’hui n’est pas touché.",
     "fillMonthsPreserved": "Les jours contenant déjà un statut, une note ou un jeûne restent exactement tels quels. Aujourd’hui n’est pas touché.",
     "fillSummaryLeftAlone": "Intacts",
-    "unlogged": "non renseigné"
+    "unlogged": "non renseigné",
+    "resetAction": "Réinitialiser le journal",
+    "resetTitle": "Réinitialiser le journal",
+    "resetBody": "Choisissez ce qu’il faut effacer, par rapport au {{day}}. Les jeûnes, les prières sunna et le dhikr sont des registres distincts et ne sont pas touchés.",
+    "resetScopeDay": "Ce jour",
+    "resetScopeMonth": "Ce mois",
+    "resetScopeYear": "Cette année",
+    "resetScopeAll": "Tout",
+    "resetCount": "{{prayers}} prières sur {{days}} jours",
+    "resetNothing": "rien",
+    "resetConfirmTitle": "Effacer ces prières ?",
+    "resetConfirm": "Les effacer",
+    "resetPreserved": "Les jeûnes, les prières sunna et le dhikr ne sont pas touchés. Cette action est irréversible.",
+    "resetRangeAll": "tout le journal"
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",

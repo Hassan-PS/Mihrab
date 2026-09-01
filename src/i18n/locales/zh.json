@@ -1274,7 +1274,20 @@
     "backfillPreserved": "你已经记录过的日子保持不变，今天不会被改动。",
     "fillMonthsPreserved": "已经有状态、备注或斋戒的日子会原样保留。今天不会被改动。",
     "fillSummaryLeftAlone": "保持不变",
-    "unlogged": "未填写"
+    "unlogged": "未填写",
+    "resetAction": "重置礼拜记录",
+    "resetTitle": "重置礼拜记录",
+    "resetBody": "以 {{day}} 为基准，选择要清除的范围。斋戒、圣行拜和赞念属于各自独立的记录，不会被清除。",
+    "resetScopeDay": "这一天",
+    "resetScopeMonth": "本月",
+    "resetScopeYear": "今年",
+    "resetScopeAll": "全部",
+    "resetCount": "{{days}} 天内的 {{prayers}} 次礼拜",
+    "resetNothing": "没有",
+    "resetConfirmTitle": "清除这些礼拜记录？",
+    "resetConfirm": "清除",
+    "resetPreserved": "斋戒、圣行拜和赞念不会受影响。此操作无法撤销。",
+    "resetRangeAll": "整个记录"
   },
   "endOfDay": {
     "title": "记录今天的拜功吗？",

@@ -43,6 +43,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { SyncHint } from './sync/SyncHint';
 import { FillSummary } from '../components/FillSummary';
+import { ResetScopePicker } from '../components/ResetScopePicker';
 import { SunnahChip } from './log/SunnahChip';
 import { PracticeStatsRow } from './log/PracticeStatsRow';
 import { useLayoutRtl } from '../i18n/useLayoutRtl';
@@ -79,7 +80,9 @@ import {
   computeCurrentStreak,
   computeLongestStreak,
   getEntryStatus,
-  removeEntry,
+  clearEntry,
+  clearRange,
+  isLogged,
   scoreByDay,
   setEntryNote,
   upsertEntry,
@@ -100,6 +103,7 @@ import { upcomingPrayers } from '../journal/upcoming';
 import { dragTranslation, swipeDayDelta } from '../journal/daySwipe';
 import { applyBackfill, planBackfill } from '../journal/backfill';
 import { applyMonthFill, planMonthFill } from '../journal/fillMonths';
+import { resetPlans, type ResetPlan } from '../journal/resetLog';
 import { installedOnDay } from '../journal/installDate';
 import { syncEndOfDayReminderForDay } from '../notifications/endOfDayLog';
 import {
@@ -154,7 +158,11 @@ function formatOwedDate(key: string, locale: string): string {
 /** Oldest day with anything recorded, or null for an empty journal. */
 function earliestEntryOf(entries: JournalEntry[]): string | null {
   let first: string | null = null;
-  for (const e of entries) if (first === null || e.date < first) first = e.date;
+  // Cleared cells do not reach back: a day the user emptied is not a day
+  // the record starts on.
+  for (const e of entries) {
+    if (isLogged(e) && (first === null || e.date < first)) first = e.date;
+  }
   return first;
 }
 
@@ -532,7 +540,7 @@ export function LogScreen() {
       // Tapping the selected status again clears it — the only way to undo
       // a mis-tap.
       if (getEntryStatus(entries, selected, prayer) === status) {
-        void persistJournal(removeEntry(entries, selected, prayer));
+        void persistJournal(clearEntry(entries, selected, prayer));
         return;
       }
       void persistJournal(upsertEntry(entries, selected, prayer, status));
@@ -576,6 +584,7 @@ export function LogScreen() {
   const earliestLogged = useMemo(() => {
     let earliest: string | null = null;
     for (const e of entries) {
+      if (!isLogged(e)) continue;
       if (earliest === null || e.date < earliest) earliest = e.date;
     }
     for (const f of fasts) {
@@ -595,6 +604,7 @@ export function LogScreen() {
   const firstPrayerLogged = useMemo(() => {
     let first: string | null = null;
     for (const e of entries) {
+      if (!isLogged(e)) continue;
       if (first === null || e.date < first) first = e.date;
     }
     return first;
@@ -832,6 +842,10 @@ export function LogScreen() {
     apply: () => void;
   } | null>(null);
   /** A dialog that reports rather than asks — nothing to fill, or refused. */
+  /** The scope sheet, and the plan it handed back for confirmation. */
+  const [resetOpen, setResetOpen] = useState(false);
+  const [pendingReset, setPendingReset] = useState<ResetPlan | null>(null);
+
   const [notice, setNotice] = useState<{
     title: string;
     message: string;
@@ -848,6 +862,21 @@ export function LogScreen() {
       return from === to ? fmt(from) : `${fmt(from)} – ${fmt(to)}`;
     },
     [i18n.language],
+  );
+
+  /**
+   * What a reset covers, said as a span rather than as a scope name.
+   *
+   * "Everything" has no dates and needs none; the other three do, and a
+   * user about to clear a year is owed the years' worth of dates rather
+   * than the word "year".
+   */
+  const resetRangeLabel = useCallback(
+    (plan: ResetPlan) =>
+      plan.from === null || plan.to === null
+        ? t('log.resetRangeAll', 'the whole log')
+        : formatRange(plan.from, plan.to),
+    [formatRange, t],
   );
 
   /** The write half, shared by both buttons: persist, or refuse loudly. */
@@ -1170,6 +1199,27 @@ export function LogScreen() {
               {t('log.fillMonthsAction', 'Fill the past three months')}
             </Text>
             <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
+          </Pressable>
+          {/* Last, and the only one in the danger colour. It undoes what the
+              two above write — issue #13, from someone who filled three
+              months by accident and had no way back. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('log.resetAction', 'Reset the prayer log')}
+            onPress={() => setResetOpen(true)}
+            disabled={backfilling || !hydrated}
+            style={[
+              styles.backfillRow,
+              { borderTopColor: palette.border ?? palette.muted },
+            ]}
+          >
+            <Text
+              style={[styles.backfillLabel, { color: palette.danger }]}
+              numberOfLines={1}
+            >
+              {t('log.resetAction', 'Reset the prayer log')}
+            </Text>
+            <Text style={{ color: palette.danger, fontSize: 15 }}>→</Text>
           </Pressable>
         </View>
 
@@ -1655,6 +1705,63 @@ export function LogScreen() {
               preservedCount={pendingFill.skipped}
               preservedLabel={t('log.fillSummaryLeftAlone', 'Left alone')}
               preserved={pendingFill.preserved}
+            />
+          ) : null}
+        </ConfirmModal>
+
+        <ResetScopePicker
+          visible={resetOpen}
+          plans={resetPlans(entries, selected)}
+          dayLabel={selectedLabel}
+          onCancel={() => setResetOpen(false)}
+          onPick={plan => {
+            setResetOpen(false);
+            setPendingReset(plan);
+          }}
+        />
+
+        {/* The same figures-first dialog the fills use, in the danger
+            colour. What is about to go is a number, not an adjective. */}
+        <ConfirmModal
+          visible={pendingReset !== null}
+          title={t('log.resetConfirmTitle', 'Clear these prayers?')}
+          confirmLabel={t('log.resetConfirm', 'Clear them')}
+          cancelLabel={t('common.cancel', 'Cancel')}
+          destructive
+          onCancel={() => setPendingReset(null)}
+          onConfirm={() => {
+            const plan = pendingReset;
+            setPendingReset(null);
+            if (!plan) return;
+            const next = clearRange(entries, plan.from, plan.to);
+            // Every day it touched, so the graph and Home reprice at once
+            // rather than only the day on screen.
+            const touched = [
+              ...new Set(
+                entries
+                  .filter(
+                    e =>
+                      isLogged(e) &&
+                      (plan.from === null || e.date >= plan.from) &&
+                      (plan.to === null || e.date <= plan.to),
+                  )
+                  .map(e => e.date),
+              ),
+            ];
+            void persistJournal(next, touched.length ? touched : [selected]);
+          }}
+        >
+          {pendingReset ? (
+            <FillSummary
+              days={pendingReset.days}
+              daysLabel={t('log.fillSummaryDays', 'Days')}
+              prayers={pendingReset.prayers}
+              prayersLabel={t('log.fillSummaryPrayers', 'Prayers')}
+              range={resetRangeLabel(pendingReset)}
+              preserved={t(
+                'log.resetPreserved',
+                'Fasts, sunnah prayers and dhikr are not touched. This cannot be undone.',
+              )}
             />
           ) : null}
         </ConfirmModal>

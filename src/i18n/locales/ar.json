@@ -1274,7 +1274,20 @@
     "backfillPreserved": "الأيام التي سجّلتها من قبل تبقى كما هي، ولا يُمسّ يومك الحالي.",
     "fillMonthsPreserved": "الأيام التي فيها حالة أو ملاحظة أو صيام تبقى كما هي تمامًا. ولا يُمسّ يومك الحالي.",
     "fillSummaryLeftAlone": "مُبقاة",
-    "unlogged": "لم تُسجَّل"
+    "unlogged": "لم تُسجَّل",
+    "resetAction": "إعادة تعيين سجل الصلاة",
+    "resetTitle": "إعادة تعيين سجل الصلاة",
+    "resetBody": "اختر ما تريد مسحه، بالنسبة إلى {{day}}. الصيام وصلوات السنة والذكر سجلات منفصلة ولن تُمَس.",
+    "resetScopeDay": "هذا اليوم",
+    "resetScopeMonth": "هذا الشهر",
+    "resetScopeYear": "هذه السنة",
+    "resetScopeAll": "كل شيء",
+    "resetCount": "{{prayers}} صلاة في {{days}} يومًا",
+    "resetNothing": "لا شيء",
+    "resetConfirmTitle": "مسح هذه الصلوات؟",
+    "resetConfirm": "امسحها",
+    "resetPreserved": "لن يُمَس الصيام ولا صلوات السنة ولا الذكر. لا يمكن التراجع عن هذا.",
+    "resetRangeAll": "السجل كله"
   },
   "endOfDay": {
     "title": "تسجيل صلوات اليوم؟",

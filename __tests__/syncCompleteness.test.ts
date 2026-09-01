@@ -91,6 +91,15 @@ const STAYS: Record<string, string> = {
     'describes this phone — which one-off pointers the user has waved away, ' +
     'the same kind of thing as the feature tour flag',
 
+  'quran/riwayat/v1':
+    'content, not record — a muṣḥaf the reader obtained from its publisher ' +
+    'and can obtain again. It is a few megabytes of scripture per riwayah, ' +
+    'it is identical on every device that has it, and Mihrab has no right ' +
+    'to redistribute it (src/quran/riwayahStore.ts) — which an export ' +
+    'mailed to somebody else would be doing. Manage downloads lists it ' +
+    'with its size and removes it; the PREFERENCE for which riwayah to ' +
+    'read does travel, inside the Quran state, and resolves back to Hafs ' +
+    'on a device that has no data for it',
   'mushaf.assets.v3.complete': 'derived — a download completion marker',
   'mushaf.assets.v2.complete': 'derived — legacy download marker',
   'mushaf.assets.v1.complete': 'derived — legacy download marker',

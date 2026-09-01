@@ -32,11 +32,22 @@ import { mkdirDeep } from './mushafDownload';
 import type { RiwayahDataset } from './riwayahImport';
 import type { RiwayahId } from './riwayat';
 
-const STORE_VERSION = 'v1';
+/**
+ * The store's path under Documents — and its identity for the sync
+ * decision.
+ *
+ * Named `..._KEY` on purpose, though it is a directory rather than an
+ * AsyncStorage key: `syncCompleteness.test.ts` reads the source for
+ * declared stores and fails the build until each one is recorded as either
+ * travelling in an export or deliberately staying. A store that quietly
+ * escaped that check is exactly the thing the test was written to catch,
+ * and a muṣḥaf on the device is a store however it is spelled.
+ */
+export const RIWAYAH_STORE_KEY = 'quran/riwayat/v1';
 
 /** Where the datasets live. */
 export function riwayahStoreDir(): string {
-  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/riwayat/${STORE_VERSION}`;
+  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/${RIWAYAH_STORE_KEY}`;
 }
 
 export function riwayahDir(id: RiwayahId): string {

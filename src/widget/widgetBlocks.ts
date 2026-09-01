@@ -16,8 +16,12 @@
  * section" rather than as zero — a streak of 0 and an unknown streak look
  * identical on screen and mean opposite things.
  */
-import { STATUS_WEIGHT } from '../journal/journal';
-import type { JournalEntry, JournalPrayer } from '../journal/journal';
+import { STATUS_WEIGHT, isLogged } from '../journal/journal';
+import type {
+  JournalEntry,
+  JournalPrayer,
+  LoggedStatus,
+} from '../journal/journal';
 import type { FastEntry } from '../fasting/fasting';
 import type { TimingsMap } from '../types/prayer';
 import {
@@ -326,8 +330,15 @@ export function buildPracticeBlock(input: {
   const missed = new Set<string>();
   let since: string | null = null;
   for (const e of input.journal) {
+    // Tombstones are not entries — a day whose prayers were all cleared has
+    // nothing recorded on it, and counting one would put a mark on the
+    // widget's graph for a day the user deliberately emptied.
+    if (!isLogged(e)) continue;
     if (since === null || e.date < since) since = e.date;
-    weighted.set(e.date, (weighted.get(e.date) ?? 0) + (STATUS_WEIGHT[e.status] ?? 0));
+    weighted.set(
+      e.date,
+      (weighted.get(e.date) ?? 0) + (STATUS_WEIGHT[e.status as LoggedStatus] ?? 0),
+    );
     logged.set(e.date, (logged.get(e.date) ?? 0) + 1);
     if (e.status === 'on-time' || e.status === 'late') {
       kept.set(e.date, (kept.get(e.date) ?? 0) + 1);
@@ -371,7 +382,8 @@ export function buildPracticeBlock(input: {
   return {
     streak: input.streak,
     bestStreak: input.bestStreak,
-    loggedToday: input.journal.filter(e => e.date === today).length,
+    loggedToday: input.journal.filter(e => e.date === today && isLogged(e))
+      .length,
     owed: owedPrayers(input.journal).length,
     sunnahRate: sunnahRateFor(input.sunnah, now),
     fastsThisMonth: input.fasts.filter(
@@ -400,7 +412,7 @@ export function buildTodayBlock(input: {
   const now = input.now ?? new Date();
   const dateKey = dayKeyOf(now);
   const midnight = startOfLocalDay(now);
-  const todays = input.journal.filter(e => e.date === dateKey);
+  const todays = input.journal.filter(e => e.date === dateKey && isLogged(e));
 
   const prayers: WidgetTodayPrayer[] = WIDGET_LOGGABLE.map(key => {
     const raw = input.timings[key];
@@ -410,7 +422,9 @@ export function buildTodayBlock(input: {
       key,
       name: i18n.t(`prayer.${key}`),
       time: raw ? formatDisplayTime(raw) : '—',
-      status: entry ? entry.status : null,
+      // `todays` is already tombstone-free, so anything found here is a
+      // status the widget knows how to draw.
+      status: entry ? (entry.status as LoggedStatus) : null,
       due: at != null && at.getTime() <= now.getTime(),
     };
   });

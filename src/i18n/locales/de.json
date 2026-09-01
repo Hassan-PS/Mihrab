@@ -1274,7 +1274,20 @@
     "backfillPreserved": "Bereits erfasste Tage bleiben unverändert, und der heutige Tag wird nicht angetastet.",
     "fillMonthsPreserved": "Tage, die bereits einen Status, eine Notiz oder ein Fasten enthalten, bleiben genau so, wie sie sind. Der heutige Tag wird nicht angetastet.",
     "fillSummaryLeftAlone": "Unberührt",
-    "unlogged": "nicht eingetragen"
+    "unlogged": "nicht eingetragen",
+    "resetAction": "Gebetsprotokoll zurücksetzen",
+    "resetTitle": "Gebetsprotokoll zurücksetzen",
+    "resetBody": "Wähle, wie viel gelöscht wird — bezogen auf {{day}}. Fasten, Sunna-Gebete und Dhikr sind eigene Aufzeichnungen und bleiben unberührt.",
+    "resetScopeDay": "Dieser Tag",
+    "resetScopeMonth": "Dieser Monat",
+    "resetScopeYear": "Dieses Jahr",
+    "resetScopeAll": "Alles",
+    "resetCount": "{{prayers}} Gebete an {{days}} Tagen",
+    "resetNothing": "nichts",
+    "resetConfirmTitle": "Diese Gebete löschen?",
+    "resetConfirm": "Löschen",
+    "resetPreserved": "Fasten, Sunna-Gebete und Dhikr bleiben unberührt. Das lässt sich nicht rückgängig machen.",
+    "resetRangeAll": "das ganze Protokoll"
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

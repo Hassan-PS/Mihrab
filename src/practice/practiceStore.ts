@@ -19,7 +19,11 @@ import {
   durableEncryptedGet,
   durableEncryptedSet,
 } from '../storage/durableWrite';
-import { coerceJournalEntries, type JournalEntry } from '../journal/journal';
+import {
+  coerceJournalEntries,
+  isLogged,
+  type JournalEntry,
+} from '../journal/journal';
 import { coerceFastEntries, type FastEntry } from '../fasting/fasting';
 import { coerceSunnahLog, type SunnahLog } from '../journal/sunnah';
 
@@ -218,7 +222,9 @@ export function usePracticeToday(): PracticeToday {
   const fast = d.fasts.find(f => f.date === today) ?? null;
   return {
     hydrated: data != null,
-    logged: d.journal.filter(e => e.date === today).length,
+    // Tombstones are not logged prayers — see `JournalStatus`. Counting one
+    // would put a tick on the Home card for a prayer the user un-logged.
+    logged: d.journal.filter(e => e.date === today && isLogged(e)).length,
     fasted: fast != null,
     fastType: fast?.type ?? null,
     dhikrSets: d.dhikr[today] ?? 0,

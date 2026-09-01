@@ -1274,7 +1274,20 @@
     "backfillPreserved": "Los días que ya has registrado no se tocan, y hoy tampoco.",
     "fillMonthsPreserved": "Los días que ya tienen un estado, una nota o un ayuno se dejan exactamente como están. Hoy no se toca.",
     "fillSummaryLeftAlone": "Intactos",
-    "unlogged": "sin registrar"
+    "unlogged": "sin registrar",
+    "resetAction": "Restablecer el registro",
+    "resetTitle": "Restablecer el registro",
+    "resetBody": "Elige cuánto borrar, respecto a {{day}}. Los ayunos, las oraciones sunna y el dhikr son registros aparte y no se tocan.",
+    "resetScopeDay": "Este día",
+    "resetScopeMonth": "Este mes",
+    "resetScopeYear": "Este año",
+    "resetScopeAll": "Todo",
+    "resetCount": "{{prayers}} oraciones en {{days}} días",
+    "resetNothing": "nada",
+    "resetConfirmTitle": "¿Borrar estas oraciones?",
+    "resetConfirm": "Borrarlas",
+    "resetPreserved": "Los ayunos, las oraciones sunna y el dhikr no se tocan. Esto no se puede deshacer.",
+    "resetRangeAll": "todo el registro"
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",
