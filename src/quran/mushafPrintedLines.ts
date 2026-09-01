@@ -182,6 +182,12 @@ export function allocate(
  * `words` cut into `shares.length` runs, each as close to its share of the
  * total advancing length as whole words allow.
  */
+/**
+ * How far past the target a word may push a line before it is left for the
+ * next one. Above 1 because the print fills.
+ */
+const FILL_BIAS = 1.8;
+
 export function splitByShare(
   words: string[],
   shares: number[],
@@ -208,9 +214,21 @@ export function splitByShare(
     let width = 0;
     while (take < most) {
       const next = width + widths[at + take];
-      // Stop at the word that would overshoot the target by more than it
-      // undershoots — the nearest boundary, not the first one past it.
-      if (take > 0 && next > carried && next - carried > carried - width) break;
+      // ── When it is close, TAKE the word ─────────────────────────────
+      //
+      // Not the nearest boundary. A typesetter fills a line and moves on,
+      // so a line that could hold one more word holds it — and the target
+      // is a proxy anyway, stated in the widths of a face we do not have.
+      // Splitting the difference evenly left one word too few on line
+      // after line, and a line a word short has to be opened out to reach
+      // the margin, which is the void on the page.
+      if (
+        take > 0 &&
+        next > carried &&
+        next - carried > (carried - width) * FILL_BIAS
+      ) {
+        break;
+      }
       width = next;
       take += 1;
       if (width >= carried) break;

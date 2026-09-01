@@ -51,6 +51,18 @@ RECT = re.compile(
 #
 # Medians across all 602 pages that carry geometry; the spread is the
 # jitter of the ink, not disagreement about the block.
+# The ayah medallion, in the same units — measured as twice the distance
+# from the marker's own centre to the left end of the row it closes, over
+# 500 ayahs. It is remarkably constant.
+#
+# It has to come OUT of the share, and that is the whole reason this file
+# was wrong: the polygon for an ayah's last row covers its words AND its
+# medallion, so handing the whole share to the words gave every line one
+# word too few and pushed the rest onto the next. The medallion is drawn
+# by the renderer, not set as text, so what the table records is the room
+# the WORDS take.
+MARKER_UNITS = 20.17
+
 BLOCK_TOP = 1.75
 BLOCK_BOTTOM = 540.14
 LINES_PER_PAGE = 15
@@ -108,12 +120,30 @@ def page_lines(entries):
                 merged[-1][2] = max(merged[-1][2], b)
             else:
                 merged.append([idx, a, b])
-        out.append([
-            (entries[idx]['surahNumber'], entries[idx]['ayahNumber'],
-             round((b - a) / (right - left), 4))
-            for idx, a, b in merged
-        ])
-    return out
+        out.append(merged)
+
+    # The last row each ayah appears on is the one carrying its medallion.
+    last_row = {}
+    for i, line in enumerate(out):
+        for idx, _a, _b in line:
+            last_row[idx] = i
+
+    measure = right - left
+    return [
+        [
+            (
+                entries[idx]['surahNumber'],
+                entries[idx]['ayahNumber'],
+                round(
+                    max(0.0, (b - a) - (MARKER_UNITS if last_row[idx] == i else 0.0))
+                    / measure,
+                    4,
+                ),
+            )
+            for idx, a, b in line
+        ]
+        for i, line in enumerate(out)
+    ]
 
 
 def main(src, dest):
@@ -140,13 +170,20 @@ def main(src, dest):
 
     empty = [p for p, l in pages.items() if any(len(x) == 0 for x in l)]
     print(f'  pages with an empty line: {len(empty)} {empty[:8]}')
+    # A line's word-shares plus one medallion's worth per ayah ending on
+    # it should come to the full measure. They will not come to 1 on their
+    # own — that is the medallion, and it is the point.
+    marker = MARKER_UNITS / 331
     off = []
     for p, l in pages.items():
         for i, line in enumerate(l):
+            if not line:
+                continue
             total = sum(s for _, _, s in line)
-            if line and not 0.9 <= total <= 1.1:
+            if not 0.85 <= total <= 1.02:
                 off.append((p, i + 1, round(total, 3)))
-    print(f'  lines whose parts do not fill the width: {len(off)} {off[:6]}')
+    print(f'  lines that do not fill the width (allowing {marker:.3f} a medallion): '
+          f'{len(off)} {off[:6]}')
 
     with open(dest, 'w', encoding='utf-8') as f:
         json.dump({'lines': {str(k): v for k, v in sorted(pages.items())}}, f,
