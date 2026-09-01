@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "Tournez de {{deg}} degrés pour faire face à la Qibla.",
     "a11ySignal_good": "Signal de la boussole : bon.",
     "a11ySignal_weak": "Signal de la boussole : faible. Essayez de vous déplacer vers un espace ouvert.",
-    "a11ySignal_very_weak": "Signal de la boussole : très faible. La précision peut être limitée."
+    "a11ySignal_very_weak": "Signal de la boussole : très faible. La précision peut être limitée.",
+    "crossCheckTitle": "Vérifiez avec votre app Boussole",
+    "crossCheckBody": "La boussole de votre appareil est calibrée pour son matériel. Pour la lecture la plus précise, ouvrez-la et tournez jusqu'à ce qu'elle affiche {{degrees}}.",
+    "openSystemCompass": "Ouvrir l'app Boussole"
   },
   "prayer": {
     "Fajr": "Fajr",

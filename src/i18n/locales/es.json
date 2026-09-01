@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "Gira {{deg}} grados para mirar hacia la Qibla.",
     "a11ySignal_good": "Señal de la brújula: buena.",
     "a11ySignal_weak": "Señal de la brújula: débil. Intenta moverte a un área abierta.",
-    "a11ySignal_very_weak": "Señal de la brújula: muy débil. La precisión puede ser limitada."
+    "a11ySignal_very_weak": "Señal de la brújula: muy débil. La precisión puede ser limitada.",
+    "crossCheckTitle": "Compruébalo con tu app de brújula",
+    "crossCheckBody": "La brújula de tu dispositivo está calibrada para su hardware. Para la lectura más precisa, ábrela y gira hasta que muestre {{degrees}}.",
+    "openSystemCompass": "Abrir la app de brújula"
   },
   "prayer": {
     "Fajr": "Fayr",

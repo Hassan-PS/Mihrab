@@ -1,6 +1,7 @@
 package com.prayer_times
 
 import android.content.Context
+import android.content.Intent
 import android.hardware.GeomagneticField
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -14,6 +15,7 @@ import android.view.WindowManager
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
@@ -168,6 +170,53 @@ class CompassModule(reactContext: ReactApplicationContext) :
     accuracyDegrees = ACCURACY_UNKNOWN
   }
 
+  /**
+   * Is one of the OEM compass apps installed, and can it be launched?
+   *
+   * Android has no standard compass app and no intent that means "show me
+   * a compass", so there is nothing to query generically — but most of
+   * the big vendors ship one under a stable package name, and a launch
+   * intent either exists or it does not. Resolving it is the only honest
+   * way to decide whether to offer the button at all: an offer that
+   * opens nothing is worse than no offer.
+   */
+  @ReactMethod
+  fun hasSystemCompass(promise: Promise) {
+    promise.resolve(resolveSystemCompass() != null)
+  }
+
+  /** Launch it. Resolves false rather than rejecting when there is none. */
+  @ReactMethod
+  fun openSystemCompass(promise: Promise) {
+    val intent = resolveSystemCompass()
+    if (intent == null) {
+      promise.resolve(false)
+      return
+    }
+    try {
+      // No Activity to start from when the app is backgrounded, so the
+      // task flag is not optional here.
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      reactApplicationContext.startActivity(intent)
+      promise.resolve(true)
+    } catch (e: Exception) {
+      promise.resolve(false)
+    }
+  }
+
+  private fun resolveSystemCompass(): Intent? {
+    val manager = reactApplicationContext.packageManager ?: return null
+    for (pkg in SYSTEM_COMPASS_PACKAGES) {
+      val intent = try {
+        manager.getLaunchIntentForPackage(pkg)
+      } catch (_: Exception) {
+        null
+      }
+      if (intent != null) return intent
+    }
+    return null
+  }
+
   /** Required by NativeEventEmitter; the work is done by the sensor listener. */
   @ReactMethod
   fun addListener(@Suppress("UNUSED_PARAMETER") eventName: String) = Unit
@@ -289,6 +338,23 @@ class CompassModule(reactContext: ReactApplicationContext) :
   }
 
   private companion object {
+    /**
+     * The compass apps the major vendors ship, by package name.
+     *
+     * Not a guess-list: each is the documented package of that vendor's
+     * own compass. Google's Android has never included one, which is why
+     * there is no AOSP entry and why the button is often simply absent.
+     */
+    val SYSTEM_COMPASS_PACKAGES = listOf(
+      "com.miui.compass",          // Xiaomi / Redmi / POCO
+      "com.huawei.compass",        // Huawei
+      "com.coloros.compass2",      // OPPO / realme / OnePlus (ColorOS)
+      "com.oneplus.compass",       // OnePlus (OxygenOS)
+      "com.vivo.compass",          // vivo / iQOO
+      "com.sec.android.app.compass", // Samsung, where it still ships
+      "com.motorola.compass",      // Motorola
+    )
+
     /** Before the first onAccuracyChanged. Treated as "fine" rather than "broken". */
     const val ACCURACY_UNKNOWN = 15
 

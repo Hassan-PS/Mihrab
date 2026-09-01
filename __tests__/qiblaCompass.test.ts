@@ -231,3 +231,90 @@ describe('the magnetometer path is gone, not merely unused', () => {
     expect(math).not.toContain('export function magneticFieldScore');
   });
 });
+
+describe('the page does not exist on a Mac', () => {
+  // A Mac has no magnetometer. The dial would sit at a fixed heading and
+  // look broken, which is worse than the feature being absent — it is
+  // why the tile was pulled in the first place. The BEARING is not a
+  // sensor reading though, so the chip stays.
+  test('the route is not registered there', () => {
+    const nav = code('src', 'navigation', 'RootNavigator.tsx');
+    expect(nav).toContain('isMacCatalyst');
+    expect(nav).toMatch(/isMacCatalyst \? null : \(/);
+  });
+
+  test('the deep link is withheld to match, rather than dangling', () => {
+    const linking = code('src', 'navigation', 'linking.ts');
+    expect(linking).toMatch(
+      /isMacCatalyst \? \{\} : \{ Compass: 'qibla' as const \}/,
+    );
+  });
+
+  test('the home screen offers no way to open it', () => {
+    const home = code('src', 'screens', 'HomeScreen.tsx');
+    expect(home).toMatch(/isMacCatalyst\s*\?\s*undefined/);
+  });
+
+  test('but the chip still renders, as a readout', () => {
+    // Keyed on the bearing, not on the callback — the bug this guards
+    // against is `{onOpenQibla ? <chip/> : null}`, which would take the
+    // chip away with the page.
+    const card = code('src', 'screens', 'home', 'TodayCard.tsx');
+    expect(card).not.toMatch(/onOpenQibla \? \(\s*<QiblaChipCorner/);
+    expect(card).toContain('<QiblaChipCorner');
+
+    const chip = code('src', 'screens', 'home', 'QiblaChip.tsx');
+    // Without a press handler it is text, not a button.
+    expect(chip).toMatch(/if \(!onPress\)/);
+    expect(chip).toContain("accessibilityRole=\"text\"");
+  });
+});
+
+describe('the cross-check note', () => {
+  const banners = repo('src', 'screens', 'compass', 'StatusBanners.tsx');
+
+  test('names the bearing, so the other app can be used against it', () => {
+    expect(banners).toContain("t('compass.crossCheckTitle')");
+    expect(banners).toContain("t('compass.crossCheckBody'");
+    expect(banners).toContain('degrees:');
+    // The screen passes the real bearing rather than the live heading:
+    // the trigonometry is ours and certain, the sensor half is not.
+    const screen = code('src', 'screens', 'CompassScreen.tsx');
+    expect(screen).toContain('bearing={qibla}');
+  });
+
+  test('offers the button only once the device says it has one', () => {
+    // Android has no compass in AOSP, so on a Pixel the honest answer is
+    // no button. Rendering it unconditionally would be an offer that
+    // opens nothing.
+    expect(banners).toContain('hasSystemCompass');
+    expect(banners).toMatch(/canOpen \? \(/);
+  });
+
+  test('the resolver never throws its way onto the screen', () => {
+    const util = code('src', 'utils', 'systemCompass.ts');
+    // Both probe and open swallow: this is an optional convenience and
+    // must not be what breaks the compass.
+    expect((util.match(/catch \{/g) ?? []).length).toBeGreaterThanOrEqual(2);
+  });
+
+  test('Android declares the packages it queries, or it can never see them', () => {
+    // Android 11 package visibility: getLaunchIntentForPackage returns
+    // null for an installed app that is not declared, which looks exactly
+    // like the vendor not shipping a compass.
+    const manifest = repo('android', 'app', 'src', 'main', 'AndroidManifest.xml');
+    expect(manifest).toContain('<queries>');
+    const declared = [...manifest.matchAll(/<package android:name="([^"]+)"/g)]
+      .map(m => m[1]);
+    const queried = [...ANDROID_MODULE.matchAll(/"(com\.[a-z0-9.]*compass[a-z0-9.]*)"/g)]
+      .map(m => m[1]);
+    expect(queried.length).toBeGreaterThan(0);
+    for (const pkg of queried) expect(declared).toContain(pkg);
+  });
+
+  test('iOS declares the scheme it probes, or canOpenURL always says no', () => {
+    const plist = repo('ios', 'PrayerApp', 'Info.plist');
+    expect(plist).toContain('LSApplicationQueriesSchemes');
+    expect(plist).toContain('<string>compass</string>');
+  });
+});

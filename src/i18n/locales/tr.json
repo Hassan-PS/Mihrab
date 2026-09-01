@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "Kıbleye dönmek için {{deg}} derece çevirin.",
     "a11ySignal_good": "Pusula sinyali: iyi.",
     "a11ySignal_weak": "Pusula sinyali: zayıf. Açık bir alana geçmeyi deneyin.",
-    "a11ySignal_very_weak": "Pusula sinyali: çok zayıf. Doğruluk sınırlı olabilir."
+    "a11ySignal_very_weak": "Pusula sinyali: çok zayıf. Doğruluk sınırlı olabilir.",
+    "crossCheckTitle": "Pusula uygulamanla karşılaştır",
+    "crossCheckBody": "Cihazının kendi pusulası donanımına göre ayarlıdır. En doğru okuma için pusulayı aç ve {{degrees}} gösterene kadar dön.",
+    "openSystemCompass": "Pusula uygulamasını aç"
   },
   "prayer": {
     "Fajr": "Sabah",

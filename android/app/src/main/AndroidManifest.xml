@@ -1,6 +1,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+        Package visibility for the Qibla screen's "open your compass app"
+        button, and nothing else.
+
+        Android 11 made other packages invisible by default, so
+        `getLaunchIntentForPackage` returns null for an app that IS
+        installed unless it is declared here. Without this the button
+        would never appear on any modern device, which is indistinguishable
+        from the vendor not shipping a compass — the failure mode that
+        looks like a correct answer.
+
+        Declared one package at a time rather than by intent filter: there
+        is no standard intent that means "show a compass", and a broad
+        query would be asking for more visibility than this needs.
+    -->
+    <queries>
+        <package android:name="com.miui.compass" />
+        <package android:name="com.huawei.compass" />
+        <package android:name="com.coloros.compass2" />
+        <package android:name="com.oneplus.compass" />
+        <package android:name="com.vivo.compass" />
+        <package android:name="com.sec.android.app.compass" />
+        <package android:name="com.motorola.compass" />
+    </queries>
+
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Reading a pairing code off another device's screen, and nothing
          else. Optional hardware: a tablet without a camera still pairs by

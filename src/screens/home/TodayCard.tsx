@@ -480,12 +480,14 @@ function TodayCardImpl({
             eyebrow above the countdown is a full-width `Text`, so it
             overlaps the corner, and a later sibling wins the hit test
             whatever `zIndex` says. */}
-        {onOpenQibla ? (
-          <QiblaChipCorner
-            bearing={qiblaBearing ?? null}
-            onPress={onOpenQibla}
-          />
-        ) : null}
+        {/* Keyed on the BEARING, not on the callback: on a Mac there is
+            no compass screen to open and `onOpenQibla` is undefined, but
+            the bearing is trigonometry on two coordinates and is just as
+            true there. The chip becomes a readout. */}
+        <QiblaChipCorner
+          bearing={qiblaBearing ?? null}
+          onPress={onOpenQibla}
+        />
         {isToday && dataStatus && dataStatus.totalDaysCached > 0 ? (
           <Text
             style={[styles.dataStatus, { color: palette.muted }]}

@@ -16,6 +16,7 @@
  * and nothing a link can ask for is destructive — the worst a forged
  * `mihrab://` does is change which tab is showing.
  */
+import { isMacCatalyst } from '../responsive/breakpoints';
 import type { LinkingOptions } from '@react-navigation/native';
 
 import type { RootStackParamList } from './types';
@@ -68,7 +69,14 @@ export const linking: LinkingOptions<RootStackParamList> = {
        */
       Sync: 'sync',
       MonthTimes: 'month',
-      Compass: 'qibla',
+      /**
+       * Absent on a Mac, where `RootNavigator` does not register the
+       * screen. A path that maps to a route the navigator has never
+       * heard of is not a no-op — React Navigation warns and the link
+       * dies somewhere unhelpful — so the map has to agree with the
+       * navigator about what exists.
+       */
+      ...(isMacCatalyst ? {} : { Compass: 'qibla' as const }),
       Fasting: 'fasting',
     },
   },

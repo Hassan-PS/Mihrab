@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "旋转 {{deg}} 度以面向朝拜方向。",
     "a11ySignal_good": "指南针信号：良好。",
     "a11ySignal_weak": "指南针信号：弱。请尝试移动到开阔区域。",
-    "a11ySignal_very_weak": "指南针信号：很弱。精度可能受限。"
+    "a11ySignal_very_weak": "指南针信号：很弱。精度可能受限。",
+    "crossCheckTitle": "用你的指南针应用核对",
+    "crossCheckBody": "设备自带的指南针针对其硬件做过校准。若要获得最准确的读数，请打开它并转动，直到显示 {{degrees}}。",
+    "openSystemCompass": "打开指南针应用"
   },
   "prayer": {
     "Fajr": "晨礼",

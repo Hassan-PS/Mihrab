@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "Vrid {{deg}} grader för att vända mot Qibla.",
     "a11ySignal_good": "Kompasssignal: bra.",
     "a11ySignal_weak": "Kompasssignal: svag.",
-    "a11ySignal_very_weak": "Kompasssignal: mycket svag."
+    "a11ySignal_very_weak": "Kompasssignal: mycket svag.",
+    "crossCheckTitle": "Dubbelkolla med din kompassapp",
+    "crossCheckBody": "Enhetens egen kompass är anpassad till dess hårdvara. För bästa noggrannhet, öppna den och vrid tills den visar {{degrees}}.",
+    "openSystemCompass": "Öppna kompassappen"
   },
   "prayer": {
     "Fajr": "Fajr",

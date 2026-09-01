@@ -770,8 +770,18 @@ export function HomeScreen() {
     () => navigation.navigate('MonthTimes'),
     [navigation],
   );
-  const handleOpenQibla = useCallback(
-    () => navigation.navigate('Compass'),
+  /**
+   * Undefined on a Mac, where the compass screen is not registered at all
+   * — see `RootNavigator`. The chip still renders; it just stops being a
+   * button rather than pushing a route that does not exist.
+   */
+  const handleOpenQibla = useMemo(
+    () =>
+      isMacCatalyst
+        ? undefined
+        : () => {
+            navigation.navigate('Compass');
+          },
     [navigation],
   );
 

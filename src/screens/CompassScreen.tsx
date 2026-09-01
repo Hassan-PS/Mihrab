@@ -122,6 +122,7 @@ export function CompassScreen() {
         signalQuality={signalQuality}
         stability={stability}
         signalStrength={signalStrength}
+        bearing={qibla}
       />
 
       <CompassDial mode={mode} needleDeg={needleDeg} />

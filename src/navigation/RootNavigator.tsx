@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabs } from './MainTabs';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
+import { isMacCatalyst } from '../responsive/breakpoints';
 import { MonthTimesScreen } from '../screens/MonthTimesScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { QuranSurahScreen } from '../screens/QuranSurahScreen';
@@ -158,11 +159,22 @@ export function RootNavigator() {
         component={ShareMonthScreen}
         options={{ title: t('nav.shareMonth'), headerLargeTitle: false }}
       />
-      <Stack.Screen
-        name="Compass"
-        component={CompassScreen}
-        options={{ title: t('nav.compass'), headerLargeTitle: false }}
-      />
+      {/* Not on a Mac. There is no magnetometer in one, so the dial has
+          nothing to point with — it would sit at a fixed heading and look
+          broken, which is worse than the feature being absent. The HERO
+          CHIP still shows the bearing there: that number is trigonometry
+          on two coordinates, not a sensor reading.
+
+          Unregistering rather than rendering a "not supported" screen so
+          that `navigate('Compass')` cannot half-work, and so the `qibla`
+          deep link 404s honestly instead of opening a dead room. */}
+      {isMacCatalyst ? null : (
+        <Stack.Screen
+          name="Compass"
+          component={CompassScreen}
+          options={{ title: t('nav.compass'), headerLargeTitle: false }}
+        />
+      )}
       <Stack.Screen
         name="QuranSurah"
         component={QuranSurahScreen}

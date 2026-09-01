@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "Putar {{deg}} derajat untuk menghadap Kiblat.",
     "a11ySignal_good": "Sinyal kompas: baik.",
     "a11ySignal_weak": "Sinyal kompas: lemah. Cobalah pindah ke area terbuka.",
-    "a11ySignal_very_weak": "Sinyal kompas: sangat lemah. Akurasi mungkin terbatas."
+    "a11ySignal_very_weak": "Sinyal kompas: sangat lemah. Akurasi mungkin terbatas.",
+    "crossCheckTitle": "Periksa silang dengan aplikasi kompas Anda",
+    "crossCheckBody": "Kompas bawaan perangkat Anda disetel untuk perangkat kerasnya. Untuk pembacaan paling akurat, buka dan putar hingga menunjukkan {{degrees}}.",
+    "openSystemCompass": "Buka aplikasi kompas"
   },
   "prayer": {
     "Fajr": "Subuh",

@@ -20,16 +20,25 @@ import { typeStyle } from '../../theme/typography';
  * A chip rather than another row: the bearing is a single number that
  * does not change unless the user moves, so it wants the smallest piece
  * of furniture that can carry a number and a tap target. Showing the
- * degrees on the chip itself is most of the feature — someone who already
- * knows which way is north never has to open anything.
+ * degrees on the chip itself is most of the feature — someone who
+ * already knows which way is north never has to open anything.
+ *
+ * ── WHY `onPress` IS OPTIONAL ─────────────────────────────────────────
+ *
+ * On a Mac there is no magnetometer, so there is no compass screen to
+ * open — but the BEARING is not a device measurement, it is spherical
+ * trigonometry on two coordinates, and it is just as true on a desktop
+ * as on a phone. So the chip stays there and stops being a button: a
+ * readout rather than a door to a room that does not exist.
  *
  * The degrees are TRUE north, the same frame `qiblaBearingFrom` computes
- * in and the same one both compass modules now report headings in.
+ * in and the same one both compass modules report headings in.
  */
 export type QiblaChipProps = {
   /** Degrees clockwise from true north, or null when there is no fix yet. */
   bearing: number | null;
-  onPress: () => void;
+  /** Omitted where there is no compass screen to open — see above. */
+  onPress?: () => void;
 };
 
 function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
@@ -41,22 +50,10 @@ function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
   if (bearing == null) return null;
 
   const degrees = Math.round(bearing) % 360;
+  const label = t('home.qiblaChipA11y', { degrees });
 
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={t('home.qiblaChipA11y', { degrees })}
-      accessibilityHint={t('home.qiblaChipHint')}
-      onPress={onPress}
-      hitSlop={8}
-      style={({ pressed }) => [
-        styles.chip,
-        {
-          backgroundColor: palette.card,
-          borderColor: palette.border,
-          opacity: pressed ? 0.75 : 1,
-        },
-      ]}>
+  const face = (
+    <>
       <CompassIcon color={String(palette.accent)} size={14} />
       <Text
         style={[typeStyle('caption'), styles.label, { color: palette.accent }]}
@@ -67,6 +64,39 @@ function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
         accessibilityLanguage="en-US">
         {`${degrees}°`}
       </Text>
+    </>
+  );
+
+  const skin = {
+    backgroundColor: palette.card,
+    borderColor: palette.border,
+  };
+
+  if (!onPress) {
+    return (
+      <View
+        accessible
+        accessibilityRole="text"
+        accessibilityLabel={label}
+        style={[styles.chip, skin]}>
+        {face}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint={t('home.qiblaChipHint')}
+      onPress={onPress}
+      hitSlop={8}
+      style={({ pressed }) => [
+        styles.chip,
+        skin,
+        pressed && styles.pressed,
+      ]}>
+      {face}
     </Pressable>
   );
 }
@@ -101,6 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
     borderWidth: StyleSheet.hairlineWidth,
   },
+  pressed: { opacity: 0.75 },
   label: {
     fontWeight: '700',
     letterSpacing: 0.2,

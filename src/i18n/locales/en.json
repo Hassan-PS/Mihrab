@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "Rotate {{deg}} degrees to face Qibla.",
     "a11ySignal_good": "Compass signal: good.",
     "a11ySignal_weak": "Compass signal: weak. Try moving to an open area.",
-    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited."
+    "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited.",
+    "crossCheckTitle": "Cross-check with your compass app",
+    "crossCheckBody": "Your device's own compass is tuned to its hardware. For the most accurate reading, open it and turn until it shows {{degrees}}.",
+    "openSystemCompass": "Open compass app"
   },
   "prayer": {
     "Fajr": "Fajr",

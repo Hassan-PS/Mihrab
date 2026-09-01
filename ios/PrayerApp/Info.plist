@@ -46,6 +46,15 @@
 
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Probed by the Qibla screen to decide whether to offer "open your
+	     compass app". `canOpenURL` returns false for any scheme not listed
+	     here, so without this the button would never appear even on an
+	     iPhone that has Compass.app. The scheme is undocumented, which is
+	     exactly why it is probed rather than opened blindly. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>compass</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

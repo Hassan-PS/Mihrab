@@ -355,7 +355,10 @@
     "a11yNeedleDeg": "Drehe um {{deg}} Grad, um zur Qibla zu zeigen.",
     "a11ySignal_good": "Kompasssignal: gut.",
     "a11ySignal_weak": "Kompasssignal: schwach. Versuche, in einen offenen Bereich zu gehen.",
-    "a11ySignal_very_weak": "Kompasssignal: sehr schwach. Genauigkeit kann eingeschränkt sein."
+    "a11ySignal_very_weak": "Kompasssignal: sehr schwach. Genauigkeit kann eingeschränkt sein.",
+    "crossCheckTitle": "Mit deiner Kompass-App gegenprüfen",
+    "crossCheckBody": "Der Kompass deines Geräts ist auf dessen Hardware abgestimmt. Für die genaueste Anzeige öffne ihn und drehe dich, bis er {{degrees}} zeigt.",
+    "openSystemCompass": "Kompass-App öffnen"
   },
   "prayer": {
     "Fajr": "Fajr",
