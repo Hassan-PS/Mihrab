@@ -83,7 +83,9 @@
     "pagesLeftToday": "आज {{count}} पृष्ठ बाकी",
     "pageNumber": "पृष्ठ {{page}}",
     "readingDone": "आज का पाठ पूरा",
-    "readOn": "पढ़ते रहें"
+    "readOn": "पढ़ते रहें",
+    "qiblaChipA11y": "क़िबला {{degrees}} डिग्री",
+    "qiblaChipHint": "क़िबला कम्पास खोलता है"
   },
   "errors": {
     "locationNeededTitle": "स्थान की आवश्यकता है",

@@ -83,7 +83,9 @@
     "pagesLeftToday": "{{count}} halaman lagi hari ini",
     "pageNumber": "halaman {{page}}",
     "readingDone": "Bacaan hari ini selesai",
-    "readOn": "Lanjut membaca"
+    "readOn": "Lanjut membaca",
+    "qiblaChipA11y": "Kiblat {{degrees}} derajat",
+    "qiblaChipHint": "Membuka kompas kiblat"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",

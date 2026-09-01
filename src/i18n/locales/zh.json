@@ -83,7 +83,9 @@
     "pagesLeftToday": "今天还剩 {{count}} 页",
     "pageNumber": "第 {{page}} 页",
     "readingDone": "今日阅读已完成",
-    "readOn": "继续阅读"
+    "readOn": "继续阅读",
+    "qiblaChipA11y": "朝拜方向 {{degrees}} 度",
+    "qiblaChipHint": "打开朝拜方向指南针"
   },
   "errors": {
     "locationNeededTitle": "需要位置",

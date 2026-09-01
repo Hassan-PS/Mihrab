@@ -28,6 +28,7 @@ class MainApplication : Application(), ReactApplication {
           add(MihrabClipboardPackage())
           add(SyncFolderPackage())
           add(ScanQrPackage())
+          add(CompassPackage())
         },
     )
   }

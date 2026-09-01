@@ -83,7 +83,9 @@
     "pagesLeftToday": "আজ আরও {{count}} পৃষ্ঠা",
     "pageNumber": "পৃষ্ঠা {{page}}",
     "readingDone": "আজকের পড়া শেষ",
-    "readOn": "পড়া চালিয়ে যান"
+    "readOn": "পড়া চালিয়ে যান",
+    "qiblaChipA11y": "কিবলা {{degrees}} ডিগ্রি",
+    "qiblaChipHint": "কিবলা কম্পাস খোলে"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",

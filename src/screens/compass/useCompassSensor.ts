@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, NativeEventEmitter, Platform } from 'react-native';
+import { AppState, NativeEventEmitter } from 'react-native';
 import {
-  magnetometer,
-  SensorTypes,
-  setUpdateIntervalForType,
-} from 'react-native-sensors';
-import { CompassModule } from '../../native/CompassModule';
+  CompassModule,
+  CompassNativeModule,
+} from '../../native/CompassModule';
 import { normalizeHeadingDeg } from '../../utils/qibla';
 import {
   combineSignal,
-  headingFromMagnetometer,
-  magneticFieldScore,
   shortestAngleDiff,
   stabilityScoreFromHeadings,
 } from './sensorMath';
@@ -40,34 +36,52 @@ export type CompassSensorReading = {
   stability: number;
 };
 
-const compassEmitter =
-  Platform.OS === 'ios' && CompassModule
-    // NativeEventEmitter expects a full NativeModule (with addListener /
-    // removeListeners), which CompassModule satisfies at runtime; cast here
-    // to avoid a compile-time mismatch against the narrower interface.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ? new NativeEventEmitter(CompassModule as any)
-    : null;
+// NativeEventEmitter wants the real NativeModule — the one with
+// addListener / removeListeners, which both platforms' modules declare —
+// rather than the typed wrapper the rest of the app calls.
+const compassEmitter = CompassNativeModule
+  ? new NativeEventEmitter(CompassNativeModule as never)
+  : null;
 
 /**
- * Owns the full magnetometer/CompassModule subscription lifecycle — task #10.
+ * Owns the full heading subscription lifecycle — task #10.
  *
- * Encapsulates everything that was previously inline in CompassScreen:
- *   • Platform-specific subscription (CompassModule on iOS, react-native-sensors
- *     on Android).
+ * ── ONE PATH, BOTH PLATFORMS ──────────────────────────────────────────
+ *
+ * This used to branch: the native module on iOS, `react-native-sensors`'
+ * raw magnetometer on Android. The Android half computed `atan2(-x, y)`,
+ * which is a heading only while the phone is flat, and reported MAGNETIC
+ * north with no declination correction — while the Qibla bearing it was
+ * drawn against is measured from TRUE north. Tilt and declination were
+ * both silent errors on a screen whose entire job is a direction.
+ *
+ * Android now has its own native module doing what the platform's own
+ * recipe says (rotation vector → remap for display rotation → orientation
+ * → GeomagneticField declination), so both platforms deliver the same
+ * `CompassHeading` event and everything below is shared. See
+ * `android/.../CompassModule.kt` and `ios/PrayerApp/CompassModule.swift`.
+ *
+ * Still here, because none of it belonged in the screen:
  *   • Smoothing of raw readings (15% blend toward each new sample).
  *   • Stability score from a rolling history of 12 samples.
- *   • Signal strength score combining field magnitude and stability.
- *   • Startup timeout that flips to "unsupported" if no sample arrives in 10s.
- *   • Watchdog interval that detects stalled samples and restarts the
- *     subscription.
- *   • AppState listener that restarts subscription on resume.
- *   • Permission-denied detection on iOS Motion access.
+ *   • Signal strength combining reported accuracy and stability.
+ *   • Startup timeout that flips to "unsupported" if no sample arrives in
+ *     10s — which is also how a device with no usable sensor reports
+ *     itself, since the native side simply stays quiet.
+ *   • Watchdog that restarts a stalled subscription.
+ *   • AppState listener that restarts on resume.
  *
- * Returns a snapshot of the current reading. The screen renders from this
- * snapshot only — no sensor state leaks outside.
+ * @param enabled   subscribe only while the screen is focused AND the app
+ *                  is foregrounded — a compass left running in a pocket is
+ *                  a battery bug.
+ * @param latitude  the user's coordinates, needed on Android to turn
+ * @param longitude magnetic north into true north.
  */
-export function useCompassSensor(enabled: boolean): CompassSensorReading {
+export function useCompassSensor(
+  enabled: boolean,
+  latitude: number,
+  longitude: number,
+): CompassSensorReading {
   const [heading, setHeading] = useState(0);
   const [mode, setMode] = useState<CompassMode>('checking');
   const [signalStrength, setSignalStrength] = useState<SignalStrength>(-1);
@@ -106,8 +120,6 @@ export function useCompassSensor(enabled: boolean): CompassSensorReading {
       setSignalStrength(-2);
     };
 
-    setUpdateIntervalForType(SensorTypes.magnetometer, 100);
-
     const clearStartupTimeout = () => {
       if (timeoutId != null) {
         clearTimeout(timeoutId);
@@ -120,6 +132,67 @@ export function useCompassSensor(enabled: boolean): CompassSensorReading {
       timeoutId = setTimeout(() => {
         if (!cancelled && !gotSampleRef.current) setUnsupportedUi();
       }, SENSOR_TIMEOUT_MS);
+    };
+
+    const startSubscription = () => {
+      if (!CompassModule || !compassEmitter) {
+        setUnsupportedUi();
+        return;
+      }
+      subscriptionRef.current?.unsubscribe();
+      CompassModule.startUpdates(latitude, longitude);
+      const sub = compassEmitter.addListener(
+        'CompassHeading',
+        (data: { heading: number; accuracy: number }) => {
+          if (cancelled) return;
+          clearStartupTimeout();
+          lastSampleAt = Date.now();
+          if (!gotSampleRef.current) {
+            gotSampleRef.current = true;
+            setMode('live');
+            modeRef.current = 'live';
+          }
+
+          const raw = data.heading;
+          const prev = smoothedRef.current;
+          const delta = shortestAngleDiff(prev, raw);
+          const nextH = normalizeHeadingDeg(prev + delta * SMOOTH);
+          smoothedRef.current = nextH;
+          setHeading(nextH);
+
+          const hist = [
+            ...headingHistoryRef.current.slice(-(HEADING_HISTORY - 1)),
+            raw,
+          ];
+          headingHistoryRef.current = hist;
+          const stab = stabilityScoreFromHeadings(hist);
+          setStability(stab);
+
+          // Negative accuracy means "needs calibrating" on both platforms
+          // — CoreLocation's own convention, which the Android module
+          // adopts for SENSOR_STATUS_UNRELIABLE.
+          if (data.accuracy < 0) {
+            setSignalStrength(10);
+            setSignalQuality('very_weak');
+          } else {
+            const field = Math.max(0, 100 - data.accuracy * 2);
+            const signal = combineSignal(field, stab);
+            setSignalStrength(signal);
+            if (signal < 20) setSignalQuality('very_weak');
+            else if (signal < 45) setSignalQuality('weak');
+            else setSignalQuality('good');
+          }
+        },
+      );
+      subscriptionRef.current = {
+        unsubscribe: () => {
+          try {
+            sub?.remove();
+          } finally {
+            CompassModule?.stopUpdates();
+          }
+        },
+      };
     };
 
     const restartSubscription = () => {
@@ -136,118 +209,6 @@ export function useCompassSensor(enabled: boolean): CompassSensorReading {
       setStability(100);
       scheduleStartupTimeout();
       startSubscription();
-    };
-
-    const startSubscription = () => {
-      if (Platform.OS === 'ios' && CompassModule) {
-        subscriptionRef.current?.unsubscribe();
-        CompassModule.startUpdates();
-        const sub = compassEmitter?.addListener(
-          'CompassHeading',
-          (data: { heading: number; accuracy: number }) => {
-            if (cancelled) return;
-            clearStartupTimeout();
-            lastSampleAt = Date.now();
-            if (!gotSampleRef.current) {
-              gotSampleRef.current = true;
-              setMode('live');
-              modeRef.current = 'live';
-            }
-
-            const raw = data.heading;
-            const prev = smoothedRef.current;
-            const delta = shortestAngleDiff(prev, raw);
-            const nextH = normalizeHeadingDeg(prev + delta * SMOOTH);
-            smoothedRef.current = nextH;
-            setHeading(nextH);
-
-            const hist = [
-              ...headingHistoryRef.current.slice(-(HEADING_HISTORY - 1)),
-              raw,
-            ];
-            headingHistoryRef.current = hist;
-            const stab = stabilityScoreFromHeadings(hist);
-            setStability(stab);
-
-            if (data.accuracy < 0) {
-              setSignalStrength(10);
-              setSignalQuality('very_weak');
-            } else {
-              const field = Math.max(0, 100 - data.accuracy * 2);
-              const signal = combineSignal(field, stab);
-              setSignalStrength(signal);
-              if (signal < 20) setSignalQuality('very_weak');
-              else if (signal < 45) setSignalQuality('weak');
-              else setSignalQuality('good');
-            }
-          },
-        );
-        subscriptionRef.current = {
-          unsubscribe: () => {
-            try {
-              sub?.remove();
-            } finally {
-              CompassModule?.stopUpdates();
-            }
-          },
-        };
-      } else {
-        subscriptionRef.current?.unsubscribe();
-        subscriptionRef.current = magnetometer.subscribe({
-          next: ({ x, y, z }) => {
-            if (cancelled) return;
-            clearStartupTimeout();
-            lastSampleAt = Date.now();
-            if (!gotSampleRef.current) {
-              gotSampleRef.current = true;
-              setMode('live');
-              modeRef.current = 'live';
-            }
-
-            const raw = headingFromMagnetometer(x, y);
-            const prev = smoothedRef.current;
-            const delta = shortestAngleDiff(prev, raw);
-            const nextH = normalizeHeadingDeg(prev + delta * SMOOTH);
-            smoothedRef.current = nextH;
-            setHeading(nextH);
-
-            const hist = [
-              ...headingHistoryRef.current.slice(-(HEADING_HISTORY - 1)),
-              raw,
-            ];
-            headingHistoryRef.current = hist;
-            const field = magneticFieldScore(x, y, z ?? 0);
-            const stab = stabilityScoreFromHeadings(hist);
-            setStability(stab);
-            const signal = combineSignal(field, stab);
-            setSignalStrength(signal);
-            if (signal < 20) setSignalQuality('very_weak');
-            else if (signal < 45) setSignalQuality('weak');
-            else setSignalQuality('good');
-          },
-          error: error => {
-            if (cancelled) return;
-            clearStartupTimeout();
-            const msg = String(
-              (error as { message?: string } | null)?.message ?? error ?? '',
-            ).toLowerCase();
-            const looksPermission =
-              msg.includes('permission') ||
-              msg.includes('denied') ||
-              msg.includes('not authorized') ||
-              msg.includes('motion');
-            if (Platform.OS === 'ios' && looksPermission) {
-              setMode('permission_denied');
-              modeRef.current = 'permission_denied';
-              setSignalStrength(-2);
-            } else {
-              setUnsupportedUi();
-            }
-            subscriptionRef.current?.unsubscribe();
-            subscriptionRef.current = null;
-          },
-        });
-      }
     };
 
     scheduleStartupTimeout();
@@ -283,7 +244,7 @@ export function useCompassSensor(enabled: boolean): CompassSensorReading {
       }
       subscriptionRef.current = null;
     };
-  }, [enabled]);
+  }, [enabled, latitude, longitude]);
 
   return { heading, mode, signalStrength, signalQuality, stability };
 }

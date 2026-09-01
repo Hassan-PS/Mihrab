@@ -83,7 +83,9 @@
     "pagesLeftToday": "{{count}} sidor kvar idag",
     "pageNumber": "sida {{page}}",
     "readingDone": "Dagens läsning klar",
-    "readOn": "Läs vidare"
+    "readOn": "Läs vidare",
+    "qiblaChipA11y": "Qibla {{degrees}} grader",
+    "qiblaChipHint": "Öppnar Qibla-kompassen"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",

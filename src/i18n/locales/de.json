@@ -83,7 +83,9 @@
     "pagesLeftToday": "heute noch {{count}} Seiten",
     "pageNumber": "Seite {{page}}",
     "readingDone": "Heutige Lesung erledigt",
-    "readOn": "Weiterlesen"
+    "readOn": "Weiterlesen",
+    "qiblaChipA11y": "Qibla {{degrees}} Grad",
+    "qiblaChipHint": "Öffnet den Qibla-Kompass"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",

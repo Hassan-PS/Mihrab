@@ -83,7 +83,9 @@
     "pagesLeftToday": "bugün {{count}} sayfa kaldı",
     "pageNumber": "sayfa {{page}}",
     "readingDone": "Bugünün okuması tamam",
-    "readOn": "Okumaya devam"
+    "readOn": "Okumaya devam",
+    "qiblaChipA11y": "Kıble {{degrees}} derece",
+    "qiblaChipHint": "Kıble pusulasını açar"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",

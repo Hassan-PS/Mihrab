@@ -41,6 +41,7 @@ import {
   getNextPrayerDisplay,
 } from '../utils/prayerTimes';
 import { filterOptionalTimes } from '../utils/nightTimes';
+import { qiblaBearingFrom } from '../utils/qibla';
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
 import { TodayCard } from './home/TodayCard';
@@ -769,6 +770,37 @@ export function HomeScreen() {
     () => navigation.navigate('MonthTimes'),
     [navigation],
   );
+  const handleOpenQibla = useCallback(
+    () => navigation.navigate('Compass'),
+    [navigation],
+  );
+
+  /**
+   * The Qibla bearing for wherever we are, for the hero chip.
+   *
+   * Null until there is a fix, so the chip shows nothing rather than a
+   * confident bearing computed from a placeholder coordinate — 0,0 is in
+   * the Atlantic and its Qibla is a real number that would be wrong
+   * everywhere.
+   */
+  const qiblaBearing = useMemo(() => {
+    const lat =
+      settings.locationMode === 'automatic'
+        ? settings.lastFetchedLatitude
+        : settings.manualLatitude;
+    const lng =
+      settings.locationMode === 'automatic'
+        ? settings.lastFetchedLongitude
+        : settings.manualLongitude;
+    if (lat == null || lng == null) return null;
+    return qiblaBearingFrom(lat, lng);
+  }, [
+    settings.locationMode,
+    settings.lastFetchedLatitude,
+    settings.lastFetchedLongitude,
+    settings.manualLatitude,
+    settings.manualLongitude,
+  ]);
   const handleOpenQuran = useCallback(
     // The Quran is a TAB now, not a pushed page — jump to it rather than
     // stacking a second copy on top of Today (design review 2e).
@@ -925,6 +957,8 @@ export function HomeScreen() {
             getDayShort={getDayShort}
             getDayNumber={getDayNumber}
             onOpenMonth={handleOpenMonth}
+            qiblaBearing={qiblaBearing}
+            onOpenQibla={handleOpenQibla}
             dataStatus={dataStatus}
             expanded={isDashboard}
           />

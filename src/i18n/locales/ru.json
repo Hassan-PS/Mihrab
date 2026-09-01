@@ -83,7 +83,9 @@
     "pagesLeftToday": "сегодня осталось страниц: {{count}}",
     "pageNumber": "страница {{page}}",
     "readingDone": "Чтение на сегодня завершено",
-    "readOn": "Читать дальше"
+    "readOn": "Читать дальше",
+    "qiblaChipA11y": "Кибла {{degrees}} градусов",
+    "qiblaChipHint": "Открывает компас киблы"
   },
   "errors": {
     "locationNeededTitle": "Требуется местоположение",

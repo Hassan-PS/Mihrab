@@ -83,7 +83,9 @@
     "pagesLeftToday": "{{count}} pages restantes aujourd'hui",
     "pageNumber": "page {{page}}",
     "readingDone": "Lecture du jour terminée",
-    "readOn": "Continuer"
+    "readOn": "Continuer",
+    "qiblaChipA11y": "Qibla {{degrees}} degrés",
+    "qiblaChipHint": "Ouvre la boussole Qibla"
   },
   "errors": {
     "locationNeededTitle": "Emplacement nécessaire",

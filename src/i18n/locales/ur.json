@@ -83,7 +83,9 @@
     "pagesLeftToday": "آج {{count}} صفحات باقی",
     "pageNumber": "صفحہ {{page}}",
     "readingDone": "آج کی قراءت مکمل",
-    "readOn": "پڑھتے رہیں"
+    "readOn": "پڑھتے رہیں",
+    "qiblaChipA11y": "قبلہ {{degrees}} درجے",
+    "qiblaChipHint": "قبلہ کمپاس کھولتا ہے"
   },
   "errors": {
     "locationNeededTitle": "مقام درکار ہے۔",

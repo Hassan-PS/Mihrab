@@ -191,5 +191,9 @@ test('the compass sensor is gated on being on screen, not just set up', () => {
     'utf-8',
   );
   expect(hook).toMatch(/if \(!enabled\) return undefined;/);
-  expect(hook).toMatch(/\}, \[enabled\]\);/);
+  // The deps grew coordinates when Android started correcting magnetic
+  // north to true north, and the point of the assertion is `enabled` —
+  // that is what tears the subscription down. Moving location must
+  // restart it too, so extra deps are correct, not a regression.
+  expect(hook).toMatch(/\}, \[enabled(?:, [a-zA-Z]+)*\]\);/);
 });

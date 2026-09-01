@@ -83,7 +83,9 @@
     "pagesLeftToday": "بقي {{count}} صفحة اليوم",
     "pageNumber": "صفحة {{page}}",
     "readingDone": "انتهت قراءة اليوم",
-    "readOn": "تابع القراءة"
+    "readOn": "تابع القراءة",
+    "qiblaChipA11y": "القبلة {{degrees}} درجة",
+    "qiblaChipHint": "يفتح بوصلة القبلة"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",

@@ -50,6 +50,7 @@ import {
 import { isRtlLanguage } from '../../i18n/layoutDirection';
 import { DayStrip, type DayStripEntry } from './DayStrip';
 import { PrayerRow } from './PrayerRow';
+import { QiblaChipCorner } from './QiblaChip';
 import { HOME_TABLE_RADIUS } from './tokens';
 
 /** The five salāh — the only rows a "first prayer of the day" can name. */
@@ -69,6 +70,14 @@ export type TodayCardProps = {
   /** Day of month for the strip chips. */
   getDayNumber: (dayOffset: number) => string;
   onOpenMonth?: () => void;
+  /**
+   * Qibla bearing in degrees from true north, or null when there is no
+   * fix yet. Passed in rather than computed here because this card is
+   * presentational and the coordinates live in settings.
+   */
+  qiblaBearing?: number | null;
+  /** Opens the compass screen from the hero chip. */
+  onOpenQibla?: () => void;
   /** Data-freshness whisper under the hero. */
   dataStatus?: { lastFetchedAt: Date | null; totalDaysCached: number } | null;
   /** Wide iPad/Mac dashboard: the hero gets more presence. */
@@ -306,6 +315,8 @@ function TodayCardImpl({
   getDayShort,
   getDayNumber,
   onOpenMonth,
+  qiblaBearing,
+  onOpenQibla,
   dataStatus,
   expanded = false,
 }: TodayCardProps) {
@@ -459,6 +470,22 @@ function TodayCardImpl({
             timings={timings}
           />
         )}
+        {/* Parked in the corner rather than in either hero's own markup:
+            the Qibla does not depend on which day is selected, and a chip
+            that vanished when the user scrolled to tomorrow would read as
+            a bug.
+
+            LAST among the wrapper's children on purpose. Rendered before
+            the heroes it drew correctly and then swallowed every tap: the
+            eyebrow above the countdown is a full-width `Text`, so it
+            overlaps the corner, and a later sibling wins the hit test
+            whatever `zIndex` says. */}
+        {onOpenQibla ? (
+          <QiblaChipCorner
+            bearing={qiblaBearing ?? null}
+            onPress={onOpenQibla}
+          />
+        ) : null}
         {isToday && dataStatus && dataStatus.totalDaysCached > 0 ? (
           <Text
             style={[styles.dataStatus, { color: palette.muted }]}

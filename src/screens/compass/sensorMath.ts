@@ -1,35 +1,24 @@
-import { Platform } from 'react-native';
 import { normalizeHeadingDeg } from '../../utils/qibla';
 
 /**
  * Pure math helpers for the compass — task #10.
  *
  * Extracted from CompassScreen so they can be unit-tested in isolation.
- * No React, no platform side effects beyond the iOS/Android branch in
- * `headingFromMagnetometer` (which is a coordinate-system difference, not
- * a runtime side effect).
+ * No React, no platform branches: both platforms now hand over a finished
+ * heading from their native module, so everything here operates on
+ * degrees rather than on raw sensor axes.
+ *
+ * `headingFromMagnetometer` and `magneticFieldScore` used to live here.
+ * They computed a heading from the two horizontal magnetometer axes,
+ * which is correct only while the phone is flat and takes no account of
+ * magnetic declination. Both are gone with the Android sensor rewrite
+ * rather than kept "just in case": a helper that produces a plausible
+ * wrong bearing is the kind of thing that gets called again.
  */
-
-export function headingFromMagnetometer(x: number, y: number): number {
-  if (Platform.OS === 'ios') {
-    const rad = Math.atan2(y, x);
-    const deg = (rad * 180) / Math.PI;
-    return normalizeHeadingDeg(90 - deg);
-  }
-  const rad = Math.atan2(-x, y);
-  const deg = (rad * 180) / Math.PI;
-  return normalizeHeadingDeg(deg);
-}
 
 /** Shortest signed angle from `from` to `to`, in (-180, 180]. */
 export function shortestAngleDiff(from: number, to: number): number {
   return ((to - from + 540) % 360) - 180;
-}
-
-/** Map magnetic field magnitude (µT) to a 0-100 score (Earth field is ~25-65). */
-export function magneticFieldScore(x: number, y: number, z: number): number {
-  const mag = Math.sqrt(x * x + y * y + z * z);
-  return Math.min(100, Math.max(0, ((mag - 10) / 60) * 100));
 }
 
 /** Score recent heading samples on stability — 100 = perfectly still, 0 = chaotic. */

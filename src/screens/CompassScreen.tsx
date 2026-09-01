@@ -65,7 +65,10 @@ export function CompassScreen() {
   const compassActive = useIsActive();
   const sensorEnabled = hydrated && !needsGpsPrime && compassActive;
   const { heading, mode, signalStrength, signalQuality, stability } =
-    useCompassSensor(sensorEnabled);
+    // The coordinates are the hook's, not just the bearing's: Android
+    // reads MAGNETIC north and needs them to look up the local
+    // declination, or the needle would be off by it everywhere.
+    useCompassSensor(sensorEnabled, lat, lng);
 
   const needleDeg = useMemo(
     () => normalizeHeadingDeg(qibla - heading),

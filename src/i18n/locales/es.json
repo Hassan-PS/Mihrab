@@ -83,7 +83,9 @@
     "pagesLeftToday": "quedan {{count}} páginas hoy",
     "pageNumber": "página {{page}}",
     "readingDone": "Lectura de hoy completada",
-    "readOn": "Seguir leyendo"
+    "readOn": "Seguir leyendo",
+    "qiblaChipA11y": "Alquibla {{degrees}} grados",
+    "qiblaChipHint": "Abre la brújula de la alquibla"
   },
   "errors": {
     "locationNeededTitle": "Ubicación necesaria",

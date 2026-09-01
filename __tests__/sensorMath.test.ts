@@ -2,15 +2,19 @@
  * Compass sensor math — task #17.
  *
  * Pure-function tests for the helpers extracted from CompassScreen in task
- * #10. These power the live compass dial — smoothing, stability scoring,
- * field-strength mapping. Bugs here surface as a jittery dial or
- * always-very-weak signal indicator.
+ * #10. These power the live compass dial — smoothing and stability
+ * scoring. Bugs here surface as a jittery dial or an always-very-weak
+ * signal indicator.
+ *
+ * `headingFromMagnetometer` and `magneticFieldScore` were tested here too
+ * and are gone: both platforms now hand over a finished heading from
+ * their native module, so nothing in the app turns raw magnetometer axes
+ * into a bearing any more. Their tests only ever asserted that the answer
+ * was in range and repeatable, which a wrong bearing also satisfies.
  */
 
 import {
   combineSignal,
-  headingFromMagnetometer,
-  magneticFieldScore,
   shortestAngleDiff,
   stabilityScoreFromHeadings,
 } from '../src/screens/compass/sensorMath';
@@ -46,43 +50,6 @@ describe('shortestAngleDiff', () => {
         expect(d).toBeLessThanOrEqual(180);
       }
     }
-  });
-});
-
-describe('headingFromMagnetometer', () => {
-  test('returns a heading in [0, 360)', () => {
-    for (const x of [-50, -10, 0, 10, 50]) {
-      for (const y of [-50, -10, 0, 10, 50]) {
-        const h = headingFromMagnetometer(x, y);
-        expect(h).toBeGreaterThanOrEqual(0);
-        expect(h).toBeLessThan(360);
-      }
-    }
-  });
-
-  test('produces stable output for the same input', () => {
-    expect(headingFromMagnetometer(20, 30)).toBe(
-      headingFromMagnetometer(20, 30),
-    );
-  });
-});
-
-describe('magneticFieldScore', () => {
-  test('returns 0 for very weak fields (< 10 µT)', () => {
-    expect(magneticFieldScore(0, 0, 0)).toBe(0);
-    expect(magneticFieldScore(3, 4, 0)).toBe(0); // |v| = 5
-  });
-
-  test('returns 100 for very strong fields (>= 70 µT)', () => {
-    expect(magneticFieldScore(70, 0, 0)).toBe(100);
-    expect(magneticFieldScore(50, 50, 50)).toBe(100); // |v| ≈ 86.6
-  });
-
-  test('scales linearly through the typical Earth-field range (10–70 µT)', () => {
-    const score40 = magneticFieldScore(40, 0, 0); // |v| = 40
-    expect(score40).toBeGreaterThan(0);
-    expect(score40).toBeLessThan(100);
-    expect(score40).toBeCloseTo(50, 0); // halfway through the scale
   });
 });
 
