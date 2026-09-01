@@ -331,3 +331,11 @@ looks for errors. The cheapest defence is an oracle — some second source
 that was not derived from the first — and this project now has two of
 them, Sweden's and Morocco's, both wired in as providers rather than as
 tests. Using them as tests is the obvious next step and is not done.
+
+## 2.13.8 (253) — 2026-09-01
+
+Took 1 aborted attempt(s) before it ran clean:
+
+  - 1 catalyst build failed — /tmp/release-catalyst.log
+
+**Lesson:** _(unfilled)_
