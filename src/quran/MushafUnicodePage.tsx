@@ -49,6 +49,13 @@ import {
   type LayoutChangeEvent,
 } from 'react-native';
 import { FONTS } from '../theme/typography';
+import {
+  MUSHAF_LINE_BOX_SLACK_EM,
+  WORD_SPACE_EM,
+  WORD_SPACE_MAX_EM,
+  WORD_SPACE_MIN_EM,
+  gapMetrics,
+} from './mushafLayout';
 
 import {
   ayahCountForRiwayah,
@@ -93,24 +100,18 @@ const MAX_FIT_PASSES = 4;
 const FIT_FLOOR = 0.93;
 
 /**
- * The ayah mark and the space before it, in advancing characters.
+ * Justification is the Hafs pages' own, not a second answer to the same
+ * question.
  *
- * Small, and on every ayah, so leaving it out of a line's width bends the
- * sizing by about a character per ayah — three or four on a busy line.
+ * `mushafLayout.ts` solved this once, and the reasoning it carries was
+ * paid for: the nominal space, the band a solved space may fall in, the
+ * slack reserved out of the block so a flush line cannot lose its last
+ * word to Android's single-line break, and above all `gapMetrics` — which
+ * shrinks the space GLYPH for a tight line rather than asking the platform
+ * for negative letter spacing, because that is where issue #6's missing
+ * words came from. Importing it means a fix to any of that reaches both
+ * renderers, and that the two pages are set to the same measure.
  */
-const AYAH_MARK_CHARS = 4;
-
-/**
- * How much of the measure a printed line is sized to fill.
- *
- * Under one because the size is derived from an estimated advance, and a
- * line that comes out a hair too wide does not clip — it WRAPS, which
- * turns fifteen rows into sixteen and undoes the whole point.
- */
-const PRINTED_FILL = 0.97;
-
-/** The most a printed line may be tracked out to reach the measure. */
-const MAX_TRACKING_EM = 0.06;
 
 /**
  * What a character of this riwayah's face actually advances, per page box.
@@ -123,6 +124,41 @@ const MAX_TRACKING_EM = 0.06;
  * page after this box's first is drawn right on its first frame.
  */
 const ADVANCE_CACHE = new Map<string, number>();
+
+/**
+ * The advance to assume before anything has been measured — deliberately
+ * an OVER-estimate.
+ *
+ * A first guess that is too small sets the page too large, the line is
+ * then drawn wider than its box, and `onTextLayout` reports the width of
+ * the BOX rather than of the text — which reads as an even smaller
+ * advance, and the page never recovers. The estimate has to approach the
+ * truth from the side where the measurement is still honest, so it starts
+ * wide, the first frame comes out narrow, and the one measurement it takes
+ * is of a line nothing has constrained.
+ *
+ * This is the third time this renderer has been caught measuring
+ * something other than the text: the fit loop measured its own minHeight,
+ * and before that the Hafs pages sized against advances that omitted the
+ * word spaces.
+ */
+const PRINTED_START_ADVANCE_EM = 0.6;
+
+/**
+ * The ayah medallion's width, learnt the same way and for the same reason.
+ *
+ * It was counted as four characters of text, and it is not: U+06DD sets
+ * the number inside a circle, one glyph carrying several characters' worth
+ * of ink. Folding it into the per-character advance made that advance
+ * absorb the error — every line then shrank to protect the few carrying a
+ * medallion, and a page that had been overflowing became a page set far
+ * too small. Two unknowns need two numbers.
+ *
+ * Learnt from lines that HAVE one, once the advance is known from lines
+ * that do not. Starts over-wide, for the reason above.
+ */
+const MARK_CACHE = new Map<string, number>();
+const PRINTED_START_MARK_EM = 3;
 
 /**
  * Average advance per base character, in ems — the one guess in the size
@@ -141,6 +177,7 @@ const FIT_CACHE = new Map<string, number>();
 export function _resetUnicodePageFitForTests(): void {
   FIT_CACHE.clear();
   ADVANCE_CACHE.clear();
+  MARK_CACHE.clear();
   calibratedAdvanceEm = 0.42;
 }
 
@@ -619,53 +656,130 @@ function PrintedPageBody({
    * recoverable. Sizing to the longest costs a little fill on the shorter
    * lines, which justification below takes back.
    */
-  const lengths = React.useMemo(
+  /** Each row's ink and gaps, in ems of the page's own face. */
+  const rows_em = React.useMemo(
     () =>
-      rows.map(row =>
-        row.ayahs.reduce(
-          (n, a) => n + advancingLength(a.text) + (a.ends ? AYAH_MARK_CHARS : 0),
-          0,
-        ),
-      ),
+      rows.map(row => {
+        let words = 0;
+        let chars = 0;
+        let marks = 0;
+        for (const part of row.ayahs) {
+          const parts = part.text.split(/\s+/).filter(Boolean);
+          words += parts.length;
+          chars += parts.reduce((n, w) => n + advancingLength(w), 0);
+          if (part.ends) marks += 1;
+        }
+        return { chars, marks, gaps: Math.max(0, words - 1) };
+      }),
     [rows],
   );
-  const widest = lengths.reduce((most, n) => Math.max(most, n), 0);
-  const widestRow = lengths.indexOf(widest);
 
   const advanceKey = `${fontFamily}:${Math.round(width)}`;
   const [advanceEm, setAdvanceEm] = React.useState(
-    () => ADVANCE_CACHE.get(advanceKey) ?? calibratedAdvanceEm,
+    () => ADVANCE_CACHE.get(advanceKey) ?? PRINTED_START_ADVANCE_EM,
   );
+  const [markEm, setMarkEm] = React.useState(
+    () => MARK_CACHE.get(advanceKey) ?? PRINTED_START_MARK_EM,
+  );
+  /** A line's ink, in ems, from what has been learnt so far. */
+  const inkEmOf = React.useCallback(
+    (row: { chars: number; marks: number }) =>
+      row.chars * advanceEm + row.marks * markEm,
+    [advanceEm, markEm],
+  );
+
+  /**
+   * The block, exactly as `pageMeasureEm` computes it for a Hafs page: the
+   * widest line set at the nominal space, plus the reserved slack. Sizing
+   * to anything narrower is what put text off both edges of every Hafs
+   * page once, and the slack is what keeps a flush line from losing its
+   * last word.
+   */
+  const { blockEm, widestRow } = React.useMemo(() => {
+    let most = 0;
+    let at = 0;
+    rows_em.forEach((row, i) => {
+      const drawn = inkEmOf(row) + row.gaps * WORD_SPACE_EM;
+      if (drawn > most) {
+        most = drawn;
+        at = i;
+      }
+    });
+    return { blockEm: most + MUSHAF_LINE_BOX_SLACK_EM, widestRow: at };
+  }, [inkEmOf, rows_em]);
+  void widestRow;
+
   const fontSize =
-    widest > 0
-      ? Math.min(
-          rowHeight / UNICODE_LINE_HEIGHT_EM,
-          (width * PRINTED_FILL) / (widest * advanceEm),
-        )
+    blockEm > 0
+      ? Math.min(rowHeight / UNICODE_LINE_HEIGHT_EM, width / blockEm)
       : rowHeight / UNICODE_LINE_HEIGHT_EM;
 
   /**
-   * One measurement of the longest line, which settles the face's advance.
+   * One honest pass over every line, then both unknowns at once.
    *
-   * `onTextLayout` reports what was DRAWN. Deriving the advance from it
-   * rather than fitting towards it is what keeps this to a single pass:
-   * width = chars × advance × size, so advance = width / (chars × size)
-   * whatever size the measurement happened at.
+   * The first frame is deliberately set from an OVER-estimate, so no line
+   * reaches its box and every measurement is of text rather than of a
+   * container. That is the whole trick, and it is the third time this
+   * renderer has needed it: a fit loop that measured its own minHeight,
+   * and an advance learnt from a line that had already been cut off, both
+   * produced a confident wrong answer that no further pass could correct.
+   *
+   * With honest widths the two unknowns fall out in order — the letters'
+   * advance from the lines carrying no medallion, then the medallion from
+   * the lines that do — and the WIDEST line decides each, so the size that
+   * follows fits the worst case and nothing overflows. One pass, cached
+   * per face and box, so only the first page a reader opens pays for it.
    */
-  const onWidestLayout = React.useCallback(
-    (e: { nativeEvent: { lines: Array<{ width: number }> } }) => {
-      if (ADVANCE_CACHE.has(advanceKey) || widest <= 0 || fontSize <= 0) return;
-      const drawn = e.nativeEvent.lines.reduce((m, l) => Math.max(m, l.width), 0);
-      if (drawn <= 0) return;
-      const implied = drawn / (widest * fontSize);
-      // A wild answer means the line wrapped, or the face fell back to
-      // something else entirely. Keep the estimate rather than enshrine a
-      // number that would mis-size every page after it.
-      if (implied < 0.2 || implied > 1.2) return;
-      ADVANCE_CACHE.set(advanceKey, implied);
-      setAdvanceEm(implied);
+  const samples = React.useRef<{
+    key: string;
+    rows: Map<number, { inkEm: number; chars: number; marks: number }>;
+  }>({ key: advanceKey, rows: new Map() });
+  if (samples.current.key !== advanceKey) {
+    samples.current = { key: advanceKey, rows: new Map() };
+  }
+  const textRows = React.useMemo(
+    () => rows.filter(r => !r.empty).length,
+    [rows],
+  );
+
+  const onLineLayout = React.useCallback(
+    (index: number, drawn: number, spaceEm: number) => {
+      if (MARK_CACHE.has(advanceKey)) return;
+      const row = rows_em[index];
+      if (!row || fontSize <= 0 || drawn <= 0) return;
+      // A line that reached its box may have been cut off at it, and its
+      // reported width is then the box's. Learning from that is how the
+      // page teaches itself to stay wrong.
+      if (drawn >= width - 1) return;
+      samples.current.rows.set(index, {
+        inkEm: drawn / fontSize - row.gaps * spaceEm,
+        chars: row.chars,
+        marks: row.marks,
+      });
+      if (samples.current.rows.size < textRows) return;
+
+      const seen = [...samples.current.rows.values()];
+      let advance = 0;
+      for (const r of seen) {
+        if (r.marks === 0 && r.chars > 0) {
+          advance = Math.max(advance, r.inkEm / r.chars);
+        }
+      }
+      // A page whose every line carries a medallion cannot separate the
+      // two, so it keeps what it has rather than guess.
+      if (advance < 0.2 || advance > 1.2) return;
+      let mark = 0;
+      for (const r of seen) {
+        if (r.marks > 0) {
+          mark = Math.max(mark, (r.inkEm - r.chars * advance) / r.marks);
+        }
+      }
+      ADVANCE_CACHE.set(advanceKey, advance);
+      MARK_CACHE.set(advanceKey, Math.max(0, Math.min(6, mark)));
+      setAdvanceEm(advance);
+      setMarkEm(Math.max(0, Math.min(6, mark)));
     },
-    [advanceKey, fontSize, widest],
+    [advanceKey, fontSize, rows_em, textRows, width],
   );
 
   /**
@@ -731,24 +845,75 @@ function PrintedPageBody({
           }
           return <View key={`e${index}`} style={{ height: rowHeight }} />;
         }
-        const chars = row.ayahs.reduce(
-          (n, a) => n + advancingLength(a.text) + (a.ends ? AYAH_MARK_CHARS : 0),
-          0,
-        );
-        // Positive only, and capped. Asking a platform for a NEGATIVE gap
-        // is what lost words off the ends of Hafs lines on one reporter's
-        // device — it was silently ignored there, and the line was then
-        // drawn wider than it had been measured for.
-        const slack = width - chars * advanceEm * fontSize;
-        const spacing =
-          chars > 1
-            ? Math.max(0, Math.min(slack / (chars - 1), fontSize * MAX_TRACKING_EM))
-            : 0;
+        // ── Justify by opening the word gaps ────────────────────────
+        //
+        // NOT by tracking the line. `letterSpacing` on a run of Arabic
+        // adds space after every glyph, and a combining mark is a glyph:
+        // tracking a line pushes the harakat off the letters they belong
+        // to. So the line is split at its spaces and each GAP is widened,
+        // which is a run of one space where there is no mark to detach.
+        //
+        // And only ever widened. Asking a platform for a negative gap is
+        // what lost words off the ends of Hafs lines on one reporter's
+        // device — it was ignored there, and the line was then drawn
+        // wider than it had been measured for.
+        const tokens: Array<{
+          text: string;
+          ref: AyahRef;
+          mark: number | null;
+          lit: boolean;
+        }> = [];
+        for (const part of row.ayahs) {
+          const words = part.text.split(/\s+/).filter(Boolean);
+          const lit =
+            highlight?.surah === part.surah && highlight?.ayah === part.ayah;
+          words.forEach((word, wi) => {
+            tokens.push({
+              text: word,
+              ref: { surah: part.surah, ayah: part.ayah },
+              mark: part.ends && wi === words.length - 1 ? part.ayah : null,
+              lit,
+            });
+          });
+        }
+        // ── Solve the gap, exactly as a Hafs line does ──────────────
+        //
+        // `lineSpaceEm`'s rule, on this renderer's numbers: the space that
+        // makes the line reach the measure, held inside the band a printed
+        // gap may occupy. A line that cannot reach it even at the widest
+        // is set at the nominal space and CENTRED rather than dragged
+        // across the page — the print does the same, and pulling a short
+        // closing line apart is what the Hafs plates were fixed for.
+        const row_em = rows_em[index];
+        const measureEm = width / fontSize - MUSHAF_LINE_BOX_SLACK_EM;
+        const required =
+          row_em.gaps > 0
+            ? (measureEm - inkEmOf(row_em)) / row_em.gaps
+            : WORD_SPACE_EM;
+        const centred = required > WORD_SPACE_MAX_EM;
+        const spaceEm = centred
+          ? WORD_SPACE_EM
+          : Math.max(WORD_SPACE_MIN_EM, required);
+        // The gap is a space in the bundled face, at a size derived from
+        // that face's own advance — never the platform's fallback, whose
+        // width differs between iOS and Android and cost page 49 the last
+        // word of all fifteen lines.
+        const gapStyle = {
+          fontFamily: FONTS.arabicQuran,
+          ...gapMetrics(spaceEm, fontSize),
+        };
+
         return (
           <Text
             key={`l${index}`}
             allowFontScaling={false}
-            onTextLayout={index === widestRow ? onWidestLayout : undefined}
+            onTextLayout={e => {
+              const drawn = e.nativeEvent.lines.reduce(
+                (m, l) => Math.max(m, l.width),
+                0,
+              );
+              onLineLayout(index, drawn, spaceEm);
+            }}
             style={[
               styles.body,
               {
@@ -757,35 +922,33 @@ function PrintedPageBody({
                 fontFamily,
                 fontSize,
                 lineHeight: rowHeight,
-                letterSpacing: spacing,
                 color: colors.text,
-                textAlign: 'right',
+                textAlign: centred ? 'center' : 'right',
               },
             ]}
           >
-            {row.ayahs.map((part, i) => {
-              const ref = { surah: part.surah, ayah: part.ayah };
-              const lit =
-                highlight?.surah === part.surah && highlight?.ayah === part.ayah;
-              return (
-                <Text
-                  key={`${part.surah}:${part.ayah}:${i}`}
-                  onPress={onAyahPress ? () => onAyahPress(ref) : undefined}
-                  onLongPress={
-                    onAyahLongPress ? () => onAyahLongPress(ref) : undefined
-                  }
-                  style={lit ? { backgroundColor: colors.selection } : undefined}
-                >
-                  {part.text}
-                  {part.ends ? (
-                    <Text style={{ color: colors.accent, fontFamily: FONTS.arabicQuran }}>
-                      {`${NBSP}${END_OF_AYAH}${easternNumerals(part.ayah)}`}
-                    </Text>
-                  ) : null}
-                  {i < row.ayahs.length - 1 ? ' ' : ''}
-                </Text>
-              );
-            })}
+            {tokens.map((token, i) => (
+              <Text
+                key={`${token.ref.surah}:${token.ref.ayah}:${i}`}
+                onPress={onAyahPress ? () => onAyahPress(token.ref) : undefined}
+                onLongPress={
+                  onAyahLongPress ? () => onAyahLongPress(token.ref) : undefined
+                }
+                style={token.lit ? { backgroundColor: colors.selection } : undefined}
+              >
+                {token.text}
+                {token.mark != null ? (
+                  <Text
+                    style={{ color: colors.accent, fontFamily: FONTS.arabicQuran }}
+                  >
+                    {`${NBSP}${END_OF_AYAH}${easternNumerals(token.mark)}`}
+                  </Text>
+                ) : null}
+                {i < tokens.length - 1 ? (
+                  <Text style={gapStyle}>{NBSP}</Text>
+                ) : null}
+              </Text>
+            ))}
           </Text>
         );
       })}
