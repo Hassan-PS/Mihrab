@@ -196,6 +196,19 @@ const PRINTED_LINE_HEIGHT_EM = UNICODE_LINE_HEIGHT_EM;
 const PRINTED_TYPICAL_LINE_EM = 18.2;
 
 /**
+ * How far apart the rows may be set, as a multiple of the leading the type
+ * actually needs — the height the page uses when it cannot use it for
+ * bigger letters.
+ *
+ * Full screen on a phone wants about 1.23 to fill exactly. A little over
+ * that so it fills rather than nearly fills, and not much over: past about
+ * a third again, fifteen lines stop reading as a page and start reading as
+ * a list. Whatever a very tall box still cannot use stays as margin, split
+ * evenly, which is the honest end of it.
+ */
+const MAX_PRINTED_LEADING = 1.3;
+
+/**
  * Average advance per base character, in ems — the one guess in the size
  * prediction, and the one thing measurement can teach.
  *
@@ -742,9 +755,24 @@ function PrintedPageBody({
    * diacritics the Warsh orthography leans on.
    *
    * The measure has the same vote as the row, and for the same reason —
-   * see `PRINTED_TYPICAL_LINE_EM`. Whichever is tighter decides, the rows
-   * take the height the type needs rather than an equal share of the box,
-   * and what is left over becomes margin above and below.
+   * see `PRINTED_TYPICAL_LINE_EM`. Whichever is tighter decides.
+   *
+   * ── AND THE LEFTOVER HEIGHT GOES INTO THE LEADING ──────────────────
+   *
+   * A box taller than the page's proportions — full screen is one — leaves
+   * height the type cannot use, because using it would make the lines
+   * wider than the measure. Banking it as margin above and below is a
+   * void at each end of the page, which is not what the extra room is
+   * for. It goes into the ROWS instead: the same fifteen lines, set
+   * further apart.
+   *
+   * This is the answer the Hafs pages already give. `MushafReader`'s
+   * `MAX_VERTICAL_STRETCH` stretches the printed page into the same free
+   * space rather than letterboxing it, and caps the stretch at 1.25
+   * because past that the calligraphy reads as drawn out. Nothing is drawn
+   * out here — the letters keep their size and only the space between the
+   * lines opens — so the cap can be a little looser, and full screen on a
+   * phone wants about 1.23 of it.
    */
   const fontSize = Math.max(
     MIN_PRINTED_SIZE,
@@ -753,7 +781,10 @@ function PrintedPageBody({
       measure / PRINTED_TYPICAL_LINE_EM,
     ),
   );
-  const rowHeight = fontSize * PRINTED_LINE_HEIGHT_EM;
+  const rowHeight = Math.min(
+    height / rows.length,
+    fontSize * PRINTED_LINE_HEIGHT_EM * MAX_PRINTED_LEADING,
+  );
   const margin = Math.max(0, (height - rowHeight * rows.length) / 2);
 
   const onLineLayout = React.useCallback(
