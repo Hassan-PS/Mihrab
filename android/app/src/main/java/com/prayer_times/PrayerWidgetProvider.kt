@@ -151,6 +151,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
    * starting, or the OS may be in a state that forbids it. A refresh that
    * only redraws is the old behaviour, which is worse than the new one and
    * much better than a crash inside a broadcast receiver.
+   *
+   * NOT WHAT THE SAME GLYPH DOES ON iOS. `RefreshIntent` over in
+   * PrayerWidgetExtension.swift calls `reloadTimelines(ofKind:)` and stops
+   * there: an iOS widget extension has no way to run a sync round, because
+   * the round needs the record's encryption key and the key lives on the
+   * JS side of the app. Android can do the second half only because a
+   * HeadlessJS service is a way to run that JS without a foreground app.
+   * So the two buttons genuinely mean different things, and the gap is not
+   * an unfinished port.
    */
   private fun onRefreshPressed(context: Context) {
     requestUpdate(context)

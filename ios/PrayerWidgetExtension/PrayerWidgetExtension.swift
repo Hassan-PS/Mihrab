@@ -918,6 +918,24 @@ struct RefreshIntent: AppIntent {
   /// which is the honest meaning of the button, and an expired payload
   /// still needs the app opened — which is what the card says when it
   /// happens.
+  ///
+  /// ── THE SAME GLYPH DOES MORE ON ANDROID ─────────────────────────────
+  ///
+  /// Worth knowing before anyone "fixes" the asymmetry. `onRefreshPressed`
+  /// in PrayerWidgetProvider.kt redraws AND starts a headless service that
+  /// runs a sync round, so a press there can pull in what another paired
+  /// device recorded without the app being opened. This one cannot do the
+  /// equivalent, and the reason is structural rather than unfinished: a
+  /// sync round needs the record's encryption key, which lives on the JS
+  /// side of the app, and a widget extension has neither the key nor a
+  /// way to run JS. The two buttons therefore mean different things —
+  /// "redraw" here, "redraw and go and look" there — and only one of them
+  /// can be made to mean the other.
+  ///
+  /// Which families carry it, since it is not all of them: `.systemLarge`
+  /// and the medium `default` branch, both behind `#available(iOS 17.0)`
+  /// because `Button(intent:)` is iOS 17. Small and the accessory families
+  /// have no room for it and never had one.
   func perform() async throws -> some IntentResult {
     WidgetCenter.shared.reloadTimelines(ofKind: "PrayerTimesWidget")
     return .result()
