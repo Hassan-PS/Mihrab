@@ -23,7 +23,7 @@
  * travels from them to the reader without passing through anything of
  * ours.
  */
-import { MUSHAF_SURAHS } from './pages';
+import { MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
 import { installRiwayahDataset } from './riwayahData';
 import { verifyRiwayahDataset } from './riwayahImport';
 import type { RiwayahProvenance } from './riwayahStore';
@@ -160,7 +160,7 @@ async function finish(
       : fail('quran.riwayahNotJson', 'That file is not a data file.');
   }
 
-  const verified = verifyRiwayahDataset(raw, MUSHAF_SURAHS);
+  const verified = verifyRiwayahDataset(raw, MUSHAF_SURAHS, MUSHAF_PAGES);
   if (!verified.ok) {
     return fail(
       'quran.riwayahNotAQuran',

@@ -22,6 +22,15 @@
  * second, figures-first confirmation (`FillSummary` in `ConfirmModal`),
  * because this is the one action in the app that removes what someone
  * recorded about their own worship.
+ *
+ * ── AND WHY THE COUNTS ARE FIGURES, NOT A SENTENCE ────────────────────
+ *
+ * "3 prayers on 1 days" was the first version, and it is the exact copy
+ * `FillSummary` warns about: a count inside a sentence needs a plural form
+ * per language — six of them in Arabic — and the version nobody writes is
+ * the one users read. A figure under a caption inflects in no language, so
+ * the captions here are the same two this app already uses above the
+ * fill's figures, and the numbers sit under them.
  */
 import {
   Modal,
@@ -29,6 +38,8 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  View,
+  type ColorValue,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -100,14 +111,17 @@ export function ResetScopePicker({
                   key={plan.scope}
                   accessibilityRole="button"
                   accessibilityState={{ disabled: empty }}
-                  accessibilityLabel={`${t(label.key, label.fallback)} — ${t(
-                    'log.resetCount',
-                    {
-                      defaultValue: '{{prayers}} prayers on {{days}} days',
-                      prayers: plan.prayers,
-                      days: plan.days,
-                    },
-                  )}`}
+                  accessibilityLabel={
+                    empty
+                      ? `${t(label.key, label.fallback)} — ${t(
+                          'log.resetNothing',
+                          'nothing',
+                        )}`
+                      : `${t(label.key, label.fallback)} — ${plan.prayers} ${t(
+                          'log.fillSummaryPrayers',
+                          'Prayers',
+                        )}, ${plan.days} ${t('log.fillSummaryDays', 'Days')}`
+                  }
                   disabled={empty}
                   onPress={() => onPick(plan)}
                   style={({ pressed }) => [
@@ -125,21 +139,26 @@ export function ResetScopePicker({
                   >
                     {t(label.key, label.fallback)}
                   </Text>
-                  <Text
-                    style={[
-                      styles.rowCount,
-                      tabularNumeralStyle,
-                      { color: palette.muted },
-                    ]}
-                  >
-                    {empty
-                      ? t('log.resetNothing', 'nothing')
-                      : t('log.resetCount', {
-                          defaultValue: '{{prayers}} prayers on {{days}} days',
-                          prayers: plan.prayers,
-                          days: plan.days,
-                        })}
-                  </Text>
+                  {empty ? (
+                    <Text style={[styles.rowCount, { color: palette.muted }]}>
+                      {t('log.resetNothing', 'nothing')}
+                    </Text>
+                  ) : (
+                    <View style={styles.figures}>
+                      <Figure
+                        value={plan.prayers}
+                        caption={t('log.fillSummaryPrayers', 'Prayers')}
+                        color={palette.text}
+                        captionColor={palette.muted}
+                      />
+                      <Figure
+                        value={plan.days}
+                        caption={t('log.fillSummaryDays', 'Days')}
+                        color={palette.text}
+                        captionColor={palette.muted}
+                      />
+                    </View>
+                  )}
                 </Pressable>
               );
             })}
@@ -158,6 +177,30 @@ export function ResetScopePicker({
         </Pressable>
       </Pressable>
     </Modal>
+  );
+}
+
+/** One number with its caption under it — the shape that never inflects. */
+function Figure({
+  value,
+  caption,
+  color,
+  captionColor,
+}: {
+  value: number;
+  caption: string;
+  color: ColorValue;
+  captionColor: ColorValue;
+}) {
+  return (
+    <View style={styles.figure}>
+      <Text style={[styles.figureValue, tabularNumeralStyle, { color }]}>
+        {value}
+      </Text>
+      <Text style={[styles.figureCaption, { color: captionColor }]}>
+        {caption}
+      </Text>
+    </View>
   );
 }
 
@@ -186,6 +229,16 @@ const styles = StyleSheet.create({
   rowEmpty: { opacity: 0.55 },
   rowLabel: { fontSize: 15, fontWeight: '600' },
   rowCount: { fontSize: 12.5, marginTop: 3 },
+  figures: { flexDirection: 'row', gap: 22, marginTop: 6 },
+  figure: { minWidth: 54 },
+  figureValue: { fontSize: 20, fontWeight: '700', lineHeight: 24 },
+  figureCaption: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginTop: 1,
+  },
   cancel: { alignSelf: 'flex-end', paddingHorizontal: 14, paddingVertical: 12 },
   cancelLabel: { fontSize: 15, fontWeight: '600' },
 });

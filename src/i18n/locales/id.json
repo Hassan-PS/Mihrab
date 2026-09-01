@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "Bulan ini",
     "resetScopeYear": "Tahun ini",
     "resetScopeAll": "Semuanya",
-    "resetCount": "{{prayers}} salat pada {{days}} hari",
     "resetNothing": "tidak ada",
     "resetConfirmTitle": "Hapus salat ini?",
     "resetConfirm": "Hapus",

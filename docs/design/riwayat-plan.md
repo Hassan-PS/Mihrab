@@ -326,9 +326,22 @@ than migrating after.
   distribute the data, so it does not need a licence to. What it does need
   is to keep being true — the moment anything is bundled or mirrored, this
   becomes the blocking question again.
-- **Text verification.** Someone with the standing to do so should check a
-  sample against a printed KFGQPC Warsh muṣḥaf. A checksum proves the file
-  did not change in transit; it does not prove the file was right.
+- **Text verification.** Half of this is now the app's job and is done.
+  `juzCheck.ts` reads an incoming dataset at the sixty places a reader
+  would check it themselves — the first and last ayah of each of the
+  thirty ajzāʾ — against the Tanzil Hafs text already in the build, and
+  refuses anything that does not read like the Qur'an there. It catches
+  the three failures that matter: a file that is not scripture, real
+  scripture shifted by an ayah, and juz numbering off by one. It was
+  written after a synthetic fixture passed every structural check and
+  rendered on a device as a muṣḥaf, complete with surah band and page
+  number, with nothing on screen to say otherwise.
+
+  The other half remains a human's. This proves a file is the Qur'an; it
+  does not prove it is a faithful WARSH edition, and someone with the
+  standing to do so should still check a sample against a printed KFGQPC
+  muṣḥaf. A checksum proves a file did not change in transit; this proves
+  it is scripture; neither proves the riwayah is right.
 - **Shaping.** Warsh orthography leans on marks Hafs does not use. RN
   `<Text>` should shape it correctly on both platforms, but "should" is
   doing work in that sentence — it needs a device test early in Phase 2,

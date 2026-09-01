@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "本月",
     "resetScopeYear": "今年",
     "resetScopeAll": "全部",
-    "resetCount": "{{days}} 天内的 {{prayers}} 次礼拜",
     "resetNothing": "没有",
     "resetConfirmTitle": "清除这些礼拜记录？",
     "resetConfirm": "清除",

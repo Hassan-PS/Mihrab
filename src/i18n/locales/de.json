@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "Dieser Monat",
     "resetScopeYear": "Dieses Jahr",
     "resetScopeAll": "Alles",
-    "resetCount": "{{prayers}} Gebete an {{days}} Tagen",
     "resetNothing": "nichts",
     "resetConfirmTitle": "Diese Gebete löschen?",
     "resetConfirm": "Löschen",

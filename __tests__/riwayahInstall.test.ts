@@ -13,7 +13,9 @@
  *     to `resolveRiwayah`, and it is the last test here.
  */
 import * as BlobUtil from 'react-native-blob-util';
-import { TOTAL_AYAHS, ayahAtIndex } from '../src/quran/ayahIndex';
+import { TOTAL_AYAHS } from '../src/quran/ayahIndex';
+import { MUSHAF_PAGES } from '../src/quran/pages';
+import { SURAHS, bundledSurahArabic } from '../src/quran/quran';
 import { installRiwayahFromText } from '../src/quran/riwayahDownload';
 import {
   _resetRiwayahDataCacheForTests,
@@ -32,18 +34,46 @@ import {
   riwayahChoiceExists,
 } from '../src/quran/riwayat';
 
+const BASMALAH = /^بِسْمِ\s*ٱللَّهِ\s*ٱلرَّحْمَٰنِ\s*ٱلرَّحِيمِ\s*/;
+
+const cmp = (
+  a: { surah: number; ayah: number },
+  b: { surah: number; ayah: number },
+) => (a.surah !== b.surah ? a.surah - b.surah : a.ayah - b.ayah);
+
+function pageMeta(surah: number, ayah: number) {
+  for (const p of MUSHAF_PAGES) {
+    const afterStart = cmp(p.start, { surah, ayah }) <= 0;
+    const beforeEnd = p.end ? cmp(p.end, { surah, ayah }) > 0 : true;
+    if (afterStart && beforeEnd) return { page: p.page, juz: p.juz };
+  }
+  return { page: 604, juz: 30 };
+}
+
+/**
+ * A dataset built from the Qur'an the app already ships.
+ *
+ * It used to be placeholder Arabic, and `juzCheck.ts` now refuses that —
+ * correctly, and it caught this file on the first run. A test fixture that
+ * is fake scripture is the same mistake as a dataset that is, just with
+ * nobody reading it; the fix is to test the install path with the real
+ * text rather than to exempt tests from the check.
+ */
 function wholeQuran(): string {
   const out = [];
-  for (let i = 1; i <= TOTAL_AYAHS; i++) {
-    const ref = ayahAtIndex(i);
-    const page =
-      i <= 7 ? 1 : 2 + Math.floor(((i - 8) * 603) / (TOTAL_AYAHS - 7));
-    out.push({
-      verse_key: `${ref.surah}:${ref.ayah}`,
-      text: 'كَلِمَةٌ كَلِمَةٌ',
-      page_number: page,
-      juz_number: Math.min(30, Math.floor((page - 1) / 21) + 1),
-    });
+  for (let s = 1; s <= 114; s++) {
+    const arabic = bundledSurahArabic(s) ?? [];
+    for (let a = 1; a <= SURAHS[s - 1].ayahCount; a++) {
+      let text = arabic[a - 1] ?? '';
+      if (a === 1 && s !== 9 && s !== 1) text = text.replace(BASMALAH, '');
+      const meta = pageMeta(s, a);
+      out.push({
+        verse_key: `${s}:${a}`,
+        text,
+        page_number: meta.page,
+        juz_number: meta.juz,
+      });
+    }
   }
   return JSON.stringify(out);
 }

@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "Этот месяц",
     "resetScopeYear": "Этот год",
     "resetScopeAll": "Всё",
-    "resetCount": "{{prayers}} молитв за {{days}} дней",
     "resetNothing": "ничего",
     "resetConfirmTitle": "Очистить эти молитвы?",
     "resetConfirm": "Очистить",

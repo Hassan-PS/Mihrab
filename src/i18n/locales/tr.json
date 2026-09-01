@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "Bu ay",
     "resetScopeYear": "Bu yıl",
     "resetScopeAll": "Her şey",
-    "resetCount": "{{days}} günde {{prayers}} namaz",
     "resetNothing": "hiçbir şey",
     "resetConfirmTitle": "Bu namazlar silinsin mi?",
     "resetConfirm": "Sil",

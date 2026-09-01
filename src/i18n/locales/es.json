@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "Este mes",
     "resetScopeYear": "Este año",
     "resetScopeAll": "Todo",
-    "resetCount": "{{prayers}} oraciones en {{days}} días",
     "resetNothing": "nada",
     "resetConfirmTitle": "¿Borrar estas oraciones?",
     "resetConfirm": "Borrarlas",

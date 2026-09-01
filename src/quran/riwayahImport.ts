@@ -32,11 +32,25 @@
  *   • Every page has at least one ayah on it. A muṣḥaf with a page nobody
  *     is on is a broken import, not a blank page in the print.
  *
- * What it CANNOT check is whether correct-shaped Arabic is the real thing.
- * That is a human's job, and the source screen says whose.
+ * ── AND WHETHER IT IS THE QUR'AN AT ALL ───────────────────────────────
+ *
+ * This used to say that whether correct-shaped Arabic is the real thing
+ * was a human's job. It was left at that, and the consequence turned up on
+ * an emulator: a synthetic dataset — literally the words "test text, not
+ * Qur'an" repeated 6236 times — passed every check here and rendered as a
+ * muṣḥaf, with surah band, juz label, ayah medallions and page number.
+ * Nothing on that screen told a reader what they were looking at.
+ *
+ * So the content is checked too, at the sixty places a reader would check
+ * it themselves: the first and last ayah of each of the thirty ajzāʾ, read
+ * against the Tanzil Hafs text this app already ships and hashes. See
+ * `juzCheck.ts`. It is not a proof of authenticity and does not pretend to
+ * be one — but nothing that is not the Qur'an gets past it, which is the
+ * failure that actually happened.
  */
 import { SURAHS } from './quran';
 import { TOTAL_AYAHS } from './ayahIndex';
+import { checkJuzBoundaries } from './juzCheck';
 import type { MushafPageRange, SurahMeta } from './pages';
 
 /** One verse as QUL publishes it — the fields we need, all optional. */
@@ -76,6 +90,16 @@ export function verifyRiwayahDataset(
   raw: unknown,
   /** The Hafs surah index; names are the same 114 in every riwayah. */
   surahs: ReadonlyArray<SurahMeta>,
+  /**
+   * The Hafs pagination, which carries the juz table the content check
+   * reads its sixty anchors from.
+   *
+   * Passed in rather than imported so this module keeps no runtime
+   * dependency on `pages.ts` — that would pull the riwayah store and
+   * `react-native-blob-util` into `tools/riwayat/import.ts`, which runs
+   * under plain node.
+   */
+  hafsPages?: ReadonlyArray<MushafPageRange>,
 ): RiwayahVerifyResult {
   const fail = (error: string): RiwayahVerifyResult => ({ ok: false, error });
 
@@ -173,6 +197,14 @@ export function verifyRiwayahDataset(
     for (let a = 1; a <= ayahsIn(s); a++) {
       text[`${s}:${a}`] = bySurah.get(s)!.get(a)!.text!.trim();
     }
+  }
+
+  // ── And is it the Qur'an? ───────────────────────────────────────────
+  if (hafsPages && hafsPages.length > 0) {
+    const juzOf = (ref: { surah: number; ayah: number }): number | null =>
+      bySurah.get(ref.surah)?.get(ref.ayah)?.juz_number ?? null;
+    const content = checkJuzBoundaries(text, juzOf, hafsPages);
+    if (!content.ok) return fail(content.error);
   }
 
   return {

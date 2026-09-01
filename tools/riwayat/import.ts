@@ -30,6 +30,12 @@ import { verifyRiwayahDataset } from '../../src/quran/riwayahImport';
 
 const hafs = require('../../src/quran/data/pages.json') as {
   surahs: Array<{ number: number; name: string; englishName: string }>;
+  pages: Array<{
+    page: number;
+    juz: number;
+    start: { surah: number; ayah: number };
+    end: { surah: number; ayah: number } | null;
+  }>;
 };
 
 function die(message: string): never {
@@ -55,7 +61,7 @@ function main(): void {
     die(`could not read ${input} as JSON: ${String(e)}`);
   }
 
-  const result = verifyRiwayahDataset(raw, hafs.surahs);
+  const result = verifyRiwayahDataset(raw, hafs.surahs, hafs.pages);
   if (!result.ok) die(result.error);
 
   const { dataset, totalPages } = result;
@@ -63,6 +69,7 @@ function main(): void {
   console.log(`\n  ✓ ${ayahs} ayahs, ${totalPages} pages, 114 surahs`);
   console.log('  ✓ every surah has its exact ayah count');
   console.log('  ✓ pages run forwards and none is empty');
+  console.log('  ✓ reads like the Qur’an at all sixty juz boundaries');
 
   const out = arg('out');
   if (!out) {

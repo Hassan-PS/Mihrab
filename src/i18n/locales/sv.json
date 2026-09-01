@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "Denna månad",
     "resetScopeYear": "Detta år",
     "resetScopeAll": "Allt",
-    "resetCount": "{{prayers}} böner på {{days}} dagar",
     "resetNothing": "ingenting",
     "resetConfirmTitle": "Rensa dessa böner?",
     "resetConfirm": "Rensa dem",

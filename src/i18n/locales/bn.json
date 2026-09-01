@@ -1282,7 +1282,6 @@
     "resetScopeMonth": "এই মাস",
     "resetScopeYear": "এই বছর",
     "resetScopeAll": "সবকিছু",
-    "resetCount": "{{days}} দিনে {{prayers}} নামাজ",
     "resetNothing": "কিছুই না",
     "resetConfirmTitle": "এই নামাজগুলো মুছবেন?",
     "resetConfirm": "মুছে ফেলুন",
