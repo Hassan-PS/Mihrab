@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} পৃষ্ঠা · {{host}} থেকে",
     "riwayahPublisher": "প্রকাশক {{publisher}}। কৃতিত্ব {{credits}}-কে।",
     "riwayahOpenSource": "উৎস খুলুন",
-    "riwayahHowTo": "উপরের পৃষ্ঠা খুলুন, JSON ডাউনলোডের লিংক কপি করুন, আর এখানে পেস্ট করুন।",
+    "riwayahHowTo": "ঐ পৃষ্ঠা থেকে JSON এক্সপোর্ট ডাউনলোড করুন, তারপর যে ফোল্ডারে গেছে সেটি বেছে নিন।",
     "riwayahLink": "ডেটা ফাইলের লিংক",
-    "riwayahInstall": "এই মুসহাফ যোগ করুন"
+    "riwayahInstall": "এই মুসহাফ যোগ করুন",
+    "riwayahChooseFile": "ডাউনলোড করা ফাইল বেছে নিন",
+    "riwayahWhichFile": "কোন ফাইলটি?",
+    "riwayahOrLink": "অথবা ফাইলের সরাসরি লিংক পেস্ট করুন:",
+    "riwayahNoJson": "ঐ ফোল্ডারে কোনো .json ফাইল নেই। যেখানে ডাউনলোড করেছেন সেই ফোল্ডার বেছে নিন।",
+    "riwayahNoPicker": "এই বিল্ড ফোল্ডার খুলতে পারে না।",
+    "riwayahUnreadable": "ঐ ফাইলটি পড়া গেল না।"
   },
   "dataStats": {
     "title": "ডেটা পরিসংখ্যান",

@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} halaman · dari {{host}}",
     "riwayahPublisher": "Diterbitkan oleh {{publisher}}. Mengkredit {{credits}}.",
     "riwayahOpenSource": "Buka sumber",
-    "riwayahHowTo": "Buka halaman di atas, salin tautan unduhan JSON, lalu tempel di sini.",
+    "riwayahHowTo": "Unduh ekspor JSON dari halaman itu, lalu pilih folder tempat berkasnya tersimpan.",
     "riwayahLink": "Tautan ke berkas data",
-    "riwayahInstall": "Tambahkan mushaf ini"
+    "riwayahInstall": "Tambahkan mushaf ini",
+    "riwayahChooseFile": "Pilih berkas yang diunduh",
+    "riwayahWhichFile": "Berkas yang mana?",
+    "riwayahOrLink": "Atau tempel tautan langsung ke berkas:",
+    "riwayahNoJson": "Tidak ada berkas .json di folder itu. Pilih folder tempat Anda mengunduhnya.",
+    "riwayahNoPicker": "Versi ini tidak dapat membuka folder.",
+    "riwayahUnreadable": "Berkas itu tidak dapat dibaca."
   },
   "dataStats": {
     "title": "Statistik data",

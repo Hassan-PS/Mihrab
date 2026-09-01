@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} صفحة · من {{host}}",
     "riwayahPublisher": "ناشره {{publisher}}. ينسب الفضل إلى {{credits}}.",
     "riwayahOpenSource": "فتح المصدر",
-    "riwayahHowTo": "افتح الصفحة أعلاه، وانسخ رابط ملف JSON، ثم الصقه هنا.",
+    "riwayahHowTo": "نزّل ملف JSON من تلك الصفحة، ثم اختر المجلد الذي حُفظ فيه.",
     "riwayahLink": "رابط ملف البيانات",
-    "riwayahInstall": "إضافة هذا المصحف"
+    "riwayahInstall": "إضافة هذا المصحف",
+    "riwayahChooseFile": "اختر الملف المنزَّل",
+    "riwayahWhichFile": "أي ملف هو؟",
+    "riwayahOrLink": "أو الصق رابطًا مباشرًا للملف:",
+    "riwayahNoJson": "لا يوجد ملف ‎.json‎ في هذا المجلد. اختر المجلد الذي نزّلته إليه.",
+    "riwayahNoPicker": "هذه النسخة لا تستطيع فتح مجلد.",
+    "riwayahUnreadable": "تعذّرت قراءة هذا الملف."
   },
   "dataStats": {
     "title": "إحصائيات البيانات",

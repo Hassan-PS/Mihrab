@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} страниц · с {{host}}",
     "riwayahPublisher": "Издатель: {{publisher}}. Ссылается на {{credits}}.",
     "riwayahOpenSource": "Открыть источник",
-    "riwayahHowTo": "Откройте страницу выше, скопируйте ссылку на загрузку JSON и вставьте её сюда.",
+    "riwayahHowTo": "Скачайте JSON-выгрузку с той страницы, затем выберите папку, куда она попала.",
     "riwayahLink": "Ссылка на файл данных",
-    "riwayahInstall": "Добавить этот мусхаф"
+    "riwayahInstall": "Добавить этот мусхаф",
+    "riwayahChooseFile": "Выбрать загруженный файл",
+    "riwayahWhichFile": "Какой это файл?",
+    "riwayahOrLink": "Или вставьте прямую ссылку на файл:",
+    "riwayahNoJson": "В этой папке нет файла .json. Выберите папку, куда вы его загрузили.",
+    "riwayahNoPicker": "Эта сборка не может открыть папку.",
+    "riwayahUnreadable": "Не удалось прочитать этот файл."
   },
   "dataStats": {
     "title": "Статистика данных",

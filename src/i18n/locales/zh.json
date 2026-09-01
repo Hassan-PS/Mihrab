@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} 页 · 来自 {{host}}",
     "riwayahPublisher": "由 {{publisher}} 出版，署名 {{credits}}。",
     "riwayahOpenSource": "打开来源",
-    "riwayahHowTo": "打开上面的页面，复制 JSON 下载链接，粘贴到这里。",
+    "riwayahHowTo": "从该页面下载 JSON 导出文件，然后选择它保存到的文件夹。",
     "riwayahLink": "数据文件链接",
-    "riwayahInstall": "添加此《古兰经》抄本"
+    "riwayahInstall": "添加此《古兰经》抄本",
+    "riwayahChooseFile": "选择已下载的文件",
+    "riwayahWhichFile": "是哪个文件？",
+    "riwayahOrLink": "或粘贴文件的直接链接：",
+    "riwayahNoJson": "该文件夹中没有 .json 文件。请选择你下载到的文件夹。",
+    "riwayahNoPicker": "此版本无法打开文件夹。",
+    "riwayahUnreadable": "无法读取该文件。"
   },
   "dataStats": {
     "title": "数据统计",

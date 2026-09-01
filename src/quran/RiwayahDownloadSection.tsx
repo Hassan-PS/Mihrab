@@ -15,13 +15,23 @@
  * between — and the reader is told exactly that, along with who publishes
  * it and whom they credit, before they add scripture to their device.
  *
- * The link field is not a developer affordance. The publisher's downloads
- * are generated in the browser rather than served at a fixed path, so
- * there is no honest URL to hardcode — one guessed from a rendered page
- * is one that breaks silently later, which for scripture is the worst
- * failure available. A field the reader pastes into keeps working when
- * the publisher reorganises, and works for the next riwayah, and for a
- * source nobody has thought of yet.
+ * ── TWO WAYS IN, BECAUSE ONE IS NOT ENOUGH ────────────────────────────
+ *
+ * The link field is not a developer affordance. There is no honest URL to
+ * hardcode: QUL's own routes are `/resources/:id/:token/download`, and the
+ * token is minted per download in the browser. A URL guessed from a
+ * rendered page is one that breaks silently later, which for scripture is
+ * the worst failure available.
+ *
+ * But pasting the resource PAGE is the obvious thing to try, and it fails
+ * — correctly, and with a message saying so, which is still a dead end for
+ * anyone who cannot find the real link. So there is a second way that has
+ * no link in it at all: download the file in a browser, then point Mihrab
+ * at the folder it went to. That is the existing folder picker — the same
+ * native module sync uses — and it works on both platforms today with no
+ * new native code.
+ *
+ * The file never travels through anything of ours either way.
  */
 import React, { useCallback, useState } from 'react';
 import {
@@ -42,7 +52,11 @@ import {
   uninstallRiwayah,
   useRiwayahAvailability,
 } from './riwayahData';
-import { installRiwayahFromUrl } from './riwayahDownload';
+import {
+  installRiwayahFromText,
+  installRiwayahFromUrl,
+} from './riwayahDownload';
+import { folderAt, hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
 import { RIWAYAT, type RiwayahDefinition } from './riwayat';
 
 function hostOf(from: string): string {
@@ -105,9 +119,107 @@ function RiwayahCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
+  /** Several JSON files in the chosen folder — the reader picks one. */
+  const [candidates, setCandidates] = useState<{
+    handle: string;
+    names: string[];
+  } | null>(null);
 
   const installed = riwayahProvenance(riwayah.id);
   const name = t(riwayah.nameKey, riwayah.arabic);
+
+  /**
+   * Take the file the reader downloaded themselves.
+   *
+   * A folder rather than a file because that is the picker this app
+   * already has native code for, on both platforms. Everything ending in
+   * `.json` is offered; one match is taken without asking, since a folder
+   * with a single JSON in it is almost always the one just downloaded.
+   */
+  const chooseFile = useCallback(async () => {
+    setError(null);
+    setDetail(null);
+    let handle: string;
+    try {
+      const picked = await pickSyncFolder();
+      if (!picked) return;
+      handle = picked.handle;
+    } catch {
+      setError(t('downloads.riwayahNoPicker', 'This build cannot open a folder.'));
+      return;
+    }
+    setBusy(true);
+    try {
+      const folder = folderAt(handle);
+      const names = (await folder.list()).filter(n =>
+        n.toLowerCase().endsWith('.json'),
+      );
+      if (names.length === 0) {
+        setError(
+          t(
+            'downloads.riwayahNoJson',
+            'There is no .json file in that folder. Choose the folder you downloaded it to.',
+          ),
+        );
+        return;
+      }
+      // Newest-looking last: exports are usually named with the resource,
+      // and a reader who has several is best served by being asked.
+      const name = names.length === 1 ? names[0] : null;
+      if (!name) {
+        setCandidates({ handle, names });
+        return;
+      }
+      const contents = await folder.read(name);
+      const result = await installRiwayahFromText(riwayah.id, contents, name);
+      if (result.ok) {
+        onChanged?.();
+        return;
+      }
+      setError(t(result.error.key, result.error.fallback, result.error.params));
+      setDetail(result.error.detail ?? null);
+    } catch (e) {
+      setError(
+        t('downloads.riwayahUnreadable', 'That file could not be read.'),
+      );
+      setDetail(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }, [onChanged, riwayah.id, t]);
+
+  /**
+   * One of several JSON files in the chosen folder.
+   *
+   * Not named `useCandidate`: the lint rule reads a `use` prefix as a hook
+   * and refuses it inside a callback, which is the rule doing its job on a
+   * function that is not one.
+   */
+  const installCandidate = useCallback(
+    async (name: string) => {
+      if (!candidates) return;
+      setBusy(true);
+      setError(null);
+      setDetail(null);
+      try {
+        const contents = await folderAt(candidates.handle).read(name);
+        const result = await installRiwayahFromText(riwayah.id, contents, name);
+        if (result.ok) {
+          setCandidates(null);
+          onChanged?.();
+          return;
+        }
+        setError(t(result.error.key, result.error.fallback, result.error.params));
+        setDetail(result.error.detail ?? null);
+      } catch (e) {
+        setError(t('downloads.riwayahUnreadable', 'That file could not be read.'));
+        setDetail(String(e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [candidates, onChanged, riwayah.id, t],
+  );
 
   const install = useCallback(async () => {
     setBusy(true);
@@ -212,8 +324,58 @@ function RiwayahCard({
       <Text style={[styles.help, { color: palette.muted }]}>
         {t(
           'downloads.riwayahHowTo',
-          'Open the page above, copy the link of the JSON download, and paste it here.',
+          'Download the JSON export from that page, then choose the folder it went to.',
         )}
+      </Text>
+
+      {hasFolderPicker() ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            'downloads.riwayahChooseFile',
+            'Choose the downloaded file',
+          )}
+          disabled={busy}
+          onPress={() => void chooseFile()}
+          style={({ pressed }) => [
+            styles.secondary,
+            { borderColor: palette.accentSolid },
+            (busy || pressed) && { opacity: 0.6 },
+          ]}
+        >
+          <Text style={[styles.secondaryLabel, { color: palette.accentSolid }]}>
+            {t('downloads.riwayahChooseFile', 'Choose the downloaded file')}
+          </Text>
+        </Pressable>
+      ) : null}
+
+      {candidates ? (
+        <View style={styles.candidates}>
+          <Text style={[styles.help, { color: palette.muted }]}>
+            {t('downloads.riwayahWhichFile', 'Which file is it?')}
+          </Text>
+          {candidates.names.map(name => (
+            <Pressable
+              key={name}
+              accessibilityRole="button"
+              accessibilityLabel={name}
+              onPress={() => void installCandidate(name)}
+              style={({ pressed }) => [
+                styles.candidate,
+                { borderColor: palette.border ?? palette.muted },
+                pressed && { opacity: 0.6 },
+              ]}
+            >
+              <Text style={{ color: palette.text, fontSize: 13 }} numberOfLines={1}>
+                {name}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
+      <Text style={[styles.help, styles.orLine, { color: palette.muted }]}>
+        {t('downloads.riwayahOrLink', 'Or paste a direct link to the file:')}
       </Text>
 
       <TextInput
@@ -286,6 +448,25 @@ const styles = StyleSheet.create({
   deleteBtn: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
   deleteLabel: { color: '#d43f3f', fontWeight: '700', fontSize: 12 },
   linkBtn: { alignSelf: 'flex-start', paddingVertical: 8 },
+  secondary: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    marginBottom: 4,
+  },
+  secondaryLabel: { fontWeight: '700', fontSize: 15 },
+  orLine: { marginTop: 10 },
+  candidates: { marginTop: 6, marginBottom: 4 },
+  candidate: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 6,
+  },
   link: { fontSize: 14, fontWeight: '700' },
   help: { fontSize: 12, lineHeight: 17, marginBottom: 8 },
   input: {

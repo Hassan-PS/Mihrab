@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} páginas · de {{host}}",
     "riwayahPublisher": "Publicado por {{publisher}}. Acredita a {{credits}}.",
     "riwayahOpenSource": "Abrir la fuente",
-    "riwayahHowTo": "Abre la página de arriba, copia el enlace de la descarga JSON y pégalo aquí.",
+    "riwayahHowTo": "Descarga la exportación JSON desde esa página y luego elige la carpeta donde se guardó.",
     "riwayahLink": "Enlace al archivo de datos",
-    "riwayahInstall": "Añadir este mushaf"
+    "riwayahInstall": "Añadir este mushaf",
+    "riwayahChooseFile": "Elegir el archivo descargado",
+    "riwayahWhichFile": "¿Cuál es el archivo?",
+    "riwayahOrLink": "O pega un enlace directo al archivo:",
+    "riwayahNoJson": "No hay ningún archivo .json en esa carpeta. Elige la carpeta de descargas.",
+    "riwayahNoPicker": "Esta versión no puede abrir carpetas.",
+    "riwayahUnreadable": "No se pudo leer ese archivo."
   },
   "dataStats": {
     "title": "Estadísticas de datos",

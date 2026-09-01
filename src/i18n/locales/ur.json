@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} صفحات · {{host}} سے",
     "riwayahPublisher": "ناشر {{publisher}}۔ اعتراف {{credits}} کا۔",
     "riwayahOpenSource": "ماخذ کھولیں",
-    "riwayahHowTo": "اوپر کا صفحہ کھولیں، JSON ڈاؤن لوڈ کا لنک کاپی کریں، اور یہاں پیسٹ کریں۔",
+    "riwayahHowTo": "اس صفحے سے JSON ایکسپورٹ ڈاؤن لوڈ کریں، پھر وہ فولڈر منتخب کریں جہاں یہ گیا۔",
     "riwayahLink": "ڈیٹا فائل کا لنک",
-    "riwayahInstall": "یہ مصحف شامل کریں"
+    "riwayahInstall": "یہ مصحف شامل کریں",
+    "riwayahChooseFile": "ڈاؤن لوڈ کی گئی فائل منتخب کریں",
+    "riwayahWhichFile": "کون سی فائل ہے؟",
+    "riwayahOrLink": "یا فائل کا براہِ راست لنک پیسٹ کریں:",
+    "riwayahNoJson": "اس فولڈر میں کوئی ‎.json‎ فائل نہیں۔ وہی فولڈر منتخب کریں جہاں ڈاؤن لوڈ کیا تھا۔",
+    "riwayahNoPicker": "یہ بلڈ فولڈر نہیں کھول سکتی۔",
+    "riwayahUnreadable": "وہ فائل پڑھی نہ جا سکی۔"
   },
   "dataStats": {
     "title": "ڈیٹا شماریات",

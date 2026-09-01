@@ -1204,9 +1204,15 @@
     "riwayahInstalled": "{{pages}} sidor · från {{host}}",
     "riwayahPublisher": "Utgiven av {{publisher}}. Krediterar {{credits}}.",
     "riwayahOpenSource": "Öppna källan",
-    "riwayahHowTo": "Öppna sidan ovan, kopiera länken till JSON-nedladdningen och klistra in den här.",
+    "riwayahHowTo": "Ladda ner JSON-exporten från den sidan och välj sedan mappen den hamnade i.",
     "riwayahLink": "Länk till datafilen",
-    "riwayahInstall": "Lägg till denna mushaf"
+    "riwayahInstall": "Lägg till denna mushaf",
+    "riwayahChooseFile": "Välj den nedladdade filen",
+    "riwayahWhichFile": "Vilken fil är det?",
+    "riwayahOrLink": "Eller klistra in en direktlänk till filen:",
+    "riwayahNoJson": "Det finns ingen .json-fil i mappen. Välj mappen du laddade ner till.",
+    "riwayahNoPicker": "Den här versionen kan inte öppna en mapp.",
+    "riwayahUnreadable": "Filen kunde inte läsas."
   },
   "dataStats": {
     "title": "Datastatistik",
