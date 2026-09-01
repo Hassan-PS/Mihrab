@@ -33,6 +33,7 @@
     "@react-navigation/native-stack": "^7.14.10",
     "@sayem314/react-native-keep-awake": "^2.0.0",
     "adhan": "^4.4.3",
+    "fflate": "^0.8.3",
     "i18next": "^26.0.4",
     "react": "19.2.0",
     "react-i18next": "^17.0.2",

@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} pages · depuis {{host}}",
     "riwayahPublisher": "Publié par {{publisher}}. Crédite {{credits}}.",
     "riwayahOpenSource": "Ouvrir la source",
-    "riwayahHowTo": "Téléchargez l’export JSON depuis cette page, puis choisissez le dossier où il a été enregistré.",
+    "riwayahHowTo": "Téléchargez l'export JSON depuis cette page, puis choisissez-le ci-dessous. Il peut rester compressé.",
     "riwayahLink": "Lien vers le fichier de données",
     "riwayahInstall": "Ajouter ce mushaf",
     "riwayahChooseFile": "Choisir le fichier téléchargé",
-    "riwayahWhichFile": "Quel fichier est-ce ?",
     "riwayahOrLink": "Ou collez un lien direct vers le fichier :",
-    "riwayahNoJson": "Il n’y a aucun fichier .json dans ce dossier. Choisissez le dossier de téléchargement.",
-    "riwayahNoPicker": "Cette version ne peut pas ouvrir de dossier.",
-    "riwayahUnreadable": "Ce fichier n’a pas pu être lu."
+    "riwayahUnreadable": "Ce fichier n’a pas pu être lu.",
+    "riwayahFileTooLarge": "Ce fichier est bien trop volumineux pour être un mushaf.",
+    "riwayahZipUnsupported": "Cette archive est dans un format que l'application ne sait pas ouvrir. Décompressez-la et choisissez le fichier qu'elle contient.",
+    "riwayahZipUnreadable": "Cette archive n'a pas pu être ouverte.",
+    "riwayahNoJsonInZip": "Cette archive ne contient aucun fichier .json."
   },
   "dataStats": {
     "title": "Statistiques des données",

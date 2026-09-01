@@ -8,6 +8,9 @@ RCT_EXTERN_METHOD(defaultFolder:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(pick:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(pickFile:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(hasAccess:(nonnull NSString *)handle
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)

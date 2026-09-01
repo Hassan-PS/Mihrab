@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} পৃষ্ঠা · {{host}} থেকে",
     "riwayahPublisher": "প্রকাশক {{publisher}}। কৃতিত্ব {{credits}}-কে।",
     "riwayahOpenSource": "উৎস খুলুন",
-    "riwayahHowTo": "ঐ পৃষ্ঠা থেকে JSON এক্সপোর্ট ডাউনলোড করুন, তারপর যে ফোল্ডারে গেছে সেটি বেছে নিন।",
+    "riwayahHowTo": "ওই পাতা থেকে JSON ফাইলটি ডাউনলোড করুন, তারপর নিচে সেটি বেছে নিন। জিপ করা থাকলেও চলবে।",
     "riwayahLink": "ডেটা ফাইলের লিংক",
     "riwayahInstall": "এই মুসহাফ যোগ করুন",
     "riwayahChooseFile": "ডাউনলোড করা ফাইল বেছে নিন",
-    "riwayahWhichFile": "কোন ফাইলটি?",
     "riwayahOrLink": "অথবা ফাইলের সরাসরি লিংক পেস্ট করুন:",
-    "riwayahNoJson": "ঐ ফোল্ডারে কোনো .json ফাইল নেই। যেখানে ডাউনলোড করেছেন সেই ফোল্ডার বেছে নিন।",
-    "riwayahNoPicker": "এই বিল্ড ফোল্ডার খুলতে পারে না।",
-    "riwayahUnreadable": "ঐ ফাইলটি পড়া গেল না।"
+    "riwayahUnreadable": "ঐ ফাইলটি পড়া গেল না।",
+    "riwayahFileTooLarge": "এই ফাইলটি মুসহাফ হওয়ার পক্ষে অনেক বড়।",
+    "riwayahZipUnsupported": "এই আর্কাইভটি এমন গড়নে আছে যা অ্যাপ খুলতে পারে না। এটি খুলে ভেতরের ফাইলটি বেছে নিন।",
+    "riwayahZipUnreadable": "আর্কাইভটি খোলা যায়নি।",
+    "riwayahNoJsonInZip": "ওই আর্কাইভের ভেতরে কোনো .json ফাইল নেই।"
   },
   "dataStats": {
     "title": "ডেটা পরিসংখ্যান",

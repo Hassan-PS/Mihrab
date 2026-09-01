@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} صفحات · {{host}} سے",
     "riwayahPublisher": "ناشر {{publisher}}۔ اعتراف {{credits}} کا۔",
     "riwayahOpenSource": "ماخذ کھولیں",
-    "riwayahHowTo": "اس صفحے سے JSON ایکسپورٹ ڈاؤن لوڈ کریں، پھر وہ فولڈر منتخب کریں جہاں یہ گیا۔",
+    "riwayahHowTo": "اُس صفحے سے JSON فائل ڈاؤن لوڈ کریں، پھر نیچے سے اُسے منتخب کریں۔ زپ شدہ رہ سکتی ہے۔",
     "riwayahLink": "ڈیٹا فائل کا لنک",
     "riwayahInstall": "یہ مصحف شامل کریں",
     "riwayahChooseFile": "ڈاؤن لوڈ کی گئی فائل منتخب کریں",
-    "riwayahWhichFile": "کون سی فائل ہے؟",
     "riwayahOrLink": "یا فائل کا براہِ راست لنک پیسٹ کریں:",
-    "riwayahNoJson": "اس فولڈر میں کوئی ‎.json‎ فائل نہیں۔ وہی فولڈر منتخب کریں جہاں ڈاؤن لوڈ کیا تھا۔",
-    "riwayahNoPicker": "یہ بلڈ فولڈر نہیں کھول سکتی۔",
-    "riwayahUnreadable": "وہ فائل پڑھی نہ جا سکی۔"
+    "riwayahUnreadable": "وہ فائل پڑھی نہ جا سکی۔",
+    "riwayahFileTooLarge": "یہ فائل مصحف ہونے کے لیے بہت بڑی ہے۔",
+    "riwayahZipUnsupported": "یہ آرکائیو ایسی صورت میں ہے جسے یہ ایپ نہیں کھول سکتی۔ اسے کھول کر اندر کی فائل منتخب کریں۔",
+    "riwayahZipUnreadable": "یہ آرکائیو نہیں کھل سکی۔",
+    "riwayahNoJsonInZip": "اس آرکائیو کے اندر کوئی .json فائل نہیں۔"
   },
   "dataStats": {
     "title": "ڈیٹا شماریات",

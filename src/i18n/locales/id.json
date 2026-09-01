@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} halaman · dari {{host}}",
     "riwayahPublisher": "Diterbitkan oleh {{publisher}}. Mengkredit {{credits}}.",
     "riwayahOpenSource": "Buka sumber",
-    "riwayahHowTo": "Unduh ekspor JSON dari halaman itu, lalu pilih folder tempat berkasnya tersimpan.",
+    "riwayahHowTo": "Unduh berkas JSON dari halaman itu, lalu pilih di bawah ini. Boleh tetap dalam bentuk zip.",
     "riwayahLink": "Tautan ke berkas data",
     "riwayahInstall": "Tambahkan mushaf ini",
     "riwayahChooseFile": "Pilih berkas yang diunduh",
-    "riwayahWhichFile": "Berkas yang mana?",
     "riwayahOrLink": "Atau tempel tautan langsung ke berkas:",
-    "riwayahNoJson": "Tidak ada berkas .json di folder itu. Pilih folder tempat Anda mengunduhnya.",
-    "riwayahNoPicker": "Versi ini tidak dapat membuka folder.",
-    "riwayahUnreadable": "Berkas itu tidak dapat dibaca."
+    "riwayahUnreadable": "Berkas itu tidak dapat dibaca.",
+    "riwayahFileTooLarge": "Berkas itu jauh terlalu besar untuk sebuah mushaf.",
+    "riwayahZipUnsupported": "Arsip itu dalam bentuk yang tidak bisa dibuka aplikasi ini. Ekstrak dan pilih berkas di dalamnya.",
+    "riwayahZipUnreadable": "Arsip itu tidak dapat dibuka.",
+    "riwayahNoJsonInZip": "Tidak ada berkas .json di dalam arsip itu."
   },
   "dataStats": {
     "title": "Statistik data",

@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} страниц · с {{host}}",
     "riwayahPublisher": "Издатель: {{publisher}}. Ссылается на {{credits}}.",
     "riwayahOpenSource": "Открыть источник",
-    "riwayahHowTo": "Скачайте JSON-выгрузку с той страницы, затем выберите папку, куда она попала.",
+    "riwayahHowTo": "Скачайте JSON-файл с той страницы и выберите его ниже. Его можно не распаковывать.",
     "riwayahLink": "Ссылка на файл данных",
     "riwayahInstall": "Добавить этот мусхаф",
     "riwayahChooseFile": "Выбрать загруженный файл",
-    "riwayahWhichFile": "Какой это файл?",
     "riwayahOrLink": "Или вставьте прямую ссылку на файл:",
-    "riwayahNoJson": "В этой папке нет файла .json. Выберите папку, куда вы его загрузили.",
-    "riwayahNoPicker": "Эта сборка не может открыть папку.",
-    "riwayahUnreadable": "Не удалось прочитать этот файл."
+    "riwayahUnreadable": "Не удалось прочитать этот файл.",
+    "riwayahFileTooLarge": "Этот файл слишком велик, чтобы быть мусхафом.",
+    "riwayahZipUnsupported": "Этот архив в формате, который приложение не может открыть. Распакуйте его и выберите файл внутри.",
+    "riwayahZipUnreadable": "Не удалось открыть этот архив.",
+    "riwayahNoJsonInZip": "Внутри этого архива нет файла .json."
   },
   "dataStats": {
     "title": "Статистика данных",

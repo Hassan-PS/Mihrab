@@ -5,6 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
+import android.provider.OpenableColumns
+import android.util.Base64
 import java.io.FileOutputStream
 import com.facebook.react.bridge.ActivityEventListener
 import com.facebook.react.bridge.Arguments
@@ -150,13 +152,106 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * Ask the user for one file, and hand back what is in it.
+   *
+   * ── WHY NO MIME FILTER ────────────────────────────────────────────────
+   *
+   * `EXTRA_MIME_TYPES` looks like the careful thing to do and is the wrong
+   * thing here. The file this is for is whatever a browser saved out of a
+   * download — a `.json.zip` is reported as `application/zip` by one
+   * provider, `application/octet-stream` by the next and `text/plain` by
+   * Downloads on some builds. A filter that is wrong once hides the file
+   * the user is looking straight at, which is the exact frustration this
+   * whole method exists to remove. What the file turns out to be is
+   * decided by reading it (`mushafFile.ts`), not by trusting a label.
+   *
+   * No persistable permission is taken: this reads the file once, now. The
+   * app is not keeping a door open to it.
+   */
+  @ReactMethod
+  fun pickFile(promise: Promise) {
+    val activity = reactContext.currentActivity
+    if (activity == null) {
+      promise.reject("no_activity", "there is no activity to show the picker over")
+      return
+    }
+    if (pending != null) {
+      promise.reject("busy", "something is already being chosen")
+      return
+    }
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+      addCategory(Intent.CATEGORY_OPENABLE)
+      type = "*/*"
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        putExtra(
+          DocumentsContract.EXTRA_INITIAL_URI,
+          DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_AUTHORITY, "primary:Download"),
+        )
+      }
+    }
+    pending = promise
+    try {
+      activity.startActivityForResult(intent, FILE_REQUEST_CODE)
+    } catch (t: Throwable) {
+      pending = null
+      promise.reject("no_picker", "this device has no document provider", t)
+    }
+  }
+
   override fun onActivityResult(
     activity: Activity,
     requestCode: Int,
     resultCode: Int,
     data: Intent?,
   ) {
-    if (requestCode != REQUEST_CODE) return
+    // The request code is how the shared `pending` promise is told which
+    // of the two pickers came back. Only one can be up at a time, so one
+    // slot is enough; knowing which door it came through is not.
+    when (requestCode) {
+      REQUEST_CODE -> onFolderPicked(resultCode, data)
+      FILE_REQUEST_CODE -> onFilePicked(resultCode, data)
+    }
+  }
+
+  /**
+   * Read the picked file and resolve `{name, base64}`.
+   *
+   * base64 because the bridge has no byte-array type, and bytes rather
+   * than text because the file may be a zip. `fromBase64` on the JS side
+   * is the other half.
+   */
+  private fun onFilePicked(resultCode: Int, data: Intent?) {
+    val promise = pending ?: return
+    pending = null
+
+    val uri = if (resultCode == Activity.RESULT_OK) data?.data else null
+    if (uri == null) {
+      promise.resolve(null)
+      return
+    }
+    try {
+      val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
+      if (bytes == null) {
+        promise.reject("unreadable", "could not open that file")
+        return
+      }
+      // Only to keep a mis-tap on a film from taking the process down with
+      // it. Ten times the size of the largest muṣḥaf this can accept.
+      if (bytes.size > MAX_PICKED_BYTES) {
+        promise.reject("too_large", "that file is ${bytes.size} bytes")
+        return
+      }
+      val out = Arguments.createMap()
+      out.putString("name", displayNameOf(uri))
+      out.putString("base64", Base64.encodeToString(bytes, Base64.NO_WRAP))
+      promise.resolve(out)
+    } catch (t: Throwable) {
+      promise.reject("unreadable", "could not read that file", t)
+    }
+  }
+
+  private fun onFolderPicked(resultCode: Int, data: Intent?) {
     val promise = pending ?: return
     pending = null
 
@@ -648,11 +743,44 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
     return tree.lastPathSegment ?: tree.toString()
   }
 
+  /**
+   * What the picked file is called.
+   *
+   * Only ever shown to the user and used to look for `.json` in the name,
+   * so a provider that will not say gets the last path segment — which is
+   * usually the id and not a name, but is at least something to show.
+   */
+  private fun displayNameOf(uri: Uri): String {
+    try {
+      resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+        ?.use { cursor ->
+          if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            val name = cursor.getString(0)
+            if (!name.isNullOrEmpty()) return name
+          }
+        }
+    } catch (t: Throwable) {
+      // As above: a name is decoration, and the bytes are the point.
+    }
+    return uri.lastPathSegment ?: "file"
+  }
+
   companion object {
     const val NAME = "SyncFolder"
 
     /** Arbitrary, and only compared against itself. */
     private const val REQUEST_CODE = 0x5946
+
+    /** The same, for the file picker — different so results can be told apart. */
+    private const val FILE_REQUEST_CODE = 0x5947
+
+    /**
+     * A ceiling, not a validation. The muṣḥaf files this is for are a few
+     * megabytes; anything at this size is a mis-tap, and reading it into
+     * memory and then base64-ing it would be how the app dies rather than
+     * how it says no.
+     */
+    private const val MAX_PICKED_BYTES = 32 * 1024 * 1024
 
     /** What the file is. Providers may still choose their own extension. */
     private const val MIME = "application/json"

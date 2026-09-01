@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} صفحة · من {{host}}",
     "riwayahPublisher": "ناشره {{publisher}}. ينسب الفضل إلى {{credits}}.",
     "riwayahOpenSource": "فتح المصدر",
-    "riwayahHowTo": "نزّل ملف JSON من تلك الصفحة، ثم اختر المجلد الذي حُفظ فيه.",
+    "riwayahHowTo": "نزّل ملف JSON من تلك الصفحة، ثم اخترْه بالأسفل. لا حاجة إلى فكّ الضغط.",
     "riwayahLink": "رابط ملف البيانات",
     "riwayahInstall": "إضافة هذا المصحف",
     "riwayahChooseFile": "اختر الملف المنزَّل",
-    "riwayahWhichFile": "أي ملف هو؟",
     "riwayahOrLink": "أو الصق رابطًا مباشرًا للملف:",
-    "riwayahNoJson": "لا يوجد ملف ‎.json‎ في هذا المجلد. اختر المجلد الذي نزّلته إليه.",
-    "riwayahNoPicker": "هذه النسخة لا تستطيع فتح مجلد.",
-    "riwayahUnreadable": "تعذّرت قراءة هذا الملف."
+    "riwayahUnreadable": "تعذّرت قراءة هذا الملف.",
+    "riwayahFileTooLarge": "هذا الملف أكبر بكثير من أن يكون مصحفًا.",
+    "riwayahZipUnsupported": "هذا الأرشيف بصيغة لا يستطيع التطبيق فتحها. فُكَّ ضغطه واختر الملف الذي بداخله.",
+    "riwayahZipUnreadable": "تعذّر فتح هذا الأرشيف.",
+    "riwayahNoJsonInZip": "لا يوجد ملف .json داخل هذا الأرشيف."
   },
   "dataStats": {
     "title": "إحصائيات البيانات",

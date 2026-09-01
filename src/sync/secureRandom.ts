@@ -38,14 +38,33 @@ const Native = NativeModules.SecureRandom as
  */
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
+/**
+ * The alphabet by character code, so decoding never scans for a character.
+ *
+ * `B64.indexOf(ch)` inside `for (const ch of text)` is two costs per byte —
+ * a one-character string allocated, then up to 64 comparisons — and both
+ * were invisible while the only things decoded here were keys and nonces.
+ * `FilePicker` now brings a picked muṣḥaf through this function, which is
+ * megabytes, and at that size the scan is seconds of a user waiting. Same
+ * function, same output; the search is just done once, at load.
+ */
+const B64_VALUE = (() => {
+  const table = new Int8Array(128).fill(-1);
+  for (let i = 0; i < B64.length; i++) table[B64.charCodeAt(i)] = i;
+  return table;
+})();
+
 export function fromBase64(input: string): Uint8Array {
-  const text = input.replace(/[^A-Za-z0-9+/]/g, '');
-  const out = new Uint8Array(Math.floor((text.length * 6) / 8));
+  // Padding and whitespace are counted here and skipped below, so this is
+  // an upper bound rather than the exact length — which is what `subarray`
+  // at the end is for.
+  const out = new Uint8Array(Math.floor((input.length * 6) / 8));
   let buffer = 0;
   let bits = 0;
   let written = 0;
-  for (const ch of text) {
-    const value = B64.indexOf(ch);
+  for (let i = 0; i < input.length; i++) {
+    const code = input.charCodeAt(i);
+    const value = code < 128 ? B64_VALUE[code] : -1;
     if (value < 0) continue;
     buffer = (buffer << 6) | value;
     bits += 6;
@@ -170,15 +189,29 @@ export function utf8Encode(text: string): Uint8Array {
  * authenticated by `secretbox`, so bad bytes mean a bug rather than an
  * attacker, and losing one character beats losing the whole snapshot.
  */
+/** U+FFFD, as a code unit — what a malformed sequence becomes. */
+const REPLACEMENT = 0xfffd;
+
 export function utf8Decode(bytes: Uint8Array): string {
+  // Code units are collected and flushed in blocks rather than appended one
+  // at a time. `out += String.fromCharCode(…)` per character costs nothing
+  // on a snapshot and is seconds on a picked muṣḥaf, which arrives here
+  // through `mushafFile.ts` and is megabytes.
   let out = '';
+  const units: number[] = [];
+  const flush = () => {
+    if (units.length === 0) return;
+    out += String.fromCharCode(...units);
+    units.length = 0;
+  };
   let i = 0;
   while (i < bytes.length) {
+    if (units.length >= 4096) flush();
     const byte = bytes[i++];
     let code: number;
     let extra: number;
     if (byte < 0x80) {
-      out += String.fromCharCode(byte);
+      units.push(byte);
       continue;
     } else if (byte >= 0xc2 && byte <= 0xdf) {
       code = byte & 0x1f;
@@ -190,11 +223,11 @@ export function utf8Decode(bytes: Uint8Array): string {
       code = byte & 0x07;
       extra = 3;
     } else {
-      out += '�';
+      units.push(REPLACEMENT);
       continue;
     }
     if (i + extra > bytes.length) {
-      out += '�';
+      units.push(REPLACEMENT);
       break;
     }
     let valid = true;
@@ -207,21 +240,19 @@ export function utf8Decode(bytes: Uint8Array): string {
       code = (code << 6) | (cont & 0x3f);
     }
     if (!valid) {
-      out += '�';
+      units.push(REPLACEMENT);
       continue;
     }
     i += extra;
     if (code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)) {
-      out += '�';
+      units.push(REPLACEMENT);
     } else if (code >= 0x10000) {
       const shifted = code - 0x10000;
-      out += String.fromCharCode(
-        0xd800 + (shifted >> 10),
-        0xdc00 + (shifted & 0x3ff),
-      );
+      units.push(0xd800 + (shifted >> 10), 0xdc00 + (shifted & 0x3ff));
     } else {
-      out += String.fromCharCode(code);
+      units.push(code);
     }
   }
+  flush();
   return out;
 }

@@ -63,6 +63,28 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
 
   private var pending: (resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock)?
 
+  /**
+   Which of the two pickers is up.
+
+   `UIDocumentPickerDelegate` has one callback and this class is the
+   delegate for both, so the result of "choose a folder" and the result of
+   "choose a file" arrive at the same method. Only one picker can be
+   presented at a time — `pending` already guarantees that — so a single
+   flag is enough to tell them apart, and answering the wrong one would
+   hand the JS side a bookmark where it expected bytes.
+   */
+  private enum PickKind { case folder, file }
+  private var pendingKind: PickKind = .folder
+
+  /**
+   A ceiling, not a validation.
+
+   The muṣḥaf files this is for are a few megabytes. Anything at this size
+   is a mis-tap, and reading it and then base64-ing it would be how the app
+   dies rather than how it says no.
+   */
+  private static let maxPickedBytes = 32 * 1024 * 1024
+
   /// Handle for "the app's own Documents directory".
   private static let appFolderHandle = "app:documents"
 
@@ -124,7 +146,45 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
       return
     }
     pending = (resolve, reject)
+    pendingKind = .folder
     let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.folder], asCopy: false)
+    picker.delegate = self
+    picker.allowsMultipleSelection = false
+    presenter.present(picker, animated: true)
+  }
+
+  /**
+   Ask the user for one file, and hand back what is in it.
+
+   ── WHY `UTType.data`, AND NOT `.json` ────────────────────────────────
+
+   The file this is for is whatever a browser saved out of a download. A
+   `.json.zip` may carry no type identifier at all once it has been through
+   a share sheet, and a content-type list that is wrong once greys out the
+   file the user is looking straight at — the exact frustration this method
+   exists to remove. `UTType.data` is every file; what it turns out to be
+   is decided by reading it (`mushafFile.ts`), not by trusting a label.
+
+   `asCopy: true` because this reads the file once, now. iOS hands over its
+   own temporary copy, so there is no scoped resource to keep, nothing to
+   bookmark, and no door left open to the user's file afterwards.
+   */
+  @objc(pickFile:rejecter:)
+  func pickFile(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    rejecter reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard pending == nil else {
+      reject("busy", "something is already being chosen", nil)
+      return
+    }
+    guard let presenter = Self.topViewController() else {
+      reject("no_window", "there is no view controller to present the picker from", nil)
+      return
+    }
+    pending = (resolve, reject)
+    pendingKind = .file
+    let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.data], asCopy: true)
     picker.delegate = self
     picker.allowsMultipleSelection = false
     presenter.present(picker, animated: true)
@@ -136,8 +196,14 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
   ) {
     guard let waiting = pending else { return }
     pending = nil
+    let kind = pendingKind
+    pendingKind = .folder
     guard let url = urls.first else {
       waiting.resolve(nil)
+      return
+    }
+    if kind == .file {
+      resolvePickedFile(url, waiting)
       return
     }
     let scoped = url.startAccessingSecurityScopedResource()
@@ -157,9 +223,41 @@ class SyncFolder: NSObject, UIDocumentPickerDelegate {
     }
   }
 
+  /**
+   Read the picked file and resolve `{name, base64}`.
+
+   base64 because the bridge has no byte-array type, and bytes rather than
+   text because the file may be a zip. `fromBase64` on the JS side is the
+   other half.
+   */
+  private func resolvePickedFile(
+    _ url: URL,
+    _ waiting: (resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock)
+  ) {
+    // `asCopy: true` normally means there is nothing scoped to start, but
+    // a file reached through a file provider can still arrive scoped, and
+    // starting access on one that is not is harmless.
+    let scoped = url.startAccessingSecurityScopedResource()
+    defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+    do {
+      let data = try Data(contentsOf: url)
+      guard data.count <= Self.maxPickedBytes else {
+        waiting.reject("too_large", "that file is \(data.count) bytes", nil)
+        return
+      }
+      waiting.resolve([
+        "name": url.lastPathComponent,
+        "base64": data.base64EncodedString(),
+      ])
+    } catch {
+      waiting.reject("unreadable", "could not read that file", error)
+    }
+  }
+
   func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
     guard let waiting = pending else { return }
     pending = nil
+    pendingKind = .folder
     waiting.resolve(nil)
   }
 

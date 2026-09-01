@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} sidor · från {{host}}",
     "riwayahPublisher": "Utgiven av {{publisher}}. Krediterar {{credits}}.",
     "riwayahOpenSource": "Öppna källan",
-    "riwayahHowTo": "Ladda ner JSON-exporten från den sidan och välj sedan mappen den hamnade i.",
+    "riwayahHowTo": "Ladda ner JSON-filen från den sidan och välj den nedan. Den får förbli zippad.",
     "riwayahLink": "Länk till datafilen",
     "riwayahInstall": "Lägg till denna mushaf",
     "riwayahChooseFile": "Välj den nedladdade filen",
-    "riwayahWhichFile": "Vilken fil är det?",
     "riwayahOrLink": "Eller klistra in en direktlänk till filen:",
-    "riwayahNoJson": "Det finns ingen .json-fil i mappen. Välj mappen du laddade ner till.",
-    "riwayahNoPicker": "Den här versionen kan inte öppna en mapp.",
-    "riwayahUnreadable": "Filen kunde inte läsas."
+    "riwayahUnreadable": "Filen kunde inte läsas.",
+    "riwayahFileTooLarge": "Filen är alldeles för stor för att vara en mushaf.",
+    "riwayahZipUnsupported": "Arkivet har ett format som appen inte kan öppna. Packa upp det och välj filen inuti.",
+    "riwayahZipUnreadable": "Arkivet kunde inte öppnas.",
+    "riwayahNoJsonInZip": "Det finns ingen .json-fil i arkivet."
   },
   "dataStats": {
     "title": "Datastatistik",

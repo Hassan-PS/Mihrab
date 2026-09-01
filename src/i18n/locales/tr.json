@@ -1204,15 +1204,16 @@
     "riwayahInstalled": "{{pages}} sayfa · {{host}} kaynağından",
     "riwayahPublisher": "Yayıncı: {{publisher}}. Kaynak gösterdiği: {{credits}}.",
     "riwayahOpenSource": "Kaynağı aç",
-    "riwayahHowTo": "O sayfadan JSON dışa aktarımını indir, sonra indiği klasörü seç.",
+    "riwayahHowTo": "JSON dosyasını o sayfadan indirin, sonra aşağıdan seçin. Zip'li kalabilir.",
     "riwayahLink": "Veri dosyasının bağlantısı",
     "riwayahInstall": "Bu mushafı ekle",
     "riwayahChooseFile": "İndirilen dosyayı seç",
-    "riwayahWhichFile": "Hangi dosya?",
     "riwayahOrLink": "Ya da dosyanın doğrudan bağlantısını yapıştır:",
-    "riwayahNoJson": "Bu klasörde .json dosyası yok. İndirdiğin klasörü seç.",
-    "riwayahNoPicker": "Bu sürüm klasör açamıyor.",
-    "riwayahUnreadable": "Bu dosya okunamadı."
+    "riwayahUnreadable": "Bu dosya okunamadı.",
+    "riwayahFileTooLarge": "Bu dosya bir mushaf olamayacak kadar büyük.",
+    "riwayahZipUnsupported": "Bu arşiv, uygulamanın açamayacağı bir biçimde. Arşivi çıkarıp içindeki dosyayı seçin.",
+    "riwayahZipUnreadable": "Bu arşiv açılamadı.",
+    "riwayahNoJsonInZip": "Bu arşivin içinde .json dosyası yok."
   },
   "dataStats": {
     "title": "Veri istatistikleri",

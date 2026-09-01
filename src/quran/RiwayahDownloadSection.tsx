@@ -25,11 +25,23 @@
  *
  * But pasting the resource PAGE is the obvious thing to try, and it fails
  * — correctly, and with a message saying so, which is still a dead end for
- * anyone who cannot find the real link. So there is a second way that has
- * no link in it at all: download the file in a browser, then point Mihrab
- * at the folder it went to. That is the existing folder picker — the same
- * native module sync uses — and it works on both platforms today with no
- * new native code.
+ * anyone who cannot find the real link. So the way in that has no link in
+ * it at all is the one offered first: download the file in a browser, then
+ * choose it. One tap, and it is installed.
+ *
+ * ── WHAT THE FIRST VERSION OF THAT GOT WRONG ──────────────────────────
+ *
+ * It asked for a FOLDER, listed the `.json` files in it, and made the
+ * reader pick from that list. Two things followed, both reported: QUL
+ * hands you `qpc-warsh-script-ayah.json.zip`, so there was no `.json` to
+ * find until you had unzipped it somewhere yourself; and being asked for a
+ * folder, by a button that says "choose the downloaded file", is a puzzle
+ * rather than an instruction.
+ *
+ * So it asks for a file, and it takes the file as it comes — zipped or
+ * not, `mushafFile.ts` reads what the bytes actually are rather than what
+ * the name claims. There is nothing left between "I downloaded it" and
+ * "it is on my device".
  *
  * The file never travels through anything of ours either way.
  */
@@ -56,7 +68,8 @@ import {
   installRiwayahFromText,
   installRiwayahFromUrl,
 } from './riwayahDownload';
-import { folderAt, hasFolderPicker, pickSyncFolder } from '../sync/folderAccess';
+import { hasFilePicker, pickFile } from '../native/FilePicker';
+import { mushafTextFromFile } from './mushafFile';
 import { RIWAYAT, type RiwayahDefinition } from './riwayat';
 
 function hostOf(from: string): string {
@@ -119,11 +132,6 @@ function RiwayahCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
-  /** Several JSON files in the chosen folder — the reader picks one. */
-  const [candidates, setCandidates] = useState<{
-    handle: string;
-    names: string[];
-  } | null>(null);
 
   const installed = riwayahProvenance(riwayah.id);
   const name = t(riwayah.nameKey, riwayah.arabic);
@@ -131,47 +139,49 @@ function RiwayahCard({
   /**
    * Take the file the reader downloaded themselves.
    *
-   * A folder rather than a file because that is the picker this app
-   * already has native code for, on both platforms. Everything ending in
-   * `.json` is offered; one match is taken without asking, since a folder
-   * with a single JSON in it is almost always the one just downloaded.
+   * One tap, start to finish: the picker opens, and whatever comes back is
+   * read, checked and installed. Nothing is asked in between — not which
+   * folder, not which of several files, and not whether it has been
+   * unzipped, because `mushafTextFromFile` decides what the bytes are.
    */
   const chooseFile = useCallback(async () => {
     setError(null);
     setDetail(null);
-    let handle: string;
+    let picked;
     try {
-      const picked = await pickSyncFolder();
-      if (!picked) return;
-      handle = picked.handle;
-    } catch {
-      setError(t('downloads.riwayahNoPicker', 'This build cannot open a folder.'));
-      return;
-    }
-    setBusy(true);
-    try {
-      const folder = folderAt(handle);
-      const names = (await folder.list()).filter(n =>
-        n.toLowerCase().endsWith('.json'),
-      );
-      if (names.length === 0) {
+      picked = await pickFile();
+    } catch (e) {
+      // `too_large` is the only native failure worth its own sentence: it
+      // means a mis-tap on a film or a backup, and "could not be read"
+      // would send the reader looking for a fault in a good file.
+      if ((e as { code?: string })?.code === 'too_large') {
         setError(
           t(
-            'downloads.riwayahNoJson',
-            'There is no .json file in that folder. Choose the folder you downloaded it to.',
+            'downloads.riwayahFileTooLarge',
+            'That file is far too large to be a muṣḥaf.',
           ),
         );
         return;
       }
-      // Newest-looking last: exports are usually named with the resource,
-      // and a reader who has several is best served by being asked.
-      const name = names.length === 1 ? names[0] : null;
-      if (!name) {
-        setCandidates({ handle, names });
+      setError(t('downloads.riwayahUnreadable', 'That file could not be read.'));
+      setDetail(String(e));
+      return;
+    }
+    // Backed out. A cancel is a decision, not an error to report back.
+    if (!picked) return;
+    setBusy(true);
+    try {
+      const read = mushafTextFromFile(picked.name, picked.bytes);
+      if (!read.ok) {
+        setError(t(read.key, read.fallback));
+        setDetail(read.detail ?? null);
         return;
       }
-      const contents = await folder.read(name);
-      const result = await installRiwayahFromText(riwayah.id, contents, name);
+      const result = await installRiwayahFromText(
+        riwayah.id,
+        read.text,
+        picked.name,
+      );
       if (result.ok) {
         onChanged?.();
         return;
@@ -179,47 +189,12 @@ function RiwayahCard({
       setError(t(result.error.key, result.error.fallback, result.error.params));
       setDetail(result.error.detail ?? null);
     } catch (e) {
-      setError(
-        t('downloads.riwayahUnreadable', 'That file could not be read.'),
-      );
+      setError(t('downloads.riwayahUnreadable', 'That file could not be read.'));
       setDetail(String(e));
     } finally {
       setBusy(false);
     }
   }, [onChanged, riwayah.id, t]);
-
-  /**
-   * One of several JSON files in the chosen folder.
-   *
-   * Not named `useCandidate`: the lint rule reads a `use` prefix as a hook
-   * and refuses it inside a callback, which is the rule doing its job on a
-   * function that is not one.
-   */
-  const installCandidate = useCallback(
-    async (name: string) => {
-      if (!candidates) return;
-      setBusy(true);
-      setError(null);
-      setDetail(null);
-      try {
-        const contents = await folderAt(candidates.handle).read(name);
-        const result = await installRiwayahFromText(riwayah.id, contents, name);
-        if (result.ok) {
-          setCandidates(null);
-          onChanged?.();
-          return;
-        }
-        setError(t(result.error.key, result.error.fallback, result.error.params));
-        setDetail(result.error.detail ?? null);
-      } catch (e) {
-        setError(t('downloads.riwayahUnreadable', 'That file could not be read.'));
-        setDetail(String(e));
-      } finally {
-        setBusy(false);
-      }
-    },
-    [candidates, onChanged, riwayah.id, t],
-  );
 
   const install = useCallback(async () => {
     setBusy(true);
@@ -324,11 +299,11 @@ function RiwayahCard({
       <Text style={[styles.help, { color: palette.muted }]}>
         {t(
           'downloads.riwayahHowTo',
-          'Download the JSON export from that page, then choose the folder it went to.',
+          'Download the JSON export from that page, then choose it below. It can stay zipped.',
         )}
       </Text>
 
-      {hasFolderPicker() ? (
+      {hasFilePicker() ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t(
@@ -337,41 +312,18 @@ function RiwayahCard({
           )}
           disabled={busy}
           onPress={() => void chooseFile()}
-          style={({ pressed }) => [
-            styles.secondary,
-            { borderColor: palette.accentSolid },
-            (busy || pressed) && { opacity: 0.6 },
-          ]}
-        >
-          <Text style={[styles.secondaryLabel, { color: palette.accentSolid }]}>
-            {t('downloads.riwayahChooseFile', 'Choose the downloaded file')}
-          </Text>
+          style={[
+            styles.cta,
+            { backgroundColor: palette.accentSolid, opacity: busy ? 0.5 : 1 },
+          ]}>
+          {busy ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.ctaLabel}>
+              {t('downloads.riwayahChooseFile', 'Choose the downloaded file')}
+            </Text>
+          )}
         </Pressable>
-      ) : null}
-
-      {candidates ? (
-        <View style={styles.candidates}>
-          <Text style={[styles.help, { color: palette.muted }]}>
-            {t('downloads.riwayahWhichFile', 'Which file is it?')}
-          </Text>
-          {candidates.names.map(name => (
-            <Pressable
-              key={name}
-              accessibilityRole="button"
-              accessibilityLabel={name}
-              onPress={() => void installCandidate(name)}
-              style={({ pressed }) => [
-                styles.candidate,
-                { borderColor: palette.border ?? palette.muted },
-                pressed && { opacity: 0.6 },
-              ]}
-            >
-              <Text style={{ color: palette.text, fontSize: 13 }} numberOfLines={1}>
-                {name}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
       ) : null}
 
       <Text style={[styles.help, styles.orLine, { color: palette.muted }]}>
@@ -411,19 +363,13 @@ function RiwayahCard({
         disabled={busy || url.trim().length === 0}
         onPress={() => void install()}
         style={[
-          styles.cta,
-          {
-            backgroundColor: palette.accentSolid,
-            opacity: busy || url.trim().length === 0 ? 0.5 : 1,
-          },
+          styles.secondary,
+          { borderColor: palette.accentSolid },
+          (busy || url.trim().length === 0) && { opacity: 0.5 },
         ]}>
-        {busy ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
-          <Text style={styles.ctaLabel}>
-            {t('downloads.riwayahInstall', 'Add this muṣḥaf')}
-          </Text>
-        )}
+        <Text style={[styles.secondaryLabel, { color: palette.accentSolid }]}>
+          {t('downloads.riwayahInstall', 'Add this muṣḥaf')}
+        </Text>
       </Pressable>
     </View>
   );
@@ -459,14 +405,6 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: { fontWeight: '700', fontSize: 15 },
   orLine: { marginTop: 10 },
-  candidates: { marginTop: 6, marginBottom: 4 },
-  candidate: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 6,
-  },
   link: { fontSize: 14, fontWeight: '700' },
   help: { fontSize: 12, lineHeight: 17, marginBottom: 8 },
   input: {
