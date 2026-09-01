@@ -20,6 +20,7 @@
  * about riwayat and because a default that silently switched under them
  * would be worse than one that stays put.
  */
+import { ayahCount } from './ayahIndex';
 import { loadRiwayahPages } from './riwayahData';
 import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
 
@@ -65,6 +66,27 @@ export function surahsForRiwayah(
 ): ReadonlyArray<SurahMeta> {
   if (riwayah === DEFAULT_RIWAYAH) return MUSHAF_SURAHS;
   return loadRiwayahPages(riwayah)?.surahs ?? MUSHAF_SURAHS;
+}
+
+/**
+ * Ayahs in a surah, IN THIS RIWAYAH.
+ *
+ * `ayahCount` is the Ḥafṣ table, and for a riwayah that divides the text
+ * differently it is the wrong answer in fifty surahs. Warsh's al-Māʾidah
+ * has 122 ayahs where Ḥafṣ has 120, so anything walking the Ḥafṣ counts
+ * stops two ayahs early and drops them off the page without a word.
+ *
+ * Falls back to the Ḥafṣ count when a stored muṣḥaf predates `ayahCounts`
+ * or is not installed — the caller is then reading Ḥafṣ anyway.
+ */
+export function ayahCountForRiwayah(
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+  surah: number,
+): number {
+  if (riwayah === DEFAULT_RIWAYAH) return ayahCount(surah);
+  const counts = loadRiwayahPages(riwayah)?.ayahCounts;
+  const own = counts?.[surah - 1];
+  return own && own > 0 ? own : ayahCount(surah);
 }
 
 /** Pages in this riwayah's muṣḥaf — not assumed to be 604. */

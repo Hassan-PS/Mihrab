@@ -40,6 +40,15 @@ import { RIWAYAT, type RiwayahId } from './riwayat';
 export type RiwayahPageTable = {
   pages: ReadonlyArray<MushafPageRange>;
   surahs: ReadonlyArray<SurahMeta>;
+  /**
+   * Ayahs per surah in THIS riwayah, indexed from 0.
+   *
+   * Optional because a muṣḥaf stored by 2.13 has none — that build assumed
+   * every riwayah counted like Ḥafṣ. `readRiwayahDataset` derives it from
+   * the stored text in that case, so this is only ever absent in memory
+   * for a table built by hand in a test.
+   */
+  ayahCounts?: ReadonlyArray<number>;
 };
 
 /** Ayah text for a `unicode` riwayah, keyed `"surah:ayah"`. */

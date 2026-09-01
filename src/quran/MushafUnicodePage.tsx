@@ -49,9 +49,18 @@ import {
   type LayoutChangeEvent,
 } from 'react-native';
 import { FONTS } from '../theme/typography';
-import { TOTAL_AYAHS, ayahAtIndex, ayahIndexOf } from './ayahIndex';
-import { easternNumerals, pagesForRiwayah } from './pages';
+
+import {
+  ayahCountForRiwayah,
+  easternNumerals,
+  pagesForRiwayah,
+} from './pages';
 import { loadRiwayahText } from './riwayahData';
+import {
+  allocate,
+  printedLinesFor,
+  type AllocatedLine,
+} from './mushafPrintedLines';
 import { riwayahById, riwayahFontFamily, type RiwayahId } from './riwayat';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import type { AyahRef } from './MushafTextPage';
@@ -84,6 +93,38 @@ const MAX_FIT_PASSES = 4;
 const FIT_FLOOR = 0.93;
 
 /**
+ * The ayah mark and the space before it, in advancing characters.
+ *
+ * Small, and on every ayah, so leaving it out of a line's width bends the
+ * sizing by about a character per ayah — three or four on a busy line.
+ */
+const AYAH_MARK_CHARS = 4;
+
+/**
+ * How much of the measure a printed line is sized to fill.
+ *
+ * Under one because the size is derived from an estimated advance, and a
+ * line that comes out a hair too wide does not clip — it WRAPS, which
+ * turns fifteen rows into sixteen and undoes the whole point.
+ */
+const PRINTED_FILL = 0.97;
+
+/** The most a printed line may be tracked out to reach the measure. */
+const MAX_TRACKING_EM = 0.06;
+
+/**
+ * What a character of this riwayah's face actually advances, per page box.
+ *
+ * The printed path needs no fitting loop — the line count is given — but
+ * it does need to know how wide a character is, and that is a property of
+ * a font nobody can look up. So the widest line is measured once and the
+ * answer kept: the implied advance is independent of the size it was
+ * measured at, so one pass is exact rather than approximate, and every
+ * page after this box's first is drawn right on its first frame.
+ */
+const ADVANCE_CACHE = new Map<string, number>();
+
+/**
  * Average advance per base character, in ems — the one guess in the size
  * prediction, and the one thing measurement can teach.
  *
@@ -99,6 +140,7 @@ const FIT_CACHE = new Map<string, number>();
 /** Tests only — the calibration and cache are process-lifetime otherwise. */
 export function _resetUnicodePageFitForTests(): void {
   FIT_CACHE.clear();
+  ADVANCE_CACHE.clear();
   calibratedAdvanceEm = 0.42;
 }
 
@@ -144,33 +186,48 @@ export function unicodePageBlocks(
   const meta = pagesForRiwayah(riwayah).find(p => p.page === page);
   if (!meta) return [];
 
-  const from = ayahIndexOf(meta.start.surah, meta.start.ayah);
-  // `end` is EXCLUSIVE — the same convention `findPageForAyah` reads it
-  // with — and a null end means the last page, which runs to 114:6.
-  const to = meta.end
-    ? ayahIndexOf(meta.end.surah, meta.end.ayah) - 1
-    : TOTAL_AYAHS;
-
+  // ── Walk this riwayah's OWN numbering ────────────────────────────────
+  //
+  // This used to step through the Ḥafṣ ayah index, converting the page's
+  // bounds with `ayahIndexOf` and reading each ref back with
+  // `ayahAtIndex`. Both are Ḥafṣ tables. For a riwayah that divides the
+  // text differently they walk the wrong space: Warsh's al-Māʾidah has 122
+  // ayahs and Ḥafṣ has 120, so the walk turned to al-Anʿām after 5:120 and
+  // 5:121 and 5:122 were never emitted at all. About two dozen ayahs
+  // across the muṣḥaf simply were not on any page, and nothing said so —
+  // the page before was a little short and that was all a reader saw.
+  const stop = meta.end ?? { surah: 114, ayah: Number.MAX_SAFE_INTEGER };
   const blocks: UnicodePageBlock[] = [];
   let run: Array<AyahRef & { text: string }> | null = null;
 
-  for (let i = from; i <= to; i++) {
-    const ref = ayahAtIndex(i);
-    if (ref.ayah === 1) {
+  for (
+    let surah = meta.start.surah, ayah = meta.start.ayah;
+    surah < stop.surah || (surah === stop.surah && ayah < stop.ayah);
+
+  ) {
+    if (ayah === 1) {
       run = null;
-      blocks.push({ kind: 'surah', surah: ref.surah });
+      blocks.push({ kind: 'surah', surah });
       // Al-Fātiḥah counts the basmalah as its first ayah, so drawing one
       // above it would print it twice; al-Tawbah has none at all. Every
       // other surah opens with it, unnumbered, under the band.
-      if (ref.surah !== 1 && ref.surah !== 9) blocks.push({ kind: 'basmalah' });
+      if (surah !== 1 && surah !== 9) blocks.push({ kind: 'basmalah' });
     }
-    const body = text[`${ref.surah}:${ref.ayah}`];
-    if (!body) continue;
-    if (!run) {
-      run = [];
-      blocks.push({ kind: 'text', ayahs: run });
+    const body = text[`${surah}:${ayah}`];
+    if (body) {
+      if (!run) {
+        run = [];
+        blocks.push({ kind: 'text', ayahs: run });
+      }
+      run.push({ surah, ayah, text: body });
     }
-    run.push({ ...ref, text: body });
+    if (ayah >= ayahCountForRiwayah(riwayah, surah)) {
+      surah += 1;
+      ayah = 1;
+      if (surah > 114) break;
+    } else {
+      ayah += 1;
+    }
   }
   return blocks;
 }
@@ -313,6 +370,20 @@ function MushafUnicodePage({
   const extent = useMemo(() => pageExtent(blocks), [blocks]);
   const fontFamily = riwayahFontFamily(riwayahById(riwayah));
 
+  /**
+   * The print's own lines, when this riwayah has a table for them.
+   *
+   * Preferred over reflowing whenever it exists: the lines are the thing
+   * a reader who has memorised from this muṣḥaf actually knows.
+   */
+  const printed = useMemo(() => {
+    const rows = printedLinesFor(riwayah, page);
+    if (!rows) return null;
+    const table = loadRiwayahText(riwayah);
+    if (!table) return null;
+    return allocate(rows, (s, a) => table[`${s}:${a}`] ?? null);
+  }, [page, riwayah]);
+
   // A page is fitted to a box, so the box is part of its identity. Rounded
   // to whole dp: the measured viewport is a float, and a sub-pixel wobble
   // in it would otherwise throw away a fit that was already correct.
@@ -385,11 +456,44 @@ function MushafUnicodePage({
 
   if (blocks.length === 0) return null;
 
+  if (printed) {
+    return (
+      <PrintedPageBody
+        rows={printed}
+        width={width}
+        height={height}
+        fontFamily={fontFamily}
+        colors={colors}
+        highlight={highlight}
+        onAyahPress={onAyahPress}
+        onAyahLongPress={onAyahLongPress}
+      />
+    );
+  }
+
   return (
     // `minHeight`, never a fixed height with `overflow: hidden` — a page
     // that came out a little tall must scroll in the column it was given,
     // not lose its last ayah to a clip nobody can see happening.
-    <View style={{ width, minHeight: height }} onLayout={onContentLayout}>
+    <View style={{ width, minHeight: height }}>
+      {/*
+        The measurement is taken from an INNER view that is only as tall as
+        the text, and this is load-bearing.
+
+        `onLayout` used to sit on the box above, whose `minHeight` is the
+        height being fitted TO. So a page that filled two thirds of its box
+        measured as exactly full, `measured <= height` was true, `measured
+        >= height * FIT_FLOOR` was true, and the fit settled on the first
+        pass at a size a third too small — with a band of dead space under
+        the last line that no number of passes could ever see, because the
+        thing being measured was the floor and not the text.
+
+        This is the same fault the Hafs pages had twice (`pageMeasureEm`,
+        and the scrolling column's dead band): a fit is only as good as
+        what it measures, and measuring the container instead of the
+        content is the way to get a confident wrong answer.
+      */}
+      <View onLayout={onContentLayout}>
       {blocks.map((block, index) => {
         if (block.kind === 'surah') {
           return (
@@ -466,6 +570,222 @@ function MushafUnicodePage({
                 {' '}
               </Text>
             ))}
+          </Text>
+        );
+      })}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * A page laid out on the print's own lines.
+ *
+ * The reflowing path below fits a font size to the box and lets the text
+ * wrap where it will. This one does the opposite and it is the better way
+ * round when the data allows it: the lines are given, so the rows divide
+ * the height exactly and the size follows from the measure. There is no
+ * fitting loop, nothing to measure, and nothing to converge — which is
+ * also why the class of bug the loop kept producing cannot arise here.
+ */
+function PrintedPageBody({
+  rows,
+  width,
+  height,
+  fontFamily,
+  colors,
+  highlight,
+  onAyahPress,
+  onAyahLongPress,
+}: {
+  rows: AllocatedLine[];
+  width: number;
+  height: number;
+  fontFamily: string;
+  colors: MushafUnicodePageProps['colors'];
+  highlight: AyahRef | null;
+  onAyahPress?: (ref: AyahRef) => void;
+  onAyahLongPress?: (ref: AyahRef) => void;
+}) {
+  // Every row is a row of the print, band rows included, so the height
+  // divides by the count and the page fills its box by construction.
+  const rowHeight = height / rows.length;
+
+  /**
+   * Sized so the LONGEST line fits the measure.
+   *
+   * Not the average: a line that overflows either wraps — destroying the
+   * grid this whole path exists to keep — or is clipped, and neither is
+   * recoverable. Sizing to the longest costs a little fill on the shorter
+   * lines, which justification below takes back.
+   */
+  const lengths = React.useMemo(
+    () =>
+      rows.map(row =>
+        row.ayahs.reduce(
+          (n, a) => n + advancingLength(a.text) + (a.ends ? AYAH_MARK_CHARS : 0),
+          0,
+        ),
+      ),
+    [rows],
+  );
+  const widest = lengths.reduce((most, n) => Math.max(most, n), 0);
+  const widestRow = lengths.indexOf(widest);
+
+  const advanceKey = `${fontFamily}:${Math.round(width)}`;
+  const [advanceEm, setAdvanceEm] = React.useState(
+    () => ADVANCE_CACHE.get(advanceKey) ?? calibratedAdvanceEm,
+  );
+  const fontSize =
+    widest > 0
+      ? Math.min(
+          rowHeight / UNICODE_LINE_HEIGHT_EM,
+          (width * PRINTED_FILL) / (widest * advanceEm),
+        )
+      : rowHeight / UNICODE_LINE_HEIGHT_EM;
+
+  /**
+   * One measurement of the longest line, which settles the face's advance.
+   *
+   * `onTextLayout` reports what was DRAWN. Deriving the advance from it
+   * rather than fitting towards it is what keeps this to a single pass:
+   * width = chars × advance × size, so advance = width / (chars × size)
+   * whatever size the measurement happened at.
+   */
+  const onWidestLayout = React.useCallback(
+    (e: { nativeEvent: { lines: Array<{ width: number }> } }) => {
+      if (ADVANCE_CACHE.has(advanceKey) || widest <= 0 || fontSize <= 0) return;
+      const drawn = e.nativeEvent.lines.reduce((m, l) => Math.max(m, l.width), 0);
+      if (drawn <= 0) return;
+      const implied = drawn / (widest * fontSize);
+      // A wild answer means the line wrapped, or the face fell back to
+      // something else entirely. Keep the estimate rather than enshrine a
+      // number that would mis-size every page after it.
+      if (implied < 0.2 || implied > 1.2) return;
+      ADVANCE_CACHE.set(advanceKey, implied);
+      setAdvanceEm(implied);
+    },
+    [advanceKey, fontSize, widest],
+  );
+
+  /**
+   * What belongs on each empty row.
+   *
+   * The table records a band's rows as lines with nothing on them, which
+   * is what they are — the print gives a surah opening two of its fifteen
+   * lines, and a renderer that adds a band ON TOP of fifteen text rows
+   * overflows the page by exactly that much. So the surah is read off the
+   * row that follows: an empty run before an ayah 1 is that surah's band,
+   * and its basmalah if the print gave it two rows.
+   */
+  const ornaments = React.useMemo(() => {
+    const out: Array<{ kind: 'band' | 'basmalah'; surah: number } | null> =
+      rows.map(() => null);
+    let i = 0;
+    while (i < rows.length) {
+      if (!rows[i].empty) {
+        i += 1;
+        continue;
+      }
+      let j = i;
+      while (j < rows.length && rows[j].empty) j += 1;
+      const opens = rows[j]?.ayahs[0];
+      if (opens && opens.ayah === 1) {
+        out[i] = { kind: 'band', surah: opens.surah };
+        if (j - i > 1 && opens.surah !== 1 && opens.surah !== 9) {
+          out[i + 1] = { kind: 'basmalah', surah: opens.surah };
+        }
+      }
+      i = j;
+    }
+    return out;
+  }, [rows]);
+
+  return (
+    <View style={{ width, height }}>
+      {rows.map((row, index) => {
+        if (row.empty) {
+          const ornament = ornaments[index];
+          if (ornament?.kind === 'band') {
+            return (
+              <SurahBandRow
+                key={`b${index}`}
+                surah={ornament.surah}
+                width={width}
+                rowHeight={rowHeight}
+                fontSize={fontSize}
+                colors={colors}
+              />
+            );
+          }
+          if (ornament?.kind === 'basmalah') {
+            return (
+              <BasmalahRow
+                key={`m${index}`}
+                width={width}
+                rowHeight={rowHeight}
+                fontSize={fontSize}
+                colors={colors}
+              />
+            );
+          }
+          return <View key={`e${index}`} style={{ height: rowHeight }} />;
+        }
+        const chars = row.ayahs.reduce(
+          (n, a) => n + advancingLength(a.text) + (a.ends ? AYAH_MARK_CHARS : 0),
+          0,
+        );
+        // Positive only, and capped. Asking a platform for a NEGATIVE gap
+        // is what lost words off the ends of Hafs lines on one reporter's
+        // device — it was silently ignored there, and the line was then
+        // drawn wider than it had been measured for.
+        const slack = width - chars * advanceEm * fontSize;
+        const spacing =
+          chars > 1
+            ? Math.max(0, Math.min(slack / (chars - 1), fontSize * MAX_TRACKING_EM))
+            : 0;
+        return (
+          <Text
+            key={`l${index}`}
+            allowFontScaling={false}
+            onTextLayout={index === widestRow ? onWidestLayout : undefined}
+            style={[
+              styles.body,
+              {
+                width,
+                height: rowHeight,
+                fontFamily,
+                fontSize,
+                lineHeight: rowHeight,
+                letterSpacing: spacing,
+                color: colors.text,
+                textAlign: 'right',
+              },
+            ]}
+          >
+            {row.ayahs.map((part, i) => {
+              const ref = { surah: part.surah, ayah: part.ayah };
+              const lit =
+                highlight?.surah === part.surah && highlight?.ayah === part.ayah;
+              return (
+                <Text
+                  key={`${part.surah}:${part.ayah}:${i}`}
+                  onPress={onAyahPress ? () => onAyahPress(ref) : undefined}
+                  onLongPress={
+                    onAyahLongPress ? () => onAyahLongPress(ref) : undefined
+                  }
+                  style={lit ? { backgroundColor: colors.selection } : undefined}
+                >
+                  {part.text}
+                  {part.ends ? (
+                    <Text style={{ color: colors.accent, fontFamily: FONTS.arabicQuran }}>
+                      {`${NBSP}${END_OF_AYAH}${easternNumerals(part.ayah)}`}
+                    </Text>
+                  ) : null}
+                  {i < row.ayahs.length - 1 ? ' ' : ''}
+                </Text>
+              );
+            })}
           </Text>
         );
       })}
