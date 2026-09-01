@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "builtAt": "2026-08-31T11:14:15.919Z",
+  "builtAt": "2026-09-01T09:39:08.292Z",
   "timezone": "Africa/Casablanca",
   "seedDays": 30,
-  "minCoverageDays": 13,
+  "minCoverageDays": 12,
   "staleCities": 0,
   "serverStatus": "ok",
   "deadCities": [],
