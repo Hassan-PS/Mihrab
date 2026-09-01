@@ -150,7 +150,15 @@ describe('clearing a range', () => {
     expect(clearRange(once, null, null)).toBe(once);
   });
 
-  it('handles a 30-day month without inventing a 31st', () => {
+  it('ends a month on the last day it actually has', () => {
+    // Not the 31st. It would clear the right days either way — these are
+    // string comparisons — but the bounds are also what the confirmation
+    // SHOWS, and "2026-09-31" renders as 1 October over a button that
+    // clears September.
+    expect(scopeBounds('month', '2026-09-15').to).toBe('2026-09-30');
+    expect(scopeBounds('month', '2026-02-10').to).toBe('2026-02-28');
+    expect(scopeBounds('month', '2024-02-10').to).toBe('2024-02-29');
+    expect(scopeBounds('month', '2026-01-10').to).toBe('2026-01-31');
     const j = [...day('2026-04-30'), ...day('2026-05-01')];
     const { from, to } = scopeBounds('month', '2026-04-15');
     expect(loggedDates(clearRange(j, from, to))).toEqual(['2026-05-01']);

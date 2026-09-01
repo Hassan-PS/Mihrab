@@ -80,11 +80,22 @@ export function ResetScopePicker({
       statusBarTranslucent
       onRequestClose={onCancel}
     >
+      {/*
+        `accessible={false}` on both, and it is not cosmetic. A Pressable is
+        an accessibility element, and on iOS an element with children
+        SWALLOWS them: VoiceOver reads the whole card as one long label and
+        the four scope rows cannot be reached individually. Found by
+        `idb ui describe-all` on the simulator, which returned exactly one
+        node for the entire sheet. Android exposes the children either way,
+        which is why it looked fine there.
+      */}
       <Pressable
+        accessible={false}
         style={[styles.scrim, { backgroundColor: palette.overlay }]}
         onPress={onCancel}
       >
         <Pressable
+          accessible={false}
           style={[
             styles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },

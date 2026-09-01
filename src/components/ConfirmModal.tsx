@@ -58,12 +58,21 @@ export function ConfirmModal({
       statusBarTranslucent
       onRequestClose={onCancel}
     >
+      {/*
+        `accessible={false}` on both. A Pressable is an accessibility
+        element and on iOS one with children swallows them, so without this
+        VoiceOver reads the title, the message, the figures and both buttons
+        as a single label and neither button can be reached. The dialog most
+        affected is the one that clears someone's prayer log.
+      */}
       <Pressable
+        accessible={false}
         style={[styles.scrim, { backgroundColor: palette.overlay }]}
         onPress={onCancel}
       >
         {/* Inner press is swallowed so taps on the sheet don't dismiss. */}
         <Pressable
+          accessible={false}
           style={[
             styles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },

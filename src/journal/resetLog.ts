@@ -50,9 +50,19 @@ export function scopeBounds(
   const [, year, month] = m;
   if (scope === 'day') return { from: date, to: date };
   if (scope === 'year') return { from: `${year}-01-01`, to: `${year}-12-31` };
-  // Month: the 31st always sorts last among a month's day-strings, whether
-  // or not the month has one, and these are string comparisons.
-  return { from: `${year}-${month}-01`, to: `${year}-${month}-31` };
+  // Month: the LAST DAY THAT EXISTS, not the 31st.
+  //
+  // The 31st would be correct for the clearing — these are string
+  // comparisons and every real day of September sorts below "2026-09-31" —
+  // but the bounds are also what the confirmation shows the user, and
+  // `2026-09-31` parses as 1 October. The dialog said "September 1 –
+  // October 1" over a button that clears a month. Seen on the simulator,
+  // and the kind of thing only looking at it catches: every test passed.
+  const lastDay = new Date(Number(year), Number(month), 0).getDate();
+  return {
+    from: `${year}-${month}-01`,
+    to: `${year}-${month}-${String(lastDay).padStart(2, '0')}`,
+  };
 }
 
 /** What a reset of `scope` around `date` would actually clear. */
