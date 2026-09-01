@@ -49,13 +49,7 @@ import {
   type LayoutChangeEvent,
 } from 'react-native';
 import { FONTS } from '../theme/typography';
-import {
-  MUSHAF_LINE_BOX_SLACK_EM,
-  WORD_SPACE_EM,
-  WORD_SPACE_MAX_EM,
-  WORD_SPACE_MIN_EM,
-  gapMetrics,
-} from './mushafLayout';
+import { WORD_SPACE_EM, gapMetrics } from './mushafLayout';
 
 import {
   ayahCountForRiwayah,
@@ -93,6 +87,33 @@ const NBSP = '\u00A0';
 const BAND_ROWS = 1.75;
 const BASMALAH_ROWS = 1.3;
 
+/** Every line of a page, measured, in ems of the size it was drawn at. */
+const PRINTED_LINE_CACHE = new Map<string, number[]>();
+
+/**
+ * How much wider than the measure a line's box is made.
+ *
+ * Wide enough that no line can reach the end of it, because a line that
+ * reaches the end of its box WRAPS, and a wrapped line's remainder is
+ * drawn where the row has no height for it — invisibly. Losing the end of
+ * an ayah is the one fault this renderer may never produce, and this is
+ * what makes that unreachable rather than merely unlikely.
+ */
+const PRINTED_BOX_SLACK = 2.5;
+
+/**
+ * How far a line may be scaled to reach the measure.
+ *
+ * With the words the print puts on it a line lands within a few per cent
+ * of the measure and the scaling is imperceptible. The bounds are for the
+ * line that does not — a hair of distortion beats a hole.
+ */
+const MIN_PRINTED_SCALE = 0.8;
+const MAX_PRINTED_SCALE = 1.25;
+
+/** Below this a page is unreadable and should scroll instead. */
+const MIN_PRINTED_SIZE = 9;
+
 /** Corrections attempted before the page settles for what it has. */
 const MAX_FIT_PASSES = 4;
 
@@ -126,59 +147,6 @@ const FIT_FLOOR = 0.93;
 const ADVANCE_CACHE = new Map<string, number>();
 
 /**
- * The advance to assume before anything has been measured — deliberately
- * an OVER-estimate.
- *
- * A first guess that is too small sets the page too large, the line is
- * then drawn wider than its box, and `onTextLayout` reports the width of
- * the BOX rather than of the text — which reads as an even smaller
- * advance, and the page never recovers. The estimate has to approach the
- * truth from the side where the measurement is still honest, so it starts
- * wide, the first frame comes out narrow, and the one measurement it takes
- * is of a line nothing has constrained.
- *
- * This is the third time this renderer has been caught measuring
- * something other than the text: the fit loop measured its own minHeight,
- * and before that the Hafs pages sized against advances that omitted the
- * word spaces.
- */
-const PRINTED_START_ADVANCE_EM = 0.6;
-
-/**
- * The ayah medallion's width, learnt the same way and for the same reason.
- *
- * It was counted as four characters of text, and it is not: U+06DD sets
- * the number inside a circle, one glyph carrying several characters' worth
- * of ink. Folding it into the per-character advance made that advance
- * absorb the error — every line then shrank to protect the few carrying a
- * medallion, and a page that had been overflowing became a page set far
- * too small. Two unknowns need two numbers.
- *
- * Learnt from lines that HAVE one, once the advance is known from lines
- * that do not. Starts over-wide, for the reason above.
- */
-const MARK_CACHE = new Map<string, number>();
-const PRINTED_START_MARK_EM = 3;
-
-/**
- * What each line of a page actually measures, in ems — the real answer.
- *
- * The character model above exists only to get the first frame close. It
- * cannot be right: it prices every letter the same, and the widest line
- * decides the page, so a page is set to whichever line happens to be
- * densest in wide letters and every other line then has to be stretched
- * to reach the margin. That is why the words came out swimming in space
- * while the print sets them nearly touching.
- *
- * Once a page has been drawn, every line's width is known exactly. From
- * then on the size comes from the widest MEASURED line and each line is
- * justified against its own width, which is what makes the setting dense
- * the way the print is dense. Keyed by page and box, because unlike the
- * advance this is not a property of the face.
- */
-const LINE_CACHE = new Map<string, number[]>();
-
-/**
  * The tightest a printed row may be set, as a multiple of the type size.
  *
  * `UNICODE_LINE_HEIGHT_EM` is 2.05, which is generous — it was chosen for
@@ -208,8 +176,7 @@ const FIT_CACHE = new Map<string, number>();
 export function _resetUnicodePageFitForTests(): void {
   FIT_CACHE.clear();
   ADVANCE_CACHE.clear();
-  MARK_CACHE.clear();
-  LINE_CACHE.clear();
+  PRINTED_LINE_CACHE.clear();
   calibratedAdvanceEm = 0.42;
 }
 
@@ -651,12 +618,27 @@ function MushafUnicodePage({
 /**
  * A page laid out on the print's own lines.
  *
- * The reflowing path below fits a font size to the box and lets the text
- * wrap where it will. This one does the opposite and it is the better way
- * round when the data allows it: the lines are given, so the rows divide
- * the height exactly and the size follows from the measure. There is no
- * fitting loop, nothing to measure, and nothing to converge — which is
- * also why the class of bug the loop kept producing cannot arise here.
+ * ── WHY NOTHING HERE IS MODELLED ──────────────────────────────────────
+ *
+ * The first four attempts at this priced the text: an advance per
+ * character, a width per medallion, a solved word gap. Every one of them
+ * produced a page that was either short of the margin — a hole in the
+ * setting — or past it. And past it is not a cosmetic fault: a line wider
+ * than its box does not clip on Android, it WRAPS, and the wrapped
+ * remainder is drawn below a row whose height leaves no room for it. Page
+ * 8 lost the last letter of الْعَذَابِ that way, and line six lost its ayah
+ * number, with nothing on screen to say either had happened.
+ *
+ * So nothing is priced. Each line is laid out in a box far wider than it
+ * can need, which makes wrapping impossible and therefore makes losing a
+ * word impossible. It is then MEASURED, and scaled horizontally to the
+ * measure exactly. A line cannot come out short, because the scale is
+ * computed from its own drawn width; and it cannot come out long, for the
+ * same reason.
+ *
+ * The type size is chosen so the median line needs no scaling at all,
+ * which keeps what scaling remains small and even — a few per cent either
+ * way, spread across the page rather than piled onto one line.
  */
 function PrintedPageBody({
   pageKey,
@@ -683,169 +665,60 @@ function PrintedPageBody({
   // Every row is a row of the print, band rows included, so the height
   // divides by the count and the page fills its box by construction.
   const rowHeight = height / rows.length;
+  const measure = width;
 
-  /**
-   * Sized so the LONGEST line fits the measure.
-   *
-   * Not the average: a line that overflows either wraps — destroying the
-   * grid this whole path exists to keep — or is clipped, and neither is
-   * recoverable. Sizing to the longest costs a little fill on the shorter
-   * lines, which justification below takes back.
-   */
-  /** Each row's ink and gaps, in ems of the page's own face. */
-  const rows_em = React.useMemo(
-    () =>
-      rows.map(row => {
-        let words = 0;
-        let chars = 0;
-        let marks = 0;
-        for (const part of row.ayahs) {
-          const parts = part.text.split(/\s+/).filter(Boolean);
-          words += parts.length;
-          chars += parts.reduce((n, w) => n + advancingLength(w), 0);
-          if (part.ends) marks += 1;
-        }
-        return { chars, marks, gaps: Math.max(0, words - 1) };
-      }),
-    [rows],
+  const fitKey = `${pageKey}:${fontFamily}:${Math.round(width)}`;
+  const [ems, setEms] = React.useState<number[] | null>(
+    () => PRINTED_LINE_CACHE.get(fitKey) ?? null,
   );
-
-  const advanceKey = `${fontFamily}:${Math.round(width)}`;
-  const [advanceEm, setAdvanceEm] = React.useState(
-    () => ADVANCE_CACHE.get(advanceKey) ?? PRINTED_START_ADVANCE_EM,
-  );
-  const [markEm, setMarkEm] = React.useState(
-    () => MARK_CACHE.get(advanceKey) ?? PRINTED_START_MARK_EM,
-  );
-  const lineKey = `${pageKey}:${fontFamily}:${Math.round(width)}`;
-  const [measured, setMeasured] = React.useState<number[] | null>(
-    () => LINE_CACHE.get(lineKey) ?? null,
-  );
-  if (measured && !LINE_CACHE.has(lineKey)) setMeasured(null);
-
-  /**
-   * A line's ink in ems: what it actually measured, or — until it has
-   * been drawn once — what the character model guesses.
-   */
-  const inkEmOf = React.useCallback(
-    (row: { chars: number; marks: number }, index: number) =>
-      measured?.[index] ?? row.chars * advanceEm + row.marks * markEm,
-    [advanceEm, markEm, measured],
-  );
-
-  /**
-   * The block, exactly as `pageMeasureEm` computes it for a Hafs page: the
-   * widest line set at the nominal space, plus the reserved slack. Sizing
-   * to anything narrower is what put text off both edges of every Hafs
-   * page once, and the slack is what keeps a flush line from losing its
-   * last word.
-   */
-  const { blockEm, widestRow } = React.useMemo(() => {
-    let most = 0;
-    let at = 0;
-    rows_em.forEach((row, i) => {
-      const drawn = inkEmOf(row, i) + row.gaps * WORD_SPACE_EM;
-      if (drawn > most) {
-        most = drawn;
-        at = i;
-      }
-    });
-    return { blockEm: most + MUSHAF_LINE_BOX_SLACK_EM, widestRow: at };
-  }, [inkEmOf, rows_em]);
-  void widestRow;
-
-  const fontSize =
-    blockEm > 0
-      ? Math.min(rowHeight / PRINTED_MIN_LINE_HEIGHT_EM, width / blockEm)
-      : rowHeight / PRINTED_MIN_LINE_HEIGHT_EM;
-
-  /**
-   * One honest pass over every line, then both unknowns at once.
-   *
-   * The first frame is deliberately set from an OVER-estimate, so no line
-   * reaches its box and every measurement is of text rather than of a
-   * container. That is the whole trick, and it is the third time this
-   * renderer has needed it: a fit loop that measured its own minHeight,
-   * and an advance learnt from a line that had already been cut off, both
-   * produced a confident wrong answer that no further pass could correct.
-   *
-   * With honest widths the two unknowns fall out in order — the letters'
-   * advance from the lines carrying no medallion, then the medallion from
-   * the lines that do — and the WIDEST line decides each, so the size that
-   * follows fits the worst case and nothing overflows. One pass, cached
-   * per face and box, so only the first page a reader opens pays for it.
-   */
-  const samples = React.useRef<{
-    key: string;
-    rows: Map<number, { inkEm: number; chars: number; marks: number }>;
-  }>({ key: lineKey, rows: new Map() });
-  if (samples.current.key !== lineKey) {
-    samples.current = { key: lineKey, rows: new Map() };
+  const pending = React.useRef<{ key: string; seen: Map<number, number> }>({
+    key: fitKey,
+    seen: new Map(),
+  });
+  if (pending.current.key !== fitKey) {
+    pending.current = { key: fitKey, seen: new Map() };
   }
+
   const textRows = React.useMemo(
-    () => rows.filter(r => !r.empty).length,
+    () => rows.map((r, i) => (r.empty ? -1 : i)).filter(i => i >= 0),
     [rows],
   );
+
+  /**
+   * The size to draw at.
+   *
+   * Before the page has been measured, a rough guess from the row height —
+   * it only has to be close enough to measure at, and every width taken
+   * from it is divided back out. Afterwards, the size at which the MEDIAN
+   * line needs no scaling, so half the page is very slightly compressed
+   * and half very slightly stretched instead of the whole page leaning one
+   * way.
+   */
+  const probeSize = rowHeight / UNICODE_LINE_HEIGHT_EM;
+  const fontSize = React.useMemo(() => {
+    if (!ems || ems.length === 0) return probeSize;
+    const sorted = [...ems].filter(e => e > 0).sort((a, b) => a - b);
+    if (sorted.length === 0) return probeSize;
+    const median = sorted[Math.floor(sorted.length / 2)];
+    const wanted = measure / median;
+    return Math.max(
+      MIN_PRINTED_SIZE,
+      Math.min(rowHeight / PRINTED_MIN_LINE_HEIGHT_EM, wanted),
+    );
+  }, [ems, measure, probeSize, rowHeight]);
 
   const onLineLayout = React.useCallback(
-    (index: number, drawn: number, spaceEm: number) => {
-      if (LINE_CACHE.has(lineKey)) return;
-      const row = rows_em[index];
-      if (!row || fontSize <= 0 || drawn <= 0) return;
-      // A line that reached its box may have been cut off at it, and its
-      // reported width is then the box's. Learning from that is how a page
-      // teaches itself to stay wrong.
-      if (drawn >= width - 1) return;
-      samples.current.rows.set(index, {
-        inkEm: drawn / fontSize - row.gaps * spaceEm,
-        chars: row.chars,
-        marks: row.marks,
-      });
-      if (samples.current.rows.size < textRows) return;
-
-      // ── This page is now known exactly ──────────────────────────────
-      const ink = rows_em.map((_, i) => samples.current.rows.get(i)?.inkEm ?? 0);
-      LINE_CACHE.set(lineKey, ink);
-      setMeasured(ink);
-
-      // ── And the face is a little better known for the next page ─────
-      //
-      // Only as a first guess: it is what makes the first frame of a page
-      // close enough not to flicker, and it is replaced by that page's own
-      // measurements as soon as it has been drawn once.
-      if (MARK_CACHE.has(advanceKey)) return;
-      const seen = [...samples.current.rows.values()];
-      let advance = 0;
-      for (const r of seen) {
-        if (r.marks === 0 && r.chars > 0) {
-          advance = Math.max(advance, r.inkEm / r.chars);
-        }
-      }
-      if (advance < 0.2 || advance > 1.2) return;
-      let mark = 0;
-      for (const r of seen) {
-        if (r.marks > 0) {
-          mark = Math.max(mark, (r.inkEm - r.chars * advance) / r.marks);
-        }
-      }
-      ADVANCE_CACHE.set(advanceKey, advance);
-      MARK_CACHE.set(advanceKey, Math.max(0, Math.min(6, mark)));
-      setAdvanceEm(advance);
-      setMarkEm(Math.max(0, Math.min(6, mark)));
+    (index: number, drawn: number) => {
+      if (PRINTED_LINE_CACHE.has(fitKey) || drawn <= 0 || probeSize <= 0) return;
+      pending.current.seen.set(index, drawn / probeSize);
+      if (pending.current.seen.size < textRows.length) return;
+      const out = rows.map((_, i) => pending.current.seen.get(i) ?? 0);
+      PRINTED_LINE_CACHE.set(fitKey, out);
+      setEms(out);
     },
-    [advanceKey, fontSize, lineKey, rows_em, textRows, width],
+    [fitKey, probeSize, rows, textRows.length],
   );
 
-  /**
-   * What belongs on each empty row.
-   *
-   * The table records a band's rows as lines with nothing on them, which
-   * is what they are — the print gives a surah opening two of its fifteen
-   * lines, and a renderer that adds a band ON TOP of fifteen text rows
-   * overflows the page by exactly that much. So the surah is read off the
-   * row that follows: an empty run before an ayah 1 is that surah's band,
-   * and its basmalah if the print gave it two rows.
-   */
   const ornaments = React.useMemo(() => {
     const out: Array<{ kind: 'band' | 'basmalah'; surah: number } | null> =
       rows.map(() => null);
@@ -868,6 +741,16 @@ function PrintedPageBody({
     }
     return out;
   }, [rows]);
+
+  // The gap is a space in the bundled face at a size derived from that
+  // face's own advance — never the platform's fallback, whose width
+  // differs between iOS and Android and cost the Hafs pages the last word
+  // of all fifteen lines of page 49. It stays NOMINAL here: the scaling
+  // below does the justifying, so there is nothing for the gap to solve.
+  const gapStyle = {
+    fontFamily: FONTS.arabicQuran,
+    ...gapMetrics(WORD_SPACE_EM, fontSize),
+  };
 
   return (
     <View style={{ width, height }}>
@@ -899,18 +782,7 @@ function PrintedPageBody({
           }
           return <View key={`e${index}`} style={{ height: rowHeight }} />;
         }
-        // ── Justify by opening the word gaps ────────────────────────
-        //
-        // NOT by tracking the line. `letterSpacing` on a run of Arabic
-        // adds space after every glyph, and a combining mark is a glyph:
-        // tracking a line pushes the harakat off the letters they belong
-        // to. So the line is split at its spaces and each GAP is widened,
-        // which is a run of one space where there is no mark to detach.
-        //
-        // And only ever widened. Asking a platform for a negative gap is
-        // what lost words off the ends of Hafs lines on one reporter's
-        // device — it was ignored there, and the line was then drawn
-        // wider than it had been measured for.
+
         const tokens: Array<{
           text: string;
           ref: AyahRef;
@@ -930,80 +802,74 @@ function PrintedPageBody({
             });
           });
         }
-        // ── Solve the gap, exactly as a Hafs line does ──────────────
-        //
-        // `lineSpaceEm`'s rule, on this renderer's numbers: the space that
-        // makes the line reach the measure, held inside the band a printed
-        // gap may occupy. A line that cannot reach it even at the widest
-        // is set at the nominal space and CENTRED rather than dragged
-        // across the page — the print does the same, and pulling a short
-        // closing line apart is what the Hafs plates were fixed for.
-        const row_em = rows_em[index];
-        const measureEm = width / fontSize - MUSHAF_LINE_BOX_SLACK_EM;
-        const required =
-          row_em.gaps > 0
-            ? (measureEm - inkEmOf(row_em, index)) / row_em.gaps
-            : WORD_SPACE_EM;
-        const centred = required > WORD_SPACE_MAX_EM;
-        const spaceEm = centred
-          ? WORD_SPACE_EM
-          : Math.max(WORD_SPACE_MIN_EM, required);
-        // The gap is a space in the bundled face, at a size derived from
-        // that face's own advance — never the platform's fallback, whose
-        // width differs between iOS and Android and cost page 49 the last
-        // word of all fifteen lines.
-        const gapStyle = {
-          fontFamily: FONTS.arabicQuran,
-          ...gapMetrics(spaceEm, fontSize),
-        };
+
+        /**
+         * Exactly the measure, or nothing.
+         *
+         * `em` is this line's own drawn width, divided by the size it was
+         * drawn at, so it is a property of the line and not of any guess.
+         * Until it is known the line is drawn unscaled and simply
+         * measured — one frame, once per page and box.
+         */
+        const em = ems?.[index] ?? 0;
+        const drawn = em * fontSize;
+        const scaleX =
+          em > 0 && drawn > 0
+            ? Math.max(MIN_PRINTED_SCALE, Math.min(MAX_PRINTED_SCALE, measure / drawn))
+            : 1;
 
         return (
-          <Text
-            key={`l${index}`}
-            allowFontScaling={false}
-            onTextLayout={e => {
-              const drawn = e.nativeEvent.lines.reduce(
-                (m, l) => Math.max(m, l.width),
-                0,
-              );
-              onLineLayout(index, drawn, spaceEm);
-            }}
-            style={[
-              styles.body,
-              {
-                width,
-                height: rowHeight,
-                fontFamily,
-                fontSize,
-                lineHeight: rowHeight,
-                color: colors.text,
-                textAlign: centred ? 'center' : 'right',
-              },
-            ]}
-          >
-            {tokens.map((token, i) => (
-              <Text
-                key={`${token.ref.surah}:${token.ref.ayah}:${i}`}
-                onPress={onAyahPress ? () => onAyahPress(token.ref) : undefined}
-                onLongPress={
-                  onAyahLongPress ? () => onAyahLongPress(token.ref) : undefined
-                }
-                style={token.lit ? { backgroundColor: colors.selection } : undefined}
-              >
-                {token.text}
-                {token.mark != null ? (
-                  <Text
-                    style={{ color: colors.accent, fontFamily: FONTS.arabicQuran }}
-                  >
-                    {`${NBSP}${END_OF_AYAH}${easternNumerals(token.mark)}`}
-                  </Text>
-                ) : null}
-                {i < tokens.length - 1 ? (
-                  <Text style={gapStyle}>{NBSP}</Text>
-                ) : null}
-              </Text>
-            ))}
-          </Text>
+          <View key={`l${index}`} style={{ height: rowHeight, width }}>
+            <Text
+              allowFontScaling={false}
+              onTextLayout={e =>
+                onLineLayout(
+                  index,
+                  e.nativeEvent.lines.reduce((m, l) => Math.max(m, l.width), 0),
+                )
+              }
+              style={[
+                styles.body,
+                styles.printedLine,
+                {
+                  // Far wider than any line can need, so the platform never
+                  // has the option of breaking one. Anchored to the right,
+                  // which is where an Arabic line begins, and scaled about
+                  // that same edge so the text lands on the margin.
+                  width: measure * PRINTED_BOX_SLACK,
+                  height: rowHeight,
+                  lineHeight: rowHeight,
+                  fontFamily,
+                  fontSize,
+                  color: colors.text,
+                  transform: [{ scaleX }],
+                },
+              ]}
+            >
+              {tokens.map((token, i) => (
+                <Text
+                  key={`${token.ref.surah}:${token.ref.ayah}:${i}`}
+                  onPress={onAyahPress ? () => onAyahPress(token.ref) : undefined}
+                  onLongPress={
+                    onAyahLongPress ? () => onAyahLongPress(token.ref) : undefined
+                  }
+                  style={token.lit ? { backgroundColor: colors.selection } : undefined}
+                >
+                  {token.text}
+                  {token.mark != null ? (
+                    <Text
+                      style={{ color: colors.accent, fontFamily: FONTS.arabicQuran }}
+                    >
+                      {`${NBSP}${END_OF_AYAH}${easternNumerals(token.mark)}`}
+                    </Text>
+                  ) : null}
+                  {i < tokens.length - 1 ? (
+                    <Text style={gapStyle}>{NBSP}</Text>
+                  ) : null}
+                </Text>
+              ))}
+            </Text>
+          </View>
         );
       })}
     </View>
@@ -1013,6 +879,15 @@ function PrintedPageBody({
 export default React.memo(MushafUnicodePage);
 
 const styles = StyleSheet.create({
+  printedLine: {
+    // Anchored to the right, which is where an Arabic line begins, and
+    // scaled about that same edge so the text lands on the margin.
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    textAlign: 'right',
+    transformOrigin: 'right center',
+  },
   body: {
     // ALWAYS rtl — never I18nManager.isRTL. That flag follows the UI
     // language, and the muṣḥaf is right-to-left in every locale.
