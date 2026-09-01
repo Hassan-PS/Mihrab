@@ -31,11 +31,15 @@ import {
 } from '../utils/prayerTimes';
 import { dayAt, sunnahCount, type SunnahLog } from '../journal/sunnah';
 import { owedPrayers, sunnahRateFor } from '../practice/practiceStats';
-import { MUSHAF_PAGES, MUSHAF_SURAHS } from '../quran/pages';
+import { MUSHAF_PAGES, MUSHAF_SURAHS, findPageForAyah } from '../quran/pages';
+import { ayahAtIndex } from '../quran/ayahIndex';
 import { mushafSurahName } from '../quran/surahName';
 import {
+  KHATMAH_TOTAL_AYAHS,
   KHATMAH_TOTAL_PAGES,
+  khatmahAyahsRead,
   khatmahCurrentPage,
+  khatmahDay,
   khatmahToday,
   type KhatmahPlan,
   type LastRead,
@@ -500,18 +504,60 @@ export function buildReadingBlock(input: {
 
   let khatmah: WidgetKhatmah | undefined;
   if (plan) {
-    const { pagesToday, behindBy, daysLeft } = khatmahToday(plan, now);
-    const dayMs = 24 * 60 * 60 * 1000;
-    const elapsed = Math.floor((now - plan.startedAt) / dayMs);
-    const startedToday =
-      plan.dayStartDate === dayKeyOf(new Date(now))
-        ? (plan.dayStartPagesRead ?? plan.pagesRead)
-        : plan.pagesRead;
+    /**
+     * ── THE WIDGET SAYS WHAT THE APP SAYS ───────────────────────────
+     *
+     * Both numbers here used to be derived from the calendar and from
+     * "what happened today", and neither agreed with the card:
+     *
+     *   • the DAY was days elapsed since the plan started, so a reader
+     *     who had read ahead, or who had missed a week, was shown a day
+     *     they were nowhere near; and
+     *   • TODAY'S PORTION was what remains divided by the days left,
+     *     against pages turned since midnight — so it moved every day,
+     *     and a portion finished last night counted for nothing this
+     *     morning.
+     *
+     * Both now come from the portion the reader is actually in
+     * (`quranState`, "Khatmah portions"), which is the same source the
+     * card and the page marker use. Nothing on either widget had to
+     * change: it already said "TODAY'S PORTION x / y", "Done for today"
+     * and "N pages left" — those sentences were simply not true.
+     *
+     * The portion is converted to PAGES here, and deliberately: the
+     * widget's own strings count pages in thirteen languages, and the
+     * honest fix is to answer in the unit that was asked for rather than
+     * to change the question in every locale.
+     */
+    const state = khatmahDay(plan, now);
+    const { behindBy, daysLeft } = khatmahToday(plan, now);
+    const pageOfIndex = (index: number) => {
+      const at = ayahAtIndex(
+        Math.max(1, Math.min(KHATMAH_TOTAL_AYAHS, Math.trunc(index))),
+      );
+      return findPageForAyah(at.surah, at.ayah);
+    };
+    const firstPage = pageOfIndex(state.portion.from);
+    const lastPage = pageOfIndex(state.portion.to);
+    const pagesToday = Math.max(1, lastPage - firstPage + 1);
+    const read = khatmahAyahsRead(plan);
     khatmah = {
-      day: Math.max(1, Math.min(plan.targetDays, elapsed + 1)),
+      day: state.portion.day,
       targetDays: plan.targetDays,
       pagesToday,
-      doneToday: Math.max(0, plan.pagesRead - startedToday),
+      // Full when the portion is finished, however the reader got there —
+      // a page count derived from the last ayah read can land one short
+      // of the portion's own last page, and "1 page left" on a day that
+      // is done is exactly the nag this feature exists to avoid.
+      doneToday: state.done
+        ? pagesToday
+        : Math.max(
+            0,
+            Math.min(
+              pagesToday,
+              read >= state.portion.from ? pageOfIndex(read) - firstPage + 1 : 0,
+            ),
+          ),
       behindBy,
       daysLeft,
     };

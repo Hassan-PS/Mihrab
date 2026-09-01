@@ -127,10 +127,80 @@ function countsFromText(text: Record<string, string>): number[] {
   return counts;
 }
 
+/**
+ * Bytes a string takes as UTF-8 — which is what it takes on disk.
+ *
+ * `String.length` is UTF-16 CODE UNITS, and for an Arabic muṣḥaf that is
+ * not close: nearly every character of it — letters and the marks alike —
+ * sits in U+0600–U+06FF, which is ONE code unit and TWO bytes. Measured
+ * against the real file, the Warsh text came out 774 KB by `.length` and
+ * 1.38 MB on disk, a factor of 1.82, so the one screen whose job is to
+ * tell a reader what a muṣḥaf costs them was reporting a little over half
+ * of it.
+ *
+ * Counted by hand rather than with `TextEncoder`, which Hermes does not
+ * have — `hermesGlobals.test.ts` is the guard that stops that assumption
+ * being made again.
+ */
+export function utf8Length(s: string): number {
+  let bytes = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c < 0x80) bytes += 1;
+    else if (c < 0x800) bytes += 2;
+    else if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+      const next = s.charCodeAt(i + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        // A surrogate PAIR is one code point in four bytes; consume both.
+        bytes += 4;
+        i += 1;
+        continue;
+      }
+      bytes += 3;
+    } else bytes += 3;
+  }
+  return bytes;
+}
+
+/** The three files a muṣḥaf is stored in. */
+const RIWAYAH_FILES = ['pages.json', 'text.json', 'source.json'];
+
+/**
+ * What this muṣḥaf actually occupies, asked of the filesystem.
+ *
+ * Provenance written before the fix above carries a UTF-16 count, and
+ * there is no way to tell one number from the other by looking at it. So
+ * the size is not trusted from the file at all — it is measured, once,
+ * when the provenance is read into the cache. That repairs every muṣḥaf
+ * already installed without asking anyone to download it again.
+ *
+ * `stat` reports the file's own length, not its allocation, so it does
+ * not vary with the block size the way the original comment here feared.
+ */
+async function bytesOnDisk(id: RiwayahId): Promise<number | null> {
+  const dir = riwayahDir(id);
+  let total = 0;
+  for (const name of RIWAYAH_FILES) {
+    try {
+      const stat = await ReactNativeBlobUtil.fs.stat(`${dir}/${name}`);
+      const size = Number(stat?.size);
+      if (Number.isFinite(size) && size > 0) total += size;
+    } catch {
+      // A missing file is a real answer: it contributes nothing.
+    }
+  }
+  return total > 0 ? total : null;
+}
+
 export async function readRiwayahProvenance(
   id: RiwayahId,
 ): Promise<RiwayahProvenance | null> {
-  return readJson<RiwayahProvenance>(`${riwayahDir(id)}/source.json`);
+  const stored = await readJson<RiwayahProvenance>(
+    `${riwayahDir(id)}/source.json`,
+  );
+  if (!stored) return null;
+  const measured = await bytesOnDisk(id);
+  return measured != null ? { ...stored, bytes: measured } : stored;
 }
 
 /**
@@ -164,10 +234,11 @@ export async function writeRiwayahDataset(
     at: new Date().toISOString(),
     ayahs: Object.keys(dataset.text).length,
     pages: dataset.pages.length,
-    // Measured from what was written rather than stat'ed: the two files
-    // are the muṣḥaf, and a directory listing on some platforms rounds to
-    // block size, which would report a different number every install.
-    bytes: pagesBlob.length + textBlob.length,
+    // UTF-8, not `String.length` — see `utf8Length`. This is the number
+    // read back from `source.json` on a platform where the stat above
+    // cannot answer; where it can, the stat wins, because it is the only
+    // one that also fixes a muṣḥaf installed before this was right.
+    bytes: utf8Length(pagesBlob) + utf8Length(textBlob),
   };
   await ReactNativeBlobUtil.fs.writeFile(
     `${dir}/source.json`,

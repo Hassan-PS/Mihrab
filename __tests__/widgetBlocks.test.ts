@@ -319,12 +319,17 @@ describe('reading', () => {
     // The khatmah's own next page, not where they were browsing.
     expect(block?.page).toBe(47);
     expect(block?.pagesRead).toBe(46);
-    expect(block?.khatmah?.day).toBe(14);
+    // The day is the PORTION in hand, not the calendar. Thirteen days
+    // have passed and forty-six pages have been read, so this reader is
+    // on the second portion of thirty and a long way behind — which is
+    // what the line below has always said, and what the day used to
+    // contradict by reporting 14.
+    expect(block?.khatmah?.day).toBe(2);
     expect(block?.khatmah?.targetDays).toBe(30);
     expect(block?.khatmah?.behindBy).toBeGreaterThan(0);
   });
 
-  it('reports pages done today from the day-start snapshot', () => {
+  it("reports today's portion, not the pages turned since midnight", () => {
     const todayKey = day(0);
     const block = buildReadingBlock({
       lastRead: LAST_READ,
@@ -340,7 +345,40 @@ describe('reading', () => {
       },
       now: NOW,
     });
-    expect(block?.khatmah?.doneToday).toBe(4);
+    const k = block?.khatmah;
+    // "TODAY'S PORTION x / y" is the portion the reader is in and how far
+    // through it they are — so it is stable across midnight, and a
+    // portion finished last night still reads as finished this morning.
+    // It used to be pages-turned-today over remaining-divided-by-days,
+    // which agreed with nothing else in the app.
+    expect(k?.pagesToday).toBeGreaterThan(0);
+    expect(k?.doneToday).toBeGreaterThan(0);
+    expect(k?.doneToday).toBeLessThanOrEqual(k!.pagesToday);
+  });
+
+  it('calls the day done when the portion is finished', () => {
+    // The widget's "Done for today" comes straight from doneToday
+    // reaching pagesToday, so a finished portion has to fill it exactly —
+    // one page short would nag someone who is finished.
+    const block = buildReadingBlock({
+      lastRead: LAST_READ,
+      bookmarks: [],
+      khatmah: {
+        id: 'k',
+        startedAt: NOW.getTime() - 86_400_000,
+        targetDays: 30,
+        pagesRead: 21,
+        // The first portion of thirty, read to its last ayah.
+        ayahsRead: Math.round(6236 / 30),
+        completedAt: null,
+        dayStartDate: day(0),
+        dayStartAyahsRead: 0,
+      },
+      now: NOW,
+    });
+    const k = block?.khatmah;
+    expect(k?.day).toBe(1);
+    expect(k?.doneToday).toBe(k?.pagesToday);
   });
 
   it('counts bookmarks', () => {
