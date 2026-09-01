@@ -6,6 +6,101 @@ Written 2026-09-01, against v2.13.8, for issue #11.
 
 **Phases 1–3 are built. Phase 0 was answered by changing the question.**
 
+### What September 1st found, and what it overturned
+
+Written after the feature reached a phone and failed on the very file this
+plan pointed at. Four things below are corrections, not additions: the
+plan asserted the opposite of each, and code was built on them.
+
+**1. The source was the wrong one, and then both were.**
+
+`riwayat.ts` pointed at QUL's `qpc-warsh-script-ayah`, which is text and
+nothing else — no `page_number`, no `juz_number`. The plan had surveyed
+the *word-by-word* export, which has them. A reader following the link
+downloaded 1.8 MB of correct Warsh scripture the app could not turn into a
+muṣḥaf, and got an error for it.
+
+Neither is what ships now. **Quranpedia** serves the same KFGQPC text at a
+fixed path — `https://api.quranpedia.net/v1/mushafs/4` — with
+`page_number`, `juz`, `hizb`, and the field that mattered most (below).
+Cross-checked against QUL's copy: identical per-surah counts in all 114
+surahs, and all 6,214 ayahs identical once the diacritics are normalised.
+
+**2. "6236 ayahs are 6236 ayahs in every riwayah" is false.**
+
+§5 option 3 rests on that sentence and it is wrong. Warsh divides the same
+text into **6,214** ayahs under the Madani-last count. Fifty surahs differ
+from the Kufan division, in both directions — al-Baqarah 285 against 286,
+al-Wāqiʿah 99 against 96 — and the difference is where the boundaries
+fall, not what text is there. Measured: 77,421 words against Ḥafṣ's
+77,430, a gap of nine, which is Warsh writing a handful of words joined.
+
+So `TOTAL_AYAHS`, the surah table and the ayah index are Ḥafṣ facts, not
+Qur'anic ones. Tracking by ayah index is still the right shape, but it
+does not come free the way §5 claimed.
+
+**3. There is a mapping, so the whole book can be checked.**
+
+Every Quranpedia ayah carries `number_in_hafs` — which Ḥafṣ ayahs of its
+own surah it corresponds to. That replaced two things:
+
+- completeness. Counting to 6,236 refuses Warsh; requiring every Ḥafṣ ayah
+  to be accounted for, in order, does not, and is strictly stronger.
+- content. `juzCheck.ts` could only read sixty places because without a
+  mapping ayah N of one riwayah is not ayah N of the other.
+  `hafsAlignment.ts` reads all of them — 6,155 groups for Warsh, 59 where
+  it splits a Ḥafṣ ayah and 78 where it merges — at a mean of 98.5%.
+
+Measuring a real Warsh muṣḥaf against a real Ḥafṣ one also found three
+ways `skeleton()` refused scripture: the dagger alif deleted rather than
+folded, yeh barree not folded at all, and short ayahs judged by a measure
+that can only answer in thirds. Fixing those moved the corpus from 95.0%
+with five failures to 98.5% with none.
+
+**4. The licence question has an answer, and it is permissive.**
+
+§1 records the search coming up empty and §6 keeps it as a standing risk.
+Both are out of date. KFGQPC publishes Muṣḥaf al-Madinah as a complete
+free digital copy, explicitly permitting *"digital publishing, media use,
+and use in websites, software, and other similar intermediates"* —
+worldwide, commercial included. The only carve-out is printing muṣḥafs
+physically for commercial sale, reserved to the Complex. Recorded in full
+in `quranpedia/quran-svg`'s NOTICE.md, sourced to qurancomplex.gov.sa.
+
+So "Mihrab cannot bundle scripture of unclear provenance" is no longer the
+situation. It still does not bundle or host one, but the reason is now a
+choice rather than a constraint: hosting means a copy of the Qur'an whose
+fidelity is ours to answer for, and it buys only convenience that the
+publisher's own link already provides.
+
+### And what that opens
+
+Quranpedia publishes eight riwayat, not one — Ḥafṣ, Warsh, Qālūn, al-Dūrī,
+al-Sūsī, al-Bazzī, Qunbul and Shuʿbah — which contradicts §1's finding
+that four of the five printed riwayat are "blocked on a text nobody has
+published openly". Run through the app's own verifier today:
+
+| Muṣḥaf | Count | Result |
+|---|---|---|
+| Warsh | madani-last, 6214 | ✅ passes |
+| Qālūn | madani-last, 6214 | ✅ passes |
+| Shuʿbah | kufi, 6236 | ✅ passes |
+| al-Dūrī | madani-first, 6218 | ❌ al-Fātiḥah maps 6 of 7 ayahs |
+| al-Bazzī | makki, 6221 | ❌ surah 72 runs backwards |
+
+The two failures are defects in Quranpedia's mapping data, worth reporting
+upstream. The three passes are a table entry and a name each.
+
+**Real page layout is also available**, which §2 concluded was not
+possible. `quranpedia/quran-svg` (CC0) publishes 604 vector pages for each
+of five riwayat with a real per-ayah polygon layer — about 72 MB brotli or
+107 MB as the publisher's zip, against the ~188 MB the Ḥafṣ glyph fonts
+already cost. What it does not give is per-line *text*, so §2's conclusion
+stands for a text renderer: the choice per riwayah is the printed page as
+vector art, or the real text reflowed.
+
+---
+
 ### The sourcing, settled
 
 The plan said the licence was blocking and that the way through it was to
@@ -307,8 +402,9 @@ Three options:
 2. **Keep one khatmah, converted on switch** via the ayah at the boundary.
    Progress survives; the number moves when you switch, which needs
    explaining in the UI or it reads as a bug.
-3. **Track by ayah index, not page.** 6236 ayahs are 6236 ayahs in every
-   riwayah. Progress becomes riwayah-independent by construction, and
+3. **Track by ayah index, not page.** ~~6236 ayahs are 6236 ayahs in every
+   riwayah.~~ *(Wrong — see Status. Warsh has 6,214, and the ayah index is
+   a Ḥafṣ fact. The option is still right; it is not free.)* Progress becomes riwayah-independent by construction, and
    pages become a display detail. Costs a migration of stored khatmah,
    bookmark and last-read records.
 
@@ -322,7 +418,9 @@ than migrating after.
 
 ## 6. What could still stop this
 
-- **Licence.** Unresolved, and no longer blocking: the app does not
+- **Licence.** ~~Unresolved~~ **resolved** — KFGQPC's terms permit software
+  use worldwide; see Status. The paragraph below stands anyway, because the
+  app still distributes nothing: the app does not
   distribute the data, so it does not need a licence to. What it does need
   is to keep being true — the moment anything is bundled or mirrored, this
   becomes the blocking question again.
