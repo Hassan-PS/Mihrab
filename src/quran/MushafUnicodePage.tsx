@@ -161,6 +161,37 @@ const MARK_CACHE = new Map<string, number>();
 const PRINTED_START_MARK_EM = 3;
 
 /**
+ * What each line of a page actually measures, in ems — the real answer.
+ *
+ * The character model above exists only to get the first frame close. It
+ * cannot be right: it prices every letter the same, and the widest line
+ * decides the page, so a page is set to whichever line happens to be
+ * densest in wide letters and every other line then has to be stretched
+ * to reach the margin. That is why the words came out swimming in space
+ * while the print sets them nearly touching.
+ *
+ * Once a page has been drawn, every line's width is known exactly. From
+ * then on the size comes from the widest MEASURED line and each line is
+ * justified against its own width, which is what makes the setting dense
+ * the way the print is dense. Keyed by page and box, because unlike the
+ * advance this is not a property of the face.
+ */
+const LINE_CACHE = new Map<string, number[]>();
+
+/**
+ * The tightest a printed row may be set, as a multiple of the type size.
+ *
+ * `UNICODE_LINE_HEIGHT_EM` is 2.05, which is generous — it was chosen for
+ * flowing text, where a loose leading is a kindness. A muṣḥaf page is not
+ * flowing text: the print sets fifteen dense lines with the letters large
+ * and the words nearly touching, and capping the size at half the row
+ * height is what kept the type small and left the gaps to do the filling.
+ * The row still divides the height; this only stops the type growing so
+ * large that its marks collide with the row above.
+ */
+const PRINTED_MIN_LINE_HEIGHT_EM = 1.5;
+
+/**
  * Average advance per base character, in ems — the one guess in the size
  * prediction, and the one thing measurement can teach.
  *
@@ -178,6 +209,7 @@ export function _resetUnicodePageFitForTests(): void {
   FIT_CACHE.clear();
   ADVANCE_CACHE.clear();
   MARK_CACHE.clear();
+  LINE_CACHE.clear();
   calibratedAdvanceEm = 0.42;
 }
 
@@ -496,6 +528,7 @@ function MushafUnicodePage({
   if (printed) {
     return (
       <PrintedPageBody
+        pageKey={`${riwayah}:${page}`}
         rows={printed}
         width={width}
         height={height}
@@ -626,6 +659,7 @@ function MushafUnicodePage({
  * also why the class of bug the loop kept producing cannot arise here.
  */
 function PrintedPageBody({
+  pageKey,
   rows,
   width,
   height,
@@ -635,6 +669,8 @@ function PrintedPageBody({
   onAyahPress,
   onAyahLongPress,
 }: {
+  /** Identifies the page whose measured line widths are cached. */
+  pageKey: string;
   rows: AllocatedLine[];
   width: number;
   height: number;
@@ -681,11 +717,20 @@ function PrintedPageBody({
   const [markEm, setMarkEm] = React.useState(
     () => MARK_CACHE.get(advanceKey) ?? PRINTED_START_MARK_EM,
   );
-  /** A line's ink, in ems, from what has been learnt so far. */
+  const lineKey = `${pageKey}:${fontFamily}:${Math.round(width)}`;
+  const [measured, setMeasured] = React.useState<number[] | null>(
+    () => LINE_CACHE.get(lineKey) ?? null,
+  );
+  if (measured && !LINE_CACHE.has(lineKey)) setMeasured(null);
+
+  /**
+   * A line's ink in ems: what it actually measured, or — until it has
+   * been drawn once — what the character model guesses.
+   */
   const inkEmOf = React.useCallback(
-    (row: { chars: number; marks: number }) =>
-      row.chars * advanceEm + row.marks * markEm,
-    [advanceEm, markEm],
+    (row: { chars: number; marks: number }, index: number) =>
+      measured?.[index] ?? row.chars * advanceEm + row.marks * markEm,
+    [advanceEm, markEm, measured],
   );
 
   /**
@@ -699,7 +744,7 @@ function PrintedPageBody({
     let most = 0;
     let at = 0;
     rows_em.forEach((row, i) => {
-      const drawn = inkEmOf(row) + row.gaps * WORD_SPACE_EM;
+      const drawn = inkEmOf(row, i) + row.gaps * WORD_SPACE_EM;
       if (drawn > most) {
         most = drawn;
         at = i;
@@ -711,8 +756,8 @@ function PrintedPageBody({
 
   const fontSize =
     blockEm > 0
-      ? Math.min(rowHeight / UNICODE_LINE_HEIGHT_EM, width / blockEm)
-      : rowHeight / UNICODE_LINE_HEIGHT_EM;
+      ? Math.min(rowHeight / PRINTED_MIN_LINE_HEIGHT_EM, width / blockEm)
+      : rowHeight / PRINTED_MIN_LINE_HEIGHT_EM;
 
   /**
    * One honest pass over every line, then both unknowns at once.
@@ -733,9 +778,9 @@ function PrintedPageBody({
   const samples = React.useRef<{
     key: string;
     rows: Map<number, { inkEm: number; chars: number; marks: number }>;
-  }>({ key: advanceKey, rows: new Map() });
-  if (samples.current.key !== advanceKey) {
-    samples.current = { key: advanceKey, rows: new Map() };
+  }>({ key: lineKey, rows: new Map() });
+  if (samples.current.key !== lineKey) {
+    samples.current = { key: lineKey, rows: new Map() };
   }
   const textRows = React.useMemo(
     () => rows.filter(r => !r.empty).length,
@@ -744,12 +789,12 @@ function PrintedPageBody({
 
   const onLineLayout = React.useCallback(
     (index: number, drawn: number, spaceEm: number) => {
-      if (MARK_CACHE.has(advanceKey)) return;
+      if (LINE_CACHE.has(lineKey)) return;
       const row = rows_em[index];
       if (!row || fontSize <= 0 || drawn <= 0) return;
       // A line that reached its box may have been cut off at it, and its
-      // reported width is then the box's. Learning from that is how the
-      // page teaches itself to stay wrong.
+      // reported width is then the box's. Learning from that is how a page
+      // teaches itself to stay wrong.
       if (drawn >= width - 1) return;
       samples.current.rows.set(index, {
         inkEm: drawn / fontSize - row.gaps * spaceEm,
@@ -758,6 +803,17 @@ function PrintedPageBody({
       });
       if (samples.current.rows.size < textRows) return;
 
+      // ── This page is now known exactly ──────────────────────────────
+      const ink = rows_em.map((_, i) => samples.current.rows.get(i)?.inkEm ?? 0);
+      LINE_CACHE.set(lineKey, ink);
+      setMeasured(ink);
+
+      // ── And the face is a little better known for the next page ─────
+      //
+      // Only as a first guess: it is what makes the first frame of a page
+      // close enough not to flicker, and it is replaced by that page's own
+      // measurements as soon as it has been drawn once.
+      if (MARK_CACHE.has(advanceKey)) return;
       const seen = [...samples.current.rows.values()];
       let advance = 0;
       for (const r of seen) {
@@ -765,8 +821,6 @@ function PrintedPageBody({
           advance = Math.max(advance, r.inkEm / r.chars);
         }
       }
-      // A page whose every line carries a medallion cannot separate the
-      // two, so it keeps what it has rather than guess.
       if (advance < 0.2 || advance > 1.2) return;
       let mark = 0;
       for (const r of seen) {
@@ -779,7 +833,7 @@ function PrintedPageBody({
       setAdvanceEm(advance);
       setMarkEm(Math.max(0, Math.min(6, mark)));
     },
-    [advanceKey, fontSize, rows_em, textRows, width],
+    [advanceKey, fontSize, lineKey, rows_em, textRows, width],
   );
 
   /**
@@ -888,7 +942,7 @@ function PrintedPageBody({
         const measureEm = width / fontSize - MUSHAF_LINE_BOX_SLACK_EM;
         const required =
           row_em.gaps > 0
-            ? (measureEm - inkEmOf(row_em)) / row_em.gaps
+            ? (measureEm - inkEmOf(row_em, index)) / row_em.gaps
             : WORD_SPACE_EM;
         const centred = required > WORD_SPACE_MAX_EM;
         const spaceEm = centred
