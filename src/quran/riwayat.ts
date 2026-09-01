@@ -49,10 +49,11 @@ export type RiwayahSource = {
   /**
    * A direct link, when the publisher offers a stable one.
    *
-   * QUL's are generated in the browser rather than served at a fixed
-   * path, so there is nothing honest to put here yet — and a URL guessed
-   * from a rendered page is one that breaks silently later. Absent means
-   * the screen asks the reader for the link instead.
+   * Present means the app can simply fetch the muṣḥaf and the screen
+   * offers a button. Absent means the publisher generates its download
+   * URLs per request — QUL does — so there is nothing honest to hardcode,
+   * and a URL guessed from a rendered page is one that breaks silently
+   * later; the screen then asks for a link or a file instead.
    */
   direct?: string;
   /** Whom the publisher credits upstream. */
@@ -124,9 +125,26 @@ export const RIWAYAT: readonly RiwayahDefinition[] = [
     arabic: 'ورش',
     render: 'unicode',
     source: {
-      publisher: 'Quranic Universal Library (Tarteel)',
-      page: 'https://qul.tarteel.ai/resources/quran-script/qpc-warsh-script-ayah',
-      credits: 'King Fahd Glorious Quran Printing Complex; text audited by Tanzil',
+      publisher: 'Quranpedia',
+      page: 'https://quranpedia.net',
+      // ── WHY THERE IS A DIRECT LINK NOW ──────────────────────────────
+      //
+      // There was not one, and the comment on `direct` said why: QUL mints
+      // its download URLs in the browser, so there was nothing honest to
+      // hardcode and the screen had to ask the reader to paste a link or
+      // find a file. That was the whole reason this feature was awkward.
+      //
+      // Quranpedia serves the muṣḥaf at a fixed path, so the app can
+      // simply fetch it — one button, like the page fonts. It is the same
+      // KFGQPC Warsh text: measured against QUL's own copy, all 114
+      // surahs agree on their ayah counts and all 6,214 ayahs are
+      // identical once the diacritics are normalised.
+      //
+      // And it carries what QUL's ayah export does not: page_number, juz,
+      // and `number_in_hafs`, which is what lets `hafsAlignment.ts` read
+      // every ayah against the Qur'an rather than sixty of them.
+      direct: 'https://api.quranpedia.net/v1/mushafs/4',
+      credits: 'King Fahd Glorious Quran Printing Complex',
     },
     fontFamily: 'UthmanicWarsh',
     fontBundled: false,

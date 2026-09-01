@@ -15,33 +15,22 @@
  * between — and the reader is told exactly that, along with who publishes
  * it and whom they credit, before they add scripture to their device.
  *
- * ── TWO WAYS IN, BECAUSE ONE IS NOT ENOUGH ────────────────────────────
+ * ── ONE BUTTON, AND A DOOR BESIDE IT ─────────────────────────────────
  *
- * The link field is not a developer affordance. There is no honest URL to
- * hardcode: QUL's own routes are `/resources/:id/:token/download`, and the
- * token is minted per download in the browser. A URL guessed from a
- * rendered page is one that breaks silently later, which for scripture is
- * the worst failure available.
+ * This screen used to ask the reader to paste a link, because there was
+ * no honest URL to hardcode: QUL mints its download URLs in the browser,
+ * so anything written here would have been a guess that breaks silently
+ * later — which for scripture is the worst failure available.
  *
- * But pasting the resource PAGE is the obvious thing to try, and it fails
- * — correctly, and with a message saying so, which is still a dead end for
- * anyone who cannot find the real link. So the way in that has no link in
- * it at all is the one offered first: download the file in a browser, then
- * choose it. One tap, and it is installed.
+ * Quranpedia serves the muṣḥaf at a fixed path, so the app fetches it.
+ * One button, the way the page fonts already work. `riwayat.ts` records
+ * why that source and not the other.
  *
- * ── WHAT THE FIRST VERSION OF THAT GOT WRONG ──────────────────────────
- *
- * It asked for a FOLDER, listed the `.json` files in it, and made the
- * reader pick from that list. Two things followed, both reported: QUL
- * hands you `qpc-warsh-script-ayah.json.zip`, so there was no `.json` to
- * find until you had unzipped it somewhere yourself; and being asked for a
- * folder, by a button that says "choose the downloaded file", is a puzzle
- * rather than an instruction.
- *
- * So it asks for a file, and it takes the file as it comes — zipped or
- * not, `mushafFile.ts` reads what the bytes actually are rather than what
- * the name claims. There is nothing left between "I downloaded it" and
- * "it is on my device".
+ * The by-hand way in is still here, folded away: a publisher's URL can
+ * move, a reader can be on a network that will not reach it, and someone
+ * may already have the file. But it is no longer the first thing on the
+ * card, because for almost everyone the first thing should be a button
+ * that simply works.
  *
  * The file never travels through anything of ours either way.
  */
@@ -132,6 +121,10 @@ function RiwayahCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
+  /** Whether the reader has asked for the by-hand way in. */
+  const [manual, setManual] = useState(false);
+
+  const direct = riwayah.source?.direct;
 
   const installed = riwayahProvenance(riwayah.id);
   const name = t(riwayah.nameKey, riwayah.arabic);
@@ -195,6 +188,29 @@ function RiwayahCard({
       setBusy(false);
     }
   }, [onChanged, riwayah.id, t]);
+
+  /**
+   * Fetch the muṣḥaf from the publisher, the way the page fonts are
+   * fetched: one button, no link to find, no file to go looking for.
+   *
+   * It still travels publisher → reader with nothing of ours in between,
+   * and it is still checked here before a word of it is drawn. What has
+   * changed is only that the reader no longer has to do the fetching.
+   */
+  const download = useCallback(async () => {
+    if (!direct) return;
+    setBusy(true);
+    setError(null);
+    setDetail(null);
+    const result = await installRiwayahFromUrl(riwayah.id, direct);
+    setBusy(false);
+    if (result.ok) {
+      onChanged?.();
+      return;
+    }
+    setError(t(result.error.key, result.error.fallback, result.error.params));
+    setDetail(result.error.detail ?? null);
+  }, [direct, onChanged, riwayah.id, t]);
 
   const install = useCallback(async () => {
     setBusy(true);
@@ -296,55 +312,34 @@ function RiwayahCard({
         </Text>
       </Pressable>
 
-      <Text style={[styles.help, { color: palette.muted }]}>
-        {t(
-          'downloads.riwayahHowTo',
-          'Download the JSON export from that page, then choose it below. It can stay zipped.',
-        )}
-      </Text>
+      {direct ? (
+        <>
+          <Text style={[styles.help, { color: palette.muted }]}>
+            {t(
+              'downloads.riwayahFetchHowTo',
+              'Mihrab will fetch it from the publisher straight to this device and check it before anything is read from it.',
+            )}
+          </Text>
 
-      {hasFilePicker() ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t(
-            'downloads.riwayahChooseFile',
-            'Choose the downloaded file',
-          )}
-          disabled={busy}
-          onPress={() => void chooseFile()}
-          style={[
-            styles.cta,
-            { backgroundColor: palette.accentSolid, opacity: busy ? 0.5 : 1 },
-          ]}>
-          {busy ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.ctaLabel}>
-              {t('downloads.riwayahChooseFile', 'Choose the downloaded file')}
-            </Text>
-          )}
-        </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('downloads.riwayahDownload', 'Download')}
+            disabled={busy}
+            onPress={() => void download()}
+            style={[
+              styles.cta,
+              { backgroundColor: palette.accentSolid, opacity: busy ? 0.5 : 1 },
+            ]}>
+            {busy ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.ctaLabel}>
+                {t('downloads.riwayahDownload', 'Download')}
+              </Text>
+            )}
+          </Pressable>
+        </>
       ) : null}
-
-      <Text style={[styles.help, styles.orLine, { color: palette.muted }]}>
-        {t('downloads.riwayahOrLink', 'Or paste a direct link to the file:')}
-      </Text>
-
-      <TextInput
-        value={url}
-        onChangeText={setUrl}
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="url"
-        editable={!busy}
-        placeholder="https://…"
-        placeholderTextColor={String(palette.muted)}
-        accessibilityLabel={t('downloads.riwayahLink', 'Link to the data file')}
-        style={[
-          styles.input,
-          { color: palette.text, borderColor: palette.border },
-        ]}
-      />
 
       {error ? (
         <View style={styles.errorBox}>
@@ -357,20 +352,96 @@ function RiwayahCard({
         </View>
       ) : null}
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('downloads.riwayahInstall', 'Add this muṣḥaf')}
-        disabled={busy || url.trim().length === 0}
-        onPress={() => void install()}
-        style={[
-          styles.secondary,
-          { borderColor: palette.accentSolid },
-          (busy || url.trim().length === 0) && { opacity: 0.5 },
-        ]}>
-        <Text style={[styles.secondaryLabel, { color: palette.accentSolid }]}>
-          {t('downloads.riwayahInstall', 'Add this muṣḥaf')}
-        </Text>
-      </Pressable>
+      {/*
+        The manual way in, folded away when there is a direct link.
+
+        It is not a developer affordance and it is not dead weight: a
+        publisher's URL can move, a reader can be on a network that will
+        not reach it, and someone may have the file already. But it is no
+        longer the first thing on the card, because for almost everyone
+        the first thing should be a button that just works.
+      */}
+      {direct && !manual ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            'downloads.riwayahAddAFile',
+            'Add a file I already have',
+          )}
+          onPress={() => setManual(true)}
+          style={styles.linkBtn}>
+          <Text style={[styles.link, { color: palette.muted }]}>
+            {t('downloads.riwayahAddAFile', 'Add a file I already have')}
+          </Text>
+        </Pressable>
+      ) : null}
+
+      {!direct || manual ? (
+        <>
+          <Text style={[styles.help, { color: palette.muted }]}>
+            {t(
+              'downloads.riwayahHowTo',
+              'Download the JSON export from that page, then choose it below. It can stay zipped.',
+            )}
+          </Text>
+
+          {hasFilePicker() ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t(
+                'downloads.riwayahChooseFile',
+                'Choose the downloaded file',
+              )}
+              disabled={busy}
+              onPress={() => void chooseFile()}
+              style={({ pressed }) => [
+                styles.secondary,
+                { borderColor: palette.accentSolid },
+                (busy || pressed) && { opacity: 0.6 },
+              ]}>
+              <Text style={[styles.secondaryLabel, { color: palette.accentSolid }]}>
+                {t('downloads.riwayahChooseFile', 'Choose the downloaded file')}
+              </Text>
+            </Pressable>
+          ) : null}
+
+          <Text style={[styles.help, styles.orLine, { color: palette.muted }]}>
+            {t('downloads.riwayahOrLink', 'Or paste a direct link to the file:')}
+          </Text>
+
+          <TextInput
+            value={url}
+            onChangeText={setUrl}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            editable={!busy}
+            placeholder="https://…"
+            placeholderTextColor={String(palette.muted)}
+            accessibilityLabel={t('downloads.riwayahLink', 'Link to the data file')}
+            style={[
+              styles.input,
+              { color: palette.text, borderColor: palette.border },
+            ]}
+          />
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('downloads.riwayahInstall', 'Add this muṣḥaf')}
+            disabled={busy || url.trim().length === 0}
+            onPress={() => void install()}
+            style={[
+              styles.secondary,
+              styles.orLine,
+              { borderColor: palette.accentSolid },
+              (busy || url.trim().length === 0) && { opacity: 0.5 },
+            ]}>
+            <Text style={[styles.secondaryLabel, { color: palette.accentSolid }]}>
+              {t('downloads.riwayahInstall', 'Add this muṣḥaf')}
+            </Text>
+          </Pressable>
+        </>
+      ) : null}
     </View>
   );
 }

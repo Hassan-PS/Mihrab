@@ -17,11 +17,17 @@
  * ── AND WHY MIHRAB DOES NOT HOST IT ───────────────────────────────────
  *
  * The Hafs page fonts come from a Mihrab release, which means the project
- * redistributes them. It cannot do that here: nobody publishes a Warsh
- * text under terms that permit it (`riwayahStore.ts` has the survey). So
- * the URL is the publisher's, or one the reader supplies, and the file
- * travels from them to the reader without passing through anything of
- * ours.
+ * redistributes them. This does not, and the reason has changed: it used
+ * to be that nobody published a Warsh text under terms that permitted it.
+ * KFGQPC's terms turn out to be permissive — a free digital copy, for
+ * software use, worldwide — so the project could now host one.
+ *
+ * It still does not. Hosting means a copy of the Qur'an whose fidelity is
+ * ours to answer for, kept in step by us, and served from an account we
+ * maintain; and the argument for taking that on is only convenience,
+ * which a direct link from the publisher already provides. So the URL is
+ * the publisher's, or one the reader supplies, and the file travels from
+ * them to the reader without passing through anything of ours.
  */
 import { MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
 import { installRiwayahDataset } from './riwayahData';
