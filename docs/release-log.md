@@ -338,4 +338,37 @@ Took 1 aborted attempt(s) before it ran clean:
 
   - 1 catalyst build failed — /tmp/release-catalyst.log
 
-**Lesson:** _(unfilled)_
+That line is misleading and the log should say so: the Catalyst build
+succeeded. It was signed, the entitlements were sealed in, it smoke-launched
+and found today's payload in the App Group. What failed was the submission
+after all of that — `notarytool` could not resolve
+`appstoreconnect.apple.com`:
+
+    Error Domain=NSURLErrorDomain Code=-1003 "A server with the specified
+    hostname could not be found." … Resolved 0 endpoints in 5004ms …
+    interface: utun4
+
+`utun4` is a VPN tunnel. DNS through it came back empty for five seconds,
+notarytool gave up, and the script stopped. Four minutes later the same
+name resolved to 23.49.109.248 and an identical re-run passed with nothing
+changed.
+
+**Lesson:** the first abort in this log that was not the cycle catching
+something wrong with the release. It was the network, and the release was
+fine — which is worth recording precisely because the log would otherwise
+read as though every abort means a defect.
+
+Two things to carry forward. First, this is the one rule paying off in its
+least dramatic form: the failure landed in the DRY RUN, before the push,
+the tag and the GitHub release, so the whole cost was one rebuild. An
+irreversible step in the middle of the list would have made the same blip
+expensive.
+
+Second, and the actually useful part: `notarytool` failing to SUBMIT and
+`notarytool` failing to NOTARIZE look alike at the top of the output and
+mean opposite things — one is your network, the other is your build. The
+error text is what separates them, and reading it before assuming the
+build is broken saved re-signing something that was never wrong. If this
+recurs, the fix is in the script rather than in the habit: retry the
+submit on a resolution error rather than dying on it, the way
+`fetchWithRetry` already treats a DNS failure as different from a refusal.
