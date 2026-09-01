@@ -306,4 +306,28 @@ Changed the release cycle itself:
   - `.github/workflows/habous-dataset.yml`
   - `.github/workflows/habous-probe.yml`
 
-**Lesson:** _(unfilled)_
+(Those three are dataset plumbing rather than release plumbing. They count
+as cycle changes only because "changed the cycle" is measured as "touched
+`.github/workflows`", which is the cheap test and worth keeping — a false
+positive costs one paragraph, and the alternative is a rule that has to
+guess which workflows matter.)
+
+**Lesson:** every gate this cycle has asks whether the release was BUILT
+and SHIPPED correctly. None of them asks whether the app is right, and
+2.13.7's headline fix was a case where nothing in the cycle could have
+helped: the app had been asking AlAdhan for `2026-08-30` in a URL that
+means `DD-MM-YYYY`, so it had been served times for 30-08-**2030** on
+every request it ever made. Status 200, valid shape, plausible times. Tests
+passed, CI was green, notarization succeeded, the release verified clean —
+and the times were four years out.
+
+What found it was comparing a stored day against an independent published
+source, which happened only because a user in Morocco reported "off by
+minutes" and the ministry's own tables were sitting there to check against.
+That is not a gate and cannot be made into one for every provider. But it
+is worth writing down what the shape of the miss was: a dependency that
+answers confidently instead of erroring is invisible to every check that
+looks for errors. The cheapest defence is an oracle — some second source
+that was not derived from the first — and this project now has two of
+them, Sweden's and Morocco's, both wired in as providers rather than as
+tests. Using them as tests is the obvious next step and is not done.

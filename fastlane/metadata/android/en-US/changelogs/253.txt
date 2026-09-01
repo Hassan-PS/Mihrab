@@ -1,0 +1,1 @@
+• Widgets placed next to each other no longer run together. Each one now draws its own rounded card, inset inside its slot, instead of painting edge to edge — so two stacked widgets have a gap between them rather than a seam.

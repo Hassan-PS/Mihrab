@@ -1,0 +1,1 @@
+• Widgetar som placeras intill varandra flyter inte längre ihop. Varje widget ritar nu sitt eget rundade kort, indraget i sin ruta, i stället för att fylla ut hela ytan — så två widgetar ovanför varandra får ett mellanrum i stället för en skarv.
