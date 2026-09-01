@@ -63,6 +63,7 @@ import {
 } from './pages';
 import { loadRiwayahText } from './riwayahData';
 import { printedPageFor, type AllocatedLine } from './mushafPrintedLines';
+import { NO_AYAH_TINT, type AyahTint } from './ayahMarks';
 import { riwayahById, riwayahFontFamily, type RiwayahId } from './riwayat';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import type { AyahRef } from './MushafTextPage';
@@ -419,13 +420,16 @@ export type MushafUnicodePageProps = {
   selected?: AyahRef | null;
   /** Ayah currently being recited — highlighted while audio plays. */
   playing?: AyahRef | null;
+  /**
+   * Bookmarks and khatmah marks, as a colour per ayah (`ayahMarks.ts`).
+   * Absent falls back to tinting `selected ?? playing` in the page's own
+   * neutral selection wash, which is all this renderer showed before.
+   */
+  tint?: AyahTint;
   onAyahPress?: (ref: AyahRef) => void;
   onAyahLongPress?: (ref: AyahRef) => void;
 };
 
-function sameAyah(a: AyahRef | null | undefined, b: AyahRef): boolean {
-  return a != null && a.surah === b.surah && a.ayah === b.ayah;
-}
 
 /**
  * Android justified its first line only below API 26, so a page there was
@@ -445,6 +449,7 @@ function MushafUnicodePage({
   colors,
   selected,
   playing,
+  tint,
   onAyahPress,
   onAyahLongPress,
 }: MushafUnicodePageProps) {
@@ -535,7 +540,17 @@ function MushafUnicodePage({
   );
 
   const lineHeight = fontSize * UNICODE_LINE_HEIGHT_EM;
-  const highlight = selected ?? playing ?? null;
+  // One lookup for both bodies. Without a tint the page keeps the old
+  // behaviour — the selected or playing ayah in the neutral wash.
+  const fallback = selected ?? playing ?? null;
+  const tintOf: AyahTint = tint
+    ? tint
+    : fallback
+      ? (surah, ayah) =>
+          surah === fallback.surah && ayah === fallback.ayah
+            ? colors.selection
+            : null
+      : NO_AYAH_TINT;
 
   if (blocks.length === 0) return null;
 
@@ -548,7 +563,7 @@ function MushafUnicodePage({
         height={height}
         fontFamily={fontFamily}
         colors={colors}
-        highlight={highlight}
+        tint={tintOf}
         onAyahPress={onAyahPress}
         onAyahLongPress={onAyahLongPress}
       />
@@ -632,11 +647,10 @@ function MushafUnicodePage({
                 // letters still join across the boundary — and so the
                 // highlight is one unbroken band over the whole ayah rather
                 // than a box per line.
-                style={
-                  sameAyah(highlight, ayah)
-                    ? { backgroundColor: colors.selection }
-                    : undefined
-                }
+                style={(() => {
+                  const colour = tintOf(ayah.surah, ayah.ayah);
+                  return colour ? { backgroundColor: colour } : undefined;
+                })()}
               >
                 {ayah.text}
                 {/* No-break before the mark, an ordinary space after it: the
@@ -694,7 +708,7 @@ function PrintedPageBody({
   height,
   fontFamily,
   colors,
-  highlight,
+  tint,
   onAyahPress,
   onAyahLongPress,
 }: {
@@ -705,7 +719,7 @@ function PrintedPageBody({
   height: number;
   fontFamily: string;
   colors: MushafUnicodePageProps['colors'];
-  highlight: AyahRef | null;
+  tint: AyahTint;
   onAyahPress?: (ref: AyahRef) => void;
   onAyahLongPress?: (ref: AyahRef) => void;
 }) {
@@ -862,12 +876,12 @@ function PrintedPageBody({
           text: string;
           ref: AyahRef;
           mark: number | null;
-          lit: boolean;
+          /** The background this ayah is marked with, or null. */
+          lit: string | null;
         }> = [];
         for (const part of row.ayahs) {
           const words = part.text.split(/\s+/).filter(Boolean);
-          const lit =
-            highlight?.surah === part.surah && highlight?.ayah === part.ayah;
+          const lit = tint(part.surah, part.ayah);
           words.forEach((word, wi) => {
             tokens.push({
               text: word,
@@ -989,7 +1003,9 @@ function PrintedPageBody({
                   onLongPress={
                     onAyahLongPress ? () => onAyahLongPress(token.ref) : undefined
                   }
-                  style={token.lit ? { backgroundColor: colors.selection } : undefined}
+                  style={
+                    token.lit ? { backgroundColor: token.lit } : undefined
+                  }
                 >
                   {token.text}
                   {token.mark != null ? (

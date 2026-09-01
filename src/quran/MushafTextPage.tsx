@@ -62,6 +62,7 @@ import {
   type MushafLine,
   type MushafWord,
 } from './mushafLayout';
+import type { AyahTint } from './ayahMarks';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import { FONTS } from '../theme/typography';
 
@@ -118,6 +119,14 @@ export type MushafTextPageProps = {
   selected?: AyahRef | null;
   /** Ayah currently being recited — highlighted while audio plays. */
   playing?: AyahRef | null;
+  /**
+   * Bookmarks and khatmah marks, as a colour per ayah (`ayahMarks.ts`).
+   *
+   * Optional, and when it is absent the page falls back to tinting
+   * `selected ?? playing` in `colors.selection` — which is all this
+   * renderer could show before there was a tint to hand it.
+   */
+  tint?: AyahTint;
   /** Word currently being recited, for follow-along highlighting. */
   activeWord?: (AyahRef & { position: number }) | null;
   onWordPress?: (ref: AyahRef, word: MushafWord) => void;
@@ -144,6 +153,7 @@ function MushafTextPage({
   lineHeight: lineHeightProp,
   selected,
   playing,
+  tint,
   activeWord,
   onWordPress,
   onWordLongPress,
@@ -199,6 +209,7 @@ function MushafTextPage({
           colors={colors}
           selected={selected}
           playing={playing}
+          tint={tint}
           activeWord={activeWord}
           onPress={handlePress}
           onLongPress={handleLongPress}
@@ -221,6 +232,7 @@ type LineViewProps = {
   colors: MushafTextPageProps['colors'];
   selected?: AyahRef | null;
   playing?: AyahRef | null;
+  tint?: AyahTint;
   activeWord?: (AyahRef & { position: number }) | null;
   onPress: (w: MushafWord) => void;
   onLongPress: (w: MushafWord) => void;
@@ -236,6 +248,7 @@ const LineView = React.memo(function LineView({
   colors,
   selected,
   playing,
+  tint,
   activeWord: _activeWord,
   onPress,
   onLongPress,
@@ -309,34 +322,48 @@ const LineView = React.memo(function LineView({
     fontFamily: FONTS.arabicQuran,
     ...gapMetrics(WORD_SPACE_EM, fontSize),
   };
-  const selectionStyle = { backgroundColor: colors.selection };
+  /**
+   * The colour an ayah's runs are drawn on, or null for the bare page.
+   *
+   * With a `tint` this is every mark the page carries — bookmarks, the
+   * khatmah's position and its target, the selection, the reciter — each
+   * already resolved to one colour per ayah by `ayahMarks.ts`. Without
+   * one it is the old behaviour and nothing else: the selected or playing
+   * ayah, in the page's neutral selection wash.
+   */
+  const tintOf = (w: MushafWord | undefined): string | null => {
+    if (w == null) return null;
+    if (tint) return tint(w.surah, w.ayah);
+    return sameAyah(selected ?? playing ?? null, w) ? colors.selection : null;
+  };
 
-  // Highlighting a single ayah inside one paragraph needs the paragraph split
-  // at the ayah boundary — nested <Text> keeps the text one shaped stream, so
+  // Marking a single ayah inside one paragraph needs the paragraph split at
+  // the ayah boundary — nested <Text> keeps the text one shaped stream, so
   // the glyphs still interlock across the boundary.
-  const highlight = selected ?? playing ?? null;
   const nodes: React.ReactNode[] = [];
   lineTokenStream(line).forEach((piece, i) => {
     if (piece.kind === 'gap') {
       const word = line.words[piece.index];
       const previous = line.words[piece.index - 1];
-      // A gap carries the highlight when both sides of it do, so the band
-      // behind a selected ayah reads as one unbroken run. An inner gap always
-      // has the same word on both sides.
+      // A gap carries the mark when both sides of it do, so the wash
+      // behind an ayah reads as one unbroken run. An inner gap always has
+      // the same word on both sides.
+      const colour = tintOf(word);
       const on =
-        sameAyah(highlight, word) &&
-        (piece.inner || (previous != null && sameAyah(highlight, previous)));
+        colour != null &&
+        (piece.inner || (previous != null && tintOf(previous) === colour));
       const base = piece.inner ? innerGapStyle : gapStyle;
       nodes.push(
-        <Text key={i} style={on ? [base, selectionStyle] : base}>
+        <Text key={i} style={on ? [base, { backgroundColor: colour }] : base}>
           {GAP}
         </Text>,
       );
       return;
     }
+    const colour = tintOf(piece.word);
     nodes.push(
-      sameAyah(highlight, piece.word) ? (
-        <Text key={i} style={selectionStyle}>
+      colour != null ? (
+        <Text key={i} style={{ backgroundColor: colour }}>
           {piece.text}
         </Text>
       ) : (

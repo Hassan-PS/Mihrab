@@ -963,7 +963,17 @@
     "downloadDoneTitle": "El Corán está listo",
     "downloadDoneBody": "Todas las páginas están en este dispositivo. Ya se lee sin conexión.",
     "downloadIncompleteTitle": "La descarga no terminó",
-    "downloadIncompleteBody": "Faltan {{count}} páginas. Abre el Corán para seguir donde se detuvo."
+    "downloadIncompleteBody": "Faltan {{count}} páginas. Abre el Corán para seguir donde se detuvo.",
+    "finishDay": "Terminar la lectura del día {{day}}",
+    "finishDayShort": "Terminar día {{day}}",
+    "khatmahAyahProgress": "{{read}} / {{total}} aleyas · día {{day}} de {{days}}",
+    "khatmahDayDone": "✓ Lectura de hoy completada",
+    "khatmahDayLeft": "Quedan {{count}} aleyas hoy",
+    "khatmahExtra": "+{{count}} extra",
+    "khatmahMarkDone": "Marcar la lectura del día {{day}} como completada",
+    "khatmahMarkNext": "✓ Terminar también el día {{day}}",
+    "khatmahMarkToday": "✓ Lectura de hoy completada",
+    "khatmahPrevDay": "‹ Día anterior"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

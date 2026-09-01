@@ -963,7 +963,17 @@
     "downloadDoneTitle": "Kur'an hazır",
     "downloadDoneBody": "Bütün sayfalar bu cihazda. Artık bağlantı olmadan okunuyor.",
     "downloadIncompleteTitle": "İndirme tamamlanmadı",
-    "downloadIncompleteBody": "{{count}} sayfa hâlâ eksik. Kaldığı yerden devam etmek için Kur'an'ı açın."
+    "downloadIncompleteBody": "{{count}} sayfa hâlâ eksik. Kaldığı yerden devam etmek için Kur'an'ı açın.",
+    "finishDay": "{{day}}. günün okumasını bitir",
+    "finishDayShort": "{{day}}. günü bitir",
+    "khatmahAyahProgress": "{{read}} / {{total}} ayet · {{days}} günün {{day}}. günü",
+    "khatmahDayDone": "✓ Bugünkü okuma tamam",
+    "khatmahDayLeft": "Bugün {{count}} ayet kaldı",
+    "khatmahExtra": "+{{count}} fazladan",
+    "khatmahMarkDone": "{{day}}. günün okumasını tamamlandı olarak işaretle",
+    "khatmahMarkNext": "✓ {{day}}. günü de bitir",
+    "khatmahMarkToday": "✓ Bugünkü okuma tamam",
+    "khatmahPrevDay": "‹ Önceki gün"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

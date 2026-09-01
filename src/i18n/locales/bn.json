@@ -963,7 +963,17 @@
     "downloadDoneTitle": "কুরআন প্রস্তুত",
     "downloadDoneBody": "সব পৃষ্ঠা এই ডিভাইসে আছে। এখন ইন্টারনেট ছাড়াই পড়া যাবে।",
     "downloadIncompleteTitle": "ডাউনলোড শেষ হয়নি",
-    "downloadIncompleteBody": "{{count}}টি পৃষ্ঠা এখনও বাকি। যেখানে থেমেছিল সেখান থেকে চালাতে কুরআন খুলুন।"
+    "downloadIncompleteBody": "{{count}}টি পৃষ্ঠা এখনও বাকি। যেখানে থেমেছিল সেখান থেকে চালাতে কুরআন খুলুন।",
+    "finishDay": "দিন {{day}} এর পাঠ শেষ করুন",
+    "finishDayShort": "দিন {{day}} শেষ করুন",
+    "khatmahAyahProgress": "{{read}} / {{total}} আয়াত · দিন {{day}} / {{days}}",
+    "khatmahDayDone": "✓ আজকের পাঠ শেষ",
+    "khatmahDayLeft": "আজ আরও {{count}} আয়াত বাকি",
+    "khatmahExtra": "+{{count}} অতিরিক্ত",
+    "khatmahMarkDone": "দিন {{day}} এর পাঠ শেষ হিসেবে চিহ্নিত করুন",
+    "khatmahMarkNext": "✓ দিন {{day}} ও শেষ করুন",
+    "khatmahMarkToday": "✓ আজকের পাঠ শেষ",
+    "khatmahPrevDay": "‹ আগের দিন"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

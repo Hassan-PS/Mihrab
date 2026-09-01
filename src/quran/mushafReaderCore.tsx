@@ -38,11 +38,16 @@ import {
 } from './pages';
 import { DEFAULT_RIWAYAH, resolveRiwayah, type RiwayahId } from './riwayat';
 import {
+  KHATMAH_COLOR,
+  activeKhatmah,
+  khatmahCurrentPortion,
+  khatmahMarkerAyah,
   recordKhatmahProgress,
   setLastRead,
   setQuranPrefs,
   useQuranState,
   useQuranHydrated,
+  type QuranBookmark,
   type QuranState,
 } from './quranState';
 import { usePlaybackStatus, type PlaybackStatus } from './audio/playback';
@@ -135,8 +140,35 @@ export function useOverlayDismissGuard(
   }, [overlayOpen, navigation]);
 }
 
+/**
+ * The standing marks a page carries, ready to hand to the surface.
+ *
+ * Derived here rather than in each reader because there are four of them,
+ * and the fifth is exactly where one copy gets forgotten — the same
+ * argument `MushafTextPageSurface` makes for owning the renderer choice.
+ */
+export type AyahMarkProps = {
+  bookmarks: readonly QuranBookmark[];
+  khatmahPosition: { surah: number; ayah: number } | null;
+  khatmahTarget: { surah: number; ayah: number } | null;
+};
+
+/**
+ * Where the portion in hand ends, in the muṣḥaf on screen.
+ *
+ * The page is resolved through the AYAH, so it is the right page in
+ * either riwayah — the same reason `khatmahCurrentPage` re-resolves a
+ * pinned position rather than trusting the number it was pinned with.
+ */
+export type KhatmahFinish = { page: number; day: number };
+
 export type MushafReaderCore = {
   quran: QuranState;
+  /** Spread straight into a page surface: `{...core.marks}`. */
+  marks: AyahMarkProps;
+  /** The page carrying the finish line, for the footer's pill. Null with
+   *  no plan, and null once the book is read. */
+  finish: KhatmahFinish | null;
   playback: PlaybackStatus;
   /** The muṣḥaf on screen. Every page number in this object is ITS page. */
   riwayah: RiwayahId;
@@ -393,8 +425,32 @@ export function useMushafReaderCore({
   }, []);
   useOverlayDismissGuard(sheetVisible || jumpVisible, closeOverlays);
 
+  const marks = useMemo<AyahMarkProps>(() => {
+    const plan = activeKhatmah(quran);
+    return {
+      bookmarks: quran.bookmarks,
+      khatmahPosition: plan?.position ?? null,
+      // The finish line for the portion in hand. Null with no plan, and
+      // null once the book is read — there is nothing left to aim at.
+      khatmahTarget: plan ? khatmahMarkerAyah(plan) : null,
+    };
+  }, [quran]);
+
+  const finish = useMemo<KhatmahFinish | null>(() => {
+    const plan = activeKhatmah(quran);
+    if (!plan) return null;
+    const at = khatmahMarkerAyah(plan);
+    if (!at) return null;
+    return {
+      page: findPageForAyah(at.surah, at.ayah, riwayah),
+      day: khatmahCurrentPortion(plan).day,
+    };
+  }, [quran, riwayah]);
+
   return {
     quran,
+    marks,
+    finish,
     playback,
     riwayah,
     totalPages,
@@ -532,10 +588,27 @@ export function MushafPageFooter({
   page,
   ornament,
   onPress,
+  finish,
 }: {
   page: number;
   ornament: string;
   onPress: () => void;
+  /**
+   * Shown only on the page the khatmah portion ends on.
+   *
+   * ── WHY IT IS HERE AND NOT BESIDE THE AYAH ────────────────────────
+   *
+   * The ayah itself is marked, in the khatmah's own colour, by
+   * `ayahMarks` — that is what the reader looks for. The BUTTON cannot
+   * sit next to it: a text page is one shaped paragraph per line, so
+   * anything inline breaks the run the font was drawn to interlock, and
+   * anything floated over the line covers the words it is pointing at.
+   *
+   * The footer is the one place on the page that is already chrome. It
+   * is on the same page as the marked ayah, it is where the eye lands
+   * at the end of a page anyway, and it costs the text nothing.
+   */
+  finish?: { day: number; onPress: () => void } | null;
 }) {
   const { t } = useTranslation();
   return (
@@ -549,6 +622,23 @@ export function MushafPageFooter({
           {easternNumerals(page)}
         </Text>
       </Pressable>
+      {finish ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.finishDay', {
+            day: finish.day,
+            defaultValue: "Finish day {{day}}'s reading",
+          })}
+          onPress={finish.onPress}
+          style={[styles.finishPill, { borderColor: KHATMAH_COLOR }]}>
+          <Text style={[styles.finishPillLabel, { color: KHATMAH_COLOR }]}>
+            {t('quran.finishDayShort', {
+              day: finish.day,
+              defaultValue: 'Finish day {{day}}',
+            })}
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -648,7 +738,21 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   nightPillText: { fontSize: 12, fontWeight: '600', letterSpacing: 0.3 },
-  pageFooter: { alignItems: 'center', paddingTop: 6, paddingBottom: 10 },
+  pageFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingTop: 6,
+    paddingBottom: 10,
+  },
+  finishPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderWidth: 1.5,
+    borderRadius: 18,
+  },
+  finishPillLabel: { fontSize: 12, fontWeight: '700' },
   pageNumberFrame: {
     minWidth: 38,
     paddingHorizontal: 10,

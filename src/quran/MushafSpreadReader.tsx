@@ -30,6 +30,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { finishKhatmahPortion } from './quranState';
 import MushafTextPageSurface from './MushafTextPageSurface';
 import { spreadCount, spreadForPage } from './mushafSpread';
 import {
@@ -263,6 +264,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 riwayah={riwayah}
                 nightMode={nightMode}
                 accentColor={palette.accentSolid}
+                {...core.marks}
                 selected={
                   core.sheetVisible && core.selected?.page === page
                     ? core.selected
@@ -285,6 +287,11 @@ export function MushafSpreadReader(props: MushafReaderProps) {
             page={page}
             ornament={ornament}
             onPress={core.openJump}
+            finish={
+              core.finish?.page === page
+                ? { day: core.finish.day, onPress: finishKhatmahPortion }
+                : null
+            }
           />
         </View>
       );

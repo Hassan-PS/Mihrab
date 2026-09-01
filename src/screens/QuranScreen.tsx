@@ -37,18 +37,25 @@ import { useActiveEdition } from '../quran/useActiveEdition';
 import {
   abandonKhatmah,
   activeKhatmah,
+  finishKhatmahPortion,
   hydrateQuranState,
+  khatmahAyahsRead,
   khatmahCurrentPage,
+  khatmahCurrentPortion,
+  khatmahDay,
   khatmahToday,
   removeBookmark,
   resetKhatmahAll,
   resetKhatmahToday,
   setQuranPrefs,
   startKhatmah,
+  stepKhatmahBack,
   toggleStar,
   useQuranState,
   BOOKMARK_COLORS,
-  KHATMAH_TOTAL_PAGES,
+  KHATMAH_COLOR,
+  KHATMAH_EXTRA_COLOR,
+  KHATMAH_TOTAL_AYAHS,
 } from '../quran/quranState';
 import { loadTafsir, resolveTafsirEdition } from '../quran/tafsir';
 import {
@@ -221,8 +228,15 @@ export function QuranScreen() {
   }, []);
 
   // ── Header (cards + tabs + search) ──────────────────────────────────
+  // Bar widths. Clamped because a plan synced from another device can
+  // claim more read than the book holds, and a negative width crashes.
+  const pct = (part: number, whole: number) =>
+    whole > 0 ? Math.max(0, Math.min(100, (part / whole) * 100)) : 0;
   const plan = activeKhatmah(quran);
   const today = plan ? khatmahToday(plan) : null;
+  // The day's portion, how much of it is read, and anything read past it.
+  const day = plan ? khatmahDay(plan) : null;
+  const readAyahs = plan ? khatmahAyahsRead(plan) : 0;
 
   const header = (
     <View style={[styles.headerWrap, listCap]}>
@@ -267,7 +281,7 @@ export function QuranScreen() {
           styles.khatmahCard,
           { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
         ]}>
-        {plan && today ? (
+        {plan && today && day ? (
           <>
             <View style={styles.khatmahTop}>
               <Text style={[styles.khatmahTitle, { color: palette.text }]}>
@@ -280,31 +294,86 @@ export function QuranScreen() {
                 })}
               </Text>
             </View>
+            {/* The book. The gold at its end is reading done past the
+                day's portion — see KHATMAH_EXTRA_COLOR. */}
             <View style={[styles.khatmahTrack, { backgroundColor: palette.accentBg }]}>
               <View
                 style={[
                   styles.khatmahFill,
                   {
                     backgroundColor: palette.accentSolid,
-                    width: `${Math.min(100, (plan.pagesRead / KHATMAH_TOTAL_PAGES) * 100)}%`,
+                    width: `${pct(readAyahs - day.extra, KHATMAH_TOTAL_AYAHS)}%`,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.khatmahFill,
+                  {
+                    backgroundColor: KHATMAH_EXTRA_COLOR,
+                    width: `${pct(day.extra, KHATMAH_TOTAL_AYAHS)}%`,
                   },
                 ]}
               />
             </View>
             <Text style={[styles.khatmahMeta, { color: palette.muted }]}>
-              {t('quran.khatmahProgress', {
-                defaultValue: '{{read}} / {{total}} pages · today: {{today}}',
-                read: plan.pagesRead,
-                total: KHATMAH_TOTAL_PAGES,
-                today: today.pagesToday,
+              {t('quran.khatmahAyahProgress', {
+                defaultValue: '{{read}} / {{total}} ayahs · day {{day}} of {{days}}',
+                read: readAyahs,
+                total: KHATMAH_TOTAL_AYAHS,
+                day: day.portion.day,
+                days: plan.targetDays,
               })}
-              {today.behindBy > 0
-                ? ` · ${t('quran.khatmahBehind', {
-                    defaultValue: '{{count}} to catch up',
-                    count: today.behindBy,
-                  })}`
-                : ''}
             </Text>
+
+            {/* The day. Its own portion, and anything read past it. */}
+            <View style={styles.khatmahDayRow}>
+              <Text
+                style={[
+                  styles.khatmahDayLabel,
+                  { color: day.done ? KHATMAH_COLOR : palette.text },
+                ]}>
+                {day.done
+                  ? t('quran.khatmahDayDone', {
+                      defaultValue: "✓ Today's reading done",
+                    })
+                  : t('quran.khatmahDayLeft', {
+                      defaultValue: '{{count}} ayahs left today',
+                      count: day.length - day.read,
+                    })}
+              </Text>
+              {day.extra > 0 ? (
+                <Text
+                  style={[styles.khatmahMeta, { color: KHATMAH_EXTRA_COLOR }]}>
+                  {t('quran.khatmahExtra', {
+                    defaultValue: '+{{count}} extra',
+                    count: day.extra,
+                  })}
+                </Text>
+              ) : null}
+            </View>
+            <View style={[styles.khatmahTrack, { backgroundColor: palette.accentBg }]}>
+              <View
+                style={[
+                  styles.khatmahFill,
+                  {
+                    backgroundColor: day.done
+                      ? KHATMAH_COLOR
+                      : palette.accentSolid,
+                    width: `${pct(day.read, day.length + day.extra)}%`,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.khatmahFill,
+                  {
+                    backgroundColor: KHATMAH_EXTRA_COLOR,
+                    width: `${pct(day.extra, day.length + day.extra)}%`,
+                  },
+                ]}
+              />
+            </View>
             {/* Continue + reset (v2.7.28) */}
             <View style={styles.khatmahActions}>
               <Pressable
@@ -333,6 +402,55 @@ export function QuranScreen() {
                 style={[styles.khatmahBtnGhost, { borderColor: palette.border }]}>
                 <Text style={{ color: palette.muted, fontWeight: '600', fontSize: 13 }}>
                   {t('quran.khatmahReset', 'Reset')}
+                </Text>
+              </Pressable>
+            </View>
+            {/*
+              The day's two controls.
+              "Done" is the fallback for a reader who read past the marked
+              ayah without tapping its pill; "Previous day" is its exact
+              undo, and the way back into yesterday's portion. Both go
+              through the same portion arithmetic the marker does, so
+              nothing here can disagree with what the page shows.
+            */}
+            <View style={styles.khatmahActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.khatmahPrevDay', 'Previous day')}
+                onPress={stepKhatmahBack}
+                disabled={khatmahAyahsRead(plan) === 0}
+                style={[
+                  styles.khatmahBtnGhost,
+                  {
+                    borderColor: palette.border,
+                    opacity: khatmahAyahsRead(plan) === 0 ? 0.4 : 1,
+                  },
+                ]}>
+                <Text style={{ color: palette.muted, fontWeight: '600', fontSize: 13 }}>
+                  {t('quran.khatmahPrevDay', '‹ Previous day')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.khatmahMarkDone', {
+                  day: khatmahCurrentPortion(plan).day,
+                  defaultValue: "Mark day {{day}}'s reading done",
+                })}
+                onPress={finishKhatmahPortion}
+                style={[
+                  styles.khatmahBtn,
+                  styles.khatmahBtnWide,
+                  { backgroundColor: KHATMAH_COLOR },
+                ]}>
+                <Text style={styles.khatmahBtnLabel}>
+                  {day.done
+                    ? t('quran.khatmahMarkNext', {
+                        day: khatmahCurrentPortion(plan).day,
+                        defaultValue: '✓ Finish day {{day}} too',
+                      })
+                    : t('quran.khatmahMarkToday', {
+                        defaultValue: "✓ Today's reading done",
+                      })}
                 </Text>
               </Pressable>
             </View>
@@ -1146,8 +1264,22 @@ const styles = StyleSheet.create({
   khatmahTop: { flexDirection: 'row', justifyContent: 'space-between' },
   khatmahTitle: { fontSize: 14, fontWeight: '700' },
   khatmahMeta: { fontSize: 12, fontVariant: ['tabular-nums'] },
-  khatmahTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  // A row, because a track carries TWO fills: the reading itself, and
+  // the gold that is reading done past the day's portion.
+  khatmahTrack: {
+    flexDirection: 'row',
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
   khatmahFill: { height: '100%' },
+  khatmahDayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  khatmahDayLabel: { fontSize: 13, fontWeight: '700' },
   khatmahChips: { flexDirection: 'row', gap: 8 },
   chip: {
     paddingHorizontal: 12,
@@ -1300,6 +1432,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   khatmahBtnLabel: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
+  khatmahBtnWide: { flex: 2 },
   khatmahBtnGhost: {
     paddingHorizontal: 14,
     paddingVertical: 9,

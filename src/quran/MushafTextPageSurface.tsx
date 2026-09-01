@@ -17,7 +17,7 @@
  * gets forgotten. A reader asks for "page 42 of this riwayah, this big";
  * everything after that is this file's problem.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import MushafTextPage, {
   MUSHAF_LINE_HEIGHT_EM,
@@ -27,6 +27,8 @@ import MushafUnicodePage from './MushafUnicodePage';
 import { getPageLayout, isFramedPage, pageMeasureEm } from './mushafLayout';
 import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
 import { useMushafPageFont } from './useMushafPageFont';
+import { ayahTint, type AyahRefLike } from './ayahMarks';
+import type { QuranBookmark } from './quranState';
 
 export type MushafPageColors = {
   text: string;
@@ -49,6 +51,16 @@ export type MushafTextPageSurfaceProps = {
   accentColor: string;
   selected?: AyahRef | null;
   playing?: AyahRef | null;
+  /**
+   * The standing marks on the page — everything the reader has put there
+   * or the khatmah is pointing at. Passed as sources rather than as a
+   * finished tint so the surface can resolve them against the palette it
+   * already owns, which is the same reason it owns the palette at all.
+   */
+  bookmarks?: readonly QuranBookmark[];
+  khatmahPosition?: AyahRefLike | null;
+  /** The ayah the khatmah portion in hand ends on. */
+  khatmahTarget?: AyahRefLike | null;
   /** Called once when this page's font cannot be loaded. Glyph pages only —
    *  a bundled riwayah has no font to fail to fetch. */
   onUnavailable?: (page: number) => void;
@@ -172,6 +184,9 @@ function GlyphPageSurface({
   accentColor,
   selected,
   playing,
+  bookmarks,
+  khatmahPosition,
+  khatmahTarget,
   onUnavailable,
   onWordPress,
   onWordLongPress,
@@ -201,6 +216,28 @@ function GlyphPageSurface({
     [nightMode, accentColor],
   );
 
+  const tint = useMemo(
+    () =>
+      ayahTint({
+        selected,
+        playing,
+        bookmarks,
+        khatmahPosition,
+        khatmahTarget,
+        accentColor,
+        nightMode,
+      }),
+    [
+      selected,
+      playing,
+      bookmarks,
+      khatmahPosition,
+      khatmahTarget,
+      accentColor,
+      nightMode,
+    ],
+  );
+
   const lineCount = layout?.lines.length ?? 15;
   const framed = isFramedPage(page);
   const inset = pageInset(page, width);
@@ -225,6 +262,7 @@ function GlyphPageSurface({
       colors={colors}
       selected={selected}
       playing={playing}
+      tint={tint}
       onWordPress={handleWordPress}
       onWordLongPress={handleWordLongPress}
     />
@@ -264,6 +302,9 @@ function UnicodePageSurface({
   accentColor,
   selected,
   playing,
+  bookmarks,
+  khatmahPosition,
+  khatmahTarget,
   onWordPress,
   onWordLongPress,
 }: MushafTextPageSurfaceProps) {
@@ -278,6 +319,28 @@ function UnicodePageSurface({
   const colors = React.useMemo(
     () => mushafPageColors(nightMode, accentColor),
     [nightMode, accentColor],
+  );
+
+  const tint = useMemo(
+    () =>
+      ayahTint({
+        selected,
+        playing,
+        bookmarks,
+        khatmahPosition,
+        khatmahTarget,
+        accentColor,
+        nightMode,
+      }),
+    [
+      selected,
+      playing,
+      bookmarks,
+      khatmahPosition,
+      khatmahTarget,
+      accentColor,
+      nightMode,
+    ],
   );
 
   const framed = isFramedPage(page);
@@ -296,6 +359,7 @@ function UnicodePageSurface({
       colors={colors}
       selected={selected}
       playing={playing}
+      tint={tint}
       onAyahPress={handlePress}
       onAyahLongPress={handleLongPress}
     />

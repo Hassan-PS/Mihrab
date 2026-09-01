@@ -963,7 +963,17 @@
     "downloadDoneTitle": "Al-Qur'an siap",
     "downloadDoneBody": "Semua halaman ada di perangkat ini. Kini bisa dibaca tanpa sambungan.",
     "downloadIncompleteTitle": "Unduhan belum selesai",
-    "downloadIncompleteBody": "{{count}} halaman masih kurang. Buka Al-Qur'an untuk melanjutkan dari tempat berhenti."
+    "downloadIncompleteBody": "{{count}} halaman masih kurang. Buka Al-Qur'an untuk melanjutkan dari tempat berhenti.",
+    "finishDay": "Selesaikan bacaan hari ke-{{day}}",
+    "finishDayShort": "Selesaikan hari ke-{{day}}",
+    "khatmahAyahProgress": "{{read}} / {{total}} ayat · hari ke-{{day}} dari {{days}}",
+    "khatmahDayDone": "✓ Bacaan hari ini selesai",
+    "khatmahDayLeft": "{{count}} ayat lagi hari ini",
+    "khatmahExtra": "+{{count}} tambahan",
+    "khatmahMarkDone": "Tandai bacaan hari ke-{{day}} selesai",
+    "khatmahMarkNext": "✓ Selesaikan hari ke-{{day}} juga",
+    "khatmahMarkToday": "✓ Bacaan hari ini selesai",
+    "khatmahPrevDay": "‹ Hari sebelumnya"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

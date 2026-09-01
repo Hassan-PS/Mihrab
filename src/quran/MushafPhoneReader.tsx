@@ -33,6 +33,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { finishKhatmahPortion } from './quranState';
 import MushafTextPageSurface, {
   mushafPageColumnHeight,
 } from './MushafTextPageSurface';
@@ -250,6 +251,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
                 riwayah={riwayah}
                 nightMode={nightMode}
                 accentColor={palette.accentSolid}
+                {...core.marks}
                 selected={
                   core.sheetVisible && core.selected?.page === page
                     ? core.selected
@@ -274,6 +276,11 @@ export function MushafPhoneReader(props: MushafReaderProps) {
               page={page}
               ornament={ornament}
               onPress={core.openJump}
+              finish={
+                core.finish?.page === page
+                  ? { day: core.finish.day, onPress: finishKhatmahPortion }
+                  : null
+              }
             />
           </ScrollView>
         </View>

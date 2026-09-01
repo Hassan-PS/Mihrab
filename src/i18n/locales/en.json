@@ -963,7 +963,17 @@
     "downloadDoneTitle": "The Quran is ready",
     "downloadDoneBody": "Every page is on this device. It reads without a connection now.",
     "downloadIncompleteTitle": "The download did not finish",
-    "downloadIncompleteBody": "{{count}} pages are still missing. Open the Quran to pick up where it stopped."
+    "downloadIncompleteBody": "{{count}} pages are still missing. Open the Quran to pick up where it stopped.",
+    "finishDay": "Finish day {{day}}'s reading",
+    "finishDayShort": "Finish day {{day}}",
+    "khatmahAyahProgress": "{{read}} / {{total}} ayahs · day {{day}} of {{days}}",
+    "khatmahDayDone": "✓ Today's reading done",
+    "khatmahDayLeft": "{{count}} ayahs left today",
+    "khatmahExtra": "+{{count}} extra",
+    "khatmahMarkDone": "Mark day {{day}}'s reading done",
+    "khatmahMarkNext": "✓ Finish day {{day}} too",
+    "khatmahMarkToday": "✓ Today's reading done",
+    "khatmahPrevDay": "‹ Previous day"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

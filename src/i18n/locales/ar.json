@@ -963,7 +963,17 @@
     "downloadDoneTitle": "القرآن جاهز",
     "downloadDoneBody": "كل الصفحات على هذا الجهاز، ويمكن القراءة دون اتصال.",
     "downloadIncompleteTitle": "لم يكتمل التنزيل",
-    "downloadIncompleteBody": "ما زالت {{count}} صفحة ناقصة. افتح القرآن لمتابعة التنزيل من حيث توقف."
+    "downloadIncompleteBody": "ما زالت {{count}} صفحة ناقصة. افتح القرآن لمتابعة التنزيل من حيث توقف.",
+    "finishDay": "إنهاء قراءة اليوم {{day}}",
+    "finishDayShort": "إنهاء اليوم {{day}}",
+    "khatmahAyahProgress": "{{read}} / {{total}} آية · اليوم {{day}} من {{days}}",
+    "khatmahDayDone": "✓ تمت قراءة اليوم",
+    "khatmahDayLeft": "بقيت {{count}} آية اليوم",
+    "khatmahExtra": "+{{count}} إضافية",
+    "khatmahMarkDone": "تعليم قراءة اليوم {{day}} كمنتهية",
+    "khatmahMarkNext": "✓ إنهاء اليوم {{day}} أيضًا",
+    "khatmahMarkToday": "✓ تمت قراءة اليوم",
+    "khatmahPrevDay": "‹ اليوم السابق"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

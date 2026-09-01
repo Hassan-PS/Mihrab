@@ -102,6 +102,7 @@ import {
 } from './mushafRenderCache';
 import {
   activeKhatmah,
+  khatmahMarkerAyah,
   recordKhatmahProgress,
   setLastRead,
   setQuranPrefs,
@@ -970,7 +971,10 @@ export function MushafReader({
       const p = findPageForAyah(b.surah, b.ayah);
       return p === page;
     });
-    const khatmahPos = activeKhatmah(quran)?.position ?? null;
+    const plan = activeKhatmah(quran);
+    const khatmahPos = plan?.position ?? null;
+    // The ayah the portion in hand ends on — the page's finish line.
+    const khatmahTarget = plan ? khatmahMarkerAyah(plan) : null;
     // Prefer the exact-display-size copy (sharpness fix, v2.7.28);
     // fall back to the original file / stream while it generates.
     const scaledPath = useLocalFiles
@@ -1092,6 +1096,9 @@ export function MushafReader({
                 height={dims.dispH}
                 nightMode={nightMode}
                 accentColor={palette.accentSolid}
+                bookmarks={pageBookmarks}
+                khatmahPosition={khatmahPos}
+                khatmahTarget={khatmahTarget}
                 selected={
                   sheetVisible && selected?.page === page ? selected : null
                 }

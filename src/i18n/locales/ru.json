@@ -963,7 +963,17 @@
     "downloadDoneTitle": "Коран готов",
     "downloadDoneBody": "Все страницы на этом устройстве. Теперь он читается без сети.",
     "downloadIncompleteTitle": "Загрузка не завершилась",
-    "downloadIncompleteBody": "Не хватает {{count}} страниц. Откройте Коран, чтобы продолжить с места остановки."
+    "downloadIncompleteBody": "Не хватает {{count}} страниц. Откройте Коран, чтобы продолжить с места остановки.",
+    "finishDay": "Завершить чтение дня {{day}}",
+    "finishDayShort": "Завершить день {{day}}",
+    "khatmahAyahProgress": "{{read}} / {{total}} аятов · день {{day}} из {{days}}",
+    "khatmahDayDone": "✓ Сегодняшнее чтение завершено",
+    "khatmahDayLeft": "Осталось {{count}} аятов на сегодня",
+    "khatmahExtra": "+{{count}} сверх нормы",
+    "khatmahMarkDone": "Отметить чтение дня {{day}} как завершённое",
+    "khatmahMarkNext": "✓ Завершить и день {{day}}",
+    "khatmahMarkToday": "✓ Сегодняшнее чтение завершено",
+    "khatmahPrevDay": "‹ Предыдущий день"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

@@ -97,6 +97,17 @@ export type KhatmahPlan = {
  *  five bookmark colors — cyan, used nowhere else in the reader). */
 export const KHATMAH_COLOR = '#0891b2';
 
+/**
+ * Reading done BEYOND the day's portion, on the progress bars.
+ *
+ * Gold rather than another shade of the accent because it is not more of
+ * the same thing: the day's own reading is the plan being kept, and this
+ * is the reader going further than they undertook to. It never appears in
+ * the muṣḥaf itself, where the khatmah speaks in one colour only, so
+ * there is nothing for it to be confused with.
+ */
+export const KHATMAH_EXTRA_COLOR = '#c9a227';
+
 export type RepeatSettings = {
   /** Repeat each ayah N times (1 = play once). */
   eachAyah: number;
@@ -816,6 +827,212 @@ export function abandonKhatmah(id: string): void {
     ...prev,
     khatmah: prev.khatmah.filter(k => k.id !== id),
   }));
+}
+
+// ── Khatmah portions ─────────────────────────────────────────────────
+//
+// A plan cuts the book into `targetDays` portions of equal length and the
+// reader walks them in order. Which one is CURRENT is a fact about
+// progress, not about the calendar: it is the portion holding the next
+// ayah not yet read.
+//
+// That single rule is the whole of the behaviour:
+//
+//   • finish the portion you are on and the next one is current from that
+//     moment, so tomorrow's reading is there tonight;
+//   • stop halfway into a later portion and THAT portion is current,
+//     however far ahead of the calendar it is;
+//   • finish a portion you were reading ahead in and the one after it
+//     becomes current.
+//
+// Nothing is reconciled at midnight and no day is ever "missed" into a
+// different state, so there is no moment at which the reader can be shown
+// a place other than the one they actually stopped at. The calendar is
+// used for one thing only — deciding which portion was the day's, so the
+// card can say today is done and count anything past it as extra.
+
+/** One portion of the plan: a slice of the book, read in one sitting. */
+export type KhatmahPortion = {
+  /** 1-based. Portion n of `targetDays`. */
+  day: number;
+  /** Index of its first ayah, 1-based and inclusive. */
+  from: number;
+  /** Index of its last ayah, inclusive. */
+  to: number;
+};
+
+/** Where the reader stands in the portion the day's reading belongs to. */
+export type KhatmahDayState = {
+  portion: KhatmahPortion;
+  /** Its length, in ayahs. */
+  length: number;
+  /** How many of them are read. */
+  read: number;
+  /** True once the whole portion is behind the reader. */
+  done: boolean;
+  /** Ayahs read PAST it — reading ahead, counted apart from the day. */
+  extra: number;
+};
+
+function planDays(plan: KhatmahPlan): number {
+  return Math.max(1, Math.trunc(plan.targetDays) || 1);
+}
+
+/** Ayahs completed once portion `day` is finished. Day 0 is nothing. */
+function portionEnd(days: number, day: number): number {
+  if (day <= 0) return 0;
+  if (day >= days) return TOTAL_AYAHS;
+  return Math.round((TOTAL_AYAHS * day) / days);
+}
+
+/** Which portion an ayah falls in, by its index. */
+export function khatmahPortionOf(plan: KhatmahPlan, index: number): number {
+  const days = planDays(plan);
+  const at = Math.min(TOTAL_AYAHS, Math.max(1, Math.trunc(index)));
+  // The boundaries are rounded, so the proportional guess can land either
+  // side of one. Walk it onto the right side rather than trusting it.
+  let day = Math.min(days, Math.max(1, Math.ceil((at * days) / TOTAL_AYAHS)));
+  while (day > 1 && portionEnd(days, day - 1) >= at) day -= 1;
+  while (day < days && portionEnd(days, day) < at) day += 1;
+  return day;
+}
+
+export function khatmahPortion(plan: KhatmahPlan, day: number): KhatmahPortion {
+  const days = planDays(plan);
+  const d = Math.min(days, Math.max(1, Math.trunc(day)));
+  return { day: d, from: portionEnd(days, d - 1) + 1, to: portionEnd(days, d) };
+}
+
+/** The portion the reader is in — the one holding the next unread ayah. */
+export function khatmahCurrentPortion(plan: KhatmahPlan): KhatmahPortion {
+  const read = khatmahAyahsRead(plan);
+  if (read >= TOTAL_AYAHS) return khatmahPortion(plan, planDays(plan));
+  return khatmahPortion(plan, khatmahPortionOf(plan, read + 1));
+}
+
+/**
+ * The ayah that closes the portion in hand — the one the page marks, and
+ * the one whose pill finishes the day. Null once the book is finished.
+ */
+export function khatmahMarkerAyah(
+  plan: KhatmahPlan,
+): { surah: number; ayah: number } | null {
+  if (khatmahAyahsRead(plan) >= TOTAL_AYAHS) return null;
+  return ayahAtIndex(khatmahCurrentPortion(plan).to);
+}
+
+/**
+ * The day's portion and how much of it is read.
+ *
+ * The portion is the one that was current when the day's reading STARTED,
+ * not the one current now: finishing it and reading on must leave the day
+ * showing as done, with the rest counted as extra, rather than silently
+ * becoming a new unfinished day. On a day with no reading yet the two are
+ * the same thing.
+ */
+export function khatmahDay(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): KhatmahDayState {
+  const read = khatmahAyahsRead(plan);
+  const opened =
+    plan.dayStartDate === localYmd(now)
+      ? Math.min(read, Math.max(0, plan.dayStartAyahsRead ?? read))
+      : read;
+  const day =
+    read >= TOTAL_AYAHS && opened >= TOTAL_AYAHS
+      ? planDays(plan)
+      : khatmahPortionOf(plan, Math.min(TOTAL_AYAHS, opened + 1));
+  const portion = khatmahPortion(plan, day);
+  const length = portion.to - portion.from + 1;
+  return {
+    portion,
+    length,
+    read: Math.max(0, Math.min(length, read - portion.from + 1)),
+    done: read >= portion.to,
+    extra: Math.max(0, read - portion.to),
+  };
+}
+
+/**
+ * Mark the portion in hand as read, in full.
+ *
+ * The button behind the "I missed the marker" case and the page pill both
+ * land here. It always finishes the CURRENT portion, so pressing it after
+ * today's is already done reads the next one ahead — which is the same
+ * thing reading ahead by hand would do, and leaves the reader in exactly
+ * the place the rule above says they are.
+ */
+export function finishKhatmahPortion(): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(k => k.completedAt == null);
+    if (!active) return prev;
+    const to = khatmahCurrentPortion(active).to;
+    if (to <= khatmahAyahsRead(active)) return prev;
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k =>
+        k.id === active.id
+          ? {
+              ...withDaySnapshot(k),
+              ayahsRead: to,
+              pagesRead: pagesThroughAyahs(to),
+              // A pin inside the portion just read is spent; leaving it
+              // would send "continue" backwards into finished ground.
+              position:
+                k.position &&
+                ayahIndexOf(k.position.surah, k.position.ayah) <= to
+                  ? null
+                  : k.position,
+              completedAt: to >= TOTAL_AYAHS ? Date.now() : null,
+            }
+          : k,
+      ),
+    };
+  });
+}
+
+/**
+ * Step back one portion, so the one before the current becomes current.
+ *
+ * The undo for a "done" pressed by mistake, and the way back into
+ * yesterday's reading. Progress is rewound to the end of the portion
+ * before last, which is what makes the previous one current again; the
+ * day snapshot moves with it so the card does not go on claiming a day
+ * the reader has just stepped out of.
+ */
+export function stepKhatmahBack(): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(k => k.completedAt == null);
+    if (!active) return prev;
+    const days = planDays(active);
+    const current = khatmahCurrentPortion(active).day;
+    const to = portionEnd(days, current - 2);
+    if (to >= khatmahAyahsRead(active)) return prev;
+    const today = localYmd();
+    const pages = pagesThroughAyahs(to);
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k =>
+        k.id === active.id
+          ? {
+              ...k,
+              ayahsRead: to,
+              pagesRead: pages,
+              dayStartDate: today,
+              dayStartAyahsRead: to,
+              dayStartPagesRead: pages,
+              position:
+                k.position &&
+                ayahIndexOf(k.position.surah, k.position.ayah) > to + 1
+                  ? null
+                  : k.position,
+              completedAt: null,
+            }
+          : k,
+      ),
+    };
+  });
 }
 
 /**

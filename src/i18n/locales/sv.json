@@ -963,7 +963,17 @@
     "downloadDoneTitle": "Koranen är klar",
     "downloadDoneBody": "Alla sidor finns på den här enheten. Den går att läsa utan uppkoppling nu.",
     "downloadIncompleteTitle": "Nedladdningen blev inte klar",
-    "downloadIncompleteBody": "{{count}} sidor saknas fortfarande. Öppna Koranen för att fortsätta där den stannade."
+    "downloadIncompleteBody": "{{count}} sidor saknas fortfarande. Öppna Koranen för att fortsätta där den stannade.",
+    "finishDay": "Avsluta dag {{day}}s läsning",
+    "finishDayShort": "Avsluta dag {{day}}",
+    "khatmahAyahProgress": "{{read}} / {{total}} verser · dag {{day}} av {{days}}",
+    "khatmahDayDone": "✓ Dagens läsning klar",
+    "khatmahDayLeft": "{{count}} verser kvar i dag",
+    "khatmahExtra": "+{{count}} extra",
+    "khatmahMarkDone": "Markera dag {{day}}s läsning som klar",
+    "khatmahMarkNext": "✓ Avsluta dag {{day}} också",
+    "khatmahMarkToday": "✓ Dagens läsning klar",
+    "khatmahPrevDay": "‹ Föregående dag"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

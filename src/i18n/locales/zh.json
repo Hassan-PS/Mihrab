@@ -963,7 +963,17 @@
     "downloadDoneTitle": "古兰经已就绪",
     "downloadDoneBody": "所有页面都已在本机，现在无需联网即可阅读。",
     "downloadIncompleteTitle": "下载未完成",
-    "downloadIncompleteBody": "仍缺 {{count}} 页。打开古兰经即可从中断处继续。"
+    "downloadIncompleteBody": "仍缺 {{count}} 页。打开古兰经即可从中断处继续。",
+    "finishDay": "完成第 {{day}} 天的诵读",
+    "finishDayShort": "完成第 {{day}} 天",
+    "khatmahAyahProgress": "{{read}} / {{total}} 节 · 第 {{day}} 天，共 {{days}} 天",
+    "khatmahDayDone": "✓ 今日诵读已完成",
+    "khatmahDayLeft": "今天还剩 {{count}} 节",
+    "khatmahExtra": "+{{count}} 额外",
+    "khatmahMarkDone": "将第 {{day}} 天的诵读标记为完成",
+    "khatmahMarkNext": "✓ 也完成第 {{day}} 天",
+    "khatmahMarkToday": "✓ 今日诵读已完成",
+    "khatmahPrevDay": "‹ 前一天"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",
