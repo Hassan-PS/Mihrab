@@ -450,3 +450,90 @@ than migrating after.
 - **Not the ten qirāʾāt.** This plan covers the riwayat that are printed
   and read as everyday muṣḥafs. It is not a qirāʾāt reference work and
   should not be described as one.
+
+## 7. Setting the printed page: what was measured
+
+The Warsh page is drawn from Unicode text into the print's own fifteen
+rows (`mushafPrintedLines.ts`, `MushafUnicodePage.tsx`). Everything below
+is measurement, not judgement — the device laid the lines out and reported
+their widths, and the numbers are what came back.
+
+### The three faults that produced holes and bulges
+
+**The rosette weighed nothing.** `advancingLength` treated the whole
+`U+06D6–U+06ED` block as marks. Three of those codepoints are not marks
+but symbols set on the line, and the bundled face gives their advances as
+`U+06DE` rub el hizb 0.652 em, `U+06E9` sajdah 0.671 em, `U+06DD` end of
+ayah 1.279 em, against a mean Arabic letter of 0.615 em. The rosette
+stands alone as a word in 435 places, on **433 of the 602 pages**. A word
+of width zero makes two consecutive word boundaries identical, which
+stopped the cut search dead on the first of them: page 30 had a line of
+four words beside a line of twenty-one.
+
+**The split filled every cut but the last.** Filling is what a typesetter
+does, but only the last piece was left the remainder, so an ayah's closing
+line came out one or two words short of its share, page after page. A cut
+now goes to the boundary nearest its share of the whole ayah, and every
+cut including the last is judged the same way.
+
+**Four ayahs are set across a page turn** — 4:44 (85/86), 20:86
+(317/318), 24:36 (354/355) and 24:42 (355/356). Allocating a page in
+isolation put the whole ayah on both sides of the turn. `printedPageFor`
+passes the neighbouring page's share into the split and drops it again.
+
+### The type size is one number for the book
+
+It was per page: the size at which that page's median line needed no
+scaling, capped at `rowHeight / 1.5`. A page whose ayahs set narrow could
+therefore be 37% larger than the page beside it, which is what made page 5
+look like a different book, and the cap sat above the leading the marks
+need.
+
+The size is now the smaller of what the row allows
+(`rowHeight / 2.05`) and what the measure allows
+(`measure / 18.2`), and it is the same on every page and in every window.
+The horizontal half matters because full screen gives the page more height
+at the same width: sized from the row alone, the type grew until every
+line had to be squeezed back — page 50 full screen. A box taller than the
+page's proportions now gives it margins instead.
+
+`PRINTED_TYPICAL_LINE_EM = 18.2` was fitted, not chosen. 1,146 lines were
+laid out on a device and their drawn widths recorded; a width model
+(characters, gaps, medallions; rms 1.2 em) was fitted to them and all
+8,807 lines of the book predicted from it. The share of lines that reach
+the measure inside the word-space band peaks flat across 18.0–18.5:
+
+| typical line em | 16.0 | 17.0 | 17.5 | **18.2** | 19.0 |
+|---|---|---|---|---|---|
+| lines needing >10% letter scaling | 24.7% | 13.5% | 10.4% | **~8.8%** | 10.6% |
+| lines that cannot be closed at all | 4.88% | 1.82% | 1.18% | **~1.1%** | 1.33% |
+
+### Justification is the Hafs pages' own
+
+A line reaches the measure by opening its **word gaps** first, inside the
+`WORD_SPACE_MIN_EM`–`WORD_SPACE_MAX_EM` band the fidelity rules already
+set, and only then by scaling the letters. Scaling first was what made a
+short page read as heavier type, and it has a ceiling, so the lines that
+needed more than the ceiling simply did not reach the margin — the void.
+
+A line that cannot reach the measure even so is **centred**, not dragged,
+which is the fidelity rules' existing answer and reads as a short line
+rather than a broken one.
+
+### What the finished layout measures
+
+Every page of the muṣḥaf was then laid out on a device (602 pages, 8,807
+lines, one type size throughout) and each line's chosen gap and scale
+recorded:
+
+| | |
+|---|---|
+| letter scale, median and interquartile range | 1.000 (p25 = p75 = 1.000) |
+| letter scale, p1 / p99 | 0.850 / 1.219 |
+| word gap resting at the band's floor / top | 18.5% / 16.3% |
+| lines centred because nothing could fill them | **46 of 8,807 (0.52%)** |
+
+Half the book needs no letter scaling at all; the gaps do the work. The 46
+that are centred are where you would expect them — pages 602–604 and the
+like, where a row of the print carries three or four words and is held out
+to the margin with kashida this renderer cannot draw.

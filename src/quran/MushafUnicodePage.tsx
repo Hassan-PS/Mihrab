@@ -49,7 +49,12 @@ import {
   type LayoutChangeEvent,
 } from 'react-native';
 import { FONTS } from '../theme/typography';
-import { WORD_SPACE_EM, gapMetrics } from './mushafLayout';
+import {
+  WORD_SPACE_EM,
+  WORD_SPACE_MAX_EM,
+  WORD_SPACE_MIN_EM,
+  gapMetrics,
+} from './mushafLayout';
 
 import {
   ayahCountForRiwayah,
@@ -57,11 +62,7 @@ import {
   pagesForRiwayah,
 } from './pages';
 import { loadRiwayahText } from './riwayahData';
-import {
-  allocate,
-  printedLinesFor,
-  type AllocatedLine,
-} from './mushafPrintedLines';
+import { printedPageFor, type AllocatedLine } from './mushafPrintedLines';
 import { riwayahById, riwayahFontFamily, type RiwayahId } from './riwayat';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import type { AyahRef } from './MushafTextPage';
@@ -114,6 +115,14 @@ const MAX_PRINTED_SCALE = 1.25;
 /** Below this a page is unreadable and should scroll instead. */
 const MIN_PRINTED_SIZE = 9;
 
+/**
+ * How far short of the measure a line has to fall before it is centred
+ * rather than left hanging off the margin. Two per cent is under a
+ * letter — below it the line looks flush and dragging it would be fussier
+ * than leaving it.
+ */
+const PRINTED_CENTRE_BELOW = 0.02;
+
 /** Corrections attempted before the page settles for what it has. */
 const MAX_FIT_PASSES = 4;
 
@@ -147,17 +156,44 @@ const FIT_FLOOR = 0.93;
 const ADVANCE_CACHE = new Map<string, number>();
 
 /**
- * The tightest a printed row may be set, as a multiple of the type size.
+ * The row height of a printed page, as a multiple of the type size.
  *
- * `UNICODE_LINE_HEIGHT_EM` is 2.05, which is generous — it was chosen for
- * flowing text, where a loose leading is a kindness. A muṣḥaf page is not
- * flowing text: the print sets fifteen dense lines with the letters large
- * and the words nearly touching, and capping the size at half the row
- * height is what kept the type small and left the gaps to do the filling.
- * The row still divides the height; this only stops the type growing so
- * large that its marks collide with the row above.
+ * This is the whole of the size decision: fifteen rows divide the box,
+ * and the type is the row divided by this. It is deliberately ONE number
+ * for the book — see the size comment in `PrintedPageBody` for why a
+ * per-page size is the wrong shape of answer — so this is the only place
+ * the printed muṣḥaf's type size can be tuned.
+ *
+ * It is `UNICODE_LINE_HEIGHT_EM` and not less because that is the leading
+ * fully-vocalised Qur'anic Arabic needs: `typography.ts` warns that Amiri
+ * clips below ≈2.1×, and the Warsh orthography leans on marks Hafs does
+ * not use. Anything tighter buys width by cutting the marks off.
  */
-const PRINTED_MIN_LINE_HEIGHT_EM = 1.5;
+const PRINTED_LINE_HEIGHT_EM = UNICODE_LINE_HEIGHT_EM;
+
+/**
+ * The width of a typical line of the printed muṣḥaf, in ems of its own
+ * type size — the horizontal half of the size decision.
+ *
+ * Sizing from the row height alone is right only while the box keeps the
+ * print's proportions, and full screen does not: it gives the page more
+ * height at the same width, which made the type grow until the lines were
+ * wider than the measure and every one of them had to be squeezed back.
+ * Page 50 full screen was that. So the size is the SMALLER of what the row
+ * allows and what the measure allows, and the page is centred in whatever
+ * height is left over — a muṣḥaf page has proportions, and a taller window
+ * gives it margins, not bigger letters.
+ *
+ * The number is measured, not chosen: 1,146 lines were laid out on a real
+ * device and their drawn widths recorded, a width model fitted to them
+ * (chars, gaps and medallions; rms 1.2 em), and every one of the book's
+ * 8,807 lines predicted from it. Sized against 18.2, 98.9% of them reach
+ * the measure inside the word-space band, which is the flat top of that
+ * curve — 17.5 and 19.0 are both worse, and either side of them worse
+ * again. `docs/design/riwayat-plan.md` §7 records the sweep and what
+ * the finished layout then measured over all 602 pages.
+ */
+const PRINTED_TYPICAL_LINE_EM = 18.2;
 
 /**
  * Average advance per base character, in ems — the one guess in the size
@@ -413,11 +449,9 @@ function MushafUnicodePage({
    * a reader who has memorised from this muṣḥaf actually knows.
    */
   const printed = useMemo(() => {
-    const rows = printedLinesFor(riwayah, page);
-    if (!rows) return null;
     const table = loadRiwayahText(riwayah);
     if (!table) return null;
-    return allocate(rows, (s, a) => table[`${s}:${a}`] ?? null);
+    return printedPageFor(riwayah, page, (s, a) => table[`${s}:${a}`] ?? null);
   }, [page, riwayah]);
 
   // A page is fitted to a box, so the box is part of its identity. Rounded
@@ -662,9 +696,6 @@ function PrintedPageBody({
   onAyahPress?: (ref: AyahRef) => void;
   onAyahLongPress?: (ref: AyahRef) => void;
 }) {
-  // Every row is a row of the print, band rows included, so the height
-  // divides by the count and the page fills its box by construction.
-  const rowHeight = height / rows.length;
   const measure = width;
 
   const fitKey = `${pageKey}:${fontFamily}:${Math.round(width)}`;
@@ -685,38 +716,56 @@ function PrintedPageBody({
   );
 
   /**
-   * The size to draw at.
+   * The size to draw at — ONE size, for every page of the muṣḥaf.
    *
-   * Before the page has been measured, a rough guess from the row height —
-   * it only has to be close enough to measure at, and every width taken
-   * from it is divided back out. Afterwards, the size at which the MEDIAN
-   * line needs no scaling, so half the page is very slightly compressed
-   * and half very slightly stretched instead of the whole page leaning one
-   * way.
+   * A printed muṣḥaf does not change its type from page to page. The line
+   * grid fixes the size and the setter fits words to lines at that size;
+   * a page whose lines carry fewer letters comes out with more air on
+   * them, not with bigger letters on them.
+   *
+   * This used to derive the size from the page's own measured lines — the
+   * size at which THIS page's median line needed no scaling. Every page
+   * therefore chose independently, and since the cap allowed anything up
+   * to `rowHeight / 1.5`, a sparse page could be set 37% larger than a
+   * dense one. Page 5 next to page 3 is what that looks like, and it
+   * reads as a different book.
+   *
+   * All 602 pages of the table have exactly fifteen rows, so `rowHeight`
+   * is already the same on every one of them. Taking the size from the
+   * row height and nothing else therefore makes the type the same on
+   * every one of them too — by construction, with nothing to converge and
+   * nothing to cache. What a page's own words decide is its `scaleX`
+   * below, which is a few per cent of width, not a third of a size.
+   *
+   * `PRINTED_LINE_HEIGHT_EM` is where that one ratio lives, and it is the
+   * leading the marks need; the old cap bought width by clipping the very
+   * diacritics the Warsh orthography leans on.
+   *
+   * The measure has the same vote as the row, and for the same reason —
+   * see `PRINTED_TYPICAL_LINE_EM`. Whichever is tighter decides, the rows
+   * take the height the type needs rather than an equal share of the box,
+   * and what is left over becomes margin above and below.
    */
-  const probeSize = rowHeight / UNICODE_LINE_HEIGHT_EM;
-  const fontSize = React.useMemo(() => {
-    if (!ems || ems.length === 0) return probeSize;
-    const sorted = [...ems].filter(e => e > 0).sort((a, b) => a - b);
-    if (sorted.length === 0) return probeSize;
-    const median = sorted[Math.floor(sorted.length / 2)];
-    const wanted = measure / median;
-    return Math.max(
-      MIN_PRINTED_SIZE,
-      Math.min(rowHeight / PRINTED_MIN_LINE_HEIGHT_EM, wanted),
-    );
-  }, [ems, measure, probeSize, rowHeight]);
+  const fontSize = Math.max(
+    MIN_PRINTED_SIZE,
+    Math.min(
+      height / rows.length / PRINTED_LINE_HEIGHT_EM,
+      measure / PRINTED_TYPICAL_LINE_EM,
+    ),
+  );
+  const rowHeight = fontSize * PRINTED_LINE_HEIGHT_EM;
+  const margin = Math.max(0, (height - rowHeight * rows.length) / 2);
 
   const onLineLayout = React.useCallback(
     (index: number, drawn: number) => {
-      if (PRINTED_LINE_CACHE.has(fitKey) || drawn <= 0 || probeSize <= 0) return;
-      pending.current.seen.set(index, drawn / probeSize);
+      if (PRINTED_LINE_CACHE.has(fitKey) || drawn <= 0 || fontSize <= 0) return;
+      pending.current.seen.set(index, drawn / fontSize);
       if (pending.current.seen.size < textRows.length) return;
       const out = rows.map((_, i) => pending.current.seen.get(i) ?? 0);
       PRINTED_LINE_CACHE.set(fitKey, out);
       setEms(out);
     },
-    [fitKey, probeSize, rows, textRows.length],
+    [fitKey, fontSize, rows, textRows.length],
   );
 
   const ornaments = React.useMemo(() => {
@@ -742,18 +791,13 @@ function PrintedPageBody({
     return out;
   }, [rows]);
 
-  // The gap is a space in the bundled face at a size derived from that
-  // face's own advance — never the platform's fallback, whose width
-  // differs between iOS and Android and cost the Hafs pages the last word
-  // of all fifteen lines of page 49. It stays NOMINAL here: the scaling
-  // below does the justifying, so there is nothing for the gap to solve.
-  const gapStyle = {
-    fontFamily: FONTS.arabicQuran,
-    ...gapMetrics(WORD_SPACE_EM, fontSize),
-  };
+  /** The measure, in ems of the size every page is set at. */
+  const targetEm = fontSize > 0 ? measure / fontSize : 0;
 
   return (
-    <View style={{ width, height }}>
+    // The rows are as tall as the type needs, so a box taller than the
+    // page's own proportions gives it a margin rather than stretching it.
+    <View style={{ width, height, paddingTop: margin }}>
       {rows.map((row, index) => {
         if (row.empty) {
           const ornament = ornaments[index];
@@ -804,19 +848,76 @@ function PrintedPageBody({
         }
 
         /**
-         * Exactly the measure, or nothing.
+         * Exactly the measure — opened out at the gaps first, and only
+         * then at the letters.
          *
-         * `em` is this line's own drawn width, divided by the size it was
-         * drawn at, so it is a property of the line and not of any guess.
-         * Until it is known the line is drawn unscaled and simply
-         * measured — one frame, once per page and box.
+         * `em` is this line's own drawn width at the nominal gap, divided
+         * by the size it was drawn at, so it is a property of the line and
+         * not of any guess. Until it is known the line is drawn nominal
+         * and simply measured — one frame, once per page and box.
+         *
+         * ── WHY THE GAPS GO FIRST ──────────────────────────────────────
+         *
+         * A line reaches the measure by scaling before this, and scaling
+         * is the wrong instrument: it is the letterforms that stretch, so
+         * a page whose lines needed 18% came out in visibly heavier type
+         * than the page beside it — which is what page 5 was. And it has a
+         * ceiling, so the lines that needed more than the ceiling simply
+         * did not reach the margin, which is the void.
+         *
+         * The print does not stretch letters. It opens the word gaps, and
+         * `mushafLayout` already has the band they may move inside and the
+         * exact advance of the bundled space to compute them with — the
+         * Hafs pages have justified this way since they were written.
+         * `natural` is what the line is without any gap at all, so the gap
+         * that closes it is arithmetic rather than a search, and the
+         * scaling that remains is the few per cent the band could not take.
          */
+        const gaps = Math.max(0, tokens.length - 1);
         const em = ems?.[index] ?? 0;
-        const drawn = em * fontSize;
+        const natural = Math.max(0, em - WORD_SPACE_EM * gaps);
+        const spaceEm =
+          em > 0 && gaps > 0
+            ? Math.min(
+                WORD_SPACE_MAX_EM,
+                Math.max(WORD_SPACE_MIN_EM, (targetEm - natural) / gaps),
+              )
+            : WORD_SPACE_EM;
+        const justifiedEm = em > 0 ? natural + spaceEm * gaps : 0;
         const scaleX =
-          em > 0 && drawn > 0
-            ? Math.max(MIN_PRINTED_SCALE, Math.min(MAX_PRINTED_SCALE, measure / drawn))
+          justifiedEm > 0
+            ? Math.max(
+                MIN_PRINTED_SCALE,
+                Math.min(MAX_PRINTED_SCALE, targetEm / justifiedEm),
+              )
             : 1;
+
+        /**
+         * The line that cannot be filled honestly is centred, not dragged.
+         *
+         * About one line in ninety is short even with the gaps at the top
+         * of their band and the letters at the top of theirs — the closing
+         * pages, where a row of the print carries three or four words and
+         * is held out to the margin with kashida we cannot draw. Pulling
+         * those to the margin anyway means a gap the width of a word
+         * between every pair of words. Centring what is there instead is
+         * the fidelity rules' own answer for a line that cannot reach the
+         * measure honestly, and it reads as a short line rather than a
+         * broken one.
+         */
+        const drawnEm = justifiedEm * scaleX;
+        const indent =
+          drawnEm > 0 && targetEm - drawnEm > targetEm * PRINTED_CENTRE_BELOW
+            ? ((targetEm - drawnEm) / 2) * fontSize
+            : 0;
+        // Always the bundled face at a size derived from its own advance —
+        // never the platform's fallback, whose width differs between iOS
+        // and Android and cost the Hafs pages the last word of all fifteen
+        // lines of page 49.
+        const gapStyle = {
+          fontFamily: FONTS.arabicQuran,
+          ...gapMetrics(spaceEm, fontSize),
+        };
 
         return (
           <View key={`l${index}`} style={{ height: rowHeight, width }}>
@@ -842,6 +943,7 @@ function PrintedPageBody({
                   fontFamily,
                   fontSize,
                   color: colors.text,
+                  right: indent,
                   transform: [{ scaleX }],
                 },
               ]}

@@ -96,9 +96,29 @@ export function printedLinesFor(
   return value;
 }
 
-/** Characters that advance the pen — marks stack and take no width. */
+/**
+ * Characters that do NOT advance the pen — the marks, which stack above
+ * and below the letters and take no width of their own.
+ *
+ * Three codepoints inside the Qur'anic block are NOT marks and must not be
+ * in here, because each is a symbol set on the line like a letter. The
+ * bundled face gives their advances as:
+ *
+ *     U+06DE  rub el hizb   0.652 em
+ *     U+06E9  sajdah        0.671 em
+ *     U+06DD  end of ayah   1.279 em
+ *
+ * against a mean Arabic letter of 0.615 em, so the rosette and the sajdah
+ * sign each count as one letter and are within 9% of it.
+ *
+ * Counting the rosette as nothing is what broke page 30. It stands alone
+ * as a word in 435 places, on 433 of the 602 pages, and a word of width
+ * zero makes two consecutive word boundaries identical — which stopped the
+ * cut search dead on the first of them and left a line of four words
+ * beside a line of twenty-one. Every one of those 433 pages had it.
+ */
 const NON_ADVANCING =
-  /[ؐ-ًؚ-ْٕ-ٰٟۖ-ۭ࣓-ࣿ‌-‏]/g;
+  /[\u0610-\u061A\u064B-\u0652\u0655-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED\u08D3-\u08FF\u200C-\u200F]/g;
 
 export function advancingLength(text: string): number {
   return text.replace(NON_ADVANCING, '').length;
@@ -119,6 +139,44 @@ export type AllocatedLine = {
   empty: boolean;
 };
 
+/** How much of an ayah is set on the page before this one, and after it. */
+export type PageSpill = { before: number; after: number };
+
+/** Everything one ayah takes on one page, in line-widths. */
+function shareOn(riwayah: RiwayahId, page: number, key: string): number {
+  const rows = printedLinesFor(riwayah, page);
+  if (!rows) return 0;
+  let total = 0;
+  for (const line of rows) {
+    for (const span of line) {
+      if (`${span.surah}:${span.ayah}` === key) total += span.share;
+    }
+  }
+  return total;
+}
+
+/**
+ * The rows of a page with this riwayah's text set into them.
+ *
+ * Wraps `allocate` with the one thing a single page's table cannot know:
+ * whether an ayah on it is also on the page before or after. Four are.
+ */
+export function printedPageFor(
+  riwayah: RiwayahId,
+  page: number,
+  textOf: (surah: number, ayah: number) => string | null,
+): AllocatedLine[] | null {
+  const rows = printedLinesFor(riwayah, page);
+  if (!rows) return null;
+  return allocate(rows, textOf, (surah, ayah) => {
+    const key = `${surah}:${ayah}`;
+    return {
+      before: shareOn(riwayah, page - 1, key),
+      after: shareOn(riwayah, page + 1, key),
+    };
+  });
+}
+
 /**
  * Split each ayah's words across the lines the print puts it on.
  *
@@ -133,6 +191,7 @@ export type AllocatedLine = {
 export function allocate(
   rows: PrintedPage,
   textOf: (surah: number, ayah: number) => string | null,
+  spill?: (surah: number, ayah: number) => PageSpill,
 ): AllocatedLine[] | null {
   // Which rows each ayah is on, in order, with its shares.
   const spread = new Map<string, { rows: number[]; shares: number[] }>();
@@ -154,13 +213,32 @@ export function allocate(
     const words = text.split(/\s+/).filter(Boolean);
     if (words.length === 0) return null;
 
-    const pieces = splitByShare(words, shares);
+    // ── THE PAGE IS NOT ALWAYS THE WHOLE AYAH ──────────────────────────
+    //
+    // Four ayahs in the book are set across a page turn, and for those the
+    // rows on THIS page hold only part of the text. Splitting the whole
+    // ayah across them puts the other page's words on this one as well —
+    // the same words twice, once on each side of the turn, and both pages
+    // overfull. The share the other page takes goes into the split as a
+    // run of its own and is then dropped, so what is left is this page's
+    // words in this page's proportions.
+    const { before, after } = spill?.(surah, ayah) ?? { before: 0, after: 0 };
+    const withSpill = [
+      ...(before > 0 ? [before] : []),
+      ...shares,
+      ...(after > 0 ? [after] : []),
+    ];
+    const all = splitByShare(words, withSpill);
+    const pieces = all.slice(before > 0 ? 1 : 0, after > 0 ? -1 : undefined);
+
     pieces.forEach((piece, i) => {
       perLine[on[i]].push({
         surah,
         ayah,
         text: piece.join(' '),
-        ends: i === pieces.length - 1,
+        // The medallion belongs to the row the ayah actually ends on. When
+        // the ayah runs on to the next page it does not end here at all.
+        ends: after <= 0 && i === pieces.length - 1,
       });
     });
   }
@@ -181,13 +259,30 @@ export function allocate(
 /**
  * `words` cut into `shares.length` runs, each as close to its share of the
  * total advancing length as whole words allow.
+ *
+ * ── EVERY CUT IS JUDGED THE SAME WAY ──────────────────────────────────
+ *
+ * This used to fill: it walked the words taking one more whenever the
+ * overshoot was small against the room left, on the reasoning that a
+ * typesetter fills a line and moves on. The reasoning is sound and the
+ * arithmetic was not — filling every cut but the last one leaves the last
+ * one whatever remains, so an ayah's closing line came out one or two
+ * words shorter than its share, page after page. Page 5 had two lines at
+ * 32 advancing characters beside a page-4 line of 53, and those two lines
+ * are the holes: no amount of justification reaches the margin from
+ * there.
+ *
+ * So a cut goes to the word boundary NEAREST its share of the ayah, and
+ * every cut including the last is measured against the running total of
+ * the whole ayah rather than against what is left of it. Nothing
+ * accumulates, and a piece that came out a word heavy is not paid for by
+ * the piece after it.
+ *
+ * A line that is then short of the measure is short because the face we
+ * set in is not the face the page was set in, which is not something a
+ * cut can fix. `MushafUnicodePage` opens the word gaps to close it, which
+ * is what the print does and what the Hafs pages have always done.
  */
-/**
- * How far past the target a word may push a line before it is left for the
- * next one. Above 1 because the print fills.
- */
-const FILL_BIAS = 1.8;
-
 export function splitByShare(
   words: string[],
   shares: number[],
@@ -197,45 +292,46 @@ export function splitByShare(
   const total = widths.reduce((n, w) => n + w, 0);
   const weight = shares.reduce((n, s) => n + s, 0) || 1;
 
+  // Where each cut wants to fall, as a running count of advancing
+  // characters from the START of the ayah — not from the last cut.
+  const wanted: number[] = [];
+  let running = 0;
+  for (let i = 0; i < shares.length - 1; i++) {
+    running += (shares[i] / weight) * total;
+    wanted.push(running);
+  }
+
+  // The running count at every word boundary, so a cut can be judged
+  // against the whole ayah in one comparison.
+  const upTo: number[] = [0];
+  for (let i = 0; i < widths.length; i++) upTo.push(upTo[i] + widths[i]);
+
   const out: string[][] = [];
   let at = 0;
-  let carried = 0;
-  for (let i = 0; i < shares.length; i++) {
-    const remaining = shares.length - i;
-    if (remaining === 1) {
-      out.push(words.slice(at));
-      break;
-    }
-    carried += (shares[i] / weight) * total;
-    // Leave at least one word for every line still to come, or a long
-    // first share eats the ayah and the print's last line comes out bare.
-    const most = words.length - at - (remaining - 1);
-    let take = 0;
-    let width = 0;
-    while (take < most) {
-      const next = width + widths[at + take];
-      // ── When it is close, TAKE the word ─────────────────────────────
-      //
-      // Not the nearest boundary. A typesetter fills a line and moves on,
-      // so a line that could hold one more word holds it — and the target
-      // is a proxy anyway, stated in the widths of a face we do not have.
-      // Splitting the difference evenly left one word too few on line
-      // after line, and a line a word short has to be opened out to reach
-      // the margin, which is the void on the page.
-      if (
-        take > 0 &&
-        next > carried &&
-        next - carried > (carried - width) * FILL_BIAS
-      ) {
-        break;
+  for (let i = 0; i < wanted.length; i++) {
+    // One word for this line, and one left for every line still to come:
+    // an empty stretch on a line the print says is occupied is a hole
+    // nothing fills.
+    const first = Math.min(at + 1, words.length);
+    const last = Math.max(first, words.length - (wanted.length - i));
+    let cut = first;
+    let best = Infinity;
+    // Every boundary in the window, with no early exit. Stopping at the
+    // first one that did not improve is only safe while `upTo` strictly
+    // grows, and it does not: a word can be a single rub-el-hizb rosette
+    // with no letters in it, and two boundaries either side of one are the
+    // same number. That tie ended the search on the wrong boundary — see
+    // `NON_ADVANCING`. The window is a few dozen boundaries at most.
+    for (let k = first; k <= last; k++) {
+      const off = Math.abs(upTo[k] - wanted[i]);
+      if (off < best) {
+        best = off;
+        cut = k;
       }
-      width = next;
-      take += 1;
-      if (width >= carried) break;
     }
-    out.push(words.slice(at, at + Math.max(1, take)));
-    at += Math.max(1, take);
-    carried -= width;
+    out.push(words.slice(at, cut));
+    at = cut;
   }
+  out.push(words.slice(at));
   return out;
 }
