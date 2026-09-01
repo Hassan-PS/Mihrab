@@ -43,9 +43,9 @@ import { MushafReader } from '../quran/MushafReader';
 import { useOverlayDismissGuard } from '../quran/mushafReaderCore';
 import { findPageForAyah } from '../quran/pages';
 import {
-  availableRiwayat,
   resolveRiwayah,
   riwayahById,
+  type RiwayahId,
   riwayahChoiceExists,
 } from '../quran/riwayat';
 import {
@@ -71,6 +71,7 @@ import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
 import { cardEdgeStyle } from '../theme/chrome';
 import { arabicTextStyle } from '../theme/typography';
+import { RiwayahPicker } from '../quran/RiwayahPicker';
 
 const isIOS = Platform.OS === 'ios';
 
@@ -154,6 +155,7 @@ export function QuranSurahScreen() {
   // sheet scrolled to the recitation section.
   const [audioSheetSignal, setAudioSheetSignal] = useState(0);
   const [editionPickerVisible, setEditionPickerVisible] = useState(false);
+  const [riwayahPickerVisible, setRiwayahPickerVisible] = useState(false);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -189,14 +191,10 @@ export function QuranSurahScreen() {
   // hidden until the screen happened to re-render for some other reason.
   useRiwayahAvailability();
   const riwayah = resolveRiwayah(quran.prefs.riwayah);
-  const nextRiwayah = (() => {
-    const offered = availableRiwayat();
-    const here = offered.findIndex(r => r.id === riwayah);
-    return offered[(Math.max(0, here) + 1) % offered.length];
-  })();
 
-  const switchRiwayah = useCallback(() => {
-    const target = nextRiwayah;
+  const switchRiwayah = useCallback(
+    (id: RiwayahId) => {
+    const target = riwayahById(id);
     setQuranPrefs({ riwayah: target.id });
     // Said ONCE, on the first switch to a muṣḥaf that reflows — see
     // `riwayahNoticeSeen`. The reader keeps their place either way; what
@@ -215,7 +213,9 @@ export function QuranSurahScreen() {
         ),
       );
     }
-  }, [nextRiwayah, quran.prefs.riwayahNoticeSeen, t]);
+    },
+    [quran.prefs.riwayahNoticeSeen, t],
+  );
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   /**
@@ -406,13 +406,16 @@ export function QuranSurahScreen() {
             // appeared to change the script there would be lying.
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t('quran.switchRiwayah', {
-                defaultValue: 'Switch to the {{name}} reading',
-                name: t(nextRiwayah.nameKey, nextRiwayah.arabic),
+              accessibilityLabel={t('quran.riwayahPickerOpen', {
+                defaultValue: 'Reading tradition: {{name}}. Tap to change.',
+                name: t(riwayahById(riwayah).nameKey, riwayahById(riwayah).arabic),
               })}
-              onPress={switchRiwayah}
+              onPress={() => setRiwayahPickerVisible(true)}
               hitSlop={10}
               style={{ paddingHorizontal: 4 }}>
+              {/* The muṣḥaf you are IN, with the caret that says there
+                  are others — see `RiwayahPicker` for why this stopped
+                  naming the next one instead. */}
               <Text
                 style={{
                   ...arabicTextStyle('body'),
@@ -420,7 +423,7 @@ export function QuranSurahScreen() {
                   fontSize: desktopSize(17),
                   fontWeight: '700',
                 }}>
-                {nextRiwayah.arabic}
+                {`${riwayahById(riwayah).arabic} ▾`}
               </Text>
             </Pressable>
           ) : null}
@@ -458,7 +461,7 @@ export function QuranSurahScreen() {
     quran.prefs.mushafNightMode,
     quran.prefs.mushafRenderer,
     quranHydrated,
-    nextRiwayah,
+    riwayah,
     switchRiwayah,
     t,
     toggleMushaf,
@@ -525,16 +528,42 @@ export function QuranSurahScreen() {
     );
   }
 
+  /** One picker, mounted by whichever branch is on screen. */
+  const riwayahSheet = (
+    <RiwayahPicker
+      visible={riwayahPickerVisible}
+      current={riwayah}
+      onClose={() => setRiwayahPickerVisible(false)}
+      onPick={id => {
+        setRiwayahPickerVisible(false);
+        if (id !== riwayah) switchRiwayah(id);
+      }}
+      onManage={() => {
+        setRiwayahPickerVisible(false);
+        navigation.navigate('QuranDownloads');
+      }}
+    />
+  );
+
   if (isMushaf) {
     return (
-      <MushafReader
-        surahNumber={surahNumber}
-        initialPage={initialPage}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={toggleFullscreen}
-        audioSheetSignal={audioSheetSignal}
-        onTitleChange={handleReaderTitleChange}
-      />
+      // A fragment, not the reader alone: the picker is opened from the
+      // header, which is on screen in BOTH modes, so it has to be mounted
+      // in both. Returning the reader by itself left the control live and
+      // the sheet unmounted — the tap set the flag, nothing appeared, and
+      // the picker turned up later when a switch to translation view
+      // mounted it with the flag already true.
+      <>
+        <MushafReader
+          surahNumber={surahNumber}
+          initialPage={initialPage}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={toggleFullscreen}
+          audioSheetSignal={audioSheetSignal}
+          onTitleChange={handleReaderTitleChange}
+        />
+        {riwayahSheet}
+      </>
     );
   }
 
@@ -778,6 +807,7 @@ export function QuranSurahScreen() {
         visible={editionPickerVisible}
         onClose={() => setEditionPickerVisible(false)}
       />
+      {riwayahSheet}
     </View>
   );
 }

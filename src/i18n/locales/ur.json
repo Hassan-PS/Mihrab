@@ -973,7 +973,13 @@
     "khatmahMarkDone": "دن {{day}} کی تلاوت مکمل نشان زد کریں",
     "khatmahMarkNext": "✓ دن {{day}} بھی مکمل کریں",
     "khatmahMarkToday": "✓ آج کی تلاوت مکمل",
-    "khatmahPrevDay": "‹ پچھلا دن"
+    "khatmahPrevDay": "‹ پچھلا دن",
+    "riwayahQalun": "قالون",
+    "riwayahShubah": "شعبہ",
+    "riwayahPickerTitle": "روایت",
+    "riwayahPickerOpen": "روایت: {{name}}. تبدیل کرنے کے لیے ٹیپ کریں",
+    "riwayahNotOnDevice": "{{name}} — ابھی اس ڈیوائس پر موجود نہیں",
+    "riwayahAddIt": "شامل کرنے کے لیے ٹیپ کریں"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

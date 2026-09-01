@@ -60,7 +60,7 @@ export type RiwayahSource = {
   credits: string;
 };
 
-export type RiwayahId = 'hafs' | 'warsh';
+export type RiwayahId = 'hafs' | 'warsh' | 'qalun' | 'shubah';
 
 /** The one every install has, and the one every default points at. */
 export const DEFAULT_RIWAYAH: RiwayahId = 'hafs';
@@ -147,6 +147,53 @@ export const RIWAYAT: readonly RiwayahDefinition[] = [
       credits: 'King Fahd Glorious Quran Printing Complex',
     },
     fontFamily: 'UthmanicWarsh',
+    fontBundled: false,
+  },
+  {
+    /**
+     * Qālūn — the other transmission from Nāfiʿ, and Warsh's twin in
+     * everything but orthography.
+     *
+     * KFGQPC sets the two from ONE typesetting: every one of the 6,214
+     * ayahs falls on the same page in both, and the publisher's own line
+     * geometry is byte-identical on 602 of the 604 pages. So Qālūn reads
+     * the Warsh line table rather than a copy of it
+     * (`mushafPrintedLines`), and the two cannot drift apart.
+     */
+    id: 'qalun',
+    nameKey: 'quran.riwayahQalun',
+    arabic: 'قالون',
+    render: 'unicode',
+    source: {
+      publisher: 'Quranpedia',
+      page: 'https://quranpedia.net',
+      direct: 'https://api.quranpedia.net/v1/mushafs/7',
+      credits: 'King Fahd Glorious Quran Printing Complex',
+    },
+    fontFamily: 'UthmanicQaloun',
+    fontBundled: false,
+  },
+  {
+    /**
+     * Shuʿbah — the other transmission from ʿĀṣim, beside Ḥafṣ.
+     *
+     * Its ayah division is the Kufan one, so it counts 6,236 like Ḥafṣ
+     * and needs none of the split/merge work Warsh did — the verifier
+     * aligns it one to one. Its LAYOUT is its own, though: 375 ayahs sit
+     * on a different page from Warsh's, and its text block runs seven
+     * units lower, so it carries its own line table.
+     */
+    id: 'shubah',
+    nameKey: 'quran.riwayahShubah',
+    arabic: 'شعبة',
+    render: 'unicode',
+    source: {
+      publisher: 'Quranpedia',
+      page: 'https://quranpedia.net',
+      direct: 'https://api.quranpedia.net/v1/mushafs/9',
+      credits: 'King Fahd Glorious Quran Printing Complex',
+    },
+    fontFamily: 'UthmanicShuba',
     fontBundled: false,
   },
 ];

@@ -973,7 +973,13 @@
     "khatmahMarkDone": "将第 {{day}} 天的诵读标记为完成",
     "khatmahMarkNext": "✓ 也完成第 {{day}} 天",
     "khatmahMarkToday": "✓ 今日诵读已完成",
-    "khatmahPrevDay": "‹ 前一天"
+    "khatmahPrevDay": "‹ 前一天",
+    "riwayahQalun": "嘉隆",
+    "riwayahShubah": "舒尔拜",
+    "riwayahPickerTitle": "诵读传统",
+    "riwayahPickerOpen": "诵读传统：{{name}}。点按可更换。",
+    "riwayahNotOnDevice": "{{name}} — 尚未下载到本设备",
+    "riwayahAddIt": "点按以添加"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

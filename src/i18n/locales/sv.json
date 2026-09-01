@@ -973,7 +973,13 @@
     "khatmahMarkDone": "Markera dag {{day}}s läsning som klar",
     "khatmahMarkNext": "✓ Avsluta dag {{day}} också",
     "khatmahMarkToday": "✓ Dagens läsning klar",
-    "khatmahPrevDay": "‹ Föregående dag"
+    "khatmahPrevDay": "‹ Föregående dag",
+    "riwayahQalun": "Qalun",
+    "riwayahShubah": "Shu'bah",
+    "riwayahPickerTitle": "Läsart",
+    "riwayahPickerOpen": "Läsart: {{name}}. Tryck för att byta.",
+    "riwayahNotOnDevice": "{{name}} — finns inte på den här enheten än",
+    "riwayahAddIt": "Tryck för att lägga till"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

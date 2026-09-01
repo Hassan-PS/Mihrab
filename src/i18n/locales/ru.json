@@ -973,7 +973,13 @@
     "khatmahMarkDone": "Отметить чтение дня {{day}} как завершённое",
     "khatmahMarkNext": "✓ Завершить и день {{day}}",
     "khatmahMarkToday": "✓ Сегодняшнее чтение завершено",
-    "khatmahPrevDay": "‹ Предыдущий день"
+    "khatmahPrevDay": "‹ Предыдущий день",
+    "riwayahQalun": "Калун",
+    "riwayahShubah": "Шуба",
+    "riwayahPickerTitle": "Чтение",
+    "riwayahPickerOpen": "Чтение: {{name}}. Нажмите, чтобы сменить.",
+    "riwayahNotOnDevice": "{{name}} — ещё не на этом устройстве",
+    "riwayahAddIt": "Нажмите, чтобы добавить"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

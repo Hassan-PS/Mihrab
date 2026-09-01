@@ -973,7 +973,13 @@
     "khatmahMarkDone": "দিন {{day}} এর পাঠ শেষ হিসেবে চিহ্নিত করুন",
     "khatmahMarkNext": "✓ দিন {{day}} ও শেষ করুন",
     "khatmahMarkToday": "✓ আজকের পাঠ শেষ",
-    "khatmahPrevDay": "‹ আগের দিন"
+    "khatmahPrevDay": "‹ আগের দিন",
+    "riwayahQalun": "কালূন",
+    "riwayahShubah": "শুবা",
+    "riwayahPickerTitle": "পাঠ ধারা",
+    "riwayahPickerOpen": "পাঠ ধারা: {{name}}। বদলাতে ট্যাপ করুন।",
+    "riwayahNotOnDevice": "{{name}} — এই ডিভাইসে এখনও নেই",
+    "riwayahAddIt": "যোগ করতে ট্যাপ করুন"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

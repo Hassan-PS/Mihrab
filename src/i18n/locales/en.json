@@ -973,7 +973,13 @@
     "khatmahMarkDone": "Mark day {{day}}'s reading done",
     "khatmahMarkNext": "✓ Finish day {{day}} too",
     "khatmahMarkToday": "✓ Today's reading done",
-    "khatmahPrevDay": "‹ Previous day"
+    "khatmahPrevDay": "‹ Previous day",
+    "riwayahQalun": "Qalun",
+    "riwayahShubah": "Shu'bah",
+    "riwayahPickerTitle": "Reading tradition",
+    "riwayahPickerOpen": "Reading tradition: {{name}}. Tap to change.",
+    "riwayahNotOnDevice": "{{name}} — not on this device yet",
+    "riwayahAddIt": "Tap to add it"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

@@ -973,7 +973,13 @@
     "khatmahMarkDone": "Marcar la lectura del día {{day}} como completada",
     "khatmahMarkNext": "✓ Terminar también el día {{day}}",
     "khatmahMarkToday": "✓ Lectura de hoy completada",
-    "khatmahPrevDay": "‹ Día anterior"
+    "khatmahPrevDay": "‹ Día anterior",
+    "riwayahQalun": "Qalun",
+    "riwayahShubah": "Shu'ba",
+    "riwayahPickerTitle": "Tradición de lectura",
+    "riwayahPickerOpen": "Tradición de lectura: {{name}}. Toca para cambiar.",
+    "riwayahNotOnDevice": "{{name}} — aún no está en este dispositivo",
+    "riwayahAddIt": "Toca para añadirla"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

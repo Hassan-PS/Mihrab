@@ -973,7 +973,13 @@
     "khatmahMarkDone": "تعليم قراءة اليوم {{day}} كمنتهية",
     "khatmahMarkNext": "✓ إنهاء اليوم {{day}} أيضًا",
     "khatmahMarkToday": "✓ تمت قراءة اليوم",
-    "khatmahPrevDay": "‹ اليوم السابق"
+    "khatmahPrevDay": "‹ اليوم السابق",
+    "riwayahQalun": "قالون",
+    "riwayahShubah": "شعبة",
+    "riwayahPickerTitle": "الرواية",
+    "riwayahPickerOpen": "الرواية: {{name}}. اضغط للتغيير",
+    "riwayahNotOnDevice": "{{name}} — غير موجودة على هذا الجهاز بعد",
+    "riwayahAddIt": "اضغط لإضافتها"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

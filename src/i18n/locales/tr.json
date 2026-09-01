@@ -973,7 +973,13 @@
     "khatmahMarkDone": "{{day}}. günün okumasını tamamlandı olarak işaretle",
     "khatmahMarkNext": "✓ {{day}}. günü de bitir",
     "khatmahMarkToday": "✓ Bugünkü okuma tamam",
-    "khatmahPrevDay": "‹ Önceki gün"
+    "khatmahPrevDay": "‹ Önceki gün",
+    "riwayahQalun": "Kalun",
+    "riwayahShubah": "Şu'be",
+    "riwayahPickerTitle": "Rivayet",
+    "riwayahPickerOpen": "Rivayet: {{name}}. Değiştirmek için dokunun.",
+    "riwayahNotOnDevice": "{{name}} — bu cihazda henüz yok",
+    "riwayahAddIt": "Eklemek için dokunun"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

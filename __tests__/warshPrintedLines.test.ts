@@ -20,17 +20,44 @@
 import {
   advancingLength,
   allocate,
+  markerShare,
   printedLinesFor,
   splitByShare,
   type PrintedPage,
 } from '../src/quran/mushafPrintedLines';
+import type { RiwayahId } from '../src/quran/riwayat';
 
 /** The rosette that stands alone as a word in 435 places. */
 const ROSETTE = '\u06DE';
 /** A fatha — a mark, which stacks and takes no width. */
 const FATHA = '\u064E';
-/** The ayah medallion's share of a line, from `tools/qiraat/lines.py`. */
-const MARKER_SHARE = 20.17 / 331;
+/**
+ * Every riwayah that ships a printed line table.
+ *
+ * The invariants below are the muṣḥaf's, not Warsh's, so they run over
+ * all of them — and a tradition added later is checked the day its table
+ * lands rather than the day someone remembers to write a test for it.
+ * Qālūn shares Warsh's table by design (`mushafPrintedLines`), so it is
+ * here to prove the sharing works, not because it is a second file.
+ */
+const TABLED: RiwayahId[] = ['warsh', 'qalun', 'shubah'];
+
+/** Rows that fall short of the measure for a reason, per riwayah. */
+const KNOWN_SHORT: Partial<Record<RiwayahId, string[]>> = {
+  warsh: [
+    'page 85 line 14',
+    'page 317 line 14',
+    'page 354 line 14',
+    'page 355 line 14',
+  ],
+  qalun: [
+    'page 85 line 14',
+    'page 317 line 14',
+    'page 354 line 14',
+    'page 355 line 14',
+  ],
+  shubah: ['page 602 line 14', 'page 603 line 14', 'page 604 line 13'],
+};
 
 const word = (letters: number) =>
   `${'\u0628'.repeat(letters)}${FATHA}`;
@@ -141,10 +168,11 @@ describe('an ayah set across a page turn', () => {
   });
 });
 
-describe('the table that ships, on every page of it', () => {
+describe.each(TABLED)('the %s table, on every page of it', riwayah => {
   const pages = Array.from({ length: 604 }, (_, i) => i + 1)
-    .map(p => [p, printedLinesFor('warsh', p)] as const)
+    .map(p => [p, printedLinesFor(riwayah, p)] as const)
     .filter((e): e is readonly [number, PrintedPage] => e[1] !== null);
+  const MARKER_SHARE = markerShare(riwayah);
 
   it('covers the book', () => {
     expect(pages.length).toBeGreaterThan(595);
@@ -189,19 +217,23 @@ describe('the table that ships, on every page of it', () => {
       });
     }
 
-    // Four rows, and they are the four ayahs the print sets across a page
-    // turn: the row that hands one on carries no medallion, but the table
-    // has still left the medallion's room on it. Six per cent of a line,
-    // on four lines of 8,807, and the word gaps close it without anyone
-    // seeing. Named rather than hidden — if a fifth ever appears it is a
-    // different fault and this should say so.
-    expect(off).toEqual([
-      'page 85 line 14',
-      'page 317 line 14',
-      'page 354 line 14',
-      'page 355 line 14',
-    ]);
-    expect(worst).toBeLessThan(0.07);
+    // Named rather than counted, so a NEW one is a failure with a page
+    // number on it rather than a threshold quietly absorbing it.
+    //
+    // Warsh and Qālūn: the four ayahs the print sets across a page turn.
+    // The row that hands one on carries no medallion, but the table has
+    // still left the medallion's room on it — six per cent of a line, on
+    // four rows of 8,807, closed by the word gaps without anyone seeing.
+    //
+    // Shuʿbah: three rows on the closing pages, where a surah of four-word
+    // ayahs genuinely does not fill the line and the renderer centres what
+    // it cannot fill.
+    expect(off).toEqual(KNOWN_SHORT[riwayah]);
+    // And a ceiling on how short the worst of them may be: Shuʿbah's
+    // page 602 line 14 sits at 0.76 of the measure, which is a real
+    // four-word line on a closing page. A row shorter than a quarter of
+    // a line would be a grid fault, not a short line.
+    expect(worst).toBeLessThan(0.25);
   });
 
   it('sets no surah above its own band', () => {

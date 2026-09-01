@@ -973,7 +973,13 @@
     "khatmahMarkDone": "Tandai bacaan hari ke-{{day}} selesai",
     "khatmahMarkNext": "✓ Selesaikan hari ke-{{day}} juga",
     "khatmahMarkToday": "✓ Bacaan hari ini selesai",
-    "khatmahPrevDay": "‹ Hari sebelumnya"
+    "khatmahPrevDay": "‹ Hari sebelumnya",
+    "riwayahQalun": "Qalun",
+    "riwayahShubah": "Syu'bah",
+    "riwayahPickerTitle": "Riwayat bacaan",
+    "riwayahPickerOpen": "Riwayat bacaan: {{name}}. Ketuk untuk mengganti.",
+    "riwayahNotOnDevice": "{{name}} — belum ada di perangkat ini",
+    "riwayahAddIt": "Ketuk untuk menambahkan"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

@@ -973,7 +973,13 @@
     "khatmahMarkDone": "Marquer la lecture du jour {{day}} comme terminée",
     "khatmahMarkNext": "✓ Terminer aussi le jour {{day}}",
     "khatmahMarkToday": "✓ Lecture du jour terminée",
-    "khatmahPrevDay": "‹ Jour précédent"
+    "khatmahPrevDay": "‹ Jour précédent",
+    "riwayahQalun": "Qaloun",
+    "riwayahShubah": "Chouba",
+    "riwayahPickerTitle": "Lecture",
+    "riwayahPickerOpen": "Lecture : {{name}}. Touchez pour changer.",
+    "riwayahNotOnDevice": "{{name}} — pas encore sur cet appareil",
+    "riwayahAddIt": "Touchez pour l’ajouter"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

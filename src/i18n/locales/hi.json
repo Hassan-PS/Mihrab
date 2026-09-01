@@ -973,7 +973,13 @@
     "khatmahMarkDone": "दिन {{day}} का पाठ पूरा चिह्नित करें",
     "khatmahMarkNext": "✓ दिन {{day}} भी पूरा करें",
     "khatmahMarkToday": "✓ आज का पाठ पूरा हुआ",
-    "khatmahPrevDay": "‹ पिछला दिन"
+    "khatmahPrevDay": "‹ पिछला दिन",
+    "riwayahQalun": "क़ालून",
+    "riwayahShubah": "शुबा",
+    "riwayahPickerTitle": "पठन परंपरा",
+    "riwayahPickerOpen": "पठन परंपरा: {{name}}। बदलने के लिए टैप करें।",
+    "riwayahNotOnDevice": "{{name}} — अभी इस डिवाइस पर नहीं है",
+    "riwayahAddIt": "जोड़ने के लिए टैप करें"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

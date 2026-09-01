@@ -43,10 +43,57 @@
  */
 import type { RiwayahId } from './riwayat';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const WARSH = require('./data/warshLines.json') as {
+type PrintedTable = {
+  /**
+   * The medallion's share of the measure, in THIS edition's frame.
+   *
+   * It travels with the table because it belongs to the export the table
+   * was cut from, not to the app: Warsh's polygons were published on a
+   * 331-unit measure and the current ones on 345, which moves the
+   * medallion from 0.061 of a line to 0.069. The number used to be a
+   * constant repeated in the tool, the renderer and its test, and three
+   * copies of a number that can change is three chances to disagree.
+   */
+  marker?: number;
   lines: Record<string, number[][][]>;
 };
+
+/**
+ * ── ONE TABLE CAN SERVE TWO RIWAYAT ───────────────────────────────────
+ *
+ * Keyed by riwayah, but the value is an EDITION, and the two are not the
+ * same thing. KFGQPC sets Warsh and Qālūn from one typesetting: all 6,214
+ * ayahs fall on the same page in both, the publisher's polygon files are
+ * byte-identical on 602 of the 604 pages, and page 100 of each breaks at
+ * the same word on all fifteen lines. They differ in orthography, which
+ * is text, and not in layout, which is this.
+ *
+ * So they share a table. That is 132 KB of APK saved, and — the reason
+ * that matters more — it makes it impossible for the two to drift apart
+ * later, which two copies of a generated file eventually would.
+ *
+ * A riwayah absent from here is not broken: it has no printed table, so
+ * `MushafUnicodePage` reflows it instead. That is the honest fallback and
+ * it is what every riwayah did before there was a table at all.
+ */
+const TABLES: Partial<Record<RiwayahId, PrintedTable>> = {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  warsh: require('./data/warshLines.json') as PrintedTable,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  qalun: require('./data/warshLines.json') as PrintedTable,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  shubah: require('./data/shubahLines.json') as PrintedTable,
+};
+
+/**
+ * The medallion's share of the measure for a riwayah's table.
+ *
+ * Falls back to the Warsh figure, which is what the tables written before
+ * they carried their own were cut with.
+ */
+export function markerShare(riwayah: RiwayahId): number {
+  return TABLES[riwayah]?.marker ?? 20.17 / 331;
+}
 
 /** One ayah's share of one line. `share` is 0..1 of the line's measure. */
 export type PrintedSpan = { surah: number; ayah: number; share: number };
@@ -122,11 +169,12 @@ export function printedLinesFor(
   riwayah: RiwayahId,
   page: number,
 ): PrintedPage | null {
-  if (riwayah !== 'warsh') return null;
+  const table = TABLES[riwayah];
+  if (!table) return null;
   const key = `${riwayah}:${page}`;
   const cached = CACHE.get(key);
   if (cached !== undefined) return cached;
-  const rows = WARSH.lines[String(page)];
+  const rows = table.lines[String(page)];
   const value = rows ? unpack(rows) : null;
   CACHE.set(key, value);
   return value;
@@ -222,13 +270,18 @@ export function printedPageFor(
 ): AllocatedLine[] | null {
   const rows = printedLinesFor(riwayah, page);
   if (!rows) return null;
-  return allocate(rows, textOf, (surah, ayah) => {
-    const key = `${surah}:${ayah}`;
-    return {
-      before: shareOn(riwayah, page - 1, key),
-      after: shareOn(riwayah, page + 1, key),
-    };
-  });
+  return allocate(
+    rows,
+    textOf,
+    (surah, ayah) => {
+      const key = `${surah}:${ayah}`;
+      return {
+        before: shareOn(riwayah, page - 1, key),
+        after: shareOn(riwayah, page + 1, key),
+      };
+    },
+    markerShare(riwayah),
+  );
 }
 
 /**
@@ -246,6 +299,8 @@ export function allocate(
   rows: PrintedPage,
   textOf: (surah: number, ayah: number) => string | null,
   spill?: (surah: number, ayah: number) => PageSpill,
+  /** The medallion's share, which belongs to the table — `markerShare`. */
+  marker: number = MARKER_SHARE,
 ): AllocatedLine[] | null {
   // Which rows each ayah is on, in order, with its shares.
   const spread = new Map<string, { rows: number[]; shares: number[] }>();
@@ -321,7 +376,7 @@ export function allocate(
       ? Math.min(
           1,
           line.reduce((n, s) => n + s.share, 0) +
-            MARKER_SHARE * ayahs.filter(a => a.ends).length,
+            marker * ayahs.filter(a => a.ends).length,
         )
       : 1;
     return { ayahs, empty: line.length === 0, share };
