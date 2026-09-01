@@ -36,6 +36,26 @@ import os
 /// `tap()` has always returned whether the write reads back, and the comment
 /// under it said in as many words that nothing acts on the result. That is the
 /// bug behind the bug: the one process that knew was the one staying quiet.
+///
+/// ── AND WHY THESE ARE `notice`, NOT `info` (2026-09-01) ───────────────
+///
+/// The lines added on 2026-08-29 were `.info`, which was the second way to
+/// lose the same evidence. `Logger.info` goes to the MEMORY store, and
+/// `log show` does not display it without `--info` — so an investigator who
+/// runs the obvious query
+///
+///   log show --predicate 'subsystem == "com.hassan.prayerapp.widget"'
+///
+/// sees an empty table and concludes the code never ran. That is exactly
+/// what happened here: chronod's own log shows `LogPrayerIntent.perform()`
+/// invoked and finished at 18:04:29 on 2026-08-31, in this extension's
+/// process, while our subsystem appeared to have said nothing at all.
+///
+/// `.notice` is the lowest level the unified log PERSISTS by default. These
+/// lines are written a handful of times a day, by a button, about whether
+/// someone's worship was recorded. That is worth a persisted line. If the
+/// volume ever becomes a problem, the fix is a signpost profile, not a
+/// quieter level.
 let widgetLogLog = Logger(subsystem: "com.hassan.prayerapp.widget", category: "logqueue")
 
 /// The Darwin notification that tells the app a widget queue has changed.
@@ -178,7 +198,7 @@ enum WidgetLogQueue {
       // Only on a write that read back. Waking the app to drain a queue that
       // did not change is the one way this can be worse than doing nothing.
       postWidgetQueueChanged()
-      widgetLogLog.info(
+      widgetLogLog.notice(
         "tap \(prayer, privacy: .public) \(date, privacy: .public) \(undoing ? "undone" : "queued", privacy: .public), queue now \(next.count, privacy: .public)")
     } else {
       // The failure the user saw: set() and synchronize() both "succeed" and

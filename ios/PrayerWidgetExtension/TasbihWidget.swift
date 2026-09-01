@@ -55,15 +55,40 @@ enum WidgetTasbihQueue {
   static let maxEntries = 4000
 
   /// See WidgetLogQueue.tap for why `synchronize()` is here.
+  ///
+  /// AND WHY IT NOW SAYS WHETHER IT WORKED. This queue had the same silence
+  /// the log queue used to: `set` and `synchronize` both "succeed" on a
+  /// group the process cannot actually write, and the only symptom is a
+  /// bead that does not count. On the Mac where the log-queue failure was
+  /// reported, `widget_tasbih_queue` is missing from the group container
+  /// too — so this is very likely one fault showing up on two widgets, and
+  /// a tap on either should now leave a line. `notice`, not `info`, so a
+  /// plain `log show` finds it; see WidgetLogQueue.swift for what that
+  /// distinction cost the first time.
   static func append(_ action: String, now: Double = Date().timeIntervalSince1970 * 1000) {
     guard actions.contains(action) else { return }
     let next = (read() + [Entry(a: action, t: now)]).suffix(maxEntries).map { $0 }
     guard let data = try? JSONEncoder().encode(next),
-          let s = String(data: data, encoding: .utf8),
-          let store = defaults()
-    else { return }
+          let s = String(data: data, encoding: .utf8)
+    else {
+      widgetLogLog.error(
+        "tasbih \(action, privacy: .public): could not encode \(next.count, privacy: .public) entr(ies)")
+      return
+    }
+    guard let store = defaults() else {
+      widgetLogLog.error(
+        "tasbih \(action, privacy: .public): no UserDefaults for suite \(kSuite, privacy: .public)")
+      return
+    }
     store.set(s, forKey: key)
     store.synchronize()
+    if read().count == next.count {
+      widgetLogLog.notice(
+        "tasbih \(action, privacy: .public) queued, queue now \(next.count, privacy: .public)")
+    } else {
+      widgetLogLog.error(
+        "tasbih \(action, privacy: .public): WRITE DROPPED — suite \(kSuite, privacy: .public) accepted \(next.count, privacy: .public) entr(ies) and read back \(self.read().count, privacy: .public)")
+    }
     // Same reason as the log queue: the drain runs on app mount and on
     // AppState `active`, and a widget tap is neither. On a Mac the app is
     // usually already active when Notification Center is open, so without

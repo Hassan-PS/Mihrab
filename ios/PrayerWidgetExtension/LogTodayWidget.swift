@@ -54,7 +54,11 @@ struct LogPrayerIntent: AppIntent {
     // A user reported the first-tap-does-nothing behaviour on 2026-08-29 and
     // there was no way to tell which, because this extension logged nothing
     // at all. See the note at the top of WidgetLogQueue.swift.
-    widgetLogLog.info(
+    // `notice`, not `info` — see the note in WidgetLogQueue.swift. An
+    // `.info` line is memory-only and invisible to a plain `log show`,
+    // which is how "the extension logged nothing" was concluded about an
+    // intent the system's own log shows running to completion.
+    widgetLogLog.notice(
       "LogPrayerIntent \(prayer, privacy: .public) \(dateKey, privacy: .public) performing")
     let stored = WidgetLogQueue.tap(date: dateKey, prayer: prayer)
     WidgetCenter.shared.reloadTimelines(ofKind: "MihrabLogToday")
