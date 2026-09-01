@@ -29,6 +29,7 @@ import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
 import { findPageForAyah, MUSHAF_PAGES } from '../quran/pages';
 import { hydrateRiwayahData } from '../quran/riwayahData';
+import { RIWAYAT } from '../quran/riwayat';
 import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
 import { findSurah, loadSurah, SURAHS, type SurahIndex } from '../quran/quran';
 import { getAyahTranslation } from '../quran/translations';
@@ -76,6 +77,15 @@ export function QuranScreen() {
   useAndroidSubScreenBack();
   const isArabic = i18n.language === 'ar';
   const quran = useQuranState();
+  /**
+   * Is there a second muṣḥaf to offer at all?
+   *
+   * The TABLE, not what this device has installed — the link's job is to
+   * lead someone to the screen where they can get one, so it has to be
+   * there before they have it. It disappears only in a build that knows
+   * one recitation, which is a build with nothing to link to.
+   */
+  const riwayahOffered = RIWAYAT.some(r => r.render === 'unicode' && r.source);
   const edition = useActiveEdition();
 
   useEffect(() => {
@@ -584,16 +594,46 @@ export function QuranScreen() {
         })}
       </View>
 
-      {/* Manage downloads (v2.7.28) */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('downloads.title', 'Manage downloads')}
-        onPress={() => navigation.navigate('QuranDownloads')}
-        style={styles.downloadsLink}>
-        <Text style={{ color: palette.muted, fontSize: 12, fontWeight: '600' }}>
-          {t('downloads.title', 'Manage downloads')} ›
-        </Text>
-      </Pressable>
+      {/* Manage downloads (v2.7.28), and beside it the way to a second
+          muṣḥaf.
+          
+          Both land on the same screen. "Manage downloads" is where you go
+          when you already know something is on the device; nobody reads it
+          as "and here is how to read Warsh", which is a feature that
+          otherwise has no door on the screen it belongs to. The riwayah
+          link is shown only when there is a riwayah to offer at all — a
+          build that knows one recitation should not advertise a picker. */}
+      <View style={styles.downloadsRow}>
+        {riwayahOffered ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t(
+              'downloads.riwayat',
+              'Reading traditions',
+            )}
+            onPress={() => navigation.navigate('QuranDownloads')}
+            style={styles.downloadsLink}>
+            <Text
+              style={{
+                color: palette.accentSolid,
+                fontSize: 12,
+                fontWeight: '700',
+              }}>
+              {t('downloads.riwayat', 'Reading traditions')} ›
+            </Text>
+          </Pressable>
+        ) : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('downloads.title', 'Manage downloads')}
+          onPress={() => navigation.navigate('QuranDownloads')}
+          style={styles.downloadsLink}>
+          <Text
+            style={{ color: palette.muted, fontSize: 12, fontWeight: '600' }}>
+            {t('downloads.title', 'Manage downloads')} ›
+          </Text>
+        </Pressable>
+      </View>
 
       {/* Full-text results */}
       {results != null ? (
@@ -1286,7 +1326,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   menuCancel: { alignItems: 'center', paddingVertical: 8 },
-  downloadsLink: { alignSelf: 'flex-end', paddingVertical: 2 },
+  downloadsLink: { paddingVertical: 2 },
+  /** The two links share the row: the riwayah one leads, downloads trails. */
+  downloadsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 14,
+  },
   starredHeading: {
     fontSize: 12,
     fontWeight: '700',
