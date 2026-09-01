@@ -64,12 +64,32 @@ function main(): void {
   const result = verifyRiwayahDataset(raw, hafs.surahs, hafs.pages);
   if (!result.ok) die(result.error);
 
-  const { dataset, totalPages } = result;
+  const { dataset, totalPages, checked } = result;
   const ayahs = Object.keys(dataset.text).length;
   console.log(`\n  ✓ ${ayahs} ayahs, ${totalPages} pages, 114 surahs`);
   console.log('  ✓ every surah has its exact ayah count');
   console.log('  ✓ pages run forwards and none is empty');
-  console.log('  ✓ reads like the Qur’an at all sixty juz boundaries');
+  // Which of the two content checks ran is the most important line here,
+  // and printing the stronger one's words after doing the weaker one would
+  // be the single most misleading thing this tool could say.
+  if (checked?.kind === 'aligned') {
+    console.log(
+      `  ✓ reads like the Qur’an at all ${checked.groups} places its ` +
+        `numbering meets Ḥafṣ’s — mean ${Math.round(checked.mean * 100)}%, ` +
+        `${checked.splits} split, ${checked.merges} merged`,
+    );
+  } else if (checked) {
+    console.log(
+      '  ✓ reads like the Qur’an at all sixty juz boundaries — mean ' +
+        `${Math.round(checked.mean * 100)}%`,
+    );
+    console.log(
+      '  ! this file does not say how its ayah numbering relates to the\n' +
+        '    Qur’an’s, so only those sixty places could be checked',
+    );
+  } else {
+    console.log('  ! its CONTENT was not checked at all — see below');
+  }
 
   const out = arg('out');
   if (!out) {

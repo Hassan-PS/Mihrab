@@ -96,12 +96,26 @@ describe('verifying a dataset', () => {
       /expected 6236 ayahs, found 6235/,
     ],
     [
-      'a Qur’an with an ayah too many',
+      'the same ayah twice',
       () => {
         const v = wholeQuran();
         return [...v, v[v.length - 1]];
       },
-      /expected 6236 ayahs, found 6237/,
+      /114:6 appears twice/,
+    ],
+    [
+      'the right total divided into the wrong surahs',
+      () => {
+        // The subtle one, and the shape a differently-counted muṣḥaf has:
+        // 6,236 ayahs, in order, but a surah boundary in the wrong place.
+        // A riwayah is allowed its own division only when it states how
+        // that division lines up against the Qur'an. This one does not.
+        const v = wholeQuran();
+        const i = v.findIndex(x => x.verse_key === '113:5');
+        v[i] = { ...v[i], verse_key: '114:7' };
+        return v;
+      },
+      /surah 113 has 4 ayahs, expected 5/,
     ],
     [
       'the same ayah twice',

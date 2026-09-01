@@ -51,6 +51,7 @@
 import { SURAHS } from './quran';
 import { TOTAL_AYAHS } from './ayahIndex';
 import { checkJuzBoundaries } from './juzCheck';
+import { checkAgainstHafs, type AlignedVerse } from './hafsAlignment';
 import type { MushafPageRange, SurahMeta } from './pages';
 
 /** One verse as QUL publishes it — the fields we need, all optional. */
@@ -59,23 +60,121 @@ type SourceVerse = {
   text?: string;
   page_number?: number;
   juz_number?: number;
+  /**
+   * Which ayahs of the Ḥafṣ muṣḥaf this one is, within the same surah.
+   *
+   * One, usually. Two or three where this riwayah merges Ḥafṣ ayahs; the
+   * same number on two consecutive ayahs where it splits one. Absent on a
+   * file that does not state it — see `verifyRiwayahDataset`, which then
+   * has to fall back to a much weaker check.
+   */
+  number_in_hafs?: number[];
 };
 
 /** A muṣḥaf, ready to store: its pagination, its index, and its text. */
 export type RiwayahDataset = {
   pages: MushafPageRange[];
   surahs: SurahMeta[];
-  /** Ayah text keyed `"surah:ayah"`. */
+  /**
+   * Ayahs per surah IN THIS RIWAYAH, indexed from 0.
+   *
+   * Beside `surahs` rather than inside it because the names are shared and
+   * the counts are not: `SurahMeta` is the same 114 entries for every
+   * riwayah, while Warsh's al-Baqarah has 285 ayahs to Ḥafṣ's 286.
+   */
+  ayahCounts: number[];
+  /** Ayah text keyed `"surah:ayah"`, in this riwayah's own numbering. */
   text: Record<string, string>;
 };
 
 export type RiwayahVerifyResult =
-  | { ok: true; dataset: RiwayahDataset; totalPages: number }
+  | {
+      ok: true;
+      dataset: RiwayahDataset;
+      totalPages: number;
+      /**
+       * What the content check was able to do — and it matters which.
+       *
+       * `aligned` means every ayah was read against the Ḥafṣ it says it
+       * is. `anchors` means only the sixty juz boundaries were, because
+       * the file did not say how its numbering lines up. A caller telling
+       * someone what was verified should not say the first when it did
+       * the second.
+       */
+      checked:
+        | { kind: 'aligned'; groups: number; splits: number; merges: number; mean: number }
+        | { kind: 'anchors'; mean: number }
+        // Null when nothing could be read — no mapping in the file AND no
+        // reference muṣḥaf passed in. Shape was checked and content was
+        // not, and the caller has to decide whether that is enough. For
+        // anything that installs scripture it is not: see
+        // `riwayahDownload.ts`, which refuses it.
+        | null;
+    }
   | { ok: false; error: string };
 
 /** Ayahs in surah `s` (1-based), from the app's own table. */
 function ayahsIn(surah: number): number {
   return SURAHS[surah - 1].ayahCount;
+}
+
+/**
+ * The verses in a published file, whichever way it is wrapped.
+ *
+ * Three shapes, because three shapes exist in the wild and none of them is
+ * wrong. QUL's own JSON exports are the third: an object keyed by verse,
+ * `{"1:1": {…}, "1:2": {…}}`. Reading only the first two is what made a
+ * perfectly good 1.8 MB Warsh download fail with "no verses found in the
+ * file" — a message that blames the file for the reader's app not knowing
+ * how to open it.
+ *
+ * The key is ignored in favour of the `verse_key` inside each entry, with
+ * one exception: a file whose entries carry no `verse_key` gets the key it
+ * was filed under, since that is plainly what it means. Everything after
+ * this point sees one flat list.
+ */
+function versesIn(raw: unknown): SourceVerse[] {
+  if (Array.isArray(raw)) return raw as SourceVerse[];
+  if (!raw || typeof raw !== 'object') return [];
+  const wrapped = (raw as { verses?: unknown }).verses;
+  if (Array.isArray(wrapped)) return wrapped as SourceVerse[];
+
+  // A muṣḥaf nested under its surahs, which is how Quranpedia publishes
+  // one. The surah supplies the number the ayah does not repeat, and the
+  // field names differ from the flat form — `juz` rather than
+  // `juz_number` — so this is a translation, not just a flattening.
+  const nested = (raw as { surahs?: unknown }).surahs;
+  if (Array.isArray(nested)) {
+    const out: SourceVerse[] = [];
+    for (const surah of nested as Array<Record<string, unknown>>) {
+      const number = Number(surah?.id);
+      const ayahs = surah?.ayahs;
+      if (!Number.isInteger(number) || !Array.isArray(ayahs)) continue;
+      for (const a of ayahs as Array<Record<string, unknown>>) {
+        const inHafs = a?.number_in_hafs;
+        out.push({
+          verse_key: `${number}:${a?.number}`,
+          text: typeof a?.text === 'string' ? a.text : undefined,
+          page_number:
+            typeof a?.page_number === 'number' ? a.page_number : undefined,
+          juz_number: typeof a?.juz === 'number' ? a.juz : undefined,
+          number_in_hafs: Array.isArray(inHafs)
+            ? (inHafs as unknown[]).map(Number).filter(Number.isInteger)
+            : typeof inHafs === 'number'
+              ? [inHafs]
+              : undefined,
+        });
+      }
+    }
+    return out;
+  }
+  const out: SourceVerse[] = [];
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+    const verse = value as SourceVerse;
+    out.push(verse.verse_key ? verse : { ...verse, verse_key: key });
+  }
+  return out;
 }
 
 /**
@@ -103,20 +202,10 @@ export function verifyRiwayahDataset(
 ): RiwayahVerifyResult {
   const fail = (error: string): RiwayahVerifyResult => ({ ok: false, error });
 
-  // The dataset ships either as a bare array or wrapped; accept both
-  // rather than make anyone reshape a file they were given.
-  const verses: SourceVerse[] = Array.isArray(raw)
-    ? (raw as SourceVerse[])
-    : ((raw as { verses?: SourceVerse[] } | null)?.verses ?? []);
+  const verses = versesIn(raw);
   if (verses.length === 0) return fail('no verses found in the file');
 
-  if (verses.length !== TOTAL_AYAHS) {
-    return fail(
-      `expected ${TOTAL_AYAHS} ayahs, found ${verses.length}. ` +
-        'This is not the whole Qur’an and will not be used.',
-    );
-  }
-
+  // ── What the file says it is ────────────────────────────────────────
   const bySurah = new Map<number, Map<number, SourceVerse>>();
   for (const v of verses) {
     const key = v.verse_key ?? '';
@@ -137,24 +226,97 @@ export function verifyRiwayahDataset(
   if (bySurah.size !== 114) {
     return fail(`expected 114 surahs, found ${bySurah.size}`);
   }
+
+  /**
+   * This riwayah's own ayah counts, read off the file.
+   *
+   * NOT the Ḥafṣ table. Warsh divides the same text into 6,214 ayahs
+   * rather than 6,236 — 22 fewer, in fifty surahs, and in both directions:
+   * al-Baqarah has 285 where Ḥafṣ has 286, al-Wāqiʿah has 99 where Ḥafṣ
+   * has 96. Checking a Madani-numbered muṣḥaf against Kufan counts refuses
+   * a perfectly good Qur'an, which is what it did.
+   *
+   * Read off the file and then proved complete by `number_in_hafs` below:
+   * the file may say how it divides the text, but it does not get to say
+   * how much text there is.
+   */
+  const counts: number[] = [];
   for (let s = 1; s <= 114; s++) {
-    const got = bySurah.get(s);
-    if (!got) return fail(`surah ${s} is missing entirely`);
-    if (got.size !== ayahsIn(s)) {
-      return fail(`surah ${s} has ${got.size} ayahs, expected ${ayahsIn(s)}`);
-    }
-    for (let a = 1; a <= ayahsIn(s); a++) {
+    const got = bySurah.get(s)!;
+    const total = Math.max(...got.keys());
+    for (let a = 1; a <= total; a++) {
       if (!got.has(a)) return fail(`${s}:${a} is missing`);
+    }
+    if (got.size !== total) return fail(`surah ${s} has ayahs out of range`);
+    counts.push(total);
+  }
+  const at = (s: number, a: number) => bySurah.get(s)!.get(a)!;
+
+  // ── Is it the whole Qur'an, and is it the Qur'an at all? ────────────
+  //
+  // Two routes, and the file chooses which by what it carries.
+  //
+  // A muṣḥaf that states its Ḥafṣ correspondence gets the strong one:
+  // every ayah of every surah accounted for against the text this app
+  // already ships and hashes, and every ayah read for content — 6,155
+  // comparisons for Warsh rather than sixty. `hafsAlignment.ts` explains
+  // why that is possible only with the mapping.
+  //
+  // One that does not is checked the old way: its counts must be the Ḥafṣ
+  // counts, and its content is sampled at the thirty juz boundaries. That
+  // is weaker, and it is all that can honestly be done for a file that
+  // will not say how its numbering relates to anything.
+  let checked: Extract<RiwayahVerifyResult, { ok: true }>['checked'] | null = null;
+  const aligned: AlignedVerse[] = [];
+  for (let s = 1; s <= 114; s++) {
+    for (let a = 1; a <= counts[s - 1]; a++) {
+      const v = at(s, a);
+      const hafs = v.number_in_hafs;
+      if (!hafs || hafs.length === 0) continue;
+      aligned.push({ surah: s, ayah: a, text: v.text!, hafs });
+    }
+  }
+  const total = counts.reduce((n, c) => n + c, 0);
+
+  if (aligned.length === total) {
+    const content = checkAgainstHafs(aligned);
+    if (!content.ok) return fail(content.error);
+    checked = {
+      kind: 'aligned',
+      groups: content.groups,
+      splits: content.splits,
+      merges: content.merges,
+      mean: content.mean,
+    };
+  } else {
+    if (aligned.length > 0) {
+      return fail(
+        `${total - aligned.length} of ${total} ayahs do not say which ` +
+          'Qur’an ayah they are. A file may state that for all of them or ' +
+          'for none, not for some.',
+      );
+    }
+    if (total !== TOTAL_AYAHS) {
+      return fail(
+        `expected ${TOTAL_AYAHS} ayahs, found ${total}. ` +
+          'This is not the whole Qur’an and will not be used.',
+      );
+    }
+    for (let s = 1; s <= 114; s++) {
+      if (counts[s - 1] !== ayahsIn(s)) {
+        return fail(
+          `surah ${s} has ${counts[s - 1]} ayahs, expected ${ayahsIn(s)}`,
+        );
+      }
     }
   }
 
-  const pageOf = (s: number, a: number) => bySurah.get(s)!.get(a)!.page_number!;
-  const juzOf = (s: number, a: number) =>
-    bySurah.get(s)!.get(a)!.juz_number ?? 1;
+  // ── Pagination ──────────────────────────────────────────────────────
+  const pageOf = (s: number, a: number) => at(s, a).page_number!;
 
   let lastPage = 0;
   for (let s = 1; s <= 114; s++) {
-    for (let a = 1; a <= ayahsIn(s); a++) {
+    for (let a = 1; a <= counts[s - 1]; a++) {
       const page = pageOf(s, a);
       if (page < lastPage) {
         return fail(
@@ -169,16 +331,44 @@ export function verifyRiwayahDataset(
 
   const seen = new Set<number>();
   for (let s = 1; s <= 114; s++) {
-    for (let a = 1; a <= ayahsIn(s); a++) seen.add(pageOf(s, a));
+    for (let a = 1; a <= counts[s - 1]; a++) seen.add(pageOf(s, a));
   }
   for (let p = 1; p <= totalPages; p++) {
     if (!seen.has(p)) return fail(`page ${p} has no ayahs on it`);
   }
 
+  /**
+   * Which juz each ayah is in, with the gaps carried forward.
+   *
+   * Quranpedia leaves `juz` at 0 for the ayahs a riwayah has and Ḥafṣ does
+   * not — 26 of them in Warsh, every one the tail of a surah where this
+   * numbering runs past the Kufan count. Their juz is the juz of the ayah
+   * before, because a juz boundary never falls at the end of a surah that
+   * the next juz does not also begin. Refusing the file over 26 zeroes
+   * would be refusing a muṣḥaf over an omission the app can repair
+   * exactly; inventing a juz where the run is genuinely ambiguous would
+   * not be, so the check below still insists the result runs 1…30 forward.
+   */
+  const juzOfAyah = new Map<string, number>();
+  let running = 0;
+  for (let s = 1; s <= 114; s++) {
+    for (let a = 1; a <= counts[s - 1]; a++) {
+      const stated = at(s, a).juz_number;
+      if (typeof stated === 'number' && stated > 0) {
+        if (stated < running) {
+          return fail(`juz goes backwards at ${s}:${a} (${running} → ${stated})`);
+        }
+        running = stated;
+      }
+      juzOfAyah.set(`${s}:${a}`, running || 1);
+    }
+  }
+  const juzOf = (s: number, a: number) => juzOfAyah.get(`${s}:${a}`) ?? 1;
+
   // ── Build what the reader reads ─────────────────────────────────────
   const firstOf = new Map<number, { surah: number; ayah: number }>();
   for (let s = 1; s <= 114; s++) {
-    for (let a = 1; a <= ayahsIn(s); a++) {
+    for (let a = 1; a <= counts[s - 1]; a++) {
       const p = pageOf(s, a);
       if (!firstOf.has(p)) firstOf.set(p, { surah: s, ayah: a });
     }
@@ -194,25 +384,32 @@ export function verifyRiwayahDataset(
 
   const text: Record<string, string> = {};
   for (let s = 1; s <= 114; s++) {
-    for (let a = 1; a <= ayahsIn(s); a++) {
-      text[`${s}:${a}`] = bySurah.get(s)!.get(a)!.text!.trim();
+    for (let a = 1; a <= counts[s - 1]; a++) {
+      text[`${s}:${a}`] = at(s, a).text!.trim();
     }
   }
 
-  // ── And is it the Qur'an? ───────────────────────────────────────────
-  if (hafsPages && hafsPages.length > 0) {
-    const juzOf = (ref: { surah: number; ayah: number }): number | null =>
-      bySurah.get(ref.surah)?.get(ref.ayah)?.juz_number ?? null;
-    const content = checkJuzBoundaries(text, juzOf, hafsPages);
+  // The sixty-anchor check, for a file that carried no mapping. One that
+  // did has already been read at every ayah, which subsumes this.
+  if (!checked && hafsPages && hafsPages.length > 0) {
+    const content = checkJuzBoundaries(text, ref => juzOf(ref.surah, ref.ayah), hafsPages);
     if (!content.ok) return fail(content.error);
+    checked = { kind: 'anchors', mean: content.mean };
   }
 
   return {
     ok: true,
     totalPages,
-    // The surah index is the Hafs one: they are the same 114 names, and
-    // inventing a second spelling here would be a difference nobody asked
-    // for and nobody could explain.
-    dataset: { pages, surahs: [...surahs], text },
+    checked,
+    dataset: {
+      pages,
+      // The surah index is the Hafs one: they are the same 114 names, and
+      // inventing a second spelling here would be a difference nobody
+      // asked for and nobody could explain. The COUNTS beside it are this
+      // riwayah's own, because those genuinely differ.
+      surahs: [...surahs],
+      ayahCounts: counts,
+      text,
+    },
   };
 }

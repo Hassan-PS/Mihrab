@@ -161,7 +161,7 @@ describe('installing a muṣḥaf', () => {
     expect(result.error.key).toBe('quran.riwayahNotAQuran');
     // The verifier's own words come through, because "it did not work" is
     // not something a reader can act on.
-    expect(result.error.detail).toMatch(/expected 6236 ayahs, found 100/);
+    expect(result.error.detail).toMatch(/expected 114 surahs, found 2/);
     expect(riwayahAvailable('warsh')).toBe(false);
     expect(files.size).toBe(0);
   });

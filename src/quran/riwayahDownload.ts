@@ -168,6 +168,19 @@ async function finish(
       { detail: verified.error },
     );
   }
+  // Shape alone is not enough to become scripture on someone's device.
+  // `verifyRiwayahDataset` will report a well-formed file it could not
+  // read the content of — a build with no reference text of its own — and
+  // that is a refusal here rather than an install, because a muṣḥaf that
+  // renders beautifully and is quietly wrong is the one failure a reader
+  // must never have.
+  if (!verified.checked) {
+    return fail(
+      'quran.riwayahNotAQuran',
+      'That file is not a complete Qur’an, so it was not installed.',
+      { detail: 'this build has no reference text to check it against' },
+    );
+  }
 
   try {
     const provenance = await installRiwayahDataset(id, verified.dataset, from);

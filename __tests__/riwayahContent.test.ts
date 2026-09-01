@@ -179,6 +179,6 @@ describe('what the verifier refuses', () => {
     const result = verify(short);
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.error).toMatch(/expected 6236 ayahs/);
+    expect(result.error).toMatch(/expected 114 surahs, found 2/);
   });
 });

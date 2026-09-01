@@ -91,12 +91,40 @@ export async function readRiwayahDataset(
   const pages = await readJson<{
     pages: RiwayahDataset['pages'];
     surahs: RiwayahDataset['surahs'];
+    ayahCounts?: RiwayahDataset['ayahCounts'];
   }>(`${dir}/pages.json`);
   const text = await readJson<Record<string, string>>(`${dir}/text.json`);
   if (!pages || !text) return null;
   if (!Array.isArray(pages.pages) || pages.pages.length === 0) return null;
   if (Object.keys(text).length === 0) return null;
-  return { pages: pages.pages, surahs: pages.surahs ?? [], text };
+  return {
+    pages: pages.pages,
+    surahs: pages.surahs ?? [],
+    // Absent in a muṣḥaf written by 2.13, which assumed every riwayah had
+    // the Ḥafṣ counts. Derived from the text it actually holds rather than
+    // re-fetched: the file on disk is the truth about what was installed.
+    ayahCounts: pages.ayahCounts ?? countsFromText(text),
+    text,
+  };
+}
+
+/**
+ * Ayahs per surah, read off a stored text map.
+ *
+ * The fallback for a muṣḥaf installed before `ayahCounts` was written
+ * beside the pagination. Counting keys is exact — the text map holds one
+ * entry per ayah and nothing else.
+ */
+function countsFromText(text: Record<string, string>): number[] {
+  const counts = new Array<number>(114).fill(0);
+  for (const key of Object.keys(text)) {
+    const m = /^(\d+):(\d+)$/.exec(key);
+    if (!m) continue;
+    const surah = Number(m[1]);
+    if (surah < 1 || surah > 114) continue;
+    counts[surah - 1] = Math.max(counts[surah - 1], Number(m[2]));
+  }
+  return counts;
 }
 
 export async function readRiwayahProvenance(

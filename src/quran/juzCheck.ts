@@ -97,17 +97,31 @@ export function juzAnchors(
 
 /**
  * Marks that are drawn but carry no letter: the ḥarakāt, the Qur'anic
- * annotation signs, the dagger alif, the waqf and sajdah marks, the
- * extended set, plus tatweel and the ayah-end sign. Written as escapes for
- * the reason `MushafUnicodePage` gives: an isolated combining character in
- * source pastes and diffs unpredictably.
+ * annotation signs, the waqf and sajdah marks, the extended set, plus
+ * tatweel and the ayah-end sign. Written as escapes for the reason
+ * `MushafUnicodePage` gives: an isolated combining character in source
+ * pastes and diffs unpredictably.
+ *
+ * NOT the dagger alif, U+0670, which this deleted until a real Warsh
+ * muṣḥaf was measured against a real Ḥafṣ one. Warsh writes the alif of
+ * prolongation as a dagger where Ḥafṣ writes it in full — ʿaynān as
+ * عَيْنَٰنِ against عَيْنَانِ — so deleting it turned a correct Warsh
+ * spelling into a word that matched nothing, and short ayahs made of two
+ * or three such words scored 0% against themselves. It is folded to a
+ * plain alif below instead.
  */
 const MARKS =
-  /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u0640\u200C-\u200F]/g;
+  /[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED\u08D3-\u08FF\u0640\u200C-\u200F]/g;
 
-/** The basmalah, as the bundled files prefix it to every surah but 9. */
+/**
+ * The basmalah, as the bundled files prefix it to every surah but 9.
+ *
+ * `\u0627?` in al-raḥmān because `skeleton` now folds the dagger alif to a
+ * full one rather than dropping it, so the word arrives here spelled
+ * either way depending on the edition.
+ */
 const BASMALAH_PREFIX =
-  /^\u0628\u0633\u0645\s*\u0627\u0644\u0644\u0647\s*\u0627\u0644\u0631\u062D\u0645\u0646\s*\u0627\u0644\u0631\u062D\u064A\u0645\s*/;
+  /^\u0628\u0633\u0645\s*\u0627\u0644\u0644\u0647\s*\u0627\u0644\u0631\u062D\u0645\u0627?\u0646\s*\u0627\u0644\u0631\u062D\u064A\u0645\s*/;
 
 /**
  * Reduce an ayah to the letters it is made of.
@@ -123,8 +137,14 @@ export function skeleton(text: string): string {
       .replace(MARKS, '')
       // alif in all its spellings
       .replace(/[\u0622\u0623\u0625\u0671\u0672\u0673\u0675]/g, '\u0627')
-      // ya, alif maqsura, farsi ya
-      .replace(/[\u0649\u06CC]/g, '\u064A')
+      // the dagger alif IS an alif — see MARKS above
+      .replace(/\u0670/g, '\u0627')
+      // ya, alif maqsura, farsi ya, yeh barree, e
+      //
+      // U+06D2 is the second thing the Warsh measurement found: it ends
+      // words there where Ḥafṣ uses a plain ya — fī as فے against في — so
+      // without it every such word missed.
+      .replace(/[\u0649\u06CC\u06D2\u06D0]/g, '\u064A')
       // bare and seated hamza carry no consonant of their own here
       .replace(/[\u0624\u0626\u0621]/g, '')
       // ta marbuta reads as ha
@@ -147,6 +167,23 @@ export function skeleton(text: string): string {
  * first run of this check. The bug was worth having: a content check that
  * rejects scripture is worse than no content check at all.
  */
+/** Does this reduced text begin with the basmalah? */
+export function startsWithBasmalah(bare: string): boolean {
+  return BASMALAH_PREFIX.test(bare);
+}
+
+/**
+ * The same text without its leading basmalah.
+ *
+ * Returns '' when the basmalah was all there was — al-Fātiḥah's first ayah
+ * in the Kufan count — so a caller can tell "nothing left to compare"
+ * apart from "nothing to strip", and refuse to judge rather than judge
+ * against emptiness.
+ */
+export function stripBasmalah(bare: string): string {
+  return bare.replace(BASMALAH_PREFIX, '').trim();
+}
+
 function referenceSkeleton(ref: AyahRef, text: string): string {
   const bare = skeleton(text);
   if (ref.ayah !== 1 || ref.surah === 1 || ref.surah === 9) return bare;
@@ -177,6 +214,78 @@ export function vocabularyOverlap(reference: string, candidate: string): number 
     }
   }
   return kept / refWords.length;
+}
+
+/**
+ * How much of the reference's LETTERS survive, in order, 0..1.
+ *
+ * ── WHY A SECOND MEASURE AT ALL ───────────────────────────────────────
+ *
+ * `vocabularyOverlap` counts words, and on a three-word ayah it can only
+ * answer 0, ⅓, ⅔ or 1. That is not a threshold problem, it is a
+ * resolution problem: al-Muddaththir 74:33 reads وَٱلَّيْلِ إِذْ أَدْبَرَ in
+ * Ḥafṣ and إِذَا دَبَرَ in other readings — one genuine variant in three
+ * words — and the word measure scores that real muṣḥaf at 33%, which is
+ * indistinguishable from noise. A check that refuses scripture is worse
+ * than no check at all; this file has made that mistake once already.
+ *
+ * So where the reference is too short for words to say anything useful,
+ * the letters are compared instead. A longest-common-subsequence ratio
+ * over the bare letters puts إذ أدبر against إذا دبر at over 90% and puts
+ * anything that is not that ayah far below.
+ */
+export function letterOverlap(reference: string, candidate: string): number {
+  const a = reference.replace(/\s+/g, '');
+  const b = candidate.replace(/\s+/g, '');
+  if (a.length === 0) return 0;
+  // Two rows rather than a full table: these are single ayahs, but there
+  // is no reason to hold n×m of anything.
+  let prev = new Uint16Array(b.length + 1);
+  let cur = new Uint16Array(b.length + 1);
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] =
+        a[i - 1] === b[j - 1]
+          ? prev[j - 1] + 1
+          : Math.max(prev[j], cur[j - 1]);
+    }
+    const swap = prev;
+    prev = cur;
+    cur = swap;
+    cur.fill(0);
+  }
+  return prev[b.length] / a.length;
+}
+
+/**
+ * Below this many words, judge by letters instead.
+ *
+ * Five because a four-word ayah still loses 25% to one variant reading,
+ * and the riwayat differ by a word far more often than that.
+ */
+export const SHORT_REFERENCE_WORDS = 5;
+
+/** And what the letter measure must clear — higher, because it forgives more. */
+export const MIN_LETTER_OVERLAP = 0.7;
+
+/**
+ * The one number for a reference and a candidate, whichever measure suits.
+ */
+export function textAgreement(
+  reference: string,
+  candidate: string,
+): { score: number; floor: number } {
+  const words = reference.split(' ').filter(Boolean).length;
+  if (words < SHORT_REFERENCE_WORDS) {
+    return {
+      score: letterOverlap(reference, candidate),
+      floor: MIN_LETTER_OVERLAP,
+    };
+  }
+  return {
+    score: vocabularyOverlap(reference, candidate),
+    floor: MIN_ANCHOR_OVERLAP,
+  };
 }
 
 /**
