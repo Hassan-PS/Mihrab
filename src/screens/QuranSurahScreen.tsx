@@ -17,6 +17,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
+  Alert,
   FlatList,
   Platform,
   Pressable,
@@ -41,12 +42,18 @@ import {
 import { MushafReader } from '../quran/MushafReader';
 import { useOverlayDismissGuard } from '../quran/mushafReaderCore';
 import { findPageForAyah } from '../quran/pages';
+import {
+  availableRiwayat,
+  riwayahById,
+  riwayahChoiceExists,
+} from '../quran/riwayat';
 import { surahName } from '../quran/surahName';
 import {
   findBookmark,
   hydrateQuranState,
   isStarred,
   setLastRead,
+  setQuranPrefs,
   useQuranState,
   useQuranHydrated,
   BOOKMARK_COLORS,
@@ -158,6 +165,44 @@ export function QuranSurahScreen() {
       quranReadingMode: isMushaf ? 'withTranslation' : 'mushaf',
     });
   }, [isMushaf, updateSettings]);
+
+  /**
+   * The riwayah the toggle would switch TO.
+   *
+   * Computed from the table, not from `riwayah === 'hafs' ? 'warsh' : …`:
+   * QUL publishes fonts for five non-Hafs riwayat and each is one dataset
+   * away (`docs/design/riwayat-plan.md` §5), so this cycles through
+   * whatever the build actually carries. With two it is a toggle; with
+   * four it is still correct.
+   */
+  const riwayah = quran.prefs.riwayah;
+  const nextRiwayah = (() => {
+    const offered = availableRiwayat();
+    const here = offered.findIndex(r => r.id === riwayah);
+    return offered[(Math.max(0, here) + 1) % offered.length];
+  })();
+
+  const switchRiwayah = useCallback(() => {
+    const target = nextRiwayah;
+    setQuranPrefs({ riwayah: target.id });
+    // Said ONCE, on the first switch to a muṣḥaf that reflows — see
+    // `riwayahNoticeSeen`. The reader keeps their place either way; what
+    // they need to know is that the lines will not fall where their
+    // printed copy puts them.
+    if (
+      riwayahById(target.id).render === 'unicode' &&
+      !quran.prefs.riwayahNoticeSeen
+    ) {
+      setQuranPrefs({ riwayahNoticeSeen: true });
+      Alert.alert(
+        t('quran.riwayahReflowTitle', 'Pages match, lines may not'),
+        t(
+          'quran.riwayahReflowBody',
+          'This muṣḥaf starts and ends every page exactly where the printed one does, but its lines are laid out by your device rather than taken from the print, so they will not always break in the same places.',
+        ),
+      );
+    }
+  }, [nextRiwayah, quran.prefs.riwayahNoticeSeen, t]);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   /**
@@ -341,6 +386,31 @@ export function QuranSurahScreen() {
                 : t('quran.viewToggleMushaf', 'Mushaf')}
             </Text>
           </Pressable>
+          {isMushaf && riwayahChoiceExists() ? (
+            // The riwayah lives with the view controls, as asked — and only
+            // in mushaf mode, because the translation reader draws its
+            // Arabic from the ayah database, which is Hafs. A control that
+            // appeared to change the script there would be lying.
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.switchRiwayah', {
+                defaultValue: 'Switch to the {{name}} reading',
+                name: t(nextRiwayah.nameKey, nextRiwayah.arabic),
+              })}
+              onPress={switchRiwayah}
+              hitSlop={10}
+              style={{ paddingHorizontal: 4 }}>
+              <Text
+                style={{
+                  ...arabicTextStyle('body'),
+                  color: palette.accentSolid,
+                  fontSize: desktopSize(17),
+                  fontWeight: '700',
+                }}>
+                {nextRiwayah.arabic}
+              </Text>
+            </Pressable>
+          ) : null}
           {isMushaf ? (
             <Pressable
               accessibilityRole="button"
@@ -375,6 +445,8 @@ export function QuranSurahScreen() {
     quran.prefs.mushafNightMode,
     quran.prefs.mushafRenderer,
     quranHydrated,
+    nextRiwayah,
+    switchRiwayah,
     t,
     toggleMushaf,
   ]);

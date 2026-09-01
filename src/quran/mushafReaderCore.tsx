@@ -31,10 +31,12 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import {
   easternNumerals,
   findPageForAyah,
-  MUSHAF_PAGES,
-  MUSHAF_SURAHS,
+  firstAyahOfPage,
+  pagesForRiwayah,
+  surahsForRiwayah,
+  totalPagesForRiwayah,
 } from './pages';
-import { MUSHAF_TOTAL_PAGES } from './mushafImages';
+import { DEFAULT_RIWAYAH, resolveRiwayah, type RiwayahId } from './riwayat';
 import {
   recordKhatmahProgress,
   setLastRead,
@@ -76,8 +78,11 @@ export type AyahSelection = AyahRef & { page: number };
 
 /** First (surah, ayah) on a page, from the bundled page ranges — no
  *  dependency on the 2.6 MB image-geometry JSON the old reader loads. */
-export function pageStartAyah(page: number): { surah: number; ayah: number } {
-  const meta = MUSHAF_PAGES.find(p => p.page === page);
+export function pageStartAyah(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): { surah: number; ayah: number } {
+  const meta = pagesForRiwayah(riwayah).find(p => p.page === page);
   return meta ? { ...meta.start } : { surah: 1, ayah: 1 };
 }
 
@@ -133,6 +138,10 @@ export function useOverlayDismissGuard(
 export type MushafReaderCore = {
   quran: QuranState;
   playback: PlaybackStatus;
+  /** The muṣḥaf on screen. Every page number in this object is ITS page. */
+  riwayah: RiwayahId;
+  /** Pages in that muṣḥaf — not assumed to be 604. */
+  totalPages: number;
   nightMode: boolean;
   /** Page + reader background. */
   pageBg: string;
@@ -171,6 +180,12 @@ export function useMushafReaderCore({
   const quran = useQuranState();
   const playback = usePlaybackStatus();
 
+  // Re-resolved rather than trusted: the stored preference is hardened on
+  // load, but a build that no longer carries a riwayah's data (an F-Droid
+  // build without it, a downgrade) must still open on a muṣḥaf it has.
+  const riwayah = resolveRiwayah(quran.prefs.riwayah);
+  const totalPages = totalPagesForRiwayah(riwayah);
+
   const nightMode = quran.prefs.mushafNightMode;
   // Until the stored preference has actually been read, `nightMode` is the
   // default `false` and painting on it would put a pure-white page on screen
@@ -183,10 +198,33 @@ export function useMushafReaderCore({
   const ornament = nightMode ? '#c9b47a' : '#7a5e1f';
 
   const initial = useMemo(
-    () => initialPage ?? findPageForAyah(surahNumber, 1),
+    () => initialPage ?? findPageForAyah(surahNumber, 1, riwayah),
+    // Deliberately not keyed on the riwayah: this is the page the reader
+    // OPENS at, and re-deriving it on a switch would send someone back to
+    // the start of the surah instead of leaving them where they were. The
+    // switch is handled where the place is actually kept, below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [surahNumber, initialPage],
   );
   const [currentPage, setCurrentPage] = useState(initial);
+
+  // ── Switching riwayah keeps your place ──────────────────────────────
+  //
+  // Page 300 of a Warsh muṣḥaf is not page 300 of a Hafs one, so carrying
+  // the NUMBER across would move the reader somewhere they did not ask to
+  // be. The ayah is the coordinate the two agree on (`ayahIndex.ts`): the
+  // page becomes its first ayah, and that ayah becomes whatever page holds
+  // it in the muṣḥaf now on screen.
+  const previousRiwayah = useRef(riwayah);
+  useEffect(() => {
+    const from = previousRiwayah.current;
+    if (from === riwayah) return;
+    previousRiwayah.current = riwayah;
+    setCurrentPage(prev => {
+      const at = firstAyahOfPage(prev, from);
+      return findPageForAyah(at.surah, at.ayah, riwayah);
+    });
+  }, [riwayah]);
 
   // ── Keep the screen awake while reading (QR-13) ─────────────────────
   useEffect(() => {
@@ -205,27 +243,37 @@ export function useMushafReaderCore({
   const language = i18nInstance.language;
   useEffect(() => {
     if (!onTitleChange) return;
-    const visiblePage = MUSHAF_PAGES.find(p => p.page === currentPage);
+    const visiblePage = pagesForRiwayah(riwayah).find(
+      p => p.page === currentPage,
+    );
     if (!visiblePage) return;
-    const surah = MUSHAF_SURAHS.find(s => s.number === visiblePage.start.surah);
+    const surah = surahsForRiwayah(riwayah).find(
+      s => s.number === visiblePage.start.surah,
+    );
     if (surah) onTitleChange(mushafSurahName(surah, language));
-  }, [currentPage, onTitleChange, language]);
+  }, [currentPage, onTitleChange, language, riwayah]);
 
   // ── Last-read + khatmah on page turns (QR-10/21) ────────────────────
-  const commitPageTurn = useCallback((newPage: number, prevPage: number) => {
-    const first = pageStartAyah(newPage);
-    setLastRead({
-      surah: first.surah,
-      ayah: first.ayah,
-      page: newPage,
-      mode: 'mushaf',
-    });
-    // Sequential forward turn = the page(s) left behind are completed.
-    // A spread pager steps by 2; `recordKhatmahProgress` is a high-water
-    // mark, so recording the last completed page covers the pair.
-    if (newPage === prevPage + 1) recordKhatmahProgress(prevPage);
-    else if (newPage === prevPage + 2) recordKhatmahProgress(prevPage + 1);
-  }, []);
+  const commitPageTurn = useCallback(
+    (newPage: number, prevPage: number) => {
+      const first = pageStartAyah(newPage, riwayah);
+      setLastRead({
+        surah: first.surah,
+        ayah: first.ayah,
+        page: newPage,
+        mode: 'mushaf',
+      });
+      // Sequential forward turn = the page(s) left behind are completed.
+      // A spread pager steps by 2; `recordKhatmahProgress` is a high-water
+      // mark, so recording the last completed page covers the pair. The
+      // riwayah goes with it — the page is converted to an ayah count
+      // before it is stored, so progress means the same thing either way.
+      if (newPage === prevPage + 1) recordKhatmahProgress(prevPage, riwayah);
+      else if (newPage === prevPage + 2)
+        recordKhatmahProgress(prevPage + 1, riwayah);
+    },
+    [riwayah],
+  );
 
   // ── Recitation follow (QR-17) ───────────────────────────────────────
   //
@@ -278,7 +326,11 @@ export function useMushafReaderCore({
 
   useEffect(() => {
     if (!playback.active || !playback.playing || followSuspended) return;
-    const page = findPageForAyah(playback.active.surah, playback.active.ayah);
+    const page = findPageForAyah(
+      playback.active.surah,
+      playback.active.ayah,
+      riwayah,
+    );
     setCurrentPage(prev => (page !== prev ? page : prev));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -286,6 +338,7 @@ export function useMushafReaderCore({
     playback.active?.ayah,
     playback.playing,
     followSuspended,
+    riwayah,
   ]);
 
   // ── Ayah selection (QR-8) ───────────────────────────────────────────
@@ -307,11 +360,11 @@ export function useMushafReaderCore({
     if (audioSheetSignal == null) return;
     if (audioSheetSignal === lastAudioSignal.current) return;
     lastAudioSignal.current = audioSheetSignal;
-    const anchor = playback.active ?? pageStartAyah(currentPage);
+    const anchor = playback.active ?? pageStartAyah(currentPage, riwayah);
     setSelected({
       surah: anchor.surah,
       ayah: anchor.ayah,
-      page: findPageForAyah(anchor.surah, anchor.ayah),
+      page: findPageForAyah(anchor.surah, anchor.ayah, riwayah),
     });
     setSheetScrollAudio(true);
     setSheetVisible(true);
@@ -322,12 +375,12 @@ export function useMushafReaderCore({
   const [jumpVisible, setJumpVisible] = useState(false);
   const jumpToPage = useCallback(
     (page: number) => {
-      const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, page));
+      const clamped = Math.max(1, Math.min(totalPages, page));
       setCurrentPage(clamped);
       commitPageTurn(clamped, clamped); // record position; not a sequential turn
       setJumpVisible(false);
     },
-    [commitPageTurn],
+    [commitPageTurn, totalPages],
   );
 
   // Leaving the reader must never tear down a presented overlay — see
@@ -343,6 +396,8 @@ export function useMushafReaderCore({
   return {
     quran,
     playback,
+    riwayah,
+    totalPages,
     nightMode,
     pageBg,
     ornament,
@@ -410,16 +465,20 @@ export function MushafPageHeader({
   isFullscreen,
   nightMode,
   ornament,
+  riwayah = DEFAULT_RIWAYAH,
   show = 'both',
 }: {
   page: number;
   isFullscreen: boolean;
   nightMode: boolean;
   ornament: string;
+  /** Which muṣḥaf's page this is — the juz label is a fact about ITS print. */
+  riwayah?: RiwayahId;
   show?: 'both' | 'label' | 'pill';
 }) {
   const { t } = useTranslation();
-  const meta = MUSHAF_PAGES.find(p => p.page === page) ?? MUSHAF_PAGES[0];
+  const pages = pagesForRiwayah(riwayah);
+  const meta = pages.find(p => p.page === page) ?? pages[0];
   return (
     <View
       style={[
@@ -432,7 +491,7 @@ export function MushafPageHeader({
           style={[styles.pageHeaderText, { color: ornament }]}>
           {isFullscreen
             ? (() => {
-                const surah = MUSHAF_SURAHS.find(
+                const surah = surahsForRiwayah(riwayah).find(
                   s => s.number === meta.start.surah,
                 );
                 return surah ? mushafSurahName(surah) : '';
@@ -499,10 +558,13 @@ export function MushafJumpModal({
   visible,
   onClose,
   onJump,
+  totalPages = totalPagesForRiwayah(DEFAULT_RIWAYAH),
 }: {
   visible: boolean;
   onClose: () => void;
   onJump: (page: number) => void;
+  /** The muṣḥaf's own page count — the placeholder is a promise. */
+  totalPages?: number;
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -528,7 +590,7 @@ export function MushafJumpModal({
           autoFocus
           maxLength={3}
           accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
-          placeholder={`1–${MUSHAF_TOTAL_PAGES}`}
+          placeholder={`1–${totalPages}`}
           placeholderTextColor={String(palette.muted)}
           style={[
             styles.jumpInput,

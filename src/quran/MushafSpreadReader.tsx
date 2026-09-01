@@ -31,7 +31,6 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import MushafTextPageSurface from './MushafTextPageSurface';
-import { MUSHAF_TOTAL_PAGES } from './mushafImages';
 import { spreadCount, spreadForPage } from './mushafSpread';
 import {
   MushafJumpModal,
@@ -69,6 +68,8 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   const core = useMushafReaderCore(props);
   const {
     playback,
+    riwayah,
+    totalPages,
     nightMode,
     pageBg,
     ornament,
@@ -106,12 +107,11 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   // The one internal branch: portrait window → single centred page per
   // item; landscape → a facing pair per item.
   const paired = width > height;
-  const itemCount = paired ? spreadCount(MUSHAF_TOTAL_PAGES) : MUSHAF_TOTAL_PAGES;
+  const itemCount = paired ? spreadCount(totalPages) : totalPages;
 
   const indexForPage = useCallback(
-    (page: number) =>
-      paired ? spreadForPage(page, MUSHAF_TOTAL_PAGES).index : page - 1,
-    [paired],
+    (page: number) => (paired ? spreadForPage(page, totalPages).index : page - 1),
+    [paired, totalPages],
   );
   // The spread's right-hand (odd) page is "current" — the first one read
   // in RTL (same convention as pageFromScroll).
@@ -220,7 +220,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
    *  page, page-number footer. */
   const renderColumn = useCallback(
     (page: number | null, colW: number, chrome: 'both' | 'label' | 'pill') => {
-      if (page == null || page < 1 || page > MUSHAF_TOTAL_PAGES) {
+      if (page == null || page < 1 || page > totalPages) {
         return <View style={{ width: colW }} />;
       }
       // Whole dp — a sub-pixel wobble in the measured viewport must not fork
@@ -250,6 +250,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
               isFullscreen={isFullscreen}
               nightMode={nightMode}
               ornament={ornament}
+              riwayah={riwayah}
               show={chrome}
             />
           </View>
@@ -259,6 +260,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 page={page}
                 width={pageW}
                 height={pageH}
+                riwayah={riwayah}
                 nightMode={nightMode}
                 accentColor={palette.accentSolid}
                 selected={
@@ -301,6 +303,8 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       playback.active,
       playback.playing,
       playerReserve,
+      riwayah,
+      totalPages,
     ],
   );
 
@@ -314,7 +318,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
           </View>
         );
       }
-      const spread = spreadForPage(index * 2 + 1, MUSHAF_TOTAL_PAGES);
+      const spread = spreadForPage(index * 2 + 1, totalPages);
       // The item lays out physically LTR (the app drives RTL via text, not
       // I18nManager): even page on the left half, odd page on the right.
       // Chrome splits across the spread's outer corners — label at the
@@ -331,7 +335,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
         </View>
       );
     },
-    [pageBg, pageWidth, paired, renderColumn],
+    [pageBg, pageWidth, paired, renderColumn, totalPages],
   );
 
   // Pointer environments (iPad trackpad, Catalyst): wheel scroll doesn't
@@ -359,6 +363,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       {showSidebar ? (
         <MushafIndexSidebar
           currentPage={currentPage}
+          riwayah={riwayah}
           onSelectPage={core.jumpToPage}
           // The navigation bar floats over the reader on iOS, and on Mac
           // Catalyst the window's traffic lights sit in the title-bar drag
@@ -439,6 +444,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       {showSidebar ? (
         <MushafPageScrubber
           page={currentPage}
+          riwayah={riwayah}
           onSelectPage={core.jumpToPage}
           onOpenJump={core.openJump}
         />
@@ -463,6 +469,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
         visible={core.jumpVisible}
         onClose={core.closeJump}
         onJump={core.jumpToPage}
+        totalPages={totalPages}
       />
     </View>
   );

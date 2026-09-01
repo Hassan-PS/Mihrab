@@ -33,10 +33,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useAppPalette } from '../hooks/useAppPalette';
-import MushafTextPageSurface from './MushafTextPageSurface';
-import { MUSHAF_TOTAL_PAGES } from './mushafImages';
-import { getPageLayout, pageMeasureEm } from './mushafLayout';
-import { MUSHAF_LINE_HEIGHT_EM } from './MushafTextPage';
+import MushafTextPageSurface, {
+  mushafPageColumnHeight,
+} from './MushafTextPageSurface';
 import {
   MushafJumpModal,
   MushafPageFooter,
@@ -76,6 +75,8 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   const core = useMushafReaderCore(props);
   const {
     playback,
+    riwayah,
+    totalPages,
     nightMode,
     pageBg,
     ornament,
@@ -118,8 +119,8 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   const playerReserve = playback.active ? PLAYER_RESERVE : 0;
 
   const data = React.useMemo(
-    () => Array.from({ length: MUSHAF_TOTAL_PAGES }, (_, i) => i + 1),
-    [],
+    () => Array.from({ length: totalPages }, (_, i) => i + 1),
+    [totalPages],
   );
 
   const getItemLayout = useCallback(
@@ -155,7 +156,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   const onMomentumEnd = useCallback(
     (e: { nativeEvent: { contentOffset: { x: number } } }) => {
       const index = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
-      const page = Math.min(MUSHAF_TOTAL_PAGES, Math.max(1, index + 1));
+      const page = Math.min(totalPages, Math.max(1, index + 1));
       if (page === settled.current) {
         // Dragged and came back. Nothing was navigated to, so lift the
         // suspension armed at drag begin rather than leaving recitation
@@ -168,7 +169,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       core.commitPageTurn(page, prev);
       setCurrentPage(page);
     },
-    [core, pageWidth, setCurrentPage],
+    [core, pageWidth, setCurrentPage, totalPages],
   );
 
   /**
@@ -184,10 +185,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
    */
   const turnPage = useCallback(
     (dir: 1 | -1) => {
-      const page = Math.min(
-        MUSHAF_TOTAL_PAGES,
-        Math.max(1, settled.current + dir),
-      );
+      const page = Math.min(totalPages, Math.max(1, settled.current + dir));
       if (page === settled.current) return;
       core.suspendFollow();
       const prev = settled.current;
@@ -196,20 +194,18 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       setCurrentPage(page);
       listRef.current?.scrollToIndex({ index: page - 1, animated: true });
     },
-    [core, setCurrentPage],
+    [core, setCurrentPage, totalPages],
   );
 
   useRegisterKeyPaging(props.keyTurn, turnPage);
 
   const renderItem = useCallback(
     ({ item: page }: { item: number }) => {
-      const layout = getPageLayout(page);
-      const lineCount = layout?.lines.length ?? 15;
       // Portrait: the page spans the width and is height-fitted — the
-      // surface divides the box height evenly into lines, so the whole
-      // page is on screen with nothing to scroll. Landscape: a READING
-      // zoom (1.6× the portrait width), so the page is taller than the
-      // window and its column scrolls vertically.
+      // surface fills the box it is given, so the whole page is on screen
+      // with nothing to scroll. Landscape: a READING zoom (1.6× the
+      // portrait width), so the page is taller than the window and its
+      // column scrolls vertically.
       const chromeH = navPad + HEADER_RESERVE + FOOTER_RESERVE;
       // Whole dp. The measured viewport is a float, and a sub-pixel wobble in
       // it is enough to give the page a different box, which re-lays out all
@@ -219,22 +215,14 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       const textWidth = isLandscape
         ? Math.min(pageWidth - H_PADDING * 2, height * LANDSCAPE_ZOOM)
         : pageWidth - H_PADDING * 2;
-      let pageBoxH: number;
-      if (isLandscape) {
-        // Height follows the text: font size is the width over the page's
-        // measure, and a line is a fixed multiple of that. The column
-        // scrolls whatever overflows. The measure has to be the DRAWN one
-        // — `layout.measure` is advances only, and sizing against it makes
-        // the column ~14% taller than the text that lands in it, leaving a
-        // dead band under the last line.
-        const fontSize = layout ? textWidth / pageMeasureEm(layout) : 0;
-        pageBoxH = Math.max(
-          viewportH,
-          fontSize * MUSHAF_LINE_HEIGHT_EM * lineCount,
-        );
-      } else {
-        pageBoxH = Math.max(120, viewportH - playerReserve);
-      }
+      const pageBoxH = mushafPageColumnHeight({
+        page,
+        riwayah,
+        textWidth,
+        viewportHeight: viewportH,
+        scrolling: isLandscape,
+        playerReserve,
+      });
 
       return (
         <View style={[styles.item, { width: pageWidth, backgroundColor: pageBg }]}>
@@ -244,6 +232,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
               isFullscreen={isFullscreen}
               nightMode={nightMode}
               ornament={ornament}
+              riwayah={riwayah}
             />
           </View>
           <ScrollView
@@ -258,6 +247,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
                 page={page}
                 width={textWidth}
                 height={pageBoxH}
+                riwayah={riwayah}
                 nightMode={nightMode}
                 accentColor={palette.accentSolid}
                 selected={
@@ -306,6 +296,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       playback.active,
       playback.playing,
       playerReserve,
+      riwayah,
     ],
   );
 
@@ -358,6 +349,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       {!isFullscreen ? (
         <MushafPageScrubber
           page={currentPage}
+          riwayah={riwayah}
           onSelectPage={core.jumpToPage}
           onOpenJump={core.openJump}
         />
@@ -380,6 +372,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
         visible={core.jumpVisible}
         onClose={core.closeJump}
         onJump={core.jumpToPage}
+        totalPages={totalPages}
       />
     </View>
   );

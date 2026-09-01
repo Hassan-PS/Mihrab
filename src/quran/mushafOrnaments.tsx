@@ -18,7 +18,10 @@
  * together from a phone in portrait to an iPad spread without a second set of
  * numbers.
  */
+import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { FONTS } from '../theme/typography';
+import { findSurah } from './quran';
 
 /** Eight-point star: two squares, one at 45°, as a single closed path. */
 function starPath(cx: number, cy: number, r: number): string {
@@ -240,3 +243,185 @@ export function BasmalahFlourish({ width, height, color }: BasmalahRuleProps) {
     </Svg>
   );
 }
+
+
+// ── The rows, as a page places them ───────────────────────────────────
+//
+// The band and the basmalah are drawn identically by BOTH renderers — the
+// glyph one that reproduces the Madinah print line for line, and the
+// Unicode one a second riwayah needs (`MushafUnicodePage`). They were
+// copied into the first renderer when there was only one; a second copy
+// is how two muṣḥafs quietly start looking different from each other, one
+// ornament at a time. So the placement lives here with the drawing, and
+// the renderers pass only what genuinely differs: how tall the row is and
+// how big the page's own text is set.
+
+/** What a page's palette has to offer its furniture. */
+export type OrnamentColors = {
+  /** Band strokes, rosettes, the basmalah's flourish. */
+  accent: string;
+  /** The surah's name inside the band. */
+  heading: string;
+  /** The page's own ink — the basmalah is a line of the muṣḥaf, not a caption. */
+  text: string;
+};
+
+/**
+ * The word that precedes the name in a band: “sūrat …”.
+ *
+ * Not named `..._PREFIX`: `syncCompleteness.test.ts` reads the source for
+ * `const *_KEY/*_PREFIX = '…'` to find every storage key the app declares,
+ * and a constant that merely LOOKS like one fails that test as an
+ * undeclared store. The test is right to be blunt about it; this is the
+ * cheaper side to fix.
+ */
+const SURAH_WORD = 'سورة ';
+const BASMALAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+
+export type SurahBandRowProps = {
+  surah: number;
+  /** Width of the page's text block. */
+  width: number;
+  /** Height of the row the band sits in. */
+  rowHeight: number;
+  /** The page's text size — the name is capped against it. */
+  fontSize: number;
+  colors: OrnamentColors;
+  /** Fraction of the row the band itself occupies. */
+  bandScale?: number;
+  /** Cap on the name, as a fraction of the page's text size. */
+  nameScale?: number;
+};
+
+/**
+ * A surah's opening: the band, across the whole measure, with the name in it.
+ *
+ * The name is sized from the clear space INSIDE both rules, never from the
+ * band's outer height — Amiri's descenders (the tails of ق, ر, ن and the ة)
+ * ran straight through the inner rule when it was sized the other way.
+ */
+export function SurahBandRow({
+  surah,
+  width,
+  rowHeight,
+  fontSize,
+  colors,
+  bandScale = 0.94,
+  nameScale = 0.78,
+}: SurahBandRowProps) {
+  const bandHeight = rowHeight * bandScale;
+  const fieldHeight = surahBandFieldHeight(bandHeight);
+  const nameSize = Math.min(fontSize * nameScale, fieldHeight * 0.62);
+  const name = findSurah(surah)?.arabic ?? '';
+  return (
+    <View style={[rowStyles.row, { height: rowHeight }]}>
+      <View style={{ width, height: bandHeight }}>
+        <View style={StyleSheet.absoluteFill}>
+          <SurahBand width={width} height={bandHeight} color={colors.accent} />
+        </View>
+        <View
+          style={[
+            rowStyles.bandLabel,
+            { paddingHorizontal: surahBandTextInset(bandHeight) },
+          ]}
+        >
+          <Text
+            allowFontScaling={false}
+            numberOfLines={1}
+            style={{
+              fontFamily: FONTS.arabicQuran,
+              fontSize: nameSize,
+              color: colors.heading,
+              // The glyph box is centred in the full field, so ascenders and
+              // descenders share the clearance evenly.
+              lineHeight: fieldHeight,
+            }}
+          >
+            {`${SURAH_WORD}${name}`}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+export type BasmalahRowProps = {
+  width: number;
+  rowHeight: number;
+  fontSize: number;
+  colors: OrnamentColors;
+  /** Flourish width, as a fraction of the measure. */
+  flourishScale?: number;
+  /** The phrase's size, as a fraction of the page's text size. */
+  textScale?: number;
+};
+
+/**
+ * The basmalah, set between its two flourishes.
+ *
+ * At the page's own size and in the page's own ink rather than small and
+ * grey: in the print this is a line of the muṣḥaf, not a caption above one.
+ */
+export function BasmalahRow({
+  width,
+  rowHeight,
+  fontSize,
+  colors,
+  flourishScale = 0.17,
+  textScale = 0.84,
+}: BasmalahRowProps) {
+  const flourishWidth = width * flourishScale;
+  const flourishHeight = rowHeight * 0.5;
+  return (
+    <View style={[rowStyles.row, { height: rowHeight }]}>
+      <View style={rowStyles.basmalahRow}>
+        <BasmalahFlourish
+          width={flourishWidth}
+          height={flourishHeight}
+          color={colors.accent}
+        />
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: FONTS.arabicQuran,
+            fontSize: fontSize * textScale,
+            color: colors.text,
+            lineHeight: rowHeight * 0.94,
+          }}
+        >
+          {BASMALAH}
+        </Text>
+        {/* Mirrored, so the pair reads the same from either end. */}
+        <View style={rowStyles.flourishMirror}>
+          <BasmalahFlourish
+            width={flourishWidth}
+            height={flourishHeight}
+            color={colors.accent}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const rowStyles = StyleSheet.create({
+  row: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  bandLabel: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  basmalahRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  // The flourish is drawn pointing one way; the far side is the same drawing
+  // reflected, so the two are guaranteed to match.
+  flourishMirror: { transform: [{ scaleX: -1 }] },
+});

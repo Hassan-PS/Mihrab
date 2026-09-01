@@ -62,6 +62,7 @@ import {
 } from '@sayem314/react-native-keep-awake';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { findPageForAyah, MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
+import { resolveRiwayah, riwayahById } from './riwayat';
 import {
   pageOffsetX,
   pageFromScroll,
@@ -175,7 +176,17 @@ export function MushafReader({
    * a page needs only its own ~300 KB font, so the reader opens straight away
    * and fetches as you read. `image` stays available for one release.
    */
-  const textMode = quran.prefs.mushafRenderer !== 'image';
+  /**
+   * A `unicode` riwayah has no page images and no page fonts — its text
+   * and its face are in the build (`docs/design/riwayat-plan.md` §2). So
+   * it is text mode whatever the renderer preference says, and it walks
+   * past the download gate below rather than being asked for 180 MB it
+   * would never use. The preference is not overwritten: switch back to
+   * Hafs and the image reader is exactly where it was left.
+   */
+  const riwayah = resolveRiwayah(quran.prefs.riwayah);
+  const bundledRiwayah = riwayahById(riwayah).render === 'unicode';
+  const textMode = bundledRiwayah || quran.prefs.mushafRenderer !== 'image';
   const pageBg = nightMode ? '#101010' : '#ffffff';
   const ornament = nightMode ? '#c9b47a' : '#7a5e1f';
 
@@ -238,6 +249,12 @@ export function MushafReader({
 
   useEffect(() => {
     let cancelled = false;
+    if (bundledRiwayah) {
+      // Nothing to fetch and nothing to check: the muṣḥaf is already here.
+      setUseLocalFiles(false);
+      setDownloadStatus('ready');
+      return;
+    }
     if (textMode) {
       // The font-rendered mushaf is gated exactly like the image one was.
       // Fetching each page's font on arrival made the reader feel like it was
@@ -265,7 +282,7 @@ export function MushafReader({
     return () => {
       cancelled = true;
     };
-  }, [textMode]);
+  }, [textMode, bundledRiwayah]);
 
   /**
    * Follow the download wherever it was started from.
@@ -277,6 +294,11 @@ export function MushafReader({
    * the user was elsewhere is reported the moment they return.
    */
   useEffect(() => {
+    // A bundled riwayah has no stake in any of this. Without the guard a
+    // half-finished Hafs font run — remembered by the manager across
+    // screens — would put its gate in front of a muṣḥaf that is already
+    // on the device and needs nothing.
+    if (bundledRiwayah) return;
     const apply = (s: ReturnType<typeof mushafDownloadState>) => {
       if (s.running) {
         setDownloadStatus('downloading');
@@ -293,7 +315,7 @@ export function MushafReader({
     // `publishProgress` is a stable useCallback; listing it would re-subscribe
     // on every render for no gain.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [bundledRiwayah]);
 
   /**
    * Re-render the progress bar when the whole percent changes, not on every

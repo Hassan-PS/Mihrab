@@ -1,16 +1,40 @@
 /**
- * A mushaf page drawn as text, with its font loaded on demand — v2.8.0.
+ * A mushaf page, drawn — and the one place that decides HOW.
  *
- * Wraps `MushafTextPage` with everything the reader shouldn't have to know
- * about: fetching and registering the page's font, the placeholder shown while
- * that happens, night-mode colours (a repaint, not an image inversion), and
- * the fallback signal when a page's font can't be had at all.
+ * Wraps a page renderer with everything the reader shouldn't have to know
+ * about: which riwayah is open and therefore which renderer draws it,
+ * fetching and registering a glyph page's font, the placeholder shown while
+ * that happens, night-mode colours (a repaint, not an image inversion), the
+ * opening plates' frame, and the fallback signal when a page's font can't be
+ * had at all.
+ *
+ * ── WHY THE DISPATCH LIVES HERE ───────────────────────────────────────
+ *
+ * There are two renderers and four readers (phone, phone-landscape, spread,
+ * and the legacy image reader's text branch). Asking each reader which
+ * renderer to use would be the same question answered four times, and the
+ * fifth reader — or the fifth riwayah — is exactly where one of the copies
+ * gets forgotten. A reader asks for "page 42 of this riwayah, this big";
+ * everything after that is this file's problem.
  */
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import MushafTextPage, { type AyahRef } from './MushafTextPage';
-import { getPageLayout, isFramedPage } from './mushafLayout';
+import MushafTextPage, {
+  MUSHAF_LINE_HEIGHT_EM,
+  type AyahRef,
+} from './MushafTextPage';
+import MushafUnicodePage from './MushafUnicodePage';
+import { getPageLayout, isFramedPage, pageMeasureEm } from './mushafLayout';
+import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
 import { useMushafPageFont } from './useMushafPageFont';
+
+export type MushafPageColors = {
+  text: string;
+  accent: string;
+  heading: string;
+  selection: string;
+  muted: string;
+};
 
 export type MushafTextPageSurfaceProps = {
   page: number;
@@ -18,11 +42,15 @@ export type MushafTextPageSurfaceProps = {
   width: number;
   /** Height of the page box in dp; lines divide it evenly. */
   height: number;
+  /** Which muṣḥaf. Absent means Hafs, which is what every reader meant
+   *  before there was a second one. */
+  riwayah?: RiwayahId;
   nightMode: boolean;
   accentColor: string;
   selected?: AyahRef | null;
   playing?: AyahRef | null;
-  /** Called once when this page's font cannot be loaded. */
+  /** Called once when this page's font cannot be loaded. Glyph pages only —
+   *  a bundled riwayah has no font to fail to fetch. */
   onUnavailable?: (page: number) => void;
   /**
    * Both handlers take the page, so the reader can pass ONE stable callback
@@ -38,7 +66,105 @@ export type MushafTextPageSurfaceProps = {
   prefetchRadius?: number;
 };
 
-function MushafTextPageSurface({
+/**
+ * The page's ink, for either renderer.
+ *
+ * Night mode is a repaint, not an image inversion, so a Unicode page gets
+ * it by using this palette and nothing else.
+ */
+export function mushafPageColors(
+  nightMode: boolean,
+  accentColor: string,
+): MushafPageColors {
+  return nightMode
+    ? {
+        text: '#E8E4DA',
+        accent: accentColor,
+        // The surah's name, inside the band. On a night page the accent
+        // is too close to the ground to read at a glance, so the name
+        // takes the page's own ink and the band keeps the accent —
+        // which is also how the print does it: the frame is worked, the
+        // name is written.
+        heading: '#F2EFE6',
+        selection: 'rgba(255,255,255,0.10)',
+        muted: 'rgba(232,228,218,0.72)',
+      }
+    : {
+        text: '#1A1A18',
+        accent: accentColor,
+        heading: accentColor,
+        selection: 'rgba(0,0,0,0.06)',
+        muted: 'rgba(26,26,24,0.66)',
+      };
+}
+
+/**
+ * The inset a page keeps clear of the edge of its block.
+ *
+ * A justified line spans the measure exactly, so without an inset the
+ * outermost glyph would sit hard against the edge of the screen. The print
+ * keeps a margin; 3% of the block reads the same at any size.
+ * Framed pages need more room: the text block sits inside a drawn double
+ * rule, so its inset has to clear the rule AND its padding, not just the
+ * screen edge.
+ * The plate pages hold 7-8 lines in the space a normal page gives 15, so
+ * they have vertical room to spare. Spending some of it on a wider text
+ * block makes the opening pages read at a size that matches their weight.
+ */
+function pageInset(page: number, width: number): number {
+  return isFramedPage(page) ? width * 0.08 : width * 0.035;
+}
+
+/**
+ * Pages 1–2 are ornamental plates in the print. We draw a restrained
+ * double rule rather than reproducing the illumination: the frame reads as
+ * deliberate, and stays inside the app's "reverent, not heavy" line.
+ */
+function FramedPlate({
+  width,
+  height,
+  inset,
+  color,
+  children,
+}: {
+  width: number;
+  height: number;
+  inset: number;
+  color: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={[styles.block, { width, height }]}>
+      <View
+        style={[
+          styles.frameOuter,
+          {
+            borderColor: color,
+            padding: inset * 0.22,
+            borderRadius: inset * 0.5,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.frameInner,
+            {
+              borderColor: color,
+              paddingHorizontal: inset * 0.6,
+              paddingVertical: inset * 0.35,
+              borderRadius: inset * 0.32,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+/** The glyph pipeline: one downloaded font per page, exact printed lines. */
+function GlyphPageSurface({
   page,
   width,
   height,
@@ -71,43 +197,13 @@ function MushafTextPageSurface({
   );
 
   const colors = React.useMemo(
-    () =>
-      nightMode
-        ? {
-            text: '#E8E4DA',
-            accent: accentColor,
-            // The surah's name, inside the band. On a night page the accent
-            // is too close to the ground to read at a glance, so the name
-            // takes the page's own ink and the band keeps the accent —
-            // which is also how the print does it: the frame is worked, the
-            // name is written.
-            heading: '#F2EFE6',
-            selection: 'rgba(255,255,255,0.10)',
-            muted: 'rgba(232,228,218,0.72)',
-          }
-        : {
-            text: '#1A1A18',
-            accent: accentColor,
-            heading: accentColor,
-            selection: 'rgba(0,0,0,0.06)',
-            muted: 'rgba(26,26,24,0.66)',
-          },
+    () => mushafPageColors(nightMode, accentColor),
     [nightMode, accentColor],
   );
 
   const lineCount = layout?.lines.length ?? 15;
   const framed = isFramedPage(page);
-
-  // A justified line spans the measure exactly, so without an inset the
-  // outermost glyph would sit hard against the edge of the screen. The print
-  // keeps a margin; 3% of the block reads the same at any size.
-  // Framed pages need more room: the text block sits inside a drawn double
-  // rule, so its inset has to clear the rule AND its padding, not just the
-  // screen edge.
-  // The plate pages hold 7-8 lines in the space a normal page gives 15, so
-  // they have vertical room to spare. Spending some of it on a wider text
-  // block makes the opening pages read at a size that matches their weight.
-  const inset = framed ? width * 0.08 : width * 0.035;
+  const inset = pageInset(page, width);
   const textWidth = width - inset * 2;
 
   if (!layout || !family) {
@@ -120,7 +216,7 @@ function MushafTextPageSurface({
     );
   }
 
-  const page1 = (
+  const drawn = (
     <MushafTextPage
       page={page}
       width={textWidth}
@@ -137,45 +233,157 @@ function MushafTextPageSurface({
   if (!framed) {
     return (
       <View style={[styles.block, { width, paddingHorizontal: inset }]}>
-        {page1}
+        {drawn}
       </View>
     );
   }
-
-  // Pages 1–2 are ornamental plates in the print. We draw a restrained
-  // double rule rather than reproducing the illumination: the frame reads as
-  // deliberate, and stays inside the app's "reverent, not heavy" line.
   return (
-    <View style={[styles.block, { width, height }]}>
-      <View
-        style={[
-          styles.frameOuter,
-          {
-            borderColor: colors.accent,
-            padding: inset * 0.22,
-            borderRadius: inset * 0.5,
-          },
-        ]}
-      >
-        <View
-          style={[
-            styles.frameInner,
-            {
-              borderColor: colors.accent,
-              paddingHorizontal: inset * 0.6,
-              paddingVertical: inset * 0.35,
-              borderRadius: inset * 0.32,
-            },
-          ]}
-        >
-          {page1}
-        </View>
+    <FramedPlate
+      width={width}
+      height={height}
+      inset={inset}
+      color={colors.accent}
+    >
+      {drawn}
+    </FramedPlate>
+  );
+}
+
+/**
+ * The Unicode pipeline: bundled text in a bundled face, fitted to the box.
+ *
+ * No font fetch, so no placeholder and no `onUnavailable` — the data either
+ * shipped with the build or the riwayah was never offered (`riwayat.ts`).
+ */
+function UnicodePageSurface({
+  page,
+  width,
+  height,
+  riwayah = DEFAULT_RIWAYAH,
+  nightMode,
+  accentColor,
+  selected,
+  playing,
+  onWordPress,
+  onWordLongPress,
+}: MushafTextPageSurfaceProps) {
+  const handlePress = React.useCallback(
+    (ref: AyahRef) => onWordPress?.(ref, page),
+    [onWordPress, page],
+  );
+  const handleLongPress = React.useCallback(
+    (ref: AyahRef) => onWordLongPress?.(ref, page),
+    [onWordLongPress, page],
+  );
+  const colors = React.useMemo(
+    () => mushafPageColors(nightMode, accentColor),
+    [nightMode, accentColor],
+  );
+
+  const framed = isFramedPage(page);
+  const inset = pageInset(page, width);
+  const textWidth = width - inset * 2;
+  // The frame's rules and padding come out of the height the text is fitted
+  // to, or the fit would size a page to a box the frame then shrinks.
+  const textHeight = Math.max(120, height - inset * (framed ? 1.6 : 0));
+
+  const drawn = (
+    <MushafUnicodePage
+      page={page}
+      riwayah={riwayah}
+      width={textWidth}
+      height={textHeight}
+      colors={colors}
+      selected={selected}
+      playing={playing}
+      onAyahPress={handlePress}
+      onAyahLongPress={handleLongPress}
+    />
+  );
+
+  if (!framed) {
+    return (
+      <View style={[styles.block, { width, paddingHorizontal: inset }]}>
+        {drawn}
       </View>
-    </View>
+    );
+  }
+  return (
+    <FramedPlate
+      width={width}
+      height={height}
+      inset={inset}
+      color={colors.accent}
+    >
+      {drawn}
+    </FramedPlate>
+  );
+}
+
+function MushafTextPageSurface(props: MushafTextPageSurfaceProps) {
+  const riwayah = props.riwayah ?? DEFAULT_RIWAYAH;
+  // Two components rather than one with a branch inside it: they do not use
+  // the same hooks, and a glyph surface that kept calling `useMushafPageFont`
+  // for a Warsh page would queue a 310 KB download per page nobody will draw.
+  return riwayahById(riwayah).render === 'unicode' ? (
+    <UnicodePageSurface {...props} riwayah={riwayah} />
+  ) : (
+    <GlyphPageSurface {...props} />
   );
 }
 
 export default React.memo(MushafTextPageSurface);
+
+/**
+ * The Madinah text block is 1.636 as tall as it is wide. A Unicode page has
+ * no printed proportions of its own to inherit, so it borrows these: a
+ * muṣḥaf is a muṣḥaf-shaped thing, and a reader who switches riwayah should
+ * not find the page has changed shape as well as script.
+ */
+const PRINT_BLOCK_ASPECT = 1.636;
+
+/**
+ * How tall a page's box should be, whichever renderer fills it.
+ *
+ * Three readers were each working this out from `getPageLayout` and
+ * `pageMeasureEm` — Hafs-only calls, in code that now has to serve a
+ * riwayah that has neither.
+ */
+export function mushafPageColumnHeight({
+  page,
+  riwayah = DEFAULT_RIWAYAH,
+  textWidth,
+  viewportHeight,
+  scrolling,
+  playerReserve = 0,
+}: {
+  page: number;
+  riwayah?: RiwayahId;
+  /** Width of the page's text block. */
+  textWidth: number;
+  /** The viewport the page has to work with. */
+  viewportHeight: number;
+  /** True when the column scrolls — the phone's landscape reading zoom. */
+  scrolling: boolean;
+  /** Room the player is holding at the foot of a non-scrolling column. */
+  playerReserve?: number;
+}): number {
+  if (!scrolling) return Math.max(120, viewportHeight - playerReserve);
+  // Height follows the text: the column scrolls whatever overflows.
+  if (riwayahById(riwayah).render === 'unicode') {
+    return Math.max(viewportHeight, textWidth * PRINT_BLOCK_ASPECT);
+  }
+  const layout = getPageLayout(page);
+  if (!layout) return Math.max(120, viewportHeight);
+  // The measure has to be the DRAWN one — `layout.measure` is advances only,
+  // and sizing against it makes the column ~14% taller than the text that
+  // lands in it, leaving a dead band under the last line.
+  const fontSize = textWidth / pageMeasureEm(layout);
+  return Math.max(
+    viewportHeight,
+    fontSize * MUSHAF_LINE_HEIGHT_EM * layout.lines.length,
+  );
+}
 
 const styles = StyleSheet.create({
   placeholder: {

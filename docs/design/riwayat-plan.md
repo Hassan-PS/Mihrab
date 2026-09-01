@@ -2,6 +2,44 @@
 
 Written 2026-09-01, against v2.13.8, for issue #11.
 
+## Status
+
+**Phases 1–3 are built. Phase 0 is not, and it is the one that decides
+whether any of this ships.**
+
+Done, and in the tree:
+
+- `ayahIndex.ts` — progress counted in ayahs, so a khatmah means the same
+  amount of Qur'an in either muṣḥaf (§5, option 3). Migrated before a
+  second riwayah existed, as the plan asked.
+- `riwayat.ts` — the riwayah TABLE, with `available` computed by trying to
+  load the data rather than declared. A build without Warsh offers Hafs
+  and shows no toggle.
+- `pages.ts` — one pagination per riwayah; `MUSHAF_PAGES` and the
+  one-argument `findPageForAyah` still mean Hafs, for every caller that
+  has not been told about riwayat.
+- `MushafUnicodePage.tsx` — the second renderer. Text from the riwayah's
+  own table, drawn in a bundled face, FITTED to the page box (the size is
+  solved for, measured, and the estimate calibrates itself).
+- Chrome parity: page number, juz, night mode, rotation, jump-to-page, the
+  scrubber and the index sidebar all read the riwayah's own table. The
+  toggle sits next to Audio and Tafsir, as asked, and only in muṣḥaf mode.
+- Switching keeps your place, by way of the ayah at the page boundary.
+- `tools/riwayat/import.ts` — refuses anything that is not the whole
+  Qur'an; `__tests__/riwayahIntegrity.test.ts` re-checks the committed
+  files, because what ships is the repo's copy, not the importer's run.
+
+Not done:
+
+- **Phase 0 — the licence.** `src/quran/data/warsh/` holds two EMPTY
+  committed placeholders and a README saying why. Until §1 is answered in
+  writing, no Warsh data is committed, and every build offers Hafs only.
+- The QPC Warsh face (`fontBundled: false` in `riwayat.ts`): it is a QUL
+  resource under the same unresolved terms. Until it arrives the Unicode
+  renderer draws in AmiriQuran, which shapes the marks correctly.
+- Phase 5 — Qālūn, al-Dūrī, al-Sūsī and Shuʿbah are each one dataset and
+  one table row away, and nothing in the code counts to two.
+
 ## What this is
 
 A plan, not a change. It answers three questions before any code moves:

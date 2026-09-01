@@ -24,7 +24,8 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { arabicTextStyle } from '../theme/typography';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import { SURAHS } from './quran';
-import { MUSHAF_PAGES } from './pages';
+import { pagesForRiwayah, totalPagesForRiwayah } from './pages';
+import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
 import {
   KHATMAH_TOTAL_PAGES,
   useQuranState,
@@ -47,6 +48,8 @@ type Tab = 'surah' | 'juz' | 'marks';
 type Props = {
   /** Page currently on screen — the row for it reads as "reading". */
   currentPage: number;
+  /** Which muṣḥaf those page numbers belong to. Absent means Hafs. */
+  riwayah?: RiwayahId;
   onSelectPage: (page: number) => void;
   /**
    * Space to keep clear at the top: the floating navigation bar on iOS and,
@@ -60,6 +63,7 @@ type JuzRow = { juz: number; page: number };
 
 function MushafIndexSidebarImpl({
   currentPage,
+  riwayah = DEFAULT_RIWAYAH,
   onSelectPage,
   topInset = 0,
 }: Props) {
@@ -69,25 +73,27 @@ function MushafIndexSidebarImpl({
   const [tab, setTab] = useState<Tab>('surah');
   const [query, setQuery] = useState('');
 
+  // Both tables are facts about the PRINT on screen, not about the Qur'an:
+  // a Warsh muṣḥaf opens al-Baqarah and juz 2 on pages of its own.
   const surahStartPage = useMemo(() => {
     const map = new Map<number, number>();
-    // MUSHAF_PAGES is ordered; the first page whose start names a surah is
-    // that surah's opening page.
-    for (const p of MUSHAF_PAGES) {
+    // The page table is ordered; the first page whose start names a surah
+    // is that surah's opening page.
+    for (const p of pagesForRiwayah(riwayah)) {
       if (!map.has(p.start.surah)) map.set(p.start.surah, p.page);
     }
     return map;
-  }, []);
+  }, [riwayah]);
 
   const juzRows: JuzRow[] = useMemo(() => {
     const seen = new Map<number, number>();
-    for (const p of MUSHAF_PAGES) {
+    for (const p of pagesForRiwayah(riwayah)) {
       if (!seen.has(p.juz)) seen.set(p.juz, p.page);
     }
     return Array.from(seen, ([juz, page]) => ({ juz, page })).sort(
       (a, b) => a.juz - b.juz,
     );
-  }, []);
+  }, [riwayah]);
 
   const surahRows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -101,7 +107,9 @@ function MushafIndexSidebarImpl({
     const asPage = Number(q);
     if (Number.isFinite(asPage) && asPage > 0) {
       return rows.filter(
-        r => r.page === Math.min(KHATMAH_TOTAL_PAGES, asPage) || String(r.number) === q,
+        r =>
+          r.page === Math.min(totalPagesForRiwayah(riwayah), asPage) ||
+          String(r.number) === q,
       );
     }
     return rows.filter(
@@ -110,7 +118,7 @@ function MushafIndexSidebarImpl({
         r.english.toLowerCase().includes(q) ||
         r.arabic.includes(query.trim()),
     );
-  }, [query, surahStartPage]);
+  }, [query, surahStartPage, riwayah]);
 
   const plan = activeKhatmah(quran);
 

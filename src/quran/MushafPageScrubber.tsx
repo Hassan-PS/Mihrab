@@ -36,12 +36,18 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import { hapticScrubStart, hapticScrubTick } from '../polish/haptics';
-import { MUSHAF_TOTAL_PAGES } from './mushafImages';
-import { MUSHAF_PAGES, MUSHAF_SURAHS } from './pages';
+import {
+  pagesForRiwayah,
+  surahsForRiwayah,
+  totalPagesForRiwayah,
+} from './pages';
+import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
 import { mushafSurahName } from './surahName';
 
 type Props = {
   page: number;
+  /** Which muṣḥaf the rail is scrubbing. Absent means Hafs. */
+  riwayah?: RiwayahId;
   onSelectPage: (page: number) => void;
   /** Opens the type-a-number sheet. Renders the ⌗ button when provided. */
   onOpenJump?: () => void;
@@ -57,21 +63,35 @@ const RANGING_PAGES_PER_SECOND = 260;
 /** Floor between ticks so a sweep cannot outrun the vibrator. */
 const MIN_TICK_INTERVAL_MS = 45;
 
-/** page → surah number, built once. */
-const SURAH_AT_PAGE: ReadonlyArray<number> = (() => {
-  const table = new Array<number>(MUSHAF_TOTAL_PAGES + 1).fill(1);
-  for (const p of MUSHAF_PAGES) {
-    if (p.page >= 1 && p.page <= MUSHAF_TOTAL_PAGES) {
-      table[p.page] = p.start.surah;
-    }
+/**
+ * page → surah number, built once PER MUṢḤAF.
+ *
+ * A table, not a constant: two riwayat break their pages differently, so
+ * "which surah is page 300" has no answer until you say which print. Built
+ * on first use and kept — the rail asks this on every frame of a drag.
+ */
+const SURAH_AT_PAGE = new Map<RiwayahId, ReadonlyArray<number>>();
+
+function surahAtPageTable(riwayah: RiwayahId): ReadonlyArray<number> {
+  const cached = SURAH_AT_PAGE.get(riwayah);
+  if (cached) return cached;
+  const total = totalPagesForRiwayah(riwayah);
+  const table = new Array<number>(total + 1).fill(1);
+  for (const p of pagesForRiwayah(riwayah)) {
+    if (p.page >= 1 && p.page <= total) table[p.page] = p.start.surah;
   }
+  SURAH_AT_PAGE.set(riwayah, table);
   return table;
-})();
+}
 
 /** The surah a page opens in. Out-of-range pages clamp to the mushaf. */
-export function surahAtPage(page: number): number {
-  const clamped = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, Math.round(page)));
-  return SURAH_AT_PAGE[clamped] ?? 1;
+export function surahAtPage(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): number {
+  const table = surahAtPageTable(riwayah);
+  const clamped = Math.max(1, Math.min(table.length - 1, Math.round(page)));
+  return table[clamped] ?? 1;
 }
 
 /**
@@ -84,8 +104,14 @@ export function isRangingDrag(pagesMoved: number, elapsedMs: number): boolean {
   return (Math.abs(pagesMoved) / elapsedMs) * 1000 > RANGING_PAGES_PER_SECOND;
 }
 
-function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
+function MushafPageScrubberImpl({
+  page,
+  riwayah = DEFAULT_RIWAYAH,
+  onSelectPage,
+  onOpenJump,
+}: Props) {
   const { t, i18n } = useTranslation();
+  const totalPages = totalPagesForRiwayah(riwayah);
   const { palette } = useAppPalette();
   const [width, setWidth] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -103,24 +129,25 @@ function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
   const lastTickAt = useRef(0);
 
   /** x → page, counting from the RIGHT: the mushaf opens that way. */
-  const pageAt = useCallback((x: number): number => {
-    const w = widthRef.current || 1;
-    const fraction = 1 - Math.max(0, Math.min(1, x / w));
-    return Math.max(
-      1,
-      Math.min(
-        MUSHAF_TOTAL_PAGES,
-        Math.round(fraction * (MUSHAF_TOTAL_PAGES - 1)) + 1,
-      ),
-    );
-  }, []);
+  const pageAt = useCallback(
+    (x: number): number => {
+      const w = widthRef.current || 1;
+      const fraction = 1 - Math.max(0, Math.min(1, x / w));
+      return Math.max(
+        1,
+        Math.min(totalPages, Math.round(fraction * (totalPages - 1)) + 1),
+      );
+    },
+    [totalPages],
+  );
 
   /**
    * Tick if this move crossed into a different surah, at a weight set by
    * how fast the thumb is travelling.
    */
-  const feedback = useCallback((next: number, now: number) => {
-    const surah = surahAtPage(next);
+  const feedback = useCallback(
+    (next: number, now: number) => {
+    const surah = surahAtPage(next, riwayah);
     if (surah === lastSurah.current) {
       lastPage.current = next;
       lastMoveAt.current = now;
@@ -136,7 +163,9 @@ function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
     if (now - lastTickAt.current < MIN_TICK_INTERVAL_MS) return;
     lastTickAt.current = now;
     hapticScrubTick(ranging);
-  }, []);
+    },
+    [riwayah],
+  );
 
   const pan = useRef(
     PanResponder.create({
@@ -149,7 +178,7 @@ function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
         // Seed from the page we land on, so the first tick is the first
         // boundary actually crossed rather than an artefact of grabbing
         // the rail somewhere else in the mushaf.
-        lastSurah.current = surahAtPage(next);
+        lastSurah.current = surahAtPage(next, riwayah);
         lastPage.current = next;
         lastMoveAt.current = Date.now();
         lastTickAt.current = 0;
@@ -165,7 +194,7 @@ function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
     }),
   ).current;
 
-  const fraction = (MUSHAF_TOTAL_PAGES - page) / (MUSHAF_TOTAL_PAGES - 1);
+  const fraction = (totalPages - page) / (totalPages - 1);
 
   /**
    * While dragging, the readout names the surah under the thumb. The page
@@ -174,10 +203,10 @@ function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
    */
   const surahLabel = useMemo(() => {
     if (!dragging) return null;
-    const number = surahAtPage(page);
-    const meta = MUSHAF_SURAHS.find(s => s.number === number);
+    const number = surahAtPage(page, riwayah);
+    const meta = surahsForRiwayah(riwayah).find(s => s.number === number);
     return meta ? mushafSurahName(meta, i18n.language) : null;
-  }, [dragging, page, i18n.language]);
+  }, [dragging, page, i18n.language, riwayah]);
 
   return (
     <View style={styles.wrap}>
@@ -198,7 +227,7 @@ function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
         accessibilityLabel={t('quran.pageScrubber', 'Go to page')}
         accessibilityValue={{
           min: 1,
-          max: MUSHAF_TOTAL_PAGES,
+          max: totalPages,
           now: page,
         }}
         onLayout={onLayout}
@@ -221,7 +250,7 @@ function MushafPageScrubberImpl({ page, onSelectPage, onOpenJump }: Props) {
           style={[styles.readout, { color: palette.muted }]}
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-          {`${page} / ${MUSHAF_TOTAL_PAGES}`}
+          {`${page} / ${totalPages}`}
         </Text>
         {surahLabel ? (
           <Text

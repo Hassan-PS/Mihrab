@@ -17,6 +17,13 @@
  */
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TOTAL_AYAHS, ayahAtIndex, ayahIndexOf } from './ayahIndex';
+import {
+  findPageForAyah,
+  firstAyahOfPage,
+  totalPagesForRiwayah,
+} from './pages';
+import { DEFAULT_RIWAYAH, resolveRiwayah, type RiwayahId } from './riwayat';
 
 /** The Quran blob's key. Exported so the snapshot layer names it once. */
 export const QURAN_STORAGE_KEY = 'mihrab.quran.v1';
@@ -67,6 +74,23 @@ export type KhatmahPlan = {
    *  lets "reset today's reading" rewind only today's progress. */
   dayStartPagesRead?: number;
   dayStartDate?: string;
+  // ── Additive fields (riwayat) ─────────────────────────────────────
+  /**
+   * Ayahs read, out of 6236 — the AUTHORITATIVE measure of progress.
+   *
+   * `pagesRead` is a page count, and a page is a fact about one printed
+   * muṣḥaf: page 300 of a Warsh print is not page 300 of a Hafs one.
+   * With a second riwayah on screen that number stops meaning one thing,
+   * so progress is counted in ayahs, which every riwayah agrees on.
+   *
+   * Optional because plans written before this existed do not have it;
+   * `khatmahAyahsRead` derives it from `pagesRead` for those. `pagesRead`
+   * is still written, in HAFS terms, so that older versions and the sync
+   * merge — which takes the max of it — keep working across devices.
+   */
+  ayahsRead?: number;
+  /** `ayahsRead` at the start of the local day, mirroring `dayStartPagesRead`. */
+  dayStartAyahsRead?: number;
 };
 
 /** Reserved highlight color for the khatmah position (distinct from the
@@ -87,6 +111,27 @@ export type QuranPrefs = {
   playbackRate: number;
   /** Mushaf night mode (inverted page). */
   mushafNightMode: boolean;
+  /**
+   * Which reading tradition the muṣḥaf is drawn in (additive).
+   *
+   * A string rather than a boolean because Warsh is the second of five
+   * the app may eventually draw, not the other one — see `riwayat.ts`.
+   * Stored ids this build cannot draw resolve back to Hafs on read, so a
+   * device that syncs `warsh` to one without the data still opens a
+   * muṣḥaf.
+   */
+  riwayah: RiwayahId;
+  /**
+   * Has the reader been told that a Unicode muṣḥaf reflows? (additive)
+   *
+   * A `unicode` riwayah gets its page BOUNDARIES from the print and its
+   * LINE breaks from the platform, because no open Warsh dataset carries
+   * line assignments (`docs/design/riwayat-plan.md` §2). Someone who has
+   * memorised where an ayah sits on the page of a physical muṣḥaf will
+   * notice, and finding out by being confused is the worst way to learn
+   * it. Said once, on the first switch, and then never again.
+   */
+  riwayahNoticeSeen: boolean;
   /**
    * How mushaf pages are drawn (v2.8.0, additive).
    *
@@ -145,6 +190,8 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     reciterId: 'husary',
     playbackRate: 1,
     mushafNightMode: false,
+    riwayah: DEFAULT_RIWAYAH,
+    riwayahNoticeSeen: false,
     mushafRenderer: 'text',
     keepAwake: true,
     hideMode: 'none',
@@ -233,6 +280,12 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
   }
   const dsp = int(r.dayStartPagesRead, 0, 604);
   if (dsp !== null) out.dayStartPagesRead = dsp;
+  // Clamped to the ayah count for the same reason `pagesRead` is clamped
+  // to the page count: a bad number is still someone's reading.
+  const ar = int(r.ayahsRead, 0, TOTAL_AYAHS);
+  if (ar !== null) out.ayahsRead = ar;
+  const dsa = int(r.dayStartAyahsRead, 0, TOTAL_AYAHS);
+  if (dsa !== null) out.dayStartAyahsRead = dsa;
   if (typeof r.dayStartDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.dayStartDate)) {
     out.dayStartDate = r.dayStartDate;
   }
@@ -302,6 +355,14 @@ function mergeStored(raw: unknown): QuranState {
     prefs: {
       ...DEFAULT_QURAN_STATE.prefs,
       ...(r.prefs ?? {}),
+      // Resolved rather than trusted: a device that synced `warsh` from a
+      // build that HAS the data to one that does not would otherwise open
+      // a reader with no muṣḥaf behind it.
+      riwayah: resolveRiwayah(
+        (r.prefs as Record<string, unknown> | undefined)?.riwayah as
+          | string
+          | undefined,
+      ),
       repeat: {
         ...DEFAULT_QURAN_STATE.prefs.repeat,
         ...(r.prefs?.repeat ?? {}),
@@ -492,12 +553,59 @@ export function setQuranPrefs(partial: Partial<QuranPrefs>): void {
 
 export const KHATMAH_TOTAL_PAGES = 604;
 
+/**
+ * Progress is ayahs now; this is what a plan is measured against.
+ *
+ * `KHATMAH_TOTAL_PAGES` stays for the page-shaped UI (the scrubber, the
+ * "page N of 604" line) and for the `pagesRead` mirror, but completion is
+ * decided here.
+ */
+export const KHATMAH_TOTAL_AYAHS = TOTAL_AYAHS;
+
+/**
+ * The ayahs a plan has read, however old the plan is.
+ *
+ * A plan from before the ayah switch has only `pagesRead`, a Hafs page
+ * count. Converting it through Hafs pagination is exact for the only
+ * riwayah those plans could ever have been reading.
+ */
+export function khatmahAyahsRead(plan: KhatmahPlan): number {
+  if (typeof plan.ayahsRead === 'number') {
+    return Math.min(TOTAL_AYAHS, Math.max(0, Math.trunc(plan.ayahsRead)));
+  }
+  return ayahsThroughPage(plan.pagesRead, DEFAULT_RIWAYAH);
+}
+
+/**
+ * Ayahs completed once `page` has been finished, in a given riwayah.
+ *
+ * "Finished page N" means "read up to the last ayah on page N", which is
+ * the ayah before the first ayah of page N+1. Page 0 is nothing read.
+ */
+export function ayahsThroughPage(page: number, riwayah: RiwayahId): number {
+  const p = Math.trunc(page);
+  if (p <= 0) return 0;
+  const total = totalPagesForRiwayah(riwayah);
+  if (p >= total) return TOTAL_AYAHS;
+  const next = firstAyahOfPage(p + 1, riwayah);
+  return Math.max(0, ayahIndexOf(next.surah, next.ayah) - 1);
+}
+
+/** The Hafs page that many ayahs reach — for the `pagesRead` mirror. */
+function pagesThroughAyahs(ayahs: number): number {
+  if (ayahs <= 0) return 0;
+  if (ayahs >= TOTAL_AYAHS) return KHATMAH_TOTAL_PAGES;
+  const at = ayahAtIndex(ayahs);
+  return findPageForAyah(at.surah, at.ayah, DEFAULT_RIWAYAH);
+}
+
 export function startKhatmah(targetDays: number): void {
   const plan: KhatmahPlan = {
     id: `${Date.now()}`,
     startedAt: Date.now(),
     targetDays,
     pagesRead: 0,
+    ayahsRead: 0,
     completedAt: null,
   };
   updateQuranState(prev => ({
@@ -522,22 +630,40 @@ function localYmd(now: number = Date.now()): string {
 function withDaySnapshot(plan: KhatmahPlan, now?: number): KhatmahPlan {
   const today = localYmd(now);
   if (plan.dayStartDate === today) return plan;
-  return { ...plan, dayStartDate: today, dayStartPagesRead: plan.pagesRead };
+  return {
+    ...plan,
+    dayStartDate: today,
+    dayStartPagesRead: plan.pagesRead,
+    dayStartAyahsRead: khatmahAyahsRead(plan),
+  };
 }
 
-export function recordKhatmahProgress(page: number): void {
+export function recordKhatmahProgress(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): void {
   updateQuranState(prev => {
     const active = prev.khatmah.find(k => k.completedAt == null);
-    if (!active || page <= active.pagesRead) return prev;
-    const done = Math.min(page, KHATMAH_TOTAL_PAGES);
+    if (!active) return prev;
+    // The page is converted to ayahs FIRST, then compared. Comparing pages
+    // would be comparing two different muṣḥafs the moment the reader
+    // switched riwayah, and the high-water mark would jump or stall.
+    const reached = ayahsThroughPage(page, riwayah);
+    const have = khatmahAyahsRead(active);
+    if (reached <= have) return prev;
+    const done = Math.min(reached, TOTAL_AYAHS);
     return {
       ...prev,
       khatmah: prev.khatmah.map(k =>
         k.id === active.id
           ? {
               ...withDaySnapshot(k),
-              pagesRead: done,
-              completedAt: done >= KHATMAH_TOTAL_PAGES ? Date.now() : null,
+              ayahsRead: done,
+              // Mirrored in Hafs pages so older versions and the sync
+              // merge, which takes the max of this field, still mean
+              // something.
+              pagesRead: pagesThroughAyahs(done),
+              completedAt: done >= TOTAL_AYAHS ? Date.now() : null,
             }
           : k,
       ),
@@ -545,10 +671,26 @@ export function recordKhatmahProgress(page: number): void {
   });
 }
 
-/** The page the reader should land on to continue the khatmah. */
-export function khatmahCurrentPage(plan: KhatmahPlan): number {
-  if (plan.position) return plan.position.page;
-  return Math.min(KHATMAH_TOTAL_PAGES, plan.pagesRead + 1);
+/**
+ * The page the reader should land on to continue the khatmah.
+ *
+ * Derived through the ayah rather than stored, which is what makes a
+ * riwayah switch keep your place: the next unread AYAH is the same in
+ * both muṣḥafs, and each one is asked which of its pages holds it.
+ */
+export function khatmahCurrentPage(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): number {
+  if (plan.position) {
+    // A pinned position is authoritative, but its `page` belongs to the
+    // muṣḥaf it was pinned in; re-resolve it through the ayah.
+    return findPageForAyah(plan.position.surah, plan.position.ayah, riwayah);
+  }
+  const read = khatmahAyahsRead(plan);
+  if (read >= TOTAL_AYAHS) return totalPagesForRiwayah(riwayah);
+  const next = ayahAtIndex(read + 1);
+  return findPageForAyah(next.surah, next.ayah, riwayah);
 }
 
 /**
@@ -571,6 +713,14 @@ export function setKhatmahPosition(
           ? {
               ...withDaySnapshot(k),
               position: { surah, ayah, page },
+              // Pages before the pinned AYAH count as read. Derived from
+              // the ayah, not the page, so pinning in one riwayah and
+              // reading in the other agree.
+              // Ayahs before the pinned one count as read — the same
+              // "everything before here" rule the page form has always
+              // had, expressed in the coordinate that survives a riwayah
+              // switch.
+              ayahsRead: Math.max(0, ayahIndexOf(surah, ayah) - 1),
               pagesRead: Math.max(0, Math.min(KHATMAH_TOTAL_PAGES, page - 1)),
               completedAt: null,
             }
@@ -596,21 +746,34 @@ export function resetKhatmahToday(): void {
     const active = prev.khatmah.find(k => k.completedAt == null);
     if (!active) return prev;
     const today = localYmd();
-    const base =
+    const baseAyahs =
       active.dayStartDate === today
-        ? (active.dayStartPagesRead ?? active.pagesRead)
-        : active.pagesRead; // no progress today — nothing to rewind
+        ? (active.dayStartAyahsRead ??
+          ayahsThroughPage(
+            active.dayStartPagesRead ?? active.pagesRead,
+            DEFAULT_RIWAYAH,
+          ))
+        : khatmahAyahsRead(active); // no progress today — nothing to rewind
+    const basePages = pagesThroughAyahs(baseAyahs);
     return {
       ...prev,
       khatmah: prev.khatmah.map(k =>
         k.id === active.id
           ? {
               ...k,
-              pagesRead: base,
+              ayahsRead: baseAyahs,
+              pagesRead: basePages,
               dayStartDate: today,
-              dayStartPagesRead: base,
+              dayStartPagesRead: basePages,
+              dayStartAyahsRead: baseAyahs,
+              // Drop a pin that now sits ahead of where the rewind left
+              // us — compared as ayahs, since the pin's page may belong
+              // to the other muṣḥaf.
               position:
-                k.position && k.position.page > base + 1 ? null : k.position,
+                k.position &&
+                ayahIndexOf(k.position.surah, k.position.ayah) > baseAyahs + 1
+                  ? null
+                  : k.position,
               completedAt: null,
             }
           : k,
@@ -632,9 +795,11 @@ export function resetKhatmahAll(): void {
               ...k,
               startedAt: Date.now(),
               pagesRead: 0,
+              ayahsRead: 0,
               position: null,
               dayStartDate: localYmd(),
               dayStartPagesRead: 0,
+              dayStartAyahsRead: 0,
               completedAt: null,
             }
           : k,

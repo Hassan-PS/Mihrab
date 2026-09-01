@@ -26,7 +26,12 @@ import type { JournalEntry } from '../journal/journal';
 import type { FastEntry } from '../fasting/fasting';
 import type { SunnahDay, SunnahLog } from '../journal/sunnah';
 import type { DhikrLog } from '../practice/practiceStore';
-import type { KhatmahPlan, QuranState } from '../quran/quranState';
+import {
+  ayahsThroughPage,
+  type KhatmahPlan,
+  type QuranState,
+} from '../quran/quranState';
+import { DEFAULT_RIWAYAH } from '../quran/riwayat';
 import type { Snapshot, SnapshotData, SyncSelection } from './snapshot';
 
 /** Epoch ms from an ISO string, or 0 when it is missing or nonsense. */
@@ -178,6 +183,22 @@ export function mergeKhatmah(
       continue;
     }
     const pagesRead = Math.max(mine.pagesRead, p.pagesRead);
+    // Ayahs are the authoritative measure and merge the same way — a
+    // high-water mark, so max is both honest and commutative. A device
+    // still on an older version sends no `ayahsRead`; taking the max with
+    // what its `pagesRead` implies keeps its progress rather than letting
+    // a silent undefined win.
+    // Only when at least one side actually carries it. Deriving a value
+    // for a pair that has none would add a field to the output that was
+    // not in either input, and merging a snapshot with ITSELF would stop
+    // returning itself — the idempotence the whole P2P cycle rests on.
+    const ayahsRead =
+      mine.ayahsRead === undefined && p.ayahsRead === undefined
+        ? undefined
+        : Math.max(
+            mine.ayahsRead ?? ayahsThroughPage(mine.pagesRead, DEFAULT_RIWAYAH),
+            p.ayahsRead ?? ayahsThroughPage(p.pagesRead, DEFAULT_RIWAYAH),
+          );
     const completedAt =
       mine.completedAt != null && p.completedAt != null
         ? Math.min(mine.completedAt, p.completedAt)
@@ -193,6 +214,7 @@ export function mergeKhatmah(
       ...p,
       startedAt: Math.min(mine.startedAt, p.startedAt),
       pagesRead,
+      ...(ayahsRead !== undefined ? { ayahsRead } : {}),
       completedAt,
       ...(position !== undefined ? { position } : {}),
     });
