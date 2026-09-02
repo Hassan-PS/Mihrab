@@ -12,29 +12,62 @@ falling nowhere near the printed ones.
 
 The text for a second riwayah carries no line assignment; nobody publishes
 one. But `quranpedia/quran-svg` publishes a per-ayah POLYGON for every
-page, CC0, and a polygon is a set of horizontal bands: which lines an ayah
-occupies, and how much of each. That is enough to lay a page out as the
-print does at the granularity of an ayah, which is the granularity the
-reader actually sees.
+page, CC0, and with it the centre of every ayah's medallion. That is
+enough to lay a page out as the print does at the granularity of an ayah,
+which is the granularity the reader actually sees.
 
-── HOW THE GRID IS RECOVERED ─────────────────────────────────────────
+── WHAT THE PAGE IS READ FROM ────────────────────────────────────────
 
-The band edges are drawn to the ink, not to a grid, so consecutive lines
-measure 30, 35 or 40 units apart with no constant to read off. What IS
-constant is the page: the text block runs from the top of the first line
-to the bottom of the last, and a Madinah page has fifteen of them. So the
-grid is the page's own extent divided by its line count, and every band is
-snapped to it. An ayah running across whole lines contributes one tall
-rectangle with no interior edges, which snaps to the right span anyway.
+The medallions, not the rectangles.
+
+That is the whole of it, and it took a reader's bug report to see. The
+rectangles are an approximation of the ink and the export draws them
+badly: on Shuʿbah page 294 the box for 18:5 runs from y 20.5 to 56.5,
+which is on no line of that page — the page's rows sit at 6.0 + 35.78k,
+so the box straddles two of them and omits the first entirely. Page 602
+gives 106:4 two boxes four units tall. On page 551 two ayahs claimed
+196% of one row between them. Every one of those put a hole on the page
+or crushed one line into another, and every fix for one of them was a
+heuristic that then had to be swept and tuned against the rest.
+
+The medallions have none of that. Each ayah carries `x, y`, the centre
+of the marker that closes it, and:
+
+  * `y` falls on the centre of the row the ayah ENDS on. The worst case
+    in either edition, against that page's own grid, is a quarter of a
+    row.
+  * `x - marker/2` is exactly where the next ayah begins. Not roughly:
+    the same number, to the hundredth, as the rectangle edge wherever
+    the rectangles are sound.
+  * an ayah begins on the row where the one before it ended, because
+    the order of the Qur'an is not in question.
+
+Three facts, and the page follows. The rectangles are still asked one
+question — whether a marker sitting at the end of a line leaves room for
+the next ayah to start there — and for that one question they are right
+4,554 times out of 4,556 on Shuʿbah and 4,564 out of 4,564 on Warsh,
+because it asks where a box BEGINS, and it is the running-down that the
+export gets wrong.
+
+── HOW IT IS CHECKED ─────────────────────────────────────────────────
+
+`ink.py` walks the page's own glyph path and reports where the text
+really starts and stops on each of the fifteen rows; `verify.py` holds
+the table against it. That is ground truth rather than a model of one,
+and it is what says this file is right: 12 rows out of 8,792 on Shuʿbah
+and 12 out of 8,807 on Warsh end anywhere but where the print puts them.
 
 The output is geometry, not scripture: line counts and widths. It carries
 no Qur'anic text and is CC0 where the polygons are.
 """
 import json
+import math
 import os
 import re
 import statistics
 import sys
+
+import grid as G
 
 RECT = re.compile(
     r'M\s+(\S+)\s+(\S+)\s+L\s+(\S+)\s+(\S+)\s+L\s+(\S+)\s+(\S+)\s+L\s+(\S+)\s+(\S+)\s+Z'
@@ -49,14 +82,16 @@ RECT = re.compile(
 # Against a fixed block the band's rows come out as empty lines, which is
 # exactly what they are, and every page has fifteen.
 #
-# Medians across all 602 pages that carry geometry; the spread is the
-# jitter of the ink, not disagreement about the block.
+# This is the ANCHOR, not the last word: each page then fits its own top
+# and pitch around it, within a fraction of a row. See `grid.fit`.
+#
 # The ayah medallion, in the same units — measured as twice the distance
 # from the marker's own centre to the left end of the row it closes, over
-# 500 ayahs. It is remarkably constant.
+# 500 ayahs. Remarkably constant within an edition, and not at all
+# constant between them: 19.96 in Warsh against 23.74 in Shuʿbah.
 #
-# It has to come OUT of the share, and that is the whole reason this file
-# was wrong: the polygon for an ayah's last row covers its words AND its
+# It has to come OUT of the share, and that is one reason this file was
+# wrong: the polygon for an ayah's last row covers its words AND its
 # medallion, so handing the whole share to the words gave every line one
 # word too few and pushed the rest onto the next. The medallion is drawn
 # by the renderer, not set as text, so what the table records is the room
@@ -67,21 +102,33 @@ BLOCK_TOP = 1.75
 BLOCK_BOTTOM = 540.14
 LINES_PER_PAGE = 15
 
+# ── Whether a marker at the end of a line leaves room for what follows ─
+#
+# Below eight units there is no room for a word, whatever a box claims.
+# Above a third of the measure there is too much room for a line simply
+# to stop — a justified page does not leave that much white — so text
+# follows however the box is drawn. The widest gap the publisher does
+# leave on purpose, on the tapered closing line of a surah, measures 83
+# units in Shuʿbah and 45 in Warsh; the narrowest genuine one that a box
+# denies is 121. Between the two guards, the boxes decide.
+ROOM_CERTAIN = 100.0
+ROOM_NEVER = 8.0
+
 
 def measure_block(pages):
     """The text block and the medallion, read off THIS edition.
 
-    ── WHY THESE ARE NO LONGER CONSTANTS ─────────────────────────────
+    ── WHY THESE ARE NOT CONSTANTS ───────────────────────────────────
 
     They were, and they were the Warsh edition's. Running the same
     numbers over Qālūn and Shuʿbah is what would have gone wrong
     silently: the three editions share a coordinate system almost
-    exactly — left 0, right 345, the medallion within a hair — but
-    Shuʿbah's block runs to y=547.6 where Warsh's stops at 540.7, seven
-    units lower. Snapping Shuʿbah's bands to Warsh's grid puts a pitch
-    of 35.5 against a real pitch of 36.0, which is under half a line at
-    the top of the page and most of a line by the bottom: the last rows
-    of every page would take their ayahs from the row above.
+    exactly — left 0, right 345 — but Shuʿbah's block runs to y=547.6
+    where Warsh's stops at 540.7, seven units lower. Snapping Shuʿbah's
+    rows to Warsh's grid puts a pitch of 35.5 against a real pitch of
+    36.0, which is under half a line at the top of the page and most of
+    a line by the bottom: the last rows of every page would take their
+    ayahs from the row above.
 
     Nothing about that would have raised an error. The page would have
     had its fifteen rows and its full-width lines, and it would simply
@@ -104,8 +151,8 @@ def measure_block(pages):
         bottoms.append(max(b[3] for b in boxes))
         for a in entries:
             rs = rectangles(a['polygon'])
-            if not rs:
-                continue
+            if not rs or a.get('x') is None:
+                continue  # Four ayahs in the Warsh export carry no marker.
             # The medallion sits at the END of the ayah's last row, and
             # `x` is its centre — so twice the gap from that centre to
             # the row's left edge is the room it takes. Only rows with a
@@ -136,148 +183,146 @@ def rectangles(polygon):
     return out
 
 
-def page_lines(entries, block):
-    """[(surah, ayah, share)] per line, right to left, or None."""
-    block_top, block_bottom, marker_units = block
-    boxes = []
-    for i, a in enumerate(entries):
-        for r in rectangles(a['polygon']):
-            boxes.append((i, *r))
+def page_lines(entries, block, counts):
+    """[(surah, ayah, share)] per line, right to left, or None.
+
+    `counts` is the highest ayah number of each surah, which is how a
+    line that closes a surah is known — and a closing line is short on
+    purpose, where any other short line is a fault.
+    """
+    block_top, block_bottom, marker = block
+    rects = [rectangles(a['polygon']) for a in entries]
+    boxes = [r for rs in rects for r in rs]
     if not boxes:
         return None
 
-    top = block_top
-    count = LINES_PER_PAGE
-    pitch = (block_bottom - block_top) / count
+    # The page's own grid, not the book's — see `grid.fit`.
+    top, pitch = G.fit(
+        sorted({round(v, 2) for r in boxes for v in (r[2], r[3])}),
+        [a['y'] for a in entries if a.get('y') is not None],
+        block_top, (block_bottom - block_top) / LINES_PER_PAGE)
 
     # The measure, on the other hand, IS the page's own: a framed page is
     # inset, and its lines are genuinely shorter.
-    left = min(b[1] for b in boxes)
-    right = max(b[2] for b in boxes)
+    left = min(r[0] for r in boxes)
+    right = max(r[1] for r in boxes)
     if right - left <= 0:
         return None
+    half = marker / 2.0
+    count = LINES_PER_PAGE
+    n = len(entries)
 
-    # ── PARTIAL IS A PROPERTY OF THE AYAH, NOT OF THE RECTANGLE ───────
+    # ── WHICH ROW EACH AYAH ENDS ON ───────────────────────────────────
     #
-    # Only two rows of an ayah are partial: the one it starts on, where
-    # the ayah before it may have ended, and the one it finishes on,
-    # where the next may begin. Every row between them is wholly its own.
+    # Its medallion's row, and nothing else is consulted. An ayah is
+    # listed on the page where it ends — except in the Warsh export,
+    # which lists four of them on the page BEFORE as well, with no `x`
+    # or `y` at all. Those rows carry no medallion and run to the
+    # margin, and the two numbers are read back off the rectangles,
+    # which for that handful are sound.
+    closes = [a.get('y') is not None for a in entries]
+    end = []
+    edges = []
+    for i, a in enumerate(entries):
+        if closes[i]:
+            row = min(count - 1,
+                      max(0, int(round((a['y'] - top) / pitch - 0.5))))
+        else:
+            low = max(r[3] for r in rects[i])
+            row = max(0, min(count - 1,
+                             math.ceil((low - top) / pitch - 0.45) - 1))
+        # Non-decreasing, because the ayahs are.
+        end.append(max(row, end[-1]) if end else row)
+        if a.get('x') is None:
+            low = max(r[3] for r in rects[i])
+            edges.append(min(r[0] for r in rects[i] if r[3] == low))
+        else:
+            edges.append(a['x'] - half)
+
+    def band_of(a):
+        """The rows a surah's opening takes: its title and its basmalah.
+
+        One for at-Tawbah, which has no basmalah.
+        """
+        return 1 if a['surahNumber'] == 9 else 2
+
+    def begins_on(i, row):
+        """Does ayah i start on the row where the one before it ended?
+
+        Usually. Not when that medallion sits at the very end of the
+        line: then there is nothing after it and the ayah starts below.
+        Getting this wrong costs a word — the sliver is given 2% of a
+        row that has no text on it at all, and the word that should be
+        there is pushed down. It was wrong on 864 rows of Shuʿbah.
+        """
+        room = edges[i - 1] - left
+        if room >= ROOM_CERTAIN:
+            return True
+        if room <= ROOM_NEVER:
+            return False
+        return min(math.floor((r[2] - top) / pitch + 0.45)
+                   for r in rects[i]) <= row
+
+    # ── WHICH ROW EACH AYAH STARTS ON ─────────────────────────────────
     #
-    # This used to be decided per RECTANGLE, and the export changed under
-    # it. The older polygons gave one rectangle per row, so a rectangle's
-    # first and last row were the ayah's; the current ones merge a run of
-    # rows into a single tall rectangle whose x-range describes only the
-    # narrowest part of it. Shuʿbah page 294 is the shape of the fault:
-    # 18:6 starts at the left end of row 0 and runs through row 1, as one
-    # rectangle x 0–136 — so row 1, a full line of text, was recorded at
-    # 39% and would have been set as a third of a line with a hole after
-    # it. Reading the span per ayah is the same rule the comment always
-    # claimed, applied to the thing it was always about.
-    spans = {}
-    for idx, x0, x1, y0, y1 in boxes:
-        first = max(0, min(count - 1, round((y0 - top) / pitch)))
-        last = max(first, min(count - 1, round((y1 - top) / pitch) - 1))
-        rows = spans.setdefault(idx, {})
-        for line in range(first, last + 1):
-            got = rows.get(line)
-            rows[line] = (
-                (min(got[0], x0), max(got[1], x1)) if got else (x0, x1)
-            )
+    # The row the one before it ended on, with a surah's opening band
+    # between them where a surah opens. The page's first ayah is the
+    # only one with nothing before it, and the only one whose rectangle
+    # has to be asked: it starts at the top of the page unless the band
+    # is on THIS page rather than at the foot of the last, and the box
+    # says which. Clamped to the band's own width, so a bad box can put
+    # it on row 0, 1 or 2 and nowhere else.
+    start = [0] * n
+    if entries[0]['ayahNumber'] == 1:
+        first = min(r[2] for r in rects[0])
+        start[0] = min(max(0, math.floor((first - top) / pitch + 0.45)),
+                       band_of(entries[0]), end[0])
+    for i in range(1, n):
+        if entries[i]['ayahNumber'] == 1:
+            start[i] = min(end[i - 1] + 1 + band_of(entries[i]), end[i])
+        else:
+            start[i] = end[i - 1]
+            if end[i] > start[i] and not begins_on(i, start[i]):
+                start[i] += 1
 
-    lines = [[] for _ in range(count)]
-    for idx, rows in spans.items():
-        opens = min(rows)
-        closes = max(rows)
-        for line, (x0, x1) in rows.items():
-            whole = line != opens and line != closes
-            a, b = (left, right) if whole else (x0, x1)
-            lines[line].append((idx, a, b))
-
-    out = []
-    for line in lines:
-        # Right to left: x = right is where an Arabic line begins.
-        line.sort(key=lambda s: -s[2])
-        merged = []
-        for idx, a, b in line:
-            if merged and merged[-1][0] == idx:
-                merged[-1][1] = min(merged[-1][1], a)
-                merged[-1][2] = max(merged[-1][2], b)
+    # ── AND HOW MUCH OF EACH ──────────────────────────────────────────
+    #
+    # A row runs from the right margin, or from the medallion of the
+    # ayah that ended on it, to the left margin, or to the ayah's own
+    # medallion. The one case that is neither: a row an ayah ENDS on
+    # where the next ayah begins on the row BELOW is still a full line,
+    # with the medallion at its end — the words fill it. Reading that as
+    # a short line lost 3% of the measure on 177 rows of Warsh.
+    out = [[] for _ in range(count)]
+    for i in range(n):
+        for row in range(start[i], end[i] + 1):
+            x1 = right
+            if row == start[i] and i > 0 and end[i - 1] == row:
+                x1 = edges[i - 1]
+            if row != end[i] or not closes[i]:
+                x0 = left
+            elif (entries[i]['ayahNumber'] == counts.get(entries[i]['surahNumber'])
+                  or (i + 1 < n and start[i + 1] == row)):
+                x0 = edges[i]
             else:
-                merged.append([idx, a, b])
-        out.append(merged)
-
-    # The last row each ayah appears on is the one carrying its medallion.
-    last_row = {}
-    for i, line in enumerate(out):
-        for idx, _a, _b in line:
-            last_row[idx] = i
-
-    # ── THE ROWS AN AYAH CARRIES OVER A PAGE TURN ─────────────────────
-    #
-    # An ayah that begins on the page before continues at the TOP of this
-    # one, and on 25 of Shuʿbah's pages the publisher has no polygon for
-    # those rows: page 551 marks 60:12 on row 3 alone, when the printed
-    # page plainly gives it rows 0 to 3 — I rendered it and counted.
-    # Warsh has none of these, because its table was cut from an older
-    # export that emitted a rectangle per row.
-    #
-    # Left alone the page opens with blank rows and the carried-over text
-    # has nowhere to go, so it stays on the page before and overfills it.
-    # A leading run of empty rows on a page that does NOT open a surah is
-    # unambiguous — a muṣḥaf page has no blank line except under a band —
-    # so the ayah that starts the first real row is extended up through
-    # them at full width, which is what the print shows.
-    if out and not out[0]:
-        first = 0
-        while first < len(out) and not out[first]:
-            first += 1
-        if first < len(out) and out[first]:
-            carried = out[first][0][0]
-            # Only when it is a continuation. A page that opens a surah
-            # has its blank rows honestly: they are the band's.
-            if entries[carried]['ayahNumber'] != 1:
-                for row in range(first):
-                    out[row] = [[carried, left, right]]
-
-    # ── A ROW CANNOT HOLD MORE THAN A ROW ─────────────────────────────
-    #
-    # Two ayahs sharing a row must between them cover it once. Shuʿbah
-    # page 551 has one row where they do not: the publisher's polygons
-    # for 61:3 and 61:4 both run almost the full width of it, so the row
-    # claims 196% of the measure. Left alone the renderer would try to
-    # fit two lines of text into one and squeeze both to the floor of the
-    # scale band.
-    #
-    # The overlap is the ambiguity and there is nothing in the file that
-    # resolves it, so the shares are scaled to fit and their proportion
-    # to each other — the one thing the polygons do agree on — is kept.
-    # One row in 8,741, and the alternative is a page that is visibly
-    # wrong with nothing to say why.
-    for line in out:
-        width = sum(b - a for _idx, a, b in line)
-        if width > right - left:
-            excess = (right - left) / width
-            for span in line:
-                mid = (span[1] + span[2]) / 2
-                half = (span[2] - span[1]) * excess / 2
-                span[1], span[2] = mid - half, mid + half
+                x0 = left
+            x0 = min(max(x0, left), right)
+            x1 = min(max(x1, left), right)
+            if x1 - x0 > 0:
+                out[row].append((i, x0, x1))
 
     measure = right - left
-    return [
-        [
-            (
-                entries[idx]['surahNumber'],
-                entries[idx]['ayahNumber'],
-                round(
-                    max(0.0, (b - a) - (marker_units if last_row[idx] == i else 0.0))
-                    / measure,
-                    4,
-                ),
-            )
-            for idx, a, b in line
-        ]
-        for i, line in enumerate(out)
-    ]
+    lines = []
+    for row, spans in enumerate(out):
+        line = []
+        for i, x0, x1 in spans:
+            worn = marker if end[i] == row and closes[i] else 0.0
+            share = round(max(0.0, (x1 - x0) - worn) / measure, 4)
+            if share > 0:
+                line.append((entries[i]['surahNumber'],
+                             entries[i]['ayahNumber'], share))
+        lines.append(line)
+    return lines
 
 
 def pack(pages):
@@ -311,7 +356,7 @@ def pack(pages):
     return out
 
 
-def main(src, dest, block=None):
+def load(src):
     raw = {}
     for name in sorted(os.listdir(src)):
         m = re.match(r'^(\d+)\.json$', name)
@@ -319,67 +364,101 @@ def main(src, dest, block=None):
             continue
         with open(os.path.join(src, name), encoding='utf-8') as f:
             raw[int(m.group(1))] = json.load(f)
+    return raw
+
+
+def ayah_counts(raw):
+    """The last ayah of every surah, as this edition numbers them."""
+    counts = {}
+    for entries in raw.values():
+        for a in entries:
+            s = a['surahNumber']
+            counts[s] = max(counts.get(s, 0), a['ayahNumber'])
+    return counts
+
+
+def main(src, dest, block=None):
+    raw = load(src)
+    counts = ayah_counts(raw)
 
     # The block first, from every page at once — see `measure_block`.
     fitted = measure_block(raw.values())
     print(
         '  fitted    top=%.2f bottom=%.2f pitch=%.2f medallion=%.2f'
-        % (fitted[0], fitted[1], (fitted[1] - fitted[0]) / LINES_PER_PAGE, fitted[2])
+        % (fitted[0], fitted[1],
+           (fitted[1] - fitted[0]) / LINES_PER_PAGE, fitted[2])
     )
     block = block or fitted
     print(
         '  using     top=%.2f bottom=%.2f pitch=%.2f medallion=%.2f'
-        % (block[0], block[1], (block[1] - block[0]) / LINES_PER_PAGE, block[2])
+        % (block[0], block[1],
+           (block[1] - block[0]) / LINES_PER_PAGE, block[2])
     )
 
     pages = {}
     widths = []
+    measures = []
     for page, entries in sorted(raw.items()):
-        lines = page_lines(entries, block)
+        lines = page_lines(entries, block, counts)
         if lines is None:
             continue
         pages[page] = lines
         widths.append(len(lines))
+        boxes = [r for a in entries for r in rectangles(a['polygon'])]
+        measures.append(max(r[1] for r in boxes) - min(r[0] for r in boxes))
 
     print(f'  {len(pages)} pages')
-    counts = {}
+    tally = {}
     for w in widths:
-        counts[w] = counts.get(w, 0) + 1
-    print(f'  lines per page: {dict(sorted(counts.items()))}')
+        tally[w] = tally.get(w, 0) + 1
+    print(f'  lines per page: {dict(sorted(tally.items()))}')
     print(f'  median {statistics.median(widths)}')
 
     empty = [p for p, l in pages.items() if any(len(x) == 0 for x in l)]
     print(f'  pages with an empty line: {len(empty)} {empty[:8]}')
+
     # A line's word-shares plus one medallion's worth per ayah ending on
-    # it should come to the full measure. They will not come to 1 on their
-    # own — that is the medallion, and it is the point.
-    marker = block[2] / 345.0
+    # it come to the full measure. They will not come to 1 on their own —
+    # that is the medallion, and it is the point. A line that closes a
+    # surah is short because the print sets it short.
+    # Of the MEASURE, which is not the sheet. The sheet is 345 units wide
+    # in both exports and a page's lines are 331 to 345 of it, so calling
+    # the sheet the measure understated Warsh's medallion by 2%. Small,
+    # and exactly the kind of small that this file has spent a day on.
+    measure = statistics.median(measures)
+    marker = block[2] / measure
+    ends = {}
+    for p, l in pages.items():
+        for i, line in enumerate(l):
+            for s, a, _ in line:
+                ends[(s, a)] = (p, i)
+    marks = {}
+    for v in ends.values():
+        marks[v] = marks.get(v, 0) + 1
     off = []
     for p, l in pages.items():
         for i, line in enumerate(l):
             if not line:
                 continue
-            total = sum(s for _, _, s in line)
-            if not 0.85 <= total <= 1.02:
-                off.append((p, i + 1, round(total, 3)))
-    print(f'  lines that do not fill the width (allowing {marker:.3f} a medallion): '
-          f'{len(off)} {off[:6]}')
+            total = sum(s for _, _, s in line) + marker * marks.get((p, i), 0)
+            closing = (i + 1 < len(l) and not l[i + 1]) or i + 1 == len(l)
+            if not 0.97 <= total <= 1.03 and not closing:
+                off.append((p, i, round(total, 3)))
+    print(f'  lines that do not come to the measure: {len(off)} {off[:6]}')
 
     # The medallion's share of the measure travels WITH the table.
     # It used to be a constant in three places — this tool, the
     # renderer and its test — and the three could disagree without
     # anything noticing. An edition's table now states its own.
     with open(dest, 'w', encoding='utf-8') as f:
-        json.dump({'marker': round(block[2] / 345.0, 5), 'lines': pack(pages)}, f,
-                  ensure_ascii=False, separators=(',', ':'))
+        json.dump({'marker': round(marker, 5), 'lines': pack(pages)},
+                  f, ensure_ascii=False, separators=(',', ':'))
     print(f'  wrote {dest} ({os.path.getsize(dest) / 1024:.0f} KB)')
 
 
 if __name__ == '__main__':
     # An edition whose block is already known passes it in rather than
-    # letting the fit decide: the Warsh/Qālūn numbers below were tuned
-    # by hand against the rendered pages and are tighter than the fit,
-    # and the table they produce is the one verified on a device.
+    # letting the fit decide.
     given = None
     if len(sys.argv) > 3:
         given = tuple(float(x) for x in sys.argv[3].split(','))

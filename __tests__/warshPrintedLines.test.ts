@@ -42,22 +42,16 @@ const FATHA = '\u064E';
  */
 const TABLED: RiwayahId[] = ['warsh', 'qalun', 'shubah'];
 
-/** Rows that fall short of the measure for a reason, per riwayah. */
-const KNOWN_SHORT: Partial<Record<RiwayahId, string[]>> = {
-  warsh: [
-    'page 85 line 14',
-    'page 317 line 14',
-    'page 354 line 14',
-    'page 355 line 14',
-  ],
-  qalun: [
-    'page 85 line 14',
-    'page 317 line 14',
-    'page 354 line 14',
-    'page 355 line 14',
-  ],
-  shubah: ['page 602 line 14', 'page 603 line 14', 'page 604 line 13'],
-};
+/**
+ * Rows that fall short of the measure for a reason, per riwayah.
+ *
+ * Empty, and that is the point. It used to name seven rows across the
+ * three tables; each of them turned out to be a fault in how the table
+ * was cut rather than a line the print sets short, and naming them was
+ * how they went unexamined. What replaces the list is the rule they
+ * were pretending to be an exception to: a short row closes a surah.
+ */
+const KNOWN_SHORT: Partial<Record<RiwayahId, string[]>> = {};
 
 const word = (letters: number) =>
   `${'\u0628'.repeat(letters)}${FATHA}`;
@@ -202,6 +196,25 @@ describe.each(TABLED)('the %s table, on every page of it', riwayah => {
       marks.set(at, (marks.get(at) ?? 0) + 1);
     }
 
+    // The last ayah of every surah, as this table itself numbers them —
+    // the riwayat do not agree on those numbers and the app ships no
+    // scripture to ask.
+    const lastAyah = new Map<number, number>();
+    for (const [, rows] of pages) {
+      for (const row of rows) {
+        for (const span of row) {
+          lastAyah.set(
+            span.surah,
+            Math.max(lastAyah.get(span.surah) ?? 0, span.ayah),
+          );
+        }
+      }
+    }
+    const closesSurah = (row: { surah: number; ayah: number }[]) => {
+      const last = row[row.length - 1];
+      return lastAyah.get(last.surah) === last.ayah;
+    };
+
     let worst = 0;
     const off: string[] = [];
     for (const [page, rows] of pages) {
@@ -209,7 +222,12 @@ describe.each(TABLED)('the %s table, on every page of it', riwayah => {
         if (row.length === 0) return;
         // The row a surah ends on is allowed to be short — that is what
         // `AllocatedLine.share` carries. Every other row is a full line.
+        //
+        // Usually the band below it says so. Not on the last row of a
+        // page, where the band is overleaf and there is no row below to
+        // look at, so the surah's own last ayah has to be recognised.
         if (rows[i + 1]?.length === 0) return;
+        if (i === rows.length - 1 && closesSurah(row)) return;
         const share = row.reduce((n, s) => n + s.share, 0);
         const full = share + MARKER_SHARE * (marks.get(`${page}:${i}`) ?? 0);
         worst = Math.max(worst, Math.abs(full - 1));
@@ -218,21 +236,17 @@ describe.each(TABLED)('the %s table, on every page of it', riwayah => {
     }
 
     // Named rather than counted, so a NEW one is a failure with a page
-    // number on it rather than a threshold quietly absorbing it.
-    //
-    // Warsh and Qālūn: the four ayahs the print sets across a page turn.
-    // The row that hands one on carries no medallion, but the table has
-    // still left the medallion's room on it — six per cent of a line, on
-    // four rows of 8,807, closed by the word gaps without anyone seeing.
-    //
-    // Shuʿbah: three rows on the closing pages, where a surah of four-word
-    // ayahs genuinely does not fill the line and the renderer centres what
-    // it cannot fill.
-    expect(off).toEqual(KNOWN_SHORT[riwayah]);
-    // And a ceiling on how short the worst of them may be: Shuʿbah's
-    // page 602 line 14 sits at 0.76 of the measure, which is a real
-    // four-word line on a closing page. A row shorter than a quarter of
-    // a line would be a grid fault, not a short line.
+    // number on it rather than a threshold quietly absorbing it — and
+    // there are none left to name. The four Warsh rows that used to be
+    // here were the ayahs the print sets across a page turn: the row
+    // handing one on carries no medallion, and the table was leaving the
+    // medallion's room on it anyway. The three Shuʿbah rows were the
+    // same fault seen from the other side.
+    expect(off).toEqual(KNOWN_SHORT[riwayah] ?? []);
+    // And a ceiling on how far off the worst row may be. Every row that
+    // is not a surah's last now comes to the measure within three per
+    // cent, so this is only here to catch a grid fault, which does not
+    // arrive by a few per cent.
     expect(worst).toBeLessThan(0.25);
   });
 
