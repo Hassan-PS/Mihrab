@@ -15,7 +15,18 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 const screen = readFileSync(
-  path.join(__dirname, '..', 'src', 'screens', 'QuranSurahScreen.tsx'),
+  path.join(__dirname, '..', 'src', 'screens', 'quran', 'MushafSurahScreen.tsx'),
+  'utf8',
+);
+const translation = readFileSync(
+  path.join(
+    __dirname,
+    '..',
+    'src',
+    'screens',
+    'quran',
+    'TranslationSurahScreen.tsx',
+  ),
   'utf8',
 );
 const spread = readFileSync(
@@ -29,9 +40,9 @@ const pagerSrc = readFileSync(
 
 describe('the back swipe gets out of the page swipe’s way', () => {
   it('is off in the mushaf on the Mac', () => {
-    expect(screen).toMatch(
-      /const gestureEnabled = !\(isMacCatalyst && isMushaf\)/,
-    );
+    // The muṣḥaf has its own screen now, so the guard is the platform
+    // alone — there is no translation branch left in here to exclude.
+    expect(screen).toMatch(/const gestureEnabled = !isMacCatalyst;/);
   });
 
   it('and set on both the windowed and the fullscreen reader', () => {
@@ -41,10 +52,10 @@ describe('the back swipe gets out of the page swipe’s way', () => {
   });
 
   it('but nowhere else — the tafsir reader has no page swipe to lose', () => {
-    // The guard is the conjunction. Dropping either half would take the
-    // back gesture away from a screen that has nothing else competing for
-    // it, on a platform where it is the only way back short of the header.
-    expect(screen).not.toMatch(/gestureEnabled: false/);
+    // Taking the back gesture away from a screen that has nothing else
+    // competing for it, on a platform where it is the only way back short
+    // of the header, would be the same mistake the other way round.
+    expect(translation).not.toMatch(/gestureEnabled/);
   });
 });
 
