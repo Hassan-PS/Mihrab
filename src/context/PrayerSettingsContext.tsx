@@ -109,6 +109,7 @@ export type LiveActivitySlice = Pick<
   | 'liveActivityShowLocation'
   | 'liveActivityDesign'
   | 'liveActivitySecondMetric'
+  | 'liveActivityLockButton'
 >;
 
 type SliceCtxValue<S> = {
@@ -303,6 +304,7 @@ export function PrayerSettingsProvider({
       liveActivityShowLocation: settings.liveActivityShowLocation,
       liveActivityDesign: settings.liveActivityDesign,
       liveActivitySecondMetric: settings.liveActivitySecondMetric,
+      liveActivityLockButton: settings.liveActivityLockButton,
     }),
     [
       settings.liveActivityEnabled,
@@ -312,6 +314,7 @@ export function PrayerSettingsProvider({
       settings.liveActivityShowLocation,
       settings.liveActivityDesign,
       settings.liveActivitySecondMetric,
+      settings.liveActivityLockButton,
     ],
   );
 

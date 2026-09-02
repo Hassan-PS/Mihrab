@@ -289,6 +289,10 @@
     "themeRestartBody": "Switching system colors needs the app to restart so every screen picks up the new theme. Restart now?",
     "themeRestartConfirm": "Restart",
     "laSecondMetricLabel": "Second metric",
+    "laSecondMetric_off": "None",
+    "laSecondMetric_time": "Prayer time",
+    "laLockButtonLabel": "Lock-screen button",
+    "laLockButtonHelp": "Show a button on the card for hiding it from the lock screen and always-on display.",
     "resetTitle": "Reset the app?",
     "resetBody": "This wipes all settings, saved locations, journal entries, fasting log, and tasbih state, then takes you back to the onboarding flow. This cannot be undone.",
     "resetConfirm": "Reset everything",
@@ -1198,7 +1202,6 @@
     "unmuteNext": "Unmute next adhan",
     "inWord": "In",
     "atWord": "At",
-    "sinceWord": "Since",
     "hideOnLock": "Hide on lock screen",
     "showOnLock": "Show on lock screen"
   },

@@ -289,6 +289,10 @@
     "themeRestartBody": "Changer les couleurs système nécessite un redémarrage pour que chaque écran adopte le thème. Redémarrer maintenant ?",
     "themeRestartConfirm": "Redémarrer",
     "laSecondMetricLabel": "Seconde information",
+    "laSecondMetric_off": "Aucune",
+    "laSecondMetric_time": "Heure de la prière",
+    "laLockButtonLabel": "Bouton d'écran de verrouillage",
+    "laLockButtonHelp": "Affiche sur la carte un bouton pour la masquer de l'écran de verrouillage et de l'écran permanent.",
     "resetTitle": "Réinitialiser l’application ?",
     "resetBody": "Cela efface tous les réglages, lieux enregistrés, entrées du journal, jeûnes et l’état du tasbih, puis vous ramène à l’introduction. Irréversible.",
     "resetConfirm": "Tout réinitialiser",
@@ -1198,7 +1202,6 @@
     "unmuteNext": "Activer le prochain adhan",
     "inWord": "Dans",
     "atWord": "À",
-    "sinceWord": "Depuis",
     "hideOnLock": "Masquer sur l’écran verrouillé",
     "showOnLock": "Afficher sur l’écran verrouillé"
   },

@@ -289,6 +289,10 @@
     "themeRestartBody": "Cambiar los colores del sistema requiere reiniciar para que todas las pantallas usen el tema. ¿Reiniciar ahora?",
     "themeRestartConfirm": "Reiniciar",
     "laSecondMetricLabel": "Segunda métrica",
+    "laSecondMetric_off": "Ninguna",
+    "laSecondMetric_time": "Hora de la oración",
+    "laLockButtonLabel": "Botón de pantalla de bloqueo",
+    "laLockButtonHelp": "Muestra en la tarjeta un botón para ocultarla de la pantalla de bloqueo y de la pantalla siempre activa.",
     "resetTitle": "¿Restablecer la app?",
     "resetBody": "Esto borra todos los ajustes, ubicaciones guardadas, entradas del registro, ayunos y el estado del tasbih, y vuelve a la introducción. No se puede deshacer.",
     "resetConfirm": "Restablecer todo",
@@ -1198,7 +1202,6 @@
     "unmuteNext": "Activar el próximo adhán",
     "inWord": "En",
     "atWord": "A las",
-    "sinceWord": "Desde",
     "hideOnLock": "Ocultar en la pantalla de bloqueo",
     "showOnLock": "Mostrar en la pantalla de bloqueo"
   },

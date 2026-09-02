@@ -584,10 +584,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           // the AOD cadence) and the critical metric drives the status-bar chip.
           val inWord = p.optString("inWord", "In")
           val atWord = p.optString("atWord", "At")
-          val sinceWord = p.optString("sinceWord", "Since")
           val ms = tryBuildCountdownMetricStyle(
-            nextEpochMs, inWord, secondMetric, nextTime, prevEpochMs,
-            atWord, sinceWord,
+            nextEpochMs, inWord, secondMetric, nextTime, atWord,
           )
           if (ms != null) {
             val (style, hasSecond) = ms
@@ -747,8 +745,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
      *   Notification.MetricStyle()  .addMetric(Metric) .setMetrics(List)
      *                               .setCriticalMetric(int)
      *   Notification.Metric(MetricValue value, CharSequence label)
-     *   Metric.TimeDifference.forTimer(Instant, int)  / forStopwatch(Instant, int)
-     *     FORMAT_CHRONOMETER / FORMAT_ADAPTIVE
+     *   Metric.TimeDifference.forTimer(Instant, int)  FORMAT_CHRONOMETER
      *   Metric.FixedTime(LocalTime)
      */
     private fun tryBuildCountdownMetricStyle(
@@ -756,9 +753,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       inWord: String,
       secondKind: String,
       nextTime: String,
-      prevEpochMs: Long,
       atWord: String,
-      sinceWord: String,
     ): Pair<Notification.Style, Boolean>? {
       return try {
         val msCls = Class.forName("android.app.Notification\$MetricStyle")
@@ -767,12 +762,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val tdCls = Class.forName("android.app.Notification\$Metric\$TimeDifference")
         val ftCls = Class.forName("android.app.Notification\$Metric\$FixedTime")
         val fmtChrono = tdCls.getField("FORMAT_CHRONOMETER").getInt(null)
-        val fmtAdapt = tdCls.getField("FORMAT_ADAPTIVE").getInt(null)
         val forTimer = tdCls.getMethod(
           "forTimer", Instant::class.java, Int::class.javaPrimitiveType,
-        )
-        val forStopwatch = tdCls.getMethod(
-          "forStopwatch", Instant::class.java, Int::class.javaPrimitiveType,
         )
         val metricCtor = metricCls.getConstructor(mvCls, CharSequence::class.java)
         val addMetric = msCls.getMethod("addMetric", metricCls)
@@ -801,12 +792,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
               metricCtor.newInstance(ftCtor.newInstance(lt), atWord as CharSequence)
             }
           }
-          "elapsed" -> if (prevEpochMs <= 0L) null else {
-            val sw = forStopwatch.invoke(
-              null, Instant.ofEpochMilli(prevEpochMs), fmtAdapt,
-            )
-            metricCtor.newInstance(sw, sinceWord as CharSequence)
-          }
+          // A "Since Asr 1:12" stopwatch used to be offered here as a third
+          // choice. It was dropped: the countdown card is one number falling
+          // to zero, and a second clock climbing away from it beside the
+          // first reads as a contradiction rather than as more information.
           else -> null
         }
 

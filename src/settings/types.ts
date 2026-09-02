@@ -288,11 +288,26 @@ export type PrayerAppSettings = {
   liveActivityDesign: 'timeline' | 'countdown' | 'markers';
   /**
    * Optional second metric shown on the Android 17 countdown (MetricStyle)
-   * design. Metrics must be numeric/time values, so the choices are the prayer
-   * clock time or the time elapsed since the previous prayer. 'off' keeps the
-   * single big countdown. Android 17 only; ignored elsewhere.
+   * design. 'off' keeps the single big countdown; 'time' puts the next
+   * prayer's clock time beside it. Android 17 only; ignored elsewhere.
+   *
+   * A third choice — a stopwatch counting up since the previous prayer —
+   * used to live here and was removed: on a card whose whole point is one
+   * number counting down, a second clock counting up reads as a
+   * contradiction rather than as extra information. Values stored by older
+   * builds are coerced back to 'off' where the setting is read.
    */
-  liveActivitySecondMetric: 'off' | 'time' | 'elapsed';
+  liveActivitySecondMetric: 'off' | 'time';
+  /**
+   * Whether the Live Activity card carries its lock-screen toggle button.
+   *
+   * Android only, and on by default because that is the behaviour it had.
+   * The card has room for two actions and the other one — muting the next
+   * adhan — is the one people reach for; someone who never hides the card
+   * from their lock screen is carrying a button they will never press,
+   * on a surface where space is the scarce thing.
+   */
+  liveActivityLockButton: boolean;
   /**
    * Non-prayer time toggles. Each gates one optional entry across the prayer
    * table, notifications, home-screen widget, and Live Activity. All three use
@@ -403,6 +418,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   liveActivityShowLocation: true,
   liveActivityDesign: 'timeline',
   liveActivitySecondMetric: 'off',
+  liveActivityLockButton: true,
   // Sunrise on by default (unchanged behaviour); the two night times off by
   // default so existing users see no new rows/notifications until they opt in.
   sunriseEnabled: true,

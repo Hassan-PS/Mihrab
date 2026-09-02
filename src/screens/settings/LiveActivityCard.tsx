@@ -225,11 +225,14 @@ function LiveActivityCardImpl() {
                   [
                     { id: 'off', dv: 'None' },
                     { id: 'time', dv: 'Prayer time' },
-                    { id: 'elapsed', dv: 'Since last' },
                   ] as const
                 ).map(opt => {
+                  // Anything not 'time' is 'off', which also catches the
+                  // retired 'since last' stopwatch on an older install.
                   const sel =
-                    (settings.liveActivitySecondMetric ?? 'off') === opt.id;
+                    (settings.liveActivitySecondMetric === 'time'
+                      ? 'time'
+                      : 'off') === opt.id;
                   return (
                     <Pressable
                       key={opt.id}
@@ -261,6 +264,39 @@ function LiveActivityCardImpl() {
               </View>
             </View>
           )}
+        </View>
+      )}
+
+      {/* Lock-screen button — Android only. The card has room for two
+          actions and the other one, muting the next adhan, is the one
+          people reach for; someone who has decided the card belongs on
+          their lock screen is carrying a button they will never press. */}
+      {Platform.OS === 'android' && settings.liveActivityEnabled && (
+        <View
+          style={[
+            s.card,
+            s.switchRow,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <View style={s.switchCopy}>
+            <Text style={[s.valueText, { color: palette.text }]}>
+              {t('settings.laLockButtonLabel', {
+                defaultValue: 'Lock-screen button',
+              })}
+            </Text>
+            <Text style={[s.help, { color: palette.muted }]}>
+              {t('settings.laLockButtonHelp', {
+                defaultValue:
+                  'Show a button on the card for hiding it from the lock screen and always-on display.',
+              })}
+            </Text>
+          </View>
+          <Switch
+            value={settings.liveActivityLockButton !== false}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor={'#ffffff'}
+            onValueChange={v => update({ liveActivityLockButton: v })}
+          />
         </View>
       )}
     </>

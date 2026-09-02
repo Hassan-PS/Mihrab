@@ -289,6 +289,10 @@
     "themeRestartBody": "Byte av systemfärger kräver omstart så att alla skärmar får det nya temat. Starta om nu?",
     "themeRestartConfirm": "Starta om",
     "laSecondMetricLabel": "Andra värdet",
+    "laSecondMetric_off": "Ingen",
+    "laSecondMetric_time": "Bönetid",
+    "laLockButtonLabel": "Knäppknapp för låsskärmen",
+    "laLockButtonHelp": "Visa en knapp på kortet för att dölja det från låsskärmen och alltid-på-skärmen.",
     "resetTitle": "Återställ appen?",
     "resetBody": "Detta raderar alla inställningar, sparade platser, loggposter, fasteloggen och tasbih-läget och tar dig tillbaka till introduktionen. Kan inte ångras.",
     "resetConfirm": "Återställ allt",
@@ -1198,7 +1202,6 @@
     "unmuteNext": "Slå på nästa böneutrop",
     "inWord": "Om",
     "atWord": "Kl.",
-    "sinceWord": "Sedan",
     "hideOnLock": "Dölj på låsskärmen",
     "showOnLock": "Visa på låsskärmen"
   },

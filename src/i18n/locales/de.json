@@ -289,6 +289,10 @@
     "themeRestartBody": "Ein Wechsel der Systemfarben erfordert einen Neustart, damit jeder Bildschirm das Design übernimmt. Jetzt neu starten?",
     "themeRestartConfirm": "Neu starten",
     "laSecondMetricLabel": "Zweiter Wert",
+    "laSecondMetric_off": "Keine",
+    "laSecondMetric_time": "Gebetszeit",
+    "laLockButtonLabel": "Sperrbildschirm-Schaltfläche",
+    "laLockButtonHelp": "Zeigt auf der Karte eine Schaltfläche, um sie vom Sperrbildschirm und Always-on-Display auszublenden.",
     "resetTitle": "App zurücksetzen?",
     "resetBody": "Das löscht alle Einstellungen, gespeicherten Orte, Protokolleinträge, Fastentage und den Tasbih-Stand und bringt dich zurück zum Einstieg. Nicht rückgängig zu machen.",
     "resetConfirm": "Alles zurücksetzen",
@@ -1198,7 +1202,6 @@
     "unmuteNext": "Nächsten Adhan einschalten",
     "inWord": "In",
     "atWord": "Um",
-    "sinceWord": "Seit",
     "hideOnLock": "Auf Sperrbildschirm ausblenden",
     "showOnLock": "Auf Sperrbildschirm anzeigen"
   },

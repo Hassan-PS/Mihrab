@@ -289,6 +289,10 @@
     "themeRestartBody": "切换系统配色需要重启应用，所有界面才会应用新主题。现在重启吗？",
     "themeRestartConfirm": "重启",
     "laSecondMetricLabel": "第二项信息",
+    "laSecondMetric_off": "无",
+    "laSecondMetric_time": "礼拜时间",
+    "laLockButtonLabel": "锁屏按钮",
+    "laLockButtonHelp": "在卡片上显示一个按钮，用于将其从锁屏和常亮显示中隐藏。",
     "resetTitle": "重置应用？",
     "resetBody": "这将清除所有设置、已保存地点、记录条目、斋戒记录与念珠状态，并回到初始引导。此操作无法撤销。",
     "resetConfirm": "全部重置",
@@ -1198,7 +1202,6 @@
     "unmuteNext": "开启下一次宣礼",
     "inWord": "还有",
     "atWord": "于",
-    "sinceWord": "已过",
     "hideOnLock": "在锁屏上隐藏",
     "showOnLock": "在锁屏上显示"
   },

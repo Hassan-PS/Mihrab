@@ -404,13 +404,18 @@ export async function startOrUpdateLiveActivity(
     // Android 17 extras: second metric + the "Mute next adhan" toggle. Read
     // from settings here (once per JS sync — the per-second redraw is native)
     // rather than threading through every layer.
-    let secondMetric: 'off' | 'time' | 'elapsed' = 'off';
+    let secondMetric: 'off' | 'time' = 'off';
+    let lockButton = true;
     let adhanActionEnabled = false;
     let adhanChannelId = 'prayer-times-default';
     let adhanSoundId = 'default';
     try {
       const s = await loadSettings();
-      secondMetric = s.liveActivitySecondMetric ?? 'off';
+      // Anything that is not 'time' is 'off' — which also migrates the
+      // retired 'elapsed' (a stopwatch since the previous prayer) off the
+      // cards of anyone who had chosen it, without a settings rewrite.
+      secondMetric = s.liveActivitySecondMetric === 'time' ? 'time' : 'off';
+      lockButton = s.liveActivityLockButton !== false;
       const soundOpt = getNotificationSoundOption(s.notificationSound);
       // Resolved rather than read off the table: the user's own recording has
       // no fixed channel, and if its file has gone this lands on the default
@@ -456,13 +461,15 @@ export async function startOrUpdateLiveActivity(
       unmuteLabel: i18n.t('liveActivity.unmuteNext', 'Unmute next adhan'),
       // Second action: toggle the card's lock-screen / always-on-display
       // visibility (native-only state; independent of the master on/off setting).
-      aodActionEnabled: true,
+      // The lock-screen toggle is one of two actions the card has room
+      // for, and someone who never hides it is carrying a button they
+      // will never press. Off by choice, on by default.
+      aodActionEnabled: lockButton,
       aodHideLabel: i18n.t('liveActivity.hideOnLock', 'Hide on lock screen'),
       aodShowLabel: i18n.t('liveActivity.showOnLock', 'Show on lock screen'),
       nowWord: i18n.t('liveActivity.now', 'Now'),
       inWord: i18n.t('liveActivity.inWord', 'In'),
       atWord: i18n.t('liveActivity.atWord', 'At'),
-      sinceWord: i18n.t('liveActivity.sinceWord', 'Since'),
       atPrayerBody: i18n.t('alertCopy.atPrayer', 'Prayer time'),
       adhanChannelId,
       adhanSoundId,

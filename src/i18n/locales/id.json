@@ -289,6 +289,10 @@
     "themeRestartBody": "Mengganti warna sistem perlu memulai ulang agar semua layar memakai tema baru. Mulai ulang sekarang?",
     "themeRestartConfirm": "Mulai ulang",
     "laSecondMetricLabel": "Metrik kedua",
+    "laSecondMetric_off": "Tidak ada",
+    "laSecondMetric_time": "Waktu salat",
+    "laLockButtonLabel": "Tombol layar kunci",
+    "laLockButtonHelp": "Tampilkan tombol pada kartu untuk menyembunyikannya dari layar kunci dan layar selalu aktif.",
     "resetTitle": "Setel ulang aplikasi?",
     "resetBody": "Ini menghapus semua pengaturan, lokasi tersimpan, catatan, log puasa, dan status tasbih, lalu kembali ke pengenalan. Tidak dapat dibatalkan.",
     "resetConfirm": "Setel ulang semua",
@@ -1198,7 +1202,6 @@
     "unmuteNext": "Aktifkan adzan berikutnya",
     "inWord": "Dalam",
     "atWord": "Pukul",
-    "sinceWord": "Sejak",
     "hideOnLock": "Sembunyikan di layar kunci",
     "showOnLock": "Tampilkan di layar kunci"
   },
