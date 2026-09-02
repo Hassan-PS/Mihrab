@@ -1,0 +1,4 @@
+• Three more reading traditions: Warsh, Qālūn and Shuʿbah, set on the printed muṣḥaf's own fifteen lines. Tap the tradition's name at the top of a page to switch. Each is fetched from the publisher, not bundled.
+• The khatmah counts in pages now, of the muṣḥaf you are in, and its days are even — a thirtieth of the book is twenty pages, not eight one day and thirty-six the next.
+• The Qibla compass is back.
+• The prayer log can be reset: one prayer, a day, a month, a year, or the lot.
