@@ -372,3 +372,15 @@ build is broken saved re-signing something that was never wrong. If this
 recurs, the fix is in the script rather than in the habit: retry the
 submit on a resolution error rather than dying on it, the way
 `fetchWithRetry` already treats a DNS failure as different from a refusal.
+
+## 2.14.0 (254) — 2026-09-02
+
+Took 1 aborted attempt(s) before it ran clean:
+
+  - 1 catalyst build failed — /tmp/release-catalyst.log
+
+Changed the release cycle itself:
+
+  - `scripts/build-catalyst.sh`
+
+**Lesson:** _(unfilled)_
