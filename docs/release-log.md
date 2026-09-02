@@ -413,3 +413,13 @@ And the one rule paid again, in the same unglamorous way it did last time:
 the failure landed in PHASE 2, so the whole cost of getting this wrong was
 a rebuild — not a tag, a GitHub release and a cask pointing at a zip with
 no ticket in it.
+
+## 2.14.1 (255) — 2026-09-02
+
+Took 4 aborted attempt(s) before it ran clean:
+
+  - 2 catalyst build failed — /tmp/release-catalyst.log
+  - 1 origin/main has commits main does not — pull first
+  - 1 working tree has tracked changes — commit or stash them first
+
+**Lesson:** _(unfilled)_
