@@ -117,6 +117,18 @@
     "gregorian": "Gregoryen",
     "prayerTimes": "Namaz Vakitleri"
   },
+  "share": {
+    "tagline": "Namaz vakitleri, kıble ve Kur’an",
+    "timesFor": "{{place}} için namaz vakitleri",
+    "scanForApp": "Uygulamayı almak için tarayın",
+    "asrHanafi": "İkindi: Hanefî",
+    "asrStandard": "İkindi: standart",
+    "source": "Vakitler: {{source}}",
+    "footerNote": "Hesaplanmış vakitler. Farklıysa mahalle camini esas al.",
+    "sheetLanguage": "Sayfa dili",
+    "exportImage": "Görseli paylaş",
+    "exportPdf": "PDF paylaş (A4)"
+  },
   "settings": {
     "laDesignLabel": "Stil",
     "laDesignTimeline": "Zaman çizelgesi",

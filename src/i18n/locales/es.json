@@ -117,6 +117,18 @@
     "gregorian": "gregoriano",
     "prayerTimes": "Horarios de oración"
   },
+  "share": {
+    "tagline": "Horarios de oración, alquibla y el Corán",
+    "timesFor": "Horarios de oración para {{place}}",
+    "scanForApp": "Escanea para obtener la app",
+    "asrHanafi": "Asr: hanafí",
+    "asrStandard": "Asr: estándar",
+    "source": "Horarios de {{source}}",
+    "footerNote": "Horarios calculados. Sigue a tu mezquita local donde difieran.",
+    "sheetLanguage": "Idioma de la hoja",
+    "exportImage": "Compartir imagen",
+    "exportPdf": "Compartir PDF (A4)"
+  },
   "settings": {
     "laDesignLabel": "Estilo",
     "laDesignTimeline": "Cronología",

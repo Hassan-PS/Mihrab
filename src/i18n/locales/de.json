@@ -117,6 +117,18 @@
     "gregorian": "Gregorianisch",
     "prayerTimes": "Gebetszeiten"
   },
+  "share": {
+    "tagline": "Gebetszeiten, Qibla und der Koran",
+    "timesFor": "Gebetszeiten für {{place}}",
+    "scanForApp": "Scannen, um die App zu laden",
+    "asrHanafi": "Asr: hanafitisch",
+    "asrStandard": "Asr: Standard",
+    "source": "Zeiten von {{source}}",
+    "footerNote": "Berechnete Zeiten. Folge deiner Moschee vor Ort, wo sie abweichen.",
+    "sheetLanguage": "Sprache des Blatts",
+    "exportImage": "Bild teilen",
+    "exportPdf": "PDF teilen (A4)"
+  },
   "settings": {
     "laDesignLabel": "Stil",
     "laDesignTimeline": "Zeitleiste",

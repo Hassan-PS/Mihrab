@@ -117,6 +117,18 @@
     "gregorian": "Gregoriansk",
     "prayerTimes": "Bönetider"
   },
+  "share": {
+    "tagline": "Bönetider, qibla och Koranen",
+    "timesFor": "Bönetider för {{place}}",
+    "scanForApp": "Skanna för att hämta appen",
+    "asrHanafi": "Asr: hanafitisk",
+    "asrStandard": "Asr: standard",
+    "source": "Tider från {{source}}",
+    "footerNote": "Beräknade tider. Följ din lokala moské där de skiljer sig.",
+    "sheetLanguage": "Bladets språk",
+    "exportImage": "Dela bild",
+    "exportPdf": "Dela PDF (A4)"
+  },
   "settings": {
     "laDesignLabel": "Stil",
     "laDesignTimeline": "Tidslinje",

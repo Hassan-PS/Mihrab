@@ -117,6 +117,18 @@
     "gregorian": "গ্রেগরিয়ান",
     "prayerTimes": "নামাজের সময়"
   },
+  "share": {
+    "tagline": "নামাজের সময়, কিবলা ও কুরআন",
+    "timesFor": "{{place}}-এর নামাজের সময়",
+    "scanForApp": "অ্যাপ পেতে স্ক্যান করুন",
+    "asrHanafi": "আসর: হানাফি",
+    "asrStandard": "আসর: সাধারণ",
+    "source": "সময় {{source}} থেকে",
+    "footerNote": "গণনা করা সময়। পার্থক্য হলে স্থানীয় মসজিদ অনুসরণ করুন।",
+    "sheetLanguage": "শিটের ভাষা",
+    "exportImage": "ছবি শেয়ার করুন",
+    "exportPdf": "PDF শেয়ার করুন (A4)"
+  },
   "settings": {
     "laDesignLabel": "শৈলী",
     "laDesignTimeline": "টাইমলাইন",

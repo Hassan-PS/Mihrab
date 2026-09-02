@@ -1,7 +1,23 @@
 import { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { AppPalette } from '../../theme/appPalette';
-import { DISPLAY_ORDER, type DisplayPrayerKey } from '../../types/prayer';
+import {
+  DISPLAY_ORDER,
+  OPTIONAL_TIME_KEYS,
+  type DisplayPrayerKey,
+} from '../../types/prayer';
+
+/**
+ * The five, and everything else.
+ *
+ * The table carries nine columns and only five of them are prayers.
+ * Sunrise was already set apart; Islamic Midnight, the Last Third and the
+ * First Third were not, so a month at a glance read as nine equal things
+ * and the eye had to work out which five it came for. Same treatment as
+ * the shared sheet: the five carry the weight, the derived times sit back.
+ */
+const isSalah = (key: string) =>
+  !(OPTIONAL_TIME_KEYS as readonly string[]).includes(key);
 import type { MonthDayEntry } from '../../prayer/loadMonthPrayerTimes';
 import { formatDisplayTime } from '../../utils/prayerTimes';
 import { SPACING } from '../../theme/tokens';
@@ -45,13 +61,13 @@ function MonthColumnHeaderImpl({
         {dayLabel}
       </Text>
       {DISPLAY_ORDER.map((key, idx) => {
-        const isSunrise = key === 'Sunrise';
+        const salah = isSalah(key);
         return (
           <Text
             key={key}
             style={[
-              styles.colHeaderTime,
-              { color: isSunrise ? palette.muted : palette.accent },
+              salah ? styles.colHeaderTime : styles.colHeaderTimeQuiet,
+              { color: salah ? palette.accent : palette.muted },
             ]}>
             {colHeaders[idx]}
           </Text>
@@ -106,20 +122,20 @@ function MonthRowImpl({ item, palette, isCurrentMonth, todayDay }: RowProps) {
       {DISPLAY_ORDER.map((key: DisplayPrayerKey) => {
         const raw = item.timings[key];
         const timeStr = raw ? formatDisplayTime(raw) : '—';
-        const isSunrise = key === 'Sunrise';
+        const salah = isSalah(key);
         return (
           <Text
             key={key}
             style={[
-              styles.cellTime,
+              salah ? styles.cellTimeSalah : styles.cellTime,
               {
                 color: isToday
                   ? palette.accent
-                  : isSunrise
-                    ? palette.muted
-                    : palette.text,
-                fontStyle: isSunrise ? 'italic' : 'normal',
-                fontWeight: isToday ? '600' : '400',
+                  : salah
+                    ? palette.text
+                    : palette.muted,
+                fontStyle: salah ? 'normal' : 'italic',
+                fontWeight: isToday ? '700' : salah ? '600' : '400',
               },
             ]}>
             {timeStr}
@@ -148,9 +164,17 @@ const styles = StyleSheet.create({
   colHeaderTime: {
     ...typeStyle('caption'),
     flex: COL_TIME,
-    fontWeight: '700',
+    fontWeight: '800',
     textTransform: 'uppercase',
     textAlign: 'center',
+  },
+  colHeaderTimeQuiet: {
+    ...typeStyle('caption'),
+    flex: COL_TIME,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    opacity: 0.85,
   },
   row: {
     flexDirection: 'row',
@@ -173,6 +197,12 @@ const styles = StyleSheet.create({
     paddingStart: SPACING.xs,
   },
   cellTime: {
+    ...typeStyle('caption'),
+    flex: COL_TIME,
+    textAlign: 'center',
+    opacity: 0.75,
+  },
+  cellTimeSalah: {
     ...typeStyle('caption'),
     flex: COL_TIME,
     textAlign: 'center',

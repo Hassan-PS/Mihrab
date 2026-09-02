@@ -117,6 +117,18 @@
     "gregorian": "григорианский",
     "prayerTimes": "Время молитв"
   },
+  "share": {
+    "tagline": "Время намаза, кибла и Коран",
+    "timesFor": "Время намаза для {{place}}",
+    "scanForApp": "Отсканируйте, чтобы установить приложение",
+    "asrHanafi": "Аср: ханафитский",
+    "asrStandard": "Аср: стандартный",
+    "source": "Время от {{source}}",
+    "footerNote": "Расчётное время. При расхождении следуйте своей мечети.",
+    "sheetLanguage": "Язык листа",
+    "exportImage": "Поделиться изображением",
+    "exportPdf": "Поделиться PDF (A4)"
+  },
   "settings": {
     "laDesignLabel": "Стиль",
     "laDesignTimeline": "Хронология",

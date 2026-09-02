@@ -75,10 +75,17 @@ export const PRAYER_DATA_PROVIDERS: ProviderOption[] = [
  * label tracks the active app language; falls back to the English name
  * if no translation is registered.
  */
-export function getProviderLabel(id: PrayerDataProviderId): string {
+export function getProviderLabel(
+  id: PrayerDataProviderId,
+  /** See `getMethodLabel` — the share sheet has its own language. */
+  translate: (key: string, opts: { defaultValue: string }) => string = (
+    key,
+    opts,
+  ) => i18n.t(key, opts),
+): string {
   const found = PRAYER_DATA_PROVIDERS.find(p => p.id === id);
   if (!found) return id;
-  return i18n.t(found.nameKey, { defaultValue: found.name });
+  return translate(found.nameKey, { defaultValue: found.name });
 }
 
 /** Resolve the localized description of a provider. */

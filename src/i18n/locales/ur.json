@@ -117,6 +117,18 @@
     "gregorian": "گریگورین",
     "prayerTimes": "نماز کے اوقات"
   },
+  "share": {
+    "tagline": "نماز کے اوقات، قبلہ اور قرآن",
+    "timesFor": "{{place}} کے نماز اوقات",
+    "scanForApp": "ایپ حاصل کرنے کے لیے اسکین کریں",
+    "asrHanafi": "عصر: حنفی",
+    "asrStandard": "عصر: معیاری",
+    "source": "اوقات بذریعہ {{source}}",
+    "footerNote": "محسوب اوقات۔ فرق ہو تو اپنی مقامی مسجد کی پیروی کریں۔",
+    "sheetLanguage": "ورق کی زبان",
+    "exportImage": "تصویر شیئر کریں",
+    "exportPdf": "پی ڈی ایف شیئر کریں (A4)"
+  },
   "settings": {
     "laDesignLabel": "انداز",
     "laDesignTimeline": "ٹائم لائن",

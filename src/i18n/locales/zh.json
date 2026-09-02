@@ -117,6 +117,18 @@
     "gregorian": "公历",
     "prayerTimes": "祈祷时间"
   },
+  "share": {
+    "tagline": "礼拜时间、朝向与《古兰经》",
+    "timesFor": "{{place}}的礼拜时间",
+    "scanForApp": "扫码获取应用",
+    "asrHanafi": "晡礼：哈乃斐",
+    "asrStandard": "晡礼：通行",
+    "source": "时间来自 {{source}}",
+    "footerNote": "为计算所得时间。若有出入，请以当地清真寺为准。",
+    "sheetLanguage": "页面语言",
+    "exportImage": "分享图片",
+    "exportPdf": "分享 PDF（A4）"
+  },
   "settings": {
     "laDesignLabel": "样式",
     "laDesignTimeline": "时间轴",

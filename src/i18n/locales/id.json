@@ -117,6 +117,18 @@
     "gregorian": "Gregorian",
     "prayerTimes": "Waktu Sholat"
   },
+  "share": {
+    "tagline": "Waktu salat, kiblat, dan Al-Qur’an",
+    "timesFor": "Waktu salat untuk {{place}}",
+    "scanForApp": "Pindai untuk mengunduh aplikasi",
+    "asrHanafi": "Asar: Hanafi",
+    "asrStandard": "Asar: standar",
+    "source": "Waktu dari {{source}}",
+    "footerNote": "Waktu hasil perhitungan. Ikuti masjid setempat bila berbeda.",
+    "sheetLanguage": "Bahasa lembar",
+    "exportImage": "Bagikan gambar",
+    "exportPdf": "Bagikan PDF (A4)"
+  },
   "settings": {
     "laDesignLabel": "Gaya",
     "laDesignTimeline": "Lini masa",

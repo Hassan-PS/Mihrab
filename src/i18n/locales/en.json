@@ -117,6 +117,18 @@
     "gregorian": "Gregorian",
     "prayerTimes": "Prayer Times"
   },
+  "share": {
+    "tagline": "Prayer times, qibla and the Qur’an",
+    "timesFor": "Prayer times for {{place}}",
+    "scanForApp": "Scan to get the app",
+    "asrHanafi": "Asr: Hanafi",
+    "asrStandard": "Asr: standard",
+    "source": "Times from {{source}}",
+    "footerNote": "Calculated times. Follow your local mosque where it differs.",
+    "sheetLanguage": "Sheet language",
+    "exportImage": "Share image",
+    "exportPdf": "Share PDF (A4)"
+  },
   "settings": {
     "laDesignLabel": "Style",
     "laDesignTimeline": "Timeline",

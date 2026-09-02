@@ -117,6 +117,18 @@
     "gregorian": "ग्रेगोरियन",
     "prayerTimes": "प्रार्थना का समय"
   },
+  "share": {
+    "tagline": "नमाज़ के समय, क़िबला और क़ुरआन",
+    "timesFor": "{{place}} के लिए नमाज़ के समय",
+    "scanForApp": "ऐप पाने के लिए स्कैन करें",
+    "asrHanafi": "अस्र: हनफ़ी",
+    "asrStandard": "अस्र: मानक",
+    "source": "समय {{source}} से",
+    "footerNote": "गणना किए गए समय। अंतर होने पर अपनी स्थानीय मस्जिद का पालन करें।",
+    "sheetLanguage": "शीट की भाषा",
+    "exportImage": "छवि साझा करें",
+    "exportPdf": "PDF साझा करें (A4)"
+  },
   "settings": {
     "laDesignLabel": "शैली",
     "laDesignTimeline": "टाइमलाइन",

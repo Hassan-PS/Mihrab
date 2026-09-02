@@ -117,6 +117,18 @@
     "gregorian": "grégorien",
     "prayerTimes": "Horaires de prière"
   },
+  "share": {
+    "tagline": "Horaires de prière, qibla et le Coran",
+    "timesFor": "Horaires de prière pour {{place}}",
+    "scanForApp": "Scannez pour obtenir l’application",
+    "asrHanafi": "Asr : hanafite",
+    "asrStandard": "Asr : standard",
+    "source": "Horaires de {{source}}",
+    "footerNote": "Horaires calculés. Suivez votre mosquée locale en cas d’écart.",
+    "sheetLanguage": "Langue de la feuille",
+    "exportImage": "Partager l’image",
+    "exportPdf": "Partager le PDF (A4)"
+  },
   "settings": {
     "laDesignLabel": "Style",
     "laDesignTimeline": "Chronologie",

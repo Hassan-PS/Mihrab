@@ -7,24 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { cardEdgeStyle, rowDividerStyle } from '../../theme/chrome';
 import type { AppPalette } from '../../theme/appPalette';
 import type { AppLanguage } from '../../settings/types';
+import { APP_LANGUAGES } from '../../i18n/languages';
 import { useSystemNavigationReserve } from '../../navigation/tabBarInset';
 import { modalStyles } from './modalStyles';
 
-const LANGUAGES: { id: AppLanguage; label: string }[] = [
-  { id: 'en', label: 'English' },
-  { id: 'sv', label: 'Svenska' },
-  { id: 'ar', label: 'العربية' },
-  { id: 'bn', label: 'বাংলা' },
-  { id: 'ur', label: 'اردو' },
-  { id: 'hi', label: 'हिन्दी' },
-  { id: 'fr', label: 'Français' },
-  { id: 'es', label: 'Español' },
-  { id: 'de', label: 'Deutsch' },
-  { id: 'tr', label: 'Türkçe' },
-  { id: 'id', label: 'Bahasa Indonesia' },
-  { id: 'ru', label: 'Русский' },
-  { id: 'zh', label: '中文' },
-];
+/** Shared with the share sheet's own picker — see `i18n/languages`. */
+const LANGUAGES = APP_LANGUAGES;
 
 type Props = {
   visible: boolean;

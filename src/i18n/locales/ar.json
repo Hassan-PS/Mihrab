@@ -117,6 +117,18 @@
     "gregorian": "ميلادي",
     "prayerTimes": "مواقيت الصلاة"
   },
+  "share": {
+    "tagline": "مواقيت الصلاة والقبلة والقرآن",
+    "timesFor": "مواقيت الصلاة في {{place}}",
+    "scanForApp": "امسح الرمز لتحميل التطبيق",
+    "asrHanafi": "العصر: حنفي",
+    "asrStandard": "العصر: الجمهور",
+    "source": "المواقيت من {{source}}",
+    "footerNote": "مواقيت محسوبة. اتبع مسجد حيّك عند الاختلاف.",
+    "sheetLanguage": "لغة الورقة",
+    "exportImage": "مشاركة صورة",
+    "exportPdf": "مشاركة PDF (A4)"
+  },
   "settings": {
     "laDesignLabel": "النمط",
     "laDesignTimeline": "الجدول الزمني",
