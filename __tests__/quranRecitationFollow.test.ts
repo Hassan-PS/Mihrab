@@ -181,15 +181,16 @@ describe('what the reporter suspected about memory', () => {
     expect(timing).toContain('while (cache.size > MAX_CACHED_RECITERS)');
   });
 
-  it('does not load the image reader’s 2.6 MB geometry in text mode', () => {
-    // `data/ayahGeometry.json` serves the retired image reader only, and
-    // geometry.ts keeps the parsed copy for the life of the process. The
-    // effect had no condition, so the default renderer paid for it on
-    // every mount.
-    const reader = read('src/quran/MushafReader.tsx');
-    const effect = reader.slice(reader.indexOf('const [geometryReady, setGeometryReady]'));
-    const body = effect.slice(0, effect.indexOf('}, ['));
-    expect(body).toContain('if (textMode) return;');
-    expect(body).toContain('loadGeometry()');
+  it('has no image-reader geometry left to load at all', () => {
+    // `data/ayahGeometry.json` was 2.6 MB of pixel boxes for the retired
+    // image reader, parsed and kept for the life of the process. First it
+    // was guarded off the text path; now the reader, the file and the
+    // parser are gone, and the guard has nothing to guard.
+    const fs = require('fs') as typeof import('fs');
+    const path = require('path') as typeof import('path');
+    expect(
+      fs.existsSync(path.join(__dirname, '..', 'src', 'quran', 'data', 'ayahGeometry.json')),
+    ).toBe(false);
+    expect(read('src/quran/MushafReader.tsx')).not.toContain('loadGeometry');
   });
 });

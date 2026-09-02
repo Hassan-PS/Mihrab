@@ -1,18 +1,11 @@
 /**
  * Quran Reader v2 logic tests — docs/quran-reader-plan.md §6.
  *
- * Covers the pure logic layers added by the reader rebuild:
- *   geometry hit-testing, repeat/queue expansion, khatmah portion math,
- *   Arabic search normalization, and the verse-of-the-day pick.
+ * Covers the pure logic layers added by the reader rebuild: repeat/queue
+ * expansion, khatmah portion math, Arabic search normalization, and the
+ * verse-of-the-day pick. (The geometry hit-testing block that opened this
+ * file went with the image reader it served.)
  */
-import {
-  GEOMETRY_REF_WIDTH,
-  hitTestAyah,
-  loadGeometry,
-  pageAyahLineRects,
-  pageWordGlyphs,
-  firstAyahOnPage,
-} from '../src/quran/geometry';
 import {
   applyRepeats,
   expandRange,
@@ -31,79 +24,7 @@ import {
   type KhatmahPlan,
 } from '../src/quran/quranState';
 import { normalizeArabic, verseOfTheDayRef } from '../src/quran/search';
-import { findPageForAyah } from '../src/quran/pages';
 import { SURAHS } from '../src/quran/quran';
-
-beforeAll(async () => {
-  await loadGeometry();
-});
-
-describe('geometry (QR-7)', () => {
-  it('loads all 604 pages with word glyphs', () => {
-    for (const page of [1, 2, 50, 302, 604]) {
-      expect(pageWordGlyphs(page).length).toBeGreaterThan(0);
-    }
-  });
-
-  it('page 1 contains only al-Fatihah', () => {
-    const glyphs = pageWordGlyphs(1);
-    expect(glyphs.every(g => g.surah === 1)).toBe(true);
-  });
-
-  it('agrees with the pages.json page index for every surah start', () => {
-    for (const s of SURAHS) {
-      const page = findPageForAyah(s.number, 1);
-      const glyphs = pageWordGlyphs(page);
-      expect(
-        glyphs.some(g => g.surah === s.number && g.ayah === 1),
-      ).toBe(true);
-    }
-  });
-
-  it('hit-tests the center of a known glyph to its ayah', () => {
-    const glyphs = pageWordGlyphs(50);
-    const g = glyphs[Math.floor(glyphs.length / 2)];
-    const cx = (g.x0 + g.x1) / 2;
-    const cy = (g.y0 + g.y1) / 2;
-    // Rendered at reference scale.
-    const hit = hitTestAyah(50, cx, cy, GEOMETRY_REF_WIDTH);
-    expect(hit).toEqual({ surah: g.surah, ayah: g.ayah });
-  });
-
-  it('hit-testing scales with rendered width', () => {
-    const glyphs = pageWordGlyphs(50);
-    const g = glyphs[0];
-    const scale = 390 / GEOMETRY_REF_WIDTH; // phone-sized render
-    const hit = hitTestAyah(
-      50,
-      ((g.x0 + g.x1) / 2) * scale,
-      ((g.y0 + g.y1) / 2) * scale,
-      390,
-    );
-    expect(hit).toEqual({ surah: g.surah, ayah: g.ayah });
-  });
-
-  it('returns null for taps in the page margin', () => {
-    // Far top-left corner (outside any text line band).
-    expect(hitTestAyah(50, 1, 1, GEOMETRY_REF_WIDTH)).toBeNull();
-  });
-
-  it('merges word glyphs into per-line ayah rects', () => {
-    const rects = pageAyahLineRects(50);
-    expect(rects.length).toBeGreaterThan(0);
-    for (const r of rects) {
-      expect(r.x1).toBeGreaterThan(r.x0);
-      expect(r.y1).toBeGreaterThan(r.y0);
-    }
-  });
-
-  it('firstAyahOnPage returns the reading-order first ayah', () => {
-    expect(firstAyahOnPage(1)).toEqual({ surah: 1, ayah: 1 });
-    const p2 = firstAyahOnPage(2);
-    expect(p2.surah).toBe(2);
-    expect(p2.ayah).toBe(1);
-  });
-});
 
 describe('queue building (QR-16/19)', () => {
   it('expands a same-surah range inclusively', () => {

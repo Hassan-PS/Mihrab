@@ -38,7 +38,6 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { cardEdgeStyle } from '../theme/chrome';
 import {
-  clearMushafDownloadFlag,
   deleteLegacyImageStore,
   legacyImageStoreBytes,
 } from '../quran/mushafDownload';
@@ -217,7 +216,6 @@ export function QuranDownloadsScreen() {
             () =>
               confirmDelete(t('downloads.mushaf', 'Mushaf pages'), async () => {
                 await deletePageFonts();
-                await clearMushafDownloadFlag();
               }),
           )
         : null}

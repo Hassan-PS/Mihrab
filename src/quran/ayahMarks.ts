@@ -3,21 +3,18 @@
  *
  * ── WHY THIS IS SHARED ────────────────────────────────────────────────
  *
- * The image renderer has drawn bookmarks and the khatmah position since
- * v2.7.28 — `MushafPageOverlay` puts a translucent box over each of the
- * ayah's line rectangles, using the page geometry table. The two TEXT
- * renderers have no geometry table and no overlay: they draw a page as
- * text, so a mark there is a background on the ayah's own runs.
- *
- * That difference in mechanism was why the text muṣḥaf showed none of it.
- * It is not a reason for the two to disagree about WHAT is marked or what
- * colour it takes, so that part lives here, in one place, and each
- * renderer applies it in whatever way it draws.
+ * Two text renderers draw the page — the glyph renderer for Ḥafṣ and the
+ * unicode renderer for the other riwāyāt — and a mark on either is a
+ * background on the ayah's own runs. A difference in mechanism is not a
+ * reason for the two to disagree about WHAT is marked or what colour it
+ * takes, so that part lives here, in one place, and each renderer applies
+ * it in whatever way it draws. (The image renderer this was first shared
+ * with, which painted a box over each ayah's line rectangles, is gone.)
  *
  * ── THE ONE RULE ABOUT ALPHA ──────────────────────────────────────────
  *
- * A mark must never compete with the ink. These are the opacities the
- * image overlay already uses, and they are low on purpose: the page reads
+ * A mark must never compete with the ink. These opacities were tuned on
+ * the image overlay and kept, and they are low on purpose: the page reads
  * exactly as it did, and the colour is a wash under the words rather than
  * a band over them. Night mode gets more because a translucent colour on
  * a near-black ground is much weaker than the same colour on cream.

@@ -29,11 +29,6 @@ function mockMakeHandle(opts?: {
   return { promise, cancel: entry.cancel };
 }
 
-jest.mock('../src/quran/mushafDownload', () => ({
-  downloadMushafAssets: (opts: Parameters<typeof mockMakeHandle>[0]) =>
-    mockMakeHandle(opts),
-}));
-
 jest.mock('../src/quran/mushafFontStore', () => ({
   downloadAllPageFonts: (opts: Parameters<typeof mockMakeHandle>[0]) =>
     mockMakeHandle(opts),
@@ -67,24 +62,24 @@ describe('who owns the download', () => {
     const unsubscribe = subscribeMushafDownload(s =>
       seen.push(String(s.running)),
     );
-    expect(startMushafDownload('images')).toBe(true);
+    expect(startMushafDownload('fonts')).toBe(true);
 
     // The screen unmounts.
     unsubscribe();
 
     expect(mockHandles[0].cancel).not.toHaveBeenCalled();
-    expect(mushafDownloadState().running).toBe('images');
-    expect(seen).toContain('images');
+    expect(mushafDownloadState().running).toBe('fonts');
+    expect(seen).toContain('fonts');
   });
 
   it('refuses to start a second one over the first', () => {
-    expect(startMushafDownload('images')).toBe(true);
+    expect(startMushafDownload('fonts')).toBe(true);
     expect(startMushafDownload('fonts')).toBe(false);
     expect(mockHandles).toHaveLength(1);
   });
 
   it('reports how the last run ended to whoever asks later', async () => {
-    startMushafDownload('images');
+    startMushafDownload('fonts');
     mockHandles[0].onProgress({ done: 604, total: 604, failed: 0 });
     mockHandles[0].resolve(true);
     await Promise.resolve();
@@ -93,7 +88,7 @@ describe('who owns the download', () => {
     const state = mushafDownloadState();
     expect(state.running).toBeNull();
     expect(state.last).toEqual({
-      kind: 'images',
+      kind: 'fonts',
       complete: true,
       cancelled: false,
       failed: 0,
@@ -121,7 +116,7 @@ describe('who owns the download', () => {
   });
 
   it('publishes progress to the notification as it goes', () => {
-    startMushafDownload('images');
+    startMushafDownload('fonts');
     mockHandles[0].onProgress({ done: 12, total: 604, failed: 0 });
     expect(mushafDownloadState().progress.done).toBe(12);
     expect(mockPublish).toHaveBeenCalledWith(

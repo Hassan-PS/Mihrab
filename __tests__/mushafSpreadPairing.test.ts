@@ -7,13 +7,7 @@
  * even page on the LEFT. Pages 1 (Al-Fatiha) and 2 (start of Al-Baqarah)
  * form the decorative opening spread, so page 1 is NOT alone.
  */
-import {
-  pageOffsetX,
-  scrollXForPage,
-  spreadCount,
-  spreadForPage,
-  spreadLeftPage,
-} from '../src/quran/mushafSpread';
+import { spreadCount, spreadForPage } from '../src/quran/mushafSpread';
 
 const TOTAL = 604;
 
@@ -63,33 +57,9 @@ describe('spreadForPage — spread-as-item pairing (RTL)', () => {
     expect(spreadForPage(9999, TOTAL)).toEqual(spreadForPage(TOTAL, TOTAL));
   });
 
-  test('agrees with the legacy spreadLeftPage pairing everywhere', () => {
-    for (let p = 1; p <= TOTAL; p++) {
-      expect(spreadForPage(p, TOTAL).left).toBe(spreadLeftPage(p, TOTAL));
-    }
-  });
-
-  test('spread index matches the legacy dual-page scroll offsets', () => {
-    // In the spread pager each item is one frame wide; the legacy dual
-    // pager scrolled by two pageW columns per spread. Inverted-list index
-    // i sits at offset (count − 1 − i) frames from the RTL far end — the
-    // same spread the legacy scrollXForPage math lands on.
-    const pageW = 400;
-    const frame = pageW * 2;
-    for (const p of [1, 2, 3, 4, 77, 302, 603, 604]) {
-      const legacySpreadsFromLeft = scrollXForPage(p, pageW, TOTAL, true) / frame;
-      const index = spreadForPage(p, TOTAL).index;
-      expect(index).toBe(spreadCount(TOTAL) - 1 - legacySpreadsFromLeft);
-    }
-  });
-
   test('spreadCount: 604 pages → 302 spreads; odd totals round up', () => {
     expect(spreadCount(TOTAL)).toBe(302);
     expect(spreadCount(5)).toBe(3);
     expect(spreadCount(1)).toBe(1);
-  });
-
-  test('single-page offsets untouched (sanity, shared module)', () => {
-    expect(pageOffsetX(1, 400, TOTAL)).toBe((TOTAL - 1) * 400);
   });
 });

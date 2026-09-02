@@ -16,7 +16,9 @@ import {
   computeLongestStreak,
 } from '../journal/journal';
 import { loadPractice } from '../practice/practiceStore';
-import { isMushafDownloaded } from '../quran/mushafDownload';
+import { fontStoreStats } from '../quran/mushafFontStore';
+import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
+import { resolveRiwayah, riwayahById } from '../quran/riwayat';
 import {
   activeKhatmah,
   getQuranState,
@@ -86,9 +88,17 @@ export async function collectWidgetExtras(input: {
     // Checked here rather than in the builder so the builder stays pure, and
     // guarded separately so a filesystem hiccup costs the mushaf deep link
     // rather than the whole reading block.
+    //
+    // The same question the reader's gate asks: a bundled riwayah is always
+    // here, Ḥafṣ is here once its fonts are. This used to ask the page-IMAGE
+    // store, which the font reader emptied in 2.8.0 — so the widget's
+    // mushaf link had been quietly off for everyone ever since.
     let mushafDownloaded = false;
     try {
-      mushafDownloaded = await isMushafDownloaded();
+      const riwayah = riwayahById(resolveRiwayah(quran.prefs.riwayah));
+      mushafDownloaded =
+        riwayah.render === 'unicode' ||
+        (await fontStoreStats()).pages >= MUSHAF_TOTAL_PAGES;
     } catch {
       /* treat as absent — the translation reader always works */
     }

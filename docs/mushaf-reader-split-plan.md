@@ -1,5 +1,15 @@
 # Splitting the mushaf reader: one mechanism per device class
 
+> **Status (2026-09-02): complete.** Steps 1–3 shipped on 2026-07-30. Step 4
+> slipped for fifteen releases — the image reader stayed mounted underneath
+> both text readers, forty-odd hooks that rendered nothing, and nothing in
+> Settings could have selected it since the day text mode shipped. It is
+> gone now: `MushafReader.tsx` is the download gate and the device-class
+> route (~300 lines, from 1,522), and with it went `MushafPhoneLandscape`,
+> the image geometry table (2.6 MB of JSON in the bundle), the render cache
+> and its native scaler on both platforms, the crop and windowed-strip math,
+> the colour-matrix dependency, and the tests that pinned all of it.
+
 Decision context (2026-07-30, Hassan): phone landscape now has its own view
 (`MushafPhoneLandscape`, shipped after the page-skip fix) — but it is bolted
 onto a 1,323-line `MushafReader` that still computes every layout mode on

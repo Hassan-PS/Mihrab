@@ -171,7 +171,6 @@ describe('two devices reading the same khatmah in different muṣḥafs', () => 
     mushafNightMode: false,
     riwayah: 'hafs',
     riwayahNoticeSeen: false,
-    mushafRenderer: 'text',
     keepAwake: true,
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },

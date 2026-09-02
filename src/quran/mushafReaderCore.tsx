@@ -75,11 +75,12 @@ export type MushafReaderProps = {
   /**
    * Where the reader on screen publishes its own page turn.
    *
-   * The keyboard is bound ONCE, in `MushafReader`, because that is the
-   * Quran reader — the split text readers are how it draws itself on a
-   * phone and on a large screen, not separate features. A reader that
-   * renders registers here through `useRegisterKeyPaging`, and the single
-   * binding drives whichever one is actually on screen.
+   * The keyboard is bound ONCE, in `MushafReader` — the gate in front of
+   * both readers — because the arrows belong to the Quran reader as a
+   * whole, and the two readers are how it draws itself on a phone and on
+   * a large screen, not separate features. A reader that renders
+   * registers here through `useRegisterKeyPaging`, and the single binding
+   * drives whichever one is actually on screen.
    */
   keyTurn?: KeyPagingTarget;
 };

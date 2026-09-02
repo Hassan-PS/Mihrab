@@ -17,15 +17,17 @@
  *
  * ── ONE AT A TIME ─────────────────────────────────────────────────────
  *
- * Both downloads pull from the same release and write to the same disk, so
- * a second one started while the first runs would halve both and confuse
- * the progress. `start` is a no-op while one is in flight; the caller finds
- * out by reading the state it gets back.
+ * A second run started while the first is in flight would halve both and
+ * confuse the progress. `start` is a no-op while one is running; the
+ * caller finds out by reading the state it gets back.
+ *
+ * There used to be two kinds — the page images, and the per-page fonts
+ * that replaced them. The image reader is gone, so the kind is kept only
+ * so the state can still say what ran.
  */
-import {
-  downloadMushafAssets,
-  type MushafDownloadHandle,
-  type MushafDownloadProgress,
+import type {
+  MushafDownloadHandle,
+  MushafDownloadProgress,
 } from './mushafDownload';
 import { downloadAllPageFonts } from './mushafFontStore';
 import {
@@ -34,8 +36,8 @@ import {
 } from './downloadNotification';
 import i18n from '../i18n';
 
-/** The page images, or the per-page fonts the text reader draws with. */
-export type MushafDownloadKind = 'images' | 'fonts';
+/** The per-page fonts the reader draws with. */
+export type MushafDownloadKind = 'fonts';
 
 export type MushafDownloadState = {
   /** What is running, or null when nothing is. */
@@ -90,10 +92,8 @@ export function subscribeMushafDownload(
   };
 }
 
-function label(kind: MushafDownloadKind): string {
-  return kind === 'fonts'
-    ? i18n.t('quran.downloadingFonts')
-    : i18n.t('quran.downloadingPages');
+function label(): string {
+  return i18n.t('quran.downloadingFonts');
 }
 
 /**
@@ -109,14 +109,11 @@ export function startMushafDownload(kind: MushafDownloadKind): boolean {
     void publishDownloadProgress({
       done: progress.done,
       total: progress.total,
-      label: label(kind),
+      label: label(),
     });
   };
 
-  handle =
-    kind === 'fonts'
-      ? downloadAllPageFonts({ onProgress })
-      : downloadMushafAssets({ concurrency: 8, onProgress });
+  handle = downloadAllPageFonts({ onProgress });
 
   void handle.promise.then(complete => {
     const failed = state.progress.failed;

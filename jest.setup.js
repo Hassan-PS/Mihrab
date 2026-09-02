@@ -270,17 +270,6 @@ jest.mock('react-native-track-player', () => ({
   },
 }));
 
-jest.mock('react-native-color-matrix-image-filters', () => {
-  const { View } = require('react-native');
-  return {
-    __esModule: true,
-    ColorMatrix: View,
-    concatColorMatrices: (...ms) => ms.flat(),
-    invert: () => [],
-    brightness: () => [],
-  };
-});
-
 jest.mock('react-native-sensors', () => ({
   magnetometer: {
     subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),

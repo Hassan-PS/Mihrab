@@ -257,12 +257,8 @@ export function QuranSurahScreen() {
      * along the screen edge where the page should reach it. The reader
      * paints its own page colour edge to edge and applies the safe-area
      * insets — cutout included — itself, so here it just gets the window.
-     *
-     * Only the FONT-rendered readers do that. The legacy image reader has no
-     * inset handling of its own, so it keeps the navigator's padding.
      */
-    const ownsItsInsets =
-      isMushaf && quran.prefs.mushafRenderer !== 'image';
+    const ownsItsInsets = isMushaf;
     // Before the stored blob is read, `mushafNightMode` is its default of
     // false, so this would paint the screen pure white and then flip to
     // #101010 a moment later when the real preference arrives. Hold the app's
@@ -483,7 +479,6 @@ export function QuranSurahScreen() {
     palette.bg,
     insets.bottom,
     quran.prefs.mushafNightMode,
-    quran.prefs.mushafRenderer,
     quranHydrated,
     riwayah,
     switchRiwayah,

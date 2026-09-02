@@ -161,15 +161,6 @@ export type QuranPrefs = {
    * it. Said once, on the first switch, and then never again.
    */
   riwayahNoticeSeen: boolean;
-  /**
-   * How mushaf pages are drawn (v2.8.0, additive).
-   *
-   * `text` renders each page from its own QPC v2 font — vector-sharp at any
-   * zoom, a fraction of the memory, and instant on rotation. `image` is the
-   * original 2600 px page PNG, kept for one release as an escape hatch and
-   * for anyone who already downloaded the images.
-   */
-  mushafRenderer: 'text' | 'image';
   keepAwake: boolean;
   /** Memorization masking in translation view. */
   hideMode: 'none' | 'arabic' | 'translation';
@@ -221,7 +212,6 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     mushafNightMode: false,
     riwayah: DEFAULT_RIWAYAH,
     riwayahNoticeSeen: false,
-    mushafRenderer: 'text',
     keepAwake: true,
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
