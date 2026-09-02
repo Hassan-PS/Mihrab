@@ -34,6 +34,7 @@ import {
 import { activeKhatmah } from './quranCardState';
 import { Chip } from '../components/controls';
 import { desktopSize } from '../responsive/desktop';
+import { suspendWhileTyping } from './useKeyPaging';
 
 /**
  * 268pt is right for a sidebar reached with a thumb on an iPad. On a Mac
@@ -234,6 +235,8 @@ function MushafIndexSidebarImpl({
 
       {tab === 'surah' ? (
         <TextInput
+          // While this has focus the arrows move the caret, not the page.
+          {...suspendWhileTyping}
           value={query}
           onChangeText={setQuery}
           placeholder={t('quran.searchSurahOrPage', 'Search surah or page')}

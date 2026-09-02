@@ -22,6 +22,9 @@
  * search types a "d" rather than turning a page. That is the whole reason
  * this is native rather than a hidden `TextInput` with `onKeyPress`, which
  * on iOS never sees an arrow key at all.
+ *
+ * The end of the chain is also why the ARROWS need `setPagingKeyPriority`
+ * and the letters do not — see the note there.
  */
 import { useEffect } from 'react';
 import type { MutableRefObject } from 'react';
@@ -77,6 +80,42 @@ export function hasKeyPaging(): boolean {
 }
 
 /**
+ * Claim, or release, the arrow keys.
+ *
+ * ── WHY THE ARROWS NEED CLAIMING AND THE LETTERS DO NOT ───────────────
+ *
+ * On Mac the letters turned pages and the arrows did nothing. A scroll
+ * view scrolls itself with ← and →; that is system behaviour, it is on by
+ * default, and the muṣḥaf reader is scroll views all the way down. System
+ * behaviour beats a key command declared at the END of the responder
+ * chain, so the arrows were eaten before the app delegate saw them.
+ * Letters mean nothing to a scroll view, so they arrived.
+ *
+ * `wantsPriorityOverSystemBehavior` takes the key back, and it is set on
+ * the arrows only, only while this says so — because a key command that
+ * outranks the system also outranks a focused text field, where ← and →
+ * move a caret. So: on while the reader is the screen, OFF the moment
+ * anything in it is being typed into. `suspendWhileTyping` is how a text
+ * field says so.
+ */
+export function setPagingKeyPriority(on: boolean): void {
+  const mod = Native as { setArrowPriority?: (on: boolean) => void } | undefined;
+  mod?.setArrowPriority?.(on);
+}
+
+/**
+ * Handlers for a text input inside the reader: `{...suspendWhileTyping}`.
+ *
+ * Spread onto a `TextInput` and the arrows go back to moving the caret
+ * for as long as it has focus. Nothing to remember to undo — blur puts
+ * them back.
+ */
+export const suspendWhileTyping = {
+  onFocus: () => setPagingKeyPriority(false),
+  onBlur: () => setPagingKeyPriority(true),
+};
+
+/**
  * Call `onForward` / `onBack` when the reader presses a paging key.
  *
  * The handlers are read through a ref-free dependency list on purpose: a
@@ -90,6 +129,9 @@ export function useKeyPaging(
 ): void {
   useEffect(() => {
     if (!Native || !enabled) return undefined;
+    // The reader is the screen: take the arrows back from the scroll
+    // views for as long as it is, and give them up when it goes.
+    setPagingKeyPriority(true);
     // The emitter is constructed per subscription rather than at module
     // scope: building one without a native module attached warns on every
     // platform that does not have this, including every phone.
@@ -103,6 +145,9 @@ export function useKeyPaging(
         else if (event?.action === 'back') onBack();
       },
     );
-    return () => sub.remove();
+    return () => {
+      setPagingKeyPriority(false);
+      sub.remove();
+    };
   }, [onForward, onBack, enabled]);
 }

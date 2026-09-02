@@ -94,6 +94,7 @@ import MushafTextPageSurface from './MushafTextPageSurface';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
 import { isMacCatalyst } from '../responsive/breakpoints';
 import { showsPointerChevrons } from './pointerChevrons';
+import { suspendWhileTyping } from './useKeyPaging';
 import { MushafPhoneReader } from './MushafPhoneReader';
 import { MushafSpreadReader } from './MushafSpreadReader';
 import {
@@ -1319,6 +1320,8 @@ export function MushafReader({
               {t('quran.jumpToPage', 'Go to page')}
             </Text>
             <TextInput
+              // While this has focus the arrows move the caret, not the page.
+              {...suspendWhileTyping}
               value={jumpText}
               onChangeText={setJumpText}
               keyboardType="number-pad"

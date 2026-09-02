@@ -21,6 +21,15 @@ class MihrabKeyCommands: RCTEventEmitter {
   /// Posted by `AppDelegate` when one of its key commands fires.
   static let notification = Notification.Name("MihrabKeyCommand")
 
+  /**
+   Whether the ARROW keys may be taken from the system, right now.
+
+   Read by `AppDelegate.keyCommands` every time UIKit asks for the list.
+   See the note on `keyCommands` for why the arrows need this and the
+   letters do not, and `useKeyPaging.ts` for who turns it on and off.
+   */
+  static var arrowPriority = false
+
   private var hasListeners = false
 
   override static func requiresMainQueueSetup() -> Bool { false }
@@ -42,6 +51,19 @@ class MihrabKeyCommands: RCTEventEmitter {
     NotificationCenter.default.removeObserver(
       self, name: MihrabKeyCommands.notification, object: nil
     )
+  }
+
+  /**
+   Claim, or release, the arrow keys.
+
+   Called from JS: on while the muṣḥaf reader is the screen, off the
+   moment a text field in it takes focus, so that ← and → still move a
+   caret in the surah search rather than turning pages under it.
+   */
+  @objc func setArrowPriority(_ on: NSNumber) {
+    DispatchQueue.main.async {
+      MihrabKeyCommands.arrowPriority = on.boolValue
+    }
   }
 
   @objc private func onKey(_ note: Notification) {
@@ -74,19 +96,50 @@ class MihrabKeyCommands: RCTEventEmitter {
  scroll a page that is taller than the window, which on a phone in
  landscape is most of them.
 
- `wantsPriorityOverSystemBehavior` is deliberately NOT set. These are
- plain letters and arrows, and claiming priority would take them from every
- text field in the app.
+ ── THE ARROWS HAVE TO BE CLAIMED, AND THE LETTERS MUST NOT BE ────────
+
+ On Mac Catalyst the letters worked and the arrows did not, which is the
+ shape of the bug reported after 2.14.1: every other control in the reader
+ turned a page and the arrow keys did nothing.
+
+ A scroll view scrolls itself with the arrow keys — that is system
+ behaviour, `UIScrollView.allowsKeyboardScrolling` is on by default, and
+ the muṣḥaf reader is scroll views all the way down. System behaviour wins
+ over a key command declared at the END of the responder chain, so ← and →
+ were being eaten before the app delegate ever saw them. Letters have no
+ system meaning in a scroll view, so they arrived fine.
+
+ `wantsPriorityOverSystemBehavior` is what takes a key back from the
+ system, and it is set HERE ON THE ARROWS ONLY, and only while
+ `MihrabKeyCommands.arrowPriority` says so. Both halves matter:
+
+   • The letters never claim priority. "d" must type a "d" in the surah
+     search, and a key command that outranks a focused text field would
+     take it.
+
+   • The arrows claim it only while the reader is open and nothing in it
+     is being typed into — JS turns the flag off the moment a text field
+     takes focus (`useKeyPaging.ts`), because ← and → move a caret there
+     and a page turn under someone's cursor is worse than no shortcut.
+
+ UIKit asks for this list afresh each time it matches a key, so reading a
+ flag here is enough; the commands do not need rebuilding.
  */
 extension AppDelegate {
   override var keyCommands: [UIKeyCommand]? {
     let forward = [UIKeyCommand.inputLeftArrow, "a", "h"]
     let back = [UIKeyCommand.inputRightArrow, "d", "l"]
-    return forward.map {
-      UIKeyCommand(input: $0, modifierFlags: [], action: #selector(mihrabForward(_:)))
-    } + back.map {
-      UIKeyCommand(input: $0, modifierFlags: [], action: #selector(mihrabBack(_:)))
+    let arrows = [UIKeyCommand.inputLeftArrow, UIKeyCommand.inputRightArrow]
+    let claim = MihrabKeyCommands.arrowPriority
+    func command(_ input: String, _ action: Selector) -> UIKeyCommand {
+      let key = UIKeyCommand(input: input, modifierFlags: [], action: action)
+      if claim && arrows.contains(input) {
+        key.wantsPriorityOverSystemBehavior = true
+      }
+      return key
     }
+    return forward.map { command($0, #selector(mihrabForward(_:))) }
+      + back.map { command($0, #selector(mihrabBack(_:))) }
   }
 
   @objc func mihrabForward(_ sender: UIKeyCommand) {
