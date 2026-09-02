@@ -45,6 +45,7 @@ import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafIndexSidebar, SIDEBAR_WIDTH } from './MushafIndexSidebar';
 import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
+import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
 import { useSpreadPager } from './useSpreadPager';
 
@@ -504,6 +505,9 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       ) : null}
 
       <MiniPlayer />
+      {/* Publishes the recited word for the lines to follow — see the
+          store for why it is a probe and not a prop. */}
+      <ActiveWordProbe />
 
       <MushafJumpModal
         visible={core.jumpVisible}

@@ -48,6 +48,7 @@ import {
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
+import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
 
 /** Breathing room either side of the page inside its column. */
@@ -381,6 +382,9 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       ) : null}
 
       <MiniPlayer />
+      {/* Publishes the recited word for the lines to follow — see the
+          store for why it is a probe and not a prop. */}
+      <ActiveWordProbe />
 
       <MushafJumpModal
         visible={core.jumpVisible}

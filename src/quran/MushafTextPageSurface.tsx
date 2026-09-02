@@ -27,7 +27,7 @@ import MushafUnicodePage from './MushafUnicodePage';
 import { getPageLayout, isFramedPage, pageMeasureEm } from './mushafLayout';
 import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
 import { useMushafPageFont } from './useMushafPageFont';
-import { ayahTint, type AyahRefLike } from './ayahMarks';
+import { ayahTint, withAlpha, type AyahRefLike } from './ayahMarks';
 import type { QuranBookmark } from './quranState';
 
 export type MushafPageColors = {
@@ -36,6 +36,8 @@ export type MushafPageColors = {
   heading: string;
   selection: string;
   muted: string;
+  /** Behind the one word being recited — stronger than the ayah's wash. */
+  word: string;
 };
 
 export type MushafTextPageSurfaceProps = {
@@ -100,6 +102,7 @@ export function mushafPageColors(
         heading: '#F2EFE6',
         selection: 'rgba(255,255,255,0.10)',
         muted: 'rgba(232,228,218,0.72)',
+        word: withAlpha(accentColor, 0.55),
       }
     : {
         text: '#1A1A18',
@@ -107,6 +110,7 @@ export function mushafPageColors(
         heading: accentColor,
         selection: 'rgba(0,0,0,0.06)',
         muted: 'rgba(26,26,24,0.66)',
+        word: withAlpha(accentColor, 0.42),
       };
 }
 

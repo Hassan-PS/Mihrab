@@ -38,6 +38,7 @@ const colors = {
   heading: '#2E6B4F',
   selection: 'rgba(0,0,0,0.06)',
   muted: '#666',
+  word: 'rgba(46,107,79,0.42)',
 };
 
 const marking =

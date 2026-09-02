@@ -63,6 +63,7 @@ import {
   type MushafWord,
 } from './mushafLayout';
 import type { AyahTint } from './ayahMarks';
+import { useActiveWordOn, wordCode } from './audio/activeWordStore';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import { FONTS } from '../theme/typography';
 
@@ -107,6 +108,8 @@ export type MushafTextPageProps = {
     selection: string;
     /** Surah plate / basmalah colour. */
     muted: string;
+    /** Behind the one word being recited. */
+    word: string;
   };
   /** Family name the page font is registered under; null → nothing to draw. */
   fontFamily: string | null;
@@ -127,8 +130,6 @@ export type MushafTextPageProps = {
    * renderer could show before there was a tint to hand it.
    */
   tint?: AyahTint;
-  /** Word currently being recited, for follow-along highlighting. */
-  activeWord?: (AyahRef & { position: number }) | null;
   onWordPress?: (ref: AyahRef, word: MushafWord) => void;
   onWordLongPress?: (ref: AyahRef, word: MushafWord) => void;
   style?: StyleProp<ViewStyle>;
@@ -154,7 +155,6 @@ function MushafTextPage({
   selected,
   playing,
   tint,
-  activeWord,
   onWordPress,
   onWordLongPress,
   style,
@@ -222,7 +222,6 @@ function MushafTextPage({
           fontFamily={fontFamily}
           colors={colors}
           marks={lineMarks(line, tintOf)}
-          activeWord={activeWord}
           onPress={handlePress}
           onLongPress={handleLongPress}
         />
@@ -272,7 +271,6 @@ type LineViewProps = {
   colors: MushafTextPageProps['colors'];
   /** See `lineMarks`: one colour per word, or '' for a bare line. */
   marks: string;
-  activeWord?: (AyahRef & { position: number }) | null;
   onPress: (w: MushafWord) => void;
   onLongPress: (w: MushafWord) => void;
 };
@@ -286,10 +284,14 @@ const LineView = React.memo(function LineView({
   fontFamily,
   colors,
   marks,
-  activeWord: _activeWord,
   onPress,
   onLongPress,
 }: LineViewProps) {
+  // The word being recited on THIS line, or -1 — a subscription per line,
+  // answered as a number, so four polls a second wake the two lines that
+  // carry the ayah and none of the others. Before the band/basmalah
+  // returns: a hook, so it runs on every render of the line.
+  const activeWord = useActiveWordOn(line);
   if (line.kind === 'surah') {
     // The band takes the full measure, as it does in the print, where a surah
     // opens across the whole text block rather than in a plate the width of
@@ -386,7 +388,14 @@ const LineView = React.memo(function LineView({
       );
       return;
     }
-    const colour = tintAt(piece.index);
+    const w = piece.word;
+    // The recited word, lit on top of whatever its ayah is washed in. The
+    // medallion is a "word" to QPC but never to a reciter.
+    const lit =
+      activeWord >= 0 &&
+      !w.isEnd &&
+      activeWord === wordCode(w.surah, w.ayah, w.position);
+    const colour = lit ? colors.word : tintAt(piece.index);
     nodes.push(
       colour != null ? (
         <Text key={i} style={{ backgroundColor: colour }}>
