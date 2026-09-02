@@ -22,6 +22,10 @@ const spread = readFileSync(
   path.join(__dirname, '..', 'src', 'quran', 'MushafSpreadReader.tsx'),
   'utf8',
 );
+const pagerSrc = readFileSync(
+  path.join(__dirname, '..', 'src', 'quran', 'useSpreadPager.ts'),
+  'utf8',
+);
 
 describe('the back swipe gets out of the page swipe’s way', () => {
   it('is off in the mushaf on the Mac', () => {
@@ -45,53 +49,33 @@ describe('the back swipe gets out of the page swipe’s way', () => {
 });
 
 describe('and the swipe it makes room for still lands on a page', () => {
-  it('settles when the scrolling stops, not when a gesture ends', () => {
-    // A trackpad swipe raises no drag end and no momentum — macOS
-    // delivers it as wheel phases, so `onScrollEndDrag` fired in the
-    // MIDDLE of one, while the fingers were still moving, and each
-    // corrective animation fought the scroll still arriving. That was
-    // the stall halfway across the screen.
-    expect(spread).toMatch(/onScroll=\{onScroll\}/);
+  // The mechanics themselves — the settle-on-silence, the guard against
+  // settling our own scrolls, the slack for a fractional width — run for
+  // real in spreadPager.test.ts. What is pinned here is the wiring: that
+  // the component hands the list to the pager and nothing else moves it.
+  it('the component defers every scroll to the pager', () => {
+    expect(spread).toMatch(/onScroll=\{pagerHandlers\.onScroll\}/);
     expect(spread).toMatch(/scrollEventThrottle=\{16\}/);
+    expect(spread).toMatch(
+      /onMomentumScrollEnd=\{pagerHandlers\.onMomentumScrollEnd\}/,
+    );
+    expect(spread).toMatch(
+      /onScrollToIndexFailed=\{pagerHandlers\.onScrollToIndexFailed\}/,
+    );
     expect(spread).not.toMatch(/onScrollEndDrag=/);
   });
 
-  it('but a finger still settles the moment it lands', () => {
-    // The momentum end cancels the idle timer instead of queueing
-    // behind it, so touch keeps the timing it has always had.
-    expect(spread).toMatch(/onMomentumScrollEnd=\{onMomentumEnd\}/);
-    expect(spread).toMatch(
-      /if \(idleTimer\.current\) clearTimeout\(idleTimer\.current\);\s*\n\s*settleAt\(/,
-    );
+  it('with no way to move the list that bypasses the pager', () => {
+    // One call site, in the pager, so the mark cannot be forgotten at a
+    // new one.
+    expect(spread).not.toMatch(/scrollToIndex\(/);
+    expect(spread).not.toMatch(/scrollToOffset\(/);
+    // (The type declaration is the other match.)
+    expect(pagerSrc.match(/\?\.scrollToIndex\(/g) ?? []).toHaveLength(1);
   });
 
-  it('never settles a scroll it started itself', () => {
-    // The loop the user found: an arrow press on a list resting
-    // off-centre scrolled, the scroll settled to an index that did not
-    // match, settling scrolled again, and the reader swung between two
-    // pages until it crashed.
-    expect(spread).toMatch(/const target = scrollingTo\.current;/);
-    expect(spread).toMatch(/if \(target != null\) \{/);
-  });
-
-  it('with no way to move the list that bypasses the guard', () => {
-    // One call site, so the mark cannot be forgotten at a new one.
-    expect(spread.match(/scrollToIndex\(/g) ?? []).toHaveLength(1);
-    expect(spread).toMatch(/scrollingTo\.current = idx;/);
-  });
-
-  it('and lifts the guard even when the scroll never arrives', () => {
-    // An animation can be interrupted by another swipe or a resize and
-    // never reach its target. A guard that never lifts is a reader that
-    // stops responding to the trackpad entirely.
-    expect(spread).toMatch(/guardTimer\.current = setTimeout\(/);
-  });
-
-  it('tolerates the rounding a fractional page width leaves behind', () => {
-    // A Mac window is whatever width the pointer left it at, so a
-    // healthy snap lands a fraction off `index × width`. At one pixel
-    // of tolerance that reads as adrift and animates a correction to
-    // the place it is already in.
-    expect(spread).toMatch(/const SNAP_SLACK = 2;/);
+  it('and the arrows turn through the same pager', () => {
+    expect(spread).toMatch(/useRegisterKeyPaging\(props\.keyTurn, turnPage\)/);
+    expect(spread).toMatch(/const \{ handlers: pagerHandlers, turnPage \} = useSpreadPager\(/);
   });
 });
