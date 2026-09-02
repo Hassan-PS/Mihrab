@@ -290,7 +290,15 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 // Single tap anywhere on the page — word included — toggles
                 // fullscreen; the ayah panel (tafsir, "play from here") is
                 // a long press on the ayah.
-                onWordPress={() => onToggleFullscreen()}
+                //
+                // The handler itself, not an arrow around it. An arrow is a
+                // new function on every render of this list, and it reaches
+                // all fifteen lines of every mounted page through three
+                // memos — every one of which compared unequal and rebuilt
+                // ~250 pieces on each page turn and each recited ayah. The
+                // screen learned this once (mushafRenderChurn.test) and the
+                // readers reintroduced it one level down.
+                onWordPress={onToggleFullscreen}
                 onWordLongPress={core.openSelection}
               />
             </Pressable>

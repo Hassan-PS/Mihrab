@@ -195,6 +195,20 @@ function MushafTextPage({
       ? lineHeightProp
       : fontSize * MUSHAF_LINE_HEIGHT_EM;
 
+  /**
+   * The colour an ayah's runs are drawn on, or null for the bare page.
+   *
+   * With a `tint` this is every mark the page carries — bookmarks, the
+   * khatmah's position and its target, the selection, the reciter — each
+   * already resolved to one colour per ayah by `ayahMarks.ts`. Without
+   * one it is the old behaviour and nothing else: the selected or playing
+   * ayah, in the page's neutral selection wash.
+   */
+  const tintOf = (w: MushafWord): string | null => {
+    if (tint) return tint(w.surah, w.ayah);
+    return sameAyah(selected ?? playing ?? null, w) ? colors.selection : null;
+  };
+
   return (
     <View style={[{ width }, style]}>
       {layout.lines.map((line, index) => (
@@ -207,9 +221,7 @@ function MushafTextPage({
           lineHeight={lineHeight}
           fontFamily={fontFamily}
           colors={colors}
-          selected={selected}
-          playing={playing}
-          tint={tint}
+          marks={lineMarks(line, tintOf)}
           activeWord={activeWord}
           onPress={handlePress}
           onLongPress={handleLongPress}
@@ -217,6 +229,34 @@ function MushafTextPage({
       ))}
     </View>
   );
+}
+
+/**
+ * A line's marks as ONE STRING — the colour of each word, `|`-joined, and
+ * '' when nothing on the line is marked.
+ *
+ * ── WHY A STRING ─────────────────────────────────────────────────────
+ *
+ * The tint used to reach every line as a function, and a function has no
+ * value to compare: each new one — every recited ayah, every bookmark, every
+ * time the selection moved — failed the memo on all fifteen lines of every
+ * mounted page, and on a spread that is ninety lines re-shaped for a change
+ * that touched two. A string compares by value, so a line whose marks are
+ * the same as last time is the same as last time, whatever happened to the
+ * page around it.
+ */
+export function lineMarks(
+  line: MushafLine,
+  tintOf: (w: MushafWord) => string | null,
+): string {
+  if (line.kind !== 'ayah') return '';
+  let any = false;
+  const parts = line.words.map(w => {
+    const c = tintOf(w);
+    if (c) any = true;
+    return c ?? '';
+  });
+  return any ? parts.join('|') : '';
 }
 
 export default React.memo(MushafTextPage);
@@ -230,9 +270,8 @@ type LineViewProps = {
   lineHeight: number;
   fontFamily: string | null;
   colors: MushafTextPageProps['colors'];
-  selected?: AyahRef | null;
-  playing?: AyahRef | null;
-  tint?: AyahTint;
+  /** See `lineMarks`: one colour per word, or '' for a bare line. */
+  marks: string;
   activeWord?: (AyahRef & { position: number }) | null;
   onPress: (w: MushafWord) => void;
   onLongPress: (w: MushafWord) => void;
@@ -246,9 +285,7 @@ const LineView = React.memo(function LineView({
   lineHeight,
   fontFamily,
   colors,
-  selected,
-  playing,
-  tint,
+  marks,
   activeWord: _activeWord,
   onPress,
   onLongPress,
@@ -322,20 +359,10 @@ const LineView = React.memo(function LineView({
     fontFamily: FONTS.arabicQuran,
     ...gapMetrics(WORD_SPACE_EM, fontSize),
   };
-  /**
-   * The colour an ayah's runs are drawn on, or null for the bare page.
-   *
-   * With a `tint` this is every mark the page carries — bookmarks, the
-   * khatmah's position and its target, the selection, the reciter — each
-   * already resolved to one colour per ayah by `ayahMarks.ts`. Without
-   * one it is the old behaviour and nothing else: the selected or playing
-   * ayah, in the page's neutral selection wash.
-   */
-  const tintOf = (w: MushafWord | undefined): string | null => {
-    if (w == null) return null;
-    if (tint) return tint(w.surah, w.ayah);
-    return sameAyah(selected ?? playing ?? null, w) ? colors.selection : null;
-  };
+  // The marks arrive resolved, one colour per word — see `lineMarks`.
+  const wordTints = marks ? marks.split('|') : null;
+  const tintAt = (index: number): string | null =>
+    wordTints ? wordTints[index] || null : null;
 
   // Marking a single ayah inside one paragraph needs the paragraph split at
   // the ayah boundary — nested <Text> keeps the text one shaped stream, so
@@ -343,15 +370,14 @@ const LineView = React.memo(function LineView({
   const nodes: React.ReactNode[] = [];
   lineTokenStream(line).forEach((piece, i) => {
     if (piece.kind === 'gap') {
-      const word = line.words[piece.index];
-      const previous = line.words[piece.index - 1];
       // A gap carries the mark when both sides of it do, so the wash
       // behind an ayah reads as one unbroken run. An inner gap always has
       // the same word on both sides.
-      const colour = tintOf(word);
+      const colour = tintAt(piece.index);
       const on =
         colour != null &&
-        (piece.inner || (previous != null && tintOf(previous) === colour));
+        (piece.inner ||
+          (piece.index > 0 && tintAt(piece.index - 1) === colour));
       const base = piece.inner ? innerGapStyle : gapStyle;
       nodes.push(
         <Text key={i} style={on ? [base, { backgroundColor: colour }] : base}>
@@ -360,7 +386,7 @@ const LineView = React.memo(function LineView({
       );
       return;
     }
-    const colour = tintOf(piece.word);
+    const colour = tintAt(piece.index);
     nodes.push(
       colour != null ? (
         <Text key={i} style={{ backgroundColor: colour }}>

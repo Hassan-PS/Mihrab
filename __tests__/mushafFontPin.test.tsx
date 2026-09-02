@@ -32,7 +32,6 @@ jest.mock('../src/native/MushafFont', () => ({
 
 jest.mock('../src/quran/mushafFontStore', () => ({
   ensurePageFontFile: async () => '/mock/quran/fonts/v2/QCF2001.ttf',
-  prefetchAround: () => {},
 }));
 
 import { useMushafPageFont } from '../src/quran/useMushafPageFont';

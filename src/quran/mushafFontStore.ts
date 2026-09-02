@@ -225,15 +225,6 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
   return task;
 }
 
-/** Warm the fonts around `page` so swiping never waits on the network. */
-export function prefetchAround(page: number, radius = 2): void {
-  for (let d = 1; d <= radius; d++) {
-    for (const p of [page + d, page - d]) {
-      if (p >= 1 && p <= MUSHAF_TOTAL_PAGES) void ensurePageFontFile(p);
-    }
-  }
-}
-
 export type FontDownloadProgress = { done: number; total: number; failed: number };
 
 export type FontDownloadHandle = {

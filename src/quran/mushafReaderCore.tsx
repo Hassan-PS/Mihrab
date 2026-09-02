@@ -436,19 +436,25 @@ export function useMushafReaderCore({
   }, []);
   useOverlayDismissGuard(sheetVisible || jumpVisible, closeOverlays);
 
-  const marks = useMemo<AyahMarkProps>(() => {
-    const plan = activeKhatmah(quran);
-    return {
+  // Keyed on the bookmarks and the plan, NOT on the state object. Every
+  // page turn writes `lastRead`, which is a new state object, and with the
+  // whole state as the key both of these were rebuilt on every turn — and
+  // `marks` feeds the tint every mounted line is memoised on, so the turn
+  // that should have touched nothing re-drew all of them. The plan is the
+  // same reference until progress is actually recorded.
+  const plan = activeKhatmah(quran);
+  const marks = useMemo<AyahMarkProps>(
+    () => ({
       bookmarks: quran.bookmarks,
       khatmahPosition: plan?.position ?? null,
       // The finish line for the portion in hand. Null with no plan, and
       // null once the book is read — there is nothing left to aim at.
       khatmahTarget: plan ? khatmahMarkerAyah(plan) : null,
-    };
-  }, [quran]);
+    }),
+    [quran.bookmarks, plan],
+  );
 
   const finish = useMemo<KhatmahFinish | null>(() => {
-    const plan = activeKhatmah(quran);
     if (!plan) return null;
     const at = khatmahMarkerAyah(plan);
     if (!at) return null;
@@ -459,7 +465,7 @@ export function useMushafReaderCore({
       // A day number means nothing without a calendar beside it.
       when: khatmahDayWhen(plan.startedAt, day),
     };
-  }, [quran, riwayah]);
+  }, [plan, riwayah]);
 
   return {
     quran,

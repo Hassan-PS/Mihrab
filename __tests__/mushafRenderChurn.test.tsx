@@ -221,3 +221,31 @@ describe('a mushaf page survives a re-render of the screen around it', () => {
     expect(longPress).toHaveBeenCalledWith({ surah: 3, ayah: 5 }, 49);
   });
 });
+
+// ── The readers do not reintroduce it one level down ─────────────────────
+
+describe('the readers hand the page a handler, not an arrow around one', () => {
+  // The screen learned this (above) and both split readers then wrote
+  // `onWordPress={() => onToggleFullscreen()}` — a new function on every
+  // render of the list, reaching all fifteen lines of every mounted page
+  // through three memos. Every page turn and every recited ayah rebuilt
+  // ~250 pieces per page.
+  const read = (p: string) =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('fs').readFileSync(require('path').join(__dirname, '..', p), 'utf8') as string;
+
+  it.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])('%s', file => {
+    const src = read(`src/quran/${file}`);
+    expect(src).not.toMatch(/onWordPress=\{\(\)\s*=>/);
+    expect(src).not.toMatch(/onWordLongPress=\{\(/);
+  });
+
+  it('and the marks are keyed on what they read, not on the whole state', () => {
+    // Every page turn writes `lastRead`, which is a new state object; with
+    // the state as the key the marks — and the tint every line memoises on
+    // — were rebuilt on the turn that should have touched nothing.
+    const core = read('src/quran/mushafReaderCore.tsx');
+    expect(core).toMatch(/\[quran\.bookmarks, plan\],?\s*\n\s*\);/);
+    expect(core).not.toMatch(/\}, \[quran\]\);/);
+  });
+});

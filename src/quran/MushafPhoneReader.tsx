@@ -268,7 +268,10 @@ export function MushafPhoneReader(props: MushafReaderProps) {
                 // who taps to clear the chrome should not be interrupted by
                 // a sheet because the tap landed on a word. The ayah panel
                 // (tafsir, "play from here") is a LONG PRESS on the ayah.
-                onWordPress={() => onToggleFullscreen()}
+                //
+                // The handler itself, not an arrow around it — see the same
+                // line in MushafSpreadReader for what the arrow cost.
+                onWordPress={onToggleFullscreen}
                 onWordLongPress={core.openSelection}
               />
             </Pressable>
