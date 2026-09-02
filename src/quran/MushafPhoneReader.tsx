@@ -228,7 +228,10 @@ export function MushafPhoneReader(props: MushafReaderProps) {
 
       return (
         <View style={[styles.item, { width: pageWidth, backgroundColor: pageBg }]}>
-          <View style={{ paddingTop: navPad }}>
+          {/* The header strip toggles fullscreen too — with a tap on a
+              word now opening the ayah, the strip and the margins are
+              where the chrome is put away and brought back. */}
+          <Pressable onPress={onToggleFullscreen} style={{ paddingTop: navPad }}>
             <MushafPageHeader
               page={page}
               isFullscreen={isFullscreen}
@@ -236,7 +239,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
               ornament={ornament}
               riwayah={riwayah}
             />
-          </View>
+          </Pressable>
           <ScrollView
             style={styles.column}
             contentContainerStyle={styles.columnContent}
@@ -263,16 +266,12 @@ export function MushafPhoneReader(props: MushafReaderProps) {
                 }
                 // Only the page being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
-                // A SINGLE TAP anywhere on the page — word, margin or the
-                // gap between lines — toggles fullscreen. Reading is the
-                // common act; opening a panel is the rare one, and a reader
-                // who taps to clear the chrome should not be interrupted by
-                // a sheet because the tap landed on a word. The ayah panel
-                // (tafsir, "play from here") is a LONG PRESS on the ayah.
-                //
-                // The handler itself, not an arrow around it — see the same
-                // line in MushafSpreadReader for what the arrow cost.
-                onWordPress={onToggleFullscreen}
+                // A TAP ON A WORD OPENS ITS AYAH; the margins, the header
+                // strip and the ⛶ in the navigation bar are where fullscreen
+                // lives — see the same line in MushafSpreadReader for why
+                // this changed, and for why it is the handler itself and
+                // not an arrow around it.
+                onWordPress={core.openSelection}
                 onWordLongPress={core.openSelection}
               />
             </Pressable>

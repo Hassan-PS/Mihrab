@@ -258,7 +258,10 @@ export function MushafSpreadReader(props: MushafReaderProps) {
             : { paddingHorizontal: margin };
       return (
         <View style={[styles.column, { width: colW }]}>
-          <View style={{ paddingTop: navPad }}>
+          {/* The header strip toggles fullscreen too — with a tap on a
+              word now opening the ayah, the strip and the margins are
+              where the chrome is put away and brought back. */}
+          <Pressable onPress={onToggleFullscreen} style={{ paddingTop: navPad }}>
             <MushafPageHeader
               page={page}
               isFullscreen={isFullscreen}
@@ -267,7 +270,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
               riwayah={riwayah}
               show={chrome}
             />
-          </View>
+          </Pressable>
           <View style={[styles.pageBox, pad]}>
             <Pressable onPress={onToggleFullscreen}>
               <MushafTextPageSurface
@@ -288,9 +291,15 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 }
                 // Only the spread being read warms its neighbours' fonts.
                 prefetchRadius={page === currentPage ? 2 : 0}
-                // Single tap anywhere on the page — word included — toggles
-                // fullscreen; the ayah panel (tafsir, "play from here") is
-                // a long press on the ayah.
+                // A TAP ON A WORD OPENS ITS AYAH — tafsir, "play from
+                // here", bookmark, share. It used to toggle fullscreen,
+                // on the reasoning that reading is the common act and a
+                // panel the rare one; in practice a tap on the words is
+                // what everyone tries first when they want the ayah, and
+                // a long press is what nobody guesses. Fullscreen moved to
+                // where the words are not: the margins, the header strip,
+                // the ⛶ in the navigation bar. A long press still opens the
+                // ayah, for hands that learned it that way.
                 //
                 // The handler itself, not an arrow around it. An arrow is a
                 // new function on every render of this list, and it reaches
@@ -299,7 +308,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 // ~250 pieces on each page turn and each recited ayah. The
                 // screen learned this once (mushafRenderChurn.test) and the
                 // readers reintroduced it one level down.
-                onWordPress={onToggleFullscreen}
+                onWordPress={core.openSelection}
                 onWordLongPress={core.openSelection}
               />
             </Pressable>
