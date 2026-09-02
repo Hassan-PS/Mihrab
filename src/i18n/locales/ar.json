@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "منتصف الليل بين المغرب والفجر. معطّل افتراضيًا.",
     "lastThird": "الثلث الأخير من الليل",
     "lastThirdHelp": "بداية الثلث الأخير من الليل — وقت قيام الليل. معطّل افتراضيًا.",
+    "firstThird": "الثلث الأول من الليل",
+    "firstThirdHelp": "نهاية الثلث الأول من الليل — وعندها يخرج وقت العشاء المختار على مذهب المالكية. معطّل افتراضيًا.",
     "accent_rose": "وردي",
     "accent_violet": "بنفسجي",
     "laDesignMarkers": "علامات",
@@ -377,7 +379,9 @@
     "Midnight": "منتصف الليل",
     "Midnight_abbr": "منتصف",
     "Lastthird": "الثلث الأخير",
-    "Lastthird_abbr": "قيام"
+    "Lastthird_abbr": "قيام",
+    "Firstthird": "الثلث الأول",
+    "Firstthird_abbr": "١/٣"
   },
   "placeSearch": {
     "label": "ابحث عن مدينة أو عنوان",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "إعادة ضبط قراءة اليوم",
     "khatmahResetTodayHelp": "يعيد فقط الصفحات المسجلة اليوم.",
     "khatmahResetAll": "إعادة بدء الختمة",
-    "khatmahResetAllHelp": "العودة إلى الصفحة 0 بجدول جديد.",
+    "khatmahResetAllHelp": "العودة إلى بداية الخطة بجدول جديد.",
     "khatmahDelete": "حذف الختمة",
     "khatmahDeleteHelp": "يزيل الخطة بالكامل.",
     "khatmahReminderChannelName": "تذكير الختمة",
@@ -936,6 +940,9 @@
     "audioButton": "الصوت",
     "khatmahCustom": "مخصص…",
     "khatmahLengthTitle": "مدة الختمة (أيام)",
+    "khatmahSetUpTitle": "ابدأ ختمة",
+    "khatmahFromPageTitle": "هل بدأت بالفعل؟ ابدأ من صفحة",
+    "khatmahFromPageHint": "من البداية",
     "khatmahStartCta": "ابدأ",
     "showMore": "عرض المزيد",
     "showLess": "عرض أقل",

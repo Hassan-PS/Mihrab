@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "مغرب اور فجر کے درمیان رات کا وسطی نقطہ۔ بطورِ پہلے سے بند۔",
     "lastThird": "رات کا آخری تہائی حصہ",
     "lastThirdHelp": "رات کے آخری تہائی حصے کا آغاز — قیام اللیل کا وقت۔ بطورِ پہلے سے بند۔",
+    "firstThird": "رات کی پہلی تہائی",
+    "firstThirdHelp": "رات کی پہلی تہائی کا اختتام — مالکی حساب کے مطابق یہاں عشاء کا افضل وقت ختم ہو جاتا ہے۔ بطورِ طے شدہ بند۔",
     "accent_rose": "گلابی",
     "accent_violet": "بنفشی",
     "laDesignMarkers": "نشانات",
@@ -377,7 +379,9 @@
     "Midnight": "نصف شب",
     "Midnight_abbr": "نصف",
     "Lastthird": "آخری تہائی",
-    "Lastthird_abbr": "قیام"
+    "Lastthird_abbr": "قیام",
+    "Firstthird": "پہلی تہائی",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "شہر یا پتہ تلاش کریں۔",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "آج کی تلاوت ری سیٹ کریں",
     "khatmahResetTodayHelp": "صرف آج درج شدہ صفحات واپس کرتا ہے۔",
     "khatmahResetAll": "ختم دوبارہ شروع کریں",
-    "khatmahResetAllHelp": "نئے شیڈول کے ساتھ صفحہ 0 سے۔",
+    "khatmahResetAllHelp": "نئے شیڈول کے ساتھ منصوبے کے آغاز پر واپس۔",
     "khatmahDelete": "ختم حذف کریں",
     "khatmahDeleteHelp": "منصوبہ مکمل طور پر ہٹا دیتا ہے۔",
     "khatmahReminderChannelName": "ختم یاد دہانی",
@@ -936,6 +940,9 @@
     "audioButton": "آڈیو",
     "khatmahCustom": "حسبِ منشا…",
     "khatmahLengthTitle": "ختم کی مدت (دن)",
+    "khatmahSetUpTitle": "ختم شروع کریں",
+    "khatmahFromPageTitle": "پہلے سے پڑھ رہے ہیں؟ اس صفحے سے شروع کریں",
+    "khatmahFromPageHint": "شروع سے",
     "khatmahStartCta": "شروع کریں",
     "showMore": "مزید دکھائیں",
     "showLess": "کم دکھائیں",

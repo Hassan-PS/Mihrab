@@ -237,6 +237,7 @@ export function HomeScreen() {
       Sunrise: boolean;
       Midnight: boolean;
       Lastthird: boolean;
+      Firstthird: boolean;
     }) => ({
       today: filterOptionalTimes(today, tg),
       tomorrow: tomorrow ? filterOptionalTimes(tomorrow, tg) : undefined,
@@ -247,11 +248,13 @@ export function HomeScreen() {
         Sunrise: settings.sunriseEnabled,
         Midnight: settings.islamicMidnightEnabled,
         Lastthird: settings.lastThirdEnabled,
+        Firstthird: settings.firstThirdEnabled,
       }),
       la: mk({
         Sunrise: settings.sunriseEnabled,
         Midnight: settings.islamicMidnightEnabled,
         Lastthird: settings.lastThirdEnabled,
+        Firstthird: settings.firstThirdEnabled,
       }),
       // The widget gets the LONG window, not the carousel's week — its copy
       // has to stay true across however long the app goes unopened.
@@ -260,12 +263,14 @@ export function HomeScreen() {
           Sunrise: true,
           Midnight: settings.islamicMidnightEnabled,
           Lastthird: settings.lastThirdEnabled,
+          Firstthird: settings.firstThirdEnabled,
         }),
         week: (state.widgetWeek ?? week).map(d =>
           filterOptionalTimes(d, {
             Sunrise: true,
             Midnight: settings.islamicMidnightEnabled,
             Lastthird: settings.lastThirdEnabled,
+            Firstthird: settings.firstThirdEnabled,
           }),
         ),
       },
@@ -275,6 +280,7 @@ export function HomeScreen() {
     settings.sunriseEnabled,
     settings.islamicMidnightEnabled,
     settings.lastThirdEnabled,
+    settings.firstThirdEnabled,
   ]);
 
   const loadedDateKeyRef = useRef<string | null>(null);

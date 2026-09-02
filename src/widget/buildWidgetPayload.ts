@@ -63,8 +63,8 @@ export const WIDGET_ROW_KEYS = [
 export type WidgetPrayerKey = (typeof WIDGET_ROW_KEYS)[number];
 
 /**
- * Optional pre-dawn non-salāh rows (Islamic Midnight / Last Third). Sunrise
- * has its own dedicated slot.
+ * Optional non-salāh night rows (Islamic Midnight / Last Third / First
+ * Third). Sunrise has its own dedicated slot.
  *
  * Both the Live Activity and the home-screen widget carry these now — the
  * widget only ever had them stripped upstream, which meant a user who turned
@@ -72,9 +72,9 @@ export type WidgetPrayerKey = (typeof WIDGET_ROW_KEYS)[number];
  * Screen, and then not on the widget, with nothing anywhere to say why. Where
  * the two surfaces still differ is the countdown: see `opts.nightCanBeNext`.
  */
-const EXTRA_ROW_KEYS = ['Midnight', 'Lastthird'] as const;
+const EXTRA_ROW_KEYS = ['Midnight', 'Lastthird', 'Firstthird'] as const;
 
-/** A copy of a day's timings with the two night entries taken out. */
+/** A copy of a day's timings with the night entries taken out. */
 function withoutNightTimes(timings: TimingsMap): TimingsMap {
   const out: TimingsMap = { ...timings };
   for (const key of EXTRA_ROW_KEYS) delete out[key];
@@ -319,7 +319,7 @@ export function buildWidgetPayload(
   }
 
   // nextKey can be a salāh key, 'Sunrise', or — for the Live Activity only —
-  // a night time (Midnight/Lastthird). See `opts.nightCanBeNext`.
+  // a night time (Midnight/Lastthird/Firstthird). See `opts.nightCanBeNext`.
   const nextKey =
     next &&
     ((WIDGET_ROW_KEYS as readonly string[]).includes(next.name) ||

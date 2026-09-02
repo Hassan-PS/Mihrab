@@ -243,6 +243,7 @@ function computePrevPrayerEpoch(
     'Asr',
     'Maghrib',
     'Isha',
+    'Firstthird',
   ];
   const times: string[] = todayTimings
     ? SALAH_KEYS.map(k => todayTimings[k]).filter(

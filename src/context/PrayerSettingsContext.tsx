@@ -78,6 +78,7 @@ export type NotificationsSlice = Pick<
   | 'sunriseEnabled'
   | 'islamicMidnightEnabled'
   | 'lastThirdEnabled'
+  | 'firstThirdEnabled'
   | 'endOfDayLogReminderEnabled'
   | 'ayahOfDayEnabled'
   | 'ayahOfDayHour'
@@ -237,6 +238,7 @@ export function PrayerSettingsProvider({
       sunriseEnabled: settings.sunriseEnabled,
       islamicMidnightEnabled: settings.islamicMidnightEnabled,
       lastThirdEnabled: settings.lastThirdEnabled,
+      firstThirdEnabled: settings.firstThirdEnabled,
       endOfDayLogReminderEnabled: settings.endOfDayLogReminderEnabled,
       ayahOfDayEnabled: settings.ayahOfDayEnabled,
       ayahOfDayHour: settings.ayahOfDayHour,
@@ -253,6 +255,7 @@ export function PrayerSettingsProvider({
       settings.sunriseEnabled,
       settings.islamicMidnightEnabled,
       settings.lastThirdEnabled,
+      settings.firstThirdEnabled,
       settings.endOfDayLogReminderEnabled,
       settings.ayahOfDayEnabled,
       settings.ayahOfDayHour,

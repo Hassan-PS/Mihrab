@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "The midpoint of the night between Maghrib and Fajr. Off by default.",
     "lastThird": "Last Third of the Night",
     "lastThirdHelp": "The start of the last third of the night — the time for Qiyam al-Layl. Off by default.",
+    "firstThird": "First Third of the Night",
+    "firstThirdHelp": "The end of the first third of the night — in the Maliki reckoning, where Isha leaves its preferred window. Off by default.",
     "accent_rose": "Rose",
     "accent_violet": "Violet",
     "laDesignMarkers": "Markers",
@@ -377,7 +379,9 @@
     "Midnight": "Islamic Midnight",
     "Midnight_abbr": "Mid",
     "Lastthird": "Last Third",
-    "Lastthird_abbr": "Qiyam"
+    "Lastthird_abbr": "Qiyam",
+    "Firstthird": "First Third",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "Search city or address",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "Reset today's reading",
     "khatmahResetTodayHelp": "Rewinds only the pages recorded today.",
     "khatmahResetAll": "Restart the khatmah",
-    "khatmahResetAllHelp": "Back to page 0 with a fresh schedule.",
+    "khatmahResetAllHelp": "Back to where the plan began, with a fresh schedule.",
     "khatmahDelete": "Delete the khatmah",
     "khatmahDeleteHelp": "Removes the plan entirely.",
     "khatmahReminderChannelName": "Khatmah reminder",
@@ -936,6 +940,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Custom…",
     "khatmahLengthTitle": "Khatmah length (days)",
+    "khatmahSetUpTitle": "Start a khatmah",
+    "khatmahFromPageTitle": "Already reading? Start at page",
+    "khatmahFromPageHint": "From the beginning",
     "khatmahStartCta": "Start",
     "showMore": "Show more",
     "showLess": "Show less",

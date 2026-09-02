@@ -76,6 +76,7 @@ import {
 import { availableRiwayat, riwayahChoiceExists } from '../src/quran/riwayat';
 import {
   advancingLength,
+  ayahMarkText,
   fitPrintedLine,
   fontBounds,
   pageExtent,
@@ -273,10 +274,13 @@ describe('fitting a page to its box', () => {
     );
     expect(empty).toBeLessThanOrEqual(max);
     expect(impossible).toBeGreaterThanOrEqual(min);
-    // The ceiling is a little over the Madinah print's own measure, so a
-    // short final page reads larger than its neighbours but not absurdly.
+    // The ceiling is comfortably over the Madinah print's own measure —
+    // pages 1 and 2 are the only ones that still reflow, they carry seven
+    // and nine lines against the fifteen of every other page, and the
+    // print sets them larger for it. Still bounded: a page must not be
+    // set at a size that reads as a mistake.
     expect(max).toBeGreaterThan(BOX.width / 15.75);
-    expect(max).toBeLessThan(BOX.width / 10);
+    expect(max).toBeLessThan(BOX.width / 7);
   });
 
   it('counts what a real page costs to draw', () => {
@@ -402,5 +406,32 @@ describe('fitting one printed line to the measure', () => {
     // A surah's closing line stops where the surah does.
     const fit = fitPrintedLine(9, 6, MEASURE * 0.6);
     expect(fit.drawnEm).toBeCloseTo(MEASURE * 0.6, 3);
+  });
+});
+
+
+describe('the ayah medallion', () => {
+  // Issue #16. The number is drawn inside the rosette by a `rlig` lookup:
+  // U+06DD then Arabic-Indic digits shapes to the rosette plus a small
+  // digit of zero advance. The mark is rendered in a nested Text that
+  // changes the font, which on Android opens a new shaping run — and a run
+  // that OPENS on U+06DD does not get the lookup, so the rosette comes out
+  // empty with a full-size digit beside it. The leading no-break space is
+  // what stops the run from opening there. It is the whole fix.
+  it('never opens on the medallion itself', () => {
+    for (const n of [1, 7, 12, 110, 286]) {
+      expect(ayahMarkText(n).charAt(0)).toBe('\u00A0');
+      expect(ayahMarkText(n).charAt(0)).not.toBe('\u06DD');
+    }
+  });
+
+  it('puts the medallion before its number, in eastern digits', () => {
+    expect(ayahMarkText(1)).toBe('\u00A0\u06DD\u0661');
+    expect(ayahMarkText(286)).toBe('\u00A0\u06DD\u0662\u0668\u0666');
+  });
+
+  it('carries no ordinary space, which a line may break at', () => {
+    // The ayah and its number must not come apart across a line.
+    expect(ayahMarkText(12)).not.toContain(' ');
   });
 });

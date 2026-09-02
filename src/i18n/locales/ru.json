@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "Середина ночи между Магрибом и Фаджром. По умолчанию выключено.",
     "lastThird": "Последняя треть ночи",
     "lastThirdHelp": "Начало последней трети ночи — время для Кияам аль-Лайль. По умолчанию выключено.",
+    "firstThird": "Первая треть ночи",
+    "firstThirdHelp": "Конец первой трети ночи — по маликитскому счёту здесь иша выходит из предпочтительного времени. По умолчанию выключено.",
     "accent_rose": "Розовый",
     "accent_violet": "Фиолетовый",
     "laDesignMarkers": "Метки",
@@ -377,7 +379,9 @@
     "Midnight": "Исламская полночь",
     "Midnight_abbr": "Полн",
     "Lastthird": "Последняя треть",
-    "Lastthird_abbr": "Кияам"
+    "Lastthird_abbr": "Кияам",
+    "Firstthird": "Первая треть",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "Поиск города или адреса",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "Сбросить сегодняшнее чтение",
     "khatmahResetTodayHelp": "Отменяет только страницы, записанные сегодня.",
     "khatmahResetAll": "Начать хатму заново",
-    "khatmahResetAllHelp": "Снова со страницы 0 и новым графиком.",
+    "khatmahResetAllHelp": "Снова с начала плана и новым графиком.",
     "khatmahDelete": "Удалить хатму",
     "khatmahDeleteHelp": "Полностью удаляет план.",
     "khatmahReminderChannelName": "Напоминание о хатме",
@@ -936,6 +940,9 @@
     "audioButton": "Аудио",
     "khatmahCustom": "Свой срок…",
     "khatmahLengthTitle": "Длительность хатмы (дней)",
+    "khatmahSetUpTitle": "Начать хатму",
+    "khatmahFromPageTitle": "Уже читаете? Начните со страницы",
+    "khatmahFromPageHint": "С начала",
     "khatmahStartCta": "Начать",
     "showMore": "Показать больше",
     "showLess": "Показать меньше",

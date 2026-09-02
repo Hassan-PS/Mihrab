@@ -22,7 +22,14 @@ import {
   khatmahPortionOf,
   type KhatmahPlan,
 } from '../src/quran/quranState';
-import { TOTAL_AYAHS, ayahIndexOf } from '../src/quran/ayahIndex';
+import { TOTAL_AYAHS, ayahAtIndex, ayahIndexOf } from '../src/quran/ayahIndex';
+import { findPageForAyah } from '../src/quran/pages';
+
+/** The Ḥafṣ page an ayah index falls on — the unit a plan is cut in. */
+function hafsPageOf(index: number): number {
+  const at = ayahAtIndex(index);
+  return findPageForAyah(at.surah, at.ayah, 'hafs');
+}
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -213,5 +220,113 @@ describe('the day, and what is read past it', () => {
       ayahsRead: khatmahPortion(plan(), 3).to,
     });
     expect(khatmahCurrentPortion(stale).day).toBe(4);
+  });
+});
+
+/**
+ * A khatmah that was already under way when the tracker heard about it
+ * (issue #17).
+ *
+ * The reader gives two things — where they are, and how long the rest
+ * should take — and both have to land. Seeding only the progress would
+ * cut the portions for a book they are not starting: a thirty-day plan
+ * begun at page 143 would spend its first five days on ground already
+ * behind the reader and then ask for the last 461 pages in twenty-five.
+ */
+describe('a plan begun partway through the book', () => {
+  it('still covers every ayah from the start onwards, once', () => {
+    for (const fromPage of [1, 143, 300, 603]) {
+      for (const targetDays of [1, 7, 30, 90]) {
+        const p = plan({ targetDays, fromPage });
+        const first = khatmahPortion(p, 1).from;
+        let expected = first;
+        for (let d = 1; d <= targetDays; d++) {
+          const portion = khatmahPortion(p, d);
+          expect([fromPage, targetDays, d, portion.from]).toEqual([
+            fromPage,
+            targetDays,
+            d,
+            expected,
+          ]);
+          expect(portion.to).toBeGreaterThanOrEqual(portion.from - 1);
+          expected = portion.to + 1;
+        }
+        expect([fromPage, targetDays, expected]).toEqual([
+          fromPage,
+          targetDays,
+          TOTAL_AYAHS + 1,
+        ]);
+      }
+    }
+  });
+
+  it('opens on the reader, not on the first page of the book', () => {
+    const p = plan({ targetDays: 30, fromPage: 143, ayahsRead: 0 });
+    // Portion one begins on page 144 — the page after the one the reader
+    // said they were on, which is the first they have not finished.
+    expect(hafsPageOf(khatmahPortion(p, 1).from)).toBe(144);
+  });
+
+  it('spreads what is left, not the whole book', () => {
+    // 604 pages over 30 days is 20 or 21 a day. 604 − 143 = 461 over the
+    // same 30 is 15 or 16, and that is the whole point: the reader asked
+    // for thirty days for the REST, not thirty days for a book they are
+    // already a quarter of the way through.
+    const days = (pl: KhatmahPlan) => {
+      const out: number[] = [];
+      for (let d = 1; d <= 30; d++) {
+        const portion = khatmahPortion(pl, d);
+        out.push(hafsPageOf(portion.to) - hafsPageOf(portion.from) + 1);
+      }
+      return out;
+    };
+    for (const n of days(plan({ targetDays: 30, fromPage: 143 }))) {
+      expect(n).toBeGreaterThanOrEqual(15);
+      expect(n).toBeLessThanOrEqual(16);
+    }
+    for (const n of days(plan({ targetDays: 30 }))) {
+      expect(n).toBeGreaterThanOrEqual(20);
+      expect(n).toBeLessThanOrEqual(21);
+    }
+  });
+
+  it('puts the reader on day one on the day they set it up', () => {
+    // The whole complaint: seeded progress against a full-book cut showed
+    // someone at page 143 as already five days in and nothing to read.
+    const from = 143;
+    const p = plan({ targetDays: 30, fromPage: from });
+    const seeded = { ...p, ayahsRead: khatmahPortion(p, 1).from - 1 };
+    expect(khatmahCurrentPortion(seeded).day).toBe(1);
+    const day = khatmahDay(seeded, Date.now());
+    expect(day.portion.day).toBe(1);
+    expect(day.done).toBe(false);
+    expect(day.read).toBe(0);
+    expect(day.extra).toBe(0);
+  });
+
+  it('finishes on the last day, wherever it began', () => {
+    const p = plan({ targetDays: 30, fromPage: 143 });
+    expect(khatmahPortion(p, 30).to).toBe(TOTAL_AYAHS);
+    expect(khatmahPortionOf(p, TOTAL_AYAHS)).toBe(30);
+  });
+
+  it('is the old plan exactly when it starts at the opening', () => {
+    for (const targetDays of [7, 30, 90]) {
+      for (let d = 1; d <= targetDays; d++) {
+        expect(khatmahPortion(plan({ targetDays, fromPage: 0 }), d)).toEqual(
+          khatmahPortion(plan({ targetDays }), d),
+        );
+      }
+    }
+  });
+
+  it('gives the marker an ayah inside the plan, not behind it', () => {
+    const p = plan({ targetDays: 30, fromPage: 143 });
+    const seeded = { ...p, ayahsRead: khatmahPortion(p, 1).from - 1 };
+    const marker = khatmahMarkerAyah(seeded);
+    expect(marker).not.toBeNull();
+    expect(ayahIndexOf(marker!.surah, marker!.ayah)).toBe(
+      khatmahPortion(p, 1).to,
+    );
   });
 });

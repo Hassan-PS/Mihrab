@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "Mittpunkten av natten mellan Maghrib och Fajr. Av som standard.",
     "lastThird": "Nattens sista tredjedel",
     "lastThirdHelp": "Början på nattens sista tredjedel — tiden för Qiyam al-Layl. Av som standard.",
+    "firstThird": "Nattens första tredjedel",
+    "firstThirdHelp": "Slutet på nattens första tredjedel — i malikitisk räkning där Isha lämnar sitt bästa tidsfönster. Av som standard.",
     "accent_rose": "Rosa",
     "accent_violet": "Violett",
     "laDesignMarkers": "Markörer",
@@ -377,7 +379,9 @@
     "Midnight": "Islamisk midnatt",
     "Midnight_abbr": "Mitt",
     "Lastthird": "Sista tredjedelen",
-    "Lastthird_abbr": "Qiyam"
+    "Lastthird_abbr": "Qiyam",
+    "Firstthird": "Första tredjedelen",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "Sök stad eller adress",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "Återställ dagens läsning",
     "khatmahResetTodayHelp": "Spolar bara tillbaka dagens registrerade sidor.",
     "khatmahResetAll": "Starta om khatman",
-    "khatmahResetAllHelp": "Tillbaka till sida 0 med nytt schema.",
+    "khatmahResetAllHelp": "Tillbaka till planens början, med nytt schema.",
     "khatmahDelete": "Ta bort khatman",
     "khatmahDeleteHelp": "Tar bort planen helt.",
     "khatmahReminderChannelName": "Khatmah-påminnelse",
@@ -936,6 +940,9 @@
     "audioButton": "Ljud",
     "khatmahCustom": "Anpassad…",
     "khatmahLengthTitle": "Khatmahns längd (dagar)",
+    "khatmahSetUpTitle": "Starta en khatmah",
+    "khatmahFromPageTitle": "Läser du redan? Börja på sida",
+    "khatmahFromPageHint": "Från början",
     "khatmahStartCta": "Starta",
     "showMore": "Visa mer",
     "showLess": "Visa mindre",

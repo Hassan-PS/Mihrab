@@ -202,6 +202,7 @@ export async function republishWidgetPayload(
       Sunrise: true,
       Midnight: settings.islamicMidnightEnabled,
       Lastthird: settings.lastThirdEnabled,
+      Firstthird: settings.firstThirdEnabled,
     };
     const week = window.map(day => filterOptionalTimes(day, optional));
 

@@ -47,6 +47,31 @@ export function startOfLocalDay(d: Date): Date {
   return out;
 }
 
+/**
+ * The date a day's entry actually falls on.
+ *
+ * Every row of a day card is that day's clock time on that day — with one
+ * exception. The first third of the night belongs to the night the day
+ * BEGINS (see `nightTimes.ts`), and at high latitude in midsummer that
+ * night's first third can land past local midnight: Maghrib 22:00 with
+ * Fajr 02:00 gives 23:20, which is fine, but push Maghrib to 23:10 and it
+ * reads 00:23 — the small hours of the NEXT day, not of this one. Pinned
+ * to this day it would be counted down to, and announced, some twenty-three
+ * hours early.
+ *
+ * Any night mark whose clock falls before Maghrib's is therefore on the
+ * other side of midnight. Nothing else on the card needs this: Islamic
+ * Midnight and the Last Third belong to the night that ENDS here, and
+ * their pre-dawn times are already this day's.
+ */
+function eventAt(name: string, timings: TimingsMap, base: Date): Date {
+  const at = combineLocalDateAndTime(base, timings[name]);
+  if (name !== 'Firstthird' || !timings.Maghrib) return at;
+  return at < combineLocalDateAndTime(base, timings.Maghrib)
+    ? addDays(at, 1)
+    : at;
+}
+
 export function computeNextSalah(
   timings: TimingsMap,
   now: Date,
@@ -57,7 +82,7 @@ export function computeNextSalah(
     if (!raw) {
       continue;
     }
-    const at = combineLocalDateAndTime(dayStart, raw);
+    const at = eventAt(name, timings, dayStart);
     if (at > now) {
       return { name, at };
     }
@@ -118,7 +143,7 @@ export function getNextPrayerDisplay(
   for (const name of NEXT_SALAH_ORDER) {
     const raw = today[name];
     if (!raw) continue;
-    const at = combineLocalDateAndTime(dayStart, raw);
+    const at = eventAt(name, today, dayStart);
     if (at > now) candidates.push({ name, at });
   }
   if (tomorrow) {
@@ -126,7 +151,7 @@ export function getNextPrayerDisplay(
     for (const name of NEXT_SALAH_ORDER) {
       const raw = tomorrow[name];
       if (!raw) continue;
-      candidates.push({ name, at: combineLocalDateAndTime(tomorrowDay, raw) });
+      candidates.push({ name, at: eventAt(name, tomorrow, tomorrowDay) });
     }
   }
   if (candidates.length === 0) return null;
@@ -169,7 +194,7 @@ export function buildUpcomingSalahEvents(
     for (const name of NEXT_SALAH_ORDER) {
       const raw = timings[name];
       if (raw) {
-        events.push({ name, at: combineLocalDateAndTime(base, raw) });
+        events.push({ name, at: eventAt(name, timings, base) });
       }
     }
   };

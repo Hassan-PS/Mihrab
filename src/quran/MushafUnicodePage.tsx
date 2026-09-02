@@ -85,6 +85,33 @@ const END_OF_AYAH = '\u06DD';
 /** No-break space — keeps an ayah and its number on the same line. */
 const NBSP = '\u00A0';
 
+/**
+ * The medallion and its number, as one run of text.
+ *
+ * THE LEADING NO-BREAK SPACE IS LOAD-BEARING — it is not decoration and
+ * it is not the gap before the mark.
+ *
+ * The number is drawn inside the rosette by a `rlig` lookup in
+ * AmiriQuran: U+06DD followed by Arabic-Indic digits shapes to the
+ * rosette plus a small digit of zero advance, positioned within it. That
+ * is one shaping run's work. A nested `Text` that changes the FONT is a
+ * metric span, and Android opens a new shaping run at one — and a run
+ * that OPENS on U+06DD does not get the lookup. The rosette then came out
+ * empty with a full-size digit sitting beside it, which is issue #16.
+ *
+ * Verified on an emulator, both directions: moving this space inside the
+ * span fixed it, and the same span with only a colour — no font change,
+ * so no new run — was never broken to begin with. The printed body has
+ * always had the space inside, which is why pages 3 and up were right
+ * while pages 1 and 2 were not.
+ *
+ * So: whatever else changes here, this string must not begin with the
+ * medallion. `riwayahUnicodePage.test.ts` holds that.
+ */
+export function ayahMarkText(ayah: number): string {
+  return `${NBSP}${END_OF_AYAH}${easternNumerals(ayah)}`;
+}
+
 /** Surah-band and basmalah rows, in units of a text line. */
 const BAND_ROWS = 1.75;
 const BASMALAH_ROWS = 1.3;
@@ -472,14 +499,24 @@ export function predictFontSize(
  * Bounds on the fitted size.
  *
  * The floor stops a dense page from shrinking to something nobody can
- * read — better that it scrolls. The ceiling stops the short final pages
- * (three surahs of a few lines each) from being set at a size that would
- * look like a mistake; the print enlarges them, but not without limit.
- * `width / 15.75` is the Madinah page's own measure, so the ceiling is a
- * little over what the Hafs pages next door are set at.
+ * read — better that it scrolls. The ceiling stops a short page from
+ * being set at a size that would look like a mistake; the print enlarges
+ * them, but not without limit. `width / 15.75` is the Madinah page's own
+ * measure, so the ceiling is comfortably over what the fifteen-line pages
+ * next door are set at.
+ *
+ * It was `width / 13`, and on the only two pages that still reflow it was
+ * the binding constraint rather than the box: al-Fātiḥah and the opening
+ * of al-Baqarah were set at the ceiling and left a third of the frame
+ * empty under them, while every page from 3 on comes off the printed line
+ * table and fills. `width / 8` lets those two grow until the BOX stops
+ * them, which is what the print does with them too — pages 1 and 2 carry
+ * seven and nine lines where the rest carry fifteen, and are set larger
+ * to match. Nothing dense reaches the ceiling: the fit settles as soon as
+ * it fills `FIT_FLOOR` of the box, so a full page never sees it.
  */
 export function fontBounds(width: number): { min: number; max: number } {
-  return { min: Math.max(9, width / 44), max: Math.max(12, width / 13) };
+  return { min: Math.max(9, width / 44), max: Math.max(12, width / 8) };
 }
 
 /** What a measurement says the advance really was, for the next page. */
@@ -750,17 +787,17 @@ function MushafUnicodePage({
                 })()}
               >
                 {ayah.text}
-                {/* No-break before the mark, an ordinary space after it: the
-                    ayah and its number never come apart, and the line may
-                    still break between one ayah and the next. */}
-                {NBSP}
+                {/* The mark carries its own no-break space — see
+                    `ayahMarkText`, which explains why it must. An ordinary
+                    space follows, so the line may still break between one
+                    ayah and the next. */}
                 <Text
                   style={{
                     color: colors.accent,
                     fontFamily: FONTS.arabicQuran,
                   }}
                 >
-                  {`${END_OF_AYAH}${easternNumerals(ayah.ayah)}`}
+                  {ayahMarkText(ayah.ayah)}
                 </Text>
                 {' '}
               </Text>
@@ -1096,7 +1133,7 @@ function PrintedPageBody({
                     <Text
                       style={{ color: colors.accent, fontFamily: FONTS.arabicQuran }}
                     >
-                      {`${NBSP}${END_OF_AYAH}${easternNumerals(token.mark)}`}
+                      {ayahMarkText(token.mark)}
                     </Text>
                   ) : null}
                   {i < tokens.length - 1 ? (

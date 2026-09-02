@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "El punto medio de la noche entre Maghrib y Fajr. Desactivado por defecto.",
     "lastThird": "Último tercio de la noche",
     "lastThirdHelp": "El comienzo del último tercio de la noche — el momento del Qiyam al-Layl. Desactivado por defecto.",
+    "firstThird": "Primer tercio de la noche",
+    "firstThirdHelp": "El final del primer tercio de la noche: según el cálculo maliki, cuando el Isha sale de su intervalo preferido. Desactivado por defecto.",
     "accent_rose": "Rosa",
     "accent_violet": "Violeta",
     "laDesignMarkers": "Marcadores",
@@ -377,7 +379,9 @@
     "Midnight": "Medianoche islámica",
     "Midnight_abbr": "Med",
     "Lastthird": "Último tercio",
-    "Lastthird_abbr": "Qiyam"
+    "Lastthird_abbr": "Qiyam",
+    "Firstthird": "Primer tercio",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "Buscar ciudad o dirección",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "Restablecer la lectura de hoy",
     "khatmahResetTodayHelp": "Revierte solo las páginas registradas hoy.",
     "khatmahResetAll": "Reiniciar el jatma",
-    "khatmahResetAllHelp": "Vuelve a la página 0 con un nuevo calendario.",
+    "khatmahResetAllHelp": "Vuelve al inicio del plan con un nuevo calendario.",
     "khatmahDelete": "Eliminar el jatma",
     "khatmahDeleteHelp": "Elimina el plan por completo.",
     "khatmahReminderChannelName": "Recordatorio de jatma",
@@ -936,6 +940,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Personalizado…",
     "khatmahLengthTitle": "Duración del jatma (días)",
+    "khatmahSetUpTitle": "Comenzar un jatma",
+    "khatmahFromPageTitle": "¿Ya vas leyendo? Empieza en la página",
+    "khatmahFromPageHint": "Desde el principio",
     "khatmahStartCta": "Comenzar",
     "showMore": "Mostrar más",
     "showLess": "Mostrar menos",

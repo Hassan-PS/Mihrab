@@ -410,6 +410,32 @@ function NotificationsCardImpl({
         />
       </View>
 
+      {/* First third of the night (issue #14). The other end of the same
+          arithmetic as the two above, and the one a reader looks at while
+          the evening is still in front of them: in the Mālikī reckoning
+          Ishāʾ leaves its preferred window when the first third closes. */}
+      <View
+        style={[
+          s.card,
+          s.switchRow,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchCopy}>
+          <Text style={[s.valueText, { color: palette.text }]}>
+            {t('settings.firstThird')}
+          </Text>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {t('settings.firstThirdHelp')}
+          </Text>
+        </View>
+        <Switch
+          value={settings.firstThirdEnabled}
+          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          thumbColor={'#ffffff'}
+          onValueChange={v => updateSettings({ firstThirdEnabled: v })}
+        />
+      </View>
+
       {/* End-of-day log prompt (v2.8.5). The same switch lives on the Log
           screen, where the thing it affects is visible. */}
       <View

@@ -17,6 +17,7 @@ import {
 } from '../prayer/loadMonthPrayerTimes';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import { DISPLAY_ORDER } from '../types/prayer';
+import { injectNightTimes } from '../utils/nightTimes';
 import { formatLocalDate } from '../utils/date';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
@@ -153,6 +154,26 @@ export function MonthTimesScreen() {
   }, [hydrated, needsGpsPrime, viewYear, viewMonth, effectiveProvider,
       settings.calculationMethod, settings.school, lat, lng, t]);
 
+  /**
+   * The night marks, derived here rather than taken from the provider.
+   *
+   * AlAdhan ships its own `Midnight`, `Firstthird` and `Lastthird`, and it
+   * cuts the night from sunSET to sunRISE. Mihrab cuts it from Maghrib to
+   * Fajr — the classical basis, and the one every other screen uses
+   * (`nightTimes.ts`). Left alone, this table quietly answered a different
+   * question from the day card beside it: 00:20 here against 23:41 there
+   * for the same Islamic Midnight, and forty minutes is not a rounding.
+   *
+   * The month is a consecutive run of days, which is exactly what
+   * `injectNightTimes` wants, so one pass over the rows makes the two
+   * agree. Whatever the provider sent is overwritten.
+   */
+  const nightRows = useMemo(() => {
+    if (!rows) return rows;
+    const times = injectNightTimes(rows.map(r => r.timings));
+    return rows.map((r, i) => ({ ...r, timings: times[i] }));
+  }, [rows]);
+
   // Abbreviated column headers from localized prayer names
   const colHeaders = useMemo(
     () => DISPLAY_ORDER.map(key => t(`prayer.${key}`).slice(0, 3)),
@@ -253,7 +274,7 @@ export function MonthTimesScreen() {
       {columnHeader}
       <FlatList
         style={{ flex: 1 }}
-        data={rows ?? []}
+        data={nightRows ?? []}
         contentInsetAdjustmentBehavior="never"
         keyExtractor={item => formatLocalDate(item.date)}
         renderItem={renderItem}
@@ -264,7 +285,9 @@ export function MonthTimesScreen() {
           ) : null
         }
         keyboardShouldPersistTaps="handled"
-        initialScrollIndex={isCurrentMonth && rows ? Math.max(0, today.day - 3) : 0}
+        initialScrollIndex={
+          isCurrentMonth && nightRows ? Math.max(0, today.day - 3) : 0
+        }
         getItemLayout={(_, index) => ({
           length: MONTH_ROW_HEIGHT,
           offset: MONTH_ROW_HEIGHT * index,

@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "মাগরিব ও ফজরের মাঝের রাতের মধ্যবিন্দু। ডিফল্টভাবে বন্ধ।",
     "lastThird": "রাতের শেষ তৃতীয়াংশ",
     "lastThirdHelp": "রাতের শেষ তৃতীয়াংশের শুরু — কিয়ামুল লাইলের সময়। ডিফল্টভাবে বন্ধ।",
+    "firstThird": "রাতের প্রথম তৃতীয়াংশ",
+    "firstThirdHelp": "রাতের প্রথম তৃতীয়াংশের শেষ — মালিকি হিসাবে এখানেই ইশার উত্তম সময় শেষ হয়। ডিফল্টে বন্ধ।",
     "accent_rose": "গোলাপি",
     "accent_violet": "বেগুনি",
     "laDesignMarkers": "মার্কার",
@@ -377,7 +379,9 @@
     "Midnight": "মধ্যরাত",
     "Midnight_abbr": "মধ্য",
     "Lastthird": "শেষ তৃতীয়াংশ",
-    "Lastthird_abbr": "কিয়াম"
+    "Lastthird_abbr": "কিয়াম",
+    "Firstthird": "প্রথম তৃতীয়াংশ",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "শহর বা ঠিকানা খুঁজুন",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "আজকের পড়া রিসেট করুন",
     "khatmahResetTodayHelp": "শুধু আজ রেকর্ড হওয়া পৃষ্ঠাগুলো ফিরিয়ে নেয়।",
     "khatmahResetAll": "খতম নতুন করে শুরু করুন",
-    "khatmahResetAllHelp": "নতুন সময়সূচিসহ পৃষ্ঠা ০ থেকে শুরু।",
+    "khatmahResetAllHelp": "নতুন সময়সূচিসহ পরিকল্পনার শুরু থেকে।",
     "khatmahDelete": "খতম মুছে ফেলুন",
     "khatmahDeleteHelp": "পরিকল্পনাটি সম্পূর্ণ মুছে দেয়।",
     "khatmahReminderChannelName": "খতম স্মরণিকা",
@@ -936,6 +940,9 @@
     "audioButton": "অডিও",
     "khatmahCustom": "কাস্টম…",
     "khatmahLengthTitle": "খতমের দৈর্ঘ্য (দিন)",
+    "khatmahSetUpTitle": "খতম শুরু করুন",
+    "khatmahFromPageTitle": "আগে থেকেই পড়ছেন? এই পৃষ্ঠা থেকে শুরু করুন",
+    "khatmahFromPageHint": "শুরু থেকে",
     "khatmahStartCta": "শুরু",
     "showMore": "আরও দেখুন",
     "showLess": "কম দেখুন",

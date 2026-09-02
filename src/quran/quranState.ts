@@ -66,6 +66,24 @@ export type KhatmahPlan = {
   pagesRead: number;
   /** Set when pagesRead reaches 604. */
   completedAt: number | null;
+  /**
+   * Ḥafṣ pages already behind the reader when the plan was made — the
+   * plan covers what FOLLOWS them, cut into `targetDays` portions.
+   *
+   * Absent or 0 on a khatmah begun at the first page, which is every plan
+   * written before this existed and most written since.
+   *
+   * A reader who is already halfway through a khatmah nobody was tracking
+   * (issue #17) has two things to say, and they are different things: how
+   * much is already read, and how long the rest should take. Seeding only
+   * the progress would leave the portions cut for a book they are not
+   * starting — a thirty-day plan begun at page 143 would hand out its
+   * first five days to ground already covered and then ask for the last
+   * 461 pages in the twenty-five that remain. So the cut moves with the
+   * start: 461 pages over thirty days, twenty or so a day, which is what
+   * the reader asked for.
+   */
+  fromPage?: number;
   // ── Additive fields (v2.7.28) ─────────────────────────────────────
   /** Explicit user-pinned position ("I am here"), shown on the mushaf
    *  in the reserved khatmah color. Overrides the derived page. */
@@ -289,6 +307,9 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
       out.position = { surah, ayah, page };
     }
   }
+  // One short of the book: see `planFrom`.
+  const fp = int(r.fromPage, 0, 603);
+  if (fp !== null && fp > 0) out.fromPage = fp;
   const dsp = int(r.dayStartPagesRead, 0, 604);
   if (dsp !== null) out.dayStartPagesRead = dsp;
   // Clamped to the ayah count for the same reason `pagesRead` is clamped
@@ -613,13 +634,66 @@ function pagesThroughAyahs(ayahs: number): number {
   return findPageForAyah(at.surah, at.ayah, DEFAULT_RIWAYAH);
 }
 
-export function startKhatmah(targetDays: number): void {
+/**
+ * Where a reader who is ON `page` of `riwayah` stands, for a new plan.
+ *
+ * Two numbers, and they are answers to different questions.
+ *
+ * `ayahs` is progress, and it is the reader's own: everything before
+ * their page, counted in their muṣḥaf. Nothing rounds it, so "continue"
+ * puts them back at the top of the page they named rather than a page to
+ * either side of it.
+ *
+ * `from` is where the plan's DAYS are cut, and the cut is in Ḥafṣ pages
+ * (see `portionEnd`) — so it is the last Ḥafṣ page that ends at or before
+ * them. Their page boundary is not Ḥafṣ's, so this can sit a fraction of
+ * a page behind their position; that is the right side to be on. It makes
+ * the first portion open a line or two before the reader rather than past
+ * them, and it never hands out a page they have not read.
+ */
+function planStart(at: { page: number; riwayah?: RiwayahId }): {
+  from: number;
+  ayahs: number;
+} {
+  const page = Math.trunc(at.page);
+  if (!Number.isFinite(page) || page <= 1) return { from: 0, ayahs: 0 };
+  const riwayah = at.riwayah ?? DEFAULT_RIWAYAH;
+  const ayahs = ayahsThroughPage(page - 1, riwayah);
+  if (ayahs <= 0) return { from: 0, ayahs: 0 };
+  let from = 0;
+  for (let p = 1; p < KHATMAH_TOTAL_PAGES; p++) {
+    if (ayahsThroughHafsPage(p) > ayahs) break;
+    from = p;
+  }
+  return { from, ayahs };
+}
+
+/**
+ * Begin a plan.
+ *
+ * `startingAt` is for a khatmah already under way: the page the reader is
+ * ON, in the muṣḥaf they are reading it in. Everything before that page
+ * counts as read, and the plan's days cover what is left.
+ *
+ * The page is the reader's own — Warsh page 143 is not Ḥafṣ page 143 —
+ * so it is converted through ayahs, which every riwayah agrees on. See
+ * `planStart` for why progress keeps that exact figure while the day cut
+ * takes the Ḥafṣ page below it.
+ */
+export function startKhatmah(
+  targetDays: number,
+  startingAt?: { page: number; riwayah?: RiwayahId },
+): void {
+  const { from, ayahs } = startingAt
+    ? planStart(startingAt)
+    : { from: 0, ayahs: 0 };
   const plan: KhatmahPlan = {
     id: `${Date.now()}`,
     startedAt: Date.now(),
     targetDays,
-    pagesRead: 0,
-    ayahsRead: 0,
+    fromPage: from,
+    pagesRead: pagesThroughAyahs(ayahs),
+    ayahsRead: ayahs,
     completedAt: null,
   };
   updateQuranState(prev => ({
@@ -801,6 +875,12 @@ export function resetKhatmahAll(): void {
   updateQuranState(prev => {
     const active = prev.khatmah.find(k => k.completedAt == null);
     if (!active) return prev;
+    // Back to where the PLAN began, which is page 0 for most plans and
+    // the reader's own start for one begun partway (issue #17). Rewinding
+    // such a plan to the opening would hand it back a hundred pages the
+    // reader never asked it to cover.
+    const from = planFrom(active);
+    const ayahs = ayahsThroughHafsPage(from);
     return {
       ...prev,
       khatmah: prev.khatmah.map(k =>
@@ -808,12 +888,12 @@ export function resetKhatmahAll(): void {
           ? {
               ...k,
               startedAt: Date.now(),
-              pagesRead: 0,
-              ayahsRead: 0,
+              pagesRead: from,
+              ayahsRead: ayahs,
               position: null,
               dayStartDate: localYmd(),
-              dayStartPagesRead: 0,
-              dayStartAyahsRead: 0,
+              dayStartPagesRead: from,
+              dayStartAyahsRead: ayahs,
               completedAt: null,
             }
           : k,
@@ -879,6 +959,18 @@ function planDays(plan: KhatmahPlan): number {
 }
 
 /**
+ * The Ḥafṣ page the plan starts after. 0 for a khatmah from the opening.
+ *
+ * Clamped one short of the book: a plan that began at the last page has
+ * nothing to cut, and one portion of nothing is not a plan.
+ */
+function planFrom(plan: KhatmahPlan): number {
+  const from = Math.trunc(plan.fromPage ?? 0);
+  if (!Number.isFinite(from) || from <= 0) return 0;
+  return Math.min(KHATMAH_TOTAL_PAGES - 1, from);
+}
+
+/**
  * Where each Ḥafṣ page ends, in ayahs. Built once, walked often.
  *
  * `portionEnd` is called inside a search, per render, so the 604 lookups
@@ -919,33 +1011,46 @@ function ayahsThroughHafsPage(page: number): number {
  * The boundary is still an ayah, so progress needs no conversion and the
  * marker still falls on something the page can point at.
  */
-function portionEnd(days: number, day: number): number {
-  if (day <= 0) return 0;
+function portionEnd(days: number, day: number, from: number = 0): number {
+  const base = ayahsThroughHafsPage(from);
+  if (day <= 0) return base;
   if (day >= days) return TOTAL_AYAHS;
-  // A plan longer than the book has pages cannot have a page a day, so it
-  // falls back to the even ayah cut rather than handing out empty days.
-  if (days > KHATMAH_TOTAL_PAGES) {
-    return Math.round((TOTAL_AYAHS * day) / days);
+  const span = KHATMAH_TOTAL_PAGES - from;
+  // A plan longer than the pages it covers cannot have a page a day, so
+  // it falls back to the even ayah cut rather than handing out empty days.
+  if (days > span) {
+    return base + Math.round(((TOTAL_AYAHS - base) * day) / days);
   }
-  return ayahsThroughHafsPage(Math.round((KHATMAH_TOTAL_PAGES * day) / days));
+  return ayahsThroughHafsPage(from + Math.round((span * day) / days));
 }
 
 /** Which portion an ayah falls in, by its index. */
 export function khatmahPortionOf(plan: KhatmahPlan, index: number): number {
   const days = planDays(plan);
+  const from = planFrom(plan);
+  const base = ayahsThroughHafsPage(from);
   const at = Math.min(TOTAL_AYAHS, Math.max(1, Math.trunc(index)));
+  const span = Math.max(1, TOTAL_AYAHS - base);
   // The boundaries are rounded, so the proportional guess can land either
   // side of one. Walk it onto the right side rather than trusting it.
-  let day = Math.min(days, Math.max(1, Math.ceil((at * days) / TOTAL_AYAHS)));
-  while (day > 1 && portionEnd(days, day - 1) >= at) day -= 1;
-  while (day < days && portionEnd(days, day) < at) day += 1;
+  let day = Math.min(
+    days,
+    Math.max(1, Math.ceil(((at - base) * days) / span)),
+  );
+  while (day > 1 && portionEnd(days, day - 1, from) >= at) day -= 1;
+  while (day < days && portionEnd(days, day, from) < at) day += 1;
   return day;
 }
 
 export function khatmahPortion(plan: KhatmahPlan, day: number): KhatmahPortion {
   const days = planDays(plan);
+  const from = planFrom(plan);
   const d = Math.min(days, Math.max(1, Math.trunc(day)));
-  return { day: d, from: portionEnd(days, d - 1) + 1, to: portionEnd(days, d) };
+  return {
+    day: d,
+    from: portionEnd(days, d - 1, from) + 1,
+    to: portionEnd(days, d, from),
+  };
 }
 
 /** The portion the reader is in — the one holding the next unread ayah. */
@@ -1052,7 +1157,7 @@ export function stepKhatmahBack(): void {
     if (!active) return prev;
     const days = planDays(active);
     const current = khatmahCurrentPortion(active).day;
-    const to = portionEnd(days, current - 2);
+    const to = portionEnd(days, current - 2, planFrom(active));
     if (to >= khatmahAyahsRead(active)) return prev;
     const today = localYmd();
     const pages = pagesThroughAyahs(to);
@@ -1128,9 +1233,13 @@ export function khatmahBehindBy(
 ): number {
   const dayMs = 24 * 60 * 60 * 1000;
   const daysElapsed = Math.floor((now - plan.startedAt) / dayMs);
+  // Against the plan's own span, not the whole book: a khatmah begun at
+  // page 143 is not five days behind on the morning it was made.
+  const from = planFrom(plan);
+  const span = KHATMAH_TOTAL_PAGES - from;
   const expected = Math.min(
     KHATMAH_TOTAL_PAGES,
-    Math.round((KHATMAH_TOTAL_PAGES / plan.targetDays) * daysElapsed),
+    from + Math.round((span / planDays(plan)) * daysElapsed),
   );
   return Math.max(0, expected - plan.pagesRead);
 }

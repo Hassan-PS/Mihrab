@@ -304,10 +304,15 @@ export type PrayerAppSettings = {
    *    (Maghrib → Fajr). Defaults OFF.
    *  - `lastThirdEnabled` — start of the last third of the night (Qiyām
    *    al-Layl). Defaults OFF.
+   *  - `firstThirdEnabled` — the END of the first third of the night, which
+   *    in the Mālikī reckoning is where Ishāʾ leaves its preferred window
+   *    for its late one (issue #14). Unlike the other two it belongs to the
+   *    night that BEGINS today, so it sits after Ishāʾ. Defaults OFF.
    */
   sunriseEnabled: boolean;
   islamicMidnightEnabled: boolean;
   lastThirdEnabled: boolean;
+  firstThirdEnabled: boolean;
   /**
    * Ayah of the day notification — v2.7.27.
    *
@@ -403,6 +408,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   sunriseEnabled: true,
   islamicMidnightEnabled: false,
   lastThirdEnabled: false,
+  firstThirdEnabled: false,
   // Ayah of the day: off by default (no surprise notifications); 9:00 AM
   // when enabled — a quiet mid-morning moment.
   ayahOfDayEnabled: false,

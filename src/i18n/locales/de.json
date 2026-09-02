@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "Der Mittelpunkt der Nacht zwischen Maghrib und Fadschr. Standardmäßig aus.",
     "lastThird": "Letztes Drittel der Nacht",
     "lastThirdHelp": "Der Beginn des letzten Drittels der Nacht — die Zeit für Qiyam al-Lail. Standardmäßig aus.",
+    "firstThird": "Erstes Drittel der Nacht",
+    "firstThirdHelp": "Das Ende des ersten Nachtdrittels — nach malikitischer Rechnung verlässt das Ischa-Gebet dann sein bevorzugtes Zeitfenster. Standardmäßig aus.",
     "accent_rose": "Rosé",
     "accent_violet": "Violett",
     "laDesignMarkers": "Markierungen",
@@ -377,7 +379,9 @@
     "Midnight": "Islamische Mitternacht",
     "Midnight_abbr": "Mitte",
     "Lastthird": "Letztes Drittel",
-    "Lastthird_abbr": "Qiyam"
+    "Lastthird_abbr": "Qiyam",
+    "Firstthird": "Erstes Drittel",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "Stadt oder Adresse suchen",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "Heutige Lektüre zurücksetzen",
     "khatmahResetTodayHelp": "Setzt nur die heute erfassten Seiten zurück.",
     "khatmahResetAll": "Khatmah neu starten",
-    "khatmahResetAllHelp": "Zurück auf Seite 0 mit neuem Zeitplan.",
+    "khatmahResetAllHelp": "Zurück zum Beginn des Plans, mit neuem Zeitplan.",
     "khatmahDelete": "Khatmah löschen",
     "khatmahDeleteHelp": "Entfernt den Plan vollständig.",
     "khatmahReminderChannelName": "Khatmah-Erinnerung",
@@ -936,6 +940,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Eigene…",
     "khatmahLengthTitle": "Khatma-Dauer (Tage)",
+    "khatmahSetUpTitle": "Khatma beginnen",
+    "khatmahFromPageTitle": "Schon dabei? Ab Seite",
+    "khatmahFromPageHint": "Von Anfang an",
     "khatmahStartCta": "Starten",
     "showMore": "Mehr anzeigen",
     "showLess": "Weniger anzeigen",

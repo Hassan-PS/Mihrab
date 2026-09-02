@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "Akşam (Maghrib) ile imsak (Fajr) arasındaki gecenin orta noktası. Varsayılan olarak kapalı.",
     "lastThird": "Gecenin son üçte biri",
     "lastThirdHelp": "Gecenin son üçte birinin başlangıcı — Kıyamü'l-Leyl vakti. Varsayılan olarak kapalı.",
+    "firstThird": "Gecenin ilk üçte biri",
+    "firstThirdHelp": "Gecenin ilk üçte birinin sonu — Maliki hesabına göre yatsının tercih edilen vaktinin çıktığı an. Varsayılan olarak kapalı.",
     "accent_rose": "Gül",
     "accent_violet": "Mor",
     "laDesignMarkers": "İşaretler",
@@ -377,7 +379,9 @@
     "Midnight": "Gece yarısı",
     "Midnight_abbr": "Yarı",
     "Lastthird": "Son üçte bir",
-    "Lastthird_abbr": "Kıyam"
+    "Lastthird_abbr": "Kıyam",
+    "Firstthird": "İlk üçte bir",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "Şehir veya adres arayın",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "Bugünkü okumayı sıfırla",
     "khatmahResetTodayHelp": "Yalnızca bugün kaydedilen sayfaları geri alır.",
     "khatmahResetAll": "Hatmi yeniden başlat",
-    "khatmahResetAllHelp": "Yeni programla 0. sayfaya döner.",
+    "khatmahResetAllHelp": "Yeni programla planın başına döner.",
     "khatmahDelete": "Hatmi sil",
     "khatmahDeleteHelp": "Planı tamamen kaldırır.",
     "khatmahReminderChannelName": "Hatim hatırlatıcısı",
@@ -936,6 +940,9 @@
     "audioButton": "Ses",
     "khatmahCustom": "Özel…",
     "khatmahLengthTitle": "Hatim süresi (gün)",
+    "khatmahSetUpTitle": "Hatme başla",
+    "khatmahFromPageTitle": "Zaten okuyor musun? Şu sayfadan başla",
+    "khatmahFromPageHint": "Baştan",
     "khatmahStartCta": "Başla",
     "showMore": "Daha fazla göster",
     "showLess": "Daha az göster",

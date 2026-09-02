@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "मग़रिब और फ़ज्र के बीच रात का मध्यबिंदु। डिफ़ॉल्ट रूप से बंद।",
     "lastThird": "रात का अंतिम तिहाई भाग",
     "lastThirdHelp": "रात के अंतिम तिहाई की शुरुआत — क़ियाम अल-लैल का समय। डिफ़ॉल्ट रूप से बंद।",
+    "firstThird": "रात की पहली तिहाई",
+    "firstThirdHelp": "रात की पहली तिहाई का अंत — मालिकी गणना में यहाँ ईशा अपने पसंदीदा समय से बाहर हो जाती है। डिफ़ॉल्ट रूप से बंद।",
     "accent_rose": "गुलाबी",
     "accent_violet": "बैंगनी",
     "laDesignMarkers": "मार्कर",
@@ -377,7 +379,9 @@
     "Midnight": "इस्लामी आधी रात",
     "Midnight_abbr": "मध्य",
     "Lastthird": "अंतिम तिहाई",
-    "Lastthird_abbr": "क़ियाम"
+    "Lastthird_abbr": "क़ियाम",
+    "Firstthird": "पहली तिहाई",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "शहर या पता खोजें",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "आज की पढ़ाई रीसेट करें",
     "khatmahResetTodayHelp": "केवल आज दर्ज पृष्ठ वापस करता है।",
     "khatmahResetAll": "ख़त्मा फिर से शुरू करें",
-    "khatmahResetAllHelp": "नए कार्यक्रम के साथ पृष्ठ 0 से।",
+    "khatmahResetAllHelp": "नए कार्यक्रम के साथ योजना की शुरुआत से।",
     "khatmahDelete": "ख़त्मा हटाएँ",
     "khatmahDeleteHelp": "योजना को पूरी तरह हटा देता है।",
     "khatmahReminderChannelName": "ख़त्मा अनुस्मारक",
@@ -936,6 +940,9 @@
     "audioButton": "ऑडियो",
     "khatmahCustom": "कस्टम…",
     "khatmahLengthTitle": "ख़त्म की अवधि (दिन)",
+    "khatmahSetUpTitle": "ख़त्म शुरू करें",
+    "khatmahFromPageTitle": "पहले से पढ़ रहे हैं? इस पृष्ठ से शुरू करें",
+    "khatmahFromPageHint": "शुरुआत से",
     "khatmahStartCta": "शुरू करें",
     "showMore": "और दिखाएँ",
     "showLess": "कम दिखाएँ",

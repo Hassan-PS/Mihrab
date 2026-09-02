@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "马格里布与法吉尔之间夜晚的中点。默认关闭。",
     "lastThird": "夜晚的最后三分之一",
     "lastThirdHelp": "夜晚最后三分之一的开始——夜间礼拜（Qiyam al-Layl）的时间。默认关闭。",
+    "firstThird": "夜晚的前三分之一",
+    "firstThirdHelp": "夜晚前三分之一的终点——按马立克派的算法，宵礼在此离开其首选时段。默认关闭。",
     "accent_rose": "玫瑰红",
     "accent_violet": "紫罗兰",
     "laDesignMarkers": "标记",
@@ -377,7 +379,9 @@
     "Midnight": "伊斯兰午夜",
     "Midnight_abbr": "午夜",
     "Lastthird": "最后三分之一",
-    "Lastthird_abbr": "夜祷"
+    "Lastthird_abbr": "夜祷",
+    "Firstthird": "前三分之一",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "搜索城市或地址",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "重置今日阅读",
     "khatmahResetTodayHelp": "仅撤销今天记录的页数。",
     "khatmahResetAll": "重新开始完读",
-    "khatmahResetAllHelp": "回到第 0 页并重新排期。",
+    "khatmahResetAllHelp": "回到计划的起点并重新排期。",
     "khatmahDelete": "删除完读计划",
     "khatmahDeleteHelp": "完全移除该计划。",
     "khatmahReminderChannelName": "完读提醒",
@@ -936,6 +940,9 @@
     "audioButton": "音频",
     "khatmahCustom": "自定义…",
     "khatmahLengthTitle": "完整诵读时长（天）",
+    "khatmahSetUpTitle": "开始一次完整诵读",
+    "khatmahFromPageTitle": "已经在读了？从此页开始",
+    "khatmahFromPageHint": "从头开始",
     "khatmahStartCta": "开始",
     "showMore": "显示更多",
     "showLess": "显示更少",

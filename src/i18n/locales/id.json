@@ -248,6 +248,8 @@
     "islamicMidnightHelp": "Titik tengah malam antara Magrib dan Subuh. Nonaktif secara default.",
     "lastThird": "Sepertiga malam terakhir",
     "lastThirdHelp": "Awal sepertiga malam terakhir — waktu untuk Qiyamul Lail. Nonaktif secara default.",
+    "firstThird": "Sepertiga malam pertama",
+    "firstThirdHelp": "Akhir sepertiga malam pertama — dalam perhitungan Maliki, saat Isya keluar dari waktu utamanya. Nonaktif secara bawaan.",
     "accent_rose": "Mawar",
     "accent_violet": "Ungu",
     "laDesignMarkers": "Penanda",
@@ -377,7 +379,9 @@
     "Midnight": "Tengah malam",
     "Midnight_abbr": "Tgh",
     "Lastthird": "Sepertiga akhir",
-    "Lastthird_abbr": "Qiyam"
+    "Lastthird_abbr": "Qiyam",
+    "Firstthird": "Sepertiga awal",
+    "Firstthird_abbr": "1/3"
   },
   "placeSearch": {
     "label": "Cari kota atau alamat",
@@ -927,7 +931,7 @@
     "khatmahResetToday": "Atur ulang bacaan hari ini",
     "khatmahResetTodayHelp": "Hanya mengembalikan halaman yang tercatat hari ini.",
     "khatmahResetAll": "Mulai ulang khataman",
-    "khatmahResetAllHelp": "Kembali ke halaman 0 dengan jadwal baru.",
+    "khatmahResetAllHelp": "Kembali ke awal rencana dengan jadwal baru.",
     "khatmahDelete": "Hapus khataman",
     "khatmahDeleteHelp": "Menghapus rencana sepenuhnya.",
     "khatmahReminderChannelName": "Pengingat khataman",
@@ -936,6 +940,9 @@
     "audioButton": "Audio",
     "khatmahCustom": "Kustom…",
     "khatmahLengthTitle": "Durasi khatmah (hari)",
+    "khatmahSetUpTitle": "Mulai khatmah",
+    "khatmahFromPageTitle": "Sudah membaca? Mulai dari halaman",
+    "khatmahFromPageHint": "Dari awal",
     "khatmahStartCta": "Mulai",
     "showMore": "Tampilkan selengkapnya",
     "showLess": "Tampilkan lebih sedikit",

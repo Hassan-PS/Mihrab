@@ -10,7 +10,7 @@
  * Above the tabs: continue-reading resume card, khatmah progress, and
  * the verse of the day.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
@@ -27,7 +27,11 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
-import { findPageForAyah, MUSHAF_PAGES } from '../quran/pages';
+import {
+  findPageForAyah,
+  MUSHAF_PAGES,
+  totalPagesForRiwayah,
+} from '../quran/pages';
 import { hydrateRiwayahData } from '../quran/riwayahData';
 import { RIWAYAT } from '../quran/riwayat';
 import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
@@ -107,6 +111,8 @@ export function QuranScreen() {
   // free-form day count entered in a small modal.
   const [customDaysVisible, setCustomDaysVisible] = useState(false);
   const [customDaysText, setCustomDaysText] = useState('');
+  // Blank means "from the opening", which is what most khatmahs are.
+  const [customFromText, setCustomFromText] = useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<QuranSearchResult[] | null>(null);
   // Go-to-page (v2.8.5) — a page number typed here opens the mushaf there.
@@ -242,6 +248,29 @@ export function QuranScreen() {
   const pages = plan ? khatmahPages(plan, quran.prefs.riwayah) : null;
   const daysLeft = plan ? khatmahDaysLeft(plan) : 0;
   const readAyahs = plan ? khatmahAyahsRead(plan) : 0;
+
+  /**
+   * Start the plan the sheet describes.
+   *
+   * A blank or unusable page means "from the opening" rather than an
+   * error: the field is an addition to the sheet, not a hurdle in front
+   * of it, and a khatmah nobody could start because they typed the wrong
+   * thing in an optional box is worse than one that starts at page one.
+   */
+  const startCustomKhatmah = useCallback(() => {
+    const n = Number(customDaysText);
+    if (!Number.isFinite(n) || n < 1) return;
+    const total = totalPagesForRiwayah(quran.prefs.riwayah);
+    const raw = Number(customFromText);
+    const from =
+      customFromText.trim() !== '' && Number.isFinite(raw) && raw >= 2
+        ? { page: Math.min(total, Math.round(raw)), riwayah: quran.prefs.riwayah }
+        : undefined;
+    // A khatmah can't be shorter than a day per page-set beyond the
+    // mushaf itself — clamp to 1..604 days.
+    startKhatmah(Math.min(604, Math.round(n)), from);
+    setCustomDaysVisible(false);
+  }, [customDaysText, customFromText, quran.prefs.riwayah]);
 
   const header = (
     <View style={[styles.headerWrap, listCap]}>
@@ -389,7 +418,12 @@ export function QuranScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={t('quran.khatmahContinue', 'Continue')}
                 onPress={() => {
-                  const page = khatmahCurrentPage(plan);
+                  // The reader's own muṣḥaf, like every other number on
+                  // this card: `khatmahCurrentPage` defaults to Ḥafṣ, and
+                  // taking that default sent a Warsh reader to the page
+                  // of that NUMBER in their print, which is not the page
+                  // the plan meant.
+                  const page = khatmahCurrentPage(plan, quran.prefs.riwayah);
                   const startSurah =
                     plan.position?.surah ??
                     MUSHAF_PAGES.find(p => p.page === page)?.start.surah ??
@@ -401,7 +435,7 @@ export function QuranScreen() {
                   { backgroundColor: palette.accentSolid },
                 ]}>
                 <Text style={styles.khatmahBtnLabel}>
-                  {`${t('quran.khatmahContinue', 'Continue')} · ${t('quran.pageLabel', { page: khatmahCurrentPage(plan) })}`}
+                  {`${t('quran.khatmahContinue', 'Continue')} · ${t('quran.pageLabel', { page: khatmahCurrentPage(plan, quran.prefs.riwayah) })}`}
                 </Text>
               </Pressable>
               <Pressable
@@ -493,6 +527,7 @@ export function QuranScreen() {
                 accessibilityLabel={t('quran.khatmahCustom', 'Custom…')}
                 onPress={() => {
                   setCustomDaysText('');
+                  setCustomFromText('');
                   setCustomDaysVisible(true);
                 }}
                 style={[styles.chip, { borderColor: palette.border }]}>
@@ -1064,7 +1099,7 @@ export function QuranScreen() {
                 t('quran.khatmahResetAll', 'Restart the khatmah'),
                 t(
                   'quran.khatmahResetAllHelp',
-                  'Back to page 0 with a fresh schedule.',
+                  'Back to where the plan began, with a fresh schedule.',
                 ),
                 () => resetKhatmahAll(),
                 false,
@@ -1127,6 +1162,9 @@ export function QuranScreen() {
         />
         <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
           <Text style={[styles.menuTitle, { color: palette.text }]}>
+            {t('quran.khatmahSetUpTitle', 'Start a khatmah')}
+          </Text>
+          <Text style={[styles.customFieldLabel, { color: palette.muted }]}>
             {t('quran.khatmahLengthTitle', 'Khatmah length (days)')}
           </Text>
           <TextInput
@@ -1142,13 +1180,35 @@ export function QuranScreen() {
               styles.customDaysInput,
               { color: palette.text, borderColor: palette.border },
             ]}
-            onSubmitEditing={() => {
-              const n = Number(customDaysText);
-              if (Number.isFinite(n) && n >= 1) {
-                startKhatmah(Math.min(604, Math.round(n)));
-                setCustomDaysVisible(false);
-              }
-            }}
+            onSubmitEditing={startCustomKhatmah}
+          />
+          {/* Issue #17. A khatmah already under way has a place in it, and
+              without somewhere to say so the tracker can only be started
+              by someone at page one. Blank is the ordinary case, and the
+              placeholder says so rather than making the reader work it
+              out. The page is theirs — of the muṣḥaf they are reading —
+              which is why the count beside it is `total`. */}
+          <Text style={[styles.customFieldLabel, { color: palette.muted }]}>
+            {t('quran.khatmahFromPageTitle', 'Already reading? Start at page')}
+          </Text>
+          <TextInput
+            value={customFromText}
+            onChangeText={setCustomFromText}
+            keyboardType="number-pad"
+            maxLength={3}
+            accessibilityLabel={t(
+              'quran.khatmahFromPageTitle',
+              'Already reading? Start at page',
+            )}
+            placeholder={t('quran.khatmahFromPageHint', {
+              defaultValue: 'From the beginning',
+            })}
+            placeholderTextColor={String(palette.muted)}
+            style={[
+              styles.customDaysInput,
+              { color: palette.text, borderColor: palette.border },
+            ]}
+            onSubmitEditing={startCustomKhatmah}
           />
           <View style={styles.customDaysRow}>
             <Pressable
@@ -1163,15 +1223,7 @@ export function QuranScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('quran.khatmahStartCta', 'Start')}
-              onPress={() => {
-                const n = Number(customDaysText);
-                if (Number.isFinite(n) && n >= 1) {
-                  // A khatmah can't be shorter than a day per page-set
-                  // beyond the mushaf itself — clamp to 1..604 days.
-                  startKhatmah(Math.min(604, Math.round(n)));
-                  setCustomDaysVisible(false);
-                }
-              }}
+              onPress={startCustomKhatmah}
               style={styles.menuCancel}>
               <Text style={{ color: palette.accentSolid, fontWeight: '700' }}>
                 {t('quran.khatmahStartCta', 'Start')}
@@ -1362,6 +1414,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontVariant: ['tabular-nums'],
     marginTop: 4,
+  },
+  customFieldLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 10,
   },
   customDaysRow: {
     flexDirection: 'row',
