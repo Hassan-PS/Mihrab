@@ -96,6 +96,7 @@ export async function collectWidgetExtras(input: {
       lastRead: quran.lastRead,
       bookmarks: quran.bookmarks,
       khatmah: activeKhatmah(quran) ?? null,
+      riwayah: quran.prefs.riwayah,
       language,
       now,
       mushafDownloaded,

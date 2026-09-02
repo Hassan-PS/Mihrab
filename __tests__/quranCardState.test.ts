@@ -10,7 +10,12 @@ import {
   pagesReadToday,
   selectQuranCardState,
 } from '../src/quran/quranCardState';
-import type { KhatmahPlan, QuranState } from '../src/quran/quranState';
+import {
+  khatmahPortion,
+  type KhatmahPlan,
+  type QuranState,
+} from '../src/quran/quranState';
+import { DEFAULT_RIWAYAH } from '../src/quran/riwayat';
 
 const DAY = 24 * 60 * 60 * 1000;
 const NOW = new Date(2026, 7, 1, 12, 0, 0).getTime();
@@ -21,7 +26,7 @@ const base: QuranState = {
   bookmarks: [],
   starred: [],
   khatmah: [],
-  prefs: {} as QuranState['prefs'],
+  prefs: { riwayah: DEFAULT_RIWAYAH } as QuranState['prefs'],
 };
 
 const lastRead = {
@@ -63,30 +68,33 @@ describe('selectQuranCardState', () => {
   });
 
   it('reports the plan while pages remain today', () => {
-    const state = selectQuranCardState(
-      { ...base, lastRead, khatmah: [plan()] },
-      NOW,
-    );
+    // Six portions behind it, so the reader is on the seventh — whatever
+    // the calendar says. That is the fault this pins: the card counted
+    // midnights while the Quran screen counted portions, so the two
+    // disagreed about what day it was.
+    const at = plan({ ayahsRead: khatmahPortion(plan(), 6).to });
+    const state = selectQuranCardState({ ...base, lastRead, khatmah: [at] }, NOW);
     expect(state.kind).toBe('khatmah');
     if (state.kind !== 'khatmah') return;
-    expect(state.dayNumber).toBe(12);
+    expect(state.dayNumber).toBe(7);
     expect(state.targetDays).toBe(30);
     expect(state.pagesLeftToday).toBeGreaterThan(0);
-    // 240 of 604 pages.
-    expect(state.progress).toBeCloseTo(240 / 604, 5);
+    expect(state.progress).toBeCloseTo(khatmahPortion(plan(), 6).to / 6236, 5);
   });
 
   it("says so once today's portion is finished", () => {
-    // khatmahToday spreads 364 remaining pages over 19 days → 20 today.
+    // Read to the end of the sixth portion, having started the day at its
+    // beginning: the day is done, and stays done however much is read on.
     const done = plan({
+      ayahsRead: khatmahPortion(plan(), 6).to,
       dayStartDate: ymd(NOW),
-      dayStartPagesRead: 240 - 25,
+      dayStartAyahsRead: khatmahPortion(plan(), 5).to,
     });
     const state = selectQuranCardState({ ...base, khatmah: [done] }, NOW);
     expect(state.kind).toBe('done');
     if (state.kind === 'done') {
-      expect(state.daysToGo).toBeGreaterThan(0);
-      expect(state.dayNumber).toBe(12);
+      expect(state.dayNumber).toBe(6);
+      expect(state.daysToGo).toBe(24);
     }
   });
 
@@ -97,11 +105,13 @@ describe('selectQuranCardState', () => {
     });
   });
 
-  it('caps the day number at the plan length', () => {
-    const late = plan({ startedAt: NOW - 90 * DAY });
+  it('does not run past the last day of the plan', () => {
+    // Nothing read for ninety days is still day one — the plan waits for
+    // the reader, it does not run off without them.
+    const late = plan({ startedAt: NOW - 90 * DAY, ayahsRead: 0 });
     const state = selectQuranCardState({ ...base, khatmah: [late] }, NOW);
     if (state.kind === 'khatmah' || state.kind === 'done') {
-      expect(state.dayNumber).toBe(30);
+      expect(state.dayNumber).toBe(1);
     } else {
       throw new Error(`unexpected state ${state.kind}`);
     }

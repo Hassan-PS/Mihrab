@@ -21,7 +21,12 @@ import {
 } from '../src/quran/audio/playback';
 import {
   DEFAULT_QURAN_STATE,
-  khatmahToday,
+  khatmahBehindBy,
+  khatmahDay,
+  khatmahDaysLeft,
+  khatmahPages,
+  khatmahPortion,
+  KHATMAH_TOTAL_AYAHS,
   KHATMAH_TOTAL_PAGES,
   type KhatmahPlan,
 } from '../src/quran/quranState';
@@ -155,27 +160,75 @@ describe('khatmah math (QR-21)', () => {
     ...over,
   });
 
-  it('spreads all pages over the plan on day one', () => {
+  it('asks the same of every day of the plan', () => {
+    // The fault this pins: cut into equal AYAH counts, a thirty-day plan
+    // asked for 36 pages on day two and 8 on day twenty-eight. Cut by
+    // page it is a twentieth of the book every day, which is what a
+    // khatmah means.
     const plan = mkPlan({});
-    const { pagesToday, behindBy } = khatmahToday(plan, plan.startedAt);
-    expect(pagesToday).toBe(Math.ceil(KHATMAH_TOTAL_PAGES / 30));
-    expect(behindBy).toBe(0);
+    const seen: number[] = [];
+    for (let day = 1; day <= 30; day++) {
+      const at = mkPlan({ ayahsRead: khatmahPortion(plan, day).from - 1 });
+      seen.push(khatmahPages(at, 'hafs', at.startedAt).today);
+    }
+    expect(Math.min(...seen)).toBeGreaterThanOrEqual(19);
+    expect(Math.max(...seen)).toBeLessThanOrEqual(22);
+
+    const first = khatmahPages(plan, 'hafs', plan.startedAt);
+    expect(first.doneToday).toBe(0);
+    expect(first.leftToday).toBe(first.today);
+    expect(first.remaining).toBe(KHATMAH_TOTAL_PAGES);
+    expect(khatmahBehindBy(plan, plan.startedAt)).toBe(0);
   });
 
-  it('reports catch-up when behind schedule', () => {
-    const plan = mkPlan({ pagesRead: 10 });
-    const tenDays = plan.startedAt + 10 * 24 * 60 * 60 * 1000;
-    const { behindBy, daysLeft } = khatmahToday(plan, tenDays);
-    expect(daysLeft).toBe(20);
-    expect(behindBy).toBeGreaterThan(0);
+  it('counts the days left off the portion, not the calendar', () => {
+    // The fault this pins: a plan begun today and read three portions
+    // into said "day 4 of 30" and "30 days left" in the same breath.
+    const plan = mkPlan({});
+    const read = mkPlan({ ayahsRead: khatmahPortion(plan, 3).to });
+    expect(khatmahDay(read, read.startedAt).portion.day).toBe(4);
+    expect(khatmahDaysLeft(read, read.startedAt)).toBe(27);
+
+    // And a reader who has not opened it for ten days is still on day one.
+    const idle = mkPlan({});
+    const tenDays = idle.startedAt + 10 * 24 * 60 * 60 * 1000;
+    expect(khatmahDaysLeft(idle, tenDays)).toBe(30);
+    expect(khatmahBehindBy(idle, tenDays)).toBeGreaterThan(0);
   });
 
-  it('never divides by zero after the target date passes', () => {
-    const plan = mkPlan({ pagesRead: 500 });
-    const late = plan.startedAt + 45 * 24 * 60 * 60 * 1000;
-    const { pagesToday, daysLeft } = khatmahToday(plan, late);
-    expect(daysLeft).toBe(1);
-    expect(pagesToday).toBe(KHATMAH_TOTAL_PAGES - 500);
+  it('answers for the book, not for the portion the day is pinned to', () => {
+    // The other half of the same fault. `khatmahDay` holds the day at the
+    // portion it STARTED in, so someone who sat down on day five and read
+    // to page 551 is still shown "day 5" until tomorrow — deliberately.
+    // What is LEFT is a different question, and the answer is where they
+    // actually are: three days, not twenty-five.
+    const plan = mkPlan({});
+    const far = mkPlan({
+      ayahsRead: khatmahPortion(plan, 27).to,
+      dayStartDate: new Date(plan.startedAt).toISOString().slice(0, 10),
+      dayStartAyahsRead: khatmahPortion(plan, 4).to,
+    });
+    expect(khatmahDaysLeft(far, plan.startedAt)).toBe(3);
+  });
+
+  it('has nothing left to say when the book is finished', () => {
+    const done = mkPlan({ ayahsRead: KHATMAH_TOTAL_AYAHS });
+    expect(khatmahDaysLeft(done, done.startedAt)).toBe(0);
+    expect(khatmahPages(done, 'hafs', done.startedAt).remaining).toBe(0);
+  });
+
+  it('counts the pages of the muṣḥaf the reader is in', () => {
+    // Without an installed riwayah every id falls back to the Ḥafṣ
+    // pagination, so this pins the fallback rather than the difference —
+    // what matters is that the riwayah is ASKED, and that the answer is
+    // a page count of a real muṣḥaf.
+    const plan = mkPlan({ ayahsRead: 1000 });
+    for (const riwayah of ['hafs', 'warsh', 'shubah'] as const) {
+      const pages = khatmahPages(plan, riwayah, plan.startedAt);
+      expect(pages.total).toBeGreaterThan(600);
+      expect(pages.remaining).toBeGreaterThan(0);
+      expect(pages.remaining).toBeLessThanOrEqual(pages.total);
+    }
   });
 
   it('default state ships a sane prefs shape', () => {

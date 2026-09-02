@@ -31,20 +31,20 @@ import {
 } from '../utils/prayerTimes';
 import { dayAt, sunnahCount, type SunnahLog } from '../journal/sunnah';
 import { owedPrayers, sunnahRateFor } from '../practice/practiceStats';
-import { MUSHAF_PAGES, MUSHAF_SURAHS, findPageForAyah } from '../quran/pages';
-import { ayahAtIndex } from '../quran/ayahIndex';
+import { MUSHAF_PAGES, MUSHAF_SURAHS } from '../quran/pages';
 import { mushafSurahName } from '../quran/surahName';
 import {
-  KHATMAH_TOTAL_AYAHS,
   KHATMAH_TOTAL_PAGES,
-  khatmahAyahsRead,
+  khatmahBehindBy,
   khatmahCurrentPage,
   khatmahDay,
-  khatmahToday,
+  khatmahDaysLeft,
+  khatmahPages,
   type KhatmahPlan,
   type LastRead,
   type QuranBookmark,
 } from '../quran/quranState';
+import type { RiwayahId } from '../quran/riwayat';
 import { gregorianToHijri } from '../hijri/convert';
 import { formatHijriLabel } from '../hijri/formatHijriLabel';
 import { TASBIH_PRESETS, findPreset } from '../tasbih/tasbih';
@@ -468,6 +468,12 @@ export function buildReadingBlock(input: {
    * wrong: the translation reader always works.
    */
   mushafDownloaded?: boolean;
+  /**
+   * The muṣḥaf the reader is in, so the page counts are that muṣḥaf's —
+   * see `khatmahPages`. Absent means Ḥafṣ, which is what a widget built
+   * before this existed was already answering.
+   */
+  riwayah?: RiwayahId;
 }): WidgetReadingBlock | null {
   const now = (input.now ?? new Date()).getTime();
   const plan = input.khatmah;
@@ -530,36 +536,14 @@ export function buildReadingBlock(input: {
      * to change the question in every locale.
      */
     const state = khatmahDay(plan, now);
-    const { behindBy, daysLeft } = khatmahToday(plan, now);
-    const pageOfIndex = (index: number) => {
-      const at = ayahAtIndex(
-        Math.max(1, Math.min(KHATMAH_TOTAL_AYAHS, Math.trunc(index))),
-      );
-      return findPageForAyah(at.surah, at.ayah);
-    };
-    const firstPage = pageOfIndex(state.portion.from);
-    const lastPage = pageOfIndex(state.portion.to);
-    const pagesToday = Math.max(1, lastPage - firstPage + 1);
-    const read = khatmahAyahsRead(plan);
+    const pages = khatmahPages(plan, input.riwayah, now);
     khatmah = {
       day: state.portion.day,
       targetDays: plan.targetDays,
-      pagesToday,
-      // Full when the portion is finished, however the reader got there —
-      // a page count derived from the last ayah read can land one short
-      // of the portion's own last page, and "1 page left" on a day that
-      // is done is exactly the nag this feature exists to avoid.
-      doneToday: state.done
-        ? pagesToday
-        : Math.max(
-            0,
-            Math.min(
-              pagesToday,
-              read >= state.portion.from ? pageOfIndex(read) - firstPage + 1 : 0,
-            ),
-          ),
-      behindBy,
-      daysLeft,
+      pagesToday: pages.today,
+      doneToday: pages.doneToday,
+      behindBy: khatmahBehindBy(plan, now),
+      daysLeft: khatmahDaysLeft(plan, now),
     };
   }
 

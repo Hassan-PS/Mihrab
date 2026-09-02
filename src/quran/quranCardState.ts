@@ -18,8 +18,11 @@
  * they belong somewhere testable. The view stays dumb.
  */
 import {
-  KHATMAH_TOTAL_PAGES,
-  khatmahToday,
+  KHATMAH_TOTAL_AYAHS,
+  khatmahAyahsRead,
+  khatmahDay,
+  khatmahDaysLeft,
+  khatmahPages,
   type KhatmahPlan,
   type LastRead,
   type QuranState,
@@ -75,23 +78,33 @@ export function selectQuranCardState(
   const lastRead = state.lastRead;
 
   if (plan) {
-    const dayMs = 24 * 60 * 60 * 1000;
-    const dayNumber = Math.min(
-      plan.targetDays,
-      Math.floor((now - plan.startedAt) / dayMs) + 1,
-    );
+    /**
+     * ── ONE DAY NUMBER, AND IT IS THE READER'S ────────────────────────
+     *
+     * This used to count midnights since the plan started, while the
+     * Quran screen counted portions actually reached. Two cards, two
+     * answers to "what day am I on", and a reader who had read ahead saw
+     * both of them at once.
+     *
+     * The portion is the one that is true: it is what the page marker,
+     * the widget and the done pill are all keyed to. What is left today
+     * is likewise the portion's own pages rather than "what remains
+     * divided by the days remaining", which moved every midnight and
+     * counted a portion finished last night for nothing this morning.
+     */
+    const day = khatmahDay(plan, now);
+    const pages = khatmahPages(plan, state.prefs.riwayah, now);
+    const dayNumber = day.portion.day;
     const progress = Math.max(
       0,
-      Math.min(1, plan.pagesRead / KHATMAH_TOTAL_PAGES),
+      Math.min(1, khatmahAyahsRead(plan) / KHATMAH_TOTAL_AYAHS),
     );
-    const { pagesToday, daysLeft } = khatmahToday(plan, now);
-    const left = Math.max(0, pagesToday - pagesReadToday(plan, now));
-    if (left === 0) {
+    if (day.done) {
       return {
         kind: 'done',
         dayNumber,
         targetDays: plan.targetDays,
-        daysToGo: daysLeft,
+        daysToGo: khatmahDaysLeft(plan, now),
         progress,
       };
     }
@@ -100,7 +113,7 @@ export function selectQuranCardState(
       lastRead,
       dayNumber,
       targetDays: plan.targetDays,
-      pagesLeftToday: left,
+      pagesLeftToday: Math.max(1, pages.leftToday),
       progress,
     };
   }

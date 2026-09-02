@@ -16,7 +16,7 @@ import {
   getQuranState,
   hydrateQuranState,
   khatmahCurrentPage,
-  khatmahToday,
+  khatmahPages,
 } from '../quran/quranState';
 
 const KHATMAH_REM_ID_PREFIX = 'khatmah-rem-';
@@ -57,7 +57,8 @@ export async function rescheduleKhatmahReminder(opts: {
   if (!opts.enabled) return;
 
   await hydrateQuranState();
-  const plan = activeKhatmah(getQuranState());
+  const quran = getQuranState();
+  const plan = activeKhatmah(quran);
   if (!plan) return;
 
   const hour = Math.max(0, Math.min(23, Math.floor(opts.hour)));
@@ -74,7 +75,13 @@ export async function rescheduleKhatmahReminder(opts: {
     // Non-fatal.
   }
 
-  const { pagesToday } = khatmahToday(plan, now.getTime());
+  // The portion's own pages, in the muṣḥaf the reader is in — the same
+  // number the card and the widget show, rather than a third answer.
+  const { today: pagesToday } = khatmahPages(
+    plan,
+    quran.prefs.riwayah,
+    now.getTime(),
+  );
   const continueFrom = khatmahCurrentPage(plan);
 
   for (let i = 0; i < LOOK_AHEAD_DAYS; i++) {

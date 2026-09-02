@@ -5,7 +5,7 @@
  * as it working: a key that takes `{{count}}` is resolved by i18next
  * through the plural rules of the language, and Arabic, Russian and Urdu
  * have categories English does not. If the lookup misses, i18next returns
- * the key NAME — so the reader sees "quran.khatmahDayLeft" on the card
+ * the key NAME — so the reader sees "quran.khatmahPagesLeftToday" on the card
  * rather than a sentence, and nothing in the build would have said so.
  *
  * These are the strings added for the khatmah day: the card, the page
@@ -36,13 +36,13 @@ const CASES: Array<{ key: string; params: Record<string, number>; shows: number[
   { key: 'quran.finishDay', params: { day: 12 }, shows: [12] },
   { key: 'quran.finishDayShort', params: { day: 12 }, shows: [12] },
   {
-    key: 'quran.khatmahAyahProgress',
-    params: { read: 1842, total: 6236, day: 12, days: 30 },
-    shows: [1842, 6236, 12, 30],
+    key: 'quran.khatmahPageProgress',
+    params: { pages: 364, day: 12, days: 30 },
+    shows: [364, 12, 30],
   },
   { key: 'quran.khatmahDayDone', params: {}, shows: [] },
-  { key: 'quran.khatmahDayLeft', params: { count: 84 }, shows: [84] },
-  { key: 'quran.khatmahExtra', params: { count: 41 }, shows: [41] },
+  { key: 'quran.khatmahPagesLeftToday', params: { count: 8 }, shows: [8] },
+  { key: 'quran.khatmahExtraPages', params: { count: 4 }, shows: [4] },
   { key: 'quran.khatmahMarkDone', params: { day: 12 }, shows: [12] },
   { key: 'quran.khatmahMarkNext', params: { day: 13 }, shows: [13] },
   { key: 'quran.khatmahMarkToday', params: {}, shows: [] },
@@ -85,7 +85,11 @@ describe('the khatmah day speaks every language', () => {
         // Arabic has six, Russian four, and a missing category is exactly
         // where a key that looks fine at count=1 falls over.
         for (const count of COUNTS) {
-          for (const key of ['quran.khatmahDayLeft', 'quran.khatmahExtra']) {
+          for (const key of [
+            'quran.khatmahPagesLeftToday',
+            'quran.khatmahExtraPages',
+            'quran.khatmahDaysLeft',
+          ]) {
             const out = i18n.t(key, { count });
             expect([locale, key, count, out]).not.toEqual([
               locale,

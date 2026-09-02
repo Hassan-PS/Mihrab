@@ -377,6 +377,27 @@ function Attributions({ palette }: { palette: AppPalette }) {
         sub="alquran.cloud /v1/meta · Tanzil-derived · CC BY 3.0"
         url="https://alquran.cloud/api"
       />
+      {/* The riwayat. Not bundled — the reader fetches each one from the
+          publisher — but attributed all the same: an attributions list
+          that names only what ships is a list that answers the wrong
+          question. Someone reading Warsh in this app should be able to
+          find out here whose text it is. */}
+      <AttributionRow
+        palette={palette}
+        label={t('attributions.riwayat', {
+          defaultValue: 'Warsh, Qālūn and Shuʿbah texts (downloaded, not bundled)',
+        })}
+        sub="quranpedia.net · King Fahd Glorious Quran Printing Complex"
+        url="https://quranpedia.net"
+      />
+      <AttributionRow
+        palette={palette}
+        label={t('attributions.riwayahLines', {
+          defaultValue: 'Printed line geometry for those muṣḥafs',
+        })}
+        sub="quranpedia/quran-svg ayah polygons · CC0"
+        url="https://github.com/quranpedia/quran-svg"
+      />
       <AttributionRow
         palette={palette}
         label={t('attributions.amiriFonts', { defaultValue: 'Amiri & Amiri Quran fonts' })}

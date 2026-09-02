@@ -43,7 +43,8 @@ import {
   khatmahCurrentPage,
   khatmahCurrentPortion,
   khatmahDay,
-  khatmahToday,
+  khatmahDaysLeft,
+  khatmahPages,
   removeBookmark,
   resetKhatmahAll,
   resetKhatmahToday,
@@ -233,9 +234,13 @@ export function QuranScreen() {
   const pct = (part: number, whole: number) =>
     whole > 0 ? Math.max(0, Math.min(100, (part / whole) * 100)) : 0;
   const plan = activeKhatmah(quran);
-  const today = plan ? khatmahToday(plan) : null;
   // The day's portion, how much of it is read, and anything read past it.
   const day = plan ? khatmahDay(plan) : null;
+  // And the same thing in pages, of the muṣḥaf this reader is in — see
+  // `khatmahPages`. A page is the unit a reader plans in; an ayah count
+  // is a number nobody can picture.
+  const pages = plan ? khatmahPages(plan, quran.prefs.riwayah) : null;
+  const daysLeft = plan ? khatmahDaysLeft(plan) : 0;
   const readAyahs = plan ? khatmahAyahsRead(plan) : 0;
 
   const header = (
@@ -281,7 +286,7 @@ export function QuranScreen() {
           styles.khatmahCard,
           { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
         ]}>
-        {plan && today && day ? (
+        {plan && pages && day ? (
           <>
             <View style={styles.khatmahTop}>
               <Text style={[styles.khatmahTitle, { color: palette.text }]}>
@@ -290,7 +295,7 @@ export function QuranScreen() {
               <Text style={[styles.khatmahMeta, { color: palette.muted }]}>
                 {t('quran.khatmahDaysLeft', {
                   defaultValue: '{{count}} days left',
-                  count: today.daysLeft,
+                  count: daysLeft,
                 })}
               </Text>
             </View>
@@ -316,11 +321,15 @@ export function QuranScreen() {
                 ]}
               />
             </View>
+            {/* Pages, not ayahs. The bar above is drawn from the ayah
+                count because that is what progress is KEPT in and what
+                every riwayah agrees on; the sentence under it is for a
+                person, and a person plans in pages. */}
             <Text style={[styles.khatmahMeta, { color: palette.muted }]}>
-              {t('quran.khatmahAyahProgress', {
-                defaultValue: '{{read}} / {{total}} ayahs · day {{day}} of {{days}}',
-                read: readAyahs,
-                total: KHATMAH_TOTAL_AYAHS,
+              {t('quran.khatmahPageProgress', {
+                defaultValue:
+                  '{{pages}} pages left · day {{day}} of {{days}}',
+                pages: pages.remaining,
                 day: day.portion.day,
                 days: plan.targetDays,
               })}
@@ -337,17 +346,17 @@ export function QuranScreen() {
                   ? t('quran.khatmahDayDone', {
                       defaultValue: "✓ Today's reading done",
                     })
-                  : t('quran.khatmahDayLeft', {
-                      defaultValue: '{{count}} ayahs left today',
-                      count: day.length - day.read,
+                  : t('quran.khatmahPagesLeftToday', {
+                      defaultValue: '{{count}} pages left today',
+                      count: Math.max(1, pages.leftToday),
                     })}
               </Text>
-              {day.extra > 0 ? (
+              {pages.extraToday > 0 ? (
                 <Text
                   style={[styles.khatmahMeta, { color: KHATMAH_EXTRA_COLOR }]}>
-                  {t('quran.khatmahExtra', {
-                    defaultValue: '+{{count}} extra',
-                    count: day.extra,
+                  {t('quran.khatmahExtraPages', {
+                    defaultValue: '+{{count}} pages extra',
+                    count: pages.extraToday,
                   })}
                 </Text>
               ) : null}

@@ -878,11 +878,56 @@ function planDays(plan: KhatmahPlan): number {
   return Math.max(1, Math.trunc(plan.targetDays) || 1);
 }
 
-/** Ayahs completed once portion `day` is finished. Day 0 is nothing. */
+/**
+ * Where each Ḥafṣ page ends, in ayahs. Built once, walked often.
+ *
+ * `portionEnd` is called inside a search, per render, so the 604 lookups
+ * it needs are done a single time rather than every time.
+ */
+let pageEnds: number[] | null = null;
+function ayahsThroughHafsPage(page: number): number {
+  if (!pageEnds) {
+    pageEnds = [0];
+    for (let p = 1; p <= KHATMAH_TOTAL_PAGES; p++) {
+      pageEnds.push(ayahsThroughPage(p, DEFAULT_RIWAYAH));
+    }
+  }
+  return pageEnds[Math.max(0, Math.min(KHATMAH_TOTAL_PAGES, page))];
+}
+
+/**
+ * Ayahs completed once portion `day` is finished. Day 0 is nothing.
+ *
+ * ── WHY THE BOOK IS CUT BY PAGES AND NOT BY AYAHS ─────────────────────
+ *
+ * Because ayahs are not spread evenly across the pages, and a plan cut
+ * into equal ayah counts is not a plan anyone would recognise. Al-Baqarah
+ * runs at a handful of long ayahs to the page and juzʾ ʿamma at forty
+ * short ones, so an even thirtieth of the 6,236 ayahs asked for 36 pages
+ * on day two of a thirty-day khatmah and 8 on day twenty-eight — four and
+ * a half times the reading, on a plan whose whole promise is that every
+ * day is the same. Cut by page it is 20 or 21 every day, which is the
+ * number every khatmah in the world is quoted in.
+ *
+ * Ḥafṣ's pages, whichever muṣḥaf is being read. The division belongs to
+ * the PLAN, not to the muṣḥaf in hand — a boundary that moved when the
+ * reader changed riwayah would move their day under them, which is the
+ * one thing this model exists to prevent. All four muṣḥafs run to 604
+ * pages, so the portion is the same reading either way; only the page
+ * NUMBERS shown alongside it are the reader's own (`khatmahPages`).
+ *
+ * The boundary is still an ayah, so progress needs no conversion and the
+ * marker still falls on something the page can point at.
+ */
 function portionEnd(days: number, day: number): number {
   if (day <= 0) return 0;
   if (day >= days) return TOTAL_AYAHS;
-  return Math.round((TOTAL_AYAHS * day) / days);
+  // A plan longer than the book has pages cannot have a page a day, so it
+  // falls back to the even ayah cut rather than handing out empty days.
+  if (days > KHATMAH_TOTAL_PAGES) {
+    return Math.round((TOTAL_AYAHS * day) / days);
+  }
+  return ayahsThroughHafsPage(Math.round((KHATMAH_TOTAL_PAGES * day) / days));
 }
 
 /** Which portion an ayah falls in, by its index. */
@@ -1036,27 +1081,132 @@ export function stepKhatmahBack(): void {
 }
 
 /**
- * Today's suggested portion for a plan: remaining pages spread over the
- * remaining days (minimum 1 day). Returns pages-to-read-today plus
- * schedule state so the UI can nudge gently, never guilt-trip.
+ * The days of reading still in front of the reader.
+ *
+ * ── WHY THIS IS NOT THE CALENDAR ──────────────────────────────────────
+ *
+ * It was, and it contradicted the line beside it. The day NUMBER comes
+ * from the portion the reader has reached — that is the whole point of
+ * the portion model, so that reading ahead or falling behind moves the
+ * reader and not the schedule — while the days left came from midnights
+ * elapsed since the plan started. On a plan begun today and read four
+ * portions into, the card said "day 4 of 30" and "30 days left" in the
+ * same breath.
+ *
+ * ── AND WHY IT IS NOT THE DAY'S PORTION EITHER ────────────────────────
+ *
+ * Because that is pinned, on purpose. `khatmahDay` reports the portion
+ * the day STARTED in, so that finishing it and reading on leaves the day
+ * showing as done rather than silently becoming a new unfinished one —
+ * and a reader who sat down at page 90 and read to page 551 is still on
+ * "day 5" until tomorrow, which is what was asked for.
+ *
+ * What is left of the BOOK is a different question, and its answer is
+ * where the reader actually is. Saying "25 days to go" to someone with
+ * fifty pages in front of them is the same fault in another place.
  */
-export function khatmahToday(
+export function khatmahDaysLeft(
+  plan: KhatmahPlan,
+  _now: number = Date.now(),
+): number {
+  if (khatmahAyahsRead(plan) >= TOTAL_AYAHS) return 0;
+  return Math.max(
+    0,
+    plan.targetDays - khatmahCurrentPortion(plan).day + 1,
+  );
+}
+
+/**
+ * How far behind the calendar the reading is, in pages.
+ *
+ * The one number here that IS the calendar's, and rightly: being behind
+ * is a statement about the schedule, not about where the reader is.
+ */
+export function khatmahBehindBy(
   plan: KhatmahPlan,
   now: number = Date.now(),
-): { pagesToday: number; behindBy: number; daysLeft: number } {
+): number {
   const dayMs = 24 * 60 * 60 * 1000;
   const daysElapsed = Math.floor((now - plan.startedAt) / dayMs);
-  const daysLeft = Math.max(1, plan.targetDays - daysElapsed);
-  const remaining = Math.max(0, KHATMAH_TOTAL_PAGES - plan.pagesRead);
-  const pagesToday = Math.ceil(remaining / daysLeft);
   const expected = Math.min(
     KHATMAH_TOTAL_PAGES,
     Math.round((KHATMAH_TOTAL_PAGES / plan.targetDays) * daysElapsed),
   );
+  return Math.max(0, expected - plan.pagesRead);
+}
+
+/** What a khatmah has left, counted in pages of the muṣḥaf in hand. */
+export type KhatmahPages = {
+  /** Pages the day's portion covers, first to last. */
+  today: number;
+  /** How many of those the reader has finished. */
+  doneToday: number;
+  /** What is left of today — `today` less `doneToday`. */
+  leftToday: number;
+  /** Pages read past the day's portion. */
+  extraToday: number;
+  /** Pages from where the reader is to the end of the muṣḥaf. */
+  remaining: number;
+  /** Pages in this riwayah's muṣḥaf. */
+  total: number;
+};
+
+/**
+ * The plan's progress in PAGES, for the muṣḥaf the reader is actually in.
+ *
+ * ── WHY THE RIWAYAH IS AN ARGUMENT ────────────────────────────────────
+ *
+ * Because a page is not a fixed quantity of Qur'an. Progress is kept in
+ * ayahs, which every riwayah agrees on, and pages are the reader's own
+ * unit — "four pages left today" is a thing anyone can picture where
+ * "sixty-one ayahs" is not. But the four pages are four pages OF SOMETHING,
+ * and Warsh, Qālūn and Shuʿbah each break the text across their fifteen
+ * lines differently. Answering out of the Ḥafṣ pagination for a reader in
+ * Shuʿbah is quietly wrong by a page here and there all the way down the
+ * book.
+ *
+ * So the ayahs are converted through the pagination of the muṣḥaf in
+ * hand. `pagesForRiwayah` falls back to Ḥafṣ for a riwayah this build
+ * cannot draw, which is the right way to be wrong: that reader is in
+ * Ḥafṣ anyway.
+ */
+export function khatmahPages(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+  now: number = Date.now(),
+): KhatmahPages {
+  const pageOf = (index: number) => {
+    const at = ayahAtIndex(
+      Math.max(1, Math.min(TOTAL_AYAHS, Math.trunc(index))),
+    );
+    return findPageForAyah(at.surah, at.ayah, riwayah);
+  };
+  const total = totalPagesForRiwayah(riwayah);
+  const day = khatmahDay(plan, now);
+  const read = khatmahAyahsRead(plan);
+  const first = pageOf(day.portion.from);
+  const last = pageOf(day.portion.to);
+  const today = Math.max(1, last - first + 1);
+  // Full when the portion is finished, however the reader got there — a
+  // page count taken from the last ayah read can land one short of the
+  // portion's own last page, and "1 page left" on a day that is done is
+  // exactly the nag this is meant to avoid.
+  const doneToday = day.done
+    ? today
+    : Math.max(
+        0,
+        Math.min(
+          today,
+          read >= day.portion.from ? pageOf(read) - first + 1 : 0,
+        ),
+      );
   return {
-    pagesToday,
-    behindBy: Math.max(0, expected - plan.pagesRead),
-    daysLeft,
+    today,
+    doneToday,
+    leftToday: Math.max(0, today - doneToday),
+    extraToday: read > day.portion.to ? Math.max(0, pageOf(read) - last) : 0,
+    remaining: read >= TOTAL_AYAHS ? 0 : total - pageOf(read + 1) + 1,
+    total,
   };
 }
 

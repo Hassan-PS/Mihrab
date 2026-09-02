@@ -20,7 +20,12 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { arabicTextStyle } from '../theme/typography';
-import { riwayahAvailable, RIWAYAT, type RiwayahId } from './riwayat';
+import {
+  DEFAULT_RIWAYAH,
+  riwayahAvailable,
+  RIWAYAT,
+  type RiwayahId,
+} from './riwayat';
 
 export function RiwayahPicker({
   visible,
@@ -86,6 +91,17 @@ export function RiwayahPicker({
                       { color: have ? palette.text : palette.muted },
                     ]}>
                     {t(riwayah.nameKey, riwayah.arabic)}
+                    {/* Said on the row rather than by its position in the
+                        list. Ḥafṣ being first is a fact about the order;
+                        that it is the one the app ships with, reads by
+                        default and falls back to is a fact about the
+                        riwayah, and a reader deciding whether to take a
+                        download needs the second one. */}
+                    {riwayah.id === DEFAULT_RIWAYAH ? (
+                      <Text style={{ color: palette.muted }}>
+                        {` ${t('quran.riwayahDefault', '(default)')}`}
+                      </Text>
+                    ) : null}
                   </Text>
                   {!have ? (
                     <Text style={[styles.note, { color: palette.muted }]}>

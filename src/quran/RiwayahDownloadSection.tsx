@@ -59,7 +59,11 @@ import {
 } from './riwayahDownload';
 import { hasFilePicker, pickFile } from '../native/FilePicker';
 import { mushafTextFromFile } from './mushafFile';
-import { RIWAYAT, type RiwayahDefinition } from './riwayat';
+import {
+  DEFAULT_RIWAYAH,
+  RIWAYAT,
+  type RiwayahDefinition,
+} from './riwayat';
 
 function hostOf(from: string): string {
   const m = /^https?:\/\/([^/]+)/i.exec(from);
@@ -91,6 +95,7 @@ export function RiwayahDownloadSection({
       <Text style={[styles.heading, { color: palette.muted }]}>
         {t('downloads.riwayat', 'Reading traditions')}
       </Text>
+      <BuiltInCard />
       {offered.map(riwayah => (
         <RiwayahCard
           key={riwayah.id}
@@ -102,6 +107,40 @@ export function RiwayahDownloadSection({
         {t(
           'downloads.riwayatFootnote',
           'Mihrab does not include or host these texts. The file is fetched from the publisher straight to this device, and checked here before anything is read from it.',
+        )}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * Ḥafṣ, which is not a download and is the reason this list looked short.
+ *
+ * The section only ever listed the riwayat that HAVE a download, so the
+ * one the reader is almost certainly in was missing from a screen headed
+ * "Reading traditions" — leaving them to wonder whether it needed
+ * fetching too, or where it had gone. It is a card like the others, with
+ * nothing to fetch and nothing to delete, and it says the two things that
+ * are true of it: it is the default, and it is already here.
+ */
+function BuiltInCard() {
+  const { t } = useTranslation();
+  const { palette } = useAppPalette();
+  const hafs = RIWAYAT.find(r => r.id === DEFAULT_RIWAYAH);
+  if (!hafs) return null;
+  return (
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+      ]}>
+      <Text style={[styles.title, { color: palette.text }]}>
+        {`${t(hafs.nameKey, hafs.arabic)} ${t('quran.riwayahDefault', '(default)')}`}
+      </Text>
+      <Text style={[styles.sub, { color: palette.muted }]}>
+        {t(
+          'downloads.riwayahBuiltIn',
+          'Built into Mihrab. Nothing to download, and nothing to delete.',
         )}
       </Text>
     </View>

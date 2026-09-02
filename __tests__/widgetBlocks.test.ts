@@ -320,11 +320,12 @@ describe('reading', () => {
     expect(block?.page).toBe(47);
     expect(block?.pagesRead).toBe(46);
     // The day is the PORTION in hand, not the calendar. Thirteen days
-    // have passed and forty-six pages have been read, so this reader is
-    // on the second portion of thirty and a long way behind — which is
-    // what the line below has always said, and what the day used to
+    // have passed and forty-six pages have been read, and a thirtieth of
+    // the book is twenty pages — so this reader has two days behind them,
+    // is on the third, and is a long way behind the calendar, which is
+    // what the line below has always said and what the day used to
     // contradict by reporting 14.
-    expect(block?.khatmah?.day).toBe(2);
+    expect(block?.khatmah?.day).toBe(3);
     expect(block?.khatmah?.targetDays).toBe(30);
     expect(block?.khatmah?.behindBy).toBeGreaterThan(0);
   });
