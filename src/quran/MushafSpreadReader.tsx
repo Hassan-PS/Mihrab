@@ -59,6 +59,27 @@ const FOOTER_RESERVE = 42;
 /** Floating mini-player card: 3px track + row (~54) + 10 bottom margin. */
 const PLAYER_RESERVE = 68;
 
+/**
+ * How far off a page boundary the list may rest before it is nudged, dp.
+ *
+ * Not zero, and not one. A page width can be fractional — a Mac window is
+ * resized to whatever the pointer left it at — so the offset a healthy
+ * snap lands on differs from `index × width` by a rounding error, and a
+ * one-pixel tolerance reads that as adrift and animates a "correction"
+ * that lands in the same place. Two pixels is below noticing and above
+ * the arithmetic.
+ */
+const SNAP_SLACK = 2;
+
+/**
+ * Silence that counts as the end of a scroll, ms.
+ *
+ * A trackpad swipe has no gesture end to listen for — see `onScroll`.
+ * Long enough that a swipe's own gaps do not trip it, short enough that
+ * the snap still feels like part of the gesture.
+ */
+const SCROLL_IDLE_MS = 140;
+
 export function MushafSpreadReader(props: MushafReaderProps) {
   const { isFullscreen, onToggleFullscreen } = props;
   const { t } = useTranslation();
@@ -145,6 +166,70 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     [pageWidth],
   );
 
+  /**
+   * The index THIS COMPONENT asked the list to move to, or null.
+   *
+   * ── EVERY SCROLL HERE HAS TWO POSSIBLE AUTHORS ────────────────────
+   *
+   * The reader both listens to the list and moves it, and until this
+   * ref existed it could not tell the two apart. Its own corrective
+   * scroll raised the same events as a swipe, those events settled to
+   * an index, settling scrolled again — and on the Mac, where the
+   * offsets a trackpad leaves are arbitrary, the two indices did not
+   * always agree, so the reader swung between two pages until it fell
+   * over. An arrow press on a list already resting off-centre started
+   * it every time.
+   *
+   * So a scroll we started is marked, and nothing settles until the
+   * list has arrived where we sent it. The timer is the escape hatch:
+   * an animation can be interrupted (another swipe, a resize) and
+   * never reach its target, and a guard that never lifts is a reader
+   * that stops responding.
+   */
+  const scrollingTo = useRef<number | null>(null);
+  const guardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastOffset = useRef(0);
+
+  const scrollTo = useCallback((idx: number, animated: boolean) => {
+    scrollingTo.current = idx;
+    if (guardTimer.current) clearTimeout(guardTimer.current);
+    guardTimer.current = setTimeout(
+      () => {
+        scrollingTo.current = null;
+      },
+      animated ? 700 : 250,
+    );
+    listRef.current?.scrollToIndex({ index: idx, animated });
+  }, []);
+
+  /**
+   * `getItemLayout` is supposed to make this unreachable — FlatList only
+   * fails a scroll when it cannot work out where the row is. A resize
+   * landing between the measure and the scroll can still miss, and the
+   * default behaviour there is to throw. Land on the offset directly and
+   * drop the guard, rather than taking the reader down with it.
+   */
+  const onScrollToIndexFailed = useCallback(
+    (info: { index: number }) => {
+      scrollingTo.current = null;
+      if (guardTimer.current) clearTimeout(guardTimer.current);
+      listRef.current?.scrollToOffset({
+        offset: info.index * pageWidth,
+        animated: false,
+      });
+    },
+    [pageWidth],
+  );
+
+  useEffect(
+    () => () => {
+      if (guardTimer.current) clearTimeout(guardTimer.current);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    },
+    [],
+  );
+
   // Follow an outside change (jump, khatmah, recitation follow). Within a
   // spread the index doesn't move, so following the playing ayah across
   // the facing page doesn't scroll.
@@ -153,8 +238,8 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     const idx = indexForPage(currentPage);
     if (idx === settledIndex.current) return;
     settledIndex.current = idx;
-    listRef.current?.scrollToIndex({ index: idx, animated: false });
-  }, [currentPage, indexForPage]);
+    scrollTo(idx, false);
+  }, [currentPage, indexForPage, scrollTo]);
 
   // Window resize / re-pair (Catalyst, iPad rotation): item offsets are
   // width-multiples and the pairing may flip, so re-anchor the settled
@@ -162,8 +247,8 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   useEffect(() => {
     const idx = indexForPage(settledPage.current);
     settledIndex.current = idx;
-    listRef.current?.scrollToIndex({ index: idx, animated: false });
-  }, [pageWidth, indexForPage]);
+    scrollTo(idx, false);
+  }, [pageWidth, indexForPage, scrollTo]);
 
   /**
    * Where a scroll came to rest, and the page it means.
@@ -178,23 +263,34 @@ export function MushafSpreadReader(props: MushafReaderProps) {
    * the nearest whole one. The reader disagreed with itself and the
    * gesture read as not working.
    *
-   * So the rest position is snapped here rather than assumed. On touch
-   * the offset is already exact and the correction is skipped, which is
-   * why the guard is a pixel rather than zero.
+   * So the rest position is snapped here rather than assumed — but only
+   * a rest position, and only one that is ours to correct. A scroll this
+   * component started is skipped until it arrives (see `scrollingTo`),
+   * because correcting a correction is how a reader ends up swinging
+   * between two pages.
    */
   const settleAt = useCallback(
     (offsetX: number) => {
+      const target = scrollingTo.current;
+      if (target != null) {
+        // Our own scroll, still travelling. Arriving lifts the guard;
+        // nothing else about this event means anything.
+        if (Math.abs(offsetX - target * pageWidth) <= SNAP_SLACK) {
+          scrollingTo.current = null;
+          if (guardTimer.current) clearTimeout(guardTimer.current);
+        }
+        return;
+      }
       const idx = Math.max(
         0,
         Math.min(itemCount - 1, Math.round(offsetX / pageWidth)),
       );
-      if (Math.abs(offsetX - idx * pageWidth) > 1) {
-        listRef.current?.scrollToIndex({ index: idx, animated: true });
-      }
+      const adrift = Math.abs(offsetX - idx * pageWidth) > SNAP_SLACK;
       if (idx === settledIndex.current) {
         // Dragged and came back. Nothing was navigated to, so lift the
         // suspension armed at drag begin rather than leaving recitation
         // follow off for thirty seconds after a gesture that did nothing.
+        if (adrift) scrollTo(idx, true);
         core.resumeFollow();
         return;
       }
@@ -204,25 +300,40 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       settledPage.current = page;
       core.commitPageTurn(page, prevPage);
       setCurrentPage(page);
+      if (adrift) scrollTo(idx, true);
     },
-    [core, itemCount, pageForIndex, pageWidth, setCurrentPage],
+    [core, itemCount, pageForIndex, pageWidth, scrollTo, setCurrentPage],
   );
 
   const onMomentumEnd = useCallback(
-    (e: { nativeEvent: { contentOffset: { x: number } } }) =>
-      settleAt(e.nativeEvent.contentOffset.x),
+    (e: { nativeEvent: { contentOffset: { x: number } } }) => {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      settleAt(e.nativeEvent.contentOffset.x);
+    },
     [settleAt],
   );
 
   /**
-   * A trackpad swipe often has no momentum phase at all — the fingers
-   * lift and the scroll simply stops — so the drag end has to settle it
-   * too. On touch this fires before the momentum and settles to the same
-   * index, which is a no-op the second time round.
+   * SETTLE WHEN THE SCROLLING STOPS, not when a gesture ends.
+   *
+   * A trackpad swipe raises no drag and no momentum: macOS delivers it
+   * as a wheel phase, so `onScrollEndDrag` fired in the MIDDLE of one —
+   * once per phase, while the fingers were still moving — and each
+   * corrective animation fought the swipe still arriving. That is the
+   * stall halfway across the screen. Nothing marks the end of an
+   * indirect scroll except its own silence, so silence is what this
+   * waits for. On touch the momentum end arrives first and cancels the
+   * timer, so a finger still settles the instant it lands.
    */
-  const onScrollEndDrag = useCallback(
-    (e: { nativeEvent: { contentOffset: { x: number } } }) =>
-      settleAt(e.nativeEvent.contentOffset.x),
+  const onScroll = useCallback(
+    (e: { nativeEvent: { contentOffset: { x: number } } }) => {
+      lastOffset.current = e.nativeEvent.contentOffset.x;
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(
+        () => settleAt(lastOffset.current),
+        SCROLL_IDLE_MS,
+      );
+    },
     [settleAt],
   );
 
@@ -242,9 +353,9 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       settledPage.current = page;
       core.commitPageTurn(page, prevPage);
       setCurrentPage(page);
-      listRef.current?.scrollToIndex({ index: idx, animated: true });
+      scrollTo(idx, true);
     },
-    [core, itemCount, pageForIndex, setCurrentPage],
+    [core, itemCount, pageForIndex, scrollTo, setCurrentPage],
   );
 
   // THIS is the reader Mac and iPad render in text mode — `MushafReader`
@@ -492,7 +603,9 @@ export function MushafSpreadReader(props: MushafReaderProps) {
           keyExtractor={i => (paired ? `s${i}` : `p${i}`)}
           renderItem={renderItem}
           onMomentumScrollEnd={onMomentumEnd}
-          onScrollEndDrag={onScrollEndDrag}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          onScrollToIndexFailed={onScrollToIndexFailed}
           onScrollBeginDrag={core.suspendFollow}
           windowSize={3}
           maxToRenderPerBatch={2}
