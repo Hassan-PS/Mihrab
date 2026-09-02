@@ -383,4 +383,33 @@ Changed the release cycle itself:
 
   - `scripts/build-catalyst.sh`
 
-**Lesson:** _(unfilled)_
+The abort was not the build. Notarization came back **Accepted**, and
+`stapler` then failed seconds later with error 73:
+
+    Processing: .../Mihrab.app
+    The staple and validate action failed! Error 73.
+
+`stapler` does not read the verdict `notarytool` has just printed — it
+fetches the ticket from Apple's CDN, and the ticket is published a little
+after the submission is accepted. Asking too early gets an error that
+looks exactly like a broken build, and the cost of finding that out was a
+full rebuild and a second notarization.
+
+**Lesson:** 2.13.8 ended by saying that a dependency failing because it is
+not ready is not the same as one refusing, and that the fix belonged in
+the script rather than in the habit. That was right, and it named the
+wrong command: it said retry the SUBMIT, and the next transient landed one
+step later, on the STAPLE. The specific command was the accidental part of
+that lesson; the shape was the durable one.
+
+So the retry went where it was actually needed — six attempts over two and
+a half minutes — and the generalisation is worth carrying rather than the
+instance. Every step of this release that talks to Apple can be early
+rather than wrong: submit, staple, and the Xcode Cloud poll after it. Two
+of the three now retry. The third has not failed yet, which is not the
+same as being safe.
+
+And the one rule paid again, in the same unglamorous way it did last time:
+the failure landed in PHASE 2, so the whole cost of getting this wrong was
+a rebuild — not a tag, a GitHub release and a cask pointing at a zip with
+no ticket in it.
