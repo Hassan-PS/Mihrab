@@ -1289,7 +1289,10 @@
     "serverUnknown": "Not checked yet",
     "unlockedTitle": "Data statistics enabled",
     "unlockedBody": "A statistics card now appears at the bottom of the home screen. Turn it off any time below.",
-    "serverCoverage": "Server coverage"
+    "serverCoverage": "Server coverage",
+    "serverSweden": "Sweden · Islamiska Förbundet",
+    "serverMorocco": "Morocco · Habous",
+    "inUse": "in use"
   },
   "log": {
     "legendPrayers": "0 → 5 prayers",

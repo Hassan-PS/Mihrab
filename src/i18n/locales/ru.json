@@ -1289,7 +1289,10 @@
     "serverUnknown": "Ещё не проверено",
     "unlockedTitle": "Статистика данных включена",
     "unlockedBody": "Карточка статистики теперь отображается внизу главного экрана. Отключить её можно в любой момент ниже.",
-    "serverCoverage": "Покрытие сервера"
+    "serverCoverage": "Покрытие сервера",
+    "serverSweden": "Швеция · Islamiska Förbundet",
+    "serverMorocco": "Марокко · Habous",
+    "inUse": "используется"
   },
   "log": {
     "legendPrayers": "0 → 5 молитв",

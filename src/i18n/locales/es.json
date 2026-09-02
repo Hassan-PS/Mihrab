@@ -1289,7 +1289,10 @@
     "serverUnknown": "Aún sin comprobar",
     "unlockedTitle": "Estadísticas de datos activadas",
     "unlockedBody": "Ahora aparece una tarjeta de estadísticas en la parte inferior de la pantalla de inicio. Desactívala cuando quieras abajo.",
-    "serverCoverage": "Cobertura del servidor"
+    "serverCoverage": "Cobertura del servidor",
+    "serverSweden": "Suecia · Islamiska Förbundet",
+    "serverMorocco": "Marruecos · Habous",
+    "inUse": "en uso"
   },
   "log": {
     "legendPrayers": "0 → 5 oraciones",

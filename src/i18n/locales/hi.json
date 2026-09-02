@@ -1289,7 +1289,10 @@
     "serverUnknown": "अभी तक जाँचा नहीं गया",
     "unlockedTitle": "डेटा आँकड़े सक्षम",
     "unlockedBody": "अब होम स्क्रीन के नीचे एक आँकड़े कार्ड दिखाई देता है। इसे नीचे कभी भी बंद करें।",
-    "serverCoverage": "सर्वर कवरेज"
+    "serverCoverage": "सर्वर कवरेज",
+    "serverSweden": "स्वीडन · Islamiska Förbundet",
+    "serverMorocco": "मोरक्को · Habous",
+    "inUse": "उपयोग में"
   },
   "log": {
     "legendPrayers": "0 → 5 नमाज़ें",

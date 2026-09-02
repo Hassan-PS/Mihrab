@@ -1289,7 +1289,10 @@
     "serverUnknown": "এখনও যাচাই করা হয়নি",
     "unlockedTitle": "ডেটা পরিসংখ্যান চালু হয়েছে",
     "unlockedBody": "এখন হোম স্ক্রিনের নিচে একটি পরিসংখ্যান কার্ড দেখা যাবে। নিচে যেকোনো সময় এটি বন্ধ করুন।",
-    "serverCoverage": "সার্ভার কভারেজ"
+    "serverCoverage": "সার্ভার কভারেজ",
+    "serverSweden": "সুইডেন · Islamiska Förbundet",
+    "serverMorocco": "মরক্কো · Habous",
+    "inUse": "ব্যবহৃত"
   },
   "log": {
     "legendPrayers": "০ → ৫ নামাজ",

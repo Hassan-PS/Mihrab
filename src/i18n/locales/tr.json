@@ -1289,7 +1289,10 @@
     "serverUnknown": "Henüz kontrol edilmedi",
     "unlockedTitle": "Veri istatistikleri etkin",
     "unlockedBody": "Artık ana ekranın altında bir istatistik kartı görünür. Aşağıdan istediğiniz zaman kapatabilirsiniz.",
-    "serverCoverage": "Sunucu kapsamı"
+    "serverCoverage": "Sunucu kapsamı",
+    "serverSweden": "İsveç · Islamiska Förbundet",
+    "serverMorocco": "Fas · Habous",
+    "inUse": "kullanımda"
   },
   "log": {
     "legendPrayers": "0 → 5 namaz",

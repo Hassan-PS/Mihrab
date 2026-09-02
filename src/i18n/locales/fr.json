@@ -1289,7 +1289,10 @@
     "serverUnknown": "Pas encore vérifié",
     "unlockedTitle": "Statistiques des données activées",
     "unlockedBody": "Une carte de statistiques apparaît maintenant en bas de l'écran d'accueil. Désactivez-la à tout moment ci-dessous.",
-    "serverCoverage": "Couverture serveur"
+    "serverCoverage": "Couverture serveur",
+    "serverSweden": "Suède · Islamiska Förbundet",
+    "serverMorocco": "Maroc · Habous",
+    "inUse": "utilisé"
   },
   "log": {
     "legendPrayers": "0 → 5 prières",

@@ -1289,7 +1289,10 @@
     "serverUnknown": "尚未检查",
     "unlockedTitle": "已启用数据统计",
     "unlockedBody": "现在主屏幕底部会显示一张统计卡片。可随时在下方关闭。",
-    "serverCoverage": "服务器覆盖天数"
+    "serverCoverage": "服务器覆盖天数",
+    "serverSweden": "瑞典 · Islamiska Förbundet",
+    "serverMorocco": "摩洛哥 · Habous",
+    "inUse": "使用中"
   },
   "log": {
     "legendPrayers": "0 → 5 次礼拜",

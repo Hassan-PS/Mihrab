@@ -140,6 +140,7 @@ async function pollServerIndex(): Promise<IndexFile | null> {
       const index = (await res.json()) as IndexFile;
       const dueAt = Date.now() + jitter(HABOUS_INDEX_POLL_INTERVAL_MS);
       await recordServerIndex(
+        'habous',
         {
           builtAt: index.builtAt ?? null,
           serverStatus: index.serverStatus,
@@ -257,6 +258,18 @@ export async function getHabousDatasetTimes(params: {
     timezone: cached?.timezone ?? seed.timezone ?? DEFAULT_TZ,
     source,
   };
+}
+
+/**
+ * Proactively refresh the Moroccan server-index snapshot (throttled the same
+ * way as the lookup path), so the statistics panel can report this dataset's
+ * coverage whether or not the phone is currently being served by it. The
+ * Swedish provider has had this for a while; the panel now reads both, and a
+ * panel that can only poll one of two servers reports the other as unknown
+ * forever.
+ */
+export async function pollServerIndexNow(): Promise<void> {
+  await pollServerIndex();
 }
 
 /** Test seam: clear the in-process memo (does not touch AsyncStorage). */

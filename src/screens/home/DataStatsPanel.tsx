@@ -11,18 +11,51 @@ import {
   getDataStatus,
   recordDataSource,
   type DataStatus,
+  type ServerDatasetId,
 } from '../../prayer/dataStatus';
 import {
   getIslamiskaForbundetDatasetTimes,
   pollServerIndexNow,
 } from '../../providers/islamiskaForbundetDataset';
+import { pollServerIndexNow as pollHabousIndexNow } from '../../providers/habousDataset';
 import { getCacheStatus } from '../../prayer/prayerStorage';
 import {
   getEffectiveDataProvider,
   resolveCoordsFromSettings,
 } from '../../settings/effectiveProvider';
-import { nextServerRunAfter } from '../../config/datasets';
+import {
+  nextHabousServerRunAfter,
+  nextServerRunAfter,
+} from '../../config/datasets';
 import type { DataSource } from '../../providers/types';
+import type { PrayerDataProviderId } from '../../settings/types';
+
+/**
+ * The two prepared datasets, in the order the panel lists them, each with the
+ * provider that reads it and the server-run schedule to expect.
+ */
+const SERVERS: {
+  id: ServerDatasetId;
+  provider: PrayerDataProviderId;
+  labelKey: string;
+  labelDefault: string;
+  nextRun: () => Date;
+}[] = [
+  {
+    id: 'ifis',
+    provider: 'islamiska_forbundet',
+    labelKey: 'dataStats.serverSweden',
+    labelDefault: 'Sweden · Islamiska Förbundet',
+    nextRun: nextServerRunAfter,
+  },
+  {
+    id: 'habous',
+    provider: 'habous',
+    labelKey: 'dataStats.serverMorocco',
+    labelDefault: 'Morocco · Habous',
+    nextRun: nextHabousServerRunAfter,
+  },
+];
 
 type DeviceCache = { total: number; lastFetchedAt: string | null };
 
@@ -40,6 +73,9 @@ function DataStatsPanelImpl() {
   const { palette } = useAppPalette();
   const [status, setStatus] = useState<DataStatus | null>(null);
   const [cache, setCache] = useState<DeviceCache | null>(null);
+  // Which dataset this phone is actually being served by, so the panel can
+  // mark it. Null when the effective provider is not a prepared dataset.
+  const [active, setActive] = useState<ServerDatasetId | null>(null);
 
   const load = useCallback(() => {
     const coords = resolveCoordsFromSettings(settings);
@@ -51,12 +87,20 @@ function DataStatsPanelImpl() {
         )
       : null;
 
+    setActive(SERVERS.find(s => s.provider === provider)?.id ?? null);
+
     void (async () => {
-      try {
-        await pollServerIndexNow();
-      } catch {
-        /* offline — keep whatever was recorded before */
-      }
+      // Both servers, whichever one is serving this phone. The panel reports
+      // on both, and a dataset that is never polled reads "not checked yet"
+      // for ever — which is how the shared slot used to look after someone
+      // travelled between the two regions.
+      await Promise.all(
+        [pollServerIndexNow(), pollHabousIndexNow()].map(p =>
+          p.catch(() => {
+            /* offline — keep whatever was recorded before */
+          }),
+        ),
+      );
       if (coords && provider === 'islamiska_forbundet') {
         try {
           const r = await getIslamiskaForbundetDatasetTimes({
@@ -127,8 +171,9 @@ function DataStatsPanelImpl() {
     }
   };
 
+  // The pill reports the dataset in use, not "the last one that answered".
   const statusMeta = (): { color: string; label: string } => {
-    switch (status?.serverStatus) {
+    switch (active ? status?.servers[active]?.status : undefined) {
       case 'ok':
         return { color: OK_GREEN, label: t('dataStats.serverOk') };
       case 'warning':
@@ -139,10 +184,10 @@ function DataStatsPanelImpl() {
   };
 
   const sm = statusMeta();
-  const coverage =
-    status?.serverMinCoverageDays != null
-      ? `${status.serverMinCoverageDays} ${t('dataStats.daysUnit')}`
-      : dash;
+  const coverageOf = (id: ServerDatasetId): string => {
+    const days = status?.servers[id]?.minCoverageDays;
+    return days != null ? `${days} ${t('dataStats.daysUnit')}` : dash;
+  };
 
   return (
     <View
@@ -181,12 +226,52 @@ function DataStatsPanelImpl() {
 
       <View style={[styles.groupGap, { borderTopColor: palette.border }]} />
 
-      <Row palette={palette} label={t('dataStats.daysStored')} value={cache ? `${cache.total} ${t('dataStats.daysUnit')}` : dash} />
-      <Row palette={palette} label={t('dataStats.lastUpdated')} value={fmt(cache?.lastFetchedAt ?? status?.lastSourceAt)} />
-      <Row palette={palette} label={t('dataStats.nextCheck')} value={fmt(status?.nextServerCheckDue)} />
-      <Row palette={palette} label={t('dataStats.serverCoverage')} value={coverage} />
-      <Row palette={palette} label={t('dataStats.serverRun')} value={fmt(status?.serverBuiltAt)} />
-      <Row palette={palette} label={t('dataStats.nextServerRun')} value={fmt(nextServerRunAfter().toISOString())} last />
+      <Row palette={palette} label={t('dataStats.daysStored')} value={cache ? `${cache.total} ${t('dataStats.daysUnit')}` : dash} last />
+
+      {/* One block per prepared dataset. Two servers, two build jobs, two
+          windows — Sweden runs most of a year ahead, Morocco a couple of
+          weeks — and they used to share a single set of rows, so a phone in
+          Stockholm could be shown Morocco's coverage under a heading that
+          named neither. */}
+      {SERVERS.map(server => (
+        <View key={server.id}>
+          <View style={[styles.groupGap, { borderTopColor: palette.border }]} />
+          <View style={styles.serverHead}>
+            <Text style={[styles.serverName, { color: palette.muted }]}>
+              {t(server.labelKey, { defaultValue: server.labelDefault })}
+            </Text>
+            {active === server.id && (
+              <View
+                style={[styles.activeTag, { backgroundColor: palette.accentBg }]}>
+                <Text style={[styles.activeTagText, { color: palette.accent }]}>
+                  {t('dataStats.inUse', { defaultValue: 'in use' })}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Row
+            palette={palette}
+            label={t('dataStats.serverCoverage')}
+            value={coverageOf(server.id)}
+          />
+          <Row
+            palette={palette}
+            label={t('dataStats.serverRun')}
+            value={fmt(status?.servers[server.id]?.builtAt)}
+          />
+          <Row
+            palette={palette}
+            label={t('dataStats.nextServerRun')}
+            value={fmt(server.nextRun().toISOString())}
+          />
+          <Row
+            palette={palette}
+            label={t('dataStats.nextCheck')}
+            value={fmt(status?.servers[server.id]?.nextCheckDue)}
+            last
+          />
+        </View>
+      ))}
     </View>
   );
 }
@@ -262,6 +347,22 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   sourceValue: { fontSize: 13, fontWeight: '700' },
+  serverHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6,
+    marginBottom: 2,
+  },
+  serverName: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    flexShrink: 1,
+  },
+  activeTag: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
+  activeTagText: { fontSize: 10, fontWeight: '700' },
   groupGap: {
     marginTop: 10,
     marginBottom: 2,

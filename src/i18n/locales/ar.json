@@ -1289,7 +1289,10 @@
     "serverUnknown": "لم يُتحقق بعد",
     "unlockedTitle": "تم تفعيل إحصائيات البيانات",
     "unlockedBody": "تظهر الآن بطاقة إحصائيات أسفل الشاشة الرئيسية. يمكنك إيقافها في أي وقت من الأسفل.",
-    "serverCoverage": "تغطية الخادم"
+    "serverCoverage": "تغطية الخادم",
+    "serverSweden": "السويد · Islamiska Förbundet",
+    "serverMorocco": "المغرب · Habous",
+    "inUse": "قيد الاستخدام"
   },
   "log": {
     "legendPrayers": "0 ← 5 صلوات",

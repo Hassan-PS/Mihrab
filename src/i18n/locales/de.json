@@ -1289,7 +1289,10 @@
     "serverUnknown": "Noch nicht geprüft",
     "unlockedTitle": "Datenstatistik aktiviert",
     "unlockedBody": "Unten auf dem Startbildschirm erscheint nun eine Statistikkarte. Sie können sie jederzeit unten deaktivieren.",
-    "serverCoverage": "Server-Abdeckung"
+    "serverCoverage": "Server-Abdeckung",
+    "serverSweden": "Schweden · Islamiska Förbundet",
+    "serverMorocco": "Marokko · Habous",
+    "inUse": "aktiv"
   },
   "log": {
     "legendPrayers": "0 → 5 Gebete",

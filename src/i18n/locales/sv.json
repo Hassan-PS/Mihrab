@@ -1289,7 +1289,10 @@
     "serverUnknown": "Inte kontrollerad än",
     "unlockedTitle": "Datastatistik aktiverad",
     "unlockedBody": "Ett statistikkort visas nu längst ned på startskärmen. Stäng av det när som helst nedan.",
-    "serverCoverage": "Servertäckning"
+    "serverCoverage": "Servertäckning",
+    "serverSweden": "Sverige · Islamiska Förbundet",
+    "serverMorocco": "Marocko · Habous",
+    "inUse": "används"
   },
   "log": {
     "legendPrayers": "0 → 5 böner",

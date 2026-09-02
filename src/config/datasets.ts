@@ -69,3 +69,24 @@ export const HABOUS_INDEX_POLL_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 /** `.github/workflows/habous-dataset.yml` cron `41 4 * * *`, for display only. */
 export const HABOUS_SERVER_CRON_DAILY_UTC = { hour: 4, minute: 41 }; // every day
+
+/**
+ * Compute the next Moroccan server run (UTC) after `from`.
+ *
+ * Daily, not weekly: the builder can only see the Hijri month the ministry's
+ * page is currently showing, so it accumulates a little every day instead of
+ * walking a horizon once a week. The statistics panel shows both cadences
+ * side by side, and showing Sweden's Monday for both was one of the ways the
+ * single shared slot misread the Moroccan dataset.
+ */
+export function nextHabousServerRunAfter(from: Date = new Date()): Date {
+  const d = new Date(from.getTime());
+  d.setUTCHours(
+    HABOUS_SERVER_CRON_DAILY_UTC.hour,
+    HABOUS_SERVER_CRON_DAILY_UTC.minute,
+    0,
+    0,
+  );
+  if (d.getTime() <= from.getTime()) d.setUTCDate(d.getUTCDate() + 1);
+  return d;
+}

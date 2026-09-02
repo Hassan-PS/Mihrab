@@ -191,6 +191,7 @@ function pollServerIndex(): Promise<ServerIndex | null> {
             : 'warning'
           : 'unknown');
       await recordServerIndex(
+        'ifis',
         {
           builtAt: idx.builtAt ?? null,
           serverStatus: status,
