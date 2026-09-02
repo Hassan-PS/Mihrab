@@ -92,6 +92,8 @@ import {
 import { firstAyahOnPage, hitTestAyah, loadGeometry } from './geometry';
 import MushafTextPageSurface from './MushafTextPageSurface';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
+import { isMacCatalyst } from '../responsive/breakpoints';
+import { showsPointerChevrons } from './pointerChevrons';
 import { MushafPhoneReader } from './MushafPhoneReader';
 import { MushafSpreadReader } from './MushafSpreadReader';
 import {
@@ -384,15 +386,15 @@ export function MushafReader({
     windowHeight,
     screenShortSide: Math.min(screenDims.width, screenDims.height),
   });
-  // Pointer environments (iPad with trackpad, Mac "Designed for iPad"):
-  // trackpad/mouse users have NO page-turn affordance — wheel scroll
-  // doesn't drive a pagingEnabled ScrollView. Show edge chevrons on
-  // iPad-idiom devices; they brighten on hover (plan v2 §C2/M2).
-  const showPagerChevrons =
-    Platform.OS === 'ios' &&
-    !isPhoneDevice &&
-    ((Platform as unknown as { isPad?: boolean }).isPad === true ||
-      windowWidth >= 900);
+  // Pointer environments have no page-turn affordance without these —
+  // see `showsPointerChevrons` for why a Mac needs asking about directly.
+  const showPagerChevrons = showsPointerChevrons({
+    os: Platform.OS,
+    isMacCatalyst,
+    isPhoneDevice,
+    isPad: (Platform as unknown as { isPad?: boolean }).isPad === true,
+    windowWidth,
+  });
   const pageW = dualPage ? windowWidth / 2 : windowWidth;
   const [currentPage, setCurrentPage] = useState(initialPage);
   // Measured height of the page viewport (imageWrap), tagged with the
