@@ -545,8 +545,30 @@ else
   fi
   rm -f "$NOTARY_LOG"
 
+  # ── STAPLING IS A DOWNLOAD, AND A DOWNLOAD CAN BE EARLY ─────────────
+  #
+  # `stapler` does not read the verdict `notarytool` just printed. It
+  # fetches the ticket from Apple's CDN, and the ticket is published a
+  # short while AFTER the submission comes back Accepted. Ask too soon
+  # and it exits 73, which reads exactly like a broken build and is not
+  # one — 2.14.0's first attempt was Accepted and then failed to staple
+  # seconds later, and finding that out cost a full rebuild and a second
+  # notarization.
+  #
+  # This is 2.13.8's lesson applied where that entry pointed it: a
+  # dependency that is not ready yet is not a dependency that refused.
+  # Six tries over two and a half minutes, and a build that genuinely
+  # cannot be stapled still fails — it just fails after asking properly.
   echo "▸ Stapling the ticket into the bundle…"
-  xcrun stapler staple "$APP" || { echo "  ✗ stapler failed." >&2; exit 1; }
+  STAPLED=0
+  for attempt in 1 2 3 4 5 6; do
+    if xcrun stapler staple "$APP"; then STAPLED=1; break; fi
+    [ "$attempt" -eq 6 ] && break
+    echo "  ▸ no ticket yet (attempt $attempt of 6) — waiting $((attempt * 10))s…"
+    sleep $((attempt * 10))
+  done
+  [ "$STAPLED" = 1 ] \
+    || { echo "  ✗ stapler failed after 6 attempts over 2.5 minutes." >&2; exit 1; }
   # The ticket goes in a part of the bundle the seal excludes, so the
   # signature must still verify. Asserted, because "must" is a claim.
   codesign --verify --strict "$APP" \
