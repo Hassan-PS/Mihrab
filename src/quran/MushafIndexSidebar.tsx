@@ -28,6 +28,7 @@ import { pagesForRiwayah, totalPagesForRiwayah } from './pages';
 import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
 import {
   KHATMAH_TOTAL_PAGES,
+  khatmahPages,
   useQuranState,
   type QuranBookmark,
 } from './quranState';
@@ -299,9 +300,14 @@ function MushafIndexSidebarImpl({
             numberOfLines={1}
             maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
             {t('quran.khatmahProgress', {
-              defaultValue: '{{read}} of {{total}} pages',
+              defaultValue: '{{read}} / {{total}} pages · today: {{today}}',
               read: plan.pagesRead,
               total: KHATMAH_TOTAL_PAGES,
+              // The string has said "today: …" in thirteen languages since
+              // 2.7.26 and this footer, written later, never filled it in —
+              // the Mac showed a literal "{today}" at the foot of the
+              // sidebar. Today's share is the pages still owed for the day.
+              today: khatmahPages(plan, riwayah).leftToday,
             })}
           </Text>
           <View style={[styles.track, { backgroundColor: palette.controlBg }]}>
