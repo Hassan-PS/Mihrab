@@ -89,7 +89,27 @@ const NBSP = '\u00A0';
 const BAND_ROWS = 1.75;
 const BASMALAH_ROWS = 1.3;
 
-/** Every line of a page, measured, in ems of the size it was drawn at. */
+/**
+ * Every line of a page with its gaps SHUT, in ems of the size it was
+ * drawn at — the one property of a line that no layout decision changes.
+ *
+ * It used to hold the drawn width at the nominal gap, and `natural` was
+ * recovered by taking `WORD_SPACE_EM` back off it. That is only true of a
+ * line that was measured on a frame drawn at the nominal gap, which is
+ * true of the first frame after a MOUNT and of nothing else: turning to
+ * another page reuses the component, `useState` does not re-run its
+ * initialiser, and the new page's first frame is laid out with the
+ * PREVIOUS page's measurements still in state — so its gaps are whatever
+ * that page's lines wanted, and the width that comes back is measured at
+ * those. Subtracting the nominal gap from it then puts `natural` out by
+ * the difference, and the page settles justified to the wrong width. On
+ * Shuʿbah page 6 reached from another riwayah, five of the fifteen lines
+ * stopped 130 to 220 px short of the margin and stayed there.
+ *
+ * Storing the line with its gaps taken out — at whatever gap it was
+ * actually drawn at — is the same number from any frame, so the
+ * measurement can no longer be read in the wrong context.
+ */
 const PRINTED_LINE_CACHE = new Map<string, number[]>();
 
 /**
@@ -104,17 +124,94 @@ const PRINTED_LINE_CACHE = new Map<string, number[]>();
 const PRINTED_BOX_SLACK = 2.5;
 
 /**
- * How far a line may be scaled to reach the measure.
+ * How far a line may be STRETCHED to reach the measure.
  *
  * With the words the print puts on it a line lands within a few per cent
- * of the measure and the scaling is imperceptible. The bounds are for the
- * line that does not — a hair of distortion beats a hole.
+ * of the measure and the scaling is imperceptible. The ceiling is for the
+ * line that does not — a hair of distortion beats a hole — and past it
+ * the line is left short and centred, which is the honest end of it.
+ *
+ * ── AND WHY THERE IS NO FLOOR TO MATCH IT ─────────────────────────────
+ *
+ * Because the two directions are not symmetric. A line that falls SHORT
+ * has somewhere to stop: centre it, and it reads as a short line. A line
+ * that runs LONG has nowhere — the measure is the edge of the page, and
+ * past the ceiling of a squeeze there is nothing to catch it, so it is
+ * simply drawn into the margin.
+ *
+ * There used to be a floor at 0.8, and it bound: the second line from the
+ * foot of Shuʿbah page 30 carries 21.7 em of words against an 18.2 em
+ * measure, needs 0.754 with its gaps already shut, got 0.8, and hung 6%
+ * past the margin. Eight lines in Shuʿbah and seven in Warsh did the
+ * same. Lowering the floor to clear them would have been fitting a
+ * constant to two editions and calling it a rule; a third edition, or a
+ * wider phone, would find the next one.
+ *
+ * So the squeeze is not bounded. Whatever the line is, it is drawn inside
+ * the measure — `riwayahUnicodePage` asserts that for every shape of line
+ * there is, not for the ones we happen to have. What a squeeze costs is
+ * condensed letterforms, and over both editions the worst any line asks
+ * for is 0.754 with 14 of 8,807 below 0.8 at all, so what it costs in
+ * practice is nothing anyone will see.
  */
-const MIN_PRINTED_SCALE = 0.8;
 const MAX_PRINTED_SCALE = 1.25;
 
 /** Below this a page is unreadable and should scroll instead. */
 const MIN_PRINTED_SIZE = 9;
+
+/** What one line's justification comes to, in ems of the type size. */
+export type FittedLine = {
+  /** The word gap to set this line's spaces at. */
+  spaceEm: number;
+  /** What is left for the letters after the gaps have done what they can. */
+  scaleX: number;
+  /** The width the line will actually be drawn at. */
+  drawnEm: number;
+};
+
+/**
+ * Fit one line to the measure: gaps first, then the letters.
+ *
+ * ── WHY THE GAPS GO FIRST ─────────────────────────────────────────────
+ *
+ * A line used to reach the measure by scaling, and scaling is the wrong
+ * instrument: it is the letterforms that stretch, so a page whose lines
+ * needed 18% came out in visibly heavier type than the page beside it —
+ * which is what page 5 was. And it has a ceiling, so the lines that
+ * needed more than the ceiling simply did not reach the margin, which is
+ * the void.
+ *
+ * The print does not stretch letters. It opens the word gaps, and
+ * `mushafLayout` already has the band they may move inside and the exact
+ * advance of the bundled space to compute them with — the Hafs pages have
+ * justified this way since they were written. `natural` is what the line
+ * is with no gap at all, so the gap that closes it is arithmetic rather
+ * than a search, and the scaling that remains is the few per cent the
+ * band could not take.
+ *
+ * It is a pure function of three numbers so that the one property that
+ * matters can be asserted rather than hoped for: whatever comes in, the
+ * line does not come out wider than the measure.
+ */
+export function fitPrintedLine(
+  natural: number,
+  gaps: number,
+  rowEm: number,
+): FittedLine {
+  if (natural <= 0) {
+    return { spaceEm: WORD_SPACE_EM, scaleX: 1, drawnEm: 0 };
+  }
+  const spaceEm =
+    gaps > 0
+      ? Math.min(
+          WORD_SPACE_MAX_EM,
+          Math.max(WORD_SPACE_MIN_EM, (rowEm - natural) / gaps),
+        )
+      : WORD_SPACE_EM;
+  const justifiedEm = natural + spaceEm * gaps;
+  const scaleX = Math.min(MAX_PRINTED_SCALE, rowEm / justifiedEm);
+  return { spaceEm, scaleX, drawnEm: justifiedEm * scaleX };
+}
 
 /**
  * How far short of the measure a line has to fall before it is centred
@@ -729,6 +826,16 @@ function PrintedPageBody({
   const [ems, setEms] = React.useState<number[] | null>(
     () => PRINTED_LINE_CACHE.get(fitKey) ?? null,
   );
+  // And on every page after the first, because the initialiser above runs
+  // once and this component is reused from page to page. Without this the
+  // new page's first frame is drawn to the old page's line widths, which
+  // is a visible flash of a wrongly justified page even now that the
+  // measurement it takes there is no longer wrong.
+  const [shown, setShown] = React.useState(fitKey);
+  if (shown !== fitKey) {
+    setShown(fitKey);
+    setEms(PRINTED_LINE_CACHE.get(fitKey) ?? null);
+  }
   const pending = React.useRef<{ key: string; seen: Map<number, number> }>({
     key: fitKey,
     seen: new Map(),
@@ -802,9 +909,13 @@ function PrintedPageBody({
   const margin = Math.max(0, (height - rowHeight * rows.length) / 2);
 
   const onLineLayout = React.useCallback(
-    (index: number, drawn: number) => {
+    (index: number, drawn: number, spaceEm: number, gaps: number) => {
       if (PRINTED_LINE_CACHE.has(fitKey) || drawn <= 0 || fontSize <= 0) return;
-      pending.current.seen.set(index, drawn / fontSize);
+      // The gap this frame was drawn at, taken back off — see
+      // `PRINTED_LINE_CACHE`. `drawn` is a layout width, so the scale is
+      // not in it; the gaps are.
+      const natural = Math.max(0, drawn / fontSize - spaceEm * gaps);
+      pending.current.seen.set(index, natural);
       if (pending.current.seen.size < textRows.length) return;
       const out = rows.map((_, i) => pending.current.seen.get(i) ?? 0);
       PRINTED_LINE_CACHE.set(fitKey, out);
@@ -893,52 +1004,24 @@ function PrintedPageBody({
         }
 
         /**
-         * Exactly the measure — opened out at the gaps first, and only
-         * then at the letters.
+         * Exactly the measure — see `fitPrintedLine`.
          *
-         * `em` is this line's own drawn width at the nominal gap, divided
+         * `natural` is this line's own width with its gaps shut, divided
          * by the size it was drawn at, so it is a property of the line and
-         * not of any guess. Until it is known the line is drawn nominal
-         * and simply measured — one frame, once per page and box.
-         *
-         * ── WHY THE GAPS GO FIRST ──────────────────────────────────────
-         *
-         * A line reaches the measure by scaling before this, and scaling
-         * is the wrong instrument: it is the letterforms that stretch, so
-         * a page whose lines needed 18% came out in visibly heavier type
-         * than the page beside it — which is what page 5 was. And it has a
-         * ceiling, so the lines that needed more than the ceiling simply
-         * did not reach the margin, which is the void.
-         *
-         * The print does not stretch letters. It opens the word gaps, and
-         * `mushafLayout` already has the band they may move inside and the
-         * exact advance of the bundled space to compute them with — the
-         * Hafs pages have justified this way since they were written.
-         * `natural` is what the line is without any gap at all, so the gap
-         * that closes it is arithmetic rather than a search, and the
-         * scaling that remains is the few per cent the band could not take.
+         * of no layout decision. Until it is known the line is drawn at
+         * the nominal gap and simply measured — one frame, once per page
+         * and box.
          */
         const gaps = Math.max(0, tokens.length - 1);
-        const em = ems?.[index] ?? 0;
-        const natural = Math.max(0, em - WORD_SPACE_EM * gaps);
+        const natural = ems?.[index] ?? 0;
         // What the print gives THIS row. A full line on all but the rows
         // a surah ends on, which stop where the surah does.
         const rowEm = targetEm * row.share;
-        const spaceEm =
-          em > 0 && gaps > 0
-            ? Math.min(
-                WORD_SPACE_MAX_EM,
-                Math.max(WORD_SPACE_MIN_EM, (rowEm - natural) / gaps),
-              )
-            : WORD_SPACE_EM;
-        const justifiedEm = em > 0 ? natural + spaceEm * gaps : 0;
-        const scaleX =
-          justifiedEm > 0
-            ? Math.max(
-                MIN_PRINTED_SCALE,
-                Math.min(MAX_PRINTED_SCALE, rowEm / justifiedEm),
-              )
-            : 1;
+        const { spaceEm, scaleX, drawnEm } = fitPrintedLine(
+          natural,
+          gaps,
+          rowEm,
+        );
 
         /**
          * The line that cannot be filled honestly is centred, not dragged.
@@ -953,7 +1036,6 @@ function PrintedPageBody({
          * measure honestly, and it reads as a short line rather than a
          * broken one.
          */
-        const drawnEm = justifiedEm * scaleX;
         const indent =
           drawnEm > 0 && targetEm - drawnEm > targetEm * PRINTED_CENTRE_BELOW
             ? ((targetEm - drawnEm) / 2) * fontSize
@@ -975,6 +1057,8 @@ function PrintedPageBody({
                 onLineLayout(
                   index,
                   e.nativeEvent.lines.reduce((m, l) => Math.max(m, l.width), 0),
+                  spaceEm,
+                  gaps,
                 )
               }
               style={[

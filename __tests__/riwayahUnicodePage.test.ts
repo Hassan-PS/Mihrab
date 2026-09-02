@@ -76,6 +76,7 @@ import {
 import { availableRiwayat, riwayahChoiceExists } from '../src/quran/riwayat';
 import {
   advancingLength,
+  fitPrintedLine,
   fontBounds,
   pageExtent,
   predictFontSize,
@@ -326,5 +327,80 @@ describe('the box a page is given', () => {
         scrolling: false,
       }),
     ).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * The measure is the page, and a line may not be drawn past it.
+ *
+ * Both faults these pin were on a device: Shuʿbah page 30's second line
+ * from the foot, drawn 6% into the margin because the letters would not
+ * condense past 0.8; and pages 4 to 7, justified to the wrong width
+ * because the line's own measurement had been read as if it were taken
+ * at a gap it was not taken at.
+ */
+describe('fitting one printed line to the measure', () => {
+  const MEASURE = 18.2;
+
+  it('leaves a line that already fits alone', () => {
+    // Ten words whose natural widths and nominal gaps come to the
+    // measure: no scaling, and a gap inside the band.
+    const fit = fitPrintedLine(15.7, 10, MEASURE);
+    expect(fit.scaleX).toBe(1);
+    expect(fit.spaceEm).toBeCloseTo(0.25, 2);
+    expect(fit.drawnEm).toBeCloseTo(MEASURE, 3);
+  });
+
+  it('opens the gaps before it touches the letters', () => {
+    // Two ems short over ten gaps is a fifth of an em each, which the
+    // band can take — so the letterforms are not asked to.
+    const fit = fitPrintedLine(13.7, 10, MEASURE);
+    expect(fit.scaleX).toBe(1);
+    expect(fit.spaceEm).toBeCloseTo(0.45, 2);
+    expect(fit.drawnEm).toBeCloseTo(MEASURE, 3);
+  });
+
+  it('never draws a line wider than the measure', () => {
+    // Shuʿbah page 30 row 13 as it actually measured on the device:
+    // 21.74 em of words over twelve gaps against an 18.2 em measure.
+    // With a scale floor of 0.8 this came out at 19.3 and hung into the
+    // margin, which is what the reader saw.
+    const worst = fitPrintedLine(21.74, 12, MEASURE);
+    expect(worst.spaceEm).toBeCloseTo(0.2, 3);
+    expect(worst.drawnEm).toBeLessThanOrEqual(MEASURE + 1e-9);
+
+    // And for EVERY shape of line, not the ones this book happens to
+    // hold: a line twice the measure is still drawn inside it.
+    for (let natural = 1; natural <= 40; natural += 0.25) {
+      for (let gaps = 0; gaps <= 24; gaps++) {
+        const fit = fitPrintedLine(natural, gaps, MEASURE);
+        expect(fit.drawnEm).toBeLessThanOrEqual(MEASURE + 1e-9);
+      }
+    }
+  });
+
+  it('stops short rather than pulling a line that cannot reach', () => {
+    // The closing pages: three or four words the print holds out with
+    // kashida. The gaps go to the top of their band and the letters to
+    // the top of theirs, and what is left is centred by the caller.
+    const fit = fitPrintedLine(6.3, 2, MEASURE);
+    expect(fit.spaceEm).toBeCloseTo(0.75, 3);
+    expect(fit.scaleX).toBeCloseTo(1.25, 3);
+    expect(fit.drawnEm).toBeLessThan(MEASURE * 0.6);
+  });
+
+  it('gives an unmeasured line the nominal gap and no scaling', () => {
+    // The frame before the measurement arrives. Drawing it at its own
+    // natural width is what makes the measurement meaningful.
+    const fit = fitPrintedLine(0, 9, MEASURE);
+    expect(fit.scaleX).toBe(1);
+    expect(fit.spaceEm).toBeCloseTo(0.25, 3);
+    expect(fit.drawnEm).toBe(0);
+  });
+
+  it('takes the row its own share, not the whole measure', () => {
+    // A surah's closing line stops where the surah does.
+    const fit = fitPrintedLine(9, 6, MEASURE * 0.6);
+    expect(fit.drawnEm).toBeCloseTo(MEASURE * 0.6, 3);
   });
 });
