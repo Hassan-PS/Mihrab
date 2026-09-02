@@ -127,7 +127,8 @@
     "footerNote": "Berechnete Zeiten. Folge deiner Moschee vor Ort, wo sie abweichen.",
     "sheetLanguage": "Sprache des Blatts",
     "exportImage": "Bild teilen",
-    "exportPdf": "PDF teilen (A4)"
+    "exportPdf": "PDF teilen (A4)",
+    "pitch": "Kostenlos und werbefrei. Gebetszeiten, Qibla, der Koran mit Rezitation und Übersetzung, und ein Khatma-Tracker."
   },
   "settings": {
     "laDesignLabel": "Stil",

@@ -127,7 +127,8 @@
     "footerNote": "Calculated times. Follow your local mosque where it differs.",
     "sheetLanguage": "Sheet language",
     "exportImage": "Share image",
-    "exportPdf": "Share PDF (A4)"
+    "exportPdf": "Share PDF (A4)",
+    "pitch": "Free and ad-free. Prayer times, qibla, the Qur’an with recitation and translation, and a khatmah tracker."
   },
   "settings": {
     "laDesignLabel": "Style",

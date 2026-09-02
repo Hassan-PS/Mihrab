@@ -127,7 +127,8 @@
     "footerNote": "Horaires calculés. Suivez votre mosquée locale en cas d’écart.",
     "sheetLanguage": "Langue de la feuille",
     "exportImage": "Partager l’image",
-    "exportPdf": "Partager le PDF (A4)"
+    "exportPdf": "Partager le PDF (A4)",
+    "pitch": "Gratuite et sans publicité. Horaires de prière, qibla, le Coran avec récitation et traduction, et un suivi de khatma."
   },
   "settings": {
     "laDesignLabel": "Style",

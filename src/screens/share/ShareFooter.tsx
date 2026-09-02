@@ -27,6 +27,16 @@ function ShareFooterImpl({ t, sourceLine, rtl }: Props) {
     <View
       style={[styles.footer, { flexDirection: rtl ? 'row-reverse' : 'row' }]}>
       <View style={styles.left}>
+        {/* What the app is, on the one artefact that reaches people who
+            do not have it. Ad-free is worth saying out loud: it is the
+            first thing anyone assumes about a free prayer-times app, and
+            it is the wrong assumption here. */}
+        <Text style={[styles.pitch, { textAlign: align }]}>
+          {t(
+            'share.pitch',
+            'Free and ad-free. Prayer times, qibla, the Qur’an with recitation and translation, and a khatmah tracker.',
+          )}
+        </Text>
         <Text style={[styles.source, { textAlign: align }]}>{sourceLine}</Text>
         <Text style={[styles.note, { textAlign: align }]}>
           {t(
@@ -54,6 +64,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   left: { flex: 1, gap: 1 },
+  pitch: { color: '#166534', fontSize: 10, fontWeight: '700' },
   source: { color: '#4b5563', fontSize: 9 },
   note: { color: '#6b7280', fontSize: 9 },
   site: { color: '#166534', fontSize: 9, fontWeight: '700' },
