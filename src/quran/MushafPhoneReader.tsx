@@ -278,7 +278,11 @@ export function MushafPhoneReader(props: MushafReaderProps) {
               onPress={core.openJump}
               finish={
                 core.finish?.page === page
-                  ? { day: core.finish.day, onPress: finishKhatmahPortion }
+                  ? {
+                    day: core.finish.day,
+                    when: core.finish.when,
+                    onPress: finishKhatmahPortion,
+                  }
                   : null
               }
             />

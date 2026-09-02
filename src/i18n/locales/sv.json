@@ -984,8 +984,8 @@
     "downloadDoneBody": "Alla sidor finns på den här enheten. Den går att läsa utan uppkoppling nu.",
     "downloadIncompleteTitle": "Nedladdningen blev inte klar",
     "downloadIncompleteBody": "{{count}} sidor saknas fortfarande. Öppna Koranen för att fortsätta där den stannade.",
-    "finishDay": "Avsluta dag {{day}}s läsning",
-    "finishDayShort": "Avsluta dag {{day}}",
+    "finishDay": "Slutför dag {{day}}s läsning ({{when}})",
+    "finishDayShort": "Slutför dag {{day}} ({{when}})",
     "khatmahPageProgress": "{{pages}} sidor kvar · dag {{day}} av {{days}}",
     "khatmahDayDone": "✓ Dagens läsning klar",
     "khatmahPagesLeftToday": "{{count}} sidor kvar i dag",
@@ -993,7 +993,7 @@
     "khatmahExtraPages": "+{{count}} sidor extra",
     "khatmahExtraPages_one": "+{{count}} sida extra",
     "khatmahMarkDone": "Markera dag {{day}}s läsning som klar",
-    "khatmahMarkNext": "✓ Avsluta dag {{day}} också",
+    "khatmahMarkNext": "✓ Slutför dag {{day}} ({{when}}) också",
     "khatmahMarkToday": "✓ Dagens läsning klar",
     "khatmahPrevDay": "‹ Föregående dag",
     "riwayahQalun": "Qalun",
@@ -1002,7 +1002,9 @@
     "riwayahPickerOpen": "Läsart: {{name}}. Tryck för att byta.",
     "riwayahNotOnDevice": "{{name}} — finns inte på den här enheten än",
     "riwayahAddIt": "Tryck för att lägga till",
-    "riwayahDefault": "(standard)"
+    "riwayahDefault": "(standard)",
+    "dueToday": "idag",
+    "dueTomorrow": "imorgon"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

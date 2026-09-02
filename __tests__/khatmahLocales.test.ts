@@ -32,9 +32,14 @@ const LOCALES = [
 ];
 
 /** Key, the params the app passes it, and the numbers that must survive. */
-const CASES: Array<{ key: string; params: Record<string, number>; shows: number[] }> = [
-  { key: 'quran.finishDay', params: { day: 12 }, shows: [12] },
-  { key: 'quran.finishDayShort', params: { day: 12 }, shows: [12] },
+const CASES: Array<{
+  key: string;
+  params: Record<string, number | string>;
+  shows: number[];
+}> = [
+  // `when` is the calendar half of "Finish day 12 (today)".
+  { key: 'quran.finishDay', params: { day: 12, when: 'today' }, shows: [12] },
+  { key: 'quran.finishDayShort', params: { day: 12, when: 'today' }, shows: [12] },
   {
     key: 'quran.khatmahPageProgress',
     params: { pages: 364, day: 12, days: 30 },
@@ -44,7 +49,7 @@ const CASES: Array<{ key: string; params: Record<string, number>; shows: number[
   { key: 'quran.khatmahPagesLeftToday', params: { count: 8 }, shows: [8] },
   { key: 'quran.khatmahExtraPages', params: { count: 4 }, shows: [4] },
   { key: 'quran.khatmahMarkDone', params: { day: 12 }, shows: [12] },
-  { key: 'quran.khatmahMarkNext', params: { day: 13 }, shows: [13] },
+  { key: 'quran.khatmahMarkNext', params: { day: 13, when: 'tomorrow' }, shows: [13] },
   { key: 'quran.khatmahMarkToday', params: {}, shows: [] },
   { key: 'quran.khatmahPrevDay', params: {}, shows: [] },
 ];

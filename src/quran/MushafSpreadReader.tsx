@@ -165,15 +165,32 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     listRef.current?.scrollToIndex({ index: idx, animated: false });
   }, [pageWidth, indexForPage]);
 
-  const onMomentumEnd = useCallback(
-    (e: { nativeEvent: { contentOffset: { x: number } } }) => {
+  /**
+   * Where a scroll came to rest, and the page it means.
+   *
+   * ── THE SNAP IS FOR THE TRACKPAD ──────────────────────────────────
+   *
+   * `pagingEnabled` snaps a finger's drag, and this used to trust it: it
+   * recorded the index and scrolled nothing. UIKit does not apply paging
+   * to an INDIRECT scroll, though, which is what a trackpad two-finger
+   * swipe and a mouse wheel are — so on a Mac the list stopped wherever
+   * the gesture left it, halfway across a page, while the state recorded
+   * the nearest whole one. The reader disagreed with itself and the
+   * gesture read as not working.
+   *
+   * So the rest position is snapped here rather than assumed. On touch
+   * the offset is already exact and the correction is skipped, which is
+   * why the guard is a pixel rather than zero.
+   */
+  const settleAt = useCallback(
+    (offsetX: number) => {
       const idx = Math.max(
         0,
-        Math.min(
-          itemCount - 1,
-          Math.round(e.nativeEvent.contentOffset.x / pageWidth),
-        ),
+        Math.min(itemCount - 1, Math.round(offsetX / pageWidth)),
       );
+      if (Math.abs(offsetX - idx * pageWidth) > 1) {
+        listRef.current?.scrollToIndex({ index: idx, animated: true });
+      }
       if (idx === settledIndex.current) {
         // Dragged and came back. Nothing was navigated to, so lift the
         // suspension armed at drag begin rather than leaving recitation
@@ -189,6 +206,24 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       setCurrentPage(page);
     },
     [core, itemCount, pageForIndex, pageWidth, setCurrentPage],
+  );
+
+  const onMomentumEnd = useCallback(
+    (e: { nativeEvent: { contentOffset: { x: number } } }) =>
+      settleAt(e.nativeEvent.contentOffset.x),
+    [settleAt],
+  );
+
+  /**
+   * A trackpad swipe often has no momentum phase at all — the fingers
+   * lift and the scroll simply stops — so the drag end has to settle it
+   * too. On touch this fires before the momentum and settles to the same
+   * index, which is a no-op the second time round.
+   */
+  const onScrollEndDrag = useCallback(
+    (e: { nativeEvent: { contentOffset: { x: number } } }) =>
+      settleAt(e.nativeEvent.contentOffset.x),
+    [settleAt],
   );
 
   /** Chevron/pointer page turn. `dir` is READING direction: +1 = next
@@ -217,13 +252,25 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   // once, up there; this is how the pages it can see say where they are.
   useRegisterKeyPaging(props.keyTurn, turnPage);
 
-  /** One page column: header chrome, centred width-fit height-capped
-   *  page, page-number footer. */
-  const renderColumn = useCallback(
-    (page: number | null, colW: number, chrome: 'both' | 'label' | 'pill') => {
-      if (page == null || page < 1 || page > totalPages) {
-        return <View style={{ width: colW }} />;
-      }
+  /**
+   * The size of one page, and the margin around a spread of two.
+   *
+   * ── WHY THE MARGINS ARE COMPUTED AND NOT PADDED ───────────────────
+   *
+   * Each column used to pad itself by `H_PADDING` and centre the page in
+   * what was left. When the page is HEIGHT-capped — which on a wide Mac
+   * window it always is — the leftover width is wider than that padding,
+   * and centring splits it evenly on both sides of each column. Both
+   * inner halves then land against each other, so the gutter between the
+   * two pages came out at twice the margin against the window's edges.
+   * A book is not set that way.
+   *
+   * So the slack is divided into THREE equal parts — outer, gutter,
+   * outer — and each page is placed against its own share rather than
+   * centred in a box.
+   */
+  const geometry = useCallback(
+    (colW: number, spread: boolean) => {
       // Whole dp — a sub-pixel wobble in the measured viewport must not fork
       // the page's layout. See the same rounding in MushafPhoneReader.
       const availH = Math.round(
@@ -236,13 +283,50 @@ export function MushafSpreadReader(props: MushafReaderProps) {
             playerReserve,
         ),
       );
-      // Width-fit, height-capped, centred — no zoom concept.
       let pageW = colW - H_PADDING * 2;
       let pageH = pageW / PAGE_ASPECT;
       if (pageH > availH) {
         pageH = availH;
         pageW = pageH * PAGE_ASPECT;
       }
+      // Three equal gaps across the pair; a single page keeps the two it
+      // has. `margin` is the outer one, and the gutter is the same.
+      const margin = spread
+        ? Math.max(H_PADDING, (colW * 2 - pageW * 2) / 3)
+        : Math.max(H_PADDING, (colW - pageW) / 2);
+      return { pageW, pageH, margin };
+    },
+    [height, listH, navPad, playerReserve],
+  );
+
+  /** One page column: header chrome, page placed to its margin, footer. */
+  const renderColumn = useCallback(
+    (
+      page: number | null,
+      colW: number,
+      chrome: 'both' | 'label' | 'pill',
+      /** Which half of a spread this is; 'single' when there is no pair. */
+      side: 'left' | 'right' | 'single' = 'single',
+    ) => {
+      if (page == null || page < 1 || page > totalPages) {
+        return <View style={{ width: colW }} />;
+      }
+      const { pageW, pageH, margin } = geometry(colW, side !== 'single');
+      // Outer edge gets the full margin, the gutter side gets half of one
+      // — the two halves together make a gutter equal to the outer margins.
+      // rtl-safe: physical left/right on purpose. A muṣḥaf's spread is
+      // physically ordered — page 1 is the rightmost sheet — and the list
+      // itself is pinned `direction: 'ltr'` for the same reason (see
+      // `listWrap`). Start/End here would mirror the gutter into the
+      // outer margin in Arabic and Urdu.
+      const pad =
+        side === 'left'
+          // rtl-safe: physical, like the pager itself — see above.
+          ? { paddingLeft: margin, paddingRight: margin / 2 }
+          : side === 'right'
+            // rtl-safe: physical, like the pager itself — see above.
+            ? { paddingLeft: margin / 2, paddingRight: margin }
+            : { paddingHorizontal: margin };
       return (
         <View style={[styles.column, { width: colW }]}>
           <View style={{ paddingTop: navPad }}>
@@ -255,7 +339,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
               show={chrome}
             />
           </View>
-          <View style={styles.pageBox}>
+          <View style={[styles.pageBox, pad]}>
             <Pressable onPress={onToggleFullscreen}>
               <MushafTextPageSurface
                 page={page}
@@ -289,7 +373,11 @@ export function MushafSpreadReader(props: MushafReaderProps) {
             onPress={core.openJump}
             finish={
               core.finish?.page === page
-                ? { day: core.finish.day, onPress: finishKhatmahPortion }
+                ? {
+                    day: core.finish.day,
+                    when: core.finish.when,
+                    onPress: finishKhatmahPortion,
+                  }
                 : null
             }
           />
@@ -299,9 +387,8 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     [
       core,
       currentPage,
-      height,
+      geometry,
       isFullscreen,
-      listH,
       navPad,
       nightMode,
       onToggleFullscreen,
@@ -309,7 +396,6 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       palette.accentSolid,
       playback.active,
       playback.playing,
-      playerReserve,
       riwayah,
       totalPages,
     ],
@@ -337,12 +423,20 @@ export function MushafSpreadReader(props: MushafReaderProps) {
             styles.spreadRow,
             { width: pageWidth, backgroundColor: pageBg },
           ]}>
-          {renderColumn(spread.left, pageWidth / 2, 'pill')}
-          {renderColumn(spread.right, pageWidth / 2, 'label')}
+          {renderColumn(spread.left, pageWidth / 2, 'pill', 'left')}
+          {renderColumn(spread.right, pageWidth / 2, 'label', 'right')}
+          {/* The gutter's own line. A printed muṣḥaf has a fold here and
+              the eye uses it: without one, two pages of the same text at
+              the same size read as a single wide column. Hairline and
+              faint — a fold is not a rule. */}
+          <View
+            pointerEvents="none"
+            style={[styles.gutter, { backgroundColor: ornament, opacity: 0.18 }]}
+          />
         </View>
       );
     },
-    [pageBg, pageWidth, paired, renderColumn, totalPages],
+    [ornament, pageBg, pageWidth, paired, renderColumn, totalPages],
   );
 
   // Pointer environments (iPad trackpad, Catalyst): wheel scroll doesn't
@@ -398,6 +492,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
           keyExtractor={i => (paired ? `s${i}` : `p${i}`)}
           renderItem={renderItem}
           onMomentumScrollEnd={onMomentumEnd}
+          onScrollEndDrag={onScrollEndDrag}
           onScrollBeginDrag={core.suspendFollow}
           windowSize={3}
           maxToRenderPerBatch={2}
@@ -508,6 +603,15 @@ const styles = StyleSheet.create({
   listWrap: { flex: 1, direction: 'ltr' },
   item: { height: '100%' },
   spreadRow: { flexDirection: 'row' },
+  // Centred in the middle gap, which the three-way split above makes
+  // exactly as wide as the margins at the window's edges.
+  gutter: {
+    position: 'absolute',
+    top: '18%',
+    bottom: '18%',
+    left: '50%',
+    width: StyleSheet.hairlineWidth,
+  },
   column: { height: '100%' },
   pageBox: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   // Physical left/right on purpose: the mushaf's page order is physical

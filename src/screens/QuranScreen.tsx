@@ -68,6 +68,10 @@ import {
   useCompanionChoice,
 } from '../quran/CompanionTextControls';
 import { searchQuran, type QuranSearchResult } from '../quran/search';
+import {
+  formatDayWhen,
+  khatmahDayWhen,
+} from '../quran/khatmahDayWhen';
 import { useVerseOfTheDay } from '../quran/useVerseOfTheDay';
 import { SyncHint } from './sync/SyncHint';
 import { cardEdgeStyle } from '../theme/chrome';
@@ -489,7 +493,18 @@ export function QuranScreen() {
                   {day.done
                     ? t('quran.khatmahMarkNext', {
                         day: khatmahCurrentPortion(plan).day,
-                        defaultValue: '✓ Finish day {{day}} too',
+                        // Which day that is, in calendar terms — a plan's
+                        // day number says nothing on its own.
+                        when: formatDayWhen(
+                          khatmahDayWhen(
+                            plan.startedAt,
+                            khatmahCurrentPortion(plan).day,
+                          ),
+                          (key: string, opts: { defaultValue: string }) =>
+                            t(key, opts) as string,
+                          i18n.language,
+                        ),
+                        defaultValue: '✓ Finish day {{day}} ({{when}}) too',
                       })
                     : t('quran.khatmahMarkToday', {
                         defaultValue: "✓ Today's reading done",

@@ -984,8 +984,8 @@
     "downloadDoneBody": "Semua halaman ada di perangkat ini. Kini bisa dibaca tanpa sambungan.",
     "downloadIncompleteTitle": "Unduhan belum selesai",
     "downloadIncompleteBody": "{{count}} halaman masih kurang. Buka Al-Qur'an untuk melanjutkan dari tempat berhenti.",
-    "finishDay": "Selesaikan bacaan hari ke-{{day}}",
-    "finishDayShort": "Selesaikan hari ke-{{day}}",
+    "finishDay": "Selesaikan bacaan hari {{day}} ({{when}})",
+    "finishDayShort": "Selesaikan hari {{day}} ({{when}})",
     "khatmahPageProgress": "{{pages}} halaman lagi · hari ke-{{day}} dari {{days}}",
     "khatmahDayDone": "✓ Bacaan hari ini selesai",
     "khatmahPagesLeftToday": "{{count}} halaman lagi hari ini",
@@ -993,7 +993,7 @@
     "khatmahExtraPages": "+{{count}} halaman tambahan",
     "khatmahExtraPages_one": "+{{count}} halaman tambahan",
     "khatmahMarkDone": "Tandai bacaan hari ke-{{day}} selesai",
-    "khatmahMarkNext": "✓ Selesaikan hari ke-{{day}} juga",
+    "khatmahMarkNext": "✓ Selesaikan hari {{day}} ({{when}}) juga",
     "khatmahMarkToday": "✓ Bacaan hari ini selesai",
     "khatmahPrevDay": "‹ Hari sebelumnya",
     "riwayahQalun": "Qalun",
@@ -1002,7 +1002,9 @@
     "riwayahPickerOpen": "Riwayat bacaan: {{name}}. Ketuk untuk mengganti.",
     "riwayahNotOnDevice": "{{name}} — belum ada di perangkat ini",
     "riwayahAddIt": "Ketuk untuk menambahkan",
-    "riwayahDefault": "(bawaan)"
+    "riwayahDefault": "(bawaan)",
+    "dueToday": "hari ini",
+    "dueTomorrow": "besok"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

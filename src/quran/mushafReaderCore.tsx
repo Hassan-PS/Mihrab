@@ -54,6 +54,11 @@ import { usePlaybackStatus, type PlaybackStatus } from './audio/playback';
 import { mushafSurahName } from './surahName';
 import type { AyahRef } from './MushafTextPage';
 import type { KeyPagingTarget } from './useKeyPaging';
+import {
+  formatDayWhen,
+  khatmahDayWhen,
+  type DayWhen,
+} from './khatmahDayWhen';
 
 /** The props contract every mushaf reader implements (see MushafReader). */
 export type MushafReaderProps = {
@@ -160,7 +165,12 @@ export type AyahMarkProps = {
  * either riwayah — the same reason `khatmahCurrentPage` re-resolves a
  * pinned position rather than trusting the number it was pinned with.
  */
-export type KhatmahFinish = { page: number; day: number };
+export type KhatmahFinish = {
+  page: number;
+  day: number;
+  /** When that day is due — "today", "tomorrow", a weekday or a date. */
+  when: DayWhen;
+};
 
 export type MushafReaderCore = {
   quran: QuranState;
@@ -441,9 +451,12 @@ export function useMushafReaderCore({
     if (!plan) return null;
     const at = khatmahMarkerAyah(plan);
     if (!at) return null;
+    const day = khatmahCurrentPortion(plan).day;
     return {
       page: findPageForAyah(at.surah, at.ayah, riwayah),
-      day: khatmahCurrentPortion(plan).day,
+      day,
+      // A day number means nothing without a calendar beside it.
+      when: khatmahDayWhen(plan.startedAt, day),
     };
   }, [quran, riwayah]);
 
@@ -608,9 +621,11 @@ export function MushafPageFooter({
    * is on the same page as the marked ayah, it is where the eye lands
    * at the end of a page anyway, and it costs the text nothing.
    */
-  finish?: { day: number; onPress: () => void } | null;
+  finish?: { day: number; when: DayWhen; onPress: () => void } | null;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const tr = (key: string, opts: { defaultValue: string }) =>
+    t(key, opts) as string;
   return (
     <View style={styles.pageFooter}>
       <Pressable
@@ -627,14 +642,16 @@ export function MushafPageFooter({
           accessibilityRole="button"
           accessibilityLabel={t('quran.finishDay', {
             day: finish.day,
-            defaultValue: "Finish day {{day}}'s reading",
+            when: formatDayWhen(finish.when, tr, i18n.language),
+            defaultValue: "Finish day {{day}}'s reading ({{when}})",
           })}
           onPress={finish.onPress}
           style={[styles.finishPill, { borderColor: KHATMAH_COLOR }]}>
           <Text style={[styles.finishPillLabel, { color: KHATMAH_COLOR }]}>
             {t('quran.finishDayShort', {
               day: finish.day,
-              defaultValue: 'Finish day {{day}}',
+              when: formatDayWhen(finish.when, tr, i18n.language),
+              defaultValue: 'Finish day {{day}} ({{when}})',
             })}
           </Text>
         </Pressable>

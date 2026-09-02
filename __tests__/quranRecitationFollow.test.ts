@@ -150,8 +150,19 @@ describe('following the recitation is not switched off by starting it', () => {
       'src/quran/MushafSpreadReader.tsx',
     ]) {
       const src = read(file);
-      const momentum = src.slice(src.indexOf('const onMomentumEnd = useCallback('));
-      expect(momentum.slice(0, momentum.indexOf('}, ['))).toContain('core.resumeFollow()');
+      // Wherever the settling lives — the spread reader factored it into
+      // `settleAt` so a trackpad's drag end can share it — the branch
+      // that finds the list back where it started must lift the
+      // suspension rather than leave follow off for thirty seconds.
+      const from = Math.min(
+        ...['const settleAt = useCallback(', 'const onMomentumEnd = useCallback(']
+          .map(m => src.indexOf(m))
+          .filter(i => i >= 0),
+      );
+      const settle = src.slice(from);
+      expect(settle.slice(0, settle.indexOf('}, ['))).toContain(
+        'core.resumeFollow()',
+      );
     }
   });
 });

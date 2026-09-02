@@ -984,8 +984,8 @@
     "downloadDoneBody": "所有页面都已在本机，现在无需联网即可阅读。",
     "downloadIncompleteTitle": "下载未完成",
     "downloadIncompleteBody": "仍缺 {{count}} 页。打开古兰经即可从中断处继续。",
-    "finishDay": "完成第 {{day}} 天的诵读",
-    "finishDayShort": "完成第 {{day}} 天",
+    "finishDay": "完成第 {{day}} 天的诵读（{{when}}）",
+    "finishDayShort": "完成第 {{day}} 天（{{when}}）",
     "khatmahPageProgress": "还剩 {{pages}} 页 · 第 {{day}} 天，共 {{days}} 天",
     "khatmahDayDone": "✓ 今日诵读已完成",
     "khatmahPagesLeftToday": "今天还剩 {{count}} 页",
@@ -993,7 +993,7 @@
     "khatmahExtraPages": "+{{count}} 页额外",
     "khatmahExtraPages_one": "+{{count}} 页额外",
     "khatmahMarkDone": "将第 {{day}} 天的诵读标记为完成",
-    "khatmahMarkNext": "✓ 也完成第 {{day}} 天",
+    "khatmahMarkNext": "✓ 也完成第 {{day}} 天（{{when}}）",
     "khatmahMarkToday": "✓ 今日诵读已完成",
     "khatmahPrevDay": "‹ 前一天",
     "riwayahQalun": "嘉隆",
@@ -1002,7 +1002,9 @@
     "riwayahPickerOpen": "诵读传统：{{name}}。点按可更换。",
     "riwayahNotOnDevice": "{{name}} — 尚未下载到本设备",
     "riwayahAddIt": "点按以添加",
-    "riwayahDefault": "(默认)"
+    "riwayahDefault": "(默认)",
+    "dueToday": "今天",
+    "dueTomorrow": "明天"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

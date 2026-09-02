@@ -984,8 +984,8 @@
     "downloadDoneBody": "Все страницы на этом устройстве. Теперь он читается без сети.",
     "downloadIncompleteTitle": "Загрузка не завершилась",
     "downloadIncompleteBody": "Не хватает {{count}} страниц. Откройте Коран, чтобы продолжить с места остановки.",
-    "finishDay": "Завершить чтение дня {{day}}",
-    "finishDayShort": "Завершить день {{day}}",
+    "finishDay": "Завершить чтение дня {{day}} ({{when}})",
+    "finishDayShort": "Завершить день {{day}} ({{when}})",
     "khatmahPageProgress": "Осталось {{pages}} стр. · день {{day}} из {{days}}",
     "khatmahDayDone": "✓ Сегодняшнее чтение завершено",
     "khatmahPagesLeftToday": "Осталось {{count}} стр. на сегодня",
@@ -993,7 +993,7 @@
     "khatmahExtraPages": "+{{count}} стр. сверх нормы",
     "khatmahExtraPages_one": "+{{count}} стр. сверх нормы",
     "khatmahMarkDone": "Отметить чтение дня {{day}} как завершённое",
-    "khatmahMarkNext": "✓ Завершить и день {{day}}",
+    "khatmahMarkNext": "✓ Завершить и день {{day}} ({{when}})",
     "khatmahMarkToday": "✓ Сегодняшнее чтение завершено",
     "khatmahPrevDay": "‹ Предыдущий день",
     "riwayahQalun": "Калун",
@@ -1002,7 +1002,9 @@
     "riwayahPickerOpen": "Чтение: {{name}}. Нажмите, чтобы сменить.",
     "riwayahNotOnDevice": "{{name}} — ещё не на этом устройстве",
     "riwayahAddIt": "Нажмите, чтобы добавить",
-    "riwayahDefault": "(по умолчанию)"
+    "riwayahDefault": "(по умолчанию)",
+    "dueToday": "сегодня",
+    "dueTomorrow": "завтра"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

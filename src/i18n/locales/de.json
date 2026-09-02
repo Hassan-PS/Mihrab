@@ -984,8 +984,8 @@
     "downloadDoneBody": "Alle Seiten liegen auf diesem Gerät. Er lässt sich jetzt ohne Verbindung lesen.",
     "downloadIncompleteTitle": "Der Download wurde nicht fertig",
     "downloadIncompleteBody": "{{count}} Seiten fehlen noch. Öffne den Koran, um dort weiterzumachen, wo er stehen blieb.",
-    "finishDay": "Lesung von Tag {{day}} abschließen",
-    "finishDayShort": "Tag {{day}} abschließen",
+    "finishDay": "Lesung von Tag {{day}} abschließen ({{when}})",
+    "finishDayShort": "Tag {{day}} abschließen ({{when}})",
     "khatmahPageProgress": "Noch {{pages}} Seiten · Tag {{day}} von {{days}}",
     "khatmahDayDone": "✓ Heutige Lesung erledigt",
     "khatmahPagesLeftToday": "Noch {{count}} Seiten heute",
@@ -993,7 +993,7 @@
     "khatmahExtraPages": "+{{count}} Seiten extra",
     "khatmahExtraPages_one": "+{{count}} Seite extra",
     "khatmahMarkDone": "Lesung von Tag {{day}} als erledigt markieren",
-    "khatmahMarkNext": "✓ Auch Tag {{day}} abschließen",
+    "khatmahMarkNext": "✓ Auch Tag {{day}} ({{when}}) abschließen",
     "khatmahMarkToday": "✓ Heutige Lesung erledigt",
     "khatmahPrevDay": "‹ Vorheriger Tag",
     "riwayahQalun": "Qalun",
@@ -1002,7 +1002,9 @@
     "riwayahPickerOpen": "Lesart: {{name}}. Zum Wechseln tippen.",
     "riwayahNotOnDevice": "{{name}} — noch nicht auf diesem Gerät",
     "riwayahAddIt": "Zum Hinzufügen tippen",
-    "riwayahDefault": "(Standard)"
+    "riwayahDefault": "(Standard)",
+    "dueToday": "heute",
+    "dueTomorrow": "morgen"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

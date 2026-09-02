@@ -984,8 +984,8 @@
     "downloadDoneBody": "Bütün sayfalar bu cihazda. Artık bağlantı olmadan okunuyor.",
     "downloadIncompleteTitle": "İndirme tamamlanmadı",
     "downloadIncompleteBody": "{{count}} sayfa hâlâ eksik. Kaldığı yerden devam etmek için Kur'an'ı açın.",
-    "finishDay": "{{day}}. günün okumasını bitir",
-    "finishDayShort": "{{day}}. günü bitir",
+    "finishDay": "{{day}}. günün okumasını bitir ({{when}})",
+    "finishDayShort": "{{day}}. günü bitir ({{when}})",
     "khatmahPageProgress": "{{pages}} sayfa kaldı · {{days}} günün {{day}}. günü",
     "khatmahDayDone": "✓ Bugünkü okuma tamam",
     "khatmahPagesLeftToday": "Bugün {{count}} sayfa kaldı",
@@ -993,7 +993,7 @@
     "khatmahExtraPages": "+{{count}} sayfa fazladan",
     "khatmahExtraPages_one": "+{{count}} sayfa fazladan",
     "khatmahMarkDone": "{{day}}. günün okumasını tamamlandı olarak işaretle",
-    "khatmahMarkNext": "✓ {{day}}. günü de bitir",
+    "khatmahMarkNext": "✓ {{day}}. günü de bitir ({{when}})",
     "khatmahMarkToday": "✓ Bugünkü okuma tamam",
     "khatmahPrevDay": "‹ Önceki gün",
     "riwayahQalun": "Kalun",
@@ -1002,7 +1002,9 @@
     "riwayahPickerOpen": "Rivayet: {{name}}. Değiştirmek için dokunun.",
     "riwayahNotOnDevice": "{{name}} — bu cihazda henüz yok",
     "riwayahAddIt": "Eklemek için dokunun",
-    "riwayahDefault": "(varsayılan)"
+    "riwayahDefault": "(varsayılan)",
+    "dueToday": "bugün",
+    "dueTomorrow": "yarın"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

@@ -984,8 +984,8 @@
     "downloadDoneBody": "सभी पृष्ठ इस डिवाइस पर हैं। अब बिना इंटरनेट के पढ़ा जा सकता है।",
     "downloadIncompleteTitle": "डाउनलोड पूरा नहीं हुआ",
     "downloadIncompleteBody": "{{count}} पृष्ठ अब भी बाकी हैं। जहाँ रुका था वहाँ से जारी रखने के लिए क़ुरआन खोलें।",
-    "finishDay": "दिन {{day}} का पाठ पूरा करें",
-    "finishDayShort": "दिन {{day}} पूरा करें",
+    "finishDay": "दिन {{day}} का पाठ पूरा करें ({{when}})",
+    "finishDayShort": "दिन {{day}} पूरा करें ({{when}})",
     "khatmahPageProgress": "{{pages}} पृष्ठ शेष · दिन {{day}} / {{days}}",
     "khatmahDayDone": "✓ आज का पाठ पूरा हुआ",
     "khatmahPagesLeftToday": "आज {{count}} पृष्ठ बाकी",
@@ -993,7 +993,7 @@
     "khatmahExtraPages": "+{{count}} पृष्ठ अतिरिक्त",
     "khatmahExtraPages_one": "+{{count}} पृष्ठ अतिरिक्त",
     "khatmahMarkDone": "दिन {{day}} का पाठ पूरा चिह्नित करें",
-    "khatmahMarkNext": "✓ दिन {{day}} भी पूरा करें",
+    "khatmahMarkNext": "✓ दिन {{day}} ({{when}}) भी पूरा करें",
     "khatmahMarkToday": "✓ आज का पाठ पूरा हुआ",
     "khatmahPrevDay": "‹ पिछला दिन",
     "riwayahQalun": "क़ालून",
@@ -1002,7 +1002,9 @@
     "riwayahPickerOpen": "पठन परंपरा: {{name}}। बदलने के लिए टैप करें।",
     "riwayahNotOnDevice": "{{name}} — अभी इस डिवाइस पर नहीं है",
     "riwayahAddIt": "जोड़ने के लिए टैप करें",
-    "riwayahDefault": "(डिफ़ॉल्ट)"
+    "riwayahDefault": "(डिफ़ॉल्ट)",
+    "dueToday": "आज",
+    "dueTomorrow": "कल"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",
