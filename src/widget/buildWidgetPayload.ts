@@ -66,20 +66,14 @@ export type WidgetPrayerKey = (typeof WIDGET_ROW_KEYS)[number];
  * Optional non-salāh night rows (Islamic Midnight / Last Third / First
  * Third). Sunrise has its own dedicated slot.
  *
- * Both the Live Activity and the home-screen widget carry these now — the
- * widget only ever had them stripped upstream, which meant a user who turned
- * Islamic Midnight on saw it in the app, in the notification and on the Lock
- * Screen, and then not on the widget, with nothing anywhere to say why. Where
- * the two surfaces still differ is the countdown: see `opts.nightCanBeNext`.
+ * Every surface carries these now, rows and countdown alike. The widget had
+ * them stripped upstream at first, and then carried as rows a headline was
+ * not allowed to name — a user who turned Islamic Midnight on saw it in the
+ * app, in the notification and on the Lock Screen, and then watched the
+ * widget beside them count down to something else. A toggle means one thing
+ * everywhere or it means nothing.
  */
 const EXTRA_ROW_KEYS = ['Midnight', 'Lastthird', 'Firstthird'] as const;
-
-/** A copy of a day's timings with the night entries taken out. */
-function withoutNightTimes(timings: TimingsMap): TimingsMap {
-  const out: TimingsMap = { ...timings };
-  for (const key of EXTRA_ROW_KEYS) delete out[key];
-  return out;
-}
 
 export type WidgetPrayerPayload = {
   /** Calendar day these times apply to (e.g. Wed, Apr 9). */
@@ -91,7 +85,7 @@ export type WidgetPrayerPayload = {
    * when the user has turned Sunrise off (the kill-switch).
    */
   sunriseRow?: WidgetPrayerRow;
-  /** Enabled pre-dawn night rows for the currently-shown day (Live Activity only). */
+  /** Enabled night rows for the currently-shown day. */
   extraRows?: WidgetPrayerRow[];
   /** Row `key` to highlight as the next event (salāh, Sunrise, or a night time). */
   nextKey: string | null;
@@ -260,17 +254,6 @@ export function buildWidgetPayload(
    * to count commas to find out which `undefined` is which.
    */
   extras?: WidgetExtras,
-  /**
-   * Whether Islamic Midnight / the Last Third may be the *next event*.
-   *
-   * Both surfaces show the rows; they disagree about the countdown. The Live
-   * Activity is a countdown to whatever comes next and has always counted
-   * down to these — that is the point of turning them on. The home-screen
-   * widget's headline is a prayer, and a widget called "Next prayer" that
-   * says "Islamic Midnight" is answering a question nobody asked it. So the
-   * rows travel either way and only the Live Activity lets one be next.
-   */
-  opts?: { nightCanBeNext?: boolean },
 ): WidgetPrayerPayload {
   if (coords && coords.lat === 0 && coords.lng === 0) {
     throw new Error(
@@ -294,19 +277,11 @@ export function buildWidgetPayload(
     day: 'numeric',
   });
 
-  // When a night time may not be the headline, it must not be *considered*
-  // either. Filtering the answer instead of the input would leave the widget
-  // with no next event at all between Isha and Fajr — the one stretch of the
-  // day where a home screen most needs to say "Fajr, in six hours".
-  const nightCanBeNext = opts?.nightCanBeNext ?? true;
-  const forNext = (m: TimingsMap | undefined) =>
-    m && !nightCanBeNext ? withoutNightTimes(m) : m;
-
-  let next = getNextPrayerDisplay(
-    forNext(today) as TimingsMap,
-    forNext(tomorrow),
-    now,
-  );
+  // Whatever is next is next. An optional time only reaches this function
+  // when the user has turned it on, and someone who has asked to be told
+  // about the Last Third has asked for a countdown to it — on the widget
+  // as much as on the Lock Screen.
+  let next = getNextPrayerDisplay(today, tomorrow, now);
   // Soft fallback: after Isha + no tomorrow data, still surface "Fajr next" by
   // estimating from today's Fajr applied to tomorrow's calendar date. The
   // widget shows something useful instead of a null nextKey + stale times.
@@ -318,14 +293,13 @@ export function buildWidgetPayload(
     }
   }
 
-  // nextKey can be a salāh key, 'Sunrise', or — for the Live Activity only —
-  // a night time (Midnight/Lastthird/Firstthird). See `opts.nightCanBeNext`.
+  // nextKey is a salāh key, 'Sunrise', or a night time
+  // (Midnight/Lastthird/Firstthird) — whichever the clock says comes next.
   const nextKey =
     next &&
     ((WIDGET_ROW_KEYS as readonly string[]).includes(next.name) ||
       next.name === 'Sunrise' ||
-      (nightCanBeNext &&
-        (EXTRA_ROW_KEYS as readonly string[]).includes(next.name)))
+      (EXTRA_ROW_KEYS as readonly string[]).includes(next.name))
       ? next.name
       : null;
 

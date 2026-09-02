@@ -220,16 +220,16 @@ export function HomeScreen() {
 
   // Reactive gating of the optional non-prayer entries, so flipping a toggle
   // updates the surfaces immediately without a re-fetch. usePrayerDay always
-  // derives Sunrise + the two night times into the raw `week`; here we strip
-  // per-surface:
-  //   • table / notifications / Live Activity → respect all three toggles
-  //     (Sunrise + the two night times). The LA counts down to Islamic Midnight
-  //     and the Last Third when they're the next event.
-  //   • home-screen widget → Sunrise always shown, and since the widget plan's
-  //     systemLarge / 4×4 mocks carry them, the night times now follow their
-  //     toggles here too. They are rows only: `syncPrayerWidget` passes
-  //     `nightCanBeNext: false`, so nothing counts down to Islamic Midnight on
-  //     a home screen.
+  // derives Sunrise + the three night times into the raw `week`; here we strip
+  // by the user's toggles, the same four for every surface — table,
+  // notifications, Live Activity and widget alike.
+  //
+  // The widget used to keep Sunrise whatever the toggle said, and to carry the
+  // night times as rows its headline was not allowed to name. Both are gone: a
+  // toggle that means "remind me about the Last Third" means the widget counts
+  // down to it too, and one turned off means the row is not there to explain
+  // away. The only surface-level difference left is the window — the widget
+  // gets the long one, because it has to stay true while the app is closed.
   const view = useMemo(() => {
     if (state.phase !== 'ready') return null;
     const { today, tomorrow, week } = state;
@@ -260,14 +260,14 @@ export function HomeScreen() {
       // has to stay true across however long the app goes unopened.
       widget: {
         ...mk({
-          Sunrise: true,
+          Sunrise: settings.sunriseEnabled,
           Midnight: settings.islamicMidnightEnabled,
           Lastthird: settings.lastThirdEnabled,
           Firstthird: settings.firstThirdEnabled,
         }),
         week: (state.widgetWeek ?? week).map(d =>
           filterOptionalTimes(d, {
-            Sunrise: true,
+            Sunrise: settings.sunriseEnabled,
             Midnight: settings.islamicMidnightEnabled,
             Lastthird: settings.lastThirdEnabled,
             Firstthird: settings.firstThirdEnabled,

@@ -244,6 +244,13 @@
                         <TextView android:id="@+id/widget_col_7_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
                     </LinearLayout>
                 </LinearLayout>
+
+                <LinearLayout android:id="@+id/widget_col_8" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:visibility="gone">
+                    <LinearLayout android:id="@+id/widget_col_8_box" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="7dp" android:paddingEnd="7dp" android:paddingTop="3dp" android:paddingBottom="3dp">
+                        <TextView android:id="@+id/widget_col_8_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" />
+                        <TextView android:id="@+id/widget_col_8_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9AA0A6" android:textSize="12sp" android:maxLines="1" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- A FrameLayout, not a View. RemoteViews has a fixed view

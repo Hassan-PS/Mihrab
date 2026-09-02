@@ -609,7 +609,7 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     }
 
     /**
-     * The first prayer of the day after `todayKey`, from the payload's
+     * The first event of the day after `todayKey`, from the payload's
      * multi-day window.
      *
      * Found by walking to today's entry and taking the one after it rather
@@ -624,10 +624,82 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       var afterToday = false
       for (i in 0 until days.length()) {
         val day = days.optJSONObject(i) ?: continue
-        if (afterToday) return day.optJSONArray("rows")?.optJSONObject(0)
+        if (afterToday) return earliest(eventsOf(day))
         if (day.optString("dateKey") == todayKey) afterToday = true
       }
       return null
+    }
+
+    /** Today's entry in the payload's multi-day window, or null. */
+    private fun dayFor(root: JSONObject?, key: String): JSONObject? {
+      val days = root?.optJSONArray("days") ?: return null
+      if (key.isEmpty()) return null
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        if (day.optString("dateKey") == key) return day
+      }
+      return null
+    }
+
+    /**
+     * Everything on one day the countdown may aim at: the five salāh, plus
+     * Sunrise and the night times when the user has turned them on. They are
+     * in the payload only when enabled, so their presence is the toggle.
+     *
+     * The card used to count down off its own chip list, which is the five
+     * loggable prayers and nothing else. A phone with the Last Third turned
+     * on read "Fajr · in 5:12" here while the Lock Screen beside it counted
+     * the forty minutes to the Last Third — one payload, two answers, and
+     * the one on the home screen ignoring a setting the user had changed.
+     */
+    private fun eventsOf(day: JSONObject?): List<JSONObject> {
+      if (day == null) return emptyList()
+      val out = mutableListOf<JSONObject>()
+      day.optJSONArray("rows")?.let { a ->
+        for (i in 0 until a.length()) a.optJSONObject(i)?.let { out.add(it) }
+      }
+      day.optJSONObject("sunriseRow")?.let { out.add(it) }
+      day.optJSONArray("extraRows")?.let { a ->
+        for (i in 0 until a.length()) a.optJSONObject(i)?.let { out.add(it) }
+      }
+      return out
+    }
+
+    /** The earliest of a day's events by clock time, or null. */
+    private fun earliest(events: List<JSONObject>): JSONObject? {
+      var best: JSONObject? = null
+      var bestAt = -1
+      for (e in events) {
+        val at = minutesOfDay(e.optString("time"))
+        if (at < 0) continue
+        if (bestAt < 0 || at < bestAt) {
+          best = e
+          bestAt = at
+        }
+      }
+      return best
+    }
+
+    /**
+     * The next event after `nowMinutes` by the clock, not by list order.
+     *
+     * Islamic Midnight and the Last Third belong to the small hours of the
+     * date they are listed under and the First Third to its evening, so the
+     * list arrives out of order and the earliest one still ahead is the
+     * answer.
+     */
+    private fun nextEvent(events: List<JSONObject>, nowMinutes: Int): JSONObject? {
+      var best: JSONObject? = null
+      var bestAt = -1
+      for (e in events) {
+        val at = minutesOfDay(e.optString("time"))
+        if (at < 0 || at <= nowMinutes) continue
+        if (bestAt < 0 || at < bestAt) {
+          best = e
+          bestAt = at
+        }
+      }
+      return best
     }
 
     private fun nextPrayer(
@@ -683,13 +755,22 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       val currentMinutes =
         now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
 
-      var next = nextPrayer(prayers, describesToday, nowMinutes)
+      // The card's own chips are the five loggable prayers; the countdown
+      // aims at everything the user asked to be told about, which is the
+      // day's full event list from the payload's window. Falls back to the
+      // chips when there is no window entry for today — an older payload, or
+      // a card still showing a day that is not today.
+      val events = eventsOf(dayFor(root, todayKey))
+      var next =
+        if (events.isNotEmpty() && describesToday) nextEvent(events, currentMinutes)
+        else nextPrayer(prayers, describesToday, nowMinutes)
       var minutesAt = minutesOfDay(next?.optString("time"))
       var minutesLeft = if (minutesAt < 0) -1 else minutesAt - currentMinutes
 
       if (next == null || minutesLeft < 0) {
         // The day is done. What is next is on the other side of midnight.
         val fajr = tomorrowFirstPrayer(root, todayKey)
+          ?: earliest(events)
           ?: prayers?.optJSONObject(0)
         val fajrMinutes = minutesOfDay(fajr?.optString("time"))
         if (fajr != null && fajrMinutes >= 0) {

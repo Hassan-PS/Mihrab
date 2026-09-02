@@ -262,10 +262,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_3,
         R.id.widget_col_4,
         R.id.widget_col_5,
-        // Islamic Midnight and the Last Third — drawn only when the
-        // user has turned them on, and never highlighted.
+        // The First Third, Islamic Midnight and the Last Third — drawn
+        // only when the user has turned them on. Three slots because all
+        // three can be on at once, and a row silently dropped off the end
+        // is worse than a crowded list.
         R.id.widget_col_6,
         R.id.widget_col_7,
+        R.id.widget_col_8,
       )
     /**
      * The inner box each column's highlight is painted on.
@@ -297,10 +300,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_3_label,
         R.id.widget_col_4_label,
         R.id.widget_col_5_label,
-        // Islamic Midnight and the Last Third — drawn only when the
-        // user has turned them on, and never highlighted.
+        // The First Third, Islamic Midnight and the Last Third — drawn
+        // only when the user has turned them on. Three slots because all
+        // three can be on at once, and a row silently dropped off the end
+        // is worse than a crowded list.
         R.id.widget_col_6_label,
         R.id.widget_col_7_label,
+        R.id.widget_col_8_label,
       )
     private val COL_TIMES =
       intArrayOf(
@@ -310,10 +316,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_3_time,
         R.id.widget_col_4_time,
         R.id.widget_col_5_time,
-        // Islamic Midnight and the Last Third — drawn only when the
-        // user has turned them on, and never highlighted.
+        // The First Third, Islamic Midnight and the Last Third — drawn
+        // only when the user has turned them on. Three slots because all
+        // three can be on at once, and a row silently dropped off the end
+        // is worse than a crowded list.
         R.id.widget_col_6_time,
         R.id.widget_col_7_time,
+        R.id.widget_col_8_time,
       )
 
     /**
@@ -657,7 +666,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       return at(first, 1)
     }
 
-    /** Every non-night boundary in a day, as minutes since local midnight. */
+    /**
+     * Every boundary in a day, as minutes since local midnight — the times
+     * the widget has to wake up and redraw at.
+     *
+     * The night times are in here because they can be the headline: leave
+     * them out and the card sits on "Isha" until something else happens to
+     * wake it, which between Isha and Fajr can be hours.
+     */
     private fun boundaryMinutes(day: JSONObject?, root: JSONObject): List<Int> {
       val rows = day?.optJSONArray("rows") ?: root.optJSONArray("rows") ?: return emptyList()
       val out = mutableListOf<Int>()
@@ -665,8 +681,10 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { candidates.add(it) }
       (day?.optJSONObject("sunriseRow") ?: root.optJSONObject("sunriseRow"))
         ?.let { candidates.add(it) }
+      (day?.optJSONArray("extraRows") ?: root.optJSONArray("extraRows"))?.let { extra ->
+        for (i in 0 until extra.length()) extra.optJSONObject(i)?.let { candidates.add(it) }
+      }
       for (row in candidates) {
-        if (isNightKey(row.optString("key"))) continue
         val parts = row.optString("time").split(":")
         if (parts.size != 2) continue
         val h = parts[0].toIntOrNull() ?: continue
@@ -1086,14 +1104,22 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         val name = o.optString("name", "").trim().ifEmpty { o.optString("key") }
         return "$name ${o.optString("time")}"
       }
+      // Two of them sit at the two ends of the line, which is how this has
+      // always looked; a third goes between them rather than off the edge.
       views.setTextViewText(R.id.widget_night_left, label(night[0]))
       views.setTextViewText(
-        R.id.widget_night_right,
-        if (night.size > 1) label(night[1]) else "",
+        R.id.widget_night_mid,
+        if (night.size > 2) label(night[1]) else "",
       )
       views.setViewVisibility(
+        R.id.widget_night_mid,
+        if (night.size > 2) View.VISIBLE else View.GONE,
+      )
+      val last = if (night.size > 2) night[2] else night.getOrNull(1)
+      views.setTextViewText(R.id.widget_night_right, last?.let { label(it) } ?: "")
+      views.setViewVisibility(
         R.id.widget_night_right,
-        if (night.size > 1) View.VISIBLE else View.GONE,
+        if (last != null) View.VISIBLE else View.GONE,
       )
     }
 
@@ -1335,9 +1361,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       )
     }
 
-    /** Islamic Midnight / the Last Third: on the card, never the headline. */
+    /**
+     * The three optional night times. They can be the headline now — this
+     * only decides how a row that is *not* the headline is painted: muted,
+     * the way Sunrise has always been, so the five salāh stay the loudest
+     * thing on the card.
+     */
     private fun isNightKey(key: String): Boolean =
-      key.equals("Midnight", ignoreCase = true) || key.equals("Lastthird", ignoreCase = true)
+      key.equals("Midnight", ignoreCase = true) ||
+        key.equals("Lastthird", ignoreCase = true) ||
+        key.equals("Firstthird", ignoreCase = true)
 
     /**
      * Minutes-since-midnight of the earliest salāh (or Sunrise) on display,
@@ -1347,10 +1380,6 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     private fun firstRowMinutes(displayRows: List<org.json.JSONObject>): Int? {
       var earliest: Int? = null
       for (row in displayRows) {
-        // Excluded here too, or the countdown aims at the Last Third while
-        // the headline beside it says Fajr — the widget contradicting itself
-        // on the same frame. Seen on an emulator at 23:56 before this line.
-        if (isNightKey(row.optString("key"))) continue
         val parts = row.optString("time").split(":")
         if (parts.size != 2) continue
         val h = parts[0].toIntOrNull() ?: continue
@@ -1470,28 +1499,34 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       var dynamicNextTime = ""
       var nextUpdateMinutes = -1
 
+      // Every row on the card is a candidate, night times included. They are
+      // only here because the user turned them on, and the hours between Isha
+      // and Fajr are exactly when a home screen has nothing else to count
+      // down to.
+      //
+      // The EARLIEST row still ahead, not the first one found: `displayRows`
+      // is in display order, and display order is not the clock. Islamic
+      // Midnight and the Last Third are drawn after Isha but belong to the
+      // small hours of the same date, and the First Third is drawn last and
+      // falls in the evening — so a walk that stopped at the first row later
+      // than now would answer "Isha" at nine o'clock with the First Third
+      // half an hour away.
       for (row in displayRows) {
-        // Islamic Midnight and the Last Third are rows, never the headline —
-        // the same rule `nightCanBeNext: false` applies on the JS side, and
-        // this is where it has to be applied again, because `displayRows`
-        // now contains them. Without this the left column reads "Islamic
-        // Midnight" between Isha and midnight on any phone with the toggle
-        // on, and the widget's own name is "next prayer".
-        if (isNightKey(row.optString("key"))) continue
         val timeStr = row.getString("time")
         val parts = timeStr.split(":")
         if (parts.size == 2) {
           val h = parts[0].toIntOrNull() ?: continue
           val m = parts[1].toIntOrNull() ?: continue
           val rowMinutes = h * 60 + m
-          if (rowMinutes > currentMinutes) {
+          if (rowMinutes > currentMinutes &&
+            (nextUpdateMinutes < 0 || rowMinutes < nextUpdateMinutes)
+          ) {
             dynamicNextKey = row.getString("key")
             dynamicNextName = row.optString("name", "").trim()
               .ifEmpty { row.optString("abbr", "").trim() }
               .ifEmpty { dynamicNextKey!! }
             dynamicNextTime = timeStr
             nextUpdateMinutes = rowMinutes
-            break
           }
         }
       }
@@ -1627,11 +1662,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           .ifEmpty { row.optString("abbr", "").trim() }
           .ifEmpty { key }
         val isNight = isNightKey(key)
-        // A night row is never the headline. The payload will not name one as
-        // `nextKey` for the widget (see nightCanBeNext on the JS side), and
-        // this is the second guard: a widget called "next prayer" should not
-        // count down to Islamic Midnight even if a stale payload says so.
-        val highlight = !isNight && effectiveNextKey != null && effectiveNextKey == key
+        val highlight = effectiveNextKey != null && effectiveNextKey == key
         val isSunrise = key.equals("Sunrise", ignoreCase = true)
         val col = when {
           highlight -> highlightColor

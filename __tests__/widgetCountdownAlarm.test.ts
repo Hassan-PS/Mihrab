@@ -48,9 +48,18 @@ describe('the next boundary is found even when today has none left', () => {
     expect(provider).not.toMatch(/\+ 24 \* 60 \* 60 \* 1000/);
   });
 
-  it('still skips the night rows', () => {
-    // Islamic Midnight is not a prayer and never was the headline.
-    expect(provider).toMatch(/if \(isNightKey\(row\.optString\("key"\)\)\) continue/);
+  it('wakes at the night boundaries too, now that they can be the headline', () => {
+    // The same bug in the other direction. These rows used to be skipped
+    // everywhere the widget looked for its next moment, which was right
+    // while they could not be the headline and wrong the moment they could:
+    // a card that says "Last Third" has to be woken when the Last Third
+    // arrives, or it sits on "Isha" until something else happens to it.
+    expect(provider).toMatch(
+      /\(day\?\.optJSONArray\("extraRows"\) \?: root\.optJSONArray\("extraRows"\)\)/,
+    );
+    expect(provider).not.toMatch(
+      /if \(isNightKey\(row\.optString\("key"\)\)\) continue/,
+    );
   });
 });
 
@@ -133,5 +142,27 @@ describe('the cards agree on what they are counting to', () => {
   it('both hand the view an instant, so the tick costs nothing', () => {
     expect(provider).toMatch(/setChronometerCountDown\(R\.id\.widget_remaining, true\)/);
     expect(log).toMatch(/setChronometerCountDown\(R\.id\.widget_log_remaining, true\)/);
+  });
+
+  it('the log card counts to whatever the user turned on, not just the five', () => {
+    // Its chips are the five loggable prayers. Its countdown is not: it
+    // reads the day's full event list out of the payload window, so a phone
+    // with the Last Third on does not read "Fajr · in 5:12" beside a Lock
+    // Screen counting the forty minutes to the Last Third.
+    expect(log).toMatch(/private fun eventsOf\(day: JSONObject\?\): List<JSONObject>/);
+    expect(log).toMatch(/day\.optJSONObject\("sunriseRow"\)\?\.let \{ out\.add\(it\) \}/);
+    expect(log).toMatch(/nextEvent\(events, currentMinutes\)/);
+  });
+
+  it('and both take the earliest thing ahead, not the first one listed', () => {
+    // Display order is not the clock. Islamic Midnight and the Last Third
+    // are drawn after Isha and belong to the small hours of the same date;
+    // the First Third is drawn last and falls that evening. A walk that
+    // stopped at the first row later than now would answer "Isha" at nine
+    // with the First Third half an hour away.
+    expect(provider).toMatch(
+      /nextUpdateMinutes < 0 \|\| rowMinutes < nextUpdateMinutes/,
+    );
+    expect(log).toMatch(/if \(bestAt < 0 \|\| at < bestAt\)/);
   });
 });

@@ -44,9 +44,6 @@ export async function syncPrayerWidget(
     seasonal,
     week,
     extras,
-    // The rows travel; the headline does not. A widget whose title is
-    // "Next prayer" should not count down to Islamic Midnight.
-    { nightCanBeNext: false },
   );
   try {
     await mod.setData(JSON.stringify(payload));
