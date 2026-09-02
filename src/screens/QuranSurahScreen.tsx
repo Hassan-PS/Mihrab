@@ -29,7 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { desktopSize } from '../responsive/desktop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPalette } from '../hooks/useAppPalette';
-import { useBreakpoint } from '../responsive/breakpoints';
+import { isMacCatalyst, useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { findSurah, loadSurah } from '../quran/quran';
 import { getSurahTranslation } from '../quran/translations';
@@ -309,9 +309,32 @@ export function QuranSurahScreen() {
             } as any,
           }
         : null;
+    /**
+     * MAC: THE PAGE SWIPE AND THE BACK SWIPE ARE THE SAME GESTURE.
+     *
+     * Turning a page with a two-finger trackpad swipe closed the muṣḥaf
+     * instead. UIKit routes that swipe to the navigation controller's
+     * interactive pop, and the pop gets it first — so the reader never saw
+     * the scroll it was asked to page on, and the screen went back to the
+     * surah list mid-āyah.
+     *
+     * A touch device tells the two apart by where the finger starts: the
+     * pop is an EDGE pan, and a swipe that begins in the middle of the page
+     * is unambiguously a page turn. A trackpad has no edges to start from,
+     * so the same gesture has to mean one thing, and inside a reader it
+     * means the page.
+     *
+     * Only in the muṣḥaf, and only on the Mac. The tafsir reader scrolls
+     * vertically and has no page swipe to lose, and on iPad the edge pan
+     * is still an edge pan. Going back on the Mac keeps the header's back
+     * button, ⌘[, and the surah sidebar.
+     */
+    const gestureEnabled = !(isMacCatalyst && isMushaf);
+
     if (isFullscreen) {
       navigation.setOptions({
         headerShown: false,
+        gestureEnabled,
         // 'default', not 'all'. react-native-screens maps 'all' to Android's
         // SCREEN_ORIENTATION_FULL_SENSOR, which includes UPSIDE-DOWN
         // portrait — and the pager renders nothing at 180° (verified on the
@@ -327,6 +350,7 @@ export function QuranSurahScreen() {
     }
     navigation.setOptions({
       headerShown: true,
+      gestureEnabled,
       // The mushaf rotates with the device whether or not the chrome is
       // hidden — the phone reader has a landscape layout of its own (a 1.6×
       // reading zoom in a scrolling column), and having to enter fullscreen
