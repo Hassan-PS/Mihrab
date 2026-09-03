@@ -19,6 +19,7 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import { MUSHAF_TOTAL_PAGES } from './mushafImages';
 import { mkdirDeep } from './mushafDownload';
 import { isValidFontFile } from '../native/MushafFont';
+import manifest from './data/mushafFontManifest.json';
 
 /**
  * Release tag holding the 604 subset page fonts. Exported because the silent
@@ -28,7 +29,49 @@ export const FONT_RELEASE = 'mushaf-fonts-v2';
 const STORE_VERSION = 'v2';
 
 /** Smallest plausible page font; anything under this is a failed download. */
-const MIN_FONT_BYTES = 8_192;
+export const MIN_FONT_BYTES = 8_192;
+
+/**
+ * The byte size of every page font AS UPLOADED to the release — written by
+ * `scripts/mushaf/rebuild_fonts_from_layout.py` beside the fonts it cut.
+ *
+ * ── WHY A FONT ON DISK IS NOT TRUSTED BY ITS NAME ─────────────────────
+ *
+ * Twenty of the fonts on the release were cut from a word list that lacked
+ * a few of their pages' glyphs, and the reader drew those words in whatever
+ * face the platform fell back to: page 564 ended in "له مج مح مخ" and page
+ * 592 lost an ayah to "هي يج يح يخ يم يى" (reported 2026-09-03, with
+ * screenshots). The fonts were replaced on the release — but a device that
+ * had already fetched them held the bad ones, at the right name and a
+ * plausible size, and nothing would ever fetch them again.
+ *
+ * So a font is the right font only when its size is the manifest's. A
+ * mismatch is STALE: present for the gate's purposes (the muṣḥaf is on the
+ * device, nobody is asked for 180 MB), fetched again before it is drawn.
+ * Sizes are what a directory listing returns in one round-trip; a hash
+ * would mean reading 180 MB on every open.
+ */
+const FONT_BYTES: ReadonlyArray<number> = manifest.bytes;
+
+/** The size the release serves for a page's font, or 0 if the manifest has none. */
+export function expectedFontBytes(page: number): number {
+  const safe = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, Math.round(page)));
+  return FONT_BYTES[safe - 1] ?? 0;
+}
+
+export type FontFileState = 'missing' | 'stale' | 'ok';
+
+/**
+ * What a file of `bytes` at a page's path is. Pure, so the rule can be
+ * tested without a filesystem: too small is a failed download and counts
+ * as missing; the wrong size is the wrong font.
+ */
+export function fontFileState(bytes: number, page: number): FontFileState {
+  if (!(bytes >= MIN_FONT_BYTES)) return 'missing';
+  const expected = expectedFontBytes(page);
+  if (expected > 0 && bytes !== expected) return 'stale';
+  return 'ok';
+}
 
 /**
  * Where the page fonts live. Exported so the asset reconciliation can stamp
@@ -58,11 +101,11 @@ export function fontUrl(page: number): string {
   )}`;
 }
 
-async function fileOk(path: string): Promise<boolean> {
+async function fileOk(path: string, page: number): Promise<boolean> {
   try {
     if (!(await ReactNativeBlobUtil.fs.exists(path))) return false;
     const stat = await ReactNativeBlobUtil.fs.stat(path);
-    return Number(stat.size) >= MIN_FONT_BYTES;
+    return fontFileState(Number(stat.size), page) === 'ok';
   } catch {
     return false;
   }
@@ -149,7 +192,7 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
   const task = (async (): Promise<string | null> => {
     const path = fontFilePath(page);
     try {
-      if (await fileOk(path)) return path;
+      if (await fileOk(path, page)) return path;
       await ensureStoreDir();
       const tmp = `${path}.part`;
       let lastError: unknown = null;
@@ -178,6 +221,13 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
           const stat = await ReactNativeBlobUtil.fs.stat(tmp).catch(() => null);
           if (status !== 200 || !stat || Number(stat.size) < MIN_FONT_BYTES) {
             throw new Error(`font ${page}: HTTP ${status}`);
+          }
+          if (fontFileState(Number(stat.size), page) === 'stale') {
+            // The release served a font the manifest does not describe — a
+            // CDN still holding a superseded asset, say. Not this font.
+            throw new Error(
+              `font ${page}: ${stat.size} bytes, manifest says ${expectedFontBytes(page)}`,
+            );
           }
           stats.bytes += Number(stat.size);
           await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
@@ -310,10 +360,16 @@ export function fontStoreKnownComplete(): boolean {
  * muṣḥaf that had been on the device for months. `lstat` on the directory
  * returns every entry with its size in a single round-trip.
  */
-export async function fontStoreStats(): Promise<{ pages: number; bytes: number }> {
+export async function fontStoreStats(): Promise<{
+  /** Page fonts on disk — the right ones and the stale ones together. */
+  pages: number;
+  /** Of those, the ones whose size is not the manifest's — being re-fetched. */
+  stale: number;
+  bytes: number;
+}> {
   try {
     if (!(await ReactNativeBlobUtil.fs.exists(storeDir()))) {
-      return { pages: 0, bytes: 0 };
+      return { pages: 0, stale: 0, bytes: 0 };
     }
     const entries = (await ReactNativeBlobUtil.fs.lstat(storeDir())) as Array<{
       filename: string;
@@ -322,19 +378,66 @@ export async function fontStoreStats(): Promise<{ pages: number; bytes: number }
     }>;
     let bytes = 0;
     let pages = 0;
+    const stalePages: number[] = [];
     for (const entry of entries) {
       if (entry.type === 'directory' || !entry.filename.endsWith('.ttf')) continue;
+      const page = pageOfFileName(entry.filename);
+      if (page == null) continue;
       const size = Number(entry.size) || 0;
-      if (size >= MIN_FONT_BYTES) {
-        pages += 1;
-        bytes += size;
-      }
+      const state = fontFileState(size, page);
+      if (state === 'missing') continue;
+      pages += 1;
+      bytes += size;
+      if (state === 'stale') stalePages.push(page);
     }
     if (pages >= MUSHAF_TOTAL_PAGES) knownComplete = true;
-    return { pages, bytes };
+    if (stalePages.length > 0) repairStaleFonts(stalePages);
+    return { pages, stale: stalePages.length, bytes };
   } catch {
-    return { pages: 0, bytes: 0 };
+    return { pages: 0, stale: 0, bytes: 0 };
   }
+}
+
+/** `QCF2564.ttf` → 564; anything else in the directory → null. */
+export function pageOfFileName(name: string): number | null {
+  const m = /^QCF2(\d{3})\.ttf$/.exec(name);
+  if (!m) return null;
+  const page = Number(m[1]);
+  return page >= 1 && page <= MUSHAF_TOTAL_PAGES ? page : null;
+}
+
+/**
+ * Fetch the stale fonts again, quietly, two at a time.
+ *
+ * Started by the listing that found them — the reader's gate, the launch
+ * reconciliation — and once per session: a second listing while it runs
+ * would only queue the same pages behind themselves. A page opened before
+ * its turn is not left waiting on this: the surface asks
+ * `ensurePageFontFile` for the page, which sees the stale size and fetches
+ * it then, sharing the download if it is already in flight.
+ */
+let repairing = false;
+export function repairStaleFonts(pages: number[]): void {
+  if (repairing || pages.length === 0) return;
+  repairing = true;
+  console.log(`[mushafFonts] ${pages.length} stale page fonts — re-fetching`);
+  const queue = [...pages];
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const page = queue.shift();
+      if (page == null) return;
+      await ensurePageFontFile(page);
+    }
+  };
+  void Promise.all([worker(), worker()]).finally(() => {
+    repairing = false;
+  });
+}
+
+/** For tests. */
+export function _resetFontStoreForTests(): void {
+  repairing = false;
+  knownComplete = false;
 }
 
 export async function deletePageFonts(): Promise<void> {

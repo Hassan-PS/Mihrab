@@ -144,6 +144,61 @@ export const MUSHAF_SPACE_ADVANCE_EM = 0.292;
 export const MUSHAF_LINE_BOX_SLACK_EM = 0.5;
 
 /**
+ * The QPC page fonts' vertical metrics, in ems: what the platform lays a
+ * line out with (hhea ascent 1.2 / descent 0.6 — a handful of pages say
+ * 1.1236 / 0.52, which only makes them safer), and how far the INK goes.
+ *
+ * ── WHY THE INK MATTERS SEPARATELY ────────────────────────────────────
+ *
+ * Calligraphy does not stay inside its metrics. Across the 604 fonts the
+ * tallest glyph reaches 1.62 em above the baseline and the deepest 0.80 em
+ * below — a swash under a final nūn, a maddah stacked over an alif. Both
+ * platforms lay the line out from the metrics and then keep only what
+ * falls inside the text view: Android's `TextView` clips its drawing to
+ * its bounds, and iOS rasterises `drawRect:` into a layer the size of the
+ * view. So on a page whose lines sit at their natural height the bottom
+ * fifth of an em of the deepest words was simply not drawn. Reported
+ * 2026-09-03 as text cut off at the bottom of the line, on Android.
+ *
+ * Measured over the raw fonts (`head.yMax` / `head.yMin` of every page),
+ * with a hair added; `rebuild_fonts_from_layout.py` is where to re-measure.
+ */
+export const MUSHAF_FONT_ASCENT_EM = 1.2;
+export const MUSHAF_FONT_DESCENT_EM = 0.6;
+export const MUSHAF_INK_ABOVE_EM = 1.64;
+export const MUSHAF_INK_BELOW_EM = 0.82;
+
+/**
+ * The padding a line's text view needs above and below its line box so
+ * the ink that overshoots the metrics is inside the view, and so drawn.
+ *
+ * Replays how a line is placed inside `lineHeight`. Both platforms split
+ * a positive leading — `lineHeight − (ascent + descent)` — in half above
+ * and below (Android's `CustomLineHeightSpan`, iOS's baseline offset). A
+ * NEGATIVE leading is where they part: Android still halves it, iOS gives
+ * no offset and lets the typesetter take the deficit off one side. So the
+ * deficit is assumed to come off EITHER side in full, which over-pads on
+ * Android by a few points of transparent view and is right on iOS. The
+ * padding is whatever the ink still needs beyond that room, in dp, and
+ * zero when the box already holds it.
+ */
+export function lineInkPadding(
+  fontSize: number,
+  lineHeight: number,
+): { top: number; bottom: number } {
+  if (!(fontSize > 0) || !(lineHeight > 0)) return { top: 0, bottom: 0 };
+  const metrics = (MUSHAF_FONT_ASCENT_EM + MUSHAF_FONT_DESCENT_EM) * fontSize;
+  const leading = lineHeight - metrics;
+  const room = leading >= 0 ? leading / 2 : leading;
+  const above = MUSHAF_FONT_ASCENT_EM * fontSize + room;
+  const below = MUSHAF_FONT_DESCENT_EM * fontSize + room;
+  return {
+    top: Math.max(0, Math.ceil(MUSHAF_INK_ABOVE_EM * fontSize - above)),
+    bottom: Math.max(0, Math.ceil(MUSHAF_INK_BELOW_EM * fontSize - below)),
+  };
+}
+
+/**
  * How to draw one gap: the size to set the space glyph at, and the letter
  * spacing to add to it. **The letter spacing is never negative.**
  *

@@ -213,6 +213,54 @@ def check_gap_font(path: str) -> list[str]:
     return problems
 
 
+def check_coverage(pages: list[dict], font_dir: str, manifest: str | None) -> list[str]:
+    """Every glyph the layout draws must be in THE FONT THE APP WILL LOAD.
+
+    Point `font_dir` at the subset fonts — the ones on the release, or a
+    fresh cut of them — not at the raw KFGQPC files, which have every glyph
+    of the page and prove nothing. Twenty of the release's fonts were cut
+    short of their pages (2026-09-03): the reader drew the missing words in
+    the platform's fallback face, and since the codepoints are Arabic
+    Presentation Forms they read as a row of letter pairs ("له مج مح مخ").
+    `check_rendering` used to shrug at a missing glyph; this does not.
+
+    With the manifest (`src/quran/data/mushafFontManifest.json`) the font's
+    size is checked too: the app treats any other size as a stale font and
+    fetches it again, so a font that is right but not what the manifest
+    says would be re-fetched for ever.
+    """
+    from fontTools.ttLib import TTFont
+
+    sizes: list[int] = []
+    if manifest and os.path.exists(manifest):
+        with open(manifest, encoding="utf-8") as fh:
+            sizes = json.load(fh).get("bytes", [])
+    problems: list[str] = []
+    for page in pages:
+        path = os.path.join(font_dir, f"QCF2{page['p']:03d}.ttf")
+        if not os.path.exists(path):
+            problems.append(f"page {page['p']}: font missing at {path}")
+            continue
+        cmap = TTFont(path, lazy=True).getBestCmap()
+        used = sorted(
+            {ord(ch) for ln in page["l"] if ln["t"] == "a" for ch in ln["x"] if ch not in "| "}
+        )
+        missing = [hex(c) for c in used if c not in cmap]
+        if missing:
+            problems.append(
+                f"page {page['p']}: font lacks {len(missing)} of the layout's glyphs "
+                f"({', '.join(missing[:6])}{'…' if len(missing) > 6 else ''})"
+            )
+        if sizes:
+            expected = sizes[page["p"] - 1] if page["p"] - 1 < len(sizes) else 0
+            actual = os.path.getsize(path)
+            if expected != actual:
+                problems.append(
+                    f"page {page['p']}: font is {actual} bytes, manifest says {expected}"
+                )
+    return problems
+
+
 def check_rendering(pages: list[dict], font_dir: str) -> list[str]:
     """Replay the reader's layout and find words whose ink collides."""
     from fontTools.pens.boundsPen import BoundsPen
@@ -242,6 +290,11 @@ def check_rendering(pages: list[dict], font_dir: str) -> list[str]:
                     continue
                 g = cmap.get(ord(ch))
                 if g is None:
+                    # Not this check's problem — `check_coverage` reports it —
+                    # but not something to measure around either.
+                    problems.append(
+                        f"page {page['p']}: {hex(ord(ch))} is not in the font"
+                    )
                     return (adv / upem, 0.0, 0.0)
                 if g not in bounds_cache:
                     bp = BoundsPen(glyphs)
@@ -290,6 +343,13 @@ def main() -> int:
     ap.add_argument("--source-txt", default="/tmp/qcf/mushaf-v2.txt")
     ap.add_argument("--gap-font", default=GAP_FONT)
     ap.add_argument("--skip-render", action="store_true")
+    ap.add_argument(
+        "--subset-fonts",
+        default="",
+        help="the SUBSET fonts the app loads (release or fresh cut): checks that "
+        "every glyph the layout draws is in them, and their sizes against the manifest",
+    )
+    ap.add_argument("--manifest", default="src/quran/data/mushafFontManifest.json")
     args = ap.parse_args()
 
     pages = load_layout(args.layout)
@@ -319,6 +379,16 @@ def main() -> int:
     for p in problems[:30]:
         print("  ", p)
     failures += len(problems)
+
+    if args.subset_fonts:
+        problems = check_coverage(pages, args.subset_fonts, args.manifest)
+        print(f"\nglyph coverage of the subset fonts: {len(problems)} problems")
+        for p in problems[:30]:
+            print("  ", p)
+        failures += len(problems)
+    else:
+        print("\n!! no --subset-fonts — the fonts the app loads are NOT checked against the layout")
+        failures += 1
 
     if not args.skip_render:
         problems = check_rendering(pages, args.fonts)

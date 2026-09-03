@@ -6,8 +6,14 @@
 #
 #   scripts/mushaf/upload_qcf_fonts.sh /tmp/qcfbuild/fonts [tag]
 #
-# Re-runnable: assets that are already uploaded are skipped, so an interrupted
-# upload can simply be started again.
+# Re-runnable: an asset already on the release AT THE SAME SIZE is skipped, so
+# an interrupted upload can simply be started again. An asset of a different
+# size is REPLACED (--clobber).
+#
+# It used to skip by name alone. That is how twenty fonts cut short of their
+# pages stayed on the release for six weeks after a correct build existed:
+# the correct files were "already present" and never uploaded, and the reader
+# drew the missing words in the platform's fallback face (2026-09-03).
 set -uo pipefail
 
 DIR="${1:?usage: upload_qcf_fonts.sh <font-dir> [tag]}"
@@ -25,7 +31,8 @@ fi
 # asset names plus grep does the same job.
 EXISTING=$(mktemp)
 trap 'rm -f "$EXISTING"' EXIT
-gh release view "$TAG" -R "$REPO" --json assets --jq '.assets[].name' > "$EXISTING" 2>/dev/null || true
+# "name size" per asset, so a rebuilt font is told apart from the one it replaces.
+gh release view "$TAG" -R "$REPO" --json assets --jq '.assets[] | "\(.name) \(.size)"' > "$EXISTING" 2>/dev/null || true
 
 total=0
 skipped=0
@@ -45,7 +52,8 @@ flush() {
 
 for f in "$DIR"/QCF2*.ttf; do
   name=$(basename "$f")
-  if grep -qxF "$name" "$EXISTING"; then
+  size=$(stat -f %z "$f" 2>/dev/null || stat -c %s "$f")
+  if grep -qxF "$name $size" "$EXISTING"; then
     skipped=$((skipped + 1))
     continue
   fi

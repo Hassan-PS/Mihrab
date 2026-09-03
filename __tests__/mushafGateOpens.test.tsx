@@ -53,21 +53,26 @@ jest.mock('../src/native/MushafFont', () => ({
 }));
 
 import {
+  _resetFontStoreForTests,
   deletePageFonts,
+  expectedFontBytes,
   fontStoreKnownComplete,
   fontStoreStats,
 } from '../src/quran/mushafFontStore';
 
-const fonts = (n: number, size = 300_000) =>
+// At the sizes the manifest names: any other size is a stale font, which a
+// listing counts as present but sends off to be fetched again.
+const fonts = (n: number, size?: number) =>
   Array.from({ length: n }, (_, i) => ({
     filename: `QCF2${String(i + 1).padStart(3, '0')}.ttf`,
-    size,
+    size: size ?? expectedFontBytes(i + 1),
     type: 'file',
   }));
 
 beforeEach(async () => {
   mockFs.calls.length = 0;
   await deletePageFonts();
+  _resetFontStoreForTests();
   mockFs.calls.length = 0;
 });
 
@@ -91,6 +96,28 @@ describe('fontStoreStats', () => {
       { filename: 'tmp', size: 0, type: 'directory' },
     ];
     expect((await fontStoreStats()).pages).toBe(2);
+  });
+
+  /**
+   * The twenty fonts cut short of their pages (2026-09-03) were on
+   * devices at a plausible size and the right name. A listing counts them
+   * as present — the muṣḥaf is there, the gate opens — and fetches them
+   * again in the background, without being asked.
+   */
+  it('counts a font of the wrong size as present but stale, and re-fetches it', async () => {
+    mockFs.entries = [
+      ...fonts(603),
+      { filename: 'QCF2564.ttf', size: 284_752, type: 'file' },
+    ];
+    const stats = await fontStoreStats();
+    expect(stats.pages).toBe(604);
+    expect(stats.stale).toBe(1);
+    expect(fontStoreKnownComplete()).toBe(true);
+    // Let the repair worker run its first step: it asks for page 564 and
+    // finds the stale size, which is what sends it to the network.
+    await new Promise(r => setTimeout(r, 0));
+    expect(mockFs.calls.slice(0, 2)).toEqual(['exists', 'lstat']);
+    expect(mockFs.calls).toContain('stat');
   });
 });
 

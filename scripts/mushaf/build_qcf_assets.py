@@ -21,6 +21,12 @@ Usage:
     python3 scripts/mushaf/build_qcf_assets.py --out build/qcf --pages 1,2,255,604
 
 Requires: fonttools, brotli  (pip install fonttools brotli)
+
+After the layout is committed, cut the fonts that SHIP with
+`rebuild_fonts_from_layout.py` — from the committed layout, not from this
+run's word list — and let it write `src/quran/data/mushafFontManifest.json`.
+The app checks every font on a device against that manifest; a font this
+script cut that differs from it would be re-fetched for ever.
 """
 from __future__ import annotations
 

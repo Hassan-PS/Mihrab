@@ -55,6 +55,7 @@ import {
   getPageLayout,
   isFramedPage,
   lineGapCount,
+  lineInkPadding,
   lineSpaceEm,
   lineTokenStream,
   pageBlockEm,
@@ -407,6 +408,22 @@ const LineView = React.memo(function LineView({
     );
   });
 
+  /**
+   * A LINE'S INK IS CLIPPED TO ITS VIEW. The platform lays the line out
+   * from the font's metrics and keeps only what falls inside the text view
+   * — Android's `TextView` clips its drawing to its bounds, iOS rasterises
+   * into a layer the size of the view — and QPC calligraphy overshoots its
+   * metrics by up to 0.4 em above and 0.2 em below (`MUSHAF_INK_ABOVE_EM`).
+   * So the deepest swashes on a page lost their bottoms. The view is padded
+   * by what the ink needs beyond the line box, and pulled back by the same
+   * margins so the box — and the baseline, and the tint behind a marked
+   * ayah — sit exactly where they did; the padding is only room for the
+   * ink to land in. On Android the clip is the whole view, padding
+   * included, on a line that does not scroll; on iOS the text is drawn in
+   * the content frame and the layer covers the padding too.
+   */
+  const ink = lineInkPadding(fontSize, lineHeight);
+
   return (
     <View style={[styles.line, { width, height: lineHeight }]}>
       <Pressable
@@ -438,6 +455,11 @@ const LineView = React.memo(function LineView({
               lineHeight,
               color: colors.text,
               width: boxWidth,
+              height: lineHeight + ink.top + ink.bottom,
+              paddingTop: ink.top,
+              paddingBottom: ink.bottom,
+              marginTop: -ink.top,
+              marginBottom: -ink.bottom,
             },
           ]}
         >
