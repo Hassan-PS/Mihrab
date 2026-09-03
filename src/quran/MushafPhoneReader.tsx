@@ -76,9 +76,11 @@ import { useRegisterKeyPaging } from './useKeyPaging';
 import { useMushafPager } from './useMushafPager';
 import { warmAround } from './useMushafPageFont';
 import { findPageForAyah } from './pages';
+import { ayahLineBox, followOffset } from './mushafFollowScroll';
 import { riwayahById, type RiwayahId } from './riwayat';
 import type { MushafTone } from './mushafTone';
 import {
+  phoneGeometryFits,
   phonePageGeometry,
   phonePageWidth,
   useSettledGeometry,
@@ -91,6 +93,14 @@ const indexPage = (index: number) => index + 1;
 
 /** Pages either side of the one being read whose fonts are registered ahead. */
 const WARM_RADIUS = 2;
+
+/**
+ * The page header row, as `MushafPageHeader` builds it: 10pt above a row of
+ * ~21pt. Only the fullscreen island offset needs these, and only to put the
+ * row's middle where the cutout's middle is.
+ */
+const PAGE_HEADER_PAD_TOP = 10;
+const PAGE_HEADER_CONTENT_H = 21;
 
 /**
  * The list's render window while the reader is opening, and after.
@@ -165,6 +175,25 @@ const PhonePageItem = React.memo(function PhonePageItem({
       })
     : 0;
 
+  /**
+   * The scrolling column follows the recitation — see `mushafFollowScroll`
+   * for why the unit is the line and not the word. Portrait never scrolls,
+   * so there is nothing to follow there; a page that is not the one being
+   * recited is handed `playing: null` and never runs this.
+   */
+  const columnRef = useRef<ScrollView>(null);
+  const playingSurah = playing?.surah ?? 0;
+  const playingAyah = playing?.ayah ?? 0;
+  useEffect(() => {
+    if (!geometry?.scrolling || !playingAyah) return;
+    const box = ayahLineBox(page, geometry.textWidth, playingSurah, playingAyah);
+    if (!box) return;
+    columnRef.current?.scrollTo({
+      y: followOffset(box, geometry.viewportH, pageBoxH),
+      animated: true,
+    });
+  }, [page, geometry, playingSurah, playingAyah, pageBoxH]);
+
   return (
     <View style={[styles.item, { width: pageWidth, backgroundColor: pageBg }]}>
       {/* The header strip toggles fullscreen too — with a tap on a word now
@@ -190,6 +219,7 @@ const PhonePageItem = React.memo(function PhonePageItem({
       </Pressable>
       {geometry ? (
         <ScrollView
+          ref={columnRef}
           style={styles.column}
           contentContainerStyle={
             geometry.scrolling ? styles.columnContent : undefined
@@ -290,15 +320,56 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
   const pageWidth = phonePageWidth(width, sideInset);
   // iOS floats a translucent nav header over the content; keep the page
   // chrome below it (0 on Android's opaque header, 0 in fullscreen).
-  const navPad =
+  const chromePad =
     !isFullscreen && Platform.OS === 'ios' && !props.chromeCleared
       ? headerHeight
       : 0;
+  /**
+   * FULLSCREEN PUTS THE PAGE HEADER BESIDE THE CUTOUT, NOT BELOW IT.
+   *
+   * The reader used to pad the whole window down by the top inset in
+   * fullscreen, which on a Dynamic Island phone spends about 59pt of a
+   * 874pt window on a strip of page colour with a black pill floating in
+   * it — and then spends another 34 on the header row underneath. But the
+   * row is a surah name at one end and a tone pill at the other, and the
+   * island is in the MIDDLE: the two things never wanted the same points.
+   *
+   * So the row is drawn ACROSS the inset band, centred on the island, and
+   * the page begins where the row ends. The label is capped at the near
+   * half of the window so a long surah name cannot run under the cutout
+   * (`pageHeaderTextIsland`). Zero where there is no inset to share —
+   * Android with the status bar hidden, and every phone without a cutout.
+   */
+  const islandPad = isFullscreen
+    ? Math.max(
+        0,
+        insets.top / 2 - PAGE_HEADER_CONTENT_H / 2 - PAGE_HEADER_PAD_TOP,
+      )
+    : 0;
+  // What sits above the page inside each item — and therefore what the
+  // geometry has to take off the viewport.
+  const navPad = chromePad + islandPad;
+
+  /**
+   * TWO BARS DO NOT FIT ACROSS A PHONE'S SHORT SIDE.
+   *
+   * Landscape leaves the reader about 300dp of height, and the page rail
+   * and the mini player are ~48 and ~50 of it — stacked under a page that
+   * is already a reading zoom. Both were drawn, the column was squeezed
+   * between them, and the player itself ran off the bottom of the window
+   * with its title and its buttons cut in half.
+   *
+   * While something is playing the player is the one that matters: it is
+   * the transport, it names the ayah, and the rail's job — getting to a
+   * distant page — is not what anyone is doing mid-recitation. Portrait
+   * has room for both and keeps both.
+   */
+  const railYieldsToPlayer = width > height && playback.active != null;
 
   // Every input that decides a page's box, folded into one value and
   // published once it has stopped moving — see phonePageGeometry.ts for the
   // three layouts per rotation this replaces.
-  const geometry = useSettledGeometry(
+  const settled = useSettledGeometry(
     phonePageGeometry({
       width,
       height,
@@ -307,6 +378,14 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       listH,
     }),
   );
+  /**
+   * A settled geometry from before a rotation describes a viewport that is
+   * no longer on screen — and the pager's offset is a multiple of ITS
+   * width, so for the frames before `reanchor` lands the window shows two
+   * pages sliding into one. The pages stop drawing, and the cover below
+   * hides the pager entirely, until the two agree again.
+   */
+  const geometry = phoneGeometryFits(settled, pageWidth) ? settled : null;
 
   const data = useMemo(
     () => Array.from({ length: totalPages }, (_, i) => i + 1),
@@ -440,7 +519,10 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
         styles.container,
         {
           backgroundColor: pageBg,
-          paddingTop: isFullscreen ? insets.top : 0,
+          // NO TOP INSET, in fullscreen or out of it: out of fullscreen the
+          // navigator's header holds that room, and in fullscreen the page
+          // header row is drawn across the band either side of the cutout —
+          // see `islandPad`.
           // Cutout on both sides (symmetric — see `sideInset`) and the
           // system navigation bar below. The container is the page colour,
           // so this clears the obstruction without opening a seam.
@@ -476,6 +558,17 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           removeClippedSubviews
           style={{ backgroundColor: pageBg }}
         />
+        {/* The rotation cover — see `phoneGeometryFits`. A plain sheet of
+            the page colour over the pager while its offset and its item
+            width disagree, so the reader never shows two pages sliding
+            into one. `pointerEvents="none"`: it is not a modal, and a
+            swipe that starts under it should still turn the page. */}
+        {geometry ? null : (
+          <View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { backgroundColor: pageBg }]}
+          />
+        )}
       </View>
 
       {/* The rail was iPad/Mac-only (design review 2d) on the theory that a
@@ -483,7 +576,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           juz 1 to juz 20 is three hundred swipes, and the reader who wants
           Yaseen has no way to ask for it. The rail costs 32pt and answers
           both — and it retires with the rest of the chrome in fullscreen. */}
-      {!isFullscreen ? (
+      {!isFullscreen && !railYieldsToPlayer ? (
         <MushafPageScrubber
           page={currentPage}
           riwayah={riwayah}

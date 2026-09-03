@@ -62,6 +62,15 @@ export const FOOTER_RESERVE = 42;
 export const GEOMETRY_QUIET_MS = 100;
 
 export type PhonePageGeometry = {
+  /**
+   * The pager item's width this geometry was computed FOR.
+   *
+   * Not used to lay anything out — it is how the reader tells a settled
+   * geometry that belongs to the list on screen from one left over from
+   * before a rotation. See `phoneGeometryFits`, and the same field on the
+   * spread's geometry, which needed it first.
+   */
+  pageWidth: number;
   /** Width of the page's text block, dp. */
   textWidth: number;
   /** The pager viewport less the page's own chrome, dp. */
@@ -112,6 +121,7 @@ export function phonePageGeometry(
     ? Math.min(pageWidth - H_PADDING * 2, input.height * LANDSCAPE_ZOOM)
     : pageWidth - H_PADDING * 2;
   return {
+    pageWidth: Math.round(pageWidth),
     // Whole dp, both of them. A sub-pixel wobble in a measurement is enough
     // to give the page a different box, which re-lays out all fifteen
     // lines to produce a page nobody could tell apart from the one on
@@ -125,7 +135,30 @@ export function phonePageGeometry(
 /** Two geometries that would lay the page out identically have one key. */
 export function geometryKey(g: PhonePageGeometry | null): string {
   if (!g) return '';
-  return `${g.textWidth}x${g.viewportH}${g.scrolling ? 's' : 'f'}`;
+  return `${g.pageWidth}:${g.textWidth}x${g.viewportH}${g.scrolling ? 's' : 'f'}`;
+}
+
+/**
+ * Does this geometry belong to the list on screen?
+ *
+ * ── WHAT A ROTATION LOOKED LIKE WITHOUT THIS ──────────────────────────
+ *
+ * The pager's items are exactly one viewport wide and its scroll offset is
+ * a multiple of that width. A rotation changes the width immediately, and
+ * the offset is corrected a frame later (`reanchor`, in an effect) — so in
+ * between, a landscape-wide viewport was showing an offset computed for a
+ * portrait-wide item: TWO pages side by side, sliding into one. Reported
+ * as the reader looking fragile, and it is: nothing about a phone muṣḥaf
+ * should ever show a spread.
+ *
+ * The reader covers the pager in the page colour while the answer is no.
+ * The platform is cross-fading the rotation over the top of it anyway.
+ */
+export function phoneGeometryFits(
+  g: PhonePageGeometry | null,
+  pageWidth: number,
+): g is PhonePageGeometry {
+  return g != null && g.pageWidth === Math.round(pageWidth);
 }
 
 /**

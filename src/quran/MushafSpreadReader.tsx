@@ -564,6 +564,16 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
           removeClippedSubviews
           style={{ backgroundColor: pageBg }}
         />
+        {/* The rotation cover, as on the phone — see `phoneGeometryFits`.
+            An iPad turned on its side re-pairs the list AND changes the
+            item width, and the offset is corrected a frame later; without
+            this the reader shows a spread mid-slide. */}
+        {availH == null ? (
+          <View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { backgroundColor: pageBg }]}
+          />
+        ) : null}
       </View>
 
       {showChevrons ? (

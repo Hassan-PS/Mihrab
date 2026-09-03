@@ -273,6 +273,10 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 20,
     paddingVertical: 10,
+    // The rail keeps its height, like the player below it: the pager above
+    // is the `flex: 1` one, and it is the one with room to give. See the
+    // same note on the mini player's card.
+    flexShrink: 0,
   },
   rail: { flex: 1, height: 12, borderRadius: 6, justifyContent: 'center' },
   knob: { position: 'absolute', width: 14, height: 14, borderRadius: 7 },

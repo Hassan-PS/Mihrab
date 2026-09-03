@@ -251,8 +251,13 @@ describe('the readers hand the page a handler, not an arrow around one', () => {
     expect(phone).toMatch(/selected=\{selectedPage === page \? selected : null\}/);
     expect(phone).toMatch(/playing=\{playingPage === page \? playingRef : null\}/);
     expect(phone).toMatch(/finish=\{finishPage === page \? finish : null\}/);
-    // The page is laid out against the SETTLED geometry, never a live one.
-    expect(phone).toMatch(/const geometry = useSettledGeometry\(/);
+    // The page is laid out against the SETTLED geometry, never a live one —
+    // and only while that geometry still describes the list on screen, or a
+    // rotation shows two pages sliding into one (`phoneGeometryFits`).
+    expect(phone).toMatch(/const settled = useSettledGeometry\(/);
+    expect(phone).toMatch(
+      /const geometry = phoneGeometryFits\(settled, pageWidth\) \? settled : null;/,
+    );
     expect(phone).toMatch(/width=\{geometry\.textWidth\}/);
   });
 

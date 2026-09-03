@@ -184,6 +184,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 14,
     overflow: 'hidden',
+    /**
+     * THE PLAYER IS NOT THE THING THAT GIVES WAY.
+     *
+     * It is a flex sibling below the muṣḥaf's pager, and the pager is
+     * `flex: 1` — so in a short window (a phone on its side, ~300dp of
+     * height) the two negotiate, and this card came out shorter than its
+     * own row. With `overflow: 'hidden'` on it, that reads exactly as
+     * reported: a white band across the transport, with the ayah name and
+     * the play button cut through the middle.
+     *
+     * The card's height is its content's. The pager is the one with room
+     * to give — it is a scrolling column, and a page that is fifteen
+     * points shorter is still a page.
+     */
+    flexShrink: 0,
   },
   track: { height: 3, width: '100%' },
   fill: { height: '100%' },
