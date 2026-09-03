@@ -124,30 +124,43 @@ export function geometryKey(g: PhonePageGeometry | null): string {
 }
 
 /**
- * The geometry, once it has stopped changing.
+ * A value, once it has stopped changing.
  *
  * Holds the last published value through a burst — the page keeps drawing
  * at the size it has — and publishes the new one `quietMs` after the last
- * change. The first geometry waits too: on iOS the header reports an
- * estimate before its measured height, and a first page laid out against
- * the estimate was a second layout waiting to happen. The push transition
- * is longer than the wait, so nobody sees it.
+ * change. The first value waits too: on iOS the header reports an estimate
+ * before its measured height, and a first page laid out against the
+ * estimate was a second layout waiting to happen. The push transition is
+ * longer than the wait, so nobody sees it.
+ *
+ * `key` says which values would lay the page out identically. It is what
+ * the comparison runs on, because the reader builds a fresh object every
+ * render, and re-arming the timer for an identical geometry would push the
+ * publication out for as long as the reader kept rendering — which, during
+ * recitation, is for ever.
  */
+export function useSettledValue<T>(
+  raw: T | null,
+  key: (value: T | null) => string,
+  quietMs: number = GEOMETRY_QUIET_MS,
+): T | null {
+  const [settled, setSettled] = useState<T | null>(null);
+  const rawKey = key(raw);
+  const settledKey = key(settled);
+  useEffect(() => {
+    if (raw == null || rawKey === settledKey) return;
+    const id = setTimeout(() => setSettled(raw), quietMs);
+    return () => clearTimeout(id);
+    // Keyed on the VALUE, not the object — see above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawKey, settledKey, quietMs]);
+  return settled;
+}
+
+/** The phone page's geometry, once it has stopped changing. */
 export function useSettledGeometry(
   raw: PhonePageGeometry | null,
   quietMs: number = GEOMETRY_QUIET_MS,
 ): PhonePageGeometry | null {
-  const [settled, setSettled] = useState<PhonePageGeometry | null>(null);
-  const rawKey = geometryKey(raw);
-  const settledKey = geometryKey(settled);
-  useEffect(() => {
-    if (!raw || rawKey === settledKey) return;
-    const id = setTimeout(() => setSettled(raw), quietMs);
-    return () => clearTimeout(id);
-    // Keyed on the VALUE, not the object: the reader builds a fresh object
-    // every render, and re-arming the timer for an identical geometry would
-    // push the publication out for as long as the reader kept rendering.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rawKey, settledKey, quietMs]);
-  return settled;
+  return useSettledValue(raw, geometryKey, quietMs);
 }

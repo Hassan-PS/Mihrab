@@ -15,9 +15,16 @@
  * re-derives everything from `useWindowDimensions` — and re-pairs —
  * without losing the current page.
  */
-import React, { useCallback, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   FlatList,
+  InteractionManager,
   Platform,
   Pressable,
   StatusBar,
@@ -32,14 +39,16 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { finishKhatmahPortion } from './quranState';
 import MushafTextPageSurface from './MushafTextPageSurface';
+import type { AyahRef } from './MushafTextPage';
 import { spreadCount, spreadForPage } from './mushafSpread';
 import {
   MushafJumpModal,
   MushafPageFooter,
   MushafPageHeader,
   useMushafReaderCore,
+  type AyahMarkProps,
+  type KhatmahFinish,
   type MushafReaderProps,
-  useSettledMeasure,
 } from './mushafReaderCore';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafIndexSidebar, SIDEBAR_WIDTH } from './MushafIndexSidebar';
@@ -48,18 +57,178 @@ import { MiniPlayer } from './audio/MiniPlayer';
 import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
 import { useMushafPager } from './useMushafPager';
+import { warmAround } from './useMushafPageFont';
+import { findPageForAyah } from './pages';
+import { riwayahById, type RiwayahId } from './riwayat';
+import type { MushafTone } from './mushafTone';
+import {
+  spreadColumn,
+  spreadGeometry,
+  spreadGeometryFits,
+  spreadPageWidth,
+  useSettledSpreadGeometry,
+} from './spreadPageGeometry';
 
-/** KFGQPC source page ratio — the printed page's width over height. */
-const PAGE_ASPECT = 2600 / 4206;
-
-/** Breathing room either side of a page inside its column. */
-const H_PADDING = 4;
-
-/** Estimated header-row / footer-medallion heights, dp. */
-const HEADER_RESERVE = 34;
-const FOOTER_RESERVE = 42;
 /** Floating mini-player card: 3px track + row (~54) + 10 bottom margin. */
 const PLAYER_RESERVE = 68;
+
+/**
+ * Pages either side of the one being read whose fonts are registered
+ * ahead. Three, not two: the pager steps by a spread, so the next item
+ * starts two pages on and its far page is three.
+ */
+const WARM_RADIUS = 3;
+
+/** One item while opening, three once the transition is over — see the
+ *  same pair in MushafPhoneReader. */
+const WINDOW_OPENING = 1;
+const WINDOW_READING = 3;
+
+type ColumnProps = {
+  page: number;
+  colW: number;
+  chrome: 'both' | 'label' | 'pill';
+  /** Which half of a spread this is; 'single' when there is no pair. */
+  side: 'left' | 'right' | 'single';
+  /** The column's page size and margin, or null while the geometry does
+   *  not yet belong to the list on screen — the chrome draws, the page
+   *  waits. */
+  fit: { pageW: number; pageH: number; margin: number } | null;
+  navPad: number;
+  isFullscreen: boolean;
+  tone: MushafTone;
+  ornament: string;
+  riwayah: RiwayahId;
+  accent: string;
+  marks: AyahMarkProps;
+  /** Only ever set on the page they are on — see MushafPhoneReader. */
+  selected: AyahRef | null;
+  playing: AyahRef | null;
+  finish: KhatmahFinish | null;
+  onToggleFullscreen: () => void;
+  onWordPress: (ref: AyahRef, page: number) => void;
+  onOpenJump: () => void;
+};
+
+/**
+ * One page column: header chrome, page placed to its margin, footer.
+ *
+ * Memoised, and handed only what is its own, for the reasons set out at
+ * the head of MushafPhoneReader: the reader re-renders for every recited
+ * ayah and every turn, and a column whose props have not changed should
+ * not notice.
+ */
+const SpreadColumn = React.memo(function SpreadColumn({
+  page,
+  colW,
+  chrome,
+  side,
+  fit,
+  navPad,
+  isFullscreen,
+  tone,
+  ornament,
+  riwayah,
+  accent,
+  marks,
+  selected,
+  playing,
+  finish,
+  onToggleFullscreen,
+  onWordPress,
+  onOpenJump,
+}: ColumnProps) {
+  // Outer edge gets the full margin, the gutter side gets half of one —
+  // the two halves together make a gutter equal to the outer margins.
+  // rtl-safe: physical left/right on purpose. A muṣḥaf's spread is
+  // physically ordered — page 1 is the rightmost sheet — and the list
+  // itself is pinned `direction: 'ltr'` for the same reason (see
+  // `listWrap`). Start/End here would mirror the gutter into the outer
+  // margin in Arabic and Urdu.
+  const margin = fit?.margin ?? 0;
+  const pad =
+    side === 'left'
+      ? { paddingLeft: margin, paddingRight: margin / 2 } // rtl-safe: physical, like the pager itself — see above.
+      : side === 'right'
+        ? { paddingLeft: margin / 2, paddingRight: margin } // rtl-safe: physical, like the pager itself — see above.
+        : { paddingHorizontal: margin };
+  return (
+    <View style={[styles.column, { width: colW }]}>
+      {/* The header strip toggles fullscreen too — with a tap on a word now
+          opening the ayah, the strip and the margins are where the chrome
+          is put away and brought back.
+
+          `accessible={false}`, or the strip becomes ONE element to
+          VoiceOver and swallows the tone pill inside it: a Pressable is
+          accessible by default, and an accessible parent hides its
+          children. Seen on the Mac — the pill's label read out, the press
+          landed on the strip. */}
+      <Pressable
+        accessible={false}
+        onPress={onToggleFullscreen}
+        style={{ paddingTop: navPad }}>
+        <MushafPageHeader
+          page={page}
+          isFullscreen={isFullscreen}
+          tone={tone}
+          ornament={ornament}
+          riwayah={riwayah}
+          show={chrome}
+        />
+      </Pressable>
+      <View style={[styles.pageBox, pad]}>
+        {fit ? (
+          <Pressable onPress={onToggleFullscreen}>
+            <MushafTextPageSurface
+              page={page}
+              width={fit.pageW}
+              height={fit.pageH}
+              riwayah={riwayah}
+              tone={tone}
+              accentColor={accent}
+              {...marks}
+              selected={selected}
+              playing={playing}
+              // A TAP ON A WORD OPENS ITS AYAH — tafsir, "play from here",
+              // bookmark, share. It used to toggle fullscreen, on the
+              // reasoning that reading is the common act and a panel the
+              // rare one; in practice a tap on the words is what everyone
+              // tries first when they want the ayah, and a long press is
+              // what nobody guesses. Fullscreen moved to where the words are
+              // not: the margins, the header strip, the ⛶ in the navigation
+              // bar. A long press still opens the ayah, for hands that
+              // learned it that way.
+              //
+              // The handler itself, not an arrow around it. An arrow is a
+              // new function on every render of this list, and it reaches
+              // all fifteen lines of every mounted page through three memos
+              // — every one of which compared unequal and rebuilt ~250
+              // pieces on each page turn and each recited ayah. The screen
+              // learned this once (mushafRenderChurn.test) and the readers
+              // reintroduced it one level down.
+              onWordPress={onWordPress}
+              onWordLongPress={onWordPress}
+            />
+          </Pressable>
+        ) : null}
+      </View>
+      <MushafPageFooter
+        page={page}
+        ornament={ornament}
+        onPress={onOpenJump}
+        finish={
+          finish
+            ? {
+                day: finish.day,
+                when: finish.when,
+                onPress: finishKhatmahPortion,
+              }
+            : null
+        }
+      />
+    </View>
+  );
+});
 
 export function MushafSpreadReader(props: MushafReaderProps) {
   const { isFullscreen, onToggleFullscreen } = props;
@@ -105,8 +274,11 @@ export function MushafSpreadReader(props: MushafReaderProps) {
    * lands on the leading edge: the left-hand page of every spread ran
    * under the sidebar and was clipped mid-line.
    */
-  const pageWidth =
-    width - sideInset * 2 - (showSidebar ? SIDEBAR_WIDTH : 0);
+  const pageWidth = spreadPageWidth(
+    width,
+    sideInset,
+    showSidebar ? SIDEBAR_WIDTH : 0,
+  );
 
   // The one internal branch: portrait window → single centred page per
   // item; landscape → a facing pair per item.
@@ -125,14 +297,32 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   );
 
   const listRef = useRef<FlatList<number>>(null);
-  const [listHRaw, setListH] = useState(0);
-  // Settled — see `useSettledMeasure`.
-  const listH = useSettledMeasure(listHRaw);
+  // Raw: the geometry it feeds is what settles, not this on its own.
+  const [listH, setListH] = useState(0);
 
   const navPad = !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
   const playerReserve = playback.active ? PLAYER_RESERVE : 0;
 
-  const data = React.useMemo(
+  // Every input that decides a page's size, folded into one value and
+  // published once it has stopped moving — see spreadPageGeometry.ts.
+  const geometry = useSettledSpreadGeometry(
+    spreadGeometry({
+      width,
+      height,
+      sideInset,
+      sidebarWidth: showSidebar ? SIDEBAR_WIDTH : 0,
+      navPad,
+      listH,
+      playerReserve,
+    }),
+  );
+  // A settled geometry from before a rotation names the old width and the
+  // old pairing; the new items must not lay their pages out against it.
+  const availH = spreadGeometryFits(geometry, pageWidth, paired)
+    ? geometry.availH
+    : null;
+
+  const data = useMemo(
     () => Array.from({ length: itemCount }, (_, i) => i),
     [itemCount],
   );
@@ -153,12 +343,13 @@ export function MushafSpreadReader(props: MushafReaderProps) {
    * a FlatList and is tested with fake offsets and fake timers; this
    * component only points it at the list and says what a turn means.
    */
+  const { commitPageTurn } = core;
   const onTurn = useCallback(
     (page: number, prevPage: number) => {
-      core.commitPageTurn(page, prevPage);
+      commitPageTurn(page, prevPage);
       setCurrentPage(page);
     },
-    [core, setCurrentPage],
+    [commitPageTurn, setCurrentPage],
   );
   const { handlers: pagerHandlers, turnPage } = useMushafPager({
     list: listRef,
@@ -182,178 +373,92 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   // this is how the pages it can see say where they are.
   useRegisterKeyPaging(props.keyTurn, turnPage);
 
-  /**
-   * The size of one page, and the margin around a spread of two.
-   *
-   * ── WHY THE MARGINS ARE COMPUTED AND NOT PADDED ───────────────────
-   *
-   * Each column used to pad itself by `H_PADDING` and centre the page in
-   * what was left. When the page is HEIGHT-capped — which on a wide Mac
-   * window it always is — the leftover width is wider than that padding,
-   * and centring splits it evenly on both sides of each column. Both
-   * inner halves then land against each other, so the gutter between the
-   * two pages came out at twice the margin against the window's edges.
-   * A book is not set that way.
-   *
-   * So the slack is divided into THREE equal parts — outer, gutter,
-   * outer — and each page is placed against its own share rather than
-   * centred in a box.
-   */
-  const geometry = useCallback(
-    (colW: number, spread: boolean) => {
-      // Whole dp — a sub-pixel wobble in the measured viewport must not fork
-      // the page's layout. See the same rounding in MushafPhoneReader.
-      const availH = Math.round(
-        Math.max(
-          120,
-          (listH || height) -
-            navPad -
-            HEADER_RESERVE -
-            FOOTER_RESERVE -
-            playerReserve,
-        ),
-      );
-      let pageW = colW - H_PADDING * 2;
-      let pageH = pageW / PAGE_ASPECT;
-      if (pageH > availH) {
-        pageH = availH;
-        pageW = pageH * PAGE_ASPECT;
-      }
-      // Three equal gaps across the pair; a single page keeps the two it
-      // has. `margin` is the outer one, and the gutter is the same.
-      const margin = spread
-        ? Math.max(H_PADDING, (colW * 2 - pageW * 2) / 3)
-        : Math.max(H_PADDING, (colW - pageW) / 2);
-      return { pageW, pageH, margin };
-    },
-    [height, listH, navPad, playerReserve],
-  );
+  // The neighbours' fonts, registered ahead of the turn — from here, once
+  // per turn, rather than as a per-page prop. A bundled riwayah has none.
+  useEffect(() => {
+    if (riwayahById(riwayah).render === 'unicode') return;
+    warmAround(currentPage, WARM_RADIUS);
+  }, [currentPage, riwayah]);
 
-  /** One page column: header chrome, page placed to its margin, footer. */
+  // One item while opening, three once the transition is out of the way.
+  const [windowSize, setWindowSize] = useState(WINDOW_OPENING);
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() =>
+      setWindowSize(WINDOW_READING),
+    );
+    return () => task.cancel();
+  }, []);
+
+  // Which page each of the per-page things is on, so every other page can
+  // be handed null and stay put.
+  const selectedPage =
+    core.sheetVisible && core.selected ? core.selected.page : 0;
+  const playingPage = useMemo(
+    () =>
+      playback.active && playback.playing
+        ? findPageForAyah(playback.active.surah, playback.active.ayah, riwayah)
+        : 0,
+    [playback.active, playback.playing, riwayah],
+  );
+  const finishPage = core.finish?.page ?? 0;
+
+  const { marks, finish, selected, openSelection, openJump } = core;
+  const accent = palette.accentSolid;
+  const playingRef = playback.active;
+
+  /** One page column, or an empty one for the blank half of a spread. */
   const renderColumn = useCallback(
     (
       page: number | null,
       colW: number,
       chrome: 'both' | 'label' | 'pill',
-      /** Which half of a spread this is; 'single' when there is no pair. */
       side: 'left' | 'right' | 'single' = 'single',
     ) => {
       if (page == null || page < 1 || page > totalPages) {
         return <View style={{ width: colW }} />;
       }
-      const { pageW, pageH, margin } = geometry(colW, side !== 'single');
-      // Outer edge gets the full margin, the gutter side gets half of one
-      // — the two halves together make a gutter equal to the outer margins.
-      // rtl-safe: physical left/right on purpose. A muṣḥaf's spread is
-      // physically ordered — page 1 is the rightmost sheet — and the list
-      // itself is pinned `direction: 'ltr'` for the same reason (see
-      // `listWrap`). Start/End here would mirror the gutter into the
-      // outer margin in Arabic and Urdu.
-      const pad =
-        side === 'left'
-          // rtl-safe: physical, like the pager itself — see above.
-          ? { paddingLeft: margin, paddingRight: margin / 2 }
-          : side === 'right'
-            // rtl-safe: physical, like the pager itself — see above.
-            ? { paddingLeft: margin / 2, paddingRight: margin }
-            : { paddingHorizontal: margin };
       return (
-        <View style={[styles.column, { width: colW }]}>
-          {/* The header strip toggles fullscreen too — with a tap on a
-              word now opening the ayah, the strip and the margins are
-              where the chrome is put away and brought back.
-
-              `accessible={false}`, or the strip becomes ONE element to
-              VoiceOver and swallows the tone pill inside it: a Pressable
-              is accessible by default, and an accessible parent hides its
-              children. Seen on the Mac — the pill's label read out, the
-              press landed on the strip. */}
-          <Pressable
-            accessible={false}
-            onPress={onToggleFullscreen}
-            style={{ paddingTop: navPad }}>
-            <MushafPageHeader
-              page={page}
-              isFullscreen={isFullscreen}
-              tone={tone}
-              ornament={ornament}
-              riwayah={riwayah}
-              show={chrome}
-            />
-          </Pressable>
-          <View style={[styles.pageBox, pad]}>
-            <Pressable onPress={onToggleFullscreen}>
-              <MushafTextPageSurface
-                page={page}
-                width={pageW}
-                height={pageH}
-                riwayah={riwayah}
-                tone={tone}
-                accentColor={palette.accentSolid}
-                {...core.marks}
-                selected={
-                  core.sheetVisible && core.selected?.page === page
-                    ? core.selected
-                    : null
-                }
-                playing={
-                  playback.active && playback.playing ? playback.active : null
-                }
-                // Only the spread being read warms its neighbours' fonts.
-                prefetchRadius={page === currentPage ? 2 : 0}
-                // A TAP ON A WORD OPENS ITS AYAH — tafsir, "play from
-                // here", bookmark, share. It used to toggle fullscreen,
-                // on the reasoning that reading is the common act and a
-                // panel the rare one; in practice a tap on the words is
-                // what everyone tries first when they want the ayah, and
-                // a long press is what nobody guesses. Fullscreen moved to
-                // where the words are not: the margins, the header strip,
-                // the ⛶ in the navigation bar. A long press still opens the
-                // ayah, for hands that learned it that way.
-                //
-                // The handler itself, not an arrow around it. An arrow is a
-                // new function on every render of this list, and it reaches
-                // all fifteen lines of every mounted page through three
-                // memos — every one of which compared unequal and rebuilt
-                // ~250 pieces on each page turn and each recited ayah. The
-                // screen learned this once (mushafRenderChurn.test) and the
-                // readers reintroduced it one level down.
-                onWordPress={core.openSelection}
-                onWordLongPress={core.openSelection}
-              />
-            </Pressable>
-          </View>
-          <MushafPageFooter
-            page={page}
-            ornament={ornament}
-            onPress={core.openJump}
-            finish={
-              core.finish?.page === page
-                ? {
-                    day: core.finish.day,
-                    when: core.finish.when,
-                    onPress: finishKhatmahPortion,
-                  }
-                : null
-            }
-          />
-        </View>
+        <SpreadColumn
+          page={page}
+          colW={colW}
+          chrome={chrome}
+          side={side}
+          fit={availH != null ? spreadColumn(availH, colW, side !== 'single') : null}
+          navPad={navPad}
+          isFullscreen={isFullscreen}
+          tone={tone}
+          ornament={ornament}
+          riwayah={riwayah}
+          accent={accent}
+          marks={marks}
+          selected={selectedPage === page ? selected : null}
+          playing={playingPage === page ? playingRef : null}
+          finish={finishPage === page ? finish : null}
+          onToggleFullscreen={onToggleFullscreen}
+          onWordPress={openSelection}
+          onOpenJump={openJump}
+        />
       );
     },
     [
-      core,
-      currentPage,
-      geometry,
-      isFullscreen,
-      navPad,
-      onToggleFullscreen,
-      ornament,
-      palette.accentSolid,
-      playback.active,
-      playback.playing,
-      riwayah,
-      tone,
       totalPages,
+      availH,
+      navPad,
+      isFullscreen,
+      tone,
+      ornament,
+      riwayah,
+      accent,
+      marks,
+      selectedPage,
+      selected,
+      playingPage,
+      playingRef,
+      finishPage,
+      finish,
+      onToggleFullscreen,
+      openSelection,
+      openJump,
     ],
   );
 
@@ -452,7 +557,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
           scrollEventThrottle={16}
           onScrollToIndexFailed={pagerHandlers.onScrollToIndexFailed}
           onScrollBeginDrag={pagerHandlers.onScrollBeginDrag}
-          windowSize={3}
+          windowSize={windowSize}
           maxToRenderPerBatch={2}
           initialNumToRender={1}
           removeClippedSubviews

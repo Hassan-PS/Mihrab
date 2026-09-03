@@ -15,24 +15,17 @@ const read = (f: string) =>
 
 describe.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])('%s', file => {
   const src = read(file);
-  // The spread reader hands the core's handler to the surface directly.
-  // The phone reader's page is a memoised component of its own, so the
-  // handler reaches the surface through the page's prop — and the reader
-  // fills that prop with the same `openSelection`.
-  const handler = file.startsWith('MushafPhone')
-    ? 'onWordPress'
-    : 'core\\.openSelection';
-
+  // Both readers' pages are memoised components of their own, so the
+  // handler reaches the surface through the page's `onWordPress` prop —
+  // and the reader fills that prop with the core's `openSelection`.
   it('a tap on a word opens the ayah', () => {
-    expect(src).toMatch(new RegExp(`onWordPress=\\{${handler}\\}`));
-    if (file.startsWith('MushafPhone')) {
-      expect(src).toMatch(/onWordPress=\{openSelection\}/);
-      expect(src).toMatch(/const \{ [^}]*openSelection[^}]* \} = core;/);
-    }
+    expect(src).toMatch(/onWordPress=\{onWordPress\}/);
+    expect(src).toMatch(/onWordPress=\{openSelection\}/);
+    expect(src).toMatch(/const \{ [^}]*openSelection[^}]* \} = core;/);
   });
 
   it('and so does a long press, for hands that learned it that way', () => {
-    expect(src).toMatch(new RegExp(`onWordLongPress=\\{${handler}\\}`));
+    expect(src).toMatch(/onWordLongPress=\{onWordPress\}/);
   });
 
   it('the header strip toggles fullscreen', () => {

@@ -256,6 +256,28 @@ describe('the readers hand the page a handler, not an arrow around one', () => {
     expect(phone).toMatch(/width=\{geometry\.textWidth\}/);
   });
 
+  it('the spread column is the same shape', () => {
+    const spread = read('src/quran/MushafSpreadReader.tsx');
+    expect(spread).toMatch(/const SpreadColumn = React\.memo\(function SpreadColumn/);
+    expect(spread).toMatch(/selected=\{selectedPage === page \? selected : null\}/);
+    expect(spread).toMatch(/playing=\{playingPage === page \? playingRef : null\}/);
+    expect(spread).toMatch(/finish=\{finishPage === page \? finish : null\}/);
+    // And a page is laid out only against a geometry that belongs to the
+    // list on screen — never one from before a rotation.
+    expect(spread).toMatch(/spreadGeometryFits\(geometry, pageWidth, paired\)/);
+    expect(spread).toMatch(/fit=\{availH != null \? spreadColumn\(availH, colW, side !== 'single'\) : null\}/);
+  });
+
+  it.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])(
+    '%s warms fonts once per turn, not through a per-page prop',
+    file => {
+      const src = read(`src/quran/${file}`);
+      expect(src).toMatch(/warmAround\(currentPage, WARM_RADIUS\)/);
+      expect(src).not.toMatch(/prefetchRadius=/);
+      expect(src).toMatch(/windowSize=\{windowSize\}/);
+    },
+  );
+
   it('the phone reader warms fonts once per turn, not through a per-page prop', () => {
     const phone = read('src/quran/MushafPhoneReader.tsx');
     expect(phone).toMatch(/warmAround\(currentPage, WARM_RADIUS\)/);
