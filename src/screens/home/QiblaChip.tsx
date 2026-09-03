@@ -54,7 +54,7 @@ function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
 
   const face = (
     <>
-      <CompassIcon color={String(palette.accent)} size={14} />
+      <CompassIcon color={palette.accentSolid} size={14} />
       <Text
         style={[typeStyle('caption'), styles.label, { color: palette.accent }]}
         numberOfLines={1}

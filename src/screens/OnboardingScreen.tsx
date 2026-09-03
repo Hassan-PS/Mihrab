@@ -274,7 +274,7 @@ export function OnboardingScreen() {
       contentInsetAdjustmentBehavior="automatic">
       <View style={styles.illustration}>
         {step.id === 'welcome' ? (
-          <SalamHero accentColor={palette.accentSolid} mutedColor={String(palette.muted)} />
+          <SalamHero accentColor={palette.accentSolid} mutedColor={palette.mutedSolid} />
         ) : (
           <CrescentIcon color={palette.accentSolid} size={64} />
         )}

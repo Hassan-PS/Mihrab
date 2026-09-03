@@ -40,6 +40,17 @@ export type AppPalette = {
    */
   accentSolid: string;
   /**
+   * Solid hex version of `muted`, for the same reason `accentSolid` exists.
+   *
+   * Under Liquid Glass `muted` is `PlatformColor('secondaryLabel')`, and an
+   * SVG cannot consume one: hand it to a `react-native-svg` fill and the
+   * icon draws NOTHING. That is what emptied the tab bar — five labelled
+   * tabs with no glyphs above them, the sixth (active, on `accentSolid`)
+   * the only one that showed. Anything that colours a drawn icon takes
+   * this; text and native views can keep the semantic colour.
+   */
+  mutedSolid: string;
+  /**
    * Filled control surface — the design review's one caveat (2f).
    *
    * Chips, steppers and secondary row actions are FILLED, not outlined: a
@@ -98,7 +109,7 @@ export function shouldUseDynamicSystemColors(
 // the base palette objects below don't (and shouldn't) declare it.
 type PaletteBase = Omit<
   AppPalette,
-  'accent' | 'accentBg' | 'accentSolid' | 'isDark' | 'onAccent'
+  'accent' | 'accentBg' | 'accentSolid' | 'mutedSolid' | 'isDark' | 'onAccent'
 >;
 
 /**
@@ -223,6 +234,9 @@ function withBrandAccents(
     accent,
     accentBg,
     accentSolid,
+    // Every base palette below states `muted` as a hex string; only the two
+    // system palettes need a separate answer, and they give their own.
+    mutedSolid: String(base.muted),
     isDark,
     onAccent: readableOn(accentSolid),
   };
@@ -311,6 +325,13 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
     // iOS systemBlue is the typical tintColor when no override; matches
     // the live PlatformColor tint closely enough for SVG icons.
     accentSolid: isDark ? '#0A84FF' : '#007AFF',
+    /**
+     * `secondaryLabel`, resolved. iOS states it as label black/white at
+     * 60%, which is a colour a native view can composite and an SVG
+     * cannot — see `mutedSolid`. These are the two composites over the
+     * grouped backgrounds this palette actually draws on.
+     */
+    mutedSolid: isDark ? '#98989E' : '#8A8A8E',
   };
 }
 
@@ -340,6 +361,9 @@ function androidDynamicPalette(
     accent: hex,
     accentBg,
     accentSolid: hex,
+    // The standard base's muted, which is already a hex string — this
+    // palette overrides the accent and nothing else.
+    mutedSolid: String(base.muted),
     isDark,
     onAccent: readableOn(hex),
   };

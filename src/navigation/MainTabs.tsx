@@ -111,10 +111,20 @@ export function MainTabs() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.accentSolid,
-        // Still stringified: react-navigation types the TINT colours as
-        // plain strings, so a PlatformColor cannot be passed here even
-        // though it can be passed to the style below.
-        tabBarInactiveTintColor: String(palette.muted),
+        /**
+         * A HEX, NOT `String(palette.muted)`.
+         *
+         * react-navigation types the TINT colours as plain strings, so a
+         * PlatformColor cannot be passed here — but stringifying one gives
+         * "[object Object]", and this tint is handed to each tab's ICON,
+         * which is an SVG. `react-native-svg` draws nothing for a colour it
+         * cannot parse, so under Liquid Glass (where `muted` is
+         * `PlatformColor('secondaryLabel')`) the bar came out as five
+         * labels with no glyphs above them — only the active tab, on
+         * `accentSolid`, had a colour it could use. `mutedSolid` is the
+         * same colour as a hex, for exactly this.
+         */
+        tabBarInactiveTintColor: palette.mutedSolid,
         /**
          * Two bars, not one.
          *
