@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { setQuranPrefs, useQuranState } from '../quranState';
 import { searchReciters, type Reciter } from './reciters';
+import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
 
 type Props = {
   visible: boolean;
@@ -83,6 +84,9 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
     <Modal
       visible={visible}
       transparent
+      // Landscape too, or the muṣḥaf on its side cannot open this
+      // at all — see MODAL_ORIENTATIONS.
+      supportedOrientations={MODAL_ORIENTATIONS}
       animationType="slide"
       onRequestClose={onClose}>
       <Pressable

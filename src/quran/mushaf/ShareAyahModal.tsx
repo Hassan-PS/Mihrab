@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { arabicTextStyle } from '../../theme/typography';
 import { findSurah } from '../quran';
+import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
 
 type Props = {
   visible: boolean;
@@ -74,6 +75,9 @@ export function ShareAyahModal({
     <Modal
       visible={visible}
       transparent
+      // Landscape too, or the muṣḥaf on its side cannot open this
+      // at all — see MODAL_ORIENTATIONS.
+      supportedOrientations={MODAL_ORIENTATIONS}
       animationType="fade"
       onRequestClose={onClose}>
       <View style={[styles.backdrop, { backgroundColor: palette.overlay }]}>

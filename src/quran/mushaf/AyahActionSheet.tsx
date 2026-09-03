@@ -53,6 +53,7 @@ import { ShareAyahModal } from './ShareAyahModal';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { RowAction, SectionHead } from '../../components/controls';
 import { ActionSheetIOS, Alert, Platform } from 'react-native';
+import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
 
 /** Clamp heights, and the text lengths past which a toggle is worth showing. */
 const TRANSLATION_CLAMP_LINES = 5;
@@ -244,6 +245,9 @@ export function AyahActionSheet({
     <Modal
       visible={visible}
       transparent
+      // Landscape too, or the muṣḥaf on its side cannot open this
+      // at all — see MODAL_ORIENTATIONS.
+      supportedOrientations={MODAL_ORIENTATIONS}
       animationType="slide"
       onRequestClose={onClose}>
       <Pressable

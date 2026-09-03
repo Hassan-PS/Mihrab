@@ -30,6 +30,7 @@ import { useQuranState, setQuranPrefs } from './quranState';
 import { QURAN_TRANSLATIONS } from './translations';
 import { useActiveEdition } from './useActiveEdition';
 import { TAFSIR_EDITIONS, resolveTafsirEdition } from './tafsir';
+import { MODAL_ORIENTATIONS } from '../components/modalOrientations';
 
 export type CompanionMode = 'translation' | 'tafsir';
 
@@ -268,6 +269,9 @@ export function CompanionTextSheet({
     <Modal
       visible={visible}
       transparent
+      // Landscape too, or the muṣḥaf on its side cannot open this
+      // at all — see MODAL_ORIENTATIONS.
+      supportedOrientations={MODAL_ORIENTATIONS}
       animationType="slide"
       onRequestClose={onClose}>
       <Pressable

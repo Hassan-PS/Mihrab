@@ -26,6 +26,7 @@ import {
   RIWAYAT,
   type RiwayahId,
 } from './riwayat';
+import { MODAL_ORIENTATIONS } from '../components/modalOrientations';
 
 export function RiwayahPicker({
   visible,
@@ -57,6 +58,9 @@ export function RiwayahPicker({
     <Modal
       visible={visible}
       transparent
+      // Landscape too, or the muṣḥaf on its side cannot open this
+      // at all — see MODAL_ORIENTATIONS.
+      supportedOrientations={MODAL_ORIENTATIONS}
       animationType="fade"
       onRequestClose={onClose}>
       <Pressable style={styles.scrim} onPress={onClose}>

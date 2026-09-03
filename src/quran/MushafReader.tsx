@@ -27,11 +27,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { resolveRiwayah, riwayahById } from './riwayat';
@@ -60,10 +63,21 @@ type Props = Omit<MushafReaderProps, 'keyTurn'>;
 /** The complete Ḥafṣ font set, as the download button says it. */
 const FONT_SET_MB = 180;
 
+/** The strip's own breathing room above its row, dp. */
+const STRIP_PADDING_TOP = 6;
+
 export function MushafReader(props: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const quran = useQuranState();
+  const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
+  /**
+   * What the download strip has to clear above it — see where it is used.
+   * Android's header is opaque and in flow, so nothing.
+   */
+  const stripTop =
+    Platform.OS !== 'ios' ? 0 : props.isFullscreen ? insets.top : headerHeight;
 
   /**
    * A `unicode` riwayah has no page fonts — its text and its face are in
@@ -265,7 +279,19 @@ export function MushafReader(props: Props) {
       <View
         style={[
           styles.strip,
-          { backgroundColor: palette.card, borderBottomColor: palette.border },
+          {
+            backgroundColor: palette.card,
+            borderBottomColor: palette.border,
+            // iOS floats a translucent navigation header OVER the content,
+            // so a strip at the top of the screen was drawn UNDER it: the
+            // percentage sat behind the blur and the Cancel button behind
+            // the header's own chips. The reader below does the same thing
+            // with `navPad` — this is the one piece of chrome that is
+            // ABOVE the reader and so has to do it for itself. In
+            // fullscreen there is no header and the status bar is hidden,
+            // so the strip only clears the cutout.
+            paddingTop: stripTop + STRIP_PADDING_TOP,
+          },
         ]}>
         <View style={styles.stripRow}>
           <Text
@@ -301,7 +327,13 @@ export function MushafReader(props: Props) {
   // Answered once, at module scope: a phone cannot become an iPad
   // mid-session, only its window can change size, and each reader handles
   // its own window from here.
-  const readerProps: MushafReaderProps = { ...props, keyTurn: keyTurnRef };
+  const readerProps: MushafReaderProps = {
+    ...props,
+    keyTurn: keyTurnRef,
+    // The strip has already padded past iOS's floating header; the reader
+    // must not pad past it a second time.
+    chromeCleared: strip != null,
+  };
   const reader =
     DEVICE_CLASS === 'phone' ? (
       <MushafPhoneReader {...readerProps} />
@@ -337,7 +369,6 @@ const styles = StyleSheet.create({
   withStrip: { flex: 1 },
   strip: {
     paddingHorizontal: 14,
-    paddingTop: 6,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   stripRow: {
