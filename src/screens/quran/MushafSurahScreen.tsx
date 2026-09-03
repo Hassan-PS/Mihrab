@@ -15,9 +15,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Alert, Platform, Pressable, Text, View } from 'react-native';
+import {
+  Alert,
+  Platform,
+  Pressable,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { desktopSize } from '../../responsive/desktop';
+import { useSettledMeasure } from '../../quran/mushafReaderCore';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { isMacCatalyst } from '../../responsive/breakpoints';
 import type { SurahIndex } from '../../quran/quran';
@@ -138,6 +146,30 @@ export function MushafSurahScreen({
   const handleReaderTitleChange = useCallback((title: string) => {
     setReaderTitle(title);
   }, []);
+
+  /**
+   * THE CHIPS GO DEAD AFTER THE WINDOW IS RESIZED.
+   *
+   * Audio, Tafsir and the riwayah chip live in the NATIVE navigation bar:
+   * `headerRight` is a React tree that react-native-screens hosts inside a
+   * UIKit bar subview, and RN lays that tree out against the width the
+   * subview had when it was last rendered. Nothing in this effect's inputs
+   * changes when a Mac window is dragged wider — not the title, not the
+   * tone, not the riwayah — so the header was never re-rendered, and the
+   * chips kept the frames they were given at the old width while UIKit
+   * moved the bar to the new one. They still DRAW in the right place; the
+   * views that answer a click are somewhere else. The same goes for the
+   * round trip through fullscreen, where the bar is torn down and rebuilt
+   * while the reader's own React tree does not change at all.
+   *
+   * So the window's size is an input to the header, and the chips are
+   * keyed on it: a changed key rebuilds the subview rather than diffing
+   * into the stale one. Settled, not live — a drag is a hundred widths and
+   * only the last one is worth a rebuild.
+   */
+  const win = useWindowDimensions();
+  const headerW = useSettledMeasure(Math.round(win.width));
+  const headerH = useSettledMeasure(Math.round(win.height));
   // A different surah means the reader's page title no longer applies.
   useEffect(() => {
     setReaderTitle(null);
@@ -272,6 +304,8 @@ export function MushafSurahScreen({
         // not thumb targets on a tablet, and Catalyst has already scaled
         // the whole row down (responsive/desktop.ts).
         <View
+          // Keyed on the settled window size — see the note by `headerW`.
+          key={`chips-${headerW}x${headerH}`}
           style={{
             flexDirection: 'row',
             gap: desktopSize(14),
@@ -372,6 +406,10 @@ export function MushafSurahScreen({
     switchRiwayah,
     t,
     onToggleMode,
+    // The window's size, so a resize re-issues the header rather than
+    // leaving UIKit holding a subview RN laid out for a different width.
+    headerW,
+    headerH,
   ]);
 
   useEffect(() => {

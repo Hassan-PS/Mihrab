@@ -407,6 +407,26 @@ export function useMushafReaderCore({
   }, []);
   const closeSheet = useCallback(() => setSheetVisible(false), []);
 
+  /**
+   * Let the sheet go once it has finished leaving.
+   *
+   * `selected` is what keeps the <Modal> mounted, and closing only ever
+   * cleared `sheetVisible` — so from the first tap on an ayah until the
+   * reader was left, a dismissed modal stayed in the tree. On iOS that is
+   * a spare view; on Mac Catalyst a modal is a presentation the window
+   * knows about, and a dismissed one that never unmounts is how the
+   * chrome above it stops answering the mouse. The sheet's own share card
+   * carries a note about the same failure one level in.
+   *
+   * The delay is the dismissal, not a guess at one: unmounting on the
+   * same commit as `visible={false}` takes the animation away with it.
+   */
+  useEffect(() => {
+    if (sheetVisible || selected == null) return;
+    const id = setTimeout(() => setSelected(null), 400);
+    return () => clearTimeout(id);
+  }, [sheetVisible, selected]);
+
   // Header "Recitation" button → unified sheet at the audio section,
   // anchored to the first ayah of the visible page (or the playing one).
   const lastAudioSignal = useRef(audioSheetSignal ?? 0);

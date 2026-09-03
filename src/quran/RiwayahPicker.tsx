@@ -44,6 +44,15 @@ export function RiwayahPicker({
   const { t } = useTranslation();
   const { palette } = useAppPalette();
 
+  // Not `visible={false}` on a mounted <Modal>: the picker is rendered
+  // beside the reader for the whole life of the screen, and on Mac
+  // Catalyst a modal that is mounted-but-hidden is still a presentation
+  // the window is holding — which is how the navigation bar's own chips
+  // stop answering the mouse. The fade-out is given up with it, which is
+  // a fair price for chrome that keeps working; the jump-to-page card has
+  // always unmounted itself the same way.
+  if (!visible) return null;
+
   return (
     <Modal
       visible={visible}

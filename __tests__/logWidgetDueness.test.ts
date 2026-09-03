@@ -98,8 +98,24 @@ describe('ios and macos decide dueness per timeline entry', () => {
     expect(logToday).toMatch(/default: return isDue\(p\) \? \.due : \.waiting/);
   });
 
-  it('the footer names the next prayer by the same reckoning', () => {
-    expect(logToday).toMatch(/first\(where: \{ !isDue\(\$0, t\) \}\)/);
+  it('the footer counts to the next EVENT, not the next loggable chip', () => {
+    // The chips are the five, by definition — they are what you tap. The
+    // countdown is what is next, which on a phone with the Last Third
+    // turned on is the Last Third. Reading the chip list here is what had
+    // this card saying "Fajr" beside a Lock Screen counting the forty
+    // minutes to it.
+    expect(logToday).toMatch(/private func nextEvent\(\)/);
+    expect(logToday).toMatch(
+      /widgetEvents\(rows: \$0\.rows, sunriseRow: \$0\.sunriseRow, extraRows: \$0\.extraRows\)/,
+    );
+    expect(logToday).not.toMatch(/first\(where: \{ !isDue\(\$0, t\) \}\)/);
+  });
+
+  it('takes the earliest still ahead, not the first in the list', () => {
+    // Display order is not the clock: the First Third is listed last and
+    // falls that evening, the night marks are listed under the date whose
+    // small hours they belong to.
+    expect(logToday).toMatch(/\.min\(by: \{ \$0\.0 < \$1\.0 \}\)/);
   });
 
   it('still emits an entry at every remaining prayer time', () => {
@@ -107,6 +123,10 @@ describe('ios and macos decide dueness per timeline entry', () => {
     expect(logToday).toMatch(/var boundaries: \[Date\] = \[now\]/);
     expect(logToday).toMatch(/boundaries\.append\(d\)/);
     expect(logToday).toMatch(/policy: \.after\(nextMidnight\)/);
+  });
+
+  it('wakes at the night marks too, or the countdown cannot leave one', () => {
+    expect(logToday).toMatch(/times \+= widgetEvents\(/);
   });
 });
 

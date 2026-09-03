@@ -18,7 +18,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { desktopSize } from '../../responsive/desktop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,7 +38,10 @@ import {
   CompanionTextSheet,
   useCompanionChoice,
 } from '../../quran/CompanionTextControls';
-import { useOverlayDismissGuard } from '../../quran/mushafReaderCore';
+import {
+  useOverlayDismissGuard,
+  useSettledMeasure,
+} from '../../quran/mushafReaderCore';
 import { findPageForAyah } from '../../quran/pages';
 import { surahName } from '../../quran/surahName';
 import {
@@ -85,6 +95,11 @@ export function TranslationSurahScreen({
   const playbackRef = useRef(playback);
   playbackRef.current = playback;
   const activeWord = useActiveWordIndex();
+  // The window's settled size, so the header row is rebuilt after a Mac
+  // resize instead of answering the mouse where it used to be.
+  const win = useWindowDimensions();
+  const headerW = useSettledMeasure(Math.round(win.width));
+  const headerH = useSettledMeasure(Math.round(win.height));
   const edition = useActiveEdition();
   // Current companion choice caption (mode + edition) for the header row.
   const companionChoice = useCompanionChoice();
@@ -161,6 +176,11 @@ export function TranslationSurahScreen({
         // not thumb targets on a tablet, and Catalyst has already scaled
         // the whole row down (responsive/desktop.ts).
         <View
+          // Keyed on the settled window size, and the size is in this
+          // effect's inputs — a native header subview that RN laid out for
+          // one window width answers the mouse at that width for ever. See
+          // the long note in MushafSurahScreen; this row is the same row.
+          key={`chips-${headerW}x${headerH}`}
           style={{
             flexDirection: 'row',
             gap: desktopSize(14),
@@ -218,6 +238,8 @@ export function TranslationSurahScreen({
     insets.bottom,
     t,
     toggleMushaf,
+    headerW,
+    headerH,
   ]);
 
   // Translation mode owns its own two <Modal>s (ayah sheet + companion-text

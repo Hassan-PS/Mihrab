@@ -121,8 +121,20 @@ describe('ios and macos already meet the same contract', () => {
   it('puts an entry at every future prayer across the whole window', () => {
     expect(swift).toMatch(/for p in prayers where p\.date > now \{ boundarySet\.insert\(p\.date\) \}/);
     // Flattened from every day in days[], not just today — which is what
-    // makes tomorrow's Fajr one of them.
-    expect(swift).toMatch(/for info in dayInfos \{\s*for r in info\.day\.rows \{/);
+    // makes tomorrow's Fajr one of them — and from every EVENT of each
+    // day, not just its five salāh, or the card cannot count down to a
+    // night mark the user turned on and cannot wake to leave one.
+    expect(swift).toMatch(
+      /for info in dayInfos \{\s*let dayEvents = widgetEvents\(\s*rows: info\.day\.rows,\s*sunriseRow: info\.day\.sunriseRow,\s*extraRows: info\.day\.extraRows,?\s*\)/,
+    );
+  });
+
+  it('takes the earliest event still ahead, not the next row in the list', () => {
+    // Display order is not the clock — the same rule the Android providers
+    // learned. `computeDynamicNext` walks the whole event list by minute.
+    expect(swift).toMatch(
+      /if let next = dated\.filter\(\{ \$0\.0 > currentMinutes \}\)\.min\(by: \{ \$0\.0 < \$1\.0 \}\)/,
+    );
   });
 
   it('rolls the rows at each day start too', () => {
