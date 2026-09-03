@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mihrab — open-source prayer times app, no ads, Madinah mushaf</title>
-<meta name="description" content="Mihrab is a free, open-source prayer times app for Android, iPhone, iPad and Mac: adhan reminders, a qibla compass, home-screen widgets, the Madinah mushaf in four riwayat, duas, tasbih, and accountless sync between your own devices. No ads, no analytics, no tracking. On F-Droid, Obtainium and Homebrew.">
+<meta name="description" content="A free, open-source prayer times app with no ads, no analytics and no account — the times are worked out on your own phone. Adhan reminders, a qibla compass, home-screen widgets, the Madinah mushaf in four riwayat, duas, tasbih, and accountless sync between your devices. Swedish times from Islamiska Förbundet. Android, iPhone, iPad and Mac; on F-Droid, Obtainium and Homebrew.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
@@ -21,6 +21,7 @@
 <meta property="og:image:height" content="900">
 <meta property="og:image:alt" content="Mihrab — prayer times, the Madinah mushaf, duas, tasbih and a fasting log, on iOS and Android">
 <meta property="og:locale" content="en">
+<meta property="og:locale:alternate" content="sv_SE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Mihrab — open-source prayer times app, no ads, Madinah mushaf">
 <meta name="twitter:description" content="A calm, private, offline-first companion for the day’s prayers. Open source under AGPL-3.0. No ads, no analytics, no tracking.">
@@ -102,6 +103,30 @@
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Yes. The F-Droid and APK builds carry no Play Services, no Play Billing and nothing proprietary, which is what lets F-Droid build and sign the app from source."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Mihrab track my location or sell my data?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, and there is nothing in the app that could. There is no analytics SDK, no ad network, no crash reporter and no account, so there is no profile for a location to be attached to. Coordinates are stored encrypted on the device; the only time they leave it is the request to the prayer-time provider you chose, which needs a place and a date to answer. Pick on-device calculation and even that request stops."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kan appen använda Islamiska Förbundets bönetider?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja. Välj Sverige som källa, så används Islamiska Förbundets publicerade tidtabell för orten närmast dig — 108 svenska orter finns med. Tiderna sparas på telefonen och gäller även utan uppkoppling, och stämmer något inte med din moské kan du justera varje bön för sig."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kostar bönetidsappen något, och finns det reklam?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nej på båda. Mihrab är gratis, har ingen reklam, ingen spårning, inga köp i appen och inget konto att skapa. Källkoden är öppen under AGPL-3.0, och F-Droid bygger Android-versionen från samma källkod."
       }
     },
     {
@@ -218,6 +243,17 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 .hero .meta a:hover { color: #fff; }
 .hero :focus-visible { outline-color: var(--cream); }
 .dot { opacity: .45; }
+/* The three claims that decide the download, above the fold. A section at
+   60% scroll is not where someone stops deciding. */
+.trust { display: flex; flex-wrap: wrap; gap: 8px 10px; margin: 22px 0 0; padding: 0; list-style: none; }
+.trust li {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 13px; border-radius: 999px;
+  background: rgba(238,228,212,.10);
+  border: 1px solid rgba(238,228,212,.24);
+  font-size: 14.5px; color: rgba(238,228,212,.94);
+}
+.trust svg { flex: none; opacity: .85; }
 /* ---- install ---- */
 .install { background: var(--surface); }
 /* Store badges. The four files are cropped to their ink, so a single height
@@ -301,6 +337,21 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 .group li b { font-weight: 650; }
 .group li span { color: var(--ink-soft); }
 /* ---- screenshots ---- */
+.sweden { background: var(--surface-2); }
+.sweden .cols {
+  /* Two columns, not three: the section is one wide explanation and two
+     questions, and two questions across three columns leaves a hole. */
+  display: grid; gap: 20px; margin-top: 28px; align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+}
+/* A card that carries the whole argument runs the width of the row rather
+   than standing alone at the end of the grid with two empty cells beside
+   it. Its list splits into columns so it does not become a tall ribbon. */
+.card.span { grid-column: 1 / -1; }
+@media (min-width: 760px) {
+  .card.span ul { columns: 2; column-gap: 40px; }
+  .card.span li { break-inside: avoid; }
+}
 .shots { background: var(--surface); }
 .gallery {
   margin: 32px 0 0; padding: 0; list-style: none;
@@ -431,10 +482,15 @@ footer .colophon {
       <img src="assets/img/icon.png" width="62" height="62" alt="Mihrab app icon">
       <span class="wordmark">Mihrab</span>
     </div>
-    <h1>Prayer times, adhan reminders, and the full Madinah mushaf.</h1>
-    <p class="sub">Mihrab keeps the five daily prayers close at hand: a calm home screen with the next
-      prayer and a live countdown, optional adhan reminders, a full-month planner, and a home-screen
-      widget. It works offline, and it does not track you.</p>
+    <h1>Prayer times that don’t know who you are.</h1>
+    <p class="sub">Adhan reminders, a qibla compass, a home-screen widget and the full Madinah mushaf
+      — with no account, no ads and no analytics. Once your location is set the times are worked
+      out on the phone itself, so the day works with the network switched off.</p>
+    <ul class="trust">
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No ads, no trackers, no account</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Works with the network off</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>F-Droid builds it from this source</li>
+    </ul>
     <p class="meta">
       <span>Version 2.14.3 (257)</span> <span class="dot" aria-hidden="true">•</span>
       <span>iOS, Android, macOS</span> <span class="dot" aria-hidden="true">•</span>
@@ -634,6 +690,50 @@ footer .colophon {
     </div>
   </div>
 </section>
+<section class="sweden" id="sverige" lang="sv">
+  <div class="wrap">
+    <p class="eyebrow">Bönetider i Sverige</p>
+    <h2>Islamiska Förbundets tidtabell, i en app som inte spårar dig</h2>
+    <p class="lede">De flesta bönetidsappar räknar ut tiderna själva och hamnar någon minut från den
+      tidtabell din moské faktiskt följer. Mihrab kan i stället använda <strong>Islamiska Förbundets
+      publicerade tider</strong> för orten närmast dig — samma tabell som moskén, utan att du behöver
+      slå upp den varje dag.</p>
+    <div class="cols">
+      <article class="card span">
+        <h3>Så fungerar det</h3>
+        <ul>
+          <li>Välj <strong>Sverige (Islamiska Förbundet)</strong> som källa i inställningarna.</li>
+          <li>Tiderna matchas mot närmaste ort. <strong>108 svenska orter</strong> finns med —
+            Stockholm, Göteborg, Malmö, Uppsala, Västerås, Örebro, Linköping, Helsingborg,
+            Jönköping, Norrköping, Lund, Umeå, Borås, Södertälje, Eskilstuna, Sundsvall och
+            resten.</li>
+          <li>Vill du hellre räkna själv finns AlAdhan, PrayTimes.dev och beräkning helt på
+            telefonen, med de vanliga metoderna och <strong>justering per bön</strong> om din moské
+            ligger några minuter från tabellen.</li>
+          <li>Widget på hemskärmen, adhan-påminnelser, qibla-kompass, månadsöversikt, fastelogg och
+            hela Medina-mushafen — på svenska, eller på något av de tolv andra språken.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Kan appen använda Islamiska Förbundets bönetider?</h3>
+        <p>Ja. Välj Sverige som källa, så används Islamiska Förbundets publicerade tidtabell för orten
+          närmast dig. Tabellen hämtas som en färdig fil från projektets eget arkiv — den frågar efter
+          en ort, inte efter dig — och sparas på telefonen, så tiderna gäller även utan uppkoppling.
+          Stämmer något ändå inte med din moské kan du justera varje bön för sig.</p>
+      </article>
+      <article class="card">
+        <h3>Kostar bönetidsappen något, och finns det reklam?</h3>
+        <p>Nej på båda. Mihrab är gratis, har ingen reklam, ingen spårning, inga köp i appen och inget
+          konto att skapa. Källkoden är öppen under AGPL-3.0, och F-Droid bygger Android-versionen
+          från samma källkod — du behöver alltså inte ta mitt ord för det.</p>
+      </article>
+    </div>
+    <p class="note">Appen finns i sin helhet på svenska, och
+      <a href="https://github.com/Hassan-PS/Mihrab/blob/main/PRIVACY_POLICY.md">integritetspolicyn</a>
+      finns också på svenska. Hittar du en tid som inte stämmer med din moské —
+      <a href="https://github.com/Hassan-PS/Mihrab/issues">säg till</a>, det är så felen hittas.</p>
+  </div>
+</section>
 <section class="shots" id="screenshots">
   <div class="wrap">
     <p class="eyebrow">Screenshots</p>
@@ -714,9 +814,10 @@ footer .colophon {
   <div class="wrap">
     <p class="eyebrow">Private by design</p>
     <h2>Nothing leaves your phone that you didn’t ask to send</h2>
-    <p class="lede">There is no account to make, and this codebase carries no analytics panel, no ad
-      network and no crash-reporting service. Once a location is set, prayer times can be calculated
-      entirely on your device — the app works with the network switched off.</p>
+    <p class="lede">Where you are, five times a day, is the most sensitive thing a prayer app ever
+      touches. So there is no account to make, this codebase carries no analytics panel, no ad
+      network and no crash-reporting service, and once a location is set, prayer times can be
+      calculated entirely on your device — the app works with the network switched off.</p>
     <div class="cols">
       <article class="card">
         <h3>Stays on the device</h3>
@@ -756,6 +857,18 @@ footer .colophon {
           <li>This page is one hand-written HTML file: no JavaScript, no webfonts, no third-party
             requests. Its two <code>&lt;script&gt;</code> tags are inert JSON describing the app and
             these questions to search engines — nothing in them runs.</li>
+        </ul>
+      </article>
+      <article class="card span">
+        <h3>None of it asks to be believed</h3>
+        <ul>
+          <li>The source is public under the <strong>AGPL-3.0</strong>, so the network calls listed
+            here are the ones anyone can go and read.</li>
+          <li><strong>F-Droid builds and signs the Android app themselves</strong>, from that source
+            — the APK they serve is not one I hand them.</li>
+          <li>The licence means a fork that changes any of this has to publish what it changed.</li>
+          <li>Every release is a tag with its notes and its artefacts attached, so a version on your
+            phone traces back to a commit you can read.</li>
         </ul>
       </article>
     </div>
@@ -807,6 +920,14 @@ footer .colophon {
           proprietary — that is what lets
           <a href="https://f-droid.org/packages/com.prayer_times/">F-Droid</a> build and sign it from
           source. Nothing in the app depends on Google being on the device.</p>
+      </article>
+      <article class="card">
+        <h3>Does Mihrab track my location or sell my data?</h3>
+        <p>No, and there is nothing in the app that could. No analytics SDK, no ad network, no crash
+          reporter and no account — so there is no profile for a location to be attached to.
+          Coordinates are stored encrypted on the device; the only time they leave it is the request
+          to the prayer-time provider you chose, which needs a place and a date to answer. Pick
+          on-device calculation and even that request stops.</p>
       </article>
       <article class="card">
         <h3>Does Mihrab work offline?</h3>
