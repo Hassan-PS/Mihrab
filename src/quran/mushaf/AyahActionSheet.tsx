@@ -54,6 +54,11 @@ import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { RowAction, SectionHead } from '../../components/controls';
 import { ActionSheetIOS, Alert, Platform } from 'react-native';
 import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+/** The sheet's own padding, before the safe-area insets are added to it. */
+const SHEET_H_PADDING = 18;
+const SHEET_BOTTOM_PADDING = 26;
 
 /** Clamp heights, and the text lengths past which a toggle is worth showing. */
 const TRANSLATION_CLAMP_LINES = 5;
@@ -81,6 +86,9 @@ export function AyahActionSheet({
 }: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const insets = useSafeAreaInsets();
+  // The larger of the two, on both — see the sheet's note.
+  const sideInset = Math.max(insets.left, insets.right);
   const { settings } = usePrayerSettings();
   const edition = useActiveEdition();
   const state = useQuranState();
@@ -255,7 +263,31 @@ export function AyahActionSheet({
         accessibilityLabel={t('common.close', 'Close')}
         onPress={onClose}
       />
-      <View style={[styles.sheet, { backgroundColor: palette.card }]}>
+      <View
+        style={[
+          styles.sheet,
+          {
+            backgroundColor: palette.card,
+            /**
+             * THE ISLAND IS ON THE SIDE IN LANDSCAPE, and it is over this
+             * sheet, not beside it.
+             *
+             * The muṣḥaf is the one screen that turns, and turned on its
+             * side an iPhone puts the cutout at one end of the LONG edge —
+             * directly on top of the āyah, its translation, and whichever
+             * control happened to be under it. The sheet is edge to edge
+             * by design, so it takes the insets on itself.
+             *
+             * Symmetrically, on the larger of the two: the sheet is a
+             * centred column of text, and shifting it off centre to dodge
+             * a cutout on one side looks like a mistake rather than a
+             * clearance.
+             */
+            paddingStart: SHEET_H_PADDING + sideInset,
+            paddingEnd: SHEET_H_PADDING + sideInset,
+            paddingBottom: SHEET_BOTTOM_PADDING + insets.bottom,
+          },
+        ]}>
         <View style={styles.headerRow}>
           <Text style={[styles.reference, { color: palette.muted }]}>
             {reference}
@@ -527,9 +559,9 @@ const styles = StyleSheet.create({
     maxHeight: '82%',
     borderTopStartRadius: 18,
     borderTopEndRadius: 18,
-    paddingHorizontal: 18,
+    // The horizontal and bottom padding are applied inline — they carry the
+    // safe-area insets with them. See the sheet's own note.
     paddingTop: 16,
-    paddingBottom: 26,
     gap: 12,
   },
   headerRow: {

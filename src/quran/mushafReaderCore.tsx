@@ -631,7 +631,16 @@ export function MushafPageHeader({
       {show !== 'pill' ? (
         <Text
           numberOfLines={1}
-          style={[styles.pageHeaderText, { color: ornament }]}>
+          style={[
+            styles.pageHeaderText,
+            // In fullscreen this row is drawn ACROSS the status-bar band, so
+            // that the surah name and the tone pill sit either side of the
+            // cutout instead of below it — see the phone reader. The middle
+            // of the row belongs to the island: the label may have the near
+            // half of the window and no more, however long the surah's name.
+            isFullscreen && styles.pageHeaderTextIsland,
+            { color: ornament },
+          ]}>
           {isFullscreen
             ? (() => {
                 const surah = surahsForRiwayah(riwayah).find(
@@ -824,6 +833,7 @@ const styles = StyleSheet.create({
   // Spread: the odd (right) page shows only the label — push it to the
   // spread's outer right corner.
   pageHeaderLabelEnd: { justifyContent: 'flex-end' },
+  pageHeaderTextIsland: { maxWidth: '38%' },
   pageHeaderText: {
     fontSize: 13,
     fontWeight: '600',
