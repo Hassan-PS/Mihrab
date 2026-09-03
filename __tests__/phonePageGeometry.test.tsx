@@ -24,7 +24,6 @@ const portrait: PhonePageInputs = {
   sideInset: 0,
   navPad: 96,
   listH: 720,
-  playerReserve: 0,
 };
 
 describe('phonePageGeometry', () => {

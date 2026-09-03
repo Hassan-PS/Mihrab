@@ -1,8 +1,24 @@
 <resources>
 
     <!-- Material 3 + dynamic color (Android 12+) for PlatformColor(?attr/...) in JS. -->
+    <!--
+        The system bars are the app's to paint.
+
+        Theme.Material3 sets an opaque `android:navigationBarColor`, and on
+        API 35+ that is what fills `android:id/navigationBarBackground` —
+        drawn OVER the app, so a fullscreen muṣḥaf page stopped dead in a
+        band of app surface along the bottom of the window. It was long
+        believed to be the platform's adaptive contrast scrim, which is why
+        turning that scrim off measured as a no-op: it was never the scrim.
+
+        Transparent here, and the app draws the band itself where buttons
+        need one — see SystemNavigationScrim, which paints the tab bar's own
+        material, or the page colour when a reader has claimed it.
+    -->
     <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <!-- NoActionBar: toolbar is in activity_prayer_widget_configure.xml for correct window insets. -->

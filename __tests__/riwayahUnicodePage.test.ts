@@ -295,6 +295,9 @@ describe('fitting a page to its box', () => {
 
 describe('the box a page is given', () => {
   it('fills the viewport when the column does not scroll', () => {
+    // The WHOLE viewport: the mini player is a flex sibling below the
+    // pager, so the viewport it was measured in already excludes it, and
+    // reserving room for it here opened a void above the player card.
     expect(
       mushafPageColumnHeight({
         page: 5,
@@ -302,9 +305,8 @@ describe('the box a page is given', () => {
         textWidth: 340,
         viewportHeight: 700,
         scrolling: false,
-        playerReserve: 68,
       }),
-    ).toBe(632);
+    ).toBe(700);
   });
 
   it('gives a scrolling Unicode column the print’s proportions', () => {

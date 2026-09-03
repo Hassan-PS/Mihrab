@@ -439,7 +439,6 @@ export function mushafPageColumnHeight({
   textWidth,
   viewportHeight,
   scrolling,
-  playerReserve = 0,
 }: {
   page: number;
   riwayah?: RiwayahId;
@@ -449,10 +448,10 @@ export function mushafPageColumnHeight({
   viewportHeight: number;
   /** True when the column scrolls — the phone's landscape reading zoom. */
   scrolling: boolean;
-  /** Room the player is holding at the foot of a non-scrolling column. */
-  playerReserve?: number;
 }): number {
-  if (!scrolling) return Math.max(120, viewportHeight - playerReserve);
+  // The mini player is a flex sibling below the pager, so the viewport it
+  // is measured in already excludes it — nothing to reserve here.
+  if (!scrolling) return Math.max(120, viewportHeight);
   // Height follows the text: the column scrolls whatever overflows.
   if (riwayahById(riwayah).render === 'unicode') {
     return Math.max(viewportHeight, textWidth * PRINT_BLOCK_ASPECT);

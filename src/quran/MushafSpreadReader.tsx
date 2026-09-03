@@ -69,9 +69,6 @@ import {
   useSettledSpreadGeometry,
 } from './spreadPageGeometry';
 
-/** Floating mini-player card: 3px track + row (~54) + 10 bottom margin. */
-const PLAYER_RESERVE = 68;
-
 /**
  * Pages either side of the one being read whose fonts are registered
  * ahead. Three, not two: the pager steps by a spread, so the next item
@@ -303,8 +300,10 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
   // Raw: the geometry it feeds is what settles, not this on its own.
   const [listH, setListH] = useState(0);
 
-  const navPad = !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
-  const playerReserve = playback.active ? PLAYER_RESERVE : 0;
+  const navPad =
+    !isFullscreen && Platform.OS === 'ios' && !props.chromeCleared
+      ? headerHeight
+      : 0;
 
   // Every input that decides a page's size, folded into one value and
   // published once it has stopped moving — see spreadPageGeometry.ts.
@@ -316,7 +315,6 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
       sidebarWidth: showSidebar ? SIDEBAR_WIDTH : 0,
       navPad,
       listH,
-      playerReserve,
     }),
   );
   // A settled geometry from before a rotation names the old width and the

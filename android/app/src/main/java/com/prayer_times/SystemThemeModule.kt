@@ -82,37 +82,31 @@ class SystemThemeModule(private val reactContext: ReactApplicationContext) :
         WindowCompat.setDecorFitsSystemWindows(window, false)
         @Suppress("DEPRECATION")
         window.navigationBarColor = Color.TRANSPARENT
-        /**
-         * Left at `false`, and asking for the scrim instead does NOT work.
-         *
-         * Three-button navigation on Android 14 leaves back, home and
-         * recents sitting directly on whatever has scrolled under them, so
-         * the obvious fix is to stop suppressing the system's contrast
-         * scrim in exactly that case. Tried: `isNavigationBarContrastEnforced
-         * = isButtonNavigation()`, rebuilt, and the bottom of the screenshot
-         * came back byte-identical to the run before it. The app draws its
-         * own band instead — see `SystemNavigationScrim`.
-         */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-          @Suppress("DEPRECATION")
-          window.isNavigationBarContrastEnforced = false
-        }
       }
       /**
-       * ON API 35+ THE SCRIM IS NOT OURS TO REMOVE, and it was worth
-       * checking rather than assuming.
+       * THE CONTRAST SCRIM IS TURNED OFF ON EVERY VERSION, and the earlier
+       * reading of this was wrong in an instructive way.
        *
-       * Behind three-button navigation the system paints a contrast band
-       * over the app's background, which is why the bar reads as a slab
-       * rather than the page continuing underneath it. React Native's
-       * `enableEdgeToEdge` asks for it (`isNavigationBarContrastEnforced =
-       * true`), so the obvious move is to set it back to false above 35 as
-       * well. Tried, on API 36 with three-button navigation: the band
-       * measured rgb(30,32,37) against app content of rgb(13,14,18) both
-       * before and after. The setter is a genuine no-op once the app targets
-       * SDK 35 — the platform owns that band now. Gesture navigation has no
-       * scrim to begin with.
+       * It was believed above API 35 that the band behind three-button
+       * navigation was the platform's adaptive scrim and no longer ours:
+       * measured on API 36, rgb(30,32,37) over app content of
+       * rgb(13,14,18), unchanged by this setter. But the app was ALSO
+       * painting `android:navigationBarBackground` with the opaque
+       * `android:navigationBarColor` Theme.Material3 hands out, and that
+       * band is what the measurement was of. With the theme's colour now
+       * transparent (`styles.xml`) the scrim is the only thing left over
+       * the app's own band, and it is worth asking for it to go — a
+       * fullscreen muṣḥaf page must reach the bottom of the window, not
+       * nearly reach it.
+       *
+       * React Native's `enableEdgeToEdge` asks for the scrim, so this has
+       * to be re-applied after it: `setNavigationBarStyle` runs on every
+       * theme change and on every return to the foreground.
        */
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        @Suppress("DEPRECATION")
+        window.isNavigationBarContrastEnforced = false
+      }
       // Icon appearance (light/dark nav-bar glyphs) is NOT deprecated and is
       // the only lever under enforced edge-to-edge — always apply it.
       val controller = WindowCompat.getInsetsController(window, window.decorView)

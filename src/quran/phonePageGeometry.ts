@@ -68,8 +68,6 @@ export type PhonePageGeometry = {
   viewportH: number;
   /** Landscape: the column scrolls a reading zoom. Portrait: height-fitted. */
   scrolling: boolean;
-  /** Room the mini player is holding at the foot of a fitted column. */
-  playerReserve: number;
 };
 
 export type PhonePageInputs = {
@@ -80,9 +78,17 @@ export type PhonePageInputs = {
   sideInset: number;
   /** iOS's floating header height while the chrome is up; 0 otherwise. */
   navPad: number;
-  /** The measured pager viewport, or 0 while it has not been measured. */
+  /**
+   * The measured pager viewport, or 0 while it has not been measured.
+   *
+   * THE MINI PLAYER IS NOT SUBTRACTED FROM THIS, and an earlier version
+   * that also subtracted a `playerReserve` was measurably wrong. The
+   * player is a plain flex sibling BELOW the list, so the moment it
+   * mounts the list is re-measured shorter by exactly the player's
+   * height: taking it off again reserved the same 68dp twice and opened
+   * a void between the page medallion and the player card.
+   */
   listH: number;
-  playerReserve: number;
 };
 
 /** One pager item = the list viewport, in the window less the cutout. */
@@ -113,14 +119,13 @@ export function phonePageGeometry(
     textWidth: Math.round(textWidth),
     viewportH: Math.round(input.listH - chromeH),
     scrolling,
-    playerReserve: input.playerReserve,
   };
 }
 
 /** Two geometries that would lay the page out identically have one key. */
 export function geometryKey(g: PhonePageGeometry | null): string {
   if (!g) return '';
-  return `${g.textWidth}x${g.viewportH}${g.scrolling ? 's' : 'f'}p${g.playerReserve}`;
+  return `${g.textWidth}x${g.viewportH}${g.scrolling ? 's' : 'f'}`;
 }
 
 /**

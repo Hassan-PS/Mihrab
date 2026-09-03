@@ -13,6 +13,7 @@ import { useSystemColorScheme } from './hooks/useSystemColorScheme';
 import { linking } from './navigation/linking';
 import { RootNavigator } from './navigation/RootNavigator';
 import { SystemNavigationScrim } from './navigation/SystemNavigationScrim';
+import { useSystemBarSurface } from './navigation/systemBarSurface';
 import {
   restartApp as nativeRestartApp,
   setNavigationBarStyle,
@@ -384,14 +385,20 @@ export function AppNavigationRoot() {
   // Re-applied whenever dark/light flips and again when the app returns
   // to the foreground (the OS can reset the inset controller across some
   // backgrounding paths). No-op on iOS.
+  //
+  // A screen that has claimed the bottom of the window decides this
+  // instead — the muṣḥaf's night page under a light app theme wants light
+  // glyphs, and the app theme cannot know that. See `systemBarSurface`.
+  const barSurface = useSystemBarSurface();
+  const barIsDark = barSurface ? barSurface.isDark : isDark;
   useEffect(() => {
-    setNavigationBarStyle(isDark);
+    setNavigationBarStyle(barIsDark);
     if (Platform.OS !== 'android') return;
     const sub = AppState.addEventListener('change', state => {
-      if (state === 'active') setNavigationBarStyle(isDark);
+      if (state === 'active') setNavigationBarStyle(barIsDark);
     });
     return () => sub.remove();
-  }, [isDark]);
+  }, [barIsDark]);
 
   // Every right-to-left language we ship, not just Arabic — Urdu was
   // getting an LTR layout with RTL text in it. One rule, one place:

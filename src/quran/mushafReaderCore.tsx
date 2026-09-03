@@ -57,8 +57,10 @@ import {
   prefsForTone,
   TONE_ORNAMENT,
   TONE_PAGE_BG,
+  toneIsDark,
   type MushafTone,
 } from './mushafTone';
+import { setSystemBarSurface } from '../navigation/systemBarSurface';
 import { mushafSurahName } from './surahName';
 import type { AyahRef } from './MushafTextPage';
 import type { KeyPagingTarget } from './useKeyPaging';
@@ -91,6 +93,16 @@ export type MushafReaderProps = {
    * drives whichever one is actually on screen.
    */
   keyTurn?: KeyPagingTarget;
+  /**
+   * Something above the reader has already cleared iOS's floating header.
+   *
+   * The download strip is the only such thing: it is drawn ABOVE both
+   * readers, and it pads itself past the header so its percentage and its
+   * Cancel are not behind the blur. Once it has, the reader's own
+   * `navPad` would push the page down a SECOND header's worth, which is
+   * how a download left the page medallion halfway down the screen.
+   */
+  chromeCleared?: boolean;
 };
 
 export type AyahSelection = AyahRef & { page: number };
@@ -280,6 +292,28 @@ export function useMushafReaderCore({
       return findPageForAyah(at.surah, at.ayah, riwayah);
     });
   }, [riwayah]);
+
+  /**
+   * The muṣḥaf owns the bottom of the window while it is open.
+   *
+   * Android paints the area behind the navigation buttons itself, in a
+   * colour that has nothing to do with the page — so a sepia page in a
+   * light app ended in a near-white band, and a night page in a light app
+   * ended in a white one. The reader publishes the page colour and how
+   * dark it is; the band and the glyph appearance both follow it, and it
+   * is handed back when the reader goes away. See `systemBarSurface`.
+   *
+   * Not gated on fullscreen: the page reaches the bottom edge either way,
+   * and a band that appeared only when the chrome was hidden would be one
+   * more thing flickering on the toggle.
+   */
+  useEffect(() => {
+    if (!hydrated) return;
+    return setSystemBarSurface({
+      color: TONE_PAGE_BG[tone],
+      isDark: toneIsDark(tone),
+    });
+  }, [hydrated, tone]);
 
   // ── Keep the screen awake while reading (QR-13) ─────────────────────
   useEffect(() => {

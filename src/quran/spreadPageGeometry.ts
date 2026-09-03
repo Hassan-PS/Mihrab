@@ -43,9 +43,15 @@ export type SpreadInputs = {
   /** The index sidebar's width when it is shown, else 0. */
   sidebarWidth: number;
   navPad: number;
-  /** Measured list viewport, or 0 while unmeasured. */
+  /**
+   * Measured list viewport, or 0 while unmeasured.
+   *
+   * The mini player is NOT subtracted from this — it is a flex sibling
+   * below the list, so the list is already re-measured shorter when the
+   * player mounts. See `PhonePageInputs.listH` for the void that
+   * subtracting it a second time opened.
+   */
   listH: number;
-  playerReserve: number;
 };
 
 export function spreadPageWidth(
@@ -67,11 +73,7 @@ export function spreadGeometry(input: SpreadInputs): SpreadGeometry | null {
     availH: Math.round(
       Math.max(
         120,
-        input.listH -
-          input.navPad -
-          HEADER_RESERVE -
-          FOOTER_RESERVE -
-          input.playerReserve,
+        input.listH - input.navPad - HEADER_RESERVE - FOOTER_RESERVE,
       ),
     ),
   };

@@ -2,6 +2,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import type { AppPalette } from '../theme/appPalette';
 import { translucentSurface } from '../theme/chrome';
 import { useSystemNavigationBand } from './tabBarInset';
+import { useSystemBarSurface } from './systemBarSurface';
 
 /**
  * A band behind the system's navigation BUTTONS, on the Android versions
@@ -43,16 +44,29 @@ import { useSystemNavigationBand } from './tabBarInset';
  *
  * Nothing for gestures: a thin handle over a live page is the entire point
  * of edge-to-edge, and a band behind it would just be a stripe.
+ *
+ * ── AND ON 35+ IT IS OURS AFTER ALL ───────────────────────────────────
+ *
+ * The paragraph above says the platform took this over above API 35, and
+ * that was the wrong reading of the evidence. What paints the bottom of
+ * the window there is `android:id/navigationBarBackground`, filled with
+ * the THEME's `android:navigationBarColor` — an opaque surface colour
+ * inherited from Theme.Material3, not the adaptive scrim. That is why
+ * `isNavigationBarContrastEnforced = false` measured as a no-op: it was
+ * never the contrast scrim being measured. The theme now asks for a
+ * transparent navigation bar (`styles.xml`), so the app draws this band
+ * on every version, and the muṣḥaf can put its page under the buttons.
+ *
+ * A screen that wants the bar to be ITS colour publishes one — see
+ * `systemBarSurface`. That colour is painted opaque and at the full
+ * height, because the point of it is that the reader cannot tell where
+ * the page stops.
  */
 export function SystemNavigationScrim({ palette }: { palette: AppPalette }) {
   const band = useSystemNavigationBand();
+  const surface = useSystemBarSurface();
 
   if (Platform.OS !== 'android') return null;
-  // `Platform.Version` is the API level on Android. 35 is where the
-  // platform took this over.
-  if (typeof Platform.Version === 'number' && Platform.Version >= 35) {
-    return null;
-  }
   if (band <= 0) return null;
 
   return (
@@ -62,7 +76,12 @@ export function SystemNavigationScrim({ palette }: { palette: AppPalette }) {
       pointerEvents="none"
       style={[
         styles.band,
-        { height: band, backgroundColor: translucentSurface(palette.card) },
+        {
+          height: band,
+          backgroundColor: surface
+            ? surface.color
+            : translucentSurface(palette.card),
+        },
       ]}
     />
   );

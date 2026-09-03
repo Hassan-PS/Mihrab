@@ -89,9 +89,6 @@ import {
 const pageIndex = (page: number) => page - 1;
 const indexPage = (index: number) => index + 1;
 
-/** Floating mini-player card: 3px track + row (~54) + 10 bottom margin. */
-const PLAYER_RESERVE = 68;
-
 /** Pages either side of the one being read whose fonts are registered ahead. */
 const WARM_RADIUS = 2;
 
@@ -165,7 +162,6 @@ const PhonePageItem = React.memo(function PhonePageItem({
         textWidth: geometry.textWidth,
         viewportHeight: geometry.viewportH,
         scrolling: geometry.scrolling,
-        playerReserve: geometry.playerReserve,
       })
     : 0;
 
@@ -195,7 +191,9 @@ const PhonePageItem = React.memo(function PhonePageItem({
       {geometry ? (
         <ScrollView
           style={styles.column}
-          contentContainerStyle={styles.columnContent}
+          contentContainerStyle={
+            geometry.scrolling ? styles.columnContent : undefined
+          }
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled>
           <Pressable
@@ -292,8 +290,10 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
   const pageWidth = phonePageWidth(width, sideInset);
   // iOS floats a translucent nav header over the content; keep the page
   // chrome below it (0 on Android's opaque header, 0 in fullscreen).
-  const navPad = !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
-  const playerReserve = playback.active ? PLAYER_RESERVE : 0;
+  const navPad =
+    !isFullscreen && Platform.OS === 'ios' && !props.chromeCleared
+      ? headerHeight
+      : 0;
 
   // Every input that decides a page's box, folded into one value and
   // published once it has stopped moving — see phonePageGeometry.ts for the
@@ -305,7 +305,6 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       sideInset,
       navPad,
       listH,
-      playerReserve,
     }),
   );
 
@@ -544,6 +543,11 @@ const styles = StyleSheet.create({
   listWrap: { flex: 1, direction: 'ltr' },
   item: { height: '100%' },
   column: { flex: 1 },
+  /**
+   * Landscape only. The fitted portrait column is exactly the viewport,
+   * and padding it pushed the medallion off the bottom of a page that had
+   * nothing to scroll.
+   */
   columnContent: { paddingBottom: 24 },
   pageWrap: { alignItems: 'center' },
 });

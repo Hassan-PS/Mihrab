@@ -34,7 +34,6 @@ const landscape: SpreadInputs = {
   sidebarWidth: 240,
   navPad: 0,
   listH: 760,
-  playerReserve: 0,
 };
 const portrait: SpreadInputs = {
   ...landscape,
@@ -59,9 +58,19 @@ describe('spreadGeometry', () => {
     expect(spreadGeometry(landscape)!.pageWidth).toBe(940);
   });
 
-  it('leaves the page the viewport less its chrome and the player', () => {
-    const g = spreadGeometry({ ...landscape, navPad: 50, playerReserve: 68 })!;
-    expect(g.availH).toBe(760 - 50 - HEADER_RESERVE - FOOTER_RESERVE - 68);
+  it('leaves the page the viewport less its own chrome', () => {
+    const g = spreadGeometry({ ...landscape, navPad: 50 })!;
+    expect(g.availH).toBe(760 - 50 - HEADER_RESERVE - FOOTER_RESERVE);
+  });
+
+  // The mini player is a flex sibling BELOW the pager: when it mounts the
+  // list is re-measured shorter by its own height. Subtracting it again
+  // reserved the same 68dp twice and opened a void above the player card.
+  it('does not reserve the mini player twice', () => {
+    const withPlayer = spreadGeometry({ ...landscape, listH: 760 - 68 })!;
+    expect(withPlayer.availH).toBe(
+      760 - 68 - HEADER_RESERVE - FOOTER_RESERVE,
+    );
   });
 
   it('rounds to whole dp', () => {
