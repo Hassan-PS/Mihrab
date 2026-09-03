@@ -42,7 +42,7 @@ import {
   activeKhatmah,
   khatmahCurrentPortion,
   khatmahMarkerAyah,
-  recordKhatmahProgress,
+  recordKhatmahPageTurn,
   setLastRead,
   setQuranPrefs,
   useQuranState,
@@ -318,14 +318,13 @@ export function useMushafReaderCore({
         page: newPage,
         mode: 'mushaf',
       });
-      // Sequential forward turn = the page(s) left behind are completed.
-      // A spread pager steps by 2; `recordKhatmahProgress` is a high-water
-      // mark, so recording the last completed page covers the pair. The
-      // riwayah goes with it — the page is converted to an ayah count
-      // before it is stored, so progress means the same thing either way.
-      if (newPage === prevPage + 1) recordKhatmahProgress(prevPage, riwayah);
-      else if (newPage === prevPage + 2)
-        recordKhatmahProgress(prevPage + 1, riwayah);
+      // Sequential forward turn = the page(s) left behind are completed —
+      // but only when they are the khatmah's own pages. Reading a juz or a
+      // bookmark ahead of the plan is reading, not khatmah progress; see
+      // `recordKhatmahPageTurn`. The riwayah goes with it: the page is
+      // converted to an ayah count before it is stored, so progress means
+      // the same thing in either muṣḥaf.
+      recordKhatmahPageTurn(prevPage, newPage, riwayah);
     },
     [riwayah],
   );

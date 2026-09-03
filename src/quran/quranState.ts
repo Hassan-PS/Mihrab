@@ -782,6 +782,53 @@ export function recordKhatmahProgress(
 }
 
 /**
+ * Is the reading in front of the reader the khatmah's own reading?
+ *
+ * A khatmah is a promise about ONE trail through the muṣḥaf, and the
+ * reader has every other reason to be somewhere else in it: a bookmark,
+ * a juz they wanted to hear, Al-Kahf on a Friday, the surah a search
+ * landed on. Progress used to be credited from wherever the pages were
+ * turning, so an evening in juz 30 could carry a plan sitting at page 50
+ * to page 590 — six hundred pages the reader never read, and no way back
+ * to the real place except by hand.
+ *
+ * The test is the trail, not the button that opened the reader. A page at
+ * or behind the plan's own next page IS the khatmah — that is what
+ * "Continue" hands you, and what a bookmark on the same page means too.
+ * A page ahead of it is not, however the reader got there, and reading
+ * there leaves the plan exactly where it was.
+ */
+export function khatmahTracksPage(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+  s: QuranState = getQuranState(),
+): boolean {
+  const plan = activeKhatmah(s);
+  if (!plan) return false;
+  return page <= khatmahCurrentPage(plan, riwayah);
+}
+
+/**
+ * Credit a page turn to the khatmah, if the turn belongs to it.
+ *
+ * The pager's step is the muṣḥaf's, not the plan's: a phone turns one
+ * page and a spread turns two, and in both cases what was completed is
+ * the page (or pages) left behind. `recordKhatmahProgress` is a
+ * high-water mark, so naming the last completed page covers the pair.
+ */
+export function recordKhatmahPageTurn(
+  prevPage: number,
+  newPage: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): void {
+  if (!khatmahTracksPage(prevPage, riwayah)) return;
+  if (newPage === prevPage + 1) recordKhatmahProgress(prevPage, riwayah);
+  else if (newPage === prevPage + 2) {
+    recordKhatmahProgress(prevPage + 1, riwayah);
+  }
+}
+
+/**
  * The page the reader should land on to continue the khatmah.
  *
  * Derived through the ayah rather than stored, which is what makes a
