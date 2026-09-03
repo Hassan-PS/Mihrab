@@ -88,6 +88,21 @@ export function MushafReader(props: Props) {
   const [lastRunFailed, setLastRunFailed] = useState(0);
   /** Bytes the retired page-image store is still occupying, if any. */
   const [staleImageBytes, setStaleImageBytes] = useState(0);
+  /**
+   * THE READER OPENS THE MOMENT THE DOWNLOAD STARTS.
+   *
+   * Nobody read anything until all 180 MB had landed: the gate held a
+   * progress bar in front of the muṣḥaf for as long as six hundred files
+   * took, on a phone, on whatever network it had. But a page needs only
+   * its own font, the surface already fetches that on demand, and the
+   * pages either side are warmed ahead — so once the download has been
+   * asked for, the reader can simply open, draw the page it is on as its
+   * font arrives, and carry a slim strip saying how the rest is going.
+   *
+   * Once true, true for the mount: a cancelled or failed run takes the
+   * strip away, never the book — the pages still arrive one by one.
+   */
+  const [reading, setReading] = useState(false);
 
   useEffect(() => {
     if (bundledRiwayah || fontStoreKnownComplete()) {
@@ -158,6 +173,7 @@ export function MushafReader(props: Props) {
   const startDownload = () => {
     if (downloadStatus === 'downloading') return;
     setDownloadStatus('downloading');
+    setReading(true);
     lastPctRef.current = -1;
     setProgress({ done: 0, total: MUSHAF_TOTAL_PAGES, failed: 0 });
     // Out with the old first. An updated app may still be carrying the page
@@ -180,19 +196,19 @@ export function MushafReader(props: Props) {
   useKeyPaging(turnForward, turnBack);
 
   // ── Gate screens ────────────────────────────────────────────────────
-  if (downloadStatus === 'checking') {
+  if (downloadStatus === 'checking' && !reading) {
     return (
       <View style={[styles.gate, { backgroundColor: palette.bg }]}>
         <ActivityIndicator color={palette.accentSolid} size="large" />
       </View>
     );
   }
-  if (downloadStatus === 'needs_download') {
+  if (downloadStatus === 'needs_download' && !reading) {
     const cta =
       lastRunFailed > 0
         ? t('quran.mushafDownloadRetryCta', 'Retry missing pages')
-        : t('quran.mushafDownloadCta', {
-            defaultValue: 'Download mushaf (~{{size}} MB)',
+        : t('quran.mushafDownloadReadCta', {
+            defaultValue: 'Download and start reading (~{{size}} MB)',
             size: FONT_SET_MB,
           });
     return (
@@ -213,6 +229,12 @@ export function MushafReader(props: Props) {
                 size: FONT_SET_MB,
               })}
         </Text>
+        <Text style={[styles.gateBody, { color: palette.muted }]}>
+          {t('quran.mushafDownloadReadHint', {
+            defaultValue:
+              'Pages appear as they arrive; the rest downloads in the background.',
+          })}
+        </Text>
         {staleImageBytes > 0 ? (
           <Text style={[styles.gateBody, { color: palette.muted }]}>
             {t('quran.mushafReplaceOldBody', {
@@ -232,53 +254,66 @@ export function MushafReader(props: Props) {
       </View>
     );
   }
-  if (downloadStatus === 'downloading') {
-    const pct =
-      progress.total > 0
-        ? Math.round((progress.done / progress.total) * 100)
-        : 0;
-    return (
-      <View style={[styles.gate, { backgroundColor: palette.bg }]}>
-        <Text style={[styles.gateTitle, { color: palette.text }]}>
-          {t('quran.mushafDownloading', 'Downloading mushaf…')}
-        </Text>
-        <Text style={[styles.progressLabel, { color: palette.muted }]}>
-          {t('quran.mushafDownloadProgress', '{{done}} / {{total}} pages · {{pct}}%', {
-            done: progress.done,
-            total: progress.total,
-            pct,
-          })}
-        </Text>
-        <View style={[styles.progressTrack, { backgroundColor: palette.accentBg }]}>
+  // ── The strip ───────────────────────────────────────────────────────
+  // While the bulk download runs, the reader carries a line saying how far
+  // it has got, with the one control that matters. It leaves when the
+  // download does, however the download ends.
+  const pct =
+    progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+  const strip =
+    downloadStatus === 'downloading' ? (
+      <View
+        style={[
+          styles.strip,
+          { backgroundColor: palette.card, borderBottomColor: palette.border },
+        ]}>
+        <View style={styles.stripRow}>
+          <Text
+            style={[styles.stripLabel, { color: palette.muted }]}
+            numberOfLines={1}>
+            {t('quran.mushafDownloadStrip', {
+              defaultValue: 'Downloading the mushaf · {{pct}}%',
+              pct,
+            })}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('common.cancel', 'Cancel')}
+            hitSlop={10}
+            onPress={() => cancelMushafDownload()}>
+            <Text style={[styles.stripCancel, { color: palette.accentSolid }]}>
+              {t('common.cancel', 'Cancel')}
+            </Text>
+          </Pressable>
+        </View>
+        <View style={[styles.stripTrack, { backgroundColor: palette.accentBg }]}>
           <View
             style={[
-              styles.progressFill,
+              styles.stripFill,
               { width: `${pct}%`, backgroundColor: palette.accentSolid },
             ]}
           />
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.cancel', 'Cancel')}
-          onPress={() => cancelMushafDownload()}
-          style={styles.cancelBtn}>
-          <Text style={[styles.cancelLabel, { color: palette.accentSolid }]}>
-            {t('common.cancel', 'Cancel')}
-          </Text>
-        </Pressable>
       </View>
-    );
-  }
+    ) : null;
 
   // ── The route ───────────────────────────────────────────────────────
   // Answered once, at module scope: a phone cannot become an iPad
   // mid-session, only its window can change size, and each reader handles
   // its own window from here.
   const readerProps: MushafReaderProps = { ...props, keyTurn: keyTurnRef };
-  return DEVICE_CLASS === 'phone' ? (
-    <MushafPhoneReader {...readerProps} />
-  ) : (
-    <MushafSpreadReader {...readerProps} />
+  const reader =
+    DEVICE_CLASS === 'phone' ? (
+      <MushafPhoneReader {...readerProps} />
+    ) : (
+      <MushafSpreadReader {...readerProps} />
+    );
+  if (!strip) return reader;
+  return (
+    <View style={styles.withStrip}>
+      {strip}
+      {reader}
+    </View>
   );
 }
 
@@ -299,15 +334,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   ctaLabel: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
-  progressLabel: { fontSize: 13, fontVariant: ['tabular-nums'] },
-  progressTrack: {
-    width: '100%',
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginTop: 6,
+  withStrip: { flex: 1 },
+  strip: {
+    paddingHorizontal: 14,
+    paddingTop: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  progressFill: { height: '100%' },
-  cancelBtn: { marginTop: 12, paddingHorizontal: 16, paddingVertical: 8 },
-  cancelLabel: { fontSize: 14, fontWeight: '600' },
+  stripRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingBottom: 5,
+  },
+  stripLabel: { fontSize: 12, fontVariant: ['tabular-nums'], flexShrink: 1 },
+  stripCancel: { fontSize: 12, fontWeight: '700' },
+  stripTrack: { height: 3, overflow: 'hidden' },
+  stripFill: { height: '100%' },
 });
