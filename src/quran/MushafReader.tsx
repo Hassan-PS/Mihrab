@@ -41,7 +41,7 @@ import {
   legacyImageStoreBytes,
   type MushafDownloadProgress,
 } from './mushafDownload';
-import { fontStoreStats } from './mushafFontStore';
+import { fontStoreKnownComplete, fontStoreStats } from './mushafFontStore';
 import {
   cancelMushafDownload,
   mushafDownloadState,
@@ -74,9 +74,12 @@ export function MushafReader(props: Props) {
   const bundledRiwayah = riwayahById(riwayah).render === 'unicode';
 
   // ── The gate ────────────────────────────────────────────────────────
+  // Opens on what this process already knows: a bundled riwayah needs
+  // nothing, and a font store seen complete once this session is complete
+  // now. Only the first open of a session, with fonts, waits on the disk.
   const [downloadStatus, setDownloadStatus] = useState<
     'checking' | 'needs_download' | 'downloading' | 'ready'
-  >('checking');
+  >(() => (bundledRiwayah || fontStoreKnownComplete() ? 'ready' : 'checking'));
   const [progress, setProgress] = useState<MushafDownloadProgress>({
     done: 0,
     total: MUSHAF_TOTAL_PAGES,
@@ -87,7 +90,7 @@ export function MushafReader(props: Props) {
   const [staleImageBytes, setStaleImageBytes] = useState(0);
 
   useEffect(() => {
-    if (bundledRiwayah) {
+    if (bundledRiwayah || fontStoreKnownComplete()) {
       // Nothing to fetch and nothing to check: the muṣḥaf is already here.
       setDownloadStatus('ready');
       return undefined;

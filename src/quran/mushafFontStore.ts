@@ -280,31 +280,57 @@ export function downloadAllPageFonts({
     };
 
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
-    return !cancelled && failed === 0;
+    const complete = !cancelled && failed === 0;
+    if (complete) knownComplete = true;
+    return complete;
   };
 
   return { promise: run(), cancel: () => { cancelled = true; } };
 }
 
-/** How many page fonts are on disk, and how many bytes they take. */
+/**
+ * Whether this process has seen the store complete. Set by the one listing
+ * that found all 604, and by the download that finished them; cleared by the
+ * delete. The reader's gate asks this first and opens on the answer, so the
+ * second open of the muṣḥaf in a session waits on nothing at all.
+ */
+let knownComplete = false;
+
+export function fontStoreKnownComplete(): boolean {
+  return knownComplete;
+}
+
+/**
+ * How many page fonts are on disk, and how many bytes they take.
+ *
+ * ONE call over the bridge, not six hundred and five. This used to `ls` the
+ * directory and then `stat` each file in turn, serially, awaiting each — and
+ * the reader's gate ran it on every open before it would draw a page. On a
+ * phone that was several hundred milliseconds of spinner in front of a
+ * muṣḥaf that had been on the device for months. `lstat` on the directory
+ * returns every entry with its size in a single round-trip.
+ */
 export async function fontStoreStats(): Promise<{ pages: number; bytes: number }> {
   try {
     if (!(await ReactNativeBlobUtil.fs.exists(storeDir()))) {
       return { pages: 0, bytes: 0 };
     }
-    const names = await ReactNativeBlobUtil.fs.ls(storeDir());
+    const entries = (await ReactNativeBlobUtil.fs.lstat(storeDir())) as Array<{
+      filename: string;
+      size: string | number;
+      type: string;
+    }>;
     let bytes = 0;
     let pages = 0;
-    for (const name of names) {
-      if (!name.endsWith('.ttf')) continue;
-      const stat = await ReactNativeBlobUtil.fs
-        .stat(`${storeDir()}/${name}`)
-        .catch(() => null);
-      if (stat && Number(stat.size) >= MIN_FONT_BYTES) {
+    for (const entry of entries) {
+      if (entry.type === 'directory' || !entry.filename.endsWith('.ttf')) continue;
+      const size = Number(entry.size) || 0;
+      if (size >= MIN_FONT_BYTES) {
         pages += 1;
-        bytes += Number(stat.size);
+        bytes += size;
       }
     }
+    if (pages >= MUSHAF_TOTAL_PAGES) knownComplete = true;
     return { pages, bytes };
   } catch {
     return { pages: 0, bytes: 0 };
@@ -312,5 +338,6 @@ export async function fontStoreStats(): Promise<{ pages: number; bytes: number }
 }
 
 export async function deletePageFonts(): Promise<void> {
+  knownComplete = false;
   await ReactNativeBlobUtil.fs.unlink(storeDir()).catch(() => undefined);
 }

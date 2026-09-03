@@ -1,6 +1,8 @@
 /**
- * The spread pager's mechanics — every way the list moves, and how a
- * movement becomes a page.
+ * The muṣḥaf pager's mechanics — every way the list moves, and how a
+ * movement becomes a page. Both readers drive their FlatList through
+ * this: the spread reader with an index per pair of pages, the phone
+ * reader with an index per page.
  *
  * ── WHY THIS IS NOT INSIDE THE COMPONENT ──────────────────────────
  *
@@ -12,7 +14,7 @@
  * that grep the component's source for the shape of the fix — which is
  * what you do when the logic cannot be run without a FlatList.
  *
- * So the logic runs without a FlatList. `createSpreadPager` is a plain
+ * So the logic runs without a FlatList. `createMushafPager` is a plain
  * closure over plain state: feed it scroll offsets and it tells a list
  * where to go and a reader which page it is on. A test drives it with fake
  * offsets and fake timers. The hook below is the thin React wrapper that
@@ -61,7 +63,7 @@ export const SCROLL_IDLE_MS = 140;
 export const GUARD_ANIMATED_MS = 700;
 export const GUARD_INSTANT_MS = 250;
 
-export type SpreadPagerInput = {
+export type MushafPagerInput = {
   /** The list, read at call time — it mounts after the pager is made. */
   list: () => PagerList | null;
   itemCount: () => number;
@@ -81,7 +83,7 @@ export type SpreadPagerInput = {
   onSettleNoop: () => void;
 };
 
-export type SpreadPager = {
+export type MushafPager = {
   /** Every scroll event, at `scrollEventThrottle` cadence. */
   onScroll: (offsetX: number) => void;
   /** The list's own momentum has ended (touch). */
@@ -102,7 +104,7 @@ export type SpreadPager = {
   dispose: () => void;
 };
 
-export function createSpreadPager(input: SpreadPagerInput): SpreadPager {
+export function createMushafPager(input: MushafPagerInput): MushafPager {
   let settledPage = input.initialPage;
   let settledIndex = input.indexForPage(input.initialPage);
   let scrollingTo: number | null = null;
@@ -200,8 +202,14 @@ export function createSpreadPager(input: SpreadPagerInput): SpreadPager {
       settledPage = page;
       const idx = input.indexForPage(page);
       if (idx === settledIndex) return;
+      // The NEXT page turns; anything further jumps. Recitation follow and
+      // the khatmah's step are always the adjacent page, and a reciter
+      // crossing a page used to be a hard cut where every other turn was
+      // a slide. A jump from the index to page 400, though, would animate
+      // through two hundred spreads — and take as long as it sounds.
+      const adjacent = Math.abs(idx - settledIndex) === 1;
       settledIndex = idx;
-      scrollTo(idx, false);
+      scrollTo(idx, adjacent);
     },
     reanchor: () => {
       const idx = input.indexForPage(settledPage);
@@ -227,7 +235,7 @@ type ScrollEvent = { nativeEvent: { contentOffset: { x: number } } };
  * returns are stable, which is what a FlatList and the key-paging
  * registration both want.
  */
-export function useSpreadPager(opts: {
+export function useMushafPager(opts: {
   list: RefObject<PagerList | null>;
   itemCount: number;
   pageWidth: number;
@@ -250,9 +258,9 @@ export function useSpreadPager(opts: {
   const latest = useRef(opts);
   latest.current = opts;
 
-  const pager = useRef<SpreadPager | null>(null);
+  const pager = useRef<MushafPager | null>(null);
   if (pager.current == null) {
-    pager.current = createSpreadPager({
+    pager.current = createMushafPager({
       list: () => latest.current.list.current,
       itemCount: () => latest.current.itemCount,
       pageWidth: () => latest.current.pageWidth,

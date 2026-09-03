@@ -146,21 +146,18 @@ describe('following the recitation is not switched off by starting it', () => {
 
   it('clears it when a drag lands back where it started', () => {
     // The branch that finds the list back where it started must lift the
-    // suspension rather than leave follow off for thirty seconds. The
-    // phone reader settles inline; the spread reader hands the pager
-    // `core.resumeFollow` as what to do when a gesture navigates nowhere,
-    // and spreadPager.test.ts runs that path for real.
-    const phone = read('src/quran/MushafPhoneReader.tsx');
-    const from = phone.indexOf('const onMomentumEnd = useCallback(');
-    expect(from).toBeGreaterThanOrEqual(0);
-    const settle = phone.slice(from);
-    expect(settle.slice(0, settle.indexOf('}, ['))).toContain(
-      'core.resumeFollow()',
-    );
-
-    const spread = read('src/quran/MushafSpreadReader.tsx');
-    expect(spread).toMatch(/onSettleNoop: core\.resumeFollow,/);
-    expect(spread).toMatch(/onTurnStart: core\.suspendFollow,/);
+    // suspension rather than leave follow off for thirty seconds. Both
+    // readers hand the pager `core.resumeFollow` as what to do when a
+    // gesture navigates nowhere, and mushafPager.test.ts runs that path
+    // for real.
+    for (const file of [
+      'src/quran/MushafPhoneReader.tsx',
+      'src/quran/MushafSpreadReader.tsx',
+    ]) {
+      const src = read(file);
+      expect(src).toMatch(/onSettleNoop: core\.resumeFollow,/);
+      expect(src).toMatch(/onTurnStart: core\.suspendFollow,/);
+    }
   });
 });
 

@@ -8,12 +8,12 @@
  * pages until the app crashed.
  */
 import {
-  createSpreadPager,
+  createMushafPager,
   GUARD_ANIMATED_MS,
   SCROLL_IDLE_MS,
   type PagerList,
-  type SpreadPager,
-} from '../src/quran/useSpreadPager';
+  type MushafPager,
+} from '../src/quran/useMushafPager';
 
 const W = 700;
 const TOTAL = 604;
@@ -32,7 +32,7 @@ function harness(opts: { width?: number; paired?: boolean; initialPage?: number 
   };
   const turns: Array<[number, number]> = [];
   const events: string[] = [];
-  const pager: SpreadPager = createSpreadPager({
+  const pager: MushafPager = createMushafPager({
     list: () => list,
     itemCount: () => (paired ? 302 : TOTAL),
     pageWidth: () => width,
@@ -240,6 +240,23 @@ describe('outside changes', () => {
     h.pager.followPage(50);
     expect(h.list.calls).toEqual(['index:24:jump']);
     expect(h.turns).toEqual([]);
+  });
+
+  it('but following the NEXT spread turns it', () => {
+    // Recitation follow and the khatmah's step are always the adjacent
+    // page, and a reciter crossing a page used to be a hard cut where
+    // every other turn was a slide.
+    const h = harness();
+    h.pager.followPage(3);
+    expect(h.list.calls).toEqual(['index:1:anim']);
+    h.pager.followPage(1);
+    expect(h.list.calls).toEqual(['index:1:anim', 'index:0:anim']);
+  });
+
+  it('and a far jump stays a jump — it would animate through the book', () => {
+    const h = harness();
+    h.pager.followPage(400);
+    expect(h.list.calls).toEqual(['index:199:jump']);
   });
 
   it('re-anchoring after a resize keeps the page under the new geometry', () => {

@@ -19,7 +19,7 @@
  * math — this component is only ever mounted on a phone (DEVICE_CLASS,
  * answered once at module scope) in text mode.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   FlatList,
   Platform,
@@ -50,6 +50,11 @@ import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
 import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
+import { useMushafPager } from './useMushafPager';
+
+/** Index per page: the FlatList index IS the page, less one. */
+const pageIndex = (page: number) => page - 1;
+const indexPage = (index: number) => index + 1;
 
 /** Breathing room either side of the page inside its column. */
 const H_PADDING = 10;
@@ -87,7 +92,6 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   } = core;
 
   const listRef = useRef<FlatList<number>>(null);
-  const settled = useRef(currentPage);
   // Measured list viewport (excludes the fullscreen top inset padding);
   // window height is a fine estimate for the first frame.
   const [listHRaw, setListH] = useState(0);
@@ -134,71 +138,37 @@ export function MushafPhoneReader(props: MushafReaderProps) {
     [pageWidth],
   );
 
-  // Follow an outside change (jump-to-page, khatmah, recitation follow).
-  // Skip the one we just reported ourselves, or the list fights the
-  // user's own swipe.
-  useEffect(() => {
-    if (currentPage === settled.current) return;
-    settled.current = currentPage;
-    listRef.current?.scrollToIndex({
-      index: currentPage - 1,
-      animated: false,
-    });
-  }, [currentPage]);
-
-  // Rotation: offsets are width-multiples, so re-anchor the settled page
-  // against the new width. The tree itself never remounts.
-  useEffect(() => {
-    listRef.current?.scrollToIndex({
-      index: settled.current - 1,
-      animated: false,
-    });
-  }, [pageWidth]);
-
-  const onMomentumEnd = useCallback(
-    (e: { nativeEvent: { contentOffset: { x: number } } }) => {
-      const index = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
-      const page = Math.min(totalPages, Math.max(1, index + 1));
-      if (page === settled.current) {
-        // Dragged and came back. Nothing was navigated to, so lift the
-        // suspension armed at drag begin rather than leaving recitation
-        // follow off for thirty seconds after a gesture that did nothing.
-        core.resumeFollow();
-        return;
-      }
-      const prev = settled.current;
-      settled.current = page;
-      core.commitPageTurn(page, prev);
+  /**
+   * The same pager the spread reader drives, with an index per page. It
+   * used to be a hand-rolled copy of the mechanics — a settled ref, two
+   * effects, a momentum handler — with none of the guard against settling
+   * its own scrolls and none of the tests. One pager, two layouts.
+   */
+  const onTurn = useCallback(
+    (page: number, prevPage: number) => {
+      core.commitPageTurn(page, prevPage);
       setCurrentPage(page);
     },
-    [core, pageWidth, setCurrentPage, totalPages],
+    [core, setCurrentPage],
   );
+  const { handlers: pagerHandlers, turnPage } = useMushafPager({
+    list: listRef,
+    itemCount: totalPages,
+    pageWidth,
+    currentPage,
+    indexForPage: pageIndex,
+    pageForIndex: indexPage,
+    onTurn,
+    onTurnStart: core.suspendFollow,
+    onSettleNoop: core.resumeFollow,
+  });
 
   /**
-   * Page turn by something other than a swipe. `dir` is READING direction:
-   * +1 = the next page of the book (the mushaf advances right-to-left,
-   * which the list already lays out; the index here IS the page number, so
-   * it moves with `dir` either way).
-   *
    * A phone with a hardware keyboard attached is rare but real, and this
    * reader is also what an iPhone-idiom window shows, so it publishes its
    * turn like the spread reader does. Where there is no keyboard the
    * native module is absent and the binding never fires.
    */
-  const turnPage = useCallback(
-    (dir: 1 | -1) => {
-      const page = Math.min(totalPages, Math.max(1, settled.current + dir));
-      if (page === settled.current) return;
-      core.suspendFollow();
-      const prev = settled.current;
-      settled.current = page;
-      core.commitPageTurn(page, prev);
-      setCurrentPage(page);
-      listRef.current?.scrollToIndex({ index: page - 1, animated: true });
-    },
-    [core, setCurrentPage, totalPages],
-  );
-
   useRegisterKeyPaging(props.keyTurn, turnPage);
 
   const renderItem = useCallback(
@@ -352,8 +322,11 @@ export function MushafPhoneReader(props: MushafReaderProps) {
           getItemLayout={getItemLayout}
           keyExtractor={p => String(p)}
           renderItem={renderItem}
-          onMomentumScrollEnd={onMomentumEnd}
-          onScrollBeginDrag={core.suspendFollow}
+          onMomentumScrollEnd={pagerHandlers.onMomentumScrollEnd}
+          onScroll={pagerHandlers.onScroll}
+          scrollEventThrottle={16}
+          onScrollToIndexFailed={pagerHandlers.onScrollToIndexFailed}
+          onScrollBeginDrag={pagerHandlers.onScrollBeginDrag}
           // A page is a typeface plus ~150 text nodes, so a small window
           // is plenty and keeps swiping instant.
           windowSize={3}
@@ -391,8 +364,10 @@ export function MushafPhoneReader(props: MushafReaderProps) {
 
       <MiniPlayer />
       {/* Publishes the recited word for the lines to follow — see the
-          store for why it is a probe and not a prop. */}
-      <ActiveWordProbe />
+          store for why it is a probe and not a prop. Mounted only while
+          something plays: the hook behind it polls playback four times a
+          second for as long as it is mounted, playing or not. */}
+      {playback.active && playback.playing ? <ActiveWordProbe /> : null}
 
       <MushafJumpModal
         visible={core.jumpVisible}

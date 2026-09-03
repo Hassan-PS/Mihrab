@@ -47,7 +47,7 @@ import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
 import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
-import { useSpreadPager } from './useSpreadPager';
+import { useMushafPager } from './useMushafPager';
 
 /** KFGQPC source page ratio — the printed page's width over height. */
 const PAGE_ASPECT = 2600 / 4206;
@@ -149,7 +149,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
   /**
    * How the list moves and how a movement becomes a page — the settle,
    * the guard against settling our own scrolls, the arrows, the re-anchor
-   * on resize. All of it lives in `useSpreadPager`, where it runs without
+   * on resize. All of it lives in `useMushafPager`, where it runs without
    * a FlatList and is tested with fake offsets and fake timers; this
    * component only points it at the list and says what a turn means.
    */
@@ -160,7 +160,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     },
     [core, setCurrentPage],
   );
-  const { handlers: pagerHandlers, turnPage } = useSpreadPager({
+  const { handlers: pagerHandlers, turnPage } = useMushafPager({
     list: listRef,
     itemCount,
     pageWidth,
@@ -525,8 +525,10 @@ export function MushafSpreadReader(props: MushafReaderProps) {
 
       <MiniPlayer />
       {/* Publishes the recited word for the lines to follow — see the
-          store for why it is a probe and not a prop. */}
-      <ActiveWordProbe />
+          store for why it is a probe and not a prop. Mounted only while
+          something plays: the hook behind it polls playback four times a
+          second for as long as it is mounted, playing or not. */}
+      {playback.active && playback.playing ? <ActiveWordProbe /> : null}
 
       <MushafJumpModal
         visible={core.jumpVisible}

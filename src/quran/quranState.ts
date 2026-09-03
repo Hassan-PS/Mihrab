@@ -454,13 +454,32 @@ export function primeQuranState(raw: unknown): void {
   emit();
 }
 
+/**
+ * Set while a write is queued for the end of the current tick, so a burst of
+ * updates lands on disk as ONE write of the state they left behind.
+ *
+ * A page turn is two updates — the last-read position, then the khatmah's
+ * progress — and each used to serialise the whole store and hand it to
+ * AsyncStorage on its own. The second write carried everything the first
+ * had, a tick later. Deferring to a microtask keeps every update visible to
+ * readers immediately (`emit` is synchronous, above) and coalesces the
+ * writes; anything `await`ed, which is everything that reads the store back,
+ * runs after the flush.
+ */
+let persistQueued = false;
+
 function persist(): void {
-  const snapshot = state;
-  writeMutex = writeMutex
-    .then(() => AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot)))
-    .catch(e => {
-      console.warn('quranState: persist failed', e);
-    });
+  if (persistQueued) return;
+  persistQueued = true;
+  void Promise.resolve().then(() => {
+    persistQueued = false;
+    const snapshot = state;
+    writeMutex = writeMutex
+      .then(() => AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot)))
+      .catch(e => {
+        console.warn('quranState: persist failed', e);
+      });
+  });
 }
 
 export function getQuranState(): QuranState {
@@ -1329,4 +1348,5 @@ export function __resetQuranStateForTests(): void {
   hydrating = null;
   listeners.clear();
   writeMutex = Promise.resolve();
+  persistQueued = false;
 }

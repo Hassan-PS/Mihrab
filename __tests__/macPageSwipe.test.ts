@@ -34,7 +34,7 @@ const spread = readFileSync(
   'utf8',
 );
 const pagerSrc = readFileSync(
-  path.join(__dirname, '..', 'src', 'quran', 'useSpreadPager.ts'),
+  path.join(__dirname, '..', 'src', 'quran', 'useMushafPager.ts'),
   'utf8',
 );
 
@@ -62,7 +62,7 @@ describe('the back swipe gets out of the page swipe’s way', () => {
 describe('and the swipe it makes room for still lands on a page', () => {
   // The mechanics themselves — the settle-on-silence, the guard against
   // settling our own scrolls, the slack for a fractional width — run for
-  // real in spreadPager.test.ts. What is pinned here is the wiring: that
+  // real in mushafPager.test.ts. What is pinned here is the wiring: that
   // the component hands the list to the pager and nothing else moves it.
   it('the component defers every scroll to the pager', () => {
     expect(spread).toMatch(/onScroll=\{pagerHandlers\.onScroll\}/);
@@ -87,6 +87,19 @@ describe('and the swipe it makes room for still lands on a page', () => {
 
   it('and the arrows turn through the same pager', () => {
     expect(spread).toMatch(/useRegisterKeyPaging\(props\.keyTurn, turnPage\)/);
-    expect(spread).toMatch(/const \{ handlers: pagerHandlers, turnPage \} = useSpreadPager\(/);
+    expect(spread).toMatch(/const \{ handlers: pagerHandlers, turnPage \} = useMushafPager\(/);
+  });
+
+  it('and so does the phone reader — one pager, two layouts', () => {
+    // It carried a hand-rolled copy of the mechanics: a settled ref, two
+    // effects, a momentum handler, and none of the guard or the tests.
+    const phone = readFileSync(
+      path.join(__dirname, '..', 'src', 'quran', 'MushafPhoneReader.tsx'),
+      'utf8',
+    );
+    expect(phone).toMatch(/useMushafPager\(\{/);
+    expect(phone).toMatch(/onScroll=\{pagerHandlers\.onScroll\}/);
+    expect(phone).not.toMatch(/scrollToIndex\(/);
+    expect(phone).not.toMatch(/const settled = useRef/);
   });
 });
