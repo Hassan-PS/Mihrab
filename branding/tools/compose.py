@@ -70,7 +70,7 @@ def wrap(draw, text, font, max_w):
     if cur: lines.append(cur)
     return lines
 
-def compose(shot_path, out_path, W, H, headline, subhead, screen_radius_frac=0.062):
+def compose(shot_path, out_path, W, H, headline, subhead, screen_radius_frac=0.062, device_w_frac=0.66, device_top_frac=None):
     canvas = gradient_bg(W, H).convert("RGBA")
     # geometry accent: large faint star, bottom-right bleed
     star_sz = int(W*0.9)
@@ -108,10 +108,14 @@ def compose(shot_path, out_path, W, H, headline, subhead, screen_radius_frac=0.0
 
     # device: screenshot with rounded corners + soft shadow, centered below text
     shot = Image.open(shot_path).convert("RGB")
+    # A fixed device top keeps every preview in a set aligned even when one
+    # headline wraps onto a second line.
     dev_top = hy + int(H*0.03)
+    if device_top_frac is not None:
+        dev_top = max(dev_top, int(H*device_top_frac))
     avail_h = H - dev_top - int(H*0.02)
     # fit by width first
-    dev_w = int(W*0.66)
+    dev_w = int(W*device_w_frac)
     dev_h = int(dev_w * shot.height / shot.width)
     if dev_h > avail_h:  # let it crop slightly below bottom edge if very tall
         dev_h = avail_h

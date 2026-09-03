@@ -95,7 +95,7 @@ Three light / three dark; four English / two Arabic. Shows the i18n surface with
 
 Each screenshot lands on your **Desktop** as `Simulator Screenshot - iPhone 17 Pro Max - …png` at 1320×2868. Drag them straight into App Store Connect → My Apps → Mihrab → 1.0 (or the in-prep version) → Screenshots → 6.9-inch iPhone.
 
-You don't need to do a separate iPad pass — App Store Connect lets you reuse iPhone 6.9″ screenshots for iPad if you don't have iPad-specific assets, and reviewers don't penalise that for a non-iPad-first app.
+An app that ships an iPad build needs its own iPad pass: App Store Connect will not accept iPhone screenshots for the iPad slots. See "The store sets" below for the sizes and the folders they live in.
 
 Localised App Store listings (Arabic, Swedish, French, etc.) can reuse the same screenshots — App Store Connect doesn't require localised images for each language.
 
@@ -138,3 +138,82 @@ cache with nothing to tell them — which is exactly what happened when the
 2.14 set went live: correct bytes on the server, August's screenshots on the
 screen. The stamp is written by the same command that writes the images, so
 the two cannot drift apart.
+
+---
+
+## The store sets (2026-09-03)
+
+Two sizes, and only two, because they are the two Apple actually requires.
+App Store Connect scales them down for every smaller class on its own, so a
+6.5″ or 6.3″ set buys nothing and is one more thing to let go stale.
+
+| Slot | Pixels | Raw shots | Captioned panels | Upload from |
+|---|---|---|---|---|
+| iPhone 6.9″ | 1320 × 2868 | `branding/store/ios-6.9` | `branding/store-previews` | `fastlane/screenshots/ios/6.9` |
+| iPad 13″ | 2064 × 2752 | `branding/store/ipad-13` | `branding/store-previews-ipad` | `fastlane/screenshots/ipad/13` |
+
+Raw shots are the untouched simulator captures. The captioned panels are what
+goes on the product page. Both are built by one script:
+
+```sh
+python3 branding/tools/build_store.py
+```
+
+It refuses to run on a shot that is the wrong size or that still carries an
+alpha channel — `simctl io … screenshot` writes RGBA, and App Store Connect
+rejects any PNG with alpha, so flatten before committing:
+
+```python
+from PIL import Image
+im = Image.open(path)
+bg = Image.new("RGB", im.size, (255, 255, 255))
+bg.paste(im, mask=im.split()[-1])
+bg.save(path)
+```
+
+The caption for each panel lives in `CAPTIONS` in `build_store.py`, keyed by
+the raw file's name — so the numbering in the file name is also the order the
+panels appear in on the product page.
+
+### The seven panels
+
+| # | Screen | Why it's in |
+|---|---|---|
+| 1 | Home — next prayer | The hero. Countdown, today's times, the ayah of the day. |
+| 2 | Mushaf — Al-Baqarah, playing | The reader *with the mini player up and a word lit*, which is the one thing a static list of features can't convey. |
+| 3 | Month | The whole table filled in — proof of the offline year. |
+| 4 | Duas | Ayat al-Kursi with Arabic, transliteration, translation, source. |
+| 5 | Tasbih | Counter part-way through a set, so it reads as used rather than empty. |
+| 6 | Log | The practice grid and today's row — the journal nobody expects. |
+| 7 | Qibla | iPhone only. |
+
+Qibla is left out of the iPad set: a simulator has no magnetometer, so the
+dial sits on "Starting compass…", and on a 13″ canvas that is mostly empty
+page. On the iPhone it still reads, because the bearing is the whole top of
+the screen.
+
+### Capturing
+
+Both simulators take synthetic taps, so the whole pass runs headless:
+
+```sh
+IPHONE=$(xcrun simctl list devices | grep 'iPhone 17 Pro Max' | grep -o '[0-9A-F-]\{36\}')
+xcrun simctl status_bar $IPHONE override --time '9:41' \
+  --batteryLevel 100 --batteryState charged --cellularBars 4 --wifiBars 3
+idb ui tap --udid $IPHONE <x> <y>        # device POINTS, i.e. pixels ÷ 3
+xcrun simctl io $IPHONE screenshot shot.png
+```
+
+`idb ui describe-all --udid <udid> --json` gives every element's label and
+frame, which is how the taps are aimed — never guess from a screenshot's
+pixels. Filter it hard; on the Log screen it prints a row per day of the year.
+
+Two things that cost time last pass:
+
+- A fresh simulator has no muṣḥaf pages, so the reader renders blank. Copy the
+  `Documents/quran` folder across from a simulator that has already downloaded
+  it (`xcrun simctl get_app_container <udid> com.hassan.prayerapp data`) —
+  185 MB, and much faster than downloading again inside each device.
+- Neither `simctl` nor `idb` can rotate a device. The iPad set is therefore
+  portrait, where the spread reader shows one page plus the surah sidebar.
+  Landscape needs the Simulator GUI and `cmd+left` / `cmd+right`.
