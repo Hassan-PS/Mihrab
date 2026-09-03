@@ -430,6 +430,13 @@ enum LiveActivityRefresher {
     if let sun = state.sunriseRow {
       if rows.isEmpty { rows.append(sun) } else { rows.insert(sun, at: 1) }
     }
+    // The night marks are events like any other: they are in the state only
+    // because the user turned them on, and a roll-forward that cannot see
+    // them can neither land on one nor step off it — the card holds a First
+    // Third that passed hours ago until the app is opened. Order does not
+    // matter here; the list is sorted by wall clock below, which is the only
+    // thing that could put them in the right place anyway.
+    rows.append(contentsOf: state.extraRows ?? [])
     let cal = Calendar.current
     var events: [(date: Date, row: PrayerLiveActivityAttributes.Row)] = []
     for row in rows {

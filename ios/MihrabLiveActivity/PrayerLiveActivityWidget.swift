@@ -103,7 +103,25 @@ private func displayRows(
   if let sun = s.sunriseRow {
     if out.isEmpty { out.append(sun) } else { out.insert(sun, at: 1) }
   }
+  // The night marks the user turned on, placed by the clock rather than
+  // appended: Islamic Midnight and the Last Third fall in the small hours
+  // and the First Third that evening, so tacking them onto the end would
+  // draw a list that runs backwards. Rows the countdown can now aim at have
+  // to be rows the reader can see.
+  let night = s.extraRows ?? []
+  if !night.isEmpty {
+    out.append(contentsOf: night)
+    out.sort { (rowMinutes($0) ?? 0) < (rowMinutes($1) ?? 0) }
+  }
   return out
+}
+
+/// Minutes since midnight for a row's "HH:MM", or nil.
+@available(iOS 16.1, *)
+private func rowMinutes(_ r: PrayerLiveActivityAttributes.Row) -> Int? {
+  let parts = r.time.split(separator: ":")
+  guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) else { return nil }
+  return h * 60 + m
 }
 
 // MARK: - Reusable pieces

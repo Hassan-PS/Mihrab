@@ -50,6 +50,19 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
     /// keep both for compatibility with the home-screen widget payload.
     public var sunriseRow: Row?
 
+    /// The night marks — First Third / Islamic Midnight / the Last Third —
+    /// present only when the user has turned them on. The JS side has always
+    /// sent them; this field is what stops them being dropped on decode, and
+    /// what lets the on-device roll-forward land on one and leave it again
+    /// instead of counting past it to the next salāh.
+    ///
+    /// Optional, not an empty-array default: synthesized `Decodable` does not
+    /// fall back to a property's default value, it throws on a missing key —
+    /// and an activity already running when this build installs was archived
+    /// by the previous one, which never wrote this field. Only an Optional
+    /// decodes as absent.
+    public var extraRows: [Row]?
+
     /// Empty string → omit.
     public var hijriLabel: String
     /// Empty string → omit.

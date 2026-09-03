@@ -256,6 +256,40 @@ func resolvedWidgetHighlightColor() -> Color {
   return presetHighlightColor(id)
 }
 
+/// Minutes since midnight for an "HH:MM" string, or nil.
+func widgetMinutesOfDay(_ hhmm: String) -> Int? {
+  let parts = hhmm.split(separator: ":")
+  guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
+        (0...23).contains(h), (0...59).contains(m)
+  else { return nil }
+  return h * 60 + m
+}
+
+/// Everything on one day the countdown may aim at: the five salāh, plus
+/// Sunrise and the night marks when the user has turned them on.
+///
+/// They are in the payload only BECAUSE they are enabled, so their presence
+/// is the toggle. A countdown that skipped them was a card disagreeing with
+/// a setting the user had just changed — the list showed the Last Third and
+/// then counted past it to Fajr.
+func widgetEvents(
+  rows: [WidgetPayload.Row],
+  sunriseRow: WidgetPayload.Row?,
+  extraRows: [WidgetPayload.Row]?
+) -> [WidgetPayload.Row] {
+  var out = rows
+  if let sr = sunriseRow { out.append(sr) }
+  out.append(contentsOf: extraRows ?? [])
+  return out
+}
+
+/// The next event after `date` by the CLOCK, not by list order.
+///
+/// Display order is not chronological: Islamic Midnight and the Last Third
+/// are listed under the date whose small hours they fall in, and the First
+/// Third is listed last but falls that same evening. Walking the list and
+/// taking the first future entry answered "Isha" at nine o'clock with the
+/// First Third half an hour away.
 private func computeDynamicNext(
   after date: Date,
   rows: [WidgetPayload.Row],
@@ -263,19 +297,18 @@ private func computeDynamicNext(
 ) -> (key: String, name: String, time: String)? {
   let currentMinutes = calendar.component(.hour, from: date) * 60
     + calendar.component(.minute, from: date)
-  for row in rows {
-    let parts = row.time.split(separator: ":")
-    if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]) {
-      if h * 60 + m > currentMinutes {
-        return (row.key, row.abbr ?? row.key, row.time)
-      }
-    }
+  let dated = rows.compactMap { row -> (Int, WidgetPayload.Row)? in
+    guard let at = widgetMinutesOfDay(row.time) else { return nil }
+    return (at, row)
   }
-  // All prayer times appear to be in the past for today's wall clock — this
-  // means the JS layer has already rolled the payload over to tomorrow's data
-  // (which it does after Isha). Return the first prayer (Fajr) as the next one.
-  if let first = rows.first {
-    return (first.key, first.abbr ?? first.key, first.time)
+  if let next = dated.filter({ $0.0 > currentMinutes }).min(by: { $0.0 < $1.0 }) {
+    return (next.1.key, next.1.abbr ?? next.1.key, next.1.time)
+  }
+  // Everything is in the past for today's wall clock — the JS layer has
+  // already rolled the payload over to tomorrow's data (which it does after
+  // Isha), so the earliest event of that day is the next one.
+  if let first = dated.min(by: { $0.0 < $1.0 }) {
+    return (first.1.key, first.1.abbr ?? first.1.key, first.1.time)
   }
   return nil
 }
@@ -288,8 +321,11 @@ struct WidgetPayload: Codable {
   /// slot 1 (between Fajr and Dhuhr) so the visible order matches
   /// Android's [Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha].
   let sunriseRow: Row?
-  /// Islamic Midnight / the Last Third for the day being shown. Absent
-  /// unless the user turned them on; they are rows, never the headline.
+  /// The night marks — First Third / Islamic Midnight / the Last Third —
+  /// for the day being shown. Absent unless the user turned them on, so
+  /// their presence IS the toggle, and the countdown aims at them like
+  /// anything else: a toggle that means "remind me about the Last Third"
+  /// means this card counts down to it too.
   var extraRows: [Row]? = nil
   let nextKey: String?
   let nextPrayerName: String?
@@ -320,8 +356,9 @@ struct WidgetPayload: Codable {
     let dayLabel: String
     let rows: [Row]
     let sunriseRow: Row?
-    /// Islamic Midnight / the Last Third, when the user has turned them on.
-    /// Never a "next prayer" target — see `nightCanBeNext` on the JS side.
+    /// The night marks, when the user has turned them on. Targets of the
+    /// countdown like anything else — the JS side stopped stripping them
+    /// out of their own answer when `nightCanBeNext` was retired.
     var extraRows: [Row]? = nil
   }
   struct SeasonalFlags: Codable {
@@ -566,7 +603,11 @@ struct Provider: TimelineProvider {
     let payload = loadPayload()
     var key: String? = nil; var name: String? = nil; var time: String? = nil
     if let p = payload {
-      let r = computeDynamicNext(after: Date(), rows: p.rows, calendar: .current)
+      let r = computeDynamicNext(
+        after: Date(),
+        rows: widgetEvents(rows: p.rows, sunriseRow: p.sunriseRow, extraRows: p.extraRows),
+        calendar: .current
+      )
       key = r?.key; name = r?.name; time = r?.time
     }
     completion(Entry(date: Date(), payload: payload ?? Self.sample, dynamicNextKey: key, dynamicNextName: name, dynamicNextTime: time))
@@ -594,7 +635,15 @@ struct Provider: TimelineProvider {
 
     // ── Legacy single-day path (no `days[]` in payload) ──────────────
     var entries: [Entry] = []
-    let currentNext = computeDynamicNext(after: now, rows: payload.rows, calendar: cal)
+    // Sunrise and the night marks are events here too: they are what the
+    // card must count down to when the user has turned them on, and a
+    // boundary entry at each is what makes the card change over on its own.
+    let events = widgetEvents(
+      rows: payload.rows,
+      sunriseRow: payload.sunriseRow,
+      extraRows: payload.extraRows
+    )
+    let currentNext = computeDynamicNext(after: now, rows: events, calendar: cal)
     entries.append(Entry(date: now, payload: payload, dynamicNextKey: currentNext?.key, dynamicNextName: currentNext?.name, dynamicNextTime: currentNext?.time))
 
     // Detect whether the payload contains tomorrow's data. This happens when
@@ -619,16 +668,23 @@ struct Provider: TimelineProvider {
     }
 
     var lastDate = now
-    for row in payload.rows {
+    for row in events {
       let parts = row.time.split(separator: ":")
       if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
          let prayerDate = cal.date(bySettingHour: h, minute: m, second: 0, of: baseDate),
          prayerDate > now {
-        let next = computeDynamicNext(after: prayerDate, rows: payload.rows, calendar: cal)
+        let next = computeDynamicNext(after: prayerDate, rows: events, calendar: cal)
         entries.append(Entry(date: prayerDate, payload: payload, dynamicNextKey: next?.key, dynamicNextName: next?.name, dynamicNextTime: next?.time))
         lastDate = prayerDate
       }
     }
+
+    // WidgetKit wants its entries in ascending order, and the event list no
+    // longer arrives in one: Sunrise and the night marks are appended after
+    // the five salāh, and the night marks are not even in the same part of
+    // the day as the row they follow.
+    entries.sort { $0.date < $1.date }
+    lastDate = entries.last?.date ?? lastDate
 
     // Ask WidgetKit to refresh 15 min after the last prayer in the timeline.
     // If we are in the overnight window (all-times-in-past), the app will push
@@ -712,13 +768,21 @@ struct Provider: TimelineProvider {
       return
     }
 
-    // Flatten the five salāh of every day into one chronological list of
-    // absolutely-dated prayer events. Sunrise is intentionally excluded from
-    // the "next prayer" target set, matching the single-day behaviour.
+    // Flatten every day's events into one chronological, absolutely-dated
+    // list: the five salāh, plus Sunrise and the night marks the user has
+    // turned on. They used to be left out of the "next" target set on
+    // purpose, which made this card the one surface that ignored those
+    // toggles — it listed the Last Third and then counted past it to Fajr,
+    // while the Lock Screen beside it counted down to the Last Third.
     struct PrayerEvent { let date: Date; let key: String; let name: String; let time: String }
     var prayers: [PrayerEvent] = []
     for info in dayInfos {
-      for r in info.day.rows {
+      let dayEvents = widgetEvents(
+        rows: info.day.rows,
+        sunriseRow: info.day.sunriseRow,
+        extraRows: info.day.extraRows
+      )
+      for r in dayEvents {
         let parts = r.time.split(separator: ":")
         if parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
            let pd = cal.date(bySettingHour: h, minute: m, second: 0, of: info.date) {
@@ -802,9 +866,11 @@ struct Provider: TimelineProvider {
     // (see the note by `widgetString` — that resolution is also what made
     // a render cost ten seconds of CPU).
     //
-    // Twelve is not a smaller magic number than sixty. It is about two
-    // days of boundaries — five or six prayers and a day start apiece —
-    // and it costs nothing in coverage, because the policy below re-runs
+    // Twelve is not a smaller magic number than sixty. It is a day or two
+    // of boundaries — five or six prayers and a day start apiece, or nearer
+    // ten once Sunrise and all three night marks are turned on and become
+    // events in their own right — and it costs nothing in coverage,
+    // because the policy below re-runs
     // this provider two hours after the last entry and it rebuilds from
     // the same stored `days[]`. The window the app wrote is still honoured
     // in full; it is delivered a couple of days at a time instead of all

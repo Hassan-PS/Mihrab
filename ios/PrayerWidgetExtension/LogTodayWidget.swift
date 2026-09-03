@@ -78,6 +78,11 @@ struct LogTodayEntry: TimelineEntry {
   let streak: Int?
   /// Prayers this device has queued but the app has not yet written.
   let queued: Set<String>
+  /// Everything the footer's countdown may aim at — the five salāh plus
+  /// Sunrise and whichever night marks the user turned on. Separate from
+  /// `today.prayers`, which is the LOGGABLE list and always the five: the
+  /// chips are what you tap, this is what is next.
+  var events: [WidgetPayload.Row] = []
 }
 
 // MARK: - Whose clock decides
@@ -150,14 +155,22 @@ struct LogTodayProvider: TimelineProvider {
       ?? now.addingTimeInterval(3600)
 
     var boundaries: [Date] = [now]
-    if let t = loadPayload()?.today {
-      for p in t.prayers {
-        if let d = Self.time(p.time, on: now, cal), d > now, d < nextMidnight {
+    if let p = loadPayload() {
+      // The chips advance on the five salāh; the countdown in the footer
+      // advances on every event the user has turned on, so both sets are
+      // boundaries. Without the second the card sat on "Isha" with the
+      // First Third half an hour gone.
+      var times = (p.today?.prayers ?? []).map(\.time)
+      times += widgetEvents(
+        rows: p.rows, sunriseRow: p.sunriseRow, extraRows: p.extraRows
+      ).map(\.time)
+      for time in times {
+        if let d = Self.time(time, on: now, cal), d > now, d < nextMidnight {
           boundaries.append(d)
         }
       }
     }
-    boundaries.sort()
+    boundaries = Array(Set(boundaries)).sorted()
     completion(Timeline(
       entries: boundaries.map { entry(at: $0, fallback: false) },
       policy: .after(nextMidnight)
@@ -171,7 +184,10 @@ struct LogTodayProvider: TimelineProvider {
       date: when,
       today: today,
       streak: p?.practice?.streak ?? (fallback ? 12 : nil),
-      queued: today.map { WidgetLogQueue.pending(for: $0.dateKey) } ?? []
+      queued: today.map { WidgetLogQueue.pending(for: $0.dateKey) } ?? [],
+      events: p.map {
+        widgetEvents(rows: $0.rows, sunriseRow: $0.sunriseRow, extraRows: $0.extraRows)
+      } ?? []
     )
   }
 
@@ -282,8 +298,8 @@ struct LogTodayEntryView: View {
   @ViewBuilder
   private func footer(_ t: WidgetPayload.Today) -> some View {
     HStack(spacing: 6) {
-      if let next = t.prayers.first(where: { !isDue($0, t) }) {
-        Text(verbatim: "\(next.name) \(next.time)")
+      if let next = nextEvent() {
+        Text(verbatim: "\(next.name ?? next.abbr ?? next.key) \(next.time)")
           .font(.system(size: 11))
           .foregroundStyle(widgetMuted)
           .lineLimit(1)
@@ -372,6 +388,25 @@ struct LogTodayEntryView: View {
   private func isDue(_ p: WidgetPayload.TodayPrayer, _ today: WidgetPayload.Today? = nil) -> Bool {
     guard let t = today ?? entry.today else { return p.due }
     return logIsDue(p, in: t, at: entry.date)
+  }
+
+  /// What this card counts down to: the earliest event still ahead by the
+  /// clock, across the five salāh and whatever else the user has turned on.
+  ///
+  /// It used to walk the LOGGABLE chips in list order and take the first not
+  /// yet due — two mistakes at once. It could not see Sunrise or the night
+  /// marks at all, so a phone with the Last Third on read "Fajr" here while
+  /// the Lock Screen beside it counted the forty minutes to the Last Third;
+  /// and list order is not the clock, so with the First Third on it answered
+  /// "Isha" at nine with the First Third half an hour away.
+  private func nextEvent() -> WidgetPayload.Row? {
+    let c = Calendar.current.dateComponents([.hour, .minute], from: entry.date)
+    let nowMinutes = (c.hour ?? 0) * 60 + (c.minute ?? 0)
+    let dated = entry.events.compactMap { row -> (Int, WidgetPayload.Row)? in
+      guard let at = widgetMinutesOfDay(row.time) else { return nil }
+      return (at, row)
+    }
+    return dated.filter { $0.0 > nowMinutes }.min(by: { $0.0 < $1.0 })?.1
   }
 
   /// A tick, a plus, an exclamation, or a dot for "not yet". The plus is the
