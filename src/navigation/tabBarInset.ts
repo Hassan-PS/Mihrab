@@ -134,6 +134,16 @@ export function tabBarBottomFor(
  * ZERO WHEN THERE ARE NO BUTTONS, gestures included — the handle is meant
  * to float over a live page, and a band painted behind it would just be a
  * stripe across the bottom of every screen.
+ *
+ * AND ZERO WHEN THE BAR IS NOT ALONG THE BOTTOM. Turn a phone on its side
+ * and Android moves the button bar to one END of the long edge: the
+ * `navigationBars` bottom inset goes to zero and the width appears on the
+ * left or right instead. `buttonBarHeight` is a property of the BAR, not
+ * of where it is, so taking the larger of the two painted a full-width
+ * band across a landscape window with no buttons anywhere near it — over
+ * the muṣḥaf's own mini player, reported as "a white thing covering the
+ * player controls". If the system is not reserving anything along the
+ * bottom, there is nothing down there to sit behind.
  */
 export function systemNavigationBand(
   insetBottom: number,
@@ -141,6 +151,7 @@ export function systemNavigationBand(
   buttonBarHeight = 0,
 ): number {
   if (!buttonNavigation) return 0;
+  if (!(insetBottom > 0)) return 0;
   return Math.max(insetBottom, buttonBarHeight);
 }
 

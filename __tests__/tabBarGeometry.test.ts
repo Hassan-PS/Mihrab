@@ -105,4 +105,14 @@ describe('systemNavigationBand', () => {
     expect(systemNavigationBand(24, false, 48)).toBe(0);
     expect(systemNavigationBand(34, undefined)).toBe(0);
   });
+
+  // Landscape moves the button bar to one END of the long edge: the bottom
+  // inset goes to zero and the bar's width turns up on the left or right.
+  // The drawn height is a property of the BAR, not of where it is, so
+  // taking the larger of the two painted a full-width band across a window
+  // with no buttons along the bottom at all — over the muṣḥaf's own mini
+  // player, which is what "a white thing covering the player controls" was.
+  it('is zero when the bar is not along the bottom', () => {
+    expect(systemNavigationBand(0, true, 48)).toBe(0);
+  });
 });
