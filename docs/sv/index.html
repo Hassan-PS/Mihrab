@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bönetider med Islamiska Förbundets tidtabell — Mihrab</title>
+<meta name="description" content="Gratis bönetider för 108 svenska orter enligt Islamiska Förbundets tidtabell. Adhan-påminnelser, qibla-kompass, widget och hela Medina-mushafen — utan reklam, utan spårning och utan konto. Till iPhone, Android och Mac.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://mihrab.elghamri.se/sv/">
+<link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/">
+<link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/">
+<link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/">
+<link rel="icon" href="../assets/img/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/img/icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mihrab">
+<meta property="og:title" content="Bönetider med Islamiska Förbundets tidtabell — Mihrab">
+<meta property="og:description" content="Bönetider för 108 svenska orter enligt Islamiska Förbundet. Gratis, utan reklam och utan spårning.">
+<meta property="og:url" content="https://mihrab.elghamri.se/sv/">
+<meta property="og:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="900">
+<meta property="og:image:alt" content="Mihrab — bönetider, Medina-mushafen, duaer och fastelogg, på iOS och Android">
+<meta property="og:locale" content="sv_SE">
+<meta property="og:locale:alternate" content="en">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Bönetider med Islamiska Förbundets tidtabell — Mihrab">
+<meta name="twitter:description" content="Bönetider för 108 svenska orter enligt Islamiska Förbundet. Gratis, utan reklam och utan spårning.">
+<meta name="twitter:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Mihrab: The Muslim Companion",
+  "alternateName": "Mihrab",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Android, iOS, iPadOS, macOS",
+  "softwareVersion": "2.14.3",
+  "url": "https://mihrab.elghamri.se/sv/",
+  "inLanguage": "sv",
+  "image": "https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03",
+  "description": "Bönetider med Islamiska Förbundets tidtabell för 108 svenska orter, adhan-påminnelser, qibla-kompass, widget på hemskärmen och hela Medina-mushafen. Gratis, utan reklam, utan spårning och utan konto. Öppen källkod under AGPL-3.0.",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "SEK"
+  },
+  "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+  "author": {
+    "@type": "Person",
+    "name": "Hassan El Ghamri",
+    "url": "https://github.com/Hassan-PS"
+  },
+  "sameAs": [
+    "https://play.google.com/store/apps/details?id=com.prayer_times",
+    "https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256",
+    "https://f-droid.org/packages/com.prayer_times/",
+    "https://github.com/Hassan-PS/Mihrab"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "sv",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Vilken app visar Islamiska Förbundets bönetider?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Mihrab. Välj Sverige (Islamiska Förbundet) som källa i inställningarna, så visas förbundets publicerade tidtabell för orten närmast dig i stället för en egen uträkning. Appen är gratis, har ingen reklam och finns till iPhone, iPad, Android och Mac."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Finns det en bönetidsapp utan reklam och spårning?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja. Mihrab har ingen reklam, ingen analys, ingen kraschrapportering och inget konto — de biblioteken finns inte ens i projektet. Källkoden är öppen under AGPL-3.0 och F-Droid bygger Android-versionen från samma källkod, så påståendet går att kontrollera i stället för att tas på tro."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Hur ställer jag in bönetider för min stad?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Låt appen hämta din position, eller sök upp orten i inställningarna. Väljer du Sverige som källa matchas du mot närmaste av de 108 orter som Islamiska Förbundet publicerar tider för. Du kan också spara flera platser och byta mellan dem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Vilka orter i Sverige stöds?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "108 orter, från Stockholm, Göteborg och Malmö till Kiruna, Visby och Strömstad. Ligger du mellan två orter används den närmaste."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Fungerar bönetiderna utan internet?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja. Tiderna sparas på telefonen när de hämtats, och notiserna schemaläggs lokalt — dagen fungerar med nätet avstängt. Väljer du beräkning på enheten behövs ingen uppkoppling alls."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kan jag få adhan-påminnelser?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja, per bön. Du kan välja adhan, en kort ton eller tyst notis, och lägga till en påminnelse några minuter före bönen. Det finns också en nedräkning på hemskärmen och en widget."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Vad kostar appen?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ingenting. Det finns inget köp i appen, ingen prenumeration och ingen donationsknapp — betalbiblioteket är borttaget ur projektet. Vill du ge något, ge det till din lokala moské."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Stämmer tiderna med min moské?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Följer din moské Islamiska Förbundets tabell blir de samma. Räknar de på ett annat sätt kan du justera varje bön för sig med några minuter, eller byta till en annan källa och metod."
+      }
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Hoppa till innehållet</a>
+
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+    <g fill="currentColor" opacity=".07">
+      <g transform="translate(1010 450)">
+        <rect x="-148" y="-148" width="296" height="296" rx="6"/>
+        <rect x="-148" y="-148" width="296" height="296" rx="6" transform="rotate(45)"/>
+      </g>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="2" opacity=".16">
+      <path d="M745 600 V335 Q745 152 905 88 Q1065 152 1065 335 V600"/>
+      <path d="M779 600 V344 Q779 186 905 132 Q1031 186 1031 344 V600"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="brandline">
+      <img src="../assets/img/icon.png" width="62" height="62" alt="Mihrabs appikon">
+      <span class="wordmark">Mihrab</span>
+    </div>
+    <h1>Bönetider enligt Islamiska Förbundets tidtabell.</h1>
+    <p class="sub">Samma tider som din moské följer, för 108 svenska orter — med adhan-påminnelser,
+      qibla-kompass, widget på hemskärmen och hela Medina-mushafen. Ingen reklam, ingen spårning,
+      inget konto, och tiderna räknas ut på telefonen så att dagen fungerar utan uppkoppling.</p>
+    <ul class="trust">
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Ingen reklam, ingen spårning</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Fungerar utan internet</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Gratis, öppen källkod</li>
+    </ul>
+    <p class="meta">
+      <span>Version 2.14.3 (257)</span> <span class="dot" aria-hidden="true">•</span>
+      <span>iOS, Android, macOS</span> <span class="dot" aria-hidden="true">•</span>
+      <span>AGPL-3.0-or-later</span> <span class="dot" aria-hidden="true">•</span>
+      <a href="../">In English</a>
+    </p>
+  </div>
+</header>
+
+<main id="main">
+<section class="install" id="ladda-ner">
+  <div class="wrap">
+    <p class="eyebrow">Ladda ner</p>
+    <h2>Hämta Mihrab</h2>
+    <p class="lede">Samma app i alla kanaler, byggd från samma <code>main</code>-gren.
+      F-Droid-bygget innehåller varken Play Billing eller Google Play Services.</p>
+    <ul class="badges">
+      <li><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="../assets/img/badges/appstore.png" width="180" height="60" alt="Ladda ned i App Store"></a></li>
+      <li><a href="https://play.google.com/store/apps/details?id=com.prayer_times"><img src="../assets/img/badges/googleplay.png" width="180" height="60" alt="Hämta på Google Play"></a></li>
+      <li><a href="https://f-droid.org/packages/com.prayer_times/"><img src="../assets/img/badges/fdroid.png" width="180" height="60" alt="Hämta på F-Droid"></a></li>
+      <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest"><img src="../assets/img/badges/github.png" width="180" height="60" alt="Hämta APK på GitHub"></a></li>
+    </ul>
+    <p class="note">På Mac: <code>brew install --cask hassan-ps/tap/mihrab</code></p>
+  </div>
+</section>
+
+<section class="sweden" id="islamiska-forbundet">
+  <div class="wrap">
+    <p class="eyebrow">Islamiska Förbundets tider</p>
+    <h2>Så ställer du in Islamiska Förbundets bönetider</h2>
+    <p class="lede">De flesta bönetidsappar räknar ut tiderna själva och hamnar någon minut från den
+      tidtabell din moské faktiskt följer. Mihrab kan i stället använda Islamiska Förbundets
+      publicerade tider — samma tabell, utan att du behöver slå upp den varje dag.</p>
+    <div class="cols">
+      <article class="card span">
+        <h3>Tre steg</h3>
+        <ul>
+          <li>Öppna <strong>Inställningar → Datakälla</strong> i appen.</li>
+          <li>Välj <strong>Sverige (Islamiska Förbundet)</strong>.</li>
+          <li>Låt appen hämta din position, eller sök upp din ort. Tiderna matchas mot närmaste av
+            de 108 orter förbundet publicerar tider för, och sparas på telefonen.</li>
+          <li>Stämmer något inte med din moské kan du <strong>justera varje bön för sig</strong> med
+            några minuter, eller byta till AlAdhan, PrayTimes.dev eller beräkning helt på enheten.</li>
+        </ul>
+      </article>
+    </div>
+    <p class="note">Tabellen hämtas som en färdig fil från projektets eget arkiv — den frågar efter
+      en ort, inte efter dig. Marockanska tider från Habous-ministeriet finns på samma sätt.</p>
+  </div>
+</section>
+
+<section class="towns" id="orter">
+  <div class="wrap">
+    <p class="eyebrow">Orter</p>
+    <h2>Bönetider för 108 orter i Sverige</h2>
+    <p class="lede">Ligger du mellan två orter används den närmaste. Saknas din ort helt fungerar
+      beräkning på enheten överallt i landet.</p>
+    <ul class="townlist">
+        <li>Alingsås</li>
+        <li>Avesta</li>
+        <li>Bengtsfors</li>
+        <li>Boden</li>
+        <li>Bollnäs</li>
+        <li>Borlänge</li>
+        <li>Borås</li>
+        <li>Eksjö</li>
+        <li>Enköping</li>
+        <li>Eskilstuna</li>
+        <li>Eslöv</li>
+        <li>Fagersta</li>
+        <li>Falkenberg</li>
+        <li>Falköping</li>
+        <li>Filipstad</li>
+        <li>Flen</li>
+        <li>Gislaved</li>
+        <li>Gnosjö</li>
+        <li>Gällivare</li>
+        <li>Gävle</li>
+        <li>Göteborg</li>
+        <li>Halmstad</li>
+        <li>Haparanda</li>
+        <li>Helsingborg</li>
+        <li>Hudiksvall</li>
+        <li>Hultsfred</li>
+        <li>Härnösand</li>
+        <li>Hässleholm</li>
+        <li>Högsby</li>
+        <li>Hörby</li>
+        <li>Jokkmokk</li>
+        <li>Jönköping</li>
+        <li>Kalmar</li>
+        <li>Karlskoga</li>
+        <li>Karlskrona</li>
+        <li>Karlstad</li>
+        <li>Katrineholm</li>
+        <li>Kiruna</li>
+        <li>Kristianstad</li>
+        <li>Kristinehamn</li>
+        <li>Köping</li>
+        <li>Laholm</li>
+        <li>Landskrona</li>
+        <li>Lessebo</li>
+        <li>Lidköping</li>
+        <li>Linköping</li>
+        <li>Ludvika</li>
+        <li>Luleå</li>
+        <li>Lund</li>
+        <li>Lysekil</li>
+        <li>Malmö</li>
+        <li>Mariestad</li>
+        <li>Mellerud</li>
+        <li>Mjölby</li>
+        <li>Mora</li>
+        <li>Munkedal</li>
+        <li>Märsta</li>
+        <li>Mönsterås</li>
+        <li>Norrköping</li>
+        <li>Norrtälje</li>
+        <li>Nybro</li>
+        <li>Nyköping</li>
+        <li>Nynäshamn</li>
+        <li>Nässjö</li>
+        <li>Oskarshamn</li>
+        <li>Oxelösund</li>
+        <li>Pajala</li>
+        <li>Piteå</li>
+        <li>Ronneby</li>
+        <li>Sala</li>
+        <li>Simrishamn</li>
+        <li>Skara</li>
+        <li>Skellefteå</li>
+        <li>Skövde</li>
+        <li>Sollefteå</li>
+        <li>Stockholm</li>
+        <li>Strängnäs</li>
+        <li>Sundsvall</li>
+        <li>Säffle</li>
+        <li>Sävsjö</li>
+        <li>Söderhamn</li>
+        <li>Södertälje</li>
+        <li>Sölvesborg</li>
+        <li>Tierp</li>
+        <li>Torsby</li>
+        <li>Tranemo</li>
+        <li>Tranås</li>
+        <li>Trelleborg</li>
+        <li>Trollhättan</li>
+        <li>Uddevalla</li>
+        <li>Ulricehamn</li>
+        <li>Umeå</li>
+        <li>Uppsala</li>
+        <li>Varberg</li>
+        <li>Vetlanda</li>
+        <li>Vimmerby</li>
+        <li>Visby</li>
+        <li>Vänersborg</li>
+        <li>Värnamo</li>
+        <li>Västervik</li>
+        <li>Västerås</li>
+        <li>Växjö</li>
+        <li>Ystad</li>
+        <li>Åmål</li>
+        <li>Ängelholm</li>
+        <li>Örebro</li>
+        <li>Örnsköldsvik</li>
+        <li>Östersund</li>
+    </ul>
+  </div>
+</section>
+
+<section class="features" id="funktioner">
+  <div class="wrap">
+    <p class="eyebrow">Vad appen mer gör</p>
+    <h2>Dagens tillbedjan, i en app</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>Bön</h3>
+        <p>Nedräkning till nästa bön, adhan-påminnelser per bön, förvarning några minuter innan,
+          månadsöversikt, qibla-kompass och widgetar på hemskärmen — plus en levande nedräkning på
+          låsskärmen.</p>
+      </article>
+      <article class="card">
+        <h3>Koranen</h3>
+        <p>Hela Medina-mushafen i fyra riwayat, med recitation, ordmarkering, tafsir, 14
+          översättningar, bokmärken och en khatmah-plan som håller reda på var du är.</p>
+      </article>
+      <article class="card">
+        <h3>Resten av dagen</h3>
+        <p>Hisnul Muslims duaer, tasbih, fastelogg och böndagbok — och synk mellan dina egna
+          enheter utan konto, genom en mapp du redan synkar själv.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="fragor">
+  <div class="wrap">
+    <p class="eyebrow">Vanliga frågor</p>
+    <h2>Bönetider, reklam och kostnad — de korta svaren</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>Vilken app visar Islamiska Förbundets bönetider?</h3>
+        <p>Mihrab. Välj Sverige (Islamiska Förbundet) som källa i inställningarna, så visas förbundets publicerade tidtabell för orten närmast dig i stället för en egen uträkning. Appen är gratis, har ingen reklam och finns till iPhone, iPad, Android och Mac.</p>
+      </article>
+      <article class="card">
+        <h3>Finns det en bönetidsapp utan reklam och spårning?</h3>
+        <p>Ja. Mihrab har ingen reklam, ingen analys, ingen kraschrapportering och inget konto — de biblioteken finns inte ens i projektet. Källkoden är öppen under AGPL-3.0 och F-Droid bygger Android-versionen från samma källkod, så påståendet går att kontrollera i stället för att tas på tro.</p>
+      </article>
+      <article class="card">
+        <h3>Hur ställer jag in bönetider för min stad?</h3>
+        <p>Låt appen hämta din position, eller sök upp orten i inställningarna. Väljer du Sverige som källa matchas du mot närmaste av de 108 orter som Islamiska Förbundet publicerar tider för. Du kan också spara flera platser och byta mellan dem.</p>
+      </article>
+      <article class="card">
+        <h3>Vilka orter i Sverige stöds?</h3>
+        <p>108 orter, från Stockholm, Göteborg och Malmö till Kiruna, Visby och Strömstad. Ligger du mellan två orter används den närmaste.</p>
+      </article>
+      <article class="card">
+        <h3>Fungerar bönetiderna utan internet?</h3>
+        <p>Ja. Tiderna sparas på telefonen när de hämtats, och notiserna schemaläggs lokalt — dagen fungerar med nätet avstängt. Väljer du beräkning på enheten behövs ingen uppkoppling alls.</p>
+      </article>
+      <article class="card">
+        <h3>Kan jag få adhan-påminnelser?</h3>
+        <p>Ja, per bön. Du kan välja adhan, en kort ton eller tyst notis, och lägga till en påminnelse några minuter före bönen. Det finns också en nedräkning på hemskärmen och en widget.</p>
+      </article>
+      <article class="card">
+        <h3>Vad kostar appen?</h3>
+        <p>Ingenting. Det finns inget köp i appen, ingen prenumeration och ingen donationsknapp — betalbiblioteket är borttaget ur projektet. Vill du ge något, ge det till din lokala moské.</p>
+      </article>
+      <article class="card">
+        <h3>Stämmer tiderna med min moské?</h3>
+        <p>Följer din moské Islamiska Förbundets tabell blir de samma. Räknar de på ett annat sätt kan du justera varje bön för sig med några minuter, eller byta till en annan källa och metod.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="privacy" id="integritet">
+  <div class="wrap">
+    <p class="eyebrow">Integritet</p>
+    <h2>Ingenting lämnar telefonen som du inte bett om</h2>
+    <p class="lede">Var du befinner dig, fem gånger om dagen, är det känsligaste en bönetidsapp rör.
+      Därför finns det inget konto att skapa, ingen analyspanel, inget annonsnätverk och ingen
+      kraschrapportering i den här koden — och när platsen är satt kan tiderna räknas ut helt på
+      din enhet.</p>
+    <div class="cols">
+      <article class="card">
+        <h3>Stannar på enheten</h3>
+        <ul>
+          <li>Språk, utseende, vald källa, beräkningsval och notisinställningar.</li>
+          <li>Sparade koordinater och ortnamn, <strong>krypterade</strong> via iOS Keychain och
+            Android EncryptedSharedPreferences.</li>
+          <li>Böndagbok och fastelogg — det finns ingen central databas som håller dem.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Går över nätet, när du väljer det</h3>
+        <ul>
+          <li>Tider från källan du valt. De nationella tabellerna (Sverige, Marocko) är färdiga
+            filer från projektets eget arkiv: de frågar efter en ort, inte efter dig.</li>
+          <li>Ortsökning via OpenStreetMap Nominatim, på deras villkor.</li>
+          <li>Nedladdning av mushaf-sidor, översättningar, tafsir och recitation.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Finns inte alls</h3>
+        <ul>
+          <li>Ingen reklam, inga spårare, ingen analys-SDK, ingen kraschrapportering.</li>
+          <li>Inget konto, ingen inloggning, ingen profil.</li>
+          <li>F-Droid-bygget saknar Google Play Services och Play Billing.</li>
+        </ul>
+      </article>
+      <article class="card span">
+        <h3>Inget av det ber om att tros på</h3>
+        <ul>
+          <li>Källkoden är offentlig under <strong>AGPL-3.0</strong>, så anropen ovan är de som vem
+            som helst kan gå och läsa.</li>
+          <li><strong>F-Droid bygger och signerar Android-appen själva</strong> från den källkoden —
+            APK:n de levererar är inte en jag räcker dem.</li>
+          <li>Licensen tvingar en fork som ändrar något av det här att publicera vad den ändrat.</li>
+          <li>Varje version är en tagg med sina noter och sina filer, så appen i din telefon går att
+            spåra till en commit.</li>
+        </ul>
+      </article>
+    </div>
+    <p class="note">Hela texten, med GDPR-grunden, finns i
+      <a href="https://github.com/Hassan-PS/Mihrab/blob/main/PRIVACY_POLICY.md">PRIVACY_POLICY.md</a>
+      (svenska och engelska). Frågor hör hemma i
+      <a href="https://github.com/Hassan-PS/Mihrab/issues">ärendespåraren</a>, öppet.</p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h2>Licens</h2>
+        <p>Mihrab är fri programvara under AGPL-3.0-or-later. Källkoden finns
+          <a href="https://github.com/Hassan-PS/Mihrab">på GitHub</a>.</p>
+      </div>
+      <div>
+        <h2>Innehåll</h2>
+        <p>Koranens text från Tanzil, mushaf-typsnitten från King Fahd-komplexet, svenska tider från
+          Islamiska Förbundet och marockanska från Habous-ministeriet. Attribution i sin helhet finns
+          i <a href="https://github.com/Hassan-PS/Mihrab/blob/main/NOTICE">NOTICE</a>.</p>
+      </div>
+      <div>
+        <h2>Projekt</h2>
+        <ul>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/issues">Rapportera ett fel</a></li>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/blob/main/CHANGELOG.md">Ändringslogg</a></li>
+          <li><a href="../">The site in English</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="colophon">Mihrab 2.14.3 (257), byggd av Hassan El Ghamri.</p>
+  </div>
+</footer>
+</body>
+</html>

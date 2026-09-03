@@ -19,6 +19,7 @@ import path from 'path';
 const ROOT = path.join(__dirname, '..');
 const DOCS = path.join(ROOT, 'docs');
 const site = readFileSync(path.join(DOCS, 'index.html'), 'utf-8');
+const siteSv = readFileSync(path.join(DOCS, 'sv', 'index.html'), 'utf-8');
 const host = readFileSync(path.join(DOCS, 'CNAME'), 'utf-8').trim();
 const origin = `https://${host}`;
 
@@ -144,5 +145,115 @@ describe('the long-tail answers are on the page, not only in the markup', () => 
     ['no play services', /no Play Services/i],
   ])('says the words someone searching for "%s" would type', (_l, re) => {
     expect(site).toMatch(re);
+  });
+});
+
+/**
+ * The Swedish page, and the wiring that makes it a translation rather than
+ * a competitor.
+ *
+ * A section in Swedish on an English page does not rank in Swedish: Google
+ * classifies a page by its language, and "bönetider" is not a query an
+ * English page wins. The answer is a real page — its own title, its own
+ * description, its own structured data — declared as the Swedish version
+ * of the English one. Declared BOTH ways: hreflang that is not reciprocal
+ * is ignored, which is the usual way this is got wrong.
+ */
+describe('the Swedish page is a page, not a section', () => {
+  it('is in Swedish, and says so', () => {
+    expect(siteSv).toMatch(/<html lang="sv">/);
+    expect(siteSv).toMatch(/<meta property="og:locale" content="sv_SE">/);
+  });
+
+  it('carries its own title and description, in Swedish', () => {
+    const title = /<title>([^<]+)<\/title>/.exec(siteSv)?.[1] ?? '';
+    expect(title).toMatch(/[Bb]önetider/);
+    expect(title).not.toBe(/<title>([^<]+)<\/title>/.exec(site)?.[1]);
+    const desc =
+      /<meta name="description" content="([^"]+)"/.exec(siteSv)?.[1] ?? '';
+    expect(desc.length).toBeGreaterThan(80);
+    expect(desc).toMatch(/Islamiska Förbundet/);
+  });
+
+  it('points at itself, not at the English page', () => {
+    expect(siteSv).toContain(`<link rel="canonical" href="${origin}/sv/">`);
+    expect(siteSv).toContain(
+      `<meta property="og:url" content="${origin}/sv/">`,
+    );
+  });
+
+  it.each([
+    ['the English page', () => site],
+    ['the Swedish page', () => siteSv],
+  ])('%s declares both languages and a default', (_l, get) => {
+    const page = get();
+    expect(page).toContain(
+      `<link rel="alternate" hreflang="en" href="${origin}/">`,
+    );
+    expect(page).toContain(
+      `<link rel="alternate" hreflang="sv" href="${origin}/sv/">`,
+    );
+    expect(page).toContain(
+      `<link rel="alternate" hreflang="x-default" href="${origin}/">`,
+    );
+  });
+
+  it('is in the sitemap, with both languages named', () => {
+    const sitemap = readFileSync(path.join(DOCS, 'sitemap.xml'), 'utf-8');
+    expect(sitemap).toContain(`<loc>${origin}/sv/</loc>`);
+    expect(sitemap).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+    expect(
+      sitemap.match(
+        new RegExp(`hreflang="sv" href="${origin}/sv/"`, 'g'),
+      )?.length,
+    ).toBe(2);
+  });
+
+  it('is not disallowed to crawlers', () => {
+    const robots = readFileSync(path.join(DOCS, 'robots.txt'), 'utf-8');
+    expect(robots).not.toMatch(/Disallow: \/sv/);
+  });
+
+  it('and the two pages link to each other for readers too', () => {
+    expect(site).toMatch(/href="sv\/"/);
+    expect(siteSv).toMatch(/href="\.\.\/"/);
+  });
+});
+
+describe('the Swedish page answers Swedish questions', () => {
+  const faq = Array.from(
+    siteSv.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
+    m => JSON.parse(m[1]),
+  ).find(b => b['@type'] === 'FAQPage');
+
+  it('ships an FAQPage with the questions people actually type', () => {
+    expect(faq.mainEntity.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('asks every marked-up question visibly, in a heading', () => {
+    const headings = Array.from(
+      siteSv.matchAll(/<h3>([^<]+)<\/h3>/g),
+      m => m[1].replace(/\s+/g, ' ').trim(),
+    );
+    for (const q of faq.mainEntity) {
+      expect(headings).toContain(q.name);
+    }
+  });
+
+  it.each([
+    ['islamiska förbundet', /Islamiska Förbundet/],
+    ['bönetider', /[Bb]önetider/],
+    ['utan reklam', /utan reklam|ingen reklam/i],
+    ['gratis', /[Gg]ratis/],
+    ['adhan', /adhan/i],
+    ['qibla', /qibla/i],
+  ])('says the words someone searching for "%s" would type', (_l, re) => {
+    expect(siteSv).toMatch(re);
+  });
+
+  it('names the towns it claims to cover', () => {
+    for (const town of ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala']) {
+      expect(siteSv).toContain(`<li>${town}</li>`);
+    }
   });
 });

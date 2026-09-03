@@ -16,6 +16,10 @@ import * as path from 'path';
 
 const ROOT = path.join(__dirname, '..');
 const site = fs.readFileSync(path.join(ROOT, 'docs', 'index.html'), 'utf-8');
+const siteSv = fs.readFileSync(
+  path.join(ROOT, 'docs', 'sv', 'index.html'),
+  'utf-8',
+);
 const gradle = fs.readFileSync(
   path.join(ROOT, 'android', 'app', 'build.gradle'),
   'utf-8',
@@ -74,6 +78,37 @@ describe('website version', () => {
       Array.from(site.matchAll(/Mihrab (\d+\.\d+\.\d+) \(\d+\)/g), m => m[1]),
     );
     for (const m of site.matchAll(/Version (\d+\.\d+\.\d+) \(\d+\)/g)) {
+      mentioned.add(m[1]);
+    }
+    expect([...mentioned]).toEqual([versionName]);
+  });
+});
+
+/**
+ * The Swedish page carries the same three stamps, and would go stale the
+ * same way — more quietly, because nobody proof-reads a page in a language
+ * they do not read to check a number in it.
+ */
+describe('the Swedish page', () => {
+  it('names the shipped version in the hero', () => {
+    expect(siteSv).toContain(
+      `<span>Version ${versionName} (${versionCode})</span>`,
+    );
+  });
+
+  it('names the shipped version in the colophon', () => {
+    expect(siteSv).toContain(`Mihrab ${versionName} (${versionCode}), byggd av`);
+  });
+
+  it('names the shipped version in the structured data', () => {
+    expect(siteSv).toContain(`"softwareVersion": "${versionName}"`);
+  });
+
+  it('says the same version everywhere it says one', () => {
+    const mentioned = new Set(
+      Array.from(siteSv.matchAll(/Mihrab (\d+\.\d+\.\d+) \(\d+\)/g), m => m[1]),
+    );
+    for (const m of siteSv.matchAll(/Version (\d+\.\d+\.\d+) \(\d+\)/g)) {
       mentioned.add(m[1]);
     }
     expect([...mentioned]).toEqual([versionName]);

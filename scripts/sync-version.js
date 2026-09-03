@@ -25,6 +25,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const GRADLE = path.join(ROOT, 'android', 'app', 'build.gradle');
 const SITE = path.join(ROOT, 'docs', 'index.html');
+const SITE_SV = path.join(ROOT, 'docs', 'sv', 'index.html');
 const RECIPE = path.join(ROOT, 'contrib', 'fdroid', 'com.prayer_times.yml');
 
 /** The version the app actually ships, straight out of the Android build. */
@@ -65,6 +66,27 @@ function rules({ versionName, versionCode }) {
       // which is exactly why it would rot unnoticed.
       file: SITE,
       what: 'site: structured-data softwareVersion',
+      find: /"softwareVersion": "[\d.]+"/,
+      replace: `"softwareVersion": "${versionName}"`,
+    },
+    // The Swedish page carries the same three, and would drift exactly the
+    // way the English one did — invisibly, because nobody reads a page in
+    // a language they do not speak to check a number in it.
+    {
+      file: SITE_SV,
+      what: 'site (sv): hero version line',
+      find: /<span>Version [\d.]+ \(\d+\)<\/span>/,
+      replace: `<span>Version ${versionName} (${versionCode})</span>`,
+    },
+    {
+      file: SITE_SV,
+      what: 'site (sv): footer colophon',
+      find: /Mihrab [\d.]+ \(\d+\), byggd av/,
+      replace: `Mihrab ${versionName} (${versionCode}), byggd av`,
+    },
+    {
+      file: SITE_SV,
+      what: 'site (sv): structured-data softwareVersion',
       find: /"softwareVersion": "[\d.]+"/,
       replace: `"softwareVersion": "${versionName}"`,
     },
@@ -168,4 +190,4 @@ if (require.main === module) {
   for (const s of r.stale) console.log(`  ${s}`);
 }
 
-module.exports = { shippedVersion, rules, SITE, RECIPE };
+module.exports = { shippedVersion, rules, SITE, SITE_SV, RECIPE };
