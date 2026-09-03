@@ -295,6 +295,11 @@ jest.mock('@notifee/react-native', () => ({
       }),
     ),
     getTriggerNotifications: jest.fn(() => Promise.resolve([])),
+    // The id-only variant, which the rolling-window schedulers (ayah of the
+    // day, the khatmah reminder) use to sweep their own previous window.
+    // Absent from this mock it threw, was swallowed by their try/catch, and
+    // every "did it cancel the old one?" assertion passed for free.
+    getTriggerNotificationIds: jest.fn(() => Promise.resolve([])),
     openAlarmPermissionSettings: jest.fn(() => Promise.resolve()),
   },
   TriggerType: { TIMESTAMP: 0, INTERVAL: 1 },

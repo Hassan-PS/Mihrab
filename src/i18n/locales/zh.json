@@ -277,6 +277,7 @@
     "hourUp": "小时 +",
     "khatmahReminder": "每日完读提醒",
     "khatmahReminderHelp": "完读计划进行期间，提示今日份额及继续位置。",
+    "khatmahReminderNoPlan": "在“古兰经”标签页开始一次诵读计划后可用。",
     "resetApp": "重置应用数据",
     "resetAppHelp": "清除所有设置和数据。无法撤销。",
     "batteryWarning": "提醒可能不可靠",

@@ -277,6 +277,7 @@
     "hourUp": "Hora +",
     "khatmahReminder": "Recordatorio diario del jatma",
     "khatmahReminderHelp": "La porción de hoy y dónde continuar, mientras haya un jatma activo.",
+    "khatmahReminderNoPlan": "Inicia una jatma en la pestaña del Corán para usar esto.",
     "resetApp": "Restablecer datos de la app",
     "resetAppHelp": "Borra todos los ajustes y datos. No se puede deshacer.",
     "batteryWarning": "Las alertas pueden ser poco fiables",

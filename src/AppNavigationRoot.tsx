@@ -34,8 +34,12 @@ import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
 import { rescheduleFastingReminders } from './notifications/fastingReminders';
-import { rescheduleKhatmahReminder } from './notifications/khatmahReminder';
 import {
+  khatmahReminderDue,
+  rescheduleKhatmahReminder,
+} from './notifications/khatmahReminder';
+import {
+  activeKhatmah,
   getQuranState,
   hydrateQuranState,
   subscribeQuranState,
@@ -168,9 +172,35 @@ export function AppNavigationRoot() {
         sync(true);
       }
     });
+    // The khatmah reminder is the one daily notification whose usefulness
+    // changes DURING the day: finishing the portion should silence today's,
+    // and starting or finishing a plan changes whether there is anything to
+    // schedule at all. Its window is written a week ahead, so without this
+    // nothing would revisit today's until tomorrow — the reader who read
+    // this morning still got poked this evening. Guarded on the verdict, not
+    // on the state: the quran blob also changes on every page turn.
+    let lastKhatmah = '';
+    const unsubKhatmah = subscribeQuranState(() => {
+      const plan = activeKhatmah(getQuranState());
+      const key = plan
+        ? `${plan.id}|${khatmahReminderDue(plan, Date.now())}`
+        : 'none';
+      if (lastKhatmah === '') {
+        lastKhatmah = key;
+        return;
+      }
+      if (key === lastKhatmah) return;
+      lastKhatmah = key;
+      void rescheduleKhatmahReminder({
+        enabled: settings.khatmahReminderEnabled,
+        hour: settings.khatmahReminderHour,
+        minute: settings.khatmahReminderMinute,
+      });
+    });
     return () => {
       sub.remove();
       unsubQuran();
+      unsubKhatmah();
     };
   }, [
     hydrated,

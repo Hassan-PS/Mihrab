@@ -22,6 +22,11 @@ import { useNotificationsSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { getNotificationSoundOption } from '../../notifications/notificationSounds';
+import {
+  activeKhatmah,
+  hydrateQuranState,
+  useQuranState,
+} from '../../quran/quranState';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 type NotificationsCardProps = {
@@ -46,6 +51,16 @@ function NotificationsCardImpl({
   const [timeTarget, setTimeTarget] = useState<'ayah' | 'khatmah' | null>(
     null,
   );
+  // The khatmah reminder has nothing to say without a plan — the scheduler
+  // returns without writing a single trigger. Reading the plan here is what
+  // lets the row say so instead of taking a promise it cannot keep. The
+  // hydrate is idempotent; the app root has usually done it already, but
+  // this card can be the first thing a deep link opens.
+  useEffect(() => {
+    void hydrateQuranState();
+  }, []);
+  const quran = useQuranState();
+  const hasKhatmah = activeKhatmah(quran) != null;
   // Android: battery optimization defers/drops the AlarmManager alarms the
   // adhan rides on once nothing (e.g. the Live Activity's foreground service)
   // keeps the app exempt — "adhan never fires" on aggressive shells (v2.7.40).
@@ -516,33 +531,41 @@ function NotificationsCardImpl({
       )}
 
       {/* Khatmah daily reminder (v2.7.28) — only meaningful while a plan
-          is active; the scheduler no-ops otherwise. */}
+          is active, and the switch says so now rather than accepting a
+          promise the scheduler will no-op on. */}
       <View
         style={[
           s.card,
           s.switchRow,
           { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          hasKhatmah ? null : timeStyles.unavailable,
         ]}>
         <View style={s.switchCopy}>
           <Text style={[s.valueText, { color: palette.text }]}>
             {t('settings.khatmahReminder', 'Khatmah daily reminder')}
           </Text>
           <Text style={[s.help, { color: palette.muted }]}>
-            {t(
-              'settings.khatmahReminderHelp',
-              "Today's portion and where to continue, while a khatmah is active.",
-            )}
+            {hasKhatmah
+              ? t(
+                  'settings.khatmahReminderHelp',
+                  "Today's portion and where to continue, while a khatmah is active.",
+                )
+              : t(
+                  'settings.khatmahReminderNoPlan',
+                  'Start a khatmah in the Qur’an tab to use this.',
+                )}
           </Text>
         </View>
         <Switch
-          value={settings.khatmahReminderEnabled}
+          value={settings.khatmahReminderEnabled && hasKhatmah}
+          disabled={!hasKhatmah}
           trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
           thumbColor={'#ffffff'}
           onValueChange={onToggleKhatmahReminder}
         />
       </View>
 
-      {settings.khatmahReminderEnabled && (
+      {settings.khatmahReminderEnabled && hasKhatmah && (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('settings.ayahOfDayTime', 'Notification time')}
@@ -657,6 +680,9 @@ function NotificationsCardImpl({
 }
 
 const timeStyles = StyleSheet.create({
+  /** A row whose switch cannot be flipped yet — dimmed so the disabled
+   *  control reads as waiting on something rather than as broken. */
+  unavailable: { opacity: 0.5 },
   backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   sheet: {
     position: 'absolute',

@@ -16,7 +16,9 @@ import {
   getQuranState,
   hydrateQuranState,
   khatmahCurrentPage,
+  khatmahDay,
   khatmahPages,
+  type KhatmahPlan,
 } from '../quran/quranState';
 
 const KHATMAH_REM_ID_PREFIX = 'khatmah-rem-';
@@ -40,6 +42,24 @@ export async function cancelAllKhatmahReminders(): Promise<void> {
   } catch (e) {
     console.warn('cancelAllKhatmahReminders failed:', e);
   }
+}
+
+/**
+ * Is there still something to remind the reader about on the day `at`
+ * falls in?
+ *
+ * The reminder's whole job is "you have not read yet today". Once the
+ * portion is done it has nothing left to say, and saying it anyway
+ * punishes exactly the reader who kept the promise — the plan's own card
+ * has said "done" for hours by then.
+ *
+ * `khatmahDay` answers this for TODAY from the day's opening snapshot,
+ * which is what makes "done" mean the portion the reader started the day
+ * on rather than whatever portion reading ahead has since moved them to.
+ * For any later day the reading has not reached it yet, so it is due.
+ */
+export function khatmahReminderDue(plan: KhatmahPlan, at: number): boolean {
+  return !khatmahDay(plan, at).done;
 }
 
 /**
@@ -89,6 +109,12 @@ export async function rescheduleKhatmahReminder(opts: {
     fireAt.setDate(fireAt.getDate() + i);
     fireAt.setHours(hour, minute, 0, 0);
     if (fireAt.getTime() <= now.getTime()) continue;
+    // Nothing to ask for. A reminder that arrives after the portion is
+    // finished is not a reminder, it is a poke — and it is the reader who
+    // kept the promise who gets it. `khatmahReminderDue` is false only for
+    // a day already read; every day further out is still ahead of the
+    // reading and stays scheduled.
+    if (!khatmahReminderDue(plan, fireAt.getTime())) continue;
 
     try {
       await notifee.createTriggerNotification(

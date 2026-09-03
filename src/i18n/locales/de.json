@@ -277,6 +277,7 @@
     "hourUp": "Stunde +",
     "khatmahReminder": "Tägliche Khatmah-Erinnerung",
     "khatmahReminderHelp": "Heutige Portion und wo es weitergeht, solange eine Khatmah aktiv ist.",
+    "khatmahReminderNoPlan": "Starte eine Khatmah im Koran-Tab, um dies zu nutzen.",
     "resetApp": "App-Daten zurücksetzen",
     "resetAppHelp": "Löscht alle Einstellungen und Daten. Nicht rückgängig machbar.",
     "batteryWarning": "Benachrichtigungen könnten unzuverlässig sein",

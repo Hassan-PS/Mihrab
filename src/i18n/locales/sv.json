@@ -277,6 +277,7 @@
     "hourUp": "Timme +",
     "khatmahReminder": "Daglig khatmah-påminnelse",
     "khatmahReminderHelp": "Dagens portion och var du ska fortsätta, medan en khatmah är aktiv.",
+    "khatmahReminderNoPlan": "Starta en khatmah i Koran-fliken för att använda detta.",
     "resetApp": "Återställ appdata",
     "resetAppHelp": "Raderar alla inställningar och data. Kan inte ångras.",
     "batteryWarning": "Aviseringar kan vara opålitliga",

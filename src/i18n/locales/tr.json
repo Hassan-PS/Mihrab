@@ -277,6 +277,7 @@
     "hourUp": "Saat +",
     "khatmahReminder": "Günlük hatim hatırlatıcısı",
     "khatmahReminderHelp": "Hatim aktifken bugünkü bölüm ve nereden devam edileceği.",
+    "khatmahReminderNoPlan": "Bunu kullanmak için Kur’an sekmesinde bir hatim başlatın.",
     "resetApp": "Uygulama verilerini sıfırla",
     "resetAppHelp": "Tüm ayarları ve verileri siler. Geri alınamaz.",
     "batteryWarning": "Bildirimler güvenilir olmayabilir",

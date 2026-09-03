@@ -277,6 +277,7 @@
     "hourUp": "Jam +",
     "khatmahReminder": "Pengingat khataman harian",
     "khatmahReminderHelp": "Bagian hari ini dan tempat melanjutkan, selama khataman aktif.",
+    "khatmahReminderNoPlan": "Mulai khatam di tab Al-Qur’an untuk menggunakan ini.",
     "resetApp": "Atur ulang data aplikasi",
     "resetAppHelp": "Menghapus semua pengaturan dan data. Tidak dapat dibatalkan.",
     "batteryWarning": "Notifikasi mungkin tidak andal",
