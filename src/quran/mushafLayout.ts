@@ -21,6 +21,7 @@
  * demand — decoding all 604 up front would cost time and memory the reader
  * never needs, since it only ever shows a handful of pages.
  */
+import { riwayahById, type RiwayahId } from './riwayat';
 
 type RawSegment = [number, number, number, number] | [number, number, number, number, number];
 
@@ -332,6 +333,29 @@ function loadRaw(): RawPage[] {
     raw = require('./data/mushafLayoutV2.json') as RawPage[];
   }
   return raw;
+}
+
+/**
+ * Bring the layout data in ahead of the reader, off the critical path.
+ *
+ * Lazy was right — a user who never opens the muṣḥaf should not pay for
+ * 1.4 MB of line data at launch. But lazy on its own meant the first
+ * `getPageLayout` of a session did the whole require: six hundred pages
+ * of words and advances materialised on the JS thread, in the middle of
+ * the push transition, for the first page the reader was trying to draw.
+ * That was the hitch on the first open of every session.
+ *
+ * So the screens a reader passes through on the way — the Qur'an tab, the
+ * home card that says "Continue" — ask for it after their own interactions
+ * are done. By the time the surah is tapped it is already here; and a
+ * user who never gets that far still never pays.
+ */
+export function warmMushafLayout(riwayah?: RiwayahId): void {
+  // A bundled riwayah draws from its own line data, not this file; a Warsh
+  // reader warming the Ḥafṣ layout would be paying for a muṣḥaf they are
+  // not in.
+  if (riwayah && riwayahById(riwayah).render === 'unicode') return;
+  loadRaw();
 }
 
 function decodeLine(line: RawLine): MushafLine | null {

@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   FlatList,
+  InteractionManager,
   Modal,
   Pressable,
   StyleSheet,
@@ -33,6 +34,7 @@ import {
   totalPagesForRiwayah,
 } from '../quran/pages';
 import { hydrateRiwayahData } from '../quran/riwayahData';
+import { warmMushafLayout } from '../quran/mushafLayout';
 import { RIWAYAT } from '../quran/riwayat';
 import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
 import { findSurah, loadSurah, SURAHS, type SurahIndex } from '../quran/quran';
@@ -108,6 +110,17 @@ export function QuranScreen() {
     void hydrateQuranState();
     void hydrateRiwayahData();
   }, []);
+
+  // Whoever is on this tab is one tap from the reader. Its page-layout
+  // data — the largest file in the app — comes in now, once the list has
+  // settled, instead of during the push transition of the surah they tap.
+  const riwayahForWarm = quran.prefs.riwayah;
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() =>
+      warmMushafLayout(riwayahForWarm),
+    );
+    return () => task.cancel();
+  }, [riwayahForWarm]);
 
   const [tab, setTab] = useState<Tab>('surah');
   const [khatmahMenuVisible, setKhatmahMenuVisible] = useState(false);

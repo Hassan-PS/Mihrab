@@ -11,7 +11,13 @@
  * never set.
  */
 import { memo, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  InteractionManager,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { QuranBookIcon } from '../../theme/icons';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -22,6 +28,7 @@ import { arabicTextStyle } from '../../theme/typography';
 import { findSurah, loadSurah } from '../../quran/quran';
 import { surahName } from '../../quran/surahName';
 import { useQuranState } from '../../quran/quranState';
+import { warmMushafLayout } from '../../quran/mushafLayout';
 import { selectQuranCardState } from '../../quran/quranCardState';
 import { useVerseOfTheDay } from '../../quran/useVerseOfTheDay';
 import { getAyahTranslation } from '../../quran/translations';
@@ -60,6 +67,20 @@ function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
   const votd = useVerseOfTheDay();
   const edition = useActiveEdition();
   const [votdArabic, setVotdArabic] = useState('');
+
+  // A card that says "Continue" into the muṣḥaf is a reader about to open
+  // it. Bring the page-layout data in now, after the home screen has
+  // settled, rather than in the middle of the push transition when the
+  // first page asks for it — see `warmMushafLayout`.
+  const readsMushaf = quran.lastRead?.mode === 'mushaf';
+  const riwayah = quran.prefs.riwayah;
+  useEffect(() => {
+    if (!readsMushaf) return;
+    const task = InteractionManager.runAfterInteractions(() =>
+      warmMushafLayout(riwayah),
+    );
+    return () => task.cancel();
+  }, [readsMushaf, riwayah]);
 
   // Only the empty state shows the verse, so only it pays for the surah load.
   const needsVerse = card.kind === 'ayah';
