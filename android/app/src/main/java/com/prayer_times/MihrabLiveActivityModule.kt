@@ -466,11 +466,12 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           builder.setProgress(100, progressPct, false)
         } else {
           // timeline (default) or markers: inline countdown in the title + the
-          // day timeline. 'markers' additionally draws a point at each prayer
-          // and a tracker icon at "now" — all native ProgressStyle APIs
-          // (Android 16), so the chip + AOD eligibility is identical.
-          val dayStyle = buildDayProgressStyle(
-            ctx, p, accentInt,
+          // bar over the next three events. 'markers' additionally draws a
+          // point at each of them and a tracker icon at "now" — all native
+          // ProgressStyle APIs (Android 16), so the chip + AOD eligibility is
+          // identical.
+          val dayStyle = buildNextEventsProgressStyle(
+            p, accentInt,
             addPoints = design == "markers",
             trackerIcon = if (design == "markers") {
               Icon.createWithResource(ctx, R.drawable.ic_stat_prayer)
@@ -608,11 +609,12 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             tryAttachShortCriticalText(builder, shortText)
           }
         } else {
-          // timeline (default) or markers: the segmented ProgressStyle bar (all
-          // Android 16 APIs, so this compiles on compileSdk 36 too). 'markers'
-          // adds per-prayer points + a tracker icon at "now".
-          val dayStyle = buildDayProgressStyle(
-            ctx, p, effectiveAccent,
+          // timeline (default) or markers: the segmented ProgressStyle bar
+          // over the next three events (all Android 16 APIs, so this compiles
+          // on compileSdk 36 too). 'markers' adds a point at each of them
+          // plus a tracker icon at "now".
+          val dayStyle = buildNextEventsProgressStyle(
+            p, effectiveAccent,
             addPoints = design == "markers",
             trackerIcon = if (design == "markers") {
               Icon.createWithResource(ctx, R.drawable.ic_stat_prayer)
@@ -823,141 +825,125 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       }
     }
 
+    /** How many events ahead the bar reaches. Three is the most a strip that
+     *  narrow can label at a glance, and enough to show the shape of the
+     *  evening — a long wait, then two short ones. */
+    private const val AHEAD = 3
+
     /**
-     * Build a native [Notification.ProgressStyle] day timeline (Android 16+):
+     * Every dated instant in the payload's window, sorted: the five salāh,
+     * Sunrise, and the night marks the user turned on. Their presence in the
+     * payload IS the toggle — the JS side only sends the ones that are on.
+     */
+    private fun datedEvents(p: JSONObject): List<Long> {
+      val days = p.optJSONArray("days") ?: return emptyList()
+      val out = ArrayList<Long>()
+      for (i in 0 until days.length()) {
+        val day = days.optJSONObject(i) ?: continue
+        val dateKey = day.optString("dateKey")
+        if (dateKey.isEmpty()) continue
+        val add = { time: String ->
+          val e = epochForDayTime(dateKey, time)
+          if (e > 0L) out.add(e)
+          Unit
+        }
+        day.optJSONArray("rows")?.let { rows ->
+          for (j in 0 until rows.length()) {
+            rows.optJSONObject(j)?.let { add(it.optString("time")) }
+          }
+        }
+        day.optJSONObject("sunriseRow")?.let { add(it.optString("time")) }
+        day.optJSONArray("extraRows")?.let { extra ->
+          for (j in 0 until extra.length()) {
+            extra.optJSONObject(j)?.let { add(it.optString("time")) }
+          }
+        }
+      }
+      out.sort()
+      return out
+    }
+
+    /**
+     * Build a native [Notification.ProgressStyle] bar over WHAT IS COMING
+     * (Android 16+):
      *
-     *   ☀ ──●──────●────◆────●──────●─────── 🌙
-     *      Sun   Dhuhr  now  Asr  Maghrib  Isha
+     *   ●━━━━━━━◆━━━━━━━━━━━━━━━━━━━━━━━●━━━━━━━━━━━━━━━━━●━━━━━━━━━━━━━━●
+     *   Dhuhr   now                     Asr             Maghrib      Isha
      *
-     * The whole prayer-day cycle (Fajr → next Fajr) is one timeline. Each
-     * inter-prayer gap is a segment, each prayer is a point, and a tracker dot
-     * sits at the current moment. `styledByProgress` (default) fills the
-     * elapsed part with the accent and dims the rest, so the bar reads as "how
-     * far through the day's prayers we are". Returns null when the cycle can't
-     * be resolved (e.g. before today's Fajr, or no `days[]`), so the caller
-     * falls back to a plain progress bar.
+     * The bar runs from the event just passed to the third one ahead, and the
+     * three gaps are drawn to scale against each other — so the picture says
+     * how long is left of this interval AND how that compares with the two
+     * after it. At a glance in the afternoon: a long wait to Asr, a shorter
+     * one to Maghrib, a short one to Isha.
+     *
+     * ── WHY NOT THE WHOLE DAY ─────────────────────────────────────────
+     *
+     * It used to be the whole solar day, midnight of one night to midnight of
+     * the next, with all six events inside it. That is a lovely diagram and a
+     * poor instrument: nine tenths of it is time you are not waiting for, the
+     * interval you actually care about is a sliver, and the night — the
+     * longest gap by hours — took the width that would have made the evening
+     * legible. A Live Activity is read in two seconds while something else is
+     * happening; it should answer "how long, and then what".
+     *
+     * Every event the user turned on counts here, night marks included. The
+     * day timeline left them out deliberately, on the grounds that they were
+     * not among "the six" — but this bar is about what is next, and what is
+     * next is whatever the toggles say it is.
+     *
+     * Returns null when nothing is ahead in the payload window (the caller
+     * falls back to a plain linear bar).
      */
     @SuppressLint("NewApi")
-    private fun buildDayProgressStyle(
-      ctx: Context,
+    private fun buildNextEventsProgressStyle(
       p: JSONObject,
       accentInt: Int,
-      // Optional per-prayer points + tracker icon (Android 16 APIs). Default off
-      // to keep the clean bar; both buildAndroid16 and buildAndroid17 use the bar.
+      // Optional per-event points + tracker icon (Android 16 APIs). Default off
+      // to keep the clean bar; both buildAndroid16 and buildAndroid17 use it.
       addPoints: Boolean = false,
       trackerIcon: Icon? = null,
     ): Notification.ProgressStyle? {
       if (Build.VERSION.SDK_INT < 36) return null
       return try {
         val now = System.currentTimeMillis()
-        val days = p.optJSONArray("days")
-        if (days == null || days.length() == 0) return null
+        val events = datedEvents(p)
+        val upcoming = events.filter { it > now }.take(AHEAD)
+        if (upcoming.isEmpty()) return null
 
-        // Dated prayer instants across all supplied days.
-        val epochs = ArrayList<Pair<Long, String>>()
-        for (i in 0 until days.length()) {
-          val day = days.optJSONObject(i) ?: continue
-          val dateKey = day.optString("dateKey")
-          if (dateKey.isEmpty()) continue
-          day.optJSONArray("rows")?.let { rows ->
-            for (j in 0 until rows.length()) {
-              val r = rows.optJSONObject(j) ?: continue
-              val e = epochForDayTime(dateKey, r.optString("time"))
-              if (e > 0L) epochs.add(e to r.optString("key"))
-            }
-          }
-          day.optJSONObject("sunriseRow")?.let { sr ->
-            val e = epochForDayTime(dateKey, sr.optString("time"))
-            if (e > 0L) epochs.add(e to sr.optString("key", "Sunrise"))
-          }
-          // NOTE: the optional pre-dawn night times (Islamic Midnight / Last
-          // Third) are deliberately NOT added to the timeline. They would slot
-          // into the night region and add extra gaps, but the bar is meant to
-          // show only the five prayers + Sunrise (six gaps). The night times
-          // still drive the countdown — when one is the next event, the title's
-          // inline countdown (and the Countdown design) targets it via
-          // nextLabel/nextEpochMs — they just don't appear as timeline marks.
+        // The left edge is the event just gone, so there is something filled
+        // to read as "how far through". Before the window's first event there
+        // is nothing behind us, so an hour is assumed — the same fallback the
+        // progress fraction uses when it has no previous prayer.
+        val start = events.lastOrNull { it <= now } ?: (upcoming.first() - 3600_000L)
+        val marks = ArrayList<Long>(upcoming.size + 1).apply {
+          add(start)
+          addAll(upcoming)
         }
-        if (epochs.size < 3) return null
-        epochs.sortBy { it.first }
 
-        // Cycle window: solar-midnight → next solar-midnight, where solar
-        // midnight is the midpoint of the night (an Isha → the next Fajr).
-        // Anchoring at the middle of the night puts ALL SIX events (Fajr,
-        // Sunrise, Dhuhr, Asr, Maghrib, Isha) strictly INSIDE the bar, so each
-        // is its own gap and neither Fajr nor Isha sits flush at an edge. The
-        // night then shows as the two end pieces — the half after Isha and the
-        // half before Fajr — i.e. "the space between Isha and Fajr".
-        val fajrEpochs = epochs.filter { it.second.equals("Fajr", true) }
-          .map { it.first }.sorted()
-        val ishaEpochs = epochs.filter { it.second.equals("Isha", true) }
-          .map { it.first }.sorted()
-        if (fajrEpochs.isEmpty() || ishaEpochs.isEmpty()) return null
-        // Midpoint of each night (Isha → the next Fajr after it).
-        val nightMids = ishaEpochs.mapNotNull { isha ->
-          fajrEpochs.firstOrNull { it > isha }?.let { f -> (isha + f) / 2 }
-        }.toMutableList()
-        // We usually don't have yesterday's Isha / the day-after's Fajr, so
-        // synthesize a midpoint just before the first Fajr and just after the
-        // last Isha (using a typical half-night) to cover a pre-dawn / late
-        // post-midnight "now".
-        val typicalHalfNight = ishaEpochs.firstOrNull()?.let { isha ->
-          fajrEpochs.firstOrNull { it > isha }?.let { f -> (f - isha) / 2 }
-        } ?: (4L * 3600_000L)
-        nightMids.add(fajrEpochs.first() - typicalHalfNight)
-        nightMids.add(ishaEpochs.last() + typicalHalfNight)
-        val mids = nightMids.distinct().sorted()
-        val cycleStart = mids.lastOrNull { it <= now }
-        val cycleEnd = mids.firstOrNull { it > now }
-        if (cycleStart == null || cycleEnd == null || cycleEnd <= cycleStart) return null
-
-        // The six events fall strictly inside the night→night window, so each
-        // becomes an interior gap; segments are the spans between marks.
-        val interior = epochs.map { it.first }
-          .filter { it > cycleStart && it < cycleEnd }
-          .distinct()
-          .sorted()
-        if (interior.isEmpty()) return null
-        val marks = ArrayList<Long>().apply {
-          add(cycleStart); addAll(interior); add(cycleEnd)
-        }
-        // Work in SECONDS (not minutes) so segment widths are exactly
-        // proportional to the real time between prayers AND the tracker
-        // advances smoothly every second (the service re-posts each second
-        // while the screen is on) rather than jumping once a minute.
-        // Segments are the spans between marks. With the night→night window
-        // there are seven: the half-night before Fajr, the five daytime spans
-        // (Fajr→Sunrise→Dhuhr→Asr→Maghrib→Isha), and the half-night after Isha
-        // — separated by SIX notches, one at each of the six events (each
-        // prayer + Sunrise gets its own gap). Widths are time-proportional, BUT
-        // each is floored to a minimum share of the bar — otherwise short spans
-        // (Fajr→Sunrise, Maghrib→Isha, a short summer night-half) shrink to an
-        // unreadable sliver and the gaps get lost. Android 16 draws the notch
-        // between segments — no milestone dots, no start/end icons (which also
-        // frees the full width).
         val rawLens = (0 until marks.size - 1).map {
           (marks[it + 1] - marks[it]).coerceAtLeast(1L)
         }
         val rawTotal = rawLens.sum().toDouble()
         val n = rawLens.size
-        // Each gap is at least `minShare` of the bar; cap the total floor so the
-        // minimums can never exceed ~66% of the bar (leaves room to stay
-        // proportional when one gap — e.g. a winter night — is very long).
+        // Proportional, but with a floor: a twelve-minute Maghrib→Isha beside
+        // a five-hour Isha→Fajr would otherwise be a hairline nobody can see,
+        // and a gap you cannot see is a gap the bar is not telling you about.
+        // Capped so the floors can never take more than about two thirds of
+        // the bar, which is what keeps the long gaps honestly long.
         val minShare = minOf(0.12, 0.66 / n)
         val floorLen = rawTotal * minShare
         val adjLens = rawLens.map { maxOf(it.toDouble(), floorLen) }
         val adjTotal = adjLens.sum()
-        // Integer unit space shared by the segment lengths and the progress.
         val unit = 100_000.0
         val segUnits = adjLens.map { (it / adjTotal * unit).toInt().coerceAtLeast(1) }
-        val segments = segUnits.mapIndexed { _, u ->
-          Notification.ProgressStyle.Segment(u).setColor(accentInt)
+        val segments = segUnits.map {
+          Notification.ProgressStyle.Segment(it).setColor(accentInt)
         }
-        // "Now" remapped into the same floored space so the filled/unfilled
-        // boundary (the only "now" marker — no tracker thumb) still lands at the
-        // real current time within whichever gap we're in.
+
+        // "Now" remapped into the same floored space, so the filled edge lands
+        // at the real moment within the gap we are actually in — which, with
+        // the left edge one event behind, is always the first segment.
         var progressUnits = 0
-        var currentSegIdx = -1
         for (i in 0 until n) {
           val segStart = marks[i]
           val segEnd = marks[i + 1]
@@ -966,7 +952,6 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           } else if (now > segStart) {
             val frac = (now - segStart).toDouble() / (segEnd - segStart).toDouble()
             progressUnits += (segUnits[i] * frac).toInt()
-            currentSegIdx = i
             break
           } else {
             break
@@ -977,13 +962,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           .setProgress(progressUnits)
           .setProgressSegments(segments)
 
-        // Optional: a point at each prayer boundary (Fajr…Isha) + a tracker icon
-        // at "now". The boundary after segment i is the cumulative unit sum; the
-        // last segment ends at the night edge (not a prayer), so it's skipped.
-        if (addPoints && n > 1) {
-          val points = ArrayList<Notification.ProgressStyle.Point>(n - 1)
+        // A point at each event the bar reaches, the far end included: unlike
+        // the day timeline, whose last mark was a notional midnight, every
+        // mark here IS an event.
+        if (addPoints) {
+          val points = ArrayList<Notification.ProgressStyle.Point>(n)
           var cum = 0
-          for (i in 0 until n - 1) {
+          for (i in 0 until n) {
             cum += segUnits[i]
             points.add(Notification.ProgressStyle.Point(cum).setColor(accentInt))
           }
@@ -993,7 +978,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
 
         style
       } catch (t: Throwable) {
-        Log.w(NAME, "buildDayProgressStyle failed", t)
+        Log.w(NAME, "buildNextEventsProgressStyle failed", t)
         null
       }
     }
