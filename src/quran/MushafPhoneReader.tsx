@@ -79,7 +79,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
     playback,
     riwayah,
     totalPages,
-    nightMode,
+    tone,
     pageBg,
     ornament,
     currentPage,
@@ -235,7 +235,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
             <MushafPageHeader
               page={page}
               isFullscreen={isFullscreen}
-              nightMode={nightMode}
+              tone={tone}
               ornament={ornament}
               riwayah={riwayah}
             />
@@ -253,7 +253,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
                 width={textWidth}
                 height={pageBoxH}
                 riwayah={riwayah}
-                nightMode={nightMode}
+                tone={tone}
                 accentColor={palette.accentSolid}
                 {...core.marks}
                 selected={
@@ -301,7 +301,6 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       isLandscape,
       listH,
       navPad,
-      nightMode,
       onToggleFullscreen,
       ornament,
       pageBg,
@@ -311,6 +310,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       playback.playing,
       playerReserve,
       riwayah,
+      tone,
     ],
   );
 

@@ -30,6 +30,7 @@ import {
 } from '../../quran/riwayat';
 import { useRiwayahAvailability } from '../../quran/riwayahData';
 import { surahName } from '../../quran/surahName';
+import { mushafTone, toneIsDark, TONE_PAGE_BG } from '../../quran/mushafTone';
 import {
   setQuranPrefs,
   useQuranState,
@@ -63,6 +64,9 @@ export function MushafSurahScreen({
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const quran = useQuranState();
   const quranHydrated = useQuranHydrated();
+  // Paper, sepia or night — the header's tint and the content colour
+  // follow the PAGE, not the app theme.
+  const tone = mushafTone(quran.prefs);
 
   // Incrementing signal → the reader opens its unified sheet scrolled to
   // the recitation section (the header "Audio" button).
@@ -150,18 +154,15 @@ export function MushafSurahScreen({
      * paints its own page colour edge to edge and applies the safe-area
      * insets — cutout included — itself, so here it just gets the window.
      */
-    // Before the stored blob is read, `mushafNightMode` is its default of
-    // false, so this would paint the screen pure white and then flip to
-    // #101010 a moment later when the real preference arrives. Hold the app's
-    // own background until we actually know — it is the colour already on
+    // Before the stored blob is read, the tone is its default of paper, so
+    // this would paint the screen pure white and then flip to #101010 a
+    // moment later when the real preference arrives. Hold the app's own
+    // background until we actually know — it is the colour already on
     // screen, so waiting shows as nothing at all, where guessing shows as a
     // full-window white flash on a large Mac Catalyst window.
+    const dark = toneIsDark(tone);
     const contentStyle = {
-      backgroundColor: !quranHydrated
-        ? palette.bg
-        : quran.prefs.mushafNightMode
-          ? '#101010'
-          : '#ffffff',
+      backgroundColor: !quranHydrated ? palette.bg : TONE_PAGE_BG[tone],
     };
     /**
      * Header colours follow the PAGE, not the app theme.
@@ -176,19 +177,17 @@ export function MushafSurahScreen({
     const pageChrome =
       isIOS && quranHydrated
         ? {
-            headerBlurEffect: (quran.prefs.mushafNightMode
-              ? 'dark'
-              : 'light') as 'dark' | 'light',
-            headerTintColor: quran.prefs.mushafNightMode ? '#f2f2f2' : '#1a1a1a',
+            headerBlurEffect: (dark ? 'dark' : 'light') as 'dark' | 'light',
+            headerTintColor: dark ? '#f2f2f2' : '#1a1a1a',
             headerTitleStyle: {
-              color: quran.prefs.mushafNightMode ? '#f2f2f2' : '#1a1a1a',
+              color: dark ? '#f2f2f2' : '#1a1a1a',
               writingDirection: isArabic ? 'rtl' : 'ltr',
               // writingDirection is a valid TextStyle prop, but react-navigation
               // types the title style as a narrower Pick<> that omits it.
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
             headerLargeTitleStyle: {
-              color: quran.prefs.mushafNightMode ? '#f2f2f2' : '#1a1a1a',
+              color: dark ? '#f2f2f2' : '#1a1a1a',
               writingDirection: isArabic ? 'rtl' : 'ltr',
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
@@ -367,7 +366,7 @@ export function MushafSurahScreen({
     readerTitle,
     palette.accentSolid,
     palette.bg,
-    quran.prefs.mushafNightMode,
+    tone,
     quranHydrated,
     riwayah,
     switchRiwayah,

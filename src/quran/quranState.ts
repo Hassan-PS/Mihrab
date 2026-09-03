@@ -138,8 +138,13 @@ export type RepeatSettings = {
 export type QuranPrefs = {
   reciterId: string;
   playbackRate: number;
-  /** Mushaf night mode (inverted page). */
+  /** Mushaf night mode (a repaint on a near-black ground). */
   mushafNightMode: boolean;
+  /**
+   * Which of the two LIGHT tones the page takes when night is off —
+   * additive, see `mushafTone.ts` for why night keeps its own boolean.
+   */
+  mushafPaperTone: 'paper' | 'sepia';
   /**
    * Which reading tradition the muṣḥaf is drawn in (additive).
    *
@@ -210,6 +215,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     reciterId: 'husary',
     playbackRate: 1,
     mushafNightMode: false,
+    mushafPaperTone: 'paper',
     riwayah: DEFAULT_RIWAYAH,
     riwayahNoticeSeen: false,
     keepAwake: true,
@@ -399,6 +405,13 @@ function mergeStored(raw: unknown): QuranState {
         r.prefs?.companionMode ??
         r.prefs?.votdMode ??
         DEFAULT_QURAN_STATE.prefs.companionMode,
+      // Anything but the one other light tone is paper — a blob from
+      // before the field existed, or a value no build has written.
+      mushafPaperTone:
+        (r.prefs as { mushafPaperTone?: unknown } | undefined)
+          ?.mushafPaperTone === 'sepia'
+          ? 'sepia'
+          : 'paper',
     },
   };
 }

@@ -74,6 +74,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
     riwayah,
     totalPages,
     nightMode,
+    tone,
     pageBg,
     ornament,
     currentPage,
@@ -265,7 +266,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
             <MushafPageHeader
               page={page}
               isFullscreen={isFullscreen}
-              nightMode={nightMode}
+              tone={tone}
               ornament={ornament}
               riwayah={riwayah}
               show={chrome}
@@ -278,7 +279,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
                 width={pageW}
                 height={pageH}
                 riwayah={riwayah}
-                nightMode={nightMode}
+                tone={tone}
                 accentColor={palette.accentSolid}
                 {...core.marks}
                 selected={
@@ -336,13 +337,13 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       geometry,
       isFullscreen,
       navPad,
-      nightMode,
       onToggleFullscreen,
       ornament,
       palette.accentSolid,
       playback.active,
       playback.playing,
       riwayah,
+      tone,
       totalPages,
     ],
   );

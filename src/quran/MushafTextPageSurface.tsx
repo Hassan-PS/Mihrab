@@ -26,6 +26,7 @@ import MushafTextPage, {
 import MushafUnicodePage from './MushafUnicodePage';
 import { getPageLayout, isFramedPage, pageMeasureEm } from './mushafLayout';
 import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
+import { toneIsDark, type MushafTone } from './mushafTone';
 import { useMushafPageFont } from './useMushafPageFont';
 import { ayahTint, withAlpha, type AyahRefLike } from './ayahMarks';
 import type { QuranBookmark } from './quranState';
@@ -49,7 +50,8 @@ export type MushafTextPageSurfaceProps = {
   /** Which muṣḥaf. Absent means Hafs, which is what every reader meant
    *  before there was a second one. */
   riwayah?: RiwayahId;
-  nightMode: boolean;
+  /** Paper, sepia or night — see `mushafTone.ts`. */
+  tone: MushafTone;
   accentColor: string;
   selected?: AyahRef | null;
   playing?: AyahRef | null;
@@ -83,35 +85,47 @@ export type MushafTextPageSurfaceProps = {
 /**
  * The page's ink, for either renderer.
  *
- * Night mode is a repaint, not an image inversion, so a Unicode page gets
- * it by using this palette and nothing else.
+ * Night is a repaint, not an image inversion, so a Unicode page gets it by
+ * using this palette and nothing else. Sepia is the paper palette with a
+ * brown ink: the ornament, the accent and the washes are the print's.
  */
 export function mushafPageColors(
-  nightMode: boolean,
+  tone: MushafTone,
   accentColor: string,
 ): MushafPageColors {
-  return nightMode
-    ? {
-        text: '#E8E4DA',
-        accent: accentColor,
-        // The surah's name, inside the band. On a night page the accent
-        // is too close to the ground to read at a glance, so the name
-        // takes the page's own ink and the band keeps the accent —
-        // which is also how the print does it: the frame is worked, the
-        // name is written.
-        heading: '#F2EFE6',
-        selection: 'rgba(255,255,255,0.10)',
-        muted: 'rgba(232,228,218,0.72)',
-        word: withAlpha(accentColor, 0.55),
-      }
-    : {
-        text: '#1A1A18',
-        accent: accentColor,
-        heading: accentColor,
-        selection: 'rgba(0,0,0,0.06)',
-        muted: 'rgba(26,26,24,0.66)',
-        word: withAlpha(accentColor, 0.42),
-      };
+  if (tone === 'night') {
+    return {
+      text: '#E8E4DA',
+      accent: accentColor,
+      // The surah's name, inside the band. On a night page the accent
+      // is too close to the ground to read at a glance, so the name
+      // takes the page's own ink and the band keeps the accent —
+      // which is also how the print does it: the frame is worked, the
+      // name is written.
+      heading: '#F2EFE6',
+      selection: 'rgba(255,255,255,0.10)',
+      muted: 'rgba(232,228,218,0.72)',
+      word: withAlpha(accentColor, 0.55),
+    };
+  }
+  if (tone === 'sepia') {
+    return {
+      text: '#2B2418',
+      accent: accentColor,
+      heading: accentColor,
+      selection: 'rgba(60,40,10,0.08)',
+      muted: 'rgba(43,36,24,0.64)',
+      word: withAlpha(accentColor, 0.42),
+    };
+  }
+  return {
+    text: '#1A1A18',
+    accent: accentColor,
+    heading: accentColor,
+    selection: 'rgba(0,0,0,0.06)',
+    muted: 'rgba(26,26,24,0.66)',
+    word: withAlpha(accentColor, 0.42),
+  };
 }
 
 /**
@@ -184,7 +198,7 @@ function GlyphPageSurface({
   page,
   width,
   height,
-  nightMode,
+  tone,
   accentColor,
   selected,
   playing,
@@ -196,6 +210,7 @@ function GlyphPageSurface({
   onWordLongPress,
   prefetchRadius = 0,
 }: MushafTextPageSurfaceProps) {
+  const nightMode = toneIsDark(tone);
   const { family, failed } = useMushafPageFont(page, true, prefetchRadius);
   const layout = getPageLayout(page);
 
@@ -216,8 +231,8 @@ function GlyphPageSurface({
   );
 
   const colors = React.useMemo(
-    () => mushafPageColors(nightMode, accentColor),
-    [nightMode, accentColor],
+    () => mushafPageColors(tone, accentColor),
+    [tone, accentColor],
   );
 
   const tint = useMemo(
@@ -302,7 +317,7 @@ function UnicodePageSurface({
   width,
   height,
   riwayah = DEFAULT_RIWAYAH,
-  nightMode,
+  tone,
   accentColor,
   selected,
   playing,
@@ -312,6 +327,7 @@ function UnicodePageSurface({
   onWordPress,
   onWordLongPress,
 }: MushafTextPageSurfaceProps) {
+  const nightMode = toneIsDark(tone);
   const handlePress = React.useCallback(
     (ref: AyahRef) => onWordPress?.(ref, page),
     [onWordPress, page],
@@ -321,8 +337,8 @@ function UnicodePageSurface({
     [onWordLongPress, page],
   );
   const colors = React.useMemo(
-    () => mushafPageColors(nightMode, accentColor),
-    [nightMode, accentColor],
+    () => mushafPageColors(tone, accentColor),
+    [tone, accentColor],
   );
 
   const tint = useMemo(

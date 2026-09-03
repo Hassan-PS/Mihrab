@@ -149,7 +149,7 @@ function Harness({ onWordPress }: { onWordPress: () => void }) {
         page={49}
         width={360}
         height={700}
-        nightMode={false}
+        tone="paper"
         accentColor="#2E6B4F"
         selected={null}
         playing={null}
@@ -208,7 +208,7 @@ describe('a mushaf page survives a re-render of the screen around it', () => {
           page={49}
           width={360}
           height={700}
-          nightMode={false}
+          tone="paper"
           accentColor="#2E6B4F"
           onWordLongPress={longPress}
         />,

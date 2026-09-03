@@ -51,6 +51,14 @@ import {
   type QuranState,
 } from './quranState';
 import { usePlaybackStatus, type PlaybackStatus } from './audio/playback';
+import {
+  mushafTone,
+  nextMushafTone,
+  prefsForTone,
+  TONE_ORNAMENT,
+  TONE_PAGE_BG,
+  type MushafTone,
+} from './mushafTone';
 import { mushafSurahName } from './surahName';
 import type { AyahRef } from './MushafTextPage';
 import type { KeyPagingTarget } from './useKeyPaging';
@@ -185,7 +193,10 @@ export type MushafReaderCore = {
   riwayah: RiwayahId;
   /** Pages in that muṣḥaf — not assumed to be 604. */
   totalPages: number;
+  /** True on the night page — kept for the chrome that only asks dark or light. */
   nightMode: boolean;
+  /** The page's tone: paper, sepia or night. See `mushafTone.ts`. */
+  tone: MushafTone;
   /** Page + reader background. */
   pageBg: string;
   /** The quiet gold used for page chrome (juz label, page number). */
@@ -229,16 +240,17 @@ export function useMushafReaderCore({
   const riwayah = resolveRiwayah(quran.prefs.riwayah);
   const totalPages = totalPagesForRiwayah(riwayah);
 
-  const nightMode = quran.prefs.mushafNightMode;
-  // Until the stored preference has actually been read, `nightMode` is the
-  // default `false` and painting on it would put a pure-white page on screen
+  const tone = mushafTone(quran.prefs);
+  const nightMode = tone === 'night';
+  // Until the stored preference has actually been read, the tone is the
+  // default paper and painting on it would put a pure-white page on screen
   // for as long as the read takes, then swap it for near-black. Staying
   // transparent lets the screen's own background show through instead, so the
   // page colour appears once — when it is known to be right. The window is
   // 5K on a Mac, which is where guessing wrong is impossible to miss.
   const hydrated = useQuranHydrated();
-  const pageBg = !hydrated ? 'transparent' : nightMode ? '#101010' : '#ffffff';
-  const ornament = nightMode ? '#c9b47a' : '#7a5e1f';
+  const pageBg = !hydrated ? 'transparent' : TONE_PAGE_BG[tone];
+  const ornament = TONE_ORNAMENT[tone];
 
   const initial = useMemo(
     () => initialPage ?? findPageForAyah(surahNumber, 1, riwayah),
@@ -475,6 +487,7 @@ export function useMushafReaderCore({
     riwayah,
     totalPages,
     nightMode,
+    tone,
     pageBg,
     ornament,
     currentPage,
@@ -539,14 +552,15 @@ export function useSettledMeasure(value: number, quietMs = 100): number {
 export function MushafPageHeader({
   page,
   isFullscreen,
-  nightMode,
+  tone,
   ornament,
   riwayah = DEFAULT_RIWAYAH,
   show = 'both',
 }: {
   page: number;
   isFullscreen: boolean;
-  nightMode: boolean;
+  /** The page's tone; the pill offers the next one. */
+  tone: MushafTone;
   ornament: string;
   /** Which muṣḥaf's page this is — the juz label is a fact about ITS print. */
   riwayah?: RiwayahId;
@@ -579,23 +593,31 @@ export function MushafPageHeader({
         </Text>
       ) : null}
       {show !== 'label' ? (
+        // The pill names the tone a tap goes TO — paper → sepia → night →
+        // paper — the way it always named "Night" on the light page.
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
-            nightMode
-              ? t('quran.switchToLight', 'Switch to light page')
-              : t('quran.switchToNight', 'Switch to night page')
+            nextMushafTone(tone) === 'sepia'
+              ? t('quran.switchToSepia', 'Switch to sepia page')
+              : nextMushafTone(tone) === 'night'
+                ? t('quran.switchToNight', 'Switch to night page')
+                : t('quran.switchToLight', 'Switch to light page')
           }
           hitSlop={8}
-          onPress={() => setQuranPrefs({ mushafNightMode: !nightMode })}
+          onPress={() => setQuranPrefs(prefsForTone(nextMushafTone(tone)))}
           style={[styles.nightPill, { borderColor: ornament }]}>
           <Text style={[styles.nightPillText, { color: ornament }]}>
-            {nightMode
-              ? // U+FE0E variation selectors force the monochrome text
-                // glyphs — Android otherwise renders the sun as a colored
-                // emoji, which shouts against the quiet page.
-                `☀︎ ${t('quran.lightShort', 'Light')}`
-              : `☾︎ ${t('quran.nightShort', 'Night')}`}
+            {
+              // U+FE0E variation selectors force the monochrome text
+              // glyphs — Android otherwise renders the sun as a colored
+              // emoji, which shouts against the quiet page.
+              nextMushafTone(tone) === 'sepia'
+                ? `◐︎ ${t('quran.sepiaShort', 'Sepia')}`
+                : nextMushafTone(tone) === 'night'
+                  ? `☾︎ ${t('quran.nightShort', 'Night')}`
+                  : `☀︎ ${t('quran.lightShort', 'Light')}`
+            }
           </Text>
         </Pressable>
       ) : null}
