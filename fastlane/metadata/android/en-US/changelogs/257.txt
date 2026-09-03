@@ -1,0 +1,4 @@
+• Twenty pages of the muṣḥaf drew some words in the system font instead of the page's own — rows of meaningless letter pairs. The page fonts are rebuilt, and Mihrab now checks the ones on your device and quietly replaces any that are wrong.
+• The bottoms of letters are no longer cut off at the line.
+• Turning the phone keeps the page you were on.
+• The page rail is rebuilt: it follows your finger smoothly, names the surah and juz under it, and slides up for finer control.

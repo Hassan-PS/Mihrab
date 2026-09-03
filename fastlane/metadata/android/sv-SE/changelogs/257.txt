@@ -1,0 +1,4 @@
+• Tjugo sidor i muṣḥafen ritade vissa ord med systemets typsnitt i stället för sidans eget — rader av meningslösa bokstavspar. Sidtypsnitten är ombyggda, och Mihrab kontrollerar nu dem du har och byter tyst ut de felaktiga.
+• Bokstävernas nederdelar kapas inte längre vid raden.
+• Att vrida telefonen behåller sidan du var på.
+• Sidreglaget är ombyggt: det följer fingret mjukt, namnger suran och juz under det, och dra uppåt för finare kontroll — en sida av 604, med avsikt.

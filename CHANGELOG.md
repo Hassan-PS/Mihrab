@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.14.3] — 2026-09-03
+
+The muṣḥaf reads right: twenty pages had words drawn in the wrong face, lines were losing the bottom of their ink, and the page rail is rebuilt.
+
+### Changed
+- **The page rail on phones is rebuilt.** Dragging it no longer re-renders the muṣḥaf on every touch sample — the knob and a readout follow the finger, the reader peeks at a page once the finger rests on it, and the place is committed on release. Slide the finger up, away from the rail, to slow the scrub to half, a quarter and a tenth, so a single page out of 604 can be chosen on purpose; the readout names the surah, juz and page under the thumb and the speed it is in. The thirty ajzāʾ are marked on the rail, a touch on the knob picks it up without jumping, and the rail can be stepped a page at a time with a screen reader.
+
+### Fixed
+- **Twenty pages of the muṣḥaf were drawing words in the wrong face.** Pages 120–122, 145, 531–533, 564, 567, 569, 575, 583, 586, 588, 590, 592, 593 and 598–600 had fonts on the release cut short of the page: the words the font lacked came out in the system's Arabic face as rows of letter pairs — "له مج مح مخ" at the foot of Al-Qalam, an ayah of Al-Aʿlā turned to "هي يج يح يخ يم يى". The fonts are rebuilt from the layout the reader actually draws (so the two cannot disagree again), the app now checks every font it holds against a manifest of the release's sizes and quietly re-fetches the twenty on devices that already had them, and the release-upload script replaces a changed font instead of skipping it by name.
+- **The bottom of a line is no longer cut off.** The page fonts' calligraphy reaches further below the baseline (and above it) than their metrics say, and both platforms keep only what falls inside a line's box; each line now has room for its ink, on every platform.
+- **Turning the phone keeps the page.** On Android, rotating on a page past the middle of the muṣḥaf — page 589, say — could land the reader hundreds of pages back, and turning back kept it there: the scroll that re-anchors the page was executed before the pager had been laid out at the new width, clamped to the old strip, and then believed. A re-anchor the list did not honour is now issued again once the layout is there, and the pager no longer settles on an offset it was not sent to — on every platform, for the spread reader's rotations and window resizes too.
+
 ## [2.14.2] — 2026-09-03
 
 The muṣḥaf, mostly: it opens faster, it follows the reciter, and it reaches the edges of the screen.
