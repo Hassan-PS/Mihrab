@@ -1294,7 +1294,8 @@
     "serverCoverage": "Servertäckning",
     "serverSweden": "Sverige · Islamiska Förbundet",
     "serverMorocco": "Marocko · Habous",
-    "inUse": "används"
+    "inUse": "används",
+    "habousWindow": "Ministeriet publicerar bara den pågående hijrimånaden, så fönstret krymper med en dag varje dag och fylls på när månaden vänder. En ombyggnad gör det inte längre."
   },
   "log": {
     "legendPrayers": "0 → 5 böner",

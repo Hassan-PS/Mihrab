@@ -1294,7 +1294,8 @@
     "serverCoverage": "Couverture serveur",
     "serverSweden": "Suède · Islamiska Förbundet",
     "serverMorocco": "Maroc · Habous",
-    "inUse": "utilisé"
+    "inUse": "utilisé",
+    "habousWindow": "Le ministère ne publie que le mois hégirien en cours : cette fenêtre perd un jour par jour et se remplit de nouveau au changement de mois. Une reconstruction ne l’allonge pas."
   },
   "log": {
     "legendPrayers": "0 → 5 prières",

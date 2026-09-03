@@ -40,6 +40,13 @@ const SERVERS: {
   labelKey: string;
   labelDefault: string;
   nextRun: () => Date;
+  /**
+   * Why this dataset's window is the size it is, where the number alone is
+   * misleading. Only Habous has one, and it is the difference between "the
+   * build is broken" and "that is everything the ministry publishes".
+   */
+  coverageNoteKey?: string;
+  coverageNoteDefault?: string;
 }[] = [
   {
     id: 'ifis',
@@ -54,6 +61,9 @@ const SERVERS: {
     labelKey: 'dataStats.serverMorocco',
     labelDefault: 'Morocco · Habous',
     nextRun: nextHabousServerRunAfter,
+    coverageNoteKey: 'dataStats.habousWindow',
+    coverageNoteDefault:
+      'The ministry publishes only the current Hijri month, so this window shrinks by a day each day and refills when the month turns. A rebuild cannot make it longer.',
   },
 ];
 
@@ -254,6 +264,13 @@ function DataStatsPanelImpl() {
             label={t('dataStats.serverCoverage')}
             value={coverageOf(server.id)}
           />
+          {server.coverageNoteKey ? (
+            <Text style={[styles.note, { color: palette.muted }]}>
+              {t(server.coverageNoteKey, {
+                defaultValue: server.coverageNoteDefault,
+              })}
+            </Text>
+          ) : null}
           <Row
             palette={palette}
             label={t('dataStats.serverRun')}
@@ -375,6 +392,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 12,
   },
+  // Sits under the coverage row it explains, not in the row's own grid.
+  note: { fontSize: 11, lineHeight: 15, paddingBottom: 10 },
   rowLabel: { fontSize: 13, flexShrink: 0 },
   rowValue: {
     fontSize: 13,

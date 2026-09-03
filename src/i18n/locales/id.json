@@ -1294,7 +1294,8 @@
     "serverCoverage": "Cakupan server",
     "serverSweden": "Swedia · Islamiska Förbundet",
     "serverMorocco": "Maroko · Habous",
-    "inUse": "dipakai"
+    "inUse": "dipakai",
+    "habousWindow": "Kementerian hanya menerbitkan bulan Hijriah yang sedang berjalan, sehingga jendela ini berkurang satu hari setiap hari dan terisi lagi saat bulan berganti. Membangun ulang tidak memperpanjangnya."
   },
   "log": {
     "legendPrayers": "0 → 5 salat",

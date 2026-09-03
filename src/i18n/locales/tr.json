@@ -1294,7 +1294,8 @@
     "serverCoverage": "Sunucu kapsamı",
     "serverSweden": "İsveç · Islamiska Förbundet",
     "serverMorocco": "Fas · Habous",
-    "inUse": "kullanımda"
+    "inUse": "kullanımda",
+    "habousWindow": "Bakanlık yalnızca içinde bulunulan hicri ayı yayımlar; bu pencere her gün bir gün kısalır ve ay dönünce yeniden dolar. Yeniden derleme onu uzatmaz."
   },
   "log": {
     "legendPrayers": "0 → 5 namaz",

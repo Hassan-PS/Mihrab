@@ -1294,7 +1294,8 @@
     "serverCoverage": "Server-Abdeckung",
     "serverSweden": "Schweden · Islamiska Förbundet",
     "serverMorocco": "Marokko · Habous",
-    "inUse": "aktiv"
+    "inUse": "aktiv",
+    "habousWindow": "Das Ministerium veröffentlicht nur den laufenden Hidschri-Monat: Dieses Fenster schrumpft täglich um einen Tag und füllt sich beim Monatswechsel wieder. Ein Neuaufbau verlängert es nicht."
   },
   "log": {
     "legendPrayers": "0 → 5 Gebete",

@@ -1294,7 +1294,8 @@
     "serverCoverage": "Cobertura del servidor",
     "serverSweden": "Suecia · Islamiska Förbundet",
     "serverMorocco": "Marruecos · Habous",
-    "inUse": "en uso"
+    "inUse": "en uso",
+    "habousWindow": "El ministerio solo publica el mes hiyrí en curso, así que esta ventana se acorta un día cada día y vuelve a llenarse al cambiar de mes. Reconstruirla no la alarga."
   },
   "log": {
     "legendPrayers": "0 → 5 oraciones",

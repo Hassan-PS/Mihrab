@@ -1294,7 +1294,8 @@
     "serverCoverage": "Server coverage",
     "serverSweden": "Sweden · Islamiska Förbundet",
     "serverMorocco": "Morocco · Habous",
-    "inUse": "in use"
+    "inUse": "in use",
+    "habousWindow": "The ministry publishes only the current Hijri month, so this window shrinks by a day each day and refills when the month turns. A rebuild cannot make it longer."
   },
   "log": {
     "legendPrayers": "0 → 5 prayers",

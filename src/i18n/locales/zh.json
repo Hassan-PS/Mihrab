@@ -1294,7 +1294,8 @@
     "serverCoverage": "服务器覆盖天数",
     "serverSweden": "瑞典 · Islamiska Förbundet",
     "serverMorocco": "摩洛哥 · Habous",
-    "inUse": "使用中"
+    "inUse": "使用中",
+    "habousWindow": "该部只公布当前的希吉来月，因此这一区间每天缩短一天，并在月份更替时重新填满。重新构建并不能让它更长。"
   },
   "log": {
     "legendPrayers": "0 → 5 次礼拜",
