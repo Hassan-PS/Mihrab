@@ -261,8 +261,17 @@ export function MushafSpreadReader(props: MushafReaderProps) {
         <View style={[styles.column, { width: colW }]}>
           {/* The header strip toggles fullscreen too — with a tap on a
               word now opening the ayah, the strip and the margins are
-              where the chrome is put away and brought back. */}
-          <Pressable onPress={onToggleFullscreen} style={{ paddingTop: navPad }}>
+              where the chrome is put away and brought back.
+
+              `accessible={false}`, or the strip becomes ONE element to
+              VoiceOver and swallows the tone pill inside it: a Pressable
+              is accessible by default, and an accessible parent hides its
+              children. Seen on the Mac — the pill's label read out, the
+              press landed on the strip. */}
+          <Pressable
+            accessible={false}
+            onPress={onToggleFullscreen}
+            style={{ paddingTop: navPad }}>
             <MushafPageHeader
               page={page}
               isFullscreen={isFullscreen}

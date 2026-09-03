@@ -28,8 +28,18 @@ describe.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])('%s', file =>
     // Without this, on a phone the only fullscreen toggle left would be a
     // 3.5% margin either side of the page.
     expect(src).toMatch(
-      /<Pressable onPress=\{onToggleFullscreen\} style=\{\{ paddingTop: navPad \}\}>\s*\n\s*<MushafPageHeader/,
+      /<Pressable\s+accessible=\{false\}\s+onPress=\{onToggleFullscreen\}\s+style=\{\{ paddingTop: navPad \}\}>\s*\n\s*<MushafPageHeader/,
     );
+  });
+
+  it('without swallowing the tone pill inside it', () => {
+    // A Pressable is accessible by default and an accessible parent hides
+    // its children: the pill's label read out, the press landed on the
+    // strip.
+    const strip = src.slice(
+      src.indexOf('onPress={onToggleFullscreen}\n            style={{ paddingTop: navPad }}') - 60,
+    );
+    expect(strip).toContain('accessible={false}');
   });
 
   it('and so do the margins around the page', () => {
