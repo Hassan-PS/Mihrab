@@ -41,7 +41,7 @@ import { ensurePageFontFile } from './mushafFontStore';
  * during: a font parse on the main thread in the middle of the turn
  * animation is a dropped frame, and the whole point is smoothness.
  */
-function warmAround(page: number, radius: number): void {
+export function warmAround(page: number, radius: number): void {
   const pages: number[] = [];
   for (let d = 1; d <= radius; d++) {
     for (const p of [page + d, page - d]) {
@@ -123,12 +123,21 @@ export function useMushafPageFont(
       })();
     }
 
-    if (prefetchRadius > 0) warmAround(page, prefetchRadius);
-
     return () => {
       alive = false;
       if (pinned) unpinPageFont(page);
     };
+  }, [page, enabled]);
+
+  // Its own effect, so the radius changing does not re-run the one above.
+  // It did: the reader hands the radius to the page being read and 0 to
+  // the rest, so every turn flipped it on two pages, and each flip
+  // unpinned the font, re-ran the load, pinned it again and set state —
+  // a render of both neighbours for a page that had not moved.
+  useEffect(() => {
+    if (enabled && mushafFontAvailable && prefetchRadius > 0) {
+      warmAround(page, prefetchRadius);
+    }
   }, [page, enabled, prefetchRadius]);
 
   return state;

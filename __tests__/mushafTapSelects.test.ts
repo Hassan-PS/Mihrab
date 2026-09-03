@@ -15,13 +15,24 @@ const read = (f: string) =>
 
 describe.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])('%s', file => {
   const src = read(file);
+  // The spread reader hands the core's handler to the surface directly.
+  // The phone reader's page is a memoised component of its own, so the
+  // handler reaches the surface through the page's prop — and the reader
+  // fills that prop with the same `openSelection`.
+  const handler = file.startsWith('MushafPhone')
+    ? 'onWordPress'
+    : 'core\\.openSelection';
 
   it('a tap on a word opens the ayah', () => {
-    expect(src).toMatch(/onWordPress=\{core\.openSelection\}/);
+    expect(src).toMatch(new RegExp(`onWordPress=\\{${handler}\\}`));
+    if (file.startsWith('MushafPhone')) {
+      expect(src).toMatch(/onWordPress=\{openSelection\}/);
+      expect(src).toMatch(/const \{ [^}]*openSelection[^}]* \} = core;/);
+    }
   });
 
   it('and so does a long press, for hands that learned it that way', () => {
-    expect(src).toMatch(/onWordLongPress=\{core\.openSelection\}/);
+    expect(src).toMatch(new RegExp(`onWordLongPress=\\{${handler}\\}`));
   });
 
   it('the header strip toggles fullscreen', () => {
@@ -36,10 +47,11 @@ describe.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])('%s', file =>
     // A Pressable is accessible by default and an accessible parent hides
     // its children: the pill's label read out, the press landed on the
     // strip.
-    const strip = src.slice(
-      src.indexOf('onPress={onToggleFullscreen}\n            style={{ paddingTop: navPad }}') - 60,
+    const strip = src.match(
+      /<Pressable[^>]*onPress=\{onToggleFullscreen\}\s+style=\{\{ paddingTop: navPad \}\}>/,
     );
-    expect(strip).toContain('accessible={false}');
+    expect(strip).not.toBeNull();
+    expect(strip![0]).toContain('accessible={false}');
   });
 
   it('and so do the margins around the page', () => {

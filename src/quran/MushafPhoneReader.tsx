@@ -3,8 +3,8 @@
  * (docs/mushaf-reader-split-plan.md, step 2).
  *
  * Grown from `MushafPhoneLandscape`'s FlatList: portrait and landscape are
- * the SAME tree, so rotation never remounts — it only re-derives three
- * numbers from `useWindowDimensions`:
+ * the SAME tree, so rotation never remounts — it only re-derives the page
+ * geometry from `useWindowDimensions` (see `phonePageGeometry.ts`):
  *
  * - `pageWidth` = window width (both orientations)
  * - `textWidth` = portrait: width − padding · landscape:
@@ -18,10 +18,31 @@
  * from the new width. No zoom clamps, no windowed strip, no image-cache
  * math — this component is only ever mounted on a phone (DEVICE_CLASS,
  * answered once at module scope) in text mode.
+ *
+ * ── WHAT A PAGE IS ALLOWED TO RE-RENDER FOR ───────────────────────────
+ *
+ * The list re-renders for every reason the reader does — a turn, a recited
+ * ayah, the chrome coming or going, the player appearing — and each of
+ * those used to reach every mounted page: `renderItem` closed over the
+ * whole core and the current page, so it was a new function every render,
+ * and a page's props carried things that belonged to other pages (the
+ * playing ayah, the selection) and so changed when THEY changed.
+ *
+ * A page is a memoised component now, and it is handed only what is its
+ * own: the settled geometry, the marks, and the selection, the playing
+ * ayah and the finish pill only when they are on it. Everything else on
+ * the screen can re-render and the page does not notice.
  */
-import React, { useCallback, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   FlatList,
+  InteractionManager,
   Platform,
   Pressable,
   ScrollView,
@@ -37,13 +58,15 @@ import { finishKhatmahPortion } from './quranState';
 import MushafTextPageSurface, {
   mushafPageColumnHeight,
 } from './MushafTextPageSurface';
+import type { AyahRef } from './MushafTextPage';
 import {
   MushafJumpModal,
   MushafPageFooter,
   MushafPageHeader,
   useMushafReaderCore,
+  type AyahMarkProps,
+  type KhatmahFinish,
   type MushafReaderProps,
-  useSettledMeasure,
 } from './mushafReaderCore';
 import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import { MushafPageScrubber } from './MushafPageScrubber';
@@ -51,27 +74,171 @@ import { MiniPlayer } from './audio/MiniPlayer';
 import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
 import { useMushafPager } from './useMushafPager';
+import { warmAround } from './useMushafPageFont';
+import { findPageForAyah } from './pages';
+import { riwayahById, type RiwayahId } from './riwayat';
+import type { MushafTone } from './mushafTone';
+import {
+  phonePageGeometry,
+  phonePageWidth,
+  useSettledGeometry,
+  type PhonePageGeometry,
+} from './phonePageGeometry';
 
 /** Index per page: the FlatList index IS the page, less one. */
 const pageIndex = (page: number) => page - 1;
 const indexPage = (index: number) => index + 1;
 
-/** Breathing room either side of the page inside its column. */
-const H_PADDING = 10;
-
-/**
- * How much bigger the landscape text is than portrait. The landscape
- * screen's short side IS the portrait page width, so this is a direct
- * multiple of it (see MushafPhoneLandscape for the full rationale).
- */
-const LANDSCAPE_ZOOM = 1.6;
-
-/** Estimated header-row / footer-medallion heights, dp — the chrome that
- *  brackets the page inside each column. */
-const HEADER_RESERVE = 34;
-const FOOTER_RESERVE = 42;
 /** Floating mini-player card: 3px track + row (~54) + 10 bottom margin. */
 const PLAYER_RESERVE = 68;
+
+/** Pages either side of the one being read whose fonts are registered ahead. */
+const WARM_RADIUS = 2;
+
+/**
+ * The list's render window while the reader is opening, and after.
+ *
+ * Three pages — the one being read and a neighbour either side — is right
+ * for swiping: the next page is already drawn when the finger moves. It is
+ * wrong for OPENING: the first page's font and fifteen lines of text were
+ * sharing the thread with two more pages' worth, under the push
+ * transition, and the page the reader came for was the one that waited.
+ * So the window is one page until the transition has finished, then three.
+ */
+const WINDOW_OPENING = 1;
+const WINDOW_READING = 3;
+
+type PageItemProps = {
+  page: number;
+  /** Live: the FlatList item has to be exactly one viewport wide. */
+  pageWidth: number;
+  /** Settled: what the text is laid out against. Null before the first
+   *  measurement, and the page draws nothing in its box. */
+  geometry: PhonePageGeometry | null;
+  /** Live: keeps the page chrome below iOS's floating header. */
+  navPad: number;
+  isFullscreen: boolean;
+  tone: MushafTone;
+  ornament: string;
+  riwayah: RiwayahId;
+  pageBg: string;
+  accent: string;
+  marks: AyahMarkProps;
+  /** Only ever set on the page they are on — null on every other page,
+   *  which is what lets those pages ignore a recited ayah or a selection
+   *  happening somewhere else. */
+  selected: AyahRef | null;
+  playing: AyahRef | null;
+  finish: KhatmahFinish | null;
+  onToggleFullscreen: () => void;
+  onWordPress: (ref: AyahRef, page: number) => void;
+  onOpenJump: () => void;
+};
+
+const PhonePageItem = React.memo(function PhonePageItem({
+  page,
+  pageWidth,
+  geometry,
+  navPad,
+  isFullscreen,
+  tone,
+  ornament,
+  riwayah,
+  pageBg,
+  accent,
+  marks,
+  selected,
+  playing,
+  finish,
+  onToggleFullscreen,
+  onWordPress,
+  onOpenJump,
+}: PageItemProps) {
+  // Portrait: the page spans the width and is height-fitted — the surface
+  // fills the box it is given, so the whole page is on screen with nothing
+  // to scroll. Landscape: a READING zoom (1.6× the portrait width), so the
+  // page is taller than the window and its column scrolls vertically.
+  const pageBoxH = geometry
+    ? mushafPageColumnHeight({
+        page,
+        riwayah,
+        textWidth: geometry.textWidth,
+        viewportHeight: geometry.viewportH,
+        scrolling: geometry.scrolling,
+        playerReserve: geometry.playerReserve,
+      })
+    : 0;
+
+  return (
+    <View style={[styles.item, { width: pageWidth, backgroundColor: pageBg }]}>
+      {/* The header strip toggles fullscreen too — with a tap on a word now
+          opening the ayah, the strip and the margins are where the chrome
+          is put away and brought back.
+
+          `accessible={false}`, or the strip becomes ONE element to
+          VoiceOver and swallows the tone pill inside it: a Pressable is
+          accessible by default, and an accessible parent hides its
+          children. Seen on the Mac — the pill's label read out, the press
+          landed on the strip. */}
+      <Pressable
+        accessible={false}
+        onPress={onToggleFullscreen}
+        style={{ paddingTop: navPad }}>
+        <MushafPageHeader
+          page={page}
+          isFullscreen={isFullscreen}
+          tone={tone}
+          ornament={ornament}
+          riwayah={riwayah}
+        />
+      </Pressable>
+      {geometry ? (
+        <ScrollView
+          style={styles.column}
+          contentContainerStyle={styles.columnContent}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled>
+          <Pressable
+            onPress={onToggleFullscreen}
+            style={[styles.pageWrap, { width: pageWidth }]}>
+            <MushafTextPageSurface
+              page={page}
+              width={geometry.textWidth}
+              height={pageBoxH}
+              riwayah={riwayah}
+              tone={tone}
+              accentColor={accent}
+              {...marks}
+              selected={selected}
+              playing={playing}
+              // A TAP ON A WORD OPENS ITS AYAH; the margins, the header
+              // strip and the ⛶ in the navigation bar are where fullscreen
+              // lives — see the same line in MushafSpreadReader for why
+              // this changed, and for why it is the handler itself and not
+              // an arrow around it.
+              onWordPress={onWordPress}
+              onWordLongPress={onWordPress}
+            />
+          </Pressable>
+          <MushafPageFooter
+            page={page}
+            ornament={ornament}
+            onPress={onOpenJump}
+            finish={
+              finish
+                ? {
+                    day: finish.day,
+                    when: finish.when,
+                    onPress: finishKhatmahPortion,
+                  }
+                : null
+            }
+          />
+        </ScrollView>
+      ) : null}
+    </View>
+  );
+});
 
 export function MushafPhoneReader(props: MushafReaderProps) {
   const { isFullscreen, onToggleFullscreen } = props;
@@ -92,14 +259,10 @@ export function MushafPhoneReader(props: MushafReaderProps) {
   } = core;
 
   const listRef = useRef<FlatList<number>>(null);
-  // Measured list viewport (excludes the fullscreen top inset padding);
-  // window height is a fine estimate for the first frame.
-  const [listHRaw, setListH] = useState(0);
-  // Settled, so a fullscreen toggle lays the page out once instead of at every
-  // intermediate height the chrome passes through on its way out.
-  const listH = useSettledMeasure(listHRaw);
+  // Measured list viewport (excludes the fullscreen top inset padding).
+  // Raw: the geometry it feeds is what settles, not this on its own.
+  const [listH, setListH] = useState(0);
 
-  const isLandscape = width > height;
   /**
    * Display cutout / rounded corners (v2.8.2). `insets.left` and
    * `insets.right` are PHYSICAL edges — unlike padding they never flip with
@@ -118,13 +281,27 @@ export function MushafPhoneReader(props: MushafReaderProps) {
    * `getItemLayout`, the momentum-end index, the page column — measures in
    * this, never the raw window width, or the snap drifts off the page.
    */
-  const pageWidth = width - sideInset * 2;
+  const pageWidth = phonePageWidth(width, sideInset);
   // iOS floats a translucent nav header over the content; keep the page
   // chrome below it (0 on Android's opaque header, 0 in fullscreen).
   const navPad = !isFullscreen && Platform.OS === 'ios' ? headerHeight : 0;
   const playerReserve = playback.active ? PLAYER_RESERVE : 0;
 
-  const data = React.useMemo(
+  // Every input that decides a page's box, folded into one value and
+  // published once it has stopped moving — see phonePageGeometry.ts for the
+  // three layouts per rotation this replaces.
+  const geometry = useSettledGeometry(
+    phonePageGeometry({
+      width,
+      height,
+      sideInset,
+      navPad,
+      listH,
+      playerReserve,
+    }),
+  );
+
+  const data = useMemo(
     () => Array.from({ length: totalPages }, (_, i) => i + 1),
     [totalPages],
   );
@@ -144,12 +321,13 @@ export function MushafPhoneReader(props: MushafReaderProps) {
    * effects, a momentum handler — with none of the guard against settling
    * its own scrolls and none of the tests. One pager, two layouts.
    */
+  const { commitPageTurn } = core;
   const onTurn = useCallback(
     (page: number, prevPage: number) => {
-      core.commitPageTurn(page, prevPage);
+      commitPageTurn(page, prevPage);
       setCurrentPage(page);
     },
-    [core, setCurrentPage],
+    [commitPageTurn, setCurrentPage],
   );
   const { handlers: pagerHandlers, turnPage } = useMushafPager({
     list: listRef,
@@ -171,125 +349,81 @@ export function MushafPhoneReader(props: MushafReaderProps) {
    */
   useRegisterKeyPaging(props.keyTurn, turnPage);
 
+  // The neighbours' fonts, registered ahead of the swipe — from here, once
+  // per turn, rather than as a per-page prop that changed on two pages
+  // every turn and re-rendered both. A bundled riwayah has no page fonts.
+  useEffect(() => {
+    if (riwayahById(riwayah).render === 'unicode') return;
+    warmAround(currentPage, WARM_RADIUS);
+  }, [currentPage, riwayah]);
+
+  // One page while opening, three once the transition is out of the way.
+  const [windowSize, setWindowSize] = useState(WINDOW_OPENING);
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() =>
+      setWindowSize(WINDOW_READING),
+    );
+    return () => task.cancel();
+  }, []);
+
+  // Which page each of the per-page things is on, so every other page can
+  // be handed null and stay put.
+  const selectedPage =
+    core.sheetVisible && core.selected ? core.selected.page : 0;
+  const playingPage = useMemo(
+    () =>
+      playback.active && playback.playing
+        ? findPageForAyah(playback.active.surah, playback.active.ayah, riwayah)
+        : 0,
+    [playback.active, playback.playing, riwayah],
+  );
+  const finishPage = core.finish?.page ?? 0;
+
+  const { marks, finish, selected, openSelection, openJump } = core;
+  const accent = palette.accentSolid;
+  const playingRef = playback.active;
   const renderItem = useCallback(
-    ({ item: page }: { item: number }) => {
-      // Portrait: the page spans the width and is height-fitted — the
-      // surface fills the box it is given, so the whole page is on screen
-      // with nothing to scroll. Landscape: a READING zoom (1.6× the
-      // portrait width), so the page is taller than the window and its
-      // column scrolls vertically.
-      const chromeH = navPad + HEADER_RESERVE + FOOTER_RESERVE;
-      // Whole dp. The measured viewport is a float, and a sub-pixel wobble in
-      // it is enough to give the page a different box, which re-lays out all
-      // fifteen lines to produce a page nobody could tell apart from the one
-      // already on screen.
-      const viewportH = Math.round((listH || height) - chromeH);
-      const textWidth = isLandscape
-        ? Math.min(pageWidth - H_PADDING * 2, height * LANDSCAPE_ZOOM)
-        : pageWidth - H_PADDING * 2;
-      const pageBoxH = mushafPageColumnHeight({
-        page,
-        riwayah,
-        textWidth,
-        viewportHeight: viewportH,
-        scrolling: isLandscape,
-        playerReserve,
-      });
-
-      return (
-        <View style={[styles.item, { width: pageWidth, backgroundColor: pageBg }]}>
-          {/* The header strip toggles fullscreen too — with a tap on a
-              word now opening the ayah, the strip and the margins are
-              where the chrome is put away and brought back.
-
-              `accessible={false}`, or the strip becomes ONE element to
-              VoiceOver and swallows the tone pill inside it: a Pressable
-              is accessible by default, and an accessible parent hides its
-              children. Seen on the Mac — the pill's label read out, the
-              press landed on the strip. */}
-          <Pressable
-            accessible={false}
-            onPress={onToggleFullscreen}
-            style={{ paddingTop: navPad }}>
-            <MushafPageHeader
-              page={page}
-              isFullscreen={isFullscreen}
-              tone={tone}
-              ornament={ornament}
-              riwayah={riwayah}
-            />
-          </Pressable>
-          <ScrollView
-            style={styles.column}
-            contentContainerStyle={styles.columnContent}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled>
-            <Pressable
-              onPress={onToggleFullscreen}
-              style={[styles.pageWrap, { width: pageWidth }]}>
-              <MushafTextPageSurface
-                page={page}
-                width={textWidth}
-                height={pageBoxH}
-                riwayah={riwayah}
-                tone={tone}
-                accentColor={palette.accentSolid}
-                {...core.marks}
-                selected={
-                  core.sheetVisible && core.selected?.page === page
-                    ? core.selected
-                    : null
-                }
-                playing={
-                  playback.active && playback.playing ? playback.active : null
-                }
-                // Only the page being read warms its neighbours' fonts.
-                prefetchRadius={page === currentPage ? 2 : 0}
-                // A TAP ON A WORD OPENS ITS AYAH; the margins, the header
-                // strip and the ⛶ in the navigation bar are where fullscreen
-                // lives — see the same line in MushafSpreadReader for why
-                // this changed, and for why it is the handler itself and
-                // not an arrow around it.
-                onWordPress={core.openSelection}
-                onWordLongPress={core.openSelection}
-              />
-            </Pressable>
-            <MushafPageFooter
-              page={page}
-              ornament={ornament}
-              onPress={core.openJump}
-              finish={
-                core.finish?.page === page
-                  ? {
-                    day: core.finish.day,
-                    when: core.finish.when,
-                    onPress: finishKhatmahPortion,
-                  }
-                  : null
-              }
-            />
-          </ScrollView>
-        </View>
-      );
-    },
+    ({ item: page }: { item: number }) => (
+      <PhonePageItem
+        page={page}
+        pageWidth={pageWidth}
+        geometry={geometry}
+        navPad={navPad}
+        isFullscreen={isFullscreen}
+        tone={tone}
+        ornament={ornament}
+        riwayah={riwayah}
+        pageBg={pageBg}
+        accent={accent}
+        marks={marks}
+        selected={selectedPage === page ? selected : null}
+        playing={playingPage === page ? playingRef : null}
+        finish={finishPage === page ? finish : null}
+        onToggleFullscreen={onToggleFullscreen}
+        onWordPress={openSelection}
+        onOpenJump={openJump}
+      />
+    ),
     [
-      core,
-      currentPage,
-      height,
-      isFullscreen,
-      isLandscape,
-      listH,
-      navPad,
-      onToggleFullscreen,
-      ornament,
-      pageBg,
       pageWidth,
-      palette.accentSolid,
-      playback.active,
-      playback.playing,
-      playerReserve,
-      riwayah,
+      geometry,
+      navPad,
+      isFullscreen,
       tone,
+      ornament,
+      riwayah,
+      pageBg,
+      accent,
+      marks,
+      selectedPage,
+      selected,
+      playingPage,
+      playingRef,
+      finishPage,
+      finish,
+      onToggleFullscreen,
+      openSelection,
+      openJump,
     ],
   );
 
@@ -328,8 +462,8 @@ export function MushafPhoneReader(props: MushafReaderProps) {
           onScrollToIndexFailed={pagerHandlers.onScrollToIndexFailed}
           onScrollBeginDrag={pagerHandlers.onScrollBeginDrag}
           // A page is a typeface plus ~150 text nodes, so a small window
-          // is plenty and keeps swiping instant.
-          windowSize={3}
+          // is plenty and keeps swiping instant — see WINDOW_READING.
+          windowSize={windowSize}
           maxToRenderPerBatch={2}
           initialNumToRender={1}
           removeClippedSubviews
