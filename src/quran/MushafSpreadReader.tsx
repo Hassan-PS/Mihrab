@@ -230,7 +230,10 @@ const SpreadColumn = React.memo(function SpreadColumn({
   );
 });
 
-export function MushafSpreadReader(props: MushafReaderProps) {
+/** Memoised on its props — see the same note on MushafPhoneReader. */
+export const MushafSpreadReader = React.memo(function MushafSpreadReader(
+  props: MushafReaderProps,
+) {
   const { isFullscreen, onToggleFullscreen } = props;
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -643,7 +646,7 @@ export function MushafSpreadReader(props: MushafReaderProps) {
       />
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

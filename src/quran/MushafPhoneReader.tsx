@@ -240,7 +240,15 @@ const PhonePageItem = React.memo(function PhonePageItem({
   );
 });
 
-export function MushafPhoneReader(props: MushafReaderProps) {
+/**
+ * Memoised on its props. The gate in front of it re-renders on every
+ * percent of a background font download and on every write to the Qur'an
+ * state; the reader subscribes to what it needs itself, and the rest of
+ * those renders were reaching the list for nothing.
+ */
+export const MushafPhoneReader = React.memo(function MushafPhoneReader(
+  props: MushafReaderProps,
+) {
   const { isFullscreen, onToggleFullscreen } = props;
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
@@ -511,7 +519,7 @@ export function MushafPhoneReader(props: MushafReaderProps) {
       />
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
