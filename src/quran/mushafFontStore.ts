@@ -363,13 +363,21 @@ export function fontStoreKnownComplete(): boolean {
 export async function fontStoreStats(): Promise<{
   /** Page fonts on disk — the right ones and the stale ones together. */
   pages: number;
-  /** Of those, the ones whose size is not the manifest's — being re-fetched. */
-  stale: number;
+  /**
+   * Of those, the ones whose size is not the manifest's.
+   *
+   * REPORTED, NOT ACTED ON. This function is a question the reader's gate,
+   * the launch reconciliation and the downloads screen all ask, and a
+   * question that quietly starts six hundred downloads is not a question —
+   * in a test it also outlives the test that asked it. `repairStaleFonts`
+   * is the answer, and `reconcileMushafAssets` is who gives it.
+   */
+  stalePages: number[];
   bytes: number;
 }> {
   try {
     if (!(await ReactNativeBlobUtil.fs.exists(storeDir()))) {
-      return { pages: 0, stale: 0, bytes: 0 };
+      return { pages: 0, stalePages: [], bytes: 0 };
     }
     const entries = (await ReactNativeBlobUtil.fs.lstat(storeDir())) as Array<{
       filename: string;
@@ -391,10 +399,9 @@ export async function fontStoreStats(): Promise<{
       if (state === 'stale') stalePages.push(page);
     }
     if (pages >= MUSHAF_TOTAL_PAGES) knownComplete = true;
-    if (stalePages.length > 0) repairStaleFonts(stalePages);
-    return { pages, stale: stalePages.length, bytes };
+    return { pages, stalePages, bytes };
   } catch {
-    return { pages: 0, stale: 0, bytes: 0 };
+    return { pages: 0, stalePages: [], bytes: 0 };
   }
 }
 
@@ -409,12 +416,13 @@ export function pageOfFileName(name: string): number | null {
 /**
  * Fetch the stale fonts again, quietly, two at a time.
  *
- * Started by the listing that found them — the reader's gate, the launch
- * reconciliation — and once per session: a second listing while it runs
- * would only queue the same pages behind themselves. A page opened before
- * its turn is not left waiting on this: the surface asks
- * `ensurePageFontFile` for the page, which sees the stale size and fetches
- * it then, sharing the download if it is already in flight.
+ * Called with what a listing found — from the launch reconciliation, which
+ * is where "the files on disk are not the files this build reads" belongs —
+ * and at most once per session: a second call while it runs would only
+ * queue the same pages behind themselves. A page opened before its turn is
+ * not left waiting on this: the surface asks `ensurePageFontFile` for the
+ * page, which sees the stale size and fetches it then, sharing the
+ * download if it is already in flight.
  */
 let repairing = false;
 export function repairStaleFonts(pages: number[]): void {

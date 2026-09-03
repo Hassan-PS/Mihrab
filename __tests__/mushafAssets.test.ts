@@ -15,12 +15,17 @@ jest.mock('../src/quran/mushafFontStore', () => ({
   FONT_RELEASE: 'mushaf-fonts-v2',
   fontStoreDir: () => '/mock/documents/quran/fonts/v2',
   deletePageFonts: jest.fn(async () => undefined),
-  fontStoreStats: jest.fn(async () => ({ pages: 0, bytes: 0 })),
+  fontStoreStats: jest.fn(async () => ({ pages: 0, stalePages: [], bytes: 0 })),
+  repairStaleFonts: jest.fn(),
 }));
 
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { deleteLegacyImageStore } from '../src/quran/mushafDownload';
-import { deletePageFonts, fontStoreStats } from '../src/quran/mushafFontStore';
+import {
+  deletePageFonts,
+  fontStoreStats,
+  repairStaleFonts,
+} from '../src/quran/mushafFontStore';
 import {
   MUSHAF_ASSET_GENERATION,
   assetActionFor,
@@ -30,6 +35,7 @@ import {
 const sweepImages = deleteLegacyImageStore as unknown as jest.Mock;
 const dropFonts = deletePageFonts as unknown as jest.Mock;
 const storeStats = fontStoreStats as unknown as jest.Mock;
+const repair = repairStaleFonts as unknown as jest.Mock;
 
 const STAMP = '/mock/documents/quran/fonts/v2/release.txt';
 const GEN = MUSHAF_ASSET_GENERATION;
@@ -42,13 +48,15 @@ const readStamp = async () =>
     : null;
 
 /** A store that is full, so there is something to keep or drop. */
-const full = () => storeStats.mockResolvedValue({ pages: 604, bytes: 1 });
+const full = () =>
+  storeStats.mockResolvedValue({ pages: 604, stalePages: [], bytes: 1 });
 
 beforeEach(async () => {
   jest.clearAllMocks();
   await ReactNativeBlobUtil.fs.unlink(STAMP).catch(() => undefined);
   sweepImages.mockResolvedValue(0);
-  storeStats.mockResolvedValue({ pages: 0, bytes: 0 });
+  storeStats.mockResolvedValue({ pages: 0, stalePages: [], bytes: 0 });
+  repair.mockClear();
 });
 
 describe('assetActionFor', () => {
@@ -155,5 +163,32 @@ describe('reconcileMushafAssets, on a bad day', () => {
     expect(r.action).toBe('adopt');
     expect(sweepImages).toHaveBeenCalledTimes(1);
     expect(dropFonts).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The twenty fonts cut short of their pages (2026-09-03) reached devices
+ * under the right names. Nothing about them looks wrong from inside the
+ * app, so the launch reconciliation — which exists for exactly "the files
+ * on disk are not the files this build reads" — is what replaces them.
+ */
+describe('stale page fonts', () => {
+  it('are re-fetched at launch, without dropping the store', async () => {
+    storeStats.mockResolvedValue({
+      pages: 604,
+      stalePages: [564, 592],
+      bytes: 1,
+    });
+    await seedStamp(GEN);
+    await reconcileMushafAssets();
+    expect(repair).toHaveBeenCalledWith([564, 592]);
+    expect(dropFonts).not.toHaveBeenCalled();
+  });
+
+  it('and a store with none is left alone', async () => {
+    full();
+    await seedStamp(GEN);
+    await reconcileMushafAssets();
+    expect(repair).not.toHaveBeenCalled();
   });
 });

@@ -335,16 +335,38 @@ fi
 # directly works too, but it throws a window onto whatever the person is doing,
 # once per build — which is rude when the launch is only a self-check.
 open -g -j "$APP" 2>>"$LAUNCH_LOG" || true
-sleep 15
-LAUNCH_PID=$(pgrep -f "$APP/Contents/MacOS/PrayerApp" | head -1)
-if ! kill -0 "$LAUNCH_PID" 2>/dev/null; then
-  echo "  ✗ the app died on launch — see $LAUNCH_LOG" >&2
+# WAIT FOR IT, rather than looking once after fifteen seconds.
+#
+# The FIRST launch of a freshly signed bundle is not the second: Gatekeeper
+# verifies the whole 32 MB binary and, for a Developer ID signature, asks
+# Apple about it — which on 2026-09-03 took longer than the fixed sleep, so
+# `pgrep` matched nothing. And `pgrep` finding nothing is a non-zero status
+# in a command substitution, which under `set -e` ended the script THERE:
+# exit 1, after "Smoke-launching the signed app…", with not one word about
+# why. A gate that can fail silently is not a gate.
+#
+# So: poll for up to a minute, and if it never appears, say so.
+LAUNCH_PID=""
+for _ in $(seq 1 30); do
+  sleep 2
+  LAUNCH_PID=$(pgrep -f "$APP/Contents/MacOS/PrayerApp" | head -1 || true)
+  [ -n "$LAUNCH_PID" ] && break
+done
+if [ -z "$LAUNCH_PID" ] || ! kill -0 "$LAUNCH_PID" 2>/dev/null; then
+  echo "  ✗ the app never came up (or died on launch) — see $LAUNCH_LOG" >&2
   tail -20 "$LAUNCH_LOG" >&2
   echo "  ✗ if it left nothing, AMFI killed it. Ask why:" >&2
   echo "    /usr/bin/log show --last 5m --predicate 'senderImagePath CONTAINS \"AppleMobileFileIntegrity\"' --style compact | tail -30" >&2
   exit 1
 fi
-echo "  ▸ alive after 15s."
+# Give it the same few seconds it always had to reach the container.
+sleep 10
+if ! kill -0 "$LAUNCH_PID" 2>/dev/null; then
+  echo "  ✗ the app started and then died — see $LAUNCH_LOG" >&2
+  tail -20 "$LAUNCH_LOG" >&2
+  exit 1
+fi
+echo "  ▸ alive."
 # The whole point of the App Group is the widget payload, so prove the app
 # really reached the container rather than trusting the entitlement.
 #

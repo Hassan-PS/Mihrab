@@ -104,20 +104,30 @@ describe('fontStoreStats', () => {
    * as present — the muṣḥaf is there, the gate opens — and fetches them
    * again in the background, without being asked.
    */
-  it('counts a font of the wrong size as present but stale, and re-fetches it', async () => {
+  it('counts a font of the wrong size as present, and names it as stale', async () => {
     mockFs.entries = [
       ...fonts(603),
       { filename: 'QCF2564.ttf', size: 284_752, type: 'file' },
     ];
     const stats = await fontStoreStats();
     expect(stats.pages).toBe(604);
-    expect(stats.stale).toBe(1);
+    expect(stats.stalePages).toEqual([564]);
     expect(fontStoreKnownComplete()).toBe(true);
-    // Let the repair worker run its first step: it asks for page 564 and
-    // finds the stale size, which is what sends it to the network.
+  });
+
+  /**
+   * A listing is a question. It was starting the repair itself for a while,
+   * which meant every caller — the gate, the downloads screen, a test —
+   * silently began fetching; `reconcileMushafAssets` asks for it instead.
+   */
+  it('starts nothing: the listing is two calls, whatever it finds', async () => {
+    mockFs.entries = [
+      ...fonts(603),
+      { filename: 'QCF2564.ttf', size: 284_752, type: 'file' },
+    ];
+    await fontStoreStats();
     await new Promise(r => setTimeout(r, 0));
-    expect(mockFs.calls.slice(0, 2)).toEqual(['exists', 'lstat']);
-    expect(mockFs.calls).toContain('stat');
+    expect(mockFs.calls).toEqual(['exists', 'lstat']);
   });
 });
 

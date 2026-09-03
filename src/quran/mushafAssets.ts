@@ -31,6 +31,7 @@ import {
   deletePageFonts,
   fontStoreDir,
   fontStoreStats,
+  repairStaleFonts,
 } from './mushafFontStore';
 import { deleteLegacyImageStore, mkdirDeep } from './mushafDownload';
 
@@ -119,6 +120,12 @@ export async function reconcileMushafAssets(
   }
 
   const [stamp, stats] = await Promise.all([readStamp(), fontStoreStats()]);
+  // Fonts that are on disk under the right name but are not the fonts this
+  // release serves — the twenty pages cut short of themselves, on a device
+  // that fetched them before they were fixed. Nothing about them looks
+  // wrong from inside the app, so this is the one place that would ever
+  // notice. It runs in the background and blocks nothing.
+  if (stats.stalePages.length > 0) repairStaleFonts(stats.stalePages);
   const action = assetActionFor(
     { stamp, pagesOnDisk: stats.pages },
     generation,
