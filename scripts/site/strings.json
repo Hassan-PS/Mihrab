@@ -1,0 +1,1145 @@
+{
+  "en": {
+    "name": "English",
+    "dir": "ltr",
+    "path": "/"
+  },
+  "sv": {
+    "name": "Svenska",
+    "dir": "ltr",
+    "path": "/sv/"
+  },
+  "ar": {
+    "name": "العربية",
+    "dir": "rtl",
+    "path": "/ar/",
+    "title": "أوقات الصلاة والمصحف المدني — تطبيق محراب",
+    "description": "تطبيق مجاني ومفتوح المصدر لأوقات الصلاة: تنبيهات الأذان، بوصلة القبلة، أدوات الشاشة الرئيسية، والمصحف المدني كاملاً. بلا إعلانات، بلا تتبّع، وبلا حساب.",
+    "h1": "أوقات صلاة لا تعرف من أنت.",
+    "sub": "تنبيهات الأذان، بوصلة القبلة، أداة على الشاشة الرئيسية، والمصحف المدني كاملاً — بلا حساب وبلا إعلانات وبلا تحليلات. وبمجرد تحديد موقعك تُحسب الأوقات على الهاتف نفسه، فيعمل اليوم كله دون اتصال.",
+    "chips": [
+      "بلا إعلانات ولا تتبّع ولا حساب",
+      "يعمل دون اتصال بالإنترنت",
+      "مجاني ومفتوح المصدر"
+    ],
+    "install": {
+      "eyebrow": "التثبيت",
+      "h2": "احصل على محراب",
+      "lede": "التطبيق نفسه في كل القنوات، مبنيّ من المصدر نفسه. نسخة F‑Droid لا تحتوي على خدمات Google Play.",
+      "brew": "على الماك:"
+    },
+    "features": {
+      "eyebrow": "المزايا",
+      "h2": "عبادات اليوم في تطبيق واحد",
+      "cards": [
+        {
+          "h3": "الصلاة",
+          "p": "عدّ تنازلي للصلاة القادمة، تنبيه أذان لكل صلاة، عرض شهري، بوصلة قبلة، وأدوات على الشاشة الرئيسية."
+        },
+        {
+          "h3": "القرآن",
+          "p": "المصحف المدني كاملاً بأربع روايات، مع التلاوة وإبراز الكلمة المتلوّة والتفسير و14 ترجمة والعلامات المرجعية وخطة ختمة."
+        },
+        {
+          "h3": "بقية اليوم",
+          "p": "أدعية حصن المسلم، والتسبيح، وسجلّ الصيام، ومفكرة الصلاة — ومزامنة بين أجهزتك بلا حساب."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "الخصوصية",
+      "h2": "لا يغادر هاتفك شيء لم تطلب إرساله",
+      "lede": "مكانك، خمس مرات في اليوم، هو أكثر ما يمسّه تطبيق صلاة حساسية. لذلك لا يوجد في هذه الشيفرة حساب ولا تحليلات ولا شبكة إعلانات ولا تقارير أعطال.",
+      "cards": [
+        {
+          "h3": "يبقى على الجهاز",
+          "p": "الإعدادات، والمواقع المحفوظة (مشفّرة)، ومفكرة الصلاة وسجلّ الصيام. والتنبيهات تُجدوَل محلياً."
+        },
+        {
+          "h3": "يمرّ عبر الشبكة حين تختار ذلك",
+          "p": "الأوقات من المصدر الذي تختاره، والبحث عن الأماكن، وتنزيل صفحات المصحف والترجمات والتلاوات."
+        },
+        {
+          "h3": "غير موجود إطلاقاً",
+          "p": "لا إعلانات ولا متتبّعات ولا حزمة تحليلات ولا مراسل أعطال ولا حساب. ونسخة F‑Droid بلا خدمات Google Play."
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "أسئلة شائعة",
+      "h2": "الأسئلة التي تُسأل أولاً",
+      "items": [
+        {
+          "q": "هل التطبيق مجاني؟",
+          "a": "نعم. برمجية حرة تحت رخصة AGPL‑3.0، ومجاني بلا مقابل: لا مشتريات ولا اشتراك ولا زرّ تبرّع."
+        },
+        {
+          "q": "هل فيه إعلانات أو متتبّعات؟",
+          "a": "لا شيء منها. لا شبكة إعلانات ولا حزمة تحليلات ولا مراسل أعطال ولا حساب — هذه المكتبات غير موجودة في المشروع أصلاً."
+        },
+        {
+          "q": "هل يعمل دون إنترنت؟",
+          "a": "نعم. بعد تحديد الموقع تُحسب الأوقات على الجهاز وتُجدوَل التنبيهات محلياً، فيعمل اليوم والشبكة مغلقة."
+        },
+        {
+          "q": "ما الأجهزة المدعومة؟",
+          "a": "آيفون وآيباد وأندرويد وماك. على الماك يمكن التثبيت عبر Homebrew."
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "الرخصة",
+        "p": "محراب برمجية حرة تحت رخصة AGPL‑3.0‑or‑later. الشيفرة المصدرية على GitHub."
+      },
+      "content": {
+        "h2": "المحتوى",
+        "p": "نص القرآن من Tanzil، وخطوط المصحف من مجمع الملك فهد. الإسناد كاملاً في ملف NOTICE."
+      },
+      "project": {
+        "h2": "المشروع",
+        "issues": "أبلغ عن خلل",
+        "changelog": "سجلّ التغييرات"
+      }
+    },
+    "labels": {
+      "skip": "تخطَّ إلى المحتوى",
+      "lang": "اللغة",
+      "version": "الإصدار",
+      "source": "الشيفرة على GitHub",
+      "built": "محراب {v}، من تطوير حسن الغمري.",
+      "banner": "وقفة مع فلسطين.",
+      "bannerMore": "أين تتبرّع، وماذا تقاطع، وكيف تتابع."
+    }
+  },
+  "tr": {
+    "name": "Türkçe",
+    "dir": "ltr",
+    "path": "/tr/",
+    "title": "Namaz vakitleri ve Medine mushafı — Mihrab",
+    "description": "Ücretsiz, açık kaynaklı namaz vakti uygulaması: ezan hatırlatmaları, kıble pusulası, ana ekran araçları ve tam Medine mushafı. Reklamsız, takipsiz, hesapsız.",
+    "h1": "Kim olduğunuzu bilmeyen namaz vakitleri.",
+    "sub": "Ezan hatırlatmaları, kıble pusulası, ana ekran aracı ve tam Medine mushafı — hesap yok, reklam yok, analitik yok. Konumunuz belirlendikten sonra vakitler telefonda hesaplanır; gün, ağ kapalıyken de işler.",
+    "chips": [
+      "Reklam, takipçi ve hesap yok",
+      "İnternetsiz çalışır",
+      "Ücretsiz ve açık kaynak"
+    ],
+    "install": {
+      "eyebrow": "Kurulum",
+      "h2": "Mihrab'ı edinin",
+      "lede": "Her kanalda aynı uygulama, aynı kaynaktan derlenmiş. F‑Droid sürümü Google Play Hizmetleri içermez.",
+      "brew": "Mac'te:"
+    },
+    "features": {
+      "eyebrow": "Özellikler",
+      "h2": "Günün ibadeti, tek uygulamada",
+      "cards": [
+        {
+          "h3": "Namaz",
+          "p": "Sonraki vakte geri sayım, her vakit için ezan hatırlatması, aylık görünüm, kıble pusulası ve ana ekran araçları."
+        },
+        {
+          "h3": "Kur'an",
+          "p": "Dört rivayette tam Medine mushafı; tilavet, okunan kelimenin vurgulanması, tefsir, 14 meal, yer imleri ve hatim planı."
+        },
+        {
+          "h3": "Günün geri kalanı",
+          "p": "Hısnu'l‑Müslim duaları, tesbih, oruç kaydı ve namaz günlüğü — ve hesapsız olarak kendi cihazlarınız arasında eşitleme."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Gizlilik",
+      "h2": "Telefonunuzdan istemediğiniz hiçbir şey çıkmaz",
+      "lede": "Günde beş kez nerede olduğunuz, bir namaz uygulamasının dokunduğu en hassas şeydir. Bu kodda hesap, analitik panel, reklam ağı ve çökme raporlama yoktur.",
+      "cards": [
+        {
+          "h3": "Cihazda kalır",
+          "p": "Ayarlar, kayıtlı yerler (şifreli), namaz günlüğünüz ve oruç kaydınız. Bildirimler yerel olarak planlanır."
+        },
+        {
+          "h3": "Siz seçtiğinizde ağa çıkar",
+          "p": "Seçtiğiniz kaynaktan vakitler, yer araması ve mushaf sayfaları, mealler ve tilavet indirmeleri."
+        },
+        {
+          "h3": "Hiç yok",
+          "p": "Reklam, takipçi, analitik SDK, çökme raporlayıcı ve hesap yok. F‑Droid sürümünde Google Play Hizmetleri bulunmaz."
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Sık sorulanlar",
+      "h2": "İlk sorulan sorular",
+      "items": [
+        {
+          "q": "Uygulama ücretsiz mi?",
+          "a": "Evet. AGPL‑3.0 altında özgür yazılım ve tamamen ücretsiz: uygulama içi satın alma, abonelik veya bağış düğmesi yok."
+        },
+        {
+          "q": "Reklam veya takipçi var mı?",
+          "a": "Hiçbiri yok. Reklam ağı, analitik SDK, çökme raporlayıcı ve hesap yok — bu kütüphaneler projede hiç bulunmuyor."
+        },
+        {
+          "q": "İnternetsiz çalışır mı?",
+          "a": "Evet. Konum belirlendikten sonra vakitler cihazda hesaplanır ve bildirimler yerel olarak planlanır."
+        },
+        {
+          "q": "Hangi cihazlarda çalışır?",
+          "a": "iPhone, iPad, Android ve Mac. Mac'te Homebrew ile kurulur."
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "Lisans",
+        "p": "Mihrab, AGPL‑3.0‑or‑later altında özgür yazılımdır. Kaynak kodu GitHub'da."
+      },
+      "content": {
+        "h2": "İçerik",
+        "p": "Kur'an metni Tanzil'den, mushaf yazı tipleri Kral Fahd Kompleksi'nden. Tüm atıflar NOTICE dosyasında."
+      },
+      "project": {
+        "h2": "Proje",
+        "issues": "Hata bildir",
+        "changelog": "Değişiklik günlüğü"
+      }
+    },
+    "labels": {
+      "skip": "İçeriğe geç",
+      "lang": "Dil",
+      "version": "Sürüm",
+      "source": "GitHub'da kaynak kodu",
+      "built": "Mihrab {v}, Hassan El Ghamri tarafından.",
+      "banner": "Filistin'in yanındayız.",
+      "bannerMore": "Nereye bağış yapılır, ne boykot edilir, nasıl takip edilir."
+    }
+  },
+  "ur": {
+    "name": "اردو",
+    "dir": "rtl",
+    "path": "/ur/",
+    "title": "نماز کے اوقات اور مصحفِ مدینہ — محراب",
+    "description": "مفت اور اوپن سورس نماز اوقات ایپ: اذان کی یاد دہانی، قبلہ کمپاس، ہوم اسکرین وجٹ اور مکمل مصحفِ مدینہ۔ بغیر اشتہار، بغیر ٹریکنگ، بغیر اکاؤنٹ۔",
+    "h1": "نماز کے اوقات جو آپ کو نہیں جانتے۔",
+    "sub": "اذان کی یاد دہانیاں، قبلہ کمپاس، ہوم اسکرین وجٹ اور مکمل مصحفِ مدینہ — نہ اکاؤنٹ، نہ اشتہار، نہ اینالٹکس۔ مقام مقرر ہونے کے بعد اوقات فون ہی پر شمار ہوتے ہیں، سو انٹرنیٹ بند ہو تب بھی دن چلتا رہتا ہے۔",
+    "chips": [
+      "نہ اشتہار، نہ ٹریکر، نہ اکاؤنٹ",
+      "انٹرنیٹ کے بغیر کام کرتی ہے",
+      "مفت اور اوپن سورس"
+    ],
+    "install": {
+      "eyebrow": "انسٹال",
+      "h2": "محراب حاصل کریں",
+      "lede": "ہر ذریعے پر وہی ایپ، ایک ہی سورس سے بنی۔ F‑Droid والا ورژن گوگل پلے سروسز کے بغیر ہے۔",
+      "brew": "میک پر:"
+    },
+    "features": {
+      "eyebrow": "خصوصیات",
+      "h2": "دن کی عبادت، ایک ایپ میں",
+      "cards": [
+        {
+          "h3": "نماز",
+          "p": "اگلی نماز تک گنتی، ہر نماز کے لیے اذان کی یاد دہانی، ماہانہ نقشہ، قبلہ کمپاس اور ہوم اسکرین وجٹ۔"
+        },
+        {
+          "h3": "قرآن",
+          "p": "چار روایات میں مکمل مصحفِ مدینہ — تلاوت، پڑھے جانے والے لفظ کی نشاندہی، تفسیر، 14 تراجم، بک مارکس اور ختم قرآن کا منصوبہ۔"
+        },
+        {
+          "h3": "باقی دن",
+          "p": "حصنِ مسلم کی دعائیں، تسبیح، روزے کا ریکارڈ اور نماز کی ڈائری — اور بغیر اکاؤنٹ اپنے آلات کے درمیان ہم آہنگی۔"
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "رازداری",
+      "h2": "آپ کے فون سے وہ کچھ نہیں جاتا جو آپ نے نہ بھیجا ہو",
+      "lede": "دن میں پانچ بار آپ کہاں ہیں — یہی سب سے حساس چیز ہے جسے نماز کی ایپ چھوتی ہے۔ اس کوڈ میں نہ اکاؤنٹ ہے، نہ اینالٹکس، نہ اشتہاری نیٹ ورک، نہ کریش رپورٹنگ۔",
+      "cards": [
+        {
+          "h3": "آلے ہی پر رہتا ہے",
+          "p": "ترتیبات، محفوظ مقامات (مرموز)، آپ کی نماز کی ڈائری اور روزے کا ریکارڈ۔ اطلاعات مقامی طور پر شیڈول ہوتی ہیں۔"
+        },
+        {
+          "h3": "جب آپ چاہیں، نیٹ ورک پر جاتا ہے",
+          "p": "آپ کے منتخب کردہ ذریعے سے اوقات، مقام کی تلاش، اور مصحف کے صفحات، تراجم اور تلاوت کی ڈاؤن لوڈنگ۔"
+        },
+        {
+          "h3": "سرے سے موجود ہی نہیں",
+          "p": "نہ اشتہار، نہ ٹریکر، نہ اینالٹکس SDK، نہ کریش رپورٹر، نہ اکاؤنٹ۔ F‑Droid ورژن میں گوگل پلے سروسز نہیں۔"
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "عام سوالات",
+      "h2": "سب سے پہلے پوچھے جانے والے سوال",
+      "items": [
+        {
+          "q": "کیا ایپ مفت ہے؟",
+          "a": "جی ہاں۔ AGPL‑3.0 کے تحت آزاد سافٹ ویئر، اور قیمت کے لحاظ سے بھی مفت: نہ ان ایپ خریداری، نہ سبسکرپشن، نہ عطیے کا بٹن۔"
+        },
+        {
+          "q": "کیا اس میں اشتہار یا ٹریکر ہیں؟",
+          "a": "بالکل نہیں۔ نہ اشتہاری نیٹ ورک، نہ اینالٹکس SDK، نہ کریش رپورٹر، نہ اکاؤنٹ — یہ لائبریریاں منصوبے میں سرے سے موجود نہیں۔"
+        },
+        {
+          "q": "کیا یہ آف لائن کام کرتی ہے؟",
+          "a": "جی ہاں۔ مقام مقرر ہونے کے بعد اوقات آلے پر شمار ہوتے ہیں اور اطلاعات مقامی طور پر شیڈول ہوتی ہیں۔"
+        },
+        {
+          "q": "کن آلات پر چلتی ہے؟",
+          "a": "آئی فون، آئی پیڈ، اینڈرائیڈ اور میک۔ میک پر Homebrew سے انسٹال کریں۔"
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "لائسنس",
+        "p": "محراب AGPL‑3.0‑or‑later کے تحت آزاد سافٹ ویئر ہے۔ سورس کوڈ GitHub پر ہے۔"
+      },
+      "content": {
+        "h2": "مواد",
+        "p": "قرآن کا متن Tanzil سے، مصحف کے فونٹ شاہ فہد کمپلیکس سے۔ مکمل حوالہ جات NOTICE فائل میں ہیں۔"
+      },
+      "project": {
+        "h2": "منصوبہ",
+        "issues": "خرابی کی اطلاع دیں",
+        "changelog": "تبدیلیوں کا ریکارڈ"
+      }
+    },
+    "labels": {
+      "skip": "مواد پر جائیں",
+      "lang": "زبان",
+      "version": "ورژن",
+      "source": "GitHub پر سورس",
+      "built": "محراب {v}، حسن الغمری کی تیار کردہ۔",
+      "banner": "فلسطین کے ساتھ۔",
+      "bannerMore": "کہاں عطیہ کریں، کس کا بائیکاٹ کریں، اور باخبر کیسے رہیں۔"
+    }
+  },
+  "id": {
+    "name": "Bahasa Indonesia",
+    "dir": "ltr",
+    "path": "/id/",
+    "title": "Jadwal sholat dan mushaf Madinah — Mihrab",
+    "description": "Aplikasi jadwal sholat gratis dan open source: pengingat adzan, kompas kiblat, widget layar utama, dan mushaf Madinah lengkap. Tanpa iklan, tanpa pelacakan, tanpa akun.",
+    "h1": "Jadwal sholat yang tidak tahu siapa Anda.",
+    "sub": "Pengingat adzan, kompas kiblat, widget layar utama, dan mushaf Madinah lengkap — tanpa akun, tanpa iklan, tanpa analitik. Setelah lokasi diatur, waktunya dihitung di ponsel sendiri, sehingga hari tetap berjalan meski jaringan dimatikan.",
+    "chips": [
+      "Tanpa iklan, pelacak, atau akun",
+      "Berfungsi tanpa internet",
+      "Gratis dan open source"
+    ],
+    "install": {
+      "eyebrow": "Pasang",
+      "h2": "Dapatkan Mihrab",
+      "lede": "Aplikasi yang sama di semua kanal, dibangun dari sumber yang sama. Versi F‑Droid tidak memuat Google Play Services.",
+      "brew": "Di Mac:"
+    },
+    "features": {
+      "eyebrow": "Fitur",
+      "h2": "Ibadah sehari, dalam satu aplikasi",
+      "cards": [
+        {
+          "h3": "Sholat",
+          "p": "Hitung mundur ke waktu berikutnya, pengingat adzan per waktu, tampilan bulanan, kompas kiblat, dan widget layar utama."
+        },
+        {
+          "h3": "Al-Qur'an",
+          "p": "Mushaf Madinah lengkap dalam empat riwayat, dengan murottal, sorotan kata yang dibaca, tafsir, 14 terjemahan, penanda, dan rencana khatam."
+        },
+        {
+          "h3": "Sisa hari Anda",
+          "p": "Doa Hisnul Muslim, tasbih, catatan puasa, dan jurnal sholat — serta sinkronisasi antarperangkat Anda tanpa akun."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Privasi",
+      "h2": "Tidak ada yang meninggalkan ponsel Anda tanpa Anda minta",
+      "lede": "Di mana Anda berada, lima kali sehari, adalah hal paling sensitif yang disentuh aplikasi sholat. Dalam kode ini tidak ada akun, panel analitik, jaringan iklan, maupun pelaporan kerusakan.",
+      "cards": [
+        {
+          "h3": "Tetap di perangkat",
+          "p": "Pengaturan, lokasi tersimpan (terenkripsi), jurnal sholat, dan catatan puasa Anda. Notifikasi dijadwalkan secara lokal."
+        },
+        {
+          "h3": "Melalui jaringan, saat Anda memilihnya",
+          "p": "Waktu dari sumber yang Anda pilih, pencarian tempat, serta unduhan halaman mushaf, terjemahan, dan murottal."
+        },
+        {
+          "h3": "Sama sekali tidak ada",
+          "p": "Tanpa iklan, pelacak, SDK analitik, pelapor kerusakan, atau akun. Versi F‑Droid tanpa Google Play Services."
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Pertanyaan umum",
+      "h2": "Yang pertama ditanyakan",
+      "items": [
+        {
+          "q": "Apakah aplikasinya gratis?",
+          "a": "Ya. Perangkat lunak bebas di bawah AGPL‑3.0, dan gratis: tidak ada pembelian dalam aplikasi, langganan, atau tombol donasi."
+        },
+        {
+          "q": "Apakah ada iklan atau pelacak?",
+          "a": "Tidak ada. Tanpa jaringan iklan, SDK analitik, pelapor kerusakan, atau akun — pustaka-pustaka itu tidak ada dalam proyek ini."
+        },
+        {
+          "q": "Apakah bisa dipakai offline?",
+          "a": "Bisa. Setelah lokasi diatur, waktunya dihitung di perangkat dan notifikasi dijadwalkan secara lokal."
+        },
+        {
+          "q": "Perangkat apa saja yang didukung?",
+          "a": "iPhone, iPad, Android, dan Mac. Di Mac, pasang melalui Homebrew."
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "Lisensi",
+        "p": "Mihrab adalah perangkat lunak bebas di bawah AGPL‑3.0‑or‑later. Kode sumbernya ada di GitHub."
+      },
+      "content": {
+        "h2": "Konten",
+        "p": "Teks Al-Qur'an dari Tanzil, fon mushaf dari Kompleks Raja Fahd. Atribusi lengkap ada di berkas NOTICE."
+      },
+      "project": {
+        "h2": "Proyek",
+        "issues": "Laporkan masalah",
+        "changelog": "Catatan perubahan"
+      }
+    },
+    "labels": {
+      "skip": "Lewati ke konten",
+      "lang": "Bahasa",
+      "version": "Versi",
+      "source": "Kode sumber di GitHub",
+      "built": "Mihrab {v}, dibuat oleh Hassan El Ghamri.",
+      "banner": "Bersama Palestina.",
+      "bannerMore": "Ke mana berdonasi, apa yang diboikot, dan cara mengikuti kabarnya."
+    }
+  },
+  "de": {
+    "name": "Deutsch",
+    "dir": "ltr",
+    "path": "/de/",
+    "title": "Gebetszeiten und Medina-Mushaf — Mihrab",
+    "description": "Kostenlose Open-Source-App für Gebetszeiten: Adhan-Erinnerungen, Qibla-Kompass, Homescreen-Widgets und der vollständige Medina-Mushaf. Ohne Werbung, ohne Tracking, ohne Konto.",
+    "h1": "Gebetszeiten, die nicht wissen, wer Sie sind.",
+    "sub": "Adhan-Erinnerungen, ein Qibla-Kompass, ein Homescreen-Widget und der vollständige Medina-Mushaf — ohne Konto, ohne Werbung, ohne Analytik. Sobald Ihr Standort gesetzt ist, werden die Zeiten auf dem Telefon selbst berechnet; der Tag funktioniert also auch ohne Netz.",
+    "chips": [
+      "Keine Werbung, kein Tracking, kein Konto",
+      "Funktioniert ohne Netz",
+      "Kostenlos und quelloffen"
+    ],
+    "install": {
+      "eyebrow": "Installieren",
+      "h2": "Mihrab holen",
+      "lede": "Dieselbe App auf jedem Kanal, aus derselben Quelle gebaut. Die F‑Droid-Version kommt ohne Google Play Services.",
+      "brew": "Auf dem Mac:"
+    },
+    "features": {
+      "eyebrow": "Funktionen",
+      "h2": "Der Gottesdienst des Tages, in einer App",
+      "cards": [
+        {
+          "h3": "Gebet",
+          "p": "Countdown bis zum nächsten Gebet, Adhan-Erinnerung je Gebet, Monatsübersicht, Qibla-Kompass und Homescreen-Widgets."
+        },
+        {
+          "h3": "Koran",
+          "p": "Der vollständige Medina-Mushaf in vier Riwayat, mit Rezitation, Wortmarkierung, Tafsir, 14 Übersetzungen, Lesezeichen und einem Khatma-Plan."
+        },
+        {
+          "h3": "Der Rest des Tages",
+          "p": "Bittgebete aus Hisnul Muslim, Tasbih, ein Fastenprotokoll und ein Gebetstagebuch — und Abgleich zwischen Ihren Geräten ganz ohne Konto."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Privatsphäre",
+      "h2": "Nichts verlässt Ihr Telefon, worum Sie nicht gebeten haben",
+      "lede": "Wo Sie sind, fünfmal am Tag, ist das Sensibelste, was eine Gebets-App berührt. In diesem Code gibt es kein Konto, kein Analytik-Panel, kein Werbenetzwerk und keine Absturzberichte.",
+      "cards": [
+        {
+          "h3": "Bleibt auf dem Gerät",
+          "p": "Einstellungen, gespeicherte Orte (verschlüsselt), Ihr Gebetstagebuch und Ihr Fastenprotokoll. Benachrichtigungen werden lokal geplant."
+        },
+        {
+          "h3": "Geht ins Netz, wenn Sie es wählen",
+          "p": "Zeiten von der Quelle Ihrer Wahl, die Ortssuche sowie Downloads von Mushaf-Seiten, Übersetzungen und Rezitationen."
+        },
+        {
+          "h3": "Gar nicht vorhanden",
+          "p": "Keine Werbung, keine Tracker, kein Analytik-SDK, kein Absturzmelder, kein Konto. Die F‑Droid-Version enthält keine Google Play Services."
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Häufige Fragen",
+      "h2": "Was zuerst gefragt wird",
+      "items": [
+        {
+          "q": "Ist die App kostenlos?",
+          "a": "Ja. Freie Software unter der AGPL‑3.0 und kostenfrei dazu: keine In-App-Käufe, kein Abo, kein Spendenknopf."
+        },
+        {
+          "q": "Gibt es Werbung oder Tracker?",
+          "a": "Nichts davon. Kein Werbenetzwerk, kein Analytik-SDK, kein Absturzmelder, kein Konto — diese Bibliotheken sind im Projekt gar nicht vorhanden."
+        },
+        {
+          "q": "Funktioniert sie offline?",
+          "a": "Ja. Ist der Standort gesetzt, werden die Zeiten auf dem Gerät berechnet und Benachrichtigungen lokal geplant."
+        },
+        {
+          "q": "Welche Geräte werden unterstützt?",
+          "a": "iPhone, iPad, Android und Mac. Auf dem Mac per Homebrew installieren."
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "Lizenz",
+        "p": "Mihrab ist freie Software unter der AGPL‑3.0‑or‑later. Der Quellcode liegt auf GitHub."
+      },
+      "content": {
+        "h2": "Inhalte",
+        "p": "Korantext von Tanzil, Mushaf-Schriften vom König-Fahd-Komplex. Die vollständige Nennung steht in der NOTICE-Datei."
+      },
+      "project": {
+        "h2": "Projekt",
+        "issues": "Fehler melden",
+        "changelog": "Änderungsprotokoll"
+      }
+    },
+    "labels": {
+      "skip": "Zum Inhalt springen",
+      "lang": "Sprache",
+      "version": "Version",
+      "source": "Quellcode auf GitHub",
+      "built": "Mihrab {v}, gebaut von Hassan El Ghamri.",
+      "banner": "Solidarität mit Palästina.",
+      "bannerMore": "Wohin spenden, was boykottieren, wie informiert bleiben."
+    }
+  },
+  "fr": {
+    "name": "Français",
+    "dir": "ltr",
+    "path": "/fr/",
+    "title": "Horaires de prière et mushaf de Médine — Mihrab",
+    "description": "Application d'horaires de prière gratuite et open source : rappels d'adhan, boussole qibla, widgets d'écran d'accueil et le mushaf de Médine complet. Sans publicité, sans pistage, sans compte.",
+    "h1": "Des horaires de prière qui ne savent pas qui vous êtes.",
+    "sub": "Rappels d'adhan, boussole qibla, widget d'écran d'accueil et le mushaf de Médine complet — sans compte, sans publicité, sans analytique. Une fois votre position définie, les horaires sont calculés sur le téléphone : la journée fonctionne réseau coupé.",
+    "chips": [
+      "Ni publicité, ni traceurs, ni compte",
+      "Fonctionne sans réseau",
+      "Gratuit et open source"
+    ],
+    "install": {
+      "eyebrow": "Installation",
+      "h2": "Obtenir Mihrab",
+      "lede": "La même application sur tous les canaux, compilée depuis la même source. La version F‑Droid ne contient pas les services Google Play.",
+      "brew": "Sur Mac :"
+    },
+    "features": {
+      "eyebrow": "Fonctions",
+      "h2": "Le culte de la journée, dans une seule application",
+      "cards": [
+        {
+          "h3": "Prière",
+          "p": "Compte à rebours jusqu'à la prière suivante, rappel d'adhan par prière, vue mensuelle, boussole qibla et widgets d'écran d'accueil."
+        },
+        {
+          "h3": "Coran",
+          "p": "Le mushaf de Médine complet en quatre riwayat, avec récitation, mise en évidence du mot lu, tafsir, 14 traductions, marque-pages et un plan de khatma."
+        },
+        {
+          "h3": "Le reste de la journée",
+          "p": "Les invocations de Hisn al-Muslim, le tasbih, un journal de jeûne et un journal de prière — et une synchronisation entre vos appareils sans aucun compte."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Vie privée",
+      "h2": "Rien ne quitte votre téléphone sans que vous l'ayez demandé",
+      "lede": "Où vous êtes, cinq fois par jour, est la donnée la plus sensible que touche une application de prière. Ce code ne contient ni compte, ni panneau d'analytique, ni régie publicitaire, ni rapport de plantage.",
+      "cards": [
+        {
+          "h3": "Reste sur l'appareil",
+          "p": "Réglages, lieux enregistrés (chiffrés), votre journal de prière et votre journal de jeûne. Les notifications sont programmées localement."
+        },
+        {
+          "h3": "Passe par le réseau, quand vous le choisissez",
+          "p": "Les horaires de la source que vous choisissez, la recherche de lieu, et le téléchargement des pages du mushaf, des traductions et des récitations."
+        },
+        {
+          "h3": "Absent, tout simplement",
+          "p": "Aucune publicité, aucun traceur, aucun SDK d'analytique, aucun rapporteur de plantage, aucun compte. La version F‑Droid est sans services Google Play."
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Questions fréquentes",
+      "h2": "Les questions que l'on pose d'abord",
+      "items": [
+        {
+          "q": "L'application est-elle gratuite ?",
+          "a": "Oui. Logiciel libre sous AGPL‑3.0, et gratuit : aucun achat intégré, aucun abonnement, aucun bouton de don."
+        },
+        {
+          "q": "Y a-t-il de la publicité ou des traceurs ?",
+          "a": "Aucun des deux. Ni régie publicitaire, ni SDK d'analytique, ni rapporteur de plantage, ni compte — ces bibliothèques ne figurent pas dans le projet."
+        },
+        {
+          "q": "Fonctionne-t-elle hors ligne ?",
+          "a": "Oui. Une fois la position définie, les horaires sont calculés sur l'appareil et les notifications programmées localement."
+        },
+        {
+          "q": "Quels appareils sont pris en charge ?",
+          "a": "iPhone, iPad, Android et Mac. Sur Mac, l'installation se fait avec Homebrew."
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "Licence",
+        "p": "Mihrab est un logiciel libre sous AGPL‑3.0‑or‑later. Le code source est sur GitHub."
+      },
+      "content": {
+        "h2": "Contenus",
+        "p": "Texte coranique de Tanzil, polices du mushaf du Complexe du Roi Fahd. L'attribution complète figure dans le fichier NOTICE."
+      },
+      "project": {
+        "h2": "Projet",
+        "issues": "Signaler un problème",
+        "changelog": "Journal des modifications"
+      }
+    },
+    "labels": {
+      "skip": "Aller au contenu",
+      "lang": "Langue",
+      "version": "Version",
+      "source": "Code source sur GitHub",
+      "built": "Mihrab {v}, réalisé par Hassan El Ghamri.",
+      "banner": "Solidarité avec la Palestine.",
+      "bannerMore": "Où faire un don, quoi boycotter, comment rester informé."
+    }
+  },
+  "es": {
+    "name": "Español",
+    "dir": "ltr",
+    "path": "/es/",
+    "title": "Horarios de oración y mushaf de Medina — Mihrab",
+    "description": "Aplicación de horarios de oración gratuita y de código abierto: recordatorios de adhán, brújula qibla, widgets de pantalla de inicio y el mushaf de Medina completo. Sin anuncios, sin rastreo, sin cuenta.",
+    "h1": "Horarios de oración que no saben quién eres.",
+    "sub": "Recordatorios de adhán, brújula qibla, widget en la pantalla de inicio y el mushaf de Medina completo — sin cuenta, sin anuncios y sin analítica. Una vez fijada tu ubicación, los horarios se calculan en el propio teléfono, así que el día funciona con la red apagada.",
+    "chips": [
+      "Sin anuncios, rastreadores ni cuenta",
+      "Funciona sin conexión",
+      "Gratis y de código abierto"
+    ],
+    "install": {
+      "eyebrow": "Instalar",
+      "h2": "Consigue Mihrab",
+      "lede": "La misma aplicación en todos los canales, compilada desde la misma fuente. La versión de F‑Droid no incluye los servicios de Google Play.",
+      "brew": "En Mac:"
+    },
+    "features": {
+      "eyebrow": "Funciones",
+      "h2": "La adoración del día, en una sola aplicación",
+      "cards": [
+        {
+          "h3": "Oración",
+          "p": "Cuenta atrás hasta la siguiente oración, recordatorio de adhán por oración, vista mensual, brújula qibla y widgets en la pantalla de inicio."
+        },
+        {
+          "h3": "Corán",
+          "p": "El mushaf de Medina completo en cuatro riwayat, con recitación, resaltado de la palabra recitada, tafsir, 14 traducciones, marcadores y un plan de jatma."
+        },
+        {
+          "h3": "El resto del día",
+          "p": "Las súplicas de Hisn al-Muslim, tasbih, un registro de ayuno y un diario de oración — y sincronización entre tus dispositivos sin ninguna cuenta."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Privacidad",
+      "h2": "Nada sale de tu teléfono que no hayas pedido enviar",
+      "lede": "Dónde estás, cinco veces al día, es lo más sensible que toca una aplicación de oración. En este código no hay cuenta, ni panel de analítica, ni red publicitaria, ni informes de fallos.",
+      "cards": [
+        {
+          "h3": "Se queda en el dispositivo",
+          "p": "Ajustes, lugares guardados (cifrados), tu diario de oración y tu registro de ayuno. Las notificaciones se programan localmente."
+        },
+        {
+          "h3": "Sale a la red cuando tú lo eliges",
+          "p": "Los horarios de la fuente que elijas, la búsqueda de lugares y las descargas de páginas del mushaf, traducciones y recitaciones."
+        },
+        {
+          "h3": "Sencillamente no está",
+          "p": "Sin anuncios, sin rastreadores, sin SDK de analítica, sin informador de fallos y sin cuenta. La versión de F‑Droid no lleva servicios de Google Play."
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Preguntas frecuentes",
+      "h2": "Lo que se pregunta primero",
+      "items": [
+        {
+          "q": "¿La aplicación es gratuita?",
+          "a": "Sí. Software libre bajo AGPL‑3.0, y gratuita: sin compras dentro de la aplicación, sin suscripción y sin botón de donación."
+        },
+        {
+          "q": "¿Hay anuncios o rastreadores?",
+          "a": "Ninguno. Sin red publicitaria, sin SDK de analítica, sin informador de fallos y sin cuenta: esas bibliotecas no están en el proyecto."
+        },
+        {
+          "q": "¿Funciona sin conexión?",
+          "a": "Sí. Fijada la ubicación, los horarios se calculan en el dispositivo y las notificaciones se programan localmente."
+        },
+        {
+          "q": "¿Qué dispositivos admite?",
+          "a": "iPhone, iPad, Android y Mac. En Mac se instala con Homebrew."
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "Licencia",
+        "p": "Mihrab es software libre bajo AGPL‑3.0‑or‑later. El código fuente está en GitHub."
+      },
+      "content": {
+        "h2": "Contenido",
+        "p": "Texto coránico de Tanzil, tipografías del mushaf del Complejo Rey Fahd. La atribución completa está en el archivo NOTICE."
+      },
+      "project": {
+        "h2": "Proyecto",
+        "issues": "Informar de un fallo",
+        "changelog": "Registro de cambios"
+      }
+    },
+    "labels": {
+      "skip": "Saltar al contenido",
+      "lang": "Idioma",
+      "version": "Versión",
+      "source": "Código en GitHub",
+      "built": "Mihrab {v}, creada por Hassan El Ghamri.",
+      "banner": "Con Palestina.",
+      "bannerMore": "Dónde donar, qué boicotear y cómo mantenerse informado."
+    }
+  },
+  "ru": {
+    "name": "Русский",
+    "dir": "ltr",
+    "path": "/ru/",
+    "title": "Время намаза и мединский мусхаф — Mihrab",
+    "description": "Бесплатное приложение с открытым исходным кодом: время намаза, напоминания азана, компас киблы, виджеты на главном экране и полный мединский мусхаф. Без рекламы, без слежки, без аккаунта.",
+    "h1": "Время намаза, которое не знает, кто вы.",
+    "sub": "Напоминания азана, компас киблы, виджет на главном экране и полный мединский мусхаф — без аккаунта, без рекламы и без аналитики. Как только задано местоположение, время рассчитывается на самом телефоне, и день работает при выключенной сети.",
+    "chips": [
+      "Без рекламы, трекеров и аккаунта",
+      "Работает без интернета",
+      "Бесплатно, открытый код"
+    ],
+    "install": {
+      "eyebrow": "Установка",
+      "h2": "Установить Mihrab",
+      "lede": "Одно и то же приложение во всех каналах, собранное из одного исходного кода. Сборка для F‑Droid идёт без сервисов Google Play.",
+      "brew": "На Mac:"
+    },
+    "features": {
+      "eyebrow": "Возможности",
+      "h2": "Поклонение целого дня — в одном приложении",
+      "cards": [
+        {
+          "h3": "Намаз",
+          "p": "Обратный отсчёт до следующего намаза, напоминание азана для каждого времени, месячный обзор, компас киблы и виджеты на главном экране."
+        },
+        {
+          "h3": "Коран",
+          "p": "Полный мединский мусхаф в четырёх риваятах: чтение вслух, подсветка читаемого слова, тафсир, 14 переводов, закладки и план хатма."
+        },
+        {
+          "h3": "Остальной день",
+          "p": "Дуа из «Хисн аль-Муслим», тасбих, журнал поста и дневник намазов — и синхронизация между вашими устройствами без аккаунта."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Приватность",
+      "h2": "С телефона не уходит ничего, о чём вы не просили",
+      "lede": "Где вы находитесь пять раз в день — самое чувствительное, чего касается приложение для намаза. В этом коде нет ни аккаунта, ни аналитики, ни рекламной сети, ни отчётов о сбоях.",
+      "cards": [
+        {
+          "h3": "Остаётся на устройстве",
+          "p": "Настройки, сохранённые места (в зашифрованном виде), дневник намазов и журнал поста. Уведомления планируются локально."
+        },
+        {
+          "h3": "Уходит в сеть, когда вы этого хотите",
+          "p": "Время из выбранного вами источника, поиск места и загрузка страниц мусхафа, переводов и чтений."
+        },
+        {
+          "h3": "Отсутствует полностью",
+          "p": "Ни рекламы, ни трекеров, ни аналитического SDK, ни сборщика сбоев, ни аккаунта. В сборке F‑Droid нет сервисов Google Play."
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Частые вопросы",
+      "h2": "О чём спрашивают в первую очередь",
+      "items": [
+        {
+          "q": "Приложение бесплатное?",
+          "a": "Да. Свободное ПО под лицензией AGPL‑3.0 и бесплатное: нет покупок внутри приложения, подписки и кнопки пожертвования."
+        },
+        {
+          "q": "Есть ли реклама или трекеры?",
+          "a": "Ни того, ни другого. Нет рекламной сети, аналитического SDK, сборщика сбоев и аккаунта — этих библиотек в проекте попросту нет."
+        },
+        {
+          "q": "Работает ли без интернета?",
+          "a": "Да. После указания местоположения время рассчитывается на устройстве, а уведомления планируются локально."
+        },
+        {
+          "q": "Какие устройства поддерживаются?",
+          "a": "iPhone, iPad, Android и Mac. На Mac устанавливается через Homebrew."
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "Лицензия",
+        "p": "Mihrab — свободное ПО под лицензией AGPL‑3.0‑or‑later. Исходный код на GitHub."
+      },
+      "content": {
+        "h2": "Содержимое",
+        "p": "Текст Корана — от Tanzil, шрифты мусхафа — от Комплекса имени короля Фахда. Полное указание авторства в файле NOTICE."
+      },
+      "project": {
+        "h2": "Проект",
+        "issues": "Сообщить об ошибке",
+        "changelog": "История изменений"
+      }
+    },
+    "labels": {
+      "skip": "Перейти к содержимому",
+      "lang": "Язык",
+      "version": "Версия",
+      "source": "Исходный код на GitHub",
+      "built": "Mihrab {v}, разработчик — Hassan El Ghamri.",
+      "banner": "Вместе с Палестиной.",
+      "bannerMore": "Куда пожертвовать, что бойкотировать и как следить за новостями."
+    }
+  },
+  "bn": {
+    "name": "বাংলা",
+    "dir": "ltr",
+    "path": "/bn/",
+    "title": "নামাজের সময় ও মদিনা মুসহাফ — Mihrab",
+    "description": "বিনামূল্যের ও ওপেন সোর্স নামাজের সময়ের অ্যাপ: আজানের রিমাইন্ডার, কিবলা কম্পাস, হোম স্ক্রিন উইজেট এবং সম্পূর্ণ মদিনা মুসহাফ। বিজ্ঞাপন নেই, ট্র্যাকিং নেই, অ্যাকাউন্ট নেই।",
+    "h1": "নামাজের সময়, যে জানে না আপনি কে।",
+    "sub": "আজানের রিমাইন্ডার, কিবলা কম্পাস, হোম স্ক্রিন উইজেট এবং সম্পূর্ণ মদিনা মুসহাফ — অ্যাকাউন্ট নেই, বিজ্ঞাপন নেই, অ্যানালিটিক্স নেই। অবস্থান একবার ঠিক করা হলে সময় ফোনেই হিসাব হয়, তাই নেটওয়ার্ক বন্ধ থাকলেও দিনটা চলে।",
+    "chips": [
+      "বিজ্ঞাপন, ট্র্যাকার বা অ্যাকাউন্ট নেই",
+      "ইন্টারনেট ছাড়াই চলে",
+      "বিনামূল্যে ও ওপেন সোর্স"
+    ],
+    "install": {
+      "eyebrow": "ইনস্টল",
+      "h2": "Mihrab নিন",
+      "lede": "সব চ্যানেলে একই অ্যাপ, একই সোর্স থেকে তৈরি। F‑Droid সংস্করণে Google Play Services নেই।",
+      "brew": "ম্যাকে:"
+    },
+    "features": {
+      "eyebrow": "বৈশিষ্ট্য",
+      "h2": "দিনের ইবাদত, এক অ্যাপে",
+      "cards": [
+        {
+          "h3": "নামাজ",
+          "p": "পরবর্তী নামাজ পর্যন্ত কাউন্টডাউন, প্রতিটি ওয়াক্তের আজান রিমাইন্ডার, মাসিক তালিকা, কিবলা কম্পাস ও হোম স্ক্রিন উইজেট।"
+        },
+        {
+          "h3": "কুরআন",
+          "p": "চার রেওয়ায়াতে সম্পূর্ণ মদিনা মুসহাফ — তিলাওয়াত, পঠিত শব্দ চিহ্নিতকরণ, তাফসির, ১৪টি অনুবাদ, বুকমার্ক এবং খতমের পরিকল্পনা।"
+        },
+        {
+          "h3": "দিনের বাকি অংশ",
+          "p": "হিসনুল মুসলিমের দোয়া, তাসবিহ, রোজার হিসাব ও নামাজের ডায়েরি — এবং অ্যাকাউন্ট ছাড়াই নিজের ডিভাইসগুলোর মধ্যে সিঙ্ক।"
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "গোপনীয়তা",
+      "h2": "আপনার না চাওয়া কিছুই ফোন ছেড়ে যায় না",
+      "lede": "দিনে পাঁচবার আপনি কোথায় আছেন — নামাজের অ্যাপ যা স্পর্শ করে তার মধ্যে এটিই সবচেয়ে সংবেদনশীল। এই কোডে অ্যাকাউন্ট নেই, অ্যানালিটিক্স নেই, বিজ্ঞাপন নেটওয়ার্ক নেই, ক্র্যাশ রিপোর্টও নেই।",
+      "cards": [
+        {
+          "h3": "ডিভাইসেই থাকে",
+          "p": "সেটিংস, সংরক্ষিত স্থান (এনক্রিপ্ট করা), আপনার নামাজের ডায়েরি ও রোজার হিসাব। নোটিফিকেশন স্থানীয়ভাবে নির্ধারিত হয়।"
+        },
+        {
+          "h3": "আপনি চাইলে নেটওয়ার্কে যায়",
+          "p": "আপনার বাছাই করা উৎস থেকে সময়, স্থান অনুসন্ধান, এবং মুসহাফের পৃষ্ঠা, অনুবাদ ও তিলাওয়াত ডাউনলোড।"
+        },
+        {
+          "h3": "একেবারেই নেই",
+          "p": "বিজ্ঞাপন নেই, ট্র্যাকার নেই, অ্যানালিটিক্স SDK নেই, ক্র্যাশ রিপোর্টার নেই, অ্যাকাউন্ট নেই। F‑Droid সংস্করণে Google Play Services নেই।"
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "সাধারণ প্রশ্ন",
+      "h2": "প্রথমেই যা জিজ্ঞাসা করা হয়",
+      "items": [
+        {
+          "q": "অ্যাপটি কি বিনামূল্যে?",
+          "a": "হ্যাঁ। AGPL‑3.0 লাইসেন্সের অধীনে মুক্ত সফটওয়্যার এবং সম্পূর্ণ বিনামূল্যে: কোনো ইন-অ্যাপ কেনাকাটা, সাবস্ক্রিপশন বা অনুদানের বোতাম নেই।"
+        },
+        {
+          "q": "বিজ্ঞাপন বা ট্র্যাকার আছে কি?",
+          "a": "কোনোটিই নেই। বিজ্ঞাপন নেটওয়ার্ক, অ্যানালিটিক্স SDK, ক্র্যাশ রিপোর্টার বা অ্যাকাউন্ট — এই লাইব্রেরিগুলো প্রকল্পেই নেই।"
+        },
+        {
+          "q": "এটি কি অফলাইনে কাজ করে?",
+          "a": "হ্যাঁ। অবস্থান ঠিক করার পর সময় ডিভাইসেই হিসাব হয় এবং নোটিফিকেশন স্থানীয়ভাবে নির্ধারিত হয়।"
+        },
+        {
+          "q": "কোন ডিভাইসে চলে?",
+          "a": "আইফোন, আইপ্যাড, অ্যান্ড্রয়েড ও ম্যাক। ম্যাকে Homebrew দিয়ে ইনস্টল করুন।"
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "লাইসেন্স",
+        "p": "Mihrab AGPL‑3.0‑or‑later লাইসেন্সের অধীনে মুক্ত সফটওয়্যার। সোর্স কোড GitHub-এ আছে।"
+      },
+      "content": {
+        "h2": "বিষয়বস্তু",
+        "p": "কুরআনের পাঠ Tanzil থেকে, মুসহাফের ফন্ট বাদশাহ ফাহাদ কমপ্লেক্স থেকে। সম্পূর্ণ স্বীকৃতি NOTICE ফাইলে।"
+      },
+      "project": {
+        "h2": "প্রকল্প",
+        "issues": "ত্রুটি জানান",
+        "changelog": "পরিবর্তনের তালিকা"
+      }
+    },
+    "labels": {
+      "skip": "সরাসরি কনটেন্টে যান",
+      "lang": "ভাষা",
+      "version": "সংস্করণ",
+      "source": "GitHub-এ সোর্স",
+      "built": "Mihrab {v}, নির্মাতা Hassan El Ghamri।",
+      "banner": "ফিলিস্তিনের পাশে।",
+      "bannerMore": "কোথায় দান করবেন, কী বর্জন করবেন, কীভাবে খবর রাখবেন।"
+    }
+  },
+  "hi": {
+    "name": "हिन्दी",
+    "dir": "ltr",
+    "path": "/hi/",
+    "title": "नमाज़ के समय और मदीना मुसहफ़ — Mihrab",
+    "description": "मुफ़्त और ओपन-सोर्स नमाज़ समय ऐप: अज़ान की याद दिलाहट, क़िबला कम्पास, होम स्क्रीन विजेट और पूरा मदीना मुसहफ़। कोई विज्ञापन नहीं, कोई ट्रैकिंग नहीं, कोई खाता नहीं।",
+    "h1": "नमाज़ के समय, जिन्हें पता ही नहीं कि आप कौन हैं।",
+    "sub": "अज़ान की याद दिलाहट, क़िबला कम्पास, होम स्क्रीन विजेट और पूरा मदीना मुसहफ़ — बिना खाते, बिना विज्ञापन, बिना एनालिटिक्स के। जगह तय हो जाने के बाद समय फ़ोन पर ही निकाला जाता है, इसलिए नेटवर्क बंद हो तब भी दिन चलता रहता है।",
+    "chips": [
+      "न विज्ञापन, न ट्रैकर, न खाता",
+      "इंटरनेट के बिना चलता है",
+      "मुफ़्त और ओपन सोर्स"
+    ],
+    "install": {
+      "eyebrow": "इंस्टॉल",
+      "h2": "Mihrab पाएँ",
+      "lede": "हर माध्यम पर वही ऐप, उसी स्रोत से बना। F‑Droid वाला संस्करण Google Play Services के बिना आता है।",
+      "brew": "मैक पर:"
+    },
+    "features": {
+      "eyebrow": "विशेषताएँ",
+      "h2": "दिन भर की इबादत, एक ऐप में",
+      "cards": [
+        {
+          "h3": "नमाज़",
+          "p": "अगली नमाज़ तक उलटी गिनती, हर वक़्त के लिए अज़ान की याद दिलाहट, महीने का नक़्शा, क़िबला कम्पास और होम स्क्रीन विजेट।"
+        },
+        {
+          "h3": "क़ुरआन",
+          "p": "चार रिवायतों में पूरा मदीना मुसहफ़ — तिलावत, पढ़े जा रहे शब्द की पहचान, तफ़सीर, 14 अनुवाद, बुकमार्क और ख़त्म-ए-क़ुरआन की योजना।"
+        },
+        {
+          "h3": "बाक़ी दिन",
+          "p": "हिस्नुल मुस्लिम की दुआएँ, तस्बीह, रोज़े का हिसाब और नमाज़ की डायरी — और बिना खाते अपने ही उपकरणों के बीच सिंक।"
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "निजता",
+      "h2": "आपके फ़ोन से वह कुछ नहीं जाता जो आपने भेजने को न कहा हो",
+      "lede": "दिन में पाँच बार आप कहाँ हैं — नमाज़ का ऐप जिस चीज़ को छूता है, उनमें यही सबसे संवेदनशील है। इस कोड में न खाता है, न एनालिटिक्स, न विज्ञापन नेटवर्क, न क्रैश रिपोर्टिंग।",
+      "cards": [
+        {
+          "h3": "उपकरण पर ही रहता है",
+          "p": "सेटिंग्स, सहेजी गई जगहें (एन्क्रिप्टेड), आपकी नमाज़ की डायरी और रोज़े का हिसाब। सूचनाएँ स्थानीय रूप से तय होती हैं।"
+        },
+        {
+          "h3": "जब आप चाहें, नेटवर्क पर जाता है",
+          "p": "आपके चुने स्रोत से समय, जगह की खोज, और मुसहफ़ के पन्ने, अनुवाद व तिलावत का डाउनलोड।"
+        },
+        {
+          "h3": "है ही नहीं",
+          "p": "न विज्ञापन, न ट्रैकर, न एनालिटिक्स SDK, न क्रैश रिपोर्टर, न खाता। F‑Droid संस्करण में Google Play Services नहीं।"
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "आम सवाल",
+      "h2": "जो सबसे पहले पूछा जाता है",
+      "items": [
+        {
+          "q": "क्या ऐप मुफ़्त है?",
+          "a": "जी हाँ। AGPL‑3.0 के तहत मुक्त सॉफ़्टवेयर, और क़ीमत में भी मुफ़्त: कोई इन-ऐप ख़रीद नहीं, कोई सदस्यता नहीं, कोई दान बटन नहीं।"
+        },
+        {
+          "q": "क्या इसमें विज्ञापन या ट्रैकर हैं?",
+          "a": "बिलकुल नहीं। न विज्ञापन नेटवर्क, न एनालिटिक्स SDK, न क्रैश रिपोर्टर, न खाता — ये लाइब्रेरियाँ परियोजना में हैं ही नहीं।"
+        },
+        {
+          "q": "क्या यह ऑफ़लाइन चलता है?",
+          "a": "हाँ। जगह तय होने के बाद समय उपकरण पर ही निकाला जाता है और सूचनाएँ स्थानीय रूप से तय होती हैं।"
+        },
+        {
+          "q": "किन उपकरणों पर चलता है?",
+          "a": "आईफ़ोन, आईपैड, एंड्रॉइड और मैक। मैक पर Homebrew से इंस्टॉल करें।"
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "लाइसेंस",
+        "p": "Mihrab AGPL‑3.0‑or‑later के तहत मुक्त सॉफ़्टवेयर है। स्रोत कोड GitHub पर है।"
+      },
+      "content": {
+        "h2": "सामग्री",
+        "p": "क़ुरआन का पाठ Tanzil से, मुसहफ़ के फ़ॉन्ट किंग फ़हद कॉम्प्लेक्स से। पूरा श्रेय NOTICE फ़ाइल में है।"
+      },
+      "project": {
+        "h2": "परियोजना",
+        "issues": "ख़राबी बताएँ",
+        "changelog": "बदलावों की सूची"
+      }
+    },
+    "labels": {
+      "skip": "सामग्री पर जाएँ",
+      "lang": "भाषा",
+      "version": "संस्करण",
+      "source": "GitHub पर स्रोत",
+      "built": "Mihrab {v}, निर्माता Hassan El Ghamri।",
+      "banner": "फ़िलिस्तीन के साथ।",
+      "bannerMore": "कहाँ दान करें, किसका बहिष्कार करें, और ख़बर कैसे रखें।"
+    }
+  },
+  "zh": {
+    "name": "中文",
+    "dir": "ltr",
+    "path": "/zh/",
+    "title": "礼拜时间与麦地那版《古兰经》— Mihrab",
+    "description": "免费开源的礼拜时间应用：宣礼提醒、朝向罗盘、主屏小组件，以及完整的麦地那版《古兰经》。没有广告，没有追踪，无需账号。",
+    "h1": "不知道你是谁的礼拜时间。",
+    "sub": "宣礼提醒、朝向罗盘、主屏小组件，以及完整的麦地那版《古兰经》——无需账号，没有广告，没有分析统计。设定位置后，时间就在手机本地推算，因此断网也不影响一天的功课。",
+    "chips": [
+      "无广告、无追踪、无账号",
+      "断网也能用",
+      "免费且开源"
+    ],
+    "install": {
+      "eyebrow": "安装",
+      "h2": "获取 Mihrab",
+      "lede": "各个渠道是同一个应用，由同一份源码构建。F‑Droid 版本不含 Google Play 服务。",
+      "brew": "在 Mac 上："
+    },
+    "features": {
+      "eyebrow": "功能",
+      "h2": "一天的功课，集于一个应用",
+      "cards": [
+        {
+          "h3": "礼拜",
+          "p": "距下次礼拜的倒计时、每个拜功的宣礼提醒、整月一览、朝向罗盘，以及主屏小组件。"
+        },
+        {
+          "h3": "《古兰经》",
+          "p": "四种传述本的完整麦地那版，配诵读、逐词高亮、经注、14 种译文、书签，以及一份通读计划。"
+        },
+        {
+          "h3": "一天的其余部分",
+          "p": "《穆斯林的堡垒》祈祷词、赞念计数、封斋记录与礼拜日志——并可在自己的设备之间同步，无需任何账号。"
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "隐私",
+      "h2": "未经你要求，没有任何东西离开手机",
+      "lede": "一天五次你身在何处，是礼拜应用所触及的最敏感的信息。这份代码里没有账号、没有分析面板、没有广告网络，也没有崩溃上报。",
+      "cards": [
+        {
+          "h3": "留在设备上",
+          "p": "设置、已保存的地点（加密存储）、你的礼拜日志与封斋记录。通知在本地排程。"
+        },
+        {
+          "h3": "你选择时才走网络",
+          "p": "来自你所选来源的时间、地点搜索，以及经文页面、译文与诵读音频的下载。"
+        },
+        {
+          "h3": "根本不存在",
+          "p": "没有广告、没有追踪器、没有分析 SDK、没有崩溃上报、没有账号。F‑Droid 版本不含 Google Play 服务。"
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "常见问题",
+      "h2": "最先被问到的问题",
+      "items": [
+        {
+          "q": "这个应用免费吗？",
+          "a": "免费。它是 AGPL‑3.0 许可下的自由软件，价格上也完全免费：没有内购、没有订阅、没有捐赠按钮。"
+        },
+        {
+          "q": "有广告或追踪器吗？",
+          "a": "都没有。没有广告网络、分析 SDK、崩溃上报或账号——这些库根本不在项目里。"
+        },
+        {
+          "q": "离线能用吗？",
+          "a": "能。设定位置后，时间在设备上推算，通知也在本地排程。"
+        },
+        {
+          "q": "支持哪些设备？",
+          "a": "iPhone、iPad、Android 和 Mac。Mac 上可用 Homebrew 安装。"
+        }
+      ]
+    },
+    "footer": {
+      "licence": {
+        "h2": "许可",
+        "p": "Mihrab 是 AGPL‑3.0‑or‑later 许可下的自由软件，源码在 GitHub 上。"
+      },
+      "content": {
+        "h2": "内容来源",
+        "p": "《古兰经》经文来自 Tanzil，经文字体来自法赫德国王古兰经印刷厂。完整署名见 NOTICE 文件。"
+      },
+      "project": {
+        "h2": "项目",
+        "issues": "报告问题",
+        "changelog": "更新日志"
+      }
+    },
+    "labels": {
+      "skip": "跳到正文",
+      "lang": "语言",
+      "version": "版本",
+      "source": "GitHub 上的源码",
+      "built": "Mihrab {v}，由 Hassan El Ghamri 开发。",
+      "banner": "声援巴勒斯坦。",
+      "bannerMore": "去哪里捐助、抵制什么、如何持续关注。"
+    }
+  }
+}

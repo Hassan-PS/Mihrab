@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Horarios de oración y mushaf de Medina — Mihrab</title>
+<meta name="description" content="Aplicación de horarios de oración gratuita y de código abierto: recordatorios de adhán, brújula qibla, widgets de pantalla de inicio y el mushaf de Medina completo. Sin anuncios, sin rastreo, sin cuenta.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://mihrab.elghamri.se/es/">
+<!-- hreflang:start -->
+<link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/">
+<link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/">
+<link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/">
+<link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/">
+<link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/">
+<link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/">
+<link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/">
+<link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/">
+<link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/">
+<link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/">
+<link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/">
+<link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/">
+<link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/">
+<link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/">
+<!-- hreflang:end -->
+<link rel="icon" href="../assets/img/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/img/icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mihrab">
+<meta property="og:title" content="Horarios de oración y mushaf de Medina — Mihrab">
+<meta property="og:description" content="Aplicación de horarios de oración gratuita y de código abierto: recordatorios de adhán, brújula qibla, widgets de pantalla de inicio y el mushaf de Medina completo. Sin anuncios, sin rastreo, sin cuenta.">
+<meta property="og:url" content="https://mihrab.elghamri.se/es/">
+<meta property="og:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="900">
+<meta property="og:locale" content="es">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Horarios de oración y mushaf de Medina — Mihrab">
+<meta name="twitter:description" content="Aplicación de horarios de oración gratuita y de código abierto: recordatorios de adhán, brújula qibla, widgets de pantalla de inicio y el mushaf de Medina completo. Sin anuncios, sin rastreo, sin cuenta.">
+<meta name="twitter:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Mihrab: The Muslim Companion",
+  "alternateName": "Mihrab",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Android, iOS, iPadOS, macOS",
+  "softwareVersion": "2.14.3",
+  "url": "https://mihrab.elghamri.se/es/",
+  "inLanguage": "es",
+  "image": "https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03",
+  "description": "Aplicación de horarios de oración gratuita y de código abierto: recordatorios de adhán, brújula qibla, widgets de pantalla de inicio y el mushaf de Medina completo. Sin anuncios, sin rastreo, sin cuenta.",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+  "author": {
+    "@type": "Person",
+    "name": "Hassan El Ghamri",
+    "url": "https://github.com/Hassan-PS"
+  },
+  "sameAs": [
+    "https://play.google.com/store/apps/details?id=com.prayer_times",
+    "https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256",
+    "https://f-droid.org/packages/com.prayer_times/",
+    "https://github.com/Hassan-PS/Mihrab"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "es",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿La aplicación es gratuita?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Software libre bajo AGPL‑3.0, y gratuita: sin compras dentro de la aplicación, sin suscripción y sin botón de donación."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Hay anuncios o rastreadores?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ninguno. Sin red publicitaria, sin SDK de analítica, sin informador de fallos y sin cuenta: esas bibliotecas no están en el proyecto."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Funciona sin conexión?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. Fijada la ubicación, los horarios se calculan en el dispositivo y las notificaciones se programan localmente."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué dispositivos admite?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "iPhone, iPad, Android y Mac. En Mac se instala con Homebrew."
+      }
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<a class="solidarity" href="https://github.com/Safouene1/support-palestine-banner/blob/master/Markdown-pages/Support.md">
+  <svg class="flag" width="27" height="18" viewBox="0 0 30 20" aria-hidden="true" focusable="false">
+    <rect width="30" height="20" fill="#FFFFFF"/>
+    <rect width="30" height="6.67" fill="#000000"/>
+    <rect y="13.33" width="30" height="6.67" fill="#007A3D"/>
+    <path d="M0 0 L13 10 L0 20 Z" fill="#CE1126"/>
+  </svg>
+  <span><b>Con Palestina.</b><span class="wide"> Dónde donar, qué boicotear y cómo mantenerse informado.</span></span>
+  <span class="go" aria-hidden="true">&rarr;</span>
+</a>
+
+<div class="langbar">
+  <div class="wrap">
+<!-- langpicker:start -->
+<details class="langpicker">
+  <summary>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
+    Idioma
+  </summary>
+  <ul>
+      <li><a href="/" hreflang="en" lang="en">English</a></li>
+      <li><a href="/sv/" hreflang="sv" lang="sv">Svenska</a></li>
+      <li><a href="/ar/" hreflang="ar" lang="ar">العربية</a></li>
+      <li><a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></li>
+      <li><a href="/ur/" hreflang="ur" lang="ur">اردو</a></li>
+      <li><a href="/id/" hreflang="id" lang="id">Bahasa Indonesia</a></li>
+      <li><a href="/de/" hreflang="de" lang="de">Deutsch</a></li>
+      <li><a href="/fr/" hreflang="fr" lang="fr">Français</a></li>
+      <li><a href="/es/" hreflang="es" lang="es" aria-current="true">Español</a></li>
+      <li><a href="/ru/" hreflang="ru" lang="ru">Русский</a></li>
+      <li><a href="/bn/" hreflang="bn" lang="bn">বাংলা</a></li>
+      <li><a href="/hi/" hreflang="hi" lang="hi">हिन्दी</a></li>
+      <li><a href="/zh/" hreflang="zh" lang="zh">中文</a></li>
+  </ul>
+</details>
+<!-- langpicker:end -->
+  </div>
+</div>
+
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+    <g fill="currentColor" opacity=".07">
+      <g transform="translate(1010 450)">
+        <rect x="-148" y="-148" width="296" height="296" rx="6"/>
+        <rect x="-148" y="-148" width="296" height="296" rx="6" transform="rotate(45)"/>
+      </g>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="2" opacity=".16">
+      <path d="M745 600 V335 Q745 152 905 88 Q1065 152 1065 335 V600"/>
+      <path d="M779 600 V344 Q779 186 905 132 Q1031 186 1031 344 V600"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="brandline">
+      <img src="../assets/img/icon.png" width="62" height="62" alt="Mihrab">
+      <span class="wordmark">Mihrab</span>
+    </div>
+    <h1>Horarios de oración que no saben quién eres.</h1>
+    <p class="sub">Recordatorios de adhán, brújula qibla, widget en la pantalla de inicio y el mushaf de Medina completo — sin cuenta, sin anuncios y sin analítica. Una vez fijada tu ubicación, los horarios se calculan en el propio teléfono, así que el día funciona con la red apagada.</p>
+    <ul class="trust">
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sin anuncios, rastreadores ni cuenta</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona sin conexión</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Gratis y de código abierto</li>
+    </ul>
+    <p class="meta">
+      <span>Versión 2.14.3 (257)</span> <span class="dot" aria-hidden="true">•</span>
+      <span>iOS, Android, macOS</span> <span class="dot" aria-hidden="true">•</span>
+      <span>AGPL-3.0-or-later</span> <span class="dot" aria-hidden="true">•</span>
+      <a href="https://github.com/Hassan-PS/Mihrab">Código en GitHub</a>
+    </p>
+  </div>
+</header>
+
+<main id="main">
+<section class="install">
+  <div class="wrap">
+    <p class="eyebrow">Instalar</p>
+    <h2>Consigue Mihrab</h2>
+    <p class="lede">La misma aplicación en todos los canales, compilada desde la misma fuente. La versión de F‑Droid no incluye los servicios de Google Play.</p>
+    <ul class="badges">
+      <li><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="../assets/img/badges/appstore.png" width="180" height="60" alt="App Store"></a></li>
+      <li><a href="https://play.google.com/store/apps/details?id=com.prayer_times"><img src="../assets/img/badges/googleplay.png" width="180" height="60" alt="Google Play"></a></li>
+      <li><a href="https://f-droid.org/packages/com.prayer_times/"><img src="../assets/img/badges/fdroid.png" width="180" height="60" alt="F-Droid"></a></li>
+      <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest"><img src="../assets/img/badges/github.png" width="180" height="60" alt="GitHub"></a></li>
+    </ul>
+    <p class="note">En Mac: <code>brew install --cask hassan-ps/tap/mihrab</code></p>
+  </div>
+</section>
+
+<section class="features">
+  <div class="wrap">
+    <p class="eyebrow">Funciones</p>
+    <h2>La adoración del día, en una sola aplicación</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>Oración</h3>
+        <p>Cuenta atrás hasta la siguiente oración, recordatorio de adhán por oración, vista mensual, brújula qibla y widgets en la pantalla de inicio.</p>
+      </article>
+      <article class="card">
+        <h3>Corán</h3>
+        <p>El mushaf de Medina completo en cuatro riwayat, con recitación, resaltado de la palabra recitada, tafsir, 14 traducciones, marcadores y un plan de jatma.</p>
+      </article>
+      <article class="card">
+        <h3>El resto del día</h3>
+        <p>Las súplicas de Hisn al-Muslim, tasbih, un registro de ayuno y un diario de oración — y sincronización entre tus dispositivos sin ninguna cuenta.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="privacy">
+  <div class="wrap">
+    <p class="eyebrow">Privacidad</p>
+    <h2>Nada sale de tu teléfono que no hayas pedido enviar</h2>
+    <p class="lede">Dónde estás, cinco veces al día, es lo más sensible que toca una aplicación de oración. En este código no hay cuenta, ni panel de analítica, ni red publicitaria, ni informes de fallos.</p>
+    <div class="cols">
+      <article class="card">
+        <h3>Se queda en el dispositivo</h3>
+        <p>Ajustes, lugares guardados (cifrados), tu diario de oración y tu registro de ayuno. Las notificaciones se programan localmente.</p>
+      </article>
+      <article class="card">
+        <h3>Sale a la red cuando tú lo eliges</h3>
+        <p>Los horarios de la fuente que elijas, la búsqueda de lugares y las descargas de páginas del mushaf, traducciones y recitaciones.</p>
+      </article>
+      <article class="card">
+        <h3>Sencillamente no está</h3>
+        <p>Sin anuncios, sin rastreadores, sin SDK de analítica, sin informador de fallos y sin cuenta. La versión de F‑Droid no lleva servicios de Google Play.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <p class="eyebrow">Preguntas frecuentes</p>
+    <h2>Lo que se pregunta primero</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>¿La aplicación es gratuita?</h3>
+        <p>Sí. Software libre bajo AGPL‑3.0, y gratuita: sin compras dentro de la aplicación, sin suscripción y sin botón de donación.</p>
+      </article>
+      <article class="card">
+        <h3>¿Hay anuncios o rastreadores?</h3>
+        <p>Ninguno. Sin red publicitaria, sin SDK de analítica, sin informador de fallos y sin cuenta: esas bibliotecas no están en el proyecto.</p>
+      </article>
+      <article class="card">
+        <h3>¿Funciona sin conexión?</h3>
+        <p>Sí. Fijada la ubicación, los horarios se calculan en el dispositivo y las notificaciones se programan localmente.</p>
+      </article>
+      <article class="card">
+        <h3>¿Qué dispositivos admite?</h3>
+        <p>iPhone, iPad, Android y Mac. En Mac se instala con Homebrew.</p>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h2>Licencia</h2>
+        <p>Mihrab es software libre bajo AGPL‑3.0‑or‑later. El código fuente está en GitHub.</p>
+      </div>
+      <div>
+        <h2>Contenido</h2>
+        <p>Texto coránico de Tanzil, tipografías del mushaf del Complejo Rey Fahd. La atribución completa está en el archivo NOTICE.</p>
+      </div>
+      <div>
+        <h2>Proyecto</h2>
+        <ul>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/issues">Informar de un fallo</a></li>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/blob/main/CHANGELOG.md">Registro de cambios</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="colophon">Mihrab 2.14.3 (257), creada por Hassan El Ghamri.</p>
+  </div>
+</footer>
+</body>
+</html>

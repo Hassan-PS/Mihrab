@@ -1,11 +1,23 @@
-# The site is two pages: / in English and /sv/ in Swedish. Everything else
-# under docs/ is working notes that GitHub Pages happens to serve as raw
-# text — plans, handovers, release logs. They are public, but they are not
-# the site and should not compete with it in search results.
+# The site is one page per language: / in English, /sv/, /ar/, /de/ and the
+# rest. Everything else under docs/ is working notes that GitHub Pages
+# happens to serve as raw text — plans, handovers, release logs. They are
+# public, but they are not the site and should not compete with it in
+# search results.
 User-agent: *
 Allow: /$
 Allow: /assets/
 Allow: /sv/
+Allow: /ar/
+Allow: /bn/
+Allow: /de/
+Allow: /es/
+Allow: /fr/
+Allow: /hi/
+Allow: /id/
+Allow: /ru/
+Allow: /tr/
+Allow: /ur/
+Allow: /zh/
 Disallow: /*.md$
 Disallow: /release/
 Disallow: /design/

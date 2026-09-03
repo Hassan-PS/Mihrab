@@ -1,10 +1,11 @@
 /* Mihrab — the site's whole stylesheet.
  *
- * One file, linked by both pages. It lived inline in index.html until the
- * Swedish page arrived; two inline copies of 250 lines is two copies that
- * drift, and the pages would have stopped looking like one site within a
- * release or two. Same origin, no webfonts, nothing third-party — the
- * claim the privacy section makes about this site still holds.
+ * One file, linked by all thirteen language pages. It lived inline in
+ * index.html until the translations arrived; thirteen inline copies of 250
+ * lines is thirteen copies that drift, and the pages would have stopped
+ * looking like one site within a release or two. Same origin, no webfonts,
+ * nothing third-party — the claim the privacy section makes about this
+ * site still holds.
  */
 :root {
   --emerald: #1F5F4A;
@@ -61,11 +62,28 @@ code {
   outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px;
 }
 .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+/* The skip link is CLIPPED out of sight, never PUSHED out of sight.
+ *
+ * It used to sit ten thousand pixels off the left edge, which is the old
+ * trick and works in a left-to-right page: the overflow is off the start edge, the viewport
+ * opens at the start, nobody sees it. Turn the same page right-to-left and
+ * the document is 11,279 px wide with the content at the far end — and the
+ * Arabic and Urdu pages opened on ten thousand pixels of empty background.
+ * A blank page, from one line of CSS that had been correct for years.
+ *
+ * A one-pixel clipped box takes part in no overflow in either direction,
+ * and still reaches a screen reader and a tab key. */
 .skip {
-  position: absolute; left: -9999px; top: 0; background: var(--emerald);
-  color: var(--cream); padding: 12px 18px; border-radius: 0 0 10px 0; z-index: 20;
+  position: absolute; top: 0; inset-inline-start: 0;
+  width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  background: var(--emerald); color: var(--cream);
+  border-radius: 0 0 10px 0; z-index: 20;
 }
-.skip:focus { left: 0; }
+.skip:focus {
+  width: auto; height: auto; margin: 0; padding: 12px 18px;
+  overflow: visible; clip-path: none;
+}
 section { padding: 72px 0; border-top: 1px solid var(--line); }
 section:first-of-type { border-top: 0; }
 .eyebrow {
@@ -321,3 +339,56 @@ footer .colophon {
   font-size: 15px; color: var(--ink-soft);
 }
 .townlist li { break-inside: avoid; margin-bottom: 6px; }
+
+/* ---- the language bar ----
+ *
+ * A <details> element, not a script. The site ships no JavaScript and says
+ * so on the privacy section as a claim someone can check, so the picker is
+ * a native disclosure; a visitor arriving from a search engine is already
+ * on their own language, because the pages declare each other in hreflang.
+ */
+.langbar { background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.langbar .wrap {
+  display: flex; justify-content: flex-end;
+  padding-top: 6px; padding-bottom: 6px;
+}
+.langpicker { position: relative; font-size: 14px; }
+.langpicker summary {
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 10px; border-radius: 8px;
+  color: var(--ink-soft); cursor: pointer; list-style: none;
+  user-select: none;
+}
+.langpicker summary::-webkit-details-marker { display: none; }
+.langpicker summary:hover { color: var(--ink); background: rgba(31,95,74,.07); }
+.langpicker summary:focus-visible { outline: 2px solid var(--emerald); outline-offset: 2px; }
+.langpicker[open] summary { color: var(--ink); }
+.langpicker ul {
+  position: absolute; z-index: 20; inset-inline-end: 0; top: calc(100% + 6px);
+  margin: 0; padding: 6px; list-style: none;
+  min-width: 190px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: var(--shadow);
+  /* Thirteen languages is taller than a phone in landscape. */
+  max-height: min(70vh, 460px); overflow-y: auto;
+}
+.langpicker li { margin: 0; break-inside: avoid; }
+.langpicker a {
+  display: block; padding: 6px 10px; border-radius: 7px;
+  color: var(--ink-soft); text-decoration: none;
+}
+.langpicker a:hover { background: rgba(31,95,74,.08); color: var(--ink); }
+.langpicker a[aria-current] { color: var(--emerald); font-weight: 650; }
+@media (max-width: 620px) {
+  .langpicker ul { min-width: 168px; }
+}
+
+/* ---- right-to-left ----
+ *
+ * Arabic and Urdu. Only two rules in the whole sheet are side-specific;
+ * everything else is flex, grid or logical, and mirrors on its own.
+ */
+[dir="rtl"] .card ul { padding-left: 0; padding-right: 18px; }
+[dir="rtl"] .group li { padding: 0 20px 0 0; }
+[dir="rtl"] .group li::before { left: auto; right: 0; }
+[dir="rtl"] .hero-art { transform: scaleX(-1); }

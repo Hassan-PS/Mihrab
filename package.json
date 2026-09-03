@@ -18,7 +18,8 @@
     "test": "jest",
     "generate-icons": "node scripts/generate-app-icons.js",
     "e2e": "maestro test .maestro/flows",
-    "sync-version": "node scripts/sync-version.js",
+    "sync-version": "node scripts/sync-version.js && node scripts/build-site.js",
+    "build-site": "node scripts/build-site.js",
     "sync-widget-strings": "node scripts/sync-widget-strings.js",
     "verify-release": "./scripts/verify-release.sh"
   },

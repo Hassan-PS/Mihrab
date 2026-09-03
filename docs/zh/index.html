@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>礼拜时间与麦地那版《古兰经》— Mihrab</title>
+<meta name="description" content="免费开源的礼拜时间应用：宣礼提醒、朝向罗盘、主屏小组件，以及完整的麦地那版《古兰经》。没有广告，没有追踪，无需账号。">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://mihrab.elghamri.se/zh/">
+<!-- hreflang:start -->
+<link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/">
+<link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/">
+<link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/">
+<link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/">
+<link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/">
+<link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/">
+<link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/">
+<link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/">
+<link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/">
+<link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/">
+<link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/">
+<link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/">
+<link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/">
+<link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/">
+<!-- hreflang:end -->
+<link rel="icon" href="../assets/img/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/img/icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mihrab">
+<meta property="og:title" content="礼拜时间与麦地那版《古兰经》— Mihrab">
+<meta property="og:description" content="免费开源的礼拜时间应用：宣礼提醒、朝向罗盘、主屏小组件，以及完整的麦地那版《古兰经》。没有广告，没有追踪，无需账号。">
+<meta property="og:url" content="https://mihrab.elghamri.se/zh/">
+<meta property="og:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="900">
+<meta property="og:locale" content="zh">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="礼拜时间与麦地那版《古兰经》— Mihrab">
+<meta name="twitter:description" content="免费开源的礼拜时间应用：宣礼提醒、朝向罗盘、主屏小组件，以及完整的麦地那版《古兰经》。没有广告，没有追踪，无需账号。">
+<meta name="twitter:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Mihrab: The Muslim Companion",
+  "alternateName": "Mihrab",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Android, iOS, iPadOS, macOS",
+  "softwareVersion": "2.14.3",
+  "url": "https://mihrab.elghamri.se/zh/",
+  "inLanguage": "zh",
+  "image": "https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03",
+  "description": "免费开源的礼拜时间应用：宣礼提醒、朝向罗盘、主屏小组件，以及完整的麦地那版《古兰经》。没有广告，没有追踪，无需账号。",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+  "author": {
+    "@type": "Person",
+    "name": "Hassan El Ghamri",
+    "url": "https://github.com/Hassan-PS"
+  },
+  "sameAs": [
+    "https://play.google.com/store/apps/details?id=com.prayer_times",
+    "https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256",
+    "https://f-droid.org/packages/com.prayer_times/",
+    "https://github.com/Hassan-PS/Mihrab"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "zh",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "这个应用免费吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "免费。它是 AGPL‑3.0 许可下的自由软件，价格上也完全免费：没有内购、没有订阅、没有捐赠按钮。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "有广告或追踪器吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "都没有。没有广告网络、分析 SDK、崩溃上报或账号——这些库根本不在项目里。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "离线能用吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "能。设定位置后，时间在设备上推算，通知也在本地排程。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "支持哪些设备？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "iPhone、iPad、Android 和 Mac。Mac 上可用 Homebrew 安装。"
+      }
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<a class="solidarity" href="https://github.com/Safouene1/support-palestine-banner/blob/master/Markdown-pages/Support.md">
+  <svg class="flag" width="27" height="18" viewBox="0 0 30 20" aria-hidden="true" focusable="false">
+    <rect width="30" height="20" fill="#FFFFFF"/>
+    <rect width="30" height="6.67" fill="#000000"/>
+    <rect y="13.33" width="30" height="6.67" fill="#007A3D"/>
+    <path d="M0 0 L13 10 L0 20 Z" fill="#CE1126"/>
+  </svg>
+  <span><b>声援巴勒斯坦。</b><span class="wide"> 去哪里捐助、抵制什么、如何持续关注。</span></span>
+  <span class="go" aria-hidden="true">&rarr;</span>
+</a>
+
+<div class="langbar">
+  <div class="wrap">
+<!-- langpicker:start -->
+<details class="langpicker">
+  <summary>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
+    语言
+  </summary>
+  <ul>
+      <li><a href="/" hreflang="en" lang="en">English</a></li>
+      <li><a href="/sv/" hreflang="sv" lang="sv">Svenska</a></li>
+      <li><a href="/ar/" hreflang="ar" lang="ar">العربية</a></li>
+      <li><a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></li>
+      <li><a href="/ur/" hreflang="ur" lang="ur">اردو</a></li>
+      <li><a href="/id/" hreflang="id" lang="id">Bahasa Indonesia</a></li>
+      <li><a href="/de/" hreflang="de" lang="de">Deutsch</a></li>
+      <li><a href="/fr/" hreflang="fr" lang="fr">Français</a></li>
+      <li><a href="/es/" hreflang="es" lang="es">Español</a></li>
+      <li><a href="/ru/" hreflang="ru" lang="ru">Русский</a></li>
+      <li><a href="/bn/" hreflang="bn" lang="bn">বাংলা</a></li>
+      <li><a href="/hi/" hreflang="hi" lang="hi">हिन्दी</a></li>
+      <li><a href="/zh/" hreflang="zh" lang="zh" aria-current="true">中文</a></li>
+  </ul>
+</details>
+<!-- langpicker:end -->
+  </div>
+</div>
+
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+    <g fill="currentColor" opacity=".07">
+      <g transform="translate(1010 450)">
+        <rect x="-148" y="-148" width="296" height="296" rx="6"/>
+        <rect x="-148" y="-148" width="296" height="296" rx="6" transform="rotate(45)"/>
+      </g>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="2" opacity=".16">
+      <path d="M745 600 V335 Q745 152 905 88 Q1065 152 1065 335 V600"/>
+      <path d="M779 600 V344 Q779 186 905 132 Q1031 186 1031 344 V600"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="brandline">
+      <img src="../assets/img/icon.png" width="62" height="62" alt="Mihrab">
+      <span class="wordmark">Mihrab</span>
+    </div>
+    <h1>不知道你是谁的礼拜时间。</h1>
+    <p class="sub">宣礼提醒、朝向罗盘、主屏小组件，以及完整的麦地那版《古兰经》——无需账号，没有广告，没有分析统计。设定位置后，时间就在手机本地推算，因此断网也不影响一天的功课。</p>
+    <ul class="trust">
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>无广告、无追踪、无账号</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>断网也能用</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>免费且开源</li>
+    </ul>
+    <p class="meta">
+      <span>版本 2.14.3 (257)</span> <span class="dot" aria-hidden="true">•</span>
+      <span>iOS, Android, macOS</span> <span class="dot" aria-hidden="true">•</span>
+      <span>AGPL-3.0-or-later</span> <span class="dot" aria-hidden="true">•</span>
+      <a href="https://github.com/Hassan-PS/Mihrab">GitHub 上的源码</a>
+    </p>
+  </div>
+</header>
+
+<main id="main">
+<section class="install">
+  <div class="wrap">
+    <p class="eyebrow">安装</p>
+    <h2>获取 Mihrab</h2>
+    <p class="lede">各个渠道是同一个应用，由同一份源码构建。F‑Droid 版本不含 Google Play 服务。</p>
+    <ul class="badges">
+      <li><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="../assets/img/badges/appstore.png" width="180" height="60" alt="App Store"></a></li>
+      <li><a href="https://play.google.com/store/apps/details?id=com.prayer_times"><img src="../assets/img/badges/googleplay.png" width="180" height="60" alt="Google Play"></a></li>
+      <li><a href="https://f-droid.org/packages/com.prayer_times/"><img src="../assets/img/badges/fdroid.png" width="180" height="60" alt="F-Droid"></a></li>
+      <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest"><img src="../assets/img/badges/github.png" width="180" height="60" alt="GitHub"></a></li>
+    </ul>
+    <p class="note">在 Mac 上： <code>brew install --cask hassan-ps/tap/mihrab</code></p>
+  </div>
+</section>
+
+<section class="features">
+  <div class="wrap">
+    <p class="eyebrow">功能</p>
+    <h2>一天的功课，集于一个应用</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>礼拜</h3>
+        <p>距下次礼拜的倒计时、每个拜功的宣礼提醒、整月一览、朝向罗盘，以及主屏小组件。</p>
+      </article>
+      <article class="card">
+        <h3>《古兰经》</h3>
+        <p>四种传述本的完整麦地那版，配诵读、逐词高亮、经注、14 种译文、书签，以及一份通读计划。</p>
+      </article>
+      <article class="card">
+        <h3>一天的其余部分</h3>
+        <p>《穆斯林的堡垒》祈祷词、赞念计数、封斋记录与礼拜日志——并可在自己的设备之间同步，无需任何账号。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="privacy">
+  <div class="wrap">
+    <p class="eyebrow">隐私</p>
+    <h2>未经你要求，没有任何东西离开手机</h2>
+    <p class="lede">一天五次你身在何处，是礼拜应用所触及的最敏感的信息。这份代码里没有账号、没有分析面板、没有广告网络，也没有崩溃上报。</p>
+    <div class="cols">
+      <article class="card">
+        <h3>留在设备上</h3>
+        <p>设置、已保存的地点（加密存储）、你的礼拜日志与封斋记录。通知在本地排程。</p>
+      </article>
+      <article class="card">
+        <h3>你选择时才走网络</h3>
+        <p>来自你所选来源的时间、地点搜索，以及经文页面、译文与诵读音频的下载。</p>
+      </article>
+      <article class="card">
+        <h3>根本不存在</h3>
+        <p>没有广告、没有追踪器、没有分析 SDK、没有崩溃上报、没有账号。F‑Droid 版本不含 Google Play 服务。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <p class="eyebrow">常见问题</p>
+    <h2>最先被问到的问题</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>这个应用免费吗？</h3>
+        <p>免费。它是 AGPL‑3.0 许可下的自由软件，价格上也完全免费：没有内购、没有订阅、没有捐赠按钮。</p>
+      </article>
+      <article class="card">
+        <h3>有广告或追踪器吗？</h3>
+        <p>都没有。没有广告网络、分析 SDK、崩溃上报或账号——这些库根本不在项目里。</p>
+      </article>
+      <article class="card">
+        <h3>离线能用吗？</h3>
+        <p>能。设定位置后，时间在设备上推算，通知也在本地排程。</p>
+      </article>
+      <article class="card">
+        <h3>支持哪些设备？</h3>
+        <p>iPhone、iPad、Android 和 Mac。Mac 上可用 Homebrew 安装。</p>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h2>许可</h2>
+        <p>Mihrab 是 AGPL‑3.0‑or‑later 许可下的自由软件，源码在 GitHub 上。</p>
+      </div>
+      <div>
+        <h2>内容来源</h2>
+        <p>《古兰经》经文来自 Tanzil，经文字体来自法赫德国王古兰经印刷厂。完整署名见 NOTICE 文件。</p>
+      </div>
+      <div>
+        <h2>项目</h2>
+        <ul>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/issues">报告问题</a></li>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/blob/main/CHANGELOG.md">更新日志</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="colophon">Mihrab 2.14.3 (257)，由 Hassan El Ghamri 开发。</p>
+  </div>
+</footer>
+</body>
+</html>

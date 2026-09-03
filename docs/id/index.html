@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jadwal sholat dan mushaf Madinah — Mihrab</title>
+<meta name="description" content="Aplikasi jadwal sholat gratis dan open source: pengingat adzan, kompas kiblat, widget layar utama, dan mushaf Madinah lengkap. Tanpa iklan, tanpa pelacakan, tanpa akun.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://mihrab.elghamri.se/id/">
+<!-- hreflang:start -->
+<link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/">
+<link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/">
+<link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/">
+<link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/">
+<link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/">
+<link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/">
+<link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/">
+<link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/">
+<link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/">
+<link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/">
+<link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/">
+<link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/">
+<link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/">
+<link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/">
+<!-- hreflang:end -->
+<link rel="icon" href="../assets/img/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/img/icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mihrab">
+<meta property="og:title" content="Jadwal sholat dan mushaf Madinah — Mihrab">
+<meta property="og:description" content="Aplikasi jadwal sholat gratis dan open source: pengingat adzan, kompas kiblat, widget layar utama, dan mushaf Madinah lengkap. Tanpa iklan, tanpa pelacakan, tanpa akun.">
+<meta property="og:url" content="https://mihrab.elghamri.se/id/">
+<meta property="og:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="900">
+<meta property="og:locale" content="id">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jadwal sholat dan mushaf Madinah — Mihrab">
+<meta name="twitter:description" content="Aplikasi jadwal sholat gratis dan open source: pengingat adzan, kompas kiblat, widget layar utama, dan mushaf Madinah lengkap. Tanpa iklan, tanpa pelacakan, tanpa akun.">
+<meta name="twitter:image" content="https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Mihrab: The Muslim Companion",
+  "alternateName": "Mihrab",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Android, iOS, iPadOS, macOS",
+  "softwareVersion": "2.14.3",
+  "url": "https://mihrab.elghamri.se/id/",
+  "inLanguage": "id",
+  "image": "https://mihrab.elghamri.se/assets/img/og-hero.png?v=2026-09-03",
+  "description": "Aplikasi jadwal sholat gratis dan open source: pengingat adzan, kompas kiblat, widget layar utama, dan mushaf Madinah lengkap. Tanpa iklan, tanpa pelacakan, tanpa akun.",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+  "author": {
+    "@type": "Person",
+    "name": "Hassan El Ghamri",
+    "url": "https://github.com/Hassan-PS"
+  },
+  "sameAs": [
+    "https://play.google.com/store/apps/details?id=com.prayer_times",
+    "https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256",
+    "https://f-droid.org/packages/com.prayer_times/",
+    "https://github.com/Hassan-PS/Mihrab"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "id",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Apakah aplikasinya gratis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ya. Perangkat lunak bebas di bawah AGPL‑3.0, dan gratis: tidak ada pembelian dalam aplikasi, langganan, atau tombol donasi."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah ada iklan atau pelacak?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tidak ada. Tanpa jaringan iklan, SDK analitik, pelapor kerusakan, atau akun — pustaka-pustaka itu tidak ada dalam proyek ini."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah bisa dipakai offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bisa. Setelah lokasi diatur, waktunya dihitung di perangkat dan notifikasi dijadwalkan secara lokal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Perangkat apa saja yang didukung?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "iPhone, iPad, Android, dan Mac. Di Mac, pasang melalui Homebrew."
+      }
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Lewati ke konten</a>
+
+<a class="solidarity" href="https://github.com/Safouene1/support-palestine-banner/blob/master/Markdown-pages/Support.md">
+  <svg class="flag" width="27" height="18" viewBox="0 0 30 20" aria-hidden="true" focusable="false">
+    <rect width="30" height="20" fill="#FFFFFF"/>
+    <rect width="30" height="6.67" fill="#000000"/>
+    <rect y="13.33" width="30" height="6.67" fill="#007A3D"/>
+    <path d="M0 0 L13 10 L0 20 Z" fill="#CE1126"/>
+  </svg>
+  <span><b>Bersama Palestina.</b><span class="wide"> Ke mana berdonasi, apa yang diboikot, dan cara mengikuti kabarnya.</span></span>
+  <span class="go" aria-hidden="true">&rarr;</span>
+</a>
+
+<div class="langbar">
+  <div class="wrap">
+<!-- langpicker:start -->
+<details class="langpicker">
+  <summary>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
+    Bahasa
+  </summary>
+  <ul>
+      <li><a href="/" hreflang="en" lang="en">English</a></li>
+      <li><a href="/sv/" hreflang="sv" lang="sv">Svenska</a></li>
+      <li><a href="/ar/" hreflang="ar" lang="ar">العربية</a></li>
+      <li><a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></li>
+      <li><a href="/ur/" hreflang="ur" lang="ur">اردو</a></li>
+      <li><a href="/id/" hreflang="id" lang="id" aria-current="true">Bahasa Indonesia</a></li>
+      <li><a href="/de/" hreflang="de" lang="de">Deutsch</a></li>
+      <li><a href="/fr/" hreflang="fr" lang="fr">Français</a></li>
+      <li><a href="/es/" hreflang="es" lang="es">Español</a></li>
+      <li><a href="/ru/" hreflang="ru" lang="ru">Русский</a></li>
+      <li><a href="/bn/" hreflang="bn" lang="bn">বাংলা</a></li>
+      <li><a href="/hi/" hreflang="hi" lang="hi">हिन्दी</a></li>
+      <li><a href="/zh/" hreflang="zh" lang="zh">中文</a></li>
+  </ul>
+</details>
+<!-- langpicker:end -->
+  </div>
+</div>
+
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+    <g fill="currentColor" opacity=".07">
+      <g transform="translate(1010 450)">
+        <rect x="-148" y="-148" width="296" height="296" rx="6"/>
+        <rect x="-148" y="-148" width="296" height="296" rx="6" transform="rotate(45)"/>
+      </g>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="2" opacity=".16">
+      <path d="M745 600 V335 Q745 152 905 88 Q1065 152 1065 335 V600"/>
+      <path d="M779 600 V344 Q779 186 905 132 Q1031 186 1031 344 V600"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="brandline">
+      <img src="../assets/img/icon.png" width="62" height="62" alt="Mihrab">
+      <span class="wordmark">Mihrab</span>
+    </div>
+    <h1>Jadwal sholat yang tidak tahu siapa Anda.</h1>
+    <p class="sub">Pengingat adzan, kompas kiblat, widget layar utama, dan mushaf Madinah lengkap — tanpa akun, tanpa iklan, tanpa analitik. Setelah lokasi diatur, waktunya dihitung di ponsel sendiri, sehingga hari tetap berjalan meski jaringan dimatikan.</p>
+    <ul class="trust">
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Tanpa iklan, pelacak, atau akun</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Berfungsi tanpa internet</li>
+      <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Gratis dan open source</li>
+    </ul>
+    <p class="meta">
+      <span>Versi 2.14.3 (257)</span> <span class="dot" aria-hidden="true">•</span>
+      <span>iOS, Android, macOS</span> <span class="dot" aria-hidden="true">•</span>
+      <span>AGPL-3.0-or-later</span> <span class="dot" aria-hidden="true">•</span>
+      <a href="https://github.com/Hassan-PS/Mihrab">Kode sumber di GitHub</a>
+    </p>
+  </div>
+</header>
+
+<main id="main">
+<section class="install">
+  <div class="wrap">
+    <p class="eyebrow">Pasang</p>
+    <h2>Dapatkan Mihrab</h2>
+    <p class="lede">Aplikasi yang sama di semua kanal, dibangun dari sumber yang sama. Versi F‑Droid tidak memuat Google Play Services.</p>
+    <ul class="badges">
+      <li><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="../assets/img/badges/appstore.png" width="180" height="60" alt="App Store"></a></li>
+      <li><a href="https://play.google.com/store/apps/details?id=com.prayer_times"><img src="../assets/img/badges/googleplay.png" width="180" height="60" alt="Google Play"></a></li>
+      <li><a href="https://f-droid.org/packages/com.prayer_times/"><img src="../assets/img/badges/fdroid.png" width="180" height="60" alt="F-Droid"></a></li>
+      <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest"><img src="../assets/img/badges/github.png" width="180" height="60" alt="GitHub"></a></li>
+    </ul>
+    <p class="note">Di Mac: <code>brew install --cask hassan-ps/tap/mihrab</code></p>
+  </div>
+</section>
+
+<section class="features">
+  <div class="wrap">
+    <p class="eyebrow">Fitur</p>
+    <h2>Ibadah sehari, dalam satu aplikasi</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>Sholat</h3>
+        <p>Hitung mundur ke waktu berikutnya, pengingat adzan per waktu, tampilan bulanan, kompas kiblat, dan widget layar utama.</p>
+      </article>
+      <article class="card">
+        <h3>Al-Qur'an</h3>
+        <p>Mushaf Madinah lengkap dalam empat riwayat, dengan murottal, sorotan kata yang dibaca, tafsir, 14 terjemahan, penanda, dan rencana khatam.</p>
+      </article>
+      <article class="card">
+        <h3>Sisa hari Anda</h3>
+        <p>Doa Hisnul Muslim, tasbih, catatan puasa, dan jurnal sholat — serta sinkronisasi antarperangkat Anda tanpa akun.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="privacy">
+  <div class="wrap">
+    <p class="eyebrow">Privasi</p>
+    <h2>Tidak ada yang meninggalkan ponsel Anda tanpa Anda minta</h2>
+    <p class="lede">Di mana Anda berada, lima kali sehari, adalah hal paling sensitif yang disentuh aplikasi sholat. Dalam kode ini tidak ada akun, panel analitik, jaringan iklan, maupun pelaporan kerusakan.</p>
+    <div class="cols">
+      <article class="card">
+        <h3>Tetap di perangkat</h3>
+        <p>Pengaturan, lokasi tersimpan (terenkripsi), jurnal sholat, dan catatan puasa Anda. Notifikasi dijadwalkan secara lokal.</p>
+      </article>
+      <article class="card">
+        <h3>Melalui jaringan, saat Anda memilihnya</h3>
+        <p>Waktu dari sumber yang Anda pilih, pencarian tempat, serta unduhan halaman mushaf, terjemahan, dan murottal.</p>
+      </article>
+      <article class="card">
+        <h3>Sama sekali tidak ada</h3>
+        <p>Tanpa iklan, pelacak, SDK analitik, pelapor kerusakan, atau akun. Versi F‑Droid tanpa Google Play Services.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <p class="eyebrow">Pertanyaan umum</p>
+    <h2>Yang pertama ditanyakan</h2>
+    <div class="cols">
+      <article class="card">
+        <h3>Apakah aplikasinya gratis?</h3>
+        <p>Ya. Perangkat lunak bebas di bawah AGPL‑3.0, dan gratis: tidak ada pembelian dalam aplikasi, langganan, atau tombol donasi.</p>
+      </article>
+      <article class="card">
+        <h3>Apakah ada iklan atau pelacak?</h3>
+        <p>Tidak ada. Tanpa jaringan iklan, SDK analitik, pelapor kerusakan, atau akun — pustaka-pustaka itu tidak ada dalam proyek ini.</p>
+      </article>
+      <article class="card">
+        <h3>Apakah bisa dipakai offline?</h3>
+        <p>Bisa. Setelah lokasi diatur, waktunya dihitung di perangkat dan notifikasi dijadwalkan secara lokal.</p>
+      </article>
+      <article class="card">
+        <h3>Perangkat apa saja yang didukung?</h3>
+        <p>iPhone, iPad, Android, dan Mac. Di Mac, pasang melalui Homebrew.</p>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h2>Lisensi</h2>
+        <p>Mihrab adalah perangkat lunak bebas di bawah AGPL‑3.0‑or‑later. Kode sumbernya ada di GitHub.</p>
+      </div>
+      <div>
+        <h2>Konten</h2>
+        <p>Teks Al-Qur'an dari Tanzil, fon mushaf dari Kompleks Raja Fahd. Atribusi lengkap ada di berkas NOTICE.</p>
+      </div>
+      <div>
+        <h2>Proyek</h2>
+        <ul>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/issues">Laporkan masalah</a></li>
+          <li><a href="https://github.com/Hassan-PS/Mihrab/blob/main/CHANGELOG.md">Catatan perubahan</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="colophon">Mihrab 2.14.3 (257), dibuat oleh Hassan El Ghamri.</p>
+  </div>
+</footer>
+</body>
+</html>

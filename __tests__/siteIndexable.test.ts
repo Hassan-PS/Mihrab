@@ -15,11 +15,16 @@
  */
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
+import { execFileSync } from 'child_process';
 
 const ROOT = path.join(__dirname, '..');
 const DOCS = path.join(ROOT, 'docs');
 const site = readFileSync(path.join(DOCS, 'index.html'), 'utf-8');
 const siteSv = readFileSync(path.join(DOCS, 'sv', 'index.html'), 'utf-8');
+const LANGS: Record<string, { name: string; dir: string; path: string }> =
+  JSON.parse(
+    readFileSync(path.join(ROOT, 'scripts', 'site', 'strings.json'), 'utf-8'),
+  );
 const host = readFileSync(path.join(DOCS, 'CNAME'), 'utf-8').trim();
 const origin = `https://${host}`;
 
@@ -198,15 +203,18 @@ describe('the Swedish page is a page, not a section', () => {
     );
   });
 
-  it('is in the sitemap, with both languages named', () => {
+  it('is in the sitemap, with every language named', () => {
     const sitemap = readFileSync(path.join(DOCS, 'sitemap.xml'), 'utf-8');
     expect(sitemap).toContain(`<loc>${origin}/sv/</loc>`);
     expect(sitemap).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+    // Every page lists every language, so each alternate appears once per
+    // page — that is what makes the annotations reciprocal.
+    const pages = Object.keys(LANGS).length;
     expect(
       sitemap.match(
         new RegExp(`hreflang="sv" href="${origin}/sv/"`, 'g'),
       )?.length,
-    ).toBe(2);
+    ).toBe(pages);
   });
 
   it('is not disallowed to crawlers', () => {
@@ -255,5 +263,134 @@ describe('the Swedish page answers Swedish questions', () => {
     for (const town of ['Stockholm', 'Göteborg', 'Malmö', 'Uppsala']) {
       expect(siteSv).toContain(`<li>${town}</li>`);
     }
+  });
+});
+
+/**
+ * The thirteen languages.
+ *
+ * The app speaks thirteen and the site spoke one, which meant twelve
+ * audiences searching in their own language could not find it: Google
+ * classifies a page by its language, so "Gebetszeiten" and "namaz
+ * vakitleri" are not queries an English page wins. Eleven of the pages are
+ * rendered by scripts/build-site.js from one template; English and Swedish
+ * are hand-written and only patched between markers. What every page must
+ * agree about is generated into all thirteen.
+ */
+describe('every language the app speaks has a page', () => {
+  const codes = Object.keys(LANGS);
+
+  it('is thirteen, the same set the app ships', () => {
+    expect(codes.sort()).toEqual(
+      ['ar', 'bn', 'de', 'en', 'es', 'fr', 'hi', 'id', 'ru', 'sv', 'tr', 'ur', 'zh'],
+    );
+  });
+
+  it.each(Object.entries(LANGS))('%s has a page at its path', (code, l) => {
+    const file =
+      code === 'en'
+        ? path.join(DOCS, 'index.html')
+        : path.join(DOCS, l.path.replace(/^\/|\/$/g, ''), 'index.html');
+    expect(existsSync(file)).toBe(true);
+  });
+
+  const pageOf = (code: string) =>
+    readFileSync(
+      code === 'en'
+        ? path.join(DOCS, 'index.html')
+        : path.join(DOCS, LANGS[code].path.replace(/^\/|\/$/g, ''), 'index.html'),
+      'utf-8',
+    );
+
+  it.each(Object.keys(LANGS))(
+    '%s declares every other language, and a default',
+    code => {
+      const page = pageOf(code);
+      for (const [other, l] of Object.entries(LANGS)) {
+        expect(page).toContain(
+          `<link rel="alternate" hreflang="${other}" href="${origin}${l.path}">`,
+        );
+      }
+      expect(page).toContain(
+        `<link rel="alternate" hreflang="x-default" href="${origin}/">`,
+      );
+    },
+  );
+
+  it.each(Object.keys(LANGS))('%s offers the picker, with all thirteen', code => {
+    const page = pageOf(code);
+    expect(page).toContain('<details class="langpicker">');
+    for (const [other, l] of Object.entries(LANGS)) {
+      expect(page).toContain(`href="${l.path}" hreflang="${other}"`);
+    }
+    // The current language is marked, and only it.
+    expect(page.match(/aria-current="true"/g)?.length).toBe(1);
+  });
+
+  it('needs no JavaScript to switch language', () => {
+    // The privacy section claims the site ships none, and the claim is the
+    // reason the picker is a <details> rather than a <select> with an
+    // onchange handler.
+    for (const code of codes) {
+      const page = pageOf(code);
+      const scripts = Array.from(
+        page.matchAll(/<script([^>]*)>/g),
+        m => m[1],
+      );
+      for (const attrs of scripts) {
+        expect(attrs).toContain('application/ld+json');
+      }
+    }
+  });
+
+  it.each([['ar'], ['ur']])('%s is laid out right to left', code => {
+    expect(pageOf(code)).toContain(`<html lang="${code}" dir="rtl">`);
+  });
+
+  it('carries the solidarity banner on every page', () => {
+    for (const code of codes) {
+      expect(pageOf(code)).toContain('class="solidarity"');
+    }
+  });
+
+  it('keeps the Swedish timetable answer on the Swedish page only', () => {
+    // It is a Swedish answer to a Swedish question. On a German or Bengali
+    // page it is noise, and it would compete with /sv/ for the phrase.
+    for (const code of codes) {
+      const page = pageOf(code);
+      if (code === 'sv' || code === 'en') continue;
+      expect(page).not.toMatch(/Islamiska Förbundet/);
+    }
+    expect(pageOf('sv')).toMatch(/Islamiska Förbundet/);
+  });
+
+  it('is what the generator would write right now', () => {
+    // The check the release cut runs: a page edited by hand, or a string
+    // changed without rebuilding, fails here rather than shipping.
+    execFileSync('node', [path.join(ROOT, 'scripts', 'build-site.js'), '--check'], {
+      cwd: ROOT,
+    });
+  });
+});
+
+/**
+ * The stylesheet, on the two counts that broke a whole language.
+ */
+describe('the stylesheet is safe in both directions', () => {
+  const css = readFileSync(path.join(DOCS, 'assets', 'site.css'), 'utf-8');
+
+  it('hides the skip link by clipping it, never by pushing it off-screen', () => {
+    // `left: -9999px` is the old trick, and it is invisible in a
+    // left-to-right page. Right-to-left it made the document 11,279 px wide
+    // with the content at the far end, and the Arabic and Urdu pages opened
+    // on ten thousand pixels of empty background — a blank page from one
+    // line of CSS.
+    expect(css).not.toMatch(/-9999px/);
+    expect(css).toMatch(/\.skip \{[^}]*clip-path: inset\(50%\)/s);
+  });
+
+  it('mirrors the two rules that are side-specific', () => {
+    expect(css).toMatch(/\[dir="rtl"\] \.card ul/);
+    expect(css).toMatch(/\[dir="rtl"\] \.group li::before/);
   });
 });

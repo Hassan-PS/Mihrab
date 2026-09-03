@@ -5,6 +5,17 @@
     <loc>https://mihrab.elghamri.se/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
     <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -13,6 +24,226 @@
     <loc>https://mihrab.elghamri.se/sv/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
     <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/ar/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/tr/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/ur/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/id/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/de/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/fr/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/es/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/ru/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/bn/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/hi/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mihrab.elghamri.se/zh/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mihrab.elghamri.se/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mihrab.elghamri.se/sv/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mihrab.elghamri.se/ar/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://mihrab.elghamri.se/tr/"/>
+    <xhtml:link rel="alternate" hreflang="ur" href="https://mihrab.elghamri.se/ur/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://mihrab.elghamri.se/id/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://mihrab.elghamri.se/de/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mihrab.elghamri.se/fr/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://mihrab.elghamri.se/es/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mihrab.elghamri.se/ru/"/>
+    <xhtml:link rel="alternate" hreflang="bn" href="https://mihrab.elghamri.se/bn/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://mihrab.elghamri.se/hi/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mihrab.elghamri.se/zh/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://mihrab.elghamri.se/"/>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
