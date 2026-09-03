@@ -34,9 +34,12 @@ def feature_graphic(out, home, W=1024,H=500):
     d.text((mx+isz+int(W*0.02), iy+isz*0.08), "Mihrab", font=_font(ROUND_FONT,int(H*0.19),"Bold"), fill=CREAM)
     d.text((mx, iy+isz+int(H*0.06)), "Prayer times · Quran · Dua · Tasbih · Qibla", font=_font(TEXT_FONT,int(H*0.062),"Semibold"), fill=CREAM)
     d.text((mx, iy+isz+int(H*0.20)), "Private. Offline. No ads, no tracking.", font=_font(TEXT_FONT,int(H*0.052),"Medium"), fill=(238,228,212,200))
-    # one phone on the right, tilted, bleeding off top/bottom
+    # One phone on the right, bleeding off top/bottom. Barely tilted: at 8
+    # degrees the prayer rows fell far enough across the width that each time
+    # lined up with the NEXT prayer's name, and a graphic whose whole subject
+    # is prayer times cannot afford to look like it has them wrong.
     dev=device(home, int(H*1.28))
-    dev=dev.rotate(-8, expand=True, resample=Image.BICUBIC)
+    dev=dev.rotate(-2.5, expand=True, resample=Image.BICUBIC)
     paste_with_shadow(c, dev, int(W*0.66), int(H*0.06), int(W*0.02))
     c.convert("RGB").save(out); print("wrote",out,(W,H))
 

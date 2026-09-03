@@ -139,6 +139,84 @@ def compose(shot_path, out_path, W, H, headline, subhead, screen_radius_frac=0.0
     canvas.convert("RGB").save(out_path, quality=95)
     print("wrote", out_path, (W,H))
 
+
+
+def compose_landscape(
+    shot_path,
+    out_path,
+    W,
+    H,
+    headline,
+    subhead,
+    screen_radius_frac=0.022,
+    device_h_frac=0.80,
+    device_x_frac=None,
+):
+    """The same panel, turned on its side.
+
+    Play wants tablet screenshots at 16:9 or 9:16 exactly, and a tablet is
+    read in landscape — so the portrait stack (text above, device below)
+    would leave the device a letterbox strip. Here the text takes the left
+    third and the device runs off the right edge, which is also how the
+    feature graphic is built.
+    """
+    canvas = gradient_bg(W, H).convert("RGBA")
+    canvas.alpha_composite(rub_star(int(H * 1.05), CREAM, 16), (int(W * 0.30), int(H * 0.34)))
+    canvas.alpha_composite(rub_star(int(H * 0.34), CREAM, 22), (int(-W * 0.03), int(-H * 0.12)))
+
+    m = int(W * 0.055)
+    # Work the device out first: a tablet panel lives or dies on whether the
+    # whole screen is visible, so the picture claims its width and the text
+    # gets what is left. Cutting a column off the right edge reads as a
+    # mistake, not as a bleed.
+    shot = Image.open(shot_path).convert("RGB")
+    dev_h = int(H * device_h_frac)
+    dev_w = int(dev_h * shot.width / shot.height)
+    dx = W - dev_w - int(W * 0.035) if device_x_frac is None else int(W * device_x_frac)
+    text_w = max(int(W * 0.20), dx - m - int(W * 0.025))
+    d = ImageDraw.Draw(canvas)
+
+    icon_sz = int(H * 0.13)
+    icon = Image.open(ICON_PATH).convert("RGBA").resize((icon_sz, icon_sz))
+    icon = round_image(icon, int(icon_sz * 0.24))
+    top_y = int(H * 0.13)
+    canvas.alpha_composite(icon, (m, top_y))
+    wm = _font(ROUND_FONT, int(H * 0.062), "Bold")
+    d.text((m + icon_sz + int(W * 0.014), top_y + icon_sz * 0.16), "Mihrab", font=wm, fill=CREAM)
+
+    hl_font = _font(ROUND_FONT, int(H * 0.076), "Bold")
+    sub_font = _font(TEXT_FONT, int(H * 0.042), "Medium")
+    hy = top_y + icon_sz + int(H * 0.085)
+    hlines = []
+    for part in headline.split("\\n"):
+        hlines += wrap(d, part, hl_font, text_w)
+    for line in hlines:
+        d.text((m, hy), line, font=hl_font, fill=CREAM)
+        hy += int(hl_font.size * 1.13)
+    hy += int(H * 0.018)
+    for line in wrap(d, subhead, sub_font, text_w):
+        d.text((m, hy), line, font=sub_font, fill=(238, 228, 212, 205))
+        hy += int(sub_font.size * 1.32)
+
+    shot_r = shot.resize((dev_w, dev_h))
+    rad = int(dev_h * screen_radius_frac)
+    dy = (H - dev_h) // 2
+    sh = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    shm = Image.new("L", (dev_w, dev_h), 0)
+    ImageDraw.Draw(shm).rounded_rectangle([0, 0, dev_w, dev_h], radius=rad, fill=120)
+    sh.paste(Image.new("RGBA", (dev_w, dev_h), (0, 0, 0, 255)), (dx, dy + int(H * 0.018)), shm)
+    sh = sh.filter(ImageFilter.GaussianBlur(int(H * 0.028)))
+    canvas.alpha_composite(sh)
+    frame = Image.new("RGBA", (dev_w, dev_h), (0, 0, 0, 0))
+    ImageDraw.Draw(frame).rounded_rectangle(
+        [0, 0, dev_w - 1, dev_h - 1], radius=rad, outline=(238, 228, 212, 90), width=max(2, int(H * 0.002))
+    )
+    canvas.alpha_composite(round_image(shot_r, rad), (dx, dy))
+    canvas.alpha_composite(frame, (dx, dy))
+    canvas.convert("RGB").save(out_path, quality=95)
+    print("wrote", out_path, (W, H))
+
+
 if __name__ == "__main__":
     import sys
     a=sys.argv

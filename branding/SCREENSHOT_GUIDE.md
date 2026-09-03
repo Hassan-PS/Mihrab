@@ -217,3 +217,89 @@ Two things that cost time last pass:
 - Neither `simctl` nor `idb` can rotate a device. The iPad set is therefore
   portrait, where the spread reader shows one page plus the surah sidebar.
   Landscape needs the Simulator GUI and `cmd+left` / `cmd+right`.
+
+---
+
+## Google Play and F-Droid (2026-09-03)
+
+The two Android stores want opposite things from the same screenshots, so
+they get different files out of the same captures.
+
+| Slot | Pixels | Raw shots | Goes to |
+|---|---|---|---|
+| Play phone | 1080 × 2160 panel | `branding/store/play` (1080 × 2400) | `branding/play-previews` |
+| Play tablet | 2560 × 1440 panel | `branding/store/play-tablet` (2560 × 1600) | `branding/play-previews-tablet` |
+| Play feature graphic | 1024 × 500 | built from `01_home` | `branding/store/play` |
+| Play icon | 512 × 512, 32-bit | — | `branding/store/play` |
+| F-Droid phone | 1080 × 2400 | the same raw shots | `fastlane/metadata/android/en-US/images/phoneScreenshots` |
+| F-Droid tablet | 2560 × 1600 | the same raw shots | `.../images/tenInchScreenshots` |
+
+**Play gets the captioned panels, F-Droid gets the raw screenshots.** That is
+each store's own convention: Play's listing is a marketing carousel, while the
+F-Droid client shows the images at device width beside a description it is
+already displaying, where a phone-inside-a-phone wastes most of the frame.
+
+`python3 branding/tools/build_store.py` builds all of it, Apple's sets
+included, and
+
+```sh
+python3 branding/tools/verify_store.py
+```
+
+checks every file against the rule its store actually enforces — exact
+pixel size, no stray alpha, Play's aspect caps, the minimum count per slot.
+It must print `ALL STORE ASSETS PASS` before anything is uploaded. It
+exists because a whole Play set shipped at a ratio Play rejects and nothing
+in the repo said so.
+
+### The sizes are a rule, not a preference
+
+Play caps a screenshot's long side at **twice** its short side. A phone
+capture is 1080 × 2400 — ratio 2.22 — so **the raw shot cannot be uploaded**,
+and the whole previous set (1320 × 2868, ratio 2.17, and 1080 × 2410) was out
+of spec. The panel is composed at 1080 × 2160, which is exactly 2.00.
+
+Tablet screenshots are stricter still: **16:9 landscape or 9:16 portrait
+only**, 1080–7680px, at least four per slot. The tablet emulator is 2560 ×
+1600 (16:10), so those panels are composed onto a 2560 × 1440 canvas by
+`compose_landscape()` — text left, device bleeding off the right. Play's
+seven-inch and ten-inch slots take the same files; upload the set twice.
+
+The feature graphic and the phone panels must have **no alpha**;
+`screencap` writes RGBA, so `build_store.py` refuses any raw shot that still
+carries a channel it should not. The icon is the one asset Play wants as
+32-bit *with* alpha.
+
+### Capturing
+
+```sh
+export ANDROID_SERIAL=emulator-5554          # or -5556 for the tablet
+adb shell settings put global sysui_demo_allowed 1
+adb shell cmd overlay enable com.android.internal.systemui.navbar.gestural
+adb shell am broadcast -a com.android.systemui.demo -e command enter
+adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941
+adb shell am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false
+adb shell am broadcast -a com.android.systemui.demo -e command network -e wifi show -e level 4
+adb shell am broadcast -a com.android.systemui.demo -e command notifications -e visible false
+adb exec-out screencap -p > shot.png
+```
+
+Demo mode is Android's answer to `simctl status_bar override`: a fixed 9:41,
+a full battery and no notification icons. Switching to gesture navigation
+replaces the three-button bar with a single pill, which is what a current
+phone looks like.
+
+Notes from this pass:
+
+- `adb shell input text` sends **one** field. Tapping the next field between
+  two `input text` calls does not always move focus, and both strings land in
+  the first one — check the field after typing rather than after saving.
+- A tablet emulator can pop Android's own "Try out your stylus" dialog over
+  the app the first time a text field is focused. Dismiss it before aiming
+  any more taps; its buttons sit where the app's do.
+- The tablet needs the ~180 MB mushaf downloaded before the reader shows
+  anything, and the progress bar sits across the top of the screen while it
+  runs. Wait for it to finish before capturing the spread.
+- The floating tab bar is 88% opaque by design (`translucentSurface`), so
+  whatever is behind it reads through faintly. Scroll so that something quiet
+  is under the bar, not a card mid-sentence.
