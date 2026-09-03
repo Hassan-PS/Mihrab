@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "Eklemek için dokunun",
     "riwayahDefault": "(varsayılan)",
     "dueToday": "bugün",
-    "dueTomorrow": "yarın"
+    "dueTomorrow": "yarın",
+    "scrubHint": "Daha hassas kontrol için yukarı kaydırın",
+    "scrubHalf": "Yarım hız",
+    "scrubQuarter": "Çeyrek hız",
+    "scrubFine": "Hassas kontrol"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

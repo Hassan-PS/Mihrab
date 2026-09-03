@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "Touchez pour l’ajouter",
     "riwayahDefault": "(par défaut)",
     "dueToday": "aujourd’hui",
-    "dueTomorrow": "demain"
+    "dueTomorrow": "demain",
+    "scrubHint": "Glissez vers le haut pour plus de précision",
+    "scrubHalf": "Demi-vitesse",
+    "scrubQuarter": "Quart de vitesse",
+    "scrubFine": "Réglage fin"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

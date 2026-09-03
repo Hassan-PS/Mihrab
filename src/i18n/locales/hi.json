@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "जोड़ने के लिए टैप करें",
     "riwayahDefault": "(डिफ़ॉल्ट)",
     "dueToday": "आज",
-    "dueTomorrow": "कल"
+    "dueTomorrow": "कल",
+    "scrubHint": "बारीक नियंत्रण के लिए ऊपर खिसकाएँ",
+    "scrubHalf": "आधी गति",
+    "scrubQuarter": "चौथाई गति",
+    "scrubFine": "सूक्ष्म नियंत्रण"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

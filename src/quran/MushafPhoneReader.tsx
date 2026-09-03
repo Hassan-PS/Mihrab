@@ -602,6 +602,12 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           scrollEventThrottle={16}
           onScrollToIndexFailed={pagerHandlers.onScrollToIndexFailed}
           onScrollBeginDrag={pagerHandlers.onScrollBeginDrag}
+          // The content has been laid out at a new width (a rotation, a
+          // resize, another muṣḥaf): re-anchor the settled page against
+          // it. The re-anchor that runs when the width CHANGES is executed
+          // on Android before the list has that width, and is clamped to
+          // the old one — see `guardExpired` in useMushafPager.
+          onContentSizeChange={pagerHandlers.onContentSizeChange}
           // A page is a typeface plus ~150 text nodes, so a small window
           // is plenty and keeps swiping instant — see WINDOW_RESTING.
           windowSize={windowSize}
@@ -633,6 +639,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           page={currentPage}
           riwayah={riwayah}
           onSelectPage={core.jumpToPage}
+          onPeekPage={core.peekPage}
           onOpenJump={core.openJump}
         />
       ) : null}

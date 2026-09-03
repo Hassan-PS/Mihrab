@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "Ketuk untuk menambahkan",
     "riwayahDefault": "(bawaan)",
     "dueToday": "hari ini",
-    "dueTomorrow": "besok"
+    "dueTomorrow": "besok",
+    "scrubHint": "Geser ke atas untuk kontrol lebih halus",
+    "scrubHalf": "Setengah kecepatan",
+    "scrubQuarter": "Seperempat kecepatan",
+    "scrubFine": "Kontrol halus"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

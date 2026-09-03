@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "Tryck för att lägga till",
     "riwayahDefault": "(standard)",
     "dueToday": "idag",
-    "dueTomorrow": "imorgon"
+    "dueTomorrow": "imorgon",
+    "scrubHint": "Dra uppåt för finare kontroll",
+    "scrubHalf": "Halv hastighet",
+    "scrubQuarter": "Kvarts hastighet",
+    "scrubFine": "Finjustering"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

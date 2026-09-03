@@ -31,6 +31,12 @@
  *    ends. A trackpad swipe raises no drag end and no momentum — macOS
  *    delivers it as wheel phases — so silence is the only thing that marks
  *    its end. A finger is unaffected: its momentum end cancels the timer.
+ * 3. A page the pager was SENT to is not negotiable. A jump that never
+ *    lands is re-issued, not forgotten: when its mark lifts by timeout and
+ *    the list has reported an offset that is not the one asked for, the
+ *    same scroll goes out again. Without this a rotation on page 589 read
+ *    as page 272 — see `guardExpired` for the mechanics — and the settle
+ *    that followed made it official.
  */
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
@@ -63,6 +69,14 @@ export const SCROLL_IDLE_MS = 140;
 export const GUARD_ANIMATED_MS = 700;
 export const GUARD_INSTANT_MS = 250;
 
+/**
+ * How many times an instant scroll that landed somewhere else is sent
+ * again before the pager gives up and believes the list. Each try waits a
+ * full guard, so this is also a bound on how long a list can be argued
+ * with — one is enough in practice, the rest is margin.
+ */
+export const REANCHOR_RETRIES = 3;
+
 export type MushafPagerInput = {
   /** The list, read at call time — it mounts after the pager is made. */
   list: () => PagerList | null;
@@ -90,6 +104,18 @@ export type MushafPager = {
   onMomentumEnd: (offsetX: number) => void;
   /** FlatList could not place the index; land on the offset instead. */
   onScrollToIndexFailed: (index: number) => void;
+  /**
+   * A finger (or a mouse) has taken hold of the list. Whatever scroll the
+   * pager had in flight is over — the user is steering now, and their
+   * settle must count the moment they let go.
+   */
+  onDragStart: () => void;
+  /**
+   * The list's content was laid out at a new size — a resize, a
+   * re-pairing, another muṣḥaf. The settled page is re-anchored against
+   * the geometry that is now actually on screen.
+   */
+  onContentResized: () => void;
   /** Turn one item in READING direction: +1 = next. */
   turnPage: (dir: 1 | -1) => void;
   /** An outside change (jump, khatmah, recitation follow) named a page. */
@@ -108,6 +134,12 @@ export function createMushafPager(input: MushafPagerInput): MushafPager {
   let settledPage = input.initialPage;
   let settledIndex = input.indexForPage(input.initialPage);
   let scrollingTo: number | null = null;
+  /** Whether the scroll in flight was asked for with animation. */
+  let scrollingAnimated = false;
+  /** Has the list reported ANY offset since the scroll in flight began? */
+  let reportedSince = false;
+  /** Instant scrolls re-issued for the same target, so far. */
+  let retries = 0;
   let guardTimer: ReturnType<typeof setTimeout> | null = null;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let lastOffset = 0;
@@ -124,15 +156,55 @@ export function createMushafPager(input: MushafPagerInput): MushafPager {
   const clampIndex = (idx: number) =>
     Math.max(0, Math.min(input.itemCount() - 1, idx));
 
+  /**
+   * The mark's timer ran out: the list never reported arriving.
+   *
+   * ── WHY THE SCROLL IS SENT AGAIN ──────────────────────────────────
+   *
+   * On Android a scroll command is executed BEFORE the layout it was
+   * computed against is on screen: Fabric runs view commands ahead of the
+   * mount items in the same batch. A rotation re-anchors with
+   * `scrollToIndex(588)` at the new width while the list's content is
+   * still the old width, and `HorizontalScrollView.scrollTo` clamps the
+   * offset to the content it has — so on a phone turned to landscape on
+   * page 589, the pager asked for 588 × 914 dp and the list stopped at the
+   * end of a 604 × 411 dp strip, which the new layout then read as page
+   * 272. The mark lifted, an idle settle read the offset, and page 272
+   * became the page. Turning back made it permanent.
+   *
+   * So an instant scroll that the list has reported landing somewhere
+   * else is simply issued again, now that the layout is settled. Animated
+   * scrolls are left alone: they are turns on a stable layout, and a
+   * trackpad swipe that interrupted one must not be fought (rule 2).
+   */
+  const guardExpired = () => {
+    guardTimer = null;
+    const idx = scrollingTo;
+    scrollingTo = null;
+    if (idx == null) return;
+    const adrift = Math.abs(lastOffset - idx * input.pageWidth()) > SNAP_SLACK;
+    if (
+      !scrollingAnimated &&
+      reportedSince &&
+      adrift &&
+      retries < REANCHOR_RETRIES
+    ) {
+      retries += 1;
+      scrollTo(idx, false, true);
+      return;
+    }
+    retries = 0;
+  };
+
   /** The one way the list is moved, so the mark cannot be forgotten. */
-  const scrollTo = (idx: number, animated: boolean) => {
+  const scrollTo = (idx: number, animated: boolean, retry = false) => {
     scrollingTo = idx;
+    scrollingAnimated = animated;
+    reportedSince = false;
+    if (!retry) retries = 0;
     clearGuard();
     guardTimer = setTimeout(
-      () => {
-        scrollingTo = null;
-        guardTimer = null;
-      },
+      guardExpired,
       animated ? GUARD_ANIMATED_MS : GUARD_INSTANT_MS,
     );
     input.list()?.scrollToIndex({ index: idx, animated });
@@ -154,6 +226,7 @@ export function createMushafPager(input: MushafPagerInput): MushafPager {
       // else about this event means anything.
       if (Math.abs(offsetX - scrollingTo * w) <= SNAP_SLACK) {
         scrollingTo = null;
+        retries = 0;
         clearGuard();
       }
       return;
@@ -172,6 +245,7 @@ export function createMushafPager(input: MushafPagerInput): MushafPager {
   return {
     onScroll: offsetX => {
       lastOffset = offsetX;
+      reportedSince = true;
       clearIdle();
       idleTimer = setTimeout(() => {
         idleTimer = null;
@@ -179,15 +253,35 @@ export function createMushafPager(input: MushafPagerInput): MushafPager {
       }, SCROLL_IDLE_MS);
     },
     onMomentumEnd: offsetX => {
+      lastOffset = offsetX;
+      reportedSince = true;
       clearIdle();
       settleAt(offsetX);
     },
     onScrollToIndexFailed: index => {
       scrollingTo = null;
+      retries = 0;
       clearGuard();
       input
         .list()
         ?.scrollToOffset({ offset: index * input.pageWidth(), animated: false });
+    },
+    onDragStart: () => {
+      // The user is steering: a scroll we had in flight is not going to
+      // land, and must not be re-issued over their gesture either.
+      scrollingTo = null;
+      retries = 0;
+      clearGuard();
+      input.onTurnStart();
+    },
+    onContentResized: () => {
+      // The authoritative re-anchor. The effect-driven one runs when the
+      // width CHANGES, which on Android is before the list has that width;
+      // this one runs when the list HAS it. On the other platforms it is
+      // an instant scroll to where the list already is, which is a no-op.
+      const idx = input.indexForPage(settledPage);
+      settledIndex = idx;
+      scrollTo(idx, false);
     },
     turnPage: dir => {
       const idx = clampIndex(settledIndex + dir);
@@ -251,6 +345,7 @@ export function useMushafPager(opts: {
     onMomentumScrollEnd: (e: ScrollEvent) => void;
     onScrollToIndexFailed: (info: { index: number }) => void;
     onScrollBeginDrag: () => void;
+    onContentSizeChange: (width: number, height: number) => void;
   };
   turnPage: (dir: 1 | -1) => void;
   settledIndex: number;
@@ -282,7 +377,10 @@ export function useMushafPager(opts: {
 
   // Window resize / re-pair (Catalyst, iPad rotation): item offsets are
   // width-multiples and the pairing may flip, so re-anchor the settled
-  // page against the new geometry without losing it.
+  // page against the new geometry without losing it. This is the prompt
+  // re-anchor; `onContentSizeChange` below re-anchors again once the list
+  // has actually laid its content out at the new width, which on Android
+  // is AFTER this scroll has been executed — see `guardExpired`.
   useEffect(() => {
     p.reanchor();
   }, [p, pageWidth, indexForPage]);
@@ -295,7 +393,8 @@ export function useMushafPager(opts: {
       p.onMomentumEnd(e.nativeEvent.contentOffset.x),
     onScrollToIndexFailed: (info: { index: number }) =>
       p.onScrollToIndexFailed(info.index),
-    onScrollBeginDrag: () => latest.current.onTurnStart(),
+    onScrollBeginDrag: () => p.onDragStart(),
+    onContentSizeChange: () => p.onContentResized(),
   }).current;
   const turnPage = useCallback((dir: 1 | -1) => p.turnPage(dir), [p]);
 

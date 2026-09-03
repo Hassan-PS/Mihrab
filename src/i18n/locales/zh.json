@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "点按以添加",
     "riwayahDefault": "(默认)",
     "dueToday": "今天",
-    "dueTomorrow": "明天"
+    "dueTomorrow": "明天",
+    "scrubHint": "向上滑动以精细调节",
+    "scrubHalf": "半速",
+    "scrubQuarter": "四分之一速",
+    "scrubFine": "精细调节"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

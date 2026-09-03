@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "اضغط لإضافتها",
     "riwayahDefault": "(افتراضي)",
     "dueToday": "اليوم",
-    "dueTomorrow": "غدًا"
+    "dueTomorrow": "غدًا",
+    "scrubHint": "اسحب لأعلى لتحكّم أدق",
+    "scrubHalf": "نصف السرعة",
+    "scrubQuarter": "ربع السرعة",
+    "scrubFine": "تحكّم دقيق"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

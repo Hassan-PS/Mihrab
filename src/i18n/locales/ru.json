@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "Нажмите, чтобы добавить",
     "riwayahDefault": "(по умолчанию)",
     "dueToday": "сегодня",
-    "dueTomorrow": "завтра"
+    "dueTomorrow": "завтра",
+    "scrubHint": "Проведите вверх для точной прокрутки",
+    "scrubHalf": "Половина скорости",
+    "scrubQuarter": "Четверть скорости",
+    "scrubFine": "Точная настройка"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

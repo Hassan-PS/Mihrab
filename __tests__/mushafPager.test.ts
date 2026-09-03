@@ -10,6 +10,8 @@
 import {
   createMushafPager,
   GUARD_ANIMATED_MS,
+  GUARD_INSTANT_MS,
+  REANCHOR_RETRIES,
   SCROLL_IDLE_MS,
   type PagerList,
   type MushafPager,
@@ -19,7 +21,11 @@ const W = 700;
 const TOTAL = 604;
 
 function harness(opts: { width?: number; paired?: boolean; initialPage?: number } = {}) {
-  const width = opts.width ?? W;
+  let width = opts.width ?? W;
+  /** The window was resized: the pager reads the new width from here on. */
+  const setWidth = (w: number) => {
+    width = w;
+  };
   const paired = opts.paired ?? true;
   const list: PagerList & { calls: string[] } = {
     calls: [],
@@ -51,7 +57,7 @@ function harness(opts: { width?: number; paired?: boolean; initialPage?: number 
     }
   };
   const silence = () => jest.advanceTimersByTime(SCROLL_IDLE_MS + 1);
-  return { list, turns, events, pager, swipe, silence, width };
+  return { list, turns, events, pager, swipe, silence, width, setWidth };
 }
 
 beforeEach(() => {
@@ -275,5 +281,145 @@ describe('outside changes', () => {
     h.swipe(1400);
     h.silence();
     expect(h.pager.settledIndex()).toBe(2);
+  });
+});
+
+/**
+ * The Android rotation of 3 September, replayed with the emulator's numbers.
+ *
+ * A phone reader on page 589 (index 588), 411 dp wide, is turned to
+ * landscape (914 dp). The re-anchor asks for 588 × 914 = 537 432 — but
+ * Android executes the scroll before the list's content has been laid out
+ * at the new width, and `HorizontalScrollView.scrollTo` clamps it to the
+ * old strip: 604 × 411 − 914 = 247 330, which the new layout reads as page
+ * 271.6. The pager used to lift its mark, settle on what it saw, and turn
+ * to page 272 — then carry 272 back to portrait.
+ */
+describe('a re-anchor the list did not honour', () => {
+  const PORTRAIT = 411;
+  const LANDSCAPE = 914;
+  const PAGE = 589;
+  const IDX = PAGE - 1;
+  /** Where Android's clamp leaves a scroll issued against the old strip. */
+  const CLAMPED = TOTAL * PORTRAIT - LANDSCAPE;
+
+  const rotate = () => {
+    const h = harness({ paired: false, width: PORTRAIT, initialPage: PAGE });
+    h.setWidth(LANDSCAPE);
+    h.pager.reanchor();
+    expect(h.list.calls).toEqual([`index:${IDX}:jump`]);
+    return h;
+  };
+
+  it('is issued again once its mark lifts, and nothing is turned', () => {
+    const h = rotate();
+    // The clamped landing, reported at once.
+    h.pager.onScroll(CLAMPED);
+    jest.advanceTimersByTime(GUARD_INSTANT_MS + 1);
+    expect(h.list.calls).toEqual([`index:${IDX}:jump`, `index:${IDX}:jump`]);
+    expect(h.turns).toEqual([]);
+    // The second scroll lands, now that the layout is there.
+    h.pager.onScroll(IDX * LANDSCAPE);
+    h.silence();
+    expect(h.list.calls).toHaveLength(2);
+    expect(h.turns).toEqual([]);
+    expect(h.pager.settledPage()).toBe(PAGE);
+  });
+
+  it('is not settled on by the idle timer, however late the offset comes', () => {
+    const h = rotate();
+    // A busy JS thread: the clamped offset is reported just before the
+    // mark would have lifted, so the idle settle fires after it did.
+    jest.advanceTimersByTime(GUARD_INSTANT_MS - 20);
+    h.pager.onScroll(CLAMPED);
+    h.silence();
+    jest.advanceTimersByTime(GUARD_INSTANT_MS);
+    expect(h.turns).toEqual([]);
+    expect(h.pager.settledPage()).toBe(PAGE);
+    expect(h.list.calls).toContain(`index:${IDX}:jump`);
+    expect(h.list.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('and rotating back keeps the page it was on', () => {
+    const h = rotate();
+    h.pager.onScroll(CLAMPED);
+    jest.advanceTimersByTime(GUARD_INSTANT_MS + 1);
+    h.pager.onScroll(IDX * LANDSCAPE);
+    h.silence();
+    h.setWidth(PORTRAIT);
+    h.pager.reanchor();
+    expect(h.list.calls.at(-1)).toBe(`index:${IDX}:jump`);
+    h.pager.onScroll(IDX * PORTRAIT);
+    h.silence();
+    expect(h.turns).toEqual([]);
+    expect(h.pager.settledPage()).toBe(PAGE);
+  });
+
+  it('gives up after a bounded number of tries, so a list that cannot comply is not argued with for ever', () => {
+    const h = rotate();
+    for (let i = 0; i <= REANCHOR_RETRIES + 2; i++) {
+      h.pager.onScroll(CLAMPED);
+      jest.advanceTimersByTime(GUARD_INSTANT_MS + 1);
+    }
+    const jumps = h.list.calls.filter(c => c.endsWith(':jump'));
+    expect(jumps).toHaveLength(1 + REANCHOR_RETRIES);
+    // After which the list is believed, and the page it is on is settled
+    // — a reader that can be moved beats one arguing with its own list.
+    expect(h.pager.settledPage()).toBe(272);
+  });
+
+  it('is not re-issued when the list never reported anything at all', () => {
+    // Nothing to compare against: the first re-anchor on mount, before
+    // the list has laid out. Sending it again would be noise.
+    const h = rotate();
+    jest.advanceTimersByTime(GUARD_INSTANT_MS + 1);
+    expect(h.list.calls).toHaveLength(1);
+  });
+
+  it('is re-anchored when the content is laid out at the new width', () => {
+    const h = rotate();
+    h.pager.onContentResized();
+    expect(h.list.calls).toEqual([`index:${IDX}:jump`, `index:${IDX}:jump`]);
+    expect(h.pager.settledIndex()).toBe(IDX);
+  });
+
+  it('but an animated turn that runs long is left to land on its own', () => {
+    // A trackpad swipe may have interrupted it (rule 2): re-issuing a turn
+    // over a gesture would be the fight the pager exists to avoid.
+    const h = harness();
+    h.pager.turnPage(1);
+    h.swipe(300);
+    jest.advanceTimersByTime(GUARD_ANIMATED_MS + 1);
+    expect(h.list.calls).toEqual(['index:1:anim']);
+  });
+});
+
+describe('a drag that begins during a scroll the pager started', () => {
+  it('ends that scroll: the user is steering, and their settle counts', () => {
+    const h = harness();
+    h.pager.turnPage(1);
+    expect(h.list.calls).toEqual(['index:1:anim']);
+    // A finger lands mid-animation and carries the list on to spread 3.
+    h.pager.onDragStart();
+    expect(h.events).toEqual(['start', 'start']);
+    h.swipe(900, 1300, 1400);
+    h.pager.onMomentumEnd(1400);
+    expect(h.turns).toEqual([
+      [3, 1],
+      [5, 3],
+    ]);
+    expect(h.pager.settledIndex()).toBe(2);
+  });
+
+  it('and a re-anchor in flight is not re-issued over the gesture', () => {
+    const h = harness({ paired: false, width: 411, initialPage: 589 });
+    h.setWidth(914);
+    h.pager.reanchor();
+    h.pager.onScroll(TOTAL * 411 - 914);
+    h.pager.onDragStart();
+    jest.advanceTimersByTime(GUARD_INSTANT_MS + 1);
+    expect(h.list.calls.filter(c => c.endsWith(':jump'))).toEqual([
+      'index:588:jump',
+    ]);
   });
 });

@@ -232,6 +232,12 @@ export type MushafReaderCore = {
   openJump: () => void;
   closeJump: () => void;
   jumpToPage: (page: number) => void;
+  /**
+   * Show a page without making it the place. The rail peeks while a
+   * finger rests on it; the place is committed once, on release, through
+   * `jumpToPage`. A peek writes no last-read and no khatmah record.
+   */
+  peekPage: (page: number) => void;
 };
 
 export function useMushafReaderCore({
@@ -490,6 +496,13 @@ export function useMushafReaderCore({
     },
     [commitPageTurn, totalPages],
   );
+  const peekPage = useCallback(
+    (page: number) => {
+      const clamped = Math.max(1, Math.min(totalPages, page));
+      setCurrentPage(prev => (prev === clamped ? prev : clamped));
+    },
+    [totalPages],
+  );
 
   // Leaving the reader must never tear down a presented overlay — see
   // `useOverlayDismissGuard`. The ayah sheet is an RN <Modal>; the jump
@@ -557,6 +570,7 @@ export function useMushafReaderCore({
     openJump: useCallback(() => setJumpVisible(true), []),
     closeJump: useCallback(() => setJumpVisible(false), []),
     jumpToPage,
+    peekPage,
   };
 }
 

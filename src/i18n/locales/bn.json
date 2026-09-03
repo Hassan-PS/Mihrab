@@ -1011,7 +1011,11 @@
     "riwayahAddIt": "যোগ করতে ট্যাপ করুন",
     "riwayahDefault": "(ডিফল্ট)",
     "dueToday": "আজ",
-    "dueTomorrow": "আগামীকাল"
+    "dueTomorrow": "আগামীকাল",
+    "scrubHint": "সূক্ষ্ম নিয়ন্ত্রণের জন্য উপরে টানুন",
+    "scrubHalf": "অর্ধেক গতি",
+    "scrubQuarter": "এক-চতুর্থাংশ গতি",
+    "scrubFine": "সূক্ষ্ম নিয়ন্ত্রণ"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

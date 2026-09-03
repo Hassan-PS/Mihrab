@@ -558,6 +558,12 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
           scrollEventThrottle={16}
           onScrollToIndexFailed={pagerHandlers.onScrollToIndexFailed}
           onScrollBeginDrag={pagerHandlers.onScrollBeginDrag}
+          // The content has been laid out at a new width (a rotation, a
+          // resize, another muṣḥaf): re-anchor the settled page against
+          // it. The re-anchor that runs when the width CHANGES is executed
+          // on Android before the list has that width, and is clamped to
+          // the old one — see `guardExpired` in useMushafPager.
+          onContentSizeChange={pagerHandlers.onContentSizeChange}
           windowSize={windowSize}
           maxToRenderPerBatch={2}
           initialNumToRender={1}
@@ -622,6 +628,7 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
           page={currentPage}
           riwayah={riwayah}
           onSelectPage={core.jumpToPage}
+          onPeekPage={core.peekPage}
           onOpenJump={core.openJump}
         />
       ) : null}
