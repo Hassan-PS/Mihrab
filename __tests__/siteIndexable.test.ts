@@ -347,6 +347,27 @@ describe('every language the app speaks has a page', () => {
     expect(pageOf(code)).toContain(`<html lang="${code}" dir="rtl">`);
   });
 
+  it('offers every install channel on every page', () => {
+    // The translated pages were written with four of the five and dropped
+    // Obtainium — on twelve pages, in the section whose whole job is to
+    // get the app onto a device. One list in the generator now, and this
+    // is what stops a channel going missing from a subset again.
+    for (const code of codes) {
+      const page = pageOf(code);
+      for (const badge of ['appstore', 'googleplay', 'fdroid', 'github', 'obtainium']) {
+        expect(page).toContain(`badges/${badge}.png`);
+      }
+    }
+  });
+
+  it('reserves the badge box at the ratio the images actually have', () => {
+    // 180×60 is not the shape of a 564×168 image: the wrong intrinsic size
+    // reserves the wrong box and the row jumps when the badges load.
+    for (const code of codes) {
+      expect(pageOf(code)).not.toMatch(/badges\/[a-z]+\.png" width="180"/);
+    }
+  });
+
   it('carries the solidarity banner on every page', () => {
     for (const code of codes) {
       expect(pageOf(code)).toContain('class="solidarity"');

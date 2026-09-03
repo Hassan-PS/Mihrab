@@ -45,6 +45,40 @@ const DOCS = path.join(ROOT, 'docs');
 const STRINGS = path.join(__dirname, 'site', 'strings.json');
 const ORIGIN = `https://${fs.readFileSync(path.join(DOCS, 'CNAME'), 'utf-8').trim()}`;
 
+/**
+ * Every channel the app ships through, in the order the English page lists
+ * them. ONE list, because the translated pages were written with four of
+ * the five and quietly dropped Obtainium — the channel that matters most
+ * to exactly the audience an F-Droid-friendly app reaches.
+ */
+const BADGES = [
+  {
+    img: 'appstore',
+    alt: 'App Store',
+    href: 'https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256',
+  },
+  {
+    img: 'googleplay',
+    alt: 'Google Play',
+    href: 'https://play.google.com/store/apps/details?id=com.prayer_times',
+  },
+  {
+    img: 'fdroid',
+    alt: 'F-Droid',
+    href: 'https://f-droid.org/packages/com.prayer_times/',
+  },
+  {
+    img: 'github',
+    alt: 'GitHub',
+    href: 'https://github.com/Hassan-PS/Mihrab/releases/latest',
+  },
+  {
+    img: 'obtainium',
+    alt: 'Obtainium',
+    href: 'https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.prayer_times%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FHassan-PS%2FMihrab%22%2C%22author%22%3A%22Hassan-PS%22%2C%22name%22%3A%22Mihrab%22%7D',
+  },
+];
+
 /** Pages written by hand, which the generator only patches between markers. */
 const HAND_WRITTEN = {
   en: path.join(DOCS, 'index.html'),
@@ -242,10 +276,9 @@ ${t.chips.map(c => `      <li>${check}${esc(c)}</li>`).join('\n')}
     <h2>${esc(t.install.h2)}</h2>
     <p class="lede">${esc(t.install.lede)}</p>
     <ul class="badges">
-      <li><a href="https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256"><img src="../assets/img/badges/appstore.png" width="180" height="60" alt="App Store"></a></li>
-      <li><a href="https://play.google.com/store/apps/details?id=com.prayer_times"><img src="../assets/img/badges/googleplay.png" width="180" height="60" alt="Google Play"></a></li>
-      <li><a href="https://f-droid.org/packages/com.prayer_times/"><img src="../assets/img/badges/fdroid.png" width="180" height="60" alt="F-Droid"></a></li>
-      <li><a href="https://github.com/Hassan-PS/Mihrab/releases/latest"><img src="../assets/img/badges/github.png" width="180" height="60" alt="GitHub"></a></li>
+${BADGES.map(
+  ba => `      <li><a href="${ba.href}"><img src="../assets/img/badges/${ba.img}.png" width="564" height="168" alt="${ba.alt}"></a></li>`,
+).join('\n')}
     </ul>
     <p class="note">${esc(t.install.brew)} <code>brew install --cask hassan-ps/tap/mihrab</code></p>
   </div>
