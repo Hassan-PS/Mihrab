@@ -43,6 +43,7 @@ import {
 } from '../../quran/quranState';
 import { usePlaybackStatus } from '../../quran/audio/playback';
 import { useActiveWordIndex } from '../../quran/audio/useWordTiming';
+import { countedWordIndices } from '../../quran/audio/countedWords';
 import { AyahActionSheet } from '../../quran/mushaf/AyahActionSheet';
 import { MiniPlayer } from '../../quran/audio/MiniPlayer';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
@@ -292,6 +293,13 @@ export function TranslationSurahScreen({
     const maskTranslation = hideMode === 'translation' && !isRevealed;
 
     const words = arabic.split(' ');
+    // The timing counts QPC's words; the text is Tanzil's. Map one onto
+    // the other, or the lit word drifts by one past every pause mark and
+    // the basmalah lights on every first ayah — see `countedWords.ts`.
+    const litIndex =
+      wordIdx >= 0
+        ? (countedWordIndices(surahNumber, ayah, words)[wordIdx] ?? -1)
+        : -1;
 
     return (
       <Pressable
@@ -340,12 +348,12 @@ export function TranslationSurahScreen({
           <Text
             style={[styles.ayahArabic, { color: palette.text }]}
             accessibilityLabel={arabic}>
-            {wordIdx >= 0
+            {litIndex >= 0
               ? words.map((w, i) => (
                   <Text
                     key={i}
                     style={
-                      i === wordIdx
+                      i === litIndex
                         ? {
                             color: palette.accentSolid,
                             backgroundColor: palette.accentBg,
