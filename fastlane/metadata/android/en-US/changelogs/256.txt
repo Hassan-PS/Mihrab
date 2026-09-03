@@ -1,0 +1,7 @@
+• A tap on a word in the muṣḥaf opens its ayah: translation, tafsir, bookmark, recitation, khatmah position.
+• A sepia page, between paper and night.
+• The recited word lights up, and in landscape the page follows it down.
+• Reading starts the moment the download does.
+• The page reaches the bottom of the screen, and the Android navigation bar takes its colour.
+• Turning the phone shows one page, not two.
+• Word highlighting works on Android again.

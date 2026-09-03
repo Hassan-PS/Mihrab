@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.14.2] — 2026-09-03
+
+The muṣḥaf, mostly: it opens faster, it follows the reciter, and it reaches the edges of the screen.
+
+### Added
+- **A tap on a word opens its ayah** — translation, tafsir, bookmark, recitation, khatmah position, all from the page itself. Fullscreen moved to the margins and the header strip.
+- **A sepia page**, between paper and night.
+- **The recited word lights up on the page**, and in landscape the column follows it down as the recitation goes.
+- **Reading starts the moment the download does.** Pages arrive as their fonts do, with a slim line saying how the rest is going.
+- **A page rail on phones**, so getting to juz 20 is not three hundred swipes.
+
+### Fixed
+- **The word highlight works on Android.** The timing file is fetched over a transport that works on every network, and a fetch that fails is retried instead of being believed for the life of the app.
+- **The page reaches the bottom of the window.** The mini player was reserved twice, which left a band of nothing above it; and the Android navigation bar now takes the page's own colour, so a sepia or night page runs to the edge instead of stopping in a strip of app grey.
+- **Turning the phone shows one page, not two.** The reader used to reveal the page waiting off-screen for the length of the rotation.
+- **On iPhones with a Dynamic Island**, the surah name and the tone pill sit either side of the cutout instead of below it, and the ayah sheet clears it when the phone is on its side. An ayah can be selected in fullscreen at all.
+- **Under Liquid Glass the tab bar has its icons back.**
+- **The khatmah advances** when you set an ayah as its position or press the day's done button, not only when you read at its frontier.
+- **Automatic location and saved locations are not alternatives** — you can keep the phone's location and still look up the places you saved.
+- **The monthly sheet names the place** instead of printing coordinates.
+
 ## [2.10.1] — 2026-08-24
 
 Sync could not accept the folder people were most likely to pick.
