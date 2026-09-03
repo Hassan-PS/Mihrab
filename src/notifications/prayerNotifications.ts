@@ -578,7 +578,19 @@ export async function syncPrayerNotifications(params: {
     const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}pre-${e.at.getTime()}-${
       e.name
     }`;
-    const preBody = i18n.t('alertCopy.prePrayer', { count: reminderMinutes });
+    // Sunrise and the three night marks get the warning too — a reader who
+    // turned on the Last Third to be up for it wants the same fifteen
+    // minutes' notice the five salāh get, and an alert at the moment itself
+    // is no use to someone who needs to be awake before it. What they don't
+    // get is being called a prayer: the alert AT the time shows their clock
+    // time instead of "Prayer time", and the one ahead of it says the same
+    // thing — "02:30 · starts in 15 min" — so the reader knows what is
+    // coming without doing the arithmetic.
+    const preBody = isNonPrayerEvent(e.name)
+      ? `${formatLocalTime(
+          new Date(e.at.getTime() + reminderMinutes * 60_000),
+        )} · ${i18n.t('alertCopy.prePrayer', { count: reminderMinutes })}`
+      : i18n.t('alertCopy.prePrayer', { count: reminderMinutes });
     await notifee.createTriggerNotification(
       {
         id: notificationId,
