@@ -5,7 +5,7 @@
 <div align="center">
   <img src="branding/github-hero.png" alt="Mihrab — prayer times, the Madinah mushaf, dua, tasbih and a fasting log, on iOS and Android">
 
-  A calm, private, offline-first companion for the day's intentions. Prayer times, a full interactive Quran with recitation and tafsir, dua and tasbih, fasting + prayer journal, and home-screen widgets — no ads, no analytics, no tracking.
+  A calm, private, offline-first companion for the day's intentions. Prayer times and a qibla compass, the Madinah muṣḥaf in four riwāyāt with recitation and tafsir, dua and tasbih, a fasting and prayer journal, home-screen widgets on three platforms, and sync between your own devices with no account and no server — no ads, no analytics, no tracking.
 
   **[mihrab website →](https://mihrab.elghamri.se/)**
 
@@ -38,35 +38,51 @@
 ### Prayer
 
 - **Prayer times, online or off** — Daily times and a full month view up to a year ahead. Cached on-device so the app opens instantly without a connection; falls back to on-device calculation when the network is away.
-- **Adhan & reminders** — Notifications with built-in Adhan sounds, a pre-prayer reminder window, and exact-alarm scheduling so the adhan lands on time even under aggressive battery managers.
-- **Live Activity** — A pinned countdown to the next prayer: Android 16+ status-bar chip + Always-On-Display notification with three selectable designs, iOS Lock Screen + Dynamic Island via ActivityKit.
-- **Home-screen widgets** — Customisable iOS and Android widgets showing the next prayer at a glance, with per-prayer accents and dynamic color support.
-- **Multiple providers** — AlAdhan, PrayerTimes.dev, Islamiska Förbundet (Sweden), or on-device calculation (Adhan JS) — pick the source that matches your community.
+- **Adhan & reminders** — 17 built-in adhan recordings (or import your own), a pre-prayer reminder window, and exact-alarm scheduling so the adhan lands on time even under aggressive battery managers.
+- **Sources, including national ones** — AlAdhan, PrayTimes.dev, on-device calculation (Adhan JS), or a published national table: **Sweden** (Islamiska Förbundet) and **Morocco** (the Ministry of Habous and Islamic Affairs), rebuilt daily by a workflow in this repo and matched to your nearest listed city. "Automatic" picks the right one for where you are.
+- **Tuned to your mosque** — Per-prayer minute offsets, Hanafi or standard Asr, and the extra marks when you want them: sunrise, Islamic midnight, the last third of the night, and the first third after Isha.
+- **Qibla compass** — A live dial with signal strength, a hold-still prompt when the sensors need it, and a cross-check against the sun. Falls back to the bearing when the phone has no magnetometer.
+- **Saved locations** — Keep the places you check on and switch between them freely; automatic location and saved places are not alternatives, and the month sheet names the city rather than printing coordinates.
+- **A month you can hand over** — The whole month as a sheet, Hijri and Gregorian side by side, exportable as an image or a PDF in any of the app's languages, with a QR back to the app.
+- **Live Activity** — A pinned countdown to the next prayer: Android 16+ status-bar chip and always-on notification in three designs (countdown, timeline, or markers with a proportional bar for the next three events), iOS Lock Screen and Dynamic Island via ActivityKit. What it shows — Hijri date, location, sunrise, the lock-screen button — is yours to switch.
+- **Home-screen widgets** — Prayer times in three sizes, plus Log Today (with the practice graph and a countdown), Hijri date, streak, tasbih and reading widgets, on iOS, Android **and** the Mac. Per-prayer accents, dynamic colour, adjustable background opacity.
 
 ### Quran
 
-- **Interactive Madinah mushaf** — All 604 pages, drawn as *text* from the official KFGQPC page fonts rather than as page images: sharp at any zoom, instant to rotate, and a fraction of the memory. Pages arrive as you read (~300 KB each), so the reader opens straight away. Tap to go fullscreen; long-press any word for its ayah. Night mode and a go-to-page jump.
-- **Everything in one panel** — Long-press an ayah for its translation, real **tafsir** (Ibn Kathir, Maarif-ul-Quran, al-Muyassar and more — cached for offline), colored bookmarks, star, share as text or a rendered image card, and the full recitation controls.
-- **42 reciters** — Al-Husary, Alafasy, Abdul Basit, Al-Minshawi, As-Sudais, Ash-Shatri, Ahmed Al-Ajmi, Yasser Ad-Dossari, Maher Al-Muaiqly, Saad Al-Ghamdi, plus mujawwad readings from Abdul Basit, Al-Minshawi and Al-Husary, streamed per-ayah or downloaded per-surah for offline listening. Word-level highlight follows the recitation for nine of them; prefetching keeps long sessions gapless.
+- **Interactive Madinah mushaf** — All 604 pages, drawn as *text* from the official KFGQPC page fonts rather than as page images: sharp at any zoom, instant to rotate, and a fraction of the memory. Reading starts the moment the download does — pages arrive as their fonts do (~300 KB each) with a slim line saying how the rest is going. Paper, sepia or night; a page rail and a go-to-page jump; fullscreen from the margins.
+- **A facing-page spread on iPad and Mac** — the pair of pages is the thing that turns, with the keyboard and a surah sidebar.
+- **Four riwāyāt** — Ḥafṣ from the KFGQPC page fonts, and Warsh, Qālūn and Shuʿbah as bundled-typeface muṣḥafs downloaded on request from Quranpedia. Your place carries across a switch: the ayah is the coordinate, not the page number.
+- **Everything in one panel** — A tap on a word opens its ayah: translation, real **tafsir** (Ibn Kathir, Maarif-ul-Quran, al-Muyassar and more — cached for offline), coloured bookmarks, star, share as text or a rendered image card, the khatmah position, and the full recitation controls.
+- **42 reciters** — Al-Husary, Alafasy, Abdul Basit, Al-Minshawi, As-Sudais, Ash-Shatri, Ahmed Al-Ajmi, Yasser Ad-Dossari, Maher Al-Muaiqly, Saad Al-Ghamdi, plus mujawwad readings from Abdul Basit, Al-Minshawi and Al-Husary, streamed per-ayah or downloaded per-surah for offline listening. **Word-level highlight on the page itself** for nine of them — and in landscape the column follows the reciter down the page; prefetching keeps long sessions gapless.
 - **Memorization (hifz) tools** — Repeat each ayah ×N, repeat a range ×M, pause-between-repeats for recite-back, and hide-and-reveal masking of Arabic or translation.
-- **Khatmah plans** — 30/60/90-day plans with automatic page tracking, a continue button, pin-your-exact-ayah positioning, flexible resets, and an optional daily reminder with today's portion.
-- **14 translation editions** — Sahih International, Pickthall, Bernström, Hamidullah, Diyanet, Cortés, Bubenheim, Ma Jian, Kuliev, Indonesian Ministry, Mujibur Rahman, Jalandhry, Suhel Farooq Khan, Tafsir al-Muyassar — with diacritic-insensitive Arabic + translation search.
+- **Khatmah plans** — 30/60/90-day plans (or your own length, from the page you are on) with automatic page tracking, a continue button, pin-your-exact-ayah positioning, a done button for the day, flexible resets, and an optional daily reminder with today's portion.
+- **13 translation editions** — Sahih International, Pickthall, Bernström, Hamidullah, Diyanet, Cortés, Bubenheim, Ma Jian, Kuliev, Indonesian Ministry, Mujibur Rahman, Jalandhry, Suhel Farooq Khan — with diacritic-insensitive Arabic + translation search, and a verse-by-verse reading view that lights the recited word too.
 - **Ayah of the day** — On the Quran page, and optionally as a daily notification at a time you choose, with its translation.
+- **Manage downloads** — Exactly what is on disk — muṣḥaf pages, riwāyāt, tafsir, recitation audio — with sizes, and a way to remove any of it.
 
 ### Daily worship
 
 - **Dua library** — 100+ duas across 19 categories (morning, evening, after prayer, food, sleep, travel, distress, gratitude, protection, and more) with Arabic, transliteration, translation, and Hisn al-Muslim sources.
 - **Tasbih counter** — Tap-to-count for the post-prayer dhikr plus open-ended Astaghfirullah and Salah on the Prophet ﷺ. Tabular numerals so digits don't shimmer on tick.
 - **Fasting log** — Tracks Ramadan + voluntary Sunnah fasts (Mondays, Thursdays, Ayyam al-Bidh, Arafah, Ashura, Six of Shawwal) with day-before reminders. Encrypted on-device.
-- **Prayer journal** — Log each prayer as on-time / late / missed / qadha with private notes and streak stats. Optional "Log prayer" action right on the prayer notification.
+- **Prayer journal** — Log each prayer as on-time / late / missed / qadha with private notes, a practice graph, streaks and what is owed. Optional "Log prayer" action right on the prayer notification, an end-of-day nudge, and tools to backfill or fill whole months at once.
+- **Hijri calendar** — Throughout, with Ramadan, Eid and Jumuʿah treatments and a Ramadan countdown on Home.
 - **Mosque finder** — One-tap to your maps app with a "mosque" search centred on your location.
+
+### Yours, and only yours
+
+- **Sync between your own devices** — Pair by scanning a QR code (or copying it), and your journal, streaks, fasts, notes and settings stay in step. No account, no server of ours: the devices write **sealed** files into a folder you already keep in sync — Syncthing, Nextcloud, whatever you use — and each device holds a key that never leaves it, so what passes through that folder is unreadable to anything but the devices you paired. Choose how often it runs: on open, every 15 minutes, hourly, daily, or never.
+- **Backup and restore** — Export everything as a file you keep, and import it back, on any platform.
+- **Your data survives reinstalls** — Settings, journal, bookmarks and khatmah ride Android Auto Backup and device-to-device transfer; large re-downloadable content stays out of your backup quota.
+- **Privacy by design** — No ads, no analytics, no tracking, no account. Coordinates and prayer history are encrypted on-device; nothing is shipped off your phone that you did not ask to send.
 
 ### The app itself
 
-- **Privacy by design** — No ads, no analytics, no tracking. Coordinates and prayer history are encrypted on-device; nothing is shipped off your phone.
-- **Your data survives reinstalls** — Settings, journal, bookmarks and khatmah ride Android Auto Backup and device-to-device transfer; large re-downloadable content stays out of your backup quota, and a Manage-downloads screen shows exactly what's on disk.
+- **Yours to look at** — Light, dark or system, pure-black for OLED, six accent colours or your own hex, and the platform's own palette when you want it: **Material You** on Android, **Liquid Glass** on iOS.
 - **Real Arabic typography** — Amiri Quran for ayah text with correct stacked diacritics, Amiri Naskh for duas, on both platforms.
-- **13 languages** — English, Arabic, Swedish, Bengali, Urdu, Hindi, French, Spanish, German, Turkish, Indonesian, Russian, and Chinese — every screen, every notification, every dua title. Arabic and Urdu are fully RTL.
+- **13 languages** — English, Arabic, Swedish, Bengali, Urdu, Hindi, French, Spanish, German, Turkish, Indonesian, Russian, and Chinese — every screen, every notification, every dua title, and the widgets too. Arabic and Urdu are fully RTL.
+- **A Mac app, not a phone app in a window** — The Catalyst build has the spread reader, keyboard paging, the surah sidebar and its own widgets in Notification Centre.
+- **It tells you what it is doing** — A data-statistics panel names the source in use, when each dataset was last rebuilt, how far ahead it reaches, and when the next check is due.
 - **Open source** — AGPL-3.0-or-later. Anyone who ships a fork, or runs it as a service, must publish their source too. The F-Droid flavor ships without Google Play Services. There are no in-app purchases in any build.
 
 ---
@@ -116,7 +132,7 @@ Archive and upload via Xcode Organizer for App Store / TestFlight.
 ### Tests
 
 ```sh
-npx jest        # 670+ unit tests
+npx jest        # 2,900+ unit tests
 npm run e2e     # Maestro end-to-end flows (needs a running emulator/simulator)
 ```
 

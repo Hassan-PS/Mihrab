@@ -1,22 +1,26 @@
-Mihrab keeps the five daily prayers close at hand: a calm home screen with the next prayer and a live countdown, optional adhan reminders, a full-month planner, and a home-screen widget.
+Mihrab keeps the five daily prayers close at hand: a calm home screen with the next prayer and a live countdown, optional adhan reminders, a full-month planner, and home-screen widgets.
 
 Key features:
-- Prayer times for today, the week ahead, and a full-month overview
-- Optional notifications for the five daily prayers, with adhan sounds, pre-prayer reminders, and snooze
-- Pinned prayer countdown (Live Activity) on the lock screen and in the notification shade
-- Home-screen widgets in several sizes
-- Quran reader: the Madinah mushaf, 14 translations and classical tafsir, recitation audio, bookmarks, and khatmah plans
-- Duas (Hisnul Muslim), tasbih counter, fasting tracker, prayer journal, and nearby mosques
+- Prayer times for today, the week ahead, and a full-month overview — shareable as an image or a PDF
+- Optional notifications for the five daily prayers, with seventeen adhan recordings or one of your own, pre-prayer reminders, and snooze
+- Pinned prayer countdown (Live Activity) on the lock screen and in the notification shade, in three designs
+- Home-screen widgets: prayer times in three sizes, today's log, Hijri date, streak, tasbih and reading
+- Qibla compass with signal strength and a cross-check against the sun
+- Quran reader: the Madinah mushaf drawn from the official page fonts, in four riwayat (Hafs, Warsh, Qalun, Shu'bah), with 13 translations and classical tafsir, 42 reciters, word-level highlighting, memorisation tools, bookmarks, and khatmah plans
+- Duas (Hisn al-Muslim), tasbih counter, fasting tracker, prayer journal with a practice graph and streaks, and nearby mosques
 - Hijri calendar with Ramadan, Eid and Jumu'ah treatments
-- GPS location, place search, or manual coordinates
-- Several prayer-time sources, or fully on-device calculation
+- Sync between your own devices with no account and no server: sealed files in a folder you already keep in sync
+- Backup and restore to a file you keep
+- GPS location, place search, saved places, or manual coordinates; per-prayer minute offsets
+- Several prayer-time sources — including the published national tables for Sweden and Morocco — or fully on-device calculation
 - 13 languages, including Arabic and Urdu with right-to-left layout
-- Light, dark, and system themes
+- Light, dark, pure-black and system themes, your choice of accent, and Material You
 
 Privacy and network use:
 - No analytics, no trackers, no advertising, no account
 - Prayer times can be calculated entirely on your device once a location is set
-- Optional online features, used only when you choose them: prayer-time providers (AlAdhan, or the Islamic Association in Sweden), place search via OpenStreetMap Nominatim, and downloading the Quran pages, translations, tafsir and recitation audio
+- Optional online features, used only when you choose them: prayer-time providers (AlAdhan, PrayTimes.dev, or the prepared national tables for Sweden and Morocco), place search via OpenStreetMap Nominatim, and downloading the Quran pages, translations, tafsir and recitation audio
+- Sync never passes through a server of ours, and what it writes is unreadable to anything but the devices you paired
 - Your coordinates are stored only on your device
 
 The app is open source under AGPL-3.0-or-later.

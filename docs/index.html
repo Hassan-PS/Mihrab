@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mihrab — open-source prayer times app, no ads, Madinah mushaf</title>
-<meta name="description" content="Mihrab is a free, open-source prayer times app for Android, iPhone, iPad and Mac: adhan reminders, home-screen widgets, the full Madinah mushaf, duas and tasbih. No ads, no analytics, no tracking. On F-Droid, Obtainium and Homebrew.">
+<meta name="description" content="Mihrab is a free, open-source prayer times app for Android, iPhone, iPad and Mac: adhan reminders, a qibla compass, home-screen widgets, the Madinah mushaf in four riwayat, duas, tasbih, and accountless sync between your own devices. No ads, no analytics, no tracking. On F-Droid, Obtainium and Homebrew.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#1F5F4A" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0E1815" media="(prefers-color-scheme: dark)">
@@ -36,7 +36,7 @@
   "softwareVersion": "2.14.2",
   "url": "https://mihrab.elghamri.se/",
   "image": "https://mihrab.elghamri.se/assets/img/og-hero.png",
-  "description": "Prayer times with adhan reminders and home-screen widgets, the full Madinah mushaf with recitation and tafsir, duas, tasbih, and a fasting and prayer journal. Offline-first, no ads, no analytics, no tracking. Open source under AGPL-3.0.",
+  "description": "Prayer times with adhan reminders, a qibla compass and home-screen widgets; the full Madinah mushaf in four riwayat with recitation and tafsir; duas, tasbih, and a fasting and prayer journal that syncs between your own devices with no account. Offline-first, no ads, no analytics, no tracking. Open source under AGPL-3.0.",
   "inLanguage": ["en", "ar", "sv", "bn", "ur", "hi", "fr", "es", "de", "tr", "id", "ru", "zh"],
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -538,14 +538,28 @@ footer .colophon {
         <ul>
           <li><b>Times for today, the week, and a full month</b> <span>— up to a year ahead, cached on
             device so the app opens instantly without a connection.</span></li>
-          <li><b>Adhan and reminders</b> <span>— built-in adhan sounds, a pre-prayer reminder window,
-            snooze, and exact-alarm scheduling so the call lands on time even under aggressive battery
-            managers.</span></li>
+          <li><b>Adhan and reminders</b> <span>— seventeen built-in adhan recordings or one of your own,
+            a pre-prayer reminder window, snooze, and exact-alarm scheduling so the call lands on time
+            even under aggressive battery managers.</span></li>
+          <li><b>Your choice of source, including national ones</b> <span>— AlAdhan, PrayTimes.dev,
+            calculation entirely on the device, or a published national table: Sweden (Islamiska
+            Förbundet) and Morocco (the Ministry of Habous and Islamic Affairs), matched to your nearest
+            listed city.</span></li>
+          <li><b>Tuned to your mosque</b> <span>— per-prayer minute offsets, Hanafi or standard Asr, and
+            the extra marks when you want them: sunrise, Islamic midnight, the last third of the night,
+            the first third after Isha.</span></li>
+          <li><b>A qibla compass</b> <span>— a live dial with signal strength, a hold-still prompt when
+            the sensors need one, and a cross-check against the sun.</span></li>
+          <li><b>Saved places</b> <span>— keep the cities you check on and switch between them without
+            giving up automatic location.</span></li>
+          <li><b>A month you can hand over</b> <span>— the whole month as a sheet, Hijri and Gregorian
+            side by side, exported as an image or a PDF in any of the app’s languages.</span></li>
           <li><b>A pinned countdown</b> <span>— Live Activity on the iOS Lock Screen and Dynamic Island;
-            a status-bar chip and always-on notification on Android 16+.</span></li>
-          <li><b>Home-screen widgets</b> <span>— several sizes, per-prayer accents, dynamic colour.</span></li>
-          <li><b>Your choice of source</b> <span>— AlAdhan, PrayerTimes.dev, Islamiska Förbundet
-            (Sweden), or calculation entirely on the device.</span></li>
+            on Android 16+ a status-bar chip and always-on notification in three designs, down to a
+            proportional bar for the next three events.</span></li>
+          <li><b>Home-screen widgets</b> <span>— prayer times in three sizes, plus today’s log, the
+            Hijri date, streak, tasbih and reading — on iPhone, Android and the Mac. Per-prayer accents,
+            dynamic colour, adjustable background.</span></li>
         </ul>
       </article>
       <article class="group">
@@ -553,18 +567,26 @@ footer .colophon {
         <ul>
           <li><b>The Madinah mushaf, drawn as text</b> <span>— all 604 pages render from the official
             KFGQPC page fonts, one glyph per word, page-for-page and line-for-line with the print. Sharp
-            at any zoom, and a page costs a fraction of what an image would. Pages arrive as you read,
-            about 300 KB each, so the reader opens straight away.</span></li>
+            at any zoom, and a page costs a fraction of what an image would. Reading starts the moment
+            the download does: pages arrive as their fonts do, about 300 KB each.</span></li>
+          <li><b>Paper, sepia or night</b> <span>— with a page rail, a go-to-page jump, and fullscreen
+            from the margins.</span></li>
+          <li><b>Four riwāyāt</b> <span>— Ḥafṣ from the page fonts, and Warsh, Qālūn and Shuʿbah
+            downloaded on request. Switching keeps your place: the ayah is the coordinate, not the page
+            number.</span></li>
           <li><b>A facing-page spread on iPad and Mac</b> <span>— the pair of pages is the thing that
-            turns.</span></li>
-          <li><b>Translation or tafsir under each verse</b> <span>— 14 translations plus Ibn Kathir,
-            Maarif-ul-Quran, al-Muyassar and others, cached for offline reading.</span></li>
-          <li><b>42 reciters</b> <span>— streamed per ayah or downloaded per surah; word-level highlight
-            follows the recitation for nine of them.</span></li>
+            turns, with the keyboard and a surah sidebar.</span></li>
+          <li><b>A tap on a word opens its ayah</b> <span>— 13 translations plus Ibn Kathir,
+            Maarif-ul-Quran, al-Muyassar and others cached for offline reading, coloured bookmarks, a
+            share card, and the recitation controls.</span></li>
+          <li><b>42 reciters</b> <span>— streamed per ayah or downloaded per surah. For nine of them the
+            recited word lights up on the page itself, and in landscape the column follows the reciter
+            down it.</span></li>
           <li><b>Memorisation tools</b> <span>— repeat an ayah or a range, pause between repeats, hide
             and reveal the Arabic or the translation.</span></li>
-          <li><b>Khatmah plans</b> <span>— 30, 60 or 90 days with automatic page tracking and an optional
-            daily reminder carrying the day’s portion.</span></li>
+          <li><b>Khatmah plans</b> <span>— 30, 60 or 90 days, or your own length from the page you are
+            on, with automatic page tracking and an optional daily reminder carrying the day’s
+            portion.</span></li>
         </ul>
       </article>
       <article class="group">
@@ -576,24 +598,35 @@ footer .colophon {
             the Prophet ﷺ, with tabular numerals so the digits don’t shimmer on tick.</span></li>
           <li><b>Fasting log</b> <span>— Ramadan and the Sunnah fasts (Mondays, Thursdays, Ayyam al-Bidh,
             Arafah, Ashura, Six of Shawwal), with day-before reminders.</span></li>
-          <li><b>Prayer journal</b> <span>— on time, late, missed or qadha, with private notes and streak
-            stats, loggable straight from the notification.</span></li>
-          <li><b>Hijri calendar</b> <span>— with Ramadan, Eid and Jumu'ah treatments.</span></li>
+          <li><b>Prayer journal</b> <span>— on time, late, missed or qadha, with private notes, a
+            practice graph, streaks and what is owed. Loggable straight from the notification, with an
+            end-of-day nudge and tools to fill in whole months at once.</span></li>
+          <li><b>Hijri calendar</b> <span>— with Ramadan, Eid and Jumu'ah treatments, and a Ramadan
+            countdown on Home.</span></li>
           <li><b>Nearby mosques</b> <span>— one tap to your maps app, centred where you are.</span></li>
         </ul>
       </article>
       <article class="group">
         <h3><svg class="glyph" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h7"/><path d="M15 7h5"/><path d="M4 17h5"/><path d="M13 17h7"/><circle cx="13" cy="7" r="2"/><circle cx="11" cy="17" r="2"/></svg>The app itself</h3>
         <ul>
+          <li><b>Sync between your own devices</b> <span>— pair by scanning a code, and the journal,
+            streaks, fasts, notes and settings stay in step. No account and no server of ours: the
+            devices write sealed files into a folder you already keep in sync, and each holds a key that
+            never leaves it.</span></li>
+          <li><b>Backup and restore</b> <span>— export everything as a file you keep, and import it back
+            on any platform. Settings, journal, bookmarks and khatmah also ride Android Auto Backup and
+            device-to-device transfer, and a Manage-downloads screen shows what is on disk.</span></li>
           <li><b>13 languages</b> <span>— English, Arabic, Swedish, Bengali, Urdu, Hindi, French,
-            Spanish, German, Turkish, Indonesian, Russian and Chinese.</span></li>
+            Spanish, German, Turkish, Indonesian, Russian and Chinese — the widgets and notifications
+            too.</span></li>
           <li><b>Real Arabic typography</b> <span>— Amiri Quran for ayah text with correctly stacked
             diacritics, Amiri Naskh for duas, on both platforms.</span></li>
-          <li><b>Light, dark and system themes</b> <span>— night mode in the reader for the hours you
-            actually read in.</span></li>
-          <li><b>Your data survives a reinstall</b> <span>— settings, journal, bookmarks and khatmah ride
-            Android Auto Backup and device-to-device transfer; large re-downloadable content stays out of
-            your backup quota, and a Manage-downloads screen shows what is on disk.</span></li>
+          <li><b>Yours to look at</b> <span>— light, dark or system, pure black for OLED, six accents or
+            your own colour, and the platform’s own palette when you want it: Material You on Android,
+            Liquid Glass on iOS.</span></li>
+          <li><b>It tells you what it is doing</b> <span>— a data panel names the source in use, when
+            each dataset was last rebuilt, how far ahead it reaches and when the next check is
+            due.</span></li>
           <li><b>Open source</b> <span>— AGPL-3.0-or-later. The F-Droid flavour ships without Play
             Billing or Google Play Services.</span></li>
         </ul>
@@ -669,13 +702,18 @@ footer .colophon {
           <li>Your prayer journal and fasting log — there is no central database to hold them.</li>
           <li>Notifications are scheduled locally; what you log is never sent anywhere as an event
             stream.</li>
+          <li>Sync writes <strong>sealed</strong> files into a folder you already keep in sync, and the
+            key that opens them never leaves the devices you paired. There is no account, and no server
+            of ours is involved at any point.</li>
         </ul>
       </article>
       <article class="card">
         <h3>Goes over the network, when you choose it</h3>
         <ul>
-          <li>Prayer times from the provider you pick — AlAdhan, PrayerTimes.dev, or Islamiska
-            Förbundet — which receives the coordinates and dates it needs to answer.</li>
+          <li>Prayer times from the provider you pick — AlAdhan or PrayTimes.dev — which receives the
+            coordinates and dates it needs to answer. The national tables (Sweden, Morocco) are prepared
+            files fetched from this project’s own repository: they are asked for a city, not for
+            you.</li>
           <li>Place search through <strong>OpenStreetMap Nominatim</strong>: your search text goes to
             them under their terms.</li>
           <li>Downloads of mushaf pages, translations, tafsir and recitation audio.</li>
