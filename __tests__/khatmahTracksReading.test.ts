@@ -10,8 +10,10 @@
 import {
   __resetQuranStateForTests,
   activeKhatmah,
+  finishKhatmahPortion,
   getQuranState,
   khatmahCurrentPage,
+  khatmahCurrentPortion,
   khatmahTracksPage,
   recordKhatmahPageTurn,
   setKhatmahPosition,
@@ -89,5 +91,93 @@ describe('recordKhatmahPageTurn', () => {
     recordKhatmahPageTurn(1, 2);
     recordKhatmahPageTurn(2, 1);
     expect(plan().pagesRead).toBe(1);
+  });
+});
+
+/**
+ * The two ways to move the plan on purpose.
+ *
+ * The gate is about READING: it decides whether the pages going past are
+ * the khatmah's own. Neither of these is reading. Pinning an ayah as the
+ * khatmah position and pressing the portion's done button are the reader
+ * saying where the plan is, and the plan goes there.
+ */
+describe('pinning an ayah as the khatmah position', () => {
+  beforeEach(() => {
+    __resetQuranStateForTests();
+    startKhatmah(30);
+  });
+
+  it('moves the plan there, from anywhere', () => {
+    // Page 300 is a long way ahead of a plan that has not begun — the
+    // reading gate would refuse it, and this is not reading.
+    expect(khatmahTracksPage(300)).toBe(false);
+    setKhatmahPosition(21, 1, 322);
+    expect(khatmahCurrentPage(plan())).toBe(322);
+  });
+
+  it('makes reading from the pin count', () => {
+    setKhatmahPosition(21, 1, 322);
+    expect(khatmahTracksPage(322)).toBe(true);
+    recordKhatmahPageTurn(322, 323);
+    expect(plan().pagesRead).toBeGreaterThanOrEqual(322);
+  });
+
+  it('keeps counting past it, rather than freezing a page later', () => {
+    // `khatmahCurrentPage` answers with the pinned page while a pin is
+    // set. Left standing, the frontier never moved and the second turn
+    // after a pin was refused — the plan advanced exactly one page and
+    // stopped. The pin is spent when the reading reaches it.
+    setKhatmahPosition(21, 1, 322);
+    recordKhatmahPageTurn(322, 323);
+    recordKhatmahPageTurn(323, 324);
+    recordKhatmahPageTurn(324, 325);
+    expect(plan().position).toBeNull();
+    expect(khatmahCurrentPage(plan())).toBe(325);
+  });
+
+  it('a pin behind the reading rewinds the plan, and reading resumes', () => {
+    recordKhatmahPageTurn(1, 2);
+    recordKhatmahPageTurn(2, 3);
+    setKhatmahPosition(2, 255, 42); // an explicit pin is authoritative
+    expect(khatmahCurrentPage(plan())).toBe(42);
+    recordKhatmahPageTurn(42, 43);
+    recordKhatmahPageTurn(43, 44);
+    expect(khatmahCurrentPage(plan())).toBe(44);
+  });
+});
+
+describe('marking the portion read', () => {
+  beforeEach(() => {
+    __resetQuranStateForTests();
+    startKhatmah(30);
+  });
+
+  it('finishes the portion in hand wherever the reader is', () => {
+    const portion = khatmahCurrentPortion(plan());
+    finishKhatmahPortion();
+    expect(plan().ayahsRead).toBe(portion.to);
+  });
+
+  it('moves the frontier on, so the next page reads as the khatmah', () => {
+    finishKhatmahPortion();
+    const next = khatmahCurrentPage(plan());
+    expect(khatmahTracksPage(next)).toBe(true);
+    recordKhatmahPageTurn(next, next + 1);
+    expect(khatmahCurrentPage(plan())).toBe(next + 1);
+  });
+
+  it('works even when the reader is off in another juz', () => {
+    // The button is about the plan, not about the page on screen.
+    recordKhatmahPageTurn(582, 583); // ignored by the gate
+    const portion = khatmahCurrentPortion(plan());
+    finishKhatmahPortion();
+    expect(plan().ayahsRead).toBe(portion.to);
+  });
+
+  it('spends a pin that the finished portion has passed', () => {
+    setKhatmahPosition(1, 1, 1);
+    finishKhatmahPortion();
+    expect(plan().position).toBeNull();
   });
 });

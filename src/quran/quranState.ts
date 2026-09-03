@@ -773,6 +773,25 @@ export function recordKhatmahProgress(
               // merge, which takes the max of this field, still mean
               // something.
               pagesRead: pagesThroughAyahs(done),
+              // A PIN IS A STARTING POINT, NOT AN ANCHOR.
+              //
+              // `khatmahCurrentPage` answers with the pinned page while a
+              // pin is set, whatever has been read since. That was already
+              // odd — "Continue" kept offering a page the reader had gone
+              // past — and it became a stall once reading was gated on the
+              // plan's own frontier: pin at page 300, read one page, and
+              // the next turn is judged against a frontier still sitting
+              // at 300 and refused. The plan froze a page after the pin.
+              //
+              // So the pin is spent when the reading reaches it, exactly as
+              // `finishKhatmahPortion` spends one inside the portion it
+              // finishes. Tracking goes back to being derived from what has
+              // been read, which is where it can move.
+              position:
+                k.position &&
+                ayahIndexOf(k.position.surah, k.position.ayah) <= done
+                  ? null
+                  : k.position,
               completedAt: done >= TOTAL_AYAHS ? Date.now() : null,
             }
           : k,
@@ -797,6 +816,14 @@ export function recordKhatmahProgress(
  * "Continue" hands you, and what a bookmark on the same page means too.
  * A page ahead of it is not, however the reader got there, and reading
  * there leaves the plan exactly where it was.
+ *
+ * Which leaves two ways to take the plan somewhere else on purpose, both
+ * of them explicit and neither of them gated by this: pinning a position
+ * from an ayah's own panel (`setKhatmahPosition` — the frontier becomes
+ * the pinned page, so reading from there counts immediately), and marking
+ * the portion read (`finishKhatmahPortion` — the frontier moves to the
+ * start of the next one). Reading is what has to prove it belongs; saying
+ * so out loud does not.
  */
 export function khatmahTracksPage(
   page: number,
