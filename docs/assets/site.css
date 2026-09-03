@@ -94,7 +94,11 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 .lede { color: var(--ink-soft); max-width: var(--measure); margin-top: 12px; }
 /* ---- hero ---- */
 .hero {
-  position: relative; overflow: hidden; border-top: 0;
+  /* NOT `overflow: hidden`. The ornament is an <svg>, and an SVG clips to
+     its own viewport by default — the hidden overflow here was doing
+     nothing for it, and it cut the open language menu off at the bottom
+     edge of the hero. */
+  position: relative; border-top: 0;
   background: linear-gradient(170deg, #1F5F4A 0%, #1A4E3D 52%, #123A2D 100%);
   color: var(--cream); padding: 0;
 }
@@ -349,46 +353,55 @@ footer .colophon {
 }
 .townlist li { break-inside: avoid; margin-bottom: 6px; }
 
-/* ---- the language bar ----
+/* ---- the language button ----
+ *
+ * It sat in a bar of its own under the solidarity banner, and two full-width
+ * strips stacked on top of each other read as one heavy double band before
+ * the page had said anything. So it lives in the brand row instead, at the
+ * far end from the wordmark — the corner every site puts this control in,
+ * and a place that costs no vertical space at all.
  *
  * A <details> element, not a script. The site ships no JavaScript and says
  * so on the privacy section as a claim someone can check, so the picker is
  * a native disclosure; a visitor arriving from a search engine is already
  * on their own language, because the pages declare each other in hreflang.
  */
-.langbar { background: var(--surface-2); border-bottom: 1px solid var(--line); }
-.langbar .wrap {
-  display: flex; justify-content: flex-end;
-  padding-top: 6px; padding-bottom: 6px;
-}
-.langpicker { position: relative; font-size: 14px; }
+.brandline .langpicker { margin-inline-start: auto; position: relative; }
+.langpicker { font-size: 14.5px; }
 .langpicker summary {
-  display: flex; align-items: center; gap: 7px;
-  padding: 4px 10px; border-radius: 8px;
-  color: var(--ink-soft); cursor: pointer; list-style: none;
-  user-select: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 15px; border-radius: 999px;
+  list-style: none; cursor: pointer; user-select: none;
+  color: rgba(238, 228, 212, .92);
+  background: rgba(238, 228, 212, .10);
+  border: 1px solid rgba(238, 228, 212, .26);
 }
 .langpicker summary::-webkit-details-marker { display: none; }
-.langpicker summary:hover { color: var(--ink); background: rgba(31,95,74,.07); }
-.langpicker summary:focus-visible { outline: 2px solid var(--emerald); outline-offset: 2px; }
-.langpicker[open] summary { color: var(--ink); }
+.langpicker summary:hover {
+  background: rgba(238, 228, 212, .18); color: #fff;
+}
+.langpicker[open] summary { background: rgba(238, 228, 212, .2); color: #fff; }
+.langpicker summary svg { flex: none; opacity: .85; }
 .langpicker ul {
-  position: absolute; z-index: 20; inset-inline-end: 0; top: calc(100% + 6px);
+  position: absolute; z-index: 30; inset-inline-end: 0; top: calc(100% + 8px);
   margin: 0; padding: 6px; list-style: none;
   min-width: 190px;
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: 12px; box-shadow: var(--shadow);
+  border-radius: 12px; box-shadow: 0 18px 40px -12px rgba(9, 24, 19, .45);
   /* Thirteen languages is taller than a phone in landscape. */
   max-height: min(70vh, 460px); overflow-y: auto;
 }
-.langpicker li { margin: 0; break-inside: avoid; }
+.langpicker li { margin: 0; }
 .langpicker a {
-  display: block; padding: 6px 10px; border-radius: 7px;
-  color: var(--ink-soft); text-decoration: none;
+  display: block; padding: 7px 11px; border-radius: 7px;
+  color: var(--ink-soft); text-decoration: none; white-space: nowrap;
 }
-.langpicker a:hover { background: rgba(31,95,74,.08); color: var(--ink); }
+.langpicker a:hover { background: rgba(31, 95, 74, .08); color: var(--ink); }
 .langpicker a[aria-current] { color: var(--emerald); font-weight: 650; }
 @media (max-width: 620px) {
+  /* The globe alone. A wordmark and a full label do not share a phone. */
+  .langpicker .lang-label { display: none; }
+  .langpicker summary { padding: 9px 11px; }
   .langpicker ul { min-width: 168px; }
 }
 

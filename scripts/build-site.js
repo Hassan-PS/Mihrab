@@ -74,8 +74,8 @@ function picker(langs, current) {
     .join('\n');
   return `<details class="langpicker">
   <summary>
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
-    ${esc(label)}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
+    <span class="lang-label">${esc(label)}</span>
   </summary>
   <ul>
 ${items}
@@ -200,14 +200,6 @@ ${ld(faq)}
   <span class="go" aria-hidden="true">&rarr;</span>
 </a>
 
-<div class="langbar">
-  <div class="wrap">
-<!-- langpicker:start -->
-${picker(langs, code)}
-<!-- langpicker:end -->
-  </div>
-</div>
-
 <header class="hero">
   <svg class="hero-art" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
     <g fill="currentColor" opacity=".07">
@@ -225,6 +217,9 @@ ${picker(langs, code)}
     <div class="brandline">
       <img src="../assets/img/icon.png" width="62" height="62" alt="Mihrab">
       <span class="wordmark">Mihrab</span>
+<!-- langpicker:start -->
+${picker(langs, code)}
+<!-- langpicker:end -->
     </div>
     <h1>${esc(t.h1)}</h1>
     <p class="sub">${esc(t.sub)}</p>
