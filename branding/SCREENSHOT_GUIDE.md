@@ -102,3 +102,31 @@ Localised App Store listings (Arabic, Swedish, French, etc.) can reuse the same 
 ## Where the simulator saves screenshots
 
 By default `~/Desktop/Simulator Screenshot - <device> - <date>.png`. If your desktop is busy, change it via simulator menu **File → Save Screen As…** and pick a folder.
+
+---
+
+## The 2.14 set (2026-09-03)
+
+`branding/screenshots-2.14/` holds the raw captures the current README and
+website imagery is built from, and `branding/tools/build_shots.py` is what
+builds it:
+
+```sh
+python3 branding/tools/build_shots.py
+```
+
+Phone captures go in at their own resolution (Android 1080×2400, iPhone
+1206×2622); the script scales each to 1800 tall and centre-crops to 810
+wide, which is the 9:20 box the site's gallery declares. The Mac capture is
+a whole desktop — the script finds the app window by scanning for the light
+rectangle inside the wallpaper, so a differently-placed window still crops
+correctly.
+
+Only the files the script names are kept here. To refresh the set, replace
+a capture under the same name and run the script again; the hero and the
+Play feature graphic come from `compose_wide.py` and are regenerated with:
+
+```sh
+python3 -c "import sys; sys.path.insert(0,'branding/tools'); from compose_wide import hero, feature_graphic; S='branding/screenshots-2.14/'; hero('branding/github-hero.png', S+'ios-home.png', S+'ios-mushaf.png', S+'ios-duas.png'); feature_graphic('branding/play-feature-graphic.png', S+'ios-home.png')"
+cp branding/github-hero.png docs/assets/img/og-hero.png
+```

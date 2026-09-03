@@ -317,7 +317,7 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
   margin-top: 10px; font-size: 14px; color: var(--ink-soft); line-height: 1.45;
 }
 .spread { margin: 34px 0 0; }
-.spread img { aspect-ratio: 59 / 41; border-radius: 12px; }
+.spread img { aspect-ratio: 800 / 439; border-radius: 12px; }
 @media (max-width: 860px) { .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 620px) {
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
@@ -643,28 +643,43 @@ footer .colophon {
     <ul class="gallery">
       <li><figure>
         <img src="assets/img/shot-home.png" width="810" height="1800" loading="lazy" decoding="async"
-          alt="Home screen: the next prayer with a live countdown above the day’s five times.">
+          alt="Home screen: the next prayer with a live countdown above the day’s times.">
         <figcaption>Home — next prayer and countdown</figcaption>
       </figure></li>
       <li><figure>
         <img src="assets/img/shot-home-dark.png" width="810" height="1800" loading="lazy" decoding="async"
-          alt="The same home screen in dark theme.">
+          alt="The same home screen in the dark theme.">
         <figcaption>Home, dark</figcaption>
       </figure></li>
       <li><figure>
         <img src="assets/img/shot-mushaf.png" width="810" height="1800" loading="lazy" decoding="async"
-          alt="The Quran reader showing a page of the Madinah mushaf.">
-        <figcaption>Mushaf — the printed page</figcaption>
+          alt="The mushaf mid-recitation: the recited word lit on the page, with the player below it.">
+        <figcaption>Mushaf — the recited word, lit</figcaption>
       </figure></li>
       <li><figure>
         <img src="assets/img/shot-mushaf-dark.png" width="810" height="1800" loading="lazy" decoding="async"
-          alt="The same mushaf page in the reader's night mode.">
-        <figcaption>Mushaf, night mode</figcaption>
+          alt="The same page in the reader’s night tone.">
+        <figcaption>Mushaf, night</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-quran.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="The Quran tab: continue reading, the khatmah plan, and the verse of the day.">
+        <figcaption>Khatmah and where you left off</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-qibla.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="Qibla compass: a dial with the bearing, the signal strength, and a cross-check.">
+        <figcaption>Qibla, with a signal reading</figcaption>
       </figure></li>
       <li><figure>
         <img src="assets/img/shot-month.png" width="810" height="1800" loading="lazy" decoding="async"
           alt="Month view: a full month of prayer times in a table.">
         <figcaption>A full month at once</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-month-share.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="The month as a shareable sheet with a QR code back to the app.">
+        <figcaption>…and a sheet to hand over</figcaption>
       </figure></li>
       <li><figure>
         <img src="assets/img/shot-duas.png" width="810" height="1800" loading="lazy" decoding="async"
@@ -676,10 +691,20 @@ footer .colophon {
           alt="Tasbih counter showing a dhikr count.">
         <figcaption>Tasbih counter</figcaption>
       </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-log.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="The prayer journal: a practice graph, on-time streak, fasts kept and what is owed.">
+        <figcaption>The journal, at a glance</figcaption>
+      </figure></li>
+      <li><figure>
+        <img src="assets/img/shot-widgets.png" width="810" height="1800" loading="lazy" decoding="async"
+          alt="A phone home screen carrying Mihrab widgets and the Live Activity countdown.">
+        <figcaption>Widgets and the Live Activity</figcaption>
+      </figure></li>
     </ul>
     <figure class="spread">
-      <img src="assets/img/shot-ipad-spread.png" width="1600" height="1103" loading="lazy" decoding="async"
-        alt="Mihrab on iPad: two facing mushaf pages side by side, as in the printed copy.">
+      <img src="assets/img/shot-spread.png" width="1600" height="878" loading="lazy" decoding="async"
+        alt="Mihrab on a Mac: two facing mushaf pages side by side with the surah sidebar, as in the printed copy.">
       <figcaption>On iPad and Mac the mushaf opens as a facing-page spread — the pair of pages is what
         turns, exactly as it does in print.</figcaption>
     </figure>
