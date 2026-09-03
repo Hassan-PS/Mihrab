@@ -706,7 +706,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       }
     }
 
-    /** Localised name of the prayer whose instant is closest to [epochMs]
+    /** Localised name of the event whose instant is closest to [epochMs]
      *  (within 2 min), looked up from the payload's day rows. "" if none. */
     private fun labelForEpoch(p: JSONObject, epochMs: Long): String {
       return try {
@@ -716,9 +716,18 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         for (i in 0 until days.length()) {
           val day = days.optJSONObject(i) ?: continue
           val dateKey = day.optString("dateKey")
-          val rows = day.optJSONArray("rows") ?: continue
-          for (j in 0 until rows.length()) {
-            val r = rows.optJSONObject(j) ?: continue
+          // Sunrise and the enabled night marks are candidates too. They pass
+          // like anything else, and the card's "It's <name>" moment went blank
+          // on them — the name was only ever looked for among the five salāh.
+          val candidates = mutableListOf<JSONObject>()
+          day.optJSONArray("rows")?.let { rows ->
+            for (j in 0 until rows.length()) rows.optJSONObject(j)?.let(candidates::add)
+          }
+          day.optJSONObject("sunriseRow")?.let(candidates::add)
+          day.optJSONArray("extraRows")?.let { extra ->
+            for (j in 0 until extra.length()) extra.optJSONObject(j)?.let(candidates::add)
+          }
+          for (r in candidates) {
             val e = epochForDayTime(dateKey, r.optString("time"))
             if (e <= 0L) continue
             val d = kotlin.math.abs(e - epochMs)

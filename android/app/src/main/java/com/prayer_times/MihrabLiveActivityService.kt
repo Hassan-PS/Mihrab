@@ -258,10 +258,11 @@ class MihrabLiveActivityService : Service() {
   /**
    * Recompute the current prayer interval from the multi-day `days[]`
    * schedule. Builds a chronological, absolutely-dated list of every event
-   * (the five salāh + Sunrise across all supplied days), then picks the next
-   * event after `now` and the most recent event at/before `now`. This is what
-   * lets the Live Activity advance to the correct day's times — and render the
-   * correct overnight Isha→Fajr progress — without the app being reopened.
+   * (the five salāh, Sunrise, and the night marks the user turned on, across
+   * all supplied days), then picks the next event after `now` and the most
+   * recent event at/before `now`. This is what lets the Live Activity advance
+   * to the correct day's times — and render the correct overnight Isha→Fajr
+   * progress — without the app being reopened.
    *
    * Returns an updated payload JSON, or null when there is no `days[]` data or
    * no future event remains in the window (caller then falls back to the
@@ -302,6 +303,23 @@ class MihrabLiveActivityService : Service() {
             events.add(Ev(e, sr.optString("key", "Sunrise"), sr.optString("name", "Sunrise"), t, dateKey))
           }
         }
+        // The night marks the user turned on — First Third, Islamic Midnight,
+        // the Last Third. They are only ever in the payload BECAUSE they were
+        // enabled, and a toggle that means "tell me about the Last Third"
+        // means this card counts down to it like anything else. Left out, the
+        // ticker could neither land on one nor step off it: the card sat on a
+        // time that had passed until the app was opened, which is exactly how
+        // the First Third → Fajr hand-over was reported.
+        day.optJSONArray("extraRows")?.let { extra ->
+          for (j in 0 until extra.length()) {
+            val r = extra.optJSONObject(j) ?: continue
+            val t = r.optString("time")
+            val e = epochForDayTime(dateKey, t)
+            if (e > 0L) {
+              events.add(Ev(e, r.optString("key"), r.optString("name"), t, dateKey))
+            }
+          }
+        }
       }
       if (events.isEmpty()) return null
       events.sortBy { it.epoch }
@@ -317,6 +335,12 @@ class MihrabLiveActivityService : Service() {
       updated.put("nextLabel", next.name)
       updated.put("nextTime", next.time)
       updated.put("title", "${next.name} · ${next.time}")
+      // The mute button belongs to the CALL TO PRAYER. JS worked the flag out
+      // for whatever was next when it last synced; every hop this walk makes
+      // afterwards is its own, and Sunrise or a night mark must never inherit
+      // a button that would put the adhan on them. Only ever cleared here —
+      // turning it back on is JS's call, on the next sync.
+      if (isNonPrayerKey(next.key)) updated.put("adhanActionEnabled", false)
 
       // Swap the displayed prayer list to the day currently in progress so any
       // list rendering (and the notifee fallback path) reflects today's times.
@@ -326,6 +350,7 @@ class MihrabLiveActivityService : Service() {
         if (day.optString("dateKey") == currentDateKey) {
           day.optJSONArray("rows")?.let { updated.put("rows", it) }
           day.optJSONObject("sunriseRow")?.let { updated.put("sunriseRow", it) }
+          day.optJSONArray("extraRows")?.let { updated.put("extraRows", it) }
           break
         }
       }
@@ -357,18 +382,25 @@ class MihrabLiveActivityService : Service() {
     }
   }
 
-  /** Sunrise and the two night times — times, not salāh. Mirrors
-   *  OPTIONAL_TIME_KEYS in src/types/prayer.ts. */
+  /** Sunrise and the three night marks — times, not salāh. Mirrors
+   *  OPTIONAL_TIME_KEYS in src/types/prayer.ts, First Third included: it was
+   *  the one key missing here, so the evening mark was the one event that
+   *  could still be handed the adhan by an auto-advance. */
   private fun isNonPrayerKey(key: String): Boolean =
       key.equals("Sunrise", ignoreCase = true) ||
           key.equals("Midnight", ignoreCase = true) ||
-          key.equals("Lastthird", ignoreCase = true)
+          key.equals("Lastthird", ignoreCase = true) ||
+          key.equals("Firstthird", ignoreCase = true)
 
   /**
-   * If `nextEpochMs` in the cached payload has passed, scan `rows[]` for
-   * the next prayer that is in the future and return an updated payload
-   * JSON string. Returns null when no advance is needed or when the
-   * rows list is exhausted (after Isha — JS will re-sync on next open).
+   * If `nextEpochMs` in the cached payload has passed, find the next event
+   * still ahead — across the five salāh, Sunrise and whichever night marks
+   * the user turned on — and return an updated payload JSON string. Returns
+   * null when no advance is needed or when nothing in the payload resolves
+   * to a time at all.
+   *
+   * This is the fallback for payloads with no dated `days[]`; the ticker
+   * prefers `recomputeFromDays`, which knows which day each time belongs to.
    */
   private fun tryAdvanceToNextPrayer(payload: String): String? {
     return try {
@@ -391,76 +423,59 @@ class MihrabLiveActivityService : Service() {
       }
       if (rowList.isEmpty()) return null
 
-      // Inject sunriseRow into the ordered list right after Fajr so
-      // that when currentKey="Sunrise" we can find it by key and select
-      // Dhuhr as the next candidate. Without this, Sunrise is absent
-      // from rowList, currentIdx=-1, and the fallback scans from Fajr —
-      // finding it already in the past → +24h → tomorrow's Fajr (wrong).
-      val sunriseObj = p.optJSONObject("sunriseRow")
-      if (sunriseObj != null) {
-        val srKey = sunriseObj.optString("key", "Sunrise")
-        val srName = sunriseObj.optString("name", "Sunrise")
-        val srTime = sunriseObj.optString("time", "")
-        if (srTime.isNotEmpty()) {
-          val fajrIdx = rowList.indexOfFirst { it.key.equals("Fajr", ignoreCase = true) }
-          val insertAt = (if (fajrIdx >= 0) fajrIdx + 1 else 1).coerceAtMost(rowList.size)
-          rowList.add(insertAt, Row(srKey, srName, srTime))
+      // Sunrise and the enabled night marks are events like any other here.
+      // They live outside `rows` in the payload only because the card draws
+      // them differently; a walk that leaves them out cannot land on one, and
+      // — worse — cannot step OFF one either, which left the card sitting on
+      // a First Third that had already passed until the app was opened.
+      p.optJSONObject("sunriseRow")?.let { sr ->
+        val t = sr.optString("time", "")
+        if (t.isNotEmpty()) {
+          rowList.add(Row(sr.optString("key", "Sunrise"), sr.optString("name", "Sunrise"), t))
+        }
+      }
+      p.optJSONArray("extraRows")?.let { extra ->
+        for (i in 0 until extra.length()) {
+          val r = extra.optJSONObject(i) ?: continue
+          val t = r.optString("time", "")
+          if (t.isNotEmpty()) rowList.add(Row(r.optString("key"), r.optString("name"), t))
         }
       }
 
-      // Start scanning from the row after the current one; wrap-around
-      // is intentionally NOT supported here — after Isha there is nothing
-      // in the list until tomorrow, so we leave the notification frozen
-      // (JS will re-sync when the app is foregrounded tomorrow morning).
-      val currentIdx = rowList.indexOfFirst { it.key == currentKey }
-      val candidates = if (currentIdx >= 0) rowList.drop(currentIdx + 1) else rowList
+      // The next event is the earliest one still ahead, not the next one in
+      // the list. Display order is not the clock: Islamic Midnight and the
+      // Last Third are drawn after Isha and belong to the small hours, the
+      // First Third is drawn last and falls that same evening. And because
+      // `parseHHMMToEpochMs` rolls a time that has already passed forward a
+      // day, "earliest still ahead" wraps onto tomorrow on its own — the
+      // walk no longer freezes after Isha waiting for a Fajr special case.
+      val next = rowList
+        .map { it to parseHHMMToEpochMs(it.time, now) }
+        .filter { it.second > now }
+        .minByOrNull { it.second }
 
-      for (row in candidates) {
-        val epochMs = parseHHMMToEpochMs(row.time, now)
-        if (epochMs > now) {
-          // Found the next prayer — build the updated payload.
-          val updated = org.json.JSONObject(payload)
-          updated.put("prevEpochMs", nextEpochMs)
-          updated.put("nextEpochMs", epochMs)
-          updated.put("nextKey", row.key)
-          updated.put("nextLabel", row.name)
-          updated.put("nextTime", row.time)
-          updated.put("title", "${row.name} · ${row.time}")
-          // The mute button belongs to the CALL TO PRAYER, and this walk
-          // steps onto Sunrise deliberately (it is injected above so the
-          // card can count down to it). JS computed `adhanActionEnabled`
-          // for whatever was next at sync time and does not get a say in
-          // this hop, so leaving the flag alone left a button pointed at
-          // Sunrise — and the headless task behind it would have scheduled
-          // Sunrise on the adhan channel. Only ever cleared here: turning
-          // it back on is JS's call, on the next sync.
-          if (isNonPrayerKey(row.key)) updated.put("adhanActionEnabled", false)
-          Log.i(TAG, "Auto-advance: $currentKey → ${row.key} @ ${row.time} (epoch=$epochMs)")
-          return updated.toString()
-        }
+      if (next != null) {
+        val (row, epochMs) = next
+        val updated = org.json.JSONObject(payload)
+        updated.put("prevEpochMs", nextEpochMs)
+        updated.put("nextEpochMs", epochMs)
+        updated.put("nextKey", row.key)
+        updated.put("nextLabel", row.name)
+        updated.put("nextTime", row.time)
+        updated.put("title", "${row.name} · ${row.time}")
+        // The mute button belongs to the CALL TO PRAYER, and this walk steps
+        // onto Sunrise and the night marks deliberately so the card can count
+        // down to them. JS computed `adhanActionEnabled` for whatever was next
+        // at sync time and gets no say in this hop, so leaving the flag alone
+        // left a button pointed at Sunrise — and the headless task behind it
+        // would have scheduled Sunrise on the adhan channel. Only ever cleared
+        // here: turning it back on is JS's call, on the next sync.
+        if (isNonPrayerKey(row.key)) updated.put("adhanActionEnabled", false)
+        Log.i(TAG, "Auto-advance: $currentKey → ${row.key} @ ${row.time} (epoch=$epochMs)")
+        return updated.toString()
       }
 
-      // No future row found in today's prayers (post-Isha).
-      // Wrap around to tomorrow's Fajr: parseHHMMToEpochMs automatically
-      // adds 24 h for any time that has already passed today, so Fajr's
-      // HH:MM string resolves to tomorrow's epoch without extra math.
-      val fajrRow = rowList.firstOrNull { it.key.equals("Fajr", ignoreCase = true) }
-      if (fajrRow != null && fajrRow.time.isNotEmpty()) {
-        val epochMs = parseHHMMToEpochMs(fajrRow.time, now)
-        if (epochMs > now) {
-          val updated = org.json.JSONObject(payload)
-          updated.put("prevEpochMs", nextEpochMs)
-          updated.put("nextEpochMs", epochMs)
-          updated.put("nextKey", fajrRow.key)
-          updated.put("nextLabel", fajrRow.name)
-          updated.put("nextTime", fajrRow.time)
-          updated.put("title", "${fajrRow.name} · ${fajrRow.time}")
-          Log.i(TAG, "Auto-advance: $currentKey → Fajr (tomorrow) @ ${fajrRow.time} epoch=$epochMs")
-          return updated.toString()
-        }
-      }
-
-      Log.i(TAG, "Auto-advance: no future row after $currentKey and no Fajr fallback — freezing")
+      Log.i(TAG, "Auto-advance: nothing ahead of $currentKey — freezing")
       null
     } catch (t: Throwable) {
       Log.w(TAG, "tryAdvanceToNextPrayer failed", t)
