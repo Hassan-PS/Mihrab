@@ -15,7 +15,9 @@ size the README's grid has always used. The Mac window is found by scanning
 for the light rectangle inside the wallpaper rather than by hardcoded
 coordinates, so a differently-placed window still crops correctly.
 """
-import os, sys
+import datetime
+import os
+import re
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -92,6 +94,33 @@ READMES = [
 ]
 
 
+def stamp_site(day=None):
+    """Bust the browser cache for every image this script just rewrote.
+
+    The site is one hand-written HTML file with no build step, and these
+    images keep their filenames from one set to the next — so a visitor who
+    has been here before is served the OLD screenshots out of their cache,
+    for as long as the cache holds them, with no way to tell. That is not a
+    hypothetical: the 2.14 set was live and byte-correct on the server while
+    the page still showed August's month view, August's home screen and a
+    muṣḥaf with no player.
+
+    So every `shot-*.png` and the OG image carry `?v=<date of the set>`, and
+    this runs as part of building them: the stamp cannot drift from the
+    images because the same command writes both.
+    """
+    day = day or datetime.date.today().isoformat()
+    path = os.path.join(ROOT, 'docs/index.html')
+    html = open(path, encoding='utf-8').read()
+    before = html
+    html = re.sub(r'(assets/img/(?:shot-[a-z-]+|og-hero)\.png)(\?v=[\d-]+)?',
+                  lambda m: f'{m.group(1)}?v={day}', html)
+    if html != before:
+        open(path, 'w', encoding='utf-8').write(html)
+    n = len(re.findall(r'\?v=' + re.escape(day), html))
+    print(f'   docs/index.html: {n} image URLs stamped ?v={day}')
+
+
 def main():
     print('site gallery:')
     for src, dst in GALLERY:
@@ -101,6 +130,8 @@ def main():
     print('readme:')
     for src, dst in READMES:
         phone(src, os.path.join(README, dst + '.png'))
+    print('cache:')
+    stamp_site()
 
 
 if __name__ == '__main__':

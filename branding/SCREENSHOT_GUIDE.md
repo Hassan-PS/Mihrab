@@ -130,3 +130,11 @@ Play feature graphic come from `compose_wide.py` and are regenerated with:
 python3 -c "import sys; sys.path.insert(0,'branding/tools'); from compose_wide import hero, feature_graphic; S='branding/screenshots-2.14/'; hero('branding/github-hero.png', S+'ios-home.png', S+'ios-mushaf.png', S+'ios-duas.png'); feature_graphic('branding/play-feature-graphic.png', S+'ios-home.png')"
 cp branding/github-hero.png docs/assets/img/og-hero.png
 ```
+
+The script also stamps `?v=<today>` onto every screenshot URL in
+`docs/index.html`. The filenames stay the same from one set to the next, so
+without it a returning visitor is served the OLD images out of their browser
+cache with nothing to tell them — which is exactly what happened when the
+2.14 set went live: correct bytes on the server, August's screenshots on the
+screen. The stamp is written by the same command that writes the images, so
+the two cannot drift apart.
