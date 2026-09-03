@@ -261,6 +261,33 @@ export async function audioDiskUsage(): Promise<number> {
   }
 }
 
+type TimingsJson = { [key: string]: number[][] };
+
+/** Smallest believable timings file — anything under this is a bad download. */
+const MIN_TIMINGS_BYTES = 10_000;
+
+/**
+ * Last-resort transport: RN's own networking stack, straight to a string.
+ *
+ * `ReactNativeBlobUtil`'s streaming downloader is the one to want, but on
+ * some networks EVERY request through it dies with "Download interrupted"
+ * — the Android emulator's NAT does exactly that, and so do some corporate
+ * proxies. The font store learned this and carries the same fallback
+ * (`fetchFontViaRNFetch`); the timings fetch did not, which is why the
+ * word highlight was dead on the emulator no matter how often it retried:
+ * every attempt used the one transport that cannot work there.
+ *
+ * A timings file is ~1.4 MB of JSON, so holding it in memory for the
+ * length of one parse is not the problem it would be for a font.
+ */
+async function fetchTimingsViaRNFetch(url: string): Promise<string> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`timings: HTTP ${response.status}`);
+  const text = await response.text();
+  if (text.length < MIN_TIMINGS_BYTES) throw new Error('timings: truncated');
+  return text;
+}
+
 /**
  * Fetch (once) and cache a reciter's word-timing JSON. Resolves null on
  * any failure — word highlighting is strictly best-effort and must never
@@ -268,30 +295,55 @@ export async function audioDiskUsage(): Promise<number> {
  */
 export async function loadReciterTimings(
   reciterId: string,
-): Promise<{ [key: string]: number[][] } | null> {
+): Promise<TimingsJson | null> {
   // No timing data published for this reciter — skip the network round
   // trip entirely; the UI falls back to ayah-level highlighting.
   if (!findReciter(reciterId).hasTimings) return null;
   const path = timingsFilePath(reciterId);
-  try {
-    if (!(await fileValid(path, 10_000))) {
-      await mkdirDeep(timingsDir());
-      const tmp = `${path}.part`;
-      const res = await ReactNativeBlobUtil.config({
-        path: tmp,
-        overwrite: true,
-      }).fetch('GET', reciterTimingsUrl(findReciter(reciterId)));
-      if (res.info().status !== 200) {
-        await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
-        return null;
-      }
+  const url = reciterTimingsUrl(findReciter(reciterId));
+
+  // Cached, and readable. A file that is there but will not parse is a bad
+  // download, and keeping it would answer null for ever — see the expiry
+  // policy in useWordTiming, which cannot help if the file never changes.
+  if (await fileValid(path, MIN_TIMINGS_BYTES)) {
+    try {
+      return JSON.parse(String(await ReactNativeBlobUtil.fs.readFile(path, 'utf8')));
+    } catch (e) {
+      console.warn('audioStore: cached timings unreadable, refetching', e);
       await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
-      await ReactNativeBlobUtil.fs.mv(tmp, path);
     }
-    const raw = await ReactNativeBlobUtil.fs.readFile(path, 'utf8');
-    return JSON.parse(String(raw));
-  } catch (e) {
-    console.warn('audioStore: timings unavailable', e);
-    return null;
+  }
+
+  const tmp = `${path}.part`;
+  try {
+    await mkdirDeep(timingsDir());
+    // No `timeout` in the config: on Android it makes every download fail
+    // instantly with "Download interrupted" (same note as the font store).
+    const res = await ReactNativeBlobUtil.config({
+      path: tmp,
+      overwrite: true,
+    }).fetch('GET', url);
+    const stat = await ReactNativeBlobUtil.fs.stat(tmp).catch(() => null);
+    if (res.info().status !== 200 || !stat) {
+      throw new Error(`timings: HTTP ${res.info().status}`);
+    }
+    await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
+    await ReactNativeBlobUtil.fs.mv(tmp, path);
+    return JSON.parse(String(await ReactNativeBlobUtil.fs.readFile(path, 'utf8')));
+  } catch (streamError) {
+    await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
+    try {
+      const text = await fetchTimingsViaRNFetch(url);
+      const parsed: TimingsJson = JSON.parse(text);
+      // Cache it, but the answer does not depend on the write: a device
+      // that cannot write here should still highlight this session.
+      await ReactNativeBlobUtil.fs
+        .writeFile(path, text, 'utf8')
+        .catch(() => undefined);
+      return parsed;
+    } catch (e) {
+      console.warn('audioStore: timings unavailable', streamError, e);
+      return null;
+    }
   }
 }
