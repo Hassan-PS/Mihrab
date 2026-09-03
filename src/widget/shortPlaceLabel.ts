@@ -20,6 +20,19 @@
  */
 const COORD_LABEL = /^-?\d+(\.\d+)?\s*°\s*,\s*-?\d+(\.\d+)?\s*°$/;
 
+/**
+ * Is this label a coordinate rather than a place?
+ *
+ * The city registry writes one into its `displayName` when it cannot
+ * geocode a fix, and from there it is saved as `autoLocationLabel` and read
+ * by everything that wants to name the place. Surfaces that have something
+ * better to offer — the month sheet can name the nearest listed city — need
+ * to be able to tell that what they were handed is not a name at all.
+ */
+export function isCoordinateLabel(label: string | undefined): boolean {
+  return label != null && COORD_LABEL.test(label.trim());
+}
+
 export function shortPlaceLabel(
   label: string | undefined,
 ): string | undefined {

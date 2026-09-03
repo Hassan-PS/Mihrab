@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { distanceKm } from '../utils/coords';
 import type { ReverseLocality } from '../geocoding/nominatim';
+import { isCoordinateLabel } from '../widget/shortPlaceLabel';
+import { nearestKnownCityName } from './nearestKnownCity';
 
 /**
  * City registry — task: "be resourceful about location changes".
@@ -138,15 +140,26 @@ export function resolveActiveCity(
   if (locality) {
     ({ cityId, displayName } = cityIdFromLocality(locality));
   } else {
-    // Offline: reuse the nearest known city if we're close to one, else a
-    // coarse bucket so we still get stable "same place" behaviour.
+    // Offline: reuse the nearest city we have already been to if we're
+    // close to one, else a coarse bucket so we still get stable "same
+    // place" behaviour.
     const near = nearestCityWithin(cities, lat, lng);
     if (near) {
       cityId = near.cityId;
       displayName = near.displayName;
     } else {
       cityId = coarseBucketId(lat, lng);
-      displayName = `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
+      // The IDENTITY is a bucket, but the NAME need not be a coordinate.
+      // This used to write "59.33°, 18.07°" straight into the display
+      // name, and from there it was saved as `autoLocationLabel` and read
+      // as a city by the location chip, the widget and the month sheet —
+      // which is how a shared timetable ended up published with a decimal
+      // degree where a place belongs. The app ships coordinates for a
+      // couple of hundred cities so its datasets can pick one; the nearest
+      // of those is a real answer, and free.
+      displayName =
+        nearestKnownCityName(lat, lng) ??
+        `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
     }
   }
 
@@ -159,11 +172,20 @@ export function resolveActiveCity(
     const promoted =
       existing.promoted ||
       now.getTime() - Date.parse(existing.firstSeenAt) >= PROMOTE_AFTER_MS;
+    // The stored name stands, unless this fix carries a better one. A
+    // fresh geocode always does. So does a nearest-city name over the
+    // coordinates an earlier version wrote here — an install that has been
+    // carrying "59.33°, 18.07°" as its city since the geocoder last failed
+    // heals on the next fix instead of waiting for the geocoder to come
+    // back.
+    const improved =
+      (locality != null && !!displayName) ||
+      (isCoordinateLabel(existing.displayName) &&
+        !isCoordinateLabel(displayName));
     entry = {
       ...existing,
       // Keep the stable anchor; only improve a placeholder display name.
-      displayName:
-        locality && displayName ? displayName : existing.displayName,
+      displayName: improved ? displayName : existing.displayName,
       lastActiveAt: iso,
       promoted,
     };
