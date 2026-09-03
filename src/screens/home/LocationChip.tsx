@@ -125,6 +125,23 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
     onAddLocation?.();
   }, [onAddLocation]);
 
+  /**
+   * Back to the GPS.
+   *
+   * The sheet could send you to a saved city and not bring you home: every
+   * row switched the app to manual and none switched it back, so "check on
+   * my family's city" was a one-way trip that ended in Settings. The active
+   * preset id is cleared with it — nothing in the list is in use while the
+   * app is following the phone.
+   */
+  const onUseAuto = useCallback(() => {
+    updateSettings({
+      locationMode: 'automatic',
+      activeLocationPresetId: undefined,
+    });
+    setOpen(false);
+  }, [updateSettings]);
+
   const onPick = useCallback(
     (id: string) => {
       const preset = findPreset(presets, id);
@@ -254,6 +271,34 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
             <Text style={[typeStyle('headline'), { color: palette.text, marginBottom: SPACING.sm }]}>
               {t('locations.title')}
             </Text>
+            {/* The GPS, as a row of its own — the way back from a saved
+                city, and the only one there has ever needed to be. Always
+                first: it is where most people are most of the time. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('locations.useAuto', 'My location')}
+              accessibilityState={{ selected: isAuto }}
+              onPress={onUseAuto}
+              style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+                styles.row,
+                isAuto && { backgroundColor: palette.accentBg },
+                pressed && { opacity: 0.75 },
+                hovered && { opacity: 0.92 },
+              ]}>
+              <Text
+                style={[typeStyle('body'), { color: palette.text, flex: 1 }]}
+                numberOfLines={1}>
+                {t('locations.useAuto', 'My location')}
+              </Text>
+              {isAuto ? (
+                <Text
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                  style={[typeStyle('headline'), { color: palette.accent }]}>
+                  ✓
+                </Text>
+              ) : null}
+            </Pressable>
             {presets.length === 0 ? (
               <Text
                 style={[
@@ -264,7 +309,11 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
               </Text>
             ) : null}
             {presets.map(preset => {
-              const isActive = preset.id === settings.activeLocationPresetId;
+              // Only while the app is actually on it. On automatic the
+              // stored id is a memory of the last one used, not a claim
+              // about what the times on screen are for.
+              const isActive =
+                !isAuto && preset.id === settings.activeLocationPresetId;
               return (
                 <Pressable
                   key={preset.id}

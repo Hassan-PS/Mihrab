@@ -424,6 +424,7 @@
     "title": "Kayıtlı konumlar",
     "empty": "Aralarında hızlıca geçiş yapabilmek için kayıtlı konumlar ekleyin.",
     "add": "Yeni konum ekle",
+    "useAuto": "Konumum",
     "addPrompt": "Bu konuma bir ad verin",
     "addPlaceholder": "Ev, İş, Seyahat…",
     "cancel": "Vazgeç",

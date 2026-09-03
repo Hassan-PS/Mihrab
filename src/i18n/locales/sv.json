@@ -424,6 +424,7 @@
     "title": "Sparade platser",
     "empty": "Lägg till sparade platser så kan du växla snabbt mellan dem.",
     "add": "Lägg till ny plats",
+    "useAuto": "Min plats",
     "addPrompt": "Namnge platsen",
     "addPlaceholder": "Hem, Jobb, Resa…",
     "cancel": "Avbryt",

@@ -424,6 +424,7 @@
     "title": "Gespeicherte Orte",
     "empty": "Speichere Orte, um schnell zwischen ihnen zu wechseln.",
     "add": "Neuen Ort hinzufügen",
+    "useAuto": "Mein Standort",
     "addPrompt": "Diesen Ort benennen",
     "addPlaceholder": "Zuhause, Arbeit, Reise…",
     "cancel": "Abbrechen",

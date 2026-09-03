@@ -424,6 +424,7 @@
     "title": "Ubicaciones guardadas",
     "empty": "Añade ubicaciones para poder cambiar rápidamente entre ellas.",
     "add": "Añadir nueva ubicación",
+    "useAuto": "Mi ubicación",
     "addPrompt": "Nombrar esta ubicación",
     "addPlaceholder": "Casa, Trabajo, Viaje…",
     "cancel": "Cancelar",

@@ -424,6 +424,7 @@
     "title": "已保存的地点",
     "empty": "添加常用地点，方便在它们之间快速切换。",
     "add": "添加新位置",
+    "useAuto": "我的位置",
     "addPrompt": "为这个地点起个名字",
     "addPlaceholder": "家、公司、旅途……",
     "cancel": "取消",

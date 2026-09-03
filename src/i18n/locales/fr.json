@@ -424,6 +424,7 @@
     "title": "Lieux enregistrés",
     "empty": "Ajoutez des lieux pour pouvoir basculer rapidement entre eux.",
     "add": "Ajouter un lieu",
+    "useAuto": "Ma position",
     "addPrompt": "Nommer ce lieu",
     "addPlaceholder": "Maison, Travail, Voyage…",
     "cancel": "Annuler",

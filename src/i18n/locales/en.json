@@ -424,6 +424,7 @@
     "title": "Saved locations",
     "empty": "Add saved locations so you can switch between them quickly.",
     "add": "Add a new location",
+    "useAuto": "My location",
     "addPrompt": "Name this location",
     "addPlaceholder": "Home, Work, Travel…",
     "cancel": "Cancel",

@@ -424,6 +424,7 @@
     "title": "Lokasi tersimpan",
     "empty": "Tambahkan lokasi tersimpan agar Anda bisa berpindah di antaranya dengan cepat.",
     "add": "Tambah lokasi baru",
+    "useAuto": "Lokasi saya",
     "addPrompt": "Beri nama lokasi ini",
     "addPlaceholder": "Rumah, Kantor, Perjalanan…",
     "cancel": "Batal",

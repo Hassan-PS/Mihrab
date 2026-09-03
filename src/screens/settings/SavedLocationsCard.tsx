@@ -44,9 +44,23 @@ function sameCoord(a: number, b: number): boolean {
  *     button at the bottom (hidden when limit reached).
  *   • Adding — inline name input replaces the bottom button.
  *
- * Only renders when locationMode === 'manual'. Saving a GPS location as a
- * preset doesn't make sense — task #18's spec is about switching between
- * manual locations.
+ * ── IT USED TO VANISH ON AUTOMATIC ─────────────────────────────────────
+ *
+ * "Only renders when locationMode === 'manual'", on the reasoning that
+ * saving a GPS location as a preset does not make sense and the feature is
+ * about switching between MANUAL locations. Both halves were wrong in
+ * practice. Reported as "multiple city gets disabled if the user selects
+ * auto location": someone on automatic could not see their saved list, add
+ * to it, or delete from it, and to save the city they were standing in
+ * they had to leave automatic first — after which the only way back was
+ * Settings, because the home chip's sheet had no row for it either.
+ *
+ * The two are not alternatives. Automatic is where you live; the saved
+ * list is the other places you look in on — family in another city, where
+ * you are travelling next week. So the card is always here, "Save current"
+ * means the GPS fix when the GPS is what is current, and using a saved
+ * location switches to it the way the home chip always has. Going back is
+ * one tap on the chip's "My location".
  */
 function SavedLocationsCardImpl({
   highlightSignal = 0,
@@ -77,7 +91,8 @@ function SavedLocationsCardImpl({
   const [draftLngStr, setDraftLngStr] = useState('');
   const [adding, setAdding] = useState(false);
 
-  if (settings.locationMode !== 'manual') return null;
+  /** GPS. Anything that is not explicit manual entry. */
+  const isAuto = settings.locationMode !== 'manual';
 
   const presets = settings.locationPresets ?? [];
   const limitReached = presets.length >= MAX_LOCATION_PRESETS;
@@ -86,6 +101,13 @@ function SavedLocationsCardImpl({
     const preset = presets.find(p => p.id === id);
     if (!preset) return;
     updateSettings({
+      // Using a saved location means using it — from automatic too. This
+      // set the coordinates and left the mode alone, so on automatic the
+      // button did nothing at all: the app went on showing GPS times while
+      // the row it had just been given ticked itself as active. The chip on
+      // the home screen has always switched the mode; this is the same act
+      // from the other end of the app.
+      locationMode: 'manual',
       manualLatitude: preset.latitude,
       manualLongitude: preset.longitude,
       manualLocationLabel: preset.label,
@@ -141,6 +163,15 @@ function SavedLocationsCardImpl({
       }
       lat = parsedLat;
       lng = parsedLng;
+    } else if (isAuto) {
+      // "Current" on automatic is the GPS fix, not the manual coordinates
+      // — which are whatever was last typed in, possibly nothing. This is
+      // the case that used to be unreachable, because the card was not
+      // rendered at all in this mode; someone wanting to save the city
+      // they were standing in had to leave automatic to do it.
+      lat = settings.lastFetchedLatitude ?? null;
+      lng = settings.lastFetchedLongitude ?? null;
+      label = settings.autoLocationLabel;
     } else {
       lat = settings.manualLatitude;
       lng = settings.manualLongitude;
@@ -180,9 +211,13 @@ function SavedLocationsCardImpl({
     // old behaviour overwrote `manualLat/Lng` and the previous location
     // was lost forever. Auto-save it as a preset first so both end up
     // in the list and the user can switch back with a tap.
+    // …in manual mode. On automatic there is nothing live to lose: the
+    // manual coordinates are not what the app is using, so rescuing them
+    // into the list would hand someone who has been on GPS for months a
+    // "Previous location" they never asked for.
     let workingPresets = presets;
-    const currentLat = settings.manualLatitude;
-    const currentLng = settings.manualLongitude;
+    const currentLat = isAuto ? 0 : settings.manualLatitude;
+    const currentLng = isAuto ? 0 : settings.manualLongitude;
     const hasCurrent =
       Number.isFinite(currentLat) &&
       Number.isFinite(currentLng) &&
@@ -217,15 +252,23 @@ function SavedLocationsCardImpl({
       label,
     });
     const newPreset = next[next.length - 1];
-    updateSettings({
-      locationPresets: next,
-      activeLocationPresetId: newPreset?.id,
-      // Switch the manual location to the just-saved preset so the rest
-      // of the app immediately reflects the user's choice.
-      manualLatitude: lat,
-      manualLongitude: lng,
-      manualLocationLabel: label,
-    });
+    updateSettings(
+      isAuto
+        ? // Saving is not switching. Someone on automatic who adds the city
+          // they are visiting next week has not asked to leave the city
+          // they are in; the list gains a row and the app carries on where
+          // it is. Use it when you want it — the row's button, or the chip.
+          { locationPresets: next }
+        : {
+            locationPresets: next,
+            activeLocationPresetId: newPreset?.id,
+            // Switch the manual location to the just-saved preset so the
+            // rest of the app immediately reflects the user's choice.
+            manualLatitude: lat,
+            manualLongitude: lng,
+            manualLocationLabel: label,
+          },
+    );
     setDraftName('');
     setDraftPlace(null);
     setDraftLatStr('');
@@ -266,7 +309,11 @@ function SavedLocationsCardImpl({
         ) : (
           <View style={styles.list}>
             {presets.map(p => {
-              const isActive = settings.activeLocationPresetId === p.id;
+              // On automatic nothing in this list is in use, whatever the
+              // stored id still says — the app is following the GPS, and a
+              // ticked row would be claiming otherwise.
+              const isActive =
+                !isAuto && settings.activeLocationPresetId === p.id;
               return (
                 <View
                   key={p.id}
