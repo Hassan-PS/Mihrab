@@ -150,14 +150,19 @@ describe('following the recitation is not switched off by starting it', () => {
     // readers hand the pager `core.resumeFollow` as what to do when a
     // gesture navigates nowhere, and mushafPager.test.ts runs that path
     // for real.
-    for (const file of [
-      'src/quran/MushafPhoneReader.tsx',
-      'src/quran/MushafSpreadReader.tsx',
-    ]) {
-      const src = read(file);
-      expect(src).toMatch(/onSettleNoop: core\.resumeFollow,/);
-      expect(src).toMatch(/onTurnStart: core\.suspendFollow,/);
-    }
+    // The spread reader hands the two callbacks straight through; the phone
+    // reader wraps them, because the same two moments are also when its
+    // render window widens and narrows (see WINDOW_RESTING) — the calls are
+    // still there, and are still the whole body of the wrapper.
+    expect(read('src/quran/MushafSpreadReader.tsx')).toMatch(
+      /onSettleNoop: core\.resumeFollow,/,
+    );
+    expect(read('src/quran/MushafSpreadReader.tsx')).toMatch(
+      /onTurnStart: core\.suspendFollow,/,
+    );
+    const phone = read('src/quran/MushafPhoneReader.tsx');
+    expect(phone).toMatch(/onTurnStart: \(\) => \{[^}]*core\.suspendFollow\(\);/);
+    expect(phone).toMatch(/onSettleNoop: \(\) => \{[^}]*core\.resumeFollow\(\);/);
   });
 });
 

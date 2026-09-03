@@ -293,13 +293,18 @@ describe('the readers hand the page a handler, not an arrow around one', () => {
     expect(font).toMatch(/\}, \[page, enabled\]\);/);
   });
 
-  it('the phone reader opens on one page and widens after the transition', () => {
+  // One page at rest, three while a finger is on the pager. The neighbours
+  // are what a rotation reveals — the platform resizes the pager's viewport
+  // before any of our code runs, and the frame it shows is the current page
+  // beside the one that was waiting off-screen. There must be nothing there
+  // to reveal; the window widens on touch, in the gap before the drag.
+  it('the phone reader holds one page at rest and widens on a touch', () => {
     const phone = read('src/quran/MushafPhoneReader.tsx');
-    expect(phone).toMatch(/const WINDOW_OPENING = 1;/);
-    expect(phone).toMatch(/const WINDOW_READING = 3;/);
-    expect(phone).toMatch(
-      /InteractionManager\.runAfterInteractions\(\(\) =>\s*setWindowSize\(WINDOW_READING\)/,
-    );
+    expect(phone).toMatch(/const WINDOW_RESTING = 1;/);
+    expect(phone).toMatch(/const WINDOW_MOVING = 3;/);
+    expect(phone).toMatch(/useState\(WINDOW_RESTING\)/);
+    expect(phone).toContain('onTouchStart={widenWindow}');
+    expect(phone).toContain('onTouchEnd={narrowWindowSoon}');
     expect(phone).toMatch(/windowSize=\{windowSize\}/);
   });
 

@@ -42,7 +42,6 @@ import React, {
 } from 'react';
 import {
   FlatList,
-  InteractionManager,
   Platform,
   Pressable,
   ScrollView,
@@ -103,17 +102,41 @@ const PAGE_HEADER_PAD_TOP = 10;
 const PAGE_HEADER_CONTENT_H = 21;
 
 /**
- * The list's render window while the reader is opening, and after.
+ * The list's render window: ONE page at rest, three while it is being
+ * touched.
  *
- * Three pages — the one being read and a neighbour either side — is right
- * for swiping: the next page is already drawn when the finger moves. It is
- * wrong for OPENING: the first page's font and fifteen lines of text were
- * sharing the thread with two more pages' worth, under the push
- * transition, and the page the reader came for was the one that waited.
- * So the window is one page until the transition has finished, then three.
+ * ── WHY A PHONE MUṢḤAF MUST NOT HOLD A NEIGHBOUR AT REST ──────────────
+ *
+ * The window used to widen to three once the push transition was over —
+ * the page being read and a neighbour either side — so the next page was
+ * already drawn when the finger moved. Those neighbours are laid out at
+ * ±one viewport, just outside the window.
+ *
+ * Then the phone is turned. The native view is resized to the landscape
+ * width in the platform's own layout pass, LONG before React Native has
+ * re-rendered anything: the pager's viewport is suddenly twice as wide,
+ * its children are still portrait-wide, and its scroll offset is still a
+ * multiple of the portrait width. The frame the platform then shows —
+ * under its own rotation cross-fade, so it is on screen for the length of
+ * that animation — is the current page and its neighbour, side by side.
+ * On a phone. Reported, exactly, as looking fragile and unstable.
+ *
+ * Nothing in JavaScript can beat that frame: it is composed before any of
+ * our code runs. What can be done is to make sure there is no second page
+ * mounted to reveal. So the window is one at rest, and widens the moment a
+ * finger lands on the pager — `onTouchStart`, not the scroll, so the
+ * neighbours are drawn during the gap between touching and moving — then
+ * narrows again once the reader has been still for a while.
+ *
+ * (It is also right for OPENING, which is what it was first written for:
+ * the first page's font and fifteen lines of text should not share the
+ * thread with two more pages' worth under the push transition.)
  */
-const WINDOW_OPENING = 1;
-const WINDOW_READING = 3;
+const WINDOW_RESTING = 1;
+const WINDOW_MOVING = 3;
+
+/** How long the pager stays wide after it has stopped being touched. */
+const WINDOW_IDLE_MS = 2500;
 
 type PageItemProps = {
   page: number;
@@ -401,6 +424,27 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
     [pageWidth],
   );
 
+  // One page at rest, three while the pager is being used — see the note on
+  // WINDOW_RESTING for the rotation this is really about.
+  const [windowSize, setWindowSize] = useState(WINDOW_RESTING);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearIdle = useCallback(() => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = null;
+  }, []);
+  const widenWindow = useCallback(() => {
+    clearIdle();
+    setWindowSize(WINDOW_MOVING);
+  }, [clearIdle]);
+  const narrowWindowSoon = useCallback(() => {
+    clearIdle();
+    idleTimer.current = setTimeout(
+      () => setWindowSize(WINDOW_RESTING),
+      WINDOW_IDLE_MS,
+    );
+  }, [clearIdle]);
+  useEffect(() => clearIdle, [clearIdle]);
+
   /**
    * The same pager the spread reader drives, with an index per page. It
    * used to be a hand-rolled copy of the mechanics — a settled ref, two
@@ -412,8 +456,10 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
     (page: number, prevPage: number) => {
       commitPageTurn(page, prevPage);
       setCurrentPage(page);
+      // The turn is over: let the neighbours go again after a pause.
+      narrowWindowSoon();
     },
-    [commitPageTurn, setCurrentPage],
+    [commitPageTurn, setCurrentPage, narrowWindowSoon],
   );
   const { handlers: pagerHandlers, turnPage } = useMushafPager({
     list: listRef,
@@ -423,8 +469,15 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
     indexForPage: pageIndex,
     pageForIndex: indexPage,
     onTurn,
-    onTurnStart: core.suspendFollow,
-    onSettleNoop: core.resumeFollow,
+    onTurnStart: () => {
+      // A drag has begun: draw the neighbours if a touch has not already.
+      widenWindow();
+      core.suspendFollow();
+    },
+    onSettleNoop: () => {
+      narrowWindowSoon();
+      core.resumeFollow();
+    },
   });
 
   /**
@@ -442,15 +495,6 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
     if (riwayahById(riwayah).render === 'unicode') return;
     warmAround(currentPage, WARM_RADIUS);
   }, [currentPage, riwayah]);
-
-  // One page while opening, three once the transition is out of the way.
-  const [windowSize, setWindowSize] = useState(WINDOW_OPENING);
-  useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() =>
-      setWindowSize(WINDOW_READING),
-    );
-    return () => task.cancel();
-  }, []);
 
   // Which page each of the per-page things is on, so every other page can
   // be handed null and stay put.
@@ -533,6 +577,14 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       <StatusBar hidden={isFullscreen} animated />
       <View
         style={styles.listWrap}
+        // A finger on the pager means a page turn is coming: draw the
+        // neighbours now, in the gap before the drag starts. See
+        // WINDOW_RESTING.
+        onTouchStart={widenWindow}
+        // And let them go again once the reader has been still for a while
+        // — the turn's own animation is far shorter than that.
+        onTouchEnd={narrowWindowSoon}
+        onTouchCancel={narrowWindowSoon}
         onLayout={e => setListH(e.nativeEvent.layout.height)}>
         <FlatList
           ref={listRef}
@@ -551,7 +603,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           onScrollToIndexFailed={pagerHandlers.onScrollToIndexFailed}
           onScrollBeginDrag={pagerHandlers.onScrollBeginDrag}
           // A page is a typeface plus ~150 text nodes, so a small window
-          // is plenty and keeps swiping instant — see WINDOW_READING.
+          // is plenty and keeps swiping instant — see WINDOW_RESTING.
           windowSize={windowSize}
           maxToRenderPerBatch={2}
           initialNumToRender={1}
