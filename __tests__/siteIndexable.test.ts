@@ -389,6 +389,13 @@ describe('the stylesheet is safe in both directions', () => {
     expect(css).toMatch(/\.skip \{[^}]*clip-path: inset\(50%\)/s);
   });
 
+  it('lays a row of cards out on the class, not on a list of sections', () => {
+    // `.privacy .cols, .support .cols, .faq .cols` was a list that had to
+    // be remembered, and the translated pages' feature section was not on
+    // it: three cards, flush against each other, on twelve pages.
+    expect(css).toMatch(/\n\.cols \{[^}]*display: grid/s);
+  });
+
   it('mirrors the two rules that are side-specific', () => {
     expect(css).toMatch(/\[dir="rtl"\] \.card ul/);
     expect(css).toMatch(/\[dir="rtl"\] \.group li::before/);

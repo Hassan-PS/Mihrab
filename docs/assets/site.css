@@ -224,7 +224,7 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
 .sweden .cols {
   /* Two columns, not three: the section is one wide explanation and two
      questions, and two questions across three columns leaves a hole. */
-  display: grid; gap: 20px; margin-top: 28px; align-items: start;
+  align-items: start;
   grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
 }
 /* A card that carries the whole argument runs the width of the row rather
@@ -257,8 +257,17 @@ h2 { font-size: clamp(26px, 4vw, 34px); }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
   .gallery figcaption, .spread figcaption { font-size: 13.5px; }
 }
-/* ---- privacy ---- */
-.privacy .cols, .support .cols, .faq .cols {
+/* ---- a row of cards ----
+ *
+ * `.cols` IS the grid, rather than the grid being granted to a list of
+ * sections that happen to use it. It was written as `.privacy .cols,
+ * .support .cols, .faq .cols`, which is a list that has to be remembered:
+ * the translated pages use the same markup for their feature section, that
+ * section was not on the list, and its three cards stacked flush against
+ * each other with no gap at all — on twelve pages at once. A layout that
+ * has to be re-granted per section is a layout that will be forgotten
+ * again. */
+.cols {
   margin-top: 32px; display: grid; gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
 }
