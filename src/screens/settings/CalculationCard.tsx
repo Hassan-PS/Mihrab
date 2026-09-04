@@ -111,6 +111,50 @@ function CalculationCardImpl({
         </View>
       )}
 
+      {/* Mālikī second times (issue #19).
+       *
+       * Here rather than with the other optional times, for two reasons.
+       * Those four each schedule a notification and this one deliberately
+       * does not — it is a line under a prayer, not an event. And the
+       * sentence that matters most about it ("the 1:1 shadow whatever your
+       * madhab setting says") only means anything sitting directly under
+       * the Ḥanafī asr switch it overrides. */}
+      <View
+        style={[
+          s.card,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <View style={s.switchRow}>
+          <View style={s.switchCopy}>
+            <Text style={[s.valueText, { color: palette.text }]}>
+              {t('settings.malikiSecondTimes', 'Maliki second times')}
+            </Text>
+            <Text style={[s.help, { color: palette.muted }]}>
+              {t('settings.malikiSecondTimesHelp')}
+            </Text>
+          </View>
+          <Switch
+            value={settings.malikiSecondTimesEnabled}
+            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            thumbColor={'#ffffff'}
+            onValueChange={v => updateSettings({ malikiSecondTimesEnabled: v })}
+          />
+        </View>
+        {/* Only once it is on. Off, they are two paragraphs explaining
+            something the reader has not asked about; on, they are what
+            the app is and is not claiming, which they are owed. */}
+        {settings.malikiSecondTimesEnabled ? (
+          <>
+            <Text style={[s.help, { color: palette.muted, marginTop: 10 }]}>
+              {t('settings.malikiSecondTimesModelled')}
+            </Text>
+            <Text style={[s.help, { color: palette.muted, marginTop: 6 }]}>
+              {t('settings.malikiSecondTimesSource')}
+            </Text>
+          </>
+        ) : null}
+      </View>
+
       {/*
        * Per-prayer offsets — task #22. Always available regardless of
        * provider; the offsets are applied AFTER provider validation.

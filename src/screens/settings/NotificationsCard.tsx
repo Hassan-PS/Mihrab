@@ -456,48 +456,6 @@ function NotificationsCardImpl({
         />
       </View>
 
-      {/* Mālikī second times (issue #19). Not a row and not an alert: a
-          line under each prayer on the Today card saying when its
-          preferred window closes. The two paragraphs under the switch are
-          not decoration — one names the source, because religious content
-          in this app is attributed, and the other says which of the five
-          boundaries are geometry and which are a model of a colour. A
-          reader is owed the difference. */}
-      <View
-        style={[
-          s.card,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
-        <View style={s.switchRow}>
-          <View style={s.switchCopy}>
-            <Text style={[s.valueText, { color: palette.text }]}>
-              {t('settings.malikiSecondTimes', 'Maliki second times')}
-            </Text>
-            <Text style={[s.help, { color: palette.muted }]}>
-              {t('settings.malikiSecondTimesHelp')}
-            </Text>
-          </View>
-          <Switch
-            value={settings.malikiSecondTimesEnabled}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-            thumbColor={'#ffffff'}
-            onValueChange={v =>
-              updateSettings({ malikiSecondTimesEnabled: v })
-            }
-          />
-        </View>
-        {settings.malikiSecondTimesEnabled ? (
-          <>
-            <Text style={[s.help, { color: palette.muted, marginTop: 10 }]}>
-              {t('settings.malikiSecondTimesModelled')}
-            </Text>
-            <Text style={[s.help, { color: palette.muted, marginTop: 6 }]}>
-              {t('settings.malikiSecondTimesSource')}
-            </Text>
-          </>
-        ) : null}
-      </View>
-
       {/* End-of-day log prompt (v2.8.5). The same switch lives on the Log
           screen, where the thing it affects is visible. */}
       <View
