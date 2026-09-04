@@ -11,7 +11,7 @@
  * the verse of the day.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   FlatList,
@@ -93,6 +93,19 @@ export function QuranScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   useAndroidSubScreenBack();
+  /**
+   * Pressing the Quran tab while already on it returns to the top — the
+   * same rule as Today, the Log, Duas and Settings, and the one this
+   * screen most needs: the surah list is 114 rows and the juz list 30, so
+   * "back to the top" was otherwise a long swipe with no shortcut.
+   *
+   * ONE ref for all three lists. The tab renders exactly one of them at a
+   * time, so at any moment this holds whichever is mounted; React detaches
+   * the outgoing list before it attaches the incoming one, so a switch
+   * never leaves the ref pointing at a list that is gone.
+   */
+  const listRef = useRef<FlatList>(null);
+  useScrollToTop(listRef);
   const isArabic = i18n.language === 'ar';
   const quran = useQuranState();
   /**
@@ -1130,6 +1143,7 @@ export function QuranScreen() {
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
       {tab === 'surah' ? (
         <FlatList<SurahIndex>
+          ref={listRef}
           {...tabBarScroll}
           data={[...filteredSurahs]}
           keyExtractor={s => String(s.number)}
@@ -1143,6 +1157,7 @@ export function QuranScreen() {
         />
       ) : tab === 'juz' ? (
         <FlatList<JuzRow>
+          ref={listRef}
           {...tabBarScroll}
           data={juzRows}
           keyExtractor={j => String(j.juz)}
@@ -1154,6 +1169,7 @@ export function QuranScreen() {
         />
       ) : (
         <FlatList
+          ref={listRef}
           {...tabBarScroll}
           data={[0]}
           keyExtractor={() => 'bookmarks'}
