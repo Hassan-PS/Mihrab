@@ -466,10 +466,16 @@ Local jest passed before the stamp and passed after it, because the file
 was correct on disk the whole time; the only place the gap was visible
 was CI, on a commit that was already tagged and published.
 
-So the rule is: `git add` in the Publishing step must list every file
-`sync-version.js` writes, and the two lists are now a pair that has to be
-edited together. That is fixed rather than remembered — the add line
-carries the reason above it.
+And it was worse than one missing file, which the first fix missed:
+`npm run sync-version` is `sync-version.js && build-site.js`, and the cut
+ran only the first of the two. So eleven GENERATED locale pages kept the
+old version as well, and `build-site.js --check` failed on all of them.
+
+Fixed at both ends rather than remembered. The stamp step now runs the
+generator and re-checks it, and the Publishing step adds `docs/` whole
+instead of naming the pages that happened to exist when the line was
+typed — a list of filenames in a release script is a list that goes stale
+the first time the site grows.
 
 The cask also needed a hand. The script's own comment predicted it: the
 cask's version is whatever SHIPPED last, not this repo's previous

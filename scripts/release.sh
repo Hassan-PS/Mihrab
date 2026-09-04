@@ -432,7 +432,15 @@ sed -i '' "s/versionCode $OLD_CODE/versionCode $CODE/" "$GRADLE_FILE"
 sed -i '' "s/versionName \"$OLD_VERSION\"/versionName \"$VERSION\"/" "$GRADLE_FILE"
 sed -i '' "s/CURRENT_PROJECT_VERSION = $OLD_CODE;/CURRENT_PROJECT_VERSION = $CODE;/g" "$PBXPROJ"
 sed -i '' "s/MARKETING_VERSION = $OLD_VERSION;/MARKETING_VERSION = $VERSION;/g" "$PBXPROJ"
+# BOTH HALVES. `npm run sync-version` is `sync-version.js && build-site.js`
+# and the cut ran only the first, so the eleven generated locale pages
+# kept the previous version while docs/index.html moved — which
+# `build-site.js --check` (and the test that runs it) then failed on,
+# after the tag.
 node "$ROOT/scripts/sync-version.js" >/dev/null || die "sync-version failed"
+node "$ROOT/scripts/build-site.js" >/dev/null || die "build-site failed"
+node "$ROOT/scripts/build-site.js" --check >/dev/null \
+  || die "the generated site is still out of date after rebuilding it"
 [ "$(current_code)" = "$CODE" ] || die "gradle stamp did not take"
 grep -q "MARKETING_VERSION = $VERSION;" "$PBXPROJ" || die "pbxproj stamp did not take"
 ok "build.gradle, pbxproj, site and F-Droid recipe all say $VERSION ($CODE)"
@@ -585,16 +593,14 @@ ok "docs/release-log.md updated"
 
 step "Publishing"
 
-# EVERY FILE `sync-version.js` WRITES, not the ones it wrote when this
-# list was typed. The Swedish site page was added in 2.15.0's cycle;
-# sync-version learned to stamp it and this list did not, so the release
-# commit carried a site that said 2.15.0 in English and 2.14.4 in
-# Swedish — and `siteVersion.test.ts`, which exists to catch exactly
-# that, went red on the release commit itself. The stamp is on disk
-# either way, so the failure is invisible here and shows up in CI after
-# the tag is already pushed.
-git add "$GRADLE_FILE" "$PBXPROJ" \
-        "$ROOT/docs/index.html" "$ROOT/docs/sv/index.html" \
+# THE WHOLE OF `docs/`, not a list of the pages that existed when this
+# line was typed. The site is fourteen files now — English, Swedish, and
+# eleven generated locales — and the version stamp reaches all of them.
+# Naming them individually is how 2.15.0 went out with a site that said
+# 2.15.0 in English and 2.14.4 everywhere else: the stamp lands on disk
+# either way, so local jest is green before and after and the mismatch is
+# only visible in CI, on a commit that is already tagged and published.
+git add "$GRADLE_FILE" "$PBXPROJ" "$ROOT/docs" \
         "$ROOT/contrib/fdroid/com.prayer_times.yml" \
         "$JOURNAL" \
         "$ROOT/fastlane/metadata/android" || die "git add failed"
