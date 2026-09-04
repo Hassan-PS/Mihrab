@@ -585,7 +585,16 @@ ok "docs/release-log.md updated"
 
 step "Publishing"
 
-git add "$GRADLE_FILE" "$PBXPROJ" "$ROOT/docs/index.html" \
+# EVERY FILE `sync-version.js` WRITES, not the ones it wrote when this
+# list was typed. The Swedish site page was added in 2.15.0's cycle;
+# sync-version learned to stamp it and this list did not, so the release
+# commit carried a site that said 2.15.0 in English and 2.14.4 in
+# Swedish — and `siteVersion.test.ts`, which exists to catch exactly
+# that, went red on the release commit itself. The stamp is on disk
+# either way, so the failure is invisible here and shows up in CI after
+# the tag is already pushed.
+git add "$GRADLE_FILE" "$PBXPROJ" \
+        "$ROOT/docs/index.html" "$ROOT/docs/sv/index.html" \
         "$ROOT/contrib/fdroid/com.prayer_times.yml" \
         "$JOURNAL" \
         "$ROOT/fastlane/metadata/android" || die "git add failed"

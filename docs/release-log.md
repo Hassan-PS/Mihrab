@@ -455,4 +455,33 @@ Changed the release cycle itself:
 
   - `scripts/sync-version.js`
 
-**Lesson:** _(unfilled)_
+**Lesson:** The journal's own "changed the release cycle" line named
+`scripts/sync-version.js` and that was the warning, read too late. The
+Swedish site page arrived this cycle, sync-version learned to stamp it,
+and the list of files the release commit ADDS did not — so the stamp
+happened on disk, the commit went out with a site saying 2.15.0 in
+English and 2.14.4 in Swedish, and `siteVersion.test.ts` — which exists
+for precisely that mismatch — went red on the release commit itself.
+Local jest passed before the stamp and passed after it, because the file
+was correct on disk the whole time; the only place the gap was visible
+was CI, on a commit that was already tagged and published.
+
+So the rule is: `git add` in the Publishing step must list every file
+`sync-version.js` writes, and the two lists are now a pair that has to be
+edited together. That is fixed rather than remembered — the add line
+carries the reason above it.
+
+The cask also needed a hand. The script's own comment predicted it: the
+cask's version is whatever SHIPPED last, not this repo's previous
+version, and 2.14.4 never shipped to the Mac — so the version sed matched
+nothing while the sha sed matched fine, leaving a cask on disk pointing
+at the 2.14.3 URL with 2.15.0's checksum. It died before pushing that,
+which is the gate working; the manual fix was one line. Worth doing
+properly next time: sed the version by pattern rather than by the value
+release.sh happens to think preceded it.
+
+Xcode Cloud never got a build. Not a code failure — the account was out
+of build minutes for the month, so #675, #676 and #677 all failed at
+"Preparing build for App Store Connect" and the release went out with
+Android, F-Droid and the Mac only. The iOS channel needs the workflow
+rerun when the quota resets.
