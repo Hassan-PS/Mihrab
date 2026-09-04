@@ -139,41 +139,46 @@ function PrayerRowImpl({
           </Text>
         ) : null}
       </View>
-      {/* Beside the time, before it in reading order: the time is what
-          the row is for, so the control that decides whether it speaks
-          sits next to it rather than at the far edge where a thumb has
-          to travel. */}
-      {alertMode && onCycleAlertMode ? (
-        <AlertModeButton
-          mode={alertMode}
-          palette={palette}
-          onPress={onCycleAlertMode}
-          prayerLabel={t(`prayer.${prayerKey}`)}
-          secondary={isSecondary}
-        />
-      ) : null}
-      <View style={styles.timeWrap}>
-        {/* Only for a row the user aimed at. The next prayer is already
-            emphasised, and marking it too would say nothing. */}
-        {isChosen ? (
-          <View style={[styles.chosenDot, { backgroundColor: palette.accent }]} />
+      {/* The control and the time travel together on the trailing edge.
+          The row is `space-between`, so a third child left loose in the
+          middle floats there — halfway between the name and the time,
+          belonging to neither. Grouped, it reads as what it is: a
+          setting about THIS time, next to it. */}
+      <View style={styles.trailing}>
+        {alertMode && onCycleAlertMode ? (
+          <AlertModeButton
+            mode={alertMode}
+            palette={palette}
+            onPress={onCycleAlertMode}
+            prayerLabel={t(`prayer.${prayerKey}`)}
+            secondary={isSecondary}
+          />
         ) : null}
-        <Text
-          style={[
-            styles.time,
-            tabularNumeralStyle,
-            {
-              color: isNext
-                ? palette.accent
-                : isSecondary
-                ? palette.muted
-                : palette.text,
-              fontWeight: isNext ? '700' : '500',
-            },
-          ]}
-          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-          {clock(rawTime)}
-        </Text>
+        <View style={styles.timeWrap}>
+          {/* Only for a row the user aimed at. The next prayer is already
+              emphasised, and marking it too would say nothing. */}
+          {isChosen ? (
+            <View
+              style={[styles.chosenDot, { backgroundColor: palette.accent }]}
+            />
+          ) : null}
+          <Text
+            style={[
+              styles.time,
+              tabularNumeralStyle,
+              {
+                color: isNext
+                  ? palette.accent
+                  : isSecondary
+                    ? palette.muted
+                    : palette.text,
+                fontWeight: isNext ? '700' : '500',
+              },
+            ]}
+            maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+            {clock(rawTime)}
+          </Text>
+        </View>
       </View>
     </Row>
   );
@@ -193,6 +198,11 @@ const styles = StyleSheet.create({
   },
   nameWrap: {
     flexShrink: 1,
+  },
+  trailing: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   daruri: {
     fontSize: 11,
