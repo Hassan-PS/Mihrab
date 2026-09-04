@@ -1312,6 +1312,12 @@ export function TilawahScreen() {
                 tone={palette.isDark ? 'night' : 'paper'}
                 accentColor={String(palette.accentSolid)}
                 playing={status.active}
+                // The reader keeps its neighbours mounted, so their fonts
+                // load as pages do. This preview mounts ONE page, so
+                // without this every page turn in the recitation was a
+                // spinner while the next page's font was fetched — the
+                // reciter had moved on and the preview had not.
+                prefetchRadius={1}
                 onUnavailable={() => setPageUnavailable(true)}
               />
             </ScrollView>
