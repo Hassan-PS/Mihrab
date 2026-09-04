@@ -347,16 +347,68 @@ export function nextAyahRef(ref: AyahRef): AyahRef | null {
   return { surah: ref.surah + 1, ayah: 1 };
 }
 
+/**
+ * SHUFFLE IS A SURAH SHUFFLE, AND ONLY EVER COULD BE.
+ *
+ * Shuffling ayahs would be meaningless — worse than meaningless: the
+ * Quran is ordered, an ayah is a sentence in an argument, and playing
+ * 2:97 after 78:12 is not a shuffled album, it is noise. So shuffle
+ * changes exactly one thing: which surah follows this one. Inside a
+ * surah, nothing moves.
+ *
+ * A bag, not a die. Rolling 1–114 each time replays surahs before it has
+ * touched most of them, which people read as broken. Every surah is heard
+ * once before any is heard twice, and the bag refills when it empties.
+ */
+let shuffle = false;
+const heard = new Set<number>();
+
+function pickNextSurah(after: number): number {
+  heard.add(after);
+  if (heard.size >= 114) heard.clear();
+  const left: number[] = [];
+  for (let n = 1; n <= 114; n++) if (!heard.has(n) && n !== after) left.push(n);
+  if (left.length === 0) return after === 114 ? 1 : after + 1;
+  return left[Math.floor(Math.random() * left.length)];
+}
+
+/** Whether the next surah is the next one, or any other one. */
+export function setShuffleSurahs(on: boolean): void {
+  shuffle = on;
+  if (!on) heard.clear();
+}
+
+export function isShuffling(): boolean {
+  return shuffle;
+}
+
+/** For tests: an empty bag and a known ordering. */
+export function _resetShuffleForTests(): void {
+  shuffle = false;
+  heard.clear();
+}
+
+/** The step the listening queue walks with — sequential, or shuffled. */
+function nextListenRef(ref: AyahRef): AyahRef | null {
+  const meta = findSurah(ref.surah);
+  if (!meta) return null;
+  if (ref.ayah < meta.ayahCount) return { surah: ref.surah, ayah: ref.ayah + 1 };
+  if (!shuffle) return nextAyahRef(ref);
+  return { surah: pickNextSurah(ref.surah), ayah: 1 };
+}
+
 /** The next `count` ayahs from `start` inclusive, and where to resume. */
 export function listenWindow(
   start: AyahRef,
   count: number,
+  /** How to step. Defaults to reading order; shuffle passes its own. */
+  step: (ref: AyahRef) => AyahRef | null = nextAyahRef,
 ): { refs: AyahRef[]; cursor: AyahRef | null } {
   const refs: AyahRef[] = [];
   let cur: AyahRef | null = start;
   while (cur && refs.length < count) {
     refs.push(cur);
-    cur = nextAyahRef(cur);
+    cur = step(cur);
   }
   return { refs, cursor: cur };
 }
@@ -377,7 +429,11 @@ async function extendListening(): Promise<void> {
     ]);
     const remaining = queue.length - ((activeIndex ?? 0) + 1);
     if (remaining >= LISTEN_REFILL_AT) return;
-    const { refs, cursor } = listenWindow(listenCursor, LISTEN_WINDOW);
+    const { refs, cursor } = listenWindow(
+      listenCursor,
+      LISTEN_WINDOW,
+      nextListenRef,
+    );
     if (refs.length === 0) {
       listenCursor = null;
       return;
@@ -467,7 +523,7 @@ export async function listenFrom(
   const prefs = getQuranState().prefs;
   setStatus({ reciterId: prefs.reciterId, loading: true });
   const start = { surah, ayah: Math.max(1, Math.min(meta.ayahCount, ayah)) };
-  const { refs, cursor } = listenWindow(start, LISTEN_WINDOW);
+  const { refs, cursor } = listenWindow(start, LISTEN_WINDOW, nextListenRef);
   const tracks = await buildTracks(refs, prefs.reciterId, 0);
   await TrackPlayer.reset();
   await TrackPlayer.add(tracks);
@@ -485,6 +541,36 @@ export async function listenFrom(
 /** Is a continuous listen the thing that is playing? */
 export function isListening(): boolean {
   return listening;
+}
+
+/**
+ * The next surah, and the previous one.
+ *
+ * The transport's big arrows move by SURAH, not by ayah. An ayah is six
+ * seconds: a "next" that advanced by one was a control you had to press
+ * two hundred times to leave Al-Baqarah, and the thing people reach for
+ * when a recitation is playing is the next surah. Ayah stepping is still
+ * there, on its own smaller pair — see the screen.
+ *
+ * Previous restarts the current surah unless you are already at its
+ * beginning, which is what every music player does with a track and what
+ * makes the button useful twice: once to start this one again, twice to
+ * leave it.
+ */
+export async function listenNextSurah(): Promise<void> {
+  const current = status.active?.surah ?? 0;
+  if (current >= 114) return;
+  await listenFrom(Math.max(1, current) + (current === 0 ? 0 : 1), 1);
+}
+
+export async function listenPreviousSurah(): Promise<void> {
+  const current = status.active?.surah ?? 1;
+  const ayah = status.active?.ayah ?? 1;
+  if (ayah > 1) {
+    await listenFrom(current, 1);
+    return;
+  }
+  await listenFrom(Math.max(1, current - 1), 1);
 }
 
 export async function stopPlayback(): Promise<void> {

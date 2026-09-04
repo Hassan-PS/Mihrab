@@ -38,12 +38,16 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useProgress } from 'react-native-track-player';
+import Svg, { Path } from 'react-native-svg';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { useAndroidSubScreenBack } from '../../navigation/useAndroidSubScreenBack';
 import { SURAHS, type SurahIndex } from '../../quran/quran';
 import {
   isListening,
   listenFrom,
+  listenNextSurah,
+  listenPreviousSurah,
+  setShuffleSurahs,
   pausePlayback,
   resumePlayback,
   seekTo,
@@ -192,6 +196,38 @@ function Scrubber({
 }
 
 /**
+ * Two arrows crossing. The one glyph here that Views cannot draw, so it
+ * is the one that gets an SVG — and therefore a resolved hex, since
+ * react-native-svg renders nothing at all when handed a PlatformColor.
+ */
+function ShuffleIcon({ color }: { color: string }) {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M3 6h3.5l4 6M3 18h3.5l4-6"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M14.5 6H21M14.5 18H21"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M18.5 3.5 21 6l-2.5 2.5M18.5 15.5 21 18l-2.5 2.5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/**
  * Play / pause / skip / stop, drawn rather than typed.
  *
  * Views with borders and backgrounds, not SVG — two bars, a triangle and a
@@ -211,8 +247,13 @@ function TransportIcon({
   // Simple filled glyphs built from views: two bars, a triangle, a square.
   // An SVG would be five more imports for shapes this plain.
   if (kind === 'pause') {
+    // `styles.iconCentre`, not `styles.iconRow`. The row had a fixed
+    // width and no justification, so two five-point bars packed against
+    // its leading edge inside a twenty-eight-point box — which is why the
+    // pause sat visibly left of the circle it was in, but only while
+    // playing, since the play triangle fills its own box.
     return (
-      <View style={[styles.iconRow, { width: size, height: size }]}>
+      <View style={[styles.iconCentre, { width: size, height: size }]}>
         <View style={[styles.bar, { backgroundColor: color, height: size }]} />
         <View style={[styles.bar, { backgroundColor: color, height: size }]} />
       </View>
@@ -248,7 +289,12 @@ function TransportIcon({
       }}
     />
   );
-  if (kind === 'play') return triangle;
+  // A triangle's mass sits behind its point, so a geometrically centred
+  // one reads as too far left. The nudge is the standard correction every
+  // play button carries.
+  if (kind === 'play') {
+    return <View style={{ marginStart: size * 0.12 }}>{triangle}</View>;
+  }
   // Skip: a triangle with a bar, mirrored for previous.
   return (
     <View
@@ -446,6 +492,23 @@ export function TilawahScreen() {
     },
     [shownSurah],
   );
+
+  /**
+   * Shuffle is a preference, and the player is where it takes effect.
+   *
+   * The pref is the record; the playback module holds the live flag,
+   * because the queue's own step function is what consults it and that
+   * runs long after this screen is gone. Pushed on mount too — a listen
+   * resumed from the notification after a restart has to shuffle if that
+   * is what the user last chose.
+   */
+  const shuffleOn = quran.prefs.shuffleSurahs;
+  useEffect(() => {
+    setShuffleSurahs(shuffleOn);
+  }, [shuffleOn]);
+  const toggleShuffle = useCallback(() => {
+    setQuranPrefs({ shuffleSurahs: !shuffleOn });
+  }, [shuffleOn]);
 
   const seekAyah = useCallback(
     (ratio: number) => {
@@ -650,14 +713,43 @@ export function TilawahScreen() {
           </Text>
         </View>
 
+        {/* THE BIG ARROWS MOVE BY SURAH.
+
+            They moved by ayah, which meant a "next" you had to press two
+            hundred and eighty-five times to leave Al-Baqarah. An ayah is
+            six seconds; the thing someone reaches for while a recitation
+            plays is the next surah. Ayah stepping did not go away — it
+            went to its own smaller pair below, where its size says what
+            it is for. */}
         <View style={styles.transport}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('quran.listenPrevious', {
-              defaultValue: 'Previous ayah',
+            accessibilityState={{ selected: shuffleOn }}
+            accessibilityLabel={t('quran.tilawahShuffle', {
+              defaultValue: 'Shuffle surahs',
             })}
             hitSlop={12}
-            onPress={() => void skipToPreviousAyah()}
+            onPress={toggleShuffle}
+            style={({ pressed }) => [
+              styles.transportBtn,
+              pressed && styles.pressed,
+            ]}>
+            <ShuffleIcon
+              color={
+                shuffleOn
+                  ? String(palette.accentSolid)
+                  : String(palette.mutedSolid)
+              }
+            />
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.tilawahPrevSurah', {
+              defaultValue: 'Previous surah',
+            })}
+            hitSlop={12}
+            onPress={() => void listenPreviousSurah()}
             style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
             <TransportIcon kind="prev" color={palette.text} />
           </Pressable>
@@ -688,11 +780,11 @@ export function TilawahScreen() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('quran.listenNext', {
-              defaultValue: 'Next ayah',
+            accessibilityLabel={t('quran.tilawahNextSurah', {
+              defaultValue: 'Next surah',
             })}
             hitSlop={12}
-            onPress={() => void skipToNextAyah()}
+            onPress={() => void listenNextSurah()}
             style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
             <TransportIcon kind="next" color={palette.text} />
           </Pressable>
@@ -703,7 +795,41 @@ export function TilawahScreen() {
             hitSlop={12}
             onPress={() => void stopPlayback()}
             style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
-            <TransportIcon kind="stop" color={palette.muted} size={20} />
+            <TransportIcon kind="stop" color={palette.muted} size={18} />
+          </Pressable>
+        </View>
+
+        {/* And the ayah, for the line you want to hear again. */}
+        <View style={styles.ayahStep}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.listenPrevious', {
+              defaultValue: 'Previous ayah',
+            })}
+            onPress={() => void skipToPreviousAyah()}
+            style={({ pressed }) => [
+              styles.ayahStepBtn,
+              { backgroundColor: palette.controlBg },
+              pressed && styles.pressed,
+            ]}>
+            <Text style={[styles.ayahStepText, { color: palette.text }]}>
+              {`‹  ${t('quran.tilawahAyahWord', { defaultValue: 'Ayah' })}`}
+            </Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.listenNext', {
+              defaultValue: 'Next ayah',
+            })}
+            onPress={() => void skipToNextAyah()}
+            style={({ pressed }) => [
+              styles.ayahStepBtn,
+              { backgroundColor: palette.controlBg },
+              pressed && styles.pressed,
+            ]}>
+            <Text style={[styles.ayahStepText, { color: palette.text }]}>
+              {`${t('quran.tilawahAyahWord', { defaultValue: 'Ayah' })}  ›`}
+            </Text>
           </Pressable>
         </View>
 
@@ -1026,6 +1152,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  // Same row, justified. See the pause branch of TransportIcon.
+  iconCentre: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  ayahStep: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  ayahStepBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 999,
+    minWidth: 92,
+    alignItems: 'center',
+  },
+  ayahStepText: { fontSize: 13, fontWeight: '600' },
   mirrored: { transform: [{ scaleX: -1 }] },
   bar: { width: 5, borderRadius: 1.5 },
 

@@ -7,7 +7,7 @@
  * but no longer reachable from anywhere.
  */
 import type { ComponentType } from 'react';
-import type { ColorValue } from 'react-native';
+import { Platform, type ColorValue } from 'react-native';
 import type { RootStackParamList } from '../../navigation/types';
 import {
   AboutIcon,
@@ -39,9 +39,18 @@ export type SettingsSubpage = {
   blurbKey: string;
   Icon: ComponentType<{ size?: number; color: ColorValue }>;
   component: ComponentType<Record<string, never>>;
+  /**
+   * Platforms this section has anything to say on. Absent = all of them.
+   *
+   * A section is dropped from BOTH the index and the navigator together,
+   * which is the whole reason this list exists — a route registered but
+   * not listed is a page you can only reach by accident, and a row listed
+   * but not registered crashes on tap.
+   */
+  platforms?: ReadonlyArray<typeof Platform.OS>;
 };
 
-export const SETTINGS_SUBPAGES: readonly SettingsSubpage[] = [
+const ALL_SUBPAGES: readonly SettingsSubpage[] = [
   {
     route: 'SettingsPrayerTimes',
     titleKey: 'settings.sectionPrayerTimes',
@@ -76,6 +85,11 @@ export const SETTINGS_SUBPAGES: readonly SettingsSubpage[] = [
     blurbKey: 'settings.sectionWidgetsBlurb',
     Icon: WidgetsIcon,
     component: WidgetSettingsScreen,
+    // Android only, now that the Live Activity has moved to
+    // Notifications where it belongs. `WidgetCard` renders nothing off
+    // Android, so everywhere else this was a section that opened onto an
+    // empty page — worse than not being there.
+    platforms: ['android'],
   },
   {
     route: 'SettingsQuran',
@@ -92,3 +106,11 @@ export const SETTINGS_SUBPAGES: readonly SettingsSubpage[] = [
     component: AboutSettingsScreen,
   },
 ] as const;
+
+export const SETTINGS_SUBPAGES: readonly SettingsSubpage[] =
+  ALL_SUBPAGES.filter(
+    page => !page.platforms || page.platforms.includes(Platform.OS),
+  );
+
+/** Every section, whatever the platform — for tests that check the set. */
+export const ALL_SETTINGS_SUBPAGES = ALL_SUBPAGES;

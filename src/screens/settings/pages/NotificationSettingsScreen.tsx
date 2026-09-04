@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePrayerSettings } from '../../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../../hooks/useAppPalette';
+import { LiveActivityCard } from '../LiveActivityCard';
 import { NotificationsCard } from '../NotificationsCard';
 import { PreReminderModal } from '../PreReminderModal';
 import { SettingsPage } from '../SettingsPage';
@@ -90,6 +91,13 @@ export function NotificationSettingsScreen() {
           onOpenSoundPicker={openSound}
           onOpenPreReminderPicker={openPreReminder}
         />
+        {/* A Live Activity is a notification: posted, dismissed, and
+            living in the shade beside the adhan alert. It sat under
+            "Home screen" next to the widget, which grouped it by where
+            it is drawn rather than by what it is — and left it somewhere
+            nobody thought to look. It owns no modals, so the page's
+            back-deferral is unaffected. */}
+        <LiveActivityCard />
       </SettingsPage>
 
       <SoundPickerModal

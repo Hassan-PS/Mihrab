@@ -142,7 +142,12 @@ function notificationText(job: QuranDownloadJob) {
   if (job.kind === 'audio') {
     const name = reciterLabel(job.reciterId);
     return {
-      label: i18n.t('quran.downloadingAudio', { name }),
+      // `downloadingReciter`, not `downloadingAudio`. The latter already
+      // existed for the per-surah download inside the ayah sheet
+      // ("Downloading… 40/86"), and adding a second entry under the same
+      // key silently overrode it — JSON keeps the last one, so that sheet
+      // had started announcing a reciter's name where a count belonged.
+      label: i18n.t('quran.downloadingReciter', { name }),
       body: (done: number, total: number) =>
         i18n.t('quran.downloadProgressAyahs', { done, total }),
       doneTitle: i18n.t('quran.audioDownloadDoneTitle', { name }),

@@ -203,6 +203,13 @@ export type QuranPrefs = {
    * point is that the reader decides, not that we guess right.
    */
   verseOfDayOpen: boolean;
+  /**
+   * Does one surah lead to a random next one? (additive)
+   *
+   * A SURAH shuffle, never an ayah shuffle — see `pickNextSurah`. Off by
+   * default: reading order is the order the book has.
+   */
+  shuffleSurahs: boolean;
 };
 
 export type QuranState = {
@@ -235,6 +242,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     companionMode: 'translation',
     tafsirEditionId: '',
     verseOfDayOpen: false,
+    shuffleSurahs: false,
   },
 };
 
