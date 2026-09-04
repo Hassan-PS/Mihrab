@@ -174,23 +174,52 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
      */
     private const val GRID_MIN_HEIGHT_DP = 265
 
-    /**
-     * Below this the card drops its date line and its rule and shrinks its
-     * chips. Two launcher rows is 210dp and one is 99, so the threshold
-     * sits between them.
+    /*
+     * THE TWO LOG BUDGETS. See the same section in PrayerWidgetProvider —
+     * this card had the identical bug and it is worth stating once more.
+     *
+     * Both numbers are what a variant needs of `heightDp`, which the
+     * launcher measures on the HOST VIEW. The card is drawn 6dp inside that
+     * host view on every side since `widget_card_inset`, so the layout has
+     * 12dp less height than `heightDp` says. The old pair — 145 to choose
+     * the variant, 148 to fill it — were measured before the inset existed
+     * and never learned about it, so a 147dp card (one launcher row on any
+     * 480dpi phone) was told it could afford the roomy variant and then
+     * asked to fit 155dp of content into 135. LinearLayout answers that by
+     * squeezing its last child, and the last child here is the footer: the
+     * countdown to the next prayer came out as a 7dp band of clipped text.
+     *
+     * Measured on the device, host-view relative, at 480dpi: 12dp of inset,
+     * 20 or 12dp of root padding, the date line at 15 with its margin at 6,
+     * the chips row at 75 (a 38dp chip over the name and the time), the rule
+     * and its two margins at 13, and the footer at 16. Rounded up, because
+     * the leftover is spent on padding and padding that overshoots is what
+     * pushed the footer off the card.
+     *
+     * As on the strip, each is a budget and a threshold at once: the variant
+     * is whichever budget fits, and the slack is the leftover against that
+     * same budget.
      */
-    private const val COMPACT_MAX_HEIGHT_DP = 145
+
+    /** Date line, rule, 10dp of root padding, 38dp chips. */
+    private const val LOG_ROOMY_CONTENT_DP = 157
+
+    /** Date line, no rule, 6dp of padding, 30dp chips. */
+    private const val LOG_TIGHT_CONTENT_DP = 134
 
     /**
-     * What the card occupies with its header on and no graph, in dp: 20 of
-     * root padding, the date line at 16, the chips row at 78 (a 38dp chip
-     * over the name and the time, plus the margin between them), the rule and
-     * its margins at 12, and the footer at 18.
+     * No date line either.
      *
-     * Deliberately a little generous: the leftover is spent on padding, and
-     * padding that overshoots pushes the footer off the bottom of the card.
+     * There are three variants here rather than the two this card used to
+     * have, and the middle one is the reason: at 147dp — a single launcher
+     * row on a 480dpi phone, which is where most of these cards live — the
+     * old pair had to choose between a layout that did not fit and one that
+     * threw the date line away to fit twice over. The rule and the chip
+     * height alone buy the 13dp it was short by, so the date line stays.
+     * That also keeps the promise the 4x1 preview makes; see
+     * widgetPreviewsMatchCards.
      */
-    private const val LOG_NO_GRID_CONTENT_DP = 148
+    private const val LOG_BARE_CONTENT_DP = 112
 
     /** A guard on arithmetic done with a number the launcher supplies. */
     private const val LOG_SLACK_CAP_DP = 56
@@ -277,10 +306,16 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       // 0 is a launcher that has not measured yet: the roomy card is the
       // safer guess, because the tight one on a tall card looks like a bug
       // while the reverse only looks tight for one frame.
-      val tight = heightDp in 1 until COMPACT_MAX_HEIGHT_DP
-      val vis = if (tight) View.GONE else View.VISIBLE
-      views.setViewVisibility(R.id.widget_log_header_row, vis)
-      views.setViewVisibility(R.id.widget_log_divider, vis)
+      val tight = heightDp in 1 until LOG_ROOMY_CONTENT_DP
+      val bare = heightDp in 1 until LOG_TIGHT_CONTENT_DP
+      views.setViewVisibility(
+        R.id.widget_log_header_row,
+        if (bare) View.GONE else View.VISIBLE,
+      )
+      views.setViewVisibility(
+        R.id.widget_log_divider,
+        if (tight) View.GONE else View.VISIBLE,
+      )
       val density = context.resources.displayMetrics.density
       val pad = ((if (tight) 6 else 10) * density).toInt()
       views.setViewPadding(R.id.widget_root, pad, pad, pad, pad)
@@ -291,12 +326,20 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       // simply ended early: at 4x2 the five prayers sat against the top with
       // a quarter of the card blank underneath. The row grows into the gap
       // instead — the date line stays at the top, the footer lands on the
-      // bottom, and the chips sit in the middle of the card. Nothing to do at
-      // one row, where there is no slack, or from three up, where the graph
-      // is what fills it.
+      // bottom, and the chips sit in the middle of the card. Nothing to do
+      // from three rows up, where the graph is what fills it.
+      //
+      // Against the budget that CHOSE the variant, never the other one: the
+      // tight card has real slack to spend too — a one-row card on a tall
+      // phone is 147dp against 134 of content — and filling it from the
+      // roomy budget is how the footer got pushed off the bottom.
+      val budget =
+        if (bare) LOG_BARE_CONTENT_DP
+        else if (tight) LOG_TIGHT_CONTENT_DP
+        else LOG_ROOMY_CONTENT_DP
       val slack =
-        if (tight || heightDp >= GRID_MIN_HEIGHT_DP) 0
-        else ((heightDp - LOG_NO_GRID_CONTENT_DP) / 2).coerceIn(0, LOG_SLACK_CAP_DP)
+        if (heightDp <= 0 || heightDp >= GRID_MIN_HEIGHT_DP) 0
+        else ((heightDp - budget) / 2).coerceIn(0, LOG_SLACK_CAP_DP)
       val slackPx = (slack * density).toInt()
       views.setViewPadding(R.id.widget_log_row, 0, slackPx, 0, slackPx)
 
@@ -444,7 +487,12 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
         val queued = pending.contains(key)
 
         views.setTextViewText(NAMES[i], row.optString("name").ifEmpty { key })
-        views.setTextViewText(TIMES[i], row.optString("time"))
+        // `display` is the clock the user reads; `time` is the canonical
+        // 24-hour string `isDue` parses. See PrayerWidgetProvider.displayTime.
+        views.setTextViewText(
+          TIMES[i],
+          row.optString("display", "").ifEmpty { row.optString("time") },
+        )
         views.setTextColor(NAMES[i], Color.parseColor(if (due || queued) NEUTRAL_TEXT else NEUTRAL_MUTED))
 
         val done = queued || status == "on-time" || status == "late" || status == "qadha"

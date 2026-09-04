@@ -94,7 +94,7 @@ struct HijriProvider: TimelineProvider {
       date: when,
       hijri: p.hijri,
       nextName: next?.name ?? next?.key,
-      nextTime: next?.time,
+      nextTime: next?.text,
       rows: p.rows
     )
   }

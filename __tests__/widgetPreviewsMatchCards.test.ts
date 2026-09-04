@@ -101,10 +101,11 @@ describe('the 4x1 previews draw the header the card draws', () => {
   it.each(['prayer_widget_strip_preview', 'prayer_widget_log_preview'])(
     '%s carries the date line',
     name => {
-      // STRIP_HEADER_MIN_HEIGHT_DP and COMPACT_MAX_HEIGHT_DP are both
-      // 145dp, and one launcher row is ~147dp on a 1080×2400 phone — so a
-      // real 4×1 draws this line and a preview without it is a card
-      // nobody gets.
+      // One launcher row is ~147dp on a tall phone, which is above both
+      // cards' "keep the date line" budget — STRIP_TIGHT_CONTENT_DP and
+      // LOG_TIGHT_CONTENT_DP — so a real 4×1 draws this line and a preview
+      // without it is a card nobody gets. The log card needed a third
+      // variant to keep that true; see widgetHeightBudgets.
       expect(layout(name)).toMatch(/android:text="@string\/widget_preview_header"/);
     },
   );

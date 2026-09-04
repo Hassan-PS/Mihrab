@@ -745,42 +745,48 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      */
     private const val STRIP_MIN_HEIGHT_DP = 92
 
-    /**
-     * Below this the strip tightens its padding to fit one launcher row.
+    /*
+     * THE THREE STRIP BUDGETS, and the bug they exist to end.
      *
-     * A one-row card is 99dp of real height on a 420dpi phone, and the
-     * content measures about 78 — so it fits, but not with 14dp of card
-     * padding at each end. Two rows is 210dp, so this threshold sits
-     * mid-band and the roomier padding comes back the moment the card is
-     * dragged taller.
+     * Each number below is what one variant of the no-graph strip needs of
+     * `heightDp` — the height the LAUNCHER reports, which is the height of
+     * the host view, NOT of the card drawn inside it. That distinction is
+     * the whole reason this section was rewritten.
+     *
+     * The old constants (132 for the content, 145 and 110 for the two
+     * thresholds) were measured in August against the card, when the card
+     * WAS the host view. `widget_card_inset` then gave every widget a 6dp
+     * gutter on all four sides so two cards in adjacent cells could not
+     * touch — 12dp of height that the layout no longer has and that none of
+     * these numbers were told about. Everything downstream inherited the
+     * error: a card was called roomy 12dp before it was, and the leftover
+     * handed to `slack` was 12dp more than existed. LinearLayout does not
+     * report an overflow, it takes it out of the last child, so on any phone
+     * whose launcher row is around 147dp — every 480dpi Pixel — the strip
+     * drew its full-height variant into a card 12dp too short and the
+     * next-prayer line came out as a 7dp sliver of clipped text.
+     *
+     * So: measured on the device, host-view relative, at 480dpi. 12dp of
+     * inset, 28 or 12dp of root padding, the header row at 19, the six
+     * columns at 40, the rule and its two margins at 17, the next-prayer
+     * line at 19, and the night row's margin at 4. Each is rounded UP —
+     * `slack` is spent on padding, and padding that overshoots is exactly
+     * how the footer went off the bottom.
+     *
+     * They are budgets and thresholds at once, which is the point: the
+     * variant is chosen by asking which budget fits, and the slack is the
+     * leftover against THAT SAME budget. A variant can no longer be picked
+     * on one number and filled against another.
      */
-    private const val STRIP_HEADER_MIN_HEIGHT_DP = 145
 
-    /**
-     * Below this the header row goes entirely, not just its padding.
-     *
-     * A one-launcher-row card measures 99dp here. The times row wants 48 of
-     * that and the next-prayer line another 24; the header is only 13dp of
-     * text but carries a 14sp refresh glyph, and 19dp is exactly what pushed
-     * the total past the card and cut the next-prayer line in half along its
-     * middle. Between this and STRIP_HEADER_MIN_HEIGHT_DP the header stays
-     * and only the padding and the rule give way — that band is the 4x2
-     * card, which has the room for it.
-     */
-    private const val STRIP_HEADER_DROP_DP = 110
+    /** Header, rule, 14dp of root padding at each end. */
+    private const val STRIP_ROOMY_CONTENT_DP = 150
 
-    /**
-     * What the strip occupies when it is drawing no graph, in dp: 28 of root
-     * padding, the header row at 19 with its refresh glyph, the six columns
-     * at 48, the rule and its margin at 10, and the next-prayer line at 24.
-     *
-     * Only used to work out how much of a two-row card is left over. It does
-     * not have to be exact — half of a few points either way is invisible —
-     * but it does have to be an over-estimate rather than under, because the
-     * slack it computes is spent on padding and padding that overshoots
-     * pushes the footer off the bottom.
-     */
-    private const val STRIP_NO_GRID_CONTENT_DP = 132
+    /** Header, no rule, 6dp of root padding: the tall-phone one-row card. */
+    private const val STRIP_TIGHT_CONTENT_DP = 124
+
+    /** No header either — the short one-row card. */
+    private const val STRIP_BARE_CONTENT_DP = 96
 
     /**
      * The most the times row will grow to absorb a card's slack.
@@ -1102,7 +1108,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_night_row, View.VISIBLE)
       fun label(o: org.json.JSONObject): String {
         val name = o.optString("name", "").trim().ifEmpty { o.optString("key") }
-        return "$name ${o.optString("time")}"
+        return "$name ${displayTime(o)}"
       }
       // Two of them sit at the two ends of the line, which is how this has
       // always looked; a third goes between them rather than off the edge.
@@ -1198,12 +1204,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // An unmeasured card (0) keeps the header: the times and the next line
       // survive being crowded, and a widget whose first draw silently loses
       // its date and city looks broken rather than tight.
-      val oneRow = heightDp in 1 until STRIP_HEADER_DROP_DP
+      val oneRow = heightDp in 1 until STRIP_TIGHT_CONTENT_DP
       views.setViewVisibility(
         R.id.widget_header_row,
         if (oneRow) View.GONE else View.VISIBLE,
       )
-      val tight = heightDp in 1 until STRIP_HEADER_MIN_HEIGHT_DP
+      val tight = heightDp in 1 until STRIP_ROOMY_CONTENT_DP
       val density = context.resources.displayMetrics.density
       val side = (14 * density).toInt()
       val ends = ((if (tight) 6 else 14) * density).toInt()
@@ -1226,11 +1232,20 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // next-prayer line lands on the bottom, and the times sit in the middle
       // of the card rather than crowded against its lid.
       //
-      // Nothing to do at one row, where there is no slack, or from three up,
-      // where the graph is the thing that fills it.
+      // Nothing to do from three rows up, where the graph is the thing that
+      // fills it.
+      //
+      // The budget below is the one that CHOSE the variant a few lines up,
+      // which is the invariant this arithmetic lost once already: pick the
+      // layout against one number and fill it against another and the
+      // difference comes out of the last row on the card.
+      val budget =
+        if (oneRow) STRIP_BARE_CONTENT_DP
+        else if (tight) STRIP_TIGHT_CONTENT_DP
+        else STRIP_ROOMY_CONTENT_DP
       val slack =
-        if (oneRow || heightDp >= GRID_MIN_HEIGHT_DP) 0
-        else ((heightDp - STRIP_NO_GRID_CONTENT_DP) / 2).coerceIn(0, STRIP_SLACK_CAP_DP)
+        if (heightDp <= 0 || heightDp >= GRID_MIN_HEIGHT_DP) 0
+        else ((heightDp - budget) / 2).coerceIn(0, STRIP_SLACK_CAP_DP)
       val slackPx = (slack * density).toInt()
       views.setViewPadding(R.id.widget_times_row, 0, slackPx, 0, slackPx)
     }
@@ -1367,6 +1382,18 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * the way Sunrise has always been, so the five salāh stay the loudest
      * thing on the card.
      */
+    /**
+     * What to DRAW for a row — issue #18.
+     *
+     * `time` is canonical 24-hour `HH:mm` because this file, the Live
+     * Activity service and the widget's own next-prayer walk all parse
+     * it. `display` is the same instant written the way the user reads a
+     * clock, and is absent from payloads written by app builds that
+     * predate the setting — hence the fallback.
+     */
+    private fun displayTime(o: org.json.JSONObject): String =
+      o.optString("display", "").ifEmpty { o.optString("time", "") }
+
     private fun isNightKey(key: String): Boolean =
       key.equals("Midnight", ignoreCase = true) ||
         key.equals("Lastthird", ignoreCase = true) ||
@@ -1461,7 +1488,8 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
 
       var nextPrayerName = o.optString("nextPrayerName", "")
-      var nextPrayerTime = o.optString("nextPrayerTime", "")
+      var nextPrayerTime =
+        o.optString("nextPrayerDisplay", "").ifEmpty { o.optString("nextPrayerTime", "") }
       val locationName = o.optString("locationName", "")
 
       // Prefer the entry from the multi-day `days[]` schedule whose dateKey
@@ -1525,7 +1553,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
             dynamicNextName = row.optString("name", "").trim()
               .ifEmpty { row.optString("abbr", "").trim() }
               .ifEmpty { dynamicNextKey!! }
-            dynamicNextTime = timeStr
+            dynamicNextTime = displayTime(row)
             nextUpdateMinutes = rowMinutes
           }
         }
@@ -1540,7 +1568,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
             nextPrayerName = row.optString("name", "").trim()
               .ifEmpty { row.optString("abbr", "").trim() }
               .ifEmpty { nextKey }
-            nextPrayerTime = row.getString("time")
+            nextPrayerTime = displayTime(row)
             break
           }
         }
@@ -1657,7 +1685,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
         val row = displayRows[i]
         val key = row.getString("key")
-        val time = row.getString("time")
+        val time = displayTime(row)
         val label = row.optString("name", "").trim()
           .ifEmpty { row.optString("abbr", "").trim() }
           .ifEmpty { key }

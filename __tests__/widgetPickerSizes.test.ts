@@ -12,7 +12,7 @@
  * They now place 4×2. That is past the thresholds that make them worth a
  * separate entry — the prayer card gets its header and full list at
  * ROWS_MIN_HEIGHT_DP (165dp), the log card its date line and full-height
- * chips past COMPACT_MAX_HEIGHT_DP (145dp) — and on an ordinary phone it
+ * chips past LOG_ROOMY_CONTENT_DP (157dp) — and on an ordinary phone it
  * is past the graph's 265dp too.
  *
  * Which is why the previews are in this test. "Two rows is ~210dp" was
