@@ -39,6 +39,7 @@ import notifee, {
   AndroidStyle,
   AndroidVisibility,
 } from '@notifee/react-native';
+import { activeClock } from '../utils/activeClock';
 import i18n from '../i18n';
 import type { WidgetPrayerPayload } from '../widget/buildWidgetPayload';
 import {
@@ -154,6 +155,13 @@ function shortLocation(label: string): string {
   return first || label;
 }
 
+/**
+ * CANONICAL 24-hour `HH:mm`. `MihrabLiveActivityModule` parses this
+ * string into a `LocalTime` for the Android 17 "At <time>" metric, and
+ * the foreground service matches it against `^(\d{1,2}):(\d{2})$` when
+ * it advances the card on its own. What the card DRAWS is
+ * `nextTimeDisplay` — see issue #18.
+ */
 function formatHHMM(epochMs: number): string {
   const d = new Date(epochMs);
   const hh = String(d.getHours()).padStart(2, '0');
@@ -306,9 +314,14 @@ export async function startOrUpdateLiveActivity(
     ? formatRemaining(input.nextPrayerTimestamp - Date.now())
     : i18n.t('liveActivity.soon', 'Starting soon');
 
+  // The same instant as `nextTime`, written the way the user reads a
+  // clock. Everything the card shows uses this; only the parsers use
+  // `nextTime`.
+  const nextTimeDisplay = nextTime ? activeClock()(nextTime) : '';
+
   // Title — what's next + when. Same in collapsed and expanded.
-  const title = nextTime
-    ? `${input.nextPrayerLabel} · ${nextTime}`
+  const title = nextTimeDisplay
+    ? `${input.nextPrayerLabel} · ${nextTimeDisplay}`
     : input.nextPrayerLabel || i18n.t('liveActivity.soon', 'Starting soon');
 
   // Body — countdown + optional location, separated by middle dots.
@@ -359,6 +372,7 @@ export async function startOrUpdateLiveActivity(
       key: r.key,
       name: localizedPrayerName(r.key, r.abbr),
       time: r.time,
+      display: r.display,
     }));
     const sunriseRow = input.payload.sunriseRow
       ? {
@@ -368,12 +382,14 @@ export async function startOrUpdateLiveActivity(
             input.payload.sunriseRow.abbr,
           ),
           time: input.payload.sunriseRow.time,
+          display: input.payload.sunriseRow.display,
         }
       : undefined;
     const extraRows = (input.payload.extraRows ?? []).map(r => ({
       key: r.key,
       name: localizedPrayerName(r.key, r.abbr),
       time: r.time,
+      display: r.display,
     }));
     // Project the multi-day schedule to the native shape with localised long
     // names. This is what lets the foreground-service ticker advance to the
@@ -387,18 +403,21 @@ export async function startOrUpdateLiveActivity(
         key: r.key,
         name: localizedPrayerName(r.key, r.abbr),
         time: r.time,
+        display: r.display,
       })),
       sunriseRow: d.sunriseRow
         ? {
             key: d.sunriseRow.key,
             name: localizedPrayerName(d.sunriseRow.key, d.sunriseRow.abbr),
             time: d.sunriseRow.time,
+            display: d.sunriseRow.display,
           }
         : undefined,
       extraRows: (d.extraRows ?? []).map(r => ({
         key: r.key,
         name: localizedPrayerName(r.key, r.abbr),
         time: r.time,
+        display: r.display,
       })),
     }));
     // Android 17 extras: second metric + the "Mute next adhan" toggle. Read
@@ -435,6 +454,7 @@ export async function startOrUpdateLiveActivity(
     const nativePayload: MihrabLiveActivityPayload = {
       nextLabel: input.nextPrayerLabel,
       nextTime,
+      nextTimeDisplay,
       nextKey: input.payload.nextKey ?? '',
       nextEpochMs: input.nextPrayerTimestamp,
       prevEpochMs,

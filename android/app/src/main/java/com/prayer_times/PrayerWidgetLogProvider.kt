@@ -444,7 +444,12 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
         val queued = pending.contains(key)
 
         views.setTextViewText(NAMES[i], row.optString("name").ifEmpty { key })
-        views.setTextViewText(TIMES[i], row.optString("time"))
+        // `display` is the clock the user reads; `time` is the canonical
+        // 24-hour string `isDue` parses. See PrayerWidgetProvider.displayTime.
+        views.setTextViewText(
+          TIMES[i],
+          row.optString("display", "").ifEmpty { row.optString("time") },
+        )
         views.setTextColor(NAMES[i], Color.parseColor(if (due || queued) NEUTRAL_TEXT else NEUTRAL_MUTED))
 
         val done = queued || status == "on-time" || status == "late" || status == "qadha"

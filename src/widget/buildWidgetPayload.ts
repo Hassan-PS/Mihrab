@@ -1,4 +1,5 @@
 import type { TimingsMap } from '../types/prayer';
+import { activeClock } from '../utils/activeClock';
 import i18n from '../i18n';
 import type {
   WidgetExtras,
@@ -21,7 +22,29 @@ import {
 
 export type WidgetPrayerRow = {
   key: string;
+  /**
+   * CANONICAL 24-hour `HH:mm`. Machine data, never localised.
+   *
+   * Native parses this: the iOS widget's progress ring splits it on ":"
+   * to place the prayer on a timeline, `logMinutesOfDay` turns it into
+   * minutes-of-day, and Android's `epochForDayTime` matches it against
+   * `^(\d{1,2}):(\d{2})$` to schedule the Live Activity. A "5:31 PM"
+   * here would not fail loudly — it would silently stop the ring
+   * advancing and the rollover happening.
+   *
+   * What the user reads is `display`.
+   */
   time: string;
+  /**
+   * The same instant, written the way the user reads a clock — issue #18.
+   *
+   * ABSENT on a 24-hour clock, where it would be a byte-for-byte copy of
+   * `time`. This payload is serialised into an app-group file and read
+   * on every widget redraw, and duplicating six to forty times across a
+   * week of days is real size for no information. Native falls back to
+   * `time`, which is exactly right when the two agree.
+   */
+  display?: string;
   /** Short label for narrow / horizontal layouts (e.g. widget columns). */
   abbr: string;
   /** Full localized name (e.g. "Maghrib", "Sunrise") for layouts with room. */
@@ -91,8 +114,10 @@ export type WidgetPrayerPayload = {
   nextKey: string | null;
   /** Name of the next prayer */
   nextPrayerName?: string;
-  /** Time of the next prayer */
+  /** Time of the next prayer, canonical 24-hour `HH:mm` — parsed natively. */
   nextPrayerTime?: string;
+  /** The same time as the user reads it — absent when identical (issue #18). */
+  nextPrayerDisplay?: string;
   /** Location name */
   locationName?: string;
   /**
@@ -167,12 +192,28 @@ function localDateKey(d: Date): string {
   return `${y}-${m}-${dd}`;
 }
 
+/**
+ * `nextPrayerDisplay`, or nothing when it would repeat `nextPrayerTime`.
+ * Same reasoning as `WidgetPrayerRow.display`.
+ */
+function nextPrayerDisplayField(at: Date | undefined): {
+  nextPrayerDisplay?: string;
+} {
+  if (!at) return {};
+  const canonical = formatLocalTime(at);
+  const display = activeClock().fromDate(at);
+  return display === canonical ? {} : { nextPrayerDisplay: display };
+}
+
 /** Build a single labelled row for a prayer/event key. */
 function buildRow(key: string, timings: TimingsMap): WidgetPrayerRow {
   const raw = timings[key];
+  const time = raw ? formatDisplayTime(raw) : '—';
+  const display = raw ? activeClock()(time) : time;
   return {
     key,
-    time: raw ? formatDisplayTime(raw) : '—',
+    time,
+    ...(display === time ? {} : { display }),
     abbr: i18n.t(`prayer.${key}_abbr`, {
       defaultValue: i18n.t(`prayer.${key}`),
     }),
@@ -326,6 +367,11 @@ export function buildWidgetPayload(
     nextKey,
     nextPrayerName: next ? i18n.t(`prayer.${next.name}`) : undefined,
     nextPrayerTime: next ? formatLocalTime(next.at) : undefined,
+    // Same instant as `nextPrayerTime`, written for a human. The
+    // canonical one stays: Android's widget provider re-derives its own
+    // `nextPrayerTime` from a row's `time`, and `syncLiveActivity`
+    // parses it back into a Date.
+    ...nextPrayerDisplayField(next?.at),
     // A saved location's label is a full postal address on every geocoder the
     // app reads; the widget header has room for a city. See shortPlaceLabel.
     locationName: shortPlaceLabel(locationName),

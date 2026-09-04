@@ -25,8 +25,14 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
   public struct ContentState: Codable, Hashable {
     /// Localised name for the upcoming prayer, e.g. "Fajr" / "الفجر".
     public var nextLabel: String
-    /// HH:MM display string for the upcoming prayer.
+    /// CANONICAL 24-hour `HH:mm` for the upcoming prayer.
+    ///
+    /// `computeNext` and the on-device roll-forward split this on ":" —
+    /// it is arithmetic. What the card draws is `nextTimeText`.
     public var nextTime: String
+    /// The same instant written the way the user reads a clock (issue #18).
+    /// Defaults to "" so payloads from older app builds still decode.
+    public var nextTimeDisplay: String = ""
     /// Wall-clock target instant for the countdown, in seconds since
     /// 1970-01-01 00:00:00 UTC. Rendered client-side via
     /// Text(timerInterval:countsDown:) so the widget ticks without our
@@ -83,6 +89,11 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
     public var showSunrise: Bool
     public var showHijri: Bool
     public var showLocation: Bool
+
+    /// The next prayer's time as it should be drawn. Never parsed.
+    public var nextTimeText: String {
+      nextTimeDisplay.isEmpty ? nextTime : nextTimeDisplay
+    }
   }
 
   /// One prayer row. `key` is canonical ("Fajr"/"Sunrise"/…) so the
@@ -98,7 +109,13 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
     /// extension. Defaults to "" so older payloads still decode (callers fall
     /// back to `abbr`).
     public var name: String = ""
+    /// CANONICAL 24-hour `HH:mm` — the roll-forward parses it. Draw `text`.
     public var time: String
+    /// The same instant written the way the user reads a clock (issue #18).
+    public var display: String = ""
+
+    /// What to put on screen. Never feed this to a parser.
+    public var text: String { display.isEmpty ? time : display }
   }
 }
 #endif

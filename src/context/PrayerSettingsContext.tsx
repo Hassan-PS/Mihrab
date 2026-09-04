@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import i18n from '../i18n';
+import { setActiveClockFormat } from '../utils/activeClock';
 import { loadSettings, saveSettings } from '../settings/storage';
 import {
   DEFAULT_SETTINGS,
@@ -49,6 +50,10 @@ export type AppearanceSlice = Pick<
   | 'language'
   | 'appAccentId'
   | 'appAccentCustomHex'
+  // Where a clock time is drawn 12- or 24-hour. It rides with `language`
+  // for the same reason: it decides how a rendered string reads, and the
+  // screens that care about one care about the other.
+  | 'clockFormat'
   // Not a colour, but it is the "what Home looks like" switch and it is
   // rendered by AppearanceCard, so it rides in this slice rather than
   // making the card subscribe to a second one.
@@ -157,6 +162,15 @@ export function PrayerSettingsProvider({
     void i18n.changeLanguage(settings.language);
   }, [hydrated, settings.language]);
 
+  // The widget and Live Activity payloads are built outside React and
+  // cannot subscribe to this context, so the clock preference is mirrored
+  // into a module singleton beside `i18n` — see `utils/activeClock.ts`.
+  // Set before hydration too: the default is what the first payload of a
+  // cold start would be built with anyway.
+  useEffect(() => {
+    setActiveClockFormat(settings.clockFormat);
+  }, [settings.clockFormat]);
+
   const updateSettings = useCallback((patch: Partial<PrayerAppSettings>) => {
     setSettings(prev => {
       let next = { ...prev, ...patch };
@@ -188,6 +202,7 @@ export function PrayerSettingsProvider({
       useSystemDynamicTheme: settings.useSystemDynamicTheme,
       pureBlackDark: settings.pureBlackDark,
       language: settings.language,
+      clockFormat: settings.clockFormat,
       appAccentId: settings.appAccentId,
       appAccentCustomHex: settings.appAccentCustomHex,
       showPracticeOnHome: settings.showPracticeOnHome,
@@ -197,6 +212,7 @@ export function PrayerSettingsProvider({
       settings.useSystemDynamicTheme,
       settings.pureBlackDark,
       settings.language,
+      settings.clockFormat,
       settings.appAccentId,
       settings.appAccentCustomHex,
       settings.showPracticeOnHome,

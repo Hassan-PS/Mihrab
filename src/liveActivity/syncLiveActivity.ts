@@ -282,6 +282,7 @@ async function syncLiveActivityImpl(args: {
       // hero label after a rollover (the strip still uses `abbr`).
       name: localizedPrayerLabel(r.key),
       time: r.time,
+      display: r.display,
     }));
     // Start anchor for the progress bar — previous prayer, falling back to one
     // hour before the next prayer so the bar still renders sensibly before the
@@ -295,6 +296,7 @@ async function syncLiveActivityImpl(args: {
       nextKey: payload.nextKey ?? '',
       nextLabel,
       nextTime: payload.nextPrayerTime ?? '',
+      nextTimeDisplay: payload.nextPrayerDisplay ?? payload.nextPrayerTime ?? '',
       // Swift ContentState.nextEpochSeconds is Double seconds-since-epoch.
       // nextPrayerTimestamp is ms-since-epoch — divide by 1000.
       nextEpochSeconds: (nextPrayerTimestamp ?? 0) / 1000,
@@ -306,6 +308,7 @@ async function syncLiveActivityImpl(args: {
             abbr: payload.sunriseRow.abbr,
             name: localizedPrayerLabel(payload.sunriseRow.key),
             time: payload.sunriseRow.time,
+            display: payload.sunriseRow.display,
           }
         : undefined,
       extraRows: (payload.extraRows ?? []).map(r => ({
@@ -313,6 +316,7 @@ async function syncLiveActivityImpl(args: {
         abbr: r.abbr,
         name: localizedPrayerLabel(r.key),
         time: r.time,
+        display: r.display,
       })),
       hijriLabel: '',
       locationLabel: '',

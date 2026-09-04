@@ -35,6 +35,19 @@ jest.mock('../src/hooks/useAppPalette', () => ({
   }),
 }));
 
+// The card asks how this user reads a clock (issue #18), which is a
+// question for the settings provider. This test is about the countdown,
+// not about the provider, so it answers with the app's own 24-hour
+// formatter directly.
+jest.mock('../src/hooks/useClockFormatter', () => {
+  const { makeClockFormatter } = require('../src/utils/clockFormat');
+  const formatter = makeClockFormatter(false, 'en');
+  return {
+    useClockFormatter: () => formatter,
+    useSystemIs24Hour: () => true,
+  };
+});
+
 jest.mock('../src/components/GlassSurface', () => {
   const { View } = require('react-native');
   return { GlassSurface: View };

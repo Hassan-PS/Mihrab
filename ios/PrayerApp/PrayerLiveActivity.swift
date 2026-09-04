@@ -269,6 +269,7 @@ final class PrayerLiveActivity: NSObject {
       state.nextKey = next.key
       state.nextLabel = next.label
       state.nextTime = next.time
+      state.nextTimeDisplay = next.display
       state.nextEpochSeconds = next.epoch
       state.prevEpochSeconds = next.prevEpoch
       let stale = Date(timeIntervalSince1970: next.epoch + 60)
@@ -389,6 +390,7 @@ enum LiveActivityRefresher {
       newState.nextKey = next.key
       newState.nextLabel = next.label
       newState.nextTime = next.time
+      newState.nextTimeDisplay = next.display
       newState.nextEpochSeconds = next.epoch
       newState.prevEpochSeconds = next.prevEpoch
       let stale = Date(timeIntervalSince1970: next.epoch + 60)
@@ -412,7 +414,10 @@ enum LiveActivityRefresher {
   fileprivate struct NextInfo {
     let key: String
     let label: String
+    /// CANONICAL 24-hour `HH:mm`.
     let time: String
+    /// The same instant as the user reads it (issue #18).
+    let display: String
     let epoch: Double
     let prevEpoch: Double
   }
@@ -456,6 +461,7 @@ enum LiveActivityRefresher {
       key: next.row.key,
       label: label,
       time: next.row.time,
+      display: next.row.text,
       epoch: next.date.timeIntervalSince1970,
       prevEpoch: prevEpoch
     )

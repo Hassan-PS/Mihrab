@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { CrescentIcon } from '../../theme/icons';
 import {
@@ -14,7 +15,7 @@ import {
 } from '../../ramadan/countdown';
 import { computeSeasonalTreatment } from '../../seasonal/treatments';
 import type { TimingsMap } from '../../types/prayer';
-import { formatCountdown, formatLocalTime } from '../../utils/prayerTimes';
+import { formatCountdown } from '../../utils/prayerTimes';
 import { HOME_CARD_PADDING, HOME_CARD_RADIUS } from './tokens';
 import { useIsActive } from '../../hooks/useIsActive';
 
@@ -49,6 +50,7 @@ function RamadanCountdownCardImpl({
 }: RamadanCountdownCardProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   const active = useIsActive();
   const [now, setNow] = useState(() => new Date());
 
@@ -85,7 +87,7 @@ function RamadanCountdownCardImpl({
   return (
     <View
       accessibilityRole="text"
-      accessibilityLabel={`${t(eventNameKey)} ${formatLocalTime(event.at)} — ${t(labelKey, { time: formatCountdown(remainingSeconds) })}`}
+      accessibilityLabel={`${t(eventNameKey)} ${clock.fromDate(event.at)} — ${t(labelKey, { time: formatCountdown(remainingSeconds) })}`}
       style={[
         styles.card,
         {
@@ -111,7 +113,7 @@ function RamadanCountdownCardImpl({
         <Text
           style={[styles.time, tabularNumeralStyle, { color: palette.accent }]}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-          {formatLocalTime(event.at)}
+          {clock.fromDate(event.at)}
         </Text>
       </View>
       <View style={styles.countdownRow}>

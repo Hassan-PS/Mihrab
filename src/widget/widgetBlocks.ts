@@ -48,6 +48,7 @@ import type { RiwayahId } from '../quran/riwayat';
 import { gregorianToHijri } from '../hijri/convert';
 import { formatHijriLabel } from '../hijri/formatHijriLabel';
 import { TASBIH_PRESETS, findPreset } from '../tasbih/tasbih';
+import { activeClock } from '../utils/activeClock';
 import i18n from '../i18n';
 
 /** The five salāh a day can hold, in the order they are prayed. */
@@ -148,8 +149,16 @@ export type WidgetTodayPrayer = {
   key: JournalPrayer;
   /** Localized full name. */
   name: string;
-  /** Display time, same formatting as the prayer rows. */
+  /**
+   * CANONICAL 24-hour `HH:mm` — `LogTodayWidget.logMinutesOfDay` parses
+   * this to decide which prayers are due. Read `display` instead.
+   */
   time: string;
+  /**
+   * The same time as the user reads it — issue #18. Absent when it would
+   * repeat `time`; see `WidgetPrayerRow.display` for why.
+   */
+  display?: string;
   /** Journal status, or null when nothing is recorded yet. */
   status: 'on-time' | 'late' | 'missed' | 'qadha' | null;
   /**
@@ -422,10 +431,13 @@ export function buildTodayBlock(input: {
     const raw = input.timings[key];
     const at = raw ? combineLocalDateAndTime(midnight, raw) : null;
     const entry = todays.find(e => e.prayer === key);
+    const time = raw ? formatDisplayTime(raw) : '—';
+    const display = raw ? activeClock()(time) : time;
     return {
       key,
       name: i18n.t(`prayer.${key}`),
-      time: raw ? formatDisplayTime(raw) : '—',
+      time,
+      ...(display === time ? {} : { display }),
       // `todays` is already tombstone-free, so anything found here is a
       // status the widget knows how to draw.
       status: entry ? (entry.status as LoggedStatus) : null,

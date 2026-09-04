@@ -145,7 +145,7 @@ private struct CountdownText: View {
           .lineLimit(1)
           .minimumScaleFactor(0.5)
       } else {
-        Text(state.nextTime)
+        Text(state.nextTimeText)
           .font(font)
           .monospacedDigit()
           .foregroundColor(color)
@@ -200,7 +200,7 @@ private struct PrayerStrip: View {
               )
               .lineLimit(1)
               .minimumScaleFactor(0.7)
-            Text(row.time)
+            Text(row.text)
               .font(.system(size: timeSize, design: .monospaced))
               .fontWeight(row.key == state.nextKey ? .semibold : .regular)
               .foregroundColor(
@@ -239,7 +239,7 @@ private struct LockScreenLiveActivityView: View {
           .foregroundColor(.white)
           .lineLimit(1)
 
-        Text(state.nextTime)
+        Text(state.nextTimeText)
           .font(.system(size: 13, design: .monospaced))
           .foregroundColor(Color.white.opacity(0.6))
 
@@ -313,7 +313,7 @@ private struct DynamicIslandLeading: View {
         Text(state.nextLabel)
           .font(.system(size: 16, weight: .semibold))
           .lineLimit(1)
-        Text(state.nextTime)
+        Text(state.nextTimeText)
           .font(.system(size: 12, design: .monospaced))
           .foregroundColor(.secondary)
       }

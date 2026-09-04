@@ -278,7 +278,10 @@ class MihrabLiveActivityService : Service() {
         val epoch: Long,
         val key: String,
         val name: String,
+        /** CANONICAL 24-hour `HH:mm` — what `epochForDayTime` parses. */
         val time: String,
+        /** The same instant as the user reads it (issue #18). */
+        val display: String,
         val dateKey: String,
       )
       val events = mutableListOf<Ev>()
@@ -292,7 +295,9 @@ class MihrabLiveActivityService : Service() {
             val t = r.optString("time")
             val e = epochForDayTime(dateKey, t)
             if (e > 0L) {
-              events.add(Ev(e, r.optString("key"), r.optString("name"), t, dateKey))
+              events.add(
+                Ev(e, r.optString("key"), r.optString("name"), t, drawn(r, t), dateKey),
+              )
             }
           }
         }
@@ -300,7 +305,16 @@ class MihrabLiveActivityService : Service() {
           val t = sr.optString("time")
           val e = epochForDayTime(dateKey, t)
           if (e > 0L) {
-            events.add(Ev(e, sr.optString("key", "Sunrise"), sr.optString("name", "Sunrise"), t, dateKey))
+            events.add(
+              Ev(
+                e,
+                sr.optString("key", "Sunrise"),
+                sr.optString("name", "Sunrise"),
+                t,
+                drawn(sr, t),
+                dateKey,
+              ),
+            )
           }
         }
         // The night marks the user turned on — First Third, Islamic Midnight,
@@ -316,7 +330,9 @@ class MihrabLiveActivityService : Service() {
             val t = r.optString("time")
             val e = epochForDayTime(dateKey, t)
             if (e > 0L) {
-              events.add(Ev(e, r.optString("key"), r.optString("name"), t, dateKey))
+              events.add(
+                Ev(e, r.optString("key"), r.optString("name"), t, drawn(r, t), dateKey),
+              )
             }
           }
         }
@@ -334,7 +350,8 @@ class MihrabLiveActivityService : Service() {
       updated.put("nextKey", next.key)
       updated.put("nextLabel", next.name)
       updated.put("nextTime", next.time)
-      updated.put("title", "${next.name} · ${next.time}")
+      updated.put("nextTimeDisplay", next.display)
+      updated.put("title", "${next.name} · ${next.display}")
       // The mute button belongs to the CALL TO PRAYER. JS worked the flag out
       // for whatever was next when it last synced; every hop this walk makes
       // afterwards is its own, and Sunrise or a night mark must never inherit
@@ -415,11 +432,19 @@ class MihrabLiveActivityService : Service() {
       val currentKey = p.optString("nextKey", "")
 
       // Collect rows into an ordered list.
-      data class Row(val key: String, val name: String, val time: String)
+      data class Row(
+        val key: String,
+        val name: String,
+        /** CANONICAL 24-hour `HH:mm` — parsed by `parseHHMMToEpochMs`. */
+        val time: String,
+        /** The same instant as the user reads it (issue #18). */
+        val display: String,
+      )
       val rowList = mutableListOf<Row>()
       for (i in 0 until rows.length()) {
         val r = rows.getJSONObject(i)
-        rowList.add(Row(r.optString("key"), r.optString("name"), r.optString("time")))
+        val t = r.optString("time")
+        rowList.add(Row(r.optString("key"), r.optString("name"), t, drawn(r, t)))
       }
       if (rowList.isEmpty()) return null
 
@@ -431,14 +456,23 @@ class MihrabLiveActivityService : Service() {
       p.optJSONObject("sunriseRow")?.let { sr ->
         val t = sr.optString("time", "")
         if (t.isNotEmpty()) {
-          rowList.add(Row(sr.optString("key", "Sunrise"), sr.optString("name", "Sunrise"), t))
+          rowList.add(
+            Row(
+              sr.optString("key", "Sunrise"),
+              sr.optString("name", "Sunrise"),
+              t,
+              drawn(sr, t),
+            ),
+          )
         }
       }
       p.optJSONArray("extraRows")?.let { extra ->
         for (i in 0 until extra.length()) {
           val r = extra.optJSONObject(i) ?: continue
           val t = r.optString("time", "")
-          if (t.isNotEmpty()) rowList.add(Row(r.optString("key"), r.optString("name"), t))
+          if (t.isNotEmpty()) {
+            rowList.add(Row(r.optString("key"), r.optString("name"), t, drawn(r, t)))
+          }
         }
       }
 
@@ -462,7 +496,8 @@ class MihrabLiveActivityService : Service() {
         updated.put("nextKey", row.key)
         updated.put("nextLabel", row.name)
         updated.put("nextTime", row.time)
-        updated.put("title", "${row.name} · ${row.time}")
+        updated.put("nextTimeDisplay", row.display)
+        updated.put("title", "${row.name} · ${row.display}")
         // The mute button belongs to the CALL TO PRAYER, and this walk steps
         // onto Sunrise and the night marks deliberately so the card can count
         // down to them. JS computed `adhanActionEnabled` for whatever was next
@@ -488,6 +523,17 @@ class MihrabLiveActivityService : Service() {
    * `referenceMs` as the base date. If the resolved time is in the past,
    * it is advanced by 24 hours to handle midnight roll-overs gracefully.
    */
+  /**
+   * What a row should be DRAWN as — issue #18.
+   *
+   * Rows carry both: `time` is canonical 24-hour `HH:mm`, which every
+   * walk in this file parses, and `display` is the same instant written
+   * the way the user reads a clock. Payloads from app builds before the
+   * setting existed have no `display`, so the canonical string stands in.
+   */
+  private fun drawn(o: org.json.JSONObject, fallback: String): String =
+    o.optString("display", "").ifEmpty { fallback }
+
   private fun parseHHMMToEpochMs(hhmm: String, referenceMs: Long): Long {
     val m = Regex("^(\\d{1,2}):(\\d{2})$").find(hhmm) ?: return 0L
     val h = m.groupValues[1].toInt()

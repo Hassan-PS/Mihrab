@@ -21,6 +21,8 @@ import { ConfirmModal } from '../../components/ConfirmModal';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { saveSettings } from '../../settings/storage';
 import type { AppAccentId } from '../../settings/types';
+import { useClockFormatter } from '../../hooks/useClockFormatter';
+import type { ClockFormat } from '../../utils/clockFormat';
 import {
   APP_ACCENT_SWATCHES,
   widgetPatchForAccent,
@@ -48,6 +50,7 @@ function AppearanceCardImpl() {
   // restarting the process — task #114.
   const { settings: fullSettings } = usePrayerSettings();
   const { palette, isDark } = useAppPalette();
+  const clock = useClockFormatter();
   const [accentHexDraft, setAccentHexDraft] = useState(
     settings.appAccentCustomHex,
   );
@@ -222,6 +225,77 @@ function AppearanceCardImpl() {
         )}
         <Text style={[s.help, { color: palette.muted }]}>
           {t('settings.themeHelp')}
+        </Text>
+      </View>
+
+      {/* Time format — issue #18.
+
+          Its own card rather than a row under Theme: it is not about
+          light and dark, and someone looking for it is looking for a
+          heading that says so. The example underneath is rendered by the
+          same formatter the rest of the app uses, so what is shown here
+          is literally what a prayer row will show. */}
+      <View
+        style={[
+          s.card,
+          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        ]}>
+        <Text style={[s.label, { color: palette.muted }]}>
+          {t('settings.clockFormat', 'Time format')}
+        </Text>
+        <View
+          style={s.segmentRow}
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t('settings.clockFormat', 'Time format')}>
+          {(
+            [
+              {
+                id: 'auto' as const,
+                label: t('settings.clockFormatAuto', 'Automatic'),
+              },
+              {
+                id: '12' as const,
+                label: t('settings.clockFormat12', '12-hour'),
+              },
+              {
+                id: '24' as const,
+                label: t('settings.clockFormat24', '24-hour'),
+              },
+            ] as ReadonlyArray<{ id: ClockFormat; label: string }>
+          ).map(opt => {
+            const selected = settings.clockFormat === opt.id;
+            return (
+              <Pressable
+                key={opt.id}
+                accessibilityRole="radio"
+                accessibilityLabel={opt.label}
+                accessibilityState={{ selected }}
+                style={[
+                  s.segment,
+                  styles.appearanceSegment,
+                  segmentChromeStyle(palette, selected),
+                ]}
+                onPress={() => updateSettings({ clockFormat: opt.id })}>
+                <Text
+                  style={[
+                    styles.appearanceSegmentLabel,
+                    { color: palette.text },
+                    selected && { color: palette.accent },
+                  ]}>
+                  {opt.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={[s.help, { color: palette.muted, marginTop: 10 }]}>
+          {t('settings.clockFormatExample', {
+            defaultValue: 'For example: {{time}}',
+            time: clock('17:31'),
+          })}
+        </Text>
+        <Text style={[s.help, { color: palette.muted }]}>
+          {t('settings.clockFormatHelp')}
         </Text>
       </View>
 

@@ -7,7 +7,7 @@ import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
 } from '../../theme/textScale';
-import { formatDisplayTime } from '../../utils/prayerTimes';
+import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { HOME_ROW_PADDING_V } from './tokens';
 
 /**
@@ -51,6 +51,7 @@ function PrayerRowImpl({
 }: PrayerRowProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
 
   const Row = onSelect ? Pressable : View;
   const interactive = onSelect
@@ -109,7 +110,7 @@ function PrayerRowImpl({
             },
           ]}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-          {formatDisplayTime(rawTime)}
+          {clock(rawTime)}
         </Text>
       </View>
     </Row>

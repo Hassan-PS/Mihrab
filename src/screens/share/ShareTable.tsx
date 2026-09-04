@@ -1,12 +1,12 @@
 // tokens-ok: deterministic raw values are part of this surface
 // contract (share-image must render identically regardless of in-app
 // theme; donations section uses platform brand colors).
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { TFunction } from 'i18next';
 import type { MonthDayEntry } from '../../prayer/loadMonthPrayerTimes';
 import { DISPLAY_ORDER, OPTIONAL_TIME_KEYS } from '../../types/prayer';
-import { formatDisplayTime } from '../../utils/prayerTimes';
+import { makeClockFormatter } from '../../utils/clockFormat';
 
 /**
  * Share-image table — task #64 split.
@@ -64,9 +64,23 @@ type Props = {
    * see `ShareMonthScreen`.
    */
   rtl: boolean;
+  /**
+   * Draw times on a 12-hour clock.
+   *
+   * The sender's own preference, not the sheet language's convention:
+   * someone who reads their app in 12-hour time is sharing the sheet
+   * they just looked at, and the two disagreeing would be a surprise.
+   * The AM/PM marker itself is still written in the sheet's language,
+   * which is why the flag comes in and the formatter is built here.
+   */
+  hour12: boolean;
 };
 
-function ShareTableImpl({ rows, locale, t, rtl }: Props) {
+function ShareTableImpl({ rows, locale, t, rtl, hour12 }: Props) {
+  const clock = useMemo(
+    () => makeClockFormatter(hour12, locale),
+    [hour12, locale],
+  );
   const dir = rtl ? ('row-reverse' as const) : ('row' as const);
   /**
    * The rows divide whatever the page has left, rather than being drawn
@@ -278,7 +292,7 @@ function ShareTableImpl({ rows, locale, t, rtl }: Props) {
               ]}>
               {DISPLAY_ORDER.map((key, idx) => {
                 const raw = row.timings[key];
-                const timeStr = raw ? formatDisplayTime(raw) : '—';
+                const timeStr = raw ? clock(raw) : '—';
                 const salah = IS_SALAH(key);
                 return (
                   <View

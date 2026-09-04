@@ -24,8 +24,20 @@ import { NativeModules } from 'react-native';
 export type MihrabLiveActivityPayload = {
   /** Localised prayer name for the upcoming prayer. */
   nextLabel: string;
-  /** HH:MM display string for the upcoming prayer. */
+  /**
+   * CANONICAL 24-hour `HH:mm` for the upcoming prayer.
+   *
+   * Parsed natively: `MihrabLiveActivityModule` turns it into a
+   * `LocalTime` for the Android 17 "At <time>" metric, which the SYSTEM
+   * then formats to the device's own clock. Draw `nextTimeDisplay`.
+   */
   nextTime: string;
+  /**
+   * The same time, written the way the user reads a clock (issue #18).
+   * Equal to `nextTime` on a 24-hour clock — this one is small enough
+   * that a copy costs nothing, unlike the per-row field.
+   */
+  nextTimeDisplay: string;
   /** Stable row key for the upcoming prayer (e.g. 'Fajr'). */
   nextKey: string;
   /** ms-since-epoch of the upcoming prayer — drives the Chronometer
@@ -46,13 +58,13 @@ export type MihrabLiveActivityPayload = {
   progressFraction: number;
   /** Chronological prayer list. Each row carries the stable `key`, the
    *  localised long `name`, and the HH:MM `time`. */
-  rows: { key: string; name: string; time: string }[];
+  rows: { key: string; name: string; time: string; display?: string }[];
   /** Sunrise row sent separately so the native module can splice it
    *  into slot 1 only when the user has the toggle on. */
-  sunriseRow?: { key: string; name: string; time: string };
+  sunriseRow?: { key: string; name: string; time: string; display?: string };
   /** Enabled pre-dawn night rows (Islamic Midnight / Last Third) for the
    *  currently-shown day. Added as timeline markers + countdown candidates. */
-  extraRows?: { key: string; name: string; time: string }[];
+  extraRows?: { key: string; name: string; time: string; display?: string }[];
   /** Multi-day schedule (index 0 = today). The foreground-service ticker
    *  uses this to recompute the next/previous prayer against the absolute
    *  dated schedule, so the countdown rolls onto the correct day's times
@@ -64,9 +76,9 @@ export type MihrabLiveActivityPayload = {
     /** Hijri label for this day; the native ticker promotes it to the
      *  top-level hijriLabel as the day rolls over. */
     hijriLabel?: string;
-    rows: { key: string; name: string; time: string }[];
-    sunriseRow?: { key: string; name: string; time: string };
-    extraRows?: { key: string; name: string; time: string }[];
+    rows: { key: string; name: string; time: string; display?: string }[];
+    sunriseRow?: { key: string; name: string; time: string; display?: string };
+    extraRows?: { key: string; name: string; time: string; display?: string }[];
   }[];
   /** Hijri caption, empty string → omit. */
   hijriLabel: string;

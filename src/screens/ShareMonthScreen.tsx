@@ -23,6 +23,7 @@ import ViewShot, { captureRef } from 'react-native-view-shot';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useClockFormatter } from '../hooks/useClockFormatter';
 import type { RootStackParamList } from '../navigation/types';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
@@ -82,6 +83,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   const { t, i18n } = useTranslation();
   const { settings, hydrated } = usePrayerSettings();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   const headerHeight = useHeaderHeight();
   const paddingTop = embedded ? 0 : headerHeight;
   const viewShotRef = useRef<ViewShot>(null);
@@ -443,6 +445,7 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
                   locale={sheetLang}
                   t={st}
                   rtl={sheetRtl}
+                  hour12={clock.hour12}
                 />
                 <ShareFooter t={st} sourceLine={sourceLine} rtl={sheetRtl} />
               </View>

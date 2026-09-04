@@ -32,6 +32,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useIsActive } from '../../hooks/useIsActive';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import {
@@ -44,8 +45,6 @@ import type { TimingsMap } from '../../types/prayer';
 import {
   combineLocalDateAndTime,
   countdownParts,
-  formatDisplayTime,
-  formatLocalTime,
 } from '../../utils/prayerTimes';
 import { isRtlLanguage } from '../../i18n/layoutDirection';
 import { DayStrip, type DayStripEntry } from './DayStrip';
@@ -116,6 +115,7 @@ const HeroToday = memo(function HeroToday({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   // Focus AND foreground. `useIsFocused()` on its own kept this ticking once
   // a second in the user's pocket: backgrounding the app from the Today tab
   // leaves Today the focused route, so the timer never stopped.
@@ -214,7 +214,7 @@ const HeroToday = memo(function HeroToday({
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
           accessibilityLanguage="en-US">
-          {formatLocalTime(target.at)}
+          {clock.fromDate(target.at)}
         </Text>
       </View>
       {rail ? (
@@ -264,6 +264,7 @@ function HeroOtherDay({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   const first = SALAH_ORDER.find(key => timings[key]);
   return (
     <View style={styles.hero}>
@@ -296,7 +297,7 @@ function HeroOtherDay({
             {t('home.firstPrayer', {
               defaultValue: 'First prayer {{prayer}} · {{time}}',
               prayer: t(`prayer.${first}`),
-              time: formatDisplayTime(timings[first]),
+              time: clock(timings[first]),
             })}
           </Text>
         </View>
@@ -322,6 +323,7 @@ function TodayCardImpl({
 }: TodayCardProps) {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   const [selected, setSelected] = useState(0);
   /**
    * The prayer the user aimed the countdown at, or null for "whatever is
@@ -497,7 +499,7 @@ function TodayCardImpl({
               ? t('home.updatedAt', {
                   // LTR isolate: a Latin-digit run inside a possibly-RTL
                   // sentence scrambles without it.
-                  when: `⁦${formatLocalTime(dataStatus.lastFetchedAt)}⁩`,
+                  when: `⁦${clock.fromDate(dataStatus.lastFetchedAt)}⁩`,
                 }) + ' · '
               : '') +
               t('home.daysStored', { count: dataStatus.totalDaysCached })}

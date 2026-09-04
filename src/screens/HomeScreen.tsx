@@ -358,6 +358,7 @@ export function HomeScreen() {
       // firing when the app isn't opened for a couple of days (v2.7.40).
       week: view.table.week,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
+      clockFormat: settings.clockFormat,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
     // The end-of-day prompt is scheduled from the same data and the same
     // moment as the prayer alerts: it needs Isha for every day it covers,
@@ -387,6 +388,7 @@ export function HomeScreen() {
     settings.prePrayerReminderMinutes,
     settings.notificationSound,
     settings.adhanUsesAlarmStream,
+    settings.clockFormat,
     settings.journalNotificationActionsEnabled,
     settings.endOfDayLogReminderEnabled,
     state,
@@ -436,6 +438,9 @@ export function HomeScreen() {
         // like "nothing changed" and the alarms would keep pointing at the
         // old channel until something else forced a rewrite.
         String(settings.adhanUsesAlarmStream),
+        // Sunrise and the night marks print a clock time in their copy,
+        // so a 12/24 change has to rewrite them — same reason as above.
+        settings.clockFormat,
         state.baseDate.getTime(),
       );
       if (shouldResync(NOTIF_RESYNC_KEY, notifPrint)) {
@@ -448,6 +453,7 @@ export function HomeScreen() {
           tomorrow: view.table.tomorrow,
           baseDate: state.baseDate,
           week: view.table.week,
+          clockFormat: settings.clockFormat,
         })
           // Marked on success only: a rewrite that threw must not suppress
           // the next attempt, or one bad round leaves the alarms as they are
@@ -532,6 +538,8 @@ export function HomeScreen() {
       settings.notificationsEnabled,
       settings.prePrayerReminderMinutes,
       settings.notificationSound,
+      settings.adhanUsesAlarmStream,
+      settings.clockFormat,
       state,
       view,
       locationLabel,

@@ -1,6 +1,7 @@
 import type { PrePrayerReminderMinutes } from './prePrayerReminder';
 import type { NotificationSoundId } from '../notifications/notificationSounds';
 import type { PrayerOffsetMinutes } from './prayerOffsets';
+import type { ClockFormat } from '../utils/clockFormat';
 
 export type LocationMode = 'automatic' | 'manual';
 
@@ -114,6 +115,18 @@ export type PrayerAppSettings = {
   locationOnboardingComplete: boolean;
   /** UI language (English, Swedish, Arabic). */
   language: AppLanguage;
+  /**
+   * How clock times are drawn — issue #18.
+   *
+   * 'auto' follows the device's own 12/24-hour switch, which is what a
+   * clock on the same screen does. '12' and '24' are the user saying
+   * they want something other than that, and are honoured over both the
+   * device and the app language.
+   *
+   * Display only. Every stored and transmitted time stays canonical
+   * 24-hour `HH:mm` — the widgets parse it. See `utils/clockFormat.ts`.
+   */
+  clockFormat: ClockFormat;
   /**
    * True once the user has chosen a language themselves.
    *
@@ -377,6 +390,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   locationOnboardingComplete: false,
   language: 'en',
   languagePicked: false,
+  clockFormat: 'auto',
   notificationsEnabled: false,
   prePrayerReminderMinutes: 0,
   notificationSound: 'default',

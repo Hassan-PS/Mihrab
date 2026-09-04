@@ -7,6 +7,12 @@ import notifee, {
   TriggerType,
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
+import { systemIs24Hour } from '../native/SystemClock';
+import {
+  makeClockFormatter,
+  resolveHour12,
+  type ClockFormat,
+} from '../utils/clockFormat';
 import i18n from '../i18n';
 import {
   getNotificationSoundOption,
@@ -32,7 +38,6 @@ import { isNonPrayerEvent } from '../types/prayer';
 import {
   buildPrePrayerReminderEvents,
   buildUpcomingSalahEvents,
-  formatLocalTime,
 } from '../utils/prayerTimes';
 
 /** Sunrise + the two night times are not salāh: default sound, no adhan, no
@@ -405,6 +410,15 @@ export async function syncPrayerNotifications(params: {
   week?: TimingsMap[];
   /** When true, the prayer-time alert gets a "Log prayer" action — task #99. */
   journalLogActionEnabled?: boolean;
+  /**
+   * How the clock times inside alert copy are written — issue #18.
+   *
+   * Only Sunrise and the night marks print a time at all (a prayer alert
+   * says "Prayer time"), but that time is read on a lock screen next to
+   * the system clock, so it follows the same preference the app does.
+   * Defaults to 'auto' for callers that predate the setting.
+   */
+  clockFormat?: ClockFormat;
 }): Promise<SyncPrayerNotificationsResult> {
   if (!params.enabled) {
     await cancelOwnedPrayerNotifications([]);
@@ -418,6 +432,14 @@ export async function syncPrayerNotifications(params: {
     }
   }
   const useAlarmStream = params.adhanUsesAlarmStream === true;
+  const clock = makeClockFormatter(
+    resolveHour12(
+      params.clockFormat ?? 'auto',
+      systemIs24Hour(),
+      i18n.language,
+    ),
+    i18n.language,
+  );
   await ensureChannel(params.notificationSound, useAlarmStream);
   const prayerTimeSound = getNotificationSoundOption(params.notificationSound);
   const reminderSound = getNotificationSoundOption('default');
@@ -504,7 +526,7 @@ export async function syncPrayerNotifications(params: {
     // prayers, so they show the clock time instead of the misleading
     // "Prayer time" line (reported for the Sunrise alert).
     const atPrayerBody = isNonPrayer
-      ? formatLocalTime(e.at)
+      ? clock.fromDate(e.at)
       : i18n.t('alertCopy.atPrayer');
     // Auto-dismiss this alert when the NEXT event is due, so a fired prayer's
     // notification never lingers into (or past) the following prayer. Capped
@@ -587,7 +609,7 @@ export async function syncPrayerNotifications(params: {
     // thing — "02:30 · starts in 15 min" — so the reader knows what is
     // coming without doing the arithmetic.
     const preBody = isNonPrayerEvent(e.name)
-      ? `${formatLocalTime(
+      ? `${clock.fromDate(
           new Date(e.at.getTime() + reminderMinutes * 60_000),
         )} · ${i18n.t('alertCopy.prePrayer', { count: reminderMinutes })}`
       : i18n.t('alertCopy.prePrayer', { count: reminderMinutes });

@@ -117,7 +117,7 @@ import {
 } from '../fasting/fasting';
 import { cardEdgeStyle, inputChromeStyle } from '../theme/chrome';
 import { tabularNumeralStyle } from '../theme/textScale';
-import { formatDisplayTime } from '../utils/prayerTimes';
+import { useClockFormatter } from '../hooks/useClockFormatter';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 
@@ -169,6 +169,7 @@ function earliestEntryOf(entries: JournalEntry[]): string | null {
 export function LogScreen() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   const tabBarInset = useTabBarInset();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
@@ -1378,7 +1379,7 @@ export function LogScreen() {
                           { color: palette.muted },
                         ]}
                       >
-                        {formatDisplayTime(time)}
+                        {clock(time)}
                       </Text>
                     ) : null}
                     <View style={styles.headSpacer} />
@@ -1565,7 +1566,7 @@ export function LogScreen() {
                   >
                     {t('log.iftarAt', {
                       defaultValue: 'Iftar {{time}}',
-                      time: formatDisplayTime(maghrib),
+                      time: clock(maghrib),
                     })}
                   </Text>
                 ) : null}

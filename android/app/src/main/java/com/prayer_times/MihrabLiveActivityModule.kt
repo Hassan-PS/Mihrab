@@ -420,6 +420,12 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         //   'countdown' — countdown-focused: big countdown title + prayer/time.
         val design = p.optString("design", "timeline")
         val nextTime = p.optString("nextTime", "")
+        // What the card DRAWS. `nextTime` stays canonical 24-hour `HH:mm`
+        // because `buildMetricStyle` parses it into a `LocalTime` for the
+        // Android 17 "At <time>" metric, which the system then formats
+        // itself. Empty on payloads from app builds before issue #18.
+        val nextTimeText =
+          p.optString("nextTimeDisplay", "").ifEmpty { nextTime }
 
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
@@ -457,7 +463,8 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           // stripped). The next prayer's name + clock time sit beneath it.
           builder.setContentTitle(countdown)
           val sub = when {
-            nextLabel.isNotEmpty() && nextTime.isNotEmpty() -> "$nextLabel · $nextTime"
+            nextLabel.isNotEmpty() && nextTimeText.isNotEmpty() ->
+              "$nextLabel · $nextTimeText"
             nextLabel.isNotEmpty() -> nextLabel
             else -> title
           }
@@ -481,7 +488,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             if (dayStyle != null) inlineTitle else "$inlineTitle · $progressPct%",
           )
           // Actual prayer time shown small/grey in the header (next to app name).
-          if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
+          if (nextTimeText.isNotEmpty()) builder.setSubText(nextTimeText)
           if (dayStyle != null) {
             builder.setStyle(dayStyle)
           } else {
@@ -527,6 +534,9 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val shortText = if (withSeconds) formatHMS(remaining) else formatRemainingShort(remaining)
         val nextLabel = p.optString("nextLabel", "")
         val nextTime = p.optString("nextTime", "")
+        // See the note in the other builder: `nextTime` is parsed, this is drawn.
+        val nextTimeText =
+          p.optString("nextTimeDisplay", "").ifEmpty { nextTime }
         val design = p.optString("design", "timeline")
         val prevEpochMs = p.optLong("prevEpochMs", 0L)
         // "It's <prayer> time" — brief SAFE (green) state for ~90s right after a
@@ -597,13 +607,13 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
             } else {
               // Single big countdown: name + Hijri on the title line, time below.
               builder.setContentTitle(arrivedTitle ?: joinDot(name, hijri))
-              if (nextTime.isNotEmpty()) builder.setSubText(nextTime)
+              if (nextTimeText.isNotEmpty()) builder.setSubText(nextTimeText)
             }
             builder.setStyle(style)
             systemTicked = true
           } else {
             builder.setContentTitle(arrivedTitle ?: "$name · $countdown")
-            val sub = joinDot(nextTime, hijri)
+            val sub = joinDot(nextTimeText, hijri)
             if (sub.isNotEmpty()) builder.setSubText(sub)
             builder.setProgress(100, progressPct, false)
             tryAttachShortCriticalText(builder, shortText)
@@ -627,7 +637,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
           }
           if (dayStyle != null) {
             builder.setContentTitle(inlineTitle)
-            val sub = joinDot(nextTime, hijri)
+            val sub = joinDot(nextTimeText, hijri)
             if (sub.isNotEmpty()) builder.setSubText(sub)
             builder.setStyle(dayStyle)
           } else {

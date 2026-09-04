@@ -20,8 +20,16 @@ export type PrayerLiveActivityContent = {
   nextKey: string;
   /** Already-localised label, e.g. 'Fajr' or 'الفجر'. */
   nextLabel: string;
-  /** Wall-clock string for the next prayer, e.g. '05:14'. */
+  /**
+   * CANONICAL 24-hour `HH:mm` for the next prayer, e.g. '17:31'.
+   *
+   * The Activity's on-device roll-forward (`computeNext` in
+   * `PrayerLiveActivity.swift`) splits row times on ":" and this is the
+   * same wire format. Drawn as `nextTimeDisplay` — issue #18.
+   */
   nextTime: string;
+  /** The same time, written the way the user reads a clock (issue #18). */
+  nextTimeDisplay: string;
   /** Seconds-since-epoch of the next prayer — matches Swift ContentState.nextEpochSeconds.
    *  Convert from ms: nextPrayerTimestamp / 1000. */
   nextEpochSeconds: number;
@@ -32,11 +40,11 @@ export type PrayerLiveActivityContent = {
   /** Same row list the home-screen widget uses (Fajr, Dhuhr, Asr, Maghrib, Isha).
    *  `name` is the localized full prayer name (the strip renders `abbr`; the
    *  background refresh task uses `name` to rebuild the hero label). */
-  rows: { key: string; abbr: string; name: string; time: string }[];
+  rows: { key: string; abbr: string; name: string; time: string; display?: string }[];
   /** Sunrise row when the user opted to show it. */
-  sunriseRow?: { key: string; abbr: string; name: string; time: string };
+  sunriseRow?: { key: string; abbr: string; name: string; time: string; display?: string };
   /** Enabled pre-dawn night rows (Islamic Midnight / Last Third). May be empty. */
-  extraRows?: { key: string; abbr: string; name: string; time: string }[];
+  extraRows?: { key: string; abbr: string; name: string; time: string; display?: string }[];
   /** Optional caption lines — pass empty strings to omit. */
   hijriLabel: string;
   locationLabel: string;

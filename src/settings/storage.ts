@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { resolveDeviceLanguage } from '../i18n/deviceLanguage';
 import { coerceNotificationSoundId } from '../notifications/notificationSounds';
+import { coerceClockFormat } from '../utils/clockFormat';
 import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
 import {
   extractSecureFields,
@@ -252,6 +253,7 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   merged.androidWidgetBackgroundOpacity = coerceWidgetOpacity(
     parsed.androidWidgetBackgroundOpacity,
   );
+  merged.clockFormat = coerceClockFormat(parsed.clockFormat);
   merged.widgetHighlightId = coerceWidgetHighlightId(parsed.widgetHighlightId);
   merged.widgetHighlightCustomHex = coerceWidgetHighlightHex(
     parsed.widgetHighlightCustomHex,

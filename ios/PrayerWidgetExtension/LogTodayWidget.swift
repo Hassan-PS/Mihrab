@@ -299,7 +299,7 @@ struct LogTodayEntryView: View {
   private func footer(_ t: WidgetPayload.Today) -> some View {
     HStack(spacing: 6) {
       if let next = nextEvent() {
-        Text(verbatim: "\(next.name ?? next.abbr ?? next.key) \(next.time)")
+        Text(verbatim: "\(next.name ?? next.abbr ?? next.key) \(next.text)")
           .font(.system(size: 11))
           .foregroundStyle(widgetMuted)
           .lineLimit(1)
@@ -352,7 +352,7 @@ struct LogTodayEntryView: View {
         .foregroundStyle(state == .waiting ? widgetMuted.opacity(0.6) : widgetMuted)
         .lineLimit(1)
         .minimumScaleFactor(0.7)
-      Text(p.time)
+      Text(p.text)
         .font(.system(size: 9))
         .monospacedDigit()
         .foregroundStyle(widgetMuted.opacity(state == .waiting ? 0.5 : 0.85))

@@ -19,6 +19,7 @@ class MainApplication : Application(), ReactApplication {
           add(PrayerWidgetPackage())
           add(PrayerBuildInfoPackage())
           add(AppVersionPackage())
+          add(SystemClockPackage())
           add(SystemThemePackage())
           add(MihrabLiveActivityPackage())
           add(MushafFontPackage())

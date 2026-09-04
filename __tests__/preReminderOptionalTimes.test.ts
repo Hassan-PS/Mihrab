@@ -100,6 +100,28 @@ describe('advance reminders for the alternative times', () => {
     expect(pre('Lastthird').body).toContain('02:30');
   });
 
+  /**
+   * The alert is read on a lock screen, next to the system clock. Issue
+   * #18 let the user choose how they read one, and this copy is the only
+   * place a notification prints a time — so it follows that choice
+   * rather than being the one surface that ignores it.
+   */
+  it('writes that time the way the user reads a clock', async () => {
+    await syncPrayerNotifications({
+      enabled: true,
+      prePrayerReminderMinutes: 15,
+      notificationSound: 'adhan_makkah',
+      today,
+      tomorrow: today,
+      baseDate: new Date(2026, 5, 14, 10, 0, 0),
+      clockFormat: '12',
+    });
+    expect(pre('Firstthird').body).toContain('10:00 PM');
+    expect(pre('Lastthird').body).toContain('2:30 AM');
+    // And the salāh copy is untouched — it never printed a time.
+    expect(pre('Dhuhr').body).toBe('Starts in 15 min');
+  });
+
   it('leaves the five salāh saying what they always said', async () => {
     await sync();
     expect(pre('Dhuhr').body).toBe('Starts in 15 min');

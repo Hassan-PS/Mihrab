@@ -20,6 +20,7 @@ import notifee, {
 } from '@notifee/react-native';
 import { useNotificationsSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { getNotificationSoundOption } from '../../notifications/notificationSounds';
 import {
@@ -47,6 +48,7 @@ function NotificationsCardImpl({
   // Subscribes only to the notifications slice (task #11).
   const { slice: settings, update: updateSettings } = useNotificationsSettings();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   // Which daily-notification time the picker edits (v2.7.28: khatmah too).
   const [timeTarget, setTimeTarget] = useState<'ayah' | 'khatmah' | null>(
     null,
@@ -141,8 +143,11 @@ function NotificationsCardImpl({
     updateSettings({ khatmahReminderEnabled: true });
   };
 
+  // The times on these rows are read the same way as every other clock
+  // in the app — including inside the stepper, where "9:00 PM" also
+  // says which half of the day the wrapping 0–23 hour has landed in.
   const fmtTime = (h: number, m: number) =>
-    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    clock(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
 
   const pickerHour =
     timeTarget === 'khatmah'

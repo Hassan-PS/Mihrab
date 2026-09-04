@@ -19,7 +19,7 @@ import {
 const isSalah = (key: string) =>
   !(OPTIONAL_TIME_KEYS as readonly string[]).includes(key);
 import type { MonthDayEntry } from '../../prayer/loadMonthPrayerTimes';
-import { formatDisplayTime } from '../../utils/prayerTimes';
+import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { SPACING } from '../../theme/tokens';
 import { typeStyle } from '../../theme/typography';
 
@@ -87,6 +87,7 @@ type RowProps = {
 };
 
 function MonthRowImpl({ item, palette, isCurrentMonth, todayDay }: RowProps) {
+  const clock = useClockFormatter();
   const d = item.date;
   const isToday = isCurrentMonth && d.getDate() === todayDay;
   const isFriday = d.getDay() === 5;
@@ -121,7 +122,7 @@ function MonthRowImpl({ item, palette, isCurrentMonth, todayDay }: RowProps) {
       </Text>
       {DISPLAY_ORDER.map((key: DisplayPrayerKey) => {
         const raw = item.timings[key];
-        const timeStr = raw ? formatDisplayTime(raw) : '—';
+        const timeStr = raw ? clock(raw) : '—';
         const salah = isSalah(key);
         return (
           <Text
