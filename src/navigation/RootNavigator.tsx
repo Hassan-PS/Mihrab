@@ -13,6 +13,7 @@ import { MonthTimesScreen } from '../screens/MonthTimesScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { QuranSurahScreen } from '../screens/QuranSurahScreen';
 import { QuranDownloadsScreen } from '../screens/QuranDownloadsScreen';
+import { QuranListenScreen } from '../screens/quran/QuranListenScreen';
 import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import { BackupScreen } from '../screens/BackupScreen';
 import { SyncScreen } from '../screens/SyncScreen';
@@ -180,6 +181,14 @@ export function RootNavigator() {
         name="QuranSurah"
         component={QuranSurahScreen}
         options={{ title: '', headerLargeTitle: false }}
+      />
+      <Stack.Screen
+        name="QuranListen"
+        component={QuranListenScreen}
+        options={{
+          title: t('quran.listenTitle', 'Listen'),
+          headerLargeTitle: false,
+        }}
       />
       <Stack.Screen
         name="QuranDownloads"

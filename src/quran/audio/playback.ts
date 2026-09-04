@@ -83,8 +83,19 @@ async function ensureSetup(): Promise<void> {
     }
     await TrackPlayer.updateOptions({
       android: {
-        appKilledPlaybackBehavior:
-          AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+        /**
+         * Swiping the app away does NOT stop the recitation.
+         *
+         * It used to, which was defensible while the only way to start
+         * audio was "play from here" inside the reader — you were looking
+         * at the page, and closing the app meant you were done. It stopped
+         * being defensible the moment there was a listening page: someone
+         * puts a surah on, locks the phone, clears their recents an hour
+         * later out of habit, and the recitation dies mid-ayah. No music
+         * player behaves that way, and the notification's own controls are
+         * what the person would reach for instead.
+         */
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
       },
       capabilities: [
         Capability.Play,
@@ -108,6 +119,9 @@ async function ensureSetup(): Promise<void> {
       setStatus({ active: ref });
       // Gapless: warm the next few ayahs onto disk (v2.7.28).
       void prefetchUpcoming();
+      // Listening: keep a couple of hundred ayahs queued ahead of here, so
+      // one surah runs into the next without a gap or a decision.
+      void extendListening();
     });
     TrackPlayer.addEventListener(Event.PlaybackState, e => {
       setStatus({
@@ -255,7 +269,25 @@ export function applyRepeats(
   return out.slice(0, MAX_QUEUE_TRACKS);
 }
 
-async function buildTracks(refs: AyahRef[], reciterId: string): Promise<Track[]> {
+/**
+ * What the lock screen shows next to the transport.
+ *
+ * The app's own icon. A media notification with no artwork is a grey
+ * rectangle and a line of text, and the phone's own player, the car and
+ * the watch all reserve the space whether we fill it or not. There is
+ * nothing to picture for a recitation — no cover exists — so the honest
+ * thing to put there is the app it is coming from.
+ */
+const ARTWORK = require('../../../assets/app-icon-rounded.png');
+
+async function buildTracks(
+  refs: AyahRef[],
+  reciterId: string,
+  // Where these tracks start in the queue. Ids have to stay unique across
+  // the top-ups a continuous listen appends, or two ayahs share one id and
+  // the active-track lookup starts answering with the wrong one.
+  indexOffset = 0,
+): Promise<Track[]> {
   const reciter = findReciter(reciterId);
   // Resolve local paths once per unique ayah.
   const localByKey = new Map<string, string | null>();
@@ -272,12 +304,95 @@ async function buildTracks(refs: AyahRef[], reciterId: string): Promise<Track[]>
     const local = localByKey.get(`${r.surah}:${r.ayah}`);
     const meta = findSurah(r.surah);
     return {
-      id: trackId(r.surah, r.ayah, i),
+      id: trackId(r.surah, r.ayah, indexOffset + i),
       url: local ? `file://${local}` : ayahAudioUrl(reciter, r.surah, r.ayah),
       title: `${meta?.romanized ?? 'Surah'} ${r.surah}:${r.ayah}`,
       artist: reciter.name,
+      // The surah, so the lock screen says which one is playing without
+      // the reader having to be open to tell you.
+      album: meta?.romanized ?? undefined,
+      artwork: ARTWORK,
     };
   });
+}
+
+// ── Listening: past the end of a surah ───────────────────────────────
+//
+// The reader's flow ends where the surah does: you tapped an ayah, you
+// wanted that passage. Listening does not — someone who puts Al-Baqarah on
+// expects Āl-ʿImrān after it, the way any album plays into the next.
+//
+// The whole book is 6,236 tracks and the player is not going to hold that.
+// So the queue is a WINDOW that walks forward: a couple of hundred ayahs
+// ahead of where you are, topped up as it drains. `listenCursor` is the
+// first ayah not yet queued, which is the only state a top-up needs.
+
+/** Ayahs queued ahead while listening. */
+const LISTEN_WINDOW = 200;
+/** Top the queue up once fewer than this many remain after the active one. */
+const LISTEN_REFILL_AT = 60;
+
+let listening = false;
+/** The first ayah NOT yet in the queue, or null at the end of the book. */
+let listenCursor: AyahRef | null = null;
+/** Monotonic, so an appended track can never reuse an id. */
+let listenIndex = 0;
+
+/** The ayah after this one, or null at 114:6. */
+export function nextAyahRef(ref: AyahRef): AyahRef | null {
+  const meta = findSurah(ref.surah);
+  if (!meta) return null;
+  if (ref.ayah < meta.ayahCount) return { surah: ref.surah, ayah: ref.ayah + 1 };
+  if (ref.surah >= 114) return null;
+  return { surah: ref.surah + 1, ayah: 1 };
+}
+
+/** The next `count` ayahs from `start` inclusive, and where to resume. */
+export function listenWindow(
+  start: AyahRef,
+  count: number,
+): { refs: AyahRef[]; cursor: AyahRef | null } {
+  const refs: AyahRef[] = [];
+  let cur: AyahRef | null = start;
+  while (cur && refs.length < count) {
+    refs.push(cur);
+    cur = nextAyahRef(cur);
+  }
+  return { refs, cursor: cur };
+}
+
+function endListening(): void {
+  listening = false;
+  listenCursor = null;
+  listenIndex = 0;
+}
+
+/** Append the next window if the queue is running low. Best effort. */
+async function extendListening(): Promise<void> {
+  if (!listening || !listenCursor) return;
+  try {
+    const [queue, activeIndex] = await Promise.all([
+      TrackPlayer.getQueue(),
+      TrackPlayer.getActiveTrackIndex(),
+    ]);
+    const remaining = queue.length - ((activeIndex ?? 0) + 1);
+    if (remaining >= LISTEN_REFILL_AT) return;
+    const { refs, cursor } = listenWindow(listenCursor, LISTEN_WINDOW);
+    if (refs.length === 0) {
+      listenCursor = null;
+      return;
+    }
+    // Claim the cursor BEFORE the await that builds the tracks: two track
+    // changes in quick succession would otherwise both queue the same
+    // window and play every ayah twice.
+    listenCursor = cursor;
+    const tracks = await buildTracks(refs, status.reciterId, listenIndex);
+    listenIndex += refs.length;
+    await TrackPlayer.add(tracks);
+  } catch {
+    // A top-up that fails leaves what is queued playing. The next track
+    // change tries again.
+  }
 }
 
 // ── Public controls ──────────────────────────────────────────────────
@@ -303,6 +418,9 @@ export async function playRange(
   opts: { useRepeats?: boolean } = {},
 ): Promise<void> {
   await ensureSetup();
+  // A deliberate range replaces a continuous listen. The two cannot both
+  // be true of one queue, and the one the user just asked for wins.
+  endListening();
   const prefs = getQuranState().prefs;
   setStatus({ reciterId: prefs.reciterId, loading: true });
   let refs = expandRange(from, to);
@@ -327,10 +445,59 @@ export async function resumePlayback(): Promise<void> {
   await TrackPlayer.play();
 }
 
+/**
+ * Listen from here to the end of the book.
+ *
+ * Starts at an ayah — normally the first of a surah, but the listening
+ * page also resumes mid-surah — and keeps going: when the queue runs low
+ * the next window is appended, surah after surah, to 114:6.
+ *
+ * The memorisation repeats are deliberately NOT applied. They belong to
+ * the range player, where you asked for an ayah five times on purpose;
+ * applying them to a continuous listen would turn an evening's recitation
+ * into the same page over and over.
+ */
+export async function listenFrom(
+  surah: number,
+  ayah: number = 1,
+): Promise<void> {
+  const meta = findSurah(surah);
+  if (!meta) return;
+  await ensureSetup();
+  const prefs = getQuranState().prefs;
+  setStatus({ reciterId: prefs.reciterId, loading: true });
+  const start = { surah, ayah: Math.max(1, Math.min(meta.ayahCount, ayah)) };
+  const { refs, cursor } = listenWindow(start, LISTEN_WINDOW);
+  const tracks = await buildTracks(refs, prefs.reciterId, 0);
+  await TrackPlayer.reset();
+  await TrackPlayer.add(tracks);
+  await TrackPlayer.setRate(prefs.playbackRate);
+  await TrackPlayer.play();
+  // Armed only once the queue is really in the player: an `extendListening`
+  // that ran against the OLD queue would top up something we are about to
+  // reset.
+  listening = true;
+  listenCursor = cursor;
+  listenIndex = refs.length;
+  setStatus({ active: start, playing: true });
+}
+
+/** Is a continuous listen the thing that is playing? */
+export function isListening(): boolean {
+  return listening;
+}
+
 export async function stopPlayback(): Promise<void> {
+  endListening();
   if (!setupPromise) return; // never started — nothing to stop
   await TrackPlayer.reset();
   setStatus({ active: null, playing: false, loading: false });
+}
+
+/** Move within the ayah being recited. */
+export async function seekTo(seconds: number): Promise<void> {
+  await ensureSetup();
+  await TrackPlayer.seekTo(Math.max(0, seconds));
 }
 
 export async function skipToNextAyah(): Promise<void> {

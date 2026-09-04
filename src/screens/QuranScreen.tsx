@@ -847,6 +847,23 @@ export function QuranScreen() {
           link is shown only when there is a riwayah to offer at all — a
           build that knows one recitation should not advertise a picker. */}
       <View style={styles.downloadsRow}>
+        {/* Listening has to have a door on the screen people already open
+            to find the Quran. It is a destination, not a setting: the
+            recitation keeps playing when this screen is gone. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.listenTitle', 'Listen')}
+          onPress={() => navigation.navigate('QuranListen')}
+          style={styles.downloadsLink}>
+          <Text
+            style={{
+              color: palette.accentSolid,
+              fontSize: 12,
+              fontWeight: '700',
+            }}>
+            {t('quran.listenTitle', 'Listen')} ›
+          </Text>
+        </Pressable>
         {riwayahOffered ? (
           <Pressable
             accessibilityRole="button"
