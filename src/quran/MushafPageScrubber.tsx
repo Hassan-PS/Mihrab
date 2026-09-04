@@ -23,19 +23,21 @@
  * a tenth — so a single page can be chosen on purpose; the readout says
  * which speed it is in. The tick marks are the thirty ajzāʾ.
  *
- * ── Why the haptics are speed-aware ──────────────────────────────────
+ * ── Why the sideways drag is silent ──────────────────────────────────
  *
- * A 604-page rail across a phone is roughly two pages per pixel, so pages
- * are the wrong unit for feedback: ticking per page is a continuous buzz
- * that says nothing. Surahs are the landmark people actually navigate by,
- * and they are unevenly spaced — which is the point. Al-Baqarah is 48
- * pages of silence, the last juz is a tick every few millimetres.
+ * It used to tick at every surah boundary, at a weight set by how fast
+ * the thumb was travelling: firm when hunting, light when ranging. The
+ * reasoning was sound and the result was not. Surahs are unevenly spaced
+ * — Al-Baqarah is 48 pages of nothing, the last juz is a boundary every
+ * few millimetres — so the same gesture is silent across half the muṣḥaf
+ * and a continuous buzz across the end of it, which reads as the rail
+ * being noisy rather than as information about where you are.
  *
- * The tick then reports the reader's own intent back to them. Drag slowly
- * and boundaries arrive rarely and land firmly, so you can stop ON one.
- * Sweep and they arrive constantly, so they go light and become a texture
- * — "you are in the short surahs now" — instead of twenty medium knocks a
- * second, which is just a vibration with no information in it.
+ * The one movement that still ticks is UP, into a slower speed. That is a
+ * mode change the finger cannot see — the rail looks identical at half
+ * speed and at a tenth — and it is the only thing here a reader needs
+ * told without looking. One tick per crossing, and nothing while the
+ * thumb runs along the rail.
  */
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -61,7 +63,6 @@ import { mushafSurahName } from './surahName';
 import {
   createRailDrag,
   fractionForPage,
-  isRangingDrag,
   juzTickFractions,
   PEEK_STILL_MS,
   surahAtPage,
@@ -69,6 +70,10 @@ import {
 } from './mushafRail';
 
 // The model's pure parts, re-exported for the tests that pinned them here.
+// `isRangingDrag` outlives its caller: the rail no longer weights ticks by
+// how fast the thumb is moving (there are no per-surah ticks left to
+// weight), but the pure function and the reasoning behind it are still
+// tested here and would be what a future speed-aware tick reached for.
 export { isRangingDrag, surahAtPage } from './mushafRail';
 
 type Props = {
@@ -86,9 +91,6 @@ type Props = {
   /** Opens the type-a-number sheet. Renders the ⌗ button when provided. */
   onOpenJump?: () => void;
 };
-
-/** Floor between ticks so a sweep cannot outrun the vibrator. */
-const MIN_TICK_INTERVAL_MS = 45;
 
 /** The touch target: the track sits in the middle of this. */
 const RAIL_BOX_H = 36;
@@ -159,37 +161,6 @@ function MushafPageScrubberImpl({
     }, PEEK_STILL_MS);
   }, []);
 
-  // Drag bookkeeping for the haptics. Refs, not state: these are read and
-  // written inside responder callbacks that must not re-render to do
-  // their job.
-  const lastSurah = useRef(0);
-  const lastPage = useRef(page);
-  const lastMoveAt = useRef(0);
-  const lastTickAt = useRef(0);
-
-  /**
-   * Tick if this move crossed into a different surah, at a weight set by
-   * how fast the thumb is travelling.
-   */
-  const feedback = useCallback((next: number, now: number) => {
-    const surah = surahAtPage(next, latest.current.riwayah);
-    if (surah === lastSurah.current) {
-      lastPage.current = next;
-      lastMoveAt.current = now;
-      return;
-    }
-    const ranging = isRangingDrag(
-      next - lastPage.current,
-      now - lastMoveAt.current,
-    );
-    lastSurah.current = surah;
-    lastPage.current = next;
-    lastMoveAt.current = now;
-    if (now - lastTickAt.current < MIN_TICK_INTERVAL_MS) return;
-    lastTickAt.current = now;
-    hapticScrubTick(ranging);
-  }, []);
-
   /** The finger lifted, or the system took the touch: commit and clear. */
   const finish = useCallback(() => {
     clearPeek();
@@ -216,7 +187,7 @@ function MushafPageScrubberImpl({
       onPanResponderGrant: e => {
         const w = widthRef.current;
         if (!(w > 0)) return;
-        const { page: at, totalPages: total, riwayah: r } = latest.current;
+        const { page: at, totalPages: total } = latest.current;
         const d = createRailDrag({
           total,
           width: w,
@@ -224,15 +195,11 @@ function MushafPageScrubberImpl({
           grabX: e.nativeEvent.locationX,
         });
         dragRef.current = d;
+        // Warms the Taptic Engine so the first speed tick is not late.
+        // It is not itself a tick: grabbing the rail is something the
+        // finger already knows it did.
         hapticScrubStart();
-        // Seed from the page we land on, so the first tick is the first
-        // boundary actually crossed rather than an artefact of grabbing
-        // the rail somewhere else in the mushaf.
         const first = d.page();
-        lastSurah.current = surahAtPage(first, r);
-        lastPage.current = first;
-        lastMoveAt.current = Date.now();
-        lastTickAt.current = 0;
         peeked.current = at;
         publish({ page: first, tier: 0 });
         schedulePeek(first);
@@ -242,10 +209,12 @@ function MushafPageScrubberImpl({
         if (!d) return;
         const before = d.tier();
         const { page: next, tier } = d.move(g.dx, g.dy);
-        // A change of speed is announced once, lightly — the way the
-        // media scrubber does — so the finger knows it has arrived.
-        if (tier !== before) hapticScrubTick(true);
-        feedback(next, Date.now());
+        // THE ONLY TICK ON THE RAIL. Reaching up into a slower speed is a
+        // mode change with no visible sign — the rail looks the same at
+        // half speed and at a tenth — so it is announced once, firmly
+        // enough to feel through a deliberate movement. Sliding ALONG the
+        // rail says nothing: see the note at the top of the file.
+        if (tier !== before) hapticScrubTick(false);
         publish({ page: next, tier });
         schedulePeek(next);
       },

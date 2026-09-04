@@ -33,7 +33,6 @@ const portrait = {
   sideInset: 0,
   navPad: 0,
   listH: 720,
-  footerDrawn: true,
 };
 
 describe('the mini player is reserved once, by the layout', () => {
@@ -43,7 +42,7 @@ describe('the mini player is reserved once, by the layout', () => {
   // in the viewport, and the page ended 68dp above the player.
   it('gives the page the whole measured viewport, less its own chrome', () => {
     const g = phonePageGeometry(portrait)!;
-    expect(g.viewportH).toBe(720 - HEADER_RESERVE - FOOTER_RESERVE);
+    expect(g.viewportH).toBe(720 - HEADER_RESERVE - FOOTER_GAP);
   });
 
   it('shrinks by exactly what the player took from the list', () => {
@@ -56,37 +55,51 @@ describe('the mini player is reserved once, by the layout', () => {
     expect(geometryKey(phonePageGeometry(portrait))).not.toMatch(/68/);
   });
 
-  it('gives the medallion room back to the text when it stands down', () => {
-    // While the player is up it names the page, so the medallion is not
-    // drawn. Reserving its room anyway did not leave the page as it was —
-    // it opened a band of nothing between the last line and the player.
-    const drawn = phonePageGeometry(portrait)!;
-    const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
-    expect(standDown.viewportH - drawn.viewportH).toBe(
-      FOOTER_RESERVE - FOOTER_GAP,
+  /**
+   * The medallion is gone from the phone entirely. It repeated what the
+   * scrubber's readout says always and the player says while it is up —
+   * and it sat exactly where the player card is pinned, so two of the
+   * three page numbers were a centimetre apart with one behind glass.
+   */
+  it('reserves no medallion, because there is no medallion', () => {
+    expect(720 - HEADER_RESERVE - phonePageGeometry(portrait)!.viewportH).toBe(
+      FOOTER_GAP,
     );
   });
 
-  it('still reserves the header, which never stands down', () => {
-    const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
-    expect(standDown.viewportH).toBe(720 - HEADER_RESERVE - FOOTER_GAP);
+  it('still reserves the header, which never stood down', () => {
+    expect(phonePageGeometry(portrait)!.viewportH).toBe(
+      720 - HEADER_RESERVE - FOOTER_GAP,
+    );
   });
 
   it('leaves the last line room to breathe above the player', () => {
     // Reclaiming the medallion's WHOLE room put the last ayah hard
     // against the card, which reads as the text running underneath it.
-    const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
-    expect(720 - HEADER_RESERVE - standDown.viewportH).toBe(FOOTER_GAP);
     expect(FOOTER_GAP).toBeGreaterThan(0);
     expect(FOOTER_GAP).toBeLessThan(FOOTER_RESERVE);
   });
 
-  it('changes the page identity, so a settled geometry is replaced', () => {
-    // The reclaimed room changes viewportH, which the key already carries
-    // — otherwise the page would keep drawing at the old height.
-    expect(geometryKey(phonePageGeometry(portrait))).not.toBe(
-      geometryKey(phonePageGeometry({ ...portrait, footerDrawn: false })),
+  /**
+   * One page still has a footer: the one a khatmah portion ends on, which
+   * carries the "mark it done" pill. It pays for that itself, out of its
+   * own column — reserving it in the shared geometry would shorten six
+   * hundred and three pages for a button on one of them.
+   */
+  it('leaves the khatmah pill to the page that draws it', () => {
+    const reader = read('src/quran/MushafPhoneReader.tsx');
+    expect(reader).toContain(
+      'geometry.viewportH - (finish ? FOOTER_RESERVE - FOOTER_GAP : 0)',
     );
+    // …and that page's footer comes without the medallion.
+    expect(reader).toContain('showPageNumber={false}');
+  });
+
+  it('draws no page number anywhere else on the phone', () => {
+    const reader = read('src/quran/MushafPhoneReader.tsx');
+    // The footer is rendered only for a finish page now.
+    expect(reader).toMatch(/\{finish \? \(\s*\n\s*<MushafPageFooter/);
+    expect(reader).not.toMatch(/hideFooter/);
   });
 
   it.each([

@@ -79,6 +79,8 @@ import { ayahLineBox, followOffset } from './mushafFollowScroll';
 import { riwayahById, type RiwayahId } from './riwayat';
 import type { MushafTone } from './mushafTone';
 import {
+  FOOTER_GAP,
+  FOOTER_RESERVE,
   phoneGeometryFits,
   phonePageGeometry,
   phonePageWidth,
@@ -160,11 +162,6 @@ type PageItemProps = {
   selected: AyahRef | null;
   playing: AyahRef | null;
   finish: KhatmahFinish | null;
-  /**
-   * The player is up and has taken the page number, so the medallion
-   * would be saying it twice — see the render below.
-   */
-  hideFooter: boolean;
   onToggleFullscreen: () => void;
   onWordPress: (ref: AyahRef, page: number) => void;
   onOpenJump: () => void;
@@ -185,7 +182,6 @@ const PhonePageItem = React.memo(function PhonePageItem({
   selected,
   playing,
   finish,
-  hideFooter,
   onToggleFullscreen,
   onWordPress,
   onOpenJump,
@@ -194,12 +190,25 @@ const PhonePageItem = React.memo(function PhonePageItem({
   // fills the box it is given, so the whole page is on screen with nothing
   // to scroll. Landscape: a READING zoom (1.6× the portrait width), so the
   // page is taller than the window and its column scrolls vertically.
+  /**
+   * The one page that still has a footer pays for it here, not in the
+   * shared geometry.
+   *
+   * `phonePageGeometry` reserves the same small gap under every page now
+   * that the medallion is gone. A khatmah portion ends on exactly one
+   * page, and that page carries the "finish" pill — so it takes the
+   * difference out of its own column. Reserving it globally would shorten
+   * six hundred and three pages for a button on one of them, and letting
+   * it overflow would make that page scroll in portrait, where a page is
+   * supposed to be a page.
+   */
   const pageBoxH = geometry
     ? mushafPageColumnHeight({
         page,
         riwayah,
         textWidth: geometry.textWidth,
-        viewportHeight: geometry.viewportH,
+        viewportHeight:
+          geometry.viewportH - (finish ? FOOTER_RESERVE - FOOTER_GAP : 0),
         scrolling: geometry.scrolling,
       })
     : 0;
@@ -277,35 +286,34 @@ const PhonePageItem = React.memo(function PhonePageItem({
               onWordLongPress={onWordPress}
             />
           </Pressable>
-          {/* THE MEDALLION STANDS DOWN WHILE THE PLAYER IS UP.
+          {/* THE MEDALLION IS GONE FROM THE PHONE.
 
-              The mini player already names where you are — surah, ayah,
-              and now the page — and it is pinned over the bottom of the
-              page, exactly where the medallion sits. Two page numbers a
-              centimetre apart, one of them behind a card. Giving the
-              space back to the text is worth more than the ornament,
-              which is a page number in a nicer frame.
+              It was a page number in a nicer frame, at the bottom of
+              every page, on a screen that already says the page twice:
+              the scrubber's readout carries it always, and the player
+              carries it while it is up — pinned, as it happens, over
+              exactly where the medallion sat. Giving the room back to
+              the text is worth more than the ornament.
 
-              Except on a page the khatmah portion ends on: that footer
-              carries the "mark it done" button, which is not decoration
-              and has nowhere else to go — the text page is one shaped
-              paragraph per line, so nothing can sit inline with it. */}
-          {hideFooter && !finish ? null : (
-          <MushafPageFooter
-            page={page}
-            ornament={ornament}
-            onPress={onOpenJump}
-            finish={
-              finish
-                ? {
-                    day: finish.day,
-                    when: finish.when,
-                    onPress: finishKhatmahPortion,
-                  }
-                : null
-            }
-          />
-          )}
+              What is left is the page a khatmah portion ends on. That
+              footer carries the "mark it done" button, which is not
+              decoration and has nowhere else to go: a text page is one
+              shaped paragraph per line, so nothing can sit inline with
+              it and anything floated over it covers the words it points
+              at. It comes without the medallion. */}
+          {finish ? (
+            <MushafPageFooter
+              page={page}
+              ornament={ornament}
+              onPress={onOpenJump}
+              showPageNumber={false}
+              finish={{
+                day: finish.day,
+                when: finish.when,
+                onPress: finishKhatmahPortion,
+              }}
+            />
+          ) : null}
         </ScrollView>
       ) : null}
     </View>
@@ -409,16 +417,6 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
    * has room for both and keeps both.
    */
   const railYieldsToPlayer = width > height && playback.active != null;
-  /**
-   * Is the player card on screen?
-   *
-   * The phone reader is the only layout this applies to, which is also
-   * the only place it was asked for: the spread reader IS the tablet and
-   * Mac layout, and there the page has room for its own medallion and the
-   * player is not pinned over it.
-   */
-  const playerUp = playback.active != null;
-
   // Every input that decides a page's box, folded into one value and
   // published once it has stopped moving — see phonePageGeometry.ts for the
   // three layouts per rotation this replaces.
@@ -429,10 +427,6 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       sideInset,
       navPad,
       listH,
-      // The medallion stands down while the player is up, so its room
-      // goes back to the text rather than becoming a band of nothing
-      // between the last line and the player card.
-      footerDrawn: !playerUp,
     }),
   );
   /**
@@ -563,7 +557,6 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
         selected={selectedPage === page ? selected : null}
         playing={playingPage === page ? playingRef : null}
         finish={finishPage === page ? finish : null}
-        hideFooter={playerUp}
         onToggleFullscreen={onToggleFullscreen}
         onWordPress={openSelection}
         onOpenJump={openJump}
@@ -586,7 +579,6 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       playingRef,
       finishPage,
       finish,
-      playerUp,
       onToggleFullscreen,
       openSelection,
       openJump,

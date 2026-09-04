@@ -124,7 +124,10 @@ export function MainTabs() {
        */
       screenLayout={({ children }) => (
         <View style={SCREEN}>
-          <HeaderPlaybackBar />
+          {/* The tab headers take the navigation theme's card colour, and
+              the bar has to be the same surface or it reads as a strip
+              stuck under the title bar rather than part of it. */}
+          <HeaderPlaybackBar surface={palette.card} />
           {children}
         </View>
       )}

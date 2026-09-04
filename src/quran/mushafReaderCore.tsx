@@ -701,16 +701,27 @@ export function MushafPageHeader({
   );
 }
 
-/** Page-number medallion — Eastern numerals; tap opens jump-to-page. */
+/**
+ * The foot of a page: the number medallion, the khatmah pill, or both.
+ *
+ * `showPageNumber` is false on the phone, where the medallion is gone
+ * entirely — the scrubber's readout and the player both name the page,
+ * and a third copy in a frame at the bottom of every page was costing the
+ * text 42dp to repeat what was already on screen twice. The spread reader
+ * keeps it: that layout is the Mac and the iPad, the page has the room,
+ * and there is no player pinned over the spot.
+ */
 export function MushafPageFooter({
   page,
   ornament,
   onPress,
   finish,
+  showPageNumber = true,
 }: {
   page: number;
   ornament: string;
   onPress: () => void;
+  showPageNumber?: boolean;
   /**
    * Shown only on the page the khatmah portion ends on.
    *
@@ -733,15 +744,17 @@ export function MushafPageFooter({
     t(key, opts) as string;
   return (
     <View style={styles.pageFooter}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
-        onPress={onPress}
-        style={[styles.pageNumberFrame, { borderColor: ornament }]}>
-        <Text style={[styles.pageNumber, { color: ornament }]}>
-          {easternNumerals(page)}
-        </Text>
-      </Pressable>
+      {showPageNumber ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+          onPress={onPress}
+          style={[styles.pageNumberFrame, { borderColor: ornament }]}>
+          <Text style={[styles.pageNumber, { color: ornament }]}>
+            {easternNumerals(page)}
+          </Text>
+        </Pressable>
+      ) : null}
       {finish ? (
         <Pressable
           accessibilityRole="button"

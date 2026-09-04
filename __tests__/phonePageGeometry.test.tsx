@@ -24,7 +24,6 @@ const portrait: PhonePageInputs = {
   sideInset: 0,
   navPad: 96,
   listH: 720,
-  footerDrawn: true,
 };
 
 describe('phonePageGeometry', () => {
@@ -36,7 +35,9 @@ describe('phonePageGeometry', () => {
     const g = phonePageGeometry(portrait)!;
     expect(g.scrolling).toBe(false);
     expect(g.textWidth).toBe(390 - 20);
-    expect(g.viewportH).toBe(720 - 96 - 34 - 42);
+    // navPad, the header reserve, and the small gap that is all a page
+    // keeps at the foot now the medallion is gone.
+    expect(g.viewportH).toBe(720 - 96 - 34 - 14);
   });
 
   it('zooms and scrolls in landscape', () => {

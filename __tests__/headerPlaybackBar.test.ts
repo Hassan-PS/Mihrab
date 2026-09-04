@@ -27,9 +27,25 @@ describe('where the bar is wired in', () => {
    */
   it('wraps every tab and every pushed screen', () => {
     expect(TABS).toMatch(/screenLayout=\{\(\{ children \}\) =>/);
-    expect(TABS).toMatch(/<HeaderPlaybackBar \/>/);
+    expect(TABS).toMatch(/<HeaderPlaybackBar surface=/);
     expect(ROOT).toMatch(/screenLayout=\{\(\{ children \}\) =>/);
-    expect(ROOT).toMatch(/<HeaderPlaybackBar underTransparentHeader \/>/);
+    expect(ROOT).toMatch(/<HeaderPlaybackBar\s+surface=/);
+    expect(ROOT).toMatch(/underTransparentHeader/);
+  });
+
+  /**
+   * The two navigators do not agree on their header colour — the tabs
+   * take the theme's `card`, the root stack sets its own `headerStyle` to
+   * `background` — and the bar had `card` hardcoded. On every pushed
+   * screen that made it a paler strip stuck under a darker title bar
+   * rather than part of it. Each navigator hands the bar the very value
+   * it gave its own header.
+   */
+  it('takes the colour of the header it hangs under', () => {
+    expect(BAR).toMatch(/backgroundColor: surface,/);
+    expect(BAR).not.toMatch(/backgroundColor: palette\.card/);
+    expect(TABS).toContain('<HeaderPlaybackBar surface={palette.card} />');
+    expect(ROOT).toContain('surface={theme.colors.background}');
   });
 });
 

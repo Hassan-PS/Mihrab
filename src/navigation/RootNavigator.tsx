@@ -101,7 +101,12 @@ export function RootNavigator() {
        */
       screenLayout={({ children }) => (
         <View style={SCREEN}>
-          <HeaderPlaybackBar underTransparentHeader />
+          {/* `theme.colors.background` is exactly what `headerStyle` below
+              is given, so the bar and the header are one surface. */}
+          <HeaderPlaybackBar
+            surface={theme.colors.background}
+            underTransparentHeader
+          />
           {children}
         </View>
       )}

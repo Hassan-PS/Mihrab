@@ -53,18 +53,32 @@ export const H_PADDING = 10;
  */
 export const LANDSCAPE_ZOOM = 1.6;
 
-/** Estimated header-row / footer-medallion heights, dp — the chrome that
- *  brackets the page inside each column. */
+/** Estimated header-row height, dp — the chrome above the page. */
 export const HEADER_RESERVE = 34;
+
+/**
+ * What a footer costs when one IS drawn.
+ *
+ * On the phone that is now only the khatmah "finish this portion" pill,
+ * on the one page a portion ends on — see `PhonePageItem`, which takes
+ * the difference out of that page's own column rather than out of the
+ * shared geometry. The spread reader keeps its own copy of this: it has
+ * a medallion on every page and always did.
+ */
 export const FOOTER_RESERVE = 42;
 
 /**
- * What stays below the last line when the medallion is not drawn.
+ * What stays below the last line on an ordinary page.
  *
- * Reclaiming the medallion's whole 42dp put the last ayah hard against
- * the top edge of the player card — the band of nothing became no band
- * at all, which reads as the text running under the card. A page wants
- * to end, not stop.
+ * The page number used to live down here in a medallion, and the reader
+ * has two better ones — the scrubber's readout says the page, and the
+ * player says it while it is up. Two or three page numbers on one screen
+ * is not redundancy that helps.
+ *
+ * The room does not all go back to the text, though: reclaiming the whole
+ * 42dp put the last ayah hard against the top edge of the player card,
+ * and the band of nothing became no band at all, which reads as the text
+ * running UNDER the card. A page wants to end, not stop.
  */
 export const FOOTER_GAP = 14;
 
@@ -108,17 +122,6 @@ export type PhonePageInputs = {
    * a void between the page medallion and the player card.
    */
   listH: number;
-  /**
-   * Is the footer medallion actually drawn?
-   *
-   * It is not, while the player is up — the player names the page
-   * instead. The room was still being taken out of the page's box, so
-   * removing the medallion did not give the text its space back: it
-   * opened a band of nothing between the last line and the player.
-   * Reserving for chrome that is not there is the same bug as not
-   * reserving for chrome that is.
-   */
-  footerDrawn: boolean;
 };
 
 /** One pager item = the list viewport, in the window less the cutout. */
@@ -137,10 +140,12 @@ export function phonePageGeometry(
   if (!(input.listH > 0)) return null;
   const scrolling = input.width > input.height;
   const pageWidth = phonePageWidth(input.width, input.sideInset);
-  const chromeH =
-    input.navPad +
-    HEADER_RESERVE +
-    (input.footerDrawn ? FOOTER_RESERVE : FOOTER_GAP);
+  // No footer to reserve for. The one page that still draws one — the
+  // end of a khatmah portion — takes its own difference out of its own
+  // column, because a footer on one page is not a reason to shorten six
+  // hundred and three others. Reserving for chrome that is not there is
+  // the same bug as not reserving for chrome that is.
+  const chromeH = input.navPad + HEADER_RESERVE + FOOTER_GAP;
   const textWidth = scrolling
     ? Math.min(pageWidth - H_PADDING * 2, input.height * LANDSCAPE_ZOOM)
     : pageWidth - H_PADDING * 2;

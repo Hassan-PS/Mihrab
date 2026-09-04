@@ -30,7 +30,14 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ColorValue,
+} from 'react-native';
 import { HeaderHeightContext } from '@react-navigation/elements';
 import { useProgress } from 'react-native-track-player';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -69,6 +76,18 @@ const OWN_PLAYER: ReadonlySet<string> = new Set([
 
 export function HeaderPlaybackBar({
   /**
+   * The colour of the header this bar hangs under.
+   *
+   * Passed in rather than assumed, because the two navigators do not
+   * agree: the tab headers take the navigation theme's `card`, and the
+   * root stack sets its own `headerStyle` to `background`. The bar had
+   * `card` hardcoded, so on every pushed screen — the settings pages
+   * most visibly — it was a paler strip stuck under a darker title bar
+   * instead of part of it. Each navigator now hands the bar the very
+   * value it gave its own header.
+   */
+  surface,
+  /**
    * True on the root stack, where iOS draws a transparent header over the
    * top of the screen — the bar has to start below it rather than under
    * it. The tab navigator's headers are opaque on every platform, so
@@ -76,6 +95,7 @@ export function HeaderPlaybackBar({
    */
   underTransparentHeader,
 }: {
+  surface: ColorValue;
   underTransparentHeader?: boolean;
 }) {
   const { t } = useTranslation();
@@ -105,7 +125,7 @@ export function HeaderPlaybackBar({
       style={[
         styles.bar,
         {
-          backgroundColor: palette.card,
+          backgroundColor: surface,
           borderBottomColor: palette.border ?? palette.muted,
           marginTop:
             underTransparentHeader && Platform.OS === 'ios' ? headerHeight : 0,

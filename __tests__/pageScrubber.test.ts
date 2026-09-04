@@ -1,21 +1,55 @@
 /**
- * The mushaf rail's landmark + speed model (v2.8.5).
+ * The mushaf rail's landmark + speed model (v2.8.5), and what is left of
+ * its haptics.
  *
- * Two decisions decide whether the rail feels like navigation or like a
- * buzzing slider, and neither can be judged from a screenshot:
+ * `surahAtPage` is what the readout above the knob is built from — it
+ * names the surah under the thumb, because nobody knows Yaseen starts on
+ * 440 and everybody knows Yaseen.
  *
- *  1. WHAT gets a tick. Pages are the wrong unit — 604 of them across a
- *     phone is roughly two per pixel, so ticking per page is a continuous
- *     vibration carrying no information. Surahs are what people navigate
- *     by, and their uneven spacing is the signal.
- *  2. HOW HARD. A slow drag is a hunt for one surah and each boundary
- *     should be firm enough to stop on; a sweep wants light texture.
+ * It used to drive the ticks as well: one at every surah boundary,
+ * weighted by whether the drag was a hunt or a sweep (`isRangingDrag`).
+ * The reasoning was sound and the result was not — surahs are unevenly
+ * spaced, so the same sideways gesture is silent across half the muṣḥaf
+ * and a continuous buzz across the last juz, which reads as a noisy rail
+ * rather than as information. Sliding ALONG the rail says nothing now.
+ * The only tick left is reaching UP into a slower speed: a mode change
+ * with no visible sign, and the one thing here worth telling a finger.
+ *
+ * Both functions stay tested: the model is still what the readout uses,
+ * and it is what a future speed-aware tick would reach for.
  */
 import {
   isRangingDrag,
   surahAtPage,
 } from '../src/quran/MushafPageScrubber';
 import { MUSHAF_TOTAL_PAGES } from '../src/quran/mushafImages';
+import fs from 'fs';
+import path from 'path';
+
+const RAIL = fs.readFileSync(
+  path.join(__dirname, '..', 'src/quran/MushafPageScrubber.tsx'),
+  'utf8',
+);
+
+describe('what the rail vibrates for', () => {
+  it('is a change of speed, and nothing else', () => {
+    // One call site, in the move handler, guarded by the tier changing.
+    expect(RAIL).toMatch(/if \(tier !== before\) hapticScrubTick\(false\);/);
+    expect(RAIL.match(/hapticScrubTick\(/g)).toHaveLength(1);
+  });
+
+  it('no longer ticks its way along the rail', () => {
+    // The per-surah feedback and its rate limiter are gone, not disabled.
+    expect(RAIL).not.toMatch(/MIN_TICK_INTERVAL_MS/);
+    expect(RAIL).not.toMatch(/lastSurah|lastTickAt|const feedback =/);
+  });
+
+  it('still warms the engine on grab, so the first tick is not late', () => {
+    // `prepare()`, not a pulse: grabbing the rail is something the finger
+    // already knows it did.
+    expect(RAIL).toMatch(/hapticScrubStart\(\)/);
+  });
+});
 
 describe('surahAtPage', () => {
   it('knows the openings every reader can check by hand', () => {
