@@ -866,6 +866,7 @@ export function HomeScreen() {
       flatChrome: palette.flatChrome,
       accent: palette.accent,
       accentBg: palette.accentBg,
+      danger: palette.danger,
     }),
     [palette],
   );

@@ -158,6 +158,7 @@
     "provider": "Anbieter von Gebetszeiten",
     "providerAutoLine": "Automatisch · {{label}}",
     "providerAutoHelp": "In Schweden verwenden die Gebetszeiten die schwedische Quelle (aufgelistete Städte); außerhalb Schwedens, AlAdhan. Wählen Sie unten eine Quelle aus, um einen Anbieter zu sperren.",
+    "providerOverridden": "{{picked}} hat keine Zeiten für deinen Standort, deshalb antwortet {{used}}.",
     "location": "Standort",
     "automatic": "Automatisch",
     "manual": "Handbuch",
@@ -363,6 +364,9 @@
     "sectionRegional": "Nationale und regionale Quellen",
     "autoTitle": "Automatisch",
     "autoSub": "Schwedenquelle in Schweden; AlAdhan anderswo.",
+    "autoNow": "An deinem jetzigen Standort ist das {{label}}.",
+    "bestHere": "Passt zu deinem Standort",
+    "outOfRegion": "Keine Zeiten für deinen Standort — stattdessen würde {{fallback}} verwendet.",
     "footer": "Länderspezifische Quellen verwenden offizielle oder nationale Gebetstabellen, sofern wir sie integrieren. Im Laufe der Zeit können weitere Regionen hinzugefügt werden."
   },
   "providers": {

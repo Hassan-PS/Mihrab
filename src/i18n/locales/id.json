@@ -158,6 +158,7 @@
     "provider": "Penyedia waktu sholat",
     "providerAutoLine": "Otomatis · {{label}}",
     "providerAutoHelp": "Di Swedia, waktu sholat menggunakan sumber Swedia (kota-kota yang terdaftar); di luar Swedia, AlAdhan. Pilih sumber di bawah untuk mengunci satu penyedia.",
+    "providerOverridden": "{{picked}} tidak punya jadwal untuk lokasi Anda, jadi {{used}} yang dipakai.",
     "location": "Lokasi",
     "automatic": "Otomatis",
     "manual": "petunjuk",
@@ -363,6 +364,9 @@
     "sectionRegional": "Sumber nasional & regional",
     "autoTitle": "Otomatis",
     "autoSub": "Sumber Swedia di Swedia; Al-Adhan di tempat lain.",
+    "autoNow": "Di lokasi Anda sekarang, itu berarti {{label}}.",
+    "bestHere": "Cocok dengan lokasi Anda",
+    "outOfRegion": "Tidak ada jadwal untuk lokasi Anda — {{fallback}} akan dipakai sebagai gantinya.",
     "footer": "Sumber khusus negara menggunakan tabel doa resmi atau nasional tempat kami mengintegrasikannya. Lebih banyak wilayah dapat ditambahkan seiring waktu."
   },
   "providers": {

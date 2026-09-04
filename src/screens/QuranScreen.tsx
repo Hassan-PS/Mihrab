@@ -29,6 +29,7 @@ import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
 import { usePlaybackStatus } from '../quran/audio/playback';
+import { ReaderIcon, TilawahIcon } from '../quran/audio/PlaybackIcons';
 import {
   findPageForAyah,
   MUSHAF_PAGES,
@@ -400,64 +401,61 @@ export function QuranScreen() {
           One tap used to mean one destination, and the card had to guess
           which: the reader, if you want to follow the words, or Tilāwah,
           if you want the transport. Guessing wrong is a screen you did
-          not ask for and a back press. Two buttons, named, is one more
-          pixel of chrome and no guessing. */}
+          not ask for and a back press.
+
+          Two buttons, then — but drawn, on the same line as the surah,
+          and in the same shapes as the transport bar under the title. A
+          three-line card with two word-buttons under it was a paragraph
+          spent saying what a note and a book say at a glance, and it sat
+          directly beneath a bar that had already said the surah's name. */}
       {playback.active ? (
         <View
           style={[
-            styles.nowPlayingCard,
+            styles.nowPlayingRow,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <Text style={[styles.resumeLabel, { color: palette.accentSolid }]}>
-            {`\u266a  ${t('quran.listenNowPlaying', 'Now playing')}`}
+          <Text
+            numberOfLines={1}
+            style={[styles.nowPlayingLabel, { color: palette.muted }]}>
+            {t('quran.listenNowPlaying', 'Now playing')}
           </Text>
-          <Text style={[styles.resumeTitle, { color: palette.text }]}>
+          <Text
+            numberOfLines={1}
+            style={[styles.nowPlayingTitle, { color: palette.text }]}>
             {`${findSurah(playback.active.surah)?.romanized ?? ''} ${playback.active.surah}:${playback.active.ayah}`}
           </Text>
-          <View style={styles.nowPlayingActions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
-              onPress={() => navigation.navigate('QuranListen')}
-              style={({ pressed }) => [
-                styles.nowPlayingBtn,
-                {
-                  backgroundColor: palette.accentBg,
-                  borderColor: palette.accentSolid,
-                },
-                pressed && { opacity: 0.6 },
-              ]}>
-              <Text
-                style={[
-                  styles.nowPlayingBtnText,
-                  { color: palette.accentSolid },
-                ]}>
-                {t('quran.listenTitle', 'Tilawah')}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('quran.openInReader', 'Open in the reader')}
-              onPress={() => {
-                const at = playback.active;
-                if (!at) return;
-                openSurah(
-                  at.surah,
-                  at.ayah,
-                  findPageForAyah(at.surah, at.ayah, quran.prefs.riwayah),
-                );
-              }}
-              style={({ pressed }) => [
-                styles.nowPlayingBtn,
-                { borderColor: palette.border ?? palette.muted },
-                pressed && { opacity: 0.6 },
-              ]}>
-              <Text
-                style={[styles.nowPlayingBtnText, { color: palette.text }]}>
-                {t('quran.openInReader', 'Open in the reader')}
-              </Text>
-            </Pressable>
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
+            hitSlop={6}
+            onPress={() => navigation.navigate('QuranListen')}
+            style={({ pressed }) => [
+              styles.nowPlayingBtn,
+              { backgroundColor: palette.accentBg },
+              pressed && styles.nowPlayingPressed,
+            ]}>
+            <TilawahIcon color={String(palette.accentSolid)} size={16} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.openInReader', 'Open in the reader')}
+            hitSlop={6}
+            onPress={() => {
+              const at = playback.active;
+              if (!at) return;
+              openSurah(
+                at.surah,
+                at.ayah,
+                findPageForAyah(at.surah, at.ayah, quran.prefs.riwayah),
+              );
+            }}
+            style={({ pressed }) => [
+              styles.nowPlayingBtn,
+              { backgroundColor: palette.controlBg },
+              pressed && styles.nowPlayingPressed,
+            ]}>
+            <ReaderIcon color={String(palette.text)} size={16} />
+          </Pressable>
         </View>
       ) : null}
 
@@ -1586,15 +1584,36 @@ const styles = StyleSheet.create({
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: 10, marginBottom: 8 },
-  nowPlayingCard: { padding: 14, borderRadius: 12, gap: 4, marginBottom: 4 },
-  nowPlayingActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  nowPlayingBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    borderWidth: StyleSheet.hairlineWidth,
+  nowPlayingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingStart: 14,
+    paddingEnd: 8,
+    paddingVertical: 7,
+    borderRadius: 12,
+    marginBottom: 4,
   },
-  nowPlayingBtnText: { fontSize: 13, fontWeight: '700' },
+  nowPlayingLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  nowPlayingTitle: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  nowPlayingPressed: { opacity: 0.55 },
+  nowPlayingBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   resumeCard: {
     flexDirection: 'row',
     alignItems: 'center',

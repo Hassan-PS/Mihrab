@@ -50,9 +50,10 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { useAndroidSubScreenBack } from '../../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../../navigation/types';
 import MushafTextPageSurface, {
+  mushafLineGeometry,
   mushafPageColumnHeight,
 } from '../../quran/MushafTextPageSurface';
-import { ayahLineBox, followOffset } from '../../quran/mushafFollowScroll';
+import { ayahLineIndex } from '../../quran/mushafFollowScroll';
 import { findPageForAyah } from '../../quran/pages';
 import { SURAHS, type SurahIndex } from '../../quran/quran';
 import {
@@ -117,7 +118,23 @@ const SLEEP_END_OF_SURAH = -1;
  * be, this is simply how much of it fits, and the column follows the
  * recitation the way the reader's does.
  */
-const PAGE_VIEWPORT = 340;
+/**
+ * How much of the page the preview shows: the line being recited, and
+ * three more.
+ *
+ * Not a height in points, because a line's height depends on the page and
+ * the width it is drawn at. Four lines is the smallest window that still
+ * reads as a muṣḥaf rather than as a ticker — one line is a caption, and
+ * a third of a page is the reader, which is one tap away and does it
+ * better.
+ */
+const PREVIEW_LINES = 4;
+
+/**
+ * Only until the page has been measured, and for riwayāt with no glyph
+ * layout to measure — a Unicode page has no printed lines to count.
+ */
+const PAGE_VIEWPORT_FALLBACK = 200;
 
 function formatBytes(bytes: number): string {
   if (bytes <= 0) return '0 MB';
@@ -647,14 +664,14 @@ export function TilawahScreen() {
   // font, not about the feature.
   useEffect(() => setPageUnavailable(false), [playingPage]);
   /**
-   * The column at reading zoom, and how far down it the recitation is.
+   * The column at reading zoom, and a four-line window onto it.
    *
    * `mushafPageColumnHeight` with `scrolling` is the reader's own answer
    * for a viewport too short to fit a page: size the type for reading and
-   * let the column be as tall as it needs. The follow-scroll is the
-   * reader's too — same line boxes, same one-third-from-the-top resting
-   * place — so the ayah being recited stays where the eye already is
-   * instead of the reader chasing it.
+   * let the column be as tall as it needs. It only uses the viewport it
+   * is handed as a floor, so it is asked with one point — the answer is
+   * the page's own height, and the window is measured off the geometry
+   * that height produces rather than fixed in advance.
    */
   const pageScrollRef = useRef<ScrollView>(null);
   const pageColumnH = useMemo(
@@ -664,26 +681,57 @@ export function TilawahScreen() {
             page: playingPage,
             riwayah: quran.prefs.riwayah,
             textWidth: pageWidth,
-            viewportHeight: PAGE_VIEWPORT,
+            viewportHeight: 1,
             scrolling: true,
           })
-        : PAGE_VIEWPORT,
+        : PAGE_VIEWPORT_FALLBACK,
     [playingPage, pageWidth, quran.prefs.riwayah],
   );
+  const lineGeometry = useMemo(
+    () =>
+      playingPage && pageWidth > 0
+        ? mushafLineGeometry({
+            page: playingPage,
+            textWidth: pageWidth,
+            columnHeight: pageColumnH,
+          })
+        : null,
+    [playingPage, pageWidth, pageColumnH],
+  );
+  const pageViewportH = lineGeometry
+    ? Math.round(lineGeometry.top + lineGeometry.pitch * PREVIEW_LINES)
+    : PAGE_VIEWPORT_FALLBACK;
+
+  /**
+   * The recited line goes to the TOP of the window, so the three under it
+   * are the ones coming next. The clamp is what handles the foot of the
+   * page: with fewer than three lines left the window stops moving and
+   * the recited line arrives at the bottom of it with its predecessors
+   * above — the only honest thing four lines can show there.
+   */
   useEffect(() => {
     if (!showPage || !playingPage || !status.active || pageWidth <= 0) return;
-    const box = ayahLineBox(
+    if (!lineGeometry) return;
+    const index = ayahLineIndex(
       playingPage,
-      pageWidth,
       status.active.surah,
       status.active.ayah,
     );
-    if (!box) return;
+    if (index == null) return;
+    const y = lineGeometry.top + index * lineGeometry.pitch;
     pageScrollRef.current?.scrollTo({
-      y: followOffset(box, PAGE_VIEWPORT, pageColumnH),
+      y: Math.max(0, Math.min(y, Math.max(0, pageColumnH - pageViewportH))),
       animated: true,
     });
-  }, [showPage, playingPage, pageWidth, pageColumnH, status.active]);
+  }, [
+    showPage,
+    playingPage,
+    pageWidth,
+    pageColumnH,
+    pageViewportH,
+    lineGeometry,
+    status.active,
+  ]);
 
   const openInReader = useCallback(() => {
     if (!status.active) return;
@@ -1185,7 +1233,7 @@ export function TilawahScreen() {
           {pageWidth > 0 ? (
             <ScrollView
               ref={pageScrollRef}
-              style={{ height: PAGE_VIEWPORT }}
+              style={{ height: pageViewportH }}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled>
               <MushafTextPageSurface

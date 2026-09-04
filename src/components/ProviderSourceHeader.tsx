@@ -16,6 +16,7 @@ type Palette = {
   overlay: ColorValue;
   accent: ColorValue;
   accentBg: ColorValue;
+  danger: ColorValue;
   flatChrome: boolean;
 };
 
@@ -85,6 +86,7 @@ export function ProviderSourceHeader({
           flatChrome: palette.flatChrome,
           accent: palette.accent,
           accentBg: palette.accentBg,
+          danger: palette.danger,
         }}
       />
     </>

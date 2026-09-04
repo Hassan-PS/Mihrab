@@ -158,6 +158,7 @@
     "provider": "Proveedor de tiempos de oración",
     "providerAutoLine": "Automático · {{label}}",
     "providerAutoHelp": "En Suecia, los tiempos de oración utilizan la fuente Suecia (ciudades enumeradas); fuera de Suecia, AlAdhan. Elija una fuente a continuación para bloquear un proveedor.",
+    "providerOverridden": "{{picked}} no tiene horarios para donde estás, así que responde {{used}}.",
     "location": "Ubicación",
     "automatic": "Automático",
     "manual": "Manual",
@@ -363,6 +364,9 @@
     "sectionRegional": "Fuentes nacionales y regionales",
     "autoTitle": "Automático",
     "autoSub": "Fuente sueca en Suecia; AlAdhan en otro lugar.",
+    "autoNow": "Donde estás ahora, eso es {{label}}.",
+    "bestHere": "Encaja con tu ubicación",
+    "outOfRegion": "No hay horarios para donde estás; se usaría {{fallback}} en su lugar.",
     "footer": "Las fuentes específicas de cada país utilizan mesas de oración oficiales o nacionales donde las integramos. Es posible que se agreguen más regiones con el tiempo."
   },
   "providers": {

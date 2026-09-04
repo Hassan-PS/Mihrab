@@ -158,6 +158,7 @@
     "provider": "Leverantör av bönetider",
     "providerAutoLine": "Automatiskt · {{label}}",
     "providerAutoHelp": "I Sverige används Sverige-källan ( listade städer); utanför Sverige används AlAdhan. Välj en källa nedan för att låsa en leverantör.",
+    "providerOverridden": "{{picked}} har inga tider för där du är, så {{used}} svarar i stället.",
     "location": "Plats",
     "automatic": "Automatisk",
     "manual": "Manuell",
@@ -363,6 +364,9 @@
     "sectionRegional": "Nationella och regionala källor",
     "autoTitle": "Automatiskt",
     "autoSub": "Sverige-källa i Sverige; AlAdhan annars.",
+    "autoNow": "Där du är nu blir det {{label}}.",
+    "bestHere": "Passar där du är",
+    "outOfRegion": "Inga tider för där du är — {{fallback}} skulle användas i stället.",
     "footer": "Landspecifika källor använder officiella eller nationella bönetabeller där vi integrerar dem. Fler regioner kan läggas till över tid."
   },
   "providers": {

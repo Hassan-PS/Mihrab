@@ -14,7 +14,17 @@ import {
   MAINSTREAM_PRAYER_PROVIDERS,
   PRAYER_DATA_PROVIDERS,
   REGIONAL_PRAYER_PROVIDERS,
+  getProviderLabel,
 } from '../settings/providersCatalog';
+import {
+  AUTO_DEFAULT_OUTSIDE_SWEDEN,
+  getEffectiveDataProvider,
+  resolveCoordsFromSettings,
+} from '../settings/effectiveProvider';
+import {
+  isRegionalProvider,
+  regionalProviderCovers,
+} from '../settings/regionalProviders';
 import type {
   PrayerAppSettings,
   PrayerDataProviderId,
@@ -32,6 +42,7 @@ type Palette = {
   flatChrome: boolean;
   accent: ColorValue;
   accentBg: ColorValue;
+  danger: ColorValue;
 };
 
 type Props = {
@@ -64,6 +75,32 @@ function ProviderPickerModalImpl({
 }: Props) {
   const { t } = useTranslation();
   const navigationReserve = useSystemNavigationReserve();
+  /**
+   * WHAT THIS LIST USED TO NOT SAY.
+   *
+   * A national source only holds tables for its own country. Pick Sweden
+   * from Cairo and nothing warns you, nothing fails, and the app quietly
+   * serves AlAdhan instead — `getEffectiveDataProvider` redirects rather
+   * than mapping Cairo to the nearest Swedish city, which is the right
+   * call and was completely invisible. The row said Sweden, the times
+   * were AlAdhan's, and the two never met.
+   *
+   * So the list is told where the user is. One row is marked as the one
+   * that fits, and any national source that has no tables where they are
+   * says so on its own row, before it is picked rather than after.
+   */
+  const coords = useMemo(
+    () => resolveCoordsFromSettings(settings),
+    [settings],
+  );
+  const preferred = useMemo(
+    () =>
+      coords
+        ? getEffectiveDataProvider(true, settings.dataProvider, coords)
+        : null,
+    [coords, settings.dataProvider],
+  );
+  const fallbackLabel = getProviderLabel(AUTO_DEFAULT_OUTSIDE_SWEDEN);
   const listData = useMemo<ListItem[]>(
     () => [
       { kind: 'auto' },
@@ -107,6 +144,13 @@ function ProviderPickerModalImpl({
       }
       if (item.kind === 'auto') {
         const selected = settings.dataProviderAuto;
+        const autoNow =
+          preferred != null
+            ? t('provider.autoNow', {
+                defaultValue: 'Where you are now, that is {{label}}.',
+                label: getProviderLabel(preferred),
+              })
+            : null;
         return (
           <Pressable
             accessibilityRole="button"
@@ -126,7 +170,7 @@ function ProviderPickerModalImpl({
               {t('provider.autoTitle')}
             </Text>
             <Text style={[styles.rowSub, { color: palette.muted }]}>
-              {t('provider.autoSub')}
+              {autoNow ?? t('provider.autoSub')}
             </Text>
           </Pressable>
         );
@@ -136,6 +180,14 @@ function ProviderPickerModalImpl({
         !settings.dataProviderAuto && settings.dataProvider === item.id;
       const name = t(opt.nameKey, { defaultValue: opt.name });
       const desc = t(opt.descriptionKey, { defaultValue: opt.description });
+      const fits = preferred != null && preferred === item.id;
+      // Only a NATIONAL source can be out of range — the worldwide ones
+      // have an answer for every coordinate. And only when the location is
+      // known: with none, the user's pick stands and so does its row.
+      const outOfRegion =
+        coords != null &&
+        isRegionalProvider(item.id) &&
+        !regionalProviderCovers(item.id, coords);
       return (
         <Pressable
           accessibilityRole="button"
@@ -154,8 +206,29 @@ function ProviderPickerModalImpl({
             onClose();
           }}
         >
-          <Text style={[styles.rowTitle, { color: palette.text }]}>{name}</Text>
+          <View style={styles.titleRow}>
+            <Text style={[styles.rowTitle, { color: palette.text }]}>
+              {name}
+            </Text>
+            {fits ? (
+              <View
+                style={[styles.badge, { backgroundColor: palette.accentBg }]}>
+                <Text style={[styles.badgeLabel, { color: palette.accent }]}>
+                  {t('provider.bestHere', 'Fits where you are')}
+                </Text>
+              </View>
+            ) : null}
+          </View>
           <Text style={[styles.rowSub, { color: palette.muted }]}>{desc}</Text>
+          {outOfRegion ? (
+            <Text style={[styles.rowWarn, { color: palette.danger }]}>
+              {t('provider.outOfRegion', {
+                defaultValue:
+                  'No times for where you are — {{fallback}} would be used instead.',
+                fallback: fallbackLabel,
+              })}
+            </Text>
+          ) : null}
         </Pressable>
       );
     },
@@ -163,6 +236,9 @@ function ProviderPickerModalImpl({
       palette,
       settings.dataProviderAuto,
       settings.dataProvider,
+      coords,
+      preferred,
+      fallbackLabel,
       t,
       updateSettings,
       onClose,
@@ -258,9 +334,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
   rowTitle: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  badgeLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  rowWarn: {
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 18,
   },
   rowSub: {
     fontSize: 13,

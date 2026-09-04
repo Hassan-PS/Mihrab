@@ -158,6 +158,7 @@
     "provider": "Namaz vakitleri sağlayıcısı",
     "providerAutoLine": "Otomatik · {{label}}",
     "providerAutoHelp": "İsveç'te namaz vakitleri İsveç kaynağını (listelenen şehirler) kullanır; İsveç dışında, AlAdhan. Bir sağlayıcıyı kilitlemek için aşağıdan bir kaynak seçin.",
+    "providerOverridden": "{{picked}} bulunduğun yer için vakit vermiyor, bu yüzden {{used}} kullanılıyor.",
     "location": "Konum",
     "automatic": "Otomatik",
     "manual": "Manuel",
@@ -363,6 +364,9 @@
     "sectionRegional": "Ulusal ve bölgesel kaynaklar",
     "autoTitle": "Otomatik",
     "autoSub": "İsveç'teki İsveç kaynağı; AlAdhan başka yerde.",
+    "autoNow": "Şu an bulunduğun yerde bu {{label}} demek.",
+    "bestHere": "Bulunduğun yere uygun",
+    "outOfRegion": "Bulunduğun yer için vakit yok — onun yerine {{fallback}} kullanılır.",
     "footer": "Ülkeye özgü kaynaklar, entegre ettiğimiz resmi veya ulusal dua tablolarını kullanır. Zamanla daha fazla bölge eklenebilir."
   },
   "providers": {

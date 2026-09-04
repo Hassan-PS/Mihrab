@@ -43,6 +43,19 @@ function DataSourceCardImpl({ onOpenProviderPicker }: DataSourceCardProps) {
     });
   }, [settings.dataProvider, t]);
 
+  /**
+   * A PINNED SOURCE THAT IS NOT THE ONE IN USE.
+   *
+   * A national source has tables for its own country and nothing else, so
+   * pinning Sweden and then being in Cairo makes `getEffectiveDataProvider`
+   * redirect to the worldwide default rather than map Cairo to the nearest
+   * Swedish city. That is the right call and it was completely silent: the
+   * row said Sweden and the times were AlAdhan's. It says so now, and the
+   * row's value is what is actually answering.
+   */
+  const overridden =
+    !settings.dataProviderAuto && effectiveProvider !== settings.dataProvider;
+
   return (
     <SettingsGroup title={t('settings.dataSource')}>
       <SettingsLinkRow
@@ -52,12 +65,21 @@ function DataSourceCardImpl({ onOpenProviderPicker }: DataSourceCardProps) {
             ? t('settings.providerAutoLine', {
                 label: getProviderLabel(effectiveProvider),
               })
-            : getProviderLabel(settings.dataProvider)
+            : getProviderLabel(
+                overridden ? effectiveProvider : settings.dataProvider,
+              )
         }
         help={
           settings.dataProviderAuto
             ? t('settings.providerAutoHelp')
-            : lockedProviderDesc
+            : overridden
+              ? t('settings.providerOverridden', {
+                  defaultValue:
+                    '{{picked}} has no times for where you are, so {{used}} is answering instead.',
+                  picked: getProviderLabel(settings.dataProvider),
+                  used: getProviderLabel(effectiveProvider),
+                })
+              : lockedProviderDesc
         }
         onPress={onOpenProviderPicker}
       />

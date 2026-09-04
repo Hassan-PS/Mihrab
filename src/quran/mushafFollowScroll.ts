@@ -32,6 +32,27 @@ export type AyahLineBox = {
 };
 
 /**
+ * The height of one printed line on `page` at this drawn width, or null
+ * where the page has no glyph layout to measure.
+ *
+ * Pulled out of `ayahLineBox` because a caller can need the unit before
+ * it knows which āyah is on screen — the Tilāwah preview sizes its own
+ * window in lines, and has to do that whether or not the recitation has
+ * reached this page yet.
+ */
+export function mushafLineHeight(
+  page: number,
+  textWidth: number,
+): number | null {
+  if (!(textWidth > 0)) return null;
+  const layout = getPageLayout(page);
+  if (!layout) return null;
+  const blockEm = pageBlockEm(layout);
+  if (!(blockEm > 0)) return null;
+  return (textWidth / blockEm) * MUSHAF_LINE_HEIGHT_EM;
+}
+
+/**
  * The first line of `page` that carries this āyah, or null when the page
  * has no glyph layout or the āyah is not on it.
  *
@@ -45,12 +66,9 @@ export function ayahLineBox(
   surah: number,
   ayah: number,
 ): AyahLineBox | null {
-  if (!(textWidth > 0)) return null;
-  const layout = getPageLayout(page);
-  if (!layout) return null;
-  const blockEm = pageBlockEm(layout);
-  if (!(blockEm > 0)) return null;
-  const lineHeight = (textWidth / blockEm) * MUSHAF_LINE_HEIGHT_EM;
+  const lineHeight = mushafLineHeight(page, textWidth);
+  if (lineHeight == null) return null;
+  const layout = getPageLayout(page)!;
   const index = layout.lines.findIndex(
     line =>
       line.kind === 'ayah' &&
@@ -72,4 +90,47 @@ export function followOffset(
 ): number {
   const target = box.y + box.lineHeight / 2 - viewportH / 3;
   return Math.max(0, Math.min(target, Math.max(0, contentH - viewportH)));
+}
+
+/**
+ * Where to scroll a column so the line being recited is the FIRST one in
+ * a short window, with the lines that come next filling the rest of it.
+ *
+ * Different question from `followOffset`, which keeps a line comfortably
+ * inside a tall viewport. Here the viewport is four lines: "comfortably
+ * inside" would spend two of them on text already recited. The clamp at
+ * the end is what handles the foot of the page — once there are fewer
+ * than three lines left below, the window stops moving and the recited
+ * line arrives at the bottom of it with its predecessors above, which is
+ * the only honest thing a four-line window can show there.
+ */
+export function windowOffset(
+  box: AyahLineBox,
+  viewportH: number,
+  contentH: number,
+): number {
+  return Math.max(0, Math.min(box.y, Math.max(0, contentH - viewportH)));
+}
+
+/**
+ * Which printed line first carries this āyah, or null when the page has
+ * no glyph layout or the āyah is not on it.
+ *
+ * The index, not a position: a caller that knows the column's real
+ * geometry (`mushafLineGeometry`) can turn an index into points exactly,
+ * and one that does not has no business guessing.
+ */
+export function ayahLineIndex(
+  page: number,
+  surah: number,
+  ayah: number,
+): number | null {
+  const layout = getPageLayout(page);
+  if (!layout) return null;
+  const index = layout.lines.findIndex(
+    line =>
+      line.kind === 'ayah' &&
+      line.words.some(w => w.surah === surah && w.ayah === ayah),
+  );
+  return index < 0 ? null : index;
 }

@@ -158,6 +158,7 @@
     "provider": "Fournisseur d'heures de prière",
     "providerAutoLine": "Automatique · {{label}}",
     "providerAutoHelp": "En Suède, les horaires de prière utilisent la source suédoise (villes répertoriées) ; en dehors de la Suède, AlAdhan. Choisissez une source ci-dessous pour verrouiller un fournisseur.",
+    "providerOverridden": "{{picked}} n'a pas d'horaires pour votre position, c'est donc {{used}} qui répond.",
     "location": "Emplacement",
     "automatic": "Automatique",
     "manual": "Manuel",
@@ -363,6 +364,9 @@
     "sectionRegional": "Sources nationales et régionales",
     "autoTitle": "Automatique",
     "autoSub": "Source suédoise en Suède ; AlAdhan ailleurs.",
+    "autoNow": "Là où vous êtes, c'est {{label}}.",
+    "bestHere": "Convient à votre position",
+    "outOfRegion": "Aucun horaire pour votre position — {{fallback}} serait utilisé à la place.",
     "footer": "Les sources spécifiques aux pays utilisent des tables de prière officielles ou nationales où nous les intégrons. D'autres régions pourraient être ajoutées au fil du temps."
   },
   "providers": {

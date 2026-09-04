@@ -158,6 +158,7 @@
     "provider": "Prayer times provider",
     "providerAutoLine": "Automatic · {{label}}",
     "providerAutoHelp": "In Sweden, prayer times use the Sweden source (listed cities); outside Sweden, AlAdhan. Pick a source below to lock one provider.",
+    "providerOverridden": "{{picked}} has no times for where you are, so {{used}} is answering instead.",
     "location": "Location",
     "automatic": "Automatic",
     "manual": "Manual",
@@ -363,6 +364,9 @@
     "sectionRegional": "National & regional sources",
     "autoTitle": "Automatic",
     "autoSub": "Sweden source in Sweden; AlAdhan elsewhere.",
+    "autoNow": "Where you are now, that is {{label}}.",
+    "bestHere": "Fits where you are",
+    "outOfRegion": "No times for where you are — {{fallback}} would be used instead.",
     "footer": "Country-specific sources use official or national prayer tables where we integrate them. More regions may be added over time."
   },
   "providers": {

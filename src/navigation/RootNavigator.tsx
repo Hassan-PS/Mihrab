@@ -3,9 +3,10 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabs } from './MainTabs';
+import { HeaderPlaybackBar } from '../quran/audio/HeaderPlaybackBar';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { CompassScreen } from '../screens/CompassScreen';
 import { isMacCatalyst } from '../responsive/breakpoints';
@@ -25,6 +26,9 @@ import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const isIOS = Platform.OS === 'ios';
+
+/** The wrapper the playback bar and the screen share. */
+const SCREEN = { flex: 1 } as const;
 
 
 // Home header controls now live in ../navigation/HomeHeaderControls so the
@@ -90,6 +94,17 @@ export function RootNavigator() {
   const titleWritingDirection: 'rtl' | 'ltr' = isRtlLocale ? 'rtl' : 'ltr';
   return (
     <Stack.Navigator
+      /**
+       * The same playback bar the tabs carry, on the pushed screens too —
+       * settings pages, downloads, the month table. Tilawah and the reader
+       * are excluded by the bar itself, which knows the route it is on.
+       */
+      screenLayout={({ children }) => (
+        <View style={SCREEN}>
+          <HeaderPlaybackBar underTransparentHeader />
+          {children}
+        </View>
+      )}
       screenOptions={{
         // Large title only on iOS AND only for LTR locales — RTL locales fall
         // back to the compact title to avoid the Arabic-letters-reversed bug.

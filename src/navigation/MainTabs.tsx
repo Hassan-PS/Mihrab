@@ -27,7 +27,7 @@
  */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
-import { Animated, Platform, StyleSheet } from 'react-native';
+import { Animated, Platform, StyleSheet, View } from 'react-native';
 import type { ViewStyle } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -50,6 +50,7 @@ import { DuasScreen } from '../screens/DuasScreen';
 import { LogScreen } from '../screens/LogScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { HomeHeaderControls } from './HomeHeaderControls';
+import { HeaderPlaybackBar } from '../quran/audio/HeaderPlaybackBar';
 import { SyncHeaderButton } from '../screens/sync/SyncHeaderButton';
 import { MihrabHeaderTitle } from './MihrabHeaderTitle';
 import { isMacCatalyst } from '../responsive/breakpoints';
@@ -64,6 +65,9 @@ import {
 import type { MainTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+
+/** The wrapper the playback bar and the screen share. */
+const SCREEN = { flex: 1 } as const;
 
 export function MainTabs() {
   const { t } = useTranslation();
@@ -110,6 +114,20 @@ export function MainTabs() {
        * able to restore it.
        */
       screenListeners={{ focus: showTabBar }}
+      /**
+       * The recitation follows the reader between tabs.
+       *
+       * Wrapping every tab here rather than adding a bar to six screens:
+       * a screen that forgot to include it would be a screen where the
+       * only way to pause is the notification shade. `HeaderPlaybackBar`
+       * decides for itself whether it has anything to say.
+       */
+      screenLayout={({ children }) => (
+        <View style={SCREEN}>
+          <HeaderPlaybackBar />
+          {children}
+        </View>
+      )}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.accentSolid,

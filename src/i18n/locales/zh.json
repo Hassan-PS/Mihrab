@@ -158,6 +158,7 @@
     "provider": "祈祷时间提供者",
     "providerAutoLine": "自动·{{label}}",
     "providerAutoHelp": "在瑞典，祈祷时间使用瑞典来源（列出的城市）；瑞典郊外的 AlAdhan。选择下面的来源来锁定一个提供商。",
+    "providerOverridden": "{{picked}} 没有你所在位置的时间，因此改由 {{used}} 提供。",
     "location": "地点",
     "automatic": "自动",
     "manual": "手动的",
@@ -363,6 +364,9 @@
     "sectionRegional": "国家和地区来源",
     "autoTitle": "自动的",
     "autoSub": "瑞典 来源瑞典；阿尔阿丹在其他地方。",
+    "autoNow": "在你现在的位置，那就是 {{label}}。",
+    "bestHere": "适合你所在的位置",
+    "outOfRegion": "没有你所在位置的时间——将改用 {{fallback}}。",
     "footer": "特定国家/地区的来源使用官方或国家祈祷表，我们将它们整合在一起。随着时间的推移，可能会添加更多区域。"
   },
   "providers": {

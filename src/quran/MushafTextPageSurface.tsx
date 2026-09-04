@@ -564,6 +564,41 @@ export function mushafPageColumnHeight({
   );
 }
 
+/**
+ * Where the lines actually land in a column of this height.
+ *
+ * The follow-scroll used to work this out from `pageBlockEm` alone, which
+ * is the width the FONT is sized against — not the pitch the lines end up
+ * drawn at. `mushafPageColumnHeight` sizes the column against
+ * `pageMeasureEm`, and `fitLinesWithInk` then divides that column back
+ * into lines, so the real pitch is a few percent off the font's own and
+ * the first line starts an ink reserve down from the top. Over fifteen
+ * lines that is most of a line of drift — invisible in a tall viewport,
+ * and the whole error in a four-line one.
+ *
+ * So this asks the same two functions the surface asks, in the same order,
+ * and answers in points from the top of the column.
+ */
+export function mushafLineGeometry({
+  page,
+  textWidth,
+  columnHeight,
+}: {
+  page: number;
+  textWidth: number;
+  columnHeight: number;
+}): { top: number; pitch: number; lineCount: number } | null {
+  if (!(textWidth > 0) || !(columnHeight > 0)) return null;
+  const layout = getPageLayout(page);
+  if (!layout) return null;
+  const blockEm = pageBlockEm(layout);
+  if (!(blockEm > 0)) return null;
+  const lineCount = layout.lines.length;
+  if (lineCount < 1) return null;
+  const fit = fitLinesWithInk(textWidth / blockEm, columnHeight, lineCount);
+  return { top: fit.top, pitch: fit.lineHeight, lineCount };
+}
+
 const styles = StyleSheet.create({
   placeholder: {
     alignItems: 'center',
