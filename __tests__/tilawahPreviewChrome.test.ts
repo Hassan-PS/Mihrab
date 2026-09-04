@@ -21,13 +21,26 @@ const read = (p: string) => fs.readFileSync(path.join(REPO, p), 'utf-8');
 const TILAWAH = read('src/screens/quran/TilawahScreen.tsx');
 
 describe('the word being recited', () => {
-  it('is published while the preview is up and something is playing', () => {
+  it('is published while the preview is up, in front, and playing', () => {
     expect(TILAWAH).toContain(
       "import { ActiveWordProbe } from '../../quran/audio/ActiveWordProbe'",
     );
+    // `focused` too: this page stays mounted under the reader it opens,
+    // and the reader mounts its own probe — two pollers publishing the
+    // same word to the same store.
     expect(TILAWAH).toMatch(
-      /\{showPage && status\.active && status\.playing \? <ActiveWordProbe \/> : null\}/,
+      /\{showPage && focused && status\.active && status\.playing \? \(\s*<ActiveWordProbe \/>\s*\) : null\}/,
     );
+  });
+
+  /**
+   * And the position poller slows to a crawl for the same reason: it is
+   * a timeout loop against the native player for as long as the hook is
+   * mounted, and it was ticking at 400ms — and re-rendering this whole
+   * page — behind a reader with its own poller for the same number.
+   */
+  it('barely polls while another screen is on top', () => {
+    expect(TILAWAH).toMatch(/useProgress\(focused \? 400 : 60_000\)/);
   });
 
   /**

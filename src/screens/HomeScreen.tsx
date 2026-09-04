@@ -61,6 +61,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { TodaySummary } from './home/TodaySummary';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { isMacCatalyst } from '../responsive/breakpoints';
+import { HeaderPlaybackBar } from '../quran/audio/HeaderPlaybackBar';
 import { HomeHeaderControls } from '../navigation/HomeHeaderControls';
 import { MihrabHeaderTitle } from '../navigation/MihrabHeaderTitle';
 import { RamadanCountdownCard } from './home/RamadanCountdownCard';
@@ -1018,10 +1019,17 @@ export function HomeScreen() {
           window rather than the card column, and unaffected by any zoom —
           held clear of the window's own title bar by `macTopBarInset`. */}
       {isMacCatalyst ? (
-        <View style={[styles.macTopBar, { paddingTop: macTopBarInset }]}>
-          <MihrabHeaderTitle />
-          <HomeHeaderControls />
-        </View>
+        <>
+          <View style={[styles.macTopBar, { paddingTop: macTopBarInset }]}>
+            <MihrabHeaderTitle />
+            <HomeHeaderControls />
+          </View>
+          {/* The playback bar every other screen gets from the navigator's
+              layout. Here it has to come AFTER the top bar above, which
+              is why the layout copy stands down for this tab on Catalyst
+              — see `HeaderPlaybackBar`. */}
+          <HeaderPlaybackBar surface={palette.bg} inline />
+        </>
       ) : null}
     <ScrollView
       ref={scrollRef}

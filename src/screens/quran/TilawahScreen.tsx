@@ -40,13 +40,10 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useProgress } from 'react-native-track-player';
-import {
-  activateKeepAwake,
-  deactivateKeepAwake,
-} from '@sayem314/react-native-keep-awake';
+import { useKeepAwake } from '../../quran/keepAwakeLock';
 import Svg, { Path } from 'react-native-svg';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { useAndroidSubScreenBack } from '../../navigation/useAndroidSubScreenBack';
@@ -469,7 +466,19 @@ export function TilawahScreen() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   useAndroidSubScreenBack();
   const status = usePlaybackStatus();
-  const progress = useProgress(400);
+  /**
+   * The position poller, throttled to almost nothing while this page is
+   * under another one.
+   *
+   * `useProgress` is a timeout loop against the native player for as
+   * long as it is mounted, and this page stays mounted when it opens the
+   * reader — so it was polling at 400ms, and re-rendering its whole
+   * header tree on every tick, behind a screen that has its own poller
+   * for the same number. The interval is a dependency of the loop, so
+   * changing it restarts the loop at the new pace.
+   */
+  const focused = useIsFocused();
+  const progress = useProgress(focused ? 400 : 60_000);
   const quran = useQuranState();
   const reciterId = quran.prefs.reciterId;
   const reciter = findReciter(reciterId);
@@ -656,11 +665,9 @@ export function TilawahScreen() {
    * screen that is gone is a flat battery nobody can explain.
    */
   const keepAwake = quran.prefs.keepAwake;
-  useEffect(() => {
-    if (!keepAwake) return undefined;
-    activateKeepAwake();
-    return () => deactivateKeepAwake();
-  }, [keepAwake]);
+  // Through the counted lock, not the library: the reader holds the same
+  // lock, and the two are mounted together whenever this page opens it.
+  useKeepAwake(keepAwake);
   const toggleKeepAwake = useCallback(() => {
     setQuranPrefs({ keepAwake: !keepAwake });
   }, [keepAwake]);
@@ -1503,7 +1510,9 @@ export function TilawahScreen() {
           the same probe the reader mounts. Without it the page shows the
           ayah's wash and nothing inside it moves, which is exactly what
           "the highlight does not work here" looked like. */}
-      {showPage && status.active && status.playing ? <ActiveWordProbe /> : null}
+      {showPage && focused && status.active && status.playing ? (
+        <ActiveWordProbe />
+      ) : null}
       <ReciterPickerSheet
         visible={pickerOpen}
         onClose={() => setPickerOpen(false)}

@@ -23,10 +23,7 @@ import {
 } from 'react-native';
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import {
-  activateKeepAwake,
-  deactivateKeepAwake,
-} from '@sayem314/react-native-keep-awake';
+import { useKeepAwake } from './keepAwakeLock';
 import { useAppPalette } from '../hooks/useAppPalette';
 import {
   easternNumerals,
@@ -322,13 +319,9 @@ export function useMushafReaderCore({
   }, [hydrated, tone]);
 
   // ── Keep the screen awake while reading (QR-13) ─────────────────────
-  useEffect(() => {
-    if (!quran.prefs.keepAwake) return;
-    activateKeepAwake();
-    return () => {
-      deactivateKeepAwake();
-    };
-  }, [quran.prefs.keepAwake]);
+  // Through the counted lock: Tilāwah holds it too, and is still on screen
+  // underneath when this reader pops — see keepAwakeLock.ts.
+  useKeepAwake(quran.prefs.keepAwake);
 
   // ── Header title follows the visible page's starting surah ──────────
   // …and the app language: an Arabic UI gets الفاتحة, not "Al-Fatihah".

@@ -25,8 +25,7 @@
  * by how far into the current one we are, because nothing knows how long
  * a surah runs until it has been played.
  */
-import { useRoute } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +41,7 @@ import { HeaderHeightContext } from '@react-navigation/elements';
 import { useProgress } from 'react-native-track-player';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { RootStackParamList } from '../../navigation/types';
+import { IS_MAC_CATALYST } from '../../responsive/desktop';
 import { findSurah } from '../quran';
 import {
   CloseIcon,
@@ -72,9 +72,56 @@ const OWN_PLAYER: ReadonlySet<string> = new Set([
   'QuranListen',
   'QuranSurah',
   'Home',
+  // Not a player, but not a place for one either: the first-run flow,
+  // which Settings can replay. A transport bar over "welcome" is noise.
+  'Onboarding',
 ]);
 
+/**
+ * The gate, and nothing else.
+ *
+ * ── WHY IT IS TWO COMPONENTS ──────────────────────────────────────────
+ *
+ * This wrapper is mounted on every screen of both navigators — six tabs,
+ * which never unmount, plus every pushed page. The first version read
+ * `useProgress(500)` right here, and `useProgress` is a timeout loop
+ * that asks the native player for its position every half-second for as
+ * long as the hook is mounted, playing or not, focused or not. So an
+ * idle app with nothing playing was making seven native calls every
+ * five hundred milliseconds to draw a line that was not on screen.
+ *
+ * Now the wrapper subscribes to the playback store — a `useSyncExternal-
+ * Store` read, free until something changes — and decides. The poller
+ * lives in `LiveBar`, which exists on exactly one screen: the focused
+ * one, while something is playing.
+ */
 export function HeaderPlaybackBar({
+  inline,
+  ...props
+}: {
+  surface: ColorValue;
+  underTransparentHeader?: boolean;
+  /**
+   * Rendered by a screen itself rather than by the navigator's layout.
+   *
+   * The one case: the Today tab on Mac Catalyst, which draws its own top
+   * bar as content — held clear of the window's title bar — because the
+   * navigator's header there sits in the title-bar drag region. The
+   * layout-mounted bar would land ABOVE that top bar, half under the
+   * window chrome, so on Catalyst the layout copy stands down for Today
+   * and `HomeScreen` mounts this under its own bar instead.
+   */
+  inline?: boolean;
+}) {
+  const route = useRoute();
+  const focused = useIsFocused();
+  const { active } = usePlaybackStatus();
+  if (!active || !focused || OWN_PLAYER.has(route.name)) return null;
+  if (!inline && IS_MAC_CATALYST && route.name === 'TodayTab') return null;
+  return <LiveBar {...props} />;
+}
+
+function LiveBar({
   /**
    * The colour of the header this bar hangs under.
    *
@@ -100,7 +147,6 @@ export function HeaderPlaybackBar({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  const route = useRoute();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { active, playing, loading } = usePlaybackStatus();
@@ -109,7 +155,10 @@ export function HeaderPlaybackBar({
   // header is mounted, and this component renders on every screen.
   const headerHeight = useContext(HeaderHeightContext) ?? 0;
 
-  if (!active || OWN_PLAYER.has(route.name)) return null;
+  // The gate above has already answered this; between its render and
+  // this one playback can stop, and a bar with nothing to name draws
+  // nothing rather than "undefined 0:0" for a frame.
+  if (!active) return null;
 
   const surah = findSurah(active.surah);
   const withinAyah = duration > 0 ? position / duration : 0;

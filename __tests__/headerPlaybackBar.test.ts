@@ -71,8 +71,31 @@ describe('the routes it stays off', () => {
 });
 
 describe('what it shows', () => {
-  it('is nothing at all when nothing is playing', () => {
-    expect(BAR).toMatch(/if \(!active \|\| OWN_PLAYER\.has\(route\.name\)\) return null;/);
+  it('is nothing at all when nothing is playing, or off screen', () => {
+    expect(BAR).toMatch(
+      /if \(!active \|\| !focused \|\| OWN_PLAYER\.has\(route\.name\)\) return null;/,
+    );
+  });
+
+  /**
+   * The wrapper is mounted on every screen of both navigators — the six
+   * tabs never unmount — and `useProgress` is a timeout loop against the
+   * native player for as long as it is mounted. Read in the wrapper, it
+   * had an idle app making seven native calls every half-second to draw
+   * nothing. So the wrapper is a gate on the playback store, and the
+   * poller lives in the inner component that exists on one screen.
+   */
+  it('polls the player only where it is actually drawing', () => {
+    const gate = BAR.slice(
+      BAR.indexOf('export function HeaderPlaybackBar'),
+      BAR.indexOf('function LiveBar'),
+    );
+    expect(gate).not.toMatch(/useProgress/);
+    expect(gate).toMatch(/usePlaybackStatus\(\)/);
+    expect(gate).toMatch(/useIsFocused\(\)/);
+    expect(gate).toMatch(/return <LiveBar \{\.\.\.props\} \/>;/);
+    const live = BAR.slice(BAR.indexOf('function LiveBar'));
+    expect(live).toMatch(/useProgress\(500\)/);
   });
 
   /**
