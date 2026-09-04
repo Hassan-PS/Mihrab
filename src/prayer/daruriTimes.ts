@@ -68,12 +68,20 @@
  *
  * ── AND SOMETIMES THERE IS NO ANSWER ──────────────────────────────────
  *
- * At 33°N every one of these angles happens every night. At 55°N some of
- * them do not: for weeks around midsummer the sun never reaches 17° below
- * the horizon, so Maghrib's second time has no beginning. `null` is the
- * honest answer there, and callers show nothing. A Mālikī in Malmö is
- * better served by a blank he can ask his imam about than by a number the
- * sky does not support.
+ * At 33°N every one of these instants happens every day. Further north
+ * they do not, and there are two separate ways for that to be true.
+ *
+ * The angle is never reached: at 55°N for weeks around midsummer the sun
+ * does not get 17° below the horizon, so the red twilight never goes and
+ * Maghrib's second time has no beginning.
+ *
+ * Or the angle IS reached but the event that would CLOSE the window is
+ * not — the case inside `solarDaruriBoundaries`, which is where it is
+ * explained, because it is the one that looks like a working answer.
+ *
+ * Both come out the same way: the key is absent and callers show
+ * nothing. A Mālikī in Malmö is better served by a blank he can ask his
+ * imam about than by a number the sky does not support.
  */
 import { clockNightTimes } from '../utils/nightTimes';
 import type { TimingsMap } from '../types/prayer';
@@ -293,11 +301,8 @@ export function solarDaruriBoundaries(
  * Maghrib and a Fajr in a place where the sun does not set, the third
  * between them is a real division of what they are looking at — and it
  * is the same instant as the `Firstthird` row, which has shipped on that
- * basis since issue #14. This is the same night the existing
- * "first third" row is computed over — and indeed Ishāʾ's second time
- * BEGINS at the end of the first third, so the two are the same instant
- * under two names. See `injectDaruriTimes` for what the card does about
- * that.
+ * basis since issue #14. See `injectDaruriTimes` for why that row stays
+ * rather than being replaced by this one.
  */
 export function daruriTimesForDay(
   date: Date,
