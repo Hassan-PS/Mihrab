@@ -7,7 +7,7 @@
  * UI falls back to ayah-level highlighting. Never blocks playback.
  */
 import { useEffect, useRef, useState } from 'react';
-import { useProgress } from 'react-native-track-player';
+import { useProgressWhileActive } from './useProgressWhileActive';
 import { loadReciterTimings } from './audioStore';
 import { findReciter } from './reciters';
 import { usePlaybackStatus } from './playback';
@@ -132,7 +132,11 @@ export function useActiveWordIndex(): {
   wordIndex: number;
 } | null {
   const { active, playing, reciterId } = usePlaybackStatus();
-  const { position } = useProgress(250);
+  // Four times a second, and only while a human can see the word it
+  // lights. The probes that mount this are gated the same way, so this
+  // is belt and braces — but the hook is exported, and the next caller
+  // should not have to remember.
+  const { position } = useProgressWhileActive(250);
   const [timings, setTimings] = useState<TimingsMap | null>(null);
   const wantedReciter = useRef<string>('');
 

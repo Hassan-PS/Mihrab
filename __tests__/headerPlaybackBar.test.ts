@@ -92,10 +92,12 @@ describe('what it shows', () => {
     );
     expect(gate).not.toMatch(/useProgress/);
     expect(gate).toMatch(/usePlaybackStatus\(\)/);
-    expect(gate).toMatch(/useIsFocused\(\)/);
+    // Foreground AND focus — `useIsFocused` alone keeps a bar polling in
+    // a pocket, since backgrounding the app leaves its route focused.
+    expect(gate).toMatch(/useIsActive\(\)/);
     expect(gate).toMatch(/return <LiveBar \{\.\.\.props\} \/>;/);
     const live = BAR.slice(BAR.indexOf('function LiveBar'));
-    expect(live).toMatch(/useProgress\(500\)/);
+    expect(live).toMatch(/useProgressWhileActive\(500\)/);
   });
 
   /**
@@ -110,10 +112,21 @@ describe('what it shows', () => {
   it('draws its controls rather than typing them', () => {
     // Glyphs like ▶︎ and ✕ land at a different size, weight and colour on
     // every platform, and cannot take the accent.
-    for (const icon of ['PlayIcon', 'PauseIcon', 'CloseIcon', 'TilawahIcon']) {
+    for (const icon of ['PlayIcon', 'PauseIcon', 'CloseIcon', 'TilawahIcon', 'ReaderIcon']) {
       expect(BAR).toContain(icon);
     }
     expect(BAR).not.toMatch(/[▶✕❚⏮⏭]/);
+  });
+
+  /**
+   * The book opens the muṣḥaf at the ayah being recited, on the page
+   * the current riwayah puts it on. It replaced the Qur'an page's own
+   * now-playing row, which was the only other place that offered this.
+   */
+  it('opens the reader at the recited ayah', () => {
+    expect(BAR).toMatch(
+      /navigation\.navigate\('QuranSurah', \{\s*surahNumber: active\.surah,\s*initialPage: findPageForAyah\(active\.surah, active\.ayah, riwayah\),\s*scrollToAyah: active\.ayah,\s*\}\)/,
+    );
   });
 
   it('reads the header height from the context, not the hook', () => {
@@ -123,18 +136,16 @@ describe('what it shows', () => {
   });
 });
 
-describe('the now-playing row on the Quran page', () => {
+describe('the Quran page', () => {
   const quran = read('src/screens/QuranScreen.tsx');
 
-  it('uses the same two marks the bar does', () => {
-    expect(quran).toMatch(
-      /import \{ ReaderIcon, TilawahIcon \} from '\.\.\/quran\/audio\/PlaybackIcons'/,
-    );
-  });
-
-  it('is one row rather than a three-line card', () => {
-    expect(quran).toMatch(/nowPlayingRow: \{\s*\n\s*flexDirection: 'row'/);
-    expect(quran).not.toMatch(/nowPlayingCard/);
-    expect(quran).not.toMatch(/nowPlayingActions/);
+  /**
+   * It had a "now playing" row of its own, forty points under a bar
+   * saying the same surah and ayah. The one thing the row had that the
+   * bar did not — the book — is on the bar now, on every screen.
+   */
+  it('no longer carries its own now-playing row', () => {
+    expect(quran).not.toMatch(/nowPlaying/);
+    expect(quran).not.toMatch(/usePlaybackStatus/);
   });
 });

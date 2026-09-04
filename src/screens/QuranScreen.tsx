@@ -28,8 +28,6 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
-import { usePlaybackStatus } from '../quran/audio/playback';
-import { ReaderIcon, TilawahIcon } from '../quran/audio/PlaybackIcons';
 import {
   findPageForAyah,
   MUSHAF_PAGES,
@@ -110,15 +108,10 @@ export function QuranScreen() {
   useScrollToTop(listRef);
   const isArabic = i18n.language === 'ar';
   const quran = useQuranState();
-  /**
-   * What is playing, so this screen can offer to open it.
-   *
-   * Tilāwah keeps going when you leave it — that is the whole point of
-   * it — so someone can arrive here with a recitation running and the
-   * surah list in front of them showing no sign of it. The card is the
-   * bridge: it says what is playing and takes you to that page.
-   */
-  const playback = usePlaybackStatus();
+  // What is playing is no longer this screen's business: the bar under
+  // the title names it and opens both the player and the reader, on
+  // every screen. The card that used to do that here sat forty points
+  // under the bar saying the same surah and ayah.
   /**
    * Is there a second muṣḥaf to offer at all?
    *
@@ -394,69 +387,6 @@ export function QuranScreen() {
           </View>
           <Text style={{ color: palette.accentSolid, fontSize: 18 }}>→</Text>
         </Pressable>
-      ) : null}
-
-      {/* Playing right now, and BOTH ways into it.
-
-          One tap used to mean one destination, and the card had to guess
-          which: the reader, if you want to follow the words, or Tilāwah,
-          if you want the transport. Guessing wrong is a screen you did
-          not ask for and a back press.
-
-          Two buttons, then — but drawn, on the same line as the surah,
-          and in the same shapes as the transport bar under the title. A
-          three-line card with two word-buttons under it was a paragraph
-          spent saying what a note and a book say at a glance, and it sat
-          directly beneath a bar that had already said the surah's name. */}
-      {playback.active ? (
-        <View
-          style={[
-            styles.nowPlayingRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <Text
-            numberOfLines={1}
-            style={[styles.nowPlayingLabel, { color: palette.muted }]}>
-            {t('quran.listenNowPlaying', 'Now playing')}
-          </Text>
-          <Text
-            numberOfLines={1}
-            style={[styles.nowPlayingTitle, { color: palette.text }]}>
-            {`${findSurah(playback.active.surah)?.romanized ?? ''} ${playback.active.surah}:${playback.active.ayah}`}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
-            hitSlop={6}
-            onPress={() => navigation.navigate('QuranListen')}
-            style={({ pressed }) => [
-              styles.nowPlayingBtn,
-              { backgroundColor: palette.accentBg },
-              pressed && styles.nowPlayingPressed,
-            ]}>
-            <TilawahIcon color={String(palette.accentSolid)} size={16} />
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.openInReader', 'Open in the reader')}
-            hitSlop={6}
-            onPress={() => {
-              const at = playback.active;
-              if (!at) return;
-              openSurah(
-                at.surah,
-                at.ayah,
-                findPageForAyah(at.surah, at.ayah, quran.prefs.riwayah),
-              );
-            }}
-            style={({ pressed }) => [
-              styles.nowPlayingBtn,
-              { backgroundColor: palette.controlBg },
-              pressed && styles.nowPlayingPressed,
-            ]}>
-            <ReaderIcon color={String(palette.text)} size={16} />
-          </Pressable>
-        </View>
       ) : null}
 
       {/* Said where it lands: this card is the user's place in the mushaf,
@@ -1584,36 +1514,6 @@ const styles = StyleSheet.create({
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: 10, marginBottom: 8 },
-  nowPlayingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingStart: 14,
-    paddingEnd: 8,
-    paddingVertical: 7,
-    borderRadius: 12,
-    marginBottom: 4,
-  },
-  nowPlayingLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  nowPlayingTitle: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-  nowPlayingPressed: { opacity: 0.55 },
-  nowPlayingBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   resumeCard: {
     flexDirection: 'row',
     alignItems: 'center',

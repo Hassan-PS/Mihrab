@@ -262,10 +262,14 @@ describe('MiniPlayer reciter picker', () => {
 
     let root!: ReactTestRenderer;
     await act(async () => {
+      // Inside a navigator, as it always is: the card asks whether its
+      // screen is in front before it polls the player.
       root = create(
-        <PrayerSettingsProvider>
-          <MiniPlayer />
-        </PrayerSettingsProvider>,
+        <NavigationContainer>
+          <PrayerSettingsProvider>
+            <MiniPlayer />
+          </PrayerSettingsProvider>
+        </NavigationContainer>,
       );
     });
 
@@ -284,9 +288,11 @@ describe('MiniPlayer reciter picker', () => {
     status = { active: null, playing: false, loading: false, reciterId: 'husary' };
     await act(async () => {
       root.update(
-        <PrayerSettingsProvider>
-          <MiniPlayer />
-        </PrayerSettingsProvider>,
+        <NavigationContainer>
+          <PrayerSettingsProvider>
+            <MiniPlayer />
+          </PrayerSettingsProvider>
+        </NavigationContainer>,
       );
     });
     expect(presentedModals(root)).toHaveLength(0);

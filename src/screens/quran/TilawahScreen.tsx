@@ -40,9 +40,10 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useProgress } from 'react-native-track-player';
+import { useProgressWhileActive } from '../../quran/audio/useProgressWhileActive';
+import { useIsActive } from '../../hooks/useIsActive';
 import { useKeepAwake } from '../../quran/keepAwakeLock';
 import Svg, { Path } from 'react-native-svg';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -467,18 +468,20 @@ export function TilawahScreen() {
   useAndroidSubScreenBack();
   const status = usePlaybackStatus();
   /**
-   * The position poller, throttled to almost nothing while this page is
-   * under another one.
+   * The position poller, and everything else here that only matters
+   * while a human is looking: throttled to nothing when they are not.
    *
-   * `useProgress` is a timeout loop against the native player for as
-   * long as it is mounted, and this page stays mounted when it opens the
-   * reader — so it was polling at 400ms, and re-rendering its whole
-   * header tree on every tick, behind a screen that has its own poller
-   * for the same number. The interval is a dependency of the loop, so
-   * changing it restarts the loop at the new pace.
+   * "Not looking" is two things, and `useIsActive` is both. This page
+   * stays mounted under the reader it opens, so it was polling at 400ms
+   * and re-rendering its whole header tree on every tick behind a screen
+   * with its own poller for the same number. And it stays focused with
+   * the screen OFF — which is how this page is used: the blurb at the
+   * top promises the recitation keeps going in a pocket, and it did,
+   * while the page kept scrolling a preview and lighting words in the
+   * dark for as long as the surah ran.
    */
-  const focused = useIsFocused();
-  const progress = useProgress(focused ? 400 : 60_000);
+  const active = useIsActive();
+  const progress = useProgressWhileActive(400);
   const quran = useQuranState();
   const reciterId = quran.prefs.reciterId;
   const reciter = findReciter(reciterId);
@@ -777,6 +780,7 @@ export function TilawahScreen() {
    * above — the only honest thing four lines can show there.
    */
   useEffect(() => {
+    if (!active) return;
     if (!showPage || !playingPage || !status.active || pageWidth <= 0) return;
     if (!lineGeometry) return;
     const index = ayahLineIndex(
@@ -791,6 +795,7 @@ export function TilawahScreen() {
       animated: true,
     });
   }, [
+    active,
     showPage,
     playingPage,
     pageWidth,
@@ -1516,7 +1521,7 @@ export function TilawahScreen() {
           the same probe the reader mounts. Without it the page shows the
           ayah's wash and nothing inside it moves, which is exactly what
           "the highlight does not work here" looked like. */}
-      {showPage && focused && status.active && status.playing ? (
+      {showPage && active && status.active && status.playing ? (
         <ActiveWordProbe />
       ) : null}
       <ReciterPickerSheet

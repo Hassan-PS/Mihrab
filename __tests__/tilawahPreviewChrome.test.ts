@@ -25,11 +25,11 @@ describe('the word being recited', () => {
     expect(TILAWAH).toContain(
       "import { ActiveWordProbe } from '../../quran/audio/ActiveWordProbe'",
     );
-    // `focused` too: this page stays mounted under the reader it opens,
-    // and the reader mounts its own probe — two pollers publishing the
-    // same word to the same store.
+    // `active` too — foregrounded AND focused. This page stays mounted
+    // under the reader it opens (which mounts its own probe), and it
+    // stays focused with the screen off, which is how it is used.
     expect(TILAWAH).toMatch(
-      /\{showPage && focused && status\.active && status\.playing \? \(\s*<ActiveWordProbe \/>\s*\) : null\}/,
+      /\{showPage && active && status\.active && status\.playing \? \(\s*<ActiveWordProbe \/>\s*\) : null\}/,
     );
   });
 
@@ -39,8 +39,11 @@ describe('the word being recited', () => {
    * mounted, and it was ticking at 400ms — and re-rendering this whole
    * page — behind a reader with its own poller for the same number.
    */
-  it('barely polls while another screen is on top', () => {
-    expect(TILAWAH).toMatch(/useProgress\(focused \? 400 : 60_000\)/);
+  it('barely polls while nobody is looking', () => {
+    expect(TILAWAH).toMatch(/useProgressWhileActive\(400\)/);
+    expect(TILAWAH).not.toMatch(/useProgress\(/);
+    // …and the follow-scroll does not move a page nobody can see.
+    expect(TILAWAH).toMatch(/useEffect\(\(\) => \{\s*if \(!active\) return;\s*if \(!showPage/);
   });
 
   /**

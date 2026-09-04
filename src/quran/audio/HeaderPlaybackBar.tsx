@@ -25,7 +25,8 @@
  * by how far into the current one we are, because nothing knows how long
  * a surah runs until it has been played.
  */
-import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsActive } from '../../hooks/useIsActive';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +39,7 @@ import {
   type ColorValue,
 } from 'react-native';
 import { HeaderHeightContext } from '@react-navigation/elements';
-import { useProgress } from 'react-native-track-player';
+import { useProgressWhileActive } from './useProgressWhileActive';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { RootStackParamList } from '../../navigation/types';
 import { IS_MAC_CATALYST } from '../../responsive/desktop';
@@ -47,8 +48,11 @@ import {
   CloseIcon,
   PauseIcon,
   PlayIcon,
+  ReaderIcon,
   TilawahIcon,
 } from './PlaybackIcons';
+import { findPageForAyah } from '../pages';
+import { useQuranState } from '../quranState';
 import {
   pausePlayback,
   resumePlayback,
@@ -114,7 +118,8 @@ export function HeaderPlaybackBar({
   inline?: boolean;
 }) {
   const route = useRoute();
-  const focused = useIsFocused();
+  // Focused AND foregrounded: in a pocket there is nothing to draw for.
+  const focused = useIsActive();
   const { active } = usePlaybackStatus();
   if (!active || !focused || OWN_PLAYER.has(route.name)) return null;
   if (!inline && IS_MAC_CATALYST && route.name === 'TodayTab') return null;
@@ -150,7 +155,8 @@ function LiveBar({
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { active, playing, loading } = usePlaybackStatus();
-  const { position, duration } = useProgress(500);
+  const { position, duration } = useProgressWhileActive(500);
+  const riwayah = useQuranState().prefs.riwayah;
   // The context rather than `useHeaderHeight()`: the hook throws where no
   // header is mounted, and this component renders on every screen.
   const headerHeight = useContext(HeaderHeightContext) ?? 0;
@@ -200,6 +206,25 @@ function LiveBar({
               ? t('quran.buffering', 'Buffering…')
               : `${surah?.romanized ?? ''} ${active.surah}:${active.ayah}`}
           </Text>
+        </Pressable>
+
+        {/* The muṣḥaf, open at the ayah being recited. This used to be the
+            one thing the now-playing row on the Qur'an page had that the
+            bar did not; the row is gone, so the book is here — and it is
+            here on every screen, which the row never was. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.openInReader', 'Open in the reader')}
+          hitSlop={8}
+          onPress={() =>
+            navigation.navigate('QuranSurah', {
+              surahNumber: active.surah,
+              initialPage: findPageForAyah(active.surah, active.ayah, riwayah),
+              scrollToAyah: active.ayah,
+            })
+          }
+          style={({ pressed }) => [styles.btn, pressed && styles.pressed]}>
+          <ReaderIcon color={String(palette.text)} size={16} />
         </Pressable>
 
         <Pressable

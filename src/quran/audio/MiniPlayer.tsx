@@ -18,7 +18,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useProgress } from 'react-native-track-player';
+import { useProgressWhileActive } from './useProgressWhileActive';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { findSurah } from '../quran';
@@ -53,7 +53,10 @@ export function MiniPlayer({
   const { palette } = useAppPalette();
   const { active, playing, loading, reciterId } = usePlaybackStatus();
   const { prefs } = useQuranState();
-  const { position, duration } = useProgress(500);
+  // Only while someone is looking — see the hook. Listening from the
+  // reader with the screen off used to keep this polling for the whole
+  // recitation, to move a hairline in a pocket.
+  const { position, duration } = useProgressWhileActive(500);
   const [pickerVisible, setPickerVisible] = useState(false);
 
   // Stopping playback unmounts this card. The reciter picker is an RN

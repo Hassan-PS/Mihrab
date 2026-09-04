@@ -37,6 +37,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useIsActive } from '../hooks/useIsActive';
 import { finishKhatmahPortion } from './quranState';
 import MushafTextPageSurface from './MushafTextPageSurface';
 import type { AyahRef } from './MushafTextPage';
@@ -405,7 +406,20 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
 
   const { marks, finish, selected, openSelection, openJump } = core;
   const accent = palette.accentSolid;
-  const playingRef = playback.active;
+  /**
+   * The recited ayah, as far as the PAGE is concerned — null while nobody
+   * is looking.
+   *
+   * With the screen off the recitation keeps going, and every ayah used
+   * to re-tint the page, re-run the follow-scroll and republish the word
+   * for fifteen lines to consider, in a pocket. Handing the page nothing
+   * while the app is away costs one re-render on the way out and one on
+   * the way back, where the effects catch up to wherever the reciter has
+   * got to. The MiniPlayer keeps `playback.active` itself: it names the
+   * ayah, and naming it is cheap.
+   */
+  const uiActive = useIsActive();
+  const playingRef = uiActive ? playback.active : null;
 
   /** One page column, or an empty one for the blank half of a spread. */
   const renderColumn = useCallback(
@@ -651,7 +665,9 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
           store for why it is a probe and not a prop. Mounted only while
           something plays: the hook behind it polls playback four times a
           second for as long as it is mounted, playing or not. */}
-      {playback.active && playback.playing ? <ActiveWordProbe /> : null}
+      {playback.active && playback.playing && uiActive ? (
+        <ActiveWordProbe />
+      ) : null}
 
       <MushafJumpModal
         visible={core.jumpVisible}

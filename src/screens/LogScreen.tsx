@@ -40,6 +40,7 @@ import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import notifee, { EventType } from '@notifee/react-native';
 import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useIsActive } from '../hooks/useIsActive';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { SyncHint } from './sync/SyncHint';
 import { FillSummary } from '../components/FillSummary';
@@ -217,11 +218,17 @@ export function LogScreen() {
    * instead of the user tapping a dead chip and wondering what is broken.
    */
   const [minuteTick, setMinuteTick] = useState(0);
+  // Foreground and focused, like the other clocks in the app — a minute
+  // tick is small, but it was the one timer here still running in a
+  // pocket (docs/design/background-power.md). Coming back re-arms it and
+  // bumps once, so a row that came due while away opens at once.
+  const logActive = useIsActive();
   useEffect(() => {
-    if (!isToday) return;
+    if (!isToday || !logActive) return;
+    setMinuteTick(n => n + 1);
     const id = setInterval(() => setMinuteTick(n => n + 1), 60000);
     return () => clearInterval(id);
-  }, [isToday]);
+  }, [isToday, logActive]);
   const selectedDate = useMemo(() => dateFromKey(selected), [selected]);
   /** Forward is barred past today — see the header comment. */
   const canGoForward = selected < today;

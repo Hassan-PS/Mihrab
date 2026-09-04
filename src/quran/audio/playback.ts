@@ -117,11 +117,22 @@ async function ensureSetup(): Promise<void> {
     TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, e => {
       const ref = e.track ? parseTrackId(String(e.track.id)) : null;
       setStatus({ active: ref });
-      // Gapless: warm the next few ayahs onto disk (v2.7.28).
-      void prefetchUpcoming();
-      // Listening: keep a couple of hundred ayahs queued ahead of here, so
-      // one surah runs into the next without a gap or a decision.
-      void extendListening();
+      // ONE look at the queue per ayah, shared by both of the jobs below.
+      //
+      // `getQueue()` hands the whole queue across the bridge — every track,
+      // with its url, title, artist and artwork — and a listening queue is
+      // up to seven hundred of them. Each job used to fetch its own copy,
+      // and the prefetch fetched a third per file it finished, so a long
+      // session was serialising a few hundred kilobytes of queue every six
+      // seconds to answer "what is next" and "how much is left".
+      void snapshotQueue().then(snap => {
+        if (!snap) return;
+        // Gapless: warm the next few ayahs onto disk (v2.7.28).
+        void prefetchUpcoming(snap);
+        // Listening: keep a couple of hundred ayahs queued ahead of here,
+        // so one surah runs into the next without a gap or a decision.
+        void extendListening(snap);
+      });
     });
     TrackPlayer.addEventListener(Event.PlaybackState, e => {
       setStatus({
@@ -151,13 +162,23 @@ async function ensureSetup(): Promise<void> {
 const PREFETCH_AHEAD = 3;
 const inFlightPrefetch = new Set<string>();
 
-async function prefetchUpcoming(): Promise<void> {
+/** The queue and where we are in it, as of one moment. */
+type QueueSnapshot = { queue: Track[]; idx: number };
+
+async function snapshotQueue(): Promise<QueueSnapshot | null> {
   try {
     const [queue, idx] = await Promise.all([
       TrackPlayer.getQueue(),
       TrackPlayer.getActiveTrackIndex(),
     ]);
-    if (idx == null) return;
+    return idx == null ? null : { queue, idx };
+  } catch {
+    return null;
+  }
+}
+
+async function prefetchUpcoming({ queue, idx }: QueueSnapshot): Promise<void> {
+  try {
     const reciterId = status.reciterId;
     const last = Math.min(idx + PREFETCH_AHEAD, queue.length - 1);
     for (let i = idx + 1; i <= last; i++) {
@@ -174,22 +195,25 @@ async function prefetchUpcoming(): Promise<void> {
         .then(async path => {
           inFlightPrefetch.delete(key);
           if (!path) return;
-          const [q2, idx2] = await Promise.all([
-            TrackPlayer.getQueue(),
+          // The swap, by INDEX rather than by scanning a fresh copy of the
+          // whole queue. The entry was at `i` when the file was asked for,
+          // and nothing moves entries about: a swap is a remove and an add
+          // at the same place, a top-up appends, and a rebuild (`listenFrom`)
+          // issues ids from a counter that never repeats — so one track
+          // fetched by index either IS the entry, or the queue is a
+          // different queue and this file waits for its own pass.
+          const [idx2, t2] = await Promise.all([
             TrackPlayer.getActiveTrackIndex(),
+            TrackPlayer.getTrack(i),
           ]);
-          if (idx2 == null) return;
-          for (let j = idx2 + 2; j < q2.length; j++) {
-            const t2 = q2[j];
-            if (
-              t2?.id === tr.id &&
-              typeof t2.url === 'string' &&
-              t2.url.startsWith('http')
-            ) {
-              await TrackPlayer.remove([j]);
-              await TrackPlayer.add({ ...t2, url: `file://${path}` }, j);
-              break;
-            }
+          if (idx2 == null || i < idx2 + 2 || !t2) return;
+          if (
+            t2.id === tr.id &&
+            typeof t2.url === 'string' &&
+            t2.url.startsWith('http')
+          ) {
+            await TrackPlayer.remove([i]);
+            await TrackPlayer.add({ ...t2, url: `file://${path}` }, i);
           }
         })
         .catch(() => {
@@ -420,14 +444,10 @@ function endListening(): void {
 }
 
 /** Append the next window if the queue is running low. Best effort. */
-async function extendListening(): Promise<void> {
+async function extendListening({ queue, idx }: QueueSnapshot): Promise<void> {
   if (!listening || !listenCursor) return;
   try {
-    const [queue, activeIndex] = await Promise.all([
-      TrackPlayer.getQueue(),
-      TrackPlayer.getActiveTrackIndex(),
-    ]);
-    const remaining = queue.length - ((activeIndex ?? 0) + 1);
+    const remaining = queue.length - (idx + 1);
     if (remaining >= LISTEN_REFILL_AT) return;
     const { refs, cursor } = listenWindow(
       listenCursor,
