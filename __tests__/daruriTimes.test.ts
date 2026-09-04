@@ -24,6 +24,7 @@ jest.unmock('adhan');
 
 import {
   DARURI_CONFIDENCE,
+  daruriImportOk,
   ISFAR_ALTITUDE_DEGREES,
   ISFIRAR_ALTITUDE_DEGREES,
   MALIKI_SHADOW_LENGTH,
@@ -260,6 +261,24 @@ describe("Ishāʾ's boundary", () => {
     expect(t.IshaDaruri).toBeUndefined();
   });
 
+  /**
+   * Both ends of the night come from the provider, and either can arrive
+   * malformed. The Maghrib case was covered; this is the other one.
+   */
+  it('survives an unparseable Fajr for tomorrow', () => {
+    const t = daruriTimesForDay(
+      new Date(2026, 8, 4, 12, 0, 0),
+      CASABLANCA.lat,
+      CASABLANCA.lng,
+      today,
+      'not-a-time',
+    );
+    expect(t.IshaDaruri).toBeUndefined();
+    // And the four solar boundaries are unharmed by it.
+    expect(t.DhuhrDaruri).toBeDefined();
+    expect(t.MaghribDaruri).toBeDefined();
+  });
+
   it('survives a provider sending something unparseable', () => {
     const t = daruriTimesForDay(
       new Date(2026, 8, 4, 12, 0, 0),
@@ -352,12 +371,62 @@ describe('injecting into a week', () => {
   });
 });
 
+describe('the engine this depends on', () => {
+  /**
+   * `SolarTime` is a deep import — adhan.js does not re-export it — so a
+   * version bump could leave the path resolving while the export stops
+   * being the class. Everything would then quietly return nothing. This
+   * is the assertion that turns that into a failing test rather than a
+   * feature that silently stopped working.
+   */
+  it('imported something that can actually be constructed', () => {
+    expect(daruriImportOk()).toBe(true);
+  });
+
+  it('and that something answers for an ordinary day', () => {
+    const b = solarDaruriBoundaries(
+      new Date(2026, 8, 4, 12, 0, 0),
+      CASABLANCA.lat,
+      CASABLANCA.lng,
+    );
+    expect(Object.keys(b)).toHaveLength(4);
+  });
+});
+
 describe('what the app is claiming', () => {
   it('has a prayer and a confidence for every boundary', () => {
     for (const key of DARURI_KEYS) {
       expect(DARURI_OF[key]).toBeTruthy();
       expect(['computed', 'modelled']).toContain(DARURI_CONFIDENCE[key]);
     }
+  });
+
+  /**
+   * The source gives −6° to −4° for *isfār*, and which end is chosen is a
+   * fiqh decision, not a rounding one. Morning twilight brightens toward
+   * sunrise, so the later angle is the later clock time — and a boundary
+   * placed late tells someone they are still in the preferred window when
+   * they may already be in the ḍarūrī one. The window this closes is one
+   * a person enters without excuse only at a cost, so the app closes it
+   * early. This pins that, because it is exactly the kind of constant
+   * that gets "tidied" back to the middle of a range by someone who has
+   * not thought about which direction the harm runs.
+   */
+  it('takes the early end of the isfar range, not the late one', () => {
+    expect(ISFAR_ALTITUDE_DEGREES).toBe(-6);
+    const early = solarDaruriBoundaries(
+      new Date(2026, 8, 4, 12, 0, 0),
+      CASABLANCA.lat,
+      CASABLANCA.lng,
+    ).FajrDaruri!;
+    // What the permissive end of the same range would have produced.
+    const SolarTime = require('adhan/lib/cjs/SolarTime').default;
+    const st = new SolarTime(new Date(2026, 8, 4, 12, 0, 0), {
+      latitude: CASABLANCA.lat,
+      longitude: CASABLANCA.lng,
+    });
+    expect(st.hourAngle(-6, false)).toBeLessThan(st.hourAngle(-4, false));
+    expect(early).toBeDefined();
   });
 
   /**

@@ -36,6 +36,11 @@
  * reader deserves to know which of the two they are looking at rather
  * than seeing all five printed in the same confident type.
  *
+ * Where a modelled angle has a stated range, the app takes the end that
+ * closes the preferred window EARLIER — see `ISFAR_ALTITUDE_DEGREES`.
+ * These are the ends of the windows a person should be praying in, and
+ * the ordinary precaution for an end is to be early.
+ *
  * ── THE SHADOW IS ALWAYS 1:1 ──────────────────────────────────────────
  *
  * Ẓuhr's first time ends where ʿAṣr's begins, at shadow = height + the
@@ -117,21 +122,58 @@ type SolarTimeLike = {
   afternoon(shadowLength: number): number;
 };
 
-const SolarTime: new (date: Date, observer: Observer) => SolarTimeLike =
-  SolarTimeModule.default ?? SolarTimeModule;
+const SolarTime: (new (date: Date, observer: Observer) => SolarTimeLike) | null =
+  typeof (SolarTimeModule?.default ?? SolarTimeModule) === 'function'
+    ? (SolarTimeModule.default ?? SolarTimeModule)
+    : null;
+
+/**
+ * Did the deep import come back as something we can construct?
+ *
+ * A missing path would fail at bundle time and CI would catch it. The
+ * case worth guarding is quieter: adhan.js reorganising so the path still
+ * resolves but the export is no longer the class — then every `new
+ * SolarTime(...)` throws, or worse returns an object whose fields are all
+ * NaN, and the feature stops working with nothing in the log to say why.
+ * `daruriImportOk()` is what the test asserts, so a version bump that
+ * breaks the shape fails the suite instead of the app.
+ */
+export function daruriImportOk(): boolean {
+  return SolarTime !== null;
+}
 
 /**
  * *Isfār* — "the stars are no longer seen because of the approach of
- * daylight" (fn. 655). Issue #19 gives −6° to −4°; this takes the later,
- * brighter end deliberately. The boundary being modelled is the one after
- * which the prayer is late, so the error that costs nothing is the one
- * that leaves the preferred window a little longer.
+ * daylight" (fn. 655). Issue #19 gives a range, −6° to −4°, and this
+ * takes the EARLY end.
+ *
+ * The first cut took the late end, on the reasoning that leaving the
+ * preferred window longer was the error that cost nothing. That had the
+ * risk backwards, and review caught it. Morning twilight brightens from
+ * −18° toward sunrise, so −4° is LATER on the clock than −6°. Put the
+ * boundary late and the app tells someone at −5° that they are still in
+ * the preferred window when they may already be in the ḍarūrī one —
+ * which is the window a person enters without excuse only at a cost.
+ * Put it early and the app closes the window before it had to; they
+ * hurry, and nothing is incurred.
+ *
+ * So the precaution runs the other way from where I first put it, and it
+ * is the ordinary one for time boundaries: begin late, end early. The
+ * end of an ikhtiyārī window is an end.
  */
-export const ISFAR_ALTITUDE_DEGREES = -4;
+export const ISFAR_ALTITUDE_DEGREES = -6;
 
 /**
  * *Iṣfirār* — the sun "has a deep yellow view and is about to turn
  * orange" (fn. 657). +5° above the horizon, as issue #19 gives it.
+ *
+ * The same precaution as *isfār* would argue for a slightly HIGHER angle
+ * here, since the sun descends toward sunset and a higher one is
+ * earlier. It is not applied, because the source gives one number rather
+ * than a range: shifting it would be inventing a boundary rather than
+ * choosing conservatively within a stated one. If a corroborating source
+ * ever gives a range, the early end of it belongs here for the reason
+ * above.
  */
 export const ISFIRAR_ALTITUDE_DEGREES = 5;
 
@@ -233,6 +275,10 @@ export function solarDaruriBoundaries(
   latitude: number,
   longitude: number,
 ): DaruriTimes {
+  // No engine, no boundaries — the same answer this module gives for
+  // every other question it cannot honestly answer. The card simply
+  // shows the prayer times it always did.
+  if (!SolarTime) return {};
   const solar = new SolarTime(date, { latitude, longitude });
   const y = date.getFullYear();
   const mo = date.getMonth();
@@ -294,15 +340,27 @@ export function solarDaruriBoundaries(
  * omitted rather than guessed.
  *
  * This one is NOT gated on the sun rising and setting the way the four
- * above are, and the difference is the point: those are claims about
- * where the sun is, and under the midnight sun there is no answer to
- * make. This is a third of the way between two times the card is already
- * showing the reader. Whatever rule their provider used to produce a
- * Maghrib and a Fajr in a place where the sun does not set, the third
- * between them is a real division of what they are looking at — and it
- * is the same instant as the `Firstthird` row, which has shipped on that
- * basis since issue #14. See `injectDaruriTimes` for why that row stays
- * rather than being replaced by this one.
+ * above are, and the difference is not convenience — it is that Ishāʾ's
+ * boundary is a different KIND of thing.
+ *
+ * The other four are solar positions. "The red glow has gone" and "the
+ * sun has yellowed" are claims about where the sun is, and under the
+ * midnight sun there is no answer to make, so the app makes none.
+ * Ishāʾ's is not a position at all: the fiqh defines it as a FRACTION OF
+ * THE NIGHT — "one third of the way between sunset and dawn" (fn. 660) —
+ * and a fraction is well defined for any interval its two ends are given
+ * for. Whatever rule a provider used to produce a Maghrib and a Fajr in
+ * a place where the sun does not set, a third of the way between them is
+ * a real division of the night that user has been handed, and it is the
+ * boundary their own table implies.
+ *
+ * Which is also why gating it would be wrong rather than merely stricter:
+ * it would withhold the one boundary of the five that still has a
+ * meaning at that latitude.
+ *
+ * The same instant as the `Firstthird` row, which has shipped on exactly
+ * this basis since issue #14. See `injectDaruriTimes` for why that row
+ * stays rather than being replaced by this one.
  */
 export function daruriTimesForDay(
   date: Date,

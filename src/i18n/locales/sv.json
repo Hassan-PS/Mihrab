@@ -271,6 +271,7 @@
     "firstThirdHelp": "Slutet på nattens första tredjedel — i malikitisk räkning där Isha lämnar sitt bästa tidsfönster. Av som standard.",
     "malikiSecondTimes": "Malikitiska andratider",
     "malikiSecondTimesHelp": "Varje bön får en rad på Idag-kortet som säger när dess föredragna tid (ikhtiyari) stängs och dess sena tid (daruri) börjar. Beräknas på din enhet utifrån dina koordinater, oavsett vilken källa tiderna kommer från. Använder 1:1-skuggan för Asr oavsett din madhhab-inställning, eftersom det är den malikitiska gränsen. Av som standard.",
+    "malikiSecondTimesHanafiWarning": "Obs: det här är malikitiska gränser, men din Asr är inställd på hanafitisk, som använder en annan skugga. Zuhrs första tid slutar ungefär en halvtimme före den Asr som visas under. Stäng av hanafitisk Asr om du vill att kortet ska stämma med sig självt.",
     "malikiSecondTimesSource": "Från Al-Murshid al-Muin (Ibn Ashir), återgiven i The Guiding Helper, sång 11.",
     "malikiSecondTimesModelled": "Fajrs och Asrs gränser är stjärnorna som bleknar och solen som gulnar — en vinkel som står för något ögat bedömer. De märks som ungefärliga. Där solen inte går upp, inte går ner, eller aldrig når vinkeln visas ingenting i stället för en gissning.",
     "accent_rose": "Rosa",

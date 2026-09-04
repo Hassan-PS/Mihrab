@@ -271,6 +271,7 @@
     "firstThirdHelp": "夜晚前三分之一的终点——按马立克派的算法，宵礼在此离开其首选时段。默认关闭。",
     "malikiSecondTimes": "马立克派第二时段",
     "malikiSecondTimesHelp": "每次礼拜都会在「今天」卡片上多一行，说明其首选时段（ikhtiyari）何时结束、延后时段（daruri）何时开始。无论礼拜时间来自哪个来源，都在你的设备上依据你的坐标计算。晡礼一律采用 1:1 影长，不受你所选教法学派影响，因为这才是马立克派的界线。默认关闭。",
+    "malikiSecondTimesHanafiWarning": "请注意：这些是马立克派的界线，但你的晡礼设为哈乃斐派，采用不同的影长。晌礼的首选时段会比下方显示的晡礼早约半小时结束。若希望卡片前后一致，请关闭哈乃斐派晡礼。",
     "malikiSecondTimesSource": "依据伊本·阿希尔《Al-Murshid al-Muin》，见 The Guiding Helper 第 11 章。",
     "malikiSecondTimesModelled": "晨礼与晡礼的界线是星辰隐没和日色转黄——用一个角度来代替肉眼的判断，因此标示为近似值。太阳不升起、不落下，或始终达不到该角度的地方，宁可留白，也不给出猜测。",
     "accent_rose": "玫瑰红",

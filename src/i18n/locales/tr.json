@@ -271,6 +271,7 @@
     "firstThirdHelp": "Gecenin ilk üçte birinin sonu — Maliki hesabına göre yatsının tercih edilen vaktinin çıktığı an. Varsayılan olarak kapalı.",
     "malikiSecondTimes": "Maliki ikinci vakitler",
     "malikiSecondTimesHelp": "Her namaz için Bugün kartında, tercih edilen vaktinin (ihtiyari) ne zaman kapandığını ve geç vaktinin (zaruri) ne zaman başladığını söyleyen bir satır çıkar. Vakitleriniz hangi kaynaktan gelirse gelsin, koordinatlarınızdan cihazınızda hesaplanır. İkindi için mezhep ayarınızdan bağımsız olarak 1:1 gölgeyi kullanır; Maliki sınırı budur. Varsayılan olarak kapalı.",
+    "malikiSecondTimesHanafiWarning": "Not: bunlar Maliki sınırlarıdır, ama ikindiniz Hanefi'ye ayarlı ve o farklı bir gölge kullanır. Öğlenin ilk vakti, altında görünen ikindiden yaklaşık yarım saat önce bitecek. Kartın kendisiyle tutarlı olmasını istiyorsanız Hanefi ikindiyi kapatın.",
     "malikiSecondTimesSource": "İbn Âşir'in El-Mürşidü'l-Muîn'inden, The Guiding Helper'daki 11. şarkıda aktarıldığı şekliyle.",
     "malikiSecondTimesModelled": "Sabah ve ikindinin sınırları yıldızların sönmesi ve güneşin sararmasıdır — gözün karar verdiği bir şeyin yerine geçen bir açı. Bu yüzden yaklaşık olarak işaretlenir. Güneşin doğmadığı, batmadığı ya da o açıya hiç ulaşmadığı yerde tahmin yerine hiçbir şey gösterilmez.",
     "accent_rose": "Gül",

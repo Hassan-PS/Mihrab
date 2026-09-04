@@ -271,6 +271,7 @@
     "firstThirdHelp": "La fin du premier tiers de la nuit — dans le calcul malikite, le moment où l'Isha quitte son créneau préféré. Désactivé par défaut.",
     "malikiSecondTimes": "Seconds temps malikites",
     "malikiSecondTimesHelp": "Chaque prière reçoit une ligne sur la carte Aujourd'hui indiquant quand se ferme son temps préféré (ikhtiyari) et quand commence son temps tardif (daruri). Calculé sur votre appareil à partir de vos coordonnées, quelle que soit la source de vos horaires. Utilise l'ombre 1:1 pour Asr indépendamment de votre réglage de madhhab, car c'est la limite malikite. Désactivé par défaut.",
+    "malikiSecondTimesHanafiWarning": "À noter : ce sont des limites malikites, mais votre Asr est réglé sur hanafite, qui utilise une autre ombre. Le premier temps de Zuhr se terminera environ une demi-heure avant l'Asr affiché en dessous. Désactivez l'Asr hanafite si vous voulez que la carte soit cohérente.",
     "malikiSecondTimesSource": "D'après Al-Murshid al-Muin (Ibn Ashir), tel que rendu dans The Guiding Helper, chant 11.",
     "malikiSecondTimesModelled": "Les limites de Fajr et d'Asr sont la disparition des étoiles et le jaunissement du soleil — un angle qui tient lieu de ce que l'œil juge. Elles sont marquées comme approximatives. Là où le soleil ne se lève pas, ne se couche pas, ou n'atteint jamais l'angle, rien n'est affiché plutôt qu'une supposition.",
     "accent_rose": "Rose",

@@ -135,3 +135,41 @@ describe('the second-time line', () => {
     }
   });
 });
+
+/**
+ * The Ḥanafī conflict, which is the one place this feature can make a
+ * card contradict itself.
+ *
+ * Ẓuhr's ḍarūrī boundary is the 1:1 shadow whatever the app's ʿAṣr
+ * setting says — it has to be, it is a Mālikī boundary. On Ḥanafī ʿAṣr
+ * that lands roughly half an hour before the ʿAṣr drawn on the row
+ * underneath it. Nothing is wrong with either number; they are two
+ * madhāhib in one table. But it reads as a bug unless somebody says so,
+ * and the place to say it is beside the switch, before it is touched.
+ */
+describe('the boundary a Hanafi user would find surprising', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { solarDaruriBoundaries } = require('../src/prayer/daruriTimes');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const adhan = jest.requireActual('adhan');
+
+  it('sits well before the Hanafi Asr on the row below it', () => {
+    const at = new Date(2026, 8, 4, 12, 0, 0);
+    const boundary = solarDaruriBoundaries(at, 33.5731, -7.5898).DhuhrDaruri;
+
+    const params = adhan.CalculationMethod.Other();
+    params.fajrAngle = 19;
+    params.ishaAngle = 17;
+    params.madhab = adhan.Madhab.Hanafi;
+    const hanafi = new adhan.PrayerTimes(
+      new (require('adhan/lib/cjs/Coordinates').default)(33.5731, -7.5898),
+      at,
+      params,
+    );
+    const asrMinutes = hanafi.asr.getHours() * 60 + hanafi.asr.getMinutes();
+    const [h, m] = boundary.split(':').map(Number);
+
+    // Not a rounding difference — a whole madhhab apart.
+    expect(asrMinutes - (h * 60 + m)).toBeGreaterThan(20);
+  });
+});

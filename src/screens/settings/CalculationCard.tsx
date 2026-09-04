@@ -30,6 +30,9 @@ function CalculationCardImpl({
 }: CalculationCardProps) {
   const { t } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
+  // `school` is 1 for Ḥanafī ʿAṣr (2:1 shadow), 0 for the 1:1 the rest of
+  // the madhāhib use — including Mālikī, which is why it matters here.
+  const hanafiAsr = settings.school === 1;
   const { palette } = useAppPalette();
 
   const coordsForEffective = useMemo(
@@ -129,8 +132,23 @@ function CalculationCardImpl({
             <Text style={[s.valueText, { color: palette.text }]}>
               {t('settings.malikiSecondTimes', 'Maliki second times')}
             </Text>
-            <Text style={[s.help, { color: palette.muted }]}>
-              {t('settings.malikiSecondTimesHelp')}
+            {/* On Ḥanafī ʿAṣr the card contradicts itself and it is worth
+                saying so BEFORE the switch is touched, not after. Ẓuhr's
+                boundary is the 1:1 shadow whatever this setting says (it
+                has to be — it is a Mālikī boundary), so it lands about
+                half an hour before the 2:1 ʿAṣr on the row underneath it,
+                and the two look like a bug rather than like two madhhabs
+                in one table. The switch is not hidden: someone may want
+                exactly this. They should just know they are asking for
+                it. */}
+            <Text
+              style={[
+                s.help,
+                { color: hanafiAsr ? palette.danger : palette.muted },
+              ]}>
+              {hanafiAsr
+                ? t('settings.malikiSecondTimesHanafiWarning')
+                : t('settings.malikiSecondTimesHelp')}
             </Text>
           </View>
           <Switch

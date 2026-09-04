@@ -271,6 +271,7 @@
     "firstThirdHelp": "Das Ende des ersten Nachtdrittels — nach malikitischer Rechnung verlässt das Ischa-Gebet dann sein bevorzugtes Zeitfenster. Standardmäßig aus.",
     "malikiSecondTimes": "Malikitische Zweitzeiten",
     "malikiSecondTimesHelp": "Jedes Gebet erhält auf der Heute-Karte eine Zeile, die sagt, wann seine bevorzugte Zeit (ikhtiyari) endet und seine späte Zeit (daruri) beginnt. Auf deinem Gerät aus deinen Koordinaten berechnet, unabhängig davon, woher deine Zeiten stammen. Nutzt für Asr den 1:1-Schatten unabhängig von deiner Madhhab-Einstellung, denn das ist die malikitische Grenze. Standardmäßig aus.",
+    "malikiSecondTimesHanafiWarning": "Hinweis: Das sind malikitische Grenzen, aber dein Asr steht auf hanafitisch, das einen anderen Schatten verwendet. Zuhrs erste Zeit endet etwa eine halbe Stunde vor dem darunter angezeigten Asr. Schalte hanafitisches Asr aus, wenn die Karte zu sich selbst passen soll.",
     "malikiSecondTimesSource": "Nach Al-Murshid al-Muin (Ibn Ashir), wiedergegeben in The Guiding Helper, Gesang 11.",
     "malikiSecondTimesModelled": "Die Grenzen von Fadschr und Asr sind das Verblassen der Sterne und das Gelbwerden der Sonne — ein Winkel als Ersatz für etwas, das das Auge beurteilt. Sie sind als ungefähr gekennzeichnet. Wo die Sonne nicht aufgeht, nicht untergeht oder den Winkel nie erreicht, wird nichts angezeigt statt einer Vermutung.",
     "accent_rose": "Rosé",
