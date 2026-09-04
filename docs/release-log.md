@@ -422,4 +422,25 @@ Took 4 aborted attempt(s) before it ran clean:
   - 1 origin/main has commits main does not — pull first
   - 1 working tree has tracked changes — commit or stash them first
 
-**Lesson:** _(unfilled)_
+**Lesson:** Four aborts, and they were two different kinds. Two were the
+script refusing to start — a dirty tree, and main behind origin — which
+cost only the seconds it took to read them. That is the one rule working
+exactly as written, and the right response to those is nothing at all.
+
+The two Catalyst failures are the ones worth a note, because they landed
+in PHASE 2 where the cost is a rebuild. The Mac build has a failure mode
+that reads as a broken build and is not one: with no Apple ID signed into
+Xcode, `xcodebuild` cannot generate a Mac Catalyst provisioning profile
+for the widget extension and stops with "No profiles for
+'maccatalyst.com.hassan.prayerapp.PrayerWidgetExtension'" — or, worse
+because it looks unrelated, "No Accounts: Add a new account in Accounts
+settings". Nothing about the tree is wrong when that happens.
+`build-catalyst.sh` does not hit it, because it builds unsigned and signs
+afterwards against the Developer ID and the embedded profile. So a
+Catalyst abort during a release is worth checking against the script
+BEFORE assuming the code broke: the same tree that fails a bare
+`xcodebuild` builds and signs cleanly through the script.
+
+The generalisation from 2.14.0 holds here too — the failure landed before
+the irreversible line, so getting it wrong cost a rebuild rather than a
+tag, a release and a cask pointing at nothing.

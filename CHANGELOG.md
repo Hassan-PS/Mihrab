@@ -4,8 +4,30 @@ All notable changes to this project are documented here. The format is inspired 
 
 ## [Unreleased]
 
+## [2.15.0] — 2026-09-04
+
+Tilāwah: the Qur'an as something you put on. Plus the Mālikī second times answering what was actually asked for, morning and evening adhkār, and a 12-hour clock.
+
+### Added
+- **Tilāwah — listening, as its own page.** The reader already played audio, but only ever the passage in front of you, and only until that surah ended. Listening is a different act: put a recitation on in the car or at night with the screen off and it runs surah into surah, from the lock screen, without the app open or even alive. Pick a reciter, start anywhere, scrub by ayah or by surah, set a speed or a sleep timer, and follow along on a live preview of the muṣḥaf page with the recited word lit. Downloads share the reader's own folder, so a reciter fetched for a flight makes play-from-here work offline in the same act.
+- **Morning and evening dua reminders.** In the windows the adhkār themselves name — after Fajr before sunrise, after ʿAṣr before sunset. There is no time to choose, deliberately: those windows move with the sun by hours over a year, so the app works the time out from the day's own prayer times instead of asking anyone to keep a clock preference in step with the seasons.
+- **The Mālikī second times (ikhtiyārī / ḍarūrī), from *Al-Murshid al-Muʿīn*** — issue #19. Each prayer's preferred window and where it closes, computed on the device from your coordinates whichever source your times come from, with the two that are a model of a colour marked as approximate. Announce any of them, and — new — be told when a prayer becomes qaḍāʾ. Showing them and announcing them are separate decisions, because the reporter wanted the second without the first.
+- **A 12-hour clock** — issue #18. Settings → Appearance → Time format: Automatic, 12-hour or 24-hour. Automatic follows the device's own switch; an explicit choice overrides both it and the app language. Every surface that prints a time follows it.
+- **Each prayer decides how it speaks** — adhan, plain notification, or silent, a row at a time.
+- **The player travels with you.** A bar under the title bar on every screen while something is playing: what it is, a progress bar for the surah, and a way to pause it or open Tilāwah without finding the tab again.
+
 ### Changed
+- **Settings is an index of seven sections**, not twelve cards in one scroll, and each long page is split into sub-pages that carry their own explanations.
+- **The remote next/previous move by surah.** A track is one ayah, so the lock screen, the media keys and a headphone button used to advance six seconds at a time — 286 of them to leave Al-Baqarah. They now do what the app's own big arrows do; the small pair still steps by ayah.
+- **Titles are centred on both platforms.** Sub-pages and tabs alike, rather than centred on iOS and left on Android because nobody had said which.
 - **The Moroccan timetable is refreshed** from the Ministry of Habous.
+- **The player costs almost nothing while nobody is looking.** Position polling, the word-highlight probe and the page preview all stop when the app is backgrounded or the page is off screen; the JS thread went from 21% to below the measurable floor with audio playing in the background.
+
+### Fixed
+- **The home-screen widgets were cutting off their last line.** The prayer strip lost its next-prayer countdown and Log Today lost its footer, squeezed to a few points of half-drawn text on any phone whose launcher row is about 147dp — every 480dpi Pixel. The height budgets were measured before `widget_card_inset` gave every card a 6dp gutter, and nothing told them the layout had lost 12dp; they are host-view relative now, and each is a threshold and a budget at once so a variant can no longer be chosen on one number and filled from another.
+- **The Mac shows what is playing.** `MPNowPlayingInfoCenter.playbackState` is optional on iOS and required on macOS, and the audio library never set it — so a Mac Catalyst build published a complete Control Center entry that macOS discarded: no panel, no media keys.
+- **The keep-awake toggle holds the Mac's display awake.** It set the iOS idle timer, which macOS ignores; with the cup lit, `pmset` listed no assertion owned by Mihrab at all.
+- **Cards no longer sit flush against each other** on the duas, fasting, backup, sync and Qur'an-download pages. The gap between them separated the scroll view's direct children, and since the reading column went in there has been exactly one of those.
 
 ## [2.14.3] — 2026-09-03
 
