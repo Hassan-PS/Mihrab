@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **The Moroccan timetable is refreshed** from the Ministry of Habous.
+
 ## [2.14.3] — 2026-09-03
 
 The muṣḥaf reads right: twenty pages had words drawn in the wrong face, lines were losing the bottom of their ink, and the page rail is rebuilt.
