@@ -193,6 +193,16 @@ export type QuranPrefs = {
    * (which falls back to the locale default when the stored id isn't offered).
    */
   tafsirEditionId: string;
+  /**
+   * Is the verse-of-the-day card open? (additive)
+   *
+   * Closed to begin with. The card is four to six lines of Arabic and
+   * tafsir sitting between someone and the surah list they came for, and
+   * a screen you have to scroll past the same thing on every day is one
+   * you stop reading the top of. Open it once and it stays open — the
+   * point is that the reader decides, not that we guess right.
+   */
+  verseOfDayOpen: boolean;
 };
 
 export type QuranState = {
@@ -224,6 +234,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     votdMode: 'translation',
     companionMode: 'translation',
     tafsirEditionId: '',
+    verseOfDayOpen: false,
   },
 };
 

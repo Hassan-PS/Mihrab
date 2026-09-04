@@ -195,6 +195,17 @@ export function QuranScreen() {
   const [votdTafsir, setVotdTafsir] = useState<string | null>(null);
   // Tafsir can be long — show a few lines by default with a "Show more" expand.
   const [votdExpanded, setVotdExpanded] = useState(false);
+  /**
+   * Is the verse-of-the-day card open, and is the search field showing?
+   *
+   * The first is a preference, because the answer should survive leaving
+   * the tab — someone who opened the card wants it open tomorrow too. The
+   * second is not: a search is a thing you are doing right now, and coming
+   * back to the tab a day later to find a stale query in a field you
+   * forgot about is worse than one tap.
+   */
+  const votdOpen = quran.prefs.verseOfDayOpen;
+  const [searchOpen, setSearchOpen] = useState(false);
   useEffect(() => {
     if (votdMode !== 'tafsir') return;
     let cancelled = false;
@@ -621,30 +632,51 @@ export function QuranScreen() {
         )}
       </View>
 
-      {/* Verse of the day (QR-23) */}
+      {/* Verse of the day (QR-23).
+
+          CLOSED TO BEGIN WITH, and the reader's choice is remembered.
+
+          It was four to six lines of Arabic and tafsir sitting between
+          someone and the surah list they opened the tab for, every single
+          time — and a screen you scroll past the same block on every day
+          is one whose top you stop reading. Collapsed, the row still
+          carries the reference, which is the part that makes anyone want
+          to open it. */}
       {votdArabic ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('quran.verseOfDay', 'Verse of the day')}
-          onPress={() =>
-            openSurah(
-              votdRef.surah,
-              votdRef.ayah,
-              findPageForAyah(votdRef.surah, votdRef.ayah),
-            )
-          }
+        <View
           style={[
             styles.votdCard,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <View style={styles.votdHeaderRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: votdOpen }}
+            accessibilityLabel={t('quran.verseOfDay', 'Verse of the day')}
+            onPress={() => setQuranPrefs({ verseOfDayOpen: !votdOpen })}
+            style={styles.votdHeaderRow}>
             <Text style={[styles.votdLabel, { color: palette.muted }]}>
               {t('quran.verseOfDay', 'Verse of the day')}
             </Text>
-            <Text style={[styles.votdRef, { color: palette.accentSolid }]}>
-              {`${votdSurah?.romanized ?? ''} ${votdRef.surah}:${votdRef.ayah}`}
-            </Text>
-          </View>
+            <View style={styles.votdHeaderEnd}>
+              <Text style={[styles.votdRef, { color: palette.accentSolid }]}>
+                {`${votdSurah?.romanized ?? ''} ${votdRef.surah}:${votdRef.ayah}`}
+              </Text>
+              <Text style={[styles.votdChevron, { color: palette.muted }]}>
+                {votdOpen ? '⌃' : '⌄'}
+              </Text>
+            </View>
+          </Pressable>
+          {votdOpen ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.openInReader', 'Open in the reader')}
+            onPress={() =>
+              openSurah(
+                votdRef.surah,
+                votdRef.ayah,
+                findPageForAyah(votdRef.surah, votdRef.ayah),
+              )
+            }>
           {/* Row 1: the ayah. Row 2: translation or tafsir. */}
           <Text
             numberOfLines={2}
@@ -684,7 +716,9 @@ export function QuranScreen() {
               {votdTranslation}
             </Text>
           ) : null}
-        </Pressable>
+          </Pressable>
+          ) : null}
+        </View>
       ) : null}
 
       {/* Companion-text control (v2.7.40) — its OWN card so it reads as a
@@ -764,13 +798,24 @@ export function QuranScreen() {
         </View>
       </View>
 
-      {/* Search (QR-22) + go-to-page (v2.8.5).
-          Someone who knows they want page 440 had to open a surah first and
-          find the jump control inside the reader. The mushaf is paginated;
-          the page number is a first-class address and belongs on the screen
-          that lists everything else you can address. */}
+      {/* Search (QR-22) + go-to-page (v2.8.5), both BEHIND their glyphs.
+
+          The field used to sit open across the screen whether or not
+          anyone was searching — a permanent row of chrome above the list
+          it filters. It is one tap now, and the tap puts the cursor in it,
+          which is the same number of touches as before for the person who
+          actually came to search and one fewer row of furniture for
+          everyone else.
+
+          Go-to-page is here for the reason it always was: someone who
+          knows they want page 440 had to open a surah first and find the
+          jump control inside the reader. The mushaf is paginated; a page
+          number is a first-class address and belongs on the screen that
+          lists everything else you can address. */}
+      {searchOpen ? (
       <View style={styles.searchRow}>
         <TextInput
+          autoFocus
           value={query}
           onChangeText={setQuery}
           placeholder={t('quran.searchPlaceholder', 'Search surahs, ayahs, translation…')}
@@ -789,23 +834,25 @@ export function QuranScreen() {
         />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+          accessibilityLabel={t('common.close', 'Close')}
           onPress={() => {
-            setPageJumpText('');
-            setPageJumpVisible(true);
+            setQuery('');
+            setSearchOpen(false);
           }}
           style={[
             styles.pageJumpBtn,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <Text style={[styles.pageJumpGlyph, { color: palette.accentSolid }]}>
-            ⌗
+          <Text style={[styles.pageJumpGlyph, { color: palette.muted }]}>
+            ✕
           </Text>
         </Pressable>
       </View>
+      ) : null}
 
-      {/* Tabs (QR-11) */}
-      <View style={[styles.tabs, { backgroundColor: palette.card, ...cardEdgeStyle(palette) }]}>
+      {/* Tabs (QR-11), with the two glyphs that open a field beside them. */}
+      <View style={styles.tabsRow}>
+      <View style={[styles.tabs, styles.tabsGrow, { backgroundColor: palette.card, ...cardEdgeStyle(palette) }]}>
         {(
           [
             ['surah', t('quran.tabSurah', 'Surah')],
@@ -836,6 +883,40 @@ export function QuranScreen() {
           );
         })}
       </View>
+        {searchOpen ? null : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t(
+              'quran.searchPlaceholder',
+              'Search surahs, ayahs, translation…',
+            )}
+            onPress={() => setSearchOpen(true)}
+            style={[
+              styles.pageJumpBtn,
+              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+            ]}>
+            <Text
+              style={[styles.pageJumpGlyph, { color: palette.accentSolid }]}>
+              ⌕
+            </Text>
+          </Pressable>
+        )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+          onPress={() => {
+            setPageJumpText('');
+            setPageJumpVisible(true);
+          }}
+          style={[
+            styles.pageJumpBtn,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <Text style={[styles.pageJumpGlyph, { color: palette.accentSolid }]}>
+            ⌗
+          </Text>
+        </Pressable>
+      </View>
 
       {/* Manage downloads (v2.7.28), and beside it the way to a second
           muṣḥaf.
@@ -847,21 +928,31 @@ export function QuranScreen() {
           link is shown only when there is a riwayah to offer at all — a
           build that knows one recitation should not advertise a picker. */}
       <View style={styles.downloadsRow}>
-        {/* Listening has to have a door on the screen people already open
-            to find the Quran. It is a destination, not a setting: the
-            recitation keeps playing when this screen is gone. */}
+        {/* Tilāwah has to have a door on the screen people already open to
+            find the Quran, and the door has to say what is behind it. The
+            word is the right one — it names Qur'anic recitation, and it
+            sits beside Tasbih and Duas in this app's own vocabulary — but
+            it is a word not everyone has, so it never travels alone: the
+            note glyph here, and a line under the title on the page itself.
+
+            A filled chip rather than a third text link. The two beside it
+            are places you go when you already know what you want; this one
+            has to be findable by someone who does not yet know it exists. */}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('quran.listenTitle', 'Listen')}
+          accessibilityLabel={`${t('quran.listenTitle', 'Tilawah')} — ${t(
+            'quran.tilawahDoorSub',
+            'Listen to the Quran',
+          )}`}
           onPress={() => navigation.navigate('QuranListen')}
-          style={styles.downloadsLink}>
+          style={[styles.tilawahChip, { backgroundColor: palette.accentBg }]}>
           <Text
             style={{
               color: palette.accentSolid,
               fontSize: 12,
               fontWeight: '700',
             }}>
-            {t('quran.listenTitle', 'Listen')} ›
+            {`♪  ${t('quran.listenTitle', 'Tilawah')} ›`}
           </Text>
         </Pressable>
         {riwayahOffered ? (
@@ -1487,7 +1578,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
   },
-  votdCard: { padding: 14, borderRadius: 12, gap: 6 },
+  votdCard: { padding: 12, borderRadius: 12, gap: 6 },
   votdLabel: {
     fontSize: 11,
     fontWeight: '700',
@@ -1504,6 +1595,9 @@ const styles = StyleSheet.create({
   votdTranslation: { fontSize: 13, lineHeight: 19 },
   votdShowMore: { fontSize: 12, fontWeight: '700', marginTop: 4 },
   votdRef: { fontSize: 12, fontWeight: '700' },
+  /** The reference and the chevron travel together on the trailing edge. */
+  votdHeaderEnd: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  votdChevron: { fontSize: 15, fontWeight: '700' },
   companionCard: {
     padding: 14,
     borderRadius: 12,
@@ -1574,12 +1668,15 @@ const styles = StyleSheet.create({
   searchRow: { flexDirection: 'row', alignItems: 'stretch', gap: 8 },
   searchGrow: { flex: 1 },
   pageJumpBtn: {
-    width: 48,
+    width: 44,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pageJumpGlyph: { fontSize: 20, fontWeight: '700' },
+  /** The three tabs, then the two glyphs that open a field. */
+  tabsRow: { flexDirection: 'row', alignItems: 'stretch', gap: 8 },
+  tabsGrow: { flex: 1 },
   tabs: {
     flexDirection: 'row',
     borderRadius: 12,
@@ -1665,12 +1762,18 @@ const styles = StyleSheet.create({
   },
   menuCancel: { alignItems: 'center', paddingVertical: 8 },
   downloadsLink: { paddingVertical: 2 },
-  /** The two links share the row: the riwayah one leads, downloads trails. */
+  /** Tilāwah leads as a chip; the two plain links trail behind it. */
   downloadsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
+  },
+  tilawahChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    marginEnd: 'auto',
   },
   starredHeading: {
     fontSize: 12,

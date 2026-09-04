@@ -99,39 +99,41 @@ function formatClock(seconds: number): string {
 }
 
 /**
- * The scrubber.
+ * A bar you can drag, in units of nothing.
  *
- * A bare View with a PanResponder rather than a slider dependency — the
- * app does not carry one, and this is a track, a fill and a thumb. While a
- * finger is down the fill follows the FINGER and not the player, or the
- * next progress tick would yank it back to where playback still is and the
- * thumb would fight the person holding it.
+ * It takes a ratio and hands one back, because it is used twice for two
+ * different things: where you are in the SURAH, and where you are in the
+ * ayah being recited. The captions belong to the caller for the same
+ * reason — one of them counts ayahs and the other counts seconds.
+ *
+ * A bare View with a PanResponder rather than a slider dependency, which
+ * the app does not carry. While a finger is down the fill follows the
+ * FINGER and not the player, or the next progress tick yanks it back to
+ * where playback still is and the thumb fights the person holding it.
  */
 function Scrubber({
-  position,
-  duration,
-  onSeek,
+  ratio,
+  onSeekRatio,
   palette,
   label,
+  minor,
 }: {
-  position: number;
-  duration: number;
-  onSeek: (seconds: number) => void;
+  ratio: number;
+  onSeekRatio: (ratio: number) => void;
   palette: ReturnType<typeof useAppPalette>['palette'];
   label: string;
+  /** The ayah bar is thinner: it is the second thing you look at. */
+  minor?: boolean;
 }) {
   const [width, setWidth] = useState(0);
   const [dragging, setDragging] = useState<number | null>(null);
   const widthRef = useRef(0);
-  const durationRef = useRef(0);
   widthRef.current = width;
-  durationRef.current = duration;
 
-  const secondsAt = useCallback((x: number) => {
+  const ratioAt = useCallback((x: number) => {
     const w = widthRef.current;
-    if (w <= 0 || durationRef.current <= 0) return 0;
-    const ratio = Math.max(0, Math.min(1, x / w));
-    return ratio * durationRef.current;
+    if (w <= 0) return 0;
+    return Math.max(0, Math.min(1, x / w));
   }, []);
 
   const responder = useMemo(
@@ -139,63 +141,52 @@ function Scrubber({
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: e => {
-          setDragging(secondsAt(e.nativeEvent.locationX));
-        },
-        onPanResponderMove: e => {
-          setDragging(secondsAt(e.nativeEvent.locationX));
-        },
+        onPanResponderGrant: e => setDragging(ratioAt(e.nativeEvent.locationX)),
+        onPanResponderMove: e => setDragging(ratioAt(e.nativeEvent.locationX)),
         onPanResponderRelease: e => {
-          const at = secondsAt(e.nativeEvent.locationX);
+          const at = ratioAt(e.nativeEvent.locationX);
           setDragging(null);
-          onSeek(at);
+          onSeekRatio(at);
         },
         onPanResponderTerminate: () => setDragging(null),
       }),
-    [onSeek, secondsAt],
+    [onSeekRatio, ratioAt],
   );
 
-  const shown = dragging ?? position;
-  const ratio = duration > 0 ? Math.max(0, Math.min(1, shown / duration)) : 0;
+  const shown = dragging ?? Math.max(0, Math.min(1, ratio));
 
   return (
-    <View style={styles.scrubWrap}>
+    <View
+      accessible
+      accessibilityRole="adjustable"
+      accessibilityLabel={label}
+      style={minor ? styles.scrubTouchMinor : styles.scrubTouch}
+      onLayout={e => setWidth(e.nativeEvent.layout.width)}
+      {...responder.panHandlers}>
+      {/* The EMPTY track is neutral, not a dimmer accent. Both were greens
+          before, and at three to five pixels a dark-green track and a
+          bright-green fill are two green lines: an untouched bar read as a
+          finished one. */}
       <View
-        accessible
-        accessibilityRole="adjustable"
-        accessibilityLabel={label}
-        style={styles.scrubTouch}
-        onLayout={e => setWidth(e.nativeEvent.layout.width)}
-        {...responder.panHandlers}>
-        <View style={[styles.scrubTrack, { backgroundColor: palette.accentBg }]}>
-          <View
-            style={[
-              styles.scrubFill,
-              {
-                width: `${ratio * 100}%`,
-                backgroundColor: palette.accentSolid,
-              },
-            ]}
-          />
-        </View>
+        style={[
+          minor ? styles.scrubTrackMinor : styles.scrubTrack,
+          { backgroundColor: palette.controlBg },
+        ]}>
         <View
           style={[
-            styles.scrubThumb,
-            {
-              left: `${ratio * 100}%`,
-              backgroundColor: palette.accentSolid,
-            },
+            minor ? styles.scrubTrackMinor : styles.scrubTrack,
+            { width: `${shown * 100}%`, backgroundColor: palette.accentSolid },
           ]}
         />
       </View>
-      <View style={styles.scrubTimes}>
-        <Text style={[styles.scrubTime, { color: palette.muted }]}>
-          {formatClock(shown)}
-        </Text>
-        <Text style={[styles.scrubTime, { color: palette.muted }]}>
-          {formatClock(duration)}
-        </Text>
-      </View>
+      {minor ? null : (
+        <View
+          style={[
+            styles.scrubThumb,
+            { left: `${shown * 100}%`, backgroundColor: palette.accentSolid },
+          ]}
+        />
+      )}
     </View>
   );
 }
@@ -293,7 +284,7 @@ function TransportIcon({
   );
 }
 
-export function QuranListenScreen() {
+export function TilawahScreen() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   useAndroidSubScreenBack();
@@ -387,9 +378,22 @@ export function QuranListenScreen() {
 
   // ── Playing ─────────────────────────────────────────────────────────
 
-  const activeSurah = status.active
-    ? SURAHS.find(s => s.number === status.active?.surah)
-    : undefined;
+  /**
+   * What the card is ABOUT — which is not the same as what is playing.
+   *
+   * Idle, it is about what pressing play would start, and it says so.
+   * "Nothing playing" told the reader what the silence had already told
+   * them, and left the biggest text on the screen doing no work; where
+   * they left off reading is an answer to a question they might actually
+   * have.
+   */
+  const idle = status.active == null;
+  const resume = quran.lastRead;
+  const shownSurah =
+    SURAHS.find(
+      s => s.number === (status.active?.surah ?? resume?.surah ?? 1),
+    ) ?? SURAHS[0];
+  const shownAyah = status.active?.ayah ?? resume?.ayah ?? 1;
 
   const togglePlay = useCallback(() => {
     if (status.playing) {
@@ -400,10 +404,55 @@ export function QuranListenScreen() {
       void resumePlayback();
       return;
     }
-    // Nothing loaded: start at the top of the book. Al-Fatihah is the
-    // right answer to "just play something".
-    void listenFrom(1, 1);
-  }, [status.active, status.playing]);
+    // Start where the card said it would. Someone who has been reading
+    // gets picked up there; someone who has not gets the opening.
+    void listenFrom(shownSurah.number, resume?.ayah ?? 1);
+  }, [resume?.ayah, shownSurah.number, status.active, status.playing]);
+
+  // ── Two progressions, one inside the other ──────────────────────────
+  //
+  // The surah is what a listener is actually in the middle of: an ayah is
+  // six seconds and a surah is an hour, and a bar that fills and empties
+  // every six seconds tells you nothing about either. So the surah leads
+  // and the ayah sits under it, thinner, for the person who wants to
+  // scrub back over the line just recited.
+  //
+  // The surah's own bar is measured in AYAHS, not seconds — nothing knows
+  // how long a surah runs until it has been played — refined by how far
+  // into the current ayah we are, so it advances smoothly rather than in
+  // steps.
+  const ayahRatio =
+    progress.duration > 0 ? progress.position / progress.duration : 0;
+  const surahRatio = idle
+    ? 0
+    : Math.max(
+        0,
+        Math.min(1, (shownAyah - 1 + ayahRatio) / shownSurah.ayahCount),
+      );
+
+  const seekSurah = useCallback(
+    (ratio: number) => {
+      // Dragging the surah bar moves to an AYAH, and moving to an ayah
+      // means rebuilding the queue from there — which is exactly what
+      // starting a listen does.
+      const target = Math.max(
+        1,
+        Math.min(
+          shownSurah.ayahCount,
+          Math.floor(ratio * shownSurah.ayahCount) + 1,
+        ),
+      );
+      void listenFrom(shownSurah.number, target);
+    },
+    [shownSurah],
+  );
+
+  const seekAyah = useCallback(
+    (ratio: number) => {
+      if (progress.duration > 0) void seekTo(ratio * progress.duration);
+    },
+    [progress.duration],
+  );
 
   const onSurah = useCallback((surah: number) => {
     void listenFrom(surah, 1);
@@ -488,49 +537,118 @@ export function QuranListenScreen() {
 
   const header = (
     <View style={styles.headerWrap}>
-      {/* ── Now playing ───────────────────────────────────────────── */}
+      {/* The word, and what it means.
+
+          "Tilawah" is the right name — it names Qur'anic recitation, and
+          it belongs to the same vocabulary as Tasbih and Duas in the tab
+          bar. But a name that half the audience has to look up is a name
+          that fails half the audience, so it never appears without this
+          line under it. One sentence, said once, at the top of the page it
+          titles. */}
+      <Text style={[styles.pageBlurb, { color: palette.muted }]}>
+        {t('quran.tilawahBlurb', {
+          defaultValue:
+            'Recitation of the Quran — it keeps playing with the screen off, and works offline once downloaded.',
+        })}
+      </Text>
+
+      {/* ── The player ────────────────────────────────────────────── */}
       <View
         style={[
           styles.card,
           { backgroundColor: palette.card, borderColor: palette.border ?? palette.muted },
         ]}>
         <Text style={[styles.nowLabel, { color: palette.muted }]}>
-          {isListening()
-            ? t('quran.listenContinuous', { defaultValue: 'Playing through' })
-            : t('quran.listenNowPlaying', { defaultValue: 'Now playing' })}
+          {idle
+            ? resume
+              ? t('quran.tilawahContinue', {
+                  defaultValue: 'Carry on from your reading',
+                })
+              : t('quran.tilawahBegin', { defaultValue: 'Begin with' })
+            : isListening()
+              ? t('quran.listenContinuous', { defaultValue: 'Playing through' })
+              : t('quran.listenNowPlaying', { defaultValue: 'Now playing' })}
         </Text>
         <Text style={[styles.nowSurah, { color: palette.text }]} numberOfLines={1}>
-          {activeSurah
-            ? activeSurah.romanized
-            : t('quran.listenIdle', { defaultValue: 'Nothing playing' })}
+          {shownSurah.romanized}
         </Text>
-        {activeSurah && status.active ? (
-          <Text style={[styles.nowAyah, { color: palette.muted }]}>
-            {`${activeSurah.arabic} · ${status.active.surah}:${status.active.ayah}`}
-          </Text>
-        ) : null}
+        <Text style={[styles.nowAyah, { color: palette.muted }]}>
+          {idle
+            ? `${shownSurah.arabic} · ${shownSurah.english}`
+            : `${shownSurah.arabic} · ${shownSurah.number}:${shownAyah}`}
+        </Text>
 
+        {/* The reciter is a CHOICE, and has to look like one.
+
+            It used to be a label and a coloured name on a bare row — which
+            reads as a statistic about the app rather than a control, and
+            nobody taps a statistic. It is a filled row with a chevron now,
+            the same shape as every other "opens a picker" row in the app. */}
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('quran.listenReciter', {
+            defaultValue: 'Reciter',
+          })}
+          accessibilityHint={reciter.name}
           onPress={() => setPickerOpen(true)}
-          style={({ pressed }) => [styles.reciterRow, pressed && styles.pressed]}>
-          <Text style={[styles.reciterLabel, { color: palette.muted }]}>
-            {t('quran.listenReciter', { defaultValue: 'Reciter' })}
-          </Text>
-          <Text
-            style={[styles.reciterName, { color: palette.accentSolid }]}
-            numberOfLines={1}>
-            {reciter.name}
+          style={({ pressed }) => [
+            styles.reciterRow,
+            { backgroundColor: palette.controlBg },
+            pressed && styles.pressed,
+          ]}>
+          <View style={styles.reciterText}>
+            <Text style={[styles.reciterLabel, { color: palette.muted }]}>
+              {t('quran.listenReciter', { defaultValue: 'Reciter' })}
+            </Text>
+            <Text
+              style={[styles.reciterName, { color: palette.text }]}
+              numberOfLines={1}>
+              {reciter.name}
+            </Text>
+          </View>
+          <Text style={[styles.reciterChevron, { color: palette.accentSolid }]}>
+            ›
           </Text>
         </Pressable>
 
+        {/* Where you are in the SURAH — the thing you are in the middle of. */}
         <Scrubber
-          position={progress.position}
-          duration={progress.duration}
-          onSeek={s => void seekTo(s)}
+          ratio={surahRatio}
+          onSeekRatio={seekSurah}
+          palette={palette}
+          label={t('quran.tilawahSurahSeek', {
+            defaultValue: 'Move through the surah',
+          })}
+        />
+        <Text style={[styles.scrubCaption, { color: palette.muted }]}>
+          {idle
+            ? t('quran.listenSurahMeta', {
+                defaultValue: '{{count}} ayahs',
+                count: shownSurah.ayahCount,
+              })
+            : t('quran.tilawahAyahOf', {
+                defaultValue: 'Ayah {{done}} of {{total}}',
+                done: shownAyah,
+                total: shownSurah.ayahCount,
+              })}
+        </Text>
+
+        {/* And where you are in the ayah, for scrubbing back over a line. */}
+        <Scrubber
+          minor
+          ratio={ayahRatio}
+          onSeekRatio={seekAyah}
           palette={palette}
           label={t('quran.listenSeek', { defaultValue: 'Seek within the ayah' })}
         />
+        <View style={styles.scrubTimes}>
+          <Text style={[styles.scrubTime, { color: palette.muted }]}>
+            {formatClock(progress.position)}
+          </Text>
+          <Text style={[styles.scrubTime, { color: palette.muted }]}>
+            {formatClock(progress.duration)}
+          </Text>
+        </View>
 
         <View style={styles.transport}>
           <Pressable
@@ -846,6 +964,7 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   list: { padding: 16, gap: 8 },
   headerWrap: { gap: 12, marginBottom: 8 },
+  pageBlurb: { fontSize: 13, lineHeight: 19, marginTop: 2 },
   card: {
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
@@ -855,20 +974,30 @@ const styles = StyleSheet.create({
   nowLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6 },
   nowSurah: { fontSize: 24, fontWeight: '700' },
   nowAyah: { fontSize: 13 },
+  // A filled row with a chevron: the shape every other picker in the app
+  // uses, so this one reads as a control rather than a readout.
   reciterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginTop: 10,
+    marginBottom: 4,
   },
-  reciterLabel: { fontSize: 13 },
-  reciterName: { fontSize: 15, fontWeight: '600', flexShrink: 1, marginStart: 12 },
+  reciterText: { flex: 1 },
+  reciterLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+  reciterName: { fontSize: 15, fontWeight: '600', marginTop: 2 },
+  reciterChevron: { fontSize: 22, fontWeight: '700' },
 
-  scrubWrap: { marginTop: 4 },
   // A thin track needs a tall touch target; the bar is 4pt, the finger is not.
   scrubTouch: { height: 28, justifyContent: 'center' },
-  scrubTrack: { height: 4, borderRadius: 2, overflow: 'hidden' },
-  scrubFill: { height: 4 },
+  scrubTrack: { height: 5, borderRadius: 2.5, overflow: 'hidden' },
+  // The ayah's bar is the second thing you look at, and says so.
+  scrubTouchMinor: { height: 18, justifyContent: 'center' },
+  scrubTrackMinor: { height: 3, borderRadius: 1.5, overflow: 'hidden' },
   scrubThumb: {
     position: 'absolute',
     width: 12,
@@ -876,6 +1005,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginStart: -6,
   },
+  scrubCaption: { fontSize: 12, fontWeight: '600', marginTop: -2 },
   scrubTimes: { flexDirection: 'row', justifyContent: 'space-between' },
   scrubTime: { fontSize: 11, fontVariant: ['tabular-nums'] },
 

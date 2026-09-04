@@ -27,7 +27,7 @@ export type RootStackParamList = {
   /** Manage downloads: mushaf pages, recitation audio, tafsir cache. */
   QuranDownloads: undefined;
   /**
-   * Listening: the recitation as a player, not as part of the reader.
+   * Tilāwah: the recitation as a player, not as part of the reader.
    *
    * On the root stack rather than inside the Quran tab for the same
    * reason the settings subpages are — the platform header, the back
