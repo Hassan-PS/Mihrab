@@ -120,4 +120,24 @@ describe('the Tilawah mark', () => {
     // react-native-svg draws nothing at all for a PlatformColor.
     expect(icons).toMatch(/color: string/);
   });
+
+  /**
+   * And it is the ONLY note in the Qur'an surfaces.
+   *
+   * `♪` is the system font's glyph: its size, weight and vertical
+   * placement are whatever the platform decided, and the space after it
+   * is whatever the font says a space is — which is why the chip in the
+   * title bar and the reader's "Audio" button each sat differently from
+   * the other and from the drawn controls beside them.
+   */
+  it.each([
+    'src/screens/quran/TilawahHeaderChip.tsx',
+    'src/screens/quran/MushafSurahScreen.tsx',
+    'src/screens/quran/TranslationSurahScreen.tsx',
+  ])('%s draws its note rather than typing one', file => {
+    const src = read(file);
+    // The doc comments explain the glyph; no JSX may still render it.
+    expect(src).not.toMatch(/\{`\u266a/);
+    expect(src).toContain('TilawahIcon');
+  });
 });

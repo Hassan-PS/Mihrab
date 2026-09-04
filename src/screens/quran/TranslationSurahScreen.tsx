@@ -27,6 +27,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { TilawahIcon } from '../../quran/audio/PlaybackIcons';
 import { desktopSize } from '../../responsive/desktop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -201,14 +202,21 @@ export function TranslationSurahScreen({
             }}
             hitSlop={10}
             style={{ paddingHorizontal: 4 }}>
-            <Text
-              style={{
-                color: palette.accentSolid,
-                fontSize: desktopSize(15),
-                fontWeight: '700',
-              }}>
-              {`♪ ${t('quran.audioButton', 'Audio')}`}
-            </Text>
+            {/* Drawn, not typed. `♪` is the system font's glyph: its
+                size, weight and vertical placement are the platform's,
+                and the "gap" after it was a space character. It is the
+                same note the player's own controls carry. */}
+            <View style={audioMark.row}>
+              <TilawahIcon color={String(palette.accentSolid)} size={desktopSize(15)} />
+              <Text
+                style={{
+                  color: palette.accentSolid,
+                  fontSize: desktopSize(15),
+                  fontWeight: '700',
+                }}>
+                {t('quran.audioButton', 'Audio')}
+              </Text>
+            </View>
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -685,3 +693,8 @@ const styles = StyleSheet.create({
   comingSoonText: { fontSize: 14, textAlign: 'center', fontWeight: '600' },
 });
 
+
+/** The mark and the word it labels, on one baseline. */
+const audioMark = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+});
