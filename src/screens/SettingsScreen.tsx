@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { useRoute, type RouteProp } from '@react-navigation/native';
+import {
+  useRoute,
+  useScrollToTop,
+  type RouteProp,
+} from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { MainTabParamList } from '../navigation/types';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
@@ -64,6 +68,14 @@ export function SettingsScreen() {
   // Locations section so the user knows where to add a location.
   const route = useRoute<RouteProp<MainTabParamList, 'SettingsTab'>>();
   const scrollRef = useRef<ScrollView>(null);
+  /**
+   * Tapping the tab you are already on returns this screen to the top —
+   * the standard idiom on both platforms, and the only way back up a
+   * long page without a lot of swiping. `useScrollToTop` listens for
+   * `tabPress` and acts only while this screen is focused, so pressing a
+   * DIFFERENT tab still just navigates.
+   */
+  useScrollToTop(scrollRef);
   const savedLocationsYRef = useRef(0);
   const [savedHighlightSignal, setSavedHighlightSignal] = useState(0);
   const didHighlightRef = useRef(false);

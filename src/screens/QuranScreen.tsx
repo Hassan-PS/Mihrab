@@ -289,8 +289,48 @@ export function QuranScreen() {
     setCustomDaysVisible(false);
   }, [customDaysText, customFromText, quran.prefs.riwayah]);
 
+  /**
+   * An honest scroll indicator — v2.14.5.
+   *
+   * Without `getItemLayout` a virtualised list can only report the height
+   * of what it has actually measured, and it says so: the tail spacer is
+   * capped at the highest measured frame. So the content starts out
+   * looking about a dozen rows long, the indicator is drawn huge, and it
+   * shrinks all the way down the surah list as the real height arrives —
+   * which means its POSITION was lying too, from the top, where it
+   * matters most.
+   *
+   * Both numbers are measured rather than assumed, because both move
+   * with the user's font-size setting: the header once (it holds the
+   * search box, the tabs and the continue-reading card), and the first
+   * row once. Until both have arrived `getItemLayout` is undefined and
+   * the list behaves exactly as it did before.
+   *
+   * The rows are separated by the content container's `gap`, and it sits
+   * inside its `padding`, so both belong in the offset — hence the two
+   * named constants shared with the stylesheet rather than two numbers
+   * typed twice.
+   */
+  const [headerH, setHeaderH] = useState(0);
+  const [surahRowH, setSurahRowH] = useState(0);
+  const [juzRowH, setJuzRowH] = useState(0);
+  const itemLayoutFor = useCallback(
+    (rowH: number) =>
+      headerH > 0 && rowH > 0
+        ? (_: unknown, index: number) => ({
+            length: rowH,
+            offset:
+              LIST_PADDING + headerH + LIST_GAP + index * (rowH + LIST_GAP),
+            index,
+          })
+        : undefined,
+    [headerH],
+  );
+
   const header = (
-    <View style={[styles.headerWrap, listCap]}>
+    <View
+      style={[styles.headerWrap, listCap]}
+      onLayout={e => setHeaderH(e.nativeEvent.layout.height)}>
       {/* Continue reading (QR-10) */}
       {quran.lastRead ? (
         <Pressable
@@ -867,10 +907,23 @@ export function QuranScreen() {
   );
 
   // ── Rows per tab ────────────────────────────────────────────────────
-  const renderSurahRow = ({ item }: { item: SurahIndex }) => {
+  const renderSurahRow = ({
+    item,
+    index,
+  }: {
+    item: SurahIndex;
+    index: number;
+  }) => {
     const startPage = findPageForAyah(item.number, 1);
     return (
       <Pressable
+        // One row is every row: the three lines below are clamped, so the
+        // measurement taken here holds for all 114.
+        onLayout={
+          index === 0
+            ? e => setSurahRowH(e.nativeEvent.layout.height)
+            : undefined
+        }
         accessibilityRole="button"
         accessibilityLabel={`${item.number}. ${item.romanized} — ${t('quran.pageLabel', { page: startPage })}`}
         onPress={() => openSurah(item.number)}
@@ -885,17 +938,26 @@ export function QuranScreen() {
           </Text>
         </View>
         <View style={styles.rowText}>
+          {/* One line each, so every row is the same height and the
+              measured one above speaks for all of them. Nothing is lost:
+              the whole of it is in the row's accessibility label. */}
           {!isArabic ? (
-            <Text style={[styles.romanized, { color: palette.text }]}>
+            <Text
+              numberOfLines={1}
+              style={[styles.romanized, { color: palette.text }]}>
               {item.romanized}
             </Text>
           ) : null}
-          <Text style={[styles.english, { color: palette.muted }]}>
+          <Text
+            numberOfLines={1}
+            style={[styles.english, { color: palette.muted }]}>
             {isArabic ? '' : `${item.english} · `}
             {t('quran.ayahCount', { count: item.ayahCount })} ·{' '}
             {item.type === 'meccan' ? t('quran.meccan') : t('quran.medinan')}
           </Text>
-          <Text style={[styles.pageHint, { color: palette.muted }]}>
+          <Text
+            numberOfLines={1}
+            style={[styles.pageHint, { color: palette.muted }]}>
             {t('quran.pageLabel', { page: startPage })}
           </Text>
         </View>
@@ -917,8 +979,11 @@ export function QuranScreen() {
     );
   };
 
-  const renderJuzRow = ({ item }: { item: JuzRow }) => (
+  const renderJuzRow = ({ item, index }: { item: JuzRow; index: number }) => (
     <Pressable
+      onLayout={
+        index === 0 ? e => setJuzRowH(e.nativeEvent.layout.height) : undefined
+      }
       accessibilityRole="button"
       accessibilityLabel={`${t('quran.juzLabel', { defaultValue: 'Juz {{juz}}', juz: item.juz })} — ${t('quran.pageLabel', { page: item.page })}`}
       onPress={() =>
@@ -1074,6 +1139,7 @@ export function QuranScreen() {
           initialNumToRender={12}
           windowSize={7}
           renderItem={renderSurahRow}
+          getItemLayout={itemLayoutFor(surahRowH)}
         />
       ) : tab === 'juz' ? (
         <FlatList<JuzRow>
@@ -1084,6 +1150,7 @@ export function QuranScreen() {
           contentInsetAdjustmentBehavior="automatic"
           ListHeaderComponent={header}
           renderItem={renderJuzRow}
+          getItemLayout={itemLayoutFor(juzRowH)}
         />
       ) : (
         <FlatList
@@ -1324,9 +1391,20 @@ export function QuranScreen() {
   );
 }
 
+/**
+ * The content container's own padding and the gap between its children.
+ *
+ * Named because `getItemLayout` has to add both to every offset — the
+ * rows sit inside the padding and are separated by the gap — and a
+ * stylesheet and an offset formula disagreeing about them is a scroll
+ * indicator that lies by exactly one gap per row.
+ */
+const LIST_PADDING = 16;
+const LIST_GAP = 8;
+
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  list: { padding: 16, gap: 8 },
+  list: { padding: LIST_PADDING, gap: LIST_GAP },
   // Center + cap the index column on iPad/Mac so surah rows stay readable.
   // Cap+center applied to the header and to EVERY row — NOT to the
   // FlatList contentContainerStyle. `alignSelf`/`maxWidth` on the content

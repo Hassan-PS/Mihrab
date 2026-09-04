@@ -1,8 +1,9 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, Vibration, View } from 'react-native';
+import { useScrollToTop } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -35,6 +36,15 @@ export function DuasScreen() {
   const tabBarInset = useTabBarInset();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
+  /**
+   * Tapping the tab you are already on returns this screen to the top —
+   * the standard idiom on both platforms, and the only way back up a
+   * long page without a lot of swiping. `useScrollToTop` listens for
+   * `tabPress` and acts only while this screen is focused, so pressing a
+   * DIFFERENT tab still just navigates.
+   */
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   // Arabic readers don't need a Latin pronunciation guide or an English
   // meaning — they read the Arabic directly. Hide both supplementary
   // lines when the app language is Arabic so the row stays clean and
@@ -116,6 +126,7 @@ export function DuasScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         {...tabBarScroll}
         style={styles.listScroll}
         contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}

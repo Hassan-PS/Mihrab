@@ -1,4 +1,8 @@
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useScrollToTop,
+} from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -111,6 +115,15 @@ export function HomeScreen() {
   // home render.
   usePrefetchSavedLocations();
   const { palette } = useAppPalette();
+  /**
+   * Tapping the tab you are already on returns this screen to the top —
+   * the standard idiom on both platforms, and the only way back up a
+   * long page without a lot of swiping. `useScrollToTop` listens for
+   * `tabPress` and acts only while this screen is focused, so pressing a
+   * DIFFERENT tab still just navigates.
+   */
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   // The RESOLVED clock, not the stored preference. On 'auto' the answer
   // moves when the device's 12/24 switch does, and that has to re-sync
   // the widget, the Live Activity and the alert copy exactly as an
@@ -1003,6 +1016,7 @@ export function HomeScreen() {
         </View>
       ) : null}
     <ScrollView
+      ref={scrollRef}
       {...tabBarScroll}
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[

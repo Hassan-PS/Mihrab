@@ -1038,7 +1038,8 @@
     "scrubHint": "اسحب لأعلى لتحكّم أدق",
     "scrubHalf": "نصف السرعة",
     "scrubQuarter": "ربع السرعة",
-    "scrubFine": "تحكّم دقيق"
+    "scrubFine": "تحكّم دقيق",
+    "translationUnavailable": "لا تتوفر ترجمة لهذه الآية."
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

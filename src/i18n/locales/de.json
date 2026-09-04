@@ -1038,7 +1038,8 @@
     "scrubHint": "Nach oben ziehen für feinere Steuerung",
     "scrubHalf": "Halbe Geschwindigkeit",
     "scrubQuarter": "Viertel Geschwindigkeit",
-    "scrubFine": "Feinsteuerung"
+    "scrubFine": "Feinsteuerung",
+    "translationUnavailable": "Keine Übersetzung für diesen Vers."
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

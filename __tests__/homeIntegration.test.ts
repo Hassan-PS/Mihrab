@@ -94,7 +94,11 @@ describe('HomeScreen integration (tasks #45–#47)', () => {
     // Above the ScrollView: inside it, the dashboard's zoom and its vertical
     // centring both get a say in where the app's chrome sits.
     const bar = HOME.indexOf('styles.macTopBar');
-    const scroll = HOME.indexOf('<ScrollView');
+    // The JSX element, not the first mention of the name — a `useRef<
+    // ScrollView>` type annotation near the top of the file is not the
+    // scroll view, and matching it made this pass or fail on whether the
+    // screen happened to hold a ref.
+    const scroll = HOME.search(/^\s*<ScrollView$/m);
     expect(bar).toBeGreaterThan(-1);
     expect(bar).toBeLessThan(scroll);
     // ...and outside the width-capped card column, because a bar that stops

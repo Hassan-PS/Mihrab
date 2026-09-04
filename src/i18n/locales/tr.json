@@ -1038,7 +1038,8 @@
     "scrubHint": "Daha hassas kontrol için yukarı kaydırın",
     "scrubHalf": "Yarım hız",
     "scrubQuarter": "Çeyrek hız",
-    "scrubFine": "Hassas kontrol"
+    "scrubFine": "Hassas kontrol",
+    "translationUnavailable": "Bu ayet için çeviri yok."
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

@@ -1038,7 +1038,8 @@
     "scrubHint": "Desliza hacia arriba para más precisión",
     "scrubHalf": "Media velocidad",
     "scrubQuarter": "Un cuarto de velocidad",
-    "scrubFine": "Control fino"
+    "scrubFine": "Control fino",
+    "translationUnavailable": "No hay traducción para esta aleya."
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

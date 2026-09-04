@@ -1038,7 +1038,8 @@
     "scrubHint": "Dra uppåt för finare kontroll",
     "scrubHalf": "Halv hastighet",
     "scrubQuarter": "Kvarts hastighet",
-    "scrubFine": "Finjustering"
+    "scrubFine": "Finjustering",
+    "translationUnavailable": "Ingen översättning för denna vers."
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

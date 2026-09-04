@@ -25,7 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { arabicTextStyle } from '../../theme/typography';
 import { findSurah, loadSurah } from '../quran';
-import { getAyahTranslation } from '../translations';
+import { getAyahTranslation, QURAN_TRANSLATIONS } from '../translations';
 import { useActiveEdition } from '../useActiveEdition';
 import {
   activeKhatmah,
@@ -89,7 +89,7 @@ export function AyahActionSheet({
   const insets = useSafeAreaInsets();
   // The larger of the two, on both — see the sheet's note.
   const sideInset = Math.max(insets.left, insets.right);
-  const { settings } = usePrayerSettings();
+  const { settings, updateSettings } = usePrayerSettings();
   const edition = useActiveEdition();
   const state = useQuranState();
   const [arabic, setArabic] = useState<string>('');
@@ -126,6 +126,17 @@ export function AyahActionSheet({
   const [tafsirExpanded, setTafsirExpanded] = useState(false);
   const [translationExpanded, setTranslationExpanded] = useState(false);
 
+  /**
+   * Both long-form sections start CLOSED (v2.14.5).
+   *
+   * The sheet is not a reader. It is where you pin your khatmah, set a
+   * bookmark colour, and reach the recitation controls — and with a
+   * translation and a tafsir open above them, all three sat below the
+   * fold on a phone. Opening a text is a decision about the ayah in
+   * front of you; the controls are why the sheet was opened at all.
+   */
+  const [translationOpen, setTranslationOpen] = useState(false);
+
   const scrollRef = useRef<ScrollView>(null);
   const audioSectionY = useRef(0);
 
@@ -135,7 +146,8 @@ export function AyahActionSheet({
     setArabic('');
     // When the app-wide companion mode is tafsir (v2.7.40), the section the
     // user chose opens pre-expanded — the sheet leads with their preference.
-    setTafsirOpen(state.prefs.companionMode === 'tafsir');
+    setTafsirOpen(false);
+    setTranslationOpen(false);
     setTafsirText(null);
     setTafsirExpanded(false);
     setTranslationExpanded(false);
@@ -146,8 +158,6 @@ export function AyahActionSheet({
     return () => {
       cancelled = true;
     };
-    // state.prefs.companionMode intentionally read once per open.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, surah, ayah]);
 
   // The share card is a <Modal> NESTED inside this sheet's <Modal>. If the
@@ -317,21 +327,76 @@ export function AyahActionSheet({
               {arabic}
             </Text>
           ) : null}
-          {translation ? (
-            <>
-              <Text
-                numberOfLines={
-                  translationExpanded ? undefined : TRANSLATION_CLAMP_LINES
-                }
-                style={[styles.translation, { color: palette.muted }]}>
-                {translation}
-              </Text>
-              {translation.length > LONG_TRANSLATION
-                ? moreToggle(translationExpanded, () =>
-                    setTranslationExpanded(v => !v),
-                  )
-                : null}
-            </>
+          {/* Translation (v2.14.5) — a section like the tafsir below it,
+              closed until asked for, and carrying its own edition picker
+              so a reader can read an ayah in a language other than the
+              one the app happens to be in. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: translationOpen }}
+            accessibilityLabel={t('quran.viewToggleTranslation', 'Translation')}
+            onPress={() => setTranslationOpen(o => !o)}
+            style={[styles.tafsirToggle, { borderColor: palette.border }]}>
+            <Text style={[styles.tafsirToggleLabel, { color: palette.accentSolid }]}>
+              {`${translationOpen ? '▾' : '▸'} ${t(
+                'quran.viewToggleTranslation',
+                'Translation',
+              )}`}
+            </Text>
+          </Pressable>
+          {translationOpen ? (
+            <View style={styles.tafsirBlock}>
+              <View style={styles.tafsirChips}>
+                {QURAN_TRANSLATIONS.map(ed => {
+                  const sel = ed.id === edition;
+                  return (
+                    <Pressable
+                      key={ed.id}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: sel }}
+                      accessibilityLabel={`${ed.language} — ${ed.label}`}
+                      onPress={() =>
+                        updateSettings({ quranTranslationEdition: ed.id })
+                      }
+                      style={[
+                        styles.tafsirChip,
+                        {
+                          backgroundColor: sel ? palette.accentBg : 'transparent',
+                          borderColor: sel ? palette.accentSolid : palette.border,
+                        },
+                      ]}>
+                      <Text
+                        style={[
+                          styles.chipLabel,
+                          { color: sel ? palette.accentSolid : palette.muted },
+                        ]}>
+                        {ed.language}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              {translation ? (
+                <>
+                  <Text
+                    numberOfLines={
+                      translationExpanded ? undefined : TRANSLATION_CLAMP_LINES
+                    }
+                    style={[styles.translation, { color: palette.muted }]}>
+                    {translation}
+                  </Text>
+                  {translation.length > LONG_TRANSLATION
+                    ? moreToggle(translationExpanded, () =>
+                        setTranslationExpanded(v => !v),
+                      )
+                    : null}
+                </>
+              ) : (
+                <Text style={[styles.tafsirMeta, { color: palette.muted }]}>
+                  {t('quran.translationUnavailable', 'No translation for this ayah.')}
+                </Text>
+              )}
+            </View>
           ) : null}
 
           {/* Tafsir (v2.7.28) */}
@@ -342,9 +407,7 @@ export function AyahActionSheet({
             onPress={() => setTafsirOpen(o => !o)}
             style={[styles.tafsirToggle, { borderColor: palette.border }]}>
             <Text style={[styles.tafsirToggleLabel, { color: palette.accentSolid }]}>
-              {tafsirOpen
-                ? `▾ ${t('quran.tafsir', 'Tafsir')}`
-                : `▸ ${t('quran.showTafsir', 'Show tafsir')}`}
+              {`${tafsirOpen ? '▾' : '▸'} ${t('quran.tafsir', 'Tafsir')}`}
             </Text>
           </Pressable>
           {tafsirOpen ? (
@@ -371,11 +434,10 @@ export function AyahActionSheet({
                           },
                         ]}>
                         <Text
-                          style={{
-                            color: sel ? palette.accentSolid : palette.muted,
-                            fontSize: 12,
-                            fontWeight: '600',
-                          }}>
+                          style={[
+                            styles.chipLabel,
+                            { color: sel ? palette.accentSolid : palette.muted },
+                          ]}>
                           {ed.label}
                         </Text>
                       </Pressable>
@@ -595,7 +657,18 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 12,
     borderWidth: 1,
+    /**
+     * A chip wraps to the next line; it never gets squeezed.
+     *
+     * Without this, Yoga fits a wrapping row by SHRINKING its items, and
+     * the text inside a shrunken chip is truncated to whatever survives.
+     * "التفسير الميسر" came back from a rotation as "التفسير" — the
+     * edition losing its name and reading as the generic word, on the one
+     * control whose whole job is to say which edition you are reading.
+     */
+    flexShrink: 0,
   },
+  chipLabel: { fontSize: 12, fontWeight: '600', flexShrink: 0 },
   tafsirMeta: { fontSize: 13, fontStyle: 'italic' },
   tafsirText: { fontSize: 14, lineHeight: 22 },
   tafsirRtl: { textAlign: 'right', writingDirection: 'rtl' },

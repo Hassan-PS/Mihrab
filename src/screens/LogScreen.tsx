@@ -36,7 +36,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import notifee, { EventType } from '@notifee/react-native';
 import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -170,6 +170,15 @@ export function LogScreen() {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const clock = useClockFormatter();
+  /**
+   * Tapping the tab you are already on returns this screen to the top —
+   * the standard idiom on both platforms, and the only way back up a
+   * long page without a lot of swiping. `useScrollToTop` listens for
+   * `tabPress` and acts only while this screen is focused, so pressing a
+   * DIFFERENT tab still just navigates.
+   */
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const tabBarInset = useTabBarInset();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
@@ -1066,6 +1075,7 @@ export function LogScreen() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       {...tabBarScroll}
       style={{ backgroundColor: palette.bg }}
       contentContainerStyle={[styles.scroll, { paddingBottom: tabBarInset }]}

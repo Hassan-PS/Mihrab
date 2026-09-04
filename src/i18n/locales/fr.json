@@ -1038,7 +1038,8 @@
     "scrubHint": "Glissez vers le haut pour plus de précision",
     "scrubHalf": "Demi-vitesse",
     "scrubQuarter": "Quart de vitesse",
-    "scrubFine": "Réglage fin"
+    "scrubFine": "Réglage fin",
+    "translationUnavailable": "Pas de traduction pour ce verset."
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

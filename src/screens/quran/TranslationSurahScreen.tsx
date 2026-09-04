@@ -637,12 +637,19 @@ const styles = StyleSheet.create({
   editionRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    // Wraps rather than squeezes. "Tafsir: التفسير الميسر" next to the
+    // CHOOSE hint overruns a narrow header, and a row that cannot wrap
+    // fits itself by shrinking its children — which truncated the
+    // edition's name away and left the bare word "Tafsir". Same fault
+    // as the chips in AyahActionSheet, same fix.
+    flexWrap: 'wrap',
     gap: 6,
     paddingTop: 4,
   },
-  editionLabel: { fontSize: 12 },
+  editionLabel: { fontSize: 12, flexShrink: 0 },
   editionHint: {
     fontSize: 11,
+    flexShrink: 0,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.4,

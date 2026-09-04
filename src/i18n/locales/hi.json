@@ -1038,7 +1038,8 @@
     "scrubHint": "बारीक नियंत्रण के लिए ऊपर खिसकाएँ",
     "scrubHalf": "आधी गति",
     "scrubQuarter": "चौथाई गति",
-    "scrubFine": "सूक्ष्म नियंत्रण"
+    "scrubFine": "सूक्ष्म नियंत्रण",
+    "translationUnavailable": "इस आयत का कोई अनुवाद नहीं है।"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

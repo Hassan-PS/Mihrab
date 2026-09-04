@@ -1038,7 +1038,8 @@
     "scrubHint": "Geser ke atas untuk kontrol lebih halus",
     "scrubHalf": "Setengah kecepatan",
     "scrubQuarter": "Seperempat kecepatan",
-    "scrubFine": "Kontrol halus"
+    "scrubFine": "Kontrol halus",
+    "translationUnavailable": "Tidak ada terjemahan untuk ayat ini."
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

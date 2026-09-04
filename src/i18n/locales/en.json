@@ -1038,7 +1038,8 @@
     "scrubHint": "Slide up for finer control",
     "scrubHalf": "Half speed",
     "scrubQuarter": "Quarter speed",
-    "scrubFine": "Fine control"
+    "scrubFine": "Fine control",
+    "translationUnavailable": "No translation for this ayah."
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",
