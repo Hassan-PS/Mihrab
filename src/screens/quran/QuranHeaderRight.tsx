@@ -21,5 +21,12 @@ export function QuranHeaderRight() {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  // The navigator gives headerRight no trailing inset of its own, so the
+  // pill sat flush against the screen edge.
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginEnd: 4,
+  },
 });

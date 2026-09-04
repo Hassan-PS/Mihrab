@@ -183,6 +183,44 @@ async function tearDownProgress(): Promise<void> {
   releaseService = null;
   await notifee.stopForegroundService().catch(() => undefined);
   await notifee.cancelNotification(PROGRESS_ID).catch(() => undefined);
+  await sweepChannel();
+}
+
+/**
+ * Cancel anything left on our channel, whatever id it went out under.
+ *
+ * `cancelNotification(PROGRESS_ID)` is the tidy way and it is not enough
+ * on its own. A bar posted by a PREVIOUS process — the app was killed
+ * mid-download — is still on screen with the foreground-service and
+ * NO_CLEAR flags set and no service behind it, which is a notification
+ * the user cannot swipe away and we have no handle on: the id we would
+ * cancel belongs to a notifee instance that no longer exists.
+ *
+ * Verified on a Pixel: force-stop mid-download, relaunch, and the bar was
+ * still there after `stopForegroundService` + `cancelNotification` had
+ * both run and both reported success.
+ *
+ * So we ask the platform what is actually displayed and cancel what we
+ * find on our own channel. Only our channel — the Live Activity is a
+ * foreground-service notification too, on a channel of its own, and it is
+ * very much alive.
+ */
+async function sweepChannel(): Promise<void> {
+  try {
+    const displayed = await notifee.getDisplayedNotifications();
+    for (const entry of displayed) {
+      const onOurChannel =
+        entry.notification?.android?.channelId === CHANNEL_ID;
+      if (!onOurChannel) continue;
+      const id = entry.id ?? entry.notification?.id;
+      if (!id) continue;
+      await notifee.cancelDisplayedNotification(id).catch(() => undefined);
+      await notifee.cancelNotification(id).catch(() => undefined);
+    }
+  } catch {
+    // Older notifee builds may not expose the query; the id-based cancel
+    // above is still the common path and still runs.
+  }
 }
 
 /**
