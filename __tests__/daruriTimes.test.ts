@@ -285,12 +285,30 @@ describe('a day of the card', () => {
     expect(t.IshaDaruri).toBe(plus(today.Maghrib, Math.round(night / 3)));
   });
 
-  it('is left out rather than guessed when tomorrow is unknown', () => {
+  /**
+   * The last day of a window has no tomorrow, and today's own Fajr
+   * stands in for the dawn that closes tonight — the same proxy
+   * `injectNightTimes` makes for the `Firstthird` row that IS this
+   * instant. A minute of drift over a night is seconds on a third of it.
+   */
+  it('falls back to today’s dawn when there is no tomorrow', () => {
     const t = daruriTimesForDay(D, CASABLANCA.lat, CASABLANCA.lng, today, undefined, 1);
-    expect(t.IshaDaruri).toBeUndefined();
-    // Maghrib's is a row, not a guess, so it survives — checked against
-    // today's Fajr as the stand-in for tomorrow's.
+    expect(t.IshaDaruri).toBeDefined();
     expect(t.MaghribDaruri).toBe(today.Isha);
+  });
+
+  /** With no dawn at all on either side there is nothing to divide. */
+  it('gives up when there is no dawn on either side', () => {
+    const t = daruriTimesForDay(
+      D,
+      CASABLANCA.lat,
+      CASABLANCA.lng,
+      { ...today, Fajr: '' },
+      undefined,
+      1,
+    );
+    expect(t.IshaDaruri).toBeUndefined();
+    expect(t.MaghribDaruri).toBeUndefined();
   });
 
   /**
@@ -448,11 +466,17 @@ describe('injecting into a week', () => {
     expect(out[0].Firstthird).toBe(week[0].Firstthird);
   });
 
-  it('leaves Ishāʾ out on the last day, which has no tomorrow to divide', () => {
+  /**
+   * The last day keeps its boundary, on the day's own dawn. It has to:
+   * `Firstthird` is the same instant and `injectNightTimes` gives it the
+   * same proxy, so dropping this one printed one moment twice on the
+   * last row of every month — a time in one column, a blank in another.
+   */
+  it('keeps Ishāʾ on the last day, on the proxy dawn', () => {
     const out = injectDaruriTimes(week, D, CASABLANCA.lat, CASABLANCA.lng);
     const last = out[out.length - 1];
-    expect(last.IshaDaruri).toBeUndefined();
-    expect(last.Firstthird).toBe(week[2].Firstthird);
+    expect(last.IshaDaruri).toBeDefined();
+    expect(last.IshaDaruri).toBe(last.Firstthird);
   });
 
   it('threads the ʿAṣr setting through', () => {
@@ -564,5 +588,85 @@ describe('the month table row', () => {
   it('grows when the second times are shown, and only then', () => {
     expect(monthRowHeight(false)).toBe(MONTH_ROW_HEIGHT);
     expect(monthRowHeight(true)).toBeGreaterThan(MONTH_ROW_HEIGHT);
+  });
+});
+
+// ── Ishāʾ's boundary and the first-third row are one instant ──────────
+
+describe("Ishāʾ's boundary agrees with the row it shares an instant with", () => {
+  /**
+   * `IshaDaruri` and `Firstthird` are the same moment under two names —
+   * the end of the first third of the night that begins on this day. They
+   * are computed by two different functions, so the only thing keeping
+   * them equal is that both divide the same night the same way. Anything
+   * that makes one of them appear where the other does not puts the same
+   * instant on one row of the month table twice, once as a time and once
+   * as a blank.
+   */
+  const CASA = { lat: 33.5731, lng: -7.5898 };
+  const START = NOON(2026, 8, 4);
+  const raw: TimingsMap[] = Array.from({ length: 7 }, (_, i) =>
+    rowsFor(CASA, new Date(2026, 8, 4 + i, 12)),
+  );
+
+  it('is present on every day of a window, including the last', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { injectNightTimes } = require('../src/utils/nightTimes');
+    const withNight = injectNightTimes(raw);
+    const out = injectDaruriTimes(withNight, START, CASA.lat, CASA.lng);
+
+    for (const [i, day] of out.entries()) {
+      // The precondition: the night row is there on every day, because
+      // `injectNightTimes` uses the day's own Fajr as the proxy when
+      // there is no tomorrow in the window.
+      expect(day.Firstthird).toBeDefined();
+      // So the boundary that IS that instant must be there too.
+      expect(day.IshaDaruri).toBeDefined();
+      expect(day.IshaDaruri).toBe(day.Firstthird);
+      expect(i).toBeLessThan(out.length);
+    }
+  });
+
+  /**
+   * The last day is the one that used to fail, and it fails invisibly:
+   * a `·` under Ishāʾ on the last row of every month, next to a
+   * first-third column showing the time.
+   */
+  it('agrees on the last day, where the proxy is doing the work', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { injectNightTimes } = require('../src/utils/nightTimes');
+    const withNight = injectNightTimes(raw);
+    const out = injectDaruriTimes(withNight, START, CASA.lat, CASA.lng);
+    const last = out[out.length - 1];
+    expect(last.IshaDaruri).toBe(last.Firstthird);
+  });
+
+  /**
+   * The proxy is a stand-in, not a guess: Fajr drifts about a minute a
+   * day, so a third of the night moves by seconds. It has to round to
+   * the same minute as the real answer would.
+   */
+  it('lands on the same minute the real tomorrow would have given', () => {
+    const day = raw[0];
+    const realTomorrow = raw[1].Fajr;
+    const withReal = daruriTimesForDay(START, CASA.lat, CASA.lng, day, realTomorrow);
+    const withProxy = daruriTimesForDay(START, CASA.lat, CASA.lng, day, undefined);
+    expect(withProxy.IshaDaruri).toBeDefined();
+    const toMin = (c: string) => Number(c.slice(0, 2)) * 60 + Number(c.slice(3));
+    expect(
+      Math.abs(toMin(withProxy.IshaDaruri!) - toMin(withReal.IshaDaruri!)),
+    ).toBeLessThanOrEqual(1);
+  });
+
+  /** A day with nothing to divide still yields nothing. */
+  it('still needs a Maghrib and a dawn to divide', () => {
+    const noMaghrib = daruriTimesForDay(
+      START,
+      CASA.lat,
+      CASA.lng,
+      { ...raw[0], Maghrib: '' },
+      raw[1].Fajr,
+    );
+    expect(noMaghrib.IshaDaruri).toBeUndefined();
   });
 });

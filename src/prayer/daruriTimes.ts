@@ -390,8 +390,10 @@ function inside(
  * reused as is; at 2 the row is the wrong madhhab's ʿAṣr and the 1:1
  * shadow is computed instead.
  *
- * `tomorrowFajr` is what closes the night; without it Ishāʾ's boundary is
- * omitted rather than guessed.
+ * `tomorrowFajr` is the dawn that closes tonight. On the last day of a
+ * window there is none, and today's own Fajr stands in — the same
+ * sub-minute proxy `injectNightTimes` makes for the `Firstthird` row it
+ * shares an instant with. See the note at the evening boundaries below.
  *
  * ── EVERY BOUNDARY IS CHECKED AGAINST THE CARD'S OWN ROWS ─────────────
  *
@@ -457,20 +459,35 @@ export function daruriTimesForDay(
     out.AsrDaruri = solar.AsrDaruri;
   }
 
+  // ── THE END OF THE NIGHT, AND THE ONE DAY THAT HAS NO TOMORROW ──────
+  //
+  // Both of the evening boundaries are measured against the dawn that
+  // closes tonight, and the last day of any window does not have one:
+  // the month table ends on the 31st, the carousel ends on day seven.
+  //
+  // Today's own Fajr stands in for it there, which is exactly what
+  // `injectNightTimes` does for the `Firstthird` row (see its comment on
+  // the same trade). Fajr drifts about a minute a day, so a third of the
+  // night moves by seconds — it rounds to the same minute.
+  //
+  // Requiring a real tomorrow instead was a bug with a visible shape.
+  // `Firstthird` and `IshaDaruri` are the same instant under two names,
+  // and the row kept the proxy while the boundary did not — so the last
+  // row of every month printed that one moment twice, once as a time in
+  // the first-third column and once as a blank under Ishāʾ.
+  const nightEnd = tomorrowFajr ?? timings.Fajr;
+
   // Maghrib: the Ishāʾ row, by definition (fn. 659). Inside
-  // (Maghrib, next Fajr), which wraps. On the last day of a window there
-  // is no tomorrow; today's Fajr stands in for the CHECK only — the same
-  // sub-minute proxy `injectNightTimes` uses — because the value here is
-  // a row the card already shows, not a number being guessed.
-  if (inside(timings.Isha, timings.Maghrib, tomorrowFajr ?? timings.Fajr)) {
+  // (Maghrib, next Fajr), which wraps.
+  if (inside(timings.Isha, timings.Maghrib, nightEnd)) {
     out.MaghribDaruri = timings.Isha;
   }
 
   // Ishāʾ: the first third of the night, inside (Isha, next Fajr).
-  if (timings.Maghrib && tomorrowFajr) {
+  if (timings.Maghrib && nightEnd) {
     try {
-      const third = clockNightTimes(timings.Maghrib, tomorrowFajr).Firstthird;
-      if (inside(third, timings.Isha, tomorrowFajr)) out.IshaDaruri = third;
+      const third = clockNightTimes(timings.Maghrib, nightEnd).Firstthird;
+      if (inside(third, timings.Isha, nightEnd)) out.IshaDaruri = third;
     } catch {
       // An unparseable time from a provider — leave Ishāʾ's boundary out
       // rather than putting a wrong one on the card.
