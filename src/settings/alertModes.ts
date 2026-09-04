@@ -105,3 +105,51 @@ export function coerceAlertModes(value: unknown): AlertModeMap {
   }
   return out;
 }
+
+/**
+ * What a home row SHOWS, given the master switch in Settings.
+ *
+ * `notificationsEnabled` decides whether the app speaks at all; these
+ * modes decide what each prayer says when it does. They used to be
+ * independent, which let the app hold two answers at once — five rows
+ * showing a green bell above a master switch that was off, and silence at
+ * every prayer time. The scheduler was already reading the master, so the
+ * rows were the half that was lying.
+ *
+ * Off, every row reads silent. It only READS: the stored choice is left
+ * alone, so turning the master back on restores what each prayer was set
+ * to rather than flattening five decisions into one default.
+ */
+export function shownAlertMode(
+  key: string,
+  modes: AlertModeMap,
+  adhanChosen: boolean,
+  notificationsEnabled: boolean,
+): PrayerAlertMode {
+  if (!notificationsEnabled) return 'silent';
+  return alertModeFor(key, modes, adhanChosen);
+}
+
+/**
+ * What pressing a home row writes — the other direction of the same bind.
+ *
+ * Asking a prayer to sound the adhan while the master switch is off is a
+ * contradiction whose other half is three screens away. Rather than doing
+ * nothing visible and nothing audible, the row turns the master on.
+ *
+ * Cycling back to silent does NOT turn the master off: one prayer going
+ * quiet is not a statement about the other four.
+ */
+export function cycleAlertModePatch(
+  key: string,
+  shown: PrayerAlertMode,
+  modes: AlertModeMap,
+  notificationsEnabled: boolean,
+): { prayerAlertModes: AlertModeMap; notificationsEnabled?: boolean } {
+  const next = nextAlertMode(key, shown);
+  const prayerAlertModes: AlertModeMap = { ...modes, [key]: next };
+  if (!notificationsEnabled && next !== 'silent') {
+    return { prayerAlertModes, notificationsEnabled: true };
+  }
+  return { prayerAlertModes };
+}

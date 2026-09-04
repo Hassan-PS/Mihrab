@@ -35,8 +35,9 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import {
-  alertModeFor,
-  nextAlertMode,
+  cycleAlertModePatch,
+  shownAlertMode,
+  type PrayerAlertMode,
 } from '../../settings/alertModes';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
@@ -414,23 +415,35 @@ function TodayCardImpl({
    * Writing is a merge for the same reason — one row's answer must not
    * become an answer for all five.
    */
+  /**
+   * The row and the master switch cannot disagree — see `shownAlertMode`
+   * and `cycleAlertModePatch`, which is where the rule lives and where it
+   * is tested. Both directions: off silences every row without forgetting
+   * what it was, and switching a row on turns the master back on.
+   */
+  const alertsEnabled = settings.notificationsEnabled;
   const alertModeOf = useCallback(
-    (key: string) =>
-      alertModeFor(
+    (key: string): PrayerAlertMode =>
+      shownAlertMode(
         key,
         settings.prayerAlertModes,
         settings.notificationSound !== 'default',
+        alertsEnabled,
       ),
-    [settings.prayerAlertModes, settings.notificationSound],
+    [alertsEnabled, settings.prayerAlertModes, settings.notificationSound],
   );
   const cycleAlertMode = useCallback(
     (key: string) => {
-      const next = nextAlertMode(key, alertModeOf(key));
-      updateSettings({
-        prayerAlertModes: { ...settings.prayerAlertModes, [key]: next },
-      });
+      updateSettings(
+        cycleAlertModePatch(
+          key,
+          alertModeOf(key),
+          settings.prayerAlertModes,
+          alertsEnabled,
+        ),
+      );
     },
-    [alertModeOf, settings.prayerAlertModes, updateSettings],
+    [alertModeOf, alertsEnabled, settings.prayerAlertModes, updateSettings],
   );
   const visibleRows = useMemo(
     () => DISPLAY_ORDER.filter(key => timings[key]),
