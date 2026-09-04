@@ -44,6 +44,7 @@ import { showTabBar, useTabBarHidden } from './tabBarVisibility';
 import { HomeScreen } from '../screens/HomeScreen';
 import { QuranScreen } from '../screens/QuranScreen';
 import { TasbihScreen } from '../screens/TasbihScreen';
+import { tabBackButton } from './TabBackButton';
 import { DuasScreen } from '../screens/DuasScreen';
 import { LogScreen } from '../screens/LogScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -281,6 +282,7 @@ export function MainTabs() {
         options={{
           title: t('nav.quran'),
           tabBarIcon: TabBookIcon,
+          headerLeft: tabBackButton,
           headerShown: true,
           // Only these two tabs carry it, and only once sync is set up: this
           // is the screen whose data the user just changed. See SyncHeaderButton.
@@ -293,6 +295,7 @@ export function MainTabs() {
         options={{
           title: t('nav.tasbih'),
           tabBarIcon: TabTasbihIcon,
+          headerLeft: tabBackButton,
           headerShown: true,
         }}
       />
@@ -302,6 +305,7 @@ export function MainTabs() {
         options={{
           title: t('nav.duas'),
           tabBarIcon: TabDuasIcon,
+          headerLeft: tabBackButton,
           headerShown: true,
         }}
       />
@@ -311,6 +315,7 @@ export function MainTabs() {
         options={{
           title: t('log.title', 'Log'),
           tabBarIcon: TabLogIcon,
+          headerLeft: tabBackButton,
           headerShown: true,
           headerRight: () => <SyncHeaderButton />,
         }}
@@ -321,6 +326,7 @@ export function MainTabs() {
         options={{
           title: t('nav.settings'),
           tabBarIcon: TabSettingsIcon,
+          headerLeft: tabBackButton,
           headerShown: true,
         }}
       />

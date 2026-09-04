@@ -9,8 +9,15 @@ import { useCallback } from 'react';
 import { BackHandler, Platform } from 'react-native';
 import type { RootStackParamList } from './types';
 
-/** The Today tab, which is what "back" means everywhere else in the app. */
-const HOME_TAB = 'TodayTab';
+/**
+ * The Today tab, which is what "back" means everywhere else in the app.
+ *
+ * Exported because the back ARROW in every other tab's
+ * title bar goes to the same place the hardware button does, and one
+ * definition is what keeps the gesture and the control saying the same
+ * thing — see TabBackButton.
+ */
+export const HOME_TAB = 'TodayTab';
 
 /**
  * Android hardware back, for every screen that is not Today.

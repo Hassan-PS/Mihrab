@@ -51,6 +51,15 @@ export type AppPalette = {
    */
   mutedSolid: string;
   /**
+   * `text`, as a colour an SVG can parse — the same bargain as
+   * `mutedSolid`, for the drawn icons that carry the app's text colour
+   * rather than its muted one. Under Liquid Glass `text` is
+   * `PlatformColor('label')`, and a `react-native-svg` stroke given one
+   * draws nothing at all: the header's back arrow simply would not be
+   * there. Text and native views keep the semantic colour.
+   */
+  textSolid: string;
+  /**
    * Filled control surface — the design review's one caveat (2f).
    *
    * Chips, steppers and secondary row actions are FILLED, not outlined: a
@@ -109,7 +118,13 @@ export function shouldUseDynamicSystemColors(
 // the base palette objects below don't (and shouldn't) declare it.
 type PaletteBase = Omit<
   AppPalette,
-  'accent' | 'accentBg' | 'accentSolid' | 'mutedSolid' | 'isDark' | 'onAccent'
+  | 'accent'
+  | 'accentBg'
+  | 'accentSolid'
+  | 'mutedSolid'
+  | 'textSolid'
+  | 'isDark'
+  | 'onAccent'
 >;
 
 /**
@@ -237,6 +252,7 @@ function withBrandAccents(
     // Every base palette below states `muted` as a hex string; only the two
     // system palettes need a separate answer, and they give their own.
     mutedSolid: String(base.muted),
+    textSolid: String(base.text),
     isDark,
     onAccent: readableOn(accentSolid),
   };
@@ -332,6 +348,8 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
      * grouped backgrounds this palette actually draws on.
      */
     mutedSolid: isDark ? '#98989E' : '#8A8A8E',
+    /** `label`, resolved: iOS states it as pure white on black. */
+    textSolid: isDark ? '#FFFFFF' : '#000000',
   };
 }
 
@@ -364,6 +382,7 @@ function androidDynamicPalette(
     // The standard base's muted, which is already a hex string — this
     // palette overrides the accent and nothing else.
     mutedSolid: String(base.muted),
+    textSolid: String(base.text),
     isDark,
     onAccent: readableOn(hex),
   };
