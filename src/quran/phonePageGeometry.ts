@@ -58,6 +58,16 @@ export const LANDSCAPE_ZOOM = 1.6;
 export const HEADER_RESERVE = 34;
 export const FOOTER_RESERVE = 42;
 
+/**
+ * What stays below the last line when the medallion is not drawn.
+ *
+ * Reclaiming the medallion's whole 42dp put the last ayah hard against
+ * the top edge of the player card — the band of nothing became no band
+ * at all, which reads as the text running under the card. A page wants
+ * to end, not stop.
+ */
+export const FOOTER_GAP = 14;
+
 /** How long the inputs have to stay still before a geometry is published. */
 export const GEOMETRY_QUIET_MS = 100;
 
@@ -128,7 +138,9 @@ export function phonePageGeometry(
   const scrolling = input.width > input.height;
   const pageWidth = phonePageWidth(input.width, input.sideInset);
   const chromeH =
-    input.navPad + HEADER_RESERVE + (input.footerDrawn ? FOOTER_RESERVE : 0);
+    input.navPad +
+    HEADER_RESERVE +
+    (input.footerDrawn ? FOOTER_RESERVE : FOOTER_GAP);
   const textWidth = scrolling
     ? Math.min(pageWidth - H_PADDING * 2, input.height * LANDSCAPE_ZOOM)
     : pageWidth - H_PADDING * 2;

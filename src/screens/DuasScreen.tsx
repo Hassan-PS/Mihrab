@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
    * spacing while drawing with the shorter face — the worst of both, and
    * why it read as loose and slightly wrong.
    */
-  arabic: { fontSize: 24, lineHeight: 52, textAlign: 'right', writingDirection: 'rtl', ...arabicTextStyle('quran') },
+  arabic: { fontSize: 20, lineHeight: 44, textAlign: 'right', writingDirection: 'rtl', ...arabicTextStyle('quran') },
   /** The two aid toggles, side by side under the Arabic. */
   aidRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 },
   aidChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },

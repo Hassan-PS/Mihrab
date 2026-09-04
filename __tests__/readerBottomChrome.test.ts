@@ -16,6 +16,7 @@ import {
   geometryKey,
   phonePageGeometry,
   HEADER_RESERVE,
+  FOOTER_GAP,
   FOOTER_RESERVE,
 } from '../src/quran/phonePageGeometry';
 import {
@@ -61,12 +62,23 @@ describe('the mini player is reserved once, by the layout', () => {
     // it opened a band of nothing between the last line and the player.
     const drawn = phonePageGeometry(portrait)!;
     const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
-    expect(standDown.viewportH - drawn.viewportH).toBe(FOOTER_RESERVE);
+    expect(standDown.viewportH - drawn.viewportH).toBe(
+      FOOTER_RESERVE - FOOTER_GAP,
+    );
   });
 
   it('still reserves the header, which never stands down', () => {
     const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
-    expect(standDown.viewportH).toBe(720 - HEADER_RESERVE);
+    expect(standDown.viewportH).toBe(720 - HEADER_RESERVE - FOOTER_GAP);
+  });
+
+  it('leaves the last line room to breathe above the player', () => {
+    // Reclaiming the medallion's WHOLE room put the last ayah hard
+    // against the card, which reads as the text running underneath it.
+    const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
+    expect(720 - HEADER_RESERVE - standDown.viewportH).toBe(FOOTER_GAP);
+    expect(FOOTER_GAP).toBeGreaterThan(0);
+    expect(FOOTER_GAP).toBeLessThan(FOOTER_RESERVE);
   });
 
   it('changes the page identity, so a settled geometry is replaced', () => {
