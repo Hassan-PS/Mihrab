@@ -45,7 +45,8 @@
     "share": "Share",
     "done": "Done",
     "delete": "Delete",
-    "cancelled": "Cancelled."
+    "cancelled": "Cancelled.",
+    "listJoin": " & "
   },
   "home": {
     "loadingPrayer": "Loading prayer times…",
@@ -345,7 +346,11 @@
     "sectionQuran": "Quran",
     "sectionQuranBlurb": "Reading, translation, tafsir, downloads",
     "sectionAbout": "About",
-    "sectionAboutBlurb": "Version, sources, licences"
+    "sectionAboutBlurb": "Version, sources, licences",
+    "malikiRows": "Show them in the day’s times",
+    "malikiRowsHelp": "Off, the boundaries are only announced — nothing is added to the card or the month.",
+    "malikiEndAlerts": "And when the time ends",
+    "malikiEndAlertsHelp": "A second notification at the moment the prayer becomes qada. Fired at the time itself, never early."
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -472,7 +477,8 @@
     "snoozeChoice": "Snooze {{minutes}} min",
     "snoozeMinutes": "Minutes",
     "daruriEndsIn": "First time ends at {{time}} — in {{count}} min",
-    "daruriEnded": "First time has ended at {{until}}"
+    "daruriEnded": "First time has ended at {{until}}",
+    "daruriExpired": "The time has ended — pray it as qada"
   },
   "locations": {
     "title": "Saved locations",
@@ -1466,6 +1472,18 @@
     "body": "Mark all five as prayed on time, or open the Log to fill them in one by one.",
     "action": "Log all as complete",
     "channelName": "End-of-day log"
+  },
+  "duaReminders": {
+    "channelName": "Morning and evening duas",
+    "morningTitle": "Morning adhkār",
+    "morningBody": "The morning duas — their time runs until sunrise.",
+    "eveningTitle": "Evening adhkār",
+    "eveningBody": "The evening duas — their time runs until sunset.",
+    "groupTitle": "Morning and evening duas",
+    "morning": "Morning duas",
+    "morningHelp": "A reminder in the morning window — after Fajr, before sunrise.",
+    "evening": "Evening duas",
+    "eveningHelp": "A reminder in the evening window — after ʿAṣr, before sunset."
   },
   "sunnah": {
     "none": "None",

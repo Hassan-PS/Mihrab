@@ -143,6 +143,25 @@ function CalculationCardImpl({
             {t('settings.malikiSecondTimesSource')}
           </Text>
 
+          {/* SHOWING them and ANNOUNCING them are now two decisions.
+           *
+           * They used to be one, and the reporter of #19 wanted the
+           * second without the first — "Having an additional time in the
+           * rows will just make the UI compact and bad looking" — which
+           * the app could not give him: the alerts hung off the same
+           * switch as the rows, so the only way to be told about a
+           * boundary was to also put it on the card. On by default, so
+           * this changes nothing for anyone who already had it. */}
+          <SettingsToggleRow
+            title={t('settings.malikiRows', 'Show them in the day’s times')}
+            help={t(
+              'settings.malikiRowsHelp',
+              'Off, the boundaries are only announced — nothing is added to the card or the month.',
+            )}
+            value={settings.malikiSecondTimeRows}
+            onValueChange={v => updateSettings({ malikiSecondTimeRows: v })}
+          />
+
           {/* Alerts, chosen one prayer at a time.
            *
            * Chips rather than five switch rows: five switches is a
@@ -218,6 +237,28 @@ function CalculationCardImpl({
                   {t('common.change')}
                 </Text>
               </Pressable>
+            ) : null}
+
+            {/* The other end of the window — issue #19 again.
+             *
+             * The alert above says the preferred time is over and there
+             * is still a valid window to pray in. This one says the
+             * window has shut and what is left is qaḍāʾ. It fires AT the
+             * instant whatever warning is set above: a notification
+             * saying a prayer is missed while there are still ten minutes
+             * to pray it would simply be false. */}
+            {alerts.length > 0 ? (
+              <SettingsToggleRow
+                title={t('settings.malikiEndAlerts', 'And when the time ends')}
+                help={t(
+                  'settings.malikiEndAlertsHelp',
+                  'A second notification at the moment the prayer becomes qaḍāʾ. Fired at the time itself, never early.',
+                )}
+                value={settings.malikiSecondTimeEndAlerts}
+                onValueChange={v =>
+                  updateSettings({ malikiSecondTimeEndAlerts: v })
+                }
+              />
             ) : null}
           </View>
         </SettingsBlock>

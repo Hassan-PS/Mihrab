@@ -70,6 +70,7 @@ import { HOME_SCREEN_PADDING } from './home/tokens';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { rescheduleEndOfDayLogReminders } from '../notifications/endOfDayLog';
+import { rescheduleDuaReminders } from '../notifications/duaReminders';
 import {
   FeatureTourModal,
   hasSeenFeatureTour,
@@ -100,6 +101,7 @@ import {
 /** Gate keys — see src/utils/resyncGate.ts. */
 const NOTIF_RESYNC_KEY = 'home.prayerNotifications';
 const EOD_RESYNC_KEY = 'home.endOfDayReminders';
+const DUA_RESYNC_KEY = 'home.duaReminders';
 
 export function HomeScreen() {
   const navigation =
@@ -279,6 +281,12 @@ export function HomeScreen() {
     // can work out from coordinates and a date. The table only — the
     // widget and the alert schedule do not carry these yet, and a payload
     // grown by fields nothing reads is size for nothing.
+    // Computed whenever the FEATURE is on, not whenever the rows are.
+    // The alert schedule reads the boundaries out of this same week, so
+    // gating the injection on the rows meant the only way to be told
+    // about a boundary was to also draw it — which is what #19's reporter
+    // asked not to have. `malikiSecondTimeRows` decides the drawing; the
+    // week below always carries them so the schedule can find them.
     const tableWithDaruri = settings.malikiSecondTimesEnabled
       ? injectDaruriTimes(
           table.week,
@@ -289,14 +297,22 @@ export function HomeScreen() {
           settings.school === 1 ? 2 : 1,
         )
       : null;
+    const drawDaruri =
+      tableWithDaruri != null && settings.malikiSecondTimeRows;
     return {
-      table: tableWithDaruri
+      table: drawDaruri
         ? {
             today: tableWithDaruri[0],
             tomorrow: tableWithDaruri[1],
             week: tableWithDaruri,
           }
         : table,
+      /**
+       * The week the ALERT schedule reads, which is not always the one
+       * the card draws: with the rows off these two differ by exactly the
+       * five boundaries, and that difference is the whole feature.
+       */
+      alertWeek: tableWithDaruri ?? table.week,
       la: mk({
         Sunrise: settings.sunriseEnabled,
         Midnight: settings.islamicMidnightEnabled,
@@ -329,6 +345,7 @@ export function HomeScreen() {
     settings.lastThirdEnabled,
     settings.firstThirdEnabled,
     settings.malikiSecondTimesEnabled,
+    settings.malikiSecondTimeRows,
     settings.school,
   ]);
 
@@ -405,7 +422,7 @@ export function HomeScreen() {
       baseDate: state.baseDate,
       // Extra cached days extend coverage past tomorrow so alerts keep
       // firing when the app isn't opened for a couple of days (v2.7.40).
-      week: view.table.week,
+      week: view.alertWeek,
       // Only when the times themselves are on: an alert about a boundary
       // the card is not showing would be the app announcing something the
       // reader cannot go and look at.
@@ -413,6 +430,7 @@ export function HomeScreen() {
         ? settings.malikiSecondTimeAlerts
         : [],
       daruriAlertMinutes: settings.malikiSecondTimeAlertMinutes,
+      daruriEndAlerts: settings.malikiSecondTimeEndAlerts,
       alertModes: settings.prayerAlertModes,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
       hour12: clockHour12,
@@ -439,6 +457,30 @@ export function HomeScreen() {
         .then(() => markResynced(EOD_RESYNC_KEY, eodPrint))
         .catch(e => console.warn('rescheduleEndOfDayLogReminders:', e));
     }
+
+    // The adhkār reminders, from the same week and the same anchor.
+    //
+    // They belong here rather than on the Duas tab for the reason the
+    // end-of-day prompt does: this is the one place in the app holding
+    // real prayer times for future days, tied to the day they were
+    // fetched for. A reminder whose whole definition is "after Fajr,
+    // before sunrise" cannot be scheduled anywhere that does not know
+    // when Fajr is.
+    const duaPrint = dayTzFingerprint(
+      new Date(),
+      `${settings.morningDuaReminderEnabled}:${settings.eveningDuaReminderEnabled}`,
+      state.baseDate.getTime(),
+    );
+    if (shouldResync(DUA_RESYNC_KEY, duaPrint)) {
+      rescheduleDuaReminders({
+        morning: settings.morningDuaReminderEnabled,
+        evening: settings.eveningDuaReminderEnabled,
+        week: view.table.week,
+        baseDate: state.baseDate,
+      })
+        .then(() => markResynced(DUA_RESYNC_KEY, duaPrint))
+        .catch(e => console.warn('rescheduleDuaReminders:', e));
+    }
   }, [
     hydrated,
     settings.notificationsEnabled,
@@ -449,9 +491,12 @@ export function HomeScreen() {
     settings.malikiSecondTimesEnabled,
     settings.malikiSecondTimeAlerts,
     settings.malikiSecondTimeAlertMinutes,
+    settings.malikiSecondTimeEndAlerts,
     settings.prayerAlertModes,
     settings.journalNotificationActionsEnabled,
     settings.endOfDayLogReminderEnabled,
+    settings.morningDuaReminderEnabled,
+    settings.eveningDuaReminderEnabled,
     state,
     view,
   ]);
@@ -510,6 +555,9 @@ export function HomeScreen() {
           ? settings.malikiSecondTimeAlerts.join(',')
           : '',
         String(settings.malikiSecondTimeAlertMinutes),
+        // The end-of-window alert doubles the set this schedule writes,
+        // so turning it on has to rewrite rather than read as no change.
+        String(settings.malikiSecondTimeEndAlerts),
         // Which prayers speak, and how. A row cycled from adhan to silent
         // has to take its alarm away, so the schedule is rewritten.
         JSON.stringify(settings.prayerAlertModes),
@@ -524,12 +572,15 @@ export function HomeScreen() {
           today: view.table.today,
           tomorrow: view.table.tomorrow,
           baseDate: state.baseDate,
-          week: view.table.week,
+          // The alert week, not the drawn one — with the rows off they
+          // differ by exactly the boundaries this schedule is for.
+          week: view.alertWeek,
           hour12: clockHour12,
           daruriAlerts: settings.malikiSecondTimesEnabled
             ? settings.malikiSecondTimeAlerts
             : [],
           daruriAlertMinutes: settings.malikiSecondTimeAlertMinutes,
+          daruriEndAlerts: settings.malikiSecondTimeEndAlerts,
           alertModes: settings.prayerAlertModes,
         })
           // Marked on success only: a rewrite that threw must not suppress
@@ -620,6 +671,7 @@ export function HomeScreen() {
       settings.malikiSecondTimesEnabled,
       settings.malikiSecondTimeAlerts,
       settings.malikiSecondTimeAlertMinutes,
+      settings.malikiSecondTimeEndAlerts,
       settings.prayerAlertModes,
       state,
       view,

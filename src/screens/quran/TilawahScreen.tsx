@@ -90,6 +90,7 @@ import {
   type QuranDownloadState,
 } from '../../quran/quranDownloadManager';
 import { setQuranPrefs, useQuranState } from '../../quran/quranState';
+import { useBreakpoint } from '../../responsive/breakpoints';
 
 /** Playback speeds, matching the reader's own chips. */
 const RATES = [0.75, 1, 1.25, 1.5, 2] as const;
@@ -463,6 +464,18 @@ function TransportIcon({
 export function TilawahScreen() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  /**
+   * The same reading measure the surah index keeps, for the same reason.
+   *
+   * On a Mac window this page ran the transport, the reciter row and the
+   * mushaf preview edge to edge across the whole display while the Quran
+   * tab beside it sat in a 720pt column — two pages of one app that did
+   * not look like one app. Capped and centred like QuranScreen, and by
+   * the same means: on the header and on every row, never on the
+   * FlatList's contentContainerStyle, which under RTL pins the column to
+   * one edge and leaves the other half of the window empty.
+   */
+  const listCap = useBreakpoint() !== 'compact' ? styles.listWide : null;
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   useAndroidSubScreenBack();
@@ -862,6 +875,7 @@ export function TilawahScreen() {
           onPress={() => onSurah(item.number)}
           style={({ pressed }) => [
             styles.surahRow,
+            listCap,
             {
               backgroundColor: isActive ? palette.accentBg : palette.card,
               borderColor: palette.border ?? palette.muted,
@@ -899,11 +913,11 @@ export function TilawahScreen() {
         </Pressable>
       );
     },
-    [onSurah, palette, status.active?.surah, t],
+    [listCap, onSurah, palette, status.active?.surah, t],
   );
 
   const header = (
-    <View style={styles.headerWrap}>
+    <View style={[styles.headerWrap, listCap]}>
       {/* The word, and what it means.
 
           "Tilawah" is the right name — it names Qur'anic recitation, and
@@ -1552,6 +1566,11 @@ const styles = StyleSheet.create({
   },
   root: { flex: 1 },
   list: { padding: 16, gap: 8 },
+  /**
+   * The reading measure on iPad and Mac. 720 is QuranScreen's number, and
+   * matching it is the point: the two pages sit one tap apart.
+   */
+  listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: 12, marginBottom: 8 },
   pageBlurb: { fontSize: 13, lineHeight: 19, marginTop: 2 },
   card: {

@@ -25,6 +25,7 @@ import { findSurah, SURAHS } from '../quran';
 import { getQuranState } from '../quranState';
 import { ayahAudioUrl, findReciter } from './reciters';
 import { localAudioPathIfAny, prefetchAyahAudio } from './audioStore';
+import { setNowPlayingState } from '../../native/NowPlayingState';
 
 export type AyahRef = { surah: number; ayah: number };
 
@@ -49,6 +50,20 @@ const listeners = new Set<() => void>();
 
 function setStatus(next: Partial<PlaybackStatus>): void {
   status = { ...status, ...next };
+  /**
+   * Tell the OS what the OS cannot work out for itself.
+   *
+   * On macOS — and a Mac Catalyst build is macOS here —
+   * `MPNowPlayingInfoCenter.playbackState` is required before Control
+   * Center will show anything at all, and track-player's iOS half never
+   * sets it. This is the one funnel every state change passes through, so
+   * publishing from here is the only way the system's answer cannot drift
+   * from the app's. No-op on Android, where the media session carries the
+   * state already. See src/native/NowPlayingState.ts.
+   */
+  setNowPlayingState(
+    status.active == null ? 'stopped' : status.playing ? 'playing' : 'paused',
+  );
   for (const l of listeners) l();
 }
 
@@ -69,6 +84,64 @@ export function usePlaybackStatus(): PlaybackStatus {
 
 // ── Player bootstrap ─────────────────────────────────────────────────
 
+/**
+ * The player's options, applied more than once ON PURPOSE.
+ *
+ * `capabilities` is what the lock screen, the notification and a pair of
+ * headphones are allowed to ask for, and on iOS the library only binds it
+ * to `MPRemoteCommandCenter` when there is a CURRENT ITEM to bind it for:
+ *
+ *     public var remoteCommands: [RemoteCommand] = [] {
+ *         didSet { if let item = currentItem { enableRemoteCommands(...) } }
+ *     }
+ *
+ * Setup runs before anything is queued, so that `didSet` fired against an
+ * empty player and bound nothing. Applying them again once a track is
+ * actually loaded is what makes the command centre real — which is the
+ * difference between a lock-screen card with transport buttons and the
+ * one this app was drawing: artwork, title, a scrubber, and no way to
+ * pause it without unlocking the phone and opening the app.
+ *
+ * Cheap to repeat and idempotent: the library diffs the set and only
+ * touches the commands whose enabled-ness changed.
+ */
+async function applyPlayerOptions(): Promise<void> {
+  await TrackPlayer.updateOptions({
+    android: {
+      /**
+       * Swiping the app away does NOT stop the recitation.
+       *
+       * It used to, which was defensible while the only way to start
+       * audio was "play from here" inside the reader — you were looking
+       * at the page, and closing the app meant you were done. It stopped
+       * being defensible the moment there was a listening page: someone
+       * puts a surah on, locks the phone, clears their recents an hour
+       * later out of habit, and the recitation dies mid-ayah. No music
+       * player behaves that way, and the notification's own controls are
+       * what the person would reach for instead.
+       */
+      appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
+    },
+    capabilities: [
+      Capability.Play,
+      Capability.Pause,
+      Capability.SkipToNext,
+      Capability.SkipToPrevious,
+      Capability.SeekTo,
+      Capability.Stop,
+    ],
+    compactCapabilities: [
+      Capability.Play,
+      Capability.Pause,
+      Capability.SkipToNext,
+    ],
+    progressUpdateEventInterval: 1,
+    });
+}
+
+/** Whether the command centre has been bound against a real track. */
+let optionsBound = false;
+
 let setupPromise: Promise<void> | null = null;
 
 async function ensureSetup(): Promise<void> {
@@ -81,42 +154,21 @@ async function ensureSetup(): Promise<void> {
       const msg = e instanceof Error ? e.message : String(e);
       if (!msg.toLowerCase().includes('already')) throw e;
     }
-    await TrackPlayer.updateOptions({
-      android: {
-        /**
-         * Swiping the app away does NOT stop the recitation.
-         *
-         * It used to, which was defensible while the only way to start
-         * audio was "play from here" inside the reader — you were looking
-         * at the page, and closing the app meant you were done. It stopped
-         * being defensible the moment there was a listening page: someone
-         * puts a surah on, locks the phone, clears their recents an hour
-         * later out of habit, and the recitation dies mid-ayah. No music
-         * player behaves that way, and the notification's own controls are
-         * what the person would reach for instead.
-         */
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
-      },
-      capabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-        Capability.SeekTo,
-        Capability.Stop,
-      ],
-      compactCapabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-      ],
-      progressUpdateEventInterval: 1,
-    });
+    await applyPlayerOptions();
 
     // Mirror player state into the status store.
     TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, e => {
       const ref = e.track ? parseTrackId(String(e.track.id)) : null;
       setStatus({ active: ref });
+      // The first track the player ever loads is the moment iOS will
+      // accept the remote commands — see applyPlayerOptions. Once only:
+      // after that the binding survives every later track by itself.
+      if (ref && !optionsBound) {
+        optionsBound = true;
+        void applyPlayerOptions().catch(() => {
+          optionsBound = false;
+        });
+      }
       // ONE look at the queue per ayah, shared by both of the jobs below.
       //
       // `getQueue()` hands the whole queue across the bridge — every track,

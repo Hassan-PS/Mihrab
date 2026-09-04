@@ -45,7 +45,8 @@
     "share": "Partager",
     "done": "Terminé",
     "delete": "Supprimer",
-    "cancelled": "Annulé."
+    "cancelled": "Annulé.",
+    "listJoin": " et "
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -345,7 +346,11 @@
     "sectionQuran": "Coran",
     "sectionQuranBlurb": "Lecture, traduction, tafsir, téléchargements",
     "sectionAbout": "À propos",
-    "sectionAboutBlurb": "Version, sources, licences"
+    "sectionAboutBlurb": "Version, sources, licences",
+    "malikiRows": "Les afficher dans les heures du jour",
+    "malikiRowsHelp": "Désactivé, les limites sont seulement annoncées — rien n’est ajouté à la carte ni au mois.",
+    "malikiEndAlerts": "Et quand le temps se termine",
+    "malikiEndAlertsHelp": "Une seconde notification au moment où la prière devient qada. À l’heure même, jamais en avance."
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -472,7 +477,8 @@
     "snoozeChoice": "Reporter {{minutes}} min",
     "snoozeMinutes": "Minutes",
     "daruriEndsIn": "Le premier temps finit à {{time}} — dans {{count}} min",
-    "daruriEnded": "Le premier temps a fini à {{until}}"
+    "daruriEnded": "Le premier temps a fini à {{until}}",
+    "daruriExpired": "Le temps est écoulé — prie-la en qada"
   },
   "locations": {
     "title": "Lieux enregistrés",
@@ -1466,6 +1472,18 @@
     "body": "Marquer les cinq comme accomplies à l’heure, ou ouvrir le journal pour les saisir une à une.",
     "action": "Tout consigner comme accompli",
     "channelName": "Journal de fin de journée"
+  },
+  "duaReminders": {
+    "channelName": "Duas du matin et du soir",
+    "morningTitle": "Adhkār du matin",
+    "morningBody": "Les duas du matin — leur temps court jusqu’au lever du soleil.",
+    "eveningTitle": "Adhkār du soir",
+    "eveningBody": "Les duas du soir — leur temps court jusqu’au coucher du soleil.",
+    "groupTitle": "Duas du matin et du soir",
+    "morning": "Duas du matin",
+    "morningHelp": "Un rappel dans la fenêtre du matin — après Fajr, avant le lever du soleil.",
+    "evening": "Duas du soir",
+    "eveningHelp": "Un rappel dans la fenêtre du soir — après Asr, avant le coucher du soleil."
   },
   "sunnah": {
     "none": "Aucune",

@@ -45,7 +45,8 @@
     "share": "分享",
     "done": "完成",
     "delete": "删除",
-    "cancelled": "已取消。"
+    "cancelled": "已取消。",
+    "listJoin": " 与 "
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",
@@ -345,7 +346,11 @@
     "sectionQuran": "《古兰经》",
     "sectionQuranBlurb": "阅读、译文、经注、下载",
     "sectionAbout": "关于",
-    "sectionAboutBlurb": "版本、来源、许可"
+    "sectionAboutBlurb": "版本、来源、许可",
+    "malikiRows": "在当天的时间中显示",
+    "malikiRowsHelp": "关闭时只发送提醒——不会在卡片或月历中添加任何内容。",
+    "malikiEndAlerts": "以及时间结束时",
+    "malikiEndAlertsHelp": "在礼拜成为盖达的那一刻发出第二条通知。就在那个时刻，绝不提前。"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -472,7 +477,8 @@
     "snoozeChoice": "延后 {{minutes}} 分钟",
     "snoozeMinutes": "分钟",
     "daruriEndsIn": "首选时段 {{time}} 结束——还有 {{count}} 分钟",
-    "daruriEnded": "首选时段已于 {{until}} 结束"
+    "daruriEnded": "首选时段已于 {{until}} 结束",
+    "daruriExpired": "时间已过——请作为盖达补礼"
   },
   "locations": {
     "title": "已保存的地点",
@@ -1466,6 +1472,18 @@
     "body": "将五番全部标记为按时礼拜，或打开记录逐一填写。",
     "action": "全部记为已完成",
     "channelName": "一天结束记录"
+  },
+  "duaReminders": {
+    "channelName": "晨间与晚间祈祷词",
+    "morningTitle": "晨间祈祷词",
+    "morningBody": "晨间的祈祷词——时间持续到日出。",
+    "eveningTitle": "晚间祈祷词",
+    "eveningBody": "晚间的祈祷词——时间持续到日落。",
+    "groupTitle": "晨间与晚间祈祷词",
+    "morning": "晨间祈祷词",
+    "morningHelp": "在晨间时段的提醒——晨礼之后，日出之前。",
+    "evening": "晚间祈祷词",
+    "eveningHelp": "在晚间时段的提醒——晡礼之后，日落之前。"
   },
   "sunnah": {
     "none": "无",

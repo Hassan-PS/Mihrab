@@ -45,7 +45,8 @@
     "share": "Compartir",
     "done": "Hecho",
     "delete": "Eliminar",
-    "cancelled": "Cancelado."
+    "cancelled": "Cancelado.",
+    "listJoin": " y "
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -345,7 +346,11 @@
     "sectionQuran": "Corán",
     "sectionQuranBlurb": "Lectura, traducción, tafsir, descargas",
     "sectionAbout": "Acerca de",
-    "sectionAboutBlurb": "Versión, fuentes, licencias"
+    "sectionAboutBlurb": "Versión, fuentes, licencias",
+    "malikiRows": "Mostrarlos en las horas del día",
+    "malikiRowsHelp": "Desactivado, los límites solo se anuncian: no se añade nada a la tarjeta ni al mes.",
+    "malikiEndAlerts": "Y cuando el tiempo termina",
+    "malikiEndAlertsHelp": "Una segunda notificación en el momento en que la oración pasa a ser qada. A esa hora exacta, nunca antes."
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",
@@ -472,7 +477,8 @@
     "snoozeChoice": "Posponer {{minutes}} min",
     "snoozeMinutes": "Minutos",
     "daruriEndsIn": "El primer tiempo acaba a las {{time}} — en {{count}} min",
-    "daruriEnded": "El primer tiempo acabó a las {{until}}"
+    "daruriEnded": "El primer tiempo acabó a las {{until}}",
+    "daruriExpired": "El tiempo ha terminado: rézala como qada"
   },
   "locations": {
     "title": "Ubicaciones guardadas",
@@ -1466,6 +1472,18 @@
     "body": "Marca las cinco como rezadas a tiempo, o abre el registro para completarlas una a una.",
     "action": "Registrar todas como completas",
     "channelName": "Registro de fin de día"
+  },
+  "duaReminders": {
+    "channelName": "Duas de la mañana y de la tarde",
+    "morningTitle": "Adhkār de la mañana",
+    "morningBody": "Las duas de la mañana: su tiempo dura hasta el amanecer.",
+    "eveningTitle": "Adhkār de la tarde",
+    "eveningBody": "Las duas de la tarde: su tiempo dura hasta el atardecer.",
+    "groupTitle": "Duas de la mañana y de la tarde",
+    "morning": "Duas de la mañana",
+    "morningHelp": "Un recordatorio en la ventana de la mañana: después del Fajr, antes del amanecer.",
+    "evening": "Duas de la tarde",
+    "eveningHelp": "Un recordatorio en la ventana de la tarde: después del Asr, antes del atardecer."
   },
   "sunnah": {
     "none": "Ninguna",

@@ -45,7 +45,8 @@
     "share": "مشاركة",
     "done": "تم",
     "delete": "حذف",
-    "cancelled": "أُلغي."
+    "cancelled": "أُلغي.",
+    "listJoin": " و"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
@@ -345,7 +346,11 @@
     "sectionQuran": "القرآن",
     "sectionQuranBlurb": "القراءة والترجمة والتفسير والتنزيلات",
     "sectionAbout": "حول",
-    "sectionAboutBlurb": "الإصدار والمصادر والتراخيص"
+    "sectionAboutBlurb": "الإصدار والمصادر والتراخيص",
+    "malikiRows": "إظهارها في أوقات اليوم",
+    "malikiRowsHelp": "عند الإيقاف، يُنبَّه على الحدود فقط دون إضافة شيء إلى البطاقة أو الشهر.",
+    "malikiEndAlerts": "وعند انتهاء الوقت",
+    "malikiEndAlertsHelp": "تنبيه ثانٍ لحظة صيرورة الصلاة قضاءً. يصل في وقته تمامًا، لا قبله."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -472,7 +477,8 @@
     "snoozeChoice": "تأجيل {{minutes}} د",
     "snoozeMinutes": "دقائق",
     "daruriEndsIn": "ينتهي الوقت الاختياري في {{time}} — بعد {{count}} دقيقة",
-    "daruriEnded": "انتهى الوقت الاختياري في {{until}}"
+    "daruriEnded": "انتهى الوقت الاختياري في {{until}}",
+    "daruriExpired": "انتهى الوقت — صلِّها قضاءً"
   },
   "locations": {
     "title": "المواقع المحفوظة",
@@ -1466,6 +1472,18 @@
     "body": "سجّل الصلوات الخمس كلّها في وقتها، أو افتح السجل لإدخالها واحدة واحدة.",
     "action": "تسجيل الكل كمكتمل",
     "channelName": "سجل نهاية اليوم"
+  },
+  "duaReminders": {
+    "channelName": "أذكار الصباح والمساء",
+    "morningTitle": "أذكار الصباح",
+    "morningBody": "أذكار الصباح — وقتها ممتدّ حتى الشروق.",
+    "eveningTitle": "أذكار المساء",
+    "eveningBody": "أذكار المساء — وقتها ممتدّ حتى الغروب.",
+    "groupTitle": "أذكار الصباح والمساء",
+    "morning": "أذكار الصباح",
+    "morningHelp": "تذكير في وقت الصباح — بعد الفجر وقبل الشروق.",
+    "evening": "أذكار المساء",
+    "eveningHelp": "تذكير في وقت المساء — بعد العصر وقبل المغرب."
   },
   "sunnah": {
     "none": "لا يوجد",

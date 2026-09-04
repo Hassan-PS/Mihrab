@@ -133,6 +133,21 @@ export function MainTabs() {
       )}
       screenOptions={{
         headerShown: false,
+        /**
+         * Quran, Tasbih, Duas, Log and Settings centre their titles on
+         * both platforms.
+         *
+         * The same inherited default the pushed subpages had, one level
+         * up: the JS header centres on iOS and leads on Android, so five
+         * of the six tabs read as two different designs depending on the
+         * phone. Now chosen rather than inherited, and chosen to match
+         * what the subpages beneath them do.
+         *
+         * Today overrides this back to `left` and says why — that row is
+         * a wordmark next to a location chip, not the name of a screen
+         * you pushed, and centring it cost the chip the room it needs.
+         */
+        headerTitleAlign: 'center',
         tabBarActiveTintColor: palette.accentSolid,
         /**
          * A HEX, NOT `String(palette.muted)`.

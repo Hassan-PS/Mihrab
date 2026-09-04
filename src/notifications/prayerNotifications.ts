@@ -11,6 +11,7 @@ import { makeClockFormatter } from '../utils/clockFormat';
 import { alertModeFor, type AlertModeMap } from '../settings/alertModes';
 import {
   buildDaruriAlertEvents,
+  buildDaruriEndEvents,
   DARURI_OF,
 } from '../prayer/daruriTimes';
 import i18n from '../i18n';
@@ -431,6 +432,16 @@ export async function syncPrayerNotifications(params: {
   /** Minutes of warning before each of those; 0 means at the boundary. */
   daruriAlertMinutes?: number;
   /**
+   * Also announce the far end of each chosen window — the instant the
+   * prayer becomes qaḍāʾ (issue #19).
+   *
+   * One switch over the boundaries already chosen rather than a second
+   * per-prayer list: someone who wants to know when ʿAṣr's preferred time
+   * closes is the same person who wants to know when ʿAṣr runs out, and
+   * two lists to keep in step would be two chances to disagree.
+   */
+  daruriEndAlerts?: boolean;
+  /**
    * How each row announces itself — adhan / notification / silent, keyed
    * by prayer. Sparse: a row that is absent keeps what the app did
    * before the setting existed. See `settings/alertModes.ts`.
@@ -506,6 +517,20 @@ export async function syncPrayerNotifications(params: {
     now,
   );
 
+  const daruriWeek = [
+    params.today,
+    ...(params.tomorrow ? [params.tomorrow] : []),
+    ...(params.week?.slice(2, 5) ?? []),
+  ];
+  const daruriEndEvents = params.daruriEndAlerts
+    ? buildDaruriEndEvents(
+        daruriWeek,
+        params.baseDate ?? now,
+        params.daruriAlerts ?? [],
+        now,
+      )
+    : [];
+
   // Nothing schedulable — the data is entirely in the past (e.g. a sync
   // fired with state fetched 2+ days ago, before the refetch landed).
   // Keep whatever is already scheduled rather than wiping the pending
@@ -513,7 +538,8 @@ export async function syncPrayerNotifications(params: {
   if (
     audibleEvents.length === 0 &&
     reminderEvents.length === 0 &&
-    daruriEvents.length === 0
+    daruriEvents.length === 0 &&
+    daruriEndEvents.length === 0
   ) {
     return {
       status: 'scheduled',
@@ -540,6 +566,11 @@ export async function syncPrayerNotifications(params: {
   for (const e of daruriEvents) {
     desiredIds.add(
       `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-${e.at.getTime()}-${e.name}`,
+    );
+  }
+  for (const e of daruriEndEvents) {
+    desiredIds.add(
+      `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-end-${e.at.getTime()}`,
     );
   }
   await cancelOwnedPrayerNotifications([...desiredIds]);
@@ -711,7 +742,7 @@ export async function syncPrayerNotifications(params: {
             count: daruriMinutes,
           })
         : i18n.t('alertCopy.daruriEnded', {
-            defaultValue: 'First time has ended — second time until {{until}}',
+            defaultValue: 'First time has ended at {{until}}',
             until: closesAt,
           });
     await notifee.createTriggerNotification(
@@ -736,10 +767,46 @@ export async function syncPrayerNotifications(params: {
     );
   }
 
+  // ── And the far end of those windows ────────────────────────────────
+  //
+  // "This prayer is now qaḍāʾ." Fired at the instant and never early —
+  // see buildDaruriEndEvents for why the lead does not reach here — and
+  // one notification per instant, because Ẓuhr and ʿAṣr run out together
+  // at Maghrib and so do Maghrib and Ishāʾ at the next Fajr.
+  for (const e of daruriEndEvents) {
+    const names = e.keys
+      .map(k => i18n.t(`prayer.${DARURI_OF[k]}`, { defaultValue: DARURI_OF[k] }))
+      .join(i18n.t('common.listJoin', { defaultValue: ' & ' }));
+    const body = i18n.t('alertCopy.daruriExpired', {
+      defaultValue: 'The time has ended — pray it as qaḍāʾ',
+    });
+    await notifee.createTriggerNotification(
+      {
+        id: `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-end-${e.at.getTime()}`,
+        title: names,
+        body,
+        ios: { sound: reminderSound.iosSound },
+        android: {
+          style: { type: AndroidStyle.BIGTEXT, text: body },
+          channelId: reminderSound.androidChannelId,
+          smallIcon: 'ic_stat_prayer',
+          pressAction: { id: 'default' },
+          // A statement about a state that does not change back, so it
+          // keeps the ordinary floor rather than a lead-shaped timeout.
+          timeoutAfter: MAX_LINGER_MS,
+        },
+      },
+      buildTimestampTrigger(e.at.getTime(), exactAlarms),
+    );
+  }
+
   return {
     status: 'scheduled',
     scheduledCount:
-      audibleEvents.length + reminderEvents.length + daruriEvents.length,
+      audibleEvents.length +
+      reminderEvents.length +
+      daruriEvents.length +
+      daruriEndEvents.length,
     exactAlarms,
     reminderMinutes,
   };

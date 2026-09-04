@@ -221,7 +221,14 @@ export function BackupScreen() {
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
-      <CenteredColumn>
+      {/* The gap belongs to the stack, not to `contentContainerStyle`.
+          That gap separates the ScrollView's DIRECT children, and since
+          the centred column went in there has been exactly one of those,
+          so it separated nothing and the cards sat flush against each
+          other. Both props: CenteredColumn is a pass-through on a phone
+          and only grows its inner column on a tablet or a Mac. See
+          duaCardSpacing, which pins this for every screen that does it. */}
+      <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         <Text
           style={[
             typeStyle('caption'),
@@ -384,7 +391,8 @@ export function BackupScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  content: { padding: SPACING.lg, gap: SPACING.md },
+  content: { padding: SPACING.lg },
+  stack: { gap: SPACING.md },
   section: {
     textTransform: 'uppercase',
     letterSpacing: 0.8,

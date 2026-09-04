@@ -149,7 +149,16 @@ export function DuasScreen() {
         style={styles.listScroll}
         contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
         contentInsetAdjustmentBehavior="automatic">
-        <CenteredColumn>
+        {/* The gap lives HERE, not on the ScrollView's content container.
+            `contentContainerStyle`'s gap separates the ScrollView's DIRECT
+            children, and since the column went in there has been exactly
+            one of those — so it separated nothing and every dua sat flush
+            against the next, one long slab of cards. The stack is the
+            thing whose children need spacing, so the spacing belongs on
+            the stack. Both props, because CenteredColumn is a plain
+            pass-through on a phone and only grows its inner column on a
+            tablet or a Mac. Same fix as LogScreen; see duaCardSpacing. */}
+        <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         {duasByCategory(selected).map(dua => (
           <View
             key={dua.id}
@@ -321,7 +330,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabLabel: { fontSize: 14, fontWeight: '600', lineHeight: 18, includeFontPadding: false },
-  list: { padding: 16, paddingTop: 0, gap: 12 },
+  list: { padding: 16, paddingTop: 0 },
+  stack: { gap: 12 },
   card: { borderRadius: 14, padding: 16, gap: 8 },
   title: { fontSize: 14, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
   /**

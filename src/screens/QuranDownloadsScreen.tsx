@@ -219,7 +219,14 @@ export function QuranDownloadsScreen() {
       style={{ flex: 1, backgroundColor: palette.bg }}
       contentContainerStyle={styles.list}
       contentInsetAdjustmentBehavior="automatic">
-      <CenteredColumn>
+      {/* The gap belongs to the stack, not to `contentContainerStyle`.
+          That gap separates the ScrollView's DIRECT children, and since
+          the centred column went in there has been exactly one of those,
+          so it separated nothing and the cards sat flush against each
+          other. Both props: CenteredColumn is a pass-through on a phone
+          and only grows its inner column on a tablet or a Mac. See
+          duaCardSpacing, which pins this for every screen that does it. */}
+      <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
       {running ? (
         <View
           style={[
@@ -356,7 +363,8 @@ export function QuranDownloadsScreen() {
 }
 
 const styles = StyleSheet.create({
-  list: { padding: 16, gap: 10 },
+  list: { padding: 16 },
+  stack: { gap: 10 },
   total: {
     fontSize: 12,
     fontWeight: '700',

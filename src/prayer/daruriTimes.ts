@@ -639,3 +639,112 @@ export function buildDaruriAlertEvents(
     })
     .sort((a, b) => a.at.getTime() - b.at.getTime());
 }
+
+/**
+ * Where each ḍarūrī window CLOSES — the instant the prayer becomes qaḍāʾ.
+ *
+ * Nothing is computed here. The module header says it: "Each window's END
+ * is a time the card already shows — Fajr's second time ends at Sunrise,
+ * Ẓuhr's and ʿAṣr's at Maghrib, Maghrib's and Ishāʾ's at the next Fajr".
+ * This is that sentence as a table, so the alert can name the instant
+ * instead of the reader working it out from two rows.
+ *
+ * Note what the shape of it means: FOUR of the five share an end with
+ * another prayer. At Maghrib both Ẓuhr and ʿAṣr run out together, and at
+ * the next Fajr so do Maghrib and Ishāʾ. Two notifications at the same
+ * minute saying the same thing about different prayers is how an app
+ * teaches someone to swipe it away, so `buildDaruriEndEvents` groups by
+ * instant and the copy names both.
+ */
+export const DARURI_END_OF: Record<
+  DaruriKey,
+  { row: 'Sunrise' | 'Maghrib' | 'Fajr'; tomorrow: boolean }
+> = {
+  FajrDaruri: { row: 'Sunrise', tomorrow: false },
+  DhuhrDaruri: { row: 'Maghrib', tomorrow: false },
+  AsrDaruri: { row: 'Maghrib', tomorrow: false },
+  MaghribDaruri: { row: 'Fajr', tomorrow: true },
+  IshaDaruri: { row: 'Fajr', tomorrow: true },
+};
+
+/**
+ * When `key`'s window closes, for the day at `offset` in `week`.
+ *
+ * Null when the answer would have to be guessed: the row is missing, or
+ * it lives on a day past the end of the cached week. Maghrib and Ishāʾ
+ * end at TOMORROW's Fajr, so the last day the app holds times for can
+ * never answer for them — and a "your prayer has expired" notification
+ * placed by guesswork is worse than none.
+ */
+export function daruriWindowEnd(
+  week: TimingsMap[],
+  baseDay: Date,
+  offset: number,
+  key: DaruriKey,
+): Date | null {
+  const { row, tomorrow } = DARURI_END_OF[key];
+  const dayIndex = tomorrow ? offset + 1 : offset;
+  const day = week[dayIndex];
+  if (!day) return null;
+  const clock = day[row];
+  if (!clock) return null;
+  try {
+    return combineLocalDateAndTime(
+      addDays(startOfLocalDay(baseDay), dayIndex),
+      clock,
+    );
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * "This prayer is now qaḍāʾ" — the other end of the window, issue #19.
+ *
+ * The start alert answers "the preferred time is over"; a reader still
+ * has the whole second window to pray in and nothing has been lost. This
+ * one answers the question that comes after it, which the reporter asked
+ * for in as many words: *"I would also love to add the end of it as a QOL
+ * improvement so I can know when the prayer is considered missed and I
+ * should pray qadhaa'."*
+ *
+ * FIRED AT THE INSTANT, never early. `leadMinutes` shapes the start alert
+ * because a warning is something you can act on; there is no acting on
+ * this one, and a notification saying a prayer is missed while there are
+ * still ten minutes to pray it would be false. The lead deliberately does
+ * not reach here.
+ *
+ * Grouped by instant, so the pairs that expire together are one
+ * notification rather than two.
+ */
+export function buildDaruriEndEvents(
+  week: TimingsMap[],
+  baseDay: Date,
+  enabled: readonly string[],
+  now: Date,
+): { at: Date; keys: DaruriKey[] }[] {
+  if (enabled.length === 0 || week.length === 0) return [];
+  const chosen = new Set(enabled.filter(isDaruriKey));
+  if (chosen.size === 0) return [];
+
+  const byInstant = new Map<number, Set<DaruriKey>>();
+  week.forEach((_day, offset) => {
+    for (const key of DARURI_KEYS) {
+      if (!chosen.has(key)) continue;
+      const at = daruriWindowEnd(week, baseDay, offset, key);
+      if (!at || at.getTime() <= now.getTime()) continue;
+      const ms = at.getTime();
+      const set = byInstant.get(ms) ?? new Set<DaruriKey>();
+      set.add(key);
+      byInstant.set(ms, set);
+    }
+  });
+
+  return [...byInstant.entries()]
+    .map(([ms, keys]) => ({
+      at: new Date(ms),
+      // In the order the day runs, not the order a Set happened to fill.
+      keys: DARURI_KEYS.filter(k => keys.has(k)),
+    }))
+    .sort((a, b) => a.at.getTime() - b.at.getTime());
+}

@@ -382,6 +382,32 @@ export type PrayerAppSettings = {
    */
   malikiSecondTimeAlerts: string[];
   /**
+   * Whether the boundaries are DRAWN in the day's times — issue #19.
+   *
+   * Separate from the feature switch above, because the reporter asked
+   * for the alerts and specifically not the rows: *"Having an additional
+   * time in the rows will just make the UI compact and bad looking."*
+   * Until this existed the only way to get the notifications was to turn
+   * on the thing he had asked not to have, since both the card and the
+   * alert schedule hung off one switch.
+   *
+   * Defaults to true, so turning the feature on gives what it always
+   * gave and nobody who already had the rows loses them.
+   */
+  malikiSecondTimeRows: boolean;
+  /**
+   * Also announce the far end of each chosen window — the instant the
+   * prayer becomes qaḍāʾ (issue #19).
+   *
+   * The start alert says the preferred time is over and the second
+   * window has opened; this one says the window has shut. *"I would also
+   * love to add the end of it as a QOL improvement so I can know when the
+   * prayer is considered missed and I should pray qadhaa'."* One switch
+   * over the boundaries already chosen rather than a second list to keep
+   * in step with the first.
+   */
+  malikiSecondTimeEndAlerts: boolean;
+  /**
    * How long before a boundary its alert fires. 0 means at the boundary.
    *
    * The default is 15: the row on the card is the reference, and the
@@ -398,6 +424,18 @@ export type PrayerAppSettings = {
    * the reader uses). Scheduled 14 days ahead, each day's ayah drawn at
    * scheduling time; re-synced on app foreground and settings change.
    */
+  /**
+   * Morning adhkār reminder — a notification inside the window the duas
+   * themselves name: after Fajr and before sunrise.
+   *
+   * No hour to pick, deliberately. The window moves with the sun by
+   * hours over a year, so a fixed clock time is right for a fortnight
+   * and wrong after that; the time is derived from the day's own prayer
+   * times instead. See notifications/duaReminders.ts.
+   */
+  morningDuaReminderEnabled: boolean;
+  /** Evening adhkār reminder: after ʿAṣr and before sunset. */
+  eveningDuaReminderEnabled: boolean;
   ayahOfDayEnabled: boolean;
   /** Hour (0–23) the ayah-of-the-day notification fires. */
   ayahOfDayHour: number;
@@ -491,8 +529,17 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   malikiSecondTimesEnabled: false,
   malikiSecondTimeAlerts: [],
   malikiSecondTimeAlertMinutes: 15,
+  // The rows are what this feature always drew, so they stay on by
+  // default; the end-of-window alert is new and opts in like every other
+  // notification the user did not ask for.
+  malikiSecondTimeRows: true,
+  malikiSecondTimeEndAlerts: false,
   // Ayah of the day: off by default (no surprise notifications); 9:00 AM
   // when enabled — a quiet mid-morning moment.
+  // Adhkār reminders: off by default, like every other notification the
+  // user did not ask for. No time to default — it comes from the sun.
+  morningDuaReminderEnabled: false,
+  eveningDuaReminderEnabled: false,
   ayahOfDayEnabled: false,
   ayahOfDayHour: 9,
   ayahOfDayMinute: 0,

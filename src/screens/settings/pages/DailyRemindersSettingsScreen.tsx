@@ -65,6 +65,35 @@ export function DailyRemindersSettingsScreen() {
     updateSettings({ khatmahReminderEnabled: true });
   };
 
+  /**
+   * The adhkār toggles.
+   *
+   * No time row underneath either of them, which is the point of the
+   * feature: the window these duas belong to is set by the sun, so the
+   * app works the time out per day from the prayer times it already has
+   * rather than asking someone to keep a clock preference in step with
+   * the seasons. The help line says which window, because a notification
+   * whose timing you cannot predict is unsettling until you know the
+   * rule.
+   */
+  const onToggleMorningDuas = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ morningDuaReminderEnabled: false });
+      return;
+    }
+    if (!(await ensureNotifPermission())) return;
+    updateSettings({ morningDuaReminderEnabled: true });
+  };
+
+  const onToggleEveningDuas = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ eveningDuaReminderEnabled: false });
+      return;
+    }
+    if (!(await ensureNotifPermission())) return;
+    updateSettings({ eveningDuaReminderEnabled: true });
+  };
+
   // Android's back button belongs to the sheet while the sheet is open.
   const deferBack = useRef(false);
   deferBack.current = timeTarget != null;
@@ -97,6 +126,28 @@ export function DailyRemindersSettingsScreen() {
               onPress={() => setTimeTarget('ayah')}
             />
           ) : null}
+        </SettingsGroup>
+
+        {/* The adhkār, in the windows they name themselves. */}
+        <SettingsGroup title={t('duaReminders.groupTitle', 'Morning and evening duas')}>
+          <SettingsToggleRow
+            title={t('duaReminders.morning', 'Morning duas')}
+            help={t(
+              'duaReminders.morningHelp',
+              'A reminder in the morning window — after Fajr, before sunrise.',
+            )}
+            value={settings.morningDuaReminderEnabled}
+            onValueChange={onToggleMorningDuas}
+          />
+          <SettingsToggleRow
+            title={t('duaReminders.evening', 'Evening duas')}
+            help={t(
+              'duaReminders.eveningHelp',
+              'A reminder in the evening window — after ʿAṣr, before sunset.',
+            )}
+            value={settings.eveningDuaReminderEnabled}
+            onValueChange={onToggleEveningDuas}
+          />
         </SettingsGroup>
 
         {/* Khatmah daily reminder (v2.7.28) — only meaningful while a

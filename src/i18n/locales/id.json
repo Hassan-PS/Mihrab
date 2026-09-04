@@ -45,7 +45,8 @@
     "share": "Bagikan",
     "done": "Selesai",
     "delete": "Hapus",
-    "cancelled": "Dibatalkan."
+    "cancelled": "Dibatalkan.",
+    "listJoin": " & "
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -345,7 +346,11 @@
     "sectionQuran": "Al-Qur'an",
     "sectionQuranBlurb": "Bacaan, terjemahan, tafsir, unduhan",
     "sectionAbout": "Tentang",
-    "sectionAboutBlurb": "Versi, sumber, lisensi"
+    "sectionAboutBlurb": "Versi, sumber, lisensi",
+    "malikiRows": "Tampilkan di antara waktu hari ini",
+    "malikiRowsHelp": "Jika nonaktif, batas waktu hanya diberitahukan — tidak ada tambahan pada kartu atau bulan.",
+    "malikiEndAlerts": "Dan saat waktunya habis",
+    "malikiEndAlertsHelp": "Notifikasi kedua tepat saat salat menjadi qadha. Pada waktunya sendiri, tidak pernah lebih awal."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -472,7 +477,8 @@
     "snoozeChoice": "Tunda {{minutes}} mnt",
     "snoozeMinutes": "Menit",
     "daruriEndsIn": "Waktu pertama berakhir {{time}} — dalam {{count}} mnt",
-    "daruriEnded": "Waktu pertama berakhir {{until}}"
+    "daruriEnded": "Waktu pertama berakhir {{until}}",
+    "daruriExpired": "Waktunya telah habis — kerjakan sebagai qadha"
   },
   "locations": {
     "title": "Lokasi tersimpan",
@@ -1466,6 +1472,18 @@
     "body": "Tandai kelimanya sebagai tepat waktu, atau buka Catatan untuk mengisinya satu per satu.",
     "action": "Catat semua sebagai selesai",
     "channelName": "Catatan akhir hari"
+  },
+  "duaReminders": {
+    "channelName": "Doa pagi dan petang",
+    "morningTitle": "Dzikir pagi",
+    "morningBody": "Doa-doa pagi — waktunya sampai matahari terbit.",
+    "eveningTitle": "Dzikir petang",
+    "eveningBody": "Doa-doa petang — waktunya sampai matahari terbenam.",
+    "groupTitle": "Doa pagi dan petang",
+    "morning": "Doa pagi",
+    "morningHelp": "Pengingat pada waktu pagi — setelah Subuh, sebelum matahari terbit.",
+    "evening": "Doa petang",
+    "eveningHelp": "Pengingat pada waktu petang — setelah Asar, sebelum matahari terbenam."
   },
   "sunnah": {
     "none": "Tidak ada",

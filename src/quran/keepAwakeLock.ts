@@ -18,20 +18,52 @@ import {
   activateKeepAwake,
   deactivateKeepAwake,
 } from '@sayem314/react-native-keep-awake';
+import { NativeModules } from 'react-native';
 import { useEffect } from 'react';
+
+/**
+ * WHAT THE LOCK ACTUALLY PULLS, which is not the same on every platform.
+ *
+ * The library's iOS half sets `UIApplication.isIdleTimerDisabled`, which
+ * is exactly right on an iPhone and is ignored outright by macOS — a Mac
+ * Catalyst build kept the toggle lit and the display slept on the Energy
+ * Saver schedule anyway. Checked rather than assumed: with the coffee
+ * cup on, `pmset -g assertions` listed nothing owned by Mihrab.
+ *
+ * `MihrabKeepAwake` is the app's own module and speaks both: the idle
+ * timer on iOS, and on Catalyst a real `ProcessInfo` activity assertion,
+ * which is the thing macOS listens to. When it is present it wins; the
+ * library stays as the Android path (a `FLAG_KEEP_SCREEN_ON` on the
+ * window, which is correct there) and as the fallback for any build
+ * without the module.
+ */
+type NativeKeepAwake = { activate(): void; deactivate(): void };
+
+const native = (NativeModules as { MihrabKeepAwake?: NativeKeepAwake })
+  .MihrabKeepAwake;
+
+function setAwake(on: boolean): void {
+  if (native) {
+    if (on) native.activate();
+    else native.deactivate();
+    return;
+  }
+  if (on) activateKeepAwake();
+  else deactivateKeepAwake();
+}
 
 let holders = 0;
 
 /** Take the lock. Returns the release; releasing twice is harmless. */
 export function acquireKeepAwake(): () => void {
-  if (holders === 0) activateKeepAwake();
+  if (holders === 0) setAwake(true);
   holders += 1;
   let released = false;
   return () => {
     if (released) return;
     released = true;
     holders -= 1;
-    if (holders === 0) deactivateKeepAwake();
+    if (holders === 0) setAwake(false);
   };
 }
 

@@ -210,7 +210,14 @@ export function FastingScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic">
-      <CenteredColumn>
+      {/* The gap belongs to the stack, not to `contentContainerStyle`.
+          That gap separates the ScrollView's DIRECT children, and since
+          the centred column went in there has been exactly one of those,
+          so it separated nothing and the cards sat flush against each
+          other. Both props: CenteredColumn is a pass-through on a phone
+          and only grows its inner column on a tablet or a Mac. See
+          duaCardSpacing, which pins this for every screen that does it. */}
+      <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
       {/* Ramadan countdown — only when <= 90 days away. Sits at the top
           to reflect the user's spec: build anticipation as Ramadan
           approaches, fade away once we're in the month. */}
@@ -556,8 +563,8 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: {
     padding: SPACING.lg,
-    gap: SPACING.md,
   },
+  stack: { gap: SPACING.md },
   heroCard: {
     padding: SPACING.lg,
     gap: SPACING.sm,

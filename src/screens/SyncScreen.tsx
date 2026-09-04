@@ -474,7 +474,7 @@ export function SyncScreen() {
   if (ready === false) {
     return (
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <CenteredColumn>
+        <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
           <View style={[styles.card, card]}>
             <Text style={[typeStyle('body'), { color: palette.text }]}>
               {t('sync.notReady')}
@@ -487,7 +487,7 @@ export function SyncScreen() {
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      <CenteredColumn>
+      <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         <Text style={[typeStyle('body'), { color: palette.text }]}>
           {t('sync.pairIntro')}
         </Text>
@@ -811,7 +811,8 @@ export function SyncScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  content: { padding: SPACING.lg, gap: SPACING.md },
+  content: { padding: SPACING.lg },
+  stack: { gap: SPACING.md },
   section: {
     textTransform: 'uppercase',
     letterSpacing: 0.8,

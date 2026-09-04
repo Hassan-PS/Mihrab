@@ -45,7 +45,8 @@
     "share": "Dela",
     "done": "Klar",
     "delete": "Ta bort",
-    "cancelled": "Avbruten."
+    "cancelled": "Avbruten.",
+    "listJoin": " & "
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -345,7 +346,11 @@
     "sectionQuran": "Koranen",
     "sectionQuranBlurb": "Läsning, översättning, tafsir, nedladdningar",
     "sectionAbout": "Om",
-    "sectionAboutBlurb": "Version, källor, licenser"
+    "sectionAboutBlurb": "Version, källor, licenser",
+    "malikiRows": "Visa dem bland dagens tider",
+    "malikiRowsHelp": "Av: gränserna aviseras bara — inget läggs till på kortet eller i månaden.",
+    "malikiEndAlerts": "Och när tiden går ut",
+    "malikiEndAlertsHelp": "En andra avisering i det ögonblick bönen blir qada. Skickas exakt då, aldrig i förväg."
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -472,7 +477,8 @@
     "snoozeChoice": "Snooza {{minutes}} min",
     "snoozeMinutes": "Minuter",
     "daruriEndsIn": "Första tiden går ut {{time}} — om {{count}} min",
-    "daruriEnded": "Första tiden gick ut {{until}}"
+    "daruriEnded": "Första tiden gick ut {{until}}",
+    "daruriExpired": "Tiden har gått ut — be den som qada"
   },
   "locations": {
     "title": "Sparade platser",
@@ -1466,6 +1472,18 @@
     "body": "Markera alla fem som bedda i tid, eller öppna loggen och fyll i dem en och en.",
     "action": "Logga alla som utförda",
     "channelName": "Slut på dagen-logg"
+  },
+  "duaReminders": {
+    "channelName": "Morgonens och kvällens duaer",
+    "morningTitle": "Morgonens adhkār",
+    "morningBody": "Morgonens duaer — deras tid varar till soluppgången.",
+    "eveningTitle": "Kvällens adhkār",
+    "eveningBody": "Kvällens duaer — deras tid varar till solnedgången.",
+    "groupTitle": "Morgonens och kvällens duaer",
+    "morning": "Morgonens duaer",
+    "morningHelp": "En påminnelse i morgonfönstret — efter Fajr, före soluppgången.",
+    "evening": "Kvällens duaer",
+    "eveningHelp": "En påminnelse i kvällsfönstret — efter Asr, före solnedgången."
   },
   "sunnah": {
     "none": "Ingen",

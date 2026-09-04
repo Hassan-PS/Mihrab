@@ -45,7 +45,8 @@
     "share": "Teilen",
     "done": "Fertig",
     "delete": "Löschen",
-    "cancelled": "Abgebrochen."
+    "cancelled": "Abgebrochen.",
+    "listJoin": " & "
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",
@@ -345,7 +346,11 @@
     "sectionQuran": "Koran",
     "sectionQuranBlurb": "Lesen, Übersetzung, Tafsir, Downloads",
     "sectionAbout": "Über",
-    "sectionAboutBlurb": "Version, Quellen, Lizenzen"
+    "sectionAboutBlurb": "Version, Quellen, Lizenzen",
+    "malikiRows": "In den Zeiten des Tages anzeigen",
+    "malikiRowsHelp": "Aus werden die Grenzen nur angekündigt — der Karte und dem Monat wird nichts hinzugefügt.",
+    "malikiEndAlerts": "Und wenn die Zeit endet",
+    "malikiEndAlertsHelp": "Eine zweite Benachrichtigung in dem Moment, in dem das Gebet zu Qada wird. Genau dann, nie früher."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -472,7 +477,8 @@
     "snoozeChoice": "{{minutes}} Min. später",
     "snoozeMinutes": "Minuten",
     "daruriEndsIn": "Die erste Zeit endet um {{time}} — in {{count}} Min.",
-    "daruriEnded": "Die erste Zeit endete um {{until}}"
+    "daruriEnded": "Die erste Zeit endete um {{until}}",
+    "daruriExpired": "Die Zeit ist vorbei — bete sie als Qada"
   },
   "locations": {
     "title": "Gespeicherte Orte",
@@ -1466,6 +1472,18 @@
     "body": "Alle fünf als pünktlich gebetet eintragen oder das Protokoll öffnen und einzeln ausfüllen.",
     "action": "Alle als erledigt eintragen",
     "channelName": "Tagesabschluss-Protokoll"
+  },
+  "duaReminders": {
+    "channelName": "Morgen- und Abend-Duas",
+    "morningTitle": "Morgen-Adhkār",
+    "morningBody": "Die Morgen-Duas — ihre Zeit läuft bis zum Sonnenaufgang.",
+    "eveningTitle": "Abend-Adhkār",
+    "eveningBody": "Die Abend-Duas — ihre Zeit läuft bis zum Sonnenuntergang.",
+    "groupTitle": "Morgen- und Abend-Duas",
+    "morning": "Morgen-Duas",
+    "morningHelp": "Eine Erinnerung im Morgenfenster — nach Fajr, vor Sonnenaufgang.",
+    "evening": "Abend-Duas",
+    "eveningHelp": "Eine Erinnerung im Abendfenster — nach Asr, vor Sonnenuntergang."
   },
   "sunnah": {
     "none": "Keine",

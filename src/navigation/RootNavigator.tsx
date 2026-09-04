@@ -118,6 +118,21 @@ export function RootNavigator() {
         headerShadowVisible: false,
         headerBlurEffect: theme.dark ? 'dark' : 'light',
         headerTransparent: isIOS,
+        /**
+         * Centred on both platforms, not just on iOS.
+         *
+         * This is one of the few places the app took a platform default
+         * without deciding anything: native-stack centres a title on iOS
+         * and left-aligns it on Android, so the same subpage — Notifications,
+         * Attributions, Daily reminders — read as two different designs
+         * depending on the phone it was opened on. Every other piece of
+         * chrome here is chosen rather than inherited; this one is now too.
+         *
+         * Only the pushed subpages. The tabs keep their own alignment
+         * (see MainTabs), where the title sits beside a large-title layout
+         * that is a different shape altogether.
+         */
+        headerTitleAlign: 'center',
         headerStyle: { backgroundColor: isIOS ? 'transparent' : theme.colors.background },
         headerLargeStyle: { backgroundColor: 'transparent' },
         // Keep content above the system navigation bar (edge-to-edge bottom inset).
