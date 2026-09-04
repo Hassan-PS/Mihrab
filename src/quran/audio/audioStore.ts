@@ -87,83 +87,97 @@ export type AudioDownloadHandle = {
   cancel: () => void;
 };
 
-/** Download one surah's ayah files for a reciter (skips valid files). */
-export function downloadSurahAudio(
-  reciterId: string,
+/** One ayah's audio, on disk, or a throw. Up to 3 attempts. */
+async function fetchAyahFile(
+  reciter: Reciter,
   surah: number,
+  ayah: number,
+  path: string,
+): Promise<void> {
+  // Transient stream resets are common on multiplexed CDN connections
+  // (same pattern as mushafDownload).
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const tmp = `${path}.part`;
+    try {
+      // No RNBlobUtil `timeout` config — it breaks Android downloads
+      // outright; the JS watchdog below covers hangs.
+      const task = ReactNativeBlobUtil.config({
+        path: tmp,
+        overwrite: true,
+      }).fetch('GET', ayahAudioUrl(reciter, surah, ayah));
+      let watchdog: ReturnType<typeof setTimeout> | null = null;
+      const res = await Promise.race([
+        task,
+        new Promise<never>((_, reject) => {
+          watchdog = setTimeout(() => {
+            task.cancel(() => undefined);
+            reject(new Error('audio fetch timed out'));
+          }, 60_000);
+        }),
+      ]).finally(() => {
+        if (watchdog != null) clearTimeout(watchdog);
+      });
+      const stat = await ReactNativeBlobUtil.fs.stat(tmp).catch(() => null);
+      if (res.info().status !== 200 || !stat || Number(stat.size) <= 1000) {
+        throw new Error(`ayah ${surah}:${ayah}`);
+      }
+      await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
+      await ReactNativeBlobUtil.fs.mv(tmp, path);
+      return;
+    } catch (e) {
+      lastError = e;
+      await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
+      if (attempt < 3) {
+        await new Promise<void>(r => setTimeout(r, 400 * attempt));
+      }
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+/** How many workers pull from a download queue at once. */
+const WORKERS = 4;
+
+/**
+ * Work a queue of ayahs down to nothing, four at a time.
+ *
+ * Shared by the one-surah download and the whole-Quran one, which differ
+ * only in the length of the list. A file already on disk and big enough to
+ * be real is skipped, and THAT is the whole of the resume story: a run
+ * that was cancelled at ayah four thousand starts again from the top and
+ * spends a few seconds walking past what it already has. No index, no
+ * checkpoint, nothing to get out of step with the files themselves.
+ *
+ * A failure is counted, never thrown — six thousand files over a phone
+ * connection will drop some, and losing the other five thousand nine
+ * hundred over it would be absurd. What failed is left for the next run to
+ * find missing.
+ */
+function runAyahQueue(
+  reciterId: string,
+  queue: Array<{ surah: number; ayah: number }>,
   onProgress?: (p: AudioDownloadProgress) => void,
 ): AudioDownloadHandle {
   const reciter: Reciter = findReciter(reciterId);
-  const meta = SURAHS.find(s => s.number === surah);
-  const total = meta?.ayahCount ?? 0;
+  const total = queue.length;
+  const pending = [...queue];
   let cancelled = false;
   let done = 0;
   let failed = 0;
 
   const run = async (): Promise<boolean> => {
-    if (!meta) return false;
+    if (total === 0) return false;
     await mkdirDeep(audioDir(reciterId));
-    const queue: number[] = [];
-    for (let a = 1; a <= meta.ayahCount; a++) queue.push(a);
 
     const worker = async (): Promise<void> => {
       while (!cancelled) {
-        const ayah = queue.shift();
-        if (ayah == null) return;
-        const path = ayahAudioFilePath(reciterId, surah, ayah);
+        const next = pending.shift();
+        if (next == null) return;
+        const path = ayahAudioFilePath(reciterId, next.surah, next.ayah);
         try {
           if (!(await fileValid(path))) {
-            // Up to 3 attempts — transient stream resets are common on
-            // multiplexed CDN connections (same pattern as mushafDownload).
-            let ok = false;
-            let lastError: unknown = null;
-            for (let attempt = 1; attempt <= 3 && !ok; attempt++) {
-              const tmp = `${path}.part`;
-              try {
-                // No RNBlobUtil `timeout` config — it breaks Android
-                // downloads outright; JS watchdog below covers hangs.
-                const task = ReactNativeBlobUtil.config({
-                  path: tmp,
-                  overwrite: true,
-                }).fetch('GET', ayahAudioUrl(reciter, surah, ayah));
-                let watchdog: ReturnType<typeof setTimeout> | null = null;
-                const res = await Promise.race([
-                  task,
-                  new Promise<never>((_, reject) => {
-                    watchdog = setTimeout(() => {
-                      task.cancel(() => undefined);
-                      reject(new Error('audio fetch timed out'));
-                    }, 60_000);
-                  }),
-                ]).finally(() => {
-                  if (watchdog != null) clearTimeout(watchdog);
-                });
-                const stat = await ReactNativeBlobUtil.fs
-                  .stat(tmp)
-                  .catch(() => null);
-                if (
-                  res.info().status !== 200 ||
-                  !stat ||
-                  Number(stat.size) <= 1000
-                ) {
-                  throw new Error(`ayah ${surah}:${ayah}`);
-                }
-                await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
-                await ReactNativeBlobUtil.fs.mv(tmp, path);
-                ok = true;
-              } catch (e) {
-                lastError = e;
-                await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
-                if (attempt < 3) {
-                  await new Promise<void>(r => setTimeout(r, 400 * attempt));
-                }
-              }
-            }
-            if (!ok) {
-              throw lastError instanceof Error
-                ? lastError
-                : new Error(String(lastError));
-            }
+            await fetchAyahFile(reciter, next.surah, next.ayah, path);
           }
         } catch {
           failed += 1;
@@ -174,7 +188,7 @@ export function downloadSurahAudio(
       }
     };
 
-    await Promise.all(Array.from({ length: 4 }, () => worker()));
+    await Promise.all(Array.from({ length: WORKERS }, () => worker()));
     return !cancelled && failed === 0;
   };
 
@@ -184,6 +198,54 @@ export function downloadSurahAudio(
       cancelled = true;
     },
   };
+}
+
+/** Download one surah's ayah files for a reciter (skips valid files). */
+export function downloadSurahAudio(
+  reciterId: string,
+  surah: number,
+  onProgress?: (p: AudioDownloadProgress) => void,
+): AudioDownloadHandle {
+  const meta = SURAHS.find(s => s.number === surah);
+  if (!meta) {
+    return { promise: Promise.resolve(false), cancel: () => undefined };
+  }
+  const queue = Array.from({ length: meta.ayahCount }, (_, i) => ({
+    surah,
+    ayah: i + 1,
+  }));
+  return runAyahQueue(reciterId, queue, onProgress);
+}
+
+/** Every ayah in the book, in recitation order. */
+export function allAyahRefs(): Array<{ surah: number; ayah: number }> {
+  const refs: Array<{ surah: number; ayah: number }> = [];
+  for (const s of SURAHS) {
+    for (let a = 1; a <= s.ayahCount; a++) refs.push({ surah: s.number, ayah: a });
+  }
+  return refs;
+}
+
+/** 6,236. Computed rather than written down, so it cannot drift. */
+export function totalAyahCount(): number {
+  return SURAHS.reduce((sum, s) => sum + s.ayahCount, 0);
+}
+
+/**
+ * The whole Quran in one reciter's voice.
+ *
+ * The same files the reader already streams and prefetches, into the same
+ * folder — `<Documents>/quran/audio/{reciterId}/` — so this is not a
+ * second copy of anything. Someone who downloads a reciter to listen to on
+ * a flight has, by the same act, made the mushaf's play-from-here work
+ * without a connection, and someone who has been reading with recitation
+ * for a month finds this download already part-done.
+ */
+export function downloadReciterAudio(
+  reciterId: string,
+  onProgress?: (p: AudioDownloadProgress) => void,
+): AudioDownloadHandle {
+  return runAyahQueue(reciterId, allAyahRefs(), onProgress);
 }
 
 /**
@@ -230,6 +292,84 @@ export async function prefetchAyahAudio(
     return path;
   } catch {
     return null;
+  }
+}
+
+/**
+ * The bitrate the reciter's files were encoded at, from the folder name.
+ *
+ * Every EveryAyah folder ends in it — `Husary_128kbps`, `Ghamadi_40kbps` —
+ * and the spread is wide enough to matter: the same book is 1.4 GB in one
+ * voice and 350 MB in another. Someone deciding whether to put this on
+ * their phone is really asking about that number, so it is worth reading
+ * rather than assuming.
+ */
+export function reciterBitrateKbps(reciter: Reciter): number {
+  const match = /_(\d+)kbps$/.exec(reciter.folder);
+  const kbps = match ? Number(match[1]) : NaN;
+  // 64 is the middle of the catalog and the safe thing to say when a
+  // folder ever stops following the convention.
+  return Number.isFinite(kbps) && kbps > 0 ? kbps : 64;
+}
+
+/**
+ * Roughly how long a whole recitation runs, in hours.
+ *
+ * Murattal readings of the whole book sit between about twenty and thirty
+ * hours depending on the reciter's pace, and nothing in the catalog
+ * carries its own duration. Twenty-four is the middle of that, and every
+ * number derived from it is presented as "about" for exactly this reason —
+ * it is the right order of magnitude for deciding whether a download fits
+ * on a phone, and it is not a promise.
+ */
+const RECITATION_HOURS = 24;
+
+/** About how many bytes a reciter's whole Quran will take. */
+export function estimatedReciterBytes(reciterId: string): number {
+  const kbps = reciterBitrateKbps(findReciter(reciterId));
+  return Math.round((RECITATION_HOURS * 3600 * kbps * 1000) / 8);
+}
+
+export type ReciterAudioStats = {
+  /** Ayah files on disk for this reciter. */
+  files: number;
+  bytes: number;
+  /** Every ayah in the book is here. */
+  complete: boolean;
+};
+
+/**
+ * What this reciter has on disk — one directory listing, not 6,236 stats.
+ *
+ * `lstat` on the folder returns every entry with its size in one call,
+ * which is the difference between a screen that opens and one that thinks
+ * about it for ten seconds. `.part` files are excluded: a half-written
+ * ayah is not a downloaded one, and counting it would make a cancelled run
+ * look further along than it is.
+ */
+export async function reciterAudioStats(
+  reciterId: string,
+): Promise<ReciterAudioStats> {
+  const empty: ReciterAudioStats = { files: 0, bytes: 0, complete: false };
+  try {
+    const dir = audioDir(reciterId);
+    if (!(await ReactNativeBlobUtil.fs.exists(dir))) return empty;
+    const entries = await ReactNativeBlobUtil.fs.lstat(dir).catch(() => []);
+    let files = 0;
+    let bytes = 0;
+    for (const entry of entries) {
+      const name = String(entry.filename ?? '');
+      if (!name.endsWith('.mp3')) continue;
+      const size = Number(entry.size) || 0;
+      // Same floor the downloader validates against, so "on disk" means
+      // the same thing to both.
+      if (size <= 1000) continue;
+      files += 1;
+      bytes += size;
+    }
+    return { files, bytes, complete: files >= totalAyahCount() };
+  } catch {
+    return empty;
   }
 }
 

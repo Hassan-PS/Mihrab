@@ -233,6 +233,10 @@ jest.mock('react-native-track-player', () => ({
     skipToNext: jest.fn(async () => {}),
     skipToPrevious: jest.fn(async () => {}),
     getQueue: jest.fn(async () => []),
+    // The gapless prefetch and the listening top-up both walk the queue
+    // relative to where playback is, and both hot-swap entries behind it.
+    getActiveTrackIndex: jest.fn(async () => 0),
+    remove: jest.fn(async () => {}),
   },
   useProgress: jest.fn(() => ({ position: 0, duration: 0, buffered: 0 })),
   usePlaybackState: jest.fn(() => ({ state: 'none' })),
@@ -301,12 +305,21 @@ jest.mock('@notifee/react-native', () => ({
     // every "did it cancel the old one?" assertion passed for free.
     getTriggerNotificationIds: jest.fn(() => Promise.resolve([])),
     openAlarmPermissionSettings: jest.fn(() => Promise.resolve()),
+    // The Quran download's foreground service. Absent from this mock,
+    // `stopForegroundService` was `undefined`, the call threw, and
+    // downloadNotification's own try/catch swallowed it — so every
+    // assertion about tearing the progress bar down passed without the
+    // teardown ever being attempted. That is how a bar that outlived its
+    // download shipped with a green suite.
+    stopForegroundService: jest.fn(() => Promise.resolve()),
+    registerForegroundService: jest.fn(),
   },
   TriggerType: { TIMESTAMP: 0, INTERVAL: 1 },
   AndroidStyle: { BIGTEXT: 0, BIGPICTURE: 1, INBOX: 2, MESSAGING: 3 },
   AndroidCategory: { STATUS: 'status', ALARM: 'alarm', REMINDER: 'reminder' },
   AndroidVisibility: { PRIVATE: 0, PUBLIC: 1, SECRET: -1 },
   AndroidImportance: { DEFAULT: 3, HIGH: 4, LOW: 2, MIN: 1, NONE: 0 },
+  AndroidForegroundServiceType: { FOREGROUND_SERVICE_TYPE_DATA_SYNC: 1 },
   AndroidNotificationSetting: { DISABLED: 0, ENABLED: 1, NOT_SUPPORTED: -1 },
   AuthorizationStatus: {
     NOT_DETERMINED: -1,

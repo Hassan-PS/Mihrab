@@ -46,11 +46,11 @@ import {
 } from './mushafDownload';
 import { fontStoreKnownComplete, fontStoreStats } from './mushafFontStore';
 import {
-  cancelMushafDownload,
-  mushafDownloadState,
-  startMushafDownload,
-  subscribeMushafDownload,
-} from './mushafDownloadManager';
+  cancelQuranDownload,
+  quranDownloadState,
+  startQuranDownload,
+  subscribeQuranDownload,
+} from './quranDownloadManager';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
 import { MushafPhoneReader } from './MushafPhoneReader';
 import { MushafSpreadReader } from './MushafSpreadReader';
@@ -158,7 +158,7 @@ export function MushafReader(props: Props) {
   /**
    * Follow the download wherever it was started from.
    *
-   * The download outlives this screen — see mushafDownloadManager — so what
+   * The download outlives this screen — see quranDownloadManager — so what
    * a mount does is ASK what is happening rather than start or stop
    * anything. Coming back to a reader that is halfway through six hundred
    * pages shows the bar where it actually is, and a run that finished while
@@ -170,18 +170,23 @@ export function MushafReader(props: Props) {
     // screens — would put its gate in front of a muṣḥaf that is already
     // on the device and needs nothing.
     if (bundledRiwayah) return undefined;
-    const apply = (s: ReturnType<typeof mushafDownloadState>) => {
+    const apply = (s: ReturnType<typeof quranDownloadState>) => {
+      // The manager also runs the recitation downloads now. A reciter
+      // arriving in the background is not this gate's business, and
+      // reporting it here would put a mushaf progress bar in front of a
+      // book that is already on the device.
       if (s.running) {
+        if (s.running.kind !== 'fonts') return;
         setDownloadStatus('downloading');
         if (s.progress.total > 0) publishProgress(s.progress);
         return;
       }
-      if (!s.last) return;
+      if (!s.last || s.last.job.kind !== 'fonts') return;
       setLastRunFailed(s.last.complete ? 0 : s.last.failed);
       setDownloadStatus(s.last.complete ? 'ready' : 'needs_download');
     };
-    apply(mushafDownloadState());
-    return subscribeMushafDownload(apply);
+    apply(quranDownloadState());
+    return subscribeQuranDownload(apply);
   }, [bundledRiwayah, publishProgress]);
 
   const startDownload = () => {
@@ -200,7 +205,7 @@ export function MushafReader(props: Props) {
     // The manager owns it from here: it keeps running when this screen goes
     // away, posts the progress notification, and tells whoever is listening
     // how it ended. The subscription above is what updates this screen.
-    startMushafDownload('fonts');
+    startQuranDownload({ kind: 'fonts' });
   };
 
   // ── The keyboard, bound once ────────────────────────────────────────
@@ -306,7 +311,7 @@ export function MushafReader(props: Props) {
             accessibilityRole="button"
             accessibilityLabel={t('common.cancel', 'Cancel')}
             hitSlop={10}
-            onPress={() => cancelMushafDownload()}>
+            onPress={() => cancelQuranDownload()}>
             <Text style={[styles.stripCancel, { color: palette.accentSolid }]}>
               {t('common.cancel', 'Cancel')}
             </Text>

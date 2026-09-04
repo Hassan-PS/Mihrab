@@ -46,6 +46,7 @@ import {
   subscribeQuranState,
 } from './quran/quranState';
 import { reconcileMushafAssets } from './quran/mushafAssets';
+import { clearStaleDownloadNotification } from './quran/downloadNotification';
 import { startAutoSync } from './sync/autoSync';
 import {
   dayTzFingerprint,
@@ -248,6 +249,24 @@ export function AppNavigationRoot() {
   // the screen that shows the data, whichever screen that is. Throttled and
   // silent — see autoSync.ts.
   useEffect(() => startAutoSync(), []);
+
+  /**
+   * Take down a download bar left behind by a process that is gone.
+   *
+   * An ongoing notification is the foreground service's own, so when the
+   * app dies mid-download — a crash, a Force stop, an install over the
+   * top — it is left in the shade with nothing behind it and the user
+   * cannot even swipe it away. We are booting, so no download of ours is
+   * running and anything under that id is a ghost.
+   *
+   * Here rather than at the top of the bundle: notifee may start this
+   * process itself to run the service task, and the registration in
+   * index.js has to have happened before anything asks the service to
+   * stop.
+   */
+  useEffect(() => {
+    void clearStaleDownloadNotification();
+  }, []);
 
   // Write anything tapped on the Log Today widget into the journal.
   //

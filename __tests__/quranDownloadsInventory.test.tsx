@@ -68,6 +68,11 @@ jest.mock('react-native-blob-util', () => ({
 }));
 
 jest.mock('react-i18next', () => ({
+  // The screen now reaches the download manager, which reaches the
+  // notification, which imports src/i18n — and that calls `use()` at module
+  // load. A mock without this passes `undefined` to i18next and the whole
+  // suite fails to run before a single test starts.
+  initReactI18next: { type: '3rdParty', init: () => {} },
   useTranslation: () => ({
     t: (_key: string, second?: unknown, third?: unknown) => {
       const isOpts = (v: unknown) => v != null && typeof v === 'object';

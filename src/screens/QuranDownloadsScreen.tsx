@@ -47,6 +47,12 @@ import {
 } from '../quran/mushafFontStore';
 import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
 import { deleteReciterAudio } from '../quran/audio/audioStore';
+import {
+  cancelQuranDownload,
+  quranDownloadState,
+  subscribeQuranDownload,
+  type QuranDownloadState,
+} from '../quran/quranDownloadManager';
 import { findReciter } from '../quran/audio/reciters';
 import { deleteTafsirCache, tafsirDiskUsage } from '../quran/tafsir';
 import { RiwayahDownloadSection } from '../quran/RiwayahDownloadSection';
@@ -124,6 +130,29 @@ export function QuranDownloadsScreen() {
     void refresh();
   }, [refresh]);
 
+  /**
+   * What is downloading right now.
+   *
+   * This screen used to be an inventory and nothing else: it could tell
+   * you a reciter took 1.2 GB and let you delete them, but a download in
+   * flight was invisible here — you had to be on the screen that started
+   * it. Which is precisely backwards for a page called "Manage
+   * downloads", and it meant the only place to cancel a run was the place
+   * you had already navigated away from.
+   *
+   * Re-reading the inventory when a run ENDS is the other half: the moment
+   * a download finishes is the moment every byte count on this screen is
+   * wrong.
+   */
+  const [download, setDownload] = useState<QuranDownloadState>(
+    quranDownloadState,
+  );
+  useEffect(() => subscribeQuranDownload(setDownload), []);
+  const running = download.running;
+  useEffect(() => {
+    if (!running) void refresh();
+  }, [running, refresh]);
+
   const confirmDelete = (label: string, action: () => Promise<void>) => {
     Alert.alert(
       t('downloads.deleteTitle', 'Delete download?'),
@@ -191,6 +220,48 @@ export function QuranDownloadsScreen() {
       contentContainerStyle={styles.list}
       contentInsetAdjustmentBehavior="automatic">
       <CenteredColumn>
+      {running ? (
+        <View
+          style={[
+            styles.row,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rowTitle, { color: palette.text }]}>
+              {running.kind === 'audio'
+                ? findReciter(running.reciterId).name
+                : t('downloads.mushaf', 'Mushaf pages')}
+            </Text>
+            <Text style={[styles.rowSub, { color: palette.muted }]}>
+              {running.kind === 'audio'
+                ? t('quran.downloadProgressAyahs', {
+                    done: download.progress.done,
+                    total: download.progress.total,
+                  })
+                : t('quran.downloadProgress', {
+                    done: download.progress.done,
+                    total: download.progress.total,
+                  })}
+            </Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('common.cancel', 'Cancel')}
+            hitSlop={8}
+            onPress={() => cancelQuranDownload()}
+            style={[styles.deleteBtn, { borderColor: palette.border }]}>
+            <Text
+              style={{
+                color: palette.accentSolid,
+                fontWeight: '700',
+                fontSize: 12,
+              }}>
+              {t('common.cancel', 'Cancel')}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       <Text style={[styles.total, { color: palette.muted }]}>
         {loading
           ? t('quran.loading', 'Loading…')
