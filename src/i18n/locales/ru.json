@@ -321,7 +321,21 @@
     "alertModeAdhan": "Азан",
     "alertModeNotification": "Сигнал",
     "alertModeSilent": "Тихо",
-    "alertModeHint": "Меняет, как эта молитва вас уведомляет"
+    "alertModeHint": "Меняет, как эта молитва вас уведомляет",
+    "sectionPrayerTimes": "Время намаза",
+    "sectionPrayerTimesBlurb": "Источник, метод расчёта, мазхаб, поправки",
+    "sectionNotifications": "Уведомления",
+    "sectionNotificationsBlurb": "Звуки, заблаговременные напоминания, доп. времена",
+    "sectionLocation": "Местоположение",
+    "sectionLocationBlurb": "Где вы и ваши сохранённые места",
+    "sectionAppearance": "Вид и язык",
+    "sectionAppearanceBlurb": "Тема, акцент, формат времени, язык",
+    "sectionWidgets": "Главный экран",
+    "sectionWidgetsBlurb": "Виджет и живая активность",
+    "sectionQuran": "Коран",
+    "sectionQuranBlurb": "Чтение, перевод, тафсир, загрузки",
+    "sectionAbout": "О приложении",
+    "sectionAboutBlurb": "Версия, источники, лицензии"
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",

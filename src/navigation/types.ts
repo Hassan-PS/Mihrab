@@ -8,8 +8,7 @@ export type MainTabParamList = {
   TasbihTab: undefined;
   DuasTab: undefined;
   LogTab: undefined;
-  /** `highlight` flashes a section after a deep link from Home. */
-  SettingsTab: { highlight?: 'savedLocations' } | undefined;
+  SettingsTab: undefined;
 };
 
 export type RootStackParamList = {
@@ -31,4 +30,22 @@ export type RootStackParamList = {
   Backup: undefined;
   Sync: undefined;
   Fasting: undefined;
+  /**
+   * The settings subpages — one destination per section, pushed from the
+   * Settings index.
+   *
+   * Routes on the ROOT stack rather than a nested stack inside the tab,
+   * because that is what gives them the platform header: a real title
+   * with the system's own back control beside it, the swipe-back gesture
+   * on iOS, and the predictive-back animation on Android. A nested
+   * navigator would have meant drawing all of that by hand.
+   */
+  SettingsAppearance: undefined;
+  SettingsPrayerTimes: undefined;
+  /** `highlight` flashes the saved-locations card after a deep link from Home. */
+  SettingsLocation: { highlight?: 'savedLocations' } | undefined;
+  SettingsNotifications: undefined;
+  SettingsWidgets: undefined;
+  SettingsQuran: undefined;
+  SettingsAbout: undefined;
 };

@@ -321,7 +321,21 @@
     "alertModeAdhan": "Adhan",
     "alertModeNotification": "Avisering",
     "alertModeSilent": "Tyst",
-    "alertModeHint": "Ändrar hur den här bönen aviserar dig"
+    "alertModeHint": "Ändrar hur den här bönen aviserar dig",
+    "sectionPrayerTimes": "Bönetider",
+    "sectionPrayerTimesBlurb": "Källa, beräkningsmetod, madhhab, justeringar",
+    "sectionNotifications": "Aviseringar",
+    "sectionNotificationsBlurb": "Ljud, förvarningar, extra tider",
+    "sectionLocation": "Plats",
+    "sectionLocationBlurb": "Var du är och dina sparade platser",
+    "sectionAppearance": "Utseende och språk",
+    "sectionAppearanceBlurb": "Tema, accentfärg, tidsformat, språk",
+    "sectionWidgets": "Hemskärm",
+    "sectionWidgetsBlurb": "Widget och live-aktivitet",
+    "sectionQuran": "Koranen",
+    "sectionQuranBlurb": "Läsning, översättning, tafsir, nedladdningar",
+    "sectionAbout": "Om",
+    "sectionAboutBlurb": "Version, källor, licenser"
   },
   "locationSetup": {
     "headline": "Ange din plats",

@@ -17,6 +17,7 @@ import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import { BackupScreen } from '../screens/BackupScreen';
 import { SyncScreen } from '../screens/SyncScreen';
 import { FastingScreen } from '../screens/FastingScreen';
+import { SETTINGS_SUBPAGES } from '../screens/settings/subpages';
 import type { RootStackParamList } from './types';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 
@@ -218,6 +219,26 @@ export function RootNavigator() {
         component={FastingScreen}
         options={{ title: t('nav.fasting'), headerLargeTitle: false }}
       />
+
+      {/* The settings subpages.
+       *
+       * `headerLargeTitle: false` and `headerBackTitle` matching every
+       * other pushed screen in this stack: the title sits small at the
+       * top with the system back control beside it, which is the styled
+       * back button — drawing our own would put a second title under the
+       * real one on iOS and lose the swipe-back gesture on both. */}
+      {SETTINGS_SUBPAGES.map(page => (
+        <Stack.Screen
+          key={page.route}
+          name={page.route}
+          component={page.component}
+          options={{
+            title: t(page.titleKey),
+            headerLargeTitle: false,
+            headerBackTitle: t('nav.settings', 'Settings'),
+          }}
+        />
+      ))}
     </Stack.Navigator>
   );
 }

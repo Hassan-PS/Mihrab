@@ -321,7 +321,21 @@
     "alertModeAdhan": "Ezan",
     "alertModeNotification": "Bildirim",
     "alertModeSilent": "Sessiz",
-    "alertModeHint": "Bu namazın sizi nasıl uyaracağını değiştirir"
+    "alertModeHint": "Bu namazın sizi nasıl uyaracağını değiştirir",
+    "sectionPrayerTimes": "Namaz vakitleri",
+    "sectionPrayerTimesBlurb": "Kaynak, hesaplama yöntemi, mezhep, düzeltmeler",
+    "sectionNotifications": "Bildirimler",
+    "sectionNotificationsBlurb": "Sesler, önceden hatırlatma, ek vakitler",
+    "sectionLocation": "Konum",
+    "sectionLocationBlurb": "Nerede olduğunuz ve kayıtlı yerleriniz",
+    "sectionAppearance": "Görünüm ve dil",
+    "sectionAppearanceBlurb": "Tema, vurgu rengi, saat biçimi, dil",
+    "sectionWidgets": "Ana ekran",
+    "sectionWidgetsBlurb": "Widget ve canlı etkinlik",
+    "sectionQuran": "Kur'an",
+    "sectionQuranBlurb": "Okuma, meal, tefsir, indirmeler",
+    "sectionAbout": "Hakkında",
+    "sectionAboutBlurb": "Sürüm, kaynaklar, lisanslar"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",

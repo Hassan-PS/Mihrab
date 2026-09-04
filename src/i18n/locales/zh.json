@@ -321,7 +321,21 @@
     "alertModeAdhan": "宣礼",
     "alertModeNotification": "提示音",
     "alertModeSilent": "静音",
-    "alertModeHint": "更改此番礼拜的提醒方式"
+    "alertModeHint": "更改此番礼拜的提醒方式",
+    "sectionPrayerTimes": "礼拜时间",
+    "sectionPrayerTimesBlurb": "来源、计算方法、教法学派、微调",
+    "sectionNotifications": "通知",
+    "sectionNotificationsBlurb": "提示音、提前提醒、额外时刻",
+    "sectionLocation": "位置",
+    "sectionLocationBlurb": "你在哪里，以及已保存的地点",
+    "sectionAppearance": "外观与语言",
+    "sectionAppearanceBlurb": "主题、强调色、时间格式、语言",
+    "sectionWidgets": "主屏幕",
+    "sectionWidgetsBlurb": "小组件与实时活动",
+    "sectionQuran": "《古兰经》",
+    "sectionQuranBlurb": "阅读、译文、经注、下载",
+    "sectionAbout": "关于",
+    "sectionAboutBlurb": "版本、来源、许可"
   },
   "locationSetup": {
     "headline": "设置您的位置",

@@ -321,7 +321,21 @@
     "alertModeAdhan": "अज़ान",
     "alertModeNotification": "सूचना",
     "alertModeSilent": "मौन",
-    "alertModeHint": "यह नमाज़ आपको कैसे सूचित करे, बदलता है"
+    "alertModeHint": "यह नमाज़ आपको कैसे सूचित करे, बदलता है",
+    "sectionPrayerTimes": "नमाज़ के समय",
+    "sectionPrayerTimesBlurb": "स्रोत, गणना विधि, मज़हब, समायोजन",
+    "sectionNotifications": "सूचनाएँ",
+    "sectionNotificationsBlurb": "ध्वनियाँ, अग्रिम अनुस्मारक, अतिरिक्त समय",
+    "sectionLocation": "स्थान",
+    "sectionLocationBlurb": "आप कहाँ हैं, और सहेजे गए स्थान",
+    "sectionAppearance": "रूप और भाषा",
+    "sectionAppearanceBlurb": "थीम, रंग, समय प्रारूप, भाषा",
+    "sectionWidgets": "होम स्क्रीन",
+    "sectionWidgetsBlurb": "विजेट और लाइव गतिविधि",
+    "sectionQuran": "क़ुरआन",
+    "sectionQuranBlurb": "पठन, अनुवाद, तफ़सीर, डाउनलोड",
+    "sectionAbout": "परिचय",
+    "sectionAboutBlurb": "संस्करण, स्रोत, लाइसेंस"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",

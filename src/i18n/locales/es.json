@@ -321,7 +321,21 @@
     "alertModeAdhan": "Adhán",
     "alertModeNotification": "Aviso",
     "alertModeSilent": "Silencio",
-    "alertModeHint": "Cambia cómo te avisa esta oración"
+    "alertModeHint": "Cambia cómo te avisa esta oración",
+    "sectionPrayerTimes": "Horarios de oración",
+    "sectionPrayerTimesBlurb": "Fuente, método de cálculo, madhab, ajustes",
+    "sectionNotifications": "Notificaciones",
+    "sectionNotificationsBlurb": "Sonidos, avisos anticipados, horarios extra",
+    "sectionLocation": "Ubicación",
+    "sectionLocationBlurb": "Dónde estás y tus lugares guardados",
+    "sectionAppearance": "Apariencia e idioma",
+    "sectionAppearanceBlurb": "Tema, color, formato de hora, idioma",
+    "sectionWidgets": "Pantalla de inicio",
+    "sectionWidgetsBlurb": "Widget y actividad en vivo",
+    "sectionQuran": "Corán",
+    "sectionQuranBlurb": "Lectura, traducción, tafsir, descargas",
+    "sectionAbout": "Acerca de",
+    "sectionAboutBlurb": "Versión, fuentes, licencias"
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",

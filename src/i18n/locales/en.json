@@ -321,7 +321,21 @@
     "alertModeAdhan": "Adhan",
     "alertModeNotification": "Alert",
     "alertModeSilent": "Silent",
-    "alertModeHint": "Changes how this prayer alerts you"
+    "alertModeHint": "Changes how this prayer alerts you",
+    "sectionPrayerTimes": "Prayer times",
+    "sectionPrayerTimesBlurb": "Source, calculation method, madhab, adjustments",
+    "sectionNotifications": "Notifications",
+    "sectionNotificationsBlurb": "Sounds, advance reminders, extra times",
+    "sectionLocation": "Location",
+    "sectionLocationBlurb": "Where you are, and your saved places",
+    "sectionAppearance": "Appearance & language",
+    "sectionAppearanceBlurb": "Theme, accent, time format, language",
+    "sectionWidgets": "Home screen",
+    "sectionWidgetsBlurb": "Widget and live activity",
+    "sectionQuran": "Quran",
+    "sectionQuranBlurb": "Reading, translation, tafsir, downloads",
+    "sectionAbout": "About",
+    "sectionAboutBlurb": "Version, sources, licences"
   },
   "locationSetup": {
     "headline": "Set your location",

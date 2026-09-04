@@ -321,7 +321,21 @@
     "alertModeAdhan": "Adhan",
     "alertModeNotification": "Alerte",
     "alertModeSilent": "Silence",
-    "alertModeHint": "Change la façon dont cette prière vous alerte"
+    "alertModeHint": "Change la façon dont cette prière vous alerte",
+    "sectionPrayerTimes": "Heures de prière",
+    "sectionPrayerTimesBlurb": "Source, méthode de calcul, madhhab, ajustements",
+    "sectionNotifications": "Notifications",
+    "sectionNotificationsBlurb": "Sons, rappels à l'avance, heures supplémentaires",
+    "sectionLocation": "Position",
+    "sectionLocationBlurb": "Où vous êtes, et vos lieux enregistrés",
+    "sectionAppearance": "Apparence et langue",
+    "sectionAppearanceBlurb": "Thème, couleur, format de l'heure, langue",
+    "sectionWidgets": "Écran d'accueil",
+    "sectionWidgetsBlurb": "Widget et activité en direct",
+    "sectionQuran": "Coran",
+    "sectionQuranBlurb": "Lecture, traduction, tafsir, téléchargements",
+    "sectionAbout": "À propos",
+    "sectionAboutBlurb": "Version, sources, licences"
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",

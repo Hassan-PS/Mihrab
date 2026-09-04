@@ -321,7 +321,21 @@
     "alertModeAdhan": "أذان",
     "alertModeNotification": "تنبيه",
     "alertModeSilent": "صامت",
-    "alertModeHint": "يغيّر طريقة تنبيهك بهذه الصلاة"
+    "alertModeHint": "يغيّر طريقة تنبيهك بهذه الصلاة",
+    "sectionPrayerTimes": "أوقات الصلاة",
+    "sectionPrayerTimesBlurb": "المصدر وطريقة الحساب والمذهب والتعديلات",
+    "sectionNotifications": "الإشعارات",
+    "sectionNotificationsBlurb": "الأصوات والتنبيهات المسبقة والأوقات الإضافية",
+    "sectionLocation": "الموقع",
+    "sectionLocationBlurb": "مكانك وأماكنك المحفوظة",
+    "sectionAppearance": "المظهر واللغة",
+    "sectionAppearanceBlurb": "السمة واللون وصيغة الوقت واللغة",
+    "sectionWidgets": "الشاشة الرئيسية",
+    "sectionWidgetsBlurb": "الأداة والنشاط المباشر",
+    "sectionQuran": "القرآن",
+    "sectionQuranBlurb": "القراءة والترجمة والتفسير والتنزيلات",
+    "sectionAbout": "حول",
+    "sectionAboutBlurb": "الإصدار والمصادر والتراخيص"
   },
   "locationSetup": {
     "headline": "حدّد موقعك",

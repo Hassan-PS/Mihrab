@@ -321,7 +321,21 @@
     "alertModeAdhan": "আজান",
     "alertModeNotification": "বিজ্ঞপ্তি",
     "alertModeSilent": "নীরব",
-    "alertModeHint": "এই নামাজ কীভাবে জানাবে তা বদলায়"
+    "alertModeHint": "এই নামাজ কীভাবে জানাবে তা বদলায়",
+    "sectionPrayerTimes": "নামাজের সময়",
+    "sectionPrayerTimesBlurb": "উৎস, হিসাবের পদ্ধতি, মাযহাব, সমন্বয়",
+    "sectionNotifications": "বিজ্ঞপ্তি",
+    "sectionNotificationsBlurb": "শব্দ, আগাম স্মরণ, বাড়তি সময়",
+    "sectionLocation": "অবস্থান",
+    "sectionLocationBlurb": "আপনি কোথায়, ও সংরক্ষিত জায়গা",
+    "sectionAppearance": "চেহারা ও ভাষা",
+    "sectionAppearanceBlurb": "থিম, রং, সময়ের বিন্যাস, ভাষা",
+    "sectionWidgets": "হোম স্ক্রিন",
+    "sectionWidgetsBlurb": "উইজেট ও লাইভ অ্যাক্টিভিটি",
+    "sectionQuran": "কুরআন",
+    "sectionQuranBlurb": "পাঠ, অনুবাদ, তাফসীর, ডাউনলোড",
+    "sectionAbout": "সম্পর্কে",
+    "sectionAboutBlurb": "সংস্করণ, উৎস, লাইসেন্স"
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",

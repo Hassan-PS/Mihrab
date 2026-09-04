@@ -38,15 +38,19 @@ describe('follow-up screen registration', () => {
       .toBe(true);
   });
 
-  test('PrayerOffsetsModal exists and is imported by SettingsScreen', () => {
+  test('PrayerOffsetsModal exists and the page that opens it owns it', () => {
     expect(
       fs.existsSync(path.join(REPO, 'src/screens/settings/PrayerOffsetsModal.tsx')),
     ).toBe(true);
-    const settings = fs.readFileSync(
-      path.join(REPO, 'src/screens/SettingsScreen.tsx'),
+    // It moved with its card when Settings became an index of sections
+    // (v2.14.5): the page that renders CalculationCard is the page that
+    // has to hold the modal that card opens. SettingsScreen is a list of
+    // destinations now and owns no picker state at all.
+    const page = fs.readFileSync(
+      path.join(REPO, 'src/screens/settings/pages/PrayerTimesSettingsScreen.tsx'),
       'utf-8',
     );
-    expect(settings).toMatch(/PrayerOffsetsModal/);
+    expect(page).toMatch(/PrayerOffsetsModal/);
   });
 
   test("Home's Today summary reads the practice store", () => {

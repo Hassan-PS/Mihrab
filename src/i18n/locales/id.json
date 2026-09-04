@@ -321,7 +321,21 @@
     "alertModeAdhan": "Azan",
     "alertModeNotification": "Notifikasi",
     "alertModeSilent": "Senyap",
-    "alertModeHint": "Mengubah cara salat ini memberi tahu Anda"
+    "alertModeHint": "Mengubah cara salat ini memberi tahu Anda",
+    "sectionPrayerTimes": "Waktu salat",
+    "sectionPrayerTimesBlurb": "Sumber, metode hitung, mazhab, penyesuaian",
+    "sectionNotifications": "Notifikasi",
+    "sectionNotificationsBlurb": "Suara, pengingat awal, waktu tambahan",
+    "sectionLocation": "Lokasi",
+    "sectionLocationBlurb": "Di mana Anda, dan tempat tersimpan",
+    "sectionAppearance": "Tampilan & bahasa",
+    "sectionAppearanceBlurb": "Tema, warna, format waktu, bahasa",
+    "sectionWidgets": "Layar utama",
+    "sectionWidgetsBlurb": "Widget dan aktivitas langsung",
+    "sectionQuran": "Al-Qur'an",
+    "sectionQuranBlurb": "Bacaan, terjemahan, tafsir, unduhan",
+    "sectionAbout": "Tentang",
+    "sectionAboutBlurb": "Versi, sumber, lisensi"
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",

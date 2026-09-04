@@ -46,8 +46,14 @@ export function HomeHeaderControls() {
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <LocationChip
         compactHeader
+        // Straight to the page the saved locations are on, rather than
+        // to the Settings tab and a scroll: since the settings became an
+        // index of sections there is a destination for this, and landing
+        // on it is the whole of what "Add new location" promised.
         onAddLocation={() =>
-          navigation.navigate('SettingsTab', { highlight: 'savedLocations' })
+          navigation.navigate('SettingsLocation', {
+            highlight: 'savedLocations',
+          })
         }
       />
     </View>

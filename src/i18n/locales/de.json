@@ -321,7 +321,21 @@
     "alertModeAdhan": "Adhan",
     "alertModeNotification": "Hinweis",
     "alertModeSilent": "Stumm",
-    "alertModeHint": "Ändert, wie dieses Gebet dich benachrichtigt"
+    "alertModeHint": "Ändert, wie dieses Gebet dich benachrichtigt",
+    "sectionPrayerTimes": "Gebetszeiten",
+    "sectionPrayerTimesBlurb": "Quelle, Berechnungsmethode, Madhhab, Anpassungen",
+    "sectionNotifications": "Benachrichtigungen",
+    "sectionNotificationsBlurb": "Töne, Vorabhinweise, weitere Zeiten",
+    "sectionLocation": "Standort",
+    "sectionLocationBlurb": "Wo du bist und deine gespeicherten Orte",
+    "sectionAppearance": "Aussehen und Sprache",
+    "sectionAppearanceBlurb": "Thema, Akzent, Zeitformat, Sprache",
+    "sectionWidgets": "Startbildschirm",
+    "sectionWidgetsBlurb": "Widget und Live-Aktivität",
+    "sectionQuran": "Koran",
+    "sectionQuranBlurb": "Lesen, Übersetzung, Tafsir, Downloads",
+    "sectionAbout": "Über",
+    "sectionAboutBlurb": "Version, Quellen, Lizenzen"
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
