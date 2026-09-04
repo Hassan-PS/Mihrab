@@ -661,8 +661,19 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           phone has the swipe. But swiping is a page at a time: getting from
           juz 1 to juz 20 is three hundred swipes, and the reader who wants
           Yaseen has no way to ask for it. The rail costs 32pt and answers
-          both — and it retires with the rest of the chrome in fullscreen. */}
-      {!isFullscreen && !railYieldsToPlayer ? (
+          both.
+
+          IT STAYS IN FULLSCREEN. It used to retire with the rest of the
+          chrome, which was the wrong company to keep: the header is a
+          title and buttons you are hiding to see the page, and the rail
+          is how you move through the muṣḥaf — losing it meant fullscreen
+          reading was a page at a time or not at all. It is also the only
+          thing on screen that names the page now the medallion is gone.
+
+          Landscape with the player up is still the exception: there the
+          window is short, the player is the thing being used, and getting
+          to a distant page is not what anyone is doing mid-recitation. */}
+      {!railYieldsToPlayer ? (
         <MushafPageScrubber
           page={currentPage}
           riwayah={riwayah}

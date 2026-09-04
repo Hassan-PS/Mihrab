@@ -66,6 +66,20 @@ describe('the reader follows only where a column scrolls', () => {
     expect(reader).toContain(
       'const railYieldsToPlayer = width > height && playback.active != null;',
     );
-    expect(reader).toContain('!isFullscreen && !railYieldsToPlayer ?');
+    expect(reader).toContain('{!railYieldsToPlayer ? (');
+  });
+
+  /**
+   * And for nothing else. The rail used to retire with the header in
+   * fullscreen, which was the wrong company to keep: a title and its
+   * buttons are what you hide to see the page, and the rail is how you
+   * move through the muṣḥaf. Without it, fullscreen reading was a page at
+   * a time — and since the medallion went, the rail is also the only
+   * thing on screen that names the page.
+   */
+  it('stays through fullscreen', () => {
+    expect(reader).not.toMatch(/!isFullscreen && !railYieldsToPlayer/);
+    // The header still goes: that is what fullscreen is for.
+    expect(reader).toMatch(/StatusBar hidden=\{isFullscreen\}/);
   });
 });

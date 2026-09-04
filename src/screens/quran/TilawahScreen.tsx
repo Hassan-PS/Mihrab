@@ -36,6 +36,8 @@ import {
   Text,
   View,
   type ColorValue,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -53,6 +55,7 @@ import MushafTextPageSurface, {
   mushafLineGeometry,
   mushafPageColumnHeight,
 } from '../../quran/MushafTextPageSurface';
+import { ActiveWordProbe } from '../../quran/audio/ActiveWordProbe';
 import { ayahLineIndex } from '../../quran/mushafFollowScroll';
 import { findPageForAyah } from '../../quran/pages';
 import { SURAHS, type SurahIndex } from '../../quran/quran';
@@ -135,6 +138,11 @@ const PREVIEW_LINES = 4;
  * layout to measure — a Unicode page has no printed lines to count.
  */
 const PAGE_VIEWPORT_FALLBACK = 200;
+
+/** How far down the list has to be before the top is worth a shortcut. */
+const TO_TOP_AFTER = 700;
+/** Movement in one direction before it counts as a direction. */
+const SCROLL_HYSTERESIS = 8;
 
 function formatBytes(bytes: number): string {
   if (bytes <= 0) return '0 MB';
@@ -305,6 +313,27 @@ function CoffeeIcon({ color }: { color: string }) {
         stroke={color}
         strokeWidth={2}
         strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+/** An arrow at a ceiling — back to the top of the list. */
+function TopArrowIcon({ color }: { color: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 20V5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M6 11l6-6 6 6"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </Svg>
   );
@@ -673,6 +702,37 @@ export function TilawahScreen() {
    * the page's own height, and the window is measured off the geometry
    * that height produces rather than fixed in advance.
    */
+  /**
+   * The list, and whether the "back to the top" button is showing.
+   *
+   * `lastOffset` is a ref rather than state: it changes on every scroll
+   * frame and nothing draws from it directly — only the crossing of the
+   * two thresholds below turns into a render.
+   */
+  const listRef = useRef<FlatList<SurahIndex>>(null);
+  const lastOffset = useRef(0);
+  const [showTop, setShowTop] = useState(false);
+  const onScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const y = e.nativeEvent.contentOffset.y;
+      const dy = y - lastOffset.current;
+      // A dead band, so a finger resting on the list does not flicker the
+      // button in and out on a pixel of drift.
+      if (Math.abs(dy) < SCROLL_HYSTERESIS) return;
+      lastOffset.current = y;
+      // Deep enough that the top is genuinely far away, and heading back
+      // towards it. Scrolling down hides it again: on the way down the
+      // reader is looking for a surah and the button is in front of the
+      // rows they are reading.
+      setShowTop(y > TO_TOP_AFTER && dy < 0);
+    },
+    [],
+  );
+  const scrollToTop = useCallback(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    setShowTop(false);
+  }, []);
+
   const pageScrollRef = useRef<ScrollView>(null);
   const pageColumnH = useMemo(
     () =>
@@ -1399,6 +1459,7 @@ export function TilawahScreen() {
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
       <FlatList<SurahIndex>
+        ref={listRef}
         data={SURAHS}
         keyExtractor={s => String(s.number)}
         renderItem={renderSurah}
@@ -1407,7 +1468,42 @@ export function TilawahScreen() {
         contentInsetAdjustmentBehavior="automatic"
         initialNumToRender={10}
         windowSize={7}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       />
+      {/* Back to the player.
+          
+          The page is the transport and then a hundred and fourteen rows
+          under it, so someone who has scrolled down to find a surah is a
+          long way from the controls they started at. The button appears
+          when they turn round and head back — going DOWN they are looking
+          for something and it would be in the way; going up they have
+          already decided where they are going, and this is the short way
+          there. */}
+      {showTop ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.backToTop', 'Back to the top')}
+          onPress={scrollToTop}
+          style={({ pressed }) => [
+            styles.toTop,
+            {
+              // The accent tint, not the card colour: the rows under it
+              // ARE the card colour, so a card-coloured circle floating
+              // over them read as part of whichever row it landed on.
+              backgroundColor: palette.accentBg,
+              borderColor: palette.accentSolid,
+            },
+            pressed && styles.pressed,
+          ]}>
+          <TopArrowIcon color={String(palette.accentSolid)} />
+        </Pressable>
+      ) : null}
+      {/* Publishes the recited word so the preview's lines can light it —
+          the same probe the reader mounts. Without it the page shows the
+          ayah's wash and nothing inside it moves, which is exactly what
+          "the highlight does not work here" looked like. */}
+      {showPage && status.active && status.playing ? <ActiveWordProbe /> : null}
       <ReciterPickerSheet
         visible={pickerOpen}
         onClose={() => setPickerOpen(false)}
@@ -1417,6 +1513,23 @@ export function TilawahScreen() {
 }
 
 const styles = StyleSheet.create({
+  toTop: {
+    position: 'absolute',
+    end: 18,
+    bottom: 24,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Enough to read as floating over the list rather than as a row in it.
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
   root: { flex: 1 },
   list: { padding: 16, gap: 8 },
   headerWrap: { gap: 12, marginBottom: 8 },

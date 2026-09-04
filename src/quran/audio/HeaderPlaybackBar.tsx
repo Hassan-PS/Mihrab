@@ -132,6 +132,36 @@ export function HeaderPlaybackBar({
         },
       ]}>
       <View style={styles.row}>
+        {/* The NAME LEADS now. It is the answer to "what is playing",
+            which is the question anyone glancing up here is asking, and
+            the leading edge is where the title above it starts — so the
+            two read as one column instead of the bar being a row of
+            buttons with a caption trailing off the end. The controls go
+            to the trailing edge, under the thumb rather than under the
+            back arrow. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
+          onPress={() => navigation.navigate('QuranListen')}
+          style={styles.namePress}>
+          <Text
+            numberOfLines={1}
+            style={[styles.name, { color: palette.text }]}>
+            {loading
+              ? t('quran.buffering', 'Buffering…')
+              : `${surah?.romanized ?? ''} ${active.surah}:${active.ayah}`}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
+          hitSlop={8}
+          onPress={() => navigation.navigate('QuranListen')}
+          style={({ pressed }) => [styles.btn, pressed && styles.pressed]}>
+          <TilawahIcon color={String(palette.accentSolid)} size={16} />
+        </Pressable>
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
@@ -163,31 +193,6 @@ export function HeaderPlaybackBar({
           style={({ pressed }) => [styles.btn, pressed && styles.pressed]}>
           <CloseIcon color={String(palette.muted)} size={16} />
         </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
-          hitSlop={8}
-          onPress={() => navigation.navigate('QuranListen')}
-          style={({ pressed }) => [styles.btn, pressed && styles.pressed]}>
-          <TilawahIcon color={String(palette.accentSolid)} size={16} />
-        </Pressable>
-
-        {/* The name goes at the far end, away from the controls: a label
-            that sat beside the buttons read as one of them. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
-          onPress={() => navigation.navigate('QuranListen')}
-          style={styles.namePress}>
-          <Text
-            numberOfLines={1}
-            style={[styles.name, { color: palette.text }]}>
-            {loading
-              ? t('quran.buffering', 'Buffering…')
-              : `${surah?.romanized ?? ''} ${active.surah}:${active.ayah}`}
-          </Text>
-        </Pressable>
       </View>
 
       {/* Along the bottom edge, so the bar has a base line rather than a
@@ -213,11 +218,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    // The controls sit in from the edge by the same measure the cards on
-    // the page below do, so the bar reads as part of the chrome rather
-    // than as something stuck to the side of the screen.
-    paddingStart: 12,
-    paddingEnd: 16,
+    // The name starts where the title above it does; the controls end
+    // where the header's own trailing buttons do.
+    paddingStart: 16,
+    paddingEnd: 12,
     paddingVertical: 5,
   },
   btn: {
@@ -228,7 +232,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pressed: { opacity: 0.55 },
-  namePress: { flex: 1, alignItems: 'flex-end', marginStart: 8 },
+  namePress: { flex: 1, marginEnd: 8 },
   name: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
   track: { height: 2, width: '100%' },
   fill: { height: '100%' },

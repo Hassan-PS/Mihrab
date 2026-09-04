@@ -1055,6 +1055,7 @@
     "tilawahBegin": "开始诵读",
     "tilawahAyahOf": "第 {{done}} 节，共 {{total}} 节",
     "tilawahShowPage": "显示页面",
+    "backToTop": "回到顶部",
     "tilawahKeepAwake": "保持屏幕常亮",
     "tilawahSurahSeek": "在本章内拖动",
     "tilawahShuffle": "随机播放各章",
