@@ -2,7 +2,7 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo, useMemo } from 'react';
-import { Pressable, Switch, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -17,22 +17,43 @@ import {
 } from '../../settings/providerUi';
 import { getMethodLabel } from '../../settings/methods';
 import type { PrayerOffsetMinutes } from '../../settings/prayerOffsets';
+import {
+  DARURI_KEYS,
+  DARURI_OF,
+  type DaruriKey,
+} from '../../prayer/daruriTimes';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 type CalculationCardProps = {
   onOpenMethodPicker: () => void;
   onOpenOffsetsModal: () => void;
+  /** Opens the lead-time picker for the Mālikī second-time alerts. */
+  onOpenDaruriLeadPicker: () => void;
 };
 
 function CalculationCardImpl({
   onOpenMethodPicker,
   onOpenOffsetsModal,
+  onOpenDaruriLeadPicker,
 }: CalculationCardProps) {
   const { t } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   // `school` is 1 for Ḥanafī ʿAṣr (2:1 shadow), 0 for the 1:1 the rest of
   // the madhāhib use — including Mālikī, which is why it matters here.
   const hanafiAsr = settings.school === 1;
+  const alerts = settings.malikiSecondTimeAlerts;
+
+  /**
+   * Adding and removing rather than rewriting: the stored order follows
+   * `DARURI_KEYS`, so two blobs holding the same set are the same string
+   * and a tap that turns something off and on again is not a change.
+   */
+  const toggleAlert = (key: DaruriKey) => {
+    const next = alerts.includes(key)
+      ? alerts.filter(k => k !== key)
+      : DARURI_KEYS.filter(k => k === key || alerts.includes(k));
+    updateSettings({ malikiSecondTimeAlerts: next });
+  };
   const { palette } = useAppPalette();
 
   const coordsForEffective = useMemo(
@@ -169,6 +190,87 @@ function CalculationCardImpl({
             <Text style={[s.help, { color: palette.muted, marginTop: 6 }]}>
               {t('settings.malikiSecondTimesSource')}
             </Text>
+
+            {/* Alerts, chosen one prayer at a time.
+             *
+             * Chips rather than five switch rows: five switches is a
+             * settings screen inside a settings card, and it would read
+             * as five decisions the app expects you to make. A row of
+             * chips reads as one — "which of these, if any" — and its
+             * honest default is that none of them are lit. */}
+            <View
+              style={[styles.alertsBlock, { borderTopColor: palette.border }]}>
+              <Text style={[s.label, { color: palette.muted }]}>
+                {t('settings.malikiAlerts', 'Notify me')}
+              </Text>
+              <View
+                style={styles.chipRow}
+                accessibilityRole="none"
+                accessibilityLabel={t('settings.malikiAlerts', 'Notify me')}>
+                {DARURI_KEYS.map(key => {
+                  const on = alerts.includes(key);
+                  const label = t(`prayer.${DARURI_OF[key]}`);
+                  return (
+                    <Pressable
+                      key={key}
+                      accessibilityRole="checkbox"
+                      accessibilityLabel={label}
+                      accessibilityState={{ checked: on }}
+                      onPress={() => toggleAlert(key)}
+                      style={[
+                        styles.chip,
+                        {
+                          backgroundColor: on
+                            ? palette.accentBg
+                            : 'transparent',
+                          borderColor: on ? palette.accentSolid : palette.border,
+                        },
+                      ]}>
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.chipLabel,
+                          { color: on ? palette.accentSolid : palette.muted },
+                        ]}>
+                        {label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Text style={[s.help, { color: palette.muted }]}>
+                {t('settings.malikiAlertsHelp')}
+              </Text>
+
+              {/* Only once something is going to fire. With nothing
+                  chosen, "how much warning" is a question about nothing. */}
+              {alerts.length > 0 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t(
+                    'settings.malikiAlertsLead',
+                    'How much warning',
+                  )}
+                  style={[s.rowPress, styles.leadRow]}
+                  onPress={onOpenDaruriLeadPicker}>
+                  <View>
+                    <Text style={[s.label, { color: palette.muted }]}>
+                      {t('settings.malikiAlertsLead', 'How much warning')}
+                    </Text>
+                    <Text style={[s.valueText, { color: palette.text }]}>
+                      {settings.malikiSecondTimeAlertMinutes === 0
+                        ? t('settings.malikiAlertsAtTime', 'When it ends')
+                        : t('settings.prePrayerReminderOption', {
+                            count: settings.malikiSecondTimeAlertMinutes,
+                          })}
+                    </Text>
+                  </View>
+                  <Text style={[s.changeLink, { color: palette.accent }]}>
+                    {t('common.change')}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
           </>
         ) : null}
       </View>
@@ -215,3 +317,30 @@ function countNonZero(offsets: PrayerOffsetMinutes | undefined): number {
 }
 
 export const CalculationCard = memo(CalculationCardImpl);
+
+const styles = StyleSheet.create({
+  alertsBlock: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  chip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  chipLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  leadRow: {
+    marginTop: 4,
+  },
+});

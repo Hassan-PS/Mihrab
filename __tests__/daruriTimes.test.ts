@@ -547,3 +547,22 @@ describe('what the app is claiming', () => {
     expect(modelled).toEqual(['FajrDaruri', 'AsrDaruri']);
   });
 });
+
+// ── The month table's row height ──────────────────────────────────────
+
+describe('the month table row', () => {
+  const { monthRowHeight, MONTH_ROW_HEIGHT } = require('../src/screens/month/MonthTable');
+
+  /**
+   * `MonthTimesScreen`'s `getItemLayout` and the row's own stylesheet
+   * both take their height from here. If they ever disagree the list
+   * scrolls to the wrong offsets and `initialScrollIndex` lands days off
+   * — a bug that looks like bad data rather than bad layout, which is
+   * why it is pinned rather than left as two constants that happen to
+   * match.
+   */
+  it('grows when the second times are shown, and only then', () => {
+    expect(monthRowHeight(false)).toBe(MONTH_ROW_HEIGHT);
+    expect(monthRowHeight(true)).toBeGreaterThan(MONTH_ROW_HEIGHT);
+  });
+});

@@ -115,7 +115,8 @@
     "date": "Date",
     "hijri": "Hijri",
     "gregorian": "Gregorian",
-    "prayerTimes": "Prayer Times"
+    "prayerTimes": "Prayer Times",
+    "daruriLegend": "The small line under Fajr, ʿAṣr and ʿIshāʾ is when each one's first (preferred) time ends. Ẓuhr's ends when ʿAṣr begins and Maghrib's when ʿIshāʾ does, so those two are the columns themselves. Fajr's and ʿAṣr's are approximate."
   },
   "share": {
     "tagline": "Prayer times, qibla and the Qur’an",
@@ -273,6 +274,12 @@
     "malikiSecondTimesHelp": "Each prayer gets a line on the Today card saying when its preferred time (ikhtiyari) closes and its late time (daruri) begins. Computed on your device from your coordinates, whichever source your times come from. Uses the 1:1 shadow for Asr regardless of your madhab setting, because that is the Maliki boundary. Off by default.",
     "malikiSecondTimesHanafiWarning": "Heads up: these are Maliki boundaries, but your Asr is set to Hanafi, which uses a different shadow. Zuhr's first time will end about half an hour before the Asr shown below it. Turn off Hanafi Asr if you want the card to agree with itself.",
     "malikiSecondTimesSource": "From Al-Murshid al-Muin (Ibn Ashir), as rendered in The Guiding Helper, Song 11.",
+    "malikiAlerts": "Notify me",
+    "malikiAlertsHelp": "Off for every prayer to begin with. Pick only the ones you want to be told about — five more alerts a day is how an app teaches you to ignore it. Needs notifications turned on.",
+    "malikiAlertsNone": "No alerts",
+    "malikiAlertsLead": "How much warning",
+    "malikiAlertsLeadTitle": "Warn me before the first time ends",
+    "malikiAlertsAtTime": "When it ends",
     "malikiSecondTimesModelled": "Fajr's and Asr's boundaries are the stars fading and the sun yellowing — an angle standing in for something the eye judges. They are marked as approximate. Where the sun does not rise, does not set, or never reaches the angle, nothing is shown rather than a guess.",
     "accent_rose": "Rose",
     "accent_violet": "Violet",
@@ -432,7 +439,9 @@
     "adhanDisableAction": "Disable adhan",
     "snoozeAction": "Snooze",
     "snoozeChoice": "Snooze {{minutes}} min",
-    "snoozeMinutes": "Minutes"
+    "snoozeMinutes": "Minutes",
+    "daruriEndsIn": "First time ends at {{time}} — in {{count}} min",
+    "daruriEnded": "First time has ended at {{until}}"
   },
   "locations": {
     "title": "Saved locations",

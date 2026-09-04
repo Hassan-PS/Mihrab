@@ -115,7 +115,8 @@
     "date": "日期",
     "hijri": "回历",
     "gregorian": "公历",
-    "prayerTimes": "祈祷时间"
+    "prayerTimes": "祈祷时间",
+    "daruriLegend": "晨礼、晡礼、宵礼下方的小字，是各自首选时段结束的时刻。晌礼在晡礼开始时结束、昏礼在宵礼开始时结束，因此这两者就是那两列本身。晨礼与晡礼的为近似值。"
   },
   "share": {
     "tagline": "礼拜时间、朝向与《古兰经》",
@@ -273,6 +274,12 @@
     "malikiSecondTimesHelp": "每次礼拜都会在「今天」卡片上多一行，说明其首选时段（ikhtiyari）何时结束、延后时段（daruri）何时开始。无论礼拜时间来自哪个来源，都在你的设备上依据你的坐标计算。晡礼一律采用 1:1 影长，不受你所选教法学派影响，因为这才是马立克派的界线。默认关闭。",
     "malikiSecondTimesHanafiWarning": "请注意：这些是马立克派的界线，但你的晡礼设为哈乃斐派，采用不同的影长。晌礼的首选时段会比下方显示的晡礼早约半小时结束。若希望卡片前后一致，请关闭哈乃斐派晡礼。",
     "malikiSecondTimesSource": "依据伊本·阿希尔《Al-Murshid al-Muin》，见 The Guiding Helper 第 11 章。",
+    "malikiAlerts": "提醒我",
+    "malikiAlertsHelp": "起初每次礼拜都关闭。只挑你确实想被告知的——每天多五条通知，正是一个应用教会你忽略它的方式。需要先开启通知。",
+    "malikiAlertsNone": "不提醒",
+    "malikiAlertsLead": "提前多久",
+    "malikiAlertsLeadTitle": "在首选时段结束前提醒我",
+    "malikiAlertsAtTime": "结束时",
     "malikiSecondTimesModelled": "晨礼与晡礼的界线是星辰隐没和日色转黄——用一个角度来代替肉眼的判断，因此标示为近似值。太阳不升起、不落下，或始终达不到该角度的地方，宁可留白，也不给出猜测。",
     "accent_rose": "玫瑰红",
     "accent_violet": "紫罗兰",
@@ -432,7 +439,9 @@
     "adhanDisableAction": "禁用宣礼",
     "snoozeAction": "稍后提醒",
     "snoozeChoice": "延后 {{minutes}} 分钟",
-    "snoozeMinutes": "分钟"
+    "snoozeMinutes": "分钟",
+    "daruriEndsIn": "首选时段 {{time}} 结束——还有 {{count}} 分钟",
+    "daruriEnded": "首选时段已于 {{until}} 结束"
   },
   "locations": {
     "title": "已保存的地点",

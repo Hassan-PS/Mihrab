@@ -115,7 +115,8 @@
     "date": "Tarih",
     "hijri": "Hicri",
     "gregorian": "Gregoryen",
-    "prayerTimes": "Namaz Vakitleri"
+    "prayerTimes": "Namaz Vakitleri",
+    "daruriLegend": "Sabah, ikindi ve yatsının altındaki küçük satır, her birinin ilk (tercih edilen) vaktinin ne zaman bittiğini gösterir. Öğlenin vakti ikindi girince, akşamınki yatsı girince biter; o ikisi zaten bu sütunların kendisidir. Sabah ve ikindininkiler yaklaşıktır."
   },
   "share": {
     "tagline": "Namaz vakitleri, kıble ve Kur’an",
@@ -273,6 +274,12 @@
     "malikiSecondTimesHelp": "Her namaz için Bugün kartında, tercih edilen vaktinin (ihtiyari) ne zaman kapandığını ve geç vaktinin (zaruri) ne zaman başladığını söyleyen bir satır çıkar. Vakitleriniz hangi kaynaktan gelirse gelsin, koordinatlarınızdan cihazınızda hesaplanır. İkindi için mezhep ayarınızdan bağımsız olarak 1:1 gölgeyi kullanır; Maliki sınırı budur. Varsayılan olarak kapalı.",
     "malikiSecondTimesHanafiWarning": "Not: bunlar Maliki sınırlarıdır, ama ikindiniz Hanefi'ye ayarlı ve o farklı bir gölge kullanır. Öğlenin ilk vakti, altında görünen ikindiden yaklaşık yarım saat önce bitecek. Kartın kendisiyle tutarlı olmasını istiyorsanız Hanefi ikindiyi kapatın.",
     "malikiSecondTimesSource": "İbn Âşir'in El-Mürşidü'l-Muîn'inden, The Guiding Helper'daki 11. şarkıda aktarıldığı şekliyle.",
+    "malikiAlerts": "Bana bildir",
+    "malikiAlertsHelp": "Başlangıçta her namaz için kapalı. Yalnızca haber almak istediklerinizi seçin — günde beş bildirim daha, bir uygulamanın size kendisini yok saymayı öğretme yoludur. Bildirimlerin açık olması gerekir.",
+    "malikiAlertsNone": "Bildirim yok",
+    "malikiAlertsLead": "Ne kadar önce",
+    "malikiAlertsLeadTitle": "İlk vakit bitmeden önce uyar",
+    "malikiAlertsAtTime": "Bittiğinde",
     "malikiSecondTimesModelled": "Sabah ve ikindinin sınırları yıldızların sönmesi ve güneşin sararmasıdır — gözün karar verdiği bir şeyin yerine geçen bir açı. Bu yüzden yaklaşık olarak işaretlenir. Güneşin doğmadığı, batmadığı ya da o açıya hiç ulaşmadığı yerde tahmin yerine hiçbir şey gösterilmez.",
     "accent_rose": "Gül",
     "accent_violet": "Mor",
@@ -432,7 +439,9 @@
     "adhanDisableAction": "Ezan'ı devre dışı bırak",
     "snoozeAction": "Ertele",
     "snoozeChoice": "{{minutes}} dk ertele",
-    "snoozeMinutes": "Dakika"
+    "snoozeMinutes": "Dakika",
+    "daruriEndsIn": "İlk vakit {{time}}'de bitiyor — {{count}} dk içinde",
+    "daruriEnded": "İlk vakit {{until}}'de bitti"
   },
   "locations": {
     "title": "Kayıtlı konumlar",

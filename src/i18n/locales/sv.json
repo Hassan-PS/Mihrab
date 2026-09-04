@@ -115,7 +115,8 @@
     "date": "Datum",
     "hijri": "Hijri",
     "gregorian": "Gregoriansk",
-    "prayerTimes": "Bönetider"
+    "prayerTimes": "Bönetider",
+    "daruriLegend": "Den lilla raden under Fajr, Asr och Isha är när respektive böns första (föredragna) tid går ut. Dhuhrs går ut när Asr börjar och Maghribs när Isha börjar, så de två är kolumnerna själva. Fajrs och Asrs är ungefärliga."
   },
   "share": {
     "tagline": "Bönetider, qibla och Koranen",
@@ -273,6 +274,12 @@
     "malikiSecondTimesHelp": "Varje bön får en rad på Idag-kortet som säger när dess föredragna tid (ikhtiyari) stängs och dess sena tid (daruri) börjar. Beräknas på din enhet utifrån dina koordinater, oavsett vilken källa tiderna kommer från. Använder 1:1-skuggan för Asr oavsett din madhhab-inställning, eftersom det är den malikitiska gränsen. Av som standard.",
     "malikiSecondTimesHanafiWarning": "Obs: det här är malikitiska gränser, men din Asr är inställd på hanafitisk, som använder en annan skugga. Zuhrs första tid slutar ungefär en halvtimme före den Asr som visas under. Stäng av hanafitisk Asr om du vill att kortet ska stämma med sig självt.",
     "malikiSecondTimesSource": "Från Al-Murshid al-Muin (Ibn Ashir), återgiven i The Guiding Helper, sång 11.",
+    "malikiAlerts": "Avisera mig",
+    "malikiAlertsHelp": "Av för alla böner från början. Välj bara dem du vill bli påmind om — fem extra aviseringar om dagen är hur en app lär dig att strunta i den. Kräver att aviseringar är på.",
+    "malikiAlertsNone": "Inga aviseringar",
+    "malikiAlertsLead": "Hur lång förvarning",
+    "malikiAlertsLeadTitle": "Varna mig innan första tiden går ut",
+    "malikiAlertsAtTime": "När den går ut",
     "malikiSecondTimesModelled": "Fajrs och Asrs gränser är stjärnorna som bleknar och solen som gulnar — en vinkel som står för något ögat bedömer. De märks som ungefärliga. Där solen inte går upp, inte går ner, eller aldrig når vinkeln visas ingenting i stället för en gissning.",
     "accent_rose": "Rosa",
     "accent_violet": "Violett",
@@ -432,7 +439,9 @@
     "adhanDisableAction": "Inaktivera adhan",
     "snoozeAction": "Snooza",
     "snoozeChoice": "Snooza {{minutes}} min",
-    "snoozeMinutes": "Minuter"
+    "snoozeMinutes": "Minuter",
+    "daruriEndsIn": "Första tiden går ut {{time}} — om {{count}} min",
+    "daruriEnded": "Första tiden gick ut {{until}}"
   },
   "locations": {
     "title": "Sparade platser",

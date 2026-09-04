@@ -115,7 +115,8 @@
     "date": "Fecha",
     "hijri": "Hijri",
     "gregorian": "gregoriano",
-    "prayerTimes": "Horarios de oración"
+    "prayerTimes": "Horarios de oración",
+    "daruriLegend": "La línea pequeña bajo Fayr, Asr e Isha indica cuándo acaba el primer tiempo (preferido) de cada una. El de Zuhr acaba cuando empieza Asr y el de Magrib cuando empieza Isha, así que esos dos son las columnas mismas. Los de Fayr y Asr son aproximados."
   },
   "share": {
     "tagline": "Horarios de oración, alquibla y el Corán",
@@ -273,6 +274,12 @@
     "malikiSecondTimesHelp": "Cada oración recibe una línea en la tarjeta de Hoy que indica cuándo se cierra su tiempo preferido (ijtiyari) y cuándo empieza su tiempo tardío (daruri). Se calcula en tu dispositivo a partir de tus coordenadas, sea cual sea la fuente de tus horarios. Usa la sombra 1:1 para Asr con independencia de tu ajuste de madhab, porque ese es el límite malikí. Desactivado por defecto.",
     "malikiSecondTimesHanafiWarning": "Aviso: estos son límites malikíes, pero tu Asr está en hanafí, que usa otra sombra. El primer tiempo de Zuhr terminará una media hora antes del Asr que aparece debajo. Desactiva el Asr hanafí si quieres que la tarjeta concuerde consigo misma.",
     "malikiSecondTimesSource": "De Al-Murshid al-Muin (Ibn Ashir), según se recoge en The Guiding Helper, canto 11.",
+    "malikiAlerts": "Avisarme",
+    "malikiAlertsHelp": "Desactivado para todas las oraciones al principio. Elige solo aquellas de las que quieras enterarte: cinco avisos más al día es como una aplicación te enseña a ignorarla. Requiere las notificaciones activadas.",
+    "malikiAlertsNone": "Sin avisos",
+    "malikiAlertsLead": "Cuánta antelación",
+    "malikiAlertsLeadTitle": "Avisarme antes de que acabe el primer tiempo",
+    "malikiAlertsAtTime": "Cuando acabe",
     "malikiSecondTimesModelled": "Los límites de Fayr y Asr son la desaparición de las estrellas y el amarilleo del sol: un ángulo que sustituye a algo que juzga el ojo. Se marcan como aproximados. Donde el sol no sale, no se pone o nunca alcanza el ángulo no se muestra nada en lugar de una suposición.",
     "accent_rose": "Rosa",
     "accent_violet": "Violeta",
@@ -432,7 +439,9 @@
     "adhanDisableAction": "Desactivar adhan",
     "snoozeAction": "Posponer",
     "snoozeChoice": "Posponer {{minutes}} min",
-    "snoozeMinutes": "Minutos"
+    "snoozeMinutes": "Minutos",
+    "daruriEndsIn": "El primer tiempo acaba a las {{time}} — en {{count}} min",
+    "daruriEnded": "El primer tiempo acabó a las {{until}}"
   },
   "locations": {
     "title": "Ubicaciones guardadas",

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { resolveDeviceLanguage } from '../i18n/deviceLanguage';
 import { coerceNotificationSoundId } from '../notifications/notificationSounds';
 import { coerceClockFormat } from '../utils/clockFormat';
+import { coerceDaruriAlerts } from '../prayer/daruriTimes';
 import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
 import {
   extractSecureFields,
@@ -260,6 +261,13 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (typeof merged.malikiSecondTimesEnabled !== 'boolean') {
     merged.malikiSecondTimesEnabled = false;
   }
+  // Alerts are opt-in per boundary and the list is the kill-switch, so a
+  // blob holding anything but a known key must come back empty rather
+  // than scheduling something nobody chose.
+  merged.malikiSecondTimeAlerts = coerceDaruriAlerts(parsed.malikiSecondTimeAlerts);
+  merged.malikiSecondTimeAlertMinutes = coercePrePrayerReminderMinutes(
+    parsed.malikiSecondTimeAlertMinutes ?? DEFAULT_SETTINGS.malikiSecondTimeAlertMinutes,
+  );
   merged.widgetHighlightId = coerceWidgetHighlightId(parsed.widgetHighlightId);
   merged.widgetHighlightCustomHex = coerceWidgetHighlightHex(
     parsed.widgetHighlightCustomHex,

@@ -17,6 +17,15 @@ type Props = {
   palette: AppPalette;
   onSelect: (minutes: PrePrayerReminderMinutes) => void;
   onClose: () => void;
+  /**
+   * Override the sheet's own title. The list of minutes is the same
+   * question — "how much warning" — asked about more than one boundary
+   * now (the pre-prayer reminder, and the Mālikī second times), and one
+   * picker asking it is better than two identical ones.
+   */
+  title?: string;
+  /** What zero means here. Defaults to "off"; for a boundary it is "when it ends". */
+  offLabel?: string;
 };
 
 export const PreReminderModal = memo(function PreReminderModal({
@@ -25,8 +34,11 @@ export const PreReminderModal = memo(function PreReminderModal({
   palette,
   onSelect,
   onClose,
+  title,
+  offLabel,
 }: Props) {
   const { t } = useTranslation();
+  const sheetTitle = title ?? t('settings.prePrayerReminderModalTitle');
   const navigationReserve = useSystemNavigationReserve();
   return (
     <Modal
@@ -44,7 +56,7 @@ export const PreReminderModal = memo(function PreReminderModal({
         />
         <View
           accessibilityRole="radiogroup"
-          accessibilityLabel={t('settings.prePrayerReminderModalTitle')}
+          accessibilityLabel={sheetTitle}
           style={[
             modalStyles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
@@ -56,7 +68,7 @@ export const PreReminderModal = memo(function PreReminderModal({
           ]}
         >
           <Text style={[modalStyles.title, { color: palette.text }]}>
-            {t('settings.prePrayerReminderModalTitle')}
+            {sheetTitle}
           </Text>
           <FlatList
             data={[...PRE_PRAYER_REMINDER_OPTIONS]}
@@ -64,7 +76,7 @@ export const PreReminderModal = memo(function PreReminderModal({
             renderItem={({ item }) => {
               const label =
                 item === 0
-                  ? t('settings.prePrayerReminderOff')
+                  ? offLabel ?? t('settings.prePrayerReminderOff')
                   : t('settings.prePrayerReminderOption', { count: item });
               return (
                 <Pressable

@@ -392,6 +392,13 @@ export function HomeScreen() {
       // Extra cached days extend coverage past tomorrow so alerts keep
       // firing when the app isn't opened for a couple of days (v2.7.40).
       week: view.table.week,
+      // Only when the times themselves are on: an alert about a boundary
+      // the card is not showing would be the app announcing something the
+      // reader cannot go and look at.
+      daruriAlerts: settings.malikiSecondTimesEnabled
+        ? settings.malikiSecondTimeAlerts
+        : [],
+      daruriAlertMinutes: settings.malikiSecondTimeAlertMinutes,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
       hour12: clockHour12,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
@@ -424,6 +431,9 @@ export function HomeScreen() {
     settings.notificationSound,
     settings.adhanUsesAlarmStream,
     clockHour12,
+    settings.malikiSecondTimesEnabled,
+    settings.malikiSecondTimeAlerts,
+    settings.malikiSecondTimeAlertMinutes,
     settings.journalNotificationActionsEnabled,
     settings.endOfDayLogReminderEnabled,
     state,
@@ -478,6 +488,12 @@ export function HomeScreen() {
         // The resolved answer rather than the setting, so 'auto' following
         // the device counts as a change too.
         String(clockHour12),
+        // The second-time alerts are part of the same schedule, so a
+        // change to which of them fire has to rewrite it.
+        settings.malikiSecondTimesEnabled
+          ? settings.malikiSecondTimeAlerts.join(',')
+          : '',
+        String(settings.malikiSecondTimeAlertMinutes),
         state.baseDate.getTime(),
       );
       if (shouldResync(NOTIF_RESYNC_KEY, notifPrint)) {
@@ -491,6 +507,10 @@ export function HomeScreen() {
           baseDate: state.baseDate,
           week: view.table.week,
           hour12: clockHour12,
+          daruriAlerts: settings.malikiSecondTimesEnabled
+            ? settings.malikiSecondTimeAlerts
+            : [],
+          daruriAlertMinutes: settings.malikiSecondTimeAlertMinutes,
         })
           // Marked on success only: a rewrite that threw must not suppress
           // the next attempt, or one bad round leaves the alarms as they are
@@ -577,6 +597,9 @@ export function HomeScreen() {
       settings.notificationSound,
       settings.adhanUsesAlarmStream,
       clockHour12,
+      settings.malikiSecondTimesEnabled,
+      settings.malikiSecondTimeAlerts,
+      settings.malikiSecondTimeAlertMinutes,
       state,
       view,
       locationLabel,

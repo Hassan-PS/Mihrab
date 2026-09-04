@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { AppPalette } from '../../theme/appPalette';
 import {
@@ -36,6 +36,36 @@ import { typeStyle } from '../../theme/typography';
 const COL_DAY = 1.4;
 const COL_TIME = 1.0;
 export const MONTH_ROW_HEIGHT = 40;
+
+/**
+ * How tall a row is once the Mālikī second times are on — issue #19.
+ *
+ * Three of the nine cells gain a second line (see `MonthRow`), so the
+ * row grows for all of them. Exported because `MonthTimesScreen`'s
+ * `getItemLayout` has to agree with the stylesheet or the list scrolls
+ * to the wrong offsets.
+ */
+export const MONTH_ROW_HEIGHT_DARURI = 54;
+
+export function monthRowHeight(showDaruri: boolean): number {
+  return showDaruri ? MONTH_ROW_HEIGHT_DARURI : MONTH_ROW_HEIGHT;
+}
+
+/**
+ * Which cells carry a second line, and which do not — issue #19.
+ *
+ * Only three of the five boundaries are new information here. Ẓuhr's
+ * first time ends where ʿAṣr begins and Maghrib's where Ishāʾ does
+ * (fn. 656, 659), and both of those are already columns of this table:
+ * printing them again under Ẓuhr and Maghrib would be the same number
+ * twice on one row, which is how a grid stops being read. The legend
+ * under the table says so in words instead.
+ */
+const DARURI_CELL: Partial<Record<DisplayPrayerKey, string>> = {
+  Fajr: 'FajrDaruri',
+  Asr: 'AsrDaruri',
+  Isha: 'IshaDaruri',
+};
 const DAYS_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 type ColumnHeaderProps = {
@@ -84,9 +114,17 @@ type RowProps = {
   palette: AppPalette;
   isCurrentMonth: boolean;
   todayDay: number;
+  /** Draw the Mālikī first-time ends under Fajr, ʿAṣr and Ishāʾ. */
+  showDaruri?: boolean;
 };
 
-function MonthRowImpl({ item, palette, isCurrentMonth, todayDay }: RowProps) {
+function MonthRowImpl({
+  item,
+  palette,
+  isCurrentMonth,
+  todayDay,
+  showDaruri = false,
+}: RowProps) {
   const clock = useClockFormatter();
   const d = item.date;
   const isToday = isCurrentMonth && d.getDate() === todayDay;
@@ -97,6 +135,7 @@ function MonthRowImpl({ item, palette, isCurrentMonth, todayDay }: RowProps) {
     <View
       style={[
         styles.row,
+        { height: monthRowHeight(showDaruri) },
         { borderBottomColor: palette.border },
         isToday && { backgroundColor: palette.accentBg },
         isFriday && !isToday && { backgroundColor: palette.card },
@@ -124,9 +163,10 @@ function MonthRowImpl({ item, palette, isCurrentMonth, todayDay }: RowProps) {
         const raw = item.timings[key];
         const timeStr = raw ? clock(raw) : '—';
         const salah = isSalah(key);
-        return (
+        const daruriKey = showDaruri ? DARURI_CELL[key] : undefined;
+        const daruriRaw = daruriKey ? item.timings[daruriKey] : undefined;
+        const cell = (
           <Text
-            key={key}
             style={[
               salah ? styles.cellTimeSalah : styles.cellTime,
               {
@@ -138,9 +178,26 @@ function MonthRowImpl({ item, palette, isCurrentMonth, todayDay }: RowProps) {
                 fontStyle: salah ? 'normal' : 'italic',
                 fontWeight: isToday ? '700' : salah ? '600' : '400',
               },
+              // The stacked cells lay the two lines out themselves.
+              showDaruri && styles.cellStacked,
             ]}>
             {timeStr}
           </Text>
+        );
+        if (!showDaruri) return <React.Fragment key={key}>{cell}</React.Fragment>;
+        return (
+          <View key={key} style={styles.cellWrap}>
+            {cell}
+            {/* An empty line rather than none on the cells that have no
+                boundary today, so the nine columns keep one baseline
+                across the row. A blank is also the honest answer where
+                the sky produced nothing (`daruriTimes.ts`). */}
+            <Text
+              style={[styles.cellDaruri, { color: palette.muted }]}
+              numberOfLines={1}>
+              {daruriKey ? (daruriRaw ? clock(daruriRaw) : '·') : ''}
+            </Text>
+          </View>
         );
       })}
     </View>
@@ -207,5 +264,25 @@ const styles = StyleSheet.create({
     ...typeStyle('caption'),
     flex: COL_TIME,
     textAlign: 'center',
+  },
+  // Inside a stacked cell the flex belongs to the wrapper, not the text.
+  cellWrap: {
+    flex: COL_TIME,
+    alignItems: 'center',
+  },
+  cellStacked: {
+    flex: 0,
+    alignSelf: 'stretch',
+  },
+  cellDaruri: {
+    ...typeStyle('caption'),
+    // Smaller than the time above it on purpose: it is the deadline for
+    // that prayer, not a second prayer, and at the same size the row
+    // reads as eighteen times rather than nine and their ends.
+    fontSize: 9,
+    lineHeight: 11,
+    textAlign: 'center',
+    opacity: 0.7,
+    marginTop: 1,
   },
 });

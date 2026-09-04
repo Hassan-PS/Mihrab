@@ -357,6 +357,28 @@ export type PrayerAppSettings = {
    */
   malikiSecondTimesEnabled: boolean;
   /**
+   * Which of the five second-time boundaries send a notification —
+   * issue #19. A subset of `DARURI_KEYS`; empty by default, and empty is
+   * the whole point.
+   *
+   * Five more alerts a day, on top of the five prayers, the advance
+   * reminders and whichever of Sunrise and the night marks are on, is
+   * how an app teaches people to swipe its notifications away — which
+   * costs more than these are worth, including for the prayer alerts
+   * that were already working. So showing the times and announcing them
+   * are separate decisions, and the second one is made a prayer at a
+   * time.
+   */
+  malikiSecondTimeAlerts: string[];
+  /**
+   * How long before a boundary its alert fires. 0 means at the boundary.
+   *
+   * The default is 15: the row on the card is the reference, and the
+   * alert is the thing a person acts on — by the moment a window closes
+   * there is nothing left to act on.
+   */
+  malikiSecondTimeAlertMinutes: PrePrayerReminderMinutes;
+  /**
    * Ayah of the day notification — v2.7.27.
    *
    * When on, a daily notification fires at the chosen time with a
@@ -455,6 +477,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   lastThirdEnabled: false,
   firstThirdEnabled: false,
   malikiSecondTimesEnabled: false,
+  malikiSecondTimeAlerts: [],
+  malikiSecondTimeAlertMinutes: 15,
   // Ayah of the day: off by default (no surprise notifications); 9:00 AM
   // when enabled — a quiet mid-morning moment.
   ayahOfDayEnabled: false,

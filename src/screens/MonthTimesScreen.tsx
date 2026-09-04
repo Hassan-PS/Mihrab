@@ -18,13 +18,14 @@ import {
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import { DISPLAY_ORDER } from '../types/prayer';
 import { injectNightTimes } from '../utils/nightTimes';
+import { injectDaruriTimes } from '../prayer/daruriTimes';
 import { formatLocalDate } from '../utils/date';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import { getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
 import { ShareMonthScreen } from './ShareMonthScreen';
 import { MonthControls } from './month/MonthControls';
 import {
-  MONTH_ROW_HEIGHT,
+  monthRowHeight,
   MonthColumnHeader,
   MonthRow,
 } from './month/MonthTable';
@@ -154,6 +155,9 @@ export function MonthTimesScreen() {
   }, [hydrated, needsGpsPrime, viewYear, viewMonth, effectiveProvider,
       settings.calculationMethod, settings.school, lat, lng, t]);
 
+  const showDaruri = settings.malikiSecondTimesEnabled;
+  const rowHeight = monthRowHeight(showDaruri);
+
   /**
    * The night marks, derived here rather than taken from the provider.
    *
@@ -170,9 +174,22 @@ export function MonthTimesScreen() {
    */
   const nightRows = useMemo(() => {
     if (!rows) return rows;
-    const times = injectNightTimes(rows.map(r => r.timings));
+    let times = injectNightTimes(rows.map(r => r.timings));
+    // The Mālikī second times, over the same consecutive run — issue #19.
+    // A month IS the window `injectDaruriTimes` wants, and the table is
+    // where a reader browses a week and can see what the boundaries do
+    // across it; the Today card only ever shows one day of them.
+    if (showDaruri && rows.length > 0) {
+      times = injectDaruriTimes(
+        times,
+        rows[0].date,
+        lat,
+        lng,
+        settings.school === 1 ? 2 : 1,
+      );
+    }
     return rows.map((r, i) => ({ ...r, timings: times[i] }));
-  }, [rows]);
+  }, [rows, showDaruri, lat, lng, settings.school]);
 
   // Abbreviated column headers from localized prayer names
   const colHeaders = useMemo(
@@ -187,9 +204,10 @@ export function MonthTimesScreen() {
         palette={palette}
         isCurrentMonth={isCurrentMonth}
         todayDay={today.day}
+        showDaruri={showDaruri}
       />
     ),
-    [palette, isCurrentMonth, today.day],
+    [palette, isCurrentMonth, today.day, showDaruri],
   );
 
   if (!hydrated) {
@@ -289,10 +307,21 @@ export function MonthTimesScreen() {
           isCurrentMonth && nightRows ? Math.max(0, today.day - 3) : 0
         }
         getItemLayout={(_, index) => ({
-          length: MONTH_ROW_HEIGHT,
-          offset: MONTH_ROW_HEIGHT * index,
+          length: rowHeight,
+          offset: rowHeight * index,
           index,
         })}
+        // The second lines are new information and nobody is born knowing
+        // what they are — and two of the five boundaries are columns of
+        // this very table, which is worth saying rather than leaving the
+        // reader to notice that Ẓuhr has no second line.
+        ListFooterComponent={
+          showDaruri ? (
+            <Text style={[styles.empty, { color: palette.muted }]}>
+              {t('month.daruriLegend')}
+            </Text>
+          ) : null
+        }
         onScrollToIndexFailed={() => {}}
       />
       </View>

@@ -8,6 +8,10 @@ import notifee, {
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
 import { makeClockFormatter } from '../utils/clockFormat';
+import {
+  buildDaruriAlertEvents,
+  DARURI_OF,
+} from '../prayer/daruriTimes';
 import i18n from '../i18n';
 import {
   getNotificationSoundOption,
@@ -417,6 +421,14 @@ export async function syncPrayerNotifications(params: {
    * callers that predate the setting.
    */
   hour12?: boolean;
+  /**
+   * Which Mālikī second-time boundaries alert — issue #19. A subset of
+   * `DARURI_KEYS`, empty by default. See `buildDaruriAlertEvents` for
+   * why this is chosen a prayer at a time rather than by one switch.
+   */
+  daruriAlerts?: readonly string[];
+  /** Minutes of warning before each of those; 0 means at the boundary. */
+  daruriAlertMinutes?: number;
 }): Promise<SyncPrayerNotificationsResult> {
   if (!params.enabled) {
     await cancelOwnedPrayerNotifications([]);
@@ -458,11 +470,30 @@ export async function syncPrayerNotifications(params: {
       ? buildPrePrayerReminderEvents(salahEvents, reminderMinutes, now)
       : [];
 
+  // The Mālikī second times, for whichever boundaries the reader asked to
+  // be told about. Built from the same window the prayers are, so they
+  // roll over with everything else; the boundaries themselves ride in the
+  // timings maps under keys nothing else looks at (`daruriTimes.ts`).
+  const daruriMinutes = clampPrePrayerReminderMinutes(
+    params.daruriAlertMinutes ?? 0,
+  );
+  const daruriEvents = buildDaruriAlertEvents(
+    [params.today, ...(params.tomorrow ? [params.tomorrow] : []), ...(params.week?.slice(2, 4) ?? [])],
+    params.baseDate ?? now,
+    params.daruriAlerts ?? [],
+    daruriMinutes,
+    now,
+  );
+
   // Nothing schedulable — the data is entirely in the past (e.g. a sync
   // fired with state fetched 2+ days ago, before the refetch landed).
   // Keep whatever is already scheduled rather than wiping the pending
   // alarms and leaving the user with NO alerts until the next good sync.
-  if (salahEvents.length === 0 && reminderEvents.length === 0) {
+  if (
+    salahEvents.length === 0 &&
+    reminderEvents.length === 0 &&
+    daruriEvents.length === 0
+  ) {
     return {
       status: 'scheduled',
       scheduledCount: 0,
@@ -483,6 +514,11 @@ export async function syncPrayerNotifications(params: {
   for (const e of reminderEvents) {
     desiredIds.add(
       `${PRAYER_NOTIFICATION_ID_PREFIX}pre-${e.at.getTime()}-${e.name}`,
+    );
+  }
+  for (const e of daruriEvents) {
+    desiredIds.add(
+      `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-${e.at.getTime()}-${e.name}`,
     );
   }
   await cancelOwnedPrayerNotifications([...desiredIds]);
@@ -626,9 +662,58 @@ export async function syncPrayerNotifications(params: {
     );
   }
 
+  // ── The Mālikī second times ─────────────────────────────────────────
+  //
+  // Never the adhan, never a log action, never a snooze: a boundary is
+  // not a prayer, and the call to prayer belongs to the five. Same
+  // reasoning as Sunrise and the night marks, and the same sound.
+  for (const e of daruriEvents) {
+    const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-${e.at.getTime()}-${
+      e.name
+    }`;
+    const prayerName = i18n.t(`prayer.${DARURI_OF[e.name]}`, {
+      defaultValue: DARURI_OF[e.name],
+    });
+    const closesAt = clock.fromDate(
+      new Date(e.at.getTime() + daruriMinutes * 60_000),
+    );
+    const body =
+      daruriMinutes > 0
+        ? i18n.t('alertCopy.daruriEndsIn', {
+            defaultValue: 'First time ends at {{time}} — in {{count}} min',
+            time: closesAt,
+            count: daruriMinutes,
+          })
+        : i18n.t('alertCopy.daruriEnded', {
+            defaultValue: 'First time has ended — second time until {{until}}',
+            until: closesAt,
+          });
+    await notifee.createTriggerNotification(
+      {
+        id: notificationId,
+        title: prayerName,
+        body,
+        ios: { sound: reminderSound.iosSound },
+        android: {
+          style: { type: AndroidStyle.BIGTEXT, text: body },
+          channelId: reminderSound.androidChannelId,
+          smallIcon: 'ic_stat_prayer',
+          pressAction: { id: 'default' },
+          // Gone by the time the window it is warning about has closed —
+          // a banner still saying "ends in 15 min" an hour later is worse
+          // than no banner. At zero lead it is a statement about a state
+          // that lasts, so it gets the same floor as everything else.
+          timeoutAfter: Math.max(60_000, daruriMinutes * 60_000),
+        },
+      },
+      buildTimestampTrigger(e.at.getTime(), exactAlarms),
+    );
+  }
+
   return {
     status: 'scheduled',
-    scheduledCount: salahEvents.length + reminderEvents.length,
+    scheduledCount:
+      salahEvents.length + reminderEvents.length + daruriEvents.length,
     exactAlarms,
     reminderMinutes,
   };

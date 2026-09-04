@@ -106,6 +106,11 @@
  * imam about than by a number the sky does not support.
  */
 import { clockNightTimes } from '../utils/nightTimes';
+import {
+  addDays,
+  combineLocalDateAndTime,
+  startOfLocalDay,
+} from '../utils/prayerTimes';
 import type { TimingsMap } from '../types/prayer';
 
 /**
@@ -512,4 +517,108 @@ export function injectDaruriTimes(
     );
     return { ...day, ...times };
   });
+}
+
+/**
+ * Is `key` one of the five? Storage hands us whatever was on disk.
+ */
+export function isDaruriKey(key: unknown): key is DaruriKey {
+  return (
+    typeof key === 'string' && (DARURI_KEYS as readonly string[]).includes(key)
+  );
+}
+
+/**
+ * The alert list, from a stored blob. Order follows `DARURI_KEYS` rather
+ * than the file's, so two blobs holding the same set compare equal and a
+ * settings write does not look like a change when it is not.
+ */
+export function coerceDaruriAlerts(value: unknown): DaruriKey[] {
+  if (!Array.isArray(value)) return [];
+  const chosen = new Set(value.filter(isDaruriKey));
+  return DARURI_KEYS.filter(k => chosen.has(k));
+}
+
+/**
+ * The alerts to schedule for the Mālikī second times — issue #19.
+ *
+ * ── WHY THIS IS OPT-IN, ONE PRAYER AT A TIME ──────────────────────────
+ *
+ * Five boundaries is five more notifications a day on top of the five
+ * prayers, the pre-prayer reminders and whichever of Sunrise and the
+ * night marks the reader has turned on. An app that started firing all
+ * of them because one switch was flipped would be teaching people to
+ * swipe its notifications away, which costs more than the alerts are
+ * worth — including for the prayer alerts that were already working.
+ * So the list starts empty and each boundary is chosen by itself.
+ *
+ * ── AND WHY IT FIRES BEFORE, NOT AT ───────────────────────────────────
+ *
+ * The row on the card is the reference; the alert is the thing a person
+ * acts on, and by the moment a window closes there is nothing left to
+ * act on. `leadMinutes` is how much warning the reader asked for. Zero
+ * is allowed and means the boundary itself — a statement of fact rather
+ * than a prompt, which is what someone tracking their own practice may
+ * actually want.
+ *
+ * Never the adhan. These are not prayer times, and the caller schedules
+ * them on the plain notification sound for the same reason Sunrise and
+ * the night marks get it (`isNonPrayerEvent`).
+ */
+export function buildDaruriAlertEvents(
+  week: TimingsMap[],
+  baseDay: Date,
+  enabled: readonly string[],
+  leadMinutes: number,
+  now: Date,
+): { name: DaruriKey; at: Date }[] {
+  if (enabled.length === 0 || week.length === 0) return [];
+  const chosen = new Set(enabled.filter(isDaruriKey));
+  if (chosen.size === 0) return [];
+
+  const dayStart = startOfLocalDay(baseDay);
+  const out: { name: DaruriKey; at: Date }[] = [];
+
+  week.forEach((day, offset) => {
+    const base = offset === 0 ? dayStart : addDays(dayStart, offset);
+    for (const key of DARURI_KEYS) {
+      if (!chosen.has(key)) continue;
+      const clock = day[key];
+      if (!clock) continue;
+      let at: Date;
+      try {
+        at = combineLocalDateAndTime(base, clock);
+      } catch {
+        continue;
+      }
+      // Ishāʾ's boundary is a third of the way into the night that BEGINS
+      // on this day, so at a long summer latitude it lands after local
+      // midnight — 00:23 for a 23:10 Maghrib — and belongs to tomorrow's
+      // date, not to this one. Exactly the rule `eventAt` applies to
+      // `Firstthird`, which is the same instant under its other name.
+      if (key === 'IshaDaruri' && day.Maghrib) {
+        try {
+          if (at < combineLocalDateAndTime(base, day.Maghrib)) {
+            at = addDays(at, 1);
+          }
+        } catch {
+          // Unparseable Maghrib — the boundary stands on its own date.
+        }
+      }
+      out.push({ name: key, at: new Date(at.getTime() - leadMinutes * 60_000) });
+    }
+  });
+
+  // Only what is still ahead, and only once: a week's worth of days can
+  // put the same instant in twice when a boundary sits either side of
+  // midnight.
+  const seen = new Set<number>();
+  return out
+    .filter(e => {
+      const ms = e.at.getTime();
+      if (ms <= now.getTime() || seen.has(ms)) return false;
+      seen.add(ms);
+      return true;
+    })
+    .sort((a, b) => a.at.getTime() - b.at.getTime());
 }

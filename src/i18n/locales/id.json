@@ -115,7 +115,8 @@
     "date": "Tanggal",
     "hijri": "Hijriah",
     "gregorian": "Gregorian",
-    "prayerTimes": "Waktu Sholat"
+    "prayerTimes": "Waktu Sholat",
+    "daruriLegend": "Baris kecil di bawah Subuh, Asar, dan Isya adalah kapan waktu pertama (pilihan) masing-masing berakhir. Zuhur berakhir saat Asar masuk dan Magrib saat Isya masuk, jadi keduanya adalah kolom itu sendiri. Milik Subuh dan Asar bersifat perkiraan."
   },
   "share": {
     "tagline": "Waktu salat, kiblat, dan Al-Qur’an",
@@ -273,6 +274,12 @@
     "malikiSecondTimesHelp": "Setiap salat mendapat satu baris di kartu Hari Ini yang menyebutkan kapan waktu pilihannya (ikhtiyari) berakhir dan waktu daruratnya (daruri) dimulai. Dihitung di perangkat Anda dari koordinat Anda, dari sumber mana pun waktu Anda berasal. Memakai bayangan 1:1 untuk Asar tanpa memandang pengaturan mazhab Anda, karena itulah batas Maliki. Nonaktif secara bawaan.",
     "malikiSecondTimesHanafiWarning": "Perhatian: ini batas Maliki, tetapi Asar Anda diatur ke Hanafi yang memakai bayangan berbeda. Waktu pertama Zuhur akan berakhir sekitar setengah jam sebelum Asar yang tampil di bawahnya. Matikan Asar Hanafi jika Anda ingin kartu ini konsisten.",
     "malikiSecondTimesSource": "Dari Al-Murshid al-Muin (Ibnu Asyir), sebagaimana dituangkan dalam The Guiding Helper, nyanyian 11.",
+    "malikiAlerts": "Beri tahu saya",
+    "malikiAlertsHelp": "Mati untuk semua salat pada awalnya. Pilih hanya yang ingin Anda ketahui — lima notifikasi tambahan sehari adalah cara sebuah aplikasi mengajari Anda mengabaikannya. Perlu notifikasi diaktifkan.",
+    "malikiAlertsNone": "Tanpa notifikasi",
+    "malikiAlertsLead": "Berapa lama sebelumnya",
+    "malikiAlertsLeadTitle": "Ingatkan sebelum waktu pertama berakhir",
+    "malikiAlertsAtTime": "Saat berakhir",
     "malikiSecondTimesModelled": "Batas Subuh dan Asar adalah pudarnya bintang dan menguningnya matahari — sebuah sudut yang menggantikan sesuatu yang dinilai mata. Keduanya ditandai sebagai perkiraan. Di tempat matahari tidak terbit, tidak terbenam, atau tidak pernah mencapai sudut itu, tidak ada yang ditampilkan alih-alih tebakan.",
     "accent_rose": "Mawar",
     "accent_violet": "Ungu",
@@ -432,7 +439,9 @@
     "adhanDisableAction": "Nonaktifkan adzan",
     "snoozeAction": "Tunda",
     "snoozeChoice": "Tunda {{minutes}} mnt",
-    "snoozeMinutes": "Menit"
+    "snoozeMinutes": "Menit",
+    "daruriEndsIn": "Waktu pertama berakhir {{time}} — dalam {{count}} mnt",
+    "daruriEnded": "Waktu pertama berakhir {{until}}"
   },
   "locations": {
     "title": "Lokasi tersimpan",

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRoute, type RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import type { MainTabParamList } from '../navigation/types';
 import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
@@ -54,6 +55,7 @@ export function SettingsScreen() {
   // settings cards wastes horizontal space, so we reflow the cards into two
   // balanced columns. Compact/regular keep the historical single column.
   const isExpanded = useBreakpoint() === 'expanded';
+  const { t } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
 
@@ -84,6 +86,7 @@ export function SettingsScreen() {
   const [methodModal, setMethodModal] = useState(false);
   const [offsetsModal, setOffsetsModal] = useState(false);
   const [preReminderModal, setPreReminderModal] = useState(false);
+  const [daruriLeadModal, setDaruriLeadModal] = useState(false);
   const [notificationSoundModal, setNotificationSoundModal] = useState(false);
   const [providerModal, setProviderModal] = useState(false);
   const [languageModal, setLanguageModal] = useState(false);
@@ -140,7 +143,8 @@ export function SettingsScreen() {
     preReminderModal ||
     notificationSoundModal ||
     providerModal ||
-    languageModal;
+    languageModal ||
+    daruriLeadModal;
   useAndroidSubScreenBack(deferHardwareBackRef);
 
   const closeMethod = useCallback(() => setMethodModal(false), []);
@@ -156,6 +160,8 @@ export function SettingsScreen() {
   const openMethod = useCallback(() => setMethodModal(true), []);
   const openOffsets = useCallback(() => setOffsetsModal(true), []);
   const openPreReminder = useCallback(() => setPreReminderModal(true), []);
+  const openDaruriLead = useCallback(() => setDaruriLeadModal(true), []);
+  const closeDaruriLead = useCallback(() => setDaruriLeadModal(false), []);
   const openSoundPicker = useCallback(
     () => setNotificationSoundModal(true),
     [],
@@ -203,6 +209,7 @@ export function SettingsScreen() {
             <CalculationCard
               onOpenMethodPicker={openMethod}
               onOpenOffsetsModal={openOffsets}
+              onOpenDaruriLeadPicker={openDaruriLead}
             />
           );
           const notifications = (
@@ -288,6 +295,21 @@ export function SettingsScreen() {
           updateSettings({ prePrayerReminderMinutes: minutes })
         }
         onClose={closePreReminder}
+      />
+
+      {/* The same picker as the pre-prayer reminder, asking the same
+          question about a different boundary — see PreReminderModal's
+          `title` / `offLabel`. */}
+      <PreReminderModal
+        visible={daruriLeadModal}
+        current={settings.malikiSecondTimeAlertMinutes}
+        palette={palette}
+        title={t('settings.malikiAlertsLeadTitle')}
+        offLabel={t('settings.malikiAlertsAtTime')}
+        onSelect={minutes =>
+          updateSettings({ malikiSecondTimeAlertMinutes: minutes })
+        }
+        onClose={closeDaruriLead}
       />
 
       <SoundPickerModal

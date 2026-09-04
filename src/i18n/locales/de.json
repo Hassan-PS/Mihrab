@@ -115,7 +115,8 @@
     "date": "Datum",
     "hijri": "Hijri",
     "gregorian": "Gregorianisch",
-    "prayerTimes": "Gebetszeiten"
+    "prayerTimes": "Gebetszeiten",
+    "daruriLegend": "Die kleine Zeile unter Fadschr, ʿAsr und ʿIschāʾ zeigt, wann deren erste (bevorzugte) Zeit endet. Zuhrs endet mit dem Beginn von ʿAsr und Maghribs mit dem Beginn von ʿIschāʾ — diese beiden sind also die Spalten selbst. Die von Fadschr und ʿAsr sind ungefähr."
   },
   "share": {
     "tagline": "Gebetszeiten, Qibla und der Koran",
@@ -273,6 +274,12 @@
     "malikiSecondTimesHelp": "Jedes Gebet erhält auf der Heute-Karte eine Zeile, die sagt, wann seine bevorzugte Zeit (ikhtiyari) endet und seine späte Zeit (daruri) beginnt. Auf deinem Gerät aus deinen Koordinaten berechnet, unabhängig davon, woher deine Zeiten stammen. Nutzt für Asr den 1:1-Schatten unabhängig von deiner Madhhab-Einstellung, denn das ist die malikitische Grenze. Standardmäßig aus.",
     "malikiSecondTimesHanafiWarning": "Hinweis: Das sind malikitische Grenzen, aber dein Asr steht auf hanafitisch, das einen anderen Schatten verwendet. Zuhrs erste Zeit endet etwa eine halbe Stunde vor dem darunter angezeigten Asr. Schalte hanafitisches Asr aus, wenn die Karte zu sich selbst passen soll.",
     "malikiSecondTimesSource": "Nach Al-Murshid al-Muin (Ibn Ashir), wiedergegeben in The Guiding Helper, Gesang 11.",
+    "malikiAlerts": "Benachrichtige mich",
+    "malikiAlertsHelp": "Zu Beginn für jedes Gebet aus. Wähle nur die, über die du Bescheid wissen willst — fünf weitere Meldungen am Tag sind der Weg, auf dem eine App dir beibringt, sie zu ignorieren. Benachrichtigungen müssen an sein.",
+    "malikiAlertsNone": "Keine Meldungen",
+    "malikiAlertsLead": "Wie viel Vorwarnung",
+    "malikiAlertsLeadTitle": "Vor dem Ende der ersten Zeit warnen",
+    "malikiAlertsAtTime": "Wenn sie endet",
     "malikiSecondTimesModelled": "Die Grenzen von Fadschr und Asr sind das Verblassen der Sterne und das Gelbwerden der Sonne — ein Winkel als Ersatz für etwas, das das Auge beurteilt. Sie sind als ungefähr gekennzeichnet. Wo die Sonne nicht aufgeht, nicht untergeht oder den Winkel nie erreicht, wird nichts angezeigt statt einer Vermutung.",
     "accent_rose": "Rosé",
     "accent_violet": "Violett",
@@ -432,7 +439,9 @@
     "adhanDisableAction": "Adhan deaktivieren",
     "snoozeAction": "Erinnern",
     "snoozeChoice": "{{minutes}} Min. später",
-    "snoozeMinutes": "Minuten"
+    "snoozeMinutes": "Minuten",
+    "daruriEndsIn": "Die erste Zeit endet um {{time}} — in {{count}} Min.",
+    "daruriEnded": "Die erste Zeit endete um {{until}}"
   },
   "locations": {
     "title": "Gespeicherte Orte",
