@@ -27,6 +27,7 @@ const portrait = {
   sideInset: 0,
   navPad: 0,
   listH: 720,
+  footerDrawn: true,
 };
 const landscape = { ...portrait, width: 844, height: 390, listH: 300 };
 

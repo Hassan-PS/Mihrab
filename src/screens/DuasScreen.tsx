@@ -58,6 +58,24 @@ export function DuasScreen() {
   // the screen so the user can navigate away from a dua and come back to
   // resume their count. Reset by tapping the inline reset affordance.
   const [counts, setCounts] = useState<Record<string, number>>({});
+  /**
+   * Which sections a reader has opened, keyed `<dua id>|<part>`.
+   *
+   * CLOSED TO BEGIN WITH. A category is up to a dozen duas and each was
+   * showing Arabic, a Latin transliteration and an English translation at
+   * once — three renderings of the same words, stacked, so the ONE you
+   * came to read was never on screen by itself and the list took three
+   * times the scrolling it needed. The Arabic is the dua; the other two
+   * are aids, and an aid you have to scroll past is not aiding.
+   *
+   * Screen-lifetime state rather than a preference: which dua you need
+   * the pronunciation of is a question you answer per dua, not once
+   * forever, and it is one tap away.
+   */
+  const [openParts, setOpenParts] = useState<Record<string, boolean>>({});
+  const togglePart = useCallback((key: string) => {
+    setOpenParts(prev => ({ ...prev, [key]: !prev[key] }));
+  }, []);
 
   const onIncrement = useCallback((id: string, target: number) => {
     setCounts(prev => {
@@ -150,17 +168,63 @@ export function DuasScreen() {
               accessibilityLabel={dua.arabic}>
               {dua.arabic}
             </Text>
-            {/* Pronunciation guide — Latin transliteration shown under the
-                Arabic so non-Arabic speakers can recite. Hidden for Arabic
-                readers (they read the Arabic line directly). */}
-            {showTranslit ? (
+            {/* The two aids, behind their own names.
+
+                Pronunciation is a Latin transliteration for readers who
+                cannot read the Arabic line; both are hidden outright for
+                Arabic readers, who need neither. */}
+            {showTranslit || showTranslation ? (
+              <View style={styles.aidRow}>
+                {showTranslit ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      expanded: !!openParts[`${dua.id}|say`],
+                    }}
+                    onPress={() => togglePart(`${dua.id}|say`)}
+                    style={[
+                      styles.aidChip,
+                      { backgroundColor: palette.controlBg },
+                    ]}>
+                    <Text
+                      style={[styles.aidChipText, { color: palette.accentSolid }]}>
+                      {`${openParts[`${dua.id}|say`] ? '▾' : '▸'} ${t(
+                        'duas.pronunciation',
+                        'Pronunciation',
+                      )}`}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {showTranslation ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      expanded: !!openParts[`${dua.id}|mean`],
+                    }}
+                    onPress={() => togglePart(`${dua.id}|mean`)}
+                    style={[
+                      styles.aidChip,
+                      { backgroundColor: palette.controlBg },
+                    ]}>
+                    <Text
+                      style={[styles.aidChipText, { color: palette.accentSolid }]}>
+                      {`${openParts[`${dua.id}|mean`] ? '▾' : '▸'} ${t(
+                        'quran.viewToggleTranslation',
+                        'Translation',
+                      )}`}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            ) : null}
+            {showTranslit && openParts[`${dua.id}|say`] ? (
               <Text
                 style={[styles.translit, { color: palette.muted }]}
                 accessibilityLabel={dua.transliteration}>
                 {dua.transliteration}
               </Text>
             ) : null}
-            {showTranslation ? (
+            {showTranslation && openParts[`${dua.id}|mean`] ? (
               <Text style={[styles.translation, { color: palette.text }]}>
                 {/* Per-dua localized translation falls back to bundled
                     English. To add another locale, drop entries under
@@ -260,7 +324,25 @@ const styles = StyleSheet.create({
   list: { padding: 16, paddingTop: 0, gap: 12 },
   card: { borderRadius: 14, padding: 16, gap: 8 },
   title: { fontSize: 14, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
-  arabic: { fontSize: 24, lineHeight: 52, textAlign: 'right', writingDirection: 'rtl', ...arabicTextStyle('body') },
+  /**
+   * The QURAN face, not the body one.
+   *
+   * A dua as this app prints it is fully vocalised — every harakah, the
+   * quranic annotation marks, the small alif — and a good third of the
+   * corpus is literal Quran (Ayat al-Kursi, the three quls). Amiri body
+   * is a text face; AmiriQuran was cut for exactly this: taller
+   * diacritics that stack without colliding, and mushaf letterforms.
+   *
+   * The leading was ALREADY the Quran face's (2.17x, per the note in
+   * typography.ts), so the page had been paying the taller face's line
+   * spacing while drawing with the shorter face — the worst of both, and
+   * why it read as loose and slightly wrong.
+   */
+  arabic: { fontSize: 24, lineHeight: 52, textAlign: 'right', writingDirection: 'rtl', ...arabicTextStyle('quran') },
+  /** The two aid toggles, side by side under the Arabic. */
+  aidRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 },
+  aidChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
+  aidChipText: { fontSize: 12, fontWeight: '700' },
   translit: { fontSize: 14, fontStyle: 'italic' },
   translation: { fontSize: 15, lineHeight: 22 },
   metaRow: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 4 },

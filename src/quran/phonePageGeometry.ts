@@ -98,6 +98,17 @@ export type PhonePageInputs = {
    * a void between the page medallion and the player card.
    */
   listH: number;
+  /**
+   * Is the footer medallion actually drawn?
+   *
+   * It is not, while the player is up — the player names the page
+   * instead. The room was still being taken out of the page's box, so
+   * removing the medallion did not give the text its space back: it
+   * opened a band of nothing between the last line and the player.
+   * Reserving for chrome that is not there is the same bug as not
+   * reserving for chrome that is.
+   */
+  footerDrawn: boolean;
 };
 
 /** One pager item = the list viewport, in the window less the cutout. */
@@ -116,7 +127,8 @@ export function phonePageGeometry(
   if (!(input.listH > 0)) return null;
   const scrolling = input.width > input.height;
   const pageWidth = phonePageWidth(input.width, input.sideInset);
-  const chromeH = input.navPad + HEADER_RESERVE + FOOTER_RESERVE;
+  const chromeH =
+    input.navPad + HEADER_RESERVE + (input.footerDrawn ? FOOTER_RESERVE : 0);
   const textWidth = scrolling
     ? Math.min(pageWidth - H_PADDING * 2, input.height * LANDSCAPE_ZOOM)
     : pageWidth - H_PADDING * 2;

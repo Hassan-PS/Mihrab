@@ -429,6 +429,10 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       sideInset,
       navPad,
       listH,
+      // The medallion stands down while the player is up, so its room
+      // goes back to the text rather than becoming a band of nothing
+      // between the last line and the player card.
+      footerDrawn: !playerUp,
     }),
   );
   /**

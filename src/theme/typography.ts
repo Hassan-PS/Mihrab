@@ -102,9 +102,10 @@ export const FONTS = {
 
 /**
  * Style helper for Arabic text. Returns a `{ fontFamily }` object you
- * can spread into a `Text` style. Use `kind='quran'` for ayahs,
- * `kind='body'` for everything else (dua text, transliterations,
- * Islamic event names).
+ * can spread into a `Text` style. Use `kind='quran'` for ayahs AND for
+ * dua text — both are printed fully vocalised, and a third of the dua
+ * corpus is literal Quran; `kind='body'` for everything else
+ * (transliterations, Islamic event names).
  *
  * NOTE (look-and-feel upgrade): Amiri's ascenders/descenders are much
  * taller than the system Arabic face — call sites must pair this with a

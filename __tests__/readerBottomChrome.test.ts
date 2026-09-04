@@ -32,6 +32,7 @@ const portrait = {
   sideInset: 0,
   navPad: 0,
   listH: 720,
+  footerDrawn: true,
 };
 
 describe('the mini player is reserved once, by the layout', () => {
@@ -52,6 +53,28 @@ describe('the mini player is reserved once, by the layout', () => {
 
   it('has no player in its identity', () => {
     expect(geometryKey(phonePageGeometry(portrait))).not.toMatch(/68/);
+  });
+
+  it('gives the medallion room back to the text when it stands down', () => {
+    // While the player is up it names the page, so the medallion is not
+    // drawn. Reserving its room anyway did not leave the page as it was —
+    // it opened a band of nothing between the last line and the player.
+    const drawn = phonePageGeometry(portrait)!;
+    const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
+    expect(standDown.viewportH - drawn.viewportH).toBe(FOOTER_RESERVE);
+  });
+
+  it('still reserves the header, which never stands down', () => {
+    const standDown = phonePageGeometry({ ...portrait, footerDrawn: false })!;
+    expect(standDown.viewportH).toBe(720 - HEADER_RESERVE);
+  });
+
+  it('changes the page identity, so a settled geometry is replaced', () => {
+    // The reclaimed room changes viewportH, which the key already carries
+    // — otherwise the page would keep drawing at the old height.
+    expect(geometryKey(phonePageGeometry(portrait))).not.toBe(
+      geometryKey(phonePageGeometry({ ...portrait, footerDrawn: false })),
+    );
   });
 
   it.each([
