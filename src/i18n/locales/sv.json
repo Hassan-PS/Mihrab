@@ -269,6 +269,10 @@
     "lastThirdHelp": "Början på nattens sista tredjedel — tiden för Qiyam al-Layl. Av som standard.",
     "firstThird": "Nattens första tredjedel",
     "firstThirdHelp": "Slutet på nattens första tredjedel — i malikitisk räkning där Isha lämnar sitt bästa tidsfönster. Av som standard.",
+    "malikiSecondTimes": "Malikitiska andratider",
+    "malikiSecondTimesHelp": "Varje bön får en rad på Idag-kortet som säger när dess föredragna tid (ikhtiyari) stängs och dess sena tid (daruri) börjar. Beräknas på din enhet utifrån dina koordinater, oavsett vilken källa tiderna kommer från. Använder 1:1-skuggan för Asr oavsett din madhhab-inställning, eftersom det är den malikitiska gränsen. Av som standard.",
+    "malikiSecondTimesSource": "Från Al-Murshid al-Muin (Ibn Ashir), återgiven i The Guiding Helper, sång 11.",
+    "malikiSecondTimesModelled": "Fajrs och Asrs gränser är stjärnorna som bleknar och solen som gulnar — en vinkel som står för något ögat bedömer. De märks som ungefärliga. Där solen aldrig når en vinkel visas ingenting i stället för en gissning.",
     "accent_rose": "Rosa",
     "accent_violet": "Violett",
     "laDesignMarkers": "Markörer",
@@ -405,7 +409,10 @@
     "Lastthird": "Sista tredjedelen",
     "Lastthird_abbr": "Qiyam",
     "Firstthird": "Första tredjedelen",
-    "Firstthird_abbr": "1/3"
+    "Firstthird_abbr": "1/3",
+    "firstTimeUntil": "Första tiden till {{time}}",
+    "secondTimeFrom": "Andra tiden från {{time}}",
+    "approx": "ca"
   },
   "placeSearch": {
     "label": "Sök stad eller adress",

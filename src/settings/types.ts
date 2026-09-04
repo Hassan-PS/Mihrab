@@ -342,6 +342,21 @@ export type PrayerAppSettings = {
   lastThirdEnabled: boolean;
   firstThirdEnabled: boolean;
   /**
+   * Mālikī second times — issue #19. Defaults OFF.
+   *
+   * In the Mālikī reckoning each prayer has a preferred window
+   * (*ikhtiyārī*) and a late one (*ḍarūrī*) that is still valid but
+   * entered without excuse only at a cost. When this is on, each prayer
+   * on the Today card says when its preferred window closes.
+   *
+   * Not a row and not a notification: five more rows would double the
+   * card, and the useful fact is an annotation on a prayer, not an event
+   * of its own. See `src/prayer/daruriTimes.ts` for the boundaries, which
+   * of them are geometry and which are a model of a colour, and why the
+   * shadow is always 1:1 whatever `school` says.
+   */
+  malikiSecondTimesEnabled: boolean;
+  /**
    * Ayah of the day notification — v2.7.27.
    *
    * When on, a daily notification fires at the chosen time with a
@@ -439,6 +454,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   islamicMidnightEnabled: false,
   lastThirdEnabled: false,
   firstThirdEnabled: false,
+  malikiSecondTimesEnabled: false,
   // Ayah of the day: off by default (no surprise notifications); 9:00 AM
   // when enabled — a quiet mid-morning moment.
   ayahOfDayEnabled: false,

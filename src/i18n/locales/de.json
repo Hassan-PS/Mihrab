@@ -269,6 +269,10 @@
     "lastThirdHelp": "Der Beginn des letzten Drittels der Nacht — die Zeit für Qiyam al-Lail. Standardmäßig aus.",
     "firstThird": "Erstes Drittel der Nacht",
     "firstThirdHelp": "Das Ende des ersten Nachtdrittels — nach malikitischer Rechnung verlässt das Ischa-Gebet dann sein bevorzugtes Zeitfenster. Standardmäßig aus.",
+    "malikiSecondTimes": "Malikitische Zweitzeiten",
+    "malikiSecondTimesHelp": "Jedes Gebet erhält auf der Heute-Karte eine Zeile, die sagt, wann seine bevorzugte Zeit (ikhtiyari) endet und seine späte Zeit (daruri) beginnt. Auf deinem Gerät aus deinen Koordinaten berechnet, unabhängig davon, woher deine Zeiten stammen. Nutzt für Asr den 1:1-Schatten unabhängig von deiner Madhhab-Einstellung, denn das ist die malikitische Grenze. Standardmäßig aus.",
+    "malikiSecondTimesSource": "Nach Al-Murshid al-Muin (Ibn Ashir), wiedergegeben in The Guiding Helper, Gesang 11.",
+    "malikiSecondTimesModelled": "Die Grenzen von Fadschr und Asr sind das Verblassen der Sterne und das Gelbwerden der Sonne — ein Winkel als Ersatz für etwas, das das Auge beurteilt. Sie sind als ungefähr gekennzeichnet. Wo die Sonne den Winkel nie erreicht, wird nichts angezeigt statt einer Vermutung.",
     "accent_rose": "Rosé",
     "accent_violet": "Violett",
     "laDesignMarkers": "Markierungen",
@@ -405,7 +409,10 @@
     "Lastthird": "Letztes Drittel",
     "Lastthird_abbr": "Qiyam",
     "Firstthird": "Erstes Drittel",
-    "Firstthird_abbr": "1/3"
+    "Firstthird_abbr": "1/3",
+    "firstTimeUntil": "Erste Zeit bis {{time}}",
+    "secondTimeFrom": "Zweite Zeit ab {{time}}",
+    "approx": "ca."
   },
   "placeSearch": {
     "label": "Stadt oder Adresse suchen",

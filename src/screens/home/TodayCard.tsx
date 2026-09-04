@@ -41,6 +41,10 @@ import {
   tabularNumeralStyle,
 } from '../../theme/textScale';
 import { DISPLAY_ORDER, OPTIONAL_TIME_KEYS } from '../../types/prayer';
+import {
+  DARURI_CONFIDENCE,
+  type DaruriKey,
+} from '../../prayer/daruriTimes';
 import type { TimingsMap } from '../../types/prayer';
 import {
   combineLocalDateAndTime,
@@ -522,6 +526,13 @@ function TodayCardImpl({
           onSelect={aimable.has(key) ? () => aimAt(key) : undefined}
           isSecondary={(OPTIONAL_TIME_KEYS as readonly string[]).includes(key)}
           isLast={rowIndex === visibleRows.length - 1}
+          // Mālikī second times (issue #19). The boundaries ride in the
+          // same map under keys nothing else iterates, so a row that has
+          // one shows it and every other row is unchanged.
+          daruriAt={timings[`${key}Daruri`]}
+          daruriApprox={
+            DARURI_CONFIDENCE[`${key}Daruri` as DaruriKey] === 'modelled'
+          }
         />
       ))}
 

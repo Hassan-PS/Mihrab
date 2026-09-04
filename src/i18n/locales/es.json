@@ -269,6 +269,10 @@
     "lastThirdHelp": "El comienzo del último tercio de la noche — el momento del Qiyam al-Layl. Desactivado por defecto.",
     "firstThird": "Primer tercio de la noche",
     "firstThirdHelp": "El final del primer tercio de la noche: según el cálculo maliki, cuando el Isha sale de su intervalo preferido. Desactivado por defecto.",
+    "malikiSecondTimes": "Segundos tiempos malikíes",
+    "malikiSecondTimesHelp": "Cada oración recibe una línea en la tarjeta de Hoy que indica cuándo se cierra su tiempo preferido (ijtiyari) y cuándo empieza su tiempo tardío (daruri). Se calcula en tu dispositivo a partir de tus coordenadas, sea cual sea la fuente de tus horarios. Usa la sombra 1:1 para Asr con independencia de tu ajuste de madhab, porque ese es el límite malikí. Desactivado por defecto.",
+    "malikiSecondTimesSource": "De Al-Murshid al-Muin (Ibn Ashir), según se recoge en The Guiding Helper, canto 11.",
+    "malikiSecondTimesModelled": "Los límites de Fayr y Asr son la desaparición de las estrellas y el amarilleo del sol: un ángulo que sustituye a algo que juzga el ojo. Se marcan como aproximados. Donde el sol nunca alcanza el ángulo no se muestra nada en lugar de una suposición.",
     "accent_rose": "Rosa",
     "accent_violet": "Violeta",
     "laDesignMarkers": "Marcadores",
@@ -405,7 +409,10 @@
     "Lastthird": "Último tercio",
     "Lastthird_abbr": "Qiyam",
     "Firstthird": "Primer tercio",
-    "Firstthird_abbr": "1/3"
+    "Firstthird_abbr": "1/3",
+    "firstTimeUntil": "Primer tiempo hasta {{time}}",
+    "secondTimeFrom": "Segundo tiempo desde {{time}}",
+    "approx": "aprox."
   },
   "placeSearch": {
     "label": "Buscar ciudad o dirección",

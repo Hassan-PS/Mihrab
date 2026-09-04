@@ -269,6 +269,10 @@
     "lastThirdHelp": "Awal sepertiga malam terakhir — waktu untuk Qiyamul Lail. Nonaktif secara default.",
     "firstThird": "Sepertiga malam pertama",
     "firstThirdHelp": "Akhir sepertiga malam pertama — dalam perhitungan Maliki, saat Isya keluar dari waktu utamanya. Nonaktif secara bawaan.",
+    "malikiSecondTimes": "Waktu kedua Maliki",
+    "malikiSecondTimesHelp": "Setiap salat mendapat satu baris di kartu Hari Ini yang menyebutkan kapan waktu pilihannya (ikhtiyari) berakhir dan waktu daruratnya (daruri) dimulai. Dihitung di perangkat Anda dari koordinat Anda, dari sumber mana pun waktu Anda berasal. Memakai bayangan 1:1 untuk Asar tanpa memandang pengaturan mazhab Anda, karena itulah batas Maliki. Nonaktif secara bawaan.",
+    "malikiSecondTimesSource": "Dari Al-Murshid al-Muin (Ibnu Asyir), sebagaimana dituangkan dalam The Guiding Helper, nyanyian 11.",
+    "malikiSecondTimesModelled": "Batas Subuh dan Asar adalah pudarnya bintang dan menguningnya matahari — sebuah sudut yang menggantikan sesuatu yang dinilai mata. Keduanya ditandai sebagai perkiraan. Di tempat matahari tidak pernah mencapai sudut itu, tidak ada yang ditampilkan alih-alih tebakan.",
     "accent_rose": "Mawar",
     "accent_violet": "Ungu",
     "laDesignMarkers": "Penanda",
@@ -405,7 +409,10 @@
     "Lastthird": "Sepertiga akhir",
     "Lastthird_abbr": "Qiyam",
     "Firstthird": "Sepertiga awal",
-    "Firstthird_abbr": "1/3"
+    "Firstthird_abbr": "1/3",
+    "firstTimeUntil": "Waktu pertama sampai {{time}}",
+    "secondTimeFrom": "Waktu kedua dari {{time}}",
+    "approx": "kira-kira"
   },
   "placeSearch": {
     "label": "Cari kota atau alamat",

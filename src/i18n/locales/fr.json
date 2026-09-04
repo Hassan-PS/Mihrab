@@ -269,6 +269,10 @@
     "lastThirdHelp": "Le début du dernier tiers de la nuit — le moment du Qiyâm al-Layl. Désactivé par défaut.",
     "firstThird": "Premier tiers de la nuit",
     "firstThirdHelp": "La fin du premier tiers de la nuit — dans le calcul malikite, le moment où l'Isha quitte son créneau préféré. Désactivé par défaut.",
+    "malikiSecondTimes": "Seconds temps malikites",
+    "malikiSecondTimesHelp": "Chaque prière reçoit une ligne sur la carte Aujourd'hui indiquant quand se ferme son temps préféré (ikhtiyari) et quand commence son temps tardif (daruri). Calculé sur votre appareil à partir de vos coordonnées, quelle que soit la source de vos horaires. Utilise l'ombre 1:1 pour Asr indépendamment de votre réglage de madhhab, car c'est la limite malikite. Désactivé par défaut.",
+    "malikiSecondTimesSource": "D'après Al-Murshid al-Muin (Ibn Ashir), tel que rendu dans The Guiding Helper, chant 11.",
+    "malikiSecondTimesModelled": "Les limites de Fajr et d'Asr sont la disparition des étoiles et le jaunissement du soleil — un angle qui tient lieu de ce que l'œil juge. Elles sont marquées comme approximatives. Là où le soleil n'atteint jamais l'angle, rien n'est affiché plutôt qu'une supposition.",
     "accent_rose": "Rose",
     "accent_violet": "Violet",
     "laDesignMarkers": "Repères",
@@ -405,7 +409,10 @@
     "Lastthird": "Dernier tiers",
     "Lastthird_abbr": "Qiyam",
     "Firstthird": "Premier tiers",
-    "Firstthird_abbr": "1/3"
+    "Firstthird_abbr": "1/3",
+    "firstTimeUntil": "Premier temps jusqu'à {{time}}",
+    "secondTimeFrom": "Second temps à partir de {{time}}",
+    "approx": "env."
   },
   "placeSearch": {
     "label": "Rechercher une ville ou une adresse",

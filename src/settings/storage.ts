@@ -254,6 +254,12 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     parsed.androidWidgetBackgroundOpacity,
   );
   merged.clockFormat = coerceClockFormat(parsed.clockFormat);
+  // Issue #19. A typed guard rather than a presence check: this decides
+  // whether the card prints a second clock time under every prayer, and a
+  // truthy non-boolean from a hand-edited blob would turn it on silently.
+  if (typeof merged.malikiSecondTimesEnabled !== 'boolean') {
+    merged.malikiSecondTimesEnabled = false;
+  }
   merged.widgetHighlightId = coerceWidgetHighlightId(parsed.widgetHighlightId);
   merged.widgetHighlightCustomHex = coerceWidgetHighlightHex(
     parsed.widgetHighlightCustomHex,

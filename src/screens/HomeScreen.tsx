@@ -41,6 +41,7 @@ import {
   getNextPrayerDisplay,
 } from '../utils/prayerTimes';
 import { filterOptionalTimes } from '../utils/nightTimes';
+import { injectDaruriTimes } from '../prayer/daruriTimes';
 import { qiblaBearingFrom } from '../utils/qibla';
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
@@ -243,13 +244,35 @@ export function HomeScreen() {
       tomorrow: tomorrow ? filterOptionalTimes(tomorrow, tg) : undefined,
       week: week.map(d => filterOptionalTimes(d, tg)),
     });
+    const table = mk({
+      Sunrise: settings.sunriseEnabled,
+      Midnight: settings.islamicMidnightEnabled,
+      Lastthird: settings.lastThirdEnabled,
+      Firstthird: settings.firstThirdEnabled,
+    });
+    // Mālikī second times (issue #19), derived HERE rather than in
+    // `usePrayerDay` for the same reason the toggles above are: flipping
+    // the setting must change the card at once, and making the fetch
+    // depend on it would cost a round trip to learn something the device
+    // can work out from coordinates and a date. The table only — the
+    // widget and the alert schedule do not carry these yet, and a payload
+    // grown by fields nothing reads is size for nothing.
+    const tableWithDaruri = settings.malikiSecondTimesEnabled
+      ? injectDaruriTimes(
+          table.week,
+          state.baseDate,
+          state.latitude,
+          state.longitude,
+        )
+      : null;
     return {
-      table: mk({
-        Sunrise: settings.sunriseEnabled,
-        Midnight: settings.islamicMidnightEnabled,
-        Lastthird: settings.lastThirdEnabled,
-        Firstthird: settings.firstThirdEnabled,
-      }),
+      table: tableWithDaruri
+        ? {
+            today: tableWithDaruri[0],
+            tomorrow: tableWithDaruri[1],
+            week: tableWithDaruri,
+          }
+        : table,
       la: mk({
         Sunrise: settings.sunriseEnabled,
         Midnight: settings.islamicMidnightEnabled,
@@ -281,6 +304,7 @@ export function HomeScreen() {
     settings.islamicMidnightEnabled,
     settings.lastThirdEnabled,
     settings.firstThirdEnabled,
+    settings.malikiSecondTimesEnabled,
   ]);
 
   const loadedDateKeyRef = useRef<string | null>(null);
@@ -544,9 +568,11 @@ export function HomeScreen() {
       view,
       locationLabel,
       settings.liveActivityEnabled,
+      // `palette.accentSolid` is derived from the accent id and its custom
+      // hex, so it moves whenever either of them does — listing all three
+      // said the same thing three times, and hid the linter's real
+      // complaints about this hook behind an "unnecessary dependency" one.
       palette.accentSolid,
-      settings.appAccentId,
-      settings.appAccentCustomHex,
       settings.appearance,
       settings.useSystemDynamicTheme,
       settings.liveActivityDesign,

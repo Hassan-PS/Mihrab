@@ -269,6 +269,10 @@
     "lastThirdHelp": "夜晚最后三分之一的开始——夜间礼拜（Qiyam al-Layl）的时间。默认关闭。",
     "firstThird": "夜晚的前三分之一",
     "firstThirdHelp": "夜晚前三分之一的终点——按马立克派的算法，宵礼在此离开其首选时段。默认关闭。",
+    "malikiSecondTimes": "马立克派第二时段",
+    "malikiSecondTimesHelp": "每次礼拜都会在「今天」卡片上多一行，说明其首选时段（ikhtiyari）何时结束、延后时段（daruri）何时开始。无论礼拜时间来自哪个来源，都在你的设备上依据你的坐标计算。晡礼一律采用 1:1 影长，不受你所选教法学派影响，因为这才是马立克派的界线。默认关闭。",
+    "malikiSecondTimesSource": "依据伊本·阿希尔《Al-Murshid al-Muin》，见 The Guiding Helper 第 11 章。",
+    "malikiSecondTimesModelled": "晨礼与晡礼的界线是星辰隐没和日色转黄——用一个角度来代替肉眼的判断，因此标示为近似值。太阳始终达不到该角度的地方，宁可留白，也不给出猜测。",
     "accent_rose": "玫瑰红",
     "accent_violet": "紫罗兰",
     "laDesignMarkers": "标记",
@@ -405,7 +409,10 @@
     "Lastthird": "最后三分之一",
     "Lastthird_abbr": "夜祷",
     "Firstthird": "前三分之一",
-    "Firstthird_abbr": "1/3"
+    "Firstthird_abbr": "1/3",
+    "firstTimeUntil": "首选时段至 {{time}}",
+    "secondTimeFrom": "第二时段自 {{time}}",
+    "approx": "约"
   },
   "placeSearch": {
     "label": "搜索城市或地址",

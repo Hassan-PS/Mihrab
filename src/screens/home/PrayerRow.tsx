@@ -38,6 +38,21 @@ type PrayerRowProps = {
    */
   isSecondary: boolean;
   isLast: boolean;
+  /**
+   * When this prayer's preferred (ikhtiyārī) window closes — issue #19.
+   *
+   * Canonical `HH:mm`; the row formats it like every other clock. Absent
+   * unless the user turned Mālikī second times on, and absent for a day
+   * or a latitude where the sky does not produce the boundary.
+   */
+  daruriAt?: string;
+  /**
+   * True when that boundary is a model of something the eye judges — the
+   * stars fading, the sun yellowing — rather than a solar position. The
+   * row says "approx." for those, because printing all five in the same
+   * confident type would claim more than the app knows.
+   */
+  daruriApprox?: boolean;
 };
 
 function PrayerRowImpl({
@@ -48,6 +63,8 @@ function PrayerRowImpl({
   onSelect,
   isSecondary,
   isLast,
+  daruriAt,
+  daruriApprox = false,
 }: PrayerRowProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -78,18 +95,39 @@ function PrayerRowImpl({
           style={[styles.activeBar, { backgroundColor: palette.accent }]}
         />
       )}
-      <Text
-        style={[
-          styles.name,
-          {
-            color: isSecondary && !isNext ? palette.muted : palette.text,
-            fontStyle: isSecondary ? 'italic' : 'normal',
-            fontWeight: isNext ? '600' : '500',
-          },
-        ]}
-        maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-        {t(`prayer.${prayerKey}`)}
-      </Text>
+      <View style={styles.nameWrap}>
+        <Text
+          style={[
+            styles.name,
+            {
+              color: isSecondary && !isNext ? palette.muted : palette.text,
+              fontStyle: isSecondary ? 'italic' : 'normal',
+              fontWeight: isNext ? '600' : '500',
+            },
+          ]}
+          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+          {t(`prayer.${prayerKey}`)}
+        </Text>
+        {/* Under the name rather than beside the time: the time column is
+            the one thing on this screen that is scanned rather than read,
+            and a second number in it would cost more than this line is
+            worth. */}
+        {daruriAt ? (
+          <Text
+            style={[styles.daruri, { color: palette.muted }]}
+            numberOfLines={1}
+            maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+            {t('prayer.firstTimeUntil', {
+              defaultValue: 'First time until {{time}}',
+              time: daruriApprox
+                ? `${t('prayer.approx', { defaultValue: 'approx.' })} ${clock(
+                    daruriAt,
+                  )}`
+                : clock(daruriAt),
+            })}
+          </Text>
+        ) : null}
+      </View>
       <View style={styles.timeWrap}>
         {/* Only for a row the user aimed at. The next prayer is already
             emphasised, and marking it too would say nothing. */}
@@ -128,6 +166,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingStart: 20,
     position: 'relative',
+  },
+  nameWrap: {
+    flexShrink: 1,
+  },
+  daruri: {
+    fontSize: 11,
+    marginTop: 2,
   },
   // Inset, rounded indicator pill instead of a full-bleed block — reads
   // as a quieter, more refined "current" marker against the tinted row.

@@ -269,6 +269,10 @@
     "lastThirdHelp": "The start of the last third of the night — the time for Qiyam al-Layl. Off by default.",
     "firstThird": "First Third of the Night",
     "firstThirdHelp": "The end of the first third of the night — in the Maliki reckoning, where Isha leaves its preferred window. Off by default.",
+    "malikiSecondTimes": "Maliki second times",
+    "malikiSecondTimesHelp": "Each prayer gets a line on the Today card saying when its preferred time (ikhtiyari) closes and its late time (daruri) begins. Computed on your device from your coordinates, whichever source your times come from. Uses the 1:1 shadow for Asr regardless of your madhab setting, because that is the Maliki boundary. Off by default.",
+    "malikiSecondTimesSource": "From Al-Murshid al-Muin (Ibn Ashir), as rendered in The Guiding Helper, Song 11.",
+    "malikiSecondTimesModelled": "Fajr's and Asr's boundaries are the stars fading and the sun yellowing — an angle standing in for something the eye judges. They are marked as approximate. Where the sun never reaches an angle, nothing is shown rather than a guess.",
     "accent_rose": "Rose",
     "accent_violet": "Violet",
     "laDesignMarkers": "Markers",
@@ -405,7 +409,10 @@
     "Lastthird": "Last Third",
     "Lastthird_abbr": "Qiyam",
     "Firstthird": "First Third",
-    "Firstthird_abbr": "1/3"
+    "Firstthird_abbr": "1/3",
+    "firstTimeUntil": "First time until {{time}}",
+    "secondTimeFrom": "Second time from {{time}}",
+    "approx": "approx."
   },
   "placeSearch": {
     "label": "Search city or address",
