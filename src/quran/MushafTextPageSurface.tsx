@@ -24,7 +24,13 @@ import MushafTextPage, {
   type AyahRef,
 } from './MushafTextPage';
 import MushafUnicodePage from './MushafUnicodePage';
-import { getPageLayout, isFramedPage, pageMeasureEm } from './mushafLayout';
+import {
+  getPageLayout,
+  isFramedPage,
+  lineInkPadding,
+  pageBlockEm,
+  pageMeasureEm,
+} from './mushafLayout';
 import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
 import { toneIsDark, type MushafTone } from './mushafTone';
 import { useMushafPageFont } from './useMushafPageFont';
@@ -143,6 +149,63 @@ export function mushafPageColors(
  */
 function pageInset(page: number, width: number): number {
   return isFramedPage(page) ? width * 0.08 : width * 0.035;
+}
+
+/**
+ * Fit `lineCount` lines into `boxH`, leaving room for the ink that
+ * overshoots the first line's box above and the last line's below.
+ *
+ * ── THE CUT THAT `lineInkPadding` DOES NOT REACH ──────────────────────
+ *
+ * A line's ink overshoots its metrics by up to 0.4 em above and 0.2 em
+ * below, and `lineInkPadding` gives the text view room for it — padding
+ * the view and pulling the padding back with a negative margin, so the
+ * baseline does not move. That works everywhere INSIDE a page, because
+ * the room borrowed is a neighbouring line's box and a line box is
+ * transparent: the maddah over an alif is drawn across the bottom of the
+ * line above it and nobody can tell.
+ *
+ * The first and last lines have no neighbour to borrow from. They borrow
+ * from outside the page, and whatever contains the page clips it there —
+ * the landscape column is a `ScrollView`, and a `ScrollView` on Android
+ * always clips its content. So the top line lost the marks ABOVE it while
+ * keeping every letter, which reads as a broken font rather than a clip,
+ * and the bottom line lost its deepest swashes.
+ *
+ * It shows worst in the landscape column, where the recitation's
+ * follow-scroll comes to rest exactly on a line box (`followOffset`) — so
+ * the line at the top of the viewport is cut at precisely the height
+ * where the harakat live, on every scroll, not just at the top of a page.
+ *
+ * So the page reserves that room out of its own box: the lines are a hair
+ * shorter and the block is padded by what the ink needs. The scrolling
+ * column asks for the reserve back in its height instead
+ * (`mushafPageColumnHeight`), which keeps the landscape reading zoom
+ * exactly where it was.
+ */
+export function fitLinesWithInk(
+  fontSize: number,
+  boxH: number,
+  lineCount: number,
+): { lineHeight: number; top: number; bottom: number } {
+  const flat = { lineHeight: boxH / lineCount, top: 0, bottom: 0 };
+  if (!(fontSize > 0) || !(boxH > 0) || lineCount < 1) return flat;
+  let lineHeight = boxH / lineCount;
+  let ink = lineInkPadding(fontSize, lineHeight);
+  // The reserve depends on the line height it is reserved out of — a
+  // shorter line has less leading and so needs a hair more room — so this
+  // is a fixed point, not a formula. Two passes land within a dp of it,
+  // and the third would move nothing anyone could see.
+  for (let pass = 0; pass < 2; pass++) {
+    const next = (boxH - ink.top - ink.bottom) / lineCount;
+    if (!(next > 0)) return flat;
+    lineHeight = next;
+    ink = lineInkPadding(fontSize, lineHeight);
+  }
+  // A box too small to hold the reserve keeps its lines rather than
+  // collapsing them: a squeezed page beats no page.
+  if (!(boxH - ink.top - ink.bottom > 0)) return flat;
+  return { lineHeight, top: ink.top, bottom: ink.bottom };
 }
 
 /**
@@ -272,11 +335,21 @@ function GlyphPageSurface({
     );
   }
 
+  // The page fits its box less the room its outermost ink needs — see
+  // `fitLinesWithInk`. `fontSize` is decided by the WIDTH alone (it is
+  // `textWidth / pageBlockEm`, in MushafTextPage), so the reserve can be
+  // solved here without laying anything out.
+  const fit = fitLinesWithInk(
+    textWidth / pageBlockEm(layout),
+    height - inset * (framed ? 1.2 : 0),
+    lineCount,
+  );
+
   const drawn = (
     <MushafTextPage
       page={page}
       width={textWidth}
-      lineHeight={(height - inset * (framed ? 1.2 : 0)) / lineCount}
+      lineHeight={fit.lineHeight}
       fontFamily={family}
       colors={colors}
       selected={selected}
@@ -287,9 +360,21 @@ function GlyphPageSurface({
     />
   );
 
+  // The reserve is padding, not margin: it has to be INSIDE the page's box
+  // so that whatever clips the page — the landscape column, always — clips
+  // outside the ink rather than through it.
   if (!framed) {
     return (
-      <View style={[styles.block, { width, paddingHorizontal: inset }]}>
+      <View
+        style={[
+          styles.block,
+          {
+            width,
+            paddingHorizontal: inset,
+            paddingTop: fit.top,
+            paddingBottom: fit.bottom,
+          },
+        ]}>
         {drawn}
       </View>
     );
@@ -301,7 +386,9 @@ function GlyphPageSurface({
       inset={inset}
       color={colors.accent}
     >
-      {drawn}
+      <View style={{ paddingTop: fit.top, paddingBottom: fit.bottom }}>
+        {drawn}
+      </View>
     </FramedPlate>
   );
 }
@@ -462,9 +549,18 @@ export function mushafPageColumnHeight({
   // and sizing against it makes the column ~14% taller than the text that
   // lands in it, leaving a dead band under the last line.
   const fontSize = textWidth / pageMeasureEm(layout);
+  // Ask for the ink reserve ON TOP of the line boxes rather than out of
+  // them. The surface takes the same reserve back out of whatever height
+  // it is given (`fitLinesWithInk`), so handing it the padded height is
+  // what leaves the landscape reading zoom exactly where it was while
+  // still giving the first and last lines room the column will not clip.
+  const drawn = textWidth / pageBlockEm(layout);
+  const ink = lineInkPadding(drawn, drawn * MUSHAF_LINE_HEIGHT_EM);
   return Math.max(
     viewportHeight,
-    fontSize * MUSHAF_LINE_HEIGHT_EM * layout.lines.length,
+    fontSize * MUSHAF_LINE_HEIGHT_EM * layout.lines.length +
+      ink.top +
+      ink.bottom,
   );
 }
 
