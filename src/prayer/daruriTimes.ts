@@ -12,10 +12,23 @@
  * 645–665, cited in issue #19.)
  *
  * So what a person actually wants to know is ONE instant per prayer:
- * when the preferred window closes. That is what this module computes.
+ * when the preferred window closes. That is what this module produces.
  * Each window's END is a time the card already shows — Fajr's second
  * time ends at Sunrise, Ẓuhr's and ʿAṣr's at Maghrib, Maghrib's and
  * Ishāʾ's at the next Fajr — so there is nothing to compute there.
+ *
+ * ── TWO OF THE FIVE ARE ROWS THE CARD ALREADY HAS ─────────────────────
+ *
+ * The book defines two boundaries as other prayers' beginnings. "The
+ * first time of Ẓuhr lasts ... up until the beginning of ʿAṣr's first
+ * time" (fn. 656); "Maghrib's first time lasts until the beginning of
+ * ʿIshāʾ's first time" (fn. 659), which is where the red twilight goes
+ * (fn. 652, 660). The card already carries an ʿAṣr and an Ishāʾ from
+ * the user's own chosen authority. Recomputing those two from angles
+ * here would put a second ʿAṣr and a second Ishāʾ on the card, a minute
+ * or five from the first, and the disagreement would read as a bug
+ * rather than as two ways of naming the same instant. So they are the
+ * rows. The one exception is Ẓuhr on a Ḥanafī ʿAṣr — see below.
  *
  * ── WHY IT IS COMPUTED HERE AND NOT FETCHED ───────────────────────────
  *
@@ -28,9 +41,9 @@
  * ── TWO OF THE FIVE ARE GEOMETRY; TWO ARE A MODEL OF A COLOUR ─────────
  *
  * `confidence` carries that difference, and callers are expected to draw
- * it. Ẓuhr's boundary is a shadow length, Maghrib's is the red twilight
- * at a fixed depression, Ishāʾ's is a third of the night — all three are
- * computed. Fajr's *isfār* ("the stars are no longer seen") and ʿAṣr's
+ * it. Ẓuhr's boundary is the ʿAṣr row, Maghrib's is the Ishāʾ row,
+ * Ishāʾ's is a third of the night — all three are exact, on the card's
+ * own terms. Fajr's *isfār* ("the stars are no longer seen") and ʿAṣr's
  * *iṣfirār* ("the sun has a deep yellow view") are judgements the eye
  * makes, and an angle is a model of them, close but never exact. A
  * reader deserves to know which of the two they are looking at rather
@@ -44,11 +57,12 @@
  * ── THE SHADOW IS ALWAYS 1:1 ──────────────────────────────────────────
  *
  * Ẓuhr's first time ends where ʿAṣr's begins, at shadow = height + the
- * noon shadow. That is the Mālikī (and Shāfiʿī) ʿAṣr, and this module
- * uses it whatever the app's asr setting says. A user on Ḥanafī ʿAṣr who
- * turned these on would otherwise get a Mālikī boundary derived from a
- * Ḥanafī shadow — a table contradicting itself. The setting screen says
- * so where the toggle is.
+ * noon shadow. That is the Mālikī (and Shāfiʿī) ʿAṣr. When the app's
+ * asr setting is 1:1 the ʿAṣr row IS that instant and is reused as is.
+ * On Ḥanafī ʿAṣr (2:1) the row is half an hour too late to be a Mālikī
+ * boundary, so this module computes the 1:1 shadow itself instead — and
+ * the card then carries a Ẓuhr boundary well before its own ʿAṣr, which
+ * the setting screen warns about in red where the toggle is.
  *
  * ── REFRACTION ────────────────────────────────────────────────────────
  *
@@ -59,11 +73,10 @@
  * the top of the sun" (fn. 661) asks for, and it is what every published
  * table means by the word.
  *
- * The other four angles are geometric, which is the convention for
- * twilight everywhere: −17° for the red glow and −4° for *isfār* are
- * defined as positions of the sun's centre, not as refracted altitudes,
- * and the constants in every madhhab's tables are quoted on that basis.
- * Only *iṣfirār* at +5° sits low enough for refraction to be worth a
+ * The twilight angles are geometric, which is the convention everywhere:
+ * −6° for *isfār* is a position of the sun's centre, not a refracted
+ * altitude, and the constants in every madhhab's tables are quoted on
+ * that basis. Only *iṣfirār* at +5° sits low enough for refraction to be worth a
  * number — about 9 arcminutes there, which is under a minute of clock
  * time at mid-latitudes and more at high ones. That is well inside the
  * uncertainty of "the sun has a deep yellow view" in the first place,
@@ -74,17 +87,21 @@
  * ── AND SOMETIMES THERE IS NO ANSWER ──────────────────────────────────
  *
  * At 33°N every one of these instants happens every day. Further north
- * they do not, and there are two separate ways for that to be true.
+ * they do not, and there are three separate ways for that to be true.
  *
- * The angle is never reached: at 55°N for weeks around midsummer the sun
- * does not get 17° below the horizon, so the red twilight never goes and
- * Maghrib's second time has no beginning.
+ * The angle is never reached. The angle IS reached but the event that
+ * would CLOSE the window is not — the case inside
+ * `solarDaruriBoundaries`, which is where it is explained, because it is
+ * the one that looks like a working answer. And the angle is reached,
+ * the window closes, but the boundary lands OUTSIDE the window the
+ * card's own rows describe — the case inside `daruriTimesForDay`, and
+ * the one that bit: at high latitude Fajr comes from a night-fraction
+ * rule or a fixed table rather than from an angle, and Stockholm's
+ * dataset gives 02:11 on midsummer's day while *isfār* at −6° is 01:59.
+ * "Fajr's first time until 01:59" under a Fajr of 02:11 is a boundary
+ * on the wrong side of the prayer it bounds, which is worse than none.
  *
- * Or the angle IS reached but the event that would CLOSE the window is
- * not — the case inside `solarDaruriBoundaries`, which is where it is
- * explained, because it is the one that looks like a working answer.
- *
- * Both come out the same way: the key is absent and callers show
+ * All three come out the same way: the key is absent and callers show
  * nothing. A Mālikī in Malmö is better served by a blank he can ask his
  * imam about than by a number the sky does not support.
  */
@@ -177,12 +194,6 @@ export const ISFAR_ALTITUDE_DEGREES = -6;
  */
 export const ISFIRAR_ALTITUDE_DEGREES = 5;
 
-/**
- * *Shafaq al-aḥmar* — the red glow gone from the western horizon
- * (fn. 659). 17° of depression, the classical Mālikī figure.
- */
-export const RED_TWILIGHT_DEPRESSION_DEGREES = 17;
-
 /** The Mālikī / Shāfiʿī shadow, used here regardless of the asr setting. */
 export const MALIKI_SHADOW_LENGTH = 1;
 
@@ -218,11 +229,11 @@ export const DARURI_OF: Record<DaruriKey, string> = {
 export const DARURI_CONFIDENCE: Record<DaruriKey, DaruriConfidence> = {
   // "The stars have gone" — an angle standing in for an appearance.
   FajrDaruri: 'modelled',
-  // Shadow = height + noon shadow. Geometry.
+  // The ʿAṣr row (or, on Ḥanafī ʿAṣr, the 1:1 shadow). Exact.
   DhuhrDaruri: 'computed',
   // "The sun has yellowed" — the other appearance.
   AsrDaruri: 'modelled',
-  // The red glow at 17° of depression. Geometry.
+  // The Ishāʾ row. Exact, on the card's own terms.
   MaghribDaruri: 'computed',
   // A third of the way from sunset to dawn. Arithmetic on two times the
   // card already carries.
@@ -263,12 +274,15 @@ function localClock(at: Date | null): string | undefined {
 }
 
 /**
- * The four solar boundaries for one local calendar day at one place.
+ * The solar boundaries for one local calendar day at one place: the
+ * three that are positions of the sun. *Isfār*, the 1:1 shadow, and
+ * *iṣfirār*.
  *
- * Ishāʾ's is not here: it is a third of the way from this day's Maghrib
- * to the NEXT day's Fajr, which is a fact about two rows of the card
- * rather than about the sun's position today. `daruriTimesForDay` adds
- * it.
+ * Maghrib's and Ishāʾ's are not here. One is the Ishāʾ row and the
+ * other is a third of the way from this day's Maghrib to the NEXT day's
+ * Fajr — facts about rows of the card rather than about the sun's
+ * position today. `daruriTimesForDay` supplies both, and decides
+ * whether Ẓuhr's comes from here or from the ʿAṣr row.
  */
 export function solarDaruriBoundaries(
   date: Date,
@@ -298,11 +312,11 @@ export function solarDaruriBoundaries(
   // 21:00 — and the app would have printed "ʿAṣr's first time until
   // 21:00" for a window ending at a sunset that never comes. The 1:1
   // shadow is reached there too, and would have closed Ẓuhr the same way.
-  // In the polar night the mirror happens: no sunrise, but *isfār* and
-  // the red twilight still resolve.
+  // In the polar night the mirror happens: no sunrise, but *isfār*
+  // still resolves.
   //
   // So a day without a sunrise has no Fajr boundary and a day without a
-  // sunset has no afternoon or evening one, whatever the angles say.
+  // sunset has no afternoon one, whatever the angles say.
   // This is the fallback for the polar regions, and it is deliberately
   // the same answer as everywhere else the sky runs out: nothing.
   const risesToday = Number.isFinite(solar.sunrise);
@@ -324,39 +338,87 @@ export function solarDaruriBoundaries(
     ? at(solar.hourAngle(ISFIRAR_ALTITUDE_DEGREES, true))
     : undefined;
   if (isfirar) out.AsrDaruri = isfirar;
-  // After transit: the red gone from the western horizon — which needs
-  // the sun to have gone under it first.
-  const red = setsToday
-    ? at(solar.hourAngle(-RED_TWILIGHT_DEPRESSION_DEGREES, true))
-    : undefined;
-  if (red) out.MaghribDaruri = red;
   return out;
+}
+
+/**
+ * Minutes since local midnight, or null for anything that is not a
+ * clock. Provider rows have been through `validateTimings`, but the
+ * boundaries are built from them and a provider that slipped once
+ * should cost one boundary, not the card.
+ */
+function minutesOf(clock: string | undefined): number | null {
+  if (!clock) return null;
+  const m = /^(\d{1,2}):(\d{2})$/.exec(clock);
+  if (!m) return null;
+  return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+}
+
+/**
+ * Is `boundary` strictly inside (`from`, `to`)?
+ *
+ * Measured from `from` and wrapping at midnight, so a night window that
+ * runs from 21:10 to 05:31 contains 23:05 and 00:23 alike. Strict at
+ * both ends on purpose: a boundary that coincides with the prayer it is
+ * supposed to come after says the preferred window has zero length,
+ * which is not a thing the card should claim.
+ */
+function inside(
+  boundary: string | undefined,
+  from: string | undefined,
+  to: string | undefined,
+): boolean {
+  const b = minutesOf(boundary);
+  const f = minutesOf(from);
+  const t = minutesOf(to);
+  if (b === null || f === null || t === null) return false;
+  const span = (t - f + 1440) % 1440;
+  const at = (b - f + 1440) % 1440;
+  return at > 0 && at < span;
 }
 
 /**
  * Every Mālikī second-time boundary for one day of a card.
  *
+ * `asrShadow` is the app's own ʿAṣr setting — 1 for the Mālikī/Shāfiʿī
+ * shadow, 2 for Ḥanafī. At 1 the ʿAṣr row is Ẓuhr's boundary and is
+ * reused as is; at 2 the row is the wrong madhhab's ʿAṣr and the 1:1
+ * shadow is computed instead.
+ *
  * `tomorrowFajr` is what closes the night; without it Ishāʾ's boundary is
  * omitted rather than guessed.
  *
- * This one is NOT gated on the sun rising and setting the way the four
- * above are, and the difference is not convenience — it is that Ishāʾ's
- * boundary is a different KIND of thing.
+ * ── EVERY BOUNDARY IS CHECKED AGAINST THE CARD'S OWN ROWS ─────────────
  *
- * The other four are solar positions. "The red glow has gone" and "the
- * sun has yellowed" are claims about where the sun is, and under the
- * midnight sun there is no answer to make, so the app makes none.
- * Ishāʾ's is not a position at all: the fiqh defines it as a FRACTION OF
- * THE NIGHT — "one third of the way between sunset and dawn" (fn. 660) —
- * and a fraction is well defined for any interval its two ends are given
- * for. Whatever rule a provider used to produce a Maghrib and a Fajr in
- * a place where the sun does not set, a third of the way between them is
- * a real division of the night that user has been handed, and it is the
- * boundary their own table implies.
+ * A boundary is only shown if it lies strictly inside the window the
+ * card's rows describe for it: after the prayer it belongs to, before
+ * the event that closes the second time. The solar gate in
+ * `solarDaruriBoundaries` cannot do this on its own, because the rows do
+ * not always come from angles: at high latitude a provider's Fajr is a
+ * night-fraction rule or a printed table, and Stockholm's own dataset
+ * puts midsummer Fajr at 02:11 while *isfār* at −6° is 01:59. A card
+ * saying "Fajr's first time until 01:59" under a Fajr of 02:11 is a
+ * boundary on the wrong side of the prayer it bounds — the one thing
+ * the test file calls worse than no boundary at all. The same check
+ * also drops a boundary that is hours off because the device's time
+ * zone is not the location's (a manual location on another continent),
+ * where a number would be wrong rather than merely blank.
  *
- * Which is also why gating it would be wrong rather than merely stricter:
- * it would withhold the one boundary of the five that still has a
- * meaning at that latitude.
+ * ── ISHĀʾ IS NOT GATED ON THE SUN, AND THAT IS NOT CONVENIENCE ────────
+ *
+ * The solar boundaries are positions of the sun, and under the midnight
+ * sun there is no answer to make. Ishāʾ's is a different KIND of thing:
+ * the fiqh defines it as a FRACTION OF THE NIGHT — "one third of the
+ * way between sunset and dawn" (fn. 660) — and a fraction is well
+ * defined for any interval its two ends are given for. Whatever rule a
+ * provider used to produce a Maghrib and a Fajr where the sun does not
+ * set, a third of the way between them is a real division of the night
+ * that user has been handed. Gating it on sunrise would not be stricter;
+ * it would withhold the one boundary of the five that still means
+ * something at that latitude. It IS gated on the rows, like the rest:
+ * an offline Malmö midsummer where Ishāʾ itself is pushed to 01:10 by a
+ * high-latitude rule puts the first third at 23:00, two hours before
+ * Ishāʾ begins, and that one is dropped.
  *
  * The same instant as the `Firstthird` row, which has shipped on exactly
  * this basis since issue #14. See `injectDaruriTimes` for why that row
@@ -368,11 +430,42 @@ export function daruriTimesForDay(
   longitude: number,
   timings: TimingsMap,
   tomorrowFajr: string | undefined,
+  asrShadow: 1 | 2 = 1,
 ): DaruriTimes {
-  const out = solarDaruriBoundaries(date, latitude, longitude);
+  const solar = solarDaruriBoundaries(date, latitude, longitude);
+  const out: DaruriTimes = {};
+
+  // Fajr: *isfār*, inside (Fajr, Sunrise).
+  if (inside(solar.FajrDaruri, timings.Fajr, timings.Sunrise)) {
+    out.FajrDaruri = solar.FajrDaruri;
+  }
+
+  // Ẓuhr: the ʿAṣr row on a 1:1 setting; the 1:1 shadow otherwise.
+  // Inside (Dhuhr, Maghrib) either way.
+  const dhuhrBoundary = asrShadow === 1 ? timings.Asr : solar.DhuhrDaruri;
+  if (inside(dhuhrBoundary, timings.Dhuhr, timings.Maghrib)) {
+    out.DhuhrDaruri = dhuhrBoundary;
+  }
+
+  // ʿAṣr: *iṣfirār*, inside (Asr, Maghrib).
+  if (inside(solar.AsrDaruri, timings.Asr, timings.Maghrib)) {
+    out.AsrDaruri = solar.AsrDaruri;
+  }
+
+  // Maghrib: the Ishāʾ row, by definition (fn. 659). Inside
+  // (Maghrib, next Fajr), which wraps. On the last day of a window there
+  // is no tomorrow; today's Fajr stands in for the CHECK only — the same
+  // sub-minute proxy `injectNightTimes` uses — because the value here is
+  // a row the card already shows, not a number being guessed.
+  if (inside(timings.Isha, timings.Maghrib, tomorrowFajr ?? timings.Fajr)) {
+    out.MaghribDaruri = timings.Isha;
+  }
+
+  // Ishāʾ: the first third of the night, inside (Isha, next Fajr).
   if (timings.Maghrib && tomorrowFajr) {
     try {
-      out.IshaDaruri = clockNightTimes(timings.Maghrib, tomorrowFajr).Firstthird;
+      const third = clockNightTimes(timings.Maghrib, tomorrowFajr).Firstthird;
+      if (inside(third, timings.Isha, tomorrowFajr)) out.IshaDaruri = third;
     } catch {
       // An unparseable time from a provider — leave Ishāʾ's boundary out
       // rather than putting a wrong one on the card.
@@ -403,6 +496,7 @@ export function injectDaruriTimes(
   startDate: Date,
   latitude: number,
   longitude: number,
+  asrShadow: 1 | 2 = 1,
 ): TimingsMap[] {
   return week.map((day, i) => {
     const date = new Date(startDate);
@@ -414,6 +508,7 @@ export function injectDaruriTimes(
       longitude,
       day,
       i < week.length - 1 ? week[i + 1].Fajr : undefined,
+      asrShadow,
     );
     return { ...day, ...times };
   });

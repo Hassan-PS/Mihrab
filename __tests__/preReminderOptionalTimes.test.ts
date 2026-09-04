@@ -114,7 +114,7 @@ describe('advance reminders for the alternative times', () => {
       today,
       tomorrow: today,
       baseDate: new Date(2026, 5, 14, 10, 0, 0),
-      clockFormat: '12',
+      hour12: true,
     });
     expect(pre('Firstthird').body).toContain('10:00 PM');
     expect(pre('Lastthird').body).toContain('2:30 AM');

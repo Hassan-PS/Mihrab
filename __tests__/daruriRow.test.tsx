@@ -169,7 +169,9 @@ describe('the boundary a Hanafi user would find surprising', () => {
     const asrMinutes = hanafi.asr.getHours() * 60 + hanafi.asr.getMinutes();
     const [h, m] = boundary.split(':').map(Number);
 
-    // Not a rounding difference — a whole madhhab apart.
-    expect(asrMinutes - (h * 60 + m)).toBeGreaterThan(20);
+    // Not a rounding difference — a whole madhhab apart. Wrap-aware, so
+    // a runner whose zone puts the Moroccan afternoon across local
+    // midnight (UTC+8:45 does) measures the same gap.
+    expect((asrMinutes - (h * 60 + m) + 1440) % 1440).toBeGreaterThan(20);
   });
 });

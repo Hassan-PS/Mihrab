@@ -33,6 +33,8 @@
  * is exact enough for a home screen.
  */
 import { AppState } from 'react-native';
+import { setActiveClockFormat } from '../utils/activeClock';
+import { refreshSystemIs24Hour } from '../native/SystemClock';
 import i18n from '../i18n';
 import { subscribePractice } from '../practice/practiceStore';
 import { subscribeQuranState } from '../quran/quranState';
@@ -174,6 +176,17 @@ export async function republishWidgetPayload(
     const settings = await loadSettings();
     const coords = coordsFor(settings);
     if (coords == null) return false;
+
+    // The clock preference lives in a module singleton that only the
+    // settings PROVIDER sets, and this can run from a headless task, from
+    // a notification's background handler, or at launch before the
+    // provider's effect has fired. Left alone, the singleton says 'auto'
+    // with no device answer, which resolves to 24-hour — and a 12-hour
+    // user who tapped the widget's refresh glyph with the app killed
+    // watched it flip to "17:31" until the app was next opened. Same
+    // situation, and same fix, as `language` further down.
+    setActiveClockFormat(settings.clockFormat);
+    await refreshSystemIs24Hour();
 
     const params: DayWindowParams = {
       provider: getEffectiveDataProvider(

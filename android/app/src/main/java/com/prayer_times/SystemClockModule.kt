@@ -16,9 +16,18 @@ import com.facebook.react.bridge.ReactMethod
  * clock app, and the app should agree.
  *
  * Exposed twice on purpose. The constant is there at startup with no
- * round trip, so the first frame is already right; `is24Hour()` is
+ * round trip, so the first frame is already right; `readIs24Hour()` is
  * called again when the app returns to the foreground, because the
  * user may have gone to Settings precisely to change this.
+ *
+ * The two have DIFFERENT names, and that is not cosmetic. Under the New
+ * Architecture's interop layer a name that is a method is a method, and
+ * a constant of the same name is unreachable; under the legacy bridge
+ * the constants are `Object.assign`ed over the module and the method is
+ * the one that vanishes. One name for both means one of the two halves
+ * is dead in every mode — and the first cut shipped exactly that, with
+ * `auto` starting as 24-hour on every cold start and flipping a frame
+ * later once the promise came back.
  */
 class SystemClockModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -30,7 +39,7 @@ class SystemClockModule(private val reactContext: ReactApplicationContext) :
   override fun getConstants(): Map<String, Any> = mapOf("is24Hour" to read())
 
   @ReactMethod
-  fun is24Hour(promise: Promise) {
+  fun readIs24Hour(promise: Promise) {
     promise.resolve(read())
   }
 

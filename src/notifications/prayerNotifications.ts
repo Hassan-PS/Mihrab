@@ -7,12 +7,7 @@ import notifee, {
   TriggerType,
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
-import { systemIs24Hour } from '../native/SystemClock';
-import {
-  makeClockFormatter,
-  resolveHour12,
-  type ClockFormat,
-} from '../utils/clockFormat';
+import { makeClockFormatter } from '../utils/clockFormat';
 import i18n from '../i18n';
 import {
   getNotificationSoundOption,
@@ -411,14 +406,17 @@ export async function syncPrayerNotifications(params: {
   /** When true, the prayer-time alert gets a "Log prayer" action — task #99. */
   journalLogActionEnabled?: boolean;
   /**
-   * How the clock times inside alert copy are written — issue #18.
+   * Draw clock times in alert copy on a 12-hour clock — issue #18.
    *
    * Only Sunrise and the night marks print a time at all (a prayer alert
    * says "Prayer time"), but that time is read on a lock screen next to
-   * the system clock, so it follows the same preference the app does.
-   * Defaults to 'auto' for callers that predate the setting.
+   * the system clock, so it follows what the app shows. The RESOLVED
+   * answer, not the stored preference: the caller has already asked the
+   * device (via `useClockFormatter`), and resolving again here would be
+   * a second place for the two to disagree. Defaults to 24-hour for
+   * callers that predate the setting.
    */
-  clockFormat?: ClockFormat;
+  hour12?: boolean;
 }): Promise<SyncPrayerNotificationsResult> {
   if (!params.enabled) {
     await cancelOwnedPrayerNotifications([]);
@@ -432,14 +430,7 @@ export async function syncPrayerNotifications(params: {
     }
   }
   const useAlarmStream = params.adhanUsesAlarmStream === true;
-  const clock = makeClockFormatter(
-    resolveHour12(
-      params.clockFormat ?? 'auto',
-      systemIs24Hour(),
-      i18n.language,
-    ),
-    i18n.language,
-  );
+  const clock = makeClockFormatter(params.hour12 === true, i18n.language);
   await ensureChannel(params.notificationSound, useAlarmStream);
   const prayerTimeSound = getNotificationSoundOption(params.notificationSound);
   const reminderSound = getNotificationSoundOption('default');

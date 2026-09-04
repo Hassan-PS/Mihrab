@@ -37,7 +37,10 @@ static BOOL MihrabSystemIs24Hour(void)
   return @{ @"is24Hour": @(MihrabSystemIs24Hour()) };
 }
 
-RCT_EXPORT_METHOD(is24Hour:(RCTPromiseResolveBlock)resolve
+// A different name from the `is24Hour` constant above, on purpose: a
+// method and a constant sharing a name means one of them is unreachable
+// from JavaScript in every bridge mode. See SystemClockModule.kt.
+RCT_EXPORT_METHOD(readIs24Hour:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
   resolve(@(MihrabSystemIs24Hour()));

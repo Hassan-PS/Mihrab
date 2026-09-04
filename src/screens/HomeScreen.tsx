@@ -42,6 +42,7 @@ import {
 } from '../utils/prayerTimes';
 import { filterOptionalTimes } from '../utils/nightTimes';
 import { injectDaruriTimes } from '../prayer/daruriTimes';
+import { useClockFormatter } from '../hooks/useClockFormatter';
 import { qiblaBearingFrom } from '../utils/qibla';
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
@@ -110,6 +111,13 @@ export function HomeScreen() {
   // home render.
   usePrefetchSavedLocations();
   const { palette } = useAppPalette();
+  // The RESOLVED clock, not the stored preference. On 'auto' the answer
+  // moves when the device's 12/24 switch does, and that has to re-sync
+  // the widget, the Live Activity and the alert copy exactly as an
+  // explicit change would — the screens already follow it through the
+  // store, and a widget still saying "17:31" beside a Today card saying
+  // "5:31 PM" is the split this dependency exists to prevent.
+  const clockHour12 = useClockFormatter().hour12;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   // Cap the day-card width to the centered content column so the carousel
   // doesn't overflow the capped column on iPad/Mac windows.
@@ -263,6 +271,8 @@ export function HomeScreen() {
           state.baseDate,
           state.latitude,
           state.longitude,
+          // `school` is 1 for Ḥanafī ʿAṣr (the 2:1 shadow), 0 otherwise.
+          settings.school === 1 ? 2 : 1,
         )
       : null;
     return {
@@ -305,6 +315,7 @@ export function HomeScreen() {
     settings.lastThirdEnabled,
     settings.firstThirdEnabled,
     settings.malikiSecondTimesEnabled,
+    settings.school,
   ]);
 
   const loadedDateKeyRef = useRef<string | null>(null);
@@ -382,7 +393,7 @@ export function HomeScreen() {
       // firing when the app isn't opened for a couple of days (v2.7.40).
       week: view.table.week,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
-      clockFormat: settings.clockFormat,
+      hour12: clockHour12,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
     // The end-of-day prompt is scheduled from the same data and the same
     // moment as the prayer alerts: it needs Isha for every day it covers,
@@ -412,7 +423,7 @@ export function HomeScreen() {
     settings.prePrayerReminderMinutes,
     settings.notificationSound,
     settings.adhanUsesAlarmStream,
-    settings.clockFormat,
+    clockHour12,
     settings.journalNotificationActionsEnabled,
     settings.endOfDayLogReminderEnabled,
     state,
@@ -464,7 +475,9 @@ export function HomeScreen() {
         String(settings.adhanUsesAlarmStream),
         // Sunrise and the night marks print a clock time in their copy,
         // so a 12/24 change has to rewrite them — same reason as above.
-        settings.clockFormat,
+        // The resolved answer rather than the setting, so 'auto' following
+        // the device counts as a change too.
+        String(clockHour12),
         state.baseDate.getTime(),
       );
       if (shouldResync(NOTIF_RESYNC_KEY, notifPrint)) {
@@ -477,7 +490,7 @@ export function HomeScreen() {
           tomorrow: view.table.tomorrow,
           baseDate: state.baseDate,
           week: view.table.week,
-          clockFormat: settings.clockFormat,
+          hour12: clockHour12,
         })
           // Marked on success only: a rewrite that threw must not suppress
           // the next attempt, or one bad round leaves the alarms as they are
@@ -563,7 +576,7 @@ export function HomeScreen() {
       settings.prePrayerReminderMinutes,
       settings.notificationSound,
       settings.adhanUsesAlarmStream,
-      settings.clockFormat,
+      clockHour12,
       state,
       view,
       locationLabel,
@@ -621,6 +634,10 @@ export function HomeScreen() {
     // effect did not, so a language change left the widget in the old one
     // until something unrelated moved.
     i18n.language,
+    // Every time in the payload is drawn in the user's clock format, and
+    // the payload is built outside React from a mirror of the answer —
+    // so the effect has to know when the answer changed.
+    clockHour12,
   ]);
 
   // Live Activity sync — runs whenever prayer data changes OR whenever the
@@ -689,6 +706,9 @@ export function HomeScreen() {
     // (not settings.language) guarantees i18n has already switched before we
     // rebuild the payload via i18n.t.
     i18n.language,
+    // Same reason as the widget effect: the card's times follow the clock
+    // format, and the format can change without any setting changing.
+    clockHour12,
   ]);
 
   // Persist last-fetched coords so MonthScreen and offline use can fall back to
