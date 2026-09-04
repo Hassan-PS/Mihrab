@@ -160,6 +160,11 @@ type PageItemProps = {
   selected: AyahRef | null;
   playing: AyahRef | null;
   finish: KhatmahFinish | null;
+  /**
+   * The player is up and has taken the page number, so the medallion
+   * would be saying it twice — see the render below.
+   */
+  hideFooter: boolean;
   onToggleFullscreen: () => void;
   onWordPress: (ref: AyahRef, page: number) => void;
   onOpenJump: () => void;
@@ -180,6 +185,7 @@ const PhonePageItem = React.memo(function PhonePageItem({
   selected,
   playing,
   finish,
+  hideFooter,
   onToggleFullscreen,
   onWordPress,
   onOpenJump,
@@ -271,6 +277,20 @@ const PhonePageItem = React.memo(function PhonePageItem({
               onWordLongPress={onWordPress}
             />
           </Pressable>
+          {/* THE MEDALLION STANDS DOWN WHILE THE PLAYER IS UP.
+
+              The mini player already names where you are — surah, ayah,
+              and now the page — and it is pinned over the bottom of the
+              page, exactly where the medallion sits. Two page numbers a
+              centimetre apart, one of them behind a card. Giving the
+              space back to the text is worth more than the ornament,
+              which is a page number in a nicer frame.
+
+              Except on a page the khatmah portion ends on: that footer
+              carries the "mark it done" button, which is not decoration
+              and has nowhere else to go — the text page is one shaped
+              paragraph per line, so nothing can sit inline with it. */}
+          {hideFooter && !finish ? null : (
           <MushafPageFooter
             page={page}
             ornament={ornament}
@@ -285,6 +305,7 @@ const PhonePageItem = React.memo(function PhonePageItem({
                 : null
             }
           />
+          )}
         </ScrollView>
       ) : null}
     </View>
@@ -388,6 +409,15 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
    * has room for both and keeps both.
    */
   const railYieldsToPlayer = width > height && playback.active != null;
+  /**
+   * Is the player card on screen?
+   *
+   * The phone reader is the only layout this applies to, which is also
+   * the only place it was asked for: the spread reader IS the tablet and
+   * Mac layout, and there the page has room for its own medallion and the
+   * player is not pinned over it.
+   */
+  const playerUp = playback.active != null;
 
   // Every input that decides a page's box, folded into one value and
   // published once it has stopped moving — see phonePageGeometry.ts for the
@@ -529,6 +559,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
         selected={selectedPage === page ? selected : null}
         playing={playingPage === page ? playingRef : null}
         finish={finishPage === page ? finish : null}
+        hideFooter={playerUp}
         onToggleFullscreen={onToggleFullscreen}
         onWordPress={openSelection}
         onOpenJump={openJump}
@@ -551,6 +582,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       playingRef,
       finishPage,
       finish,
+      playerUp,
       onToggleFullscreen,
       openSelection,
       openJump,
@@ -655,7 +687,9 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
         />
       ) : null}
 
-      <MiniPlayer />
+      {/* The player takes the page number over from the page — see the
+          footer in PhonePageItem for why it is worth the trade. */}
+      <MiniPlayer page={currentPage} onPressPage={openJump} />
       {/* Publishes the recited word for the lines to follow — see the
           store for why it is a probe and not a prop. Mounted only while
           something plays: the hook behind it polls playback four times a

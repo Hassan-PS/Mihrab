@@ -34,7 +34,21 @@ import {
   usePlaybackStatus,
 } from './playback';
 
-export function MiniPlayer() {
+/**
+ * `page` is passed in rather than derived, because only the reader knows
+ * which page is on screen — playback knows an ayah, and an ayah spans
+ * pages differently in every riwayah. When it is given, the card carries
+ * the page number and the page's own medallion stands down: the card is
+ * pinned over exactly where that medallion sits, so the two were saying
+ * the same thing a centimetre apart with one of them behind glass.
+ */
+export function MiniPlayer({
+  page,
+  onPressPage,
+}: {
+  page?: number;
+  onPressPage?: () => void;
+} = {}) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const { active, playing, loading, reciterId } = usePlaybackStatus();
@@ -119,6 +133,26 @@ export function MiniPlayer() {
                 you could be at 1.5× with 3× repeats and nothing on screen
                 said so. They are the two settings most likely to be left on
                 by accident, so they report themselves here. */}
+            {page != null ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+                hitSlop={6}
+                onPress={onPressPage}
+                style={[
+                  styles.stateChip,
+                  { backgroundColor: palette.controlBg },
+                ]}>
+                <Text
+                  style={[styles.stateChipLabel, { color: palette.text }]}
+                  accessibilityLanguage="en-US">
+                  {t('quran.pageShort', {
+                    defaultValue: 'p. {{page}}',
+                    page,
+                  })}
+                </Text>
+              </Pressable>
+            ) : null}
             {prefs.playbackRate !== 1 ? (
               <View style={[styles.stateChip, { backgroundColor: palette.controlBg }]}>
                 <Text style={[styles.stateChipLabel, { color: palette.text }]}>

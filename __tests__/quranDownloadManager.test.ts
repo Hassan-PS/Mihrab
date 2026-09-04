@@ -226,3 +226,50 @@ describe('the bar knows what it is counting', () => {
     expect(call.label).toMatch(/Husary/i);
   });
 });
+
+describe('the flood a whole-Quran download makes', () => {
+  it('publishes on percent, not on every one of 6,236 files', () => {
+    // Every publish drags each subscribed screen through a render, and the
+    // listening page subscribes above a 114-row list. The bar cannot show
+    // one ayah anyway: it is a few hundred points wide.
+    startQuranDownload(HUSARY);
+    let renders = 0;
+    subscribeQuranDownload(() => {
+      renders += 1;
+    });
+    for (let done = 1; done <= 700; done++) {
+      mockHandles[0].onProgress({ done, total: 6236, failed: 0 });
+    }
+    // 700 files of 6236 is 11%, so at most a dozen publications.
+    expect(renders).toBeGreaterThan(0);
+    expect(renders).toBeLessThanOrEqual(12);
+  });
+
+  it('always publishes the last one exactly', () => {
+    // "6236 of 6236" is the one number that has to be right, whatever
+    // percent the previous event happened to land on.
+    startQuranDownload(HUSARY);
+    const seen: number[] = [];
+    subscribeQuranDownload(s => seen.push(s.progress.done));
+    mockHandles[0].onProgress({ done: 6235, total: 6236, failed: 0 });
+    mockHandles[0].onProgress({ done: 6236, total: 6236, failed: 0 });
+    expect(seen).toContain(6236);
+  });
+
+  it('starts each run from a clean slate', () => {
+    // A second download whose first percent matched the last one of the
+    // previous run would publish nothing until it passed it.
+    startQuranDownload(FONTS);
+    mockHandles[0].onProgress({ done: 302, total: 604, failed: 0 });
+    mockHandles[0].resolve(true);
+    return Promise.resolve()
+      .then(() => Promise.resolve())
+      .then(() => {
+        startQuranDownload(HUSARY);
+        const seen: number[] = [];
+        subscribeQuranDownload(s => seen.push(s.progress.done));
+        mockHandles[1].onProgress({ done: 3118, total: 6236, failed: 0 });
+        expect(seen).toContain(3118);
+      });
+  });
+});

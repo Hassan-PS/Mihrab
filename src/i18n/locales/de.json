@@ -901,6 +901,7 @@
     "juzLabel": "Juz {{juz}}",
     "nightMode": "Nachtmodus",
     "jumpToPage": "Gehe zu Seite",
+    "pageShort": "S. {{page}}",
     "go": "Los",
     "mushafDownloadRetryBody": "{{count}} Seiten wurden nicht heruntergeladen. Erneut versuchen, um die fehlenden Seiten zu laden — alles bereits Heruntergeladene bleibt erhalten.",
     "mushafDownloadRetryCta": "Fehlende Seiten erneut laden",

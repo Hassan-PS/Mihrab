@@ -169,9 +169,34 @@ function notificationText(job: QuranDownloadJob) {
   };
 }
 
+/**
+ * The last percent this manager told anybody about.
+ *
+ * A whole-Quran download reports 6,236 times. Publishing each one drags
+ * every subscribed screen through a render — and the listening page's
+ * subscriber sits above a 114-row list, so that is 6,236 full re-renders
+ * of the screen you are watching the bar on. The bar itself cannot show
+ * them: it is a few hundred points wide, so one ayah is a fraction of a
+ * pixel.
+ *
+ * The mushaf reader had worked this out and throttled inside its own
+ * component. That fixed the reader and left every other consumer to
+ * rediscover it, so the throttle lives here now, where the flood starts.
+ * The final event always goes out whatever the percent, because "6236 of
+ * 6236" is the one number that has to be exact.
+ */
+let lastPublishedPct = -1;
+
 function begin(job: QuranDownloadJob): MushafDownloadHandle {
   const text = notificationText(job);
   const onProgress = (progress: MushafDownloadProgress) => {
+    const pct =
+      progress.total > 0
+        ? Math.floor((progress.done / progress.total) * 100)
+        : 0;
+    const finished = progress.done >= progress.total;
+    if (pct === lastPublishedPct && !finished) return;
+    lastPublishedPct = pct;
     publish({ ...state, progress });
     void publishDownloadProgress({
       done: progress.done,
@@ -192,6 +217,7 @@ function begin(job: QuranDownloadJob): MushafDownloadHandle {
 export function startQuranDownload(job: QuranDownloadJob): boolean {
   if (state.running) return false;
   cancelledByUser = false;
+  lastPublishedPct = -1;
   publish({
     running: job,
     // The total is known before the first file lands, and a bar that
@@ -238,6 +264,7 @@ export function cancelQuranDownload(): void {
 export function resetQuranDownloadState(): void {
   handle = null;
   cancelledByUser = false;
+  lastPublishedPct = -1;
   listeners.clear();
   state = { running: null, progress: EMPTY_PROGRESS, last: null };
 }

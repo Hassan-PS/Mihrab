@@ -55,8 +55,24 @@ function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
   const face = (
     <>
       <CompassIcon color={palette.accentSolid} size={14} />
+      {/* THE WORD, then the number.
+
+          A compass rose and "116°" is a puzzle: the icon is small, the
+          number could be a temperature, and nothing on the chip says what
+          it is a bearing TO. Screen readers were told — `qiblaChipA11y`
+          has always read "Qibla 116 degrees" — and everyone looking at it
+          had to already know.
+
+          `nav.compass` rather than a new string: it is already "Qibla" in
+          all thirteen languages, which makes it the word this app has
+          settled on for the thing this chip opens. */}
       <Text
         style={[typeStyle('caption'), styles.label, { color: palette.accent }]}
+        numberOfLines={1}>
+        {t('nav.compass', 'Qibla')}
+      </Text>
+      <Text
+        style={[typeStyle('caption'), styles.degrees, { color: palette.accent }]}
         numberOfLines={1}
         // A degree run is Latin left-to-right whatever the app language;
         // without this it collapses in Arabic, the same way the countdown
@@ -135,5 +151,11 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: '700',
     letterSpacing: 0.2,
+  },
+  /** The bearing, a shade lighter than the word so the word leads. */
+  degrees: {
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    opacity: 0.85,
   },
 });

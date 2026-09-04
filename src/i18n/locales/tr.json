@@ -901,6 +901,7 @@
     "juzLabel": "{{juz}}. Cüz",
     "nightMode": "Gece modu",
     "jumpToPage": "Sayfaya git",
+    "pageShort": "s. {{page}}",
     "go": "Git",
     "mushafDownloadRetryBody": "{{count}} sayfa indirilemedi. Eksik sayfaları almak için yeniden deneyin — indirilmiş olanlar korunur.",
     "mushafDownloadRetryCta": "Eksik sayfaları yeniden dene",

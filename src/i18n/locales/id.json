@@ -901,6 +901,7 @@
     "juzLabel": "Juz {{juz}}",
     "nightMode": "Mode malam",
     "jumpToPage": "Ke halaman",
+    "pageShort": "hlm. {{page}}",
     "go": "Buka",
     "mushafDownloadRetryBody": "{{count}} halaman gagal diunduh. Coba lagi untuk mengambil halaman yang hilang — semua yang sudah diunduh tetap tersimpan.",
     "mushafDownloadRetryCta": "Coba lagi halaman yang hilang",

@@ -45,6 +45,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { QuranScreen } from '../screens/QuranScreen';
 import { TasbihScreen } from '../screens/TasbihScreen';
 import { tabBackButton } from './TabBackButton';
+import { QuranHeaderRight } from '../screens/quran/QuranHeaderRight';
 import { DuasScreen } from '../screens/DuasScreen';
 import { LogScreen } from '../screens/LogScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -284,9 +285,9 @@ export function MainTabs() {
           tabBarIcon: TabBookIcon,
           headerLeft: tabBackButton,
           headerShown: true,
-          // Only these two tabs carry it, and only once sync is set up: this
-          // is the screen whose data the user just changed. See SyncHeaderButton.
-          headerRight: () => <SyncHeaderButton />,
+          // Tilāwah opposite the title, with sync beside it — sync only
+          // once it is set up, which is why the pair is one component.
+          headerRight: () => <QuranHeaderRight />,
         }}
       />
       <Tab.Screen

@@ -901,6 +901,7 @@
     "juzLabel": "第 {{juz}} 卷",
     "nightMode": "夜间模式",
     "jumpToPage": "跳转到页面",
+    "pageShort": "第 {{page}} 页",
     "go": "前往",
     "mushafDownloadRetryBody": "{{count}} 页未能下载。重试以获取缺失的页面——已下载的内容将保留。",
     "mushafDownloadRetryCta": "重试缺失页面",

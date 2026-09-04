@@ -928,33 +928,6 @@ export function QuranScreen() {
           link is shown only when there is a riwayah to offer at all — a
           build that knows one recitation should not advertise a picker. */}
       <View style={styles.downloadsRow}>
-        {/* Tilāwah has to have a door on the screen people already open to
-            find the Quran, and the door has to say what is behind it. The
-            word is the right one — it names Qur'anic recitation, and it
-            sits beside Tasbih and Duas in this app's own vocabulary — but
-            it is a word not everyone has, so it never travels alone: the
-            note glyph here, and a line under the title on the page itself.
-
-            A filled chip rather than a third text link. The two beside it
-            are places you go when you already know what you want; this one
-            has to be findable by someone who does not yet know it exists. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${t('quran.listenTitle', 'Tilawah')} — ${t(
-            'quran.tilawahDoorSub',
-            'Listen to the Quran',
-          )}`}
-          onPress={() => navigation.navigate('QuranListen')}
-          style={[styles.tilawahChip, { backgroundColor: palette.accentBg }]}>
-          <Text
-            style={{
-              color: palette.accentSolid,
-              fontSize: 12,
-              fontWeight: '700',
-            }}>
-            {`♪  ${t('quran.listenTitle', 'Tilawah')} ›`}
-          </Text>
-        </Pressable>
         {riwayahOffered ? (
           <Pressable
             accessibilityRole="button"

@@ -901,6 +901,7 @@
     "juzLabel": "पारा {{juz}}",
     "nightMode": "नाइट मोड",
     "jumpToPage": "पृष्ठ पर जाएँ",
+    "pageShort": "पृ. {{page}}",
     "go": "जाएँ",
     "mushafDownloadRetryBody": "{{count}} पृष्ठ डाउनलोड नहीं हुए। छूटे हुए पृष्ठ पाने के लिए पुनः प्रयास करें — पहले से डाउनलोड किया गया सब कुछ सुरक्षित रहेगा।",
     "mushafDownloadRetryCta": "छूटे पृष्ठ पुनः प्रयास करें",

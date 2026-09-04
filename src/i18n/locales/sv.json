@@ -901,6 +901,7 @@
     "juzLabel": "Juz {{juz}}",
     "nightMode": "Nattläge",
     "jumpToPage": "Gå till sida",
+    "pageShort": "s. {{page}}",
     "go": "Gå",
     "mushafDownloadRetryBody": "{{count}} sidor kunde inte laddas ned. Försök igen för att hämta de saknade sidorna — allt som redan laddats ned behålls.",
     "mushafDownloadRetryCta": "Försök igen med saknade sidor",

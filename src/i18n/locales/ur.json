@@ -901,6 +901,7 @@
     "juzLabel": "پارہ {{juz}}",
     "nightMode": "نائٹ موڈ",
     "jumpToPage": "صفحے پر جائیں",
+    "pageShort": "ص {{page}}",
     "go": "جائیں",
     "mushafDownloadRetryBody": "{{count}} صفحات ڈاؤن لوڈ نہیں ہو سکے۔ باقی صفحات حاصل کرنے کے لیے دوبارہ کوشش کریں — جو کچھ پہلے ڈاؤن لوڈ ہو چکا ہے وہ محفوظ رہے گا۔",
     "mushafDownloadRetryCta": "باقی صفحات دوبارہ آزمائیں",

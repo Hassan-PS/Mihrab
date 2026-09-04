@@ -87,6 +87,75 @@ export type AudioDownloadHandle = {
   cancel: () => void;
 };
 
+/** Smallest believable MP3 — anything under this is a bad download. */
+const MIN_AUDIO_BYTES = 1000;
+
+/**
+ * Last-resort transport: RN's own networking stack, via base64.
+ *
+ * `ReactNativeBlobUtil`'s streaming downloader is the one to want, but on
+ * some networks EVERY request through it dies with "Download interrupted"
+ * — the Android emulator's NAT does exactly that, and so do some
+ * corporate proxies. The font store learned this and carries the fix; the
+ * timings fetch learned it after that. The MP3s never did.
+ *
+ * An ayah is tens of kilobytes, so holding one in memory for the length of
+ * one write is not the problem it would be for a font.
+ */
+async function fetchAyahViaRNFetch(url: string, dest: string): Promise<void> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`ayah: HTTP ${response.status}`);
+  const blob = await response.blob();
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('ayah: read failed'));
+    reader.onloadend = () => {
+      const result = String(reader.result ?? '');
+      resolve(result.slice(result.indexOf(',') + 1));
+    };
+    reader.readAsDataURL(blob);
+  });
+  if (base64.length < MIN_AUDIO_BYTES) throw new Error('ayah: truncated');
+  await ReactNativeBlobUtil.fs.unlink(dest).catch(() => undefined);
+  await ReactNativeBlobUtil.fs.writeFile(dest, base64, 'base64');
+}
+
+/**
+ * WHY A WHOLE-QURAN DOWNLOAD APPEARED TO HANG.
+ *
+ * Reported 2026-09-04: it gets stuck every time. It was not stuck — it was
+ * failing 6,236 times in the slowest possible way.
+ *
+ * On a network where the streaming transport cannot work, every ayah spent
+ * two doomed requests, a 60-second watchdog apiece, and 1.2 s of backoff
+ * before falling over. Four workers doing that in parallel is a progress
+ * bar that moves a few files a minute and a screen that looks frozen. The
+ * font store hit exactly this and wrote it down: "the whole reason the
+ * download crawled and appeared to freeze in blocks."
+ *
+ * So the same cure. One streaming failure condemns the transport for the
+ * rest of the session and everything after it goes straight to the
+ * fallback; the next launch gives streaming another chance, in case it was
+ * the network that was wrong rather than the device.
+ */
+let streamingAudioWorks = true;
+
+/** Rate-limited telemetry, so a slow run can be diagnosed from a log. */
+const audioStats = { retries: 0, failures: 0, lastLog: 0, startedAt: 0 };
+
+function noteAudioProgress(done: number, total: number): void {
+  const now = Date.now();
+  if (audioStats.startedAt === 0) audioStats.startedAt = now;
+  if (now - audioStats.lastLog < 5000) return;
+  audioStats.lastLog = now;
+  const secs = Math.max(0.001, (now - audioStats.startedAt) / 1000);
+  console.log(
+    `[quranAudio] ${done}/${total} · ${(done / secs).toFixed(1)} files/s · ` +
+      `streaming=${streamingAudioWorks} · retries=${audioStats.retries} · ` +
+      `failed=${audioStats.failures}`,
+  );
+}
+
 /** One ayah's audio, on disk, or a throw. Up to 3 attempts. */
 async function fetchAyahFile(
   reciter: Reciter,
@@ -97,15 +166,24 @@ async function fetchAyahFile(
   // Transient stream resets are common on multiplexed CDN connections
   // (same pattern as mushafDownload).
   let lastError: unknown = null;
+  const url = ayahAudioUrl(reciter, surah, ayah);
   for (let attempt = 1; attempt <= 3; attempt++) {
     const tmp = `${path}.part`;
     try {
+      if (attempt > 1) audioStats.retries += 1;
+      // Straight to the fallback once streaming has been condemned, and
+      // on the last attempt regardless — a file worth three tries is
+      // worth trying the other transport at least once.
+      if (attempt === 3 || !streamingAudioWorks) {
+        await fetchAyahViaRNFetch(url, path);
+        return;
+      }
       // No RNBlobUtil `timeout` config — it breaks Android downloads
       // outright; the JS watchdog below covers hangs.
       const task = ReactNativeBlobUtil.config({
         path: tmp,
         overwrite: true,
-      }).fetch('GET', ayahAudioUrl(reciter, surah, ayah));
+      }).fetch('GET', url);
       let watchdog: ReturnType<typeof setTimeout> | null = null;
       const res = await Promise.race([
         task,
@@ -119,7 +197,11 @@ async function fetchAyahFile(
         if (watchdog != null) clearTimeout(watchdog);
       });
       const stat = await ReactNativeBlobUtil.fs.stat(tmp).catch(() => null);
-      if (res.info().status !== 200 || !stat || Number(stat.size) <= 1000) {
+      if (
+        res.info().status !== 200 ||
+        !stat ||
+        Number(stat.size) <= MIN_AUDIO_BYTES
+      ) {
         throw new Error(`ayah ${surah}:${ayah}`);
       }
       await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
@@ -127,13 +209,32 @@ async function fetchAyahFile(
       return;
     } catch (e) {
       lastError = e;
+      // The streaming transport just failed. It is condemned for the rest
+      // of the session rather than retried 6,235 more times.
+      if (streamingAudioWorks && attempt < 3) {
+        streamingAudioWorks = false;
+        console.warn(
+          '[quranAudio] streaming transport failed; using RN fetch for the rest of this session',
+          e,
+        );
+      }
       await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
       if (attempt < 3) {
         await new Promise<void>(r => setTimeout(r, 400 * attempt));
       }
     }
   }
+  audioStats.failures += 1;
   throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+/** For tests: a fresh session's optimism about the transport. */
+export function _resetAudioTransportForTests(): void {
+  streamingAudioWorks = true;
+  audioStats.retries = 0;
+  audioStats.failures = 0;
+  audioStats.lastLog = 0;
+  audioStats.startedAt = 0;
 }
 
 /** How many workers pull from a download queue at once. */
@@ -183,6 +284,7 @@ function runAyahQueue(
           failed += 1;
         } finally {
           done += 1;
+          noteAudioProgress(done, total);
           onProgress?.({ done, total, failed });
         }
       }

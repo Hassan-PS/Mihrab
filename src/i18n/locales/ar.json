@@ -901,6 +901,7 @@
     "juzLabel": "الجزء {{juz}}",
     "nightMode": "الوضع الليلي",
     "jumpToPage": "الانتقال إلى صفحة",
+    "pageShort": "ص {{page}}",
     "go": "انتقال",
     "mushafDownloadRetryBody": "تعذَّر تنزيل {{count}} من الصفحات. أعد المحاولة لجلب الصفحات الناقصة — كل ما تم تنزيله محفوظ.",
     "mushafDownloadRetryCta": "إعادة محاولة الصفحات الناقصة",
