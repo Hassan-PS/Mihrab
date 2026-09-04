@@ -272,7 +272,7 @@
     "malikiSecondTimes": "Waktu kedua Maliki",
     "malikiSecondTimesHelp": "Setiap salat mendapat satu baris di kartu Hari Ini yang menyebutkan kapan waktu pilihannya (ikhtiyari) berakhir dan waktu daruratnya (daruri) dimulai. Dihitung di perangkat Anda dari koordinat Anda, dari sumber mana pun waktu Anda berasal. Memakai bayangan 1:1 untuk Asar tanpa memandang pengaturan mazhab Anda, karena itulah batas Maliki. Nonaktif secara bawaan.",
     "malikiSecondTimesSource": "Dari Al-Murshid al-Muin (Ibnu Asyir), sebagaimana dituangkan dalam The Guiding Helper, nyanyian 11.",
-    "malikiSecondTimesModelled": "Batas Subuh dan Asar adalah pudarnya bintang dan menguningnya matahari — sebuah sudut yang menggantikan sesuatu yang dinilai mata. Keduanya ditandai sebagai perkiraan. Di tempat matahari tidak pernah mencapai sudut itu, tidak ada yang ditampilkan alih-alih tebakan.",
+    "malikiSecondTimesModelled": "Batas Subuh dan Asar adalah pudarnya bintang dan menguningnya matahari — sebuah sudut yang menggantikan sesuatu yang dinilai mata. Keduanya ditandai sebagai perkiraan. Di tempat matahari tidak terbit, tidak terbenam, atau tidak pernah mencapai sudut itu, tidak ada yang ditampilkan alih-alih tebakan.",
     "accent_rose": "Mawar",
     "accent_violet": "Ungu",
     "laDesignMarkers": "Penanda",

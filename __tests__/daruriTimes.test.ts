@@ -158,14 +158,57 @@ describe('when the sky has no answer', () => {
     expect(Object.keys(b)).toHaveLength(4);
   });
 
-  it('says almost nothing under the midnight sun', () => {
+  /**
+   * The case the reviewer caught, and the reason the gate exists.
+   *
+   * Under the midnight sun every one of these windows is open-ended: the
+   * sun does not set, so Ẓuhr's and ʿAṣr's second times have no close.
+   * The ANGLES are still reached — the sun descends through +5° and the
+   * 1:1 shadow happens — so an implementation that only asked "was the
+   * angle reached?" would print "ʿAṣr's first time until 21:00" for a
+   * window ending at a sunset that never comes.
+   */
+  it('says nothing at all under the midnight sun', () => {
     const b = solarDaruriBoundaries(
       new Date(2026, 5, 21, 12, 0, 0),
       TROMSO.lat,
       TROMSO.lng,
     );
-    expect(b.FajrDaruri).toBeUndefined();
-    expect(b.MaghribDaruri).toBeUndefined();
+    expect(b).toEqual({});
+  });
+
+  /** The mirror of it: in the polar night nothing rises to end Fajr's. */
+  it('says nothing in the polar night either', () => {
+    const b = solarDaruriBoundaries(
+      new Date(2026, 11, 21, 12, 0, 0),
+      TROMSO.lat,
+      TROMSO.lng,
+    );
+    expect(b).toEqual({});
+  });
+
+  it('holds that line further north as well', () => {
+    const b = solarDaruriBoundaries(
+      new Date(2026, 5, 21, 12, 0, 0),
+      78.2232,
+      15.6469,
+    );
+    expect(b).toEqual({});
+  });
+
+  /**
+   * The gate is about the sun, not about the latitude: Tromsø in the
+   * shoulder seasons has ordinary days and gets ordinary boundaries.
+   */
+  it('gives the same place every boundary once the sun rises and sets again', () => {
+    const b = solarDaruriBoundaries(
+      new Date(2026, 8, 21, 12, 0, 0),
+      TROMSO.lat,
+      TROMSO.lng,
+    );
+    expect(Object.keys(b).sort()).toEqual(
+      ['AsrDaruri', 'DhuhrDaruri', 'FajrDaruri', 'MaghribDaruri'].sort(),
+    );
   });
 
   it('never returns NaN dressed up as a time', () => {

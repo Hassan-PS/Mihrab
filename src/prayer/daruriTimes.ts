@@ -45,6 +45,27 @@
  * Ḥanafī shadow — a table contradicting itself. The setting screen says
  * so where the toggle is.
  *
+ * ── REFRACTION ────────────────────────────────────────────────────────
+ *
+ * Sunrise and sunset here are adhan.js's, taken at −0.833° — the standard
+ * allowance for atmospheric refraction plus the sun's own radius, so the
+ * moment the disc's upper limb touches the horizon rather than the moment
+ * its centre crosses a geometric line. That is what "the appearance of
+ * the top of the sun" (fn. 661) asks for, and it is what every published
+ * table means by the word.
+ *
+ * The other four angles are geometric, which is the convention for
+ * twilight everywhere: −17° for the red glow and −4° for *isfār* are
+ * defined as positions of the sun's centre, not as refracted altitudes,
+ * and the constants in every madhhab's tables are quoted on that basis.
+ * Only *iṣfirār* at +5° sits low enough for refraction to be worth a
+ * number — about 9 arcminutes there, which is under a minute of clock
+ * time at mid-latitudes and more at high ones. That is well inside the
+ * uncertainty of "the sun has a deep yellow view" in the first place,
+ * which is why that boundary is `modelled` rather than `computed` and why
+ * the row says approx. Correcting it would make the arithmetic tidier
+ * without making the answer truer.
+ *
  * ── AND SOMETIMES THERE IS NO ANSWER ──────────────────────────────────
  *
  * At 33°N every one of these angles happens every night. At 55°N some of
@@ -210,18 +231,50 @@ export function solarDaruriBoundaries(
   const d = date.getDate();
   const at = (hours: number) => localClock(utcDateFromHours(y, mo, d, hours));
 
+  // ── A WINDOW NEEDS BOTH ENDS ────────────────────────────────────────
+  //
+  // Every one of these boundaries OPENS a window that some other event
+  // CLOSES: Fajr's ḍarūrī runs to sunrise, Ẓuhr's and ʿAṣr's to sunset.
+  // An angle can be reached on a day when the closing event never
+  // happens, and then the boundary is a number with nothing on the other
+  // side of it.
+  //
+  // Tromsø at midsummer is the case that makes it concrete. The sun does
+  // not set, but it still descends through +5°, so `hourAngle` answers
+  // 21:00 — and the app would have printed "ʿAṣr's first time until
+  // 21:00" for a window ending at a sunset that never comes. The 1:1
+  // shadow is reached there too, and would have closed Ẓuhr the same way.
+  // In the polar night the mirror happens: no sunrise, but *isfār* and
+  // the red twilight still resolve.
+  //
+  // So a day without a sunrise has no Fajr boundary and a day without a
+  // sunset has no afternoon or evening one, whatever the angles say.
+  // This is the fallback for the polar regions, and it is deliberately
+  // the same answer as everywhere else the sky runs out: nothing.
+  const risesToday = Number.isFinite(solar.sunrise);
+  const setsToday = Number.isFinite(solar.sunset);
+
   const out: DaruriTimes = {};
-  // Before transit: the morning twilight brightening toward sunrise.
-  const isfar = at(solar.hourAngle(ISFAR_ALTITUDE_DEGREES, false));
+  // Before transit: the morning twilight brightening toward sunrise —
+  // which has to be a sunrise there is.
+  const isfar = risesToday
+    ? at(solar.hourAngle(ISFAR_ALTITUDE_DEGREES, false))
+    : undefined;
   if (isfar) out.FajrDaruri = isfar;
-  // After transit: the shadow reaching height + noon shadow.
-  const asr = at(solar.afternoon(MALIKI_SHADOW_LENGTH));
+  // After transit: the shadow reaching height + noon shadow. Closes at
+  // sunset, like ʿAṣr's below.
+  const asr = setsToday ? at(solar.afternoon(MALIKI_SHADOW_LENGTH)) : undefined;
   if (asr) out.DhuhrDaruri = asr;
   // After transit: the sun still up, five degrees above the horizon.
-  const isfirar = at(solar.hourAngle(ISFIRAR_ALTITUDE_DEGREES, true));
+  const isfirar = setsToday
+    ? at(solar.hourAngle(ISFIRAR_ALTITUDE_DEGREES, true))
+    : undefined;
   if (isfirar) out.AsrDaruri = isfirar;
-  // After transit: the red gone from the western horizon.
-  const red = at(solar.hourAngle(-RED_TWILIGHT_DEPRESSION_DEGREES, true));
+  // After transit: the red gone from the western horizon — which needs
+  // the sun to have gone under it first.
+  const red = setsToday
+    ? at(solar.hourAngle(-RED_TWILIGHT_DEPRESSION_DEGREES, true))
+    : undefined;
   if (red) out.MaghribDaruri = red;
   return out;
 }
@@ -230,7 +283,17 @@ export function solarDaruriBoundaries(
  * Every Mālikī second-time boundary for one day of a card.
  *
  * `tomorrowFajr` is what closes the night; without it Ishāʾ's boundary is
- * omitted rather than guessed. This is the same night the existing
+ * omitted rather than guessed.
+ *
+ * This one is NOT gated on the sun rising and setting the way the four
+ * above are, and the difference is the point: those are claims about
+ * where the sun is, and under the midnight sun there is no answer to
+ * make. This is a third of the way between two times the card is already
+ * showing the reader. Whatever rule their provider used to produce a
+ * Maghrib and a Fajr in a place where the sun does not set, the third
+ * between them is a real division of what they are looking at — and it
+ * is the same instant as the `Firstthird` row, which has shipped on that
+ * basis since issue #14. This is the same night the existing
  * "first third" row is computed over — and indeed Ishāʾ's second time
  * BEGINS at the end of the first third, so the two are the same instant
  * under two names. See `injectDaruriTimes` for what the card does about

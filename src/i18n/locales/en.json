@@ -272,7 +272,7 @@
     "malikiSecondTimes": "Maliki second times",
     "malikiSecondTimesHelp": "Each prayer gets a line on the Today card saying when its preferred time (ikhtiyari) closes and its late time (daruri) begins. Computed on your device from your coordinates, whichever source your times come from. Uses the 1:1 shadow for Asr regardless of your madhab setting, because that is the Maliki boundary. Off by default.",
     "malikiSecondTimesSource": "From Al-Murshid al-Muin (Ibn Ashir), as rendered in The Guiding Helper, Song 11.",
-    "malikiSecondTimesModelled": "Fajr's and Asr's boundaries are the stars fading and the sun yellowing — an angle standing in for something the eye judges. They are marked as approximate. Where the sun never reaches an angle, nothing is shown rather than a guess.",
+    "malikiSecondTimesModelled": "Fajr's and Asr's boundaries are the stars fading and the sun yellowing — an angle standing in for something the eye judges. They are marked as approximate. Where the sun does not rise, does not set, or never reaches the angle, nothing is shown rather than a guess.",
     "accent_rose": "Rose",
     "accent_violet": "Violet",
     "laDesignMarkers": "Markers",
