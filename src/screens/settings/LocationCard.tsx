@@ -11,11 +11,8 @@ import { Button } from '../../components/ui/Button';
 import { useLocationSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { GeocodedPlace } from '../../geocoding/nominatim';
-import {
-  cardEdgeStyle,
-  inputChromeStyle,
-  segmentChromeStyle,
-} from '../../theme/chrome';
+import { inputChromeStyle, segmentChromeStyle } from '../../theme/chrome';
+import { SettingsBlock, SettingsGroup } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 /**
@@ -86,15 +83,9 @@ function LocationCardImpl() {
   };
 
   return (
-    <>
-      <Text style={[s.sectionTitle, { color: palette.muted }]}>
-        {t('settings.location')}
-      </Text>
-      <View
-        style={[
-          s.card,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
+    // No heading: the page is already called Location.
+    <SettingsGroup>
+      <SettingsBlock>
         <View
           style={s.segmentRow}
           accessibilityRole="radiogroup"
@@ -186,8 +177,8 @@ function LocationCardImpl() {
             />
           </View>
         )}
-      </View>
-    </>
+      </SettingsBlock>
+    </SettingsGroup>
   );
 }
 

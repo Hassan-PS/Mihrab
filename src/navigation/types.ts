@@ -57,4 +57,12 @@ export type RootStackParamList = {
   SettingsWidgets: undefined;
   SettingsQuran: undefined;
   SettingsAbout: undefined;
+  /**
+   * Pages nested under a section rather than under the index. They are
+   * on the same stack — only the row that opens them differs — so they
+   * are declared here beside their parents.
+   */
+  SettingsExtraTimes: undefined;
+  SettingsDailyReminders: undefined;
+  SettingsAttributions: undefined;
 };

@@ -1,13 +1,7 @@
-// hover-ok: list-row / settings-row / sheet pressables. Hover-state
-// treatment would visually noise these dense surfaces; the touch
-// feedback (pressed opacity / ripple) is the right affordance here.
 import { memo } from 'react';
-import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppearanceSettings } from '../../context/PrayerSettingsContext';
-import { useAppPalette } from '../../hooks/useAppPalette';
-import { cardEdgeStyle } from '../../theme/chrome';
-import { sharedSettingsStyles as s } from './sharedStyles';
+import { SettingsGroup, SettingsLinkRow } from './SettingsGroup';
 
 const LANGUAGE_LABELS: Array<{ id: string; label: string; isI18nKey?: boolean }> = [
   { id: 'en', label: 'settings.langEn', isI18nKey: true },
@@ -33,7 +27,6 @@ function LanguageCardImpl({ onOpenLanguagePicker }: LanguageCardProps) {
   const { t } = useTranslation();
   // Language lives in the appearance slice — task #11.
   const { slice: settings } = useAppearanceSettings();
-  const { palette } = useAppPalette();
 
   const current = LANGUAGE_LABELS.find(l => l.id === settings.language);
   const currentLabel = current
@@ -43,35 +36,15 @@ function LanguageCardImpl({ onOpenLanguagePicker }: LanguageCardProps) {
     : 'English';
 
   return (
-    <>
-      <Text style={[s.sectionTitle, { color: palette.muted }]}>
-        {t('settings.language')}
-      </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('settings.language')}
-        style={[
-          s.card,
-          s.rowPress,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}
-        onPress={onOpenLanguagePicker}>
-        <View style={s.copyBlock}>
-          <Text style={[s.label, { color: palette.muted }]}>
-            {t('settings.language')}
-          </Text>
-          <Text style={[s.valueText, { color: palette.text }]}>
-            {currentLabel}
-          </Text>
-          <Text style={[s.help, { color: palette.muted }]}>
-            {t('settings.languageHelp')}
-          </Text>
-        </View>
-        <Text style={[s.changeLink, { color: palette.accent }]}>
-          {t('common.change')}
-        </Text>
-      </Pressable>
-    </>
+    <SettingsGroup
+      title={t('settings.language')}
+      footer={t('settings.languageHelp')}>
+      <SettingsLinkRow
+        title={t('settings.language')}
+        value={currentLabel}
+        onPress={onOpenLanguagePicker}
+      />
+    </SettingsGroup>
   );
 }
 

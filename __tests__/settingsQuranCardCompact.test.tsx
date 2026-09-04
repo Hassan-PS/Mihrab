@@ -108,7 +108,9 @@ describe('the Settings companion-text card', () => {
     // The mode and the edition currently in force, and a way in.
     expect(texts).toContain('quran.viewToggleTranslation');
     expect(texts).toContain('Sahih International');
-    expect(texts).toContain('common.change');
+    // A chevron, not a "Change" link: the row opens a sheet, which is
+    // what every other row that opens something now looks like.
+    expect(texts).toContain('›');
 
     // ...and nothing else from the picker. Pickthall is an English
     // translation that the inline list always drew; a tafsir edition and

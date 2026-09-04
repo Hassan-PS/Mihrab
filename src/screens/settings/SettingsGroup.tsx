@@ -109,12 +109,21 @@ export function SettingsToggleRow({
   value,
   onValueChange,
   disabled,
+  testID,
+  helpDanger,
 }: {
   title: string;
   help?: string;
   value: boolean;
   onValueChange: (next: boolean) => void;
   disabled?: boolean;
+  testID?: string;
+  /**
+   * Colours the explanation as a warning. For the case where the row is
+   * about to contradict a neighbouring setting and the reader is owed
+   * that BEFORE the switch is touched rather than after.
+   */
+  helpDanger?: boolean;
 }) {
   const { palette } = useAppPalette();
   return (
@@ -122,10 +131,17 @@ export function SettingsToggleRow({
       <View style={styles.copy}>
         <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
         {help ? (
-          <Text style={[styles.help, { color: palette.muted }]}>{help}</Text>
+          <Text
+            style={[
+              styles.help,
+              { color: helpDanger ? palette.danger : palette.muted },
+            ]}>
+            {help}
+          </Text>
         ) : null}
       </View>
       <Switch
+        testID={testID}
         value={value}
         disabled={disabled}
         onValueChange={onValueChange}
@@ -151,6 +167,7 @@ export function SettingsLinkRow({
   onPress,
   destructive,
   accessory,
+  testID,
 }: {
   title: string;
   value?: string;
@@ -159,11 +176,13 @@ export function SettingsLinkRow({
   destructive?: boolean;
   /** Overrides the chevron — a "Change" link, a count, a spinner. */
   accessory?: ReactNode;
+  testID?: string;
 }) {
   const { palette } = useAppPalette();
   const tint: ColorValue = destructive ? '#d43f3f' : palette.text;
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityHint={value}

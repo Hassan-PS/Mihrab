@@ -8,12 +8,11 @@
  * row still reaches it in one tap from where the times are.
  */
 import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { cardEdgeStyle } from '../../theme/chrome';
 import { CalendarIcon } from '../../components/HeaderToolbarIcons';
+import { SettingsGroup, SettingsNavRow } from './SettingsGroup';
 
 function MonthTimesCardImpl() {
   const { t } = useTranslation();
@@ -21,44 +20,15 @@ function MonthTimesCardImpl() {
   const navigation = useNavigation();
 
   return (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-      ]}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('nav.month')}
-        accessibilityHint={t('a11y.openMonth')}
+    <SettingsGroup>
+      <SettingsNavRow
+        icon={<CalendarIcon color={palette.accentSolid} size={20} />}
+        title={t('nav.month')}
+        subtitle={t('home.monthTimesLink')}
         onPress={() => navigation.navigate('MonthTimes' as never)}
-        style={styles.row}>
-        <CalendarIcon color={palette.accentSolid} size={20} />
-        <View style={styles.body}>
-          <Text style={[styles.title, { color: palette.text }]}>
-            {t('nav.month')}
-          </Text>
-          <Text style={[styles.subtitle, { color: palette.muted }]}>
-            {t('home.monthTimesLink')}
-          </Text>
-        </View>
-        <Text style={{ color: palette.accent, fontSize: 15 }}>›</Text>
-      </Pressable>
-    </View>
+      />
+    </SettingsGroup>
   );
 }
 
 export const MonthTimesCard = memo(MonthTimesCardImpl);
-
-const styles = StyleSheet.create({
-  card: { borderRadius: 18, overflow: 'hidden' },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  body: { flex: 1, minWidth: 0 },
-  title: { fontSize: 15, fontWeight: '600' },
-  subtitle: { fontSize: 12.5, marginTop: 2 },
-});

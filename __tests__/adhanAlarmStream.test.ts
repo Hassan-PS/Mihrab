@@ -139,7 +139,7 @@ describe('wiring that would fail silently if it drifted', () => {
     // nothing on iPhone is worse than no switch.
     const card = read('src/screens/settings/NotificationsCard.tsx');
     expect(card).toMatch(
-      /Platform\.OS === 'android' && \(\s*<View[\s\S]{0,600}adhanAlarmStream/,
+      /Platform\.OS === 'android' \?\s*\(\s*<SettingsToggleRow[\s\S]{0,600}adhanAlarmStream/,
     );
   });
 });

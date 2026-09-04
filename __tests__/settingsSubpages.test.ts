@@ -18,8 +18,20 @@ const INDEX = read('src/screens/SettingsScreen.tsx');
 const NAV = read('src/navigation/RootNavigator.tsx');
 const TYPES = read('src/navigation/types.ts');
 
-/** Every route named in the section list. */
+/** Every route named in the section list — sections and nested pages. */
 const routes = [...SUBPAGES.matchAll(/route: '(Settings\w+)'/g)].map(m => m[1]);
+
+/**
+ * The nested ones: declared inside a `children:` block rather than at the
+ * top level. They are NOT on the index — the only way in is the row their
+ * parent draws, which `NestedPageRows` builds from this same list.
+ */
+const NESTED = read('src/screens/settings/NestedPageRows.tsx');
+const nestedRoutes = [
+  ...SUBPAGES.matchAll(/children: \[([\s\S]*?)\n {4}\],/g),
+].flatMap(block =>
+  [...block[1].matchAll(/route: '(Settings\w+)'/g)].map(m => m[1]),
+);
 
 /** Every settings card that still exists on disk. */
 const cards = fs
@@ -38,7 +50,9 @@ describe('the sections', () => {
   it('are declared once and read by both the index and the navigator', () => {
     expect(routes.length).toBeGreaterThanOrEqual(7);
     expect(INDEX).toMatch(/SETTINGS_SUBPAGES/);
-    expect(NAV).toMatch(/SETTINGS_SUBPAGES/);
+    // The navigator registers the flattened list, so a nested page is on
+    // the stack for the same reason its parent is.
+    expect(NAV).toMatch(/SETTINGS_STACK_PAGES/);
     // The index must not hand-list them, or the two can drift.
     for (const route of routes) {
       expect(INDEX).not.toContain(`'${route}'`);
@@ -62,6 +76,43 @@ describe('the sections', () => {
   });
 });
 
+describe('the pages nested under a section', () => {
+  it('exist, and stay off the index', () => {
+    expect(nestedRoutes.length).toBeGreaterThanOrEqual(3);
+    for (const route of nestedRoutes) {
+      expect(TYPES).toMatch(new RegExp(`\\b${route}:`));
+      // The index lists sections. A nested page reached from there as
+      // well would be the same setting in two places.
+      expect(INDEX).not.toContain(route);
+    }
+  });
+
+  /**
+   * The failure this shape invites, one level further down: a page
+   * registered on the stack whose row nobody drew. Nothing crashes and
+   * nothing fails to compile — the setting simply cannot be reached. So
+   * the rows are generated from the same list the navigator reads.
+   */
+  it('are opened by rows generated from that same list', () => {
+    expect(NESTED).toMatch(/nestedPagesOf\(parent\)/);
+    expect(NESTED).toMatch(/navigation\.navigate\(/);
+    expect(SUBPAGES).toMatch(/export function nestedPagesOf/);
+    // And someone renders those rows for each parent that has children.
+    const parents = [
+      // No other `route:` may fall between the two, or a childless
+      // section would claim the next section's children.
+      ...SUBPAGES.matchAll(
+        /route: '(Settings\w+)',(?:(?!route: ')[\s\S]){0,400}?children: \[/g,
+      ),
+    ].map(m => m[1]);
+    expect(parents.length).toBeGreaterThan(0);
+    const rendered = pageSources + read('src/screens/settings/AboutCard.tsx');
+    for (const parent of parents) {
+      expect(rendered).toContain(`<NestedPageRows parent="${parent}"`);
+    }
+  });
+});
+
 describe('the index itself', () => {
   it('holds no picker state — the pages own their modals', () => {
     expect(INDEX).not.toMatch(/Modal/);
@@ -80,7 +131,14 @@ describe('every subpage', () => {
    * other pushed screen in this stack already does.
    */
   it('gets the platform header, with a back title that says where back is', () => {
-    expect(NAV).toMatch(/headerLargeTitle: false,\s*\n\s*headerBackTitle: t\('nav\.settings'/);
+    expect(NAV).toMatch(
+      /headerLargeTitle: false,[\s\S]{0,200}headerBackTitle: t\(page\.backTitleKey\)/,
+    );
+    // "Settings" for a section; the section's own name for a page nested
+    // under it — "‹ Settings" from two levels down points past where back
+    // actually goes.
+    expect(SUBPAGES).toMatch(/backTitleKey: 'nav\.settings'/);
+    expect(SUBPAGES).toMatch(/backTitleKey: page\.titleKey/);
   });
 
   it('sits in the shared frame rather than rolling its own scroll view', () => {

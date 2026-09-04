@@ -1,6 +1,4 @@
-// hover-ok: list-row / settings-row / sheet pressables. Hover-state
-// treatment would visually noise these dense surfaces; the touch
-// feedback (pressed opacity / ripple) is the right affordance here.
+// hover-ok: settings-row pressables — pressed feedback is the right affordance.
 import { memo } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -14,12 +12,11 @@ import {
   widgetPatchForAccent,
   widgetSwatchSelected,
 } from '../../settings/widgetAccent';
-import { cardEdgeStyle } from '../../theme/chrome';
 import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
 } from '../../theme/textScale';
-import { sharedSettingsStyles as s } from './sharedStyles';
+import { SettingsBlock, SettingsGroup } from './SettingsGroup';
 
 /**
  * Widget settings card — Android background strength, and the widget's own
@@ -64,16 +61,20 @@ function WidgetCardImpl() {
     appearance.appearance === 'system' && appearance.useSystemDynamicTheme;
 
   return (
-    <>
-      <Text style={[s.sectionTitle, { color: palette.muted }]}>
-        {t('settings.homeScreenWidget')}
-      </Text>
-      <View
-        style={[
-          s.card,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
-        <Text style={[s.label, { color: palette.muted }]}>
+    // No heading: the page is already called Home screen.
+    <SettingsGroup
+      footer={
+        needsOwnPicker
+          ? t('settings.widgetConfigureHint')
+          : // The widget follows the app accent, so the answer to "where
+            // do I change its colour" belongs where the question is asked.
+            `${t(
+              'settings.widgetColorFollowsAccentHelp',
+              'The widget uses the same accent color as the app. Pick it under Appearance.',
+            )} ${t('settings.widgetConfigureHint')}`
+      }>
+      <SettingsBlock>
+        <Text style={[styles.label, { color: palette.muted }]}>
           {t('settings.widgetBackgroundOpacity')}
         </Text>
         <View style={styles.widgetOpacityRow}>
@@ -84,8 +85,7 @@ function WidgetCardImpl() {
               styles.widgetOpacityBtn,
               {
                 borderColor: palette.border,
-                opacity:
-                  settings.androidWidgetBackgroundOpacity <= 0 ? 0.4 : 1,
+                opacity: settings.androidWidgetBackgroundOpacity <= 0 ? 0.4 : 1,
               },
             ]}
             disabled={settings.androidWidgetBackgroundOpacity <= 0}
@@ -97,7 +97,7 @@ function WidgetCardImpl() {
                 ),
               })
             }>
-            <Text style={{ color: palette.text, fontSize: 20 }}>−</Text>
+            <Text style={[styles.stepGlyph, { color: palette.text }]}>−</Text>
           </Pressable>
           <Text
             style={[
@@ -128,66 +128,62 @@ function WidgetCardImpl() {
                 ),
               })
             }>
-            <Text style={{ color: palette.text, fontSize: 20 }}>+</Text>
+            <Text style={[styles.stepGlyph, { color: palette.text }]}>+</Text>
           </Pressable>
         </View>
-        {needsOwnPicker ? (
-          <>
-            <Text style={[s.label, { color: palette.muted, marginTop: 16 }]}>
-              {t('settings.widgetHighlight')}
-            </Text>
-            <View style={styles.swatchRow}>
-              {APP_ACCENT_SWATCHES.map(sw => {
-                const selected = widgetSwatchSelected(
-                  sw,
-                  settings.widgetHighlightId,
-                  settings.widgetHighlightCustomHex,
-                );
-                return (
-                  <Pressable
-                    key={sw.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={t(`settings.accent_${sw.id}`, sw.id)}
-                    accessibilityState={{ selected }}
-                    onPress={() => updateSettings(widgetPatchForAccent(sw.id))}
-                    style={[
-                      styles.swatch,
-                      {
-                        backgroundColor: isDark ? sw.dark : sw.light,
-                        borderColor: selected ? palette.accent : palette.border,
-                        borderWidth: selected ? 3 : 2,
-                      },
-                    ]}
-                  />
-                );
-              })}
-            </View>
-            <Text style={[s.help, { color: palette.muted, marginTop: 12 }]}>
-              {t(
-                'settings.widgetColorOwnHelp',
-                'The app is following your system colors, which the widget does not. Pick the widget’s highlight here.',
-              )}
-            </Text>
-          </>
-        ) : (
-          <Text style={[s.help, { color: palette.muted, marginTop: 16 }]}>
+      </SettingsBlock>
+
+      {needsOwnPicker ? (
+        <SettingsBlock>
+          <Text style={[styles.label, { color: palette.muted }]}>
+            {t('settings.widgetHighlight')}
+          </Text>
+          <View style={styles.swatchRow}>
+            {APP_ACCENT_SWATCHES.map(sw => {
+              const selected = widgetSwatchSelected(
+                sw,
+                settings.widgetHighlightId,
+                settings.widgetHighlightCustomHex,
+              );
+              return (
+                <Pressable
+                  key={sw.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(`settings.accent_${sw.id}`, sw.id)}
+                  accessibilityState={{ selected }}
+                  onPress={() => updateSettings(widgetPatchForAccent(sw.id))}
+                  style={[
+                    styles.swatch,
+                    {
+                      backgroundColor: isDark ? sw.dark : sw.light,
+                      borderColor: selected ? palette.accent : palette.border,
+                      borderWidth: selected ? 3 : 2,
+                    },
+                  ]}
+                />
+              );
+            })}
+          </View>
+          <Text style={[styles.help, { color: palette.muted }]}>
             {t(
-              'settings.widgetColorFollowsAccentHelp',
-              'The widget uses the same accent color as the app. Pick it under Appearance.',
+              'settings.widgetColorOwnHelp',
+              'The app is following your system colors, which the widget does not. Pick the widget\u2019s highlight here.',
             )}
           </Text>
-        )}
-        <Text style={[s.help, { color: palette.muted }]}>
-          {t('settings.widgetConfigureHint')}
-        </Text>
-      </View>
-    </>
+        </SettingsBlock>
+      ) : null}
+    </SettingsGroup>
   );
 }
 
 export const WidgetCard = memo(WidgetCardImpl);
 
 const styles = StyleSheet.create({
+  // Reads like AppearanceCard's inner labels ("Theme", "Accent color"),
+  // not like a second group heading.
+  label: { fontSize: 13, marginBottom: 4 },
+  help: { fontSize: 13, lineHeight: 18, marginTop: 12 },
+  stepGlyph: { fontSize: 20 },
   // Same geometry as the Appearance card's row, so the two read as one
   // control that moved rather than two different pickers.
   swatchRow: {

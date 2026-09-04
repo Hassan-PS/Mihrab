@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePrayerSettings } from '../../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../../hooks/useAppPalette';
 import { LiveActivityCard } from '../LiveActivityCard';
+import { NestedPageRows } from '../NestedPageRows';
 import { NotificationsCard } from '../NotificationsCard';
 import { PreReminderModal } from '../PreReminderModal';
 import { SettingsPage } from '../SettingsPage';
@@ -91,6 +92,10 @@ export function NotificationSettingsScreen() {
           onOpenSoundPicker={openSound}
           onOpenPreReminderPicker={openPreReminder}
         />
+        {/* The extra times and the daily Qur'an reminders. Both were
+            headings further down this same scroll, which is where a
+            setting goes to be missed. */}
+        <NestedPageRows parent="SettingsNotifications" />
         {/* A Live Activity is a notification: posted, dismissed, and
             living in the shade beside the adhan alert. It sat under
             "Home screen" next to the widget, which grouped it by where

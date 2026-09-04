@@ -29,7 +29,7 @@ describe('the lock-screen button can be turned off', () => {
 
   it('has a row in Settings, and only on Android', () => {
     expect(card).toMatch(
-      /Platform\.OS === 'android' && settings\.liveActivityEnabled &&/,
+      /Platform\.OS === 'android' && settings\.liveActivityEnabled \?/,
     );
     expect(card).toMatch(/update\(\{ liveActivityLockButton: v \}\)/);
     // Absent means on: a stored `false` is the only thing that hides it,

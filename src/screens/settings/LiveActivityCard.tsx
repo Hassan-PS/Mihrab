@@ -1,10 +1,14 @@
 import { memo } from 'react';
-import { Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useLiveActivitySettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { cardEdgeStyle } from '../../theme/chrome';
 import { isMacCatalyst } from '../../responsive/breakpoints';
+import {
+  SettingsBlock,
+  SettingsGroup,
+  SettingsToggleRow,
+} from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 type LADesign = 'timeline' | 'countdown' | 'markers';
@@ -126,47 +130,24 @@ function LiveActivityCardImpl() {
   ];
 
   return (
-    <>
-      <Text style={[s.sectionTitle, { color: palette.muted }]}>
-        {t('settings.liveActivity')}
-      </Text>
-
-      <View
-        style={[
-          s.card,
-          s.switchRow,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
-        <View style={s.switchCopy}>
-          <Text style={[s.valueText, { color: palette.text }]}>
-            {t('settings.liveActivity')}
-          </Text>
-          <Text style={[s.help, { color: palette.muted }]}>
-            {t('settings.liveActivityHelp')}
-          </Text>
-          {Platform.OS === 'ios' && (
-            <Text
-              style={[s.help, { color: palette.muted, fontStyle: 'italic' }]}>
-              {t('settings.liveActivityExperimental')}
-            </Text>
-          )}
-        </View>
-        <Switch
-          value={settings.liveActivityEnabled}
-          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-          thumbColor={'#ffffff'}
-          onValueChange={v => update({ liveActivityEnabled: v })}
-        />
-      </View>
+    <SettingsGroup
+      title={t('settings.liveActivity')}
+      footer={
+        Platform.OS === 'ios'
+          ? t('settings.liveActivityExperimental')
+          : undefined
+      }>
+      <SettingsToggleRow
+        title={t('settings.liveActivity')}
+        help={t('settings.liveActivityHelp')}
+        value={settings.liveActivityEnabled}
+        onValueChange={v => update({ liveActivityEnabled: v })}
+      />
 
       {/* Design picker — Android only (the iOS Live Activity has its own,
           fixed layout). Shown when the Live Activity is enabled. */}
-      {Platform.OS === 'android' && settings.liveActivityEnabled && (
-        <View
-          style={[
-            s.card,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
+      {Platform.OS === 'android' && settings.liveActivityEnabled ? (
+        <SettingsBlock>
           <Text style={[s.label, { color: palette.muted }]}>
             {t('settings.laDesignLabel', { defaultValue: 'Style' })}
           </Text>
@@ -264,42 +245,27 @@ function LiveActivityCardImpl() {
               </View>
             </View>
           )}
-        </View>
-      )}
+        </SettingsBlock>
+      ) : null}
 
       {/* Lock-screen button — Android only. The card has room for two
           actions and the other one, muting the next adhan, is the one
           people reach for; someone who has decided the card belongs on
           their lock screen is carrying a button they will never press. */}
-      {Platform.OS === 'android' && settings.liveActivityEnabled && (
-        <View
-          style={[
-            s.card,
-            s.switchRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <View style={s.switchCopy}>
-            <Text style={[s.valueText, { color: palette.text }]}>
-              {t('settings.laLockButtonLabel', {
-                defaultValue: 'Lock-screen button',
-              })}
-            </Text>
-            <Text style={[s.help, { color: palette.muted }]}>
-              {t('settings.laLockButtonHelp', {
-                defaultValue:
-                  'Show a button on the card for hiding it from the lock screen and always-on display.',
-              })}
-            </Text>
-          </View>
-          <Switch
-            value={settings.liveActivityLockButton !== false}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-            thumbColor={'#ffffff'}
-            onValueChange={v => update({ liveActivityLockButton: v })}
-          />
-        </View>
-      )}
-    </>
+      {Platform.OS === 'android' && settings.liveActivityEnabled ? (
+        <SettingsToggleRow
+          title={t('settings.laLockButtonLabel', {
+            defaultValue: 'Lock-screen button',
+          })}
+          help={t('settings.laLockButtonHelp', {
+            defaultValue:
+              'Show a button on the card for hiding it from the lock screen and always-on display.',
+          })}
+          value={settings.liveActivityLockButton !== false}
+          onValueChange={v => update({ liveActivityLockButton: v })}
+        />
+      ) : null}
+    </SettingsGroup>
   );
 }
 

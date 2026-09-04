@@ -18,7 +18,7 @@ import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import { BackupScreen } from '../screens/BackupScreen';
 import { SyncScreen } from '../screens/SyncScreen';
 import { FastingScreen } from '../screens/FastingScreen';
-import { SETTINGS_SUBPAGES } from '../screens/settings/subpages';
+import { SETTINGS_STACK_PAGES } from '../screens/settings/subpages';
 import type { RootStackParamList } from './types';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 
@@ -236,7 +236,7 @@ export function RootNavigator() {
        * top with the system back control beside it, which is the styled
        * back button — drawing our own would put a second title under the
        * real one on iOS and lose the swipe-back gesture on both. */}
-      {SETTINGS_SUBPAGES.map(page => (
+      {SETTINGS_STACK_PAGES.map(page => (
         <Stack.Screen
           key={page.route}
           name={page.route}
@@ -244,7 +244,9 @@ export function RootNavigator() {
           options={{
             title: t(page.titleKey),
             headerLargeTitle: false,
-            headerBackTitle: t('nav.settings', 'Settings'),
+            // "Settings" for a section, the section's own name for a page
+            // nested under it — back says where back goes.
+            headerBackTitle: t(page.backTitleKey),
           }}
         />
       ))}

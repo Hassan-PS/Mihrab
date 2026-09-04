@@ -1,14 +1,10 @@
-// hover-ok: settings-row pressables — pressed feedback is the right affordance.
 import { memo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAppPalette } from '../../hooks/useAppPalette';
-import { cardEdgeStyle } from '../../theme/chrome';
 import {
   CompanionTextSheet,
   useCompanionChoice,
 } from '../../quran/CompanionTextControls';
-import { sharedSettingsStyles as s } from './sharedStyles';
+import { SettingsGroup, SettingsLinkRow } from './SettingsGroup';
 
 /**
  * Quran preferences card — the app-wide companion-text choice (v2.7.40).
@@ -27,7 +23,6 @@ import { sharedSettingsStyles as s } from './sharedStyles';
  */
 function QuranCardImpl() {
   const { t } = useTranslation();
-  const { palette } = useAppPalette();
   const { mode, editionLabel } = useCompanionChoice();
   const [sheetVisible, setSheetVisible] = useState(false);
 
@@ -38,36 +33,19 @@ function QuranCardImpl() {
 
   return (
     <>
-      <Text style={[s.sectionTitle, { color: palette.muted }]}>
-        {t('quran.companionTitle', 'Under each verse')}
-      </Text>
-      <Pressable
-        testID="settings-companion-row"
-        accessibilityRole="button"
-        accessibilityLabel={t('quran.companionTitle', 'Under each verse')}
-        accessibilityValue={{ text: `${modeLabel} — ${editionLabel}` }}
-        style={[
-          s.card,
-          s.rowPress,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}
-        onPress={() => setSheetVisible(true)}>
-        <View style={s.copyBlock}>
-          <Text style={[s.label, { color: palette.muted }]}>{modeLabel}</Text>
-          <Text style={[s.valueText, { color: palette.text }]}>
-            {editionLabel}
-          </Text>
-          <Text style={[s.help, { color: palette.muted }]}>
-            {t('quran.companionHelp', {
-              defaultValue:
-                'Applies everywhere a verse is shown — the reader, the verse of the day, and the daily-ayah notification. Also changeable from the Quran page.',
-            })}
-          </Text>
-        </View>
-        <Text style={[s.changeLink, { color: palette.accent }]}>
-          {t('common.change')}
-        </Text>
-      </Pressable>
+      <SettingsGroup
+        title={t('quran.companionTitle', 'Under each verse')}
+        footer={t('quran.companionHelp', {
+          defaultValue:
+            'Applies everywhere a verse is shown — the reader, the verse of the day, and the daily-ayah notification. Also changeable from the Quran page.',
+        })}>
+        <SettingsLinkRow
+          testID="settings-companion-row"
+          title={modeLabel}
+          value={editionLabel}
+          onPress={() => setSheetVisible(true)}
+        />
+      </SettingsGroup>
       <CompanionTextSheet
         visible={sheetVisible}
         onClose={() => setSheetVisible(false)}

@@ -9,13 +9,16 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAppearanceSettings, usePrayerSettings, useWidgetSettings } from '../../context/PrayerSettingsContext';
+import {
+  useAppearanceSettings,
+  usePrayerSettings,
+  useWidgetSettings,
+} from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
@@ -27,7 +30,12 @@ import {
   APP_ACCENT_SWATCHES,
   widgetPatchForAccent,
 } from '../../settings/widgetAccent';
-import { cardEdgeStyle, segmentChromeStyle } from '../../theme/chrome';
+import { segmentChromeStyle } from '../../theme/chrome';
+import {
+  SettingsBlock,
+  SettingsGroup,
+  SettingsToggleRow,
+} from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 /**
@@ -136,97 +144,91 @@ function AppearanceCardImpl() {
 
   return (
     <>
-      <Text style={[s.sectionTitle, { color: palette.muted }]}>
-        {t('settings.appearance')}
-      </Text>
-      <View
-        style={[
-          s.card,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
-        <Text style={[s.label, { color: palette.muted }]}>
-          {t('settings.theme')}
-        </Text>
-        <View
-          style={s.segmentRow}
-          accessibilityRole="radiogroup"
-          accessibilityLabel={t('settings.theme')}>
-          {(
-            [
-              { id: 'system' as const, label: t('settings.themeSystem') },
-              { id: 'light' as const, label: t('settings.themeLight') },
-              { id: 'dark' as const, label: t('settings.themeDark') },
-            ] as const
-          ).map(opt => (
-            <Pressable
-              key={opt.id}
-              accessibilityRole="radio"
-              accessibilityLabel={opt.label}
-              accessibilityState={{ selected: settings.appearance === opt.id }}
-              style={[
-                s.segment,
-                styles.appearanceSegment,
-                segmentChromeStyle(palette, settings.appearance === opt.id),
-              ]}
-              onPress={() => updateSettings({ appearance: opt.id })}>
-              <Text
-                style={[
-                  styles.appearanceSegmentLabel,
-                  { color: palette.text },
-                  settings.appearance === opt.id && { color: palette.accent },
-                ]}>
-                {opt.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        {(Platform.OS === 'android' || Platform.OS === 'ios') && (
+      <SettingsGroup
+        title={t('settings.appearance')}
+        footer={t('settings.themeHelp')}
+      >
+        <SettingsBlock>
+          <Text style={[s.label, { color: palette.muted }]}>
+            {t('settings.theme')}
+          </Text>
           <View
-            style={[
-              s.switchRow,
-              {
-                marginTop: 14,
-                opacity: settings.appearance === 'system' ? 1 : 0.45,
-              },
-            ]}
-            pointerEvents={settings.appearance === 'system' ? 'auto' : 'none'}>
-            <View style={s.switchCopy}>
-              <Text style={[s.valueText, { color: palette.text }]}>
-                {Platform.OS === 'ios'
-                  ? t('settings.liquidGlass', 'Liquid Glass')
-                  : t('settings.systemDynamicColors')}
-              </Text>
-              <Text style={[s.help, { color: palette.muted }]}>
-                {Platform.OS === 'ios'
-                  ? t(
-                      'settings.liquidGlassHelp',
-                      'Adopt iOS system colours and translucent glass chrome. Follows Light/Dark automatically.',
-                    )
-                  : t('settings.systemDynamicColorsHelp')}
-              </Text>
-            </View>
-            <Switch
-              value={settings.useSystemDynamicTheme}
-              disabled={settings.appearance !== 'system'}
-              // Explicit accent so the Switch shows brand green when
-              // dynamic colors are off; under dynamic colors,
-              // accentSolid resolves to the live system primary (#115).
-              trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-              thumbColor={'#ffffff'}
-              // Material You / iOS dynamic colors are resolved at
-              // view-attach time, so flipping them mid-session leaves
-              // stale tints on already-mounted surfaces (#110). Defer the
-              // actual change to a themed confirm modal; the Switch is
-              // controlled by the persisted value, so until the user
-              // confirms it snaps back to its prior position.
-              onValueChange={v => setPendingDynamic(v)}
-            />
+            style={s.segmentRow}
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('settings.theme')}
+          >
+            {(
+              [
+                { id: 'system' as const, label: t('settings.themeSystem') },
+                { id: 'light' as const, label: t('settings.themeLight') },
+                { id: 'dark' as const, label: t('settings.themeDark') },
+              ] as const
+            ).map(opt => (
+              <Pressable
+                key={opt.id}
+                accessibilityRole="radio"
+                accessibilityLabel={opt.label}
+                accessibilityState={{
+                  selected: settings.appearance === opt.id,
+                }}
+                style={[
+                  s.segment,
+                  styles.appearanceSegment,
+                  segmentChromeStyle(palette, settings.appearance === opt.id),
+                ]}
+                onPress={() => updateSettings({ appearance: opt.id })}
+              >
+                <Text
+                  style={[
+                    styles.appearanceSegmentLabel,
+                    { color: palette.text },
+                    settings.appearance === opt.id && { color: palette.accent },
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+              </Pressable>
+            ))}
           </View>
-        )}
-        <Text style={[s.help, { color: palette.muted }]}>
-          {t('settings.themeHelp')}
-        </Text>
-      </View>
+        </SettingsBlock>
+        {Platform.OS === 'android' || Platform.OS === 'ios' ? (
+          <SettingsToggleRow
+            title={
+              Platform.OS === 'ios'
+                ? t('settings.liquidGlass', 'Liquid Glass')
+                : t('settings.systemDynamicColors')
+            }
+            help={
+              Platform.OS === 'ios'
+                ? t(
+                    'settings.liquidGlassHelp',
+                    'Adopt iOS system colours and translucent glass chrome. Follows Light/Dark automatically.',
+                  )
+                : t('settings.systemDynamicColorsHelp')
+            }
+            value={settings.useSystemDynamicTheme}
+            // Only answerable while the theme follows the system: there is
+            // nothing dynamic to follow once Light or Dark is pinned.
+            disabled={settings.appearance !== 'system'}
+            // Material You / iOS dynamic colors are resolved at view-attach
+            // time, so flipping them mid-session leaves stale tints on
+            // already-mounted surfaces (#110). Defer the actual change to a
+            // themed confirm modal; the switch is controlled by the
+            // persisted value, so until the user confirms it snaps back to
+            // its prior position.
+            onValueChange={v => setPendingDynamic(v)}
+          />
+        ) : null}
+
+        {isDark ? (
+          <SettingsToggleRow
+            title={t('settings.pureBlack')}
+            help={t('settings.pureBlackHelp')}
+            value={settings.pureBlackDark}
+            onValueChange={v => updateSettings({ pureBlackDark: v })}
+          />
+        ) : null}
+      </SettingsGroup>
 
       {/* Time format — issue #18.
 
@@ -235,209 +237,168 @@ function AppearanceCardImpl() {
           heading that says so. The example underneath is rendered by the
           same formatter the rest of the app uses, so what is shown here
           is literally what a prayer row will show. */}
-      <View
-        style={[
-          s.card,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
-        <Text style={[s.label, { color: palette.muted }]}>
-          {t('settings.clockFormat', 'Time format')}
-        </Text>
-        <View
-          style={s.segmentRow}
-          accessibilityRole="radiogroup"
-          accessibilityLabel={t('settings.clockFormat', 'Time format')}>
-          {(
-            [
-              {
-                id: 'auto' as const,
-                label: t('settings.clockFormatAuto', 'Automatic'),
-              },
-              {
-                id: '12' as const,
-                label: t('settings.clockFormat12', '12-hour'),
-              },
-              {
-                id: '24' as const,
-                label: t('settings.clockFormat24', '24-hour'),
-              },
-            ] as ReadonlyArray<{ id: ClockFormat; label: string }>
-          ).map(opt => {
-            const selected = settings.clockFormat === opt.id;
-            return (
-              <Pressable
-                key={opt.id}
-                accessibilityRole="radio"
-                accessibilityLabel={opt.label}
-                accessibilityState={{ selected }}
-                style={[
-                  s.segment,
-                  styles.appearanceSegment,
-                  segmentChromeStyle(palette, selected),
-                ]}
-                onPress={() => updateSettings({ clockFormat: opt.id })}>
-                <Text
-                  style={[
-                    styles.appearanceSegmentLabel,
-                    { color: palette.text },
-                    selected && { color: palette.accent },
-                  ]}>
-                  {opt.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <Text style={[s.help, { color: palette.muted, marginTop: 10 }]}>
-          {t('settings.clockFormatExample', {
-            defaultValue: 'For example: {{time}}',
-            time: clock('17:31'),
-          })}
-        </Text>
-        <Text style={[s.help, { color: palette.muted }]}>
-          {t('settings.clockFormatHelp')}
-        </Text>
-      </View>
-
-      {!dynamicColorsActive && (
-        <View
-          style={[
-            s.card,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
+      <SettingsGroup footer={t('settings.clockFormatHelp')}>
+        <SettingsBlock>
           <Text style={[s.label, { color: palette.muted }]}>
-            {t('settings.accentColor', 'Accent color')}
+            {t('settings.clockFormat', 'Time format')}
           </Text>
-          <View style={styles.swatchRow}>
-            {APP_ACCENT_SWATCHES.map(sw => {
-              const selected = settings.appAccentId === sw.id;
+          <View
+            style={s.segmentRow}
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('settings.clockFormat', 'Time format')}
+          >
+            {(
+              [
+                {
+                  id: 'auto' as const,
+                  label: t('settings.clockFormatAuto', 'Automatic'),
+                },
+                {
+                  id: '12' as const,
+                  label: t('settings.clockFormat12', '12-hour'),
+                },
+                {
+                  id: '24' as const,
+                  label: t('settings.clockFormat24', '24-hour'),
+                },
+              ] as ReadonlyArray<{ id: ClockFormat; label: string }>
+            ).map(opt => {
+              const selected = settings.clockFormat === opt.id;
               return (
                 <Pressable
-                  key={sw.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={t(
-                    `settings.accent_${sw.id}`,
-                    sw.id,
-                  )}
+                  key={opt.id}
+                  accessibilityRole="radio"
+                  accessibilityLabel={opt.label}
                   accessibilityState={{ selected }}
-                  onPress={() => setAccent(sw.id)}
                   style={[
-                    styles.swatch,
-                    {
-                      backgroundColor: isDark ? sw.dark : sw.light,
-                      borderColor: selected ? palette.accent : palette.border,
-                      borderWidth: selected ? 3 : 2,
-                    },
+                    s.segment,
+                    styles.appearanceSegment,
+                    segmentChromeStyle(palette, selected),
                   ]}
-                />
+                  onPress={() => updateSettings({ clockFormat: opt.id })}
+                >
+                  <Text
+                    style={[
+                      styles.appearanceSegmentLabel,
+                      { color: palette.text },
+                      selected && { color: palette.accent },
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
               );
             })}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('settings.accent_custom', 'Custom')}
-              accessibilityState={{ selected: settings.appAccentId === 'custom' }}
-              onPress={() => setAccent('custom')}
-              style={[
-                styles.swatch,
-                styles.swatchCustom,
-                {
-                  backgroundColor: palette.card,
-                  borderColor:
-                    settings.appAccentId === 'custom'
-                      ? palette.accent
-                      : palette.border,
-                  borderWidth: settings.appAccentId === 'custom' ? 3 : 2,
-                },
-              ]}>
-              <Text
-                style={[styles.swatchCustomLabel, { color: palette.muted }]}>
-                {t('settings.accent_customAbbr', 'Hex')}
-              </Text>
-            </Pressable>
           </View>
-          {settings.appAccentId === 'custom' ? (
-            <TextInput
-              style={[
-                s.input,
-                {
-                  marginTop: 10,
-                  borderColor: palette.border,
-                  color: palette.text,
-                  backgroundColor: palette.bg,
-                },
-              ]}
-              value={accentHexDraft}
-              onChangeText={setAccentHexDraft}
-              onBlur={() => {
-                const trimmed = accentHexDraft.trim();
-                if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
-                  setAccent('custom', trimmed);
-                } else {
-                  setAccentHexDraft(settings.appAccentCustomHex);
-                }
-              }}
-              placeholder="#22c55e"
-              placeholderTextColor={palette.muted}
-              autoCapitalize="characters"
-              autoCorrect={false}
-            />
-          ) : null}
-          <Text style={[s.help, { color: palette.muted, marginTop: 8 }]}>
-            {t(
-              'settings.accentColorHelp',
-              'Used across the app and the home-screen widget.',
-            )}
+          <Text style={[s.help, { color: palette.muted, marginTop: 10 }]}>
+            {t('settings.clockFormatExample', {
+              defaultValue: 'For example: {{time}}',
+              time: clock('17:31'),
+            })}
           </Text>
-        </View>
-      )}
+        </SettingsBlock>
+      </SettingsGroup>
 
-      {isDark ? (
-        <View
-          style={[
-            s.card,
-            s.switchRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}>
-          <View style={s.switchCopy}>
-            <Text style={[s.valueText, { color: palette.text }]}>
-              {t('settings.pureBlack')}
+      {!dynamicColorsActive && (
+        <SettingsGroup
+          footer={t(
+            'settings.accentColorHelp',
+            'Used across the app and the home-screen widget.',
+          )}
+        >
+          <SettingsBlock>
+            <Text style={[s.label, { color: palette.muted }]}>
+              {t('settings.accentColor', 'Accent color')}
             </Text>
-            <Text style={[s.help, { color: palette.muted }]}>
-              {t('settings.pureBlackHelp')}
-            </Text>
-          </View>
-          <Switch
-            value={settings.pureBlackDark}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-            thumbColor={'#ffffff'}
-            onValueChange={v => updateSettings({ pureBlackDark: v })}
-          />
-        </View>
-      ) : null}
+            <View style={styles.swatchRow}>
+              {APP_ACCENT_SWATCHES.map(sw => {
+                const selected = settings.appAccentId === sw.id;
+                return (
+                  <Pressable
+                    key={sw.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(`settings.accent_${sw.id}`, sw.id)}
+                    accessibilityState={{ selected }}
+                    onPress={() => setAccent(sw.id)}
+                    style={[
+                      styles.swatch,
+                      {
+                        backgroundColor: isDark ? sw.dark : sw.light,
+                        borderColor: selected ? palette.accent : palette.border,
+                        borderWidth: selected ? 3 : 2,
+                      },
+                    ]}
+                  />
+                );
+              })}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('settings.accent_custom', 'Custom')}
+                accessibilityState={{
+                  selected: settings.appAccentId === 'custom',
+                }}
+                onPress={() => setAccent('custom')}
+                style={[
+                  styles.swatch,
+                  styles.swatchCustom,
+                  {
+                    backgroundColor: palette.card,
+                    borderColor:
+                      settings.appAccentId === 'custom'
+                        ? palette.accent
+                        : palette.border,
+                    borderWidth: settings.appAccentId === 'custom' ? 3 : 2,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.swatchCustomLabel, { color: palette.muted }]}
+                >
+                  {t('settings.accent_customAbbr', 'Hex')}
+                </Text>
+              </Pressable>
+            </View>
+            {settings.appAccentId === 'custom' ? (
+              <TextInput
+                style={[
+                  s.input,
+                  {
+                    marginTop: 10,
+                    borderColor: palette.border,
+                    color: palette.text,
+                    backgroundColor: palette.bg,
+                  },
+                ]}
+                value={accentHexDraft}
+                onChangeText={setAccentHexDraft}
+                onBlur={() => {
+                  const trimmed = accentHexDraft.trim();
+                  if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+                    setAccent('custom', trimmed);
+                  } else {
+                    setAccentHexDraft(settings.appAccentCustomHex);
+                  }
+                }}
+                placeholder="#22c55e"
+                placeholderTextColor={palette.muted}
+                autoCapitalize="characters"
+                autoCorrect={false}
+              />
+            ) : null}
+          </SettingsBlock>
+        </SettingsGroup>
+      )}
 
       {/* Also on the Log tab, next to the graph it governs — this is where
           someone looking for it in Settings would go. */}
-      <View
-        style={[
-          s.card,
-          s.switchRow,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
-        <View style={s.switchCopy}>
-          <Text style={[s.valueText, { color: palette.text }]}>
-            {t('log.showOnHome')}
-          </Text>
-          <Text style={[s.help, { color: palette.muted }]}>
-            {t('log.showOnHomeHelp')}
-          </Text>
-        </View>
-        <Switch
+      <SettingsGroup>
+        <SettingsToggleRow
+          title={t('log.showOnHome')}
+          help={t('log.showOnHomeHelp')}
           value={settings.showPracticeOnHome}
-          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
-          thumbColor={'#ffffff'}
           onValueChange={v => updateSettings({ showPracticeOnHome: v })}
         />
-      </View>
+      </SettingsGroup>
 
       <ConfirmModal
         visible={pendingDynamic !== null}

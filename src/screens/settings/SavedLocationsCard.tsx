@@ -14,7 +14,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useLocationSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { cardEdgeStyle, inputChromeStyle } from '../../theme/chrome';
+import { inputChromeStyle } from '../../theme/chrome';
 import {
   addPreset,
   deletePreset,
@@ -22,6 +22,7 @@ import {
 } from '../../settings/locationPresets';
 import { PlaceSearchSection } from '../../components/PlaceSearchSection';
 import type { GeocodedPlace } from '../../geocoding/nominatim';
+import { SettingsBlock, SettingsGroup } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
 
 /** Coords are "the same place" if they round to the same 4-decimal value
@@ -277,16 +278,8 @@ function SavedLocationsCardImpl({
   };
 
   return (
-    <>
-      <Text style={[s.sectionTitle, { color: palette.muted }]}>
-        {t('locations.title')}
-      </Text>
-      <View
-        style={[
-          s.card,
-          styles.cardClip,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
+    <SettingsGroup title={t('locations.title')}>
+      <SettingsBlock>
         {/* Attention flash overlay — a soft accent wash that pulses when the
             user is routed here to add a location. Non-interactive. */}
         <Animated.View
@@ -496,19 +489,14 @@ function SavedLocationsCardImpl({
             </Text>
           </Pressable>
         )}
-      </View>
-    </>
+      </SettingsBlock>
+    </SettingsGroup>
   );
 }
 
 export const SavedLocationsCard = memo(SavedLocationsCardImpl);
 
 const styles = StyleSheet.create({
-  // Clip the flash overlay to the card's rounded corners.
-  cardClip: {
-    overflow: 'hidden',
-    position: 'relative',
-  },
   list: {
     gap: 4,
   },
