@@ -444,3 +444,15 @@ BEFORE assuming the code broke: the same tree that fails a bare
 The generalisation from 2.14.0 holds here too — the failure landed before
 the irreversible line, so getting it wrong cost a rebuild rather than a
 tag, a release and a cask pointing at nothing.
+
+## 2.15.0 (259) — 2026-09-04
+
+Took 1 aborted attempt(s) before it ran clean:
+
+  - 1 an Xcode Cloud run is already in flight — let it finish, or it and the release build will kill each other
+
+Changed the release cycle itself:
+
+  - `scripts/sync-version.js`
+
+**Lesson:** _(unfilled)_
