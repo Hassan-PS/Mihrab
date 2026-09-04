@@ -1102,7 +1102,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_night_row, View.VISIBLE)
       fun label(o: org.json.JSONObject): String {
         val name = o.optString("name", "").trim().ifEmpty { o.optString("key") }
-        return "$name ${displayTime(o)}"
+        return "$name ${o.optString("time")}"
       }
       // Two of them sit at the two ends of the line, which is how this has
       // always looked; a third goes between them rather than off the edge.
@@ -1367,18 +1367,6 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * the way Sunrise has always been, so the five salāh stay the loudest
      * thing on the card.
      */
-    /**
-     * What to DRAW for a row — issue #18.
-     *
-     * `time` is canonical 24-hour `HH:mm` because this file, the Live
-     * Activity service and the widget's own next-prayer walk all parse
-     * it. `display` is the same instant written the way the user reads a
-     * clock, and is absent from payloads written by app builds that
-     * predate the setting — hence the fallback.
-     */
-    private fun displayTime(o: org.json.JSONObject): String =
-      o.optString("display", "").ifEmpty { o.optString("time", "") }
-
     private fun isNightKey(key: String): Boolean =
       key.equals("Midnight", ignoreCase = true) ||
         key.equals("Lastthird", ignoreCase = true) ||
@@ -1473,8 +1461,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
 
       var nextPrayerName = o.optString("nextPrayerName", "")
-      var nextPrayerTime =
-        o.optString("nextPrayerDisplay", "").ifEmpty { o.optString("nextPrayerTime", "") }
+      var nextPrayerTime = o.optString("nextPrayerTime", "")
       val locationName = o.optString("locationName", "")
 
       // Prefer the entry from the multi-day `days[]` schedule whose dateKey
@@ -1538,7 +1525,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
             dynamicNextName = row.optString("name", "").trim()
               .ifEmpty { row.optString("abbr", "").trim() }
               .ifEmpty { dynamicNextKey!! }
-            dynamicNextTime = displayTime(row)
+            dynamicNextTime = timeStr
             nextUpdateMinutes = rowMinutes
           }
         }
@@ -1553,7 +1540,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
             nextPrayerName = row.optString("name", "").trim()
               .ifEmpty { row.optString("abbr", "").trim() }
               .ifEmpty { nextKey }
-            nextPrayerTime = displayTime(row)
+            nextPrayerTime = row.getString("time")
             break
           }
         }
@@ -1670,7 +1657,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
         val row = displayRows[i]
         val key = row.getString("key")
-        val time = displayTime(row)
+        val time = row.getString("time")
         val label = row.optString("name", "").trim()
           .ifEmpty { row.optString("abbr", "").trim() }
           .ifEmpty { key }

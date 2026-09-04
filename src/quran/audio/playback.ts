@@ -330,10 +330,25 @@ async function buildTracks(
     return {
       id: trackId(r.surah, r.ayah, indexOffset + i),
       url: local ? `file://${local}` : ayahAudioUrl(reciter, r.surah, r.ayah),
-      title: `${meta?.romanized ?? 'Surah'} ${r.surah}:${r.ayah}`,
+      /**
+       * THE SURAH, AND HOW FAR INTO IT — because the bar cannot say so.
+       *
+       * The system player's progress bar belongs to the TRACK, and a
+       * track here is one ayah: six seconds that fill and reset, over and
+       * over, saying nothing about the thing being listened to. It is the
+       * platform's bar, drawn from the media session's own position and
+       * duration, and neither can be overridden on Android — the session
+       * reports what the player is actually playing.
+       *
+       * So the surah's progress goes where this app CAN put it: the
+       * title. "Al-Kahf · 5 / 110" answers the question the bar looks
+       * like it is answering and is not.
+       */
+      title: meta
+        ? `${meta.romanized} · ${r.ayah} / ${meta.ayahCount}`
+        : `${r.surah}:${r.ayah}`,
       artist: reciter.name,
-      // The surah, so the lock screen says which one is playing without
-      // the reader having to be open to tell you.
+      // The surah on its own, for the surfaces that show an album line.
       album: meta?.romanized ?? undefined,
       artwork: ARTWORK,
     };

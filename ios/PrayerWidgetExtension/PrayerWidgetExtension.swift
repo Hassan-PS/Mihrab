@@ -302,13 +302,13 @@ private func computeDynamicNext(
     return (at, row)
   }
   if let next = dated.filter({ $0.0 > currentMinutes }).min(by: { $0.0 < $1.0 }) {
-    return (next.1.key, next.1.abbr ?? next.1.key, next.1.text)
+    return (next.1.key, next.1.abbr ?? next.1.key, next.1.time)
   }
   // Everything is in the past for today's wall clock — the JS layer has
   // already rolled the payload over to tomorrow's data (which it does after
   // Isha), so the earliest event of that day is the next one.
   if let first = dated.min(by: { $0.0 < $1.0 }) {
-    return (first.1.key, first.1.abbr ?? first.1.key, first.1.text)
+    return (first.1.key, first.1.abbr ?? first.1.key, first.1.time)
   }
   return nil
 }
@@ -330,8 +330,6 @@ struct WidgetPayload: Codable {
   let nextKey: String?
   let nextPrayerName: String?
   let nextPrayerTime: String?
-  /// `nextPrayerTime` written for a human — issue #18. See `Row.display`.
-  var nextPrayerDisplay: String? = nil
   let locationName: String?
   /// Seasonal treatment flags — task #67. Optional because older app
   /// versions push payloads without this field; absent treats as
@@ -345,22 +343,12 @@ struct WidgetPayload: Codable {
   let days: [Day]?
   struct Row: Codable {
     let key: String
-    /// CANONICAL 24-hour `HH:mm`. The progress ring, the timeline
-    /// boundaries and every "which prayer is next" computation split this
-    /// on ":" — it is arithmetic, not text. Draw `text` instead.
     let time: String
-    /// The same instant written the way the user reads a clock (issue #18).
-    /// Absent in payloads from app builds that predate the setting, which
-    /// is what `text` falls back for.
-    var display: String? = nil
     let abbr: String?
     /// The full localized label ("Islamic Midnight"). Only the night rows
     /// use it — a five-letter abbreviation is right in a six-column strip
     /// and wrong on a full-width row that has the space to say the thing.
     var name: String? = nil
-
-    /// What to put on screen. Never feed this to a parser.
-    var text: String { display ?? time }
   }
   struct Day: Codable {
     /// Local calendar date these times apply to (yyyy-MM-dd).
@@ -452,16 +440,10 @@ struct WidgetPayload: Codable {
   struct TodayPrayer: Codable {
     let key: String
     let name: String
-    /// CANONICAL 24-hour `HH:mm` — `logIsDue` parses it. Draw `text`.
     let time: String
-    /// The same time, written the way the user reads a clock (issue #18).
-    var display: String? = nil
     /// on-time / late / missed / qadha, or nil when nothing is recorded.
     let status: String?
     let due: Bool
-
-    /// What to put on screen.
-    var text: String { display ?? time }
   }
 
   struct Reading: Codable {
@@ -538,9 +520,6 @@ struct WidgetPayload: Codable {
   /// when `sunriseRow` is present, otherwise just `rows`. The medium
   /// and large widgets use this; the next-prayer computation still
   /// uses `rows` alone since Sunrise isn't a "next prayer" target.
-  /// The next prayer's time as it should be drawn.
-  var nextPrayerText: String? { nextPrayerDisplay ?? nextPrayerTime }
-
   var displayRows: [Row] {
     guard let sr = sunriseRow else { return rows }
     var out = rows
@@ -577,7 +556,7 @@ struct WidgetPayload: Codable {
 extension WidgetPayload {
   enum CodingKeys: String, CodingKey {
     case dayLabel, rows, sunriseRow, extraRows
-    case nextKey, nextPrayerName, nextPrayerTime, nextPrayerDisplay, locationName
+    case nextKey, nextPrayerName, nextPrayerTime, locationName
     case seasonal, days
     case practice, today, reading, hijri, tasbih
   }
@@ -597,7 +576,6 @@ extension WidgetPayload {
     nextKey = (try? c.decodeIfPresent(String.self, forKey: .nextKey)) ?? nil
     nextPrayerName = (try? c.decodeIfPresent(String.self, forKey: .nextPrayerName)) ?? nil
     nextPrayerTime = (try? c.decodeIfPresent(String.self, forKey: .nextPrayerTime)) ?? nil
-    nextPrayerDisplay = (try? c.decodeIfPresent(String.self, forKey: .nextPrayerDisplay)) ?? nil
     locationName = (try? c.decodeIfPresent(String.self, forKey: .locationName)) ?? nil
     seasonal = (try? c.decodeIfPresent(SeasonalFlags.self, forKey: .seasonal)) ?? nil
 
@@ -796,7 +774,7 @@ struct Provider: TimelineProvider {
     // purpose, which made this card the one surface that ignored those
     // toggles — it listed the Last Third and then counted past it to Fajr,
     // while the Lock Screen beside it counted down to the Last Third.
-    struct PrayerEvent { let date: Date; let key: String; let name: String; let time: String; let display: String }
+    struct PrayerEvent { let date: Date; let key: String; let name: String; let time: String }
     var prayers: [PrayerEvent] = []
     for info in dayInfos {
       let dayEvents = widgetEvents(
@@ -811,7 +789,7 @@ struct Provider: TimelineProvider {
           // Full name first. `abbr` exists so six prayers fit across an
           // Android strip; the headline of a widget has room to say
           // "Maghrib", and "Magh" up there reads as a truncation bug.
-          prayers.append(PrayerEvent(date: pd, key: r.key, name: r.name ?? r.key, time: r.time, display: r.text))
+          prayers.append(PrayerEvent(date: pd, key: r.key, name: r.name ?? r.key, time: r.time))
         }
       }
     }
@@ -844,7 +822,6 @@ struct Provider: TimelineProvider {
         nextKey: np?.key,
         nextPrayerName: np?.name,
         nextPrayerTime: np?.time,
-        nextPrayerDisplay: np?.display,
         locationName: payload.locationName,
         seasonal: payload.seasonal,
         days: nil,
@@ -916,7 +893,7 @@ struct Provider: TimelineProvider {
         payload: perDayPayload(info, np, isToday: info.day.dateKey == todayInfo.day.dateKey),
         dynamicNextKey: np?.key,
         dynamicNextName: np?.name,
-        dynamicNextTime: np?.display
+        dynamicNextTime: np?.time
       ))
     }
 
@@ -1194,7 +1171,7 @@ struct PrayerWidgetEntryView: View {
   private var smallWidgetContent: some View {
     if let p = entry.payload {
       let name = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey
-      let time = entry.dynamicNextTime ?? p.nextPrayerText
+      let time = entry.dynamicNextTime ?? p.nextPrayerTime
       let interval = currentInterval(p)
 
       VStack(alignment: .leading, spacing: 0) {
@@ -1307,7 +1284,7 @@ struct PrayerWidgetEntryView: View {
           }
 
           // Time — large, light weight
-          if let time = entry.dynamicNextTime ?? p.nextPrayerText, !time.isEmpty {
+          if let time = entry.dynamicNextTime ?? p.nextPrayerTime, !time.isEmpty {
             Text(time)
               .font(.system(size: 34, weight: .light))
               .foregroundStyle(resolvedWidgetHighlightColor())
@@ -1386,7 +1363,7 @@ struct PrayerWidgetEntryView: View {
                   .lineLimit(1)
                   .padding(.leading, highlight ? 7 : 4)
 
-                Text(r.text)
+                Text(r.time)
                   .font(.system(size: 11, weight: highlight ? .semibold : .medium))
                   .foregroundStyle(col)
                   .padding(.trailing, 4)
@@ -1424,7 +1401,7 @@ struct PrayerWidgetEntryView: View {
   private var inlineWidgetContent: some View {
     if let p = entry.payload,
        let name = entry.dynamicNextName ?? p.nextPrayerName,
-       let time = entry.dynamicNextTime ?? p.nextPrayerText {
+       let time = entry.dynamicNextTime ?? p.nextPrayerTime {
       // Inline family is rendered by the system inside the lock-screen
       // status row — single line, system styling. Pre-format as
       // "Fajr · 05:12" so the system can lay it out compactly.
@@ -1437,7 +1414,7 @@ struct PrayerWidgetEntryView: View {
   @ViewBuilder
   private var circularWidgetContent: some View {
     if let p = entry.payload,
-       let time = entry.dynamicNextTime ?? p.nextPrayerText {
+       let time = entry.dynamicNextTime ?? p.nextPrayerTime {
       // Circular: just the time with a tiny prayer-name ring above.
       // System tints the whole view in the user's chosen lock-screen color.
       VStack(spacing: 2) {
@@ -1494,7 +1471,7 @@ struct PrayerWidgetEntryView: View {
             .font(.system(size: 13, weight: .semibold))
             .lineLimit(1)
         }
-        if let time = entry.dynamicNextTime ?? p.nextPrayerText {
+        if let time = entry.dynamicNextTime ?? p.nextPrayerTime {
           Text(time)
             .font(.system(size: 18, weight: .regular))
             .lineLimit(1)
@@ -1525,7 +1502,7 @@ struct PrayerWidgetEntryView: View {
     if let p = entry.payload {
       let currentNextKey = entry.dynamicNextKey ?? p.nextKey
       let name = entry.dynamicNextName ?? p.nextPrayerName ?? p.nextKey
-      let time = entry.dynamicNextTime ?? p.nextPrayerText
+      let time = entry.dynamicNextTime ?? p.nextPrayerTime
 
       VStack(alignment: .leading, spacing: 0) {
         HStack(alignment: .firstTextBaseline) {
@@ -1658,7 +1635,7 @@ struct PrayerWidgetEntryView: View {
           .lineLimit(1)
           .minimumScaleFactor(0.85)
           .padding(.leading, highlight ? 9 : 6)
-        Text(r.text)
+        Text(r.time)
           .font(.system(size: secondary ? 12 : 14, weight: highlight ? .semibold : .medium))
           .monospacedDigit()
           .foregroundStyle(col)
