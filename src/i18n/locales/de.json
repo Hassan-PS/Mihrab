@@ -317,7 +317,11 @@
     "resetConfirm": "Alles zurücksetzen",
     "prayerOffsetsCount": "{{count}} angepasst",
     "endOfDayLog": "Erinnerung am Tagesende",
-    "endOfDayLogHelp": "Zehn Minuten nach dem Isha fragt sie, ob die fünf Gebete des Tages eingetragen werden sollen. Auch eine Antwort am nächsten Morgen trägt den richtigen Tag ein."
+    "endOfDayLogHelp": "Zehn Minuten nach dem Isha fragt sie, ob die fünf Gebete des Tages eingetragen werden sollen. Auch eine Antwort am nächsten Morgen trägt den richtigen Tag ein.",
+    "alertModeAdhan": "Adhan",
+    "alertModeNotification": "Hinweis",
+    "alertModeSilent": "Stumm",
+    "alertModeHint": "Ändert, wie dieses Gebet dich benachrichtigt"
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",

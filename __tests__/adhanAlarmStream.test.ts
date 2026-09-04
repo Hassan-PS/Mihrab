@@ -108,7 +108,22 @@ describe('wiring that would fail silently if it drifted', () => {
 
   it('only the adhan gets the alarm twin', () => {
     const ts = read('src/notifications/prayerNotifications.ts');
-    expect(ts).toMatch(/useAlarmStream && !isNonPrayer && !isMutedNext/);
+    // The gate is `wantsAdhan`, and `wantsAdhan` is the whole claim: a
+    // real prayer, not muted for this one occurrence, and set to the
+    // adhan by its own row (v2.14.5 — before that the mode was global,
+    // so being a prayer at all was the whole test).
+    expect(ts).toMatch(/useAlarmStream && wantsAdhan/);
+    expect(ts).toMatch(
+      /const wantsAdhan =\s*\n?\s*!isNonPrayer && !isMutedNext && modeOf\(e\.name\) === 'adhan'/,
+    );
+  });
+
+  it('a prayer set to the plain alert is not making the adhan’s claim', () => {
+    // The alarm stream exists so the CALL TO PRAYER survives a silenced
+    // ringer. A row cycled to the ordinary tone has asked for an alert,
+    // not for something that overrides the phone being silenced.
+    const ts = read('src/notifications/prayerNotifications.ts');
+    expect(ts).toMatch(/const eventSound = wantsAdhan \? prayerTimeSound : reminderSound/);
   });
 
   it('the resync fingerprint includes it', () => {

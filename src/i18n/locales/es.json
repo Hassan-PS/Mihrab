@@ -317,7 +317,11 @@
     "resetConfirm": "Restablecer todo",
     "prayerOffsetsCount": "{{count}} ajustadas",
     "endOfDayLog": "Recordatorio al final del día",
-    "endOfDayLogHelp": "Diez minutos después del Isha pregunta si registrar las cinco oraciones del día. Responder a la mañana siguiente registra igualmente el día correcto."
+    "endOfDayLogHelp": "Diez minutos después del Isha pregunta si registrar las cinco oraciones del día. Responder a la mañana siguiente registra igualmente el día correcto.",
+    "alertModeAdhan": "Adhán",
+    "alertModeNotification": "Aviso",
+    "alertModeSilent": "Silencio",
+    "alertModeHint": "Cambia cómo te avisa esta oración"
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",

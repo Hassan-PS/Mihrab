@@ -317,7 +317,11 @@
     "resetConfirm": "Tout réinitialiser",
     "prayerOffsetsCount": "{{count}} ajustées",
     "endOfDayLog": "Rappel de fin de journée",
-    "endOfDayLogHelp": "Dix minutes après l’Isha, demande s’il faut consigner les cinq prières du jour. Y répondre le lendemain matin consigne quand même le bon jour."
+    "endOfDayLogHelp": "Dix minutes après l’Isha, demande s’il faut consigner les cinq prières du jour. Y répondre le lendemain matin consigne quand même le bon jour.",
+    "alertModeAdhan": "Adhan",
+    "alertModeNotification": "Alerte",
+    "alertModeSilent": "Silence",
+    "alertModeHint": "Change la façon dont cette prière vous alerte"
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",

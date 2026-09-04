@@ -1,6 +1,7 @@
 import type { PrePrayerReminderMinutes } from './prePrayerReminder';
 import type { NotificationSoundId } from '../notifications/notificationSounds';
 import type { PrayerOffsetMinutes } from './prayerOffsets';
+import type { AlertModeMap } from './alertModes';
 import type { ClockFormat } from '../utils/clockFormat';
 
 export type LocationMode = 'automatic' | 'manual';
@@ -151,6 +152,16 @@ export type PrayerAppSettings = {
   prePrayerReminderMinutes: PrePrayerReminderMinutes;
   /** Notification sound profile for prayer alerts/reminders. */
   notificationSound: NotificationSoundId;
+  /**
+   * How each prayer and each optional time announces itself — adhan,
+   * notification or silent. Keyed by row (`Fajr`, `Sunrise`, …).
+   *
+   * Sparse on purpose. A key that is absent means "whatever the app did
+   * before this setting existed" — see `alertModeFor` — so an upgrade
+   * sounds identical until somebody actually changes a row, and the
+   * global sound picker keeps working for everyone who never does.
+   */
+  prayerAlertModes: AlertModeMap;
   /**
    * ANDROID: play the adhan through the alarm stream, so the ringer switch
    * does not silence it (issue #9).
@@ -432,6 +443,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   prePrayerReminderMinutes: 0,
   notificationSound: 'default',
   adhanUsesAlarmStream: false,
+  prayerAlertModes: {},
   androidWidgetBackgroundOpacity: 88,
   widgetHighlightId: 'green',
   widgetHighlightCustomHex: '#6BC98A',

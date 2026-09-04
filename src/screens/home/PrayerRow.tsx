@@ -9,6 +9,8 @@ import {
 } from '../../theme/textScale';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { HOME_ROW_PADDING_V } from './tokens';
+import { AlertModeButton } from './AlertModeButton';
+import type { PrayerAlertMode } from '../../settings/alertModes';
 
 /**
  * Single prayer row inside a day card.
@@ -53,6 +55,13 @@ type PrayerRowProps = {
    * confident type would claim more than the app knows.
    */
   daruriApprox?: boolean;
+  /**
+   * How this row announces itself, and the tap that cycles it. Absent
+   * for a row that cannot be aimed at — yesterday's card, or the share
+   * sheet — where a control that changes a setting has no business.
+   */
+  alertMode?: PrayerAlertMode;
+  onCycleAlertMode?: () => void;
 };
 
 function PrayerRowImpl({
@@ -65,6 +74,8 @@ function PrayerRowImpl({
   isLast,
   daruriAt,
   daruriApprox = false,
+  alertMode,
+  onCycleAlertMode,
 }: PrayerRowProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -128,6 +139,19 @@ function PrayerRowImpl({
           </Text>
         ) : null}
       </View>
+      {/* Beside the time, before it in reading order: the time is what
+          the row is for, so the control that decides whether it speaks
+          sits next to it rather than at the far edge where a thumb has
+          to travel. */}
+      {alertMode && onCycleAlertMode ? (
+        <AlertModeButton
+          mode={alertMode}
+          palette={palette}
+          onPress={onCycleAlertMode}
+          prayerLabel={t(`prayer.${prayerKey}`)}
+          secondary={isSecondary}
+        />
+      ) : null}
       <View style={styles.timeWrap}>
         {/* Only for a row the user aimed at. The next prayer is already
             emphasised, and marking it too would say nothing. */}

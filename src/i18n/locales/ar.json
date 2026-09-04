@@ -317,7 +317,11 @@
     "resetConfirm": "إعادة تعيين كل شيء",
     "prayerOffsetsCount": "{{count}} معدّلة",
     "endOfDayLog": "تذكير تسجيل نهاية اليوم",
-    "endOfDayLogHelp": "بعد العشاء بعشر دقائق يسأل إن كنت تريد تسجيل صلوات اليوم الخمس. لو أجبت في الصباح التالي فسيُسجَّل اليوم الصحيح."
+    "endOfDayLogHelp": "بعد العشاء بعشر دقائق يسأل إن كنت تريد تسجيل صلوات اليوم الخمس. لو أجبت في الصباح التالي فسيُسجَّل اليوم الصحيح.",
+    "alertModeAdhan": "أذان",
+    "alertModeNotification": "تنبيه",
+    "alertModeSilent": "صامت",
+    "alertModeHint": "يغيّر طريقة تنبيهك بهذه الصلاة"
   },
   "locationSetup": {
     "headline": "حدّد موقعك",

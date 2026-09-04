@@ -35,6 +35,17 @@ jest.mock('../src/hooks/useAppPalette', () => ({
   }),
 }));
 
+// The card also reads (and writes) the per-prayer alert modes, which is
+// a question for the settings provider. This test is about the
+// countdown, so it answers with an empty map — nothing set, which is the
+// state every install starts in.
+jest.mock('../src/context/PrayerSettingsContext', () => ({
+  usePrayerSettings: () => ({
+    settings: { prayerAlertModes: {}, notificationSound: 'default' },
+    updateSettings: jest.fn(),
+  }),
+}));
+
 // The card asks how this user reads a clock (issue #18), which is a
 // question for the settings provider. This test is about the countdown,
 // not about the provider, so it answers with the app's own 24-hour

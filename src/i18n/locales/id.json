@@ -317,7 +317,11 @@
     "resetConfirm": "Setel ulang semua",
     "prayerOffsetsCount": "{{count}} disesuaikan",
     "endOfDayLog": "Pengingat catatan akhir hari",
-    "endOfDayLogHelp": "Sepuluh menit setelah Isya, menanyakan apakah lima salat hari itu dicatat. Menjawabnya keesokan pagi tetap mencatat hari yang benar."
+    "endOfDayLogHelp": "Sepuluh menit setelah Isya, menanyakan apakah lima salat hari itu dicatat. Menjawabnya keesokan pagi tetap mencatat hari yang benar.",
+    "alertModeAdhan": "Azan",
+    "alertModeNotification": "Notifikasi",
+    "alertModeSilent": "Senyap",
+    "alertModeHint": "Mengubah cara salat ini memberi tahu Anda"
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",

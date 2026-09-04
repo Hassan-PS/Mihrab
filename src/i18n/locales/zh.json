@@ -317,7 +317,11 @@
     "resetConfirm": "全部重置",
     "prayerOffsetsCount": "已调整 {{count}} 项",
     "endOfDayLog": "一天结束时的记录提醒",
-    "endOfDayLogHelp": "宵礼后十分钟询问是否记录当天的五番拜功。第二天早上回应，仍会记入正确的日期。"
+    "endOfDayLogHelp": "宵礼后十分钟询问是否记录当天的五番拜功。第二天早上回应，仍会记入正确的日期。",
+    "alertModeAdhan": "宣礼",
+    "alertModeNotification": "提示音",
+    "alertModeSilent": "静音",
+    "alertModeHint": "更改此番礼拜的提醒方式"
   },
   "locationSetup": {
     "headline": "设置您的位置",

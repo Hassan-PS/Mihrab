@@ -317,7 +317,11 @@
     "resetConfirm": "Återställ allt",
     "prayerOffsetsCount": "{{count}} justerade",
     "endOfDayLog": "Påminnelse i slutet av dagen",
-    "endOfDayLogHelp": "Tio minuter efter isha frågar den om dagens fem böner ska loggas. Svarar du nästa morgon loggas ändå rätt dag."
+    "endOfDayLogHelp": "Tio minuter efter isha frågar den om dagens fem böner ska loggas. Svarar du nästa morgon loggas ändå rätt dag.",
+    "alertModeAdhan": "Adhan",
+    "alertModeNotification": "Avisering",
+    "alertModeSilent": "Tyst",
+    "alertModeHint": "Ändrar hur den här bönen aviserar dig"
   },
   "locationSetup": {
     "headline": "Ange din plats",

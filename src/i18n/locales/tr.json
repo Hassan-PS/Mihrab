@@ -317,7 +317,11 @@
     "resetConfirm": "Her şeyi sıfırla",
     "prayerOffsetsCount": "{{count}} ayarlandı",
     "endOfDayLog": "Gün sonu kayıt hatırlatması",
-    "endOfDayLogHelp": "Yatsıdan on dakika sonra günün beş vaktinin kaydedilip kaydedilmeyeceğini sorar. Ertesi sabah yanıtlasanız da doğru gün kaydedilir."
+    "endOfDayLogHelp": "Yatsıdan on dakika sonra günün beş vaktinin kaydedilip kaydedilmeyeceğini sorar. Ertesi sabah yanıtlasanız da doğru gün kaydedilir.",
+    "alertModeAdhan": "Ezan",
+    "alertModeNotification": "Bildirim",
+    "alertModeSilent": "Sessiz",
+    "alertModeHint": "Bu namazın sizi nasıl uyaracağını değiştirir"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",

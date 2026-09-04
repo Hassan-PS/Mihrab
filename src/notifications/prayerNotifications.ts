@@ -8,6 +8,7 @@ import notifee, {
 } from '@notifee/react-native';
 import { Platform } from 'react-native';
 import { makeClockFormatter } from '../utils/clockFormat';
+import { alertModeFor, type AlertModeMap } from '../settings/alertModes';
 import {
   buildDaruriAlertEvents,
   DARURI_OF,
@@ -429,6 +430,12 @@ export async function syncPrayerNotifications(params: {
   daruriAlerts?: readonly string[];
   /** Minutes of warning before each of those; 0 means at the boundary. */
   daruriAlertMinutes?: number;
+  /**
+   * How each row announces itself — adhan / notification / silent, keyed
+   * by prayer. Sparse: a row that is absent keeps what the app did
+   * before the setting existed. See `settings/alertModes.ts`.
+   */
+  alertModes?: AlertModeMap;
 }): Promise<SyncPrayerNotificationsResult> {
   if (!params.enabled) {
     await cancelOwnedPrayerNotifications([]);
@@ -452,6 +459,16 @@ export async function syncPrayerNotifications(params: {
   // toggle. The matching prayer is scheduled with the plain default sound so a
   // full resync (e.g. on app focus) doesn't undo the mute.
   const mutedNextAdhan = await getMutedNextAdhan();
+  // ── Per-row modes (v2.14.5) ─────────────────────────────────────────
+  //
+  // `adhanChosen` is the old global answer, and it is what a row falls
+  // back to: an install that upgrades into this feature sounds exactly as
+  // it did until somebody actually changes a row.
+  const alertModes = params.alertModes ?? {};
+  const adhanChosen = params.notificationSound !== 'default';
+  const modeOf = (name: string) =>
+    alertModeFor(name, alertModes, adhanChosen);
+
   const salahEvents = buildUpcomingSalahEvents(
     params.today,
     params.tomorrow,
@@ -465,9 +482,13 @@ export async function syncPrayerNotifications(params: {
   const reminderMinutes = clampPrePrayerReminderMinutes(
     params.prePrayerReminderMinutes,
   );
+  // Silent means no alarm is registered, not a muted one. It is the only
+  // version of "silent" that also keeps the prayer off the lock screen,
+  // and it is what someone who silenced Fajr is asking for.
+  const audibleEvents = salahEvents.filter(e => modeOf(e.name) !== 'silent');
   const reminderEvents =
     reminderMinutes > 0
-      ? buildPrePrayerReminderEvents(salahEvents, reminderMinutes, now)
+      ? buildPrePrayerReminderEvents(audibleEvents, reminderMinutes, now)
       : [];
 
   // The Mālikī second times, for whichever boundaries the reader asked to
@@ -490,7 +511,7 @@ export async function syncPrayerNotifications(params: {
   // Keep whatever is already scheduled rather than wiping the pending
   // alarms and leaving the user with NO alerts until the next good sync.
   if (
-    salahEvents.length === 0 &&
+    audibleEvents.length === 0 &&
     reminderEvents.length === 0 &&
     daruriEvents.length === 0
   ) {
@@ -506,7 +527,7 @@ export async function syncPrayerNotifications(params: {
   // notifications to keep. createTriggerNotification with the same ID
   // replaces atomically (no cancel/recreate gap).
   const desiredIds = new Set<string>();
-  for (const e of salahEvents) {
+  for (const e of audibleEvents) {
     desiredIds.add(
       `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${e.name}`,
     );
@@ -527,8 +548,8 @@ export async function syncPrayerNotifications(params: {
   // current one in the shade / AOD.
   await clearStaleDisplayedPrayerNotifications(now.getTime());
 
-  for (let i = 0; i < salahEvents.length; i++) {
-    const e = salahEvents[i];
+  for (let i = 0; i < audibleEvents.length; i++) {
+    const e = audibleEvents[i];
     const notificationId = `${PRAYER_NOTIFICATION_ID_PREFIX}${e.at.getTime()}-${
       e.name
     }`;
@@ -538,14 +559,19 @@ export async function syncPrayerNotifications(params: {
     // actual prayer uses the user's chosen adhan/sound.
     const isNonPrayer = isNonPrayerEvent(e.name);
     const isMutedNext = mutedNextAdhan === `${e.at.getTime()}-${e.name}`;
-    const eventSound =
-      isNonPrayer || isMutedNext ? reminderSound : prayerTimeSound;
+    // The row's own mode decides. `isNonPrayer` stays in the condition
+    // rather than being folded into the mode: Sunrise can never reach
+    // 'adhan' through the setting, and it must not reach it through a
+    // stored value either.
+    const wantsAdhan =
+      !isNonPrayer && !isMutedNext && modeOf(e.name) === 'adhan';
+    const eventSound = wantsAdhan ? prayerTimeSound : reminderSound;
     // The alarm twin is for the CALL TO PRAYER only. Sunrise and the night
     // times are not prayers, and a muted next adhan has just been silenced
     // on purpose — neither should override a silenced phone.
     const eventTargets = resolveSoundTargets(
       eventSound.id,
-      useAlarmStream && !isNonPrayer && !isMutedNext,
+      useAlarmStream && wantsAdhan,
     );
     const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
@@ -559,7 +585,7 @@ export async function syncPrayerNotifications(params: {
     // notification never lingers into (or past) the following prayer. Capped
     // for the long Isha→Fajr gap. Android honours this even if the app is
     // killed, which is the case that produced the stale "Isha" alert.
-    const nextAt = salahEvents[i + 1]?.at.getTime();
+    const nextAt = audibleEvents[i + 1]?.at.getTime();
     const timeoutAfterMs = Math.max(
       60_000,
       Math.min(nextAt ? nextAt - e.at.getTime() : MAX_LINGER_MS, MAX_LINGER_MS),
@@ -713,7 +739,7 @@ export async function syncPrayerNotifications(params: {
   return {
     status: 'scheduled',
     scheduledCount:
-      salahEvents.length + reminderEvents.length + daruriEvents.length,
+      audibleEvents.length + reminderEvents.length + daruriEvents.length,
     exactAlarms,
     reminderMinutes,
   };

@@ -412,6 +412,7 @@ export function HomeScreen() {
         ? settings.malikiSecondTimeAlerts
         : [],
       daruriAlertMinutes: settings.malikiSecondTimeAlertMinutes,
+      alertModes: settings.prayerAlertModes,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
       hour12: clockHour12,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
@@ -447,6 +448,7 @@ export function HomeScreen() {
     settings.malikiSecondTimesEnabled,
     settings.malikiSecondTimeAlerts,
     settings.malikiSecondTimeAlertMinutes,
+    settings.prayerAlertModes,
     settings.journalNotificationActionsEnabled,
     settings.endOfDayLogReminderEnabled,
     state,
@@ -507,6 +509,9 @@ export function HomeScreen() {
           ? settings.malikiSecondTimeAlerts.join(',')
           : '',
         String(settings.malikiSecondTimeAlertMinutes),
+        // Which prayers speak, and how. A row cycled from adhan to silent
+        // has to take its alarm away, so the schedule is rewritten.
+        JSON.stringify(settings.prayerAlertModes),
         state.baseDate.getTime(),
       );
       if (shouldResync(NOTIF_RESYNC_KEY, notifPrint)) {
@@ -524,6 +529,7 @@ export function HomeScreen() {
             ? settings.malikiSecondTimeAlerts
             : [],
           daruriAlertMinutes: settings.malikiSecondTimeAlertMinutes,
+          alertModes: settings.prayerAlertModes,
         })
           // Marked on success only: a rewrite that threw must not suppress
           // the next attempt, or one bad round leaves the alarms as they are
@@ -613,6 +619,7 @@ export function HomeScreen() {
       settings.malikiSecondTimesEnabled,
       settings.malikiSecondTimeAlerts,
       settings.malikiSecondTimeAlertMinutes,
+      settings.prayerAlertModes,
       state,
       view,
       locationLabel,

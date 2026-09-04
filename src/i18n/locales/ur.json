@@ -317,7 +317,11 @@
     "resetConfirm": "سب کچھ ری سیٹ کریں",
     "prayerOffsetsCount": "{{count}} ایڈجسٹ کیے گئے",
     "endOfDayLog": "دن کے اختتام پر ریکارڈ یاد دہانی",
-    "endOfDayLogHelp": "عشاء کے دس منٹ بعد پوچھتا ہے کہ دن کی پانچ نمازیں درج کی جائیں۔ اگلی صبح جواب دینے پر بھی درست دن درج ہوگا۔"
+    "endOfDayLogHelp": "عشاء کے دس منٹ بعد پوچھتا ہے کہ دن کی پانچ نمازیں درج کی جائیں۔ اگلی صبح جواب دینے پر بھی درست دن درج ہوگا۔",
+    "alertModeAdhan": "اذان",
+    "alertModeNotification": "اطلاع",
+    "alertModeSilent": "خاموش",
+    "alertModeHint": "یہ نماز آپ کو کیسے مطلع کرے، بدلتا ہے"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",

@@ -33,6 +33,11 @@ import { useTranslation } from 'react-i18next';
 import { useIsActive } from '../../hooks/useIsActive';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
+import { usePrayerSettings } from '../../context/PrayerSettingsContext';
+import {
+  alertModeFor,
+  nextAlertMode,
+} from '../../settings/alertModes';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import {
@@ -328,6 +333,7 @@ function TodayCardImpl({
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const clock = useClockFormatter();
+  const { settings, updateSettings } = usePrayerSettings();
   const [selected, setSelected] = useState(0);
   /**
    * The prayer the user aimed the countdown at, or null for "whatever is
@@ -398,6 +404,34 @@ function TodayCardImpl({
     [week, selected],
   );
   const isToday = selected === 0;
+
+  /**
+   * How each row announces itself, and the tap that cycles it — v2.14.5.
+   *
+   * Read through `alertModeFor` rather than straight from the map: the
+   * map is sparse, and an absent row means "whatever the app did before
+   * this control existed", which depends on whether an adhan is chosen.
+   * Writing is a merge for the same reason — one row's answer must not
+   * become an answer for all five.
+   */
+  const alertModeOf = useCallback(
+    (key: string) =>
+      alertModeFor(
+        key,
+        settings.prayerAlertModes,
+        settings.notificationSound !== 'default',
+      ),
+    [settings.prayerAlertModes, settings.notificationSound],
+  );
+  const cycleAlertMode = useCallback(
+    (key: string) => {
+      const next = nextAlertMode(key, alertModeOf(key));
+      updateSettings({
+        prayerAlertModes: { ...settings.prayerAlertModes, [key]: next },
+      });
+    },
+    [alertModeOf, settings.prayerAlertModes, updateSettings],
+  );
   const visibleRows = useMemo(
     () => DISPLAY_ORDER.filter(key => timings[key]),
     [timings],
@@ -532,6 +566,13 @@ function TodayCardImpl({
           daruriAt={timings[`${key}Daruri`]}
           daruriApprox={
             DARURI_CONFIDENCE[`${key}Daruri` as DaruriKey] === 'modelled'
+          }
+          // Only on today's card. On yesterday's or tomorrow's the
+          // control would still change a setting for every day, which
+          // is not what a tap on a past row looks like it does.
+          alertMode={isToday ? alertModeOf(key) : undefined}
+          onCycleAlertMode={
+            isToday ? () => cycleAlertMode(key) : undefined
           }
         />
       ))}

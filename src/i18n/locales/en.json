@@ -317,7 +317,11 @@
     "resetConfirm": "Reset everything",
     "prayerOffsetsCount": "{{count}} adjusted",
     "endOfDayLog": "End-of-day log reminder",
-    "endOfDayLogHelp": "Ten minutes after Isha, asks whether to log the day’s five prayers. Answering it the next morning still logs the right day."
+    "endOfDayLogHelp": "Ten minutes after Isha, asks whether to log the day’s five prayers. Answering it the next morning still logs the right day.",
+    "alertModeAdhan": "Adhan",
+    "alertModeNotification": "Alert",
+    "alertModeSilent": "Silent",
+    "alertModeHint": "Changes how this prayer alerts you"
   },
   "locationSetup": {
     "headline": "Set your location",
