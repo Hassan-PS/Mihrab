@@ -1044,6 +1044,8 @@
     "tilawahContinue": "যেখানে পড়ছিলেন সেখান থেকে",
     "tilawahBegin": "শুরু করুন",
     "tilawahAyahOf": "{{total}}টির মধ্যে {{done}} নম্বর আয়াত",
+    "tilawahShowPage": "পৃষ্ঠা দেখান",
+    "tilawahKeepAwake": "স্ক্রিন চালু রাখুন",
     "tilawahSurahSeek": "সূরার মধ্যে সরান",
     "tilawahShuffle": "সূরা এলোমেলোভাবে চালান",
     "tilawahPrevSurah": "আগের সূরা",

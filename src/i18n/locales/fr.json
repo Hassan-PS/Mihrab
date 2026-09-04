@@ -1044,6 +1044,8 @@
     "tilawahContinue": "Reprendre où vous en étiez",
     "tilawahBegin": "Commencer par",
     "tilawahAyahOf": "Verset {{done}} sur {{total}}",
+    "tilawahShowPage": "Afficher la page",
+    "tilawahKeepAwake": "Garder l'écran allumé",
     "tilawahSurahSeek": "Se déplacer dans la sourate",
     "tilawahShuffle": "Lecture aléatoire des sourates",
     "tilawahPrevSurah": "Sourate précédente",

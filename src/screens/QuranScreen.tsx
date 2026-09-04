@@ -28,6 +28,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
+import { usePlaybackStatus } from '../quran/audio/playback';
 import {
   findPageForAyah,
   MUSHAF_PAGES,
@@ -108,6 +109,15 @@ export function QuranScreen() {
   useScrollToTop(listRef);
   const isArabic = i18n.language === 'ar';
   const quran = useQuranState();
+  /**
+   * What is playing, so this screen can offer to open it.
+   *
+   * Tilāwah keeps going when you leave it — that is the whole point of
+   * it — so someone can arrive here with a recitation running and the
+   * surah list in front of them showing no sign of it. The card is the
+   * bridge: it says what is playing and takes you to that page.
+   */
+  const playback = usePlaybackStatus();
   /**
    * Is there a second muṣḥaf to offer at all?
    *
@@ -383,6 +393,72 @@ export function QuranScreen() {
           </View>
           <Text style={{ color: palette.accentSolid, fontSize: 18 }}>→</Text>
         </Pressable>
+      ) : null}
+
+      {/* Playing right now, and BOTH ways into it.
+
+          One tap used to mean one destination, and the card had to guess
+          which: the reader, if you want to follow the words, or Tilāwah,
+          if you want the transport. Guessing wrong is a screen you did
+          not ask for and a back press. Two buttons, named, is one more
+          pixel of chrome and no guessing. */}
+      {playback.active ? (
+        <View
+          style={[
+            styles.nowPlayingCard,
+            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          ]}>
+          <Text style={[styles.resumeLabel, { color: palette.accentSolid }]}>
+            {`\u266a  ${t('quran.listenNowPlaying', 'Now playing')}`}
+          </Text>
+          <Text style={[styles.resumeTitle, { color: palette.text }]}>
+            {`${findSurah(playback.active.surah)?.romanized ?? ''} ${playback.active.surah}:${playback.active.ayah}`}
+          </Text>
+          <View style={styles.nowPlayingActions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.listenTitle', 'Tilawah')}
+              onPress={() => navigation.navigate('QuranListen')}
+              style={({ pressed }) => [
+                styles.nowPlayingBtn,
+                {
+                  backgroundColor: palette.accentBg,
+                  borderColor: palette.accentSolid,
+                },
+                pressed && { opacity: 0.6 },
+              ]}>
+              <Text
+                style={[
+                  styles.nowPlayingBtnText,
+                  { color: palette.accentSolid },
+                ]}>
+                {t('quran.listenTitle', 'Tilawah')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.openInReader', 'Open in the reader')}
+              onPress={() => {
+                const at = playback.active;
+                if (!at) return;
+                openSurah(
+                  at.surah,
+                  at.ayah,
+                  findPageForAyah(at.surah, at.ayah, quran.prefs.riwayah),
+                );
+              }}
+              style={({ pressed }) => [
+                styles.nowPlayingBtn,
+                { borderColor: palette.border ?? palette.muted },
+                pressed && { opacity: 0.6 },
+              ]}>
+              <Text
+                style={[styles.nowPlayingBtnText, { color: palette.text }]}>
+                {t('quran.openInReader', 'Open in the reader')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       ) : null}
 
       {/* Said where it lands: this card is the user's place in the mushaf,
@@ -1510,6 +1586,15 @@ const styles = StyleSheet.create({
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: 10, marginBottom: 8 },
+  nowPlayingCard: { padding: 14, borderRadius: 12, gap: 4, marginBottom: 4 },
+  nowPlayingActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  nowPlayingBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  nowPlayingBtnText: { fontSize: 13, fontWeight: '700' },
   resumeCard: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1044,6 +1044,8 @@
     "tilawahContinue": "تابع من موضع قراءتك",
     "tilawahBegin": "ابدأ من",
     "tilawahAyahOf": "الآية {{done}} من {{total}}",
+    "tilawahShowPage": "إظهار الصفحة",
+    "tilawahKeepAwake": "إبقاء الشاشة مضاءة",
     "tilawahSurahSeek": "التنقّل داخل السورة",
     "tilawahShuffle": "ترتيب عشوائي للسور",
     "tilawahPrevSurah": "السورة السابقة",

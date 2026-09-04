@@ -1044,6 +1044,8 @@
     "tilawahContinue": "Продолжить с места чтения",
     "tilawahBegin": "Начать с",
     "tilawahAyahOf": "Аят {{done}} из {{total}}",
+    "tilawahShowPage": "Показывать страницу",
+    "tilawahKeepAwake": "Не гасить экран",
     "tilawahSurahSeek": "Перемотка внутри суры",
     "tilawahShuffle": "Перемешать суры",
     "tilawahPrevSurah": "Предыдущая сура",

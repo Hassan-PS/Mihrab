@@ -1044,6 +1044,8 @@
     "tilawahContinue": "Carry on from your reading",
     "tilawahBegin": "Begin with",
     "tilawahAyahOf": "Ayah {{done}} of {{total}}",
+    "tilawahShowPage": "Show the page",
+    "tilawahKeepAwake": "Keep the screen on",
     "tilawahSurahSeek": "Move through the surah",
     "tilawahShuffle": "Shuffle surahs",
     "tilawahPrevSurah": "Previous surah",

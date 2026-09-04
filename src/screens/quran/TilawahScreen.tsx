@@ -31,16 +31,29 @@ import {
   FlatList,
   PanResponder,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
   type ColorValue,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useProgress } from 'react-native-track-player';
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
 import Svg, { Path } from 'react-native-svg';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { useAndroidSubScreenBack } from '../../navigation/useAndroidSubScreenBack';
+import type { RootStackParamList } from '../../navigation/types';
+import MushafTextPageSurface, {
+  mushafPageColumnHeight,
+} from '../../quran/MushafTextPageSurface';
+import { ayahLineBox, followOffset } from '../../quran/mushafFollowScroll';
+import { findPageForAyah } from '../../quran/pages';
 import { SURAHS, type SurahIndex } from '../../quran/quran';
 import {
   isListening,
@@ -86,6 +99,25 @@ const RATES = [0.75, 1, 1.25, 1.5, 2] as const;
  */
 const SLEEP_CHOICES = [0, 15, 30, 60, -1] as const;
 const SLEEP_END_OF_SURAH = -1;
+
+/**
+ * How much of the page is on screen at once.
+ *
+ * ── WHY IT SCROLLS RATHER THAN SHRINKS ────────────────────────────────
+ *
+ * A muṣḥaf page is fifteen lines, and a fitted page divides whatever
+ * height it is handed between them. Handing it a card-sized box was the
+ * obvious thing and the wrong one: at 320, then at 430, the lines were
+ * still small enough that the harakat stopped resolving and the card
+ * became a picture OF a page rather than a page you can follow along in.
+ *
+ * The reader had already solved this for its own narrow viewport — in
+ * landscape it stops fitting the page and gives it a READING ZOOM, then
+ * scrolls the column. Same thing here: the type is the size it needs to
+ * be, this is simply how much of it fits, and the column follows the
+ * recitation the way the reader's does.
+ */
+const PAGE_VIEWPORT = 340;
 
 function formatBytes(bytes: number): string {
   if (bytes <= 0) return '0 MB';
@@ -228,6 +260,60 @@ function ShuffleIcon({ color }: { color: string }) {
 }
 
 /**
+ * A cup, for "do not let the screen go dark".
+ *
+ * Drawn rather than set as an emoji. An emoji is somebody else's artwork
+ * at somebody else's weight: it lands full-colour in a row of thin
+ * monochrome strokes, it changes shape per platform and per Android
+ * skin, and it cannot take the accent when the toggle is on — so it
+ * always looked like a sticker on the control rather than the control.
+ */
+function CoffeeIcon({ color }: { color: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M4 9h12v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V9Z"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M16 10.5h1.5a2.5 2.5 0 0 1 0 5H16"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M8 3v2.5M12 3v2.5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+/** Lines on a page, for the muṣḥaf preview toggle. */
+function PageIcon({ color }: { color: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M5 4h14v16H5z"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M8 9h8M8 12.5h8M8 16h5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+/**
  * Play / pause / skip / stop, drawn rather than typed.
  *
  * Views with borders and backgrounds, not SVG — two bars, a triangle and a
@@ -333,6 +419,8 @@ function TransportIcon({
 export function TilawahScreen() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   useAndroidSubScreenBack();
   const status = usePlaybackStatus();
   const progress = useProgress(400);
@@ -509,6 +597,102 @@ export function TilawahScreen() {
   const toggleShuffle = useCallback(() => {
     setQuranPrefs({ shuffleSurahs: !shuffleOn });
   }, [shuffleOn]);
+
+  /**
+   * The coffee toggle: don't let the screen go dark while I listen.
+   *
+   * It shares `keepAwake` with the reader rather than adding a second
+   * flag, because it is one question — "keep the screen on while I am in
+   * the Qur'an" — and the reader's copy had no visible control anywhere.
+   * This gives the preference a home you can see.
+   *
+   * Released on unmount whatever the preference says: a lock held by a
+   * screen that is gone is a flat battery nobody can explain.
+   */
+  const keepAwake = quran.prefs.keepAwake;
+  useEffect(() => {
+    if (!keepAwake) return undefined;
+    activateKeepAwake();
+    return () => deactivateKeepAwake();
+  }, [keepAwake]);
+  const toggleKeepAwake = useCallback(() => {
+    setQuranPrefs({ keepAwake: !keepAwake });
+  }, [keepAwake]);
+
+  /**
+   * The page the recitation is on, drawn the way the reader draws it.
+   *
+   * Same renderer, same layout engine, same fonts — a smaller box. What
+   * it does NOT take from the reader is the paper: a muṣḥaf tone is a
+   * reading choice made on a full-screen page, and a white plate glued
+   * into the middle of a dark app is a hole in the screen. The tone
+   * follows the APP here, which is why night and paper are chosen from
+   * the palette rather than read from the muṣḥaf preference.
+   */
+  const showPage = quran.prefs.tilawahShowPage;
+  const [pageWidth, setPageWidth] = useState(0);
+  const [pageUnavailable, setPageUnavailable] = useState(false);
+  const playingPage = useMemo(
+    () =>
+      status.active
+        ? findPageForAyah(
+            status.active.surah,
+            status.active.ayah,
+            quran.prefs.riwayah,
+          )
+        : null,
+    [status.active, quran.prefs.riwayah],
+  );
+  // A new page deserves a fresh chance: "unavailable" is about one page's
+  // font, not about the feature.
+  useEffect(() => setPageUnavailable(false), [playingPage]);
+  /**
+   * The column at reading zoom, and how far down it the recitation is.
+   *
+   * `mushafPageColumnHeight` with `scrolling` is the reader's own answer
+   * for a viewport too short to fit a page: size the type for reading and
+   * let the column be as tall as it needs. The follow-scroll is the
+   * reader's too — same line boxes, same one-third-from-the-top resting
+   * place — so the ayah being recited stays where the eye already is
+   * instead of the reader chasing it.
+   */
+  const pageScrollRef = useRef<ScrollView>(null);
+  const pageColumnH = useMemo(
+    () =>
+      playingPage && pageWidth > 0
+        ? mushafPageColumnHeight({
+            page: playingPage,
+            riwayah: quran.prefs.riwayah,
+            textWidth: pageWidth,
+            viewportHeight: PAGE_VIEWPORT,
+            scrolling: true,
+          })
+        : PAGE_VIEWPORT,
+    [playingPage, pageWidth, quran.prefs.riwayah],
+  );
+  useEffect(() => {
+    if (!showPage || !playingPage || !status.active || pageWidth <= 0) return;
+    const box = ayahLineBox(
+      playingPage,
+      pageWidth,
+      status.active.surah,
+      status.active.ayah,
+    );
+    if (!box) return;
+    pageScrollRef.current?.scrollTo({
+      y: followOffset(box, PAGE_VIEWPORT, pageColumnH),
+      animated: true,
+    });
+  }, [showPage, playingPage, pageWidth, pageColumnH, status.active]);
+
+  const openInReader = useCallback(() => {
+    if (!status.active) return;
+    navigation.navigate('QuranSurah', {
+      surahNumber: status.active.surah,
+      initialPage: playingPage ?? undefined,
+      scrollToAyah: status.active.ayah,
+    });
+  }, [navigation, playingPage, status.active]);
 
   const seekAyah = useCallback(
     (ratio: number) => {
@@ -831,6 +1015,56 @@ export function TilawahScreen() {
               {`${t('quran.tilawahAyahWord', { defaultValue: 'Ayah' })}  ›`}
             </Text>
           </Pressable>
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityState={{ checked: showPage }}
+            accessibilityLabel={t('quran.tilawahShowPage', {
+              defaultValue: 'Show the page',
+            })}
+            onPress={() => setQuranPrefs({ tilawahShowPage: !showPage })}
+            style={({ pressed }) => [
+              styles.coffeeBtn,
+              {
+                backgroundColor: showPage
+                  ? palette.accentBg
+                  : palette.controlBg,
+              },
+              pressed && styles.pressed,
+            ]}>
+            <PageIcon
+              color={
+                showPage
+                  ? String(palette.accentSolid)
+                  : String(palette.mutedSolid)
+              }
+            />
+          </Pressable>
+          {/* On the secondary row rather than the transport: it is not a
+              playback control, it is about the phone. */}
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityState={{ checked: keepAwake }}
+            accessibilityLabel={t('quran.tilawahKeepAwake', {
+              defaultValue: 'Keep the screen on',
+            })}
+            onPress={toggleKeepAwake}
+            style={({ pressed }) => [
+              styles.coffeeBtn,
+              {
+                backgroundColor: keepAwake
+                  ? palette.accentBg
+                  : palette.controlBg,
+              },
+              pressed && styles.pressed,
+            ]}>
+            <CoffeeIcon
+              color={
+                keepAwake
+                  ? String(palette.accentSolid)
+                  : String(palette.mutedSolid)
+              }
+            />
+          </Pressable>
         </View>
 
         {/* Speed */}
@@ -921,6 +1155,54 @@ export function TilawahScreen() {
           </Text>
         ) : null}
       </View>
+
+      {/* ── The page it is on ─────────────────────────────────────── */}
+      {showPage && playingPage && !pageUnavailable ? (
+        <View
+          style={[
+            styles.card,
+            styles.pageCard,
+            { backgroundColor: palette.card, borderColor: palette.border ?? palette.muted },
+          ]}
+          onLayout={e => setPageWidth(e.nativeEvent.layout.width - 24)}>
+          <View style={styles.pageHead}>
+            <Text style={[styles.nowLabel, { color: palette.muted }]}>
+              {t('quran.pageShort', {
+                defaultValue: 'p. {{page}}',
+                page: playingPage,
+              })}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={openInReader}
+              hitSlop={8}
+              style={({ pressed }) => [pressed && styles.pressed]}>
+              <Text style={[styles.pageOpen, { color: palette.accentSolid }]}>
+                {`${t('quran.openInReader', 'Open in the reader')} ›`}
+              </Text>
+            </Pressable>
+          </View>
+          {pageWidth > 0 ? (
+            <ScrollView
+              ref={pageScrollRef}
+              style={{ height: PAGE_VIEWPORT }}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled>
+              <MushafTextPageSurface
+                page={playingPage}
+                width={pageWidth}
+                height={pageColumnH}
+                riwayah={quran.prefs.riwayah}
+                // The APP's tone, not the mushaf's — see the note above.
+                tone={palette.isDark ? 'night' : 'paper'}
+                accentColor={String(palette.accentSolid)}
+                playing={status.active}
+                onUnavailable={() => setPageUnavailable(true)}
+              />
+            </ScrollView>
+          ) : null}
+        </View>
+      ) : null}
 
       {/* ── Offline ───────────────────────────────────────────────── */}
       <View
@@ -1174,6 +1456,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ayahStepText: { fontSize: 13, fontWeight: '600' },
+  coffeeBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pageCard: { paddingHorizontal: 12, paddingVertical: 12, gap: 8 },
+  pageHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  pageOpen: { fontSize: 13, fontWeight: '700' },
   mirrored: { transform: [{ scaleX: -1 }] },
   bar: { width: 5, borderRadius: 1.5 },
 

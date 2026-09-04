@@ -210,6 +210,16 @@ export type QuranPrefs = {
    * default: reading order is the order the book has.
    */
   shuffleSurahs: boolean;
+  /**
+   * Does Tilāwah draw the page the recitation is on? (additive)
+   *
+   * On by default: it is the difference between listening to a voice and
+   * following a text, and someone who does not want it turns it off once.
+   * The card removes itself when the page's font cannot be had, so a
+   * device with no muṣḥaf and no connection is not left staring at a
+   * spinner.
+   */
+  tilawahShowPage: boolean;
 };
 
 export type QuranState = {
@@ -243,6 +253,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     tafsirEditionId: '',
     verseOfDayOpen: false,
     shuffleSurahs: false,
+    tilawahShowPage: true,
   },
 };
 

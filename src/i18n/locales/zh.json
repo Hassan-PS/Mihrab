@@ -1044,6 +1044,8 @@
     "tilawahContinue": "从上次阅读处继续",
     "tilawahBegin": "开始诵读",
     "tilawahAyahOf": "第 {{done}} 节，共 {{total}} 节",
+    "tilawahShowPage": "显示页面",
+    "tilawahKeepAwake": "保持屏幕常亮",
     "tilawahSurahSeek": "在本章内拖动",
     "tilawahShuffle": "随机播放各章",
     "tilawahPrevSurah": "上一章",
