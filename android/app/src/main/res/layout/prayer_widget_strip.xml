@@ -232,16 +232,25 @@
                 android:layout_height="1dp"
                 android:background="#1FFFFFFF"
                 android:layout_marginTop="6dp"
-                android:layout_marginBottom="6dp" />
+                android:layout_marginBottom="8dp" />
 
-            <!-- "Asr in 37 min" opposite "2 of 5 logged". -->
+            <!-- "Asr in 37 min" opposite "2 of 5 logged".
+
+                 NO marginTop. The band this row sits in is bounded by a rule
+                 above and a rule below, and it has to look centred between
+                 them: the divider's own 8dp marginBottom is the whole of the
+                 space above, and `widget_practice_divider`'s 8dp marginTop is
+                 the whole of the space below. It was 6+8 above against 10
+                 below, which reads as a line sitting low in its band — and
+                 the Log card, with 6 above and 8 below, sat high in a band
+                 10dp shorter. Two cards on one home screen, two different
+                 answers to the same rule. -->
             <LinearLayout
                 android:id="@+id/widget_next_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:baselineAligned="true"
-                android:layout_marginTop="8dp">
+                android:baselineAligned="true">
 
                 <TextView
                     android:id="@+id/widget_next_name"
@@ -323,7 +332,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#26FFFFFF"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:visibility="gone" />
 
             <!-- The streak's old row, emptied out: its three views moved up
@@ -339,14 +349,26 @@
 
             <!-- The column count is chosen to fit the box, so the squares stay
                  square and the graph still reaches the far edge. See the same
-                 note in prayer_widget_log.xml. -->
+                 note in prayer_widget_log.xml.
+
+                 fitCenter, not fitStart. The row count quantises: the box is
+                 whatever the card has left and the graph is a whole number of
+                 whole squares, so there is up to a row's worth of slack no
+                 arithmetic can spend. Top-aligned, all of it piles up under
+                 the last row and reads as a card that ran out — and it read
+                 differently on each card, since the two have different
+                 chrome above the graph. Centred, the slack is split, and
+                 what is left above and below the graph reads as the margin
+                 it is. -->
+            <!-- The graph's own margin comes from the divider's 8dp
+                 marginBottom, exactly as it does on the Log card. -->
+            <!-- Weighted, not wrap_content — see prayer_widget_log.xml. -->
             <ImageView
                 android:id="@+id/widget_practice_grid"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="2"
-                android:layout_marginTop="8dp"
-                android:scaleType="fitStart"
+                android:scaleType="fitCenter"
                 android:contentDescription="@string/widget_streak_grid_description"
                 android:visibility="gone" />
 

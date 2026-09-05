@@ -158,7 +158,19 @@ object PracticeGridBitmap {
     Math.ceil(ringWidth(cellPx).toDouble()).toInt()
 
   /** Today's ring — the widest stroke the grid draws, and the outermost. */
-  private fun ringWidth(cellPx: Int): Float = (cellPx * 0.14f).coerceAtLeast(1.5f)
+  private fun ringWidth(cellPx: Int): Float = ringWidthOf(cellPx.toFloat())
+
+  /**
+   * The same number in whatever unit the cell was given in.
+   *
+   * `layoutFor` needs it in dp, to count the margin against the box before
+   * it decides how many rows fit; `padFor` needs it in pixels, to leave that
+   * margin in the bitmap. One formula, so the row that is counted as fitting
+   * is the row that fits.
+   */
+  private fun ringWidthOf(cell: Float): Float = (cell * RING_RATIO).coerceAtLeast(1.5f)
+
+  private const val RING_RATIO = 0.14f
 
   /**
    * @param days    the payload's `practice.days` array, sparse, each entry
@@ -372,13 +384,27 @@ object PracticeGridBitmap {
     // as a day; it reads as a bar in a chart of something else.
     val cellDp = ((boxW - (columns - 1) * GAP_DP) / columns).coerceIn(3f, MAX_CELL_DP)
 
-    // ROWS FROM WHAT IS LEFT, ROUNDED TO THE NEAREST. Rounded down for a
-    // while, which was the safe answer while the cell size also depended on
-    // this estimate — being wrong then meant the whole graph shrank. It does
-    // not any more: the cell comes from the width, so a row too many costs a
-    // few percent of scale and a row too few costs a whole empty row's worth
-    // of card. Nearest is the honest answer to "how many fit".
-    val roomFor = Math.round((boxH + GAP_DP) / (cellDp + GAP_DP))
+    // ROWS FROM WHAT IS LEFT, ROUNDED DOWN, AND THE BITMAP'S OWN MARGIN
+    // COUNTED — because the margin is part of what has to fit.
+    //
+    // Nearest was the honest answer to "how many rows fit in this height"
+    // and the wrong answer to the question that decides how the widget
+    // behaves. `fitStart` scales the bitmap by whichever axis binds first.
+    // The width always lands on the box by construction, so while the grid
+    // is no TALLER than its box the width binds, the scale is the same
+    // whatever the height, and the cell arrives the size the width chose.
+    // Round up by half a cell and the height binds instead — and then a
+    // card dragged an inch shorter does not lose a row, it draws every day
+    // on it smaller. That is the difference between a shorter widget and a
+    // smaller one, and it is the whole reason the rows are counted here.
+    //
+    // So the height only ever removes rows, one at a time, down to one; the
+    // leftover is a band of card under the last row, at most a row deep,
+    // which is what quantising into whole squares costs and is invisible
+    // next to a graph that changes size when you drag the handle.
+    val marginDp = 2f * ringWidthOf(cellDp)
+    val usableH = (boxH - marginDp).coerceAtLeast(cellDp)
+    val roomFor = ((usableH + GAP_DP) / (cellDp + GAP_DP)).toInt()
     val rows = roomFor
       .coerceIn(1, MAX_ROWS)
       .coerceAtMost((maxDays / columns).coerceAtLeast(1))

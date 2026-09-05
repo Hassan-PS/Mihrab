@@ -150,8 +150,13 @@
                 android:layout_height="1dp"
                 android:background="#1FFFFFFF"
                 android:layout_marginTop="6dp"
-                android:layout_marginBottom="6dp" />
+                android:layout_marginBottom="8dp" />
 
+            <!-- The band between this rule and the grid's rule: 8dp above
+                 from the margin overhead, 8dp below from
+                 `widget_log_grid_divider`'s marginTop. Equal, so the line
+                 reads as centred, and the same pair of numbers the prayer
+                 card uses — the two sit on one home screen. -->
             <LinearLayout
                 android:id="@+id/widget_log_footer"
                 android:layout_width="match_parent"
@@ -274,7 +279,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:scaleType="fitStart"
+                android:scaleType="fitCenter"
                 android:contentDescription="@string/widget_streak_grid_description"
                 android:visibility="gone" />
         </LinearLayout>

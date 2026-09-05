@@ -166,13 +166,16 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     /**
      * The height at which the practice graph appears.
      *
-     * The same number the prayer-times widget uses for the same bitmap: two
-     * launcher rows is 210dp and three is 321dp on a 420dpi phone, so 265
-     * sits in the middle of that gap. A 4x2 — where this widget was
-     * designed to live — is unchanged; drag it to 4x3 and the graph is
-     * what the extra row is for.
+     * It was 265 — between two launcher rows (210dp on a 420dpi phone) and
+     * three (321dp) — which made the graph a thing the third row bought, and
+     * made dragging the card shorter an on/off switch rather than a dial.
+     *
+     * The graph is a row count now, so this is `LOG_CHROME_DP` plus one row:
+     * below it there is not room for a single square, and above it every
+     * extra square of height is another row. Drag the card and it gains or
+     * loses whole weeks of days, at the size they always were.
      */
-    private const val GRID_MIN_HEIGHT_DP = 265
+    private const val GRID_MIN_HEIGHT_DP = 212
 
     /*
      * THE TWO LOG BUDGETS. See the same section in PrayerWidgetProvider —
@@ -229,8 +232,15 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
      * top and bottom, the header line, the chips row at its natural height,
      * the divider above the footer with its margins, the footer, the streak
      * line, and the divider above the grid.
+     *
+     * 177, measured the same way the prayer card's was: on a 304dp host view
+     * the grid's box comes out about 131dp, so the true chrome is 173 — 164
+     * had it 9 points generous, and generous is the direction that scales
+     * the whole graph down instead of dropping a row from it. Two of those
+     * nine went to evening the band's margins up; the rest is now honest,
+     * with four points to the safe side.
      */
-    private const val LOG_CHROME_DP = 164
+    private const val LOG_CHROME_DP = 177
     private const val CARD_PADDING_DP = 20
 
     /** As many days as the payload carries. See PRACTICE_WINDOW_DAYS. */

@@ -937,15 +937,29 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * padding, the header line, the next-prayer footer and the divider above
      * the graph. The times row and the grid share what is left.
      *
-     * 150, measured against a real card: on a 288dp host view the grid comes
-     * out 127dp tall, so 288 - 150 is within ten points of the truth once
-     * `layoutFor`'s own bias is applied. It was briefly 108 on the reasoning
-     * that the streak's old row no longer costs anything — true, but the
-     * figure had never been only that row, and the graph then asked for a
-     * box fifty points taller than it was given, chose too few columns for
-     * it, and stopped short of the card's right edge.
+     * 164, measured off a screenshot rather than reasoned about. On a 303dp
+     * host view the card drew five rows at 87% scale, which puts the real
+     * box at 135dp — so the true chrome was 168, against the 150 this number
+     * claimed. Eighteen points of over-estimated box, and eighteen points is
+     * most of a row. Evening up the margins around the band above the graph
+     * (see prayer_widget_strip.xml) gave 8dp back, leaving the true chrome
+     * at about 160; 164 is that, four points to the safe side.
+     *
+     * WHICH WAY TO BE WRONG, and it is the opposite of the old answer. This
+     * number is only ever compared against the box the grid must fit inside,
+     * and `fitStart`/`fitCenter` scale the bitmap by whichever axis binds
+     * first. Claim more height than the card has and the grid comes out
+     * taller than its ImageView, the HEIGHT binds, and the whole graph is
+     * scaled down — smaller squares AND a gap against the right edge, which
+     * is what a card an inch shorter than its neighbour looked like. Claim
+     * less and the grid loses a row, which `fitCenter` then centres in the
+     * slack. So: under-estimate the box, never over-estimate it.
+     *
+     * (It was 150 here, and briefly 108 on the reasoning that the streak's
+     * old row no longer costs anything — true, but the figure had never been
+     * only that row.)
      */
-    private const val STRIP_CHROME_DP = 150
+    private const val STRIP_CHROME_DP = 164
 
     /**
      * Three launcher cells of width. Below this the six-column strip gives
@@ -1613,8 +1627,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * weighted times row was pooling the card's slack, which was a layout
      * bug wearing this constant's clothes. The row takes its own height now,
      * so the number is free to mean what it says.)
+     *
+     * 198 now, which is `STRIP_CHROME_DP` plus one row: the graph is no
+     * longer a block that needs three rows or nothing, it is however many
+     * rows the card has room for, and the smallest useful answer to that is
+     * one row rather than an absence. Below this there is not room for a
+     * single square under the times, and a graph with no rows in it is a gap
+     * with a description.
      */
-    private const val GRID_MIN_HEIGHT_DP = 200
+    private const val GRID_MIN_HEIGHT_DP = 198
 
     /**
      * Bind the payload into whichever layout was chosen.

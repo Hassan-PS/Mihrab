@@ -55,6 +55,11 @@ const MAX_ROWS = numberOf('MAX_ROWS');
 const MIN_COLUMNS = numberOf('MIN_COLUMNS');
 const MAX_CELL_DP = numberOf('MAX_CELL_DP');
 
+const RING_RATIO = numberOf('RING_RATIO');
+
+/** The margin the bitmap keeps for the rings that overhang a cell. */
+const marginOf = (cell: number) => 2 * Math.max(1.5, cell * RING_RATIO);
+
 /** A mirror of `layoutFor`'s geometry, built from the Kotlin's own numbers. */
 function layoutFor(boxW: number, boxH: number, maxDays: number) {
   const columns = Math.max(
@@ -65,8 +70,9 @@ function layoutFor(boxW: number, boxH: number, maxDays: number) {
     MAX_CELL_DP,
     Math.max(3, (boxW - (columns - 1) * GAP_DP) / columns),
   );
+  const usableH = Math.max(cell, boxH - marginOf(cell));
   const rows = Math.min(
-    Math.max(1, Math.round((boxH + GAP_DP) / (cell + GAP_DP))),
+    Math.max(1, Math.floor((usableH + GAP_DP) / (cell + GAP_DP))),
     MAX_ROWS,
     Math.max(1, Math.floor(maxDays / columns)),
   );
@@ -97,7 +103,8 @@ describe('the graph spans its box, whatever the height turns out to be', () => {
   it.each(BOXES)('%s is never taller than its box', (_label, boxW, boxH) => {
     // Taller than the box is the failure that shrinks the whole graph and
     // stands it away from the right-hand edge. Shorter is a band of card.
-    expect(gridH(layoutFor(boxW, boxH, 210))).toBeLessThanOrEqual(boxH);
+    const l = layoutFor(boxW, boxH, 210);
+    expect(gridH(l) + marginOf(l.cell)).toBeLessThanOrEqual(boxH);
   });
 
   it('drops a row rather than shrinking when the card gets shorter', () => {
@@ -108,6 +115,55 @@ describe('the graph spans its box, whatever the height turns out to be', () => {
     // smaller ones. That is the difference between a shorter widget and a
     // smaller one.
     expect(short.cell).toBeCloseTo(tall.cell, 5);
+  });
+
+  it('never lets the height be the axis that binds, at ANY height', () => {
+    // The one that matters, and the one four hand-picked boxes kept
+    // missing. `fitStart` scales by whichever axis binds first: while the
+    // bitmap is no taller than its box the WIDTH binds, the scale is the
+    // same at every height, and the cell is the size the width chose. Let
+    // the grid come out half a cell too tall — which round-to-nearest did,
+    // for a third of all heights — and the height binds instead, so
+    // dragging the card shorter shrinks every square on it instead of
+    // dropping a row. Rounding down is what makes a resize a row count.
+    // From one row's worth of box upward. Below that the grid still returns
+    // a single row rather than none — a graph that is drawn at all has at
+    // least one row in it — and it is the providers' `GRID_MIN_HEIGHT_DP`
+    // that keeps a box this short from ever being handed over.
+    const oneRow = (() => {
+      const { cell } = layoutFor(318, 400, 210);
+      return Math.ceil(cell + marginOf(cell));
+    })();
+    const over: Array<{ boxH: number; by: number }> = [];
+    for (let boxH = oneRow; boxH <= 400; boxH += 1) {
+      const l = layoutFor(318, boxH, 210);
+      const tall = gridH(l) + marginOf(l.cell);
+      if (tall > boxH) over.push({ boxH, by: Math.round(tall - boxH) });
+    }
+    expect(over).toEqual([]);
+  });
+
+  it('is monotonic: taller card, never fewer rows', () => {
+    // A dial, not a lottery. Every extra dp either buys a row or buys
+    // nothing; none of them may cost one.
+    let last = 0;
+    for (let boxH = 20; boxH <= 400; boxH += 1) {
+      const { rows } = layoutFor(318, boxH, 210);
+      expect(rows).toBeGreaterThanOrEqual(last);
+      last = rows;
+    }
+  });
+
+  it('goes all the way down to one row, and keeps the cell', () => {
+    // "It should be able to go from one row up to however many it can fit."
+    // The floor is one row of full-size squares, not a smaller graph and
+    // not an empty band where the graph was.
+    const one = layoutFor(318, 34, 210);
+    const many = layoutFor(318, 400, 210);
+    expect(one.rows).toBe(1);
+    expect(many.rows).toBeGreaterThan(6);
+    expect(one.cell).toBeCloseTo(many.cell, 5);
+    expect(one.columns).toBe(many.columns);
   });
 
   it('keeps the cells square', () => {
@@ -277,6 +333,63 @@ describe('the streak sits on the line with what is next', () => {
       ruleOf('prayer_widget_log', 'widget_log_divider') ??
         ruleOf('prayer_widget_log', 'widget_log_grid_divider'),
     );
+  });
+
+  /**
+   * The band is what sits between the rule under the times and the rule
+   * over the graph. Reported as "the middle segment in both of the widgets
+   * is not centered between the top and the bottom line", and measured off
+   * the screenshot: the prayer card had 6+8dp above the line against 10
+   * below, so it sat low in a 43dp band; the Log card had 6 above against
+   * 8 below, so it sat high in a band 10dp shorter. Two cards on one home
+   * screen, two different answers.
+   */
+  /** The id, and only that id — `widget_log_grid` is a prefix of its divider. */
+  const tagOf = (layout: string, id: string) => {
+    const xml = layoutXml(layout);
+    const at = xml.indexOf(`@+id/${id}"`);
+    expect(at).toBeGreaterThan(-1);
+    return xml.slice(at, xml.indexOf('/>', at));
+  };
+
+  const marginsOf = (layout: string, id: string) => {
+    const tag = tagOf(layout, id);
+    const dp = (attr: string) =>
+      Number(new RegExp(`android:layout_${attr}="(\\d+)dp"`).exec(tag)?.[1] ?? 0);
+    return { top: dp('marginTop'), bottom: dp('marginBottom') };
+  };
+
+  it.each([
+    ['prayer_widget_strip', 'widget_strip_divider', 'widget_next_row', 'widget_practice_divider'],
+    ['prayer_widget_log', 'widget_log_divider', 'widget_log_footer', 'widget_log_grid_divider'],
+  ])('%s centres the band between its two rules', (layout, above, row, below) => {
+    const space = {
+      above: marginsOf(layout, above).bottom + marginsOf(layout, row).top,
+      below: marginsOf(layout, row).bottom + marginsOf(layout, below).top,
+    };
+    expect(space.above).toBe(space.below);
+  });
+
+  it('gives both cards the same band, not just a symmetric one', () => {
+    // Symmetric on each card and different between them would still read as
+    // two designs; the number has to be the same number.
+    expect(marginsOf('prayer_widget_strip', 'widget_strip_divider').bottom).toBe(
+      marginsOf('prayer_widget_log', 'widget_log_divider').bottom,
+    );
+    expect(marginsOf('prayer_widget_strip', 'widget_practice_divider').top).toBe(
+      marginsOf('prayer_widget_log', 'widget_log_grid_divider').top,
+    );
+  });
+
+  it.each([
+    ['prayer_widget_strip', 'widget_practice_grid'],
+    ['prayer_widget_log', 'widget_log_grid'],
+  ])('%s centres the graph in whatever slack is left', (layout, id) => {
+    // The row count quantises, so up to a row's worth of the box goes
+    // unspent. fitStart piled all of it under the last row — a void that
+    // came out a different size on each card, because the two have
+    // different chrome above the graph. fitCenter splits it.
+    expect(tagOf(layout, id)).toContain('android:scaleType="fitCenter"');
   });
 
   it('reads at the same size on both cards', () => {
