@@ -2,12 +2,132 @@
   "en": {
     "name": "English",
     "dir": "ltr",
-    "path": "/"
+    "path": "/",
+    "shots": {
+      "items": {
+        "home": {
+          "alt": "Home screen: the next prayer with a live countdown above the day’s times.",
+          "cap": "Home — next prayer and countdown"
+        },
+        "home-dark": {
+          "alt": "The same home screen in the dark theme.",
+          "cap": "Home, dark"
+        },
+        "tilawah": {
+          "alt": "Tilāwah: a recitation playing through Al-Baqarah, with the reciter, a speed control, a sleep timer, and the muṣḥaf page below with the recited ayah lit.",
+          "cap": "Tilāwah — put it on and let it run"
+        },
+        "mushaf": {
+          "alt": "The mushaf mid-recitation: the recited word lit on the page, with the player below it.",
+          "cap": "Mushaf — the recited word, lit"
+        },
+        "mushaf-dark": {
+          "alt": "The same page in the reader’s night tone.",
+          "cap": "Mushaf, night"
+        },
+        "quran": {
+          "alt": "The Quran tab: continue reading, the khatmah plan, the verse of the day, and the Tilāwah button in the title bar.",
+          "cap": "Khatmah and where you left off"
+        },
+        "qibla": {
+          "alt": "Qibla compass: a dial with the bearing, the signal strength, and a cross-check.",
+          "cap": "Qibla, with a signal reading"
+        },
+        "month": {
+          "alt": "Month view: a full month of prayer times in a table.",
+          "cap": "A full month at once"
+        },
+        "month-share": {
+          "alt": "The month as a shareable sheet with a QR code back to the app.",
+          "cap": "…and a sheet to hand over"
+        },
+        "duas": {
+          "alt": "Dua library entry with Arabic, transliteration, translation and its source.",
+          "cap": "Duas, with sources"
+        },
+        "tasbih": {
+          "alt": "Tasbih counter showing a dhikr count.",
+          "cap": "Tasbih counter"
+        },
+        "log": {
+          "alt": "The prayer journal: a practice graph, on-time streak, fasts kept and what is owed.",
+          "cap": "The journal, at a glance"
+        },
+        "widgets": {
+          "alt": "A phone home screen carrying Mihrab widgets and the Live Activity countdown.",
+          "cap": "Widgets and the Live Activity"
+        }
+      },
+      "spread": {
+        "alt": "Mihrab on a Mac: two facing mushaf pages side by side with the surah sidebar, as in the printed copy.",
+        "cap": "On iPad and Mac the mushaf opens as a facing-page spread — the pair of pages is what turns, exactly as it does in print."
+      }
+    }
   },
   "sv": {
     "name": "Svenska",
     "dir": "ltr",
-    "path": "/sv/"
+    "path": "/sv/",
+    "shots": {
+      "items": {
+        "home": {
+          "alt": "Hemskärmen: nästa bön med en levande nedräkning ovanför dagens tider.",
+          "cap": "Hem — nästa bön och nedräkning"
+        },
+        "home-dark": {
+          "alt": "Samma hemskärm i mörkt tema.",
+          "cap": "Hem, mörkt"
+        },
+        "tilawah": {
+          "alt": "Tilawah: en recitation som går genom Al-Baqarah, med reciter, hastighet, insomningstimer och mushaf-sidan under där den reciterade versen lyser.",
+          "cap": "Tilawah — sätt på och låt den gå"
+        },
+        "mushaf": {
+          "alt": "Mushafen mitt i recitationen: det reciterade ordet lyser på sidan, med spelaren under.",
+          "cap": "Mushaf — det reciterade ordet, upplyst"
+        },
+        "mushaf-dark": {
+          "alt": "Samma sida i läsarens nattton.",
+          "cap": "Mushaf, natt"
+        },
+        "quran": {
+          "alt": "Koran-fliken: fortsätt läsa, khatmah-planen, dagens vers och Tilawah-knappen i titelraden.",
+          "cap": "Khatmah och där du slutade"
+        },
+        "qibla": {
+          "alt": "Qibla-kompassen: en urtavla med riktningen, signalstyrkan och en kontroll mot solen.",
+          "cap": "Qibla, med signalstyrka"
+        },
+        "month": {
+          "alt": "Månadsvyn: en hel månads bönetider i en tabell.",
+          "cap": "En hel månad på en gång"
+        },
+        "month-share": {
+          "alt": "Månaden som ett delbart blad med en QR-kod tillbaka till appen.",
+          "cap": "…och ett blad att lämna vidare"
+        },
+        "duas": {
+          "alt": "En dua ur biblioteket med arabiska, translitterering, översättning och källa.",
+          "cap": "Duaer, med källor"
+        },
+        "tasbih": {
+          "alt": "Tasbih-räknaren som visar en dhikr-räkning.",
+          "cap": "Tasbih-räknare"
+        },
+        "log": {
+          "alt": "Böndagboken: en övningsgraf, svit av böner i tid, hållna fastor och vad som återstår.",
+          "cap": "Dagboken, med ett ögonkast"
+        },
+        "widgets": {
+          "alt": "En hemskärm på en telefon med Mihrabs widgetar och den levande nedräkningen.",
+          "cap": "Widgetar och den levande nedräkningen"
+        }
+      },
+      "spread": {
+        "alt": "Mihrab på en Mac: två uppslagna mushaf-sidor sida vid sida med surelistan, som i den tryckta boken.",
+        "cap": "På iPad och Mac öppnas mushafen som ett uppslag — det är sidparet som vänds, precis som i tryck."
+      }
+    }
   },
   "ar": {
     "name": "العربية",
@@ -39,6 +159,10 @@
         {
           "h3": "القرآن",
           "p": "المصحف المدني كاملاً بأربع روايات، مع التلاوة وإبراز الكلمة المتلوّة والتفسير و14 ترجمة والعلامات المرجعية وخطة ختمة."
+        },
+        {
+          "h3": "التلاوة",
+          "p": "الاستماع كصفحة مستقلة: اختر قارئًا فتمضي التلاوة سورة بعد سورة والشاشة مطفأة، وتُدار من شاشة القفل. مؤقّت نوم، وسرعة، وصفحة مصحف حيّة تضيء فيها الكلمة المتلوّة."
         },
         {
           "h3": "بقية اليوم",
@@ -110,6 +234,69 @@
       "built": "محراب {v}، من تطوير حسن الغمري.",
       "banner": "وقفة مع فلسطين.",
       "bannerMore": "أين تتبرّع، وماذا تقاطع، وكيف تتابع."
+    },
+    "shots": {
+      "eyebrow": "لقطات الشاشة",
+      "h2": "كيف يبدو التطبيق",
+      "lede": "فاتح وداكن، على الهاتف واللوحي. المصحف هو صفحة المدينة المطبوعة نفسها لا صورة عنها. اللقطات بالإنجليزية، والتطبيق يتحدث العربية كذلك.",
+      "items": {
+        "home": {
+          "alt": "الشاشة الرئيسية: الصلاة القادمة مع عدّ تنازلي حيّ فوق مواقيت اليوم.",
+          "cap": "الرئيسية — الصلاة القادمة والعدّ التنازلي"
+        },
+        "home-dark": {
+          "alt": "الشاشة الرئيسية نفسها بالمظهر الداكن.",
+          "cap": "الرئيسية، داكنة"
+        },
+        "tilawah": {
+          "alt": "صفحة التلاوة: سورة البقرة تُتلى، مع القارئ والسرعة ومؤقّت النوم وصفحة المصحف أسفلها والآية المتلوّة مضاءة.",
+          "cap": "التلاوة — شغّلها ودعها تمضي"
+        },
+        "mushaf": {
+          "alt": "المصحف أثناء التلاوة: الكلمة المتلوّة مضاءة على الصفحة والمشغّل أسفلها.",
+          "cap": "المصحف — الكلمة المتلوّة مضاءة"
+        },
+        "mushaf-dark": {
+          "alt": "الصفحة نفسها بالمظهر الليلي للقارئ.",
+          "cap": "المصحف، ليلاً"
+        },
+        "quran": {
+          "alt": "تبويب القرآن: متابعة القراءة، وخطة الختمة، وآية اليوم، وزرّ التلاوة في الشريط العلوي.",
+          "cap": "الختمة وأين توقفت"
+        },
+        "qibla": {
+          "alt": "بوصلة القبلة: قرص يبيّن الاتجاه وقوة الإشارة ومراجعة بالشمس.",
+          "cap": "القبلة، مع قراءة للإشارة"
+        },
+        "month": {
+          "alt": "عرض الشهر: مواقيت شهر كامل في جدول.",
+          "cap": "شهر كامل دفعة واحدة"
+        },
+        "month-share": {
+          "alt": "الشهر كورقة قابلة للمشاركة مع رمز QR يعود إلى التطبيق.",
+          "cap": "…وورقة تُعطى لغيرك"
+        },
+        "duas": {
+          "alt": "دعاء من المكتبة بالعربية والنقحرة والترجمة ومصدره.",
+          "cap": "الأدعية، بمصادرها"
+        },
+        "tasbih": {
+          "alt": "عدّاد التسبيح يعرض عدّ الذكر.",
+          "cap": "عدّاد التسبيح"
+        },
+        "log": {
+          "alt": "مفكرة الصلاة: رسم بياني للمواظبة، وسلسلة الصلوات في وقتها، والصيام، وما في الذمّة.",
+          "cap": "المفكرة في لمحة"
+        },
+        "widgets": {
+          "alt": "شاشة هاتف تحمل أدوات محراب والعدّ التنازلي الحيّ.",
+          "cap": "الأدوات والنشاط الحيّ"
+        }
+      },
+      "spread": {
+        "alt": "محراب على الماك: صفحتان متقابلتان من المصحف مع قائمة السور، كما في المصحف المطبوع.",
+        "cap": "على الآيباد والماك يفتح المصحف صفحتين متقابلتين — الصفحتان معًا هما ما ينقلب، تمامًا كالمطبوع."
+      }
     }
   },
   "tr": {
@@ -142,6 +329,10 @@
         {
           "h3": "Kur'an",
           "p": "Dört rivayette tam Medine mushafı; tilavet, okunan kelimenin vurgulanması, tefsir, 14 meal, yer imleri ve hatim planı."
+        },
+        {
+          "h3": "Tilavet",
+          "p": "Dinlemek, kendi sayfasında: bir kâri seçin, tilavet ekran kapalıyken sure sure devam etsin, kilit ekranından yönetilsin. Uyku zamanlayıcısı, hız ayarı ve okunan kelimenin ışıdığı canlı bir mushaf sayfası."
         },
         {
           "h3": "Günün geri kalanı",
@@ -213,6 +404,69 @@
       "built": "Mihrab {v}, Hassan El Ghamri tarafından.",
       "banner": "Filistin'in yanındayız.",
       "bannerMore": "Nereye bağış yapılır, ne boykot edilir, nasıl takip edilir."
+    },
+    "shots": {
+      "eyebrow": "Ekran görüntüleri",
+      "h2": "Nasıl görünüyor",
+      "lede": "Açık ve koyu, telefon ve tablet. Mushaf, basılı Medine sayfasının kendisi; onun bir fotoğrafı değil. Görsellerdeki uygulama İngilizce; uygulama Türkçe de konuşuyor.",
+      "items": {
+        "home": {
+          "alt": "Ana ekran: günün vakitlerinin üstünde bir sonraki namaz ve canlı geri sayım.",
+          "cap": "Ana ekran — sonraki namaz ve geri sayım"
+        },
+        "home-dark": {
+          "alt": "Aynı ana ekran, koyu temada.",
+          "cap": "Ana ekran, koyu"
+        },
+        "tilawah": {
+          "alt": "Tilavet sayfası: Bakara suresi çalıyor; kâri, hız, uyku zamanlayıcısı ve altta okunan ayeti ışıyan mushaf sayfası.",
+          "cap": "Tilavet — koy, kendi akışında gitsin"
+        },
+        "mushaf": {
+          "alt": "Tilavet sırasında mushaf: okunan kelime sayfada ışıyor, altında oynatıcı.",
+          "cap": "Mushaf — okunan kelime, ışıklı"
+        },
+        "mushaf-dark": {
+          "alt": "Aynı sayfa, okuyucunun gece tonunda.",
+          "cap": "Mushaf, gece"
+        },
+        "quran": {
+          "alt": "Kuran sekmesi: kaldığın yer, hatim planı, günün ayeti ve başlık çubuğundaki Tilavet düğmesi.",
+          "cap": "Hatim ve kaldığın yer"
+        },
+        "qibla": {
+          "alt": "Kıble pusulası: yön, sinyal gücü ve güneşle çapraz kontrol.",
+          "cap": "Kıble, sinyal okumasıyla"
+        },
+        "month": {
+          "alt": "Ay görünümü: bir ayın tüm namaz vakitleri tabloda.",
+          "cap": "Bir ay, tek seferde"
+        },
+        "month-share": {
+          "alt": "Ay, uygulamaya dönen bir QR koduyla paylaşılabilir sayfa olarak.",
+          "cap": "…ve elden verilecek bir sayfa"
+        },
+        "duas": {
+          "alt": "Dua kitaplığından bir kayıt: Arapçası, okunuşu, çevirisi ve kaynağı.",
+          "cap": "Dualar, kaynaklarıyla"
+        },
+        "tasbih": {
+          "alt": "Zikir sayısını gösteren tesbih sayacı.",
+          "cap": "Tesbih sayacı"
+        },
+        "log": {
+          "alt": "Namaz günlüğü: alışkanlık grafiği, vaktinde kılma serisi, tutulan oruçlar ve kaza borcu.",
+          "cap": "Günlük, tek bakışta"
+        },
+        "widgets": {
+          "alt": "Mihrab widget’larını ve canlı geri sayımı taşıyan bir telefon ana ekranı.",
+          "cap": "Widget’lar ve canlı etkinlik"
+        }
+      },
+      "spread": {
+        "alt": "Mac’te Mihrab: sure kenar çubuğuyla yan yana iki mushaf sayfası, basılı nüshadaki gibi.",
+        "cap": "iPad ve Mac’te mushaf iki sayfa yan yana açılır — çevrilen şey sayfa çiftidir, tıpkı basılı nüshadaki gibi."
+      }
     }
   },
   "ur": {
@@ -245,6 +499,10 @@
         {
           "h3": "قرآن",
           "p": "چار روایات میں مکمل مصحفِ مدینہ — تلاوت، پڑھے جانے والے لفظ کی نشاندہی، تفسیر، 14 تراجم، بک مارکس اور ختم قرآن کا منصوبہ۔"
+        },
+        {
+          "h3": "تلاوت",
+          "p": "سننا، اپنے الگ صفحے پر: ایک قاری چنیے اور تلاوت سورہ در سورہ چلتی رہے، اسکرین بند ہو تب بھی، لاک اسکرین سے قابو میں۔ سلیپ ٹائمر، رفتار، اور ایک زندہ مصحف صفحہ جس پر پڑھا جانے والا لفظ روشن ہوتا ہے۔"
         },
         {
           "h3": "باقی دن",
@@ -316,6 +574,69 @@
       "built": "محراب {v}، حسن الغمری کی تیار کردہ۔",
       "banner": "فلسطین کے ساتھ۔",
       "bannerMore": "کہاں عطیہ کریں، کس کا بائیکاٹ کریں، اور باخبر کیسے رہیں۔"
+    },
+    "shots": {
+      "eyebrow": "اسکرین شاٹس",
+      "h2": "دیکھنے میں کیسا ہے",
+      "lede": "روشن اور تاریک، فون اور ٹیبلٹ۔ مصحف مدینہ کا چھپا ہوا صفحہ ہی ہے، اُس کی تصویر نہیں۔ تصاویر میں ایپ انگریزی میں ہے؛ یہ اردو بھی بولتی ہے۔",
+      "items": {
+        "home": {
+          "alt": "ہوم اسکرین: دن کے اوقات کے اوپر اگلی نماز اور چلتی ہوئی گنتی۔",
+          "cap": "ہوم — اگلی نماز اور گنتی"
+        },
+        "home-dark": {
+          "alt": "وہی ہوم اسکرین، تاریک تھیم میں۔",
+          "cap": "ہوم، تاریک"
+        },
+        "tilawah": {
+          "alt": "تلاوت کا صفحہ: سورۃ البقرہ چل رہی ہے — قاری، رفتار، سلیپ ٹائمر، اور نیچے مصحف کا صفحہ جس پر پڑھی جانے والی آیت روشن ہے۔",
+          "cap": "تلاوت — لگا دیجیے اور چلنے دیجیے"
+        },
+        "mushaf": {
+          "alt": "تلاوت کے دوران مصحف: پڑھا جانے والا لفظ صفحے پر روشن، نیچے پلیئر۔",
+          "cap": "مصحف — پڑھا جانے والا لفظ، روشن"
+        },
+        "mushaf-dark": {
+          "alt": "وہی صفحہ قاری کے رات والے رنگ میں۔",
+          "cap": "مصحف، رات"
+        },
+        "quran": {
+          "alt": "قرآن ٹیب: پڑھائی جاری رکھیں، ختم قرآن کا منصوبہ، آیتِ روز، اور عنوان کی پٹی میں تلاوت کا بٹن۔",
+          "cap": "ختم قرآن اور آپ کہاں رکے تھے"
+        },
+        "qibla": {
+          "alt": "قبلہ کمپاس: سمت، سگنل کی قوت، اور سورج سے جانچ۔",
+          "cap": "قبلہ، سگنل کی پیمائش کے ساتھ"
+        },
+        "month": {
+          "alt": "ماہانہ منظر: پورے مہینے کے اوقات ایک جدول میں۔",
+          "cap": "پورا مہینہ ایک ساتھ"
+        },
+        "month-share": {
+          "alt": "مہینہ ایک قابلِ اشتراک ورق کے طور پر، ایپ کی طرف واپس لے جانے والے QR کے ساتھ۔",
+          "cap": "…اور ایک ورق جو کسی کو دیا جا سکے"
+        },
+        "duas": {
+          "alt": "دعاؤں کی لائبریری کا ایک اندراج: عربی، رومن، ترجمہ اور مأخذ۔",
+          "cap": "دعائیں، مأخذ کے ساتھ"
+        },
+        "tasbih": {
+          "alt": "تسبیح کاؤنٹر جو ذکر کی گنتی دکھا رہا ہے۔",
+          "cap": "تسبیح کاؤنٹر"
+        },
+        "log": {
+          "alt": "نماز کی ڈائری: پابندی کا گراف، وقت پر نمازوں کا تسلسل، رکھے گئے روزے اور قضا نمازیں۔",
+          "cap": "ڈائری، ایک نظر میں"
+        },
+        "widgets": {
+          "alt": "ایک فون کی ہوم اسکرین جس پر محراب کے ویجٹ اور چلتی ہوئی گنتی ہے۔",
+          "cap": "ویجٹ اور لائیو ایکٹیویٹی"
+        }
+      },
+      "spread": {
+        "alt": "میک پر محراب: سورتوں کی فہرست کے ساتھ مصحف کے دو آمنے سامنے صفحات، جیسے چھپی ہوئی جلد میں۔",
+        "cap": "آئی پیڈ اور میک پر مصحف دو آمنے سامنے صفحات کے طور پر کھلتا ہے — پلٹنے والی چیز صفحوں کا جوڑا ہے، بالکل چھپی ہوئی جلد کی طرح۔"
+      }
     }
   },
   "id": {
@@ -348,6 +669,10 @@
         {
           "h3": "Al-Qur'an",
           "p": "Mushaf Madinah lengkap dalam empat riwayat, dengan murottal, sorotan kata yang dibaca, tafsir, 14 terjemahan, penanda, dan rencana khatam."
+        },
+        {
+          "h3": "Tilawah",
+          "p": "Mendengarkan, sebagai halamannya sendiri: pilih qari dan tilawah berjalan surah demi surah meski layar mati, dikendalikan dari layar kunci. Pengatur waktu tidur, kecepatan, dan halaman mushaf hidup tempat kata yang dibaca menyala."
         },
         {
           "h3": "Sisa hari Anda",
@@ -419,6 +744,69 @@
       "built": "Mihrab {v}, dibuat oleh Hassan El Ghamri.",
       "banner": "Bersama Palestina.",
       "bannerMore": "Ke mana berdonasi, apa yang diboikot, dan cara mengikuti kabarnya."
+    },
+    "shots": {
+      "eyebrow": "Tangkapan layar",
+      "h2": "Seperti apa tampilannya",
+      "lede": "Terang dan gelap, ponsel dan tablet. Mushafnya adalah halaman Madinah cetakan itu sendiri, bukan fotonya. Aplikasi pada gambar berbahasa Inggris; aplikasinya berbahasa Indonesia juga.",
+      "items": {
+        "home": {
+          "alt": "Layar utama: salat berikutnya dengan hitung mundur langsung di atas jadwal hari ini.",
+          "cap": "Beranda — salat berikutnya dan hitung mundur"
+        },
+        "home-dark": {
+          "alt": "Layar utama yang sama dalam tema gelap.",
+          "cap": "Beranda, gelap"
+        },
+        "tilawah": {
+          "alt": "Halaman Tilawah: Al-Baqarah sedang diputar, dengan qari, kecepatan, pengatur waktu tidur, dan halaman mushaf di bawahnya tempat ayat yang dibaca menyala.",
+          "cap": "Tilawah — putar dan biarkan berjalan"
+        },
+        "mushaf": {
+          "alt": "Mushaf saat dibacakan: kata yang dibaca menyala di halaman, pemutar di bawahnya.",
+          "cap": "Mushaf — kata yang dibaca, menyala"
+        },
+        "mushaf-dark": {
+          "alt": "Halaman yang sama dalam nada malam pembaca.",
+          "cap": "Mushaf, malam"
+        },
+        "quran": {
+          "alt": "Tab Al-Qur’an: lanjutkan membaca, rencana khatam, ayat hari ini, dan tombol Tilawah di bilah judul.",
+          "cap": "Khatam dan tempat terakhir Anda"
+        },
+        "qibla": {
+          "alt": "Kompas kiblat: arah, kekuatan sinyal, dan pemeriksaan silang dengan matahari.",
+          "cap": "Kiblat, dengan pembacaan sinyal"
+        },
+        "month": {
+          "alt": "Tampilan bulanan: jadwal salat satu bulan penuh dalam tabel.",
+          "cap": "Satu bulan penuh sekaligus"
+        },
+        "month-share": {
+          "alt": "Jadwal sebulan sebagai lembar yang bisa dibagikan, dengan kode QR kembali ke aplikasi.",
+          "cap": "…dan lembar untuk diberikan"
+        },
+        "duas": {
+          "alt": "Entri pustaka doa dengan teks Arab, transliterasi, terjemahan, dan sumbernya.",
+          "cap": "Doa, dengan sumbernya"
+        },
+        "tasbih": {
+          "alt": "Penghitung tasbih menampilkan hitungan zikir.",
+          "cap": "Penghitung tasbih"
+        },
+        "log": {
+          "alt": "Jurnal salat: grafik kebiasaan, rentetan tepat waktu, puasa yang dijalani, dan utang salat.",
+          "cap": "Jurnal, sekilas"
+        },
+        "widgets": {
+          "alt": "Layar beranda ponsel dengan widget Mihrab dan hitung mundur langsung.",
+          "cap": "Widget dan Live Activity"
+        }
+      },
+      "spread": {
+        "alt": "Mihrab di Mac: dua halaman mushaf berdampingan dengan bilah sisi surah, seperti pada cetakan.",
+        "cap": "Di iPad dan Mac mushaf terbuka sebagai dua halaman berdampingan — sepasang halaman itulah yang dibalik, persis seperti cetakannya."
+      }
     }
   },
   "de": {
@@ -451,6 +839,10 @@
         {
           "h3": "Koran",
           "p": "Der vollständige Medina-Mushaf in vier Riwayat, mit Rezitation, Wortmarkierung, Tafsir, 14 Übersetzungen, Lesezeichen und einem Khatma-Plan."
+        },
+        {
+          "h3": "Tilawa",
+          "p": "Hören, als eigene Seite: einen Rezitator wählen, und die Rezitation läuft Sure für Sure bei ausgeschaltetem Bildschirm weiter, gesteuert vom Sperrbildschirm. Einschlaftimer, Tempo und eine lebendige Mushaf-Seite, auf der das rezitierte Wort leuchtet."
         },
         {
           "h3": "Der Rest des Tages",
@@ -522,6 +914,69 @@
       "built": "Mihrab {v}, gebaut von Hassan El Ghamri.",
       "banner": "Solidarität mit Palästina.",
       "bannerMore": "Wohin spenden, was boykottieren, wie informiert bleiben."
+    },
+    "shots": {
+      "eyebrow": "Bildschirmfotos",
+      "h2": "So sieht sie aus",
+      "lede": "Hell und dunkel, Telefon und Tablet. Der Mushaf ist die gedruckte Medina-Seite selbst, kein Bild davon. Die App auf den Aufnahmen ist englisch; sie spricht auch Deutsch.",
+      "items": {
+        "home": {
+          "alt": "Startbildschirm: das nächste Gebet mit laufendem Countdown über den Zeiten des Tages.",
+          "cap": "Start — nächstes Gebet und Countdown"
+        },
+        "home-dark": {
+          "alt": "Derselbe Startbildschirm im dunklen Design.",
+          "cap": "Start, dunkel"
+        },
+        "tilawah": {
+          "alt": "Die Tilawa-Seite: Al-Baqara läuft, mit Rezitator, Tempo, Einschlaftimer und darunter der Mushaf-Seite, auf der der rezitierte Vers leuchtet.",
+          "cap": "Tilawa — anmachen und laufen lassen"
+        },
+        "mushaf": {
+          "alt": "Der Mushaf während der Rezitation: das rezitierte Wort leuchtet auf der Seite, darunter der Player.",
+          "cap": "Mushaf — das rezitierte Wort, hervorgehoben"
+        },
+        "mushaf-dark": {
+          "alt": "Dieselbe Seite im Nachtton des Lesers.",
+          "cap": "Mushaf, nachts"
+        },
+        "quran": {
+          "alt": "Der Koran-Tab: Weiterlesen, der Khatma-Plan, der Vers des Tages und die Tilawa-Schaltfläche in der Titelleiste.",
+          "cap": "Khatma und wo Sie stehen geblieben sind"
+        },
+        "qibla": {
+          "alt": "Qibla-Kompass: Richtung, Signalstärke und ein Abgleich mit dem Sonnenstand.",
+          "cap": "Qibla, mit Signalanzeige"
+        },
+        "month": {
+          "alt": "Monatsansicht: ein ganzer Monat Gebetszeiten als Tabelle.",
+          "cap": "Ein ganzer Monat auf einmal"
+        },
+        "month-share": {
+          "alt": "Der Monat als teilbares Blatt mit QR-Code zurück zur App.",
+          "cap": "…und ein Blatt zum Weitergeben"
+        },
+        "duas": {
+          "alt": "Ein Eintrag der Bittgebetssammlung mit Arabisch, Umschrift, Übersetzung und Quelle.",
+          "cap": "Bittgebete, mit Quellen"
+        },
+        "tasbih": {
+          "alt": "Tasbih-Zähler mit einem Dhikr-Zählstand.",
+          "cap": "Tasbih-Zähler"
+        },
+        "log": {
+          "alt": "Das Gebetstagebuch: Übungsgraph, Serie pünktlicher Gebete, gehaltene Fasten und was nachzuholen ist.",
+          "cap": "Das Tagebuch auf einen Blick"
+        },
+        "widgets": {
+          "alt": "Ein Handy-Startbildschirm mit Mihrab-Widgets und dem Live-Countdown.",
+          "cap": "Widgets und die Live-Aktivität"
+        }
+      },
+      "spread": {
+        "alt": "Mihrab auf dem Mac: zwei gegenüberliegende Mushaf-Seiten mit Suren-Seitenleiste, wie im gedruckten Exemplar.",
+        "cap": "Auf iPad und Mac öffnet sich der Mushaf als Doppelseite — geblättert wird das Seitenpaar, genau wie im Druck."
+      }
     }
   },
   "fr": {
@@ -554,6 +1009,10 @@
         {
           "h3": "Coran",
           "p": "Le mushaf de Médine complet en quatre riwayat, avec récitation, mise en évidence du mot lu, tafsir, 14 traductions, marque-pages et un plan de khatma."
+        },
+        {
+          "h3": "Tilawa",
+          "p": "Écouter, sur sa propre page : choisissez un récitant et la récitation enchaîne sourate après sourate, écran éteint, pilotée depuis l’écran verrouillé. Minuterie d’arrêt, vitesse, et une page du mushaf en direct où le mot récité s’allume."
         },
         {
           "h3": "Le reste de la journée",
@@ -625,6 +1084,69 @@
       "built": "Mihrab {v}, réalisé par Hassan El Ghamri.",
       "banner": "Solidarité avec la Palestine.",
       "bannerMore": "Où faire un don, quoi boycotter, comment rester informé."
+    },
+    "shots": {
+      "eyebrow": "Captures d’écran",
+      "h2": "À quoi ça ressemble",
+      "lede": "Clair et sombre, téléphone et tablette. Le mushaf est la page de Médine imprimée elle-même, pas une image de celle-ci. L’application des captures est en anglais ; elle parle aussi français.",
+      "items": {
+        "home": {
+          "alt": "Écran d’accueil : la prochaine prière et son compte à rebours au-dessus des horaires du jour.",
+          "cap": "Accueil — prochaine prière et compte à rebours"
+        },
+        "home-dark": {
+          "alt": "Le même écran d’accueil en thème sombre.",
+          "cap": "Accueil, sombre"
+        },
+        "tilawah": {
+          "alt": "La page Tilawa : Al-Baqara en lecture, avec le récitant, la vitesse, la minuterie d’arrêt et, en dessous, la page du mushaf où le verset récité s’allume.",
+          "cap": "Tilawa — on lance, et ça continue"
+        },
+        "mushaf": {
+          "alt": "Le mushaf pendant la récitation : le mot récité s’allume sur la page, le lecteur en dessous.",
+          "cap": "Mushaf — le mot récité, allumé"
+        },
+        "mushaf-dark": {
+          "alt": "La même page dans la teinte nuit du lecteur.",
+          "cap": "Mushaf, nuit"
+        },
+        "quran": {
+          "alt": "L’onglet Coran : reprendre la lecture, le plan de khatma, le verset du jour et le bouton Tilawa dans la barre de titre.",
+          "cap": "La khatma et où vous en êtes"
+        },
+        "qibla": {
+          "alt": "Boussole qibla : le cap, la force du signal et une vérification par le soleil.",
+          "cap": "Qibla, avec la qualité du signal"
+        },
+        "month": {
+          "alt": "Vue mensuelle : un mois entier d’horaires en tableau.",
+          "cap": "Un mois entier d’un coup"
+        },
+        "month-share": {
+          "alt": "Le mois sous forme de feuille partageable, avec un QR code vers l’application.",
+          "cap": "…et une feuille à donner"
+        },
+        "duas": {
+          "alt": "Une invocation de la bibliothèque avec l’arabe, la translittération, la traduction et sa source.",
+          "cap": "Des invocations, avec leurs sources"
+        },
+        "tasbih": {
+          "alt": "Compteur de tasbih affichant un décompte de dhikr.",
+          "cap": "Compteur de tasbih"
+        },
+        "log": {
+          "alt": "Le journal de prière : graphique d’assiduité, série de prières à l’heure, jeûnes tenus et ce qui reste à rattraper.",
+          "cap": "Le journal, d’un coup d’œil"
+        },
+        "widgets": {
+          "alt": "Un écran d’accueil de téléphone portant les widgets Mihrab et le compte à rebours en direct.",
+          "cap": "Widgets et activité en direct"
+        }
+      },
+      "spread": {
+        "alt": "Mihrab sur Mac : deux pages de mushaf en vis-à-vis avec la barre latérale des sourates, comme dans l’exemplaire imprimé.",
+        "cap": "Sur iPad et Mac, le mushaf s’ouvre en double page — c’est la paire qui tourne, exactement comme sur le papier."
+      }
     }
   },
   "es": {
@@ -657,6 +1179,10 @@
         {
           "h3": "Corán",
           "p": "El mushaf de Medina completo en cuatro riwayat, con recitación, resaltado de la palabra recitada, tafsir, 14 traducciones, marcadores y un plan de jatma."
+        },
+        {
+          "h3": "Tilawah",
+          "p": "Escuchar, en su propia página: elige un recitador y la recitación sigue sura tras sura con la pantalla apagada, gobernada desde la pantalla de bloqueo. Temporizador, velocidad y una página del mushaf en vivo donde se enciende la palabra recitada."
         },
         {
           "h3": "El resto del día",
@@ -728,6 +1254,69 @@
       "built": "Mihrab {v}, creada por Hassan El Ghamri.",
       "banner": "Con Palestina.",
       "bannerMore": "Dónde donar, qué boicotear y cómo mantenerse informado."
+    },
+    "shots": {
+      "eyebrow": "Capturas de pantalla",
+      "h2": "Qué aspecto tiene",
+      "lede": "Claro y oscuro, teléfono y tableta. El mushaf es la página de Medina impresa, no una foto de ella. La app de las capturas está en inglés; también habla español.",
+      "items": {
+        "home": {
+          "alt": "Pantalla de inicio: la próxima oración con su cuenta atrás sobre los horarios del día.",
+          "cap": "Inicio — próxima oración y cuenta atrás"
+        },
+        "home-dark": {
+          "alt": "La misma pantalla de inicio en tema oscuro.",
+          "cap": "Inicio, oscuro"
+        },
+        "tilawah": {
+          "alt": "La página de Tilawah: Al-Baqara sonando, con el recitador, la velocidad, el temporizador y, debajo, la página del mushaf con la aleya recitada encendida.",
+          "cap": "Tilawah — la pones y sigue sola"
+        },
+        "mushaf": {
+          "alt": "El mushaf durante la recitación: la palabra recitada se enciende en la página, con el reproductor debajo.",
+          "cap": "Mushaf — la palabra recitada, encendida"
+        },
+        "mushaf-dark": {
+          "alt": "La misma página en el tono nocturno del lector.",
+          "cap": "Mushaf, noche"
+        },
+        "quran": {
+          "alt": "La pestaña del Corán: seguir leyendo, el plan de jatma, la aleya del día y el botón de Tilawah en la barra de título.",
+          "cap": "La jatma y dónde lo dejaste"
+        },
+        "qibla": {
+          "alt": "Brújula de la alquibla: el rumbo, la fuerza de la señal y una comprobación con el sol.",
+          "cap": "Alquibla, con lectura de señal"
+        },
+        "month": {
+          "alt": "Vista mensual: un mes entero de horarios en una tabla.",
+          "cap": "Un mes entero de una vez"
+        },
+        "month-share": {
+          "alt": "El mes como hoja para compartir, con un código QR de vuelta a la app.",
+          "cap": "…y una hoja para dar en mano"
+        },
+        "duas": {
+          "alt": "Una súplica de la biblioteca con árabe, transliteración, traducción y su fuente.",
+          "cap": "Súplicas, con sus fuentes"
+        },
+        "tasbih": {
+          "alt": "Contador de tasbih mostrando un recuento de dhikr.",
+          "cap": "Contador de tasbih"
+        },
+        "log": {
+          "alt": "El diario de oración: gráfico de constancia, racha de oraciones a tiempo, ayunos y lo que queda por recuperar.",
+          "cap": "El diario, de un vistazo"
+        },
+        "widgets": {
+          "alt": "La pantalla de inicio de un teléfono con los widgets de Mihrab y la cuenta atrás en directo.",
+          "cap": "Widgets y actividad en directo"
+        }
+      },
+      "spread": {
+        "alt": "Mihrab en un Mac: dos páginas enfrentadas del mushaf con la barra lateral de suras, como en el ejemplar impreso.",
+        "cap": "En iPad y Mac el mushaf se abre a doble página — lo que pasa es el par de páginas, igual que en el papel."
+      }
     }
   },
   "ru": {
@@ -760,6 +1349,10 @@
         {
           "h3": "Коран",
           "p": "Полный мединский мусхаф в четырёх риваятах: чтение вслух, подсветка читаемого слова, тафсир, 14 переводов, закладки и план хатма."
+        },
+        {
+          "h3": "Тилават",
+          "p": "Слушание отдельной страницей: выберите чтеца — и чтение идёт сура за сурой с выключенным экраном, управляясь с экрана блокировки. Таймер сна, скорость и живая страница мусхафа, где подсвечивается читаемое слово."
         },
         {
           "h3": "Остальной день",
@@ -831,6 +1424,69 @@
       "built": "Mihrab {v}, разработчик — Hassan El Ghamri.",
       "banner": "Вместе с Палестиной.",
       "bannerMore": "Куда пожертвовать, что бойкотировать и как следить за новостями."
+    },
+    "shots": {
+      "eyebrow": "Скриншоты",
+      "h2": "Как это выглядит",
+      "lede": "Светлая и тёмная тема, телефон и планшет. Мусхаф — это сама печатная мединская страница, а не её снимок. На скриншотах приложение по-английски; по-русски оно говорит так же.",
+      "items": {
+        "home": {
+          "alt": "Главный экран: следующая молитва с живым обратным отсчётом над временами дня.",
+          "cap": "Главная — следующая молитва и отсчёт"
+        },
+        "home-dark": {
+          "alt": "Тот же главный экран в тёмной теме.",
+          "cap": "Главная, тёмная"
+        },
+        "tilawah": {
+          "alt": "Страница «Тилават»: звучит сура Аль-Бакара — чтец, скорость, таймер сна и ниже страница мусхафа с подсвеченным читаемым аятом.",
+          "cap": "Тилават — включил и слушаешь"
+        },
+        "mushaf": {
+          "alt": "Мусхаф во время чтения: читаемое слово подсвечено на странице, ниже плеер.",
+          "cap": "Мусхаф — подсвеченное слово"
+        },
+        "mushaf-dark": {
+          "alt": "Та же страница в ночном тоне читалки.",
+          "cap": "Мусхаф, ночью"
+        },
+        "quran": {
+          "alt": "Вкладка Корана: продолжить чтение, план хатма, аят дня и кнопка «Тилават» в заголовке.",
+          "cap": "Хатм и место, где вы остановились"
+        },
+        "qibla": {
+          "alt": "Компас киблы: направление, сила сигнала и сверка по солнцу.",
+          "cap": "Кибла и качество сигнала"
+        },
+        "month": {
+          "alt": "Месячный вид: время молитв на целый месяц таблицей.",
+          "cap": "Целый месяц сразу"
+        },
+        "month-share": {
+          "alt": "Месяц как лист, которым можно поделиться, с QR-кодом обратно в приложение.",
+          "cap": "…и лист, который можно отдать"
+        },
+        "duas": {
+          "alt": "Дуа из библиотеки: арабский текст, транслитерация, перевод и источник.",
+          "cap": "Дуа с источниками"
+        },
+        "tasbih": {
+          "alt": "Счётчик тасбиха со счётом зикра.",
+          "cap": "Счётчик тасбиха"
+        },
+        "log": {
+          "alt": "Дневник молитв: график постоянства, серия молитв вовремя, посты и то, что осталось восполнить.",
+          "cap": "Дневник с одного взгляда"
+        },
+        "widgets": {
+          "alt": "Домашний экран телефона с виджетами Mihrab и живым отсчётом.",
+          "cap": "Виджеты и живой отсчёт"
+        }
+      },
+      "spread": {
+        "alt": "Mihrab на Mac: два разворотных листа мусхафа рядом и боковой список сур, как в печатном экземпляре.",
+        "cap": "На iPad и Mac мусхаф открывается разворотом — переворачивается пара страниц, ровно как в печати."
+      }
     }
   },
   "bn": {
@@ -863,6 +1519,10 @@
         {
           "h3": "কুরআন",
           "p": "চার রেওয়ায়াতে সম্পূর্ণ মদিনা মুসহাফ — তিলাওয়াত, পঠিত শব্দ চিহ্নিতকরণ, তাফসির, ১৪টি অনুবাদ, বুকমার্ক এবং খতমের পরিকল্পনা।"
+        },
+        {
+          "h3": "তিলাওয়াত",
+          "p": "শোনা, নিজের আলাদা পাতায়: একজন ক্বারী বেছে নিন, স্ক্রিন বন্ধ থাকলেও তিলাওয়াত সূরার পর সূরা চলতে থাকে, লক স্ক্রিন থেকেই নিয়ন্ত্রণ। স্লিপ টাইমার, গতি, আর জীবন্ত মুসহাফ পাতা যেখানে পঠিত শব্দ আলোকিত হয়।"
         },
         {
           "h3": "দিনের বাকি অংশ",
@@ -934,6 +1594,69 @@
       "built": "Mihrab {v}, নির্মাতা Hassan El Ghamri।",
       "banner": "ফিলিস্তিনের পাশে।",
       "bannerMore": "কোথায় দান করবেন, কী বর্জন করবেন, কীভাবে খবর রাখবেন।"
+    },
+    "shots": {
+      "eyebrow": "স্ক্রিনশট",
+      "h2": "দেখতে কেমন",
+      "lede": "আলো আর অন্ধকার, ফোন আর ট্যাবলেট। মুসহাফ হলো ছাপা মদিনা পৃষ্ঠাটিই, তার ছবি নয়। ছবিতে অ্যাপটি ইংরেজিতে; বাংলাও সে বলে।",
+      "items": {
+        "home": {
+          "alt": "হোম স্ক্রিন: দিনের সময়সূচির উপরে পরের নামাজ ও চলমান কাউন্টডাউন।",
+          "cap": "হোম — পরের নামাজ ও কাউন্টডাউন"
+        },
+        "home-dark": {
+          "alt": "একই হোম স্ক্রিন, অন্ধকার থিমে।",
+          "cap": "হোম, অন্ধকার"
+        },
+        "tilawah": {
+          "alt": "তিলাওয়াত পাতা: সূরা বাকারা বাজছে — ক্বারী, গতি, স্লিপ টাইমার, আর নিচে মুসহাফের পাতা যেখানে পঠিত আয়াত আলোকিত।",
+          "cap": "তিলাওয়াত — চালিয়ে দিন, চলতে থাকবে"
+        },
+        "mushaf": {
+          "alt": "তিলাওয়াতের সময় মুসহাফ: পঠিত শব্দটি পাতায় আলোকিত, নিচে প্লেয়ার।",
+          "cap": "মুসহাফ — পঠিত শব্দ, আলোকিত"
+        },
+        "mushaf-dark": {
+          "alt": "একই পাতা পাঠকের রাতের রঙে।",
+          "cap": "মুসহাফ, রাত"
+        },
+        "quran": {
+          "alt": "কুরআন ট্যাব: পড়া চালিয়ে যান, খতম পরিকল্পনা, দিনের আয়াত, আর শিরোনাম বারে তিলাওয়াত বোতাম।",
+          "cap": "খতম আর আপনি কোথায় ছিলেন"
+        },
+        "qibla": {
+          "alt": "কিবলা কম্পাস: দিক, সিগন্যালের জোর, আর সূর্যের সঙ্গে মিলিয়ে দেখা।",
+          "cap": "কিবলা, সিগন্যাল পাঠসহ"
+        },
+        "month": {
+          "alt": "মাসিক দৃশ্য: পুরো মাসের নামাজের সময় এক তালিকায়।",
+          "cap": "পুরো মাস একসঙ্গে"
+        },
+        "month-share": {
+          "alt": "মাসটি শেয়ার করার মতো একটি পাতা হিসেবে, অ্যাপে ফেরার QR কোডসহ।",
+          "cap": "…আর হাতে দেওয়ার মতো একটি পাতা"
+        },
+        "duas": {
+          "alt": "দুআ সংগ্রহের একটি এন্ট্রি — আরবি, উচ্চারণ, অনুবাদ ও সূত্রসহ।",
+          "cap": "দুআ, সূত্রসহ"
+        },
+        "tasbih": {
+          "alt": "তাসবিহ কাউন্টারে জিকিরের গণনা।",
+          "cap": "তাসবিহ কাউন্টার"
+        },
+        "log": {
+          "alt": "নামাজের ডায়েরি: অভ্যাসের গ্রাফ, সময়মতো নামাজের ধারাবাহিকতা, রোজা আর কাজা।",
+          "cap": "ডায়েরি, এক নজরে"
+        },
+        "widgets": {
+          "alt": "একটি ফোনের হোম স্ক্রিনে মিহরাবের উইজেট ও লাইভ কাউন্টডাউন।",
+          "cap": "উইজেট আর লাইভ অ্যাক্টিভিটি"
+        }
+      },
+      "spread": {
+        "alt": "ম্যাকে মিহরাব: পাশাপাশি মুসহাফের দুই পাতা ও সূরার সাইডবার, ছাপা কপির মতোই।",
+        "cap": "আইপ্যাড আর ম্যাকে মুসহাফ খোলে পাশাপাশি দুই পাতায় — পাতা-জোড়াটাই ওল্টায়, ঠিক ছাপা কপির মতো।"
+      }
     }
   },
   "hi": {
@@ -966,6 +1689,10 @@
         {
           "h3": "क़ुरआन",
           "p": "चार रिवायतों में पूरा मदीना मुसहफ़ — तिलावत, पढ़े जा रहे शब्द की पहचान, तफ़सीर, 14 अनुवाद, बुकमार्क और ख़त्म-ए-क़ुरआन की योजना।"
+        },
+        {
+          "h3": "तिलावत",
+          "p": "सुनना, अपने अलग पन्ने पर: एक क़ारी चुनिए और तिलावत सूरह दर सूरह चलती रहे, स्क्रीन बंद हो तब भी, लॉक स्क्रीन से नियंत्रित। स्लीप टाइमर, गति, और एक जीवंत मुसहफ़ पृष्ठ जिस पर पढ़ा जा रहा शब्द रोशन होता है।"
         },
         {
           "h3": "बाक़ी दिन",
@@ -1037,6 +1764,69 @@
       "built": "Mihrab {v}, निर्माता Hassan El Ghamri।",
       "banner": "फ़िलिस्तीन के साथ।",
       "bannerMore": "कहाँ दान करें, किसका बहिष्कार करें, और ख़बर कैसे रखें।"
+    },
+    "shots": {
+      "eyebrow": "स्क्रीनशॉट",
+      "h2": "यह दिखता कैसा है",
+      "lede": "उजाला और अँधेरा, फ़ोन और टैबलेट। मुसहफ़ छपा हुआ मदीना पृष्ठ ही है, उसकी तस्वीर नहीं। तस्वीरों में ऐप अंग्रेज़ी में है; हिंदी भी वह बोलता है।",
+      "items": {
+        "home": {
+          "alt": "होम स्क्रीन: दिन के समयों के ऊपर अगली नमाज़ और चलती उलटी गिनती।",
+          "cap": "होम — अगली नमाज़ और उलटी गिनती"
+        },
+        "home-dark": {
+          "alt": "वही होम स्क्रीन, गहरे रंग में।",
+          "cap": "होम, गहरा"
+        },
+        "tilawah": {
+          "alt": "तिलावत पृष्ठ: सूरह अल-बक़रह चल रही है — क़ारी, गति, स्लीप टाइमर, और नीचे मुसहफ़ का पृष्ठ जिस पर पढ़ी जा रही आयत रोशन है।",
+          "cap": "तिलावत — लगाइए और चलने दीजिए"
+        },
+        "mushaf": {
+          "alt": "तिलावत के दौरान मुसहफ़: पढ़ा जा रहा शब्द पृष्ठ पर रोशन, नीचे प्लेयर।",
+          "cap": "मुसहफ़ — पढ़ा जा रहा शब्द, रोशन"
+        },
+        "mushaf-dark": {
+          "alt": "वही पृष्ठ पाठक के रात वाले रंग में।",
+          "cap": "मुसहफ़, रात"
+        },
+        "quran": {
+          "alt": "क़ुरआन टैब: पढ़ना जारी रखें, ख़त्म योजना, दिन की आयत, और शीर्षक पट्टी में तिलावत बटन।",
+          "cap": "ख़त्म और आप कहाँ रुके थे"
+        },
+        "qibla": {
+          "alt": "क़िबला कम्पास: दिशा, सिग्नल की मज़बूती, और सूरज से जाँच।",
+          "cap": "क़िबला, सिग्नल पाठ के साथ"
+        },
+        "month": {
+          "alt": "मासिक दृश्य: पूरे महीने के समय एक तालिका में।",
+          "cap": "पूरा महीना एक साथ"
+        },
+        "month-share": {
+          "alt": "महीना एक साझा करने योग्य पन्ने के रूप में, ऐप पर लौटाने वाले QR के साथ।",
+          "cap": "…और एक पन्ना जो किसी को दिया जा सके"
+        },
+        "duas": {
+          "alt": "दुआ संग्रह की एक प्रविष्टि — अरबी, लिप्यंतरण, अनुवाद और स्रोत के साथ।",
+          "cap": "दुआएँ, स्रोत के साथ"
+        },
+        "tasbih": {
+          "alt": "तस्बीह काउंटर ज़िक्र की गिनती दिखाते हुए।",
+          "cap": "तस्बीह काउंटर"
+        },
+        "log": {
+          "alt": "नमाज़ डायरी: नियमितता का ग्राफ़, समय पर नमाज़ों का सिलसिला, रोज़े और क़ज़ा।",
+          "cap": "डायरी, एक नज़र में"
+        },
+        "widgets": {
+          "alt": "एक फ़ोन की होम स्क्रीन जिस पर मिहराब के विजेट और लाइव उलटी गिनती है।",
+          "cap": "विजेट और लाइव गतिविधि"
+        }
+      },
+      "spread": {
+        "alt": "मैक पर मिहराब: सूरह साइडबार के साथ मुसहफ़ के आमने-सामने दो पृष्ठ, छपी प्रति की तरह।",
+        "cap": "आईपैड और मैक पर मुसहफ़ आमने-सामने दो पृष्ठों में खुलता है — पलटने वाली चीज़ पृष्ठों की जोड़ी है, बिलकुल छपी प्रति की तरह।"
+      }
     }
   },
   "zh": {
@@ -1069,6 +1859,10 @@
         {
           "h3": "《古兰经》",
           "p": "四种传述本的完整麦地那版，配诵读、逐词高亮、经注、14 种译文、书签，以及一份通读计划。"
+        },
+        {
+          "h3": "诵读",
+          "p": "把聆听单独做成一页：选一位诵读者，熄屏后仍一章接一章地读下去，可从锁屏控制。睡眠定时、语速，以及一页实时的穆斯哈夫，正在诵读的词会被点亮。"
         },
         {
           "h3": "一天的其余部分",
@@ -1140,6 +1934,69 @@
       "built": "Mihrab {v}，由 Hassan El Ghamri 开发。",
       "banner": "声援巴勒斯坦。",
       "bannerMore": "去哪里捐助、抵制什么、如何持续关注。"
+    },
+    "shots": {
+      "eyebrow": "应用截图",
+      "h2": "它长什么样",
+      "lede": "浅色与深色，手机与平板。穆斯哈夫就是印刷的麦地那版页面本身，而不是它的图片。截图里的应用是英文的；它同样说中文。",
+      "items": {
+        "home": {
+          "alt": "主屏幕：当日各拜功时间上方是下一次礼拜与实时倒计时。",
+          "cap": "主页 — 下一次礼拜与倒计时"
+        },
+        "home-dark": {
+          "alt": "同一个主屏幕的深色主题。",
+          "cap": "主页，深色"
+        },
+        "tilawah": {
+          "alt": "诵读页面：黄牛章正在播放，显示诵读者、语速、睡眠定时，下方是穆斯哈夫页面，正在诵读的经文被点亮。",
+          "cap": "诵读 — 放上就一直读下去"
+        },
+        "mushaf": {
+          "alt": "诵读中的穆斯哈夫：正在诵读的词在页面上点亮，下方是播放器。",
+          "cap": "穆斯哈夫 — 点亮正在诵读的词"
+        },
+        "mushaf-dark": {
+          "alt": "同一页在阅读器的夜间色调下。",
+          "cap": "穆斯哈夫，夜间"
+        },
+        "quran": {
+          "alt": "《古兰经》标签页：继续阅读、通读计划、每日经文，以及标题栏中的诵读按钮。",
+          "cap": "通读计划与上次读到的地方"
+        },
+        "qibla": {
+          "alt": "朝向罗盘：方位、信号强度，以及与太阳的交叉校验。",
+          "cap": "朝向，带信号读数"
+        },
+        "month": {
+          "alt": "月视图：整月礼拜时间的表格。",
+          "cap": "一次看完整月"
+        },
+        "month-share": {
+          "alt": "整月做成可分享的一页，附有回到应用的二维码。",
+          "cap": "……以及一张可以递给别人的表"
+        },
+        "duas": {
+          "alt": "祈祷词库中的一条：阿拉伯原文、转写、翻译和出处。",
+          "cap": "祈祷词，附出处"
+        },
+        "tasbih": {
+          "alt": "赞念计数器显示着一次赞念的计数。",
+          "cap": "赞念计数器"
+        },
+        "log": {
+          "alt": "礼拜日志：习惯图表、准时连续天数、封斋记录和待补的拜功。",
+          "cap": "日志，一眼看清"
+        },
+        "widgets": {
+          "alt": "手机主屏幕上的 Mihrab 小组件与实时倒计时。",
+          "cap": "小组件与实时活动"
+        }
+      },
+      "spread": {
+        "alt": "Mac 上的 Mihrab：并排的两页穆斯哈夫和章目侧栏，与印刷本一样。",
+        "cap": "在 iPad 和 Mac 上，穆斯哈夫以对开页打开——翻动的是这一对页面，正如印刷本。"
+      }
     }
   }
 }

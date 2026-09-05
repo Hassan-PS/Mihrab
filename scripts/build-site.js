@@ -17,9 +17,13 @@
  * the ones that drift silently are the ones nobody on the project can
  * read. So the eleven translations are rendered from ONE template and one
  * strings file. English and Swedish stay hand-written, because they carry
- * content the others do not (the screenshot gallery and the support
- * section; the Islamiska Förbundet timetable and its 108 towns, which is
- * a Swedish answer to a Swedish question and belongs on no other page).
+ * content the others do not (the feature list written out in full and the
+ * support section; the Islamiska Förbundet timetable and its 108 towns,
+ * which is a Swedish answer to a Swedish question and belongs on no other
+ * page). The screenshots are NOT one of those things — they were, for a
+ * while, and a page describing an app it never shows is a page asking to
+ * be taken on faith — so the gallery is generated into all thirteen from
+ * the SHOTS list below.
  *
  * What every page must agree about — which languages exist, where they
  * live, and that each declares all the others — is generated into all
@@ -79,6 +83,33 @@ const BADGES = [
   },
 ];
 
+/**
+ * The screenshot gallery, in the order the English page shows it.
+ *
+ * The pictures were the one thing the translations did not get: a reader
+ * arriving on /tr/ was asked to believe a description of an app nobody had
+ * shown them. The images carry no words of ours — the app in the shots
+ * speaks English, and that is worth saying rather than hiding — so the
+ * only thing a translation has to supply is the alt text and the caption,
+ * keyed here so a missing one is an error and not a silently English page.
+ */
+const SHOT_V = '?v=2026-09-05';
+const SHOTS = [
+  'home',
+  'home-dark',
+  'tilawah',
+  'mushaf',
+  'mushaf-dark',
+  'quran',
+  'qibla',
+  'month',
+  'month-share',
+  'duas',
+  'tasbih',
+  'log',
+  'widgets',
+];
+
 /** Pages written by hand, which the generator only patches between markers. */
 const HAND_WRITTEN = {
   en: path.join(DOCS, 'index.html'),
@@ -115,6 +146,31 @@ function picker(langs, current) {
 ${items}
   </ul>
 </details>`;
+}
+
+/**
+ * The gallery itself — the same pictures in the same order on every page,
+ * each with the words of the page it is on. English sits at the root and
+ * every other language a directory down, so the only thing that differs
+ * between them is how far back up to the assets.
+ */
+function gallery(code, t) {
+  const at = code === 'en' ? 'assets' : '../assets';
+  const shot = (id, w, h, alt, cap, cls) =>
+    `<figure${cls ? ` class="${cls}"` : ''}>
+        <img src="${at}/img/shot-${id}.png${SHOT_V}" width="${w}" height="${h}" loading="lazy" decoding="async"
+          alt="${esc(alt)}">
+        <figcaption>${esc(cap)}</figcaption>
+      </figure>`;
+  const items = SHOTS.map(id => {
+    const s = t.shots.items[id];
+    if (!s) throw new Error(`${code}: no strings for the "${id}" screenshot`);
+    return `      <li>${shot(id, 810, 1800, s.alt, s.cap)}</li>`;
+  }).join('\n');
+  return `    <ul class="gallery">
+${items}
+    </ul>
+    ${shot('spread', 1600, 878, t.shots.spread.alt, t.shots.spread.cap, 'spread')}`;
 }
 
 /** Reciprocal hreflang: a page that names only itself is ignored. */
@@ -301,6 +357,15 @@ ${t.features.cards
   </div>
 </section>
 
+<section class="shots" id="screenshots">
+  <div class="wrap">
+    <p class="eyebrow">${esc(t.shots.eyebrow)}</p>
+    <h2>${esc(t.shots.h2)}</h2>
+    <p class="lede">${esc(t.shots.lede)}</p>
+${gallery(code, t)}
+  </div>
+</section>
+
 <section class="privacy">
   <div class="wrap">
     <p class="eyebrow">${esc(t.privacy.eyebrow)}</p>
@@ -402,6 +467,7 @@ function build() {
       let text = fs.readFileSync(file, 'utf-8');
       text = patchBlock(text, 'hreflang', hreflang(langs));
       text = patchBlock(text, 'langpicker', picker(langs, code));
+      text = patchBlock(text, 'gallery', gallery(code, l));
       files.set(file, text);
       continue;
     }
@@ -440,4 +506,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { build, picker, hreflang, ORIGIN };
+module.exports = { build, picker, hreflang, gallery, ORIGIN, SHOTS, SHOT_V };

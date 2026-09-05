@@ -28,6 +28,14 @@ const LANGS: Record<string, { name: string; dir: string; path: string }> =
 const host = readFileSync(path.join(DOCS, 'CNAME'), 'utf-8').trim();
 const origin = `https://${host}`;
 
+type Shot = { alt: string; cap: string };
+type Shots = { items: Record<string, Shot>; spread: Shot };
+const SHOT_STRINGS = LANGS as unknown as Record<string, { shots: Shots }>;
+const { SHOTS, SHOT_V } = require('../scripts/build-site') as {
+  SHOTS: string[];
+  SHOT_V: string;
+};
+
 describe('the page agrees with itself about where it lives', () => {
   it.each([
     ['canonical', /<link rel="canonical" href="([^"]+)"/],
@@ -384,6 +392,45 @@ describe('every language the app speaks has a page', () => {
     }
     expect(pageOf('sv')).toMatch(/Islamiska Förbundet/);
   });
+
+  /**
+   * The screenshots were English-only for as long as the translations
+   * existed: twelve pages describing an app they never showed, which is a
+   * page asking to be taken on faith. The gallery is generated now, so
+   * these are the three ways it could quietly go back to that — a picture
+   * missing from a page, a picture missing from disk, or a translated page
+   * carrying the English words under it.
+   */
+  it.each(codes)('%s shows every screenshot, not only the words', code => {
+    const page = pageOf(code);
+    const at = code === 'en' ? 'assets' : '../assets';
+    for (const id of [...SHOTS, 'spread']) {
+      expect(page).toContain(`src="${at}/img/shot-${id}.png${SHOT_V}"`);
+    }
+  });
+
+  it('ships every picture the pages ask for', () => {
+    for (const id of [...SHOTS, 'spread']) {
+      expect(existsSync(path.join(DOCS, 'assets', 'img', `shot-${id}.png`))).toBe(
+        true,
+      );
+    }
+  });
+
+  it.each(codes.filter(c => c !== 'en'))(
+    '%s captions the pictures in its own language',
+    code => {
+      const shots = SHOT_STRINGS[code].shots;
+      const english = SHOT_STRINGS.en.shots;
+      for (const id of SHOTS) {
+        expect(shots.items[id].alt.trim()).not.toBe('');
+        expect(shots.items[id].cap.trim()).not.toBe('');
+        expect(shots.items[id].alt).not.toBe(english.items[id].alt);
+        expect(pageOf(code)).toContain(shots.items[id].cap);
+      }
+      expect(shots.spread.cap).not.toBe(english.spread.cap);
+    },
+  );
 
   it('is what the generator would write right now', () => {
     // The check the release cut runs: a page edited by hand, or a string
