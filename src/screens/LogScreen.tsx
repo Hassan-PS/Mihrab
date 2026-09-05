@@ -107,6 +107,8 @@ import { applyMonthFill, planMonthFill } from '../journal/fillMonths';
 import { resetPlans, type ResetPlan } from '../journal/resetLog';
 import { installedOnDay } from '../journal/installDate';
 import { syncEndOfDayReminderForDay } from '../notifications/endOfDayLog';
+import { dropDaruriAlertsForLogged } from '../notifications/prayerNotifications';
+import { loggedPrayersOn } from '../journal/loggedPrayers';
 import {
   coerceFastEntries,
   findFastEntry,
@@ -448,6 +450,10 @@ export function LogScreen() {
         // is retired here rather than left to fire at us tonight.
         for (const date of dates) {
           void syncEndOfDayReminderForDay(date, next);
+          // Same idea, one prayer at a time: a recorded prayer's own
+          // second-time alerts have nothing left to say, and saying it
+          // anyway is the app contradicting its own journal.
+          void dropDaruriAlertsForLogged(date, loggedPrayersOn(next, date));
         }
       } catch (e) {
         console.warn('LogScreen journal persist failed', e);

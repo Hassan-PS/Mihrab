@@ -588,6 +588,7 @@ export function buildDaruriAlertEvents(
   enabled: readonly string[],
   leadMinutes: number,
   now: Date,
+  logged?: LoggedByDate,
 ): { name: DaruriKey; at: Date }[] {
   if (enabled.length === 0 || week.length === 0) return [];
   const chosen = new Set(enabled.filter(isDaruriKey));
@@ -600,6 +601,10 @@ export function buildDaruriAlertEvents(
     const base = offset === 0 ? dayStart : addDays(dayStart, offset);
     for (const key of DARURI_KEYS) {
       if (!chosen.has(key)) continue;
+      // Already prayed and recorded — see `daruriAnswered`. The date is
+      // the day the WINDOW belongs to, which for Ishāʾ can be the day
+      // before the alert lands.
+      if (daruriAnswered(logged, localYmd(base), key)) continue;
       const clock = day[key];
       if (!clock) continue;
       let at: Date;
@@ -656,6 +661,39 @@ export function buildDaruriAlertEvents(
  * teaches someone to swipe it away, so `buildDaruriEndEvents` groups by
  * instant and the copy names both.
  */
+/**
+ * "Already prayed" — the one fact that makes these alerts wrong.
+ *
+ * A boundary alert tells you your preferred window has closed and an
+ * end-of-window alert tells you the prayer is now qaḍāʾ. Sent to someone
+ * who prayed ʿAṣr at 16:35 and recorded it, both are false statements
+ * made from data the app is already holding. So a prayer that has been
+ * logged for that day takes its boundaries out of the schedule.
+ *
+ * Keyed by the local date the boundary belongs to — not by "today" —
+ * because the schedule runs a week ahead and a day logged in advance
+ * (the backfill button does that) is as answered as one logged this
+ * afternoon.
+ */
+export type LoggedByDate = Readonly<Record<string, readonly string[]>>;
+
+/** YYYY-MM-DD in local time, the shape the journal keys days by. */
+export function localYmd(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/** Whether `key`'s prayer is already recorded on `date`. */
+export function daruriAnswered(
+  logged: LoggedByDate | undefined,
+  date: string,
+  key: DaruriKey,
+): boolean {
+  const day = logged?.[date];
+  return day != null && day.includes(DARURI_OF[key]);
+}
+
 export const DARURI_END_OF: Record<
   DaruriKey,
   { row: 'Sunrise' | 'Maghrib' | 'Fajr'; tomorrow: boolean }
@@ -722,15 +760,23 @@ export function buildDaruriEndEvents(
   baseDay: Date,
   enabled: readonly string[],
   now: Date,
+  logged?: LoggedByDate,
 ): { at: Date; keys: DaruriKey[] }[] {
   if (enabled.length === 0 || week.length === 0) return [];
   const chosen = new Set(enabled.filter(isDaruriKey));
   if (chosen.size === 0) return [];
 
   const byInstant = new Map<number, Set<DaruriKey>>();
+  const dayStart = startOfLocalDay(baseDay);
   week.forEach((_day, offset) => {
     for (const key of DARURI_KEYS) {
       if (!chosen.has(key)) continue;
+      // A prayer that has been recorded does not expire — telling someone
+      // a prayer they logged is now qaḍāʾ is the worst of these to get
+      // wrong, because it is the one that reads as an accusation.
+      if (daruriAnswered(logged, localYmd(addDays(dayStart, offset)), key)) {
+        continue;
+      }
       const at = daruriWindowEnd(week, baseDay, offset, key);
       if (!at || at.getTime() <= now.getTime()) continue;
       const ms = at.getTime();

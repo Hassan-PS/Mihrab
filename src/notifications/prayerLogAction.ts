@@ -55,6 +55,7 @@ import {
   notifyPracticeChanged,
 } from '../practice/practiceStore';
 import { syncEndOfDayReminderForDay } from './endOfDayLog';
+import { dropDaruriAlertsForLogged } from './prayerNotifications';
 import { flushRecordSync } from '../sync/recordChanged';
 
 /**
@@ -201,6 +202,10 @@ export async function logPrayerOnTime(
   // Logging the fifth prayer of the day should retire that evening's
   // "log today's prayers?" prompt — see syncEndOfDayReminderForDay.
   await syncEndOfDayReminderForDay(date, next).catch(() => {});
+  // And this prayer's own second-time alerts, for the same reason one
+  // step earlier: they would tell someone who has just recorded a prayer
+  // that its window is closing, and then that it has expired.
+  await dropDaruriAlertsForLogged(date, [prayer]).catch(() => {});
   return true;
 }
 

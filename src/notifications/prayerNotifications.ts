@@ -12,7 +12,11 @@ import { alertModeFor, type AlertModeMap } from '../settings/alertModes';
 import {
   buildDaruriAlertEvents,
   buildDaruriEndEvents,
+  DARURI_KEYS,
   DARURI_OF,
+  localYmd,
+  type DaruriKey,
+  type LoggedByDate,
 } from '../prayer/daruriTimes';
 import i18n from '../i18n';
 import {
@@ -35,6 +39,10 @@ import { JOURNAL_LOG_ACTION_ID } from './prayerLogAction';
 import { AdhanPlayer } from '../native/AdhanPlayer';
 import { getMutedNextAdhan } from './adhanMute';
 import type { TimingsMap } from '../types/prayer';
+import {
+  loggedByDate,
+  storedJournalEntries,
+} from '../journal/loggedPrayers';
 import { isNonPrayerEvent } from '../types/prayer';
 import {
   buildPrePrayerReminderEvents,
@@ -45,6 +53,61 @@ import {
  *  journal action. The predicate lives in types/prayer beside the list, so
  *  every path that has to ask asks the same question — this file used to own
  *  the only copy, and the mute task did not have one. */
+
+/** The days a second-time schedule can reach: today and the cached week. */
+function daruriDatesFrom(base: Date): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < 8; i++) {
+    const d = new Date(base);
+    d.setDate(d.getDate() + i);
+    out.push(localYmd(d));
+  }
+  return out;
+}
+
+/**
+ * The id of an end-of-window notification, carrying the prayers it covers.
+ *
+ * The keys are IN THE ID on purpose. Ẓuhr and ʿAṣr expire together at
+ * Maghrib and are therefore one notification, so when only one of them is
+ * logged the right move is not to cancel it but to redraw it naming the
+ * other — and the code that does that runs from a journal write, in a
+ * background handler that has no prayer times and no schedule in front of
+ * it. Everything it needs is the instant and the keys, and both are here.
+ */
+export function daruriEndId(ms: number, keys: readonly DaruriKey[]): string {
+  return `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-end-${ms}-${keys.join('+')}`;
+}
+
+/** Read an end-of-window id back. Null for anything else. */
+export function parseDaruriEndId(
+  id: string,
+): { ms: number; keys: DaruriKey[] } | null {
+  const m = new RegExp(
+    `^${PRAYER_NOTIFICATION_ID_PREFIX}daruri-end-(\\d+)-(.+)$`,
+  ).exec(id);
+  if (!m) return null;
+  const keys = m[2]
+    .split('+')
+    .filter((k): k is DaruriKey =>
+      (DARURI_KEYS as readonly string[]).includes(k),
+    );
+  return keys.length ? { ms: Number(m[1]), keys } : null;
+}
+
+/** Read a boundary (start) alert id back. Null for anything else. */
+export function parseDaruriStartId(
+  id: string,
+): { ms: number; key: DaruriKey } | null {
+  const m = new RegExp(
+    `^${PRAYER_NOTIFICATION_ID_PREFIX}daruri-(\\d+)-(\\w+)$`,
+  ).exec(id);
+  if (!m) return null;
+  const key = m[2];
+  return (DARURI_KEYS as readonly string[]).includes(key)
+    ? { ms: Number(m[1]), key: key as DaruriKey }
+    : null;
+}
 
 /** Safety cap for how long a delivered prayer notification lingers before it
  *  auto-dismisses, when the next prayer is unusually far off (e.g. Isha→Fajr). */
@@ -393,6 +456,88 @@ function ymdLocal(d: Date): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
+/**
+ * A prayer has just been recorded — take its boundaries off the schedule.
+ *
+ * The counterpart to `syncEndOfDayReminderForDay`, and it exists for the
+ * same reason: the schedule was written before the journal knew anything,
+ * and by the time a boundary fires the person may have answered the
+ * question it is about. An alert saying ʿAṣr's preferred time has closed,
+ * or that ʿAṣr is now qaḍāʾ, sent to someone who prayed ʿAṣr at 16:35 and
+ * logged it, is the app contradicting its own records.
+ *
+ * Runs off the PENDING IDS rather than off the times, because this is
+ * called from a journal write — including the one inside a notification
+ * action handler, where there is no screen, no week of prayer times and
+ * no settings in front of us. Everything needed is in the ids.
+ *
+ * The end-of-window notification is shared: Ẓuhr and ʿAṣr expire together
+ * at Maghrib. Logging one of them must not cancel the other's warning, so
+ * a partially-answered one is REDRAWN with the remaining prayers rather
+ * than dropped — same instant, same trigger, one fewer name.
+ */
+export async function dropDaruriAlertsForLogged(
+  date: string,
+  prayers: readonly string[],
+): Promise<void> {
+  if (prayers.length === 0) return;
+  const answered = new Set(prayers);
+  // The same plain sound the schedule gives these: a boundary is not a
+  // prayer and never speaks with the adhan.
+  const sound = getNotificationSoundOption('default');
+  const ids = await notifee.getTriggerNotificationIds().catch(() => []);
+
+  for (const id of ids) {
+    const start = parseDaruriStartId(id);
+    if (start) {
+      // The date the WINDOW belongs to, recovered from the instant. A
+      // lead time can put the alert on the previous day, so the window's
+      // own day is the one that has to match — and for Ishāʾ that is the
+      // day before the boundary lands.
+      if (
+        answered.has(DARURI_OF[start.key]) &&
+        localYmd(new Date(start.ms)) === date
+      ) {
+        await notifee.cancelTriggerNotification(id).catch(() => {});
+      }
+      continue;
+    }
+
+    const end = parseDaruriEndId(id);
+    if (!end) continue;
+    const keep = end.keys.filter(k => !answered.has(DARURI_OF[k]));
+    if (keep.length === end.keys.length) continue;
+    await notifee.cancelTriggerNotification(id).catch(() => {});
+    if (keep.length === 0) continue;
+    // Redrawn from the id alone: the instant is in it, and the body of
+    // this notification never mentions a time.
+    const names = keep
+      .map(k => i18n.t(`prayer.${DARURI_OF[k]}`, { defaultValue: DARURI_OF[k] }))
+      .join(i18n.t('common.listJoin', { defaultValue: ' & ' }));
+    const body = i18n.t('alertCopy.daruriExpired', {
+      defaultValue: 'The time has ended — pray it as qada',
+    });
+    await notifee
+      .createTriggerNotification(
+        {
+          id: daruriEndId(end.ms, keep),
+          title: names,
+          body,
+          ios: { sound: sound.iosSound },
+          android: {
+            style: { type: AndroidStyle.BIGTEXT, text: body },
+            channelId: sound.androidChannelId,
+            smallIcon: 'ic_stat_prayer',
+            pressAction: { id: 'default' },
+            timeoutAfter: MAX_LINGER_MS,
+          },
+        },
+        { type: TriggerType.TIMESTAMP, timestamp: end.ms },
+      )
+      .catch(() => {});
+  }
+}
+
 export async function syncPrayerNotifications(params: {
   enabled: boolean;
   prePrayerReminderMinutes: number;
@@ -441,6 +586,21 @@ export async function syncPrayerNotifications(params: {
    * two lists to keep in step would be two chances to disagree.
    */
   daruriEndAlerts?: boolean;
+  /**
+   * Which prayers are already recorded, by local date — issue #23.
+   *
+   * A boundary alert for a prayer the journal already holds is the app
+   * telling someone they are late for something they have done.
+   *
+   * Optional, and read from storage when it is absent — the same shape
+   * `rescheduleEndOfDayLogReminders` uses, and for the same reason: the
+   * callers are screens that do not otherwise hold the journal, and
+   * making each of them learn about it to schedule a notification is a
+   * worse trade than one decrypt here. It is skipped entirely unless a
+   * second-time alert is actually armed, which for almost everyone means
+   * it never happens.
+   */
+  daruriLogged?: LoggedByDate;
   /**
    * How each row announces itself — adhan / notification / silent, keyed
    * by prayer. Sparse: a row that is absent keeps what the app did
@@ -509,12 +669,24 @@ export async function syncPrayerNotifications(params: {
   const daruriMinutes = clampPrePrayerReminderMinutes(
     params.daruriAlertMinutes ?? 0,
   );
+  // Only when something is armed: with no boundary chosen there is
+  // nothing for the journal to suppress, and this read decrypts.
+  const daruriLogged =
+    (params.daruriAlerts ?? []).length === 0
+      ? undefined
+      : (params.daruriLogged ??
+        loggedByDate(
+          await storedJournalEntries().catch(() => []),
+          daruriDatesFrom(params.baseDate ?? now),
+        ));
+
   const daruriEvents = buildDaruriAlertEvents(
     [params.today, ...(params.tomorrow ? [params.tomorrow] : []), ...(params.week?.slice(2, 4) ?? [])],
     params.baseDate ?? now,
     params.daruriAlerts ?? [],
     daruriMinutes,
     now,
+    daruriLogged,
   );
 
   const daruriWeek = [
@@ -528,6 +700,7 @@ export async function syncPrayerNotifications(params: {
         params.baseDate ?? now,
         params.daruriAlerts ?? [],
         now,
+        daruriLogged,
       )
     : [];
 
@@ -569,9 +742,7 @@ export async function syncPrayerNotifications(params: {
     );
   }
   for (const e of daruriEndEvents) {
-    desiredIds.add(
-      `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-end-${e.at.getTime()}`,
-    );
+    desiredIds.add(daruriEndId(e.at.getTime(), e.keys));
   }
   await cancelOwnedPrayerNotifications([...desiredIds]);
   // Sweep up any previously-delivered prayer/reminder alerts that are now stale
@@ -782,7 +953,7 @@ export async function syncPrayerNotifications(params: {
     });
     await notifee.createTriggerNotification(
       {
-        id: `${PRAYER_NOTIFICATION_ID_PREFIX}daruri-end-${e.at.getTime()}`,
+        id: daruriEndId(e.at.getTime(), e.keys),
         title: names,
         body,
         ios: { sound: reminderSound.iosSound },
