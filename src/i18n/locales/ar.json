@@ -46,7 +46,8 @@
     "done": "تم",
     "delete": "حذف",
     "cancelled": "أُلغي.",
-    "listJoin": " و"
+    "listJoin": " و",
+    "confirmDelete": "اضغط مرة أخرى للحذف"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "ربع السرعة",
     "scrubFine": "تحكّم دقيق",
     "translationUnavailable": "لا تتوفر ترجمة لهذه الآية.",
-    "oftenRead": "الأكثر قراءةً"
+    "oftenRead": "الأكثر قراءةً",
+    "listenDeleteAudio": "حذف {{name}} من هذا الجهاز",
+    "listenDownloadReciter": "تنزيل {{name}}، نحو {{size}}",
+    "listenDownloadRunning": "جارٍ التنزيل · {{done}} من {{total}}"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

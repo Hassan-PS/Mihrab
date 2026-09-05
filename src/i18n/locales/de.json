@@ -46,7 +46,8 @@
     "done": "Fertig",
     "delete": "Löschen",
     "cancelled": "Abgebrochen.",
-    "listJoin": " & "
+    "listJoin": " & ",
+    "confirmDelete": "Zum Löschen erneut tippen"
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "Viertel Geschwindigkeit",
     "scrubFine": "Feinsteuerung",
     "translationUnavailable": "Keine Übersetzung für diesen Vers.",
-    "oftenRead": "Häufig gelesen"
+    "oftenRead": "Häufig gelesen",
+    "listenDeleteAudio": "{{name}} von diesem Gerät löschen",
+    "listenDownloadReciter": "{{name}} herunterladen, etwa {{size}}",
+    "listenDownloadRunning": "Wird geladen · {{done}} von {{total}}"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

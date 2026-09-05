@@ -46,7 +46,8 @@
     "done": "Terminé",
     "delete": "Supprimer",
     "cancelled": "Annulé.",
-    "listJoin": " et "
+    "listJoin": " et ",
+    "confirmDelete": "Appuyez à nouveau pour supprimer"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "Quart de vitesse",
     "scrubFine": "Réglage fin",
     "translationUnavailable": "Pas de traduction pour ce verset.",
-    "oftenRead": "Souvent lues"
+    "oftenRead": "Souvent lues",
+    "listenDeleteAudio": "Supprimer {{name}} de cet appareil",
+    "listenDownloadReciter": "Télécharger {{name}}, environ {{size}}",
+    "listenDownloadRunning": "Téléchargement · {{done}} sur {{total}}"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

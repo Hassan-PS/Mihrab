@@ -475,6 +475,35 @@ export async function reciterAudioStats(
   }
 }
 
+/**
+ * Every reciter with anything on disk, keyed by id.
+ *
+ * For the picker, which has to decide per row whether to offer a download
+ * or a delete — and cannot ask forty-two times. One `ls` of the audio
+ * folder names the reciters that have a directory at all, which on a real
+ * device is nought to three of them, and only those are measured.
+ */
+export async function downloadedReciters(): Promise<
+  Record<string, ReciterAudioStats>
+> {
+  const out: Record<string, ReciterAudioStats> = {};
+  try {
+    const base = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/audio`;
+    if (!(await ReactNativeBlobUtil.fs.exists(base))) return out;
+    const dirs = await ReactNativeBlobUtil.fs.ls(base).catch(() => []);
+    for (const id of dirs) {
+      const stats = await reciterAudioStats(id);
+      // A directory with nothing usable in it is not a download. It is
+      // what a cancelled run leaves behind, and offering to delete it
+      // would be offering to delete nothing.
+      if (stats.files > 0) out[id] = stats;
+    }
+  } catch {
+    /* an unreadable folder is an empty one, for this purpose */
+  }
+  return out;
+}
+
 /** Delete all downloaded audio for one reciter. */
 export async function deleteReciterAudio(reciterId: string): Promise<void> {
   try {

@@ -46,7 +46,8 @@
     "done": "সম্পন্ন",
     "delete": "মুছুন",
     "cancelled": "বাতিল করা হয়েছে।",
-    "listJoin": " ও "
+    "listJoin": " ও ",
+    "confirmDelete": "মুছতে আবার চাপুন"
   },
   "home": {
     "loadingPrayer": "নামাজের সময় লোড হচ্ছে...",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "এক-চতুর্থাংশ গতি",
     "scrubFine": "সূক্ষ্ম নিয়ন্ত্রণ",
     "translationUnavailable": "এই আয়াতের কোনো অনুবাদ নেই।",
-    "oftenRead": "প্রায়ই পড়া হয়"
+    "oftenRead": "প্রায়ই পড়া হয়",
+    "listenDeleteAudio": "এই ডিভাইস থেকে {{name}} মুছুন",
+    "listenDownloadReciter": "{{name}} ডাউনলোড করুন, প্রায় {{size}}",
+    "listenDownloadRunning": "ডাউনলোড হচ্ছে · {{total}}-এর {{done}}"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

@@ -18,12 +18,21 @@
  *
  * ── THE FILES ARE THE SAME FILES ──────────────────────────────────────
  *
- * This page's download writes into `<Documents>/quran/audio/{reciter}/`,
+ * Downloaded recitation lives in `<Documents>/quran/audio/{reciter}/`,
  * which is exactly where the reader's prefetch writes and exactly where
  * its player looks. Downloading a reciter to listen to on a flight makes
  * the mushaf's play-from-here work offline in the same act, and someone
- * who has been reading with recitation for a month finds this download
+ * who has been reading with recitation for a month finds that download
  * already part-done. One folder, one answer to "do I have this".
+ *
+ * Which is why the download is not on this page. It used to be: a card
+ * under the transport, "Keep <name> on this device", sized and buttoned
+ * — one card describing one reciter, the selected one, sitting between
+ * the player and the surah list on every visit whether or not anything
+ * was ever downloaded. "Which voices do I have offline?" was a question
+ * about forty-two reciters answered one selection at a time. It belongs
+ * on the list of reciters, so that is where it went: see
+ * `ReciterPickerSheet`.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -75,20 +84,7 @@ import {
 import { findReciter } from '../../quran/audio/reciters';
 import { ReciterPickerSheet } from '../../quran/audio/ReciterPickerSheet';
 import {
-  deleteReciterAudio,
-  estimatedReciterBytes,
-  reciterAudioStats,
-  totalAyahCount,
-  type ReciterAudioStats,
 } from '../../quran/audio/audioStore';
-import {
-  cancelQuranDownload,
-  isJobRunning,
-  quranDownloadState,
-  startQuranDownload,
-  subscribeQuranDownload,
-  type QuranDownloadState,
-} from '../../quran/quranDownloadManager';
 import { setQuranPrefs, useQuranState } from '../../quran/quranState';
 import { useBreakpoint } from '../../responsive/breakpoints';
 
@@ -142,13 +138,6 @@ const PAGE_VIEWPORT_FALLBACK = 200;
 const TO_TOP_AFTER = 700;
 /** Movement in one direction before it counts as a direction. */
 const SCROLL_HYSTERESIS = 8;
-
-function formatBytes(bytes: number): string {
-  if (bytes <= 0) return '0 MB';
-  const mb = bytes / (1024 * 1024);
-  if (mb >= 1024) return `${(mb / 1024).toFixed(1)} GB`;
-  return `${Math.round(mb)} MB`;
-}
 
 function formatClock(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return '0:00';
@@ -500,34 +489,8 @@ export function TilawahScreen() {
   const reciter = findReciter(reciterId);
 
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [download, setDownload] = useState<QuranDownloadState>(
-    quranDownloadState,
-  );
-  const [stats, setStats] = useState<ReciterAudioStats | null>(null);
   const [sleepMinutes, setSleepMinutes] = useState(0);
   const [sleepEndsAt, setSleepEndsAt] = useState<number | null>(null);
-
-  useEffect(() => subscribeQuranDownload(setDownload), []);
-
-  /**
-   * What this reciter has on disk.
-   *
-   * Re-read when the reciter changes and whenever a download stops
-   * running — the moment it ends is the moment the number is wrong, and a
-   * screen that keeps saying "4,102 of 6,236" after the run completed is
-   * the kind of thing people report as the download not working.
-   */
-  const refreshStats = useCallback(() => {
-    let alive = true;
-    void reciterAudioStats(reciterId).then(s => {
-      if (alive) setStats(s);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [reciterId]);
-
-  useEffect(refreshStats, [refreshStats, download.running]);
 
   // ── The sleep timer ─────────────────────────────────────────────────
   //
@@ -842,26 +805,6 @@ export function TilawahScreen() {
     setQuranPrefs({ playbackRate: rate });
     void setPlaybackRate(rate);
   }, []);
-
-  // ── The download ────────────────────────────────────────────────────
-
-  const job = useMemo(
-    () => ({ kind: 'audio' as const, reciterId }),
-    [reciterId],
-  );
-  const runningThis = isJobRunning(job);
-  const runningOther = download.running != null && !runningThis;
-  const total = totalAyahCount();
-  const onDisk = stats?.files ?? 0;
-  const complete = stats?.complete ?? false;
-
-  const startDownload = useCallback(() => {
-    startQuranDownload(job);
-  }, [job]);
-
-  const removeDownload = useCallback(() => {
-    void deleteReciterAudio(reciterId).then(refreshStats);
-  }, [reciterId, refreshStats]);
 
   // ── Rows ────────────────────────────────────────────────────────────
 
@@ -1344,143 +1287,14 @@ export function TilawahScreen() {
         </View>
       ) : null}
 
-      {/* ── Offline ───────────────────────────────────────────────── */}
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: palette.card, borderColor: palette.border ?? palette.muted },
-        ]}>
-        <Text style={[styles.cardTitle, { color: palette.text }]}>
-          {t('quran.listenDownloadTitle', {
-            defaultValue: 'Keep {{name}} on this device',
-            name: reciter.name,
-          })}
-        </Text>
-        <Text style={[styles.cardBody, { color: palette.muted }]}>
-          {t('quran.listenDownloadBody', {
-            defaultValue:
-              'The whole Quran in this voice, about {{size}}. The reader plays the same files, so this works there too.',
-            size: formatBytes(estimatedReciterBytes(reciterId)),
-          })}
-        </Text>
+      {/* The offline card is gone — see ReciterPickerSheet.
 
-        {runningThis ? (
-          <>
-            <View
-              style={[styles.progressTrack, { backgroundColor: palette.accentBg }]}>
-              <View
-                style={[
-                  styles.progressFill,
-                  {
-                    backgroundColor: palette.accentSolid,
-                    width: `${
-                      download.progress.total > 0
-                        ? Math.round(
-                            (download.progress.done / download.progress.total) *
-                              100,
-                          )
-                        : 0
-                    }%`,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={[styles.hint, { color: palette.muted }]}>
-              {t('quran.downloadProgressAyahs', {
-                done: download.progress.done,
-                total: download.progress.total,
-              })}
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => cancelQuranDownload()}
-              style={({ pressed }) => [
-                styles.action,
-                { borderColor: palette.border ?? palette.muted },
-                pressed && styles.pressed,
-              ]}>
-              <Text style={[styles.actionText, { color: palette.text }]}>
-                {t('common.cancel', { defaultValue: 'Cancel' })}
-              </Text>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <Text style={[styles.hint, { color: palette.muted }]}>
-              {complete
-                ? t('quran.listenDownloadComplete', {
-                    defaultValue: 'Complete · {{size}}',
-                    size: formatBytes(stats?.bytes ?? 0),
-                  })
-                : t('quran.listenDownloadPartial', {
-                    defaultValue:
-                      '{{done}} of {{total}} ayahs here · {{size}}',
-                    done: onDisk,
-                    total,
-                    size: formatBytes(stats?.bytes ?? 0),
-                  })}
-            </Text>
-            <View style={styles.actionRow}>
-              {complete ? null : (
-                <Pressable
-                  accessibilityRole="button"
-                  disabled={runningOther}
-                  onPress={startDownload}
-                  style={({ pressed }) => [
-                    styles.action,
-                    {
-                      backgroundColor: runningOther
-                        ? palette.controlBg
-                        : palette.accentBg,
-                      borderColor: runningOther
-                        ? 'transparent'
-                        : palette.accentSolid,
-                    },
-                    pressed && styles.pressed,
-                  ]}>
-                  <Text
-                    style={[
-                      styles.actionText,
-                      {
-                        color: runningOther ? palette.muted : palette.accentSolid,
-                      },
-                    ]}>
-                    {onDisk > 0
-                      ? t('quran.listenDownloadResume', {
-                          defaultValue: 'Continue downloading',
-                        })
-                      : t('quran.listenDownloadStart', {
-                          defaultValue: 'Download',
-                        })}
-                  </Text>
-                </Pressable>
-              )}
-              {onDisk > 0 ? (
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={removeDownload}
-                  style={({ pressed }) => [
-                    styles.action,
-                    { borderColor: palette.border ?? palette.muted },
-                    pressed && styles.pressed,
-                  ]}>
-                  <Text style={[styles.actionText, { color: palette.text }]}>
-                    {t('common.delete', { defaultValue: 'Delete' })}
-                  </Text>
-                </Pressable>
-              ) : null}
-            </View>
-            {runningOther ? (
-              <Text style={[styles.hint, { color: palette.muted }]}>
-                {t('quran.listenDownloadBusy', {
-                  defaultValue:
-                    'Something else is downloading. One at a time, so neither is halved.',
-                })}
-              </Text>
-            ) : null}
-          </>
-        )}
-      </View>
+          It described one reciter, the selected one, so "which voices do I
+          have?" meant selecting each of forty-two and reading the card
+          again; and it sat between the transport and the surah list on
+          every visit whether anything was downloaded or not. The reciter
+          list answers it for all of them at once, and that is where the
+          download and the delete live now. */}
 
       <Text style={[styles.listLabel, { color: palette.muted }]}>
         {t('quran.listenPickSurah', { defaultValue: 'Start from' })}

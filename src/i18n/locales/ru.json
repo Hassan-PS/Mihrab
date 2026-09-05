@@ -46,7 +46,8 @@
     "done": "Готово",
     "delete": "Удалить",
     "cancelled": "Отменено.",
-    "listJoin": " и "
+    "listJoin": " и ",
+    "confirmDelete": "Нажмите ещё раз, чтобы удалить"
   },
   "home": {
     "loadingPrayer": "Загрузка времени молитв…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "Четверть скорости",
     "scrubFine": "Точная настройка",
     "translationUnavailable": "Для этого аята нет перевода.",
-    "oftenRead": "Читают чаще всего"
+    "oftenRead": "Читают чаще всего",
+    "listenDeleteAudio": "Удалить {{name}} с этого устройства",
+    "listenDownloadReciter": "Скачать {{name}}, около {{size}}",
+    "listenDownloadRunning": "Загрузка · {{done}} из {{total}}"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

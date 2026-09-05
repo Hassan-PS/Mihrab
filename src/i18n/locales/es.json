@@ -46,7 +46,8 @@
     "done": "Hecho",
     "delete": "Eliminar",
     "cancelled": "Cancelado.",
-    "listJoin": " y "
+    "listJoin": " y ",
+    "confirmDelete": "Toca otra vez para eliminar"
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "Un cuarto de velocidad",
     "scrubFine": "Control fino",
     "translationUnavailable": "No hay traducción para esta aleya.",
-    "oftenRead": "De lectura frecuente"
+    "oftenRead": "De lectura frecuente",
+    "listenDeleteAudio": "Eliminar {{name}} de este dispositivo",
+    "listenDownloadReciter": "Descargar {{name}}, unos {{size}}",
+    "listenDownloadRunning": "Descargando · {{done}} de {{total}}"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

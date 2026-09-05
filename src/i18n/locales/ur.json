@@ -46,7 +46,8 @@
     "done": "ہو گیا",
     "delete": "حذف کریں",
     "cancelled": "منسوخ کر دیا گیا۔",
-    "listJoin": " اور "
+    "listJoin": " اور ",
+    "confirmDelete": "حذف کرنے کے لیے دوبارہ دبائیں"
   },
   "home": {
     "loadingPrayer": "نماز کے اوقات لوڈ ہو رہے ہیں…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "چوتھائی رفتار",
     "scrubFine": "باریک کنٹرول",
     "translationUnavailable": "اس آیت کا کوئی ترجمہ دستیاب نہیں۔",
-    "oftenRead": "اکثر پڑھی جانے والی"
+    "oftenRead": "اکثر پڑھی جانے والی",
+    "listenDeleteAudio": "{{name}} کو اس ڈیوائس سے حذف کریں",
+    "listenDownloadReciter": "{{name}} ڈاؤن لوڈ کریں، تقریباً {{size}}",
+    "listenDownloadRunning": "ڈاؤن لوڈ ہو رہا ہے · {{total}} میں سے {{done}}"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

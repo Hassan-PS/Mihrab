@@ -46,7 +46,8 @@
     "done": "完成",
     "delete": "删除",
     "cancelled": "已取消。",
-    "listJoin": " 与 "
+    "listJoin": " 与 ",
+    "confirmDelete": "再次点按以删除"
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "四分之一速",
     "scrubFine": "精细调节",
     "translationUnavailable": "此节暂无译文。",
-    "oftenRead": "常读章节"
+    "oftenRead": "常读章节",
+    "listenDeleteAudio": "从本设备删除{{name}}",
+    "listenDownloadReciter": "下载{{name}}，约 {{size}}",
+    "listenDownloadRunning": "正在下载 · {{total}} 中的 {{done}}"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

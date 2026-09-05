@@ -46,7 +46,8 @@
     "done": "Klar",
     "delete": "Ta bort",
     "cancelled": "Avbruten.",
-    "listJoin": " & "
+    "listJoin": " & ",
+    "confirmDelete": "Tryck igen för att ta bort"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "Kvarts hastighet",
     "scrubFine": "Finjustering",
     "translationUnavailable": "Ingen översättning för denna vers.",
-    "oftenRead": "Läses ofta"
+    "oftenRead": "Läses ofta",
+    "listenDeleteAudio": "Ta bort {{name}} från den här enheten",
+    "listenDownloadReciter": "Ladda ner {{name}}, cirka {{size}}",
+    "listenDownloadRunning": "Laddar ner · {{done}} av {{total}}"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

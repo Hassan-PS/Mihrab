@@ -46,7 +46,8 @@
     "done": "Bitti",
     "delete": "Sil",
     "cancelled": "İptal edildi.",
-    "listJoin": " ve "
+    "listJoin": " ve ",
+    "confirmDelete": "Silmek için tekrar dokunun"
   },
   "home": {
     "loadingPrayer": "Namaz vakitleri yükleniyor…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "Çeyrek hız",
     "scrubFine": "Hassas kontrol",
     "translationUnavailable": "Bu ayet için çeviri yok.",
-    "oftenRead": "Sık okunanlar"
+    "oftenRead": "Sık okunanlar",
+    "listenDeleteAudio": "{{name}} kaydını bu cihazdan sil",
+    "listenDownloadReciter": "{{name}} indir, yaklaşık {{size}}",
+    "listenDownloadRunning": "İndiriliyor · {{total}} içinden {{done}}"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

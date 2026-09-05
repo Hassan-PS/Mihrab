@@ -46,7 +46,8 @@
     "done": "Selesai",
     "delete": "Hapus",
     "cancelled": "Dibatalkan.",
-    "listJoin": " & "
+    "listJoin": " & ",
+    "confirmDelete": "Ketuk lagi untuk menghapus"
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "Seperempat kecepatan",
     "scrubFine": "Kontrol halus",
     "translationUnavailable": "Tidak ada terjemahan untuk ayat ini.",
-    "oftenRead": "Sering dibaca"
+    "oftenRead": "Sering dibaca",
+    "listenDeleteAudio": "Hapus {{name}} dari perangkat ini",
+    "listenDownloadReciter": "Unduh {{name}}, sekitar {{size}}",
+    "listenDownloadRunning": "Mengunduh · {{done}} dari {{total}}"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

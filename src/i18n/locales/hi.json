@@ -46,7 +46,8 @@
     "done": "हो गया",
     "delete": "हटाएँ",
     "cancelled": "रद्द किया गया।",
-    "listJoin": " और "
+    "listJoin": " और ",
+    "confirmDelete": "हटाने के लिए फिर दबाएँ"
   },
   "home": {
     "loadingPrayer": "प्रार्थना का समय लोड हो रहा है...",
@@ -1122,7 +1123,10 @@
     "scrubQuarter": "चौथाई गति",
     "scrubFine": "सूक्ष्म नियंत्रण",
     "translationUnavailable": "इस आयत का कोई अनुवाद नहीं है।",
-    "oftenRead": "अक्सर पढ़ी जाने वाली"
+    "oftenRead": "अक्सर पढ़ी जाने वाली",
+    "listenDeleteAudio": "{{name}} को इस डिवाइस से हटाएँ",
+    "listenDownloadReciter": "{{name}} डाउनलोड करें, लगभग {{size}}",
+    "listenDownloadRunning": "डाउनलोड हो रहा है · {{total}} में से {{done}}"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",
