@@ -59,17 +59,27 @@ describe('assets are published under the names people already have', () => {
 describe('a run that stops partway can be undone in one line', () => {
   it('the revert covers everything phase 2 writes, including the journal', () => {
     const revert = script.match(/^REVERT="([^"]*)"/m)?.[1] ?? '';
+    // COVERAGE, not a literal substring. `git checkout -- docs` undoes
+    // every file under it, and naming them one by one is what went stale:
+    // the site grew to fourteen pages and the list still said one. So a
+    // path counts as covered when it, or a directory above it, is there.
+    const paths = revert.replace(/^git checkout -- /, '').trim().split(/\s+/);
+    const covers = (f: string) =>
+      paths.some(p => f === p || f.startsWith(`${p}/`));
     for (const f of [
       'android/app/build.gradle',
       'ios/PrayerApp.xcodeproj/project.pbxproj',
       'docs/index.html',
+      // Every locale page the stamp reaches, not just the English one.
+      'docs/sv/index.html',
+      'docs/ar/index.html',
       'contrib/fdroid/com.prayer_times.yml',
       // The one that was missing: the entry is appended BEFORE the release
       // commit, so rerunning after a failed publish would add a second
       // entry for the same version.
       'docs/release-log.md',
     ]) {
-      expect(revert).toContain(f);
+      expect(covers(f)).toBe(true);
     }
   });
 
