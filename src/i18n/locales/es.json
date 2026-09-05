@@ -1121,7 +1121,8 @@
     "scrubHalf": "Media velocidad",
     "scrubQuarter": "Un cuarto de velocidad",
     "scrubFine": "Control fino",
-    "translationUnavailable": "No hay traducción para esta aleya."
+    "translationUnavailable": "No hay traducción para esta aleya.",
+    "oftenRead": "De lectura frecuente"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

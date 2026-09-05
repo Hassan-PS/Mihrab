@@ -1121,7 +1121,8 @@
     "scrubHalf": "आधी गति",
     "scrubQuarter": "चौथाई गति",
     "scrubFine": "सूक्ष्म नियंत्रण",
-    "translationUnavailable": "इस आयत का कोई अनुवाद नहीं है।"
+    "translationUnavailable": "इस आयत का कोई अनुवाद नहीं है।",
+    "oftenRead": "अक्सर पढ़ी जाने वाली"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

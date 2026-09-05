@@ -62,6 +62,17 @@ type PrayerRowProps = {
    */
   alertMode?: PrayerAlertMode;
   onCycleAlertMode?: () => void;
+  /**
+   * The widest time on this card, which sizes the time column on EVERY
+   * row of it.
+   *
+   * Without it the column is as wide as its own time, and the control
+   * beside it moves with that width: on a 12-hour clock "11:09 PM" is a
+   * digit wider than "5:36 AM", so one row's bell sat a digit to the left
+   * of the other six. The card knows all the times, so it picks the
+   * longest and hands the same string to every row.
+   */
+  timeSample?: string;
 };
 
 function PrayerRowImpl({
@@ -76,6 +87,7 @@ function PrayerRowImpl({
   daruriApprox = false,
   alertMode,
   onCycleAlertMode,
+  timeSample,
 }: PrayerRowProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -154,18 +166,37 @@ function PrayerRowImpl({
             secondary={isSecondary}
           />
         ) : null}
-        <View style={styles.timeWrap}>
-          {/* Only for a row the user aimed at. The next prayer is already
-              emphasised, and marking it too would say nothing. */}
-          {isChosen ? (
-            <View
-              style={[styles.chosenDot, { backgroundColor: palette.accent }]}
-            />
-          ) : null}
+        {/* Only for a row the user aimed at. The next prayer is already
+            emphasised, and marking it too would say nothing.
+
+            Its slot is held on every row, dot or no dot: it sits between
+            the control and the time, so a slot that appeared only on the
+            chosen row would slide that row's control left — the same
+            misalignment the sizing sample below exists to prevent. */}
+        <View
+          style={[
+            styles.chosenDot,
+            isChosen && { backgroundColor: palette.accent },
+          ]}
+        />
+        <View style={styles.timeCol}>
+          {/* Invisible, and hidden from screen readers: it is here only
+              to give the column a width, and it carries the widest time
+              on the card at the heaviest weight the column ever uses, so
+              the real time below can never outgrow it. */}
+          <Text
+            aria-hidden
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+            style={[styles.time, tabularNumeralStyle, styles.timeSample]}
+            maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+            {timeSample ?? clock(rawTime)}
+          </Text>
           <Text
             style={[
               styles.time,
               tabularNumeralStyle,
+              styles.timeReal,
               {
                 color: isNext
                   ? palette.accent
@@ -199,10 +230,12 @@ const styles = StyleSheet.create({
   nameWrap: {
     flexShrink: 1,
   },
+  // No `gap`: the dot's slot carries the spacing on both of its sides, so
+  // the control-to-time distance is the same whether the dot is drawn or
+  // not.
   trailing: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
   },
   daruri: {
     fontSize: 11,
@@ -220,7 +253,18 @@ const styles = StyleSheet.create({
     borderBottomEndRadius: 3,
   },
   name: { fontSize: 17 },
-  timeWrap: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  chosenDot: { width: 6, height: 6, borderRadius: 3 },
+  chosenDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginStart: 12,
+    marginEnd: 7,
+    backgroundColor: 'transparent',
+  },
+  timeCol: { justifyContent: 'center' },
+  timeSample: { opacity: 0, fontWeight: '700' },
+  // Laid over the sample, flush with the trailing edge — `end`, so it is
+  // the right edge in English and the left in Arabic.
+  timeReal: { position: 'absolute', top: 0, end: 0 },
   time: { fontSize: 17 },
 });

@@ -1121,7 +1121,8 @@
     "scrubHalf": "نصف السرعة",
     "scrubQuarter": "ربع السرعة",
     "scrubFine": "تحكّم دقيق",
-    "translationUnavailable": "لا تتوفر ترجمة لهذه الآية."
+    "translationUnavailable": "لا تتوفر ترجمة لهذه الآية.",
+    "oftenRead": "الأكثر قراءةً"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

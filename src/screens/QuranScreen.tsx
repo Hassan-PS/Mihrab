@@ -83,6 +83,17 @@ import { useTabBarScroll } from '../navigation/tabBarVisibility';
 
 type Tab = 'surah' | 'juz' | 'bookmarks';
 
+/**
+ * The surahs with a standing appointment — issue #23.
+ *
+ * Al-Kahf on Friday and Al-Mulk before sleep, both named in well-known
+ * ḥadīth, are the two people open on a schedule rather than look up.
+ * Deliberately just the two: a shortcut row grows into a second list the
+ * moment it tries to be a favourites feature, and this one is meant to
+ * cost nothing to skip.
+ */
+const OFTEN_READ = [18, 67] as const;
+
 type JuzRow = { juz: number; page: number; startSurah: SurahIndex | undefined };
 
 export function QuranScreen() {
@@ -922,6 +933,47 @@ export function QuranScreen() {
         </Pressable>
       </View>
 
+      {/* The two surahs with a place in the week — issue #23.
+          
+          Al-Kahf on Friday and Al-Mulk before sleep are read on a
+          schedule rather than looked up, and reaching them meant
+          scrolling 18 and 67 rows or typing a name that has four
+          spellings in Latin letters. Only on the surah tab, and only
+          while nothing is being searched: they are a shortcut past the
+          list, so above a list that is already narrowed they would be in
+          the way. */}
+      {tab === 'surah' && !query.trim() && results == null ? (
+        <View style={styles.oftenRow}>
+          <Text style={[styles.oftenLabel, { color: palette.muted }]}>
+            {t('quran.oftenRead', { defaultValue: 'Often read' })}
+          </Text>
+          {OFTEN_READ.map(number => {
+            const surah = findSurah(number);
+            if (!surah) return null;
+            return (
+              <Pressable
+                key={number}
+                accessibilityRole="button"
+                accessibilityLabel={`${surah.romanized} — ${surah.english}`}
+                onPress={() => openSurah(number)}
+                style={[
+                  styles.oftenChip,
+                  {
+                    backgroundColor: palette.card,
+                    ...cardEdgeStyle(palette),
+                  },
+                ]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.oftenChipText, { color: palette.text }]}>
+                  {isArabic ? surah.arabic : surah.romanized}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
+
       {/* Manage downloads (v2.7.28), and beside it the way to a second
           muṣḥaf.
           
@@ -1739,6 +1791,20 @@ const styles = StyleSheet.create({
   },
   menuCancel: { alignItems: 'center', paddingVertical: 8 },
   downloadsLink: { paddingVertical: 2 },
+  oftenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 10,
+  },
+  oftenLabel: { fontSize: 12, fontWeight: '700' },
+  oftenChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  oftenChipText: { fontSize: 13, fontWeight: '600' },
   /** Tilāwah leads as a chip; the two plain links trail behind it. */
   downloadsRow: {
     flexDirection: 'row',

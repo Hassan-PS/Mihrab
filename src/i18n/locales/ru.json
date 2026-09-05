@@ -1121,7 +1121,8 @@
     "scrubHalf": "Половина скорости",
     "scrubQuarter": "Четверть скорости",
     "scrubFine": "Точная настройка",
-    "translationUnavailable": "Для этого аята нет перевода."
+    "translationUnavailable": "Для этого аята нет перевода.",
+    "oftenRead": "Читают чаще всего"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

@@ -1121,7 +1121,8 @@
     "scrubHalf": "Yarım hız",
     "scrubQuarter": "Çeyrek hız",
     "scrubFine": "Hassas kontrol",
-    "translationUnavailable": "Bu ayet için çeviri yok."
+    "translationUnavailable": "Bu ayet için çeviri yok.",
+    "oftenRead": "Sık okunanlar"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

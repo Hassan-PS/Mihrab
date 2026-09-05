@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format is inspired 
 
 ## [Unreleased]
 
+### Added
+- **Today and the Log say which day it is, in both calendars.** The Hijri date was on the widget and nowhere in the app — issue #23. Today's card carries it under the countdown, and the tracker under the day it is logging, where the line above reads "Today" and says nothing about which day that is.
+- **Al-Kahf and Al-Mulk have a door on the Qur'an page** — issue #23. The two surahs read on a schedule rather than looked up, reachable without scrolling eighteen and sixty-seven rows or typing a name that has four spellings in Latin letters.
+
+### Fixed
+- **The alert bells on the Today card line up.** The control sits beside its time, and the time column was as wide as its own time — so on a 12-hour clock the one row with a two-digit hour ("11:09 PM") pushed its bell a digit to the left of the other six, and a column of controls read as a ragged edge. Every row is now sized by the widest time on the card. The dot that marks a prayer you aimed the countdown at holds its place on every row too, rather than nudging that one row's control aside.
+
 ## [2.15.1] — 2026-09-05
 
 ### Fixed

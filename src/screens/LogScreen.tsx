@@ -70,6 +70,7 @@ import {
   PracticeHeatmap,
   weeksToCover,
 } from '../practice/PracticeHeatmap';
+import { formatHijriLabel } from '../hijri/formatHijriLabel';
 import { computePracticeStats, owedDays } from '../practice/practiceStats';
 import { getCachedPrayerTimes } from '../prayer/prayerStorage';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
@@ -1086,6 +1087,19 @@ export function LogScreen() {
     [selectedDate, i18n.language],
   );
 
+  /**
+   * The same day in the Hijri calendar — issue #23.
+   *
+   * The widget had it and the tracker did not, which made "did I fast on
+   * the 13th?" a question you left the app to answer. On today it carries
+   * the Gregorian date too, because the line above it reads "Today" and
+   * says nothing about which day that is.
+   */
+  const selectedHijriLine = useMemo(() => {
+    const hijri = formatHijriLabel(selectedDate);
+    return isToday ? `${selectedLabel} · ${hijri}` : hijri;
+  }, [selectedDate, selectedLabel, isToday]);
+
   return (
     <ScrollView
       ref={scrollRef}
@@ -1266,6 +1280,12 @@ export function LogScreen() {
               numberOfLines={1}
             >
               {isToday ? t('journal.todayLabel') : selectedLabel}
+            </Text>
+            <Text
+              style={[styles.dayHijri, { color: palette.muted }]}
+              numberOfLines={1}
+            >
+              {selectedHijriLine}
             </Text>
             {isToday ? null : (
               <Pressable
@@ -1869,6 +1889,7 @@ const styles = StyleSheet.create({
   dayArrowGlyph: { fontSize: 20, fontWeight: '700', lineHeight: 22 },
   dayNameWrap: { flex: 1, alignItems: 'center' },
   dayName: { fontSize: 16, fontWeight: '700' },
+  dayHijri: { fontSize: 12, marginTop: 1 },
   backToToday: { fontSize: 12, fontWeight: '700', marginTop: 1 },
   ghostBtn: {
     paddingHorizontal: 11,

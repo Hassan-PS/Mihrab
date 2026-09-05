@@ -1121,7 +1121,8 @@
     "scrubHalf": "Setengah kecepatan",
     "scrubQuarter": "Seperempat kecepatan",
     "scrubFine": "Kontrol halus",
-    "translationUnavailable": "Tidak ada terjemahan untuk ayat ini."
+    "translationUnavailable": "Tidak ada terjemahan untuk ayat ini.",
+    "oftenRead": "Sering dibaca"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

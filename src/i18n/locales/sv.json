@@ -1121,7 +1121,8 @@
     "scrubHalf": "Halv hastighet",
     "scrubQuarter": "Kvarts hastighet",
     "scrubFine": "Finjustering",
-    "translationUnavailable": "Ingen översättning för denna vers."
+    "translationUnavailable": "Ingen översättning för denna vers.",
+    "oftenRead": "Läses ofta"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

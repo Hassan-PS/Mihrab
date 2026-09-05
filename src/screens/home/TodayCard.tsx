@@ -113,6 +113,7 @@ const HeroToday = memo(function HeroToday({
   onExpire,
   today,
   expanded,
+  dateLine,
 }: {
   /** What the countdown is aimed at: the next prayer, or the user's pick. */
   target: { name: string; at: Date };
@@ -122,6 +123,16 @@ const HeroToday = memo(function HeroToday({
   onExpire: () => void;
   today: TimingsMap;
   expanded: boolean;
+  /**
+   * Today's date, Gregorian and Hijri — issue #23.
+   *
+   * Every other day's hero says which day it is; today's said only how
+   * long until the next prayer, and the Hijri date was on the widget but
+   * nowhere in the app. It goes at the foot of the hero rather than the
+   * head: what someone opens this screen for is the number, and a date
+   * above it would be a line to read past.
+   */
+  dateLine?: string;
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -255,6 +266,14 @@ const HeroToday = memo(function HeroToday({
             </Text>
           </View>
         </View>
+      ) : null}
+      {dateLine ? (
+        <Text
+          style={[styles.heroTodayDate, { color: palette.muted }]}
+          numberOfLines={1}
+          maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+          {dateLine}
+        </Text>
       ) : null}
     </View>
   );
@@ -449,6 +468,34 @@ function TodayCardImpl({
     () => DISPLAY_ORDER.filter(key => timings[key]),
     [timings],
   );
+  /**
+   * The longest time on this card, which sizes the time column on all of
+   * its rows — see `timeSample` in PrayerRow.
+   *
+   * Length is the right comparison because the numerals are tabular: two
+   * times in the same locale and the same clock format differ only in
+   * how many equal-width digits they carry.
+   */
+  const timeSample = useMemo(
+    () =>
+      visibleRows.reduce((widest, key) => {
+        const shown = clock(timings[key]);
+        return shown.length > widest.length ? shown : widest;
+      }, ''),
+    [visibleRows, timings, clock],
+  );
+  /**
+   * Today's date on today's card — issue #23.
+   *
+   * Built from the same two callbacks the other days' hero already uses,
+   * so the Gregorian half is formatted once for the whole card and the
+   * Hijri half cannot drift from the one on the widget.
+   */
+  const todayDateLine = useMemo(() => {
+    const gregorian = getDayDate(0);
+    const hijri = getHijriDate?.(0);
+    return hijri ? `${gregorian} · ${hijri}` : gregorian;
+  }, [getDayDate, getHijriDate]);
   const handleSelect = useCallback((offset: number) => setSelected(offset), []);
 
   /**
@@ -514,6 +561,7 @@ function TodayCardImpl({
             onExpire={clearChosen}
             today={timings}
             expanded={expanded}
+            dateLine={todayDateLine}
           />
         ) : (
           <HeroOtherDay
@@ -587,6 +635,7 @@ function TodayCardImpl({
           onCycleAlertMode={
             isToday ? () => cycleAlertMode(key) : undefined
           }
+          timeSample={timeSample}
         />
       ))}
 
@@ -644,6 +693,7 @@ const styles = StyleSheet.create({
   heroAt: { fontSize: 17, fontWeight: '600' },
   heroDate: { fontSize: 34, fontWeight: '700', marginTop: 2 },
   heroHijri: { fontSize: 14, marginTop: 2 },
+  heroTodayDate: { fontSize: 13, marginTop: 10 },
   firstPill: {
     marginTop: 13,
     alignSelf: 'flex-start',

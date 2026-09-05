@@ -1121,7 +1121,8 @@
     "scrubHalf": "Demi-vitesse",
     "scrubQuarter": "Quart de vitesse",
     "scrubFine": "Réglage fin",
-    "translationUnavailable": "Pas de traduction pour ce verset."
+    "translationUnavailable": "Pas de traduction pour ce verset.",
+    "oftenRead": "Souvent lues"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

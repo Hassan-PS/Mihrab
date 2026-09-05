@@ -1121,7 +1121,8 @@
     "scrubHalf": "অর্ধেক গতি",
     "scrubQuarter": "এক-চতুর্থাংশ গতি",
     "scrubFine": "সূক্ষ্ম নিয়ন্ত্রণ",
-    "translationUnavailable": "এই আয়াতের কোনো অনুবাদ নেই।"
+    "translationUnavailable": "এই আয়াতের কোনো অনুবাদ নেই।",
+    "oftenRead": "প্রায়ই পড়া হয়"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

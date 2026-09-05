@@ -1121,7 +1121,8 @@
     "scrubHalf": "Half speed",
     "scrubQuarter": "Quarter speed",
     "scrubFine": "Fine control",
-    "translationUnavailable": "No translation for this ayah."
+    "translationUnavailable": "No translation for this ayah.",
+    "oftenRead": "Often read"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",
