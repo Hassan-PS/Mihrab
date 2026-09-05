@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format is inspired 
 
 ## [Unreleased]
 
+## [2.15.1] — 2026-09-05
+
+### Fixed
+- **A prayer you have logged is no longer told it is late.** The second-time alerts were built from prayer times and nothing else, so someone who prayed ʿAṣr at 16:35 and recorded it was still told at 18:40 that ʿAṣr's preferred time had closed, and at sunset that ʿAṣr was now qaḍāʾ — the app contradicting its own journal, from data it was already holding. The schedule now skips a boundary whose prayer the journal has answered, keyed by the day the window belongs to rather than by "today", and logging a prayer drops what is already scheduled rather than waiting for the next resync. Where two prayers share one alert — Ẓuhr and ʿAṣr expire together at Maghrib, Maghrib and ʿIshāʾ at the next Fajr — logging one redraws the notification naming the other, instead of cancelling it and taking the other's warning away. A prayer recorded as missed counts as answered too. Reported in #23.
+
+### Changed
+- **The Moroccan timetable is refreshed** from the Ministry of Habous.
+
 ## [2.15.0] — 2026-09-04
 
 Tilāwah: the Qur'an as something you put on. Plus the Mālikī second times answering what was actually asked for, morning and evening adhkār, and a 12-hour clock.

@@ -1,0 +1,2 @@
+• The second-time alerts no longer fire for a prayer you have already logged. Recording ʿAṣr now takes its boundary alert and its "the time has ended" alert off the schedule — and where two prayers share one alert, the other prayer keeps its warning.
+• The Moroccan timetable is refreshed from the Ministry of Habous.
