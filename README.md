@@ -29,6 +29,8 @@
 
 <img src="branding/readme/04_tasbih.png" width="32%" alt="Tasbih counter — dhikr with tabular digits">&nbsp;<img src="branding/readme/05_qibla.png" width="32%" alt="Qibla compass — the bearing, the signal strength and a cross-check">&nbsp;<img src="branding/readme/06_journal.png" width="32%" alt="Prayer journal — the practice graph, the on-time streak and what is owed">
 
+<img src="branding/readme/07_tilawah.png" width="32%" alt="Tilawah — a recitation of Al-Baqarah with the reciter, a speed control and a sleep timer">&nbsp;<img src="branding/readme/08_fasting.png" width="32%" alt="Fasting — today's fast, the Ramadan and voluntary counts, and the coming Sunnah days">&nbsp;<img src="branding/readme/09_widgets.png" width="32%" alt="Android home-screen widgets — the day's times with the countdown and practice graph, above the khatmah widget">
+
 </div>
 
 ---
@@ -41,6 +43,7 @@
 - **Adhan & reminders** — 17 built-in adhan recordings (or import your own), a pre-prayer reminder window, and exact-alarm scheduling so the adhan lands on time even under aggressive battery managers.
 - **Sources, including national ones** — AlAdhan, PrayTimes.dev, on-device calculation (Adhan JS), or a published national table: **Sweden** (Islamiska Förbundet) and **Morocco** (the Ministry of Habous and Islamic Affairs), rebuilt daily by a workflow in this repo and matched to your nearest listed city. "Automatic" picks the right one for where you are.
 - **Tuned to your mosque** — Per-prayer minute offsets, Hanafi or standard Asr, and the extra marks when you want them: sunrise, Islamic midnight, the last third of the night, and the first third after Isha.
+- **Maliki second times** — Off by default: turn them on and each prayer gains a line saying when its preferred time (*ikhtiyārī*) closes and its late time (*ḍarūrī*) begins, computed on your device from your coordinates whichever source the times come from. From *Al-Murshid al-Muʿīn* (Ibn ʿĀshir). Fajr's and Asr's boundaries are marked approximate, and where the sun never reaches the angle nothing is shown rather than a guess.
 - **Qibla compass** — A live dial with signal strength, a hold-still prompt when the sensors need it, and a cross-check against the sun. Falls back to the bearing when the phone has no magnetometer.
 - **Saved locations** — Keep the places you check on and switch between them freely; automatic location and saved places are not alternatives, and the month sheet names the city rather than printing coordinates.
 - **A month you can hand over** — The whole month as a sheet, Hijri and Gregorian side by side, exportable as an image or a PDF in any of the app's languages, with a QR back to the app.

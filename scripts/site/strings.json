@@ -9,21 +9,33 @@
           "alt": "Home screen: the next prayer with a live countdown above the day’s times.",
           "cap": "Home — next prayer and countdown"
         },
+        "home-maliki": {
+          "alt": "The same day with the Maliki second times switched on: under each prayer, when its preferred (ikhtiyari) window closes.",
+          "cap": "Maliki second times"
+        },
         "home-dark": {
           "alt": "The same home screen in the dark theme.",
           "cap": "Home, dark"
         },
         "tilawah": {
-          "alt": "Tilāwah: a recitation playing through Al-Baqarah, with the reciter, a speed control, a sleep timer, and the muṣḥaf page below with the recited ayah lit.",
+          "alt": "Tilāwah: a recitation of Al-Baqarah with the reciter, the transport, a speed control and a sleep timer, and the surah list below to start anywhere.",
           "cap": "Tilāwah — put it on and let it run"
+        },
+        "reciters": {
+          "alt": "The reciter list: forty-two voices, each row saying what is already on the device, with a button to download it or delete it.",
+          "cap": "Reciters, and what you have offline"
         },
         "mushaf": {
           "alt": "The mushaf mid-recitation: the recited word lit on the page, with the player below it.",
           "cap": "Mushaf — the recited word, lit"
         },
         "mushaf-dark": {
-          "alt": "The same page in the reader’s night tone.",
+          "alt": "The reader in its night theme.",
           "cap": "Mushaf, night"
+        },
+        "memorize": {
+          "alt": "The recitation panel: reciter, speed, repeat each ayah, repeat the range, a pause between repeats, and hiding the Arabic or the translation while reviewing.",
+          "cap": "Repeat, pause, hide — for memorising"
         },
         "quran": {
           "alt": "The Quran tab: continue reading, the khatmah plan, the verse of the day, and the Tilāwah button in the title bar.",
@@ -53,9 +65,17 @@
           "alt": "The prayer journal: a practice graph, on-time streak, fasts kept and what is owed.",
           "cap": "The journal, at a glance"
         },
+        "fasting": {
+          "alt": "The fasting page: today, the Ramadan and voluntary counts, and the coming Sunnah fasting days with how far off each one is.",
+          "cap": "Fasting — Ramadan and the Sunnah days"
+        },
         "widgets": {
           "alt": "A phone home screen carrying Mihrab widgets and the Live Activity countdown.",
           "cap": "Widgets and the Live Activity"
+        },
+        "widgets-android": {
+          "alt": "An Android home screen with the prayer-times widget — the day's times, the countdown, the streak and the practice graph — above the khatmah widget.",
+          "cap": "Android home-screen widgets"
         }
       },
       "spread": {
@@ -74,21 +94,33 @@
           "alt": "Hemskärmen: nästa bön med en levande nedräkning ovanför dagens tider.",
           "cap": "Hem — nästa bön och nedräkning"
         },
+        "home-maliki": {
+          "alt": "Samma dag med malikitiska andratider på: under varje bön står när dess föredragna tid (ikhtiyari) tar slut.",
+          "cap": "Malikitiska andratider"
+        },
         "home-dark": {
           "alt": "Samma hemskärm i mörkt tema.",
           "cap": "Hem, mörkt"
         },
         "tilawah": {
-          "alt": "Tilawah: en recitation som går genom Al-Baqarah, med reciter, hastighet, insomningstimer och mushaf-sidan under där den reciterade versen lyser.",
+          "alt": "Tilāwah: en recitation av Al-Baqarah med recitatör, uppspelningskontroller, hastighet och sovtimer, och surahlistan nedanför för att börja var som helst.",
           "cap": "Tilawah — sätt på och låt den gå"
+        },
+        "reciters": {
+          "alt": "Recitatörslistan: fyrtiotvå röster, varje rad visar vad som redan finns på enheten, med en knapp för att ladda ner eller radera.",
+          "cap": "Recitatörer, och vad du har offline"
         },
         "mushaf": {
           "alt": "Mushafen mitt i recitationen: det reciterade ordet lyser på sidan, med spelaren under.",
           "cap": "Mushaf — det reciterade ordet, upplyst"
         },
         "mushaf-dark": {
-          "alt": "Samma sida i läsarens nattton.",
+          "alt": "Läsaren i sitt nattläge.",
           "cap": "Mushaf, natt"
+        },
+        "memorize": {
+          "alt": "Recitationspanelen: recitatör, hastighet, upprepa varje vers, upprepa stycket, paus mellan upprepningarna och att dölja arabiskan eller översättningen under repetition.",
+          "cap": "Upprepa, pausa, dölj — för memorering"
         },
         "quran": {
           "alt": "Koran-fliken: fortsätt läsa, khatmah-planen, dagens vers och Tilawah-knappen i titelraden.",
@@ -118,9 +150,17 @@
           "alt": "Böndagboken: en övningsgraf, svit av böner i tid, hållna fastor och vad som återstår.",
           "cap": "Dagboken, med ett ögonkast"
         },
+        "fasting": {
+          "alt": "Fastesidan: idag, antalet ramadan- och frivilliga fastor, och kommande sunnafastedagar med hur långt bort var och en är.",
+          "cap": "Fasta — ramadan och sunnadagarna"
+        },
         "widgets": {
           "alt": "En hemskärm på en telefon med Mihrabs widgetar och den levande nedräkningen.",
           "cap": "Widgetar och den levande nedräkningen"
+        },
+        "widgets-android": {
+          "alt": "En Android-hemskärm med bönetidswidgeten — dagens tider, nedräkningen, sviten och praktikgrafen — ovanför khatmah-widgeten.",
+          "cap": "Widgetar på Android-hemskärmen"
         }
       },
       "spread": {
@@ -244,21 +284,33 @@
           "alt": "الشاشة الرئيسية: الصلاة القادمة مع عدّ تنازلي حيّ فوق مواقيت اليوم.",
           "cap": "الرئيسية — الصلاة القادمة والعدّ التنازلي"
         },
+        "home-maliki": {
+          "alt": "اليوم نفسه مع تفعيل الأوقات الثانية المالكية: تحت كل صلاة موعد انتهاء وقتها الاختياري.",
+          "cap": "الأوقات الثانية المالكية"
+        },
         "home-dark": {
           "alt": "الشاشة الرئيسية نفسها بالمظهر الداكن.",
           "cap": "الرئيسية، داكنة"
         },
         "tilawah": {
-          "alt": "صفحة التلاوة: سورة البقرة تُتلى، مع القارئ والسرعة ومؤقّت النوم وصفحة المصحف أسفلها والآية المتلوّة مضاءة.",
+          "alt": "تِلاوة: تلاوة سورة البقرة مع القارئ وأزرار التشغيل والسرعة ومؤقّت النوم، وقائمة السور أسفلها للبدء من أي موضع.",
           "cap": "التلاوة — شغّلها ودعها تمضي"
+        },
+        "reciters": {
+          "alt": "قائمة القرّاء: اثنان وأربعون صوتًا، كل سطر يبيّن ما هو محفوظ على الجهاز، مع زر للتنزيل أو الحذف.",
+          "cap": "القرّاء، وما لديك دون إنترنت"
         },
         "mushaf": {
           "alt": "المصحف أثناء التلاوة: الكلمة المتلوّة مضاءة على الصفحة والمشغّل أسفلها.",
           "cap": "المصحف — الكلمة المتلوّة مضاءة"
         },
         "mushaf-dark": {
-          "alt": "الصفحة نفسها بالمظهر الليلي للقارئ.",
+          "alt": "القارئ في وضعه الليلي.",
           "cap": "المصحف، ليلاً"
+        },
+        "memorize": {
+          "alt": "لوحة التلاوة: القارئ، والسرعة، وتكرار كل آية، وتكرار المقطع، ووقفة بين التكرارات، وإخفاء العربية أو الترجمة أثناء المراجعة.",
+          "cap": "تكرار ووقفة وإخفاء — للحفظ"
         },
         "quran": {
           "alt": "تبويب القرآن: متابعة القراءة، وخطة الختمة، وآية اليوم، وزرّ التلاوة في الشريط العلوي.",
@@ -288,9 +340,17 @@
           "alt": "مفكرة الصلاة: رسم بياني للمواظبة، وسلسلة الصلوات في وقتها، والصيام، وما في الذمّة.",
           "cap": "المفكرة في لمحة"
         },
+        "fasting": {
+          "alt": "صفحة الصيام: اليوم، وعدد أيام رمضان والتطوع، وأيام الصيام المسنونة القادمة وكم بقي على كل منها.",
+          "cap": "الصيام — رمضان وأيام السنة"
+        },
         "widgets": {
           "alt": "شاشة هاتف تحمل أدوات محراب والعدّ التنازلي الحيّ.",
           "cap": "الأدوات والنشاط الحيّ"
+        },
+        "widgets-android": {
+          "alt": "شاشة رئيسية على أندرويد فيها أداة مواقيت الصلاة — مواقيت اليوم والعد التنازلي والمواظبة ورسم المتابعة — فوق أداة الختمة.",
+          "cap": "أدوات الشاشة الرئيسية على أندرويد"
         }
       },
       "spread": {
@@ -414,21 +474,33 @@
           "alt": "Ana ekran: günün vakitlerinin üstünde bir sonraki namaz ve canlı geri sayım.",
           "cap": "Ana ekran — sonraki namaz ve geri sayım"
         },
+        "home-maliki": {
+          "alt": "Aynı gün, Maliki ikinci vakitleri açıkken: her namazın altında ihtiyari vaktinin ne zaman bittiği.",
+          "cap": "Maliki ikinci vakitleri"
+        },
         "home-dark": {
           "alt": "Aynı ana ekran, koyu temada.",
           "cap": "Ana ekran, koyu"
         },
         "tilawah": {
-          "alt": "Tilavet sayfası: Bakara suresi çalıyor; kâri, hız, uyku zamanlayıcısı ve altta okunan ayeti ışıyan mushaf sayfası.",
+          "alt": "Tilâvet: Bakara sûresinin tilaveti; kâri, oynatma denetimleri, hız ve uyku zamanlayıcısı, altında istediğiniz yerden başlamak için sûre listesi.",
           "cap": "Tilavet — koy, kendi akışında gitsin"
+        },
+        "reciters": {
+          "alt": "Kâri listesi: kırk iki ses; her satır cihazda hâlihazırda ne olduğunu söyler, indirme ya da silme düğmesiyle.",
+          "cap": "Kâriler ve çevrimdışı olanlar"
         },
         "mushaf": {
           "alt": "Tilavet sırasında mushaf: okunan kelime sayfada ışıyor, altında oynatıcı.",
           "cap": "Mushaf — okunan kelime, ışıklı"
         },
         "mushaf-dark": {
-          "alt": "Aynı sayfa, okuyucunun gece tonunda.",
+          "alt": "Okuyucu gece temasında.",
           "cap": "Mushaf, gece"
+        },
+        "memorize": {
+          "alt": "Tilavet paneli: kâri, hız, her ayeti tekrar, aralığı tekrar, tekrarlar arası duraklama ve tekrar ederken Arapçayı ya da meali gizleme.",
+          "cap": "Tekrar, duraklama, gizleme — ezber için"
         },
         "quran": {
           "alt": "Kuran sekmesi: kaldığın yer, hatim planı, günün ayeti ve başlık çubuğundaki Tilavet düğmesi.",
@@ -458,9 +530,17 @@
           "alt": "Namaz günlüğü: alışkanlık grafiği, vaktinde kılma serisi, tutulan oruçlar ve kaza borcu.",
           "cap": "Günlük, tek bakışta"
         },
+        "fasting": {
+          "alt": "Oruç sayfası: bugün, Ramazan ve nafile sayıları, ve yaklaşan sünnet oruç günleri ile her birine kalan süre.",
+          "cap": "Oruç — Ramazan ve sünnet günleri"
+        },
         "widgets": {
           "alt": "Mihrab widget’larını ve canlı geri sayımı taşıyan bir telefon ana ekranı.",
           "cap": "Widget’lar ve canlı etkinlik"
+        },
+        "widgets-android": {
+          "alt": "Namaz vakitleri widget'ı bulunan bir Android ana ekranı — günün vakitleri, geri sayım, seri ve takip grafiği — hatim widget'ının üstünde.",
+          "cap": "Android ana ekran widget'ları"
         }
       },
       "spread": {
@@ -584,21 +664,33 @@
           "alt": "ہوم اسکرین: دن کے اوقات کے اوپر اگلی نماز اور چلتی ہوئی گنتی۔",
           "cap": "ہوم — اگلی نماز اور گنتی"
         },
+        "home-maliki": {
+          "alt": "وہی دن مالکی ثانوی اوقات کے ساتھ: ہر نماز کے نیچے یہ کہ اس کا اختیاری وقت کب ختم ہوتا ہے۔",
+          "cap": "مالکی ثانوی اوقات"
+        },
         "home-dark": {
           "alt": "وہی ہوم اسکرین، تاریک تھیم میں۔",
           "cap": "ہوم، تاریک"
         },
         "tilawah": {
-          "alt": "تلاوت کا صفحہ: سورۃ البقرہ چل رہی ہے — قاری، رفتار، سلیپ ٹائمر، اور نیچے مصحف کا صفحہ جس پر پڑھی جانے والی آیت روشن ہے۔",
+          "alt": "تلاوت: سورۃ البقرہ کی تلاوت، قاری، پلے بیک کنٹرول، رفتار اور سلیپ ٹائمر کے ساتھ، اور نیچے سورتوں کی فہرست تاکہ کہیں سے بھی شروع کیا جا سکے۔",
           "cap": "تلاوت — لگا دیجیے اور چلنے دیجیے"
+        },
+        "reciters": {
+          "alt": "قاریوں کی فہرست: بیالیس آوازیں، ہر سطر بتاتی ہے کہ ڈیوائس پر کیا موجود ہے، ڈاؤن لوڈ یا حذف کرنے کے بٹن کے ساتھ۔",
+          "cap": "قاری، اور آف لائن کیا موجود ہے"
         },
         "mushaf": {
           "alt": "تلاوت کے دوران مصحف: پڑھا جانے والا لفظ صفحے پر روشن، نیچے پلیئر۔",
           "cap": "مصحف — پڑھا جانے والا لفظ، روشن"
         },
         "mushaf-dark": {
-          "alt": "وہی صفحہ قاری کے رات والے رنگ میں۔",
+          "alt": "قاری اپنے رات کے انداز میں۔",
           "cap": "مصحف، رات"
+        },
+        "memorize": {
+          "alt": "تلاوت پینل: قاری، رفتار، ہر آیت کی تکرار، پورے حصے کی تکرار، تکرار کے درمیان وقفہ، اور دہراتے وقت عربی یا ترجمہ چھپانا۔",
+          "cap": "تکرار، وقفہ، اخفا — حفظ کے لیے"
         },
         "quran": {
           "alt": "قرآن ٹیب: پڑھائی جاری رکھیں، ختم قرآن کا منصوبہ، آیتِ روز، اور عنوان کی پٹی میں تلاوت کا بٹن۔",
@@ -628,9 +720,17 @@
           "alt": "نماز کی ڈائری: پابندی کا گراف، وقت پر نمازوں کا تسلسل، رکھے گئے روزے اور قضا نمازیں۔",
           "cap": "ڈائری، ایک نظر میں"
         },
+        "fasting": {
+          "alt": "روزے کا صفحہ: آج، رمضان اور نفلی روزوں کی گنتی، اور آنے والے سنت روزوں کے دن اور ہر ایک میں کتنا وقت باقی ہے۔",
+          "cap": "روزہ — رمضان اور سنت کے دن"
+        },
         "widgets": {
           "alt": "ایک فون کی ہوم اسکرین جس پر محراب کے ویجٹ اور چلتی ہوئی گنتی ہے۔",
           "cap": "ویجٹ اور لائیو ایکٹیویٹی"
+        },
+        "widgets-android": {
+          "alt": "اینڈرائیڈ ہوم اسکرین جس پر نماز اوقات کا وجٹ ہے — دن کے اوقات، الٹی گنتی، تسلسل اور پریکٹس گراف — ختمہ وجٹ کے اوپر۔",
+          "cap": "اینڈرائیڈ ہوم اسکرین وجٹ"
         }
       },
       "spread": {
@@ -754,21 +854,33 @@
           "alt": "Layar utama: salat berikutnya dengan hitung mundur langsung di atas jadwal hari ini.",
           "cap": "Beranda — salat berikutnya dan hitung mundur"
         },
+        "home-maliki": {
+          "alt": "Hari yang sama dengan waktu kedua Maliki aktif: di bawah setiap salat, kapan waktu pilihannya (ikhtiyari) berakhir.",
+          "cap": "Waktu kedua Maliki"
+        },
         "home-dark": {
           "alt": "Layar utama yang sama dalam tema gelap.",
           "cap": "Beranda, gelap"
         },
         "tilawah": {
-          "alt": "Halaman Tilawah: Al-Baqarah sedang diputar, dengan qari, kecepatan, pengatur waktu tidur, dan halaman mushaf di bawahnya tempat ayat yang dibaca menyala.",
+          "alt": "Tilāwah: bacaan Al-Baqarah dengan qari, kendali pemutaran, pengatur kecepatan dan pengatur waktu tidur, serta daftar surah di bawahnya untuk memulai dari mana saja.",
           "cap": "Tilawah — putar dan biarkan berjalan"
+        },
+        "reciters": {
+          "alt": "Daftar qari: empat puluh dua suara, tiap baris menyebut apa yang sudah ada di perangkat, dengan tombol untuk mengunduh atau menghapus.",
+          "cap": "Qari, dan yang tersimpan offline"
         },
         "mushaf": {
           "alt": "Mushaf saat dibacakan: kata yang dibaca menyala di halaman, pemutar di bawahnya.",
           "cap": "Mushaf — kata yang dibaca, menyala"
         },
         "mushaf-dark": {
-          "alt": "Halaman yang sama dalam nada malam pembaca.",
+          "alt": "Pembaca dalam tema malam.",
           "cap": "Mushaf, malam"
+        },
+        "memorize": {
+          "alt": "Panel tilawah: qari, kecepatan, ulangi tiap ayat, ulangi rentang, jeda antar pengulangan, dan menyembunyikan teks Arab atau terjemahan saat mengulang.",
+          "cap": "Ulang, jeda, sembunyikan — untuk menghafal"
         },
         "quran": {
           "alt": "Tab Al-Qur’an: lanjutkan membaca, rencana khatam, ayat hari ini, dan tombol Tilawah di bilah judul.",
@@ -798,9 +910,17 @@
           "alt": "Jurnal salat: grafik kebiasaan, rentetan tepat waktu, puasa yang dijalani, dan utang salat.",
           "cap": "Jurnal, sekilas"
         },
+        "fasting": {
+          "alt": "Halaman puasa: hari ini, jumlah puasa Ramadan dan sunah, serta hari-hari puasa sunah berikutnya dan berapa lama lagi.",
+          "cap": "Puasa — Ramadan dan hari-hari sunah"
+        },
         "widgets": {
           "alt": "Layar beranda ponsel dengan widget Mihrab dan hitung mundur langsung.",
           "cap": "Widget dan Live Activity"
+        },
+        "widgets-android": {
+          "alt": "Layar utama Android dengan widget waktu salat — waktu hari ini, hitung mundur, rentetan, dan grafik amalan — di atas widget khatmah.",
+          "cap": "Widget layar utama Android"
         }
       },
       "spread": {
@@ -924,21 +1044,33 @@
           "alt": "Startbildschirm: das nächste Gebet mit laufendem Countdown über den Zeiten des Tages.",
           "cap": "Start — nächstes Gebet und Countdown"
         },
+        "home-maliki": {
+          "alt": "Derselbe Tag mit eingeschalteten malikitischen Zweitzeiten: unter jedem Gebet, wann sein bevorzugtes Fenster (ikhtiyari) endet.",
+          "cap": "Malikitische Zweitzeiten"
+        },
         "home-dark": {
           "alt": "Derselbe Startbildschirm im dunklen Design.",
           "cap": "Start, dunkel"
         },
         "tilawah": {
-          "alt": "Die Tilawa-Seite: Al-Baqara läuft, mit Rezitator, Tempo, Einschlaftimer und darunter der Mushaf-Seite, auf der der rezitierte Vers leuchtet.",
+          "alt": "Tilāwah: eine Rezitation von Al-Baqara mit Rezitator, Wiedergabesteuerung, Tempo und Sleeptimer, darunter die Suren-Liste, um überall zu beginnen.",
           "cap": "Tilawa — anmachen und laufen lassen"
+        },
+        "reciters": {
+          "alt": "Die Rezitatorenliste: zweiundvierzig Stimmen; jede Zeile sagt, was schon auf dem Gerät liegt, mit einer Schaltfläche zum Laden oder Löschen.",
+          "cap": "Rezitatoren — und was offline da ist"
         },
         "mushaf": {
           "alt": "Der Mushaf während der Rezitation: das rezitierte Wort leuchtet auf der Seite, darunter der Player.",
           "cap": "Mushaf — das rezitierte Wort, hervorgehoben"
         },
         "mushaf-dark": {
-          "alt": "Dieselbe Seite im Nachtton des Lesers.",
+          "alt": "Der Leser im Nachtmodus.",
           "cap": "Mushaf, nachts"
+        },
+        "memorize": {
+          "alt": "Das Rezitationspanel: Rezitator, Tempo, jede Aya wiederholen, den Abschnitt wiederholen, Pause zwischen den Wiederholungen und das Ausblenden von Arabisch oder Übersetzung beim Wiederholen.",
+          "cap": "Wiederholen, pausieren, ausblenden — zum Auswendiglernen"
         },
         "quran": {
           "alt": "Der Koran-Tab: Weiterlesen, der Khatma-Plan, der Vers des Tages und die Tilawa-Schaltfläche in der Titelleiste.",
@@ -968,9 +1100,17 @@
           "alt": "Das Gebetstagebuch: Übungsgraph, Serie pünktlicher Gebete, gehaltene Fasten und was nachzuholen ist.",
           "cap": "Das Tagebuch auf einen Blick"
         },
+        "fasting": {
+          "alt": "Die Fastenseite: heute, die Zählung der Ramadan- und der freiwilligen Fasten sowie die kommenden Sunna-Fastentage mit dem Abstand zu jedem.",
+          "cap": "Fasten — Ramadan und die Sunna-Tage"
+        },
         "widgets": {
           "alt": "Ein Handy-Startbildschirm mit Mihrab-Widgets und dem Live-Countdown.",
           "cap": "Widgets und die Live-Aktivität"
+        },
+        "widgets-android": {
+          "alt": "Ein Android-Startbildschirm mit dem Gebetszeiten-Widget — die Zeiten des Tages, der Countdown, die Serie und das Praxisdiagramm — über dem Khatma-Widget.",
+          "cap": "Widgets auf dem Android-Startbildschirm"
         }
       },
       "spread": {
@@ -1094,21 +1234,33 @@
           "alt": "Écran d’accueil : la prochaine prière et son compte à rebours au-dessus des horaires du jour.",
           "cap": "Accueil — prochaine prière et compte à rebours"
         },
+        "home-maliki": {
+          "alt": "La même journée avec les seconds temps malikites activés : sous chaque prière, l’heure où sa plage préférée (ikhtiyari) se termine.",
+          "cap": "Les seconds temps malikites"
+        },
         "home-dark": {
           "alt": "Le même écran d’accueil en thème sombre.",
           "cap": "Accueil, sombre"
         },
         "tilawah": {
-          "alt": "La page Tilawa : Al-Baqara en lecture, avec le récitant, la vitesse, la minuterie d’arrêt et, en dessous, la page du mushaf où le verset récité s’allume.",
+          "alt": "Tilāwah : une récitation d’Al-Baqara avec le récitateur, les commandes de lecture, la vitesse et une minuterie de sommeil, et la liste des sourates dessous pour commencer où l’on veut.",
           "cap": "Tilawa — on lance, et ça continue"
+        },
+        "reciters": {
+          "alt": "La liste des récitateurs : quarante-deux voix, chaque ligne indiquant ce qui est déjà sur l’appareil, avec un bouton pour télécharger ou supprimer.",
+          "cap": "Récitateurs, et ce que vous avez hors ligne"
         },
         "mushaf": {
           "alt": "Le mushaf pendant la récitation : le mot récité s’allume sur la page, le lecteur en dessous.",
           "cap": "Mushaf — le mot récité, allumé"
         },
         "mushaf-dark": {
-          "alt": "La même page dans la teinte nuit du lecteur.",
+          "alt": "Le lecteur dans son thème de nuit.",
           "cap": "Mushaf, nuit"
+        },
+        "memorize": {
+          "alt": "Le panneau de récitation : récitateur, vitesse, répéter chaque verset, répéter la plage, pause entre les répétitions, et masquer l’arabe ou la traduction pendant la révision.",
+          "cap": "Répéter, marquer une pause, masquer — pour mémoriser"
         },
         "quran": {
           "alt": "L’onglet Coran : reprendre la lecture, le plan de khatma, le verset du jour et le bouton Tilawa dans la barre de titre.",
@@ -1138,9 +1290,17 @@
           "alt": "Le journal de prière : graphique d’assiduité, série de prières à l’heure, jeûnes tenus et ce qui reste à rattraper.",
           "cap": "Le journal, d’un coup d’œil"
         },
+        "fasting": {
+          "alt": "La page du jeûne : aujourd’hui, le compte des jeûnes de Ramadan et surérogatoires, et les prochains jours de jeûne sunna avec le délai pour chacun.",
+          "cap": "Jeûne — Ramadan et les jours sunna"
+        },
         "widgets": {
           "alt": "Un écran d’accueil de téléphone portant les widgets Mihrab et le compte à rebours en direct.",
           "cap": "Widgets et activité en direct"
+        },
+        "widgets-android": {
+          "alt": "Un écran d’accueil Android avec le widget des horaires — les heures du jour, le compte à rebours, la série et le graphique de pratique — au-dessus du widget khatma.",
+          "cap": "Widgets sur l’écran d’accueil Android"
         }
       },
       "spread": {
@@ -1264,21 +1424,33 @@
           "alt": "Pantalla de inicio: la próxima oración con su cuenta atrás sobre los horarios del día.",
           "cap": "Inicio — próxima oración y cuenta atrás"
         },
+        "home-maliki": {
+          "alt": "El mismo día con los segundos tiempos malikíes activados: bajo cada oración, cuándo termina su tiempo preferido (ijtiyari).",
+          "cap": "Segundos tiempos malikíes"
+        },
         "home-dark": {
           "alt": "La misma pantalla de inicio en tema oscuro.",
           "cap": "Inicio, oscuro"
         },
         "tilawah": {
-          "alt": "La página de Tilawah: Al-Baqara sonando, con el recitador, la velocidad, el temporizador y, debajo, la página del mushaf con la aleya recitada encendida.",
+          "alt": "Tilāwah: una recitación de Al-Baqara con el recitador, los controles, la velocidad y un temporizador de apagado, y debajo la lista de suras para empezar donde quieras.",
           "cap": "Tilawah — la pones y sigue sola"
+        },
+        "reciters": {
+          "alt": "La lista de recitadores: cuarenta y dos voces; cada fila dice qué hay ya en el dispositivo, con un botón para descargar o borrar.",
+          "cap": "Recitadores, y lo que tienes sin conexión"
         },
         "mushaf": {
           "alt": "El mushaf durante la recitación: la palabra recitada se enciende en la página, con el reproductor debajo.",
           "cap": "Mushaf — la palabra recitada, encendida"
         },
         "mushaf-dark": {
-          "alt": "La misma página en el tono nocturno del lector.",
+          "alt": "El lector en su tema nocturno.",
           "cap": "Mushaf, noche"
+        },
+        "memorize": {
+          "alt": "El panel de recitación: recitador, velocidad, repetir cada aleya, repetir el tramo, pausa entre repeticiones y ocultar el árabe o la traducción al repasar.",
+          "cap": "Repetir, pausar, ocultar — para memorizar"
         },
         "quran": {
           "alt": "La pestaña del Corán: seguir leyendo, el plan de jatma, la aleya del día y el botón de Tilawah en la barra de título.",
@@ -1308,9 +1480,17 @@
           "alt": "El diario de oración: gráfico de constancia, racha de oraciones a tiempo, ayunos y lo que queda por recuperar.",
           "cap": "El diario, de un vistazo"
         },
+        "fasting": {
+          "alt": "La página de ayuno: hoy, el recuento de ayunos de Ramadán y voluntarios, y los próximos días de ayuno sunna con cuánto falta para cada uno.",
+          "cap": "Ayuno — Ramadán y los días sunna"
+        },
         "widgets": {
           "alt": "La pantalla de inicio de un teléfono con los widgets de Mihrab y la cuenta atrás en directo.",
           "cap": "Widgets y actividad en directo"
+        },
+        "widgets-android": {
+          "alt": "Una pantalla de inicio de Android con el widget de horarios — las horas del día, la cuenta atrás, la racha y el gráfico de práctica — sobre el widget de la jatma.",
+          "cap": "Widgets en la pantalla de inicio de Android"
         }
       },
       "spread": {
@@ -1434,21 +1614,33 @@
           "alt": "Главный экран: следующая молитва с живым обратным отсчётом над временами дня.",
           "cap": "Главная — следующая молитва и отсчёт"
         },
+        "home-maliki": {
+          "alt": "Тот же день с включёнными маликитскими вторыми временами: под каждой молитвой — когда заканчивается её предпочтительное время (ихтияри).",
+          "cap": "Маликитские вторые времена"
+        },
         "home-dark": {
           "alt": "Тот же главный экран в тёмной теме.",
           "cap": "Главная, тёмная"
         },
         "tilawah": {
-          "alt": "Страница «Тилават»: звучит сура Аль-Бакара — чтец, скорость, таймер сна и ниже страница мусхафа с подсвеченным читаемым аятом.",
+          "alt": "Тиляуа: чтение суры «Аль-Бакара» с чтецом, кнопками воспроизведения, скоростью и таймером сна, а ниже — список сур, чтобы начать с любого места.",
           "cap": "Тилават — включил и слушаешь"
+        },
+        "reciters": {
+          "alt": "Список чтецов: сорок два голоса, в каждой строке — что уже есть на устройстве, с кнопкой загрузки или удаления.",
+          "cap": "Чтецы и то, что есть офлайн"
         },
         "mushaf": {
           "alt": "Мусхаф во время чтения: читаемое слово подсвечено на странице, ниже плеер.",
           "cap": "Мусхаф — подсвеченное слово"
         },
         "mushaf-dark": {
-          "alt": "Та же страница в ночном тоне читалки.",
+          "alt": "Читалка в ночной теме.",
           "cap": "Мусхаф, ночью"
+        },
+        "memorize": {
+          "alt": "Панель чтения: чтец, скорость, повтор каждого аята, повтор отрывка, пауза между повторами и сокрытие арабского или перевода при повторении.",
+          "cap": "Повтор, пауза, скрытие — для заучивания"
         },
         "quran": {
           "alt": "Вкладка Корана: продолжить чтение, план хатма, аят дня и кнопка «Тилават» в заголовке.",
@@ -1478,9 +1670,17 @@
           "alt": "Дневник молитв: график постоянства, серия молитв вовремя, посты и то, что осталось восполнить.",
           "cap": "Дневник с одного взгляда"
         },
+        "fasting": {
+          "alt": "Страница поста: сегодня, счёт постов Рамадана и добровольных, а также ближайшие сунна-дни поста и сколько до каждого осталось.",
+          "cap": "Пост — Рамадан и дни сунны"
+        },
         "widgets": {
           "alt": "Домашний экран телефона с виджетами Mihrab и живым отсчётом.",
           "cap": "Виджеты и живой отсчёт"
+        },
+        "widgets-android": {
+          "alt": "Домашний экран Android с виджетом времён молитв — времена дня, обратный отсчёт, серия и график практики — над виджетом хатмы.",
+          "cap": "Виджеты на домашнем экране Android"
         }
       },
       "spread": {
@@ -1604,21 +1804,33 @@
           "alt": "হোম স্ক্রিন: দিনের সময়সূচির উপরে পরের নামাজ ও চলমান কাউন্টডাউন।",
           "cap": "হোম — পরের নামাজ ও কাউন্টডাউন"
         },
+        "home-maliki": {
+          "alt": "একই দিন, মালিকি দ্বিতীয় সময় চালু থাকা অবস্থায়: প্রতিটি নামাজের নিচে তার পছন্দনীয় (ইখতিয়ারি) সময় কখন শেষ হয়।",
+          "cap": "মালিকি দ্বিতীয় সময়"
+        },
         "home-dark": {
           "alt": "একই হোম স্ক্রিন, অন্ধকার থিমে।",
           "cap": "হোম, অন্ধকার"
         },
         "tilawah": {
-          "alt": "তিলাওয়াত পাতা: সূরা বাকারা বাজছে — ক্বারী, গতি, স্লিপ টাইমার, আর নিচে মুসহাফের পাতা যেখানে পঠিত আয়াত আলোকিত।",
+          "alt": "তিলাওয়াত: সূরা আল-বাকারার তিলাওয়াত — ক্বারী, প্লেব্যাক নিয়ন্ত্রণ, গতি ও স্লিপ টাইমার, আর নিচে যেকোনো জায়গা থেকে শুরু করার জন্য সূরার তালিকা।",
           "cap": "তিলাওয়াত — চালিয়ে দিন, চলতে থাকবে"
+        },
+        "reciters": {
+          "alt": "ক্বারীর তালিকা: বিয়াল্লিশটি কণ্ঠ, প্রতিটি সারিতে ডিভাইসে ইতিমধ্যে কী আছে তা লেখা, ডাউনলোড বা মুছে ফেলার বোতামসহ।",
+          "cap": "ক্বারী, আর অফলাইনে যা আছে"
         },
         "mushaf": {
           "alt": "তিলাওয়াতের সময় মুসহাফ: পঠিত শব্দটি পাতায় আলোকিত, নিচে প্লেয়ার।",
           "cap": "মুসহাফ — পঠিত শব্দ, আলোকিত"
         },
         "mushaf-dark": {
-          "alt": "একই পাতা পাঠকের রাতের রঙে।",
+          "alt": "রিডার তার রাতের সাজে।",
           "cap": "মুসহাফ, রাত"
+        },
+        "memorize": {
+          "alt": "তিলাওয়াত প্যানেল: ক্বারী, গতি, প্রতিটি আয়াতের পুনরাবৃত্তি, অংশের পুনরাবৃত্তি, পুনরাবৃত্তির মাঝে বিরতি এবং পুনরালোচনার সময় আরবি বা অনুবাদ লুকানো।",
+          "cap": "পুনরাবৃত্তি, বিরতি, আড়াল — মুখস্থের জন্য"
         },
         "quran": {
           "alt": "কুরআন ট্যাব: পড়া চালিয়ে যান, খতম পরিকল্পনা, দিনের আয়াত, আর শিরোনাম বারে তিলাওয়াত বোতাম।",
@@ -1648,9 +1860,17 @@
           "alt": "নামাজের ডায়েরি: অভ্যাসের গ্রাফ, সময়মতো নামাজের ধারাবাহিকতা, রোজা আর কাজা।",
           "cap": "ডায়েরি, এক নজরে"
         },
+        "fasting": {
+          "alt": "রোজার পাতা: আজ, রমজান ও নফল রোজার হিসাব, এবং আসন্ন সুন্নত রোজার দিনগুলো ও প্রতিটি কত দূরে।",
+          "cap": "রোজা — রমজান ও সুন্নতের দিন"
+        },
         "widgets": {
           "alt": "একটি ফোনের হোম স্ক্রিনে মিহরাবের উইজেট ও লাইভ কাউন্টডাউন।",
           "cap": "উইজেট আর লাইভ অ্যাক্টিভিটি"
+        },
+        "widgets-android": {
+          "alt": "অ্যান্ড্রয়েড হোম স্ক্রিনে নামাজের সময়ের উইজেট — দিনের সময়, কাউন্টডাউন, ধারাবাহিকতা ও অনুশীলন গ্রাফ — খতমের উইজেটের ওপরে।",
+          "cap": "অ্যান্ড্রয়েড হোম স্ক্রিনের উইজেট"
         }
       },
       "spread": {
@@ -1774,21 +1994,33 @@
           "alt": "होम स्क्रीन: दिन के समयों के ऊपर अगली नमाज़ और चलती उलटी गिनती।",
           "cap": "होम — अगली नमाज़ और उलटी गिनती"
         },
+        "home-maliki": {
+          "alt": "वही दिन, मालिकी दूसरे समय चालू होने पर: हर नमाज़ के नीचे यह कि उसका पसंदीदा (इख़्तियारी) समय कब ख़त्म होता है।",
+          "cap": "मालिकी दूसरे समय"
+        },
         "home-dark": {
           "alt": "वही होम स्क्रीन, गहरे रंग में।",
           "cap": "होम, गहरा"
         },
         "tilawah": {
-          "alt": "तिलावत पृष्ठ: सूरह अल-बक़रह चल रही है — क़ारी, गति, स्लीप टाइमर, और नीचे मुसहफ़ का पृष्ठ जिस पर पढ़ी जा रही आयत रोशन है।",
+          "alt": "तिलावत: सूरह अल-बक़रा की तिलावत — क़ारी, प्लेबैक नियंत्रण, गति और स्लीप टाइमर, और नीचे कहीं से भी शुरू करने के लिए सूरतों की सूची।",
           "cap": "तिलावत — लगाइए और चलने दीजिए"
+        },
+        "reciters": {
+          "alt": "क़ारियों की सूची: बयालीस आवाज़ें, हर पंक्ति बताती है कि डिवाइस पर पहले से क्या है, डाउनलोड या मिटाने के बटन के साथ।",
+          "cap": "क़ारी, और ऑफ़लाइन क्या है"
         },
         "mushaf": {
           "alt": "तिलावत के दौरान मुसहफ़: पढ़ा जा रहा शब्द पृष्ठ पर रोशन, नीचे प्लेयर।",
           "cap": "मुसहफ़ — पढ़ा जा रहा शब्द, रोशन"
         },
         "mushaf-dark": {
-          "alt": "वही पृष्ठ पाठक के रात वाले रंग में।",
+          "alt": "रीडर अपने रात के रूप में।",
           "cap": "मुसहफ़, रात"
+        },
+        "memorize": {
+          "alt": "तिलावत पैनल: क़ारी, गति, हर आयत दोहराना, पूरे हिस्से को दोहराना, दोहराव के बीच ठहराव, और दोहराते समय अरबी या अनुवाद छिपाना।",
+          "cap": "दोहराव, ठहराव, छिपाव — याद करने के लिए"
         },
         "quran": {
           "alt": "क़ुरआन टैब: पढ़ना जारी रखें, ख़त्म योजना, दिन की आयत, और शीर्षक पट्टी में तिलावत बटन।",
@@ -1818,9 +2050,17 @@
           "alt": "नमाज़ डायरी: नियमितता का ग्राफ़, समय पर नमाज़ों का सिलसिला, रोज़े और क़ज़ा।",
           "cap": "डायरी, एक नज़र में"
         },
+        "fasting": {
+          "alt": "रोज़े का पन्ना: आज, रमज़ान और नफ़्ल रोज़ों की गिनती, और आने वाले सुन्नत रोज़ों के दिन तथा हर एक में कितना बाक़ी है।",
+          "cap": "रोज़ा — रमज़ान और सुन्नत के दिन"
+        },
         "widgets": {
           "alt": "एक फ़ोन की होम स्क्रीन जिस पर मिहराब के विजेट और लाइव उलटी गिनती है।",
           "cap": "विजेट और लाइव गतिविधि"
+        },
+        "widgets-android": {
+          "alt": "एंड्रॉइड होम स्क्रीन पर नमाज़ के समय का विजेट — दिन के समय, उलटी गिनती, सिलसिला और अभ्यास ग्राफ़ — ख़त्म विजेट के ऊपर।",
+          "cap": "एंड्रॉइड होम स्क्रीन विजेट"
         }
       },
       "spread": {
@@ -1944,21 +2184,33 @@
           "alt": "主屏幕：当日各拜功时间上方是下一次礼拜与实时倒计时。",
           "cap": "主页 — 下一次礼拜与倒计时"
         },
+        "home-maliki": {
+          "alt": "同一天开启马立克派次要时段后的样子：每番拜功下方标出其首选（ikhtiyari）时段何时结束。",
+          "cap": "马立克派次要时段"
+        },
         "home-dark": {
           "alt": "同一个主屏幕的深色主题。",
           "cap": "主页，深色"
         },
         "tilawah": {
-          "alt": "诵读页面：黄牛章正在播放，显示诵读者、语速、睡眠定时，下方是穆斯哈夫页面，正在诵读的经文被点亮。",
+          "alt": "诵读：黄牛章的诵读，带诵读者、播放控制、语速与睡眠定时器，下方是可从任意处开始的章节列表。",
           "cap": "诵读 — 放上就一直读下去"
+        },
+        "reciters": {
+          "alt": "诵读者名单：四十二个声音，每一行说明设备上已有多少，并带有下载或删除按钮。",
+          "cap": "诵读者，以及离线已有的部分"
         },
         "mushaf": {
           "alt": "诵读中的穆斯哈夫：正在诵读的词在页面上点亮，下方是播放器。",
           "cap": "穆斯哈夫 — 点亮正在诵读的词"
         },
         "mushaf-dark": {
-          "alt": "同一页在阅读器的夜间色调下。",
+          "alt": "阅读器的夜间外观。",
           "cap": "穆斯哈夫，夜间"
+        },
+        "memorize": {
+          "alt": "诵读面板：诵读者、语速、逐节重复、整段重复、重复之间的停顿，以及复习时隐藏阿拉伯文或译文。",
+          "cap": "重复、停顿、隐藏——为了背诵"
         },
         "quran": {
           "alt": "《古兰经》标签页：继续阅读、通读计划、每日经文，以及标题栏中的诵读按钮。",
@@ -1988,9 +2240,17 @@
           "alt": "礼拜日志：习惯图表、准时连续天数、封斋记录和待补的拜功。",
           "cap": "日志，一眼看清"
         },
+        "fasting": {
+          "alt": "封斋页面：今天、莱麦丹与副功斋的次数，以及接下来的圣行斋日和各自还有多久。",
+          "cap": "封斋——莱麦丹与圣行斋日"
+        },
         "widgets": {
           "alt": "手机主屏幕上的 Mihrab 小组件与实时倒计时。",
           "cap": "小组件与实时活动"
+        },
+        "widgets-android": {
+          "alt": "安卓主屏幕上的礼拜时间小组件——当天时刻、倒计时、连续天数与练习图——位于诵读全本小组件之上。",
+          "cap": "安卓主屏幕小组件"
         }
       },
       "spread": {

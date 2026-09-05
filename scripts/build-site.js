@@ -93,13 +93,16 @@ const BADGES = [
  * only thing a translation has to supply is the alt text and the caption,
  * keyed here so a missing one is an error and not a silently English page.
  */
-const SHOT_V = '?v=2026-09-05';
+const SHOT_V = '?v=2026-09-06';
 const SHOTS = [
   'home',
+  'home-maliki',
   'home-dark',
   'tilawah',
+  'reciters',
   'mushaf',
   'mushaf-dark',
+  'memorize',
   'quran',
   'qibla',
   'month',
@@ -107,7 +110,9 @@ const SHOTS = [
   'duas',
   'tasbih',
   'log',
+  'fasting',
   'widgets',
+  'widgets-android',
 ];
 
 /** Pages written by hand, which the generator only patches between markers. */
