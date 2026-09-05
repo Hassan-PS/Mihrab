@@ -525,3 +525,9 @@ there. Assert the BEHAVIOUR (every file `sync-version` writes is covered)
 rather than the spelling.
 
 The catalyst abort was the ordinary one, unrelated and unremarkable.
+
+## 2.16.0 (261) — 2026-09-05
+
+Ran clean on the first attempt.
+
+**Lesson:** none needed — clean run, no change to the cycle.
