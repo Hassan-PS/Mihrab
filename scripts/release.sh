@@ -205,7 +205,11 @@ JOURNAL="$ROOT/docs/release-log.md"
 # be undone in one line. The JOURNAL belongs in here: it is appended before
 # the release commit, so a rerun after a failed publish would otherwise add
 # a SECOND entry for the same version.
-REVERT="git checkout -- android/app/build.gradle ios/PrayerApp.xcodeproj/project.pbxproj docs/index.html contrib/fdroid/com.prayer_times.yml docs/release-log.md"
+# `docs` WHOLE, for the same reason the Publishing step adds it whole: the
+# site is fourteen files and a list of them here goes stale the moment it
+# grows. An abort that leaves half the site stamped is an abort that makes
+# the next run refuse to start on a dirty tree, with no clue why.
+REVERT="git checkout -- android/app/build.gradle ios/PrayerApp.xcodeproj/project.pbxproj docs contrib/fdroid/com.prayer_times.yml"
 
 current_version() { grep -o 'versionName "[^"]*"' "$GRADLE_FILE" | head -1 | cut -d'"' -f2; }
 current_code()    { grep -o 'versionCode [0-9]*'  "$GRADLE_FILE" | head -1 | awk '{print $2}'; }
