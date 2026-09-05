@@ -250,6 +250,32 @@ describe('the streak sits on the line with what is next', () => {
     expect(xml.slice(at - 200, at)).toContain('FrameLayout');
   });
 
+  it('is one line on the prayer card, as it is on the Log card', () => {
+    // The night times used to sit UNDER the streak line, which made the
+    // band between the times and the graph two lines on one card and one
+    // on the other. They belong to the times, so they are above the rule
+    // now and the band itself is a single line on both.
+    const xml = layoutXml('prayer_widget_strip');
+    expect(xml.indexOf('@+id/widget_night_row')).toBeLessThan(
+      xml.indexOf('@+id/widget_strip_divider'),
+    );
+    expect(xml.indexOf('@+id/widget_strip_divider')).toBeLessThan(
+      xml.indexOf('@+id/widget_next_row'),
+    );
+  });
+
+  it('rules itself off the same way on both cards', () => {
+    const ruleOf = (layout: string, id: string) => {
+      const xml = layoutXml(layout);
+      const at = xml.indexOf(`@+id/${id}`);
+      return /android:background="(#[0-9A-F]+)"/.exec(xml.slice(at, at + 400))?.[1];
+    };
+    expect(ruleOf('prayer_widget_strip', 'widget_strip_divider')).toBe(
+      ruleOf('prayer_widget_log', 'widget_log_divider') ??
+        ruleOf('prayer_widget_log', 'widget_log_grid_divider'),
+    );
+  });
+
   it('reads at the same size on both cards', () => {
     const sizeOf = (layout: string, id: string) => {
       const xml = layoutXml(layout);

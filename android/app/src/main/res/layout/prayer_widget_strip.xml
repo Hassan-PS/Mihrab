@@ -181,6 +181,48 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Islamic Midnight and the Last Third, when the user asked for
+                 them. A pair on one line rather than two more strip columns:
+                 eight columns at this width is 5pt type. -->
+            <LinearLayout
+                android:id="@+id/widget_night_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="true"
+                android:layout_marginTop="4dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/widget_night_left"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_night_mid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/widget_night_right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="6dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1" />
+            </LinearLayout>
             <!-- A FrameLayout, not a View. RemoteViews has a fixed view
                  vocabulary and android.view.View is not in it: the whole widget
                  fails to inflate with "Class not allowed to be inflated". -->
@@ -188,8 +230,9 @@
                 android:id="@+id/widget_strip_divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#26FFFFFF"
-                android:layout_marginTop="9dp" />
+                android:background="#1FFFFFFF"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp" />
 
             <!-- "Asr in 37 min" opposite "2 of 5 logged". -->
             <LinearLayout
@@ -272,48 +315,6 @@
                     android:maxLines="1" />
             </LinearLayout>
 
-            <!-- Islamic Midnight and the Last Third, when the user asked for
-                 them. A pair on one line rather than two more strip columns:
-                 eight columns at this width is 5pt type. -->
-            <LinearLayout
-                android:id="@+id/widget_night_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="true"
-                android:layout_marginTop="4dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/widget_night_left"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="#9AA0A6"
-                    android:textSize="11sp"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-
-                <TextView
-                    android:id="@+id/widget_night_mid"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="6dp"
-                    android:paddingEnd="6dp"
-                    android:textColor="#9AA0A6"
-                    android:textSize="11sp"
-                    android:maxLines="1"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/widget_night_right"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="6dp"
-                    android:textColor="#9AA0A6"
-                    android:textSize="11sp"
-                    android:maxLines="1" />
-            </LinearLayout>
 
             <!-- ── 4x4 only, from here down ─────────────────────────────── -->
 
