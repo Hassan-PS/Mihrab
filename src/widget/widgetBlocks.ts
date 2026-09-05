@@ -72,12 +72,22 @@ export const WIDGET_LOGGABLE: ReadonlyArray<JournalPrayer> = [
  * always more weeks available than the widest card can show, and the card
  * takes as many as fit at full size rather than stretching what it has.
  *
+ * THIRTY now, because "more than the widest card can show" was not true.
+ * Twenty-six columns is a shape about 3.8 times wider than it is tall, and
+ * a 4x4's grid box on a 480dpi phone is 3.4 — inside it, but with nothing
+ * to spare, and a card whose chrome measured a few dp shorter would have
+ * been outside it with no way to say so except by stopping short of its own
+ * right edge. Thirty reaches 4.4, which covers the shapes a phone card
+ * takes; a tablet flatter than that gets every week there is, which is the
+ * honest answer rather than a silent gap.
+ *
  * A day costs about forty bytes and only days with something recorded are
  * sent, so the block is still a few KB: the number that matters is that
  * this rides in a SharedPreferences string and an App Group plist, both
  * read on the main thread of a process that has milliseconds to live.
+ * `widgetPayloadSize` holds the budget this is spending from.
  */
-export const PRACTICE_WINDOW_DAYS = 182;
+export const PRACTICE_WINDOW_DAYS = 210;
 
 /** One day's marks on the practice grid. */
 export type WidgetPracticeDay = {

@@ -182,10 +182,11 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
         R.id.streak_unit,
         context.resources.getQuantityString(R.plurals.widget_streak_days, streak, streak),
       )
-      // Ten weeks at 4x2, five at 2x2 — measured, not assumed. A grid sized
-      // for the wide case and drawn into the narrow one is what makes cells
-      // 4px and the whole thing a texture rather than a record.
-      val weeks = if (widthDp >= 220) 10 else 5
+      // Sixteen columns at 4x2, eight at 2x2 — measured, not assumed. A grid
+      // sized for the wide case and drawn into the narrow one is what makes
+      // cells 4px and the whole thing a texture rather than a record. Three
+      // rows now, so a column is three days: forty-eight days and twenty-four.
+      val columns = if (widthDp >= 220) 16 else 8
       val density = context.resources.displayMetrics.density
       val cell = (7 * density).toInt().coerceAtLeast(3)
       val gap = (2 * density).toInt().coerceAtLeast(1)
@@ -217,7 +218,7 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
           pr = pr,
           owed = if (inlineOwed) owed else 0,
           fasts = if (inlineFasts) fasts else 0,
-          widthPx = summaryWidthPx(context, widthDp, weeks, cell, gap),
+          widthPx = summaryWidthPx(context, widthDp, columns, cell, gap),
         ),
       )
 
@@ -244,7 +245,9 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
         R.id.streak_grid,
         PracticeGridBitmap.render(
           pr.optJSONArray("days"),
-          weeks,
+          PracticeGridBitmap.MAX_ROWS,
+          columns,
+          cell,
           cell,
           gap,
           accent,
@@ -272,13 +275,13 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
     private fun summaryWidthPx(
       context: Context,
       widthDp: Int,
-      weeks: Int,
+      columns: Int,
       cell: Int,
       gap: Int,
     ): Float {
       if (widthDp <= 0) return 0f
       val density = context.resources.displayMetrics.density
-      val gridPx = weeks * cell + (weeks - 1) * gap
+      val gridPx = columns * cell + (columns - 1) * gap
       // 10dp padding either side, and the 8dp margin before the graph.
       return widthDp * density - 28 * density - gridPx
     }

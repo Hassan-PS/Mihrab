@@ -159,6 +159,9 @@
                 android:orientation="horizontal"
                 android:baselineAligned="false">
 
+                <!-- The "tap a tick to log" hint. It steps aside for the
+                     streak line when the graph is showing: the hint is worth
+                     one reading and the streak is worth every one. -->
                 <TextView
                     android:id="@+id/widget_log_foot_left"
                     android:layout_width="0dp"
@@ -192,6 +195,39 @@
                     android:fontFamily="sans-serif-medium"
                     android:maxLines="1"
                     android:visibility="gone" />
+
+                <!-- The streak, on this line rather than a second one under
+                     it, and in the same order the prayer-times card puts it:
+                     what is next on the left, how the week has gone on the
+                     right. The two cards sit on the same home screen and the
+                     band between their times and their graph should not be
+                     two different designs. -->
+                <!-- The slack between the two halves, so the number stays
+                     against the words that name it. -->
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/widget_log_streak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="10dp"
+                    android:textColor="#E8EAED"
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/widget_log_practice_second"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="5dp"
+                    android:textColor="#9AA0A6"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
             </LinearLayout>
 
             <!--
@@ -207,36 +243,13 @@
             <!-- The streak line, the same one the prayer-times card carries: a
                  number at size with the rest muted beside it. Shown with the
                  graph and hidden with it, because the two are one block. -->
-            <LinearLayout
+            <!-- Emptied out: its two views moved up into the footer line. The
+                 id stays because the binder still toggles it. -->
+            <FrameLayout
                 android:id="@+id/widget_log_practice_row"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="true"
-                android:layout_marginTop="8dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/widget_log_streak"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#E8EAED"
-                    android:textSize="26sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:includeFontPadding="false"
-                    android:maxLines="1" />
-
-                <TextView
-                    android:id="@+id/widget_log_practice_second"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingStart="7dp"
-                    android:textColor="#9AA0A6"
-                    android:textSize="12sp"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-            </LinearLayout>
+                android:layout_height="0dp"
+                android:visibility="gone" />
 
             <FrameLayout
                 android:id="@+id/widget_log_grid_divider"

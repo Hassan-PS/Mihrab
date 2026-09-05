@@ -230,11 +230,11 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
      * the divider above the footer with its margins, the footer, the streak
      * line, and the divider above the grid.
      */
-    private const val LOG_CHROME_DP = 206
+    private const val LOG_CHROME_DP = 164
     private const val CARD_PADDING_DP = 20
 
-    /** As many weeks as the payload carries. See PRACTICE_WINDOW_DAYS. */
-    private const val MAX_GRID_WEEKS = 26
+    /** As many days as the payload carries. See PRACTICE_WINDOW_DAYS. */
+    private const val MAX_GRID_DAYS = 210
 
     private fun buildViews(base: Context, appWidgetId: Int): RemoteViews {
       // Every label below comes out of the string table, so the context has to
@@ -383,6 +383,16 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       val vis = if (show) View.VISIBLE else View.GONE
       views.setViewVisibility(R.id.widget_log_grid_divider, vis)
       views.setViewVisibility(R.id.widget_log_practice_row, vis)
+      // The streak sits on the footer line now, beside what is next, the way
+      // the prayer-times card arranges the same two facts. The hint it
+      // displaces — "tap a tick to log" — is worth one reading; the streak is
+      // worth every one.
+      views.setViewVisibility(R.id.widget_log_streak, vis)
+      views.setViewVisibility(R.id.widget_log_practice_second, vis)
+      views.setViewVisibility(
+        R.id.widget_log_foot_left,
+        if (show) View.GONE else View.VISIBLE,
+      )
       views.setViewVisibility(R.id.widget_log_grid, vis)
       if (!show || practice == null) return
 
@@ -423,13 +433,16 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       // the box the column count is chosen for.
       val boxHeight = heightDp - LOG_CHROME_DP
       val boxWidth = widthDp - CARD_PADDING_DP
+      val grid = PracticeGridBitmap.layoutFor(boxWidth, boxHeight, density, MAX_GRID_DAYS)
       views.setImageViewBitmap(
         R.id.widget_log_grid,
         PracticeGridBitmap.render(
           practice.optJSONArray("days"),
-          PracticeGridBitmap.weeksForBox(boxWidth, boxHeight, MAX_GRID_WEEKS),
-          (7 * density).toInt().coerceAtLeast(3),
-          (2f * density).toInt().coerceAtLeast(1),
+          grid.rows,
+          grid.columns,
+          grid.cellWPx,
+          grid.cellHPx,
+          grid.gapPx,
           accent,
           since,
         ),
@@ -489,9 +502,14 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
         views.setTextViewText(NAMES[i], row.optString("name").ifEmpty { key })
         // `display` is the clock the user reads; `time` is the canonical
         // 24-hour string `isDue` parses. See PrayerWidgetProvider.displayTime.
+        // Small-capped around the digits, the same as the prayer strip: on
+        // a 12-hour clock the meridiem is three characters of the widest
+        // thing on this row, and it is not the part anyone reads.
         views.setTextViewText(
           TIMES[i],
-          row.optString("display", "").ifEmpty { row.optString("time") },
+          PrayerWidgetProvider.styledTime(
+            row.optString("display", "").ifEmpty { row.optString("time") },
+          ),
         )
         views.setTextColor(NAMES[i], Color.parseColor(if (due || queued) NEUTRAL_TEXT else NEUTRAL_MUTED))
 

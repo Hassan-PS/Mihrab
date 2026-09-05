@@ -26,11 +26,24 @@ import org.json.JSONObject
  * drew a record the Log screen had never shown. Look the day up by its date,
  * the way iOS's PracticeGrid does, and a gap is a gap.
  *
- * Weeks are columns and days are rows, MONDAY FIRST — the order the in-app
- * heatmap uses, chosen there so Mondays and Thursdays (the sunnah fast days)
- * sit in the first and fourth rows rather than straddling a column boundary.
- * The eye reads a week as a vertical stripe in the app and in the widget, so a
- * habit is the same shape in both.
+ * A RUN OF DAYS, READ LIKE A SENTENCE. It was seven rows of week-columns —
+ * the shape the in-app heatmap uses — and on a home screen that shape costs
+ * more than it returns: seven rows in the height a card can spare makes
+ * every day a speck, and to reach the card's far edge it takes six months of
+ * them, so the graph was mostly a wall of history nobody was looking at,
+ * drawn too small to read. The days run left to right now and wrap like
+ * text, the last cell is today, and the cell is big enough to have a mark on
+ * it that means something. The weekly rhythm is gone; on a surface with no
+ * legend and no tap, being able to see last week at all is worth more.
+ *
+ * THE WIDTH DECIDES THE CELL AND THE HEIGHT DECIDES THE ROWS. Those are the
+ * two things a card can say about its shape, and the one it can say
+ * accurately is its width — the height it reports is the launcher's figure
+ * for the host view less whatever chrome the card believes it draws. So the
+ * cell is the width divided among as many columns as fit, which lands the
+ * grid flush on both edges whatever the height turns out to be, and the
+ * height only decides how many rows of that cell there is room for. Shrink
+ * the card and it loses a row rather than shrinking every day in it.
  *
  * FOUR CHANNELS, the same four the Log screen uses: fill depth for the
  * prayers, an outer amber ring for a completed fast, an inset gold line for
@@ -46,8 +59,38 @@ import org.json.JSONObject
  */
 object PracticeGridBitmap {
 
-  /** Days per column. Seven, because a week is what people count in. */
-  private const val ROWS = 7
+  /**
+   * A sanity bound on the rows, not a design number.
+   *
+   * The row count is the height divided by a cell — make the card taller
+   * and it grows a row, shorter and it loses one, and the cells stay the
+   * size they were either way. That is the difference between a shorter
+   * widget and a smaller one. This only stops a nonsense height from asking
+   * for a grid with more rows than the payload has days to fill.
+   */
+  const val MAX_ROWS = 12
+
+  /**
+   * The cell size the rows are counted against, in dp.
+   *
+   * Not a minimum and not a maximum — the cell ends up whatever the box
+   * divides into. It is the size at which a day is comfortably readable on
+   * a home screen, and so the size that decides whether a given height has
+   * room for another row of them.
+   */
+  private const val TARGET_CELL_DP = 26f
+
+  /** Everything the grid needs to be drawn into a particular box. */
+  data class Layout(
+    val rows: Int,
+    val columns: Int,
+    val cellWPx: Int,
+    val cellHPx: Int,
+    val gapPx: Int,
+  ) {
+    /** Days the grid will show. */
+    val days: Int get() = rows * columns
+  }
 
   private const val OWED_COLOR = "#F87171"
 
@@ -86,39 +129,77 @@ object PracticeGridBitmap {
    * comfortably inside the budget on any density, at the cost of a grid
    * that stops growing on the very densest screens — where it is already
    * more pixels than the eye is using.
+   *
+   * Raised from 14 with the fold to three rows, and now a backstop rather
+   * than the working limit: `layoutFor` sizes the bitmap against an AREA
+   * budget, which is the thing the transaction actually cares about, and a
+   * per-cell ceiling of 14px only ever meant a big cell arriving as a blur.
    */
-  private const val MAX_CELL_PX = 14
+  private const val MAX_CELL_PX = 96
 
   /**
-   * @param days   the payload's `practice.days` array, sparse, each entry
-   *               carrying its own `d` date key
-   * @param weeks  how many columns to draw, ending with the week containing
-   *               today
-   * @param cellPx square size in pixels, clamped to MAX_CELL_PX
-   * @param gapPx  space between squares
-   * @param since  the payload's `practice.since` — the first day the user
-   *               ever logged a prayer, or null. Days from it onwards that
-   *               do not account for all five carry the unaccounted dot;
-   *               days before it carry nothing, because there was nothing
-   *               to record yet.
-   * @param now    the moment the grid describes — injectable so the shape can
-   *               be asserted against a fixed date
+   * The margin the grid keeps inside its own bitmap, so an edge square is a
+   * whole square.
+   *
+   * Every ring here is drawn CENTRED on a cell's boundary, and two of them
+   * reach outside it: the empty square's hairline by half its width, and
+   * today's ring — which is itself drawn on a rect outset by half a stroke —
+   * by a whole one. The first column starts at x=0 and the last ends at the
+   * bitmap's width, so the outer half of those rings fell off the edge: the
+   * leftmost column came out with a flat left side and a hairline half as
+   * thick as its neighbours', which on a home screen reads as a graph the
+   * card is clipping rather than a graph drawn to its own edge.
+   *
+   * A bitmap is not a canvas with room around it, so the room has to be part
+   * of the bitmap. One ring's width on all four sides is the widest anything
+   * reaches; the ~1dp it costs is invisible next to a square that is whole.
+   */
+  private fun padFor(cellPx: Int): Int =
+    Math.ceil(ringWidth(cellPx).toDouble()).toInt()
+
+  /** Today's ring — the widest stroke the grid draws, and the outermost. */
+  private fun ringWidth(cellPx: Int): Float = (cellPx * 0.14f).coerceAtLeast(1.5f)
+
+  /**
+   * @param days    the payload's `practice.days` array, sparse, each entry
+   *                carrying its own `d` date key
+   * @param columns how many days each row holds. The grid draws
+   *                `rows * columns` days, oldest at the top left and TODAY in
+   *                the last cell.
+   * @param cellWPx cell width in pixels
+   * @param cellHPx cell height in pixels — not the same number, because the
+   *                box a card gives the grid is not three cells tall for
+   *                every width it is cells wide
+   * @param gapPx   space between cells
+   * @param since   the payload's `practice.since` — the first day the user
+   *                ever logged a prayer, or null. Days from it onwards that
+   *                do not account for all five carry the unaccounted dot;
+   *                days before it carry nothing, because there was nothing
+   *                to record yet.
+   * @param now     the moment the grid describes — injectable so the shape
+   *                can be asserted against a fixed date
    */
   @JvmOverloads
   fun render(
     days: JSONArray?,
-    weeks: Int,
-    cellPx: Int,
+    rows: Int,
+    columns: Int,
+    cellWPx: Int,
+    cellHPx: Int,
     gapPx: Int,
     accent: Int,
     since: String? = null,
     now: Calendar = Calendar.getInstance(),
   ): Bitmap {
-    @Suppress("NAME_SHADOWING") val cellPx = cellPx.coerceIn(3, MAX_CELL_PX)
-    @Suppress("NAME_SHADOWING") val gapPx = gapPx.coerceIn(1, 4)
-    @Suppress("NAME_SHADOWING") val weeks = weeks.coerceAtLeast(1)
-    val width = weeks * cellPx + (weeks - 1) * gapPx
-    val height = ROWS * cellPx + (ROWS - 1) * gapPx
+    @Suppress("NAME_SHADOWING") val cellWPx = cellWPx.coerceIn(3, MAX_CELL_PX)
+    @Suppress("NAME_SHADOWING") val cellHPx = cellHPx.coerceIn(3, MAX_CELL_PX)
+    @Suppress("NAME_SHADOWING") val gapPx = gapPx.coerceIn(1, 24)
+    @Suppress("NAME_SHADOWING") val columns = columns.coerceAtLeast(1)
+    @Suppress("NAME_SHADOWING") val rows = rows.coerceIn(1, MAX_ROWS)
+    val ringUnit = minOf(cellWPx, cellHPx)
+    val pad = padFor(ringUnit)
+    val width = columns * cellWPx + (columns - 1) * gapPx + 2 * pad
+    val height = rows * cellHPx + (rows - 1) * gapPx + 2 * pad
     val bmp = Bitmap.createBitmap(
       width.coerceAtLeast(1),
       height.coerceAtLeast(1),
@@ -126,28 +207,28 @@ object PracticeGridBitmap {
     )
     val canvas = Canvas(bmp)
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    val radius = cellPx * 0.28f
+    val radius = ringUnit * 0.28f
 
     val byDate = indexByDate(days)
     val todayKey = keyOf(now)
-    // The Monday of the week containing today. Calendar.MONDAY is 2 and the
-    // week runs 1..7 from Sunday, so (dow + 5) % 7 is days since Monday.
+    // Today is the LAST cell, so the run starts however many days back that
+    // makes it. Nothing after today is drawn at all: a home screen has room
+    // for the days that happened, and a tail of empty squares reads as days
+    // already lost rather than days not yet arrived.
     val cursor = (now.clone() as Calendar).apply {
       set(Calendar.HOUR_OF_DAY, 12)
       set(Calendar.MINUTE, 0)
       set(Calendar.SECOND, 0)
       set(Calendar.MILLISECOND, 0)
-      add(Calendar.DAY_OF_YEAR, -((get(Calendar.DAY_OF_WEEK) + 5) % 7))
-      // Back to the first column's Monday.
-      add(Calendar.DAY_OF_YEAR, -7 * (weeks - 1))
+      add(Calendar.DAY_OF_YEAR, -(rows * columns - 1))
     }
 
-    for (col in 0 until weeks) {
-      for (row in 0 until ROWS) {
+    for (row in 0 until rows) {
+      for (col in 0 until columns) {
         val key = keyOf(cursor)
-        val left = (col * (cellPx + gapPx)).toFloat()
-        val top = (row * (cellPx + gapPx)).toFloat()
-        val rect = RectF(left, top, left + cellPx, top + cellPx)
+        val left = (pad + col * (cellWPx + gapPx)).toFloat()
+        val top = (pad + row * (cellHPx + gapPx)).toFloat()
+        val rect = RectF(left, top, left + cellWPx, top + cellHPx)
         // A date key is YYYY-MM-DD, so string order IS date order.
         val future = key > todayKey
         if (!future) {
@@ -162,7 +243,7 @@ object PracticeGridBitmap {
           // logged week are indistinguishable from the card behind them.
           if (day == null || (weightOf(day) <= 0 && loggedOf(day) <= 0)) {
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = (cellPx * 0.09f).coerceAtLeast(1f)
+            paint.strokeWidth = (ringUnit * 0.09f).coerceAtLeast(1f)
             paint.color = withAlpha(accent, 0.22f)
             canvas.drawRoundRect(rect, radius, radius, paint)
           }
@@ -171,7 +252,7 @@ object PracticeGridBitmap {
           // squares in both places.
           if (day != null && day.optBoolean("f", false)) {
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = (cellPx * 0.12f).coerceAtLeast(1f)
+            paint.strokeWidth = (ringUnit * 0.12f).coerceAtLeast(1f)
             paint.color = Color.parseColor(FAST_RING_COLOR)
             val half = paint.strokeWidth / 2f
             canvas.drawRoundRect(
@@ -192,7 +273,7 @@ object PracticeGridBitmap {
           // one colour never did.
           val sunnah = (day?.optInt("s", 0) ?: 0).coerceIn(0, SUNNAH_TOTAL)
           if (sunnah > 0) {
-            drawSunnah(canvas, rect, sunnah / SUNNAH_TOTAL.toFloat(), cellPx, paint)
+            drawSunnah(canvas, rect, sunnah / SUNNAH_TOTAL.toFloat(), ringUnit, paint)
           }
           // The unaccounted mark: a day inside the record that never got
           // all five filled in. FILLED here where the app draws it hollow —
@@ -205,7 +286,7 @@ object PracticeGridBitmap {
           ) {
             paint.style = Paint.Style.FILL
             paint.color = withAlpha(Color.parseColor(FUTURE_COLOR), 0.85f)
-            val r = (cellPx * 0.16f).coerceAtLeast(1.2f)
+            val r = (ringUnit * 0.16f).coerceAtLeast(1.2f)
             canvas.drawCircle(rect.left + r + 1f, rect.top + r + 1f, r, paint)
           }
         }
@@ -213,7 +294,7 @@ object PracticeGridBitmap {
         // recent squares are empty gives no clue where "now" is without it.
         if (key == todayKey) {
           paint.style = Paint.Style.STROKE
-          paint.strokeWidth = (cellPx * 0.14f).coerceAtLeast(1.5f)
+          paint.strokeWidth = ringWidth(ringUnit)
           paint.color = withAlpha(accent, 0.85f)
           val inset = paint.strokeWidth / 2f
           canvas.drawRoundRect(
@@ -231,30 +312,139 @@ object PracticeGridBitmap {
   }
 
   /**
-   * How many columns fill a box of this shape at full-size squares.
+   * The grid's whole geometry for a given box — how many days, and the
+   * shape of the cell that carries one.
    *
-   * Seven rows is fixed, so a box three times wider than it is tall needs
-   * about twenty-one columns to reach the far edge — and the only
-   * alternatives are a graph that stops short of it or squares stretched
-   * into bricks. The payload carries twenty-six weeks so there is always
-   * more available than the widest card asks for.
+   * ── ONE PLACE, BECAUSE TWO WAS THE BUG ────────────────────────────────
    *
-   * `boxWidthDp` and `boxHeightDp` are the space the grid actually gets,
-   * not the card: the caller subtracts its own chrome. A zero or negative
-   * box is a launcher that has not measured yet, which gets the default
-   * rather than a grid one column wide.
+   * The count and the cell size used to be decided by different code: a
+   * cell size derived from the box's HEIGHT chose the column count, and
+   * then the caller drew that count at a size of its own. Two shapes with
+   * no reason to agree, and on a 4x4 they did not — the bitmap came out
+   * proportionally narrower than its ImageView, `fitStart` scaled it to the
+   * height, and eighty-odd pixels of width piled up on the right. A graph
+   * that stops short of the edge every other element reaches does not read
+   * as a graph that chose to be narrow; it reads as one being clipped.
+   *
+   * So it is answered once, here, and the caller passes the answer straight
+   * through to `render`.
+   *
+   * ── AND WHICH WAY TO BE WRONG ─────────────────────────────────────────
+   *
+   * `boxHeightDp` is an estimate: the caller subtracts the chrome it knows
+   * about from the height the launcher reports for the host view, and the
+   * ImageView's real height comes out a little under it. So the box is
+   * reckoned SHORTER than it measured. Too many columns costs a few percent
+   * of cell width with the slack falling under the grid, where nothing is
+   * looking; too few costs the gap against the right edge. Being wrong in
+   * one direction is a rounding error and in the other it is the bug.
+   *
+   * @param maxDays how much history the payload actually carries
    */
   @JvmStatic
-  fun weeksForBox(boxWidthDp: Int, boxHeightDp: Int, max: Int): Int {
-    if (boxWidthDp <= 0 || boxHeightDp <= 0) return max
-    val cell = (boxHeightDp - 6f * GAP_DP) / ROWS
-    if (cell < 4f) return max
-    val fit = ((boxWidthDp + GAP_DP) / (cell + GAP_DP)).toInt()
-    return fit.coerceIn(8, max)
+  fun layoutFor(
+    boxWidthDp: Int,
+    boxHeightDp: Int,
+    density: Float,
+    maxDays: Int,
+  ): Layout {
+    val boxW = boxWidthDp.toFloat().coerceAtLeast(40f)
+    // The height is an estimate: the launcher reports the host view and the
+    // card subtracts the chrome it believes it draws. It decides the row
+    // count and nothing else — see below.
+    val boxH = boxHeightDp.toFloat().coerceAtLeast(14f)
+
+    // THE WIDTH DECIDES THE CELL, because the width is the number the caller
+    // actually knows: it is the card's own width less its padding, and no
+    // estimate of anything comes into it. So the columns are however many
+    // readable cells fit across it, and the cell is then the width divided
+    // exactly among them — which is what makes the grid land flush on both
+    // edges, every time, rather than when an estimate happens to be right.
+    val columns = Math.round((boxW + GAP_DP) / (TARGET_CELL_DP + GAP_DP))
+      .coerceAtLeast(MIN_COLUMNS)
+    // SQUARE. The cell was allowed to take the box's proportions for a
+    // while, and a day drawn half again as wide as it is tall does not read
+    // as a day; it reads as a bar in a chart of something else.
+    val cellDp = ((boxW - (columns - 1) * GAP_DP) / columns).coerceIn(3f, MAX_CELL_DP)
+
+    // ROWS FROM WHAT IS LEFT, ROUNDED TO THE NEAREST. Rounded down for a
+    // while, which was the safe answer while the cell size also depended on
+    // this estimate — being wrong then meant the whole graph shrank. It does
+    // not any more: the cell comes from the width, so a row too many costs a
+    // few percent of scale and a row too few costs a whole empty row's worth
+    // of card. Nearest is the honest answer to "how many fit".
+    val roomFor = Math.round((boxH + GAP_DP) / (cellDp + GAP_DP))
+    val rows = roomFor
+      .coerceIn(1, MAX_ROWS)
+      .coerceAtMost((maxDays / columns).coerceAtLeast(1))
+    val cellHDp = cellDp
+    val cellWDp = cellDp
+
+    // Only the RATIOS above matter for how the grid LOOKS, because it is
+    // scaled into the box either way. What the scale below decides is how
+    // sharp it arrives: draw at the device's own pixels and every edge is
+    // exactly where it should be; draw at a third of them and the launcher
+    // enlarges the bitmap, which is a blur with rounded corners.
+    //
+    // Native resolution wherever it fits. It does not always fit — the
+    // bitmap crosses a Binder transaction and the host has its own ceiling
+    // on top of that, and the failure is the whole widget refusing to draw
+    // rather than a warning — so the only thing that pulls the scale down
+    // is the area budget, and it pulls it down by as little as it must.
+    val gridW = columns * cellWDp + (columns - 1) * GAP_DP
+    val gridH = rows * cellHDp + (rows - 1) * GAP_DP
+    var scale = density
+    val area = gridW * gridH * scale * scale
+    if (area > MAX_BITMAP_PX) {
+      scale *= Math.sqrt((MAX_BITMAP_PX / area).toDouble()).toFloat()
+    }
+    return Layout(
+      rows = rows,
+      columns = columns,
+      cellWPx = Math.round(cellWDp * scale).coerceAtLeast(3),
+      cellHPx = Math.round(cellHDp * scale).coerceAtLeast(3),
+      gapPx = Math.round(GAP_DP * scale).coerceAtLeast(1),
+    )
   }
 
-  /** The space between squares, in dp, on both axes. */
-  private const val GAP_DP = 2f
+  /** Never fewer than a fortnight's worth of columns, however small the box. */
+  private const val MIN_COLUMNS = 5
+
+  /**
+   * A ceiling on the cell, in dp, and it is deliberately generous.
+   *
+   * The grid takes the shape of its box: a third of the height per row, and
+   * as many columns as that cell size fits across the width. Capping the
+   * cell tighter than this would buy extra columns at the price of a band
+   * of empty card under the graph — the bitmap would be proportionally
+   * wider than its box, so the width would bind and the leftover height
+   * would sit there doing nothing. Better to let a tall box have big days
+   * and fewer of them; how many days to show is a decision the person
+   * makes by resizing the widget, which is the control they already have.
+   */
+  private const val MAX_CELL_DP = 40f
+
+  /**
+   * The most pixels the bitmap may hold, and it is a Binder budget.
+   *
+   * 100k pixels is 400 KB as ARGB_8888 — comfortably inside what an
+   * AppWidget host will carry, and enough that a 4x4's grid is drawn at
+   * about two thirds of the device's own resolution rather than a third of
+   * it. Below that the enlargement starts to show on the cells' corners.
+   */
+  private const val MAX_BITMAP_PX = 100_000f
+
+
+
+  /**
+   * The space between cells, in dp, on both axes.
+   *
+   * Four, up from two. Two was right for a 7dp square in a grid of a
+   * hundred and eighty; at three rows the cells are four times the size and
+   * the same two points between them read as a solid slab with grout lines
+   * scratched into it. The gap has to grow with what it separates.
+   */
+  private const val GAP_DP = 7f
 
   /**
    * The sunnah line: four straight sides, clockwise from the top-left,
@@ -276,26 +466,30 @@ object PracticeGridBitmap {
     val t = rect.top + inset
     val r = rect.right - inset
     val b = rect.bottom - inset
-    val side = r - l
-    if (side <= 0f) return
+    val w = r - l
+    val h = b - t
+    if (w <= 0f || h <= 0f) return
     paint.style = Paint.Style.STROKE
     paint.strokeWidth = (cellPx * 0.09f).coerceAtLeast(1f)
     paint.color = Color.parseColor(SUNNAH_GOLD)
-    var left = fraction.coerceIn(0f, 1f) * side * 4f
+    // Round the PERIMETER, not four equal sides: the cell is a rectangle
+    // now, and splitting the fraction evenly would have the line finish a
+    // short side early and crawl along a long one.
+    var left = fraction.coerceIn(0f, 1f) * (2f * w + 2f * h)
     if (left <= 0f) return
-    var d = minOf(left, side)
+    var d = minOf(left, w)
     canvas.drawLine(l, t, l + d, t, paint)
     left -= d
     if (left <= 0f) return
-    d = minOf(left, side)
+    d = minOf(left, h)
     canvas.drawLine(r, t, r, t + d, paint)
     left -= d
     if (left <= 0f) return
-    d = minOf(left, side)
+    d = minOf(left, w)
     canvas.drawLine(r, b, r - d, b, paint)
     left -= d
     if (left <= 0f) return
-    d = minOf(left, side)
+    d = minOf(left, h)
     canvas.drawLine(l, b, l, b - d, paint)
   }
 

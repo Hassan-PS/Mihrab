@@ -9,8 +9,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.style.RelativeSizeSpan
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -253,6 +259,136 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
     private const val NEUTRAL_TEXT = "#E8EAED"
     private const val NEUTRAL_MUTED = "#9AA0A6"
+
+    /** What the card spends on its own left and right padding, in dp. */
+    private const val STRIP_CONTENT_INSET_DP = 20
+
+    /** As many days as the payload carries. See PRACTICE_WINDOW_DAYS. */
+    private const val MAX_GRID_DAYS = 210
+
+    /**
+     * The times row's type size, and why it is measured rather than declared.
+     *
+     * The layout asks for 17sp with `autoSizeTextType="uniform"` under it,
+     * and auto-sizing is not honoured by every AppWidget host — on the ones
+     * that ignore it a `TextView` simply draws its text at the size it was
+     * given and lets it spill past its column. With 24-hour times nobody
+     * noticed, because "05:36" fits a sixth of a 4x4 at 17sp with room to
+     * spare. The 12-hour clock in 2.15.0 made every one of those strings
+     * "5:36 AM" — half again as wide — and six of them ran into each other
+     * across the top of the card.
+     *
+     * So the size is worked out here, where the strings and the column width
+     * are both known, and set explicitly. Measured with the row's own
+     * typeface, against the WIDEST of the times rather than each one on its
+     * own: a row where Fajr is 17sp and Maghrib is 12sp would be a worse
+     * answer than a row that is uniformly smaller.
+     *
+     * @param columnDp one column's share of the row, before its gutter
+     */
+    private fun stripTimeSizeSp(
+      context: Context,
+      times: List<String>,
+      columnDp: Float,
+    ): Float {
+      if (times.isEmpty() || columnDp <= 0f) return TIME_MAX_SP
+      val metrics = context.resources.displayMetrics
+      // A gutter, not a hairline: text that stops exactly at its column's
+      // edge still reads as two words with no space between them.
+      val availablePx = (columnDp - TIME_GUTTER_DP) * metrics.density
+      if (availablePx <= 0f) return TIME_MIN_SP
+      val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+      }
+      var sp = TIME_MAX_SP
+      while (sp > TIME_MIN_SP) {
+        if (times.all { measureTimePx(paint, it, sp, metrics.scaledDensity) <= availablePx }) {
+          break
+        }
+        sp -= 0.5f
+      }
+      return sp
+    }
+
+    /**
+     * How wide one time is with the meridiem drawn small — the width the
+     * size search has to agree with, or it would fit a string nobody draws.
+     */
+    private fun measureTimePx(
+      paint: TextPaint,
+      time: String,
+      sp: Float,
+      scaledDensity: Float,
+    ): Float {
+      val core = numericRange(time)
+      paint.textSize = sp * scaledDensity
+      var width = paint.measureText(time, core.first, core.last + 1)
+      if (core.first > 0 || core.last < time.length - 1) {
+        paint.textSize = sp * MERIDIEM_SCALE * scaledDensity
+        width += paint.measureText(time, 0, core.first)
+        width += paint.measureText(time, core.last + 1, time.length)
+      }
+      return width
+    }
+
+    /**
+     * The clock itself, small-capped around the digits.
+     *
+     * A 12-hour time is two things: the number, which is what anyone
+     * actually reads off a widget, and three characters saying which half
+     * of the day it is. Shrinking the whole string to fit the column made
+     * the number small to buy room for the part nobody looks at. The
+     * meridiem is set at 62% instead, and the digits keep nearly the size
+     * the 24-hour clock has.
+     *
+     * The span is applied to whatever falls OUTSIDE the digits rather than
+     * to a trailing suffix, because the meridiem does not always trail:
+     * Chinese writes 上午5:36 and reordering someone's clock to suit a
+     * layout is not a fix.
+     */
+    @JvmStatic
+    fun styledTime(time: String): CharSequence {
+      val core = numericRange(time)
+      if (core.first == 0 && core.last == time.length - 1) return time
+      val out = SpannableString(time)
+      if (core.first > 0) {
+        out.setSpan(
+          RelativeSizeSpan(MERIDIEM_SCALE),
+          0,
+          core.first,
+          Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+        )
+      }
+      if (core.last < time.length - 1) {
+        out.setSpan(
+          RelativeSizeSpan(MERIDIEM_SCALE),
+          core.last + 1,
+          time.length,
+          Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+        )
+      }
+      return out
+    }
+
+    /**
+     * First and last index of the clock's own characters — digits in any
+     * script the app ships, and the separators between them.
+     */
+    private fun numericRange(time: String): IntRange {
+      val isDigit = { c: Char ->
+        c.isDigit() || c in '٠'..'٩' || c in '۰'..'۹'
+      }
+      val first = time.indexOfFirst(isDigit)
+      val last = time.indexOfLast(isDigit)
+      if (first < 0) return 0..(time.length - 1)
+      return first..last
+    }
+
+    /** The size the layout declares, and the floor below which it stops. */
+    private const val TIME_MAX_SP = 17f
+    private const val TIME_MIN_SP = 10f
+    private const val TIME_GUTTER_DP = 4f
+    private const val MERIDIEM_SCALE = 0.62f
 
     private val COL_WRAPPERS =
       intArrayOf(
@@ -798,9 +934,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
     /**
      * What the strip spends before the practice grid gets a say, in dp:
-     * padding, the header line, the next-prayer footer, the divider and the
-     * streak line above the graph. The times row and the grid share what is
-     * left, weighted 1:2, which is where the two thirds below comes from.
+     * padding, the header line, the next-prayer footer and the divider above
+     * the graph. The times row and the grid share what is left.
+     *
+     * 150, measured against a real card: on a 288dp host view the grid comes
+     * out 127dp tall, so 288 - 150 is within ten points of the truth once
+     * `layoutFor`'s own bias is applied. It was briefly 108 on the reasoning
+     * that the streak's old row no longer costs anything — true, but the
+     * figure had never been only that row, and the graph then asked for a
+     * box fifty points taller than it was given, chose too few columns for
+     * it, and stopped short of the card's right edge.
      */
     private const val STRIP_CHROME_DP = 150
 
@@ -1278,6 +1421,19 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_practice_divider, vis)
       views.setViewVisibility(R.id.widget_practice_row, vis)
       views.setViewVisibility(R.id.widget_practice_grid, vis)
+      // In the strip these three live on the next-prayer line rather than in
+      // a row of their own, so they are shown and hidden by name. In the tall
+      // layout they are inside `widget_practice_row` and this is redundant —
+      // a GONE parent wins — which is the cheaper of the two ways to keep one
+      // binder honest about two layouts.
+      views.setViewVisibility(R.id.widget_practice_streak, vis)
+      views.setViewVisibility(R.id.widget_practice_second, vis)
+      // "2 of 5 logged" and the summary's "2 of 5 today" are the same fact,
+      // and on one line they would sit six points apart.
+      views.setViewVisibility(
+        R.id.widget_logged,
+        if (show && layoutId == R.layout.prayer_widget_strip) View.GONE else View.VISIBLE,
+      )
       views.setViewVisibility(
         R.id.widget_practice_foot,
         if (showFoot) View.VISIBLE else View.GONE,
@@ -1317,33 +1473,32 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       }
       views.setTextViewText(R.id.widget_practice_second, parts.joinToString(" · "))
 
-      // The plan's 4x4 draws fourteen weeks across the full width, not ten
-      // squeezed beside the streak number.
-      // The strip gives the grid the full width, so it gets fourteen weeks;
-      // the tall layout sets it beside the streak number, where fourteen
-      // columns would be slivers.
       val density = context.resources.displayMetrics.density
       val wide = layoutId == R.layout.prayer_widget_strip
+      // The wide layout gives the grid the card's width and roughly two
+      // thirds of what is left below the strip; the tall one sets it beside
+      // the streak number, in half the width. The count of days, the cell
+      // shape and the gap all come out of that one box — see `layoutFor`.
+      val grid = PracticeGridBitmap.layoutFor(
+        (if (wide) widthDp - STRIP_CONTENT_INSET_DP
+        else (widthDp - STRIP_CONTENT_INSET_DP) / 2),
+        // The times row and the grid split what is left, weighted 1:2 — but
+        // only while the month footer is drawn under it. Without the footer
+        // the grid keeps the whole remainder, and a box reckoned at two
+        // thirds of it is a graph with a third of a card under it.
+        ((heightDp - STRIP_CHROME_DP) * (if (heightDp >= PRACTICE_MIN_HEIGHT_DP) 2 else 3)) / 3,
+        density,
+        if (wide) MAX_GRID_DAYS else MAX_GRID_DAYS / 2,
+      )
       views.setImageViewBitmap(
         R.id.widget_practice_grid,
         PracticeGridBitmap.render(
           practice.optJSONArray("days"),
-          // Twenty across the full width, eleven beside the streak number.
-          // Fourteen used to be the widest the payload carried; it now
-          // carries twenty, and fourteen left the right third of a 4x4
-          // empty — seven rows of fourteen is a 2:1 shape in a box nearer
-          // 3:1, and columns are the only axis that can give.
-          // As many weeks as fill the box at full-size squares. The wide
-          // layout gives the grid the card's width and roughly two thirds
-          // of what is left below the strip; the tall one sets it beside
-          // the streak number, in half the width.
-          PracticeGridBitmap.weeksForBox(
-            (if (wide) widthDp - 20 else (widthDp - 20) / 2),
-            ((heightDp - STRIP_CHROME_DP) * 2) / 3,
-            if (wide) 26 else 14,
-          ),
-          ((if (wide) 7 else 6) * density).toInt().coerceAtLeast(3),
-          (2f * density).toInt().coerceAtLeast(1),
+          grid.rows,
+          grid.columns,
+          grid.cellWPx,
+          grid.cellHPx,
+          grid.gapPx,
           accent,
           practice.optString("since").ifEmpty { null },
         ),
@@ -1446,17 +1601,20 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * bottom third of the card. Three launcher rows is enough to draw a
      * graph; it is not enough to draw a graph AND two more lines under it.
      *
-     * 265, which is where the Log Today widget has always drawn the same
-     * bitmap: two launcher rows is 210dp and three is 321dp on a 420dpi
-     * phone, so this sits in the gap between them and the graph is what the
-     * third row buys. It was briefly 180 to stop a 4x2 drawing six times
-     * with a hand's width of nothing under them — but that emptiness came
-     * from a weighted times row pooling the card's slack around six lines of
-     * text, and the row takes its own height now. The fix belonged in the
-     * layout, and putting it here bought a 4x2 a graph nobody had asked that
-     * size for.
+     * It was 265 — between two launcher rows (210dp on a 420dpi phone) and
+     * three (321dp) — so the graph was what a third row bought. Seven rows
+     * of week-columns needed that much: below it the days came out as specks
+     * and the card was better off without them.
+     *
+     * Three rows need less than half the height, and a 4x2 is the size
+     * people actually keep a prayer widget at. 200 puts the graph inside two
+     * launcher rows, where it now has room to be read rather than merely
+     * fitted. (It was 180 once, for a different reason and wrongly: a
+     * weighted times row was pooling the card's slack, which was a layout
+     * bug wearing this constant's clothes. The row takes its own height now,
+     * so the number is free to mean what it says.)
      */
-    private const val GRID_MIN_HEIGHT_DP = 265
+    private const val GRID_MIN_HEIGHT_DP = 200
 
     /**
      * Bind the payload into whichever layout was chosen.
@@ -1678,6 +1836,17 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
       views.setViewVisibility(R.id.widget_times_row, View.VISIBLE)
 
+      // How big the times can be set without the columns running into each
+      // other — see `stripTimeSizeSp`. Measured across ALL the visible times
+      // and applied to all of them, because a row where one column is 12sp
+      // and the next is 17sp is worse than a row that is uniformly smaller.
+      val shown = displayRows.take(COL_LABELS.size)
+      val timeSizeSp = stripTimeSizeSp(
+        context,
+        shown.map { displayTime(it) },
+        (widthDp - STRIP_CONTENT_INSET_DP).toFloat() / shown.size.coerceAtLeast(1),
+      )
+
       for (i in COL_LABELS.indices) {
         if (i >= displayRows.size) {
           views.setViewVisibility(COL_WRAPPERS[i], View.GONE)
@@ -1702,7 +1871,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
         views.setViewVisibility(COL_WRAPPERS[i], View.VISIBLE)
         views.setTextViewText(COL_LABELS[i], label)
-        views.setTextViewText(COL_TIMES[i], time)
+        views.setTextViewText(COL_TIMES[i], styledTime(time))
+        views.setTextViewTextSize(
+          COL_TIMES[i],
+          android.util.TypedValue.COMPLEX_UNIT_SP,
+          timeSizeSp,
+        )
         views.setTextColor(COL_LABELS[i], col)
         views.setTextColor(COL_TIMES[i], col)
 
