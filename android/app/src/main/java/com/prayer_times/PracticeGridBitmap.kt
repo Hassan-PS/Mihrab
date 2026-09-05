@@ -223,8 +223,13 @@ object PracticeGridBitmap {
       add(Calendar.DAY_OF_YEAR, -(rows * columns - 1))
     }
 
-    for (row in 0 until rows) {
-      for (col in 0 until columns) {
+    // COLUMN-MAJOR, and deliberately: the Log screen's heatmap runs the days
+    // down each column, one column to a week, newest week at the right. At
+    // seven rows this grid IS that heatmap; at any other row count it is
+    // still the same reading direction, so the widget and the screen it
+    // summarises never disagree about which square is which day.
+    for (col in 0 until columns) {
+      for (row in 0 until rows) {
         val key = keyOf(cursor)
         val left = (pad + col * (cellWPx + gapPx)).toFloat()
         val top = (pad + row * (cellHPx + gapPx)).toFloat()

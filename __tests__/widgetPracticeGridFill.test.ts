@@ -125,12 +125,15 @@ describe('the graph spans its box, whatever the height turns out to be', () => {
 });
 
 describe('the run of days reads in order, and ends today', () => {
-  it('fills a row at a time, left to right', () => {
-    // Row-major, like text. The old grid was seven rows of week-columns,
-    // which is the in-app heatmap's shape and needs a legend this surface
-    // does not have.
+  it('fills a column at a time, top to bottom', () => {
+    // Column-major, because the Log screen's heatmap is: days run down a
+    // column, a column is a week, the newest week is on the right. It was
+    // row-major for a while — the days were the same days in the same
+    // order, but laid along rows, and reading the widget after reading the
+    // Log screen meant re-learning which square was which. Two pictures of
+    // one record should not need two reading directions.
     expect(GRID).toMatch(
-      /for \(row in 0 until rows\) \{\s*\n\s*for \(col in 0 until columns\)/,
+      /for \(col in 0 until columns\) \{\s*\n\s*for \(row in 0 until rows\)/,
     );
   });
 
