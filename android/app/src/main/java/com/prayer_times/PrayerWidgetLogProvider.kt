@@ -170,12 +170,18 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
      * three (321dp) — which made the graph a thing the third row bought, and
      * made dragging the card shorter an on/off switch rather than a dial.
      *
-     * The graph is a row count now, so this is `LOG_CHROME_DP` plus one row:
-     * below it there is not room for a single square, and above it every
-     * extra square of height is another row. Drag the card and it gains or
-     * loses whole weeks of days, at the size they always were.
+     * The graph is a row count now, so this is `LOG_CHROME_DP` plus one row
+     * of squares: below it there is not room for a single square, and above
+     * it every extra square of height is another row. Drag the card and it
+     * gains or loses whole weeks of days, at the size they always were.
+     *
+     * 190, not 212. At 212 a card with 38dp going spare under its chips —
+     * a whole row of squares and then some — drew nothing, because the
+     * chrome it was measured against still counted the date-and-count line
+     * that this card no longer shows. The line goes at exactly this height,
+     * which is what pays for the row.
      */
-    private const val GRID_MIN_HEIGHT_DP = 212
+    private const val GRID_MIN_HEIGHT_DP = 190
 
     /*
      * THE TWO LOG BUDGETS. See the same section in PrayerWidgetProvider —
@@ -233,14 +239,19 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
      * the divider above the footer with its margins, the footer, the streak
      * line, and the divider above the grid.
      *
-     * 177, measured the same way the prayer card's was: on a 304dp host view
-     * the grid's box comes out about 131dp, so the true chrome is 173 — 164
-     * had it 9 points generous, and generous is the direction that scales
-     * the whole graph down instead of dropping a row from it. Two of those
-     * nine went to evening the band's margins up; the rest is now honest,
-     * with four points to the safe side.
+     * 177 measured the same way the prayer card's was: on a 304dp host view
+     * the grid's box comes out about 131dp, so the true chrome was 173 —
+     * 164 had it 9 points generous, and generous is the direction that
+     * scales the whole graph down instead of dropping a row from it.
+     *
+     * 155 now, because the date-and-count line is hidden whenever the graph
+     * is drawn (see `bindCompact`) and it was 22dp of that 177. This number
+     * and `GRID_MIN_HEIGHT_DP` describe the same card and have to be
+     * measured on the same card: quote the chrome WITH the header and the
+     * grid asks for a box 22dp taller than it has, which is most of a row
+     * and lands as a graph scaled down rather than a graph with fewer rows.
      */
-    private const val LOG_CHROME_DP = 177
+    private const val LOG_CHROME_DP = 155
     private const val CARD_PADDING_DP = 20
 
     /** As many days as the payload carries. See PRACTICE_WINDOW_DAYS. */
@@ -318,9 +329,20 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       // while the reverse only looks tight for one frame.
       val tight = heightDp in 1 until LOG_ROOMY_CONTENT_DP
       val bare = heightDp in 1 until LOG_TIGHT_CONTENT_DP
+      // The date-and-count line goes when the graph arrives, and that is
+      // what lets the graph arrive at all.
+      //
+      // It is 22dp with its margin — most of a row of squares — and both of
+      // its facts are said again below once the graph is drawn: the band
+      // under the chips carries "0 of 5 today", and the chips themselves are
+      // the day. So on a card with no graph it is the cheap line worth
+      // keeping, and on a card with one it is a row of history spent on a
+      // repetition. `LOG_CHROME_DP` is measured without it for exactly this
+      // reason — the two constants describe the same card.
+      val graph = heightDp >= GRID_MIN_HEIGHT_DP
       views.setViewVisibility(
         R.id.widget_log_header_row,
-        if (bare) View.GONE else View.VISIBLE,
+        if (bare || graph) View.GONE else View.VISIBLE,
       )
       views.setViewVisibility(
         R.id.widget_log_divider,

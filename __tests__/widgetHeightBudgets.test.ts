@@ -119,3 +119,52 @@ describe('a variant is filled against the budget that chose it', () => {
     expect(file).not.toMatch(/\(heightDp - \d+\) \/ 2/);
   });
 });
+
+/**
+ * The graph's two numbers describe the SAME card, or the graph is wrong.
+ *
+ * `GRID_MIN_HEIGHT_DP` is the height at which the graph first appears and
+ * `*_CHROME_DP` is what everything else on the card costs, so the first has
+ * to be the second plus a row of squares. Drift between them shows up as one
+ * of the two failures reported here: quote the chrome too high and a card
+ * with a row of space going spare draws nothing; quote it too low and the
+ * grid asks for a box taller than it has, which `fitCenter` answers by
+ * scaling every square down instead of dropping a row.
+ *
+ * The Log card's chrome is measured WITHOUT its date-and-count line, because
+ * that line is hidden at exactly `GRID_MIN_HEIGHT_DP` — it is what pays for
+ * the first row.
+ */
+describe('the graph appears exactly when a row of it fits', () => {
+  const gridNum = (file: string, name: string) => {
+    const m = new RegExp(`val ${name} = (\\d+)`).exec(file);
+    if (!m) throw new Error(`${name} is gone`);
+    return Number(m[1]);
+  };
+  const gridSrc = src('PracticeGridBitmap');
+  const f = (name: string) =>
+    Number(new RegExp(`${name} = ([0-9.]+)f?`).exec(gridSrc)![1]);
+  /** One row of squares, plus the gap and ring margin that come with it. */
+  const oneRow = f('TARGET_CELL_DP') + f('GAP_DP');
+
+  it.each([
+    ['the strip', strip, 'STRIP_CHROME_DP'],
+    ['the log card', log, 'LOG_CHROME_DP'],
+  ])('%s turns the graph on within a row of its own chrome', (_l, file, chrome) => {
+    const gate = gridNum(file, 'GRID_MIN_HEIGHT_DP');
+    const over = gate - gridNum(file, chrome);
+    // At least a row — below that the graph appears with nowhere to draw —
+    // and no more than two, which is a row of card going spare.
+    expect(over).toBeGreaterThanOrEqual(oneRow * 0.9);
+    expect(over).toBeLessThan(oneRow * 2);
+  });
+
+  it('drops the log card’s date line when the graph takes its place', () => {
+    // Both facts on that line are said again once the graph is drawn, and
+    // the 22dp it costs is most of a row of history.
+    expect(log).toContain('val graph = heightDp >= GRID_MIN_HEIGHT_DP');
+    expect(log).toMatch(
+      /widget_log_header_row,\s*\n\s*if \(bare \|\| graph\) View\.GONE/,
+    );
+  });
+});
