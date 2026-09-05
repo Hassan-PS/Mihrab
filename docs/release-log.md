@@ -491,3 +491,16 @@ of build minutes for the month, so #675, #676 and #677 all failed at
 "Preparing build for App Store Connect" and the release went out with
 Android, F-Droid and the Mac only. The iOS channel needs the workflow
 rerun when the quota resets.
+
+## 2.15.1 (260) — 2026-09-05
+
+Took 2 aborted attempt(s) before it ran clean:
+
+  - 1 CI on main last concluded 'failure' on "release.sh: revert the site whole, like the add does" — fix it before releasing on top of it: https://github.com/Hassan-PS/Mihrab/actions/runs/33981339332
+  - 1 catalyst build failed — /tmp/release-catalyst.log
+
+Changed the release cycle itself:
+
+  - `scripts/release.sh`
+
+**Lesson:** _(unfilled)_
