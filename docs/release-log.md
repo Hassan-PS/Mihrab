@@ -503,4 +503,25 @@ Changed the release cycle itself:
 
   - `scripts/release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the same staleness, a third time, and then a fourth in the
+test written to catch it. 2.15.0's list of files to ADD had gone stale;
+this cycle found the list of files to REVERT had gone stale identically,
+so a phase-2 failure left the Swedish page and the eleven generated ones
+stamped and the next run refused to start on a dirty tree of thirteen
+files it had written itself. Both are `docs` whole now.
+
+The abort that cost the cycle was the fix's own CI.
+`releasePublishStep.test.ts` asserted the revert string *contains*
+`docs/index.html` — a test that pins a list of filenames, which goes
+stale exactly the way the list does, and went red on the commit that
+stopped naming files at all. The
+release then refused to start on a red main, which is the preflight gate
+doing its job on a failure the previous release taught it to look for.
+
+So: when a release-script fix is "stop naming files, name the directory",
+the test has to move in the same commit — and a check that asserts a
+specific path inside a release script is the same bug as the path being
+there. Assert the BEHAVIOUR (every file `sync-version` writes is covered)
+rather than the spelling.
+
+The catalyst abort was the ordinary one, unrelated and unremarkable.

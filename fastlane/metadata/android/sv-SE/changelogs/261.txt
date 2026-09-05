@@ -1,0 +1,2 @@
+• Nedladdningen av en recitatör har flyttat till recitatörslistan. Varje röst visar nu vad som finns på enheten och erbjuder att hämta eller radera den — så "vilka har jag offline?" är en skärm i stället för fyrtiotvå.
+• Praktikgrafen på hemskärmen är ombyggd: större rutor, kant till kant, och den läses nedåt i kolumner som i Loggen. Att ändra storlek lägger till eller tar bort rader i stället för att krympa grafen, från en rad och uppåt.

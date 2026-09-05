@@ -1,0 +1,2 @@
+• Downloading a reciter has moved onto the reciter list. Every voice now says what it holds on your device, and offers to fetch it or delete it — so "which do I have offline?" is one screen instead of forty-two.
+• The home-screen practice graph is rebuilt: bigger squares, edge to edge, and it reads down its columns like the Log screen does. Resizing the widget now adds or removes rows instead of shrinking the graph, from one row up.
