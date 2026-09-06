@@ -595,3 +595,31 @@ For the next cycle:
     start, which is an account question, not a repo one.
   - Do not touch the script's push ordering on the strength of this. It
     was the obvious suspect and it was innocent.
+
+**Second lesson: the release commit cannot pass tests that assert the
+files the release stamps.**
+
+CI went red on a7a4965 itself. `translationLoader.test.ts` pinned the
+Qur'an folder reference as `path = "../assets/quran"`, quotes included —
+and stamping the version rewrote `project.pbxproj`, where Xcode's own
+normalisation dropped them. The published build was correct throughout:
+unzipping `Mihrab-macOS-2.17.0.zip` off the release shows all thirteen
+translations and all 114 surahs in place. Only the regex was wrong.
+
+The order is what makes this structural rather than unlucky. Tests run in
+phase 2, stamping happens in phase 4, and the commit is made from what
+stamping produced — so any assertion about a stamped file is checked
+against the version BEFORE the release touched it, and the released commit
+is the one version of the tree nobody tested. It cannot be fixed by being
+more careful; a test like this will always go red after the tag, never
+before it.
+
+Two ways out, neither taken yet because they deserve their own change:
+re-run the suite after stamping and before committing, which costs two
+minutes and closes the hole completely; or keep assertions off the files
+the release rewrites, which is the 2.15.1 lesson again — assert the
+behaviour, not the spelling. The test itself has been loosened either way.
+
+Left ✗ at the end of this cycle: iOS (account, above) and CI on the
+released commit (this). The Android, macOS, Homebrew, F-Droid, site and
+store-notes channels all verified.
