@@ -238,14 +238,17 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
      * 164 had it 9 points generous, and generous is the direction that
      * scales the whole graph down instead of dropping a row from it.
      *
-     * 155 now, because the date-and-count line is hidden whenever the graph
-     * is drawn (see `bindCompact`) and it was 22dp of that 177. This number
-     * and `GRID_MIN_HEIGHT_DP` describe the same card and have to be
-     * measured on the same card: quote the chrome WITH the header and the
-     * grid asks for a box 22dp taller than it has, which is most of a row
-     * and lands as a graph scaled down rather than a graph with fewer rows.
+     * 165 now. It was 155, on the same reasoning — the date-and-count line
+     * is hidden whenever the graph is drawn (see `bindCompact`) and it was
+     * 22dp of the 177 this once quoted — but ten points short of what the
+     * card actually spends: measured off a screenshot, a 210dp host gave the
+     * graph's ImageView 45dp, and 155 claimed 55. The graph came out taller
+     * than its box, so the HEIGHT bound, and `fitCenter` scaled every square
+     * down and stood the whole grid away from both edges. This number and
+     * `GRID_MIN_HEIGHT_DP` describe the same card and have to be measured on
+     * the same card.
      */
-    private const val LOG_CHROME_DP = 155
+    private const val LOG_CHROME_DP = 165
     private const val CARD_PADDING_DP = 20
 
     /** As many days as the payload carries. See PRACTICE_WINDOW_DAYS. */

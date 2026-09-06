@@ -937,13 +937,16 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * padding, the header line, the next-prayer footer and the divider above
      * the graph. The times row and the grid share what is left.
      *
-     * 164, measured off a screenshot rather than reasoned about. On a 303dp
-     * host view the card drew five rows at 87% scale, which puts the real
-     * box at 135dp — so the true chrome was 168, against the 150 this number
-     * claimed. Eighteen points of over-estimated box, and eighteen points is
-     * most of a row. Evening up the margins around the band above the graph
-     * (see prayer_widget_strip.xml) gave 8dp back, leaving the true chrome
-     * at about 160; 164 is that, four points to the safe side.
+     * 184, measured off a screenshot rather than reasoned about, and
+     * measured WITHOUT the month footer — that is `STRIP_FOOT_DP`, taken off
+     * separately on the cards tall enough to draw it.
+     *
+     * On a 432dp host view the card's own edges put the graph's ImageView at
+     * 233dp: 432 less the launcher's 16dp of host padding, the card's 28dp
+     * of its own, and 155dp of header, times row, night row, two rules, the
+     * next-prayer line and the month footer. Take the footer's 19 off that
+     * and the chrome the graph always pays is 180; 184 is that, four points
+     * to the safe side, for the reason the next paragraph gives.
      *
      * WHICH WAY TO BE WRONG, and it is the opposite of the old answer. This
      * number is only ever compared against the box the grid must fit inside,
@@ -959,7 +962,49 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * old row no longer costs anything — true, but the figure had never been
      * only that row.)
      */
-    private const val STRIP_CHROME_DP = 164
+    private const val STRIP_CHROME_DP = 184
+
+    /**
+     * The month footer, with the margin above it: "Sunnah 10% this month".
+     *
+     * It is drawn only from `PRACTICE_MIN_HEIGHT_DP` up, and it comes out of
+     * the same remainder the graph is given, so it is subtracted separately
+     * rather than folded into the chrome — a card too short for the footer
+     * gets those dp back as another row of history.
+     */
+    private const val STRIP_FOOT_DP = 19
+
+    /**
+     * The height, in dp, of the box the practice graph is actually handed.
+     *
+     * TWO LAYOUTS, TWO ANSWERS, and the difference is not cosmetic: it is
+     * which side of the ImageView decides the other's size.
+     *
+     * On the STRIP the graph's ImageView is the only weighted child of the
+     * content column, so the card hands it the whole remainder and the
+     * bitmap is scaled into it. Ask for less than that and `fitCenter`
+     * centres a small graph in a large view — a band of empty card above it
+     * and another below, which is what "too much void space above and under"
+     * was. So the box is what is left after everything else the card draws,
+     * subtracted by name. (It used to be that remainder times two thirds,
+     * standing in for a times row that takes its own height and never took a
+     * third of anything: measured on a 432dp host, the ImageView was 233dp
+     * and the arithmetic asked for 178.)
+     *
+     * On the TALL card the graph sits in a `wrap_content` row beside the
+     * streak number, so nothing constrains it: the bitmap's own height
+     * BECOMES the row's height, and a box bigger than the card can spare
+     * does not scale anything down, it pushes the month footer off the
+     * bottom. There the fraction is the right shape of answer — a share of
+     * what is left, deliberately short — and it stays.
+     */
+    private fun gridBoxHeight(wide: Boolean, heightDp: Int): Int =
+      if (wide) {
+        heightDp - STRIP_CHROME_DP -
+          (if (heightDp >= PRACTICE_MIN_HEIGHT_DP) STRIP_FOOT_DP else 0)
+      } else {
+        ((heightDp - STRIP_CHROME_DP) * 2) / 3
+      }
 
     /**
      * Three launcher cells of width. Below this the six-column strip gives
@@ -1540,11 +1585,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       val grid = PracticeGridBitmap.layoutFor(
         (if (wide) widthDp - STRIP_CONTENT_INSET_DP
         else (widthDp - STRIP_CONTENT_INSET_DP) / 2),
-        // The times row and the grid split what is left, weighted 1:2 — but
-        // only while the month footer is drawn under it. Without the footer
-        // the grid keeps the whole remainder, and a box reckoned at two
-        // thirds of it is a graph with a third of a card under it.
-        ((heightDp - STRIP_CHROME_DP) * (if (heightDp >= PRACTICE_MIN_HEIGHT_DP) 2 else 3)) / 3,
+        gridBoxHeight(wide, heightDp),
         density,
         if (wide) MAX_GRID_DAYS else MAX_GRID_DAYS / 2,
       )
@@ -1672,14 +1713,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * bug wearing this constant's clothes. The row takes its own height now,
      * so the number is free to mean what it says.)
      *
-     * 198 now, which is `STRIP_CHROME_DP` plus one row: the graph is no
+     * 211 now, which is `STRIP_CHROME_DP` plus one row: the graph is no
      * longer a block that needs three rows or nothing, it is however many
      * rows the card has room for, and the smallest useful answer to that is
      * one row rather than an absence. Below this there is not room for a
      * single square under the times, and a graph with no rows in it is a gap
      * with a description.
      */
-    private const val GRID_MIN_HEIGHT_DP = 198
+    private const val GRID_MIN_HEIGHT_DP = 211
 
     /**
      * Bind the payload into whichever layout was chosen.

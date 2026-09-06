@@ -168,3 +168,109 @@ describe('the graph appears exactly when a row of it fits', () => {
     );
   });
 });
+
+/**
+ * The box the graph is TOLD it has is the box the card HANDS it.
+ *
+ * Reported as "the graph in the widget is better but has too much void space
+ * above and under", with a screenshot of a 4x4: a six-row graph floating in
+ * the middle of the card with a band of nothing at each end.
+ *
+ * The rows and the cell come out of a box the provider works out by
+ * subtracting what it believes the rest of the card costs. The strip did not
+ * subtract — it took the remainder and multiplied it by two thirds, standing
+ * in for "the times row takes the other third". No layout ever behaved that
+ * way: the graph's ImageView is the ONLY weighted child of the content
+ * column, so the times row takes its own height and the ImageView is handed
+ * everything that is left. Measured on a 432dp host: the ImageView got 233dp
+ * and the arithmetic asked for 178, so a graph built for two thirds of its
+ * box was centred in it and the missing third became the void, split above
+ * and below by `fitCenter`.
+ *
+ * The arithmetic is now a subtraction of named, measured constants, and the
+ * layout fact it rests on is pinned below — because a weighted sibling added
+ * to either column would break the arithmetic silently, and the only symptom
+ * would be a graph that had shrunk.
+ */
+describe('the graph is sized for the space it is actually given', () => {
+  const layoutXml = (name: string) =>
+    readFileSync(path.join(RES, 'layout', `${name}.xml`), 'utf8');
+
+  /**
+   * The direct children of one element, by id — a real walk rather than a
+   * regex, because "weighted sibling" is a question about depth.
+   */
+  const childrenOf = (xml: string, id: string): string[] => {
+    const body = xml.replace(/<!--[\s\S]*?-->/g, '');
+    const tag = /<(\/?)([A-Za-z][\w.]*)((?:[^<>"]|"[^"]*")*?)(\/?)>/g;
+    const stack: string[] = [];
+    const kids: string[] = [];
+    let m: RegExpExecArray | null;
+    let depth = -1;
+    while ((m = tag.exec(body))) {
+      const [, closing, name, attrs, selfClosing] = m;
+      if (closing) {
+        if (stack.length - 1 === depth) depth = -1;
+        stack.pop();
+        continue;
+      }
+      const open = `<${name}${attrs}>`;
+      if (depth >= 0 && stack.length === depth + 1) kids.push(open);
+      if (!selfClosing) {
+        stack.push(name);
+        if (attrs.includes(`@+id/${id}"`) && depth < 0) depth = stack.length - 1;
+      } else if (depth >= 0 && stack.length === depth + 1) {
+        // already counted above
+      }
+    }
+    return kids;
+  };
+
+  it.each([
+    ['prayer_widget_strip', 'widget_content', 'widget_practice_grid'],
+    ['prayer_widget_log', 'widget_content', 'widget_log_grid'],
+  ])('%s gives the whole remainder to the graph alone', (layout, parent, gridId) => {
+    const kids = childrenOf(layoutXml(layout), parent);
+    expect(kids.length).toBeGreaterThan(3);
+    const weighted = kids.filter((k) => k.includes('android:layout_weight'));
+    expect(weighted).toHaveLength(1);
+    expect(weighted[0]).toContain(`@+id/${gridId}"`);
+  });
+
+  it('the strip subtracts what the card costs instead of taking a fraction', () => {
+    const at = strip.indexOf('private fun gridBoxHeight(');
+    expect(at).toBeGreaterThan(-1);
+    const box = strip.slice(at, at + 400);
+    const branches = /if \(wide\) \{([\s\S]*?)\} else \{([\s\S]*?)\n      \}/.exec(box);
+    expect(branches).not.toBeNull();
+    const [, wide, tall] = branches!;
+    // The strip's own branch: a subtraction of named constants, no fraction.
+    expect(wide).toContain('heightDp - STRIP_CHROME_DP -');
+    expect(wide).toContain('STRIP_FOOT_DP');
+    expect(wide).not.toMatch(/[*\/]\s*\d/);
+    // The tall card's stays a share, and the comment above says why: its
+    // graph sits in a wrap_content row, so the bitmap sets the row's height
+    // instead of being scaled into it, and asking for too much pushes the
+    // footer off the card rather than shrinking the squares.
+    expect(tall).toMatch(/\* 2\) \/ 3/);
+  });
+
+  it('the log card subtracts its own, and neither scales the answer', () => {
+    expect(log).toContain('val boxHeight = heightDp - LOG_CHROME_DP');
+  });
+
+  /**
+   * Both numbers are measurements of the same two cards, taken the same way,
+   * so they cannot drift far apart: the Log card carries one fewer band
+   * above its graph than the strip does, and no month footer under it.
+   */
+  it('the two chromes stay within a band of each other', () => {
+    const stripChrome = constOf(strip, 'STRIP_CHROME_DP');
+    const logChrome = constOf(log, 'LOG_CHROME_DP');
+    expect(Math.abs(stripChrome - logChrome)).toBeLessThan(40);
+    // And both are big enough to be a real card's chrome rather than a
+    // guess left over from a smaller layout.
+    expect(stripChrome).toBeGreaterThan(160);
+    expect(logChrome).toBeGreaterThan(160);
+  });
+});
