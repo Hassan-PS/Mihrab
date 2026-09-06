@@ -539,4 +539,38 @@ Took 2 aborted attempt(s) before it ran clean:
   - 1 missing release notes: en-US/changelogs/262.txt
   - 1 working tree has tracked changes — commit or stash them first
 
-**Lesson:** _(unfilled)_
+Both were the gate doing its job before anything irreversible. Every
+channel then published and verified except one: `verify-release.sh` ended
+on `iOS: 2.17.0 NEVER REACHED App Store Connect, and nothing is building
+it`.
+
+**Lesson: pushing the tag straight after `main` cancels the build the
+`main` push just started.**
+
+There is one Xcode Cloud workflow and it triggers on `main`. The script
+pushes `main`, a run starts — and seconds later it pushes the tag, which
+is another ref change on the same product. Xcode Cloud cancels the
+in-flight run and does not start a replacement, because the tag is not a
+trigger. Run #722 was created for the release commit and cancelled with no
+completion date at all; #719–#721 went the same way earlier in the day,
+each cancelled by the next push.
+
+The documented remedy, `xcode-cloud.py start`, answered HTTP 500
+`UNEXPECTED_ERROR` on four consecutive attempts while `runs` kept working
+— so read access was fine and the one call that would have fixed this was
+not. Apple's own system status reported Xcode Cloud healthy. A commit to
+`main` is the trigger that does work, which is what this entry is.
+
+Two things for the next cycle:
+
+  - The gate is right to fail here and did. What it cannot yet say is
+    *why*, and "nothing is building it" reads like the trigger never fired
+    when in fact it fired and was cancelled. A run that exists for the
+    release commit in state CANCELED is a different diagnosis from no run
+    at all, and the message could say so.
+  - If the cancellation is the tag push, the ordering is the fix: give the
+    `main` push time to be picked up before the tag lands, or start the
+    workflow explicitly after both. Worth confirming across a couple of
+    releases before changing the script — one observation is not a
+    pattern, and #717 and #718 both succeeded on the same kind of push
+    earlier the same day.
