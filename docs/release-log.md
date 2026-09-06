@@ -577,14 +577,27 @@ completion date at all**. They were never begun. Nothing about the pushes
 changed at that boundary; what changed is that the product stopped running
 anything, at 20:38 on 2026-09-06.
 
-`xcode-cloud.py start` answered HTTP 500 `UNEXPECTED_ERROR` on four
-consecutive attempts across ten minutes, while `runs` kept answering
+`xcode-cloud.py start` answered HTTP 500 `UNEXPECTED_ERROR` on five
+consecutive attempts across half an hour, while `runs` kept answering
 normally on the same credentials — read fine, the one write that would
 start a build refused. Apple's system status reported Xcode Cloud healthy
-throughout. An account-level stop — compute hours spent for the period, or
-a lapsed subscription — fits every one of those observations; a trigger
-problem fits none of them, because the triggers plainly fired and produced
-runs.
+throughout.
+
+**It was rate limiting.** Not something either the run list or the error
+said: a 500 `UNEXPECTED_ERROR` is what the API returns for it, the status
+page stays green because nothing is down, and the cancellations look
+exactly like an account-level stop from the outside. Eleven pushes to
+`main` in about three hours — the fixes, the release itself, and then the
+notes about the release — is what spent it.
+
+The lesson survives the correction, and is worth more for it: read the
+completion dates, not the states. Five runs cancelled with no completion
+date at all say the product refused to start them, and *why* it refused is
+not visible from here at all. What that rules out is everything in this
+repo — the trigger fired, the runs existed, nothing about the pushes
+changed at the boundary. What it cannot tell apart is quota, billing,
+throttling or an outage, and guessing between them from the outside is how
+this entry came to name the wrong one twice.
 
 For the next cycle:
 
@@ -595,6 +608,9 @@ For the next cycle:
     start, which is an account question, not a repo one.
   - Do not touch the script's push ordering on the strength of this. It
     was the obvious suspect and it was innocent.
+  - A release cut is not the time to also push a run of small commits. The
+    limit is shared, the release needs one build out of it, and the notes
+    explaining the release can wait until the build has started.
 
 **Second lesson: the release commit cannot pass tests that assert the
 files the release stamps.**
