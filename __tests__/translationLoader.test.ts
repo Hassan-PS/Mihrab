@@ -181,9 +181,20 @@ describe('the editions stay out of the JS bundle', () => {
   it('is wired into the iOS build as a copied folder', () => {
     // A folder reference, so the tree lands in the bundle at the same
     // path Android's asset root produces — one loader, two platforms.
+    //
+    // The PATH IS MATCHED WITH ITS QUOTES OPTIONAL. This assertion pinned
+    // `path = "../assets/quran"` and went red on 2.17.0 because the
+    // release's version stamp rewrote the project and Xcode's own
+    // normalisation dropped the quotes — `path = ../assets/quran`, which
+    // a pbxproj parses identically, and the published build carried all
+    // thirteen translations and all 114 surahs exactly as before. Nothing
+    // was wrong except this regex. Quoting inside a pbxproj belongs to the
+    // toolchain that writes it; what belongs to us is that the folder is
+    // referenced and copied. Same lesson as docs/release-log.md's entry
+    // for 2.15.1: assert the behaviour, not the spelling.
     const pbx = read('ios/PrayerApp.xcodeproj/project.pbxproj');
     expect(pbx).toMatch(
-      /isa = PBXFileReference; lastKnownFileType = folder; name = quran; path = "\.\.\/assets\/quran"/,
+      /isa = PBXFileReference; lastKnownFileType = folder; name = quran; path = "?\.\.\/assets\/quran"?;/,
     );
     expect(pbx).toMatch(/[0-9A-F]{24} \/\* quran in Resources \*\//);
   });
