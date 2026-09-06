@@ -544,33 +544,54 @@ channel then published and verified except one: `verify-release.sh` ended
 on `iOS: 2.17.0 NEVER REACHED App Store Connect, and nothing is building
 it`.
 
-**Lesson: pushing the tag straight after `main` cancels the build the
-`main` push just started.**
+**Lesson: when every run is cancelled before it starts, it is not the
+trigger — check the account.**
 
-There is one Xcode Cloud workflow and it triggers on `main`. The script
-pushes `main`, a run starts — and seconds later it pushes the tag, which
-is another ref change on the same product. Xcode Cloud cancels the
-in-flight run and does not start a replacement, because the tag is not a
-trigger. Run #722 was created for the release commit and cancelled with no
-completion date at all; #719–#721 went the same way earlier in the day,
-each cancelled by the next push.
+The first diagnosis here was wrong and is kept for the shape of the
+mistake. Seeing run #722 cancelled right after the tag push, I concluded
+the tag had cancelled the build the `main` push started, wrote that up,
+and pushed the note to `main` — which is itself a trigger, with no tag
+behind it. Run #723 was cancelled too. One push, nothing following it,
+same result: the hypothesis was falsified by the very commit that
+recorded it.
 
-The documented remedy, `xcode-cloud.py start`, answered HTTP 500
-`UNEXPECTED_ERROR` on four consecutive attempts while `runs` kept working
-— so read access was fine and the one call that would have fixed this was
-not. Apple's own system status reported Xcode Cloud healthy. A commit to
-`main` is the trigger that does work, which is what this entry is.
+What the run list actually says, once the timestamps are read rather than
+the states:
 
-Two things for the next cycle:
+    #723  CANCELED   (no completion date)
+    #722  CANCELED   (no completion date)
+    #721  CANCELED   (no completion date)
+    #720  CANCELED   (no completion date)
+    #719  CANCELED   (no completion date)
+    #718  SUCCEEDED  20:38
+    #717  SUCCEEDED  20:02
+    #716  CANCELED   19:54
+    #715  CANCELED   19:50
+    #714  SUCCEEDED  19:08
 
-  - The gate is right to fail here and did. What it cannot yet say is
-    *why*, and "nothing is building it" reads like the trigger never fired
-    when in fact it fired and was cancelled. A run that exists for the
-    release commit in state CANCELED is a different diagnosis from no run
-    at all, and the message could say so.
-  - If the cancellation is the tag push, the ordering is the fix: give the
-    `main` push time to be picked up before the tag lands, or start the
-    workflow explicitly after both. Worth confirming across a couple of
-    releases before changing the script — one observation is not a
-    pattern, and #717 and #718 both succeeded on the same kind of push
-    earlier the same day.
+Two different cancellations wear the same word. Up to #718 the cancelled
+runs all carry a completion time: they started, ran, and were superseded
+by the next push — ordinary, interleaved with successes, exactly what a
+busy afternoon of commits looks like. From #719 every run has **no
+completion date at all**. They were never begun. Nothing about the pushes
+changed at that boundary; what changed is that the product stopped running
+anything, at 20:38 on 2026-09-06.
+
+`xcode-cloud.py start` answered HTTP 500 `UNEXPECTED_ERROR` on four
+consecutive attempts across ten minutes, while `runs` kept answering
+normally on the same credentials — read fine, the one write that would
+start a build refused. Apple's system status reported Xcode Cloud healthy
+throughout. An account-level stop — compute hours spent for the period, or
+a lapsed subscription — fits every one of those observations; a trigger
+problem fits none of them, because the triggers plainly fired and produced
+runs.
+
+For the next cycle:
+
+  - The gate is right to fail and did. Its wording is what sent me down
+    the wrong path: "nothing is building it" reads as *no run exists*,
+    when five did. A run in state CANCELED **with no completion date** is
+    its own diagnosis and worth naming — it means the product refused to
+    start, which is an account question, not a repo one.
+  - Do not touch the script's push ordering on the strength of this. It
+    was the obvious suspect and it was innocent.
