@@ -544,8 +544,8 @@ channel then published and verified except one: `verify-release.sh` ended
 on `iOS: 2.17.0 NEVER REACHED App Store Connect, and nothing is building
 it`.
 
-**Lesson: when every run is cancelled before it starts, it is not the
-trigger — check the account.**
+**Lesson:** when every run is cancelled before it starts, it is not the
+trigger — check the account.
 
 The first diagnosis here was wrong and is kept for the shape of the
 mistake. Seeing run #722 cancelled right after the tag push, I concluded
