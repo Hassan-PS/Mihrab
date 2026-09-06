@@ -54,13 +54,21 @@ const TARGET_CELL_DP = numberOf('TARGET_CELL_DP');
 const MAX_ROWS = numberOf('MAX_ROWS');
 const MIN_COLUMNS = numberOf('MIN_COLUMNS');
 const MAX_CELL_DP = numberOf('MAX_CELL_DP');
+const MIN_ROW_RATIO = numberOf('MIN_ROW_RATIO');
+const MAX_ROW_RATIO = numberOf('MAX_ROW_RATIO');
 
 const RING_RATIO = numberOf('RING_RATIO');
 
 /** The margin the bitmap keeps for the rings that overhang a cell. */
 const marginOf = (cell: number) => 2 * Math.max(1.5, cell * RING_RATIO);
 
-/** A mirror of `layoutFor`'s geometry, built from the Kotlin's own numbers. */
+/**
+ * A mirror of `layoutFor`'s geometry, built from the Kotlin's own numbers.
+ *
+ * `cell` is the day's WIDTH, which the box's width decides on its own;
+ * `cellH` is its height, which is the width within MAX_ROW_RATIO and is
+ * what spends the dp the row count could not.
+ */
 function layoutFor(boxW: number, boxH: number, maxDays: number) {
   const columns = Math.max(
     MIN_COLUMNS,
@@ -71,18 +79,28 @@ function layoutFor(boxW: number, boxH: number, maxDays: number) {
     Math.max(3, (boxW - (columns - 1) * GAP_DP) / columns),
   );
   const usableH = Math.max(cell, boxH - marginOf(cell));
+  const roomFor = Math.floor((usableH + GAP_DP) / (cell * MIN_ROW_RATIO + GAP_DP));
+  const wanted = Math.min(
+    Math.round((usableH + GAP_DP) / (cell + GAP_DP)),
+    roomFor,
+  );
   const rows = Math.min(
-    Math.max(1, Math.floor((usableH + GAP_DP) / (cell + GAP_DP))),
+    Math.max(1, wanted),
     MAX_ROWS,
     Math.max(1, Math.floor(maxDays / columns)),
   );
-  return { rows, columns, cell };
+  const exactH = (usableH - (rows - 1) * GAP_DP) / rows;
+  const cellH = Math.max(3, Math.min(exactH, cell * MAX_ROW_RATIO));
+  // `wanted` is what the HEIGHT asked for; when `rows` is less than it, the
+  // day cap is what settled the count and the leftover is a design choice,
+  // not a quantising error.
+  return { rows, columns, cell, cellH, wanted, usableH };
 }
 
 const gridW = (l: { columns: number; cell: number }) =>
   l.columns * l.cell + (l.columns - 1) * GAP_DP;
-const gridH = (l: { rows: number; cell: number }) =>
-  l.rows * l.cell + (l.rows - 1) * GAP_DP;
+const gridH = (l: { rows: number; cellH: number }) =>
+  l.rows * l.cellH + (l.rows - 1) * GAP_DP;
 
 /** Grid boxes measured off real cards, in dp. */
 const BOXES: Array<[string, number, number]> = [
@@ -111,9 +129,9 @@ describe('the graph spans its box, whatever the height turns out to be', () => {
     const tall = layoutFor(318, 127, 210);
     const short = layoutFor(318, 60, 210);
     expect(short.rows).toBeLessThan(tall.rows);
-    // The cell is the same size: a shorter card shows fewer days, not
+    // The cell is the same WIDTH: a shorter card shows fewer days, not
     // smaller ones. That is the difference between a shorter widget and a
-    // smaller one.
+    // smaller one. Only the height gives, and only by an eighth.
     expect(short.cell).toBeCloseTo(tall.cell, 5);
   });
 
@@ -166,10 +184,57 @@ describe('the graph spans its box, whatever the height turns out to be', () => {
     expect(one.columns).toBe(many.columns);
   });
 
-  it('keeps the cells square', () => {
+  it('keeps a day within an eighth of square', () => {
     // A day drawn half again as wide as it is tall does not read as a day.
-    expect(GRID).toContain('val cellHDp = cellDp');
+    // The height is allowed to differ from the width — that is what spends
+    // the leftover — but only by the bound the Kotlin states, and the
+    // WIDTH is still the number the box's width decides on its own.
     expect(GRID).toContain('val cellWDp = cellDp');
+    expect(GRID).toContain('val cellHDp = exactH.coerceAtMost(cellDp * MAX_ROW_RATIO)');
+    expect(MAX_ROW_RATIO).toBeLessThanOrEqual(1.15);
+    expect(MIN_ROW_RATIO).toBeGreaterThanOrEqual(0.85);
+    for (const [, boxW] of BOXES) {
+      for (let boxH = 30; boxH <= 400; boxH += 1) {
+        const l = layoutFor(boxW, boxH, 210);
+        expect(l.cellH / l.cell).toBeGreaterThanOrEqual(MIN_ROW_RATIO - 0.001);
+        expect(l.cellH / l.cell).toBeLessThanOrEqual(MAX_ROW_RATIO + 0.001);
+      }
+    }
+  });
+
+  /**
+   * Reported as "the graph in the widget is better but has too much void
+   * space above and under".
+   *
+   * The rows were whole squares and the box is never a whole number of
+   * them, so up to a row's worth of the box — 27dp on a four-wide card —
+   * went unspent, and `fitCenter` split it into a band above the grid and
+   * a band below. Averaged over the heights a launcher actually hands out
+   * it was 13dp of empty card per graph. The rows take it now.
+   */
+  it('spends the box on the graph instead of on a band at each end', () => {
+    const leftovers: number[] = [];
+    let worst = 0;
+    for (const [, boxW] of BOXES) {
+      for (let boxH = 40; boxH <= 400; boxH += 1) {
+        const l = layoutFor(boxW, boxH, 210);
+        // Only where the HEIGHT settled the row count. Past that it is
+        // MAX_ROWS or the payload's own history that stops the graph
+        // growing, and the card keeping the rest is the intended answer.
+        if (l.rows < l.wanted || l.rows < 2) continue;
+        const left = l.usableH - gridH(l);
+        leftovers.push(left);
+        worst = Math.max(worst, left);
+      }
+    }
+    const mean = leftovers.reduce((a, b) => a + b, 0) / leftovers.length;
+    // Under a dp on average — invisible on a card, where it used to be a
+    // sixth of the graph's own height.
+    expect(mean).toBeLessThan(2);
+    // A two-row box is the one shape that can still keep a band: there is
+    // no third row that fits, however far it is squeezed, so what is left
+    // over is the difference between two rows and three. Half a cell.
+    expect(worst).toBeLessThan(TARGET_CELL_DP * 0.8);
   });
 
   it('never asks for more history than the payload carries', () => {

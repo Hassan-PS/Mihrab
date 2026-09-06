@@ -43,7 +43,10 @@ import org.json.JSONObject
  * cell is the width divided among as many columns as fit, which lands the
  * grid flush on both edges whatever the height turns out to be, and the
  * height only decides how many rows of that cell there is room for. Shrink
- * the card and it loses a row rather than shrinking every day in it.
+ * the card and it loses a row rather than shrinking every day in it. The
+ * few dp the last row does not divide into are given back to the rows, up
+ * to an eighth of a cell, so the graph fills the box instead of floating
+ * in a band of empty card at each end.
  *
  * FOUR CHANNELS, the same four the Log screen uses: fill depth for the
  * prayers, an outer amber ring for a completed fast, an inset gold line for
@@ -386,36 +389,52 @@ object PracticeGridBitmap {
     // edges, every time, rather than when an estimate happens to be right.
     val columns = Math.round((boxW + GAP_DP) / (TARGET_CELL_DP + GAP_DP))
       .coerceAtLeast(MIN_COLUMNS)
-    // SQUARE. The cell was allowed to take the box's proportions for a
-    // while, and a day drawn half again as wide as it is tall does not read
-    // as a day; it reads as a bar in a chart of something else.
+    // SQUARE, near enough. The cell was allowed to take the box's
+    // proportions for a while, and a day drawn half again as wide as it is
+    // tall does not read as a day; it reads as a bar in a chart of
+    // something else. This is the day's WIDTH, and its height is this
+    // within an eighth — see MAX_ROW_RATIO, and the rows below.
     val cellDp = ((boxW - (columns - 1) * GAP_DP) / columns).coerceIn(3f, MAX_CELL_DP)
 
-    // ROWS FROM WHAT IS LEFT, ROUNDED DOWN, AND THE BITMAP'S OWN MARGIN
-    // COUNTED — because the margin is part of what has to fit.
+    // ROWS FROM WHAT IS LEFT — AND THEN THE LAST FEW DP GIVEN BACK TO THEM.
     //
-    // Nearest was the honest answer to "how many rows fit in this height"
-    // and the wrong answer to the question that decides how the widget
-    // behaves. `fitStart` scales the bitmap by whichever axis binds first.
-    // The width always lands on the box by construction, so while the grid
-    // is no TALLER than its box the width binds, the scale is the same
-    // whatever the height, and the cell arrives the size the width chose.
-    // Round up by half a cell and the height binds instead — and then a
-    // card dragged an inch shorter does not lose a row, it draws every day
-    // on it smaller. That is the difference between a shorter widget and a
-    // smaller one, and it is the whole reason the rows are counted here.
+    // Counting the rows, rather than shrinking the cell, is what makes a
+    // resize change how many days the graph shows instead of how big a day
+    // is drawn: the width decides the cell, and the height only ever adds
+    // or removes a whole row of it. What that costs is quantising. A box is
+    // never a whole number of rows tall, so up to one row's worth of it
+    // went unspent, and `fitCenter` put half of that above the grid and
+    // half below — on a card whose height landed badly, a band of empty
+    // card at both ends. Reported as "too much void space above and under".
     //
-    // So the height only ever removes rows, one at a time, down to one; the
-    // leftover is a band of card under the last row, at most a row deep,
-    // which is what quantising into whole squares costs and is invisible
-    // next to a graph that changes size when you drag the handle.
+    // So the leftover is handed back to the rows themselves. The count is
+    // the nearest whole number of rows the box holds, and a row is then
+    // drawn exactly as tall as the box divides into. Bounded, because a day
+    // drawn half again as tall as it is wide stops reading as a day: inside
+    // a few percent it is still the same square, and what survives the
+    // bound is a few dp of card rather than a few tens.
+    //
+    // The WIDTH still decides the cell, so the grid still lands flush on
+    // both edges; and the height still cannot be the axis that binds,
+    // because the row height is derived FROM the box — the grid cannot come
+    // out taller than the box that asked for it.
     val marginDp = 2f * ringWidthOf(cellDp)
     val usableH = (boxH - marginDp).coerceAtLeast(cellDp)
-    val roomFor = ((usableH + GAP_DP) / (cellDp + GAP_DP)).toInt()
-    val rows = roomFor
+    // The row count is counted against the SHORTEST a row may be drawn, so
+    // a row is only added when there is honestly room for one; and it is
+    // the nearest count rather than the largest, so the rows that are drawn
+    // are the ones nearest the size the width chose.
+    val minRowH = cellDp * MIN_ROW_RATIO
+    val roomFor = ((usableH + GAP_DP) / (minRowH + GAP_DP)).toInt()
+    val rows = Math.round((usableH + GAP_DP) / (cellDp + GAP_DP))
+      .coerceAtMost(roomFor)
       .coerceIn(1, MAX_ROWS)
       .coerceAtMost((maxDays / columns).coerceAtLeast(1))
-    val cellHDp = cellDp
+    // What a row would have to be for the rows to fill the box exactly.
+    // Capped and never raised: a shorter row than this is a grid that fits
+    // with room to spare, a taller one is a grid hanging out of its box.
+    val exactH = (usableH - (rows - 1) * GAP_DP) / rows
+    val cellHDp = exactH.coerceAtMost(cellDp * MAX_ROW_RATIO).coerceAtLeast(3f)
     val cellWDp = cellDp
 
     // Only the RATIOS above matter for how the grid LOOKS, because it is
@@ -461,6 +480,30 @@ object PracticeGridBitmap {
    * makes by resizing the widget, which is the control they already have.
    */
   private const val MAX_CELL_DP = 40f
+
+  /**
+   * How far off square a day may be drawn, to spend what quantising left.
+   *
+   * The rows are whole squares and the box is not a whole number of them,
+   * so something has to absorb the remainder: either the card does, as a
+   * void the graph floats in, or the rows do, as a few percent on their
+   * height. A day 12% taller than it is wide still reads as that day — the
+   * marks on it are drawn as fractions of the smaller side, so nothing
+   * inside it stretches — and it is the difference between a graph that
+   * sits in its box and one that has a band of nothing at each end.
+   *
+   * 12%, not more: the fill, the fast ring and the sunnah arc are read as
+   * a SHAPE at this size, and past about an eighth off square the eye
+   * starts reading the shape instead of the mark on it.
+   */
+  private const val MAX_ROW_RATIO = 1.12f
+
+  /**
+   * And the same bound the other way, which is what the row COUNT is
+   * measured against: a row is added only when the box has room for one at
+   * this height, so the rows never come out shorter than this.
+   */
+  private const val MIN_ROW_RATIO = 0.88f
 
   /**
    * The most pixels the bitmap may hold, and it is a Binder budget.
