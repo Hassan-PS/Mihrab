@@ -639,3 +639,8 @@ behaviour, not the spelling. The test itself has been loosened either way.
 Left ✗ at the end of this cycle: iOS (account, above) and CI on the
 released commit (this). The Android, macOS, Homebrew, F-Droid, site and
 store-notes channels all verified.
+## 2.17.1 (263) — 2026-09-07
+
+Ran clean on the first attempt.
+
+**Lesson:** none needed — clean run, no change to the cycle.
