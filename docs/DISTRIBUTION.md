@@ -114,12 +114,21 @@ finishes:
 - **Play** — upload `app-play-release.aab`. The release notes for the new
   `versionCode` must already be in `fastlane/metadata/android/*/changelogs/`
   before you start; the script refuses to run without them.
-- **App Store** — Xcode Cloud starts on the push to `main`; submit from
-  App Store Connect once it succeeds (`./scripts/xcode-cloud.py runs 3`).
+- **App Store** — the Xcode Cloud workflow is PAUSED (see *Workflows*
+  below), so the push to `main` starts nothing. Build the tagged commit by
+  hand:
+
+  ```sh
+  ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start
+  ./scripts/xcode-cloud.py runs 3      # watch it
+  ./scripts/xcode-cloud.py pause       # once it lands
+  ```
+
   **Do not push to `main` again until it finishes.** A second push cancels
-  the run, and the build that reaches App Store Connect is then built from
-  the newer commit rather than the tagged one — 2.13.1's own run #550 was
-  cancelled this way, minutes after the tag.
+  the run (the workflow sets `autoCancel`), and the build that reaches App
+  Store Connect is then built from the newer commit rather than the tagged
+  one — 2.13.1's own run #550 was cancelled this way, minutes after the
+  tag. Submit from App Store Connect once it succeeds.
 
 For beta tags, swap the Gradle commands for `assembleFdroidBeta` /
 `bundlePlayBeta` and mark the GitHub release as **prerelease** — the
@@ -274,12 +283,32 @@ Fully automated via **Xcode Cloud**. We don't build the iOS binary locally for d
 
 ### Workflows
 
-Connected in Xcode → Settings → Accounts → Xcode Cloud. Two workflows on the GitHub repo:
+Connected in Xcode → Settings → Accounts → Xcode Cloud. ONE workflow,
+named **Default**, configured to start on branch changes to `main` — a tag
+push has never started anything, whatever an older version of this page
+said.
 
-| Trigger | Workflow | Outcome |
-|---|---|---|
-| Push to `main` | **Beta (TestFlight)** | New TestFlight build for the internal/external tester groups. |
-| Push of tag `vX.Y.Z` | **Release (App Store)** | New App Store Connect build; needs the human submit step after build finishes. |
+**It is paused.** `isEnabled` is false on the workflow, so no push starts a
+run and nothing is built until someone asks for it:
+
+```sh
+./scripts/xcode-cloud.py resume   # pushes to main build again
+./scripts/xcode-cloud.py start    # build now, whatever the trigger says
+./scripts/xcode-cloud.py pause    # back to silent
+```
+
+WHY IT IS PAUSED, since a paused build system is the kind of thing that
+looks like an accident. Every run posts its result to GitHub as a commit
+status called `PrayerApp | Default`, and on a public repository every
+status is public — there is no way to report it privately. A run that is
+cancelled, rate-limited or red therefore leaves a red X on the commit for
+anyone reading the repo, sitting next to five green GitHub Actions checks
+and saying nothing true about the code. Runs #724–#728 were all
+`COMPLETE/CANCELED`, so `main` wore an X it had not earned.
+
+The cost is that iOS ships only when someone runs `start`, and
+`./scripts/xcode-cloud.py shipped X.Y.Z` reports the version as never
+having reached App Store Connect until they do.
 
 The same Xcode workspace builds both. There's no Fastlane lane, no `xcrun altool` upload — Xcode Cloud signs the build with the App Store Connect cert + provisioning profile, and runs the iOS Distribution upload itself.
 

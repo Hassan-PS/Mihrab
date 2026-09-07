@@ -844,11 +844,16 @@ cat <<EOF
     Play      upload $AAB
               (release notes for this build are already in the repo)
 
-    App Store Xcode Cloud starts on the push to main; when it succeeds the
-              build is in App Store Connect to submit.
-              ./scripts/xcode-cloud.py runs 3
+    App Store The Xcode Cloud workflow is PAUSED, so the push above
+              started nothing. Build this tag by hand:
+                ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start
+                ./scripts/xcode-cloud.py runs 3
+                ./scripts/xcode-cloud.py pause    (once it lands)
               Leave main alone until that run finishes — the next push
               cancels it, and iOS then ships the newer commit, not the tag.
+              Why it is paused: every run posts a PUBLIC commit status, and
+              a cancelled one is a red X on a commit that deserves none.
+              See docs/DISTRIBUTION.md.
 
 EOF
 

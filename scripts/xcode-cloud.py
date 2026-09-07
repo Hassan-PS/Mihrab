@@ -7,6 +7,10 @@ way to know whether a release is actually building.
                                            #   (refuses if one is already running)
     ./scripts/xcode-cloud.py why <run-id>  # non-warning issues of a failed run
     ./scripts/xcode-cloud.py shipped X.Y.Z [sha]  # did that version reach App Store Connect
+    ./scripts/xcode-cloud.py pause         # stop every push to main starting
+                                           #   a run — and posting its result
+                                           #   as a PUBLIC commit status
+    ./scripts/xcode-cloud.py resume        # let pushes start runs again
 
 WHY THIS EXISTS. A release cut assumed that pushing a tag started an App Store
 build. It does not — there is one workflow and it starts on `main` — and on
@@ -109,6 +113,34 @@ def call(path: str, body: dict | None = None):
         sys.exit(f"HTTP {err.code}: {err.read().decode()[:1000]}")
 
 
+def patch(path: str, body: dict):
+    """PATCH, which `call` cannot do — it is GET or POST by whether a body
+
+    is passed, and a PATCH needs both a body and its own verb.
+
+    NULL IS NOT A VALUE HERE. App Store Connect treats an attribute sent as
+    `null` as one you did not send: clearing `branchStartCondition` this way
+    returns 200 and changes nothing, which is how "the trigger is off now"
+    can be believed for a whole release. Only attributes with real values
+    take, which is why pausing is `isEnabled: false` rather than the removal
+    of a start condition.
+    """
+    req = urllib.request.Request(
+        path if path.startswith("http") else BASE + path,
+        data=json.dumps(body).encode(),
+        headers={
+            "Authorization": "Bearer " + token(),
+            "Content-Type": "application/json",
+        },
+        method="PATCH",
+    )
+    try:
+        with urllib.request.urlopen(req, context=CTX) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as err:
+        sys.exit(f"HTTP {err.code}: {err.read().decode()[:1000]}")
+
+
 def product() -> str:
     products = call("/v1/ciProducts?limit=10")["data"]
     if len(products) != 1:
@@ -169,6 +201,11 @@ def start(force: str | None = None) -> None:
     script exists. So this does not stop you starting one — it stops you
     starting a SECOND one, which never helps and reliably kills the first.
     """
+    if not workflow_enabled(default_workflow(product())):
+        sys.exit(
+            "the Default workflow is paused, so nothing can start it — including this.\n"
+            "  ./scripts/xcode-cloud.py resume   (then start; pause again when it lands)"
+        )
     live = in_flight()
     if live and force != "--force":
         for run in live:
@@ -195,6 +232,55 @@ def start(force: str | None = None) -> None:
     )
     a = out["data"]["attributes"]
     print(f"started run {a.get('number')} ({a.get('executionProgress')}) id={out['data']['id']}")
+
+
+def workflow_enabled(wf: str) -> bool:
+    return bool(call(f"/v1/ciWorkflows/{wf}")["data"]["attributes"].get("isEnabled"))
+
+
+def pause(_: str | None = None) -> None:
+    """Stop Xcode Cloud starting a run on every push to `main`.
+
+    WHY YOU WOULD. Every run this workflow starts posts a commit status to
+    GitHub — context `PrayerApp | Default` — and on a public repository
+    every status is public. There is no "report privately" switch in App
+    Store Connect. So a run that is cancelled, rate-limited or red leaves a
+    red X against the commit for anyone reading the repo, next to five green
+    GitHub Actions checks, saying nothing true about the code.
+
+    It is `isEnabled`, not the start condition: see `patch`. A paused
+    workflow keeps its configuration, its history and its start condition —
+    it simply does not fire, and `resume` puts it back exactly as it was.
+
+    THE COST, and it is real: nothing builds iOS until you say so. A release
+    that would have been picked up by the push to `main` now needs
+    `./scripts/xcode-cloud.py start` after the tag, and `shipped` will
+    report the version as never having reached App Store Connect until it
+    does. `start` refuses while paused rather than failing obscurely.
+    """
+    wf = default_workflow(product())
+    if not workflow_enabled(wf):
+        print("already paused — pushes to main start nothing.")
+        return
+    patch(f"/v1/ciWorkflows/{wf}", {
+        "data": {"type": "ciWorkflows", "id": wf, "attributes": {"isEnabled": False}},
+    })
+    print("paused: pushes to main no longer start a run, and no status is")
+    print("posted to GitHub. Start a release build by hand with:")
+    print("  ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start")
+
+
+def resume(_: str | None = None) -> None:
+    """Let pushes to `main` start runs again."""
+    wf = default_workflow(product())
+    if workflow_enabled(wf):
+        print("already running: every push to main starts a build.")
+        return
+    patch(f"/v1/ciWorkflows/{wf}", {
+        "data": {"type": "ciWorkflows", "id": wf, "attributes": {"isEnabled": True}},
+    })
+    print("resumed: every push to main starts a build, and every run posts")
+    print("its result to GitHub as a public commit status. ./scripts/xcode-cloud.py pause")
 
 
 def why(run_id: str) -> None:
@@ -316,5 +402,9 @@ if __name__ == "__main__":
         why(sys.argv[2])
     elif cmd == "shipped":
         shipped(sys.argv[2], *sys.argv[3:4])
+    elif cmd == "pause":
+        pause()
+    elif cmd == "resume":
+        resume()
     else:
         sys.exit(__doc__)
