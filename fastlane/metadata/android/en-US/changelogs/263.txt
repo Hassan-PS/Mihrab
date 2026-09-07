@@ -1,0 +1,2 @@
+• The practice graph fills the card it is drawn on. It was built for two thirds of the space the card actually gives it, so it floated in the middle with a band of empty card above and below — a 4x4 now draws eight rows of history where it drew six.
+• Fixed: on the Log card the graph came out slightly too large for its box, so every square was scaled down and the grid stood away from both edges.
