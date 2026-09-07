@@ -114,21 +114,26 @@ finishes:
 - **Play** — upload `app-play-release.aab`. The release notes for the new
   `versionCode` must already be in `fastlane/metadata/android/*/changelogs/`
   before you start; the script refuses to run without them.
-- **App Store** — the Xcode Cloud workflow is PAUSED (see *Workflows*
-  below), so the push to `main` starts nothing. Build the tagged commit by
-  hand:
+- **App Store** — the release script already started the build, on the
+  commit it tagged: it un-pauses the workflow, starts a run and pauses it
+  again, all inside one step. Watch it with `./scripts/xcode-cloud.py runs
+  3` and submit from App Store Connect once it succeeds.
+
+  **Do not push to `main` until it finishes.** A second push cancels the
+  run (the workflow sets `autoCancel`), and the build that reaches App
+  Store Connect is then built from the newer commit rather than the tagged
+  one — 2.13.1's own run #550 was cancelled this way, minutes after the
+  tag.
+
+  If the script reported that Apple would not start the run — `HTTP 500
+  UNEXPECTED_ERROR` from `POST /v1/ciBuildRuns`, which is how App Store
+  Connect says *rate limited* — nothing is building. Retry when it clears;
+  it re-pauses itself either way:
 
   ```sh
   ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start
-  ./scripts/xcode-cloud.py runs 3      # watch it
-  ./scripts/xcode-cloud.py pause       # once it lands
+  ./scripts/xcode-cloud.py pause
   ```
-
-  **Do not push to `main` again until it finishes.** A second push cancels
-  the run (the workflow sets `autoCancel`), and the build that reaches App
-  Store Connect is then built from the newer commit rather than the tagged
-  one — 2.13.1's own run #550 was cancelled this way, minutes after the
-  tag. Submit from App Store Connect once it succeeds.
 
 For beta tags, swap the Gradle commands for `assembleFdroidBeta` /
 `bundlePlayBeta` and mark the GitHub release as **prerelease** — the
@@ -288,12 +293,19 @@ named **Default**, configured to start on branch changes to `main` — a tag
 push has never started anything, whatever an older version of this page
 said.
 
-**It is paused.** `isEnabled` is false on the workflow, so no push starts a
-run and nothing is built until someone asks for it:
+**It is paused, and a release is the only thing that un-pauses it.**
+`isEnabled` is false on the workflow, so no push builds anything —
+`scripts/release.sh` arms it for the few seconds it takes to start a run on
+the commit it just tagged, then disarms it. The pause is a `trap`, so it
+happens on every path out of the script, including an abort: an armed
+trigger left behind is the failure this whole arrangement exists to
+prevent.
+
+By hand, if you ever need it:
 
 ```sh
 ./scripts/xcode-cloud.py resume   # pushes to main build again
-./scripts/xcode-cloud.py start    # build now, whatever the trigger says
+./scripts/xcode-cloud.py start    # build now (refuses while paused)
 ./scripts/xcode-cloud.py pause    # back to silent
 ```
 

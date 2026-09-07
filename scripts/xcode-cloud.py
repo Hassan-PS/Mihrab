@@ -13,11 +13,18 @@ way to know whether a release is actually building.
     ./scripts/xcode-cloud.py resume        # let pushes start runs again
 
 WHY THIS EXISTS. A release cut assumed that pushing a tag started an App Store
-build. It does not — there is one workflow and it starts on `main` — and on
+build. It does not — there is one workflow and it started on `main` — and on
 2026-08-07 the push trigger did not fire either: `main` moved and no run
 appeared for half an hour. A run started by hand picked up the same commit and
 succeeded. Nothing in the repo could see any of that, so the release was
 reported finished while the iOS channel had quietly not started.
+
+NOTHING IS TRIGGERED BY A PUSH ANY MORE. The workflow is paused between
+releases (`pause`/`resume` below) and scripts/release.sh arms it for the few
+seconds it takes to start a run on the commit it just tagged. Two reasons, and
+the second is the one that made it worth doing: a run cancelled by the next
+push posts a public red X to a commit that earned none, and a build nobody
+asked for is a build nobody reads.
 
 CREDENTIALS. The same App Store Connect API key notarytool uses. Nothing here
 is written down in the repo — export these first, or put them in
@@ -382,9 +389,14 @@ def shipped(version: str, commit: str | None = None) -> None:
                   f"{f' ({age} min after the commit)' if age is not None else ''} — "
                   f"it normally starts within a few minutes. Re-run this check.")
             raise SystemExit(3)
+        # NOT "the trigger did not fire" any more: there is no trigger between
+        # releases. The workflow is paused, the release cut is what starts a
+        # run, and a missing run means that step did not get one — Apple
+        # refusing with HTTP 500 is the usual reason, and it clears.
         print(f"{version}: {commit[:8]} is {age} min old and Xcode Cloud never started "
-              f"a run for it — the push trigger did not fire. Start one by hand: "
-              f"./scripts/xcode-cloud.py start")
+              f"a run for it. The release cut starts one; if it could not, retry:\n"
+              f"  ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start"
+              f"; ./scripts/xcode-cloud.py pause")
         raise SystemExit(2)
 
     print(f"{version} NEVER REACHED App Store Connect, and nothing is building it. "

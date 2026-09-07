@@ -100,3 +100,86 @@ describe('the summary line only claims what is true', () => {
     expect(exits).toHaveLength(1);
   });
 });
+
+/**
+ * iOS BUILDS ONCE PER RELEASE, AND ONLY FROM THE RELEASE.
+ *
+ * The Xcode Cloud workflow is paused between releases — `isEnabled` false,
+ * so a push to `main` starts nothing at all. That is not a build-minutes
+ * decision: every run posts its result to GitHub as a commit status named
+ * `PrayerApp | Default`, and on a public repository every status is
+ * public. Runs #724 to #728 were all COMPLETE/CANCELED — cancelled by the
+ * next push, including the prayer-times data cron's — so `main` wore a red
+ * X next to five green GitHub Actions checks, describing nothing about the
+ * code.
+ *
+ * So release.sh arms the trigger for the few seconds it takes to start a
+ * run on the commit it just tagged, and disarms it again. What these pin
+ * is the disarming: the window has to close on EVERY path out of the
+ * script, not just the happy one, or an interrupted release leaves the
+ * trigger armed and the next unrelated push builds, posts and is
+ * cancelled — exactly the state this replaced.
+ */
+describe('the release is the only thing that builds iOS', () => {
+  const releaseSh = readFileSync(
+    path.join(__dirname, '..', 'scripts', 'release.sh'),
+    'utf8',
+  );
+  const xc = readFileSync(
+    path.join(__dirname, '..', 'scripts', 'xcode-cloud.py'),
+    'utf8',
+  );
+
+  it('arms the trigger, starts a run, and disarms it', () => {
+    const step = releaseSh.slice(releaseSh.indexOf('step "App Store build"'));
+    expect(step).toContain('$XC resume');
+    expect(step).toContain('XC_ARMED=1');
+    expect(step).toContain('$XC start');
+    // Disarmed in the same step, not left to the end of the script.
+    const armed = step.indexOf('XC_ARMED=1');
+    const disarmed = step.indexOf('xc_pause');
+    expect(disarmed).toBeGreaterThan(armed);
+    expect(disarmed - armed).toBeLessThan(1200);
+  });
+
+  it('closes the window on every path out, including a die', () => {
+    // `die` exits without running cleanup_workbench — it always has — so
+    // the pause cannot live at the end of the script.
+    expect(releaseSh).toMatch(/trap xc_pause EXIT INT TERM/);
+    const fn = releaseSh.slice(releaseSh.indexOf('xc_pause() {'));
+    // Idempotent: the trap fires again on a normal exit, after the step
+    // already paused, and must not un-pause or report twice.
+    expect(fn).toContain('[ "$XC_ARMED" = "1" ] || return 0');
+    // A pause that fails is the one thing here that must be loud.
+    expect(fn).toContain('STILL ARMED');
+  });
+
+  it('never dies between arming and disarming', () => {
+    // Everything in the App Store step is a warn: the release is already
+    // public by then, and Apple refusing to start a run is a retry, not a
+    // release to unwind. A `die` in there would skip nothing (the trap
+    // still fires) but it would unwind a published release for a
+    // recoverable fault.
+    const start = releaseSh.indexOf('step "App Store build"');
+    const end = releaseSh.indexOf('PHASE 4 — VERIFY', start);
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    expect(releaseSh.slice(start, end)).not.toMatch(/\bdie\b/);
+  });
+
+  it('refuses to start a run while the workflow is paused', () => {
+    // Otherwise the failure is an HTTP error from inside Apple's API,
+    // which reads like the rate limiting it is not.
+    expect(xc).toContain('if not workflow_enabled(default_workflow(product())):');
+    expect(xc).toContain('the Default workflow is paused');
+  });
+
+  it('pauses by isEnabled, because a null start condition is ignored', () => {
+    // App Store Connect treats an attribute sent as null as one you did
+    // not send: clearing branchStartCondition returns 200 and changes
+    // nothing, which is a fine way to believe the trigger is off for a
+    // whole release.
+    expect(xc).toMatch(/"isEnabled": False/);
+    expect(xc).toMatch(/NULL IS NOT A VALUE HERE/);
+  });
+});

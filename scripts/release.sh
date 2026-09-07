@@ -159,6 +159,40 @@ keep_installed_widget_registered() {
   return 0
 }
 
+# ── XCODE CLOUD IS ARMED FOR SECONDS, AND ONLY HERE ───────────────────
+#
+# The Default workflow is PAUSED between releases (`isEnabled` false on
+# `ciWorkflows/{id}` — see scripts/xcode-cloud.py). That is deliberate and
+# it is not about build minutes: every run posts its result to GitHub as a
+# commit status called `PrayerApp | Default`, and on a public repository
+# every status is public. A run cancelled by the next push — or by the data
+# refresh cron, which pushes to `main` on its own schedule — leaves a red X
+# on a commit that earned none, beside five green GitHub Actions checks.
+# Runs #724 to #728 were all COMPLETE/CANCELED for exactly that reason.
+#
+# So a push never builds iOS. The RELEASE builds iOS, here, on the commit
+# it just tagged: resume, start, pause. The window in which a stray push
+# could trigger anything is the few seconds between those calls.
+#
+# AND IT CLOSES ON EVERY PATH OUT. `die` does not run `cleanup_workbench`
+# — nothing did until this — so the pause is a trap rather than a line at
+# the end. A release that fell over between the resume and the pause would
+# otherwise leave the trigger armed, and the next unrelated push to `main`
+# would build, and post, and be cancelled by the one after it: precisely
+# the state this was written to end. Verified by killing a run mid-step.
+XC="python3 $ROOT/scripts/xcode-cloud.py"
+XC_ARMED=0
+xc_pause() {
+  [ "$XC_ARMED" = "1" ] || return 0
+  XC_ARMED=0
+  if $XC pause >/dev/null 2>&1; then
+    ok "Xcode Cloud paused again — no push builds iOS until the next release"
+  else
+    warn "Xcode Cloud is STILL ARMED — run ./scripts/xcode-cloud.py pause"
+  fi
+}
+trap xc_pause EXIT INT TERM
+
 cleanup_workbench() {
   step "Cleanup"
   reap "the app and widget extension left running from ios/build" \
@@ -688,6 +722,34 @@ has "$NEW_CASK" "sha256 \"$SHA\"" \
   && git push -q origin HEAD ) || die "tap push failed — run verify-release.sh and fix the cask by hand"
 ok "cask at $VERSION, sha matches the published zip"
 
+# ── THE APP STORE BUILD ───────────────────────────────────────────────
+#
+# Started here because this is the only moment iOS is meant to build, and
+# because "Xcode Cloud starts on the push to main" was a promise this
+# repo made for a year and could not keep: the trigger silently did not
+# fire on 2026-08-07, and every run from #724 on was cancelled by the next
+# push. A build the release starts is one the release can name.
+#
+# A warning and not a `die`: everything above this line is already public,
+# and Apple refusing to start a run is a thing to retry rather than a
+# release to unwind. The exact retry is printed at the end.
+step "App Store build"
+$XC resume >/dev/null 2>&1 || warn "could not un-pause Xcode Cloud"
+XC_ARMED=1
+XC_START="$($XC start 2>&1)"
+if [ $? -eq 0 ]; then
+  ok "$XC_START"
+  XC_STARTED=1
+else
+  # HTTP 500 UNEXPECTED_ERROR from `POST /v1/ciBuildRuns` is how App Store
+  # Connect says "rate limited" — it is not a fault in this repo, and it
+  # clears on its own.
+  printf "%s\n" "$XC_START" | sed 's/^/      /' >&2
+  warn "Xcode Cloud would not start a run — iOS has not built"
+  XC_STARTED=0
+fi
+xc_pause
+
 # ══════════════════════════════════════════════════════════════════════
 # PHASE 4 — VERIFY.  The same gate as always, against what is now live.
 # ══════════════════════════════════════════════════════════════════════
@@ -837,6 +899,14 @@ EOF
 else
   bold "$VERSION ($CODE) is live on GitHub, Homebrew and the F-Droid recipe."
 fi
+if [ "${XC_STARTED:-0}" = "1" ]; then
+  XC_APP_STORE_NOTE="building now — submit it in App Store Connect when it
+              lands.  ./scripts/xcode-cloud.py runs 3"
+else
+  XC_APP_STORE_NOTE="NOT BUILDING. Apple refused to start the run (see
+              above). Retry when it clears — it pauses itself again:
+                ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start; ./scripts/xcode-cloud.py pause"
+fi
 cat <<EOF
 
   Still yours to do — both need a human at a console:
@@ -844,16 +914,13 @@ cat <<EOF
     Play      upload $AAB
               (release notes for this build are already in the repo)
 
-    App Store The Xcode Cloud workflow is PAUSED, so the push above
-              started nothing. Build this tag by hand:
-                ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start
-                ./scripts/xcode-cloud.py runs 3
-                ./scripts/xcode-cloud.py pause    (once it lands)
+    App Store $XC_APP_STORE_NOTE
               Leave main alone until that run finishes — the next push
-              cancels it, and iOS then ships the newer commit, not the tag.
-              Why it is paused: every run posts a PUBLIC commit status, and
-              a cancelled one is a red X on a commit that deserves none.
-              See docs/DISTRIBUTION.md.
+              cancels it, and iOS then ships the newer commit, not the
+              tag. Nothing else will start one: the workflow is paused
+              between releases, because every run posts a PUBLIC commit
+              status and a cancelled one is a red X on a commit that
+              deserves none. See docs/DISTRIBUTION.md.
 
 EOF
 
