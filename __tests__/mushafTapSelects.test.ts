@@ -32,7 +32,9 @@ describe.each(['MushafSpreadReader.tsx', 'MushafPhoneReader.tsx'])('%s', file =>
     // Without this, on a phone the only fullscreen toggle left would be a
     // 3.5% margin either side of the page.
     expect(src).toMatch(
-      /<Pressable\s+accessible=\{false\}\s+onPress=\{onToggleFullscreen\}\s+style=\{\{ paddingTop: navPad \}\}>\s*\n\s*<MushafPageHeader/,
+      // The strip holds the header row in fullscreen and a gap out of it
+      // (redesign phase 5b) — either way it is the strip that toggles.
+      /<Pressable\s+accessible=\{false\}\s+onPress=\{onToggleFullscreen\}\s+style=\{\{ paddingTop: navPad \}\}>[\s\S]*?<MushafPageHeader/,
     );
   });
 

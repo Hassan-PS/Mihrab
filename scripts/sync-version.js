@@ -27,6 +27,10 @@ const GRADLE = path.join(ROOT, 'android', 'app', 'build.gradle');
 const SITE = path.join(ROOT, 'docs', 'index.html');
 const SITE_SV = path.join(ROOT, 'docs', 'sv', 'index.html');
 const RECIPE = path.join(ROOT, 'contrib', 'fdroid', 'com.prayer_times.yml');
+/** Every language page other than English and Swedish, which have rules of their own. */
+const OTHER_SITES = ['ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ru', 'tr', 'ur', 'zh'].map(
+  lang => ({ lang, file: path.join(ROOT, 'docs', lang, 'index.html') }),
+);
 
 /** The version the app actually ships, straight out of the Android build. */
 function shippedVersion() {
@@ -90,6 +94,32 @@ function rules({ versionName, versionCode }) {
       find: /"softwareVersion": "[\d.]+"/,
       replace: `"softwareVersion": "${versionName}"`,
     },
+    // The other eleven language pages. Each carries the same three places,
+    // in its own words — so the rules match the NUMBER by what surrounds
+    // it rather than by the sentence it sits in. The hero line is the
+    // version followed by the dot separator; the colophon is the one
+    // version inside `class="colophon">…</p>`. They were stamped by hand
+    // at 2.18.0 and had never been checked by this script.
+    ...OTHER_SITES.flatMap(({ lang, file }) => [
+      {
+        file,
+        what: `site (${lang}): hero version line`,
+        find: /[\d.]+ \(\d+\)(?=<\/span> <span class="dot")/,
+        replace: `${versionName} (${versionCode})`,
+      },
+      {
+        file,
+        what: `site (${lang}): footer colophon`,
+        find: /(?<=class="colophon">[^<]*)[\d.]+ \(\d+\)/,
+        replace: `${versionName} (${versionCode})`,
+      },
+      {
+        file,
+        what: `site (${lang}): structured-data softwareVersion`,
+        find: /"softwareVersion": "[\d.]+"/,
+        replace: `"softwareVersion": "${versionName}"`,
+      },
+    ]),
     // The F-Droid mirror. Since the recipe merged upstream their bot adds
     // each version from the tag, so this copy is documentation — but it is
     // what `verify-release.sh` reads, and it had gone three versions stale
@@ -190,4 +220,4 @@ if (require.main === module) {
   for (const s of r.stale) console.log(`  ${s}`);
 }
 
-module.exports = { shippedVersion, rules, SITE, SITE_SV, RECIPE };
+module.exports = { shippedVersion, rules, SITE, SITE_SV, OTHER_SITES, RECIPE };

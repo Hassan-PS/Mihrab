@@ -114,3 +114,42 @@ describe('the Swedish page', () => {
     expect([...mentioned]).toEqual([versionName]);
   });
 });
+
+/**
+ * The other eleven language pages. They carry the same three stamps as the
+ * English and Swedish pages and were stamped by hand — which is how the
+ * English page drifted in the first place. Found at 2.18.1: sync-version
+ * had stamped en and sv and left the other eleven a version behind.
+ */
+describe('the other language pages', () => {
+  const langs = ['ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ru', 'tr', 'ur', 'zh'];
+  const pages = langs.map(lang => ({
+    lang,
+    html: fs.readFileSync(path.join(ROOT, 'docs', lang, 'index.html'), 'utf-8'),
+  }));
+
+  it.each(pages)('$lang names the shipped version in all three places', ({ html }) => {
+    // Hero: the version, then the dot separator.
+    expect(html).toContain(`${versionName} (${versionCode})</span> <span class="dot"`);
+    // Colophon: the one version inside the colophon paragraph.
+    expect(html).toMatch(
+      new RegExp(
+        `class="colophon">[^<]*${String(versionName).replace(/\./g, '\\.')} \\(${versionCode}\\)`,
+      ),
+    );
+    expect(html).toContain(`"softwareVersion": "${versionName}"`);
+  });
+
+  it.each(pages)('$lang says the same version everywhere it says one', ({ html }) => {
+    const mentioned = new Set(
+      Array.from(html.matchAll(/(\d+\.\d+\.\d+) \(\d+\)/g), m => m[1]),
+    );
+    expect([...mentioned]).toEqual([versionName]);
+  });
+
+  it('sync-version knows about every one of them', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { OTHER_SITES } = require('../scripts/sync-version.js');
+    expect(OTHER_SITES.map((s: { lang: string }) => s.lang).sort()).toEqual([...langs].sort());
+  });
+});

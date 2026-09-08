@@ -80,6 +80,6 @@ describe('the reader follows only where a column scrolls', () => {
   it('stays through fullscreen', () => {
     expect(reader).not.toMatch(/!isFullscreen && !railYieldsToPlayer/);
     // The header still goes: that is what fullscreen is for.
-    expect(reader).toMatch(/StatusBar hidden=\{isFullscreen\}/);
+    expect(reader).toMatch(/StatusBar\s+hidden=\{isFullscreen\}/);
   });
 });

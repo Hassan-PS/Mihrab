@@ -343,7 +343,7 @@ exist for this. The bottom bar becomes one row: `#` · scrubber · `2 / 604` ·
 Each phase is a release. Each is shippable on its own and visibly better than
 the one before. Nothing waits on a big-bang.
 
-### Phase 0 — Guardrails *(2 days, ships with Phase 1)*
+### Phase 0 — Guardrails *(done — 2.18.1)*
 
 Before changing pixels, make it possible to see what changed.
 
@@ -359,7 +359,7 @@ Before changing pixels, make it possible to see what changed.
 - **`tabBarInset` test**: every screen registered as a tab must call the
   hook.
 
-### Phase 1 — The bug and the plainly wrong *(1 week → v2.19)*
+### Phase 1 — The bug and the plainly wrong *(done — 2.18.1)*
 
 - **P0.** The fade scrim in `MainTabs`; bottom insets on Today, Quran, Duas,
   Log, dua category. Verified by the sweep: no text under the bar on any
@@ -376,7 +376,7 @@ Before changing pixels, make it possible to see what changed.
 Strings: deletions only (`MAGHRIB IN`-style labels). 13 locales lose keys;
 none gain any.
 
-### Phase 2 — Type and labels *(1 week → v2.20)*
+### Phase 2 — Type and labels *(done — 2.18.1)*
 
 - `label` token added; `callout` retired.
 - All 47 `textTransform: 'uppercase'` → `label` in sentence case, except the
@@ -388,7 +388,7 @@ none gain any.
 Strings: casing is `textTransform`, not translation — **no locale work**. A
 locale that stores a label in caps is a bug to fix in that locale.
 
-### Phase 3 — Surfaces and controls *(2 weeks → v2.21)*
+### Phase 3 — Surfaces and controls *(done — 2.18.1)*
 
 - **P2**: `rowDividerStyle` → inset (behind a flag for one release, then
   default). Sweep before/after.
@@ -402,7 +402,7 @@ locale that stores a label in caps is a bug to fix in that locale.
 - **Stepper** component; Month and Log share it.
 - Alert-mode control: label → `caption` muted; accent only on non-default.
 
-### Phase 4 — Prose, colour, and the sweep *(2 weeks → v2.22)*
+### Phase 4 — Prose, colour, and the sweep *(done — 2.18.1)*
 
 - **P7**: `InfoSheet` component; Settings → Prayer times, Appearance, Sync,
   Qibla, Notifications' banner. Rule: one line per row; word count enforced
@@ -415,7 +415,7 @@ locale that stores a label in caps is a bug to fix in that locale.
   **`design-qa.js` passes at the end of this phase and CI blocks on it from
   then on.**
 
-### Phase 5 — The two design pieces *(1 week → v2.23)*
+### Phase 5 — The two design pieces *(done — 2.18.1)*
 
 - The Qibla dial (§4).
 - The immersive reader (§4).
@@ -456,22 +456,25 @@ Both get easier because this plan ran first. Neither is part of it.
 
 ## 7. Definition of done
 
-| Measure | 2.18.0 | Target |
-|---|---|---|
-| `tokens-audit` findings | 1,483 | **0**, blocking in CI |
-| `textTransform: 'uppercase'` | 47 | ≤ 3 (month table) |
-| raw `fontSize:` literals | 505 | 0 |
-| raw `borderRadius:` literals | 244 | 0 |
-| distinct radii in use | 26 | 4 |
-| type tokens in use | 9 (+30 literals) | 9 |
-| accent hues on screen | 5 | 2 (accent, danger) + data ramp |
-| cards above the fold, Today | 1 (containing 4 things) | 1 (containing 1) |
-| cards on Log | 3 nested | 1 |
-| cards before the surah list | 6 | 1 strip |
-| pill buttons on Log day view | 20 + 5 chips | 3 filled + 9 text |
-| settings rows over 90 characters | ~12 | 0 |
-| screens where content passes under the tab bar | 5 | 0 |
-| `design-qa.js` | FAIL | PASS |
+| Measure | 2.18.0 | Target | 2.18.1 (this branch) |
+|---|---|---|---|
+| `tokens-audit` findings | 1,483 | **0**, blocking in CI | **0** — `designGuardrails.test` fails the suite on any finding |
+| `textTransform: 'uppercase'` | 47 | ≤ 3 (month table) | 3 (month table) + 1 wordmark on the exported share card |
+| raw `fontSize:` literals | 505 | 0 | 55 in 18 files, 17 of them `tokens-ok` (SVG instruments, the muṣḥaf's print sizes, the share card) |
+| raw `borderRadius:` literals | 244 | 0 | 17 (6 distinct), all in `tokens-ok` files |
+| distinct radii in use | 26 | 4 | 5 tokens (`xs sm md lg xl`) + `full` |
+| type tokens in use | 9 (+30 literals) | 9 | 10 (`label` added; `callout` deprecated, 0 new uses) |
+| accent hues on screen | 5 | 2 (accent, danger) + data ramp | 2 + the muṣḥaf's own ornament gold on the page (B.4.4, withdrawn) |
+| cards above the fold, Today | 1 (containing 4 things) | 1 (containing 1) | 1 (hero; the data-status block is gone) |
+| cards on Log | 3 nested | 1 | 1 (`Group`); stats are `Tile`s on the page |
+| cards before the surah list | 6 | 1 strip | 1 (the khatmah strip; resume card only without a plan) |
+| pill buttons on Log day view | 20 + 5 chips | 3 filled + 9 text | 0 filled until chosen; 1 suggested tint; a `Stepper` and a `Group` of 3 rows |
+| settings rows over 90 characters | ~12 | 0 | 0 — `HelpText` clamps at 140 chars / 2 lines with ⓘ |
+| screens where content passes under the tab bar | 5 | 0 | 0 — `TabBarScrim` on every tab |
+| `design-qa.js` | FAIL | PASS | Tokens · Icons · Responsive PASS; Components (4 `ActivityIndicator`s), Accessibility (heuristic scan), Locales (drift heuristics), States pre-date this plan and are outside it |
+
+Verified on the Pixel 10 Pro at each phase (light, dark, RTL; the muṣḥaf in
+all three tones and in fullscreen), installed as 2.18.1 (265).
 
 Plus the qualitative gate the repo already uses: every phase's screenshots
 reviewed side-by-side with the baseline in light, dark and RTL, on a phone,

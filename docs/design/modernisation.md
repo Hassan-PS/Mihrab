@@ -18,6 +18,12 @@ screens again in dark mode. About thirty captures. The store screenshots
 (`fastlane/metadata/android/en-US/images/phoneScreenshots/`) were the first
 pass; the device pass changed several conclusions and added the whole of §B.
 
+**Status (2.18.1, branch `redesign`):** everything below that made it into
+`redesign-plan.md` has been built — P0 through P7 and the per-screen items in
+§B, with the exceptions the plan records (B.4.4's gold withdrawn, D1–D5 as
+recommended). P8 (density) was not taken into the plan and is still open.
+The plan's §7 table carries the measured before/after.
+
 ---
 
 ## What is already good, and must not be touched
