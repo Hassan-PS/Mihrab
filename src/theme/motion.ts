@@ -85,3 +85,50 @@ export function resolveMotion(
  *  RN's Easing.linear is the canonical choice; we expose a marker constant
  *  callers can pattern-match against. */
 export const REDUCE_MOTION_EASING_NAME = 'linear' as const;
+
+/**
+ * Springs — two tracks, from the Material 3 Expressive motion spec, which
+ * is the one part of that system worth borrowing (see
+ * `docs/material-direction.md` §9.1). Not a dependency: RN's
+ * `Animated.spring` takes `stiffness` / `damping` / `mass` natively.
+ *
+ * The idea worth keeping regardless of where the numbers came from:
+ *   • `spatial`  — things that MOVE (position, size). Underdamped, so a
+ *                  sheet or a bar is allowed to overshoot by a hair and
+ *                  settle, which is what makes it read as physical.
+ *   • `effects`  — things that CHANGE APPEARANCE (colour, opacity).
+ *                  Critically damped: a colour that bounces looks broken.
+ *
+ * The spec states damping as a RATIO; RN wants a COEFFICIENT, which is
+ * `ratio × 2 × √(stiffness × mass)`. These are the converted numbers at
+ * mass 1 for the spec's "standard, default" speed, which is the calm end
+ * of its range — the expressive tier (ratio 0.6–0.8) bounces more than a
+ * prayer app wants.
+ */
+export const SPRING = {
+  /** stiffness 700, ratio 0.9 */
+  spatial: { stiffness: 700, damping: 47.6, mass: 1 },
+  /** stiffness 1600, ratio 1.0 */
+  effects: { stiffness: 1600, damping: 80, mass: 1 },
+} as const;
+export type SpringToken = keyof typeof SPRING;
+
+/**
+ * An `Animated.spring` config for a track, or — under Reduce Motion — a
+ * spring so stiff and so damped it lands in the next frame, which keeps
+ * one code path for both and no `timing` fallback to forget.
+ */
+export function resolveSpring(
+  track: SpringToken,
+  reduceMotion: boolean,
+): {
+  stiffness: number;
+  damping: number;
+  mass: number;
+  useNativeDriver: boolean;
+} {
+  if (reduceMotion) {
+    return { stiffness: 10000, damping: 200, mass: 1, useNativeDriver: true };
+  }
+  return { ...SPRING[track], useNativeDriver: true };
+}

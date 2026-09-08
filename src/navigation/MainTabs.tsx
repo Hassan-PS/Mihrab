@@ -31,7 +31,9 @@ import { Animated, Platform, StyleSheet, View } from 'react-native';
 import type { ViewStyle } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useReduceMotion } from '../hooks/useReduceMotion';
 import { translucentSurface } from '../theme/chrome';
+import { resolveSpring } from '../theme/motion';
 import { CARD_SHADOW } from '../theme/tokens';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 import {
@@ -40,6 +42,7 @@ import {
   TAB_BAR_SIDE_INSET,
   useTabBarBottom,
 } from './tabBarInset';
+import { TabBarScrim } from './TabBarScrim';
 import { showTabBar, useTabBarHidden } from './tabBarVisibility';
 import { HomeScreen } from '../screens/HomeScreen';
 import { QuranScreen } from '../screens/QuranScreen';
@@ -89,16 +92,17 @@ export function MainTabs() {
    * reader's thumb — a different behaviour, and a worse one.
    */
   const hidden = useTabBarHidden();
+  const reduceMotion = useReduceMotion();
   const slide = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(slide, {
+    // A spring, not a timing: the bar is a thing that MOVES, and the
+    // `spatial` track lets it settle like one. Under Reduce Motion the same
+    // call lands in a frame — see `resolveSpring`.
+    Animated.spring(slide, {
       toValue: hidden ? 1 : 0,
-      // Long enough to read as movement, short enough that a flick up
-      // does not feel like waiting for the bar.
-      duration: 180,
-      useNativeDriver: true,
+      ...resolveSpring('spatial', reduceMotion),
     }).start();
-  }, [hidden, slide]);
+  }, [hidden, reduceMotion, slide]);
   const hideBy = TAB_BAR_HEIGHT + barBottom + 16;
 
   return (
@@ -129,6 +133,9 @@ export function MainTabs() {
               stuck under the title bar rather than part of it. */}
           <HeaderPlaybackBar surface={palette.card} />
           {children}
+          {/* Under the bar, over the page: the fade that keeps the two from
+              colliding. Same `slide` as the bar, so it leaves with it. */}
+          <TabBarScrim bg={palette.bg} slide={slide} />
         </View>
       )}
       screenOptions={{

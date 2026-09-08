@@ -82,7 +82,48 @@ for (const f of files) {
   }
 }
 
+/**
+ * Burn-down for the 2026 redesign (docs/design/redesign-plan.md §7) —
+ * printed on every run, pass or fail, so the trend is visible in CI logs.
+ * Counts what the plan's definition-of-done table counts, over the same
+ * files the audit walks (opt-outs included, since a `tokens-ok` file still
+ * contributes to the number of distinct sizes on screen).
+ */
+function burnDown() {
+  const sizes = new Map();
+  const radii = new Map();
+  let uppercase = 0;
+  for (const f of files) {
+    const rel = path.relative(ROOT, f);
+    if (rel.endsWith('.d.ts')) continue;
+    const src = fs.readFileSync(f, 'utf-8');
+    for (const m of src.matchAll(/\bfontSize:\s*(\d+(?:\.\d+)?)\b/g)) {
+      sizes.set(m[1], (sizes.get(m[1]) || 0) + 1);
+    }
+    for (const m of src.matchAll(/\bborderRadius:\s*(\d+)\b/g)) {
+      radii.set(m[1], (radii.get(m[1]) || 0) + 1);
+    }
+    uppercase += (src.match(/textTransform:\s*'uppercase'/g) || []).length;
+  }
+  const sum = map => [...map.values()].reduce((a, b) => a + b, 0);
+  return {
+    fontSizeLiterals: sum(sizes),
+    distinctFontSizes: sizes.size,
+    borderRadiusLiterals: sum(radii),
+    distinctRadii: radii.size,
+    uppercase,
+  };
+}
+
 const total = findings.hex.length + findings.spacing.length + findings.fontSize.length;
+const bd = burnDown();
+console.log(
+  `Burn-down: fontSize literals ${bd.fontSizeLiterals} (${bd.distinctFontSizes} distinct) · ` +
+    `borderRadius literals ${bd.borderRadiusLiterals} (${bd.distinctRadii} distinct) · ` +
+    `uppercase ${bd.uppercase} · audit findings ${total}`,
+);
+console.log('');
+if (process.argv.includes('--summary')) process.exit(0);
 if (total === 0) {
   console.log('All values use design tokens ✓');
   process.exit(0);
