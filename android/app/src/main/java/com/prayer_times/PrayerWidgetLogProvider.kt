@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONObject
@@ -263,11 +264,17 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
       val (bg, accent) = PrayerWidgetProvider.resolvedColors(context)
       WidgetCard.paint(views, bg)
 
+      // THE LOG, not the app. A bare launcher intent opens whatever
+      // screen the app was last on, which on the card whose entire subject
+      // is the day's prayers reads as a tap that did nothing — reported in
+      // #27. Every other widget sends a mihrab:// VIEW intent; this one
+      // was the only card still opening the app and stopping there.
       val open = PendingIntent.getActivity(
         context,
         0,
-        Intent(context, MainActivity::class.java).apply {
-          flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        Intent(Intent.ACTION_VIEW, Uri.parse("mihrab://log")).apply {
+          setPackage(context.packageName)
+          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         },
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
       )

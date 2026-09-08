@@ -32,11 +32,11 @@ import {
 import { dayAt, sunnahCount, type SunnahLog } from '../journal/sunnah';
 import { owedPrayers, sunnahRateFor } from '../practice/practiceStats';
 import { MUSHAF_PAGES, MUSHAF_SURAHS } from '../quran/pages';
+import { khatmahContinueTarget } from '../quran/khatmahTarget';
 import { mushafSurahName } from '../quran/surahName';
 import {
   KHATMAH_TOTAL_PAGES,
   khatmahBehindBy,
-  khatmahCurrentPage,
   khatmahDay,
   khatmahDaysLeft,
   khatmahPages,
@@ -522,12 +522,13 @@ export function buildReadingBlock(input: {
   // With a plan running, the plan's own page is the one to continue from —
   // the user may have browsed elsewhere since, and the widget's job is the
   // khatmah, not the last thing they happened to look at.
-  const page = plan ? khatmahCurrentPage(plan) : (last?.page ?? 1);
-  const pageMeta = MUSHAF_PAGES.find(p => p.page === page);
-  const surah = plan
-    ? (pageMeta?.start.surah ?? last?.surah ?? 1)
-    : (last?.surah ?? 1);
-  const ayah = plan ? (pageMeta?.start.ayah ?? 1) : (last?.ayah ?? 1);
+  // One resolver, shared with the khatmah reminder's destination — see
+  // khatmahContinueTarget. The card and the notification make the same
+  // offer and must not disagree about where it leads.
+  const target = plan ? khatmahContinueTarget(plan) : null;
+  const page = target?.page ?? last?.page ?? 1;
+  const surah = target?.surah ?? last?.surah ?? 1;
+  const ayah = target?.ayah ?? last?.ayah ?? 1;
   const meta = MUSHAF_SURAHS.find(s => s.number === surah);
 
   let khatmah: WidgetKhatmah | undefined;

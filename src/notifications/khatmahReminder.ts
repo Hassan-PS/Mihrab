@@ -11,6 +11,7 @@
  */
 import notifee, { AndroidImportance, TriggerType } from '@notifee/react-native';
 import i18n from '../i18n';
+import { ROUTE_KHATMAH } from './notificationRoute';
 import {
   activeKhatmah,
   getQuranState,
@@ -127,6 +128,10 @@ export async function rescheduleKhatmahReminder(opts: {
             pages: pagesToday,
             page: continueFrom,
           }),
+          // Where this leads is worked out when it is tapped, not now:
+          // the body's page is the plan's page today, and this is
+          // scheduled up to a week ahead. See notificationRoute.
+          data: { route: ROUTE_KHATMAH },
           android: {
             channelId: KHATMAH_CHANNEL_ID,
             smallIcon: 'ic_stat_prayer',

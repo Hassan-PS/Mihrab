@@ -1,7 +1,9 @@
 /**
  * Where a `mihrab://` link lands.
  *
- * Widgets are the only sender. Before this existed a widget tap opened the
+ * Widgets were the only sender, and notifications are the second — see
+ * `notificationRoute`, and #27, where every tapped reminder left you
+ * wherever you happened to be. Before this existed a widget tap opened the
  * app on whatever screen it was last on, which is fine for a prayer table —
  * the answer is on the widget already — and useless for the ones whose whole
  * promise is a destination: Continue Reading means page 3 of Al-Baqarah, and
@@ -18,7 +20,10 @@
  */
 import { isMacCatalyst } from '../responsive/breakpoints';
 import type { LinkingOptions } from '@react-navigation/native';
+import notifee, { EventType } from '@notifee/react-native';
+import { Linking } from 'react-native';
 
+import { notificationRoute } from '../notifications/notificationRoute';
 import type { RootStackParamList } from './types';
 
 export const MIHRAB_SCHEME = 'mihrab://';
@@ -29,8 +34,44 @@ function positiveInt(value: string): number | undefined {
   return Number.isInteger(n) && n > 0 ? n : undefined;
 }
 
+/**
+ * A tapped notification, turned into a link — all three ways a tap arrives.
+ *
+ * Overriding `getInitialURL` and `subscribe` REPLACES React Navigation's
+ * own, so both have to keep doing what the defaults did (`Linking`) as
+ * well as the new thing. Getting that wrong breaks every widget on the
+ * home screen, which is the more used half of this file.
+ *
+ * The three cases are genuinely three:
+ *
+ *   • app running       — notifee's foreground PRESS event;
+ *   • app in the background — the same event, once the press brings it
+ *     forward;
+ *   • app not running   — `getInitialNotification`, and this is the case
+ *     that is usually forgotten and is the ordinary one for a reminder
+ *     that arrives hours after the app was last opened.
+ */
 export const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [MIHRAB_SCHEME],
+  async getInitialURL() {
+    const url = await Linking.getInitialURL();
+    if (url) return url;
+    const initial = await notifee.getInitialNotification();
+    return initial ? await notificationRoute(initial.notification) : null;
+  },
+  subscribe(listener) {
+    const link = Linking.addEventListener('url', ({ url }) => listener(url));
+    const press = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type !== EventType.PRESS) return;
+      void notificationRoute(detail.notification).then(url => {
+        if (url) listener(url);
+      });
+    });
+    return () => {
+      link.remove();
+      press();
+    };
+  },
   config: {
     screens: {
       Home: {

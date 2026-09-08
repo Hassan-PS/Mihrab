@@ -28,6 +28,7 @@ import notifee, {
   TriggerType,
 } from '@notifee/react-native';
 import i18n from '../i18n';
+import { ROUTE_AYAH_OF_DAY } from './notificationRoute';
 import { findSurah, loadSurah, SURAHS } from '../quran/quran';
 import { verseOfTheDayRef } from '../quran/search';
 import {
@@ -208,7 +209,13 @@ export async function rescheduleAyahOfDay(opts: {
           id: `${AYAH_DAY_ID_PREFIX}${ymd(fireAt)}`,
           title: `${i18n.t('quran.ayahOfDayTitle', 'Ayah of the day')} · ${refLabel}`,
           body,
-          data: { surah: String(ref.surah), ayah: String(ref.ayah) },
+          // The ayah is baked in: it is THIS day's ayah, and a late tap
+          // should still open it. See notificationRoute.
+          data: {
+            route: ROUTE_AYAH_OF_DAY,
+            surah: String(ref.surah),
+            ayah: String(ref.ayah),
+          },
           android: {
             channelId: AYAH_DAY_CHANNEL_ID,
             smallIcon: 'ic_stat_prayer',
