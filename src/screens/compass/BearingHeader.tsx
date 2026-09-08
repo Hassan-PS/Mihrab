@@ -6,6 +6,8 @@ import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
 } from '../../theme/textScale';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /** Top-of-screen "Qibla bearing: N° from north" label. */
 type BearingHeaderProps = { qiblaDeg: number };
@@ -31,15 +33,15 @@ export const BearingHeader = memo(BearingHeaderImpl);
 
 const styles = StyleSheet.create({
   label: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     fontWeight: '600',
     textAlign: 'center',
   },
   value: {
-    fontSize: 22,
+    fontSize: TYPE.title2.fontSize,
     fontWeight: '700',
     textAlign: 'center',
-    marginTop: 4,
-    marginBottom: 16,
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.lg,
   },
 });

@@ -64,6 +64,8 @@ import {
   RIWAYAT,
   type RiwayahDefinition,
 } from './riwayat';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 function hostOf(from: string): string {
   const m = /^https?:\/\/([^/]+)/i.exec(from);
@@ -314,7 +316,7 @@ function RiwayahCard({
             hitSlop={8}
             onPress={remove}
             style={[styles.deleteBtn, { borderColor: palette.border }]}>
-            <Text style={styles.deleteLabel}>
+            <Text style={[styles.deleteLabel, { color: palette.danger }]}>
               {t('common.delete', 'Delete')}
             </Text>
           </Pressable>
@@ -382,7 +384,7 @@ function RiwayahCard({
 
       {error ? (
         <View style={styles.errorBox}>
-          <Text style={styles.error}>{error}</Text>
+          <Text style={[styles.error, { color: palette.danger }]}>{error}</Text>
           {detail ? (
             <Text style={[styles.detail, { color: palette.muted }]}>
               {detail}
@@ -486,53 +488,53 @@ function RiwayahCard({
 }
 
 const styles = StyleSheet.create({
-  section: { marginTop: 18 },
+  section: { marginTop: SPACING.lg },
   heading: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginBottom: 8,
-    marginHorizontal: 4,
+    marginBottom: SPACING.sm,
+    marginHorizontal: SPACING.xs,
   },
-  card: { borderRadius: 14, padding: 14, marginBottom: 10 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  card: { borderRadius: RADIUS.lg, padding: SPACING.lg, marginBottom: SPACING.md },
+  row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   grow: { flex: 1 },
-  title: { fontSize: 15, fontWeight: '700' },
-  sub: { fontSize: 12, marginTop: 3, lineHeight: 17 },
-  bytes: { fontSize: 12, fontVariant: ['tabular-nums'] },
-  deleteBtn: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
-  deleteLabel: { color: '#d43f3f', fontWeight: '700', fontSize: 12 },
-  linkBtn: { alignSelf: 'flex-start', paddingVertical: 8 },
+  title: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  sub: { fontSize: TYPE.label.fontSize, marginTop: SPACING.xs, lineHeight: 17 },
+  bytes: { fontSize: TYPE.label.fontSize, fontVariant: ['tabular-nums'] },
+  deleteBtn: { borderWidth: 1, borderRadius: RADIUS.sm, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm },
+  deleteLabel: { fontWeight: '700', fontSize: TYPE.label.fontSize },
+  linkBtn: { alignSelf: 'flex-start', paddingVertical: SPACING.sm },
   secondary: {
     borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.md,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 44,
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
   },
-  secondaryLabel: { fontWeight: '700', fontSize: 15 },
-  orLine: { marginTop: 10 },
-  link: { fontSize: 14, fontWeight: '700' },
-  help: { fontSize: 12, lineHeight: 17, marginBottom: 8 },
+  secondaryLabel: { fontWeight: '700', fontSize: TYPE.callout.fontSize },
+  orLine: { marginTop: SPACING.md },
+  link: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  help: { fontSize: TYPE.label.fontSize, lineHeight: 17, marginBottom: SPACING.sm },
   input: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    fontSize: TYPE.callout.fontSize,
   },
-  errorBox: { marginTop: 10 },
-  error: { color: '#d43f3f', fontSize: 13, fontWeight: '600', lineHeight: 18 },
-  detail: { fontSize: 11, marginTop: 4, lineHeight: 15 },
+  errorBox: { marginTop: SPACING.md },
+  error: { fontSize: TYPE.footnote.fontSize, fontWeight: '600', lineHeight: 18 },
+  detail: { fontSize: TYPE.caption.fontSize, marginTop: SPACING.xs, lineHeight: 15 },
   cta: {
-    marginTop: 12,
-    borderRadius: 12,
-    paddingVertical: 12,
+    marginTop: SPACING.md,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.md,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 44,
   },
-  ctaLabel: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  footnote: { fontSize: 11, lineHeight: 16, marginHorizontal: 4, marginTop: 2 },
+  ctaLabel: { color: '#fff', fontWeight: '700', fontSize: TYPE.callout.fontSize },
+  footnote: { fontSize: TYPE.caption.fontSize, lineHeight: 16, marginHorizontal: SPACING.xs, marginTop: 2 },
 });

@@ -15,6 +15,7 @@
  *
  * Schema is additive-only (same rule as the settings blob).
  */
+// tokens-ok: the five bookmark colours and the khatmah marker are a named, user-facing set the reader keys on
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TOTAL_AYAHS, ayahAtIndex, ayahIndexOf } from './ayahIndex';

@@ -1,8 +1,9 @@
 import { memo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { typeStyle } from '../../theme/typography';
+import { TYPE, typeStyle } from '../../theme/typography';
 import { ROW_PADDING } from './Group';
+import { SPACING } from '../../theme/tokens';
 
 /**
  * Row — title, optional subtitle, optional trailing, inside a Group or bare
@@ -104,10 +105,10 @@ const styles = StyleSheet.create({
     ...ROW_PADDING,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.md,
   },
   text: { flex: 1, minWidth: 0 },
   subtitle: { marginTop: 2 },
-  chevron: { fontSize: 22, lineHeight: 24, marginStart: -4 },
+  chevron: { fontSize: TYPE.title2.fontSize, lineHeight: 24, marginStart: -4 },
   quiet: { opacity: 0.55 },
 });

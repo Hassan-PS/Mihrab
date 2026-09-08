@@ -7,6 +7,8 @@ import {
   openSystemCompass,
 } from '../../utils/systemCompass';
 import type { CompassMode, SignalQuality } from './useCompassSensor';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Five mutually-non-exclusive status banners stacked above the dial:
@@ -147,8 +149,8 @@ function StatusBannersImpl({
 export const StatusBanners = memo(StatusBannersImpl);
 
 const styles = StyleSheet.create({
-  banner: { marginBottom: 12, gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', textAlign: 'center' },
-  body: { fontSize: 14, lineHeight: 20, textAlign: 'center' },
-  link: { textAlign: 'center', fontSize: 14, fontWeight: '700' },
+  banner: { marginBottom: SPACING.md, gap: SPACING.sm },
+  title: { fontSize: TYPE.body.fontSize, fontWeight: '700', textAlign: 'center' },
+  body: { fontSize: TYPE.callout.fontSize, lineHeight: 20, textAlign: 'center' },
+  link: { textAlign: 'center', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
 });

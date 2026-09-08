@@ -47,7 +47,8 @@
     "delete": "Удалить",
     "cancelled": "Отменено.",
     "listJoin": " и ",
-    "confirmDelete": "Нажмите ещё раз, чтобы удалить"
+    "confirmDelete": "Нажмите ещё раз, чтобы удалить",
+    "learnMore": "Подробнее"
   },
   "home": {
     "loadingPrayer": "Загрузка времени молитв…",

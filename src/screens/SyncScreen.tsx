@@ -41,7 +41,8 @@ import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { cardEdgeStyle } from '../theme/chrome';
 import { RADIUS, SPACING } from '../theme/tokens';
-import { typeStyle } from '../theme/typography';
+import { TYPE, typeStyle } from '../theme/typography';
+import { HelpText } from '../components/ui/InfoSheet';
 import { PairingQr } from './sync/PairingQr';
 import { useSyncDialog } from './sync/useSyncDialog';
 import { copyToClipboard, readClipboard } from '../sync/clipboard';
@@ -488,9 +489,16 @@ export function SyncScreen() {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
-        <Text style={[typeStyle('body'), { color: palette.text }]}>
-          {t('sync.pairIntro')}
-        </Text>
+        {/* One explanation, two lines, the rest a tap away. The intro and
+            the folder card each carried a paragraph saying the same thing
+            (redesign-plan B.10.4); the intro is the one that stays, with the
+            folder card's fuller version behind the ⓘ. */}
+        <HelpText
+          title={t('sync.folderSection')}
+          text={`${t('sync.pairIntro')}\n\n${t('sync.folderHelp')}`}
+          style={[typeStyle('body'), styles.intro]}
+          color={palette.text}
+        />
 
         <Text
           style={[typeStyle('label'), styles.section, { color: palette.muted }]}
@@ -498,9 +506,6 @@ export function SyncScreen() {
           {t('sync.folderSection')}
         </Text>
         <View style={[styles.card, card]}>
-          <Text style={[typeStyle('body'), { color: palette.text }]}>
-            {t('sync.folderHelp')}
-          </Text>
           {settings?.folder ? (
             <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
               {settings.folder.kind === 'app'
@@ -816,17 +821,18 @@ const styles = StyleSheet.create({
   section: {
     marginTop: SPACING.sm,
   },
+  intro: { marginBottom: SPACING.xs },
   card: { padding: SPACING.md, gap: SPACING.sm },
   code: {
     fontFamily: 'monospace',
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     lineHeight: 22,
     letterSpacing: 1,
     textAlign: 'center',
   },
   codeInput: {
     fontFamily: 'monospace',
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     borderWidth: 1,
     padding: SPACING.sm,
     minHeight: 72,
@@ -862,5 +868,5 @@ const styles = StyleSheet.create({
   },
   peerText: { flex: 1 },
   peerName: { padding: 0, margin: 0 },
-  remove: { paddingVertical: 4, paddingHorizontal: SPACING.xs },
+  remove: { paddingVertical: SPACING.xs, paddingHorizontal: SPACING.xs },
 });

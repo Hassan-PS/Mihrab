@@ -50,7 +50,7 @@ import {
   sunnahFraction,
   type SunnahLog,
 } from '../journal/sunnah';
-import { QIYAM_MARK, sunnahGold } from './sunnahTheme';
+import { QIYAM_MARK, sunnahMark } from './sunnahTheme';
 import { dayKey } from './practiceStore';
 import {
   maxOffset,
@@ -58,6 +58,8 @@ import {
   shouldLoadOlder,
   todayOffset,
 } from './heatmapScroll';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 /**
  * The SHORTEST the graph is ever drawn. Thirteen ≈ a quarter and fits the
@@ -86,9 +88,12 @@ const MONTH_ROW = 15;
  * measurement that never settles, not a budget anyone should reach.
  */
 const GROWTH_ASKS = 3;
-/** Amber, for the fast ring — the app's own amber accent swatch. */
-const FAST_RING_LIGHT = '#B45309';
-const FAST_RING_DARK = '#FBBF24';
+/**
+ * The fast ring is drawn in INK — the text colour — not amber. An outline
+ * already reads as a distinct category from a fill; giving it a hue of its
+ * own as well was one of six colours on the Log (redesign-plan §2.4). Ink
+ * on the green ramp is unmistakable in both themes and adds no voice.
+ */
 /**
  * The border a square carries when it is fasted or selected.
  *
@@ -482,8 +487,8 @@ function PracticeHeatmapImpl({
 }: Props) {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
-  const ring = palette.isDark ? FAST_RING_DARK : FAST_RING_LIGHT;
-  const gold = sunnahGold(palette.isDark);
+  const ring = palette.textSolid;
+  const gold = sunnahMark(palette);
   const accent = palette.accentSolid;
 
   const legend = useMemo(() => [0, 1, 3, 5], []);
@@ -1220,10 +1225,10 @@ function PracticeHeatmapImpl({
 export const PracticeHeatmap = memo(PracticeHeatmapImpl);
 
 const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', gap: 6 },
+  grid: { flexDirection: 'row', gap: SPACING.sm },
   labels: { gap: GAP },
   labelCell: { height: SQUARE, justifyContent: 'center' },
-  labelText: { fontSize: 9, fontWeight: '600' },
+  labelText: { fontSize: TYPE.caption.fontSize, fontWeight: '600' },
   monthSpacer: { height: MONTH_ROW },
   // `gap` deliberately absent: each cell is exactly one column wide, so the
   // strip and the grid below it stay in step by construction.
@@ -1231,7 +1236,7 @@ const styles = StyleSheet.create({
   monthCell: { width: COL, justifyContent: 'flex-end' },
   // Wider than the column it sits in, so a three-letter month name is not
   // clipped to one. Overflow is harmless: the next label is a month away.
-  monthText: { fontSize: 9, fontWeight: '600', width: COL * 3 },
+  monthText: { fontSize: TYPE.caption.fontSize, fontWeight: '600', width: COL * 3 },
   // `paddingEnd`, not `paddingRight`: in Arabic and Urdu the grid runs the
   // other way and the breathing room has to follow it (the repo's RTL audit
   // catches exactly this).
@@ -1249,7 +1254,7 @@ const styles = StyleSheet.create({
   scrollBody: { paddingEnd: 2, flexGrow: 1, justifyContent: 'flex-end' },
   weeks: { gap: GAP },
   week: { flexDirection: 'row', gap: GAP },
-  square: { width: SQUARE, height: SQUARE, borderRadius: 3.5 },
+  square: { width: SQUARE, height: SQUARE, borderRadius: RADIUS.xs },
   /** See EMPTY_TINT — applied only to a day with nothing drawn on it. */
   emptyEdge: { borderWidth: StyleSheet.hairlineWidth },
   /**
@@ -1268,10 +1273,10 @@ const styles = StyleSheet.create({
   legendRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 10,
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
   },
-  legendSquares: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  legendSquares: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
   legendSquare: { width: 11, height: 11, borderRadius: 2.5 },
   legendQiyamMark: {
     position: 'absolute',
@@ -1299,6 +1304,6 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
     borderWidth: 1.2,
   },
-  legendText: { fontSize: 10.5, fontWeight: '600' },
-  caption: { fontSize: 12, lineHeight: 17, marginTop: 8 },
+  legendText: { fontSize: TYPE.caption.fontSize, fontWeight: '600' },
+  caption: { fontSize: TYPE.label.fontSize, lineHeight: 17, marginTop: SPACING.sm },
 });

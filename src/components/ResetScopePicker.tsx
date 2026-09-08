@@ -46,6 +46,8 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { cardEdgeStyle } from '../theme/chrome';
 import { tabularNumeralStyle } from '../theme/textScale';
 import type { ResetPlan, ResetScope } from '../journal/resetLog';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 const SCOPE_LABEL: Record<ResetScope, { key: string; fallback: string }> = {
   day: { key: 'log.resetScopeDay', fallback: 'This day' },
@@ -216,38 +218,38 @@ function Figure({
 }
 
 const styles = StyleSheet.create({
-  scrim: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28 },
+  scrim: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xxl },
   sheet: {
     width: '100%',
     maxWidth: 380,
-    borderRadius: 22,
-    paddingHorizontal: 22,
-    paddingTop: 22,
-    paddingBottom: 14,
+    borderRadius: RADIUS.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.lg,
   },
-  title: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  message: { fontSize: 15, lineHeight: 21 },
-  list: { marginTop: 14, maxHeight: 320 },
+  title: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.sm },
+  message: { fontSize: TYPE.callout.fontSize, lineHeight: 21 },
+  list: { marginTop: SPACING.lg, maxHeight: 320 },
   row: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 8,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    marginBottom: SPACING.sm,
     minHeight: 48,
     justifyContent: 'center',
   },
   rowEmpty: { opacity: 0.55 },
-  rowLabel: { fontSize: 15, fontWeight: '600' },
-  rowCount: { fontSize: 12.5, marginTop: 3 },
-  figures: { flexDirection: 'row', gap: 22, marginTop: 6 },
+  rowLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  rowCount: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.xs },
+  figures: { flexDirection: 'row', gap: SPACING.xl, marginTop: SPACING.sm },
   figure: { minWidth: 54 },
-  figureValue: { fontSize: 20, fontWeight: '700', lineHeight: 24 },
+  figureValue: { fontSize: TYPE.title2.fontSize, fontWeight: '700', lineHeight: 24 },
   figureCaption: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
     marginTop: 1,
   },
-  cancel: { alignSelf: 'flex-end', paddingHorizontal: 14, paddingVertical: 12 },
-  cancelLabel: { fontSize: 15, fontWeight: '600' },
+  cancel: { alignSelf: 'flex-end', paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
+  cancelLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
 });

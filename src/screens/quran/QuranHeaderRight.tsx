@@ -10,6 +10,7 @@
 import { StyleSheet, View } from 'react-native';
 import { SyncHeaderButton } from '../sync/SyncHeaderButton';
 import { TilawahHeaderChip } from './TilawahHeaderChip';
+import { SPACING } from '../../theme/tokens';
 
 export function QuranHeaderRight() {
   return (
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginEnd: 4,
+    gap: SPACING.sm,
+    marginEnd: SPACING.xs,
   },
 });

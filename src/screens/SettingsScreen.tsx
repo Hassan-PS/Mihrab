@@ -39,6 +39,8 @@ import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { ChevronIcon } from './settings/SettingsSectionIcons';
 import { SETTINGS_SUBPAGES } from './settings/subpages';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -70,7 +72,7 @@ export function SettingsScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.content,
-        { paddingBottom: 24 + tabBarInset },
+        { paddingBottom: SPACING.xl + tabBarInset },
       ]}
       contentInsetAdjustmentBehavior="automatic">
       <CenteredColumn>
@@ -127,14 +129,14 @@ export function SettingsScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  content: { padding: 16 },
-  group: { borderRadius: 14, overflow: 'hidden' },
+  content: { padding: SPACING.lg },
+  group: { borderRadius: RADIUS.lg, overflow: 'hidden' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    gap: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
     position: 'relative',
   },
   // Under the row above, starting where the text does: past the padding
@@ -149,11 +151,11 @@ const styles = StyleSheet.create({
   iconWell: {
     width: 38,
     height: 38,
-    borderRadius: 11,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rowText: { flex: 1, gap: 2 },
-  title: { fontSize: 16, fontWeight: '600' },
-  blurb: { fontSize: 12 },
+  title: { fontSize: TYPE.body.fontSize, fontWeight: '600' },
+  blurb: { fontSize: TYPE.label.fontSize },
 });

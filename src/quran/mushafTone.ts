@@ -17,6 +17,7 @@
  * and its meaning. Nothing already stored changes shape, and a downgrade
  * reads the old field exactly as before.
  */
+// tokens-ok: the mushaf is a print with its own three tones — paper, sepia, night — independent of the app palette
 import type { QuranPrefs } from './quranState';
 
 export type MushafTone = 'paper' | 'sepia' | 'night';

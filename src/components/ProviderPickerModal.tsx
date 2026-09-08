@@ -31,6 +31,8 @@ import type {
 } from '../settings/types';
 import { useSystemNavigationReserve } from '../navigation/tabBarInset';
 import { cardEdgeStyle, rowDividerStyle } from '../theme/chrome';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 type Palette = {
   card: ColorValue;
@@ -300,65 +302,65 @@ const styles = StyleSheet.create({
     borderTopStartRadius: 16,
     borderTopEndRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    paddingTop: 12,
+    paddingTop: SPACING.md,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: TYPE.title3.fontSize,
     fontWeight: '700',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
   sectionHeader: {
-    paddingTop: 12,
-    paddingBottom: 6,
-    paddingHorizontal: 16,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   footerWrap: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    paddingBottom: 20,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    paddingBottom: SPACING.xl,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     lineHeight: 17,
   },
   row: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.sm,
     flexWrap: 'wrap',
   },
   rowTitle: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
     fontWeight: '600',
   },
   badge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
   badgeLabel: {
-    fontSize: 11,
+    fontSize: TYPE.caption.fontSize,
     fontWeight: '700',
   },
   rowWarn: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: TYPE.footnote.fontSize,
+    marginTop: SPACING.xs,
     lineHeight: 18,
   },
   rowSub: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: TYPE.footnote.fontSize,
+    marginTop: SPACING.xs,
     lineHeight: 18,
   },
 });

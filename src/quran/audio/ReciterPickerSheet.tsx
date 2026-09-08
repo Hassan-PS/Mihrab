@@ -56,6 +56,8 @@ import {
   subscribeQuranDownload,
   type QuranDownloadState,
 } from '../quranDownloadManager';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /** "1.2 GB", "812 MB" — the same shape the downloads screen prints. */
 function formatBytes(bytes: number): string {
@@ -193,7 +195,7 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
           ) : null}
         </View>
         {selected ? (
-          <Text style={{ color: palette.accentSolid, fontSize: 17 }}>✓</Text>
+          <Text style={{ color: palette.accentSolid, fontSize: TYPE.title3.fontSize }}>✓</Text>
         ) : null}
         {/* The audio control. One row, one verb: fetch it, stop fetching
             it, or delete it — never two of the three at once. */}
@@ -326,49 +328,49 @@ const styles = StyleSheet.create({
     height: '75%',
     borderTopStartRadius: 18,
     borderTopEndRadius: 18,
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 24,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xl,
   },
-  title: { fontSize: 17, fontWeight: '700', marginBottom: 10 },
+  title: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.md },
   search: {
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 15,
-    marginBottom: 8,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    fontSize: TYPE.callout.fontSize,
+    marginBottom: SPACING.sm,
   },
   list: { flex: 1 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 11,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    gap: 8,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    gap: SPACING.sm,
     marginVertical: 1,
   },
-  name: { fontSize: 15, fontWeight: '600' },
+  name: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
   subRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.sm,
     marginTop: 2,
   },
-  arabic: { fontSize: 12 },
-  offline: { fontSize: 11, marginTop: 3 },
+  arabic: { fontSize: TYPE.label.fontSize },
+  offline: { fontSize: TYPE.caption.fontSize, marginTop: SPACING.xs },
   iconBtn: {
     minWidth: 34,
     height: 30,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.sm,
     borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  icon: { fontSize: 15, fontWeight: '700' },
-  confirmText: { fontSize: 12, fontWeight: '700' },
+  icon: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  confirmText: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   confirmOnDanger: { color: '#fff' },
   // The trash: a handle, a lid, and a tapered body. 16×16 all told, which
   // is the optical weight of the ↓ and the ✕ it stands beside.
@@ -393,12 +395,12 @@ const styles = StyleSheet.create({
   },
   badge: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 8,
-    paddingHorizontal: 6,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
     paddingVertical: 1,
   },
   badgeText: {
-    fontSize: 10,
+    fontSize: TYPE.caption.fontSize,
     fontWeight: '600',
   },
 });

@@ -34,7 +34,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useReduceMotion } from '../hooks/useReduceMotion';
 import { translucentSurface } from '../theme/chrome';
 import { resolveSpring } from '../theme/motion';
-import { CARD_SHADOW } from '../theme/tokens';
+import { CARD_SHADOW, RADIUS, SPACING } from '../theme/tokens';
 import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
 import {
   FLOATS_OVER_CONTENT,
@@ -222,9 +222,9 @@ export function MainTabs() {
               marginHorizontal: TAB_BAR_SIDE_INSET,
               marginBottom: barBottom,
               height: TAB_BAR_HEIGHT,
-              paddingTop: 6,
-              paddingBottom: 4,
-              borderRadius: 22,
+              paddingTop: SPACING.sm,
+              paddingBottom: SPACING.xs,
+              borderRadius: RADIUS.xl,
               // A detached pill is bounded by its own silhouette, not by a
               // hairline where it meets the screen edge.
               borderTopWidth: 0,

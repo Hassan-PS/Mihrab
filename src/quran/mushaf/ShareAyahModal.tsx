@@ -6,6 +6,7 @@
  * react-native-view-shot and hands it to the system share sheet.
  * Islamic ornament stays a quiet accent (design principle 2).
  */
+// tokens-ok: an exported image, deterministic whatever the in-app theme
 import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -19,9 +20,10 @@ import { captureRef } from 'react-native-view-shot';
 import RNShare from 'react-native-share';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { arabicTextStyle } from '../../theme/typography';
+import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { findSurah } from '../quran';
 import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
+import { RADIUS, SPACING } from '../../theme/tokens';
 
 type Props = {
   visible: boolean;
@@ -127,23 +129,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
-    gap: 18,
+    padding: SPACING.xl,
+    gap: SPACING.lg,
   },
   card: {
     width: '100%',
     maxWidth: 420,
     backgroundColor: CARD_BG,
-    borderRadius: 20,
-    paddingHorizontal: 26,
-    paddingVertical: 30,
-    gap: 14,
+    borderRadius: RADIUS.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.xxl,
+    gap: SPACING.lg,
     alignItems: 'center',
   },
-  ornamentTop: { color: CARD_ORNAMENT, fontSize: 18, letterSpacing: 6 },
+  ornamentTop: { color: CARD_ORNAMENT, fontSize: TYPE.title3.fontSize, letterSpacing: 6 },
   arabic: {
     color: '#f4efe2',
-    fontSize: 26,
+    fontSize: 26, // tokens-ok-line: display or Arabic scale, sized by hand
     lineHeight: 58,
     textAlign: 'center',
     writingDirection: 'rtl',
@@ -151,29 +153,29 @@ const styles = StyleSheet.create({
   },
   translation: {
     color: 'rgba(244,239,226,0.75)',
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     lineHeight: 21,
     textAlign: 'center',
   },
   reference: {
     color: CARD_ORNAMENT,
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     fontWeight: '700',
     letterSpacing: 0.6,
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
   wordmark: {
     color: 'rgba(244,239,226,0.4)',
-    fontSize: 11,
+    fontSize: TYPE.caption.fontSize,
     letterSpacing: 2,
     textTransform: 'uppercase',
   },
-  buttons: { flexDirection: 'row', gap: 12 },
+  buttons: { flexDirection: 'row', gap: SPACING.md },
   btn: {
     minWidth: 110,
     alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
   },
 });

@@ -24,6 +24,9 @@ import {
   SettingsToggleRow,
 } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { HelpText } from '../../components/ui/InfoSheet';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 type CalculationCardProps = {
   onOpenMethodPicker: () => void;
@@ -167,12 +170,16 @@ function CalculationCardImpl({
           app is and is not claiming, which they are owed. */}
       {settings.malikiSecondTimesEnabled ? (
         <SettingsBlock>
-          <Text style={[s.help, { color: palette.muted }]}>
-            {t('settings.malikiSecondTimesModelled')}
-          </Text>
-          <Text style={[s.help, { color: palette.muted, marginTop: 6 }]}>
-            {t('settings.malikiSecondTimesSource')}
-          </Text>
+          {/* What the app is and is not claiming, and its source. Two lines
+              on the page and the whole of it one tap away — a six-line
+              paragraph and a citation rendered as a settings row was the
+              page reading as documentation (redesign-plan P7). */}
+          <HelpText
+            title={t('settings.malikiSecondTimes', 'Maliki second times')}
+            text={`${t('settings.malikiSecondTimesModelled')}\n\n${t('settings.malikiSecondTimesSource')}`}
+            style={s.help}
+            color={palette.muted}
+          />
 
           {/* SHOWING them and ANNOUNCING them are now two decisions.
            *
@@ -226,27 +233,27 @@ export const CalculationCard = memo(CalculationCardImpl);
 
 const styles = StyleSheet.create({
   alertsBlock: {
-    marginTop: 14,
-    paddingTop: 12,
+    marginTop: SPACING.lg,
+    paddingTop: SPACING.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    gap: 8,
+    gap: SPACING.sm,
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: SPACING.sm,
   },
   chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
   },
   chipLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   leadRow: {
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
 });

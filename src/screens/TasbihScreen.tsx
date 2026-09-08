@@ -34,6 +34,8 @@ import {
   tabularNumeralStyle,
 } from '../theme/textScale';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 /**
  * TasbihScreen — task #19, reworked under #80, redesigned under the design
@@ -139,7 +141,7 @@ export function TasbihScreen() {
         styles.root,
         {
           backgroundColor: palette.bg,
-          paddingTop: 12,
+          paddingTop: SPACING.md,
           // Not a scrolling screen — the controls simply stop above the
           // floating bar rather than scrolling clear of it.
           paddingBottom: tabBarInset,
@@ -290,63 +292,63 @@ const styles = StyleSheet.create({
   // Cap the counter column on iPad/Mac so the big number stays centered
   // instead of stretching across a wide window.
   capWide: { width: '100%', maxWidth: 520, alignSelf: 'center' },
-  root: { flex: 1, padding: 16, gap: 14 },
-  head: { alignItems: 'center', gap: 6 },
+  root: { flex: 1, padding: SPACING.lg, gap: SPACING.lg },
+  head: { alignItems: 'center', gap: SPACING.sm },
   position: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   arabic: {
-    fontSize: 30,
+    fontSize: 30, // tokens-ok-line: display or Arabic scale, sized by hand
     fontWeight: '600',
     textAlign: 'center',
     writingDirection: 'rtl',
   },
-  subtitle: { fontSize: 14, fontWeight: '500', textAlign: 'center' },
+  subtitle: { fontSize: TYPE.callout.fontSize, fontWeight: '500', textAlign: 'center' },
   tapTarget: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 14,
+    gap: SPACING.lg,
   },
   count: { fontWeight: '700' },
-  targetText: { fontSize: 16, fontWeight: '500', marginTop: 2 },
-  hint: { fontSize: 12, fontWeight: '600', letterSpacing: 0.3 },
+  targetText: { fontSize: TYPE.body.fontSize, fontWeight: '500', marginTop: 2 },
+  hint: { fontSize: TYPE.label.fontSize, fontWeight: '600', letterSpacing: 0.3 },
   peek: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderRadius: 14,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.lg,
   },
   peekLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   peekBody: { flex: 1, minWidth: 0, alignItems: 'flex-end' },
-  peekMeta: { fontSize: 12, fontWeight: '600' },
-  peekArabic: { fontSize: 17, fontWeight: '600', writingDirection: 'rtl' },
+  peekMeta: { fontSize: TYPE.label.fontSize, fontWeight: '600' },
+  peekArabic: { fontSize: TYPE.title3.fontSize, fontWeight: '600', writingDirection: 'rtl' },
   navRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: SPACING.md,
     alignItems: 'center',
     // Off the tab bar. The row is the last thing in a `flex: 1` column, so
     // it sits against the bottom of the screen — and the bottom of the
     // screen is where the navigation bar is. Previous and Skip are big
     // targets a thumb reaches for without looking, which is exactly the
     // thumb that was landing on the tab bar instead.
-    marginBottom: 12,
+    marginBottom: SPACING.md,
   },
   navBtn: {
     flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 13,
-    borderRadius: 13,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  navLabel: { fontSize: 15, fontWeight: '700' },
-  resetLink: { paddingHorizontal: 6, paddingVertical: 10 },
-  resetLabel: { fontSize: 13, fontWeight: '600' },
+  navLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  resetLink: { paddingHorizontal: SPACING.sm, paddingVertical: SPACING.md },
+  resetLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
 });

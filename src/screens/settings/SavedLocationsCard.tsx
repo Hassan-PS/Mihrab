@@ -24,6 +24,8 @@ import { PlaceSearchSection } from '../../components/PlaceSearchSection';
 import type { GeocodedPlace } from '../../geocoding/nominatim';
 import { SettingsBlock, SettingsGroup } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /** Coords are "the same place" if they round to the same 4-decimal value
  *  (~11 m precision). Used to reject duplicate saves of the same spot
@@ -349,7 +351,7 @@ function SavedLocationsCardImpl({
                       onPress={() => onDelete(p.id)}
                       hitSlop={8}
                       style={styles.actionBtn}>
-                      <Text style={[styles.actionLabel, styles.deleteLabel]}>
+                      <Text style={[styles.actionLabel, { color: palette.danger }]}>
                         {t('locations.delete')}
                       </Text>
                     </Pressable>
@@ -388,6 +390,7 @@ function SavedLocationsCardImpl({
                 accent: palette.accent,
                 accentBg: palette.accentBg,
                 card: palette.card,
+                danger: palette.danger,
                 flatChrome: palette.flatChrome,
               }}
               onSelectPlace={place => {
@@ -472,7 +475,7 @@ function SavedLocationsCardImpl({
           </View>
         ) : limitReached ? (
           <Text
-            style={[s.help, { color: palette.muted, marginTop: 8 }]}>
+            style={[s.help, { color: palette.muted, marginTop: SPACING.sm }]}>
             {t('locations.limitReached', { max: MAX_LOCATION_PRESETS })}
           </Text>
         ) : (
@@ -498,66 +501,63 @@ export const SavedLocationsCard = memo(SavedLocationsCardImpl);
 
 const styles = StyleSheet.create({
   list: {
-    gap: 4,
+    gap: SPACING.xs,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    gap: 8,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    gap: SPACING.sm,
   },
   rowText: {
     flex: 1,
   },
   rowName: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
     fontWeight: '600',
   },
   rowSub: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     marginTop: 2,
   },
   rowActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: SPACING.md,
   },
   actionBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
   },
   actionLabel: {
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '600',
   },
-  deleteLabel: {
-    color: '#b91c1c',
-  },
   addBtn: {
-    marginTop: 12,
-    paddingVertical: 12,
-    borderRadius: 10,
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     alignItems: 'center',
   },
   addBtnLabel: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '600',
   },
   addColumn: {
-    marginTop: 12,
-    gap: 10,
+    marginTop: SPACING.md,
+    gap: SPACING.md,
   },
   addRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.sm,
     justifyContent: 'flex-end',
   },
   coordsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: SPACING.sm,
   },
   coordInput: {
     flex: 1,
@@ -566,18 +566,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   addCancelBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 8,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
   },
   addSaveBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
   },
   addSaveLabel: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
   },
 });

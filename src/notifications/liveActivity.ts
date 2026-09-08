@@ -31,6 +31,7 @@
  *  - The OS clears ongoing notifications on reboot; index.js re-arms
  *    via `syncLiveActivity()` on next foreground.
  */
+// tokens-ok: colour handed to the native notification
 
 import { Platform } from 'react-native';
 import notifee, {

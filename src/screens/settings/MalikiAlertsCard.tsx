@@ -17,6 +17,8 @@ import {
   SettingsToggleRow,
 } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Settings → Notifications → the Mālikī second times, the part that fires.
@@ -187,16 +189,16 @@ function MalikiAlertsCardImpl({
 export const MalikiAlertsCard = memo(MalikiAlertsCardImpl);
 
 const styles = StyleSheet.create({
-  block: { gap: 10 },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  block: { gap: SPACING.md },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
     minHeight: 36,
     justifyContent: 'center',
   },
-  chipLabel: { fontSize: 13, fontWeight: '600' },
-  leadRow: { marginTop: 4 },
+  chipLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
+  leadRow: { marginTop: SPACING.xs },
 });

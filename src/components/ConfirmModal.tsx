@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { cardEdgeStyle } from '../theme/chrome';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 /**
  * ConfirmModal — a themed two-button confirmation dialog.
@@ -137,32 +139,32 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 28,
+    padding: SPACING.xxl,
   },
   sheet: {
     width: '100%',
     maxWidth: 380,
-    borderRadius: 22,
-    paddingHorizontal: 22,
-    paddingTop: 22,
-    paddingBottom: 14,
+    borderRadius: RADIUS.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.lg,
   },
   title: {
-    fontSize: 18,
+    fontSize: TYPE.title3.fontSize,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
   },
   message: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     lineHeight: 21,
-    marginBottom: 18,
+    marginBottom: SPACING.lg,
   },
-  messageWithBody: { marginBottom: 12 },
+  messageWithBody: { marginBottom: SPACING.md },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 6,
+    gap: SPACING.sm,
   },
   btn: {
     minHeight: 44,
@@ -170,19 +172,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelBtn: {
-    paddingHorizontal: 16,
-    borderRadius: 22,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.xl,
   },
   cancelLabel: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '600',
   },
   confirmBtn: {
-    paddingHorizontal: 22,
-    borderRadius: 22,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADIUS.xl,
   },
   confirmLabel: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
     color: '#ffffff',
   },

@@ -57,6 +57,8 @@ import { MushafSpreadReader } from './MushafSpreadReader';
 import { useQuranState } from './quranState';
 import { type MushafReaderProps } from './mushafReaderCore';
 import { useKeyPaging, type PageTurner } from './useKeyPaging';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 type Props = Omit<MushafReaderProps, 'keyTurn'>;
 
@@ -359,32 +361,32 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 32,
-    gap: 16,
+    paddingHorizontal: SPACING.xxl,
+    gap: SPACING.lg,
   },
-  gateTitle: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
-  gateBody: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  gateTitle: { fontSize: TYPE.title2.fontSize, fontWeight: '700', textAlign: 'center' },
+  gateBody: { fontSize: TYPE.callout.fontSize, lineHeight: 22, textAlign: 'center' },
   cta: {
-    marginTop: 8,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 12,
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
   },
-  ctaLabel: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  ctaLabel: { color: '#ffffff', fontSize: TYPE.body.fontSize, fontWeight: '700' },
   withStrip: { flex: 1 },
   strip: {
-    paddingHorizontal: 14,
+    paddingHorizontal: SPACING.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   stripRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 12,
-    paddingBottom: 5,
+    gap: SPACING.md,
+    paddingBottom: SPACING.xs,
   },
-  stripLabel: { fontSize: 12, fontVariant: ['tabular-nums'], flexShrink: 1 },
-  stripCancel: { fontSize: 12, fontWeight: '700' },
+  stripLabel: { fontSize: TYPE.label.fontSize, fontVariant: ['tabular-nums'], flexShrink: 1 },
+  stripCancel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   stripTrack: { height: 3, overflow: 'hidden' },
   stripFill: { height: '100%' },
 });

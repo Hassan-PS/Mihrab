@@ -21,6 +21,8 @@ import {
   SettingsToggleRow,
 } from './SettingsGroup';
 import { MIHRAB_WEBSITE, MIHRAB_WEBSITE_LABEL } from '../../config/links';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * About card: the installed-version label and the GitHub link.
@@ -221,19 +223,19 @@ function AboutCardImpl() {
 export const AboutCard = memo(AboutCardImpl);
 
 const styles = StyleSheet.create({
-  star: { fontSize: 18 },
+  star: { fontSize: TYPE.title3.fontSize },
   versionBlock: {
-    marginTop: 10,
-    marginBottom: 4,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
     alignItems: 'center',
-    gap: 3,
+    gap: SPACING.xs,
   },
   versionText: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     textAlign: 'center',
   },
   versionLink: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
 });

@@ -15,6 +15,7 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'src');
 const TOKENS_FILE = 'src/theme/tokens.ts';
 const APP_PALETTE = 'src/theme/appPalette.ts';
+const TYPOGRAPHY = 'src/theme/typography.ts';
 
 function walk(dir, results = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -30,7 +31,7 @@ const files = walk(SRC);
 
 for (const f of files) {
   const rel = path.relative(ROOT, f);
-  if (rel === TOKENS_FILE || rel === APP_PALETTE) continue; // tokens are allowed here
+  if (rel === TOKENS_FILE || rel === APP_PALETTE || rel === TYPOGRAPHY) continue; // tokens are allowed here
   // Type definition files are pure types — no runtime tokens. Skip.
   if (rel.endsWith('.d.ts')) continue;
   // Provider catalog data and similar config-shaped files often carry
@@ -52,7 +53,8 @@ for (const f of files) {
     // they look the same in every palette so they're allowed as raw
     // values. Lines that opt out via `// tokens-ok-line:` (or anywhere
     // in the file via `// tokens-ok:`, handled above) are skipped.
-    const hexRe = /#[0-9a-fA-F]{3,8}\b/g;
+    // A colour in code is a quoted string; "task #104" in prose is not.
+    const hexRe = /(?<=['"`])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g;
     let m;
     while ((m = hexRe.exec(line)) !== null) {
       const v = m[0].toLowerCase();

@@ -7,6 +7,7 @@
  * here rather than in either card so the two can never drift apart on what
  * "teal" means.
  */
+// tokens-ok: the user-selectable accent swatches — these ARE the accent choices
 import type { AppAccentId, WidgetHighlightId } from './types';
 
 /**

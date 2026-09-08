@@ -11,7 +11,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { SPACING } from '../../theme/tokens';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Loading and error screens for the non-`ready` phases of `usePrayerDay`.
@@ -100,13 +101,13 @@ export const PhaseScreen = memo(PhaseScreenImpl);
 
 const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorScreen: { padding: 24 },
-  loadingHint: { marginTop: 12, fontSize: 15, textAlign: 'center' },
-  title: { fontSize: 20, fontWeight: '600', marginBottom: 8 },
-  body: { fontSize: 15, lineHeight: 22, marginBottom: 20 },
+  errorScreen: { padding: SPACING.xl },
+  loadingHint: { marginTop: SPACING.md, fontSize: TYPE.callout.fontSize, textAlign: 'center' },
+  title: { fontSize: TYPE.title2.fontSize, fontWeight: '600', marginBottom: SPACING.sm },
+  body: { fontSize: TYPE.callout.fontSize, lineHeight: 22, marginBottom: SPACING.xl },
   bodyCenter: { textAlign: 'center' },
-  button: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10 },
-  buttonLabel: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+  button: { paddingHorizontal: SPACING.xl, paddingVertical: SPACING.md, borderRadius: RADIUS.md },
+  buttonLabel: { color: '#ffffff', fontSize: TYPE.body.fontSize, fontWeight: '600' },
   skeletonScreen: { flex: 1, padding: SPACING.lg, gap: SPACING.md },
   skelRow: {
     flexDirection: 'row',

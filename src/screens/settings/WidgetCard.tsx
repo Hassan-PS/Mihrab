@@ -17,6 +17,8 @@ import {
   tabularNumeralStyle,
 } from '../../theme/textScale';
 import { SettingsBlock, SettingsGroup } from './SettingsGroup';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Widget settings card — Android background strength, and the widget's own
@@ -181,39 +183,39 @@ export const WidgetCard = memo(WidgetCardImpl);
 const styles = StyleSheet.create({
   // Reads like AppearanceCard's inner labels ("Theme", "Accent color"),
   // not like a second group heading.
-  label: { fontSize: 13, marginBottom: 4 },
-  help: { fontSize: 13, lineHeight: 18, marginTop: 12 },
-  stepGlyph: { fontSize: 20 },
+  label: { fontSize: TYPE.footnote.fontSize, marginBottom: SPACING.xs },
+  help: { fontSize: TYPE.footnote.fontSize, lineHeight: 18, marginTop: SPACING.md },
+  stepGlyph: { fontSize: TYPE.title2.fontSize },
   // Same geometry as the Appearance card's row, so the two read as one
   // control that moved rather than two different pickers.
   swatchRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 10,
+    gap: SPACING.md,
+    marginTop: SPACING.md,
   },
   swatch: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: RADIUS.xl,
   },
   widgetOpacityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
-    marginTop: 8,
+    gap: SPACING.xl,
+    marginTop: SPACING.sm,
   },
   widgetOpacityBtn: {
     width: 44,
     height: 44,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   widgetOpacityValue: {
-    fontSize: 18,
+    fontSize: TYPE.title3.fontSize,
     fontWeight: '600',
     minWidth: 52,
     textAlign: 'center',

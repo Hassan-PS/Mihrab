@@ -22,6 +22,7 @@
  * day is open. Forward stops at today, because a log of the future is a
  * plan, and this screen is not for plans.
  */
+// tokens-ok: the owed band is the danger colour as a tint; the palette has no danger tint
 import { Chip, Group, Row, Stepper } from '../components/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -125,6 +126,8 @@ import { tabularNumeralStyle } from '../theme/textScale';
 import { useClockFormatter } from '../hooks/useClockFormatter';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 const PRAYERS: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const STATUSES: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
@@ -1373,7 +1376,7 @@ export function LogScreen() {
                       <Text
                         style={{
                           color: savedNote ? palette.accent : palette.muted,
-                          fontSize: 15,
+                          fontSize: TYPE.callout.fontSize,
                         }}
                       >
                         ✎
@@ -1561,7 +1564,7 @@ export function LogScreen() {
               <Text style={[styles.upcomingLabel, { color: palette.accent }]}>
                 {t('log.allUpcoming', 'All upcoming')}
               </Text>
-              <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
+              <Text style={{ color: palette.accent, fontSize: TYPE.callout.fontSize }}>→</Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -1587,7 +1590,7 @@ export function LogScreen() {
           </View>
           <Switch
             value={settings.endOfDayLogReminderEnabled}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
             thumbColor="#ffffff"
             onValueChange={v =>
               updateSettings({ endOfDayLogReminderEnabled: v })
@@ -1615,7 +1618,7 @@ export function LogScreen() {
           </View>
           <Switch
             value={settings.showPracticeOnHome}
-            trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+            trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
             thumbColor="#ffffff"
             onValueChange={v => updateSettings({ showPracticeOnHome: v })}
           />
@@ -1734,18 +1737,18 @@ export function LogScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { padding: 16, paddingBottom: 36 },
+  scroll: { padding: SPACING.lg, paddingBottom: SPACING.xxl },
   /** Space between every card on the page. 14 rather than 12: the day panel
    *  is now one tall card between two smaller ones, and at 12 the seams
    *  read as a rendering artefact rather than a deliberate gap. */
-  stack: { gap: 14 },
-  card: { borderRadius: 18, padding: 14 },
-  graphBlock: { gap: 10, paddingHorizontal: 2 },
+  stack: { gap: SPACING.lg },
+  card: { borderRadius: RADIUS.xl, padding: SPACING.lg },
+  graphBlock: { gap: SPACING.md, paddingHorizontal: 2 },
   backToTodayRow: { alignSelf: 'center', marginTop: -6 },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: SPACING.md,
   },
   /**
    * The owed drawer, between the grid and "Fill in earlier days".
@@ -1756,57 +1759,57 @@ const styles = StyleSheet.create({
    * days the graph is at that moment pointing at.
    */
   owedBar: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 9,
-    marginTop: 8,
-    gap: 7,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    marginTop: SPACING.sm,
+    gap: SPACING.sm,
   },
-  owedHint: { fontSize: 11, fontWeight: '700' },
-  owedChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
+  owedHint: { fontSize: TYPE.caption.fontSize, fontWeight: '700' },
+  owedChips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, alignItems: 'center' },
   owedChip: {
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: 999,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.full,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  owedChipText: { fontSize: 11.5, fontWeight: '600' },
-  owedMore: { fontSize: 11, alignSelf: 'center' },
+  owedChipText: { fontSize: TYPE.label.fontSize, fontWeight: '600' },
+  owedMore: { fontSize: TYPE.caption.fontSize, alignSelf: 'center' },
   todayHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     // Inside the day card now, so it carries the card's own side padding
     // rather than sitting flush against the screen's.
-    paddingHorizontal: 14,
+    paddingHorizontal: SPACING.lg,
     paddingTop: 2,
   },
-  backToToday: { fontSize: 12, fontWeight: '700', marginTop: 1 },
+  backToToday: { fontSize: TYPE.label.fontSize, fontWeight: '700', marginTop: 1 },
   ghostBtn: {
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 999,
-    marginBottom: 10,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
+    marginBottom: SPACING.md,
   },
   reminderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
+    gap: SPACING.md,
+    paddingVertical: SPACING.md,
   },
   reminderCopy: { flex: 1, minWidth: 0, gap: 2 },
-  reminderTitle: { fontSize: 14, fontWeight: '700' },
-  reminderHelp: { fontSize: 12, lineHeight: 16 },
-  ghostLabel: { fontSize: 12, fontWeight: '700' },
-  prayerRow: { paddingVertical: 10 },
-  prayerHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  prayerName: { fontSize: 15, fontWeight: '600' },
-  prayerTime: { fontSize: 13 },
+  reminderTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  reminderHelp: { fontSize: TYPE.label.fontSize, lineHeight: 16 },
+  ghostLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
+  prayerRow: { paddingVertical: SPACING.md },
+  prayerHead: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  prayerName: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  prayerTime: { fontSize: TYPE.footnote.fontSize },
   /** Pushes the sunnah chip and the note toggle to the end of the header. */
   headSpacer: { flex: 1 },
-  noteToggle: { padding: 4 },
-  statusRow: { flexDirection: 'row', gap: 4, marginTop: 6, alignItems: 'stretch' },
-  notYet: { fontSize: 13, marginTop: 8 },
+  noteToggle: { padding: SPACING.xs },
+  statusRow: { flexDirection: 'row', gap: SPACING.xs, marginTop: SPACING.sm, alignItems: 'stretch' },
+  notYet: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.sm },
   /**
    * Two lines rather than an ellipsis.
    *
@@ -1820,43 +1823,43 @@ const styles = StyleSheet.create({
   noteRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
-    marginTop: 8,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   noteInput: {
     flex: 1,
     minHeight: 40,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    fontSize: 14,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    fontSize: TYPE.callout.fontSize,
   },
-  saveNoteBtn: { paddingHorizontal: 12, paddingVertical: 9, borderRadius: 10 },
-  saveNoteLabel: { fontSize: 13, fontWeight: '700' },
-  fastRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  fastState: { fontSize: 15, fontWeight: '600' },
-  fastMeta: { fontSize: 12.5, marginTop: 2 },
-  fastCta: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 12 },
-  fastCtaLabel: { fontSize: 13, fontWeight: '700' },
+  saveNoteBtn: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.md },
+  saveNoteLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
+  fastRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+  fastState: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  fastMeta: { fontSize: TYPE.footnote.fontSize, marginTop: 2 },
+  fastCta: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, borderRadius: RADIUS.md },
+  fastCtaLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
   upcomingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 11,
-    marginTop: 12,
+    paddingTop: SPACING.md,
+    marginTop: SPACING.md,
   },
-  upcomingLabel: { fontSize: 13.5, fontWeight: '600' },
+  upcomingLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   /** The swipeable day page: one card surface holding the whole day. */
-  dayPanel: { borderRadius: 18, overflow: 'hidden', paddingBottom: 4 },
+  dayPanel: { borderRadius: RADIUS.xl, overflow: 'hidden', paddingBottom: SPACING.xs },
   /** Sections inside that card carry the padding the old separate cards
    *  did, so nothing shifted visually except the seams between them. */
-  panelSection: { paddingHorizontal: 14, paddingVertical: 12 },
+  panelSection: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
   panelDivider: { borderTopWidth: StyleSheet.hairlineWidth },
-  grabberWrap: { alignItems: 'center', paddingTop: 9, paddingBottom: 2 },
+  grabberWrap: { alignItems: 'center', paddingTop: SPACING.sm, paddingBottom: 2 },
   /** The sheet-style handle. Small, dim, and the only thing on the screen
    *  that says this panel is draggable — without it the gesture is
    *  undiscoverable, and a feature nobody finds is not a feature. */
   grabber: { width: 38, height: 4, borderRadius: 2, opacity: 0.7 },
-  hint: { fontSize: 13, textAlign: 'center', marginTop: 8 },
+  hint: { fontSize: TYPE.footnote.fontSize, textAlign: 'center', marginTop: SPACING.sm },
 });

@@ -75,6 +75,7 @@ import {
   FeatureTourModal,
   hasSeenFeatureTour,
 } from '../polish/FeatureTourModal';
+import { SPACING } from '../theme/tokens';
 
 /**
  * HomeScreen orchestrator — task #8 split.
@@ -1089,7 +1090,7 @@ export function HomeScreen() {
         // spends `insets.bottom`. Adding it here as well cost ~54pt of
         // dead air at the foot of the page, which on iPad was most of
         // the reason the dashboard overflowed and had to scroll at all.
-        { paddingBottom: 24 + tabBarInset },
+        { paddingBottom: SPACING.xl + tabBarInset },
         // Fill the viewport on the dashboard: when the two columns are
         // shorter than the window, center them vertically instead of
         // leaving the bottom half of a Mac/iPad window empty (§B1).
@@ -1098,7 +1099,7 @@ export function HomeScreen() {
       contentInsetAdjustmentBehavior="automatic">
       {/* gap must live INSIDE CenteredColumn: the wrapper collapses all
           cards into one child of the scroll container, so the container's
-          own gap:12 stopped separating them (2.7.36 regression — the
+          own gap: SPACING.md stopped separating them (2.7.36 regression — the
           carousel dots overlapped the day table and the Quran button). */}
       <CenteredColumn
         maxWidth={isDashboard ? dashCap : undefined}
@@ -1190,7 +1191,7 @@ export function HomeScreen() {
                   goes FIRST in it — the side column was half empty, and
                   a shortcut outranks a read-only summary. Home now fits
                   the window on iPad with nothing to scroll to. */}
-              <View style={{ width: HOME_MAIN_COL, gap: 12 }}>{dayTable}</View>
+              <View style={{ width: HOME_MAIN_COL, gap: SPACING.md }}>{dayTable}</View>
               <View style={styles.dashSide}>
                 {quranShortcut}
                 {toolsGrid}
@@ -1241,11 +1242,11 @@ const styles = StyleSheet.create({
     // Stretch (not flex-start): the sidebar's last card can breathe to
     // the main column's height, so the two columns read as one piece.
     alignItems: 'stretch',
-    gap: 20,
+    gap: SPACING.xl,
   },
   dashSide: {
     flex: 1,
-    gap: 12,
+    gap: SPACING.md,
   },
   homeRoot: { flex: 1 },
   // Mac Catalyst top bar (see the render site). `row` + `space-between`
@@ -1264,17 +1265,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: HOME_SCREEN_PADDING,
     // paddingTop is `macTopBarInset`, applied at the render site: it depends
     // on the window's title-bar band, which is not a constant.
-    paddingBottom: 6,
+    paddingBottom: SPACING.sm,
     minHeight: 34,
   },
   scroll: { flex: 1 },
   // Inter-card rhythm for BOTH CenteredColumn variants (compact uses the
   // outer `style`, wide uses the capped inner column).
-  homeColumn: { gap: 12 },
+  homeColumn: { gap: SPACING.md },
   scrollContent: {
     padding: HOME_SCREEN_PADDING,
-    paddingBottom: 36,
-    gap: 12,
+    paddingBottom: SPACING.xxl,
+    gap: SPACING.md,
   },
   // Dashboard: let the content grow to the viewport and center it
   // vertically when shorter (§B1 — kills the dead bottom half).

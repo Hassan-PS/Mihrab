@@ -11,6 +11,8 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * The controls themselves, without a sheet around them — an hour
@@ -153,28 +155,28 @@ const styles = StyleSheet.create({
     right: 0,
     borderTopStartRadius: 18,
     borderTopEndRadius: 18,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 32,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xxl,
   },
-  title: { fontSize: 17, fontWeight: '700', marginBottom: 14 },
+  title: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.lg },
   hourRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 18,
+    gap: SPACING.lg,
   },
   stepBtn: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: RADIUS.xl,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepGlyph: { fontSize: 20, fontWeight: '700' },
+  stepGlyph: { fontSize: TYPE.title2.fontSize, fontWeight: '700' },
   timeValue: {
-    fontSize: 30,
+    fontSize: 30, // tokens-ok-line: display or Arabic scale, sized by hand
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
     minWidth: 110,
@@ -183,21 +185,21 @@ const styles = StyleSheet.create({
   minuteRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
-    marginTop: 14,
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
   },
-  chipLabel: { fontWeight: '600', fontSize: 13, fontVariant: ['tabular-nums'] },
+  chipLabel: { fontWeight: '600', fontSize: TYPE.footnote.fontSize, fontVariant: ['tabular-nums'] },
   doneBtn: {
-    marginTop: 18,
-    paddingVertical: 13,
-    borderRadius: 12,
+    marginTop: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
   },
-  doneLabel: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+  doneLabel: { color: '#ffffff', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
 });

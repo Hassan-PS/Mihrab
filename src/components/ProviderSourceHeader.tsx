@@ -6,6 +6,8 @@ import { getProviderLabel } from '../settings/providersCatalog';
 import type { PrayerAppSettings } from '../settings/types';
 import { cardEdgeStyle } from '../theme/chrome';
 import { ProviderPickerModal } from './ProviderPickerModal';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 type Palette = {
   card: ColorValue;
@@ -98,31 +100,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    marginBottom: 14,
+    marginBottom: SPACING.lg,
   },
   barText: {
     flex: 1,
-    paddingEnd: 8,
+    paddingEnd: SPACING.sm,
   },
   kicker: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
     marginBottom: 2,
   },
   title: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
     fontWeight: '600',
   },
   sub: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     marginTop: 2,
   },
   chevron: {
-    fontSize: 18,
+    fontSize: TYPE.title3.fontSize,
     fontWeight: '600',
   },
 });

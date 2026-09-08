@@ -1,4 +1,6 @@
 import { StyleSheet } from 'react-native';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Shared styles for Settings cards — task #9.
@@ -9,16 +11,16 @@ import { StyleSheet } from 'react-native';
  */
 export const sharedSettingsStyles = StyleSheet.create({
   sectionTitle: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 8,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   card: {
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    padding: 16,
-    marginBottom: 12,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   rowPress: {
     flexDirection: 'row',
@@ -27,22 +29,22 @@ export const sharedSettingsStyles = StyleSheet.create({
   },
   copyBlock: {
     flex: 1,
-    paddingEnd: 12,
+    paddingEnd: SPACING.md,
   },
   changeLink: {
-    fontSize: 17,
+    fontSize: TYPE.title3.fontSize,
   },
   label: {
-    fontSize: 13,
-    marginBottom: 4,
+    fontSize: TYPE.footnote.fontSize,
+    marginBottom: SPACING.xs,
   },
   valueText: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
     fontWeight: '500',
   },
   help: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: TYPE.footnote.fontSize,
+    marginTop: SPACING.xs,
     lineHeight: 18,
   },
   switchRow: {
@@ -52,28 +54,28 @@ export const sharedSettingsStyles = StyleSheet.create({
   },
   switchCopy: {
     flex: 1,
-    paddingEnd: 12,
+    paddingEnd: SPACING.md,
   },
   segmentRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: SPACING.md,
   },
   segment: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     alignItems: 'center',
   },
   segmentLabel: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
     fontWeight: '600',
   },
   input: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    fontSize: TYPE.body.fontSize,
   },
 });

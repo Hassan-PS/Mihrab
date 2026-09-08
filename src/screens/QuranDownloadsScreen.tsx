@@ -61,6 +61,8 @@ import {
   riwayahProvenance,
 } from '../quran/riwayahData';
 import { RIWAYAT } from '../quran/riwayat';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 type ReciterUsage = { reciterId: string; bytes: number };
 
@@ -200,7 +202,7 @@ export function QuranDownloadsScreen() {
         hitSlop={8}
         onPress={onDelete}
         style={[styles.deleteBtn, { borderColor: palette.border }]}>
-        <Text style={{ color: '#d43f3f', fontWeight: '700', fontSize: 12 }}>
+        <Text style={{ color: palette.danger, fontWeight: '700', fontSize: TYPE.label.fontSize }}>
           {t('common.delete', 'Delete')}
         </Text>
       </Pressable>
@@ -261,7 +263,7 @@ export function QuranDownloadsScreen() {
               style={{
                 color: palette.accentSolid,
                 fontWeight: '700',
-                fontSize: 12,
+                fontSize: TYPE.label.fontSize,
               }}>
               {t('common.cancel', 'Cancel')}
             </Text>
@@ -349,7 +351,7 @@ export function QuranDownloadsScreen() {
             styles.row,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <Text style={{ color: palette.muted, fontSize: 13, flex: 1 }}>
+          <Text style={{ color: palette.muted, fontSize: TYPE.footnote.fontSize, flex: 1 }}>
             {t(
               'downloads.empty',
               'Nothing downloaded yet. Mushaf pages, recitation audio and tafsir you download appear here.',
@@ -363,27 +365,27 @@ export function QuranDownloadsScreen() {
 }
 
 const styles = StyleSheet.create({
-  list: { padding: 16 },
-  stack: { gap: 10 },
+  list: { padding: SPACING.lg },
+  stack: { gap: SPACING.md },
   total: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
     marginBottom: 2,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
-    borderRadius: 12,
-    gap: 10,
+    padding: SPACING.lg,
+    borderRadius: RADIUS.md,
+    gap: SPACING.md,
   },
-  rowTitle: { fontSize: 15, fontWeight: '600' },
-  rowSub: { fontSize: 12, marginTop: 2 },
-  rowBytes: { fontSize: 13, fontVariant: ['tabular-nums'] },
+  rowTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  rowSub: { fontSize: TYPE.label.fontSize, marginTop: 2 },
+  rowBytes: { fontSize: TYPE.footnote.fontSize, fontVariant: ['tabular-nums'] },
   deleteBtn: {
     borderWidth: 1,
-    borderRadius: 9,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
 });

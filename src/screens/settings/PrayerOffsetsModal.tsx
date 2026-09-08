@@ -115,7 +115,7 @@ export const PrayerOffsetsModal = memo(function PrayerOffsetsModal({
             <Text
               style={[
                 styles.help,
-                { color: palette.muted, paddingHorizontal: 16 },
+                { color: palette.muted, paddingHorizontal: SPACING.lg },
               ]}
             >
               {t('settings.prayerOffsetsHelp', {

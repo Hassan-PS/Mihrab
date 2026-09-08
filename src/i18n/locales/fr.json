@@ -47,7 +47,8 @@
     "delete": "Supprimer",
     "cancelled": "Annulé.",
     "listJoin": " et ",
-    "confirmDelete": "Appuyez à nouveau pour supprimer"
+    "confirmDelete": "Appuyez à nouveau pour supprimer",
+    "learnMore": "En savoir plus"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",

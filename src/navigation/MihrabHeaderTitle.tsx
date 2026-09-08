@@ -2,6 +2,7 @@ import { useTheme } from '@react-navigation/native';
 import { Platform, Text, View } from 'react-native';
 import { MihrabLogoIcon } from '../theme/icons';
 import { desktopSize } from '../responsive/desktop';
+import { SPACING } from '../theme/tokens';
 
 const isIOS = Platform.OS === 'ios';
 
@@ -15,7 +16,7 @@ const isIOS = Platform.OS === 'ios';
 export function MihrabHeaderTitle() {
   const { colors } = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
       {/* desktopSize is a no-op everywhere but Mac Catalyst, which scales
           the whole canvas down ~23% — a 17pt wordmark arrives at 13. */}
       <MihrabLogoIcon size={desktopSize(20)} color={colors.text} />

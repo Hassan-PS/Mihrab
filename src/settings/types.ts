@@ -1,3 +1,4 @@
+// tokens-ok: default accent hexes for stored settings
 import type { Madhab } from '../prayer/madhab';
 import type { PrePrayerReminderMinutes } from './prePrayerReminder';
 import type { NotificationSoundId } from '../notifications/notificationSounds';

@@ -29,7 +29,7 @@ import {
 } from '../onboarding/steps';
 import { CrescentIcon } from '../theme/icons';
 import { RADIUS, SPACING } from '../theme/tokens';
-import { typeStyle } from '../theme/typography';
+import { TYPE, typeStyle } from '../theme/typography';
 import type { RootStackParamList } from '../navigation/types';
 import { LocationSetup } from '../components/LocationSetup';
 
@@ -146,20 +146,20 @@ function SalamHero({
 const salamStyles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    paddingVertical: 12,
-    gap: 12,
+    paddingVertical: SPACING.md,
+    gap: SPACING.md,
   },
   salam: {
-    fontSize: 30,
+    fontSize: 30, // tokens-ok-line: display or Arabic scale, sized by hand
     lineHeight: 50,
     textAlign: 'center',
     writingDirection: 'rtl',
     fontWeight: '500',
     letterSpacing: 0,
-    paddingHorizontal: 8,
+    paddingHorizontal: SPACING.sm,
   },
   translation: {
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     lineHeight: 20,
     textAlign: 'center',
     fontStyle: 'italic',

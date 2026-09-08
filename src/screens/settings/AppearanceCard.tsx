@@ -1,3 +1,4 @@
+// tokens-ok: the hex-input placeholder is an example hex, not a colour in use
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
@@ -37,6 +38,8 @@ import {
   SettingsToggleRow,
 } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Appearance card: theme picker (System / Light / Dark), Android system
@@ -226,7 +229,7 @@ function AppearanceCardImpl() {
             value={settings.clockFormat}
             onChange={clockFormat => updateSettings({ clockFormat })}
           />
-          <Text style={[s.help, { color: palette.muted, marginTop: 10 }]}>
+          <Text style={[s.help, { color: palette.muted, marginTop: SPACING.md }]}>
             {t('settings.clockFormatExample', {
               defaultValue: 'For example: {{time}}',
               time: clock('17:31'),
@@ -299,7 +302,7 @@ function AppearanceCardImpl() {
                 style={[
                   s.input,
                   {
-                    marginTop: 10,
+                    marginTop: SPACING.md,
                     borderColor: palette.border,
                     color: palette.text,
                     backgroundColor: palette.bg,
@@ -362,14 +365,14 @@ const styles = StyleSheet.create({
   swatchRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 10,
+    gap: SPACING.md,
+    marginTop: SPACING.md,
     alignItems: 'center',
   },
   swatch: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: RADIUS.xl,
   },
   swatchCustom: {
     alignItems: 'center',
@@ -377,7 +380,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   swatchCustomLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '700',
   },
 });

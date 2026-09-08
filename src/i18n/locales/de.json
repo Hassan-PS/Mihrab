@@ -47,7 +47,8 @@
     "delete": "Löschen",
     "cancelled": "Abgebrochen.",
     "listJoin": " & ",
-    "confirmDelete": "Zum Löschen erneut tippen"
+    "confirmDelete": "Zum Löschen erneut tippen",
+    "learnMore": "Mehr erfahren"
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",

@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { RADIUS } from '../../theme/tokens';
+import { RADIUS, SPACING } from '../../theme/tokens';
 import { typeStyle } from '../../theme/typography';
 
 /**
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
     borderRadius: RADIUS.md,
-    padding: 3,
+    padding: SPACING.xs,
     gap: 2,
   },
   segment: {
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md - 3,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: SPACING.sm,
   },
   label: { textAlign: 'center' },
 });

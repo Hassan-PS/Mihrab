@@ -30,6 +30,7 @@ import {
   SettingsLinkRow,
   SettingsToggleRow,
 } from './SettingsGroup';
+import { TYPE } from '../../theme/typography';
 
 type NotificationsCardProps = {
   onOpenSoundPicker: () => void;
@@ -198,7 +199,7 @@ function NotificationsCardImpl({
 }
 
 const styles = StyleSheet.create({
-  change: { fontSize: 14, fontWeight: '600' },
+  change: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
 });
 
 export const NotificationsCard = memo(NotificationsCardImpl);

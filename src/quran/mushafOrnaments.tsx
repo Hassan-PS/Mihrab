@@ -22,6 +22,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { FONTS } from '../theme/typography';
 import { findSurah } from './quran';
+import { SPACING } from '../theme/tokens';
 
 /** Eight-point star: two squares, one at 45°, as a single closed path. */
 function starPath(cx: number, cy: number, r: number): string {
@@ -419,7 +420,7 @@ const rowStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: SPACING.sm,
   },
   // The flourish is drawn pointing one way; the far side is the same drawing
   // reflected, so the two are guaranteed to match.

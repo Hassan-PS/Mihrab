@@ -46,7 +46,7 @@ import {
  */
 const FASTING_KEY = 'prayerapp.fasting.v1';
 import { RADIUS, SPACING } from '../theme/tokens';
-import { typeStyle } from '../theme/typography';
+import { TYPE, typeStyle } from '../theme/typography';
 import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
@@ -405,7 +405,7 @@ export function FastingScreen() {
           accessibilityLabel={t('fasting.reminderToggleA11y', 'Enable day-before fasting reminders')}
           value={settings.fastingRemindersEnabled}
           onValueChange={onToggleReminders}
-          trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+          trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
           // Thumb stays light in BOTH states so it remains visible
           // against the accent-coloured track when on. Previously the
           // thumb was set to the same accent colour, which made the
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: SPACING.sm,
   },
   gridCell: {
     width: 36,
@@ -564,22 +564,22 @@ const styles = StyleSheet.create({
   reminderCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.md,
     padding: SPACING.md,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
   },
-  reminderTextCol: { flex: 1, gap: 4 },
-  reminderTitle: { fontSize: 15, fontWeight: '600' },
-  reminderBody: { fontSize: 12, lineHeight: 18 },
+  reminderTextCol: { flex: 1, gap: SPACING.xs },
+  reminderTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  reminderBody: { fontSize: TYPE.label.fontSize, lineHeight: 18 },
   ramadanCountdown: {
     alignItems: 'center',
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.md,
-    gap: 4,
+    gap: SPACING.xs,
   },
   sectionTitle: {
     marginTop: SPACING.sm,
   },
-  upcomingDays: { fontSize: 14, fontWeight: '700' },
-  emptyHint: { fontSize: 13, textAlign: 'center', marginTop: 4, marginBottom: 8 },
+  upcomingDays: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  emptyHint: { fontSize: TYPE.footnote.fontSize, textAlign: 'center', marginTop: SPACING.xs, marginBottom: SPACING.sm },
 });

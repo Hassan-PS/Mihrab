@@ -10,6 +10,7 @@ import { MADHABS, type Madhab } from '../../prayer/madhab';
 import { useSystemNavigationReserve } from '../../navigation/tabBarInset';
 import { modalStyles } from './modalStyles';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { SPACING } from '../../theme/tokens';
 
 type Props = {
   visible: boolean;
@@ -95,7 +96,7 @@ export const MadhabModal = memo(function MadhabModal({
             );
           })}
           <Text
-            style={[s.help, { color: palette.muted, padding: 16, paddingTop: 12 }]}
+            style={[s.help, { color: palette.muted, padding: SPACING.lg, paddingTop: SPACING.md }]}
           >
             {t('settings.madhabHelp')}
           </Text>

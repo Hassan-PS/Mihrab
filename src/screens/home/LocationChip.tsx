@@ -16,7 +16,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { findPreset } from '../../settings/locationPresets';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { RADIUS, SPACING } from '../../theme/tokens';
-import { typeStyle } from '../../theme/typography';
+import { TYPE, typeStyle } from '../../theme/typography';
 
 /**
  * Compact map-pin icon for the header-mounted LocationChip variant.
@@ -370,8 +370,8 @@ const styles = StyleSheet.create({
   // maxWidth keeps a long preset name from pushing the Settings gear
   // off the right edge on the smallest supported iPhones (~375 pt).
   headerPin: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
     alignItems: 'center',
     justifyContent: 'center',
     // Roomier than before so the city name AND the "Auto" badge both fit; the
@@ -381,27 +381,27 @@ const styles = StyleSheet.create({
   headerPinRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: SPACING.sm,
     flexShrink: 1,
   },
   headerPinLabel: {
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '600',
     flexShrink: 1,
   },
   chipLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: SPACING.sm,
     flexShrink: 1,
   },
   // Small "Auto" pill shown when the app is on automatic (GPS) location.
   // flexShrink:0 so it never gets squeezed out — the city label truncates
   // instead (seen clipped on iOS where the name filled the whole chip).
   autoBadge: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    paddingHorizontal: 5,
+    paddingHorizontal: SPACING.xs,
     paddingVertical: 1,
     borderRadius: RADIUS.sm,
     overflow: 'hidden',
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   },
   sheet: {
     padding: SPACING.md,
-    gap: 4,
+    gap: SPACING.xs,
   },
   row: {
     paddingVertical: SPACING.sm,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   addRow: {
-    marginTop: 4,
+    marginTop: SPACING.xs,
     paddingTop: SPACING.md,
     paddingBottom: SPACING.xs,
     paddingHorizontal: SPACING.sm,

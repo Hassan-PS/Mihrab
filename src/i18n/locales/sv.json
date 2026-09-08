@@ -47,7 +47,8 @@
     "delete": "Ta bort",
     "cancelled": "Avbruten.",
     "listJoin": " & ",
-    "confirmDelete": "Tryck igen för att ta bort"
+    "confirmDelete": "Tryck igen för att ta bort",
+    "learnMore": "Läs mer"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",

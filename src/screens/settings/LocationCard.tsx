@@ -14,6 +14,8 @@ import type { GeocodedPlace } from '../../geocoding/nominatim';
 import { inputChromeStyle, segmentChromeStyle } from '../../theme/chrome';
 import { SettingsBlock, SettingsGroup } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Location card: automatic/manual segment, place search (manual mode), and
@@ -79,6 +81,7 @@ function LocationCardImpl() {
     accent: palette.accent,
     accentBg: palette.accentBg,
     card: palette.card,
+    danger: palette.danger,
     flatChrome: palette.flatChrome,
   };
 
@@ -169,7 +172,7 @@ function LocationCardImpl() {
                 { color: palette.text, backgroundColor: palette.bg },
               ]}
             />
-            {coordError && <Text style={styles.errorText}>{coordError}</Text>}
+            {coordError && <Text style={[styles.errorText, { color: palette.danger }]}>{coordError}</Text>}
             <Button
               label={t('settings.applyCoords')}
               onPress={applyCoords}
@@ -186,11 +189,10 @@ export const LocationCard = memo(LocationCardImpl);
 
 const styles = StyleSheet.create({
   manualBlock: {
-    marginTop: 16,
-    gap: 10,
+    marginTop: SPACING.lg,
+    gap: SPACING.md,
   },
   errorText: {
-    color: '#b91c1c',
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
   },
 });

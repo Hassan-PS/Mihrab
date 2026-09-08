@@ -70,6 +70,8 @@ import { clearNativeAlertOverride } from '../../native/MihrabLiveActivity';
 import { ymdLocal } from '../../notifications/scheduling';
 import { QiblaChipCorner } from './QiblaChip';
 import { HOME_TABLE_RADIUS } from './tokens';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /** The five salāh — the only rows a "first prayer of the day" can name. */
 const SALAH_ORDER = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
@@ -737,59 +739,59 @@ export const TodayCard = memo(TodayCardImpl);
 
 const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
-  heroWrap: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14 },
+  heroWrap: { paddingHorizontal: SPACING.xl, paddingTop: SPACING.lg, paddingBottom: SPACING.lg },
   hero: {},
-  heroExpanded: { paddingVertical: 10 },
+  heroExpanded: { paddingVertical: SPACING.md },
   // Sentence case, quiet: the countdown is the thing the eye lands on and
   // the eyebrow only names what it counts to. It was an uppercase,
   // letterspaced overline — the 2016 idiom (docs/design/redesign-plan.md
   // §2.1, the `label` token).
   heroEyebrow: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     fontWeight: '600',
   },
   heroCountdownRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 8,
+    gap: SPACING.sm,
     marginTop: 2,
   },
   // The question the app is opened to answer, at the size that says so.
-  heroCountdown: { fontSize: 54, fontWeight: '700' },
-  heroCountdownExpanded: { fontSize: 78 },
+  heroCountdown: { fontSize: 54, fontWeight: '700' }, // tokens-ok-line: display or Arabic scale, sized by hand
+  heroCountdownExpanded: { fontSize: 78 }, // tokens-ok-line: display or Arabic scale, sized by hand
   // Two thirds of the "at" line's weight and a third of the countdown's
   // size: present, readable, and never the thing the eye lands on first.
-  heroSeconds: { fontSize: 20, fontWeight: '600', marginStart: -3 },
-  heroSecondsExpanded: { fontSize: 28 },
-  heroAt: { fontSize: 17, fontWeight: '600' },
-  heroDate: { fontSize: 34, fontWeight: '700', marginTop: 2 },
-  heroHijri: { fontSize: 14, marginTop: 2 },
-  heroTodayDate: { fontSize: 13, marginTop: 10 },
+  heroSeconds: { fontSize: TYPE.title2.fontSize, fontWeight: '600', marginStart: -3 },
+  heroSecondsExpanded: { fontSize: 28 }, // tokens-ok-line: display or Arabic scale, sized by hand
+  heroAt: { fontSize: TYPE.title3.fontSize, fontWeight: '600' },
+  heroDate: { fontSize: 34, fontWeight: '700', marginTop: 2 }, // tokens-ok-line: display or Arabic scale, sized by hand
+  heroHijri: { fontSize: TYPE.callout.fontSize, marginTop: 2 },
+  heroTodayDate: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.md },
   firstPill: {
-    marginTop: 13,
+    marginTop: SPACING.md,
     alignSelf: 'flex-start',
-    paddingHorizontal: 13,
-    paddingVertical: 7,
-    borderRadius: 999,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
   },
-  firstPillText: { fontSize: 13, fontWeight: '600' },
-  railWrap: { marginTop: 11 },
-  railTrack: { height: 5, borderRadius: 3, overflow: 'hidden' },
-  railFill: { height: '100%', borderRadius: 3 },
+  firstPillText: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
+  railWrap: { marginTop: SPACING.md },
+  railTrack: { height: 5, borderRadius: RADIUS.xs, overflow: 'hidden' },
+  railFill: { height: '100%', borderRadius: RADIUS.xs },
   railLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 7,
+    marginTop: SPACING.sm,
   },
-  railLabel: { fontSize: 11.5, fontWeight: '600' },
+  railLabel: { fontSize: TYPE.label.fontSize, fontWeight: '600' },
   monthRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 18,
-    paddingVertical: 11,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
-  monthLabel: { fontSize: 13.5, fontWeight: '600' },
-  monthChevron: { fontSize: 15 },
+  monthLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
+  monthChevron: { fontSize: TYPE.callout.fontSize },
 });

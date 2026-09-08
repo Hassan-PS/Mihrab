@@ -21,7 +21,7 @@ const isSalah = (key: string) =>
 import type { MonthDayEntry } from '../../prayer/loadMonthPrayerTimes';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { SPACING } from '../../theme/tokens';
-import { typeStyle } from '../../theme/typography';
+import { TYPE, typeStyle } from '../../theme/typography';
 
 /**
  * Row + column-header presentational components for MonthTimesScreen —
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     // Smaller than the time above it on purpose: it is the deadline for
     // that prayer, not a second prayer, and at the same size the row
     // reads as eighteen times rather than nine and their ends.
-    fontSize: 9,
+    fontSize: TYPE.caption.fontSize,
     lineHeight: 11,
     textAlign: 'center',
     opacity: 0.7,

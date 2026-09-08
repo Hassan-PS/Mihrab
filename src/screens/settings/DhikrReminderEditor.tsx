@@ -21,6 +21,8 @@ import type { DhikrReminder } from '../../dhikr/dhikrReminders';
 import { modalStyles } from './modalStyles';
 import { sharedSettingsStyles as s } from './sharedStyles';
 import { TimeOfDayPicker } from './TimePickerSheet';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /** What the editor hands back — everything but the id. */
 export type DhikrDraft = Omit<DhikrReminder, 'id'>;
@@ -341,7 +343,7 @@ export function DhikrReminderEditor({
                     onClose();
                   }}
                   style={styles.deleteBtn}>
-                  <Text style={styles.deleteLabel}>
+                  <Text style={[styles.deleteLabel, { color: palette.danger }]}>
                     {t('dhikr.deleteReminder', 'Delete reminder')}
                   </Text>
                 </Pressable>
@@ -357,41 +359,41 @@ export function DhikrReminderEditor({
 const styles = StyleSheet.create({
   sheet: { maxHeight: '88%' },
   section: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 6,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
-  arabic: { fontSize: 20, lineHeight: 34, writingDirection: 'rtl' },
-  source: { fontSize: 11, lineHeight: 16, marginTop: 4 },
-  block: { paddingHorizontal: 16, paddingTop: 12, gap: 10 },
+  arabic: { fontSize: TYPE.title2.fontSize, lineHeight: 34, writingDirection: 'rtl' },
+  source: { fontSize: TYPE.caption.fontSize, lineHeight: 16, marginTop: SPACING.xs },
+  block: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.md, gap: SPACING.md },
   multiline: { minHeight: 84, textAlignVertical: 'top' },
   dayRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    paddingHorizontal: 16,
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
   },
   dayChip: {
     minWidth: 42,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
     alignItems: 'center',
   },
   soundChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
   },
-  dayLabel: { fontWeight: '600', fontSize: 13 },
-  soundHelp: { paddingHorizontal: 16, paddingTop: 8 },
-  actions: { padding: 16, gap: 10 },
-  primaryBtn: { paddingVertical: 13, borderRadius: 12, alignItems: 'center' },
-  primaryLabel: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
-  deleteBtn: { paddingVertical: 12, alignItems: 'center' },
-  deleteLabel: { color: '#d43f3f', fontSize: 15, fontWeight: '600' },
+  dayLabel: { fontWeight: '600', fontSize: TYPE.footnote.fontSize },
+  soundHelp: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm },
+  actions: { padding: SPACING.lg, gap: SPACING.md },
+  primaryBtn: { paddingVertical: SPACING.md, borderRadius: RADIUS.md, alignItems: 'center' },
+  primaryLabel: { color: '#ffffff', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  deleteBtn: { paddingVertical: SPACING.md, alignItems: 'center' },
+  deleteLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
 });

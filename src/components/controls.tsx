@@ -27,6 +27,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import { desktopSize } from '../responsive/desktop';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 // ── Chip ──────────────────────────────────────────────────────────────
 
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
   chip: {
     paddingHorizontal: desktopSize(13),
     paddingVertical: desktopSize(8),
-    borderRadius: 13,
+    borderRadius: RADIUS.md,
     minWidth: 44,
     alignItems: 'center',
   },
@@ -241,18 +243,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7,
+    gap: SPACING.sm,
     paddingHorizontal: desktopSize(14),
     paddingVertical: desktopSize(11),
-    borderRadius: 14,
+    borderRadius: RADIUS.lg,
   },
   actionGlyph: { fontSize: desktopSize(13), fontWeight: '700' },
   actionLabel: { fontSize: desktopSize(13.5), fontWeight: '700' },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 13,
-    paddingHorizontal: 4,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.xs,
   },
   stepperBtn: {
     width: 34,
@@ -260,11 +262,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepperGlyph: { fontSize: 18, fontWeight: '700' },
+  stepperGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
   stepperValue: {
     minWidth: 38,
     textAlign: 'center',
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
@@ -272,13 +274,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
-    marginTop: 18,
-    paddingTop: 14,
-    marginBottom: 8,
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+    paddingTop: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
 });

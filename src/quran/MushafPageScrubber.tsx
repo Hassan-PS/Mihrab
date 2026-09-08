@@ -68,6 +68,8 @@ import {
   surahAtPage,
   type RailDrag,
 } from './mushafRail';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 // The model's pure parts, re-exported for the tests that pinned them here.
 // `isRangingDrag` outlives its caller: the rail no longer weights ticks by
@@ -378,9 +380,9 @@ const styles = StyleSheet.create({
   wrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 4,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.xs,
     // The rail keeps its height, like the player below it: the pager above
     // is the `flex: 1` one, and it is the one with room to give. See the
     // same note on the mini player's card.
@@ -414,30 +416,30 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: RAIL_BOX_H + 4,
     width: BUBBLE_W,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     gap: 2,
   },
-  bubbleSurah: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
+  bubbleSurah: { fontSize: TYPE.callout.fontSize, fontWeight: '700', textAlign: 'center' },
   bubbleWhere: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontVariant: ['tabular-nums'],
     textAlign: 'center',
   },
-  bubbleSpeed: { fontSize: 11, textAlign: 'center' },
+  bubbleSpeed: { fontSize: TYPE.caption.fontSize, textAlign: 'center' },
   jumpBtn: {
     width: 34,
     height: 30,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  jumpGlyph: { fontSize: 17, fontWeight: '700', lineHeight: 20 },
+  jumpGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '700', lineHeight: 20 },
   readoutBox: { minWidth: 76, alignItems: 'flex-end' },
   readout: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
     textAlign: 'right',

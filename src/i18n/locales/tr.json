@@ -47,7 +47,8 @@
     "delete": "Sil",
     "cancelled": "İptal edildi.",
     "listJoin": " ve ",
-    "confirmDelete": "Silmek için tekrar dokunun"
+    "confirmDelete": "Silmek için tekrar dokunun",
+    "learnMore": "Daha fazla bilgi"
   },
   "home": {
     "loadingPrayer": "Namaz vakitleri yükleniyor…",

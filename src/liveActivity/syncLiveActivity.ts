@@ -12,6 +12,7 @@
  * The first beta ships without the iOS bridge — calls there silently
  * no-op. Task #129 lands the ActivityKit widget + bridge.
  */
+// tokens-ok: colours handed to the native notification, which has no palette
 
 import { Platform } from 'react-native';
 import { isMacCatalyst } from '../responsive/breakpoints';

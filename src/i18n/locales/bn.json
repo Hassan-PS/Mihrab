@@ -47,7 +47,8 @@
     "delete": "মুছুন",
     "cancelled": "বাতিল করা হয়েছে।",
     "listJoin": " ও ",
-    "confirmDelete": "মুছতে আবার চাপুন"
+    "confirmDelete": "মুছতে আবার চাপুন",
+    "learnMore": "আরও জানুন"
   },
   "home": {
     "loadingPrayer": "নামাজের সময় লোড হচ্ছে...",

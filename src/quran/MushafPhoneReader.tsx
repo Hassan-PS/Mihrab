@@ -88,6 +88,7 @@ import {
   useSettledGeometry,
   type PhonePageGeometry,
 } from './phonePageGeometry';
+import { SPACING } from '../theme/tokens';
 
 /** Index per page: the FlatList index IS the page, less one. */
 const pageIndex = (page: number) => page - 1;
@@ -757,6 +758,6 @@ const styles = StyleSheet.create({
    * and padding it pushed the medallion off the bottom of a page that had
    * nothing to scroll.
    */
-  columnContent: { paddingBottom: 24 },
+  columnContent: { paddingBottom: SPACING.xl },
   pageWrap: { alignItems: 'center' },
 });

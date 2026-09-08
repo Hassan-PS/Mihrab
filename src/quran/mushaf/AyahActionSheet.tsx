@@ -23,7 +23,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { arabicTextStyle } from '../../theme/typography';
+import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { findSurah, loadSurah } from '../quran';
 import { getAyahTranslation, QURAN_TRANSLATIONS } from '../translations';
 import { useActiveEdition } from '../useActiveEdition';
@@ -57,6 +57,7 @@ import { RowAction, SectionHead } from '../../components/controls';
 import { ActionSheetIOS, Alert, Platform } from 'react-native';
 import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { RADIUS, SPACING } from '../../theme/tokens';
 
 /** The sheet's own padding, before the safe-area insets are added to it. */
 const SHEET_H_PADDING = 18;
@@ -382,8 +383,8 @@ export function AyahActionSheet({
             onPress={() => toggleStar(surah, ayah)}>
             <Text
               style={{
-                fontSize: 22,
-                color: starred ? '#e0a52e' : palette.muted,
+                fontSize: TYPE.title2.fontSize,
+                color: starred ? palette.accentSolid : palette.muted,
               }}>
               {starred ? '★' : '☆'}
             </Text>
@@ -719,39 +720,39 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 18,
     // The horizontal and bottom padding are applied inline — they carry the
     // safe-area insets with them. See the sheet's own note.
-    paddingTop: 16,
-    gap: 12,
+    paddingTop: SPACING.lg,
+    gap: SPACING.md,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  reference: { fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
+  reference: { fontSize: TYPE.footnote.fontSize, fontWeight: '700', letterSpacing: 0.3 },
   body: { flexGrow: 0 },
   arabic: {
-    fontSize: 24,
+    fontSize: TYPE.title2.fontSize,
     lineHeight: 54,
     textAlign: 'right',
     writingDirection: 'rtl',
     ...arabicTextStyle('quran'),
   },
-  translation: { fontSize: 15, lineHeight: 22, marginTop: 10 },
+  translation: { fontSize: TYPE.callout.fontSize, lineHeight: 22, marginTop: SPACING.md },
   tafsirToggle: {
-    marginTop: 12,
+    marginTop: SPACING.md,
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
     alignSelf: 'flex-start',
   },
-  tafsirToggleLabel: { fontSize: 13, fontWeight: '700' },
-  tafsirBlock: { marginTop: 10, gap: 8 },
-  tafsirChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  tafsirToggleLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
+  tafsirBlock: { marginTop: SPACING.md, gap: SPACING.sm },
+  tafsirChips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
   tafsirChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     /**
      * A chip wraps to the next line; it never gets squeezed.
@@ -764,54 +765,54 @@ const styles = StyleSheet.create({
      */
     flexShrink: 0,
   },
-  chipLabel: { fontSize: 12, fontWeight: '600', flexShrink: 0 },
-  tafsirMeta: { fontSize: 13, fontStyle: 'italic' },
-  tafsirText: { fontSize: 14, lineHeight: 22 },
+  chipLabel: { fontSize: TYPE.label.fontSize, fontWeight: '600', flexShrink: 0 },
+  tafsirMeta: { fontSize: TYPE.footnote.fontSize, fontStyle: 'italic' },
+  tafsirText: { fontSize: TYPE.callout.fontSize, lineHeight: 22 },
   // The more/less link keeps the leading edge; the share control is
   // pushed to the trailing one with `marginStart: 'auto'` on the control
   // itself, so it sits correctly whether or not the toggle is drawn —
   // and on the right edge in English, the left in Arabic.
-  tafsirActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  tafsirActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   tafsirShare: {
     marginStart: 'auto',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: SPACING.xs,
   },
   tafsirRtl: { textAlign: 'right', writingDirection: 'rtl' },
-  moreLink: { fontSize: 12, fontWeight: '700', marginTop: 4 },
+  moreLink: { fontSize: TYPE.label.fontSize, fontWeight: '700', marginTop: SPACING.xs },
   bookmarkRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginTop: 14,
+    gap: SPACING.md,
+    marginTop: SPACING.lg,
   },
-  bookmarkLabel: { fontSize: 13, marginEnd: 4 },
-  colorDot: { width: 24, height: 24, borderRadius: 12 },
+  bookmarkLabel: { fontSize: TYPE.footnote.fontSize, marginEnd: SPACING.xs },
+  colorDot: { width: 24, height: 24, borderRadius: RADIUS.md },
   colorDotSelected: {
-    borderWidth: 3,
+    borderWidth: 3, // tokens-ok-line: the selected swatch ring, thicker than a hairline by design
     borderColor: 'rgba(255,255,255,0.9)',
     transform: [{ scale: 1.15 }],
   },
   khatmahPin: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 12,
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
     borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 9,
-    paddingHorizontal: 12,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
   },
-  khatmahDot: { width: 12, height: 12, borderRadius: 6 },
-  khatmahPinLabel: { fontSize: 13, fontWeight: '600', flex: 1 },
+  khatmahDot: { width: 12, height: 12, borderRadius: RADIUS.sm },
+  khatmahPinLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600', flex: 1 },
   // The emerald button takes the row's full width; repeat and share share
   // the line below it, so the ranking is visible before it is read.
   actionsPrimary: { width: '100%' },
   actionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 14,
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
   },
 });

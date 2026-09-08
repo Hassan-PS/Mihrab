@@ -17,6 +17,7 @@
  * gets forgotten. A reader asks for "page 42 of this riwayah, this big";
  * everything after that is this file's problem.
  */
+// tokens-ok: the page paper of the mushaf print, per tone; not app chrome
 import React, { useEffect, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import MushafTextPage, {

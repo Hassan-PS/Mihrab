@@ -1,3 +1,4 @@
+// tokens-ok: status semaphore (ok / warning) in a diagnostics panel — universal, not the accent
 import { memo, useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -30,6 +31,8 @@ import {
 } from '../../config/datasets';
 import type { DataSource } from '../../providers/types';
 import type { PrayerDataProviderId } from '../../settings/types';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * The two prepared datasets, in the order the panel lists them, each with the
@@ -363,66 +366,66 @@ export const DataStatsPanel = memo(DataStatsPanelImpl);
 
 const styles = StyleSheet.create({
   chevron: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     lineHeight: 18,
     fontWeight: '700',
-    marginStart: 8,
+    marginStart: SPACING.sm,
     includeFontPadding: false,
   },
   card: {
-    marginTop: 12,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 6,
+    marginTop: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 14,
+    marginBottom: SPACING.lg,
   },
   title: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: SPACING.sm,
   },
-  dot: { width: 7, height: 7, borderRadius: 4 },
-  statusText: { fontSize: 12, fontWeight: '700' },
+  dot: { width: 7, height: 7, borderRadius: RADIUS.xs },
+  statusText: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   sourceRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
-    gap: 12,
+    marginBottom: SPACING.xs,
+    gap: SPACING.md,
   },
-  sourceLabel: { fontSize: 14, fontWeight: '600' },
+  sourceLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
   sourcePill: {
-    borderRadius: 999,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
     flexShrink: 1,
   },
-  sourceValue: { fontSize: 13, fontWeight: '700' },
+  sourceValue: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
   serverHead: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 6,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
     marginBottom: 2,
   },
   serverName: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
     flexShrink: 1,
   },
-  activeTag: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
-  activeTagText: { fontSize: 10, fontWeight: '700' },
+  activeTag: { borderRadius: RADIUS.full, paddingHorizontal: SPACING.sm, paddingVertical: 2 },
+  activeTagText: { fontSize: TYPE.caption.fontSize, fontWeight: '700' },
   groupGap: {
-    marginTop: 10,
+    marginTop: SPACING.md,
     marginBottom: 2,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
@@ -430,14 +433,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    gap: 12,
+    paddingVertical: SPACING.md,
+    gap: SPACING.md,
   },
   // Sits under the coverage row it explains, not in the row's own grid.
-  note: { fontSize: 11, lineHeight: 15, paddingBottom: 10 },
-  rowLabel: { fontSize: 13, flexShrink: 0 },
+  note: { fontSize: TYPE.caption.fontSize, lineHeight: 15, paddingBottom: SPACING.md },
+  rowLabel: { fontSize: TYPE.footnote.fontSize, flexShrink: 0 },
   rowValue: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     fontWeight: '600',
     flexShrink: 1,
     textAlign: 'right',

@@ -14,6 +14,8 @@ import { StatusBanners } from './compass/StatusBanners';
 import { useCompassAnnouncer } from './compass/useCompassAnnouncer';
 import { useCompassSensor } from './compass/useCompassSensor';
 import { useIsActive } from '../hooks/useIsActive';
+import { SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 /**
  * CompassScreen orchestrator — task #10 split.
@@ -145,16 +147,16 @@ export function CompassScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, padding: 24, paddingTop: 16 },
+  root: { flex: 1, padding: SPACING.xl, paddingTop: SPACING.lg },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  pad: { padding: 24 },
+  pad: { padding: SPACING.xl },
   title: {
-    fontSize: 20,
+    fontSize: TYPE.title2.fontSize,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
     textAlign: 'center',
   },
-  body: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
-  checkingHint: { fontSize: 14, textAlign: 'center', marginTop: 12 },
-  hint: { fontSize: 14, lineHeight: 20, textAlign: 'center', marginTop: 16 },
+  body: { fontSize: TYPE.callout.fontSize, lineHeight: 22, textAlign: 'center' },
+  checkingHint: { fontSize: TYPE.callout.fontSize, textAlign: 'center', marginTop: SPACING.md },
+  hint: { fontSize: TYPE.callout.fontSize, lineHeight: 20, textAlign: 'center', marginTop: SPACING.lg },
 });

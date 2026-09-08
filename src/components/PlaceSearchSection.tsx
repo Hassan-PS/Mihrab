@@ -16,6 +16,8 @@ import {
   inputChromeStyle,
   listRowBottomBorder,
 } from '../theme/chrome';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 type Palette = {
   bg: ColorValue;
@@ -25,6 +27,7 @@ type Palette = {
   accent: ColorValue;
   accentBg: ColorValue;
   card: ColorValue;
+  danger: ColorValue;
   flatChrome: boolean;
 };
 
@@ -162,7 +165,7 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
           size="small"
         />
       )}
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: palette.danger }]}>{error}</Text>}
       {!loading &&
         !error &&
         searched &&
@@ -205,74 +208,73 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
 
 const styles = StyleSheet.create({
   wrap: {
-    gap: 8,
+    gap: SPACING.sm,
   },
   label: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     marginBottom: 2,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    fontSize: TYPE.body.fontSize,
   },
   hint: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     lineHeight: 16,
   },
   loader: {
     alignSelf: 'flex-start',
   },
   errorText: {
-    color: '#b91c1c',
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
   },
   noResults: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     fontStyle: 'italic',
   },
   appliedBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    gap: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
   },
   appliedCheck: {
-    fontSize: 18,
+    fontSize: TYPE.title3.fontSize,
     fontWeight: '700',
   },
   appliedTextWrap: {
     flex: 1,
   },
   appliedTitle: {
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '600',
   },
   appliedSubtitle: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     marginTop: 2,
   },
   listCard: {
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     overflow: 'hidden',
   },
   resultRow: {
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   resultTitle: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '500',
   },
   resultMeta: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: TYPE.footnote.fontSize,
+    marginTop: SPACING.xs,
   },
 });

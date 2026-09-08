@@ -11,6 +11,8 @@ import { HOME_ROW_PADDING_V } from './tokens';
 import { AlertModeButton } from './AlertModeButton';
 import { AlertOverrideChip } from './AlertOverrideChip';
 import type { PrayerAlertMode } from '../../settings/alertModes';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Single prayer row inside a day card.
@@ -302,8 +304,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: HOME_ROW_PADDING_V,
-    paddingHorizontal: 16,
-    paddingStart: 20,
+    paddingHorizontal: SPACING.lg,
+    paddingStart: SPACING.xl,
     position: 'relative',
   },
   divider: {
@@ -324,7 +326,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   daruri: {
-    fontSize: 11,
+    fontSize: TYPE.caption.fontSize,
     marginTop: 2,
   },
   // Inset, rounded indicator pill instead of a full-bleed block — reads
@@ -338,13 +340,13 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 3,
     borderBottomEndRadius: 3,
   },
-  name: { fontSize: 17 },
+  name: { fontSize: TYPE.title3.fontSize },
   chosenDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
-    marginStart: 12,
-    marginEnd: 7,
+    borderRadius: RADIUS.xs,
+    marginStart: SPACING.md,
+    marginEnd: SPACING.sm,
     backgroundColor: 'transparent',
   },
   timeCol: { justifyContent: 'center' },
@@ -352,5 +354,5 @@ const styles = StyleSheet.create({
   // Laid over the sample, flush with the trailing edge — `end`, so it is
   // the right edge in English and the left in Arabic.
   timeReal: { position: 'absolute', top: 0, end: 0 },
-  time: { fontSize: 17 },
+  time: { fontSize: TYPE.title3.fontSize },
 });

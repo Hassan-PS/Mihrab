@@ -41,6 +41,7 @@ jest.mock('../src/hooks/useAppPalette', () => ({
       muted: '#6B7280',
       controlBg: '#F3EFE7',
       text: '#111111',
+      textSolid: '#111111',
       danger: '#B91C1C',
     },
   }),
@@ -127,10 +128,12 @@ function marks(tree: Renderer): Array<Record<string, number | string>> {
     .map(c => Object.assign({}, ...[c.props.style].flat(3).filter(Boolean)));
 }
 
-/** The gold segments: absolutely-positioned children with a background. */
+/** The sunnah segments — drawn in the accent now, not a gold of their own
+ *  (redesign-plan §2.4): absolutely-positioned children with a background. */
+const SUNNAH = '#0F5132';
 function segments(tree: Renderer) {
   return marks(tree).filter(
-    s => s.backgroundColor === '#9A7B1F' && s.position === 'absolute',
+    s => s.backgroundColor === SUNNAH && s.position === 'absolute',
   );
 }
 
@@ -165,7 +168,7 @@ describe('the sunnah line is drawn round the square, not faded in', () => {
   it('closes into a single ring — not four segments — on a complete day', async () => {
     const tree = await render(full);
     expect(segments(tree)).toHaveLength(0);
-    const ring = marks(tree).filter(s => s.borderColor === '#9A7B1F');
+    const ring = marks(tree).filter(s => s.borderColor === SUNNAH);
     expect(ring).toHaveLength(1);
     expect(ring[0].borderWidth).toBe(1.5);
   });
@@ -196,7 +199,7 @@ describe('the line stays inside the fasting ring', () => {
 
     it(`closes the ring 2.5pt from the outer edge on ${name}`, async () => {
       const tree = await render(full, opts);
-      const ring = marks(tree).filter(s => s.borderColor === '#9A7B1F')[0];
+      const ring = marks(tree).filter(s => s.borderColor === SUNNAH)[0];
       for (const side of ['top', 'left', 'right', 'bottom'] as const) {
         expect(edge(tree, ring[side])).toBeCloseTo(2.5);
       }

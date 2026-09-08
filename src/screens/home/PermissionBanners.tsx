@@ -6,6 +6,8 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import notifee from '@notifee/react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Three banner conditions surfaced above the next-prayer card:
@@ -101,11 +103,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    gap: 8,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
   },
-  text: { flex: 1, fontSize: 13, lineHeight: 18 },
-  action: { fontSize: 13, fontWeight: '600' },
+  text: { flex: 1, fontSize: TYPE.footnote.fontSize, lineHeight: 18 },
+  action: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
 });

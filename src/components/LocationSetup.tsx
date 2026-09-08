@@ -143,6 +143,7 @@ export function LocationSetup({ palette }: Props) {
     accent: palette.accent,
     accentBg: palette.accentBg,
     card: palette.card,
+    danger: palette.danger,
     flatChrome: palette.flatChrome,
   };
 

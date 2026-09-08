@@ -27,7 +27,9 @@ import { useTranslation } from 'react-i18next';
 import type { AppPalette } from '../../theme/appPalette';
 import type { JournalPrayer } from '../../journal/journal';
 import { SUNNAH_UNITS } from '../../journal/sunnah';
-import { sunnahGold } from '../../practice/sunnahTheme';
+import { sunnahMark } from '../../practice/sunnahTheme';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 type Props = {
   prayer: JournalPrayer;
@@ -44,7 +46,7 @@ function SunnahChipImpl({ prayer, count, palette, notYet, onPress }: Props) {
   // Asr, and anything else that carries no sunnah: draw nothing at all.
   if (max <= 0) return null;
 
-  const gold = sunnahGold(palette.isDark);
+  const gold = sunnahMark(palette);
   const complete = count >= max;
   const dead = notYet === true;
 
@@ -63,7 +65,7 @@ function SunnahChipImpl({ prayer, count, palette, notYet, onPress }: Props) {
       style={[
         styles.chip,
         { borderColor: gold },
-        complete && { backgroundColor: palette.isDark ? '#3A310F' : '#F4E9C8' },
+        complete && { backgroundColor: palette.accentBg },
         dead && styles.dead,
       ]}
     >
@@ -104,14 +106,14 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 99,
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.full,
     borderWidth: 1,
   },
   dead: { opacity: 0.4 },
-  pips: { flexDirection: 'row', gap: 3 },
-  pip: { width: 7, height: 7, borderRadius: 99, borderWidth: 1.5 },
-  label: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.3 },
+  pips: { flexDirection: 'row', gap: SPACING.xs },
+  pip: { width: 7, height: 7, borderRadius: RADIUS.full, borderWidth: 1.5 },
+  label: { fontSize: TYPE.caption.fontSize, fontWeight: '700', letterSpacing: 0.3 },
 });

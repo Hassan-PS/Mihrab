@@ -47,7 +47,8 @@
     "delete": "हटाएँ",
     "cancelled": "रद्द किया गया।",
     "listJoin": " और ",
-    "confirmDelete": "हटाने के लिए फिर दबाएँ"
+    "confirmDelete": "हटाने के लिए फिर दबाएँ",
+    "learnMore": "और जानें"
   },
   "home": {
     "loadingPrayer": "प्रार्थना का समय लोड हो रहा है...",

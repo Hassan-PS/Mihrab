@@ -31,6 +31,8 @@ import { QURAN_TRANSLATIONS } from './translations';
 import { useActiveEdition } from './useActiveEdition';
 import { TAFSIR_EDITIONS, resolveTafsirEdition } from './tafsir';
 import { MODAL_ORIENTATIONS } from '../components/modalOrientations';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 export type CompanionMode = 'translation' | 'tafsir';
 
@@ -152,7 +154,7 @@ export function CompanionTextControls({
                 style={{
                   color: selected ? palette.accentSolid : palette.muted,
                   fontWeight: '700',
-                  fontSize: 13,
+                  fontSize: TYPE.footnote.fontSize,
                 }}>
                 {label}
               </Text>
@@ -303,36 +305,36 @@ const styles = StyleSheet.create({
   segments: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   segment: {
     flex: 1,
-    paddingVertical: 9,
+    paddingVertical: SPACING.sm,
     alignItems: 'center',
   },
   sectionHeader: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginTop: 14,
+    marginTop: SPACING.lg,
     marginBottom: 2,
   },
   langHeader: {
-    fontSize: 11,
+    fontSize: TYPE.caption.fontSize,
     fontWeight: '600',
-    marginTop: 8,
+    marginTop: SPACING.sm,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingStart: 10,
+    paddingVertical: SPACING.md,
+    paddingStart: SPACING.md,
   },
-  rowLabel: { fontSize: 16, flexShrink: 1, paddingEnd: 12 },
+  rowLabel: { fontSize: TYPE.body.fontSize, flexShrink: 1, paddingEnd: SPACING.md },
   rtl: { writingDirection: 'rtl', textAlign: 'right' },
-  check: { fontSize: 18, fontWeight: '700' },
+  check: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
   backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   sheet: {
     position: 'absolute',
@@ -342,17 +344,17 @@ const styles = StyleSheet.create({
     maxHeight: '75%',
     borderTopStartRadius: 18,
     borderTopEndRadius: 18,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 28,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xxl,
   },
-  title: { fontSize: 17, fontWeight: '700', marginBottom: 10 },
+  title: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.md },
   list: { flexGrow: 0 },
   doneBtn: {
-    marginTop: 14,
-    paddingVertical: 13,
-    borderRadius: 12,
+    marginTop: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
   },
-  doneLabel: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+  doneLabel: { color: '#ffffff', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
 });

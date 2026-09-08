@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { FIXED_LABEL_MAX_FONT_SCALE } from '../../theme/textScale';
 import type { CompassMode } from './useCompassSensor';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 export const DIAL = 260;
 const ARM_H = DIAL * 0.4;
@@ -143,7 +145,7 @@ function CompassDialImpl({ mode, needleDeg }: CompassDialProps) {
 export const CompassDial = memo(CompassDialImpl);
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', marginVertical: 8 },
+  wrap: { alignItems: 'center', marginVertical: SPACING.sm },
   dial: {
     width: DIAL,
     height: DIAL,
@@ -161,7 +163,7 @@ const styles = StyleSheet.create({
     zIndex: 4,
   },
   phoneFrontLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   // rtl-safe: geometric triangle (the classic 0×0 + transparent borders trick).
@@ -177,7 +179,7 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent', // rtl-safe: triangle geometry
     borderRightColor: 'transparent', // rtl-safe: triangle geometry
   },
-  cardinal: { position: 'absolute', fontSize: 14, fontWeight: '700' },
+  cardinal: { position: 'absolute', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
   n: { top: 36 },
   s: { bottom: 10 },
   // rtl-safe: cardinal labels mark geographic directions, not text direction.
@@ -202,8 +204,8 @@ const styles = StyleSheet.create({
   qiblaShaft: {
     width: 7,
     height: ARM_H * 0.62,
-    borderRadius: 3,
-    marginTop: 4,
+    borderRadius: RADIUS.xs,
+    marginTop: SPACING.xs,
   },
   qiblaHead: { alignItems: 'center', marginBottom: 2 },
   // rtl-safe: Qibla arrowhead — geometric triangle, must not flip in RTL.
@@ -219,12 +221,12 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent', // rtl-safe: triangle geometry
     marginBottom: 2,
   },
-  qiblaHeadText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
+  qiblaHeadText: { fontSize: TYPE.caption.fontSize, fontWeight: '800', letterSpacing: 0.3 },
   hub: {
     position: 'absolute',
     width: 14,
     height: 14,
-    borderRadius: 7,
+    borderRadius: RADIUS.sm,
     left: DIAL / 2 - 7,
     top: DIAL / 2 - 7,
     zIndex: 3,
@@ -235,5 +237,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 2,
   },
-  disabledGlyph: { fontSize: 48, fontWeight: '200' },
+  disabledGlyph: { fontSize: 48, fontWeight: '200' }, // tokens-ok-line: display or Arabic scale, sized by hand
 });

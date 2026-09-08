@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
-import { arabicTextStyle } from '../theme/typography';
+import { TYPE, arabicTextStyle } from '../theme/typography';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import { SURAHS } from './quran';
 import { pagesForRiwayah, totalPagesForRiwayah } from './pages';
@@ -36,6 +36,7 @@ import { activeKhatmah } from './quranCardState';
 import { Chip } from '../components/controls';
 import { desktopSize } from '../responsive/desktop';
 import { suspendWhileTyping } from './useKeyPaging';
+import { RADIUS, SPACING } from '../theme/tokens';
 
 /**
  * 268pt is right for a sidebar reached with a thumb on an iPad. On a Mac
@@ -333,16 +334,16 @@ const styles = StyleSheet.create({
   sidebar: { borderEndWidth: StyleSheet.hairlineWidth },
   tabs: {
     flexDirection: 'row',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: 8,
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
   search: {
-    marginHorizontal: 12,
-    marginBottom: 8,
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
     paddingVertical: desktopSize(8),
     fontSize: desktopSize(14),
   },
@@ -350,8 +351,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 12,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.md,
     paddingVertical: desktopSize(9),
   },
   rowNumber: {
@@ -364,18 +365,18 @@ const styles = StyleSheet.create({
   rowTitle: { fontSize: desktopSize(14), fontWeight: '600' },
   rowMeta: { fontSize: desktopSize(11), marginTop: 1 },
   rowArabic: { fontSize: desktopSize(15), ...arabicTextStyle('body') },
-  empty: { fontSize: desktopSize(13), padding: 16, textAlign: 'center' },
+  empty: { fontSize: desktopSize(13), padding: SPACING.lg, textAlign: 'center' },
   khatmah: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    gap: 4,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    gap: SPACING.xs,
   },
   khatmahLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
-  khatmahMeta: { fontSize: 13, fontWeight: '600' },
-  track: { height: 4, borderRadius: 2, overflow: 'hidden', marginTop: 4 },
+  khatmahMeta: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
+  track: { height: 4, borderRadius: 2, overflow: 'hidden', marginTop: SPACING.xs },
   fill: { height: '100%', borderRadius: 2 },
 });

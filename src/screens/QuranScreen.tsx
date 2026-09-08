@@ -77,9 +77,10 @@ import {
 import { useVerseOfTheDay } from '../quran/useVerseOfTheDay';
 import { SyncHint } from './sync/SyncHint';
 import { cardEdgeStyle } from '../theme/chrome';
-import { arabicTextStyle } from '../theme/typography';
+import { TYPE, arabicTextStyle } from '../theme/typography';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
+import { RADIUS, SPACING } from '../theme/tokens';
 
 type Tab = 'surah' | 'juz' | 'bookmarks';
 
@@ -426,7 +427,7 @@ export function QuranScreen() {
               {`${findSurah(quran.lastRead.surah)?.romanized ?? ''} · ${t('quran.pageLabel', { page: quran.lastRead.page })}`}
             </Text>
           </View>
-          <Text style={{ color: palette.accentSolid, fontSize: 18 }}>→</Text>
+          <Text style={{ color: palette.accentSolid, fontSize: TYPE.title3.fontSize }}>→</Text>
         </Pressable>
       ) : null}
 
@@ -646,7 +647,7 @@ export function QuranScreen() {
                     page: quran.lastRead.page,
                   })}
                 </Text>
-                <Text style={{ color: palette.accentSolid, fontSize: 14 }}>→</Text>
+                <Text style={{ color: palette.accentSolid, fontSize: TYPE.callout.fontSize }}>→</Text>
               </Pressable>
             ) : null}
           </>
@@ -666,7 +667,7 @@ export function QuranScreen() {
                   })}
                   onPress={() => startKhatmah(days)}
                   style={[styles.chip, { borderColor: palette.border }]}>
-                  <Text style={{ color: palette.accentSolid, fontWeight: '600', fontSize: 13 }}>
+                  <Text style={{ color: palette.accentSolid, fontWeight: '600', fontSize: TYPE.footnote.fontSize }}>
                     {t('quran.khatmahDays', {
                       defaultValue: '{{count}} days',
                       count: days,
@@ -683,7 +684,7 @@ export function QuranScreen() {
                   setCustomDaysVisible(true);
                 }}
                 style={[styles.chip, { borderColor: palette.border }]}>
-                <Text style={{ color: palette.accentSolid, fontWeight: '600', fontSize: 13 }}>
+                <Text style={{ color: palette.accentSolid, fontWeight: '600', fontSize: TYPE.footnote.fontSize }}>
                   {t('quran.khatmahCustom', 'Custom…')}
                 </Text>
               </Pressable>
@@ -824,7 +825,7 @@ export function QuranScreen() {
                     style={{
                       color: selected ? palette.accentSolid : palette.muted,
                       fontWeight: '700',
-                      fontSize: 12,
+                      fontSize: TYPE.label.fontSize,
                     }}>
                     {label}
                   </Text>
@@ -848,7 +849,7 @@ export function QuranScreen() {
               <Text
                 style={{
                   color: palette.accentSolid,
-                  fontSize: 12,
+                  fontSize: TYPE.label.fontSize,
                   fontWeight: '700',
                 }}>
                 {' ▾'}
@@ -1022,7 +1023,7 @@ export function QuranScreen() {
             <Text
               style={{
                 color: palette.accentSolid,
-                fontSize: 12,
+                fontSize: TYPE.label.fontSize,
                 fontWeight: '700',
               }}>
               {t('downloads.riwayat', 'Reading traditions')} ›
@@ -1035,7 +1036,7 @@ export function QuranScreen() {
           onPress={() => navigation.navigate('QuranDownloads')}
           style={styles.downloadsLink}>
           <Text
-            style={{ color: palette.muted, fontSize: 12, fontWeight: '600' }}>
+            style={{ color: palette.muted, fontSize: TYPE.label.fontSize, fontWeight: '600' }}>
             {t('downloads.title', 'Manage downloads')} ›
           </Text>
         </Pressable>
@@ -1217,14 +1218,14 @@ export function QuranScreen() {
   const bookmarksEmpty = bookmarks.length === 0 && starredRefs.length === 0;
 
   const renderBookmarks = () => (
-    <View style={[{ gap: 8 }, listCap]}>
+    <View style={[{ gap: SPACING.sm }, listCap]}>
       {bookmarksEmpty ? (
         <View
           style={[
             styles.row,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <Text style={{ color: palette.muted, fontSize: 13, flex: 1 }}>
+          <Text style={{ color: palette.muted, fontSize: TYPE.footnote.fontSize, flex: 1 }}>
             {t(
               'quran.noBookmarks',
               'No bookmarks yet — tap any ayah while reading to bookmark or star it.',
@@ -1283,7 +1284,7 @@ export function QuranScreen() {
             styles.row,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <Text style={{ color: '#e0a52e', fontSize: 16 }}>★</Text>
+          <Text style={{ color: palette.accentSolid, fontSize: TYPE.body.fontSize }}>★</Text>
           <View style={styles.rowText}>
             <Text style={[styles.romanized, { color: palette.text }]}>
               {`${findSurah(r.surah)?.romanized ?? ''} ${r.surah}:${r.ayah}`}
@@ -1411,13 +1412,13 @@ export function QuranScreen() {
               style={[styles.menuRow, { borderColor: palette.border }]}>
               <Text
                 style={{
-                  color: destructive ? '#d43f3f' : palette.text,
+                  color: destructive ? palette.danger : palette.text,
                   fontWeight: '600',
-                  fontSize: 15,
+                  fontSize: TYPE.callout.fontSize,
                 }}>
                 {label}
               </Text>
-              <Text style={{ color: palette.muted, fontSize: 12, marginTop: 2 }}>
+              <Text style={{ color: palette.muted, fontSize: TYPE.label.fontSize, marginTop: 2 }}>
                 {help}
               </Text>
             </Pressable>
@@ -1609,29 +1610,29 @@ const styles = StyleSheet.create({
   // shoved the whole 720pt column against the RIGHT edge of a wide
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
-  headerWrap: { gap: 10, marginBottom: HEADER_GAP },
+  headerWrap: { gap: SPACING.md, marginBottom: HEADER_GAP },
   resumeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
-    borderRadius: 12,
-    gap: 10,
+    padding: SPACING.lg,
+    borderRadius: RADIUS.md,
+    gap: SPACING.md,
   },
   resumeLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
-  resumeTitle: { fontSize: 15, fontWeight: '700', marginTop: 2 },
-  khatmahCard: { padding: 14, borderRadius: 12, gap: 8 },
+  resumeTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '700', marginTop: 2 },
+  khatmahCard: { padding: SPACING.lg, borderRadius: RADIUS.md, gap: SPACING.sm },
   khatmahTop: { flexDirection: 'row', justifyContent: 'space-between' },
-  khatmahTitle: { fontSize: 14, fontWeight: '700' },
-  khatmahMeta: { fontSize: 12, fontVariant: ['tabular-nums'] },
+  khatmahTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  khatmahMeta: { fontSize: TYPE.label.fontSize, fontVariant: ['tabular-nums'] },
   // A row, because a track carries TWO fills: the reading itself, and
   // the gold that is reading done past the day's portion.
   khatmahTrack: {
     flexDirection: 'row',
     height: 6,
-    borderRadius: 3,
+    borderRadius: RADIUS.xs,
     overflow: 'hidden',
   },
   khatmahFill: { height: '100%' },
@@ -1640,17 +1641,17 @@ const styles = StyleSheet.create({
   khatmahMore: {
     width: 40,
     height: 40,
-    borderRadius: 999,
+    borderRadius: RADIUS.full,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  khatmahMoreGlyph: { fontSize: 18, fontWeight: '700', lineHeight: 20 },
+  khatmahMoreGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '700', lineHeight: 20 },
   lastReadRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingTop: 4,
+    gap: SPACING.sm,
+    paddingTop: SPACING.xs,
   },
   khatmahDayRow: {
     flexDirection: 'row',
@@ -1658,47 +1659,47 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 2,
   },
-  khatmahDayLabel: { fontSize: 13, fontWeight: '700' },
-  khatmahChips: { flexDirection: 'row', gap: 8 },
+  khatmahDayLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
+  khatmahChips: { flexDirection: 'row', gap: SPACING.sm },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 16,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
   },
-  votdCard: { padding: 12, borderRadius: 12, gap: 6 },
+  votdCard: { padding: SPACING.md, borderRadius: RADIUS.md, gap: SPACING.sm },
   votdLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   votdArabic: {
-    fontSize: 18,
+    fontSize: TYPE.title3.fontSize,
     lineHeight: 40,
     textAlign: 'right',
     writingDirection: 'rtl',
     ...arabicTextStyle('quran'),
   },
-  votdTranslation: { fontSize: 13, lineHeight: 19 },
-  votdShowMore: { fontSize: 12, fontWeight: '700', marginTop: 4 },
-  votdRef: { fontSize: 12, fontWeight: '700' },
+  votdTranslation: { fontSize: TYPE.footnote.fontSize, lineHeight: 19 },
+  votdShowMore: { fontSize: TYPE.label.fontSize, fontWeight: '700', marginTop: SPACING.xs },
+  votdRef: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   /** The reference and the chevron travel together on the trailing edge. */
-  votdHeaderEnd: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  votdChevron: { fontSize: 15, fontWeight: '700' },
+  votdHeaderEnd: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  votdChevron: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
   companionCard: {
-    padding: 14,
-    borderRadius: 12,
+    padding: SPACING.lg,
+    borderRadius: RADIUS.md,
   },
   companionCardRow: {
-    marginTop: 8,
+    marginTop: SPACING.sm,
   },
-  votdEdition: { fontSize: 11, fontWeight: '600', flexShrink: 1 },
+  votdEdition: { fontSize: TYPE.caption.fontSize, fontWeight: '600', flexShrink: 1 },
   votdCompanionBar: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     maxWidth: '100%',
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
   },
   votdBarDivider: {
@@ -1708,79 +1709,79 @@ const styles = StyleSheet.create({
   votdEditionSeg: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
     flexShrink: 1,
   },
   votdHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: SPACING.sm,
   },
   votdToggle: {
     flexDirection: 'row',
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
   },
-  votdToggleSeg: { paddingHorizontal: 10, paddingVertical: 4 },
+  votdToggleSeg: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs },
   customDaysInput: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 18,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    fontSize: TYPE.title3.fontSize,
     fontVariant: ['tabular-nums'],
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
   customFieldLabel: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginTop: 10,
+    marginTop: SPACING.md,
   },
   customDaysRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 16,
-    marginTop: 6,
+    gap: SPACING.lg,
+    marginTop: SPACING.sm,
   },
   search: {
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 15,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    fontSize: TYPE.callout.fontSize,
   },
-  searchRow: { flexDirection: 'row', alignItems: 'stretch', gap: 8 },
+  searchRow: { flexDirection: 'row', alignItems: 'stretch', gap: SPACING.sm },
   searchGrow: { flex: 1 },
   pageJumpBtn: {
     width: 44,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pageJumpGlyph: { fontSize: 20, fontWeight: '700' },
+  pageJumpGlyph: { fontSize: TYPE.title2.fontSize, fontWeight: '700' },
   /** The three tabs, then the two glyphs that open a field. */
-  tabsRow: { flexDirection: 'row', alignItems: 'stretch', gap: 8 },
+  tabsRow: { flexDirection: 'row', alignItems: 'stretch', gap: SPACING.sm },
   tabsGrow: { flex: 1 },
-  resultsWrap: { gap: 8 },
-  resultsLabel: { fontSize: 12, fontWeight: '600', marginTop: 2 },
-  resultRow: { padding: 12, borderRadius: 12, gap: 4 },
-  resultRef: { fontSize: 12, fontWeight: '700' },
+  resultsWrap: { gap: SPACING.sm },
+  resultsLabel: { fontSize: TYPE.label.fontSize, fontWeight: '600', marginTop: 2 },
+  resultRow: { padding: SPACING.md, borderRadius: RADIUS.md, gap: SPACING.xs },
+  resultRef: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   resultArabic: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
     lineHeight: 36,
     textAlign: 'right',
     writingDirection: 'rtl',
     ...arabicTextStyle('quran'),
   },
-  resultTranslation: { fontSize: 12, lineHeight: 17 },
+  resultTranslation: { fontSize: TYPE.label.fontSize, lineHeight: 17 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    gap: 12,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    gap: SPACING.md,
     position: 'relative',
   },
   // The inset hairline under a list row: starts where the text does.
@@ -1794,80 +1795,80 @@ const styles = StyleSheet.create({
   numberBadge: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: RADIUS.xl,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  numberText: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  numberText: { fontSize: TYPE.callout.fontSize, fontWeight: '700', fontVariant: ['tabular-nums'] },
   rowText: { flex: 1 },
-  romanized: { fontSize: 16, fontWeight: '600' },
-  english: { fontSize: 12, marginTop: 2 },
-  pageHint: { fontSize: 11, marginTop: 2, fontVariant: ['tabular-nums'] },
+  romanized: { fontSize: TYPE.body.fontSize, fontWeight: '600' },
+  english: { fontSize: TYPE.label.fontSize, marginTop: 2 },
+  pageHint: { fontSize: TYPE.caption.fontSize, marginTop: 2, fontVariant: ['tabular-nums'] },
   // flexShrink: 0 — the name keeps its intrinsic single-line width (made
   // unwrappable via NBSP); the flexible left column yields instead.
-  arabic: { fontSize: 22, lineHeight: 42, flexShrink: 0, ...arabicTextStyle('body') },
-  bookmarkDot: { width: 14, height: 14, borderRadius: 7 },
-  deleteBtn: { paddingHorizontal: 6, paddingVertical: 6 },
-  deleteGlyph: { fontSize: 14, fontWeight: '700' },
-  khatmahActions: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  arabic: { fontSize: TYPE.title2.fontSize, lineHeight: 42, flexShrink: 0, ...arabicTextStyle('body') },
+  bookmarkDot: { width: 14, height: 14, borderRadius: RADIUS.sm },
+  deleteBtn: { paddingHorizontal: SPACING.sm, paddingVertical: SPACING.sm },
+  deleteGlyph: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  khatmahActions: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.xs },
   khatmahBtn: {
     flex: 1,
     minHeight: 40,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  khatmahBtnLabel: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
+  khatmahBtnLabel: { color: '#ffffff', fontWeight: '700', fontSize: TYPE.footnote.fontSize },
   menuBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   menuCard: {
     position: 'absolute',
     left: 24,
     right: 24,
     top: '25%',
-    borderRadius: 16,
-    padding: 18,
-    gap: 10,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    gap: SPACING.md,
   },
-  menuTitle: { fontSize: 17, fontWeight: '700', marginBottom: 4 },
+  menuTitle: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.xs },
   menuRow: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
   },
-  menuCancel: { alignItems: 'center', paddingVertical: 8 },
+  menuCancel: { alignItems: 'center', paddingVertical: SPACING.sm },
   downloadsLink: { paddingVertical: 2 },
   oftenRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 10,
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
   },
-  oftenLabel: { fontSize: 12, fontWeight: '700' },
+  oftenLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   oftenChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
   },
-  oftenChipText: { fontSize: 13, fontWeight: '600' },
+  oftenChipText: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   /** Tilāwah leads as a chip; the two plain links trail behind it. */
   downloadsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.md,
   },
   tilawahChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 999,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
     marginEnd: 'auto',
   },
   starredHeading: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginTop: 8,
+    marginTop: SPACING.sm,
   },
 });

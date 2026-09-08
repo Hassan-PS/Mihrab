@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Svg, { Path } from 'react-native-svg';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { HOME_TAB } from './useAndroidSubScreenBack';
+import { SPACING } from '../theme/tokens';
 
 /**
  * The way back to Today, in the title bar of every other tab.
@@ -113,9 +114,9 @@ const styles = StyleSheet.create({
   button: {
     // Matches the inset the navigator gives its own back control, so the
     // arrow does not jump sideways between a tab and a pushed page.
-    paddingStart: 8,
-    paddingEnd: 4,
-    paddingVertical: 4,
+    paddingStart: SPACING.sm,
+    paddingEnd: SPACING.xs,
+    paddingVertical: SPACING.xs,
   },
   pressed: { opacity: 0.55 },
 });

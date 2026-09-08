@@ -15,6 +15,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { TABULAR_MAX_FONT_SCALE, tabularNumeralStyle } from '../../theme/textScale';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 export type DayStripEntry = {
   /** Offset from today, 0…6 — also the index into the week's timings. */
@@ -105,23 +107,23 @@ const styles = StyleSheet.create({
   stripContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
   },
   chip: {
     minWidth: 44,
-    paddingVertical: 7,
-    paddingHorizontal: 9,
-    borderRadius: 999,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.full,
     alignItems: 'center',
     gap: 1,
   },
   dow: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
-  dom: { fontSize: 16, fontWeight: '700' },
+  dom: { fontSize: TYPE.body.fontSize, fontWeight: '700' },
   // Keeps the last chip clear of the card's rounded corner while scrolling.
   tailSpacer: { width: 2 },
 });

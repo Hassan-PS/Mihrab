@@ -18,6 +18,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../../hooks/useAppPalette';
 import { SettingsGroup } from '../SettingsGroup';
 import { SettingsPage } from '../SettingsPage';
+import { SPACING } from '../../../theme/tokens';
+import { TYPE } from '../../../theme/typography';
 
 type Credit = { label: string; sub: string; url: string };
 
@@ -188,7 +190,7 @@ function CreditRow({ credit }: { credit: Credit }) {
 }
 
 const styles = StyleSheet.create({
-  row: { paddingHorizontal: 16, paddingVertical: 12 },
-  label: { fontSize: 15, lineHeight: 21 },
-  sub: { fontSize: 13, lineHeight: 19 },
+  row: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
+  label: { fontSize: TYPE.callout.fontSize, lineHeight: 21 },
+  sub: { fontSize: TYPE.footnote.fontSize, lineHeight: 19 },
 });

@@ -38,6 +38,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import type { RootStackParamList } from '../../navigation/types';
 import { TilawahIcon } from '../../quran/audio/PlaybackIcons';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 export function TilawahHeaderChip() {
   const { t } = useTranslation();
@@ -78,11 +80,11 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingStart: 10,
-    paddingEnd: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
+    gap: SPACING.sm,
+    paddingStart: SPACING.md,
+    paddingEnd: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
     // A hairline on a filled pill is a rounding error on a dark ground —
     // the same lesson the "back to the top" button learned. One point.
     borderWidth: 1,
@@ -91,6 +93,6 @@ const styles = StyleSheet.create({
     maxWidth: 190,
   },
   mark: { height: 15, justifyContent: 'center' },
-  text: { fontSize: 13, fontWeight: '700' },
+  text: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
   pressed: { opacity: 0.65 },
 });

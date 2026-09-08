@@ -60,7 +60,8 @@ import { MiniPlayer } from '../../quran/audio/MiniPlayer';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../../navigation/types';
 import { cardEdgeStyle } from '../../theme/chrome';
-import { arabicTextStyle } from '../../theme/typography';
+import { TYPE, arabicTextStyle } from '../../theme/typography';
+import { RADIUS, SPACING } from '../../theme/tokens';
 
 type AyahRow = {
   ayah: number; // 1-based
@@ -209,7 +210,7 @@ export function TranslationSurahScreen({
               setSheetVisible(true);
             }}
             hitSlop={10}
-            style={{ paddingHorizontal: 4 }}>
+            style={{ paddingHorizontal: SPACING.xs }}>
             {/* Drawn, not typed. `♪` is the system font's glyph: its
                 size, weight and vertical placement are the platform's,
                 and the "gap" after it was a space character. It is the
@@ -231,7 +232,7 @@ export function TranslationSurahScreen({
             accessibilityLabel={t('quran.switchToMushaf', 'Switch to mushaf view')}
             onPress={toggleMushaf}
             hitSlop={10}
-            style={{ paddingHorizontal: 4 }}>
+            style={{ paddingHorizontal: SPACING.xs }}>
             <Text
               style={{
                 color: palette.accentSolid,
@@ -372,7 +373,7 @@ export function TranslationSurahScreen({
             />
           ) : null}
           {starred ? (
-            <Text style={{ color: '#e0a52e', fontSize: 13 }}>★</Text>
+            <Text style={{ color: palette.accentSolid, fontSize: TYPE.footnote.fontSize }}>★</Text>
           ) : null}
           <Text style={[styles.ayahNumber, { color: palette.accent }]}>
             {ayah}
@@ -623,9 +624,9 @@ function TafsirRowText({
           <Text
             style={{
               color: palette.accentSolid,
-              fontSize: 12,
+              fontSize: TYPE.label.fontSize,
               fontWeight: '700',
-              marginTop: 4,
+              marginTop: SPACING.xs,
             }}>
             {expanded
               ? t('quran.showLess', 'Show less')
@@ -639,17 +640,17 @@ function TafsirRowText({
 
 
 const styles = StyleSheet.create({
-  scroll: { padding: 16, gap: 12 },
+  scroll: { padding: SPACING.lg, gap: SPACING.md },
   header: {
-    padding: 20,
-    borderRadius: 14,
+    padding: SPACING.xl,
+    borderRadius: RADIUS.lg,
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
+    gap: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
-  surahArabic: { fontSize: 32, lineHeight: 62, ...arabicTextStyle('body') },
-  surahRomanized: { fontSize: 18, fontWeight: '700' },
-  surahMeta: { fontSize: 12 },
+  surahArabic: { fontSize: 32, lineHeight: 62, ...arabicTextStyle('body') }, // tokens-ok-line: display or Arabic scale, sized by hand
+  surahRomanized: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
+  surahMeta: { fontSize: TYPE.label.fontSize },
   editionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -659,27 +660,27 @@ const styles = StyleSheet.create({
     // edition's name away and left the bare word "Tafsir". Same fault
     // as the chips in AyahActionSheet, same fix.
     flexWrap: 'wrap',
-    gap: 6,
-    paddingTop: 4,
+    gap: SPACING.sm,
+    paddingTop: SPACING.xs,
   },
-  editionLabel: { fontSize: 12, flexShrink: 0 },
+  editionLabel: { fontSize: TYPE.label.fontSize, flexShrink: 0 },
   editionHint: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     flexShrink: 0,
     fontWeight: '600',
   },
-  hideHint: { fontSize: 12, fontWeight: '600', textAlign: 'center', marginTop: 6 },
-  ayahCard: { padding: 16, borderRadius: 12, gap: 10, marginTop: 12 },
+  hideHint: { fontSize: TYPE.label.fontSize, fontWeight: '600', textAlign: 'center', marginTop: SPACING.sm },
+  ayahCard: { padding: SPACING.lg, borderRadius: RADIUS.md, gap: SPACING.md, marginTop: SPACING.md },
   ayahMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 8,
+    gap: SPACING.sm,
   },
-  bookmarkBar: { width: 18, height: 5, borderRadius: 3 },
-  ayahNumber: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  bookmarkBar: { width: 18, height: 5, borderRadius: RADIUS.xs },
+  ayahNumber: { fontSize: TYPE.footnote.fontSize, fontWeight: '700', fontVariant: ['tabular-nums'] },
   ayahArabic: {
-    fontSize: 24,
+    fontSize: TYPE.title2.fontSize,
     // Amiri Quran carries tall stacked diacritics — ~2.2× line height
     // keeps fatha/kasra clusters unclipped (see arabicTextStyle docs).
     lineHeight: 54,
@@ -687,20 +688,20 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
     ...arabicTextStyle('quran'),
   },
-  ayahTranslation: { fontSize: 15, lineHeight: 22 },
+  ayahTranslation: { fontSize: TYPE.callout.fontSize, lineHeight: 22 },
   masked: {
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     fontStyle: 'italic',
     textAlign: 'center',
-    paddingVertical: 12,
+    paddingVertical: SPACING.md,
   },
-  skeleton: { height: 14, borderRadius: 7, opacity: 0.5, marginTop: 4 },
-  comingSoon: { padding: 24, borderRadius: 12, alignItems: 'center', gap: 8, marginTop: 12 },
-  comingSoonText: { fontSize: 14, textAlign: 'center', fontWeight: '600' },
+  skeleton: { height: 14, borderRadius: RADIUS.sm, opacity: 0.5, marginTop: SPACING.xs },
+  comingSoon: { padding: SPACING.xl, borderRadius: RADIUS.md, alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.md },
+  comingSoonText: { fontSize: TYPE.callout.fontSize, textAlign: 'center', fontWeight: '600' },
 });
 
 
 /** The mark and the word it labels, on one baseline. */
 const audioMark = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
 });

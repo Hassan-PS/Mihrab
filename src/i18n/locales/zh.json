@@ -47,7 +47,8 @@
     "delete": "删除",
     "cancelled": "已取消。",
     "listJoin": " 与 ",
-    "confirmDelete": "再次点按以删除"
+    "confirmDelete": "再次点按以删除",
+    "learnMore": "了解更多"
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",

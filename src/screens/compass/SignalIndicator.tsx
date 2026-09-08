@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { TITLE_BAND_MAX_FONT_SCALE } from '../../theme/textScale';
 import type { CompassMode, SignalStrength } from './useCompassSensor';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Signal strength header + progress bar. Memoized so it re-renders only on
@@ -72,27 +74,27 @@ function SignalIndicatorImpl({ mode, signalStrength }: SignalIndicatorProps) {
 export const SignalIndicator = memo(SignalIndicatorImpl);
 
 const styles = StyleSheet.create({
-  block: { marginBottom: 16 },
+  block: { marginBottom: SPACING.lg },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   label: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     fontWeight: '600',
   },
   value: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
   track: {
     height: 8,
-    borderRadius: 4,
+    borderRadius: RADIUS.xs,
     overflow: 'hidden',
   },
-  fill: { height: '100%', borderRadius: 4 },
-  help: { fontSize: 12, lineHeight: 17, marginTop: 8 },
+  fill: { height: '100%', borderRadius: RADIUS.xs },
+  help: { fontSize: TYPE.label.fontSize, lineHeight: 17, marginTop: SPACING.sm },
 });

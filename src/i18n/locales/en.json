@@ -47,7 +47,8 @@
     "delete": "Delete",
     "cancelled": "Cancelled.",
     "listJoin": " & ",
-    "confirmDelete": "Tap again to delete"
+    "confirmDelete": "Tap again to delete",
+    "learnMore": "Learn more"
   },
   "home": {
     "loadingPrayer": "Loading prayer times…",

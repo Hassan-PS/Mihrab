@@ -18,12 +18,15 @@
  * a section that comes and goes with the clock reads as a bug, and anything
  * already logged has to remain reachable to be undone.
  */
+// tokens-ok: the witr mark on dark is ink on the accent
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { AppPalette } from '../../theme/appPalette';
 import { tabularNumeralStyle } from '../../theme/textScale';
-import { sunnahGold } from '../../practice/sunnahTheme';
+import { sunnahMark } from '../../practice/sunnahTheme';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 type Props = {
   witr: boolean;
@@ -46,7 +49,7 @@ function IshaExtrasImpl({
   onResetQiyam,
 }: Props) {
   const { t } = useTranslation();
-  const gold = sunnahGold(palette.isDark);
+  const gold = sunnahMark(palette);
   const dead = notYet === true;
 
   return (
@@ -156,32 +159,32 @@ const styles = StyleSheet.create({
    * hairline rule and the same left edge instead of a box of their own.
    */
   wrap: {
-    marginTop: 6,
+    marginTop: SPACING.sm,
     gap: 2,
   },
   // The same 0.4 the status chips and the sunnah tile use, so the whole Isha
   // row dims as one piece rather than three shades of grey.
   wrapNotYet: { opacity: 0.4 },
   head: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: SPACING.xs,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingVertical: 9,
+    gap: SPACING.sm,
+    paddingVertical: SPACING.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   nameCol: { flex: 1 },
-  name: { flex: 1, fontSize: 13.5, fontWeight: '600' },
-  sub: { fontSize: 11, marginTop: 1 },
-  toggle: { paddingHorizontal: 13, paddingVertical: 6, borderRadius: 11 },
-  toggleLabel: { fontSize: 12, fontWeight: '700' },
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  step: { width: 28, height: 28, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  stepLabel: { fontSize: 16, fontWeight: '700', lineHeight: 19 },
-  count: { minWidth: 20, textAlign: 'center', fontSize: 15, fontWeight: '700' },
-  reset: { fontSize: 11, fontWeight: '600', textDecorationLine: 'underline' },
+  name: { flex: 1, fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
+  sub: { fontSize: TYPE.caption.fontSize, marginTop: 1 },
+  toggle: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.md },
+  toggleLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  step: { width: 28, height: 28, borderRadius: RADIUS.sm, alignItems: 'center', justifyContent: 'center' },
+  stepLabel: { fontSize: TYPE.body.fontSize, fontWeight: '700', lineHeight: 19 },
+  count: { minWidth: 20, textAlign: 'center', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  reset: { fontSize: TYPE.caption.fontSize, fontWeight: '600', textDecorationLine: 'underline' },
 });

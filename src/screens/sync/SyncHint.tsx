@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { RADIUS, SPACING } from '../../theme/tokens';
-import { typeStyle } from '../../theme/typography';
+import { TYPE, typeStyle } from '../../theme/typography';
 import type { RootStackParamList } from '../../navigation/types';
 import { hasFolderPicker } from '../../sync/folderAccess';
 import { syncIsReady } from '../../sync/runSync';
@@ -191,8 +191,8 @@ const styles = StyleSheet.create({
   },
   body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   text: { flex: 1, gap: 2 },
-  arrow: { fontSize: 18 },
+  arrow: { fontSize: TYPE.title3.fontSize },
   pressed: { opacity: 0.7 },
   dismiss: { padding: SPACING.sm },
-  dismissGlyph: { fontSize: 15, lineHeight: 18 },
+  dismissGlyph: { fontSize: TYPE.callout.fontSize, lineHeight: 18 },
 });

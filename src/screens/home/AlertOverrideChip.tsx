@@ -47,6 +47,8 @@ import Svg, { Path } from 'react-native-svg';
 import type { ColorValue } from 'react-native';
 import type { AppPalette } from '../../theme/appPalette';
 import type { PrayerAlertMode } from '../../settings/alertModes';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 const SIZE = 12;
 
@@ -146,15 +148,15 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 3,
+    marginTop: SPACING.xs,
     // Its own row, so the press target is the line rather than the text's
     // exact width — with hitSlop that is a comfortable target without
     // drawing a button-shaped box on a card that has none.
     alignSelf: 'flex-start',
   },
   pressed: { opacity: 0.55 },
-  glyph: { marginEnd: 5, height: SIZE, justifyContent: 'center' },
+  glyph: { marginEnd: SPACING.xs, height: SIZE, justifyContent: 'center' },
   // Shrinks rather than pushing the row wider when a locale needs a whole
   // clause for "just this once".
-  label: { fontSize: 11, fontWeight: '600', flexShrink: 1 },
+  label: { fontSize: TYPE.caption.fontSize, fontWeight: '600', flexShrink: 1 },
 });

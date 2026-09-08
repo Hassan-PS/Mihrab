@@ -51,6 +51,9 @@ import {
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { RowDivider } from '../../components/ui';
+import { HelpText } from '../../components/ui/InfoSheet';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * A titled family of settings, in one card.
@@ -96,9 +99,14 @@ export function SettingsGroup({
         ))}
       </View>
       {footer ? (
-        <Text style={[styles.groupFooter, { color: palette.muted }]}>
-          {footer}
-        </Text>
+        // The paragraph under a group: whole when short, two lines and a ⓘ
+        // when it is an essay (redesign-plan P7). Titled by the group.
+        <HelpText
+          text={footer}
+          title={title ?? footer.slice(0, 40)}
+          style={styles.groupFooter}
+          color={palette.muted}
+        />
       ) : null}
     </View>
   );
@@ -133,13 +141,12 @@ export function SettingsToggleRow({
       <View style={styles.copy}>
         <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
         {help ? (
-          <Text
-            style={[
-              styles.help,
-              { color: helpDanger ? palette.danger : palette.muted },
-            ]}>
-            {help}
-          </Text>
+          <HelpText
+            text={help}
+            title={title}
+            style={styles.help}
+            color={helpDanger ? palette.danger : palette.muted}
+          />
         ) : null}
       </View>
       <Switch
@@ -147,7 +154,7 @@ export function SettingsToggleRow({
         value={value}
         disabled={disabled}
         onValueChange={onValueChange}
-        trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+        trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
         thumbColor="#ffffff"
       />
     </View>
@@ -181,7 +188,7 @@ export function SettingsLinkRow({
   testID?: string;
 }) {
   const { palette } = useAppPalette();
-  const tint: ColorValue = destructive ? '#d43f3f' : palette.text;
+  const tint: ColorValue = destructive ? palette.danger : palette.text;
   return (
     <Pressable
       testID={testID}
@@ -196,14 +203,14 @@ export function SettingsLinkRow({
           <Text style={[styles.value, { color: palette.muted }]}>{value}</Text>
         ) : null}
         {help ? (
-          <Text style={[styles.help, { color: palette.muted }]}>{help}</Text>
+          <HelpText text={help} title={title} style={styles.help} color={palette.muted} />
         ) : null}
       </View>
       {accessory ?? (
         <Text
           style={[
             styles.chevron,
-            { color: destructive ? '#d43f3f' : palette.accentSolid },
+            { color: destructive ? palette.danger : palette.accentSolid },
           ]}>
           ›
         </Text>
@@ -250,35 +257,35 @@ export function SettingsBlock({ children }: { children: ReactNode }) {
 }
 
 const styles = StyleSheet.create({
-  group: { marginBottom: 20 },
+  group: { marginBottom: SPACING.xl },
   groupTitle: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginBottom: 8,
-    marginStart: 4,
+    marginBottom: SPACING.sm,
+    marginStart: SPACING.xs,
   },
-  card: { borderRadius: 14, overflow: 'hidden' },
+  card: { borderRadius: RADIUS.lg, overflow: 'hidden' },
   groupFooter: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     lineHeight: 17,
-    marginTop: 8,
-    marginStart: 4,
-    marginEnd: 4,
+    marginTop: SPACING.sm,
+    marginStart: SPACING.xs,
+    marginEnd: SPACING.xs,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
   },
-  block: { paddingHorizontal: 16, paddingVertical: 14 },
+  block: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.lg },
   copy: { flex: 1 },
   icon: { width: 28, alignItems: 'center' },
-  title: { fontSize: 16, fontWeight: '500' },
-  value: { fontSize: 14, marginTop: 2 },
-  help: { fontSize: 13, lineHeight: 18, marginTop: 3 },
-  chevron: { fontSize: 22, fontWeight: '600' },
+  title: { fontSize: TYPE.body.fontSize, fontWeight: '500' },
+  value: { fontSize: TYPE.callout.fontSize, marginTop: 2 },
+  help: { fontSize: TYPE.footnote.fontSize, lineHeight: 18, marginTop: SPACING.xs },
+  chevron: { fontSize: TYPE.title2.fontSize, fontWeight: '600' },
   pressed: { opacity: 0.6 },
   disabled: { opacity: 0.5 },
 });

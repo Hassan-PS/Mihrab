@@ -18,6 +18,8 @@ import type { TimingsMap } from '../../types/prayer';
 import { formatCountdown } from '../../utils/prayerTimes';
 import { HOME_CARD_PADDING, HOME_CARD_RADIUS } from './tokens';
 import { useIsActive } from '../../hooks/useIsActive';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Suhoor / Iftar countdown — visible only during Ramadan.
@@ -140,26 +142,26 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   label: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: SPACING.sm,
   },
-  name: { fontSize: 26, fontWeight: '700', flex: 1 },
-  time: { fontSize: 22, fontWeight: '700' },
-  countdownRow: { marginTop: 10, flexDirection: 'row' },
+  name: { fontSize: 26, fontWeight: '700', flex: 1 }, // tokens-ok-line: display or Arabic scale, sized by hand
+  time: { fontSize: TYPE.title2.fontSize, fontWeight: '700' },
+  countdownRow: { marginTop: SPACING.md, flexDirection: 'row' },
   pill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.xl,
   },
-  countdown: { fontSize: 14, fontWeight: '500' },
+  countdown: { fontSize: TYPE.callout.fontSize, fontWeight: '500' },
 });

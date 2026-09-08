@@ -29,6 +29,7 @@ import {
   MonthColumnHeader,
   MonthRow,
 } from './month/MonthTable';
+import { TYPE } from '../theme/typography';
 
 export function MonthTimesScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
@@ -341,8 +342,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: SPACING.xs,
   },
-  pad: { padding: 24 },
-  title: { fontSize: 20, fontWeight: '600', marginBottom: 8, textAlign: 'center' },
-  body: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
-  empty: { textAlign: 'center', marginTop: 24, paddingHorizontal: 24 },
+  pad: { padding: SPACING.xl },
+  title: { fontSize: TYPE.title2.fontSize, fontWeight: '600', marginBottom: SPACING.sm, textAlign: 'center' },
+  body: { fontSize: TYPE.callout.fontSize, lineHeight: 22, textAlign: 'center' },
+  empty: { textAlign: 'center', marginTop: SPACING.xl, paddingHorizontal: SPACING.xl },
 });

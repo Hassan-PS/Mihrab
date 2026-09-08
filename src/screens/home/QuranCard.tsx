@@ -24,7 +24,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { TABULAR_MAX_FONT_SCALE } from '../../theme/textScale';
-import { arabicTextStyle } from '../../theme/typography';
+import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { findSurah, loadSurah } from '../../quran/quran';
 import { surahName } from '../../quran/surahName';
 import { useQuranState } from '../../quran/quranState';
@@ -34,6 +34,7 @@ import { useVerseOfTheDay } from '../../quran/useVerseOfTheDay';
 import { getAyahTranslation } from '../../quran/translations';
 import { useActiveEdition } from '../../quran/useActiveEdition';
 import { HOME_TABLE_RADIUS } from './tokens';
+import { RADIUS, SPACING } from '../../theme/tokens';
 
 type Props = {
   /** Continue reading — surah + optional page for the mushaf. */
@@ -297,47 +298,47 @@ const styles = StyleSheet.create({
   pressable: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 13,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
   },
   body: { flex: 1, minWidth: 0 },
-  title: { fontSize: 15.5, fontWeight: '700' },
-  subtitle: { fontSize: 12.5, marginTop: 2 },
-  track: { height: 4, borderRadius: 2, marginTop: 8, overflow: 'hidden' },
+  title: { fontSize: TYPE.body.fontSize, fontWeight: '700' },
+  subtitle: { fontSize: TYPE.footnote.fontSize, marginTop: 2 },
+  track: { height: 4, borderRadius: 2, marginTop: SPACING.sm, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 2 },
   tick: {
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tickGlyph: { fontSize: 14, fontWeight: '700' },
-  trailingAction: { fontSize: 12.5, fontWeight: '700' },
-  chip: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999 },
-  chipLabel: { fontSize: 11.5, fontWeight: '700' },
+  tickGlyph: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  trailingAction: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
+  chip: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.full },
+  chipLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   eyebrow: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
-  verseBody: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 },
+  verseBody: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.md },
   verseArabic: {
-    fontSize: 22,
+    fontSize: TYPE.title2.fontSize,
     lineHeight: 44,
     textAlign: 'right',
     writingDirection: 'rtl',
-    marginTop: 8,
+    marginTop: SPACING.sm,
     ...arabicTextStyle('body'),
   },
-  verseMeaning: { fontSize: 13, marginTop: 4 },
+  verseMeaning: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.xs },
   verseAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
-  verseActionLabel: { flex: 1, fontSize: 14.5, fontWeight: '700' },
+  verseActionLabel: { flex: 1, fontSize: TYPE.callout.fontSize, fontWeight: '700' },
 });

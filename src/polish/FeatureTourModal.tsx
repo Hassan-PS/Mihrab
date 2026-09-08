@@ -30,6 +30,8 @@ import {
   EightPointStarIcon,
   MihrabLogoIcon,
 } from '../theme/icons';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 const SEEN_KEY = 'mihrab.featureTour.v1';
 
@@ -219,49 +221,49 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingHorizontal: 24,
-    paddingTop: 64,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xxxxl,
   },
-  skip: { fontSize: 15, fontWeight: '600' },
-  pager: { flexGrow: 0, marginTop: 12 },
+  skip: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  pager: { flexGrow: 0, marginTop: SPACING.md },
   slide: {
     alignItems: 'center',
-    paddingHorizontal: 36,
-    paddingTop: 48,
+    paddingHorizontal: SPACING.xxl,
+    paddingTop: SPACING.xxxl,
     minHeight: 420,
   },
   iconWrap: {
     width: 112,
     height: 112,
-    borderRadius: 56,
+    borderRadius: RADIUS.full,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 32,
+    marginBottom: SPACING.xxl,
   },
   title: {
-    fontSize: 26,
+    fontSize: 26, // tokens-ok-line: display or Arabic scale, sized by hand
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 14,
+    marginBottom: SPACING.lg,
   },
   body: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
     lineHeight: 24,
     textAlign: 'center',
   },
   dots: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
-    marginTop: 24,
+    gap: SPACING.sm,
+    marginTop: SPACING.xl,
   },
-  dot: { height: 8, borderRadius: 4 },
+  dot: { height: 8, borderRadius: RADIUS.xs },
   cta: {
-    marginTop: 32,
-    marginHorizontal: 36,
-    paddingVertical: 15,
-    borderRadius: 14,
+    marginTop: SPACING.xxl,
+    marginHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.lg,
+    borderRadius: RADIUS.lg,
     alignItems: 'center',
   },
-  ctaLabel: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  ctaLabel: { color: '#ffffff', fontSize: TYPE.body.fontSize, fontWeight: '700' },
 });

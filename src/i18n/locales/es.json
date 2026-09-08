@@ -47,7 +47,8 @@
     "delete": "Eliminar",
     "cancelled": "Cancelado.",
     "listJoin": " y ",
-    "confirmDelete": "Toca otra vez para eliminar"
+    "confirmDelete": "Toca otra vez para eliminar",
+    "learnMore": "Más información"
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",

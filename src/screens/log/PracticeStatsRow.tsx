@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import type { AppPalette } from '../../theme/appPalette';
 import type { PracticeStats } from '../../practice/practiceStats';
 import { Tile } from '../../components/ui/Tile';
+import { RADIUS, SPACING } from '../../theme/tokens';
 
 type Props = {
   stats: PracticeStats;
@@ -116,6 +117,6 @@ function PracticeStatsRowImpl({
 export const PracticeStatsRow = memo(PracticeStatsRowImpl);
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 12, marginBottom: 6 },
-  owed: { flex: 1, minWidth: 0, borderRadius: 12, marginHorizontal: -4, paddingHorizontal: 4 },
+  row: { flexDirection: 'row', gap: SPACING.md, marginBottom: SPACING.sm },
+  owed: { flex: 1, minWidth: 0, borderRadius: RADIUS.md, marginHorizontal: -4, paddingHorizontal: SPACING.xs },
 });

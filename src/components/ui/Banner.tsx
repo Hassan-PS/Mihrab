@@ -1,3 +1,4 @@
+// tokens-ok: semantic banner tints (warning / success) — universal status colours
 import { memo, type ReactNode } from 'react';
 import {
   Pressable,

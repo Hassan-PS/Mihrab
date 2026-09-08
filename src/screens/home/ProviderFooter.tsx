@@ -17,6 +17,8 @@ import {
 import { getProviderLabel } from '../../settings/providersCatalog';
 import type { PrayerDataProviderId } from '../../settings/types';
 import { HOME_TABLE_RADIUS } from './tokens';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /** Pressable footer showing provider, method/madhab, and location label. */
 type ProviderFooterProps = {
@@ -108,18 +110,18 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 11,
-    paddingHorizontal: 14,
-    gap: 8,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
   },
   body: { flex: 1, gap: 2 },
-  kicker: { fontSize: 10, fontWeight: '600', letterSpacing: 0.5 },
-  label: { fontSize: 14, fontWeight: '600' },
-  sub: { fontSize: 12 },
+  kicker: { fontSize: TYPE.caption.fontSize, fontWeight: '600', letterSpacing: 0.5 },
+  label: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  sub: { fontSize: TYPE.label.fontSize },
   right: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: SPACING.sm,
   },
-  chevron: { fontSize: 18, fontWeight: '600' },
+  chevron: { fontSize: TYPE.title3.fontSize, fontWeight: '600' },
 });

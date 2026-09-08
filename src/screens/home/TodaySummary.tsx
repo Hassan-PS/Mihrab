@@ -33,6 +33,8 @@ import {
   usePracticeToday,
 } from '../../practice/practiceStore';
 import { HOME_TABLE_RADIUS } from './tokens';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 type Props = {
   /** Opens the Log (prayers + fasting). */
@@ -184,13 +186,13 @@ export const TodaySummary = memo(TodaySummaryImpl);
 
 const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
-  inner: { paddingHorizontal: 16, paddingVertical: 13 },
+  inner: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
   line: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginTop: 7,
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
   },
   firstLine: { marginTop: 0 },
-  label: { flex: 1, fontSize: 14.5 },
+  label: { flex: 1, fontSize: TYPE.callout.fontSize },
 });

@@ -47,7 +47,8 @@
     "delete": "حذف",
     "cancelled": "أُلغي.",
     "listJoin": " و",
-    "confirmDelete": "اضغط مرة أخرى للحذف"
+    "confirmDelete": "اضغط مرة أخرى للحذف",
+    "learnMore": "اعرف المزيد"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",

@@ -10,6 +10,8 @@ import {
   SettingsToggleRow,
 } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 type LADesign = 'timeline' | 'countdown' | 'markers';
 
@@ -223,44 +225,44 @@ function LiveActivityCardImpl() {
 export const LiveActivityCard = memo(LiveActivityCardImpl);
 
 const styles = StyleSheet.create({
-  optionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  chipRow: { flexDirection: 'row', gap: 8, marginTop: 8, flexWrap: 'wrap' },
+  optionRow: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.sm },
+  chipRow: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.sm, flexWrap: 'wrap' },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
   },
   option: {
     flex: 1,
-    borderRadius: 12,
-    padding: 8,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm,
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.sm,
   },
-  optionLabel: { fontSize: 13, fontWeight: '600' },
+  optionLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   preview: {
     width: '100%',
     height: 64,
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.md,
     justifyContent: 'center',
-    gap: 4,
+    gap: SPACING.xs,
   },
-  previewCountdown: { fontSize: 22, fontWeight: '800', letterSpacing: 0.5 },
-  previewSub: { fontSize: 11, fontWeight: '500' },
-  previewRow: { fontSize: 13, fontWeight: '700' },
+  previewCountdown: { fontSize: TYPE.title2.fontSize, fontWeight: '800', letterSpacing: 0.5 },
+  previewSub: { fontSize: TYPE.caption.fontSize, fontWeight: '500' },
+  previewRow: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
   /* The header slot, where the platform's own chronometer ticks. */
-  previewHeader: { fontSize: 10, fontWeight: '600' },
+  previewHeader: { fontSize: TYPE.caption.fontSize, fontWeight: '600' },
   segRow: {
     flexDirection: 'row',
-    gap: 3,
-    marginTop: 6,
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
     alignItems: 'center',
   },
   seg: {
     flex: 1,
     height: 5,
-    borderRadius: 3,
+    borderRadius: RADIUS.xs,
   },
   markerSegWrap: {
     flex: 1,
@@ -271,14 +273,14 @@ const styles = StyleSheet.create({
   markerDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: RADIUS.xs,
   },
   markerTracker: {
     position: 'absolute',
     left: '56%',
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: RADIUS.xs,
     borderWidth: 2,
     backgroundColor: 'transparent',
   },

@@ -12,6 +12,7 @@
  * reader also ran. They share a route and a toggle, and that is all they
  * share; `QuranSurahScreen` is the route now, and this is the muṣḥaf.
  */
+// tokens-ok: mushaf page tones for the reader chrome; not app palette
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -49,6 +50,7 @@ import {
 import type { RootStackParamList } from '../../navigation/types';
 import { arabicTextStyle } from '../../theme/typography';
 import { RiwayahPicker } from '../../quran/RiwayahPicker';
+import { SPACING } from '../../theme/tokens';
 
 const isIOS = Platform.OS === 'ios';
 
@@ -320,7 +322,7 @@ export function MushafSurahScreen({
             // recitation controls — everything lives in one place.
             onPress={() => setAudioSheetSignal(s => s + 1)}
             hitSlop={10}
-            style={{ paddingHorizontal: 4 }}>
+            style={{ paddingHorizontal: SPACING.xs }}>
             {/* Drawn, not typed. `♪` is the system font's glyph: its
                 size, weight and vertical placement are the platform's,
                 and the "gap" after it was a space character. It is the
@@ -345,7 +347,7 @@ export function MushafSurahScreen({
             )}
             onPress={onToggleMode}
             hitSlop={10}
-            style={{ paddingHorizontal: 4 }}>
+            style={{ paddingHorizontal: SPACING.xs }}>
             <Text
               style={{
                 color: palette.accentSolid,
@@ -368,7 +370,7 @@ export function MushafSurahScreen({
               })}
               onPress={() => setRiwayahPickerVisible(true)}
               hitSlop={10}
-              style={{ paddingHorizontal: 4 }}>
+              style={{ paddingHorizontal: SPACING.xs }}>
               {/* The muṣḥaf you are IN, with the caret that says there
                   are others — see `RiwayahPicker` for why this stopped
                   naming the next one instead. */}
@@ -388,7 +390,7 @@ export function MushafSurahScreen({
             accessibilityLabel={t('quran.enterFullscreen', 'Enter fullscreen')}
             onPress={() => setIsFullscreen(true)}
             hitSlop={10}
-            style={{ paddingHorizontal: 4 }}>
+            style={{ paddingHorizontal: SPACING.xs }}>
             <Text
               style={{
                 color: palette.accentSolid,
@@ -467,5 +469,5 @@ export function MushafSurahScreen({
 
 /** The mark and the word it labels, on one baseline. */
 const audioMark = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
 });

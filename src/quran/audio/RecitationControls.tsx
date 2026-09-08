@@ -23,6 +23,8 @@ import {
 import { playRange, setPlaybackRate } from './playback';
 import { setQuranPrefs, useQuranState } from '../quranState';
 import { Chip, RowAction, SectionHead, Stepper } from '../../components/controls';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 type Props = {
   /** Surah context for the range player + offline download. */
@@ -187,7 +189,7 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
         <Text
           style={{
             color: palette.accentSolid,
-            fontSize: 13,
+            fontSize: TYPE.footnote.fontSize,
             fontWeight: '700',
           }}>
           {t('quran.changeReciter', 'Change')}
@@ -343,81 +345,81 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
 
 const styles = StyleSheet.create({
   section: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   reciterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    gap: 8,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    gap: SPACING.sm,
   },
-  reciterName: { fontSize: 15, fontWeight: '600' },
-  reciterArabic: { fontSize: 12, marginTop: 1 },
+  reciterName: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  reciterArabic: { fontSize: TYPE.label.fontSize, marginTop: 1 },
   dlRow: {
-    marginTop: 8,
+    marginTop: SPACING.sm,
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: SPACING.md,
   },
-  rowLabel: { fontSize: 14, fontWeight: '600', flex: 1 },
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  rowLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600', flex: 1 },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   stepBtn: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepGlyph: { fontSize: 18, fontWeight: '700' },
+  stepGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
   stepValue: {
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
     minWidth: 34,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
-  dlWrap: { marginTop: 8 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginTop: SPACING.sm },
+  dlWrap: { marginTop: SPACING.sm },
   playRangeWrap: { marginStart: 'auto' },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 16,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
   },
   rangeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 4,
+    gap: SPACING.sm,
+    marginTop: SPACING.xs,
   },
   rangeInput: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    fontSize: 15,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    fontSize: TYPE.callout.fontSize,
     minWidth: 56,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },
   playRangeBtn: {
     marginStart: 'auto',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 10,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
   },
 });

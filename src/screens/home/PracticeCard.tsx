@@ -36,6 +36,8 @@ import {
   weeksToCover,
 } from '../../practice/PracticeHeatmap';
 import { HOME_TABLE_RADIUS } from './tokens';
+import { SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 function PracticeCardImpl() {
   const { t, i18n } = useTranslation();
@@ -134,7 +136,7 @@ function PracticeCardImpl() {
         <Text style={[styles.openLabel, { color: palette.accent }]}>
           {t('log.openLogFromHome', 'Open the Log')}
         </Text>
-        <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
+        <Text style={{ color: palette.accent, fontSize: TYPE.callout.fontSize }}>→</Text>
       </Pressable>
     </View>
   );
@@ -143,19 +145,19 @@ function PracticeCardImpl() {
 export const PracticeCard = memo(PracticeCardImpl);
 
 const styles = StyleSheet.create({
-  card: { padding: 14, overflow: 'hidden' },
+  card: { padding: SPACING.lg, overflow: 'hidden' },
   openRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 10,
-    marginTop: 12,
+    paddingTop: SPACING.md,
+    marginTop: SPACING.md,
   },
-  openLabel: { fontSize: 13.5, fontWeight: '600' },
+  openLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   title: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: SPACING.md,
   },
 });

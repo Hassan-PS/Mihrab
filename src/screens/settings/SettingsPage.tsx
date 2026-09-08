@@ -17,6 +17,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { CenteredColumn } from '../../responsive/CenteredColumn';
 import { useTabBarInset } from '../../navigation/tabBarInset';
 import { useAndroidSubScreenBack } from '../../navigation/useAndroidSubScreenBack';
+import { SPACING } from '../../theme/tokens';
 
 type Props = {
   children: ReactNode;
@@ -38,7 +39,7 @@ export function SettingsPage({ children, deferBackRef }: Props) {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.content,
-        { paddingBottom: 24 + tabBarInset },
+        { paddingBottom: SPACING.xl + tabBarInset },
       ]}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled">
@@ -51,6 +52,6 @@ export function SettingsPage({ children, deferBackRef }: Props) {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  content: { padding: 16 },
+  content: { padding: SPACING.lg },
   stack: { gap: 0 },
 });

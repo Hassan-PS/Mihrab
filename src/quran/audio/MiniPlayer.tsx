@@ -33,6 +33,8 @@ import {
   stopPlayback,
   usePlaybackStatus,
 } from './playback';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * `page` is passed in rather than derived, because only the reader knows
@@ -234,15 +236,15 @@ export function MiniPlayer({
 
 const styles = StyleSheet.create({
   gap: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     lineHeight: 16,
-    paddingHorizontal: 12,
-    paddingTop: 8,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
   },
   card: {
-    marginHorizontal: 12,
-    marginBottom: 10,
-    borderRadius: 14,
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    borderRadius: RADIUS.lg,
     overflow: 'hidden',
     /**
      * THE PLAYER IS NOT THE THING THAT GIVES WAY.
@@ -265,44 +267,44 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     gap: 2,
   },
-  info: { flex: 1, marginEnd: 8 },
-  subRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 1 },
-  stateChip: { paddingHorizontal: 6, paddingVertical: 1, borderRadius: 7 },
+  info: { flex: 1, marginEnd: SPACING.sm },
+  subRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: 1 },
+  stateChip: { paddingHorizontal: SPACING.sm, paddingVertical: 1, borderRadius: RADIUS.sm },
   stateChipLabel: {
-    fontSize: 10,
+    fontSize: TYPE.caption.fontSize,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
   stopBtn: {
     width: 34,
     height: 34,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginStart: 6,
+    marginStart: SPACING.sm,
   },
-  title: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  sub: { fontSize: 11, fontWeight: '600' },
-  sideBtn: { paddingHorizontal: 7, paddingVertical: 6 },
-  sideGlyph: { fontSize: 17, fontWeight: '700' },
-  closeGlyph: { fontSize: 15, fontWeight: '700' },
+  title: { fontSize: TYPE.callout.fontSize, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  sub: { fontSize: TYPE.caption.fontSize, fontWeight: '600' },
+  sideBtn: { paddingHorizontal: SPACING.sm, paddingVertical: SPACING.sm },
+  sideGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
+  closeGlyph: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
   playBtn: {
     // A squircle at the sheet's radius family, not the reader's only
     // perfectly round control.
     width: 40,
     height: 40,
-    borderRadius: 14,
+    borderRadius: RADIUS.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 4,
+    marginHorizontal: SPACING.xs,
   },
   playGlyph: {
     color: '#ffffff',
-    fontSize: 15,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
     letterSpacing: 1,
   },

@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import Svg, { Path, Line } from 'react-native-svg';
 import type { AppPalette } from '../../theme/appPalette';
 import type { PrayerAlertMode } from '../../settings/alertModes';
+import { TYPE } from '../../theme/typography';
 
 const SIZE = 20;
 
@@ -163,5 +164,5 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.55 },
   glyph: { height: SIZE, justifyContent: 'center' },
-  label: { fontSize: 10, fontWeight: '500', marginTop: 1 },
+  label: { fontSize: TYPE.caption.fontSize, fontWeight: '500', marginTop: 1 },
 });

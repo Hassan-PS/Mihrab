@@ -151,7 +151,7 @@ function MonthControlsImpl({
           "Refresh stored data" caption. The full-screen hydration loader
           uses a Skeleton; this is a 16x16 spinner during cache refill. */}
       {loading && (
-        <ActivityIndicator style={{ marginTop: 8 }} color={palette.accent} />
+        <ActivityIndicator style={{ marginTop: SPACING.sm }} color={palette.accent} />
       )}
       {error ? (
         <Text style={[styles.err, { color: palette.danger }]}>{error}</Text>

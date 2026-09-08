@@ -19,7 +19,7 @@ import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
-import { arabicTextStyle } from '../theme/typography';
+import { TYPE, arabicTextStyle } from '../theme/typography';
 import {
   DEFAULT_RIWAYAH,
   riwayahAvailable,
@@ -27,6 +27,7 @@ import {
   type RiwayahId,
 } from './riwayat';
 import { MODAL_ORIENTATIONS } from '../components/modalOrientations';
+import { RADIUS, SPACING } from '../theme/tokens';
 
 export function RiwayahPicker({
   visible,
@@ -168,24 +169,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: SPACING.xl,
   },
-  card: { width: '100%', maxWidth: 360, borderRadius: 16, padding: 16, gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  card: { width: '100%', maxWidth: 360, borderRadius: RADIUS.lg, padding: SPACING.lg, gap: SPACING.sm },
+  title: { fontSize: TYPE.body.fontSize, fontWeight: '700', marginBottom: SPACING.xs },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    gap: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
   },
   rowText: { flex: 1 },
-  name: { fontSize: 15, fontWeight: '600' },
-  note: { fontSize: 12, marginTop: 2 },
-  arabic: { ...arabicTextStyle('body'), fontSize: 17, fontWeight: '700' },
+  name: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  note: { fontSize: TYPE.label.fontSize, marginTop: 2 },
+  arabic: { ...arabicTextStyle('body'), fontSize: TYPE.title3.fontSize, fontWeight: '700' },
   tick: { width: 16, alignItems: 'center' },
-  tickMark: { fontSize: 15, fontWeight: '700' },
-  cancel: { alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 16 },
+  tickMark: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  cancel: { alignSelf: 'center', paddingVertical: SPACING.md, paddingHorizontal: SPACING.lg },
 });

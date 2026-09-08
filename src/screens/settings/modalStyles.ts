@@ -1,5 +1,7 @@
 /** Shared stylesheet for the bottom-sheet modals inside SettingsScreen. */
 import { StyleSheet } from 'react-native';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 export const modalStyles = StyleSheet.create({
   root: {
@@ -14,25 +16,25 @@ export const modalStyles = StyleSheet.create({
     borderTopStartRadius: 16,
     borderTopEndRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    paddingTop: 12,
+    paddingTop: SPACING.md,
   },
   title: {
-    fontSize: 18,
+    fontSize: TYPE.title3.fontSize,
     fontWeight: '700',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
   row: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   rowLabel: {
-    fontSize: 16,
+    fontSize: TYPE.body.fontSize,
   },
   rowSub: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: TYPE.footnote.fontSize,
+    marginTop: SPACING.xs,
     lineHeight: 18,
   },
   soundRowContent: {
@@ -45,14 +47,14 @@ export const modalStyles = StyleSheet.create({
   soundPreviewBtn: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: RADIUS.xl,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginStart: 8,
+    marginStart: SPACING.sm,
   },
   soundPreviewIcon: {
-    fontSize: 14,
+    fontSize: TYPE.callout.fontSize,
     lineHeight: 18,
   },
 });

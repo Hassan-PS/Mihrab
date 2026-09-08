@@ -142,7 +142,7 @@ export function DhikrRemindersSettingsScreen() {
                 <Switch
                   value={reminder.enabled}
                   onValueChange={v => onToggle(reminder, v)}
-                  trackColor={{ true: palette.accentSolid, false: '#9ca3af' }}
+                  trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
                   thumbColor="#ffffff"
                 />
               }

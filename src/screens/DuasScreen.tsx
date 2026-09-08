@@ -35,10 +35,11 @@ import { cardEdgeStyle } from '../theme/chrome';
 import { Group, Row } from '../components/ui';
 import { ShareIcon } from '../theme/icons';
 import { duaShareText } from '../share/shareText';
-import { arabicTextStyle } from '../theme/typography';
+import { TYPE, arabicTextStyle } from '../theme/typography';
 import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
+import { RADIUS, SPACING } from '../theme/tokens';
 
 /**
  * Dua library screen — task #26.
@@ -488,14 +489,14 @@ export { _DuasScreenMemo as DuasScreenMemo };
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  section: { gap: 8 },
+  section: { gap: SPACING.sm },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
-    paddingHorizontal: 4,
+    paddingHorizontal: SPACING.xs,
   },
   categoryChevron: {
-    fontSize: 20,
+    fontSize: TYPE.title2.fontSize,
     lineHeight: 22,
     includeFontPadding: false,
     // The count sits next to it, not across the row from it: two things
@@ -503,29 +504,29 @@ const styles = StyleSheet.create({
     marginStart: -4,
   },
   listScroll: { flex: 1 },
-  tabs: { paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center' },
+  tabs: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md, gap: SPACING.sm, alignItems: 'center' },
   tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 18,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: RADIUS.xl,
     borderWidth: 1,
     minHeight: 40,
     justifyContent: 'center',
   },
-  tabLabel: { fontSize: 14, fontWeight: '600', lineHeight: 18, includeFontPadding: false },
-  list: { padding: 16, paddingTop: 0 },
-  listTop: { paddingTop: 16 },
-  stack: { gap: 12 },
-  card: { borderRadius: 14, padding: 16, gap: 8 },
+  tabLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600', lineHeight: 18, includeFontPadding: false },
+  list: { padding: SPACING.lg, paddingTop: 0 },
+  listTop: { paddingTop: SPACING.lg },
+  stack: { gap: SPACING.md },
+  card: { borderRadius: RADIUS.lg, padding: SPACING.lg, gap: SPACING.sm },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     // The title takes the room; the control keeps its own.
-    gap: 8,
+    gap: SPACING.sm,
   },
   title: {
     flexShrink: 1,
-    fontSize: 17,
+    fontSize: TYPE.title3.fontSize,
     fontWeight: '600',
   },
   // Pushed to the trailing edge, and `marginStart: 'auto'` rather than a
@@ -546,38 +547,38 @@ const styles = StyleSheet.create({
    * spacing while drawing with the shorter face — the worst of both, and
    * why it read as loose and slightly wrong.
    */
-  arabic: { fontSize: 20, lineHeight: 44, textAlign: 'right', writingDirection: 'rtl', ...arabicTextStyle('quran') },
+  arabic: { fontSize: TYPE.title2.fontSize, lineHeight: 44, textAlign: 'right', writingDirection: 'rtl', ...arabicTextStyle('quran') },
   /** The two aid toggles, side by side under the Arabic. */
-  aidRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 2 },
-  aidChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
-  aidChipText: { fontSize: 12, fontWeight: '700' },
-  translit: { fontSize: 14, fontStyle: 'italic' },
-  translation: { fontSize: 15, lineHeight: 22 },
-  metaRow: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 4 },
-  meta: { fontSize: 12 },
+  aidRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginTop: 2 },
+  aidChip: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs, borderRadius: RADIUS.full },
+  aidChipText: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
+  translit: { fontSize: TYPE.callout.fontSize, fontStyle: 'italic' },
+  translation: { fontSize: TYPE.callout.fontSize, lineHeight: 22 },
+  metaRow: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', gap: SPACING.sm, marginTop: SPACING.xs },
+  meta: { fontSize: TYPE.label.fontSize },
   source: { flexShrink: 1, textAlign: 'right' },
   counterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 4,
+    gap: SPACING.md,
+    marginTop: SPACING.xs,
   },
   counterBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    gap: SPACING.sm,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.md,
     borderWidth: 1.5,
   },
-  counterValue: { fontSize: 28, fontWeight: '700' },
-  counterTarget: { fontSize: 16, fontWeight: '500' },
+  counterValue: { fontSize: 28, fontWeight: '700' }, // tokens-ok-line: display or Arabic scale, sized by hand
+  counterTarget: { fontSize: TYPE.body.fontSize, fontWeight: '500' },
   counterReset: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
   },
-  counterResetLabel: { fontSize: 13, fontWeight: '600' },
+  counterResetLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
 });

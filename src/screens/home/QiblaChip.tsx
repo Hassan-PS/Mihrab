@@ -141,9 +141,9 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: SPACING.xs,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
+    paddingVertical: SPACING.xs,
     borderRadius: RADIUS.full,
     borderWidth: StyleSheet.hairlineWidth,
   },

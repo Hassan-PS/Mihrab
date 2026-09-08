@@ -15,6 +15,7 @@
  * re-derives everything from `useWindowDimensions` — and re-pairs —
  * without losing the current page.
  */
+// tokens-ok: mushaf page surfaces per tone; not app chrome
 import React, {
   useCallback,
   useEffect,
@@ -69,6 +70,7 @@ import {
   spreadPageWidth,
   useSettledSpreadGeometry,
 } from './spreadPageGeometry';
+import { RADIUS } from '../theme/tokens';
 
 /**
  * Pages either side of the one being read whose fonts are registered
@@ -724,11 +726,11 @@ const styles = StyleSheet.create({
     marginTop: -24,
     width: 40,
     height: 48,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chevronLeft: { left: 8 },
   chevronRight: { right: 8 },
-  chevronGlyph: { fontSize: 30, fontWeight: '600', lineHeight: 34 },
+  chevronGlyph: { fontSize: 30, fontWeight: '600', lineHeight: 34 }, // tokens-ok-line: display or Arabic scale, sized by hand
 });

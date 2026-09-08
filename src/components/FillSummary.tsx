@@ -17,6 +17,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { tabularNumeralStyle } from '../theme/textScale';
+import { RADIUS, SPACING } from '../theme/tokens';
+import { TYPE } from '../theme/typography';
 
 type Props = {
   /** Big figure, left: days that would gain entries. */
@@ -132,31 +134,31 @@ export function FillSummary({
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginBottom: 16 },
+  wrap: { marginBottom: SPACING.lg },
   figures: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    borderRadius: 14,
+    borderRadius: RADIUS.lg,
     borderWidth: StyleSheet.hairlineWidth,
-    paddingVertical: 12,
+    paddingVertical: SPACING.md,
   },
   figure: { flex: 1, alignItems: 'center', gap: 2 },
   rule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch' },
-  number: { fontSize: 26, fontWeight: '700' },
+  number: { fontSize: 26, fontWeight: '700' }, // tokens-ok-line: display or Arabic scale, sized by hand
   caption: {
-    fontSize: 12,
+    fontSize: TYPE.label.fontSize,
     fontWeight: '600',
   },
   range: {
-    fontSize: 14.5,
+    fontSize: TYPE.callout.fontSize,
     fontWeight: '600',
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: SPACING.md,
   },
   preserved: {
-    fontSize: 13,
+    fontSize: TYPE.footnote.fontSize,
     lineHeight: 18,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: SPACING.sm,
   },
 });

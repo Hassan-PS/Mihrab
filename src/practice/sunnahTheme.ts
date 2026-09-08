@@ -17,11 +17,16 @@
  * Amber is also one of the accent colours a user can pick, which is why this
  * is not derived from the accent: their whole graph could otherwise go gold.
  */
-export const SUNNAH_GOLD_LIGHT = '#9A7B1F';
-export const SUNNAH_GOLD_DARK = '#E8CE7A';
-
-export function sunnahGold(isDark: boolean): string {
-  return isDark ? SUNNAH_GOLD_DARK : SUNNAH_GOLD_LIGHT;
+/**
+ * The sunnah marker's colour is the app's accent, not a gold of its own
+ * (docs/design/redesign-plan.md §2.4). Gold was a third hue on the Log —
+ * beside the green ramp, the orange fast ring and the red missed mark —
+ * and six colours on one screen read as noise. A sunnah is "more of the
+ * same act", so it speaks in the same voice, as a small solid mark where
+ * the prayers are a fill.
+ */
+export function sunnahMark(palette: { accentSolid: string }): string {
+  return palette.accentSolid;
 }
 
 /**

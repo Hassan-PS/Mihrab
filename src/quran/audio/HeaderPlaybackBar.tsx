@@ -59,6 +59,8 @@ import {
   stopPlayback,
   usePlaybackStatus,
 } from './playback';
+import { RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE } from '../../theme/typography';
 
 /**
  * Screens this bar stays off.
@@ -291,23 +293,23 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: SPACING.xs,
     // The name starts where the title above it does; the controls end
     // where the header's own trailing buttons do.
-    paddingStart: 16,
-    paddingEnd: 12,
-    paddingVertical: 5,
+    paddingStart: SPACING.lg,
+    paddingEnd: SPACING.md,
+    paddingVertical: SPACING.xs,
   },
   btn: {
     width: 30,
     height: 30,
-    borderRadius: 9,
+    borderRadius: RADIUS.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pressed: { opacity: 0.55 },
-  namePress: { flex: 1, marginEnd: 8 },
-  name: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  namePress: { flex: 1, marginEnd: SPACING.sm },
+  name: { fontSize: TYPE.footnote.fontSize, fontWeight: '700', fontVariant: ['tabular-nums'] },
   track: { height: 2, width: '100%' },
   fill: { height: '100%' },
 });

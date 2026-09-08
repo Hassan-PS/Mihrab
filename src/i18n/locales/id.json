@@ -47,7 +47,8 @@
     "delete": "Hapus",
     "cancelled": "Dibatalkan.",
     "listJoin": " & ",
-    "confirmDelete": "Ketuk lagi untuk menghapus"
+    "confirmDelete": "Ketuk lagi untuk menghapus",
+    "learnMore": "Pelajari lebih lanjut"
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
