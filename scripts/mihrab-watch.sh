@@ -81,8 +81,19 @@ done
 # Which checks actually ran. Reported when it changes, so a capability that
 # quietly disappears (an expired token, a revoked scope) surfaces instead of
 # turning into a permanently silent "all clear".
+#
+# TRAFFIC IS NOT IN THIS SET, and that is the fix for #28. Clone traffic is an
+# Administration-read endpoint: a workflow's default GITHUB_TOKEN cannot read
+# it and never will, because `administration` is not a key the workflow
+# permissions block accepts. Counting it as coverage meant the scheduled run
+# reported a permanent, unfixable "coverage changed" — a monitor filing an
+# issue every week about its own configuration, which is the fastest way to
+# teach someone to close this report unread.
+#
+# The reading is still taken, and the clone-spike alert below still uses it
+# when a PAT makes it available. It is simply not something whose absence is
+# news. Coverage now means the checks that CAN run: forks, and code search.
 caps="forks"
-[ "$clones" -ge 0 ] && caps="$caps,traffic"
 [ "$search_ok" = "1" ] && caps="$caps,codesearch"
 
 # ---- compare ----------------------------------------------------------------
@@ -129,17 +140,20 @@ fi
 # even if something else turns intermittent, one bad reading cannot generate an
 # alert on its own. The cost is that a genuine loss is reported a week late,
 # which is the right trade for a report that only fires when it means something.
-old_caps=$(json_get caps "forks,traffic,codesearch")
-old_seen=$(json_get caps_seen "")
+# Baselines written before traffic left the set still name it. Strip it on
+# read rather than comparing against it once and calling that news — the whole
+# point of #28 is that this comparison stops firing about the token.
+old_caps=$(json_get caps "forks,codesearch" | sed 's/,traffic//; s/traffic,//')
+old_seen=$(json_get caps_seen "" | sed 's/,traffic//; s/traffic,//')
 caps_confirmed="$old_caps"
 if [ "$caps" = "$old_seen" ] && [ "$caps" != "$old_caps" ]; then
   caps_confirmed="$caps"
   changed=1
   report="$report\n• CHECK COVERAGE changed: was [$old_caps], now [$caps]."
-  report="$report\n  A check that stopped running leaves a blind spot. 'traffic' needs a PAT"
-  report="$report\n  in the MIHRAB_WATCH_TOKEN secret — it is an Administration-read endpoint,"
-  report="$report\n  and 'administration' is not a key the workflow permissions block accepts."
-  report="$report\n  'codesearch' and 'forks' do work on the default GITHUB_TOKEN."
+  report="$report\n  A check that stopped running leaves a blind spot, and both of these"
+  report="$report\n  work on the default GITHUB_TOKEN — so this is a real loss rather than"
+  report="$report\n  a missing permission: an expired PAT, a revoked scope, or a search API"
+  report="$report\n  that has started refusing every request."
 fi
 
 old_clones=$(json_get clones 0)
@@ -167,7 +181,9 @@ PY
 if [ "$FULL" = "--full" ]; then
   echo "Mihrab reuse check — $(date -u +%Y-%m-%d)"
   echo "  forks $forks · network $network · stars $stars · watchers $watchers"
-  echo "  unique cloners (14d): $clones"
+  # Not part of `caps`: see the note there. Shown when a PAT makes it
+  # readable, absent otherwise, and neither is news.
+  [ "$clones" -ge 0 ] && echo "  unique cloners (14d): $clones"
   echo -e "  code-search hits:${hits:- none}"
   echo "  checks that ran: $caps"
 fi

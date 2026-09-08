@@ -21,9 +21,12 @@ permissions:
 # GitHub rejects the whole workflow with a 422 if you try. It needs a PAT in
 # the MIHRAB_WATCH_TOKEN secret (fine-grained, this repo only, Administration:
 # read is enough). Forks and code search both work on the default token, as of
-# the 2026-07-31 run. Until that secret exists the clone count is missing, and
-# the job now says so on every run where coverage differs — rather than
-# reporting "no change" and reading as an all-clear.
+# the 2026-07-31 run.
+#
+# So this job does NOT expect the clone count, and its absence is not a
+# finding — #28, where the check spent its Mondays opening an issue about its
+# own token. If the secret is ever added the reading comes back on its own and
+# the clone-spike alert starts working again; nothing here has to change.
 
 jobs:
   check:
