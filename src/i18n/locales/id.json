@@ -124,7 +124,8 @@
     "hijri": "Hijriah",
     "gregorian": "Gregorian",
     "prayerTimes": "Waktu Sholat",
-    "daruriLegend": "Baris kecil di bawah Subuh, Asar, dan Isya adalah kapan waktu pertama (pilihan) masing-masing berakhir. Zuhur berakhir saat Asar masuk dan Magrib saat Isya masuk, jadi keduanya adalah kolom itu sendiri. Milik Subuh dan Asar bersifat perkiraan."
+    "daruriLegend": "Baris kecil di bawah Subuh, Asar, dan Isya adalah kapan waktu pertama (pilihan) masing-masing berakhir. Zuhur berakhir saat Asar masuk dan Magrib saat Isya masuk, jadi keduanya adalah kolom itu sendiri. Milik Subuh dan Asar bersifat perkiraan.",
+    "daruriLegendLat45": "Tanda ° setelah waktu berarti matahari di sini tidak memberi batas itu, sehingga dihitung pada lintang 45°."
   },
   "share": {
     "tagline": "Waktu salat, kiblat, dan Al-Qur’an",
@@ -289,6 +290,9 @@
     "malikiSecondTimesHelp": "Setiap salat mendapat satu baris di kartu Hari Ini yang menyebutkan kapan waktu pilihannya (ikhtiyari) berakhir dan waktu daruratnya (daruri) dimulai. Dihitung di perangkat Anda dari koordinat Anda, dari sumber mana pun waktu Anda berasal. Memakai bayangan 1:1 untuk Asar tanpa memandang pengaturan mazhab Anda, karena itulah batas Maliki. Nonaktif secara bawaan.",
     "malikiSecondTimesHanafiWarning": "Perhatian: ini batas Maliki, tetapi Asar Anda diatur ke Hanafi yang memakai bayangan berbeda. Waktu pertama Zuhur akan berakhir sekitar setengah jam sebelum Asar yang tampil di bawahnya. Matikan Asar Hanafi jika Anda ingin kartu ini konsisten.",
     "malikiSecondTimesSource": "Dari Al-Murshid al-Muin (Ibnu Asyir), sebagaimana dituangkan dalam The Guiding Helper, nyanyian 11.",
+    "malikiLat45": "Pengganti 45°",
+    "malikiLat45Help": "Di tempat matahari di sini tidak pernah mencapai sudut itu, batas tersebut dihitung pada lintang 45° di bujur Anda sendiri, bukan dibiarkan kosong. Waktu pengganti diberi tanda di mana pun ia muncul, dan pemberitahuan yang Anda pilih juga berbunyi untuknya. Lima waktu salat harian Anda tidak pernah berubah karenanya. Mati secara bawaan.",
+    "malikiLat45Source": "The Guiding Helper, kidung 11, catatan kaki 653: di tempat matahari tidak berperilaku teratur, ikutilah waktu yang lazim dari otoritas Islam setempat; jika tidak ada yang berlaku, boleh mengikuti waktu untuk lintang 45° pada bujur Anda.",
     "malikiAlerts": "Beri tahu saya",
     "malikiAlertsHelp": "Mati untuk semua salat pada awalnya. Pilih hanya yang ingin Anda ketahui — lima notifikasi tambahan sehari adalah cara sebuah aplikasi mengajari Anda mengabaikannya. Perlu notifikasi diaktifkan.",
     "malikiAlertsDisabled": "Aktifkan waktu kedua Maliki di Waktu salat, lalu waktu itu bisa diumumkan di sini.",
@@ -465,6 +469,7 @@
     "Firstthird": "Sepertiga awal",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Waktu pertama sampai {{time}}",
+    "firstTimeUntilLat45": "Waktu pertama sampai {{time}} — pengganti 45°",
     "secondTimeFrom": "Waktu kedua dari {{time}}",
     "approx": "kira-kira",
     "Subh": "Subuh",

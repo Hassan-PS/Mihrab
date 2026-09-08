@@ -18,6 +18,10 @@ import {
  */
 const isSalah = (key: string) =>
   !(OPTIONAL_TIME_KEYS as readonly string[]).includes(key);
+import {
+  DARURI_SUBSTITUTE_KEY,
+  type DaruriKey,
+} from '../../prayer/daruriTimes';
 import type { MonthDayEntry } from '../../prayer/loadMonthPrayerTimes';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { SPACING } from '../../theme/tokens';
@@ -61,7 +65,7 @@ export function monthRowHeight(showDaruri: boolean): number {
  * twice on one row, which is how a grid stops being read. The legend
  * under the table says so in words instead.
  */
-const DARURI_CELL: Partial<Record<DisplayPrayerKey, string>> = {
+const DARURI_CELL: Partial<Record<DisplayPrayerKey, DaruriKey>> = {
   Fajr: 'FajrDaruri',
   Asr: 'AsrDaruri',
   Isha: 'IshaDaruri',
@@ -165,6 +169,11 @@ function MonthRowImpl({
         const salah = isSalah(key);
         const daruriKey = showDaruri ? DARURI_CELL[key] : undefined;
         const daruriRaw = daruriKey ? item.timings[daruriKey] : undefined;
+        // #20: the same clock again under a companion key means it was
+        // worked at 45° rather than here.
+        const daruriSubKey = daruriKey
+          ? DARURI_SUBSTITUTE_KEY[daruriKey]
+          : undefined;
         const cell = (
           <Text
             style={[
@@ -195,7 +204,18 @@ function MonthRowImpl({
             <Text
               style={[styles.cellDaruri, { color: palette.muted }]}
               numberOfLines={1}>
-              {daruriKey ? (daruriRaw ? clock(daruriRaw) : '·') : ''}
+              {/* A trailing ° marks a boundary the sky here did not give,
+                  worked at 45° instead (issue #20). One character because
+                  this line is 9px in a nine-column row and there is no
+                  room for a word; the Today card says it in full, and the
+                  legend under the table says what the mark means. */}
+              {daruriKey
+                ? daruriRaw
+                  ? `${clock(daruriRaw)}${
+                      daruriSubKey && item.timings[daruriSubKey] ? '°' : ''
+                    }`
+                  : '·'
+                : ''}
             </Text>
           </View>
         );

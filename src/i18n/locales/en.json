@@ -124,7 +124,8 @@
     "hijri": "Hijri",
     "gregorian": "Gregorian",
     "prayerTimes": "Prayer Times",
-    "daruriLegend": "The small line under Fajr, ʿAṣr and ʿIshāʾ is when each one's first (preferred) time ends. Ẓuhr's ends when ʿAṣr begins and Maghrib's when ʿIshāʾ does, so those two are the columns themselves. Fajr's and ʿAṣr's are approximate."
+    "daruriLegend": "The small line under Fajr, ʿAṣr and ʿIshāʾ is when each one's first (preferred) time ends. Ẓuhr's ends when ʿAṣr begins and Maghrib's when ʿIshāʾ does, so those two are the columns themselves. Fajr's and ʿAṣr's are approximate.",
+    "daruriLegendLat45": "A ° after a time means the sun here did not give that boundary, so it was worked at the 45° latitude mark instead."
   },
   "share": {
     "tagline": "Prayer times, qibla and the Qur’an",
@@ -289,6 +290,9 @@
     "malikiSecondTimesHelp": "Each prayer gets a line on the Today card saying when its preferred time (ikhtiyari) closes and its late time (daruri) begins. Computed on your device from your coordinates, whichever source your times come from. Uses the 1:1 shadow for Asr regardless of your madhab setting, because that is the Maliki boundary. Off by default.",
     "malikiSecondTimesHanafiWarning": "Heads up: these are Maliki boundaries, but your Asr is set to Hanafi, which uses a different shadow. Zuhr's first time will end about half an hour before the Asr shown below it. Turn off Hanafi Asr if you want the card to agree with itself.",
     "malikiSecondTimesSource": "From Al-Murshid al-Muin (Ibn Ashir), as rendered in The Guiding Helper, Song 11.",
+    "malikiLat45": "45° substitute",
+    "malikiLat45Help": "Where the sun here never reaches the angle, that boundary is worked at the 45° latitude mark on your own longitude instead of being left blank. Substituted times are labelled wherever they appear, and any alerts you have chosen fire for them too. Your five daily prayer times are never changed by this. Off by default.",
+    "malikiLat45Source": "The Guiding Helper, Song 11, footnote 653: where the sun does not behave regularly, follow the customary timings of your local Islamic authority; where there are none in practice, you may follow the timings for the 45° latitude mark at your longitude.",
     "malikiAlerts": "Notify me",
     "malikiAlertsHelp": "Off for every prayer to begin with. Pick only the ones you want to be told about — five more alerts a day is how an app teaches you to ignore it. Needs notifications turned on.",
     "malikiAlertsDisabled": "Turn on the Maliki second times under Prayer times, and they can be announced here.",
@@ -465,6 +469,7 @@
     "Firstthird": "First Third",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "First time until {{time}}",
+    "firstTimeUntilLat45": "First time until {{time}} — 45° substitute",
     "secondTimeFrom": "Second time from {{time}}",
     "approx": "approx.",
     "Subh": "Subh",

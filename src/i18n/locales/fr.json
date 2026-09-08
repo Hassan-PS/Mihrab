@@ -124,7 +124,8 @@
     "hijri": "Hijri",
     "gregorian": "grégorien",
     "prayerTimes": "Horaires de prière",
-    "daruriLegend": "La petite ligne sous Fajr, ʿAsr et ʿIshâ indique quand se termine le premier temps (préféré) de chacune. Celui de Zuhr se termine quand ʿAsr commence et celui de Maghrib quand ʿIshâ commence : ces deux-là sont donc les colonnes elles-mêmes. Ceux de Fajr et ʿAsr sont approximatifs."
+    "daruriLegend": "La petite ligne sous Fajr, ʿAsr et ʿIshâ indique quand se termine le premier temps (préféré) de chacune. Celui de Zuhr se termine quand ʿAsr commence et celui de Maghrib quand ʿIshâ commence : ces deux-là sont donc les colonnes elles-mêmes. Ceux de Fajr et ʿAsr sont approximatifs.",
+    "daruriLegendLat45": "Un ° après une heure signifie que le soleil d'ici n'a pas donné cette limite : elle a été calculée au 45e parallèle."
   },
   "share": {
     "tagline": "Horaires de prière, qibla et le Coran",
@@ -289,6 +290,9 @@
     "malikiSecondTimesHelp": "Chaque prière reçoit une ligne sur la carte Aujourd'hui indiquant quand se ferme son temps préféré (ikhtiyari) et quand commence son temps tardif (daruri). Calculé sur votre appareil à partir de vos coordonnées, quelle que soit la source de vos horaires. Utilise l'ombre 1:1 pour Asr indépendamment de votre réglage de madhhab, car c'est la limite malikite. Désactivé par défaut.",
     "malikiSecondTimesHanafiWarning": "À noter : ce sont des limites malikites, mais votre Asr est réglé sur hanafite, qui utilise une autre ombre. Le premier temps de Zuhr se terminera environ une demi-heure avant l'Asr affiché en dessous. Désactivez l'Asr hanafite si vous voulez que la carte soit cohérente.",
     "malikiSecondTimesSource": "D'après Al-Murshid al-Muin (Ibn Ashir), tel que rendu dans The Guiding Helper, chant 11.",
+    "malikiLat45": "Substitut à 45°",
+    "malikiLat45Help": "Là où le soleil n'atteint jamais l'angle ici, cette limite est calculée au 45e parallèle sur ta propre longitude plutôt que laissée vide. Les heures substituées sont signalées partout où elles apparaissent, et les alertes que tu as choisies se déclenchent aussi pour elles. Tes cinq horaires de prière quotidiens n'en sont jamais changés. Désactivé par défaut.",
+    "malikiLat45Source": "The Guiding Helper, chant 11, note 653 : là où le soleil ne se comporte pas régulièrement, suis les horaires habituels de ton autorité islamique locale ; à défaut, tu peux suivre les horaires du 45e parallèle à ta longitude.",
     "malikiAlerts": "Me prévenir",
     "malikiAlertsHelp": "Désactivé pour chaque prière au départ. Ne choisissez que celles dont vous voulez être averti — cinq alertes de plus par jour, c'est ainsi qu'une application vous apprend à l'ignorer. Nécessite les notifications activées.",
     "malikiAlertsDisabled": "Activez les seconds temps malikites dans Horaires de prière, et ils pourront être annoncés ici.",
@@ -465,6 +469,7 @@
     "Firstthird": "Premier tiers",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Premier temps jusqu'à {{time}}",
+    "firstTimeUntilLat45": "Premier temps jusqu'à {{time}} — substitut à 45°",
     "secondTimeFrom": "Second temps à partir de {{time}}",
     "approx": "env.",
     "Subh": "Sobh",

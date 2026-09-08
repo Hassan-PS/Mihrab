@@ -186,10 +186,19 @@ export function MonthTimesScreen() {
         lat,
         lng,
         settings.school === 1 ? 2 : 1,
+        // #20 — the 45° substitute, on the same terms as the card's.
+        settings.malikiLat45Substitute,
       );
     }
     return rows.map((r, i) => ({ ...r, timings: times[i] }));
-  }, [rows, showDaruri, lat, lng, settings.school]);
+  }, [
+    rows,
+    showDaruri,
+    lat,
+    lng,
+    settings.school,
+    settings.malikiLat45Substitute,
+  ]);
 
   // Abbreviated column headers from localized prayer names
   const colHeaders = useMemo(
@@ -319,6 +328,12 @@ export function MonthTimesScreen() {
           showDaruri ? (
             <Text style={[styles.empty, { color: palette.muted }]}>
               {t('month.daruriLegend')}
+              {/* Only when the substitute is on, because only then can a
+                  ° appear in the table — a legend for a mark that is not
+                  there teaches the reader to look for one. #20. */}
+              {settings.malikiLat45Substitute
+                ? ` ${t('month.daruriLegendLat45')}`
+                : ''}
             </Text>
           ) : null
         }

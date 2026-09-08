@@ -124,7 +124,8 @@
     "hijri": "Hijri",
     "gregorian": "Gregorianisch",
     "prayerTimes": "Gebetszeiten",
-    "daruriLegend": "Die kleine Zeile unter Fadschr, ʿAsr und ʿIschāʾ zeigt, wann deren erste (bevorzugte) Zeit endet. Zuhrs endet mit dem Beginn von ʿAsr und Maghribs mit dem Beginn von ʿIschāʾ — diese beiden sind also die Spalten selbst. Die von Fadschr und ʿAsr sind ungefähr."
+    "daruriLegend": "Die kleine Zeile unter Fadschr, ʿAsr und ʿIschāʾ zeigt, wann deren erste (bevorzugte) Zeit endet. Zuhrs endet mit dem Beginn von ʿAsr und Maghribs mit dem Beginn von ʿIschāʾ — diese beiden sind also die Spalten selbst. Die von Fadschr und ʿAsr sind ungefähr.",
+    "daruriLegendLat45": "Ein ° nach einer Zeit bedeutet, dass die Sonne hier diese Grenze nicht ergab und sie am 45. Breitengrad berechnet wurde."
   },
   "share": {
     "tagline": "Gebetszeiten, Qibla und der Koran",
@@ -289,6 +290,9 @@
     "malikiSecondTimesHelp": "Jedes Gebet erhält auf der Heute-Karte eine Zeile, die sagt, wann seine bevorzugte Zeit (ikhtiyari) endet und seine späte Zeit (daruri) beginnt. Auf deinem Gerät aus deinen Koordinaten berechnet, unabhängig davon, woher deine Zeiten stammen. Nutzt für Asr den 1:1-Schatten unabhängig von deiner Madhhab-Einstellung, denn das ist die malikitische Grenze. Standardmäßig aus.",
     "malikiSecondTimesHanafiWarning": "Hinweis: Das sind malikitische Grenzen, aber dein Asr steht auf hanafitisch, das einen anderen Schatten verwendet. Zuhrs erste Zeit endet etwa eine halbe Stunde vor dem darunter angezeigten Asr. Schalte hanafitisches Asr aus, wenn die Karte zu sich selbst passen soll.",
     "malikiSecondTimesSource": "Nach Al-Murshid al-Muin (Ibn Ashir), wiedergegeben in The Guiding Helper, Gesang 11.",
+    "malikiLat45": "45°-Ersatzwert",
+    "malikiLat45Help": "Wo die Sonne hier den Winkel nie erreicht, wird diese Grenze am 45. Breitengrad auf deinem eigenen Längengrad berechnet, statt leer zu bleiben. Ersetzte Zeiten sind überall gekennzeichnet, wo sie erscheinen, und die von dir gewählten Hinweise gelten auch für sie. Deine fünf täglichen Gebetszeiten ändern sich dadurch nie. Standardmäßig aus.",
+    "malikiLat45Source": "The Guiding Helper, Gesang 11, Fußnote 653: Wo die Sonne sich nicht regelmäßig verhält, folge den üblichen Zeiten deiner örtlichen islamischen Autorität; gibt es keine, darfst du den Zeiten des 45. Breitengrads auf deinem Längengrad folgen.",
     "malikiAlerts": "Benachrichtige mich",
     "malikiAlertsHelp": "Zu Beginn für jedes Gebet aus. Wähle nur die, über die du Bescheid wissen willst — fünf weitere Meldungen am Tag sind der Weg, auf dem eine App dir beibringt, sie zu ignorieren. Benachrichtigungen müssen an sein.",
     "malikiAlertsDisabled": "Schalte die malikitischen Zweitzeiten unter Gebetszeiten ein, dann können sie hier angekündigt werden.",
@@ -465,6 +469,7 @@
     "Firstthird": "Erstes Drittel",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Erste Zeit bis {{time}}",
+    "firstTimeUntilLat45": "Erste Zeit bis {{time}} — 45°-Ersatzwert",
     "secondTimeFrom": "Zweite Zeit ab {{time}}",
     "approx": "ca.",
     "Subh": "Subh",

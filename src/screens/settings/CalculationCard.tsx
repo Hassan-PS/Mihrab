@@ -16,6 +16,7 @@ import {
 } from '../../settings/providerUi';
 import { getMethodLabel } from '../../settings/methods';
 import { madhabMatches, selectedMadhab } from '../../prayer/madhab';
+import { substituteApplies } from '../../prayer/daruriTimes';
 import type { PrayerOffsetMinutes } from '../../settings/prayerOffsets';
 import {
   SettingsBlock,
@@ -59,6 +60,20 @@ function CalculationCardImpl({
       ),
     [settings.dataProviderAuto, settings.dataProvider, coordsForEffective],
   );
+
+  /**
+   * Is the 45° substitute worth offering here — issue #20.
+   *
+   * Poleward of 45°, where fn. 653 is addressed and where the app
+   * actually leaves boundaries blank. Below it the switch would do
+   * nothing at all, and a switch that does nothing is worse than an
+   * absent one: it invites somebody to turn it on and then wonder what
+   * broke. Anyone who already has it on keeps the switch wherever they
+   * are, so a trip south does not silently take a setting away.
+   */
+  const substituteOffered =
+    settings.malikiLat45Substitute ||
+    substituteApplies(coordsForEffective?.latitude ?? NaN);
 
   return (
     <SettingsGroup title={t('settings.calculation')}>
@@ -173,6 +188,36 @@ function CalculationCardImpl({
           <Text style={[s.help, { color: palette.muted, marginTop: 6 }]}>
             {t('settings.malikiSecondTimesSource')}
           </Text>
+
+          {/* THE 45° SUBSTITUTE — issue #20.
+           *
+           * Offered where the reader is poleward of 45°, which is where
+           * fn. 653 is addressed, and to anyone who already turned it on
+           * — the same rule the second-times switch itself follows, and
+           * for the same reason: a feature must not vanish because
+           * somebody travelled.
+           *
+           * The quote sits UNDER the switch rather than behind an info
+           * tap. It is the whole justification for printing a time this
+           * reader's own sky did not give, and a person deciding whether
+           * to accept that should not have to go looking for it. */}
+          {substituteOffered ? (
+            <>
+              <SettingsToggleRow
+                title={t('settings.malikiLat45', '45° substitute')}
+                help={t('settings.malikiLat45Help')}
+                value={settings.malikiLat45Substitute}
+                onValueChange={v =>
+                  updateSettings({ malikiLat45Substitute: v })
+                }
+              />
+              {settings.malikiLat45Substitute ? (
+                <Text style={[s.help, { color: palette.muted, marginTop: 6 }]}>
+                  {t('settings.malikiLat45Source')}
+                </Text>
+              ) : null}
+            </>
+          ) : null}
 
           {/* SHOWING them and ANNOUNCING them are now two decisions.
            *

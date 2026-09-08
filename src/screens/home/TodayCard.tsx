@@ -49,6 +49,7 @@ import {
 import { DISPLAY_ORDER, OPTIONAL_TIME_KEYS } from '../../types/prayer';
 import {
   DARURI_CONFIDENCE,
+  isDaruriSubstitute,
   type DaruriKey,
 } from '../../prayer/daruriTimes';
 import type { TimingsMap } from '../../types/prayer';
@@ -697,6 +698,12 @@ function TodayCardImpl({
           daruriApprox={
             DARURI_CONFIDENCE[`${key}Daruri` as DaruriKey] === 'modelled'
           }
+          // #20. Per DAY, not per key: the same boundary is the sky's own
+          // answer in March and a substitute in June.
+          daruriSubstitute={isDaruriSubstitute(
+            timings,
+            `${key}Daruri` as DaruriKey,
+          )}
           // Only on today's card. On yesterday's or tomorrow's the
           // control would still change a setting for every day, which
           // is not what a tap on a past row looks like it does.

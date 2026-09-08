@@ -262,6 +262,12 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (typeof merged.malikiSecondTimesEnabled !== 'boolean') {
     merged.malikiSecondTimesEnabled = false;
   }
+  // Issue #20, and the same guard for the same reason: this one decides
+  // whether a clock time invented at another latitude appears under a
+  // prayer. It has to be a boolean somebody set, not a truthy leftover.
+  if (typeof merged.malikiLat45Substitute !== 'boolean') {
+    merged.malikiLat45Substitute = false;
+  }
   // Alerts are opt-in per boundary and the list is the kill-switch, so a
   // blob holding anything but a known key must come back empty rather
   // than scheduling something nobody chose.

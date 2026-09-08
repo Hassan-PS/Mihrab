@@ -124,7 +124,8 @@
     "hijri": "Hijri",
     "gregorian": "gregoriano",
     "prayerTimes": "Horarios de oración",
-    "daruriLegend": "La línea pequeña bajo Fayr, Asr e Isha indica cuándo acaba el primer tiempo (preferido) de cada una. El de Zuhr acaba cuando empieza Asr y el de Magrib cuando empieza Isha, así que esos dos son las columnas mismas. Los de Fayr y Asr son aproximados."
+    "daruriLegend": "La línea pequeña bajo Fayr, Asr e Isha indica cuándo acaba el primer tiempo (preferido) de cada una. El de Zuhr acaba cuando empieza Asr y el de Magrib cuando empieza Isha, así que esos dos son las columnas mismas. Los de Fayr y Asr son aproximados.",
+    "daruriLegendLat45": "Un ° tras una hora indica que el sol de aquí no dio ese límite y se calculó en el paralelo 45°."
   },
   "share": {
     "tagline": "Horarios de oración, alquibla y el Corán",
@@ -289,6 +290,9 @@
     "malikiSecondTimesHelp": "Cada oración recibe una línea en la tarjeta de Hoy que indica cuándo se cierra su tiempo preferido (ijtiyari) y cuándo empieza su tiempo tardío (daruri). Se calcula en tu dispositivo a partir de tus coordenadas, sea cual sea la fuente de tus horarios. Usa la sombra 1:1 para Asr con independencia de tu ajuste de madhab, porque ese es el límite malikí. Desactivado por defecto.",
     "malikiSecondTimesHanafiWarning": "Aviso: estos son límites malikíes, pero tu Asr está en hanafí, que usa otra sombra. El primer tiempo de Zuhr terminará una media hora antes del Asr que aparece debajo. Desactiva el Asr hanafí si quieres que la tarjeta concuerde consigo misma.",
     "malikiSecondTimesSource": "De Al-Murshid al-Muin (Ibn Ashir), según se recoge en The Guiding Helper, canto 11.",
+    "malikiLat45": "Sustituto de 45°",
+    "malikiLat45Help": "Donde el sol no alcanza aquí el ángulo, ese límite se calcula en el paralelo 45° de tu propia longitud en lugar de dejarse en blanco. Las horas sustituidas se señalan allí donde aparecen, y los avisos que hayas elegido también suenan para ellas. Tus cinco horas de oración diarias nunca cambian por esto. Desactivado por defecto.",
+    "malikiLat45Source": "The Guiding Helper, canto 11, nota 653: donde el sol no se comporta con regularidad, sigue los horarios habituales de tu autoridad islámica local; si no hay ninguno en uso, puedes seguir los horarios del paralelo 45° en tu longitud.",
     "malikiAlerts": "Avisarme",
     "malikiAlertsHelp": "Desactivado para todas las oraciones al principio. Elige solo aquellas de las que quieras enterarte: cinco avisos más al día es como una aplicación te enseña a ignorarla. Requiere las notificaciones activadas.",
     "malikiAlertsDisabled": "Activa los segundos tiempos malikíes en Horarios de oración y podrán anunciarse aquí.",
@@ -465,6 +469,7 @@
     "Firstthird": "Primer tercio",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Primer tiempo hasta {{time}}",
+    "firstTimeUntilLat45": "Primer tiempo hasta {{time}} — sustituto de 45°",
     "secondTimeFrom": "Segundo tiempo desde {{time}}",
     "approx": "aprox.",
     "Subh": "Subh",

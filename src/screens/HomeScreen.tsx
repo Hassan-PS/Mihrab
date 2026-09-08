@@ -310,6 +310,9 @@ export function HomeScreen() {
           state.longitude,
           // `school` is 1 for Ḥanafī ʿAṣr (the 2:1 shadow), 0 otherwise.
           settings.school === 1 ? 2 : 1,
+          // #20. Fills only the boundaries the sun gave nothing for, only
+          // above 45°, and never the five daily times.
+          settings.malikiLat45Substitute,
         )
       : null;
     const drawDaruri =
@@ -362,6 +365,7 @@ export function HomeScreen() {
     settings.malikiSecondTimesEnabled,
     settings.malikiSecondTimeRows,
     settings.school,
+    settings.malikiLat45Substitute,
   ]);
 
   const loadedDateKeyRef = useRef<string | null>(null);
@@ -573,6 +577,11 @@ export function HomeScreen() {
           ? settings.malikiSecondTimeAlerts.join(',')
           : '',
         String(settings.malikiSecondTimeAlertMinutes),
+        // #20. The substitute adds boundaries where the sky gave none, so
+        // turning it on adds alerts for the ones already chosen. Left out,
+        // the flip would read as "nothing changed" and those alerts would
+        // not be written until something else forced a rewrite.
+        String(settings.malikiLat45Substitute),
         // The end-of-window alert doubles the set this schedule writes,
         // so turning it on has to rewrite rather than read as no change.
         String(settings.malikiSecondTimeEndAlerts),

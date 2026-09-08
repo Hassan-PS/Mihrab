@@ -203,6 +203,125 @@ export const ISFIRAR_ALTITUDE_DEGREES = 5;
 export const MALIKI_SHADOW_LENGTH = 1;
 
 /**
+ * ── THE 45° SUBSTITUTE — issue #20 ────────────────────────────────────
+ *
+ * *The Guiding Helper*, Song 11, footnote 653, quoted in full in issue
+ * #19: where the sun does not behave regularly — months without a
+ * sunrise or a sunset — one follows the customary timings of one's local
+ * Islamic authority, and failing that "the prayer timings for the 45°
+ * latitude mark at their longitude".
+ *
+ * Two steps, and the app only performs the second. The first — the local
+ * authority — is already what choosing a provider does: a user in Sweden
+ * on Islamiska Förbundet has a published timetable and their five times
+ * come from it. Nothing here touches those. The provider's five stay
+ * exactly as they are, on every day, at every latitude, whether or not
+ * this is on. What the substitute fills is the gap this module leaves
+ * behind: the boundaries the app works out FOR ITSELF from the sun, on
+ * the days when the sun does not reach the angle and the app currently
+ * prints a blank.
+ *
+ * ── ONLY WHERE THE SKY GAVE NO ANSWER AT ALL ──────────────────────────
+ *
+ * The substitute stands in for a MISSING boundary, never for an
+ * unwelcome one. `daruriTimesForDay` drops boundaries for two different
+ * reasons, and only one of them is a reason to substitute:
+ *
+ *   - the sun never reached the angle, or the event that would close the
+ *     window never happened. There is nothing to show, the reader gets a
+ *     blank, and fn. 653 is written for exactly this. Substitute.
+ *   - the sun DID answer, and the answer falls outside the window the
+ *     card's own rows describe — Stockholm's midsummer *isfār* at 01:59
+ *     under a provider's Fajr of 02:11. That is a disagreement between
+ *     two sources about a real instant, and printing a third number from
+ *     a different latitude does not resolve it, it hides it. No
+ *     substitute; the blank stands.
+ *
+ * And the substitute is then held to the same rule as everything else
+ * here: it is shown only if it lands strictly inside the window the
+ * reader's own rows describe. A substitute that contradicts the card is
+ * worth no more than a computed one that does.
+ *
+ * ── WHAT IS NOT SUBSTITUTED, AND WHY ──────────────────────────────────
+ *
+ * Ẓuhr's boundary on a 1:1 ʿaṣr, and Maghrib's: both are ROWS the reader
+ * already has, from their own provider. They are never missing, so there
+ * is nothing to fill.
+ *
+ * Ishāʾ's — a third of the way from Maghrib to dawn — is not substituted
+ * either, and that one is a decision rather than an accident. It is not
+ * a position of the sun; it is a FRACTION of an interval whose two ends
+ * the reader has been handed. Where the sun misbehaves, that arithmetic
+ * still works, on the night they were actually given. Replacing it with
+ * a third of somebody else's night 15° south would be substituting for
+ * an answer that exists.
+ *
+ * ── AND WHY IT IS OFF BY DEFAULT ──────────────────────────────────────
+ *
+ * fn. 653's first step is a person's local authority, and this app is
+ * not it. A number that appears without being asked for reads as the
+ * app's own reckoning; the same number behind a switch, labelled, with
+ * the footnote under the switch, reads as what it is — a rule the reader
+ * chose to apply.
+ */
+export const SUBSTITUTE_LATITUDE_DEGREES = 45;
+
+/**
+ * The 45° mark in the reader's OWN hemisphere. "The 45° latitude mark at
+ * their longitude" is a place with the same seasons they have; the
+ * northern one would put a Melbourne winter against a Stockholm summer.
+ */
+export function substituteLatitude(latitude: number): number {
+  return latitude >= 0
+    ? SUBSTITUTE_LATITUDE_DEGREES
+    : -SUBSTITUTE_LATITUDE_DEGREES;
+}
+
+/**
+ * Is this a place fn. 653 is addressed to?
+ *
+ * Strictly poleward of 45°. At or below it the substitute would be the
+ * reader's own latitude or a move AWAY from it, and a missing boundary
+ * there means something other than the polar sun — a bad coordinate, a
+ * time zone that is not the location's — which a number invented at 45°
+ * would paper over rather than answer.
+ */
+export function substituteApplies(latitude: number): boolean {
+  return (
+    Number.isFinite(latitude) &&
+    Math.abs(latitude) > SUBSTITUTE_LATITUDE_DEGREES
+  );
+}
+
+/**
+ * The companion key that says a boundary came from 45° rather than from
+ * the reader's own sky.
+ *
+ * It carries the SAME clock string as the boundary itself, so nothing in
+ * the map is a flag pretending to be a time, and every existing consumer
+ * — which reads `FajrDaruri` and knows nothing about this — keeps
+ * working unchanged. A surface that wants to LABEL the substitute asks
+ * for this key by name; one that does not, does not.
+ */
+export type DaruriSubstituteKey = `${DaruriKey}Lat45`;
+
+export const DARURI_SUBSTITUTE_KEY: Record<DaruriKey, DaruriSubstituteKey> = {
+  FajrDaruri: 'FajrDaruriLat45',
+  DhuhrDaruri: 'DhuhrDaruriLat45',
+  AsrDaruri: 'AsrDaruriLat45',
+  MaghribDaruri: 'MaghribDaruriLat45',
+  IshaDaruri: 'IshaDaruriLat45',
+};
+
+/** Did this day's boundary for `key` come from the 45° substitute? */
+export function isDaruriSubstitute(
+  timings: TimingsMap | undefined,
+  key: DaruriKey,
+): boolean {
+  return Boolean(timings?.[DARURI_SUBSTITUTE_KEY[key]]);
+}
+
+/**
  * How much the app is claiming.
  *
  * `computed` — a solar position or a division of the night. Exact to the
@@ -245,8 +364,14 @@ export const DARURI_CONFIDENCE: Record<DaruriKey, DaruriConfidence> = {
   IshaDaruri: 'computed',
 };
 
-/** Clock times, one per boundary; a key is absent when the sky has no answer. */
-export type DaruriTimes = Partial<Record<DaruriKey, string>>;
+/**
+ * Clock times, one per boundary; a key is absent when the sky has no
+ * answer. A `…Lat45` key alongside one of the five repeats that same
+ * clock and means it came from the substitute (issue #20).
+ */
+export type DaruriTimes = Partial<
+  Record<DaruriKey | DaruriSubstituteKey, string>
+>;
 
 /** `Date.UTC` from adhan's decimal-hours convention — see `TimeComponents`. */
 function utcDateFromHours(
@@ -438,25 +563,55 @@ export function daruriTimesForDay(
   timings: TimingsMap,
   tomorrowFajr: string | undefined,
   asrShadow: 1 | 2 = 1,
+  substitute = false,
 ): DaruriTimes {
   const solar = solarDaruriBoundaries(date, latitude, longitude);
   const out: DaruriTimes = {};
 
+  // ── THE 45° SUBSTITUTE — issue #20 ─────────────────────────────────
+  //
+  // The same three solar boundaries, worked at 45° in this reader's own
+  // hemisphere and at their own longitude, per fn. 653. Computed only
+  // where the switch is on AND the reader is poleward of 45°, so at any
+  // ordinary latitude this whole feature is one boolean and a second
+  // `SolarTime` that is never constructed.
+  //
+  // `fill` is the whole of the policy: the substitute is consulted only
+  // where the sky gave nothing at all. See the constant's comment.
+  const sub =
+    substitute && substituteApplies(latitude)
+      ? solarDaruriBoundaries(date, substituteLatitude(latitude), longitude)
+      : {};
+  const substituted = new Set<DaruriKey>();
+  const fill = (key: DaruriKey, own: string | undefined) => {
+    if (own) return own;
+    const stand = sub[key];
+    if (stand) substituted.add(key);
+    return stand;
+  };
+
   // Fajr: *isfār*, inside (Fajr, Sunrise).
-  if (inside(solar.FajrDaruri, timings.Fajr, timings.Sunrise)) {
-    out.FajrDaruri = solar.FajrDaruri;
+  const fajrBoundary = fill('FajrDaruri', solar.FajrDaruri);
+  if (inside(fajrBoundary, timings.Fajr, timings.Sunrise)) {
+    out.FajrDaruri = fajrBoundary;
   }
 
   // Ẓuhr: the ʿAṣr row on a 1:1 setting; the 1:1 shadow otherwise.
   // Inside (Dhuhr, Maghrib) either way.
-  const dhuhrBoundary = asrShadow === 1 ? timings.Asr : solar.DhuhrDaruri;
+  //
+  // Only the computed branch can be substituted. On a 1:1 ʿaṣr this is
+  // the reader's own ʿAṣr row, which is never missing and is not this
+  // module's to replace.
+  const dhuhrBoundary =
+    asrShadow === 1 ? timings.Asr : fill('DhuhrDaruri', solar.DhuhrDaruri);
   if (inside(dhuhrBoundary, timings.Dhuhr, timings.Maghrib)) {
     out.DhuhrDaruri = dhuhrBoundary;
   }
 
   // ʿAṣr: *iṣfirār*, inside (Asr, Maghrib).
-  if (inside(solar.AsrDaruri, timings.Asr, timings.Maghrib)) {
-    out.AsrDaruri = solar.AsrDaruri;
+  const asrBoundary = fill('AsrDaruri', solar.AsrDaruri);
+  if (inside(asrBoundary, timings.Asr, timings.Maghrib)) {
+    out.AsrDaruri = asrBoundary;
   }
 
   // ── THE END OF THE NIGHT, AND THE ONE DAY THAT HAS NO TOMORROW ──────
@@ -493,6 +648,15 @@ export function daruriTimesForDay(
       // rather than putting a wrong one on the card.
     }
   }
+
+  // The companion keys, and only for boundaries that actually SURVIVED
+  // the gate above. A substitute that was computed and then dropped for
+  // contradicting the card must not leave a marker behind claiming a
+  // boundary that is not there.
+  for (const key of substituted) {
+    const shown = out[key];
+    if (shown) out[DARURI_SUBSTITUTE_KEY[key]] = shown;
+  }
   return out;
 }
 
@@ -519,6 +683,7 @@ export function injectDaruriTimes(
   latitude: number,
   longitude: number,
   asrShadow: 1 | 2 = 1,
+  substitute = false,
 ): TimingsMap[] {
   return week.map((day, i) => {
     const date = new Date(startDate);
@@ -531,6 +696,7 @@ export function injectDaruriTimes(
       day,
       i < week.length - 1 ? week[i + 1].Fajr : undefined,
       asrShadow,
+      substitute,
     );
     return { ...day, ...times };
   });

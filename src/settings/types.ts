@@ -432,6 +432,25 @@ export type PrayerAppSettings = {
    */
   malikiSecondTimeEndAlerts: boolean;
   /**
+   * The 45° substitute for boundaries the sun does not give — issue #20.
+   * Defaults OFF, and does nothing at all below 45°.
+   *
+   * *The Guiding Helper* fn. 653: where the sun does not behave, follow
+   * the local authority, and failing that "the prayer timings for the
+   * 45° latitude mark at their longitude". The first step is a person,
+   * not an app; the second is arithmetic, and this switch is that
+   * arithmetic.
+   *
+   * It is deliberately NARROW. The five daily prayers are never touched —
+   * they come from the reader's provider, which is the local authority
+   * fn. 653 asks for first. What this fills is the second times the app
+   * works out for itself and today leaves blank: *isfār*, *iṣfirār*, and
+   * the 1:1 shadow on a Ḥanafī ʿaṣr, on the days at high latitude when
+   * the sun never reaches the angle. Substituted boundaries are labelled
+   * wherever they appear. See `src/prayer/daruriTimes.ts`.
+   */
+  malikiLat45Substitute: boolean;
+  /**
    * How long before a boundary its alert fires. 0 means at the boundary.
    *
    * The default is 15: the row on the card is the reference, and the
@@ -578,6 +597,10 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // notification the user did not ask for.
   malikiSecondTimeRows: true,
   malikiSecondTimeEndAlerts: false,
+  // #20. Off: fn. 653's first step is the reader's local authority, and a
+  // substitute that appeared without being asked for would read as the
+  // app's own reckoning of a sky it cannot see.
+  malikiLat45Substitute: false,
   // Ayah of the day: off by default (no surprise notifications); 9:00 AM
   // when enabled — a quiet mid-morning moment.
   // Adhkār reminders: off by default, like every other notification the

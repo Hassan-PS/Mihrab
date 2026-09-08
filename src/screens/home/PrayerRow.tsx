@@ -57,6 +57,17 @@ type PrayerRowProps = {
    */
   daruriApprox?: boolean;
   /**
+   * True when the sky here gave no boundary and this one was worked at
+   * the 45° mark instead — issue #20, *The Guiding Helper* fn. 653.
+   *
+   * It replaces "approx." rather than joining it. Both are caveats, and
+   * where they coincide the substitute is the larger one by far: a
+   * modelled angle is a few minutes' doubt about this reader's own sky,
+   * and a substitute is a different sky. Printing both would spend two
+   * thirds of the line on hedging and leave the reader ranking them.
+   */
+  daruriSubstitute?: boolean;
+  /**
    * How this row announces itself, and the tap that cycles it. Absent
    * for a row that cannot be aimed at — yesterday's card, or the share
    * sheet — where a control that changes a setting has no business.
@@ -127,6 +138,7 @@ function PrayerRowImpl({
   isLast,
   daruriAt,
   daruriApprox = false,
+  daruriSubstitute = false,
   alertMode,
   onCycleAlertMode,
   overrideMode,
@@ -190,14 +202,24 @@ function PrayerRowImpl({
             style={[styles.daruri, { color: palette.muted }]}
             numberOfLines={1}
             maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-            {t('prayer.firstTimeUntil', {
-              defaultValue: 'First time until {{time}}',
-              time: daruriApprox
-                ? `${t('prayer.approx', { defaultValue: 'approx.' })} ${clock(
-                    daruriAt,
-                  )}`
-                : clock(daruriAt),
-            })}
+            {daruriSubstitute
+              ? // Issue #20. Its own sentence rather than a marker glued
+                // to the time, because what it says is not "about" — it
+                // is "this is not your sky's answer". A reader who wants
+                // to know why is one tap from the switch that turned it
+                // on, where fn. 653 is quoted in full.
+                t('prayer.firstTimeUntilLat45', {
+                  defaultValue: 'First time until {{time}} — 45° substitute',
+                  time: clock(daruriAt),
+                })
+              : t('prayer.firstTimeUntil', {
+                  defaultValue: 'First time until {{time}}',
+                  time: daruriApprox
+                    ? `${t('prayer.approx', {
+                        defaultValue: 'approx.',
+                      })} ${clock(daruriAt)}`
+                    : clock(daruriAt),
+                })}
           </Text>
         ) : null}
         {/* Under the name for the same reason the line above is, and for

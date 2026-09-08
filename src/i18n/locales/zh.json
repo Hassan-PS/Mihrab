@@ -124,7 +124,8 @@
     "hijri": "回历",
     "gregorian": "公历",
     "prayerTimes": "祈祷时间",
-    "daruriLegend": "晨礼、晡礼、宵礼下方的小字，是各自首选时段结束的时刻。晌礼在晡礼开始时结束、昏礼在宵礼开始时结束，因此这两者就是那两列本身。晨礼与晡礼的为近似值。"
+    "daruriLegend": "晨礼、晡礼、宵礼下方的小字，是各自首选时段结束的时刻。晌礼在晡礼开始时结束、昏礼在宵礼开始时结束，因此这两者就是那两列本身。晨礼与晡礼的为近似值。",
+    "daruriLegendLat45": "时刻后的 ° 表示此地太阳未给出该界限，故按 45° 纬线推算。"
   },
   "share": {
     "tagline": "礼拜时间、朝向与《古兰经》",
@@ -289,6 +290,9 @@
     "malikiSecondTimesHelp": "每次礼拜都会在「今天」卡片上多一行，说明其首选时段（ikhtiyari）何时结束、延后时段（daruri）何时开始。无论礼拜时间来自哪个来源，都在你的设备上依据你的坐标计算。晡礼一律采用 1:1 影长，不受你所选教法学派影响，因为这才是马立克派的界线。默认关闭。",
     "malikiSecondTimesHanafiWarning": "请注意：这些是马立克派的界线，但你的晡礼设为哈乃斐派，采用不同的影长。晌礼的首选时段会比下方显示的晡礼早约半小时结束。若希望卡片前后一致，请关闭哈乃斐派晡礼。",
     "malikiSecondTimesSource": "依据伊本·阿希尔《Al-Murshid al-Muin》，见 The Guiding Helper 第 11 章。",
+    "malikiLat45": "45° 替代",
+    "malikiLat45Help": "在此地太阳始终达不到该角度时，该界限不再留空，而是按你所在经度上的 45° 纬线推算。替代的时刻在出现处都会标注，你已选择的提醒也会为它们响起。这不会改变你的五番拜功时刻。默认关闭。",
+    "malikiLat45Source": "The Guiding Helper 第 11 章脚注 653：太阳运行不规律之处，应依循当地伊斯兰权威通行的时刻；若实际上并无通行时刻，可依循自己经度上 45° 纬线的时刻。",
     "malikiAlerts": "提醒我",
     "malikiAlertsHelp": "起初每次礼拜都关闭。只挑你确实想被告知的——每天多五条通知，正是一个应用教会你忽略它的方式。需要先开启通知。",
     "malikiAlertsDisabled": "在“礼拜时间”中开启马立克派的第二时间，之后即可在此处提醒。",
@@ -465,6 +469,7 @@
     "Firstthird": "前三分之一",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "首选时段至 {{time}}",
+    "firstTimeUntilLat45": "首选时段至 {{time}} — 45° 替代",
     "secondTimeFrom": "第二时段自 {{time}}",
     "approx": "约",
     "Subh": "晨礼",
