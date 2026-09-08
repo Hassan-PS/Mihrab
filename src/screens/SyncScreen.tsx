@@ -493,7 +493,7 @@ export function SyncScreen() {
         </Text>
 
         <Text
-          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+          style={[typeStyle('label'), styles.section, { color: palette.muted }]}
         >
           {t('sync.folderSection')}
         </Text>
@@ -594,7 +594,7 @@ export function SyncScreen() {
         </View>
 
         <Text
-          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+          style={[typeStyle('label'), styles.section, { color: palette.muted }]}
         >
           {t('sync.thisDevice')}
         </Text>
@@ -655,7 +655,7 @@ export function SyncScreen() {
         </View>
 
         <Text
-          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+          style={[typeStyle('label'), styles.section, { color: palette.muted }]}
         >
           {t('sync.addDevice')}
         </Text>
@@ -742,7 +742,7 @@ export function SyncScreen() {
         </View>
 
         <Text
-          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+          style={[typeStyle('label'), styles.section, { color: palette.muted }]}
         >
           {t('sync.pairedSection')}
         </Text>
@@ -771,7 +771,7 @@ export function SyncScreen() {
 
 
         <Text
-          style={[typeStyle('caption'), styles.section, { color: palette.muted }]}
+          style={[typeStyle('label'), styles.section, { color: palette.muted }]}
         >
           {t('sync.whatSyncs')}
         </Text>
@@ -814,8 +814,6 @@ const styles = StyleSheet.create({
   content: { padding: SPACING.lg },
   stack: { gap: SPACING.md },
   section: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
     marginTop: SPACING.sm,
   },
   card: { padding: SPACING.md, gap: SPACING.sm },

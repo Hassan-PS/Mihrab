@@ -11,8 +11,6 @@ export const sharedSettingsStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 8,
   },

@@ -517,9 +517,7 @@ const styles = StyleSheet.create({
   section: { gap: 8 },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    fontWeight: '600',
     paddingHorizontal: 4,
   },
   sectionCard: {
@@ -571,10 +569,8 @@ const styles = StyleSheet.create({
   },
   title: {
     flexShrink: 1,
-    fontSize: 14,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontSize: 17,
+    fontWeight: '600',
   },
   // Pushed to the trailing edge, and `marginStart: 'auto'` rather than a
   // Spacer so a long title shrinks past it instead of pushing it off the

@@ -367,9 +367,7 @@ const styles = StyleSheet.create({
   stack: { gap: 10 },
   total: {
     fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontWeight: '600',
     marginBottom: 2,
   },
   row: {

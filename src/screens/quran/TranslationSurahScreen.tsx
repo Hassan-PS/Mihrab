@@ -664,11 +664,9 @@ const styles = StyleSheet.create({
   },
   editionLabel: { fontSize: 12, flexShrink: 0 },
   editionHint: {
-    fontSize: 11,
+    fontSize: 12,
     flexShrink: 0,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontWeight: '600',
   },
   hideHint: { fontSize: 12, fontWeight: '600', textAlign: 'center', marginTop: 6 },
   ayahCard: { padding: 16, borderRadius: 12, gap: 10, marginTop: 12 },

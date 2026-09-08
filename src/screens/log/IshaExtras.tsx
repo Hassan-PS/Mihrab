@@ -164,10 +164,8 @@ const styles = StyleSheet.create({
   wrapNotYet: { opacity: 0.4 },
   head: {
     marginTop: 4,
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
   },
   row: {
     flexDirection: 'row',

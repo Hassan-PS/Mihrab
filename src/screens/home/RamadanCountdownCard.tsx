@@ -146,8 +146,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
   },
   row: {
     flexDirection: 'row',

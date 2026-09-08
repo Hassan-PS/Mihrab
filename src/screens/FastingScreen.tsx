@@ -231,7 +231,7 @@ export function FastingScreen() {
               ...cardEdgeStyle(palette),
             },
           ]}>
-          <Text style={[typeStyle('caption'), { color: palette.muted, textTransform: 'uppercase' }]}>
+          <Text style={[typeStyle('label'), { color: palette.muted }]}>
             {t('fasting.ramadanCountdownLabel', 'Ramadan begins in')}
           </Text>
           <Text
@@ -253,7 +253,7 @@ export function FastingScreen() {
         ]}>
         <View style={styles.heroRow}>
           <CrescentIcon color={palette.accentSolid} size={28} />
-          <Text style={[typeStyle('caption'), styles.eyebrow, { color: palette.muted }]}>
+          <Text style={[typeStyle('label'), { color: palette.muted }]}>
             {inRamadan
               ? t('fasting.ramadanDayLabel', { day: ramadanDay ?? 0 })
               : t('fasting.todayLabel')}
@@ -340,7 +340,7 @@ export function FastingScreen() {
               ...cardEdgeStyle(palette),
             },
           ]}>
-          <Text style={[typeStyle('caption'), styles.eyebrow, { color: palette.muted }]}>
+          <Text style={[typeStyle('label'), { color: palette.muted }]}>
             {t('fasting.gridLabel')}
           </Text>
           <View style={styles.grid}>
@@ -426,7 +426,7 @@ export function FastingScreen() {
       {/* Upcoming high-reward fasting days, each with a "X days away"
           countdown. Surfaces White Days (every Hijri month), Ashura,
           Arafah, 6 of Shawwal, and Ramadan. */}
-      <Text style={[typeStyle('caption'), styles.sectionTitle, { color: palette.muted }]}>
+      <Text style={[typeStyle('label'), styles.sectionTitle, { color: palette.muted }]}>
         {t('fasting.upcomingLabel', 'Upcoming fasting Sunnahs')}
       </Text>
       <View style={styles.upcomingList}>
@@ -466,7 +466,7 @@ export function FastingScreen() {
 
       {/* Month-view-style log: every fasting day the user has recorded,
           newest first. Mirrors the Journal's history list (#82). */}
-      <Text style={[typeStyle('caption'), styles.sectionTitle, { color: palette.muted }]}>
+      <Text style={[typeStyle('label'), styles.sectionTitle, { color: palette.muted }]}>
         {t('fasting.monthViewLabel', 'All logged fasts')}
       </Text>
       {allLoggedDates.length === 0 ? (
@@ -574,10 +574,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.xs,
   },
-  eyebrow: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
   primary: {
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
@@ -633,8 +629,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   sectionTitle: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
     marginTop: SPACING.sm,
   },
   upcomingList: {

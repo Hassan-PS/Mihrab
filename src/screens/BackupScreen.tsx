@@ -231,7 +231,7 @@ export function BackupScreen() {
       <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         <Text
           style={[
-            typeStyle('caption'),
+            typeStyle('label'),
             styles.section,
             { color: palette.muted },
           ]}
@@ -281,7 +281,7 @@ export function BackupScreen() {
 
         <Text
           style={[
-            typeStyle('caption'),
+            typeStyle('label'),
             styles.section,
             { color: palette.muted },
           ]}
@@ -394,8 +394,6 @@ const styles = StyleSheet.create({
   content: { padding: SPACING.lg },
   stack: { gap: SPACING.md },
   section: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
     marginTop: SPACING.sm,
   },
   card: { padding: SPACING.md, gap: SPACING.sm },

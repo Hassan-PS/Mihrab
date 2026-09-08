@@ -244,10 +244,8 @@ const styles = StyleSheet.create({
   figure: { minWidth: 54 },
   figureValue: { fontSize: 20, fontWeight: '700', lineHeight: 24 },
   figureCaption: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
     marginTop: 1,
   },
   cancel: { alignSelf: 'flex-end', paddingHorizontal: 14, paddingVertical: 12 },

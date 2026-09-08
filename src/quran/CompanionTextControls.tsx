@@ -313,10 +313,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionHeader: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontSize: 12,
+    fontWeight: '600',
     marginTop: 14,
     marginBottom: 2,
   },

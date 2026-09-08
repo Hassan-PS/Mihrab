@@ -383,9 +383,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    fontWeight: '600',
   },
   statusPill: {
     flexDirection: 'row',
@@ -417,10 +415,8 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   serverName: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    fontSize: 12,
+    fontWeight: '600',
     flexShrink: 1,
   },
   activeTag: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },

@@ -113,10 +113,8 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   dow: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    fontSize: 12,
+    fontWeight: '600',
   },
   dom: { fontSize: 16, fontWeight: '700' },
   // Keeps the last chip clear of the card's rounded corner while scrolling.

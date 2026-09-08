@@ -358,9 +358,7 @@ const styles = StyleSheet.create({
   sheet: { maxHeight: '88%' },
   section: {
     fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    fontWeight: '600',
     paddingHorizontal: 16,
     paddingTop: 18,
     paddingBottom: 6,

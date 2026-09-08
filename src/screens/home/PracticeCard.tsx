@@ -154,10 +154,8 @@ const styles = StyleSheet.create({
   },
   openLabel: { fontSize: 13.5, fontWeight: '600' },
   title: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
     marginBottom: 10,
   },
 });

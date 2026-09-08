@@ -398,9 +398,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   badgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontSize: 10,
+    fontWeight: '600',
   },
 });

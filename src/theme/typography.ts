@@ -1,7 +1,7 @@
 /**
  * Typography system — task #36.
  *
- * 9-token type scale that every Text in the app should reference. Pairs
+ * Type scale that every Text in the app should reference. Pairs
  * the platform default Latin face (SF Pro on iOS, Roboto on Android) with
  * Amiri / Scheherazade for Arabic ayah and dua text once those fonts are
  * bundled (a follow-up data PR — they need to be added to assets/fonts/
@@ -34,7 +34,8 @@ export const TYPE: Record<
   | 'body'
   | 'callout'
   | 'footnote'
-  | 'caption',
+  | 'caption'
+  | 'label',
   TypeToken
 > = {
   display: { fontSize: 56, lineHeight: 60, fontWeight: '600', letterSpacing: -0.6, tabular: true },
@@ -43,9 +44,17 @@ export const TYPE: Record<
   title3: { fontSize: 18, lineHeight: 24, fontWeight: '600' },
   headline: { fontSize: 16, lineHeight: 22, fontWeight: '600' },
   body: { fontSize: 16, lineHeight: 22, fontWeight: '400' },
+  /** @deprecated 15 is the size that puts 14/15/16 on one screen — use `body` or `footnote`. */
   callout: { fontSize: 15, lineHeight: 20, fontWeight: '400' },
   footnote: { fontSize: 13, lineHeight: 18, fontWeight: '400' },
   caption: { fontSize: 11, lineHeight: 14, fontWeight: '400', letterSpacing: 0.4 },
+  /**
+   * Section and tile labels — the replacement for every uppercase,
+   * letterspaced overline (docs/design/redesign-plan.md §2.1). Sentence
+   * case, `palette.muted`, no tracking. A label names the group under it
+   * and then gets out of the way; the overline shouted it.
+   */
+  label: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
 };
 
 /** Returns a flat style object for a type token, with tabular numerals

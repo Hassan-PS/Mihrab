@@ -290,10 +290,8 @@ const styles = StyleSheet.create({
   root: { flex: 1, padding: 16, gap: 14 },
   head: { alignItems: 'center', gap: 6 },
   position: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
   },
   arabic: {
     fontSize: 30,
@@ -320,10 +318,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   peekLabel: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
   },
   peekBody: { flex: 1, minWidth: 0, alignItems: 'flex-end' },
   peekMeta: { fontSize: 12, fontWeight: '600' },

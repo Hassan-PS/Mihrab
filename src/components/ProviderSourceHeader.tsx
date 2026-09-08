@@ -109,10 +109,8 @@ const styles = StyleSheet.create({
     paddingEnd: 8,
   },
   kicker: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
     marginBottom: 2,
   },
   title: {

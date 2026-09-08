@@ -372,10 +372,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   khatmahLabel: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
   },
   khatmahMeta: { fontSize: 13, fontWeight: '600' },
   track: { height: 4, borderRadius: 2, overflow: 'hidden', marginTop: 4 },

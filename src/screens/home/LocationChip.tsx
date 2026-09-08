@@ -399,10 +399,8 @@ const styles = StyleSheet.create({
   // flexShrink:0 so it never gets squeezed out — the city label truncates
   // instead (seen clipped on iOS where the name filled the whole chip).
   autoBadge: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: RADIUS.sm,

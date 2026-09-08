@@ -161,10 +161,8 @@ const styles = StyleSheet.create({
     zIndex: 4,
   },
   phoneFrontLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    fontSize: 12,
+    fontWeight: '600',
   },
   // rtl-safe: geometric triangle (the classic 0×0 + transparent borders trick).
   // borderLeftWidth / borderRightWidth define the triangle's base, NOT a layout

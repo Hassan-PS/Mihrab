@@ -1615,10 +1615,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   resumeLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontSize: 12,
+    fontWeight: '600',
   },
   resumeTitle: { fontSize: 15, fontWeight: '700', marginTop: 2 },
   khatmahCard: { padding: 14, borderRadius: 12, gap: 8 },
@@ -1667,10 +1665,8 @@ const styles = StyleSheet.create({
   },
   votdCard: { padding: 12, borderRadius: 12, gap: 6 },
   votdLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontSize: 12,
+    fontWeight: '600',
   },
   votdArabic: {
     fontSize: 18,
@@ -1871,9 +1867,7 @@ const styles = StyleSheet.create({
   },
   starredHeading: {
     fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    fontWeight: '600',
     marginTop: 8,
   },
 });

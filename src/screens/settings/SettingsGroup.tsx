@@ -251,9 +251,7 @@ const styles = StyleSheet.create({
   group: { marginBottom: 20 },
   groupTitle: {
     fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    fontWeight: '600',
     marginBottom: 8,
     marginStart: 4,
   },

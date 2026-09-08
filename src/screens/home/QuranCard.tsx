@@ -318,10 +318,8 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999 },
   chipLabel: { fontSize: 11.5, fontWeight: '700' },
   eyebrow: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
   },
   verseBody: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 },
   verseArabic: {

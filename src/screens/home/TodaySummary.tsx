@@ -93,10 +93,18 @@ function Mark({ fraction }: { fraction: number }) {
 
 /** One logged fact. Only ever rendered for something that happened, so it
  *  has no unmarked state to draw. */
-function Line({ label, fraction = 1 }: { label: string; fraction?: number }) {
+function Line({
+  label,
+  fraction = 1,
+  first = false,
+}: {
+  label: string;
+  fraction?: number;
+  first?: boolean;
+}) {
   const { palette } = useAppPalette();
   return (
-    <View style={styles.line}>
+    <View style={[styles.line, first && styles.firstLine]}>
       <Mark fraction={fraction} />
       <Text
         style={[styles.label, { color: palette.text }]}
@@ -135,11 +143,13 @@ function TodaySummaryImpl({ onOpenLog }: Props) {
         onPress={onOpenLog}
         style={styles.inner}
       >
-        <Text style={[styles.heading, { color: palette.muted }]}>
-          {t('home.todaySummary', 'Today')}
-        </Text>
+        {/* No heading. The card sits on the Today tab; a label reading
+            "Today" above three facts about today was the one overline that
+            said nothing at all (redesign-plan P1). The accessibility label
+            on the Pressable still names it. */}
         {logged > 0 ? (
           <Line
+            first
             fraction={logged / LOGGABLE_PRAYERS}
             label={t('home.prayersLogged', {
               defaultValue: '{{count}} of {{total}} prayers logged',
@@ -150,6 +160,7 @@ function TodaySummaryImpl({ onOpenLog }: Props) {
         ) : null}
         {fasted ? (
           <Line
+            first={logged === 0}
             label={t(`home.fastKept.${fastType ?? 'voluntary'}`, {
               defaultValue: 'Fast kept',
             })}
@@ -157,6 +168,7 @@ function TodaySummaryImpl({ onOpenLog }: Props) {
         ) : null}
         {dhikrSets > 0 ? (
           <Line
+            first={logged === 0 && !fasted}
             label={t('home.dhikrSets', {
               defaultValue: '{{count}} dhikr sets completed',
               count: dhikrSets,
@@ -173,15 +185,12 @@ export const TodaySummary = memo(TodaySummaryImpl);
 const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
   inner: { paddingHorizontal: 16, paddingVertical: 13 },
-  heading: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
   line: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     marginTop: 7,
   },
+  firstLine: { marginTop: 0 },
   label: { flex: 1, fontSize: 14.5 },
 });

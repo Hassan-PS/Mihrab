@@ -144,10 +144,8 @@ const styles = StyleSheet.create({
   rule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch' },
   number: { fontSize: 26, fontWeight: '700' },
   caption: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
   },
   range: {
     fontSize: 14.5,

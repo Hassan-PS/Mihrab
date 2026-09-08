@@ -207,10 +207,8 @@ const styles = StyleSheet.create({
   value: { fontSize: 19, fontWeight: '700', lineHeight: 23 },
   unit: { fontSize: 11, fontWeight: '700' },
   label: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
+    fontSize: 11,
+    fontWeight: '600',
     textAlign: 'center',
     marginTop: 3,
     lineHeight: 12,

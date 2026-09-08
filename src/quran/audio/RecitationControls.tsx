@@ -344,9 +344,7 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
 const styles = StyleSheet.create({
   section: {
     fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    fontWeight: '600',
     marginTop: 16,
     marginBottom: 8,
   },

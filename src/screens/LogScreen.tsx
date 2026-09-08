@@ -1122,9 +1122,8 @@ export function LogScreen() {
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}
         >
-          <Text style={[styles.sectionTitle, { color: palette.muted }]}>
-            {t('log.practiceTitle')}
-          </Text>
+          {/* No "Practice" label: four numbers and a heatmap on the Log tab
+              need no heading to say what they are (redesign-plan P1). */}
           {/* The caption this replaces read "5-day streak (best 12) · 0-day
               sunnah · 1 fasts" — three statistics in prose under a chart,
               with the middle one a puzzle. See PracticeStatsRow. */}
@@ -1833,10 +1832,8 @@ const styles = StyleSheet.create({
   stack: { gap: 14 },
   card: { borderRadius: 18, padding: 14 },
   sectionTitle: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '600',
     marginBottom: 10,
   },
   /**

@@ -281,7 +281,7 @@ export function OnboardingScreen() {
       </View>
 
       <Text
-        style={[typeStyle('caption'), styles.stepLabel, { color: palette.muted }]}>
+        style={[typeStyle('label'), styles.stepLabel, { color: palette.muted }]}>
         {t('onboarding.stepLabel', {
           current: index + 1,
           total: steps.length,
@@ -377,8 +377,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xl,
   },
   stepLabel: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
     textAlign: 'center',
   },
   title: { textAlign: 'center', fontWeight: '700' },
