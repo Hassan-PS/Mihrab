@@ -151,3 +151,57 @@ describe('every plural the widgets format has an “other”', () => {
     }
   });
 });
+
+describe('the render survives a payload it does not recognise', () => {
+  // The Huawei cause in #31 is still unknown, but every throw that WAS
+  // reachable in this path is now a missing row or a placeholder. If the
+  // cause was one of them, it is fixed rather than merely reported.
+  it('does not throw on a payload with no rows', () => {
+    expect(PROVIDER).toMatch(/o\.optJSONArray\("rows"\)/);
+    expect(PROVIDER).not.toMatch(/o\.getJSONArray\("rows"\)/);
+  });
+
+  it('drops a malformed row rather than the card', () => {
+    expect(PROVIDER).not.toMatch(/rows\.getJSONObject\(/);
+    expect(PROVIDER).toMatch(/rows\.optJSONObject\(0\)\?\.let/);
+  });
+
+  it('reads a row’s fields without demanding them', () => {
+    // `getString` throws when the key is absent; every one of these sits
+    // inside a loop over rows the payload supplied.
+    expect(PROVIDER).not.toMatch(/row\.getString\(/);
+  });
+});
+
+describe('the two entries in the widget picker', () => {
+  // Reported as "duplicate ... widgets (4x1) in the choices". They are
+  // not duplicates — one is the strip and one carries the graph — but on
+  // a launcher that ignores targetCellWidth/Height (API 31) and falls
+  // back to minWidth/minHeight, both advertised 250x60 and previewed
+  // identically.
+  const xml = (rel: string) => read(`android/app/src/main/res/xml/${rel}`);
+  const dp = (src: string, attr: string) =>
+    Number(new RegExp(`android:${attr}="(\\d+)dp"`).exec(src)?.[1] ?? 0);
+
+  it.each([
+    ['prayer_widget_info.xml', 'prayer_widget_tall_info.xml'],
+    ['prayer_widget_log_info.xml', 'prayer_widget_log_tall_info.xml'],
+  ])('%s and %s ask for different heights', (shortFile, tallFile) => {
+    const short = xml(shortFile);
+    const tall = xml(tallFile);
+    expect(dp(tall, 'minHeight')).toBeGreaterThanOrEqual(
+      dp(short, 'minHeight') * 2,
+    );
+  });
+
+  it.each(['prayer_widget_tall_info.xml', 'prayer_widget_log_tall_info.xml'])(
+    '%s can still be dragged down to the strip',
+    (file: string) => {
+      // minHeight is where the picker PLACES it; minResizeHeight is how
+      // small it may then go. The tall entry losing the second was the
+      // thing to avoid while fixing the first.
+      const src = xml(file);
+      expect(dp(src, 'minResizeHeight')).toBeLessThanOrEqual(60);
+    },
+  );
+});

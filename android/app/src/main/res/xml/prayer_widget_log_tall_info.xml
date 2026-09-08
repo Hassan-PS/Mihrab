@@ -17,13 +17,26 @@
   as well. See prayer_widget_tall_info.xml on why a launcher row is not a
   fixed number of dp.
 -->
+<!-- TWO ROWS IN THE PICKER, NOT ONE — issue #31.
+
+     `targetCellWidth`/`targetCellHeight` are API 31 and say 4x2, and on a
+     launcher that honours them this entry previews at twice the height of
+     the short one. Not every launcher does. EMUI falls back to
+     minWidth/minHeight, and both providers advertised 250x60 — so the
+     picker showed two 4x1 tiles with almost the same label, which is
+     exactly what was reported: "duplicate widgets (4x1) in the choices".
+
+     `minHeight` is the size the picker PLACES it at; `minResizeHeight` is
+     how small it may then be dragged. Separating the two is what this
+     entry always meant: place it tall, shrink it if you want the strip.
+-->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
     android:widgetFeatures="reconfigurable|configuration_optional"
     android:description="@string/widget_description_log_tall"
     android:initialLayout="@layout/prayer_widget_log"
     android:minWidth="250dp"
-    android:minHeight="60dp"
+    android:minHeight="130dp"
     android:previewImage="@mipmap/ic_launcher"
     android:previewLayout="@layout/prayer_widget_log_tall_preview"
     android:resizeMode="horizontal|vertical"

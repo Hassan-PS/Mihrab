@@ -1824,15 +1824,35 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // the times went stale ~24h later. Falls back to the top-level single-day
       // fields when no `days[]` is present (older payloads) or none matches.
       val todayDay = selectTodayDay(o)
-      val rows = todayDay?.optJSONArray("rows") ?: o.getJSONArray("rows")
+      // ── NOT `getJSONArray` — issue #31 ──────────────────────────────
+      //
+      // `getJSONArray` throws when the key is absent, and a throw here is
+      // the whole card replaced by "Could not load widget data". Every
+      // payload this app writes carries `rows`, which is exactly why the
+      // throw was acceptable for a year and exactly why it is not: the
+      // one report of that message comes from a phone whose payload we
+      // cannot see. A missing `rows` is a payload with nothing to say,
+      // and the placeholder already exists for that.
+      val rows = todayDay?.optJSONArray("rows") ?: o.optJSONArray("rows")
+      if (rows == null) {
+        showMessageOnly(
+          views,
+          context.getString(R.string.widget_placeholder_day),
+          isError = false,
+          style,
+        )
+        return
+      }
       // sunriseRow is a separate object (not in `rows`) rendered at display slot 1.
       val sunriseRowObj = todayDay?.optJSONObject("sunriseRow") ?: o.optJSONObject("sunriseRow")
 
       // Build the ordered display list: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha
       val displayRows = mutableListOf<org.json.JSONObject>()
-      if (rows.length() > 0) displayRows.add(rows.getJSONObject(0)) // Fajr at slot 0
+      // `optJSONObject` throughout: an entry that is not an object is one
+      // row missing, not a card missing.
+      if (rows.length() > 0) rows.optJSONObject(0)?.let { displayRows.add(it) }
       sunriseRowObj?.let { displayRows.add(it) }                     // Sunrise at slot 1
-      for (i in 1 until rows.length()) displayRows.add(rows.getJSONObject(i)) // rest of salāh
+      for (i in 1 until rows.length()) rows.optJSONObject(i)?.let { displayRows.add(it) }
       // ...then the night rows, after Isha. Absent entirely unless the user
       // turned them on — the payload only carries them when they are enabled,
       // so there is nothing to gate on here.
@@ -1865,7 +1885,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // than now would answer "Isha" at nine o'clock with the First Third
       // half an hour away.
       for (row in displayRows) {
-        val timeStr = row.getString("time")
+        val timeStr = row.optString("time", "")
         val parts = timeStr.split(":")
         if (parts.size == 2) {
           val h = parts[0].toIntOrNull() ?: continue
@@ -1874,7 +1894,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           if (rowMinutes > currentMinutes &&
             (nextUpdateMinutes < 0 || rowMinutes < nextUpdateMinutes)
           ) {
-            dynamicNextKey = row.getString("key")
+            dynamicNextKey = row.optString("key", "")
             dynamicNextName = row.optString("name", "").trim()
               .ifEmpty { row.optString("abbr", "").trim() }
               .ifEmpty { dynamicNextKey!! }
@@ -1889,7 +1909,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         nextPrayerTime = dynamicNextTime
       } else if (nextPrayerName.isEmpty() && nextKey != null) {
         for (row in displayRows) {
-          if (row.getString("key") == nextKey) {
+          if (row.optString("key", "") == nextKey) {
             nextPrayerName = row.optString("name", "").trim()
               .ifEmpty { row.optString("abbr", "").trim() }
               .ifEmpty { nextKey }
@@ -2020,7 +2040,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
           continue
         }
         val row = displayRows[i]
-        val key = row.getString("key")
+        val key = row.optString("key", "")
         val time = displayTime(row)
         val label = row.optString("name", "").trim()
           .ifEmpty { row.optString("abbr", "").trim() }
