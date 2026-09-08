@@ -167,23 +167,37 @@ The Hisnul Muslim collection by Sa'id bin 'Ali bin Wahf al-Qahtani is
 widely treated as public domain. Three open-source JSON mirrors exist
 on GitHub:
 
-#### Recommended: rn0x/hisn_almuslim_json
+#### The Arabic: rn0x/hisn_almuslim_json
 
 - **URL:** https://github.com/rn0x/hisn_almuslim_json
-- **Format:** JSON file with full Arabic + reference + count.
-- **Coverage:** All chapters of Hisn al-Muslim.
-- **Why this one:** Cleanest schema among the three; one JSON file
-  per chapter; references include hadith collection citation strings.
+- **Format:** One JSON object, 134 chapters keyed by Arabic title, each
+  with `text[]` and `footnote[]` — the footnotes carry the hadith
+  citation (`أخرجه البخاري 1/45 ومسلم 1/283`, and so on).
+- **Licence: NONE.** Checked against the GitHub API on 2026-09-07: the
+  repository has no licence file and no licence field. **An earlier
+  version of this page said "MIT" and that was wrong** — the kind of
+  error that ends up in an attribution screen, which is worse than
+  having no attribution screen.
+- **What that means in practice:** the Arabic is quotation of hadith
+  and is not this repository's to license — the citations let us
+  attribute to Bukhārī, Muslim, Abū Dāwūd and the rest directly. So the
+  file is usable as a CROSS-CHECK and an index, not as a thing to copy
+  wholesale and credit.
 
-#### Alternative: wafaaelmaandy/Hisn-Muslim-Json
+#### wafaaelmaandy/Hisn-Muslim-Json — do NOT take the English
 
 - **URL:** https://github.com/wafaaelmaandy/Hisn-Muslim-Json
-- **Format:** Single JSON file with Arabic + English translation
-  side-by-side (rare combination — most mirrors are Arabic-only).
-- **Why consider it:** Pre-translated English columns, but you must
-  spot-check the translation quality — it doesn't appear to be the
-  Darussalam edition (which is copyrighted), so it should be safe
-  to redistribute.
+- **Format:** Arabic + transliteration + English side by side.
+- **Licence: NONE.**
+- **Why not:** an earlier version of this page said the English
+  "doesn't appear to be the Darussalam edition ... so it should be safe
+  to redistribute". Read the records: every one carries an `AUDIO` field
+  pointing at `hisnmuslim.com/audio/...`, which is the book's own site,
+  and the English matches what that site publishes ("All Praise is for
+  Allah who has clothed me with this garment and provided it for me,
+  with no power nor might from myself"). That is the published
+  translation, mirrored — exactly the thing this page says never to
+  ship. Treat it as copyrighted.
 
 #### Audio (optional follow-up): khDev01/islamic-data
 
@@ -207,18 +221,38 @@ on GitHub:
    - Ensures every output record has a non-empty `source` string. If
      the source JSON omits one, we fall back to "Hisn al-Muslim
      §{chapter}.{number}".
-3. Translation strategy:
-   - For entries that already have an English translation in
-     wafaaelmaandy's mirror, use that (cross-reference by Arabic
-     match).
-   - For entries without, mark `translation: ''` and document them in
-     `docs/duas-needing-translation.md` so a scholar can review later.
-   - **Never** ship the Darussalam English translation (copyrighted).
-4. Update DuasScreen About row attribution:
+3. Translation strategy — and this is the whole cost of the task:
+   - The Arabic is free to quote. **Every translation is a modern
+     work with an author**, and this app ships thirteen languages, so
+     one imported dua is one Arabic text and thirteen translation
+     problems. No GitHub dataset found (2026-09-07) solves that: the
+     multilingual ones are either unlicensed mirrors of the published
+     translation, or machine-translated, and a machine translation of
+     a supplication is not something to put in front of someone.
+   - **Never** ship the Darussalam English translation (copyrighted),
+     and treat any unattributed English mirror of Hisn al-Muslim as
+     being that translation until shown otherwise.
+   - **The route worth trying: IslamHouse.** islamhouse.com publishes
+     this same book in 64 languages, including every one Mihrab ships.
+     Its pages carry "© Islamhouse Website" and no redistribution
+     licence, so it is a permission to ASK FOR rather than a file to
+     take — but it is one request that would answer thirteen languages
+     at once, from a publisher whose whole purpose is free
+     distribution. https://islamhouse.com/en/books/39062/
+   - Failing that, they are short texts: six of them for the lavatory
+     and garment categories, one of which is a single word. Writing our
+     own translations is a smaller job than it looks, and it is the only
+     option that leaves the app owning what it ships.
+4. Update DuasScreen About row attribution — naming the hadith
+   collections, which is what the citations actually support:
 
-   > "Duas from Hisn al-Muslim by Sa'id bin 'Ali bin Wahf al-Qahtani
-   > (public domain). JSON adaptation: rn0x/hisn_almuslim_json under
-   > MIT license."
+   > "Supplications from the Qur'an and the hadith collections cited on
+   > each entry; arranged after Hisn al-Muslim by Saʿīd b. ʿAlī b. Wahf
+   > al-Qaḥṭānī. Translations by the Mihrab project."
+
+   NOT "JSON adaptation: rn0x/hisn_almuslim_json under MIT license" —
+   that repository has no licence, and crediting a licence that does not
+   exist is worse than crediting nothing.
 
 ### Why we haven't shipped the full collection yet
 
@@ -266,3 +300,30 @@ the assets above, do one of:
 - Run the download steps locally on your dev machine (no allowlist).
 - Add the relevant hosts to *Settings → Capabilities → Network access*
   if you want to fetch them inside Cowork sessions.
+
+
+## The duʿāʾ khatm al-Qurʾān — issue #35
+
+Searched GitHub on 2026-09-07. **There is no usable dataset**, and the
+reason is more interesting than the absence.
+
+**It is not one text.** "دعاء ختم القرآن" names several different
+supplications: the one printed at the end of many muṣḥafs, and — for
+instance — the one attributed to ʿAbd al-Qādir al-Jīlānī, which turns up
+in app repositories under exactly the same name. Choosing to ship one is
+choosing between traditions, before any question of translation.
+
+**Its provenance is contested, and the corpus says so.** The core of the
+printed version — *اللهم ارحمني بالقرآن واجعله لي إماماً ونوراً وهدى
+ورحمة* — appears in OpenITI's academic corpus of classical Arabic texts
+(github.com/OpenITI), where it is quoted with its chain: reported by Abū
+Manṣūr al-Muẓaffar b. al-Ḥusayn al-Arrajānī in *Faḍāʾil al-Qurʾān* and by
+Abū Bakr b. al-Ḍaḥḥāk in *al-Shamāʾil*, through Abū Dharr al-Harawī. One
+of the other places it turns up is al-ʿIrāqī's takhrīj of the *Iḥyāʾ* —
+the section collecting reports **for which he found no isnād**.
+
+So this is a scholarly decision rather than a data import: which text,
+and whether the app can print it with the honesty its other entries
+have. Every dua Mihrab ships names its collection and stands on it. A
+supplication whose best citation is "printed in most muṣḥafs" needs to
+say that on screen, or not be there.
