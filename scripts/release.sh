@@ -734,6 +734,24 @@ ok "cask at $VERSION, sha matches the published zip"
 # and Apple refusing to start a run is a thing to retry rather than a
 # release to unwind. The exact retry is printed at the end.
 step "App Store build"
+# ── SOMETIMES APPLE IS NOT THE PROBLEM AND THE DATE IS ────────────────
+#
+# App Store Connect has holds a release can run into that have nothing to
+# do with this repo: a submission window, a review already in flight, an
+# account that may not take a new build until a given day. In every one
+# of those the right move is to ship everything else and start iOS later,
+# and until this flag existed the only ways to do that were to comment
+# out a step in the middle of a release script or to let the run fail and
+# read the retry line. Both are how a release gets cut wrong at 1am.
+#
+# SKIP_APP_STORE=1 leaves the workflow PAUSED — nothing is sent, nothing
+# is queued, and no public commit status is posted — and the closing
+# summary says so and prints the one command that starts it when the hold
+# lifts. Everything else about the release is unchanged.
+if [ "${SKIP_APP_STORE:-0}" = "1" ]; then
+  ok "skipped: SKIP_APP_STORE=1 — Xcode Cloud stays paused, nothing sent"
+  XC_STARTED=skipped
+else
 $XC resume >/dev/null 2>&1 || warn "could not un-pause Xcode Cloud"
 XC_ARMED=1
 XC_START="$($XC start 2>&1)"
@@ -749,6 +767,7 @@ else
   XC_STARTED=0
 fi
 xc_pause
+fi
 
 # ══════════════════════════════════════════════════════════════════════
 # PHASE 4 — VERIFY.  The same gate as always, against what is now live.
@@ -899,7 +918,13 @@ EOF
 else
   bold "$VERSION ($CODE) is live on GitHub, Homebrew and the F-Droid recipe."
 fi
-if [ "${XC_STARTED:-0}" = "1" ]; then
+if [ "${XC_STARTED:-0}" = "skipped" ]; then
+  XC_APP_STORE_NOTE="NOT BUILT, on purpose (SKIP_APP_STORE=1). Nothing was
+              sent to App Store Connect and the workflow is still paused.
+              When the hold lifts, build this tag — not main:
+                git checkout $TAG
+                ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start; ./scripts/xcode-cloud.py pause"
+elif [ "${XC_STARTED:-0}" = "1" ]; then
   XC_APP_STORE_NOTE="building now — submit it in App Store Connect when it
               lands.  ./scripts/xcode-cloud.py runs 3"
 else
