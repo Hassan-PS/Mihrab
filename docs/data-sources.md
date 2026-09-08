@@ -294,13 +294,88 @@ pass.
 ## Network-allowlist note for future fetches
 
 The Cowork environment in which this codebase is developed has an
-egress allowlist that blocks `github.com` and `tanzil.net`. To pull
-the assets above, do one of:
+egress allowlist. Confirmed blocked as of 2026-09-08: `github.com`,
+`tanzil.net`, `quranenc.com`, `api.alquran.cloud`. Confirmed reachable:
+`raw.githubusercontent.com` (any repo's file contents) and, from the
+Mac side, `api.github.com` via `gh`. So a dataset that lives in a
+GitHub repository can be fetched here; one behind a project's own API
+cannot. To pull the assets above, do one of:
 
 - Run the download steps locally on your dev machine (no allowlist).
 - Add the relevant hosts to *Settings → Capabilities → Network access*
   if you want to fetch them inside Cowork sessions.
 
+
+## The Isa García Spanish translation — issue #37, SHIPPED 2026-09-08
+
+The app shipped one Spanish edition, Julio Cortés. #37 asked for a
+second: Muhammad Isa García's translation, which Quran.com uses. It now
+ships as `es.garcia`, **beside** Cortés and not in place of it — Cortés
+stays first in `QURAN_TRANSLATIONS` and therefore stays what
+`defaultEditionForLocale('es')` returns, so nobody's reading changes
+unless they choose it.
+
+### Licence
+
+Same slot as the other twelve. The text is the **Tanzil** edition of
+García, redistributed by Tanzil under **CC BY 3.0** with the standing
+condition that copies are verbatim (no modification) and attributed to
+the Tanzil Project. That is the identical basis on which Cortés,
+Bernström, Hamidullah, Bubenheim, Diyanet, Kuliev and Ma Jian already
+ship, so #37 adds no new licence regime and nothing new for the F-Droid
+build to answer for.
+
+QuranEnc also publishes a García edition, under its own seven
+conditions (no modification, credit quranenc.com, name the version,
+keep transcript info, report errors, track the latest revision). It
+was not used. Its terms are workable but they are a *second* regime to
+honour, and its text is a later revision than the one the rest of the
+Spanish tooling in this app is aligned to. Tanzil was already the
+answer for every other edition here; adding a fourteenth from the same
+place keeps one rule instead of two.
+
+### Where the bytes came from, and how we know they are the right ones
+
+Neither tanzil.net nor quranenc.com nor api.alquran.cloud is reachable
+from this development environment (see the allowlist note above);
+`raw.githubusercontent.com` is. So the file was assembled from GitHub
+mirrors, and then **proved** rather than trusted:
+
+1. **Two independent mirrors, compared against each other.**
+   `jomtek/quran-translated` (`es.garcia/{1..114}`, one ayah per line)
+   and `Damarcreative/QuranAPI` (`surah/{n}/es-garcia.json`) were both
+   downloaded in full. After dropping the basmalah row that
+   Damarcreative prepends to every surah but 1 and 9, the two agree on
+   **all 6,236 ayahs, character for character**. Two unrelated
+   repositories do not converge on 6,236 identical strings by accident.
+
+2. **Both compared against a copy that names Tanzil as its source.**
+   `fawazahmed0/quran-api` carries `spa-muhammadisagarc` with
+   `"source": "http://tanzil.net"` in its `editions.json`. That
+   aggregator strips punctuation, so the comparison normalises
+   punctuation away on both sides — and then **6,235 of 6,236 ayahs
+   match exactly**. The one exception, 26:69, is a leading "Y " the
+   aggregator dropped.
+
+3. **The same test, run against an edition we already had, as a
+   control.** The aggregator's `spa-juliocortes` was compared to the
+   `es.cortes.json` this app has shipped since v2.7.40 — which came
+   from Tanzil through alquran.cloud. Same normalisation: **6,193 of
+   6,236 exact, and every one of the 43 remainder is a punctuation mark
+   or a muqaṭṭaʿāt backtick the aggregator removed**, not a word. That
+   establishes what the aggregator does to a text we can already
+   verify, which is what makes step 2 mean anything.
+
+The shipped `assets/quran/translations/es.garcia.json` is built from the
+mirror with punctuation intact (`jomtek`), keyed chapter → ayah exactly
+like the other thirteen: 114 chapters, 6,236 ayahs, checked against the
+per-surah counts of the existing corpus.
+
+### If this needs redoing
+
+Fetch the Tanzil text directly (`https://tanzil.net/trans/es.garcia`)
+from a machine without the allowlist and diff it against the shipped
+asset. If they differ, Tanzil is right and this file is wrong.
 
 ## The duʿāʾ khatm al-Qurʾān — issue #35, DECLINED 2026-09-07
 

@@ -5,8 +5,8 @@
  * user can pick the one that matches their preferred language. Default
  * follows the active app locale (see `defaultEditionForLocale`).
  *
- * They ship as ASSETS, not inside the JS bundle. The thirteen editions
- * are ~16 MB, and `index.android.bundle` is STORED in the APK — Android
+ * They ship as ASSETS, not inside the JS bundle. The fourteen editions
+ * are ~17 MB, and `index.android.bundle` is STORED in the APK — Android
  * does not compress a `.bundle`, so every one of those megabytes was
  * paid at full price on every download. As ordinary assets they
  * compress like the JSON they are: the APK went from 50.1 MB to 37.3.
@@ -52,6 +52,12 @@ export const QURAN_TRANSLATIONS: ReadonlyArray<QuranTranslationEdition> = [
   { id: 'hi.hindi', label: 'Suhel Farooq Khan', language: 'Hindi', locale: 'hi' },
   { id: 'fr.hamidullah', label: 'Hamidullah', language: 'French', locale: 'fr' },
   { id: 'es.cortes', label: 'Cortés', language: 'Spanish', locale: 'es' },
+  // Issue #37. Cortés stays FIRST of the two, and that ordering is load
+  // bearing: `defaultEditionForLocale` takes the first edition whose
+  // locale matches, so a Spanish reader who has never opened the picker
+  // still opens the edition they have always opened. García is offered
+  // beside it, not in place of it. Provenance in docs/data-sources.md.
+  { id: 'es.garcia', label: 'Isa García', language: 'Spanish', locale: 'es' },
   { id: 'de.bubenheim', label: 'Bubenheim & Elyas', language: 'German', locale: 'de' },
   { id: 'tr.diyanet', label: 'Diyanet İşleri', language: 'Turkish', locale: 'tr' },
   { id: 'id.indonesian', label: 'Indonesian Ministry', language: 'Indonesian', locale: 'id' },
