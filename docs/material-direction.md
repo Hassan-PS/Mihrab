@@ -15,6 +15,12 @@ whichever option is chosen.
 **Don't go all out. Take the one part of Material that is genuinely better
 than what we have, and leave the look alone.**
 
+*(Hassan clarified afterwards that he means **Material 3 Expressive**
+specifically. That sharpens the answer rather than changing it — §9 is the
+Expressive-specific version, and option E is what it produces. The three
+findings below apply to M3E with more force, not less: Expressive is exactly
+the part of Material that has no React Native implementation.)*
+
 Three findings, in descending order of how much they should move the decision:
 
 1. **The brief contradicts itself.** If Google built a prayer app, its iOS
@@ -293,7 +299,150 @@ It also makes the marketing site's existing claim honest.
 
 ---
 
-## 9. The options
+## 9. Material 3 Expressive, specifically
+
+Clarified by Hassan after the above was written: the target is **M3 Expressive**,
+not Material 3 in general. That sharpens the answer rather than changing it,
+and it cuts both ways.
+
+**The bad news is worse than §1 suggested.** M3E is precisely the part of
+Material that does not exist in React Native. Generic MD3 is at least
+shippable — `react-native-paper` 5.15.3 is stable and MD3 by default. M3E is
+not: a search of npm for Material 3 Expressive packages returns about a dozen
+active ones and **every single one is web** — React, Svelte, Solid, Angular.
+Zero React Native. `react-native-paper` 6.0.0-alpha.0 ships the Expressive
+*tokens and motion springs* but still the **v5 component set**: no ButtonGroup,
+no SplitButton, no FAB Menu, no LoadingIndicator, no FloatingToolbar. And
+**shape morphing — the single most recognisable M3E effect — has no React
+Native implementation anywhere at all.**
+
+**The good news is better than expected.** Three of M3E's four pillars are
+free or nearly free here, and one of them is the one that matters most.
+
+### 9.1 Motion — free, and worth taking on its own merits
+
+`Animated.spring` in React Native 0.83.1 accepts `stiffness`, `damping` and
+`mass` natively (`Libraries/Animated/animations/SpringAnimation.js:56-57`).
+**No Reanimated, no new dependency, no F-Droid question.** The M3E spec's
+values can go straight into `src/theme/motion.ts`.
+
+One conversion is needed: the spec states damping as a *ratio*, RN wants a
+*coefficient* — `damping = ratio × 2 × √(stiffness × mass)`. Computed, at
+mass 1:
+
+| Token | spatial stiffness | spatial damping | effects stiffness | effects damping |
+|---|---|---|---|---|
+| expressive fast | 800 | 33.9 | 3800 | 123.3 |
+| expressive default | 380 | 31.2 | 1600 | 80.0 |
+| expressive slow | 200 | 22.6 | 800 | 56.6 |
+| standard fast | 1400 | 67.3 | 3800 | 123.3 |
+| standard default | 700 | 47.6 | 1600 | 80.0 |
+| standard slow | 300 | 31.2 | 800 | 56.6 |
+
+The two-track split is the idea worth internalising, independent of Material:
+**`spatial` moves things** (position, size — underdamped, allowed to overshoot)
+and **`effects` changes appearances** (colour, opacity — critically damped,
+never overshoots). Ratio 0.6–0.8 for expressive, 0.9 for standard. A colour
+that bounces looks broken; a sheet that bounces looks alive. The app currently
+uses `Animated.spring` in exactly two places (`LogScreen.tsx:290`, `:311`) and
+beziers everywhere else.
+
+`motion.ts` is already halfway there by accident: `EASING_BEZIERS.emphasized`
+is `[0.2, 0, 0, 1]`, which *is* the M3 emphasized curve, and `DURATION` already
+has a token literally named `expressive`.
+
+Cost: one file, ~40 lines, plus the existing Reduce Motion path which already
+returns instant durations and must keep doing so. **Recommended regardless of
+what else is decided** — springs read as *quality*, not as loudness, which
+makes this the one part of Expressive that survives principle §1's 5 a.m. Fajr
+test.
+
+### 9.2 Shape scale — free
+
+M3E extends the corner tokens: `largeIncreased: 20`, `extraLargeIncreased: 32`,
+`extraExtraLarge: 48`, and `cornerFull` becomes a true full round rather than
+50%. `RADIUS` in `tokens.ts` already matches five of the six original MD3
+steps; adding three constants is a two-line change.
+
+Using them everywhere is a different matter. A 48 dp corner on a prayer-time
+row is the "over-containerisation" 9to5Google criticised. Add the tokens, use
+them on one or two surfaces, not as a global radius bump.
+
+### 9.3 Google Sans Flex — the real decision, and the biggest visual payoff
+
+Released publicly 18 Nov 2025 under **SIL OFL 1.1**, so bundling it in an AGPL
+app is legally clean, the same footing as the Amiri fonts already shipped.
+Six variable axes; the expressive lever is `ROND` (roundness), alongside
+`wght` 1–1000 and `opsz` 6–144.
+
+This is the single most recognisable M3E element and the one that would make
+the app *look* like 2026 rather than 2021. It is also the largest commitment
+in this section:
+
+- `FONTS.primary` is deliberately `undefined` today — "we don't override
+  Latin" — so Android already renders Roboto and iOS renders SF. Bundling
+  Google Sans Flex overrides both.
+- On iOS it would look distinctly un-iOS, which is the same objection as §1
+  in miniature.
+- A variable font with six axes is not small; APK size and F-Droid both
+  care.
+- Reader reaction to it in Google's own rollout included "like a comic sans
+  clone" — a minority view, but a real one.
+
+**Suggested shape if it is taken: Android only, behind the existing "System
+colors" toggle or a new "Expressive" one, with the system font as the default.**
+That keeps iOS untouched and makes it reversible, which is the same pattern
+§8's tonal surfaces use.
+
+### 9.4 Shape morphing and the Expressive components — skip
+
+Shape morphing would need `@shopify/react-native-skia` (a large native
+dependency with real F-Droid consequences) or hand-rolled path interpolation
+in Reanimated. There is no reference implementation to copy in any RN project.
+
+The fifteen Expressive components mostly do not fit these screens anyway. The
+app has **no FAB** and shouldn't — principle §1 says one primary action per
+screen carried by typography and space, not a floating circle. Button groups,
+split buttons and floating toolbars are for content-creation apps. A prayer
+app's screens are lists, a clock, a compass and a mushaf page.
+
+### 9.5 The reservation worth stating plainly
+
+M3E's own research frames the win as **+34% modernity, +32% subculture, +30%
+rebelliousness**, with preference "up to 87%" among 18–24s. Those are brand
+perception metrics. Whatever one thinks of the methodology, "rebellious" is
+not the axis a prayer app should be optimising, and Google's own execution drew
+"Material 3.5" criticism through 2025–26 with their M3E sample app publicly
+panned in August 2026.
+
+Motion is the exception, and that is why §9.1 is the recommendation and §9.3
+is a question. Springs make an interface feel *considered*. Bigger corners and
+a rounder font make it feel *younger*. Only one of those serves someone
+checking Fajr.
+
+### 9.6 What an "Expressive" option actually looks like
+
+If the answer is yes to Expressive, the honest scope is:
+
+1. **Motion tokens** (§9.1) — free, do it either way.
+2. **Shape tokens** (§9.2) — free, use sparingly.
+3. **Tonal colour** (§6) — this is what makes containers legible enough to be
+   worth having at all, and it is the same work option C already proposes.
+4. **Emphasized type** — larger, heavier headlines from the existing scale.
+   Free.
+5. **Google Sans Flex** (§9.3) — Android only, behind a toggle. The one real
+   cost.
+
+That is roughly **3–4 weeks**, not 3–5 months, because it is the *token* layer
+of Expressive rather than its component layer — and the component layer is the
+part that does not exist in React Native and would have to be invented here.
+
+Call it **option E**. It sits between C and A, it is reversible, and it is the
+most Expressive this app can honestly be without leaving React Native.
+
+---
+
+## 10. The options
 
 **A — All out MD3/Expressive, both platforms.** 3–5 months, ~20k lines, kills
 the iOS identity, orphans iPad and Mac, reverses the design position, and the
@@ -322,9 +471,16 @@ visible as a redesign. Reversible.
 docstring, and either soften the marketing claim or ship §8 to make it true)
 and carry on with the themes plan as written. Legitimate, and cheap.
 
+**E — Expressive at the token layer.** §9.6: M3E's motion springs and shape
+scale (both free, no new dependency), emphasized type, the tonal colour engine
+from C, and optionally Google Sans Flex on Android behind a toggle. ~3–4
+weeks. This is the most Expressive the app can honestly be without leaving
+React Native, because M3E's component layer does not exist there. **The answer
+if the goal is "make it feel like 2026."**
+
 ---
 
-## 10. What would change this
+## 11. What would change this
 
 - **Mihrab drops iOS.** Then A becomes reasonable — and the honest version of
   A is Al-Azan's: leave React Native for Compose, where Material is actually
