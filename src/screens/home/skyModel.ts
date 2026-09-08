@@ -1,6 +1,7 @@
-// tokens-ok: the sky's own colours — a drawn scene at low alpha over the hero's surface, not app chrome
+// tokens-ok: the sky's own colours — a drawn scene with its own ink, not app chrome
 /**
- * The sky behind the countdown — which sky, for which prayer.
+ * The sky behind the countdown — which sky, for which prayer, and what ink
+ * reads on it.
  *
  * The hero is "styled after each prayer time": the card's ground is a
  * drawn sky that moves through the day with the prayer being counted
@@ -8,20 +9,24 @@
  * morning towards Dhuhr, the warm light of the afternoon towards Asr, the
  * sunset towards Maghrib, dusk towards Isha, and night again after it.
  *
- * ── WHY IT IS A WASH AND NOT A PICTURE ────────────────────────────────
+ * ── THE SKY IS TRUE TO THE HOUR, NOT TO THE THEME ─────────────────────
  *
- * The countdown is the app's best piece of hierarchy and it is set in the
- * theme's accent on the theme's tint. A painted sky with real sky colours
- * would put dark green on navy at night and white on peach at dawn. So
- * every sky here is drawn at LOW ALPHA over the surface the hero already
- * has (`accentBg`): the colours below are the sky's own, the alpha keeps
- * the surface's legibility, and in the dark theme the same skies are a
- * shade deeper so they read on a dark ground. Nothing here is the accent;
- * the accent stays the one colour of action (redesign-plan §2.4).
+ * The first cut drew the sky as a wash over the theme's surface, so a
+ * light theme at midnight showed a pale grey-blue and a dark theme at noon
+ * a murky one — the theme was deciding what the sky looked like, which is
+ * backwards. Now the sky is painted at full strength whatever the theme,
+ * and whatever Material You has done to the accent: night is dark at
+ * night in a light app, noon is bright at noon in a dark one. That means
+ * the hero's TEXT cannot come from the theme either — dark green on a
+ * navy night, or a light theme's white on a noon sky, would be unreadable.
+ * So each sky declares its ink, `light` or `dark`, and `skyInk` turns that
+ * into the colours the hero's text, rail and date use. Every sky's colours
+ * are chosen so that its ink reads on the whole gradient — dark-ink skies
+ * keep their tops mid-light, light-ink skies keep their feet mid-dark.
+ * The accent stays out of it: on the hero the countdown is the ink.
  *
- * Pure: the phase from the target's key, the colours from the phase and
- * the theme, and where the sun or moon is from how far the current
- * interval has run. The component only draws what this returns.
+ * Pure: the phase from the target's key, the colours from the phase, and
+ * where the sun or moon is from how far the current interval has run.
  */
 export type SkyPhase =
   | 'night' // after Isha, or towards Midnight / the last third
@@ -52,67 +57,70 @@ export function skyPhaseFor(targetKey: string): SkyPhase {
 }
 
 export type SkyBody = 'sun' | 'moon' | 'none';
+export type SkyInk = 'light' | 'dark';
 
 export type Sky = {
-  /** Gradient stops, top to bottom, as hex. */
+  /** Gradient stops, top to bottom, as hex — painted at full strength. */
   top: string;
   bottom: string;
-  /** The glow around the sun or moon, and the stars. */
+  /** The sun or moon, its glow, and the stars. */
   glow: string;
-  /** Alpha for the whole wash — the surface underneath must stay legible. */
-  alpha: number;
+  /** Which ink reads on this sky. */
+  ink: SkyInk;
   body: SkyBody;
-  /** Stars in the field — night skies only. */
+  /** Stars in the field — the dark skies only. */
   stars: boolean;
 };
 
-/** The sky's own colours per phase, light-theme and dark-theme variants. */
-const SKIES: Record<SkyPhase, { light: Sky; dark: Sky }> = {
-  night: {
-    light: { top: '#3B4A7A', bottom: '#8A97C4', glow: '#E8ECFF', alpha: 0.22, body: 'moon', stars: true },
-    dark: { top: '#0B1230', bottom: '#1D2A5C', glow: '#B7C3FF', alpha: 0.55, body: 'moon', stars: true },
-  },
-  predawn: {
-    light: { top: '#3E4E86', bottom: '#C8A6C9', glow: '#F6D9C5', alpha: 0.24, body: 'moon', stars: true },
-    dark: { top: '#0E1740', bottom: '#4A3766', glow: '#E0B8A6', alpha: 0.55, body: 'moon', stars: true },
-  },
-  dawn: {
-    light: { top: '#7A8FD0', bottom: '#F7C9A0', glow: '#FFE7B3', alpha: 0.3, body: 'sun', stars: false },
-    dark: { top: '#1B2A66', bottom: '#8C5A3F', glow: '#FFC98A', alpha: 0.5, body: 'sun', stars: false },
-  },
-  morning: {
-    light: { top: '#8FC3F2', bottom: '#DDF0FF', glow: '#FFF3C4', alpha: 0.32, body: 'sun', stars: false },
-    dark: { top: '#12325C', bottom: '#2B5A8A', glow: '#F3DFA0', alpha: 0.5, body: 'sun', stars: false },
-  },
-  afternoon: {
-    light: { top: '#7FB3E8', bottom: '#F9E4B7', glow: '#FFE39A', alpha: 0.32, body: 'sun', stars: false },
-    dark: { top: '#143A66', bottom: '#6B5530', glow: '#F1CF7E', alpha: 0.5, body: 'sun', stars: false },
-  },
-  sunset: {
-    light: { top: '#6C7FC9', bottom: '#F8B27A', glow: '#FFD08A', alpha: 0.3, body: 'sun', stars: false },
-    dark: { top: '#1A2454', bottom: '#8E4A2A', glow: '#F6B26B', alpha: 0.52, body: 'sun', stars: false },
-  },
-  dusk: {
-    light: { top: '#4A5490', bottom: '#D9A2A6', glow: '#F5CDB6', alpha: 0.26, body: 'none', stars: true },
-    dark: { top: '#0F1740', bottom: '#5A3552', glow: '#D9A28E', alpha: 0.55, body: 'none', stars: true },
-  },
+const SKIES: Record<SkyPhase, Sky> = {
+  night: { top: '#0B1230', bottom: '#243462', glow: '#D2DAFF', ink: 'light', body: 'moon', stars: true },
+  predawn: { top: '#101A48', bottom: '#5E4C7A', glow: '#F2CDB4', ink: 'light', body: 'moon', stars: true },
+  dawn: { top: '#8FA8E0', bottom: '#F7D0AF', glow: '#FFE7B8', ink: 'dark', body: 'sun', stars: false },
+  morning: { top: '#7DBCF0', bottom: '#E3F2FD', glow: '#FFF3C8', ink: 'dark', body: 'sun', stars: false },
+  afternoon: { top: '#79B0E6', bottom: '#F7E7BF', glow: '#FFE3A0', ink: 'dark', body: 'sun', stars: false },
+  sunset: { top: '#8C8FCB', bottom: '#F6B37F', glow: '#FFD08E', ink: 'dark', body: 'sun', stars: false },
+  dusk: { top: '#1F2A5E', bottom: '#7B5875', glow: '#EBB9A5', ink: 'light', body: 'none', stars: true },
 };
 
-export function skyFor(phase: SkyPhase, isDark: boolean): Sky {
-  return isDark ? SKIES[phase].dark : SKIES[phase].light;
+export function skyFor(phase: SkyPhase): Sky {
+  return SKIES[phase];
+}
+
+export type SkyInkColors = {
+  /** The countdown and anything that must be read first. */
+  text: string;
+  /** Eyebrow, seconds, the clock time, rail labels, the date. */
+  muted: string;
+  /** The rail's track and its fill. */
+  track: string;
+  fill: string;
+};
+
+/** The colours the hero's text takes on a sky. */
+export function skyInk(sky: Sky): SkyInkColors {
+  return sky.ink === 'light'
+    ? {
+        text: '#F7F3EA',
+        muted: 'rgba(247,243,234,0.74)',
+        track: 'rgba(247,243,234,0.22)',
+        fill: '#F7F3EA',
+      }
+    : {
+        text: '#161A26',
+        muted: 'rgba(22,26,38,0.66)',
+        track: 'rgba(22,26,38,0.16)',
+        fill: '#161A26',
+      };
 }
 
 /**
  * Where the sun or moon sits, as fractions of the card.
  *
  * In the TOP STRIP of the hero — between the eyebrow and the Qibla chip —
- * and nowhere else. The first cut let the body run the card's whole width
- * along a mid-height arc, which put a glowing moon behind the "5h" of the
- * countdown and a horizon line through the date. The countdown is the
- * hero; the sky stays out of its way. x still runs with the current
- * interval (the rail's own fraction) so the body moves through the
- * evening; y is a shallow arc within the strip, rising towards sunrise
- * and sinking towards Maghrib.
+ * and nowhere else, so the body is never behind the countdown. x runs
+ * with the current interval (the rail's own fraction) so the body moves
+ * through the evening; y is a shallow arc within the strip, rising
+ * towards sunrise and sinking towards Maghrib.
  */
 export function skyBodyPosition(
   phase: SkyPhase,

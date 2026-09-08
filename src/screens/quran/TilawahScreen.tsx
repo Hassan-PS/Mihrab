@@ -87,7 +87,8 @@ import {
 import { setQuranPrefs, useQuranState } from '../../quran/quranState';
 import { useBreakpoint } from '../../responsive/breakpoints';
 import { RADIUS, SPACING } from '../../theme/tokens';
-import { TYPE, arabicTextStyle } from '../../theme/typography';
+import { TYPE } from '../../theme/typography';
+import { surahHeaderGlyph, surahHeaderStyle } from '../../quran/surahHeaderGlyph';
 import { InfoButton } from '../../components/ui/InfoSheet';
 
 /** Playback speeds, matching the reader's own chips. */
@@ -921,8 +922,11 @@ export function TilawahScreen() {
               })}
             </Text>
           </View>
-          <Text style={[styles.surahArabic, { color: palette.text }]}>
-            {item.arabic}
+          <Text
+            style={[styles.surahArabic, { color: palette.text }]}
+            accessible={false}
+            importantForAccessibility="no">
+            {surahHeaderGlyph(item.number)}
           </Text>
         </Pressable>
       );
@@ -973,8 +977,12 @@ export function TilawahScreen() {
           <Text style={[styles.nowSurah, { color: palette.text }]} numberOfLines={1}>
             {shownSurah.romanized}
           </Text>
-          <Text style={[styles.nowArabic, { color: palette.text }]} numberOfLines={1}>
-            {shownSurah.arabic}
+          <Text
+            style={[styles.nowArabic, { color: palette.text }]}
+            numberOfLines={1}
+            accessible={false}
+            importantForAccessibility="no">
+            {surahHeaderGlyph(shownSurah.number)}
           </Text>
         </View>
         {/* The reciter is a CHOICE and reads as one — a line with a
@@ -1331,11 +1339,10 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   nowSurah: { fontSize: TYPE.title1.fontSize, fontWeight: '700', flexShrink: 1 },
-  // The name as a muṣḥaf writes it — Katibeh, the calligraphic face.
+  // The name as the muṣḥaf writes it — see surahHeaderGlyph.ts.
   nowArabic: {
-    fontSize: 36, // tokens-ok-line: display or Arabic scale, sized by hand
-    lineHeight: 44, // tokens-ok-line: display or Arabic scale, sized by hand
-    ...arabicTextStyle('calligraphy'),
+    flexShrink: 0,
+    ...surahHeaderStyle(),
   },
   // A line, not a card: the tertiary style for "a choice you can change".
   reciterLine: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, alignSelf: 'flex-start' },
@@ -1472,9 +1479,8 @@ const styles = StyleSheet.create({
   surahRoman: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
   surahMeta: { fontSize: TYPE.label.fontSize, marginTop: 1 },
   surahArabic: {
-    fontSize: 30, // tokens-ok-line: display or Arabic scale, sized by hand
-    lineHeight: 44, // tokens-ok-line: display or Arabic scale, sized by hand
-    ...arabicTextStyle('calligraphy'),
+    flexShrink: 0,
+    ...surahHeaderStyle(),
   },
   pressed: { opacity: 0.6 },
 });

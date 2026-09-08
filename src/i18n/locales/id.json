@@ -1369,7 +1369,7 @@
     "quranGeometry": "Data posisi ayat (quran.com / proyek Quran for Android)",
     "recitation": "Audio tilawah (42 qari): EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)",
     "tafsir": "Teks tafsir: Ibnu Katsir, Maarif-ul-Quran, al-Muyassar",
-    "katibehFont": "Fon Katibeh (nama surah)"
+    "surahHeaderFont": "Kaligrafi kepala surah"
   },
   "liveActivity": {
     "title": "Salat berikutnya",

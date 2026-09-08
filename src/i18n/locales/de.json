@@ -1369,7 +1369,7 @@
     "quranGeometry": "Ayah-Positionsdaten (quran.com / Quran-for-Android-Projekt)",
     "recitation": "Rezitationsaudio (42 Rezitatoren): EveryAyah.com · Wort-Timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-Texte: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
-    "katibehFont": "Schrift Katibeh (Surennamen)"
+    "surahHeaderFont": "Kalligrafie der Surenüberschriften"
   },
   "liveActivity": {
     "title": "Nächstes Gebet",

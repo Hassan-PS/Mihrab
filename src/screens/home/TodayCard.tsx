@@ -63,6 +63,7 @@ import { isRtlLanguage } from '../../i18n/layoutDirection';
 import { DayStrip, type DayStripEntry } from './DayStrip';
 import { isSalah, quickLogPhase, useQuickLog } from '../../journal/quickLog';
 import { HeroSky } from './HeroSky';
+import { skyFor, skyInk, skyPhaseFor } from './skyModel';
 import { PrayerRow } from './PrayerRow';
 import {
   useNextAlertOverride,
@@ -146,8 +147,15 @@ const HeroToday = memo(function HeroToday({
   dateLine?: string;
 }) {
   const { t } = useTranslation();
-  const { palette, isDark } = useAppPalette();
   const clock = useClockFormatter();
+  /**
+   * The hero's ink comes from the SKY, not the theme (skyModel.ts): the sky
+   * is painted at full strength whatever the theme or Material You has
+   * done to the accent, so a night sky wants light ink in a light app and
+   * a noon sky dark ink in a dark one. The accent does not appear on the
+   * hero at all — the countdown is the ink, and its size is its rank.
+   */
+  const ink = skyInk(skyFor(skyPhaseFor(target.name)));
   // Focus AND foreground. `useIsFocused()` on its own kept this ticking once
   // a second in the user's pocket: backgrounding the app from the Today tab
   // leaves Today the focused route, so the timer never stopped.
@@ -212,14 +220,13 @@ const HeroToday = memo(function HeroToday({
       <HeroSky
         targetKey={target.name}
         progress={rail ? Math.round(rail.pct * 100) / 100 : 0}
-        isDark={isDark}
         bleed={{
           horizontal: SPACING.xl,
           vertical: expanded ? SPACING.lg + SPACING.md : SPACING.lg,
         }}
       />
       <Text
-        style={[styles.heroEyebrow, { color: palette.muted }]}
+        style={[styles.heroEyebrow, { color: ink.muted }]}
         numberOfLines={1}
         maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
         {t('home.nextPrayerIn', {
@@ -233,7 +240,7 @@ const HeroToday = memo(function HeroToday({
             styles.heroCountdown,
             expanded && styles.heroCountdownExpanded,
             tabularNumeralStyle,
-            { color: palette.accent },
+            { color: ink.text },
           ]}
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
@@ -247,7 +254,7 @@ const HeroToday = memo(function HeroToday({
             styles.heroSeconds,
             expanded && styles.heroSecondsExpanded,
             tabularNumeralStyle,
-            { color: palette.muted },
+            { color: ink.muted },
           ]}
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
@@ -255,7 +262,7 @@ const HeroToday = memo(function HeroToday({
           {parts.seconds}s
         </Text>
         <Text
-          style={[styles.heroAt, tabularNumeralStyle, { color: palette.muted }]}
+          style={[styles.heroAt, tabularNumeralStyle, { color: ink.muted }]}
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
           accessibilityLanguage="en-US">
@@ -264,12 +271,12 @@ const HeroToday = memo(function HeroToday({
       </View>
       {rail ? (
         <View style={styles.railWrap}>
-          <View style={[styles.railTrack, { backgroundColor: palette.controlBg }]}>
+          <View style={[styles.railTrack, { backgroundColor: ink.track }]}>
             <View
               style={[
                 styles.railFill,
                 {
-                  backgroundColor: palette.accentSolid,
+                  backgroundColor: ink.fill,
                   width: `${Math.round(rail.pct * 100)}%`,
                 },
               ]}
@@ -277,13 +284,13 @@ const HeroToday = memo(function HeroToday({
           </View>
           <View style={styles.railLabels}>
             <Text
-              style={[styles.railLabel, tabularNumeralStyle, { color: palette.muted }]}
+              style={[styles.railLabel, tabularNumeralStyle, { color: ink.muted }]}
               numberOfLines={1}
               maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
               {t(`prayer.${rail.from.key}`)}
             </Text>
             <Text
-              style={[styles.railLabel, tabularNumeralStyle, { color: palette.muted }]}
+              style={[styles.railLabel, tabularNumeralStyle, { color: ink.muted }]}
               numberOfLines={1}
               maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
               {t(`prayer.${target.name}`)}
@@ -293,7 +300,7 @@ const HeroToday = memo(function HeroToday({
       ) : null}
       {dateLine ? (
         <Text
-          style={[styles.heroTodayDate, { color: palette.muted }]}
+          style={[styles.heroTodayDate, { color: ink.muted }]}
           numberOfLines={1}
           maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
           {dateLine}
@@ -743,6 +750,7 @@ function TodayCardImpl({
               ? () => void quickLog.toggle(key, timings, tomorrow)
               : undefined
           }
+          hasCheckColumn={isToday}
         />
       ))}
 

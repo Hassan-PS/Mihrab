@@ -78,6 +78,7 @@ import { useVerseOfTheDay } from '../quran/useVerseOfTheDay';
 import { SyncHint } from './sync/SyncHint';
 import { cardEdgeStyle } from '../theme/chrome';
 import { TYPE, arabicTextStyle } from '../theme/typography';
+import { surahHeaderGlyph, surahHeaderStyle } from '../quran/surahHeaderGlyph';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { RADIUS, SPACING } from '../theme/tokens';
@@ -1150,8 +1151,12 @@ export function QuranScreen() {
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.6}
+          // A drawing of the header, not text — the row's own label names
+          // the surah for screen readers.
+          accessible={false}
+          importantForAccessibility="no"
           style={[styles.arabic, { color: palette.text }]}>
-          {item.arabic.replace(/ /g, '\u00A0')}
+          {surahHeaderGlyph(item.number)}
         </Text>
       </Pressable>
     );
@@ -1190,8 +1195,10 @@ export function QuranScreen() {
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.6}
+        accessible={false}
+        importantForAccessibility="no"
         style={[styles.arabic, { color: palette.text }]}>
-        {(item.startSurah?.arabic ?? '').replace(/ /g, '\u00A0')}
+        {item.startSurah ? surahHeaderGlyph(item.startSurah.number) : ''}
       </Text>
     </Pressable>
   );
@@ -1806,15 +1813,11 @@ const styles = StyleSheet.create({
   pageHint: { fontSize: TYPE.caption.fontSize, marginTop: 2, fontVariant: ['tabular-nums'] },
   // flexShrink: 0 — the name keeps its intrinsic single-line width (made
   // unwrappable via NBSP); the flexible left column yields instead.
-  // Calligraphy for the names, as a muṣḥaf writes them: Katibeh, a
-  // Thuluth-style face, rather than the body Naskh used for duas and UI
-  // Arabic. Large, because a display face is drawn to be looked at and
-  // sits low on the line; the leading is generous for its tall strokes.
+  // The name as the muṣḥaf writes it — see surahHeaderGlyph.ts. Not text:
+  // one drawn glyph per surah, at the one size the name has everywhere.
   arabic: {
-    fontSize: 34, // tokens-ok-line: display or Arabic scale, sized by hand
-    lineHeight: 50, // tokens-ok-line: display or Arabic scale, sized by hand
     flexShrink: 0,
-    ...arabicTextStyle('calligraphy'),
+    ...surahHeaderStyle(),
   },
   bookmarkDot: { width: 14, height: 14, borderRadius: RADIUS.sm },
   deleteBtn: { paddingHorizontal: SPACING.sm, paddingVertical: SPACING.sm },

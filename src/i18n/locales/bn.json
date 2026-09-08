@@ -1369,7 +1369,7 @@
     "quranGeometry": "আয়াতের অবস্থানের ডেটা (quran.com / Quran for Android প্রকল্প)",
     "recitation": "তিলাওয়াতের অডিও (৪২ জন ক্বারী): EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)",
     "tafsir": "তাফসীর: ইবনে কাসীর, মাআরিফুল কুরআন, আল-মুয়াসসার",
-    "katibehFont": "কাতিবেহ ফন্ট (সূরার নাম)"
+    "surahHeaderFont": "সূরা-শিরোনাম ক্যালিগ্রাফি"
   },
   "liveActivity": {
     "title": "পরবর্তী নামায",

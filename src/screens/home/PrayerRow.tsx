@@ -128,6 +128,14 @@ type PrayerRowProps = {
    */
   log?: { status: LoggedStatus | null; phase: QuickLogPhase };
   onToggleLog?: () => void;
+  /**
+   * Whether this card has a check column at all. Today's does, so its
+   * secondary rows hold the slot and every name starts on one line; the
+   * other days have no checks and no slot — their names sit where they
+   * always did. Reported: tomorrow's rows were indented for a control
+   * that was not there.
+   */
+  hasCheckColumn?: boolean;
 };
 
 function PrayerRowImpl({
@@ -148,6 +156,7 @@ function PrayerRowImpl({
   timeSample,
   log,
   onToggleLog,
+  hasCheckColumn = false,
 }: PrayerRowProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -202,9 +211,9 @@ function PrayerRowImpl({
           prayerLabel={t(`prayer.${prayerKey}`)}
           onPress={onToggleLog}
         />
-      ) : (
+      ) : hasCheckColumn ? (
         <View style={styles.checkSlot} />
-      )}
+      ) : null}
       <View style={styles.nameWrap}>
         <Text
           style={[

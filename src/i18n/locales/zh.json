@@ -1369,7 +1369,7 @@
     "quranGeometry": "经文位置数据（quran.com / Quran for Android 项目）",
     "recitation": "诵读音频（42位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）",
     "tafsir": "经注文本：伊本·凯西尔、Maarif-ul-Quran、简明经注",
-    "katibehFont": "Katibeh 字体（章名）"
+    "surahHeaderFont": "章名书法"
   },
   "liveActivity": {
     "title": "下一次礼拜",

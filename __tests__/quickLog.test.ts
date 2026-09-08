@@ -70,9 +70,10 @@ describe('the row and the card', () => {
   const check = read('src/screens/home/LogCheck.tsx');
   const quick = read('src/journal/quickLog.ts');
 
-  it('holds the check slot on every row so names line up', () => {
-    expect(row).toMatch(/<LogCheck[\s\S]*?\/>\s*\) : \(\s*<View style=\{styles\.checkSlot\} \/>/);
+  it('holds the check slot on today’s rows only, so names line up there and nowhere else', () => {
+    expect(row).toMatch(/<LogCheck[\s\S]*?\/>\s*\) : hasCheckColumn \? \(\s*<View style=\{styles\.checkSlot\} \/>\s*\) : null\}/);
     expect(row).toMatch(/checkSlot: \{ width: LOG_CHECK_SIZE, marginEnd: SPACING\.md \}/);
+    expect(card).toMatch(/hasCheckColumn=\{isToday\}/);
   });
 
   it('offers the check on today’s salāh only', () => {

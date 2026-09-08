@@ -1369,7 +1369,7 @@
     "quranGeometry": "Ayah position data (quran.com / Quran for Android project)",
     "recitation": "Recitation audio (42 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
-    "katibehFont": "Katibeh font (surah names)"
+    "surahHeaderFont": "Surah-header calligraphy"
   },
   "liveActivity": {
     "title": "Next prayer",

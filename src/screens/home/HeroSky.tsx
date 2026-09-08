@@ -12,25 +12,23 @@ import Svg, {
 import { skyBodyPosition, skyFor, skyPhaseFor } from './skyModel';
 
 /**
- * The drawn sky behind today's hero — see skyModel.ts for which sky and
- * why it is a wash rather than a picture.
+ * The drawn sky behind today's hero — see skyModel.ts for which sky, and
+ * why it is painted at full strength whatever the theme.
  *
  * Everything is in percentages of the card, so the same drawing fits the
  * phone's hero and the iPad's expanded one. It sits under the hero's
- * content (absoluteFill, no pointer events) and over the hero's own tint,
- * which is what keeps the countdown legible whatever the hour.
+ * content (absoluteFill, no pointer events); the content takes its ink
+ * from the sky (`skyInk`), not from the theme.
  */
 function HeroSkyImpl({
   targetKey,
   progress,
-  isDark,
   bleed,
 }: {
   /** The prayer being counted down to — decides the sky. */
   targetKey: string;
   /** How far the current interval has run, 0–1 — moves the sun or moon. */
   progress: number;
-  isDark: boolean;
   /**
    * How far past its parent's box to draw, so a sky mounted inside the
    * padded hero still reaches the card's edges.
@@ -38,11 +36,12 @@ function HeroSkyImpl({
   bleed?: { horizontal: number; vertical: number };
 }) {
   const phase = skyPhaseFor(targetKey);
-  const sky = skyFor(phase, isDark);
+  const sky = skyFor(phase);
   const body = skyBodyPosition(phase, progress);
 
-  // A fixed, sparse field: the same six stars every night, so the card
-  // does not twinkle from one render to the next.
+  // A fixed, sparse field in the top strip: the same stars every night, so
+  // the card does not twinkle from one render to the next, and none of
+  // them behind the countdown.
   const stars = useMemo(
     () =>
       sky.stars
@@ -53,6 +52,7 @@ function HeroSkyImpl({
             [44, 8, 1.1],
             [56, 26, 0.9],
             [66, 40, 1.2],
+            [78, 14, 0.8],
           ]
         : [],
     [sky.stars],
@@ -73,13 +73,11 @@ function HeroSkyImpl({
       <Svg width="100%" height="100%">
         <Defs>
           <LinearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={sky.top} stopOpacity={sky.alpha} />
-            {/* Fading towards the foot, so the hero melts into the card
-                rather than ending on a band of the deeper colour. */}
-            <Stop offset="1" stopColor={sky.bottom} stopOpacity={sky.alpha * 0.45} />
+            <Stop offset="0" stopColor={sky.top} />
+            <Stop offset="1" stopColor={sky.bottom} />
           </LinearGradient>
-          <RadialGradient id="glow" cx={`${body.x * 100}%`} cy={`${body.y * 100}%`} r="22%">
-            <Stop offset="0" stopColor={sky.glow} stopOpacity={sky.alpha * 0.7} />
+          <RadialGradient id="glow" cx={`${body.x * 100}%`} cy={`${body.y * 100}%`} r="24%">
+            <Stop offset="0" stopColor={sky.glow} stopOpacity={0.55} />
             <Stop offset="1" stopColor={sky.glow} stopOpacity={0} />
           </RadialGradient>
         </Defs>
@@ -88,40 +86,22 @@ function HeroSkyImpl({
           <Rect x="0" y="0" width="100%" height="100%" fill="url(#glow)" />
         ) : null}
         {stars.map(([x, y, r], i) => (
-          <Circle
-            key={i}
-            cx={`${x}%`}
-            cy={`${y}%`}
-            r={r}
-            fill={sky.glow}
-            fillOpacity={sky.alpha * 1.4}
-          />
+          <Circle key={i} cx={`${x}%`} cy={`${y}%`} r={r} fill={sky.glow} fillOpacity={0.85} />
         ))}
         {sky.body === 'sun' ? (
-          <Circle
-            cx={`${body.x * 100}%`}
-            cy={`${body.y * 100}%`}
-            r={9}
-            fill={sky.glow}
-            fillOpacity={Math.min(1, sky.alpha * 2.2)}
-          />
+          <Circle cx={`${body.x * 100}%`} cy={`${body.y * 100}%`} r={9} fill={sky.glow} />
         ) : null}
       </Svg>
       {sky.body === 'moon' ? (
-        // A crescent, drawn as one path in its own small canvas so it can
-        // be a shape rather than a disc with a disc cut from it — the cut
-        // read as a dark blob on the first device pass. Positioned by the
-        // same fractions as everything else.
+        // A crescent, drawn as one path in its own small canvas so it is a
+        // shape rather than a disc with a disc cut from it. Positioned by
+        // the same fractions as everything else.
         <View
-          style={[
-            styles.moon,
-            { left: `${body.x * 100}%`, top: `${body.y * 100}%` },
-          ]}>
+          style={[styles.moon, { left: `${body.x * 100}%`, top: `${body.y * 100}%` }]}>
           <Svg width={MOON} height={MOON} viewBox="0 0 24 24">
             <Path
               d="M15.5 3.2a9.2 9.2 0 1 0 5.3 15.6A8 8 0 0 1 15.5 3.2Z"
               fill={sky.glow}
-              fillOpacity={Math.min(1, sky.alpha * 2.2)}
             />
           </Svg>
         </View>

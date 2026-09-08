@@ -1369,7 +1369,7 @@
     "quranGeometry": "Ayet konum verileri (quran.com / Quran for Android projesi)",
     "recitation": "Tilavet sesi (42 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)",
     "tafsir": "Tefsir metinleri: İbn Kesir, Maarif-ul-Kuran, el-Müyesser",
-    "katibehFont": "Katibeh yazı tipi (sure adları)"
+    "surahHeaderFont": "Sure başlığı hattı"
   },
   "liveActivity": {
     "title": "Sıradaki namaz",

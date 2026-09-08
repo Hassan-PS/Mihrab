@@ -1369,7 +1369,7 @@
     "quranGeometry": "Data för ayah-positioner (quran.com / projektet Quran for Android)",
     "recitation": "Recitationsljud (42 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-texter: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
-    "katibehFont": "Typsnittet Katibeh (surornas namn)"
+    "surahHeaderFont": "Kalligrafi för surarubriker"
   },
   "liveActivity": {
     "title": "Nästa bön",

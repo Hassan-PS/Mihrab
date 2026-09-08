@@ -19,10 +19,12 @@ describe('the player', () => {
     expect(src).toMatch(/<InfoButton[\s\S]*?quran\.tilawahBlurb/);
   });
 
-  it('writes the surah name in calligraphy beside the Latin one', () => {
+  it('draws the surah header glyph beside the Latin name', () => {
     expect(src).toMatch(/styles\.nowArabic/);
-    expect(src).toMatch(/nowArabic: \{[\s\S]*?arabicTextStyle\('calligraphy'\)/);
-    expect(src).toMatch(/surahArabic: \{[\s\S]*?arabicTextStyle\('calligraphy'\)/);
+    expect(src).toMatch(/nowArabic: \{[\s\S]*?surahHeaderStyle\(/);
+    expect(src).toMatch(/surahArabic: \{[\s\S]*?surahHeaderStyle\(/);
+    // A glyph, not text: hidden from screen readers, which have the name.
+    expect(src.match(/surahHeaderGlyph\([^)]*\)/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
   it('has one transport: ayah, surah, play, surah, ayah', () => {

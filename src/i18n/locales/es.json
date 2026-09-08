@@ -1369,7 +1369,7 @@
     "quranGeometry": "Datos de posición de aleyas (quran.com / proyecto Quran for Android)",
     "recitation": "Audio de recitación (42 recitadores): EveryAyah.com · tiempos de palabras: quran-align (CC BY 4.0)",
     "tafsir": "Textos de tafsir: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
-    "katibehFont": "Fuente Katibeh (nombres de las suras)"
+    "surahHeaderFont": "Caligrafía de encabezados de sura"
   },
   "liveActivity": {
     "title": "Próxima oración",

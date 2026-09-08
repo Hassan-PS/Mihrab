@@ -1369,7 +1369,7 @@
     "quranGeometry": "Данные о положении аятов (quran.com / проект Quran for Android)",
     "recitation": "Аудио чтения (42 чтеца): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)",
     "tafsir": "Тафсиры: Ибн Касир, Маариф-уль-Куран, аль-Муяссар",
-    "katibehFont": "Шрифт Katibeh (названия сур)"
+    "surahHeaderFont": "Каллиграфия заголовков сур"
   },
   "liveActivity": {
     "title": "Следующая молитва",

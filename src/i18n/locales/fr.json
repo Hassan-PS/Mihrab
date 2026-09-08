@@ -1369,7 +1369,7 @@
     "quranGeometry": "Données de position des versets (quran.com / projet Quran for Android)",
     "recitation": "Audio de récitation (42 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)",
     "tafsir": "Textes de tafsir : Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
-    "katibehFont": "Police Katibeh (noms des sourates)"
+    "surahHeaderFont": "Calligraphie des en-têtes de sourates"
   },
   "liveActivity": {
     "title": "Prochaine prière",

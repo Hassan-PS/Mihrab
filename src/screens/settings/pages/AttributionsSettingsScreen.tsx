@@ -132,11 +132,11 @@ export function AttributionsSettingsScreen() {
       url: 'https://github.com/aliftype/amiri',
     },
     {
-      label: t('attributions.katibehFont', {
-        defaultValue: 'Katibeh font (surah names)',
+      label: t('attributions.surahHeaderFont', {
+        defaultValue: 'Surah-name calligraphy',
       }),
-      sub: 'KB-Studio, Lasse Fister, Eduardo Tunni · SIL OFL 1.1',
-      url: 'https://github.com/Tarobish/Katibeh',
+      sub: 'King Fahd Glorious Quran Printing Complex · via quran.com (MIT)',
+      url: 'https://github.com/quran/quran.com-frontend-next',
     },
   ];
 

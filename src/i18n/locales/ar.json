@@ -1369,7 +1369,7 @@
     "quranGeometry": "بيانات مواضع الآيات (quran.com / مشروع Quran for Android)",
     "recitation": "صوت التلاوة (42 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)",
     "tafsir": "نصوص التفسير: ابن كثير، معارف القرآن، الميسر",
-    "katibehFont": "خط كاتبة (أسماء السور)"
+    "surahHeaderFont": "خط عناوين السور"
   },
   "liveActivity": {
     "title": "الصلاة التالية",

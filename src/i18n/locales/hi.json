@@ -1369,7 +1369,7 @@
     "quranGeometry": "आयत स्थिति डेटा (quran.com / Quran for Android प्रोजेक्ट)",
     "recitation": "तिलावत ऑडियो (42 क़ारी): EveryAyah.com · शब्द समय: quran-align (CC BY 4.0)",
     "tafsir": "तफ़सीर: इब्न कसीर, मआरिफ़-उल-क़ुरआन, अल-मुयस्सर",
-    "katibehFont": "कातिबेह फ़ॉन्ट (सूरह के नाम)"
+    "surahHeaderFont": "सूरह शीर्षक कैलिग्राफी"
   },
   "liveActivity": {
     "title": "अगली नमाज़",
