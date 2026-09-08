@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { InfoButton } from '../../components/ui/InfoSheet';
 import {
   hasSystemCompass,
   openSystemCompass,
@@ -108,17 +109,18 @@ function StatusBannersImpl({
         </View>
       ) : null}
 
-      <View style={styles.banner}>
-        <Text style={[styles.title, { color: palette.text }]}>
+      {/* The cross-check: one line and a link, not a heading and a paragraph
+          (redesign-plan B.8.3). The full advice is behind the ⓘ. */}
+      <View style={styles.crossCheck}>
+        <Text style={[styles.body, { color: palette.muted }]} numberOfLines={1}>
           {t('compass.crossCheckTitle')}
         </Text>
-        <Text style={[styles.body, { color: palette.muted }]}>
-          {t('compass.crossCheckBody', {
-            // LTR isolate: a Latin-digit run inside a possibly-RTL
-            // sentence scrambles without it.
+        <InfoButton
+          title={t('compass.crossCheckTitle')}
+          body={t('compass.crossCheckBody', {
             degrees: `\u2066${Math.round(bearing) % 360}\u00B0\u2069`,
           })}
-        </Text>
+        />
         {canOpen ? (
           <Text
             accessibilityRole="link"
@@ -150,6 +152,14 @@ export const StatusBanners = memo(StatusBannersImpl);
 
 const styles = StyleSheet.create({
   banner: { marginBottom: SPACING.md, gap: SPACING.sm },
+  crossCheck: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
+    flexWrap: 'wrap',
+  },
   title: { fontSize: TYPE.body.fontSize, fontWeight: '700', textAlign: 'center' },
   body: { fontSize: TYPE.callout.fontSize, lineHeight: 20, textAlign: 'center' },
   link: { textAlign: 'center', fontSize: TYPE.callout.fontSize, fontWeight: '700' },

@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { TITLE_BAND_MAX_FONT_SCALE } from '../../theme/textScale';
 import type { CompassMode, SignalStrength } from './useCompassSensor';
-import { RADIUS, SPACING } from '../../theme/tokens';
+import { SPACING } from '../../theme/tokens';
+import { InfoButton } from '../../components/ui/InfoSheet';
 import { TYPE } from '../../theme/typography';
 
 /**
@@ -28,44 +29,30 @@ function SignalIndicatorImpl({ mode, signalStrength }: SignalIndicatorProps) {
       : `${signalStrength}%`;
 
   return (
-    <View style={styles.block}>
-      <View style={styles.header}>
-        <Text style={[styles.label, { color: palette.muted }]}>
-          {t('compass.signalStrength')}
-        </Text>
-        <Text
-          style={[styles.value, { color: palette.text }]}
-          maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-          {valueText}
-        </Text>
-      </View>
-      <View
-        accessible
-        accessibilityRole="progressbar"
-        accessibilityLabel={t('compass.signalStrength')}
-        accessibilityValue={{
-          min: 0,
-          max: 100,
-          now: signalStrength >= 0 ? signalStrength : 0,
-          text: valueText,
-        }}
-        style={[styles.track, { backgroundColor: palette.border }]}>
-        {mode === 'live' && signalStrength >= 0 ? (
-          <View
-            style={[
-              styles.fill,
-              {
-                width: `${signalStrength}%`,
-                backgroundColor: palette.accent,
-              },
-            ]}
-          />
-        ) : null}
-      </View>
+    <View
+      style={styles.row}
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={t('compass.signalStrength')}
+      accessibilityValue={{
+        min: 0,
+        max: 100,
+        now: signalStrength >= 0 ? signalStrength : 0,
+        text: valueText,
+      }}>
+      {/* One line. The bar itself is now the arc around the dial; this is
+          its caption, and the paragraph about magnetic fields is a tap
+          away (redesign-plan B.8.4). */}
+      <Text style={[styles.label, { color: palette.muted }]}>
+        {t('compass.signalStrength')}
+      </Text>
+      <Text
+        style={[styles.value, { color: palette.text }]}
+        maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+        {valueText}
+      </Text>
       {mode === 'live' ? (
-        <Text style={[styles.help, { color: palette.muted }]}>
-          {t('compass.signalHelp')}
-        </Text>
+        <InfoButton title={t('compass.signalStrength')} body={t('compass.signalHelp')} />
       ) : null}
     </View>
   );
@@ -74,27 +61,17 @@ function SignalIndicatorImpl({ mode, signalStrength }: SignalIndicatorProps) {
 export const SignalIndicator = memo(SignalIndicatorImpl);
 
 const styles = StyleSheet.create({
-  block: { marginBottom: SPACING.lg },
-  header: {
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: SPACING.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
   },
-  label: {
-    fontSize: TYPE.footnote.fontSize,
-    fontWeight: '600',
-  },
+  label: { fontSize: TYPE.footnote.fontSize, fontWeight: '500' },
   value: {
-    fontSize: TYPE.callout.fontSize,
+    fontSize: TYPE.footnote.fontSize,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
-  track: {
-    height: 8,
-    borderRadius: RADIUS.xs,
-    overflow: 'hidden',
-  },
-  fill: { height: '100%', borderRadius: RADIUS.xs },
-  help: { fontSize: TYPE.label.fontSize, lineHeight: 17, marginTop: SPACING.sm },
 });

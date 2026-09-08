@@ -446,7 +446,8 @@
     "a11ySignal_very_weak": "指南针信号：很弱。精度可能受限。",
     "crossCheckTitle": "用你的指南针应用核对",
     "crossCheckBody": "设备自带的指南针针对其硬件做过校准。若要获得最准确的读数，请打开它并转动，直到显示 {{degrees}}。",
-    "openSystemCompass": "打开指南针应用"
+    "openSystemCompass": "打开指南针应用",
+    "fromNorthLabel": "距北"
   },
   "prayer": {
     "Fajr": "晨礼",

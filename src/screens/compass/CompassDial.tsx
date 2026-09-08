@@ -1,30 +1,53 @@
 import { memo } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { FIXED_LABEL_MAX_FONT_SCALE } from '../../theme/textScale';
-import type { CompassMode } from './useCompassSensor';
-import { RADIUS, SPACING } from '../../theme/tokens';
-import { TYPE } from '../../theme/typography';
-
-export const DIAL = 260;
-const ARM_H = DIAL * 0.4;
+import type { CompassMode, SignalStrength } from './useCompassSensor';
+import { SPACING } from '../../theme/tokens';
 
 /**
- * The Qibla compass dial — round face with cardinal labels, phone-front
- * indicator, rotating Qibla arm, and centre hub.
+ * The Qibla compass dial (docs/design/redesign-plan.md §4).
  *
- * `needleDeg` is the rotation applied to the arm (Qibla bearing minus current
- * heading). A change here re-renders only this component; the surrounding
- * status banners and bearing header don't move.
+ * A compass is the single most visually iconic object in a prayer app, and
+ * this one was a white circle with four letters, a 7dp green bar and a
+ * black dot. It is now an instrument: a degree ring with a tick every 10°
+ * and a numeral every 30°, a thin needle with the Kaaba at its tip, a
+ * small centre pin, and the compass signal drawn as an arc around the
+ * outside of the ring rather than as a full-width bar with a label above
+ * it. Monochrome plus the accent; one SVG.
+ *
+ * `needleDeg` is the rotation applied to the needle (Qibla bearing minus
+ * current heading). A change here re-renders only this component.
+ *
+ * Geography, not typography: the cardinals and ticks mark directions, so
+ * nothing in here follows the writing direction. East stays east in
+ * Arabic.
  */
+export const DIAL = 280;
+const C = DIAL / 2;
+/** The degree ring. */
+const R = C - 22;
+/** The signal arc, just outside the ring. */
+const R_SIGNAL = C - 8;
+const SIGNAL_C = 2 * Math.PI * R_SIGNAL;
+const KAABA = 16;
+
 type CompassDialProps = {
   mode: CompassMode;
-  /** 0-360. Rotation of the Qibla arm relative to "Phone front". */
+  /** 0-360. Rotation of the needle relative to "Phone front". */
   needleDeg: number;
+  /** 0–100, or the sentinel values the sensor hook uses. */
+  signalStrength?: SignalStrength;
 };
 
-function CompassDialImpl({ mode, needleDeg }: CompassDialProps) {
+/** A point on a circle of radius `r` at `deg` clockwise from twelve o'clock. */
+function polar(r: number, deg: number): { x: number; y: number } {
+  const a = ((deg - 90) * Math.PI) / 180;
+  return { x: C + r * Math.cos(a), y: C + r * Math.sin(a) };
+}
+
+function CompassDialImpl({ mode, needleDeg, signalStrength = -1 }: CompassDialProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
 
@@ -35,106 +58,138 @@ function CompassDialImpl({ mode, needleDeg }: CompassDialProps) {
       ? t('compass.a11yDialChecking')
       : t('compass.a11yDialUnavailable');
 
+  // SVG takes plain strings only — the *Solid palette fields exist for this.
+  const ink = palette.textSolid;
+  const quiet = palette.mutedSolid;
+  const accent = palette.accentSolid;
+  const live = mode === 'live';
+  const signal = live && signalStrength >= 0 ? signalStrength / 100 : 0;
+
+  const cardinals: Array<[number, string]> = [
+    [0, t('compass.north')],
+    [90, t('compass.east')],
+    [180, t('compass.south')],
+    [270, t('compass.west')],
+  ];
+
+  // Inside the numeral ring (which sits at R − 24), so the Kaaba never
+  // covers the figure it happens to be pointing at.
+  const tip = polar(R - 48, 0);
+
   return (
     <View style={styles.wrap}>
       <View
         accessible
         accessibilityRole="image"
         accessibilityLabel={a11yLabel}
-        style={[
-          styles.dial,
-          {
-            backgroundColor: palette.card,
-            opacity: mode === 'unsupported' ? 0.5 : 1,
-            ...(palette.flatChrome
-              ? { borderWidth: 0, borderColor: 'transparent' }
-              : { borderColor: palette.border }),
-          },
-        ]}>
-        <View style={styles.phoneFrontMark} pointerEvents="none">
-          <Text
-            style={[styles.phoneFrontLabel, { color: palette.accent }]}
-            maxFontSizeMultiplier={FIXED_LABEL_MAX_FONT_SCALE}>
-            {t('compass.phoneFront')}
-          </Text>
-          <View
-            style={[
-              styles.phoneFrontArrow,
-              { borderTopColor: palette.accent },
-            ]}
-          />
-        </View>
+        style={[styles.dial, mode === 'unsupported' && styles.unsupported]}>
+        <Svg width={DIAL} height={DIAL} viewBox={`0 0 ${DIAL} ${DIAL}`}>
+          {/* The signal, as an arc around the outside: a full circle is a
+              clean reading, a short one says move away from the metal. */}
+          <Circle cx={C} cy={C} r={R_SIGNAL} stroke={quiet} strokeOpacity={0.18} strokeWidth={3} fill="none" />
+          {signal > 0 ? (
+            <Circle
+              cx={C}
+              cy={C}
+              r={R_SIGNAL}
+              stroke={accent}
+              strokeWidth={3}
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray={`${SIGNAL_C * signal} ${SIGNAL_C}`}
+              transform={`rotate(-90 ${C} ${C})`}
+            />
+          ) : null}
 
-        <Text
-          style={[styles.cardinal, styles.n, { color: palette.muted }]}
-          maxFontSizeMultiplier={FIXED_LABEL_MAX_FONT_SCALE}>
-          {t('compass.north')}
-        </Text>
-        <Text
-          style={[styles.cardinal, styles.e, { color: palette.muted }]}
-          maxFontSizeMultiplier={FIXED_LABEL_MAX_FONT_SCALE}>
-          {t('compass.east')}
-        </Text>
-        <Text
-          style={[styles.cardinal, styles.s, { color: palette.muted }]}
-          maxFontSizeMultiplier={FIXED_LABEL_MAX_FONT_SCALE}>
-          {t('compass.south')}
-        </Text>
-        <Text
-          style={[styles.cardinal, styles.w, { color: palette.muted }]}
-          maxFontSizeMultiplier={FIXED_LABEL_MAX_FONT_SCALE}>
-          {t('compass.west')}
-        </Text>
+          {/* The ring and its ticks. */}
+          <Circle cx={C} cy={C} r={R} stroke={quiet} strokeOpacity={0.45} strokeWidth={1} fill="none" />
+          {Array.from({ length: 36 }, (_, i) => i * 10).map(deg => {
+            const major = deg % 30 === 0;
+            const a = polar(R, deg);
+            const b = polar(R - (major ? 10 : 5), deg);
+            return (
+              <Line
+                key={deg}
+                x1={a.x}
+                y1={a.y}
+                x2={b.x}
+                y2={b.y}
+                stroke={major ? ink : quiet}
+                strokeOpacity={major ? 0.8 : 0.5}
+                strokeWidth={major ? 1.5 : 1}
+                strokeLinecap="round"
+              />
+            );
+          })}
+          {/* Numerals at 30°, where there is no cardinal. */}
+          {[30, 60, 120, 150, 210, 240, 300, 330].map(deg => {
+            const p = polar(R - 24, deg);
+            return (
+              <SvgText
+                key={deg}
+                x={p.x}
+                y={p.y + 3.5}
+                fill={quiet}
+                fontSize={10}
+                fontWeight="500"
+                textAnchor="middle">
+                {deg}
+              </SvgText>
+            );
+          })}
+          {/* The cardinals. North is the one that matters, so it is the
+              one in ink and weight; the others are lighter. */}
+          {cardinals.map(([deg, label]) => {
+            const p = polar(R - 24, deg);
+            return (
+              <SvgText
+                key={deg}
+                x={p.x}
+                y={p.y + 5}
+                fill={deg === 0 ? ink : quiet}
+                fontSize={deg === 0 ? 15 : 13}
+                fontWeight={deg === 0 ? '700' : '600'}
+                textAnchor="middle">
+                {label}
+              </SvgText>
+            );
+          })}
+
+          {/* Phone front: a small filled marker just outside the ring at
+              twelve o'clock. The needle is read against it. */}
+          <Path
+            d={`M ${C - 6} ${C - R - 14} L ${C + 6} ${C - R - 14} L ${C} ${C - R - 4} Z`}
+            fill={accent}
+          />
+
+          {live ? (
+            <G transform={`rotate(${needleDeg} ${C} ${C})`}>
+              {/* Counterweight, so the needle reads as pivoting rather than
+                  sprouting from the centre. */}
+              <Line x1={C} y1={C} x2={C} y2={C + 26} stroke={quiet} strokeWidth={2.5} strokeLinecap="round" strokeOpacity={0.6} />
+              {/* The needle. */}
+              <Line x1={C} y1={C} x2={tip.x} y2={tip.y + KAABA / 2 + 2} stroke={accent} strokeWidth={2.5} strokeLinecap="round" />
+              {/* The Kaaba at its tip: a cube with its band. */}
+              <Rect x={C - KAABA / 2} y={tip.y - KAABA / 2} width={KAABA} height={KAABA} rx={2} fill={accent} />
+              <Rect x={C - KAABA / 2} y={tip.y - KAABA / 2 + 4} width={KAABA} height={2.5} fill={palette.onAccent} opacity={0.9} />
+            </G>
+          ) : null}
+
+          {/* The pin. */}
+          <Circle cx={C} cy={C} r={5} fill={live ? accent : quiet} />
+          <Circle cx={C} cy={C} r={2} fill={palette.onAccent} />
+
+          {mode === 'unsupported' ? (
+            <Line x1={C - 40} y1={C} x2={C + 40} y2={C} stroke={quiet} strokeWidth={2} strokeLinecap="round" />
+          ) : null}
+        </Svg>
 
         {mode === 'checking' ? (
           // activity-indicator-allowed: sensor-warmup is <1 s and transient.
           // A Skeleton dial would imply we're waiting for data when we're
           // actually waiting for the magnetometer to stabilise.
-          <ActivityIndicator size="large" color={palette.accent} />
-        ) : null}
-
-        {mode === 'live' ? (
-          <>
-            <View
-              style={[
-                styles.rotatePlate,
-                { transform: [{ rotate: `${needleDeg}deg` }] },
-              ]}>
-              <View
-                style={[
-                  styles.qiblaArm,
-                  { bottom: DIAL / 2, left: DIAL / 2 - 26 },
-                ]}>
-                <View style={styles.qiblaHead}>
-                  <View
-                    style={[
-                      styles.qiblaTriangle,
-                      { borderBottomColor: palette.accent },
-                    ]}
-                  />
-                  <Text
-                    style={[styles.qiblaHeadText, { color: palette.accent }]}
-                    maxFontSizeMultiplier={FIXED_LABEL_MAX_FONT_SCALE}>
-                    {t('compass.qiblaMarker')}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.qiblaShaft,
-                    { backgroundColor: palette.accent },
-                  ]}
-                />
-              </View>
-            </View>
-            <View style={[styles.hub, { backgroundColor: palette.text }]} />
-          </>
-        ) : null}
-
-        {mode === 'unsupported' ? (
-          <View style={styles.disabledOverlay} pointerEvents="none">
-            <Text style={[styles.disabledGlyph, { color: palette.muted }]}>
-              —
-            </Text>
+          <View style={styles.centre} pointerEvents="none">
+            <ActivityIndicator size="large" color={palette.accent} />
           </View>
         ) : null}
       </View>
@@ -146,96 +201,7 @@ export const CompassDial = memo(CompassDialImpl);
 
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', marginVertical: SPACING.sm },
-  dial: {
-    width: DIAL,
-    height: DIAL,
-    borderRadius: DIAL / 2,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phoneFrontMark: {
-    position: 'absolute',
-    top: 6,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 4,
-  },
-  phoneFrontLabel: {
-    fontSize: TYPE.label.fontSize,
-    fontWeight: '600',
-  },
-  // rtl-safe: geometric triangle (the classic 0×0 + transparent borders trick).
-  // borderLeftWidth / borderRightWidth define the triangle's base, NOT a layout
-  // direction — they must NOT flip in RTL or the arrow shape inverts.
-  phoneFrontArrow: {
-    marginTop: 2,
-    width: 0,
-    height: 0,
-    borderLeftWidth: 7, // rtl-safe: triangle geometry
-    borderRightWidth: 7, // rtl-safe: triangle geometry
-    borderTopWidth: 9,
-    borderLeftColor: 'transparent', // rtl-safe: triangle geometry
-    borderRightColor: 'transparent', // rtl-safe: triangle geometry
-  },
-  cardinal: { position: 'absolute', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
-  n: { top: 36 },
-  s: { bottom: 10 },
-  // rtl-safe: cardinal labels mark geographic directions, not text direction.
-  // East stays on the geographic east of the dial regardless of UI language.
-  e: { right: 14 }, // rtl-safe: geographic east
-  w: { left: 14 }, // rtl-safe: geographic west
-  rotatePlate: {
-    position: 'absolute',
-    width: DIAL,
-    height: DIAL,
-    top: 0,
-    left: 0,
-    zIndex: 1,
-  },
-  qiblaArm: {
-    position: 'absolute',
-    width: 52,
-    height: ARM_H,
-    alignItems: 'center',
-    flexDirection: 'column-reverse',
-  },
-  qiblaShaft: {
-    width: 7,
-    height: ARM_H * 0.62,
-    borderRadius: RADIUS.xs,
-    marginTop: SPACING.xs,
-  },
-  qiblaHead: { alignItems: 'center', marginBottom: 2 },
-  // rtl-safe: Qibla arrowhead — geometric triangle, must not flip in RTL.
-  qiblaTriangle: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderLeftWidth: 14, // rtl-safe: triangle geometry
-    borderRightWidth: 14, // rtl-safe: triangle geometry
-    borderBottomWidth: 20,
-    borderLeftColor: 'transparent', // rtl-safe: triangle geometry
-    borderRightColor: 'transparent', // rtl-safe: triangle geometry
-    marginBottom: 2,
-  },
-  qiblaHeadText: { fontSize: TYPE.caption.fontSize, fontWeight: '800', letterSpacing: 0.3 },
-  hub: {
-    position: 'absolute',
-    width: 14,
-    height: 14,
-    borderRadius: RADIUS.sm,
-    left: DIAL / 2 - 7,
-    top: DIAL / 2 - 7,
-    zIndex: 3,
-  },
-  disabledOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-  disabledGlyph: { fontSize: 48, fontWeight: '200' }, // tokens-ok-line: display or Arabic scale, sized by hand
+  dial: { width: DIAL, height: DIAL, alignItems: 'center', justifyContent: 'center' },
+  unsupported: { opacity: 0.5 },
+  centre: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
 });

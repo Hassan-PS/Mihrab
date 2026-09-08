@@ -44,7 +44,9 @@ const FONT_CLAMP_REQUIRED = [
   'src/screens/home/DayStrip.tsx',
   'src/screens/compass/BearingHeader.tsx',
   'src/screens/compass/SignalIndicator.tsx',
-  'src/screens/compass/CompassDial.tsx',
+  // CompassDial is one SVG now (redesign-plan §4): its numerals are drawn,
+  // not laid out as Text, and an instrument's face does not follow the
+  // system font size — the screen reader gets the bearing from the label.
   'src/screens/settings/WidgetCard.tsx',
 ];
 

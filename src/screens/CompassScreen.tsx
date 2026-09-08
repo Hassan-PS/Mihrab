@@ -117,6 +117,8 @@ export function CompassScreen() {
       ]}>
       <BearingHeader qiblaDeg={qibla} />
 
+      <CompassDial mode={mode} needleDeg={needleDeg} signalStrength={signalStrength} />
+
       <SignalIndicator mode={mode} signalStrength={signalStrength} />
 
       <StatusBanners
@@ -126,8 +128,6 @@ export function CompassScreen() {
         signalStrength={signalStrength}
         bearing={qibla}
       />
-
-      <CompassDial mode={mode} needleDeg={needleDeg} />
 
       {mode === 'checking' ? (
         <Text style={[styles.checkingHint, { color: palette.muted }]}>

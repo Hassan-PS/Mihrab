@@ -446,7 +446,8 @@
     "a11ySignal_very_weak": "إشارة البوصلة: ضعيفة جداً.",
     "crossCheckTitle": "تحقّق باستخدام تطبيق البوصلة",
     "crossCheckBody": "بوصلة جهازك مضبوطة على عتاده. للحصول على أدقّ قراءة، افتحها وأدر الجهاز حتى تُظهر {{degrees}}.",
-    "openSystemCompass": "فتح تطبيق البوصلة"
+    "openSystemCompass": "فتح تطبيق البوصلة",
+    "fromNorthLabel": "من الشمال"
   },
   "prayer": {
     "Fajr": "الفجر",

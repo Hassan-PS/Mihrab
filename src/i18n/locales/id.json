@@ -446,7 +446,8 @@
     "a11ySignal_very_weak": "Sinyal kompas: sangat lemah. Akurasi mungkin terbatas.",
     "crossCheckTitle": "Periksa silang dengan aplikasi kompas Anda",
     "crossCheckBody": "Kompas bawaan perangkat Anda disetel untuk perangkat kerasnya. Untuk pembacaan paling akurat, buka dan putar hingga menunjukkan {{degrees}}.",
-    "openSystemCompass": "Buka aplikasi kompas"
+    "openSystemCompass": "Buka aplikasi kompas",
+    "fromNorthLabel": "dari utara"
   },
   "prayer": {
     "Fajr": "Subuh",

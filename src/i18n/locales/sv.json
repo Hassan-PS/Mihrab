@@ -446,7 +446,8 @@
     "a11ySignal_very_weak": "Kompasssignal: mycket svag.",
     "crossCheckTitle": "Dubbelkolla med din kompassapp",
     "crossCheckBody": "Enhetens egen kompass är anpassad till dess hårdvara. För bästa noggrannhet, öppna den och vrid tills den visar {{degrees}}.",
-    "openSystemCompass": "Öppna kompassappen"
+    "openSystemCompass": "Öppna kompassappen",
+    "fromNorthLabel": "från norr"
   },
   "prayer": {
     "Fajr": "Fajr",

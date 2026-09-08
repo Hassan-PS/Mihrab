@@ -446,7 +446,8 @@
     "a11ySignal_very_weak": "Compass signal: very weak. Accuracy may be limited.",
     "crossCheckTitle": "Cross-check with your compass app",
     "crossCheckBody": "Your device's own compass is tuned to its hardware. For the most accurate reading, open it and turn until it shows {{degrees}}.",
-    "openSystemCompass": "Open compass app"
+    "openSystemCompass": "Open compass app",
+    "fromNorthLabel": "from north"
   },
   "prayer": {
     "Fajr": "Fajr",

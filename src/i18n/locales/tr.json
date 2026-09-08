@@ -446,7 +446,8 @@
     "a11ySignal_very_weak": "Pusula sinyali: çok zayıf. Doğruluk sınırlı olabilir.",
     "crossCheckTitle": "Pusula uygulamanla karşılaştır",
     "crossCheckBody": "Cihazının kendi pusulası donanımına göre ayarlıdır. En doğru okuma için pusulayı aç ve {{degrees}} gösterene kadar dön.",
-    "openSystemCompass": "Pusula uygulamasını aç"
+    "openSystemCompass": "Pusula uygulamasını aç",
+    "fromNorthLabel": "kuzeyden"
   },
   "prayer": {
     "Fajr": "Sabah",

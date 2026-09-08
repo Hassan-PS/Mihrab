@@ -446,7 +446,8 @@
     "a11ySignal_very_weak": "Señal de la brújula: muy débil. La precisión puede ser limitada.",
     "crossCheckTitle": "Compruébalo con tu app de brújula",
     "crossCheckBody": "La brújula de tu dispositivo está calibrada para su hardware. Para la lectura más precisa, ábrela y gira hasta que muestre {{degrees}}.",
-    "openSystemCompass": "Abrir la app de brújula"
+    "openSystemCompass": "Abrir la app de brújula",
+    "fromNorthLabel": "desde el norte"
   },
   "prayer": {
     "Fajr": "Fayr",
