@@ -656,4 +656,32 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/xcode-cloud.py`
 
-**Lesson:** _(unfilled)_
+**Lesson:** Three, and the first two are now in the machinery rather than in
+anyone's head.
+
+**A hold at Apple is an ordinary condition, so it has a name.** This release
+could not go to App Store Connect — the account may not take a new build until
+the 12th — and everything else could ship on the day it was ready. The two ways
+to do that before `SKIP_APP_STORE=1` were to comment out a step in the middle of
+a release script, or to let the run fail and read the retry line off the end.
+Both are how a release gets cut wrong. The flag leaves the workflow PAUSED
+rather than armed, says which of three states iOS is in — built, refused,
+skipped on purpose — and prints the command to build THE TAG when the hold
+lifts, because by then main has moved and a run started from it would ship a
+newer commit under this version's number.
+
+**A test can be vacuously true and look like proof.** The one covering that flag
+sliced the script with `indexOf('else')` measured from the start of the step,
+which landed inside the comment above it — an empty slice, and three assertions
+that passed on nothing. It was caught only by deliberately breaking the script
+so the skip re-armed Xcode Cloud and watching the test stay green. Breaking the
+thing a test watches is this repo's rule for a reason; this is the release where
+it earned its keep on the release machinery itself.
+
+**Jest inherits NODE_ENV, and a dirty shell lies.** Jest defaults it to `test`
+only when it is unset. Inherit `NODE_ENV=production` — the release script exports
+it, and so does the desktop tooling this repo is driven from — and every suite
+gets React's production build, which has no `act`: 195 failures across 35 suites,
+none of them real. `jest.config.js` pins it now, so the suite means the same
+thing whatever shell starts it. Before that, an hour of this release's day went
+into deciding which change had broken react-test-renderer. None had.
