@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "Rensa dessa böner?",
     "resetConfirm": "Rensa dem",
     "resetPreserved": "Fastor, sunnaböner och dhikr rörs inte. Detta går inte att ångra.",
-    "resetRangeAll": "hela loggen"
+    "resetRangeAll": "hela loggen",
+    "options": "Alternativ",
+    "setUpSync": "Ställ in synk"
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

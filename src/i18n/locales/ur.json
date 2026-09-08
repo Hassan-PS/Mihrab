@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "یہ نمازیں مٹا دیں؟",
     "resetConfirm": "مٹا دیں",
     "resetPreserved": "روزے، سنت نمازیں اور ذکر کو ہاتھ نہیں لگایا جائے گا۔ اسے واپس نہیں لایا جا سکتا۔",
-    "resetRangeAll": "پورا ریکارڈ"
+    "resetRangeAll": "پورا ریکارڈ",
+    "options": "اختیارات",
+    "setUpSync": "سنک سیٹ اپ کریں"
   },
   "endOfDay": {
     "title": "آج کی نمازیں درج کریں؟",

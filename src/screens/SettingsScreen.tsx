@@ -36,6 +36,7 @@ import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useLayoutRtl } from '../i18n/useLayoutRtl';
 import { cardEdgeStyle } from '../theme/chrome';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabPageTop } from '../navigation/useTabPageTop';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { ChevronIcon } from './settings/SettingsSectionIcons';
 import { SETTINGS_SUBPAGES } from './settings/subpages';
@@ -47,6 +48,7 @@ export function SettingsScreen() {
   const { palette } = useAppPalette();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const tabBarInset = useTabBarInset();
+  const pageTop = useTabPageTop();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
   const isRtl = useLayoutRtl();
@@ -72,9 +74,9 @@ export function SettingsScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.content,
-        { paddingBottom: SPACING.xl + tabBarInset },
+        { paddingTop: pageTop, paddingBottom: SPACING.xl + tabBarInset },
       ]}
-      contentInsetAdjustmentBehavior="automatic">
+      contentInsetAdjustmentBehavior="never">
       <CenteredColumn>
         <View
           style={[

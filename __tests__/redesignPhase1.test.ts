@@ -71,9 +71,12 @@ describe('the Quran tab', () => {
 
 describe('Duas', () => {
   const src = read('src/screens/DuasScreen.tsx');
-  it('has one way back — the header arrow, pointed at the index', () => {
+  it('has one way back — the arrow at the top of the page, pointed at the index', () => {
     expect(src).not.toContain('styles.backRow');
-    expect(src).toMatch(/headerLeft: selected\s*\?\s*\(\) => \(\s*<TabBackButton/);
+    // No title bar on a tab: the arrow and the category name are the
+    // page's own first row, drawn only inside a category.
+    expect(src).toMatch(/\{selected !== null \? \(\s*<View style=\{styles\.categoryBar\}>\s*<TabBackButton/);
+    expect(src).not.toContain('setOptions');
   });
 });
 

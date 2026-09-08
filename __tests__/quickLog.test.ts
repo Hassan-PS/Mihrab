@@ -77,9 +77,10 @@ describe('the row and the card', () => {
   });
 
   it('offers the check on today’s salāh only', () => {
-    expect(card).toMatch(/const logNow = isToday \? new Date\(\) : null;/);
-    expect(card).toMatch(/logNow && isSalah\(key\)/);
-    expect(card).toMatch(/quickLog\.toggle\(key, timings, tomorrow\)/);
+    // Per page: only the today page (offset 0) gets a check.
+    expect(card).toMatch(/const isToday = offset === 0;/);
+    expect(card).toMatch(/isToday && isSalah\(key\)/);
+    expect(card).toMatch(/quickLog\.toggle\(key, dayTimings, tomorrow\)/);
   });
 
   it('is a checkbox that cannot be pressed before its time', () => {

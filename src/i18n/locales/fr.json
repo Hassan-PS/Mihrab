@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "Effacer ces prières ?",
     "resetConfirm": "Les effacer",
     "resetPreserved": "Les jeûnes, les prières sunna et le dhikr ne sont pas touchés. Cette action est irréversible.",
-    "resetRangeAll": "tout le journal"
+    "resetRangeAll": "tout le journal",
+    "options": "Options",
+    "setUpSync": "Configurer la synchronisation"
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",

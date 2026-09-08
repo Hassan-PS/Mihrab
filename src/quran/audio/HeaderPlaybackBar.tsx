@@ -104,10 +104,17 @@ const OWN_PLAYER: ReadonlySet<string> = new Set([
  */
 export function HeaderPlaybackBar({
   inline,
+  headerless = false,
   ...props
 }: {
   surface: ColorValue;
   underTransparentHeader?: boolean;
+  /**
+   * No title bar above this bar — the tabs draw none — so it is the first
+   * thing under the status bar and pads past it itself. The navigator
+   * that mounts the bar says so, because only it knows what it drew.
+   */
+  headerless?: boolean;
   /**
    * Rendered by a screen itself rather than by the navigator's layout.
    *
@@ -126,11 +133,7 @@ export function HeaderPlaybackBar({
   const { active } = usePlaybackStatus();
   if (!active || !focused || OWN_PLAYER.has(route.name)) return null;
   if (!inline && IS_MAC_CATALYST && route.name === 'TodayTab') return null;
-  // Today has no header on the phone — its hero runs under the status
-  // bar — so a bar mounted above it is the first thing under the status
-  // bar and has to clear it itself.
-  const headerless = !inline && route.name === 'TodayTab';
-  return <LiveBar {...props} headerless={headerless} />;
+  return <LiveBar {...props} headerless={!inline && headerless} />;
 }
 
 function LiveBar({

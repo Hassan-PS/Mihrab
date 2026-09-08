@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "Hapus salat ini?",
     "resetConfirm": "Hapus",
     "resetPreserved": "Puasa, salat sunah dan zikir tidak disentuh. Ini tidak bisa dibatalkan.",
-    "resetRangeAll": "seluruh catatan"
+    "resetRangeAll": "seluruh catatan",
+    "options": "Opsi",
+    "setUpSync": "Siapkan sinkronisasi"
   },
   "endOfDay": {
     "title": "Catat salat hari ini?",

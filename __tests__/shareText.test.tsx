@@ -125,6 +125,7 @@ describe('the ayah body the refactor inherited', () => {
 
 // ── the screens that call them ──────────────────────────────────────────
 
+jest.mock('../src/navigation/useTabPageTop', () => ({ useTabPageTop: () => 12 }));
 jest.mock('../src/hooks/useAppPalette', () => ({
   useAppPalette: () => ({
     isDark: false,
@@ -156,6 +157,8 @@ jest.mock('react-i18next', () => ({
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useScrollToTop: () => {},
+  // The arrow at the top of an open category reads the navigator.
+  useNavigation: () => ({ navigate: () => {} }),
 }));
 jest.mock('../src/navigation/tabBarInset', () => ({ useTabBarInset: () => 0 }));
 jest.mock('../src/navigation/tabBarVisibility', () => ({

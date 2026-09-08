@@ -1,14 +1,7 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import {
-  memo,
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -24,7 +17,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
-import { TabBackButton, tabBackButton } from '../navigation/TabBackButton';
+import { TabBackButton } from '../navigation/TabBackButton';
 import {
   DUA_SECTIONS,
   duasByCategory,
@@ -38,6 +31,7 @@ import { duaShareText } from '../share/shareText';
 import { TYPE, arabicTextStyle } from '../theme/typography';
 import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabPageTop } from '../navigation/useTabPageTop';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { RADIUS, SPACING } from '../theme/tokens';
 
@@ -62,20 +56,14 @@ import { RADIUS, SPACING } from '../theme/tokens';
  * would have found — with the difference that a test can hand over a
  * fake one and assert what the header was told.
  */
-type DuasNav = {
-  setOptions: (options: {
-    headerTitle: string;
-    headerLeft?: () => ReactNode;
-  }) => void;
-};
-
-export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
+export function DuasScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
   const tabBarInset = useTabBarInset();
+  const pageTop = useTabPageTop();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
   /**
@@ -109,40 +97,14 @@ export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
    */
   const [selected, setSelected] = useState<DuaCategory | null>(null);
   /**
-   * THE HEADER SAYS WHERE YOU ARE.
+   * THE PAGE SAYS WHERE YOU ARE.
    *
-   * This is a tab screen, so its title comes from the tab's `title` and
-   * stayed "Duas" for every one of the twenty-one categories you can open
-   * inside it — the one place on screen that names a destination, naming
-   * the tab instead. The category is what you navigated to; it is what
-   * the header should say.
-   *
-   * `headerTitle` and not `title`: `title` is the fallback for the tab
-   * BAR's label too, so setting it here would rename the tab at the foot
-   * of the screen every time a category opened.
-   *
-   * `useLayoutEffect` so the title and the list change in the same frame.
-   * With `useEffect` the header repaints one frame late, which on a slow
-   * device reads as the old title flashing over the new content.
+   * There is no title bar on a tab any more, so the category a reader
+   * opened is named by the page itself: a row at the top with the arrow
+   * up to the index and the category's name, drawn only inside a
+   * category. On the index the tab under the thumb already says "Duas",
+   * and a second "Duas" over the list would say it twice.
    */
-  useLayoutEffect(() => {
-    navigation?.setOptions({
-      headerTitle: selected ? t(`duas.cat.${selected}`) : t('nav.duas'),
-      // Inside a category the arrow goes up to the index, not home to
-      // Today — the same control, pointed one level up. There used to be
-      // a second "‹ All duas" link under the title for this, which with
-      // the title already naming the category was two ways back drawn
-      // next to each other (redesign-plan B.6.2).
-      headerLeft: selected
-        ? () => (
-            <TabBackButton
-              onPress={() => setSelected(null)}
-              label={t('duas.allCategories', 'All duas')}
-            />
-          )
-        : tabBackButton,
-    });
-  }, [navigation, selected, t]);
   /**
    * Back closes the category before it leaves the tab.
    *
@@ -249,13 +211,9 @@ export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
         style={styles.listScroll}
         contentContainerStyle={[
           styles.list,
-          // On the index there is no row above the list to hold it off the
-          // header, so the list holds itself off. In a category the way
-          // back is that row, and a second gap would double it.
-          selected === null ? styles.listTop : null,
-          { paddingBottom: tabBarInset },
+          { paddingTop: pageTop, paddingBottom: tabBarInset },
         ]}
-        contentInsetAdjustmentBehavior="automatic">
+        contentInsetAdjustmentBehavior="never">
         {/* The gap lives HERE, not on the ScrollView's content container.
             `contentContainerStyle`'s gap separates the ScrollView's DIRECT
             children, and since the column went in there has been exactly
@@ -266,6 +224,20 @@ export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
             pass-through on a phone and only grows its inner column on a
             tablet or a Mac. Same fix as LogScreen; see duaCardSpacing. */}
         <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
+        {selected !== null ? (
+          <View style={styles.categoryBar}>
+            <TabBackButton
+              onPress={() => setSelected(null)}
+              label={t('duas.allCategories', 'All duas')}
+            />
+            <Text
+              style={[styles.categoryTitle, { color: palette.text }]}
+              numberOfLines={1}
+              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+              {t(`duas.cat.${selected}`)}
+            </Text>
+          </View>
+        ) : null}
         {selected === null
           ? /* ── THE INDEX ────────────────────────────────────────────
                Twenty-one categories in five groups, each group one card
@@ -515,7 +487,19 @@ const styles = StyleSheet.create({
   },
   tabLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600', lineHeight: 18, includeFontPadding: false },
   list: { padding: SPACING.lg, paddingTop: 0 },
-  listTop: { paddingTop: SPACING.lg },
+  categoryBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    // The arrow carries its own inset; pull the row back so the glyph
+    // sits on the list's edge rather than a step inside it.
+    marginStart: -SPACING.sm,
+  },
+  categoryTitle: {
+    flex: 1,
+    fontSize: TYPE.title2.fontSize,
+    fontWeight: '700',
+  },
   stack: { gap: SPACING.md },
   card: { borderRadius: RADIUS.lg, padding: SPACING.lg, gap: SPACING.sm },
   titleRow: {

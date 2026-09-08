@@ -61,6 +61,9 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 jest.mock('../src/navigation/tabBarInset', () => ({ useTabBarInset: () => 0 }));
+// No title bar on a tab: the page clears the status bar itself, and the
+// number it clears it by comes from a hook with no provider in this tree.
+jest.mock('../src/navigation/useTabPageTop', () => ({ useTabPageTop: () => 12 }));
 jest.mock('../src/navigation/tabBarVisibility', () => ({
   useTabBarScroll: () => ({}),
 }));
@@ -83,12 +86,10 @@ const texts = (root: ReactTestInstance): string[] =>
         .map(String),
     );
 
-function render(navigation?: {
-  setOptions: (o: { headerTitle: string; headerLeft?: () => unknown }) => void;
-}) {
+function render() {
   let tree!: ReturnType<typeof create>;
   act(() => {
-    tree = create(<DuasScreen navigation={navigation} />);
+    tree = create(<DuasScreen />);
   });
   return tree;
 }
@@ -143,24 +144,17 @@ describe('a category opens, and back closes it', () => {
     expect(shown).not.toContain('duas.cat.travel');
   });
 
-  it('offers the way back in the header, and it works', () => {
-    // The way back is the header's one arrow, pointed at the index — not a
-    // second "‹ All duas" link under the title (redesign-plan B.6.2).
-    const options: Array<{ headerTitle: string; headerLeft?: () => unknown }> = [];
-    const tree = render({ setOptions: o => options.push(o) });
+  it('offers the way back at the top of the page, and it works', () => {
+    // There is no title bar on a tab any more, so the way back is the
+    // page's own first row: the arrow up to the index, beside the name of
+    // the category. On the index there is no such row — the tab under the
+    // thumb already says "Duas".
+    const tree = render();
     expect(
       texts(tree.root).some(s => s === 'All duas' || s === 'duas.allCategories'),
     ).toBe(false);
     openMorning(tree);
-    const last = options[options.length - 1];
-    expect(last.headerTitle).toBe('duas.cat.morning');
-    expect(typeof last.headerLeft).toBe('function');
-    // Render the control the header was handed and press it.
-    let control!: ReturnType<typeof create>;
-    act(() => {
-      control = create(last.headerLeft!() as React.ReactElement);
-    });
-    const back = control.root
+    const back = tree.root
       .findAllByProps({ accessibilityRole: 'button' })
       .find(n => n.props.accessibilityLabel === 'All duas');
     expect(back).toBeTruthy();
@@ -168,8 +162,11 @@ describe('a category opens, and back closes it', () => {
       back!.props.onPress();
     });
     expect(texts(tree.root)).toContain('duas.cat.travel');
-    // And on the index the arrow is the tab's ordinary one again.
-    expect(options[options.length - 1].headerTitle).toBe('nav.duas');
+    expect(
+      tree.root
+        .findAllByProps({ accessibilityRole: 'button' })
+        .some(n => n.props.accessibilityLabel === 'All duas'),
+    ).toBe(false);
   });
 
   it('takes the Android back press rather than leaving the tab', () => {
@@ -226,53 +223,49 @@ describe('the index is grouped, and the grouping is exhaustive', () => {
   });
 });
 
-describe('the header says which category is open', () => {
-  const nav = () => {
-    const titles: string[] = [];
-    return {
-      titles,
-      setOptions: (o: { headerTitle: string }) => titles.push(o.headerTitle),
-    };
+describe('the page says which category is open', () => {
+  const openMorning = (tree: ReturnType<typeof create>) => {
+    const row = tree.root
+      .findAllByProps({ accessibilityRole: 'button' })
+      .find(x => x.props.accessibilityLabel === 'duas.cat.morning');
+    act(() => {
+      row!.props.onPress();
+    });
   };
 
-  it('names the tab on the index', () => {
-    const n = nav();
-    render(n);
-    expect(n.titles[n.titles.length - 1]).toBe('nav.duas');
+  it('names no page on the index', () => {
+    // The tab bar names it; a "Duas" over a list of duas would say it twice.
+    const tree = render();
+    expect(texts(tree.root)).not.toContain('nav.duas');
   });
 
   it('names the category once one is open', () => {
-    // The fault: this is a tab screen, so its title came from the tab and
-    // stayed "Duas" for all twenty-one categories inside it.
-    const n = nav();
-    const tree = render(n);
-    const row = tree.root
-      .findAllByProps({ accessibilityRole: 'button' })
-      .find(x => x.props.accessibilityLabel === 'duas.cat.morning');
-    act(() => {
-      row!.props.onPress();
-    });
-    expect(n.titles[n.titles.length - 1]).toBe('duas.cat.morning');
+    // The fault this replaces: the title came from the tab and stayed
+    // "Duas" for all twenty-one categories inside it.
+    const tree = render();
+    openMorning(tree);
+    const shown = texts(tree.root);
+    // Once as the page's title; the index row that said it is gone.
+    expect(shown.filter(s => s === 'duas.cat.morning')).toHaveLength(1);
   });
 
-  it('goes back to the tab’s name when the category closes', () => {
-    const n = nav();
-    const tree = render(n);
-    const row = tree.root
-      .findAllByProps({ accessibilityRole: 'button' })
-      .find(x => x.props.accessibilityLabel === 'duas.cat.morning');
-    act(() => {
-      row!.props.onPress();
-    });
+  it('drops the name when the category closes', () => {
+    const tree = render();
+    openMorning(tree);
     act(() => {
       mockIntercept?.();
     });
-    expect(n.titles[n.titles.length - 1]).toBe('nav.duas');
+    // Back on the index, the name is the row's again — not a title.
+    expect(
+      tree.root
+        .findAllByProps({ accessibilityRole: 'button' })
+        .some(x => x.props.accessibilityLabel === 'duas.cat.morning'),
+    ).toBe(true);
   });
 
   it('renders without a navigator at all', () => {
-    // The prop is optional on purpose: `useNavigation()` throws outside a
-    // container, and these screens are rendered bare here.
+    // These screens are rendered bare here; nothing in the page asks the
+    // navigator for a header any more.
     expect(() => render()).not.toThrow();
   });
 });

@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "清除这些礼拜记录？",
     "resetConfirm": "清除",
     "resetPreserved": "斋戒、圣行拜和赞念不会受影响。此操作无法撤销。",
-    "resetRangeAll": "整个记录"
+    "resetRangeAll": "整个记录",
+    "options": "选项",
+    "setUpSync": "设置同步"
   },
   "endOfDay": {
     "title": "记录今天的拜功吗？",

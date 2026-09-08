@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "ये नमाज़ें मिटाएँ?",
     "resetConfirm": "मिटाएँ",
     "resetPreserved": "रोज़े, सुन्नत नमाज़ें और ज़िक्र छुए नहीं जाएँगे। इसे वापस नहीं लाया जा सकता।",
-    "resetRangeAll": "पूरा रिकॉर्ड"
+    "resetRangeAll": "पूरा रिकॉर्ड",
+    "options": "विकल्प",
+    "setUpSync": "सिंक सेट अप करें"
   },
   "endOfDay": {
     "title": "आज की नमाज़ें दर्ज करें?",

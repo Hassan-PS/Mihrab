@@ -107,12 +107,12 @@ describe('the marker belongs to an occurrence, not to a name', () => {
   it('is matched on the instant in the card', () => {
     const ts = read('src/screens/home/TodayCard.tsx');
     expect(ts).toMatch(
-      /if \(ymdLocal\(eventAt\(key, timings, base\)\) !== override\.date\) continue;/,
+      /if \(ymdLocal\(eventAt\(key, dayTimings, base\)\) !== override\.date\) continue;/,
     );
     // Built from the selected day, so it follows the occurrence onto
     // whichever card holds it.
     expect(ts).toMatch(
-      /const base = addDays\(startOfLocalDay\(new Date\(\)\), selected\);/,
+      /const base = addDays\(startOfLocalDay\(new Date\(\)\), offset\);/,
     );
   });
 });
@@ -363,7 +363,7 @@ describe('an occurrence survives its own clock time changing', () => {
     // different occurrence than the alert was written against — and the
     // marker never appeared for that row at all.
     expect(card).toMatch(
-      /ymdLocal\(eventAt\(key, timings, base\)\) !== override\.date/,
+      /ymdLocal\(eventAt\(key, dayTimings, base\)\) !== override\.date/,
     );
   });
 });

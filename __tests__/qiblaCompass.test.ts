@@ -122,18 +122,17 @@ describe('the way back in', () => {
     expect(chipAt).toBeGreaterThan(heroWrapAt);
   });
 
-  test('and is rendered AFTER the heroes, or it cannot be tapped', () => {
-    // Found on a device: drawn before them the chip appeared exactly
+  test('and is rendered AFTER the hero, or it cannot be tapped', () => {
+    // Found on a device: drawn before it the chip appeared exactly
     // right and swallowed every tap, because the hero's eyebrow is a
     // full-width Text overlapping the corner and a later sibling wins
-    // the hit test whatever zIndex says.
+    // the hit test whatever zIndex says. (There is one hero now — the
+    // days page under it rather than replacing it.)
     const chipAt = card.indexOf('<QiblaChipCorner');
     const heroTodayAt = card.indexOf('<HeroToday');
-    const heroOtherAt = card.indexOf('<HeroOtherDay');
     expect(heroTodayAt).toBeGreaterThan(-1);
-    expect(heroOtherAt).toBeGreaterThan(-1);
+    expect(card).not.toContain('HeroOtherDay');
     expect(chipAt).toBeGreaterThan(heroTodayAt);
-    expect(chipAt).toBeGreaterThan(heroOtherAt);
   });
 
   test('the chip is labelled for screen readers in every language', () => {

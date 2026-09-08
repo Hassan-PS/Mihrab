@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "Bu namazlar silinsin mi?",
     "resetConfirm": "Sil",
     "resetPreserved": "Oruç, sünnet namazları ve zikir dokunulmaz. Bu geri alınamaz.",
-    "resetRangeAll": "kaydın tamamı"
+    "resetRangeAll": "kaydın tamamı",
+    "options": "Seçenekler",
+    "setUpSync": "Eşitlemeyi ayarla"
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

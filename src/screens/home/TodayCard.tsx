@@ -23,12 +23,15 @@
  */
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
-  PanResponder,
+  FlatList,
   Pressable,
   StatusBar,
   StyleSheet,
   Text,
   View,
+  type LayoutChangeEvent,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useIsActive } from '../../hooks/useIsActive';
@@ -78,9 +81,6 @@ import { QiblaChipCorner } from './QiblaChip';
 import { HOME_SCREEN_PADDING, HOME_TABLE_RADIUS } from './tokens';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
-
-/** The five salāh — the only rows a "first prayer of the day" can name. */
-const SALAH_ORDER = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
 
 export type TodayCardProps = {
   /** Today first, then the next six days. */
@@ -376,62 +376,6 @@ const HeroToday = memo(function HeroToday({
   );
 });
 
-/** The hero on any day that is not today: date, hijri date, first prayer. */
-function HeroOtherDay({
-  label,
-  date,
-  hijri,
-  timings,
-}: {
-  label: string;
-  date: string;
-  hijri?: string;
-  timings: TimingsMap;
-}) {
-  const { t } = useTranslation();
-  const { palette } = useAppPalette();
-  const clock = useClockFormatter();
-  const first = SALAH_ORDER.find(key => timings[key]);
-  return (
-    <View style={styles.hero}>
-      <Text
-        style={[styles.heroEyebrow, { color: palette.muted }]}
-        numberOfLines={1}
-        maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-        {label}
-      </Text>
-      <Text
-        style={[styles.heroDate, { color: palette.text }]}
-        numberOfLines={1}
-        maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-        {date}
-      </Text>
-      {hijri ? (
-        <Text
-          style={[styles.heroHijri, { color: palette.muted }]}
-          numberOfLines={1}
-          maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-          {hijri}
-        </Text>
-      ) : null}
-      {first ? (
-        <View style={[styles.firstPill, { backgroundColor: palette.controlBg }]}>
-          <Text
-            style={[styles.firstPillText, { color: palette.text }]}
-            numberOfLines={1}
-            maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-            {t('home.firstPrayer', {
-              defaultValue: 'First prayer {{prayer}} · {{time}}',
-              prayer: t(`prayer.${first}`),
-              time: clock(timings[first]),
-            })}
-          </Text>
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
 function TodayCardImpl({
   week,
   nextInfo,
@@ -484,44 +428,54 @@ function TodayCardImpl({
   );
 
   /**
-   * Swiping the card body still turns the day, because that is the gesture
-   * the carousel taught. It is a PanResponder rather than a paged ScrollView:
-   * the hero and the rows both change with the day but the strip between them
-   * does not, and a pager cannot hold two non-adjacent slices of one card.
-   * The responder only claims clearly horizontal drags, so the vertical
-   * scroll of the page underneath is untouched.
+   * The days are PAGES under one hero.
+   *
+   * The card used to swap its whole body for the chosen day — the sky and
+   * the countdown for a date and a "first prayer" pill — which turned the
+   * one living thing on the screen into a dead panel the moment anyone
+   * looked at Wednesday. Now the hero is always today, and only the table
+   * under the strip turns: a paged list, one day per page, that the strip
+   * selects and tracks. Swiping the rows is the gesture the carousel
+   * taught; tapping a chip scrolls there.
+   *
+   * The pager needs the width of a page, which is the width of the table,
+   * so it is measured; until it is (the first frame, and in a test
+   * renderer) today's table is drawn on its own.
    */
-  const selectedRef = useRef(selected);
-  selectedRef.current = selected;
-  const lengthRef = useRef(week.length);
-  lengthRef.current = week.length;
-  const rtlRef = useRef(rtl);
-  rtlRef.current = rtl;
-  const pan = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_e, g) =>
-          Math.abs(g.dx) > 18 && Math.abs(g.dx) > Math.abs(g.dy) * 1.6,
-        onPanResponderRelease: (_e, g) => {
-          if (Math.abs(g.dx) < 40) return;
-          // Dragging leftward advances in LTR and goes back in RTL, matching
-          // the direction the strip itself runs.
-          const forward = rtlRef.current ? g.dx > 0 : g.dx < 0;
-          const next = selectedRef.current + (forward ? 1 : -1);
-          if (next < 0 || next >= lengthRef.current) return;
-          setSelected(next);
-        },
-      }),
-    [],
+  const [pageWidth, setPageWidth] = useState(0);
+  const onTableLayout = useCallback((e: LayoutChangeEvent) => {
+    const w = Math.round(e.nativeEvent.layout.width);
+    setPageWidth(prev => (prev === w ? prev : w));
+  }, []);
+  const pagerRef = useRef<FlatList<TimingsMap>>(null);
+  const scrollToDay = useCallback(
+    (offset: number, animated: boolean) => {
+      if (pageWidth <= 0) return;
+      pagerRef.current?.scrollToIndex({ index: offset, animated });
+    },
+    [pageWidth],
+  );
+  const onPageSettled = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (pageWidth <= 0) return;
+      const page = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
+      setSelected(Math.max(0, Math.min(week.length - 1, page)));
+    },
+    [pageWidth, week.length],
+  );
+  const pageLayout = useCallback(
+    (_: unknown, index: number) => ({
+      length: pageWidth,
+      offset: pageWidth * index,
+      index,
+    }),
+    [pageWidth],
   );
 
-  // Memoised because the aim-and-countdown memos below depend on it, and a
-  // fresh object every render would make them run every render.
-  const timings = useMemo(
-    () => week[selected] ?? week[0] ?? {},
-    [week, selected],
-  );
-  const isToday = selected === 0;
+  // Today's times, which the hero, the countdown and the check column all
+  // work from whatever day the table is turned to. Memoised because the
+  // aim-and-countdown memos below depend on it.
+  const timings = useMemo(() => week[0] ?? {}, [week]);
 
   /**
    * How each row announces itself, and the tap that cycles it — v2.14.5.
@@ -585,29 +539,32 @@ function TodayCardImpl({
    * Ishāʾ is tomorrow's.
    */
   const override = useNextAlertOverride();
-  const overrideKey = useMemo(() => {
-    if (!override) return null;
-    // WITH NOTIFICATIONS OFF THERE IS NOTHING TO EXPLAIN. The master
-    // switch has already made every row silent, so a line promising
-    // "Alert just this once" would be promising an alert that cannot
-    // happen. The override is inert, not gone: turn the switch back on
-    // before that instant and the line returns with it.
-    if (!alertsEnabled) return null;
-    const base = addDays(startOfLocalDay(new Date()), selected);
-    for (const key of visibleRows) {
-      if (key !== override.name) continue;
-      if (ymdLocal(eventAt(key, timings, base)) !== override.date) continue;
-      // AND ONLY WHEN IT STILL DIFFERS FROM THE ROW. An override is
-      // written against an instant and the standing setting can move
-      // under it: silence one Fajr from the card, then set the Fajr row
-      // to silent here, and the two now say the same thing. Calling that
-      // "just this once" would tell the reader their permanent change had
-      // not taken. The card drops its own marker on the same test, and
-      // the two must not disagree about whether anything is temporary.
-      return override.mode === alertModeOf(key) ? null : key;
-    }
-    return null;
-  }, [override, selected, visibleRows, timings, alertsEnabled, alertModeOf]);
+  const overrideKeyFor = useCallback(
+    (offset: number, dayTimings: TimingsMap, rows: readonly string[]): string | null => {
+      if (!override) return null;
+      // WITH NOTIFICATIONS OFF THERE IS NOTHING TO EXPLAIN. The master
+      // switch has already made every row silent, so a line promising
+      // "Alert just this once" would be promising an alert that cannot
+      // happen. The override is inert, not gone: turn the switch back on
+      // before that instant and the line returns with it.
+      if (!alertsEnabled) return null;
+      const base = addDays(startOfLocalDay(new Date()), offset);
+      for (const key of rows) {
+        if (key !== override.name) continue;
+        if (ymdLocal(eventAt(key, dayTimings, base)) !== override.date) continue;
+        // AND ONLY WHEN IT STILL DIFFERS FROM THE ROW. An override is
+        // written against an instant and the standing setting can move
+        // under it: silence one Fajr from the card, then set the Fajr row
+        // to silent here, and the two now say the same thing. Calling that
+        // "just this once" would tell the reader their permanent change had
+        // not taken. The card drops its own marker on the same test, and
+        // the two must not disagree about whether anything is temporary.
+        return override.mode === alertModeOf(key) ? null : key;
+      }
+      return null;
+    },
+    [override, alertsEnabled, alertModeOf],
+  );
   /**
    * What the row is set to when nobody has overridden it — what reset
    * puts back. Read the same way the cycling control reads it, master
@@ -634,13 +591,13 @@ function TodayCardImpl({
    * ignore. A row therefore falls back to its own time when this sample
    * is no longer than it (issue #26, and the long note in PrayerRow).
    */
-  const timeSample = useMemo(
-    () =>
-      visibleRows.reduce((widest, key) => {
-        const shown = clock(timings[key]);
+  const timeSampleFor = useCallback(
+    (dayTimings: TimingsMap, rows: readonly string[]) =>
+      rows.reduce((widest, key) => {
+        const shown = clock(dayTimings[key]);
         return shown.length > widest.length ? shown : widest;
       }, ''),
-    [visibleRows, timings, clock],
+    [clock],
   );
   /**
    * Today's date on today's card — issue #23.
@@ -654,7 +611,18 @@ function TodayCardImpl({
     const hijri = getHijriDate?.(0);
     return hijri ? `${gregorian} · ${hijri}` : gregorian;
   }, [getDayDate, getHijriDate]);
-  const handleSelect = useCallback((offset: number) => setSelected(offset), []);
+  const handleSelect = useCallback(
+    (offset: number) => {
+      setSelected(offset);
+      scrollToDay(offset, true);
+    },
+    [scrollToDay],
+  );
+  // A new city (or a fresh week) put the strip back on today; the pager
+  // follows it there.
+  useEffect(() => {
+    scrollToDay(0, false);
+  }, [resetKey, scrollToDay]);
 
   /**
    * What the hero counts down to, and which rows can be aimed at.
@@ -667,7 +635,7 @@ function TodayCardImpl({
   const now = nextInfo ? new Date() : null;
   const aimable = useMemo(() => {
     const out = new Set<string>();
-    if (!isToday || !now) return out;
+    if (!now) return out;
     for (const key of visibleRows) {
       const raw = timings[key];
       if (!raw) continue;
@@ -679,10 +647,10 @@ function TodayCardImpl({
     // `now` is deliberately not a dependency: it is re-read on every render
     // this memo would run for anyway, and adding it would defeat the memo.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isToday, timings, visibleRows.join(','), nextInfo?.name]);
+  }, [timings, visibleRows.join(','), nextInfo?.name]);
 
   const target = useMemo(() => {
-    if (!isToday || !nextInfo) return null;
+    if (!nextInfo) return null;
     if (!chosenKey) return nextInfo;
     const raw = timings[chosenKey];
     if (!raw) return nextInfo;
@@ -690,7 +658,7 @@ function TodayCardImpl({
       name: chosenKey,
       at: combineLocalDateAndTime(new Date(), raw),
     };
-  }, [isToday, nextInfo, chosenKey, timings]);
+  }, [nextInfo, chosenKey, timings]);
 
   /**
    * The check beside each salāh — see quickLog.ts. Today only: a tap on
@@ -698,7 +666,7 @@ function TodayCardImpl({
    */
   const quickLog = useQuickLog();
   const tomorrow = week[1];
-  const logNow = isToday ? new Date() : null;
+  const logNow = new Date();
 
   const clearChosen = useCallback(() => setChosenKey(null), []);
   const aimAt = useCallback(
@@ -717,24 +685,93 @@ function TodayCardImpl({
       <QiblaChip bearing={qiblaBearing} onPress={onOpenQibla} />
     ) : null;
 
+  /**
+   * One day's table. Today's rows carry the live things — the next-prayer
+   * emphasis, the aim, the alert bells, the check column; another day's
+   * rows carry the times and the Mālikī boundaries and nothing that
+   * pretends a tap on Thursday changes Thursday.
+   */
+  const renderDay = (offset: number) => {
+    const dayTimings = week[offset] ?? {};
+    const isToday = offset === 0;
+    const rows = DISPLAY_ORDER.filter(key => dayTimings[key]);
+    const overrideKey = overrideKeyFor(offset, dayTimings, rows);
+    const timeSample = timeSampleFor(dayTimings, rows);
+    return rows.map((key, rowIndex) => (
+      <PrayerRow
+        key={key}
+        prayerKey={key}
+        rawTime={dayTimings[key]}
+        // Only today can have one — on Thursday nothing is next, and an
+        // emphasis that means nothing is just decoration. It follows the
+        // hero rather than the clock: see PrayerRow.
+        isNext={isToday && target?.name === key}
+        isChosen={isToday && chosenKey === key}
+        onSelect={isToday && aimable.has(key) ? () => aimAt(key) : undefined}
+        isSecondary={(OPTIONAL_TIME_KEYS as readonly string[]).includes(key)}
+        isLast={rowIndex === rows.length - 1}
+        // Mālikī second times (issue #19). The boundaries ride in the
+        // same map under keys nothing else iterates, so a row that has
+        // one shows it and every other row is unchanged.
+        daruriAt={dayTimings[`${key}Daruri`]}
+        daruriApprox={
+          DARURI_CONFIDENCE[`${key}Daruri` as DaruriKey] === 'modelled'
+        }
+        // Only on today's card. On yesterday's or tomorrow's the
+        // control would still change a setting for every day, which
+        // is not what a tap on a past row looks like it does.
+        // The bell shows what will ACTUALLY happen at this time, which
+        // is the override when there is one. A row that showed the
+        // standing setting while the card showed something else would
+        // be the app holding two answers about one prayer — the thing
+        // the alert-mode button exists to stop.
+        alertMode={
+          isToday
+            ? overrideKey === key && override
+              ? override.mode
+              : alertModeOf(key)
+            : undefined
+        }
+        onCycleAlertMode={isToday ? () => cycleAlertMode(key) : undefined}
+        // Not gated on `isToday`: this one belongs to an instant, and
+        // after Isha that instant is on tomorrow's card.
+        overrideMode={overrideKey === key ? override?.mode : undefined}
+        standingAlertMode={overrideKey === key ? standingModeOf(key) : undefined}
+        onResetAlertMode={overrideKey === key ? resetOverride : undefined}
+        timeSample={timeSample}
+        log={
+          isToday && isSalah(key)
+            ? {
+                status: quickLog.statusOf(key),
+                phase: quickLogPhase(key, dayTimings, logNow, tomorrow),
+              }
+            : undefined
+        }
+        onToggleLog={
+          isToday && isSalah(key)
+            ? () => void quickLog.toggle(key, dayTimings, tomorrow)
+            : undefined
+        }
+        hasCheckColumn={isToday}
+      />
+    ));
+  };
+
   return (
     <Outer
       style={
         fullBleed
           ? styles.cardBleed
           : [styles.card, { borderRadius: HOME_TABLE_RADIUS, ...cardEdgeStyle(palette) }]
-      }
-      {...pan.panHandlers}>
+      }>
       <View
         style={[
           styles.heroWrap,
           { paddingTop: heroTop },
           fullBleed && styles.heroWrapBleed,
-          {
-            backgroundColor: isToday ? palette.accentBg : 'transparent',
-          },
+          { backgroundColor: palette.accentBg },
         ]}>
-        {isToday && target ? (
+        {target ? (
           <HeroToday
             target={target}
             chosen={chosenKey !== null}
@@ -748,24 +785,11 @@ function TodayCardImpl({
             topRow={fullBleed ? { renderLocation, qibla: qiblaChip } : undefined}
             ownsStatusBar={fullBleed}
           />
-        ) : (
-          <HeroOtherDay
-            label={getDayLabel(selected)}
-            date={getDayDate(selected)}
-            hijri={getHijriDate?.(selected)}
-            timings={timings}
-          />
-        )}
-        {/* Parked in the corner rather than in either hero's own markup:
-            the Qibla does not depend on which day is selected, and a chip
-            that vanished when the user scrolled to tomorrow would read as
-            a bug.
-
-            LAST among the wrapper's children on purpose. Rendered before
-            the heroes it drew correctly and then swallowed every tap: the
-            eyebrow above the countdown is a full-width `Text`, so it
-            overlaps the corner, and a later sibling wins the hit test
-            whatever `zIndex` says. */}
+        ) : null}
+        {/* Parked in the corner rather than in the hero's own markup, and
+            LAST among the wrapper's children on purpose: the eyebrow above
+            the countdown is a full-width `Text`, so it overlaps the corner,
+            and a later sibling wins the hit test whatever `zIndex` says. */}
         {/* Keyed on the BEARING, not on the callback: on a Mac there is
             no compass screen to open and `onOpenQibla` is undefined, but
             the bearing is trigonometry on two coordinates and is just as
@@ -779,92 +803,56 @@ function TodayCardImpl({
       </View>
 
       <View style={fullBleed ? styles.tableBleed : null}>
-      <DayStrip days={days} selected={selected} onSelect={handleSelect} />
+        <DayStrip days={days} selected={selected} onSelect={handleSelect} />
 
-      {visibleRows.map((key, rowIndex) => (
-        <PrayerRow
-          key={key}
-          prayerKey={key}
-          rawTime={timings[key]}
-          // Only today can have one — on Thursday nothing is next, and an
-          // emphasis that means nothing is just decoration. It follows the
-          // hero rather than the clock: see PrayerRow.
-          isNext={isToday && target?.name === key}
-          isChosen={chosenKey === key}
-          onSelect={aimable.has(key) ? () => aimAt(key) : undefined}
-          isSecondary={(OPTIONAL_TIME_KEYS as readonly string[]).includes(key)}
-          isLast={rowIndex === visibleRows.length - 1}
-          // Mālikī second times (issue #19). The boundaries ride in the
-          // same map under keys nothing else iterates, so a row that has
-          // one shows it and every other row is unchanged.
-          daruriAt={timings[`${key}Daruri`]}
-          daruriApprox={
-            DARURI_CONFIDENCE[`${key}Daruri` as DaruriKey] === 'modelled'
-          }
-          // Only on today's card. On yesterday's or tomorrow's the
-          // control would still change a setting for every day, which
-          // is not what a tap on a past row looks like it does.
-          // The bell shows what will ACTUALLY happen at this time, which
-          // is the override when there is one. A row that showed the
-          // standing setting while the card showed something else would
-          // be the app holding two answers about one prayer — the thing
-          // the alert-mode button exists to stop.
-          alertMode={
-            isToday
-              ? overrideKey === key && override
-                ? override.mode
-                : alertModeOf(key)
-              : undefined
-          }
-          onCycleAlertMode={
-            isToday ? () => cycleAlertMode(key) : undefined
-          }
-          // Not gated on `isToday`: this one belongs to an instant, and
-          // after Isha that instant is on tomorrow's card.
-          overrideMode={overrideKey === key ? override?.mode : undefined}
-          standingAlertMode={
-            overrideKey === key ? standingModeOf(key) : undefined
-          }
-          onResetAlertMode={overrideKey === key ? resetOverride : undefined}
-          timeSample={timeSample}
-          log={
-            logNow && isSalah(key)
-              ? {
-                  status: quickLog.statusOf(key),
-                  phase: quickLogPhase(key, timings, logNow, tomorrow),
-                }
-              : undefined
-          }
-          onToggleLog={
-            logNow && isSalah(key)
-              ? () => void quickLog.toggle(key, timings, tomorrow)
-              : undefined
-          }
-          hasCheckColumn={isToday}
-        />
-      ))}
+        <View onLayout={onTableLayout}>
+          {pageWidth > 0 ? (
+            <FlatList
+              ref={pagerRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              bounces={false}
+              // Seven pages, all light: mount them all so a swipe never
+              // lands on a blank page mid-render.
+              initialNumToRender={week.length}
+              data={week}
+              keyExtractor={(_, index) => String(index)}
+              getItemLayout={pageLayout}
+              onMomentumScrollEnd={onPageSettled}
+              // Nested in the page's vertical scroll: this one owns only
+              // clearly horizontal drags.
+              nestedScrollEnabled
+              renderItem={({ index }) => (
+                <View style={{ width: pageWidth }}>{renderDay(index)}</View>
+              )}
+            />
+          ) : (
+            renderDay(0)
+          )}
+        </View>
 
-      {onOpenMonth ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('home.monthTimesLink')}
-          accessibilityHint={t('a11y.openMonth')}
-          onPress={onOpenMonth}
-          style={[
-            styles.monthRow,
-            { borderTopColor: palette.border ?? palette.muted },
-          ]}>
-          <Text
-            style={[styles.monthLabel, { color: palette.accent }]}
-            numberOfLines={1}
-            maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-            {t('home.monthTimesLink')}
-          </Text>
-          <Text style={[styles.monthChevron, { color: palette.accent }]}>
-            {rtl ? '←' : '→'}
-          </Text>
-        </Pressable>
-      ) : null}
+        {onOpenMonth ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('home.monthTimesLink')}
+            accessibilityHint={t('a11y.openMonth')}
+            onPress={onOpenMonth}
+            style={[
+              styles.monthRow,
+              { borderTopColor: palette.border ?? palette.muted },
+            ]}>
+            <Text
+              style={[styles.monthLabel, { color: palette.accent }]}
+              numberOfLines={1}
+              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+              {t('home.monthTimesLink')}
+            </Text>
+            <Text style={[styles.monthChevron, { color: palette.accent }]}>
+              {rtl ? '←' : '→'}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
     </Outer>
   );
@@ -916,17 +904,7 @@ const styles = StyleSheet.create({
   heroSeconds: { fontSize: TYPE.title2.fontSize, fontWeight: '600', marginStart: -3 },
   heroSecondsExpanded: { fontSize: 28 }, // tokens-ok-line: display or Arabic scale, sized by hand
   heroAt: { fontSize: TYPE.title3.fontSize, fontWeight: '600' },
-  heroDate: { fontSize: 34, fontWeight: '700', marginTop: 2 }, // tokens-ok-line: display or Arabic scale, sized by hand
-  heroHijri: { fontSize: TYPE.callout.fontSize, marginTop: 2 },
   heroTodayDate: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.md },
-  firstPill: {
-    marginTop: SPACING.md,
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-  },
-  firstPillText: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   railWrap: { marginTop: SPACING.md },
   railTrack: { height: 5, borderRadius: RADIUS.xs, overflow: 'hidden' },
   railFill: { height: '100%', borderRadius: RADIUS.xs },

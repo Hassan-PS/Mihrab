@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "مسح هذه الصلوات؟",
     "resetConfirm": "امسحها",
     "resetPreserved": "لن يُمَس الصيام ولا صلوات السنة ولا الذكر. لا يمكن التراجع عن هذا.",
-    "resetRangeAll": "السجل كله"
+    "resetRangeAll": "السجل كله",
+    "options": "خيارات",
+    "setUpSync": "إعداد المزامنة"
   },
   "endOfDay": {
     "title": "تسجيل صلوات اليوم؟",

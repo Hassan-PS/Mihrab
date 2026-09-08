@@ -34,6 +34,7 @@ import {
   tabularNumeralStyle,
 } from '../theme/textScale';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabPageTop } from '../navigation/useTabPageTop';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE } from '../theme/typography';
 
@@ -76,6 +77,7 @@ export function TasbihScreen() {
   // is a tab now, and the tab navigator's header is opaque: it insets the
   // content itself, so reserving its height here counted it twice.
   const tabBarInset = useTabBarInset();
+  const pageTop = useTabPageTop();
 
   // The count now outlives this screen — it is the same store the home-screen
   // widget reads, so unmounting must not zero it and a reboot must not either.
@@ -141,7 +143,8 @@ export function TasbihScreen() {
         styles.root,
         {
           backgroundColor: palette.bg,
-          paddingTop: SPACING.md,
+          // No title bar: the page clears the status bar itself.
+          paddingTop: pageTop,
           // Not a scrolling screen — the controls simply stop above the
           // floating bar rather than scrolling clear of it.
           paddingBottom: tabBarInset,

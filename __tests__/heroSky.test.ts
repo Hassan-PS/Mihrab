@@ -122,7 +122,7 @@ describe('the ink', () => {
 
   it('is taken per element in the hero, at that element’s height', () => {
     const card = read('src/screens/home/TodayCard.tsx');
-    const hero = card.slice(card.indexOf('const HeroToday = memo('), card.indexOf('function HeroOtherDay'));
+    const hero = card.slice(card.indexOf('const HeroToday = memo('), card.indexOf('function TodayCardImpl'));
     expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.eyebrow\)/);
     expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.countdown\)/);
     expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.foot\)/);

@@ -80,6 +80,9 @@ import { cardEdgeStyle } from '../theme/chrome';
 import { TYPE, arabicTextStyle } from '../theme/typography';
 import { surahHeaderGlyph, surahHeaderStyle } from '../quran/surahHeaderGlyph';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabPageTop } from '../navigation/useTabPageTop';
+import { SyncHeaderButton } from './sync/SyncHeaderButton';
+import { TilawahHeaderChip } from './quran/TilawahHeaderChip';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { RADIUS, SPACING } from '../theme/tokens';
 
@@ -175,6 +178,7 @@ export function QuranScreen() {
   const [results, setResults] = useState<QuranSearchResult[] | null>(null);
   // Go-to-page (v2.8.5) — a page number typed here opens the mushaf there.
   const tabBarInset = useTabBarInset();
+  const pageTop = useTabPageTop();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
   const [pageJumpVisible, setPageJumpVisible] = useState(false);
@@ -399,6 +403,14 @@ export function QuranScreen() {
     <View
       style={[styles.headerWrap, listCap]}
       onLayout={e => setHeaderH(e.nativeEvent.layout.height)}>
+      {/* The page's first row is what the title bar used to hold — the
+          way into Tilāwah and, once it is set up, sync — at the trailing
+          edge, where the eye lands on the way in. No title: the tab under
+          the thumb already says "Quran". */}
+      <View style={styles.pageActions}>
+        <TilawahHeaderChip />
+        <SyncHeaderButton />
+      </View>
       {/* Continue reading (QR-10). Alone only when there is no khatmah —
           with one, it is a row inside the khatmah card, so the screen never
           shows two "Continue"s with two different page numbers side by side
@@ -1320,8 +1332,11 @@ export function QuranScreen() {
           {...tabBarScroll}
           data={[...filteredSurahs]}
           keyExtractor={s => String(s.number)}
-          contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
-          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={[
+            styles.list,
+            { paddingTop: pageTop, paddingBottom: tabBarInset },
+          ]}
+          contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
           initialNumToRender={12}
           windowSize={7}
@@ -1334,8 +1349,11 @@ export function QuranScreen() {
           {...tabBarScroll}
           data={juzRows}
           keyExtractor={j => String(j.juz)}
-          contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
-          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={[
+            styles.list,
+            { paddingTop: pageTop, paddingBottom: tabBarInset },
+          ]}
+          contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
           renderItem={renderJuzRow}
           getItemLayout={itemLayoutFor(juzRowH)}
@@ -1346,8 +1364,11 @@ export function QuranScreen() {
           {...tabBarScroll}
           data={[0]}
           keyExtractor={() => 'bookmarks'}
-          contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
-          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={[
+            styles.list,
+            { paddingTop: pageTop, paddingBottom: tabBarInset },
+          ]}
+          contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
           renderItem={renderBookmarks}
         />
@@ -1618,6 +1639,12 @@ const styles = StyleSheet.create({
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: SPACING.md, marginBottom: HEADER_GAP },
+  pageActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: SPACING.sm,
+  },
   resumeCard: {
     flexDirection: 'row',
     alignItems: 'center',

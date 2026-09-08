@@ -23,7 +23,7 @@
  * plan, and this screen is not for plans.
  */
 // tokens-ok: the owed band is the danger colour as a tint; the palette has no danger tint
-import { Chip, Group, Row, Stepper } from '../components/ui';
+import { Chip, Stepper } from '../components/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -32,7 +32,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -44,7 +43,7 @@ import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useIsActive } from '../hooks/useIsActive';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { SyncHint } from './sync/SyncHint';
+import { LogOptionsButton, LogOptionsSheet } from './log/LogOptionsSheet';
 import { FillSummary } from '../components/FillSummary';
 import { ResetScopePicker } from '../components/ResetScopePicker';
 import { SunnahChip } from './log/SunnahChip';
@@ -125,6 +124,7 @@ import { cardEdgeStyle, inputChromeStyle } from '../theme/chrome';
 import { tabularNumeralStyle } from '../theme/textScale';
 import { useClockFormatter } from '../hooks/useClockFormatter';
 import { useTabBarInset } from '../navigation/tabBarInset';
+import { useTabPageTop } from '../navigation/useTabPageTop';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE } from '../theme/typography';
@@ -188,6 +188,8 @@ export function LogScreen() {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
   const tabBarInset = useTabBarInset();
+  const pageTop = useTabPageTop();
+  const [optionsOpen, setOptionsOpen] = useState(false);
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
   const navigation = useNavigation();
@@ -1109,8 +1111,11 @@ export function LogScreen() {
       ref={scrollRef}
       {...tabBarScroll}
       style={{ backgroundColor: palette.bg }}
-      contentContainerStyle={[styles.scroll, { paddingBottom: tabBarInset }]}
-      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={[
+        styles.scroll,
+        { paddingTop: pageTop, paddingBottom: tabBarInset },
+      ]}
+      contentInsetAdjustmentBehavior="never"
     >
       {/* The gap lives HERE, not on the ScrollView's content container.
           `contentContainerStyle`'s gap applies to the ScrollView's direct
@@ -1192,32 +1197,6 @@ export function LogScreen() {
             </View>
           ) : null}
         </View>
-        {/* Under the graph, because the graph is what makes the case for
-            it: a wall of empty squares behind someone who has been praying
-            for months is the app being wrong about them. Three actions in
-            one group; the last is the only one in the danger colour — it
-            undoes what the two above write (issue #13). */}
-        <Group>
-          <Row
-            tone="accent"
-            title={t('log.backfillAction', 'Fill in earlier days')}
-            onPress={backfilling || !hydrated ? undefined : runBackfill}
-            quiet={backfilling || !hydrated}
-          />
-          <Row
-            tone="accent"
-            title={t('log.fillMonthsAction', 'Fill the past three months')}
-            onPress={backfilling || !hydrated ? undefined : runMonthFill}
-            quiet={backfilling || !hydrated}
-          />
-          <Row
-            tone="danger"
-            title={t('log.resetAction', 'Reset the prayer log')}
-            onPress={backfilling || !hydrated ? undefined : () => setResetOpen(true)}
-            quiet={backfilling || !hydrated}
-          />
-        </Group>
-
         {/* ── The day being logged ──────────────────────────────────── */}
         {/* The same stepper the month table uses (redesign-plan §2.6); the
             two screens step through time and drew it differently. */}
@@ -1265,20 +1244,15 @@ export function LogScreen() {
           ]}
           {...panResponder.panHandlers}
         >
+          {/* The panel's first line: the ⋯ that holds everything that used
+              to sit under the day (LogOptionsSheet), and the one shortcut
+              worth keeping in view. The grabber that lived here is gone —
+              the row itself is the handle, and the Stepper above already
+              says the day can change. */}
           <View
-            accessibilityRole="adjustable"
             accessibilityLabel={t('log.swipeHint', 'Swipe to change day')}
-            style={styles.grabberWrap}
-          >
-            <View
-              style={[
-                styles.grabber,
-                { backgroundColor: palette.border ?? palette.muted },
-              ]}
-            />
-          </View>
-
-          <View style={styles.todayHeader}>
+            style={styles.todayHeader}>
+            <LogOptionsButton onPress={() => setOptionsOpen(true)} />
             <View style={{ flex: 1 }} />
             <Pressable
               accessibilityRole="button"
@@ -1491,112 +1465,71 @@ export function LogScreen() {
             })}
           </View>
 
-          {/* ── Fasting: a section of the day, not a card of its own ──── */}
+          {/* ── Fasting: one line of the day, not a section of its own ──
+              The state and the iftar time on the left — tapping them opens
+              the fasting page with every upcoming fast — and the one action
+              on the right. The section title and the separate "All
+              upcoming" row it had cost two lines the page no longer has. */}
           <View
             style={[
               styles.panelSection,
               styles.panelDivider,
+              styles.fastRow,
               { borderTopColor: palette.border ?? palette.muted },
             ]}
           >
-            <Text style={[styles.sectionTitle, { color: palette.muted }]}>
-              {t('log.fastingTitle')}
-            </Text>
-            <View style={styles.fastRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.fastState, { color: palette.text }]}>
-                  {dayFast
-                    ? t('fasting.statusKept')
-                    : ramadanDay != null
-                    ? t('fasting.ramadanDayLabel', { day: ramadanDay })
-                    : isSunnahDay
-                    ? t('fasting.statusRecommended')
-                    : t('log.noFastLogged')}
-                </Text>
-                {maghrib ? (
-                  <Text
-                    style={[styles.fastMeta, { color: palette.muted }]}
-                    numberOfLines={1}
-                  >
-                    {t('log.iftarAt', {
-                      defaultValue: 'Iftar {{time}}',
-                      time: clock(maghrib),
-                    })}
-                  </Text>
-                ) : null}
-              </View>
-              {/* Neutral wording in both states: "Mark TODAY as fasted" was
-                a lie on every day but one, now that older days open here. */}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={
-                  dayFast ? t('log.unmarkFasted') : t('log.markFasted')
-                }
-                onPress={toggleFast}
-                style={[
-                  styles.fastCta,
-                  {
-                    backgroundColor: dayFast
-                      ? palette.controlBg
-                      : palette.accentSolid,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.fastCtaLabel,
-                    { color: dayFast ? palette.text : palette.onAccent },
-                  ]}
-                >
-                  {dayFast ? t('log.unmarkFasted') : t('log.markFasted')}
-                </Text>
-              </Pressable>
-            </View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('log.allUpcoming', 'All upcoming')}
               onPress={() => navigation.navigate('Fasting' as never)}
+              style={{ flex: 1 }}
+            >
+              <Text style={[styles.fastState, { color: palette.text }]} numberOfLines={1}>
+                {dayFast
+                  ? t('fasting.statusKept')
+                  : ramadanDay != null
+                  ? t('fasting.ramadanDayLabel', { day: ramadanDay })
+                  : isSunnahDay
+                  ? t('fasting.statusRecommended')
+                  : t('log.noFastLogged')}
+              </Text>
+              <Text style={[styles.fastMeta, { color: palette.accent }]} numberOfLines={1}>
+                {maghrib
+                  ? `${t('log.iftarAt', {
+                      defaultValue: 'Iftar {{time}}',
+                      time: clock(maghrib),
+                    })} · ${t('log.allUpcoming', 'All upcoming')} →`
+                  : `${t('log.allUpcoming', 'All upcoming')} →`}
+              </Text>
+            </Pressable>
+            {/* Neutral wording in both states: "Mark TODAY as fasted" was
+                a lie on every day but one, now that older days open here. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                dayFast ? t('log.unmarkFasted') : t('log.markFasted')
+              }
+              onPress={toggleFast}
               style={[
-                styles.upcomingRow,
-                { borderTopColor: palette.border ?? palette.muted },
+                styles.fastCta,
+                {
+                  backgroundColor: dayFast
+                    ? palette.controlBg
+                    : palette.accentSolid,
+                },
               ]}
             >
-              <Text style={[styles.upcomingLabel, { color: palette.accent }]}>
-                {t('log.allUpcoming', 'All upcoming')}
+              <Text
+                style={[
+                  styles.fastCtaLabel,
+                  { color: dayFast ? palette.text : palette.onAccent },
+                ]}
+              >
+                {dayFast ? t('log.unmarkFasted') : t('log.markFasted')}
               </Text>
-              <Text style={{ color: palette.accent, fontSize: TYPE.callout.fontSize }}>→</Text>
             </Pressable>
           </View>
         </Animated.View>
-
-        {/* ── The two switches, after the day they act on ───────────────
-            They used to sit between the date and the prayers, which put two
-            settings in the middle of the thing you came here to do. They
-            are about the day rather than part of it, so they follow it. */}
-        <View
-          style={[
-            styles.card,
-            styles.reminderRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}
-        >
-          <View style={styles.reminderCopy}>
-            <Text style={[styles.reminderTitle, { color: palette.text }]}>
-              {t('settings.endOfDayLog')}
-            </Text>
-            <Text style={[styles.reminderHelp, { color: palette.muted }]}>
-              {t('settings.endOfDayLogHelp')}
-            </Text>
-          </View>
-          <Switch
-            value={settings.endOfDayLogReminderEnabled}
-            trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
-            thumbColor="#ffffff"
-            onValueChange={v =>
-              updateSettings({ endOfDayLogReminderEnabled: v })
-            }
-          />
-        </View>
 
         {!hydrated ? (
           <Text style={[styles.hint, { color: palette.muted }]}>
@@ -1604,10 +1537,18 @@ export function LogScreen() {
           </Text>
         ) : null}
 
-        {/* Below the record rather than above it: the log is what the user
-            came for, and this is an aside about where it can also live.
-            Shows only until sync works or they wave it away — see SyncHint. */}
-        <SyncHint place="log" />
+        {/* Everything that was under the day — the fills, the reset, the
+            end-of-day reminder, sync — behind the ⋯ on the day panel. */}
+        <LogOptionsSheet
+          visible={optionsOpen}
+          onClose={() => setOptionsOpen(false)}
+          disabled={backfilling || !hydrated}
+          onBackfill={runBackfill}
+          onMonthFill={runMonthFill}
+          onReset={() => setResetOpen(true)}
+          reminderOn={settings.endOfDayLogReminderEnabled}
+          onReminderChange={v => updateSettings({ endOfDayLogReminderEnabled: v })}
+        />
 
         {/* Themed, in-app, and the same dialog the theme-restart prompt
             uses — a stock Alert cannot show the figures, and these are the
@@ -1715,15 +1656,10 @@ const styles = StyleSheet.create({
   /** Space between every card on the page. 14 rather than 12: the day panel
    *  is now one tall card between two smaller ones, and at 12 the seams
    *  read as a rendering artefact rather than a deliberate gap. */
-  stack: { gap: SPACING.lg },
+  stack: { gap: SPACING.md },
   card: { borderRadius: RADIUS.xl, padding: SPACING.lg },
   graphBlock: { gap: SPACING.md, paddingHorizontal: 2 },
   backToTodayRow: { alignSelf: 'center', marginTop: -6 },
-  sectionTitle: {
-    fontSize: TYPE.label.fontSize,
-    fontWeight: '600',
-    marginBottom: SPACING.md,
-  },
   /**
    * The owed drawer, between the grid and "Fill in earlier days".
    *
@@ -1756,34 +1692,25 @@ const styles = StyleSheet.create({
     // Inside the day card now, so it carries the card's own side padding
     // rather than sitting flush against the screen's.
     paddingHorizontal: SPACING.lg,
-    paddingTop: 2,
+    paddingTop: SPACING.sm,
   },
   backToToday: { fontSize: TYPE.label.fontSize, fontWeight: '700', marginTop: 1 },
   ghostBtn: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.full,
-    marginBottom: SPACING.md,
   },
-  reminderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    paddingVertical: SPACING.md,
-  },
-  reminderCopy: { flex: 1, minWidth: 0, gap: 2 },
-  reminderTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
-  reminderHelp: { fontSize: TYPE.label.fontSize, lineHeight: 16 },
   ghostLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
-  prayerRow: { paddingVertical: SPACING.md },
+  /** Tighter than the settings rows: five of these and the day must fit. */
+  prayerRow: { paddingVertical: SPACING.sm },
   prayerHead: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   prayerName: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
   prayerTime: { fontSize: TYPE.footnote.fontSize },
   /** Pushes the sunnah chip and the note toggle to the end of the header. */
   headSpacer: { flex: 1 },
   noteToggle: { padding: SPACING.xs },
-  statusRow: { flexDirection: 'row', gap: SPACING.xs, marginTop: SPACING.sm, alignItems: 'stretch' },
-  notYet: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.sm },
+  statusRow: { flexDirection: 'row', gap: SPACING.xs, marginTop: SPACING.xs, alignItems: 'stretch' },
+  notYet: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.xs },
   /**
    * Two lines rather than an ellipsis.
    *
@@ -1815,25 +1742,11 @@ const styles = StyleSheet.create({
   fastMeta: { fontSize: TYPE.footnote.fontSize, marginTop: 2 },
   fastCta: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, borderRadius: RADIUS.md },
   fastCtaLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
-  upcomingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: SPACING.md,
-    marginTop: SPACING.md,
-  },
-  upcomingLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   /** The swipeable day page: one card surface holding the whole day. */
   dayPanel: { borderRadius: RADIUS.xl, overflow: 'hidden', paddingBottom: SPACING.xs },
   /** Sections inside that card carry the padding the old separate cards
    *  did, so nothing shifted visually except the seams between them. */
   panelSection: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
   panelDivider: { borderTopWidth: StyleSheet.hairlineWidth },
-  grabberWrap: { alignItems: 'center', paddingTop: SPACING.sm, paddingBottom: 2 },
-  /** The sheet-style handle. Small, dim, and the only thing on the screen
-   *  that says this panel is draggable — without it the gesture is
-   *  undiscoverable, and a feature nobody finds is not a feature. */
-  grabber: { width: 38, height: 4, borderRadius: 2, opacity: 0.7 },
   hint: { fontSize: TYPE.footnote.fontSize, textAlign: 'center', marginTop: SPACING.sm },
 });

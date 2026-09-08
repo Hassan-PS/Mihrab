@@ -1,16 +1,17 @@
 /**
- * Today is home, and every other tab says so.
+ * Today is home, and the hardware button says so.
  *
  * `decideAndroidBack` has always sent hardware back from Quran, Tasbih,
  * Duas, the Log and Settings to Today, and treated Today as the one screen
- * you cannot leave. That rule was only ever a gesture: the tabs looked
- * like six peers, so landing on Today read as a bug rather than the model.
- * The arrow in each of those five title bars is the same rule, visible.
+ * you cannot leave. For a while each of those five tabs also drew an arrow
+ * in its title bar saying the same thing; the tabs draw NO title bar now
+ * (the page runs from the status bar, Pillars-style), so the gesture is
+ * the rule's only expression again and the arrow survives only inside
+ * Duas, pointed one level up at the category index.
  *
- * What this pins is that the two cannot drift apart — the arrow goes where
- * the button goes, it is on exactly the tabs the button acts on, and it is
- * NOT on Today, which would offer a way out of the one screen that has
- * none.
+ * What this pins: the gesture still goes home from the five, still leaves
+ * Today alone, no tab draws a header, and the control that remains goes
+ * where the gesture goes.
  */
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -31,36 +32,31 @@ const AWAY_FROM_HOME = [
   'SettingsTab',
 ];
 
-describe('the arrow is on every tab the hardware button acts on', () => {
+describe('the hardware button goes home from every tab but Today', () => {
   for (const tab of AWAY_FROM_HOME) {
-    it(`${tab} sends back to Today, and shows it`, () => {
-      // The gesture...
+    it(`${tab} sends back to Today, and draws no title bar`, () => {
       expect(
         decideAndroidBack({ type: 'tab', index: 0, routes: [{ name: tab }] }, false),
       ).toBe('home');
-      // ...and the control, on the same screen.
       const block = TABS.split(`name="${tab}"`)[1]?.split('<Tab.Screen')[0] ?? '';
-      expect(block).toContain('headerLeft: tabBackButton');
+      expect(block).toContain('headerShown: false');
+      expect(block).not.toContain('headerLeft');
     });
   }
 
   it('leaves Today alone', () => {
-    // Today is where back GOES. An arrow there would be a way out of the
-    // screen the whole rule exists to arrive at.
+    // Today is where back GOES.
     expect(
       decideAndroidBack(
         { type: 'tab', index: 0, routes: [{ name: HOME_TAB }] },
         false,
       ),
     ).toBe('system');
-    const block = TABS.split(`name="${HOME_TAB}"`)[1]?.split('<Tab.Screen')[0] ?? '';
-    expect(block).not.toContain('headerLeft');
   });
 
-  it('puts it on five tabs and no more', () => {
-    expect((TABS.match(/headerLeft: tabBackButton/g) ?? []).length).toBe(
-      AWAY_FROM_HOME.length,
-    );
+  it('puts the arrow in no tab header at all', () => {
+    expect(TABS).not.toContain('tabBackButton');
+    expect(TABS).not.toMatch(/headerLeft/);
   });
 });
 

@@ -26,8 +26,8 @@ describe('where the bar is wired in', () => {
    * new pushed page carries the bar without anyone remembering to add it.
    */
   it('wraps every tab and every pushed screen', () => {
-    expect(TABS).toMatch(/screenLayout=\{\(\{ children \}\) =>/);
-    expect(TABS).toMatch(/<HeaderPlaybackBar surface=/);
+    expect(TABS).toMatch(/screenLayout=\{\(\{ route, children \}\) =>/);
+    expect(TABS).toMatch(/<HeaderPlaybackBar\s+surface=/);
     expect(ROOT).toMatch(/screenLayout=\{\(\{ children \}\) =>/);
     expect(ROOT).toMatch(/<HeaderPlaybackBar\s+surface=/);
     expect(ROOT).toMatch(/underTransparentHeader/);
@@ -44,7 +44,7 @@ describe('where the bar is wired in', () => {
   it('takes the colour of the header it hangs under', () => {
     expect(BAR).toMatch(/backgroundColor: surface,/);
     expect(BAR).not.toMatch(/backgroundColor: palette\.card/);
-    expect(TABS).toContain('<HeaderPlaybackBar surface={palette.bg} />');
+    expect(TABS).toMatch(/<HeaderPlaybackBar\s+surface=\{palette\.bg\}\s+headerless=/);
     expect(ROOT).toContain('surface={theme.colors.background}');
   });
 });
@@ -95,7 +95,7 @@ describe('what it shows', () => {
     // Foreground AND focus — `useIsFocused` alone keeps a bar polling in
     // a pocket, since backgrounding the app leaves its route focused.
     expect(gate).toMatch(/useIsActive\(\)/);
-    expect(gate).toMatch(/return <LiveBar \{\.\.\.props\} headerless=\{headerless\} \/>;/);
+    expect(gate).toMatch(/return <LiveBar \{\.\.\.props\} headerless=\{!inline && headerless\} \/>;/);
     const live = BAR.slice(BAR.indexOf('function LiveBar'));
     expect(live).toMatch(/useProgressWhileActive\(500\)/);
   });

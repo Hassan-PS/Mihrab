@@ -1528,7 +1528,9 @@
     "resetConfirmTitle": "¿Borrar estas oraciones?",
     "resetConfirm": "Borrarlas",
     "resetPreserved": "Los ayunos, las oraciones sunna y el dhikr no se tocan. Esto no se puede deshacer.",
-    "resetRangeAll": "todo el registro"
+    "resetRangeAll": "todo el registro",
+    "options": "Opciones",
+    "setUpSync": "Configurar la sincronización"
   },
   "endOfDay": {
     "title": "¿Registrar las oraciones de hoy?",

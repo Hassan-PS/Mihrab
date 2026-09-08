@@ -1055,7 +1055,9 @@ export function HomeScreen() {
         // leaving the bottom half of a Mac/iPad window empty (§B1).
         isDashboard && styles.scrollContentDash,
       ]}
-      contentInsetAdjustmentBehavior="automatic">
+      // On the phone the hero clears the status bar itself; letting iOS add
+      // the inset too would push the sky down by a status bar.
+      contentInsetAdjustmentBehavior={!isDashboard && !isMacCatalyst ? 'never' : 'automatic'}>
       {/* gap must live INSIDE CenteredColumn: the wrapper collapses all
           cards into one child of the scroll container, so the container's
           own gap: SPACING.md stopped separating them (2.7.36 regression — the
@@ -1172,16 +1174,20 @@ export function HomeScreen() {
          * Pillars does it). What used to follow them below the fold has
          * gone where it is looked for: the times source and the data
          * statistics to Settings → Prayer times, the day's practice
-         * summary and the graph to the Log tab (which is theirs), the
-         * Quran shortcut to the Quran tab's own strip and the Continue
-         * Reading widget. Only the Ramadan countdown stays, and only in
-         * its season. The dashboard has the room and keeps its side
-         * column.
+         * summary and the graph to the Log tab (which is theirs). The
+         * Quran shortcut — continue reading, or start, or the khatmah's
+         * next page — stays, because it fits under the table and is the
+         * one thing on this page that is not about the times. The
+         * Ramadan countdown stays in its season. The dashboard has the
+         * room and keeps its side column.
          */
         return (
           <>
             {dayTable}
-            <View style={styles.belowHero}>{ramadanCard}</View>
+            <View style={styles.belowHero}>
+              {quranShortcut}
+              {ramadanCard}
+            </View>
           </>
         );
       })()}
@@ -1241,7 +1247,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   scrollContentBleed: { paddingTop: 0, paddingHorizontal: 0 },
-  belowHero: { paddingHorizontal: HOME_SCREEN_PADDING },
+  belowHero: { paddingHorizontal: HOME_SCREEN_PADDING, gap: SPACING.md },
   // Dashboard: let the content grow to the viewport and center it
   // vertically when shorter (§B1 — kills the dead bottom half).
   scrollContentDash: {

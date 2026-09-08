@@ -133,7 +133,9 @@ describe('Stepper', () => {
 
 describe('the screens use them', () => {
   it.each([
-    ['src/screens/LogScreen.tsx', ['<Group>', '<Stepper', '<Chip', 'tone="danger"']],
+    // The Group with the danger-toned reset moved behind the ⋯ (LogOptionsSheet).
+    ['src/screens/LogScreen.tsx', ['<Stepper', '<Chip', '<LogOptionsSheet']],
+    ['src/screens/log/LogOptionsSheet.tsx', ['<Group>', '<Row', 'tone="danger"']],
     ['src/screens/log/PracticeStatsRow.tsx', ['<Tile']],
     ['src/screens/FastingScreen.tsx', ['<Group>', '<Tile']],
     ['src/screens/DuasScreen.tsx', ['<Group>', '<Row']],

@@ -127,7 +127,8 @@ describe('HomeScreen integration (tasks #45–#47)', () => {
       path.join(__dirname, '..', 'src', 'navigation', 'MainTabs.tsx'),
       'utf-8',
     );
-    expect(TABS).toMatch(/headerShown:\s*!isMacCatalyst/);
+    expect(TABS).toMatch(/const todayHeader = !isMacCatalyst && isDashboardWidth;/);
+    expect(TABS).toMatch(/headerShown:\s*todayHeader/);
 
     const wordmark = HOME.indexOf('<MihrabHeaderTitle');
     const chip = HOME.indexOf('<HomeHeaderControls');

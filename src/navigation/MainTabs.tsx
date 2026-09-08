@@ -47,14 +47,11 @@ import { showTabBar, useTabBarHidden } from './tabBarVisibility';
 import { HomeScreen } from '../screens/HomeScreen';
 import { QuranScreen } from '../screens/QuranScreen';
 import { TasbihScreen } from '../screens/TasbihScreen';
-import { tabBackButton } from './TabBackButton';
-import { QuranHeaderRight } from '../screens/quran/QuranHeaderRight';
 import { DuasScreen } from '../screens/DuasScreen';
 import { LogScreen } from '../screens/LogScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { HomeHeaderControls } from './HomeHeaderControls';
 import { HeaderPlaybackBar } from '../quran/audio/HeaderPlaybackBar';
-import { SyncHeaderButton } from '../screens/sync/SyncHeaderButton';
 import { MihrabHeaderTitle } from './MihrabHeaderTitle';
 import { isMacCatalyst, HOME_DASHBOARD_MIN_WIDTH } from '../responsive/breakpoints';
 import {
@@ -76,6 +73,8 @@ export function MainTabs() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const isDashboardWidth = useWindowDimensions().width >= HOME_DASHBOARD_MIN_WIDTH;
+  // Today's header survives only on the wide dashboard; see its options.
+  const todayHeader = !isMacCatalyst && isDashboardWidth;
   const barBottom = useTabBarBottom();
 
   /**
@@ -127,12 +126,17 @@ export function MainTabs() {
        * only way to pause is the notification shade. `HeaderPlaybackBar`
        * decides for itself whether it has anything to say.
        */
-      screenLayout={({ children }) => (
+      screenLayout={({ route, children }) => (
         <View style={SCREEN}>
-          {/* The tab headers are the page's own colour (see `headerStyle`
-              below), and the bar has to be the same surface or it reads as
-              a strip stuck under the title bar rather than part of it. */}
-          <HeaderPlaybackBar surface={palette.bg} />
+          {/* The bar is the page's own colour, and — since no tab draws a
+              title bar any more — it is the first thing under the status
+              bar and clears it itself (`headerless`). The one tab with a
+              header left is Today on the wide dashboard, where the bar
+              hangs under that header instead. */}
+          <HeaderPlaybackBar
+            surface={palette.bg}
+            headerless={!(route.name === 'TodayTab' && todayHeader)}
+          />
           {children}
           {/* Under the bar, over the page: the fade that keeps the two from
               colliding. Same `slide` as the bar, so it leaves with it. */}
@@ -302,7 +306,7 @@ export function MainTabs() {
            * are in the hero now, on the sky. The wide dashboard keeps its
            * card and this header; Catalyst draws its own bar as content.
            */
-          headerShown: !isMacCatalyst && isDashboardWidth,
+          headerShown: todayHeader,
           // Always "Mihrab" — a proper name, not a translated label.
           headerTitle: () => <MihrabHeaderTitle />,
           /**
@@ -346,11 +350,15 @@ export function MainTabs() {
         options={{
           title: t('nav.quran'),
           tabBarIcon: TabBookIcon,
-          headerLeft: tabBackButton,
-          headerShown: true,
-          // Tilāwah opposite the title, with sync beside it — sync only
-          // once it is set up, which is why the pair is one component.
-          headerRight: () => <QuranHeaderRight />,
+          /**
+           * NO TITLE BAR ON ANY TAB. The page begins at the status bar
+           * (`useTabPageTop`), and what the bar used to hold moved into
+           * the page: Quran's Tilāwah and sync controls are its first
+           * row, the Log's sync is in its options menu, the arrow back to
+           * Today is gone — the tab bar is the way between tabs, and the
+           * hardware button still goes home (`decideAndroidBack`).
+           */
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -359,8 +367,7 @@ export function MainTabs() {
         options={{
           title: t('nav.tasbih'),
           tabBarIcon: TabTasbihIcon,
-          headerLeft: tabBackButton,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -369,8 +376,7 @@ export function MainTabs() {
         options={{
           title: t('nav.duas'),
           tabBarIcon: TabDuasIcon,
-          headerLeft: tabBackButton,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -379,9 +385,7 @@ export function MainTabs() {
         options={{
           title: t('log.title', 'Log'),
           tabBarIcon: TabLogIcon,
-          headerLeft: tabBackButton,
-          headerShown: true,
-          headerRight: () => <SyncHeaderButton />,
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -390,8 +394,7 @@ export function MainTabs() {
         options={{
           title: t('nav.settings'),
           tabBarIcon: TabSettingsIcon,
-          headerLeft: tabBackButton,
-          headerShown: true,
+          headerShown: false,
         }}
       />
     </Tab.Navigator>
