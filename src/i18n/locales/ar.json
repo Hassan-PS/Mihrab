@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "تعذّر الحفظ",
     "saveFailedBody": "يرجى المحاولة مرة أخرى.",
     "noteLabel": "ملاحظة شخصية (خاصة ومشفّرة)",
-    "notYet": "ليس بعد — لم يحن وقتها"
+    "notYet": "ليس بعد — لم يحن وقتها",
+    "quickLogMark": "تسجيل صلاة {{prayer}}",
+    "quickLogLogged": "سُجّلت {{prayer}}: {{status}}. اضغط للتراجع",
+    "quickLogNotYet": "لم يدخل وقت {{prayer}} بعد"
   },
   "events": {
     "islamicNewYear": "رأس السنة الهجرية",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "أدعية حصن المسلم",
     "quranGeometry": "بيانات مواضع الآيات (quran.com / مشروع Quran for Android)",
     "recitation": "صوت التلاوة (42 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)",
-    "tafsir": "نصوص التفسير: ابن كثير، معارف القرآن، الميسر"
+    "tafsir": "نصوص التفسير: ابن كثير، معارف القرآن، الميسر",
+    "katibehFont": "خط كاتبة (أسماء السور)"
   },
   "liveActivity": {
     "title": "الصلاة التالية",

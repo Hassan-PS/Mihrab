@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "Tidak dapat menyimpan",
     "saveFailedBody": "Silakan coba lagi.",
     "noteLabel": "Catatan pribadi (privat, terenkripsi)",
-    "notYet": "Belum — waktunya belum tiba"
+    "notYet": "Belum — waktunya belum tiba",
+    "quickLogMark": "Tandai {{prayer}} sudah ditunaikan",
+    "quickLogLogged": "{{prayer}} dicatat: {{status}}. Ketuk untuk membatalkan",
+    "quickLogNotYet": "Waktu {{prayer}} belum masuk"
   },
   "events": {
     "islamicNewYear": "Tahun Baru Hijriyah",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "Doa-doa Hisnul Muslim",
     "quranGeometry": "Data posisi ayat (quran.com / proyek Quran for Android)",
     "recitation": "Audio tilawah (42 qari): EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)",
-    "tafsir": "Teks tafsir: Ibnu Katsir, Maarif-ul-Quran, al-Muyassar"
+    "tafsir": "Teks tafsir: Ibnu Katsir, Maarif-ul-Quran, al-Muyassar",
+    "katibehFont": "Fon Katibeh (nama surah)"
   },
   "liveActivity": {
     "title": "Salat berikutnya",

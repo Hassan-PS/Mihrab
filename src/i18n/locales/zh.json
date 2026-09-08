@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "无法保存",
     "saveFailedBody": "请重试。",
     "noteLabel": "私人笔记（私密、已加密）",
-    "notYet": "还未到——时间尚未到来"
+    "notYet": "还未到——时间尚未到来",
+    "quickLogMark": "将{{prayer}}标记为已礼",
+    "quickLogLogged": "{{prayer}}已记录：{{status}}。点按可撤销",
+    "quickLogNotYet": "{{prayer}}时间尚未到"
   },
   "events": {
     "islamicNewYear": "伊斯兰新年",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "《穆斯林堡垒》中的祷词",
     "quranGeometry": "经文位置数据（quran.com / Quran for Android 项目）",
     "recitation": "诵读音频（42位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）",
-    "tafsir": "经注文本：伊本·凯西尔、Maarif-ul-Quran、简明经注"
+    "tafsir": "经注文本：伊本·凯西尔、Maarif-ul-Quran、简明经注",
+    "katibehFont": "Katibeh 字体（章名）"
   },
   "liveActivity": {
     "title": "下一次礼拜",

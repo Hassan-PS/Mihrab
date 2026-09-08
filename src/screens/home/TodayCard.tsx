@@ -61,6 +61,8 @@ import {
 } from '../../utils/prayerTimes';
 import { isRtlLanguage } from '../../i18n/layoutDirection';
 import { DayStrip, type DayStripEntry } from './DayStrip';
+import { isSalah, quickLogPhase, useQuickLog } from '../../journal/quickLog';
+import { HeroSky } from './HeroSky';
 import { PrayerRow } from './PrayerRow';
 import {
   useNextAlertOverride,
@@ -144,7 +146,7 @@ const HeroToday = memo(function HeroToday({
   dateLine?: string;
 }) {
   const { t } = useTranslation();
-  const { palette } = useAppPalette();
+  const { palette, isDark } = useAppPalette();
   const clock = useClockFormatter();
   // Focus AND foreground. `useIsFocused()` on its own kept this ticking once
   // a second in the user's pocket: backgrounding the app from the Today tab
@@ -203,6 +205,19 @@ const HeroToday = memo(function HeroToday({
 
   return (
     <View style={[styles.hero, expanded && styles.heroExpanded]}>
+      {/* The sky, under everything and out to the card's edges. Its sun
+          or moon moves with the rail's own fraction, rounded so the SVG
+          is redrawn about a hundred times an interval rather than once a
+          second. */}
+      <HeroSky
+        targetKey={target.name}
+        progress={rail ? Math.round(rail.pct * 100) / 100 : 0}
+        isDark={isDark}
+        bleed={{
+          horizontal: SPACING.xl,
+          vertical: expanded ? SPACING.lg + SPACING.md : SPACING.lg,
+        }}
+      />
       <Text
         style={[styles.heroEyebrow, { color: palette.muted }]}
         numberOfLines={1}
@@ -602,6 +617,14 @@ function TodayCardImpl({
     };
   }, [isToday, nextInfo, chosenKey, timings]);
 
+  /**
+   * The check beside each salāh — see quickLog.ts. Today only: a tap on
+   * tomorrow's Fajr has nothing to record, and yesterday is the Log's.
+   */
+  const quickLog = useQuickLog();
+  const tomorrow = week[1];
+  const logNow = isToday ? new Date() : null;
+
   const clearChosen = useCallback(() => setChosenKey(null), []);
   const aimAt = useCallback(
     (key: string) => setChosenKey(current => (current === key ? null : key)),
@@ -707,6 +730,19 @@ function TodayCardImpl({
           }
           onResetAlertMode={overrideKey === key ? resetOverride : undefined}
           timeSample={timeSample}
+          log={
+            logNow && isSalah(key)
+              ? {
+                  status: quickLog.statusOf(key),
+                  phase: quickLogPhase(key, timings, logNow, tomorrow),
+                }
+              : undefined
+          }
+          onToggleLog={
+            logNow && isSalah(key)
+              ? () => void quickLog.toggle(key, timings, tomorrow)
+              : undefined
+          }
         />
       ))}
 

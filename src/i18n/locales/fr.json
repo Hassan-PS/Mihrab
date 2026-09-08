@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "Impossible d’enregistrer",
     "saveFailedBody": "Veuillez réessayer.",
     "noteLabel": "Note personnelle (privée, chiffrée)",
-    "notYet": "Pas encore — son heure n’est pas venue"
+    "notYet": "Pas encore — son heure n’est pas venue",
+    "quickLogMark": "Marquer {{prayer}} comme priée",
+    "quickLogLogged": "{{prayer}} enregistrée : {{status}}. Touchez pour annuler",
+    "quickLogNotYet": "{{prayer}} n’est pas encore arrivée"
   },
   "events": {
     "islamicNewYear": "Nouvel an hijri",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "Invocations de Hisn al-Muslim",
     "quranGeometry": "Données de position des versets (quran.com / projet Quran for Android)",
     "recitation": "Audio de récitation (42 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)",
-    "tafsir": "Textes de tafsir : Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
+    "tafsir": "Textes de tafsir : Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
+    "katibehFont": "Police Katibeh (noms des sourates)"
   },
   "liveActivity": {
     "title": "Prochaine prière",

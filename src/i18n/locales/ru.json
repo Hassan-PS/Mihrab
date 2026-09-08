@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "Не удалось сохранить",
     "saveFailedBody": "Попробуйте ещё раз.",
     "noteLabel": "Личная заметка (приватная, зашифрованная)",
-    "notYet": "Ещё нет — время не наступило"
+    "notYet": "Ещё нет — время не наступило",
+    "quickLogMark": "Отметить {{prayer}} как совершённую",
+    "quickLogLogged": "{{prayer}} записана: {{status}}. Нажмите, чтобы отменить",
+    "quickLogNotYet": "Время {{prayer}} ещё не наступило"
   },
   "events": {
     "islamicNewYear": "Исламский новый год",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "Дуа из Хисн аль-Муслим",
     "quranGeometry": "Данные о положении аятов (quran.com / проект Quran for Android)",
     "recitation": "Аудио чтения (42 чтеца): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)",
-    "tafsir": "Тафсиры: Ибн Касир, Маариф-уль-Куран, аль-Муяссар"
+    "tafsir": "Тафсиры: Ибн Касир, Маариф-уль-Куран, аль-Муяссар",
+    "katibehFont": "Шрифт Katibeh (названия сур)"
   },
   "liveActivity": {
     "title": "Следующая молитва",

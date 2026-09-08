@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "सहेजा नहीं जा सका",
     "saveFailedBody": "कृपया फिर प्रयास करें।",
     "noteLabel": "निजी टिप्पणी (गोपनीय, एन्क्रिप्टेड)",
-    "notYet": "अभी नहीं — इसका समय नहीं आया"
+    "notYet": "अभी नहीं — इसका समय नहीं आया",
+    "quickLogMark": "{{prayer}} को पढ़ी गई के रूप में चिह्नित करें",
+    "quickLogLogged": "{{prayer}} दर्ज: {{status}}। पूर्ववत करने के लिए टैप करें",
+    "quickLogNotYet": "{{prayer}} का समय अभी नहीं आया"
   },
   "events": {
     "islamicNewYear": "इस्लामी नववर्ष",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "हिस्न अल-मुस्लिम की दुआएँ",
     "quranGeometry": "आयत स्थिति डेटा (quran.com / Quran for Android प्रोजेक्ट)",
     "recitation": "तिलावत ऑडियो (42 क़ारी): EveryAyah.com · शब्द समय: quran-align (CC BY 4.0)",
-    "tafsir": "तफ़सीर: इब्न कसीर, मआरिफ़-उल-क़ुरआन, अल-मुयस्सर"
+    "tafsir": "तफ़सीर: इब्न कसीर, मआरिफ़-उल-क़ुरआन, अल-मुयस्सर",
+    "katibehFont": "कातिबेह फ़ॉन्ट (सूरह के नाम)"
   },
   "liveActivity": {
     "title": "अगली नमाज़",

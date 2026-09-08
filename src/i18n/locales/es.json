@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "No se pudo guardar",
     "saveFailedBody": "Inténtalo de nuevo.",
     "noteLabel": "Nota personal (privada, cifrada)",
-    "notYet": "Aún no: todavía no es su hora"
+    "notYet": "Aún no: todavía no es su hora",
+    "quickLogMark": "Marcar {{prayer}} como rezada",
+    "quickLogLogged": "{{prayer}} registrada: {{status}}. Toca para deshacer",
+    "quickLogNotYet": "{{prayer}} aún no ha llegado"
   },
   "events": {
     "islamicNewYear": "Año Nuevo islámico",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "Súplicas de Hisn al-Muslim",
     "quranGeometry": "Datos de posición de aleyas (quran.com / proyecto Quran for Android)",
     "recitation": "Audio de recitación (42 recitadores): EveryAyah.com · tiempos de palabras: quran-align (CC BY 4.0)",
-    "tafsir": "Textos de tafsir: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
+    "tafsir": "Textos de tafsir: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
+    "katibehFont": "Fuente Katibeh (nombres de las suras)"
   },
   "liveActivity": {
     "title": "Próxima oración",

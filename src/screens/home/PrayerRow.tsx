@@ -10,6 +10,9 @@ import { useClockFormatter } from '../../hooks/useClockFormatter';
 import { HOME_ROW_PADDING_V } from './tokens';
 import { AlertModeButton } from './AlertModeButton';
 import { AlertOverrideChip } from './AlertOverrideChip';
+import { LogCheck, LOG_CHECK_SIZE } from './LogCheck';
+import type { LoggedStatus } from '../../journal/journal';
+import type { QuickLogPhase } from '../../journal/quickLog';
 import type { PrayerAlertMode } from '../../settings/alertModes';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
@@ -116,6 +119,15 @@ type PrayerRowProps = {
    * alternative is a prayer time broken across two lines.
    */
   timeSample?: string;
+  /**
+   * The check at the leading edge — today's five salāh only. `log` says
+   * what today's journal holds for this prayer and where the clock is in
+   * its window; `onToggleLog` records or un-records it (quickLog.ts).
+   * Absent on secondary rows and on other days, where the slot is still
+   * held so every name on the card starts on the same line.
+   */
+  log?: { status: LoggedStatus | null; phase: QuickLogPhase };
+  onToggleLog?: () => void;
 };
 
 function PrayerRowImpl({
@@ -134,6 +146,8 @@ function PrayerRowImpl({
   standingAlertMode,
   onResetAlertMode,
   timeSample,
+  log,
+  onToggleLog,
 }: PrayerRowProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -177,6 +191,20 @@ function PrayerRowImpl({
           style={[styles.divider, { backgroundColor: palette.border }]}
         />
       ) : null}
+      {/* The checklist column. A salāh row on today's card carries the
+          check; every other row holds its width, so the names line up
+          whether or not there is anything to check. */}
+      {log && onToggleLog ? (
+        <LogCheck
+          status={log.status}
+          phase={log.phase}
+          palette={palette}
+          prayerLabel={t(`prayer.${prayerKey}`)}
+          onPress={onToggleLog}
+        />
+      ) : (
+        <View style={styles.checkSlot} />
+      )}
       <View style={styles.nameWrap}>
         <Text
           style={[
@@ -317,7 +345,9 @@ const styles = StyleSheet.create({
   },
   nameWrap: {
     flexShrink: 1,
+    flexGrow: 1,
   },
+  checkSlot: { width: LOG_CHECK_SIZE, marginEnd: SPACING.md },
   // No `gap`: the dot's slot carries the spacing on both of its sides, so
   // the control-to-time distance is the same whether the dot is drawn or
   // not.

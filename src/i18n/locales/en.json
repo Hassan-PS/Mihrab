@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "Could not save",
     "saveFailedBody": "Please try again.",
     "noteLabel": "Personal note (private, encrypted)",
-    "notYet": "Not yet — its time has not come"
+    "notYet": "Not yet — its time has not come",
+    "quickLogMark": "Mark {{prayer}} as prayed",
+    "quickLogLogged": "{{prayer}} logged: {{status}}. Tap to undo",
+    "quickLogNotYet": "{{prayer}} has not come yet"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "Hisnul Muslim duas",
     "quranGeometry": "Ayah position data (quran.com / Quran for Android project)",
     "recitation": "Recitation audio (42 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)",
-    "tafsir": "Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
+    "tafsir": "Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
+    "katibehFont": "Katibeh font (surah names)"
   },
   "liveActivity": {
     "title": "Next prayer",

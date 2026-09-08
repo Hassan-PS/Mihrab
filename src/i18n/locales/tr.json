@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "Kaydedilemedi",
     "saveFailedBody": "Lütfen tekrar deneyin.",
     "noteLabel": "Kişisel not (özel, şifreli)",
-    "notYet": "Henüz değil — vakti gelmedi"
+    "notYet": "Henüz değil — vakti gelmedi",
+    "quickLogMark": "{{prayer}} kılındı olarak işaretle",
+    "quickLogLogged": "{{prayer}} kaydedildi: {{status}}. Geri almak için dokunun",
+    "quickLogNotYet": "{{prayer}} vakti henüz girmedi"
   },
   "events": {
     "islamicNewYear": "Hicri yılbaşı",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "Hisn al-Muslim duaları",
     "quranGeometry": "Ayet konum verileri (quran.com / Quran for Android projesi)",
     "recitation": "Tilavet sesi (42 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)",
-    "tafsir": "Tefsir metinleri: İbn Kesir, Maarif-ul-Kuran, el-Müyesser"
+    "tafsir": "Tefsir metinleri: İbn Kesir, Maarif-ul-Kuran, el-Müyesser",
+    "katibehFont": "Katibeh yazı tipi (sure adları)"
   },
   "liveActivity": {
     "title": "Sıradaki namaz",

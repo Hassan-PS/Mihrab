@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "সংরক্ষণ করা যায়নি",
     "saveFailedBody": "আবার চেষ্টা করুন।",
     "noteLabel": "ব্যক্তিগত নোট (গোপন, এনক্রিপ্টেড)",
-    "notYet": "এখনো না — এর সময় আসেনি"
+    "notYet": "এখনো না — এর সময় আসেনি",
+    "quickLogMark": "{{prayer}} পড়া হয়েছে বলে চিহ্নিত করুন",
+    "quickLogLogged": "{{prayer}} লগ করা হয়েছে: {{status}}। বাতিল করতে ট্যাপ করুন",
+    "quickLogNotYet": "{{prayer}} এর সময় এখনও আসেনি"
   },
   "events": {
     "islamicNewYear": "ইসলামি নববর্ষ",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "হিসনুল মুসলিম-এর দোআ",
     "quranGeometry": "আয়াতের অবস্থানের ডেটা (quran.com / Quran for Android প্রকল্প)",
     "recitation": "তিলাওয়াতের অডিও (৪২ জন ক্বারী): EveryAyah.com · শব্দের সময়: quran-align (CC BY 4.0)",
-    "tafsir": "তাফসীর: ইবনে কাসীর, মাআরিফুল কুরআন, আল-মুয়াসসার"
+    "tafsir": "তাফসীর: ইবনে কাসীর, মাআরিফুল কুরআন, আল-মুয়াসসার",
+    "katibehFont": "কাতিবেহ ফন্ট (সূরার নাম)"
   },
   "liveActivity": {
     "title": "পরবর্তী নামায",

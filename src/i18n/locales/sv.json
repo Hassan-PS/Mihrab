@@ -1226,7 +1226,10 @@
     "saveFailedTitle": "Kunde inte spara",
     "saveFailedBody": "Försök igen.",
     "noteLabel": "Personlig anteckning (privat, krypterad)",
-    "notYet": "Inte än – tiden har inte kommit"
+    "notYet": "Inte än – tiden har inte kommit",
+    "quickLogMark": "Markera {{prayer}} som bedd",
+    "quickLogLogged": "{{prayer}} loggad: {{status}}. Tryck för att ångra",
+    "quickLogNotYet": "{{prayer}} har inte infallit ännu"
   },
   "events": {
     "islamicNewYear": "Islamiskt nyår",
@@ -1365,7 +1368,8 @@
     "hisnulMuslim": "Hisn al-Muslim-duor",
     "quranGeometry": "Data för ayah-positioner (quran.com / projektet Quran for Android)",
     "recitation": "Recitationsljud (42 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)",
-    "tafsir": "Tafsir-texter: Ibn Kathir, Maarif-ul-Quran, al-Muyassar"
+    "tafsir": "Tafsir-texter: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
+    "katibehFont": "Typsnittet Katibeh (surornas namn)"
   },
   "liveActivity": {
     "title": "Nästa bön",
