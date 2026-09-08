@@ -15,7 +15,6 @@ import { memo } from 'react';
 import {
   Pressable,
   StyleSheet,
-  Text,
   View,
   type ColorValue,
 } from 'react-native';
@@ -23,7 +22,6 @@ import { useTranslation } from 'react-i18next';
 import Svg, { Path, Line } from 'react-native-svg';
 import type { AppPalette } from '../../theme/appPalette';
 import type { PrayerAlertMode } from '../../settings/alertModes';
-import { TYPE } from '../../theme/typography';
 
 const SIZE = 20;
 
@@ -139,6 +137,11 @@ function AlertModeButtonImpl({
       hitSlop={8}
       onPress={onPress}
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
+      {/* The glyph alone. The word under it ("Silent", "Adhan") was a
+          second line on every row of a list that has to fit the screen,
+          and the glyph already says it — a struck bell is silence, the
+          bell is an alert, the minaret is the adhan. The word stays in
+          the accessibility label, where it is read rather than looked at. */}
       <View style={styles.glyph}>
         {mode === 'adhan' ? (
           <AdhanGlyph color={tint} />
@@ -146,9 +149,6 @@ function AlertModeButtonImpl({
           <BellGlyph color={tint} struck={mode === 'silent'} />
         )}
       </View>
-      <Text numberOfLines={1} style={[styles.label, { color: tint }]}>
-        {label}
-      </Text>
     </Pressable>
   );
 }
@@ -159,10 +159,9 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 52,
+    width: 44,
     paddingVertical: 2,
   },
   pressed: { opacity: 0.55 },
   glyph: { height: SIZE, justifyContent: 'center' },
-  label: { fontSize: TYPE.caption.fontSize, fontWeight: '500', marginTop: 1 },
 });

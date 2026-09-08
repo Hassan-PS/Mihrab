@@ -64,6 +64,12 @@ type Props = {
    */
   compactHeader?: boolean;
   /**
+   * Colours for the compact chip when it sits on the hero's sky rather
+   * than on the theme's surface: the sky's own ink (skyModel.ts), so the
+   * pin and the name read on a night sky in a light app and vice versa.
+   */
+  ink?: { text: string; muted: string };
+  /**
    * Called from the selector's "Add new location" button — the caller
    * routes to Settings (and flashes the Saved Locations section) so the
    * user knows where to add a location.
@@ -71,7 +77,7 @@ type Props = {
   onAddLocation?: () => void;
 };
 
-function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
+function LocationChipImpl({ compactHeader = false, ink, onAddLocation }: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const { slice: settings, update: updateSettings } = useLocationSettings();
@@ -197,7 +203,7 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
           // gear off-screen on smaller iPhones; full name is in the
           // accessibilityHint above for screen-reader users.
           <View style={styles.headerPinRow}>
-            <PinIcon color={palette.accentSolid} size={20} />
+            <PinIcon color={ink ? ink.text : palette.accentSolid} size={20} />
             {/* City name + an inline "· Auto" suffix in the accent colour.
                 Nested Text (rather than a sibling pill) is used deliberately:
                 iOS's native header wraps headerRight in a glass capsule that
@@ -206,10 +212,10 @@ function LocationChipImpl({ compactHeader = false, onAddLocation }: Props) {
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
-              style={[styles.headerPinLabel, { color: palette.text }]}>
+              style={[styles.headerPinLabel, { color: ink ? ink.text : palette.text }]}>
               {chipLabel}
               {isAuto ? (
-                <Text style={{ color: palette.accentSolid }}>
+                <Text style={{ color: ink ? ink.muted : palette.accentSolid }}>
                   {'  '}
                   {t('home.autoBadge')}
                 </Text>

@@ -1,5 +1,5 @@
-import { memo, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import Svg, {
   Circle,
   Defs,
@@ -23,15 +23,37 @@ import type { MoonPhase, SkyFrame } from './skyModel';
 function HeroSkyImpl({
   frame,
   bleed,
+  sceneTop = 0,
 }: {
   frame: SkyFrame;
   /**
    * How far past its parent's box to draw, so a sky mounted inside the
    * padded hero still reaches the card's edges.
    */
-  bleed?: { horizontal: number; vertical: number };
+  bleed?: { horizontal: number; top: number; bottom: number };
+  /**
+   * A band at the top of the sky, dp, that the gradient paints but the
+   * sun, moon and stars keep out of. On the phone the sky runs up under
+   * the status bar; the bodies are laid out in the sky BELOW it, or the
+   * moon lands between the clock and the battery and reads as one more
+   * status icon.
+   */
+  sceneTop?: number;
 }) {
   const { top, bottom, glow, stars, body } = frame;
+
+  // The scene's height in dp, once laid out, so a fraction of the scene
+  // can be turned into a position under `sceneTop`. Until then — and
+  // wherever there is no band — the plain percentage of the whole sky.
+  const [height, setHeight] = useState(0);
+  const onLayout = useCallback(
+    (e: LayoutChangeEvent) => setHeight(e.nativeEvent.layout.height),
+    [],
+  );
+  const sceneY = (fraction: number): number | `${number}%` =>
+    sceneTop > 0 && height > sceneTop
+      ? sceneTop + fraction * (height - sceneTop)
+      : `${fraction * 100}%`;
 
   // A fixed, sparse field in the top strip: the same stars every night, so
   // the card does not twinkle from one render to the next, and none of
@@ -54,11 +76,12 @@ function HeroSkyImpl({
   return (
     <View
       pointerEvents="none"
+      onLayout={sceneTop > 0 ? onLayout : undefined}
       style={[
         styles.fill,
         bleed && {
-          top: -bleed.vertical,
-          bottom: -bleed.vertical,
+          top: -bleed.top,
+          bottom: -bleed.bottom,
           start: -bleed.horizontal,
           end: -bleed.horizontal,
         },
@@ -70,7 +93,7 @@ function HeroSkyImpl({
             <Stop offset="1" stopColor={bottom} />
           </LinearGradient>
           {bodyXY ? (
-            <RadialGradient id="glow" cx={`${bodyXY.x * 100}%`} cy={`${bodyXY.y * 100}%`} r="26%">
+            <RadialGradient id="glow" cx={`${bodyXY.x * 100}%`} cy={sceneY(bodyXY.y)} r="26%">
               <Stop
                 offset="0"
                 stopColor={glow}
@@ -96,7 +119,7 @@ function HeroSkyImpl({
               <Circle
                 key={i}
                 cx={`${x}%`}
-                cy={`${y}%`}
+                cy={sceneY(y / 100)}
                 r={r}
                 fill={glow}
                 fillOpacity={0.85 * stars}
@@ -106,7 +129,7 @@ function HeroSkyImpl({
         {body.kind === 'sun' ? (
           <Circle
             cx={`${body.x * 100}%`}
-            cy={`${body.y * 100}%`}
+            cy={sceneY(body.y)}
             r={9}
             fill={glow}
             fillOpacity={body.alpha}
@@ -114,7 +137,7 @@ function HeroSkyImpl({
         ) : null}
       </Svg>
       {body.kind === 'moon' ? (
-        <View style={[styles.moon, { left: `${body.x * 100}%`, top: `${body.y * 100}%` }]}>
+        <View style={[styles.moon, { start: `${body.x * 100}%`, top: sceneY(body.y) }]}>
           <Moon phase={body.phase} lit={glow} shadow={top} />
         </View>
       ) : null}

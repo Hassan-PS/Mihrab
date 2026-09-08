@@ -44,7 +44,7 @@ describe('where the bar is wired in', () => {
   it('takes the colour of the header it hangs under', () => {
     expect(BAR).toMatch(/backgroundColor: surface,/);
     expect(BAR).not.toMatch(/backgroundColor: palette\.card/);
-    expect(TABS).toContain('<HeaderPlaybackBar surface={palette.card} />');
+    expect(TABS).toContain('<HeaderPlaybackBar surface={palette.bg} />');
     expect(ROOT).toContain('surface={theme.colors.background}');
   });
 });
@@ -95,7 +95,7 @@ describe('what it shows', () => {
     // Foreground AND focus — `useIsFocused` alone keeps a bar polling in
     // a pocket, since backgrounding the app leaves its route focused.
     expect(gate).toMatch(/useIsActive\(\)/);
-    expect(gate).toMatch(/return <LiveBar \{\.\.\.props\} \/>;/);
+    expect(gate).toMatch(/return <LiveBar \{\.\.\.props\} headerless=\{headerless\} \/>;/);
     const live = BAR.slice(BAR.indexOf('function LiveBar'));
     expect(live).toMatch(/useProgressWhileActive\(500\)/);
   });

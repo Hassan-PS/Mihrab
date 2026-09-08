@@ -19,7 +19,6 @@ import notifee, {
   AndroidNotificationSetting,
   AuthorizationStatus,
 } from '@notifee/react-native';
-import { ProviderPickerModal } from '../components/ProviderPickerModal';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useIsActive } from '../hooks/useIsActive';
@@ -37,10 +36,6 @@ import { collectWidgetExtras } from '../widget/collectWidgetExtras';
 import { useWidgetDataRevision } from '../widget/useWidgetDataRevision';
 import { syncLiveActivity } from '../liveActivity/syncLiveActivity';
 import {
-  getEffectiveDataProvider,
-  resolveCoordsForProvider,
-} from '../settings/effectiveProvider';
-import {
   addDays,
   getNextPrayerDisplay,
 } from '../utils/prayerTimes';
@@ -51,16 +46,15 @@ import { qiblaBearingFrom } from '../utils/qibla';
 import type { RootStackParamList } from '../navigation/types';
 import { computeSeasonalTreatment } from '../seasonal/treatments';
 import { TodayCard } from './home/TodayCard';
+import { LocationChip } from './home/LocationChip';
 import { formatHijriLabel } from '../hijri/formatHijriLabel';
 import { QuranCard } from './home/QuranCard';
 import { PermissionBanners } from './home/PermissionBanners';
-import { ProviderFooter } from './home/ProviderFooter';
-import { DataStatsPanel } from './home/DataStatsPanel';
 import { PracticeCard } from './home/PracticeCard';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { TodaySummary } from './home/TodaySummary';
 import { CenteredColumn } from '../responsive/CenteredColumn';
-import { isMacCatalyst } from '../responsive/breakpoints';
+import { isMacCatalyst, HOME_DASHBOARD_MIN_WIDTH } from '../responsive/breakpoints';
 import { HeaderPlaybackBar } from '../quran/audio/HeaderPlaybackBar';
 import { HomeHeaderControls } from '../navigation/HomeHeaderControls';
 import { MihrabHeaderTitle } from '../navigation/MihrabHeaderTitle';
@@ -166,7 +160,7 @@ export function HomeScreen() {
   // 1180 (not the 1100 'expanded' edge): below that the sidebar drops
   // under ~440pt and the tools grid crams — the centered single column
   // reads far better in that band (Mac audit 2026-07-16, plan v2 §B4).
-  const isDashboard = screenWidth >= 1180;
+  const isDashboard = screenWidth >= HOME_DASHBOARD_MIN_WIDTH;
   // Adapt to the window instead of a fixed cap: up to 1360pt of content
   // on big Mac windows, with the main column taking a proportional share
   // (clamped so the day table keeps a comfortable measure).
@@ -229,7 +223,6 @@ export function HomeScreen() {
     // than anything this margin needs to be right about.
     setDashRowH(prev => (Math.abs(prev - h) > 1 ? h : prev));
   }, []);
-  const [providerPickerOpen, setProviderPickerOpen] = useState(false);
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
   const [notifPermDenied, setNotifPermDenied] = useState(false);
   const [nextInfo, setNextInfo] = useState<{ name: string; at: Date } | null>(
@@ -875,19 +868,6 @@ export function HomeScreen() {
     updateSettings,
   ]);
 
-  const coordsForProviderUi = useMemo(
-    () => resolveCoordsForProvider(settings, state),
-    [settings, state],
-  );
-  const effectiveProvider = useMemo(
-    () =>
-      getEffectiveDataProvider(
-        settings.dataProviderAuto,
-        settings.dataProvider,
-        coordsForProviderUi,
-      ),
-    [settings.dataProviderAuto, settings.dataProvider, coordsForProviderUi],
-  );
 
   const getDayLabel = useCallback(
     (dayOffset: number): string => {
@@ -938,21 +918,6 @@ export function HomeScreen() {
     [i18n.language],
   );
 
-  const pickerPalette = useMemo(
-    () => ({
-      card: palette.card,
-      text: palette.text,
-      muted: palette.muted,
-      border: palette.border,
-      bg: palette.bg,
-      overlay: palette.overlay,
-      flatChrome: palette.flatChrome,
-      accent: palette.accent,
-      accentBg: palette.accentBg,
-      danger: palette.danger,
-    }),
-    [palette],
-  );
 
   const handleOpenMonth = useCallback(
     () => navigation.navigate('MonthTimes'),
@@ -1020,14 +985,6 @@ export function HomeScreen() {
     [navigation],
   );
 
-  const handleOpenProviderPicker = useCallback(
-    () => setProviderPickerOpen(true),
-    [],
-  );
-  const handleCloseProviderPicker = useCallback(
-    () => setProviderPickerOpen(false),
-    [],
-  );
 
   // ── Phase routing: any non-ready phase short-circuits here. ───────────────
   const nonReadyEl = useNonReadyPhaseElement({
@@ -1084,6 +1041,8 @@ export function HomeScreen() {
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.scrollContent,
+        // The phone's hero runs edge to edge; the rows pad themselves.
+        !isDashboard && !isMacCatalyst && styles.scrollContentBleed,
         // Breathing room under the last card — and NOTHING for the tab
         // bar or the safe area. The bar is in flow, so the scroll view
         // already ends above it, and the bar's own bottom margin already
@@ -1117,6 +1076,10 @@ export function HomeScreen() {
         // One card: countdown → day strip → times → month link (2a). The
         // hero and the table were the same data at two sizes, and the day
         // switcher was six invisible dots between them.
+        // Phones: the hero runs to the top of the screen under the status
+        // bar and carries the location chip; the tab's header is hidden.
+        // The dashboard (iPad/Mac) keeps its card and its header.
+        const fullBleed = !isDashboard && !isMacCatalyst;
         const dayTable = (
           <TodayCard
             week={view.table.week}
@@ -1131,6 +1094,22 @@ export function HomeScreen() {
             qiblaBearing={qiblaBearing}
             onOpenQibla={handleOpenQibla}
             expanded={isDashboard}
+            fullBleed={fullBleed}
+            renderLocation={
+              fullBleed
+                ? ink => (
+                    <LocationChip
+                      compactHeader
+                      ink={ink}
+                      onAddLocation={() =>
+                        navigation.navigate('SettingsLocation', {
+                          highlight: 'savedLocations',
+                        })
+                      }
+                    />
+                  )
+                : undefined
+            }
           />
         );
         const ramadanCard = (
@@ -1140,25 +1119,9 @@ export function HomeScreen() {
           <QuranCard onOpenAt={handleOpenQuranAt} onOpenQuran={handleOpenQuran} />
         );
         const toolsGrid = <TodaySummary onOpenLog={handleOpenLog} />;
-        const providerFooter = (
-          <ProviderFooter
-            effectiveProvider={effectiveProvider}
-            calculationMethod={settings.calculationMethod}
-            school={settings.school}
-            dataProviderAuto={settings.dataProviderAuto}
-            locationLabel={locationLabel}
-            backgroundRefreshing={state.backgroundRefreshing ?? false}
-            onPress={handleOpenProviderPicker}
-          />
-        );
         const practiceCard = settings.showPracticeOnHome ? (
           <ErrorBoundary label="PracticeCard">
             <PracticeCard />
-          </ErrorBoundary>
-        ) : null;
-        const statsPanel = settings.showDataStats ? (
-          <ErrorBoundary label="DataStatsPanel">
-            <DataStatsPanel />
           </ErrorBoundary>
         ) : null;
 
@@ -1197,33 +1160,33 @@ export function HomeScreen() {
                 {toolsGrid}
                 {practiceCard}
                 {ramadanCard}
-                {providerFooter}
-                {statsPanel}
               </View>
             </View>
           );
         }
+        /**
+         * THE PHONE SHOWS WHAT IT NEEDS AND NO MORE.
+         *
+         * The hero, the strip and the day's times fit the screen without
+         * scrolling — that is the whole design of the page (the way
+         * Pillars does it). What used to follow them below the fold has
+         * gone where it is looked for: the times source and the data
+         * statistics to Settings → Prayer times, the day's practice
+         * summary and the graph to the Log tab (which is theirs), the
+         * Quran shortcut to the Quran tab's own strip and the Continue
+         * Reading widget. Only the Ramadan countdown stays, and only in
+         * its season. The dashboard has the room and keeps its side
+         * column.
+         */
         return (
           <>
             {dayTable}
-            {ramadanCard}
-            {quranShortcut}
-            {toolsGrid}
-            {practiceCard}
-            {providerFooter}
-            {statsPanel}
+            <View style={styles.belowHero}>{ramadanCard}</View>
           </>
         );
       })()}
       </CenteredColumn>
 
-      <ProviderPickerModal
-        visible={providerPickerOpen}
-        onClose={handleCloseProviderPicker}
-        settings={settings}
-        updateSettings={updateSettings}
-        palette={pickerPalette}
-      />
 
       <FeatureTourModal
         visible={tourVisible}
@@ -1277,6 +1240,8 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
     gap: SPACING.md,
   },
+  scrollContentBleed: { paddingTop: 0, paddingHorizontal: 0 },
+  belowHero: { paddingHorizontal: HOME_SCREEN_PADDING },
   // Dashboard: let the content grow to the viewport and center it
   // vertically when shorter (§B1 — kills the dead bottom half).
   scrollContentDash: {

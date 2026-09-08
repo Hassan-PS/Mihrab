@@ -124,3 +124,12 @@ export const isMacCatalyst: boolean =
   (((Platform as unknown as { isMacCatalyst?: boolean }).isMacCatalyst ?? false) ||
     (Platform.constants as unknown as { interfaceIdiom?: string })
       ?.interfaceIdiom === 'mac');
+
+/**
+ * The width at which Home becomes the two-column dashboard (day table +
+ * side column) rather than the phone page. 1180, not the 1100 'expanded'
+ * edge: below it the sidebar drops under the table. Shared with the tab
+ * navigator, which shows Today's header only on the dashboard — the phone
+ * hero carries the header's contents itself.
+ */
+export const HOME_DASHBOARD_MIN_WIDTH = 1180;

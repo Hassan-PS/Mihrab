@@ -27,7 +27,7 @@
  */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTranslation } from 'react-i18next';
-import { Animated, Platform, StyleSheet, View } from 'react-native';
+import { Animated, Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import type { ViewStyle } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -56,7 +56,7 @@ import { HomeHeaderControls } from './HomeHeaderControls';
 import { HeaderPlaybackBar } from '../quran/audio/HeaderPlaybackBar';
 import { SyncHeaderButton } from '../screens/sync/SyncHeaderButton';
 import { MihrabHeaderTitle } from './MihrabHeaderTitle';
-import { isMacCatalyst } from '../responsive/breakpoints';
+import { isMacCatalyst, HOME_DASHBOARD_MIN_WIDTH } from '../responsive/breakpoints';
 import {
   TabBookIcon,
   TabDuasIcon,
@@ -75,6 +75,7 @@ const SCREEN = { flex: 1 } as const;
 export function MainTabs() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const isDashboardWidth = useWindowDimensions().width >= HOME_DASHBOARD_MIN_WIDTH;
   const barBottom = useTabBarBottom();
 
   /**
@@ -128,10 +129,10 @@ export function MainTabs() {
        */
       screenLayout={({ children }) => (
         <View style={SCREEN}>
-          {/* The tab headers take the navigation theme's card colour, and
-              the bar has to be the same surface or it reads as a strip
-              stuck under the title bar rather than part of it. */}
-          <HeaderPlaybackBar surface={palette.card} />
+          {/* The tab headers are the page's own colour (see `headerStyle`
+              below), and the bar has to be the same surface or it reads as
+              a strip stuck under the title bar rather than part of it. */}
+          <HeaderPlaybackBar surface={palette.bg} />
           {children}
           {/* Under the bar, over the page: the fade that keeps the two from
               colliding. Same `slide` as the bar, so it leaves with it. */}
@@ -155,6 +156,16 @@ export function MainTabs() {
          * you pushed, and centring it cost the chip the room it needs.
          */
         headerTitleAlign: 'center',
+        /**
+         * The header is the page, not a bar on it. It took the navigation
+         * theme's card colour, which on the warm paper theme is a white
+         * band over an off-white page — a title bar, visibly. In the page's
+         * own colour with no shadow, the title reads as the top of the page
+         * (the way Pillars does it), and the bottom bar, in the same
+         * colour, as its foot.
+         */
+        headerStyle: { backgroundColor: palette.bg },
+        headerShadowVisible: false,
         tabBarActiveTintColor: palette.accentSolid,
         /**
          * A HEX, NOT `String(palette.muted)`.
@@ -248,8 +259,11 @@ export function MainTabs() {
               ] as unknown as ViewStyle['transform'],
             }
           : {
-              backgroundColor: palette.card,
+              // The page's own colour, not the card's: the bar is part of
+              // the page it sits under, and a hairline is the only edge.
+              backgroundColor: palette.bg,
               borderTopColor: palette.border ?? palette.muted,
+              borderTopWidth: StyleSheet.hairlineWidth,
               // iPad gets NOTHING else — the original bar, exactly.
               // Overriding its height would drop the labels onto the home
               // indicator, since the navigator's own height folds in
@@ -280,9 +294,15 @@ export function MainTabs() {
         options={{
           title: t('nav.today', 'Today'),
           tabBarIcon: TabHomeIcon,
-          // Everywhere but Catalyst, where Home draws its own top bar —
-          // see the Catalyst branch at the end of these options.
-          headerShown: !isMacCatalyst,
+          /**
+           * NO HEADER ON THE PHONE (and on any window narrower than the
+           * dashboard). Today's hero runs to the top of the screen, under
+           * the status bar, and carries the location chip and the Qibla
+           * chip in its top row — the wordmark and chip that lived here
+           * are in the hero now, on the sky. The wide dashboard keeps its
+           * card and this header; Catalyst draws its own bar as content.
+           */
+          headerShown: !isMacCatalyst && isDashboardWidth,
           // Always "Mihrab" — a proper name, not a translated label.
           headerTitle: () => <MihrabHeaderTitle />,
           /**

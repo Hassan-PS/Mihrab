@@ -1449,7 +1449,7 @@
   "dataStats": {
     "title": "数据统计",
     "toggle": "显示数据统计",
-    "toggleHelp": "查看礼拜时间的来源、已存储的数量以及更新时间。",
+    "toggleHelp": "在“设置 → 礼拜时间”中显示礼拜时间的来源、已存储的数据量以及刷新时间。",
     "source": "当前来源",
     "daysStored": "已存储于设备",
     "lastUpdated": "上次更新",
@@ -1468,7 +1468,7 @@
     "serverWarning": "覆盖不足",
     "serverUnknown": "尚未检查",
     "unlockedTitle": "已启用数据统计",
-    "unlockedBody": "现在主屏幕底部会显示一张统计卡片。可随时在下方关闭。",
+    "unlockedBody": "统计卡片现显示在“设置 → 礼拜时间”中。可随时在下方关闭。",
     "serverCoverage": "服务器覆盖天数",
     "serverSweden": "瑞典 · Islamiska Förbundet",
     "serverMorocco": "摩洛哥 · Habous",

@@ -21,10 +21,11 @@
  * Both gestures drive one selection: tap a chip, or swipe the card body the
  * way the carousel used to work.
  */
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   PanResponder,
   Pressable,
+  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -63,7 +64,9 @@ import { isRtlLanguage } from '../../i18n/layoutDirection';
 import { DayStrip, type DayStripEntry } from './DayStrip';
 import { isSalah, quickLogPhase, useQuickLog } from '../../journal/quickLog';
 import { HeroSky } from './HeroSky';
-import { HERO_Y, skyFrame, skyInkAt, skyMoment } from './skyModel';
+import { HERO_Y, skyFrame, skyInkAt, skyMoment, type SkyInkColors } from './skyModel';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { QiblaChip } from './QiblaChip';
 import { PrayerRow } from './PrayerRow';
 import {
   useNextAlertOverride,
@@ -72,7 +75,7 @@ import {
 import { clearNativeAlertOverride } from '../../native/MihrabLiveActivity';
 import { ymdLocal } from '../../notifications/scheduling';
 import { QiblaChipCorner } from './QiblaChip';
-import { HOME_TABLE_RADIUS } from './tokens';
+import { HOME_SCREEN_PADDING, HOME_TABLE_RADIUS } from './tokens';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
 
@@ -103,6 +106,15 @@ export type TodayCardProps = {
   onOpenQibla?: () => void;
   /** Wide iPad/Mac dashboard: the hero gets more presence. */
   expanded?: boolean;
+  /**
+   * The phone layout: the hero runs to the top edge of the screen, under
+   * the status bar, and carries the location chip and the Qibla chip in
+   * its top row — the screen's own header is hidden. The day strip and
+   * the rows sit on the page beneath it, not in a card.
+   */
+  fullBleed?: boolean;
+  /** The location chip for the hero's top row, drawn in the sky's ink. */
+  renderLocation?: (ink: SkyInkColors) => ReactNode;
 };
 
 /**
@@ -126,6 +138,10 @@ const HeroToday = memo(function HeroToday({
   today,
   tomorrowFajr,
   expanded,
+  bleed,
+  topRow,
+  ownsStatusBar = false,
+  sceneTop = 0,
   dateLine,
 }: {
   /** What the countdown is aimed at: the next prayer, or the user's pick. */
@@ -138,6 +154,17 @@ const HeroToday = memo(function HeroToday({
   /** Tomorrow's Fajr, `HH:mm`, which closes tonight's sky. */
   tomorrowFajr?: string;
   expanded: boolean;
+  /**
+   * Full-bleed (phone): how far the hero's padding reaches above and to
+   * the sides, so the sky covers it — the top includes the status bar.
+   */
+  bleed?: { horizontal: number; top: number; bottom: number };
+  /** The top row: location chip leading, Qibla chip trailing. */
+  topRow?: { renderLocation?: (ink: SkyInkColors) => ReactNode; qibla?: ReactNode };
+  /** The status bar's glyphs follow the sky while this hero is on screen. */
+  ownsStatusBar?: boolean;
+  /** The status-bar band the sky's bodies keep out of — see HeroSky. */
+  sceneTop?: number;
   /**
    * Today's date, Gregorian and Hijri — issue #23.
    *
@@ -231,17 +258,39 @@ const HeroToday = memo(function HeroToday({
 
   return (
     <View style={[styles.hero, expanded && styles.heroExpanded]}>
-      {/* The sky, under everything and out to the card's edges. Its sun
-          or moon moves with the rail's own fraction, rounded so the SVG
-          is redrawn about a hundred times an interval rather than once a
-          second. */}
+      {/* The sky, under everything and out to the card's edges — and, on
+          the phone, up under the status bar. */}
       <HeroSky
         frame={frame}
-        bleed={{
-          horizontal: SPACING.xl,
-          vertical: expanded ? SPACING.lg + SPACING.md : SPACING.lg,
-        }}
+        sceneTop={sceneTop}
+        bleed={
+          bleed ?? {
+            horizontal: SPACING.xl,
+            top: expanded ? SPACING.lg + SPACING.md : SPACING.lg,
+            bottom: expanded ? SPACING.lg + SPACING.md : SPACING.lg,
+          }
+        }
       />
+      {/* The status bar sits over the sky, so its glyphs take the sky's
+          ink — only while this screen is the one on show: the tabs keep
+          their screens mounted, and a bar styled by an unseen hero would
+          be wrong on every other tab. Unmounting hands the root's back.
+          `active` (focus AND foreground) rather than `useIsFocused`, the
+          same gate as the countdown, so nothing here runs in a pocket. */}
+      {ownsStatusBar && active ? (
+        <StatusBar
+          translucent
+          backgroundColor="transparent"
+          barStyle={inkTop.text === '#FFFFFF' ? 'light-content' : 'dark-content'}
+          animated
+        />
+      ) : null}
+      {topRow ? (
+        <View style={styles.heroTopRow}>
+          <View style={styles.heroTopLeading}>{topRow.renderLocation?.(inkTop)}</View>
+          {topRow.qibla}
+        </View>
+      ) : null}
       <Text
         style={[styles.heroEyebrow, { color: inkTop.muted }]}
         numberOfLines={1}
@@ -396,6 +445,8 @@ function TodayCardImpl({
   qiblaBearing,
   onOpenQibla,
   expanded = false,
+  fullBleed = false,
+  renderLocation,
 }: TodayCardProps) {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
@@ -655,16 +706,30 @@ function TodayCardImpl({
     [],
   );
 
+  const insets = useSafeAreaInsets();
+  // Full-bleed: the hero's top padding clears the status bar; the sky
+  // bleeds up under it. The card chrome — radius, edge, glass — is gone:
+  // the hero is a panel of the page, and the rows sit on the page.
+  const heroTop = fullBleed ? insets.top + SPACING.md : SPACING.lg;
+  const Outer = fullBleed ? View : GlassSurface;
+  const qiblaChip =
+    fullBleed && qiblaBearing != null ? (
+      <QiblaChip bearing={qiblaBearing} onPress={onOpenQibla} />
+    ) : null;
+
   return (
-    <GlassSurface
-      style={[
-        styles.card,
-        { borderRadius: HOME_TABLE_RADIUS, ...cardEdgeStyle(palette) },
-      ]}
+    <Outer
+      style={
+        fullBleed
+          ? styles.cardBleed
+          : [styles.card, { borderRadius: HOME_TABLE_RADIUS, ...cardEdgeStyle(palette) }]
+      }
       {...pan.panHandlers}>
       <View
         style={[
           styles.heroWrap,
+          { paddingTop: heroTop },
+          fullBleed && styles.heroWrapBleed,
           {
             backgroundColor: isToday ? palette.accentBg : 'transparent',
           },
@@ -678,6 +743,10 @@ function TodayCardImpl({
             tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
             dateLine={todayDateLine}
+            bleed={{ horizontal: SPACING.xl, top: heroTop, bottom: SPACING.lg }}
+            sceneTop={fullBleed ? insets.top : 0}
+            topRow={fullBleed ? { renderLocation, qibla: qiblaChip } : undefined}
+            ownsStatusBar={fullBleed}
           />
         ) : (
           <HeroOtherDay
@@ -701,12 +770,15 @@ function TodayCardImpl({
             no compass screen to open and `onOpenQibla` is undefined, but
             the bearing is trigonometry on two coordinates and is just as
             true there. The chip becomes a readout. */}
-        <QiblaChipCorner
-          bearing={qiblaBearing ?? null}
-          onPress={onOpenQibla}
-        />
+        {fullBleed ? null : (
+          <QiblaChipCorner
+            bearing={qiblaBearing ?? null}
+            onPress={onOpenQibla}
+          />
+        )}
       </View>
 
+      <View style={fullBleed ? styles.tableBleed : null}>
       <DayStrip days={days} selected={selected} onSelect={handleSelect} />
 
       {visibleRows.map((key, rowIndex) => (
@@ -793,7 +865,8 @@ function TodayCardImpl({
           </Text>
         </Pressable>
       ) : null}
-    </GlassSurface>
+      </View>
+    </Outer>
   );
 }
 
@@ -801,7 +874,24 @@ export const TodayCard = memo(TodayCardImpl);
 
 const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
-  heroWrap: { paddingHorizontal: SPACING.xl, paddingTop: SPACING.lg, paddingBottom: SPACING.lg },
+  // Full-bleed: no radius at the top (it meets the screen edge), the
+  // page's radius at the foot where the hero becomes the page.
+  cardBleed: { overflow: 'hidden' },
+  heroWrap: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.lg },
+  heroWrapBleed: {
+    borderBottomStartRadius: HOME_TABLE_RADIUS,
+    borderBottomEndRadius: HOME_TABLE_RADIUS,
+    overflow: 'hidden',
+  },
+  tableBleed: { paddingHorizontal: HOME_SCREEN_PADDING },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  heroTopLeading: { flexShrink: 1, flexGrow: 1 },
   hero: {},
   heroExpanded: { paddingVertical: SPACING.md },
   // Sentence case, quiet: the countdown is the thing the eye lands on and

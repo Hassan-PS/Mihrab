@@ -11,6 +11,8 @@
  */
 export const HOME_CARD_RADIUS = 22;
 export const HOME_CARD_PADDING = 20;
-export const HOME_ROW_PADDING_V = 15;
+// 12, from 15: six rows and the strip have to fit under the hero with
+// nothing to scroll (the Today screen shows what it needs and no more).
+export const HOME_ROW_PADDING_V = 12;
 export const HOME_TABLE_RADIUS = 20;
 export const HOME_SCREEN_PADDING = 16;

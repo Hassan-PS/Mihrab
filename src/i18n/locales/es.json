@@ -1449,7 +1449,7 @@
   "dataStats": {
     "title": "Estadísticas de datos",
     "toggle": "Mostrar estadísticas de datos",
-    "toggleHelp": "Consulta de dónde provienen los horarios de oración, cuántos se almacenan y cuándo se actualizan.",
+    "toggleHelp": "Muestra en Ajustes → Horarios de oración de dónde vienen los horarios, cuánto hay almacenado y cuándo se actualizan.",
     "source": "Fuente actual",
     "daysStored": "Almacenado en el dispositivo",
     "lastUpdated": "Última actualización",
@@ -1468,7 +1468,7 @@
     "serverWarning": "Cobertura baja",
     "serverUnknown": "Aún sin comprobar",
     "unlockedTitle": "Estadísticas de datos activadas",
-    "unlockedBody": "Ahora aparece una tarjeta de estadísticas en la parte inferior de la pantalla de inicio. Desactívala cuando quieras abajo.",
+    "unlockedBody": "Ahora aparece una tarjeta de estadísticas en Ajustes → Horarios de oración. Desactívala cuando quieras abajo.",
     "serverCoverage": "Cobertura del servidor",
     "serverSweden": "Suecia · Islamiska Förbundet",
     "serverMorocco": "Marruecos · Habous",

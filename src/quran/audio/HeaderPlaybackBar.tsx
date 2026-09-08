@@ -26,6 +26,7 @@
  * a surah runs until it has been played.
  */
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsActive } from '../../hooks/useIsActive';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useContext } from 'react';
@@ -125,7 +126,11 @@ export function HeaderPlaybackBar({
   const { active } = usePlaybackStatus();
   if (!active || !focused || OWN_PLAYER.has(route.name)) return null;
   if (!inline && IS_MAC_CATALYST && route.name === 'TodayTab') return null;
-  return <LiveBar {...props} />;
+  // Today has no header on the phone — its hero runs under the status
+  // bar — so a bar mounted above it is the first thing under the status
+  // bar and has to clear it itself.
+  const headerless = !inline && route.name === 'TodayTab';
+  return <LiveBar {...props} headerless={headerless} />;
 }
 
 function LiveBar({
@@ -148,12 +153,16 @@ function LiveBar({
    * there the bar is simply the first thing in the screen.
    */
   underTransparentHeader,
+  headerless = false,
 }: {
   surface: ColorValue;
   underTransparentHeader?: boolean;
+  /** No header above this bar: it pads past the status bar itself. */
+  headerless?: boolean;
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const insets = useSafeAreaInsets();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { active, playing, loading } = usePlaybackStatus();
@@ -186,6 +195,7 @@ function LiveBar({
           borderBottomColor: palette.border ?? palette.muted,
           marginTop:
             underTransparentHeader && Platform.OS === 'ios' ? headerHeight : 0,
+          paddingTop: headerless ? insets.top : 0,
         },
       ]}>
       <View style={styles.row}>

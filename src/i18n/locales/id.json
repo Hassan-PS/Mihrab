@@ -1449,7 +1449,7 @@
   "dataStats": {
     "title": "Statistik data",
     "toggle": "Tampilkan statistik data",
-    "toggleHelp": "Lihat asal jadwal salat, seberapa banyak yang tersimpan, dan waktu pembaruan.",
+    "toggleHelp": "Menampilkan di Pengaturan → Waktu salat dari mana waktu salat berasal, berapa banyak yang tersimpan, dan jadwal pembaruan.",
     "source": "Sumber saat ini",
     "daysStored": "Tersimpan di perangkat",
     "lastUpdated": "Terakhir diperbarui",
@@ -1468,7 +1468,7 @@
     "serverWarning": "Cakupan rendah",
     "serverUnknown": "Belum diperiksa",
     "unlockedTitle": "Statistik data diaktifkan",
-    "unlockedBody": "Kartu statistik kini muncul di bagian bawah layar utama. Matikan kapan saja di bawah ini.",
+    "unlockedBody": "Kartu statistik kini muncul di Pengaturan → Waktu salat. Matikan kapan saja di bawah.",
     "serverCoverage": "Cakupan server",
     "serverSweden": "Swedia · Islamiska Förbundet",
     "serverMorocco": "Maroko · Habous",

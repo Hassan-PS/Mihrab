@@ -1449,7 +1449,7 @@
   "dataStats": {
     "title": "Datenstatistik",
     "toggle": "Datenstatistik anzeigen",
-    "toggleHelp": "Sehen Sie, woher die Gebetszeiten stammen, wie viel gespeichert ist und wann aktualisiert wird.",
+    "toggleHelp": "Zeigt unter Einstellungen → Gebetszeiten, woher die Gebetszeiten stammen, wie viel gespeichert ist und wann aktualisiert wird.",
     "source": "Aktuelle Quelle",
     "daysStored": "Auf dem Gerät gespeichert",
     "lastUpdated": "Zuletzt aktualisiert",
@@ -1468,7 +1468,7 @@
     "serverWarning": "Geringe Abdeckung",
     "serverUnknown": "Noch nicht geprüft",
     "unlockedTitle": "Datenstatistik aktiviert",
-    "unlockedBody": "Unten auf dem Startbildschirm erscheint nun eine Statistikkarte. Sie können sie jederzeit unten deaktivieren.",
+    "unlockedBody": "Eine Statistikkarte erscheint jetzt unter Einstellungen → Gebetszeiten. Unten jederzeit ausschaltbar.",
     "serverCoverage": "Server-Abdeckung",
     "serverSweden": "Schweden · Islamiska Förbundet",
     "serverMorocco": "Marokko · Habous",

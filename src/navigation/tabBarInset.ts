@@ -20,8 +20,7 @@ import {
   buttonNavigationHeight,
   isButtonNavigation,
 } from '../native/SystemTheme';
-import { desktopSize, IS_MAC_CATALYST } from '../responsive/desktop';
-import { DEVICE_CLASS } from '../responsive/deviceClass';
+import { desktopSize } from '../responsive/desktop';
 
 /** The pill's own height. */
 export const TAB_BAR_HEIGHT = desktopSize(60);
@@ -251,4 +250,20 @@ export function useTabBarInset(): number {
  * used to paint correctly and receive no touches at all; re-tested on the
  * current version by tapping all six tabs, that is fixed.
  */
-export const FLOATS_OVER_CONTENT = !IS_MAC_CATALYST && DEVICE_CLASS === 'phone';
+/**
+ * FALSE EVERYWHERE NOW.
+ *
+ * The phone had the floating pill from the 2026 redesign's first phase.
+ * It was set aside for the way Pillars does it — a flat band in the page's
+ * own colour, welded to the bottom edge, with a hairline where it meets the
+ * page — because a bar that is part of the page reads as one design with
+ * the page, and the pill, however tidy, was a second object on every
+ * screen. Every page is laid out to fit the window above it, so nothing
+ * needs to run underneath it.
+ *
+ * Kept as a switch rather than deleted: the scrim, the hide-on-scroll and
+ * the per-screen inset all key off it, and all of them stand down cleanly
+ * when it is false. The pill's own rule was
+ * `!IS_MAC_CATALYST && DEVICE_CLASS === 'phone'`.
+ */
+export const FLOATS_OVER_CONTENT: boolean = false;

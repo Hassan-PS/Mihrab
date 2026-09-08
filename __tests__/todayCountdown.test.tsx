@@ -17,6 +17,12 @@ jest.mock('@react-navigation/native', () => ({
   useIsFocused: () => mockFocused.value,
 }));
 
+// The full-bleed hero reads the status-bar inset; there is no provider in
+// a test tree, so hand it a flat one.
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
 jest.mock('../src/hooks/useAppPalette', () => ({
   useAppPalette: () => ({
     isDark: false,

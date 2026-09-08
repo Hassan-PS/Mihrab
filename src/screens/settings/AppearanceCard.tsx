@@ -328,17 +328,6 @@ function AppearanceCardImpl() {
         </SettingsGroup>
       )}
 
-      {/* Also on the Log tab, next to the graph it governs — this is where
-          someone looking for it in Settings would go. */}
-      <SettingsGroup>
-        <SettingsToggleRow
-          title={t('log.showOnHome')}
-          help={t('log.showOnHomeHelp')}
-          value={settings.showPracticeOnHome}
-          onValueChange={v => updateSettings({ showPracticeOnHome: v })}
-        />
-      </SettingsGroup>
-
       <ConfirmModal
         visible={pendingDynamic !== null}
         title={t('settings.themeRestartTitle', 'Restart required')}

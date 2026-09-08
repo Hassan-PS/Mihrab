@@ -18,7 +18,6 @@ import { useCallback, useRef, useState } from 'react';
 import { ProviderPickerModal } from '../../../components/ProviderPickerModal';
 import { usePrayerSettings } from '../../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../../hooks/useAppPalette';
-import { useTranslation } from 'react-i18next';
 import { CalculationCard } from '../CalculationCard';
 import { DataSourceCard } from '../DataSourceCard';
 import { MadhabModal } from '../MadhabModal';
@@ -27,9 +26,9 @@ import { asrSchoolFor, selectedMadhab } from '../../../prayer/madhab';
 import { MonthTimesCard } from '../MonthTimesCard';
 import { PrayerOffsetsModal } from '../PrayerOffsetsModal';
 import { SettingsPage } from '../SettingsPage';
+import { DataStatsPanel } from '../../home/DataStatsPanel';
 
 export function PrayerTimesSettingsScreen() {
-  const { t } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
   const [providerModal, setProviderModal] = useState(false);
@@ -59,6 +58,13 @@ export function PrayerTimesSettingsScreen() {
           onOpenMadhabPicker={openMadhab}
         />
         <MonthTimesCard />
+        {/* The data statistics — where the times come from, how much is
+            stored, when they were refreshed — sit with the source they
+            describe. They were a card at the foot of Home, which is a page
+            that now shows the day and nothing else. Still behind the
+            developer unlock (About → tap the version five times) and its
+            switch. */}
+        {settings.dataStatsUnlocked && settings.showDataStats ? <DataStatsPanel /> : null}
       </SettingsPage>
 
       <ProviderPickerModal

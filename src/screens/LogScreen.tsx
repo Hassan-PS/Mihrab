@@ -1598,32 +1598,6 @@ export function LogScreen() {
           />
         </View>
 
-        {/* The same switch is in Settings. It lives here too because this is
-            where you are looking at the graph and deciding you want it in
-            front of you every time you open the app. */}
-        <View
-          style={[
-            styles.card,
-            styles.reminderRow,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}
-        >
-          <View style={styles.reminderCopy}>
-            <Text style={[styles.reminderTitle, { color: palette.text }]}>
-              {t('log.showOnHome')}
-            </Text>
-            <Text style={[styles.reminderHelp, { color: palette.muted }]}>
-              {t('log.showOnHomeHelp')}
-            </Text>
-          </View>
-          <Switch
-            value={settings.showPracticeOnHome}
-            trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
-            thumbColor="#ffffff"
-            onValueChange={v => updateSettings({ showPracticeOnHome: v })}
-          />
-        </View>
-
         {!hydrated ? (
           <Text style={[styles.hint, { color: palette.muted }]}>
             {t('common.loading')}

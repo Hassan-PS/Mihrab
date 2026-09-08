@@ -1449,7 +1449,7 @@
   "dataStats": {
     "title": "Datastatistik",
     "toggle": "Visa datastatistik",
-    "toggleHelp": "Se varifrån bönetiderna kommer, hur mycket som sparas och när det uppdateras.",
+    "toggleHelp": "Visar under Inställningar → Bönetider var bönetiderna kommer ifrån, hur mycket som är lagrat och när de uppdateras.",
     "source": "Aktuell källa",
     "daysStored": "Sparat på enheten",
     "lastUpdated": "Senast uppdaterad",
@@ -1468,7 +1468,7 @@
     "serverWarning": "Låg täckning",
     "serverUnknown": "Inte kontrollerad än",
     "unlockedTitle": "Datastatistik aktiverad",
-    "unlockedBody": "Ett statistikkort visas nu längst ned på startskärmen. Stäng av det när som helst nedan.",
+    "unlockedBody": "Ett statistikkort visas nu under Inställningar → Bönetider. Stäng av det när du vill nedan.",
     "serverCoverage": "Servertäckning",
     "serverSweden": "Sverige · Islamiska Förbundet",
     "serverMorocco": "Marocko · Habous",
