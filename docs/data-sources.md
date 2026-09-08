@@ -302,7 +302,7 @@ the assets above, do one of:
   if you want to fetch them inside Cowork sessions.
 
 
-## The duʿāʾ khatm al-Qurʾān — issue #35
+## The duʿāʾ khatm al-Qurʾān — issue #35, DECLINED 2026-09-07
 
 Searched GitHub on 2026-09-07. **There is no usable dataset**, and the
 reason is more interesting than the absence.
@@ -322,8 +322,36 @@ Abū Bakr b. al-Ḍaḥḥāk in *al-Shamāʾil*, through Abū Dharr al-Harawī.
 of the other places it turns up is al-ʿIrāqī's takhrīj of the *Iḥyāʾ* —
 the section collecting reports **for which he found no isnād**.
 
-So this is a scholarly decision rather than a data import: which text,
-and whether the app can print it with the honesty its other entries
-have. Every dua Mihrab ships names its collection and stands on it. A
-supplication whose best citation is "printed in most muṣḥafs" needs to
-say that on screen, or not be there.
+### The decision, and why
+
+**Mihrab does not ship it.** Not because it is disliked, and not because
+nobody asked — it was requested with a reference, by someone who has
+given this project more good reports than anyone.
+
+Every dua in this app names its collection and stands on it. That rule is
+what the Duas screen is worth: a reader can check any line in it against
+a book. The printed khatm duʿāʾ cannot meet that bar. Its best honest
+citation is "printed in most muṣḥafs", and the report behind it is one
+al-ʿIrāqī lists among those for which he found no isnād. Printing it
+beside sixty entries that each cite Bukhārī or Muslim would either
+mislead by association, or need a disclaimer explaining that this one is
+different — and a disclaimer on a supplication is a strange thing to hand
+somebody who has just finished the Qurʾān.
+
+There is also no single text to ship. The muṣḥaf version and the one
+attributed to ʿAbd al-Qādir al-Jīlānī share the name, so shipping "the"
+khatm duʿāʾ means picking a tradition on the reader's behalf, silently,
+in an app used across all of them.
+
+### What would change the answer
+
+- A khatm supplication with a chain that stands — then it goes in like
+  any other entry, citing that chain.
+- A ruling from a scholar this project can name, that the printed text is
+  sound enough to carry, and a form of words on screen that says exactly
+  what it is.
+
+Neither is a research task. Both are somebody's judgement, on the record.
+
+Nothing stops a reader saying the duʿāʾ from the muṣḥaf in front of them;
+this is about what the app puts its own name to.

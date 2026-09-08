@@ -1544,6 +1544,16 @@ export const DUAS: ReadonlyArray<Dua> = [
   },
 ] as const;
 
+/**
+ * NOT HERE: the duʿāʾ khatm al-Qurʾān.
+ *
+ * It has been requested (#35) and it was declined on 2026-09-07, so if
+ * you are here to add it, read `docs/data-sources.md` first — the short
+ * version is that every entry in this file names a collection and stands
+ * on it, and that supplication cannot: it is printed in muṣḥafs rather
+ * than narrated with a chain that holds, and "the" khatm duʿāʾ is at
+ * least two different texts.
+ */
 export const DUA_CATEGORIES: DuaCategory[] = [
   'morning',
   'evening',
