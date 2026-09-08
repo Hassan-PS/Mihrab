@@ -13,7 +13,7 @@
  * has to get right and a copy-paste cannot: the group owns the surface,
  * and a row never paints one of its own.
  */
-import { Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
 import {
   SettingsGroup,
@@ -61,13 +61,16 @@ describe('the group owns the surface', () => {
         <SettingsToggleRow title="C" value onValueChange={() => {}} />
       </SettingsGroup>,
     );
-    const painted = root
-      .findAllByType(View)
-      .filter(v =>
-        stylesOf(v).some(
-          st => (st as { backgroundColor?: string }).backgroundColor,
-        ),
-      );
+    // The dividers are hairline Views painted in the border colour now (inset
+    // to the text — redesign-plan P2), so exclude anything hairline-tall:
+    // a divider is a line, not a surface.
+    const painted = root.findAllByType(View).filter(v => {
+      const merged = Object.assign({}, ...stylesOf(v)) as {
+        backgroundColor?: string;
+        height?: number;
+      };
+      return merged.backgroundColor && merged.height !== StyleSheet.hairlineWidth;
+    });
     expect(painted).toHaveLength(1);
   });
 
@@ -126,14 +129,17 @@ describe('the group owns the surface', () => {
         <SettingsToggleRow title="C" value onValueChange={() => {}} />
       </SettingsGroup>,
     );
+    // A divider is an inset hairline View between two rows — two of them
+    // for three rows, and nothing under the last.
     const divided = root
       .findAllByType(View)
       .filter(v =>
         stylesOf(v).some(
-          st => (st as { borderBottomWidth?: number }).borderBottomWidth,
+          st => (st as { height?: number }).height === StyleSheet.hairlineWidth,
         ),
       );
     expect(divided).toHaveLength(2);
+    expect(divided.every(v => stylesOf(v).some(st => (st as { marginStart?: number }).marginStart! > 0))).toBe(true);
   });
 });
 

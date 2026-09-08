@@ -25,6 +25,8 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import type { AppPalette } from '../theme/appPalette';
+import { SegmentedControl } from '../components/ui';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import type { RootStackParamList } from '../navigation/types';
@@ -93,6 +95,17 @@ type Tab = 'surah' | 'juz' | 'bookmarks';
 const OFTEN_READ = [18, 67] as const;
 
 type JuzRow = { juz: number; page: number; startSurah: SurahIndex | undefined };
+
+/** The inset hairline under a surah or juz row. Nothing under flat chrome. */
+function RowLine({ palette }: { palette: AppPalette }) {
+  if (palette.flatChrome) return null;
+  return (
+    <View
+      pointerEvents="none"
+      style={[styles.rowLine, { backgroundColor: palette.border }]}
+    />
+  );
+}
 
 export function QuranScreen() {
   const quranWide = useBreakpoint() !== 'compact';
@@ -373,7 +386,7 @@ export function QuranScreen() {
         ? (_: unknown, index: number) => ({
             length: rowH,
             offset:
-              LIST_PADDING + headerH + LIST_GAP + index * (rowH + LIST_GAP),
+              LIST_PADDING + headerH + HEADER_GAP + index * (rowH + LIST_GAP),
             index,
           })
         : undefined,
@@ -899,36 +912,17 @@ export function QuranScreen() {
 
       {/* Tabs (QR-11), with the two glyphs that open a field beside them. */}
       <View style={styles.tabsRow}>
-      <View style={[styles.tabs, styles.tabsGrow, { backgroundColor: palette.card, ...cardEdgeStyle(palette) }]}>
-        {(
-          [
-            ['surah', t('quran.tabSurah', 'Surah')],
-            ['juz', t('quran.tabJuz', 'Juz')],
-            ['bookmarks', t('quran.tabBookmarks', 'Bookmarks')],
-          ] as Array<[Tab, string]>
-        ).map(([key, label]) => {
-          const selected = tab === key;
-          return (
-            <Pressable
-              key={key}
-              accessibilityRole="tab"
-              accessibilityState={{ selected }}
-              onPress={() => setTab(key)}
-              style={[
-                styles.tab,
-                selected && { backgroundColor: palette.accentBg },
-              ]}>
-              <Text
-                style={{
-                  color: selected ? palette.accentSolid : palette.muted,
-                  fontWeight: '700',
-                  fontSize: 13,
-                }}>
-                {label}
-              </Text>
-            </Pressable>
-          );
-        })}
+      <View style={styles.tabsGrow}>
+        <SegmentedControl
+          accessibilityLabel={t('quran.tabSurah', 'Surah')}
+          segments={[
+            { key: 'surah', label: t('quran.tabSurah', 'Surah') },
+            { key: 'juz', label: t('quran.tabJuz', 'Juz') },
+            { key: 'bookmarks', label: t('quran.tabBookmarks', 'Bookmarks') },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
       </View>
         {searchOpen ? null : (
           <Pressable
@@ -1109,11 +1103,12 @@ export function QuranScreen() {
         accessibilityRole="button"
         accessibilityLabel={`${item.number}. ${item.romanized} — ${t('quran.pageLabel', { page: startPage })}`}
         onPress={() => openSurah(item.number)}
-        style={[
+        style={({ pressed }) => [
           styles.row,
           listCap,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+          pressed && { backgroundColor: palette.controlBg },
         ]}>
+        <RowLine palette={palette} />
         <View style={[styles.numberBadge, { backgroundColor: palette.accentBg }]}>
           <Text style={[styles.numberText, { color: palette.accent }]}>
             {item.number}
@@ -1171,11 +1166,12 @@ export function QuranScreen() {
       onPress={() =>
         item.startSurah && openSurah(item.startSurah.number, undefined, item.page)
       }
-      style={[
+      style={({ pressed }) => [
         styles.row,
         listCap,
-        { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+        pressed && { backgroundColor: palette.controlBg },
       ]}>
+      <RowLine palette={palette} />
       <View style={[styles.numberBadge, { backgroundColor: palette.accentBg }]}>
         <Text style={[styles.numberText, { color: palette.accent }]}>
           {item.juz}
@@ -1594,7 +1590,14 @@ export function QuranScreen() {
  * indicator that lies by exactly one gap per row.
  */
 const LIST_PADDING = 16;
-const LIST_GAP = 8;
+/**
+ * Zero: the surah, juz and bookmark rows are ROWS now, separated by an inset
+ * hairline, not 114 cards separated by air (redesign-plan B.3.5). The
+ * header keeps its own gap below (`HEADER_GAP`), which `itemLayoutFor`
+ * accounts for since `onLayout` heights exclude margins.
+ */
+const LIST_GAP = 0;
+const HEADER_GAP = 12;
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
@@ -1606,7 +1609,7 @@ const styles = StyleSheet.create({
   // shoved the whole 720pt column against the RIGHT edge of a wide
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
-  headerWrap: { gap: 10, marginBottom: 8 },
+  headerWrap: { gap: 10, marginBottom: HEADER_GAP },
   resumeCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1760,18 +1763,6 @@ const styles = StyleSheet.create({
   /** The three tabs, then the two glyphs that open a field. */
   tabsRow: { flexDirection: 'row', alignItems: 'stretch', gap: 8 },
   tabsGrow: { flex: 1 },
-  tabs: {
-    flexDirection: 'row',
-    borderRadius: 12,
-    padding: 4,
-    gap: 4,
-  },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 9,
-  },
   resultsWrap: { gap: 8 },
   resultsLabel: { fontSize: 12, fontWeight: '600', marginTop: 2 },
   resultRow: { padding: 12, borderRadius: 12, gap: 4 },
@@ -1790,6 +1781,15 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     gap: 12,
+    position: 'relative',
+  },
+  // The inset hairline under a list row: starts where the text does.
+  rowLine: {
+    position: 'absolute',
+    bottom: 0,
+    start: 12 + 36 + 12,
+    end: 0,
+    height: StyleSheet.hairlineWidth,
   },
   numberBadge: {
     width: 36,

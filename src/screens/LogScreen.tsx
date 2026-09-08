@@ -22,6 +22,7 @@
  * day is open. Forward stops at today, because a log of the future is a
  * plan, and this screen is not for plans.
  */
+import { Chip, Group, Row, Stepper } from '../components/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -1116,14 +1117,10 @@ export function LogScreen() {
           spacing belongs on the stack. */}
       <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         {/* ── The graph ─────────────────────────────────────────────── */}
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-          ]}
-        >
-          {/* No "Practice" label: four numbers and a heatmap on the Log tab
-              need no heading to say what they are (redesign-plan P1). */}
+        {/* On the page, not in a card: four numbers and a graph need no box
+            to say what they are, and the box was the outer of three nested
+            containers (redesign-plan P3). */}
+        <View style={styles.graphBlock}>
           {/* The caption this replaces read "5-day streak (best 12) · 0-day
               sunnah · 1 fasts" — three statistics in prose under a chart,
               with the middle one a puzzle. See PracticeStatsRow. */}
@@ -1191,134 +1188,58 @@ export function LogScreen() {
               </View>
             </View>
           ) : null}
-          {/* Under the graph, because the graph is what makes the case for
-              it: a wall of empty squares behind someone who has been
-              praying for months is the app being wrong about them. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('log.backfillAction', 'Fill in earlier days')}
-            onPress={runBackfill}
-            // Disabled until the journal has been read: a press before that
-            // would plan against an empty array.
-            disabled={backfilling || !hydrated}
-            style={[
-              styles.backfillRow,
-              { borderTopColor: palette.border ?? palette.muted },
-            ]}
-          >
-            <Text
-              style={[styles.backfillLabel, { color: palette.accent }]}
-              numberOfLines={1}
-            >
-              {t('log.backfillAction', 'Fill in earlier days')}
-            </Text>
-            <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
-          </Pressable>
-          {/* The longer reach, and the stricter rule: only days holding
-              nothing at all. Second because it is the bigger claim. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t(
-              'log.fillMonthsAction',
-              'Fill the past three months',
-            )}
-            onPress={runMonthFill}
-            disabled={backfilling || !hydrated}
-            style={[
-              styles.backfillRow,
-              { borderTopColor: palette.border ?? palette.muted },
-            ]}
-          >
-            <Text
-              style={[styles.backfillLabel, { color: palette.accent }]}
-              numberOfLines={1}
-            >
-              {t('log.fillMonthsAction', 'Fill the past three months')}
-            </Text>
-            <Text style={{ color: palette.accent, fontSize: 15 }}>→</Text>
-          </Pressable>
-          {/* Last, and the only one in the danger colour. It undoes what the
-              two above write — issue #13, from someone who filled three
-              months by accident and had no way back. */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('log.resetAction', 'Reset the prayer log')}
-            onPress={() => setResetOpen(true)}
-            disabled={backfilling || !hydrated}
-            style={[
-              styles.backfillRow,
-              { borderTopColor: palette.border ?? palette.muted },
-            ]}
-          >
-            <Text
-              style={[styles.backfillLabel, { color: palette.danger }]}
-              numberOfLines={1}
-            >
-              {t('log.resetAction', 'Reset the prayer log')}
-            </Text>
-            <Text style={{ color: palette.danger, fontSize: 15 }}>→</Text>
-          </Pressable>
         </View>
+        {/* Under the graph, because the graph is what makes the case for
+            it: a wall of empty squares behind someone who has been praying
+            for months is the app being wrong about them. Three actions in
+            one group; the last is the only one in the danger colour — it
+            undoes what the two above write (issue #13). */}
+        <Group>
+          <Row
+            tone="accent"
+            title={t('log.backfillAction', 'Fill in earlier days')}
+            onPress={backfilling || !hydrated ? undefined : runBackfill}
+            quiet={backfilling || !hydrated}
+          />
+          <Row
+            tone="accent"
+            title={t('log.fillMonthsAction', 'Fill the past three months')}
+            onPress={backfilling || !hydrated ? undefined : runMonthFill}
+            quiet={backfilling || !hydrated}
+          />
+          <Row
+            tone="danger"
+            title={t('log.resetAction', 'Reset the prayer log')}
+            onPress={backfilling || !hydrated ? undefined : () => setResetOpen(true)}
+            quiet={backfilling || !hydrated}
+          />
+        </Group>
 
         {/* ── The day being logged ──────────────────────────────────── */}
-        <View style={styles.dayBar}>
+        {/* The same stepper the month table uses (redesign-plan §2.6); the
+            two screens step through time and drew it differently. */}
+        <Stepper
+          title={isToday ? t('journal.todayLabel') : selectedLabel}
+          subtitle={selectedHijriLine}
+          prevLabel={t('log.previousDay')}
+          nextLabel={t('log.nextDay')}
+          onPrev={() => stepDay(-1)}
+          // Tomorrow is not a thing you can have prayed.
+          onNext={canGoForward ? () => stepDay(1) : undefined}
+        />
+        {isToday ? null : (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('log.previousDay')}
-            onPress={() => stepDay(-1)}
-            hitSlop={10}
-            style={[styles.dayArrow, { backgroundColor: palette.controlBg }]}
+            accessibilityLabel={t('log.backToToday')}
+            onPress={() => setSelected(today)}
+            hitSlop={6}
+            style={styles.backToTodayRow}
           >
-            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>
-              ‹
+            <Text style={[styles.backToToday, { color: palette.accent }]}>
+              {t('log.backToToday')}
             </Text>
           </Pressable>
-          <View style={styles.dayNameWrap}>
-            <Text
-              style={[styles.dayName, { color: palette.text }]}
-              numberOfLines={1}
-            >
-              {isToday ? t('journal.todayLabel') : selectedLabel}
-            </Text>
-            <Text
-              style={[styles.dayHijri, { color: palette.muted }]}
-              numberOfLines={1}
-            >
-              {selectedHijriLine}
-            </Text>
-            {isToday ? null : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('log.backToToday')}
-                onPress={() => setSelected(today)}
-                hitSlop={6}
-              >
-                <Text style={[styles.backToToday, { color: palette.accent }]}>
-                  {t('log.backToToday')}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('log.nextDay')}
-            // Tomorrow is not a thing you can have prayed.
-            disabled={!canGoForward}
-            onPress={() => stepDay(1)}
-            hitSlop={10}
-            style={[
-              styles.dayArrow,
-              {
-                backgroundColor: palette.controlBg,
-                opacity: canGoForward ? 1 : 0.35,
-              },
-            ]}
-          >
-            <Text style={[styles.dayArrowGlyph, { color: palette.accent }]}>
-              ›
-            </Text>
-          </Pressable>
-        </View>
+        )}
         {/* ── The day, as one card you can throw sideways ───────────────
             One surface, not a stack of loose cards: the whole thing is a
             single day, it moves as a single thing, and it should look like
@@ -1459,48 +1380,36 @@ export function LogScreen() {
                       </Text>
                     </Pressable>
                   </View>
-                  <View style={styles.statusRow}>
-                    {STATUSES.map(s => {
-                      const isSel = current === s;
-                      return (
-                        <Pressable
+                  {/* A prayer whose time has not come cannot be recorded —
+                      in either direction — and used to show four dead chips
+                      saying so. One quiet line says it better, and the row
+                      stops shouting about the future (redesign-plan B.7.3).
+                      Anything already recorded keeps the chips, so a mis-tap
+                      stays undoable. */}
+                  {notYet && !current ? (
+                    <Text
+                      style={[styles.notYet, { color: palette.muted }]}
+                      numberOfLines={1}>
+                      {t('journal.notYet', 'Not yet — its time has not come')}
+                    </Text>
+                  ) : (
+                    <View style={styles.statusRow}>
+                      {STATUSES.map(s => (
+                        <Chip
                           key={s}
-                          accessibilityRole="radio"
+                          grow
+                          label={t(`journal.statusShort.${s}`)}
                           accessibilityLabel={t(`journal.status.${s}`)}
-                          accessibilityState={{
-                            selected: isSel,
-                            disabled: notYet,
-                          }}
-                          // A prayer whose time has not come cannot be
-                          // recorded — in either direction. The chips are the
-                          // rule; "Mark all on time" obeys the same one.
+                          selected={current === s}
+                          // The answer the app expects but has not been
+                          // given: the light tint, not the fill.
+                          suggested={!current && s === 'on-time'}
                           disabled={notYet}
                           onPress={() => onMark(prayer, s)}
-                          style={[
-                            styles.statusChip,
-                            {
-                              backgroundColor: isSel
-                                ? palette.accentSolid
-                                : palette.controlBg,
-                              opacity: notYet ? 0.4 : 1,
-                            },
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.statusLabel,
-                              {
-                                color: isSel ? palette.onAccent : palette.text,
-                              },
-                            ]}
-                            numberOfLines={2}
-                          >
-                            {t(`journal.statusShort.${s}`)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
+                        />
+                      ))}
+                    </View>
+                  )}
                   {/* Witr and Qiyam hang off Isha because that is when they
                       are prayed — not in a section of their own, where they
                       would read as unrelated to the night. */}
@@ -1831,6 +1740,8 @@ const styles = StyleSheet.create({
    *  read as a rendering artefact rather than a deliberate gap. */
   stack: { gap: 14 },
   card: { borderRadius: 18, padding: 14 },
+  graphBlock: { gap: 10, paddingHorizontal: 2 },
+  backToTodayRow: { alignSelf: 'center', marginTop: -6 },
   sectionTitle: {
     fontSize: 12,
     fontWeight: '600',
@@ -1870,23 +1781,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 2,
   },
-  dayBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 8,
-  },
-  dayArrow: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayArrowGlyph: { fontSize: 20, fontWeight: '700', lineHeight: 22 },
-  dayNameWrap: { flex: 1, alignItems: 'center' },
-  dayName: { fontSize: 16, fontWeight: '700' },
-  dayHijri: { fontSize: 12, marginTop: 1 },
   backToToday: { fontSize: 12, fontWeight: '700', marginTop: 1 },
   ghostBtn: {
     paddingHorizontal: 11,
@@ -1911,15 +1805,8 @@ const styles = StyleSheet.create({
   /** Pushes the sunnah chip and the note toggle to the end of the header. */
   headSpacer: { flex: 1 },
   noteToggle: { padding: 4 },
-  statusRow: { flexDirection: 'row', gap: 6, marginTop: 8, alignItems: 'stretch' },
-  statusChip: {
-    flex: 1,
-    paddingVertical: 7,
-    paddingHorizontal: 2,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  statusRow: { flexDirection: 'row', gap: 4, marginTop: 6, alignItems: 'stretch' },
+  notYet: { fontSize: 13, marginTop: 8 },
   /**
    * Two lines rather than an ellipsis.
    *
@@ -1930,7 +1817,6 @@ const styles = StyleSheet.create({
    * takes two lines lifts the other three with it rather than stepping out
    * of line.
    */
-  statusLabel: { fontSize: 11.5, fontWeight: '600', textAlign: 'center' },
   noteRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -1972,14 +1858,5 @@ const styles = StyleSheet.create({
    *  that says this panel is draggable — without it the gesture is
    *  undiscoverable, and a feature nobody finds is not a feature. */
   grabber: { width: 38, height: 4, borderRadius: 2, opacity: 0.7 },
-  backfillRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 11,
-    marginTop: 12,
-  },
-  backfillLabel: { fontSize: 13.5, fontWeight: '600' },
   hint: { fontSize: 13, textAlign: 'center', marginTop: 8 },
 });

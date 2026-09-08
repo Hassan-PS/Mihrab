@@ -1222,7 +1222,8 @@
     "loadFailedBody": "Vos données sont intactes sur l’appareil mais illisibles pour le moment. Rouvrez le journal.",
     "saveFailedTitle": "Impossible d’enregistrer",
     "saveFailedBody": "Veuillez réessayer.",
-    "noteLabel": "Note personnelle (privée, chiffrée)"
+    "noteLabel": "Note personnelle (privée, chiffrée)",
+    "notYet": "Pas encore — son heure n’est pas venue"
   },
   "events": {
     "islamicNewYear": "Nouvel an hijri",

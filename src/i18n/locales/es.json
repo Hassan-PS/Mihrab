@@ -1222,7 +1222,8 @@
     "loadFailedBody": "Tus datos están a salvo en el dispositivo pero no se pudieron leer ahora. Abre el registro de nuevo.",
     "saveFailedTitle": "No se pudo guardar",
     "saveFailedBody": "Inténtalo de nuevo.",
-    "noteLabel": "Nota personal (privada, cifrada)"
+    "noteLabel": "Nota personal (privada, cifrada)",
+    "notYet": "Aún no: todavía no es su hora"
   },
   "events": {
     "islamicNewYear": "Año Nuevo islámico",

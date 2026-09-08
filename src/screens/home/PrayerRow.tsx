@@ -2,7 +2,6 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { rowDividerStyle } from '../../theme/chrome';
 import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
@@ -160,7 +159,6 @@ function PrayerRowImpl({
       {...interactive}
       style={[
         styles.row,
-        !isLast && rowDividerStyle(palette),
         isNext && { backgroundColor: palette.accentBg },
       ]}>
       {isNext && (
@@ -168,6 +166,15 @@ function PrayerRowImpl({
           style={[styles.activeBar, { backgroundColor: palette.accent }]}
         />
       )}
+      {/* An inset hairline, not a full-bleed one: the divider starts where
+          the text does (redesign-plan P2). Drawn as a child so the current
+          prayer's tinted fill still runs edge to edge above it. */}
+      {!isLast && !palette.flatChrome ? (
+        <View
+          pointerEvents="none"
+          style={[styles.divider, { backgroundColor: palette.border }]}
+        />
+      ) : null}
       <View style={styles.nameWrap}>
         <Text
           style={[
@@ -229,6 +236,10 @@ function PrayerRowImpl({
             onPress={onCycleAlertMode}
             prayerLabel={t(`prayer.${prayerKey}`)}
             secondary={isSecondary}
+            // The accent only where this prayer differs from the standing
+            // setting: a list on the default reads quiet, and the one Fajr
+            // set differently is what stands out (redesign-plan §3.1).
+            emphasised={!!overrideMode}
           />
         ) : null}
         {/* Only for a row the user aimed at. The next prayer is already
@@ -294,6 +305,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingStart: 20,
     position: 'relative',
+  },
+  divider: {
+    position: 'absolute',
+    bottom: 0,
+    start: 20,
+    end: 0,
+    height: StyleSheet.hairlineWidth,
   },
   nameWrap: {
     flexShrink: 1,

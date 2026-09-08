@@ -49,7 +49,8 @@ import {
   type ColorValue,
 } from 'react-native';
 import { useAppPalette } from '../../hooks/useAppPalette';
-import { cardEdgeStyle, rowDividerStyle } from '../../theme/chrome';
+import { cardEdgeStyle } from '../../theme/chrome';
+import { RowDivider } from '../../components/ui';
 
 /**
  * A titled family of settings, in one card.
@@ -86,9 +87,10 @@ export function SettingsGroup({
           { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
         ]}>
         {visible.map((row, i) => (
-          <View
-            key={i}
-            style={i < visible.length - 1 ? rowDividerStyle(palette) : null}>
+          <View key={i}>
+            {/* Inset, not full-bleed: the hairline starts where the text
+                does (redesign-plan P2). */}
+            {i > 0 ? <RowDivider /> : null}
             {row as ReactNode}
           </View>
         ))}

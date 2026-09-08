@@ -29,7 +29,6 @@ import {
 import { TasbihRing } from '../tasbih/TasbihRing';
 import { recordDhikrSet } from '../practice/practiceStore';
 import { hapticCelebrate, hapticTick } from '../polish/haptics';
-import { cardEdgeStyle } from '../theme/chrome';
 import {
   TABULAR_MAX_FONT_SCALE,
   tabularNumeralStyle,
@@ -216,11 +215,10 @@ export function TasbihScreen() {
         accessibilityRole="button"
         accessibilityLabel={`${t('tasbih.upNext')} — ${nextPreset.arabic}`}
         onPress={onNext}
-        style={[
-          styles.peek,
-          capStyle,
-          { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-        ]}>
+        // A line, not a card: the screen wants one focal object, and the
+        // preview of what comes next was a fourth container under it
+        // (redesign-plan B.5.5).
+        style={[styles.peek, capStyle]}>
         <Text style={[styles.peekLabel, { color: palette.muted }]}>
           {t('tasbih.upNext')}
         </Text>
@@ -249,11 +247,11 @@ export function TasbihScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('tasbih.prev', 'Previous')}
           onPress={onPrev}
-          style={[
+          style={({ pressed }) => [
             styles.navBtn,
-            { backgroundColor: palette.controlBg },
+            pressed && { backgroundColor: palette.controlBg },
           ]}>
-          <Text style={[styles.navLabel, { color: palette.text }]}>
+          <Text style={[styles.navLabel, { color: palette.muted }]}>
             ← {t('tasbih.prev', 'Previous')}
           </Text>
         </Pressable>
@@ -273,8 +271,13 @@ export function TasbihScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('tasbih.skip')}
           onPress={onNext}
-          style={[styles.navBtn, { backgroundColor: palette.accentSolid }]}>
-          <Text style={[styles.navLabel, { color: palette.onAccent }]}>
+          // Tertiary, like its siblings: the primary action on this screen
+          // is the tap, not a button (redesign-plan B.5.4).
+          style={({ pressed }) => [
+            styles.navBtn,
+            pressed && { backgroundColor: palette.controlBg },
+          ]}>
+          <Text style={[styles.navLabel, { color: palette.accentSolid }]}>
             {t('tasbih.skip')} →
           </Text>
         </Pressable>

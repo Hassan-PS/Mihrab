@@ -96,6 +96,9 @@ type Props = {
   prayerLabel: string;
   /** Muted styling for Sunrise and the night marks. */
   secondary?: boolean;
+  /** This prayer differs from the standing setting — the one case that
+   *  earns the accent. */
+  emphasised?: boolean;
 };
 
 function AlertModeButtonImpl({
@@ -104,6 +107,7 @@ function AlertModeButtonImpl({
   onPress,
   prayerLabel,
   secondary = false,
+  emphasised = false,
 }: Props) {
   const { t } = useTranslation();
 
@@ -114,14 +118,14 @@ function AlertModeButtonImpl({
         ? t('settings.alertModeNotification', 'Alert')
         : t('settings.alertModeSilent', 'Silent');
 
-  // Silence reads as absence: the struck bell and its word sit back, so a
-  // glance down the card shows which prayers will speak.
+  // Quiet by default. The accent marks only a prayer set DIFFERENTLY from
+  // the standing setting — seven rows all saying "Adhan" in green was a
+  // setting drawn as a button seven times (redesign-plan B.1.5). Silence
+  // still reads as absence: the struck bell sits back whatever else is true.
   const tint =
-    mode === 'silent'
+    mode === 'silent' || secondary || !emphasised
       ? palette.muted
-      : secondary
-        ? palette.muted
-        : palette.accentSolid;
+      : palette.accentSolid;
 
   return (
     <Pressable
@@ -159,5 +163,5 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.55 },
   glyph: { height: SIZE, justifyContent: 'center' },
-  label: { fontSize: 9, fontWeight: '600', marginTop: 1 },
+  label: { fontSize: 10, fontWeight: '500', marginTop: 1 },
 });

@@ -1222,7 +1222,8 @@
     "loadFailedBody": "你的数据在设备上是安全的，但此刻无法读取。请重新打开记录。",
     "saveFailedTitle": "无法保存",
     "saveFailedBody": "请重试。",
-    "noteLabel": "私人笔记（私密、已加密）"
+    "noteLabel": "私人笔记（私密、已加密）",
+    "notYet": "还未到——时间尚未到来"
   },
   "events": {
     "islamicNewYear": "伊斯兰新年",

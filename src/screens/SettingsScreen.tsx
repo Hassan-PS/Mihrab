@@ -34,7 +34,7 @@ import type { RootStackParamList } from '../navigation/types';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useLayoutRtl } from '../i18n/useLayoutRtl';
-import { cardEdgeStyle, rowDividerStyle } from '../theme/chrome';
+import { cardEdgeStyle } from '../theme/chrome';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { ChevronIcon } from './settings/SettingsSectionIcons';
@@ -88,9 +88,15 @@ export function SettingsScreen() {
               onPress={go(page.route)}
               style={({ pressed }) => [
                 styles.row,
-                i < SETTINGS_SUBPAGES.length - 1 && rowDividerStyle(palette),
                 pressed && { backgroundColor: palette.accentBg },
               ]}>
+              {/* Inset to the text, past the icon tile (redesign-plan P2). */}
+              {i > 0 && !palette.flatChrome ? (
+                <View
+                  pointerEvents="none"
+                  style={[styles.rowLine, { backgroundColor: palette.border }]}
+                />
+              ) : null}
               <View
                 style={[
                   styles.iconWell,
@@ -129,6 +135,16 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingVertical: 14,
     paddingHorizontal: 14,
+    position: 'relative',
+  },
+  // Under the row above, starting where the text does: past the padding
+  // and the icon well.
+  rowLine: {
+    position: 'absolute',
+    top: 0,
+    start: 14 + 38 + 14,
+    end: 0,
+    height: StyleSheet.hairlineWidth,
   },
   iconWell: {
     width: 38,

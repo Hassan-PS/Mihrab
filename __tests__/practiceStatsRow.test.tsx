@@ -16,6 +16,7 @@
 // string with its {{placeholders}} intact — which would let a label pass
 // while naming no number at all.
 jest.mock('react-i18next', () => ({
+  initReactI18next: { type: '3rdParty', init: () => {} },
   useTranslation: () => ({
     t: (_key: string, second?: unknown, third?: unknown) => {
       const isOpts = (v: unknown) => v != null && typeof v === 'object';
@@ -31,6 +32,23 @@ jest.mock('react-i18next', () => ({
       );
     },
     i18n: { language: 'en' },
+  }),
+}));
+
+// The tiles read the palette themselves now (they sit on the page, in the
+// text colour); the row still takes one for the owed control.
+jest.mock('../src/hooks/useAppPalette', () => ({
+  useAppPalette: () => ({
+    palette: {
+      isDark: false,
+      text: '#1A1814',
+      muted: '#6B6660',
+      controlBg: '#F4F0E9',
+      accent: '#1F5F4A',
+      accentBg: '#E8F0EC',
+      danger: '#B3261E',
+    },
+    isDark: false,
   }),
 }));
 

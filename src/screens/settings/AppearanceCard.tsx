@@ -30,7 +30,7 @@ import {
   APP_ACCENT_SWATCHES,
   widgetPatchForAccent,
 } from '../../settings/widgetAccent';
-import { segmentChromeStyle } from '../../theme/chrome';
+import { SegmentedControl } from '../../components/ui';
 import {
   SettingsBlock,
   SettingsGroup,
@@ -152,44 +152,16 @@ function AppearanceCardImpl() {
           <Text style={[s.label, { color: palette.muted }]}>
             {t('settings.theme')}
           </Text>
-          <View
-            style={s.segmentRow}
-            accessibilityRole="radiogroup"
+          <SegmentedControl
             accessibilityLabel={t('settings.theme')}
-          >
-            {(
-              [
-                { id: 'system' as const, label: t('settings.themeSystem') },
-                { id: 'light' as const, label: t('settings.themeLight') },
-                { id: 'dark' as const, label: t('settings.themeDark') },
-              ] as const
-            ).map(opt => (
-              <Pressable
-                key={opt.id}
-                accessibilityRole="radio"
-                accessibilityLabel={opt.label}
-                accessibilityState={{
-                  selected: settings.appearance === opt.id,
-                }}
-                style={[
-                  s.segment,
-                  styles.appearanceSegment,
-                  segmentChromeStyle(palette, settings.appearance === opt.id),
-                ]}
-                onPress={() => updateSettings({ appearance: opt.id })}
-              >
-                <Text
-                  style={[
-                    styles.appearanceSegmentLabel,
-                    { color: palette.text },
-                    settings.appearance === opt.id && { color: palette.accent },
-                  ]}
-                >
-                  {opt.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+            segments={[
+              { key: 'system', label: t('settings.themeSystem') },
+              { key: 'light', label: t('settings.themeLight') },
+              { key: 'dark', label: t('settings.themeDark') },
+            ]}
+            value={settings.appearance}
+            onChange={appearance => updateSettings({ appearance })}
+          />
         </SettingsBlock>
         {Platform.OS === 'android' || Platform.OS === 'ios' ? (
           <SettingsToggleRow
@@ -242,54 +214,18 @@ function AppearanceCardImpl() {
           <Text style={[s.label, { color: palette.muted }]}>
             {t('settings.clockFormat', 'Time format')}
           </Text>
-          <View
-            style={s.segmentRow}
-            accessibilityRole="radiogroup"
+          <SegmentedControl
             accessibilityLabel={t('settings.clockFormat', 'Time format')}
-          >
-            {(
+            segments={
               [
-                {
-                  id: 'auto' as const,
-                  label: t('settings.clockFormatAuto', 'Automatic'),
-                },
-                {
-                  id: '12' as const,
-                  label: t('settings.clockFormat12', '12-hour'),
-                },
-                {
-                  id: '24' as const,
-                  label: t('settings.clockFormat24', '24-hour'),
-                },
-              ] as ReadonlyArray<{ id: ClockFormat; label: string }>
-            ).map(opt => {
-              const selected = settings.clockFormat === opt.id;
-              return (
-                <Pressable
-                  key={opt.id}
-                  accessibilityRole="radio"
-                  accessibilityLabel={opt.label}
-                  accessibilityState={{ selected }}
-                  style={[
-                    s.segment,
-                    styles.appearanceSegment,
-                    segmentChromeStyle(palette, selected),
-                  ]}
-                  onPress={() => updateSettings({ clockFormat: opt.id })}
-                >
-                  <Text
-                    style={[
-                      styles.appearanceSegmentLabel,
-                      { color: palette.text },
-                      selected && { color: palette.accent },
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+                { key: 'auto', label: t('settings.clockFormatAuto', 'Automatic') },
+                { key: '12', label: t('settings.clockFormat12', '12-hour') },
+                { key: '24', label: t('settings.clockFormat24', '24-hour') },
+              ] as ReadonlyArray<{ key: ClockFormat; label: string }>
+            }
+            value={settings.clockFormat}
+            onChange={clockFormat => updateSettings({ clockFormat })}
+          />
           <Text style={[s.help, { color: palette.muted, marginTop: 10 }]}>
             {t('settings.clockFormatExample', {
               defaultValue: 'For example: {{time}}',
@@ -423,17 +359,6 @@ function AppearanceCardImpl() {
 export const AppearanceCard = memo(AppearanceCardImpl);
 
 const styles = StyleSheet.create({
-  appearanceSegment: {
-    flex: 1,
-    minWidth: 0,
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-  },
-  appearanceSegmentLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
   swatchRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',

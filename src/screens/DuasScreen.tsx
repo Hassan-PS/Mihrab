@@ -31,7 +31,8 @@ import {
   type Dua,
   type DuaCategory,
 } from '../duas/duas';
-import { cardEdgeStyle, rowDividerStyle } from '../theme/chrome';
+import { cardEdgeStyle } from '../theme/chrome';
+import { Group, Row } from '../components/ui';
 import { ShareIcon } from '../theme/icons';
 import { duaShareText } from '../share/shareText';
 import { arabicTextStyle } from '../theme/typography';
@@ -281,59 +282,32 @@ export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
                   maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
                   {t(`duas.section.${section.id}`)}
                 </Text>
-                <View
-                  style={[
-                    styles.sectionCard,
-                    { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-                  ]}>
-                  {section.categories.map((c, i) => {
+                <Group>
+                  {section.categories.map(c => {
                     const count = duasByCategory(c).length;
                     return (
-                      <Pressable
+                      <Row
                         key={c}
-                        accessibilityRole="button"
+                        title={t(`duas.cat.${c}`)}
                         accessibilityLabel={t(`duas.cat.${c}`)}
-                        accessibilityHint={t('duas.countHint', {
-                          defaultValue: '{{count}} duas',
-                          count,
-                        })}
                         onPress={() => setSelected(c)}
-                        style={({ pressed }) => [
-                          styles.categoryRow,
-                          i < section.categories.length - 1
-                            ? rowDividerStyle(palette)
-                            : null,
-                          pressed ? { backgroundColor: palette.bg } : null,
-                        ]}>
-                        <Text
-                          numberOfLines={2}
-                          style={[styles.categoryName, { color: palette.text }]}>
-                          {t(`duas.cat.${c}`)}
-                        </Text>
-                        {/* How many, because a row that only names a
-                            category says nothing about whether it is
-                            worth opening. */}
-                        <Text
-                          style={[
-                            styles.categoryCount,
-                            tabularNumeralStyle,
-                            { color: palette.muted },
-                          ]}>
-                          {count}
-                        </Text>
-                        {/* The affordance the flat rows never had: this
-                            one opens something. */}
-                        <Text
-                          style={[
-                            styles.categoryChevron,
-                            { color: palette.accentSolid },
-                          ]}>
-                          {'\u203A'}
-                        </Text>
-                      </Pressable>
+                        // How many, because a row that only names a
+                        // category says nothing about whether it is
+                        // worth opening.
+                        value={String(count)}
+                        trailing={
+                          <Text
+                            style={[
+                              styles.categoryChevron,
+                              { color: palette.accentSolid },
+                            ]}>
+                            {'\u203A'}
+                          </Text>
+                        }
+                      />
                     );
                   })}
-                </View>
+                </Group>
               </View>
             ))
           : duasByCategory(selected).map(dua => (
@@ -520,24 +494,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     paddingHorizontal: 4,
   },
-  sectionCard: {
-    borderRadius: 14,
-    // The card is the group; the rows inside it are separated by
-    // hairlines rather than by gaps, so a group reads as one object.
-    overflow: 'hidden',
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    // Comfortably past the 44pt floor: this is the whole screen's
-    // navigation now, not a chip in a strip.
-    paddingVertical: 16,
-    minHeight: 56,
-  },
-  categoryName: { flex: 1, fontSize: 16, fontWeight: '600' },
-  categoryCount: { fontSize: 14, fontWeight: '600' },
   categoryChevron: {
     fontSize: 20,
     lineHeight: 22,

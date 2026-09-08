@@ -1222,7 +1222,8 @@
     "loadFailedBody": "Your data is safe on disk but could not be read right now. Please try opening the journal again.",
     "saveFailedTitle": "Could not save",
     "saveFailedBody": "Please try again.",
-    "noteLabel": "Personal note (private, encrypted)"
+    "noteLabel": "Personal note (private, encrypted)",
+    "notYet": "Not yet — its time has not come"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",

@@ -11,6 +11,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { cardEdgeStyle } from '../theme/chrome';
+import { Group, Row, Tile } from '../components/ui';
 import { CrescentIcon } from '../theme/icons';
 import { gregorianToHijri } from '../hijri/convert';
 import { isRamadan } from '../hijri/events';
@@ -301,33 +302,24 @@ export function FastingScreen() {
               : t('fasting.markCta')}
           </Text>
         </Pressable>
+        {/* Encouragement copy — task #95, adapting to the user's progress.
+            Inside the hero, as its last line, rather than floating loose
+            between the hero and the numbers with no container and no role
+            (redesign-plan B.9.2). */}
+        <Text style={[typeStyle('footnote'), styles.encouragement, { color: palette.muted }]}>
+          {stats.currentStreak >= 3
+            ? t('fasting.encourageStreak', 'Mashallah, {{count}}-day streak. Keep it up.', { count: stats.currentStreak })
+            : (stats.ramadanDaysKept + stats.voluntaryDaysKept) >= 1
+            ? t('fasting.encourageActive', 'Every fast counts. May Allah accept it.')
+            : t('fasting.encourageEmpty', 'Log your first fast to start tracking.')}
+        </Text>
       </View>
 
-      {/* Encouragement copy above the stats — task #95. Mirrors the
-          Journal pattern and adapts to the user's progress. */}
-      <Text style={[styles.encouragement, { color: palette.text }]}>
-        {stats.currentStreak >= 3
-          ? t('fasting.encourageStreak', 'Mashallah, {{count}}-day streak. Keep it up.', { count: stats.currentStreak })
-          : (stats.ramadanDaysKept + stats.voluntaryDaysKept) >= 1
-          ? t('fasting.encourageActive', 'Every fast counts. May Allah accept it.')
-          : t('fasting.encourageEmpty', 'Log your first fast to start tracking.')}
-      </Text>
+      {/* Numbers on the page, not three cards (redesign-plan P3). */}
       <View style={styles.statsRow}>
-        <StatCell
-          label={t('fasting.statRamadan')}
-          value={stats.ramadanDaysKept}
-          palette={palette}
-        />
-        <StatCell
-          label={t('fasting.statVoluntary')}
-          value={stats.voluntaryDaysKept}
-          palette={palette}
-        />
-        <StatCell
-          label={t('fasting.statStreak')}
-          value={stats.currentStreak}
-          palette={palette}
-        />
+        <Tile label={t('fasting.statRamadan')} value={String(stats.ramadanDaysKept)} />
+        <Tile label={t('fasting.statVoluntary')} value={String(stats.voluntaryDaysKept)} />
+        <Tile label={t('fasting.statStreak')} value={String(stats.currentStreak)} />
       </View>
 
       {inRamadan ? (
@@ -429,40 +421,41 @@ export function FastingScreen() {
       <Text style={[typeStyle('label'), styles.sectionTitle, { color: palette.muted }]}>
         {t('fasting.upcomingLabel', 'Upcoming fasting Sunnahs')}
       </Text>
-      <View style={styles.upcomingList}>
-        {upcomingEvents.slice(0, 6).map(({ event, daysAway, gregorianDate }) => (
-          <View
+      {/* One group of rows, not five cards (redesign-plan P3). Only the
+          nearest date takes the accent: five equally bold green countdowns
+          were five things asking for attention at once (B.9.3). */}
+      <Group>
+        {upcomingEvents.slice(0, 6).map(({ event, daysAway, gregorianDate }, i) => (
+          <Row
             key={`${event.id}-${gregorianDate.toISOString().slice(0, 10)}`}
-            style={[
-              styles.upcomingRow,
-              { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-            ]}>
-            <View style={styles.upcomingTextCol}>
-              <Text style={[styles.upcomingName, { color: palette.text }]}>
-                {t(`events.${event.id}`, event.englishLabel)}
+            title={t(`events.${event.id}`, event.englishLabel)}
+            subtitle={
+              gregorianDate.toLocaleDateString(i18n.language, {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              }) +
+              (event.spanDays && event.spanDays > 1
+                ? ` · ${t('fasting.daysSpan', { count: event.spanDays, defaultValue: '{{count}} days' })}`
+                : '')
+            }
+            trailing={
+              <Text
+                style={[
+                  styles.upcomingDays,
+                  tabularNumeralStyle,
+                  { color: i === 0 ? palette.accent : palette.muted },
+                ]}
+                maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+                {daysAway === 0
+                  ? t('common.today', 'Today')
+                  : t('fasting.daysAway', { count: daysAway, defaultValue: 'in {{count}}d' })}
               </Text>
-              <Text style={[styles.upcomingDate, { color: palette.muted }]}>
-                {gregorianDate.toLocaleDateString(i18n.language, {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-                {event.spanDays && event.spanDays > 1
-                  ? ` · ${t('fasting.daysSpan', { count: event.spanDays, defaultValue: '{{count}} days' })}`
-                  : ''}
-              </Text>
-            </View>
-            <Text
-              style={[styles.upcomingDays, tabularNumeralStyle, { color: palette.accent }]}
-              maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-              {daysAway === 0
-                ? t('common.today', 'Today')
-                : t('fasting.daysAway', { count: daysAway, defaultValue: 'in {{count}}d' })}
-            </Text>
-          </View>
+            }
+          />
         ))}
-      </View>
+      </Group>
 
       {/* Month-view-style log: every fasting day the user has recorded,
           newest first. Mirrors the Journal's history list (#82). */}
@@ -474,35 +467,32 @@ export function FastingScreen() {
           {t('fasting.noLogsYet', 'Days you keep will appear here.')}
         </Text>
       ) : (
-        <View style={styles.upcomingList}>
+        <Group>
           {allLoggedDates.map(date => {
             const entry = entries.find(e => e.date === date);
             if (!entry) return null;
             return (
-              <View
+              <Row
                 key={date}
-                style={[
-                  styles.upcomingRow,
-                  { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
-                ]}>
-                <View style={styles.upcomingTextCol}>
-                  <Text style={[styles.upcomingName, { color: palette.text }]}>
-                    {date}
+                title={date}
+                subtitle={
+                  entry.type === 'ramadan'
+                    ? t('fasting.typeRamadan', 'Ramadan')
+                    : t('fasting.typeVoluntary', 'Voluntary / Sunnah')
+                }
+                trailing={
+                  <Text
+                    style={[
+                      styles.upcomingDays,
+                      { color: entry.completed ? palette.accent : palette.muted },
+                    ]}>
+                    {entry.completed ? '✓' : '–'}
                   </Text>
-                  <Text style={[styles.upcomingDate, { color: palette.muted }]}>
-                    {entry.type === 'ramadan'
-                      ? t('fasting.typeRamadan', 'Ramadan')
-                      : t('fasting.typeVoluntary', 'Voluntary / Sunnah')}
-                  </Text>
-                </View>
-                <Text
-                  style={[styles.upcomingDays, { color: entry.completed ? palette.accent : palette.muted }]}>
-                  {entry.completed ? '✓' : '–'}
-                </Text>
-              </View>
+                }
+              />
             );
           })}
-        </View>
+        </Group>
       )}
 
       <Text style={[typeStyle('footnote'), { color: palette.muted, textAlign: 'center' }]}>
@@ -510,37 +500,6 @@ export function FastingScreen() {
       </Text>
       </CenteredColumn>
     </ScrollView>
-  );
-}
-
-function StatCell({
-  label,
-  value,
-  palette,
-}: {
-  label: string;
-  value: number;
-  palette: ReturnType<typeof useAppPalette>['palette'];
-}) {
-  return (
-    <View
-      style={[
-        styles.statCell,
-        {
-          backgroundColor: palette.card,
-          borderRadius: RADIUS.md,
-          ...cardEdgeStyle(palette),
-        },
-      ]}>
-      <Text
-        style={[typeStyle('title2'), tabularNumeralStyle, { color: palette.accent }]}
-        maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-        {value}
-      </Text>
-      <Text style={[typeStyle('caption'), { color: palette.muted, textAlign: 'center' }]}>
-        {label}
-      </Text>
-    </View>
   );
 }
 
@@ -582,13 +541,8 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-  statCell: {
-    flex: 1,
-    padding: SPACING.md,
-    alignItems: 'center',
-    gap: 4,
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.xs,
   },
   gridCard: {
     padding: SPACING.md,
@@ -606,12 +560,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
   },
-  encouragement: {
-    fontSize: 15,
-    fontWeight: '600',
-    lineHeight: 22,
-    marginBottom: 4,
-  },
+  encouragement: { marginTop: 2 },
   reminderCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -631,19 +580,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: SPACING.sm,
   },
-  upcomingList: {
-    gap: SPACING.sm,
-  },
-  upcomingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    padding: SPACING.md,
-    borderRadius: 12,
-  },
-  upcomingTextCol: { flex: 1, gap: 2 },
-  upcomingName: { fontSize: 15, fontWeight: '600' },
-  upcomingDate: { fontSize: 12 },
   upcomingDays: { fontSize: 14, fontWeight: '700' },
   emptyHint: { fontSize: 13, textAlign: 'center', marginTop: 4, marginBottom: 8 },
 });

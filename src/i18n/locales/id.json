@@ -1222,7 +1222,8 @@
     "loadFailedBody": "Data Anda aman di perangkat tetapi tidak dapat dibaca sekarang. Coba buka catatan lagi.",
     "saveFailedTitle": "Tidak dapat menyimpan",
     "saveFailedBody": "Silakan coba lagi.",
-    "noteLabel": "Catatan pribadi (privat, terenkripsi)"
+    "noteLabel": "Catatan pribadi (privat, terenkripsi)",
+    "notYet": "Belum — waktunya belum tiba"
   },
   "events": {
     "islamicNewYear": "Tahun Baru Hijriyah",

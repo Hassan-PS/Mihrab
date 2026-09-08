@@ -44,6 +44,24 @@ export const RADIUS = {
 } as const;
 export type RadiusToken = keyof typeof RADIUS;
 
+/**
+ * Layout constants — so screens stop choosing (docs/design/redesign-plan.md
+ * §2.2). One gutter, one card padding, one row padding, one gap between
+ * cards. A screen that needs a different one is a design question.
+ */
+export const LAYOUT = {
+  /** Screen edge to content, and a row's horizontal padding. */
+  gutter: SPACING.lg,
+  /** Inside a card. */
+  cardPad: SPACING.lg,
+  /** A row's vertical padding. */
+  rowPad: SPACING.md,
+  /** Between cards, groups and tiles on a page. */
+  cardGap: SPACING.md,
+  /** The corner of a card, a group, a sheet, the hero. */
+  cardRadius: RADIUS.xl,
+} as const;
+
 // ─── Color tokens (raw values — NOT consumed directly) ───────────────────
 // Components should reference SEMANTIC tokens via the theme palette
 // (`useAppPalette`); this raw layer is the implementation detail behind

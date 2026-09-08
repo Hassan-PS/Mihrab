@@ -1222,7 +1222,8 @@
     "loadFailedBody": "Deine Daten sind auf dem Gerät sicher, konnten aber gerade nicht gelesen werden. Öffne das Protokoll erneut.",
     "saveFailedTitle": "Konnte nicht gespeichert werden",
     "saveFailedBody": "Bitte erneut versuchen.",
-    "noteLabel": "Persönliche Notiz (privat, verschlüsselt)"
+    "noteLabel": "Persönliche Notiz (privat, verschlüsselt)",
+    "notYet": "Noch nicht – die Zeit ist noch nicht gekommen"
   },
   "events": {
     "islamicNewYear": "Islamisches Neujahr",

@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Stepper } from '../../components/ui';
 import type { AppPalette } from '../../theme/appPalette';
 import { getMethodLabel } from '../../settings/methods';
 import {
@@ -79,27 +80,33 @@ function MonthControlsImpl({
         styles.controls,
         { backgroundColor: palette.bg, borderBottomColor: palette.border },
       ]}>
-      <View style={styles.monthNav}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
-          onPress={onPrev}
-          hitSlop={16}
-          style={styles.navHit}>
-          <Text style={[styles.navArrow, { color: palette.accent }]}>‹</Text>
-        </Pressable>
-        <Text style={[styles.monthTitle, { color: palette.text }]}>
-          {monthTitle}
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.continue')}
-          onPress={onNext}
-          hitSlop={16}
-          style={styles.navHit}>
-          <Text style={[styles.navArrow, { color: palette.accent }]}>›</Text>
-        </Pressable>
-      </View>
+      {/* The same stepper the Log's day view uses (redesign-plan §2.6). The
+          provenance line — provider, method, months stored — is its
+          subtitle rather than a caption floating under two pills. */}
+      <Stepper
+        title={monthTitle}
+        subtitle={
+          getProviderLabel(effectiveProvider) +
+          (!providerHidesCalculationMethod(effectiveProvider)
+            ? ` · ${getMethodLabel(calculationMethod)}`
+            : '') +
+          // Not `!== 'islamiska_forbundet'`: Morocco publishes a single
+          // schedule too, so a stored Hanafi setting must not caption a
+          // table that does not vary by madhab.
+          (!providerHidesHanafiAsr(effectiveProvider) && school === 1
+            ? ` · ${t('home.hanafiSuffix')}`
+            : '') +
+          // `month.monthsStored` has been translated into all thirteen
+          // languages since the screen was written.
+          (cacheStatus && !refreshingCache
+            ? ` · ${t('month.monthsStored', { count: cacheStatus.monthsStored })}`
+            : '')
+        }
+        prevLabel={t('common.back')}
+        nextLabel={t('common.continue')}
+        onPrev={onPrev}
+        onNext={onNext}
+      />
 
       <View style={styles.actionsRow}>
         {!isCurrentMonth && (
@@ -107,10 +114,7 @@ function MonthControlsImpl({
             accessibilityRole="button"
             accessibilityLabel={t('month.thisMonth')}
             onPress={onThisMonth}
-            style={[
-              styles.pill,
-              { backgroundColor: palette.card, borderColor: palette.border },
-            ]}>
+            style={styles.action}>
             <Text style={[styles.pillLabel, { color: palette.accent }]}>
               {t('month.thisMonth')}
             </Text>
@@ -122,14 +126,7 @@ function MonthControlsImpl({
           accessibilityState={{ busy: refreshingCache, disabled: refreshingCache }}
           onPress={onRefreshCache}
           disabled={refreshingCache}
-          style={[
-            styles.pill,
-            {
-              backgroundColor: palette.card,
-              borderColor: palette.border,
-              opacity: refreshingCache ? 0.5 : 1,
-            },
-          ]}>
+          style={[styles.action, { opacity: refreshingCache ? 0.5 : 1 }]}>
           <Text style={[styles.pillLabel, { color: palette.muted }]}>
             {refreshingCache
               ? refreshProgress
@@ -143,41 +140,12 @@ function MonthControlsImpl({
           accessibilityLabel={t('month.shareView', 'Share')}
           accessibilityState={{ selected: isShareView }}
           onPress={onToggleShareView}
-          style={[
-            styles.pill,
-            {
-              backgroundColor: isShareView ? palette.accentBg : palette.card,
-              borderColor: isShareView ? palette.accent : palette.border,
-            },
-          ]}>
-          <Text
-            style={[
-              styles.pillLabel,
-              { color: isShareView ? palette.accent : palette.muted },
-            ]}>
+          style={[styles.action, isShareView && { backgroundColor: palette.accentBg }]}>
+          <Text style={[styles.pillLabel, { color: palette.accent }]}>
             {t('month.shareView', 'Share')}
           </Text>
         </Pressable>
       </View>
-
-      <Text style={[styles.meta, { color: palette.muted }]}>
-        {getProviderLabel(effectiveProvider)}
-        {!providerHidesCalculationMethod(effectiveProvider)
-          ? ` · ${getMethodLabel(calculationMethod)}`
-          : ''}
-        {/* Not `!== 'islamiska_forbundet'`: Morocco publishes a single
-            schedule too, so a stored Hanafi setting must not caption a
-            table that does not vary by madhab. */}
-        {!providerHidesHanafiAsr(effectiveProvider) && school === 1
-          ? ` · ${t('home.hanafiSuffix')}`
-          : ''}
-        {/* `month.monthsStored` has been translated into all thirteen
-            languages since the screen was written; the line was printing a
-            hardcoded English "12mo cached" over the top of it. */}
-        {cacheStatus && !refreshingCache
-          ? ` · ${t('month.monthsStored', { count: cacheStatus.monthsStored })}`
-          : ''}
-      </Text>
 
       {/* activity-indicator-allowed: small inline progress beside the
           "Refresh stored data" caption. The full-screen hydration loader
@@ -201,31 +169,22 @@ const styles = StyleSheet.create({
     paddingBottom: 10, // tokens-ok-line: 10px sits between sm (8) and md (12) — lifted from iOS HIG header padding
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  monthNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  navHit: {
-    minWidth: 44, // 44pt touch-target baseline (Apple HIG)
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navArrow: { ...typeStyle('display'), fontSize: 30, fontWeight: '300', lineHeight: 36 }, // tokens-ok-line: bespoke nav-arrow size between title1 and display
-  monthTitle: typeStyle('title2'),
   actionsRow: {
     flexDirection: 'row',
+    justifyContent: 'center',
     gap: SPACING.sm,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xs,
     flexWrap: 'wrap',
   },
-  pill: {
+  // Quiet text actions, not bordered pills under the title
+  // (redesign-plan B.2.1): "Share" is the one that earns the accent.
+  action: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2, // tokens-ok-line: 6px is half the row height — between xs (4) and sm (8)
-    borderRadius: RADIUS.md + 2, // tokens-ok-line: 14px softer pill curve
-    borderWidth: StyleSheet.hairlineWidth,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
+    minHeight: 36,
+    justifyContent: 'center',
   },
-  pillLabel: { ...typeStyle('caption'), fontWeight: '600' },
-  meta: { ...typeStyle('caption'), marginTop: SPACING.sm, textAlign: 'center' },
+  pillLabel: { ...typeStyle('footnote'), fontWeight: '600' },
   err: { ...typeStyle('footnote'), marginTop: SPACING.xs + 2, textAlign: 'center' },
 });

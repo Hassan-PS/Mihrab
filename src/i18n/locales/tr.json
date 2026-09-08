@@ -1222,7 +1222,8 @@
     "loadFailedBody": "Verileriniz cihazda güvende ama şu anda okunamadı. Kaydı tekrar açmayı deneyin.",
     "saveFailedTitle": "Kaydedilemedi",
     "saveFailedBody": "Lütfen tekrar deneyin.",
-    "noteLabel": "Kişisel not (özel, şifreli)"
+    "noteLabel": "Kişisel not (özel, şifreli)",
+    "notYet": "Henüz değil — vakti gelmedi"
   },
   "events": {
     "islamicNewYear": "Hicri yılbaşı",

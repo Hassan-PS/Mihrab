@@ -58,12 +58,17 @@ function DayStripImpl({ days, selected, onSelect }: Props) {
             accessibilityState={{ selected: isSelected }}
             accessibilityLabel={day.a11yLabel}
             onPress={() => onSelect(day.offset)}
-            style={[
+            // Only the chosen day has ink (redesign-plan P4): seven filled
+            // rectangles with one selected was the row shouting and the
+            // choice whispering. The other six are plain text.
+            style={({ pressed }) => [
               styles.chip,
               {
                 backgroundColor: isSelected
                   ? palette.accentSolid
-                  : palette.controlBg,
+                  : pressed
+                  ? palette.controlBg
+                  : 'transparent',
               },
             ]}>
             <Text
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
     minWidth: 44,
     paddingVertical: 7,
     paddingHorizontal: 9,
-    borderRadius: 14,
+    borderRadius: 999,
     alignItems: 'center',
     gap: 1,
   },

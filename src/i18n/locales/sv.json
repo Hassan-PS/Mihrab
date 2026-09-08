@@ -1222,7 +1222,8 @@
     "loadFailedBody": "Dina data finns kvar på enheten men kunde inte läsas just nu. Försök öppna loggen igen.",
     "saveFailedTitle": "Kunde inte spara",
     "saveFailedBody": "Försök igen.",
-    "noteLabel": "Personlig anteckning (privat, krypterad)"
+    "noteLabel": "Personlig anteckning (privat, krypterad)",
+    "notYet": "Inte än – tiden har inte kommit"
   },
   "events": {
     "islamicNewYear": "Islamiskt nyår",
