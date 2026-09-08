@@ -175,6 +175,18 @@ describe('the dua card’s share control', () => {
       act(() => {
         tree = create(<DuasScreen />);
       });
+      // The screen opens on the category index now (#33), so a dua card
+      // exists only once a category has been opened. Any category will do;
+      // what is under test is the share control on the card.
+      act(() => {
+        tree.root
+          .findAll(
+            n =>
+              n.props?.accessibilityLabel === 'duas.cat.morning' &&
+              typeof n.props?.onPress === 'function',
+          )[0]
+          .props.onPress();
+      });
       // By label and handler, not by `findAllByType(Pressable)`: RN's
       // Pressable renders through a wrapper, so the exported component is
       // not the type the tree carries. The node that owns the press is the

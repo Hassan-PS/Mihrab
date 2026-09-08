@@ -549,6 +549,7 @@
       "protection": "Protection",
       "guidance": "Guidance"
     },
+    "allCategories": "Toutes les invocations",
     "repeat": "Réciter ×{{count}}",
     "morning_01_ayat_kursi": {
       "title": "Âyat al-Kursî"

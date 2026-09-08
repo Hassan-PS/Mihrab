@@ -549,6 +549,7 @@
       "protection": "保护",
       "guidance": "引导"
     },
+    "allCategories": "全部祈祷文",
     "repeat": "诵读 ×{{count}}",
     "morning_01_ayat_kursi": {
       "title": "宝座经文（Ayat al-Kursi）"

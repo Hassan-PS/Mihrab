@@ -34,9 +34,13 @@ import { useTabBarScroll } from '../navigation/tabBarVisibility';
 /**
  * Dua library screen — task #26.
  *
- * Vertical scroll of category sections. Tap a category chip at the top to
- * jump-scroll to that section. Each dua row shows Arabic + transliteration
- * + translation + source + repeat count.
+ * A vertical index of the nineteen categories; tapping one opens its
+ * duas, and back returns to the index. Each dua row shows Arabic +
+ * transliteration + translation + source + repeat count.
+ *
+ * The index replaced a horizontal strip of chips (#33) that could show
+ * about four of the nineteen at a time, on the one screen in the app that
+ * scrolled sideways.
  */
 export function DuasScreen() {
   // Subscribe to width changes so future master-detail layouts pick up
@@ -63,8 +67,33 @@ export function DuasScreen() {
   const isArabic = i18n.language === 'ar';
   const showTranslit = !isArabic;
   const showTranslation = !isArabic;
-  useAndroidSubScreenBack();
-  const [selected, setSelected] = useState<DuaCategory>('morning');
+  /**
+   * WHICH CATEGORY, OR NONE — and none is where the screen opens.
+   *
+   * The categories used to be a horizontal row of chips above the list.
+   * Nineteen of them, and the row showed four: the rest existed only if
+   * you thought to swipe sideways on the one screen in the app that
+   * scrolled that way (#33). A reader cannot pick from a list they cannot
+   * see, and "how many kinds of dua are in here" is the question the
+   * screen is opened with.
+   *
+   * So `null` is the index — every category, one per row, scrolling the
+   * way everything else does — and a category name opens that category.
+   */
+  const [selected, setSelected] = useState<DuaCategory | null>(null);
+  /**
+   * Back closes the category before it leaves the tab.
+   *
+   * Intercepted rather than deferred: deferring gives the press to the
+   * system, and on a tab root that means leaving the app — from a
+   * category, which is a screen the reader navigated INTO. One level at a
+   * time is what back means everywhere else here.
+   */
+  useAndroidSubScreenBack(undefined, () => {
+    if (selected === null) return false;
+    setSelected(null);
+    return true;
+  });
   // Per-dua tap-to-count state — task #94. Persists for the lifetime of
   // the screen so the user can navigate away from a dua and come back to
   // resume their count. Reset by tapping the inline reset affordance.
@@ -152,46 +181,37 @@ export function DuasScreen() {
           duas the chips stay at the top instead of vertically centering
           (#101 follow-up). The dua list ScrollView fills the rest of
           the screen and starts at a predictable y-offset. */}
-      <View style={styles.tabsRow}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabs}
-        accessibilityRole="tablist">
-        {DUA_CATEGORIES.map(c => {
-          const isSel = c === selected;
-          return (
-            <Pressable
-              key={c}
-              accessibilityRole="tab"
-              accessibilityLabel={t(`duas.cat.${c}`)}
-              accessibilityState={{ selected: isSel }}
-              onPress={() => setSelected(c)}
-              style={[
-                styles.tab,
-                {
-                  backgroundColor: isSel ? palette.accent : palette.card,
-                  borderColor: isSel ? palette.accent : palette.border,
-                },
-              ]}>
-              <Text
-                style={[
-                  styles.tabLabel,
-                  { color: isSel ? '#fff' : palette.text },
-                ]}>
-                {t(`duas.cat.${c}`)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-      </View>
+      {selected === null ? null : (
+        <View style={styles.tabsRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('duas.allCategories', 'All duas')}
+            onPress={() => setSelected(null)}
+            style={styles.backRow}>
+            <Text style={[styles.backChevron, { color: palette.accent }]}>
+              {'\u2039'}
+            </Text>
+            <Text
+              numberOfLines={1}
+              style={[styles.backLabel, { color: palette.accent }]}>
+              {t('duas.allCategories', 'All duas')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       <ScrollView
         ref={scrollRef}
         {...tabBarScroll}
         style={styles.listScroll}
-        contentContainerStyle={[styles.list, { paddingBottom: tabBarInset }]}
+        contentContainerStyle={[
+          styles.list,
+          // On the index there is no row above the list to hold it off the
+          // header, so the list holds itself off. In a category the way
+          // back is that row, and a second gap would double it.
+          selected === null ? styles.listTop : null,
+          { paddingBottom: tabBarInset },
+        ]}
         contentInsetAdjustmentBehavior="automatic">
         {/* The gap lives HERE, not on the ScrollView's content container.
             `contentContainerStyle`'s gap separates the ScrollView's DIRECT
@@ -203,7 +223,38 @@ export function DuasScreen() {
             pass-through on a phone and only grows its inner column on a
             tablet or a Mac. Same fix as LogScreen; see duaCardSpacing. */}
         <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
-        {duasByCategory(selected).map(dua => (
+        {selected === null
+          ? DUA_CATEGORIES.map(c => {
+              const count = duasByCategory(c).length;
+              return (
+                <Pressable
+                  key={c}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(`duas.cat.${c}`)}
+                  onPress={() => setSelected(c)}
+                  style={[
+                    styles.categoryRow,
+                    { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+                  ]}>
+                  <Text
+                    numberOfLines={2}
+                    style={[styles.categoryName, { color: palette.text }]}>
+                    {t(`duas.cat.${c}`)}
+                  </Text>
+                  {/* How many, because a row that only names a category
+                      says nothing about whether it is worth opening. */}
+                  <Text
+                    style={[
+                      styles.categoryCount,
+                      tabularNumeralStyle,
+                      { color: palette.muted },
+                    ]}>
+                    {count}
+                  </Text>
+                </Pressable>
+              );
+            })
+          : duasByCategory(selected).map(dua => (
           <View
             key={dua.id}
             style={[
@@ -369,7 +420,7 @@ export function DuasScreen() {
               </Text>
             </View>
           </View>
-        ))}
+            ))}
         </CenteredColumn>
       </ScrollView>
     </View>
@@ -382,10 +433,34 @@ export { _DuasScreenMemo as DuasScreenMemo };
 const styles = StyleSheet.create({
   root: { flex: 1 },
   tabsRow: {
-    // Fixed-height pinned row so single-dua categories don't vertically
-    // center the chips. The list area below uses flex:1 underneath.
+    // Fixed-height pinned row so a short category does not vertically
+    // centre the way back. The list area below uses flex:1 underneath.
     flexShrink: 0,
   },
+  backRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minHeight: 44,
+  },
+  backChevron: { fontSize: 22, lineHeight: 24, includeFontPadding: false },
+  backLabel: { fontSize: 15, fontWeight: '600' },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    // Comfortably past the 44pt floor: this is the whole screen's
+    // navigation now, not a chip in a strip.
+    paddingVertical: 16,
+    minHeight: 56,
+  },
+  categoryName: { flex: 1, fontSize: 16, fontWeight: '600' },
+  categoryCount: { fontSize: 14, fontWeight: '600' },
   listScroll: { flex: 1 },
   tabs: { paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center' },
   tab: {
@@ -398,6 +473,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: { fontSize: 14, fontWeight: '600', lineHeight: 18, includeFontPadding: false },
   list: { padding: 16, paddingTop: 0 },
+  listTop: { paddingTop: 16 },
   stack: { gap: 12 },
   card: { borderRadius: 14, padding: 16, gap: 8 },
   titleRow: {

@@ -91,7 +91,23 @@ export function decideAndroidBack(
   return current === HOME_TAB ? 'system' : 'home';
 }
 
-export function useAndroidSubScreenBack(deferRef?: RefObject<boolean>): void {
+/**
+ * @param deferRef  an overlay is open: let the system have the press.
+ * @param intercept the screen wants the press for itself. Returning true
+ *   means "handled here"; false falls through to the decision below.
+ *
+ *   THIS IS NOT `deferRef` WITH A CALLBACK. Deferring hands the press to
+ *   the system, which on a tab root means leaving the app; intercepting
+ *   keeps it. The Duas tab needs the second: it shows a category index and
+ *   then a category, and back from a category means the index, not the
+ *   door. Doing that with a second BackHandler in the screen would work
+ *   only because RN calls the most recently added listener first, which is
+ *   a fact about registration order that nothing states and nothing tests.
+ */
+export function useAndroidSubScreenBack(
+  deferRef?: RefObject<boolean>,
+  intercept?: () => boolean,
+): void {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -101,6 +117,8 @@ export function useAndroidSubScreenBack(deferRef?: RefObject<boolean>): void {
         return undefined;
       }
       const onBackPress = () => {
+        // The screen's own answer first, and only if it takes the press.
+        if (intercept?.()) return true;
         // `getState` is untyped across navigator kinds; the fields read are
         // present on all of them.
         const state = navigation.getState() as BackNavState | undefined;
@@ -117,6 +135,6 @@ export function useAndroidSubScreenBack(deferRef?: RefObject<boolean>): void {
       };
       const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
       return () => sub.remove();
-    }, [navigation, deferRef]),
+    }, [navigation, deferRef, intercept]),
   );
 }

@@ -549,6 +549,7 @@
       "protection": "Koruma",
       "guidance": "Hidayet"
     },
+    "allCategories": "Tüm dualar",
     "repeat": "Oku ×{{count}}",
     "morning_01_ayat_kursi": {
       "title": "Âyetü’l-Kürsî"
