@@ -63,7 +63,7 @@ import { isRtlLanguage } from '../../i18n/layoutDirection';
 import { DayStrip, type DayStripEntry } from './DayStrip';
 import { isSalah, quickLogPhase, useQuickLog } from '../../journal/quickLog';
 import { HeroSky } from './HeroSky';
-import { skyFor, skyInk, skyPhaseFor } from './skyModel';
+import { HERO_Y, skyFrame, skyInkAt, skyMoment } from './skyModel';
 import { PrayerRow } from './PrayerRow';
 import {
   useNextAlertOverride,
@@ -124,6 +124,7 @@ const HeroToday = memo(function HeroToday({
   chosen,
   onExpire,
   today,
+  tomorrowFajr,
   expanded,
   dateLine,
 }: {
@@ -134,6 +135,8 @@ const HeroToday = memo(function HeroToday({
   /** Called when a chosen prayer's time arrives, to hand the hero back. */
   onExpire: () => void;
   today: TimingsMap;
+  /** Tomorrow's Fajr, `HH:mm`, which closes tonight's sky. */
+  tomorrowFajr?: string;
   expanded: boolean;
   /**
    * Today's date, Gregorian and Hijri — issue #23.
@@ -148,14 +151,6 @@ const HeroToday = memo(function HeroToday({
 }) {
   const { t } = useTranslation();
   const clock = useClockFormatter();
-  /**
-   * The hero's ink comes from the SKY, not the theme (skyModel.ts): the sky
-   * is painted at full strength whatever the theme or Material You has
-   * done to the accent, so a night sky wants light ink in a light app and
-   * a noon sky dark ink in a dark one. The accent does not appear on the
-   * hero at all — the countdown is the ink, and its size is its rank.
-   */
-  const ink = skyInk(skyFor(skyPhaseFor(target.name)));
   // Focus AND foreground. `useIsFocused()` on its own kept this ticking once
   // a second in the user's pocket: backgrounding the app from the Today tab
   // leaves Today the focused route, so the timer never stopped.
@@ -184,6 +179,29 @@ const HeroToday = memo(function HeroToday({
   }, [chosen, remainingSeconds, onExpire]);
 
   const parts = countdownParts(remainingSeconds);
+
+  /**
+   * The sky, from the CLOCK — not from the target. Someone aiming the
+   * countdown at Isha in the morning still sees the morning. Recomputed
+   * once a minute (the moment is rounded to the minute) so the SVG is not
+   * redrawn on every tick; a passage is hours long, so a minute is a
+   * fraction of a percent of it.
+   */
+  const minuteKey = Math.floor(now.getTime() / 60_000);
+  const frame = useMemo(
+    () => skyFrame(skyMoment(today, new Date(minuteKey * 60_000), tomorrowFajr), new Date(minuteKey * 60_000)),
+    [today, tomorrowFajr, minuteKey],
+  );
+  /**
+   * The hero's ink comes from the sky, not the theme (skyModel.ts), and
+   * per element: the eyebrow sits over the sky's top, the countdown over
+   * its middle, the rail and the date over its foot — and at dawn those
+   * three can be three different skies. The accent does not appear on the
+   * hero at all; the countdown is the ink, and its size is its rank.
+   */
+  const inkTop = skyInkAt(frame, HERO_Y.eyebrow);
+  const ink = skyInkAt(frame, HERO_Y.countdown);
+  const inkFoot = skyInkAt(frame, HERO_Y.foot);
 
   /**
    * The rail measures the CURRENT interval — from the prayer that has most
@@ -218,15 +236,14 @@ const HeroToday = memo(function HeroToday({
           is redrawn about a hundred times an interval rather than once a
           second. */}
       <HeroSky
-        targetKey={target.name}
-        progress={rail ? Math.round(rail.pct * 100) / 100 : 0}
+        frame={frame}
         bleed={{
           horizontal: SPACING.xl,
           vertical: expanded ? SPACING.lg + SPACING.md : SPACING.lg,
         }}
       />
       <Text
-        style={[styles.heroEyebrow, { color: ink.muted }]}
+        style={[styles.heroEyebrow, { color: inkTop.muted }]}
         numberOfLines={1}
         maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
         {t('home.nextPrayerIn', {
@@ -271,12 +288,12 @@ const HeroToday = memo(function HeroToday({
       </View>
       {rail ? (
         <View style={styles.railWrap}>
-          <View style={[styles.railTrack, { backgroundColor: ink.track }]}>
+          <View style={[styles.railTrack, { backgroundColor: inkFoot.track }]}>
             <View
               style={[
                 styles.railFill,
                 {
-                  backgroundColor: ink.fill,
+                  backgroundColor: inkFoot.fill,
                   width: `${Math.round(rail.pct * 100)}%`,
                 },
               ]}
@@ -284,13 +301,13 @@ const HeroToday = memo(function HeroToday({
           </View>
           <View style={styles.railLabels}>
             <Text
-              style={[styles.railLabel, tabularNumeralStyle, { color: ink.muted }]}
+              style={[styles.railLabel, tabularNumeralStyle, { color: inkFoot.muted }]}
               numberOfLines={1}
               maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
               {t(`prayer.${rail.from.key}`)}
             </Text>
             <Text
-              style={[styles.railLabel, tabularNumeralStyle, { color: ink.muted }]}
+              style={[styles.railLabel, tabularNumeralStyle, { color: inkFoot.muted }]}
               numberOfLines={1}
               maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
               {t(`prayer.${target.name}`)}
@@ -300,7 +317,7 @@ const HeroToday = memo(function HeroToday({
       ) : null}
       {dateLine ? (
         <Text
-          style={[styles.heroTodayDate, { color: ink.muted }]}
+          style={[styles.heroTodayDate, { color: inkFoot.muted }]}
           numberOfLines={1}
           maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
           {dateLine}
@@ -658,6 +675,7 @@ function TodayCardImpl({
             chosen={chosenKey !== null}
             onExpire={clearChosen}
             today={timings}
+            tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
             dateLine={todayDateLine}
           />

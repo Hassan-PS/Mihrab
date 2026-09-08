@@ -1,126 +1,201 @@
 /**
- * The sky behind today's countdown follows the prayer being counted to,
- * is true to the hour whatever the theme, and carries its own ink.
- * See src/screens/home/skyModel.ts.
+ * The sky behind today's countdown: one continuous day from the clock, in
+ * five passages that meet at the prayer times, with the moon in its phase
+ * and ink the text can be read in at every minute. See skyModel.ts.
  */
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
-  skyBodyPosition,
-  skyFor,
-  skyInk,
-  skyPhaseFor,
-  type SkyPhase,
+  HERO_Y,
+  INK_SWITCH_LUMINANCE,
+  luminance,
+  mixHex,
+  moonPhase,
+  moonPhaseFraction,
+  skyColorAt,
+  skyFrame,
+  skyInkAt,
+  skyMoment,
+  type SkyPassage,
 } from '../src/screens/home/skyModel';
+import { moonShadowPath } from '../src/screens/home/HeroSky';
 
 const read = (p: string) => readFileSync(join(__dirname, '..', p), 'utf8');
-const PHASES: SkyPhase[] = ['night', 'predawn', 'dawn', 'morning', 'afternoon', 'sunset', 'dusk'];
+const PASSAGES: SkyPassage[] = ['night', 'dawn', 'day', 'sunset', 'dusk'];
 
-/** WCAG relative luminance of a #rrggbb. */
-function luminance(hex: string): number {
-  const c = hex.replace('#', '');
-  const [r, g, b] = [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16) / 255);
-  const lin = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-}
 function contrast(a: string, b: string): number {
   const [l1, l2] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (l1 + 0.05) / (l2 + 0.05);
 }
 
-describe('which sky', () => {
-  it('follows the target prayer through the day', () => {
-    expect(skyPhaseFor('Fajr')).toBe('predawn');
-    expect(skyPhaseFor('Sunrise')).toBe('dawn');
-    expect(skyPhaseFor('Dhuhr')).toBe('morning');
-    expect(skyPhaseFor('Asr')).toBe('afternoon');
-    expect(skyPhaseFor('Maghrib')).toBe('sunset');
-    expect(skyPhaseFor('Isha')).toBe('dusk');
-    for (const k of ['Midnight', 'Lastthird', 'Firstthird', 'anything']) {
-      expect(skyPhaseFor(k)).toBe('night');
-    }
+const day = { Fajr: '04:30', Sunrise: '06:10', Dhuhr: '12:50', Asr: '16:20', Maghrib: '19:40', Isha: '21:45' };
+const at = (h: number, m = 0) => new Date(2026, 8, 8, h, m);
+
+describe('where in the day', () => {
+  it('walks the five passages at the prayer times', () => {
+    expect(skyMoment(day, at(2))).toMatchObject({ passage: 'night' });
+    expect(skyMoment(day, at(4, 30))).toMatchObject({ passage: 'dawn', t: 0 });
+    expect(skyMoment(day, at(5, 20)).passage).toBe('dawn');
+    expect(skyMoment(day, at(6, 10))).toMatchObject({ passage: 'day', t: 0 });
+    expect(skyMoment(day, at(12, 50)).t).toBeCloseTo(0.66, 1); // Dhuhr is past the middle of Sunrise→Asr here
+    expect(skyMoment(day, at(16, 20))).toMatchObject({ passage: 'sunset', t: 0 });
+    expect(skyMoment(day, at(19, 40))).toMatchObject({ passage: 'dusk', t: 0 });
+    expect(skyMoment(day, at(21, 45))).toMatchObject({ passage: 'night', t: 0 });
   });
 
-  it('is the same sky in both themes — the hour decides, not the theme', () => {
-    // `skyFor` takes no theme. A light app at midnight shows a dark sky.
-    expect(skyFor.length).toBe(1);
-    expect(luminance(skyFor('night').top)).toBeLessThan(0.05);
-    expect(luminance(skyFor('morning').bottom)).toBeGreaterThan(0.8);
+  it("closes the night at tomorrow's Fajr when it is known", () => {
+    const withTomorrow = skyMoment(day, at(23, 45), '04:32');
+    const without = skyMoment(day, at(23, 45));
+    expect(withTomorrow.passage).toBe('night');
+    // Isha 21:45 → 04:32 is 6h47m; 2h in is ~0.29.
+    expect(withTomorrow.t).toBeCloseTo(0.29, 1);
+    expect(without.t).toBeCloseTo(0.29, 1);
   });
 
-  it('puts the sun in the day skies, the moon at night, stars only after dark', () => {
-    expect(skyFor('morning').body).toBe('sun');
-    expect(skyFor('sunset').body).toBe('sun');
-    expect(skyFor('night').body).toBe('moon');
-    expect(skyFor('predawn').body).toBe('moon');
-    expect(skyFor('dusk').body).toBe('none');
-    for (const p of PHASES) {
-      expect(skyFor(p).stars).toBe(p === 'night' || p === 'predawn' || p === 'dusk');
-    }
+  it('falls back to a plain day when the timings are missing', () => {
+    expect(skyMoment({}, at(12))).toEqual({ passage: 'day', t: 0.5 });
+  });
+});
+
+describe('the colours', () => {
+  it('meet at the seams: each passage ends where the next begins', () => {
+    const f = (p: SkyPassage, t: number) => skyFrame({ passage: p, t }, at(12));
+    const same = (a: ReturnType<typeof f>, b: ReturnType<typeof f>) => {
+      expect(a.top).toBe(b.top);
+      expect(a.bottom).toBe(b.bottom);
+    };
+    same(f('day', 1), f('sunset', 0));
+    same(f('sunset', 1), f('dusk', 0));
+    same(f('dusk', 1), f('night', 0));
+    same(f('night', 1), f('night', 0));
+  });
+
+  it('go dark → saturated → light through dawn, and light → saturated → dark through sunset', () => {
+    const b = (p: SkyPassage, t: number) => luminance(skyFrame({ passage: p, t }, at(12)).bottom);
+    expect(b('dawn', 0)).toBeLessThan(b('dawn', 0.5));
+    expect(b('dawn', 0.5)).toBeLessThan(b('dawn', 1));
+    expect(b('sunset', 0)).toBeGreaterThan(b('sunset', 0.85));
+    expect(b('sunset', 0.85)).toBeGreaterThan(b('dusk', 1));
+    // Saturation peaks mid-passage: the dawn's horizon at 0.78 is more
+    // saturated (further from grey) than at either end.
+    const sat = (hex: string) => {
+      const c = hex.replace('#', '');
+      const v = [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16));
+      return Math.max(...v) - Math.min(...v);
+    };
+    const dawnBottom = (t: number) => sat(skyFrame({ passage: 'dawn', t }, at(12)).bottom);
+    expect(dawnBottom(0.78)).toBeGreaterThan(dawnBottom(0));
+    expect(dawnBottom(0.78)).toBeGreaterThan(dawnBottom(1));
+  });
+
+  it('mix and sample sanely', () => {
+    expect(mixHex('#000000', '#ffffff', 0.5)).toBe('#808080');
+    expect(skyColorAt({ top: '#000000', bottom: '#ffffff' }, 0)).toBe('#000000');
+    expect(skyColorAt({ top: '#000000', bottom: '#ffffff' }, 1)).toBe('#ffffff');
   });
 });
 
 describe('the ink', () => {
-  it('reads on every sky it is set on, top and bottom, at AA or better', () => {
-    // The countdown and the eyebrow sit over the whole gradient; whatever
-    // Material You or the theme does, this text is the sky's own.
-    for (const p of PHASES) {
-      const sky = skyFor(p);
-      const { text } = skyInk(sky);
-      expect(contrast(text, sky.top)).toBeGreaterThanOrEqual(4.5);
-      expect(contrast(text, sky.bottom)).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-
-  it('is light on the dark skies and dark on the light ones', () => {
-    for (const p of PHASES) {
-      const sky = skyFor(p);
-      const mid = (luminance(sky.top) + luminance(sky.bottom)) / 2;
-      expect(sky.ink).toBe(mid < 0.35 ? 'light' : 'dark');
-    }
-  });
-
-  it('is what the hero paints its text, rail and date with', () => {
-    const card = read('src/screens/home/TodayCard.tsx');
-    const hero = card.slice(card.indexOf('const HeroToday = memo('), card.indexOf('function HeroOtherDay'));
-    expect(hero).toMatch(/const ink = skyInk\(skyFor\(skyPhaseFor\(target\.name\)\)\)/);
-    expect(hero).not.toMatch(/palette\./);
-    expect(hero).toMatch(/color: ink\.text/);
-    expect(hero).toMatch(/backgroundColor: ink\.track/);
-    expect(hero).toMatch(/backgroundColor: ink\.fill/);
-  });
-});
-
-describe('where the body is', () => {
-  it('rises towards sunrise and sets towards Maghrib', () => {
-    expect(skyBodyPosition('dawn', 0).y).toBeGreaterThan(skyBodyPosition('dawn', 1).y);
-    expect(skyBodyPosition('sunset', 0).y).toBeLessThan(skyBodyPosition('sunset', 1).y);
-  });
-
-  it('keeps to the top strip between the eyebrow and the Qibla chip', () => {
-    for (const p of PHASES) {
-      for (const f of [0, 0.25, 0.5, 0.75, 1]) {
-        const { x, y } = skyBodyPosition(p, f);
-        expect(x).toBeGreaterThanOrEqual(0.3);
-        expect(x).toBeLessThanOrEqual(0.66);
-        expect(y).toBeGreaterThan(0.05);
-        expect(y).toBeLessThanOrEqual(0.32);
+  it('reads at AA on the sky behind it, at every minute of every passage', () => {
+    // The sweep the design has to survive: every passage at 1% steps, the
+    // three heights the hero puts text at.
+    for (const p of PASSAGES) {
+      for (let i = 0; i <= 100; i++) {
+        const frame = skyFrame({ passage: p, t: i / 100 }, at(12));
+        for (const y of Object.values(HERO_Y)) {
+          const { text } = skyInkAt(frame, y);
+          expect(contrast(text, skyColorAt(frame, y))).toBeGreaterThanOrEqual(4.5);
+        }
       }
     }
   });
 
-  it('clamps progress', () => {
-    expect(skyBodyPosition('night', -1)).toEqual(skyBodyPosition('night', 0));
-    expect(skyBodyPosition('night', 7)).toEqual(skyBodyPosition('night', 1));
+  it('switches where pure white and pure black both clear AA', () => {
+    // Just under the switch, white must clear; at it, black must.
+    const under = mixHex('#000000', '#ffffff', 0.44); // ~L 0.17
+    const over = mixHex('#000000', '#ffffff', 0.47);
+    expect(luminance(under)).toBeLessThan(INK_SWITCH_LUMINANCE);
+    expect(contrast('#FFFFFF', under)).toBeGreaterThanOrEqual(4.5);
+    expect(luminance(over)).toBeGreaterThanOrEqual(INK_SWITCH_LUMINANCE);
+    expect(contrast('#000000', over)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('is taken per element in the hero, at that element’s height', () => {
+    const card = read('src/screens/home/TodayCard.tsx');
+    const hero = card.slice(card.indexOf('const HeroToday = memo('), card.indexOf('function HeroOtherDay'));
+    expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.eyebrow\)/);
+    expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.countdown\)/);
+    expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.foot\)/);
+    expect(hero).not.toMatch(/palette\./);
+    // The sky is the clock's, not the target's.
+    expect(hero).toMatch(/skyMoment\(today, /);
+    expect(hero).not.toMatch(/skyPhaseFor|targetKey/);
   });
 });
 
-describe('the drawing', () => {
-  it('is painted at full strength, percent geometry, no horizon line', () => {
-    const sky = read('src/screens/home/HeroSky.tsx');
-    expect(sky).toMatch(/<Svg width="100%" height="100%">/);
-    expect(sky).toMatch(/<Stop offset="0" stopColor=\{sky\.top\} \/>/);
-    expect(sky).not.toMatch(/isDark|alpha|SKY_HORIZON|horizonY/);
-    expect(sky).toMatch(/pointerEvents="none"/);
+describe('the moon', () => {
+  it('knows its phase from the date', () => {
+    // New moon 2024-01-11 11:57 UTC; full moon 2024-01-25 17:54 UTC.
+    expect(moonPhaseFraction(new Date(Date.UTC(2024, 0, 11, 11, 57)))).toBeLessThan(0.02);
+    expect(moonPhase(new Date(Date.UTC(2024, 0, 11, 11, 57)))).toBe(0);
+    expect(moonPhase(new Date(Date.UTC(2024, 0, 25, 17, 54)))).toBe(4);
+    // First quarter 2024-01-18 03:52 UTC.
+    expect(moonPhase(new Date(Date.UTC(2024, 0, 18, 3, 52)))).toBe(2);
+  });
+
+  it('is drawn in the night passage only, in its phase, crossing the top strip', () => {
+    const early = skyFrame({ passage: 'night', t: 0.1 }, new Date(Date.UTC(2024, 0, 25, 17, 54)));
+    const late = skyFrame({ passage: 'night', t: 0.9 }, new Date(Date.UTC(2024, 0, 25, 17, 54)));
+    expect(early.body).toMatchObject({ kind: 'moon', phase: 4 });
+    expect(late.body).toMatchObject({ kind: 'moon' });
+    if (early.body.kind === 'moon' && late.body.kind === 'moon') {
+      expect(late.body.x).toBeGreaterThan(early.body.x);
+      expect(early.body.y).toBeLessThanOrEqual(0.32);
+    }
+    expect(skyFrame({ passage: 'dawn', t: 0 }, at(12)).body.kind).toBe('none');
+  });
+
+  it('has no shadow when full and a full shadow when new', () => {
+    expect(moonShadowPath(4, 10, 10, 8)).toBeNull();
+    expect(moonShadowPath(0, 10, 10, 8)).toMatch(/^M 10 2 A 8 8/);
+    // Quarters: the terminator is a straight line (rx = 0).
+    expect(moonShadowPath(2, 10, 10, 8)).toMatch(/A 0 8 0 0 [01] 10 2/);
+    expect(moonShadowPath(6, 10, 10, 8)).toMatch(/A 0 8 0 0 [01] 10 2/);
+  });
+});
+
+describe('the sun', () => {
+  const f = (p: SkyPassage, t: number) => skyFrame({ passage: p, t }, at(12));
+  it('rises late in the dawn, climbs to its height about the middle of the day, and has set by Maghrib', () => {
+    expect(f('dawn', 0.3).body.kind).toBe('none');
+    expect(f('dawn', 0.95).body.kind).toBe('sun');
+    const noon = f('day', 0.5).body;
+    const morning = f('day', 0.1).body;
+    if (noon.kind === 'sun' && morning.kind === 'sun') expect(noon.y).toBeLessThan(morning.y);
+    const set = f('sunset', 1).body;
+    expect(set.kind === 'sun' ? set.alpha : 0).toBe(0);
+    expect(f('dusk', 0.5).body.kind).toBe('none');
+  });
+
+  it('keeps every body in the top strip, clear of the countdown', () => {
+    for (const p of PASSAGES) {
+      for (let i = 0; i <= 20; i++) {
+        const b = f(p, i / 20).body;
+        if (b.kind === 'none') continue;
+        expect(b.x).toBeGreaterThanOrEqual(0.3);
+        expect(b.x).toBeLessThanOrEqual(0.66);
+        expect(b.y).toBeLessThanOrEqual(0.28);
+        expect(b.y).toBeGreaterThan(0.05);
+      }
+    }
+  });
+
+  it('brings the stars out through dusk and puts them away through dawn', () => {
+    expect(f('dusk', 0.2).stars).toBe(0);
+    expect(f('dusk', 1).stars).toBe(1);
+    expect(f('night', 0.5).stars).toBe(1);
+    expect(f('dawn', 0.25).stars).toBeCloseTo(0.5, 5);
+    expect(f('dawn', 0.6).stars).toBe(0);
+    expect(f('day', 0.5).stars).toBe(0);
   });
 });

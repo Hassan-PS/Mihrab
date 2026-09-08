@@ -1,146 +1,318 @@
 // tokens-ok: the sky's own colours — a drawn scene with its own ink, not app chrome
 /**
- * The sky behind the countdown — which sky, for which prayer, and what ink
- * reads on it.
+ * The sky behind the countdown — one continuous day, drawn from the clock.
  *
- * The hero is "styled after each prayer time": the card's ground is a
- * drawn sky that moves through the day with the prayer being counted
- * down to. Night before Fajr, the dawn band before sunrise, a clear
- * morning towards Dhuhr, the warm light of the afternoon towards Asr, the
- * sunset towards Maghrib, dusk towards Isha, and night again after it.
+ * ── FIVE PASSAGES ────────────────────────────────────────────────────
+ *
+ * The sky is not a set of pictures chosen by the next prayer; it is one
+ * scene that moves with the time of day, in five passages that meet at the
+ * prayer times themselves:
+ *
+ *   Isha → Fajr      night. The moon crosses the top of the card, drawn in
+ *                    its actual phase — one of the eight — for today.
+ *   Fajr → Sunrise   dawn. From the dark of Fajr through the saturated
+ *                    rose and orange of the horizon to the peach of first
+ *                    light; the sun rises into the card near the end.
+ *   Sunrise → Asr    the day. The sun climbs to its height about Dhuhr and
+ *                    starts down; the sky goes from morning gold through
+ *                    bright noon blue to the warmth of the afternoon.
+ *   Asr → Maghrib    sunset. Deepening orange and red as the sun sinks,
+ *                    until it has set completely at Maghrib.
+ *   Maghrib → Isha   dusk. The afterglow darkens through purple into the
+ *                    night that begins at Isha; the stars come out.
+ *
+ * Each passage is a run of colour KEYFRAMES interpolated by how far the
+ * clock has come through it, so the card changes minute by minute and is
+ * never seen to jump.
  *
  * ── THE SKY IS TRUE TO THE HOUR, NOT TO THE THEME ─────────────────────
  *
- * The first cut drew the sky as a wash over the theme's surface, so a
- * light theme at midnight showed a pale grey-blue and a dark theme at noon
- * a murky one — the theme was deciding what the sky looked like, which is
- * backwards. Now the sky is painted at full strength whatever the theme,
- * and whatever Material You has done to the accent: night is dark at
- * night in a light app, noon is bright at noon in a dark one. That means
- * the hero's TEXT cannot come from the theme either — dark green on a
- * navy night, or a light theme's white on a noon sky, would be unreadable.
- * So each sky declares its ink, `light` or `dark`, and `skyInk` turns that
- * into the colours the hero's text, rail and date use. Every sky's colours
- * are chosen so that its ink reads on the whole gradient — dark-ink skies
- * keep their tops mid-light, light-ink skies keep their feet mid-dark.
- * The accent stays out of it: on the hero the countdown is the ink.
+ * Painted at full strength whatever the theme or Material You has done to
+ * the accent: night is dark at night in a light app, noon is bright at
+ * noon in a dark one. So the hero's TEXT cannot come from the theme either.
+ * `skyInkAt` picks the ink for an element from the sky's own colour at
+ * that element's height — pure white where the sky is dark, pure black
+ * where it is light, with the switch at a luminance where BOTH inks meet
+ * WCAG AA (4.5:1): pure white on L = 0.18 is 4.56, pure black on it 4.6.
+ * Anything softer than pure fails at the crossing, which is exactly the
+ * moment a dawn passes through. The accent stays out of it: on the hero
+ * the countdown is the ink, and its size is its rank.
  *
- * Pure: the phase from the target's key, the colours from the phase, and
- * where the sun or moon is from how far the current interval has run.
+ * Pure functions throughout; the component only draws what `skyFrame`
+ * returns.
  */
-export type SkyPhase =
-  | 'night' // after Isha, or towards Midnight / the last third
-  | 'predawn' // towards Fajr
-  | 'dawn' // towards Sunrise
-  | 'morning' // towards Dhuhr
-  | 'afternoon' // towards Asr
-  | 'sunset' // towards Maghrib
-  | 'dusk'; // towards Isha
+import { combineLocalDateAndTime } from '../../utils/prayerTimes';
+import type { TimingsMap } from '../../types/prayer';
 
-export function skyPhaseFor(targetKey: string): SkyPhase {
-  switch (targetKey) {
-    case 'Fajr':
-      return 'predawn';
-    case 'Sunrise':
-      return 'dawn';
-    case 'Dhuhr':
-      return 'morning';
-    case 'Asr':
-      return 'afternoon';
-    case 'Maghrib':
-      return 'sunset';
-    case 'Isha':
-      return 'dusk';
-    default:
-      return 'night';
-  }
+export type SkyPassage = 'night' | 'dawn' | 'day' | 'sunset' | 'dusk';
+
+/** A colour pair at a moment of a passage. */
+type Key = { t: number; top: string; bottom: string };
+
+const NIGHT_TOP = '#0B1230';
+const NIGHT_BOTTOM = '#1E2B5A';
+
+const KEYS: Record<SkyPassage, Key[]> = {
+  night: [
+    { t: 0, top: NIGHT_TOP, bottom: NIGHT_BOTTOM },
+    { t: 1, top: NIGHT_TOP, bottom: NIGHT_BOTTOM },
+  ],
+  dawn: [
+    { t: 0, top: '#0E1745', bottom: '#3B3163' },
+    { t: 0.45, top: '#2F4A8F', bottom: '#B85E7C' },
+    { t: 0.78, top: '#5A7FC8', bottom: '#F5924F' },
+    { t: 1, top: '#7FA6DC', bottom: '#FBC48A' },
+  ],
+  day: [
+    { t: 0, top: '#6F9BD8', bottom: '#FBD7A8' },
+    { t: 0.5, top: '#3F8FE0', bottom: '#D6ECFF' },
+    { t: 1, top: '#5F9EDC', bottom: '#F3DFAE' },
+  ],
+  sunset: [
+    { t: 0, top: '#5F9EDC', bottom: '#F3DFAE' },
+    { t: 0.5, top: '#6C7BC2', bottom: '#F7A45A' },
+    { t: 0.85, top: '#4B4A93', bottom: '#F0653A' },
+    { t: 1, top: '#2E3272', bottom: '#D25A55' },
+  ],
+  dusk: [
+    { t: 0, top: '#2E3272', bottom: '#D25A55' },
+    { t: 0.4, top: '#1C2260', bottom: '#8A4B72' },
+    { t: 1, top: NIGHT_TOP, bottom: NIGHT_BOTTOM },
+  ],
+};
+
+/** The glow of the sun or moon, per passage. */
+const GLOW: Record<SkyPassage, string> = {
+  night: '#E6E9FF',
+  dawn: '#FFD9A0',
+  day: '#FFF3C4',
+  sunset: '#FFC27A',
+  dusk: '#F2B3A0',
+};
+
+// ── Colour arithmetic ───────────────────────────────────────────────────
+
+function hexToRgb(hex: string): [number, number, number] {
+  const c = hex.replace('#', '');
+  return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16)) as [number, number, number];
+}
+function rgbToHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('')}`;
+}
+/** Linear blend of two hex colours, `t` from a to b. */
+export function mixHex(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  const k = Math.max(0, Math.min(1, t));
+  return rgbToHex([ar + (br - ar) * k, ag + (bg - ag) * k, ab + (bb - ab) * k]);
+}
+/** WCAG relative luminance of a hex colour. */
+export function luminance(hex: string): number {
+  const lin = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const [r, g, b] = hexToRgb(hex).map(v => lin(v / 255));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-export type SkyBody = 'sun' | 'moon' | 'none';
-export type SkyInk = 'light' | 'dark';
+function keyed(keys: Key[], t: number): { top: string; bottom: string } {
+  const k = Math.max(0, Math.min(1, t));
+  for (let i = 1; i < keys.length; i++) {
+    if (k <= keys[i].t) {
+      const a = keys[i - 1];
+      const b = keys[i];
+      const span = b.t - a.t || 1;
+      const u = (k - a.t) / span;
+      return { top: mixHex(a.top, b.top, u), bottom: mixHex(a.bottom, b.bottom, u) };
+    }
+  }
+  const last = keys[keys.length - 1];
+  return { top: last.top, bottom: last.bottom };
+}
 
-export type Sky = {
-  /** Gradient stops, top to bottom, as hex — painted at full strength. */
+// ── Where in the day ────────────────────────────────────────────────────
+
+export type SkyMoment = { passage: SkyPassage; t: number };
+
+/**
+ * Which passage the clock is in and how far through it, from the day's
+ * timings. `tomorrowFajr` closes the night after Isha; without it the
+ * night is assumed to end at today's Fajr plus a day. Before today's Fajr
+ * the night is assumed to have begun at today's Isha minus a day.
+ */
+export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string): SkyMoment {
+  const at = (key: string, dayShift = 0): number | null => {
+    const raw = timings[key];
+    if (!raw) return null;
+    const d = combineLocalDateAndTime(now, raw);
+    if (dayShift) d.setDate(d.getDate() + dayShift);
+    return d.getTime();
+  };
+  const n = now.getTime();
+  const fajr = at('Fajr');
+  const sunrise = at('Sunrise');
+  const asr = at('Asr');
+  const maghrib = at('Maghrib');
+  const isha = at('Isha');
+  const frac = (a: number, b: number) => (b > a ? Math.max(0, Math.min(1, (n - a) / (b - a))) : 0);
+
+  if (fajr == null || sunrise == null || asr == null || maghrib == null || isha == null) {
+    return { passage: 'day', t: 0.5 };
+  }
+  if (n < fajr) {
+    const from = isha - 24 * 3600_000;
+    return { passage: 'night', t: frac(from, fajr) };
+  }
+  if (n < sunrise) return { passage: 'dawn', t: frac(fajr, sunrise) };
+  if (n < asr) return { passage: 'day', t: frac(sunrise, asr) };
+  if (n < maghrib) return { passage: 'sunset', t: frac(asr, maghrib) };
+  if (n < isha) return { passage: 'dusk', t: frac(maghrib, isha) };
+  let end: number;
+  if (tomorrowFajr) {
+    const d = combineLocalDateAndTime(now, tomorrowFajr);
+    d.setDate(d.getDate() + 1);
+    end = d.getTime();
+  } else {
+    end = fajr + 24 * 3600_000;
+  }
+  return { passage: 'night', t: frac(isha, end) };
+}
+
+// ── The moon ────────────────────────────────────────────────────────────
+
+/** The eight phases, new moon first, waxing through full and back. */
+export type MoonPhase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+/** Reference new moon: 2000-01-06 18:14 UTC. Mean synodic month in days. */
+const NEW_MOON_EPOCH_MS = Date.UTC(2000, 0, 6, 18, 14);
+const SYNODIC_DAYS = 29.530588853;
+
+/** 0 at new moon, 0.5 at full, back to 1 at the next new moon. */
+export function moonPhaseFraction(date: Date): number {
+  const days = (date.getTime() - NEW_MOON_EPOCH_MS) / 86_400_000;
+  const f = (days / SYNODIC_DAYS) % 1;
+  return f < 0 ? f + 1 : f;
+}
+
+/** The nearest of the eight main phases. */
+export function moonPhase(date: Date): MoonPhase {
+  return (Math.round(moonPhaseFraction(date) * 8) % 8) as MoonPhase;
+}
+
+// ── The frame the component draws ───────────────────────────────────────
+
+export type SkyBody =
+  | { kind: 'none' }
+  | { kind: 'sun'; x: number; y: number; alpha: number }
+  | {
+      kind: 'moon';
+      x: number;
+      y: number;
+      phase: MoonPhase;
+      /** How much of the disc is lit, 0–1 — the glow follows it. */
+      lit: number;
+    };
+
+export type SkyFrame = {
+  passage: SkyPassage;
+  t: number;
   top: string;
   bottom: string;
-  /** The sun or moon, its glow, and the stars. */
   glow: string;
-  /** Which ink reads on this sky. */
-  ink: SkyInk;
+  /** 0–1: how visible the stars are. */
+  stars: number;
   body: SkyBody;
-  /** Stars in the field — the dark skies only. */
-  stars: boolean;
 };
 
-const SKIES: Record<SkyPhase, Sky> = {
-  night: { top: '#0B1230', bottom: '#243462', glow: '#D2DAFF', ink: 'light', body: 'moon', stars: true },
-  predawn: { top: '#101A48', bottom: '#5E4C7A', glow: '#F2CDB4', ink: 'light', body: 'moon', stars: true },
-  dawn: { top: '#8FA8E0', bottom: '#F7D0AF', glow: '#FFE7B8', ink: 'dark', body: 'sun', stars: false },
-  morning: { top: '#7DBCF0', bottom: '#E3F2FD', glow: '#FFF3C8', ink: 'dark', body: 'sun', stars: false },
-  afternoon: { top: '#79B0E6', bottom: '#F7E7BF', glow: '#FFE3A0', ink: 'dark', body: 'sun', stars: false },
-  sunset: { top: '#8C8FCB', bottom: '#F6B37F', glow: '#FFD08E', ink: 'dark', body: 'sun', stars: false },
-  dusk: { top: '#1F2A5E', bottom: '#7B5875', glow: '#EBB9A5', ink: 'light', body: 'none', stars: true },
-};
+/** The body's x across the top strip — between the eyebrow and the Qibla chip. */
+const X0 = 0.3;
+const X1 = 0.66;
+/**
+ * The strip's floor — a body "at the horizon" sits here. The countdown's
+ * cap line is at about 0.3 of the hero, so nothing drawn goes below 0.28.
+ */
+const Y_LOW = 0.26;
+const Y_HIGH = 0.08;
 
-export function skyFor(phase: SkyPhase): Sky {
-  return SKIES[phase];
+export function skyFrame(moment: SkyMoment, moonDate: Date): SkyFrame {
+  const { passage, t } = moment;
+  const { top, bottom } = keyed(KEYS[passage], t);
+  const x = X0 + t * (X1 - X0);
+  let stars = 0;
+  let body: SkyBody = { kind: 'none' };
+  switch (passage) {
+    case 'night':
+      stars = 1;
+      {
+        const phase = moonPhase(moonDate);
+        // Illuminated fraction of the disc for a phase angle of 2π·p.
+        const lit = (1 - Math.cos((2 * Math.PI * phase) / 8)) / 2;
+        body = { kind: 'moon', x, y: 0.22 - Math.sin(t * Math.PI) * 0.1, phase, lit };
+      }
+      break;
+    case 'dawn': {
+      // Stars fade as the sky lightens; the sun breaks the strip's floor at
+      // t ≈ 0.6 and stands at the horizon line by sunrise.
+      stars = Math.max(0, 1 - t / 0.5);
+      const rise = Math.max(0, (t - 0.6) / 0.4);
+      body =
+        rise > 0
+          ? { kind: 'sun', x, y: Y_LOW + 0.02 - rise * 0.02, alpha: Math.min(1, rise * 1.5) }
+          : { kind: 'none' };
+      break;
+    }
+    case 'day':
+      // Up to its height about Dhuhr (the middle of Sunrise → Asr), then down.
+      body = { kind: 'sun', x, y: Y_LOW - Math.sin(t * Math.PI) * (Y_LOW - Y_HIGH), alpha: 1 };
+      break;
+    case 'sunset': {
+      // From the afternoon's height to the horizon, gone as Maghrib arrives.
+      const y = 0.16 + t * (Y_LOW + 0.02 - 0.16);
+      body = { kind: 'sun', x, y, alpha: t < 0.9 ? 1 : Math.max(0, Math.round((1 - (t - 0.9) / 0.1) * 1000) / 1000) };
+      break;
+    }
+    case 'dusk':
+      stars = Math.max(0, (t - 0.4) / 0.6);
+      break;
+  }
+  return { passage, t, top, bottom, glow: GLOW[passage], stars, body };
 }
 
+// ── The ink ─────────────────────────────────────────────────────────────
+
 export type SkyInkColors = {
-  /** The countdown and anything that must be read first. */
   text: string;
-  /** Eyebrow, seconds, the clock time, rail labels, the date. */
   muted: string;
-  /** The rail's track and its fill. */
   track: string;
   fill: string;
 };
 
-/** The colours the hero's text takes on a sky. */
-export function skyInk(sky: Sky): SkyInkColors {
-  return sky.ink === 'light'
-    ? {
-        text: '#F7F3EA',
-        muted: 'rgba(247,243,234,0.74)',
-        track: 'rgba(247,243,234,0.22)',
-        fill: '#F7F3EA',
-      }
-    : {
-        text: '#161A26',
-        muted: 'rgba(22,26,38,0.66)',
-        track: 'rgba(22,26,38,0.16)',
-        fill: '#161A26',
-      };
+/** The sky's colour at a fraction of the card's height. */
+export function skyColorAt(frame: Pick<SkyFrame, 'top' | 'bottom'>, y: number): string {
+  return mixHex(frame.top, frame.bottom, y);
 }
 
 /**
- * Where the sun or moon sits, as fractions of the card.
- *
- * In the TOP STRIP of the hero — between the eyebrow and the Qibla chip —
- * and nowhere else, so the body is never behind the countdown. x runs
- * with the current interval (the rail's own fraction) so the body moves
- * through the evening; y is a shallow arc within the strip, rising
- * towards sunrise and sinking towards Maghrib.
+ * The luminance at which the ink switches — where pure white (4.56:1)
+ * and pure black (4.6:1) both clear AA against the sky.
  */
-export function skyBodyPosition(
-  phase: SkyPhase,
-  progress: number,
-): { x: number; y: number } {
-  const p = Math.max(0, Math.min(1, progress));
-  const x = 0.3 + p * 0.36;
-  const arc = Math.sin(p * Math.PI); // 0 → 1 → 0
-  switch (phase) {
-    case 'dawn':
-      // Rising.
-      return { x, y: 0.3 - p * 0.18 };
-    case 'sunset':
-      // Setting.
-      return { x, y: 0.12 + p * 0.18 };
-    case 'morning':
-    case 'afternoon':
-      return { x, y: 0.26 - arc * 0.14 };
-    default:
-      // The moon: a shallow arc.
-      return { x, y: 0.22 - arc * 0.1 };
-  }
+export const INK_SWITCH_LUMINANCE = 0.18;
+
+/** The ink for an element drawn at height `y` of the card. */
+export function skyInkAt(frame: Pick<SkyFrame, 'top' | 'bottom'>, y: number): SkyInkColors {
+  const light = luminance(skyColorAt(frame, y)) < INK_SWITCH_LUMINANCE;
+  return light
+    ? {
+        text: '#FFFFFF',
+        muted: 'rgba(255,255,255,0.78)',
+        track: 'rgba(255,255,255,0.24)',
+        fill: '#FFFFFF',
+      }
+    : {
+        text: '#000000',
+        muted: 'rgba(0,0,0,0.66)',
+        track: 'rgba(0,0,0,0.16)',
+        fill: '#000000',
+      };
 }
+
+/** Where the hero's elements sit, as fractions of its height. */
+export const HERO_Y = { eyebrow: 0.12, countdown: 0.4, foot: 0.82 } as const;
