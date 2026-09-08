@@ -51,6 +51,16 @@ export function showTabBar(): void {
   setHidden(false);
 }
 
+/**
+ * Put it away on purpose — a page inside a tab that wants the whole
+ * screen (a dua category, which reads like a pushed page). Every tab
+ * change shows it again (`screenListeners.focus` in MainTabs), so a
+ * screen that hides it need only show it when its own reason ends.
+ */
+export function hideTabBar(): void {
+  setHidden(true);
+}
+
 /** For tests. */
 export function resetTabBarVisibility(): void {
   hidden = false;

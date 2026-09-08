@@ -1,7 +1,7 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -25,14 +25,15 @@ import {
   type DuaCategory,
 } from '../duas/duas';
 import { cardEdgeStyle } from '../theme/chrome';
-import { Group, Row } from '../components/ui';
+import { BackToTopButton, Group, Row, useBackToTop } from '../components/ui';
 import { ShareIcon } from '../theme/icons';
 import { duaShareText } from '../share/shareText';
 import { TYPE, arabicTextStyle } from '../theme/typography';
 import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabPageTop } from '../navigation/useTabPageTop';
-import { useTabBarScroll } from '../navigation/tabBarVisibility';
+import { hideTabBar, showTabBar, useTabBarScroll } from '../navigation/tabBarVisibility';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RADIUS, SPACING } from '../theme/tokens';
 
 /**
@@ -96,6 +97,29 @@ export function DuasScreen() {
    * way everything else does — and a category name opens that category.
    */
   const [selected, setSelected] = useState<DuaCategory | null>(null);
+  /**
+   * A CATEGORY IS A PAGE OF ITS OWN. Inside one the tab bar goes away —
+   * the reader went INTO something, and a row of tabs under a list of
+   * duas said "you could be anywhere" about a place they had chosen —
+   * and the list gets the bar's height. Back on the index it returns.
+   * Leaving the tab shows it regardless (MainTabs' focus listener).
+   */
+  useEffect(() => {
+    if (selected !== null) hideTabBar();
+    else showTabBar();
+  }, [selected]);
+  const insets = useSafeAreaInsets();
+  // The long lists here: a category is up to a dozen duas, each three
+  // renderings tall once opened. Same arrow as Tilāwah's surah list.
+  const scrollToTop = useCallback(
+    () => scrollRef.current?.scrollTo({ y: 0, animated: true }),
+    [],
+  );
+  const backToTop = useBackToTop(scrollToTop);
+  const resetBackToTop = backToTop.reset;
+  useEffect(() => {
+    resetBackToTop();
+  }, [selected, resetBackToTop]);
   /**
    * THE PAGE SAYS WHERE YOU ARE.
    *
@@ -208,10 +232,17 @@ export function DuasScreen() {
       <ScrollView
         ref={scrollRef}
         {...tabBarScroll}
+        onScroll={backToTop.onScroll}
+        scrollEventThrottle={16}
         style={styles.listScroll}
         contentContainerStyle={[
           styles.list,
-          { paddingTop: pageTop, paddingBottom: tabBarInset },
+          {
+            paddingTop: pageTop,
+            // With the bar away the list runs to the screen's foot, so it
+            // pads the home-indicator inset itself.
+            paddingBottom: selected !== null ? tabBarInset + insets.bottom : tabBarInset,
+          },
         ]}
         contentInsetAdjustmentBehavior="never">
         {/* The gap lives HERE, not on the ScrollView's content container.
@@ -236,6 +267,9 @@ export function DuasScreen() {
               maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
               {t(`duas.cat.${selected}`)}
             </Text>
+            {/* The arrow's width again, so the title is centred on the
+                page and not on what is left beside the arrow. */}
+            <View style={styles.categoryBarSpacer} />
           </View>
         ) : null}
         {selected === null
@@ -452,6 +486,13 @@ export function DuasScreen() {
             ))}
         </CenteredColumn>
       </ScrollView>
+      {selected !== null ? (
+        <BackToTopButton
+          visible={backToTop.show}
+          onPress={backToTop.onPress}
+          bottom={insets.bottom + SPACING.lg}
+        />
+      ) : null}
     </View>
   );
 }
@@ -499,7 +540,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: TYPE.title2.fontSize,
     fontWeight: '700',
+    textAlign: 'center',
   },
+  // The arrow is 24 + 8 + 4 wide and the row is pulled 8 out, so 28 on the far side balances it.
+  categoryBarSpacer: { width: 28 },
   stack: { gap: SPACING.md },
   card: { borderRadius: RADIUS.lg, padding: SPACING.lg, gap: SPACING.sm },
   titleRow: {

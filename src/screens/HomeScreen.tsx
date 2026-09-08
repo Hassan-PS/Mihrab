@@ -1256,7 +1256,8 @@ const styles = StyleSheet.create({
   // the hero takes whatever the table and the shortcut leave, so the sky
   // ends where the tab bar begins rather than above a band of nothing.
   scrollContentBleed: { paddingTop: 0, paddingHorizontal: 0, flexGrow: 1 },
-  fillColumn: { flex: 1 },
+  // Grow, never shrink under the content — see TodayCard's `cardBleed`.
+  fillColumn: { flexGrow: 1, flexShrink: 0, flexBasis: 'auto' },
   belowHero: { paddingHorizontal: HOME_SCREEN_PADDING, gap: SPACING.md },
   // Dashboard: let the content grow to the viewport and center it
   // vertically when shorter (§B1 — kills the dead bottom half).

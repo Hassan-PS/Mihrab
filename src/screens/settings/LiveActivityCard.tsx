@@ -73,7 +73,11 @@ function DesignPreview({
         {subText ? `Mihrab · ${subText}` : 'Mihrab'}
       </Text>
       {chronometer ? (
-        <Text style={[styles.pvHeaderText, styles.pvChrono, { color: muted }]}>2:18:42</Text>
+        <Text
+          style={[styles.pvHeaderText, styles.pvChrono, { color: muted }]}
+          numberOfLines={1}>
+          2:18:42
+        </Text>
       ) : null}
     </View>
   );
@@ -100,12 +104,26 @@ function DesignPreview({
           <View style={styles.pvMetrics}>
             <View style={styles.pvMetric}>
               <Text style={[styles.pvSmall, { color: muted }]}>At</Text>
-              <Text style={[styles.pvMetricValue, { color: text }]}>22:12</Text>
+              <Text
+                style={[styles.pvMetricValue, { color: text }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}>
+                22:12
+              </Text>
             </View>
             <View style={[styles.pvMetricDivider, { backgroundColor: muted }]} />
             <View style={styles.pvMetric}>
               <Text style={[styles.pvSmall, { color: muted }]}>In</Text>
-              <Text style={[styles.pvMetricValue, { color: accent }]}>2:18:42</Text>
+              {/* The card is a third of a settings row wide; a seven-digit
+                  countdown at footnote size ran out of it. Fit, not clip. */}
+              <Text
+                style={[styles.pvMetricValue, { color: accent }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}>
+                2:18:42
+              </Text>
             </View>
           </View>
         </View>
@@ -114,7 +132,13 @@ function DesignPreview({
     return (
       <View style={[styles.preview, { backgroundColor: surface }]}>
         {header(true)}
-        <Text style={[styles.pvBig, { color: text }]}>2:18</Text>
+        <Text
+          style={[styles.pvBig, { color: text }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}>
+          2:18
+        </Text>
         <Text style={[styles.pvSmall, { color: muted }]}>Maghrib · 22:12</Text>
         <PlainBar accent={accent} muted={muted} pct={0.52} />
       </View>
@@ -349,6 +373,8 @@ const styles = StyleSheet.create({
   preview: {
     width: '100%',
     minHeight: 64,
+    // Nothing drawn inside a miniature may leave it, whatever the font.
+    overflow: 'hidden',
     borderRadius: RADIUS.sm,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.sm,
@@ -357,8 +383,9 @@ const styles = StyleSheet.create({
   },
   pvHeader: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   pvAppIcon: { width: 8, height: 8, borderRadius: 2 },
-  pvHeaderText: { fontSize: 8, fontWeight: '500', flexShrink: 1 },
-  pvChrono: { marginStart: 'auto', fontVariant: ['tabular-nums'] },
+  pvHeaderText: { fontSize: 8, fontWeight: '500', flexShrink: 1, minWidth: 0 },
+  // The chronometer keeps its digits; the app-name text is what gives way.
+  pvChrono: { marginStart: 'auto', fontVariant: ['tabular-nums'], flexShrink: 0 },
   pvRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
@@ -374,7 +401,7 @@ const styles = StyleSheet.create({
   },
   pvSmall: { fontSize: 9, fontWeight: '500' },
   pvMetrics: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: 2 },
-  pvMetric: { gap: 1 },
+  pvMetric: { gap: 1, flex: 1, minWidth: 0 },
   pvMetricValue: {
     fontSize: TYPE.footnote.fontSize,
     fontWeight: '700',

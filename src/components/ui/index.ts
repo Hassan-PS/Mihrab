@@ -10,6 +10,7 @@
  * else), `Row`, `Tile` (a number on the page — never in a card).
  * Controls: `Button`, `Chip`, `SegmentedControl`, `Stepper`.
  */
+export { BackToTopButton, useBackToTop } from './BackToTop';
 export { Banner } from './Banner';
 export type { BannerVariant } from './Banner';
 export { Button } from './Button';

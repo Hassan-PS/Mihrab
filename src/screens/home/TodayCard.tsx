@@ -921,10 +921,16 @@ const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
   // Full-bleed: no radius at the top (it meets the screen edge), the
   // page's radius at the foot where the hero becomes the page.
-  cardBleed: { overflow: 'hidden', flex: 1 },
+  // Grow to fill the page; never shrink under the content. `flex: 1`
+  // would set flexBasis 0 and let a long table (extra times, the Mālikī
+  // boundaries) squash the hero to nothing; with basis auto the hero keeps
+  // its own height and the page scrolls the little it then has to.
+  cardBleed: { overflow: 'hidden', flexGrow: 1, flexShrink: 0, flexBasis: 'auto' },
   heroWrap: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.lg },
   heroWrapBleed: {
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 'auto',
     borderBottomStartRadius: HOME_TABLE_RADIUS,
     borderBottomEndRadius: HOME_TABLE_RADIUS,
     overflow: 'hidden',
@@ -940,9 +946,10 @@ const styles = StyleSheet.create({
   heroTopLeading: { flexShrink: 1, flexGrow: 1 },
   hero: {},
   heroExpanded: { paddingVertical: SPACING.md },
-  heroFill: { flex: 1 },
-  /** Grows; the sun and moon cross it. At least a moon's worth tall. */
-  heroScene: { flex: 1, minHeight: 32 },
+  heroFill: { flexGrow: 1, flexShrink: 0, flexBasis: 'auto' },
+  /** Grows; the sun and moon cross it — and gives way first when the
+   *  table needs the room (the sky then hides its bodies, see HeroSky). */
+  heroScene: { flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 0 },
   // Sentence case, quiet: the countdown is the thing the eye lands on and
   // the eyebrow only names what it counts to. It was an uppercase,
   // letterspaced overline — the 2016 idiom (docs/design/redesign-plan.md

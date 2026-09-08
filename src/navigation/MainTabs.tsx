@@ -263,6 +263,10 @@ export function MainTabs() {
               ] as unknown as ViewStyle['transform'],
             }
           : {
+              // In flow, the bar is either there or not: a page inside a
+              // tab that asks for the whole screen (a dua category) puts
+              // it away, and the page takes its height.
+              display: hidden ? 'none' : 'flex',
               // The page's own colour, not the card's: the bar is part of
               // the page it sits under, and a hairline is the only edge.
               backgroundColor: palette.bg,

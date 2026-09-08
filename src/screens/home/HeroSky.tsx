@@ -84,7 +84,13 @@ function HeroSkyImpl({
     [],
   );
 
-  const bodyXY = body.kind === 'none' ? null : { x: body.x, y: body.y };
+  // When the table has taken the room — extra times and the Mālikī
+  // boundaries all on — the band can close to a sliver. A moon drawn
+  // there would sit half behind the countdown; the gradient alone says
+  // the hour well enough until the room comes back.
+  const cramped = banded && height > 0 && room < 40;
+  const bodyXY = body.kind === 'none' || cramped ? null : { x: body.x, y: body.y };
+  const drawStars = stars > 0 && !cramped;
 
   return (
     <View
@@ -127,7 +133,7 @@ function HeroSkyImpl({
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#sky)" />
         {bodyXY ? <Rect x="0" y="0" width="100%" height="100%" fill="url(#glow)" /> : null}
-        {stars > 0
+        {drawStars
           ? starField.map(([x, y, r], i) => (
               <Circle
                 key={i}
@@ -139,7 +145,7 @@ function HeroSkyImpl({
               />
             ))
           : null}
-        {body.kind === 'sun' ? (
+        {body.kind === 'sun' && !cramped ? (
           <Circle
             cx={`${body.x * 100}%`}
             cy={sceneY(body.y)}
@@ -149,7 +155,7 @@ function HeroSkyImpl({
           />
         ) : null}
       </Svg>
-      {body.kind === 'moon' ? (
+      {body.kind === 'moon' && !cramped ? (
         <View style={[styles.moon, { start: `${body.x * 100}%`, top: sceneY(body.y) }]}>
           <Moon phase={body.phase} lit={glow} shadow={top} />
         </View>

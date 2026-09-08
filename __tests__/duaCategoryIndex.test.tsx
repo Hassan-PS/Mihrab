@@ -64,8 +64,13 @@ jest.mock('../src/navigation/tabBarInset', () => ({ useTabBarInset: () => 0 }));
 // No title bar on a tab: the page clears the status bar itself, and the
 // number it clears it by comes from a hook with no provider in this tree.
 jest.mock('../src/navigation/useTabPageTop', () => ({ useTabPageTop: () => 12 }));
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
 jest.mock('../src/navigation/tabBarVisibility', () => ({
   useTabBarScroll: () => ({}),
+  hideTabBar: () => {},
+  showTabBar: () => {},
 }));
 
 import { DuasScreen } from '../src/screens/DuasScreen';

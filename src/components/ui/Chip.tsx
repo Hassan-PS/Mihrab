@@ -83,7 +83,15 @@ function ChipImpl({
           </Text>
         ) : null}
         <Text
-          style={[typeStyle('headline'), styles.label, { color: fg }]}
+          style={[
+            // Compact chips sit under a line of callout text (the Log's
+            // prayer rows) and take the smaller type to match it; the
+            // full chip keeps the headline it always had.
+            typeStyle(compact ? 'footnote' : 'headline'),
+            compact && styles.labelCompact,
+            styles.label,
+            { color: fg },
+          ]}
           numberOfLines={1}>
           {label}
         </Text>
@@ -105,7 +113,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   grow: { flex: 1 },
-  compact: { minHeight: 32, paddingVertical: SPACING.xs, paddingHorizontal: SPACING.sm },
+  compact: { minHeight: 28, paddingVertical: SPACING.xs, paddingHorizontal: SPACING.sm },
+  labelCompact: { fontWeight: '600' },
   inner: { alignItems: 'center' },
   above: { fontWeight: '600', marginBottom: 1 },
   label: { textAlign: 'center' },

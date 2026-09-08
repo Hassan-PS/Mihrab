@@ -72,7 +72,8 @@ describe('the picker', () => {
   it('previews follow the builders, not a sketch', () => {
     // Countdown on 17 is a MetricStyle row; on 16 a big minute-resolution title.
     expect(card).toMatch(/renderer === 'android17'[\s\S]*?>At<\/Text>[\s\S]*?>In<\/Text>/);
-    expect(card).toMatch(/styles\.pvBig[^\n]*>2:18<\/Text>/);
+    // Fitted to the miniature rather than allowed out of it.
+    expect(card).toMatch(/styles\.pvBig[\s\S]{0,160}adjustsFontSizeToFit[\s\S]{0,80}2:18\s*<\/Text>/);
     // Timeline/markers: three segments (the next three events), not seven equal ones.
     expect(card).toMatch(/const segments = \[0\.35, 0\.25, 0\.4\]/);
     expect(card).not.toMatch(/\[0, 1, 2, 3, 4, 5, 6\]\.map/);
