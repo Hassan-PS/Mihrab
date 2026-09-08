@@ -1165,7 +1165,8 @@
     "shareTafsir": "یہ تفسیر شیئر کریں ({{edition}})",
     "surahAudioPartial": "{{total}} میں سے {{have}} آیات · باقی ڈاؤن لوڈ کرنے کے لیے دبائیں",
     "deleteSurahAudio": "اس سورت کی آڈیو حذف کریں",
-    "deleteSurahAudioFor": "{{surah}} کی ڈاؤن لوڈ شدہ آڈیو حذف کریں"
+    "deleteSurahAudioFor": "{{surah}} کی ڈاؤن لوڈ شدہ آڈیو حذف کریں",
+    "audioGap": "{{surah}} {{ayah}} ڈاؤن لوڈ نہیں ہے — انٹرنیٹ سے جُڑیں، یا آف لائن سننے کے لیے یہ سورت ڈاؤن لوڈ کریں۔"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

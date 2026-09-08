@@ -1165,7 +1165,8 @@
     "shareTafsir": "分享此经注（{{edition}}）",
     "surahAudioPartial": "{{total}} 节中已有 {{have}} 节 · 点按下载其余部分",
     "deleteSurahAudio": "删除此章的音频",
-    "deleteSurahAudioFor": "删除已下载的 {{surah}} 音频"
+    "deleteSurahAudioFor": "删除已下载的 {{surah}} 音频",
+    "audioGap": "{{surah}} {{ayah}} 尚未下载——请联网，或下载此章以便离线收听。"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

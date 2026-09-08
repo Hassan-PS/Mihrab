@@ -36,6 +36,22 @@ export type PlaybackStatus = {
   /** Buffering / loading state for spinners. */
   loading: boolean;
   reciterId: string;
+  /**
+   * The ayah playback stopped on because its audio is neither on disk
+   * nor reachable — issue #30.
+   *
+   * A track's source is the local file when it exists and a URL when it
+   * does not, which is right, and which offline turns into a request
+   * that fails and a player that stops with nothing said. "Downloaded
+   * audio will not play offline" is partly that silence: the reader
+   * cannot tell a network problem from a gap in the download, and the
+   * app knows exactly which it is.
+   *
+   * Null whenever playback is working, and cleared by the next
+   * successful start, so it can never outlive the condition it
+   * describes.
+   */
+  gap: AyahRef | null;
 };
 
 const IDLE: PlaybackStatus = {
@@ -43,6 +59,7 @@ const IDLE: PlaybackStatus = {
   playing: false,
   loading: false,
   reciterId: 'husary',
+  gap: null,
 };
 
 let status: PlaybackStatus = IDLE;
@@ -197,6 +214,26 @@ async function ensureSetup(): Promise<void> {
     });
     TrackPlayer.addEventListener(Event.PlaybackQueueEnded, () => {
       setStatus({ active: null, playing: false, loading: false });
+    });
+
+    /**
+     * A track failed. Say whether it was the network or the download.
+     *
+     * The distinction is the entire point, and only this process can
+     * make it: if the file is on disk and the player still failed, that
+     * is a broken file or a busy device and retrying is reasonable. If
+     * the file is NOT on disk, the player was reaching for a URL, and
+     * offline that is a gap in the download — a specific ayah, which the
+     * reader can be told about and can fix.
+     */
+    TrackPlayer.addEventListener(Event.PlaybackError, () => {
+      const ref = getPlaybackStatus().active;
+      if (!ref) return;
+      void localAudioPathIfAny(getPlaybackStatus().reciterId, ref.surah, ref.ayah)
+        .then(local => {
+          if (!local) setStatus({ gap: ref, playing: false, loading: false });
+        })
+        .catch(() => undefined);
     });
   })();
   return setupPromise;
@@ -565,7 +602,7 @@ export async function playRange(
   // be true of one queue, and the one the user just asked for wins.
   endListening();
   const prefs = getQuranState().prefs;
-  setStatus({ reciterId: prefs.reciterId, loading: true });
+  setStatus({ reciterId: prefs.reciterId, loading: true, gap: null });
   let refs = expandRange(from, to);
   if (opts.useRepeats !== false) {
     refs = applyRepeats(refs, prefs.repeat.eachAyah, prefs.repeat.range);
@@ -608,7 +645,7 @@ export async function listenFrom(
   if (!meta) return;
   await ensureSetup();
   const prefs = getQuranState().prefs;
-  setStatus({ reciterId: prefs.reciterId, loading: true });
+  setStatus({ reciterId: prefs.reciterId, loading: true, gap: null });
   const start = { surah, ayah: Math.max(1, Math.min(meta.ayahCount, ayah)) };
   const { refs, cursor } = listenWindow(start, LISTEN_WINDOW, nextListenRef);
   const tracks = await buildTracks(refs, prefs.reciterId, 0);

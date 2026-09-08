@@ -354,6 +354,22 @@ function runAyahQueue(
     if (total === 0) return false;
     await mkdirDeep(audioDir(reciterId));
 
+    // ── THE WORDS COME WITH THE AUDIO — issue #30 ────────────────────
+    //
+    // "Plays start to finish in aeroplane mode WITH THE TEXT
+    // SYNCHRONISED" is the whole of #30's first condition, and the
+    // synchronising half was never downloaded with the audio. Timings
+    // are fetched the first time the highlight needs them, which is
+    // during ONLINE playback — so a reader who downloaded a surah and
+    // went straight to a plane had every MP3 and no word timing, and the
+    // highlight silently fell back to the ayah.
+    //
+    // One file per reciter, cached on disk by `loadReciterTimings`, and
+    // free after the first time. Awaited so it is on disk before the
+    // download reports success, and swallowed so it can never fail an
+    // audio download: the words are best-effort, the recitation is not.
+    await loadReciterTimings(reciterId).catch(() => null);
+
     const worker = async (): Promise<void> => {
       while (!cancelled) {
         const next = pending.shift();

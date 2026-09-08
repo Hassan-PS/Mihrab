@@ -1165,7 +1165,8 @@
     "shareTafsir": "यह तफ़सीर साझा करें ({{edition}})",
     "surahAudioPartial": "{{total}} में से {{have}} आयतें · बाकी डाउनलोड करने के लिए टैप करें",
     "deleteSurahAudio": "इस सूरह का ऑडियो हटाएँ",
-    "deleteSurahAudioFor": "{{surah}} का डाउनलोड किया ऑडियो हटाएँ"
+    "deleteSurahAudioFor": "{{surah}} का डाउनलोड किया ऑडियो हटाएँ",
+    "audioGap": "{{surah}} {{ayah}} डाउनलोड नहीं है — कनेक्ट करें, या ऑफ़लाइन सुनने के लिए यह सूरह डाउनलोड करें।"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

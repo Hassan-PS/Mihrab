@@ -1165,7 +1165,8 @@
     "shareTafsir": "مشاركة هذا التفسير ({{edition}})",
     "surahAudioPartial": "{{have}} من {{total}} آية · اضغط لتنزيل الباقي",
     "deleteSurahAudio": "حذف صوت هذه السورة",
-    "deleteSurahAudioFor": "حذف الصوت المنزَّل لسورة {{surah}}"
+    "deleteSurahAudioFor": "حذف الصوت المنزَّل لسورة {{surah}}",
+    "audioGap": "الآية {{ayah}} من {{surah}} غير منزَّلة — اتصل بالإنترنت، أو نزِّل هذه السورة للاستماع دون اتصال."
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

@@ -51,7 +51,7 @@ export function MiniPlayer({
 } = {}) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  const { active, playing, loading, reciterId } = usePlaybackStatus();
+  const { active, playing, loading, reciterId, gap } = usePlaybackStatus();
   const { prefs } = useQuranState();
   // Only while someone is looking — see the hook. Listening from the
   // reader with the screen off used to keep this polling for the whole
@@ -112,6 +112,23 @@ export function MiniPlayer({
           ]}
         />
       </View>
+
+      {/* ── WHY IT STOPPED — issue #30 ─────────────────────────────────
+          A track's source is the local file when there is one and a URL
+          when there is not. Offline, a gap in the download is a request
+          that fails and a player that stops, and the reader is left
+          guessing between a bad connection and a bad download. The app
+          knows which, and knows the ayah. It says so. */}
+      {gap ? (
+        <Text style={[styles.gap, { color: palette.danger }]}>
+          {t('quran.audioGap', {
+            defaultValue:
+              '{{surah}} {{ayah}} is not downloaded — connect, or download this surah for offline use.',
+            surah: findSurah(gap.surah)?.romanized ?? gap.surah,
+            ayah: gap.ayah,
+          })}
+        </Text>
+      ) : null}
 
       <View style={styles.row}>
         <View style={styles.info}>
@@ -216,6 +233,12 @@ export function MiniPlayer({
 }
 
 const styles = StyleSheet.create({
+  gap: {
+    fontSize: 12,
+    lineHeight: 16,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+  },
   card: {
     marginHorizontal: 12,
     marginBottom: 10,

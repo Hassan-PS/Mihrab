@@ -143,21 +143,38 @@ describe('repairing a gap', () => {
   });
 
   it('never reaches the network for an ayah already on disk', async () => {
-    // One of #30's own conditions, and the one that is cheap to prove:
-    // every file exists, so the queue should do no fetching at all.
+    // One of #30's own conditions. Every ayah is there, so nothing should
+    // be fetched FOR AUDIO — which is not the same as fetching nothing:
+    // see the next test.
     for (let a = 1; a <= 7; a++) put(1, a);
     const blob = require('react-native-blob-util').default;
     blob.config.mockClear();
-    const globalFetch = jest.spyOn(global, 'fetch' as never);
     const handle = downloadAyahs(
       RECITER,
       [1, 2, 3, 4, 5, 6, 7].map(ayah => ({ surah: 1, ayah })),
       undefined,
     );
     await handle.promise;
-    expect(blob.config).not.toHaveBeenCalled();
-    expect(globalFetch).not.toHaveBeenCalled();
-    globalFetch.mockRestore();
+    const fetchedPaths = blob.config.mock.calls.map(
+      (c: [{ path?: string }]) => String(c[0]?.path ?? ''),
+    );
+    expect(fetchedPaths.filter((p: string) => p.includes('.mp3'))).toEqual([]);
+  });
+
+  it('brings the word timings down with the audio', async () => {
+    // The other half of "plays start to finish in aeroplane mode WITH THE
+    // TEXT SYNCHRONISED". Timings used to be fetched the first time the
+    // highlight needed them, which is during ONLINE playback — so a
+    // reader who downloaded a surah and went straight to a plane had
+    // every MP3 and no word timing.
+    for (let a = 1; a <= 7; a++) put(1, a);
+    const blob = require('react-native-blob-util').default;
+    blob.config.mockClear();
+    await downloadAyahs(RECITER, [{ surah: 1, ayah: 1 }], undefined).promise;
+    const fetchedPaths = blob.config.mock.calls.map(
+      (c: [{ path?: string }]) => String(c[0]?.path ?? ''),
+    );
+    expect(fetchedPaths.some((p: string) => p.includes('timings'))).toBe(true);
   });
 });
 
@@ -200,5 +217,46 @@ describe('the row that reports it', () => {
 
   it('offers to delete this surah once anything is on disk', () => {
     expect(src).toMatch(/deleteSurahAudio\(prefs\.reciterId, surahNumber\)/);
+  });
+});
+
+describe('why playback stopped', () => {
+  const read = (rel: string) =>
+    require('fs').readFileSync(require('path').join(__dirname, '..', rel), 'utf-8');
+  const PLAYBACK = read('src/quran/audio/playback.ts');
+  const PLAYER = read('src/quran/audio/MiniPlayer.tsx');
+
+  it('starts with nothing to report', () => {
+    const { getPlaybackStatus } = require('../src/quran/audio/playback');
+    expect(getPlaybackStatus().gap).toBeNull();
+  });
+
+  it('listens for the failure at all', () => {
+    // Before this there was no PlaybackError listener: a track that could
+    // not be loaded stopped the player and said nothing.
+    expect(PLAYBACK).toMatch(/addEventListener\(Event\.PlaybackError/);
+  });
+
+  it('blames the download only when the file is genuinely absent', () => {
+    // A file that IS on disk and still failed is a broken file or a busy
+    // device, and telling somebody to connect would be wrong.
+    const handler = PLAYBACK.slice(
+      PLAYBACK.indexOf('addEventListener(Event.PlaybackError'),
+    ).slice(0, 700);
+    expect(handler).toMatch(/localAudioPathIfAny\(/);
+    expect(handler).toMatch(/if \(!local\) setStatus\(\{ gap: ref/);
+  });
+
+  it('clears itself the moment playback starts again', () => {
+    // The message must never outlive the condition it describes.
+    const starts = PLAYBACK.match(/setStatus\(\{ reciterId: prefs\.reciterId, loading: true[^}]*\}\)/g) ?? [];
+    expect(starts.length).toBeGreaterThan(0);
+    for (const start of starts) expect(start).toMatch(/gap: null/);
+  });
+
+  it('names the ayah on screen rather than in a log', () => {
+    expect(PLAYER).toMatch(/quran\.audioGap/);
+    expect(PLAYER).toMatch(/surah: findSurah\(gap\.surah\)\?\.romanized/);
+    expect(PLAYER).toMatch(/ayah: gap\.ayah/);
   });
 });

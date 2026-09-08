@@ -316,6 +316,9 @@ jest.mock('react-native-track-player', () => ({
   },
   Event: {
     PlaybackState: 'playback-state',
+    // #30: the event that says a track could not be loaded, which is how
+    // a gap in a download tells itself apart from a network problem.
+    PlaybackError: 'playback-error',
     PlaybackActiveTrackChanged: 'playback-active-track-changed',
     PlaybackQueueEnded: 'playback-queue-ended',
     RemotePlay: 'remote-play',

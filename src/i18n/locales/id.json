@@ -1165,7 +1165,8 @@
     "shareTafsir": "Bagikan tafsir ini ({{edition}})",
     "surahAudioPartial": "{{have}} dari {{total}} ayat · ketuk untuk mengunduh sisanya",
     "deleteSurahAudio": "Hapus audio surah ini",
-    "deleteSurahAudioFor": "Hapus audio {{surah}} yang telah diunduh"
+    "deleteSurahAudioFor": "Hapus audio {{surah}} yang telah diunduh",
+    "audioGap": "{{surah}} {{ayah}} belum diunduh — sambungkan, atau unduh surah ini untuk didengarkan luring."
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

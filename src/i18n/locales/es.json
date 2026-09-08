@@ -1165,7 +1165,8 @@
     "shareTafsir": "Compartir este tafsir ({{edition}})",
     "surahAudioPartial": "{{have}} de {{total}} aleyas · toca para descargar el resto",
     "deleteSurahAudio": "Eliminar el audio de esta sura",
-    "deleteSurahAudioFor": "Eliminar el audio descargado de {{surah}}"
+    "deleteSurahAudioFor": "Eliminar el audio descargado de {{surah}}",
+    "audioGap": "{{surah}} {{ayah}} no está descargada — conéctate, o descarga esta sura para escucharla sin conexión."
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

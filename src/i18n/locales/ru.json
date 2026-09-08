@@ -1165,7 +1165,8 @@
     "shareTafsir": "Поделиться этим тафсиром ({{edition}})",
     "surahAudioPartial": "{{have}} из {{total}} аятов · нажмите, чтобы загрузить остальное",
     "deleteSurahAudio": "Удалить аудио этой суры",
-    "deleteSurahAudioFor": "Удалить загруженное аудио суры {{surah}}"
+    "deleteSurahAudioFor": "Удалить загруженное аудио суры {{surah}}",
+    "audioGap": "{{surah}} {{ayah}} не загружен — подключитесь или загрузите эту суру для прослушивания офлайн."
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",
