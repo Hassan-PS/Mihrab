@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "Soluppgång, midnatt och nattens tredjedelar",
     "additionalTimesFooter": "De syns i bönetabellen, widgeten och Live-aktiviteten lika mycket som i aviseringarna, och använder standardljudet i stället för adhan.",
     "dailyReminders": "Dagliga påminnelser",
-    "dailyRemindersBlurb": "En vers varje dag, och dagens khatmah-del",
+    "dailyRemindersBlurb": "En vers om dagen, dagens khatma-del, Al-Kahf och Al-Mulk",
     "logSection": "Logg",
     "sunriseTime": "Soluppgång",
     "sunriseTimeHelp": "Visa soluppgång i bönetabellen, aviseringar, widgeten och Live Activity.",
@@ -352,7 +352,8 @@
     "malikiRows": "Visa dem bland dagens tider",
     "malikiRowsHelp": "Av: gränserna aviseras bara — inget läggs till på kortet eller i månaden.",
     "malikiEndAlerts": "Och när tiden går ut",
-    "malikiEndAlertsHelp": "En andra avisering i det ögonblick bönen blir qada. Skickas exakt då, aldrig i förväg."
+    "malikiEndAlertsHelp": "En andra avisering i det ögonblick bönen blir qada. Skickas exakt då, aldrig i förväg.",
+    "surahRemindersChannel": "Surapåminnelser"
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} till",
     "owedA11y": "{{owed}} böner att ta igen, visa dem",
     "nothingOwedA11y": "Inget att ta igen"
+  },
+  "surahReminders": {
+    "groupTitle": "Surapåminnelser",
+    "kahf": "Sura Al-Kahf på fredagar",
+    "kahfHelp": "En gång i veckan, på fredagen, vid tiden du väljer.",
+    "kahfTitle": "Al-Kahf",
+    "kahfBody": "Det är fredag — läs sura Al-Kahf.",
+    "mulk": "Sura Al-Mulk på kvällen",
+    "mulkHelp": "Varje kväll vid tiden du väljer — appen vet inte när du sover, så den frågar.",
+    "mulkTitle": "Al-Mulk",
+    "mulkBody": "Före sömnen — läs sura Al-Mulk."
   }
 }

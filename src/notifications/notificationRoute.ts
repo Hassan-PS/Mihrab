@@ -37,6 +37,7 @@
  */
 import type { Notification } from '@notifee/react-native';
 import { MIHRAB_SCHEME } from '../navigation/linking';
+import { findPageForAyah } from '../quran/pages';
 import { khatmahContinueTarget } from '../quran/khatmahTarget';
 import {
   activeKhatmah,
@@ -47,6 +48,8 @@ import {
 /** The value of `data.route` on a notification that has a destination. */
 export const ROUTE_KHATMAH = 'khatmah';
 export const ROUTE_AYAH_OF_DAY = 'ayahOfDay';
+/** A whole surah — the Al-Kahf and Al-Mulk reminders, #36. */
+export const ROUTE_SURAH = 'surah';
 
 function positiveInt(value: unknown): number | null {
   const n = Number(value);
@@ -75,6 +78,24 @@ export async function notificationRoute(
   if (data.route === ROUTE_AYAH_OF_DAY || (surah && ayah && !data.route)) {
     if (!surah || !ayah) return null;
     return readUrl(surah, `scrollToAyah=${ayah}`);
+  }
+
+  // A surah, opened at its beginning, in whichever reader they were last
+  // in — the same choice the khatmah link makes below.
+  if (data.route === ROUTE_SURAH) {
+    if (!surah) return null;
+    try {
+      await hydrateQuranState();
+      if (getQuranState().lastRead?.mode === 'mushaf') {
+        // The page the surah BEGINS on — most surahs start partway down
+        // one, so this is a lookup rather than a page whose start names
+        // the surah.
+        return readUrl(surah, `initialPage=${findPageForAyah(surah, 1)}`);
+      }
+    } catch {
+      // Fall through to the ayah form, which needs nothing loaded.
+    }
+    return readUrl(surah, 'scrollToAyah=1');
   }
 
   if (data.route === ROUTE_KHATMAH) {

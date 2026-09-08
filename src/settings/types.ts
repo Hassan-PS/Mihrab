@@ -454,6 +454,26 @@ export type PrayerAppSettings = {
   khatmahReminderEnabled: boolean;
   khatmahReminderHour: number;
   khatmahReminderMinute: number;
+  /**
+   * The two surahs with a time of their own — issue #36.
+   *
+   * Al-Kahf on Friday and Al-Mulk before sleeping are the two most
+   * commonly kept reading habits that are not a khatmah, and neither is
+   * served by a reminder about a portion. Both off by default: a habit
+   * nobody asked for, announced, is an interruption.
+   *
+   * A CLOCK TIME FOR BOTH, and for Al-Mulk that is a compromise worth
+   * naming. "Before sleeping" is not a time the app knows; the honest
+   * options were to ask, or to guess from ʿIshāʾ and be wrong for anyone
+   * who sleeps early or late. It asks. The default sits late enough to
+   * be after ʿIshāʾ across most of the year at most latitudes.
+   */
+  kahfReminderEnabled: boolean;
+  kahfReminderHour: number;
+  kahfReminderMinute: number;
+  mulkReminderEnabled: boolean;
+  mulkReminderHour: number;
+  mulkReminderMinute: number;
 };
 
 export const DEFAULT_SETTINGS: PrayerAppSettings = {
@@ -552,4 +572,10 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   khatmahReminderEnabled: false,
   khatmahReminderHour: 18,
   khatmahReminderMinute: 0,
+  kahfReminderEnabled: false,
+  kahfReminderHour: 9,
+  kahfReminderMinute: 0,
+  mulkReminderEnabled: false,
+  mulkReminderHour: 22,
+  mulkReminderMinute: 0,
 };

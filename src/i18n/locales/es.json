@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "El amanecer, la medianoche y los tercios de la noche",
     "additionalTimesFooter": "Además de en las notificaciones, aparecen en la tabla de oraciones, el widget y la Actividad en vivo, y usan el sonido predeterminado en lugar del adhan.",
     "dailyReminders": "Recordatorios diarios",
-    "dailyRemindersBlurb": "Una aleya cada día y la porción de la jatma de hoy",
+    "dailyRemindersBlurb": "Una aleya al día, la porción de la khatma de hoy, Al-Kahf y Al-Mulk",
     "logSection": "Registro",
     "sunriseTime": "Amanecer",
     "sunriseTimeHelp": "Mostrar el amanecer en la tabla de oraciones, las notificaciones, el widget y la Live Activity.",
@@ -352,7 +352,8 @@
     "malikiRows": "Mostrarlos en las horas del día",
     "malikiRowsHelp": "Desactivado, los límites solo se anuncian: no se añade nada a la tarjeta ni al mes.",
     "malikiEndAlerts": "Y cuando el tiempo termina",
-    "malikiEndAlertsHelp": "Una segunda notificación en el momento en que la oración pasa a ser qada. A esa hora exacta, nunca antes."
+    "malikiEndAlertsHelp": "Una segunda notificación en el momento en que la oración pasa a ser qada. A esa hora exacta, nunca antes.",
+    "surahRemindersChannel": "Recordatorios de suras"
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} más",
     "owedA11y": "{{owed}} rezos pendientes, mostrarlos",
     "nothingOwedA11y": "Nada pendiente"
+  },
+  "surahReminders": {
+    "groupTitle": "Recordatorios de suras",
+    "kahf": "Sura Al-Kahf los viernes",
+    "kahfHelp": "Una vez por semana, el viernes, a la hora que elijas.",
+    "kahfTitle": "Al-Kahf",
+    "kahfBody": "Es viernes — lee la sura Al-Kahf.",
+    "mulk": "Sura Al-Mulk por la noche",
+    "mulkHelp": "Cada noche a la hora que elijas: la app no sabe cuándo duermes, así que lo pregunta.",
+    "mulkTitle": "Al-Mulk",
+    "mulkBody": "Antes de dormir — lee la sura Al-Mulk."
   }
 }

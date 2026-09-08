@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "日出、午夜与夜的三分之一",
     "additionalTimesFooter": "除通知外，这些时刻也会出现在礼拜时间表、小组件和实时活动中，并使用默认提示音而非宣礼。",
     "dailyReminders": "每日提醒",
-    "dailyRemindersBlurb": "每天一节经文，以及今天的诵读进度",
+    "dailyRemindersBlurb": "每日一节经文、今日的诵读份额、《山洞章》与《国权章》",
     "logSection": "记录",
     "sunriseTime": "日出",
     "sunriseTimeHelp": "在礼拜时间表、通知、小组件和 Live Activity 中显示日出。",
@@ -352,7 +352,8 @@
     "malikiRows": "在当天的时间中显示",
     "malikiRowsHelp": "关闭时只发送提醒——不会在卡片或月历中添加任何内容。",
     "malikiEndAlerts": "以及时间结束时",
-    "malikiEndAlertsHelp": "在礼拜成为盖达的那一刻发出第二条通知。就在那个时刻，绝不提前。"
+    "malikiEndAlertsHelp": "在礼拜成为盖达的那一刻发出第二条通知。就在那个时刻，绝不提前。",
+    "surahRemindersChannel": "章节提醒"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} 更多",
     "owedA11y": "{{owed}} 项待补拜功，显示",
     "nothingOwedA11y": "无待补"
+  },
+  "surahReminders": {
+    "groupTitle": "章节提醒",
+    "kahf": "主麻日诵读《山洞章》",
+    "kahfHelp": "每周一次，在主麻日，于你选择的时间。",
+    "kahfTitle": "山洞章",
+    "kahfBody": "今天是主麻日——诵读《山洞章》。",
+    "mulk": "夜间诵读《国权章》",
+    "mulkHelp": "每晚在你选择的时间——应用不知道你何时入睡，所以由你决定。",
+    "mulkTitle": "国权章",
+    "mulkBody": "睡前——诵读《国权章》。"
   }
 }

@@ -35,6 +35,7 @@ import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
 import { rescheduleFastingReminders } from './notifications/fastingReminders';
+import { rescheduleSurahReminders } from './notifications/surahReminders';
 import {
   khatmahReminderDue,
   rescheduleKhatmahReminder,
@@ -123,6 +124,12 @@ export function AppNavigationRoot() {
         settings.khatmahReminderMinute,
         String(settings.fastingRemindersEnabled),
         settings.fastingReminderHour,
+        String(settings.kahfReminderEnabled),
+        settings.kahfReminderHour,
+        settings.kahfReminderMinute,
+        String(settings.mulkReminderEnabled),
+        settings.mulkReminderHour,
+        settings.mulkReminderMinute,
       );
       if (!shouldResync(DAILY_RESYNC_KEY, dailyPrint, now)) return;
       markResynced(DAILY_RESYNC_KEY, dailyPrint, now);
@@ -150,6 +157,16 @@ export function AppNavigationRoot() {
       void rescheduleFastingReminders({
         enabled: settings.fastingRemindersEnabled,
         hour: settings.fastingReminderHour,
+      });
+      // Al-Kahf on Friday and Al-Mulk at night (#36). Same rolling
+      // window as the others, rolled forward by this same resync.
+      void rescheduleSurahReminders({
+        kahfEnabled: settings.kahfReminderEnabled,
+        kahfHour: settings.kahfReminderHour,
+        kahfMinute: settings.kahfReminderMinute,
+        mulkEnabled: settings.mulkReminderEnabled,
+        mulkHour: settings.mulkReminderHour,
+        mulkMinute: settings.mulkReminderMinute,
       });
 
     };
@@ -216,6 +233,12 @@ export function AppNavigationRoot() {
     settings.khatmahReminderMinute,
     settings.fastingRemindersEnabled,
     settings.fastingReminderHour,
+    settings.kahfReminderEnabled,
+    settings.kahfReminderHour,
+    settings.kahfReminderMinute,
+    settings.mulkReminderEnabled,
+    settings.mulkReminderHour,
+    settings.mulkReminderMinute,
   ]);
 
   // iOS: re-show the Live Activity if the user dismissed it (swipe / "Clear

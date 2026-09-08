@@ -30,7 +30,9 @@ export function DailyRemindersSettingsScreen() {
   const { slice: settings, update: updateSettings } = useNotificationsSettings();
   const clock = useClockFormatter();
   /** Which of the two times the sheet is editing, or none. */
-  const [timeTarget, setTimeTarget] = useState<'ayah' | 'khatmah' | null>(null);
+  const [timeTarget, setTimeTarget] = useState<
+    'ayah' | 'khatmah' | 'kahf' | 'mulk' | null
+  >(null);
 
   // The khatmah reminder has nothing to say without a plan — the
   // scheduler returns without writing a single trigger. Reading the plan
@@ -85,6 +87,32 @@ export function DailyRemindersSettingsScreen() {
     updateSettings({ morningDuaReminderEnabled: true });
   };
 
+  /**
+   * Al-Kahf and Al-Mulk — issue #36.
+   *
+   * A clock time for both, including Al-Mulk, and that is a compromise
+   * worth naming in the help text rather than hiding: "before sleeping"
+   * is not a time the app knows, and guessing it from ʿIshāʾ is wrong for
+   * anyone who sleeps early and badly wrong at high latitude in June.
+   */
+  const onToggleKahf = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ kahfReminderEnabled: false });
+      return;
+    }
+    if (!(await ensureNotifPermission())) return;
+    updateSettings({ kahfReminderEnabled: true });
+  };
+
+  const onToggleMulk = async (value: boolean) => {
+    if (!value) {
+      updateSettings({ mulkReminderEnabled: false });
+      return;
+    }
+    if (!(await ensureNotifPermission())) return;
+    updateSettings({ mulkReminderEnabled: true });
+  };
+
   const onToggleEveningDuas = async (value: boolean) => {
     if (!value) {
       updateSettings({ eveningDuaReminderEnabled: false });
@@ -98,13 +126,39 @@ export function DailyRemindersSettingsScreen() {
   const deferBack = useRef(false);
   deferBack.current = timeTarget != null;
 
-  const editingKhatmah = timeTarget === 'khatmah';
-  const pickerHour = editingKhatmah
-    ? settings.khatmahReminderHour
-    : settings.ayahOfDayHour;
-  const pickerMinute = editingKhatmah
-    ? settings.khatmahReminderMinute
-    : settings.ayahOfDayMinute;
+  /**
+   * One sheet, four possible times. Keyed by which row opened it rather
+   * than by a boolean pair, which is what this was when there were two
+   * and what would have quietly kept editing the ayah's time when a
+   * third arrived.
+   */
+  const PICKER = {
+    ayah: {
+      hour: settings.ayahOfDayHour,
+      minute: settings.ayahOfDayMinute,
+      setHour: (h: number) => updateSettings({ ayahOfDayHour: h }),
+      setMinute: (m: number) => updateSettings({ ayahOfDayMinute: m }),
+    },
+    khatmah: {
+      hour: settings.khatmahReminderHour,
+      minute: settings.khatmahReminderMinute,
+      setHour: (h: number) => updateSettings({ khatmahReminderHour: h }),
+      setMinute: (m: number) => updateSettings({ khatmahReminderMinute: m }),
+    },
+    kahf: {
+      hour: settings.kahfReminderHour,
+      minute: settings.kahfReminderMinute,
+      setHour: (h: number) => updateSettings({ kahfReminderHour: h }),
+      setMinute: (m: number) => updateSettings({ kahfReminderMinute: m }),
+    },
+    mulk: {
+      hour: settings.mulkReminderHour,
+      minute: settings.mulkReminderMinute,
+      setHour: (h: number) => updateSettings({ mulkReminderHour: h }),
+      setMinute: (m: number) => updateSettings({ mulkReminderMinute: m }),
+    },
+  } as const;
+  const picker = PICKER[timeTarget ?? 'ayah'];
 
   return (
     <>
@@ -182,26 +236,58 @@ export function DailyRemindersSettingsScreen() {
             />
           ) : null}
         </SettingsGroup>
+
+        {/* The two surahs with a time of their own — issue #36. Both off
+            by default: a reading habit nobody asked to be reminded of,
+            announced, is an interruption. */}
+        <SettingsGroup title={t('surahReminders.groupTitle', 'Surah reminders')}>
+          <SettingsToggleRow
+            title={t('surahReminders.kahf', 'Surah Al-Kahf on Friday')}
+            help={t(
+              'surahReminders.kahfHelp',
+              'Once a week, on Friday, at the time you choose.',
+            )}
+            value={settings.kahfReminderEnabled}
+            onValueChange={onToggleKahf}
+          />
+          {settings.kahfReminderEnabled ? (
+            <SettingsLinkRow
+              title={t('settings.ayahOfDayTime', 'Notification time')}
+              value={fmtTime(
+                settings.kahfReminderHour,
+                settings.kahfReminderMinute,
+              )}
+              onPress={() => setTimeTarget('kahf')}
+            />
+          ) : null}
+          <SettingsToggleRow
+            title={t('surahReminders.mulk', 'Surah Al-Mulk at night')}
+            help={t(
+              'surahReminders.mulkHelp',
+              'Every night at the time you choose — the app does not know when you sleep, so it asks.',
+            )}
+            value={settings.mulkReminderEnabled}
+            onValueChange={onToggleMulk}
+          />
+          {settings.mulkReminderEnabled ? (
+            <SettingsLinkRow
+              title={t('settings.ayahOfDayTime', 'Notification time')}
+              value={fmtTime(
+                settings.mulkReminderHour,
+                settings.mulkReminderMinute,
+              )}
+              onPress={() => setTimeTarget('mulk')}
+            />
+          ) : null}
+        </SettingsGroup>
       </SettingsPage>
 
       <TimePickerSheet
         visible={timeTarget != null}
-        hour={pickerHour}
-        minute={pickerMinute}
-        onChangeHour={h =>
-          updateSettings(
-            editingKhatmah
-              ? { khatmahReminderHour: h }
-              : { ayahOfDayHour: h },
-          )
-        }
-        onChangeMinute={m =>
-          updateSettings(
-            editingKhatmah
-              ? { khatmahReminderMinute: m }
-              : { ayahOfDayMinute: m },
-          )
-        }
+        hour={picker.hour}
+        minute={picker.minute}
+        onChangeHour={picker.setHour}
+        onChangeMinute={picker.setMinute}
         onClose={() => setTimeTarget(null)}
       />
     </>

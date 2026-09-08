@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "Le lever du soleil, minuit et les tiers de la nuit",
     "additionalTimesFooter": "Elles apparaissent dans le tableau des prières, le widget et l'activité en direct autant que dans les notifications, et utilisent le son par défaut plutôt que l'adhan.",
     "dailyReminders": "Rappels quotidiens",
-    "dailyRemindersBlurb": "Un verset chaque jour, et la portion de khatma du jour",
+    "dailyRemindersBlurb": "Un verset par jour, la portion de khatma du jour, Al-Kahf et Al-Mulk",
     "logSection": "Journal",
     "sunriseTime": "Lever du soleil",
     "sunriseTimeHelp": "Afficher le lever du soleil dans le tableau des prières, les notifications, le widget et la Live Activity.",
@@ -352,7 +352,8 @@
     "malikiRows": "Les afficher dans les heures du jour",
     "malikiRowsHelp": "Désactivé, les limites sont seulement annoncées — rien n’est ajouté à la carte ni au mois.",
     "malikiEndAlerts": "Et quand le temps se termine",
-    "malikiEndAlertsHelp": "Une seconde notification au moment où la prière devient qada. À l’heure même, jamais en avance."
+    "malikiEndAlertsHelp": "Une seconde notification au moment où la prière devient qada. À l’heure même, jamais en avance.",
+    "surahRemindersChannel": "Rappels de sourates"
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} autres",
     "owedA11y": "{{owed}} prières dues, les afficher",
     "nothingOwedA11y": "Rien à rattraper"
+  },
+  "surahReminders": {
+    "groupTitle": "Rappels de sourates",
+    "kahf": "Sourate Al-Kahf le vendredi",
+    "kahfHelp": "Une fois par semaine, le vendredi, à l’heure de votre choix.",
+    "kahfTitle": "Al-Kahf",
+    "kahfBody": "C’est vendredi — lisez la sourate Al-Kahf.",
+    "mulk": "Sourate Al-Mulk le soir",
+    "mulkHelp": "Chaque nuit à l’heure de votre choix — l’application ignore quand vous dormez, elle vous le demande.",
+    "mulkTitle": "Al-Mulk",
+    "mulkBody": "Avant de dormir — lisez la sourate Al-Mulk."
   }
 }

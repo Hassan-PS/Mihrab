@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "Matahari terbit, tengah malam, dan sepertiga malam",
     "additionalTimesFooter": "Semua ini muncul di tabel salat, widget, dan Live Activity selain di notifikasi, dan memakai suara bawaan, bukan azan.",
     "dailyReminders": "Pengingat harian",
-    "dailyRemindersBlurb": "Satu ayat setiap hari, dan bagian khatam hari ini",
+    "dailyRemindersBlurb": "Satu ayat setiap hari, jatah khatam hari ini, Al-Kahf dan Al-Mulk",
     "logSection": "Catatan",
     "sunriseTime": "Matahari terbit",
     "sunriseTimeHelp": "Tampilkan matahari terbit di tabel salat, notifikasi, widget, dan Live Activity.",
@@ -352,7 +352,8 @@
     "malikiRows": "Tampilkan di antara waktu hari ini",
     "malikiRowsHelp": "Jika nonaktif, batas waktu hanya diberitahukan — tidak ada tambahan pada kartu atau bulan.",
     "malikiEndAlerts": "Dan saat waktunya habis",
-    "malikiEndAlertsHelp": "Notifikasi kedua tepat saat salat menjadi qadha. Pada waktunya sendiri, tidak pernah lebih awal."
+    "malikiEndAlertsHelp": "Notifikasi kedua tepat saat salat menjadi qadha. Pada waktunya sendiri, tidak pernah lebih awal.",
+    "surahRemindersChannel": "Pengingat surah"
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} lagi",
     "owedA11y": "{{owed}} salat qadha, tampilkan",
     "nothingOwedA11y": "Tidak ada qadha"
+  },
+  "surahReminders": {
+    "groupTitle": "Pengingat surah",
+    "kahf": "Surah Al-Kahf pada hari Jumat",
+    "kahfHelp": "Sekali sepekan, pada hari Jumat, pada waktu yang kamu pilih.",
+    "kahfTitle": "Al-Kahf",
+    "kahfBody": "Hari ini Jumat — bacalah Surah Al-Kahf.",
+    "mulk": "Surah Al-Mulk pada malam hari",
+    "mulkHelp": "Setiap malam pada waktu yang kamu pilih — aplikasi tidak tahu kapan kamu tidur, jadi ia bertanya.",
+    "mulkTitle": "Al-Mulk",
+    "mulkBody": "Sebelum tidur — bacalah Surah Al-Mulk."
   }
 }

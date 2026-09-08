@@ -94,6 +94,12 @@ export type NotificationsSlice = Pick<
   | 'khatmahReminderEnabled'
   | 'khatmahReminderHour'
   | 'khatmahReminderMinute'
+  | 'kahfReminderEnabled'
+  | 'kahfReminderHour'
+  | 'kahfReminderMinute'
+  | 'mulkReminderEnabled'
+  | 'mulkReminderHour'
+  | 'mulkReminderMinute'
 >;
 
 export type DataSourceSlice = Pick<
@@ -268,6 +274,12 @@ export function PrayerSettingsProvider({
       khatmahReminderEnabled: settings.khatmahReminderEnabled,
       khatmahReminderHour: settings.khatmahReminderHour,
       khatmahReminderMinute: settings.khatmahReminderMinute,
+      kahfReminderEnabled: settings.kahfReminderEnabled,
+      kahfReminderHour: settings.kahfReminderHour,
+      kahfReminderMinute: settings.kahfReminderMinute,
+      mulkReminderEnabled: settings.mulkReminderEnabled,
+      mulkReminderHour: settings.mulkReminderHour,
+      mulkReminderMinute: settings.mulkReminderMinute,
     }),
     [
       settings.notificationsEnabled,
@@ -288,6 +300,12 @@ export function PrayerSettingsProvider({
       settings.khatmahReminderEnabled,
       settings.khatmahReminderHour,
       settings.khatmahReminderMinute,
+      settings.kahfReminderEnabled,
+      settings.kahfReminderHour,
+      settings.kahfReminderMinute,
+      settings.mulkReminderEnabled,
+      settings.mulkReminderHour,
+      settings.mulkReminderMinute,
     ],
   );
 

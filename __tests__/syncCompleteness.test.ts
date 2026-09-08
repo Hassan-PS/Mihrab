@@ -129,6 +129,8 @@ const STAYS: Record<string, string> = {
   'dua-adhkar-': 'a notification id prefix, not a store',
   'fast-rem-': 'a notification id prefix, not a store',
   'khatmah-rem-': 'a notification id prefix, not a store',
+  'surah-kahf-': 'a notification id prefix, not a store',
+  'surah-mulk-': 'a notification id prefix, not a store',
   'mihrab.snapshot': 'the export format tag, not a store',
   'prayerapp.sync.secret.v1':
     'this device’s X25519 secret half, and the one key in the app that ' +

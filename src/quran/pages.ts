@@ -155,3 +155,4 @@ export function easternNumerals(n: number | string): string {
     String.fromCharCode('٠'.charCodeAt(0) + Number(d)),
   );
 }
+

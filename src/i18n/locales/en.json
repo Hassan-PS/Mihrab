@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "Sunrise, midnight and the thirds of the night",
     "additionalTimesFooter": "These appear in the prayer table, the widget and the Live Activity as well as in notifications, and they use the default sound rather than the adhan.",
     "dailyReminders": "Daily reminders",
-    "dailyRemindersBlurb": "An ayah each day, and today's khatmah portion",
+    "dailyRemindersBlurb": "An ayah each day, today's khatmah portion, Al-Kahf and Al-Mulk",
     "logSection": "Log",
     "sunriseTime": "Sunrise",
     "sunriseTimeHelp": "Show sunrise in the prayer table, notifications, widget, and Live Activity.",
@@ -352,7 +352,8 @@
     "malikiRows": "Show them in the day’s times",
     "malikiRowsHelp": "Off, the boundaries are only announced — nothing is added to the card or the month.",
     "malikiEndAlerts": "And when the time ends",
-    "malikiEndAlertsHelp": "A second notification at the moment the prayer becomes qada. Fired at the time itself, never early."
+    "malikiEndAlertsHelp": "A second notification at the moment the prayer becomes qada. Fired at the time itself, never early.",
+    "surahRemindersChannel": "Surah reminders"
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} more",
     "owedA11y": "{{owed}} prayers owed, show them",
     "nothingOwedA11y": "Nothing owed"
+  },
+  "surahReminders": {
+    "groupTitle": "Surah reminders",
+    "kahf": "Surah Al-Kahf on Friday",
+    "kahfHelp": "Once a week, on Friday, at the time you choose.",
+    "kahfTitle": "Al-Kahf",
+    "kahfBody": "It is Friday — read Surah Al-Kahf.",
+    "mulk": "Surah Al-Mulk at night",
+    "mulkHelp": "Every night at the time you choose — the app does not know when you sleep, so it asks.",
+    "mulkTitle": "Al-Mulk",
+    "mulkBody": "Before sleeping — read Surah Al-Mulk."
   }
 }

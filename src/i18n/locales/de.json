@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "Sonnenaufgang, Mitternacht und die Nachtdrittel",
     "additionalTimesFooter": "Diese erscheinen neben den Benachrichtigungen auch in der Gebetstabelle, im Widget und in der Live-Aktivität und verwenden den Standardton statt des Adhans.",
     "dailyReminders": "Tägliche Erinnerungen",
-    "dailyRemindersBlurb": "Jeden Tag ein Vers und das heutige Khatmah-Pensum",
+    "dailyRemindersBlurb": "Täglich ein Vers, die heutige Khatma-Portion, Al-Kahf und Al-Mulk",
     "logSection": "Protokoll",
     "sunriseTime": "Sonnenaufgang",
     "sunriseTimeHelp": "Sonnenaufgang in der Gebetstabelle, in Benachrichtigungen, im Widget und in der Live-Aktivität anzeigen.",
@@ -352,7 +352,8 @@
     "malikiRows": "In den Zeiten des Tages anzeigen",
     "malikiRowsHelp": "Aus werden die Grenzen nur angekündigt — der Karte und dem Monat wird nichts hinzugefügt.",
     "malikiEndAlerts": "Und wenn die Zeit endet",
-    "malikiEndAlertsHelp": "Eine zweite Benachrichtigung in dem Moment, in dem das Gebet zu Qada wird. Genau dann, nie früher."
+    "malikiEndAlertsHelp": "Eine zweite Benachrichtigung in dem Moment, in dem das Gebet zu Qada wird. Genau dann, nie früher.",
+    "surahRemindersChannel": "Sura-Erinnerungen"
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} weitere",
     "owedA11y": "{{owed}} offene Gebete, anzeigen",
     "nothingOwedA11y": "Nichts offen"
+  },
+  "surahReminders": {
+    "groupTitle": "Sura-Erinnerungen",
+    "kahf": "Sure Al-Kahf am Freitag",
+    "kahfHelp": "Einmal pro Woche, freitags, zur gewählten Zeit.",
+    "kahfTitle": "Al-Kahf",
+    "kahfBody": "Es ist Freitag — lies Sure Al-Kahf.",
+    "mulk": "Sure Al-Mulk am Abend",
+    "mulkHelp": "Jede Nacht zur gewählten Zeit — die App weiß nicht, wann du schläfst, also fragt sie.",
+    "mulkTitle": "Al-Mulk",
+    "mulkBody": "Vor dem Schlafen — lies Sure Al-Mulk."
   }
 }

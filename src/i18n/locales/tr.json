@@ -275,7 +275,7 @@
     "additionalTimesBlurb": "Güneşin doğuşu, gece yarısı ve gecenin üçte birleri",
     "additionalTimesFooter": "Bunlar bildirimlerin yanı sıra namaz tablosunda, widget'ta ve Canlı Etkinlik'te de görünür ve ezan yerine varsayılan sesi kullanır.",
     "dailyReminders": "Günlük hatırlatmalar",
-    "dailyRemindersBlurb": "Her gün bir ayet ve bugünün hatim payı",
+    "dailyRemindersBlurb": "Her gün bir ayet, bugünkü hatim payı, Kehf ve Mülk",
     "logSection": "Kayıt",
     "sunriseTime": "Gündoğumu",
     "sunriseTimeHelp": "Gündoğumunu namaz tablosunda, bildirimlerde, widget'ta ve Live Activity'de göster.",
@@ -352,7 +352,8 @@
     "malikiRows": "Günün vakitleri arasında göster",
     "malikiRowsHelp": "Kapalıyken sınırlar yalnızca bildirilir; karta veya aya hiçbir şey eklenmez.",
     "malikiEndAlerts": "Ve vakit çıktığında",
-    "malikiEndAlertsHelp": "Namazın kazaya kaldığı anda ikinci bir bildirim. Tam o vakitte, asla erken değil."
+    "malikiEndAlertsHelp": "Namazın kazaya kaldığı anda ikinci bir bildirim. Tam o vakitte, asla erken değil.",
+    "surahRemindersChannel": "Sure hatırlatıcıları"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -1659,5 +1660,16 @@
     "owedMore": "+{{more}} daha",
     "owedA11y": "{{owed}} kaza namazı, göster",
     "nothingOwedA11y": "Kaza yok"
+  },
+  "surahReminders": {
+    "groupTitle": "Sure hatırlatıcıları",
+    "kahf": "Cuma günü Kehf suresi",
+    "kahfHelp": "Haftada bir kez, cuma günü, seçtiğin saatte.",
+    "kahfTitle": "Kehf",
+    "kahfBody": "Bugün cuma — Kehf suresini oku.",
+    "mulk": "Geceleri Mülk suresi",
+    "mulkHelp": "Her gece seçtiğin saatte — uygulama ne zaman uyuduğunu bilmez, bu yüzden sorar.",
+    "mulkTitle": "Mülk",
+    "mulkBody": "Uyumadan önce — Mülk suresini oku."
   }
 }
