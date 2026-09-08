@@ -29,6 +29,7 @@ class MainApplication : Application(), ReactApplication {
           add(SyncFolderPackage())
           add(ScanQrPackage())
           add(CompassPackage())
+          add(DisplayCutoutPackage())
         },
     )
   }

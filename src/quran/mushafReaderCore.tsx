@@ -619,6 +619,8 @@ export function MushafPageHeader({
   ornament,
   riwayah = DEFAULT_RIWAYAH,
   show = 'both',
+  labelSide,
+  labelMaxWidth,
 }: {
   page: number;
   isFullscreen: boolean;
@@ -628,6 +630,15 @@ export function MushafPageHeader({
   /** Which muṣḥaf's page this is — the juz label is a fact about ITS print. */
   riwayah?: RiwayahId;
   show?: 'both' | 'label' | 'pill';
+  /**
+   * Which PHYSICAL side the label sits on when it is alone in the row —
+   * the fullscreen phone puts it on the side away from the camera (see
+   * `useCutoutSide` in the phone reader). Defaults to the end, which is
+   * where the spread's odd page wants it.
+   */
+  labelSide?: 'start' | 'end';
+  /** A cap in dp so the label stops short of the camera, if one is near. */
+  labelMaxWidth?: number;
 }) {
   const { t } = useTranslation();
   const pages = pagesForRiwayah(riwayah);
@@ -636,7 +647,7 @@ export function MushafPageHeader({
     <View
       style={[
         styles.pageHeader,
-        show === 'label' && styles.pageHeaderLabelEnd,
+        show === 'label' && labelSide !== 'start' && styles.pageHeaderLabelEnd,
       ]}>
       {show !== 'pill' ? (
         <Text
@@ -648,7 +659,8 @@ export function MushafPageHeader({
             // cutout instead of below it — see the phone reader. The middle
             // of the row belongs to the island: the label may have the near
             // half of the window and no more, however long the surah's name.
-            isFullscreen && styles.pageHeaderTextIsland,
+            isFullscreen && labelMaxWidth == null && styles.pageHeaderTextIsland,
+            labelMaxWidth != null && { maxWidth: labelMaxWidth },
             { color: ornament },
           ]}>
           {isFullscreen

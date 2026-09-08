@@ -34,6 +34,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDisplayCutout } from '../native/DisplayCutout';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -76,10 +77,21 @@ export function MushafReader(props: Props) {
   const headerHeight = useHeaderHeight();
   /**
    * What the download strip has to clear above it — see where it is used.
-   * Android's header is opaque and in flow, so nothing.
+   * Android's header is opaque and in flow, so nothing while it is shown.
+   * In fullscreen the status bar is hidden and the window runs to the top
+   * edge, so the strip has to clear the camera itself: it used to sit at
+   * y = 0 with the percentage under the lens. The cutout's own inset is
+   * the answer (the safe-area top can read 0 there, with the bar hidden).
    */
+  const cutout = useDisplayCutout();
   const stripTop =
-    Platform.OS !== 'ios' ? 0 : props.isFullscreen ? insets.top : headerHeight;
+    Platform.OS !== 'ios'
+      ? props.isFullscreen
+        ? Math.max(cutout.top, insets.top)
+        : 0
+      : props.isFullscreen
+        ? insets.top
+        : headerHeight;
 
   /**
    * A `unicode` riwayah has no page fonts — its text and its face are in

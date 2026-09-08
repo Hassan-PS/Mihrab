@@ -20,9 +20,12 @@ describe('the download strip clears the floating header', () => {
   const source = read('src/quran/MushafReader.tsx');
 
   it('pads itself past the header, or the cutout in fullscreen', () => {
-    expect(source).toContain(
-      "Platform.OS !== 'ios' ? 0 : props.isFullscreen ? insets.top : headerHeight",
-    );
+    // iOS: the floating header, or the top inset in fullscreen. Android:
+    // nothing under its opaque header, but in fullscreen the cutout — the
+    // strip sat under the camera there (the safe-area top reads 0 with
+    // the status bar hidden, so the cutout's own inset is consulted too).
+    expect(source).toMatch(/props\.isFullscreen\s*\?\s*insets\.top\s*:\s*headerHeight/);
+    expect(source).toMatch(/Math\.max\(cutout\.top, insets\.top\)/);
     expect(source).toContain('paddingTop: stripTop + STRIP_PADDING_TOP');
   });
 

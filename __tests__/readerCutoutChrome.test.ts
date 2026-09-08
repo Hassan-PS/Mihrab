@@ -39,12 +39,17 @@ describe('the page header shares the cutout band', () => {
     expect(reader).toContain('const navPad = chromePad + islandPad;');
   });
 
-  // A long surah name must not run under the cutout: the label gets the
-  // near half of the window and no more.
-  it('caps the label at the near half of the row', () => {
+  // A long surah name must not run under the cutout. Where the cutout's
+  // position is known (Android, `DisplayCutout`) the label is capped where
+  // the lens begins and put on the side away from it; where it is not
+  // (iOS's centred island) it keeps the near half of the window and no more.
+  it('caps the label short of the camera', () => {
     const core = read('src/quran/mushafReaderCore.tsx');
-    expect(core).toContain('isFullscreen && styles.pageHeaderTextIsland');
+    expect(core).toContain('isFullscreen && labelMaxWidth == null && styles.pageHeaderTextIsland');
+    expect(core).toContain('labelMaxWidth != null && { maxWidth: labelMaxWidth }');
     expect(core).toContain("pageHeaderTextIsland: { maxWidth: '38%' }");
+    const phone = read('src/quran/MushafPhoneReader.tsx');
+    expect(phone).toMatch(/classifyTopCutout\(cutout, width\)/);
   });
 });
 

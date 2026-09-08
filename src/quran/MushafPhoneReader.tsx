@@ -92,6 +92,7 @@ import {
   type PhonePageGeometry,
 } from './phonePageGeometry';
 import { SPACING } from '../theme/tokens';
+import { classifyTopCutout, useDisplayCutout } from '../native/DisplayCutout';
 
 /** Index per page: the FlatList index IS the page, less one. */
 const pageIndex = (page: number) => page - 1;
@@ -155,6 +156,8 @@ type PageItemProps = {
   /** Live: keeps the page chrome below iOS's floating header. */
   navPad: number;
   isFullscreen: boolean;
+  /** Fullscreen: where the surah name goes so it is not under the camera. */
+  label: { side: 'start' | 'end'; maxWidth?: number };
   tone: MushafTone;
   ornament: string;
   riwayah: RiwayahId;
@@ -178,6 +181,7 @@ const PhonePageItem = React.memo(function PhonePageItem({
   geometry,
   navPad,
   isFullscreen,
+  label,
   tone,
   ornament,
   riwayah,
@@ -268,6 +272,8 @@ const PhonePageItem = React.memo(function PhonePageItem({
             ornament={ornament}
             riwayah={riwayah}
             show="label"
+            labelSide={label.side}
+            labelMaxWidth={label.maxWidth}
           />
         ) : (
           <View style={styles.pageTopGap} />
@@ -419,6 +425,32 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
   // What sits above the page inside each item — and therefore what the
   // geometry has to take off the viewport.
   const navPad = chromePad + islandPad;
+
+  /**
+   * WHICH SIDE OF THE CAMERA THE SURAH NAME GOES.
+   *
+   * The row above assumes the camera is in the middle of the band and
+   * gives the label the near half — which put the name straight under the
+   * lens on the phones that have it in a corner. The cutout's own
+   * rectangles say where it is (`DisplayCutout`, Android; iOS's island is
+   * always centred and the insets already describe it). A camera on the
+   * left puts the name on the right, and the other way round; a centred
+   * one keeps the name at the start, capped where the lens begins. The
+   * reader's pager is pinned LTR, so these sides are physical.
+   */
+  const cutout = useDisplayCutout();
+  const label = useMemo<{ side: 'start' | 'end'; maxWidth?: number }>(() => {
+    if (!isFullscreen) return { side: 'start' };
+    const { side, rect } = classifyTopCutout(cutout, width);
+    if (!rect || side === 'none') return { side: 'start' };
+    // The label's own horizontal padding, plus a finger's breadth of air
+    // before the lens.
+    const air = SPACING.lg + SPACING.md;
+    if (side === 'left') {
+      return { side: 'end', maxWidth: Math.max(0, width - (rect.x + rect.width) - air) };
+    }
+    return { side: 'start', maxWidth: Math.max(0, rect.x - air) };
+  }, [isFullscreen, cutout, width]);
 
   /**
    * TWO BARS DO NOT FIT ACROSS A PHONE'S SHORT SIDE.
@@ -580,6 +612,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
         geometry={geometry}
         navPad={navPad}
         isFullscreen={isFullscreen}
+        label={label}
         tone={tone}
         ornament={ornament}
         riwayah={riwayah}
@@ -599,6 +632,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       geometry,
       navPad,
       isFullscreen,
+      label,
       tone,
       ornament,
       riwayah,
