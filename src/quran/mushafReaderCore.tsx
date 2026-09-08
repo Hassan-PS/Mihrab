@@ -20,6 +20,7 @@ import {
   Text,
   TextInput,
   View,
+  type ColorValue,
 } from 'react-native';
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -696,6 +697,47 @@ export function MushafPageHeader({
   );
 }
 
+/** The glyph for the tone a tap goes TO — monochrome, see the pill. */
+export function toneGlyph(next: MushafTone): string {
+  return next === 'sepia' ? '◐︎' : next === 'night' ? '☾︎' : '☀︎';
+}
+
+/**
+ * The tone control as a bar button (redesign plan §4): the same cycle as
+ * the page-header pill — paper → sepia → night → paper — as one glyph in
+ * the page bar beside the rail, where the phone keeps it now that the row
+ * above the page is gone out of fullscreen. Same accessibility label as
+ * the pill; the word the pill carried is what the label says.
+ */
+export function MushafToneButton({
+  tone,
+  color,
+  backgroundColor,
+}: {
+  tone: MushafTone;
+  color: ColorValue;
+  backgroundColor: ColorValue;
+}) {
+  const { t } = useTranslation();
+  const next = nextMushafTone(tone);
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={
+        next === 'sepia'
+          ? t('quran.switchToSepia', 'Switch to sepia page')
+          : next === 'night'
+            ? t('quran.switchToNight', 'Switch to night page')
+            : t('quran.switchToLight', 'Switch to light page')
+      }
+      hitSlop={8}
+      onPress={() => setQuranPrefs(prefsForTone(next))}
+      style={[styles.toneBtn, { backgroundColor }]}>
+      <Text style={[styles.toneGlyph, { color }]}>{toneGlyph(next)}</Text>
+    </Pressable>
+  );
+}
+
 /**
  * The foot of a page: the number medallion, the khatmah pill, or both.
  *
@@ -869,6 +911,16 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
   },
   nightPillText: { fontSize: TYPE.label.fontSize, fontWeight: '600', letterSpacing: 0.3 },
+  // The same box as the rail's jump button, so the bar reads as one row of
+  // controls rather than a rail with things stuck to it.
+  toneBtn: {
+    width: 34,
+    height: 30,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toneGlyph: { fontSize: TYPE.body.fontSize, lineHeight: 20 },
   pageFooter: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -58,6 +58,52 @@ export const TONE_ORNAMENT: Record<MushafTone, string> = {
   night: '#c9b47a',
 };
 
+/**
+ * The colours of the chrome that sits ON the page — the page bar with its
+ * rail, readout, jump and tone buttons (redesign plan §4, "the immersive
+ * reader").
+ *
+ * The bar used to take the APP palette, and the app palette does not know
+ * what page it is standing on: a dark app theme reading a paper page put
+ * near-black control boxes on white, and a light theme reading a night
+ * page put the app's dark green on near-black. The bar is part of the
+ * print, so it takes the print's colours — the page ground behind it, the
+ * page's ink and a quiet grey for text, a faint tint for the control
+ * boxes, and the ornament gold where the app would use its accent. The
+ * gold is the page's own (see B.4.4), not a second accent.
+ */
+export type ToneChrome = {
+  ink: string;
+  muted: string;
+  control: string;
+  accent: string;
+  card: string;
+};
+
+export const TONE_CHROME: Record<MushafTone, ToneChrome> = {
+  paper: {
+    ink: '#1a1a1a',
+    muted: '#6b6b6b',
+    control: '#efefef',
+    accent: TONE_ORNAMENT.paper,
+    card: TONE_PAGE_BG.paper,
+  },
+  sepia: {
+    ink: '#2b2418',
+    muted: '#6f6146',
+    control: '#e7dcc5',
+    accent: TONE_ORNAMENT.sepia,
+    card: TONE_PAGE_BG.sepia,
+  },
+  night: {
+    ink: '#f2f2f2',
+    muted: '#9a9a9a',
+    control: '#1e1e1e',
+    accent: TONE_ORNAMENT.night,
+    card: '#181818',
+  },
+};
+
 /** True for the tone whose ink is light on a dark ground. */
 export function toneIsDark(tone: MushafTone): boolean {
   return tone === 'night';

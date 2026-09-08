@@ -20,13 +20,13 @@ import {
   Alert,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   useWindowDimensions,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { TilawahIcon } from '../../quran/audio/PlaybackIcons';
+import { TranslationIcon } from '../../theme/icons';
 import { desktopSize } from '../../responsive/desktop';
 import { useSettledMeasure } from '../../quran/mushafReaderCore';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -210,20 +210,31 @@ export function MushafSurahScreen({
      * if you already knew where to look. The mirror case (dark theme, light
      * page) is the same mistake the other way round.
      */
-    const pageChrome =
-      isIOS && quranHydrated
-        ? {
-            headerBlurEffect: (dark ? 'dark' : 'light') as 'dark' | 'light',
-            headerTintColor: dark ? '#f2f2f2' : '#1a1a1a',
+    /**
+     * …and on Android too (redesign plan §4, "the immersive reader"). The
+     * Android header is opaque in the app's background colour, so a night
+     * page under a light theme ran under a white bar with a black title —
+     * the seam the fullscreen mode exists to remove, but out of fullscreen.
+     * The bar is now painted in the page colour and its title and buttons
+     * in the page's ink, on both platforms: the reader is the page, edge to
+     * edge, and the app's own chrome waits behind the back button.
+     */
+    const ink = dark ? '#f2f2f2' : '#1a1a1a';
+    const pageChrome = quranHydrated
+      ? {
+            ...(isIOS
+              ? { headerBlurEffect: (dark ? 'dark' : 'light') as 'dark' | 'light' }
+              : { headerStyle: { backgroundColor: TONE_PAGE_BG[tone] } }),
+            headerTintColor: ink,
             headerTitleStyle: {
-              color: dark ? '#f2f2f2' : '#1a1a1a',
+              color: ink,
               writingDirection: isArabic ? 'rtl' : 'ltr',
               // writingDirection is a valid TextStyle prop, but react-navigation
               // types the title style as a narrower Pick<> that omits it.
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
             headerLargeTitleStyle: {
-              color: dark ? '#f2f2f2' : '#1a1a1a',
+              color: ink,
               writingDirection: isArabic ? 'rtl' : 'ltr',
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
@@ -323,21 +334,15 @@ export function MushafSurahScreen({
             onPress={() => setAudioSheetSignal(s => s + 1)}
             hitSlop={10}
             style={{ paddingHorizontal: SPACING.xs }}>
-            {/* Drawn, not typed. `♪` is the system font's glyph: its
-                size, weight and vertical placement are the platform's,
-                and the "gap" after it was a space character. It is the
-                same note the player's own controls carry. */}
-            <View style={audioMark.row}>
-              <TilawahIcon color={String(palette.accentSolid)} size={desktopSize(15)} />
-              <Text
-                style={{
-                  color: palette.accentSolid,
-                  fontSize: desktopSize(15),
-                  fontWeight: '700',
-                }}>
-                {t('quran.audioButton', 'Audio')}
-              </Text>
-            </View>
+            {/* The mark alone (redesign plan §4). It used to carry the
+                word "Audio" beside it, and the translation switch the
+                word "Tafsir": two labels in the header of a screen whose
+                whole point is the page. The icons are the player's own,
+                so they are already known by the time anyone looks for
+                them here; the words live on in the accessibility labels.
+                Painted in the page's ink, like the title, so a night page
+                does not put the app's dark green on near-black. */}
+            <TilawahIcon color={ink} size={desktopSize(22)} />
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -348,14 +353,7 @@ export function MushafSurahScreen({
             onPress={onToggleMode}
             hitSlop={10}
             style={{ paddingHorizontal: SPACING.xs }}>
-            <Text
-              style={{
-                color: palette.accentSolid,
-                fontSize: desktopSize(15),
-                fontWeight: '700',
-              }}>
-              {t('quran.viewToggleTranslation', 'Tafsir')}
-            </Text>
+            <TranslationIcon color={ink} size={desktopSize(22)} />
           </Pressable>
           {riwayahChoiceExists() ? (
             // The riwayah lives with the view controls, as asked — and only
@@ -377,7 +375,7 @@ export function MushafSurahScreen({
               <Text
                 style={{
                   ...arabicTextStyle('body'),
-                  color: palette.accentSolid,
+                  color: ink,
                   fontSize: desktopSize(17),
                   fontWeight: '700',
                 }}>
@@ -393,7 +391,7 @@ export function MushafSurahScreen({
             style={{ paddingHorizontal: SPACING.xs }}>
             <Text
               style={{
-                color: palette.accentSolid,
+                color: ink,
                 fontSize: desktopSize(18),
                 fontWeight: '700',
               }}>
@@ -409,7 +407,6 @@ export function MushafSurahScreen({
     isArabic,
     isFullscreen,
     readerTitle,
-    palette.accentSolid,
     palette.bg,
     tone,
     quranHydrated,
@@ -466,8 +463,3 @@ export function MushafSurahScreen({
     </>
   );
 }
-
-/** The mark and the word it labels, on one baseline. */
-const audioMark = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
-});

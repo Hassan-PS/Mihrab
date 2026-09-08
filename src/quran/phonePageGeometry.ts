@@ -53,8 +53,19 @@ export const H_PADDING = 10;
  */
 export const LANDSCAPE_ZOOM = 1.6;
 
-/** Estimated header-row height, dp — the chrome above the page. */
+/**
+ * Estimated header-row height, dp — the chrome above the page, in
+ * FULLSCREEN, where the row carries the surah name across the status band.
+ *
+ * Out of fullscreen the row is gone (redesign plan §4, "the immersive
+ * reader"): the juz label and the tone control moved down into the page
+ * bar with the rail, the surah name is the navigation header's title, and
+ * the 34dp the row cost went back to the text. What remains above the page
+ * is `PAGE_TOP_GAP`, so the first line does not sit against the header.
+ */
 export const HEADER_RESERVE = 34;
+/** What sits above the page out of fullscreen: a breath, not a row. */
+export const PAGE_TOP_GAP = 8;
 
 /**
  * What a footer costs when one IS drawn.
@@ -112,6 +123,13 @@ export type PhonePageInputs = {
   /** iOS's floating header height while the chrome is up; 0 otherwise. */
   navPad: number;
   /**
+   * The page-header row's height — `HEADER_RESERVE` in fullscreen, where
+   * the row is drawn, `PAGE_TOP_GAP` out of it, where it is not. Defaults
+   * to the reserve so a caller that has not decided still gets a page
+   * that fits.
+   */
+  headerReserve?: number;
+  /**
    * The measured pager viewport, or 0 while it has not been measured.
    *
    * THE MINI PLAYER IS NOT SUBTRACTED FROM THIS, and an earlier version
@@ -145,7 +163,8 @@ export function phonePageGeometry(
   // column, because a footer on one page is not a reason to shorten six
   // hundred and three others. Reserving for chrome that is not there is
   // the same bug as not reserving for chrome that is.
-  const chromeH = input.navPad + HEADER_RESERVE + FOOTER_GAP;
+  const chromeH =
+    input.navPad + (input.headerReserve ?? HEADER_RESERVE) + FOOTER_GAP;
   const textWidth = scrolling
     ? Math.min(pageWidth - H_PADDING * 2, input.height * LANDSCAPE_ZOOM)
     : pageWidth - H_PADDING * 2;

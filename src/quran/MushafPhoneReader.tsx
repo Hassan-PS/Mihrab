@@ -63,6 +63,7 @@ import {
   MushafJumpModal,
   MushafPageFooter,
   MushafPageHeader,
+  MushafToneButton,
   useMushafReaderCore,
   type AyahMarkProps,
   type KhatmahFinish,
@@ -78,10 +79,12 @@ import { warmAround } from './useMushafPageFont';
 import { findPageForAyah } from './pages';
 import { ayahLineBox, followOffset } from './mushafFollowScroll';
 import { riwayahById, type RiwayahId } from './riwayat';
-import type { MushafTone } from './mushafTone';
+import { TONE_CHROME, toneIsDark, type MushafTone } from './mushafTone';
 import {
   FOOTER_GAP,
   FOOTER_RESERVE,
+  HEADER_RESERVE,
+  PAGE_TOP_GAP,
   phoneGeometryFits,
   phonePageGeometry,
   phonePageWidth,
@@ -249,13 +252,26 @@ const PhonePageItem = React.memo(function PhonePageItem({
         accessible={false}
         onPress={onToggleFullscreen}
         style={{ paddingTop: navPad }}>
-        <MushafPageHeader
-          page={page}
-          isFullscreen={isFullscreen}
-          tone={tone}
-          ornament={ornament}
-          riwayah={riwayah}
-        />
+        {/* THE ROW IS FULLSCREEN-ONLY NOW (redesign plan §4). Out of
+            fullscreen it was a juz label and a tone pill on a strip above
+            the page, under a header that already names the surah: both
+            moved into the page bar with the rail, and the page took the
+            room. In fullscreen the row stays, as the surah name drawn
+            across the status band — the only thing left that says where
+            you are once the header is hidden. The pill does not come
+            back with it: the bar keeps the tone button in both modes. */}
+        {isFullscreen ? (
+          <MushafPageHeader
+            page={page}
+            isFullscreen
+            tone={tone}
+            ornament={ornament}
+            riwayah={riwayah}
+            show="label"
+          />
+        ) : (
+          <View style={styles.pageTopGap} />
+        )}
       </Pressable>
       {geometry ? (
         <ScrollView
@@ -428,6 +444,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       height,
       sideInset,
       navPad,
+      headerReserve: isFullscreen ? HEADER_RESERVE : PAGE_TOP_GAP,
       listH,
     }),
   );
@@ -617,7 +634,16 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           paddingBottom: insets.bottom,
         },
       ]}>
-      <StatusBar hidden={isFullscreen} animated />
+      {/* The status bar's glyphs follow the PAGE, like the header's title:
+          a night page under a light app theme wants light glyphs on its
+          near-black ground, and the root's bar (which follows the theme)
+          cannot know that. RN applies the most recently mounted StatusBar,
+          and the root's is re-applied when this one unmounts. */}
+      <StatusBar
+        hidden={isFullscreen}
+        barStyle={toneIsDark(tone) ? 'light-content' : 'dark-content'}
+        animated
+      />
       <View
         style={styles.listWrap}
         // A finger on the pager means a page turn is coming: draw the
@@ -695,6 +721,15 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           onSelectPage={core.jumpToPage}
           onPeekPage={core.peekPage}
           onOpenJump={core.openJump}
+          showJuz
+          chrome={TONE_CHROME[tone]}
+          trailing={
+            <MushafToneButton
+              tone={tone}
+              color={TONE_CHROME[tone].accent}
+              backgroundColor={TONE_CHROME[tone].control}
+            />
+          }
         />
       ) : null}
 
@@ -760,4 +795,5 @@ const styles = StyleSheet.create({
    */
   columnContent: { paddingBottom: SPACING.xl },
   pageWrap: { alignItems: 'center' },
+  pageTopGap: { height: PAGE_TOP_GAP },
 });

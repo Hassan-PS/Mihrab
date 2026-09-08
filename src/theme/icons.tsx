@@ -238,6 +238,38 @@ export function BookIcon({ size = 24, color = '#000' }: IconProps) {
   );
 }
 
+/**
+ * A page of text with a second, smaller page behind it — "the same thing in
+ * another language". The reader's switch between the muṣḥaf and the
+ * translation view, where a word ("Tafsir", "Translation") in the header
+ * was one more label competing with the page (redesign plan §4).
+ */
+export function TranslationIcon({ size = 24, color = '#000' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M8 3.5h9A2.5 2.5 0 0119.5 6v9A2.5 2.5 0 0117 17.5H8A2.5 2.5 0 015.5 15V6A2.5 2.5 0 018 3.5z"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M5.5 8.5H4A2.5 2.5 0 001.5 11v7A2.5 2.5 0 004 20.5h8a2.5 2.5 0 002.5-2.5v-1"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M9 8h7M9 11h7M9 14h4"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 /** Two cupped hands raised in dua — used for the duas/supplications nav
  *  tile. Stylised as two slightly-opened palms meeting at the base, the
  *  classic Islamic dua gesture. */

@@ -39,7 +39,15 @@
  * told without looking. One tick per crossing, and nothing while the
  * thumb runs along the rail.
  */
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import {
   LayoutChangeEvent,
   PanResponder,
@@ -60,6 +68,7 @@ import {
 } from './pages';
 import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
 import { mushafSurahName } from './surahName';
+import type { ToneChrome } from './mushafTone';
 import {
   createRailDrag,
   fractionForPage,
@@ -92,6 +101,23 @@ type Props = {
   onPeekPage?: (page: number) => void;
   /** Opens the type-a-number sheet. Renders the ⌗ button when provided. */
   onOpenJump?: () => void;
+  /**
+   * Whether the readout carries the juz under the page count. The phone
+   * says yes: its page-header row is gone out of fullscreen (redesign plan
+   * §4), and the juz label that lived there lives here now. The spread
+   * reader keeps the label in the page corner, where the print puts it.
+   */
+  showJuz?: boolean;
+  /**
+   * Controls after the readout — the phone puts the tone button here, so
+   * the bar is one row: ⌗ · rail · page / total · juz · ☀︎.
+   */
+  trailing?: ReactNode;
+  /**
+   * The page's own chrome colours. Given, the bar is part of the print —
+   * see `TONE_CHROME`. Absent, it falls back to the app palette.
+   */
+  chrome?: ToneChrome;
 };
 
 /** The touch target: the track sits in the middle of this. */
@@ -107,10 +133,20 @@ function MushafPageScrubberImpl({
   onSelectPage,
   onPeekPage,
   onOpenJump,
+  showJuz = false,
+  trailing,
+  chrome,
 }: Props) {
   const { t, i18n } = useTranslation();
   const totalPages = totalPagesForRiwayah(riwayah);
   const { palette } = useAppPalette();
+  const c: ToneChrome = chrome ?? {
+    ink: String(palette.text),
+    muted: String(palette.muted),
+    control: String(palette.controlBg),
+    accent: String(palette.accentSolid),
+    card: String(palette.card),
+  };
   const [width, setWidth] = useState(0);
   const widthRef = useRef(0);
   const onLayout = (e: LayoutChangeEvent) => {
@@ -276,8 +312,8 @@ function MushafPageScrubberImpl({
           accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
           onPress={onOpenJump}
           hitSlop={10}
-          style={[styles.jumpBtn, { backgroundColor: palette.controlBg }]}>
-          <Text style={[styles.jumpGlyph, { color: palette.accentSolid }]}>
+          style={[styles.jumpBtn, { backgroundColor: c.control }]}>
+          <Text style={[styles.jumpGlyph, { color: c.accent }]}>
             ⌗
           </Text>
         </Pressable>
@@ -302,7 +338,7 @@ function MushafPageScrubberImpl({
         {...pan.panHandlers}>
         <View
           pointerEvents="none"
-          style={[styles.track, { backgroundColor: palette.controlBg }]}>
+          style={[styles.track, { backgroundColor: c.control }]}>
           {/* Thirty landmarks a reader can use; a hundred and fourteen
               surahs would be a texture. */}
           {width > 0
@@ -313,7 +349,7 @@ function MushafPageScrubberImpl({
                     styles.tick,
                     {
                       left: Math.round(f * width) - 0.5,
-                      backgroundColor: palette.muted,
+                      backgroundColor: c.muted,
                     },
                   ]}
                 />
@@ -325,7 +361,7 @@ function MushafPageScrubberImpl({
           style={[
             styles.knob,
             {
-              backgroundColor: palette.accentSolid,
+              backgroundColor: c.accent,
               // Clamp so the knob stays inside the rail at both ends.
               left: Math.max(0, Math.min(width - KNOB, knobCenter - KNOB / 2)),
               transform: [{ scale: drag ? 1.25 : 1 }],
@@ -337,16 +373,18 @@ function MushafPageScrubberImpl({
             pointerEvents="none"
             style={[
               styles.bubble,
-              cardEdgeStyle(palette),
-              { backgroundColor: palette.card, left: bubbleLeft },
+              chrome
+                ? { borderWidth: StyleSheet.hairlineWidth, borderColor: c.muted }
+                : cardEdgeStyle(palette),
+              { backgroundColor: c.card, left: bubbleLeft },
             ]}>
             <Text
-              style={[styles.bubbleSurah, { color: palette.text }]}
+              style={[styles.bubbleSurah, { color: c.ink }]}
               numberOfLines={1}>
               {bubble.surah}
             </Text>
             <Text
-              style={[styles.bubbleWhere, { color: palette.muted }]}
+              style={[styles.bubbleWhere, { color: c.muted }]}
               numberOfLines={1}
               maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
               {bubble.where}
@@ -354,7 +392,7 @@ function MushafPageScrubberImpl({
             <Text
               style={[
                 styles.bubbleSpeed,
-                { color: bubble.active ? palette.accentSolid : palette.muted },
+                { color: bubble.active ? c.accent : c.muted },
               ]}
               numberOfLines={1}>
               {bubble.speed}
@@ -362,14 +400,25 @@ function MushafPageScrubberImpl({
           </View>
         ) : null}
       </View>
-      <View style={styles.readoutBox} pointerEvents="none">
+      <View
+        style={[styles.readoutBox, showJuz && styles.readoutBoxTight]}
+        pointerEvents="none">
         <Text
-          style={[styles.readout, { color: palette.muted }]}
+          style={[styles.readout, { color: c.muted }]}
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
           {`${shown} / ${totalPages}`}
         </Text>
+        {showJuz ? (
+          <Text
+            style={[styles.readoutJuz, { color: c.muted }]}
+            numberOfLines={1}
+            maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+            {t('quran.juzLabel', { juz: juzForPageIn(shown, riwayah) })}
+          </Text>
+        ) : null}
       </View>
+      {trailing}
     </View>
   );
 }
@@ -438,6 +487,15 @@ const styles = StyleSheet.create({
   },
   jumpGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '700', lineHeight: 20 },
   readoutBox: { minWidth: 76, alignItems: 'flex-end' },
+  // Two short lines instead of one wide one, so the rail keeps its length
+  // now that the tone button shares the row.
+  readoutBoxTight: { minWidth: 56 },
+  readoutJuz: {
+    fontSize: TYPE.caption.fontSize,
+    fontVariant: ['tabular-nums'],
+    textAlign: 'right',
+    marginTop: 1,
+  },
   readout: {
     fontSize: TYPE.label.fontSize,
     fontWeight: '600',

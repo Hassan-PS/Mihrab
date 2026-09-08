@@ -62,7 +62,7 @@ import { useMushafPager } from './useMushafPager';
 import { warmAround } from './useMushafPageFont';
 import { findPageForAyah } from './pages';
 import { riwayahById, type RiwayahId } from './riwayat';
-import type { MushafTone } from './mushafTone';
+import { TONE_CHROME, toneIsDark, type MushafTone } from './mushafTone';
 import {
   spreadColumn,
   spreadGeometry,
@@ -537,7 +537,16 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
           paddingBottom: insets.bottom,
         },
       ]}>
-      <StatusBar hidden={isFullscreen} animated />
+      {/* The status bar's glyphs follow the PAGE, like the header's title:
+          a night page under a light app theme wants light glyphs on its
+          near-black ground, and the root's bar (which follows the theme)
+          cannot know that. RN applies the most recently mounted StatusBar,
+          and the root's is re-applied when this one unmounts. */}
+      <StatusBar
+        hidden={isFullscreen}
+        barStyle={toneIsDark(tone) ? 'light-content' : 'dark-content'}
+        animated
+      />
       <View style={styles.body}>
       {showSidebar ? (
         <MushafIndexSidebar
@@ -646,6 +655,7 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
           onSelectPage={core.jumpToPage}
           onPeekPage={core.peekPage}
           onOpenJump={core.openJump}
+          chrome={TONE_CHROME[tone]}
         />
       ) : null}
       </View>
