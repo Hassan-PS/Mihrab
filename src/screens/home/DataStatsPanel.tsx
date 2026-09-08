@@ -1,5 +1,5 @@
 import { memo, useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
@@ -79,7 +79,7 @@ const WARN_AMBER = '#d99a2b';
  */
 function DataStatsPanelImpl() {
   const { t, i18n } = useTranslation();
-  const { settings } = usePrayerSettings();
+  const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
   const [status, setStatus] = useState<DataStatus | null>(null);
   const [cache, setCache] = useState<DeviceCache | null>(null);
@@ -194,6 +194,7 @@ function DataStatsPanelImpl() {
   };
 
   const sm = statusMeta();
+  const expanded = settings.dataStatsExpanded;
   const coverageOf = (id: ServerDatasetId): string => {
     const days = status?.servers[id]?.minCoverageDays;
     return days != null ? `${days} ${t('dataStats.daysUnit')}` : dash;
@@ -209,8 +210,23 @@ function DataStatsPanelImpl() {
           ...cardEdgeStyle(palette),
         },
       ]}>
-      {/* header: title + server status pill */}
-      <View style={styles.header}>
+      {/* ── THE HEADER IS THE CONTROL ───────────────────────────────
+          Folded, this row is the whole card. It keeps the status dot,
+          which is the one fact worth a glance at a diagnostics panel;
+          everything under it is for the visit where something looks
+          wrong.
+
+          `accessibilityState.expanded` rather than a pair of strings for
+          "Expand" and "Collapse": both platforms' screen readers say it
+          themselves, in the reader's own language, and a label that has
+          to be translated thirteen times to say what the platform
+          already says is a label that can drift. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('dataStats.title')}
+        accessibilityState={{ expanded }}
+        onPress={() => updateSettings({ dataStatsExpanded: !expanded })}
+        style={styles.header}>
         <Text style={[styles.title, { color: palette.muted }]}>
           {t('dataStats.title')}
         </Text>
@@ -218,8 +234,13 @@ function DataStatsPanelImpl() {
           <View style={[styles.dot, { backgroundColor: sm.color }]} />
           <Text style={[styles.statusText, { color: sm.color }]}>{sm.label}</Text>
         </View>
-      </View>
+        <Text style={[styles.chevron, { color: palette.accentSolid }]}>
+          {expanded ? '\u2303' : '\u2304'}
+        </Text>
+      </Pressable>
 
+      {!expanded ? null : (
+      <>
       {/* source — the headline fact, in an accent pill */}
       <View style={styles.sourceRow}>
         <Text style={[styles.sourceLabel, { color: palette.muted }]}>
@@ -289,6 +310,8 @@ function DataStatsPanelImpl() {
           />
         </View>
       ))}
+      </>
+      )}
     </View>
   );
 }
@@ -324,6 +347,13 @@ function Row({
 export const DataStatsPanel = memo(DataStatsPanelImpl);
 
 const styles = StyleSheet.create({
+  chevron: {
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: '700',
+    marginStart: 8,
+    includeFontPadding: false,
+  },
   card: {
     marginTop: 12,
     paddingHorizontal: 16,

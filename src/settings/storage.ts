@@ -263,6 +263,11 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (typeof merged.malikiSecondTimesEnabled !== 'boolean') {
     merged.malikiSecondTimesEnabled = false;
   }
+  // A truthy non-boolean here would unfold a diagnostics panel on the
+  // Today screen of somebody who never asked for one.
+  if (typeof merged.dataStatsExpanded !== 'boolean') {
+    merged.dataStatsExpanded = false;
+  }
   // Alerts are opt-in per boundary and the list is the kill-switch, so a
   // blob holding anything but a known key must come back empty rather
   // than scheduling something nobody chose.

@@ -102,6 +102,23 @@ export type PrayerAppSettings = {
    *  refresh timing, last server-run status). Diagnostic; default off. */
   showDataStats: boolean;
   /**
+   * Is that panel unfolded? Defaults to folded.
+   *
+   * It is the longest card on the Today screen by a distance — a source
+   * row, the device's cache, and then five rows and a note for each of
+   * the two prepared datasets — and it is a diagnostics card: read
+   * closely once when something looks wrong, glanced at the rest of the
+   * time. Folded it is one row, and the row still carries the server
+   * status dot, which is the fact worth a glance.
+   *
+   * Persisted rather than screen-lifetime state, because the answer to
+   * "do I want to see this" does not change between one visit to Today
+   * and the next — and because the panel itself is behind a flag someone
+   * had to unlock deliberately, so their choice about it is worth
+   * keeping.
+   */
+  dataStatsExpanded: boolean;
+  /**
    * Put the practice graph on Home as well as the Log tab. Off by default:
    * Home is the screen you open to find out when to pray, and a record of
    * how the last three months went is not that question.
@@ -514,6 +531,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   dataProviderAuto: true,
   dataStatsUnlocked: false,
   showDataStats: false,
+  // Folded. Unfolding it is one tap, and it stays unfolded after that.
+  dataStatsExpanded: false,
   showPracticeOnHome: false,
   calculationMethod: 'auto',
   school: 0,
