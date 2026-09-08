@@ -1,3 +1,13 @@
+// Jest defaults NODE_ENV to 'test' ONLY when it is unset, and takes an
+// inherited value otherwise. A shell left with NODE_ENV=production — the
+// release script exports it, and so does the desktop tooling this repo is
+// driven from — therefore hands every suite React's PRODUCTION build,
+// which does not export `act`. The run does not error; it reports 195
+// failures across 35 suites, all of them `(0, _react.act) is not a
+// function`, and every one of them is a lie. Pinned here so the suite
+// means the same thing whatever shell starts it.
+process.env.NODE_ENV = 'test';
+
 module.exports = {
   preset: 'react-native',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
