@@ -23,6 +23,9 @@ const read = (p: string) => fs.readFileSync(path.join(REPO, p), 'utf-8');
 
 const HOME = read('src/screens/HomeScreen.tsx');
 const CARD = read('src/screens/settings/CalculationCard.tsx');
+// The alerts moved to the Notifications page in #23: what fires is not
+// decided on the screen about where the numbers come from.
+const ALERTS = read('src/screens/settings/MalikiAlertsCard.tsx');
 const TYPES = read('src/settings/types.ts');
 
 describe('the setting exists and defaults to what the app already did', () => {
@@ -73,8 +76,14 @@ describe('the settings screen offers both', () => {
   });
 
   it('offers the end alert once something is set to fire', () => {
-    expect(CARD).toMatch(
+    expect(ALERTS).toMatch(
       /alerts\.length > 0 \? \([\s\S]{0,800}?malikiSecondTimeEndAlerts/,
     );
+  });
+
+  it('keeps the two halves on the screens they belong to', () => {
+    // Showing them is a question about the times; announcing them is not.
+    expect(CARD).not.toMatch(/malikiSecondTimeEndAlerts/);
+    expect(ALERTS).not.toMatch(/malikiSecondTimeRows/);
   });
 });

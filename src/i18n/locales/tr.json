@@ -291,6 +291,7 @@
     "malikiSecondTimesSource": "İbn Âşir'in El-Mürşidü'l-Muîn'inden, The Guiding Helper'daki 11. şarkıda aktarıldığı şekliyle.",
     "malikiAlerts": "Bana bildir",
     "malikiAlertsHelp": "Başlangıçta her namaz için kapalı. Yalnızca haber almak istediklerinizi seçin — günde beş bildirim daha, bir uygulamanın size kendisini yok saymayı öğretme yoludur. Bildirimlerin açık olması gerekir.",
+    "malikiAlertsDisabled": "Maliki ikinci vakitleri Namaz vakitleri altından açın, sonra burada bildirilebilirler.",
     "malikiAlertsNone": "Bildirim yok",
     "malikiAlertsLead": "Ne kadar önce",
     "malikiAlertsLeadTitle": "İlk vakit bitmeden önce uyar",

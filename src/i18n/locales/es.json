@@ -291,6 +291,7 @@
     "malikiSecondTimesSource": "De Al-Murshid al-Muin (Ibn Ashir), según se recoge en The Guiding Helper, canto 11.",
     "malikiAlerts": "Avisarme",
     "malikiAlertsHelp": "Desactivado para todas las oraciones al principio. Elige solo aquellas de las que quieras enterarte: cinco avisos más al día es como una aplicación te enseña a ignorarla. Requiere las notificaciones activadas.",
+    "malikiAlertsDisabled": "Activa los segundos tiempos malikíes en Horarios de oración y podrán anunciarse aquí.",
     "malikiAlertsNone": "Sin avisos",
     "malikiAlertsLead": "Cuánta antelación",
     "malikiAlertsLeadTitle": "Avisarme antes de que acabe el primer tiempo",

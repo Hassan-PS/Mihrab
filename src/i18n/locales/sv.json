@@ -291,6 +291,7 @@
     "malikiSecondTimesSource": "Från Al-Murshid al-Muin (Ibn Ashir), återgiven i The Guiding Helper, sång 11.",
     "malikiAlerts": "Avisera mig",
     "malikiAlertsHelp": "Av för alla böner från början. Välj bara dem du vill bli påmind om — fem extra aviseringar om dagen är hur en app lär dig att strunta i den. Kräver att aviseringar är på.",
+    "malikiAlertsDisabled": "Slå på de malikitiska andratiderna under Bönetider, så kan de aviseras härifrån.",
     "malikiAlertsNone": "Inga aviseringar",
     "malikiAlertsLead": "Hur lång förvarning",
     "malikiAlertsLeadTitle": "Varna mig innan första tiden går ut",

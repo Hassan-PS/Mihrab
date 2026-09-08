@@ -291,6 +291,7 @@
     "malikiSecondTimesSource": "Nach Al-Murshid al-Muin (Ibn Ashir), wiedergegeben in The Guiding Helper, Gesang 11.",
     "malikiAlerts": "Benachrichtige mich",
     "malikiAlertsHelp": "Zu Beginn für jedes Gebet aus. Wähle nur die, über die du Bescheid wissen willst — fünf weitere Meldungen am Tag sind der Weg, auf dem eine App dir beibringt, sie zu ignorieren. Benachrichtigungen müssen an sein.",
+    "malikiAlertsDisabled": "Schalte die malikitischen Zweitzeiten unter Gebetszeiten ein, dann können sie hier angekündigt werden.",
     "malikiAlertsNone": "Keine Meldungen",
     "malikiAlertsLead": "Wie viel Vorwarnung",
     "malikiAlertsLeadTitle": "Vor dem Ende der ersten Zeit warnen",

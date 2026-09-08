@@ -1,5 +1,10 @@
 /**
- * Settings → the second-time alert chips — issue #19.
+ * Settings → the second-time alert chips — issue #19, moved by #23.
+ *
+ * The chips now live on the Notifications page rather than inside the
+ * Calculation card: they fire, and Prayer times is about what the times
+ * ARE. The Ḥanafī warning stayed with the calculation, which is the one
+ * place this feature can make a card contradict itself.
  *
  * What is pinned here is restraint made visible. The chips only exist
  * once the times themselves are on, none of them are lit to begin with,
@@ -53,6 +58,7 @@ jest.mock('../src/context/PrayerSettingsContext', () => ({
 
 import { Text } from 'react-native';
 import { CalculationCard } from '../src/screens/settings/CalculationCard';
+import { MalikiAlertsCard } from '../src/screens/settings/MalikiAlertsCard';
 
 /**
  * The chips, by role rather than by component type — under the RN jest
@@ -91,7 +97,18 @@ const BASE = {
   malikiSecondTimeAlertMinutes: 15,
 };
 
+/** The alerts, wherever they live — Notifications, since #23. */
 function render(settings: Partial<typeof BASE> = {}) {
+  mockSettings = { ...BASE, ...settings };
+  let tree!: ReactTestRenderer;
+  act(() => {
+    tree = create(<MalikiAlertsCard onOpenDaruriLeadPicker={jest.fn()} />);
+  });
+  return tree;
+}
+
+/** The calculation half, which kept the switch and the warning. */
+function renderCalculation(settings: Partial<typeof BASE> = {}) {
   mockSettings = { ...BASE, ...settings };
   let tree!: ReactTestRenderer;
   act(() => {
@@ -99,7 +116,6 @@ function render(settings: Partial<typeof BASE> = {}) {
       <CalculationCard
         onOpenMethodPicker={jest.fn()}
         onOpenOffsetsModal={jest.fn()}
-        onOpenDaruriLeadPicker={jest.fn()}
       />,
     );
   });
@@ -124,9 +140,12 @@ beforeEach(() => {
 });
 
 describe('the alert chips', () => {
-  it('are absent until the second times are on', () => {
+  it('are absent until the second times are on, and say why', () => {
     const texts = textsOf(render({ malikiSecondTimesEnabled: false }));
     expect(texts).not.toContain('settings.malikiAlerts');
+    // Not simply gone: a card that vanishes leaves a reader hunting for a
+    // control they remember, on the screen it is supposed to be on.
+    expect(texts).toContain('settings.malikiAlertsDisabled');
   });
 
   it('appear once they are, with none of them lit', () => {
@@ -196,16 +215,16 @@ describe('the alert chips', () => {
 
 describe('the Ḥanafī warning', () => {
   it('replaces the help text when Ḥanafī ʿAṣr is on', () => {
-    expect(textsOf(render({ school: 0 }))).toContain(
+    expect(textsOf(renderCalculation({ school: 0 }))).toContain(
       'settings.malikiSecondTimesHelp',
     );
-    const hanafi = textsOf(render({ school: 1 }));
+    const hanafi = textsOf(renderCalculation({ school: 1 }));
     expect(hanafi).toContain('settings.malikiSecondTimesHanafiWarning');
     expect(hanafi).not.toContain('settings.malikiSecondTimesHelp');
   });
 
   it('is drawn in the danger colour, not the muted one', () => {
-    const tree = render({ school: 1 });
+    const tree = renderCalculation({ school: 1 });
     const warning = tree.root
       .findAllByType(Text)
       .find(n =>
@@ -214,5 +233,68 @@ describe('the Ḥanafī warning', () => {
         ),
       );
     expect(JSON.stringify(warning?.props.style)).toContain('#B91C1C');
+  });
+});
+
+/**
+ * The split itself — issue #23.
+ *
+ * "Keep Settings > Prayer Times strictly focused on calculation
+ * parameters and time displays; move all notification triggers into
+ * Settings > Notifications."
+ *
+ * The line is what a control DOES, not what it is about. Whether the
+ * boundaries are computed, and whether they are printed on the day's
+ * card, are questions about the times. Which of them are announced, how
+ * much warning, and whether the end of the window is announced too — those
+ * fire, so they moved. A test rather than a comment, because the tempting
+ * place to add the next alert is next to the switch that enables it.
+ */
+describe('what fires is on the Notifications page', () => {
+  const CALCULATION_KEEPS = [
+    'settings.malikiSecondTimes',
+    'settings.malikiRows',
+  ];
+  const NOTIFICATIONS_TAKE = [
+    'settings.malikiAlerts',
+    'settings.malikiAlertsHelp',
+    'settings.malikiEndAlerts',
+  ];
+
+  it('the calculation card no longer announces anything', () => {
+    const texts = textsOf(
+      renderCalculation({
+        malikiSecondTimesEnabled: true,
+        malikiSecondTimeAlerts: ['AsrDaruri'],
+      }),
+    );
+    for (const key of NOTIFICATIONS_TAKE) expect(texts).not.toContain(key);
+    for (const key of CALCULATION_KEEPS) expect(texts).toContain(key);
+  });
+
+  it('the alerts card announces and nothing else', () => {
+    const texts = textsOf(
+      render({
+        malikiSecondTimesEnabled: true,
+        malikiSecondTimeAlerts: ['AsrDaruri'],
+      }),
+    );
+    for (const key of NOTIFICATIONS_TAKE) expect(texts).toContain(key);
+    // The switch that computes them, and the one that prints them, stayed
+    // where the times are decided.
+    expect(texts).not.toContain('settings.malikiRows');
+  });
+
+  it('nothing stored changed name, so no configuration moved', () => {
+    // The whole change is which screen draws the control. A settings key
+    // renamed here would silently reset whatever a reader had chosen.
+    const tree = render({
+      malikiSecondTimesEnabled: true,
+      malikiSecondTimeAlerts: [],
+    });
+    act(() => chipsOf(tree)[2].props.onPress());
+    expect(mockUpdateSettings).toHaveBeenCalledWith({
+      malikiSecondTimeAlerts: ['AsrDaruri'],
+    });
   });
 });

@@ -291,6 +291,7 @@
     "malikiSecondTimesSource": "依据伊本·阿希尔《Al-Murshid al-Muin》，见 The Guiding Helper 第 11 章。",
     "malikiAlerts": "提醒我",
     "malikiAlertsHelp": "起初每次礼拜都关闭。只挑你确实想被告知的——每天多五条通知，正是一个应用教会你忽略它的方式。需要先开启通知。",
+    "malikiAlertsDisabled": "在“礼拜时间”中开启马立克派的第二时间，之后即可在此处提醒。",
     "malikiAlertsNone": "不提醒",
     "malikiAlertsLead": "提前多久",
     "malikiAlertsLeadTitle": "在首选时段结束前提醒我",

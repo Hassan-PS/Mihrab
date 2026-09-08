@@ -291,6 +291,7 @@
     "malikiSecondTimesSource": "D'après Al-Murshid al-Muin (Ibn Ashir), tel que rendu dans The Guiding Helper, chant 11.",
     "malikiAlerts": "Me prévenir",
     "malikiAlertsHelp": "Désactivé pour chaque prière au départ. Ne choisissez que celles dont vous voulez être averti — cinq alertes de plus par jour, c'est ainsi qu'une application vous apprend à l'ignorer. Nécessite les notifications activées.",
+    "malikiAlertsDisabled": "Activez les seconds temps malikites dans Horaires de prière, et ils pourront être annoncés ici.",
     "malikiAlertsNone": "Aucune alerte",
     "malikiAlertsLead": "Combien de temps avant",
     "malikiAlertsLeadTitle": "Me prévenir avant la fin du premier temps",

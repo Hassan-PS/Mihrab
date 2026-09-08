@@ -291,6 +291,7 @@
     "malikiSecondTimesSource": "From Al-Murshid al-Muin (Ibn Ashir), as rendered in The Guiding Helper, Song 11.",
     "malikiAlerts": "Notify me",
     "malikiAlertsHelp": "Off for every prayer to begin with. Pick only the ones you want to be told about — five more alerts a day is how an app teaches you to ignore it. Needs notifications turned on.",
+    "malikiAlertsDisabled": "Turn on the Maliki second times under Prayer times, and they can be announced here.",
     "malikiAlertsNone": "No alerts",
     "malikiAlertsLead": "How much warning",
     "malikiAlertsLeadTitle": "Warn me before the first time ends",
