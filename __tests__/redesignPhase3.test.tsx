@@ -163,3 +163,14 @@ describe('the screens use them', () => {
     expect(btn).toMatch(/!emphasised[\s\S]{0,40}palette\.muted/);
   });
 });
+
+describe('SegmentedControl sizing', () => {
+  it('sizes segments from their labels, so a long one is not clipped', () => {
+    // Seen on the Quran tab: "Surah · Juz · Bookmarks" in three equal thirds
+    // clipped the last to "Bookmar…" beside the search and jump buttons.
+    const src = readFileSync(join(__dirname, '..', 'src/components/ui/SegmentedControl.tsx'), 'utf8');
+    expect(src).toMatch(/flexBasis: 'auto'/);
+    expect(src).not.toMatch(/segment: \{\s*flex: 1,/);
+    expect(src).toMatch(/adjustsFontSizeToFit/);
+  });
+});

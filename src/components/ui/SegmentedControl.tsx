@@ -58,7 +58,11 @@ function SegmentedControlImpl<K extends string>({
                 styles.label,
                 { color: selected ? palette.accentSolid : palette.muted },
               ]}
-              numberOfLines={1}>
+              numberOfLines={1}
+              // Last resort for a long word in a narrow window: shrink the
+              // type a little rather than cut the word.
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}>
               {seg.label}
             </Text>
           </Pressable>
@@ -78,7 +82,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   segment: {
-    flex: 1,
+    // Grow from the label's own width, not from zero: three equal thirds
+    // clipped "Bookmarks" to "Bookmar…" beside "Juz" on a phone. Each
+    // segment takes what its word needs and the spare is shared evenly.
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 'auto',
     minHeight: 38,
     borderRadius: RADIUS.md - 3,
     alignItems: 'center',
