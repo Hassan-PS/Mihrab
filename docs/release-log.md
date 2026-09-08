@@ -644,3 +644,16 @@ store-notes channels all verified.
 Ran clean on the first attempt.
 
 **Lesson:** none needed — clean run, no change to the cycle.
+
+## 2.18.0 (264) — 2026-09-08
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `.github/workflows/reuse-check.yml`
+  - `docs/DISTRIBUTION.md`
+  - `scripts/release.sh`
+  - `scripts/xcode-cloud.py`
+
+**Lesson:** _(unfilled)_
