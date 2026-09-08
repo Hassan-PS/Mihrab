@@ -363,7 +363,8 @@
     "madhabCustom": "Khusus",
     "madhabHelp": "Syafii, Maliki dan Hanbali memakai bayangan asar yang sama, jadi memilih di antaranya tidak mengubah waktu mana pun. Maliki juga menamai salat fajar dengan Subuh dan menyediakan waktu kedua.",
     "dhikrRemindersChannel": "Pengingat zikir",
-    "dhikrRemindersSilentChannel": "Pengingat zikir (senyap)"
+    "dhikrRemindersSilentChannel": "Pengingat zikir (senyap)",
+    "laDesignNeedsAndroid16": "Gaya memerlukan Android 16 atau lebih baru. Ponsel ini menampilkan kartu standar: salat, sisa waktu, dan bilah kemajuan."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",

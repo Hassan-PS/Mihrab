@@ -363,7 +363,8 @@
     "madhabCustom": "自定义",
     "madhabHelp": "沙斐仪、马立克与罕百里采用相同的晡礼影长，在三者之间选择不会改变任何时间。马立克还将破晓的主命拜称为晨礼，并提供第二时间。",
     "dhikrRemindersChannel": "齐克尔提醒",
-    "dhikrRemindersSilentChannel": "齐克尔提醒（静音）"
+    "dhikrRemindersSilentChannel": "齐克尔提醒（静音）",
+    "laDesignNeedsAndroid16": "样式需要 Android 16 或更高版本。此手机显示标准卡片：礼拜、剩余时间和进度条。"
   },
   "locationSetup": {
     "headline": "设置您的位置",

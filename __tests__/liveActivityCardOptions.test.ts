@@ -150,7 +150,8 @@ describe('timeline and markers show one countdown, not two', () => {
     // countdown in the header slot with the prayer name as the title,
     // which is the hierarchy the notification has.
     expect(card).not.toContain('Maghrib · 2:18');
-    expect(card).toMatch(/styles\.previewHeader[\s\S]{0,60}2:18:42/);
-    expect(card).toMatch(/styles\.previewRow[\s\S]{0,40}>Maghrib</);
+    // The chronometer lives in the header line, and the title is the name.
+    expect(card).toMatch(/styles\.pvChrono[\s\S]{0,60}2:18:42/);
+    expect(card).toMatch(/styles\.pvTitle[\s\S]{0,40}>Maghrib</);
   });
 });

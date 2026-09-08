@@ -363,7 +363,8 @@
     "madhabCustom": "Benutzerdefiniert",
     "madhabHelp": "Schafiiten, Malikiten und Hanbaliten nehmen denselben Asr-Schatten — die Wahl zwischen ihnen ändert keine Zeit. Malikitisch nennt das Morgengebet zusätzlich Subh und bietet die Zweitzeiten an.",
     "dhikrRemindersChannel": "Dhikr-Erinnerungen",
-    "dhikrRemindersSilentChannel": "Dhikr-Erinnerungen (lautlos)"
+    "dhikrRemindersSilentChannel": "Dhikr-Erinnerungen (lautlos)",
+    "laDesignNeedsAndroid16": "Stile benötigen Android 16 oder neuer. Dieses Telefon zeigt die Standardkarte: das Gebet, die verbleibende Zeit und einen Fortschrittsbalken."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",

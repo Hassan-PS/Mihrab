@@ -363,7 +363,8 @@
     "madhabCustom": "Personnalisé",
     "madhabHelp": "Chaféites, malikites et hanbalites prennent la même ombre pour le ʿasr : choisir entre eux ne change aucune heure. Le malikite nomme en plus Sobh la prière de l’aube et propose les seconds temps.",
     "dhikrRemindersChannel": "Rappels de dhikr",
-    "dhikrRemindersSilentChannel": "Rappels de dhikr (silencieux)"
+    "dhikrRemindersSilentChannel": "Rappels de dhikr (silencieux)",
+    "laDesignNeedsAndroid16": "Les styles nécessitent Android 16 ou plus récent. Ce téléphone affiche la carte standard : la prière, le temps restant et une barre de progression."
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
