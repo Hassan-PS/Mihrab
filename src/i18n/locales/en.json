@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "When taking a garment off"
-    }
+    },
+    "section": {
+      "day": "Through the day",
+      "worship": "Worship",
+      "out": "Out and about",
+      "hardship": "When it is hard",
+      "asking": "Asking"
+    },
+    "countHint": "{{count}} duas"
   },
   "quran": {
     "meccan": "Meccan",

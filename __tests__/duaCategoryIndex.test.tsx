@@ -64,7 +64,12 @@ jest.mock('../src/navigation/tabBarVisibility', () => ({
 }));
 
 import { DuasScreen } from '../src/screens/DuasScreen';
-import { DUA_CATEGORIES, duasByCategory } from '../src/duas/duas';
+import {
+  DUA_CATEGORIES,
+  DUA_SECTIONS,
+  duasByCategory,
+  sectionedCategories,
+} from '../src/duas/duas';
 
 /** Every string rendered anywhere in the tree. */
 const texts = (root: ReactTestInstance): string[] =>
@@ -76,10 +81,10 @@ const texts = (root: ReactTestInstance): string[] =>
         .map(String),
     );
 
-function render() {
+function render(navigation?: { setOptions: (o: { headerTitle: string }) => void }) {
   let tree!: ReturnType<typeof create>;
   act(() => {
-    tree = create(<DuasScreen />);
+    tree = create(<DuasScreen navigation={navigation} />);
   });
   return tree;
 }
@@ -161,5 +166,93 @@ describe('a category opens, and back closes it', () => {
     });
     expect(handled).toBe(true);
     expect(texts(tree.root)).toContain('duas.cat.travel');
+  });
+});
+
+describe('the index is grouped, and the grouping is exhaustive', () => {
+  it('names every category exactly once, and no other', () => {
+    // The groups are the only way into a category. One dropped from this
+    // table falls off the screen entirely, and nothing else would say so.
+    expect([...sectionedCategories()].sort()).toEqual(
+      [...DUA_CATEGORIES].sort(),
+    );
+    expect(sectionedCategories()).toHaveLength(DUA_CATEGORIES.length);
+  });
+
+  it('keeps each group in the order the catalogue is in', () => {
+    // DUA_CATEGORIES is ordered by where each sits in a day; a group
+    // that reshuffles its members loses that for no gain.
+    for (const section of DUA_SECTIONS) {
+      const rank = section.categories.map(c => DUA_CATEGORIES.indexOf(c));
+      expect(rank).toEqual([...rank].sort((a, b) => a - b));
+    }
+  });
+
+  it('draws a heading for every group', () => {
+    const shown = texts(render().root);
+    for (const section of DUA_SECTIONS) {
+      expect(shown).toContain(`duas.section.${section.id}`);
+    }
+  });
+
+  it('still reaches every category from the index', () => {
+    // The redesign is a layout change; what it must not become is a
+    // layout that hides one.
+    const tree = render();
+    const labels = tree.root
+      .findAllByProps({ accessibilityRole: 'button' })
+      .map(n => n.props.accessibilityLabel);
+    for (const c of DUA_CATEGORIES) expect(labels).toContain(`duas.cat.${c}`);
+  });
+});
+
+describe('the header says which category is open', () => {
+  const nav = () => {
+    const titles: string[] = [];
+    return {
+      titles,
+      setOptions: (o: { headerTitle: string }) => titles.push(o.headerTitle),
+    };
+  };
+
+  it('names the tab on the index', () => {
+    const n = nav();
+    render(n);
+    expect(n.titles[n.titles.length - 1]).toBe('nav.duas');
+  });
+
+  it('names the category once one is open', () => {
+    // The fault: this is a tab screen, so its title came from the tab and
+    // stayed "Duas" for all twenty-one categories inside it.
+    const n = nav();
+    const tree = render(n);
+    const row = tree.root
+      .findAllByProps({ accessibilityRole: 'button' })
+      .find(x => x.props.accessibilityLabel === 'duas.cat.morning');
+    act(() => {
+      row!.props.onPress();
+    });
+    expect(n.titles[n.titles.length - 1]).toBe('duas.cat.morning');
+  });
+
+  it('goes back to the tab’s name when the category closes', () => {
+    const n = nav();
+    const tree = render(n);
+    const row = tree.root
+      .findAllByProps({ accessibilityRole: 'button' })
+      .find(x => x.props.accessibilityLabel === 'duas.cat.morning');
+    act(() => {
+      row!.props.onPress();
+    });
+    act(() => {
+      mockIntercept?.();
+    });
+    expect(n.titles[n.titles.length - 1]).toBe('nav.duas');
+  });
+
+  it('renders without a navigator at all', () => {
+    // The prop is optional on purpose: `useNavigation()` throws outside a
+    // container, and these screens are rendered bare here.
+    expect(() => render()).not.toThrow();
   });
 });

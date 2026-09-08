@@ -1,7 +1,7 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -18,12 +18,12 @@ import { useBreakpoint } from '../responsive/breakpoints';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
 import {
-  DUA_CATEGORIES,
+  DUA_SECTIONS,
   duasByCategory,
   type Dua,
   type DuaCategory,
 } from '../duas/duas';
-import { cardEdgeStyle } from '../theme/chrome';
+import { cardEdgeStyle, rowDividerStyle } from '../theme/chrome';
 import { ShareIcon } from '../theme/icons';
 import { duaShareText } from '../share/shareText';
 import { arabicTextStyle } from '../theme/typography';
@@ -42,7 +42,19 @@ import { useTabBarScroll } from '../navigation/tabBarVisibility';
  * about four of the nineteen at a time, on the one screen in the app that
  * scrolled sideways.
  */
-export function DuasScreen() {
+/**
+ * Only what this screen needs from the navigator, and optional.
+ *
+ * Taken as a PROP rather than through `useNavigation()`: the hook throws
+ * outside a NavigationContainer, and these screens are rendered bare in
+ * the tests that cover their content. React Navigation passes this to
+ * every screen component anyway, so the prop is the same object the hook
+ * would have found — with the difference that a test can hand over a
+ * fake one and assert what the header was told.
+ */
+type DuasNav = { setOptions: (options: { headerTitle: string }) => void };
+
+export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
@@ -81,6 +93,28 @@ export function DuasScreen() {
    * way everything else does — and a category name opens that category.
    */
   const [selected, setSelected] = useState<DuaCategory | null>(null);
+  /**
+   * THE HEADER SAYS WHERE YOU ARE.
+   *
+   * This is a tab screen, so its title comes from the tab's `title` and
+   * stayed "Duas" for every one of the twenty-one categories you can open
+   * inside it — the one place on screen that names a destination, naming
+   * the tab instead. The category is what you navigated to; it is what
+   * the header should say.
+   *
+   * `headerTitle` and not `title`: `title` is the fallback for the tab
+   * BAR's label too, so setting it here would rename the tab at the foot
+   * of the screen every time a category opened.
+   *
+   * `useLayoutEffect` so the title and the list change in the same frame.
+   * With `useEffect` the header repaints one frame late, which on a slow
+   * device reads as the old title flashing over the new content.
+   */
+  useLayoutEffect(() => {
+    navigation?.setOptions({
+      headerTitle: selected ? t(`duas.cat.${selected}`) : t('nav.duas'),
+    });
+  }, [navigation, selected, t]);
   /**
    * Back closes the category before it leaves the tab.
    *
@@ -224,36 +258,77 @@ export function DuasScreen() {
             tablet or a Mac. Same fix as LogScreen; see duaCardSpacing. */}
         <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         {selected === null
-          ? DUA_CATEGORIES.map(c => {
-              const count = duasByCategory(c).length;
-              return (
-                <Pressable
-                  key={c}
-                  accessibilityRole="button"
-                  accessibilityLabel={t(`duas.cat.${c}`)}
-                  onPress={() => setSelected(c)}
+          ? /* ── THE INDEX ────────────────────────────────────────────
+               Twenty-one categories in five groups, each group one card
+               with hairlines between its rows — the settings idiom this
+               app already reads as "a set of related things", rather
+               than twenty-one floating slabs that read as a list of
+               unrelated ones. The groups are navigational and live in
+               `DUA_SECTIONS`; a test keeps them exhaustive, because a
+               category that falls out of that table falls off the only
+               screen that can reach it. */
+            DUA_SECTIONS.map(section => (
+              <View key={section.id} style={styles.section}>
+                <Text
+                  style={[styles.sectionTitle, { color: palette.muted }]}
+                  maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+                  {t(`duas.section.${section.id}`)}
+                </Text>
+                <View
                   style={[
-                    styles.categoryRow,
+                    styles.sectionCard,
                     { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
                   ]}>
-                  <Text
-                    numberOfLines={2}
-                    style={[styles.categoryName, { color: palette.text }]}>
-                    {t(`duas.cat.${c}`)}
-                  </Text>
-                  {/* How many, because a row that only names a category
-                      says nothing about whether it is worth opening. */}
-                  <Text
-                    style={[
-                      styles.categoryCount,
-                      tabularNumeralStyle,
-                      { color: palette.muted },
-                    ]}>
-                    {count}
-                  </Text>
-                </Pressable>
-              );
-            })
+                  {section.categories.map((c, i) => {
+                    const count = duasByCategory(c).length;
+                    return (
+                      <Pressable
+                        key={c}
+                        accessibilityRole="button"
+                        accessibilityLabel={t(`duas.cat.${c}`)}
+                        accessibilityHint={t('duas.countHint', {
+                          defaultValue: '{{count}} duas',
+                          count,
+                        })}
+                        onPress={() => setSelected(c)}
+                        style={({ pressed }) => [
+                          styles.categoryRow,
+                          i < section.categories.length - 1
+                            ? rowDividerStyle(palette)
+                            : null,
+                          pressed ? { backgroundColor: palette.bg } : null,
+                        ]}>
+                        <Text
+                          numberOfLines={2}
+                          style={[styles.categoryName, { color: palette.text }]}>
+                          {t(`duas.cat.${c}`)}
+                        </Text>
+                        {/* How many, because a row that only names a
+                            category says nothing about whether it is
+                            worth opening. */}
+                        <Text
+                          style={[
+                            styles.categoryCount,
+                            tabularNumeralStyle,
+                            { color: palette.muted },
+                          ]}>
+                          {count}
+                        </Text>
+                        {/* The affordance the flat rows never had: this
+                            one opens something. */}
+                        <Text
+                          style={[
+                            styles.categoryChevron,
+                            { color: palette.accentSolid },
+                          ]}>
+                          {'\u203A'}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            ))
           : duasByCategory(selected).map(dua => (
           <View
             key={dua.id}
@@ -447,12 +522,24 @@ const styles = StyleSheet.create({
   },
   backChevron: { fontSize: 22, lineHeight: 24, includeFontPadding: false },
   backLabel: { fontSize: 15, fontWeight: '600' },
+  section: { gap: 8 },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    paddingHorizontal: 4,
+  },
+  sectionCard: {
+    borderRadius: 14,
+    // The card is the group; the rows inside it are separated by
+    // hairlines rather than by gaps, so a group reads as one object.
+    overflow: 'hidden',
+  },
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 12,
-    borderRadius: 14,
     paddingHorizontal: 16,
     // Comfortably past the 44pt floor: this is the whole screen's
     // navigation now, not a chip in a strip.
@@ -461,6 +548,14 @@ const styles = StyleSheet.create({
   },
   categoryName: { flex: 1, fontSize: 16, fontWeight: '600' },
   categoryCount: { fontSize: 14, fontWeight: '600' },
+  categoryChevron: {
+    fontSize: 20,
+    lineHeight: 22,
+    includeFontPadding: false,
+    // The count sits next to it, not across the row from it: two things
+    // pinned to opposite edges of a 56pt row is a row with a hole in it.
+    marginStart: -4,
+  },
   listScroll: { flex: 1 },
   tabs: { paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center' },
   tab: {

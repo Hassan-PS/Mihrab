@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "Beim Ausziehen"
-    }
+    },
+    "section": {
+      "day": "Durch den Tag",
+      "worship": "Gottesdienst",
+      "out": "Unterwegs",
+      "hardship": "Wenn es schwer ist",
+      "asking": "Bitten"
+    },
+    "countHint": "{{count}} Bittgebete"
   },
   "quran": {
     "meccan": "Mekkanisch",

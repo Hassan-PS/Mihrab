@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "वस्त्र उतारते समय"
-    }
+    },
+    "section": {
+      "day": "दिन भर",
+      "worship": "इबादत",
+      "out": "सफ़र में",
+      "hardship": "जब मुश्किल हो",
+      "asking": "दुआ माँगना"
+    },
+    "countHint": "{{count}} दुआएँ"
   },
   "quran": {
     "meccan": "मक्की",

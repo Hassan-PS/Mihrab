@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "Al quitarse la ropa"
-    }
+    },
+    "section": {
+      "day": "A lo largo del día",
+      "worship": "Adoración",
+      "out": "Fuera de casa",
+      "hardship": "Cuando cuesta",
+      "asking": "Peticiones"
+    },
+    "countHint": "{{count}} súplicas"
   },
   "quran": {
     "meccan": "Mecana",

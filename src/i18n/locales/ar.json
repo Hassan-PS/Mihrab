@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "ما يقول إذا وضع الثوب"
-    }
+    },
+    "section": {
+      "day": "خلال اليوم",
+      "worship": "العبادة",
+      "out": "في الطريق",
+      "hardship": "عند الشدة",
+      "asking": "الدعاء والطلب"
+    },
+    "countHint": "{{count}} دعاء"
   },
   "quran": {
     "meccan": "مكية",

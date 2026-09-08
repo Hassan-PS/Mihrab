@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "脱衣服时"
-    }
+    },
+    "section": {
+      "day": "一日之间",
+      "worship": "功修",
+      "out": "出门在外",
+      "hardship": "艰难之时",
+      "asking": "祈求"
+    },
+    "countHint": "{{count}} 条杜阿"
   },
   "quran": {
     "meccan": "麦加",

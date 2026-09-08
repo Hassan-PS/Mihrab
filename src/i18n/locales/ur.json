@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "کپڑا اتارتے وقت"
-    }
+    },
+    "section": {
+      "day": "دن بھر",
+      "worship": "عبادت",
+      "out": "سفر و باہر",
+      "hardship": "مشکل وقت میں",
+      "asking": "دعا و طلب"
+    },
+    "countHint": "{{count}} دعائیں"
   },
   "quran": {
     "meccan": "مکی",

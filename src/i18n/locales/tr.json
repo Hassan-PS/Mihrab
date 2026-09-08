@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "Elbiseyi çıkarırken"
-    }
+    },
+    "section": {
+      "day": "Gün boyunca",
+      "worship": "İbadet",
+      "out": "Yolda",
+      "hardship": "Zor zamanlarda",
+      "asking": "İstemek"
+    },
+    "countHint": "{{count}} dua"
   },
   "quran": {
     "meccan": "Mekki",

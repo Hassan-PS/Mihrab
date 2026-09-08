@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "Ketika melepas pakaian"
-    }
+    },
+    "section": {
+      "day": "Sepanjang hari",
+      "worship": "Ibadah",
+      "out": "Dalam perjalanan",
+      "hardship": "Saat berat",
+      "asking": "Memohon"
+    },
+    "countHint": "{{count}} doa"
   },
   "quran": {
     "meccan": "Makkiyah",

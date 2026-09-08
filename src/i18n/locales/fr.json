@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "En ôtant un vêtement"
-    }
+    },
+    "section": {
+      "day": "Au fil de la journée",
+      "worship": "Adoration",
+      "out": "En chemin",
+      "hardship": "Quand c’est difficile",
+      "asking": "Demandes"
+    },
+    "countHint": "{{count}} invocations"
   },
   "quran": {
     "meccan": "Mecquoise",

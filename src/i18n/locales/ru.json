@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "Когда снимаешь одежду"
-    }
+    },
+    "section": {
+      "day": "В течение дня",
+      "worship": "Поклонение",
+      "out": "В пути",
+      "hardship": "Когда тяжело",
+      "asking": "Просьбы"
+    },
+    "countHint": "{{count}} дуа"
   },
   "quran": {
     "meccan": "Мекканская",

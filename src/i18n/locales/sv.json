@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "När man tar av sig ett plagg"
-    }
+    },
+    "section": {
+      "day": "Genom dagen",
+      "worship": "Tillbedjan",
+      "out": "På väg",
+      "hardship": "När det är svårt",
+      "asking": "Att be om"
+    },
+    "countHint": "{{count}} duor"
   },
   "quran": {
     "meccan": "Meckansk",

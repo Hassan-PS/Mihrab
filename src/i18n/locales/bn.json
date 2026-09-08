@@ -931,7 +931,15 @@
     },
     "garment_04_undressing": {
       "title": "পোশাক খোলার সময়"
-    }
+    },
+    "section": {
+      "day": "সারা দিন",
+      "worship": "ইবাদত",
+      "out": "পথে-ঘাটে",
+      "hardship": "কঠিন সময়ে",
+      "asking": "প্রার্থনা"
+    },
+    "countHint": "{{count}}টি দুআ"
   },
   "quran": {
     "meccan": "মাক্কী",
