@@ -1174,7 +1174,10 @@
     "surahAudioPartial": "{{have}} sur {{total}} versets · touche pour télécharger le reste",
     "deleteSurahAudio": "Supprimer l’audio de cette sourate",
     "deleteSurahAudioFor": "Supprimer l’audio téléchargé de {{surah}}",
-    "audioGap": "{{surah}} {{ayah}} n’est pas téléchargé — connecte-toi, ou télécharge cette sourate pour l’écoute hors ligne."
+    "audioGap": "{{surah}} {{ayah}} n’est pas téléchargé — connecte-toi, ou télécharge cette sourate pour l’écoute hors ligne.",
+    "khatmahMore": "Plus d’options pour la khatma",
+    "khatmahPrevDayHelp": "Annule la marque d’aujourd’hui et revient à la portion de la veille.",
+    "lastReadRow": "Dernière lecture · {{surah}}, page {{page}}"
   },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",

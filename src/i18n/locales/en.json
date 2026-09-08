@@ -1174,7 +1174,10 @@
     "surahAudioPartial": "{{have}} of {{total}} ayahs · tap to download the rest",
     "deleteSurahAudio": "Delete this surah’s audio",
     "deleteSurahAudioFor": "Delete downloaded audio for {{surah}}",
-    "audioGap": "{{surah}} {{ayah}} is not downloaded — connect, or download this surah for offline use."
+    "audioGap": "{{surah}} {{ayah}} is not downloaded — connect, or download this surah for offline use.",
+    "khatmahMore": "More khatmah options",
+    "khatmahPrevDayHelp": "Undo today’s mark and step back to the previous day’s portion.",
+    "lastReadRow": "Last read · {{surah}}, page {{page}}"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

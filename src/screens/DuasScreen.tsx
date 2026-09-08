@@ -1,7 +1,14 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import {
   Pressable,
   ScrollView,
@@ -17,6 +24,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
+import { TabBackButton, tabBackButton } from '../navigation/TabBackButton';
 import {
   DUA_SECTIONS,
   duasByCategory,
@@ -52,7 +60,12 @@ import { useTabBarScroll } from '../navigation/tabBarVisibility';
  * would have found — with the difference that a test can hand over a
  * fake one and assert what the header was told.
  */
-type DuasNav = { setOptions: (options: { headerTitle: string }) => void };
+type DuasNav = {
+  setOptions: (options: {
+    headerTitle: string;
+    headerLeft?: () => ReactNode;
+  }) => void;
+};
 
 export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
   // Subscribe to width changes so future master-detail layouts pick up
@@ -113,6 +126,19 @@ export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
   useLayoutEffect(() => {
     navigation?.setOptions({
       headerTitle: selected ? t(`duas.cat.${selected}`) : t('nav.duas'),
+      // Inside a category the arrow goes up to the index, not home to
+      // Today — the same control, pointed one level up. There used to be
+      // a second "‹ All duas" link under the title for this, which with
+      // the title already naming the category was two ways back drawn
+      // next to each other (redesign-plan B.6.2).
+      headerLeft: selected
+        ? () => (
+            <TabBackButton
+              onPress={() => setSelected(null)}
+              label={t('duas.allCategories', 'All duas')}
+            />
+          )
+        : tabBackButton,
     });
   }, [navigation, selected, t]);
   /**
@@ -215,25 +241,6 @@ export function DuasScreen({ navigation }: { navigation?: DuasNav } = {}) {
           duas the chips stay at the top instead of vertically centering
           (#101 follow-up). The dua list ScrollView fills the rest of
           the screen and starts at a predictable y-offset. */}
-      {selected === null ? null : (
-        <View style={styles.tabsRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('duas.allCategories', 'All duas')}
-            onPress={() => setSelected(null)}
-            style={styles.backRow}>
-            <Text style={[styles.backChevron, { color: palette.accent }]}>
-              {'\u2039'}
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={[styles.backLabel, { color: palette.accent }]}>
-              {t('duas.allCategories', 'All duas')}
-            </Text>
-          </Pressable>
-        </View>
-      )}
-
       <ScrollView
         ref={scrollRef}
         {...tabBarScroll}
@@ -507,21 +514,6 @@ export { _DuasScreenMemo as DuasScreenMemo };
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  tabsRow: {
-    // Fixed-height pinned row so a short category does not vertically
-    // centre the way back. The list area below uses flex:1 underneath.
-    flexShrink: 0,
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    minHeight: 44,
-  },
-  backChevron: { fontSize: 22, lineHeight: 24, includeFontPadding: false },
-  backLabel: { fontSize: 15, fontWeight: '600' },
   section: { gap: 8 },
   sectionTitle: {
     fontSize: 12,

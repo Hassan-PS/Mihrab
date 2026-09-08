@@ -60,8 +60,6 @@ import {
   toggleStar,
   useQuranState,
   BOOKMARK_COLORS,
-  KHATMAH_COLOR,
-  KHATMAH_EXTRA_COLOR,
   KHATMAH_TOTAL_AYAHS,
 } from '../quran/quranState';
 import { loadTafsir, resolveTafsirEdition } from '../quran/tafsir';
@@ -386,8 +384,11 @@ export function QuranScreen() {
     <View
       style={[styles.headerWrap, listCap]}
       onLayout={e => setHeaderH(e.nativeEvent.layout.height)}>
-      {/* Continue reading (QR-10) */}
-      {quran.lastRead ? (
+      {/* Continue reading (QR-10). Alone only when there is no khatmah —
+          with one, it is a row inside the khatmah card, so the screen never
+          shows two "Continue"s with two different page numbers side by side
+          (redesign-plan B.3.2). */}
+      {quran.lastRead && !plan ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('quran.continueReading', 'Continue reading')}
@@ -440,8 +441,9 @@ export function QuranScreen() {
                 })}
               </Text>
             </View>
-            {/* The book. The gold at its end is reading done past the
-                day's portion — see KHATMAH_EXTRA_COLOR. */}
+            {/* The book. The lighter run at its end is reading done past
+                the day's portion — the accent at less strength, not a
+                second colour (redesign-plan P6). */}
             <View style={[styles.khatmahTrack, { backgroundColor: palette.accentBg }]}>
               <View
                 style={[
@@ -455,8 +457,9 @@ export function QuranScreen() {
               <View
                 style={[
                   styles.khatmahFill,
+                  styles.khatmahFillExtra,
                   {
-                    backgroundColor: KHATMAH_EXTRA_COLOR,
+                    backgroundColor: palette.accentSolid,
                     width: `${pct(day.extra, KHATMAH_TOTAL_AYAHS)}%`,
                   },
                 ]}
@@ -481,7 +484,7 @@ export function QuranScreen() {
               <Text
                 style={[
                   styles.khatmahDayLabel,
-                  { color: day.done ? KHATMAH_COLOR : palette.text },
+                  { color: day.done ? palette.accentSolid : palette.text },
                 ]}>
                 {day.done
                   ? t('quran.khatmahDayDone', {
@@ -494,7 +497,7 @@ export function QuranScreen() {
               </Text>
               {pages.extraToday > 0 ? (
                 <Text
-                  style={[styles.khatmahMeta, { color: KHATMAH_EXTRA_COLOR }]}>
+                  style={[styles.khatmahMeta, { color: palette.muted }]}>
                   {t('quran.khatmahExtraPages', {
                     defaultValue: '+{{count}} pages extra',
                     count: pages.extraToday,
@@ -507,9 +510,7 @@ export function QuranScreen() {
                 style={[
                   styles.khatmahFill,
                   {
-                    backgroundColor: day.done
-                      ? KHATMAH_COLOR
-                      : palette.accentSolid,
+                    backgroundColor: palette.accentSolid,
                     width: `${pct(day.read, day.length + day.extra)}%`,
                   },
                 ]}
@@ -517,14 +518,18 @@ export function QuranScreen() {
               <View
                 style={[
                   styles.khatmahFill,
+                  styles.khatmahFillExtra,
                   {
-                    backgroundColor: KHATMAH_EXTRA_COLOR,
+                    backgroundColor: palette.accentSolid,
                     width: `${pct(day.extra, day.length + day.extra)}%`,
                   },
                 ]}
               />
             </View>
-            {/* Continue + reset (v2.7.28) */}
+            {/* One primary, one secondary, the rest behind "more"
+                (redesign-plan B.3.3). Four buttons in two rows was the
+                loudest thing on the screen, and the second row's filled
+                button was cyan — a second accent. */}
             <View style={styles.khatmahActions}>
               <Pressable
                 accessibilityRole="button"
@@ -552,41 +557,6 @@ export function QuranScreen() {
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={t('quran.khatmahReset', 'Reset')}
-                onPress={() => setKhatmahMenuVisible(true)}
-                style={[styles.khatmahBtnGhost, { borderColor: palette.border }]}>
-                <Text style={{ color: palette.muted, fontWeight: '600', fontSize: 13 }}>
-                  {t('quran.khatmahReset', 'Reset')}
-                </Text>
-              </Pressable>
-            </View>
-            {/*
-              The day's two controls.
-              "Done" is the fallback for a reader who read past the marked
-              ayah without tapping its pill; "Previous day" is its exact
-              undo, and the way back into yesterday's portion. Both go
-              through the same portion arithmetic the marker does, so
-              nothing here can disagree with what the page shows.
-            */}
-            <View style={styles.khatmahActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('quran.khatmahPrevDay', 'Previous day')}
-                onPress={stepKhatmahBack}
-                disabled={khatmahAyahsRead(plan) === 0}
-                style={[
-                  styles.khatmahBtnGhost,
-                  {
-                    borderColor: palette.border,
-                    opacity: khatmahAyahsRead(plan) === 0 ? 0.4 : 1,
-                  },
-                ]}>
-                <Text style={{ color: palette.muted, fontWeight: '600', fontSize: 13 }}>
-                  {t('quran.khatmahPrevDay', '‹ Previous day')}
-                </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
                 accessibilityLabel={t('quran.khatmahMarkDone', {
                   day: khatmahCurrentPortion(plan).day,
                   defaultValue: "Mark day {{day}}'s reading done",
@@ -594,11 +564,17 @@ export function QuranScreen() {
                 onPress={finishKhatmahPortion}
                 style={[
                   styles.khatmahBtn,
-                  styles.khatmahBtnWide,
-                  { backgroundColor: KHATMAH_COLOR },
+                  styles.khatmahBtnSecondary,
+                  { backgroundColor: palette.accentBg },
                 ]}>
-                <Text style={styles.khatmahBtnLabel}>
-                  {day.done
+                <Text
+                  style={[styles.khatmahBtnLabel, { color: palette.accentSolid }]}
+                  numberOfLines={1}>
+                  {/* The strings carry a leading "✓" from when this was the
+                      only filled button on the card; a secondary button
+                      does not need to shout it, and the glyph was what
+                      pushed the label into an ellipsis at 2 : 3. */}
+                  {(day.done
                     ? t('quran.khatmahMarkNext', {
                         day: khatmahCurrentPortion(plan).day,
                         // Which day that is, in calendar terms — a plan's
@@ -616,10 +592,50 @@ export function QuranScreen() {
                       })
                     : t('quran.khatmahMarkToday', {
                         defaultValue: "✓ Today's reading done",
-                      })}
+                      })
+                  ).replace(/^✓\s*/, '')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.khatmahMore', 'More khatmah options')}
+                onPress={() => setKhatmahMenuVisible(true)}
+                hitSlop={8}
+                style={[styles.khatmahMore, { borderColor: palette.border }]}>
+                <Text style={[styles.khatmahMoreGlyph, { color: palette.muted }]}>
+                  ⋯
                 </Text>
               </Pressable>
             </View>
+            {/* Where the reader actually left off, which is not always the
+                plan's page. Labelled, so the two numbers stop looking like
+                a disagreement. */}
+            {quran.lastRead ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.continueReading', 'Continue reading')}
+                onPress={() => {
+                  const lr = quran.lastRead;
+                  if (!lr) return;
+                  openSurah(
+                    lr.surah,
+                    lr.mode === 'withTranslation' ? lr.ayah : undefined,
+                    lr.mode === 'mushaf' ? lr.page : undefined,
+                  );
+                }}
+                style={styles.lastReadRow}>
+                <Text
+                  style={[styles.khatmahMeta, { color: palette.muted, flex: 1 }]}
+                  numberOfLines={1}>
+                  {t('quran.lastReadRow', {
+                    defaultValue: 'Last read · {{surah}}, page {{page}}',
+                    surah: findSurah(quran.lastRead.surah)?.romanized ?? '',
+                    page: quran.lastRead.page,
+                  })}
+                </Text>
+                <Text style={{ color: palette.accentSolid, fontSize: 14 }}>→</Text>
+              </Pressable>
+            ) : null}
           </>
         ) : (
           <>
@@ -1351,6 +1367,15 @@ export function QuranScreen() {
           {(
             [
               [
+                t('quran.khatmahPrevDay', '‹ Previous day').replace(/^‹\s*/, ''),
+                t(
+                  'quran.khatmahPrevDayHelp',
+                  "Undo today's mark and step back to the previous day's portion.",
+                ),
+                () => stepKhatmahBack(),
+                false,
+              ],
+              [
                 t('quran.khatmahResetToday', "Reset today's reading"),
                 t(
                   'quran.khatmahResetTodayHelp',
@@ -1609,6 +1634,23 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   khatmahFill: { height: '100%' },
+  khatmahFillExtra: { opacity: 0.45 },
+  khatmahBtnSecondary: { flex: 1.15 },
+  khatmahMore: {
+    width: 40,
+    height: 40,
+    borderRadius: 999,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  khatmahMoreGlyph: { fontSize: 18, fontWeight: '700', lineHeight: 20 },
+  lastReadRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingTop: 4,
+  },
   khatmahDayRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1774,20 +1816,13 @@ const styles = StyleSheet.create({
   khatmahActions: { flexDirection: 'row', gap: 8, marginTop: 4 },
   khatmahBtn: {
     flex: 1,
-    paddingVertical: 9,
+    minHeight: 40,
+    paddingHorizontal: 10,
     borderRadius: 10,
-    alignItems: 'center',
-  },
-  khatmahBtnLabel: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
-  khatmahBtnWide: { flex: 2 },
-  khatmahBtnGhost: {
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  khatmahBtnLabel: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
   menuBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   menuCard: {
     position: 'absolute',

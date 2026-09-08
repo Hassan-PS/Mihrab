@@ -96,8 +96,6 @@ export type TodayCardProps = {
   qiblaBearing?: number | null;
   /** Opens the compass screen from the hero chip. */
   onOpenQibla?: () => void;
-  /** Data-freshness whisper under the hero. */
-  dataStatus?: { lastFetchedAt: Date | null; totalDaysCached: number } | null;
   /** Wide iPad/Mac dashboard: the hero gets more presence. */
   expanded?: boolean;
 };
@@ -204,7 +202,7 @@ const HeroToday = memo(function HeroToday({
   return (
     <View style={[styles.hero, expanded && styles.heroExpanded]}>
       <Text
-        style={[styles.heroEyebrow, { color: palette.accent }]}
+        style={[styles.heroEyebrow, { color: palette.muted }]}
         numberOfLines={1}
         maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
         {t('home.nextPrayerIn', {
@@ -356,7 +354,6 @@ function TodayCardImpl({
   onOpenMonth,
   qiblaBearing,
   onOpenQibla,
-  dataStatus,
   expanded = false,
 }: TodayCardProps) {
   const { t, i18n } = useTranslation();
@@ -658,21 +655,6 @@ function TodayCardImpl({
           bearing={qiblaBearing ?? null}
           onPress={onOpenQibla}
         />
-        {isToday && dataStatus && dataStatus.totalDaysCached > 0 ? (
-          <Text
-            style={[styles.dataStatus, { color: palette.muted }]}
-            numberOfLines={1}
-            maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-            {(dataStatus.lastFetchedAt
-              ? t('home.updatedAt', {
-                  // LTR isolate: a Latin-digit run inside a possibly-RTL
-                  // sentence scrambles without it.
-                  when: `⁦${clock.fromDate(dataStatus.lastFetchedAt)}⁩`,
-                }) + ' · '
-              : '') +
-              t('home.daysStored', { count: dataStatus.totalDaysCached })}
-          </Text>
-        ) : null}
       </View>
 
       <DayStrip days={days} selected={selected} onSelect={handleSelect} />
@@ -758,11 +740,13 @@ const styles = StyleSheet.create({
   heroWrap: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 14 },
   hero: {},
   heroExpanded: { paddingVertical: 10 },
+  // Sentence case, quiet: the countdown is the thing the eye lands on and
+  // the eyebrow only names what it counts to. It was an uppercase,
+  // letterspaced overline — the 2016 idiom (docs/design/redesign-plan.md
+  // §2.1, the `label` token).
   heroEyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    fontSize: 13,
+    fontWeight: '600',
   },
   heroCountdownRow: {
     flexDirection: 'row',
@@ -798,7 +782,6 @@ const styles = StyleSheet.create({
     marginTop: 7,
   },
   railLabel: { fontSize: 11.5, fontWeight: '600' },
-  dataStatus: { marginTop: 10, fontSize: 11, fontWeight: '500' },
   monthRow: {
     flexDirection: 'row',
     alignItems: 'center',

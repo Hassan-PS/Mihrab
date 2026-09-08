@@ -1174,7 +1174,10 @@
     "surahAudioPartial": "{{have}} av {{total}} verser · tryck för att hämta resten",
     "deleteSurahAudio": "Ta bort ljudet för denna sura",
     "deleteSurahAudioFor": "Ta bort hämtat ljud för {{surah}}",
-    "audioGap": "{{surah}} {{ayah}} är inte hämtad — anslut, eller hämta suran för offline-bruk."
+    "audioGap": "{{surah}} {{ayah}} är inte hämtad — anslut, eller hämta suran för offline-bruk.",
+    "khatmahMore": "Fler alternativ för khatmah",
+    "khatmahPrevDayHelp": "Ångra dagens markering och gå tillbaka till föregående dags del.",
+    "lastReadRow": "Senast läst · {{surah}}, sida {{page}}"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

@@ -23,6 +23,7 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
@@ -38,15 +39,65 @@ type Props = {
   onOpenLog?: () => void;
 };
 
+const MARK = 20;
+const RING_R = 8;
+const RING_C = 2 * Math.PI * RING_R;
+
+/**
+ * The mark beside a fact: a ring filled to the fraction done, and a tick
+ * once it is whole. It was a filled box with an "✕" in it — meant as a
+ * check, read as an error — and "3 of 5 prayers logged" beside a crossed
+ * box said the opposite of what the line said (redesign-plan B.1.7).
+ */
+function Mark({ fraction }: { fraction: number }) {
+  const { palette } = useAppPalette();
+  const done = fraction >= 1;
+  const pct = Math.max(0, Math.min(1, fraction));
+  return (
+    <Svg width={MARK} height={MARK} viewBox={`0 0 ${MARK} ${MARK}`}>
+      <Circle
+        cx={MARK / 2}
+        cy={MARK / 2}
+        r={RING_R}
+        stroke={palette.accentSolid}
+        strokeOpacity={done ? 1 : 0.25}
+        strokeWidth={2}
+        fill={done ? palette.accentSolid : 'none'}
+      />
+      {done ? (
+        <Path
+          d="M6 10.5l2.6 2.6L14 7.6"
+          stroke={palette.onAccent}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      ) : (
+        <Circle
+          cx={MARK / 2}
+          cy={MARK / 2}
+          r={RING_R}
+          stroke={palette.accentSolid}
+          strokeWidth={2}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={`${RING_C * pct} ${RING_C}`}
+          // Start at twelve o'clock.
+          transform={`rotate(-90 ${MARK / 2} ${MARK / 2})`}
+        />
+      )}
+    </Svg>
+  );
+}
+
 /** One logged fact. Only ever rendered for something that happened, so it
  *  has no unmarked state to draw. */
-function Line({ label }: { label: string }) {
+function Line({ label, fraction = 1 }: { label: string; fraction?: number }) {
   const { palette } = useAppPalette();
   return (
     <View style={styles.line}>
-      <View style={[styles.box, { backgroundColor: palette.accentSolid }]}>
-        <Text style={[styles.tick, { color: palette.onAccent }]}>✕</Text>
-      </View>
+      <Mark fraction={fraction} />
       <Text
         style={[styles.label, { color: palette.text }]}
         numberOfLines={2}
@@ -89,6 +140,7 @@ function TodaySummaryImpl({ onOpenLog }: Props) {
         </Text>
         {logged > 0 ? (
           <Line
+            fraction={logged / LOGGABLE_PRAYERS}
             label={t('home.prayersLogged', {
               defaultValue: '{{count}} of {{total}} prayers logged',
               count: logged,
@@ -122,10 +174,8 @@ const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
   inner: { paddingHorizontal: 16, paddingVertical: 13 },
   heading: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    fontSize: 13,
+    fontWeight: '600',
   },
   line: {
     flexDirection: 'row',
@@ -133,13 +183,5 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 7,
   },
-  box: {
-    width: 19,
-    height: 19,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tick: { fontSize: 11, fontWeight: '700' },
   label: { flex: 1, fontSize: 14.5 },
 });

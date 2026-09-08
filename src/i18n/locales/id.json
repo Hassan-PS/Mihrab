@@ -1174,7 +1174,10 @@
     "surahAudioPartial": "{{have}} dari {{total}} ayat · ketuk untuk mengunduh sisanya",
     "deleteSurahAudio": "Hapus audio surah ini",
     "deleteSurahAudioFor": "Hapus audio {{surah}} yang telah diunduh",
-    "audioGap": "{{surah}} {{ayah}} belum diunduh — sambungkan, atau unduh surah ini untuk didengarkan luring."
+    "audioGap": "{{surah}} {{ayah}} belum diunduh — sambungkan, atau unduh surah ini untuk didengarkan luring.",
+    "khatmahMore": "Opsi khatam lainnya",
+    "khatmahPrevDayHelp": "Batalkan tanda hari ini dan kembali ke bagian hari sebelumnya.",
+    "lastReadRow": "Terakhir dibaca · {{surah}}, halaman {{page}}"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",

@@ -56,6 +56,8 @@ jest.mock('../src/hooks/useAppPalette', () => ({
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useScrollToTop: () => {},
+  // The header's back control asks for the navigator; none is mounted here.
+  useNavigation: () => ({ navigate: () => {} }),
 }));
 
 jest.mock('../src/navigation/tabBarInset', () => ({ useTabBarInset: () => 0 }));
@@ -81,7 +83,9 @@ const texts = (root: ReactTestInstance): string[] =>
         .map(String),
     );
 
-function render(navigation?: { setOptions: (o: { headerTitle: string }) => void }) {
+function render(navigation?: {
+  setOptions: (o: { headerTitle: string; headerLeft?: () => unknown }) => void;
+}) {
   let tree!: ReturnType<typeof create>;
   act(() => {
     tree = create(<DuasScreen navigation={navigation} />);
@@ -139,10 +143,24 @@ describe('a category opens, and back closes it', () => {
     expect(shown).not.toContain('duas.cat.travel');
   });
 
-  it('offers the way back, and it works', () => {
-    const tree = render();
+  it('offers the way back in the header, and it works', () => {
+    // The way back is the header's one arrow, pointed at the index — not a
+    // second "‹ All duas" link under the title (redesign-plan B.6.2).
+    const options: Array<{ headerTitle: string; headerLeft?: () => unknown }> = [];
+    const tree = render({ setOptions: o => options.push(o) });
+    expect(
+      texts(tree.root).some(s => s === 'All duas' || s === 'duas.allCategories'),
+    ).toBe(false);
     openMorning(tree);
-    const back = tree.root
+    const last = options[options.length - 1];
+    expect(last.headerTitle).toBe('duas.cat.morning');
+    expect(typeof last.headerLeft).toBe('function');
+    // Render the control the header was handed and press it.
+    let control!: ReturnType<typeof create>;
+    act(() => {
+      control = create(last.headerLeft!() as React.ReactElement);
+    });
+    const back = control.root
       .findAllByProps({ accessibilityRole: 'button' })
       .find(n => n.props.accessibilityLabel === 'All duas');
     expect(back).toBeTruthy();
@@ -150,6 +168,8 @@ describe('a category opens, and back closes it', () => {
       back!.props.onPress();
     });
     expect(texts(tree.root)).toContain('duas.cat.travel');
+    // And on the index the arrow is the tab's ordinary one again.
+    expect(options[options.length - 1].headerTitle).toBe('nav.duas');
   });
 
   it('takes the Android back press rather than leaving the tab', () => {

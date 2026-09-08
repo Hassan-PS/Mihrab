@@ -25,6 +25,9 @@ jest.mock('../src/context/PrayerSettingsContext', () => ({
     settings: mockSettings,
     updateSettings: mockUpdate,
   }),
+  // The panel now shows when timings last landed (moved out of the Today
+  // hero), which goes through the clock formatter.
+  useAppearanceSettings: () => ({ slice: { clockFormat: 'auto', language: 'en' } }),
 }));
 
 jest.mock('react-i18next', () => ({

@@ -29,7 +29,6 @@ import {
   shouldResync,
 } from '../utils/resyncGate';
 import { usePrayerDay } from '../hooks/usePrayerDay';
-import { getCacheStatus } from '../prayer/prayerStorage';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { useNextAlertOverride } from '../notifications/adhanMute';
@@ -1020,41 +1019,6 @@ export function HomeScreen() {
     [navigation],
   );
 
-  // Data-freshness status for the hero indicator (v2.7.30): when timings
-  // last landed from the provider + how many days sit in the on-device
-  // cache. Re-checked whenever the fetch state changes (a background
-  // refresh completing flips `state`, which re-runs this).
-  const [dataStatus, setDataStatus] = useState<{
-    lastFetchedAt: Date | null;
-    totalDaysCached: number;
-  } | null>(null);
-  useEffect(() => {
-    if (state.phase !== 'ready') return;
-    let cancelled = false;
-    getCacheStatus({
-      provider: effectiveProvider,
-      latitude: state.latitude,
-      longitude: state.longitude,
-      calculationMethod: settings.calculationMethod,
-      school: settings.school,
-    })
-      .then(s => {
-        if (cancelled) return;
-        setDataStatus({
-          lastFetchedAt: s.lastFetchedAt ? new Date(s.lastFetchedAt) : null,
-          totalDaysCached: s.totalDaysCached,
-        });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    state,
-    effectiveProvider,
-    settings.calculationMethod,
-    settings.school,
-  ]);
   const handleOpenProviderPicker = useCallback(
     () => setProviderPickerOpen(true),
     [],
@@ -1165,7 +1129,6 @@ export function HomeScreen() {
             onOpenMonth={handleOpenMonth}
             qiblaBearing={qiblaBearing}
             onOpenQibla={handleOpenQibla}
-            dataStatus={dataStatus}
             expanded={isDashboard}
           />
         );

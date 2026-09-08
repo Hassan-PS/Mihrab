@@ -1174,7 +1174,10 @@
     "surahAudioPartial": "{{total}} ayetten {{have}} tanesi · kalanını indirmek için dokun",
     "deleteSurahAudio": "Bu surenin sesini sil",
     "deleteSurahAudioFor": "{{surah}} için indirilen sesi sil",
-    "audioGap": "{{surah}} {{ayah}} indirilmemiş — bağlan ya da bu sureyi çevrimdışı dinlemek için indir."
+    "audioGap": "{{surah}} {{ayah}} indirilmemiş — bağlan ya da bu sureyi çevrimdışı dinlemek için indir.",
+    "khatmahMore": "Diğer hatim seçenekleri",
+    "khatmahPrevDayHelp": "Bugünün işaretini geri al ve önceki günün bölümüne dön.",
+    "lastReadRow": "Son okunan · {{surah}}, sayfa {{page}}"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

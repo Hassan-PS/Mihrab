@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { useClockFormatter } from '../../hooks/useClockFormatter';
 import type { AppPalette } from '../../theme/appPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { HOME_CARD_RADIUS } from './tokens';
@@ -81,6 +82,7 @@ function DataStatsPanelImpl() {
   const { t, i18n } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   const { palette } = useAppPalette();
+  const clock = useClockFormatter();
   const [status, setStatus] = useState<DataStatus | null>(null);
   const [cache, setCache] = useState<DeviceCache | null>(null);
   // Which dataset this phone is actually being served by, so the panel can
@@ -257,6 +259,19 @@ function DataStatsPanelImpl() {
 
       <View style={[styles.groupGap, { borderTopColor: palette.border }]} />
 
+      {/* When timings last landed from the provider. This used to be the
+          last line of the Today hero — diagnostics in the most prominent
+          card in the app — and it lives here now, with the rest of the
+          facts about the data (docs/design/redesign-plan.md, B.1.2). */}
+      <Row
+        palette={palette}
+        label={t('dataStats.lastUpdated')}
+        value={
+          cache?.lastFetchedAt
+            ? `⁦${clock.fromDate(new Date(cache.lastFetchedAt))}⁩`
+            : dash
+        }
+      />
       <Row palette={palette} label={t('dataStats.daysStored')} value={cache ? `${cache.total} ${t('dataStats.daysUnit')}` : dash} last />
 
       {/* One block per prepared dataset. Two servers, two build jobs, two

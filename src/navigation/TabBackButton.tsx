@@ -74,19 +74,32 @@ function BackArrow({ color }: { color: string }) {
   );
 }
 
-export function TabBackButton() {
+export function TabBackButton({
+  onPress,
+  label,
+}: {
+  /**
+   * Somewhere other than Today. A tab that opens a page INSIDE itself —
+   * the Duas index opening a category — hands the header this, so the one
+   * arrow in the bar goes up one level, as an arrow does everywhere else,
+   * rather than the tab keeping a second "‹ All duas" link under the title
+   * for the same job.
+   */
+  onPress?: () => void;
+  label?: string;
+} = {}) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const navigation = useNavigation();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t('common.back', 'Back')}
+      accessibilityLabel={label ?? t('common.back', 'Back')}
       hitSlop={10}
       // `navigate`, not a pop: there is no stack under a tab to pop. It
       // selects the Today tab, which is what the hardware button has
       // always done from here.
-      onPress={() => navigation.navigate(HOME_TAB as never)}
+      onPress={onPress ?? (() => navigation.navigate(HOME_TAB as never))}
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
       {/* `textSolid`, not `text`: under Liquid Glass the semantic colour
           is a PlatformColor, and react-native-svg given one draws nothing

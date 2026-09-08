@@ -338,8 +338,12 @@ of the way down.
    ad-hoc controls in two visual languages floating over the page. Both into
    the bottom bar beside the page scrubber, or both into a tap-to-reveal
    overlay so the page is clean by default.
-4. The target-ayah highlight is **gold-brown** (P6); an accent tint at low
-   alpha instead.
+4. ~~The target-ayah highlight is gold-brown (P6); an accent tint at low
+   alpha instead.~~ **Withdrawn 2026-09-08.** The gold is the page's own
+   *ornament* colour — `mushafTone.ts` defines the mushaf as a print with
+   its own three tones, and the highlight, the juz label and the page
+   number all speak in it deliberately. Inside the mushaf, gold is not a
+   second accent; it is the paper's language. Left alone.
 5. The `#` button beside the scrubber is unlabelled; fine as an icon, but
    its radius does not match the scrubber's pill.
 

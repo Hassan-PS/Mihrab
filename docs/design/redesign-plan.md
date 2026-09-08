@@ -299,8 +299,9 @@ chips fold into the pencil's sheet. Gold and orange are gone.
   `Continue` and a secondary `Done for today`; the two "Continue"s merged and
   labelled; surahs as rows; header = `‹ Quran  ♫`.
 - **Reader:** header takes the page tone (dark on dark); `Audio` /
-  `Translation` as icons; `Juz` and `Light` into the bottom bar; accent-alpha
-  highlight.
+  `Translation` as icons; `Juz` and `Light` into the bottom bar. The page's
+  own gold (highlight, juz, page number) stays — it is the print's
+  ornament colour, not a second accent (see `modernisation.md` B.4.4).
 - **Tasbih:** count centred; the ring shows progress; `Previous` / `Reset` /
   `Skip` all tertiary; the "next" preview as a footnote line, not a card.
 - **Duas:** category page loses `‹ All duas`; dua titles at `title3`;
@@ -431,6 +432,8 @@ Both get easier because this plan ran first. Neither is part of it.
 ---
 
 ## 6. Decisions needed from Hassan
+
+*All five accepted as recommended, 2026-09-08 ("go ahead and implement it all").*
 
 - **D1 — the back arrow on tabs.** `TabBackButton.tsx` argues for it (Today
   is home; hardware back always went there; the arrow says so). The cost is
