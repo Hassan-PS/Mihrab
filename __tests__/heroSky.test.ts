@@ -55,6 +55,17 @@ describe('where in the day', () => {
   it('falls back to a plain day when the timings are missing', () => {
     expect(skyMoment({}, at(12))).toEqual({ passage: 'day', t: 0.5 });
   });
+
+  it('stays night at one in the morning with the Sunrise row turned off', () => {
+    // Seen on a device: turning the extra times off removes the Sunrise
+    // key from the day's map, and the sky answered with noon at 00:59.
+    const noSunrise = { Fajr: day.Fajr, Dhuhr: day.Dhuhr, Asr: day.Asr, Maghrib: day.Maghrib, Isha: day.Isha };
+    expect(skyMoment(noSunrise, at(0, 59)).passage).toBe('night');
+    expect(skyMoment(noSunrise, at(4, 30))).toMatchObject({ passage: 'dawn', t: 0 });
+    // Dawn is assumed to last an hour and a half without the real sunrise.
+    expect(skyMoment(noSunrise, at(6, 0))).toMatchObject({ passage: 'day', t: 0 });
+    expect(skyMoment(noSunrise, at(13)).passage).toBe('day');
+  });
 });
 
 describe('the colours', () => {

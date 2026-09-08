@@ -148,15 +148,20 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
   };
   const n = now.getTime();
   const fajr = at('Fajr');
-  const sunrise = at('Sunrise');
   const asr = at('Asr');
   const maghrib = at('Maghrib');
   const isha = at('Isha');
   const frac = (a: number, b: number) => (b > a ? Math.max(0, Math.min(1, (n - a) / (b - a))) : 0);
 
-  if (fajr == null || sunrise == null || asr == null || maghrib == null || isha == null) {
+  if (fajr == null || asr == null || maghrib == null || isha == null) {
     return { passage: 'day', t: 0.5 };
   }
+  // Sunrise is an OPTIONAL row, and a map with the row turned off has no
+  // key for it — which once turned the whole night into noon. Without it
+  // the dawn is taken to last as long as it does at the middle latitudes
+  // this app is used at, an hour and a half; the sky is a drawing, not a
+  // timetable, and a dawn ten minutes long or short is not visible.
+  const sunrise = at('Sunrise') ?? fajr + 90 * 60_000;
   if (n < fajr) {
     const from = isha - 24 * 3600_000;
     return { passage: 'night', t: frac(from, fajr) };

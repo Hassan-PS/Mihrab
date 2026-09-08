@@ -51,11 +51,22 @@ function HeroSkyImpl({
   // The scene's height in dp, once laid out, so a fraction of the scene
   // can be turned into a position under `sceneTop`. Until then — and
   // wherever there is no band — the plain percentage of the whole sky.
-  const [height, setHeight] = useState(0);
-  const onLayout = useCallback(
-    (e: LayoutChangeEvent) => setHeight(e.nativeEvent.layout.height),
-    [],
-  );
+  //
+  // The SVG takes the SAME measured size in dp rather than "100%": a
+  // percentage-sized Svg did not follow its parent when the hero grew or
+  // shrank later — the countdown turning over to the next prayer, the
+  // extra-times toggle — and the gradient stopped short of the hero's
+  // foot, leaving the date line on a band of the page colour.
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const height = size.height;
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    const { width, height: h } = e.nativeEvent.layout;
+    setSize(prev =>
+      Math.abs(prev.width - width) < 0.5 && Math.abs(prev.height - h) < 0.5
+        ? prev
+        : { width, height: h },
+    );
+  }, []);
   const banded = sceneTop > 0 || sceneBottom > 0;
   const room = height - sceneTop - sceneBottom;
   // The model places bodies in the top ~0.3 of a short card. Given a
@@ -95,7 +106,7 @@ function HeroSkyImpl({
   return (
     <View
       pointerEvents="none"
-      onLayout={banded ? onLayout : undefined}
+      onLayout={onLayout}
       style={[
         styles.fill,
         bleed && {
@@ -105,7 +116,9 @@ function HeroSkyImpl({
           end: -bleed.horizontal,
         },
       ]}>
-      <Svg width="100%" height="100%">
+      <Svg
+        width={size.width > 0 ? size.width : '100%'}
+        height={size.height > 0 ? size.height : '100%'}>
         <Defs>
           <LinearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={top} />

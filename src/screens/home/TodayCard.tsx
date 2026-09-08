@@ -85,6 +85,13 @@ import { TYPE } from '../../theme/typography';
 export type TodayCardProps = {
   /** Today first, then the next six days. */
   week: TimingsMap[];
+  /**
+   * Today's times UNFILTERED — with Sunrise whatever the rows setting
+   * says — for the sky, which needs the sunrise to know where dawn ends.
+   * The rows themselves come from `week`, which carries only what is
+   * drawn. Optional; the sky falls back to `week[0]`.
+   */
+  skyTimings?: TimingsMap;
   nextInfo: { name: string; at: Date } | null;
   /** Changing this returns the strip to today (e.g. the user moved city). */
   resetKey: string;
@@ -444,6 +451,7 @@ function TodayCardImpl({
   expanded = false,
   fullBleed = false,
   renderLocation,
+  skyTimings,
 }: TodayCardProps) {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
@@ -825,14 +833,16 @@ function TodayCardImpl({
           styles.heroWrap,
           { paddingTop: heroTop },
           fullBleed && styles.heroWrapBleed,
-          { backgroundColor: palette.accentBg },
+          // Full-bleed, the sky IS the wrap's ground — a tint under it
+          // would show as a band wherever the two disagreed by a pixel.
+          { backgroundColor: fullBleed ? 'transparent' : palette.accentBg },
         ]}>
         {target ? (
           <HeroToday
             target={target}
             chosen={chosenKey !== null}
             onExpire={clearChosen}
-            today={timings}
+            today={skyTimings ?? timings}
             tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
             dateLine={todayDateLine}
@@ -949,7 +959,9 @@ const styles = StyleSheet.create({
   heroFill: { flexGrow: 1, flexShrink: 0, flexBasis: 'auto' },
   /** Grows; the sun and moon cross it — and gives way first when the
    *  table needs the room (the sky then hides its bodies, see HeroSky). */
-  heroScene: { flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 0 },
+  // Never below a moon's worth of sky: the table may push the page into
+  // a scroll, but it may not take the night out of the hero.
+  heroScene: { flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 64 },
   // Sentence case, quiet: the countdown is the thing the eye lands on and
   // the eyebrow only names what it counts to. It was an uppercase,
   // letterspaced overline — the 2016 idiom (docs/design/redesign-plan.md

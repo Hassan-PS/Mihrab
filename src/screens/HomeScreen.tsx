@@ -1091,6 +1091,9 @@ export function HomeScreen() {
         const dayTable = (
           <TodayCard
             week={view.table.week}
+            // The raw day, Sunrise included whatever the rows say: the sky
+            // needs it to know where dawn ends.
+            skyTimings={state.phase === 'ready' ? state.today : undefined}
             nextInfo={nextInfo}
             resetKey={carouselResetKey}
             getDayLabel={getDayLabel}
