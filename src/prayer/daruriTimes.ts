@@ -104,6 +104,24 @@
  * All three come out the same way: the key is absent and callers show
  * nothing. A Mālikī in Malmö is better served by a blank he can ask his
  * imam about than by a number the sky does not support.
+ *
+ * ── AND THE 45° SUBSTITUTE DOES NOT FILL THEM — issue #20 ─────────────
+ *
+ * *The Guiding Helper* fn. 653 says that where the sun misbehaves one
+ * may follow "the prayer timings for the 45° latitude mark at their
+ * longitude". Filling these blanks from 45° was built and measured, and
+ * over 4,283 place-days from 46°N to 75°N it fills 13 of 817 of them.
+ *
+ * The reason is in this module rather than in that arithmetic. Every
+ * boundary here lives inside a window whose ends are the reader's OWN
+ * rows: *isfār* runs to their sunrise, *iṣfirār* to their sunset. Where
+ * the sun does not rise there is no end to the window at all, and where
+ * it rises but never reaches the angle, a boundary computed 20° south
+ * lands outside it — 15:48 under a 13:12 Maghrib at 68°N in January.
+ * Two different skies cannot be spliced one row at a time.
+ *
+ * docs/latitude-45-substitute.md has the measurement and what would
+ * change the answer; the code is on `issue-20-lat45-substitute`.
  */
 import { clockNightTimes } from '../utils/nightTimes';
 import {
